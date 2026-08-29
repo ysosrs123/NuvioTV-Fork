@@ -590,18 +590,7 @@ fun AdvancedSettingsContent(
                         )
                     }
                 )
-                SettingsToggleRow(
-                    title = stringResource(R.string.advanced_player_stats_hud),
-                    subtitle = stringResource(R.string.advanced_player_stats_hud_subtitle),
-                    checked = uiState.playerStatsHudEnabled,
-                    onToggle = {
-                        viewModel.onEvent(
-                            AdvancedSettingsEvent.SetPlayerStatsHudEnabled(
-                                !uiState.playerStatsHudEnabled
-                            )
-                        )
-                    }
-                )
+                // Fork: upstream's stats-HUD toggle is not offered; the fork's own HUD ('i') is the stats surface.
             }
         }
 
