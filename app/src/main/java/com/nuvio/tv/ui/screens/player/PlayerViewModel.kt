@@ -1036,6 +1036,8 @@ class PlayerViewModel @Inject constructor(
 
     fun getCurrentHeaders(): Map<String, String> = controller.getCurrentHeaders()
 
+    fun getCurrentFileSizeBytes(): Long? = controller.currentVideoSize
+
     fun stopAndRelease() {
         postPlayRecommendationController.stop()
         controller.stopAndRelease()

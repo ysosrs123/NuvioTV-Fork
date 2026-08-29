@@ -1645,11 +1645,9 @@
 
     <!-- AuthQrSignInScreen -->
     <string name="auth_qr_title">Prihlásiť sa cez QR</string>
-    <string name="auth_qr_account_login">Prihlásenie do účtu</string>
     <string name="auth_qr_finishing">Dokončuje sa prihlásenie…</string>
     <string name="auth_qr_code_label">Kód: %1$s</string>
     <string name="auth_qr_expires">Vyprší o %1$s</string>
-    <string name="auth_qr_phone_hint">Použite telefón na prihlásenie e-mailom/heslom. TV zostáva iba na QR pre rýchlejšie prihlásenie.</string>
     <string name="auth_qr_scan_instruction">Naskenujte QR, schváľte v prehliadači a vráťte sa sem.</string>
     <string name="auth_qr_code_display">Kód: %1$s</string>
     <string name="auth_qr_refresh">Obnoviť QR</string>

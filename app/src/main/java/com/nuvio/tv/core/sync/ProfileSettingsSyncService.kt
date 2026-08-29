@@ -121,6 +121,8 @@ private val localOnlyPlayerProfileSettingsKeys = setOf(
     "buffer_budget_managed",
     "parallel_connection_count",
     "parallel_chunk_size_mb",
+    "parallel_chunk_size_kb",
+    "enable_http2",
     "last_playback_diagnostics_json",
     "enable_buffer_logs",
     "resize_mode",

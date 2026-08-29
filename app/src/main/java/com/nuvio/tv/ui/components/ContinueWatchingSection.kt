@@ -44,6 +44,7 @@ import com.nuvio.tv.R
 import com.nuvio.tv.domain.model.CardDepthSurface
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -135,6 +136,8 @@ fun ContinueWatchingSection(
     downFocusRequester: FocusRequester? = null,
     entryFocusRequester: FocusRequester? = null,
     focusRequesters: MutableMap<Int, FocusRequester> = remember { mutableMapOf() },
+    rowFocusRequester: FocusRequester = remember { FocusRequester() },
+    listState: LazyListState = rememberLazyListState(),
     lastFocusedIndexState: MutableIntState = remember { mutableIntStateOf(-1) },
     cardWidth: Dp = 288.dp,
     imageHeight: Dp = 162.dp,
@@ -148,8 +151,6 @@ fun ContinueWatchingSection(
     var lastRequestedFocusIndex by remember { mutableIntStateOf(-1) }
     var pendingFocusIndex by remember { mutableStateOf<Int?>(null) }
     var optionsItem by remember { mutableStateOf<ContinueWatchingItem?>(null) }
-
-    val listState = rememberLazyListState()
 
     // Restore focus to specific item if requested
     LaunchedEffect(focusedItemIndex) {
@@ -223,6 +224,7 @@ fun ContinueWatchingSection(
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
+                .focusRequester(rowFocusRequester)
                 .focusRestorer {
                     val visibleIndices = listState.layoutInfo.visibleItemsInfo
                         .map { it.index }
@@ -269,8 +271,10 @@ fun ContinueWatchingSection(
                     modifier = Modifier
                         .onFocusChanged { focusState ->
                             isCardFocused = focusState.isFocused
-                            if (focusState.isFocused && lastFocusedIndex != index) {
-                                lastFocusedIndex = index
+                            if (focusState.isFocused) {
+                                if (lastFocusedIndex != index) {
+                                    lastFocusedIndex = index
+                                }
                                 onItemFocused(index)
                             }
                         }

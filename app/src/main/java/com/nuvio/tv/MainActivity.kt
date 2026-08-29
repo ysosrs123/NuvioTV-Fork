@@ -57,6 +57,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -964,6 +965,28 @@ class MainActivity : ComponentActivity() {
                     }?.route
                     val selectedDrawerItem = drawerItems.firstOrNull { it.route == selectedDrawerRoute } ?: drawerItems.first()
 
+                    val confirmExitEnabled by profileManager.confirmExitEnabled.collectAsState()
+                    var backPressedOnce by remember { mutableStateOf(false) }
+                    LaunchedEffect(backPressedOnce) {
+                        if (backPressedOnce) {
+                            delay(2000L)
+                            backPressedOnce = false
+                        }
+                    }
+                    val handleExitApp: () -> Unit = {
+                        if (!confirmExitEnabled || backPressedOnce) {
+                            finishAffinity()
+                            finishAndRemoveTask()
+                            if (confirmExitEnabled) {
+                                // Kill the process to free RAM on low-memory devices.
+                                android.os.Process.killProcess(android.os.Process.myPid())
+                            }
+                        } else {
+                            backPressedOnce = true
+                            Toast.makeText(this@MainActivity, getString(R.string.confirm_exit_toast), Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
                     val updateViewModel: UpdateViewModel = hiltViewModel(this@MainActivity)
                     val updateState by updateViewModel.uiState.collectAsState()
                     val updateBannerState = updateState.copy(
@@ -982,6 +1005,7 @@ class MainActivity : ComponentActivity() {
                         Box(modifier = Modifier.fillMaxSize()) {
                             if (modernSidebarEnabled) {
                                 ModernSidebarScaffold(
+                                    longPressBackHeld = longPressBackHeld,
                                     navController = navController,
                                     startDestination = startDestination,
                                     currentRoute = currentRoute,
@@ -998,13 +1022,11 @@ class MainActivity : ComponentActivity() {
                                     showProfileSelector = activeProfile != null,
                                     onSwitchProfile = { hasSelectedProfileThisSession = false },
                                     onNavigate = { optimisticRoute = it },
-                                    onExitApp = {
-                                        finishAffinity()
-                                        finishAndRemoveTask()
-                                    }
+                                    onExitApp = handleExitApp
                                 )
                             } else {
                                 LegacySidebarScaffold(
+                                    longPressBackHeld = longPressBackHeld,
                                     navController = navController,
                                     startDestination = startDestination,
                                     currentRoute = currentRoute,
@@ -1019,10 +1041,7 @@ class MainActivity : ComponentActivity() {
                                     showProfileSelector = activeProfile != null,
                                     onSwitchProfile = { hasSelectedProfileThisSession = false },
                                     onNavigate = { optimisticRoute = it },
-                                    onExitApp = {
-                                        finishAffinity()
-                                        finishAndRemoveTask()
-                                    }
+                                    onExitApp = handleExitApp
                                 )
                             }
 
@@ -1101,6 +1120,12 @@ class MainActivity : ComponentActivity() {
     // Intercept Back at the Activity level, before any Compose BackHandler, so the auto-next loader
     // can always be dismissed. Compose back-dispatch ordering kept putting the destination screen's
     // handler above the loader's, so Back never reached it.
+    // Tracks whether a long-press Back sequence is in progress. When true, all Back
+    // key events are consumed at the Activity level so that repeated DOWN events from a
+    // held Back key don't cascade through Compose BackHandlers (e.g. opening the sidebar
+    // and then immediately exiting the app).
+    val longPressBackHeld = mutableStateOf(false)
+
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         // OLED screensaver: while the dim overlay is visible, the first key press wakes
         // it and the whole press (down, repeats, and the matching up) is swallowed so
@@ -1120,6 +1145,12 @@ class MainActivity : ComponentActivity() {
             return true
         }
         screensaverController.notifyInteraction()
+        if (event.keyCode == KeyEvent.KEYCODE_BACK) {
+            if (longPressBackHeld.value) {
+                if (event.action == KeyEvent.ACTION_UP) longPressBackHeld.value = false
+                return true
+            }
+        }
         if (event.keyCode == KeyEvent.KEYCODE_BACK &&
             externalPlaybackTracker.autoNextOverlay.value != null
         ) {
@@ -1186,6 +1217,7 @@ private fun SidebarFocusRecoveryEffect(
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun LegacySidebarScaffold(
+    longPressBackHeld: MutableState<Boolean>,
     navController: NavHostController,
     startDestination: String,
     currentRoute: String?,
@@ -1208,6 +1240,7 @@ private fun LegacySidebarScaffold(
     val showSidebar = currentRoute in rootRoutes
 
     LaunchedEffect(currentRoute) {
+        longPressBackHeld.value = false
         drawerState.setValue(DrawerValue.Closed)
     }
 
@@ -1232,6 +1265,7 @@ private fun LegacySidebarScaffold(
     }
 
     BackHandler(enabled = currentRoute in rootRoutes && drawerState.currentValue == DrawerValue.Open) {
+        if (longPressBackHeld.value) return@BackHandler
         onExitApp()
     }
 
@@ -1416,6 +1450,31 @@ private fun LegacySidebarScaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(start = contentStartPadding)
+                .onPreviewKeyEvent { keyEvent ->
+                    // Long-press Back on a root route directly opens the sidebar,
+                    // bypassing the "scroll row to start" BackHandler in home content.
+                    if (keyEvent.key == Key.Back) {
+                        if (
+                            keyEvent.type == KeyEventType.KeyDown &&
+                            showSidebar &&
+                            drawerState.currentValue == DrawerValue.Closed &&
+                            currentRoute in rootRoutes &&
+                            keyEvent.nativeKeyEvent.isLongPress
+                        ) {
+                            if (!longPressBackHeld.value) {
+                                longPressBackHeld.value = true
+                                pendingSidebarFocusRequest = true
+                                drawerState.setValue(DrawerValue.Open)
+                            }
+                            return@onPreviewKeyEvent true
+                        }
+                        if (longPressBackHeld.value) {
+                            if (keyEvent.type == KeyEventType.KeyUp) longPressBackHeld.value = false
+                            return@onPreviewKeyEvent true
+                        }
+                    }
+                    false
+                }
                 .onKeyEvent { keyEvent ->
                     val openKey = if (isRtl) Key.DirectionRight else Key.DirectionLeft
                     if (
@@ -1567,6 +1626,7 @@ private fun LegacySidebarButton(
 
 @Composable
 private fun ModernSidebarScaffold(
+    longPressBackHeld: MutableState<Boolean>,
     navController: NavHostController,
     startDestination: String,
     currentRoute: String?,
@@ -1631,6 +1691,7 @@ private fun ModernSidebarScaffold(
     }
 
     BackHandler(enabled = currentRoute in rootRoutes && isSidebarExpanded && !sidebarCollapsePending) {
+        if (longPressBackHeld.value) return@BackHandler
         onExitApp()
     }
 
@@ -1807,11 +1868,47 @@ private fun ModernSidebarScaffold(
         sidebarOwnsFocus = showSidebar && isSidebarExpanded
     )
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .onPreviewKeyEvent { keyEvent ->
+                // Consume all Back key events after long-press until released,
+                // preventing the exit-app BackHandler from firing during the hold.
+                if (longPressBackHeld.value && keyEvent.key == Key.Back) {
+                    if (keyEvent.type == KeyEventType.KeyUp) longPressBackHeld.value = false
+                    return@onPreviewKeyEvent true
+                }
+                false
+            }
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .onPreviewKeyEvent { keyEvent ->
+                    // Long-press Back on a root route directly opens the sidebar,
+                    // bypassing the "scroll row to start" BackHandler in home content.
+                    if (keyEvent.key == Key.Back) {
+                        if (
+                            keyEvent.type == KeyEventType.KeyDown &&
+                            showSidebar &&
+                            !isSidebarExpanded &&
+                            !sidebarCollapsePending &&
+                            currentRoute in rootRoutes &&
+                            keyEvent.nativeKeyEvent.isLongPress
+                        ) {
+                            if (!longPressBackHeld.value) {
+                                longPressBackHeld.value = true
+                                isSidebarExpanded = true
+                                sidebarCollapsePending = false
+                                pendingSidebarFocusRequest = true
+                            }
+                            return@onPreviewKeyEvent true
+                        }
+                        if (longPressBackHeld.value) {
+                            if (keyEvent.type == KeyEventType.KeyUp) longPressBackHeld.value = false
+                            return@onPreviewKeyEvent true
+                        }
+                    }
                     if (
                         isSidebarExpanded &&
                         !sidebarCollapsePending &&

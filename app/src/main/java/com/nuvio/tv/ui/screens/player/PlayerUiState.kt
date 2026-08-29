@@ -90,6 +90,8 @@ data class PlayerUiState(
     val loadingIssueElapsedMs: Long = 0L,
     val pauseOverlayEnabled: Boolean = false,
     val osdClockEnabled: Boolean = true,
+    val playerStatsHudEnabled: Boolean = false,
+    val playerStatsHudVisible: Boolean = true,
     val showPauseOverlay: Boolean = false,
     val audioTracks: List<TrackInfo> = emptyList(),
     val subtitleTracks: List<TrackInfo> = emptyList(),
@@ -343,6 +345,7 @@ sealed class PlayerEvent {
     data object OnSwitchInternalPlayerEngine : PlayerEvent()
     data object OnShowStreamInfo : PlayerEvent()
     data object OnDismissStreamInfo : PlayerEvent()
+    data object OnTogglePlayerStatsHud : PlayerEvent()
     data object OnToggleTorrentStats : PlayerEvent()
     data object OnTogglePlaybackStats : PlayerEvent()
 }
@@ -381,6 +384,7 @@ data class StreamInfoData(
     val videoHeight: Int? = null,
     val videoFrameRate: Float? = null,
     val videoBitrate: Int? = null,
+    val fileBitrate: Int? = null,
     // Audio
     val audioCodec: String? = null,
     val audioChannels: String? = null,

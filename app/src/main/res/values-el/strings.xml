@@ -1846,11 +1846,9 @@
   <string name="custom_server_restart_failed">Ο διακομιστής αποθηκεύτηκε, αλλά η εφαρμογή δεν μπόρεσε να επανεκκινήσει αυτόματα. Επανεκκινήστε την χειροκίνητα.</string>
   <!-- AuthQrSignInScreen -->
   <string name="auth_qr_title">Σύνδεση με QR</string>
-  <string name="auth_qr_account_login">Σύνδεση λογαριασμού</string>
   <string name="auth_qr_finishing">Ολοκλήρωση σύνδεσης…</string>
   <string name="auth_qr_code_label">Κωδικός: %1$s</string>
   <string name="auth_qr_expires">Λήγει σε %1$s</string>
-  <string name="auth_qr_phone_hint">Χρησιμοποιήστε το κινητό σας για σύνδεση με email/κωδικό. Η TV παραμένει μόνο με QR για γρηγορότερη σύνδεση.</string>
   <string name="auth_qr_scan_instruction">Σαρώστε QR, εγκρίνετε στον browser και επιστρέψτε εδώ.</string>
   <string name="auth_qr_code_display">Κωδικός: %1$s</string>
   <string name="auth_qr_refresh">Ανανέωση QR</string>

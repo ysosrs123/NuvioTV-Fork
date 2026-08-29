@@ -226,6 +226,9 @@ fun PlaybackSettingsContent(
                 onSetPostPlayRecommendationsEnabled = { enabled ->
                     coroutineScope.launch { viewModel.setPostPlayRecommendationsEnabled(enabled) }
                 },
+                onSetPostPlayMovieThresholdPercent = { percent ->
+                    coroutineScope.launch { viewModel.setPostPlayMovieThresholdPercent(percent) }
+                },
                 onSetStreamAutoPlayNextEpisodeEnabled = { enabled ->
                     coroutineScope.launch { viewModel.setStreamAutoPlayNextEpisodeEnabled(enabled) }
                 },

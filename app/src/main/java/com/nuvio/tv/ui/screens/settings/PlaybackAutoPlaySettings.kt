@@ -87,6 +87,7 @@ internal fun LazyListScope.autoPlaySettingsItems(
     onShowReuseLastLinkCacheDialog: () -> Unit,
     onOpenConnectedServices: (() -> Unit)? = null,
     onSetPostPlayRecommendationsEnabled: (Boolean) -> Unit,
+    onSetPostPlayMovieThresholdPercent: (Int) -> Unit,
     onSetStreamAutoPlayNextEpisodeEnabled: (Boolean) -> Unit,
     onSetStreamAutoPlayNextEpisodeFallbackEnabled: (Boolean) -> Unit,
     onSetStreamAutoPlayPreferBingeGroupForNextEpisode: (Boolean) -> Unit,
@@ -189,6 +190,23 @@ internal fun LazyListScope.autoPlaySettingsItems(
             onCheckedChange = onSetPostPlayRecommendationsEnabled,
             onFocused = onItemFocused
         )
+    }
+
+    if (playerSettings.postPlayRecommendationsEnabled) {
+        item(key = "post_play_movie_threshold") {
+            SliderSettingsItem(
+                icon = Icons.Default.Recommend,
+                title = stringResource(R.string.autoplay_post_play_movie_threshold),
+                subtitle = stringResource(R.string.autoplay_post_play_movie_threshold_sub),
+                value = playerSettings.postPlayMovieThresholdPercent,
+                valueText = "${playerSettings.postPlayMovieThresholdPercent}%",
+                minValue = PlayerSettings.MIN_POST_PLAY_MOVIE_THRESHOLD_PERCENT,
+                maxValue = PlayerSettings.MAX_POST_PLAY_MOVIE_THRESHOLD_PERCENT,
+                step = 1,
+                onValueChange = onSetPostPlayMovieThresholdPercent,
+                onFocused = onItemFocused
+            )
+        }
     }
 
     item(key = "autoplay_eager_ready") {

@@ -496,6 +496,10 @@ class PlaybackSettingsViewModel @Inject constructor(
         playerSettingsDataStore.setPostPlayRecommendationsEnabled(enabled)
     }
 
+    suspend fun setPostPlayMovieThresholdPercent(percent: Int) {
+        playerSettingsDataStore.setPostPlayMovieThresholdPercent(percent)
+    }
+
     suspend fun setStreamAutoPlayNextEpisodeEnabled(enabled: Boolean) {
         playerSettingsDataStore.setStreamAutoPlayNextEpisodeEnabled(enabled)
     }

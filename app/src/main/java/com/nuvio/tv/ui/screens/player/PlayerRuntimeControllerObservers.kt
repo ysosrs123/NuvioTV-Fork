@@ -1103,6 +1103,23 @@ internal fun PlayerRuntimeController.scheduleDeferredPlayerReinitialize(
     }
 }
 
+internal fun PlayerRuntimeController.observePlayerStatsHud() {
+    scope.launch {
+        deviceLocalPlayerPreferences.playerStatsHudEnabled
+            .distinctUntilChanged()
+            .collect { enabled ->
+                // Turning the setting on is a request to see the overlay, even if the button hid
+                // it during an earlier playback.
+                _uiState.update {
+                    it.copy(
+                        playerStatsHudEnabled = enabled,
+                        playerStatsHudVisible = if (enabled) true else it.playerStatsHudVisible
+                    )
+                }
+            }
+    }
+}
+
 internal fun PlayerRuntimeController.observeDeviceLocalAspectMode() {
     scope.launch {
         deviceLocalPlayerPreferences.aspectMode

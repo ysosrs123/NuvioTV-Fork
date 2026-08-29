@@ -552,7 +552,12 @@ fun PlayerScreen(
                     return@onPreviewKeyEvent true
                 }
 
-                if (keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ESCAPE) {
+                val postPlayHandlesBack = postPlayRecommendationState.isVisible ||
+                    postPlayRecommendationState.isLoadingRecommendation ||
+                    postPlayRecommendationState.isTrailerPlaying
+                if (keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ESCAPE ||
+                    (keyEvent.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_BACK && !postPlayHandlesBack)
+                ) {
                     return@onPreviewKeyEvent when (keyEvent.nativeKeyEvent.action) {
                         KeyEvent.ACTION_DOWN -> true
                         KeyEvent.ACTION_UP -> {
@@ -1051,10 +1056,23 @@ fun PlayerScreen(
                 !uiState.showLoadingOverlay && !postPlayRecommendationState.isVisible,
             onClose = dismissStreamInfoOverlay,
             data = uiState.streamInfoData,
+            hudAvailable = uiState.playerStatsHudEnabled,
+            hudVisible = uiState.playerStatsHudVisible,
+            onToggleHud = { viewModel.onEvent(PlayerEvent.OnTogglePlayerStatsHud) },
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(2.6f)
         )
+
+        if (uiState.playerStatsHudEnabled && uiState.playerStatsHudVisible && uiState.error == null) {
+            PlayerDebugStatsOverlay(
+                viewModel = viewModel,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 28.dp, top = NuvioTheme.spacing.xl)
+                    .zIndex(2.75f)
+            )
+        }
 
         // Torrent stats overlay (top-right corner)
         TorrentOverlay(

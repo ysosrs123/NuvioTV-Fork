@@ -1861,11 +1861,9 @@
 
     <string name="auth_qr_title">התחבר עם קוד QR</string>
     <string name="auth_qr_tagline">צפה בספרייה שלך, בכל מקום</string>
-    <string name="auth_qr_account_login">כניסה לחשבון</string>
     <string name="auth_qr_finishing">מסיים כניסה…</string>
     <string name="auth_qr_code_label">קוד: %1$s</string>
     <string name="auth_qr_expires">יפוג בעוד %1$s</string>
-    <string name="auth_qr_phone_hint">השתמש בטלפון שלך והתחבר עם אימייל וסיסמה.</string>
     <string name="auth_qr_scan_instruction">סרוק קוד QR, אשר בדפדפן, ואז חזור לכאן.</string>
     <string name="auth_qr_code_display">קוד: %1$s</string>
     <string name="auth_qr_refresh">רענן קוד QR</string>

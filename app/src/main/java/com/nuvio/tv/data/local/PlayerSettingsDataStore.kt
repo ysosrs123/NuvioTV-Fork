@@ -304,6 +304,7 @@ data class PlayerSettings(
     val streamAutoPlayRegex: String = "",
     // Fork: default OFF until validated against the passthrough audio lifecycle.
     val postPlayRecommendationsEnabled: Boolean = false,
+    val postPlayMovieThresholdPercent: Int = DEFAULT_POST_PLAY_MOVIE_THRESHOLD_PERCENT,
     val streamAutoPlayNextEpisodeEnabled: Boolean = false,
     val streamAutoPlayNextEpisodeFallbackEnabled: Boolean = true,
     val streamAutoPlayPreferBingeGroupForNextEpisode: Boolean = true,
@@ -393,6 +394,9 @@ data class PlayerSettings(
         const val DEFAULT_STILL_WATCHING_EPISODE_THRESHOLD = 3
         const val MIN_STILL_WATCHING_EPISODE_THRESHOLD = 2
         const val MAX_STILL_WATCHING_EPISODE_THRESHOLD = 6
+        const val DEFAULT_POST_PLAY_MOVIE_THRESHOLD_PERCENT = 90
+        const val MIN_POST_PLAY_MOVIE_THRESHOLD_PERCENT = 80
+        const val MAX_POST_PLAY_MOVIE_THRESHOLD_PERCENT = 100
 
         const val STREAM_AUTOPLAY_TIMEOUT_UNLIMITED = Int.MAX_VALUE
 
@@ -624,6 +628,7 @@ class PlayerSettingsDataStore @Inject constructor(
     private val streamAutoPlaySelectedPluginsKey = stringSetPreferencesKey("stream_auto_play_selected_plugins")
     private val streamAutoPlayRegexKey = stringPreferencesKey("stream_auto_play_regex")
     private val postPlayRecommendationsEnabledKey = booleanPreferencesKey("post_play_recommendations_enabled")
+    private val postPlayMovieThresholdPercentKey = intPreferencesKey("post_play_movie_threshold_percent")
     private val streamAutoPlayNextEpisodeEnabledKey = booleanPreferencesKey("stream_auto_play_next_episode_enabled")
     private val streamAutoPlayNextEpisodeFallbackEnabledKey = booleanPreferencesKey("stream_auto_play_next_episode_fallback_enabled")
     private val streamAutoPlayPreferBingeGroupForNextEpisodeKey = booleanPreferencesKey("stream_auto_play_prefer_bingegroup_next_episode")
@@ -1010,6 +1015,11 @@ class PlayerSettingsDataStore @Inject constructor(
                 streamAutoPlaySelectedPlugins = prefs[streamAutoPlaySelectedPluginsKey] ?: emptySet(),
                 streamAutoPlayRegex = prefs[streamAutoPlayRegexKey] ?: "",
                 postPlayRecommendationsEnabled = prefs[postPlayRecommendationsEnabledKey] ?: false,
+                postPlayMovieThresholdPercent = (prefs[postPlayMovieThresholdPercentKey]
+                    ?: PlayerSettings.DEFAULT_POST_PLAY_MOVIE_THRESHOLD_PERCENT).coerceIn(
+                    PlayerSettings.MIN_POST_PLAY_MOVIE_THRESHOLD_PERCENT,
+                    PlayerSettings.MAX_POST_PLAY_MOVIE_THRESHOLD_PERCENT
+                ),
                 streamAutoPlayNextEpisodeEnabled = prefs[streamAutoPlayNextEpisodeEnabledKey] ?: false,
                 streamAutoPlayNextEpisodeFallbackEnabled = prefs[streamAutoPlayNextEpisodeFallbackEnabledKey] ?: true,
                 streamAutoPlayPreferBingeGroupForNextEpisode =
@@ -1427,6 +1437,15 @@ class PlayerSettingsDataStore @Inject constructor(
     suspend fun setPostPlayRecommendationsEnabled(enabled: Boolean) {
         store().edit { prefs ->
             prefs[postPlayRecommendationsEnabledKey] = enabled
+        }
+    }
+
+    suspend fun setPostPlayMovieThresholdPercent(percent: Int) {
+        store().edit { prefs ->
+            prefs[postPlayMovieThresholdPercentKey] = percent.coerceIn(
+                PlayerSettings.MIN_POST_PLAY_MOVIE_THRESHOLD_PERCENT,
+                PlayerSettings.MAX_POST_PLAY_MOVIE_THRESHOLD_PERCENT
+            )
         }
     }
 

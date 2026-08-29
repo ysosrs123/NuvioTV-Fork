@@ -2,6 +2,7 @@ package com.nuvio.tv.ui.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nuvio.tv.data.local.DeviceLocalPlayerPreferences
 import com.nuvio.tv.data.local.LayoutPreferenceDataStore
 import com.nuvio.tv.data.local.PlayerSettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,7 @@ data class AdvancedSettingsUiState(
     val smoothBringIntoViewEnabled: Boolean = true,
     val composeHighlighterEnabled: Boolean = false,
     val playbackIssueReportsEnabled: Boolean = false,
+    val playerStatsHudEnabled: Boolean = false,
     val addonHealthEnabled: Boolean = true
 )
 
@@ -27,12 +29,14 @@ sealed class AdvancedSettingsEvent {
     data class SetComposeHighlighterEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
     data class SetPlaybackIssueReportsEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
     data class SetAddonHealthEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
+    data class SetPlayerStatsHudEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
 }
 
 @HiltViewModel
 class AdvancedSettingsViewModel @Inject constructor(
     private val layoutPreferenceDataStore: LayoutPreferenceDataStore,
-    private val playerSettingsDataStore: PlayerSettingsDataStore
+    private val playerSettingsDataStore: PlayerSettingsDataStore,
+    private val deviceLocalPlayerPreferences: DeviceLocalPlayerPreferences
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AdvancedSettingsUiState())
     val uiState: StateFlow<AdvancedSettingsUiState> = _uiState.asStateFlow()
@@ -63,6 +67,11 @@ class AdvancedSettingsViewModel @Inject constructor(
                 _uiState.update { it.copy(addonHealthEnabled = enabled) }
             }
         }
+        viewModelScope.launch {
+            deviceLocalPlayerPreferences.playerStatsHudEnabled.collectLatest { enabled ->
+                _uiState.update { it.copy(playerStatsHudEnabled = enabled) }
+            }
+        }
     }
 
     fun onEvent(event: AdvancedSettingsEvent) {
@@ -85,6 +94,11 @@ class AdvancedSettingsViewModel @Inject constructor(
             is AdvancedSettingsEvent.SetPlaybackIssueReportsEnabled -> {
                 viewModelScope.launch {
                     playerSettingsDataStore.setPlaybackIssueReportsEnabled(event.enabled)
+                }
+            }
+            is AdvancedSettingsEvent.SetPlayerStatsHudEnabled -> {
+                viewModelScope.launch {
+                    deviceLocalPlayerPreferences.setPlayerStatsHudEnabled(event.enabled)
                 }
             }
             is AdvancedSettingsEvent.SetAddonHealthEnabled -> {

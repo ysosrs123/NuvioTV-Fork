@@ -206,7 +206,7 @@ fun AddonManagerScreen(
         }
     }
 
-    LaunchedEffect(uiState.isQrModeActive, uiState.pendingChange, isEditing, addonUrlPendingDeletion) {
+    LaunchedEffect(uiState.isQrModeActive, uiState.pendingChange, addonUrlPendingDeletion) {
         if (!uiState.isQrModeActive && uiState.pendingChange == null && !isEditing && addonUrlPendingDeletion == null) {
             requestInputBarFocus()
         }
@@ -226,7 +226,7 @@ fun AddonManagerScreen(
         }
     }
 
-    DisposableEffect(lifecycleOwner, uiState.isQrModeActive, uiState.pendingChange, isEditing, addonUrlPendingDeletion) {
+    DisposableEffect(lifecycleOwner, uiState.isQrModeActive, uiState.pendingChange, addonUrlPendingDeletion) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME &&
                 !uiState.isQrModeActive &&
