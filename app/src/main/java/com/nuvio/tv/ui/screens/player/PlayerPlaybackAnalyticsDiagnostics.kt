@@ -891,15 +891,24 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
         eventCount += 1
         val position = eventTime?.currentPlaybackPositionMs.safeTimeMs() ?: positionMs
         val bufferedPosition = eventTime?.bufferedPositionMs() ?: bufferedPositionMs
-        recordRawEventLine(
-            buildRawEventLine(
-                name = name,
-                elapsedMs = (now - sessionStartedAtElapsedMs).coerceAtLeast(0L),
-                positionMs = position,
-                bufferedPositionMs = bufferedPosition,
-                details = details
-            )
+        val rawLine = buildRawEventLine(
+            name = name,
+            elapsedMs = (now - sessionStartedAtElapsedMs).coerceAtLeast(0L),
+            positionMs = position,
+            bufferedPositionMs = bufferedPosition,
+            details = details
         )
+        recordRawEventLine(rawLine)
+        // Fork (capture instrument): mirror warning-class events and Loader load
+        // lifecycle events to logcat so a device capture can see load_error
+        // exception/dataType and dropped_video_frames timing. The in-memory ring
+        // above is unchanged; media3 load events are per Loader load, not per
+        // chunk, so this is low volume.
+        if (name.isPlaybackWarningEvent()) {
+            Log.w(EXO_EVENT_LOG_TAG, rawLine)
+        } else if (name.isLoaderLoadEvent()) {
+            Log.i(EXO_EVENT_LOG_TAG, rawLine)
+        }
         events.addLast(
             PlaybackIssuePlaybackEventInput(
                 timeMs = timeMs,
@@ -943,6 +952,13 @@ internal fun PlayerRuntimeController.flushPendingPlaybackRawEventLines() {
         playbackAnalyticsDiagnostics.recordRawEventLine(pendingPlaybackRawEventLines.removeFirst())
     }
 }
+
+private const val EXO_EVENT_LOG_TAG = "NuvioExoEvent"
+
+private fun String.isLoaderLoadEvent(): Boolean =
+    this == "load_started" ||
+        this == "load_completed" ||
+        this == "load_canceled"
 
 private fun String.isPlaybackWarningEvent(): Boolean =
     this == "dropped_video_frames" ||
