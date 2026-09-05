@@ -114,7 +114,10 @@ class MetaDetailsViewModel @Inject constructor(
     private val prefetchSelectionSupplier: com.nuvio.tv.core.stream.PrefetchSelectionSupplier,
     savedStateHandle: SavedStateHandle,
     private val healthStore: AddonHealthStore,
-    private val trackingProgressRefreshCoordinator: TrackingProgressRefreshCoordinator
+    private val trackingProgressRefreshCoordinator: TrackingProgressRefreshCoordinator,
+    // 0.9.0 merge: upstream 8e0c8c6fb scopes the watched-episodes refresh to the
+    // active profile; the fork had dropped this injection (upstream 70c7c2ebc).
+    private val profileManager: com.nuvio.tv.core.profile.ProfileManager
 ) : ViewModel() {
     private val itemId: String = savedStateHandle["itemId"] ?: ""
     private val itemType: String = savedStateHandle["itemType"] ?: ""
