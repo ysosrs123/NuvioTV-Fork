@@ -2,7 +2,9 @@ package com.nuvio.tv.ui.screens.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nuvio.tv.core.runtime.AppRestarter
 import com.nuvio.tv.data.local.DeviceLocalPlayerPreferences
+import com.nuvio.tv.data.local.ImagePerformancePreferences
 import com.nuvio.tv.data.local.LayoutPreferenceDataStore
 import com.nuvio.tv.data.local.PlayerSettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +22,8 @@ data class AdvancedSettingsUiState(
     val composeHighlighterEnabled: Boolean = false,
     val playbackIssueReportsEnabled: Boolean = false,
     val playerStatsHudEnabled: Boolean = false,
-    val addonHealthEnabled: Boolean = true
+    val addonHealthEnabled: Boolean = true,
+    val rgb565Enabled: Boolean = true
 )
 
 sealed class AdvancedSettingsEvent {
@@ -30,18 +33,22 @@ sealed class AdvancedSettingsEvent {
     data class SetPlaybackIssueReportsEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
     data class SetAddonHealthEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
     data class SetPlayerStatsHudEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
+    data class SetRgb565Enabled(val enabled: Boolean) : AdvancedSettingsEvent()
 }
 
 @HiltViewModel
 class AdvancedSettingsViewModel @Inject constructor(
     private val layoutPreferenceDataStore: LayoutPreferenceDataStore,
     private val playerSettingsDataStore: PlayerSettingsDataStore,
-    private val deviceLocalPlayerPreferences: DeviceLocalPlayerPreferences
+    private val deviceLocalPlayerPreferences: DeviceLocalPlayerPreferences,
+    private val imagePerformancePreferences: ImagePerformancePreferences,
+    private val appRestarter: AppRestarter
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AdvancedSettingsUiState())
     val uiState: StateFlow<AdvancedSettingsUiState> = _uiState.asStateFlow()
 
     init {
+        _uiState.update { it.copy(rgb565Enabled = imagePerformancePreferences.rgb565Enabled) }
         viewModelScope.launch {
             layoutPreferenceDataStore.fastHorizontalNavigationEnabled.collectLatest { enabled ->
                 _uiState.update { it.copy(fastHorizontalNavigationEnabled = enabled) }
@@ -99,6 +106,12 @@ class AdvancedSettingsViewModel @Inject constructor(
             is AdvancedSettingsEvent.SetPlayerStatsHudEnabled -> {
                 viewModelScope.launch {
                     deviceLocalPlayerPreferences.setPlayerStatsHudEnabled(event.enabled)
+                }
+            }
+            is AdvancedSettingsEvent.SetRgb565Enabled -> {
+                if (imagePerformancePreferences.setRgb565Enabled(event.enabled)) {
+                    _uiState.update { it.copy(rgb565Enabled = event.enabled) }
+                    appRestarter.restart()
                 }
             }
             is AdvancedSettingsEvent.SetAddonHealthEnabled -> {

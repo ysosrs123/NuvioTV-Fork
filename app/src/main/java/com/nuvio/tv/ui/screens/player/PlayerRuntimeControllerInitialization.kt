@@ -317,6 +317,7 @@ internal fun PlayerRuntimeController.initializePlayer(
         _uiState.update { it.copy(error = context.getString(R.string.player_error_no_stream_url), showLoadingOverlay = false) }
         return
     }
+    mpvMediaLoadPrepared = false
 
     scope.launch {
         try {
@@ -406,6 +407,8 @@ internal fun PlayerRuntimeController.initializePlayer(
                 contentOriginalLanguage = contentLanguage
             )
             mpvPreferredAudioLanguages = preferredAudioLanguages
+            mpvHi10pGnextSoftwareFallbackEnabledSetting =
+                playerSettings.mpvHi10pGnextSoftwareFallbackEnabled
             mpvHardwareDecodeModeSetting = playerSettings.mpvHardwareDecodeMode
             var effectiveInternalPlayerEngine = overrideInternalPlayerEngine ?: playerSettings.internalPlayerEngine
             if (effectiveInternalPlayerEngine == InternalPlayerEngine.AUTO) {
@@ -1075,10 +1078,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                 context = context,
                 subtitleDelayUsProvider = subtitleDelayUs::get,
                 audioDelayUsProvider = audioDelayUs::get,
-                shouldNormalizeCuePositionProvider = {
-                    val selectedAddonSubtitle = _uiState.value.selectedAddonSubtitle
-                    selectedAddonSubtitle != null && PlayerSubtitleUtils.mimeTypeFromUrl(selectedAddonSubtitle.url) == MimeTypes.TEXT_VTT
-                },
+                shouldNormalizeCuePositionProvider = { true },
                 shouldStripSdhProvider = {
                     currentPlayerSettingsForReport.subtitleStyle.stripSdh
                 },
@@ -1329,7 +1329,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                 try {
                     currentMediaSession?.release()
                     if (canAdvertiseSession()) {
-                        currentMediaSession = MediaSession.Builder(context, this).build()
+                        currentMediaSession = MediaSession.Builder(context, SafeMediaSessionPlayer(this)).build()
                     }
                     updateMediaSessionMetadata()
                 } catch (e: Exception) {

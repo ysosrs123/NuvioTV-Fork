@@ -217,13 +217,7 @@ class LayoutPreferenceDataStore @Inject constructor(
     }
 
     val sidebarCollapsedByDefault: Flow<Boolean> = profileFlow { prefs ->
-        val modernSidebarEnabled =
-            prefs[modernSidebarEnabledKey] ?: prefs[legacyModernSidebarEnabledKey] ?: false
-        if (modernSidebarEnabled) {
-            false
-        } else {
-            prefs[sidebarCollapsedKey] ?: false
-        }
+        prefs[sidebarCollapsedKey] ?: false
     }
 
     val modernSidebarEnabled: Flow<Boolean> = profileFlow { prefs ->
@@ -511,9 +505,7 @@ class LayoutPreferenceDataStore @Inject constructor(
 
     suspend fun setSidebarCollapsedByDefault(collapsed: Boolean) {
         store().edit { prefs ->
-            val modernSidebarEnabled =
-                prefs[modernSidebarEnabledKey] ?: prefs[legacyModernSidebarEnabledKey] ?: false
-            prefs[sidebarCollapsedKey] = if (modernSidebarEnabled) false else collapsed
+            prefs[sidebarCollapsedKey] = collapsed
         }
     }
 
@@ -521,9 +513,6 @@ class LayoutPreferenceDataStore @Inject constructor(
         store().edit { prefs ->
             prefs[modernSidebarEnabledKey] = enabled
             prefs.remove(legacyModernSidebarEnabledKey)
-            if (enabled) {
-                prefs[sidebarCollapsedKey] = false
-            }
         }
     }
 

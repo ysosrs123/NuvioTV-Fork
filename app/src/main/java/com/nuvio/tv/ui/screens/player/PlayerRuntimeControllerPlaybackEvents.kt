@@ -273,7 +273,8 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                         isPlaying = playingForWatchClock
                     )
                     val nearEnd = playerDuration > 0L && pos >= (playerDuration - 500L)
-                    val naturalEnded = !view.isLiveStreamNow() && nearEnd && shouldTreatAsNaturalPlaybackCompletion(
+                    val mpvEofReached = view.isEofReached()
+                    val naturalEnded = !view.isLiveStreamNow() && (nearEnd || mpvEofReached) && shouldTreatAsNaturalPlaybackCompletion(
                         hasRenderedFirstFrame = firstFrameReady,
                         hasFatalError = !_uiState.value.error.isNullOrBlank(),
                         durationMs = playerDuration
@@ -282,7 +283,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                     _uiState.update { state ->
                         state.copy(
                             isPlaying = playingNow,
-                            isBuffering = !firstFrameReady || cacheBuffering,
+                            isBuffering = if (naturalEnded) false else (!firstFrameReady || cacheBuffering),
                             showLoadingOverlay = if (state.loadingOverlayEnabled) !firstFrameReady else false,
                             // Snap the loading-logo fill to 100% once playback is
                             // ready so the logo finishes filling on dismissal.
@@ -974,7 +975,8 @@ internal fun PlayerRuntimeController.saveWatchProgressInternal(position: Long, d
     scope.launch(kotlinx.coroutines.NonCancellable) {
         val effectiveContentId = watchProgressRepository.normalizeParentContentId(
             parentContentId = progress.contentId,
-            videoId = progress.videoId
+            videoId = progress.videoId,
+            profileId = profileId
         )
         val normalizedProgress = progress.copy(contentId = effectiveContentId)
         if (normalizedProgress.isCompleted()) {
@@ -982,12 +984,17 @@ internal fun PlayerRuntimeController.saveWatchProgressInternal(position: Long, d
                 hasMarkedCurrentEpisodeCompleted = true
                 watchProgressRepository.markAsCompleted(
                     normalizedProgress,
+                    profileId = profileId,
                     broadcastTrackingHistory = false
                 )
             }
             runCatching { tvRecommendationManager.onProgressRemoved(normalizedProgress.contentId) }
         } else {
-            watchProgressRepository.saveProgress(normalizedProgress, syncRemote = syncRemote)
+            watchProgressRepository.saveProgress(
+                normalizedProgress,
+                profileId = profileId,
+                syncRemote = syncRemote
+            )
             runCatching { tvRecommendationManager.updateSingleWatchNextProgram(normalizedProgress) }
         }
     }
@@ -2028,9 +2035,13 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
             _uiState.update { it.copy(showPlaybackStatsOverlay = !it.showPlaybackStatsOverlay) }
         }
         PlayerEvent.OnTogglePlayerStatsHud -> {
-            // Writing the setting here would hide the button along with the overlay and leave no way
-            // back without going to settings mid playback.
-            _uiState.update { it.copy(playerStatsHudVisible = !it.playerStatsHudVisible) }
+            val currentState = _uiState.value
+            if (currentState.playerStatsHudButtonAvailable) {
+                val newActive = !currentState.playerStatsHudEnabled
+                scope.launch {
+                    deviceLocalPlayerPreferences.setPlayerStatsHudActive(newActive)
+                }
+            }
         }
     }
 }

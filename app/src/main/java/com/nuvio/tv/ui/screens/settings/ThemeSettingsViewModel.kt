@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.data.local.ThemeDataStore
 import com.nuvio.tv.data.repository.MemberAccessRepository
 import com.nuvio.tv.domain.model.AppFont
+import com.nuvio.tv.domain.model.AppIconOption
 import com.nuvio.tv.domain.model.AppTheme
 import com.nuvio.tv.domain.model.CosmeticEntitlements
 import com.nuvio.tv.domain.model.SettingsUiStyle
 import com.nuvio.tv.domain.model.availableAppThemes
 import com.nuvio.tv.domain.model.resolveAppTheme
+import com.nuvio.tv.launcher.AppIconManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,16 +47,19 @@ sealed class ThemeSettingsEvent {
     data class ToggleScreensaver(val enabled: Boolean) : ThemeSettingsEvent()
     data class SelectScreensaverTimeout(val minutes: Int) : ThemeSettingsEvent()
     data class SelectScreensaverDim(val percent: Int) : ThemeSettingsEvent()
+    data object DismissAppIconFailure : ThemeSettingsEvent()
 }
 
 @HiltViewModel
 class ThemeSettingsViewModel @Inject constructor(
     private val themeDataStore: ThemeDataStore,
-    memberAccessRepository: MemberAccessRepository
+    memberAccessRepository: MemberAccessRepository,
+    private val appIconManager: AppIconManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ThemeSettingsUiState())
     val uiState: StateFlow<ThemeSettingsUiState> = _uiState.asStateFlow()
+    val appIconState = appIconManager.state
 
     private var restoreStyleFocus = false
 
@@ -163,8 +168,11 @@ class ThemeSettingsViewModel @Inject constructor(
             is ThemeSettingsEvent.ToggleScreensaver -> setScreensaverEnabled(event.enabled)
             is ThemeSettingsEvent.SelectScreensaverTimeout -> setScreensaverTimeout(event.minutes)
             is ThemeSettingsEvent.SelectScreensaverDim -> setScreensaverDim(event.percent)
+            ThemeSettingsEvent.DismissAppIconFailure -> appIconManager.clearFailure()
         }
     }
+
+    fun selectAppIcon(option: AppIconOption): Boolean = appIconManager.select(option)
 
     private fun selectTheme(theme: AppTheme) {
         if (currentTheme() == theme) return

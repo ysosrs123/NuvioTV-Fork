@@ -357,6 +357,21 @@
     <string name="appearance_screensaver_dim_gentle">Screen remains clearly visible</string>
     <string name="appearance_screensaver_dim_balanced">Dark but readable</string>
     <string name="appearance_screensaver_dim_strong">Barely visible</string>
+    <string name="appearance_launcher_artwork">Launcher Artwork</string>
+    <string name="appearance_launcher_artwork_subtitle">Choose how Nuvio appears on your TV home screen</string>
+    <string name="appearance_app_icon_and_banner">App Icon &amp; Banner</string>
+    <string name="appearance_app_icon_and_banner_subtitle">Change app icon and banner</string>
+    <string name="appearance_app_icon_picker_title">Choose App Icon &amp; Banner</string>
+    <string name="appearance_app_icon_picker_subtitle">Each style includes a matching square icon and TV banner</string>
+    <string name="appearance_app_icon_confirmation_title">Change App Icon?</string>
+    <string name="appearance_app_icon_confirmation_message">Changing to %1$s will close Nuvio. The TV banner may require a device restart before it updates. Select OK to continue.</string>
+    <string name="appearance_app_icon_change_failed">The icon and banner could not be changed. Please try again.</string>
+    <string name="appearance_app_icon_original">Original</string>
+    <string name="appearance_app_icon_arctic_blue">Arctic Blue</string>
+    <string name="appearance_app_icon_emerald">Emerald</string>
+    <string name="appearance_app_icon_rose_gold">Rose Gold</string>
+    <string name="appearance_app_icon_copper">Copper</string>
+    <string name="appearance_app_icon_graphite">Graphite</string>
     <string name="settings_style_classic">Default</string>
     <string name="settings_style_classic_desc">Standard layout with cards</string>
     <string name="settings_style_zen">Minimal</string>
@@ -373,8 +388,15 @@
     <string name="about_version">Version %1$s</string>
     <string name="about_update_banner_title">Automatic update banner</string>
     <string name="about_update_banner_subtitle">Show a banner when a new version is available</string>
+    <string name="about_update_channel_title">Update channel</string>
+    <string name="about_update_channel_subtitle">Choose the type of app updates to receive</string>
     <string name="about_check_updates">Check for updates</string>
     <string name="about_check_updates_subtitle">Download latest release</string>
+    <string name="update_channel_stable">Stable</string>
+    <string name="update_channel_beta">Beta</string>
+    <string name="update_channel_dialog_subtitle">Choose the type of updates you want to receive</string>
+    <string name="update_channel_stable_description">Intended for everyday use.</string>
+    <string name="update_channel_beta_description">Early updates that may contain bugs, break features, or behave unexpectedly.</string>
     <string name="about_privacy_policy">Privacy Policy</string>
     <string name="about_privacy_policy_subtitle">View our privacy policy</string>
     <string name="support_nuvio_name">Support Nuvio</string>
@@ -548,7 +570,7 @@
     <string name="advanced_playback_issue_reports">Playback issue reports</string>
     <string name="advanced_playback_issue_reports_subtitle">Show report buttons during playback, long loading, and playback errors</string>
     <string name="advanced_player_stats_hud">Playback stats overlay</string>
-    <string name="advanced_player_stats_hud_subtitle">Show live cpu, memory, buffer, bitrate and thermal readings during playback</string>
+    <string name="advanced_player_stats_hud_subtitle">Show a button in stream info to toggle live cpu, memory, buffer, bitrate and thermal readings during playback</string>
     <string name="sentry_enable_dialog_title">Turn on crash reports?</string>
     <string name="sentry_enable_dialog_subtitle">Crash reports help identify device-specific failures without asking you to reproduce the issue with ADB logs.</string>
     <string name="sentry_disable_dialog_title">Turn off crash reports?</string>
@@ -575,6 +597,8 @@
     <string name="buffer_auto_limit_active">Auto-scaled Safe Limit: %d MB</string>
     <string name="advanced_nuvio_focus_scroll">Nuvio Focus Scrolling</string>
     <string name="advanced_nuvio_focus_scroll_subtitle">Use Nuvio\'s custom global focus scroll animation and positioning.</string>
+    <string name="advanced_rgb565">RGB565 image decoding</string>
+    <string name="advanced_rgb565_subtitle">Use lower-memory 16-bit color for eligible opaque images. Changing this restarts the app.</string>
     <string name="advanced_memory_only_vertical_scroll">Memory-only Vertical Scrolling</string>
     <string name="advanced_memory_only_vertical_scroll_subtitle">Skip disk and network image requests while vertically scrolling home rows.</string>
     <string name="advanced_compose_highlighter">Compose Highlighter</string>
@@ -845,6 +869,8 @@
     <string name="dv7_libdovi_mode_3_sub" translatable="false">Legacy alias of Mode 2 — libdovi maps both to the same 8.1 conversion, so forcing this changes nothing. The Convert DV5 to DV8.1 toggle uses Mode 2, not this.</string>
     <string name="dv7_libdovi_mode_4_title" translatable="false">Mode 4 — 8.4 (static)</string>
     <string name="dv7_libdovi_mode_4_sub" translatable="false">Convert to static profile 8.4. Profile 8.4 is HLG-based with fixed reshaping: wrong for PQ/HDR10-base disc remuxes, which lose their dynamic metadata. Do not use on remuxes.</string>
+    <string name="audio_mpv_hi10p_gnext_sw_title">Hi10P G-NEXT SW fallback (MPV-only)</string>
+    <string name="audio_mpv_hi10p_gnext_sw_subtitle">Use G-NEXT software decoding when stream details identify H.264 Hi10P. Off by default; enable only if Hi10P playback freezes or fails.</string>
     <string name="audio_mpv_hwdec_title">Hardware Decoding (MPV-only)</string>
     <string name="audio_mpv_hwdec_dialog_subtitle">Select how libmpv should use hardware decoders.</string>
     <string name="audio_mpv_hwdec_legacy_direct_copy">Legacy (direct -&gt; copy)</string>
@@ -989,6 +1015,8 @@
     <string name="layout_section_content_desc">Control what appears on home and search.</string>
     <string name="layout_collapse_sidebar">Collapse Sidebar</string>
     <string name="layout_collapse_sidebar_sub">Hide sidebar by default; show when focused.</string>
+    <string name="layout_hide_floating_pill">Hide Floating Pill</string>
+    <string name="layout_hide_floating_pill_sub">Hide the floating navigation indicator on the home screen.</string>
     <string name="layout_modern_sidebar">Modern Sidebar</string>
     <string name="layout_modern_sidebar_sub">Enable floating sidebar navigation.</string>
     <string name="layout_modern_sidebar_blur">Modern Sidebar Blur</string>
@@ -1550,6 +1578,28 @@
     <string name="profile_add_new">Add Profile</string>
     <string name="profile_cancel">Cancel</string>
     <string name="profile_save">Save</string>
+    <string name="profile_copy_settings_label">Copy Settings</string>
+    <string name="profile_copy_settings_setup_title">Profile Settings</string>
+    <string name="profile_copy_settings_setup_subtitle">Start fresh or copy TV settings from another profile once.</string>
+    <string name="profile_copy_settings_start_fresh">Start Fresh</string>
+    <string name="profile_copy_settings_primary_source">%1$s (Primary)</string>
+    <string name="profile_copy_settings_create_fresh">Settings: Start fresh</string>
+    <string name="profile_copy_settings_create_source">Settings: %1$s</string>
+    <string name="profile_copy_settings_title">Copy Settings to %1$s</string>
+    <string name="profile_copy_settings_subtitle">Choose a source profile. Its supported TV settings will replace this profile’s settings once.</string>
+    <string name="profile_copy_settings_from">Copy from</string>
+    <string name="profile_copy_settings_action">Copy Settings</string>
+    <string name="profile_copy_settings_copying">Copying\u2026</string>
+    <string name="profile_copy_settings_apply">Apply</string>
+    <string name="profile_copy_settings_credentials_off">API Keys: Do Not Copy</string>
+    <string name="profile_copy_settings_credentials_on">API Keys: Copy Missing Keys</string>
+    <string name="profile_copy_settings_details">Existing API keys are kept. OAuth, addons, plugins, home layout, PIN, history, library, downloads, and device-specific settings stay unchanged.</string>
+    <string name="profile_copy_settings_exclusions">OAuth, addons, plugins, home layout, PIN, history, library, downloads, and device-specific settings stay unchanged.</string>
+    <string name="profile_copy_settings_success">Settings copied from %1$s to %2$s.</string>
+    <string name="profile_copy_settings_error">Could not copy settings. Check your connection and try again.</string>
+    <string name="profile_copy_settings_created_success">Profile created with settings from %1$s.</string>
+    <string name="profile_copy_settings_created_error">Profile created, but settings could not be copied. You can retry from Profile Options.</string>
+    <string name="profile_create_error">Could not create profile. Try again.</string>
     <string name="profile_pin_title">Profile PIN lock</string>
     <string name="profile_pin_enabled_subtitle">This profile requires a 4-digit PIN before switching.</string>
     <string name="profile_pin_disabled_subtitle">Set a 4-digit PIN to lock this profile.</string>
@@ -1898,6 +1948,7 @@
     <string name="search_start_subtitle_no_discover">Discover is disabled. Enter at least 2 characters</string>
     <string name="search_recent_title">Recent searches</string>
     <string name="search_recent_clear">Clear history</string>
+    <string name="cd_remove_recent_search">Remove %1$s from recent searches</string>
     <string name="search_voice_no_speech">No speech detected. Try again.</string>
     <string name="search_voice_mic_permission">Microphone permission is required for voice search.</string>
     <string name="search_voice_failed">Voice recognition failed. Try again.</string>
@@ -2315,6 +2366,7 @@
     <string name="cd_expand_sidebar">Expand sidebar</string>
 
     <string name="update_checking">Checking for updates…</string>
+    <string name="update_waiting_for_stable">You’ll receive the next stable release when it becomes available</string>
     <string name="update_download_complete">Download complete. Ready to install.</string>
     <string name="update_up_to_date">System is up to date. Latest changes:</string>
     <string name="update_close">Close</string>

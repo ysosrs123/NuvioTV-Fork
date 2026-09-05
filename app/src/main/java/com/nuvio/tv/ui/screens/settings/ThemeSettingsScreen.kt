@@ -7,6 +7,7 @@ import com.nuvio.tv.ui.theme.NuvioTheme
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.os.Process
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -67,6 +68,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.LocaleCache
 import com.nuvio.tv.R
+import com.nuvio.tv.domain.model.AppIconOption
 import com.nuvio.tv.domain.model.AppTheme
 import com.nuvio.tv.domain.model.SettingsUiStyle
 import com.nuvio.tv.ui.components.NuvioDialog
@@ -98,8 +100,11 @@ fun ThemeSettingsContent(
     initialFocusRequester: FocusRequester? = null
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val appIconState by viewModel.appIconState.collectAsStateWithLifecycle()
     var showFontDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showAppIconDialog by remember { mutableStateOf(false) }
+    var appIconConfirmation by remember { mutableStateOf<AppIconOption?>(null) }
     var pendingLanguageRestart by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -107,7 +112,7 @@ fun ThemeSettingsContent(
     val supportedLocales = remember(strLanguageSystem) {
         val tags = listOf(
             "en", "ru", "ar", "bg", "bs", "da", "de", "el", "es", "es-419", "hu", "fr", "in", "it",
-            "no", "pl", "pt-PT", "pt-BR", "tr", "uk", "cs", "sk", "sl", "sq", "sv", "ta", "ro", "ja",
+            "no", "pl", "pt-PT", "pt-BR", "tr", "uk", "cs", "sk", "sl", "sq", "sr-Latn", "sv", "ta", "ro", "ja",
             "nl", "vi", "hi", "lt", "he", "zh-CN", "zh-TW"
         )
         listOf(null to strLanguageSystem) + tags.map { tag ->
@@ -131,6 +136,15 @@ fun ThemeSettingsContent(
             context.findActivity()?.recreate()
                 ?: Toast.makeText(context, strRestartHint, Toast.LENGTH_LONG).show()
             pendingLanguageRestart = false
+        }
+    }
+
+    val styleFocusRequesters = remember { SettingsUiStyle.entries.associateWith { FocusRequester() } }
+    val firstThemeFocusRequester = remember { FocusRequester() }
+    val appliedSettingsUiStyle = NuvioTheme.settingsUiStyle
+    LaunchedEffect(Unit) {
+        if (viewModel.consumeStyleFocusRestore()) {
+            styleFocusRequesters[appliedSettingsUiStyle]?.requestFocusAfterFrames()
         }
     }
 
@@ -165,14 +179,16 @@ fun ThemeSettingsContent(
                 Box(modifier = Modifier.fillMaxWidth()) {
                     LazyRow(
                         state = themeRowState,
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .settingsOptionRow(firstThemeFocusRequester),
                         contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xs, vertical = NuvioTheme.spacing.xs),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         itemsIndexed(
                             items = uiState.availableThemes,
                             key = { _, theme -> theme.name }
-                        ) { _, theme ->
+                        ) { themeIndex, theme ->
                             ThemeSwatchChip(
                                 theme = theme,
                                 isSelected = theme == uiState.selectedTheme,
@@ -185,7 +201,13 @@ fun ThemeSettingsContent(
                                     Modifier.focusRequester(initialFocusRequester)
                                 } else {
                                     Modifier
-                                }
+                                }.then(
+                                    if (themeIndex == 0) {
+                                        Modifier.focusRequester(firstThemeFocusRequester)
+                                    } else {
+                                        Modifier
+                                    }
+                                )
                             )
                         }
                     }
@@ -316,6 +338,23 @@ fun ThemeSettingsContent(
 
             SettingsGroupCard(
                 modifier = Modifier.fillMaxWidth(),
+                title = stringResource(R.string.appearance_launcher_artwork),
+                subtitle = stringResource(R.string.appearance_launcher_artwork_subtitle)
+            ) {
+                SettingsActionRow(
+                    title = stringResource(R.string.appearance_app_icon_and_banner),
+                    subtitle = stringResource(R.string.appearance_app_icon_and_banner_subtitle),
+                    value = appIconState.selected.localizedName(),
+                    enabled = appIconState.pending == null,
+                    onClick = {
+                        viewModel.onEvent(ThemeSettingsEvent.DismissAppIconFailure)
+                        showAppIconDialog = true
+                    }
+                )
+            }
+
+            SettingsGroupCard(
+                modifier = Modifier.fillMaxWidth(),
                 title = stringResource(R.string.appearance_font_and_language),
                 subtitle = stringResource(R.string.appearance_font_and_language_subtitle)
             ) {
@@ -375,6 +414,36 @@ fun ThemeSettingsContent(
             onDismiss = { showLanguageDialog = false },
             width = 400.dp,
             maxHeight = 280.dp
+        )
+    }
+
+    if (showAppIconDialog && appIconConfirmation == null) {
+        AppIconPickerDialog(
+            state = appIconState,
+            onSelected = { option ->
+                viewModel.onEvent(ThemeSettingsEvent.DismissAppIconFailure)
+                if (option != appIconState.selected) {
+                    appIconConfirmation = option
+                }
+            },
+            onDismiss = {
+                viewModel.onEvent(ThemeSettingsEvent.DismissAppIconFailure)
+                showAppIconDialog = false
+            }
+        )
+    }
+
+    appIconConfirmation?.let { option ->
+        AppIconChangeConfirmationDialog(
+            option = option,
+            onConfirm = {
+                appIconConfirmation = null
+                if (viewModel.selectAppIcon(option)) {
+                    context.findActivity()?.finishAffinity()
+                    Process.killProcess(Process.myPid())
+                }
+            },
+            onDismiss = { appIconConfirmation = null }
         )
     }
 }

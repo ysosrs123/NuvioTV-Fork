@@ -13,6 +13,7 @@ import com.nuvio.tv.domain.model.enabledAddons
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -50,9 +51,11 @@ internal suspend fun PlayerRuntimeController.fetchAddonSubtitlesNow(
     if (!addonSubtitlesEnabled) {
         addonSubtitlesEnabled =
             playerSettingsDataStore.playerSettings.firstOrNull()?.addonSubtitlesEnabled == true
-        if (!addonSubtitlesEnabled) return emptyList()
+        // Stream sidecar subtitles (upstream 0.8.12) ride on the stream itself,
+        // not on an addon fetch, so they are surfaced even when addon subtitles are off.
+        if (!addonSubtitlesEnabled) return withStreamSidecarSubtitles(emptyList())
     }
-    val request = buildSubtitleFetchRequest() ?: return emptyList()
+    val request = buildSubtitleFetchRequest() ?: return withStreamSidecarSubtitles(emptyList())
     val installedAddonOrder = addonRepository.getInstalledAddons().firstOrNull()
         ?.enabledAddons()
         ?.map { it.displayName }
@@ -103,20 +106,27 @@ internal suspend fun PlayerRuntimeController.fetchAddonSubtitlesNow(
         }
     }
 
-    return subtitleRepository.getSubtitles(
-        type = request.type,
-        id = request.id,
-        videoId = request.videoId,
-        videoHash = currentVideoHash,
-        videoSize = currentVideoSize,
-        filename = currentFilename,
-        onProgress = onProgress,
-        onSubtitlesEmitted = onSubtitlesEmitted
+    return withStreamSidecarSubtitles(
+        subtitleRepository.getSubtitles(
+            type = request.type,
+            id = request.id,
+            videoId = request.videoId,
+            videoHash = currentVideoHash,
+            videoSize = currentVideoSize,
+            filename = currentFilename,
+            onProgress = onProgress,
+            onSubtitlesEmitted = { currentList ->
+                onSubtitlesEmitted?.invoke(withStreamSidecarSubtitles(currentList))
+            }
+        )
     )
 }
 
 internal fun PlayerRuntimeController.fetchAddonSubtitles() {
-    if (buildSubtitleFetchRequest() == null) return
+    if (buildSubtitleFetchRequest() == null) {
+        publishStreamSidecarSubtitlesWithoutAddonFetch()
+        return
+    }
 
     scope.launch {
         // nt6 race hardening: gate check runs inside the coroutine so it can
@@ -124,15 +134,25 @@ internal fun PlayerRuntimeController.fetchAddonSubtitles() {
         if (!addonSubtitlesEnabled &&
             playerSettingsDataStore.playerSettings.firstOrNull()?.addonSubtitlesEnabled != true
         ) {
+            publishStreamSidecarSubtitlesWithoutAddonFetch()
             return@launch
         }
-        _uiState.update { it.copy(isLoadingAddonSubtitles = true, addonSubtitlesError = null) }
+        _uiState.update {
+            it.copy(
+                isLoadingAddonSubtitles = true,
+                addonSubtitlesError = null,
+                addonSubtitles = if (streamSubtitles.isNotEmpty()) {
+                    filterToVisibleAddonSubtitles(streamSubtitles)
+                } else {
+                    it.addonSubtitles
+                }
+            )
+        }
 
         try {
             val subtitles = fetchAddonSubtitlesNow(
                 onSubtitlesEmitted = { currentList ->
-                    val visibleSubtitles = filterToVisibleAddonSubtitles(currentList)
-                    _uiState.update { it.copy(addonSubtitles = visibleSubtitles) }
+                    _uiState.update { it.copy(addonSubtitles = currentList) }
                 }
             )
             val visibleSubtitles = filterToVisibleAddonSubtitles(subtitles)
@@ -161,7 +181,12 @@ internal fun PlayerRuntimeController.fetchAddonSubtitles() {
             _uiState.update {
                 it.copy(
                     isLoadingAddonSubtitles = false,
-                    addonSubtitlesError = e.message
+                    addonSubtitlesError = e.message,
+                    addonSubtitles = if (streamSubtitles.isNotEmpty()) {
+                        filterToVisibleAddonSubtitles(streamSubtitles)
+                    } else {
+                        it.addonSubtitles
+                    }
                 )
             }
         }
@@ -205,6 +230,18 @@ internal fun PlayerRuntimeController.maybeAttachDeferredAddonSubtitle() {
     _uiState.update { it.copy(selectedAddonSubtitle = subtitle, selectedSubtitleTrackIndex = -1) }
 }
 
+private fun PlayerRuntimeController.publishStreamSidecarSubtitlesWithoutAddonFetch() {
+    if (streamSubtitles.isEmpty()) return
+    _uiState.update {
+        it.copy(
+            addonSubtitles = filterToVisibleAddonSubtitles(streamSubtitles),
+            isLoadingAddonSubtitles = false,
+            addonSubtitlesError = null
+        )
+    }
+    tryAutoSelectPreferredSubtitleFromAvailableTracks()
+}
+
 internal fun PlayerRuntimeController.refreshSubtitlesForCurrentEpisode() {
     val keepDisabled = subtitleDisabledByPersistedPreference ||
         (rememberedTrackPreference?.subtitle == PlayerRuntimeController.RememberedSubtitleSelection.Disabled)
@@ -234,6 +271,13 @@ internal fun PlayerRuntimeController.refreshSubtitlesForCurrentEpisode() {
         )
     }
     fetchAddonSubtitles()
+}
+
+internal fun PlayerRuntimeController.withStreamSidecarSubtitles(addonSubtitles: List<Subtitle>): List<Subtitle> {
+    if (streamSubtitles.isEmpty()) return filterToVisibleAddonSubtitles(addonSubtitles)
+    return filterToVisibleAddonSubtitles(
+        (streamSubtitles + addonSubtitles).distinctBy { addonSubtitleKey(it) }
+    )
 }
 
 internal fun PlayerRuntimeController.filterToVisibleAddonSubtitles(
@@ -293,12 +337,12 @@ internal fun PlayerRuntimeController.observeEpisodeWatchProgress() {
     if (type.lowercase() != "series") return
     val baseId = id.split(":").firstOrNull() ?: id
     scope.launch {
-        watchProgressRepository.getAllEpisodeProgress(baseId).collectLatest { progressMap ->
+        watchProgressRepository.getAllEpisodeProgress(baseId, profileId).collectLatest { progressMap ->
             _uiState.update { it.copy(episodeWatchProgressMap = progressMap) }
         }
     }
     scope.launch {
-        watchedItemsPreferences.getWatchedEpisodesForContent(baseId).collectLatest { watchedSet ->
+        watchedItemsPreferences.getWatchedEpisodesForContent(baseId, profileId).collectLatest { watchedSet ->
             _uiState.update { it.copy(watchedEpisodeKeys = watchedSet) }
         }
     }
@@ -523,9 +567,14 @@ internal fun PlayerRuntimeController.loadSavedProgressFor(season: Int?, episode:
         val progress = if (isCloudLibraryPlayback) {
             loadCloudLibraryResumeProgress()
         } else if (season != null && episode != null) {
-            watchProgressRepository.getEpisodeProgress(progressContentId!!, season, episode).firstOrNull()
+            watchProgressRepository.getEpisodeProgress(
+                progressContentId!!,
+                season,
+                episode,
+                profileId
+            ).firstOrNull()
         } else {
-            watchProgressRepository.getProgress(progressContentId!!).firstOrNull()
+            watchProgressRepository.getProgress(progressContentId!!, profileId).firstOrNull()
         }
 
         progress?.let { saved ->
@@ -567,9 +616,14 @@ internal suspend fun PlayerRuntimeController.loadSavedProgressSuspend(season: In
     val progress = if (isCloudLibraryPlayback) {
         loadCloudLibraryResumeProgress()
     } else if (season != null && episode != null) {
-        watchProgressRepository.getEpisodeProgress(progressContentId!!, season, episode).firstOrNull()
+        watchProgressRepository.getEpisodeProgress(
+            progressContentId!!,
+            season,
+            episode,
+            profileId
+        ).firstOrNull()
     } else {
-        watchProgressRepository.getProgress(progressContentId!!).firstOrNull()
+        watchProgressRepository.getProgress(progressContentId!!, profileId).firstOrNull()
     }
 
     progress?.let { saved ->
@@ -1105,15 +1159,18 @@ internal fun PlayerRuntimeController.scheduleDeferredPlayerReinitialize(
 
 internal fun PlayerRuntimeController.observePlayerStatsHud() {
     scope.launch {
-        deviceLocalPlayerPreferences.playerStatsHudEnabled
-            .distinctUntilChanged()
-            .collect { enabled ->
-                // Turning the setting on is a request to see the overlay, even if the button hid
-                // it during an earlier playback.
+        combine(
+            deviceLocalPlayerPreferences.playerStatsHudButtonEnabled,
+            deviceLocalPlayerPreferences.playerStatsHudActive
+        ) { buttonAvailable, active ->
+            val isHudEnabled = buttonAvailable && active
+            buttonAvailable to isHudEnabled
+        }.distinctUntilChanged()
+            .collect { (buttonAvailable, isHudEnabled) ->
                 _uiState.update {
                     it.copy(
-                        playerStatsHudEnabled = enabled,
-                        playerStatsHudVisible = if (enabled) true else it.playerStatsHudVisible
+                        playerStatsHudButtonAvailable = buttonAvailable,
+                        playerStatsHudEnabled = isHudEnabled
                     )
                 }
             }

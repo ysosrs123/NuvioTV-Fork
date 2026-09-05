@@ -250,7 +250,7 @@ class StreamRepositoryImpl @Inject constructor(
                         var addonStreamCount = 0
                         try {
                           withTimeout(ADDON_STREAM_FETCH_TIMEOUT_MS) {
-                            val streamsResult = getStreamsFromAddon(addon.baseUrl, type, videoId, addon.displayName, addon.logo)
+                            val streamsResult = getStreamsFromAddon(addon, type, videoId)
                             when (streamsResult) {
                                 is NetworkResult.Success -> {
                                     if (streamsResult.data.isNotEmpty()) {
@@ -717,7 +717,8 @@ class StreamRepositoryImpl @Inject constructor(
             ytId = null,
             externalUrl = null,
             quality = quality,
-            qualityValue = parseQualityValue(quality)
+            qualityValue = parseQualityValue(quality),
+            subtitles = subtitles
         )
     }
 
@@ -755,13 +756,11 @@ class StreamRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getStreamsFromAddon(
-        baseUrl: String,
+        addon: Addon,
         type: String,
-        videoId: String,
-        addonName: String?,
-        addonLogo: String?
+        videoId: String
     ): NetworkResult<List<Stream>> {
-        val cleanBaseUrl = baseUrl.trimEnd('/')
+        val cleanBaseUrl = addon.baseUrl.trimEnd('/')
         val queryStart = cleanBaseUrl.indexOf('?')
         val basePath = if (queryStart >= 0) cleanBaseUrl.substring(0, queryStart).trimEnd('/') else cleanBaseUrl
         val baseQuery = if (queryStart >= 0) cleanBaseUrl.substring(queryStart) else ""
@@ -770,13 +769,12 @@ class StreamRepositoryImpl @Inject constructor(
         val streamUrl = "$basePath/stream/$encodedType/$encodedVideoId.json$baseQuery"
         Log.d(TAG, "Fetching streams type=$type videoId=$videoId url=$streamUrl")
 
-        // Name/logo come from the caller (it already holds the installed Addon and
-        // overwrites these fields on the result anyway). The previous per-call
-        // addonRepository.fetchAddon() here bypassed the manifest cache and fired a
-        // redundant network round trip per addon, serialised before every stream
-        // request, only to be discarded (main review F1).
-        val resolvedAddonName = addonName
-            ?: context.getString(com.nuvio.tv.R.string.stream_addon_unknown)
+        // Display info comes from the installed addon the caller already holds. Calling
+        // addonRepository.fetchAddon() here caused an unconditional manifest GET ahead of every
+        // queried addon's stream request: fetchAddon is the low-level fetch that does not consult
+        // the cache, so this sidestepped the manifest-cache policy in AddonRepositoryImpl.
+        val resolvedAddonName = addon.displayName
+        val addonLogo = addon.logo
 
         return when (val result = safeAddonApiCall(context) { api.getStreams(streamUrl) }) {
             is NetworkResult.Success -> {

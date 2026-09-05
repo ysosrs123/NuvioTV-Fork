@@ -107,6 +107,7 @@ class PlayerViewModel @Inject constructor(
     private val prefetchSelectionSupplier: com.nuvio.tv.core.stream.PrefetchSelectionSupplier,
     private val screensaverController: com.nuvio.tv.core.player.ScreensaverController,
     private val tvRecommendationManager: com.nuvio.tv.core.recommendations.TvRecommendationManager,
+    profileManager: com.nuvio.tv.core.profile.ProfileManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -152,6 +153,8 @@ class PlayerViewModel @Inject constructor(
         debridSettingsDataStore = debridSettingsDataStore,
         playbackIssueReportRepository = playbackIssueReportRepository,
         tvRecommendationManager = tvRecommendationManager,
+        profileId = savedStateHandle.get<String>("profileId")?.toIntOrNull()
+            ?: profileManager.activeProfileId.value,
         savedStateHandle = savedStateHandle,
         scope = viewModelScope
     )
@@ -1038,6 +1041,13 @@ class PlayerViewModel @Inject constructor(
 
     fun getCurrentFileSizeBytes(): Long? = controller.currentVideoSize
 
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    fun getPlayerNativeMemoryBytes(): Long? {
+        val allocator = controller._loadControl?.allocator as? androidx.media3.exoplayer.upstream.DefaultAllocator ?: return null
+        val activeBytes = allocator.totalBytesAllocated.toLong()
+        return if (activeBytes > 0L) activeBytes else null
+    }
+
     fun stopAndRelease() {
         postPlayRecommendationController.stop()
         controller.stopAndRelease()
@@ -1164,7 +1174,8 @@ class PlayerViewModel @Inject constructor(
             season = controller.currentSeason,
             episode = controller.currentEpisode,
             episodeTitle = controller.currentEpisodeTitle,
-            year = controller.year
+            year = controller.year,
+            profileId = controller.profileId
         )
         val headers = controller.getCurrentHeaders()
         val nextEpisodeSnapshot = controller.metaVideos

@@ -12,6 +12,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -108,6 +109,8 @@ internal fun SubtitleSelectionOverlay(
     subtitleDelayMs: Int,
     installedSubtitleAddonOrder: List<String>,
     isLoadingAddons: Boolean,
+    useLibass: Boolean = false,
+    isUsingMpv: Boolean = false,
     onInternalTrackSelected: (Int) -> Unit,
     onAddonSubtitleSelected: (Subtitle) -> Unit,
     onDisableSubtitles: () -> Unit,
@@ -184,6 +187,40 @@ internal fun SubtitleSelectionOverlay(
 
     var editorOpen by remember(visible) { mutableStateOf(false) }
     var currentSelectedOptionId by remember(visible) { mutableStateOf(sessionSelectedOptionId) }
+    // Upstream 0.9.0: style controls are disabled while an ASS/SSA track is
+    // selected under libass or MPV (they render the embedded styling themselves).
+    val isStyleDisabledByLibass = remember(
+        useLibass,
+        isUsingMpv,
+        flatOptions,
+        currentSelectedOptionId,
+        sessionInternalTracks,
+        selectedInternalIndex,
+        selectedAddonSubtitle
+    ) {
+        if (!useLibass && !isUsingMpv) return@remember false
+        val selectedOption = flatOptions.firstOrNull { it.id == currentSelectedOptionId }
+        val isAss = when (selectedOption?.kind) {
+            SubtitleOptionKind.INTERNAL -> {
+                val track = selectedOption.internalTrackIndex?.let { sessionInternalTracks.getOrNull(it) }
+                val codec = track?.codec?.lowercase(java.util.Locale.US).orEmpty()
+                codec.contains("ass") || codec.contains("ssa") || track?.name?.contains("ASS", ignoreCase = true) == true
+            }
+            SubtitleOptionKind.ADDON -> {
+                val url = selectedOption.addonSubtitle?.url?.lowercase(java.util.Locale.US).orEmpty()
+                url.contains(".ass") || url.contains(".ssa")
+            }
+            null -> {
+                val currentInternalTrack = sessionInternalTracks.getOrNull(selectedInternalIndex)
+                val internalCodec = currentInternalTrack?.codec?.lowercase(java.util.Locale.US).orEmpty()
+                val addonUrl = selectedAddonSubtitle?.url?.lowercase(java.util.Locale.US).orEmpty()
+                internalCodec.contains("ass") || internalCodec.contains("ssa") ||
+                    currentInternalTrack?.name?.contains("ASS", ignoreCase = true) == true ||
+                    addonUrl.contains(".ass") || addonUrl.contains(".ssa")
+            }
+        }
+        isAss
+    }
     val listFocusRequester = remember { FocusRequester() }
     val listState = remember(visible) {
         val selectedIndex = flatOptions.indexOfFirst { it.id == sessionSelectedOptionId }
@@ -238,7 +275,8 @@ internal fun SubtitleSelectionOverlay(
                     onMoveLeft = {},
                     focusRequesters = styleRequesters,
                     onStyleFocused = {},
-                    onEvent = onEvent
+                    onEvent = onEvent,
+                    isStyleDisabledByLibass = isStyleDisabledByLibass
                 )
             } else if (flatOptions.isEmpty() && sessionIsLoadingAddons) {
                 OverlayLoadingCard(text = stringResource(R.string.subtitle_loading_addon))
@@ -297,10 +335,21 @@ private fun SubtitleStyleRail(
     onMoveLeft: () -> Unit,
     focusRequesters: Map<String, FocusRequester>,
     onStyleFocused: (String) -> Unit,
-    onEvent: (PlayerEvent) -> Unit
+    onEvent: (PlayerEvent) -> Unit,
+    isStyleDisabledByLibass: Boolean = false
 ) {
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val moveLeftKey = if (isRtl) android.view.KeyEvent.KEYCODE_DPAD_RIGHT else android.view.KeyEvent.KEYCODE_DPAD_LEFT
+    // Upstream 0.9.0 (68e943f77/e96a94748): libass and MPV render ASS/SSA styling
+    // themselves, so the user style controls are inert for those tracks. Same
+    // semantics as upstream (events dropped, cards dimmed) ported into the fork's
+    // single-column editor; cards stay focusable so D-pad can still leave the editor.
+    val dispatchStyleEvent: (PlayerEvent) -> Unit = { event ->
+        if (!isStyleDisabledByLibass) {
+            onEvent(event)
+        }
+    }
+    val styleCardModifier = if (isStyleDisabledByLibass) Modifier.alpha(0.35f) else Modifier
     Column(modifier = Modifier.fillMaxWidth()) {
         LazyColumn(
             state = listState,
@@ -311,11 +360,12 @@ private fun SubtitleStyleRail(
         ) {
             item {
                 Card(
-                    onClick = { onEvent(PlayerEvent.OnShowSubtitleDelayOverlay) },
+                    onClick = { dispatchStyleEvent(PlayerEvent.OnShowSubtitleDelayOverlay) },
                     colors = overlayCardColors(selected = false),
                     shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
                     modifier = Modifier
                         .fillMaxWidth()
+                        .then(styleCardModifier)
                         .focusRequester(requireNotNull(focusRequesters[StyleFocusKey.DelaySet]))
                         .onPreviewKeyEvent { event ->
                             when (event.nativeKeyEvent.keyCode) {
@@ -360,11 +410,14 @@ private fun SubtitleStyleRail(
                 }
             }
             item {
-                OverlaySectionCard(title = stringResource(R.string.subtitle_style_font_size)) {
+                OverlaySectionCard(
+                    title = stringResource(R.string.subtitle_style_font_size),
+                    modifier = styleCardModifier
+                ) {
                     StepperRow(
                         value = "${subtitleStyle.size}%",
-                        onDecrease = { onEvent(PlayerEvent.OnSetSubtitleSize(subtitleStyle.size - 10)) },
-                        onIncrease = { onEvent(PlayerEvent.OnSetSubtitleSize(subtitleStyle.size + 10)) },
+                        onDecrease = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleSize(subtitleStyle.size - 10)) },
+                        onIncrease = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleSize(subtitleStyle.size + 10)) },
                         onMoveLeft = onMoveLeft,
                         decrementFocusRequester = focusRequesters[StyleFocusKey.FontSizeDecrease],
                         incrementFocusRequester = focusRequesters[StyleFocusKey.FontSizeIncrease],
@@ -375,7 +428,10 @@ private fun SubtitleStyleRail(
                 }
             }
             item {
-                OverlaySectionCard(title = stringResource(R.string.subtitle_style_bold)) {
+                OverlaySectionCard(
+                    title = stringResource(R.string.subtitle_style_bold),
+                    modifier = styleCardModifier
+                ) {
                     ToggleChip(
                         label = if (subtitleStyle.bold) stringResource(R.string.subtitle_style_on) else stringResource(R.string.subtitle_style_off),
                         isEnabled = subtitleStyle.bold,
@@ -383,12 +439,15 @@ private fun SubtitleStyleRail(
                         focusRequester = focusRequesters[StyleFocusKey.Bold],
                         focusKey = StyleFocusKey.Bold,
                         onFocused = onStyleFocused,
-                        onClick = { onEvent(PlayerEvent.OnSetSubtitleBold(!subtitleStyle.bold)) }
+                        onClick = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleBold(!subtitleStyle.bold)) }
                     )
                 }
             }
             item {
-                OverlaySectionCard(title = stringResource(R.string.subtitle_style_text_color)) {
+                OverlaySectionCard(
+                    title = stringResource(R.string.subtitle_style_text_color),
+                    modifier = styleCardModifier
+                ) {
                     ColorChipRow(
                         colors = OverlayTextColors,
                         selectedColor = subtitleStyle.textColor,
@@ -396,23 +455,26 @@ private fun SubtitleStyleRail(
                         focusRequesters = focusRequesters,
                         focusKeyPrefix = StyleFocusKey.TextColorPrefix,
                         onFocused = onStyleFocused,
-                        onColorSelected = { color -> onEvent(PlayerEvent.OnSetSubtitleTextColor(color)) }
+                        onColorSelected = { color -> dispatchStyleEvent(PlayerEvent.OnSetSubtitleTextColor(color)) }
                     )
                 }
             }
             item {
-                OverlaySectionCard(title = stringResource(R.string.subtitle_style_text_opacity)) {
+                OverlaySectionCard(
+                    title = stringResource(R.string.subtitle_style_text_opacity),
+                    modifier = styleCardModifier
+                ) {
                     val currentColor = Color(subtitleStyle.textColor)
                     val currentAlphaPercent = (currentColor.alpha * 100f).roundToInt().coerceIn(0, 100)
                     StepperRow(
                         value = "$currentAlphaPercent%",
                         onDecrease = {
                             val newAlpha = (currentAlphaPercent - 10).coerceAtLeast(0) / 100f
-                            onEvent(PlayerEvent.OnSetSubtitleTextColor(currentColor.copy(alpha = newAlpha).toArgb()))
+                            dispatchStyleEvent(PlayerEvent.OnSetSubtitleTextColor(currentColor.copy(alpha = newAlpha).toArgb()))
                         },
                         onIncrease = {
                             val newAlpha = (currentAlphaPercent + 10).coerceAtMost(100) / 100f
-                            onEvent(PlayerEvent.OnSetSubtitleTextColor(currentColor.copy(alpha = newAlpha).toArgb()))
+                            dispatchStyleEvent(PlayerEvent.OnSetSubtitleTextColor(currentColor.copy(alpha = newAlpha).toArgb()))
                         },
                         onMoveLeft = onMoveLeft,
                         decrementFocusRequester = focusRequesters[StyleFocusKey.OpacityDecrease],
@@ -424,7 +486,10 @@ private fun SubtitleStyleRail(
                 }
             }
             item {
-                OverlaySectionCard(title = stringResource(R.string.subtitle_style_outline)) {
+                OverlaySectionCard(
+                    title = stringResource(R.string.subtitle_style_outline),
+                    modifier = styleCardModifier
+                ) {
                     Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
                         ToggleChip(
                             label = if (subtitleStyle.outlineEnabled) stringResource(R.string.subtitle_style_on) else stringResource(R.string.subtitle_style_off),
@@ -433,7 +498,7 @@ private fun SubtitleStyleRail(
                             focusRequester = focusRequesters[StyleFocusKey.OutlineToggle],
                             focusKey = StyleFocusKey.OutlineToggle,
                             onFocused = onStyleFocused,
-                            onClick = { onEvent(PlayerEvent.OnSetSubtitleOutlineEnabled(!subtitleStyle.outlineEnabled)) }
+                            onClick = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleOutlineEnabled(!subtitleStyle.outlineEnabled)) }
                         )
                         ColorChipRow(
                             colors = OverlayOutlineColors,
@@ -445,20 +510,23 @@ private fun SubtitleStyleRail(
                             onFocused = onStyleFocused,
                             onColorSelected = { color ->
                                 if (!subtitleStyle.outlineEnabled) {
-                                    onEvent(PlayerEvent.OnSetSubtitleOutlineEnabled(true))
+                                    dispatchStyleEvent(PlayerEvent.OnSetSubtitleOutlineEnabled(true))
                                 }
-                                onEvent(PlayerEvent.OnSetSubtitleOutlineColor(color))
+                                dispatchStyleEvent(PlayerEvent.OnSetSubtitleOutlineColor(color))
                             }
                         )
                     }
                 }
             }
             item {
-                OverlaySectionCard(title = stringResource(R.string.subtitle_style_bottom_offset)) {
+                OverlaySectionCard(
+                    title = stringResource(R.string.subtitle_style_bottom_offset),
+                    modifier = styleCardModifier
+                ) {
                     StepperRow(
                         value = subtitleStyle.verticalOffset.toString(),
-                        onDecrease = { onEvent(PlayerEvent.OnSetSubtitleVerticalOffset(subtitleStyle.verticalOffset - 5)) },
-                        onIncrease = { onEvent(PlayerEvent.OnSetSubtitleVerticalOffset(subtitleStyle.verticalOffset + 5)) },
+                        onDecrease = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleVerticalOffset(subtitleStyle.verticalOffset - 5)) },
+                        onIncrease = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleVerticalOffset(subtitleStyle.verticalOffset + 5)) },
                         onMoveLeft = onMoveLeft,
                         decrementFocusRequester = focusRequesters[StyleFocusKey.OffsetDecrease],
                         incrementFocusRequester = focusRequesters[StyleFocusKey.OffsetIncrease],
@@ -470,10 +538,11 @@ private fun SubtitleStyleRail(
             }
             item {
                 Card(
-                    onClick = { onEvent(PlayerEvent.OnResetSubtitleDefaults) },
+                    onClick = { dispatchStyleEvent(PlayerEvent.OnResetSubtitleDefaults) },
                     colors = overlayCardColors(selected = false),
                     shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
                     modifier = Modifier
+                        .then(styleCardModifier)
                         .focusRequester(requireNotNull(focusRequesters[StyleFocusKey.Reset]))
                         .onPreviewKeyEvent { event ->
                             when (event.nativeKeyEvent.keyCode) {
@@ -547,6 +616,7 @@ private fun OverlayEmptyCard(text: String) {
 @Composable
 private fun OverlaySectionCard(
     title: String,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -1041,6 +1111,31 @@ private fun buildSubtitleOptionRailItems(
     if (selectedLanguageKey == SubtitleOffLanguageKey) return emptyList()
 
     val addonOrderMap = installedAddonOrder.withIndex().associate { (index, name) -> name to index }
+    fun toAddonItem(subtitle: Subtitle): SubtitleOptionRailItem {
+        val optionId = addonSubtitleOptionId(subtitle)
+        return SubtitleOptionRailItem(
+            id = optionId,
+            kind = SubtitleOptionKind.ADDON,
+            title = if (subtitle.isStreamProvided) {
+                streamProvidedSubtitleTitle(subtitle)
+            } else {
+                Subtitle.languageCodeToName(PlayerSubtitleUtils.normalizeLanguageCode(subtitle.lang))
+            },
+            sourceLabel = if (subtitle.isStreamProvided) builtInLabel else subtitle.addonName,
+            meta = subtitle.id.takeIf { it.isNotBlank() && it != subtitle.lang && it != subtitle.url },
+            isSelected = optionId == selectedOptionId,
+            addonSubtitle = subtitle
+        )
+    }
+
+    val matchingAddonSubtitles = addonSubtitles
+        .filter { normalizeOverlayLanguageKey(it.lang) == selectedLanguageKey }
+        .distinctBy { addonSubtitleOptionId(it) }
+
+    val streamProvidedItems = matchingAddonSubtitles
+        .filter { it.isStreamProvided }
+        .map(::toAddonItem)
+
     val internalItems = internalTracks
         .filter { normalizeOverlayLanguageKeyForTrack(it) == selectedLanguageKey }
         .map { track ->
@@ -1058,30 +1153,18 @@ private fun buildSubtitleOptionRailItems(
             )
         }
 
-    val addonItems = addonSubtitles
+    val addonFetchedItems = matchingAddonSubtitles
+        .filter { !it.isStreamProvided }
         .withIndex()
-        .filter { (_, subtitle) -> normalizeOverlayLanguageKey(subtitle.lang) == selectedLanguageKey }
         .sortedWith(
             compareBy(
-                { (index, subtitle) -> addonOrderMap[subtitle.addonName] ?: Int.MAX_VALUE },
+                { (_, subtitle) -> addonOrderMap[subtitle.addonName] ?: Int.MAX_VALUE },
                 { (index, _) -> index }
             )
         )
-        .distinctBy { (_, subtitle) -> addonSubtitleOptionId(subtitle) }
-        .map { (_, subtitle) ->
-            val optionId = addonSubtitleOptionId(subtitle)
-            SubtitleOptionRailItem(
-                id = optionId,
-                kind = SubtitleOptionKind.ADDON,
-                title = Subtitle.languageCodeToName(PlayerSubtitleUtils.normalizeLanguageCode(subtitle.lang)),
-                sourceLabel = subtitle.addonName,
-                meta = subtitle.id.takeIf { it.isNotBlank() && it != subtitle.lang },
-                isSelected = optionId == selectedOptionId,
-                addonSubtitle = subtitle
-            )
-        }
+        .map { (_, subtitle) -> toAddonItem(subtitle) }
 
-    return internalItems + addonItems
+    return internalItems + streamProvidedItems + addonFetchedItems
 }
 
 private fun selectedSubtitleLanguageKey(
@@ -1128,6 +1211,14 @@ private fun selectedSubtitleOptionId(
 
 private fun addonSubtitleOptionId(subtitle: Subtitle): String {
     return "addon:${subtitle.addonName}:${subtitle.id}:${subtitle.url}"
+}
+
+private fun streamProvidedSubtitleTitle(subtitle: Subtitle): String {
+    val name = subtitle.addonName.trim()
+    if (name.isNotBlank() && !name.equals("Plugin", ignoreCase = true)) {
+        return name
+    }
+    return subtitle.lang
 }
 
 private fun normalizeOverlayLanguageKey(language: String?): String {
