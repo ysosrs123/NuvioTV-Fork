@@ -93,11 +93,14 @@ internal object PlayerTunnelAvSyncPolicy {
         val readyMs: Long,
         val noFrameThresholdMs: Long,
         val tunnelingAlreadyDisarmed: Boolean,
+        // True once the watchdog has already flushed and retried the tunnel for this stream.
+        val tunnelFlushAlreadyTried: Boolean,
     )
 
     sealed class Decision {
         data object None : Decision()
         data object Stop : Decision()
+        data object FlushAndRetryTunnel : Decision()
         data object DisableTunnelingAndRebuild : Decision()
     }
 
@@ -125,12 +128,21 @@ internal object PlayerTunnelAvSyncPolicy {
             input.bufferedPositionMs <= input.positionMs -> 0L
             else -> input.stalledMs + input.intervalMs
         }
-        if (stalledMs >= input.stallThresholdMs) {
-            return Result(Decision.DisableTunnelingAndRebuild, stalledMs, readyMs, Reason.PositionFrozen)
+        val reason = when {
+            stalledMs >= input.stallThresholdMs -> Reason.PositionFrozen
+            input.renderedOutputBufferCount == 0 && readyMs >= input.noFrameThresholdMs ->
+                Reason.NoFramesRendered
+            else -> null
+        } ?: return Result(Decision.None, stalledMs, readyMs)
+        // The first detection reprimes the tunnel decoder (a seek flushes it and re-arms
+        // first-frame setup) and gives it another window; only a stall that survives the
+        // reprime demotes, so a TV that renders the format only tunnelled is not demoted into
+        // an unrenderable state on the first stall.
+        val decision = if (input.tunnelFlushAlreadyTried) {
+            Decision.DisableTunnelingAndRebuild
+        } else {
+            Decision.FlushAndRetryTunnel
         }
-        if (input.renderedOutputBufferCount == 0 && readyMs >= input.noFrameThresholdMs) {
-            return Result(Decision.DisableTunnelingAndRebuild, stalledMs, readyMs, Reason.NoFramesRendered)
-        }
-        return Result(Decision.None, stalledMs, readyMs)
+        return Result(decision, stalledMs, readyMs, reason)
     }
 }

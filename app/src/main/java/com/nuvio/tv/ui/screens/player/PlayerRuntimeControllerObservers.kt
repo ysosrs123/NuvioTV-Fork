@@ -925,6 +925,7 @@ internal fun PlayerRuntimeController.maybeScheduleTunnelAvSyncWatchdog() {
         var readyMs = 0L
         var firstReadyPositionMs: Long? = null
         var pendingDeadClockMemo: Pair<String, String>? = null
+        var tunnelFlushedOnce = false
         while (isActive) {
             delay(PlayerRuntimeController.TUNNEL_AV_SYNC_CHECK_MS)
             val livePlayer = _exoPlayer ?: return@launch
@@ -949,6 +950,7 @@ internal fun PlayerRuntimeController.maybeScheduleTunnelAvSyncWatchdog() {
                     readyMs = readyMs,
                     noFrameThresholdMs = PlayerRuntimeController.TUNNEL_AV_SYNC_NO_FRAME_MS,
                     tunnelingAlreadyDisarmed = tunnelingDisabledStreamUrls.contains(currentStreamUrl),
+                    tunnelFlushAlreadyTried = tunnelFlushedOnce,
                 )
             )
             lastPositionMs = positionMs
@@ -957,6 +959,27 @@ internal fun PlayerRuntimeController.maybeScheduleTunnelAvSyncWatchdog() {
             when (result.decision) {
                 PlayerTunnelAvSyncPolicy.Decision.Stop -> return@launch
                 PlayerTunnelAvSyncPolicy.Decision.None -> Unit
+                PlayerTunnelAvSyncPolicy.Decision.FlushAndRetryTunnel -> {
+                    val audioLabel = playbackSpeedAwareAudioSink?.currentTunnelAudioClass ?: "unknown"
+                    Log.w(
+                        PlayerRuntimeController.TAG,
+                        "TUNNEL_AV_SYNC: reprime after ${result.reason} at ${positionMs}ms " +
+                            "(audio=$audioLabel); flushing tunnel and retrying before demote"
+                    )
+                    queuePlaybackRawEventLine(
+                        "tunnel_av_sync_flush_retry positionMs=$positionMs audioClass=$audioLabel " +
+                            "reason=${result.reason}"
+                    )
+                    // A seek flushes the tunnel video codec and re-arms first-frame setup,
+                    // which is what a manual seek does to rescue a held picture. Reset the
+                    // accumulators so the reprimed clock gets a full window before any demote.
+                    tunnelFlushedOnce = true
+                    lastPositionMs = null
+                    stalledMs = 0L
+                    readyMs = 0L
+                    firstReadyPositionMs = null
+                    livePlayer.seekTo(positionMs)
+                }
                 PlayerTunnelAvSyncPolicy.Decision.DisableTunnelingAndRebuild -> {
                     val audioClass = playbackSpeedAwareAudioSink?.currentTunnelAudioClass
                     val audioLabel = audioClass ?: "unknown"

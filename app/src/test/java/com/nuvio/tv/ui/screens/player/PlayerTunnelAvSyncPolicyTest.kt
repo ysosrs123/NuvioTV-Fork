@@ -22,6 +22,7 @@ class PlayerTunnelAvSyncPolicyTest {
         readyMs = 0L,
         noFrameThresholdMs = 8_000L,
         tunnelingAlreadyDisarmed = false,
+        tunnelFlushAlreadyTried = false,
     )
 
     // Position advancing every sample, so only the frame leg can decide.
@@ -37,7 +38,7 @@ class PlayerTunnelAvSyncPolicyTest {
         }
         assertEquals(4_000L, stalled)
         val fifth = PlayerTunnelAvSyncPolicy.evaluate(baseInput().copy(stalledMs = stalled))
-        assertEquals(PlayerTunnelAvSyncPolicy.Decision.DisableTunnelingAndRebuild, fifth.decision)
+        assertEquals(PlayerTunnelAvSyncPolicy.Decision.FlushAndRetryTunnel, fifth.decision)
         assertEquals(5_000L, fifth.stalledMs)
         assertEquals(PlayerTunnelAvSyncPolicy.Reason.PositionFrozen, fifth.reason)
     }
@@ -106,7 +107,7 @@ class PlayerTunnelAvSyncPolicyTest {
         val eighth = PlayerTunnelAvSyncPolicy.evaluate(
             advancingInput().copy(renderedOutputBufferCount = 0, readyMs = ready)
         )
-        assertEquals(PlayerTunnelAvSyncPolicy.Decision.DisableTunnelingAndRebuild, eighth.decision)
+        assertEquals(PlayerTunnelAvSyncPolicy.Decision.FlushAndRetryTunnel, eighth.decision)
         assertEquals(8_000L, eighth.readyMs)
         assertEquals(PlayerTunnelAvSyncPolicy.Reason.NoFramesRendered, eighth.reason)
     }
@@ -128,7 +129,43 @@ class PlayerTunnelAvSyncPolicyTest {
         val result = PlayerTunnelAvSyncPolicy.evaluate(
             baseInput().copy(renderedOutputBufferCount = 0, stalledMs = 4_000L, readyMs = 9_000L)
         )
+        assertEquals(PlayerTunnelAvSyncPolicy.Decision.FlushAndRetryTunnel, result.decision)
+        assertEquals(PlayerTunnelAvSyncPolicy.Reason.PositionFrozen, result.reason)
+    }
+
+    @Test
+    fun firstPositionFrozenStrike_flushesAndRetriesTheTunnel() {
+        val result = PlayerTunnelAvSyncPolicy.evaluate(
+            baseInput().copy(stalledMs = 4_000L, tunnelFlushAlreadyTried = false)
+        )
+        assertEquals(PlayerTunnelAvSyncPolicy.Decision.FlushAndRetryTunnel, result.decision)
+        assertEquals(PlayerTunnelAvSyncPolicy.Reason.PositionFrozen, result.reason)
+    }
+
+    @Test
+    fun secondPositionFrozenStrike_afterFlush_demotes() {
+        val result = PlayerTunnelAvSyncPolicy.evaluate(
+            baseInput().copy(stalledMs = 4_000L, tunnelFlushAlreadyTried = true)
+        )
         assertEquals(PlayerTunnelAvSyncPolicy.Decision.DisableTunnelingAndRebuild, result.decision)
         assertEquals(PlayerTunnelAvSyncPolicy.Reason.PositionFrozen, result.reason)
+    }
+
+    @Test
+    fun firstNoFramesStrike_flushesAndRetriesTheTunnel() {
+        val result = PlayerTunnelAvSyncPolicy.evaluate(
+            advancingInput().copy(renderedOutputBufferCount = 0, readyMs = 7_000L, tunnelFlushAlreadyTried = false)
+        )
+        assertEquals(PlayerTunnelAvSyncPolicy.Decision.FlushAndRetryTunnel, result.decision)
+        assertEquals(PlayerTunnelAvSyncPolicy.Reason.NoFramesRendered, result.reason)
+    }
+
+    @Test
+    fun secondNoFramesStrike_afterFlush_demotes() {
+        val result = PlayerTunnelAvSyncPolicy.evaluate(
+            advancingInput().copy(renderedOutputBufferCount = 0, readyMs = 7_000L, tunnelFlushAlreadyTried = true)
+        )
+        assertEquals(PlayerTunnelAvSyncPolicy.Decision.DisableTunnelingAndRebuild, result.decision)
+        assertEquals(PlayerTunnelAvSyncPolicy.Reason.NoFramesRendered, result.reason)
     }
 }
