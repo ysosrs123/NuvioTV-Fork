@@ -175,7 +175,7 @@ class BluetoothAudioRoutePolicyTest {
     @Test
     fun `mid-session bluetooth connect forces pcm without a rebuild flag`() {
         val sink = PlaybackSpeedAwareAudioSink(
-            sink = AlwaysSupportedDelegateSink(),
+            delegate = AlwaysSupportedDelegateSink(),
             initialForcePcm = false,
             forcePcmForBluetooth = false
         )
@@ -192,7 +192,7 @@ class BluetoothAudioRoutePolicyTest {
     @Test
     fun `hdmi-started session restores passthrough after bluetooth disconnect`() {
         val sink = PlaybackSpeedAwareAudioSink(
-            sink = AlwaysSupportedDelegateSink(),
+            delegate = AlwaysSupportedDelegateSink(),
             initialForcePcm = false,
             forcePcmForBluetooth = false
         )
@@ -209,7 +209,7 @@ class BluetoothAudioRoutePolicyTest {
     @Test
     fun `session built for bluetooth stays on pcm after disconnect`() {
         val sink = PlaybackSpeedAwareAudioSink(
-            sink = AlwaysSupportedDelegateSink(),
+            delegate = AlwaysSupportedDelegateSink(),
             initialForcePcm = true,
             forcePcmForBluetooth = true
         )

@@ -396,6 +396,8 @@ class SearchViewModelSuggestionsTest {
          *  search argument does. */
         private val ignoresQuery: Boolean = false
     ) : CatalogRepository {
+        override suspend fun clearCaches() = Unit
+
         override fun getCatalog(
             addonBaseUrl: String,
             addonId: String,
@@ -442,6 +444,8 @@ class SearchViewModelSuggestionsTest {
     /** Two catalogs of one addon answering out of order: the one with no usable titles first,
      *  the one holding the match after a pause. */
     private class StagedCatalogRepository(private val addon: Addon) : CatalogRepository {
+        override suspend fun clearCaches() = Unit
+
         override fun getCatalog(
             addonBaseUrl: String,
             addonId: String,

@@ -37,7 +37,8 @@ class CatalogRepositoryMalformedEntryTest {
         coEvery { api.getCatalog(any()) } returns Response.success(response)
         val repository = CatalogRepositoryImpl(
             context = mockk<Context>(relaxed = true),
-            api = api
+            api = api,
+            healthStore = mockk(relaxed = true)
         )
 
         val result = repository.getCatalog(

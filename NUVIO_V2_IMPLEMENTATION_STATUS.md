@@ -5,64 +5,47 @@
 - Base branch: `nuvio-test`
 - Base commit: `45e0984c18460d2a65c5d745999011b4314328eb`
 - Initial feature HEAD: `45e0984c18460d2a65c5d745999011b4314328eb`
-- Latest recorded feature HEAD before this status checkpoint: `85fd97be545710de692dff4105974c3117a34493`
+- Latest recorded feature HEAD before this status checkpoint: `3eccf39e03b9f4fb7832b7a2367e09b36144a33b`
 - First remote baseline/status checkpoint: `cf3225698a6a95d39b03e92c721f2b62bd892dcb`
 - Earlier local-only baseline commit: `f57a9c2500127885f87b72d352a8781ee527a914` (same status contents; not a remote ancestor).
 - Resolve the checkpoint's own HEAD with `git rev-parse HEAD`; a commit cannot embed its own hash.
 
 ## Progress
 
-- Current phase: Phase 0 — blocked on Android build environment
-- Completed phases: none
-- Both supplied documents have been read completely (413-line Autonomous Work Brief and 3,714-line technical specification v0.4).
-- Feature branch created from the verified latest remote base above; no application code changed.
+- Current phase: Phase 0 — Android baseline established; integrating diagnostics next.
+- Completed: toolchain provisioning, debug/release baseline builds, full lint inventory and executable unit-test baseline.
+- Read the full 413-line work brief, 3,714-line specification and prior status before changes.
+- All existing feature-branch history is preserved. Application source remains identical to the recorded base at this checkpoint.
 
-## Baseline validation
+## Validation
 
-- Android baseline command attempted on the unmodified application:
-  `./gradlew :app:testFullDebugUnitTest :app:lintFullDebug :app:assembleFullDebug --continue --stacktrace`
-- Result: wrapper bootstrap failed before any Gradle task ran. Downloading
-  `https://services.gradle.org/distributions/gradle-8.13-bin.zip` raised
-  `java.net.SocketException: Network is unreachable`.
-- No installed Gradle, Android SDK/adb/emulator, or cached Gradle distribution was found in the inspected standard locations. Java 17 runtime is present; `javac` is not on PATH.
-- Android build, lint and unit-test results: **unknown**, not application failures.
-- Release-mode build, instrumentation and performance tests: **not run**; same toolchain blocker, plus no connected TV/emulator.
-- Release-tooling baseline: `bash -n scripts/generate-release-notes.sh scripts/release-metadata.sh` passed.
-- Release-tooling tests: `PYTHONPATH=scripts python3 -m unittest discover -s scripts/tests -v` — **19 passed**.
-- Static performance inventory: `MainActivity` already logs janky frames with JankStats; `baselineprofile` has a D-pad profile-generation journey. No runtime P95/P99, jank percentage or startup measurements were obtained.
+- Temurin JDK 17.0.20.1 was downloaded and checksum-verified; Gradle 8.13 and Android SDK 36 work on this Windows host.
+- Debug and R8-optimized release APKs built for ARM64 and ARMv7, using development debug signing only.
+- Full unit suite after fixture compilation repairs: 1,325 tests; 37 failures and one skipped. One failure was a Windows sparse-file allocation problem, repaired in this checkpoint.
+- Focused rerun of all six changed test classes: 100 tests; 99 passed, one existing live-credential integration test skipped; no failures.
+- Full lint: 3,592 existing errors, 1,835 warnings, 22 hints. No lint rules were disabled and no lint suppression baseline was added.
+- Release-tooling tests: 19 passed. Bash cannot start in this Windows sandbox; its syntax check passed in the earlier workspace.
+- See NUVIO_V2_BASELINE_VALIDATION.md for commands, exact baseline APK hashes, test failures and lint inventory.
+- No runtime performance results yet. D8/R8 report stale startup-profile entries; profile regeneration is outstanding.
 
-## Architecture decisions
+## Architecture
 
-- Preserve `nuvio-test` playback, repository, profile/session and navigation-domain logic.
-- Implement V2 as a device-selectable presentation layer while keeping Original Nuvio available.
-- Keep UI scale (geometry) independent from visual quality (rendering budget).
+- Original and V2 will share repositories, ViewModels, navigation, profile/session and playback state.
+- Original remains the safe opt-in rollout default; its existing scale/theme preferences must remain intact.
+- UI scale and visual quality are device-local and independent of each other and HDMI output mode.
+- The proposed 1280 x 720 dp reference is provisional pending paired device calibration.
 
-## Known issues
+## Known issues and remaining work
 
-- Android validation is blocked by missing build tooling and restricted dependency-download access. No pre-existing Android source failure has been established.
-- Existing PR debug CI targets `dev`, not `nuvio-test`, and covers updater tests rather than the whole test suite. Available GitHub connector actions do not expose workflow dispatch.
-- The release workflow is not a substitute for validation: its build modes can create releases, while dry-run only validates release metadata. It has not been dispatched or modified.
-- Inherited upstream contribution rules restrict UI/features; this task is explicitly requested by the fork owner. Do not misrepresent the redesign as a critical bug fix or mark incompatible PR-template assertions true.
-
-## Codex handoff
-
-- Select the existing remote `feature/nuvio-v2-ui` branch. Do not recreate it or overwrite its history. The recorded `nuvio-test` base remains the recovery reference.
-- Read `NUVIO_V2_AUTONOMOUS_WORK_BRIEF.md` and `Nuvio_V2_UI_UX_Technical_Design_Spec_v0.4.md` completely before application changes. These are unchanged copies of the supplied documents, with normalized filenames.
-- The baseline report was committed first; the two source documents were added afterward. Application code is unchanged from the recorded base.
-- GitHub branch/document writes succeeded through the connected GitHub integration. The earlier command-line Git push failure did not indicate missing repository permissions.
-- The Android toolchain/network observations below describe the earlier Work workspace. Recheck them in the new Codex environment; do not assume it has the same limitations.
-- Finish baseline build/lint/tests and practical instrumentation, record results, then implement autonomously according to the brief. Target the final PR at `nuvio-test`; do not merge or publish a release.
-
-## Resume requirements
-
-Provide a build-capable environment with JDK 17, Android SDK platform 36 and required build tools, Gradle 8.13, and authorized access to the repository's dependency repositories (or their complete caches). Alternatively, explicitly authorize a branch-scoped GitHub Actions validation workflow and provide a supported way to execute and retrieve its results.
-
-Then rerun the Android baseline before V2 changes, recording failures against the immutable base SHA. Include `CI_USE_DEBUG_SIGNING=true ./gradlew :app:assembleFullRelease` for a non-production-signed optimized build; never require or expose production signing credentials for validation.
-
-Continue with diagnostics and the Original/V2 preference foundation after the baseline is established. No implementation phase or completion PR is claimed.
+- Remaining unit failures include stale expectations, missing service configuration and behavior requiring separate triage. They precede V2 changes.
+- Existing lint debt includes translations, opt-in annotations and resource/API usage. Compare V2 results against the saved baseline rather than claiming a clean repository.
+- Command-line push is blocked by the Windows Git credential helper; the connected GitHub integration is available for fast-forward checkpoints.
+- No connected ADB devices or installed TV emulator images were found. The owner has been asked for reachable Ugoos / Fire TV device details while implementation proceeds.
+- Continue through diagnostics, preference/renderer foundation and scale implementation. Broader V2 screen, quality, profile-ident, player and benchmark work remains.
 
 ## Remaining physical-device validation
 
-- Ugoos AM9 Pro and Fire TV Stick 4K Max logical-canvas calibration on the same TV.
-- 2 GB and 4 GB device performance, memory, D-pad, 1080p/4K and AFR/player-overlay validation.
-- No test APK exists yet. Exact APK hashes and grouped device procedures must accompany a successfully built diagnostics checkpoint before requesting owner measurements.
+- Ugoos AM9 Pro and Fire TV Stick 4K Max logical-canvas calibration on the same TV, with matching rows and output settings.
+- Grouped diagnostics procedures and exact diagnostic APK hashes must accompany the first installable checkpoint.
+- Release-mode 2 GB/4 GB performance, D-pad/focus, 1080p/4K, AFR and player-overlay validation remains unperformed.
+- No final PR, merge or release has been created.
