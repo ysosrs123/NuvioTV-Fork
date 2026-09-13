@@ -1071,7 +1071,11 @@ open class MainActivity : ComponentActivity() {
             }
         }
 
+        com.nuvio.tv.ui.v2.diagnostics.UiFrameDiagnostics.frames.clear()
         jankStats = JankStats.createAndTrack(window) { frameData ->
+            com.nuvio.tv.ui.v2.diagnostics.UiFrameDiagnostics.frames.record(
+                System.nanoTime(), frameData.frameDurationUiNanos, frameData.isJank
+            )
             if (frameData.isJank) {
                 Log.w(
                     "JankStats",

@@ -79,6 +79,10 @@ fun DebugSettingsContent(
             contentPadding = PaddingValues(top = NuvioTheme.spacing.md, bottom = NuvioTheme.spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
         ) {
+            item(key = "device_ui_diagnostics") {
+                UiDiagnosticsSettingsRow()
+            }
+
             // ── Popup / Dialog Testing ──
             item(key = "debug_popup_header") {
                 Text(

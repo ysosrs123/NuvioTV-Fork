@@ -1,0 +1,14 @@
+// Opt-in validation package, used only with --init-script validation/isolated-ui.init.gradle.
+// Keeps regular builds unchanged and gives device testing its own app data directory.
+gradle.beforeProject { project ->
+    project.pluginManager.withPlugin('com.android.application') {
+        project.extensions.getByName('androidComponents').finalizeDsl { android ->
+            android.defaultConfig.applicationId = 'com.nuvio.tv.v2.validation'
+            ['fullDebug', 'fullRelease'].each { name ->
+                android.sourceSets.maybeCreate(name).res.srcDir(
+                    project.rootProject.file('validation/res')
+                )
+            }
+        }
+    }
+}

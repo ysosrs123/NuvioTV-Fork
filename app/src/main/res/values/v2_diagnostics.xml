@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fixed English operator labels for the calibration report/log capture. -->
+    <string name="v2_ui_diagnostics_title" translatable="false">Device UI Diagnostics</string>
+    <string name="v2_ui_diagnostics_subtitle" translatable="false">Window, density, effective canvas and recent UI frame timing</string>
+</resources>

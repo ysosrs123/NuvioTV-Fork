@@ -576,6 +576,10 @@ fun AdvancedSettingsContent(
             )
         }
 
+        item(key = "device_ui_diagnostics") {
+            UiDiagnosticsSettingsRow()
+        }
+
         item(key = "playback_issue_reports") {
             SettingsGroupCard(modifier = Modifier.fillMaxWidth()) {
                 SettingsToggleRow(
