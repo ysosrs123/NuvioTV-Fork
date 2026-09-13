@@ -63,6 +63,8 @@ import androidx.compose.ui.draw.drawWithCache
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.hazeEffect
+import com.nuvio.tv.ui.v2.components.GlassRole
+import com.nuvio.tv.ui.v2.components.nuvioGlass
 
 private val SidebarLeadingVisualSize = NuvioComponents.tokens.sidebar.leadingVisual
 private val SidebarContentGap = NuvioComponents.tokens.sidebar.contentGap
@@ -99,7 +101,7 @@ internal fun ModernSidebarBlurPanel(
         isSidebarExpanded &&
         !sidebarCollapsePending &&
         delayedBlurProgress > 0f
-    val expandedPanelBlurModifier = if (showPanelBlur) {
+    val expandedPanelBlurModifier = if (showPanelBlur && v2Glass == null) {
         Modifier.hazeEffect(state = sidebarHazeState) {
             blurRadius = if (v2Glass != null) v2Glass.blurRadiusDp.dp else NuvioTheme.effects.blurPanel * delayedBlurProgress
             noiseFactor = v2Glass?.noise ?: (0.04f * delayedBlurProgress)
@@ -131,9 +133,13 @@ internal fun ModernSidebarBlurPanel(
                 scaleY = s
                 transformOrigin = TransformOrigin(0f, 0f)
             }
-            .clip(panelShape)
-            .then(expandedPanelBlurModifier)
-            .background(brush = panelBackgroundBrush, shape = panelShape)
+            .then(if (v2Glass != null) {
+                Modifier.nuvioGlass(GlassRole.NAVIGATION, shape = panelShape,
+                    hazeState = sidebarHazeState.takeIf { showPanelBlur })
+            } else {
+                Modifier.clip(panelShape).then(expandedPanelBlurModifier)
+                    .background(brush = panelBackgroundBrush, shape = panelShape)
+            })
             .padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.lg - NuvioTheme.spacing.xxs)
     ) {
         if (showProfileSelector && activeProfileName.isNotEmpty()) {

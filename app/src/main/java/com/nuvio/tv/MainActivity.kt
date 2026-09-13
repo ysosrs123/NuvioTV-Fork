@@ -197,6 +197,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.hazeEffect
+import com.nuvio.tv.ui.v2.components.GlassRole
+import com.nuvio.tv.ui.v2.components.nuvioGlass
 import dev.chrisbanes.haze.hazeSource
 import java.util.Locale
 import javax.inject.Inject
@@ -2161,18 +2163,21 @@ private fun CollapsedSidebarPill(
         Box(
             modifier = Modifier
                 .height(NuvioTheme.sizes.player.control)
-                .clip(pillShape)
                 .then(
-                    if (blurEnabled && hazeState != null) {
-                        Modifier.hazeEffect(state = hazeState) {
-                            blurRadius = v2Glass?.blurRadiusDp?.dp ?: 24.dp
-                            inputScale = HazeInputScale.Fixed(v2Glass?.inputScale ?: 0.66f)
-                        }
+                    if (v2Glass != null) {
+                        Modifier.nuvioGlass(GlassRole.NAVIGATION, shape = pillShape,
+                            hazeState = hazeState.takeIf { blurEnabled })
                     } else {
-                        Modifier
+                        Modifier.clip(pillShape).then(
+                            if (blurEnabled && hazeState != null) {
+                                Modifier.hazeEffect(state = hazeState) {
+                                    blurRadius = 24.dp
+                                    inputScale = HazeInputScale.Fixed(0.66f)
+                                }
+                            } else Modifier
+                        ).background(brush = pillBackgroundBrush, shape = pillShape)
                     }
                 )
-                .background(brush = pillBackgroundBrush, shape = pillShape)
         ) {
             Row(
                 modifier = Modifier

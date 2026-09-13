@@ -60,6 +60,8 @@ import com.nuvio.tv.domain.model.CardDepthSurface
 import com.nuvio.tv.domain.model.MetaPreview
 import com.nuvio.tv.domain.model.PosterShape
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
+import com.nuvio.tv.ui.v2.components.nuvioV2Focus
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.CachePolicy
@@ -100,6 +102,10 @@ fun ContentCard(
     onLongPress: (() -> Unit)? = null,
     onClick: () -> Unit = {}
 ) {
+    val isV2 = LocalV2Appearance.current != null
+    // V2 focus is a layer transform. Expanded artwork belongs to the Home hero,
+    // never a changing LazyRow item width.
+    val backdropExpansionEnabled = focusedPosterBackdropExpandEnabled && !isV2
     val cardShape = remember(posterCardStyle.cornerRadius) { RoundedCornerShape(posterCardStyle.cornerRadius) }
     val cardDepthStyle = LocalCardDepthStyle.current
     val baseCardWidth = when (item.posterShape) {
@@ -119,6 +125,9 @@ fun ContentCard(
     val longPressKeyTracker = rememberLongPressKeyTracker()
     var interactionNonce by remember { mutableIntStateOf(0) }
     var isBackdropExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(backdropExpansionEnabled) {
+        if (!backdropExpansionEnabled) isBackdropExpanded = false
+    }
     var trailerFirstFrameRendered by remember(trailerPreviewUrl) { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -132,7 +141,7 @@ fun ContentCard(
 
     val isPlaceholderItem = item.poster == PLACEHOLDER_IMAGE_URL
 
-    if (focusedPosterBackdropExpandEnabled && !isPlaceholderItem) {
+    if (backdropExpansionEnabled && !isPlaceholderItem) {
         LaunchedEffect(
             focusedPosterBackdropExpandDelaySeconds,
             isFocused,
@@ -150,7 +159,7 @@ fun ContentCard(
             // Minimum debounce so rapid D-pad scrolling doesn't expand every card.
             val backdropDelayMs = if (delaySeconds == 0) 370L else delaySeconds * 1000L
             delay(backdropDelayMs)
-            if (isFocused && focusedPosterBackdropExpandEnabled &&
+            if (isFocused && backdropExpansionEnabled &&
                 lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
             ) {
                 isBackdropExpanded = true
@@ -167,7 +176,7 @@ fun ContentCard(
     // Only pay the animation cost on the card that is actually focused/expanding.
     // Unfocused cards snap directly to baseCardWidth — no animation state overhead.
     val animatedCardWidth = when {
-        !focusedPosterBackdropExpandEnabled -> baseCardWidth
+        !backdropExpansionEnabled -> baseCardWidth
         !isFocused && !isBackdropExpanded -> baseCardWidth
         else -> {
             val targetCardWidth = if (isBackdropExpanded) expandedCardWidth else baseCardWidth
@@ -219,7 +228,7 @@ fun ContentCard(
         val context = LocalContext.current
         val density = LocalDensity.current
         // Keep decode size stable during width animation to avoid recreating requests/painters every frame.
-        val maxRequestCardWidth = if (focusedPosterBackdropExpandEnabled) {
+        val maxRequestCardWidth = if (backdropExpansionEnabled) {
             maxOf(baseCardWidth, expandedCardWidth)
         } else {
             baseCardWidth
@@ -231,7 +240,7 @@ fun ContentCard(
             with(density) { baseCardHeight.roundToPx() }.coerceAtLeast(1)
         }
 
-        val imageUrl = if (focusedPosterBackdropExpandEnabled && isBackdropExpanded) {
+        val imageUrl = if (backdropExpansionEnabled && isBackdropExpanded) {
             item.backdropUrl ?: item.poster
         } else {
             item.poster
@@ -277,6 +286,7 @@ fun ContentCard(
             },
             modifier = Modifier
                 .fillMaxWidth()
+                .nuvioV2Focus(isFocused, cardShape)
                 .onFocusChanged { state ->
                     val focusedNow = state.isFocused
                     if (needsFocusState) {
@@ -299,7 +309,7 @@ fun ContentCard(
                 .onPreviewKeyEvent { keyEvent ->
                     val native = keyEvent.nativeKeyEvent
                     if (native.action == AndroidKeyEvent.ACTION_DOWN) {
-                        if (focusedPosterBackdropExpandEnabled && isFocused && shouldResetBackdropTimer(native)) {
+                        if (backdropExpansionEnabled && isFocused && shouldResetBackdropTimer(native)) {
                             interactionNonce++
                         }
                         if (onLongPress != null) {
@@ -347,12 +357,12 @@ fun ContentCard(
                 focusedContainerColor = Color.Transparent
             ),
             border = CardDefaults.border(
-                focusedBorder = Border(
+                focusedBorder = if (isV2) Border.None else Border(
                     border = NuvioTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
                     shape = cardShape
                 )
             ),
-            scale = CardDefaults.scale(focusedScale = posterCardStyle.focusedScale)
+            scale = CardDefaults.scale(focusedScale = if (isV2) 1f else posterCardStyle.focusedScale)
         ) {
             Box(
                 modifier = Modifier
@@ -557,7 +567,7 @@ fun ContentCard(
                             color = NuvioTheme.extendedColors.textSecondary,
                         )
                     }
-                    if (focusedPosterBackdropExpandEnabled) {
+                    if (backdropExpansionEnabled) {
                         Spacer(modifier = Modifier.height(15.dp))
                     }
                 }

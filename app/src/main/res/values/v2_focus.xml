@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_focus_style_title">Focus style</string>
+    <string name="v2_focus_glass_lift" translatable="false">Glass Lift</string>
+    <string name="v2_focus_cinematic" translatable="false">Cinematic Focus</string>
+</resources>

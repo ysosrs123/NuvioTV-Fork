@@ -5,14 +5,14 @@
 - Base branch: `nuvio-test`
 - Base commit: `45e0984c18460d2a65c5d745999011b4314328eb`
 - Initial feature HEAD: `45e0984c18460d2a65c5d745999011b4314328eb`
-- Latest recorded feature HEAD before this status checkpoint: `cb16c1f506beff650c6c0954a8087d9b4d8db673`
+- Latest recorded feature HEAD before this status checkpoint: `32157f351826a1d3ed7c63d1eb2f57dd2ffe7208`
 - First remote baseline/status checkpoint: `cf3225698a6a95d39b03e92c721f2b62bd892dcb`
 - Earlier local-only baseline commit: `f57a9c2500127885f87b72d352a8781ee527a914` (same status contents; not a remote ancestor).
 - Resolve the checkpoint's own HEAD with `git rev-parse HEAD`; a commit cannot embed its own hash.
 
 ## Progress
 
-- Current phase: Phase 3 — quality foundation and benchmark harness implemented; both Fire TV exact-base and V2 comparisons pass. Ugoos performance and exact 24 Hz playback checks remain outstanding. Phase 4 reusable surfaces are being developed separately.
+- Current phase: Phase 4 — reusable surfaces, motion, card focus and its selector compile and build. Phase 4A profile landing/avatar/entry-ident integration follows. Ugoos performance and exact 24 Hz playback checks remain outstanding.
 - Completed: toolchain provisioning, debug/release baseline builds, diagnostics, device-local preference migration, Original/V2 selection and automatic/manual scale foundation.
 - Read the full 413-line work brief, 3,714-line specification and prior status before changes.
 - All existing feature-branch history is preserved. Diagnostics are available from Advanced settings and Debug settings without changing playback behavior.
@@ -86,4 +86,12 @@
 - Self-authored 24 and 59.94 fps H.264 patterns with two silent AAC tracks and English/Spanish embedded/external subtitles are available through validation/playback_fixture.py. Track metadata, manifest/meta/stream/subtitle routes and bounded/open/suffix HTTP seek ranges were verified locally. The server binds loopback and exposes only its fixed fixture files; ADB reverse serves the isolated app.
 - Fire TV isolated V2 playback renders the 24 fps pattern, pauses/resumes, seeks from 0:55 to 1:12, selects Spanish audio and displays the English embedded subtitle. Observed statistics show zero dropped frames/underruns during this short check; this is not a long-duration or passthrough acceptance test. Audio selection and speed-dialog dismissal return focus to Play, recorded for Phase 7 launch-control restoration.
 - With isolated-app AFR set to On start/stop, Fire TV switches 4K output from 59.94 to 60 Hz for the 24 fps fixture and restores 59.94 Hz on exit. Opening the audio panel leaves 60 Hz stable. The app capability report exposes only 30/50/59.94/60 Hz, despite additional modes in the system dump. Exact 24 Hz matching is not established; existing player/AFR code is unchanged. Stream selection focus is restored on exit.
+
+## Shared presentation components
+
+- Central glass roles, named motion durations, action pills and an Activity-local side-sheet focus boundary are implemented. Modern navigation's V2 surfaces use the shared material; Original retains its prior rendering. The sheet is available for later utility-panel integration, not yet a completed player redesign.
+- Content and grid cards use V2 graphics-layer scale/lift and a drawn focus ring. The Focus style picker selects Glass Lift or Cinematic Focus independently. V2 poster widths no longer animate on focus, and image requests use their fixed displayed width. Existing expanding-card behavior remains in Original; V2 hero/trailer presentation is part of the upcoming Home work.
+- Focus selector translations cover all 36 current resource locales; branded style names remain consistent. Native-speaker review is pending.
+- All 15 focused V2 tests pass. ARM64 and ARMv7 optimized release builds succeed. Combined validation exits unsuccessfully only on existing lint debt (3,592 errors, 1,834 warnings, 22 hints); no rules are suppressed.
+- Phase 4 isolated APK SHA-256: ARM64 `ff03d5bea70863a767527a5eef459f7cc5b05108cf8f615fedc4bd2049a10f56`; ARMv7 `b00b153d160d2254082897f0fb325bd9b1fc9d8010dc51bb34a78db92590cf6b`. Physical focus/geometry and comparative performance checks of these APKs are pending. Both devices must be awake for their grouped runs.
 

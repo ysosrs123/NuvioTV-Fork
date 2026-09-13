@@ -1,6 +1,8 @@
 package com.nuvio.tv.ui.components
 
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
+import com.nuvio.tv.ui.v2.components.nuvioV2Focus
 
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.animation.core.tween
@@ -73,6 +75,7 @@ fun GridContentCard(
     onLongPress: (() -> Unit)? = null,
     onFocused: () -> Unit = {}
 ) {
+    val isV2 = LocalV2Appearance.current != null
     val cardShape = remember(posterCardStyle.cornerRadius) { RoundedCornerShape(posterCardStyle.cornerRadius) }
     val cardDepthStyle = LocalCardDepthStyle.current
     val density = LocalDensity.current
@@ -108,6 +111,7 @@ fun GridContentCard(
             modifier = Modifier
                 .width(posterCardStyle.width)
                 .height(cardHeight)
+                .nuvioV2Focus(isFocused, cardShape)
                 .then(
                     if (focusRequester != null) Modifier.focusRequester(focusRequester)
                     else Modifier
@@ -165,12 +169,12 @@ fun GridContentCard(
                 focusedContainerColor = androidx.compose.ui.graphics.Color.Transparent
             ),
             border = CardDefaults.border(
-                focusedBorder = Border(
+                focusedBorder = if (isV2) Border.None else Border(
                     border = NuvioTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
                     shape = cardShape
                 )
             ),
-            scale = CardDefaults.scale(focusedScale = posterCardStyle.focusedScale)
+            scale = CardDefaults.scale(focusedScale = if (isV2) 1f else posterCardStyle.focusedScale)
         ) {
             Box(
                 modifier = Modifier

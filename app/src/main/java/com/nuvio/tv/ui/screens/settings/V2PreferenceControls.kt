@@ -16,6 +16,7 @@ import com.nuvio.tv.R
 import com.nuvio.tv.data.local.DeviceUiPreferenceStore
 import com.nuvio.tv.data.local.V2AppearancePreferenceStore
 import com.nuvio.tv.domain.model.InterfaceExperience
+import com.nuvio.tv.domain.model.FocusStyle
 import com.nuvio.tv.domain.model.UiScaleMode
 import com.nuvio.tv.domain.model.VisualStyle
 import com.nuvio.tv.domain.model.VisualQualityMode
@@ -53,6 +54,17 @@ internal fun V2PreferenceControls() {
                 ),
                 onSelect = { value -> scope.launch {
                     V2AppearancePreferenceStore.update(context) { it.copy(visualStyle = value) }
+                } }
+            )
+            V2ChoiceRow(
+                title = stringResource(R.string.v2_focus_style_title),
+                selected = appearance.focusStyle,
+                options = listOf(
+                    FocusStyle.GLASS_LIFT to stringResource(R.string.v2_focus_glass_lift),
+                    FocusStyle.CINEMATIC_FOCUS to stringResource(R.string.v2_focus_cinematic)
+                ),
+                onSelect = { value -> scope.launch {
+                    V2AppearancePreferenceStore.update(context) { it.copy(focusStyle = value) }
                 } }
             )
         }
