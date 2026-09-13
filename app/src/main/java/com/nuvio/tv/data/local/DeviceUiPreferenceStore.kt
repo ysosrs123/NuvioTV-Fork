@@ -32,6 +32,8 @@ internal object DeviceUiPreferenceCodec {
     val manualScale = intPreferencesKey("manual_ui_scale_percent")
     val fineTune = intPreferencesKey("auto_scale_fine_tune_percent")
     val quality = stringPreferencesKey("visual_quality_mode")
+    val automaticTier = stringPreferencesKey("automatic_quality_tier")
+    val assessmentKey = stringPreferencesKey("quality_assessment_key")
 
     fun decode(p: Preferences) = DeviceUiPreferences(
         interfaceExperience = InterfaceExperience.entries.firstOrNull { it.name == p[experience] }
@@ -40,7 +42,9 @@ internal object DeviceUiPreferenceCodec {
         manualUiScalePercent = (p[manualScale] ?: 100).coerceIn(75, 115),
         autoScaleFineTunePercent = (p[fineTune] ?: 0).coerceIn(-10, 10),
         visualQualityMode = VisualQualityMode.entries.firstOrNull { it.name == p[quality] }
-            ?: VisualQualityMode.AUTOMATIC
+            ?: VisualQualityMode.AUTOMATIC,
+        automaticQualityTier = p[automaticTier],
+        qualityAssessmentKey = p[assessmentKey]
     )
 }
 
@@ -74,6 +78,10 @@ object DeviceUiPreferenceStore {
             p[DeviceUiPreferenceCodec.manualScale] = next.manualUiScalePercent.coerceIn(75, 115)
             p[DeviceUiPreferenceCodec.fineTune] = next.autoScaleFineTunePercent.coerceIn(-10, 10)
             p[DeviceUiPreferenceCodec.quality] = next.visualQualityMode.name
+            next.automaticQualityTier?.let { p[DeviceUiPreferenceCodec.automaticTier] = it }
+                ?: p.remove(DeviceUiPreferenceCodec.automaticTier)
+            next.qualityAssessmentKey?.let { p[DeviceUiPreferenceCodec.assessmentKey] = it }
+                ?: p.remove(DeviceUiPreferenceCodec.assessmentKey)
         }
     }
 }

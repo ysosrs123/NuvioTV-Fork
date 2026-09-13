@@ -577,6 +577,7 @@ open class MainActivity : ComponentActivity() {
             var playbackUiActive by remember { mutableStateOf(false) }
             val canvas = rememberUiCanvasSnapshot()
             val scaleDecision = rememberStableUiScale(canvas, device, originalScale, playbackUiActive)
+            val qualityDecision = com.nuvio.tv.ui.v2.quality.rememberDeviceVisualQuality(canvas, device)
             NuvioTheme(
                 appTheme = mainUiPrefs.theme,
                 appFont = mainUiPrefs.font,
@@ -584,7 +585,7 @@ open class MainActivity : ComponentActivity() {
                 amoledSurfacesMode = mainUiPrefs.amoledSurfacesMode,
                 settingsUiStyle = mainUiPrefs.settingsUiStyle,
                 uiScalePercent = scaleDecision.percent,
-                presentation = ResolvedAppearance(device, appearance, scaleDecision)
+                presentation = ResolvedAppearance(device, appearance, scaleDecision, qualityDecision, playbackUiActive)
             ) {
                 val defaultBringIntoViewSpec = LocalBringIntoViewSpec.current
                 val bringIntoViewSpec = if (mainUiPrefs.smoothBringIntoViewEnabled) {
@@ -746,8 +747,9 @@ open class MainActivity : ComponentActivity() {
                     }
                     val sidebarCollapsed = mainUiPrefs.sidebarCollapsed
                     val modernSidebarEnabled = mainUiPrefs.modernSidebarEnabled
-                    val modernSidebarBlurEnabled =
-                        mainUiPrefs.modernSidebarBlurPref && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
+                    val modernSidebarBlurEnabled = if (com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null) {
+                        com.nuvio.tv.ui.v2.quality.LocalGlassTokens.current.liveBlur
+                    } else mainUiPrefs.modernSidebarBlurPref && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S
                     val hideBuiltInHeadersForFloatingPill = modernSidebarEnabled && !sidebarCollapsed
 
                     val startDestination = when {
@@ -2133,13 +2135,16 @@ private fun CollapsedSidebarPill(
     onExpand: () -> Unit
 ) {
     val pillShape = RoundedCornerShape(NuvioRadii.tokens.full)
+    val v2Glass = com.nuvio.tv.ui.v2.quality.LocalGlassTokens.current.takeIf {
+        com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null
+    }
     val colors = NuvioTheme.colors
     val bgElevated = colors.BackgroundElevated
     val bgCard = colors.BackgroundCard
     val borderBase = colors.Border
     val mediaColors = colors.media
-    val pillBackgroundBrush = remember(blurEnabled) {
-        val alpha = if (blurEnabled) 0.65f else 0.96f
+    val pillBackgroundBrush = remember(blurEnabled, v2Glass) {
+        val alpha = v2Glass?.surfaceAlpha ?: if (blurEnabled) 0.65f else 0.96f
         Brush.verticalGradient(listOf(
             Color(0xFF1C1C1E).copy(alpha = alpha),
             Color(0xFF1C1C1E).copy(alpha = alpha)
@@ -2160,8 +2165,8 @@ private fun CollapsedSidebarPill(
                 .then(
                     if (blurEnabled && hazeState != null) {
                         Modifier.hazeEffect(state = hazeState) {
-                            blurRadius = 24.dp
-                            inputScale = HazeInputScale.Fixed(0.66f)
+                            blurRadius = v2Glass?.blurRadiusDp?.dp ?: 24.dp
+                            inputScale = HazeInputScale.Fixed(v2Glass?.inputScale ?: 0.66f)
                         }
                     } else {
                         Modifier

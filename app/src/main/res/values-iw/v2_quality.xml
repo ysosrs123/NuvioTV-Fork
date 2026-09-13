@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">איכות חזותית</string>
+    <string name="v2_quality_subtitle">איזון בין אפקטים חזותיים לניווט חלק.</string>
+    <string name="v2_quality_performance">ביצועים</string>
+    <string name="v2_quality_enhanced">משופרת</string>
+    <string name="v2_quality_maximum">מרבית</string>
+</resources>

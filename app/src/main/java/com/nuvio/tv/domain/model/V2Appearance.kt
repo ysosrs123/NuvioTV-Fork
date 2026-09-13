@@ -28,5 +28,7 @@ data class DeviceUiPreferences(
     val uiScaleMode: UiScaleMode = UiScaleMode.AUTOMATIC,
     val manualUiScalePercent: Int = 100,
     val autoScaleFineTunePercent: Int = 0,
-    val visualQualityMode: VisualQualityMode = VisualQualityMode.AUTOMATIC
+    val visualQualityMode: VisualQualityMode = VisualQualityMode.AUTOMATIC,
+    val automaticQualityTier: String? = null,
+    val qualityAssessmentKey: String? = null
 )

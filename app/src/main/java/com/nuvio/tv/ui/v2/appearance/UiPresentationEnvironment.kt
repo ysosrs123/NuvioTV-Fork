@@ -22,6 +22,8 @@ import com.nuvio.tv.ui.v2.diagnostics.UiCanvasSnapshot
 import com.nuvio.tv.ui.v2.diagnostics.readUiCanvasSnapshot
 import com.nuvio.tv.ui.v2.scale.UiScaleDecision
 import com.nuvio.tv.ui.v2.scale.UiScaleResolver
+import com.nuvio.tv.ui.v2.quality.VisualQualityDecision
+import com.nuvio.tv.ui.v2.quality.VisualQualityTier
 
 val LocalV2Appearance = staticCompositionLocalOf<V2AppearancePreferences?> { null }
 val LocalUiScaleDecision = staticCompositionLocalOf { UiScaleDecision(100, "Original Nuvio") }
@@ -31,7 +33,9 @@ val LocalResolvedAppearance = staticCompositionLocalOf<ResolvedAppearance?> { nu
 data class ResolvedAppearance(
     val device: DeviceUiPreferences,
     val appearance: V2AppearancePreferences,
-    val uiScale: UiScaleDecision
+    val uiScale: UiScaleDecision,
+    val quality: VisualQualityDecision = VisualQualityDecision(VisualQualityTier.PERFORMANCE, "Not assessed", false),
+    val playbackActive: Boolean = false
 )
 
 @Composable

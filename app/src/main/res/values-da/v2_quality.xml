@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Visuel kvalitet</string>
+    <string name="v2_quality_subtitle">Afbalancer visuelle effekter og jævn navigation.</string>
+    <string name="v2_quality_performance">Ydeevne</string>
+    <string name="v2_quality_enhanced">Forbedret</string>
+    <string name="v2_quality_maximum">Maksimal</string>
+</resources>

@@ -36,12 +36,16 @@ internal fun UiDiagnosticsSettingsRow() {
     val context = LocalContext.current
     val activityView = LocalView.current
     val scale = LocalUiScaleDecision.current
+    val quality = com.nuvio.tv.ui.v2.quality.LocalVisualQuality.current
+    val glass = com.nuvio.tv.ui.v2.quality.LocalGlassTokens.current
     val launchFocus = remember { FocusRequester() }
     val closeFocus = remember { FocusRequester() }
     var report by remember { mutableStateOf<String?>(null) }
     var restoreFocus by remember { mutableStateOf(false) }
     fun capture() {
-        report = deviceUiDiagnosticReport(context, activityView, scale.percent, scale.reason)
+        report = deviceUiDiagnosticReport(context, activityView, scale.percent, scale.reason) +
+            "\nVisual quality: ${quality.tier} / ${quality.reason}" +
+            "\nLive glass: ${glass.liveBlur} / radius ${glass.blurRadiusDp} dp / input ${glass.inputScale}"
         Log.i("NuvioUiDiagnostics", report.orEmpty())
     }
     fun dismiss() {

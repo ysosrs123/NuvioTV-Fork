@@ -18,6 +18,7 @@ import com.nuvio.tv.data.local.V2AppearancePreferenceStore
 import com.nuvio.tv.domain.model.InterfaceExperience
 import com.nuvio.tv.domain.model.UiScaleMode
 import com.nuvio.tv.domain.model.VisualStyle
+import com.nuvio.tv.domain.model.VisualQualityMode
 import com.nuvio.tv.ui.v2.appearance.LocalDeviceUiPreferences
 import com.nuvio.tv.ui.v2.appearance.LocalUiScaleDecision
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
@@ -57,6 +58,22 @@ internal fun V2PreferenceControls() {
         }
     }
     if (appearance != null) {
+        SettingsGroupCard(title = stringResource(R.string.v2_quality_title)) {
+            V2ChoiceRow(
+                title = stringResource(R.string.v2_quality_title),
+                subtitle = stringResource(R.string.v2_quality_subtitle),
+                selected = device.visualQualityMode,
+                options = listOf(
+                    VisualQualityMode.AUTOMATIC to stringResource(R.string.v2_scale_automatic),
+                    VisualQualityMode.PERFORMANCE to stringResource(R.string.v2_quality_performance),
+                    VisualQualityMode.ENHANCED to stringResource(R.string.v2_quality_enhanced),
+                    VisualQualityMode.MAXIMUM to stringResource(R.string.v2_quality_maximum)
+                ),
+                onSelect = { value -> scope.launch {
+                    DeviceUiPreferenceStore.update(context) { it.copy(visualQualityMode = value) }
+                } }
+            )
+        }
         SettingsGroupCard(title = stringResource(R.string.ui_scale_title)) {
             V2ChoiceRow(
                 title = stringResource(R.string.ui_scale_title),

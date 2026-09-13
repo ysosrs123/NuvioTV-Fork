@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">الجودة المرئية</string>
+    <string name="v2_quality_subtitle">وازن بين المؤثرات المرئية وسلاسة التنقل.</string>
+    <string name="v2_quality_performance">الأداء</string>
+    <string name="v2_quality_enhanced">محسّنة</string>
+    <string name="v2_quality_maximum">القصوى</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">视觉质量</string>
+    <string name="v2_quality_subtitle">平衡视觉效果与流畅操作。</string>
+    <string name="v2_quality_performance">性能</string>
+    <string name="v2_quality_enhanced">增强</string>
+    <string name="v2_quality_maximum">最高</string>
+</resources>

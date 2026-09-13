@@ -90,6 +90,9 @@ internal fun ModernSidebarBlurPanel(
     showProfileSelector: Boolean,
     onSwitchProfile: () -> Unit
 ) {
+    val v2Glass = com.nuvio.tv.ui.v2.quality.LocalGlassTokens.current.takeIf {
+        com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null
+    }
     val delayedBlurProgress =
         ((sidebarExpandProgress - 0.34f) / 0.66f).coerceIn(0f, 1f)
     val showPanelBlur = blurEnabled &&
@@ -98,9 +101,9 @@ internal fun ModernSidebarBlurPanel(
         delayedBlurProgress > 0f
     val expandedPanelBlurModifier = if (showPanelBlur) {
         Modifier.hazeEffect(state = sidebarHazeState) {
-            blurRadius = NuvioTheme.effects.blurPanel * delayedBlurProgress
-            noiseFactor = 0.04f * delayedBlurProgress
-            inputScale = HazeInputScale.Fixed(0.66f)
+            blurRadius = if (v2Glass != null) v2Glass.blurRadiusDp.dp else NuvioTheme.effects.blurPanel * delayedBlurProgress
+            noiseFactor = v2Glass?.noise ?: (0.04f * delayedBlurProgress)
+            inputScale = HazeInputScale.Fixed(v2Glass?.inputScale ?: 0.66f)
         }
     } else {
         Modifier
@@ -109,8 +112,8 @@ internal fun ModernSidebarBlurPanel(
     val bgElevated = colors.BackgroundElevated
     val bgCard = colors.BackgroundCard
     val borderBase = colors.Border
-    val panelBackgroundBrush = remember(blurEnabled) {
-        val alpha = if (blurEnabled) 0.65f else 0.96f
+    val panelBackgroundBrush = remember(blurEnabled, v2Glass) {
+        val alpha = v2Glass?.surfaceAlpha ?: if (blurEnabled) 0.65f else 0.96f
         Brush.verticalGradient(listOf(
             Color(0xFF1C1C1E).copy(alpha = alpha),
             Color(0xFF1C1C1E).copy(alpha = alpha)

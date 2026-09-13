@@ -9,6 +9,11 @@ import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.appearance.ResolvedAppearance
 import com.nuvio.tv.ui.v2.appearance.v2Palette
 import com.nuvio.tv.ui.v2.scale.UiScaleDecision
+import com.nuvio.tv.ui.v2.quality.GlassQualityTokens
+import com.nuvio.tv.ui.v2.quality.LocalGlassTokens
+import com.nuvio.tv.ui.v2.quality.LocalVisualQuality
+import com.nuvio.tv.ui.v2.quality.VisualQualityDecision
+import com.nuvio.tv.ui.v2.quality.VisualQualityTier
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -77,6 +82,10 @@ fun NuvioTheme(
     }
     val originalPalette = ThemeColors.getColorPalette(appTheme)
     val palette = if (appearance == null) originalPalette else v2Palette(originalPalette, appearance)
+    val quality = presentation?.quality ?: VisualQualityDecision(VisualQualityTier.PERFORMANCE, "Not assessed", false)
+    val glassTokens = remember(quality, presentation?.playbackActive) {
+        GlassQualityTokens.resolve(quality, presentation?.playbackActive == true)
+    }
     val focusRingStyle = createFocusRingStyle(palette)
     val colorScheme = NuvioColorScheme(
         palette = palette,
@@ -112,6 +121,8 @@ fun NuvioTheme(
 
     CompositionLocalProvider(
         LocalV2Appearance provides appearance,
+        LocalVisualQuality provides quality,
+        LocalGlassTokens provides glassTokens,
         LocalDeviceUiPreferences provides (presentation?.device ?: DeviceUiPreferences()),
         LocalResolvedAppearance provides presentation,
         LocalUiScaleDecision provides (presentation?.uiScale ?: UiScaleDecision(uiScalePercent, "Original Nuvio")),

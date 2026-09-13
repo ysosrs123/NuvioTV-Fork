@@ -2,6 +2,7 @@ package com.nuvio.tv.baselineprofile
 
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiDevice
@@ -21,27 +22,25 @@ class BaselineProfileGenerator {
 
     @Test
     fun generate() {
-        val targetPackage = "com.nuvio.tv.test"
+        val targetPackage = InstrumentationRegistry.getArguments()
+            .getString("nuvioPackage", "com.nuvio.tv.v2.validation")
+        require(targetPackage in setOf("com.nuvio.tv.v2.validation", "com.nuvio.tv.v2.baseline"))
         rule.collect(
             packageName = targetPackage,
             includeInStartupProfile = true
         ) {
-            // Force English locale so onboarding labels are predictable regardless of device language.
-            val originalLocale = device.executeShellCommand("getprop persist.sys.locale").trim()
-            device.executeShellCommand("setprop persist.sys.locale en-US")
-            device.executeShellCommand("settings put system system_locales en-US")
-
-            try {
             pressHome()
             startActivityAndWait()
             device.wait(Until.hasObject(By.pkg(targetPackage)), 5_000)
             device.waitForIdle()
 
             // Step through the first-run onboarding with D-pad focus, skipping it entirely on later iterations where the app already opens on home.
-            if (device.wait(Until.hasObject(By.text(ONBOARDING_FIRST_LABEL)), 8_000) != null) {
-                device.focusAndSelect(ONBOARDING_FIRST_LABEL)
-                device.focusAndSelect("Advanced")
-                device.focusAndSelect("Continue")
+            if (device.wait(Until.hasObject(By.text(ONBOARDING_FIRST_LABEL)), 2_000) == true) {
+                check(device.focusAndSelect(ONBOARDING_FIRST_LABEL))
+                check(device.focusAndSelect("Advanced"))
+            }
+            check(device.wait(Until.hasObject(By.text("Popular - Movie")), 30_000) == true) {
+                "Prepare the isolated validation app with English labels and populated Home"
             }
             device.waitForIdle()
             Thread.sleep(3_000)
@@ -80,13 +79,6 @@ class BaselineProfileGenerator {
             device.pressBack()
             device.waitForIdle()
             Thread.sleep(800)
-            } finally {
-                // Restore original locale.
-                if (originalLocale.isNotBlank()) {
-                    device.executeShellCommand("setprop persist.sys.locale $originalLocale")
-                    device.executeShellCommand("settings put system system_locales $originalLocale")
-                }
-            }
         }
     }
 }
@@ -94,7 +86,7 @@ class BaselineProfileGenerator {
 // Moves D-pad focus until the control carrying the given label is focused and then selects it, since TV devices have no touch input.
 private fun UiDevice.focusAndSelect(label: String, maxSteps: Int = 24): Boolean {
     val pattern = Pattern.compile(Pattern.quote(label), Pattern.CASE_INSENSITIVE)
-    if (wait(Until.hasObject(By.text(pattern)), 10_000) == null) return false
+    if (wait(Until.hasObject(By.text(pattern)), 10_000) != true) return false
     repeat(maxSteps) { step ->
         if (isFocusedLabel(label, pattern)) {
             pressDPadCenter()

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Якість оформлення</string>
+    <string name="v2_quality_subtitle">Баланс візуальних ефектів і плавної навігації.</string>
+    <string name="v2_quality_performance">Продуктивність</string>
+    <string name="v2_quality_enhanced">Покращена</string>
+    <string name="v2_quality_maximum">Максимальна</string>
+</resources>
