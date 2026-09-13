@@ -5,7 +5,9 @@
 - Base branch: `nuvio-test`
 - Base commit: `45e0984c18460d2a65c5d745999011b4314328eb`
 - Initial feature HEAD: `45e0984c18460d2a65c5d745999011b4314328eb`
-- Latest recorded feature HEAD before this status checkpoint: `45e0984c18460d2a65c5d745999011b4314328eb`
+- Latest recorded feature HEAD before this status checkpoint: `85fd97be545710de692dff4105974c3117a34493`
+- First remote baseline/status checkpoint: `cf3225698a6a95d39b03e92c721f2b62bd892dcb`
+- Earlier local-only baseline commit: `f57a9c2500127885f87b72d352a8781ee527a914` (same status contents; not a remote ancestor).
 - Resolve the checkpoint's own HEAD with `git rev-parse HEAD`; a commit cannot embed its own hash.
 
 ## Progress
@@ -41,6 +43,15 @@
 - Existing PR debug CI targets `dev`, not `nuvio-test`, and covers updater tests rather than the whole test suite. Available GitHub connector actions do not expose workflow dispatch.
 - The release workflow is not a substitute for validation: its build modes can create releases, while dry-run only validates release metadata. It has not been dispatched or modified.
 - Inherited upstream contribution rules restrict UI/features; this task is explicitly requested by the fork owner. Do not misrepresent the redesign as a critical bug fix or mark incompatible PR-template assertions true.
+
+## Codex handoff
+
+- Select the existing remote `feature/nuvio-v2-ui` branch. Do not recreate it or overwrite its history. The recorded `nuvio-test` base remains the recovery reference.
+- Read `NUVIO_V2_AUTONOMOUS_WORK_BRIEF.md` and `Nuvio_V2_UI_UX_Technical_Design_Spec_v0.4.md` completely before application changes. These are unchanged copies of the supplied documents, with normalized filenames.
+- The baseline report was committed first; the two source documents were added afterward. Application code is unchanged from the recorded base.
+- GitHub branch/document writes succeeded through the connected GitHub integration. The earlier command-line Git push failure did not indicate missing repository permissions.
+- The Android toolchain/network observations below describe the earlier Work workspace. Recheck them in the new Codex environment; do not assume it has the same limitations.
+- Finish baseline build/lint/tests and practical instrumentation, record results, then implement autonomously according to the brief. Target the final PR at `nuvio-test`; do not merge or publish a release.
 
 ## Resume requirements
 
