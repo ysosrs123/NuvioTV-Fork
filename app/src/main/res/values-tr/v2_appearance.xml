@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Arayüz deneyimi</string>
+    <string name="v2_experience_subtitle">Bu cihaz için arayüzü seçin</string>
+    <string name="v2_visual_style_title">Görsel stil</string>
+    <string name="v2_scale_resolved">Uygulanan ölçek: %1$d%%</string>
+    <string name="v2_scale_automatic">Otomatik</string>
+    <string name="v2_scale_manual">Manuel</string>
+    <string name="v2_scale_fine_tune">Ölçek ince ayarı</string>
+</resources>

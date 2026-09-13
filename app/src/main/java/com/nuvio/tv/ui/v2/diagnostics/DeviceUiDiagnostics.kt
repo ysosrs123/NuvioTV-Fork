@@ -4,18 +4,22 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import android.view.View
+import android.view.WindowManager
 import com.nuvio.tv.BuildConfig
 import java.util.Locale
 
 /** Capture from the Activity view before opening a dialog, whose window has different bounds. */
-fun deviceUiDiagnosticReport(context: Context, view: View, scalePercent: Int): String {
+fun readUiCanvasSnapshot(context: Context, view: View): UiCanvasSnapshot {
     val metrics = context.resources.displayMetrics
     val configuration = context.resources.configuration
     val root = view.rootView
     val mode = view.display?.mode
-    val canvas = UiCanvasSnapshot(
-        windowWidthPx = root.width,
-        windowHeightPx = root.height,
+    val bounds = if (Build.VERSION.SDK_INT >= 30) {
+        (context.getSystemService(Context.WINDOW_SERVICE) as? WindowManager)?.currentWindowMetrics?.bounds
+    } else null
+    return UiCanvasSnapshot(
+        windowWidthPx = root.width.takeIf { it > 0 } ?: bounds?.width() ?: metrics.widthPixels,
+        windowHeightPx = root.height.takeIf { it > 0 } ?: bounds?.height() ?: metrics.heightPixels,
         baseDensity = metrics.density,
         densityDpi = metrics.densityDpi,
         screenWidthDp = configuration.screenWidthDp,
@@ -25,6 +29,15 @@ fun deviceUiDiagnosticReport(context: Context, view: View, scalePercent: Int): S
         outputHeightPx = mode?.physicalHeight,
         refreshRateHz = mode?.refreshRate
     )
+}
+
+fun deviceUiDiagnosticReport(
+    context: Context,
+    view: View,
+    scalePercent: Int,
+    scaleReason: String = "Original Nuvio"
+): String {
+    val canvas = readUiCanvasSnapshot(context, view)
     val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
     val memory = manager?.let { ActivityManager.MemoryInfo().also(it::getMemoryInfo) }
     val frames = UiFrameDiagnostics.frames.snapshot(System.nanoTime())
@@ -36,7 +49,7 @@ fun deviceUiDiagnosticReport(context: Context, view: View, scalePercent: Int): S
         appendLine("Density: ${number(canvas.baseDensity)} / ${canvas.densityDpi} dpi")
         appendLine("Reported screen: ${canvas.screenWidthDp} x ${canvas.screenHeightDp} dp")
         appendLine("Base canvas: ${number(canvas.logicalWidthDp)} x ${number(canvas.logicalHeightDp)} dp")
-        appendLine("UI scale: $scalePercent% (current Original renderer)")
+        appendLine("UI scale: $scalePercent% / $scaleReason")
         appendLine("Effective canvas: ${number(canvas.effectiveWidthDp(scalePercent))} x ${number(canvas.effectiveHeightDp(scalePercent))} dp")
         appendLine("Output mode ${canvas.modeId ?: "unavailable"}: ${canvas.outputWidthPx ?: "?"} x ${canvas.outputHeightPx ?: "?"} @ ${number(canvas.refreshRateHz)} Hz")
         appendLine("RAM: ${number(memory?.totalMem?.div(1_073_741_824.0))} GiB / heap: ${manager?.memoryClass ?: "?"} MiB / low RAM: ${manager?.isLowRamDevice ?: "?"}")

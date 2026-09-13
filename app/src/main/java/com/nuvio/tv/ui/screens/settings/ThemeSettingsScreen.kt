@@ -2,6 +2,7 @@
 
 package com.nuvio.tv.ui.screens.settings
 
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import android.app.Activity
@@ -171,6 +172,8 @@ fun ThemeSettingsContent(
                 subtitle = stringResource(R.string.appearance_subtitle)
             )
 
+            V2PreferenceControls()
+
             SettingsGroupCard(
                 modifier = Modifier.fillMaxWidth(),
                 title = stringResource(R.string.appearance_color_theme),
@@ -213,25 +216,27 @@ fun ThemeSettingsContent(
                     }
                     SettingsHorizontalScrollIndicators(state = themeRowState)
                 }
-                SettingsToggleRow(
-                    title = stringResource(R.string.appearance_amoled_mode),
-                    subtitle = stringResource(R.string.appearance_amoled_mode_subtitle),
-                    checked = uiState.amoledMode,
-                    onToggle = {
-                        viewModel.onEvent(ThemeSettingsEvent.ToggleAmoledMode(!uiState.amoledMode))
-                    }
-                )
-                if (uiState.amoledMode) {
+                if (LocalV2Appearance.current == null) {
                     SettingsToggleRow(
-                        title = stringResource(R.string.appearance_amoled_surfaces_mode),
-                        subtitle = stringResource(R.string.appearance_amoled_surfaces_mode_subtitle),
-                        checked = uiState.amoledSurfacesMode,
+                        title = stringResource(R.string.appearance_amoled_mode),
+                        subtitle = stringResource(R.string.appearance_amoled_mode_subtitle),
+                        checked = uiState.amoledMode,
                         onToggle = {
-                            viewModel.onEvent(
-                                ThemeSettingsEvent.ToggleAmoledSurfacesMode(!uiState.amoledSurfacesMode)
-                            )
+                            viewModel.onEvent(ThemeSettingsEvent.ToggleAmoledMode(!uiState.amoledMode))
                         }
                     )
+                    if (uiState.amoledMode) {
+                        SettingsToggleRow(
+                            title = stringResource(R.string.appearance_amoled_surfaces_mode),
+                            subtitle = stringResource(R.string.appearance_amoled_surfaces_mode_subtitle),
+                            checked = uiState.amoledSurfacesMode,
+                            onToggle = {
+                                viewModel.onEvent(
+                                    ThemeSettingsEvent.ToggleAmoledSurfacesMode(!uiState.amoledSurfacesMode)
+                                )
+                            }
+                        )
+                    }
                 }
             }
 
@@ -311,29 +316,31 @@ fun ThemeSettingsContent(
                 }
             }
 
-            SettingsGroupCard(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.ui_scale_title),
-                subtitle = stringResource(R.string.ui_scale_group_subtitle)
-            ) {
-                val uiScaleContext = LocalContext.current
-                val uiScaleScope = rememberCoroutineScope()
-                val uiScalePercent by com.nuvio.tv.data.local.UiScalePreference.flow(uiScaleContext).collectAsState(initial = 100)
-                SliderSettingsItem(
-                    icon = Icons.Default.AspectRatio,
+            if (LocalV2Appearance.current == null) {
+                SettingsGroupCard(
+                    modifier = Modifier.fillMaxWidth(),
                     title = stringResource(R.string.ui_scale_title),
-                    value = uiScalePercent,
-                    valueText = "$uiScalePercent%",
-                    minValue = 85,
-                    maxValue = 115,
-                    step = 5,
-                    onValueChange = { percent ->
-                        uiScaleScope.launch {
-                            com.nuvio.tv.data.local.UiScalePreference.set(uiScaleContext, percent)
-                        }
-                    },
-                    onFocused = {}
-                )
+                    subtitle = stringResource(R.string.ui_scale_group_subtitle)
+                ) {
+                    val uiScaleContext = LocalContext.current
+                    val uiScaleScope = rememberCoroutineScope()
+                    val uiScalePercent by com.nuvio.tv.data.local.UiScalePreference.flow(uiScaleContext).collectAsState(initial = 100)
+                    SliderSettingsItem(
+                        icon = Icons.Default.AspectRatio,
+                        title = stringResource(R.string.ui_scale_title),
+                        value = uiScalePercent,
+                        valueText = "$uiScalePercent%",
+                        minValue = 85,
+                        maxValue = 115,
+                        step = 5,
+                        onValueChange = { percent ->
+                            uiScaleScope.launch {
+                                com.nuvio.tv.data.local.UiScalePreference.set(uiScaleContext, percent)
+                            }
+                        },
+                        onFocused = {}
+                    )
+                }
             }
 
             SettingsGroupCard(

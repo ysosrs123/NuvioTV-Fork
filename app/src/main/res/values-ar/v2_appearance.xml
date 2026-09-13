@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">تجربة الواجهة</string>
+    <string name="v2_experience_subtitle">اختر واجهة هذا الجهاز</string>
+    <string name="v2_visual_style_title">النمط المرئي</string>
+    <string name="v2_scale_resolved">المقياس المطبق: %1$d%%</string>
+    <string name="v2_scale_automatic">تلقائي</string>
+    <string name="v2_scale_manual">يدوي</string>
+    <string name="v2_scale_fine_tune">ضبط المقياس بدقة</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Grænseflade</string>
+    <string name="v2_experience_subtitle">Vælg grænsefladen til denne enhed</string>
+    <string name="v2_visual_style_title">Visuel stil</string>
+    <string name="v2_scale_resolved">Anvendt skalering: %1$d%%</string>
+    <string name="v2_scale_automatic">Automatisk</string>
+    <string name="v2_scale_manual">Manuel</string>
+    <string name="v2_scale_fine_tune">Finjuster skalering</string>
+</resources>

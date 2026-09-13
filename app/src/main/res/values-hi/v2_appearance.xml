@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">इंटरफ़ेस अनुभव</string>
+    <string name="v2_experience_subtitle">इस डिवाइस के लिए इंटरफ़ेस चुनें</string>
+    <string name="v2_visual_style_title">दृश्य शैली</string>
+    <string name="v2_scale_resolved">लागू स्केल: %1$d%%</string>
+    <string name="v2_scale_automatic">स्वचालित</string>
+    <string name="v2_scale_manual">मैन्युअल</string>
+    <string name="v2_scale_fine_tune">स्केल का सूक्ष्म समायोजन</string>
+</resources>

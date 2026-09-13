@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +26,7 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
-import com.nuvio.tv.data.local.UiScalePreference
+import com.nuvio.tv.ui.v2.appearance.LocalUiScaleDecision
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.screens.detail.requestFocusAfterFrames
 import com.nuvio.tv.ui.v2.diagnostics.deviceUiDiagnosticReport
@@ -36,13 +35,13 @@ import com.nuvio.tv.ui.v2.diagnostics.deviceUiDiagnosticReport
 internal fun UiDiagnosticsSettingsRow() {
     val context = LocalContext.current
     val activityView = LocalView.current
-    val scale by remember(context) { UiScalePreference.flow(context) }.collectAsState(initial = 100)
+    val scale = LocalUiScaleDecision.current
     val launchFocus = remember { FocusRequester() }
     val closeFocus = remember { FocusRequester() }
     var report by remember { mutableStateOf<String?>(null) }
     var restoreFocus by remember { mutableStateOf(false) }
     fun capture() {
-        report = deviceUiDiagnosticReport(context, activityView, scale)
+        report = deviceUiDiagnosticReport(context, activityView, scale.percent, scale.reason)
         Log.i("NuvioUiDiagnostics", report.orEmpty())
     }
     fun dismiss() {

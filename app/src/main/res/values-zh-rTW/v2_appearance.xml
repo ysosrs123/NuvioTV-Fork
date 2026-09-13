@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">介面體驗</string>
+    <string name="v2_experience_subtitle">選擇此裝置的介面</string>
+    <string name="v2_visual_style_title">視覺風格</string>
+    <string name="v2_scale_resolved">已套用縮放：%1$d%%</string>
+    <string name="v2_scale_automatic">自動</string>
+    <string name="v2_scale_manual">手動</string>
+    <string name="v2_scale_fine_tune">縮放微調</string>
+</resources>

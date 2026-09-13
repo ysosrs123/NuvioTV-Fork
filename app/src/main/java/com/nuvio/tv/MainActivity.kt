@@ -1,5 +1,12 @@
 package com.nuvio.tv
 
+import androidx.compose.runtime.SideEffect
+import com.nuvio.tv.data.local.DeviceUiPreferenceStore
+import com.nuvio.tv.data.local.V2AppearancePreferenceStore
+import com.nuvio.tv.ui.v2.appearance.ResolvedAppearance
+import com.nuvio.tv.ui.v2.appearance.rememberStableUiScale
+import com.nuvio.tv.ui.v2.appearance.rememberUiCanvasSnapshot
+import com.nuvio.tv.ui.v2.scale.isPlayerUiVisible
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -552,14 +559,32 @@ open class MainActivity : ComponentActivity() {
             }.collectAsState(initial = null)
             val discoverLocation = mainUiPrefs.discoverLocation
 
-            val uiScalePercent by com.nuvio.tv.data.local.UiScalePreference.flow(applicationContext).collectAsState(initial = 100)
+            val uiScalePercent by remember {
+                com.nuvio.tv.data.local.UiScalePreference.flow(applicationContext)
+            }.collectAsState(initial = null)
+            val devicePreferences by remember { DeviceUiPreferenceStore.flow(applicationContext) }
+                .collectAsState(initial = null)
+            val appearancePreferences by remember { V2AppearancePreferenceStore.flow(applicationContext) }
+                .collectAsState(initial = null)
+            val device = devicePreferences
+            val appearance = appearancePreferences
+            val originalScale = uiScalePercent
+            // Resolve the device snapshot before profile selection's first themed frame.
+            if (device == null || appearance == null || originalScale == null) {
+                Box(Modifier.fillMaxSize().background(Color.Black))
+                return@setContent
+            }
+            var playbackUiActive by remember { mutableStateOf(false) }
+            val canvas = rememberUiCanvasSnapshot()
+            val scaleDecision = rememberStableUiScale(canvas, device, originalScale, playbackUiActive)
             NuvioTheme(
                 appTheme = mainUiPrefs.theme,
                 appFont = mainUiPrefs.font,
                 amoledMode = mainUiPrefs.amoledMode,
                 amoledSurfacesMode = mainUiPrefs.amoledSurfacesMode,
                 settingsUiStyle = mainUiPrefs.settingsUiStyle,
-                uiScalePercent = uiScalePercent
+                uiScalePercent = scaleDecision.percent,
+                presentation = ResolvedAppearance(device, appearance, scaleDecision)
             ) {
                 val defaultBringIntoViewSpec = LocalBringIntoViewSpec.current
                 val bringIntoViewSpec = if (mainUiPrefs.smoothBringIntoViewEnabled) {
@@ -736,6 +761,15 @@ open class MainActivity : ComponentActivity() {
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
                     val actualRoute = navBackStackEntry?.destination?.route
                     val currentRoute = optimisticRoute ?: actualRoute
+                    val visibleEntries by navController.visibleEntries.collectAsState()
+                    SideEffect {
+                        playbackUiActive = isPlayerUiVisible(
+                            actualRoute, visibleEntries.map { it.destination.route }
+                        )
+                    }
+                    DisposableEffect(Unit) {
+                        onDispose { playbackUiActive = false }
+                    }
 
                     LaunchedEffect(actualRoute) {
                         optimisticRoute = null

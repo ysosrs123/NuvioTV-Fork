@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">חוויית הממשק</string>
+    <string name="v2_experience_subtitle">בחירת הממשק למכשיר זה</string>
+    <string name="v2_visual_style_title">סגנון חזותי</string>
+    <string name="v2_scale_resolved">קנה מידה מיושם: %1$d%%</string>
+    <string name="v2_scale_automatic">אוטומטי</string>
+    <string name="v2_scale_manual">ידני</string>
+    <string name="v2_scale_fine_tune">כוונון עדין של קנה המידה</string>
+</resources>

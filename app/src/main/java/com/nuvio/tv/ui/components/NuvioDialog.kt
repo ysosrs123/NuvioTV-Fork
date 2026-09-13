@@ -1,8 +1,10 @@
 package com.nuvio.tv.ui.components
 
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.platform.LocalWindowInfo
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 
 import android.os.SystemClock
 import android.view.KeyEvent as AndroidKeyEvent
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,7 +62,11 @@ fun NuvioDialog(
 ) {
     var isReady by remember { mutableStateOf(!suppressFirstKeyUp) }
     val dialogDensity = LocalDensity.current
-    val dialogWindowHeightPx = LocalContext.current.resources.displayMetrics.heightPixels
+    val v2 = LocalV2Appearance.current != null
+    val resources = LocalResources.current
+    val dialogWindowHeightPx = if (v2) {
+        LocalWindowInfo.current.containerSize.height.takeIf { it > 0 } ?: resources.displayMetrics.heightPixels
+    } else resources.displayMetrics.heightPixels
     val maxDialogHeight = (with(dialogDensity) { dialogWindowHeightPx.toDp() } - NuvioTheme.spacing.xxxl).coerceAtLeast(320.dp)
     val containerShape = RoundedCornerShape(containerCornerRadius)
     val backgroundModifier = if (containerBrush == null) {
@@ -70,62 +77,66 @@ fun NuvioDialog(
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = usePlatformDefaultWidth)
+        properties = DialogProperties(usePlatformDefaultWidth = usePlatformDefaultWidth && !v2)
     ) {
-        Box(
-            modifier = Modifier
-                .width(width)
-                .heightIn(max = maxDialogHeight)
-                .clip(containerShape)
-                .then(backgroundModifier)
-                .then(
-                    if (containerBorderColor != null) {
-                        Modifier.border(containerBorderWidth, containerBorderColor, containerShape)
-                    } else {
-                        Modifier
-                    }
-                )
-                .onPreviewKeyEvent { event ->
-                    val native = event.nativeKeyEvent
-                    if (isSelectKey(native.keyCode) || native.keyCode == AndroidKeyEvent.KEYCODE_MENU) {
-                        if (native.action == AndroidKeyEvent.ACTION_DOWN && native.repeatCount == 0) {
-                            isReady = true
-                        }
-                        if (!isReady) {
-                            return@onPreviewKeyEvent true
-                        }
-                    }
-                    false
-                }
-        ) {
-            backgroundContent()
-            Column(
+        // Dialog creates a new Android window and resets LocalDensity. Keep V2 geometry
+        // consistent with the activity; Original retains its existing dialog behavior.
+        CompositionLocalProvider(LocalDensity provides if (v2) dialogDensity else LocalDensity.current) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(contentPadding),
-                verticalArrangement = Arrangement.spacedBy(contentSpacing)
+                    .width(width)
+                    .heightIn(max = maxDialogHeight)
+                    .clip(containerShape)
+                    .then(backgroundModifier)
+                    .then(
+                        if (containerBorderColor != null) {
+                            Modifier.border(containerBorderWidth, containerBorderColor, containerShape)
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .onPreviewKeyEvent { event ->
+                        val native = event.nativeKeyEvent
+                        if (isSelectKey(native.keyCode) || native.keyCode == AndroidKeyEvent.KEYCODE_MENU) {
+                            if (native.action == AndroidKeyEvent.ACTION_DOWN && native.repeatCount == 0) {
+                                isReady = true
+                            }
+                            if (!isReady) {
+                                return@onPreviewKeyEvent true
+                            }
+                        }
+                        false
+                    }
             ) {
-                if (title.isNotBlank()) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = NuvioTheme.colors.TextPrimary,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = titleTextAlign,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                backgroundContent()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(contentPadding),
+                    verticalArrangement = Arrangement.spacedBy(contentSpacing)
+                ) {
+                    if (title.isNotBlank()) {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = NuvioTheme.colors.TextPrimary,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = titleTextAlign,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
 
-                if (subtitle != null) {
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = NuvioTheme.colors.TextSecondary
-                    )
-                }
+                    if (subtitle != null) {
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = NuvioTheme.colors.TextSecondary
+                        )
+                    }
 
-                content()
+                    content()
+                }
             }
         }
     }

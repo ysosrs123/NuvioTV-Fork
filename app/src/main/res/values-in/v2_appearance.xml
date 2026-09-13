@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Pengalaman antarmuka</string>
+    <string name="v2_experience_subtitle">Pilih antarmuka untuk perangkat ini</string>
+    <string name="v2_visual_style_title">Gaya visual</string>
+    <string name="v2_scale_resolved">Skala yang diterapkan: %1$d%%</string>
+    <string name="v2_scale_automatic">Otomatis</string>
+    <string name="v2_scale_manual">Manual</string>
+    <string name="v2_scale_fine_tune">Penyesuaian skala</string>
+</resources>

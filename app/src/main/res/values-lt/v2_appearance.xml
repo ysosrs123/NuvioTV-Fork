@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Sąsajos išvaizda</string>
+    <string name="v2_experience_subtitle">Pasirinkite šio įrenginio sąsają</string>
+    <string name="v2_visual_style_title">Vaizdinis stilius</string>
+    <string name="v2_scale_resolved">Pritaikytas mastelis: %1$d%%</string>
+    <string name="v2_scale_automatic">Automatinis</string>
+    <string name="v2_scale_manual">Rankinis</string>
+    <string name="v2_scale_fine_tune">Tikslus mastelio reguliavimas</string>
+</resources>

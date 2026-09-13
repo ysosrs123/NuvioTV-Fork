@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Вигляд інтерфейсу</string>
+    <string name="v2_experience_subtitle">Виберіть інтерфейс для цього пристрою</string>
+    <string name="v2_visual_style_title">Візуальний стиль</string>
+    <string name="v2_scale_resolved">Застосований масштаб: %1$d%%</string>
+    <string name="v2_scale_automatic">Автоматично</string>
+    <string name="v2_scale_manual">Вручну</string>
+    <string name="v2_scale_fine_tune">Точне налаштування масштабу</string>
+</resources>

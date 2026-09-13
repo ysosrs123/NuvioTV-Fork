@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Benutzeroberfläche</string>
+    <string name="v2_experience_subtitle">Oberfläche für dieses Gerät wählen</string>
+    <string name="v2_visual_style_title">Visueller Stil</string>
+    <string name="v2_scale_resolved">Angewendete Skalierung: %1$d%%</string>
+    <string name="v2_scale_automatic">Automatisch</string>
+    <string name="v2_scale_manual">Manuell</string>
+    <string name="v2_scale_fine_tune">Skalierung feinjustieren</string>
+</resources>

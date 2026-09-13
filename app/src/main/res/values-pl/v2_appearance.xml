@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Interfejs</string>
+    <string name="v2_experience_subtitle">Wybierz interfejs dla tego urządzenia</string>
+    <string name="v2_visual_style_title">Styl wizualny</string>
+    <string name="v2_scale_resolved">Zastosowana skala: %1$d%%</string>
+    <string name="v2_scale_automatic">Automatyczna</string>
+    <string name="v2_scale_manual">Ręczna</string>
+    <string name="v2_scale_fine_tune">Dostrajanie skali</string>
+</resources>

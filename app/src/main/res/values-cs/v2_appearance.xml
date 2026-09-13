@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Prostředí rozhraní</string>
+    <string name="v2_experience_subtitle">Vyberte rozhraní pro toto zařízení</string>
+    <string name="v2_visual_style_title">Vizuální styl</string>
+    <string name="v2_scale_resolved">Použité měřítko: %1$d%%</string>
+    <string name="v2_scale_automatic">Automaticky</string>
+    <string name="v2_scale_manual">Ručně</string>
+    <string name="v2_scale_fine_tune">Jemné nastavení měřítka</string>
+</resources>

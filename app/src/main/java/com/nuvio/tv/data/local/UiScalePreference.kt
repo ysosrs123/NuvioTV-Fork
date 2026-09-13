@@ -16,6 +16,10 @@ private val Context.uiScaleDataStore by preferencesDataStore(name = "ui_scale_pr
 object UiScalePreference {
     private val key = intPreferencesKey("ui_scale_percent")
 
+    /** Null distinguishes a new install from an explicitly saved 100 percent. */
+    fun storedPercent(context: Context): Flow<Int?> =
+        context.uiScaleDataStore.data.map { it[key] }
+
     fun flow(context: Context): Flow<Int> =
         context.uiScaleDataStore.data.map { prefs -> (prefs[key] ?: 100).coerceIn(85, 115) }
 

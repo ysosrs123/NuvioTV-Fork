@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Εμπειρία διεπαφής</string>
+    <string name="v2_experience_subtitle">Επιλέξτε τη διεπαφή για αυτή τη συσκευή</string>
+    <string name="v2_visual_style_title">Οπτικό στυλ</string>
+    <string name="v2_scale_resolved">Εφαρμοσμένη κλίμακα: %1$d%%</string>
+    <string name="v2_scale_automatic">Αυτόματα</string>
+    <string name="v2_scale_manual">Χειροκίνητα</string>
+    <string name="v2_scale_fine_tune">Λεπτομερής ρύθμιση κλίμακας</string>
+</resources>

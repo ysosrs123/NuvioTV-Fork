@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Grensesnitt</string>
+    <string name="v2_experience_subtitle">Velg grensesnittet for denne enheten</string>
+    <string name="v2_visual_style_title">Visuell stil</string>
+    <string name="v2_scale_resolved">Brukt skalering: %1$d%%</string>
+    <string name="v2_scale_automatic">Automatisk</string>
+    <string name="v2_scale_manual">Manuell</string>
+    <string name="v2_scale_fine_tune">Finjuster skalering</string>
+</resources>
