@@ -57,6 +57,9 @@ internal class IecPassthroughAudioSink(
     private var lastHealthNanos: Long = 0L
     private var lastHealthUnderruns: Int = -1
     private var tunnelingRequested: Boolean = false
+    // Whether the open IEC track was created with FLAG_HW_AV_SYNC. The request can change
+    // (disableTunneling) while the track lives on, so diagnostics report this, not the request.
+    private var iecTrackHwAvSync: Boolean = false
     private var sinkListener: AudioSink.Listener? = null
     // Wall-clock start of the current hw_av_sync track's playback, for the drain bound in
     // hasPendingData(); zero until the first write while playing, reset with the track.
@@ -77,7 +80,7 @@ internal class IecPassthroughAudioSink(
         val track = iecTrack
         return "iec_state mode=$mode active=$isIecActive tunneling=$tunnelingRequested playing=$playing " +
             "payload=${track?.payload ?: "none"} session=${track?.audioSessionId?.takeIf { it > 0 } ?: audioSessionId} " +
-            "hwAvSync=$tunnelingRequested written=$writtenFrames head=${track?.playbackHeadFrames() ?: -1} " +
+            "hwAvSync=$iecTrackHwAvSync written=$writtenFrames head=${track?.playbackHeadFrames() ?: -1} " +
             "pending=${pendingFrames.size} leftover=${leftover.size} startPtsUs=$startPtsUs " +
             "stalls=$totalWriteStalls failed=$iecFailedThisSession"
     }
@@ -124,11 +127,11 @@ internal class IecPassthroughAudioSink(
             android.util.Log.i(
                 "IecPassthrough",
                 "HBR active payload=${iecTrack?.payload} mime=${inputFormat.sampleMimeType} " +
-                    "hwAvSync=$tunnelingRequested"
+                    "hwAvSync=$iecTrackHwAvSync"
             )
             onDiagnosticEvent?.invoke(
                 "iec_hbr_active payload=${iecTrack?.payload} mime=${inputFormat.sampleMimeType} " +
-                    "hwAvSync=$tunnelingRequested"
+                    "hwAvSync=$iecTrackHwAvSync"
             )
             return
         }
@@ -365,6 +368,7 @@ internal class IecPassthroughAudioSink(
         ) ?: return false
         track.setVolume(volume)
         iecTrack = track
+        iecTrackHwAvSync = tunnelingRequested
         val session = track.audioSessionId.takeIf { it > 0 } ?: audioSessionId
         if (session > 0) {
             sinkListener?.onAudioSessionIdChanged(session)
@@ -586,6 +590,7 @@ internal class IecPassthroughAudioSink(
         if (!keepTrack) {
             iecTrack?.release()
             iecTrack = null
+            iecTrackHwAvSync = false
             totalWriteStalls = 0L
             lastHealthNanos = 0L
             lastHealthUnderruns = -1

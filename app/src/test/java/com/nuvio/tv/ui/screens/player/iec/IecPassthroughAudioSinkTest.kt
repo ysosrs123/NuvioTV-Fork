@@ -608,6 +608,21 @@ class IecPassthroughAudioSinkTest {
     }
 
     @Test
+    fun disableTunneling_iecStateReportsTrackFlagNotRequest() {
+        val fakeTrack = FakeIecAudioTrack(192_000, 16)
+        val sink = IecPassthroughAudioSink(sink = RecordingSink(), trackFactory = ReadyFactory(fakeTrack))
+        sink.enableTunnelingV21()
+        sink.configure(dtsHdFormat(), 0, null)
+        assertTrue(sink.isIecActive)
+        assertTrue(sink.diagnosticRawLine().contains("hwAvSync=true"))
+        sink.disableTunneling()
+        assertTrue(sink.isIecActive)
+        val line = sink.diagnosticRawLine()
+        assertTrue(line, line.contains("tunneling=false"))
+        assertTrue(line, line.contains("hwAvSync=true"))
+    }
+
+    @Test
     fun probeReadyListener_invokesCallback() {
         var captured: (() -> Unit)? = null
         val factory = object : IecAudioTrackFactory {
