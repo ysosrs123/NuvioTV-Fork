@@ -628,6 +628,44 @@ class IecPassthroughAudioSinkTest {
         assertTrue(notified)
     }
 
+    @Test
+    fun tunneling_playToEndOfStream_endsWhenHeadReachesWritten() {
+        val fakeTrack = FakeIecAudioTrack(192_000, 16)
+        val sink = IecPassthroughAudioSink(sink = RecordingSink(), trackFactory = ReadyFactory(fakeTrack))
+        val now = 1_000_000_000L
+        sink.nanoTime = { now }
+        sink.enableTunnelingV21()
+        sink.configure(dtsHdFormat(), 0, null)
+        sink.play()
+        fakeTrack.headFrames = 0L
+        assertTrue(sink.handleBuffer(ByteBuffer.allocate(64), 2_000_000L, 1))
+        sink.playToEndOfStream()
+        assertTrue(sink.hasPendingData())
+        assertFalse(sink.isEnded())
+        fakeTrack.headFrames = null
+        assertFalse(sink.hasPendingData())
+        assertTrue(sink.isEnded())
+    }
+
+    @Test
+    fun tunneling_frozenHead_endsAfterWallClockDrain() {
+        val fakeTrack = FakeIecAudioTrack(192_000, 16)
+        val sink = IecPassthroughAudioSink(sink = RecordingSink(), trackFactory = ReadyFactory(fakeTrack))
+        var now = 1_000_000_000L
+        sink.nanoTime = { now }
+        sink.enableTunnelingV21()
+        sink.configure(dtsHdFormat(), 0, null)
+        sink.play()
+        fakeTrack.headFrames = 0L
+        assertTrue(sink.handleBuffer(ByteBuffer.allocate(64), 2_000_000L, 1))
+        sink.playToEndOfStream()
+        assertFalse(sink.isEnded())
+        now += 1_000_000_000L
+        assertFalse(sink.isEnded())
+        now += 1_000_000_000L
+        assertTrue(sink.isEnded())
+    }
+
     private class ReadyFactory(val track: IecAudioTrack?) : IecAudioTrackFactory {
         var markedUnusable = false
         var probeStarted = false
@@ -712,7 +750,9 @@ class IecPassthroughAudioSinkTest {
         override fun release() {
             releaseCount++
         }
-        override fun playbackHeadFrames(): Long = (written / frameSizeBytes).toLong()
+        // Tests set this to model a HAL whose head lags or never advances; null tracks written.
+        var headFrames: Long? = null
+        override fun playbackHeadFrames(): Long = headFrames ?: (written / frameSizeBytes).toLong()
         override fun setVolume(volume: Float) = Unit
         override fun underrunCount(): Int = underruns
     }

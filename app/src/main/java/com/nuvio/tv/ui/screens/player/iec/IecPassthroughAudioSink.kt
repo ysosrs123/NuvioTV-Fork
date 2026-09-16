@@ -58,6 +58,11 @@ internal class IecPassthroughAudioSink(
     private var lastHealthUnderruns: Int = -1
     private var tunnelingRequested: Boolean = false
     private var sinkListener: AudioSink.Listener? = null
+    // Wall-clock start of the current hw_av_sync track's playback, for the drain bound in
+    // hasPendingData(); zero until the first write while playing, reset with the track.
+    private var hwAvSyncPlayStartNanos: Long = 0L
+    // Injectable for tests; production reads System.nanoTime().
+    internal var nanoTime: () -> Long = System::nanoTime
 
     init {
         trackFactory.setReadyListener { onIecBecameReady?.invoke() }
@@ -279,8 +284,17 @@ internal class IecPassthroughAudioSink(
         if (mode == Mode.FORWARD) return super.hasPendingData()
         if (pendingFrames.isNotEmpty() || leftover.isNotEmpty()) return true
         val track = iecTrack ?: return false
-        if (tunnelingRequested) return playing && writtenFrames > 0L
-        return writtenFrames > track.playbackHeadFrames()
+        if (writtenFrames <= track.playbackHeadFrames()) return false
+        if (!tunnelingRequested) return true
+        // Under hw_av_sync the head is HAL-dependent: it advances on some devices and never
+        // moves on others, and an always-true answer makes isEnded() unreachable. Trust a
+        // head that reports the track drained; otherwise bound the wait by wall clock, with
+        // an allowance for a HAL that holds output while it establishes sync.
+        val start = hwAvSyncPlayStartNanos
+        if (start == 0L) return true
+        val playedFrames = (nanoTime() - start) / 1_000L * track.sampleRate / 1_000_000L
+        val allowanceFrames = HW_AV_SYNC_DRAIN_ALLOWANCE_US * track.sampleRate / 1_000_000L
+        return playedFrames < writtenFrames + allowanceFrames
     }
 
     override fun setAudioSessionId(audioSessionId: Int) {
@@ -488,7 +502,12 @@ internal class IecPassthroughAudioSink(
 
     private fun drainPending(): Boolean {
         val track = iecTrack ?: return true
-        if (playing) track.play()
+        if (playing) {
+            track.play()
+            if (tunnelingRequested && hwAvSyncPlayStartNanos == 0L) {
+                hwAvSyncPlayStartNanos = nanoTime()
+            }
+        }
         while (pendingFrames.isNotEmpty()) {
             val frame = pendingFrames.first()
             val timestampNs = if (tunnelingRequested && startPtsUs != C.TIME_UNSET) {
@@ -563,6 +582,7 @@ internal class IecPassthroughAudioSink(
         headAnchorFrames = 0L
         handledEndOfStream = false
         consecutiveWriteStalls = 0
+        hwAvSyncPlayStartNanos = 0L
         if (!keepTrack) {
             iecTrack?.release()
             iecTrack = null
@@ -613,6 +633,9 @@ internal class IecPassthroughAudioSink(
         // during a fallback; not an AudioTrack return value.
         internal const val WRITE_ERROR_FALLBACK_REFUSED = -1_000
         private const val HEALTH_INTERVAL_NANOS = 5_000_000_000L
+        // Wall-clock allowance past the written duration before a hw_av_sync track whose head
+        // never advances is treated as drained; covers a HAL that holds output while syncing.
+        private const val HW_AV_SYNC_DRAIN_ALLOWANCE_US = 1_500_000L
         private const val FRAME_POOL_LIMIT = 8
 
         fun isTrueHd(format: Format): Boolean {
