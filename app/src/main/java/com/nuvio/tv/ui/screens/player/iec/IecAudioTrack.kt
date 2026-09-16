@@ -127,6 +127,10 @@ internal class PlatformIecAudioTrackFactory : IecAudioTrackFactory {
             }
         }
         if (iec61937Usable) {
+            if (hwAvSync && iec61937HwAvSyncRefused) {
+                Log.i(TAG, "IEC61937 hw_av_sync open skipped: refused on this route")
+                return null
+            }
             val track = createTrack(
                 sampleRate,
                 mask,
@@ -139,7 +143,9 @@ internal class PlatformIecAudioTrackFactory : IecAudioTrackFactory {
                 Log.i(TAG, "opened IEC61937 $sampleRate/$channelCount hwAvSync=$hwAvSync")
                 return PlatformIecAudioTrack(track, sampleRate, channelCount * 2, HbrPayload.IEC_BURST)
             }
-            if (!hwAvSync) {
+            if (hwAvSync) {
+                iec61937HwAvSyncRefused = true
+            } else {
                 iec61937Usable = false
             }
             Log.w(TAG, "IEC61937 open failed after probe hwAvSync=$hwAvSync")
@@ -217,6 +223,16 @@ internal class PlatformIecAudioTrackFactory : IecAudioTrackFactory {
 
         @Volatile
         private var iec61937ProbeStarted: Boolean = false
+
+        // An IEC61937 open with FLAG_HW_AV_SYNC this HAL refused. Separate from the
+        // untunnelled probe result, and not latched for the process: cleared on an audio
+        // route change, since a refusal captured during a hotplug would otherwise pin it.
+        @Volatile
+        private var iec61937HwAvSyncRefused: Boolean = false
+
+        fun clearHwAvSyncRefusal() {
+            iec61937HwAvSyncRefused = false
+        }
 
         @Volatile
         private var iec61937ReadyListener: (() -> Unit)? = null
