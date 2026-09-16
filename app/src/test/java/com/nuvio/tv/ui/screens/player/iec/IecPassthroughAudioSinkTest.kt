@@ -681,6 +681,23 @@ class IecPassthroughAudioSinkTest {
         assertTrue(sink.isEnded())
     }
 
+    @Test
+    fun tunneling_fedWhilePaused_thenPlay_endsAfterWallClockDrain() {
+        val fakeTrack = FakeIecAudioTrack(192_000, 16)
+        val sink = IecPassthroughAudioSink(sink = RecordingSink(), trackFactory = ReadyFactory(fakeTrack))
+        var now = 1_000_000_000L
+        sink.nanoTime = { now }
+        sink.enableTunnelingV21()
+        sink.configure(dtsHdFormat(), 0, null)
+        fakeTrack.headFrames = 0L
+        assertTrue(sink.handleBuffer(ByteBuffer.allocate(64), 2_000_000L, 1))
+        sink.playToEndOfStream()
+        sink.play()
+        assertFalse(sink.isEnded())
+        now += 2_000_000_000L
+        assertTrue(sink.isEnded())
+    }
+
     private class ReadyFactory(val track: IecAudioTrack?) : IecAudioTrackFactory {
         var markedUnusable = false
         var probeStarted = false

@@ -207,6 +207,11 @@ internal class IecPassthroughAudioSink(
             return
         }
         iecTrack?.play()
+        // Data fed while paused (a seek while paused, then resume) reaches the track
+        // without drainPending() running while playing, so start the drain clock here too.
+        if (tunnelingRequested && hwAvSyncPlayStartNanos == 0L && writtenFrames > 0L) {
+            hwAvSyncPlayStartNanos = nanoTime()
+        }
         emitIec("iec_play")
     }
 
