@@ -608,18 +608,76 @@ class IecPassthroughAudioSinkTest {
     }
 
     @Test
-    fun disableTunneling_iecStateReportsTrackFlagNotRequest() {
+    fun tunnelingToggles_iecStateReportsTheOpenTracksFlag() {
         val fakeTrack = FakeIecAudioTrack(192_000, 16)
-        val sink = IecPassthroughAudioSink(sink = RecordingSink(), trackFactory = ReadyFactory(fakeTrack))
-        sink.enableTunnelingV21()
+        val factory = ReadyFactory(fakeTrack)
+        val sink = IecPassthroughAudioSink(sink = RecordingSink(), trackFactory = factory)
         sink.configure(dtsHdFormat(), 0, null)
         assertTrue(sink.isIecActive)
+        assertFalse(factory.lastHwAvSync)
+        assertTrue(sink.diagnosticRawLine().contains("hwAvSync=false"))
+        sink.enableTunnelingV21()
+        assertEquals(2, factory.openCount)
+        assertTrue(factory.lastHwAvSync)
         assertTrue(sink.diagnosticRawLine().contains("hwAvSync=true"))
         sink.disableTunneling()
+        assertEquals(2, factory.openCount)
+        assertFalse(sink.isIecActive)
+        assertTrue(sink.diagnosticRawLine().contains("hwAvSync=false"))
+        sink.play()
+        assertEquals(3, factory.openCount)
+        assertFalse(factory.lastHwAvSync)
         assertTrue(sink.isIecActive)
         val line = sink.diagnosticRawLine()
         assertTrue(line, line.contains("tunneling=false"))
-        assertTrue(line, line.contains("hwAvSync=true"))
+        assertTrue(line, line.contains("hwAvSync=false"))
+    }
+
+    @Test
+    fun tunneling_discontinuity_stampsQueuedFramesUnderTheOldAnchor() {
+        val fakeTrack = FakeIecAudioTrack(192_000, 16)
+        val events = mutableListOf<String>()
+        val sink = IecPassthroughAudioSink(
+            sink = RecordingSink(),
+            trackFactory = ReadyFactory(fakeTrack),
+            onDiagnosticEvent = { events.add(it) }
+        )
+        sink.enableTunnelingV21()
+        sink.configure(dtsHdFormat(), 0, null)
+        sink.play()
+        fakeTrack.writeResult = 0
+        assertTrue(sink.handleBuffer(ByteBuffer.allocate(64), 2_000_000L, 1))
+        assertTrue(sink.hasPendingData())
+        fakeTrack.writeResult = null
+        sink.handleDiscontinuity()
+        assertEquals(2_000_000L * 1000L, fakeTrack.lastTimestampNs)
+        assertEquals(0, fakeTrack.untimestampedWrites)
+        assertFalse(events.any { it.startsWith("iec_discontinuity_dropped") })
+        assertTrue(sink.handleBuffer(ByteBuffer.allocate(64), 9_000_000L, 1))
+        assertEquals(0, fakeTrack.untimestampedWrites)
+    }
+
+    @Test
+    fun tunneling_discontinuityWithFullTrack_dropsOldFramesAndNeverWritesUntimestamped() {
+        val fakeTrack = FakeIecAudioTrack(192_000, 16)
+        val events = mutableListOf<String>()
+        val sink = IecPassthroughAudioSink(
+            sink = RecordingSink(),
+            trackFactory = ReadyFactory(fakeTrack),
+            onDiagnosticEvent = { events.add(it) }
+        )
+        sink.enableTunnelingV21()
+        sink.configure(dtsHdFormat(), 0, null)
+        sink.play()
+        fakeTrack.writeResult = 0
+        assertTrue(sink.handleBuffer(ByteBuffer.allocate(64), 2_000_000L, 1))
+        sink.handleDiscontinuity()
+        assertTrue(events.any { it.startsWith("iec_discontinuity_dropped frames=1") })
+        assertFalse(sink.hasPendingData())
+        fakeTrack.writeResult = null
+        assertTrue(sink.handleBuffer(ByteBuffer.allocate(64), 9_000_000L, 1))
+        assertEquals(0, fakeTrack.untimestampedWrites)
+        assertEquals(9_000_000L * 1000L, fakeTrack.lastTimestampNs)
     }
 
     @Test
@@ -761,13 +819,21 @@ class IecPassthroughAudioSinkTest {
         var releaseCount: Int = 0
             private set
 
+        // Tests set this to model a full (0) or failing (<0) track mid-test; null defers to
+        // fixedWriteResult.
+        var writeResult: Int? = null
+        var untimestampedWrites: Int = 0
+            private set
+
         override fun write(data: ByteArray, offset: Int, size: Int): Int {
-            if (fixedWriteResult != null) return fixedWriteResult
+            val fixed = writeResult ?: fixedWriteResult
+            if (fixed != null) return fixed
             written += size
             return size
         }
 
         override fun write(data: ByteArray, offset: Int, size: Int, timestampNs: Long): Int {
+            if (timestampNs < 0L) untimestampedWrites++
             lastTimestampNs = timestampNs
             return write(data, offset, size)
         }

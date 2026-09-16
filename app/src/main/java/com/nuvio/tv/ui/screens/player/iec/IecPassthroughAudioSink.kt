@@ -251,6 +251,23 @@ internal class IecPassthroughAudioSink(
             super.handleDiscontinuity()
             return
         }
+        if (iecTrackHwAvSync) {
+            // Frames queued before the discontinuity belong to the old timeline. Stamp what
+            // still fits under the old anchor; anything left would go out untimestamped on
+            // the next handleBuffer (it drains before handleTrueHd re-anchors) or be stamped
+            // onto the new timeline, so drop it with the stale TrueHD input carry.
+            drainPending()
+            val droppedFrames = pendingFrames.size
+            val droppedLeftover = leftover.size
+            if (droppedFrames > 0 || droppedLeftover > 0) {
+                while (pendingFrames.isNotEmpty()) recycleFrame(pendingFrames.removeFirst())
+                pendingOffset = 0
+                leftover = ByteArray(0)
+                onDiagnosticEvent?.invoke(
+                    "iec_discontinuity_dropped frames=$droppedFrames leftoverBytes=$droppedLeftover"
+                )
+            }
+        }
         headAnchorFrames = iecTrack?.playbackHeadFrames() ?: 0L
         startPtsUs = C.TIME_UNSET
         firstBufferPtsUs = C.TIME_UNSET
@@ -325,6 +342,11 @@ internal class IecPassthroughAudioSink(
     override fun disableTunneling() {
         tunnelingRequested = false
         super.disableTunneling()
+        // Mirror DefaultAudioSink, which flushes here: a track opened with hw_av_sync must
+        // not live on under a non-tunnelling request, or every later write goes out
+        // untimestamped on a bound stream. Release it; configure() or the next write reopens
+        // it unbound through ensureIecTrack(), so a following configure() costs one open.
+        if (iecTrackHwAvSync) resetIecState(keepTrack = false)
     }
 
     override fun setVolume(volume: Float) {
@@ -519,7 +541,10 @@ internal class IecPassthroughAudioSink(
         }
         while (pendingFrames.isNotEmpty()) {
             val frame = pendingFrames.first()
-            val timestampNs = if (tunnelingRequested && startPtsUs != C.TIME_UNSET) {
+            val timestampNs = if (iecTrackHwAvSync) {
+                // A hw_av_sync track must never see an untimestamped block: the HAL logs
+                // "NONE_HW_SYNC while no reference" and clocks it unsynced. Hold until anchored.
+                if (startPtsUs == C.TIME_UNSET) return true
                 startPtsUs * 1000L + writtenFrames * 1_000_000_000L / track.sampleRate
             } else {
                 -1L
