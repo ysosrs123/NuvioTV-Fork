@@ -60,7 +60,9 @@ internal class IecPassthroughAudioSink(
     private var tunnelingRequested: Boolean = false
     // The factory probe is process-wide and can finish while reset/release has dropped
     // the listener. Deliver onIecBecameReady at most once so a later configure can
-    // reselect DTS onto IEC without looping every configure.
+    // reselect DTS onto IEC without looping every configure. Written on the probe thread
+    // (the factory listener) and on the playback thread (configure).
+    @Volatile
     private var iecReadyDelivered: Boolean = false
 
     init {
