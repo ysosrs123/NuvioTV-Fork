@@ -182,6 +182,11 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         return mpv.getPropertyBoolean("paused-for-cache") == true
     }
 
+    fun isSeekingNow(): Boolean {
+        if (!initialized) return false
+        return mpv.getPropertyBoolean("seeking") == true
+    }
+
     fun demuxerCacheDurationSec(): Double {
         if (!initialized) return 0.0
         return mpv.getPropertyDouble("demuxer-cache-duration") ?: 0.0
@@ -410,6 +415,17 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         postDelayed(aspectReapplyRunnable, delayMs)
     }
 
+    private var dimHdrSubtitles = false
+    fun setHdrSubtitleDimming(enabled: Boolean, style: SubtitleStyleSettings) {
+        if (dimHdrSubtitles == enabled) return
+        dimHdrSubtitles = enabled
+        applySubtitleStyle(style)
+    }
+
+    fun isHdrVideo(): Boolean = initialized && runCatching {
+        mpv.getPropertyString("video-params/gamma") in setOf("pq", "hlg", "st2084")
+    }.getOrDefault(false)
+
     fun applySubtitleStyle(style: SubtitleStyleSettings) {
         if (!initialized) return
         runCatching {
@@ -424,25 +440,18 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
                 (normalizedOffset * (MPV_SUB_POS_AT_BOTTOM - MPV_SUB_POS_AT_TOP))
             val subMarginY = (MPV_SUB_MARGIN_Y_MIN +
                 (normalizedOffset * (MPV_SUB_MARGIN_Y_MAX - MPV_SUB_MARGIN_Y_MIN))).toInt()
-            val outlineSize = when {
-                !style.outlineEnabled -> 0.0
-                isAssOrSsaSubtitleSelectedNow() -> style.outlineWidth.coerceIn(1, 6).toDouble()
-                else -> 1.0
-            }
-            val backgroundAlpha = (style.backgroundColor ushr 24) and 0xFF
-            val borderStyle = if (backgroundAlpha > 0) "background-box" else "outline-and-shadow"
-            // In background-box mode, sub-shadow-offset controls the box padding/margin
-            val shadowOffset = if (backgroundAlpha > 0) 5.0 else 0.0
+            val edges = mpvSubtitleEdges(style, isAssOrSsaSubtitleSelectedNow())
+            mpv.setPropertyString("sub-font", style.font?.mpvFontName() ?: "Roboto")
 
             mpv.setPropertyDouble("sub-scale", scale)
             mpv.setPropertyBoolean("sub-bold", style.bold)
-            mpv.setPropertyDouble("sub-outline-size", outlineSize)
+            mpv.setPropertyDouble("sub-outline-size", edges.outlineSize)
             mpv.setPropertyDouble("sub-pos", subPos)
             mpv.setPropertyInt("sub-margin-y", subMarginY)
-            mpv.setPropertyDouble("sub-shadow-offset", shadowOffset)
-            mpv.setPropertyString("sub-border-style", borderStyle)
-            mpv.setPropertyString("sub-color", toMpvColor(style.textColor))
-            mpv.setPropertyString("sub-back-color", toMpvColor(style.backgroundColor))
+            mpv.setPropertyDouble("sub-shadow-offset", edges.shadowOffset)
+            mpv.setPropertyString("sub-border-style", edges.borderStyle)
+            mpv.setPropertyString("sub-color", toMpvColor(if (dimHdrSubtitles) capSubtitleHighlight(style.textColor) else style.textColor))
+            mpv.setPropertyString("sub-back-color", toMpvColor(edges.backColor))
             mpv.setPropertyString("sub-outline-color", toMpvColor(style.outlineColor))
             mpv.setPropertyBoolean("sub-filter-sdh", style.stripSdh)
             mpv.setPropertyBoolean("sub-filter-sdh-harder", style.stripSdh)
@@ -661,6 +670,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         // Preserve native ASS/SSA styling behavior on MPV.
         mpv.setOptionString("sub-ass-override", "no")
         mpv.setOptionString("sub-codepage", "auto:utf-8")
+        mpv.setOptionString("sub-fonts-dir", prepareMpvSubtitleFonts(context).absolutePath)
         mpv.setOptionString("sub-font", "Roboto")
         mpv.setOptionString("sub-use-margins", "yes")
         mpv.setOptionString("sub-ass-force-margins", "yes")

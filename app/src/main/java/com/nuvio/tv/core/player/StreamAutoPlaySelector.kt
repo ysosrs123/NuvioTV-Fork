@@ -4,15 +4,22 @@ import com.nuvio.tv.core.build.AppFeaturePolicy
 import com.nuvio.tv.data.local.StreamAutoPlayMode
 import com.nuvio.tv.data.local.StreamAutoPlaySource
 import com.nuvio.tv.domain.model.AddonStreams
+import com.nuvio.tv.domain.model.DebridStreamPreferences
 import com.nuvio.tv.domain.model.Stream
 import com.nuvio.tv.domain.model.StreamDebridCacheState
 
 object StreamAutoPlaySelector {
     fun orderAddonStreams(
         streams: List<AddonStreams>,
-        installedOrder: List<String>
+        installedOrder: List<String>,
+        preferredNames: Set<String> = emptySet()
     ): List<AddonStreams> {
         if (streams.isEmpty()) return streams
+        val (servers, rest) = streams.partition { it.addonName in preferredNames || it.isServerGroup() }
+        if (servers.isNotEmpty()) {
+            val (preferred, others) = servers.partition { it.addonName in preferredNames }
+            return preferred + others + orderAddonStreams(rest, installedOrder)
+        }
 
         val addonRankByName = HashMap<String, Int>(installedOrder.size)
         installedOrder.forEachIndexed { index, addonName ->
@@ -30,9 +37,12 @@ object StreamAutoPlaySelector {
         return directDebridEntries + orderedAddons + pluginEntries
     }
 
+    private fun AddonStreams.isServerGroup(): Boolean = streams.any { it.serverTarget != null }
+
     private fun isPlayable(stream: Stream): Boolean {
         // External URL streams (e.g. error pages, web links) are not playable.
         if (stream.isExternal()) return false
+        if (stream.serverTarget != null) return true
         when (stream.debridCacheStatus?.state) {
             StreamDebridCacheState.CHECKING,
             StreamDebridCacheState.NOT_CACHED,
@@ -60,7 +70,8 @@ object StreamAutoPlaySelector {
         selectedPlugins: Set<String>,
         preferredBingeGroup: String? = null,
         preferBingeGroupInSelection: Boolean = false,
-        bingeGroupOnly: Boolean = false
+        bingeGroupOnly: Boolean = false,
+        debridStreamPreferences: DebridStreamPreferences? = null
     ): Stream? {
         if (streams.isEmpty()) return null
 
@@ -72,12 +83,14 @@ object StreamAutoPlaySelector {
 
         val sourceScopedStreams = when (effectiveSource) {
             StreamAutoPlaySource.ALL_SOURCES -> streams
-            StreamAutoPlaySource.INSTALLED_ADDONS_ONLY -> streams.filter { it.addonName in installedAddonNames }
+            StreamAutoPlaySource.INSTALLED_ADDONS_ONLY -> streams.filter { it.serverTarget != null || it.addonName in installedAddonNames }
             StreamAutoPlaySource.ENABLED_PLUGINS_ONLY -> streams.filter { it.addonName !in installedAddonNames }
         }
         val candidateStreams = sourceScopedStreams.filter { stream ->
             val isAddonStream = stream.addonName in installedAddonNames
-            if (isAddonStream) {
+            if (stream.serverTarget != null) {
+                true
+            } else if (isAddonStream) {
                 selectedAddons.isEmpty() || stream.addonName in selectedAddons
             } else {
                 selectedPlugins.isEmpty() || stream.addonName in selectedPlugins
@@ -103,9 +116,20 @@ object StreamAutoPlaySelector {
 
         if (mode == StreamAutoPlayMode.MANUAL) return null
 
+        return selectByMode(candidateStreams, mode, regexPattern, debridStreamPreferences)
+    }
+
+    private fun selectByMode(
+        candidateStreams: List<Stream>,
+        mode: StreamAutoPlayMode,
+        regexPattern: String,
+        debridStreamPreferences: DebridStreamPreferences?
+    ): Stream? {
         return when (mode) {
             StreamAutoPlayMode.MANUAL -> null
             StreamAutoPlayMode.FIRST_STREAM -> candidateStreams.firstOrNull { isPlayable(it) }
+            StreamAutoPlayMode.QUALITY_RANK ->
+                StreamQualityRank.rank(candidateStreams.filter { isPlayable(it) }, debridStreamPreferences).firstOrNull()
             StreamAutoPlayMode.REGEX_MATCH -> {
                 val pattern = regexPattern.trim()
  

@@ -107,6 +107,15 @@ internal class PlaybackSpeedAwareAudioRenderer(
         format: Format,
         requiresSecureDecoder: Boolean
     ): List<MediaCodecInfo> {
+        // Returning no MediaCodec decoder for a policy-denied format makes
+        // supportsFormat() above report FORMAT_UNSUPPORTED_SUBTYPE (it consults this
+        // list), so track selection falls through to FfmpegAudioRenderer. That cannot
+        // strand the track: AudioPassthroughPolicy only denies the five formats the
+        // bundled FFmpeg decoder handles, and only while softwareDecodersAvailable is
+        // true, which already requires the FFmpeg renderer to be in the renderer list.
+        if (playbackSpeedAwareAudioSink.isPolicyDeniedPassthrough(format)) {
+            return emptyList()
+        }
         val decoderInfos = if (!playbackSpeedAwareAudioSink.shouldForcePcmForFormat(format) && playbackSpeedAwareAudioSink.supportsFormat(format)) {
             MediaCodecUtil.getDecryptOnlyDecoderInfo()?.let(::listOf)
                 ?: MediaCodecUtil.getDecoderInfosSoftMatch(

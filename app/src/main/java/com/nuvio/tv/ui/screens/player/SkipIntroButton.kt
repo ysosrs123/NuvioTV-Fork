@@ -194,7 +194,7 @@ fun SkipIntroButton(
                 },
             colors = CardDefaults.colors(
                 containerColor = Color(0xFF1E1E1E).copy(alpha = 0.85f),
-                focusedContainerColor = NuvioTheme.colors.Secondary
+                focusedContainerColor = Color.White
             ),
             shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.md))
         ) {
@@ -208,12 +208,12 @@ fun SkipIntroButton(
                     Icon(
                         imageVector = Icons.Default.SkipNext,
                         contentDescription = null,
-                        tint = if (isFocused) NuvioTheme.colors.OnSecondary else Color.White,
+                        tint = if (isFocused) Color(0xFF16161A) else Color.White,
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
                         text = getSkipLabel(lastType, targetsPostCredits),
-                        color = if (isFocused) NuvioTheme.colors.OnSecondary else Color.White,
+                        color = if (isFocused) Color(0xFF16161A) else Color.White,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(start = NuvioTheme.spacing.sm)
                     )

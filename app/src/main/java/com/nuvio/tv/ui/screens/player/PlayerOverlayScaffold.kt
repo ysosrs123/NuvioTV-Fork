@@ -1,10 +1,14 @@
 package com.nuvio.tv.ui.screens.player
 
 import android.view.KeyEvent
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
+import com.nuvio.tv.domain.model.VisualStyle
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -38,10 +42,14 @@ internal fun PlayerOverlayScaffold(
     topEndContent: (@Composable () -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
+    val isV2 = LocalV2Appearance.current != null
+    val cinematicGlass = LocalV2Appearance.current?.visualStyle == VisualStyle.CINEMATIC_GLASS
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn(animationSpec = tween(250)),
-        exit = fadeOut(animationSpec = tween(200)),
+        enter = if (isV2 && !captureKeys) fadeIn(tween(180)) + slideInHorizontally(tween(220)) { it / 8 }
+            else fadeIn(animationSpec = tween(250)),
+        exit = if (isV2 && !captureKeys) fadeOut(tween(160)) + slideOutHorizontally(tween(180)) { it / 8 }
+            else fadeOut(animationSpec = tween(200)),
         modifier = modifier
     ) {
         val focusRequester = remember { FocusRequester() }
@@ -121,11 +129,15 @@ internal fun PlayerOverlayScaffold(
                             )
                         )
                         onDrawBehind {
-                            drawRect(brush = horizontalGradient)
-                            if (overlayTint.alpha > 0f) {
-                                drawRect(color = overlayTint)
+                            if (isV2) {
+                                drawRect(color = Color.Black.copy(alpha = if (cinematicGlass) .08f else .45f))
+                            } else {
+                                drawRect(brush = horizontalGradient)
+                                if (overlayTint.alpha > 0f) {
+                                    drawRect(color = overlayTint)
+                                }
+                                drawRect(brush = verticalGradient)
                             }
-                            drawRect(brush = verticalGradient)
                         }
                     }
                     .padding(contentPadding)

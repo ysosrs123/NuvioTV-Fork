@@ -2,6 +2,14 @@
 
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.ui.components.PanelEyebrow
+import com.nuvio.tv.ui.components.PanelActionRow
+import com.nuvio.tv.ui.components.PlayerPanelRow
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import com.nuvio.tv.ui.v2.player.v2PlayerPanel
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import androidx.compose.foundation.BorderStroke
@@ -159,71 +167,73 @@ internal fun AudioSelectionOverlay(
         onDismiss = onDismiss,
         modifier = modifier,
         captureKeys = false,
-        contentPadding = PaddingValues(start = 44.dp, end = 44.dp, top = 28.dp, bottom = 64.dp)
+        contentPadding = PaddingValues(start = 44.dp, end = 44.dp, top = 28.dp, bottom = 28.dp)
     ) {
+        var editorOpen by remember { mutableStateOf(false) }
+
+        LaunchedEffect(editorOpen) {
+            if (editorOpen) {
+                runCatching { delayMinusFocusRequester.requestFocus() }
+            } else {
+                runCatching { tracksFocusRequester.requestFocus() }
+            }
+        }
+
         Column(
             modifier = Modifier
-                .width(724.dp)
-                .align(Alignment.BottomStart)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Bottom
+                .width(if (LocalV2Appearance.current != null) 400.dp else 320.dp)
+                .align(Alignment.BottomEnd)
+                .heightIn(max = 620.dp)
+                .v2PlayerPanel()
+                .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
-            Text(
-                text = stringResource(R.string.audio_dialog_title),
-                style = MaterialTheme.typography.headlineMedium,
-                color = Color.White,
-                modifier = Modifier.padding(bottom = NuvioTheme.spacing.sm)
+            PanelEyebrow(text = stringResource(R.string.audio_dialog_title))
+
+            PanelActionRow(
+                label = if (editorOpen) {
+                    stringResource(R.string.panel_audio_back_to_tracks)
+                } else {
+                    stringResource(R.string.panel_audio_adjustments)
+                },
+                onClick = { editorOpen = !editorOpen }
             )
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-                verticalAlignment = Alignment.Top,
-                modifier = Modifier.padding(bottom = NuvioTheme.spacing.sm)
-            ) {
-                Column(modifier = Modifier.width(444.dp)) {
-                    AudioTracksContent(
-                        tracks = tracks,
-                        selectedIndex = selectedIndex,
-                        listState = listState,
-                        initialFocusRequester = tracksFocusRequester,
-                        rightFocusRequester = when {
-                            canDecreaseDelay -> delayMinusFocusRequester
-                            canIncreaseDelay -> delayPlusFocusRequester
-                            canDecreaseAmp -> ampMinusFocusRequester
-                            canIncreaseAmp -> ampPlusFocusRequester
-                            canDecreaseCenterMix -> centerMinusFocusRequester
-                            canIncreaseCenterMix -> centerPlusFocusRequester
-                            else -> persistFocusRequester
-                        },
-                        onTrackFocused = { lastFocusedAudioIndex = it },
-                        onTrackSelected = onTrackSelected
-                    )
-                }
-                Column(modifier = Modifier.width(268.dp)) {
-                    AudioControlsContent(
-                        audioDelayMs = audioDelayMs,
-                        audioAmplificationDb = audioAmplificationDb,
-                        isAmplificationAvailable = isAmplificationAvailable,
-                        centerMixLevelDb = centerMixLevelDb,
-                        isCenterMixAvailable = isCenterMixAvailable,
-                        persistAmplification = persistAmplification,
-                        delayMinusFocusRequester = delayMinusFocusRequester,
-                        delayPlusFocusRequester = delayPlusFocusRequester,
-                        ampMinusFocusRequester = ampMinusFocusRequester,
-                        ampPlusFocusRequester = ampPlusFocusRequester,
-                        centerMinusFocusRequester = centerMinusFocusRequester,
-                        centerPlusFocusRequester = centerPlusFocusRequester,
-                        persistFocusRequester = persistFocusRequester,
-                        leftFocusRequester = tracksFocusRequester,
-                        onAudioDelayChange = onAudioDelayChange,
-                        onAmplificationChange = { nextDb, focusTarget ->
-                            pendingControlFocusTarget = focusTarget
-                            onAmplificationChange(nextDb)
-                        },
-                        onCenterMixLevelChange = onCenterMixLevelChange,
-                        onPersistAmplificationChange = onPersistAmplificationChange
-                    )
-                }
+            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+
+            if (editorOpen) {
+                AudioControlsContent(
+                    audioDelayMs = audioDelayMs,
+                    audioAmplificationDb = audioAmplificationDb,
+                    isAmplificationAvailable = isAmplificationAvailable,
+                    centerMixLevelDb = centerMixLevelDb,
+                    isCenterMixAvailable = isCenterMixAvailable,
+                    persistAmplification = persistAmplification,
+                    delayMinusFocusRequester = delayMinusFocusRequester,
+                    delayPlusFocusRequester = delayPlusFocusRequester,
+                    ampMinusFocusRequester = ampMinusFocusRequester,
+                    ampPlusFocusRequester = ampPlusFocusRequester,
+                    centerMinusFocusRequester = centerMinusFocusRequester,
+                    centerPlusFocusRequester = centerPlusFocusRequester,
+                    persistFocusRequester = persistFocusRequester,
+                    leftFocusRequester = FocusRequester.Default,
+                    onAudioDelayChange = onAudioDelayChange,
+                    onAmplificationChange = { nextDb, focusTarget ->
+                        pendingControlFocusTarget = focusTarget
+                        onAmplificationChange(nextDb)
+                    },
+                    onCenterMixLevelChange = onCenterMixLevelChange,
+                    onPersistAmplificationChange = onPersistAmplificationChange
+                )
+            } else {
+                AudioTracksContent(
+                    tracks = tracks,
+                    selectedIndex = selectedIndex,
+                    listState = listState,
+                    initialFocusRequester = tracksFocusRequester,
+                    rightFocusRequester = FocusRequester.Default,
+                    onTrackFocused = { lastFocusedAudioIndex = it },
+                    onTrackSelected = onTrackSelected
+                )
             }
         }
     }
@@ -254,7 +264,7 @@ private fun AudioTracksContent(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         contentPadding = PaddingValues(top = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.sm),
         modifier = Modifier
-            .heightIn(max = 620.dp)
+            .heightIn(max = 500.dp)
             .fillMaxWidth()
     ) {
         items(items = tracks, key = { track -> track.index }) { track ->
@@ -285,89 +295,28 @@ private fun AudioTrackCard(
     rightFocusRequester: FocusRequester,
     focusRequester: FocusRequester?
 ) {
+    val languageLine = track.language
+        ?.takeIf { it.isNotBlank() && it != "und" }
+        ?.let { languageCodeToName(it) }
     val metadata = listOfNotNull(
         track.codec,
         track.channelCount?.let { "$it ch" },
         track.sampleRate?.let { "${it / 1000} kHz" }
-    ).joinToString(" | ")
+    ).joinToString(" · ")
+    val subtitle = listOfNotNull(
+        languageLine,
+        metadata.ifBlank { null }
+    ).joinToString(" · ").ifBlank { null }
 
-    Card(
+    PlayerPanelRow(
+        title = track.name,
+        subtitle = subtitle,
+        selected = isSelected,
         onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
-            .focusProperties { right = rightFocusRequester }
-            .onFocusChanged { if (it.isFocused) onFocused() },
-        colors = CardDefaults.colors(
-            containerColor = if (isSelected) NuvioTheme.colors.Secondary else Color.Transparent,
-            focusedContainerColor = if (isSelected) NuvioTheme.colors.Secondary else Color.Transparent
-        ),
-        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
-        border = CardDefaults.border(
-            border = Border(
-                border = BorderStroke(NuvioTheme.spacing.xxs, Color.Transparent),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
-            ),
-            focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
-            )
-        ),
-        scale = CardDefaults.scale(focusedScale = 1f, pressedScale = 1f)
-    ) {
-        val primaryTextColor = if (isSelected) NuvioTheme.colors.OnSecondary else Color.White
-        val secondaryTextColor = if (isSelected) {
-            NuvioTheme.colors.OnSecondary.copy(alpha = 0.82f)
-        } else {
-            Color.White.copy(alpha = 0.72f)
-        }
-        val metadataTextColor = if (isSelected) {
-            NuvioTheme.colors.OnSecondary.copy(alpha = 0.72f)
-        } else {
-            NuvioTheme.colors.TextTertiary
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.sm),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
-            ) {
-                Text(
-                    text = track.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = primaryTextColor
-                )
-                if (!track.language.isNullOrBlank() && track.language != "und") {
-                    Text(
-                        text = languageCodeToName(track.language),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = secondaryTextColor
-                    )
-                }
-                if (metadata.isNotBlank()) {
-                    Text(
-                        text = metadata,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = metadataTextColor
-                    )
-                }
-            }
-
-            if (isSelected) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = NuvioTheme.colors.OnSecondary
-                )
-            }
-        }
-    }
+        onFocused = onFocused,
+        focusRequester = focusRequester,
+        modifier = Modifier.focusProperties { right = rightFocusRequester }
+    )
 }
 
 @Composable
@@ -600,8 +549,8 @@ private fun AudioControlsContent(
                         up = persistUpFocusRequester
                     },
                 colors = CardDefaults.colors(
-                    containerColor = if (persistAmplification) NuvioTheme.colors.Secondary else Color.Transparent,
-                    focusedContainerColor = if (persistAmplification) NuvioTheme.colors.Secondary else Color.Transparent
+                    containerColor = if (persistAmplification) Color.White.copy(alpha = 0.16f) else Color.Transparent,
+                    focusedContainerColor = if (persistAmplification) Color.White.copy(alpha = 0.16f) else Color.Transparent
                 ),
                 shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
                 border = CardDefaults.border(
@@ -610,7 +559,7 @@ private fun AudioControlsContent(
                         shape = RoundedCornerShape(NuvioTheme.radii.md)
                     ),
                     focusedBorder = Border(
-                        border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                        border = BorderStroke(NuvioTheme.spacing.xxs, Color.White),
                         shape = RoundedCornerShape(NuvioTheme.radii.md)
                     )
                 ),
@@ -623,7 +572,7 @@ private fun AudioControlsContent(
                         stringResource(R.string.audio_mix_persist_off)
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (persistAmplification) NuvioTheme.colors.OnSecondary else Color.White,
+                    color = if (persistAmplification) Color.White else Color.White,
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp)
                 )
             }
@@ -768,10 +717,7 @@ private fun StepCard(
                 shape = RoundedCornerShape(NuvioTheme.radii.md)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(
-                    width = NuvioTheme.spacing.xxs,
-                    alpha = if (enabled) 1f else 0f
-                ),
+                border = BorderStroke(NuvioTheme.spacing.xxs, if (enabled) Color.White else Color.Transparent),
                 shape = RoundedCornerShape(NuvioTheme.radii.md)
             )
         ),

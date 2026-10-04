@@ -1,6 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
 import android.app.Activity
+import androidx.compose.runtime.mutableStateOf
 import android.content.Context
 import android.media.AudioDeviceCallback
 import android.media.audiofx.LoudnessEnhancer
@@ -35,6 +36,8 @@ import com.nuvio.tv.data.local.StreamLinkCacheDataStore
 import com.nuvio.tv.data.local.StreamBadgeSettingsDataStore
 import com.nuvio.tv.data.local.BingeGroupCacheDataStore
 import com.nuvio.tv.data.local.StreamAutoPlayMode
+import com.nuvio.tv.data.mediaserver.ServerPlayback
+import com.nuvio.tv.data.mediaserver.ServerStreams
 import com.nuvio.tv.data.repository.ParentalGuideRepository
 import com.nuvio.tv.data.repository.PlaybackIssueErrorInput
 import com.nuvio.tv.data.repository.PlaybackIssueReportRepository
@@ -70,6 +73,8 @@ class PlayerRuntimeController(
     internal val watchProgressRepository: WatchProgressRepository,
     internal val metaRepository: MetaRepository,
     internal val streamRepository: StreamRepository,
+    // The binge lookahead needs a ranker to pre-resolve with.
+    internal val prefetchSelectionSupplier: com.nuvio.tv.core.stream.PrefetchSelectionSupplier,
     internal val addonRepository: AddonRepository,
     internal val pluginManager: PluginManager,
     internal val subtitleRepository: com.nuvio.tv.domain.repository.SubtitleRepository,
@@ -99,8 +104,11 @@ class PlayerRuntimeController(
     internal val cloudPlaybackProgressStore: CloudLibraryPlaybackProgressStore,
     internal val cloudPlaybackSessionStore: CloudLibraryPlaybackSessionStore,
     internal val streamBadgePresentation: com.nuvio.tv.core.streams.StreamBadgePresentation,
+    internal val debridSettingsDataStore: com.nuvio.tv.data.local.DebridSettingsDataStore,
     internal val playbackIssueReportRepository: PlaybackIssueReportRepository,
     internal val tvRecommendationManager: com.nuvio.tv.core.recommendations.TvRecommendationManager,
+    internal val serverPlayback: ServerPlayback,
+    internal val serverStreams: ServerStreams,
     internal val profileId: Int,
     savedStateHandle: SavedStateHandle,
     internal val scope: CoroutineScope
@@ -112,14 +120,38 @@ class PlayerRuntimeController(
     companion object {
         private val CONVERTIBLE_DV_PROFILES = setOf("5", "7")
         internal const val TAG = "PlayerViewModel"
+
+        /**
+         * The value every LoadControl branch constructs with, at all three
+         * construction sites: BitrateAwareLoadControl(retainBackBufferFromKeyframe = true),
+         * NuvioExoPlayerPerformanceHelper .setBackBuffer(backBufferMs, true), and the stock
+         * branch .setBackBuffer(1_500, true). The persisted user setting is not wired to
+         * the engine, so diagnostics must report this rather than the stored flag.
+         */
+        internal const val ENGINE_RETAIN_BACK_BUFFER_FROM_KEYFRAME = true
         internal const val SWITCH_TRACE_TAG = "SwitchTrace"
         internal const val SWITCH_TRACE_ENABLED = false
         internal const val TRACK_FRAME_RATE_GRACE_MS = 1500L
         internal const val FIRST_FRAME_TIMEOUT_MS = 12_000L
+        internal const val TUNNEL_AV_SYNC_CHECK_MS = 1_000L
+        internal const val TUNNEL_AV_SYNC_STALL_MS = 5_000L
+        internal const val TUNNEL_AV_SYNC_NO_FRAME_MS = 8_000L
         // Stall watchdog: re-seeks past the buffered edge if bufferedPosition stops
         // advancing during STATE_BUFFERING. Fires before OkHttp's readTimeout.
         internal const val STALL_WATCHDOG_THRESHOLD_MS = 15_000L
         internal const val STALL_WATCHDOG_POLL_INTERVAL_MS = 1_000L
+
+        // Startup watchdog: covers starting_stream -> first frame. The stall
+        // watchdog's remedy is a self-seek and it bails when buffered <= playhead;
+        // the first-frame watchdog only arms at STATE_READY. A hang before READY
+        // (the vendor Codec2 service wedging during decoder allocation) would
+        // otherwise leave an endless spinner with no error. A slow but legitimate
+        // first frame can take about 14.5 s from the press.
+        internal const val STARTUP_WATCHDOG_TIMEOUT_MS = 20_000L
+        // Hard ceiling for extend-on-buffered-progress. Checks land at
+        // 20/40/60 s; a re-arm is only granted if another full interval fits
+        // inside the ceiling, so 60 s is the latest possible fire.
+        internal const val STARTUP_WATCHDOG_CEILING_MS = 60_000L
         internal const val MAX_TIMEOUT_RECOVERY_ATTEMPTS = 2
         internal const val ADDON_SUBTITLE_TRACK_ID_PREFIX = "nuvio-addon-sub:"
     }
@@ -214,6 +246,27 @@ class PlayerRuntimeController(
 
     internal var currentVideoHash: String? = navigationArgs.videoHash
     internal var currentVideoSize: Long? = navigationArgs.videoSize
+
+    /** The current episode started through binge autoplay; "Generate thumbnails before play" does not hold it. */
+    internal var currentEpisodeAutoPlayed: Boolean = false
+
+    /**
+     * Expected runtime in minutes from the title's metadata, resolved by the
+     * stream screen before the press. Null when unknown; consumers must treat
+     * null as "do not judge" rather than as zero.
+     *
+     * A var, not a val: this controller survives a binge transition, so the value
+     * must follow the episode rather than stay pinned to the runtime carried in
+     * the original nav args. Updated in playNextEpisode from Video.runtime.
+     */
+    internal var expectedRuntimeMinutes: Int? = navigationArgs.runtimeMinutes
+
+    /**
+     * One-shot guard for the placeholder probe. STATE_READY fires again after
+     * seeks and rebuffers; the probe is about the file, not the moment, so it
+     * runs once per play session.
+     */
+    internal var placeholderProbeDone: Boolean = false
     internal var currentFilename: String? = navigationArgs.filename
         ?: initialStreamUrl.substringBefore('?').substringAfterLast('/', "")
             .takeIf { it.isNotBlank() && it.contains('.') }
@@ -226,6 +279,8 @@ class PlayerRuntimeController(
     internal var currentVideoHeight: Int? = null
     internal var currentVideoBitrate: Int? = null
     internal var currentStreamUrl: String
+    internal var reportedServerUrl: String? = null
+    internal var serverAudioChosenByUser = false
     internal var currentStreamResponseHeaders: Map<String, String> = emptyMap()
     internal var currentStreamCacheKey: String? = null
     internal var currentStreamMimeType: String?
@@ -252,14 +307,28 @@ class PlayerRuntimeController(
     fun getCurrentHeaders(): Map<String, String> = currentHeaders
 
     fun stopAndRelease() {
+        PlayerPlaybackNetworking.cancelSelectedPlaybackPrewarm(currentStreamUrl, currentHeaders)
+        // The diagnostics record persists at FIRST FRAME, and on a mid-episode
+        // back-out no later persist runs at all (the natural-end path is skipped),
+        // so under AFR - where the first frame renders during the settle, before
+        // MAT engages - the card's audioPath would otherwise stay null.
+        // Re-persist once at teardown from the tick-filled field, guarded to the
+        // clean-playback case so an error record is never clobbered by a stale
+        // 'Played' one.
+        val audioPathAtTeardown = currentAudioPathDescription
         // Cache counters only reach the card on a natural finish, so capture them when the user exits too.
         val diagnostics = lastPlaybackDiagnosticsForReport
         if (diagnostics.timestampMs > 0L) {
+            val fillAudioPath = audioPathAtTeardown != null &&
+                diagnostics.result == "Played" &&
+                diagnostics.audioPath == null &&
+                lastPlaybackIssueError == null
             // Only a profile 5 or 7 source that actually converted counts; every other playback
             // still runs the bridge self-test and would otherwise stamp a conversion that never ran.
             val converted = diagnostics.dv7DoviSuccess > 0 &&
                 diagnostics.dvSourceProfile in CONVERTIBLE_DV_PROFILES
             val updated = diagnostics.copy(
+                audioPath = if (fillAudioPath) audioPathAtTeardown else diagnostics.audioPath,
                 vodCacheStats = mediaSourceFactory.vodCacheStatsLabel(context),
                 dvConvertEndedAtMs = if (converted) {
                     System.currentTimeMillis()
@@ -343,15 +412,15 @@ class PlayerRuntimeController(
     internal var livePlaybackLatched: Boolean = false
 
     internal fun updatePlaybackTimeline(
-        currentPosition: Long = _playbackTimeline.value.currentPosition,
+        currentPosition: Long? = null,
         duration: Long = _playbackTimeline.value.duration,
         bufferedPosition: Long = _playbackTimeline.value.bufferedPosition,
         isLive: Boolean = _playbackTimeline.value.isLive,
-        watchedDurationMs: Long = _playbackTimeline.value.watchedDurationMs
+        watchedDurationMs: Long = _playbackTimeline.value.watchedDurationMs,
+        playbackPosition: Long? = currentPosition
     ) {
         _playbackTimeline.update {
-            it.copy(
-                currentPosition = currentPosition.coerceAtLeast(0L),
+            it.withPositions(currentPosition, playbackPosition).copy(
                 duration = duration.coerceAtLeast(0L),
                 bufferedPosition = bufferedPosition.coerceAtLeast(0L),
                 isLive = isLive,
@@ -365,7 +434,8 @@ class PlayerRuntimeController(
         duration: Long,
         bufferedPosition: Long,
         playerReportsLive: Boolean,
-        isPlaying: Boolean
+        isPlaying: Boolean,
+        playbackPosition: Long = currentPosition
     ) {
         livePlaybackLatched = LivePlaybackUiPolicy.nextLiveLatch(
             playerReportsLive = playerReportsLive,
@@ -386,7 +456,8 @@ class PlayerRuntimeController(
             duration = duration,
             bufferedPosition = bufferedPosition,
             isLive = isLive,
-            watchedDurationMs = watched
+            watchedDurationMs = watched,
+            playbackPosition = playbackPosition
         )
     }
 
@@ -397,18 +468,25 @@ class PlayerRuntimeController(
         _playbackTimeline.value = PlaybackTimelineState()
     }
 
+    internal val nativeVideoSelection = PlayerNativeVideoSelection()
     internal var _exoPlayer: ExoPlayer? = null
+    @Volatile internal var nextEpisodeThumbsLookAtMs = 0L
+    @Volatile internal var nextEpisodeThumbsFailedFor: String? = null
     val exoPlayer: ExoPlayer?
         get() = _exoPlayer
     @Volatile var videoAspectRatio: Float = 0f
     @Volatile var exoPlayerView: androidx.media3.ui.PlayerView? = null
+    val videoBottomFractionState = mutableStateOf<Float?>(null)
     internal var _loadControl: DefaultLoadControl? = null
     internal var playbackSpeedAwareAudioSink: PlaybackSpeedAwareAudioSink? = null
+    internal var partyBridge: PartyPlayerBridge? = null
 
     internal var progressJob: Job? = null
     internal var vodTelemetryJob: Job? = null
     internal var firstFrameWatchdogJob: Job? = null
+    internal var tunnelAvSyncWatchdogJob: Job? = null
     internal var stallWatchdogJob: Job? = null
+    internal var startupWatchdogJob: Job? = null
     internal var seekSourceLogJob: Job? = null
     internal var hideControlsJob: Job? = null
     internal var hideSeekOverlayJob: Job? = null
@@ -428,6 +506,7 @@ class PlayerRuntimeController(
     internal var activeSidecarGeneration: Long = 0L // AutoSync hook
     internal var activeSidecarSubtitleKey: String? = null
     internal var sidecarTimedCues: List<androidx.media3.extractor.text.CuesWithTiming> = emptyList()
+    internal val subtitlePresentation = SubtitlePresentation()
     internal var lastSidecarCueSignature: Long? = null
     internal var exoSubtitleViewRef: WeakReference<androidx.media3.ui.SubtitleView>? = null
     /** Cancels previous TEXT-track bounce jobs when subtitle delay is adjusted repeatedly. */
@@ -478,16 +557,35 @@ class PlayerRuntimeController(
     internal var shouldEnforceAutoplayOnFirstReady = true
 
     internal var rebufferCount: Int = 0
+
+    // Wall time (elapsedRealtime) of the last DISCONTINUITY_REASON_SEEK, whether the
+    // currently-open buffering episode was seek-induced (excluded from rebuffer stats), and
+    // the grace window (seek-induced entries land within a few ms of the stamp, genuine
+    // ones seconds later).
+    internal var lastSeekWallMs: Long = 0L
+    internal var seekReadyLogPending: Boolean = false
+    internal var seekReadyLogTargetMs: Long = -1L
+    internal var currentRebufferSeekInduced: Boolean = false
+    internal val seekRebufferGraceMs: Long = 1_500L
+
     internal var rebufferTotalMs: Long = 0L
     internal var rebufferStartedAtMs: Long = 0L
     /** Back buffer (ms) currently in force, after the first-frame DV7/low-RAM resolution. */
     internal var effectiveBackBufferDurationMs: Int = 0
     /** Custom LoadControl for this playback (null when using stock); used to resolve the back buffer at first frame. */
     internal var currentBitrateAwareLoadControl: BitrateAwareLoadControl? = null
-    /** Parallel chunk buffer overhead (MB) currently deducted from the target buffer size. */
-    internal var currentParallelChunkOverheadMb: Int = 0
     /** Back buffer (ms) the user configured, captured at build to restore once DV7 status is known. */
     internal var configuredBackBufferMs: Int = 0
+    /** The per-stream listeners registered on the live ExoPlayer, tracked so a
+     *  reused instance can drop the previous stream's listeners before re-adding. */
+    internal var currentExoPlayerListener: androidx.media3.common.Player.Listener? = null
+    internal var currentExoAnalyticsListener: androidx.media3.exoplayer.analytics.AnalyticsListener? = null
+    /** Fingerprint of the constructor-baked configuration of the live ExoPlayer;
+     *  a transition may reuse the instance only when the fresh derivation matches. */
+    internal var lastExoConstructionFingerprint: ExoConstructionFingerprint? = null
+    /** The settings last pushed onto the media-source factory, so the chunk-0
+     *  pre-start can derive geometry without suspending on the settings Flow. */
+    @Volatile internal var lastAppliedPlayerSettings: PlayerSettings? = null
     internal var metaVideos: List<Video> = emptyList()
     internal var playbackShuffleState: com.nuvio.tv.core.player.PlaybackShuffleState? = null
     internal var cloudPlaybackContext: CloudLibraryPlaybackContext? =
@@ -499,8 +597,14 @@ class PlayerRuntimeController(
     internal var nextEpisodePreloadJob: Job? = null
     internal var nextEpisodePreloadTriggered: Boolean = false
     internal var userPausedManually = false
+    /** Playback paused by a held scrub, not by the user; resumed when the seek commits. */
+    internal var scrubHoldPaused = false
 
     internal var isInBackground: Boolean = false
+
+    /** True after the system or the TV paused playback through the media session, until play is pressed again. */
+    internal var pausedFromOutside: Boolean = false
+    internal val onSessionPlayPause: (Boolean) -> Unit = { playing -> pausedFromOutside = !playing }
     internal var pendingBackgroundCrashRecovery: Boolean = false
     internal var backgroundCrashSavedPositionMs: Long = 0L
 
@@ -510,6 +614,9 @@ class PlayerRuntimeController(
     internal var autoSkipSegmentTypes: Set<AutoSkipSegmentType> = emptySet()
     internal var playerSettingsInitialized: Boolean = false
     internal var skipIntroFetchedKey: String? = null
+    internal var serverSkipIntervals: List<SkipInterval> = emptyList()
+    internal var providerSkipIntervals: List<SkipInterval> = emptyList()
+    internal var serverSkipFetchedKey: String? = null
     internal val autoSkippedIntervalKeys: MutableSet<String> = mutableSetOf()
     internal var lastActiveSkipType: String? = null
     internal var autoSubtitleSelected: Boolean = false
@@ -522,6 +629,13 @@ class PlayerRuntimeController(
     internal var pendingAudioSelectionAfterSubtitleRefresh: PendingAudioSelection? = null
     internal var rememberedTrackPreference: TrackPreference? = null
     internal var persistedTrackPreference: TrackPreference? = null
+
+    /**
+     * The lossless audio default runs at most once per stream, and only when
+     * no remembered/persisted/carry-over audio preference was seen for it.
+     */
+    internal var losslessAudioDefaultAppliedForStream: Boolean = false
+    internal var persistedAudioPreferenceSeenForStream: Boolean = false
     internal var pendingEngineSwitchTrackPreference: PendingEngineSwitchTrackPreference? = null
     internal var explicitSubtitleSelectionForEngineSwitch: ExplicitSubtitleSelectionForEngineSwitch? = null
     internal var effectiveSubtitleSelectionForEngineSwitch: ExplicitSubtitleSelectionForEngineSwitch? = null
@@ -530,10 +644,16 @@ class PlayerRuntimeController(
     internal var subtitleDisabledByPersistedPreference: Boolean = false
     internal var subtitleAddonRestoredByPersistedPreference: Boolean = false
     internal var pendingRestoredAddonSubtitle: com.nuvio.tv.domain.model.Subtitle? = null
+    // An auto-restored addon subtitle whose attach would require a
+    // mid-playback media reload is parked here and attached at the next user
+    // pause (or superseded by any explicit selection). See
+    // autoSelectAddonSubtitleDeferringReload.
+    internal var deferredAutoAddonSubtitle: com.nuvio.tv.domain.model.Subtitle? = null
     internal var attachedAddonSubtitleKeys: Set<String> = emptySet()
     internal var hasScannedTextTracksOnce: Boolean = false
     internal var streamReuseLastLinkEnabled: Boolean = false
     internal var autoSwitchInternalPlayerOnErrorEnabled: Boolean = false
+    internal var addonSubtitlesEnabled: Boolean = false
     internal var startupEngineFailoverTriggered: Boolean = false
     internal var runtimeInternalPlayerEngineOverride: InternalPlayerEngine? = null
     internal var resolvedAutoPlayerEngine: InternalPlayerEngine? = null
@@ -559,12 +679,14 @@ class PlayerRuntimeController(
     internal var rememberAudioDelayPerDeviceEnabled: Boolean = false
     internal var currentAudioOutputRoute: AudioOutputRoute? = null
     internal var audioOutputRouteCallback: AudioDeviceCallback? = null
+    internal var tunnelDeadClockSignature: String? = null
     internal var audioRouteChangeJob: Job? = null
+    internal var passthroughReturnCheckJob: Job? = null
+    internal val passthroughReturnRebuilds: MutableMap<String, Int> = mutableMapOf()
 
     internal var lastBufferLogTimeMs: Long = 0L
     internal var pendingSeekFlush: Boolean = false
     internal var suppressBufferingUiForSeek: Boolean = false
-    internal var isScrubbingModeActive: Boolean = false
     internal var seekBufferingUiJob: Job? = null
     internal var seekBufferingUiDeferred: Boolean = false
     internal val seekBufferingUiDelayMs = 1000L
@@ -593,15 +715,45 @@ class PlayerRuntimeController(
     internal var mpvIdleActiveTicks: Int = 0
     internal var mpvStartupStallTicks: Int = 0
     internal var mpvStartupAbsoluteTicks: Int = 0
+    internal var mpvStartupCacheGrowthTicks: Int = 0
     internal var mpvLastDemuxerCacheSec: Double = 0.0
     internal var mpvActivePlaylistEntryId: Long? = null
     internal var mpvLastFileError: String? = null
     internal var mpvErrorRecoveryArmed: Boolean = false
     internal var mpvStableProgressResetJob: Job? = null
     @Volatile internal var mpvLastErrorLogLine: String? = null
+    internal var mpvLastHttpErrorAtMs: Long = 0L
     internal val mpvErrorHandlingInProgress = AtomicBoolean(false)
     internal var delayMpvResumeSeekUntilVideoTrack: Boolean = false
     internal var mpvDelayStartAfterAfrSwitch: Boolean = false
+    // Exo counterpart of the MPV settle hold: set when the AFR preflight
+    // actually changed the display mode, consumed by initializePlayer to hold
+    // playback start briefly so the (tunneled) pipeline does not begin inside
+    // the mode transition.
+    internal var exoDelayStartAfterAfrSwitch: Boolean = false
+    // Frame rate taken from ExoPlayer's reported track format between prepare
+    // and first frame, instead of a MediaExtractor probe on the ExoPlayer engine
+    // path. trackAfrAttemptedForCurrentStream gates one attempt
+    // per stream; afrTrackSwitchInFlight holds playback start while a track-driven
+    // display-mode switch settles; afrModeAppliedPreStart records that the
+    // cache-hit preflight already applied a mode so the track path stands down.
+    internal var trackAfrAttemptedForCurrentStream: Boolean = false
+    @Volatile internal var afrTrackSwitchInFlight: Boolean = false
+    // Per-stream generation stamp for the track-AFR coroutine. An old
+    // stream's coroutine reaching its finally block must not collapse the new
+    // stream's start-hold; incremented at every per-stream AFR reset.
+    @Volatile internal var afrTrackGeneration: Int = 0
+    internal var afrModeAppliedPreStart: Boolean = false
+    // The raw fps of a provisional seed applied by the cache preflight from
+    // prewarm head bytes, or 0f. The track-format path validates the real
+    // reported rate against this and corrects on mismatch. Reset per stream.
+    internal var afrSeededRateRaw: Float = 0f
+    // Hard cap on total automatic recoveries per stream URL, across
+    // all fallback ladders, so a persistently failing pipeline (e.g. wedged
+    // hardware decoder) surfaces an error in bounded time instead of silently
+    // re-preparing for minutes.
+    internal var autoRecoveryBudgetUrl: String = ""
+    internal var autoRecoveryCountForCurrentStream: Int = 0
     internal var pauseOverlayJob: Job? = null
     internal val pauseOverlayDelayMs = 5000L
     internal val seekProgressSyncDebounceMs = 700L
@@ -618,12 +770,20 @@ class PlayerRuntimeController(
                 }
             }
         }
+    // Auto-expires an uncommitted preview. The ACTION_UP commit is swallowed when
+    // a panel (Still Watching / end-of-episode) opens mid-gesture; without expiry
+    // the timeline stays pinned to the phantom position and the next gesture
+    // commits from it, possibly across an episode boundary.
+    internal var pendingPreviewSeekExpiryJob: kotlinx.coroutines.Job? = null
     internal var pendingResumeProgress: WatchProgress? = null
     internal var hasRetriedCurrentStreamAfter416: Boolean = false
     internal var isReleasingPlayer: Boolean = false
     internal var cachedDecoderPriority: Int = 1
     internal var hasTriedAudioPcmFallback: Boolean = false
     internal var pendingAudioPcmFallbackRebuild: Boolean = false
+    // Same-configuration rebuilds after a bitstream (passthrough) AudioTrack refusal, per stream.
+    internal val playbackRecoveryGate = PlaybackRecoveryGate()
+    internal var playbackRecoveryJob: Job? = null
     internal var hasTriedDv7HevcFallback: Boolean = false
     internal var forceDv7ToHevc: Boolean = false
     internal var startupRetryCount: Int = 0
@@ -638,17 +798,38 @@ class PlayerRuntimeController(
     @Volatile internal var currentPlayerSettingsForReport: PlayerSettings = PlayerSettings()
 
     internal val dv7ToHevcForcedStreamUrls: MutableSet<String> = mutableSetOf()
+    // AM9 native FEL: streams that left the native dual-layer path (MEL, non-P7 RPU, device error or
+    // stall) and are re-prepared on the AUTO path.
+    internal val nativeFelDisabledStreamUrls: MutableSet<String> = mutableSetOf()
+    internal var isNativeFelActiveForCurrentPlayback: Boolean = false
     // Streams where manual Convert-to-DV8.1 mode 2 failed to play, so the next
     // attempt is forced to libdovi mode 1 before falling back to HDR10 base layer.
     internal val dv7Mode1ForcedStreamUrls: MutableSet<String> = mutableSetOf()
+    // Streams that hit a 4001 on a policy-denied audio format and must be
+    // rebuilt with the FFmpeg audio renderer preferred (audio-local reorder).
+    internal val preferFfmpegAudioStreamUrls: MutableSet<String> = mutableSetOf()
+    internal val tunnelingDisabledStreamUrls: MutableSet<String> = mutableSetOf()
+    internal var surroundResolveInputs: SurroundResolveInputs? = null
+    internal var lastAppliedSurroundResolve: SurroundResolveResult? = null
+    // Policy the current player was built with; lets error recovery test denial
+    // without re-deriving settings.
+    internal var currentAudioPassthroughPolicy: com.nuvio.tv.core.player.AudioPassthroughPolicy? = null
     internal val vc1TrackSelectionBypassStreamUrls: MutableSet<String> = mutableSetOf()
+    internal val vc1DecoderRetryStreamUrls: MutableSet<String> = mutableSetOf()
+    internal val mpvFormatFallbackStreamUrls: MutableSet<String> = mutableSetOf()
     internal val safeAudioForcedStreamUrls: MutableSet<String> = mutableSetOf()
     internal val audioDisabledForcedStreamUrls: MutableSet<String> = mutableSetOf()
+    // URLs proven dead this session (sniff failure on a non-media body, or HTTP
+    // 404/410): auto-failover skips them and the source panel greys them out.
+    internal val deadSourceStreamUrls: MutableSet<String> = mutableSetOf()
+    internal var deadSourceFailoverCount: Int = 0
+    internal var hasRetriedAfterMimeOverrideClear: Boolean = false
     internal var isMapDv7ToHevcActiveForCurrentPlayback: Boolean = false
     internal var isManualDv81Mode2ActiveForCurrentPlayback: Boolean = false
     internal var isExperimentalDv7ToDv81ActiveForCurrentPlayback: Boolean = false
     internal var isVc1TrackSelectionBypassActiveForCurrentPlayback: Boolean = false
     internal var isSafeAudioModeActiveForCurrentPlayback: Boolean = false
+    internal var isTunnelingActiveForCurrentPlayback: Boolean = false
     internal var isAudioDisabledForCurrentPlayback: Boolean = false
     internal var hasAttemptedDv7ToDv81ForCurrentPlayback: Boolean = false
     internal var dv7ToDv81BridgeVersionForCurrentPlayback: String? = null
@@ -670,6 +851,10 @@ class PlayerRuntimeController(
     internal var scrobbleStartRequestGeneration: Long = 0L
     internal var playbackPreparationJob: Job? = null
     internal var traktMappingJob: Job? = null
+    // Saved-progress read launched at
+    // preparePlaybackBeforeStart, joined in initializePlayer before
+    // either engine reads the resume position.
+    internal var savedProgressDeferred: kotlinx.coroutines.Deferred<Unit>? = null
     internal var hasSentCompletionScrobbleForCurrentItem: Boolean = false
 
     internal var requestedUseLibassByUser: Boolean = false
@@ -697,6 +882,15 @@ class PlayerRuntimeController(
     internal var currentVideoTrackIsLikelyVc1: Boolean = false
     internal var currentVideoTrackMimeType: String? = null
     internal var currentVideoTrackCodecs: String? = null
+    // Negotiated audio output path, from onAudioTrackInitialized.
+    // e.g. "TrueHD -> Passthrough (TrueHD, 48 kHz, 8ch)" / "DTS-HD -> PCM decode".
+    internal var currentAudioPathDescription: String? = null
+    // True while the negotiated AudioTrack encoding is
+    // non-PCM (bitstream bypass). Gain and skip-silence are PCM processors, so
+    // they are silent no-ops in this state; the UI gates on this instead of
+    // offering a dead slider. Set from onAudioTrackInitialized (Exo only -
+    // MPV always decodes), reset per playback and on release.
+    internal var isAudioOutputBypassing: Boolean = false
     internal var currentVideoTrackWidth: Int = 0
     internal var currentVideoTrackHeight: Int = 0
     internal var currentVideoTrackBitrate: Int = -1
@@ -731,9 +925,9 @@ class PlayerRuntimeController(
         observeTorrentSettings()
         observeStreamBadgeSettings()
         observeDeviceLocalAspectMode()
+        // Fork: observePlayerStatsHud() deliberately not armed, upstream stats HUD stays permanently dormant.
         observeDeviceLocalTransparentLetterbox()
         observeDeviceLocalTunneledSurfaceFill()
-        observePlayerStatsHud()
     }
 
     private fun observeTorrentSettings() {
@@ -759,6 +953,7 @@ class PlayerRuntimeController(
     }
 
     fun onCleared() {
+        stopServerPlayback()
         releasePlayer()
         stopTorrentStream()
         torrentService.shutdown()

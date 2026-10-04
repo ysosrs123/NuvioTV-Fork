@@ -505,7 +505,7 @@ class TrackSelectionInvestigationTest {
             currentStreamName = "Test Stream",
             detectedFrameRate = 23.976f
         ))
-        every { controller.playbackTimeline } returns MutableStateFlow(PlaybackTimelineState())
+        every { controller.playbackTimeline } returns MutableStateFlow(PlaybackTimelineState(duration = 4_096L))
         every { controller.currentAddonName } returns "Test Addon"
         every { controller.currentAddonLogo } returns "logo.png"
         every { controller.currentStreamDescription } returns "Description"
@@ -529,6 +529,7 @@ class TrackSelectionInvestigationTest {
         assertEquals(1080, streamInfo.videoHeight)
         assertEquals(1800000, streamInfo.videoBitrate)
         assertEquals("AVC", streamInfo.videoCodec)
+        assertEquals(2000, streamInfo.fileBitrate)
     }
 
     @Test

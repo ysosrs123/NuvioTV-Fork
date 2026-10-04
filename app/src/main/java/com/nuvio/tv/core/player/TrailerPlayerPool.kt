@@ -40,8 +40,10 @@ class TrailerPlayerPool @Inject constructor(
     }
 
     private var _player: ExoPlayer? = null
+    private var owner: Any? = null
     private val yielded = AtomicBoolean(false)
     private val released = AtomicBoolean(false)
+    private val screensaverSuppressed = AtomicBoolean(false)
 
     @Volatile
     private var cachedForceNative: Boolean = false
@@ -60,15 +62,26 @@ class TrailerPlayerPool @Inject constructor(
 
     /**
      * Returns the shared trailer ExoPlayer, creating it lazily if needed.
-     * Returns null only if [release] was called (process shutdown).
+     * Returns null if [release] was called (process shutdown) or while the OLED
+     * screensaver has suppressed trailer playback via [setScreensaverSuppressed].
      */
-    fun acquire(): ExoPlayer? {
+    fun acquire(owner: Any): ExoPlayer? {
         if (released.get()) return null
+        if (screensaverSuppressed.get()) return null
         if (yielded.get()) {
             // Reclaim was not called yet but someone wants the player — rebuild.
             reclaim()
         }
-        return _player ?: createPlayer().also { _player = it }
+        return (_player ?: createPlayer().also { _player = it }).also { this.owner = owner }
+    }
+
+    fun isOwner(owner: Any): Boolean = this.owner === owner
+
+    /** An outgoing screen must not stop a newer screen's preview during a transition. */
+    fun stop(owner: Any) {
+        if (!isOwner(owner)) return
+        this.owner = null
+        stop()
     }
 
     /**
@@ -86,10 +99,20 @@ class TrailerPlayerPool @Inject constructor(
     }
 
     /**
+     * While suppressed, [acquire] returns null so every trailer start silently no-ops.
+     * Set by the OLED screensaver on engage (together with [stop]) and cleared on wake.
+     * Trailers resume on their next natural trigger (focus change or hero rotation).
+     */
+    fun setScreensaverSuppressed(suppressed: Boolean) {
+        screensaverSuppressed.set(suppressed)
+    }
+
+    /**
      * Releases codec resources so the detail-screen player can claim hardware decoders.
      * The ExoPlayer instance is released here; [reclaim] will create a fresh one.
      */
     fun yield() {
+        owner = null
         if (yielded.compareAndSet(false, true)) {
             Log.d(TAG, "Yielding trailer player for detail playback")
             _player?.let { player ->
@@ -116,6 +139,7 @@ class TrailerPlayerPool @Inject constructor(
      * Permanently releases the player. Called on process death / Application.onTerminate.
      */
     fun release() {
+        owner = null
         if (released.compareAndSet(false, true)) {
             _player?.let { player ->
                 runCatching { player.stop() }

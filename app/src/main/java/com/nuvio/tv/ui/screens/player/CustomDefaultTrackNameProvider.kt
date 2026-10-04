@@ -60,6 +60,7 @@ class CustomDefaultTrackNameProvider(resources: Resources) : DefaultTrackNamePro
                 MimeTypes.AUDIO_FLAC -> "FLAC"
                 MimeTypes.AUDIO_ALAC -> "ALAC"
                 MimeTypes.AUDIO_WAV -> "WAV"
+                MimeTypes.AUDIO_RAW -> "PCM"
                 MimeTypes.AUDIO_AMR -> "AMR"
                 MimeTypes.AUDIO_AMR_NB -> "AMR-NB"
                 MimeTypes.AUDIO_AMR_WB -> "AMR-WB"

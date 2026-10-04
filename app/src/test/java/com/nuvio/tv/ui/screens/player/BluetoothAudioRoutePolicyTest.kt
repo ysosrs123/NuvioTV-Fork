@@ -17,6 +17,9 @@ import java.nio.ByteBuffer
 /**
  * Bluetooth media policy mirrors Media3 1.8.0 AudioCapabilities:
  * when the route is Bluetooth, encoded passthrough is rejected and PCM decode is forced.
+ *
+ * PlaybackSpeedAwareAudioSink's first constructor parameter is named delegate;
+ * the named arguments below use that name.
  */
 class BluetoothAudioRoutePolicyTest {
 

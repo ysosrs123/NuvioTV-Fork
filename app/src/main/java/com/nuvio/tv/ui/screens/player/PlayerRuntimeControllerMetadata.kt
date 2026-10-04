@@ -1,7 +1,12 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.core.player.thumbnail.NextEpisodeThumbs
+import com.nuvio.tv.core.player.thumbnail.SeekThumbMode
+import com.nuvio.tv.core.player.thumbnail.SeekThumbnailPreferences
+import com.nuvio.tv.core.player.thumbnail.ThumbSource
 import com.nuvio.tv.R
 import com.nuvio.tv.core.network.NetworkResult
+import com.nuvio.tv.core.player.thumbnail.isThumbnailSource
 import com.nuvio.tv.data.local.AutoSkipSegmentType
 import com.nuvio.tv.data.repository.SkipInterval
 import com.nuvio.tv.domain.model.ContentType
@@ -24,7 +29,7 @@ internal fun PlayerRuntimeController.fetchMetaDetails(id: String?, type: String?
                 .first { it !is NetworkResult.Loading }
         ) {
             is NetworkResult.Success -> {
-                applyMetaDetails(result.data)
+                if (id == contentId && type == contentType) applyMetaDetails(result.data)
             }
             is NetworkResult.Error -> {
             }
@@ -66,11 +71,17 @@ internal fun PlayerRuntimeController.applyMetaDetails(meta: Meta) {
         contentLanguage = meta.resolveContentLanguage()
     }
     val description = resolveDescription(meta)
+    val episodeTitle = meta.videos.firstOrNull {
+        it.id == currentVideoId || (it.season == currentSeason && it.episode == currentEpisode && currentSeason != null)
+    }?.title?.takeIf(String::isNotBlank)
+    if (episodeTitle != null) currentEpisodeTitle = episodeTitle
 
     recomputeNextEpisode(resetVisibility = false)
     _uiState.update { state ->
         state.copy(
             description = description ?: state.description,
+            currentEpisodeTitle = episodeTitle ?: state.currentEpisodeTitle,
+            releaseYear = if (contentType == "movie") playerMovieYear(meta.releaseInfo) ?: state.releaseYear else state.releaseYear,
             castMembers = if (meta.castMembers.isNotEmpty()) meta.castMembers else state.castMembers,
             isNextEpisodeMetadataResolved = true
         )
@@ -110,6 +121,9 @@ internal fun PlayerRuntimeController.updateEpisodeDescription() {
 
 private suspend fun PlayerRuntimeController.enrichDescriptionFromTmdb(id: String?, type: String?) {
     if (id.isNullOrBlank() || type.isNullOrBlank()) return
+    val requestedVideoId = currentVideoId
+    val season = currentSeason
+    val episode = currentEpisode
     val settings = tmdbSettingsDataStore.settings.first()
     if (!settings.enabled || !settings.useBasicInfo) return
 
@@ -127,9 +141,6 @@ private suspend fun PlayerRuntimeController.enrichDescriptionFromTmdb(id: String
     }.getOrNull() ?: return
 
     val isSeries = type.lowercase() in listOf("series", "tv")
-    val season = currentSeason
-    val episode = currentEpisode
-
     // For series, try to get episode-level overview and title from TMDB.
     val episodeEnrichment = if (isSeries && season != null && episode != null) {
         runCatching {
@@ -141,6 +152,15 @@ private suspend fun PlayerRuntimeController.enrichDescriptionFromTmdb(id: String
         }.getOrNull()
     } else null
 
+    // Requests may finish after the user moves to another episode or source.
+    if (id != contentId || type != this.contentType || requestedVideoId != currentVideoId ||
+        season != currentSeason || episode != currentEpisode) return
+
+    if (!isSeries) {
+        playerMovieYear(enrichment.releaseInfo)?.let { resolvedYear ->
+            _uiState.update { it.copy(releaseYear = resolvedYear) }
+        }
+    }
     val tmdbDescription = episodeEnrichment?.overview ?: enrichment.description
     if (settings.useBasicInfo && !tmdbDescription.isNullOrBlank()) {
         _uiState.update { it.copy(description = tmdbDescription) }
@@ -166,6 +186,7 @@ private suspend fun PlayerRuntimeController.enrichDescriptionFromTmdb(id: String
     if (settings.useBasicInfo) {
         val tmdbEpisodeTitle = episodeEnrichment?.title
         if (!tmdbEpisodeTitle.isNullOrBlank()) {
+            currentEpisodeTitle = tmdbEpisodeTitle
             _uiState.update { it.copy(currentEpisodeTitle = tmdbEpisodeTitle) }
         }
     }
@@ -353,8 +374,120 @@ internal fun PlayerRuntimeController.resetPostPlayOverlayState(clearEpisode: Boo
     }
 }
 
+/**
+ * Binge lookahead: start the next episode's scrape before it is pressed.
+ * Called from [evaluatePostPlayOverlayVisibility] on every progress tick.
+ *
+ * The trigger is near the end of the episode because StreamPrefetchCache
+ * entries expire after five minutes. Firing six minutes out means the first
+ * entry expires with about a minute left and the next tick re-fires it
+ * ([StreamPrefetchCache.prefetch] no-ops on a fresh or in-flight key), so the
+ * second entry is still fresh on the post-play card. Two scrape cycles per
+ * episode.
+ *
+ * Only metadata is listed and ranked; provider resolution and media access
+ * wait for selection.
+ */
+internal fun PlayerRuntimeController.maybePrefetchNextEpisodeForBinge(
+    positionMs: Long,
+    durationMs: Long
+) {
+    if (!hasRenderedFirstFrame) return
+    val type = contentType ?: return
+    val nextVideo = nextEpisodeVideo ?: return
+    if (_uiState.value.nextEpisode?.hasAired != true) return
+
+    val effectiveDuration = durationMs.takeIf { it > 0L } ?: lastKnownDuration
+    if (effectiveDuration <= 0L) return
+    val remainingMs = effectiveDuration - positionMs
+    if (remainingMs <= 0L || remainingMs > BINGE_LOOKAHEAD_TRIGGER_MS) return
+
+    com.nuvio.tv.core.stream.StreamPrefetchCache.prefetch(
+        repository = streamRepository,
+        type = type,
+        videoId = nextVideo.id,
+        season = nextVideo.season,
+        episode = nextVideo.episode,
+        source = "binge_lookahead",
+        background = true,
+        rank = { groups ->
+            // Mirror what the press SETTLES on, which is not its first
+            // attempt. PlayerRuntimeControllerStreams tries
+            // tryBingeGroupOnly opportunistically while the scrape is still
+            // arriving, but when nothing matches it falls through on timeout
+            // to trySelectStream -- a full select carrying
+            // currentStreamBingeGroup as a PREFERENCE, not a requirement.
+            //
+            // Mirroring only the early attempt usually returns no winner, since
+            // cross-episode binge-group matches are the exception, not the
+            // rule, and the transition then pays a full cold resolve and probe.
+            // The fall-through is the common path and the only one worth
+            // predicting.
+            val preferBinge = playerSettingsDataStore.playerSettings.first()
+                .streamAutoPlayPreferBingeGroupForNextEpisode
+            val lookaheadBingeGroup = currentStreamBingeGroup?.takeIf { preferBinge }
+            prefetchSelectionSupplier.rankForPrefetch(
+                groups = groups,
+                contentId = contentId,
+                season = nextVideo.season,
+                episode = nextVideo.episode,
+                bingeOverride = lookaheadBingeGroup
+            )
+        }
+    )
+    maybeStartNextEpisodeThumbnails(type, nextVideo.id, nextVideo.season, nextVideo.episode)
+}
+
+/**
+ * Makes the next episode's seek thumbnails in the background once the lookahead has ranked its sources.
+ * This fetches the winner's playable link ahead of the press. The press usually picks the same release;
+ * if not, the thumbnails go unused.
+ */
+internal fun PlayerRuntimeController.maybeStartNextEpisodeThumbnails(
+    type: String,
+    videoId: String,
+    season: Int?,
+    episode: Int?
+) {
+    if (_exoPlayer == null) return
+    if (nextEpisodeThumbsFailedFor == videoId || NextEpisodeThumbs.attempted(videoId)) return
+    val now = android.os.SystemClock.elapsedRealtime()
+    if (now - nextEpisodeThumbsLookAtMs < 10_000L) return
+    nextEpisodeThumbsLookAtMs = now
+    val selection = com.nuvio.tv.core.stream.StreamPrefetchCache.selectionFor(type, videoId, season, episode) ?: return
+    scope.launch {
+        val mode = runCatching { SeekThumbnailPreferences.mode(context) }.getOrNull() ?: return@launch
+        if (mode == SeekThumbMode.OFF) return@launch
+        val winner = selection.winner
+        val resolved = if (directDebridResolver.shouldResolveToPlayableStream(winner)) {
+            // A resolved link is cached by the resolver; a failed lookup is not repeated for this episode.
+            val result = directDebridResolver.resolveToPlayableStream(winner, season, episode)
+            (result as? com.nuvio.tv.core.debrid.DirectDebridPlayableResult.Success)?.stream ?: run {
+                nextEpisodeThumbsFailedFor = videoId
+                return@launch
+            }
+        } else {
+            winner
+        }
+        if (resolved.isTorrent()) return@launch
+        val url = resolved.getStreamUrl()?.takeIf { isThumbnailSource(it) } ?: return@launch
+        val headers = if (resolved === winner) winner.behaviorHints?.proxyHeaders?.request.orEmpty() else emptyMap()
+        android.util.Log.i("ThumbNext", "lookahead winner for $videoId resolved")
+        NextEpisodeThumbs.start(
+            context = context,
+            source = ThumbSource(url, headers, identity = videoId),
+            allow4K = mode == SeekThumbMode.ALL,
+            playerProvider = { _exoPlayer }
+        )
+    }
+}
+
+/** How much of the episode may remain when the lookahead prefetch fires. */
+private const val BINGE_LOOKAHEAD_TRIGGER_MS = 6L * 60L * 1000L
+
 internal fun PlayerRuntimeController.evaluatePostPlayOverlayVisibility(positionMs: Long, durationMs: Long) {
     if (_playbackTimeline.value.isLive) return
+    maybePrefetchNextEpisodeForBinge(positionMs, durationMs)
     if (!hasRenderedFirstFrame) return
     // Short debrid/error clips must never arm next-episode auto-play (see #2819).
     // Prefer the largest known duration; the per-poll value can drop transiently.

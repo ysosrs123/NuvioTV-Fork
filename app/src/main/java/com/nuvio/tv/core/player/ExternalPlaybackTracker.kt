@@ -464,7 +464,7 @@ class ExternalPlaybackTracker @Inject constructor(
         val settings = playerSettingsDataStore.playerSettings.first()
         if (!settings.shouldSendSkipSegments()) return null
 
-        // videoId carries the episode-specific id (e.g. mal:/kitsu:/imdb); fall back to contentId.
+        // videoId carries the episode-specific id (e.g. imdb); fall back to contentId.
         val effectiveId = metadata.videoId.takeIf { it.isNotBlank() } ?: metadata.contentId
 
         val intervals = withTimeoutOrNull(SKIP_RESOLVE_TIMEOUT_MS) {

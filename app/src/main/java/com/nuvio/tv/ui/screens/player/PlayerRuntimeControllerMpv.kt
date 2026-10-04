@@ -2,6 +2,7 @@ package com.nuvio.tv.ui.screens.player
 
 import android.util.Log
 import androidx.media3.exoplayer.SeekParameters
+import com.nuvio.tv.core.util.TtffTrace
 import com.nuvio.tv.data.local.InternalPlayerEngine
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -94,6 +95,7 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
     mpvMediaLoadPrepared = true
     _exoPlayer?.release()
     _exoPlayer = null
+    nativeVideoSelection.clear()
     trackSelector = null
     try {
         currentMediaSession?.release()
@@ -135,10 +137,11 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
             ?: (_uiState.value.pendingSeekPosition?.coerceAtLeast(0L) ?: 0L)
         playbackAnalyticsDiagnostics.setStartupStartPosition(initialResumePosition)
         view.setMedia(url, headers, initialResumePosition)
-        playbackAnalyticsDiagnostics.recordRawEventLine(
+        val playerInitLine =
             "PLAYER_INIT: engine=MPV host=${url.safeMpvTraceHost()} " +
                 "playbackSpeed=${_uiState.value.playbackSpeed} resumePositionMs=$initialResumePosition"
-        )
+        playbackAnalyticsDiagnostics.recordRawEventLine(playerInitLine)
+        TtffTrace.mirror(playerInitLine)
         if (initialResumePosition > 0L) {
             clearPendingInitialResumePosition()
             _uiState.update { it.copy(pendingSeekPosition = null) }
@@ -245,6 +248,7 @@ internal fun PlayerRuntimeController.pauseForLifecycle() {
         stopWatchProgressSaving()
         stopProgressUpdates()
         _uiState.update { it.copy(isPlaying = false) }
+        reportServerPlayback()
         return
     }
     _exoPlayer?.let { player ->
@@ -283,12 +287,13 @@ internal fun PlayerRuntimeController.resumeForLifecycle() {
         // Re-create the MediaSession so media controls work in the foreground.
         if (currentMediaSession == null) {
             try {
-                currentMediaSession = androidx.media3.session.MediaSession.Builder(context, SafeMediaSessionPlayer(player)).build()
+                currentMediaSession = androidx.media3.session.MediaSession.Builder(context, SafeMediaSessionPlayer(player, onSessionPlayPause)).build()
                 updateMediaSessionMetadata()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+        schedulePassthroughReturnCheck("resume")
     }
 }
 
@@ -418,6 +423,7 @@ private fun PlayerRuntimeController.applyMpvTrackSnapshot(snapshot: MpvTrackSnap
         audioTracks = audioTracks,
         subtitleTracks = internalSubtitleTracks
     )
+    applyLosslessAudioDefaultIfUnset(audioTracks)
     logSwitchTrace(
         stage = "mpv-snapshot-after-restore",
         message = "uiAudioIndex=${_uiState.value.selectedAudioTrackIndex} " +
@@ -568,13 +574,18 @@ internal fun PlayerRuntimeController.seekPlaybackTo(
                     seekBufferingUiJob?.cancel()
                     _uiState.update { it.copy(isBuffering = true) }
                 }
-                NuvioExoPlayerPerformanceHelper.buildScrubbingParams()?.let { params ->
-                    isScrubbingModeActive = true
-                    player.setScrubbingModeParameters(params)
-                }
             }
             player.setSeekParameters(seekParameters)
             player.seekTo(positionMs)
+            // SeekParameters is persistent player state. Restore the default so
+            // the raw player.seekTo() sites (audio-track-change nudge, long-pause
+            // resume, error recovery, resume progress, stall watchdog) do not
+            // inherit the direction of the user's last seek: a stale NEXT_SYNC
+            // turns the "seek back 1ms to unstick buffering" nudge into a forward
+            // jump of up to a full GOP on every audio-track change. Set/seek/reset
+            // messages are processed in order on the playback thread, so the
+            // requested seek still uses [seekParameters].
+            player.setSeekParameters(SeekParameters.DEFAULT)
         }
     }
 }

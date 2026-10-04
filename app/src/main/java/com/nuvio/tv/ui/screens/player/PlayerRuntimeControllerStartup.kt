@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.core.util.TtffTrace
 import android.app.Activity
 import android.os.SystemClock
 import android.util.Log
@@ -31,12 +32,13 @@ internal fun PlayerRuntimeController.startInitialPlaybackIfNeeded() {
     val clickElapsedMs = launchStartedAtElapsedMs
         ?.let { (SystemClock.elapsedRealtime() - it).coerceAtLeast(0L) }
         ?: -1L
-    queuePlaybackRawEventLine(
+    val startRequestLine =
         "PLAYER_START_REQUEST: clickElapsedMs=$clickElapsedMs host=${initialStreamUrl.safeStartupHost()} " +
             "contentId=${contentId ?: "n/a"} videoId=${currentVideoId ?: "n/a"} " +
             "S${currentSeason ?: "-"}E${currentEpisode ?: "-"} infoHash=${infoHash != null} " +
             "startFromBeginning=${navigationArgs.startFromBeginning} streamName=${streamName ?: "n/a"}"
-    )
+    queuePlaybackRawEventLine(startRequestLine)
+    TtffTrace.mirror(startRequestLine)
     Log.d(
         "PlayerStartup",
         "startInitialPlayback: infoHash=$infoHash host=${currentStreamUrl.safeStartupHost()} " +

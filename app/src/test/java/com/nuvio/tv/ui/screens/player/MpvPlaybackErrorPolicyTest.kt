@@ -95,19 +95,88 @@ class MpvPlaybackErrorPolicyTest {
     }
 
     @Test
-    fun watchdog_cacheGrowthExtendsWaitUntilAbsoluteTimeout() {
+    fun watchdog_steadyCacheGrowthKeepsWaiting() {
         val stillWaiting = advance(
-            ticks = MpvStartupWatchdogPolicy.stallTicksLimit,
+            ticks = MpvStartupWatchdogPolicy.absoluteTicksLimit * 3,
             cacheProgressing = true
         )
         assertEquals(MpvStartupWatchdogPolicy.Action.Continue, stillWaiting.action)
         assertEquals(0, stillWaiting.counters.stallTicks)
+        assertEquals(0, stillWaiting.counters.absoluteTicks)
+    }
 
-        val fired = advance(
-            ticks = MpvStartupWatchdogPolicy.absoluteTicksLimit,
-            cacheProgressing = true
-        )
+    @Test
+    fun watchdog_cacheGrowthWithoutAPictureEndsAfterTwoMinutes() {
+        val before = advance(MpvStartupWatchdogPolicy.cacheGrowthTicksLimit - 1, cacheProgressing = true)
+        assertEquals(MpvStartupWatchdogPolicy.Action.Continue, before.action)
+
+        val fired = advance(MpvStartupWatchdogPolicy.cacheGrowthTicksLimit, cacheProgressing = true)
         assertEquals(MpvStartupWatchdogPolicy.Action.AbsoluteTimeout, fired.action)
+        assertEquals(
+            120_000L,
+            MpvStartupWatchdogPolicy.cacheGrowthTicksLimit * MpvStartupWatchdogPolicy.POLL_INTERVAL_MS
+        )
+    }
+
+    @Test
+    fun watchdog_cacheGrowthCountSurvivesStallsAndIdleBlips() {
+        var counters = MpvStartupWatchdogPolicy.Counters(
+            cacheGrowthTicks = MpvStartupWatchdogPolicy.cacheGrowthTicksLimit - 1
+        )
+        counters = MpvStartupWatchdogPolicy.step(
+            MpvStartupWatchdogPolicy.Input(true, false, idleActive = false, cacheProgressing = false, counters = counters)
+        ).counters
+        counters = MpvStartupWatchdogPolicy.step(
+            MpvStartupWatchdogPolicy.Input(true, false, idleActive = true, cacheProgressing = false, counters = counters)
+        ).counters
+        val fired = MpvStartupWatchdogPolicy.step(
+            MpvStartupWatchdogPolicy.Input(true, false, idleActive = false, cacheProgressing = true, counters = counters)
+        )
+
+        assertEquals(MpvStartupWatchdogPolicy.Action.AbsoluteTimeout, fired.action)
+    }
+
+    @Test
+    fun deadLink_onlyAFreshStatusLineCounts() {
+        assertTrue(isMpvHttpErrorFresh(loggedAtMs = 50_000L, nowMs = 50_200L))
+        assertTrue(isMpvHttpErrorFresh(loggedAtMs = 50_000L, nowMs = 60_000L))
+        assertFalse(isMpvHttpErrorFresh(loggedAtMs = 50_000L, nowMs = 60_001L))
+        assertFalse(isMpvHttpErrorFresh(loggedAtMs = 0L, nowMs = 1_000L))
+    }
+
+    @Test
+    fun watchdog_absoluteClockCountsOnlyTicksWithoutGrowth() {
+        var counters = MpvStartupWatchdogPolicy.Counters()
+        var action = MpvStartupWatchdogPolicy.Action.Continue
+        var ticks = 0
+        while (action == MpvStartupWatchdogPolicy.Action.Continue && ticks < 1_000) {
+            val step = MpvStartupWatchdogPolicy.step(
+                MpvStartupWatchdogPolicy.Input(
+                    enabled = true,
+                    waitingForSurface = false,
+                    idleActive = false,
+                    cacheProgressing = ticks % 10 == 9,
+                    counters = counters
+                )
+            )
+            counters = step.counters
+            action = step.action
+            ticks++
+        }
+
+        assertEquals(MpvStartupWatchdogPolicy.Action.AbsoluteTimeout, action)
+        assertTrue(ticks > MpvStartupWatchdogPolicy.absoluteTicksLimit)
+    }
+
+    @Test
+    fun deadLink_onlyNotFoundAndGone() {
+        assertTrue(isMpvDeadLinkHttpStatus(mpvHttpStatusCode("[ffmpeg] https: HTTP error 404 Not Found")))
+        assertTrue(isMpvDeadLinkHttpStatus(mpvHttpStatusCode("[ffmpeg] HTTP error 410 Gone\n[stream] Failed to open")))
+        assertFalse(isMpvDeadLinkHttpStatus(mpvHttpStatusCode("[ffmpeg] HTTP error 403 Forbidden")))
+        assertFalse(isMpvDeadLinkHttpStatus(mpvHttpStatusCode("[ffmpeg] HTTP error 429 Too Many Requests")))
+        assertFalse(isMpvDeadLinkHttpStatus(mpvHttpStatusCode("[ffmpeg] HTTP error 503 Service Unavailable")))
+        assertFalse(isMpvDeadLinkHttpStatus(mpvHttpStatusCode("[ffmpeg] Connection refused")))
+        assertFalse(isMpvDeadLinkHttpStatus(mpvHttpStatusCode(null)))
     }
 
     @Test

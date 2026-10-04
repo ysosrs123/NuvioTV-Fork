@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.core.util.TtffTrace
 import android.net.Uri
 import android.util.Log
 import androidx.media3.common.Player
@@ -15,6 +16,7 @@ import com.nuvio.tv.core.tracking.buildTrackingMediaReference
 import com.nuvio.tv.core.tracking.scrobbleDiagnosticIdentity
 import com.nuvio.tv.data.local.InternalPlayerEngine
 import com.nuvio.tv.data.local.SubtitleStyleSettings
+import com.nuvio.tv.data.mediaserver.ServerItemRef
 import com.nuvio.tv.data.repository.PlaybackIssueErrorInput
 import com.nuvio.tv.data.repository.PlaybackIssuePlaybackSettingsInput
 import com.nuvio.tv.data.repository.PlaybackIssueReportInput
@@ -23,6 +25,8 @@ import com.nuvio.tv.domain.model.WatchProgress
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
+import com.nuvio.tv.core.player.PlaceholderStreamPolicy
+import com.nuvio.tv.core.player.thumbnail.SeekThumbnails
 import kotlinx.coroutines.launch
 
 internal const val AUDIO_AMPLIFICATION_MIN_DB = 0
@@ -79,7 +83,11 @@ internal fun PlayerRuntimeController.skipInterval(interval: SkipInterval): Boole
 
 internal fun PlayerRuntimeController.applyAudioAmplification(db: Int) {
     val clampedDb = db.coerceIn(AUDIO_AMPLIFICATION_MIN_DB, AUDIO_AMPLIFICATION_MAX_DB)
-    val isAudioAmplificationAvailable = isUsingMpvEngine() || _exoPlayer != null
+    // Gain is a PCM processor: during bitstream bypass it is
+    // a silent no-op, so the control reports unavailable instead of offering a
+    // dead slider. MPV always decodes, so bypass only applies on ExoPlayer.
+    val isAudioAmplificationAvailable =
+        isUsingMpvEngine() || (_exoPlayer != null && !isAudioOutputBypassing)
     val wasActive = gainAudioProcessor.isGainEnabled()
     gainAudioProcessor.setGainDb(if (isAudioAmplificationAvailable) clampedDb else AUDIO_AMPLIFICATION_MIN_DB)
     val isActiveNow = gainAudioProcessor.isGainEnabled()
@@ -115,7 +123,9 @@ internal fun PlayerRuntimeController.updateAudioControlAvailability(
     selectedAudioIndex: Int = _uiState.value.selectedAudioTrackIndex
 ) {
     val selectedTrack = audioTracks.getOrNull(selectedAudioIndex)
-    val isAudioAmplificationAvailable = isUsingMpvEngine() || _exoPlayer != null
+    // See applyAudioAmplification.
+    val isAudioAmplificationAvailable =
+        isUsingMpvEngine() || (_exoPlayer != null && !isAudioOutputBypassing)
     val isCenterMixAvailable =
         ffmpegAudioRenderer?.isCenterMixActive() == true && (selectedTrack?.channelCount ?: 0) > 2
     val clampedDb = _uiState.value.audioAmplificationDb
@@ -184,6 +194,15 @@ internal fun shouldTreatAsNaturalPlaybackCompletion(
     return true
 }
 
+/**
+ * This 2:01 threshold is intentionally NOT aligned with
+ * [com.nuvio.tv.core.player.PlaceholderStreamPolicy.MIN_PLAUSIBLE_DURATION_MS] (3:00).
+ * This guard is duration-only and suppresses watch-state side-effects (progress,
+ * mark-watched, next-episode) for junk clips. Raising it to 3:00 would wrongly
+ * suppress those for legitimately short real content; the policy avoids that only
+ * because its 3:00 threshold is ANDed with a <33%-of-runtime ratio this guard has
+ * no runtime to apply. The two serve different jobs and must stay separate.
+ */
 /** Streams shorter than ~2:01 are treated as error/placeholder clips, not real episodes. */
 internal fun isShortPlaceholderDuration(duration: Long): Boolean = duration in 1..120_999L
 
@@ -216,12 +235,13 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                                     ?: -1L
                                 val initToFirstFrameMs = (System.currentTimeMillis() - playerInitializationStartedAtMs)
                                     .coerceAtLeast(0L)
-                                playbackAnalyticsDiagnostics.recordRawEventLine(
+                                val mpvStartupLine =
                                     "PLAYBACK_STARTUP: clickToFirstFrameMs=$clickToFirstFrameMs " +
                                         "initToFirstFrameMs=$initToFirstFrameMs playbackSpeed=${_uiState.value.playbackSpeed} " +
                                         "currentPositionMs=$pos durationMs=$playerDuration engine=MPV " +
                                         "host=${currentStreamUrl.safePlaybackEventsHost()}"
-                                )
+                                playbackAnalyticsDiagnostics.recordRawEventLine(mpvStartupLine)
+                                TtffTrace.mirror(mpvStartupLine)
                                 finishLoadingDiagnostics("mpv_first_frame_ready")
                                 if (_uiState.value.postPlayDismissedForCurrentEpisode) {
                                     _uiState.update { it.copy(postPlayDismissedForCurrentEpisode = false) }
@@ -236,9 +256,10 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                     val playingForWatchClock = playingNow && !cacheBuffering
                     publishPlaybackTimeline(
                         currentPosition = displayPosition,
+                        playbackPosition = pos,
                         duration = playerDuration,
                         bufferedPosition = (pos + (view.demuxerCacheDurationSec() * 1000.0).toLong())
-                            .coerceAtLeast(displayPosition),
+                            .coerceAtLeast(pos),
                         playerReportsLive = view.isLiveStreamNow(),
                         isPlaying = playingForWatchClock
                     )
@@ -282,6 +303,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                         handleNaturalPlaybackEnded()
                     }
                 }
+                reportServerPlayback()
                 delay(500)
                 continue
             }
@@ -292,11 +314,28 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                 if (playerDuration > lastKnownDuration) {
                     lastKnownDuration = playerDuration
                 }
-                val displayPosition = pendingPreviewSeekPosition ?: pos
+                // Placeholder duration backstop. Content-length was judged at READY;
+                // here the decoded duration is trustworthy. Guarded on a blank error so
+                // it fires once -- the reject sets error, and every later tick short-circuits.
+                if (hasRenderedFirstFrame && _uiState.value.error.isNullOrBlank()) {
+                    val placeholderDurationVerdict = PlaceholderStreamPolicy.evaluate(
+                        contentLengthBytes = null,
+                        durationMs = getEffectiveDuration(pos),
+                        expectedRuntimeMs = expectedRuntimeMinutes?.let { it * 60_000L }
+                    )
+                    if (placeholderDurationVerdict is PlaceholderStreamPolicy.Verdict.Reject &&
+                        placeholderDurationVerdict.reason == PlaceholderStreamPolicy.Reason.ImplausibleDuration
+                    ) {
+                        rejectPlaceholderStream(placeholderDurationVerdict)
+                    }
+                }
+
+                val displayPosition = previewDisplayPosition() ?: pos
                 publishPlaybackTimeline(
                     currentPosition = displayPosition,
+                    playbackPosition = pos,
                     duration = playerDuration.coerceAtLeast(0L),
-                    bufferedPosition = player.bufferedPosition.coerceAtLeast(displayPosition),
+                    bufferedPosition = player.bufferedPosition.coerceAtLeast(pos),
                     playerReportsLive = player.isCurrentMediaItemLive,
                     isPlaying = player.isPlaying
                 )
@@ -377,6 +416,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                     }
                 }
             }
+            reportServerPlayback()
             delay(500)
         }
     }
@@ -439,7 +479,17 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport() {
         rebufferCount = rebufferCount,
         rebufferTotalMs = rebufferTotalMs,
         rebufferStartedAtMs = rebufferStartedAtMs
-    ).copy(startupStages = loadingInput.events)
+    ).let { snapshot ->
+        snapshot.copy(
+            startupStages = loadingInput.events,
+            rawEventLines = snapshot.rawEventLines + listOf(
+                "audio_passthrough_state surroundMode=${currentPlayerSettingsForReport.surroundFormatMode.name} " +
+                    "iecActive=${playbackSpeedAwareAudioSink?.isIecHbrActive()} " +
+                    "forceOptical=${currentPlayerSettingsForReport.forceOpticalPassthrough} " +
+                    "tunnelingEffective=${state.tunnelingEnabled}"
+            )
+        )
+    }
     val input = PlaybackIssueReportInput(
         diagnostics = diagnostics,
         error = reportError,
@@ -549,7 +599,6 @@ private fun PlayerRuntimeController.buildPlaybackIssuePlaybackSettingsInput(): P
         showPlayerLoadingStatus = settings.showPlayerLoadingStatus,
         playbackIssueReportsEnabled = settings.playbackIssueReportsEnabled,
         dv5ToDv81Enabled = settings.dv5ToDv81Enabled,
-        dv7ToDv81PreserveMappingEnabled = settings.dv7ToDv81PreserveMappingEnabled,
         dv7HandlingMode = settings.dv7HandlingMode.name,
         dv7LibdoviModeOverride = settings.dv7LibdoviModeOverride,
         stripHdr10PlusSei = settings.stripHdr10PlusSei,
@@ -566,7 +615,10 @@ private fun PlayerRuntimeController.buildPlaybackIssuePlaybackSettingsInput(): P
         targetBufferSizeMb = settings.bufferSettings.targetBufferSizeMb,
         backBufferDurationMs = settings.bufferSettings.backBufferDurationMs,
         effectiveBackBufferDurationMs = effectiveBackBufferDurationMs,
-        retainBackBufferFromKeyframe = settings.bufferSettings.retainBackBufferFromKeyframe,
+        // Report what the engine actually runs, not the stored setting. Every
+        // LoadControl branch constructs with retainBackBufferFromKeyframe = true; the
+        // stored flag is not wired to the engine.
+        retainBackBufferFromKeyframe = PlayerRuntimeController.ENGINE_RETAIN_BACK_BUFFER_FROM_KEYFRAME,
         parallelNetworkEnabled = settings.parallelNetworkEnabled,
         bufferBudgetManaged = settings.bufferBudgetManaged,
         allowLargeTargetBuffer = settings.allowLargeTargetBuffer,
@@ -806,10 +858,12 @@ internal fun PlayerRuntimeController.refreshScrobbleItem() {
 
 internal fun PlayerRuntimeController.buildScrobbleItem(): TrackingMediaReference? {
     val rawContentId = contentId ?: return null
+    val isServerItem = ServerItemRef.isServerId(rawContentId)
+    val parentMetaId = if (isServerItem) serverImdbId(rawContentId) ?: return null else rawContentId
     val reference = buildTrackingMediaReference(
         contentType = contentType ?: "movie",
-        parentMetaId = rawContentId,
-        videoId = currentVideoId,
+        parentMetaId = parentMetaId,
+        videoId = currentVideoId.takeUnless { isServerItem },
         title = contentName ?: title,
         releaseInfo = year,
         seasonNumber = currentSeason,
@@ -1028,14 +1082,14 @@ internal fun PlayerRuntimeController.scheduleProgressSyncAfterSeek() {
 fun PlayerRuntimeController.scheduleHideControls() {
     hideControlsJob?.cancel()
     hideControlsJob = scope.launch {
-        delay(3000)
+        delay(8000)
         if (_uiState.value.isPlaying && !_uiState.value.showAudioOverlay &&
             !_uiState.value.showSubtitleOverlay && !_uiState.value.showSubtitleStylePanel &&
             !_uiState.value.showSpeedDialog && !_uiState.value.showMoreDialog &&
             !_uiState.value.showSubtitleDelayOverlay &&
             !_uiState.value.showSubtitleTimingDialog &&
             !_uiState.value.showEpisodesPanel && !_uiState.value.showSourcesPanel &&
-            !_uiState.value.showStreamInfoOverlay) {
+            !_uiState.value.showStreamInfoOverlay && !_uiState.value.showPartyPanel) {
             _uiState.update { it.copy(showControls = false) }
         }
     }
@@ -1128,7 +1182,9 @@ internal fun PlayerRuntimeController.scheduleHideSubtitleDelayOverlay() {
 internal fun PlayerRuntimeController.schedulePauseOverlay() {
     pauseOverlayJob?.cancel()
 
-    if (!_uiState.value.pauseOverlayEnabled || !hasRenderedFirstFrame || !userPausedManually) {
+    if (!_uiState.value.pauseOverlayEnabled || !hasRenderedFirstFrame || !userPausedManually ||
+        partyBridge?.partyPaused == true
+    ) {
         _uiState.update { it.copy(showPauseOverlay = false) }
         return
     }
@@ -1140,11 +1196,36 @@ internal fun PlayerRuntimeController.schedulePauseOverlay() {
         val anyPanelOpen = s.showSubtitleOverlay || s.showSubtitleStylePanel ||
             s.showSpeedDialog || s.showMoreDialog || s.showEpisodesPanel ||
             s.showSourcesPanel || s.showAudioOverlay || s.showStreamInfoOverlay ||
-            s.showSubtitleTimingDialog || s.showSubtitleDelayOverlay
+            s.showSubtitleTimingDialog || s.showSubtitleDelayOverlay || s.showPartyPanel
         if (!s.isPlaying && s.pauseOverlayEnabled && s.error == null && !anyPanelOpen) {
             _uiState.update { it.copy(showPauseOverlay = true, showControls = false) }
         }
     }
+}
+
+/**
+ * "Generate thumbnails before play": holds the player like a user pause, so start-up autoplay leaves it paused.
+ * False when the user already paused, null when this start cannot be held.
+ */
+internal fun PlayerRuntimeController.pauseForSeekThumbnails(): Boolean? {
+    if (isUsingMpvEngine()) return false
+    // In a party the room decides when this box plays; a hold here would pause everyone.
+    if (partyBridge?.inParty == true) return null
+    val player = _exoPlayer ?: return false
+    // Already a user pause (or "start paused"): not ours to hold, and never ours to resume.
+    if (userPausedManually) return false
+    // A tunnelled start only leaves the loading screen on its first READY with autoplay still armed.
+    if ((_uiState.value.tunnelingEnabled || player.isTunnelingEnabled) && !hasRenderedFirstFrame) return null
+    // The native Dolby Vision renderer must show its first frame before anything pauses it.
+    // The route is armed before the video type is known; only a Dolby Vision (or not yet known) track uses it.
+    val mayUseNativeRoute = currentVideoTrackMimeType.let { it == null || it == androidx.media3.common.MimeTypes.VIDEO_DOLBY_VISION } ||
+        currentVideoTrackCodecs?.startsWith("dv") == true
+    if (isNativeFelActiveForCurrentPlayback && mayUseNativeRoute && !hasRenderedFirstFrame) return null
+    userPausedManually = true
+    shouldEnforceAutoplayOnFirstReady = false
+    player.pause()
+    cancelPauseOverlay()
+    return true
 }
 
 internal fun PlayerRuntimeController.cancelPauseOverlay() {
@@ -1168,11 +1249,14 @@ fun PlayerRuntimeController.hideControls() {
 }
 
 fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
+    if (partyBridge?.onPlayerEvent(event) == true) return
     if (event != PlayerEvent.OnParentalGuideHide) {
         onUserInteraction()
     }
     when (event) {
         PlayerEvent.OnPlayPause -> {
+            // A play/pause press during a held scrub is the user's own choice from here on.
+            scrubHoldPaused = false
             if (isUsingMpvEngine()) {
                 val playing = isPlaybackCurrentlyPlaying()
                 if (playing) {
@@ -1197,6 +1281,9 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
                         userPausedManually = true
                         player.pause()
                         schedulePauseOverlay()
+                        // A parked auto-restore subtitle attaches here,
+                        // while paused, so the reload lands invisibly.
+                        maybeAttachDeferredAddonSubtitle()
                     } else {
                         userPausedManually = false
                         cancelPauseOverlay()
@@ -1216,7 +1303,9 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
         }
         is PlayerEvent.OnSeekBy -> {
             if (_playbackTimeline.value.isLive) return
+            releaseScrubHold()
             pendingPreviewSeekPosition = null
+            _uiState.update { it.copy(pendingPreviewSeekPosition = null, previewThumbPositionMs = null) }
             val current = currentPlaybackPositionMs() ?: 0L
             val maxDuration = currentPlaybackDurationMs().takeIf { it >= 0 } ?: Long.MAX_VALUE
             val target = (current + event.deltaMs)
@@ -1239,12 +1328,23 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
         is PlayerEvent.OnPreviewSeekBy -> {
             if (_playbackTimeline.value.isLive) return
             val maxDuration = currentPlaybackDurationMs().takeIf { it >= 0 } ?: Long.MAX_VALUE
+            // A second step before the commit means the key is held; a single press never pauses.
+            val heldKey = pendingPreviewSeekPosition != null
+            if (heldKey) holdPlaybackForScrub()
             val basePosition = pendingPreviewSeekPosition ?: currentPlaybackPositionMs()?.coerceAtLeast(0L) ?: 0L
-            val target = (basePosition + event.deltaMs)
+            // With thumbnails on, every step lands on the 10 s thumbnail grid.
+            val target = (SeekThumbnails.gridStep(basePosition, event.deltaMs) ?: (basePosition + event.deltaMs))
                 .coerceAtLeast(0L)
                 .coerceAtMost(maxDuration)
             pendingPreviewSeekPosition = target
-            updatePlaybackTimeline(currentPosition = target)
+            _uiState.update { it.copy(pendingPreviewSeekPosition = target, previewThumbPositionMs = target) }
+            // Taps show no thumbnails, so only a held key asks the worker for this position first.
+            if (heldKey) SeekThumbnails.notePriority(target)
+            schedulePendingPreviewSeekExpiry()
+            updatePlaybackTimeline(
+                currentPosition = previewDisplayPosition() ?: target,
+                playbackPosition = currentPlaybackPositionMs() ?: _playbackTimeline.value.playbackPosition
+            )
             if (_uiState.value.showControls) {
                 showControlsTemporarily()
             } else {
@@ -1255,20 +1355,29 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
             if (_playbackTimeline.value.isLive) return
             val target = pendingPreviewSeekPosition
             if (target != null) {
-                seekPlaybackTo(target, SeekParameters.CLOSEST_SYNC)
-                updatePlaybackTimeline(currentPosition = target)
+                pendingPreviewSeekExpiryJob?.cancel()
+                // Land on the keyframe whose thumbnail was shown.
+                val landing = SeekThumbnails.landingFor(target) ?: target
+                seekPlaybackTo(landing, SeekParameters.CLOSEST_SYNC)
+                releaseScrubHold()
+                updatePlaybackTimeline(currentPosition = landing)
                 pendingPreviewSeekPosition = null
+                _uiState.update { it.copy(pendingPreviewSeekPosition = null, previewThumbPositionMs = target) }
                 scheduleProgressSyncAfterSeek()
                 if (_uiState.value.showControls) {
                     showControlsTemporarily()
                 } else {
                     showSeekOverlayTemporarily()
                 }
+            } else {
+                releaseScrubHold()
             }
         }
         is PlayerEvent.OnSeekTo -> {
             if (_playbackTimeline.value.isLive) return
+            releaseScrubHold()
             pendingPreviewSeekPosition = null
+            _uiState.update { it.copy(pendingPreviewSeekPosition = null, previewThumbPositionMs = null) }
             seekPlaybackTo(event.position, SeekParameters.CLOSEST_SYNC)
             updatePlaybackTimeline(currentPosition = event.position)
             scheduleProgressSyncAfterSeek()
@@ -1283,8 +1392,17 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
                 stage = "event-select-audio",
                 message = "index=${event.index}"
             )
-            rememberAudioSelection(event.index)
-            selectAudioTrack(event.index)
+            if (_uiState.value.serverAudioTracks.isNotEmpty()) {
+                selectServerAudio(event.index)
+            } else {
+                rememberAudioSelection(event.index)
+                // Tunnelled playback: in-place AudioTrack recreation inside a live
+                // tunnel latches bad frame pacing on some vendor HALs (the Prism+
+                // class). Rebuild at position instead; no-op when tunneling off.
+                if (!maybeRebuildForTunneledAudioSwitch(event.index)) {
+                    selectAudioTrack(event.index)
+                }
+            }
             _uiState.update {
                 it.copy(
                     showAudioOverlay = false,
@@ -1337,8 +1455,12 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
             pendingAudioSelectionAfterSubtitleRefresh = null
             resetSubtitleAutoSyncState()
             cancelAutomaticSubtitleSync() // AutoSync hook
-            rememberInternalSubtitleSelection(event.index)
-            selectSubtitleTrack(event.index)
+            if (_uiState.value.serverSubtitleTracks.isNotEmpty()) {
+                selectServerSubtitle(event.index)
+            } else {
+                rememberInternalSubtitleSelection(event.index)
+                selectSubtitleTrack(event.index)
+            }
             _uiState.update {
                 it.copy(
                     showSubtitleOverlay = true,
@@ -1363,6 +1485,7 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
             cancelAutomaticSubtitleSync() // AutoSync hook
             rememberSubtitleDisabled()
             disableSubtitles()
+            if (hasBurnedInServerSubtitle) clearServerSubtitle()
             _uiState.update {
                 it.copy(
                     showSubtitleOverlay = true,
@@ -1383,6 +1506,7 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
             autoSubtitleSelected = true
             rememberAddonSubtitleSelection(event.subtitle)
             selectAddonSubtitle(event.subtitle)
+            if (hasBurnedInServerSubtitle) clearServerSubtitle()
             runSelectedAutomaticSubtitleSync(event.subtitle) // AutoSync hook
             _uiState.update {
                 it.copy(
@@ -1395,6 +1519,10 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
             }
         }
         is PlayerEvent.OnSetPlaybackSpeed -> {
+            if (event.speed != 1f && !canChangePlaybackSpeed()) {
+                showPlaybackSpeedUnavailable()
+                return
+            }
             if (isUsingMpvEngine()) {
                 setPlaybackSpeedInternal(event.speed)
             } else {
@@ -1506,19 +1634,8 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
             resetSubtitleDelay(event.showOverlay)
         }
         PlayerEvent.OnShowSpeedDialog -> {
-            val state = _uiState.value
-            if (state.tunnelingEnabled) {
-                _uiState.update {
-                    it.copy(
-                        showAspectRatioIndicator = true,
-                        aspectRatioIndicatorText = context.getString(R.string.player_aspect_tunneling_unavailable)
-                    )
-                }
-                hideAspectRatioIndicatorJob?.cancel()
-                hideAspectRatioIndicatorJob = scope.launch {
-                    delay(1500)
-                    _uiState.update { it.copy(showAspectRatioIndicator = false) }
-                }
+            if (!canChangePlaybackSpeed()) {
+                showPlaybackSpeedUnavailable()
                 return
             }
             _uiState.update {
@@ -1617,6 +1734,7 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
             hasRetriedCurrentStreamAfter416 = false
             playbackIssueReportRequestVersion.incrementAndGet()
             resetErrorRetryState()
+            deadSourceFailoverCount = 0
             lastPlaybackIssueError = null
             clearPendingEngineSwitchTrackPreference()
             resetPostPlayOverlayState(clearEpisode = false)
@@ -1702,6 +1820,9 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
         }
         PlayerEvent.OnStillWatchingContinue -> onStillWatchingContinue()
         PlayerEvent.OnDismissStillWatchingPrompt -> onDismissStillWatchingPrompt()
+        is PlayerEvent.OnSetSubtitleBitmapSize -> {
+            scope.launch { playerSettingsDataStore.setSubtitleBitmapSize(event.size) }
+        }
         is PlayerEvent.OnSetSubtitleSize -> {
             scope.launch { playerSettingsDataStore.setSubtitleSize(event.size) }
         }
@@ -1710,6 +1831,12 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
         }
         is PlayerEvent.OnSetSubtitleBold -> {
             scope.launch { playerSettingsDataStore.setSubtitleBold(event.bold) }
+        }
+        is PlayerEvent.OnSetSubtitleFont -> {
+            scope.launch { playerSettingsDataStore.setSubtitleFont(event.font) }
+        }
+        is PlayerEvent.OnSetSubtitleEdgeStyle -> {
+            scope.launch { playerSettingsDataStore.setSubtitleEdgeStyle(event.style) }
         }
         is PlayerEvent.OnSetSubtitleOutlineEnabled -> {
             scope.launch { playerSettingsDataStore.setSubtitleOutlineEnabled(event.enabled) }
@@ -1722,15 +1849,7 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
         }
         PlayerEvent.OnResetSubtitleDefaults -> {
             scope.launch {
-                val defaults = SubtitleStyleSettings()
-                playerSettingsDataStore.setSubtitleSize(defaults.size)
-                playerSettingsDataStore.setSubtitleTextColor(defaults.textColor)
-                playerSettingsDataStore.setSubtitleBold(defaults.bold)
-                playerSettingsDataStore.setSubtitleOutlineEnabled(defaults.outlineEnabled)
-                playerSettingsDataStore.setSubtitleOutlineColor(defaults.outlineColor)
-                playerSettingsDataStore.setSubtitleOutlineWidth(defaults.outlineWidth)
-                playerSettingsDataStore.setSubtitleVerticalOffset(defaults.verticalOffset)
-                playerSettingsDataStore.setSubtitleBackgroundColor(defaults.backgroundColor)
+                playerSettingsDataStore.resetSubtitleAppearance()
             }
         }
         PlayerEvent.OnToggleAspectRatio -> {
@@ -1812,6 +1931,29 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
         PlayerEvent.OnDismissStreamInfo -> {
             _uiState.update { it.copy(showStreamInfoOverlay = false) }
         }
+        PlayerEvent.OnShowPartyPanel -> {
+            _uiState.update {
+                it.copy(
+                    showPartyPanel = true,
+                    showAudioOverlay = false,
+                    showSubtitleOverlay = false,
+                    showSubtitleStylePanel = false,
+                    showSpeedDialog = false,
+                    showMoreDialog = false,
+                    showSubtitleTimingDialog = false,
+                    showSubtitleDelayOverlay = false,
+                    showStreamInfoOverlay = false,
+                    showControls = true
+                )
+            }
+        }
+        PlayerEvent.OnDismissPartyPanel -> {
+            _uiState.update { it.copy(showPartyPanel = false) }
+            scheduleHideControls()
+        }
+        PlayerEvent.OnTogglePlaybackStats -> {
+            _uiState.update { it.copy(showPlaybackStatsOverlay = !it.showPlaybackStatsOverlay) }
+        }
         PlayerEvent.OnTogglePlayerStatsHud -> {
             val currentState = _uiState.value
             if (currentState.playerStatsHudButtonAvailable) {
@@ -1847,6 +1989,16 @@ internal fun PlayerRuntimeController.buildStreamInfoData(): StreamInfoData {
             ?: CustomDefaultTrackNameProvider.formatNameFromMime(format.codecs)
     } ?: currentVideoCodec
 
+    // Prefer the renderer's live format for the audio codec label: the dvmkv extractor
+    // publishes a provisional core-DTS mime and may refine it to DTS-HD only after the
+    // TrackGroup snapshot freezes, so the track-list value can understate the stream.
+    // The live format carries the refinement; the track-list value stays as fallback
+    // (and is the only value on the mpv engine, where the Exo player handle is null).
+    val liveAudioCodec = _exoPlayer?.audioFormat?.let { format ->
+        CustomDefaultTrackNameProvider.formatNameFromMime(format.sampleMimeType)
+            ?: CustomDefaultTrackNameProvider.formatNameFromMime(format.codecs)
+    }
+
     return StreamInfoData(
         addonName = currentAddonName,
         addonLogo = currentAddonLogo,
@@ -1863,7 +2015,7 @@ internal fun PlayerRuntimeController.buildStreamInfoData(): StreamInfoData {
             currentVideoSize,
             playbackTimeline.value.duration
         ),
-        audioCodec = selectedAudio?.codec,
+        audioCodec = liveAudioCodec ?: selectedAudio?.codec,
         audioChannels = selectedAudio?.channelCount?.let {
             CustomDefaultTrackNameProvider.getChannelLayoutName(it)
         },
@@ -1881,7 +2033,8 @@ internal fun PlayerRuntimeController.buildStreamInfoData(): StreamInfoData {
             com.nuvio.tv.data.local.InternalPlayerEngine.EXOPLAYER -> context.getString(R.string.playback_engine_exoplayer)
             com.nuvio.tv.data.local.InternalPlayerEngine.MVP_PLAYER -> context.getString(R.string.playback_engine_mvplayer)
             com.nuvio.tv.data.local.InternalPlayerEngine.AUTO -> null
-        }
+        },
+        serverPlayback = serverPlaybackSummary()
     )
 }
 
@@ -1896,5 +2049,69 @@ private fun formatTorrentSpeed(context: android.content.Context, bytesPerSec: Lo
         bytesPerSec >= 1_048_576 -> context.getString(R.string.unit_speed_mb_s, String.format("%.1f", bytesPerSec / 1_048_576.0))
         bytesPerSec >= 1_024 -> context.getString(R.string.unit_speed_kb_s, String.format("%.0f", bytesPerSec / 1_024.0))
         else -> context.getString(R.string.unit_speed_b_s, bytesPerSec)
+    }
+}
+
+/**
+ * Expires an uncommitted preview position ~3 s after the last
+ * preview event, snapping the timeline back to the real position. Covers commits
+ * swallowed by panels opening mid-gesture and controls-visibility changes.
+ */
+/**
+ * Position the bar and time show for a pending seek: the keyframe the commit will land on when thumbnails are
+ * active, else the target itself. Null when no seek is pending.
+ */
+internal fun PlayerRuntimeController.previewDisplayPosition(): Long? =
+    pendingPreviewSeekPosition?.let { SeekThumbnails.landingFor(it) ?: it }
+
+/**
+ * Pauses playback while a seek key is held, so the CPU goes to the thumbnails (a small box decodes one in about
+ * 0.6 s paused, up to 5 s while playing). Not a user pause; released at the commit, a cancel or the expiry.
+ */
+internal fun PlayerRuntimeController.holdPlaybackForScrub() {
+    if (scrubHoldPaused || isUsingMpvEngine()) return
+    if (!SeekThumbnails.pausesPlaybackWhileScrubbing()) return
+    val player = _exoPlayer ?: return
+    if (!player.playWhenReady) return
+    scrubHoldPaused = true
+    player.pause()
+    android.util.Log.d("ThumbWorker", "scrub: playback held while seeking")
+}
+
+/** Ends a [holdPlaybackForScrub] pause unless the user paused meanwhile. */
+internal fun PlayerRuntimeController.releaseScrubHold() {
+    if (!scrubHoldPaused) return
+    scrubHoldPaused = false
+    if (userPausedManually) return
+    _exoPlayer?.takeIf { !it.playWhenReady }?.play()
+    android.util.Log.d("ThumbWorker", "scrub: playback resumed")
+}
+
+internal fun PlayerRuntimeController.schedulePendingPreviewSeekExpiry() {
+    pendingPreviewSeekExpiryJob?.cancel()
+    pendingPreviewSeekExpiryJob = scope.launch {
+        kotlinx.coroutines.delay(3_000L)
+        if (pendingPreviewSeekPosition != null) {
+            releaseScrubHold()
+            pendingPreviewSeekPosition = null
+            _uiState.update { it.copy(pendingPreviewSeekPosition = null, previewThumbPositionMs = null) }
+            currentPlaybackPositionMs()?.let { updatePlaybackTimeline(currentPosition = it) }
+        }
+    }
+}
+
+
+/** Selected native ownership is independent of factory preference or HUD labels. */
+internal fun PlayerRuntimeController.canChangePlaybackSpeed(): Boolean =
+    isUsingMpvEngine() || (!nativeVideoSelection.isSelected && !_uiState.value.tunnelingEnabled &&
+        _exoPlayer?.isTunnelingEnabled != true)
+
+private fun PlayerRuntimeController.showPlaybackSpeedUnavailable() {
+    _uiState.update { it.copy(showSpeedDialog = false, showAspectRatioIndicator = true,
+        aspectRatioIndicatorText = context.getString(R.string.player_speed_unavailable)) }
+    hideAspectRatioIndicatorJob?.cancel()
+    hideAspectRatioIndicatorJob = scope.launch {
+        delay(1500)
+        _uiState.update { it.copy(showAspectRatioIndicator = false) }
     }
 }

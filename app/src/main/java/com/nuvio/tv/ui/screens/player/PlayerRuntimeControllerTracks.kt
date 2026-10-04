@@ -2,6 +2,7 @@ package com.nuvio.tv.ui.screens.player
 
 import android.net.Uri
 import android.util.Log
+import com.nuvio.tv.core.logging.redactedUrlForLog
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.MimeTypes
@@ -91,6 +92,10 @@ internal fun PlayerRuntimeController.updateAvailableTracks(tracks: Tracks) {
                                 )
                             }
                         }
+                        // Drive the display-mode switch from
+                        // the format ExoPlayer just reported (self-gating; see
+                        // PlayerRuntimeControllerAfrTrack.kt).
+                        maybeRunTrackFormatAfr(rawFps = raw, format = format)
                     }
                     // Extract video codec, resolution, and bitrate for stream info
                     currentVideoCodec = CustomDefaultTrackNameProvider.formatNameFromMime(format.sampleMimeType)
@@ -152,7 +157,7 @@ internal fun PlayerRuntimeController.updateAvailableTracks(tracks: Tracks) {
                             name = format.label ?: format.language ?: context.getString(com.nuvio.tv.R.string.player_track_subtitle_fallback, subtitleTracks.size + 1),
                             language = format.language,
                             trackId = format.id,
-                            codec = CustomDefaultTrackNameProvider.formatNameFromMime(format.sampleMimeType),
+                            codec = subtitleCodecName(format),
                             isForced = hasForcedFlag || nameHintForced || isSongsAndSigns,
                             isSelected = isSelected
                         )
@@ -164,6 +169,7 @@ internal fun PlayerRuntimeController.updateAvailableTracks(tracks: Tracks) {
 
     currentStreamHasVideoTrack = hasVideoTrack
     val effectiveVideoFormat = selectedVideoFormat ?: firstVideoFormat
+    _uiState.update { it.copy(isHdrVideo = isHdrVideoFormat(selectedVideoFormat)) }
     if (effectiveVideoFormat != null) {
         currentVideoTrackMimeType = effectiveVideoFormat.sampleMimeType
         currentVideoTrackCodecs = effectiveVideoFormat.codecs
@@ -231,6 +237,16 @@ internal fun PlayerRuntimeController.updateAvailableTracks(tracks: Tracks) {
             retryCurrentStreamWithVc1TrackSelectionBypass(currentPosition)
             return
         }
+        if (UnsupportedFormatMpvFallbackPolicy.shouldSwitchForUnplayableVideoTrack(
+                exoPlayerActive = isExoPlayerActiveForFormatFallback,
+                alreadySwitched = currentStreamUrl in mpvFormatFallbackStreamUrls,
+                videoTrackPresent = true,
+                videoTrackSelected = currentVideoTrackSelected,
+                videoFormatSupport = currentVideoTrackBestSupport
+            ) && switchToMpvForUnsupportedFormat("no-decoder")
+        ) {
+            return
+        }
     } else {
         currentVideoTrackMimeType = null
         currentVideoTrackCodecs = null
@@ -241,6 +257,16 @@ internal fun PlayerRuntimeController.updateAvailableTracks(tracks: Tracks) {
         currentVideoTrackBestSupport = C.FORMAT_UNSUPPORTED_TYPE
         currentVideoTrackIsLikelyVc1 = false
         lastLoggedVideoTrackSignature = null
+        if (UnsupportedFormatMpvFallbackPolicy.shouldSwitchForMissingVideoTrack(
+                exoPlayerActive = isExoPlayerActiveForFormatFallback,
+                alreadySwitched = currentStreamUrl in mpvFormatFallbackStreamUrls,
+                hasAudioTrack = audioTracks.isNotEmpty(),
+                fileName = currentFilename ?: currentStreamUrl,
+                streamMimeType = currentStreamMimeType
+            ) && switchToMpvForUnsupportedFormat("no-video-track")
+        ) {
+            return
+        }
     }
 
     hasScannedTextTracksOnce = true
@@ -314,10 +340,13 @@ internal fun PlayerRuntimeController.updateAvailableTracks(tracks: Tracks) {
         audioTracks = audioTracks,
         subtitleTracks = subtitleTracks
     )
+    applyLosslessAudioDefaultIfUnset(audioTracks)
     if (currentStreamHasVideoTrack) {
         maybeScheduleFirstFrameWatchdog()
+        maybeScheduleTunnelAvSyncWatchdog()
     } else {
         cancelFirstFrameWatchdog()
+        cancelTunnelAvSyncWatchdog()
     }
     tryAutoSelectPreferredSubtitleFromAvailableTracks()
     maybeAdjustLibassPipelineForTracks(tracks)
@@ -484,7 +513,7 @@ internal fun PlayerRuntimeController.maybeRestorePendingAudioSelectionAfterSubti
     if (pending.streamUrl != currentStreamUrl) {
         logSwitchTrace(
             stage = "restore-audio-after-subtitle-refresh",
-            message = "action=clear reason=stream-mismatch pendingStream=${pending.streamUrl} currentStream=$currentStreamUrl"
+            message = "action=clear reason=stream-mismatch pendingStream=${pending.streamUrl.redactedUrlForLog()} currentStream=${currentStreamUrl.redactedUrlForLog()}"
         )
         pendingAudioSelectionAfterSubtitleRefresh = null
         return null
@@ -901,7 +930,7 @@ internal fun PlayerRuntimeController.applyPersistedTrackPreference(
     if (pendingEngineSwitchTrackPreference != null && switchPending == null) {
         logSwitchTrace(
             stage = "restore-switch-pref-clear",
-            message = "reason=stream-mismatch pendingStream=${pendingEngineSwitchTrackPreference?.streamUrl} currentStream=$currentStreamUrl"
+            message = "reason=stream-mismatch pendingStream=${pendingEngineSwitchTrackPreference?.streamUrl.redactedUrlForLog()} currentStream=${currentStreamUrl.redactedUrlForLog()}"
         )
         pendingEngineSwitchTrackPreference = null
     }
@@ -928,6 +957,9 @@ internal fun PlayerRuntimeController.applyPersistedTrackPreference(
     var updatedAddonSubtitle: com.nuvio.tv.domain.model.Subtitle? = null
 
     pending.audio?.let { audioSelection ->
+        // An audio preference existed for this stream (whether or not it
+        // matches a track here), so the lossless default must never run over it.
+        persistedAudioPreferenceSeenForStream = true
         if (audioTracks.isEmpty()) {
             logSwitchTrace(
                 stage = "restore-audio",
@@ -1597,6 +1629,10 @@ private fun audioMatchesSubtitleTargetForForced(audioTrack: TrackInfo, target: S
 internal fun PlayerRuntimeController.tryAutoSelectPreferredSubtitleFromAvailableTracks() {
     if (isUserExplicitSubtitleSelection) {
         Log.d(PlayerRuntimeController.TAG, "AUTO_SUB stop: user explicitly selected current subtitle")
+        return
+    }
+    if (hasBurnedInServerSubtitle) {
+        Log.d(PlayerRuntimeController.TAG, "AUTO_SUB stop: server is burning in a subtitle")
         return
     }
     val state = _uiState.value

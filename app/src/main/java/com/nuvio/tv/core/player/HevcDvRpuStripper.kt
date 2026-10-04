@@ -50,7 +50,7 @@ internal object HevcDvRpuStripper {
                 }
             val isRpu = nalType == NAL_TYPE_DV_RPU
             val isEnhancementLayer =
-                layerId > 0
+                layerId > 0 || nalType == NAL_TYPE_DV_EL
             val shouldDrop = isRpu || isEnhancementLayer
             if (shouldDrop) {
                 changed = true
@@ -116,6 +116,83 @@ internal object HevcDvRpuStripper {
         }
         return found
     }
+
+    /**
+     * Locates the first DV RPU NAL (HEVC type 62) in a length-delimited
+     * (MP4/fMP4/MKV) sample and returns (nalOffset, nalSize) pointing at the NAL
+     * *including* its 2-byte header, the exact slice
+     * [DoviBridge.getRpuStaticMetadata] / [DoviBridge.detectRpuElType] expect.
+     * Returns null when no RPU NAL is present. Read-only; does not mutate.
+     */
+    fun findRpuNalLengthDelimited(
+        sample: ByteArray,
+        sampleLen: Int,
+        nalLengthFieldLength: Int
+    ): Pair<Int, Int>? {
+        if (nalLengthFieldLength !in 1..4) return null
+        var pos = 0
+        while (pos + nalLengthFieldLength <= sampleLen) {
+            val nalSize = readLengthField(sample, pos, nalLengthFieldLength)
+            val nalStart = pos + nalLengthFieldLength
+            if (nalSize <= 0 || nalStart + nalSize > sampleLen) return null
+            val nalType = (sample[nalStart].toInt() ushr 1) and 0x3F
+            if (nalType == NAL_TYPE_DV_RPU) return nalStart to nalSize
+            pos = nalStart + nalSize
+        }
+        return null
+    }
+
+    /**
+     * Diagnostic: lists the HEVC NAL types in a length-delimited sample, in
+     * walk order, so a probe that finds no RPU can be told apart from a framing
+     * desync. An empty/short list or implausible types means the length-field
+     * size is wrong; a sensible list without 62 means the sample carries no RPU.
+     * Capped to avoid log spam.
+     */
+    fun listNalTypesLengthDelimited(
+        sample: ByteArray,
+        sampleLen: Int,
+        nalLengthFieldLength: Int
+    ): List<Int> {
+        if (nalLengthFieldLength !in 1..4) return emptyList()
+        val types = ArrayList<Int>(16)
+        var pos = 0
+        while (pos + nalLengthFieldLength <= sampleLen && types.size < 64) {
+            val nalSize = readLengthField(sample, pos, nalLengthFieldLength)
+            val nalStart = pos + nalLengthFieldLength
+            if (nalSize <= 0 || nalStart + nalSize > sampleLen) break
+            types += (sample[nalStart].toInt() ushr 1) and 0x3F
+            pos = nalStart + nalSize
+        }
+        return types
+    }
+
+    /**
+     * Annex-B (TS/raw HEVC) counterpart of [findRpuNalLengthDelimited]. Returns
+     * (nalOffset, nalSize) of the first DV RPU NAL payload (excluding the start
+     * code, including the 2-byte NAL header), or null when none is present.
+     */
+    fun findRpuNalAnnexB(
+        sample: ByteArray,
+        sampleLen: Int
+    ): Pair<Int, Int>? {
+        var scan = 0
+        while (scan < sampleLen) {
+            val startCode = findStartCode(sample, scan, sampleLen)
+            if (startCode < 0) break
+            val scLen = startCodeLength(sample, startCode, sampleLen)
+            val nalBegin = startCode + scLen
+            val nextStartCode = findStartCode(sample, nalBegin + 2, sampleLen)
+            val nalEnd = if (nextStartCode < 0) sampleLen else nextStartCode
+            if (nalBegin < nalEnd) {
+                val nalType = (sample[nalBegin].toInt() ushr 1) and 0x3F
+                if (nalType == NAL_TYPE_DV_RPU) return nalBegin to (nalEnd - nalBegin)
+            }
+            scan = nalEnd
+        }
+        return null
+    }
+
     /**
      * Rewrites a length-delimited (MP4/fMP4) sample, removing any NAL unit
      * whose type is 62 (DV RPU). Returns the rewritten bytes, or null if

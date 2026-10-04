@@ -8,9 +8,15 @@ internal fun PlayerRuntimeController.releasePlayer() {
     releasePlayer(flushPlaybackState = true)
 }
 
-internal fun PlayerRuntimeController.releasePlayer(flushPlaybackState: Boolean) {
+internal fun PlayerRuntimeController.releasePlayer(flushPlaybackState: Boolean, preserveRecovery: Boolean = false) {
+    if (!preserveRecovery) {
+        playbackRecoveryJob?.cancel()
+        playbackRecoveryJob = null
+        playbackRecoveryGate.cancel(resetIdentity = flushPlaybackState)
+    }
     logScrobbleDiagnostic("release_player", "flushPlaybackState=$flushPlaybackState")
     isReleasingPlayer = true
+    PlaybackByteCounter.reset()
     com.nuvio.tv.core.recommendations.TvRecommendationManager.isPlaybackActive.value = false
     if (flushPlaybackState) {
         stopTorrentStream()
@@ -68,21 +74,38 @@ internal fun PlayerRuntimeController.releasePlayer(flushPlaybackState: Boolean) 
     mpvStableProgressResetJob?.cancel()
     mpvStableProgressResetJob = null
     releaseMpvPlayer()
+    // Ordering: notifyAudioSessionUpdate(false) above
+    // reads _exoPlayer.audioSessionId and MUST run before _exoPlayer is nulled
+    // below, or the audio-effect close broadcast silently no-ops and the
+    // session leaks. Keep that call ahead of this block in any refactor.
     _exoPlayer?.let { player ->
+        // No pause()/clearMediaItems(): they are redundant pre-release round
+        // trips (see disposeExoPlayerBeforeRebuild). release() itself must stay
+        // on Main (the engine enforces application-thread access), so the
+        // Main-thread block is instead capped by
+        // PLAYER_RELEASE_TIMEOUT_MS and measured here.
         runCatching { player.playWhenReady = false }
-        runCatching { player.pause() }
         runCatching { player.stop() }
-        runCatching { player.clearMediaItems() }
         runCatching { player.clearVideoSurface() }
+        val releaseStartMs = android.os.SystemClock.elapsedRealtime()
         runCatching { player.release() }
+        val releaseMs = android.os.SystemClock.elapsedRealtime() - releaseStartMs
+        android.util.Log.i(
+            PlayerRuntimeController.TAG,
+            "PLAYER_RELEASE: site=teardown exoReleaseMs=$releaseMs"
+        )
     }
     _exoPlayer = null
+    nativeVideoSelection.clear()
     _loadControl = null
     currentBitrateAwareLoadControl = null
-    currentParallelChunkOverheadMb = 0
     ffmpegAudioRenderer = null
+    // No player, no bypass.
+    isAudioOutputBypassing = false
     updateAudioControlAvailability()
     playbackSpeedAwareAudioSink = null
+    currentExoPlayerListener = null
+    currentExoAnalyticsListener = null
     resetPlaybackTimeline()
     isReleasingPlayer = false
 }

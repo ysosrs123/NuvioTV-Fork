@@ -1,5 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.domain.model.AppFont
+import com.nuvio.tv.data.local.SubtitleEdgeStyle
 import androidx.media3.common.C
 import androidx.media3.common.TrackGroup
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -78,22 +80,28 @@ data class PlayerUiState(
     val showControls: Boolean = true,
     val showSeekOverlay: Boolean = false,
     val pendingPreviewSeekPosition: Long? = null,
+    val previewThumbPositionMs: Long? = null,
     val playbackSpeed: Float = 1f,
     val loadingOverlayEnabled: Boolean = true,
     val showPlayerLoadingStatus: Boolean = false,
+    // Keep source details hidden until the saved profile setting has arrived.
+    val showPlayerLoadingSource: Boolean = false,
     val playbackIssueReportsEnabled: Boolean = false,
     val showLoadingOverlay: Boolean = true,
     val loadingMessage: String? = null,
     val loadingProgress: Float? = null,
     val loadingIssueReportVisible: Boolean = false,
     val loadingIssueElapsedMs: Long = 0L,
-    val pauseOverlayEnabled: Boolean = true,
+    val pauseOverlayEnabled: Boolean = false,
     val osdClockEnabled: Boolean = true,
     val transparentLetterbox: Boolean = false,
     val playerStatsHudEnabled: Boolean = false,
     val playerStatsHudButtonAvailable: Boolean = false,
     val showPauseOverlay: Boolean = false,
     val audioTracks: List<TrackInfo> = emptyList(),
+    val serverAudioTracks: List<TrackInfo> = emptyList(),
+    val serverSubtitleTracks: List<TrackInfo> = emptyList(),
+    val isServerStream: Boolean = false,
     val subtitleTracks: List<TrackInfo> = emptyList(),
     val selectedAudioTrackIndex: Int = -1,
     val selectedSubtitleTrackIndex: Int = -1,
@@ -117,6 +125,8 @@ data class PlayerUiState(
     val subtitleAutoSyncLoadedTrackKey: String? = null,
     val showSpeedDialog: Boolean = false,
     val showMoreDialog: Boolean = false,
+    val dimHdrOverlays: Boolean = false,
+    val isHdrVideo: Boolean = false,
     // Subtitle style settings
     val subtitleStyle: SubtitleStyleSettings = SubtitleStyleSettings(),
     // Addon subtitles
@@ -157,6 +167,8 @@ data class PlayerUiState(
     val isLoadingSourceStreams: Boolean = false,
     val sourceStreamsError: String? = null,
     val sourceAllStreams: List<Stream> = emptyList(),
+    // URLs proven dead this session (non-media body / 404 / 410); greyed in the panel.
+    val deadSourceStreamUrls: Set<String> = emptySet(),
     val sourceSelectedAddonFilter: String? = null, // null means "All"
     val sourceFilteredStreams: List<Stream> = emptyList(),
     val sourceAvailableAddons: List<String> = emptyList(),
@@ -211,7 +223,10 @@ data class PlayerUiState(
     val aspectRatioIndicatorText: String = "",
     // Stream info overlay
     val showStreamInfoOverlay: Boolean = false,
+    val showPartyPanel: Boolean = false,
     val streamInfoData: StreamInfoData? = null,
+    // Live playback stats overlay
+    val showPlaybackStatsOverlay: Boolean = false,
     // Torrent streaming state
     val isTorrentStream: Boolean = false,
     val torrentDownloadSpeed: Long = 0L,
@@ -226,10 +241,12 @@ data class PlayerUiState(
     val torrentBufferingProgress: Float = 0f,
     // When true, suppress all torrent stats text (buffer, seeds, peers, speed)
     // from loading overlay, rebuffering indicator, and corner overlay.
-    val hideTorrentStats: Boolean = true
+    val hideTorrentStats: Boolean = true,
+    val controlLayout: com.nuvio.tv.data.local.PlayerControlLayout? = null
 )
 
 data class PlaybackTimelineState(
+    /** Display/seek-preview position used by the timers. */
     val currentPosition: Long = 0L,
     val duration: Long = 0L,
     /** Position (ms) up to which the player has buffered ahead of the playhead. */
@@ -237,8 +254,16 @@ data class PlaybackTimelineState(
     /** True for live windows (Live TV / live HLS), not VOD HLS. */
     val isLive: Boolean = false,
     /** Wall-clock time spent playing the current live stream. */
-    val watchedDurationMs: Long = 0L
-)
+    val watchedDurationMs: Long = 0L,
+    /** Actual playback position; preview-only input must not move it. */
+    val playbackPosition: Long = currentPosition
+) {
+    /** Omitted positions preserve the preview and playhead independently. */
+    internal fun withPositions(preview: Long? = null, actual: Long? = preview) = copy(
+        currentPosition = (preview ?: currentPosition).coerceAtLeast(0L),
+        playbackPosition = (actual ?: playbackPosition).coerceAtLeast(0L)
+    )
+}
 
 data class TrackInfo(
     val index: Int,
@@ -334,9 +359,12 @@ sealed class PlayerEvent {
     data object OnDismissStillWatchingPrompt : PlayerEvent()
 
     // Subtitle style events (for in-player style tab)
+    data class OnSetSubtitleBitmapSize(val size: Int) : PlayerEvent()
     data class OnSetSubtitleSize(val size: Int) : PlayerEvent()
     data class OnSetSubtitleTextColor(val color: Int) : PlayerEvent()
     data class OnSetSubtitleBold(val bold: Boolean) : PlayerEvent()
+    data class OnSetSubtitleFont(val font: AppFont?) : PlayerEvent()
+    data class OnSetSubtitleEdgeStyle(val style: SubtitleEdgeStyle) : PlayerEvent()
     data class OnSetSubtitleOutlineEnabled(val enabled: Boolean) : PlayerEvent()
     data class OnSetSubtitleOutlineColor(val color: Int) : PlayerEvent()
     data class OnSetSubtitleVerticalOffset(val offset: Int) : PlayerEvent()
@@ -346,8 +374,11 @@ sealed class PlayerEvent {
     data object OnSwitchToMpvPlayer : PlayerEvent()
     data object OnShowStreamInfo : PlayerEvent()
     data object OnDismissStreamInfo : PlayerEvent()
+    data object OnShowPartyPanel : PlayerEvent()
+    data object OnDismissPartyPanel : PlayerEvent()
     data object OnTogglePlayerStatsHud : PlayerEvent()
     data object OnToggleTorrentStats : PlayerEvent()
+    data object OnTogglePlaybackStats : PlayerEvent()
 }
 
 data class ParentalWarning(
@@ -395,5 +426,6 @@ data class StreamInfoData(
     val subtitleCodec: String? = null,
     val subtitleLanguage: String? = null,
     val subtitleSource: String? = null,
-    val playerEngine: String? = null
+    val playerEngine: String? = null,
+    val serverPlayback: String? = null
 )

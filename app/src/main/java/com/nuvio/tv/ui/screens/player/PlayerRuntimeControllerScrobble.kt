@@ -3,6 +3,7 @@ package com.nuvio.tv.ui.screens.player
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import com.nuvio.tv.data.local.toTrackPreference
@@ -36,6 +37,22 @@ internal fun PlayerRuntimeController.preparePlaybackBeforeStart(
     )
     clearPendingEngineSwitchTrackPreference()
     playbackPreparationJob?.cancel()
+
+    // Start the saved-progress read NOW, concurrent with
+    // everything up to and including player construction, instead of
+    // serially between the preparing_metadata and initializing_player
+    // phases (about 350 ms on the Trakt-active path, which collects the
+    // whole account's progress and filters client-side). The join sits in
+    // initializePlayer immediately before the resume position is read
+    // -- on both engine branches, before setMediaSource/setMedia -- so
+    // the STATE_READY race (see loadSavedProgressSuspend's KDoc) stays
+    // closed.
+    savedProgressDeferred?.cancel()
+    savedProgressDeferred = if (loadSavedProgress) {
+        scope.async { loadSavedProgressSuspend(currentSeason, currentEpisode) }
+    } else {
+        null
+    }
 
     // Fire-and-forget: warm the Trakt episode mapping in the background.
     traktMappingJob?.cancel()
@@ -104,11 +121,12 @@ internal fun PlayerRuntimeController.preparePlaybackBeforeStart(
         // seek to be silently skipped — the player would start from 0:00
         // or hang in buffering after a late seek.
         if (loadSavedProgress) {
+            // The read itself runs concurrently (launched above); the phase
+            // marker keeps loading timelines comparable and should read ~0 ms.
             recordLoadingDiagnosticEvent(
                 phase = "loading_saved_progress",
                 message = context.getString(com.nuvio.tv.R.string.player_loading_preparing)
             )
-            loadSavedProgressSuspend(currentSeason, currentEpisode)
         }
         recordLoadingDiagnosticEvent(
             phase = "initializing_player",

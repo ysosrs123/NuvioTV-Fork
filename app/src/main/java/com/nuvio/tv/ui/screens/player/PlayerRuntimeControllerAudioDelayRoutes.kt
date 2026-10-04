@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.os.Build
 import android.util.Log
 import com.nuvio.tv.data.local.AudioOutputChannels
+import com.nuvio.tv.ui.screens.player.iec.PlatformIecAudioTrackFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -141,6 +142,11 @@ private fun PlayerRuntimeController.onAudioOutputRouteMaybeChanged(
         if (newRoute != null) {
             currentAudioOutputRoute = newRoute
         }
+        AudioRejectionReverifier.ledger.invalidate()
+        saveAudioRefusalEvidence()
+        AudioChainProbe.invalidate()
+        PlatformIecAudioTrackFactory.invalidateIec61937ProbeMemo()
+        applySurroundResolutionInPlace(reason)
 
         if (rememberAudioDelayPerDeviceEnabled) {
             applyStoredAudioDelayForCurrentRouteIfEnabled()
@@ -162,6 +168,7 @@ private fun PlayerRuntimeController.onAudioOutputRouteMaybeChanged(
                     PlayerRuntimeController.TAG,
                     "Audio route after device $reason: bluetooth=$isBluetooth (was=$wasBluetooth); player stays running"
                 )
+                if (reason == "added" && !isBluetooth) schedulePassthroughReturnCheck("device added")
             }
             BluetoothRoutePlaybackAction.UPDATE_SINK_IN_PLACE -> {
                 if (_exoPlayer == null) return@launch
@@ -182,6 +189,54 @@ private fun PlayerRuntimeController.onAudioOutputRouteMaybeChanged(
             }
         }
     }
+}
+
+/**
+ * Rebuilds the player when the HDMI output is back and takes the current track as bitstream,
+ * but the player was built while it did not (TV on another input, box asleep). Runs again a
+ * little later because a receiver can report its formats a moment after the device appears.
+ */
+internal fun PlayerRuntimeController.schedulePassthroughReturnCheck(reason: String) {
+    if (_exoPlayer == null || isUsingMpvEngine()) return
+    passthroughReturnCheckJob?.cancel()
+    passthroughReturnCheckJob = scope.launch {
+        if (rebuildForReturnedPassthroughIfNeeded(reason)) return@launch
+        delay(PassthroughOutputReturn.SECOND_CHECK_DELAY_MS)
+        rebuildForReturnedPassthroughIfNeeded("$reason, second check")
+    }
+}
+
+private fun PlayerRuntimeController.rebuildForReturnedPassthroughIfNeeded(reason: String): Boolean {
+    if (isReleasingPlayer || isInBackground || playbackRecoveryJob?.isActive == true) return false
+    if (isUsingMpvEngine()) return false
+    val player = _exoPlayer ?: return false
+    val sink = playbackSpeedAwareAudioSink ?: return false
+    val format = player.audioFormat ?: return false
+    val encoding = PassthroughOutputReturn.encodingOf(format) ?: return false
+    if (AudioOutputRouteDetector.isBluetoothMediaOutput(context)) return false
+    val live = PassthroughOutputReturn.liveEncodings(context)
+    val rebuildsSoFar = passthroughReturnRebuilds[currentStreamUrl] ?: 0
+    val rebuild = PassthroughOutputReturn.shouldRebuild(
+        encoding = encoding,
+        pinned = sink.pinnedOutputEncodings,
+        live = live,
+        alreadyBitstream = sink.isDirectPlaybackActive() || sink.isIecHbrActive(),
+        claimedByIec = sink.demandsNonTunnelledVideo(format),
+        policyDenies = currentAudioPassthroughPolicy?.deniesPassthrough(format.sampleMimeType) == true,
+        forcedPcm = hasTriedAudioPcmFallback ||
+            _uiState.value.playbackSpeed != 1f ||
+            currentStreamUrl in preferFfmpegAudioStreamUrls,
+        rebuildsSoFar = rebuildsSoFar
+    )
+    if (!rebuild) return false
+    passthroughReturnRebuilds[currentStreamUrl] = rebuildsSoFar + 1
+    Log.i(
+        PlayerRuntimeController.TAG,
+        "PASSTHROUGH_RETURN rebuild reason=$reason encoding=$encoding " +
+            "pinned=${sink.pinnedOutputEncodings} live=$live route=${currentAudioOutputRoute?.key}"
+    )
+    scheduleOwnedPlaybackRecovery(player.currentPosition, 0L)
+    return true
 }
 
 internal fun PlayerRuntimeController.applyBluetoothAudioRouteInPlace(isBluetooth: Boolean) {
