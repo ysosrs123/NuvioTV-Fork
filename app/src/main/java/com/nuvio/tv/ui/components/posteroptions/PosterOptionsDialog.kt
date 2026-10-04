@@ -1,27 +1,18 @@
 package com.nuvio.tv.ui.components.posteroptions
 
-import com.nuvio.tv.ui.theme.NuvioTheme
-
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.Button
-import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -34,6 +25,8 @@ import com.nuvio.tv.domain.model.LibraryListTab
 import com.nuvio.tv.domain.model.localizedMembershipTitle
 import com.nuvio.tv.domain.model.LibrarySourceMode
 import com.nuvio.tv.ui.components.NuvioDialog
+import com.nuvio.tv.ui.components.PanelActionRow
+import com.nuvio.tv.ui.components.PlayerPanelRow
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -49,6 +42,7 @@ fun PosterOptionsDialog(
     onDismiss: () -> Unit,
     onDetails: () -> Unit,
     onToggleLibrary: () -> Unit,
+    onManageLists: () -> Unit,
     onToggleWatched: () -> Unit
 ) {
     val primaryFocusRequester = remember { FocusRequester() }
@@ -62,59 +56,40 @@ fun PosterOptionsDialog(
         title = title,
         subtitle = stringResource(R.string.home_poster_dialog_subtitle)
     ) {
-        Button(
+        PanelActionRow(
+            label = stringResource(R.string.cw_action_go_to_details),
             onClick = onDetails,
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(primaryFocusRequester),
-            colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
-            )
-        ) {
-            Text(stringResource(R.string.cw_action_go_to_details))
-        }
+            focusRequester = primaryFocusRequester
+        )
 
-        Button(
+        PanelActionRow(
+            label = if (isInLibrary) {
+                stringResource(R.string.hero_remove_from_library)
+            } else {
+                stringResource(R.string.hero_add_to_library)
+            },
             onClick = onToggleLibrary,
-            enabled = !isLibraryPending,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
-            )
-        ) {
-            Text(
-                if (showManageLists) {
-                    stringResource(R.string.library_manage_lists)
-                } else {
-                    if (isInLibrary) {
-                        stringResource(R.string.hero_remove_from_library)
-                    } else {
-                        stringResource(R.string.hero_add_to_library)
-                    }
-                }
+            enabled = !isLibraryPending
+        )
+
+        if (showManageLists) {
+            PanelActionRow(
+                label = stringResource(R.string.library_manage_lists),
+                onClick = onManageLists,
+                enabled = !isLibraryPending
             )
         }
 
         if (isMovie || isSeries) {
-            Button(
+            PanelActionRow(
+                label = if (isWatched) {
+                    stringResource(R.string.hero_mark_unwatched)
+                } else {
+                    stringResource(R.string.hero_mark_watched)
+                },
                 onClick = onToggleWatched,
-                enabled = !isWatchedPending,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
-                )
-            ) {
-                Text(
-                    if (isWatched) {
-                        stringResource(R.string.hero_mark_unwatched)
-                    } else {
-                        stringResource(R.string.hero_mark_watched)
-                    }
-                )
-            }
+                enabled = !isWatchedPending
+            )
         }
     }
 }
@@ -155,49 +130,24 @@ fun PosterListPickerDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 300.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items(tabs, key = { it.key }) { tab ->
                 val selected = membership[tab.key] == true
-                val titleText = if (selected) "✓ ${tab.localizedMembershipTitle()}" else tab.localizedMembershipTitle()
-                Button(
-                    onClick = { onToggle(tab.key) },
-                    enabled = !isPending,
-                    modifier = if (tab.key == tabs.firstOrNull()?.key) {
-                        Modifier
-                            .fillMaxWidth()
-                            .focusRequester(primaryFocusRequester)
-                    } else {
-                        Modifier.fillMaxWidth()
-                    },
-                    colors = ButtonDefaults.colors(
-                        containerColor = if (selected) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextPrimary
-                    )
-                ) {
-                    Text(
-                        text = titleText,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        }
-
-        Divider(color = NuvioTheme.colors.Border, thickness = NuvioTheme.spacing.hairline)
-
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-            Button(
-                onClick = onSave,
-                enabled = !isPending,
-                colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                PlayerPanelRow(
+                    title = if (selected) "\u2713 ${tab.localizedMembershipTitle()}" else tab.localizedMembershipTitle(),
+                    selected = selected,
+                    onClick = { if (!isPending) onToggle(tab.key) },
+                    focusRequester = if (tab.key == tabs.firstOrNull()?.key) primaryFocusRequester else null
                 )
-            ) {
-                Text(if (isPending) stringResource(R.string.action_saving) else stringResource(R.string.action_save))
             }
         }
+
+        PanelActionRow(
+            label = if (isPending) stringResource(R.string.action_saving) else stringResource(R.string.action_save),
+            onClick = onSave,
+            enabled = !isPending
+        )
     }
 }
 
@@ -228,12 +178,11 @@ fun PosterOptionsHost(
                 controller.dismiss()
             },
             onToggleLibrary = {
-                if (state.librarySourceMode != LibrarySourceMode.LOCAL) {
-                    controller.openListPicker()
-                } else {
-                    controller.toggleLibrary()
-                    controller.dismiss()
-                }
+                controller.toggleLibrary()
+                controller.dismiss()
+            },
+            onManageLists = {
+                controller.openListPicker()
             },
             onToggleWatched = {
                 if (isMovie) {
@@ -306,22 +255,14 @@ fun TrackingRemovalConfirmationDialog(
         width = 560.dp,
         suppressFirstKeyUp = false
     ) {
-        Button(
+        PanelActionRow(
+            label = stringResource(R.string.action_remove_anyway),
             onClick = onConfirm,
-            enabled = !isPending,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.action_remove_anyway))
-        }
-        Button(
-            onClick = onDismiss,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
-            )
-        ) {
-            Text(stringResource(R.string.action_cancel))
-        }
+            enabled = !isPending
+        )
+        PanelActionRow(
+            label = stringResource(R.string.action_cancel),
+            onClick = onDismiss
+        )
     }
 }

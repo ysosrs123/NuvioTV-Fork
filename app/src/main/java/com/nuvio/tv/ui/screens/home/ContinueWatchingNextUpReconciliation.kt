@@ -94,12 +94,13 @@ internal suspend fun HomeViewModel.applyConclusiveOlderNextUpResults(
     }
 
     if (!persistSnapshot) return
+    val clearVersion = cwEnrichmentCache.cacheCleared.value
+    val snapshot = (_uiState.value.continueWatchingItems + _uiState.value.upcomingItems)
+        .toCachedNextUpSnapshot(com.nuvio.tv.ui.components.brokenImageUrls)
     withContext(Dispatchers.IO) {
         if (profileManager.activeProfileId.value != pipelineProfileId) return@withContext
-        val snapshot = (_uiState.value.continueWatchingItems + _uiState.value.upcomingItems)
-            .toCachedNextUpSnapshot(com.nuvio.tv.ui.components.brokenImageUrls)
         runCatching {
-            cwEnrichmentCache.saveNextUpSnapshot(snapshot, force = true)
+            cwEnrichmentCache.saveNextUpSnapshot(snapshot, force = true, profileId = pipelineProfileId, expectedClearVersion = clearVersion)
         }
     }
 }

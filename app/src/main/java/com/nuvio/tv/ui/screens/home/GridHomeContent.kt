@@ -1,5 +1,8 @@
 package com.nuvio.tv.ui.screens.home
 
+import com.nuvio.tv.data.mediaserver.ServerCatalog
+import com.nuvio.tv.ui.v2.components.sidebarPageContent
+
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import androidx.activity.compose.BackHandler
@@ -93,6 +96,7 @@ import com.nuvio.tv.ui.components.LocalStartupSplashEnabled
 import com.nuvio.tv.ui.components.PosterCardDefaults
 import com.nuvio.tv.ui.components.PosterCardStyle
 import com.nuvio.tv.ui.components.collectionFolderCardImageUrl
+import com.nuvio.tv.ui.components.wideFolderCoverNeedsCrop
 import com.nuvio.tv.ui.components.nuvioCardDepth
 import com.nuvio.tv.ui.components.rememberArtworkBackedCardGlow
 
@@ -106,6 +110,8 @@ fun GridHomeContent(
     onContinueWatchingStartFromBeginning: (ContinueWatchingItem) -> Unit = {},
     onContinueWatchingPlayManually: (ContinueWatchingItem) -> Unit = {},
     showContinueWatchingManualPlayOption: Boolean = false,
+    /** CW card focus, indexed into uiState.continueWatchingItems. */
+    onContinueWatchingItemFocused: (Int) -> Unit = {},
     onNavigateToCatalogSeeAll: (String, String, String) -> Unit,
     onNavigateToFolderDetail: (String, String) -> Unit = { _, _ -> },
     onRemoveContinueWatching: (String, Int?, Int?, Boolean) -> Unit,
@@ -357,7 +363,7 @@ fun GridHomeContent(
         return
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
+    Box(modifier = Modifier.sidebarPageContent().fillMaxSize().background(NuvioTheme.colors.Background)) {
         val contentFocusRequester = LocalContentFocusRequester.current
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val gridWidth = maxWidth
@@ -537,7 +543,11 @@ fun GridHomeContent(
                         focusRequesters = cwFocusRequesters,
                         rowFocusRequester = cwRowFocusRequester,
                         listState = cwListState,
-                        onItemFocused = { lastFocusedCwIndex.intValue = it; activeCwRowKey.value = "continue_watching" },
+                        onItemFocused = {
+                            lastFocusedCwIndex.intValue = it
+                            activeCwRowKey.value = "continue_watching"
+                            onContinueWatchingItemFocused(it)
+                        },
                         onItemClick = onContinueWatchingClick,
                         onStartFromBeginning = onContinueWatchingStartFromBeginning,
                         showManualPlayOption = showContinueWatchingManualPlayOption,
@@ -708,7 +718,11 @@ fun GridHomeContent(
                             "series" -> strTypeSeries
                             else -> gridItem.type.replaceFirstChar { it.uppercase() }
                         }
-                        val displayName = if (uiState.catalogTypeSuffixEnabled && typeLabel.isNotBlank()) {
+                        val displayName = if (
+                            uiState.catalogTypeSuffixEnabled &&
+                            typeLabel.isNotBlank() &&
+                            !ServerCatalog.isServerAddonId(gridItem.addonId)
+                        ) {
                             "${gridItem.catalogName.replaceFirstChar { it.uppercase() }} - $typeLabel"
                         } else {
                             gridItem.catalogName.replaceFirstChar { it.uppercase() }
@@ -1060,11 +1074,15 @@ private fun GridCollectionFolderCard(
         ) {
             val activeImageUrl = collectionFolderCardImageUrl(folder, isFocused)
             if (!activeImageUrl.isNullOrBlank()) {
+                var cropCover by remember(activeImageUrl, folder.tileShape) { mutableStateOf(false) }
                 AsyncImage(
                     model = activeImageUrl,
                     contentDescription = folder.title,
                     modifier = Modifier.fillMaxSize().clip(cardShape),
-                    contentScale = ContentScale.FillBounds
+                    contentScale = if (cropCover) ContentScale.Crop else ContentScale.FillBounds,
+                    onSuccess = {
+                        cropCover = wideFolderCoverNeedsCrop(folder.tileShape, it.result.image.width, it.result.image.height)
+                    }
                 )
             } else if (!folder.coverEmoji.isNullOrBlank()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

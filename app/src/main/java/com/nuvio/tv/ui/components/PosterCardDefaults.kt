@@ -7,6 +7,7 @@ import com.nuvio.tv.ui.theme.NuvioComponents
 
 val LocalLandscapePosterMode = staticCompositionLocalOf { false }
 val LocalAlwaysBackdropWithLogo = staticCompositionLocalOf { false }
+val LocalLogoOverCardTrailer = staticCompositionLocalOf { true }
 
 @Immutable
 data class PosterCardStyle(

@@ -18,4 +18,12 @@ interface CatalogRepository {
         supportsSkip: Boolean = false,
         posterScreen: com.nuvio.tv.core.poster.CustomPosterScreen = com.nuvio.tv.core.poster.CustomPosterScreen.HOME
     ): Flow<NetworkResult<CatalogRow>>
+
+    /**
+     * Drops every catalogue cache layer this repository owns: the in-memory
+     * freshness LRU and the persistent first-paint disk cache (map plus
+     * backing file). Used by the Settings clear-cache action; subsequent
+     * catalogue reads go to the network.
+     */
+    suspend fun clearCaches()
 }

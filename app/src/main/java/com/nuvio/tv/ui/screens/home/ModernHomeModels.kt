@@ -1,5 +1,8 @@
 package com.nuvio.tv.ui.screens.home
 
+import com.nuvio.tv.data.mediaserver.ServerCatalog
+import com.nuvio.tv.domain.model.isPlaceholder
+
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Brush
@@ -16,6 +19,8 @@ import com.nuvio.tv.ui.util.localizedContentType
 import com.nuvio.tv.ui.util.computeAirDateBadgeText
 import com.nuvio.tv.ui.util.formatHeroRuntime
 import com.nuvio.tv.domain.model.MetaPreview
+import com.nuvio.tv.core.poster.isPosterUrl
+import com.nuvio.tv.core.poster.posterFallbackUrl
 import com.nuvio.tv.R
 import com.nuvio.tv.ui.components.formatContinueWatchingProgressLabel
 import com.nuvio.tv.ui.util.StableList
@@ -26,7 +31,7 @@ import com.nuvio.tv.ui.util.asStable
 internal val YEAR_REGEX = Regex("""\b(19|20)\d{2}\b""")
 internal const val MODERN_HERO_TEXT_WIDTH_FRACTION = 0.42f
 internal const val MODERN_HERO_MEDIA_WIDTH_FRACTION = 0.72f
-internal const val MODERN_TRAILER_OVERSCAN_ZOOM = 1.35f
+internal const val MODERN_TRAILER_OVERSCAN_ZOOM = 1.0f
 internal const val MODERN_HERO_FOCUS_DEBOUNCE_MS = 450L
 internal val MODERN_ROW_HEADER_FOCUS_INSET = 40.dp
 internal const val MODERN_CONTINUE_WATCHING_ROW_KEY = "continue_watching"
@@ -110,7 +115,9 @@ data class ModernCarouselItem(
     val imageUrl: String?,
     val heroPreview: HeroPreview,
     val payload: ModernPayload,
-    val metaPreview: MetaPreview? = null
+    val metaPreview: MetaPreview? = null,
+    val cornerLabel: String? = null,
+    val progressFraction: Float? = null
 )
 
 @Immutable
@@ -158,6 +165,7 @@ data class ModernHomePresentationState(
 
 @Immutable
 internal data class ModernHeroSceneState(
+    val artwork: HeroArtworkSelection,
     val heroBackdrop: String?,
     val preview: HeroPreview?,
     val enrichmentActive: Boolean,
@@ -167,7 +175,8 @@ internal data class ModernHeroSceneState(
     val trailerAudioUrl: String?,
     val trailerPlaybackKey: String?,
     val trailerMuted: Boolean,
-    val fullScreenBackdrop: Boolean
+    val fullScreenBackdrop: Boolean,
+    val featheredTrailer: Boolean = false
 )
 
 internal data class ModernCatalogRowBuildCacheEntry(
@@ -416,6 +425,8 @@ internal fun buildContinueWatchingItem(
 
     return ModernCarouselItem(
         key = continueWatchingItemKey(item),
+        cornerLabel = secondaryHighlightText,
+        progressFraction = (item as? ContinueWatchingItem.InProgress)?.progress?.progressPercentage,
         title = when (item) {
             is ContinueWatchingItem.InProgress -> item.progress.name
             is ContinueWatchingItem.NextUp -> item.info.name
@@ -466,11 +477,11 @@ internal fun buildCatalogItem(
     val carriedBackdrop = previousCachedItem?.heroPreview?.frozenBackdropUrl
     val carriedLogo = previousCachedItem?.heroPreview?.frozenLogoUrl
 
-    val currentBackdrop = item.backdropUrl
+    val currentBackdrop = (item.background ?: item.landscapePoster)?.takeUnless { item.isStandInBackdrop(it) }
     val currentLogo = item.logo
 
-    // First non-blank value wins and is never replaced.
-    val frozenBackdrop = carriedBackdrop?.takeIf { it.isNotBlank() }
+    // First non-blank value wins and is never replaced, except a poster standing in for the backdrop.
+    val frozenBackdrop = carriedBackdrop?.takeIf { it.isNotBlank() && !item.isStandInBackdrop(it) }
         ?: currentBackdrop
     val frozenLogo = carriedLogo?.takeIf { it.isNotBlank() }
         ?: currentLogo
@@ -601,7 +612,7 @@ internal fun catalogRowTitle(
     strTypeSeries: String = ""
 ): String {
     val catalogName = row.catalogName.replaceFirstChar { it.uppercase() }
-    if (!showCatalogTypeSuffix) return catalogName
+    if (!showCatalogTypeSuffix || ServerCatalog.isServerAddonId(row.addonId)) return catalogName
     val typeLabel = when (row.apiType.lowercase()) {
         "movie" -> strTypeMovie.ifBlank { row.apiType.replaceFirstChar { it.uppercase() } }
         "series" -> strTypeSeries.ifBlank { row.apiType.replaceFirstChar { it.uppercase() } }
@@ -695,4 +706,65 @@ internal fun ContinueWatchingItem.episode(): Int? {
         is ContinueWatchingItem.InProgress -> progress.episode
         is ContinueWatchingItem.NextUp -> info.seedEpisode
     }
+}
+
+/** Collapsed-card artwork shared by rendering and all poster warmers. */
+internal fun ModernCarouselItem.collapsedArtworkUrl(
+    landscape: Boolean,
+    backdrop: String? = heroPreview.frozenBackdropUrl?.takeUnless { it.isPlaceholder() }
+        ?: heroPreview.backdrop?.takeUnless { it.isPlaceholder() },
+    alwaysShowLandscapeClearlogo: Boolean = false
+): String? = when {
+    landscape && payload !is ModernPayload.CollectionFolder ->
+        landscapePosterUrl(alwaysShowLandscapeClearlogo) ?: backdrop ?: heroPreview.poster
+    payload is ModernPayload.CollectionFolder && !payload.coverEmoji.isNullOrBlank() -> imageUrl
+    else -> imageUrl ?: heroPreview.poster ?: heroPreview.backdrop
+}
+
+internal fun ModernCarouselItem.landscapePosterUrl(alwaysShowLandscapeClearlogo: Boolean): String? {
+    val preview = metaPreview ?: return null
+    if (alwaysShowLandscapeClearlogo) return null
+    return preview.landscapePoster?.takeUnless { it.isBlank() }
+}
+
+/** A poster, or a landscape poster that is not the item's own background, standing in for backdrop art. */
+private fun MetaPreview.isStandInBackdrop(url: String?): Boolean =
+    isPosterUrl(url) || (!url.isNullOrBlank() && url == landscapePoster && url != background)
+
+/**
+ * Backdrop a row card keeps showing. Landscape cards hold on to their first backdrop,
+ * but a poster standing in for it gives way once to real backdrop art.
+ */
+internal fun ModernCarouselItem.cardBackdropUrl(
+    current: String?,
+    enrichedBackdrop: String?,
+    landscape: Boolean
+): String? {
+    fun replaceable(url: String?) =
+        url.isNullOrBlank() || url.isPlaceholder() || metaPreview?.isStandInBackdrop(url) == true
+
+    var backdrop = current
+    if (replaceable(backdrop)) {
+        val known = heroPreview.frozenBackdropUrl?.takeUnless { it.isBlank() || it.isPlaceholder() }
+            ?: heroPreview.backdrop?.takeUnless { it.isBlank() || it.isPlaceholder() }
+        if (known != null && (backdrop.isNullOrBlank() || backdrop.isPlaceholder() || !replaceable(known))) {
+            backdrop = known
+        }
+    }
+    if (!enrichedBackdrop.isNullOrBlank() && enrichedBackdrop != backdrop &&
+        (!landscape || (replaceable(backdrop) && !replaceable(enrichedBackdrop)))
+    ) {
+        backdrop = enrichedBackdrop
+    }
+    return backdrop
+}
+
+/** Memory-cache extras of the card request, so warmed posters hit the same cache entry. */
+internal fun ModernCarouselItem.customPosterCacheExtras(
+    url: String,
+    landscape: Boolean
+): Map<String, String> {
+    val fallbackUrl = metaPreview?.posterFallbackUrl(url, landscapeCard = landscape)
+    return if (fallbackUrl == null) emptyMap()
+    else mapOf(com.nuvio.tv.core.image.CustomPosterFallbackInterceptor.FALLBACK_URL_KEY to fallbackUrl)
 }

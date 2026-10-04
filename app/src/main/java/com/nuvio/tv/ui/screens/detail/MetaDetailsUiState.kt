@@ -28,6 +28,7 @@ enum class CommentsMode {
 
 data class MetaDetailsUiState(
     val isLoading: Boolean = true,
+    val heroPresentationToken: Int = 0,
     val meta: Meta? = null,
     val error: String? = null,
     val selectedSeason: Int = 1,
@@ -133,4 +134,5 @@ sealed class MetaDetailsEvent {
     data object OnRemovalCancelled : MetaDetailsEvent()
     data object OnClearMessage : MetaDetailsEvent()
     data object OnLifecyclePause : MetaDetailsEvent()
+    data object OnLifecycleResume : MetaDetailsEvent()
 }

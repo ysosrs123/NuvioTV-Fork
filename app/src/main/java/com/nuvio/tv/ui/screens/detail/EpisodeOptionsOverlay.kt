@@ -250,6 +250,23 @@ internal fun EpisodeOptionsOverlay(
         primaryFocusRequester.requestFocus()
     }
 
+    if (com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null) {
+        com.nuvio.tv.ui.components.NuvioDialog(onDismiss = onDismiss, title = title, subtitle = episodeLabel) {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (description.isNotBlank()) {
+                    Text(description, color = NuvioTheme.colors.TextSecondary,
+                        style = MaterialTheme.typography.bodyMedium)
+                }
+                actions.forEachIndexed { index, action ->
+                    com.nuvio.tv.ui.components.PanelActionRow(label = action.label,
+                        enabled = action.enabled, onClick = action.onClick,
+                        focusRequester = primaryFocusRequester.takeIf { index == initialActionIndex })
+                }
+            }
+        }
+        return
+    }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(

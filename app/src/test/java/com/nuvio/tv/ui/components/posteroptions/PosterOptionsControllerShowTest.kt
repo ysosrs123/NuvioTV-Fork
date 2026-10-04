@@ -16,6 +16,10 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
@@ -26,6 +30,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PosterOptionsControllerShowTest {
 
     @Before
@@ -47,7 +52,8 @@ class PosterOptionsControllerShowTest {
             isInLibrary = true,
             isWatched = false
         )
-        controller.bind(backgroundScope)
+        val bindScope = CoroutineScope(coroutineContext + Job())
+        controller.bind(bindScope)
 
         controller.show(samplePreview(), addonBaseUrl = null)
         runCurrent()
@@ -57,6 +63,7 @@ class PosterOptionsControllerShowTest {
         assertEquals(false, state.isWatched)
         // Sanity: target was set so the dialog will actually render.
         assertTrue("target should be non-null after show()", state.target != null)
+        bindScope.cancel()
     }
 
     @Test
@@ -65,7 +72,8 @@ class PosterOptionsControllerShowTest {
             isInLibrary = false,
             isWatched = false
         )
-        controller.bind(backgroundScope)
+        val bindScope = CoroutineScope(coroutineContext + Job())
+        controller.bind(bindScope)
 
         controller.show(samplePreview(), addonBaseUrl = null)
         runCurrent()
@@ -74,6 +82,7 @@ class PosterOptionsControllerShowTest {
         assertEquals(false, state.isInLibrary)
         assertEquals(false, state.isWatched)
         assertTrue("target should be non-null after show()", state.target != null)
+        bindScope.cancel()
     }
 
     @Test
@@ -82,13 +91,15 @@ class PosterOptionsControllerShowTest {
             isInLibrary = false,
             isWatched = true
         )
-        controller.bind(backgroundScope)
+        val bindScope = CoroutineScope(coroutineContext + Job())
+        controller.bind(bindScope)
 
         controller.show(samplePreview(), addonBaseUrl = null)
         runCurrent()
 
         val state = controller.state.value
         assertEquals(true, state.isWatched)
+        bindScope.cancel()
     }
 
     @Test
@@ -122,7 +133,8 @@ class PosterOptionsControllerShowTest {
             watchedSeriesStateHolder = watchedSeriesStateHolder,
             tmdbService = tmdbService
         )
-        controller.bind(backgroundScope)
+        val bindScope = CoroutineScope(coroutineContext + Job())
+        controller.bind(bindScope)
 
         controller.show(samplePreview(id = "tmdb:111"), addonBaseUrl = null)
         controller.show(samplePreview(id = "tmdb:222"), addonBaseUrl = null)
@@ -130,6 +142,7 @@ class PosterOptionsControllerShowTest {
 
         val state = controller.state.value
         assertEquals("tt0000002", state.target?.id)
+        bindScope.cancel()
     }
 
     @Test
@@ -164,7 +177,8 @@ class PosterOptionsControllerShowTest {
             watchedSeriesStateHolder = watchedSeriesStateHolder,
             tmdbService = tmdbService
         )
-        controller.bind(backgroundScope)
+        val bindScope = CoroutineScope(coroutineContext + Job())
+        controller.bind(bindScope)
 
         controller.show(samplePreview(id = tmdbId), addonBaseUrl = null)
         runCurrent()
@@ -172,6 +186,7 @@ class PosterOptionsControllerShowTest {
         val state = controller.state.value
         assertEquals(true, state.isInLibrary)
         assertEquals(imdbId, state.target?.id)
+        bindScope.cancel()
     }
 
     private fun newController(isInLibrary: Boolean, isWatched: Boolean): PosterOptionsController {

@@ -7,16 +7,20 @@ import com.nuvio.tv.domain.model.EpisodeShuffle
 import com.nuvio.tv.domain.model.ShuffleSurface
 import com.nuvio.tv.domain.model.Video
 import com.nuvio.tv.domain.model.WatchProgress
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 internal data class HomeShuffleRefresh(val visit: Long = System.nanoTime(), val metadata: Int = 0)
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal fun HomeViewModel.createShuffleHomeState(): StateFlow<HomeUiState> {
     val finished = finishedShuffleSeeds().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     viewModelScope.launch {
@@ -25,13 +29,19 @@ internal fun HomeViewModel.createShuffleHomeState(): StateFlow<HomeUiState> {
     return combine(
         _uiState,
         episodeShuffleStore.profiles,
-        combine(watchProgressRepository.watchedItems, watchProgressRepository.allProgress) { watched, progress ->
-            val keys = watched.mapNotNull { item ->
-                item.season?.let { season -> item.episode?.let { item.contentId to (season to it) } }
-            } + progress.filter { it.isCompleted() }.mapNotNull { item ->
-                item.season?.let { season -> item.episode?.let { item.contentId to (season to it) } }
+        episodeShuffleStore.profiles.flatMapLatest { profile ->
+            if (!profile.available || profile.shows.values.none { it.enabled }) {
+                flowOf(emptyMap())
+            } else {
+                combine(watchProgressRepository.watchedItems, watchProgressRepository.allProgress) { watched, progress ->
+                    val keys = watched.mapNotNull { item ->
+                        item.season?.let { season -> item.episode?.let { item.contentId to (season to it) } }
+                    } + progress.filter { it.isCompleted() }.mapNotNull { item ->
+                        item.season?.let { season -> item.episode?.let { item.contentId to (season to it) } }
+                    }
+                    keys.groupBy({ it.first }, { it.second }).mapValues { it.value.toSet() }
+                }
             }
-            keys.groupBy({ it.first }, { it.second }).mapValues { it.value.toSet() }
         }.distinctUntilChanged(),
         shuffleHomeRefresh,
         finished

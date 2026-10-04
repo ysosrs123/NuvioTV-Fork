@@ -33,7 +33,10 @@ class CatalogRepositoryTypeTest {
             every { customPosterUrlPattern } returns flowOf("")
             every { customPosterEnabledScreens } returns flowOf(emptySet())
         }
-        val repository = CatalogRepositoryImpl(mockk<Context>(relaxed = true), api, preferences)
+        val repository = CatalogRepositoryImpl(
+            mockk<Context>(relaxed = true), api, preferences, healthStore = mockk(relaxed = true),
+            serverCatalog = mockk(relaxed = true)
+        )
         val descriptor = CatalogDescriptor(ContentType.SERIES, "Series", "mdblist.123", "My shows")
         val first = repository.getCatalog(
             addonBaseUrl = "https://example.com",

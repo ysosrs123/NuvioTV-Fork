@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.home
 
+import coil3.imageLoader
 import android.util.Log
 import kotlinx.coroutines.CancellationException
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,14 @@ import com.nuvio.tv.core.build.AppFeaturePolicy
 import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.poster.withCustomPosterUrls
 import com.nuvio.tv.core.tmdb.TmdbEnrichment
+import com.nuvio.tv.data.mediaserver.ServerItemRef
+import com.nuvio.tv.data.trailer.TrailerPlaybackFailures
+import com.nuvio.tv.data.trailer.isTrailerPreviewLinkExpired
+import com.nuvio.tv.data.trailer.isTrailerPreviewMissFresh
+import com.nuvio.tv.data.trailer.lookupTrailerPreview
+import com.nuvio.tv.data.trailer.shouldRetryTrailerPreviewAfterFailure
+import com.nuvio.tv.data.trailer.trailerPreviewMissTimestamp
+import com.nuvio.tv.data.trailer.trailerPreviewYtIds
 import com.nuvio.tv.domain.model.FocusedPosterTrailerPlaybackTarget
 import com.nuvio.tv.domain.model.HomeImdbRatingsVisibility
 import com.nuvio.tv.domain.model.HomeLayout
@@ -24,6 +33,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -31,6 +41,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import java.time.Instant
 
 private const val TMDB_HERO_ENRICHMENT_CONCURRENCY = 4
 
@@ -359,13 +370,62 @@ internal fun HomeViewModel.observeExternalMetaPrefetchPreferencePipeline() {
     }
 }
 
+/**
+ * Fork: the per-item trailer-preview caches (resolved URL/audio maps, negative
+ * cache) are keyed by itemId only, so a trailer source switch must clear them, or a
+ * hero trailer resolved under IMDb keeps playing after switching to YouTube (and a
+ * YouTube miss stays negative after switching to IMDb). TrailerService's own cache
+ * is already source-keyed; this clears the
+ * layer above it and re-requests the currently focused item.
+ */
+internal fun HomeViewModel.observeTrailerSourceChangesPipeline() {
+    viewModelScope.launch {
+        trailerSettingsDataStore.settings
+            .map { it.source }
+            .distinctUntilChanged()
+            .drop(1) // initial value: nothing cached yet
+            .collectLatest {
+                trailerPreviewJob?.cancel()
+                trailerPreviewLoadingIds.clear()
+                trailerPreviewNegativeCache.clear()
+                trailerPreviewUrlsState.clear()
+                trailerPreviewAudioUrlsState.clear()
+                val refocusId = activeTrailerPreviewItemId
+                activeTrailerPreviewItemId = null
+                refocusId?.let { id -> findCatalogItemById(id)?.let { requestTrailerPreviewPipeline(it) } }
+            }
+    }
+}
+
+/** A link that fails in the player is dropped and looked up once more; a second failure leaves the backdrop. */
+internal fun HomeViewModel.observeTrailerPlaybackFailuresPipeline() {
+    viewModelScope.launch {
+        TrailerPlaybackFailures.events.collect { failedUrl ->
+            val itemId = trailerPreviewUrlsState.entries.firstOrNull { it.value == failedUrl }?.key
+                ?: return@collect
+            trailerPreviewUrlsState.remove(itemId)
+            trailerPreviewAudioUrlsState.remove(itemId)
+            val now = System.currentTimeMillis()
+            if (!shouldRetryTrailerPreviewAfterFailure(trailerPreviewErrorRetryAt[itemId], now)) {
+                trailerPreviewNegativeCache[itemId] = now
+                return@collect
+            }
+            trailerPreviewErrorRetryAt[itemId] = now
+            if (activeTrailerPreviewItemId == itemId) {
+                findCatalogItemById(itemId)?.let { requestTrailerPreviewPipeline(it) }
+            }
+        }
+    }
+}
+
 internal fun HomeViewModel.requestTrailerPreviewPipeline(item: MetaPreview) {
     requestTrailerPreviewPipeline(
         itemId = item.id,
         title = item.name,
         releaseInfo = item.releaseInfo,
         apiType = item.apiType,
-        fallbackYtId = item.trailerYtIds.firstOrNull()
+        fallbackYtId = item.trailerYtIds.firstOrNull(),
+        fallbackImdbId = item.imdbId
     )
 }
 
@@ -374,71 +434,74 @@ internal fun HomeViewModel.requestTrailerPreviewPipeline(
     title: String,
     releaseInfo: String?,
     apiType: String,
-    fallbackYtId: String? = null
+    fallbackYtId: String? = null,
+    fallbackImdbId: String? = null
 ) {
     if (!AppFeaturePolicy.inAppTrailerPlaybackEnabled) return
-    if (startupGracePeriodActive) return
-
-    // Resolve fallbackYtId from catalog item if not provided
-    val resolvedFallbackYtId = fallbackYtId ?: findCatalogItemById(itemId)?.trailerYtIds?.firstOrNull()
-
-    // Always bump version — only the latest request (highest version) will proceed after debounce
     activeTrailerPreviewItemId = itemId
+    if (!trailerPreviewActive) return
+    if (startupGracePeriodActive) {
+        deferredTrailerPreviewRequest = {
+            requestTrailerPreviewPipeline(itemId, title, releaseInfo, apiType, fallbackYtId, fallbackImdbId)
+        }
+        return
+    }
+    if (ServerItemRef.isServerId(itemId)) {
+        trailerPreviewJob?.cancel()
+        return
+    }
+
+    // Repeated composition/focus notifications for the same pending title must not
+    // invalidate its debounce. Switching to a cached title still cancels old work.
+    if (trailerPreviewJob?.isActive == true && itemId in trailerPreviewLoadingIds) return
+    trailerPreviewJob?.cancel()
+    trailerPreviewLoadingIds.clear()
     trailerPreviewRequestVersion++
     val requestVersion = trailerPreviewRequestVersion
 
-    if (trailerPreviewNegativeCache.contains(itemId)) return
-    if (trailerPreviewUrlsState.containsKey(itemId)) return
+    trailerPreviewNegativeCache[itemId]?.let { missedAt ->
+        if (isTrailerPreviewMissFresh(missedAt, System.currentTimeMillis())) return
+        trailerPreviewNegativeCache.remove(itemId)
+    }
+    trailerPreviewUrlsState[itemId]?.let { url ->
+        if (!isTrailerPreviewLinkExpired(url, trailerPreviewAudioUrlsState[itemId], Instant.now())) return
+        trailerPreviewUrlsState.remove(itemId)
+        trailerPreviewAudioUrlsState.remove(itemId)
+    }
     if (!trailerPreviewLoadingIds.add(itemId)) return
 
-    trailerPreviewJob?.cancel()
-    trailerPreviewJob = viewModelScope.launch(Dispatchers.IO) {
+    // Keep bookkeeping on Main; repositories/extractors own their IO dispatchers.
+    trailerPreviewJob = viewModelScope.launch {
         try {
-            // Debounce: wait for focus to settle before hitting network
-            delay(180)
+            // Debounce: wait for focus to settle before hitting network. 350ms starts prewarming
+            // ~250ms sooner than 600 on a deliberate pause, still past a scroll-flick (~<200ms).
+            delay(350)
 
             // Only the LATEST request proceeds — all earlier ones are stale
             if (trailerPreviewRequestVersion != requestVersion) {
                 return@launch
             }
 
-            val tmdbId = try {
-                tmdbService.ensureTmdbId(itemId, apiType)
-            } catch (_: Exception) {
-                null
-            }
-
-            val trailerSource = trailerService.getTrailerPlaybackSource(
+            // The indexed item carries ids merged in by enrichment, the caller's copy may not.
+            val catalogItem = findCatalogItemById(itemId)
+            val lookup = lookupTrailerPreview(
+                trailerService = trailerService,
+                tmdbService = tmdbService,
+                itemId = itemId,
+                apiType = apiType,
                 title = title,
                 year = extractYear(releaseInfo),
-                tmdbId = tmdbId,
-                type = apiType
+                imdbId = catalogItem?.imdbId ?: fallbackImdbId,
+                ytIds = trailerPreviewYtIds(catalogItem?.trailerYtIds.orEmpty() + listOfNotNull(fallbackYtId))
             )
+            val trailerSource = lookup.source
 
             withContext(Dispatchers.Main) {
-                if (trailerSource?.videoUrl.isNullOrBlank()) {
-                    val fallbackSource = resolvedFallbackYtId?.let { ytId ->
-                        trailerService.getTrailerPlaybackSourceFromYouTubeUrl(
-                            youtubeUrl = "https://www.youtube.com/watch?v=$ytId",
-                            title = title,
-                            year = extractYear(releaseInfo)
-                        )
-                    }
-                    if (fallbackSource?.videoUrl != null) {
-                        if (trailerPreviewUrlsState[itemId] != fallbackSource.videoUrl) {
-                            trailerPreviewUrlsState[itemId] = fallbackSource.videoUrl
-                        }
-                        val fallbackAudio = fallbackSource.audioUrl
-                        if (fallbackAudio.isNullOrBlank()) {
-                            trailerPreviewAudioUrlsState.remove(itemId)
-                        } else if (trailerPreviewAudioUrlsState[itemId] != fallbackAudio) {
-                            trailerPreviewAudioUrlsState[itemId] = fallbackAudio
-                        }
-                    } else {
-                        trailerPreviewNegativeCache.add(itemId)
-                        trailerPreviewUrlsState.remove(itemId)
-                        trailerPreviewAudioUrlsState.remove(itemId)
-                    }
+                if (trailerSource == null) {
+                    trailerPreviewNegativeCache[itemId] =
+                        trailerPreviewMissTimestamp(lookup.rememberMiss, System.currentTimeMillis())
+                    trailerPreviewUrlsState.remove(itemId)
+                    trailerPreviewAudioUrlsState.remove(itemId)
                 } else {
                     val videoUrl = trailerSource.videoUrl
                     if (trailerPreviewUrlsState[itemId] != videoUrl) {
@@ -453,7 +516,7 @@ internal fun HomeViewModel.requestTrailerPreviewPipeline(
                 }
             }
         } finally {
-            trailerPreviewLoadingIds.remove(itemId)
+            if (trailerPreviewRequestVersion == requestVersion) trailerPreviewLoadingIds.remove(itemId)
         }
     }
 }
@@ -511,6 +574,11 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
         deferredEnrichItem = item
         return
     }
+    if (pendingTmdbEnrichItemId != item.id) {
+        tmdbEnrichFocusJob?.cancel()
+        pendingTmdbEnrichItemId = null
+        setEnrichingItemId(null)
+    }
     if (item.id in prefetchedTmdbIds || item.id in prefetchedExternalMetaIds) {
         // Only external enrichment re-opens this gate, so a cached external result still shuts out
         // an unresolved TMDB fetch. That is unchanged from before and deliberate: TMDB is never
@@ -539,14 +607,11 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
                 addEnrichedPreview(item.id, enriched)
             }
             if (_enrichingItemId.value == item.id) setEnrichingItemId(null)
-            // Still prefetch full meta in background for instant detail screen.
-            if (item.id !in backgroundMetaPrefetchedIds) {
-                backgroundMetaPrefetchedIds.add(item.id)
-                viewModelScope.launch {
-                    metaRepository.getMetaFromAllAddons(
-                        type = item.apiType,
-                        id = item.id
-                    ).first { it !is NetworkResult.Loading }
+            if (pendingTmdbEnrichItemId != item.id || tmdbEnrichFocusJob?.isActive != true) {
+                pendingTmdbEnrichItemId = item.id
+                tmdbEnrichFocusJob = viewModelScope.launch(Dispatchers.IO) {
+                    delay(HomeViewModel.EXTERNAL_META_PREFETCH_FOCUS_DEBOUNCE_MS)
+                    prefetchDetailsMeta(item)
                 }
             }
             return
@@ -579,15 +644,7 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
             if (!externalEnrichmentOutstanding(item.id)) {
                 if (_enrichingItemId.value == item.id) setEnrichingItemId(null)
                 // Still prefetch full meta in background for instant detail screen.
-                if (item.id !in backgroundMetaPrefetchedIds) {
-                    backgroundMetaPrefetchedIds.add(item.id)
-                    launch {
-                        metaRepository.getMetaFromAllAddons(
-                            type = item.apiType,
-                            id = item.id
-                        ).first { it !is NetworkResult.Loading }
-                    }
-                }
+                prefetchDetailsMeta(item)
                 return@launch
             }
         }
@@ -598,8 +655,9 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
             // - tmdbEnabledForCurrentLayout: controls TMDB enrichment
             // - externalMetaPrefetchEnabled: controls external meta addon fetch
             val tmdbDeferred = if (tmdbEnabledForCurrentLayout && item.id !in prefetchedTmdbIds) {
-                val tmdbId = runCatching { tmdbService.ensureTmdbId(item.id, item.apiType) }.getOrNull()
-                if (tmdbId != null) async {
+                async {
+                    val tmdbId = runCatching { tmdbService.ensureTmdbId(item.id, item.apiType) }.getOrNull()
+                        ?: return@async null
                     runCatching {
                         tmdbMetadataService.fetchEnrichment(
                             tmdbId = tmdbId,
@@ -607,7 +665,7 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
                             language = currentTmdbSettings.language
                         )
                     }.getOrNull()
-                } else null
+                }
             } else null
 
 
@@ -664,15 +722,7 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
             }
 
             // Always prefetch full meta in background for instant detail screen loading.
-            if (item.id !in backgroundMetaPrefetchedIds) {
-                backgroundMetaPrefetchedIds.add(item.id)
-                viewModelScope.launch {
-                    metaRepository.getMetaFromAllAddons(
-                        type = item.apiType,
-                        id = item.id
-                    ).first { it !is NetworkResult.Loading }
-                }
-            }
+            prefetchDetailsMeta(item)
 
             // Warm up watch progress pipeline so detail screen reads are fast.
             viewModelScope.launch {
@@ -703,87 +753,102 @@ internal fun HomeViewModel.onItemFocusPipeline(item: MetaPreview) {
  */
 internal fun HomeViewModel.preloadAdjacentItemPipeline(item: MetaPreview) {
     if (startupGracePeriodActive) return
-    if (item.id in prefetchedTmdbIds || item.id in prefetchedExternalMetaIds) return
-    if (pendingTmdbEnrichItemId == item.id || pendingAdjacentPrefetchItemId == item.id) return
-
-    pendingAdjacentPrefetchItemId = item.id
-    adjacentItemPrefetchJob?.cancel()
-    adjacentItemPrefetchJob = viewModelScope.launch(Dispatchers.IO) {
+    if (pendingTmdbEnrichItemId == item.id) return
+    adjacentItemPrefetchJobs.launch(viewModelScope, item.id, Dispatchers.IO) {
         val tmdbEnabledForCurrentLayout = currentTmdbSettings.enabled &&
             (_uiState.value.homeLayout != HomeLayout.MODERN || currentTmdbSettings.modernHomeEnabled)
         delay(HomeViewModel.EXTERNAL_META_PREFETCH_ADJACENT_DEBOUNCE_MS)
-        if (pendingAdjacentPrefetchItemId != item.id) return@launch
 
-        if (item.id in prefetchedTmdbIds || item.id in prefetchedExternalMetaIds) return@launch
-
-        try {
-            // Launch TMDB and external meta addon fetch in parallel (same as focused pipeline).
-            val tmdbDeferred = if (tmdbEnabledForCurrentLayout) {
-                val tmdbId = runCatching { tmdbService.ensureTmdbId(item.id, item.apiType) }.getOrNull()
-                if (tmdbId != null) async {
-                    runCatching {
-                        tmdbMetadataService.fetchEnrichment(
-                            tmdbId = tmdbId,
-                            contentType = item.type,
-                            language = currentTmdbSettings.language
-                        )
-                    }.getOrNull()
-                } else null
-            } else null
-
-            val externalMetaDeferred = if (externalMetaPrefetchEnabled &&
-                item.id !in prefetchedExternalMetaIds &&
-                externalMetaPrefetchInFlightIds.add(item.id)
-            ) {
-                // The id is claimed here, in the enclosing coroutine, but released when the
-                // deferred completes rather than inside its body. A focus that moves on during
-                // the debounce cancels this job before the body runs, and a body that never runs
-                // never reaches its own finally, which would strand the id in the in-flight set
-                // and block every later fetch for that item.
-                async { fetchExternalMetaOutcome(item) }
-                    .also { d -> d.invokeOnCompletion { externalMetaPrefetchInFlightIds.remove(item.id) } }
-            } else null
-
-            val tmdbEnrichment = tmdbDeferred?.await()
-            val externalOutcome = externalMetaDeferred?.await()
-            val externalMeta = (externalOutcome as? ExternalMetaOutcome.Resolved)?.meta
-
-            if (tmdbEnrichment != null) prefetchedTmdbIds.add(item.id)
-            if (externalOutcome != null && externalOutcome != ExternalMetaOutcome.Failed) {
-                prefetchedExternalMetaIds.add(item.id)
-            }
-
-            if (externalMeta != null) {
-                updateCatalogItemWithMeta(item.id, externalMeta)
-            }
-            if (tmdbEnrichment != null) {
-                updateCatalogItemWithTmdb(item.id, tmdbEnrichment)
-            }
-
-            // MDBList ratings are handled by batch row prefetch
-            // (see HomeViewModelMdbListBatchPrefetch.kt).
-
-            if (tmdbEnrichment == null && externalMeta == null) {
-                addEnrichedPreview(item.id, item)
-            }
-
-            // Background prefetch for detail screen cache.
-            if (item.id !in backgroundMetaPrefetchedIds) {
-                backgroundMetaPrefetchedIds.add(item.id)
-                viewModelScope.launch {
-                    metaRepository.getMetaFromAllAddons(
-                        type = item.apiType,
-                        id = item.id
-                    ).first { it !is NetworkResult.Loading }
-                }
-            }
-
-        } finally {
-            if (pendingAdjacentPrefetchItemId == item.id) {
-                pendingAdjacentPrefetchItemId = null
-            }
+        val initialPreview = _enrichedPreviews.value[item.id] ?: item
+        val artworkWarmup = async { prefetchHeroArtwork(initialPreview) }
+        if (item.id in prefetchedTmdbIds || item.id in prefetchedExternalMetaIds) {
+            artworkWarmup.await()
+            return@launch
         }
+
+        // Launch TMDB and external meta addon fetch in parallel (same as focused pipeline).
+        val tmdbDeferred = if (tmdbEnabledForCurrentLayout) {
+            async {
+                val tmdbId = runCatching { tmdbService.ensureTmdbId(item.id, item.apiType) }.getOrNull()
+                    ?: return@async null
+                runCatching {
+                    tmdbMetadataService.fetchEnrichment(
+                        tmdbId = tmdbId,
+                        contentType = item.type,
+                        language = currentTmdbSettings.language
+                    )
+                }.getOrNull()
+            }
+        } else null
+
+        val externalMetaDeferred = if (externalMetaPrefetchEnabled &&
+            item.id !in prefetchedExternalMetaIds &&
+            externalMetaPrefetchInFlightIds.add(item.id)
+        ) {
+            // The id is claimed here, in the enclosing coroutine, but released when the
+            // deferred completes rather than inside its body. A focus that moves on during
+            // the debounce cancels this job before the body runs, and a body that never runs
+            // never reaches its own finally, which would strand the id in the in-flight set
+            // and block every later fetch for that item.
+            async { fetchExternalMetaOutcome(item) }
+                .also { d -> d.invokeOnCompletion { externalMetaPrefetchInFlightIds.remove(item.id) } }
+        } else null
+
+        val tmdbEnrichment = tmdbDeferred?.await()
+        val externalOutcome = externalMetaDeferred?.await()
+        val externalMeta = (externalOutcome as? ExternalMetaOutcome.Resolved)?.meta
+
+        if (tmdbEnrichment != null) prefetchedTmdbIds.add(item.id)
+        if (externalOutcome != null && externalOutcome != ExternalMetaOutcome.Failed) {
+            prefetchedExternalMetaIds.add(item.id)
+        }
+
+        if (externalMeta != null) {
+            updateCatalogItemWithMeta(item.id, externalMeta)
+        }
+        if (tmdbEnrichment != null) {
+            updateCatalogItemWithTmdb(item.id, tmdbEnrichment)
+        }
+
+        if (tmdbEnrichment == null && externalMeta == null) {
+            addEnrichedPreview(item.id, item)
+        }
+
+        val preview = _enrichedPreviews.value[item.id] ?: findCatalogItemById(item.id) ?: item
+        artworkWarmup.await()
+        if (preview.backdropUrl != initialPreview.backdropUrl) prefetchHeroArtwork(preview)
+
+        // Background prefetch for detail screen cache.
+        prefetchDetailsMeta(item)
+
     }
+}
+
+/** Warm the same source order Details uses. Repository TTL and shared requests own
+ * reuse; a session-long attempted-id marker must not suppress retries or expired data.
+ * Runs in the caller's bounded focus/neighbour job, not a detached ViewModel job.
+ */
+internal suspend fun HomeViewModel.prefetchDetailsMeta(item: MetaPreview) {
+    val source = item.sourceAddonBaseUrl?.takeIf(String::isNotBlank)
+    val preferred = if (!externalMetaPrefetchEnabled && source != null) {
+        metaRepository.getMeta(source, item.apiType, item.id).first { it !is NetworkResult.Loading }
+    } else null
+    val result = if (preferred is NetworkResult.Success) preferred else {
+        metaRepository.getMetaFromAllAddons(item.apiType, item.id).first { it !is NetworkResult.Loading }
+    }
+    if (result is NetworkResult.Success) backgroundMetaPrefetchedIds.add(item.id)
+}
+
+private suspend fun HomeViewModel.prefetchHeroArtwork(preview: MetaPreview) {
+    val url = preview.backdropUrl?.takeIf { it.isNotBlank() } ?: return
+    val metrics = appContext.resources.displayMetrics
+    appContext.imageLoader.execute(coil3.request.ImageRequest.Builder(appContext)
+        .data(url).size(metrics.widthPixels, metrics.heightPixels)
+        // Neighbours may never be displayed. Warm their existing encoded URL,
+        // without evicting visible posters with full-screen decoded bitmaps.
+        .memoryCachePolicy(coil3.request.CachePolicy.DISABLED)
+        .decoderFactory(coil3.decode.BlackholeDecoder.Factory())
+        .scale(coil3.size.Scale.FILL).build())
 }
 
 /**
@@ -950,6 +1015,9 @@ internal fun HomeViewModel.updateCatalogItemImdbRating(itemId: String, rating: F
     }
 }
 
+internal fun MetaPreview.enrichedBackground(meta: Meta): String? =
+    meta.background ?: meta.landscapePoster ?: background
+
 private fun HomeViewModel.updateCatalogItemWithMeta(itemId: String, meta: Meta) {
     enrichmentMergedIds.add(itemId)
     val incomingTrailerYtIds = meta.trailerYtIds
@@ -962,7 +1030,7 @@ private fun HomeViewModel.updateCatalogItemWithMeta(itemId: String, meta: Meta) 
         .takeIf { it > 0 }
 
     fun mergeItem(currentItem: MetaPreview): MetaPreview = currentItem.copy(
-        background = meta.backdropUrl ?: currentItem.backdropUrl,
+        background = currentItem.enrichedBackground(meta),
         logo = meta.logo ?: currentItem.logo,
         description = meta.description ?: currentItem.description,
         imdbRating = meta.imdbRating ?: currentItem.imdbRating,
@@ -973,8 +1041,10 @@ private fun HomeViewModel.updateCatalogItemWithMeta(itemId: String, meta: Meta) 
         language = meta.language ?: currentItem.language,
         country = meta.country ?: currentItem.country,
         seasonCount = seasonCount ?: currentItem.seasonCount,
-        trailerYtIds = if (incomingTrailerYtIds.isNotEmpty()) incomingTrailerYtIds else currentItem.trailerYtIds
+        trailerYtIds = if (incomingTrailerYtIds.isNotEmpty()) incomingTrailerYtIds else currentItem.trailerYtIds,
+        imdbId = currentItem.imdbId ?: meta.imdbId
     )
+    val gainsImdbId = findCatalogItemById(itemId)?.let { it.imdbId == null && meta.imdbId != null } == true
 
     updateIndexedCatalogItem(itemId, ::mergeItem)
     clearEnrichmentFailure(itemId)
@@ -987,7 +1057,8 @@ private fun HomeViewModel.updateCatalogItemWithMeta(itemId: String, meta: Meta) 
 
     // If external meta brought new trailerYtIds and the item has no trailer resolved yet, retry.
     // Only retry if this item is currently focused — avoid prefetching trailers for adjacent items.
-    if (incomingTrailerYtIds.isNotEmpty() && !trailerPreviewUrlsState.containsKey(itemId) && activeTrailerPreviewItemId == itemId) {
+    if ((incomingTrailerYtIds.isNotEmpty() || gainsImdbId) &&
+        !trailerPreviewUrlsState.containsKey(itemId) && activeTrailerPreviewItemId == itemId) {
         trailerPreviewNegativeCache.remove(itemId)
         trailerPreviewLoadingIds.remove(itemId)
         // Bump version so any in-flight pipeline for this item treats itself as stale
@@ -1000,7 +1071,7 @@ private fun HomeViewModel.updateCatalogItemWithMeta(itemId: String, meta: Meta) 
 
 private fun HomeViewModel.updateCatalogItemArtworkOnly(itemId: String, meta: Meta) {
     fun mergeItem(currentItem: MetaPreview): MetaPreview = currentItem.copy(
-        background = meta.backdropUrl ?: currentItem.backdropUrl,
+        background = currentItem.enrichedBackground(meta),
         logo = meta.logo ?: currentItem.logo
     )
 

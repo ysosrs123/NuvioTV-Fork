@@ -5,7 +5,13 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class CatalogResponseDto(
-    @Json(name = "metas") val metas: List<MetaPreviewDto?> = emptyList()
+    @Json(name = "metas") val metas: List<MetaPreviewDto?> = emptyList(),
+    /**
+     * Stremio addons may declare a response TTL alongside the metas. It is
+     * logged next to the in-memory catalogue cache TTL
+     * (CatalogRepositoryImpl.CATALOG_CACHE_TTL_MS, 90 s) but not acted on yet.
+     */
+    @Json(name = "cacheMaxAge") val cacheMaxAge: Long? = null
 )
 
 @JsonClass(generateAdapter = true)

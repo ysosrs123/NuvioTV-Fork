@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -40,8 +40,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.tv.material3.Button
-import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -52,10 +50,13 @@ import com.nuvio.tv.domain.model.LibrarySourceMode
 import com.nuvio.tv.domain.model.MetaPreview
 import com.nuvio.tv.ui.components.ErrorState
 import com.nuvio.tv.ui.components.LoadingIndicator
+import com.nuvio.tv.ui.components.LocalLandscapePosterMode
 import com.nuvio.tv.ui.components.LocalStartupLoadingState
 import com.nuvio.tv.ui.components.LocalStartupSplashEnabled
 import com.nuvio.tv.ui.components.shouldShowHomeStartupLoader
 import com.nuvio.tv.ui.components.NuvioDialog
+import com.nuvio.tv.ui.components.PanelActionRow
+import com.nuvio.tv.ui.components.PlayerPanelRow
 import com.nuvio.tv.ui.components.PosterCardDefaults
 import com.nuvio.tv.ui.components.PosterCardStyle
 import androidx.compose.ui.res.stringResource
@@ -102,15 +103,24 @@ fun HomeScreen(
     // Home was the only major screen without a lifecycle observer, so nothing ever told it to
     // look at its catalogs again.
     val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner, viewModel) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.setTrailerPreviewActive(true)
                 viewModel.beginShuffleHomeVisit()
                 viewModel.refreshHomeCatalogsIfStale()
+            } else if (event == Lifecycle.Event.ON_PAUSE || event == Lifecycle.Event.ON_STOP) {
+                com.nuvio.tv.core.performance.DetailEntryTrace.mark("home_paused", once = true)
+                // STOP can arrive after the destination has started its own search.
+                if (event == Lifecycle.Event.ON_PAUSE) com.nuvio.tv.core.stream.StreamPrefetchCache.cancelPending()
+                viewModel.setTrailerPreviewActive(false)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+            viewModel.setTrailerPreviewActive(false)
+        }
     }
     val modernPresentation by viewModel.modernHomePresentation.collectAsStateWithLifecycle()
     val initialCwResolved by viewModel.initialCwResolved.collectAsStateWithLifecycle()
@@ -224,7 +234,7 @@ fun HomeScreen(
         )
     }
 
-    val noAddonsError = stringResource(R.string.home_error_no_addons)
+    val noAddonsError = stringResource(R.string.home_empty_no_sources_title)
     val noCatalogAddonsError = stringResource(R.string.home_error_no_catalog_addons)
     val hasAnyContent = uiState.catalogRows.isNotEmpty() ||
         (uiState.continueWatchingEnabled && uiState.continueWatchingItems.isNotEmpty()) ||
@@ -241,7 +251,19 @@ fun HomeScreen(
     }
 
     // Reports the home screen as fully drawn once it leaves the loading state so startup timing is measurable and post-launch work can be deferred.
-    ReportDrawnWhen { !showStartupLoader }
+    val profileEntry = com.nuvio.tv.ui.v2.profile.LocalProfileEntryState.current
+    LaunchedEffect(profileEntry?.pending, showStartupLoader) {
+        if (profileEntry?.pending == true) {
+            profileEntry.homeReady = false
+            if (!showStartupLoader) {
+                // Let the populated/error surface and its existing focus targets attach.
+                repeat(2) { androidx.compose.runtime.withFrameNanos { } }
+                kotlinx.coroutines.delay(700)
+                profileEntry.homeReady = true
+            }
+        }
+    }
+    ReportDrawnWhen { !showStartupLoader && profileEntry?.pending != true }
 
     val startupLoadingState = LocalStartupLoadingState.current
     val showHomeLoader = shouldShowHomeStartupLoader(
@@ -364,6 +386,10 @@ fun HomeScreen(
                                 )
                         }
                     ) {
+                        CompositionLocalProvider(
+                            LocalLandscapePosterMode provides
+                                (LocalLandscapePosterMode.current || uiState.modernLandscapePostersEnabled)
+                        ) {
                         when (uiState.homeLayout) {
                             HomeLayout.CLASSIC -> ClassicHomeRoute(
                                 viewModel = viewModel,
@@ -407,6 +433,7 @@ fun HomeScreen(
                                 isCatalogItemWatched = isCatalogItemWatched,
                                 onCatalogItemLongPress = onCatalogItemLongPress
                             )
+                        }
                         }
                     }
                 }
@@ -469,11 +496,11 @@ fun HomeScreen(
                 posterOptionsTarget = null
             },
             onToggleLibrary = {
-                if (uiState.librarySourceMode != LibrarySourceMode.LOCAL) {
-                    viewModel.openPosterListPicker(item, selectedPoster.addonBaseUrl)
-                } else {
-                    viewModel.togglePosterLibrary(item, selectedPoster.addonBaseUrl)
-                }
+                viewModel.togglePosterLibrary(item, selectedPoster.addonBaseUrl)
+                posterOptionsTarget = null
+            },
+            onManageLists = {
+                viewModel.openPosterListPicker(item, selectedPoster.addonBaseUrl)
                 posterOptionsTarget = null
             },
             onToggleWatched = {
@@ -572,6 +599,10 @@ private fun ClassicHomeRoute(
         },
         onRequestLazyCatalogLoad = remember(viewModel) {
             { catalogKey: String -> viewModel.requestLazyCatalogLoad(catalogKey) }
+        },
+        // Focus-dwell stream prefetch for CW cards.
+        onContinueWatchingItemFocused = remember(viewModel) {
+            { index: Int -> viewModel.onContinueWatchingItemFocused(index) }
         }
     )
 }
@@ -624,6 +655,10 @@ private fun GridHomeRoute(
             { vi, vo, key ->
                 viewModel.saveGridFocusState(vi, vo, focusedItemKey = key)
             }
+        },
+        // Focus-dwell stream prefetch for CW cards.
+        onContinueWatchingItemFocused = remember(viewModel) {
+            { index: Int -> viewModel.onContinueWatchingItemFocused(index) }
         }
     )
 }
@@ -707,6 +742,16 @@ private fun ModernHomeRoute(
         },
         onRequestLazyCatalogLoad = remember(viewModel) {
             { catalogKey: String -> viewModel.requestLazyCatalogLoad(catalogKey) }
+        },
+        // Focus-dwell stream prefetch for CW cards. Gated on the CW
+        // row KEY, not the isCw flag -- ModernHomeRows sets that flag for the
+        // Upcoming row too, whose cards are unaired and must not be scraped.
+        onRowItemFocusedCallback = remember(viewModel) {
+            { rowKey: String, index: Int, _: Boolean ->
+                if (rowKey == MODERN_CONTINUE_WATCHING_ROW_KEY) {
+                    viewModel.onContinueWatchingItemFocused(index)
+                }
+            }
         }
     )
 }
@@ -725,6 +770,7 @@ private fun HomePosterOptionsDialog(
     onDismiss: () -> Unit,
     onDetails: () -> Unit,
     onToggleLibrary: () -> Unit,
+    onManageLists: () -> Unit,
     onToggleWatched: () -> Unit
 ) {
     val primaryFocusRequester = remember { FocusRequester() }
@@ -738,59 +784,40 @@ private fun HomePosterOptionsDialog(
         title = title,
         subtitle = stringResource(R.string.home_poster_dialog_subtitle)
     ) {
-        Button(
+        PanelActionRow(
+            label = stringResource(R.string.cw_action_go_to_details),
             onClick = onDetails,
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(primaryFocusRequester),
-            colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
-            )
-        ) {
-            Text(stringResource(R.string.cw_action_go_to_details))
-        }
+            focusRequester = primaryFocusRequester
+        )
 
-        Button(
+        PanelActionRow(
+            label = if (isInLibrary) {
+                stringResource(R.string.hero_remove_from_library)
+            } else {
+                stringResource(R.string.hero_add_to_library)
+            },
             onClick = onToggleLibrary,
-            enabled = !isLibraryPending,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
-            )
-        ) {
-            Text(
-                if (showManageLists) {
-                    stringResource(R.string.library_manage_lists)
-                } else {
-                    if (isInLibrary) {
-                        stringResource(R.string.hero_remove_from_library)
-                    } else {
-                        stringResource(R.string.hero_add_to_library)
-                    }
-                }
+            enabled = !isLibraryPending
+        )
+
+        if (showManageLists) {
+            PanelActionRow(
+                label = stringResource(R.string.library_manage_lists),
+                onClick = onManageLists,
+                enabled = !isLibraryPending
             )
         }
 
         if (isMovie || isSeries) {
-            Button(
+            PanelActionRow(
+                label = if (isWatched) {
+                    stringResource(R.string.hero_mark_unwatched)
+                } else {
+                    stringResource(R.string.hero_mark_watched)
+                },
                 onClick = onToggleWatched,
-                enabled = !isWatchedPending,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
-                )
-            ) {
-                Text(
-                    if (isWatched) {
-                        stringResource(R.string.hero_mark_unwatched)
-                    } else {
-                        stringResource(R.string.hero_mark_watched)
-                    }
-                )
-            }
+                enabled = !isWatchedPending
+            )
         }
     }
 }
@@ -831,48 +858,23 @@ private fun HomeLibraryListPickerDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 300.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items(tabs, key = { it.key }) { tab ->
                 val selected = membership[tab.key] == true
-                val titleText = if (selected) "\u2713 ${tab.localizedMembershipTitle()}" else tab.localizedMembershipTitle()
-                Button(
-                    onClick = { onToggle(tab.key) },
-                    enabled = !isPending,
-                    modifier = if (tab.key == tabs.firstOrNull()?.key) {
-                        Modifier
-                            .fillMaxWidth()
-                            .focusRequester(primaryFocusRequester)
-                    } else {
-                        Modifier.fillMaxWidth()
-                    },
-                    colors = ButtonDefaults.colors(
-                        containerColor = if (selected) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextPrimary
-                    )
-                ) {
-                    Text(
-                        text = titleText,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-        }
-
-        Divider(color = NuvioTheme.colors.Border, thickness = NuvioTheme.spacing.hairline)
-
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-            Button(
-                onClick = onSave,
-                enabled = !isPending,
-                colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                PlayerPanelRow(
+                    title = if (selected) "\u2713 ${tab.localizedMembershipTitle()}" else tab.localizedMembershipTitle(),
+                    selected = selected,
+                    onClick = { if (!isPending) onToggle(tab.key) },
+                    focusRequester = if (tab.key == tabs.firstOrNull()?.key) primaryFocusRequester else null
                 )
-            ) {
-                Text(if (isPending) stringResource(R.string.action_saving) else stringResource(R.string.action_save))
             }
         }
+
+        PanelActionRow(
+            label = if (isPending) stringResource(R.string.action_saving) else stringResource(R.string.action_save),
+            onClick = onSave,
+            enabled = !isPending
+        )
     }
 }

@@ -84,11 +84,71 @@ class HomeEnrichmentRepositoryBoundaryTest {
         // The failed lookup came back as a codeless Error, so the item was never marked prefetched
         // and the focus gate let it through again.
         awaitAtLeast(metaCalls, 2)
+        // The API counter advances before the response has reached the enrichment
+        // collector. Await that observable outcome instead of racing its dispatcher.
+        withTimeout(5_000) {
+            while (itemId !in viewModel.prefetchedExternalMetaIds) delay(25)
+        }
         assertEquals(
             "the resolved item should now be cached",
             true,
             itemId in viewModel.prefetchedExternalMetaIds
         )
+    }
+
+
+    @Test
+    fun `rapid focus on cached titles only warms full metadata for the settled title`() = runBlocking {
+        val transientId = "tt9000011"
+        val settledId = "tt9000012"
+        val requested = java.util.concurrent.ConcurrentLinkedQueue<String>()
+        val api = mockk<AddonApi>()
+        coEvery { api.getMeta(any()) } coAnswers {
+            requested.add(firstArg<String>())
+            Response.success(MetaResponseDto(meta = MetaDto(id = settledId, type = "series", name = "Settled")))
+        }
+        val viewModel = newViewModel(realRepository(api))
+        viewModel.externalMetaPrefetchEnabled = false
+        viewModel.prefetchedTmdbIds.addAll(listOf(transientId, settledId))
+        viewModel.onItemFocusPipeline(item(transientId))
+        viewModel.onItemFocusPipeline(item(settledId))
+        withTimeout(5_000) { while (requested.isEmpty()) delay(25) }
+        delay(HomeViewModel.EXTERNAL_META_PREFETCH_FOCUS_DEBOUNCE_MS + 100)
+        assertEquals(1, requested.size)
+        assertEquals(true, requested.single().contains(settledId))
+    }
+
+    @Test
+    fun `details prefetch prefers catalogue source and shares that result with Details`() = runBlocking {
+        val requested = mutableListOf<String>()
+        val api = mockk<AddonApi>()
+        coEvery { api.getMeta(any()) } coAnswers {
+            requested += firstArg<String>()
+            Response.success(MetaResponseDto(meta = MetaDto(id = itemId, type = "series", name = "Source")))
+        }
+        val repository = realRepository(api)
+        val vm = newViewModel(repository)
+        vm.externalMetaPrefetchEnabled = false
+        vm.prefetchDetailsMeta(item(itemId))
+        repository.getMeta(catalogSourceUrl, "series", itemId).collect { }
+        assertEquals(1, requested.size)
+        assertEquals(true, requested.single().startsWith(catalogSourceUrl))
+    }
+
+    @Test
+    fun `failed full metadata prefetch is not marked complete and can retry`() = runBlocking {
+        val reachable = AtomicBoolean(false)
+        val api = mockk<AddonApi>()
+        coEvery { api.getMeta(any()) } coAnswers {
+            if (!reachable.get()) throw IOException("offline")
+            Response.success(MetaResponseDto(meta = MetaDto(id = itemId, type = "series", name = "Recovered")))
+        }
+        val vm = newViewModel(realRepository(api))
+        vm.prefetchDetailsMeta(item(itemId))
+        assertEquals(false, itemId in vm.backgroundMetaPrefetchedIds)
+        reachable.set(true)
+        vm.prefetchDetailsMeta(item(itemId))
+        assertEquals(true, itemId in vm.backgroundMetaPrefetchedIds)
     }
 
     private suspend fun focusAndSettle(viewModel: HomeViewModel, item: MetaPreview) {
@@ -111,7 +171,7 @@ class HomeEnrichmentRepositoryBoundaryTest {
         val addonRepository = mockk<AddonRepository>(relaxed = true) {
             every { getInstalledAddons() } returns flowOf(listOf(metaAddon()))
         }
-        return MetaRepositoryImpl(context = context, api = api, addonRepository = addonRepository)
+        return MetaRepositoryImpl(context = context, api = api, addonRepository = addonRepository, healthStore = mockk(relaxed = true), serverCatalog = mockk(relaxed = true))
     }
 
     /** Deliberately not the catalog source, or the lookup short-circuits as source-sufficient. */
@@ -200,7 +260,12 @@ class HomeEnrichmentRepositoryBoundaryTest {
             watchedSeriesStateHolder = mockk(relaxed = true),
             cwEnrichmentCache = cwEnrichmentCache,
             profileManager = profileManager,
-            tvRecommendationManager = mockk(relaxed = true)
+            tvRecommendationManager = mockk(relaxed = true),
+            homeRefreshSignal = mockk(relaxed = true),
+            prefetchSelectionSupplier = mockk(relaxed = true),
+            streamRepository = mockk(relaxed = true),
+            trailerSettingsDataStore = mockk(relaxed = true),
+            serverCatalog = mockk(relaxed = true)
         )
         viewModel.startupGracePeriodActive = false
         viewModel.externalMetaPrefetchEnabled = true

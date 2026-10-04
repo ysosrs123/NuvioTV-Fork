@@ -1,5 +1,7 @@
 package com.nuvio.tv.ui.screens.home
 
+import com.nuvio.tv.ui.v2.components.sidebarPageContent
+
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import androidx.activity.compose.BackHandler
@@ -98,6 +100,8 @@ fun ClassicHomeContent(
     onContinueWatchingStartFromBeginning: (ContinueWatchingItem) -> Unit = {},
     onContinueWatchingPlayManually: (ContinueWatchingItem) -> Unit = {},
     showContinueWatchingManualPlayOption: Boolean = false,
+    /** CW card focus, indexed into uiState.continueWatchingItems. */
+    onContinueWatchingItemFocused: (Int) -> Unit = {},
     onNavigateToCatalogSeeAll: (String, String, String) -> Unit,
     onNavigateToFolderDetail: (String, String) -> Unit = { _, _ -> },
     onRemoveContinueWatching: (String, Int?, Int?, Boolean) -> Unit,
@@ -373,7 +377,6 @@ fun ClassicHomeContent(
     if (uiState.focusedPosterBackdropTrailerEnabled) {
         LaunchedEffect(focusedCatalogItem) {
             val item = focusedCatalogItem ?: return@LaunchedEffect
-            if (trailerPreviewUrls.containsKey(item.id)) return@LaunchedEffect
             delay(150)
             if (focusedCatalogItem?.id != item.id) return@LaunchedEffect
             latestOnRequestTrailerPreview(item)
@@ -530,6 +533,7 @@ fun ClassicHomeContent(
     LazyColumn(
         state = columnListState,
         modifier = Modifier
+            .sidebarPageContent()
             .fillMaxSize()
             .onFocusChanged { contentHasFocus.value = it.hasFocus }
             .focusRequester(contentFocusRequester)
@@ -679,6 +683,7 @@ fun ClassicHomeContent(
                         currentFocusSnapshot.rowIndex = -1
                         currentFocusSnapshot.itemIndex = itemIndex
                         currentFocusSnapshot.rowKey = "continue_watching"
+                        onContinueWatchingItemFocused(itemIndex)
                         activeRowKeyState.value = "continue_watching"
                         cwFocusedIndex.intValue = itemIndex
                         onFocusedRowKeyChanged(null)

@@ -3,14 +3,15 @@ package com.nuvio.tv.domain.model
 private const val DEFAULT_SKIP_STEP = 100
 
 /**
- * Whether this catalog supports a given extra argument (e.g. "skip", "search", "genre").
+ * Whether this catalog declares support for an extra argument (e.g. "skip", "search").
  *
- * Stremio manifests declare extras in either:
- * - full form: `extra: [{ "name": "skip" }, ...]`
- * - short form: `extraSupported: ["skip", ...]` / `extraRequired: [...]`
+ * Stremio manifests declare extras in either form:
+ *  - long form:  extra: [{ "name": "skip" }, ...]        (parsed into [extra])
+ *  - short form: extraSupported: ["skip", ...] / extraRequired: [...]
  *
- * Both must be checked; otherwise short-form catalogs never paginate (hasMore stays false
- * after the first batch).
+ * AddonMapper.parseCatalogExtras only populates [extra] from the long form, so
+ * short-form catalogs need the extraSupported/extraRequired checks; without them
+ * pagination is disabled (hasMore never set) and the catalog is hidden from search.
  */
 fun CatalogDescriptor.supportsExtra(name: String): Boolean {
     if (extra.any { it.name.equals(name, ignoreCase = true) }) return true
@@ -21,20 +22,24 @@ fun CatalogDescriptor.supportsExtra(name: String): Boolean {
 
 fun CatalogDescriptor.skipStep(defaultStep: Int = DEFAULT_SKIP_STEP): Int {
     if (pageSize != null && pageSize > 0) return pageSize
-    // Prefer step inferred from skip extra options when present (e.g. ["0","50","100"]).
-    val skipExtra = extra.firstOrNull { it.name.equals("skip", ignoreCase = true) }
-    val numericOptions = skipExtra?.options
+    // Some manifests omit pageSize but enumerate the skip extra's own options
+    // (e.g. ["0", "50", "100"]). The smallest positive gap between consecutive
+    // options is the real page size; without it we assume DEFAULT_SKIP_STEP and
+    // request skips the addon never serves.
+    val skipOptions = extra
+        .firstOrNull { it.name.equals("skip", ignoreCase = true) }
+        ?.options
         .orEmpty()
         .mapNotNull { it.trim().toIntOrNull() }
         .filter { it >= 0 }
         .distinct()
         .sorted()
-    if (numericOptions.size >= 2) {
-        val step = numericOptions
+    if (skipOptions.size >= 2) {
+        val inferred = skipOptions
             .zipWithNext()
-            .mapNotNull { (a, b) -> (b - a).takeIf { it > 0 } }
+            .mapNotNull { (lower, upper) -> (upper - lower).takeIf { gap -> gap > 0 } }
             .minOrNull()
-        if (step != null && step > 0) return step
+        if (inferred != null && inferred > 0) return inferred
     }
     return defaultStep
 }

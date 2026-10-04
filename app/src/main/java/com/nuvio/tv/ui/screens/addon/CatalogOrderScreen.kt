@@ -2,7 +2,16 @@
 
 package com.nuvio.tv.ui.screens.addon
 
+import com.nuvio.tv.data.mediaserver.ServerCatalog
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.screens.settings.SettingsPageAtmosphere
+import com.nuvio.tv.ui.screens.settings.SettingsStandaloneScaffold
+import com.nuvio.tv.ui.screens.settings.SettingsToggleRow
+import com.nuvio.tv.ui.screens.settings.settingsSubmenuSurface
+import com.nuvio.tv.ui.screens.settings.isV2Settings
+import com.nuvio.tv.ui.v2.components.NuvioActionPill
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.ui.graphics.Color
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -61,10 +70,10 @@ fun CatalogOrderScreen(
 
     BackHandler { onBackPress() }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.xl)
+    SettingsPageAtmosphere()
+    SettingsStandaloneScaffold(
+        title = stringResource(R.string.catalog_order_title),
+        subtitle = stringResource(R.string.catalog_order_subtitle)
     ) {
         LazyColumn(
             state = listState,
@@ -85,32 +94,12 @@ fun CatalogOrderScreen(
                     color = NuvioTheme.colors.TextSecondary
                 )
                 Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.catalog_order_follow_addons),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = NuvioTheme.colors.TextPrimary
-                        )
-                        Text(
-                            text = stringResource(R.string.catalog_order_follow_addons_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = NuvioTheme.colors.TextSecondary
-                        )
-                    }
-                    Switch(
-                        checked = uiState.followAddonsOrder,
-                        onCheckedChange = { viewModel.toggleFollowAddonsOrder(it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = NuvioTheme.colors.Primary,
-                            checkedTrackColor = NuvioTheme.colors.Primary.copy(alpha = 0.5f)
-                        )
-                    )
-                }
+                SettingsToggleRow(
+                    title = stringResource(R.string.catalog_order_follow_addons),
+                    subtitle = stringResource(R.string.catalog_order_follow_addons_desc),
+                    checked = uiState.followAddonsOrder,
+                    onToggle = { viewModel.toggleFollowAddonsOrder(!uiState.followAddonsOrder) }
+                )
             }
 
             when {
@@ -175,8 +164,8 @@ private fun CatalogOrderCard(
     onToggleEnabled: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = NuvioTheme.colors.BackgroundCard),
+        modifier = Modifier.fillMaxWidth().settingsSubmenuSurface(),
+        colors = CardDefaults.cardColors(containerColor = if (isV2Settings()) Color.Transparent else NuvioTheme.colors.BackgroundCard),
         shape = RoundedCornerShape(NuvioTheme.radii.md)
     ) {
         Row(
@@ -188,7 +177,11 @@ private fun CatalogOrderCard(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "${item.catalogName} - ${item.typeLabel.toDisplayTypeLabel()}",
+                    text = if (ServerCatalog.isServerKey(item.key)) {
+                        item.catalogName
+                    } else {
+                        "${item.catalogName} - ${item.typeLabel.toDisplayTypeLabel()}"
+                    },
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = if (item.isDisabled) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.TextPrimary
                 )
@@ -212,22 +205,10 @@ private fun CatalogOrderCard(
                 horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(
+                CatalogOrderButton(
                     onClick = onMoveUp,
                     enabled = item.canMoveUp,
-                    colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextSecondary,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                        focusedContentColor = NuvioTheme.colors.Primary
-                    ),
-                    border = ButtonDefaults.border(
-                        focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
-                        )
-                    ),
-                    shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowUpward,
@@ -235,22 +216,10 @@ private fun CatalogOrderCard(
                     )
                 }
 
-                Button(
+                CatalogOrderButton(
                     onClick = onMoveDown,
                     enabled = item.canMoveDown,
-                    colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextSecondary,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                        focusedContentColor = NuvioTheme.colors.Primary
-                    ),
-                    border = ButtonDefaults.border(
-                        focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
-                        )
-                    ),
-                    shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowDownward,
@@ -258,21 +227,9 @@ private fun CatalogOrderCard(
                     )
                 }
 
-                Button(
+                CatalogOrderButton(
                     onClick = onToggleEnabled,
-                    colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        contentColor = if (item.isDisabled) NuvioTheme.colors.Success else NuvioTheme.colors.TextSecondary,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                        focusedContentColor = if (item.isDisabled) NuvioTheme.colors.Success else NuvioTheme.colors.Error
-                    ),
-                    border = ButtonDefaults.border(
-                        focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
-                        )
-                    ),
-                    shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+
                 ) {
                     Text(text = if (item.isDisabled) stringResource(R.string.catalog_order_enable) else stringResource(R.string.catalog_order_disable))
                 }
@@ -284,5 +241,24 @@ private fun CatalogOrderCard(
 private fun String.toDisplayTypeLabel(): String {
     return replaceFirstChar { ch ->
         if (ch.isLowerCase()) ch.titlecase() else ch.toString()
+    }
+}
+
+@Composable
+private fun CatalogOrderButton(
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit
+) {
+    if (isV2Settings()) {
+        NuvioActionPill(onClick = onClick, enabled = enabled, content = content)
+    } else {
+        Button(onClick = onClick, enabled = enabled,
+            colors = ButtonDefaults.colors(
+                containerColor = NuvioTheme.colors.BackgroundCard,
+                contentColor = NuvioTheme.colors.TextSecondary,
+                focusedContainerColor = NuvioTheme.colors.FocusBackground,
+                focusedContentColor = NuvioTheme.colors.TextPrimary
+            ), content = content)
     }
 }

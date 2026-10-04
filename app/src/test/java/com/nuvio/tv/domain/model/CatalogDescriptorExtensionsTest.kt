@@ -5,10 +5,16 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * Covers the short-form manifest extras gap: AddonMapper only parses long-form
+ * `extra` into CatalogDescriptor.extra, so supportsExtra had to consult
+ * extraSupported/extraRequired directly or short-form catalogs never paginated
+ * and never appeared in search.
+ */
 class CatalogDescriptorExtensionsTest {
 
     @Test
-    fun `supportsExtra reads full extra list`() {
+    fun `supportsExtra reads long-form extra list`() {
         val catalog = descriptor(
             extra = listOf(CatalogExtra(name = "skip"), CatalogExtra(name = "genre"))
         )
@@ -33,13 +39,17 @@ class CatalogDescriptorExtensionsTest {
     }
 
     @Test
-    fun `skipStep prefers pageSize`() {
-        val catalog = descriptor(pageSize = 20)
-        assertEquals(20, catalog.skipStep())
+    fun `supportsExtra is false when nothing declares the extra`() {
+        assertFalse(descriptor().supportsExtra("skip"))
     }
 
     @Test
-    fun `skipStep infers step from skip options`() {
+    fun `skipStep prefers declared pageSize`() {
+        assertEquals(20, descriptor(pageSize = 20).skipStep())
+    }
+
+    @Test
+    fun `skipStep infers the step from skip options`() {
         val catalog = descriptor(
             extra = listOf(
                 CatalogExtra(name = "skip", options = listOf("0", "50", "100", "150"))
@@ -49,9 +59,37 @@ class CatalogDescriptorExtensionsTest {
     }
 
     @Test
-    fun `skipStep falls back to default when no pageSize or options`() {
-        val catalog = descriptor()
+    fun `skipStep ignores non-numeric and negative skip options`() {
+        val catalog = descriptor(
+            extra = listOf(
+                CatalogExtra(name = "skip", options = listOf("all", "-10", "0", "25"))
+            )
+        )
+        assertEquals(25, catalog.skipStep())
+    }
+
+    @Test
+    fun `skipStep falls back to the default with a single skip option`() {
+        val catalog = descriptor(
+            extra = listOf(CatalogExtra(name = "skip", options = listOf("0")))
+        )
         assertEquals(100, catalog.skipStep())
+    }
+
+    @Test
+    fun `skipStep falls back to the default with no pageSize and no options`() {
+        assertEquals(100, descriptor().skipStep())
+    }
+
+    @Test
+    fun `pageSize wins over inferable skip options`() {
+        val catalog = descriptor(
+            pageSize = 20,
+            extra = listOf(
+                CatalogExtra(name = "skip", options = listOf("0", "50", "100"))
+            )
+        )
+        assertEquals(20, catalog.skipStep())
     }
 
     private fun descriptor(
@@ -59,15 +97,13 @@ class CatalogDescriptorExtensionsTest {
         pageSize: Int? = null,
         extraSupported: List<String> = emptyList(),
         extraRequired: List<String> = emptyList()
-    ): CatalogDescriptor {
-        return CatalogDescriptor(
-            type = ContentType.MOVIE,
-            id = "top",
-            name = "Top",
-            extra = extra,
-            pageSize = pageSize,
-            extraSupported = extraSupported,
-            extraRequired = extraRequired
-        )
-    }
+    ): CatalogDescriptor = CatalogDescriptor(
+        type = ContentType.MOVIE,
+        id = "top",
+        name = "Top",
+        extra = extra,
+        pageSize = pageSize,
+        extraSupported = extraSupported,
+        extraRequired = extraRequired
+    )
 }

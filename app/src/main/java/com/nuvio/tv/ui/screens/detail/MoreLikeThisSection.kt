@@ -134,7 +134,7 @@ fun MoreLikeThisSection(
                     }
                 }
                 .focusGroup(),
-            contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = 6.dp),
+            contentPadding = PaddingValues(start = detailStartInset, end = NuvioTheme.spacing.xxxl, top = 6.dp, bottom = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
         ) {
             itemsIndexed(

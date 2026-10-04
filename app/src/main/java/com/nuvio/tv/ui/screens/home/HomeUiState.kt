@@ -39,8 +39,8 @@ data class HomeUiState(
     val classicFocusGradientEnabled: Boolean = false,
     val focusedPosterBackdropExpandEnabled: Boolean = false,
     val focusedPosterBackdropExpandDelaySeconds: Int = 3,
-    val focusedPosterBackdropTrailerEnabled: Boolean = false,
-    val focusedPosterBackdropTrailerMuted: Boolean = true,
+    val focusedPosterBackdropTrailerEnabled: Boolean = true,
+    val focusedPosterBackdropTrailerMuted: Boolean = false,
     val focusedPosterBackdropTrailerPlaybackTarget: FocusedPosterTrailerPlaybackTarget =
         FocusedPosterTrailerPlaybackTarget.HERO_MEDIA,
     val posterCardWidthDp: Int = 126,

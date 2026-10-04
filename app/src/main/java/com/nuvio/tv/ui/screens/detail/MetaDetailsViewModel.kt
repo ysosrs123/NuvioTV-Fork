@@ -1,11 +1,14 @@
 package com.nuvio.tv.ui.screens.detail
 
+import com.nuvio.tv.core.stream.withFileSizeVisibility
+import kotlinx.coroutines.flow.stateIn
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nuvio.tv.core.health.AddonHealthStore
+import com.nuvio.tv.core.health.HealthOutcome
 import com.nuvio.tv.core.player.StreamAutoPlayPolicy
-import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.poster.withCustomPosterUrls
 import com.nuvio.tv.core.tmdb.TmdbMetadataService
@@ -18,6 +21,10 @@ import com.nuvio.tv.data.local.TraktAuthDataStore
 import com.nuvio.tv.data.local.TraktSettingsDataStore
 import com.nuvio.tv.data.local.TmdbSettingsDataStore
 import com.nuvio.tv.data.repository.ImdbEpisodeRatingsRepository
+import com.nuvio.tv.data.trailer.TrailerPlaybackFailures
+import com.nuvio.tv.data.trailer.YouTubeUnplayableReason
+import com.nuvio.tv.data.trailer.shouldRetryTrailerPreviewAfterFailure
+import com.nuvio.tv.data.trailer.youTubeVideoIdOf
 import com.nuvio.tv.data.repository.MDBListRepository
 import com.nuvio.tv.data.repository.TraktCommentsService
 import com.nuvio.tv.data.repository.TraktRelatedService
@@ -28,6 +35,8 @@ import com.nuvio.tv.domain.model.LibrarySourceMode
 import com.nuvio.tv.domain.model.ListMembershipChanges
 import com.nuvio.tv.core.tracking.TrackingMembershipRemovalConfirmation
 import com.nuvio.tv.core.tracking.toggleTrackingMembershipSelection
+import com.nuvio.tv.core.tracking.TrackingProgressRefreshCoordinator
+import com.nuvio.tv.core.tracking.TrackingRefreshIntent
 import com.nuvio.tv.domain.model.Meta
 import com.nuvio.tv.domain.model.MetaTrailer
 import com.nuvio.tv.domain.model.NextToWatch
@@ -40,6 +49,8 @@ import com.nuvio.tv.domain.repository.MetaRepository
 import com.nuvio.tv.domain.repository.WatchProgressRepository
 import com.nuvio.tv.data.local.WatchedItemsPreferences
 import com.nuvio.tv.data.local.TrailerSettingsDataStore
+import com.nuvio.tv.data.mediaserver.ServerItemRef
+import com.nuvio.tv.data.mediaserver.withoutUnmarked
 import com.nuvio.tv.data.trailer.TrailerService
 import com.nuvio.tv.core.util.withAppLocale
 import com.nuvio.tv.core.util.isUnreleased
@@ -49,9 +60,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -64,6 +74,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.content.Context
@@ -75,11 +86,23 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 private const val TAG = "MetaDetailsViewModel"
+private const val STREAM_PREFETCH_DEBOUNCE_MS = 300L
+
+// Episode focus moves on every D-pad press while scrolling a season,
+// which is far faster than opening a details page, so this is deliberately
+// longer than STREAM_PREFETCH_DEBOUNCE_MS. collectLatest cancels a pending
+// delay when focus moves again, so scrolling past an episode starts no work
+// at all and only a deliberate pause triggers a scrape. 2x the hero debounce.
+private const val EPISODE_FOCUS_PREFETCH_DEBOUNCE_MS = 600L
+
+private const val SERVER_STATES_TIMEOUT_MS = 3_000L
 
 @HiltViewModel
 class MetaDetailsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val metaRepository: MetaRepository,
+    // Used only to pre-scrape the play target while this page is open.
+    private val streamRepository: com.nuvio.tv.domain.repository.StreamRepository,
     private val tmdbSettingsDataStore: TmdbSettingsDataStore,
     private val tmdbService: TmdbService,
     private val tmdbMetadataService: TmdbMetadataService,
@@ -101,13 +124,20 @@ class MetaDetailsViewModel @Inject constructor(
     private val episodeShuffleStore: com.nuvio.tv.data.local.EpisodeShuffleStore,
     private val episodeShuffle: com.nuvio.tv.domain.model.EpisodeShuffle,
     private val playerSettingsDataStore: PlayerSettingsDataStore,
-    private val profileManager: ProfileManager,
-    private val metaDetailsSessionState: MetaDetailsSessionState,
     private val watchedSeriesStateHolder: com.nuvio.tv.data.local.WatchedSeriesStateHolder,
     val posterOptions: com.nuvio.tv.ui.components.posteroptions.PosterOptionsController,
-    savedStateHandle: SavedStateHandle
+    private val prefetchSelectionSupplier: com.nuvio.tv.core.stream.PrefetchSelectionSupplier,
+    savedStateHandle: SavedStateHandle,
+    private val healthStore: AddonHealthStore,
+    private val trackingProgressRefreshCoordinator: TrackingProgressRefreshCoordinator,
+    // Scopes the watched-episodes refresh to the active profile.
+    private val profileManager: com.nuvio.tv.core.profile.ProfileManager,
+    private val streamBadgeSettingsDataStore: com.nuvio.tv.data.local.StreamBadgeSettingsDataStore,
+    private val serverEpisodeStates: com.nuvio.tv.data.mediaserver.ServerEpisodeStates
 ) : ViewModel() {
+    private val traceSetup = com.nuvio.tv.core.performance.DetailEntryTrace.mark("viewmodel_setup")
     private val itemId: String = savedStateHandle["itemId"] ?: ""
+    private val isServerItem = ServerItemRef.isServerId(itemId)
     private val itemType: String = savedStateHandle["itemType"] ?: ""
     private val preferredAddonBaseUrl: String? = savedStateHandle["addonBaseUrl"]
 
@@ -119,6 +149,244 @@ class MetaDetailsViewModel @Inject constructor(
         applyDetailShuffle(state, profile, progress, episodeShuffle, shuffleVisit, localizedContext)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, MetaDetailsUiState())
 
+    // The details page resolves its play target (NextToWatch -> the
+    // "Next S1 E2" / "Resume ..." button) well before the press, but the addon
+    // scrape cannot start until StreamScreenViewModel exists, which is after it.
+    // That scrape takes about 2-3 s on every play, so kick it off here instead.
+    //
+    // Debounced so an accidental open that is immediately backed out of does not
+    // scrape. Every millisecond of debounce is a millisecond of head start given
+    // up, so it is deliberately short. StreamPrefetchCache keeps at most one
+    // prefetch in flight and drops the result if nothing consumes it.
+    private data class StreamPrefetchTarget(
+        val type: String,
+        val videoId: String,
+        val season: Int?,
+        val episode: Int?,
+        /** The meta id, for the binge-group cache the stream screen reads. */
+        val contentId: String?
+    )
+
+    private var metaLoadJob: Job? = null
+    private val presentationGate = DetailPresentationGate()
+    private val secondaryContentReady = MutableStateFlow(false)
+    val secondaryReady = secondaryContentReady.asStateFlow()
+    private val detailsResumed = MutableStateFlow(true)
+    private var lastStreamPrefetchKey: String? = null
+    private var streamPrefetchJob: Job? = null
+
+    /** Fork: details-page source line. Key of the hero-target prefetch; SEARCHING until the supplier signals. */
+    private val heroSourceKey = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+    val heroSourceSignal: kotlinx.coroutines.flow.StateFlow<com.nuvio.tv.core.stream.SourcePrefetchSignal?> =
+        kotlinx.coroutines.flow.combine(
+            heroSourceKey,
+            prefetchSelectionSupplier.uiSignals,
+            playerSettingsDataStore.playerSettings,
+            streamBadgeSettingsDataStore.settings
+        ) { key, sig, settings, badgeSettings ->
+            when {
+                key == null || !settings.speculativeStreamSearchEnabled -> null
+                settings.streamAutoPlayMode == com.nuvio.tv.data.local.StreamAutoPlayMode.MANUAL -> null
+                sig?.uiKey != key -> com.nuvio.tv.core.stream.SourcePrefetchSignal(
+                    key, com.nuvio.tv.core.stream.SourcePrefetchPhase.SEARCHING, null
+                )
+                sig.phase == com.nuvio.tv.core.stream.SourcePrefetchPhase.EMPTY -> null
+                else -> sig.withFileSizeVisibility(badgeSettings.showFileSizeBadges)
+            }
+        }.stateIn(
+            viewModelScope,
+            kotlinx.coroutines.flow.SharingStarted.Eagerly,
+            null
+        )
+
+    /**
+     * Kick the stream prefetch as early as the play target is knowable -
+     * at raw-meta time, before enrichment - so the prewarm has the maximum head
+     * start to finish before the user presses. Mirrors the post-applyMeta
+     * observer's target selection exactly (movie -> the meta id; series -> the
+     * nextToWatch episode, or nothing when there is no next), so the key matches
+     * and the observer's later fire is a dedup no-op rather than a re-scrape.
+     */
+    private fun launchEarlyStreamPrefetch(rawMeta: Meta) {
+        viewModelScope.launch {
+            val isSeries = rawMeta.videos.any { it.season != null }
+            val target: StreamPrefetchTarget? = if (isSeries) {
+                val progressMap = watchProgressRepository
+                    .getAllEpisodeProgress(_effectiveContentId.value)
+                    .first()
+                val watchedEpisodes = watchedItemsPreferences
+                    .getWatchedEpisodesForContent(_effectiveContentId.value)
+                    .first()
+                val ntw = computeNextToWatch(rawMeta, progressMap, watchedEpisodes)
+                // Fork: caught-up suppresses the hero
+                // source line entirely - no early scrape, no hero key. The
+                // Play button still targets the last episode; a press pays a
+                // normal scrape under the user's auto/manual selection mode.
+                // Without this gate the early path fires for the (non-null)
+                // replay target and the line flashes before the observer
+                // hides it.
+                if (ntw.isCaughtUp) {
+                    null
+                } else ntw.nextVideoId?.let {
+                    StreamPrefetchTarget(rawMeta.apiType, it, ntw.nextSeason, ntw.nextEpisode, rawMeta.id)
+                }
+            } else {
+                StreamPrefetchTarget(rawMeta.apiType, rawMeta.id, null, null, rawMeta.id)
+            }
+            target?.let {
+                onStreamPrefetchTarget(it.type, it.videoId, it.season, it.episode, it.contentId, "details_hero_early")
+            }
+        }
+    }
+
+    private fun onStreamPrefetchTarget(
+        type: String,
+        videoId: String,
+        season: Int?,
+        episode: Int?,
+        contentId: String?,
+        source: String
+    ) {
+        if (!detailsResumed.value || !com.nuvio.tv.core.stream.StreamPrefetchCache.speculationAllowed.value || type.isBlank() || videoId.isBlank()) return
+        val key = com.nuvio.tv.core.stream.StreamPrefetchCache.keyOf(type, videoId, season, episode)
+        if (key == lastStreamPrefetchKey) return
+        lastStreamPrefetchKey = key
+        if (source != "episode_focus") heroSourceKey.value = key
+        streamPrefetchJob?.cancel()
+        streamPrefetchJob = viewModelScope.launch {
+            presentationGate.awaitPresentation()
+            delay(STREAM_PREFETCH_DEBOUNCE_MS)
+            if (!detailsResumed.value) return@launch
+            // Cap the prefetch's wait at the auto-play timeout when eager
+            // ready is on, so a slow source (a bridge can take 6-9 s for 2-3
+            // streams) does not hold up ranking and the hero
+            // source line. Null = wait for full completion,
+            // used when the toggle is off or the timeout is instant/unlimited.
+            val capMs = playerSettingsDataStore.playerSettings.first().eagerReadyCapMs()
+            // Covers BOTH shapes: a movie's own id, and a series' hero
+            // target (resume/next episode). Both rank locally
+            // through the same supplier the Continue Watching path uses.
+            com.nuvio.tv.core.stream.StreamPrefetchCache.prefetch(
+                repository = streamRepository,
+                type = type,
+                videoId = videoId,
+                season = season,
+                episode = episode,
+                source = source,
+                capMs = capMs,
+                republishOnDedup = source != "episode_focus",
+                rank = { groups ->
+                    prefetchSelectionSupplier.rankForPrefetch(
+                        groups = groups,
+                        contentId = contentId,
+                        season = season,
+                        episode = episode,
+                        uiKey = if (source != "episode_focus") key else null
+                    )
+                }
+            )
+        }
+    }
+
+
+    /**
+     * Prefetch for an episode picked from the list. The hero button's target
+     * and the top Continue Watching entry are prefetched elsewhere; without this
+     * any OTHER episode starts from cold: full scrape, full rank, full debrid
+     * resolve, all after the press.
+     *
+     * MetaDetailsContent does not receive the ViewModel, but the episode focus
+     * callback already writes lastFocusedEpisodeIdBySeason here, so this hooks
+     * into that callback rather than adding a MetaDetailsEvent.
+     *
+     * Focus is not intent, so this is debounced harder than the hero path. The
+     * cost of over-firing is bounded by StreamPrefetchCache being single-flight
+     * -- a new target cancels the previous scrape. Resolution/media access is
+     * never performed by focus, regardless of the optional search setting.
+     */
+    fun onEpisodeFocusedForPrefetch(episode: Video) {
+        val meta = _uiState.value.meta ?: return
+        if (episode.id.isBlank()) return
+        episodeFocusPrefetchRequests.tryEmit(
+            StreamPrefetchTarget(
+                type = meta.apiType,
+                videoId = episode.id,
+                season = episode.season,
+                episode = episode.episode,
+                contentId = meta.id
+            )
+        )
+    }
+
+    private val episodeFocusPrefetchRequests =
+        MutableSharedFlow<StreamPrefetchTarget>(extraBufferCapacity = 16)
+
+    private val episodeFocusPrefetchObserver: Job = viewModelScope.launch {
+        episodeFocusPrefetchRequests
+            .distinctUntilChanged()
+            .collectLatest { target ->
+                delay(EPISODE_FOCUS_PREFETCH_DEBOUNCE_MS)
+                onStreamPrefetchTarget(
+                    target.type,
+                    target.videoId,
+                    target.season,
+                    target.episode,
+                    target.contentId,
+                    "episode_focus"
+                )
+            }
+    }
+
+    private val streamPrefetchObserver: Job = viewModelScope.launch {
+        _uiState
+            .map { state ->
+                val meta = state.meta
+                val ntw = state.nextToWatch
+                val nextId = ntw?.nextVideoId
+                when {
+                    meta == null -> null
+                    // Fork: caught-up is checked BEFORE nextId - the
+                    // caught-up target is the non-null LAST episode, which
+                    // would otherwise match the branch below and key the hero
+                    // line to a replay the user did not ask to preview.
+                    ntw?.isCaughtUp == true -> null
+                    // Series: the hero button plays this exact video id.
+                    nextId != null -> StreamPrefetchTarget(meta.apiType, nextId, ntw?.nextSeason, ntw?.nextEpisode, meta.id)
+                    // Movie: the hero button plays the meta id itself.
+                    state.seasons.isEmpty() -> StreamPrefetchTarget(meta.apiType, meta.id, null, null, meta.id)
+                    else -> null
+                }
+            }
+            .distinctUntilChanged()
+            .combine(com.nuvio.tv.core.stream.StreamPrefetchCache.speculationAllowed) { target, enabled ->
+                target.takeIf { enabled }
+            }
+            .combine(detailsResumed) { target, resumed -> target.takeIf { resumed } }
+            .collectLatest { target ->
+                if (target != null) {
+                    onStreamPrefetchTarget(
+                        target.type,
+                        target.videoId,
+                        target.season,
+                        target.episode,
+                        target.contentId,
+                        "details_hero"
+                    )
+                } else {
+                    // Fork: a null target must CLEAR the hero-key state.
+                    // Otherwise the source line stays keyed to the previous
+                    // target with no prefetch behind it and the combine
+                    // synthesises SEARCHING forever (for example once a series
+                    // is caught up). lastStreamPrefetchKey
+                    // is cleared with it so a later return to the SAME target
+                    // re-enters onStreamPrefetchTarget - re-keying the line via
+                    // a cheap cache-dedup republish - instead of dedup-skipping
+                    // with the line still hidden.
+                    heroSourceKey.value = null
+                    lastStreamPrefetchKey = null
+                }
+            }
+    }
     private val _posterCardCornerRadiusDp = MutableStateFlow(12)
     val posterCardCornerRadiusDp: StateFlow<Int> = _posterCardCornerRadiusDp.asStateFlow()
 
@@ -136,6 +404,11 @@ class MetaDetailsViewModel @Inject constructor(
     val lastFocusedEpisodeIdBySeason = androidx.compose.runtime.mutableStateMapOf<Int, String>()
     private var episodeRatingsJob: Job? = null
     private var nextToWatchJob: Job? = null
+
+    @Volatile
+    private var serverStates: List<com.nuvio.tv.data.mediaserver.ServerUserState> = emptyList()
+    private var serverStatesJob: Job? = null
+    private val serverUnmarks = java.util.concurrent.ConcurrentHashMap<Pair<Int, Int>, Long>()
     private var commentsJob: Job? = null
     private var commentsLoadMoreJob: Job? = null
     private var pendingDefaultLibraryToggle: LibraryEntryInput? = null
@@ -144,6 +417,8 @@ class MetaDetailsViewModel @Inject constructor(
     private var trailerAutoplayEnabled = false
     private var trailerPlayInBackground = false
     private var trailerHasPlayed = false
+    private var trailerPlaybackRetriedAtMs: Long? = null
+    private var sharedTrailerRetriedYtId: String? = null
     private var suppressSeasonAutoSwitch = false
 
     private var isPlayButtonFocused = false
@@ -164,6 +439,7 @@ class MetaDetailsViewModel @Inject constructor(
         posterOptions.bind(viewModelScope)
         observeMetaViewSettings()
         observeTrailerAutoplaySettings()
+        observeTrailerPlaybackFailures()
         observeTraktCommentsAvailability()
         observeLibraryState()
         observeWatchProgress()
@@ -290,15 +566,6 @@ class MetaDetailsViewModel @Inject constructor(
     }
 
     private fun updateNextToWatch(nextToWatch: NextToWatch) {
-        _uiState.value.meta?.let { meta ->
-            metaDetailsSessionState.putNextToWatch(
-                profileId = profileManager.activeProfileId.value,
-                progressSource = traktSettingsDataStore.watchProgressSource.value.name,
-                contentId = _effectiveContentId.value,
-                contentType = meta.apiType,
-                nextToWatch = nextToWatch
-            )
-        }
         _uiState.update { state ->
             if (state.nextToWatch == nextToWatch) return@update state
             val nextSeason = nextToWatch.nextSeason
@@ -376,6 +643,7 @@ class MetaDetailsViewModel @Inject constructor(
             MetaDetailsEvent.OnRemovalCancelled -> cancelPickerRemoval()
             MetaDetailsEvent.OnClearMessage -> clearMessage()
             MetaDetailsEvent.OnLifecyclePause -> handleLifecyclePause()
+            MetaDetailsEvent.OnLifecycleResume -> handleLifecycleResume()
         }
     }
 
@@ -570,6 +838,7 @@ class MetaDetailsViewModel @Inject constructor(
             }
                 .distinctUntilChanged()
                 .collectLatest { watchedSet ->
+                val previous = _uiState.value.watchedEpisodes
                 _uiState.update { state ->
                     if (state.watchedEpisodes == watchedSet) {
                         state
@@ -577,6 +846,7 @@ class MetaDetailsViewModel @Inject constructor(
                         state.copy(watchedEpisodes = watchedSet)
                     }
                 }
+                if (previous != watchedSet) onWatchedEpisodesChangedForServer()
                 reevaluateSeriesWatchedBadge()
                 calculateNextToWatch()
             }
@@ -724,8 +994,30 @@ class MetaDetailsViewModel @Inject constructor(
         }
     }
 
+    fun onHeroPresented(token: Int) {
+        com.nuvio.tv.core.performance.DetailEntryTrace.mark("hero_ack")
+        presentationGate.acknowledge(token)
+    }
+    fun onSecondaryContentRequested() {
+        presentationGate.requestSecondary()
+        secondaryContentReady.value = true
+    }
+
+    private suspend fun awaitHeroPresentation() {
+        val token = presentationGate.begin()
+        _uiState.update { it.copy(heroPresentationToken = token) }
+        presentationGate.awaitPresentation()
+    }
+
     private fun loadMeta() {
-        viewModelScope.launch {
+        metaLoadJob?.cancel()
+        secondaryContentReady.value = false
+        metaLoadJob = viewModelScope.launch {
+            // Metadata timing instrument. Grep anchor: MetaTiming. metaLoadStartMs
+            // is read in applyMetaWithEnrichment (always the next step on the
+            // meta) to measure addon-meta-ready, enrich and total text-ready
+            // latency. Logging only.
+            metaLoadStartMs = android.os.SystemClock.elapsedRealtime()
             cancelCommentsRequests()
             val mdbListSettings = mdbListSettingsDataStore.settings.first()
             val isMdbListActive = mdbListRepository.isAvailable(mdbListSettings)
@@ -818,9 +1110,7 @@ class MetaDetailsViewModel @Inject constructor(
                 } else {
                     metaRepository.getMetaFromAllAddons(type = itemType, id = metaLookupId).collect { result ->
                         when (result) {
-                            is NetworkResult.Success -> {
-                                applyMetaWithEnrichment(result.data)
-                            }
+                            is NetworkResult.Success -> applyMetaWithEnrichment(result.data)
                             is NetworkResult.Error -> {
                                 if (!tryApplyTmdbFallbackMeta()) {
                                     val errorMsg = buildMetaLoadErrorMessage(result.message, metaLookupId)
@@ -849,7 +1139,23 @@ class MetaDetailsViewModel @Inject constructor(
         val enrichment = tmdbMetadataService.fetchEnrichment(
             tmdbId = tmdbId.toString(),
             contentType = type,
-            language = settings.language
+            language = settings.language,
+            onHeroReady = { hero ->
+                withContext(Dispatchers.Main.immediate) {
+                    publishMetaToUi(Meta(
+                        id = itemId, type = type, rawType = itemType,
+                        name = hero.title ?: context.getString(R.string.detail_tmdb_fallback_title, tmdbId),
+                        poster = hero.poster, posterShape = com.nuvio.tv.domain.model.PosterShape.POSTER,
+                        background = hero.backdrop, logo = hero.logo, description = hero.description,
+                        releaseInfo = hero.releaseInfo, imdbRating = hero.rating?.toFloat(),
+                        genres = hero.genres, runtime = hero.runtimeMinutes?.toString(),
+                        director = emptyList(), cast = emptyList(), videos = emptyList(),
+                        country = null, awards = null, language = null, links = emptyList()
+                    ))
+                    awaitHeroPresentation()
+                    secondaryContentReady.value = true
+                }
+            }
         ) ?: return false
         val meta = Meta(
             id = itemId,
@@ -913,7 +1219,19 @@ class MetaDetailsViewModel @Inject constructor(
         return "$base\n\nID: $lookupId"
     }
 
-    private fun syncEffectiveContentId(meta: Meta) {
+    /**
+     * Render-raw-first: publishes meta to the UI state only, the
+     * part that makes the details screen appear. Split out of applyMeta so the
+     * raw addon meta can be painted immediately, before the ~900ms TMDB
+     * enrichment, then re-published (with backdrop/logo/etc.) on the enriched
+     * pass. Side effects run once, on the enriched applyMeta below.
+     */
+    private fun publishMetaToUi(meta: Meta) {
+        com.nuvio.tv.core.performance.DetailEntryTrace.mark("metadata_publish")
+        // Update the effective content ID so watch-progress observers pick up
+        // the canonical ID (e.g. IMDB "tt0396375") instead of the navigation ID
+        // (which may be "tmdb:13836").  Don't downgrade from an IMDB ID to a
+        // less canonical one (e.g. tmdb:): Trakt stores progress under IMDB.
         if (meta.id.isNotBlank() && meta.id != itemId) {
             val currentIsImdb = _effectiveContentId.value.startsWith("tt")
             val newIsImdb = meta.id.startsWith("tt")
@@ -921,17 +1239,6 @@ class MetaDetailsViewModel @Inject constructor(
                 _effectiveContentId.value = meta.id
             }
         }
-    }
-
-    private fun applyMeta(
-        meta: Meta,
-        initialNextToWatch: NextToWatch?
-    ) {
-        // Update the effective content ID so watch-progress observers pick up
-        // the canonical ID (e.g. IMDB "tt0396375") instead of the navigation ID
-        // (which may be "tmdb:13836").  Don't downgrade from an IMDB ID to a
-        // less canonical one (e.g. tmdb:) — Trakt stores progress under IMDB.
-        syncEffectiveContentId(meta)
 
         val seasons = if (meta.apiType.equals("tv", ignoreCase = true)) {
             meta.videos
@@ -963,8 +1270,7 @@ class MetaDetailsViewModel @Inject constructor(
         _uiState.update {
             // If nextToWatch already set a season (from pre-computed remap), prefer it
             // over the default season selection.
-            val effectiveNextToWatch = initialNextToWatch ?: it.nextToWatch
-            val effectiveSeason = effectiveNextToWatch?.nextSeason
+            val effectiveSeason = it.nextToWatch?.nextSeason
                 ?.takeIf { s -> s in seasons }
                 ?: selectedSeason
             val effectiveEpisodes = if (effectiveSeason != selectedSeason) {
@@ -978,17 +1284,22 @@ class MetaDetailsViewModel @Inject constructor(
                 seasons = seasons,
                 selectedSeason = effectiveSeason,
                 episodesForSeason = effectiveEpisodes,
-                nextToWatch = effectiveNextToWatch,
                 error = null,
                 commentsEpisodeTarget = null,
                 shouldShowCommentsSection = traktCommentsEnabled && traktAuthenticated && supportsComments(meta)
             )
         }
 
+    }
+
+    private fun applyMeta(meta: Meta) {
+        publishMetaToUi(meta)
         // Calculate next to watch after meta is loaded
         reevaluateSeriesWatchedBadge()
+        calculateNextToWatch()
 
         // Start fetching trailer after meta is loaded
+        trailerPlaybackRetriedAtMs = null
         fetchTrailerUrl()
 
         if (traktCommentsEnabled && traktAuthenticated && supportsComments(meta)) {
@@ -996,65 +1307,83 @@ class MetaDetailsViewModel @Inject constructor(
         }
     }
 
+    /** Metadata timing instrument (grep anchor: MetaTiming). Set in loadMeta. */
+    @Volatile
+    private var metaLoadStartMs: Long = 0L
+
     private suspend fun applyMetaWithEnrichment(meta: Meta) {
-        // Fire all independent async jobs immediately — they run in parallel.
-        loadMoreLikeThisAsync(meta)
-        val enriched = enrichMeta(meta)
-
-        syncEffectiveContentId(enriched)
-        val cachedNextToWatch = metaDetailsSessionState.getNextToWatch(
-            profileId = profileManager.activeProfileId.value,
-            progressSource = traktSettingsDataStore.watchProgressSource.value.name,
-            contentId = _effectiveContentId.value,
-            contentType = enriched.apiType
-        )?.resolveForMeta(enriched)
-
-        applyMeta(
-            meta = enriched,
-            initialNextToWatch = cachedNextToWatch
+        // Addon text is published first; TMDB hero artwork is published separately
+        // before supplementary enrichment. META_APPLY records the final enriched state.
+        android.util.Log.i(
+            "MetaTiming",
+            "META_FETCH ms=${android.os.SystemClock.elapsedRealtime() - metaLoadStartMs} id=${meta.id}"
+        )
+        publishMetaToUi(meta)
+        // Queue now, but the job waits for hero readiness (or explicit Down navigation).
+        if (!isServerItem) loadMoreLikeThisAsync(meta)
+        awaitHeroPresentation()
+        val progressMap = watchProgressRepository
+            .getAllEpisodeProgress(_effectiveContentId.value)
+            .first()
+        val watchedEpisodes = watchedItemsPreferences
+            .getWatchedEpisodesForContent(_effectiveContentId.value)
+            .first()
+        // Stabilize the local season/episode target before revealing the existing row.
+        // Remote progress refinement still runs after enrichment.
+        updateNextToWatch(computeNextToWatch(meta, progressMap, watchedEpisodes))
+        loadServerEpisodeStates(meta)
+        // Existing episodes/cast can appear with the hero; remote enrichment must not hold them back.
+        secondaryContentReady.value = true
+        // Retain the early best-source head start, after the first hero frame.
+        launchEarlyStreamPrefetch(meta)
+        val enrichT0 = android.os.SystemClock.elapsedRealtime()
+        val enriched = if (isServerItem) meta else enrichMeta(meta)
+        secondaryContentReady.value = true
+        android.util.Log.i(
+            "MetaTiming",
+            "META_ENRICH ms=${android.os.SystemClock.elapsedRealtime() - enrichT0} " +
+                "thread=${Thread.currentThread().name}"
         )
 
-        val contentId = _effectiveContentId.value
-
-        // Wait for remote progress provider (Simkl/Trakt) to finish initial load.
-        watchProgressRepository.observeRemoteProgressLoaded().first { it }
-
-        // After remote is loaded, getAllEpisodeProgress may start with an onStart{emptyMap()}
-        // then emit real data. Take the first non-empty emission, or fallback to empty after timeout.
-        val progressDeferred = viewModelScope.async {
-            val flow = watchProgressRepository.getAllEpisodeProgress(contentId)
-            // Try to get a non-empty result within 150ms; fall back to whatever is available.
-            withTimeoutOrNull(150L) {
-                flow.first { it.isNotEmpty() }
-            } ?: flow.first()
-        }
-        val watchedDeferred = viewModelScope.async {
-            watchedItemsPreferences.getWatchedEpisodesForContent(contentId).first()
-        }
-        val progressMap = progressDeferred.await()
-        val watchedEpisodes = watchedDeferred.await()
+        // Pre-compute nextToWatch before applyMeta so the PlayButton text is stable
+        // from the first composition. This prevents focus invalidation from late recomposition.
         val precomputedNextToWatch = computeNextToWatch(enriched, progressMap, watchedEpisodes)
         updateNextToWatch(precomputedNextToWatch)
 
+        android.util.Log.i(
+            "MetaTiming",
+            "META_APPLY total_ms=${android.os.SystemClock.elapsedRealtime() - metaLoadStartMs}"
+        )
+        viewModelScope.launch {
+            healthStore.record(
+                AddonHealthStore.METADATA_KEY,
+                HealthOutcome.SUCCESS,
+                android.os.SystemClock.elapsedRealtime() - metaLoadStartMs
+            )
+        }
+        applyMeta(enriched)
+        // Remote-progress correctness: the local read above can
+        // land before the remote provider (Simkl/Trakt) has finished its initial
+        // sync, seeding an empty progress map and a wrong "Play S1E1" instead of
+        // "Resume". First paint stays fast (above); once remote signals loaded we
+        // re-read, bounded, and refine. updateNextToWatch no-ops when the value is
+        // unchanged, so this is free on the common local-only path.
+        viewModelScope.launch {
+            val cid = _effectiveContentId.value
+            watchProgressRepository.observeRemoteProgressLoaded().first { it }
+            val refreshedProgress = withTimeoutOrNull(150L) {
+                watchProgressRepository.getAllEpisodeProgress(cid).first { it.isNotEmpty() }
+            } ?: watchProgressRepository.getAllEpisodeProgress(cid).first()
+            val refreshedWatched = watchedItemsPreferences
+                .getWatchedEpisodesForContent(cid)
+                .first()
+            val refined = computeNextToWatch(enriched, refreshedProgress, refreshedWatched)
+            updateNextToWatch(refined)
+        }
+        if (isServerItem) return
         // Episode ratings and MDBList are independent — launch both without waiting.
         loadEpisodeRatingsAsync(enriched)
         viewModelScope.launch { loadMDBListRatings(enriched) }
-    }
-
-    private fun NextToWatch.resolveForMeta(meta: Meta): NextToWatch? {
-        val isSeries = meta.apiType.equals("series", ignoreCase = true) ||
-            meta.apiType.equals("tv", ignoreCase = true)
-        if (!isSeries) return copy(nextVideoId = meta.id)
-
-        val matchingEpisode = if (nextSeason != null && nextEpisode != null) {
-            meta.videos.firstOrNull { video ->
-                video.season == nextSeason && video.episode == nextEpisode
-            }
-        } else {
-            nextVideoId?.let { id -> meta.videos.firstOrNull { it.id == id } }
-        } ?: return null
-
-        return copy(nextVideoId = matchingEpisode.id)
     }
 
     private fun loadComments(meta: Meta, forceRefresh: Boolean = false) {
@@ -1080,6 +1409,8 @@ class MetaDetailsViewModel @Inject constructor(
         commentsJob?.cancel()
         commentsLoadMoreJob?.cancel()
         commentsJob = viewModelScope.launch {
+            secondaryContentReady.first { it }
+            presentationGate.awaitQuietPeriod(300L)
             _uiState.update { state ->
                 if (state.meta == null || state.meta.id != meta.id) {
                     state
@@ -1149,7 +1480,7 @@ class MetaDetailsViewModel @Inject constructor(
     }
 
     private fun supportsComments(meta: Meta?): Boolean {
-        if (meta == null) return false
+        if (meta == null || isServerItem) return false
         return when (meta.type) {
             ContentType.MOVIE -> true
             ContentType.SERIES, ContentType.TV -> true
@@ -1262,6 +1593,8 @@ class MetaDetailsViewModel @Inject constructor(
     private fun loadMoreLikeThisAsync(meta: Meta) {
         moreLikeThisJob?.cancel()
         moreLikeThisJob = viewModelScope.launch {
+            secondaryContentReady.first { it }
+            presentationGate.awaitQuietPeriod(150L)
             val source = when {
                 shouldLoadSimklMoreLikeThis() -> MoreLikeThisSource.SIMKL
                 shouldLoadTraktMoreLikeThis(meta) -> MoreLikeThisSource.TRAKT
@@ -1550,26 +1883,49 @@ class MetaDetailsViewModel @Inject constructor(
         val isSeries = meta.apiType in listOf("series", "tv")
         val needsEpisodes = settings.useEpisodes && isSeries
 
-        // Fetch main enrichment and episode enrichment in parallel.
-        val (enrichment, episodeMap) = coroutineScope {
-            val main = async(Dispatchers.IO) {
-                tmdbMetadataService.fetchEnrichment(
-                    tmdbId = tmdbId,
-                    contentType = tmdbContentType,
-                    language = settings.language
-                )
-            }
-            val episodes = if (needsEpisodes) {
-                async(Dispatchers.IO) {
-                    val seasonNumbers = meta.videos.mapNotNull { it.season }.distinct()
-                    tmdbMetadataService.fetchEpisodeEnrichment(
-                        tmdbId = tmdbId,
-                        seasonNumbers = seasonNumbers,
-                        language = settings.language
-                    )
+        // Fetch the main TMDB enrichment on the render path; episode enrichment
+        // is deferred to the background (see below).
+        val tmdbT0 = android.os.SystemClock.elapsedRealtime()
+        val enrichment = withContext(Dispatchers.IO) {
+            tmdbMetadataService.fetchEnrichment(
+                tmdbId = tmdbId,
+                contentType = tmdbContentType,
+                language = settings.language,
+                onHeroReady = { hero ->
+                    withContext(Dispatchers.Main.immediate) {
+                        _uiState.update { state ->
+                            val current = state.meta ?: meta
+                            state.copy(
+                                meta = current.copy(
+                                    background = if (settings.useArtwork) hero.backdrop ?: current.background else current.background,
+                                    logo = if (settings.useArtwork) hero.logo ?: current.logo else current.logo,
+                                    description = if (settings.useBasicInfo) hero.description ?: current.description else current.description,
+                                    genres = if (settings.useBasicInfo && hero.genres.isNotEmpty()) hero.genres else current.genres,
+                                    runtime = if (settings.useDetails) hero.runtimeMinutes?.toString() ?: current.runtime else current.runtime
+                                ),
+                                tmdbRating = if (settings.useBasicInfo) hero.rating?.toFloat() ?: state.tmdbRating else state.tmdbRating
+                            )
+                        }
+                        // The initial hero has already been presented. Do not block credits
+                        // behind another image-presentation wait when enriched artwork arrives.
+                    }
                 }
-            } else null
-            main.await() to episodes?.await()
+            )
+        }
+        // Only the main enrichment (synopsis/cast/backdrop/logo/genres/...)
+        // gates the render. Episode enrichment - the slow, series-only part,
+        // up to ~7 s - is fetched in the background and merged into the
+        // already-published meta, so the details text does not wait on it.
+        // The merge changes only per-episode fields on the SAME video list,
+        // and nextToWatch does not depend on it, so the hero button and focus
+        // are unaffected.
+        android.util.Log.i(
+            "MetaTiming",
+            "META_TMDB main_ms=${android.os.SystemClock.elapsedRealtime() - tmdbT0} " +
+                "episodes=$needsEpisodes"
+        )
+        if (needsEpisodes) {
+            launchEpisodeEnrichmentMerge(tmdbId, settings, meta.videos)
         }
 
         var updated = meta
@@ -1648,31 +2004,79 @@ class MetaDetailsViewModel @Inject constructor(
             }
         }
 
-        if (!episodeMap.isNullOrEmpty()) {
-            updated = updated.copy(
-                videos = meta.videos.map { video ->
-                    val key = if (video.season != null && video.episode != null) video.season to video.episode else null
-                    val ep = key?.let { episodeMap[it] }
-                    video.copy(
-                        title = if (settings.useEpisodes) ep?.title ?: video.title else video.title,
-                        overview = if (settings.useEpisodes) ep?.overview ?: video.overview else video.overview,
-                        released = selectEpisodeReleaseValue(
-                            addonReleased = video.released,
-                            tmdbAirDate = ep?.airDate,
-                            useTmdbReleaseDates = false
-                        ),
-                        thumbnail = if (settings.useEpisodes) ep?.thumbnail ?: video.thumbnail else video.thumbnail,
-                        runtime = if (settings.useEpisodes) ep?.runtimeMinutes ?: video.runtime else video.runtime
-                    )
-                }
-            )
-        }
-
         if (enrichment?.collectionId != null) {
             loadCollectionAsync(enrichment.collectionId, enrichment.collectionName, settings)
         }
 
         return updated
+    }
+
+    /**
+     * Episode enrichment (TMDB per-episode titles/overviews/air-dates/
+     * stills/runtimes) is the slow, series-only part of TMDB enrichment - up to
+     * ~7 s, against under 2 s for the main enrichment. It does not change the
+     * episode SET, and neither the synopsis, cast, nor nextToWatch depend on it,
+     * so it is fetched off the initial render path and merged into the
+     * already-published meta when it lands. Details text and the hero button
+     * render at main-enrichment speed; per-episode titles and stills fill in shortly after.
+     */
+    private fun launchEpisodeEnrichmentMerge(
+        tmdbId: String,
+        settings: TmdbSettings,
+        baseVideos: List<Video>
+    ) {
+        viewModelScope.launch {
+            val t0 = android.os.SystemClock.elapsedRealtime()
+            val episodeMap = try {
+                withContext(Dispatchers.IO) {
+                    tmdbMetadataService.fetchEpisodeEnrichment(
+                        tmdbId = tmdbId,
+                        seasonNumbers = baseVideos.mapNotNull { it.season }.distinct(),
+                        language = settings.language
+                    )
+                }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                emptyMap()
+            }
+            android.util.Log.i(
+                "MetaTiming",
+                "META_EPISODES ms=${android.os.SystemClock.elapsedRealtime() - t0} count=${episodeMap.size}"
+            )
+            if (episodeMap.isEmpty()) return@launch
+            _uiState.update { state ->
+                // applyMeta publishes meta microseconds after enrichMeta returns,
+                // seconds before this fetch completes, so meta is set here. If it
+                // somehow is not, skip rather than resurrect a stale meta.
+                val current = state.meta ?: return@update state
+                val enrichedMeta = current.copy(videos = enrichVideosWithEpisodes(current.videos, episodeMap, settings))
+                state.copy(
+                    meta = enrichedMeta,
+                    episodesForSeason = getEpisodesForSeason(enrichedMeta, state.selectedSeason)
+                )
+            }
+        }
+    }
+
+    private fun enrichVideosWithEpisodes(
+        videos: List<Video>,
+        episodeMap: Map<Pair<Int, Int>, com.nuvio.tv.core.tmdb.TmdbEpisodeEnrichment>,
+        settings: TmdbSettings
+    ): List<Video> = videos.map { video ->
+        val key = if (video.season != null && video.episode != null) video.season to video.episode else null
+        val ep = key?.let { episodeMap[it] }
+        video.copy(
+            title = if (settings.useEpisodes) ep?.title ?: video.title else video.title,
+            overview = if (settings.useEpisodes) ep?.overview ?: video.overview else video.overview,
+            released = selectEpisodeReleaseValue(
+                addonReleased = video.released,
+                tmdbAirDate = ep?.airDate,
+                useTmdbReleaseDates = false
+            ),
+            thumbnail = if (settings.useEpisodes) ep?.thumbnail ?: video.thumbnail else video.thumbnail,
+            runtime = if (settings.useEpisodes) ep?.runtimeMinutes ?: video.runtime else video.runtime
+        )
     }
 
     private fun resolveTmdbContentType(meta: Meta): ContentType {
@@ -1852,14 +2256,11 @@ class MetaDetailsViewModel @Inject constructor(
         val meta = _uiState.value.meta ?: return
         val progressMap = _uiState.value.episodeProgressMap
         val watchedEpisodes = _uiState.value.watchedEpisodes
-
-        // Don't override an existing nextToWatch with a computation from empty progress data.
-        // The inline computation in applyMetaWithEnrichment reads directly from the repo
-        // and may have better data than the UI state observer at this point.
+        // Don't let an observer-driven recompute from empty progress
+        // clobber a good nextToWatch that the applyMetaWithEnrichment refine already set.
         if (progressMap.isEmpty() && watchedEpisodes.isEmpty() && _uiState.value.nextToWatch != null) {
             return
         }
-
         nextToWatchJob?.cancel()
 
         nextToWatchJob = viewModelScope.launch {
@@ -1868,10 +2269,34 @@ class MetaDetailsViewModel @Inject constructor(
         }
     }
 
+    private fun onWatchedEpisodesChangedForServer() {
+        val now = System.currentTimeMillis()
+        _optimisticUnmarks.forEach { serverUnmarks.putIfAbsent(it, now) }
+        _optimisticMarks.forEach { serverUnmarks.remove(it) }
+        if (serverStates.isEmpty()) return
+        _uiState.value.meta?.let { loadServerEpisodeStates(it, reload = true) }
+    }
+
+    private fun loadServerEpisodeStates(meta: Meta, reload: Boolean = false) {
+        if (meta.apiType !in listOf("series", "tv") || (!reload && serverStates.isNotEmpty())) return
+        serverStatesJob?.cancel()
+        serverStatesJob = viewModelScope.launch {
+            val contentId = _effectiveContentId.value
+            val states = withTimeoutOrNull(SERVER_STATES_TIMEOUT_MS) {
+                serverEpisodeStates.load(meta.apiType, if (isServerItem) itemId else contentId)
+            }.orEmpty()
+            if (states.isEmpty()) return@launch
+            serverStates = states
+            val progress = watchProgressRepository.getAllEpisodeProgress(contentId).first()
+            val watched = watchedItemsPreferences.getWatchedEpisodesForContent(contentId).first()
+            updateNextToWatch(computeNextToWatch(_uiState.value.meta ?: meta, progress, watched))
+        }
+    }
+
     private suspend fun computeNextToWatch(
         meta: Meta,
-        progressMap: Map<Pair<Int, Int>, WatchProgress> = emptyMap(),
-        watchedEpisodes: Set<Pair<Int, Int>> = emptySet()
+        localProgressMap: Map<Pair<Int, Int>, WatchProgress> = emptyMap(),
+        localWatchedEpisodes: Set<Pair<Int, Int>> = emptySet()
     ): NextToWatch {
         val isSeries = meta.apiType in listOf("series", "tv")
 
@@ -1916,6 +2341,10 @@ class MetaDetailsViewModel @Inject constructor(
 
         val nonSpecialEpisodes = allEpisodes.filter { (it.season ?: 0) > 0 }
         val episodePool = if (nonSpecialEpisodes.isNotEmpty()) nonSpecialEpisodes else allEpisodes
+        val (progressMap, watchedEpisodes) = com.nuvio.tv.data.mediaserver.mergeServerEpisodeStates(
+            serverStates.withoutUnmarked(serverUnmarks.toMap()), localProgressMap, localWatchedEpisodes,
+            _effectiveContentId.value, episodePool
+        )
         val useFurthestEpisode = layoutPreferenceDataStore.nextUpFromFurthestEpisode.first()
         val latestSeriesProgress = if (useFurthestEpisode) {
             // When using furthest episode mode, consider both progressMap entries
@@ -2148,18 +2577,25 @@ class MetaDetailsViewModel @Inject constructor(
                 )
             }
             else -> {
-                val firstEpisode = episodes.firstOrNull()
+                // Fork: this branch is reached only when every
+                // available episode is watched and none is resumable - e.g.
+                // the newest aired episode of an ongoing series was just
+                // finished and the next is unreleased. Target the LAST episode
+                // (an honest replay, not S1E1) and flag
+                // the state so the hero source line suppresses itself.
+                val lastEpisode = episodes.lastOrNull()
                 NextToWatch(
                     watchProgress = null,
                     isResume = false,
-                    nextVideoId = firstEpisode?.id ?: metaId,
-                    nextSeason = firstEpisode?.season,
-                    nextEpisode = firstEpisode?.episode,
-                    displayText = if (firstEpisode != null) {
-                        localizedContext.getString(R.string.detail_btn_play_episode, firstEpisode.season, firstEpisode.episode)
+                    nextVideoId = lastEpisode?.id ?: metaId,
+                    nextSeason = lastEpisode?.season,
+                    nextEpisode = lastEpisode?.episode,
+                    displayText = if (lastEpisode != null) {
+                        localizedContext.getString(R.string.detail_btn_play_episode, lastEpisode.season, lastEpisode.episode)
                     } else {
                         localizedContext.getString(R.string.detail_btn_play)
-                    }
+                    },
+                    isCaughtUp = true
                 )
             }
         }
@@ -2820,6 +3256,7 @@ class MetaDetailsViewModel @Inject constructor(
     // --- Trailer ---
 
     private fun fetchTrailerUrl() {
+        if (isServerItem) return
         val meta = _uiState.value.meta ?: return
 
         trailerFetchJob?.cancel()
@@ -2845,13 +3282,17 @@ class MetaDetailsViewModel @Inject constructor(
                     year = year,
                     tmdbId = tmdbId,
                     type = meta.apiType
-                ) ?: meta.trailerYtIds.firstOrNull()?.let { ytId ->
-                    trailerService.getTrailerPlaybackSourceFromYouTubeUrl(
-                        youtubeUrl = "https://www.youtube.com/watch?v=$ytId",
-                        title = meta.name,
-                        year = year
-                    )
-                }
+                ) ?: meta.trailerYtIds
+                    .mapNotNull(::youTubeVideoIdOf)
+                    .distinct()
+                    .take(3)
+                    .firstNotNullOfOrNull { ytId ->
+                        trailerService.getTrailerPlaybackSourceFromYouTubeUrl(
+                            youtubeUrl = "https://www.youtube.com/watch?v=$ytId",
+                            title = meta.name,
+                            year = year
+                        )
+                    }
             } else {
                 val externalUrl = if (AppFeaturePolicy.externalTrailerPlaybackEnabled) {
                     trailerService.getExternalTrailerUrl(
@@ -2886,6 +3327,48 @@ class MetaDetailsViewModel @Inject constructor(
             if (url != null && isPlayButtonFocused && AppFeaturePolicy.inAppTrailerPlaybackEnabled) {
                 startIdleTimer()
             }
+        }
+    }
+
+    private fun observeTrailerPlaybackFailures() {
+        viewModelScope.launch {
+            TrailerPlaybackFailures.events.collect { failedUrl ->
+                val state = _uiState.value
+                when (failedUrl) {
+                    state.sharedTrailerUrl -> retryFailedSharedTrailer(state.selectedSharedTrailer)
+                    state.trailerUrl -> retryFailedTrailer(failedUrl)
+                }
+            }
+        }
+    }
+
+    private suspend fun retryFailedTrailer(failedUrl: String) {
+        val now = System.currentTimeMillis()
+        if (shouldRetryTrailerPreviewAfterFailure(trailerPlaybackRetriedAtMs, now)) {
+            trailerPlaybackRetriedAtMs = now
+            fetchTrailerUrl()
+            trailerFetchJob?.join()
+            val retriedUrl = _uiState.value.trailerUrl
+            if (retriedUrl != null && retriedUrl != failedUrl) return
+        }
+        val state = _uiState.value
+        if (state.isTrailerPlaying || state.isBackgroundTrailerPlaying) handleTrailerEnded()
+    }
+
+    private fun retryFailedSharedTrailer(trailer: MetaTrailer?) {
+        trailer ?: return
+        if (sharedTrailerRetriedYtId != trailer.ytId) {
+            sharedTrailerRetriedYtId = trailer.ytId
+            handleSharedTrailerSelected(trailer)
+            return
+        }
+        _uiState.update { state ->
+            state.copy(
+                isSharedTrailerLoading = false,
+                sharedTrailerUrl = null,
+                sharedTrailerAudioUrl = null,
+                sharedTrailerErrorMessage = localizedContext.getString(R.string.detail_trailer_error)
+            )
         }
     }
 
@@ -2938,6 +3421,10 @@ class MetaDetailsViewModel @Inject constructor(
     }
 
     private fun handleLifecyclePause() {
+        detailsResumed.value = false
+        streamPrefetchJob?.cancel()
+        com.nuvio.tv.core.stream.StreamPrefetchCache.cancelPending()
+        lastStreamPrefetchKey = null
         idleTimerJob?.cancel()
         isPlayButtonFocused = false
         dismissSharedTrailerOverlay()
@@ -2945,6 +3432,26 @@ class MetaDetailsViewModel @Inject constructor(
         if ((state.isTrailerPlaying && !state.showTrailerControls) || state.isBackgroundTrailerPlaying) {
             trailerHasPlayed = true
             setTrailerPlaybackState(isPlaying = false, showControls = false, hideLogo = false)
+        }
+    }
+
+    /**
+     * Returning to this page from the player is an in-app navigation, so the
+     * app never went through MainActivity.onResume and the connected tracking
+     * providers were never asked to re-pull. Under a remote Watch Progress
+     * source getAllEpisodeProgress is provider-projected, so an episode just
+     * completed in the player does not surface until the next provider refresh
+     * - leaving nextToWatch (and the hero source-line prefetch keyed off it)
+     * stale on the episode just watched. Mirror MainActivity.onResume's refresh
+     * here so the completion is pulled and the existing
+     * observeWatchProgress -> calculateNextToWatch -> stream-prefetch cascade
+     * re-runs for the new target. A no-op under a local source (no
+     * authenticated providers to refresh).
+     */
+    private fun handleLifecycleResume() {
+        detailsResumed.value = true
+        viewModelScope.launch {
+            trackingProgressRefreshCoordinator.refreshConnected(TrackingRefreshIntent.INVALIDATED)
         }
     }
 
@@ -3021,11 +3528,12 @@ class MetaDetailsViewModel @Inject constructor(
             val year = meta?.releaseInfo?.let { info ->
                 if (info.isBlank()) null else Regex("""\b(19|20)\d{2}\b""").find(info)?.value
             }
-            val source = trailerService.getTrailerPlaybackSourceFromYouTubeUrl(
+            val lookup = trailerService.lookupYouTubeTrailer(
                 youtubeUrl = "https://www.youtube.com/watch?v=$ytId",
                 title = meta?.name,
                 year = year
             )
+            val source = lookup.source
 
             _uiState.update { state ->
                 if (state.selectedSharedTrailer?.ytId != trailer.ytId) {
@@ -3037,7 +3545,7 @@ class MetaDetailsViewModel @Inject constructor(
                         sharedTrailerUrl = source?.videoUrl,
                         sharedTrailerAudioUrl = source?.audioUrl,
                         sharedTrailerErrorMessage = if (source == null) {
-                            localizedContext.getString(R.string.detail_trailer_error)
+                            localizedContext.getString(sharedTrailerErrorRes(lookup.unplayable))
                         } else {
                             null
                         }
@@ -3045,6 +3553,13 @@ class MetaDetailsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun sharedTrailerErrorRes(reason: YouTubeUnplayableReason?): Int = when (reason) {
+        YouTubeUnplayableReason.AGE_RESTRICTED -> R.string.detail_trailer_error_age_restricted
+        YouTubeUnplayableReason.UNAVAILABLE -> R.string.detail_trailer_error_unavailable
+        YouTubeUnplayableReason.SIGN_IN_REQUIRED -> R.string.detail_trailer_error_sign_in
+        null -> R.string.detail_trailer_error
     }
 
     private fun openExternalTrailer(url: String) {

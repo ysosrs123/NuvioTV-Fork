@@ -3,6 +3,9 @@ package com.nuvio.tv.ui.screens.home
 import com.nuvio.tv.ui.theme.NuvioMotion
 
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.v2.components.v2GlassSource
+import dev.chrisbanes.haze.hazeSource
+import androidx.compose.foundation.layout.offset
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -10,9 +13,12 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -51,8 +58,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.painter.Painter
+import coil3.compose.asPainter
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.coroutineContext
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.imageLoader
+import coil3.request.SuccessResult
+import coil3.size.Scale
 import coil3.request.crossfade
 import com.nuvio.tv.ui.util.LocalRecompositionHighlighterEnabled
 import com.nuvio.tv.ui.util.contentTextDirection
@@ -76,43 +91,55 @@ internal fun ModernHeroScene(
     state: () -> ModernHeroSceneState,
     isFullScreen: () -> Boolean,
     bgColor: Color,
+    trailerBottomLimit: androidx.compose.ui.unit.Dp,
     modifier: Modifier,
     requestWidthPx: Int,
     requestHeightPx: Int,
     onTrailerEnded: () -> Unit,
     onFirstFrameRendered: () -> Unit
 ) {
-    ModernHeroMediaLayer(
-        heroBackdrop = { state().heroBackdrop },
-        enrichmentActive = { state().enrichmentActive },
-        shouldPlayHeroTrailer = { state().shouldPlayTrailer },
-        heroTrailerFirstFrameRendered = { state().trailerFirstFrameRendered },
-        heroTrailerUrl = { state().trailerUrl },
-        heroTrailerAudioUrl = { state().trailerAudioUrl },
-        heroTrailerPlaybackKey = { state().trailerPlaybackKey },
-        muted = { state().trailerMuted },
-        onTrailerEnded = onTrailerEnded,
-        onFirstFrameRendered = onFirstFrameRendered,
-        modifier = modifier,
-        requestWidthPx = requestWidthPx,
-        requestHeightPx = requestHeightPx
-    )
-    val isTrailerPlayingFullScreen = {
-        val s = state()
-        s.fullScreenBackdrop && s.shouldPlayTrailer && s.trailerFirstFrameRendered
+    // Navigation must sample the same darkened image seen on the page, not raw artwork.
+    // This source attaches only while the glass sidebar is visible. Home stops trailers
+    // on sidebar entry; other glass controls retain their existing capture/quality policy.
+    val sidebarSource = com.nuvio.tv.ui.v2.components.LocalSidebarBackdropSource.current
+    Box(modifier.then(if (sidebarSource != null) Modifier.hazeSource(sidebarSource) else Modifier)
+        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
+        ModernHeroMediaLayer(
+            artwork = state().artwork,
+            featheredTrailer = state().featheredTrailer,
+            fullScreenBackdrop = state().fullScreenBackdrop,
+            trailerBottomLimit = trailerBottomLimit,
+            shouldPlayHeroTrailer = { state().shouldPlayTrailer },
+            heroTrailerFirstFrameRendered = { state().trailerFirstFrameRendered },
+            heroTrailerUrl = { state().trailerUrl },
+            heroTrailerAudioUrl = { state().trailerAudioUrl },
+            heroTrailerPlaybackKey = { state().trailerPlaybackKey },
+            muted = { state().trailerMuted },
+            onTrailerEnded = onTrailerEnded,
+            onFirstFrameRendered = onFirstFrameRendered,
+            modifier = Modifier.fillMaxSize(),
+            requestWidthPx = requestWidthPx,
+            requestHeightPx = requestHeightPx
+        )
+        val isTrailerPlayingFullScreen = {
+            val s = state()
+            !s.featheredTrailer && s.fullScreenBackdrop && s.shouldPlayTrailer && s.trailerFirstFrameRendered
+        }
+        ModernHeroGradientLayer(
+            bgColor = bgColor,
+            isFullScreen = isFullScreen,
+            isTrailerPlayingFullScreen = isTrailerPlayingFullScreen,
+            modifier = Modifier.fillMaxSize()
+        )
     }
-    ModernHeroGradientLayer(
-        bgColor = bgColor,
-        isFullScreen = isFullScreen,
-        isTrailerPlayingFullScreen = isTrailerPlayingFullScreen,
-        modifier = modifier
-    )
 }
 
 @Composable
 internal fun ModernHeroMediaLayer(
-    heroBackdrop: () -> String?,
-    enrichmentActive: () -> Boolean,
+    artwork: HeroArtworkSelection,
+    featheredTrailer: Boolean = false,
+    fullScreenBackdrop: Boolean = false,
+    trailerBottomLimit: androidx.compose.ui.unit.Dp,
     shouldPlayHeroTrailer: () -> Boolean,
     heroTrailerFirstFrameRendered: () -> Boolean,
     heroTrailerUrl: () -> String?,
@@ -133,58 +160,136 @@ internal fun ModernHeroMediaLayer(
         label = "heroBackdropTrailerCrossfadeProgress"
     )
     val localContext = LocalContext.current
+    val artworkAccent = com.nuvio.tv.ui.v2.appearance.LocalArtworkAccent.current
 
-    // Backdrop URL is managed upstream (heroSceneStateLambda freezes it
-    // during rapid nav / scroll). Only update when enrichment is not active
-    val rawBackdrop by remember { derivedStateOf { heroBackdrop() } }
-    val enriching by remember { derivedStateOf { enrichmentActive() } }
-    var displayedBackdrop by remember { mutableStateOf(HeroBackdropState.lastDisplayedUrl ?: heroBackdrop()) }
-    if (rawBackdrop != null && rawBackdrop != displayedBackdrop && !enriching) {
-        displayedBackdrop = rawBackdrop!!
-    }
-    val imageModel = remember(
-        localContext,
-        displayedBackdrop,
-        requestWidthPx,
-        requestHeightPx
-    ) {
-        displayedBackdrop?.let {
-            ImageRequest.Builder(localContext)
-                .data(it)
-                .size(width = requestWidthPx, height = requestHeightPx)
+    var artworkState by remember { mutableStateOf(HeroArtworkLoadState<Painter>(artwork)) }
+    if (artworkState.selection != artwork) artworkState = artworkState.select(artwork)
+    val ticket = artworkState.ticket
+    // Start from the focused title's available artwork, without the metadata gate.
+    // Render the decoded result directly: no second image request/cache lookup.
+    LaunchedEffect(ticket, artwork.ownerKey, requestWidthPx, requestHeightPx) {
+        val pageSelection = HeroBackdropState.selectPageArtwork(artwork.ownerKey, ticket?.url)
+        if (ticket != null) {
+            val cached = localContext.imageLoader.memoryCache?.get(coil3.memory.MemoryCache.Key(ticket.url))?.image
+            // Back and warmed A-B-A should display ready artwork without a focus
+            // debounce. Coil still validates the actual request/cache compatibility.
+            if (cached == null || cached.width < requestWidthPx || cached.height < requestHeightPx) delay(250)
+            val request = ImageRequest.Builder(localContext)
+                .data(ticket.url)
+                .size(requestWidthPx, requestHeightPx)
+                .scale(Scale.FILL)
                 .build()
+            val result = localContext.imageLoader.execute(request)
+            coroutineContext.ensureActive()
+            if (result is SuccessResult) {
+                artworkState = artworkState.loaded(ticket, result.image.asPainter(localContext))
+                HeroBackdropState.recordDisplayedArtwork(pageSelection, ticket.url)
+                artworkAccent?.imageLoaded(ticket.url)
+            } else {
+                // A broken/missing backdrop advances to this title's next candidate.
+                artworkState = artworkState.failed(ticket)
+            }
         }
     }
-    // Keep HeroBackdropState in sync for navigation transitions.
-    LaunchedEffect(displayedBackdrop) {
-        displayedBackdrop?.let { HeroBackdropState.update(it) }
+    val cinematic = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current?.visualStyle ==
+        com.nuvio.tv.domain.model.VisualStyle.CINEMATIC_GLASS
+    val liveTrailerGlass = cinematic && com.nuvio.tv.ui.v2.quality.LocalGlassTokens.current.liveBlur &&
+        com.nuvio.tv.ui.v2.quality.LocalVisualQuality.current.tier == com.nuvio.tv.ui.v2.quality.VisualQualityTier.MAXIMUM
+    val glassFrame = remember { androidx.compose.runtime.mutableLongStateOf(0L) }
+    LaunchedEffect(liveTrailerGlass, shouldPlay) {
+        if (liveTrailerGlass && shouldPlay) {
+            var lastCapture = 0L
+            while (true) {
+                androidx.compose.runtime.withFrameNanos { frame ->
+                    if (frame - lastCapture >= 33_000_000L) {
+                        glassFrame.longValue = frame
+                        lastCapture = frame
+                    }
+                }
+            }
+        }
     }
-
-    Box(modifier = modifier) {
+    // Capture artwork and its compatible TextureView together so their alpha
+    // and corner masks are preserved, with no foreground controls in the source.
+    Box(modifier = if (liveTrailerGlass) modifier.v2GlassSource().drawWithContent {
+        // Texture updates do not necessarily invalidate Compose's captured layer.
+        // Read only in drawing: refresh the source, without recomposition/layout.
+        glassFrame.longValue
+        drawContent()
+    } else modifier) {
+      BoxWithConstraints(Modifier.fillMaxSize()) {
+        // A crossfade may retain an outgoing painter only within the SAME title.
+        key(artwork.ownerKey) {
         androidx.compose.animation.Crossfade(
-            targetState = imageModel,
+            targetState = artworkState.ready,
             animationSpec = tween(durationMillis = NuvioMotion.tokens.durations.overlay),
             label = "heroBackdropCrossfade"
-        ) { model ->
-            AsyncImage(
-                model = model,
+        ) { painter ->
+            if (painter != null) Image(
+                painter = painter,
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        compositingStrategy = CompositingStrategy.Offscreen
-                        alpha = 1f - transitionProgressState.value
-                    },
+                        // Auto, not Offscreen: this layer holds a single
+                        // full-screen image (no overlapping content), so
+                        // Auto composites the transition alpha correctly while
+                        // avoiding a redundant offscreen buffer at rest. Inside a
+                        // Crossfade, Offscreen meant two buffered full-screen
+                        // backdrops alive at once during a hero swap. The hero
+                        // scrim layer keeps Offscreen (overlapping gradients).
+                        compositingStrategy = CompositingStrategy.Auto
+                        alpha = if (featheredTrailer) 1f else 1f - transitionProgressState.value
+                    }.then(if (liveTrailerGlass) Modifier else Modifier.v2GlassSource()),
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.TopEnd
             )
+        }
         }
         if (shouldPlay) {
             val trailerUrlVal = heroTrailerUrl()
             val playbackKeyVal = heroTrailerPlaybackKey()
             val audioUrlVal = heroTrailerAudioUrl()
             val mutedVal = muted()
+            // Feathered mode retains artwork behind the corner video.
+            // The enclosing layer supplies live trailer pixels only at Maximum.
+            // The fullscreen canvas runs behind the rows; use their actual viewport
+            // boundary as a separate window constraint. Compact placement is unchanged.
+            val windowWidth = com.nuvio.tv.ui.components.featheredTrailerWidth(
+                maxWidth.value, maxHeight.value, fullScreenBackdrop, trailerBottomLimit.value
+            ).dp
+            var videoAspect by remember(playbackKeyVal, trailerUrlVal) { mutableStateOf(16f / 9f) }
+            val trailerModifier = if (featheredTrailer) Modifier.align(Alignment.TopEnd)
+                .padding(top = 12.dp, end = 12.dp)
+                .width(windowWidth).aspectRatio(16f / 9f)
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                .drawWithCache {
+                    // FIT can letterbox inside this viewport. Mask the displayed image,
+                    // not the outer PlayerView, so native widescreen edges never bypass it.
+                    val image = com.nuvio.tv.ui.components.fittedTrailerImage(size.width, size.height, videoAspect)
+                    val x = minOf(48.dp.toPx() / image.width, .09f)
+                    val inset = com.nuvio.tv.ui.components.trailerVerticalFeatherInset(videoAspect)
+                    val y = minOf(56.dp.toPx() / image.height, .14f)
+                    val sides = Brush.horizontalGradient(0f to Color.Transparent,
+                        x * .3f to Color.White.copy(alpha = .16f), x to Color.White,
+                        1f - x to Color.White, 1f - x * .3f to Color.White.copy(alpha = .16f), 1f to Color.Transparent,
+                        startX = image.left, endX = image.left + image.width)
+                    val ends = Brush.verticalGradient(0f to Color.Transparent,
+                        inset to Color.Transparent,
+                        inset + y * .3f to Color.White.copy(alpha = .16f), inset + y to Color.White,
+                        1f - inset - y to Color.White, 1f - inset - y * .3f to Color.White.copy(alpha = .16f),
+                        1f - inset to Color.Transparent, 1f to Color.Transparent,
+                        startY = image.top, endY = image.top + image.height)
+                    onDrawWithContent {
+                        drawContent()
+                        drawRect(sides, blendMode = androidx.compose.ui.graphics.BlendMode.DstIn)
+                        drawRect(ends, blendMode = androidx.compose.ui.graphics.BlendMode.DstIn)
+                    }
+                } else Modifier.fillMaxSize()
             key(playbackKeyVal ?: trailerUrlVal) {
+              // TrailerPlayer wraps AndroidView in AnimatedVisibility; position
+              // this outer Box so that wrapper cannot discard BoxScope alignment.
+              Box(trailerModifier.graphicsLayer { alpha = transitionProgressState.value }) {
                 TrailerPlayer(
                     trailerUrl = trailerUrlVal,
                     trailerAudioUrl = audioUrlVal,
@@ -192,16 +297,16 @@ internal fun ModernHeroMediaLayer(
                     onEnded = onTrailerEnded,
                     onFirstFrameRendered = onFirstFrameRendered,
                     muted = mutedVal,
-                    cropToFill = true,
+                    cropToFill = !featheredTrailer,
+                    transparentVideoBackground = featheredTrailer,
+                    onVideoAspectRatioChanged = { videoAspect = it },
                     overscanZoom = MODERN_TRAILER_OVERSCAN_ZOOM,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            alpha = transitionProgressState.value
-                        }
+                    modifier = Modifier.fillMaxSize()
                 )
+              }
             }
         }
+      }
     }
 }
 
@@ -213,10 +318,14 @@ internal fun ModernHeroGradientLayer(
     modifier: Modifier
 ) {
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val cinematic = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current?.visualStyle ==
+        com.nuvio.tv.domain.model.VisualStyle.CINEMATIC_GLASS
+    val pureDark = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current?.visualStyle ==
+        com.nuvio.tv.domain.model.VisualStyle.PURE_LIQUID_DARK
     Box(
         modifier = modifier
             .graphicsLayer {
-                compositingStrategy = CompositingStrategy.Offscreen
+                compositingStrategy = CompositingStrategy.Auto
                 alpha = if (isTrailerPlayingFullScreen()) 0f else 1f
             }
             .drawWithCache {
@@ -253,7 +362,9 @@ internal fun ModernHeroGradientLayer(
                     )
                 }
 
-                val bottomStripStartY = size.height * if (fullScreen) 0.64f else 0.82f
+                val bottomStripStartY = size.height * if (fullScreen) {
+                    if (cinematic) 0.32f else 0.64f
+                } else 0.82f
                 val verticalGradient = Brush.verticalGradient(
                     colorStops = if (fullScreen) {
                         arrayOf(
@@ -275,6 +386,7 @@ internal fun ModernHeroGradientLayer(
                 )
 
                 onDrawBehind {
+                    if (pureDark) drawRect(Color(0xFF03080D).copy(alpha = 0.12f))
                     // 1. Horizontal fade (reversed in RTL)
                     val rectLeft = if (isRtl) size.width - horizontalFadeEndX else 0f
                     drawRect(
@@ -299,6 +411,7 @@ internal fun HeroTitleBlock(
     previewProvider: () -> HeroPreview?,
     enrichmentActive: () -> Boolean = { false },
     portraitMode: Boolean,
+    descriptionMaxLines: Int,
     showImdbRatings: Boolean,
     mdbListShowOnHero: Boolean = false,
     mdbListRatingOrder: List<String> = com.nuvio.tv.domain.model.MDBListSettings.DEFAULT_RATING_ORDER,
@@ -320,7 +433,8 @@ internal fun HeroTitleBlock(
         }
     }
 
-    val displayPreview = if (!isEnriching && currentPreview != null) currentPreview else stablePreview
+    val displayPreview = if (com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null) currentPreview
+        else if (!isEnriching && currentPreview != null) currentPreview else stablePreview
     if (displayPreview == null) return
     
     Box(
@@ -330,6 +444,7 @@ internal fun HeroTitleBlock(
         HeroTitleContent(
             previewProvider = { displayPreview },
             portraitMode = portraitMode,
+            descriptionMaxLines = descriptionMaxLines,
             showImdbRatings = showImdbRatings,
             mdbListShowOnHero = mdbListShowOnHero,
             mdbListRatingOrder = mdbListRatingOrder,
@@ -342,6 +457,7 @@ internal fun HeroTitleBlock(
 private fun HeroTitleContent(
     previewProvider: () -> HeroPreview?,
     portraitMode: Boolean,
+    descriptionMaxLines: Int,
     showImdbRatings: Boolean,
     mdbListShowOnHero: Boolean = false,
     mdbListRatingOrder: List<String> = com.nuvio.tv.domain.model.MDBListSettings.DEFAULT_RATING_ORDER,
@@ -349,7 +465,6 @@ private fun HeroTitleContent(
 ) {
     val preview = previewProvider() ?: return
     val highlighterEnabled = LocalRecompositionHighlighterEnabled.current
-    val descriptionMaxLines = 4
     val descriptionScale = if (portraitMode) 0.90f else 1f
     val titleScale = if (portraitMode) 0.92f else 1f
     val metaScale = 1f
@@ -368,6 +483,7 @@ private fun HeroTitleContent(
         preview.logo?.let {
             ImageRequest.Builder(context)
                 .data(it)
+                .memoryCacheKey(com.nuvio.tv.core.image.titleLogoCacheKey(it))
                 .crossfade(true)
                 .size(width = logoMaxWidthPx, height = logoHeightPx)
                 .build()
@@ -406,7 +522,8 @@ private fun HeroTitleContent(
                 modifier = Modifier
                     .height(100.dp)
                     .widthIn(min = 100.dp, max = 220.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .graphicsLayer { alpha = metaAlpha },
                 contentScale = ContentScale.Fit,
                 alignment = Alignment.CenterStart
             )
@@ -416,7 +533,8 @@ private fun HeroTitleContent(
                 style = scaledTitleStyle,
                 color = NuvioTheme.colors.TextPrimary,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.graphicsLayer { alpha = metaAlpha }
             )
         }
 
@@ -703,10 +821,7 @@ private fun HeroCombinedMetaBadge(
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(6.dp))
-            .border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, dividerColor),
-                shape = RoundedCornerShape(6.dp)
-            )
+            .background(Color.White.copy(alpha = 0.08f))
             .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
@@ -744,10 +859,7 @@ private fun HeroMetaBadge(
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(6.dp))
-            .border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, contentColor.copy(alpha = 0.55f)),
-                shape = RoundedCornerShape(6.dp)
-            )
+            .background(Color.White.copy(alpha = 0.08f))
             .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs),
         contentAlignment = Alignment.Center
     ) {

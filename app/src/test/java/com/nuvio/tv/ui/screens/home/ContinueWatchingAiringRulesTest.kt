@@ -130,6 +130,7 @@ class ContinueWatchingAiringRulesTest {
 
         val ms = meta.earliestUpcomingEpisodeMs(now)
         assertNotNull(ms)
+        // A release date without a time counts from UTC midnight, whatever the device's timezone.
         val expected = tomorrow.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
         assertEquals(expected, ms)
 
