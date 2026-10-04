@@ -18,7 +18,8 @@ class PlayButtonColorTest {
     @Test
     fun playTextStaysReadableOnEveryThemeColour() {
         AppTheme.entries.forEach { theme ->
-            val container = v2AccentStops(ThemeColors.getColorPalette(theme), adaptive = false, artwork = null).first()
+            val palette = ThemeColors.getColorPalette(theme)
+            val container = v2PlayButtonColor(v2AccentStops(palette, adaptive = false, artwork = null), palette.secondary)
             val text = playButtonContentColor(container)
             assertTrue("$theme: ${contrast(container, text)}", contrast(container, text) >= 4.3f)
         }
@@ -30,6 +31,14 @@ class PlayButtonColorTest {
         assertEquals(Color.White, playButtonContentColor(Color(0xFF6A1B9A)))
         assertTrue(playButtonContentColor(Color(0xFFD5DDE3)) != Color.White)
         assertTrue(playButtonContentColor(Color(0xFFF2F6FF)) != Color.White)
+    }
+
+    @Test
+    fun gradientThemesUseTheirMainColourAndArtworkWins() {
+        val arctic = ThemeColors.getColorPalette(AppTheme.ARCTIC_BLUE)
+        assertEquals(arctic.secondary, v2PlayButtonColor(v2AccentStops(arctic, adaptive = false, artwork = null), arctic.secondary))
+        val artwork = Color(0xFF7FB3FF)
+        assertEquals(artwork, v2PlayButtonColor(v2AccentStops(arctic, adaptive = true, artwork = artwork), arctic.secondary))
     }
 
     @Test

@@ -449,6 +449,9 @@ fun HeroContentSection(
 
 private val PlayButtonDarkText = Color(0xFF081421)
 
+internal fun v2PlayButtonColor(accentStops: List<Color>, themeAccent: Color): Color =
+    accentStops.singleOrNull() ?: themeAccent
+
 internal fun playButtonContentColor(container: Color): Color {
     val background = container.luminance() + 0.05f
     val onWhite = 1.05f / background
@@ -469,7 +472,11 @@ internal fun PlayButton(
     onFocusRestored: () -> Unit = {}
 ) {
     val isV2 = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null
-    val v2PlayColor = if (isV2) com.nuvio.tv.ui.v2.appearance.v2AccentColors().first() else Color.Unspecified
+    val v2PlayColor = if (isV2) {
+        v2PlayButtonColor(com.nuvio.tv.ui.v2.appearance.v2AccentColors(), NuvioTheme.colors.Secondary)
+    } else {
+        Color.Unspecified
+    }
     var longPressTriggered by remember { mutableStateOf(false) }
     val longPressKeyTracker = rememberLongPressKeyTracker()
 
