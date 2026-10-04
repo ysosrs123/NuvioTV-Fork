@@ -32,6 +32,7 @@ object ThemeColors {
         secondaryVariant = NuvioPrimitives.red600,
         focusRing = NuvioPrimitives.red300,
         focusBackground = Color(0xFF3D1A1A),
+        background = Color(0xFF0A0A0E),
         backgroundCard = Color(0xFF241A1A)
     )
 
@@ -87,8 +88,14 @@ object ThemeColors {
         onSecondary = NuvioPrimitives.neutral925,
         onSecondaryVariant = NuvioPrimitives.neutral925,
         focusRing = NuvioPrimitives.white,
-        focusBackground = Color(0xFF303030),
+        focusBackground = Color(0x24FFFFFF),
         backgroundCard = NuvioPrimitives.neutral850
+    )
+
+    val Glass = White.copy(
+        secondary = Color(0xFFD5DDE3), secondaryVariant = Color(0xFFB6C0C8),
+        focusRing = Color(0xFFF3F6F8), focusBackground = Color(0x183B4248),
+        background = Color(0xFF080A0C), surface = Color(0xFF14181C)
     )
 
     fun getColorPalette(
@@ -109,6 +116,7 @@ object ThemeColors {
             AppTheme.AMBER -> Amber
             AppTheme.ROSE -> Rose
             AppTheme.WHITE -> White
+            AppTheme.GLASS -> Glass
         }
     }
 }

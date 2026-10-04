@@ -90,7 +90,7 @@ fun LayoutSettingsContent(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 18.dp),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                    verticalArrangement = Arrangement.spacedBy(if (isV2Settings()) 4.dp else NuvioTheme.spacing.md)
                 ) {
                     items(items = sections, key = { it.name }) { section ->
                         val expanded = section.name in expandedSections

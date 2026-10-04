@@ -7,7 +7,6 @@ import com.nuvio.tv.data.local.DeviceLocalPlayerPreferences
 import com.nuvio.tv.data.local.ImagePerformancePreferences
 import com.nuvio.tv.data.local.LayoutPreferenceDataStore
 import com.nuvio.tv.data.local.PlayerSettingsDataStore
-import com.nuvio.tv.data.local.SentrySettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +22,8 @@ data class AdvancedSettingsUiState(
     val composeHighlighterEnabled: Boolean = false,
     val playbackIssueReportsEnabled: Boolean = false,
     val playerStatsHudEnabled: Boolean = false,
-    val rgb565Enabled: Boolean = true,
-    val sentryEnabled: Boolean = true
+    val addonHealthEnabled: Boolean = true,
+    val rgb565Enabled: Boolean = true
 )
 
 sealed class AdvancedSettingsEvent {
@@ -32,9 +31,9 @@ sealed class AdvancedSettingsEvent {
     data class SetSmoothBringIntoViewEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
     data class SetComposeHighlighterEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
     data class SetPlaybackIssueReportsEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
+    data class SetAddonHealthEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
     data class SetPlayerStatsHudEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
     data class SetRgb565Enabled(val enabled: Boolean) : AdvancedSettingsEvent()
-    data class SetSentryEnabled(val enabled: Boolean) : AdvancedSettingsEvent()
 }
 
 @HiltViewModel
@@ -42,7 +41,6 @@ class AdvancedSettingsViewModel @Inject constructor(
     private val layoutPreferenceDataStore: LayoutPreferenceDataStore,
     private val playerSettingsDataStore: PlayerSettingsDataStore,
     private val deviceLocalPlayerPreferences: DeviceLocalPlayerPreferences,
-    private val sentrySettingsDataStore: SentrySettingsDataStore,
     private val imagePerformancePreferences: ImagePerformancePreferences,
     private val appRestarter: AppRestarter
 ) : ViewModel() {
@@ -72,13 +70,13 @@ class AdvancedSettingsViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            deviceLocalPlayerPreferences.playerStatsHudEnabled.collectLatest { enabled ->
-                _uiState.update { it.copy(playerStatsHudEnabled = enabled) }
+            layoutPreferenceDataStore.addonHealthEnabled.collectLatest { enabled ->
+                _uiState.update { it.copy(addonHealthEnabled = enabled) }
             }
         }
         viewModelScope.launch {
-            sentrySettingsDataStore.enabled.collectLatest { enabled ->
-                _uiState.update { it.copy(sentryEnabled = enabled) }
+            deviceLocalPlayerPreferences.playerStatsHudEnabled.collectLatest { enabled ->
+                _uiState.update { it.copy(playerStatsHudEnabled = enabled) }
             }
         }
     }
@@ -116,9 +114,9 @@ class AdvancedSettingsViewModel @Inject constructor(
                     appRestarter.restart()
                 }
             }
-            is AdvancedSettingsEvent.SetSentryEnabled -> {
+            is AdvancedSettingsEvent.SetAddonHealthEnabled -> {
                 viewModelScope.launch {
-                    sentrySettingsDataStore.setEnabled(event.enabled)
+                    layoutPreferenceDataStore.setAddonHealthEnabled(event.enabled)
                 }
             }
         }

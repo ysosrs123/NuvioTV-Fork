@@ -7,6 +7,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,6 +37,8 @@ data class SourceChipItem(
     val status: SourceChipStatus
 )
 
+private val SourceChipLoadingIndicatorSize = 12.dp
+
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun SourceStatusFilterChip(
@@ -48,6 +51,20 @@ fun SourceStatusFilterChip(
     modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    if (com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null) {
+        com.nuvio.tv.ui.v2.components.NuvioFilterPill(
+            onClick = { if (isSelectable) onClick() }, selected = isSelected,
+            modifier = modifier.onFocusChanged {
+                if (it.isFocused && !isSelected && isSelectable) onFocusSelect?.invoke()
+            }
+        ) {
+            if (status == SourceChipStatus.LOADING) LoadingIndicator(
+                Modifier.size(SourceChipLoadingIndicatorSize), color = NuvioTheme.colors.TextSecondary)
+            Text(name, style = MaterialTheme.typography.labelLarge,
+                color = if (status == SourceChipStatus.ERROR) NuvioTheme.colors.Error else NuvioTheme.colors.TextPrimary)
+        }
+        return
+    }
     val isError = status == SourceChipStatus.ERROR
     val isLoading = status == SourceChipStatus.LOADING
     val shouldUseNormalColors = !isError

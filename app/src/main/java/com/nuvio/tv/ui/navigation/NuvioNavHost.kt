@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.navigation
 
+import android.os.SystemClock
 import com.nuvio.tv.ui.theme.NuvioMotion
 import com.nuvio.tv.ui.components.PlaybackAvailabilityProvider
 import com.nuvio.tv.ui.components.LocalPlaybackAvailability
@@ -23,7 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.nuvio.tv.core.build.AppFeaturePolicy
-import com.nuvio.tv.domain.model.ExperienceMode
+import com.nuvio.tv.data.mediaserver.ServerCatalog
 import com.nuvio.tv.ui.screens.CatalogSeeAllScreen
 import com.nuvio.tv.ui.screens.ExperienceModeSelectionScreen
 import com.nuvio.tv.ui.screens.LayoutSelectionScreen
@@ -34,6 +35,7 @@ import com.nuvio.tv.ui.screens.addon.CatalogOrderScreen
 import com.nuvio.tv.ui.screens.library.LibraryScreen
 import com.nuvio.tv.ui.screens.player.PlayerExitReason
 import com.nuvio.tv.ui.screens.player.PlayerScreen
+import com.nuvio.tv.ui.screens.player.isShortPlaceholderDuration
 import com.nuvio.tv.ui.screens.player.PostPlayRecommendation
 import com.nuvio.tv.ui.screens.player.playerBackOpensCurrentEpisodeStreams
 import com.nuvio.tv.ui.screens.plugin.PluginScreen
@@ -47,6 +49,7 @@ import com.nuvio.tv.ui.screens.settings.SettingsScreen
 import com.nuvio.tv.ui.screens.settings.SupportersContributorsScreen
 import com.nuvio.tv.ui.screens.settings.ThemeSettingsScreen
 import com.nuvio.tv.ui.screens.settings.TrackingSettingsScreen
+import com.nuvio.tv.ui.screens.party.PartyScreen
 import com.nuvio.tv.ui.screens.settings.TmdbSettingsScreen
 import com.nuvio.tv.ui.screens.stream.StreamScreen
 import com.nuvio.tv.ui.screens.home.ContinueWatchingItem
@@ -84,6 +87,9 @@ private fun PlaybackNavHost(
         return from.startsWith("player/") && to.startsWith("stream/")
     }
 
+    val v2 = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null
+    // Keep destination overlap short: both populated screens otherwise draw through the whole transition.
+    val transitionMs = if (v2) 180 else NuvioMotion.tokens.durations.medium
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -93,10 +99,11 @@ private fun PlaybackNavHost(
             val isAutoPlayNav = targetState.arguments
                 ?.getString("autoPlayNav")
                 ?.toBooleanStrictOrNull() == true
-            if (isStreamToPlayer(from, to) && isAutoPlayNav) {
+            if ((isStreamToPlayer(from, to) && isAutoPlayNav) ||
+                (v2 && (from.startsWith("detail/") || to.startsWith("detail/")))) {
                 EnterTransition.None
             } else {
-                fadeIn(animationSpec = tween(NuvioMotion.tokens.durations.medium))
+                fadeIn(animationSpec = tween(transitionMs))
             }
         },
         exitTransition = {
@@ -105,10 +112,11 @@ private fun PlaybackNavHost(
             val isAutoPlayNav = targetState.arguments
                 ?.getString("autoPlayNav")
                 ?.toBooleanStrictOrNull() == true
-            if (isStreamToPlayer(from, to) && isAutoPlayNav) {
+            if ((isStreamToPlayer(from, to) && isAutoPlayNav) ||
+                (v2 && (from.startsWith("detail/") || to.startsWith("detail/")))) {
                 ExitTransition.None
             } else {
-                fadeOut(animationSpec = tween(NuvioMotion.tokens.durations.medium))
+                fadeOut(animationSpec = tween(transitionMs))
             }
         },
         popEnterTransition = {
@@ -117,10 +125,11 @@ private fun PlaybackNavHost(
             val isAutoPlayNav = initialState.arguments
                 ?.getString("autoPlayNav")
                 ?.toBooleanStrictOrNull() == true
-            if (isPlayerToStream(from, to) && isAutoPlayNav) {
+            if ((isPlayerToStream(from, to) && isAutoPlayNav) ||
+                (v2 && (from.startsWith("detail/") || to.startsWith("detail/")))) {
                 EnterTransition.None
             } else {
-                fadeIn(animationSpec = tween(NuvioMotion.tokens.durations.medium))
+                fadeIn(animationSpec = tween(transitionMs))
             }
         },
         popExitTransition = {
@@ -129,22 +138,19 @@ private fun PlaybackNavHost(
             val isAutoPlayNav = initialState.arguments
                 ?.getString("autoPlayNav")
                 ?.toBooleanStrictOrNull() == true
-            if (isPlayerToStream(from, to) && isAutoPlayNav) {
+            if ((isPlayerToStream(from, to) && isAutoPlayNav) ||
+                (v2 && (from.startsWith("detail/") || to.startsWith("detail/")))) {
                 ExitTransition.None
             } else {
-                fadeOut(animationSpec = tween(NuvioMotion.tokens.durations.medium))
+                fadeOut(animationSpec = tween(transitionMs))
             }
         }
     ) {
         composable(Screen.ExperienceModeSelection.route) {
             ExperienceModeSelectionScreen(
-                onContinue = { mode ->
-                    val destination = if (mode == ExperienceMode.ESSENTIAL) {
-                        Screen.Home.route
-                    } else {
-                        Screen.LayoutSelection.route
-                    }
-                    navController.navigate(destination) {
+                onContinue = {
+                    // The fork has one layout: both modes go straight to Home.
+                    navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.ExperienceModeSelection.route) { inclusive = true }
                     }
                 }
@@ -182,7 +188,19 @@ private fun PlaybackNavHost(
                         year = null,
                         contentId = item.progress.contentId,
                         contentName = item.progress.name,
-                        runtime = null,
+                        // WatchProgress.duration is overloaded: a real playback duration on
+                        // some write paths, a 1L "watched, duration unknown" sentinel on
+                        // others (mark-watched, poster options, next-up seeds). Filter it
+                        // through the fork's existing definition of "too short to be a real
+                        // title" rather than converting blindly -- and check > 0 explicitly,
+                        // because isShortPlaceholderDuration's range starts at 1 and would
+                        // otherwise let a zero through as "0 minutes".
+                        //
+                        // Truncating rather than rounding is deliberate: a smaller runtime
+                        // weakens the placeholder gate's guard, so the error is fail-safe.
+                        runtime = item.progress.duration
+                            .takeIf { it > 0L && !isShortPlaceholderDuration(it) }
+                            ?.let { (it / 60_000L).toInt() },
                         manualSelection = manualSelection,
                         returnToDetailOnBack = item.progress.contentType.equals("series", ignoreCase = true),
                         returnToHomeOnBack = true,
@@ -215,13 +233,15 @@ private fun PlaybackNavHost(
 
             HomeScreen(
                 onNavigateToDetail = { itemId, itemType, addonBaseUrl ->
-                    val heroBackdrop = HeroBackdropState.consumeAndClear()
+                    com.nuvio.tv.core.performance.DetailEntryTrace.begin()
+                    val heroArtwork = HeroBackdropState.consumeArtworkForTitle(itemId, itemType)
                     navController.navigate(
                         Screen.Detail.createRoute(
                             itemId = itemId,
                             itemType = itemType,
                             addonBaseUrl = addonBaseUrl,
-                            heroBackdropUrl = heroBackdrop
+                            heroBackdropUrl = heroArtwork?.backdropUrl,
+                            heroLogoUrl = heroArtwork?.logoUrl
                         )
                     )
                 },
@@ -284,6 +304,11 @@ private fun PlaybackNavHost(
                     nullable = true
                     defaultValue = "false"
                 },
+                navArgument("heroLogoUrl") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
                 navArgument("heroBackdropUrl") {
                     type = NavType.StringType
                     nullable = true
@@ -302,6 +327,10 @@ private fun PlaybackNavHost(
             )
         ) { backStackEntry ->
             val detailArgs = backStackEntry.arguments
+            if (ServerCatalog.isCollection(detailArgs?.getString("itemId"), detailArgs?.getString("itemType"))) {
+                ServerCatalogDestination(navController, backStackEntry)
+                return@composable
+            }
             val savedState = backStackEntry.savedStateHandle
             val returnToHomeOnBack = detailArgs
                 ?.getString("returnToHomeOnBack")
@@ -324,6 +353,7 @@ private fun PlaybackNavHost(
                 returnFocusEpisode = returnFocusEpisode,
                 heroRestoreToken = heroRestoreToken,
                 heroBackdropUrl = heroBackdropUrl,
+                heroLogoUrl = detailArgs?.getString("heroLogoUrl")?.takeIf { it.isNotBlank() },
                 playOnLoad = playOnLoad,
                 playOnLoadManually = manualSelection,
                 onReturnFocusConsumed = {
@@ -602,6 +632,7 @@ private fun PlaybackNavHost(
                                 filename = playbackInfo.filename,
                                 videoHash = playbackInfo.videoHash,
                                 videoSize = playbackInfo.videoSize,
+                                runtimeMinutes = playbackInfo.runtimeMinutes,
                                 startFromBeginning = startFromBeginning,
                                 addonName = playbackInfo.addonName,
                                 addonLogo = playbackInfo.addonLogo,
@@ -610,6 +641,8 @@ private fun PlaybackNavHost(
                                 fileIdx = playbackInfo.fileIdx,
                                 sources = playbackInfo.sources,
                                 contentLanguage = playbackInfo.contentLanguage,
+                                launchStartedAtMs = playbackInfo.launchStartedAtMs
+                                    ?: SystemClock.elapsedRealtime(),
                                 profileId = playbackInfo.profileId
                             )
                         )
@@ -643,6 +676,7 @@ private fun PlaybackNavHost(
                                 filename = playbackInfo.filename,
                                 videoHash = playbackInfo.videoHash,
                                 videoSize = playbackInfo.videoSize,
+                                runtimeMinutes = playbackInfo.runtimeMinutes,
                                 startFromBeginning = startFromBeginning,
                                 addonName = playbackInfo.addonName,
                                 addonLogo = playbackInfo.addonLogo,
@@ -651,6 +685,8 @@ private fun PlaybackNavHost(
                                 fileIdx = playbackInfo.fileIdx,
                                 sources = playbackInfo.sources,
                                 contentLanguage = playbackInfo.contentLanguage,
+                                launchStartedAtMs = playbackInfo.launchStartedAtMs
+                                    ?: SystemClock.elapsedRealtime(),
                                 profileId = playbackInfo.profileId
                             )
                         ) {
@@ -762,6 +798,11 @@ private fun PlaybackNavHost(
                     defaultValue = null
                 },
                 navArgument("videoSize") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+                navArgument("runtimeMinutes") {
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
@@ -1167,6 +1208,9 @@ private fun PlaybackNavHost(
                 onNavigateToDetail = { itemId, itemType, addonBaseUrl ->
                     navController.navigate(Screen.Detail.createRoute(itemId, itemType, addonBaseUrl))
                 },
+                onNavigateToCatalogSeeAll = { catalogId, addonId, type ->
+                    navController.navigate(Screen.CatalogSeeAll.createRoute(catalogId, addonId, type))
+                },
                 onCloudPlaybackResolved = { info ->
                     val filename = info.filename ?: info.file.name
                     navController.navigate(
@@ -1194,9 +1238,9 @@ private fun PlaybackNavHost(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 showBuiltInHeader = !hideBuiltInHeaders,
-                onNavigateToTracking = { navController.navigate(Screen.Tracking.route) },
                 onNavigateToAddons = { navController.navigate(Screen.AddonManager.route) },
                 onNavigateToPlugins = { navController.navigate(Screen.Plugins.route) },
+                onNavigateToWatchParty = { navController.navigate(Screen.WatchParty.route) },
                 onNavigateToAuthQrSignIn = { navController.navigate(Screen.AuthQrSignIn.route) },
                 onNavigateToManageProfiles = { navController.navigate(Screen.ManageProfiles.route) },
                 onNavigateToSupportersContributors = {
@@ -1224,6 +1268,12 @@ private fun PlaybackNavHost(
 
         composable(Screen.TmdbSettings.route) {
             TmdbSettingsScreen(
+                onBackPress = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.WatchParty.route) {
+            PartyScreen(
                 onBackPress = { navController.popBackStack() }
             )
         }
@@ -1369,6 +1419,10 @@ private fun PlaybackNavHost(
             val addonId = backStackEntry.arguments?.getString("addonId") ?: ""
             val type = backStackEntry.arguments?.getString("type") ?: ""
             val fromSearch = backStackEntry.arguments?.getBoolean("fromSearch") ?: false
+            if (ServerCatalog.isServerAddonId(addonId) && !fromSearch) {
+                ServerCatalogDestination(navController, backStackEntry)
+                return@composable
+            }
 
             // When coming from search, get the SearchViewModel from the Search back stack entry
             // so we share the same data (existing results + pagination)

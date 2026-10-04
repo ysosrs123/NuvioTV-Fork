@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Player controls</string>
+    <string name="v2_player_deck">Control deck</string>
+    <string name="v2_player_invisible">Invisible</string>
+    <string name="v2_settings_presentation">Settings presentation</string>
+    <string name="v2_settings_minimal">Minimal</string>
+    <string name="v2_settings_glass">Glass</string>
+</resources>

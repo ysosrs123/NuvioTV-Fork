@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.settings
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -18,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -26,7 +28,9 @@ import com.nuvio.tv.R
 import com.nuvio.tv.core.torrent.TorrentCacheClearResult
 import com.nuvio.tv.core.torrent.TorrentSettingsData
 import com.nuvio.tv.core.torrent.TorrentState
+import com.nuvio.tv.data.local.PlayerControlLayoutSnapshot
 import com.nuvio.tv.data.local.PlayerSettings
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -48,7 +52,8 @@ fun PlaybackSettingsScreen(
 @Composable
 fun PlaybackSettingsContent(
     viewModel: PlaybackSettingsViewModel = hiltViewModel(),
-    initialFocusRequester: FocusRequester? = null
+    initialFocusRequester: FocusRequester? = null,
+    onOpenConnectedServices: (() -> Unit)? = null
 ) {
     val playerSettings by viewModel.playerSettings.collectAsStateWithLifecycle(initialValue = PlayerSettings())
     val transparentLetterbox by viewModel.transparentLetterbox.collectAsStateWithLifecycle(initialValue = false)
@@ -76,11 +81,29 @@ fun PlaybackSettingsContent(
     val installedAddonNames by viewModel.installedAddonNames.collectAsStateWithLifecycle(initialValue = emptyList())
     val enabledPluginNames by viewModel.enabledPluginNames.collectAsStateWithLifecycle(initialValue = emptyList())
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     var openDialog by remember { mutableStateOf<PlaybackDialog?>(null) }
     var memoryUsageTrigger by remember { mutableIntStateOf(0) }
     var showMemoryUsage by remember { mutableStateOf(false) }
     val onUpdate: PlaybackSettingsUpdate = remember(viewModel, coroutineScope) {
         { block -> coroutineScope.launch { viewModel.block() } }
+    }
+    val layoutSnapshot by viewModel.controlLayoutSnapshot.collectAsStateWithLifecycle(initialValue = null)
+    var editorSnapshot by remember { mutableStateOf<PlayerControlLayoutSnapshot?>(null) }
+    var openingLayoutEditor by remember { mutableStateOf(false) }
+
+    val iecProbeChecking = stringResource(R.string.audio_surround_iec_probe_checking)
+    val iecProbeAvailable = stringResource(R.string.audio_surround_iec_probe_available)
+    val iecProbeUnavailable = stringResource(R.string.audio_surround_iec_probe_unavailable)
+    LaunchedEffect(Unit) {
+        viewModel.iecProbeFeedback.collect { feedback ->
+            val message = when (feedback) {
+                IecProbeFeedback.STARTED -> iecProbeChecking
+                IecProbeFeedback.AVAILABLE -> iecProbeAvailable
+                IecProbeFeedback.UNAVAILABLE -> iecProbeUnavailable
+            }
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        }
     }
 
     LaunchedEffect(memoryUsageTrigger) {
@@ -88,6 +111,15 @@ fun PlaybackSettingsContent(
         showMemoryUsage = true
         delay(2200)
         showMemoryUsage = false
+    }
+
+    editorSnapshot?.let { captured ->
+        PlayerControlLayoutEditor(
+            captured,
+            layoutSnapshot?.profileId,
+            save = viewModel::saveControlLayout,
+            onDismiss = { editorSnapshot = null }
+        )
     }
 
     Column(
@@ -120,7 +152,27 @@ fun PlaybackSettingsContent(
                             .onFailure { torrentCacheClearFailed = true }
                     }
                 },
-                initialFocusRequester = initialFocusRequester
+                initialFocusRequester = initialFocusRequester,
+                onOpenConnectedServices = onOpenConnectedServices,
+                onShowControlLayoutEditor = if (layoutSnapshot == null || openingLayoutEditor) null else ({
+                    openDialog = null
+                    openingLayoutEditor = true
+                    coroutineScope.launch {
+                        try {
+                            editorSnapshot = viewModel.captureControlLayoutSnapshot()
+                        } catch (cancelled: CancellationException) {
+                            throw cancelled
+                        } catch (_: Exception) {
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.player_layout_load_failed),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } finally {
+                            openingLayoutEditor = false
+                        }
+                    }
+                })
             )
         }
 

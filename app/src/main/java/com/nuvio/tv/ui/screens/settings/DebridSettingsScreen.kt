@@ -237,14 +237,14 @@ fun DebridSettingsContent(
 
                     if (uiState.canResolvePlayableLinks) {
                         item(key = "debrid_instant_section") {
-                            SettingsSectionLabel(text = stringResource(R.string.debrid_section_instant_playback))
+                            SettingsSectionLabel(text = stringResource(R.string.debrid_cached_playback_links))
                         }
 
                         item(key = "debrid_prepare_links") {
                             val prepareEnabled = uiState.instantPlaybackPreparationLimit > 0
                             SettingsToggleRow(
-                                title = stringResource(R.string.debrid_prepare_instant_playback),
-                                subtitle = stringResource(R.string.debrid_prepare_instant_playback_description),
+                                title = stringResource(R.string.debrid_cached_playback_links),
+                                subtitle = stringResource(R.string.debrid_cached_playback_links_description),
                                 checked = prepareEnabled,
                                 onToggle = { viewModel.setInstantPlaybackPreparationEnabled(!prepareEnabled) },
                                 enabled = true
@@ -353,6 +353,37 @@ fun DebridSettingsContent(
                                     enabled = true
                                 )
                             }
+                        }
+
+                        item(key = "debrid_filters_reset_defaults") {
+                            SettingsActionRow(
+                                title = stringResource(R.string.debrid_filters_reset_title),
+                                subtitle = stringResource(R.string.debrid_filters_reset_subtitle),
+                                value = stringResource(R.string.layout_reset_default),
+                                onClick = { viewModel.setStreamPreferences(DebridStreamPreferences()) },
+                                enabled = true
+                            )
+                        }
+
+                        item(key = "debrid_filters_show_everything") {
+                            SettingsActionRow(
+                                title = stringResource(R.string.debrid_filters_show_everything_title),
+                                subtitle = stringResource(R.string.debrid_filters_show_everything_subtitle),
+                                value = stringResource(R.string.debrid_filters_show_everything_action),
+                                onClick = {
+                                    viewModel.setStreamPreferences(
+                                        DebridStreamPreferences(
+                                            maxResults = 0,
+                                            requiredResolutions = emptyList(),
+                                            excludedQualities = emptyList(),
+                                            excludedVisualTags = emptyList(),
+                                            excludedEncodes = emptyList(),
+                                            excludedReleaseGroups = emptyList()
+                                        )
+                                    )
+                                },
+                                enabled = true
+                            )
                         }
                     }
                 }
@@ -677,6 +708,15 @@ fun DebridSettingsContent(
             },
             onDismiss = { activeStreamPicker = null }
         )
+        DebridStreamPicker.PREFERRED_RELEASE_GROUPS -> DebridTextListDialog(
+            title = stringResource(R.string.debrid_stream_release_groups_preferred),
+            selectedValues = uiState.streamPreferences.preferredReleaseGroups,
+            onSelected = { value ->
+                viewModel.setStreamPreferences(uiState.streamPreferences.copy(preferredReleaseGroups = value))
+                activeStreamPicker = null
+            },
+            onDismiss = { activeStreamPicker = null }
+        )
         DebridStreamPicker.REQUIRED_RELEASE_GROUPS -> DebridTextListDialog(
             title = stringResource(R.string.debrid_stream_release_groups_required),
             selectedValues = uiState.streamPreferences.requiredReleaseGroups,
@@ -915,8 +955,8 @@ private fun DebridTextListDialog(
             onClick = { inputFocusRequester.requestFocus() },
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundElevated,
-                focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+                containerColor = Color.Black.copy(alpha = 0.85f),
+                focusedContainerColor = Color.Black.copy(alpha = 0.85f)
             ),
             shape = CardDefaults.shape(RoundedCornerShape(10.dp)),
             scale = CardDefaults.scale(focusedScale = 1f)
@@ -944,7 +984,7 @@ private fun DebridTextListDialog(
                     keyboardActions = KeyboardActions(onDone = { submit() }),
                     textStyle = MaterialTheme.typography.bodyMedium.copy(color = NuvioTheme.colors.TextPrimary,
                                             textDirection = TextDirection.Content),
-                    cursorBrush = SolidColor(NuvioTheme.colors.Primary)
+                    cursorBrush = SolidColor(Color.White)
                 )
             }
         }
@@ -1114,6 +1154,12 @@ private fun LazyListScope.debridRuleRows(
         context.getString(R.string.debrid_picker_excluded_languages_title),
         context.getString(R.string.debrid_picker_excluded_languages_subtitle),
         selectionCountLabel(preferences.excludedLanguages, context)
+    )
+    row(
+        DebridStreamPicker.PREFERRED_RELEASE_GROUPS,
+        context.getString(R.string.debrid_picker_preferred_release_groups_title),
+        context.getString(R.string.debrid_picker_preferred_release_groups_subtitle),
+        selectionCountLabel(preferences.preferredReleaseGroups, context)
     )
     row(
         DebridStreamPicker.REQUIRED_RELEASE_GROUPS,
@@ -1506,8 +1552,8 @@ private fun DebridApiKeyDialog(
                 .fillMaxWidth()
                 .onFocusChanged { isInputFocused = it.isFocused || it.hasFocus },
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundElevated,
-                focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+                containerColor = Color.Black.copy(alpha = 0.85f),
+                focusedContainerColor = Color.Black.copy(alpha = 0.85f)
             ),
             border = CardDefaults.border(
                 border = Border(
@@ -1551,7 +1597,7 @@ private fun DebridApiKeyDialog(
                     textStyle = MaterialTheme.typography.bodyMedium.copy(color = NuvioTheme.colors.TextPrimary,
                                             textDirection = TextDirection.Content),
                     cursorBrush = SolidColor(
-                        if (isInputFocused) NuvioTheme.colors.Primary else Color.Transparent
+                        if (isInputFocused) Color.White else Color.Transparent
                     ),
                     decorationBox = { innerTextField ->
                         if (value.isBlank()) {
@@ -1630,6 +1676,7 @@ private enum class DebridStreamPicker {
     PREFERRED_LANGUAGES,
     REQUIRED_LANGUAGES,
     EXCLUDED_LANGUAGES,
+    PREFERRED_RELEASE_GROUPS,
     REQUIRED_RELEASE_GROUPS,
     EXCLUDED_RELEASE_GROUPS
 }

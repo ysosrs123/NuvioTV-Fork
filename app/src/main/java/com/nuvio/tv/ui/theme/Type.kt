@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.theme
 
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -32,10 +33,34 @@ val OpenSansFamily = FontFamily(
     Font(R.font.opensans_variable, FontWeight.Bold)
 )
 
+val AtkinsonHyperlegibleNextFamily = FontFamily(
+    Font(R.font.atkinson_hyperlegible_next_variable, FontWeight.Normal),
+    Font(R.font.atkinson_hyperlegible_next_variable, FontWeight.Medium),
+    Font(R.font.atkinson_hyperlegible_next_variable, FontWeight.SemiBold),
+    Font(R.font.atkinson_hyperlegible_next_variable, FontWeight.Bold),
+    Font(R.font.atkinson_hyperlegible_next_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.atkinson_hyperlegible_next_italic, FontWeight.Medium, FontStyle.Italic),
+    Font(R.font.atkinson_hyperlegible_next_italic, FontWeight.SemiBold, FontStyle.Italic),
+    Font(R.font.atkinson_hyperlegible_next_italic, FontWeight.Bold, FontStyle.Italic)
+)
+
+val SourceSans3Family = FontFamily(
+    Font(R.font.source_sans3_variable, FontWeight.Normal),
+    Font(R.font.source_sans3_variable, FontWeight.Medium),
+    Font(R.font.source_sans3_variable, FontWeight.SemiBold),
+    Font(R.font.source_sans3_variable, FontWeight.Bold),
+    Font(R.font.source_sans3_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.source_sans3_italic, FontWeight.Medium, FontStyle.Italic),
+    Font(R.font.source_sans3_italic, FontWeight.SemiBold, FontStyle.Italic),
+    Font(R.font.source_sans3_italic, FontWeight.Bold, FontStyle.Italic)
+)
+
 fun getFontFamily(appFont: AppFont): FontFamily = when (appFont) {
     AppFont.INTER -> InterFamily
     AppFont.DM_SANS -> DMSansFamily
     AppFont.OPEN_SANS -> OpenSansFamily
+    AppFont.ATKINSON_HYPERLEGIBLE_NEXT -> AtkinsonHyperlegibleNextFamily
+    AppFont.SOURCE_SANS_3 -> SourceSans3Family
 }
 
 @Immutable

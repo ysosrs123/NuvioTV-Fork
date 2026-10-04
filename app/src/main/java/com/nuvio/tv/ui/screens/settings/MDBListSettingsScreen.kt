@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,6 +54,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.ui.components.NuvioDialog
+import com.nuvio.tv.data.local.WatchProgressSource
 
 @Composable
 fun MDBListSettingsContent(
@@ -61,6 +63,28 @@ fun MDBListSettingsContent(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showApiKeyDialog by remember { mutableStateOf(false) }
+    var showWatchProgressDialog by remember { mutableStateOf(false) }
+    val notSetLabel = stringResource(R.string.mdblist_not_set)
+    // Hoisted at composable scope on purpose: the formatter below is a plain
+    // function type, so a composable-only call cannot be made from inside it.
+    // This mirrors the tracking settings screen, where the picker's other
+    // entry point lives.
+    val strWatchProgressTrakt = stringResource(R.string.trakt_watch_progress_source_trakt)
+    val strWatchProgressNuvio = stringResource(R.string.trakt_watch_progress_source_nuvio)
+    val strWatchProgressMdbList = stringResource(R.string.trakt_watch_progress_source_mdblist)
+    val strWatchProgressSimkl = stringResource(R.string.simkl_name)
+    val watchProgressFormatter: (WatchProgressSource) -> String = { source ->
+        when (source) {
+            WatchProgressSource.TRAKT -> strWatchProgressTrakt
+            WatchProgressSource.SIMKL -> strWatchProgressSimkl
+            WatchProgressSource.NUVIO_SYNC -> strWatchProgressNuvio
+            WatchProgressSource.MDBLIST -> strWatchProgressMdbList
+        }
+    }
+
+    LaunchedEffect(uiState.enabled, uiState.apiKey, uiState.isConnected) {
+        viewModel.refreshAccount()
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -113,6 +137,62 @@ fun MDBListSettingsContent(
                     )
                 }
 
+                item(key = "mdblist_account") {
+                    SettingsActionRow(
+                        title = stringResource(R.string.mdblist_account_title),
+                        subtitle = stringResource(R.string.mdblist_account_subtitle),
+                        value = uiState.username ?: notSetLabel,
+                        onClick = { viewModel.refreshAccount() },
+                        enabled = uiState.enabled || uiState.isConnected,
+                        trailingIcon = null
+                    )
+                }
+
+                item(key = "mdblist_plan") {
+                    SettingsActionRow(
+                        title = stringResource(R.string.mdblist_plan_title),
+                        subtitle = stringResource(R.string.mdblist_plan_subtitle),
+                        value = uiState.plan ?: uiState.isSupporter?.let { supporter ->
+                            stringResource(if (supporter) R.string.mdblist_plan_supporter else R.string.mdblist_plan_free)
+                        } ?: notSetLabel,
+                        onClick = { viewModel.refreshAccount() },
+                        enabled = uiState.enabled || uiState.isConnected,
+                        trailingIcon = null
+                    )
+                }
+
+                item(key = "mdblist_requests") {
+                    val used = uiState.requestsUsed
+                    val limit = uiState.requestsLimit
+                    SettingsActionRow(
+                        title = stringResource(R.string.mdblist_requests_title),
+                        subtitle = stringResource(R.string.mdblist_requests_subtitle),
+                        value = if (used != null && limit != null) "" + used + " / " + limit else notSetLabel,
+                        onClick = { viewModel.refreshAccount() },
+                        enabled = uiState.enabled || uiState.isConnected,
+                        trailingIcon = null
+                    )
+                }
+
+                item(key = "mdblist_watch_progress") {
+                    SettingsActionRow(
+                        title = stringResource(R.string.trakt_watch_progress_title),
+                        subtitle = stringResource(R.string.trakt_watch_progress_subtitle),
+                        value = watchProgressFormatter(uiState.watchProgressSource),
+                        onClick = { showWatchProgressDialog = true },
+                        enabled = uiState.enabled || uiState.isConnected
+                    )
+                }
+
+                item(key = "mdblist_ratings_heading") {
+                    Text(
+                        text = stringResource(R.string.mdblist_ratings_heading),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = NuvioTheme.colors.TextTertiary,
+                        modifier = Modifier.padding(top = NuvioTheme.spacing.sm)
+                    )
+                }
+
                 item(key = "mdblist_show_on_hero") {
                     SettingsToggleRow(
                         title = stringResource(R.string.mdblist_show_on_hero_title),
@@ -160,6 +240,30 @@ fun MDBListSettingsContent(
         }
     }
 
+    if (showWatchProgressDialog) {
+        SettingsSingleChoiceDialog(
+            title = stringResource(R.string.trakt_watch_progress_dialog_title),
+            subtitle = stringResource(R.string.trakt_watch_progress_dialog_subtitle),
+            options = listOfNotNull(
+                SettingsPickerOption(WatchProgressSource.TRAKT, stringResource(R.string.trakt_watch_progress_source_trakt)),
+                SettingsPickerOption(WatchProgressSource.NUVIO_SYNC, stringResource(R.string.trakt_watch_progress_source_nuvio)),
+                if (uiState.isConnected || uiState.watchProgressSource == WatchProgressSource.MDBLIST) {
+                    SettingsPickerOption(WatchProgressSource.MDBLIST, stringResource(R.string.trakt_watch_progress_source_mdblist))
+                } else {
+                    null
+                }
+            ),
+            selectedValue = uiState.watchProgressSource,
+            onOptionSelected = { source ->
+                viewModel.onWatchProgressSourceSelected(source)
+                showWatchProgressDialog = false
+            },
+            onDismiss = { showWatchProgressDialog = false },
+            width = 620.dp,
+            maxHeight = 320.dp
+        )
+    }
+
     if (showApiKeyDialog) {
         MDBListApiKeyDialog(
             currentValue = uiState.apiKey,
@@ -205,8 +309,8 @@ private fun MDBListApiKeyDialog(
                 .fillMaxWidth()
                 .onFocusChanged { isInputFocused = it.isFocused || it.hasFocus },
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundElevated,
-                focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+                containerColor = settingsItemColor(Color.Black.copy(alpha = 0.85f)),
+                focusedContainerColor = settingsItemColor(Color.Black.copy(alpha = 0.85f))
             ),
             border = CardDefaults.border(
                 border = Border(
@@ -240,7 +344,7 @@ private fun MDBListApiKeyDialog(
                     textStyle = MaterialTheme.typography.bodyMedium.copy(color = NuvioTheme.colors.TextPrimary,
                                             textDirection = TextDirection.Content),
                     cursorBrush = SolidColor(
-                        if (isInputFocused) NuvioTheme.colors.Primary
+                        if (isInputFocused) Color.White
                         else androidx.compose.ui.graphics.Color.Transparent
                     ),
                     decorationBox = { innerTextField ->
@@ -264,7 +368,7 @@ private fun MDBListApiKeyDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundElevated,
+                    containerColor = settingsItemColor(Color.Black.copy(alpha = 0.85f)),
                     contentColor = NuvioTheme.colors.TextPrimary
                 )
             ) {
@@ -274,7 +378,7 @@ private fun MDBListApiKeyDialog(
             Button(
                 onClick = onClear,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundElevated,
+                    containerColor = settingsItemColor(Color.Black.copy(alpha = 0.85f)),
                     contentColor = NuvioTheme.colors.TextPrimary
                 )
             ) {
@@ -284,7 +388,7 @@ private fun MDBListApiKeyDialog(
             Button(
                 onClick = { if (!validating) viewModel.validateAndSaveApiKey(value, onSaved) },
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
+                    containerColor = settingsItemColor(Color.Black.copy(alpha = 0.85f)),
                     contentColor = NuvioTheme.colors.TextPrimary
                 )
             ) {

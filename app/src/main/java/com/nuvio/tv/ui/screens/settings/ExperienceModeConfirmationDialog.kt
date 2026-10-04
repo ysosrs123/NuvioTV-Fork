@@ -13,6 +13,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Text
@@ -57,7 +58,7 @@ internal fun ExperienceModeConfirmationDialog(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
+                    containerColor = Color.Black.copy(alpha = 0.85f),
                     contentColor = NuvioTheme.colors.TextPrimary
                 )
             ) {
@@ -72,7 +73,7 @@ internal fun ExperienceModeConfirmationDialog(
                     .weight(1f)
                     .focusRequester(confirmFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
+                    containerColor = Color.Black.copy(alpha = 0.85f),
                     contentColor = NuvioTheme.colors.TextPrimary
                 )
             ) {

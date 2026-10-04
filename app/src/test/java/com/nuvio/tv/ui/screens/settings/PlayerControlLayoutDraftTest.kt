@@ -1,0 +1,13 @@
+package com.nuvio.tv.ui.screens.settings
+import com.nuvio.tv.data.local.*
+import org.junit.Assert.*
+import org.junit.Test
+class PlayerControlLayoutDraftTest {
+ private fun original()=PlayerControlLayoutSnapshot(1,null,null)
+ @Test fun `visibility group and move preview keeps captured revision immutable`() { val snapshot=original(); val d=PlayerControlLayoutDraft(snapshot).visibility(PlayerControlAction.PLAY_PAUSE,false).group(PlayerControlAction.AUDIO,PlayerControlGroup.CENTRE).group(PlayerControlAction.STATS,PlayerControlGroup.CENTRE).move(PlayerControlAction.STATS,-1); assertNull(snapshot.layout); assertNull(snapshot.serialized); assertSame(snapshot,d.snapshot); assertEquals(listOf(PlayerControlAction.STATS,PlayerControlAction.AUDIO),d.preview.visibleGroups(PlayerControlAction.entries.toSet()).getValue(PlayerControlGroup.CENTRE)) }
+ @Test fun `edge move cannot materialize a custom layout from original defaults`() { val d=PlayerControlLayoutDraft(original()); assertSame(d,d.move(PlayerControlAction.PLAY_PAUSE,-1)); assertNull(d.move(PlayerControlAction.PLAY_PAUSE,-1).layout) }
+ @Test fun `reset previews null without losing raw revision for Save`() { val snapshot=PlayerControlLayoutSnapshot(1,"old",PlayerControlLayout.default()); val reset=PlayerControlLayoutDraft(snapshot).visibility(PlayerControlAction.AUDIO,false).reset(); assertNull(reset.layout); assertSame(snapshot,reset.snapshot); assertEquals("old",reset.snapshot.serialized) }
+ @Test fun `hidden controls remain editable and can return in another group`() { val d=PlayerControlLayoutDraft(original()).visibility(PlayerControlAction.PLAY_PAUSE,false).group(PlayerControlAction.PLAY_PAUSE,PlayerControlGroup.RIGHT).visibility(PlayerControlAction.PLAY_PAUSE,true); assertTrue(d.preview.entries.single{it.action==PlayerControlAction.PLAY_PAUSE}.visible); assertEquals(PlayerControlGroup.RIGHT,d.preview.entries.single{it.action==PlayerControlAction.PLAY_PAUSE}.group) }
+ @Test fun `rejection retains draft and original ownership without becoming another profile`() { val d=PlayerControlLayoutDraft(original()).visibility(PlayerControlAction.AUDIO,false); val rejected=d.reject(); assertTrue(rejected.rejected); assertEquals(d.layout,rejected.layout); assertSame(d.snapshot,rejected.snapshot); assertTrue(rejected.belongsTo(1)); assertFalse(rejected.belongsTo(2)) }
+ @Test fun `cancel can discard edited preview without altering unknown restored value`() { val snapshot=PlayerControlLayoutSnapshot(1,"v9|future",null); val d=PlayerControlLayoutDraft(snapshot).visibility(PlayerControlAction.AUDIO,false); assertNotNull(d.layout); assertNull(snapshot.layout); assertEquals("v9|future",snapshot.serialized) }
+}

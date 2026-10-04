@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.components
 
+import com.nuvio.tv.core.profile.LocalProfileAvatars
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import androidx.compose.animation.animateColorAsState
@@ -91,10 +92,12 @@ fun AvatarPickerGrid(
 
             normalizedCategories
                 .filterNot { category ->
-                    PinnedAvatarCategories.any { it.equals(category, ignoreCase = true) }
+                    PinnedAvatarCategories.any { it.equals(category, ignoreCase = true) } ||
+                        category == LocalProfileAvatars.CATEGORY
                 }
                 .sortedBy { it.lowercase() }
                 .forEach(::add)
+            if (LocalProfileAvatars.CATEGORY in normalizedCategories) add(LocalProfileAvatars.CATEGORY)
         }
     }
     var selectedCategory by remember { mutableStateOf("all") }
@@ -110,7 +113,7 @@ fun AvatarPickerGrid(
 
     val filteredAvatars = remember(avatars, selectedCategory) {
         when (selectedCategory) {
-            "all" -> avatars
+            "all" -> avatars.filterNot { it.category == LocalProfileAvatars.CATEGORY }
             "supporter" -> avatars.filter { it.memberOnly }
             else -> avatars.filter {
                 !it.memberOnly && it.category.equals(selectedCategory, ignoreCase = true)
@@ -279,6 +282,18 @@ private fun AvatarGridItem(
     onFocused: (Boolean) -> Unit,
     onClick: () -> Unit
 ) {
+    if (com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null) {
+        var focused by remember { mutableStateOf(false) }
+        com.nuvio.tv.ui.v2.components.NuvioAvatar(
+            avatar = com.nuvio.tv.ui.v2.components.AvatarModel(avatar.id, avatar.displayName, "#24465C", avatar.imageUrl),
+            size = 80.dp, focused = focused, selected = isSelected,
+            modifier = Modifier.focusRequester(focusRequester)
+                .focusProperties { upFocusRequester?.let { up = it } }
+                .onFocusChanged { focused = it.isFocused; onFocused(it.isFocused) }
+                .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onClick)
+        )
+        return
+    }
     var isFocused by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -359,6 +374,7 @@ private fun categoryLabel(category: String): String {
         "movie" -> stringResource(R.string.profile_avatar_category_movie)
         "tv" -> stringResource(R.string.profile_avatar_category_tv)
         "gaming" -> stringResource(R.string.profile_avatar_category_gaming)
+        LocalProfileAvatars.CATEGORY -> stringResource(R.string.profile_avatar_category_local)
         else -> category.replaceFirstChar { it.uppercase() }
     }
 }

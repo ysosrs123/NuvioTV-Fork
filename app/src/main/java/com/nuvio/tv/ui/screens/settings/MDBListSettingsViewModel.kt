@@ -1,8 +1,13 @@
 package com.nuvio.tv.ui.screens.settings
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.data.local.MDBListSettingsDataStore
+import com.nuvio.tv.data.local.TraktSettingsDataStore
+import com.nuvio.tv.data.local.WatchProgressSource
+import com.nuvio.tv.data.mdblist.MdbListApiClient
+import com.nuvio.tv.data.mdblist.MdbListAuthException
 import com.nuvio.tv.data.mdblist.MdbListAuthStore
 import com.nuvio.tv.data.remote.api.MDBListApi
 import com.nuvio.tv.domain.model.MDBListSettings
@@ -15,14 +20,21 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.nuvio.tv.core.tracking.TrackingSourceController
 import javax.inject.Inject
+
+private const val TAG = "MDBListSettings"
 
 @HiltViewModel
 class MDBListSettingsViewModel @Inject constructor(
     private val dataStore: MDBListSettingsDataStore,
     private val mdbListApi: MDBListApi,
-    authStore: MdbListAuthStore
+    authStore: MdbListAuthStore,
+    private val mdbListAccountApi: MdbListApiClient,
+    private val traktSettingsDataStore: TraktSettingsDataStore,
+    private val trackingSourceController: TrackingSourceController
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MDBListSettingsUiState())
@@ -37,11 +49,100 @@ class MDBListSettingsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             combine(dataStore.settings, authStore.state) { settings, auth ->
-                MDBListSettingsUiState(isConnected = auth.isAuthenticated).fromSettings(settings)
-            }.collectLatest { state ->
-                _uiState.value = state
+                settings to auth.isAuthenticated
+            }.collectLatest { (settings, isConnected) ->
+                _uiState.update { it.copy(isConnected = isConnected).fromSettings(settings) }
             }
         }
+        // The Watch Progress source is one setting with two entry points -
+        // this screen and the Trakt screen - so it is read from and written
+        // to the same store rather than duplicated here.
+        viewModelScope.launch {
+            traktSettingsDataStore.watchProgressSource.collectLatest { source ->
+                _uiState.update { it.copy(watchProgressSource = source) }
+            }
+        }
+    }
+
+    /**
+     * Reads the account summary. Costs one request, so it is driven by the
+     * screen rather than polled. The signed-in account wins; otherwise the
+     * ratings key is used, and nothing is read without either.
+     */
+    fun refreshAccount() {
+        val state = _uiState.value
+        if (state.isConnected) {
+            viewModelScope.launch {
+                val user = try {
+                    mdbListAccountApi.refreshUser()
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.w(TAG, "account summary failed: ${(e as? MdbListAuthException)?.error ?: e.javaClass.simpleName}")
+                    null
+                }
+                val limit = user?.rateLimit
+                val remaining = user?.rateLimitRemaining
+                var used = user?.apiRequestsCount
+                    ?: if (limit != null && remaining != null) (limit - remaining).coerceAtLeast(0) else null
+                var plan = user?.plan
+                var requestsLimit = limit
+                val username = user?.username
+                // The key's summary fills what the account reply left out.
+                if ((plan == null || used == null || requestsLimit == null) && state.enabled && state.apiKey.isNotBlank()) {
+                    val keyUser = try {
+                        mdbListApi.getUser(state.apiKey.trim()).body()
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        null
+                    }
+                    if (keyUser != null) {
+                        plan = plan ?: keyUser.plan
+                        used = used ?: keyUser.apiRequestsCount
+                        requestsLimit = requestsLimit ?: keyUser.rateLimit
+                    }
+                }
+                _uiState.update {
+                    it.copy(
+                        username = username,
+                        plan = plan,
+                        isSupporter = if (plan == null && user != null) user.isSupporter else null,
+                        requestsUsed = used,
+                        requestsLimit = requestsLimit
+                    )
+                }
+            }
+            return
+        }
+        if (!state.enabled || state.apiKey.isBlank()) {
+            _uiState.update { it.copy(username = null, plan = null, isSupporter = null, requestsUsed = null, requestsLimit = null) }
+            return
+        }
+        viewModelScope.launch {
+            val user = try {
+                mdbListApi.getUser(state.apiKey.trim()).body()
+            } catch (e: Exception) {
+                null
+            }
+            _uiState.update {
+                it.copy(
+                    username = user?.username,
+                    plan = user?.plan,
+                    isSupporter = null,
+                    requestsUsed = user?.apiRequestsCount,
+                    requestsLimit = user?.rateLimit
+                )
+            }
+        }
+    }
+
+    fun onWatchProgressSourceSelected(source: WatchProgressSource) {
+        // Routed through the shared controller so this mirror of the picker is
+        // behaviourally identical to the one on the Tracking screen: the CW
+        // enrichment caches are cleared and the newly selected source is
+        // refreshed. Writing the datastore directly would skip those side effects.
+        viewModelScope.launch { trackingSourceController.selectWatchProgressSource(source) }
     }
 
     fun onEvent(event: MDBListSettingsEvent) {
@@ -76,6 +177,7 @@ class MDBListSettingsViewModel @Inject constructor(
             _validating.value = false
             if (valid) {
                 dataStore.setApiKey(trimmed)
+                refreshAccount()
                 onSuccess()
             } else {
                 _validationError.tryEmit(Unit)
@@ -111,6 +213,12 @@ data class MDBListSettingsUiState(
     val showAudience: Boolean = true,
     val showMetacritic: Boolean = true,
     val showMal: Boolean = true,
+    val watchProgressSource: WatchProgressSource = WatchProgressSource.NUVIO_SYNC,
+    val username: String? = null,
+    val plan: String? = null,
+    val isSupporter: Boolean? = null,
+    val requestsUsed: Int? = null,
+    val requestsLimit: Int? = null,
     val showOnHero: Boolean = false,
     val ratingOrder: List<String> = com.nuvio.tv.domain.model.MDBListSettings.DEFAULT_RATING_ORDER
 ) {

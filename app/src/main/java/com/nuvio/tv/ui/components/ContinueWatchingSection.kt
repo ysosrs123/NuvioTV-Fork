@@ -67,14 +67,15 @@ import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Button
-import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Text
 import com.nuvio.tv.ui.screens.home.ContinueWatchingItem
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
+import com.nuvio.tv.ui.v2.components.nuvioV2Focus
 import com.nuvio.tv.ui.theme.NuvioTheme
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.nuvio.tv.core.image.homePosterPriority
 import coil3.request.transformations
 import coil3.request.crossfade
 import kotlin.math.roundToInt
@@ -95,8 +96,6 @@ import com.nuvio.tv.domain.model.CardDepthStyle
 import kotlinx.coroutines.delay
 
 private val BadgeShape = RoundedCornerShape(NuvioTheme.radii.xs)
-private val CwNewEpisodeBadgeColor = Color(0xFF1D4ED8)
-private val CwNewSeasonBadgeColor = Color(0xFFB45309)
 
 /** URLs that failed to load — skip them immediately on next recomposition. */
 internal val brokenImageUrls = java.util.Collections.synchronizedSet(mutableSetOf<String>())
@@ -448,6 +447,7 @@ fun ContinueWatchingCard(
     cornerRadius: Dp = NuvioTheme.radii.md,
     posterTitleOverride: TextStyle? = null
 ) {
+    val isV2 = LocalV2Appearance.current != null
     val isPosterStyle = cardStyle == ContinueWatchingCardStyle.POSTER
     val isWideStyle = cardStyle == ContinueWatchingCardStyle.WIDE
     val effectiveEpisodeThumbnails =
@@ -585,9 +585,11 @@ fun ContinueWatchingCard(
             titleMarqueeActive = true
         }
     }
-    val imageRequest = remember(effectiveImageModel, requestWidthPx, requestHeightPx, shouldBlur) {
+    val homeImagePriority = com.nuvio.tv.core.image.LocalHomePosterPriority.current
+    val imageRequest = remember(effectiveImageModel, requestWidthPx, requestHeightPx, shouldBlur, homeImagePriority) {
         val builder = ImageRequest.Builder(context)
             .data(effectiveImageModel)
+            .homePosterPriority(homeImagePriority)
             .crossfade(true)
             .memoryCacheKey(
                 continueWatchingImageCacheKey(
@@ -611,13 +613,7 @@ fun ContinueWatchingCard(
     }
 
     val bgColor = NuvioTheme.colors.Background
-    val badgeBackground = remember(bgColor, nextUp) {
-        when {
-            nextUp?.isNewSeasonRelease == true -> CwNewSeasonBadgeColor
-            nextUp?.isReleaseAlert == true -> CwNewEpisodeBadgeColor
-            else -> bgColor.copy(alpha = 0.8f)
-        }
-    }
+    val badgeBackground = remember { Color.Black.copy(alpha = 0.7f) }
     
     val bgCardColor = NuvioTheme.colors.BackgroundCard
     val backgroundPainter = remember(bgCardColor) { androidx.compose.ui.graphics.painter.ColorPainter(bgCardColor) }
@@ -632,6 +628,7 @@ fun ContinueWatchingCard(
         },
         modifier = modifier
             .width(cardWidth)
+            .nuvioV2Focus(isFocused, cwCardShape, stationary = true)
             .recompositionHighlighter()
             .onPreviewKeyEvent { event ->
                 val native = event.nativeKeyEvent
@@ -667,7 +664,7 @@ fun ContinueWatchingCard(
             focusedContainerColor = Color.Transparent
         ),
         // With text under the artwork the card border would ring the text too, so the artwork draws its own.
-        border = if (textBelowArtwork) {
+        border = if (isV2 || textBelowArtwork) {
             CardDefaults.border(focusedBorder = Border.None)
         } else {
             CardDefaults.border(
@@ -740,7 +737,7 @@ fun ContinueWatchingCard(
                     )
                     .clip(cwClipShape)
                     .then(
-                        if (textBelowArtwork && isFocused) {
+                        if (!isV2 && textBelowArtwork && isFocused) {
                             Modifier.border(
                                 border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
                                 shape = cwClipShape
@@ -1148,55 +1145,30 @@ fun ContinueWatchingOptionsDialog(
         title = title,
         subtitle = stringResource(R.string.cw_dialog_subtitle)
     ) {
-        Button(
+        PanelActionRow(
+            label = stringResource(R.string.cw_action_go_to_details),
             onClick = onDetails,
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(detailsFocusRequester),
-            colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
-            )
-        ) {
-            Text(stringResource(R.string.cw_action_go_to_details))
-        }
+            focusRequester = detailsFocusRequester
+        )
 
         if (showPlayManually && isPlayEnabled) {
-            Button(
-                onClick = onPlayManually,
-                colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.play_manually))
-            }
+            PanelActionRow(
+                label = stringResource(R.string.play_manually),
+                onClick = onPlayManually
+            )
         }
 
         if (item is ContinueWatchingItem.InProgress && isPlayEnabled) {
-            Button(
-                onClick = onStartFromBeginning,
-                colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.cw_action_start_from_beginning))
-            }
+            PanelActionRow(
+                label = stringResource(R.string.cw_action_start_from_beginning),
+                onClick = onStartFromBeginning
+            )
         }
 
-        Button(
-            onClick = onRemove,
-            colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
-            ),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.cw_action_remove))
-        }
+        PanelActionRow(
+            label = stringResource(R.string.cw_action_remove),
+            onClick = onRemove
+        )
     }
 }
 

@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -48,30 +50,33 @@ class AnimeSkipSettingsViewModel @Inject constructor(
         viewModelScope.launch { dataStore.setEnabled(value) }
     }
 
+    private var validationJob: Job? = null
+
     fun validateAndSave(value: String, onSuccess: () -> Unit) {
-        val trimmed = value.trim()
-        if (trimmed.isBlank()) {
-            viewModelScope.launch { dataStore.setClientId("") }
-            onSuccess()
-            return
-        }
-        viewModelScope.launch {
-            _validating.value = true
-            val valid = try {
-                val response = animeSkipApi.query(
-                    clientId = trimmed,
-                    body = AnimeSkipRequest(
-                        query = "{ findShowsByExternalId(service: ANILIST, serviceId: \"1\") { id } }"
+        validationJob?.cancel()
+        validationJob = viewModelScope.launch {
+            val profileId = dataStore.snapshot().profileId
+            val trimmed = value.trim()
+            _validating.value = trimmed.isNotBlank()
+            try {
+                val valid = if (trimmed.isBlank()) true else try {
+                    val response = animeSkipApi.query(
+                        clientId = trimmed,
+                        body = AnimeSkipRequest(query = "{ findShowsByExternalId(service: ANILIST, serviceId: \"1\") { id } }")
                     )
-                )
-                response.isSuccessful && response.body()?.data != null
-            } catch (e: Exception) { false }
-            _validating.value = false
-            if (valid) {
-                dataStore.setClientId(trimmed)
-                onSuccess()
-            } else {
-                _validationError.tryEmit(Unit)
+                    response.isSuccessful && response.body()?.data != null
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) { false }
+                if (valid) {
+                    // Validation may outlive a profile switch: never save into the new profile.
+                    dataStore.setClientId(trimmed, profileId)
+                    onSuccess()
+                } else {
+                    _validationError.tryEmit(Unit)
+                }
+            } finally {
+                _validating.value = false
             }
         }
     }

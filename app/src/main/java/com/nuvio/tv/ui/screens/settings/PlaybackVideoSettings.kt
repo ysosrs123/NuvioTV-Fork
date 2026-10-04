@@ -58,8 +58,18 @@ internal fun PlaybackVideoSection(
     val frameRateFocusRequester = remember { FocusRequester() }
     val resolutionSwitchingSupported = !displayCapabilities.apiSupported ||
         displayCapabilities.supportsResolutionSwitching
-    val showAfrWarning = settings.frameRateMatchingMode != FrameRateMatchingMode.OFF ||
+    val showAfrWarning = (settings.frameRateMatchingMode != FrameRateMatchingMode.OFF &&
+        displayCapabilities.apiSupported &&
+        !displayCapabilities.supportsFrameRateSwitching) ||
         (settings.resolutionMatchingEnabled && !resolutionSwitchingSupported)
+
+    SettingsToggleRow(
+        title = stringResource(R.string.playback_dim_hdr_overlays),
+        subtitle = stringResource(R.string.playback_dim_hdr_overlays_sub),
+        checked = settings.dimHdrOverlays,
+        onToggle = { onUpdate { setDimHdrOverlays(!settings.dimHdrOverlays) } },
+        enabled = enabled
+    )
 
     SettingsSectionLabel(text = stringResource(R.string.playback_auto_frame_rate))
     SettingsActionRow(
@@ -109,13 +119,6 @@ internal fun PlaybackVideoSection(
             onClick = { onOpenDialog(PlaybackDialog.DV7_HANDLING_MODE) }
         )
         SettingsToggleRow(
-            title = stringResource(R.string.audio_dv7_preserve_mapping_title),
-            subtitle = stringResource(R.string.audio_dv7_preserve_mapping_sub),
-            checked = settings.dv7ToDv81PreserveMappingEnabled && dv81Conversion,
-            onToggle = { onUpdate { setDv7ToDv81PreserveMappingEnabled(!settings.dv7ToDv81PreserveMappingEnabled) } },
-            enabled = enabled && dv81Conversion
-        )
-        SettingsToggleRow(
             title = stringResource(R.string.audio_dv5_to_dv81_title),
             subtitle = stringResource(R.string.audio_dv5_to_dv81_sub),
             checked = settings.dv5ToDv81Enabled && dv81Conversion,
@@ -128,6 +131,16 @@ internal fun PlaybackVideoSection(
             checked = settings.stripHdr10PlusSei,
             onToggle = { onUpdate { setStripHdr10PlusSei(!settings.stripHdr10PlusSei) } },
             enabled = enabled
+        )
+        SettingsToggleRow(
+            title = stringResource(R.string.audio_inject_hdr10_sei_title),
+            subtitle = stringResource(R.string.audio_inject_hdr10_sei_sub),
+            checked = settings.injectHdr10MetadataOnStrip,
+            onToggle = { onUpdate { setInjectHdr10MetadataOnStrip(!settings.injectHdr10MetadataOnStrip) } },
+            enabled = enabled && (
+                settings.dv7HandlingMode == Dv7HandlingMode.STRIP_DV ||
+                    settings.dv7HandlingMode == Dv7HandlingMode.HDR10_BASE_LAYER
+                )
         )
         SettingsToggleRow(
             title = stringResource(R.string.playback_true_black_letterbox),
@@ -195,6 +208,7 @@ private fun dv7HandlingModeLabel(mode: Dv7HandlingMode): String = when (mode) {
     Dv7HandlingMode.DV81_LIBDOVI -> stringResource(R.string.dv7_mode_dv81_libdovi)
     Dv7HandlingMode.STRIP_DV -> stringResource(R.string.dv7_mode_strip_dv)
     Dv7HandlingMode.OFF -> stringResource(R.string.dv7_mode_off)
+    Dv7HandlingMode.NATIVE_FEL -> stringResource(R.string.dv7_mode_native_fel)
 }
 
 @Composable
@@ -387,6 +401,11 @@ private fun Dv7HandlingModeDialog(
             Dv7HandlingMode.OFF,
             stringResource(R.string.dv7_mode_off),
             stringResource(R.string.dv7_mode_off_desc)
+        ),
+        SettingsPickerOption(
+            Dv7HandlingMode.NATIVE_FEL,
+            stringResource(R.string.dv7_mode_native_fel),
+            stringResource(R.string.dv7_mode_native_fel_desc)
         )
     )
 

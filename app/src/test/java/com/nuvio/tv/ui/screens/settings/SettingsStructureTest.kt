@@ -81,4 +81,21 @@ class SettingsStructureTest {
         assertFalse(LayoutSettingsUiState(selectedLayout = com.nuvio.tv.domain.model.HomeLayout.GRID).focusedPosterHasOptions())
         assertTrue(LayoutSettingsUiState(selectedLayout = com.nuvio.tv.domain.model.HomeLayout.CLASSIC).focusedPosterHasOptions())
     }
+
+    @Test
+    fun `trailer logo row on modern needs the trailer in the expanded card`() {
+        val modern = LayoutSettingsUiState(selectedLayout = com.nuvio.tv.domain.model.HomeLayout.MODERN)
+        com.nuvio.tv.domain.model.FocusedPosterTrailerPlaybackTarget.entries.forEach { target ->
+            assertEquals(
+                target == com.nuvio.tv.domain.model.FocusedPosterTrailerPlaybackTarget.EXPANDED_CARD,
+                modern.copy(focusedPosterBackdropTrailerPlaybackTarget = target).showsTrailerLogoRow()
+            )
+            assertTrue(
+                modern.copy(
+                    selectedLayout = com.nuvio.tv.domain.model.HomeLayout.CLASSIC,
+                    focusedPosterBackdropTrailerPlaybackTarget = target
+                ).showsTrailerLogoRow()
+            )
+        }
+    }
 }

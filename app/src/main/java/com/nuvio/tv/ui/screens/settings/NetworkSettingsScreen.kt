@@ -3,6 +3,7 @@
 
 package com.nuvio.tv.ui.screens.settings
 
+import com.nuvio.tv.core.network.StreamSweepEngine
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import android.net.ConnectivityManager
@@ -30,12 +31,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import com.nuvio.tv.ui.components.FocusMarqueeText
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SignalWifiOff
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -68,14 +73,8 @@ import com.nuvio.tv.data.local.Dv7HandlingMode
 import com.nuvio.tv.data.local.InternalPlayerEngine
 import com.nuvio.tv.domain.model.ExperienceMode
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 
 @dagger.hilt.EntryPoint
 @dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
@@ -85,11 +84,21 @@ private interface ClearCwCacheEntryPoint {
 
 @dagger.hilt.EntryPoint
 @dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
+private interface ClearImageCacheEntryPoint {
+    fun catalogRepository(): com.nuvio.tv.domain.repository.CatalogRepository
+    fun homeRefreshSignal(): com.nuvio.tv.core.util.HomeRefreshSignal
+    fun okHttpClient(): okhttp3.OkHttpClient
+
+    @javax.inject.Named("validated")
+    fun validatedOkHttpClient(): okhttp3.OkHttpClient
+}
+
+@dagger.hilt.EntryPoint
+@dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
 private interface ProfileManagerEntryPoint {
     fun profileManager(): com.nuvio.tv.core.profile.ProfileManager
 }
 
-private enum class NetworkTestState { Idle, TestingLatency, TestingDownload, Done, Error }
 
 private enum class ConnectionType { WiFi, Ethernet, Offline }
 
@@ -134,39 +143,7 @@ private fun ConnectionStatusBadge(type: ConnectionType) {
     }
 }
 
-private suspend fun fetchFastComUrls(context: android.content.Context): List<String> = withContext(Dispatchers.IO) {
-    // 1. Load fast.com page to find the app JS bundle URL
-    val html = (URL("https://fast.com").openConnection() as HttpURLConnection).run {
-        connectTimeout = 10_000
-        readTimeout = 15_000
-        setRequestProperty("User-Agent", "Mozilla/5.0")
-        inputStream.bufferedReader().use { it.readText() }.also { disconnect() }
-    }
-    val scriptPath = Regex("""<script src="(/app[^"]+\.js)"""").find(html)?.groupValues?.get(1)
-        ?: throw Exception(context.getString(com.nuvio.tv.R.string.network_fast_error_script_path_missing))
-
-    // 2. Extract the API token from the JS bundle
-    val js = (URL("https://fast.com$scriptPath").openConnection() as HttpURLConnection).run {
-        connectTimeout = 10_000
-        readTimeout = 30_000
-        setRequestProperty("User-Agent", "Mozilla/5.0")
-        inputStream.bufferedReader().use { it.readText() }.also { disconnect() }
-    }
-    val token = Regex("""token:"([^"]+)"""").find(js)?.groupValues?.get(1)
-        ?: throw Exception(context.getString(com.nuvio.tv.R.string.network_fast_error_token_missing))
-
-    // 3. Fetch CDN URLs from the speed-test API
-    val apiJson = (URL("https://api.fast.com/netflix/speedtest/v2?https=true&token=$token&urlCount=15")
-        .openConnection() as HttpURLConnection).run {
-        connectTimeout = 5_000
-        readTimeout = 10_000
-        setRequestProperty("User-Agent", "Mozilla/5.0")
-        inputStream.bufferedReader().use { it.readText() }.also { disconnect() }
-    }
-    val targets = JSONObject(apiJson).getJSONArray("targets")
-    (0 until targets.length()).map { targets.getJSONObject(it).getString("url") }
-}
-
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 fun AdvancedSettingsContent(
     initialFocusRequester: FocusRequester? = null,
@@ -176,13 +153,16 @@ fun AdvancedSettingsContent(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var connectionType by remember { mutableStateOf(getConnectionType(context)) }
-    var testState by remember { mutableStateOf(NetworkTestState.Idle) }
-    var latencyMs by remember { mutableStateOf<Long?>(null) }
-    var downloadMbps by remember { mutableStateOf<Double?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val generalDiagnostic = remember { GeneralDiagnosticState() }
+    val networkMonitor = remember(context) { com.nuvio.tv.core.network.DiagnosticNetworkMonitor(context) }
+    val networkRevision by networkMonitor.tracker.changes.collectAsStateWithLifecycle()
+    DisposableEffect(networkMonitor) {
+        networkMonitor.start()
+        onDispose { networkMonitor.close(); generalDiagnostic.cancel() }
+    }
+
 
     val scope = rememberCoroutineScope()
-    val unknownError = stringResource(R.string.error_unknown)
 
     // DV Diagnostics: reuse the playback settings store for the conversion-mode
     // override and the last-playback diagnostics card.
@@ -194,17 +174,12 @@ fun AdvancedSettingsContent(
         initialValue = com.nuvio.tv.core.player.LastPlaybackDiagnostics.EMPTY
     )
 
-    // Stream Speed Test States
-    var streamTestState by remember { mutableStateOf("Idle") }
-    var streamBaselineSpeed by remember { mutableStateOf<Double?>(null) }
-    var streamParallel1Speed by remember { mutableStateOf<Double?>(null) }
-    var streamParallel4Speed by remember { mutableStateOf<Double?>(null) }
-    var streamParallel8Speed by remember { mutableStateOf<Double?>(null) }
-    var streamParallel16Speed by remember { mutableStateOf<Double?>(null) }
-    var streamErrorMessage by remember { mutableStateOf<String?>(null) }
-
+    val latestAssessmentInputs by androidx.compose.runtime.rememberUpdatedState(
+        com.nuvio.tv.core.assessment.AssessmentInputs.capture(dvPlayerSettings, dvDiagnostics))
     val lastStreamUrl = dvDiagnostics.streamUrl
     val lastHeadersJson = dvDiagnostics.headersJson
+    val streamDiagnostic = remember(lastStreamUrl, lastHeadersJson, dvDiagnostics.timestampMs) { StreamDiagnosticState() }
+    DisposableEffect(streamDiagnostic) { onDispose { streamDiagnostic.cancel() } }
 
     val lastHeadersMap = remember(lastHeadersJson) {
         if (!lastHeadersJson.isNullOrBlank()) {
@@ -223,170 +198,108 @@ fun AdvancedSettingsContent(
         }
     }
 
-    var estimatedBitrate by remember { mutableStateOf<Long?>(null) }
-
-    LaunchedEffect(dvDiagnostics) {
-        val formatBitrate = dvDiagnostics.videoBitrate.takeIf { it > 0 }?.toLong()
-        if (formatBitrate != null) {
-            estimatedBitrate = formatBitrate
-        } else if (!lastStreamUrl.isNullOrBlank() && dvDiagnostics.durationMs > 0) {
-            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                val size = com.nuvio.tv.core.network.StreamSpeedTester.getStreamContentLength(lastStreamUrl, lastHeadersMap)
-                if (size > 0) {
-                    val durationSecs = dvDiagnostics.durationMs / 1000.0
-                    if (durationSecs > 0) {
-                        estimatedBitrate = ((size * 8.0) / durationSecs).toLong()
-                    }
-                }
-            }
-        } else {
-            estimatedBitrate = null
-        }
+    val estimatedBitrate by remember(lastStreamUrl, lastHeadersJson, dvDiagnostics.durationMs, dvDiagnostics.videoBitrate) {
+        mutableStateOf(dvDiagnostics.videoBitrate.takeIf { it > 0 }?.toLong())
     }
 
-    fun runStreamDiagnostics() {
-        if (lastStreamUrl.isNullOrBlank()) return
-        scope.launch {
-            streamBaselineSpeed = null
-            streamParallel1Speed = null
-            streamParallel4Speed = null
-            streamParallel8Speed = null
-            streamParallel16Speed = null
-            streamErrorMessage = null
+    fun routeLabel(label: String): String = if (networkMonitor.token()?.routeFactsKnown == false)
+        label + " · " + context.getString(R.string.diagnostic_route_partial) else label
 
-            try {
-                streamTestState = "Baseline"
-                val baseline = com.nuvio.tv.core.network.StreamSpeedTester.runBaselineTest(
-                    lastStreamUrl,
-                    lastHeadersMap
-                )
-                streamBaselineSpeed = baseline
-
-                if (baseline <= 0.0) {
-                    streamErrorMessage = context.getString(R.string.stream_test_error_connection)
-                    streamTestState = "Error"
-                    return@launch
-                }
-
-                val measureChunkBytes =
-                    com.nuvio.tv.data.local.PlayerSettings.DEFAULT_PARALLEL_CHUNK_SIZE_KB.toLong() * 1024L
-
-                streamTestState = "Parallel1"
-                streamParallel1Speed = com.nuvio.tv.core.network.StreamSpeedTester.runParallelChunkTest(
-                    lastStreamUrl,
-                    lastHeadersMap,
-                    chunkSizeBytes = measureChunkBytes,
-                    parallelConnections = 1
-                ).mbps
-
-                streamTestState = "Parallel4"
-                streamParallel4Speed = com.nuvio.tv.core.network.StreamSpeedTester.runParallelChunkTest(
-                    lastStreamUrl,
-                    lastHeadersMap,
-                    chunkSizeBytes = measureChunkBytes,
-                    parallelConnections = 4
-                ).mbps
-
-                streamTestState = "Parallel8"
-                streamParallel8Speed = com.nuvio.tv.core.network.StreamSpeedTester.runParallelChunkTest(
-                    lastStreamUrl,
-                    lastHeadersMap,
-                    chunkSizeBytes = measureChunkBytes,
-                    parallelConnections = 8
-                ).mbps
-
-                streamTestState = "Parallel16"
-                streamParallel16Speed = com.nuvio.tv.core.network.StreamSpeedTester.runParallelChunkTest(
-                    lastStreamUrl,
-                    lastHeadersMap,
-                    chunkSizeBytes = measureChunkBytes,
-                    parallelConnections = 16
-                ).mbps
-
-                streamTestState = "Done"
-            } catch (e: java.lang.Exception) {
-                streamErrorMessage = e.localizedMessage ?: unknownError
-                streamTestState = "Error"
-            }
-        }
+    fun runStreamDiagnostics(mode: StreamDiagnosticMode) {
+        val url = lastStreamUrl ?: return
+        val networkLabel = routeLabel(context.getString(when (getConnectionType(context)) {
+            ConnectionType.WiFi -> R.string.network_connection_wifi
+            ConnectionType.Ethernet -> R.string.network_connection_ethernet
+            ConnectionType.Offline -> R.string.network_connection_offline
+        }))
+        streamDiagnostic.start(scope, context, mode, url, lastHeadersMap + playbackVm.serverAuthHeaders(url), estimatedBitrate,
+            networkIdentity = { networkMonitor.token() }, networkLabel = networkLabel, durationMs = dvDiagnostics.durationMs)
     }
 
     fun runSpeedTest() {
-        scope.launch {
-            connectionType = getConnectionType(context)
-            testState = NetworkTestState.TestingLatency
-            latencyMs = null
-            downloadMbps = null
-            errorMessage = null
+        connectionType = getConnectionType(context)
+        val label = context.getString(when (connectionType) {
+            ConnectionType.WiFi -> R.string.network_connection_wifi
+            ConnectionType.Ethernet -> R.string.network_connection_ethernet
+            ConnectionType.Offline -> R.string.network_connection_offline
+        })
+        generalDiagnostic.start(scope, context, { networkMonitor.token() }, routeLabel(label))
+    }
 
-            try {
-                // ── Latency: average 3 round-trips to Cloudflare ─────────────
-                var totalMs = 0L
-                withContext(Dispatchers.IO) {
-                    repeat(3) {
-                        val conn = URL("https://cloudflare.com/cdn-cgi/trace")
-                            .openConnection() as HttpURLConnection
-                        conn.requestMethod = "GET"
-                        conn.connectTimeout = 5_000
-                        conn.readTimeout = 5_000
-                        val t0 = System.currentTimeMillis()
-                        conn.connect()
-                        conn.inputStream.use { it.read() }
-                        totalMs += System.currentTimeMillis() - t0
-                        conn.disconnect()
-                    }
-                }
-                latencyMs = totalMs / 3
+    // Device assessment state lives at screen level so scrolling result
+    // cards out of composition can't destroy them (lazy items are disposed;
+    // the screen composable is not), and a mid-run scroll can't cancel the
+    // sweep (the run launches on this screen's scope).
+    val activeProfileId by remember(context) {
+        dagger.hilt.android.EntryPointAccessors.fromApplication(
+            context.applicationContext, ProfileManagerEntryPoint::class.java
+        ).profileManager().activeProfileId
+    }.collectAsStateWithLifecycle()
+    val assessmentState = remember(activeProfileId) { DeviceAssessmentState() }
+    DisposableEffect(assessmentState) { onDispose { assessmentState.cancel() } }
+    LaunchedEffect(networkRevision, assessmentState, streamDiagnostic) {
+        connectionType = getConnectionType(context)
+        val token = networkMonitor.token()
+        generalDiagnostic.invalidateNetwork(context, token)
+        streamDiagnostic.invalidateNetwork(context, token)
+        assessmentState.invalidateNetwork(context)
+    }
 
-                // ── Download: parallel streams from fast.com for 10 s ────────
-                testState = NetworkTestState.TestingDownload
-                val (totalBytes, elapsed) = withContext(Dispatchers.IO) {
-                    val urls = fetchFastComUrls(context)
-                    val deadline = System.currentTimeMillis() + 10_000L
-                    val startTime = System.currentTimeMillis()
-
-                    // Open 4 connections per URL → 60 parallel streams total
-                    val streams = urls.flatMap { url -> List(4) { url } }
-                    coroutineScope {
-                        val jobs = streams.map { url ->
-                            async {
-                                var bytes = 0L
-                                val buf = ByteArray(65536)
-                                try {
-                                    val conn = URL(url).openConnection() as HttpURLConnection
-                                    conn.connectTimeout = 5_000
-                                    conn.readTimeout = 15_000
-                                    conn.connect()
-                                    conn.inputStream.use { stream ->
-                                        var read: Int = 0
-                                        while (System.currentTimeMillis() < deadline &&
-                                            stream.read(buf).also { read = it } != -1
-                                        ) {
-                                            bytes += read
-                                        }
-                                    }
-                                    conn.disconnect()
-                                } catch (_: Exception) {}
-                                bytes
-                            }
-                        }
-                        val total = jobs.awaitAll().sum()
-                        Pair(total, System.currentTimeMillis() - startTime)
-                    }
-                }
-                downloadMbps = if (elapsed > 0) (totalBytes * 8.0) / (elapsed * 1000.0) else 0.0
-                testState = NetworkTestState.Done
-
-            } catch (e: Exception) {
-                errorMessage = e.localizedMessage ?: unknownError
-                testState = NetworkTestState.Error
-            }
-        }
+    LaunchedEffect(dvPlayerSettings, dvDiagnostics, assessmentState, assessmentState.applying) {
+        assessmentState.invalidateInputs(context)
     }
 
     val networkListState = rememberLazyListState()
+
+    // The same treatment for the device-assessment results card. It grows the
+    // same way and overflows the same way - it just never had the effect,
+    // because deviceAssessmentItems contributes item() blocks to THIS
+    // screen's LazyColumn and has no list state of its own to scroll. Keyed
+    // on the row count and on the note count, so a row that resolves to
+    // "Rate-limited" or "Skipped" (no number, so it never counts as
+    // completed) still triggers a re-measure.
+    LaunchedEffect(
+        assessmentState.passRows.size,
+        assessmentState.passRows.count { it.second != null },
+        assessmentState.passNotes.size,
+        assessmentState.running
+    ) {
+        if (assessmentState.passRows.isEmpty()) return@LaunchedEffect
+        withFrameNanos { }
+        withFrameNanos { }
+        val card = networkListState.layoutInfo.visibleItemsInfo
+            .find { it.key == "assessment_passes" } ?: return@LaunchedEffect
+        val overflow = (card.offset + card.size) - networkListState.layoutInfo.viewportEndOffset
+        if (overflow > 0) {
+            networkListState.animateScrollBy(overflow.toFloat() + 16f)
+        }
+    }
+
+    // Keep the growing stream-test results card in view: each completed pass adds
+    // a row and the card can extend past the bottom of the screen. When that
+    // happens, scroll by exactly the overflow so the newest rows stay visible.
+    // If the card is not on screen (the user scrolled elsewhere), do nothing.
+    // streamDiagnostic.notes.size is part of the key for the same reason it is on the
+    // assessment effect: a row that resolves to a note never gains a number,
+    // so it never changes streamCompletedPasses, and without this the card
+    // would not re-measure after such a row.
+    val streamCompletedPasses = streamDiagnostic.rows.count { it.second != null }
+    LaunchedEffect(
+        streamDiagnostic.rows.size, streamCompletedPasses, streamDiagnostic.notes.size, streamDiagnostic.verdict
+    ) {
+        if (streamDiagnostic.rows.isEmpty()) return@LaunchedEffect
+        // Let the newly added row be measured before reading layout info.
+        withFrameNanos { }
+        withFrameNanos { }
+        val resultsItem = networkListState.layoutInfo.visibleItemsInfo
+            .find { it.key == "stream_speed_results" } ?: return@LaunchedEffect
+        val overflow = (resultsItem.offset + resultsItem.size) -
+            networkListState.layoutInfo.viewportEndOffset
+        if (overflow > 0) {
+            networkListState.animateScrollBy(overflow.toFloat() + 16f)
+        }
+    }
     var showExperienceModeConfirmation by remember { mutableStateOf(false) }
-    var showSentryDialog by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxSize()) {
     LazyColumn(
         state = networkListState,
@@ -405,7 +318,7 @@ fun AdvancedSettingsContent(
                     subtitle = stringResource(R.string.settings_advanced_subtitle)
                 )
                 AnimatedVisibility(
-                    visible = testState != NetworkTestState.Idle,
+                    visible = generalDiagnostic.status != NetworkTestState.Idle,
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
@@ -463,13 +376,13 @@ fun AdvancedSettingsContent(
                     }
                 )
                 SettingsToggleRow(
-                    title = stringResource(R.string.advanced_rgb565),
-                    subtitle = stringResource(R.string.advanced_rgb565_subtitle),
-                    checked = uiState.rgb565Enabled,
+                    title = "Add-on health indicators",
+                    subtitle = "Show OK/Slow/Down status on add-ons and resolvers. Passive - no background scanning.",
+                    checked = uiState.addonHealthEnabled,
                     onToggle = {
                         viewModel.onEvent(
-                            AdvancedSettingsEvent.SetRgb565Enabled(
-                                !uiState.rgb565Enabled
+                            AdvancedSettingsEvent.SetAddonHealthEnabled(
+                                !uiState.addonHealthEnabled
                             )
                         )
                     }
@@ -488,17 +401,6 @@ fun AdvancedSettingsContent(
                         ProfileManagerEntryPoint::class.java
                     ).profileManager()
                 }
-                val startupSplashEnabled by profileManager.startupSplashEnabled.collectAsState()
-                SettingsToggleRow(
-                    title = stringResource(R.string.appearance_startup_splash),
-                    subtitle = stringResource(R.string.appearance_startup_splash_subtitle),
-                    checked = startupSplashEnabled,
-                    onToggle = {
-                        scope.launch {
-                            profileManager.setStartupSplashEnabled(!startupSplashEnabled)
-                        }
-                    }
-                )
                 val rememberLastProfileEnabled by profileManager.rememberLastProfileEnabled.collectAsState()
                 SettingsToggleRow(
                     title = stringResource(R.string.advanced_remember_last_profile),
@@ -531,12 +433,6 @@ fun AdvancedSettingsContent(
                 title = stringResource(R.string.advanced_section_diagnostics)
             ) {
                 SettingsToggleRow(
-                    title = stringResource(R.string.advanced_sentry_reports),
-                    subtitle = stringResource(R.string.advanced_sentry_reports_subtitle),
-                    checked = uiState.sentryEnabled,
-                    onToggle = { showSentryDialog = true }
-                )
-                SettingsToggleRow(
                     title = stringResource(R.string.advanced_playback_issue_reports),
                     subtitle = stringResource(R.string.advanced_playback_issue_reports_subtitle),
                     checked = uiState.playbackIssueReportsEnabled,
@@ -548,19 +444,12 @@ fun AdvancedSettingsContent(
                         )
                     }
                 )
-                SettingsToggleRow(
-                    title = stringResource(R.string.advanced_player_stats_hud),
-                    subtitle = stringResource(R.string.advanced_player_stats_hud_subtitle),
-                    checked = uiState.playerStatsHudEnabled,
-                    onToggle = {
-                        viewModel.onEvent(
-                            AdvancedSettingsEvent.SetPlayerStatsHudEnabled(
-                                !uiState.playerStatsHudEnabled
-                            )
-                        )
-                    }
-                )
+                // Fork: upstream's stats-HUD toggle is not offered; the fork's own HUD ('i') is the stats surface.
             }
+        }
+
+        item(key = "device_ui_diagnostics") {
+            UiDiagnosticsSettingsRow()
         }
 
         item(key = "network_tests") {
@@ -568,51 +457,90 @@ fun AdvancedSettingsContent(
                 modifier = Modifier.fillMaxWidth(),
                 title = stringResource(R.string.advanced_section_network_tests)
             ) {
-                val isRunning = testState == NetworkTestState.TestingLatency ||
-                        testState == NetworkTestState.TestingDownload
+                val isRunning = generalDiagnostic.status == NetworkTestState.TestingLatency ||
+                        generalDiagnostic.status == NetworkTestState.TestingDownload
                 SettingsActionRow(
                     title = stringResource(
-                        if (isRunning) R.string.network_speed_test_running
+                        if (isRunning) R.string.action_cancel
                         else R.string.network_speed_test_run
                     ),
-                    subtitle = stringResource(R.string.network_speed_test_subtitle),
+                    subtitle = stringResource(R.string.network_bounded_test_subtitle),
                     value = if (isRunning) stringResource(
-                        when (testState) {
-                            NetworkTestState.TestingLatency -> R.string.network_testing_latency
+                        when (generalDiagnostic.status) {
+                            NetworkTestState.TestingLatency -> R.string.network_testing_http
                             else -> R.string.network_testing_download
                         }
                     ) else null,
-                    onClick = { if (!isRunning) runSpeedTest() }
+                    onClick = { if (isRunning) generalDiagnostic.cancel() else runSpeedTest() }
                 )
-                val isStreamRunning = streamTestState != "Idle" && streamTestState != "Done" && streamTestState != "Error"
+                val isStreamRunning = streamDiagnostic.run.running
                 val hasStream = !lastStreamUrl.isNullOrBlank()
                 SettingsActionRow(
                     title = stringResource(
-                        if (isStreamRunning) R.string.stream_test_btn_running
-                        else R.string.stream_test_card_title
+                        if (isStreamRunning && streamDiagnostic.mode == StreamDiagnosticMode.QUICK) R.string.action_cancel
+                        else R.string.stream_diagnostic_quick
                     ),
-                    subtitle = if (hasStream) {
-                        stringResource(R.string.stream_test_server_label, lastStreamUrl.let { android.net.Uri.parse(it).host } ?: stringResource(R.string.stream_quality_unknown))
-                    } else {
-                        stringResource(R.string.stream_test_no_stream)
-                    },
-                    value = if (isStreamRunning) {
-                        when (streamTestState) {
-                            "Baseline" -> stringResource(R.string.stream_test_btn_measuring_baseline)
-                            "Parallel1" -> stringResource(R.string.stream_test_btn_measuring_parallel1)
-                            "Parallel4" -> stringResource(R.string.stream_test_btn_measuring_parallel4)
-                            "Parallel8" -> stringResource(R.string.stream_test_btn_measuring_parallel8)
-                            "Parallel16" -> stringResource(R.string.stream_test_btn_measuring_parallel16)
-                            else -> stringResource(R.string.stream_test_btn_running)
+                    subtitle = if (hasStream) null else stringResource(R.string.stream_test_no_stream),
+                    subtitleContent = if (hasStream) {
+                        { focused, contentAlpha ->
+                            val lineStyle = MaterialTheme.typography.bodySmall
+                            val lineColor = NuvioTheme.colors.TextSecondary.copy(alpha = contentAlpha)
+                            Text(
+                                text = stringResource(R.string.stream_test_server_label, lastStreamUrl.let { android.net.Uri.parse(it).host } ?: stringResource(R.string.stream_quality_unknown)),
+                                style = lineStyle,
+                                color = lineColor
+                            )
+                            Text(text = stringResource(R.string.stream_diagnostic_quick_limits),
+                                style = lineStyle, color = lineColor)
+                            streamDiagnostic.endpoint?.let { servingHost ->
+                                Text(
+                                    text = stringResource(R.string.stream_test_baseline_host_label, servingHost),
+                                    style = lineStyle,
+                                    color = lineColor
+                                )
+                            }
+                            dvDiagnostics.filename?.let { name ->
+                                // Long remux filenames marquee-scroll while the card is
+                                // focused instead of ellipsising, at Compose's default 30.dp/s
+                                // (slower than the app-wide 45) so dense release names stay
+                                // readable.
+                                FocusMarqueeText(
+                                    text = stringResource(R.string.stream_test_file_label, name),
+                                    focused = focused,
+                                    style = lineStyle,
+                                    color = lineColor,
+                                    velocity = 30.dp
+                                )
+                            }
+                            if (isStreamRunning) {
+                                Text(
+                                    text = stringResource(R.string.stream_test_btn_measuring_dyn, streamDiagnostic.status),
+                                    style = lineStyle,
+                                    color = lineColor
+                                )
+                            }
                         }
                     } else null,
-                    enabled = hasStream && !isStreamRunning,
-                    onClick = { if (hasStream && !isStreamRunning) runStreamDiagnostics() }
+                    enabled = hasStream && (!isStreamRunning || streamDiagnostic.mode == StreamDiagnosticMode.QUICK),
+                    onClick = {
+                        if (isStreamRunning) streamDiagnostic.cancel()
+                        else runStreamDiagnostics(StreamDiagnosticMode.QUICK)
+                    }
+                )
+                SettingsActionRow(
+                    title = stringResource(if (isStreamRunning && streamDiagnostic.mode == StreamDiagnosticMode.ADVANCED)
+                        R.string.action_cancel else R.string.stream_diagnostic_advanced),
+                    subtitle = stringResource(R.string.diagnostic_comparison_limits),
+                    enabled = hasStream && (!isStreamRunning || streamDiagnostic.mode == StreamDiagnosticMode.ADVANCED),
+                    onClick = {
+                        if (isStreamRunning) streamDiagnostic.cancel()
+                        else runStreamDiagnostics(StreamDiagnosticMode.ADVANCED)
+                    }
                 )
             }
         }
 
-        if (testState != NetworkTestState.Idle) {
+        if (generalDiagnostic.status != NetworkTestState.Idle) {
             item(key = "speed_results") {
                 SettingsGroupCard(modifier = Modifier.fillMaxWidth()) {
                     Column(
@@ -632,29 +560,29 @@ fun AdvancedSettingsContent(
                             NetworkMetricCard(
                                 modifier = Modifier.weight(1f),
                                 icon = Icons.Default.Timer,
-                                label = stringResource(R.string.network_latency_label),
-                                value = latencyMs?.let { "$it ms" },
-                                loading = testState == NetworkTestState.TestingLatency
+                                label = stringResource(R.string.network_http_response_label),
+                                value = generalDiagnostic.latencyMs?.let { "$it ms" },
+                                loading = generalDiagnostic.status == NetworkTestState.TestingLatency
                             )
                             NetworkMetricCard(
                                 modifier = Modifier.weight(1f),
                                 icon = Icons.Default.Speed,
                                 label = stringResource(R.string.network_download_label),
-                                value = downloadMbps?.let { "%.1f Mbps".format(it) },
-                                loading = testState == NetworkTestState.TestingDownload
+                                value = generalDiagnostic.downloadMbps?.let { "%.1f Mbps".format(it) },
+                                loading = generalDiagnostic.status == NetworkTestState.TestingDownload
                             )
                         }
 
-                        if (testState == NetworkTestState.Error && errorMessage != null) {
+                        if (generalDiagnostic.status == NetworkTestState.Error && generalDiagnostic.errorMessage != null) {
                             Text(
-                                text = stringResource(R.string.network_error_prefix, errorMessage!!),
+                                text = stringResource(R.string.network_error_prefix, generalDiagnostic.errorMessage!!),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = NuvioTheme.colors.Error
                             )
                         }
 
                         Text(
-                            text = stringResource(R.string.network_powered_by_fast),
+                            text = generalDiagnostic.resultScope ?: stringResource(R.string.network_test_provider_scope),
                             style = MaterialTheme.typography.labelSmall,
                             color = NuvioTheme.colors.TextSecondary.copy(alpha = 0.45f)
                         )
@@ -663,7 +591,7 @@ fun AdvancedSettingsContent(
             }
         }
 
-        if (streamTestState != "Idle") {
+        if (streamDiagnostic.status != "Idle") {
             item(key = "stream_speed_results") {
                 SettingsGroupCard(modifier = Modifier.fillMaxWidth()) {
                     Column(
@@ -681,10 +609,10 @@ fun AdvancedSettingsContent(
                                 color = NuvioTheme.colors.TextSecondary
                             )
 
-                            val bitrateMbps = estimatedBitrate?.takeIf { it > 0 }?.let { it.toDouble() / 1_000_000.0 }
+                            val bitrateMbps = streamDiagnostic.bitrate?.takeIf { it > 0 }?.let { it.toDouble() / 1_000_000.0 }
                             if (bitrateMbps != null) {
                                 Text(
-                                    text = stringResource(R.string.stream_test_video_bitrate, "%.1f Mbps".format(bitrateMbps)),
+                                    text = stringResource(if (streamDiagnostic.bitrateIsMux) R.string.stream_diagnostic_mux_bitrate else R.string.stream_test_video_bitrate, "%.1f Mbps".format(bitrateMbps)),
                                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                                     color = NuvioTheme.colors.TextPrimary
                                 )
@@ -694,37 +622,42 @@ fun AdvancedSettingsContent(
                         Column(
                             verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
                         ) {
-                            StreamTestResultRow(
-                                label = stringResource(R.string.stream_test_label_baseline),
-                                speed = streamBaselineSpeed,
-                                isRunning = streamTestState == "Baseline"
-                            )
-                            StreamTestResultRow(
-                                label = stringResource(R.string.stream_test_label_parallel1),
-                                speed = streamParallel1Speed,
-                                isRunning = streamTestState == "Parallel1"
-                            )
-                            StreamTestResultRow(
-                                label = stringResource(R.string.stream_test_label_parallel4),
-                                speed = streamParallel4Speed,
-                                isRunning = streamTestState == "Parallel4"
-                            )
-                            StreamTestResultRow(
-                                label = stringResource(R.string.stream_test_label_parallel8),
-                                speed = streamParallel8Speed,
-                                isRunning = streamTestState == "Parallel8"
-                            )
-                            StreamTestResultRow(
-                                label = stringResource(R.string.stream_test_label_parallel16),
-                                speed = streamParallel16Speed,
-                                isRunning = streamTestState == "Parallel16"
-                            )
+                            streamDiagnostic.rows.forEach { (label, speed) ->
+                                StreamTestResultRow(
+                                    label = label,
+                                    speed = speed,
+                                    note = streamDiagnostic.notes[label],
+                                    isRunning = streamDiagnostic.status == label && speed == null &&
+                                        streamDiagnostic.notes[label] == null
+                                )
+                            }
 
-                            if (streamTestState == "Error" && streamErrorMessage != null) {
+                            if (streamDiagnostic.status == "Error" && streamDiagnostic.error != null) {
                                 Text(
-                                    text = stringResource(R.string.stream_test_error_prefix, streamErrorMessage!!),
+                                    text = stringResource(R.string.stream_test_error_prefix, streamDiagnostic.error!!),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = NuvioTheme.colors.Error
+                                )
+                            }
+
+                            streamDiagnostic.verdict?.let { verdict ->
+                                Text(
+                                    text = verdict,
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = NuvioTheme.colors.TextPrimary
+                                )
+                            }
+
+                            streamDiagnostic.resultScope?.let { observation ->
+                                Text(text = observation, style = MaterialTheme.typography.bodySmall,
+                                    color = NuvioTheme.colors.TextSecondary)
+                            }
+
+                            if (streamDiagnostic.status == "Done") {
+                                Text(
+                                    text = stringResource(R.string.stream_test_caveat),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = NuvioTheme.colors.TextSecondary.copy(alpha = 0.6f)
                                 )
                             }
                         }
@@ -732,6 +665,42 @@ fun AdvancedSettingsContent(
                 }
             }
         }
+
+        item(key = "assessment_header") {
+            Text(
+                text = stringResource(R.string.assessment_section_header),
+                style = MaterialTheme.typography.titleSmall,
+                color = NuvioTheme.colors.TextTertiary,
+                modifier = Modifier.padding(top = NuvioTheme.spacing.xs)
+            )
+        }
+
+        deviceAssessmentItems(
+            state = assessmentState,
+            diagnostics = dvDiagnostics,
+            onRun = {
+                runDeviceAssessment(
+                    scope = scope,
+                    context = context,
+                    state = assessmentState,
+                    settings = dvPlayerSettings,
+                    diagnostics = dvDiagnostics,
+                    extraHeaders = playbackVm.serverAuthHeaders(dvDiagnostics.streamUrl),
+                    profileId = activeProfileId,
+                    networkIdentity = { networkMonitor.token() },
+                    inputIdentity = { latestAssessmentInputs },
+                    deviceFactsCurrent = { assessed -> assessmentFactsCurrent(context, dvPlayerSettings, assessed) },
+                    networkLabel = routeLabel(context.getString(R.string.assessment_default_network))
+                )
+            },
+            onCancel = { assessmentState.cancel() },
+            onApply = {
+                runApplyAssessment(scope = scope, context = context, state = assessmentState)
+            },
+            onRevert = {
+                runRevertAssessment(scope = scope, context = context, state = assessmentState)
+            }
+        )
 
         item(key = "clear_cw_cache") {
             SettingsGroupCard(
@@ -756,6 +725,48 @@ fun AdvancedSettingsContent(
                                     )
                                 entryPoint.cwEnrichmentCache().clearAll()
                                 cleared = true
+                            }
+                        }
+                    }
+                )
+            }
+        }
+
+        item(key = "clear_image_cache") {
+            SettingsGroupCard(modifier = Modifier.fillMaxWidth()) {
+                // 0 = idle, 1 = clearing, 2 = done
+                var clearState by remember { mutableStateOf(0) }
+                SettingsActionRow(
+                    title = stringResource(R.string.advanced_clear_image_cache),
+                    subtitle = when (clearState) {
+                        1 -> stringResource(R.string.advanced_clear_image_cache_working)
+                        2 -> stringResource(R.string.advanced_clear_image_cache_done)
+                        else -> stringResource(R.string.advanced_clear_image_cache_subtitle)
+                    },
+                    onClick = {
+                        if (clearState == 0) {
+                            clearState = 1
+                            scope.launch {
+                                val entryPoint = dagger.hilt.android.EntryPointAccessors
+                                    .fromApplication(
+                                        context.applicationContext,
+                                        ClearImageCacheEntryPoint::class.java
+                                    )
+                                withContext(Dispatchers.IO) {
+                                    // Coil 3.3.0: DiskCache.clear() and
+                                    // MemoryCache.clear() both exist; the
+                                    // memory cache is lock-guarded so an IO
+                                    // thread call is safe.
+                                    val loader = coil3.SingletonImageLoader
+                                        .get(context.applicationContext)
+                                    runCatching { loader.memoryCache?.clear() }
+                                    runCatching { loader.diskCache?.clear() }
+                                    runCatching { entryPoint.okHttpClient().cache?.evictAll() }
+                                    runCatching { entryPoint.validatedOkHttpClient().cache?.evictAll() }
+                                    runCatching { entryPoint.catalogRepository().clearCaches() }
+                                }
+                                entryPoint.homeRefreshSignal().requestRefresh()
+                                clearState = 2
                             }
                         }
                     }
@@ -828,18 +839,6 @@ fun AdvancedSettingsContent(
             onDismiss = { showExperienceModeConfirmation = false }
         )
     }
-
-    if (showSentryDialog) {
-        SentrySettingsDialog(
-            enabled = uiState.sentryEnabled,
-            onConfirm = {
-                viewModel.onEvent(
-                    AdvancedSettingsEvent.SetSentryEnabled(!uiState.sentryEnabled)
-                )
-            },
-            onDismiss = { showSentryDialog = false }
-        )
-    }
 }
 
 @Composable
@@ -872,7 +871,7 @@ private fun NetworkMetricCard(
             modifier = Modifier
                 .size(28.dp)
                 .then(if (loading) Modifier.rotate(rotation) else Modifier),
-            tint = if (loading) NuvioTheme.colors.Secondary else NuvioTheme.colors.Primary
+            tint = if (loading) Color.White else Color.White
         )
         Text(
             text = label,
@@ -895,6 +894,7 @@ private fun NetworkMetricCard(
 private fun StreamTestResultRow(
     label: String,
     speed: Double?,
+    note: StreamSweepEngine.PassNote? = null,
     isRunning: Boolean
 ) {
     Row(
@@ -902,15 +902,25 @@ private fun StreamTestResultRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = NuvioTheme.colors.TextSecondary
-        )
+        Column(modifier = Modifier.weight(1f, fill = false)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = NuvioTheme.colors.TextSecondary
+            )
+            note?.detail?.let { detail ->
+                Text(
+                    text = detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = NuvioTheme.colors.TextTertiary
+                )
+            }
+        }
         Text(
             text = when {
                 isRunning -> stringResource(R.string.stream_test_btn_running)
                 speed != null -> "%.1f Mbps".format(speed)
+                note != null -> note.state
                 else -> "---"
             },
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),

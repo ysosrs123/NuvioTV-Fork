@@ -48,7 +48,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -420,13 +419,15 @@ internal fun HeroCarouselBackdrop(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
-    val configuration = LocalConfiguration.current
-    val requestWidthPx = remember(configuration.screenWidthDp, density) {
-        with(density) { configuration.screenWidthDp.dp.roundToPx() }.coerceAtLeast(1)
-    }
-    val requestHeightPx = remember(configuration.screenHeightDp, density, fullPage) {
-        val height = if (fullPage) configuration.screenHeightDp.dp else 400.dp
-        with(density) { height.roundToPx() }.coerceAtLeast(1)
+    // Full-bleed requests size from real window pixels, not
+    // screenWidthDp x the interface-scaled density.
+    val requestWidthPx = remember(context) { context.resources.displayMetrics.widthPixels.coerceAtLeast(1) }
+    val requestHeightPx = remember(context, density, fullPage) {
+        if (fullPage) {
+            context.resources.displayMetrics.heightPixels.coerceAtLeast(1)
+        } else {
+            with(density) { 400.dp.roundToPx() }.coerceAtLeast(1)
+        }
     }
     val backdropUrl = item.backdropUrl
     val backgroundModel = remember(context, backdropUrl, requestWidthPx, requestHeightPx, fullPage) {

@@ -10,6 +10,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.nuvio.tv.ui.util.contentLayoutDirection
@@ -21,6 +23,11 @@ internal const val MarqueeIterations = 3
  * Single-line text that scrolls (marquees) horizontally while [focused] if the content overflows,
  * and otherwise ellipsizes.
  *
+ * Scrolling only happens while [focused] and when the text actually overflows (Compose's
+ * [basicMarquee] is a no-op when it already fits).
+ *
+ * [velocity] defaults to the app-wide 45.dp/s; pass a lower value where dense text (e.g. long
+ * release filenames) reads better at a slower scroll.
  * The layout direction is derived from the text's own content (via [contentLayoutDirection]), so RTL titles
  * marquee correctly even when the app's ambient layout direction is LTR, and vice versa.
  */
@@ -32,13 +39,14 @@ fun FocusMarqueeText(
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
     textAlign: TextAlign? = null,
+    velocity: Dp = MarqueeVelocity,
 ) {
     val currentDirection = LocalLayoutDirection.current
     val textDirection = remember(text) { text.contentLayoutDirection() }
     val needsDirectionOverride = textDirection != currentDirection
 
     val textModifier = if (focused) {
-        modifier.basicMarquee(iterations = MarqueeIterations, velocity = MarqueeVelocity)
+        modifier.basicMarquee(iterations = MarqueeIterations, velocity = velocity)
     } else {
         modifier
     }

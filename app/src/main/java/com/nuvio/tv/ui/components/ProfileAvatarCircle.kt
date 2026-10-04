@@ -32,6 +32,13 @@ fun ProfileAvatarCircle(
     avatarImageUrl: String? = null,
     imageCrossfade: Boolean = true
 ) {
+    if (com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null) {
+        com.nuvio.tv.ui.v2.components.NuvioAvatar(
+            avatar = com.nuvio.tv.ui.v2.components.AvatarModel(name, name, colorHex, avatarImageUrl),
+            size = size, selected = isSelected, modifier = modifier
+        )
+        return
+    }
     val avatarColor = runCatching { Color(android.graphics.Color.parseColor(colorHex)) }
         .getOrDefault(Color(0xFF1E88E5))
     val initial = name.firstOrNull()?.uppercaseChar()?.toString() ?: "?"

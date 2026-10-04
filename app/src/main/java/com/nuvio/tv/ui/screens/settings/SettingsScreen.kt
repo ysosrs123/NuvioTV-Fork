@@ -2,6 +2,10 @@
 
 package com.nuvio.tv.ui.screens.settings
 
+import com.nuvio.tv.ui.v2.components.sidebarPageContent
+
+import com.nuvio.tv.domain.model.AuthState
+
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import androidx.activity.compose.BackHandler
@@ -40,14 +44,13 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sync
@@ -88,6 +91,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -134,7 +138,6 @@ private const val SETTINGS_RAIL_FOCUS_RETRY_WINDOW_MS = 200L
  * first time the rail takes focus the mark reads as set and the restoration is skipped.
  */
 private const val NO_RAIL_FALLBACK = -1L
-private const val SETTINGS_TAB_FOCUS_SELECT_DELAY_MS = 140L
 private const val SETTINGS_DETAIL_ANIM_IN_DURATION_MS = 200
 private const val SETTINGS_DETAIL_ANIM_OUT_DURATION_MS = 180
 
@@ -160,7 +163,7 @@ private fun settingsSectionSpec(category: SettingsCategory): SettingsSectionSpec
     SettingsCategory.CONTENT_DISCOVERY -> SettingsSectionSpec(category, stringResource(R.string.settings_content_discovery), Icons.Default.Explore, destination = SettingsSectionDestination.Inline)
     SettingsCategory.PLAYBACK -> SettingsSectionSpec(category, stringResource(R.string.settings_playback), Icons.Rounded.PlayArrow, destination = SettingsSectionDestination.Inline)
     SettingsCategory.INTEGRATION -> SettingsSectionSpec(category, stringResource(R.string.settings_integration), Icons.Default.Link, destination = SettingsSectionDestination.Inline)
-    SettingsCategory.TRACKING -> SettingsSectionSpec(category, stringResource(R.string.settings_tracking_title), Icons.Default.Sync, destination = SettingsSectionDestination.External)
+    SettingsCategory.TRACKING -> SettingsSectionSpec(category, stringResource(R.string.settings_tracking_title), Icons.Default.Sync, destination = SettingsSectionDestination.Inline)
     SettingsCategory.ADVANCED -> SettingsSectionSpec(category, stringResource(R.string.settings_advanced), Icons.Default.Build, destination = SettingsSectionDestination.Inline)
     SettingsCategory.ABOUT -> SettingsSectionSpec(category, stringResource(R.string.about_title), Icons.Default.Info, destination = SettingsSectionDestination.Inline)
     SettingsCategory.DEBUG -> SettingsSectionSpec(category, stringResource(R.string.settings_debug), Icons.Default.BugReport, destination = SettingsSectionDestination.Inline)
@@ -170,9 +173,9 @@ private fun settingsSectionSpec(category: SettingsCategory): SettingsSectionSpec
 @Composable
 fun SettingsScreen(
     showBuiltInHeader: Boolean = true,
-    onNavigateToTracking: () -> Unit = {},
     onNavigateToAddons: () -> Unit = {},
     onNavigateToPlugins: () -> Unit = {},
+    onNavigateToWatchParty: () -> Unit = {},
     onNavigateToAuthQrSignIn: () -> Unit = {},
     onNavigateToManageProfiles: () -> Unit = {},
     onNavigateToSupportersContributors: () -> Unit = {},
@@ -228,6 +231,7 @@ fun SettingsScreen(
             SettingsCategory.CONTENT_DISCOVERY to FocusRequester(),
             SettingsCategory.INTEGRATION to FocusRequester(),
             SettingsCategory.PLAYBACK to FocusRequester(),
+            SettingsCategory.TRACKING to FocusRequester(),
             SettingsCategory.ADVANCED to FocusRequester(),
             SettingsCategory.ABOUT to FocusRequester(),
             SettingsCategory.ACCOUNT to FocusRequester()
@@ -247,10 +251,8 @@ fun SettingsScreen(
     // every return from those screens land on the rail rather than where the user had been.
     var allowDetailAutofocus by rememberSaveable { mutableStateOf(false) }
     var detailHasFocus by remember { mutableStateOf(false) }
-    // The rail item that last had focus. Not the same as the selected category: an external
-    // category such as tracking never becomes the selected one, and moving along the rail without
-    // opening anything does not change it either. Saveable so returning from the sidebar, or from
-    // a screen a category opened, comes back to the item the user left from.
+    // Keep the last rail item across sidebar/child-screen trips. Focus also selects its
+    // inline pane, while explicit entry into that pane remains a separate action.
     var railFocusCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
     val railFocusCategory = railFocusCategoryName
         ?.let { name -> SettingsCategory.entries.firstOrNull { it.name == name } }
@@ -402,17 +404,50 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(NuvioTheme.colors.Background)
-            .padding(
-                start = NuvioTheme.spacing.xxl,
-                end = NuvioTheme.spacing.xxl,
-                top = if (showBuiltInHeader) NuvioTheme.spacing.xl else 68.dp,
-                bottom = NuvioTheme.spacing.xl
-            )
+
     ) {
+        com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current?.let { appearance ->
+            com.nuvio.tv.ui.v2.appearance.V2Atmosphere(
+                rich = appearance.settingsPresentation == com.nuvio.tv.domain.model.SettingsPresentation.GLASS,
+                background = appearance.settingsBackground)
+        }
         SettingsWorkspaceSurface(
             modifier = Modifier
+                .sidebarPageContent()
                 .fillMaxSize()
+            .padding(
+                start = if (isV2Settings()) 16.dp else NuvioTheme.spacing.xxl,
+                end = NuvioTheme.spacing.xxl,
+                top = when {
+                    com.nuvio.tv.ui.v2.navigation.LocalV2TopChrome.current -> 16.dp
+                    showBuiltInHeader -> NuvioTheme.spacing.xl
+                    else -> 68.dp
+                },
+                bottom = NuvioTheme.spacing.xl
+            )
         ) {
+
+            val onSectionFocused: (SettingsSectionSpec) -> Unit = { section ->
+                val restoringTo = railRestoringCategory
+                // Ignore temporary lazy-list focus while restoring an off-screen category.
+                if (restoringTo == null || restoringTo == section.category) {
+                    railRestoringCategory = null
+                    railFocusCategoryName = section.category.name
+                    allowDetailAutofocus = false
+                    // A previous click must not pull focus into a pane after the user moves on.
+                    if (pendingContentFocusCategory != null) {
+                        pendingContentFocusCategory = null
+                        pendingContentFocusRequestId += 1L
+                    }
+                    if (section.destination == SettingsSectionDestination.Inline &&
+                        selectedCategory != section.category) {
+                        if (section.category == SettingsCategory.INTEGRATION) {
+                            integrationSection = IntegrationSettingsSection.Hub
+                        }
+                        selectedCategory = section.category
+                    }
+                }
+            }
 
             val onSectionClick: (SettingsSectionSpec) -> Unit = { section ->
                 if (section.destination == SettingsSectionDestination.External) {
@@ -423,7 +458,6 @@ fun SettingsScreen(
                     allowDetailAutofocus = false
                     when (section.category) {
                         SettingsCategory.ACCOUNT -> onNavigateToAuthQrSignIn()
-                        SettingsCategory.TRACKING -> onNavigateToTracking()
                         else -> Unit
                     }
                 } else {
@@ -442,23 +476,6 @@ fun SettingsScreen(
                 var focusedTabBounds by remember { mutableStateOf<Rect?>(null) }
                 val density = LocalDensity.current
 
-                var focusedTabCategory by remember { mutableStateOf<SettingsCategory?>(null) }
-                val selectFocusedTab: (SettingsCategory) -> Unit = { category ->
-                    if (selectedCategory != category) {
-                        if (category == SettingsCategory.INTEGRATION) {
-                            integrationSection = IntegrationSettingsSection.Hub
-                        }
-                        allowDetailAutofocus = false
-                        selectedCategory = category
-                    }
-                }
-
-                LaunchedEffect(focusedTabCategory) {
-                    val category = focusedTabCategory ?: return@LaunchedEffect
-                    delay(SETTINGS_TAB_FOCUS_SELECT_DELAY_MS)
-                    selectFocusedTab(category)
-                }
-
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
@@ -469,27 +486,10 @@ fun SettingsScreen(
                             .onGloballyPositioned { topBarCoordinates = it }
                     ) {
                         focusedTabBounds?.let { bounds ->
-                            val glideSpec = tween<Float>(durationMillis = 250, easing = FastOutSlowInEasing)
-                            val pillLeft by animateFloatAsState(bounds.left, glideSpec, label = "pillLeft")
-                            val pillTop by animateFloatAsState(bounds.top, glideSpec, label = "pillTop")
-                            val pillWidth by animateFloatAsState(bounds.width, glideSpec, label = "pillWidth")
-                            val pillHeight by animateFloatAsState(bounds.height, glideSpec, label = "pillHeight")
-                            val pillAlpha by animateFloatAsState(
-                                targetValue = if (railHadFocus) 1f else 0f,
-                                animationSpec = tween(durationMillis = 200),
-                                label = "pillAlpha"
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .align(AbsoluteAlignment.TopLeft)
-                                    .absoluteOffset { IntOffset(pillLeft.roundToInt(), pillTop.roundToInt()) }
-                                    .size(
-                                        width = with(density) { pillWidth.toDp() },
-                                        height = with(density) { pillHeight.toDp() }
-                                    )
-                                    .graphicsLayer { alpha = pillAlpha }
-                                    .clip(RoundedCornerShape(SettingsPillRadius))
-                                    .background(NuvioTheme.colors.Secondary)
+                            SettingsHorizonFocusPill(
+                                bounds = bounds,
+                                focused = railHadFocus,
+                                modifier = Modifier.align(AbsoluteAlignment.TopLeft)
                             )
                         }
                         LazyRow(
@@ -530,7 +530,6 @@ fun SettingsScreen(
                                         railRestoringCategory = null
                                     }
                                     if (event.type == KeyEventType.KeyDown && event.key == Key.DirectionDown) {
-                                        focusedTabCategory?.let(selectFocusedTab)
                                         allowDetailAutofocus = true
                                     }
                                     false
@@ -553,22 +552,7 @@ fun SettingsScreen(
                                         isSelected = selectedCategory == section.category,
                                         focusRequester = railFocusRequesters[section.category],
                                         onClick = { onSectionClick(section) },
-                                        onFocused = {
-                                            val restoringTo = railRestoringCategory
-                                            if (section.category == restoringTo) {
-                                                // Cleared here rather than waiting for the attempt to
-                                                // reach its next suspension point. The attempt is left
-                                                // running: it ends on its own once the request lands, and
-                                                // a directional press stops it early.
-                                                railRestoringCategory = null
-                                                railFocusCategoryName = section.category.name
-                                            } else if (restoringTo == null) {
-                                                railFocusCategoryName = section.category.name
-                                            }
-                                            if (section.destination == SettingsSectionDestination.Inline) {
-                                                focusedTabCategory = section.category
-                                            }
-                                        },
+                                        onFocused = { onSectionFocused(section) },
                                         onFocusedTabPositioned = { tabCoordinates ->
                                             topBarCoordinates?.let { container ->
                                                 focusedTabBounds = container.localBoundingBoxOf(tabCoordinates, clipBounds = false)
@@ -624,6 +608,10 @@ fun SettingsScreen(
                                 experienceModeViewModel = experienceModeViewModel,
                                 integrationSection = integrationSection,
                                 onSelectIntegrationSection = { integrationSection = it },
+                                onOpenConnectedServices = {
+                                    selectedCategory = SettingsCategory.INTEGRATION
+                                    integrationSection = IntegrationSettingsSection.Debrid
+                                },
                                 integrationHubFocusRequester = integrationHubFocusRequester,
                                 integrationDebridFocusRequester = integrationDebridFocusRequester,
                                 integrationTmdbFocusRequester = integrationTmdbFocusRequester,
@@ -632,6 +620,7 @@ fun SettingsScreen(
                                 onNavigateToManageProfiles = onNavigateToManageProfiles,
                                 onNavigateToAddons = onNavigateToAddons,
                                 onNavigateToPlugins = onNavigateToPlugins,
+                                onNavigateToWatchParty = onNavigateToWatchParty,
                                 onNavigateToAuthQrSignIn = onNavigateToAuthQrSignIn,
                                 onNavigateToSupportersContributors = onNavigateToSupportersContributors,
                                 onNavigateToLicensesAttributions = onNavigateToLicensesAttributions
@@ -646,7 +635,7 @@ fun SettingsScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .width(220.dp)
+                        .width(if (com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null) 244.dp else 220.dp)
                         .fillMaxHeight()
                 ) {
                     LazyColumn(
@@ -694,7 +683,9 @@ fun SettingsScreen(
                                     false
                                 }
                             },
-                        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
+                        verticalArrangement = if (com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null)
+                            Arrangement.spacedBy(2.dp, Alignment.Top)
+                        else Arrangement.spacedBy(10.dp, Alignment.CenterVertically)
                     ) {
                         itemsIndexed(
                             items = visibleSections,
@@ -705,19 +696,7 @@ fun SettingsScreen(
                                     SettingsRailDivider()
                                 }
                                 SettingsRailButton(
-                                    onFocused = {
-                                        val restoringTo = railRestoringCategory
-                                        if (section.category == restoringTo) {
-                                            // Cleared here rather than waiting for the attempt to
-                                            // reach its next suspension point. The attempt is left
-                                            // running: it ends on its own once the request lands, and
-                                            // a directional press stops it early.
-                                            railRestoringCategory = null
-                                            railFocusCategoryName = section.category.name
-                                        } else if (restoringTo == null) {
-                                            railFocusCategoryName = section.category.name
-                                        }
-                                    },
+                                    onFocused = { onSectionFocused(section) },
                                     title = section.title,
                                     icon = section.icon,
                                     rawIconRes = section.rawIconRes,
@@ -763,6 +742,10 @@ fun SettingsScreen(
                         experienceModeViewModel = experienceModeViewModel,
                         integrationSection = integrationSection,
                         onSelectIntegrationSection = { integrationSection = it },
+                        onOpenConnectedServices = {
+                            selectedCategory = SettingsCategory.INTEGRATION
+                            integrationSection = IntegrationSettingsSection.Debrid
+                        },
                         integrationHubFocusRequester = integrationHubFocusRequester,
                         integrationDebridFocusRequester = integrationDebridFocusRequester,
                         integrationTmdbFocusRequester = integrationTmdbFocusRequester,
@@ -771,6 +754,7 @@ fun SettingsScreen(
                         onNavigateToManageProfiles = onNavigateToManageProfiles,
                         onNavigateToAddons = onNavigateToAddons,
                         onNavigateToPlugins = onNavigateToPlugins,
+                        onNavigateToWatchParty = onNavigateToWatchParty,
                         onNavigateToAuthQrSignIn = onNavigateToAuthQrSignIn,
                         onNavigateToSupportersContributors = onNavigateToSupportersContributors,
                         onNavigateToLicensesAttributions = onNavigateToLicensesAttributions
@@ -791,6 +775,7 @@ private fun SettingsDetailPane(
     experienceModeViewModel: ExperienceModeSettingsViewModel,
     integrationSection: IntegrationSettingsSection,
     onSelectIntegrationSection: (IntegrationSettingsSection) -> Unit,
+    onOpenConnectedServices: (() -> Unit)? = null,
     integrationHubFocusRequester: FocusRequester,
     integrationDebridFocusRequester: FocusRequester,
     integrationTmdbFocusRequester: FocusRequester,
@@ -799,6 +784,7 @@ private fun SettingsDetailPane(
     onNavigateToManageProfiles: () -> Unit,
     onNavigateToAddons: () -> Unit,
     onNavigateToPlugins: () -> Unit,
+    onNavigateToWatchParty: () -> Unit,
     onNavigateToAuthQrSignIn: () -> Unit,
     onNavigateToSupportersContributors: () -> Unit,
     onNavigateToLicensesAttributions: () -> Unit
@@ -845,6 +831,7 @@ private fun SettingsDetailPane(
             )
         } else {
             PlaybackSettingsContent(
+                onOpenConnectedServices = onOpenConnectedServices,
                 initialFocusRequester = if (allowDetailAutofocus) {
                     contentFocusRequesters[SettingsCategory.PLAYBACK]
                 } else {
@@ -898,6 +885,7 @@ private fun SettingsDetailPane(
         SettingsCategory.CONTENT_DISCOVERY -> ContentDiscoverySettingsContent(
             onNavigateToAddons = onNavigateToAddons,
             onNavigateToPlugins = onNavigateToPlugins,
+            onNavigateToWatchParty = onNavigateToWatchParty,
             showPlugins = AppFeaturePolicy.pluginsEnabled && !isEssentialMode,
             initialFocusRequester = if (allowDetailAutofocus) {
                 contentFocusRequesters[SettingsCategory.CONTENT_DISCOVERY]
@@ -914,46 +902,13 @@ private fun SettingsDetailPane(
             }
         )
         SettingsCategory.DEBUG -> DebugSettingsContent()
-        SettingsCategory.TRACKING -> Unit
-    }
-}
-
-@Composable
-private fun ContentDiscoverySettingsContent(
-    onNavigateToAddons: () -> Unit,
-    onNavigateToPlugins: () -> Unit,
-    showPlugins: Boolean,
-    initialFocusRequester: FocusRequester?
-) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
-    ) {
-        SettingsDetailHeader(
-            title = stringResource(R.string.settings_content_discovery),
-            subtitle = stringResource(R.string.settings_content_discovery_subtitle)
-        )
-        SettingsGroupCard(modifier = Modifier.fillMaxWidth()) {
-            SettingsActionRow(
-                title = stringResource(R.string.addon_title),
-                subtitle = stringResource(R.string.settings_content_discovery_addons_subtitle),
-                onClick = onNavigateToAddons,
-                leadingIcon = Icons.Default.Extension,
-                modifier = if (initialFocusRequester != null) {
-                    Modifier.focusRequester(initialFocusRequester)
-                } else {
-                    Modifier
-                }
-            )
-            if (showPlugins) {
-                SettingsActionRow(
-                    title = stringResource(R.string.plugin_title),
-                    subtitle = stringResource(R.string.settings_content_discovery_plugins_subtitle),
-                    onClick = onNavigateToPlugins,
-                    leadingIcon = Icons.Default.Power
-                )
+        SettingsCategory.TRACKING -> TrackingSettingsContent(
+            initialFocusRequester = if (allowDetailAutofocus) {
+                contentFocusRequesters[SettingsCategory.TRACKING]
+            } else {
+                null
             }
-        }
+        )
     }
 }
 
@@ -1015,7 +970,7 @@ private fun AccountSettingsInline(
         SettingsGroupCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .then(if (isV2Settings()) Modifier else Modifier.weight(1f))
         ) {
             com.nuvio.tv.ui.screens.account.AccountSettingsContent(
                 uiState = accountUiState,
@@ -1070,13 +1025,13 @@ private fun IntegrationSettingsContent(
                 SettingsGroupCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
+                        .weight(1f, fill = !isV2Settings())
                 ) {
                     val integrationHubState = rememberLazyListState()
-                    Box(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = if (isV2Settings()) Modifier.fillMaxWidth() else Modifier.fillMaxSize()) {
                         LazyColumn(
                             state = integrationHubState,
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                            verticalArrangement = Arrangement.spacedBy(if (isV2Settings()) 4.dp else 10.dp)
                         ) {
                             item(key = "integration_hub_debrid") {
                                 SettingsActionRow(
@@ -1135,7 +1090,6 @@ private fun IntegrationSettingsContent(
                 initialFocusRequester = mdbListFocusRequester
             )
         }
-
         IntegrationSettingsSection.AnimeSkip -> {
             AnimeSkipSettingsContent(
                 initialFocusRequester = animeSkipFocusRequester
@@ -1158,3 +1112,31 @@ private fun Key.isDirection(): Boolean =
         this == Key.DirectionDown ||
         this == Key.DirectionLeft ||
         this == Key.DirectionRight
+
+
+/** Keep animated pill dimensions in their own scope instead of recomposing the Settings page. */
+@Composable
+private fun SettingsHorizonFocusPill(bounds: Rect, focused: Boolean, modifier: Modifier) {
+    val density = LocalDensity.current
+    val glideSpec = tween<Float>(durationMillis = 250, easing = FastOutSlowInEasing)
+    val pillLeft by animateFloatAsState(bounds.left, glideSpec, label = "pillLeft")
+    val pillTop by animateFloatAsState(bounds.top, glideSpec, label = "pillTop")
+    val pillWidth by animateFloatAsState(bounds.width, glideSpec, label = "pillWidth")
+    val pillHeight by animateFloatAsState(bounds.height, glideSpec, label = "pillHeight")
+    val pillAlpha by animateFloatAsState(
+        targetValue = if (focused) 1f else 0f,
+        animationSpec = tween(durationMillis = 200),
+        label = "pillAlpha"
+    )
+    Box(
+        modifier = modifier
+            .absoluteOffset { IntOffset(pillLeft.roundToInt(), pillTop.roundToInt()) }
+            .size(
+                width = with(density) { pillWidth.toDp() },
+                height = with(density) { pillHeight.toDp() }
+            )
+            .graphicsLayer { alpha = pillAlpha }
+            .clip(RoundedCornerShape(SettingsPillRadius))
+            .background(NuvioTheme.colors.FocusBackground)
+    )
+}

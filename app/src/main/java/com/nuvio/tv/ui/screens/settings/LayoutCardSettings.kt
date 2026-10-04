@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -30,8 +32,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,11 +69,13 @@ import com.nuvio.tv.domain.model.DEFAULT_CARD_DEPTH_EDGE_STRENGTH
 import com.nuvio.tv.domain.model.DEFAULT_CARD_DEPTH_SHEEN_STRENGTH
 import com.nuvio.tv.domain.model.FocusedPosterTrailerPlaybackTarget
 import com.nuvio.tv.domain.model.HomeLayout
+import com.nuvio.tv.domain.model.LandscapePosterScope
 import com.nuvio.tv.ui.components.CardCwStylePreview
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.components.PosterCwStylePreview
 import com.nuvio.tv.ui.components.WideCwStylePreview
 import com.nuvio.tv.ui.components.cardDepthVisual
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun LayoutContinueWatchingSection(
@@ -167,6 +173,11 @@ internal fun LayoutSettingsUiState.focusedPosterHasOptions(): Boolean {
     return selectedLayout != HomeLayout.GRID && (!modernLandscape || AppFeaturePolicy.inAppTrailerPlaybackEnabled)
 }
 
+/** On Modern Home the card itself plays the trailer only when that is the chosen trailer location. */
+internal fun LayoutSettingsUiState.showsTrailerLogoRow(): Boolean =
+    selectedLayout != HomeLayout.MODERN ||
+        focusedPosterBackdropTrailerPlaybackTarget == FocusedPosterTrailerPlaybackTarget.EXPANDED_CARD
+
 @Composable
 internal fun LayoutFocusedPosterSection(
     uiState: LayoutSettingsUiState,
@@ -176,7 +187,7 @@ internal fun LayoutFocusedPosterSection(
     val isLandscapeActive = uiState.modernLandscapePostersEnabled
     val isModernLandscape = isModern && isLandscapeActive
     val showAutoplayRow = AppFeaturePolicy.inAppTrailerPlaybackEnabled &&
-        (uiState.focusedPosterBackdropExpandEnabled || isModernLandscape)
+        (isV2Settings() || uiState.focusedPosterBackdropExpandEnabled || isModernLandscape)
 
     if (!isModernLandscape) {
         SettingsToggleRow(
@@ -235,6 +246,20 @@ internal fun LayoutFocusedPosterSection(
                     }
                 )
             }
+            if (uiState.showsTrailerLogoRow()) {
+                SettingsToggleRow(
+                    title = stringResource(R.string.layout_trailer_logo),
+                    subtitle = stringResource(R.string.layout_trailer_logo_sub),
+                    checked = uiState.focusedPosterBackdropTrailerLogoEnabled,
+                    onToggle = {
+                        onEvent(
+                            LayoutSettingsEvent.SetFocusedPosterBackdropTrailerLogoEnabled(
+                                !uiState.focusedPosterBackdropTrailerLogoEnabled
+                            )
+                        )
+                    }
+                )
+            }
         }
     }
 }
@@ -272,13 +297,9 @@ internal fun LayoutPosterCardSection(
         options = radiusOptions,
         onSelected = { radius -> onEvent(LayoutSettingsEvent.SetPosterCardCornerRadius(radius)) }
     )
-    SettingsToggleRow(
-        title = stringResource(R.string.layout_landscape_posters),
-        subtitle = stringResource(R.string.layout_landscape_posters_sub),
-        checked = uiState.modernLandscapePostersEnabled,
-        onToggle = {
-            onEvent(LayoutSettingsEvent.SetModernLandscapePostersEnabled(!uiState.modernLandscapePostersEnabled))
-        }
+    LandscapePosterScopeRow(
+        selectedScope = uiState.landscapePosterScope,
+        onScopeSelected = { scope -> onEvent(LayoutSettingsEvent.SetLandscapePosterScope(scope)) }
     )
     SettingsToggleRow(
         title = stringResource(R.string.layout_always_show_landscape_clearlogo),
@@ -500,45 +521,95 @@ private fun ContinueWatchingSortModeDialog(
 }
 
 @Composable
+private fun LandscapePosterScopeRow(
+    selectedScope: LandscapePosterScope,
+    onScopeSelected: (LandscapePosterScope) -> Unit
+) {
+    var open by remember { mutableStateOf(false) }
+    val rowFocus = remember { FocusRequester() }
+    val rowVisibility = remember { BringIntoViewRequester() }
+    val scope = rememberCoroutineScope()
+    val options = listOf(
+        SettingsPickerOption(
+            LandscapePosterScope.OFF,
+            stringResource(R.string.layout_landscape_posters_off),
+            stringResource(R.string.layout_landscape_posters_off_desc)
+        ),
+        SettingsPickerOption(
+            LandscapePosterScope.HOME_ONLY,
+            stringResource(R.string.layout_landscape_posters_home_only),
+            stringResource(R.string.layout_landscape_posters_home_only_desc)
+        ),
+        SettingsPickerOption(
+            LandscapePosterScope.EVERYWHERE,
+            stringResource(R.string.layout_landscape_posters_everywhere),
+            stringResource(R.string.layout_landscape_posters_everywhere_desc)
+        )
+    )
+    val dismiss: () -> Unit = {
+        open = false
+        scope.launch {
+            repeat(2) { withFrameNanos { } }
+            rowFocus.requestFocus()
+            rowVisibility.bringIntoView()
+        }
+    }
+    SettingsActionRow(
+        title = stringResource(R.string.layout_landscape_posters),
+        subtitle = stringResource(R.string.layout_landscape_posters_sub),
+        value = options.first { it.value == selectedScope }.title,
+        modifier = Modifier.focusRequester(rowFocus).bringIntoViewRequester(rowVisibility),
+        onClick = { open = true }
+    )
+    if (open) {
+        SettingsSingleChoiceDialog(
+            title = stringResource(R.string.layout_landscape_posters),
+            options = options,
+            selectedValue = selectedScope,
+            onOptionSelected = { onScopeSelected(it); dismiss() },
+            onDismiss = dismiss,
+            width = 480.dp
+        )
+    }
+}
+
+@Composable
 private fun ModernTrailerPlaybackTargetRow(
     selectedTarget: FocusedPosterTrailerPlaybackTarget,
     onTargetSelected: (FocusedPosterTrailerPlaybackTarget) -> Unit
 ) {
-    Text(
-        text = stringResource(R.string.layout_trailer_location),
-        style = MaterialTheme.typography.labelLarge,
-        color = NuvioTheme.colors.TextSecondary
+    var open by remember { mutableStateOf(false) }
+    val rowFocus = remember { FocusRequester() }
+    val rowVisibility = remember { BringIntoViewRequester() }
+    val scope = rememberCoroutineScope()
+    val options = listOf(
+        SettingsPickerOption(FocusedPosterTrailerPlaybackTarget.EXPANDED_CARD, stringResource(R.string.layout_trailer_expanded_card)),
+        SettingsPickerOption(FocusedPosterTrailerPlaybackTarget.HERO_MEDIA, stringResource(R.string.layout_trailer_hero_media)),
+        SettingsPickerOption(FocusedPosterTrailerPlaybackTarget.FEATHERED_WINDOW, stringResource(R.string.layout_trailer_feathered))
     )
-    Text(
-        text = stringResource(R.string.layout_trailer_location_sub),
-        style = MaterialTheme.typography.bodySmall,
-        color = NuvioTheme.colors.TextTertiary
+    val dismiss: () -> Unit = {
+        open = false
+        scope.launch {
+            repeat(2) { withFrameNanos { } }
+            rowFocus.requestFocus()
+            rowVisibility.bringIntoView()
+        }
+    }
+    SettingsActionRow(
+        title = stringResource(R.string.layout_trailer_location),
+        subtitle = stringResource(R.string.layout_trailer_location_sub),
+        value = options.first { it.value == selectedTarget }.title,
+        modifier = Modifier.focusRequester(rowFocus).bringIntoViewRequester(rowVisibility),
+        onClick = { open = true }
     )
-    val firstTrailerTargetFocusRequester = remember { FocusRequester() }
-    LazyRow(
-        modifier = Modifier.settingsOptionRow(firstTrailerTargetFocusRequester),
-        contentPadding = PaddingValues(end = NuvioTheme.spacing.sm),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
-    ) {
-        item(key = "trailer_target_expanded_card") {
-            SettingsChoiceChip(
-                modifier = Modifier.focusRequester(firstTrailerTargetFocusRequester),
-                label = stringResource(R.string.layout_trailer_expanded_card),
-                selected = selectedTarget == FocusedPosterTrailerPlaybackTarget.EXPANDED_CARD,
-                onClick = {
-                    onTargetSelected(FocusedPosterTrailerPlaybackTarget.EXPANDED_CARD)
-                }
-            )
-        }
-        item(key = "trailer_target_hero_media") {
-            SettingsChoiceChip(
-                label = stringResource(R.string.layout_trailer_hero_media),
-                selected = selectedTarget == FocusedPosterTrailerPlaybackTarget.HERO_MEDIA,
-                onClick = {
-                    onTargetSelected(FocusedPosterTrailerPlaybackTarget.HERO_MEDIA)
-                }
-            )
-        }
+    if (open) {
+        SettingsSingleChoiceDialog(
+            title = stringResource(R.string.layout_trailer_location),
+            options = options,
+            selectedValue = selectedTarget,
+            onOptionSelected = { onTargetSelected(it); dismiss() },
+            onDismiss = dismiss
+        )
     }
 }
 

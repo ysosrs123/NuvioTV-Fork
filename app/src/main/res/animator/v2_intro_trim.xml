@@ -1,0 +1,4 @@
+<set xmlns:android="http://schemas.android.com/apk/res/android" android:ordering="together">
+    <objectAnimator android:propertyName="trimPathEnd" android:valueFrom="0" android:valueTo="1" android:duration="4700" android:valueType="floatType" android:interpolator="@android:interpolator/linear" />
+    <objectAnimator android:propertyName="trimPathStart" android:valueFrom="0" android:valueTo="1" android:startOffset="1300" android:duration="3900" android:valueType="floatType" android:interpolator="@android:interpolator/linear" />
+</set>

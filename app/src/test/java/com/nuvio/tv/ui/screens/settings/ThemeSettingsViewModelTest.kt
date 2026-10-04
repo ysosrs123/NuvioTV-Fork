@@ -41,6 +41,9 @@ class ThemeSettingsViewModelTest {
         every { amoledMode } returns flowOf(false)
         every { amoledSurfacesMode } returns flowOf(false)
         every { settingsUiStyle } returns flowOf(SettingsUiStyle.CLASSIC)
+        every { screensaverEnabled } returns flowOf(true)
+        every { screensaverTimeoutMinutes } returns flowOf(ThemeDataStore.DEFAULT_SCREENSAVER_TIMEOUT_MINUTES)
+        every { screensaverDimPercent } returns flowOf(ThemeDataStore.DEFAULT_SCREENSAVER_DIM_PERCENT)
         coEvery { setCustomTheme(any()) } coAnswers {
             selection.value = ThemeSelection(AppTheme.CUSTOM, firstArg())
         }

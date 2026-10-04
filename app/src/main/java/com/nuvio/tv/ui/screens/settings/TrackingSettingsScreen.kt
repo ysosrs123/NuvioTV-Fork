@@ -48,12 +48,34 @@ fun TrackingSettingsScreen(
     trackingViewModel: TrackingSettingsViewModel = hiltViewModel(),
     onBackPress: () -> Unit
 ) {
+    TrackingSettingsContent(
+        traktViewModel = traktViewModel,
+        simklViewModel = simklViewModel,
+        trackingViewModel = trackingViewModel,
+        mdbListViewModel = mdbListViewModel,
+        standalone = true,
+        onBackPress = onBackPress
+    )
+}
+
+/** Shared controls; the Settings pane owns focus and Back when embedded. */
+@Composable
+internal fun TrackingSettingsContent(
+    traktViewModel: TraktViewModel = hiltViewModel(),
+    simklViewModel: SimklSettingsViewModel = hiltViewModel(),
+    trackingViewModel: TrackingSettingsViewModel = hiltViewModel(),
+    mdbListViewModel: MdbListTrackerViewModel = hiltViewModel(),
+    initialFocusRequester: FocusRequester? = null,
+    standalone: Boolean = false,
+    onBackPress: (() -> Unit)? = null
+) {
     val traktState by traktViewModel.uiState.collectAsStateWithLifecycle()
     val simklState by simklViewModel.uiState.collectAsStateWithLifecycle()
     val mdbListState by mdbListViewModel.uiState.collectAsStateWithLifecycle()
     val mdbListLibraryLists by mdbListViewModel.libraryLists.collectAsStateWithLifecycle()
     val trackingState by trackingViewModel.uiState.collectAsStateWithLifecycle()
-    val traktFocusRequester = remember { FocusRequester() }
+    val defaultTraktFocusRequester = remember { FocusRequester() }
+    val traktFocusRequester = initialFocusRequester ?: defaultTraktFocusRequester
     val simklFocusRequester = remember { FocusRequester() }
     val mdbListFocusRequester = remember { FocusRequester() }
     val libraryFocusRequester = remember { FocusRequester() }
@@ -66,6 +88,7 @@ fun TrackingSettingsScreen(
     var disconnectProvider by remember { mutableStateOf<TrackingProviderId?>(null) }
     var restoreFocusTarget by remember { mutableStateOf<TrackingFocusTarget?>(null) }
     var showLibrarySourceDialog by remember { mutableStateOf(false) }
+    var showTransferFlow by remember { mutableStateOf(false) }
     var showWatchProgressDialog by remember { mutableStateOf(false) }
     var showDaysCapDialog by remember { mutableStateOf(false) }
     var showMoreLikeThisSourceDialog by remember { mutableStateOf(false) }
@@ -79,13 +102,15 @@ fun TrackingSettingsScreen(
         showDaysCapDialog ||
         showMoreLikeThisSourceDialog ||
         showAnimeIdDialog ||
+        showTransferFlow ||
         showMdbListLibraryListsDialog
 
-    BackHandler(enabled = !hasOverlay) {
-        onBackPress()
+    BackHandler(enabled = onBackPress != null && !hasOverlay) {
+        onBackPress?.invoke()
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(standalone) {
+        if (!standalone) return@LaunchedEffect
         delay(160L)
         runCatching { traktFocusRequester.requestFocus() }
     }
@@ -169,6 +194,7 @@ fun TrackingSettingsScreen(
     }
 
     TrackingSettingsOverview(
+        standalone = standalone,
         traktState = traktState,
         simklState = simklState,
         mdbListState = mdbListState,
@@ -186,6 +212,10 @@ fun TrackingSettingsScreen(
         onLibrarySourceClick = {
             restoreFocusTarget = TrackingFocusTarget.LIBRARY
             showLibrarySourceDialog = true
+        },
+        onTransferClick = {
+            restoreFocusTarget = TrackingFocusTarget.LIBRARY
+            showTransferFlow = true
         },
         onWatchProgressClick = {
             restoreFocusTarget = TrackingFocusTarget.WATCH_PROGRESS
@@ -316,6 +346,13 @@ fun TrackingSettingsScreen(
                 )
             }
         }
+    }
+
+    if (showTransferFlow) {
+        LibraryTransferFlow(
+            availableModes = trackingState.availableLibrarySourceModes,
+            onDismiss = { showTransferFlow = false }
+        )
     }
 
     if (showLibrarySourceDialog) {
@@ -456,6 +493,7 @@ fun TrackingSettingsScreen(
 
 @Composable
 internal fun TrackingSettingsOverview(
+    standalone: Boolean = true,
     traktState: TraktUiState,
     simklState: SimklSettingsUiState,
     mdbListState: MdbListTrackerUiState,
@@ -471,6 +509,7 @@ internal fun TrackingSettingsOverview(
     onSimklClick: () -> Unit,
     onMdbListClick: () -> Unit,
     onLibrarySourceClick: () -> Unit,
+    onTransferClick: () -> Unit = {},
     onWatchProgressClick: () -> Unit,
     onContinueWatchingWindowClick: () -> Unit,
     onCommentsChanged: (Boolean) -> Unit,
@@ -486,11 +525,7 @@ internal fun TrackingSettingsOverview(
     val traktConnected = traktState.mode == TraktConnectionMode.CONNECTED
     val traktProgressActive = trackingState.watchProgressSource == WatchProgressSource.TRAKT
 
-    SettingsStandaloneScaffold(
-        title = stringResource(R.string.settings_tracking_title),
-        subtitle = stringResource(R.string.settings_tracking_description),
-        classicContainer = false
-    ) {
+    val content: @Composable () -> Unit = {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -565,6 +600,12 @@ internal fun TrackingSettingsOverview(
                                 modifier = Modifier
                                     .focusRequester(libraryFocusRequester)
                                     .testTag(TrackingSettingsTestTags.LIBRARY_SOURCE)
+                            )
+                            SettingsActionRow(
+                                title = stringResource(R.string.library_transfer_row_title),
+                                subtitle = stringResource(R.string.library_transfer_row_subtitle),
+                                enabled = trackingState.isReady,
+                                onClick = onTransferClick
                             )
                             SettingsActionRow(
                                 title = stringResource(R.string.trakt_watch_progress_title),
@@ -661,6 +702,15 @@ internal fun TrackingSettingsOverview(
                 SettingsVerticalScrollIndicators(state = listState)
             }
         }
+    }
+    if (standalone) {
+        SettingsStandaloneScaffold(
+            title = stringResource(R.string.settings_tracking_title),
+            subtitle = stringResource(R.string.settings_tracking_description),
+            classicContainer = false
+        ) { content() }
+    } else {
+        content()
     }
 }
 

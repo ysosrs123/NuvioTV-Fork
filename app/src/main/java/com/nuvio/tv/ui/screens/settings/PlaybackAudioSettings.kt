@@ -1,15 +1,28 @@
 package com.nuvio.tv.ui.screens.settings
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.nuvio.tv.R
 import com.nuvio.tv.data.local.AVAILABLE_SUBTITLE_LANGUAGES
 import com.nuvio.tv.data.local.AudioLanguageOption
 import com.nuvio.tv.data.local.AudioOutputChannels
+import com.nuvio.tv.data.local.DeniedCodecHandling
 import com.nuvio.tv.data.local.PlayerPreference
 import com.nuvio.tv.data.local.PlayerSettings
+import com.nuvio.tv.data.local.SurroundChannelTarget
+import com.nuvio.tv.data.local.SurroundFormatMode
 import com.nuvio.tv.data.local.displayName
+
+/** Format names in learned rejection entries ("route::GROUP"), in passthrough settings order. */
+internal fun learnedRejectionFormatLabels(entries: Set<String>): String {
+    val groups = entries.mapNotNull { it.substringAfterLast("::", "").takeIf { group -> group.isNotEmpty() } }.toSet()
+    return listOf("AC3" to "AC-3", "EAC3" to "E-AC-3", "TRUEHD" to "TrueHD", "DTS" to "DTS", "DTS_HD" to "DTS-HD")
+        .filter { (group, _) -> group in groups }
+        .joinToString(", ") { (_, label) -> label }
+}
 
 @Composable
 internal fun PlaybackAudioSection(
@@ -72,7 +85,7 @@ internal fun PlaybackAudioSection(
         subtitle = stringResource(R.string.audio_enable_downmix_subtitle),
         checked = settings.effectiveDownmixEnabled,
         onToggle = { onUpdate { setDownmixEnabled(!settings.effectiveDownmixEnabled) } },
-        enabled = enabled && settings.isPreferAppDecoder
+        enabled = enabled && settings.decoderPriority != 0
     )
     if (settings.effectiveDownmixEnabled) {
         SettingsActionRow(
@@ -97,12 +110,118 @@ internal fun PlaybackAudioSection(
         onToggle = { onUpdate { setTunnelingEnabled(!settings.effectiveTunnelingEnabled) } },
         enabled = enabled && settings.isTunnelingCompatible
     )
+
+    SurroundSettingsRows(settings = settings, enabled = enabled, onUpdate = onUpdate, onOpenDialog = onOpenDialog)
+
     SettingsToggleRow(
         title = stringResource(R.string.audio_force_optical_passthrough),
         subtitle = stringResource(R.string.audio_force_optical_passthrough_sub),
         checked = settings.forceOpticalPassthrough && settings.decoderPriority != 0,
         onToggle = { onUpdate { setForceOpticalPassthrough(!settings.forceOpticalPassthrough) } },
         enabled = enabled && settings.decoderPriority != 0
+    )
+}
+
+@Composable
+private fun SurroundSettingsRows(
+    settings: PlayerSettings,
+    enabled: Boolean,
+    onUpdate: PlaybackSettingsUpdate,
+    onOpenDialog: (PlaybackDialog) -> Unit
+) {
+    val context = LocalContext.current
+
+    SettingsSectionLabel(text = stringResource(R.string.audio_surround_header))
+    SettingsActionRow(
+        title = stringResource(R.string.audio_surround_format_mode),
+        subtitle = null,
+        value = surroundFormatModeLabel(settings.surroundFormatMode),
+        enabled = enabled,
+        onClick = { onOpenDialog(PlaybackDialog.SURROUND_FORMAT_MODE) }
+    )
+
+    if (settings.surroundFormatMode == SurroundFormatMode.MANUAL) {
+        val deviceOnly = settings.decoderPriority == 0
+        val switchesEnabled = enabled && !deviceOnly
+        SettingsToggleRow(
+            title = stringResource(R.string.audio_surround_allow_ac3),
+            subtitle = stringResource(R.string.audio_surround_allow_ac3_sub),
+            checked = settings.allowAc3Passthrough || deviceOnly,
+            onToggle = { onUpdate { setAllowAc3Passthrough(!settings.allowAc3Passthrough) } },
+            enabled = switchesEnabled
+        )
+        SettingsToggleRow(
+            title = stringResource(R.string.audio_surround_allow_eac3),
+            subtitle = stringResource(R.string.audio_surround_allow_eac3_sub),
+            checked = settings.allowEac3Passthrough || deviceOnly,
+            onToggle = { onUpdate { setAllowEac3Passthrough(!settings.allowEac3Passthrough) } },
+            enabled = switchesEnabled
+        )
+        SettingsToggleRow(
+            title = stringResource(R.string.audio_surround_allow_truehd),
+            subtitle = stringResource(R.string.audio_surround_allow_truehd_sub),
+            checked = settings.allowTruehdPassthrough || deviceOnly,
+            onToggle = { onUpdate { setAllowTruehdPassthrough(!settings.allowTruehdPassthrough) } },
+            enabled = switchesEnabled
+        )
+        SettingsToggleRow(
+            title = stringResource(R.string.audio_surround_allow_dts),
+            subtitle = stringResource(R.string.audio_surround_allow_dts_sub),
+            checked = settings.allowDtsPassthrough || deviceOnly,
+            onToggle = { onUpdate { setAllowDtsPassthrough(!settings.allowDtsPassthrough) } },
+            enabled = switchesEnabled
+        )
+        SettingsToggleRow(
+            title = stringResource(R.string.audio_surround_allow_dtshd),
+            subtitle = stringResource(R.string.audio_surround_allow_dtshd_sub),
+            checked = settings.allowDtshdPassthrough || deviceOnly,
+            onToggle = { onUpdate { setAllowDtshdPassthrough(!settings.allowDtshdPassthrough) } },
+            enabled = switchesEnabled
+        )
+        val transcodeDenied = settings.deniedCodecHandling == DeniedCodecHandling.TRANSCODE_AC3
+        SettingsToggleRow(
+            title = stringResource(R.string.audio_surround_transcode_denied),
+            subtitle = stringResource(R.string.audio_surround_transcode_denied_sub),
+            checked = transcodeDenied && !deviceOnly,
+            onToggle = { onUpdate { setTranscodeDeniedToAc3(!transcodeDenied) } },
+            enabled = switchesEnabled
+        )
+    }
+
+    SettingsActionRow(
+        title = stringResource(R.string.audio_surround_channel_target),
+        subtitle = null,
+        value = surroundChannelTargetLabel(settings.surroundChannelTarget),
+        enabled = enabled && settings.decoderPriority != 0,
+        onClick = { onOpenDialog(PlaybackDialog.SURROUND_CHANNEL_TARGET) }
+    )
+    SettingsToggleRow(
+        title = stringResource(R.string.audio_use_system_passthrough),
+        subtitle = stringResource(R.string.audio_use_system_passthrough_sub),
+        checked = settings.useSystemPassthrough,
+        onToggle = { onUpdate { setUseSystemPassthrough(!settings.useSystemPassthrough) } },
+        enabled = enabled
+    )
+    SettingsActionRow(
+        title = stringResource(R.string.audio_surround_reset_iec_probe),
+        subtitle = stringResource(R.string.audio_surround_reset_iec_probe_sub),
+        enabled = enabled && !settings.useSystemPassthrough,
+        onClick = { onUpdate { resetIecPassthroughProbe() } }
+    )
+
+    val clearedMessage = stringResource(R.string.audio_forget_rejections_done)
+    val nothingLearned = stringResource(R.string.audio_forget_rejections_none)
+    val learnedFormats = learnedRejectionFormatLabels(settings.audioRejectionsConfirmed)
+    SettingsActionRow(
+        title = stringResource(R.string.audio_forget_rejections_title),
+        subtitle = stringResource(R.string.audio_forget_rejections_sub),
+        value = learnedFormats.ifEmpty { nothingLearned },
+        trailingIcon = null,
+        enabled = enabled && learnedFormats.isNotEmpty(),
+        onClick = {
+            onUpdate { forgetLearnedAudioRejections() }
+            Toast.makeText(context, clearedMessage, Toast.LENGTH_SHORT).show()
+        }
     )
 }
 
@@ -126,6 +245,20 @@ internal fun decoderPriorityLabel(priority: Int): String = when (priority) {
     0 -> stringResource(R.string.audio_decoder_device_only)
     2 -> stringResource(R.string.audio_decoder_prefer_app)
     else -> stringResource(R.string.audio_decoder_prefer_device)
+}
+
+@Composable
+private fun surroundFormatModeLabel(mode: SurroundFormatMode): String = when (mode) {
+    SurroundFormatMode.AUTO -> stringResource(R.string.audio_surround_mode_auto)
+    SurroundFormatMode.MANUAL -> stringResource(R.string.audio_surround_mode_manual)
+}
+
+@Composable
+private fun surroundChannelTargetLabel(target: SurroundChannelTarget): String = when (target) {
+    SurroundChannelTarget.AUTO -> stringResource(R.string.audio_surround_channel_auto)
+    SurroundChannelTarget.CH_2_0 -> stringResource(R.string.audio_surround_channel_2_0)
+    SurroundChannelTarget.CH_5_1 -> stringResource(R.string.audio_surround_channel_5_1)
+    SurroundChannelTarget.CH_7_1 -> stringResource(R.string.audio_surround_channel_7_1)
 }
 
 @Composable
@@ -169,6 +302,22 @@ internal fun AudioSettingsDialogs(
             selectedPriority = settings.decoderPriority,
             onPrioritySelected = { priority ->
                 onUpdate { setDecoderPriority(priority) }
+                onDismiss()
+            },
+            onDismiss = onDismiss
+        )
+        PlaybackDialog.SURROUND_FORMAT_MODE -> SurroundFormatModeDialog(
+            selectedMode = settings.surroundFormatMode,
+            onModeSelected = { mode ->
+                onUpdate { setSurroundFormatMode(mode) }
+                onDismiss()
+            },
+            onDismiss = onDismiss
+        )
+        PlaybackDialog.SURROUND_CHANNEL_TARGET -> SurroundChannelTargetDialog(
+            selectedTarget = settings.surroundChannelTarget,
+            onTargetSelected = { target ->
+                onUpdate { setSurroundChannelTarget(target) }
                 onDismiss()
             },
             onDismiss = onDismiss
@@ -229,6 +378,78 @@ private fun AudioLanguageSelectionDialog(
         onDismiss = onDismiss,
         width = 400.dp,
         maxHeight = 320.dp
+    )
+}
+
+@Composable
+private fun SurroundFormatModeDialog(
+    selectedMode: SurroundFormatMode,
+    onModeSelected: (SurroundFormatMode) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val options = listOf(
+        SettingsPickerOption(
+            SurroundFormatMode.AUTO,
+            stringResource(R.string.audio_surround_mode_auto),
+            stringResource(R.string.audio_surround_mode_auto_desc)
+        ),
+        SettingsPickerOption(
+            SurroundFormatMode.MANUAL,
+            stringResource(R.string.audio_surround_mode_manual),
+            stringResource(R.string.audio_surround_mode_manual_desc)
+        )
+    )
+
+    SettingsSingleChoiceDialog(
+        title = stringResource(R.string.audio_surround_format_mode),
+        subtitle = stringResource(R.string.audio_surround_format_dialog_subtitle),
+        options = options,
+        selectedValue = selectedMode,
+        onOptionSelected = onModeSelected,
+        onDismiss = onDismiss,
+        width = 460.dp,
+        maxHeight = 320.dp
+    )
+}
+
+@Composable
+private fun SurroundChannelTargetDialog(
+    selectedTarget: SurroundChannelTarget,
+    onTargetSelected: (SurroundChannelTarget) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val options = listOf(
+        SettingsPickerOption(
+            SurroundChannelTarget.AUTO,
+            stringResource(R.string.audio_surround_channel_auto),
+            stringResource(R.string.audio_surround_channel_auto_desc)
+        ),
+        SettingsPickerOption(
+            SurroundChannelTarget.CH_2_0,
+            stringResource(R.string.audio_surround_channel_2_0),
+            stringResource(R.string.audio_surround_channel_2_0_desc)
+        ),
+        SettingsPickerOption(
+            SurroundChannelTarget.CH_5_1,
+            stringResource(R.string.audio_surround_channel_5_1),
+            stringResource(R.string.audio_surround_channel_5_1_desc)
+        ),
+        SettingsPickerOption(
+            SurroundChannelTarget.CH_7_1,
+            stringResource(R.string.audio_surround_channel_7_1),
+            stringResource(R.string.audio_surround_channel_7_1_desc)
+        )
+    )
+
+    SettingsSingleChoiceDialog(
+        title = stringResource(R.string.audio_surround_channel_target),
+        subtitle = stringResource(R.string.audio_surround_channel_target_dialog_subtitle),
+        options = options,
+        selectedValue = selectedTarget,
+        onOptionSelected = onTargetSelected,
+        onDismiss = onDismiss,
+        width = 460.dp,
+        maxHeight = 420.dp
     )
 }
 

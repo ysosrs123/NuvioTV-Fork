@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Navigation style</string>
+    <string name="v2_navigation_sidebar">Floating sidebar</string>
+    <string name="v2_navigation_top">Top navigation</string>
+    <string name="v2_accent_title">Accent</string>
+    <string name="v2_accent_fixed">Selected theme colour</string>
+    <string name="v2_accent_artwork">Adaptive to artwork</string>
+    <string name="v2_glass_tint">Glass tint</string>
+    <string name="v2_tint_neutral">Neutral</string>
+</resources>
