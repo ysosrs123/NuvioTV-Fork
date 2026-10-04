@@ -1,0 +1,43 @@
+{
+  "recordedAtUtc": "2026-10-04T23:41:25.004547+00:00",
+  "milestone": "Transactional profile-scoped XMLTV guide storage and bounded gzip import; backend only",
+  "device": "UGOOS AM9PRO Android 14 API 34",
+  "deviceTests": {
+    "total": 90,
+    "core": 64,
+    "catalogueStorage": 13,
+    "guideStorage": 11,
+    "repository": 2,
+    "failures": 0,
+    "seconds": 12.627
+  },
+  "jvmTests": {
+    "total": 73,
+    "failures": 0,
+    "overlapWithDeviceCore": true
+  },
+  "finalAppKotlinCompile": "passed",
+  "fixtureApplicationId": "com.nuvio.iptv.validation",
+  "fixtureNetworkPermission": false,
+  "fixturePackagesRemoved": true,
+  "liveProviderRequests": 0,
+  "limits": [
+    "No user-facing IPTV UI yet",
+    "No production guide HTTP coordinator or persisted source/feed associations",
+    "No real Xtream HTTP adapter",
+    "No playback or capture runtime",
+    "Close/reopen only; no abrupt process-kill or power-loss test",
+    "No full-scale catalogue/EPG performance result",
+    "SQLite page limits do not bound WAL/journal or total device storage",
+    "Retention applies on imports only; no scheduled pruning or refresh"
+  ],
+  "deviceLogSha256": "d9dd6ed9f16dc531d19520583e43b1c9cfb66a3a1b93306d8cea831d66d2e507",
+  "sourceSha256": {
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/IptvGuideStoreTest.kt": "1935398a15f0a04b40831bc8cfb4c8bc2f140e95960dc33b705d70cd00fd95da",
+    "app/src/main/java/com/nuvio/tv/core/iptv/GuideInput.kt": "0bfa78bfd3b2525aa69fbc01dd139875825361a6a9e51f0157c1dc275460f644",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvGuideJson.kt": "a929b41757d9bf22d43d4283ffb550dbc85196772ec8e8a0204d4da8cb400715",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvGuideModels.kt": "cfd93c89df0efc1ede677a1646fdd9f429698c890687c802d0c18f376e03f52c",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvGuideStore.kt": "7aab190394970936d601406fb3e57c73ab7ad06a740ddb2eb1a17f5b51ecdf75",
+    "app/src/test/java/com/nuvio/tv/core/iptv/GuideInputTest.kt": "30edd4f88c68a3f05024f25f9349e0ee1bdf27bc9cdd568acbb522e2497a320e"
+  }
+}
