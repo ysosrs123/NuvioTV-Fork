@@ -4,6 +4,10 @@
     <string name="servers_section_connected">Servers</string>
     <string name="servers_section_add">Add server</string>
     <string name="servers_section_account">Nuvio account</string>
+    <string name="servers_source_details">Source details</string>
+    <string name="servers_source_details_description">Full shows the file name and icons on server sources. Clean shows only picture, sound and size.</string>
+    <string name="servers_source_details_full">Full</string>
+    <string name="servers_source_details_clean">Clean</string>
     <string name="servers_account_sync">Sync media servers to my Nuvio account</string>
     <string name="servers_account_sync_description">Off: your servers and their sign-ins stay on this device. On: the server list, including the sign-ins, is saved to your Nuvio account and shared with your other devices.</string>
     <string name="servers_account_remove">Remove my servers from my Nuvio account</string>

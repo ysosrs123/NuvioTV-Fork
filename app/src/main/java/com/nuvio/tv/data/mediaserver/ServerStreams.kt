@@ -22,7 +22,7 @@ class ServerStreams @Inject constructor(
     private val matcher: ServerMatcher
 ) {
     val revision: Int
-        get() = repository.uiState.value.revision
+        get() = repository.uiState.value.let { 31 * it.revision + if (it.fullSourceText) 1 else 0 }
 
     fun isNativeRequest(videoId: String): Boolean = ServerItemRef.isServerId(videoId)
 
@@ -72,7 +72,8 @@ class ServerStreams @Inject constructor(
         val providerName = repository.provider(connection)?.displayName ?: connection.providerId
         val logo = serverLogoUri(connection.providerId)
         val candidates = repository.call(ref.connectionId) { provider, session -> provider.candidates(session, ref.itemId) }
-        return candidates.zip(serverStreamTexts(candidates, providerName, connection.name))
+        val full = repository.uiState.value.fullSourceText
+        return candidates.zip(serverStreamTexts(candidates, providerName, connection.name, full))
             .map { (candidate, text) ->
                 Stream(
                     name = text.name,
@@ -107,7 +108,8 @@ internal data class ServerStreamText(
 internal fun serverStreamTexts(
     candidates: List<ServerCandidate>,
     providerName: String,
-    serverName: String
+    serverName: String,
+    full: Boolean = true
 ): List<ServerStreamText> {
     val names = candidates.map { candidate ->
         listOf(providerName, candidate.title).filter { it.isNotBlank() }.joinToString(" · ")
@@ -115,8 +117,32 @@ internal fun serverStreamTexts(
     val repeated = names.groupingBy { it }.eachCount().filterValues { it > 1 }.keys
     return candidates.mapIndexed { index, candidate ->
         val versionName = candidate.versionName?.takeIf { names[index] in repeated }
-        ServerStreamText(names[index], serverStreamDescription(candidate, serverName, versionName))
+        val description = if (full) {
+            serverStreamDescription(candidate, serverName, versionName)
+        } else {
+            cleanServerStreamDescription(candidate, serverName, versionName)
+        }
+        ServerStreamText(names[index], description)
     }
+}
+
+internal fun cleanServerStreamDescription(
+    candidate: ServerCandidate,
+    serverName: String,
+    versionName: String? = null
+): String? {
+    val details = listOfNotNull(
+        candidate.container?.takeIf { it.isNotBlank() },
+        candidate.bitrateBps?.let(::formatBitrate),
+        candidate.sizeBytes?.takeIf { it > 0 }?.let(::formatServerSize),
+        serverName.takeIf { it.isNotBlank() },
+        versionName?.takeIf { it.isNotBlank() }
+    ).joinToString(" • ").ifEmpty { null }
+    return listOfNotNull(
+        candidate.video?.takeIf { it.isNotBlank() },
+        candidate.audio?.takeIf { it.isNotBlank() },
+        details
+    ).joinToString("\n").ifEmpty { null }
 }
 
 internal fun serverStreamDescription(

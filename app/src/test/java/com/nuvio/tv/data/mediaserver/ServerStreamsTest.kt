@@ -111,8 +111,9 @@ class ServerStreamsTest {
         assertNull(serverLogoUri("fake", "com.nuvio.tv.test"))
     }
 
-    private fun streams(provider: FakeServerProvider): ServerStreams {
+    private fun streams(provider: FakeServerProvider, fullSourceText: Boolean = false): ServerStreams {
         val (repository, _) = fakeServerRepository(provider)
+        repository.setFullSourceText(fullSourceText)
         val metaRepository = mockk<MetaRepository> { every { getCachedMeta(any(), any()) } returns null }
         return ServerStreams(repository, ServerMatcher(repository, mockk<TmdbService>(relaxed = true), metaRepository))
     }
@@ -128,7 +129,43 @@ class ServerStreamsTest {
         assertEquals(serverLogoUri("jellyfin"), stream.addonLogo)
         assertEquals(57_508_742_418L, stream.behaviorHints?.videoSize)
         assertEquals(file, stream.behaviorHints?.filename)
+        assertEquals(
+            "HEVC • DV P7.6 (HDR10)\nTrueHD Atmos • 7.1\nMKV • 52 Mbps • 53.6 GB • Box",
+            stream.description
+        )
+    }
+
+    @Test
+    fun fullSourceTextKeepsTheFileNameAndIcons() = runBlocking {
+        val provider = FakeServerProvider(id = "jellyfin").apply {
+            itemCandidates["m1"] = listOf(candidate())
+        }
+        val stream = streams(provider, fullSourceText = true).candidates(ServerItemRef("cfake", "m1")).single()
+        assertEquals("📄 $file", stream.description!!.lines().first())
         assertEquals("💾 53.6 GB • 52 Mbps • MKV • 🔍 Box", stream.description!!.lines().last())
+    }
+
+    @Test
+    fun cleanTextLeavesOutFileNameAndIcons() {
+        assertEquals(
+            "HEVC • DV P7.6 (HDR10)\nTrueHD Atmos • 7.1\nMKV • 52 Mbps • 53.6 GB • HomeServer",
+            cleanServerStreamDescription(candidate(), "HomeServer")
+        )
+        assertEquals("HomeServer", cleanServerStreamDescription(candidate(video = null, audio = null, sizeBytes = null, bitrateBps = null, container = null), "HomeServer"))
+        assertNull(
+            cleanServerStreamDescription(
+                candidate(filename = null, video = null, audio = null, sizeBytes = null, bitrateBps = null, container = null),
+                ""
+            )
+        )
+        val texts = serverStreamTexts(
+            listOf(candidate("a", versionName = "Theatrical Cut"), candidate("b", versionName = "Redux")),
+            "Jellyfin",
+            "HomeServer",
+            full = false
+        )
+        assertEquals("MKV • 52 Mbps • 53.6 GB • HomeServer • Theatrical Cut", texts[0].description!!.lines().last())
+        assertEquals("MKV • 52 Mbps • 53.6 GB • HomeServer • Redux", texts[1].description!!.lines().last())
     }
 
     @Test

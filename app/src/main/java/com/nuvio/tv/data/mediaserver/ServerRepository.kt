@@ -37,7 +37,8 @@ data class ServersUiState(
     val connections: List<ServerConnection> = emptyList(),
     val failures: Map<String, ServerFailure> = emptyMap(),
     val revision: Int = 0,
-    val syncEnabled: Boolean = false
+    val syncEnabled: Boolean = false,
+    val fullSourceText: Boolean = false
 ) {
     val enabledConnections: List<ServerConnection>
         get() = connections.filter { it.enabled }
@@ -76,6 +77,7 @@ class ServerRepository(
     private var pendingPush = false
     private var syncedKeys: Set<String>? = null
     private var syncEnabled = false
+    private var fullSourceText = false
     private var localVersion = 0L
     private val activeAddresses = ConcurrentHashMap<String, AddressChoice>()
     private val trustLock = Any()
@@ -376,6 +378,14 @@ class ServerRepository(
         if (enabled) mutableLocalChanges.tryEmit(profileId)
     }
 
+    fun setFullSourceText(full: Boolean) {
+        ensureLoaded()
+        if (loadedProfileId == null || fullSourceText == full) return
+        fullSourceText = full
+        persist(mutableState.value.connections, synchronized(lock) { tokens })
+        mutableState.update { it.copy(fullSourceText = full) }
+    }
+
     fun syncSnapshot(profileId: Int): ServerSyncSnapshot? {
         ensureLoaded()
         if (loadedProfileId != profileId || !syncEnabled) return null
@@ -449,6 +459,7 @@ class ServerRepository(
         pendingPush = false
         syncedKeys = null
         syncEnabled = false
+        fullSourceText = false
         runCatching { persistence.clear() }.onFailure { Log.w(TAG, "Unable to clear server storage", it) }
         mutableState.value = ServersUiState(revision = mutableState.value.revision + 1)
     }
@@ -460,11 +471,13 @@ class ServerRepository(
         pendingPush = stored.pendingPush
         syncedKeys = stored.syncedKeys?.toSet()
         syncEnabled = stored.syncEnabled
+        fullSourceText = stored.fullSourceText
         loadedProfileId = profileId
         mutableState.value = ServersUiState(
             connections = stored.connections,
             revision = mutableState.value.revision + 1,
-            syncEnabled = stored.syncEnabled
+            syncEnabled = stored.syncEnabled,
+            fullSourceText = stored.fullSourceText
         )
         publishTrust()
     }
@@ -505,7 +518,7 @@ class ServerRepository(
 
     private fun persist(connections: List<ServerConnection>, currentTokens: Map<String, String>) {
         val profileId = loadedProfileId ?: return
-        val stored = StoredServers(connections, currentTokens, pendingPush, syncedKeys?.toList(), syncEnabled)
+        val stored = StoredServers(connections, currentTokens, pendingPush, syncedKeys?.toList(), syncEnabled, fullSourceText)
         runCatching {
             persistence.write(profileId, json.encodeToString(StoredServers.serializer(), stored))
         }.onFailure { Log.w(TAG, "Unable to save server connections", it) }

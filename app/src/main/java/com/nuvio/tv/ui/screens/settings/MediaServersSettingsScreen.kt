@@ -106,6 +106,17 @@ internal fun MediaServersSettingsContent(
                             modifier = if (connections.isEmpty() && provider == viewModel.providers.first()) focusModifier else Modifier
                         )
                     }
+                    item(key = "servers_display_label") { ServerSectionLabel(stringResource(R.string.settings_stream_display_section)) }
+                    item(key = "servers_source_details") {
+                        SettingsActionRow(
+                            title = stringResource(R.string.servers_source_details),
+                            subtitle = stringResource(R.string.servers_source_details_description),
+                            value = stringResource(
+                                if (uiState.fullSourceText) R.string.servers_source_details_full else R.string.servers_source_details_clean
+                            ),
+                            onClick = { viewModel.setFullSourceText(!uiState.fullSourceText) }
+                        )
+                    }
                     item(key = "servers_account_label") { ServerSectionLabel(stringResource(R.string.servers_section_account)) }
                     item(key = "servers_account_sync") {
                         SettingsToggleRow(

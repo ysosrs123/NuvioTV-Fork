@@ -162,6 +162,19 @@ class ServerRepositoryTest {
     }
 
     @Test
+    fun cleanSourceTextIsTheDefaultAndFullIsRemembered() {
+        repository.store(connection("c1", "k1"), "token-one")
+        assertFalse(repository.uiState.value.fullSourceText)
+
+        repository.setFullSourceText(true)
+        assertTrue(repository.uiState.value.fullSourceText)
+
+        val reloaded = ServerRepository(persistence, emptyList(), CoroutineScope(Dispatchers.Unconfined))
+        reloaded.ensureLoaded()
+        assertTrue(reloaded.uiState.value.fullSourceText)
+    }
+
+    @Test
     fun accountSyncIsOffByDefaultAndRememberedPerProfile() {
         repository.store(connection("c1", "k1"), "token-one")
         assertFalse(repository.uiState.value.syncEnabled)

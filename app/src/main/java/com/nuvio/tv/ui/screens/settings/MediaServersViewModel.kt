@@ -274,6 +274,8 @@ class MediaServersViewModel @Inject constructor(
 
     fun setSyncEnabled(enabled: Boolean) = repository.setSyncEnabled(enabled)
 
+    fun setFullSourceText(full: Boolean) = repository.setFullSourceText(full)
+
     fun activeAddress(connection: ServerConnection): String = repository.activeAddress(connection)
 
     fun removeFromAccount(onResult: (Boolean) -> Unit) {
