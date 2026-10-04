@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -446,6 +447,15 @@ fun HeroContentSection(
     }
 }
 
+private val PlayButtonDarkText = Color(0xFF081421)
+
+internal fun playButtonContentColor(container: Color): Color {
+    val background = container.luminance() + 0.05f
+    val onWhite = 1.05f / background
+    val onDark = background / (PlayButtonDarkText.luminance() + 0.05f)
+    return if (onDark > onWhite) PlayButtonDarkText else Color.White
+}
+
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 internal fun PlayButton(
@@ -459,6 +469,7 @@ internal fun PlayButton(
     onFocusRestored: () -> Unit = {}
 ) {
     val isV2 = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null
+    val v2PlayColor = if (isV2) com.nuvio.tv.ui.v2.appearance.v2AccentColors().first() else Color.Unspecified
     var longPressTriggered by remember { mutableStateOf(false) }
     val longPressKeyTracker = rememberLongPressKeyTracker()
 
@@ -526,9 +537,9 @@ internal fun PlayButton(
             .focusProperties { up = FocusRequester.Cancel },
         scale = if (isV2) ButtonDefaults.scale(focusedScale = 1f) else ButtonDefaults.scale(),
         colors = ButtonDefaults.colors(
-            containerColor = if (isV2) Color(0xFFF2F6FF) else NuvioTheme.colors.Secondary,
+            containerColor = if (isV2) v2PlayColor else NuvioTheme.colors.Secondary,
             focusedContainerColor = if (isV2) Color.Transparent else NuvioTheme.colors.Secondary,
-            contentColor = if (isV2) Color(0xFF081421) else NuvioTheme.colors.OnSecondary,
+            contentColor = if (isV2) playButtonContentColor(v2PlayColor) else NuvioTheme.colors.OnSecondary,
             focusedContentColor = if (isV2) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.OnSecondary
         ),
         shape = ButtonDefaults.shape(
