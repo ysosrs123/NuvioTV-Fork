@@ -161,6 +161,7 @@ object StreamAutoPlaySelector {
                         append(stream.description.orEmpty()).append(' ')
                         append(stream.getStreamUrl().orEmpty())
                         if (stream.isTorrent()) append(' ').append(stream.infoHash.orEmpty())
+                        if (stream.serverTarget != null) append(' ').append(stream.behaviorHints?.filename.orEmpty())
                     }
 
                     // Must match include pattern

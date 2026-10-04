@@ -249,6 +249,35 @@ class StreamAutoPlaySelectorTest {
     }
 
     @Test
+    fun `regex mode sees the file name of a media server source`() {
+        val server = stream(addonName = "Jellyfin · Home", name = "Jellyfin · 2160p").copy(
+            description = "HEVC • DV P7.6 (HDR10)\nTrueHD Atmos • 7.1\nMKV • 52 Mbps • 53.6 GB • Home",
+            behaviorHints = StreamBehaviorHints(
+                notWebReady = null,
+                bingeGroup = null,
+                countryWhitelist = null,
+                proxyHeaders = null,
+                filename = "Film 2160p UHD BluRay REMUX TrueHD.mkv"
+            ),
+            serverTarget = ServerPlaybackTarget(ServerItemRef("c1", "m1"), "ms1")
+        )
+        fun pick(pattern: String) = StreamAutoPlaySelector.selectAutoPlayStream(
+            streams = listOf(server),
+            mode = StreamAutoPlayMode.REGEX_MATCH,
+            regexPattern = pattern,
+            source = StreamAutoPlaySource.ALL_SOURCES,
+            installedAddonNames = setOf("Jellyfin · Home"),
+            selectedAddons = emptySet(),
+            selectedPlugins = emptySet(),
+            preferredBingeGroup = null,
+            preferBingeGroupInSelection = false
+        )
+
+        assertEquals(server, pick("BluRay"))
+        assertNull(pick("WEB-DL"))
+    }
+
+    @Test
     fun `blank preferredBingeGroup behaves as disabled`() {
         val first = stream(
             addonName = "AddonA",
