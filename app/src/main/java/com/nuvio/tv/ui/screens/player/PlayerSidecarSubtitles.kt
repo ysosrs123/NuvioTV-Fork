@@ -261,7 +261,8 @@ internal fun PlayerRuntimeController.renderSidecarCuesAtCurrentPosition() {
     val stripSdh = currentPlayerSettingsForReport.subtitleStyle.stripSdh
     // Sign before sanitising, filtering and merging to skip that work while cues are
     // unchanged. stripSdh is included because it changes what filtering removes.
-    val signature = activeCueSignature(active, stripSdh)
+    val signature = activeCueSignature(active, stripSdh) * 31 + _uiState.value.subtitleStyle.hashCode() +
+        (if (_uiState.value.dimHdrOverlays && _uiState.value.isHdrVideo) 1L else 0L)
     if (signature == lastSidecarCueSignature) return
     lastSidecarCueSignature = signature
     val sanitized = active.map { SubtitleMojibakeSanitizer.sanitizeCue(it) }
@@ -275,7 +276,7 @@ internal fun PlayerRuntimeController.renderSidecarCuesAtCurrentPosition() {
             activeSidecarGeneration == currentGeneration &&
             view.getTag(R.id.player_view_sidecar_generation_tag) == currentKey
         ) {
-            view.setCues(merged)
+            view.setCues(merged.map { presentSubtitleCue(it) })
         }
     }
 }

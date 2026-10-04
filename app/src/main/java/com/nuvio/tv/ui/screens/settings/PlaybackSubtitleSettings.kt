@@ -1,6 +1,10 @@
 package com.nuvio.tv.ui.screens.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
@@ -10,6 +14,7 @@ import com.nuvio.tv.data.local.AVAILABLE_SUBTITLE_LANGUAGES
 import com.nuvio.tv.data.local.LibassRenderType
 import com.nuvio.tv.data.local.PlayerPreference
 import com.nuvio.tv.data.local.PlayerSettings
+import com.nuvio.tv.data.local.SubtitleEdgeStyle
 import com.nuvio.tv.data.local.SubtitleLanguageOption
 import com.nuvio.tv.data.local.SubtitleStyleSettings
 import com.nuvio.tv.data.local.displayName
@@ -85,6 +90,13 @@ internal fun PlaybackSubtitlesSection(
         enabled = enabled
     )
     SettingsToggleRow(
+        title = stringResource(R.string.sub_addon_subtitles),
+        subtitle = stringResource(R.string.sub_addon_subtitles_desc),
+        checked = settings.addonSubtitlesEnabled,
+        onToggle = { onUpdate { setAddonSubtitlesEnabled(!settings.addonSubtitlesEnabled) } },
+        enabled = enabled
+    )
+    SettingsToggleRow(
         title = stringResource(R.string.sub_strip_sdh),
         subtitle = stringResource(R.string.sub_strip_sdh_desc),
         checked = style.stripSdh,
@@ -93,6 +105,17 @@ internal fun PlaybackSubtitlesSection(
     )
 
     SettingsSectionLabel(text = stringResource(R.string.sub_style_label))
+    var showFontPicker by remember { mutableStateOf(false) }
+    SettingsActionRow(
+        title = stringResource(R.string.subtitle_font_family),
+        subtitle = null,
+        value = subtitleFontName(style.font),
+        enabled = enabled,
+        onClick = { showFontPicker = true }
+    )
+    if (showFontPicker && enabled) {
+        SubtitleFontDialog(style.font, { font -> onUpdate { setSubtitleFont(font) } }) { showFontPicker = false }
+    }
     SliderSettingsItem(
         title = stringResource(R.string.sub_size),
         value = style.size,
@@ -133,14 +156,20 @@ internal fun PlaybackSubtitlesSection(
         onClick = { onOpenDialog(PlaybackDialog.SUBTITLE_BACKGROUND_COLOR) },
         enabled = enabled
     )
-    SettingsToggleRow(
-        title = stringResource(R.string.sub_outline),
-        subtitle = stringResource(R.string.sub_outline_sub),
-        checked = style.outlineEnabled,
-        onToggle = { onUpdate { setSubtitleOutlineEnabled(!style.outlineEnabled) } },
-        enabled = enabled
+    var showEdgePicker by remember { mutableStateOf(false) }
+    SettingsActionRow(
+        title = stringResource(R.string.subtitle_edge_style),
+        subtitle = null,
+        value = subtitleEdgeName(style.effectiveEdgeStyle),
+        enabled = enabled,
+        onClick = { showEdgePicker = true }
     )
-    if (style.outlineEnabled) {
+    if (showEdgePicker && enabled) {
+        SubtitleEdgeDialog(style.effectiveEdgeStyle, { edge -> onUpdate { setSubtitleEdgeStyle(edge) } }) {
+            showEdgePicker = false
+        }
+    }
+    if (style.effectiveEdgeStyle == SubtitleEdgeStyle.OUTLINE) {
         ColorSettingsItem(
             title = stringResource(R.string.sub_outline_color),
             currentColor = Color(style.outlineColor),

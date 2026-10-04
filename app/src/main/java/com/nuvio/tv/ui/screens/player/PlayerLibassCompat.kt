@@ -1,6 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
 import android.content.Context
+import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.media3.common.Format
 import androidx.media3.common.MimeTypes
@@ -11,9 +12,11 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.RenderersFactory
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.extractor.DefaultExtractorsFactory
+import androidx.media3.extractor.Extractor
 import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.mkv.MatroskaExtractor as StockMatroskaExtractor
 import androidx.media3.extractor.text.SubtitleParser
+import com.nuvio.tv.core.player.HdrColorSignalingExtractor
 import com.nuvio.tv.core.player.dvmkv.MatroskaExtractor as DvMatroskaExtractor
 import io.github.peerless2012.ass.media.AssHandler
 import io.github.peerless2012.ass.media.kt.withAssSupport
@@ -31,13 +34,20 @@ internal fun ExoPlayer.Builder.buildWithAssSupportCompat(
     playerMediaSourceFactory: PlayerMediaSourceFactory? = null,
     dataSourceFactory: DataSource.Factory = PlayerPlaybackNetworking.createDataSourceFactory(context),
     extractorsFactory: ExtractorsFactory = DefaultExtractorsFactory(),
-    renderersFactory: RenderersFactory = DefaultRenderersFactory(context)
+    renderersFactory: RenderersFactory = DefaultRenderersFactory(context),
+    autoSyncSourceKey: String? = null
 ): ExoPlayer {
     val assHandler = AssHandler(renderType)
     val assSubtitleParserFactory = CompatAssSubtitleParserFactory(assHandler)
-    val assExtractorsFactory = extractorsFactory.withAssMkvSupportCompat(
+    // AutoSync and the tap wrap after the Matroska swap, which matches extractors by class.
+    val swappedExtractorsFactory = extractorsFactory.withAssMkvSupportCompat(
         subtitleParserFactory = assSubtitleParserFactory,
         assHandler = assHandler
+    )
+    val assExtractorsFactory = com.nuvio.tv.core.player.thumbnail.PlaybackTap.wrap(
+        autoSyncSourceKey?.let {
+            com.nuvio.tv.ui.screens.player.autosync.AutoSyncExtractorsFactory(swappedExtractorsFactory, it)
+        } ?: swappedExtractorsFactory
     )
     playerMediaSourceFactory?.configureSubtitleParsing(
         extractorsFactory = assExtractorsFactory,
@@ -93,30 +103,29 @@ private class CompatAssSubtitleParserFactory(
 }
 
 @OptIn(UnstableApi::class)
-private fun ExtractorsFactory.withAssMkvSupportCompat(
+internal fun ExtractorsFactory.withAssMkvSupportCompat(
     subtitleParserFactory: SubtitleParser.Factory,
     assHandler: AssHandler
 ): ExtractorsFactory {
     val delegate = this
-    return ExtractorsFactory {
-        val extractors = delegate.createExtractors()
-        extractors.forEachIndexed { index, extractor ->
-            val underlying = extractor.getUnderlyingImplementation()
-            // Stock MatroskaExtractor: replace with ASS-aware variant for libass support.
-            if (underlying is StockMatroskaExtractor) {
-                extractors[index] = NuvioAssMatroskaExtractor(subtitleParserFactory, assHandler)
-            }
-            // The DV7 factory swaps in a vendored DvMatroskaExtractor for DV conversion.
-            // Preserve its Dolby Vision transformer while enabling libass and zlib subtitle
-            // decompression from the same vendored Matroska extractor base class.
-            if (underlying is DvMatroskaExtractor) {
-                extractors[index] = NuvioAssMatroskaExtractor(
-                    subtitleParserFactory = subtitleParserFactory,
-                    assHandler = assHandler,
-                    dolbyVisionSampleTransformer = underlying.dolbyVisionSampleTransformer
-                )
-            }
-        }
-        extractors
+    fun replace(extractor: Extractor): Extractor = when (extractor) {
+        is HdrColorSignalingExtractor -> HdrColorSignalingExtractor(replace(extractor.delegate))
+        is DvMatroskaExtractor -> NuvioAssMatroskaExtractor(
+            subtitleParserFactory = subtitleParserFactory,
+            assHandler = assHandler,
+            dolbyVisionSampleTransformer = extractor.dolbyVisionSampleTransformer
+        )
+        is StockMatroskaExtractor -> NuvioAssMatroskaExtractor(subtitleParserFactory, assHandler)
+        else -> extractor
+    }
+    // Retain the HDR wrapper and the vendored extractor's DV transformer/DTS detection.
+    return object : ExtractorsFactory {
+        override fun createExtractors(): Array<Extractor> =
+            delegate.createExtractors().map(::replace).toTypedArray()
+
+        override fun createExtractors(
+            uri: Uri,
+            responseHeaders: Map<String, List<String>>
+        ): Array<Extractor> = delegate.createExtractors(uri, responseHeaders).map(::replace).toTypedArray()
     }
 }
