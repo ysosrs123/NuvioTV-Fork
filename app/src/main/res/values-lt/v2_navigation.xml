@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Naršymo stilius</string>
+    <string name="v2_navigation_sidebar">Slankioji šoninė juosta</string>
+    <string name="v2_navigation_top">Viršutinis naršymas</string>
+    <string name="v2_accent_title">Akcento spalva</string>
+    <string name="v2_accent_fixed">Pasirinktos temos spalva</string>
+    <string name="v2_accent_artwork">Derinti prie vaizdų</string>
+    <string name="v2_glass_tint">Stiklo atspalvis</string>
+    <string name="v2_tint_neutral">Neutralus</string>
+</resources>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Oynatıcı kontrolleri</string>
+    <string name="v2_player_deck">Kontrol paneli</string>
+    <string name="v2_player_invisible">Görünmez</string>
+    <string name="v2_settings_presentation">Ayarların görünümü</string>
+    <string name="v2_settings_minimal">Minimal</string>
+    <string name="v2_settings_glass">Cam</string>
+</resources>

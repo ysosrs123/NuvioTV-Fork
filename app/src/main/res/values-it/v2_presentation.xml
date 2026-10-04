@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Controlli del lettore</string>
+    <string name="v2_player_deck">Pannello di controllo</string>
+    <string name="v2_player_invisible">Invisibile</string>
+    <string name="v2_settings_presentation">Aspetto delle impostazioni</string>
+    <string name="v2_settings_minimal">Minimale</string>
+    <string name="v2_settings_glass">Vetro</string>
+</resources>

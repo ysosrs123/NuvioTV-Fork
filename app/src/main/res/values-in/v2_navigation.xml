@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Gaya navigasi</string>
+    <string name="v2_navigation_sidebar">Bilah samping mengambang</string>
+    <string name="v2_navigation_top">Navigasi atas</string>
+    <string name="v2_accent_title">Warna aksen</string>
+    <string name="v2_accent_fixed">Warna tema terpilih</string>
+    <string name="v2_accent_artwork">Sesuaikan dengan gambar</string>
+    <string name="v2_glass_tint">Warna kaca</string>
+    <string name="v2_tint_neutral">Netral</string>
+</resources>

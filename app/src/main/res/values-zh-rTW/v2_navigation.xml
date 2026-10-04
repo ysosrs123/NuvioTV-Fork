@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">導覽樣式</string>
+    <string name="v2_navigation_sidebar">浮動側邊欄</string>
+    <string name="v2_navigation_top">頂部導覽</string>
+    <string name="v2_accent_title">強調色</string>
+    <string name="v2_accent_fixed">所選佈景主題色彩</string>
+    <string name="v2_accent_artwork">隨封面自動調整</string>
+    <string name="v2_glass_tint">玻璃色調</string>
+    <string name="v2_tint_neutral">中性</string>
+</resources>

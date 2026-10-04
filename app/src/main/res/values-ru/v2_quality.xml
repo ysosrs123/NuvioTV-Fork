@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Качество оформления</string>
+    <string name="v2_quality_subtitle">Баланс визуальных эффектов и плавной навигации.</string>
+    <string name="v2_quality_performance">Производительность</string>
+    <string name="v2_quality_enhanced">Улучшенное</string>
+    <string name="v2_quality_maximum">Максимальное</string>
+</resources>

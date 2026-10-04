@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">Γυαλί</string>
+    <string name="v2_control_speed">Ταχύτητα</string>
+    <string name="v2_control_external">Εξωτερική συσκευή αναπαραγωγής</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Estilo de navegación</string>
+    <string name="v2_navigation_sidebar">Barra lateral flotante</string>
+    <string name="v2_navigation_top">Navegación superior</string>
+    <string name="v2_accent_title">Color de acento</string>
+    <string name="v2_accent_fixed">Color del tema seleccionado</string>
+    <string name="v2_accent_artwork">Adaptar a las imágenes</string>
+    <string name="v2_glass_tint">Tinte del cristal</string>
+    <string name="v2_tint_neutral">Neutro</string>
+</resources>

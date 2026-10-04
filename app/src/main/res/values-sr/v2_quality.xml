@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="v2_quality_title">Визуелни квалитет</string>
+    <string name="v2_quality_subtitle">Уравнотежите визуелне ефекте и глатку навигацију.</string>
+    <string name="v2_quality_performance">Перформансе</string>
+    <string name="v2_quality_enhanced">Побољшан</string>
+    <string name="v2_quality_maximum">Максималан</string>
+</resources>

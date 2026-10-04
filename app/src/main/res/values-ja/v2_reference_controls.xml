@@ -1,0 +1,5 @@
+<resources>
+    <string name="v2_control_info">情報</string>
+    <string name="v2_control_stats">統計</string>
+    <string name="v2_control_more">その他</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">Verre</string>
+    <string name="v2_control_speed">Vitesse</string>
+    <string name="v2_control_external">Lecteur externe</string>
+</resources>

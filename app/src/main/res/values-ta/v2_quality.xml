@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">காட்சித் தரம்</string>
+    <string name="v2_quality_subtitle">காட்சி விளைவுகளையும் சீரான வழிசெலுத்தலையும் சமநிலைப்படுத்துங்கள்.</string>
+    <string name="v2_quality_performance">செயல்திறன்</string>
+    <string name="v2_quality_enhanced">மேம்படுத்தப்பட்டது</string>
+    <string name="v2_quality_maximum">அதிகபட்சம்</string>
+</resources>

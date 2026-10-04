@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Player-Steuerung</string>
+    <string name="v2_player_deck">Steuerpult</string>
+    <string name="v2_player_invisible">Unsichtbar</string>
+    <string name="v2_settings_presentation">Darstellung der Einstellungen</string>
+    <string name="v2_settings_minimal">Minimal</string>
+    <string name="v2_settings_glass">Glas</string>
+</resources>

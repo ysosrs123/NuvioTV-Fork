@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Animation d’introduction</string>
+    <string name="v2_intro_animation_subtitle">Afficher l’introduction pendant le chargement de l’accueil et des affiches en arrière-plan</string>
+</resources>

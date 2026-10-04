@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="v2_player_chrome">播放器控件</string>
+    <string name="v2_player_deck">控制台</string>
+    <string name="v2_player_invisible">隐形</string>
+    <string name="v2_settings_presentation">设置外观</string>
+    <string name="v2_settings_minimal">极简</string>
+    <string name="v2_settings_glass">玻璃</string>
+</resources>

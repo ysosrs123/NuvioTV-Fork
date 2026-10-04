@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">नेविगेशन शैली</string>
+    <string name="v2_navigation_sidebar">फ़्लोटिंग साइडबार</string>
+    <string name="v2_navigation_top">शीर्ष नेविगेशन</string>
+    <string name="v2_accent_title">एक्सेंट रंग</string>
+    <string name="v2_accent_fixed">चुनी गई थीम का रंग</string>
+    <string name="v2_accent_artwork">कलाकृति के अनुसार</string>
+    <string name="v2_glass_tint">ग्लास का रंग</string>
+    <string name="v2_tint_neutral">तटस्थ</string>
+</resources>

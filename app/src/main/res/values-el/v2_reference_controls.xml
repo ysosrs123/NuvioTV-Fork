@@ -1,0 +1,5 @@
+<resources>
+    <string name="v2_control_info">Πληροφορίες</string>
+    <string name="v2_control_stats">Στατιστικά</string>
+    <string name="v2_control_more">Περισσότερα</string>
+</resources>

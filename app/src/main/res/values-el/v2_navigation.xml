@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Στυλ πλοήγησης</string>
+    <string name="v2_navigation_sidebar">Αιωρούμενη πλαϊνή γραμμή</string>
+    <string name="v2_navigation_top">Επάνω πλοήγηση</string>
+    <string name="v2_accent_title">Χρώμα έμφασης</string>
+    <string name="v2_accent_fixed">Χρώμα επιλεγμένου θέματος</string>
+    <string name="v2_accent_artwork">Προσαρμογή στις εικόνες</string>
+    <string name="v2_glass_tint">Απόχρωση γυαλιού</string>
+    <string name="v2_tint_neutral">Ουδέτερη</string>
+</resources>

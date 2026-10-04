@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Controles del reproductor</string>
+    <string name="v2_player_deck">Panel de control</string>
+    <string name="v2_player_invisible">Invisible</string>
+    <string name="v2_settings_presentation">Presentación de ajustes</string>
+    <string name="v2_settings_minimal">Minimalista</string>
+    <string name="v2_settings_glass">Cristal</string>
+</resources>

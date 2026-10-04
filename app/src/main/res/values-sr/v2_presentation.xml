@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="v2_player_chrome">Контроле плејера</string>
+    <string name="v2_player_deck">Контролна табла</string>
+    <string name="v2_player_invisible">Невидљиво</string>
+    <string name="v2_settings_presentation">Изглед подешавања</string>
+    <string name="v2_settings_minimal">Минимално</string>
+    <string name="v2_settings_glass">Стакло</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">வழிசெலுத்தல் பாணி</string>
+    <string name="v2_navigation_sidebar">மிதக்கும் பக்கப்பட்டி</string>
+    <string name="v2_navigation_top">மேல் வழிசெலுத்தல்</string>
+    <string name="v2_accent_title">சிறப்பித்தல் நிறம்</string>
+    <string name="v2_accent_fixed">தேர்ந்தெடுத்த தீமின் நிறம்</string>
+    <string name="v2_accent_artwork">படத்திற்கேற்ப மாற்று</string>
+    <string name="v2_glass_tint">கண்ணாடி நிறம்</string>
+    <string name="v2_tint_neutral">நடுநிலை</string>
+</resources>

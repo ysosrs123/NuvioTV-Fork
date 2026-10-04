@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">开场动画</string>
+    <string name="v2_intro_animation_subtitle">在后台加载主页和海报时显示开场动画</string>
+</resources>

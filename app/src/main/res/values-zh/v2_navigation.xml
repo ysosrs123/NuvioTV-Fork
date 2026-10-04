@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="v2_navigation_title">导航样式</string>
+    <string name="v2_navigation_sidebar">悬浮侧边栏</string>
+    <string name="v2_navigation_top">顶部导航</string>
+    <string name="v2_accent_title">强调色</string>
+    <string name="v2_accent_fixed">所选主题颜色</string>
+    <string name="v2_accent_artwork">跟随封面自适应</string>
+    <string name="v2_glass_tint">玻璃色调</string>
+    <string name="v2_tint_neutral">中性</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Vizuelni kvalitet</string>
+    <string name="v2_quality_subtitle">Uravnotežite vizuelne efekte i glatku navigaciju.</string>
+    <string name="v2_quality_performance">Performanse</string>
+    <string name="v2_quality_enhanced">Poboljšan</string>
+    <string name="v2_quality_maximum">Maksimalan</string>
+</resources>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">プレーヤー操作</string>
+    <string name="v2_player_deck">コントロールデッキ</string>
+    <string name="v2_player_invisible">インビジブル</string>
+    <string name="v2_settings_presentation">設定画面の表示</string>
+    <string name="v2_settings_minimal">ミニマル</string>
+    <string name="v2_settings_glass">ガラス</string>
+</resources>

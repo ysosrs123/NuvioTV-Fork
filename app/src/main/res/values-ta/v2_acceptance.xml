@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">கண்ணாடி</string>
+    <string name="v2_control_speed">வேகம்</string>
+    <string name="v2_control_external">வெளிப்புற இயக்கி</string>
+</resources>

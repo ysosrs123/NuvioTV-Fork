@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Trải nghiệm giao diện</string>
+    <string name="v2_experience_subtitle">Chọn giao diện cho thiết bị này</string>
+    <string name="v2_visual_style_title">Phong cách hiển thị</string>
+    <string name="v2_scale_resolved">Tỷ lệ đã áp dụng: %1$d%%</string>
+    <string name="v2_scale_automatic">Tự động</string>
+    <string name="v2_scale_manual">Thủ công</string>
+    <string name="v2_scale_fine_tune">Tinh chỉnh tỷ lệ</string>
+</resources>

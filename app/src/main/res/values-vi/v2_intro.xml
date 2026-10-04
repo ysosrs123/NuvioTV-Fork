@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Hoạt ảnh mở đầu</string>
+    <string name="v2_intro_animation_subtitle">Hiển thị phần mở đầu trong khi trang chủ và áp phích tải ở chế độ nền</string>
+</resources>

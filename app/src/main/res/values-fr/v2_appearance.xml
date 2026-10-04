@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Interface</string>
+    <string name="v2_experience_subtitle">Choisissez l’interface de cet appareil</string>
+    <string name="v2_visual_style_title">Style visuel</string>
+    <string name="v2_scale_resolved">Échelle appliquée : %1$d%%</string>
+    <string name="v2_scale_automatic">Automatique</string>
+    <string name="v2_scale_manual">Manuelle</string>
+    <string name="v2_scale_fine_tune">Réglage précis de l’échelle</string>
+</resources>

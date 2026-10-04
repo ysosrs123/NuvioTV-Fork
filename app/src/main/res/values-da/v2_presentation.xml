@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Afspillerkontroller</string>
+    <string name="v2_player_deck">Kontrolpanel</string>
+    <string name="v2_player_invisible">Usynlig</string>
+    <string name="v2_settings_presentation">Indstillingernes udseende</string>
+    <string name="v2_settings_minimal">Minimal</string>
+    <string name="v2_settings_glass">Glas</string>
+</resources>

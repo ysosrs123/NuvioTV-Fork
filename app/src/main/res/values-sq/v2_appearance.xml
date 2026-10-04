@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Përvoja e ndërfaqes</string>
+    <string name="v2_experience_subtitle">Zgjidhni ndërfaqen për këtë pajisje</string>
+    <string name="v2_visual_style_title">Stili vizual</string>
+    <string name="v2_scale_resolved">Shkalla e zbatuar: %1$d%%</string>
+    <string name="v2_scale_automatic">Automatike</string>
+    <string name="v2_scale_manual">Manuale</string>
+    <string name="v2_scale_fine_tune">Rregullim i imët i shkallës</string>
+</resources>

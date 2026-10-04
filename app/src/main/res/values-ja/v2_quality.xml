@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">表示品質</string>
+    <string name="v2_quality_subtitle">視覚効果とスムーズな操作のバランスを調整します。</string>
+    <string name="v2_quality_performance">パフォーマンス</string>
+    <string name="v2_quality_enhanced">拡張</string>
+    <string name="v2_quality_maximum">最高</string>
+</resources>

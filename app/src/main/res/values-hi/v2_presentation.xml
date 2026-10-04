@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">प्लेयर नियंत्रण</string>
+    <string name="v2_player_deck">नियंत्रण पैनल</string>
+    <string name="v2_player_invisible">अदृश्य</string>
+    <string name="v2_settings_presentation">सेटिंग का रूप</string>
+    <string name="v2_settings_minimal">न्यूनतम</string>
+    <string name="v2_settings_glass">ग्लास</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Izgled interfejsa</string>
+    <string name="v2_experience_subtitle">Odaberite interfejs za ovaj uređaj</string>
+    <string name="v2_visual_style_title">Vizuelni stil</string>
+    <string name="v2_scale_resolved">Primijenjena veličina: %1$d%%</string>
+    <string name="v2_scale_automatic">Automatski</string>
+    <string name="v2_scale_manual">Ručno</string>
+    <string name="v2_scale_fine_tune">Fino podešavanje veličine</string>
+</resources>

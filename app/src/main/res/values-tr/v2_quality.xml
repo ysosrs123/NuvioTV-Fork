@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Görsel kalite</string>
+    <string name="v2_quality_subtitle">Görsel efektleri ve akıcı gezinmeyi dengeleyin.</string>
+    <string name="v2_quality_performance">Performans</string>
+    <string name="v2_quality_enhanced">Geliştirilmiş</string>
+    <string name="v2_quality_maximum">Maksimum</string>
+</resources>

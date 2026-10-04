@@ -1,0 +1,5 @@
+<resources>
+    <string name="v2_control_info">Thông tin</string>
+    <string name="v2_control_stats">Thống kê</string>
+    <string name="v2_control_more">Thêm</string>
+</resources>

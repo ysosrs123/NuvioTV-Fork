@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Kontrollet e luajtësit</string>
+    <string name="v2_player_deck">Panel kontrolli</string>
+    <string name="v2_player_invisible">I padukshëm</string>
+    <string name="v2_settings_presentation">Pamja e cilësimeve</string>
+    <string name="v2_settings_minimal">Minimal</string>
+    <string name="v2_settings_glass">Xham</string>
+</resources>

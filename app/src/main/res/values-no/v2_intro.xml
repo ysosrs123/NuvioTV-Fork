@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Introanimasjon</string>
+    <string name="v2_intro_animation_subtitle">Vis introen mens startsiden og plakatene lastes inn i bakgrunnen</string>
+</resources>

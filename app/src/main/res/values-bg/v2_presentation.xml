@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Контроли на плейъра</string>
+    <string name="v2_player_deck">Контролен панел</string>
+    <string name="v2_player_invisible">Невидим</string>
+    <string name="v2_settings_presentation">Изглед на настройките</string>
+    <string name="v2_settings_minimal">Минимален</string>
+    <string name="v2_settings_glass">Стъкло</string>
+</resources>

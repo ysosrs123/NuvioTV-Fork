@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Χειριστήρια αναπαραγωγής</string>
+    <string name="v2_player_deck">Πίνακας ελέγχου</string>
+    <string name="v2_player_invisible">Αόρατο</string>
+    <string name="v2_settings_presentation">Εμφάνιση ρυθμίσεων</string>
+    <string name="v2_settings_minimal">Μινιμαλιστική</string>
+    <string name="v2_settings_glass">Γυαλί</string>
+</resources>

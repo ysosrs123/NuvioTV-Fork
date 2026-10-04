@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Videz vmesnika</string>
+    <string name="v2_experience_subtitle">Izberite vmesnik za to napravo</string>
+    <string name="v2_visual_style_title">Vizualni slog</string>
+    <string name="v2_scale_resolved">Uporabljeno merilo: %1$d%%</string>
+    <string name="v2_scale_automatic">Samodejno</string>
+    <string name="v2_scale_manual">Ročno</string>
+    <string name="v2_scale_fine_tune">Natančna nastavitev merila</string>
+</resources>

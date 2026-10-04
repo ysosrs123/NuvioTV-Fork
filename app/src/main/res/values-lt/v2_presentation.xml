@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Grotuvo valdikliai</string>
+    <string name="v2_player_deck">Valdymo skydas</string>
+    <string name="v2_player_invisible">Nematomas</string>
+    <string name="v2_settings_presentation">Nustatymų išvaizda</string>
+    <string name="v2_settings_minimal">Minimalus</string>
+    <string name="v2_settings_glass">Stiklas</string>
+</resources>

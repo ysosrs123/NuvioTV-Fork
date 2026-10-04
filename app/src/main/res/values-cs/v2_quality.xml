@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Vizuální kvalita</string>
+    <string name="v2_quality_subtitle">Vyvažte vizuální efekty a plynulé ovládání.</string>
+    <string name="v2_quality_performance">Výkon</string>
+    <string name="v2_quality_enhanced">Vylepšená</string>
+    <string name="v2_quality_maximum">Maximální</string>
+</resources>

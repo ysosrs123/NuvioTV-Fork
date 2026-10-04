@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">Kính</string>
+    <string name="v2_control_speed">Tốc độ</string>
+    <string name="v2_control_external">Trình phát ngoài</string>
+</resources>

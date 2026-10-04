@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Commandes du lecteur</string>
+    <string name="v2_player_deck">Panneau de commande</string>
+    <string name="v2_player_invisible">Invisible</string>
+    <string name="v2_settings_presentation">Présentation des paramètres</string>
+    <string name="v2_settings_minimal">Minimaliste</string>
+    <string name="v2_settings_glass">Verre</string>
+</resources>

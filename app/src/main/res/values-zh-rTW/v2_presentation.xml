@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">播放器控制項</string>
+    <string name="v2_player_deck">控制台</string>
+    <string name="v2_player_invisible">隱形</string>
+    <string name="v2_settings_presentation">設定外觀</string>
+    <string name="v2_settings_minimal">極簡</string>
+    <string name="v2_settings_glass">玻璃</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Kiểu điều hướng</string>
+    <string name="v2_navigation_sidebar">Thanh bên nổi</string>
+    <string name="v2_navigation_top">Điều hướng trên cùng</string>
+    <string name="v2_accent_title">Màu nhấn</string>
+    <string name="v2_accent_fixed">Màu chủ đề đã chọn</string>
+    <string name="v2_accent_artwork">Thích ứng với hình ảnh</string>
+    <string name="v2_glass_tint">Màu kính</string>
+    <string name="v2_tint_neutral">Trung tính</string>
+</resources>

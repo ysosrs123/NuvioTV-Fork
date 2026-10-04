@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Giriş animasyonu</string>
+    <string name="v2_intro_animation_subtitle">Ana sayfa ve posterler arka planda yüklenirken giriş animasyonunu göster</string>
+</resources>

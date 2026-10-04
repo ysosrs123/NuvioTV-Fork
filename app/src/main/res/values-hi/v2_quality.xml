@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">दृश्य गुणवत्ता</string>
+    <string name="v2_quality_subtitle">दृश्य प्रभावों और सहज नेविगेशन में संतुलन रखें।</string>
+    <string name="v2_quality_performance">प्रदर्शन</string>
+    <string name="v2_quality_enhanced">बेहतर</string>
+    <string name="v2_quality_maximum">अधिकतम</string>
+</resources>

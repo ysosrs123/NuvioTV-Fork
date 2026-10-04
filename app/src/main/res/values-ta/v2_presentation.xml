@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">பிளேயர் கட்டுப்பாடுகள்</string>
+    <string name="v2_player_deck">கட்டுப்பாட்டுப் பலகம்</string>
+    <string name="v2_player_invisible">மறைவானது</string>
+    <string name="v2_settings_presentation">அமைப்புகளின் தோற்றம்</string>
+    <string name="v2_settings_minimal">எளிமையானது</string>
+    <string name="v2_settings_glass">கண்ணாடி</string>
+</resources>

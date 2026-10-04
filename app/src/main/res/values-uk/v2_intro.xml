@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Вступна анімація</string>
+    <string name="v2_intro_animation_subtitle">Показувати вступ, поки головна сторінка та постери завантажуються у фоні</string>
+</resources>

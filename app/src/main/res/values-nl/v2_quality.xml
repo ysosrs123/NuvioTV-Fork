@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Visuele kwaliteit</string>
+    <string name="v2_quality_subtitle">Breng visuele effecten en soepele navigatie in balans.</string>
+    <string name="v2_quality_performance">Prestaties</string>
+    <string name="v2_quality_enhanced">Verbeterd</string>
+    <string name="v2_quality_maximum">Maximaal</string>
+</resources>

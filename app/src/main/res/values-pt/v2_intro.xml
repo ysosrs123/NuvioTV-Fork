@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Animação de introdução</string>
+    <string name="v2_intro_animation_subtitle">Mostrar a introdução enquanto a página inicial e os cartazes carregam em segundo plano</string>
+</resources>

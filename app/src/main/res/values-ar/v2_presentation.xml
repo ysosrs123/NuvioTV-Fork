@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">عناصر تحكم المشغل</string>
+    <string name="v2_player_deck">لوحة التحكم</string>
+    <string name="v2_player_invisible">غير مرئي</string>
+    <string name="v2_settings_presentation">مظهر الإعدادات</string>
+    <string name="v2_settings_minimal">بسيط</string>
+    <string name="v2_settings_glass">زجاجي</string>
+</resources>

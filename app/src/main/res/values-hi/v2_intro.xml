@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">इंट्रो ऐनिमेशन</string>
+    <string name="v2_intro_animation_subtitle">होम और पोस्टर बैकग्राउंड में लोड होने के दौरान इंट्रो दिखाएँ</string>
+</resources>

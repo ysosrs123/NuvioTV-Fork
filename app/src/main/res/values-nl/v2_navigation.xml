@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Navigatiestijl</string>
+    <string name="v2_navigation_sidebar">Zwevende zijbalk</string>
+    <string name="v2_navigation_top">Bovennavigatie</string>
+    <string name="v2_accent_title">Accentkleur</string>
+    <string name="v2_accent_fixed">Geselecteerde themakleur</string>
+    <string name="v2_accent_artwork">Aanpassen aan afbeeldingen</string>
+    <string name="v2_glass_tint">Glaskleur</string>
+    <string name="v2_tint_neutral">Neutraal</string>
+</resources>

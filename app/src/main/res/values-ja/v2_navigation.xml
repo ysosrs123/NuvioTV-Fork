@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">ナビゲーションスタイル</string>
+    <string name="v2_navigation_sidebar">フローティングサイドバー</string>
+    <string name="v2_navigation_top">上部ナビゲーション</string>
+    <string name="v2_accent_title">アクセント</string>
+    <string name="v2_accent_fixed">選択したテーマの色</string>
+    <string name="v2_accent_artwork">アートワークに合わせる</string>
+    <string name="v2_glass_tint">ガラスの色合い</string>
+    <string name="v2_tint_neutral">ニュートラル</string>
+</resources>

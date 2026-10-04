@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Navigationsstil</string>
+    <string name="v2_navigation_sidebar">Schwebende Seitenleiste</string>
+    <string name="v2_navigation_top">Obere Navigation</string>
+    <string name="v2_accent_title">Akzentfarbe</string>
+    <string name="v2_accent_fixed">Gewählte Designfarbe</string>
+    <string name="v2_accent_artwork">An Bilder anpassen</string>
+    <string name="v2_glass_tint">Glastönung</string>
+    <string name="v2_tint_neutral">Neutral</string>
+</resources>

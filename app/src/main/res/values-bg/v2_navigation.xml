@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Стил на навигация</string>
+    <string name="v2_navigation_sidebar">Плаваща странична лента</string>
+    <string name="v2_navigation_top">Горна навигация</string>
+    <string name="v2_accent_title">Акцент</string>
+    <string name="v2_accent_fixed">Цвят на избраната тема</string>
+    <string name="v2_accent_artwork">Адаптиране към изображенията</string>
+    <string name="v2_glass_tint">Оттенък на стъклото</string>
+    <string name="v2_tint_neutral">Неутрален</string>
+</resources>

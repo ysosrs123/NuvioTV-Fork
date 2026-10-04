@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Οπτική ποιότητα</string>
+    <string name="v2_quality_subtitle">Ισορροπία οπτικών εφέ και ομαλής πλοήγησης.</string>
+    <string name="v2_quality_performance">Απόδοση</string>
+    <string name="v2_quality_enhanced">Βελτιωμένη</string>
+    <string name="v2_quality_maximum">Μέγιστη</string>
+</resources>

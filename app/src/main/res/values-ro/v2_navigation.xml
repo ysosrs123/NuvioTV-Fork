@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Stil de navigare</string>
+    <string name="v2_navigation_sidebar">Bară laterală flotantă</string>
+    <string name="v2_navigation_top">Navigare superioară</string>
+    <string name="v2_accent_title">Culoare de accent</string>
+    <string name="v2_accent_fixed">Culoarea temei selectate</string>
+    <string name="v2_accent_artwork">Adaptare la imagini</string>
+    <string name="v2_glass_tint">Nuanța sticlei</string>
+    <string name="v2_tint_neutral">Neutru</string>
+</resources>

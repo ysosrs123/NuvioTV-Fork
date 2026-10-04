@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Spelerbediening</string>
+    <string name="v2_player_deck">Bedieningspaneel</string>
+    <string name="v2_player_invisible">Onzichtbaar</string>
+    <string name="v2_settings_presentation">Weergave van instellingen</string>
+    <string name="v2_settings_minimal">Minimaal</string>
+    <string name="v2_settings_glass">Glas</string>
+</resources>

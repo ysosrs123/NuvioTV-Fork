@@ -1,0 +1,5 @@
+<resources>
+    <string name="v2_control_info">Informacija</string>
+    <string name="v2_control_stats">Statistika</string>
+    <string name="v2_control_more">Daugiau</string>
+</resources>

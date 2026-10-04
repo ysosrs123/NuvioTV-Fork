@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">סגנון ניווט</string>
+    <string name="v2_navigation_sidebar">סרגל צד צף</string>
+    <string name="v2_navigation_top">ניווט עליון</string>
+    <string name="v2_accent_title">צבע הדגשה</string>
+    <string name="v2_accent_fixed">צבע ערכת הנושא שנבחרה</string>
+    <string name="v2_accent_artwork">התאמה לתמונות</string>
+    <string name="v2_glass_tint">גוון זכוכית</string>
+    <string name="v2_tint_neutral">ניטרלי</string>
+</resources>

@@ -1,0 +1,5 @@
+<resources>
+    <string name="v2_control_info">Bilgi</string>
+    <string name="v2_control_stats">İstatistikler</string>
+    <string name="v2_control_more">Diğer</string>
+</resources>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Kontrole plejera</string>
+    <string name="v2_player_deck">Kontrolna tabla</string>
+    <string name="v2_player_invisible">Nevidljivo</string>
+    <string name="v2_settings_presentation">Izgled podešavanja</string>
+    <string name="v2_settings_minimal">Minimalno</string>
+    <string name="v2_settings_glass">Staklo</string>
+</resources>

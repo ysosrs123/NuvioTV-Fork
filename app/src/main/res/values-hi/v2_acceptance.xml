@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">ग्लास</string>
+    <string name="v2_control_speed">गति</string>
+    <string name="v2_control_external">बाहरी प्लेयर</string>
+</resources>

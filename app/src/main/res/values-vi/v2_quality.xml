@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Chất lượng hình ảnh</string>
+    <string name="v2_quality_subtitle">Cân bằng hiệu ứng hình ảnh và điều hướng mượt mà.</string>
+    <string name="v2_quality_performance">Hiệu suất</string>
+    <string name="v2_quality_enhanced">Nâng cao</string>
+    <string name="v2_quality_maximum">Tối đa</string>
+</resources>

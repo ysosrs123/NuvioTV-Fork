@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Điều khiển trình phát</string>
+    <string name="v2_player_deck">Bảng điều khiển</string>
+    <string name="v2_player_invisible">Ẩn</string>
+    <string name="v2_settings_presentation">Giao diện cài đặt</string>
+    <string name="v2_settings_minimal">Tối giản</string>
+    <string name="v2_settings_glass">Kính</string>
+</resources>

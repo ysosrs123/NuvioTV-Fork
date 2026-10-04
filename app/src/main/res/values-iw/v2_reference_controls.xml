@@ -1,0 +1,5 @@
+<resources>
+    <string name="v2_control_info">מידע</string>
+    <string name="v2_control_stats">נתונים</string>
+    <string name="v2_control_more">עוד</string>
+</resources>

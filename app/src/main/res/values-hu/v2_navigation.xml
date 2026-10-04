@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Navigációs stílus</string>
+    <string name="v2_navigation_sidebar">Lebegő oldalsáv</string>
+    <string name="v2_navigation_top">Felső navigáció</string>
+    <string name="v2_accent_title">Kiemelőszín</string>
+    <string name="v2_accent_fixed">A kiválasztott téma színe</string>
+    <string name="v2_accent_artwork">Igazítás a képekhez</string>
+    <string name="v2_glass_tint">Üveg árnyalata</string>
+    <string name="v2_tint_neutral">Semleges</string>
+</resources>

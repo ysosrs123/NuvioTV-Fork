@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Animazione introduttiva</string>
+    <string name="v2_intro_animation_subtitle">Mostra l’introduzione mentre la pagina iniziale e le locandine vengono caricate in background</string>
+</resources>

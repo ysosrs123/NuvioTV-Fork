@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Animacja wstępna</string>
+    <string name="v2_intro_animation_subtitle">Pokazuj wstęp podczas ładowania strony głównej i plakatów w tle</string>
+</resources>

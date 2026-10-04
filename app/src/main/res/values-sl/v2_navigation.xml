@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Slog krmarjenja</string>
+    <string name="v2_navigation_sidebar">Plavajoča stranska vrstica</string>
+    <string name="v2_navigation_top">Zgornje krmarjenje</string>
+    <string name="v2_accent_title">Barva poudarka</string>
+    <string name="v2_accent_fixed">Barva izbrane teme</string>
+    <string name="v2_accent_artwork">Prilagodi slikam</string>
+    <string name="v2_glass_tint">Odtenek stekla</string>
+    <string name="v2_tint_neutral">Nevtralno</string>
+</resources>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Sterowanie odtwarzaczem</string>
+    <string name="v2_player_deck">Panel sterowania</string>
+    <string name="v2_player_invisible">Niewidoczny</string>
+    <string name="v2_settings_presentation">Wygląd ustawień</string>
+    <string name="v2_settings_minimal">Minimalny</string>
+    <string name="v2_settings_glass">Szkło</string>
+</resources>

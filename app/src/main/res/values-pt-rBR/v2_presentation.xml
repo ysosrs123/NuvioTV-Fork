@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Controles do player</string>
+    <string name="v2_player_deck">Painel de controle</string>
+    <string name="v2_player_invisible">Invisível</string>
+    <string name="v2_settings_presentation">Apresentação das configurações</string>
+    <string name="v2_settings_minimal">Minimalista</string>
+    <string name="v2_settings_glass">Vidro</string>
+</resources>

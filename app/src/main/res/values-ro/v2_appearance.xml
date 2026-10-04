@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">Experiența interfeței</string>
+    <string name="v2_experience_subtitle">Alegeți interfața pentru acest dispozitiv</string>
+    <string name="v2_visual_style_title">Stil vizual</string>
+    <string name="v2_scale_resolved">Scală aplicată: %1$d%%</string>
+    <string name="v2_scale_automatic">Automată</string>
+    <string name="v2_scale_manual">Manuală</string>
+    <string name="v2_scale_fine_tune">Reglare fină a scalei</string>
+</resources>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Comenzi player</string>
+    <string name="v2_player_deck">Panou de control</string>
+    <string name="v2_player_invisible">Invizibil</string>
+    <string name="v2_settings_presentation">Aspectul setărilor</string>
+    <string name="v2_settings_minimal">Minimal</string>
+    <string name="v2_settings_glass">Sticlă</string>
+</resources>

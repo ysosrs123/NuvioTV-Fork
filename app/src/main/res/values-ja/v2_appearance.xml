@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">インターフェース</string>
+    <string name="v2_experience_subtitle">この端末のインターフェースを選択</string>
+    <string name="v2_visual_style_title">ビジュアルスタイル</string>
+    <string name="v2_scale_resolved">適用中の倍率: %1$d%%</string>
+    <string name="v2_scale_automatic">自動</string>
+    <string name="v2_scale_manual">手動</string>
+    <string name="v2_scale_fine_tune">倍率の微調整</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Animacioni hyrës</string>
+    <string name="v2_intro_animation_subtitle">Shfaq hyrjen ndërsa faqja kryesore dhe posterat ngarkohen në sfond</string>
+</resources>

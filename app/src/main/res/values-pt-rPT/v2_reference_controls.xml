@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="v2_control_info">Info</string>
+    <string name="v2_control_stats">Estatísticas</string>
+    <string name="v2_control_more">Mais</string>
+</resources>

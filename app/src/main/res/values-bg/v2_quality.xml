@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Визуално качество</string>
+    <string name="v2_quality_subtitle">Баланс между визуални ефекти и плавна навигация.</string>
+    <string name="v2_quality_performance">Производителност</string>
+    <string name="v2_quality_enhanced">Подобрено</string>
+    <string name="v2_quality_maximum">Максимално</string>
+</resources>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Nuvio</string>
+    <string name="app_name">Nuvio-test</string>
     <string name="tv_channel_continue_watching">Megtekintés folytatása</string>
     <string name="type_movie">Film</string>
     <string name="type_movies">Filmek</string>
@@ -99,7 +99,7 @@
     <string name="home_no_addons">Nincsenek telepített bővítmények. A kezdéshez adj hozzá egyet.</string>
     <string name="home_no_catalog_addons">Nincsenek katalógusbővítmények. Telepíts egyet a tartalom megtekintéséhez.</string>
     <string name="auth_notice_nuvio_logged_out">Kijelentkeztél a Nuvio-ból. Kérlek, jelentkezz be újra.</string>
-    <string name="auth_notice_trakt_logged_out">Kijelentkeztél a Trakt-ból. Kérlek, csatlakozz újra.</string>
+    <string name="auth_notice_trakt_logged_out">A Trakt-munkamenet lejárt. Csatlakozz újra a Beállítások > Tracking alatt (egy munkamenet kb. 7 napig tart).</string>
     <string name="error_generic">Hiba történt</string>
 
     <string name="action_retry">Próbáld újra</string>
@@ -371,8 +371,8 @@
     <string name="licenses_attributions_section_app">ALKALMAZÁS LICENC</string>
     <string name="licenses_attributions_section_data">ADATOK ÉS SZOLGÁLTATÁSOK</string>
     <string name="licenses_attributions_section_playback">ANDROID LEJÁTSZÁSI LICENCEK</string>
-    <string name="licenses_attributions_nuvio_title">Nuvio TV</string>
-    <string name="licenses_attributions_nuvio_body">A forráskód és a licencfeltételek elérhetők a projekt tárolójában. Licenc: GNU General Public License v3.0.</string>
+    <string name="licenses_attributions_nuvio_title">Nuvio-test (a Nuvio TV forkja)</string>
+    <string name="licenses_attributions_nuvio_body">A Nuvio TV módosított változata. Ennek a buildnek a forráskódja és licencfeltételei a fork tárolójában érhetők el. A Nuvio TV itt található: github.com/NuvioMedia/NuvioTV. Licenc: GNU General Public License v3.0.</string>
     <string name="licenses_attributions_tmdb_title">The Movie Database (TMDB)</string>
     <string name="licenses_attributions_tmdb_body">A Nuvio a TMDB API-t használja a filmek és tévéműsorok metaadataihoz, borítóképekhez, előzetesekhez, stáblistákhoz, gyártási adatokhoz, gyűjteményekhez és ajánlásokhoz. Ez a termék a TMDB API-t használja, de a TMDB nem támogatja és nem hagyta jóvá.</string>
     <string name="licenses_attributions_trakt_title">Trakt</string>
@@ -568,7 +568,7 @@
     <string name="settings_integrations_section">Integrációk</string>
     <string name="settings_integrations_section_subtitle">TMDB vagy MDBList beállítások</string>
     <string name="settings_tmdb_subtitle">Metaadat-bővítési beállítások</string>
-    <string name="settings_mdblist_subtitle">Külső értékelési szolgáltatók</string>
+    <string name="settings_mdblist_subtitle">Megtekintések követése és értékelések</string>
     <string name="settings_animeskip_subtitle">Anime intro/outro átugrási időbélyegek</string>
     <string name="settings_debrid_subtitle">Kísérleti felhőfiók források</string>
 
@@ -649,8 +649,8 @@
     <string name="playback_internal_player_engine">Belső motor</string>
     <string name="playback_engine_exoplayer">ExoPlayer</string>
     <string name="playback_engine_mvplayer">Libmpv (Béta)</string>
-    <string name="playback_auto_switch_internal_player_on_error">Automatikus motorváltás indítási hiba esetén</string>
-    <string name="playback_auto_switch_internal_player_on_error_sub">Ha a stream indítása sikertelen, váltson automatikusan az ExoPlayer és libmpv között.</string>
+    <string name="playback_auto_switch_internal_player_on_error">Automatikus váltás ExoPlayerre indítási hiba esetén</string>
+    <string name="playback_auto_switch_internal_player_on_error_sub">Ha a stream indítása libmpv-ben sikertelen, automatikusan újrapróbálja ExoPlayerrel.</string>
     <string name="playback_external_forward_subtitles">Feliratok továbbítása külső lejátszónak</string>
     <string name="playback_external_forward_subtitles_sub">Töltsd le a feliratokat az előnyben részesített nyelven a bővítményekből, és add át a külső lejátszónak.</string>
     <string name="playback_external_send_skip_segments">Bevezető és záró időbélyegek küldése</string>
@@ -692,7 +692,7 @@
     <string name="audio_lang_original_hint">A TMDB metaadatok engedélyezése szükséges</string>
     <string name="audio_preferred_lang">Előnyben részesített hangsáv</string>
     <string name="audio_skip_silence">Csend átugrása</string>
-    <string name="audio_skip_silence_sub">Néma szakaszok átugrása lejátszás közben</string>
+    <string name="audio_skip_silence_sub">Néma szakaszok átugrása lejátszás közben. Nincs hatása, amíg a hang passthrough-val (bitstream) megy ki</string>
     <string name="audio_remember_delay_per_device">Késleltetés megjegyzése eszközönként</string>
     <string name="audio_remember_delay_per_device_sub">Menti és visszaállítja a lejátszón belüli hangkésleltetést az aktuális hangkimenethez</string>
     <string name="audio_advanced_section">Speciális hangbeállítások</string>
@@ -704,7 +704,7 @@
     <string name="audio_decoder_prefer_app">Alkalmazás dekódereinek előnyben részesítése (FFmpeg)</string>
     <string name="audio_decoder_priority">Dekóder prioritása</string>
     <string name="audio_enable_downmix_title">Lekeverés engedélyezése</string>
-    <string name="audio_enable_downmix_subtitle">Az FFmpeg lekeverését (downmix) használja. Szükséges hozzá az Alkalmazás dekódereinek előnyben részesítése (FFmpeg). Ha ki van kapcsolva, a hang a korábbi Android/eszköz szintű feldolgozáson megy át.</string>
+    <string name="audio_enable_downmix_subtitle">Az alkalmazás által dekódolt hangot a kiválasztott csatornaszámra keveri le. Az erősítőd által elfogadott formátumok továbbra is érintetlenül, bitstreamként mennek ki. A Csak az eszköz dekóderei beállítással nem érhető el.</string>
     <string name="audio_tunneled">Alagutazott (tunneled) lejátszás</string>
     <string name="audio_tunneled_sub">Hang/videó szinkronizálása hardveres szinten. Javíthatja a lejátszást egyes Android TV eszközökön.</string>
     <string name="audio_force_optical_passthrough">AC-3 átkódolás kényszerítése (optikai/SPDIF)</string>
@@ -727,7 +727,7 @@
     <string name="audio_strip_hdr10plus_title">HDR10+ metaadatok eltávolítása</string>
     <string name="audio_strip_hdr10plus_sub">Eltávolítja a HDR10+ dinamikus metaadatokat a streamekből. Ha a Konvertálás DV8.1-re is be van kapcsolva, az eltávolítás a konvertálás után fut.</string>
     <string name="audio_dv7_preserve_mapping_title">DV leképezés megőrzése (DV7-ről DV8.1-re)</string>
-    <string name="audio_dv7_preserve_mapping_sub">Megőrzi az alkotó által szándékolt eredeti tónusleképezést, képkockánként egy kicsit több feldolgozás árán.</string>
+    <string name="audio_dv7_preserve_mapping_sub">Kéri a mapping megőrzését, de a beépített libdovi C API ezt nem tudja teljesíteni: a lejátszás a szokásos 8.1-es konvertálásra vált (a mapping nem marad meg). Egyszeri DV7_NATIVE figyelmeztetés kerül a naplóba.</string>
     <string name="dv7_libdovi_mode_caption" translatable="false">Conversion mode (auto-selected, do not change unless instructed). Pick one to force it; None uses auto. Active only when DV7 Handling is Convert to DV8.1.</string>
     <string name="dv7_libdovi_mode_row_title" translatable="false">Conversion mode</string>
     <string name="dv7_libdovi_mode_none_title" translatable="false">None</string>
@@ -863,9 +863,9 @@
     <string name="layout_grid_desc">Minden tartalom függőleges rácsban, kiemelt (hero) szekcióval</string>
     <string name="layout_modern_desc">Rögzített kiemelt rész egyetlen aktív sorral a gyorsabb böngészésért</string>
     <string name="layout_section_home">Kezdőlap elrendezése</string>
-    <string name="layout_section_home_desc">Válaszd ki a felépítést és a kiemelt tartalom forrását.</string>
+    <string name="layout_section_home_desc">A Modern nézet beállításai.</string>
     <string name="layout_landscape_posters">Fekvő poszterek</string>
-    <string name="layout_landscape_posters_sub">Váltás az álló és fekvő poszterek között Modern nézetben.</string>
+    <string name="layout_landscape_posters_sub">Fekvő kártyák csak a Kezdőlapon vagy mindenhol.</string>
     <string name="layout_preview_row">Előnézeti sor megjelenítése</string>
     <string name="layout_preview_row_sub">A következő sor részleges előnézete Modern elrendezésben.</string>
     <string name="layout_hero_catalogs">Kiemelt katalógusok</string>
@@ -1011,10 +1011,10 @@
     <string name="layout_custom">Egyéni</string>
 
 
-    <string name="mdblist_title">MDBList értékelések</string>
-    <string name="mdblist_subtitle">Külső értékelések beállítása a részletek oldalon</string>
+    <string name="mdblist_title">MDBList</string>
+    <string name="mdblist_subtitle">Külső értékelések és az MDBList-fiókod</string>
     <string name="mdblist_enable_title">MDBList értékelések engedélyezése</string>
-    <string name="mdblist_enable_subtitle">Értékelések lekérése külső szolgáltatóktól a részletek képernyőn</string>
+    <string name="mdblist_enable_subtitle">Értékelésjelvények megjelenítése az MDBListről. A megtekintések követéséhez jelentkezz be a Tracking alatt.</string>
     <string name="mdblist_api_key_title">API-kulcs</string>
     <string name="mdblist_api_key_subtitle">Szükséges az értékelések lekéréséhez az MDBList-ről</string>
     <string name="mdblist_trakt_title">Trakt</string>
@@ -1269,7 +1269,7 @@
     <string name="trakt_watch_progress_title">Megtekintési folyamat</string>
     <string name="trakt_watch_progress_subtitle">Válaszd ki, melyik folyamatforrás vezérelje a lejátszás folytatását</string>
     <string name="trakt_watch_progress_dialog_title">Megtekintési folyamat</string>
-    <string name="trakt_watch_progress_dialog_subtitle">Válaszd ki, hogy a lejátszás folytatása a Traktot vagy a Nuvio Sync-et használja-e, miközben a Trakt scrobbling aktív marad.</string>
+    <string name="trakt_watch_progress_dialog_subtitle">Válaszd ki, melyik forrás adja a folytatást és a Megtekintés folytatása sort. A csatlakoztatott szolgáltatások felé a scrobbling ettől függetlenül aktív marad.</string>
     <string name="trakt_watch_progress_source_trakt">Trakt</string>
     <string name="trakt_watch_progress_source_nuvio">Nuvio Sync</string>
     <string name="trakt_library_source_title">Könyvtár forrása</string>
@@ -1650,7 +1650,7 @@
     <string name="audio_mix_persist_off">Mentés munkamenetek között: KI</string>
     <string name="audio_mix_range">Tartomány: %1$d dB - %2$d dB</string>
     <string name="audio_mix_range_saved">Tartomány: %1$d dB - %2$d dB (mentve)</string>
-    <string name="audio_mix_unavailable">Az erősítés nem érhető el ezen az eszközön</string>
+    <string name="audio_mix_unavailable">Passthrough közben nem érhető el - az erősítés csak a PCM-re dekódolt hangra hat</string>
     <string name="audio_center_mix_label">Lekeverés: Középső keverési szint</string>
     <string name="audio_center_mix_value_db">%1$d dB</string>
     <string name="audio_center_mix_help">Középső keverési szint dB-ben a metaadatokhoz vagy az alapértelmezetthez képest (-3 dB)</string>

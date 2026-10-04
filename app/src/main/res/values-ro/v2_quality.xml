@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Calitate vizuală</string>
+    <string name="v2_quality_subtitle">Echilibrează efectele vizuale și navigarea fluidă.</string>
+    <string name="v2_quality_performance">Performanță</string>
+    <string name="v2_quality_enhanced">Îmbunătățită</string>
+    <string name="v2_quality_maximum">Maximă</string>
+</resources>

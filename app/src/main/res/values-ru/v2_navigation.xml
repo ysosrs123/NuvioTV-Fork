@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Стиль навигации</string>
+    <string name="v2_navigation_sidebar">Плавающая боковая панель</string>
+    <string name="v2_navigation_top">Верхняя навигация</string>
+    <string name="v2_accent_title">Акцентный цвет</string>
+    <string name="v2_accent_fixed">Цвет выбранной темы</string>
+    <string name="v2_accent_artwork">Подстраивать под изображения</string>
+    <string name="v2_glass_tint">Оттенок стекла</string>
+    <string name="v2_tint_neutral">Нейтральный</string>
+</resources>

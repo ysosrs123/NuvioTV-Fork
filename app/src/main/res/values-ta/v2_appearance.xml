@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_experience_title">இடைமுக அனுபவம்</string>
+    <string name="v2_experience_subtitle">இந்தச் சாதனத்திற்கான இடைமுகத்தைத் தேர்ந்தெடுக்கவும்</string>
+    <string name="v2_visual_style_title">காட்சி பாணி</string>
+    <string name="v2_scale_resolved">பயன்படுத்தப்பட்ட அளவு: %1$d%%</string>
+    <string name="v2_scale_automatic">தானியங்கி</string>
+    <string name="v2_scale_manual">கைமுறை</string>
+    <string name="v2_scale_fine_tune">அளவை நுணுக்கமாகச் சரிசெய்</string>
+</resources>

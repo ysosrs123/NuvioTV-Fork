@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">פקדי הנגן</string>
+    <string name="v2_player_deck">לוח בקרה</string>
+    <string name="v2_player_invisible">בלתי נראה</string>
+    <string name="v2_settings_presentation">מראה ההגדרות</string>
+    <string name="v2_settings_minimal">מינימלי</string>
+    <string name="v2_settings_glass">זכוכית</string>
+</resources>

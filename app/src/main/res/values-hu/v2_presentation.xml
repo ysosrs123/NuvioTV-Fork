@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Lejátszóvezérlők</string>
+    <string name="v2_player_deck">Vezérlőpult</string>
+    <string name="v2_player_invisible">Láthatatlan</string>
+    <string name="v2_settings_presentation">Beállítások megjelenése</string>
+    <string name="v2_settings_minimal">Minimális</string>
+    <string name="v2_settings_glass">Üveg</string>
+</resources>

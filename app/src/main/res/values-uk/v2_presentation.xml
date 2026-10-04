@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Керування програвачем</string>
+    <string name="v2_player_deck">Панель керування</string>
+    <string name="v2_player_invisible">Невидимий</string>
+    <string name="v2_settings_presentation">Оформлення налаштувань</string>
+    <string name="v2_settings_minimal">Мінімалізм</string>
+    <string name="v2_settings_glass">Скло</string>
+</resources>

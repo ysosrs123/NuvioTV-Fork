@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">Üveg</string>
+    <string name="v2_control_speed">Sebesség</string>
+    <string name="v2_control_external">Külső lejátszó</string>
+</resources>

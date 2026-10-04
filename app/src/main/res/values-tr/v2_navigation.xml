@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Gezinme stili</string>
+    <string name="v2_navigation_sidebar">Yüzen kenar çubuğu</string>
+    <string name="v2_navigation_top">Üst gezinme</string>
+    <string name="v2_accent_title">Vurgu rengi</string>
+    <string name="v2_accent_fixed">Seçili tema rengi</string>
+    <string name="v2_accent_artwork">Görsele göre uyarla</string>
+    <string name="v2_glass_tint">Cam tonu</string>
+    <string name="v2_tint_neutral">Nötr</string>
+</resources>

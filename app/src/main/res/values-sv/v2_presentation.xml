@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Spelarkontroller</string>
+    <string name="v2_player_deck">Kontrollpanel</string>
+    <string name="v2_player_invisible">Osynlig</string>
+    <string name="v2_settings_presentation">Inställningarnas utseende</string>
+    <string name="v2_settings_minimal">Minimal</string>
+    <string name="v2_settings_glass">Glas</string>
+</resources>

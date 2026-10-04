@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="v2_player_chrome">Controlos do leitor</string>
+    <string name="v2_player_deck">Painel de controlo</string>
+    <string name="v2_player_invisible">Invisível</string>
+    <string name="v2_settings_presentation">Apresentação das Definições</string>
+    <string name="v2_settings_minimal">Minimalista</string>
+    <string name="v2_settings_glass">Vidro</string>
+</resources>

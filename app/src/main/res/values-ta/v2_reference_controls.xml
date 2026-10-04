@@ -1,0 +1,5 @@
+<resources>
+    <string name="v2_control_info">தகவல்</string>
+    <string name="v2_control_stats">புள்ளிவிவரங்கள்</string>
+    <string name="v2_control_more">மேலும்</string>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="v2_navigation_title">Стил навигације</string>
+    <string name="v2_navigation_sidebar">Плутајућа бочна трака</string>
+    <string name="v2_navigation_top">Горња навигација</string>
+    <string name="v2_accent_title">Боја истицања</string>
+    <string name="v2_accent_fixed">Боја изабране теме</string>
+    <string name="v2_accent_artwork">Прилагоди сликама</string>
+    <string name="v2_glass_tint">Нијанса стакла</string>
+    <string name="v2_tint_neutral">Неутрално</string>
+</resources>

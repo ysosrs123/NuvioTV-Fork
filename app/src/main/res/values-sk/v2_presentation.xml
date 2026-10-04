@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Ovládanie prehrávača</string>
+    <string name="v2_player_deck">Ovládací panel</string>
+    <string name="v2_player_invisible">Neviditeľný</string>
+    <string name="v2_settings_presentation">Vzhľad nastavení</string>
+    <string name="v2_settings_minimal">Minimálny</string>
+    <string name="v2_settings_glass">Sklo</string>
+</resources>

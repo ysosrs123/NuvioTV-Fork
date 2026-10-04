@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">Sklo</string>
+    <string name="v2_control_speed">Rychlost</string>
+    <string name="v2_control_external">Externí přehrávač</string>
+</resources>

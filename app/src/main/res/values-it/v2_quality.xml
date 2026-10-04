@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Qualità visiva</string>
+    <string name="v2_quality_subtitle">Bilancia effetti visivi e navigazione fluida.</string>
+    <string name="v2_quality_performance">Prestazioni</string>
+    <string name="v2_quality_enhanced">Migliorata</string>
+    <string name="v2_quality_maximum">Massima</string>
+</resources>

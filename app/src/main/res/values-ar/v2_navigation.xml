@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">نمط التنقل</string>
+    <string name="v2_navigation_sidebar">شريط جانبي عائم</string>
+    <string name="v2_navigation_top">التنقل العلوي</string>
+    <string name="v2_accent_title">لون التمييز</string>
+    <string name="v2_accent_fixed">لون السمة المحدد</string>
+    <string name="v2_accent_artwork">متكيف مع الصور</string>
+    <string name="v2_glass_tint">لون الزجاج</string>
+    <string name="v2_tint_neutral">محايد</string>
+</resources>

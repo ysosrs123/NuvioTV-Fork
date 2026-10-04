@@ -1,0 +1,5 @@
+<resources>
+    <string name="v2_control_info">Info</string>
+    <string name="v2_control_stats">Statistik</string>
+    <string name="v2_control_more">Mere</string>
+</resources>

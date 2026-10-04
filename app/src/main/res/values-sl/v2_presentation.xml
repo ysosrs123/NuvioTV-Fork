@@ -1,0 +1,8 @@
+<resources>
+    <string name="v2_player_chrome">Kontrolniki predvajalnika</string>
+    <string name="v2_player_deck">Nadzorna plošča</string>
+    <string name="v2_player_invisible">Nevidno</string>
+    <string name="v2_settings_presentation">Videz nastavitev</string>
+    <string name="v2_settings_minimal">Minimalno</string>
+    <string name="v2_settings_glass">Steklo</string>
+</resources>

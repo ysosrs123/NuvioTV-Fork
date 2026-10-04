@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Úvodná animácia</string>
+    <string name="v2_intro_animation_subtitle">Zobraziť úvod počas načítavania domovskej stránky a plagátov na pozadí</string>
+</resources>

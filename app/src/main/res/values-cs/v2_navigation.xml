@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Styl navigace</string>
+    <string name="v2_navigation_sidebar">Plovoucí postranní panel</string>
+    <string name="v2_navigation_top">Horní navigace</string>
+    <string name="v2_accent_title">Barva zvýraznění</string>
+    <string name="v2_accent_fixed">Barva vybraného motivu</string>
+    <string name="v2_accent_artwork">Přizpůsobit obrázku</string>
+    <string name="v2_glass_tint">Odstín skla</string>
+    <string name="v2_tint_neutral">Neutrální</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Navigasjonsstil</string>
+    <string name="v2_navigation_sidebar">Flytende sidepanel</string>
+    <string name="v2_navigation_top">Toppnavigasjon</string>
+    <string name="v2_accent_title">Aksentfarge</string>
+    <string name="v2_accent_fixed">Valgt temafarge</string>
+    <string name="v2_accent_artwork">Tilpass til bilder</string>
+    <string name="v2_glass_tint">Glassfarge</string>
+    <string name="v2_tint_neutral">Nøytral</string>
+</resources>

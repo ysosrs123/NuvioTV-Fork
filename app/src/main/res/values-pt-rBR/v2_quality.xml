@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Qualidade visual</string>
+    <string name="v2_quality_subtitle">Equilibre efeitos visuais e navegação fluida.</string>
+    <string name="v2_quality_performance">Desempenho</string>
+    <string name="v2_quality_enhanced">Aprimorada</string>
+    <string name="v2_quality_maximum">Máxima</string>
+</resources>

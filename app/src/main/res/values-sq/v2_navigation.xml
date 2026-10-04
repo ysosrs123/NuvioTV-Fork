@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Stili i navigimit</string>
+    <string name="v2_navigation_sidebar">Shirit anësor lundrues</string>
+    <string name="v2_navigation_top">Navigimi sipër</string>
+    <string name="v2_accent_title">Ngjyra e theksimit</string>
+    <string name="v2_accent_fixed">Ngjyra e temës së zgjedhur</string>
+    <string name="v2_accent_artwork">Përshtate me figurat</string>
+    <string name="v2_glass_tint">Ngjyra e xhamit</string>
+    <string name="v2_tint_neutral">Neutrale</string>
+</resources>

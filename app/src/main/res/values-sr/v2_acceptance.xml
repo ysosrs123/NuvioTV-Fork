@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">Стакло</string>
+    <string name="v2_control_speed">Брзина</string>
+    <string name="v2_control_external">Спољни плејер</string>
+</resources>

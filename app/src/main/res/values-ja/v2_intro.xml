@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">イントロアニメーション</string>
+    <string name="v2_intro_animation_subtitle">ホーム画面とポスターをバックグラウンドで読み込む間、イントロを表示します</string>
+</resources>

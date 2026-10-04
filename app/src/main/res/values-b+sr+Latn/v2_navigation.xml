@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Stil navigacije</string>
+    <string name="v2_navigation_sidebar">Plutajuća bočna traka</string>
+    <string name="v2_navigation_top">Gornja navigacija</string>
+    <string name="v2_accent_title">Boja isticanja</string>
+    <string name="v2_accent_fixed">Boja izabrane teme</string>
+    <string name="v2_accent_artwork">Prilagodi slikama</string>
+    <string name="v2_glass_tint">Nijansa stakla</string>
+    <string name="v2_tint_neutral">Neutralno</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="v2_experience_title">Изглед интерфејса</string>
+    <string name="v2_experience_subtitle">Изаберите интерфејс за овај уређај</string>
+    <string name="v2_visual_style_title">Визуелни стил</string>
+    <string name="v2_scale_resolved">Примењена величина: %1$d%%</string>
+    <string name="v2_scale_automatic">Аутоматски</string>
+    <string name="v2_scale_manual">Ручно</string>
+    <string name="v2_scale_fine_tune">Фино подешавање величине</string>
+</resources>

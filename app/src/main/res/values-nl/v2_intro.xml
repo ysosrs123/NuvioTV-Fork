@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_intro_animation_title">Intro-animatie</string>
+    <string name="v2_intro_animation_subtitle">Toon de intro terwijl de startpagina en posters op de achtergrond laden</string>
+</resources>

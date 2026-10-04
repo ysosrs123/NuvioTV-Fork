@@ -1,0 +1,5 @@
+<resources>
+    <string name="v2_control_info">Инфо</string>
+    <string name="v2_control_stats">Статистика</string>
+    <string name="v2_control_more">Још</string>
+</resources>

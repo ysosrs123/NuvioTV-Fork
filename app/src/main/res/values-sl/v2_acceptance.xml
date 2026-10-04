@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">Steklo</string>
+    <string name="v2_control_speed">Hitrost</string>
+    <string name="v2_control_external">Zunanji predvajalnik</string>
+</resources>

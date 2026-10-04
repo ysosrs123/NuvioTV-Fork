@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="v2_navigation_title">Estilo de navegação</string>
+    <string name="v2_navigation_sidebar">Barra lateral flutuante</string>
+    <string name="v2_navigation_top">Navegação no topo</string>
+    <string name="v2_accent_title">Cor de destaque</string>
+    <string name="v2_accent_fixed">Cor do tema selecionado</string>
+    <string name="v2_accent_artwork">Adaptada à ilustração</string>
+    <string name="v2_glass_tint">Tonalidade do vidro</string>
+    <string name="v2_tint_neutral">Neutra</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_quality_title">Qualité visuelle</string>
+    <string name="v2_quality_subtitle">Équilibrez les effets visuels et la fluidité de navigation.</string>
+    <string name="v2_quality_performance">Performances</string>
+    <string name="v2_quality_enhanced">Améliorée</string>
+    <string name="v2_quality_maximum">Maximale</string>
+</resources>

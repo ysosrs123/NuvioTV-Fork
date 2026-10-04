@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">ガラス</string>
+    <string name="v2_control_speed">速度</string>
+    <string name="v2_control_external">外部プレーヤー</string>
+</resources>

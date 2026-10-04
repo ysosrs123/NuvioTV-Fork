@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="v2_navigation_title">Stile di navigazione</string>
+    <string name="v2_navigation_sidebar">Barra laterale sospesa</string>
+    <string name="v2_navigation_top">Navigazione superiore</string>
+    <string name="v2_accent_title">Colore di risalto</string>
+    <string name="v2_accent_fixed">Colore del tema selezionato</string>
+    <string name="v2_accent_artwork">Adatta alle immagini</string>
+    <string name="v2_glass_tint">Tinta del vetro</string>
+    <string name="v2_tint_neutral">Neutro</string>
+</resources>

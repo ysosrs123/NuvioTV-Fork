@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_color_glass">Glas</string>
+    <string name="v2_control_speed">Hastighet</string>
+    <string name="v2_control_external">Extern spelare</string>
+</resources>
