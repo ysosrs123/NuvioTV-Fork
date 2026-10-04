@@ -1,5 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.core.iptv.PlaybackPurpose
+
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
@@ -175,7 +177,13 @@ internal object PlayerPlaybackNetworking {
     )
 
     /** Selected playback only: one bounded head/suffix pair, with no application-level warm retries. */
-    fun prewarmSelectedPlayback(url: String?, headers: Map<String, String>?, enableHttp2: Boolean) {
+    fun prewarmSelectedPlayback(
+        url: String?,
+        headers: Map<String, String>?,
+        enableHttp2: Boolean,
+        purpose: PlaybackPurpose = PlaybackPurpose.VOD,
+    ) {
+        if (!purpose.allowsVodNetworkOptimizations) return
         val request = prewarmRequest(url, headers) ?: return
         if (!canReusePrewarmFor(request.url.toString())) return
         prewarmCoordinator.start(request) {

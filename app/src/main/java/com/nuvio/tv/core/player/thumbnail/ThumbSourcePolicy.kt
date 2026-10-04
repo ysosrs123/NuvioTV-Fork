@@ -1,5 +1,7 @@
 package com.nuvio.tv.core.player.thumbnail
 
+import com.nuvio.tv.core.iptv.PlaybackPurpose
+
 private val ADAPTIVE_MIME_TYPES = setOf(
     "application/x-mpegurl",
     "application/vnd.apple.mpegurl",
@@ -15,7 +17,12 @@ private val ADAPTIVE_PATH_SUFFIXES = listOf(".m3u8", ".m3u", ".mpd", ".ism", ".i
  * Thumbnails read keyframes out of one file by range request. A segmented stream (HLS, DASH,
  * Smooth Streaming) has no such file, so it is left alone before anything is shown or fetched.
  */
-internal fun isThumbnailSource(url: String?, mimeType: String? = null): Boolean {
+internal fun isThumbnailSource(
+    url: String?,
+    mimeType: String? = null,
+    purpose: PlaybackPurpose = PlaybackPurpose.VOD,
+): Boolean {
+    if (!purpose.allowsUpstreamThumbnails) return false
     if (url.isNullOrBlank()) return false
     if (!url.startsWith("http://", ignoreCase = true) && !url.startsWith("https://", ignoreCase = true)) return false
     if (mimeType != null && mimeType.trim().lowercase() in ADAPTIVE_MIME_TYPES) return false

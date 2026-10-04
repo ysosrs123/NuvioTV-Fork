@@ -1,0 +1,37 @@
+{
+  "dateLocal": "2026-10-05",
+  "timezone": "Australia/Brisbane",
+  "device": "UGOOS AM9PRO",
+  "androidApi": 34,
+  "evidenceLocation": "Original NuvioTV-Fork checkout: captures/iptv-am9-reference-20261005 (private local evidence; no credentials copied)",
+  "tivimate": {
+    "version": "5.4.0 Beta 2",
+    "versionCode": 1000005402,
+    "channel": "BBC News",
+    "reportedStream": { "quality": "FHD", "framesPerSecond": 50, "audio": "stereo" },
+    "afrTemporaryChange": "Enabled TV only; screen refresh-rate switch already enabled, resolution switch disabled",
+    "display": [
+      { "phase": "initial guide preview", "modeId": 3, "width": 3840, "height": 2160, "hz": 59.94006, "evidence": "43-tivimate-display.txt" },
+      { "phase": "fullscreen", "modeId": 5, "width": 3840, "height": 2160, "hz": 50.0, "evidence": "44-tivimate-display.txt" },
+      { "phase": "return to playing guide preview", "modeId": 5, "width": 3840, "height": 2160, "hz": 50.0, "evidence": "46-tivimate-display.txt" },
+      { "phase": "Home after restoring preference", "modeId": 3, "width": 3840, "height": 2160, "hz": 59.94006, "evidence": "51-tivimate-home-display.txt" }
+    ],
+    "restored": "AFR TV and VOD both off, confirmed screenshot 50-tivimate-afr-restored.png; app stopped after test",
+    "limit": "Single channel and display route. No prior-version A/B, all-rates check, HDMI resync timing, audio continuity, HDR or sink-wide conclusion."
+  },
+  "nobuffr": {
+    "version": "1.0.0",
+    "versionCode": 210271,
+    "activation": "User signed in; catalogue populated",
+    "catalogueCountDisplayed": 13740,
+    "primaryChannel": "TNT Ultimate UHD",
+    "reportedStream": { "width": 3840, "height": 2160, "framesPerSecond": 50, "audio": "5.1" },
+    "observedSettings": { "localTimeshift": true, "bufferLabel": "1 GB", "afrTv": false, "afrVod": false, "audioPassthrough": true },
+    "pause": "Paused UI showed a play button and 00:39 behind live (32-nobuffr-actions.png)",
+    "resume": "Inconclusive. Delayed Up input after controls disappeared changed to Sky Sport 1 UHD (NZ); no valid before/after retained-position comparison.",
+    "memorySampleKiB": { "pss": 275073, "nativeHeap": 109264, "dalvikHeap": 66738, "graphics": 16476 },
+    "limit": "Single memory sample is not capacity/plateau/leak evidence. Black UHD screenshot does not establish physical video failure. No HDR/Atmos, recording, multiview, provider quota or timeshift correctness claim.",
+    "finalState": "App stopped; account, data and preferences preserved"
+  },
+  "nuvio": { "prototypeInstalled": false, "userFacingIptvComplete": false, "fullAndroidCompile": "passed", "iptvUnitTests": 68, "failures": 0, "errors": 0 }
+}

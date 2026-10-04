@@ -64,3 +64,4 @@ AGENTS.md
 docs/
 status-page/
 sentry.properties
+!scripts/check_iptv_core.py

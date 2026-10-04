@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.core.iptv.PlaybackPurpose
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -197,7 +198,8 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         url: String,
         filename: String?,
         responseHeaders: Map<String, String>,
-        mimeTypeOverride: String?
+        mimeTypeOverride: String?,
+        purpose: PlaybackPurpose
     ): ChunkSessionShape {
         val resolvedMimeType = mimeTypeOverride ?: inferMimeType(
             url = url,
@@ -207,9 +209,9 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         val isHls = resolvedMimeType == MimeTypes.APPLICATION_M3U8
         val isDash = resolvedMimeType == MimeTypes.APPLICATION_MPD
         // A loopback engine can hold a read while it fetches pieces, so it keeps the long-timeout plain path.
-        val mp4SessionMode = !useParallelConnections && !isHls && !isDash &&
+        val mp4SessionMode = purpose.allowsVodNetworkOptimizations && !useParallelConnections && !isHls && !isDash &&
             resolvedMimeType == MimeTypes.VIDEO_MP4 && !isLoopbackUrl(url)
-        val useChunkSessionSource = (useParallelConnections || mp4SessionMode) && !isHls && !isDash
+        val useChunkSessionSource = purpose.allowsVodNetworkOptimizations && (useParallelConnections || mp4SessionMode) && !isHls && !isDash
         return ChunkSessionShape(
             resolvedMimeType = resolvedMimeType,
             isHls = isHls,
@@ -234,13 +236,16 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         headers: Map<String, String>,
         filename: String? = null,
         responseHeaders: Map<String, String> = emptyMap(),
-        mimeTypeOverride: String? = null
+        mimeTypeOverride: String? = null,
+        purpose: PlaybackPurpose = PlaybackPurpose.VOD
     ) {
+        if (!purpose.allowsVodNetworkOptimizations) return
         val shape = resolveChunkSessionShape(
             url = url,
             filename = filename,
             responseHeaders = responseHeaders,
-            mimeTypeOverride = mimeTypeOverride
+            mimeTypeOverride = mimeTypeOverride,
+            purpose = purpose
         )
         if (!shape.useChunkSessionSource || shape.mp4SessionMode) return
         val uri = runCatching { Uri.parse(url) }.getOrNull() ?: return
@@ -276,7 +281,8 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         mimeTypeOverride: String? = null,
         audioDelayUsProvider: (() -> Long)? = null,
         mediaMetadata: androidx.media3.common.MediaMetadata? = null,
-        cacheKey: String? = null
+        cacheKey: String? = null,
+        purpose: PlaybackPurpose = PlaybackPurpose.VOD
     ): MediaSource {
         val sanitizedHeaders = sanitizeHeaders(headers)
         val httpDataSourceFactory = PlayerPlaybackNetworking.createDataSourceFactory(context, sanitizedHeaders)
@@ -285,7 +291,8 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
             url = url,
             filename = filename,
             responseHeaders = responseHeaders,
-            mimeTypeOverride = mimeTypeOverride
+            mimeTypeOverride = mimeTypeOverride,
+            purpose = purpose
         )
         val resolvedMimeType = chunkSessionShape.resolvedMimeType
         val isHls = chunkSessionShape.isHls
@@ -375,7 +382,7 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         }
 
         // 2. VOD disk cache (opt-in).
-        val useVodCache = ENABLE_VOD_CACHE && vodCacheEnabled && !isHls && !isDash && shouldUseVodCache(url)
+        val useVodCache = purpose.allowsVodNetworkOptimizations && ENABLE_VOD_CACHE && vodCacheEnabled && !isHls && !isDash && shouldUseVodCache(url)
         // A playback started inside the delay window would have its own data swept out from under it.
         pendingEvictionJob?.cancel()
         pendingEvictionJob = null
