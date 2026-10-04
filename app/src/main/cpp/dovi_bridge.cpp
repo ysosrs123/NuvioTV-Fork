@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <android/log.h>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -15,21 +16,10 @@
 #endif
 
 #if DOVI_REAL_LINKED
-extern "C" {
-typedef struct DoviRpuOpaque DoviRpuOpaque;
-typedef struct DoviData {
-    const uint8_t* data;
-    size_t len;
-} DoviData;
-
-DoviRpuOpaque* dovi_parse_unspec62_nalu(const uint8_t* buf, size_t len);
-DoviRpuOpaque* dovi_parse_rpu(const uint8_t* buf, size_t len);
-const char* dovi_rpu_get_error(const DoviRpuOpaque* ptr);
-void dovi_rpu_free(DoviRpuOpaque* ptr);
-int32_t dovi_convert_rpu_with_mode(DoviRpuOpaque* ptr, uint8_t mode);
-const DoviData* dovi_write_unspec62_nalu(DoviRpuOpaque* ptr);
-void dovi_data_free(const DoviData* data);
-}
+// The bundled libdovi header supplies DoviRpuDataHeader and
+// dovi_rpu_get_header/dovi_rpu_free_header for the EL-type accessor, and
+// keeps the declarations in step with the linked library.
+#include <libdovi/rpu_parser.h>
 
 static inline bool dovi_has_error(const DoviRpuOpaque* rpu, std::string* out_error) {
     if (rpu == nullptr) {
@@ -89,10 +79,36 @@ static inline uint8_t map_conversion_mode(jint mode) {
         case 3:
         case 4:
             return static_cast<uint8_t>(mode);
-        case 5:
-            return 4U;
+        case 5: {
+            // Kotlin mode 5 = "preserve DV mapping". The bundled libdovi
+            // 3.3.2 C API has no reachable To81MappingPreserved variant:
+            // From<u8> maps 4 -> To84 (static 8.4) and >= 5 -> Lossless,
+            // despite the header doc claiming "4 = 8.1 preserving mapping".
+            // Mapping 5 to 4 would give static 8.4 output, so fall back to
+            // standard 8.1 (mode 2, mapping NOT preserved) until libdovi
+            // exposes preserve-mapping through the C API.
+            static bool warned = false;
+            if (!warned) {
+                warned = true;
+                LOGW("DV7_NATIVE: preserve-mapping unsupported by bundled libdovi C API; using standard 8.1 (mode 2)");
+            }
+            return 2U;
+        }
         default:
             return 2U;
+    }
+}
+
+// Counts RPUs dropped because per-frame conversion failed on
+// the MP4/TS sample path, with a throttled log (first drop + every 100th).
+// Process-wide by design: it is diagnostics-only and monotonically counts;
+// worst-case cross-stream interleave slightly skews the throttle cadence.
+static std::atomic<uint64_t> g_rpuDropCount{0};
+static inline void noteRpuDropOnFailure() {
+    const uint64_t n = g_rpuDropCount.fetch_add(1, std::memory_order_relaxed) + 1;
+    if (n == 1 || n % 100 == 0) {
+        LOGW("DV7_NATIVE: RPU conversion failed; dropping RPU (dropped=%llu)",
+             static_cast<unsigned long long>(n));
     }
 }
 #endif
@@ -456,6 +472,216 @@ static int startCodeLength(const uint8_t* data, int offset, int limit) {
 }
 
 extern "C" JNIEXPORT jint JNICALL
+Java_com_nuvio_tv_core_player_DoviBridge_nativeDetectRpuElType(
+        JNIEnv* env,
+        jclass /* clazz */,
+        jbyteArray sample,
+        jint offset,
+        jint length) {
+    // FEL/MEL detection.
+    // Returns: 2 = FEL, 1 = MEL, 0 = parsed but no EL type (not profile 7),
+    //          -1 = parse failure, -2 = stub build / bad args.
+#if DOVI_REAL_LINKED
+    if (sample == nullptr || offset < 0 || length <= 0) return -2;
+    const jsize arrLen = env->GetArrayLength(sample);
+    if (offset > arrLen - length) return -2;
+    std::vector<uint8_t> input(static_cast<size_t>(length));
+    env->GetByteArrayRegion(sample, offset, length, reinterpret_cast<jbyte*>(input.data()));
+    std::string parse_error;
+    DoviRpuOpaque* rpu = dovi_parse_any_rpu(input, &parse_error);
+    if (rpu == nullptr) return -1;
+    jint result = 0;
+    const DoviRpuDataHeader* header = dovi_rpu_get_header(rpu);
+    if (header != nullptr) {
+        if (header->el_type != nullptr) {
+            if (std::strcmp(header->el_type, "FEL") == 0) {
+                result = 2;
+            } else if (std::strcmp(header->el_type, "MEL") == 0) {
+                result = 1;
+            }
+        }
+        dovi_rpu_free_header(header);
+    }
+    dovi_rpu_free(rpu);
+    return result;
+#else
+    (void) env; (void) sample; (void) offset; (void) length;
+    return -2;
+#endif
+}
+
+extern "C" JNIEXPORT jintArray JNICALL
+Java_com_nuvio_tv_core_player_DoviBridge_nativeGetRpuStaticMetadata(
+        JNIEnv* env,
+        jclass /* clazz */,
+        jbyteArray sample,
+        jint offset,
+        jint length) {
+    // RPU-informed diagnostics: reads the DV RPU's static HDR mastering
+    // metadata via the bundled libdovi 3.3.2 readers and returns
+    //   int[6] = { source_min_pq, source_max_pq,
+    //              L6 min_display_mastering_luminance, L6 max_display_mastering_luminance,
+    //              L6 max_content_light_level (MaxCLL), L6 max_frame_average_light_level (MaxFALL) }
+    // Any field absent from the RPU is -1 (L6 is a nullable block; source_*_pq are
+    // always present when vdr_dm_data exists). Returns null when the RPU carries no
+    // DM metadata, on parse failure, or in a stub build. Intended to run once per
+    // stream on the first RPU, mirroring nativeDetectRpuElType.
+#if DOVI_REAL_LINKED
+    if (sample == nullptr || offset < 0 || length <= 0) return nullptr;
+    const jsize arrLen = env->GetArrayLength(sample);
+    if (offset > arrLen - length) return nullptr;
+
+    std::vector<uint8_t> input(static_cast<size_t>(length));
+    env->GetByteArrayRegion(sample, offset, length, reinterpret_cast<jbyte*>(input.data()));
+
+    std::string parse_error;
+    DoviRpuOpaque* rpu = dovi_parse_any_rpu(input, &parse_error);
+    if (rpu == nullptr) return nullptr;
+
+    const DoviVdrDmData* dm = dovi_rpu_get_vdr_dm_data(rpu);
+    if (dm == nullptr) {
+        dovi_rpu_free(rpu);
+        return nullptr;
+    }
+
+    jint values[6];
+    values[0] = static_cast<jint>(dm->source_min_pq);
+    values[1] = static_cast<jint>(dm->source_max_pq);
+    const DoviExtMetadataBlockLevel6* l6 = dm->dm_data.level6;
+    if (l6 != nullptr) {
+        values[2] = static_cast<jint>(l6->min_display_mastering_luminance);
+        values[3] = static_cast<jint>(l6->max_display_mastering_luminance);
+        values[4] = static_cast<jint>(l6->max_content_light_level);
+        values[5] = static_cast<jint>(l6->max_frame_average_light_level);
+    } else {
+        values[2] = -1;
+        values[3] = -1;
+        values[4] = -1;
+        values[5] = -1;
+    }
+
+    dovi_rpu_free_vdr_dm_data(dm);
+    dovi_rpu_free(rpu);
+
+    jintArray out = env->NewIntArray(6);
+    if (out == nullptr) return nullptr;
+    env->SetIntArrayRegion(out, 0, 6, values);
+    return out;
+#else
+    (void) env; (void) sample; (void) offset; (void) length;
+    return nullptr;
+#endif
+}
+
+extern "C" JNIEXPORT jintArray JNICALL
+Java_com_nuvio_tv_core_player_DoviBridge_nativeGetRpuDmInfo(
+        JNIEnv* env,
+        jclass /* clazz */,
+        jbyteArray sample,
+        jint offset,
+        jint length) try {
+    // Per-frame RPU display-management summary for the stats HUD, read-only, via the bundled libdovi 3.3.2
+    // readers. int[26] (-1 = absent):
+    //   [0] CM version (40 = L254 present, 29 = DM data without L254), [1] levels bitmask (bit n = level n
+    //   for 1..11, bit 12 = L254, bit 13 = L255), [2..4] L1 min/max/avg PQ, [5..8] L5 left/right/top/bottom
+    //   offsets, [9..10] source min/max PQ, [11..14] L6 max/min mastering luminance, MaxCLL, MaxFALL,
+    //   [15] guessed profile, [16] EL type (2 FEL, 1 MEL, 0 none), [17..19] BL/EL/VDR bit depth,
+    //   [20] EL spatial resampling (1 = EL at half resolution), [21..23] L2/L8/L10 block counts,
+    //   [24] L254 dm_version_index, [25] scene_refresh_flag.
+    // Header fields are filled even when the RPU carries no DM data ([0] = -1 then).
+#if DOVI_REAL_LINKED
+    if (sample == nullptr || offset < 0 || length <= 0 || length > 65536) return nullptr;
+    const jsize arrLen = env->GetArrayLength(sample);
+    if (offset > arrLen - length) return nullptr;
+
+    std::vector<uint8_t> input(static_cast<size_t>(length));
+    env->GetByteArrayRegion(sample, offset, length, reinterpret_cast<jbyte*>(input.data()));
+    if (env->ExceptionCheck()) return nullptr;
+
+    std::string parse_error;
+    DoviRpuOpaque* rpu = dovi_parse_any_rpu(input, &parse_error);
+    if (rpu == nullptr) return nullptr;
+
+    constexpr int kCount = 26;
+    jint v[kCount];
+    for (int i = 0; i < kCount; i++) v[i] = -1;
+
+    const DoviRpuDataHeader* header = dovi_rpu_get_header(rpu);
+    if (header != nullptr) {
+        v[15] = static_cast<jint>(header->guessed_profile);
+        v[16] = 0;
+        if (header->el_type != nullptr) {
+            if (std::strcmp(header->el_type, "FEL") == 0) v[16] = 2;
+            else if (std::strcmp(header->el_type, "MEL") == 0) v[16] = 1;
+        }
+        // Bit depths and EL resampling are only coded with sequence info and rpu_format & 0x700 == 0 (libdovi
+        // leaves them 0 otherwise, which would read as "8-bit, full resolution").
+        if (header->vdr_seq_info_present_flag && (header->rpu_format & 0x700) == 0) {
+            v[17] = static_cast<jint>(header->bl_bit_depth_minus8 + 8);
+            v[18] = static_cast<jint>(header->el_bit_depth_minus8 + 8);
+            v[19] = static_cast<jint>(header->vdr_bit_depth_minus8 + 8);
+            v[20] = header->el_spatial_resampling_filter_flag ? 1 : 0;
+        }
+        dovi_rpu_free_header(header);
+    }
+
+    const DoviVdrDmData* dm = dovi_rpu_get_vdr_dm_data(rpu);
+    if (dm != nullptr) {
+        const DoviDmData& d = dm->dm_data;
+        jint levels = 0;
+        if (d.level1 != nullptr) levels |= 1 << 1;
+        if (d.level2.len > 0) levels |= 1 << 2;
+        if (d.level3 != nullptr) levels |= 1 << 3;
+        if (d.level4 != nullptr) levels |= 1 << 4;
+        if (d.level5 != nullptr) levels |= 1 << 5;
+        if (d.level6 != nullptr) levels |= 1 << 6;
+        if (d.level8.len > 0) levels |= 1 << 8;
+        if (d.level9 != nullptr) levels |= 1 << 9;
+        if (d.level10.len > 0) levels |= 1 << 10;
+        if (d.level11 != nullptr) levels |= 1 << 11;
+        if (d.level254 != nullptr) levels |= 1 << 12;
+        if (d.level255 != nullptr) levels |= 1 << 13;
+        v[0] = d.level254 != nullptr ? 40 : 29;
+        v[1] = levels;
+        if (d.level1 != nullptr) {
+            v[2] = static_cast<jint>(d.level1->min_pq);
+            v[3] = static_cast<jint>(d.level1->max_pq);
+            v[4] = static_cast<jint>(d.level1->avg_pq);
+        }
+        if (d.level5 != nullptr) {
+            v[5] = static_cast<jint>(d.level5->active_area_left_offset);
+            v[6] = static_cast<jint>(d.level5->active_area_right_offset);
+            v[7] = static_cast<jint>(d.level5->active_area_top_offset);
+            v[8] = static_cast<jint>(d.level5->active_area_bottom_offset);
+        }
+        v[9] = static_cast<jint>(dm->source_min_pq);
+        v[10] = static_cast<jint>(dm->source_max_pq);
+        if (d.level6 != nullptr) {
+            v[11] = static_cast<jint>(d.level6->max_display_mastering_luminance);
+            v[12] = static_cast<jint>(d.level6->min_display_mastering_luminance);
+            v[13] = static_cast<jint>(d.level6->max_content_light_level);
+            v[14] = static_cast<jint>(d.level6->max_frame_average_light_level);
+        }
+        v[21] = static_cast<jint>(d.level2.len);
+        v[22] = static_cast<jint>(d.level8.len);
+        v[23] = static_cast<jint>(d.level10.len);
+        if (d.level254 != nullptr) v[24] = static_cast<jint>(d.level254->dm_version_index);
+        v[25] = static_cast<jint>(dm->scene_refresh_flag);
+        dovi_rpu_free_vdr_dm_data(dm);
+    }
+    dovi_rpu_free(rpu);
+
+    jintArray out = env->NewIntArray(kCount);
+    if (out == nullptr) return nullptr;
+    env->SetIntArrayRegion(out, 0, kCount, v);
+    return out;
+#else
+    (void) env; (void) sample; (void) offset; (void) length;
+    return nullptr;
+#endif
+} catch (...) { return nullptr; }
+
+extern "C" JNIEXPORT jint JNICALL
 Java_com_nuvio_tv_core_player_DoviBridge_nativeProcessVideoSample(
     JNIEnv* env,
     jclass /* clazz */,
@@ -511,8 +737,7 @@ Java_com_nuvio_tv_core_player_DoviBridge_nativeProcessVideoSample(
 
             if (convertDovi || stripDoviRpu) {
                 bool isRpu = (nalType == 62);
-                // Type 63 = P7 EL on single-track remuxes (layer 0).
-                bool isEl = (layerId > 0) || (nalType == 63);
+                bool isEl = (layerId > 0) || (nalType == 63); // unspec63 = single-track EL carriage at layer 0
                 if (isRpu) {
                     if (stripDoviRpu) {
                         shouldDrop = true;
@@ -546,6 +771,16 @@ Java_com_nuvio_tv_core_player_DoviBridge_nativeProcessVideoSample(
                         }
 #endif
                         if (!processed) {
+#if DOVI_REAL_LINKED
+                            // Conversion failed: drop the RPU
+                            // rather than forwarding the raw P7 RPU under 8.1
+                            // signalling (mixed streams, frame after frame).
+                            // The base layer continues as HDR10.
+                            shouldDrop = true;
+                            noteRpuDropOnFailure();
+#else
+                            // Stub build (no libdovi linked): conversion is
+                            // never truly active; keep raw passthrough.
                             processed = true;
                             processedNal.resize(nalSize);
                             std::memcpy(processedNal.data(), sampleBuffer.data() + nalStart, nalSize);
@@ -553,6 +788,7 @@ Java_com_nuvio_tv_core_player_DoviBridge_nativeProcessVideoSample(
                                 processedNal[0] &= 0xFE;
                                 processedNal[1] &= 0x07;
                             }
+#endif
                         }
                     }
                 } else if (isEl) {
@@ -622,8 +858,7 @@ Java_com_nuvio_tv_core_player_DoviBridge_nativeProcessVideoSample(
 
                 if (convertDovi || stripDoviRpu) {
                     bool isRpu = (nalType == 62);
-                    // Type 63 = P7 EL on single-track remuxes (layer 0).
-                    bool isEl = (layerId > 0) || (nalType == 63);
+                    bool isEl = (layerId > 0) || (nalType == 63); // unspec63 = single-track EL carriage at layer 0
                     if (isRpu) {
                         if (stripDoviRpu) {
                             shouldDrop = true;
@@ -657,6 +892,13 @@ Java_com_nuvio_tv_core_player_DoviBridge_nativeProcessVideoSample(
                             }
 #endif
                             if (!processed) {
+#if DOVI_REAL_LINKED
+                                // Drop, don't forward raw P7
+                                // under 8.1 signalling (see length-delimited
+                                // loop above).
+                                shouldDrop = true;
+                                noteRpuDropOnFailure();
+#else
                                 processed = true;
                                 processedNal.resize(nalSize);
                                 std::memcpy(processedNal.data(), sampleBuffer.data() + nalBegin, nalSize);
@@ -664,6 +906,7 @@ Java_com_nuvio_tv_core_player_DoviBridge_nativeProcessVideoSample(
                                     processedNal[0] &= 0xFE;
                                     processedNal[1] &= 0x07;
                                 }
+#endif
                             }
                         }
                     } else if (isEl) {

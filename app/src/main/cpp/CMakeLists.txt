@@ -5,14 +5,32 @@ option(DOVI_ENABLE_LIBDOVI "Link against a real libdovi static library" OFF)
 set(DOVI_LIBDOVI_STATIC_LIB "" CACHE FILEPATH "Path to libdovi static archive (.a)")
 set(DOVI_LIBDOVI_INCLUDE_DIR "" CACHE PATH "Path to libdovi C headers")
 set(DOVI_LIBDOVI_PREBUILT_ROOT "" CACHE PATH "Root path containing ABI folders for prebuilt libdovi artifacts")
+# Gradle passes OFF when DOVI native is disabled; the project still builds libnuviothumb (below).
+option(NUVIO_BUILD_DOVI "Build the Dolby Vision bridge (dovi_bridge)" ON)
 
+find_library(log-lib log)
+
+# Native Dolby Vision Profile 7 FEL output through the Amlogic amstream dual-layer port
+# (core/player/amlfel). Self-contained: no libdovi, only the NDK log and android (ANativeWindow) libraries.
+option(AML_FEL_NATIVE_ENABLED "Build optional Amlogic FEL bridge" OFF)
+if(AML_FEL_NATIVE_ENABLED)
+add_library(
+    aml_fel
+    SHARED
+    aml_fel_native.cpp
+)
+target_compile_features(aml_fel PRIVATE cxx_std_17)
+target_compile_options(aml_fel PRIVATE -Wall -Wextra -Werror)
+target_link_options(aml_fel PRIVATE "-Wl,-z,max-page-size=16384")
+target_link_libraries(aml_fel ${log-lib} android)
+endif()
+
+if (NUVIO_BUILD_DOVI)
 add_library(
     dovi_bridge
     SHARED
     dovi_bridge.cpp
 )
-
-find_library(log-lib log)
 
 target_compile_features(dovi_bridge PRIVATE cxx_std_17)
 target_compile_options(dovi_bridge PRIVATE -Wall -Wextra -Wno-unused-parameter)
@@ -71,7 +89,33 @@ if (DOVI_ENABLE_LIBDOVI
 else()
     target_compile_definitions(dovi_bridge PRIVATE DOVI_REAL_LINKED=0)
     if (DOVI_ENABLE_LIBDOVI)
-        message(WARNING "libdovi requested but no static library resolved for ABI=${ANDROID_ABI}. Using stub mode.")
+        message(FATAL_ERROR "libdovi requested but no static library resolved for ABI=${ANDROID_ABI}.")
     endif()
     target_link_libraries(dovi_bridge ${log-lib})
 endif()
+endif() # NUVIO_BUILD_DOVI
+
+# Seek thumbnails: keyframe decoder over an FFmpeg that is already in the APK, loaded at runtime with
+# dlopen/dlsym (no FFmpeg code is linked or duplicated). Two backends (thumb_backend.h), each compiled
+# against its own vendored headers, set PER SOURCE FILE so no struct layout crosses versions:
+#   thumb_backend_mpv.cpp  -> MPV's FFmpeg master N-122742 (third_party/ffmpeg-a7522f3fef), primary;
+#   thumb_backend_ff60.cpp -> FFmpeg 6.0 in libmediainfo.so (third_party/ffmpeg-n6.0), fallback.
+add_library(
+    nuviothumb
+    SHARED
+    thumb_shim.cpp
+    thumb_backend_mpv.cpp
+    thumb_backend_ff60.cpp
+    thumbcolor.c
+    thumbdovi.c
+)
+find_library(jnigraphics-lib jnigraphics)
+target_include_directories(nuviothumb PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
+set_source_files_properties(thumb_backend_mpv.cpp PROPERTIES
+    INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/third_party/ffmpeg-a7522f3fef")
+set_source_files_properties(thumb_backend_ff60.cpp PROPERTIES
+    INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}/third_party/ffmpeg-n6.0")
+target_compile_features(nuviothumb PRIVATE cxx_std_17)
+target_compile_options(nuviothumb PRIVATE -O2 -Wall -Wextra -Wno-deprecated-declarations -Wno-unused-parameter)
+target_link_options(nuviothumb PRIVATE "-Wl,-z,max-page-size=16384")
+target_link_libraries(nuviothumb ${log-lib} ${jnigraphics-lib} dl m)

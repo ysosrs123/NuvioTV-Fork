@@ -206,7 +206,7 @@ class DolbyVisionBaseLayerPolicyTest {
         assertEquals(Decision.STRIP_TO_HDR10, r.decision)
     }
 
-    // ── CONVERT_TO_DV81: any device on DV display with DV81 decoder ──
+    // Current fork: eligible DV-display conversion is not manufacturer-gated.
 
     @Test
     fun `non-Amazon device on DV display with DV81 decoder and bridge converts`() {
