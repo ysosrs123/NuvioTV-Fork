@@ -134,7 +134,41 @@ class TraktPublicListSourceResolverTest {
         assertEquals("movie", result.data.items.single().apiType)
         assertEquals("https://media.trakt.tv/images/movies/000/000/009/posters/medium/poster.jpg.webp", result.data.items.single().poster)
         assertEquals("https://media.trakt.tv/images/movies/000/000/009/fanarts/medium/fanart.jpg.webp", result.data.items.single().background)
+        assertEquals(null, result.data.items.single().landscapePoster)
         assertEquals("https://media.trakt.tv/images/movies/000/000/009/logos/medium/logo.png.webp", result.data.items.single().logo)
+    }
+
+    @Test
+    fun `list item without fanart has no landscape artwork`() = runTest {
+        val api = mockk<TraktApi>()
+        coEvery {
+            api.getPublicListItems(null, "77", "movie", "full,images", 1, 50, "rank", "asc")
+        } returns Response.success(
+            listOf(
+                TraktListItemDto(
+                    rank = 1,
+                    type = "movie",
+                    movie = TraktMovieDto(
+                        title = "Movie",
+                        year = 2024,
+                        ids = TraktIdsDto(trakt = 9, imdb = "tt1234567", tmdb = 90),
+                        images = TraktImagesDto(
+                            poster = listOf("media.trakt.tv/images/movies/000/000/009/posters/medium/poster.jpg.webp")
+                        )
+                    )
+                )
+            )
+        )
+        val result = resolver(api, authenticated = true).resolve(
+            TraktCollectionSource(title = "Public", traktListId = 77L, mediaType = TmdbCollectionMediaType.MOVIE),
+            page = 1
+        ).first { it is NetworkResult.Success } as NetworkResult.Success
+
+        val item = result.data.items.single()
+        assertEquals("https://media.trakt.tv/images/movies/000/000/009/posters/medium/poster.jpg.webp", item.poster)
+        assertEquals(null, item.background)
+        assertEquals(null, item.landscapePoster)
+        assertEquals(item.poster, item.backdropUrl)
     }
 
     @Test

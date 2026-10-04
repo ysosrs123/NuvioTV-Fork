@@ -452,6 +452,7 @@ class SearchViewModelSuggestionsTest {
             watchProgressRepository = watchProgress,
             watchedSeriesStateHolder = watchedSeries,
             posterOptions = mockk<PosterOptionsController>(relaxed = true),
+            serverCatalog = mockk { every { searchAddons } returns flowOf(emptyList()) },
             context = mockk<Context>(relaxed = true)
         )
     }
@@ -473,6 +474,8 @@ class SearchViewModelSuggestionsTest {
          *  search argument does. */
         private val ignoresQuery: Boolean = false
     ) : CatalogRepository {
+        override suspend fun clearCaches() = Unit
+
         override fun getCatalog(
             addonBaseUrl: String,
             addonId: String,
@@ -520,6 +523,8 @@ class SearchViewModelSuggestionsTest {
     /** Two catalogs of one addon answering out of order: the one with no usable titles first,
      *  the one holding the match after a pause. */
     private class StagedCatalogRepository(private val addon: Addon) : CatalogRepository {
+        override suspend fun clearCaches() = Unit
+
         override fun getCatalog(
             addonBaseUrl: String,
             addonId: String,
@@ -591,6 +596,8 @@ class SearchViewModelSuggestionsTest {
             if (catalogId in slowCatalogs) delay(100)
             emit(NetworkResult.Success(row(catalogId, catalogTitles.getValue(catalogId))))
         }
+
+        override suspend fun clearCaches() = Unit
 
         private fun row(catalogId: String, titles: List<String>): CatalogRow = CatalogRow(
             addonId = addon.id,

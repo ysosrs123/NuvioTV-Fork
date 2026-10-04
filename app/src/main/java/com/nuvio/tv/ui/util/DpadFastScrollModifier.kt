@@ -42,6 +42,19 @@ private const val DEFAULT_END_TIMEOUT_MS = 160L
  */
 private const val DEFAULT_MAX_FRAME_DT_SEC = 0.048f
 
+/**
+ * How long the held-scroll takes to ramp from a standstill to full velocity, in
+ * nanoseconds (~130 ms). Removes the first-frame jerk without making the drag feel
+ * sluggish to start. A smoothstep curve is applied across this window.
+ */
+private const val RAMP_UP_NANOS = 130_000_000L
+
+/**
+ * Velocity floor as a fraction of full speed. The ease never drops the drag below
+ * this, so approaching an edge slows but never crawls.
+ */
+private const val MIN_EASE = 0.35f
+
 private enum class FastScrollMode { None, Vertical }
 
 /**
@@ -208,7 +221,8 @@ fun Modifier.dpadVerticalFastScroll(
                 scope.launch {
                     try {
                         scrollableState.scroll {
-                            var lastFrame = withFrameNanos { it }
+                            val dragStartNanos = withFrameNanos { it }
+                            var lastFrame = dragStartNanos
                             while (true) {
                                 val now = withFrameNanos { it }
                                 val dtSec = ((now - lastFrame) / 1_000_000_000f)
@@ -217,8 +231,23 @@ fun Modifier.dpadVerticalFastScroll(
 
                                 if (sign > 0 && shouldHaltForward()) break
 
-                                val delta = sign * velocityPxPerSec * dtSec
+                                // Start ramp: smoothstep from MIN_EASE up to full
+                                // velocity across RAMP_UP_NANOS, so the drag glides
+                                // in rather than jerking to full speed on frame one.
+                                val rampT = ((now - dragStartNanos).toFloat() /
+                                    RAMP_UP_NANOS.toFloat()).coerceIn(0f, 1f)
+                                val smooth = rampT * rampT * (3f - 2f * rampT)
+                                val ease = MIN_EASE + (1f - MIN_EASE) * smooth
+                                val easedVelocity = velocityPxPerSec * ease
+
+                                val delta = sign * easedVelocity * dtSec
                                 val consumed = scrollBy(delta)
+                                // Stop ramp falls out naturally: as the list nears
+                                // its edge scrollBy consumes less than requested,
+                                // and when it consumes nothing the drag ends and
+                                // focus lands (endFastScroll), so the last frames
+                                // decelerate against the edge instead of stopping
+                                // dead mid-travel.
                                 if (consumed == 0f && delta != 0f) break
                             }
                         }

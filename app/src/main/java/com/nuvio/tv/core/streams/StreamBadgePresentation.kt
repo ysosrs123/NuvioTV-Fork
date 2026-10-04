@@ -43,6 +43,13 @@ class StreamBadgePresentation @Inject constructor(
         }
     }
 
+    suspend fun badgesFor(stream: Stream): List<StreamBadge> {
+        val rules = dataStore.settings.first().rules
+        val filters = getBadgeFilters(rules)
+        if (filters.isEmpty()) return emptyList()
+        return StreamBadgeMatcher.matchedBadges(stream, filters)
+    }
+
     private fun getBadgeFilters(rules: StreamBadgeRules): List<CompiledStreamBadgeFilter> {
         val normalized = rules.normalized()
         val cached = badgeFilterCache.get()

@@ -2,12 +2,14 @@ package com.nuvio.tv.ui.screens.addon
 
 import android.graphics.Bitmap
 import com.nuvio.tv.domain.model.Addon
+import com.nuvio.tv.core.health.AddonHealthLevel
 
 data class AddonManagerUiState(
     val isLoading: Boolean = false,
     val isInstalling: Boolean = false,
     val installUrl: String = "",
     val installedAddons: List<Addon> = emptyList(),
+    val healthByUrl: Map<String, AddonHealthLevel> = emptyMap(),
     val error: String? = null,
     val transientMessage: String? = null,
     val transientMessageIsError: Boolean = false,

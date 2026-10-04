@@ -190,7 +190,7 @@ class TraktPublicListSourceResolver @Inject constructor(
             name = title,
             poster = images.traktBestPosterUrl(),
             posterShape = PosterShape.POSTER,
-            background = images.traktBestBackdropUrl(),
+            background = images.traktLandscapeOnlyUrl(),
             logo = images.traktBestLogoUrl(),
             description = overview?.takeIf { it.isNotBlank() },
             releaseInfo = year?.toString() ?: released?.take(4),
@@ -204,7 +204,6 @@ class TraktPublicListSourceResolver @Inject constructor(
             country = country,
             imdbId = ids?.imdb?.takeIf { it.isNotBlank() },
             slug = ids?.slug?.takeIf { it.isNotBlank() },
-            landscapePoster = images.traktBestBackdropUrl(),
             rawPosterUrl = images.traktPosterUrl()
         )
     }
@@ -225,7 +224,7 @@ class TraktPublicListSourceResolver @Inject constructor(
             name = title,
             poster = images.traktBestPosterUrl(),
             posterShape = PosterShape.POSTER,
-            background = images.traktBestBackdropUrl(),
+            background = images.traktLandscapeOnlyUrl(),
             logo = images.traktBestLogoUrl(),
             description = overview?.takeIf { it.isNotBlank() },
             releaseInfo = year?.toString() ?: firstAired?.take(4),
@@ -239,7 +238,6 @@ class TraktPublicListSourceResolver @Inject constructor(
             country = country,
             imdbId = ids?.imdb?.takeIf { it.isNotBlank() },
             slug = ids?.slug?.takeIf { it.isNotBlank() },
-            landscapePoster = images.traktBestBackdropUrl(),
             rawPosterUrl = images.traktPosterUrl()
         )
     }

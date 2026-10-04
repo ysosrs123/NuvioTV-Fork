@@ -1,7 +1,9 @@
 package com.nuvio.tv.ui.screens.stream
 
+import com.nuvio.tv.core.util.TtffTrace
 import android.content.Context
 import android.util.Log
+import android.os.SystemClock
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,6 +17,10 @@ import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.torrent.TorrentSettings
 import com.nuvio.tv.core.torrent.TorrentService
 import com.nuvio.tv.core.torrent.TorrentState
+import com.nuvio.tv.core.player.AutoPlaySelection
+import com.nuvio.tv.core.player.PrefetchedSelectionGate
+import com.nuvio.tv.core.player.SelectionOutcome
+import com.nuvio.tv.core.player.SelectionSnapshot
 import com.nuvio.tv.core.player.StreamAutoPlayPolicy
 import com.nuvio.tv.core.player.StreamAutoPlaySelector
 import com.nuvio.tv.core.tracking.TrackingMediaKind
@@ -33,6 +39,10 @@ import com.nuvio.tv.data.local.StreamAutoPlayMode
 import com.nuvio.tv.data.local.StreamBadgeSettingsDataStore
 import com.nuvio.tv.data.local.StreamLinkCacheDataStore
 import com.nuvio.tv.data.local.BingeGroupCacheDataStore
+import com.nuvio.tv.data.mediaserver.ServerPlayback
+import com.nuvio.tv.data.mediaserver.ServerPlaybackTarget
+import com.nuvio.tv.data.mediaserver.ServerStreams
+import com.nuvio.tv.data.mediaserver.serverPlaybackMessageRes
 import com.nuvio.tv.domain.model.AddonStreams
 import com.nuvio.tv.domain.model.Meta
 import com.nuvio.tv.domain.model.Stream
@@ -50,11 +60,14 @@ import com.nuvio.tv.ui.screens.player.StreamSidecarSubtitles
 import com.nuvio.tv.ui.util.localizedGenreLabel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,6 +77,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 private const val TAG = "StreamScreenViewModel"
@@ -88,15 +102,32 @@ class StreamScreenViewModel @Inject constructor(
     private val directDebridResolver: DirectDebridResolver,
     private val directDebridStreamPreparer: DirectDebridStreamPreparer,
     private val debridStreamPresentation: DebridStreamPresentation,
+    private val debridSettingsDataStore: com.nuvio.tv.data.local.DebridSettingsDataStore,
     private val youTubeStreamResolver: YouTubeStreamResolver,
     private val externalPlaybackTracker: com.nuvio.tv.core.player.ExternalPlaybackTracker,
     private val subtitleRepository: com.nuvio.tv.domain.repository.SubtitleRepository,
     private val subtitleFileCache: com.nuvio.tv.core.player.SubtitleFileCache,
     private val torrentService: TorrentService,
+    private val serverStreams: ServerStreams,
+    private val serverPlayback: ServerPlayback,
+    partyRuntime: com.nuvio.tv.core.party.PartyRuntime,
     profileManager: com.nuvio.tv.core.profile.ProfileManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+
+    /** Latest debrid stream preferences for TRaSH-aligned auto-pick ranking. */
+    @Volatile
+    private var latestDebridStreamPreferences: com.nuvio.tv.domain.model.DebridStreamPreferences? = null
+
+    init {
+        viewModelScope.launch {
+            debridSettingsDataStore.settings.collect { settings ->
+                latestDebridStreamPreferences = settings.streamPreferences
+            }
+        }
+    }
     private var autoPlayHandledForSession = false
+    private var ttffSourcesReadyMarked = false
     private var directAutoPlayModeInitializedForSession = false
     private var directAutoPlayFlowEnabledForSession = false
     private var isTorrentStreamStarted = false
@@ -104,6 +135,7 @@ class StreamScreenViewModel @Inject constructor(
     private var streamLoadScope: kotlinx.coroutines.CoroutineScope? = null
     private var streamLoadCompleted = false
     private var sourceChipErrorDismissJob: Job? = null
+    private var sessionFillJob: Job? = null
     private var pendingCacheSaveJob: Job? = null
     private var streamBadgePresentationJob: Job? = null
     private var streamFilterExpandJob: Job? = null
@@ -140,6 +172,13 @@ class StreamScreenViewModel @Inject constructor(
         ?.toBooleanStrictOrNull()
         ?: false
     private val streamCacheKey: String = "${contentType.lowercase()}|$videoId"
+    private val partyHostMedia: com.nuvio.tv.core.party.PartyMedia? =
+        partyRuntime.guestMediaFor(videoId, season, episode)
+    private val autoSelectionOff: Boolean = manualSelection || partyHostMedia != null
+    private var partyPickDone = false
+
+    /** Set while this picker is choosing a source for a watch party: rows show how they compare with the host's file. */
+    val partyFingerprint: com.nuvio.tv.core.party.PartyFingerprint? = partyHostMedia?.fingerprint
 
     private val _uiState = MutableStateFlow(
         StreamScreenUiState(
@@ -245,7 +284,7 @@ class StreamScreenViewModel @Inject constructor(
                     externalPlaybackTracker.updateAutoNextOverlayStatus(message, progress)
                 }
         }
-        if (manualSelection) {
+        if (autoSelectionOff) {
             // Returning from a playback error: keep the user on stream selection.
             autoPlayHandledForSession = true
             directAutoPlayModeInitializedForSession = true
@@ -342,6 +381,8 @@ class StreamScreenViewModel @Inject constructor(
 
     private fun loadStreams(forceRefresh: Boolean = false) {
         streamRepository.setLocalPluginSearchPaused(false)
+        TtffTrace.begin("streams_load_start")
+        ttffSourcesReadyMarked = false
         streamLoadScope?.cancel()
         streamLoadScope = null
         streamLoadJob = null
@@ -351,12 +392,20 @@ class StreamScreenViewModel @Inject constructor(
             badgedAddonNames = emptySet()
         }
         sourceChipErrorDismissJob?.cancel()
+        sessionFillJob?.cancel()
         val newScope = kotlinx.coroutines.CoroutineScope(viewModelScope.coroutineContext + kotlinx.coroutines.SupervisorJob())
         streamLoadScope = newScope
         streamLoadJob = newScope.launch {
             streamLoadCompleted = false
+            // LOAD_SPLIT: on a StreamPrefetchCache hit the addon scrape is already
+            // done, yet sources_ready can still take about a second. These
+            // marks attribute that residual: three sequential DataStore reads run
+            // before the scrape is even built, and applySuccess does ordering,
+            // badge-merge and chip-merge work on Main afterwards. Logging only.
+            val loadSplitT0 = SystemClock.elapsedRealtime()
             val playerSettings = playerSettingsDataStore.playerSettings.first()
-            if (manualSelection) {
+            android.util.Log.i(TAG, "LOAD_SPLIT playerSettings=${SystemClock.elapsedRealtime() - loadSplitT0}ms")
+            if (autoSelectionOff) {
                 directAutoPlayModeInitializedForSession = true
                 directAutoPlayFlowEnabledForSession = false
                 autoPlayHandledForSession = true
@@ -371,7 +420,9 @@ class StreamScreenViewModel @Inject constructor(
                     playerSettings.streamAutoPlayPreferBingeGroupForNextEpisode &&
                     playerSettings.streamAutoPlayReuseBingeGroup
                 ) {
+                    val bingeSplitT0 = SystemClock.elapsedRealtime()
                     val hasBingeGroup = contentId?.let { bingeGroupCacheDataStore.get(it) } != null
+                    android.util.Log.i(TAG, "LOAD_SPLIT bingeGroup=${SystemClock.elapsedRealtime() - bingeSplitT0}ms")
                     if (hasBingeGroup) {
                         directAutoPlayFlowEnabledForSession = true
                     }
@@ -465,7 +516,20 @@ class StreamScreenViewModel @Inject constructor(
                 )
             }
 
-            val installedAddons = addonRepository.getInstalledAddons().first().enabledAddons()
+            val isNativeServerRequest = serverStreams.isNativeRequest(videoId)
+            val serverSourceNames = serverStreams.sources(contentType, videoId, season, episode).map { it.name }
+            val preferredServerNames = serverStreams.preferredSourceNames(contentType, videoId)
+            val addonsSplitT0 = SystemClock.elapsedRealtime()
+            val installedAddons = if (isNativeServerRequest) {
+                emptyList()
+            } else {
+                addonRepository.getInstalledAddons().first().enabledAddons()
+            }
+            android.util.Log.i(
+                TAG,
+                "LOAD_SPLIT installedAddons=${SystemClock.elapsedRealtime() - addonsSplitT0}ms " +
+                    "preScrapeTotal=${SystemClock.elapsedRealtime() - loadSplitT0}ms"
+            )
             val installedAddonOrder = installedAddons.map { it.displayName }
             val directDebridSourceNames = emptyList<String>()
             val directDebridAvailable = false
@@ -474,11 +538,30 @@ class StreamScreenViewModel @Inject constructor(
                 contentId?.let { bingeGroupCacheDataStore.get(it) }
             } else null
 
-            fun applySuccess(addonStreamGroups: List<AddonStreams>, isAllLoaded: Boolean) {
+            // Extracted so both selection call sites below, and future callers
+            // that must predict the same winner (ranking during the prefetch,
+            // pre-resolve), share one argument assembly. Every field here is
+            // already a snapshot: playerSettings from one .first(),
+            // installedAddonOrder from one getInstalledAddons().first(),
+            // persistedBingeGroup from one cache read.
+            val autoPlayInputs = AutoPlaySelection.Inputs(
+                mode = playerSettings.streamAutoPlayMode,
+                regexPattern = playerSettings.streamAutoPlayRegex,
+                source = playerSettings.streamAutoPlaySource,
+                installedAddonNames = installedAddonOrder.toSet(),
+                selectedAddons = playerSettings.streamAutoPlaySelectedAddons,
+                selectedPlugins = playerSettings.streamAutoPlaySelectedPlugins,
+                preferredBingeGroup = persistedBingeGroup
+            )
+
+            suspend fun applySuccess(addonStreamGroups: List<AddonStreams>, isAllLoaded: Boolean) {
+                val applyT0 = SystemClock.elapsedRealtime()
                 val orderedAddonStreams = StreamAutoPlaySelector.orderAddonStreams(
                     addonStreamGroups,
-                    installedAddonOrder
+                    installedAddonOrder,
+                    preferredServerNames
                 )
+                val applyOrderMs = SystemClock.elapsedRealtime() - applyT0
 
                 // Preserve badges already computed by prior badge jobs so they
                 // don't vanish when repository emits fresh (badge-less) streams.
@@ -504,28 +587,104 @@ class StreamScreenViewModel @Inject constructor(
                 }
 
                 val allStreams = mergedAddonStreams.flatMap { it.streams }
+                val applyBadgeMs = SystemClock.elapsedRealtime() - applyT0 - applyOrderMs
                 val availableAddons = mergedAddonStreams.map { it.addonName }
                 // Auto-select only after all addons have responded or the
                 // configured timeout has elapsed. This gives slower addons a
                 // chance to return higher-quality streams before the selector
                 // picks from whatever is available.
                 val shouldAutoSelect = !autoPlayHandledForSession && !resolvedAutoPlayTarget && isAllLoaded
-                val selectedAutoPlayStream = if (!shouldAutoSelect) {
+                // Ranking here, on Main.immediate, costs about 350-400 ms,
+                // mostly inside DirectDebridStreamFilter.factsFor, so the
+                // prefetch ranks seconds early instead. The gate below discards
+                // the cached winner unless every setting that decided it still
+                // holds, so a divergent pick is structurally excluded rather
+                // than detected. src=live with a reason is the honest fallback
+                // and must not be read as a win.
+                val partyPick = partyHostMedia?.takeIf { !partyPickDone }?.let { host ->
+                    com.nuvio.tv.core.party.PartyStreamMatcher
+                        .pick(host.fingerprint, allStreams) { it.partyFingerprint() }
+                        ?.let(allStreams::get)
+                }
+                if (partyPick != null) {
+                    partyPickDone = true
+                } else if (isAllLoaded && !partyPickDone && partyHostMedia?.sharedUrl != null) {
+                    partyPickDone = true
+                    updateUiStateIfChanged { it.copy(autoPlayPlaybackInfo = partySharedLinkPlayback(partyHostMedia)) }
+                }
+                val selectedAutoPlayStream = partyPick ?: if (!shouldAutoSelect) {
                     null
                 } else {
-                    StreamAutoPlaySelector.selectAutoPlayStream(
+                    val gateT0 = SystemClock.elapsedRealtime()
+                    val outcome = PrefetchedSelectionGate.resolve(
+                        prefetched = if (serverSourceNames.size > 1) {
+                            null
+                        } else {
+                            com.nuvio.tv.core.stream.StreamPrefetchCache.selectionFor(
+                                type = contentType,
+                                videoId = videoId,
+                                season = season,
+                                episode = episode
+                            )
+                        },
+                        snapshot = SelectionSnapshot(
+                            inputs = autoPlayInputs,
+                            installedAddonOrder = installedAddonOrder,
+                            preferences = latestDebridStreamPreferences
+                        ),
                         streams = allStreams,
-                        mode = playerSettings.streamAutoPlayMode,
-                        regexPattern = playerSettings.streamAutoPlayRegex,
-                        source = playerSettings.streamAutoPlaySource,
-                        installedAddonNames = installedAddonOrder.toSet(),
-                        selectedAddons = playerSettings.streamAutoPlaySelectedAddons,
-                        selectedPlugins = playerSettings.streamAutoPlaySelectedPlugins,
-                        preferredBingeGroup = persistedBingeGroup,
-                        preferBingeGroupInSelection = persistedBingeGroup != null
+                        identityOf = { it.badgeMergeKey() }
                     )
+                    when (outcome) {
+                        is SelectionOutcome.Hit -> {
+                            android.util.Log.i(
+                                TAG,
+                                "R2_SELECT src=prefetch " +
+                                    "ms=${SystemClock.elapsedRealtime() - gateT0}"
+                            )
+                            outcome.stream
+                        }
+                        is SelectionOutcome.Live -> {
+                            val debridPreferences = latestDebridStreamPreferences
+                            val ranked = withContext(Dispatchers.Default) {
+                                AutoPlaySelection.select(
+                                    streams = allStreams,
+                                    inputs = autoPlayInputs,
+                                    debridStreamPreferences = debridPreferences
+                                )
+                            }
+                            val live = ranked.takeUnless { resolvedAutoPlayTarget || autoPlayHandledForSession }
+                            android.util.Log.i(
+                                TAG,
+                                "R2_SELECT src=live reason=${outcome.reason} " +
+                                    "ms=${SystemClock.elapsedRealtime() - gateT0}"
+                            )
+                            live
+                        }
+                    }
+                }
+                // APPLY_SPLIT: a residual of up to ~900 ms sits between the
+                // stream list arriving and the sources_ready mark below. Everything
+                // timed here runs on Dispatchers.Main.immediate via viewModelScope,
+                // and applySuccess runs twice -- once at isAllLoaded=false and again
+                // on flow completion -- so order and badge work is paid twice while
+                // the ranking is paid once. selectAutoPlayStream fans out to
+                // StreamQualityRank.rank, which derives facts from every stream name.
+                // Logging only.
+                val applySelectMs = SystemClock.elapsedRealtime() - applyT0 - applyOrderMs - applyBadgeMs
+                android.util.Log.i(
+                    TAG,
+                    "APPLY_SPLIT allLoaded=$isAllLoaded groups=${mergedAddonStreams.size} " +
+                        "streams=${allStreams.size} order=${applyOrderMs}ms badge=${applyBadgeMs}ms " +
+                        "select=${applySelectMs}ms ranked=$shouldAutoSelect " +
+                        "total=${SystemClock.elapsedRealtime() - applyT0}ms"
+                )
+                if (shouldAutoSelect && !ttffSourcesReadyMarked) {
+                    ttffSourcesReadyMarked = true
+                    TtffTrace.mark("sources_ready")
                 }
                 if (selectedAutoPlayStream != null) {
+                    TtffTrace.mark("auto_selected")
                     resolvedAutoPlayTarget = true
                 }
 
@@ -602,6 +761,8 @@ class StreamScreenViewModel @Inject constructor(
             updateSourceChipsForFetchStart(
                 installedAddons = installedAddons,
                 directDebridSourceNames = directDebridSourceNames,
+                serverSourceNames = serverSourceNames,
+                includePlugins = !isNativeServerRequest,
                 alreadySucceededNames = alreadySucceededNames
             )
 
@@ -659,13 +820,29 @@ class StreamScreenViewModel @Inject constructor(
             }
 
             val streamLoadInner = launch {
-                streamRepository.getStreamsFromAllAddons(
+                // A completed details-page prefetch is emitted here as one
+                // Success followed by completion -- exactly the shape of a very
+                // fast scrape -- so the collect below and the post-collect
+                // isAllLoaded=true pass behave identically. A miss returns the
+                // live repository flow unchanged.
+                com.nuvio.tv.core.stream.StreamPrefetchCache.streamsFor(
+                    repository = streamRepository,
                     type = contentType,
                     videoId = videoId,
                     season = season,
                     episode = episode,
                     forceRefresh = forceRefresh
-                ).collect { result ->
+                )
+                    // Each emission carries the FULL accumulated
+                    // list and applySuccess reprocesses all of it (ordering,
+                    // badge merge, chip merge) on Main. conflate() drops
+                    // intermediate emissions that arrive while a presentation
+                    // pass is still running: zero added latency for a lone
+                    // addon, and burst arrivals from many addons collapse to
+                    // one pass over the latest accumulation. The final
+                    // emission is always delivered.
+                    .conflate()
+                    .collect { result ->
                     when (result) {
                         is NetworkResult.Success -> {
                             lastSuccessData = result.data
@@ -709,19 +886,13 @@ class StreamScreenViewModel @Inject constructor(
                                 // match is found we can start playback immediately
                                 // without waiting for the full timeout.
                                 val orderedStreams = StreamAutoPlaySelector.orderAddonStreams(
-                                    result.data, installedAddonOrder
+                                    result.data, installedAddonOrder, preferredServerNames
                                 )
                                 val allStreams = orderedStreams.flatMap { it.streams }
-                                val earlyMatch = StreamAutoPlaySelector.selectAutoPlayStream(
+                                val earlyMatch = AutoPlaySelection.select(
                                     streams = allStreams,
-                                    mode = playerSettings.streamAutoPlayMode,
-                                    regexPattern = playerSettings.streamAutoPlayRegex,
-                                    source = playerSettings.streamAutoPlaySource,
-                                    installedAddonNames = installedAddonOrder.toSet(),
-                                    selectedAddons = playerSettings.streamAutoPlaySelectedAddons,
-                                    selectedPlugins = playerSettings.streamAutoPlaySelectedPlugins,
-                                    preferredBingeGroup = persistedBingeGroup,
-                                    preferBingeGroupInSelection = true,
+                                    inputs = autoPlayInputs,
+                                    debridStreamPreferences = latestDebridStreamPreferences,
                                     bingeGroupOnly = true
                                 )
                                 if (earlyMatch != null) {
@@ -769,7 +940,36 @@ class StreamScreenViewModel @Inject constructor(
                     autoSelectTriggered = true
                     lastSuccessData?.let { applySuccess(it, isAllLoaded = true) }
                 }
-                markRemainingSourceChipsAsError()
+                // If this collect's pool was cut short by the prefetch
+                // completion cap (capHit) and chips are still loading, the missing
+                // sources are alive in the session, not dead. Fill the manual list
+                // from the session in the background WITHOUT gating auto-select
+                // (already resolved above), then mark ERROR only for genuinely dead
+                // addons. Non-capHit / fully-loaded collects mark immediately.
+                // Detached on viewModelScope so it never defers
+                // streamLoadCompleted; cancelled at the next loadStreams.
+                val hasLoadingChips = _uiState.value.sourceChips.any {
+                    it.status == SourceChipStatus.LOADING
+                }
+                if (hasLoadingChips &&
+                    com.nuvio.tv.core.stream.StreamPrefetchCache.capHitFor(
+                        contentType, videoId, season, episode
+                    )
+                ) {
+                    sessionFillJob?.cancel()
+                    sessionFillJob = viewModelScope.launch {
+                        streamRepository.getStreamsFromAllAddons(
+                            contentType, videoId, season, episode
+                        ).collect { fillResult ->
+                            if (fillResult is NetworkResult.Success) {
+                                applySuccess(fillResult.data, isAllLoaded = false)
+                            }
+                        }
+                        markRemainingSourceChipsAsError()
+                    }
+                } else {
+                    markRemainingSourceChipsAsError()
+                }
                 if (directAutoPlayFlowEnabledForSession && !resolvedAutoPlayTarget) {
                     directAutoPlayFlowEnabledForSession = false
                     // All addons finished with no instant stream to auto-play: drop the loader and
@@ -902,6 +1102,7 @@ class StreamScreenViewModel @Inject constructor(
     }
 
     private fun shouldAttemptEmbeddedMetaStreamLookup(): Boolean {
+        if (serverStreams.isNativeRequest(videoId)) return false
         val metaId = contentId?.takeIf { it.isNotBlank() } ?: return false
         if (contentType.isBlank()) return false
         if (metaRepository.getCachedMeta(contentType, metaId)?.videos?.any {
@@ -916,6 +1117,8 @@ class StreamScreenViewModel @Inject constructor(
     private suspend fun updateSourceChipsForFetchStart(
         installedAddons: List<com.nuvio.tv.domain.model.Addon>,
         directDebridSourceNames: List<String>,
+        serverSourceNames: List<String>,
+        includePlugins: Boolean,
         alreadySucceededNames: Set<String> = emptySet()
     ) {
         val addonNames = installedAddons
@@ -923,7 +1126,7 @@ class StreamScreenViewModel @Inject constructor(
             .map { it.displayName }
 
         val pluginNames = try {
-            if (pluginManager.pluginsEnabled.first()) {
+            if (includePlugins && pluginManager.pluginsEnabled.first()) {
                 val groupByRepository = pluginManager.groupStreamsByRepository.first()
                 val scrapers = pluginManager.enabledScrapers.first()
                     .filter { it.supportsType(contentType) }
@@ -946,7 +1149,7 @@ class StreamScreenViewModel @Inject constructor(
             emptyList()
         }
 
-        val orderedNames = (directDebridSourceNames + addonNames + pluginNames).distinct()
+        val orderedNames = (serverSourceNames + directDebridSourceNames + addonNames + pluginNames).distinct()
         if (orderedNames.isEmpty()) {
             updateUiStateIfChanged { it.copy(sourceChips = emptyList()) }
             return
@@ -1165,12 +1368,22 @@ class StreamScreenViewModel @Inject constructor(
         }
     }
 
+    suspend fun prewarmSelectedPlayback(playbackInfo: StreamPlaybackInfo) {
+        val settings = playerSettingsDataStore.playerSettings.first()
+        com.nuvio.tv.ui.screens.player.PlayerPlaybackNetworking.prewarmSelectedPlayback(
+            playbackInfo.url, playbackInfo.headers, enableHttp2 = settings.enableHttp2
+        )
+    }
+
     suspend fun resolveStreamForPlayback(stream: Stream): StreamPlaybackInfo? {
+        stream.serverTarget?.let { target -> return prepareServerStream(stream, target) }
+        TtffTrace.mark("resolve_start")
         if (stream.youTubeIdToResolve() != null) {
             return resolveYouTubeStreamForPlayback(stream)
         }
         if (!directDebridResolver.shouldResolveToPlayableStream(stream)) {
             Log.d(TAG, "resolveStreamForPlayback: no debrid resolve needed, using direct URL")
+            TtffTrace.mark("resolve_skip_direct")
             return getStreamForPlayback(stream)
         }
 
@@ -1236,6 +1449,7 @@ class StreamScreenViewModel @Inject constructor(
                         )
                     }
                 }
+                TtffTrace.mark("resolve_done")
                 resolved
             }
             DirectDebridResolveResult.MissingApiKey -> {
@@ -1291,6 +1505,42 @@ class StreamScreenViewModel @Inject constructor(
         }
         // The resolved URL stops working after a few hours, so it isn't kept for reusing the last link.
         return getStreamForPlayback(resolved, saveLastLink = false)
+    }
+
+    private suspend fun prepareServerStream(stream: Stream, target: ServerPlaybackTarget): StreamPlaybackInfo? {
+        val showLoadingStatus = playerSettingsDataStore.playerSettings.first().showPlayerLoadingStatus
+        updateUiStateIfChanged {
+            it.copy(
+                showDirectAutoPlayOverlay = true,
+                directAutoPlayMessage = if (showLoadingStatus) context.getString(R.string.player_loading_preparing) else null,
+                playbackErrorMessage = null
+            )
+        }
+        val session = try {
+            serverPlayback.prepare(target)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            updateUiStateIfChanged {
+                it.copy(
+                    showDirectAutoPlayOverlay = false,
+                    directAutoPlayMessage = null,
+                    playbackErrorMessage = context.getString(error.serverPlaybackMessageRes())
+                )
+            }
+            return null
+        }
+        updateUiStateIfChanged {
+            if (it.isDirectAutoPlayFlow) it.copy(directAutoPlayMessage = null)
+            else it.copy(showDirectAutoPlayOverlay = false, directAutoPlayMessage = null)
+        }
+        val playbackInfo = getStreamForPlayback(stream).copy(
+            url = session.url,
+            headers = session.headers.takeIf { it.isNotEmpty() },
+            isServerStream = true
+        )
+        StreamSidecarSubtitles.set(session.url, session.subtitles + stream.subtitles)
+        return playbackInfo
     }
 
     fun onPlaybackErrorShown() {
@@ -1393,6 +1643,35 @@ class StreamScreenViewModel @Inject constructor(
     /**
      * Gets the selected stream for playback
      */
+    private fun partySharedLinkPlayback(host: com.nuvio.tv.core.party.PartyMedia): StreamPlaybackInfo =
+        StreamPlaybackInfo(
+            url = host.sharedUrl,
+            title = title,
+            streamName = host.streamName ?: host.addonName ?: title,
+            year = year,
+            isExternal = false,
+            isTorrent = false,
+            infoHash = null,
+            ytId = null,
+            headers = null,
+            contentId = contentId ?: videoId.substringBefore(":"),
+            contentType = contentType,
+            contentName = contentName ?: title,
+            poster = poster,
+            backdrop = backdrop,
+            logo = logo,
+            videoId = videoId,
+            season = season,
+            episode = episode,
+            episodeTitle = episodeName,
+            bingeGroup = null,
+            profileId = playbackProfileId,
+            filename = host.fingerprint.filename,
+            videoHash = host.fingerprint.videoHash,
+            videoSize = host.fingerprint.sizeBytes,
+            contentLanguage = contentLanguage
+        )
+
     fun getStreamForPlayback(stream: Stream, saveLastLink: Boolean = true): StreamPlaybackInfo {
         cancelStreamsLoad()
         val playbackInfo = StreamPlaybackInfo(
@@ -1420,12 +1699,16 @@ class StreamScreenViewModel @Inject constructor(
             filename = stream.behaviorHints?.filename,
             videoHash = stream.behaviorHints?.videoHash,
             videoSize = stream.behaviorHints?.videoSize,
+            // Already resolved by loadMetadataIfNeeded, including the per-episode
+            // case; the route value is only a seed for it.
+            runtimeMinutes = _uiState.value.runtime,
             addonName = stream.addonName,
             addonLogo = stream.addonLogo,
             streamDescription = stream.description,
             fileIdx = stream.getEffectiveFileIdx(),
             sources = stream.sources,
-            contentLanguage = contentLanguage
+            contentLanguage = contentLanguage,
+            launchStartedAtMs = TtffTrace.t0ElapsedMsOrNull()
         )
         StreamSidecarSubtitles.set(playbackUrlFor(playbackInfo), stream.subtitles)
 
@@ -1901,6 +2184,7 @@ class StreamScreenViewModel @Inject constructor(
 }
 
 private fun Stream.badgeMergeKey(): String {
+    serverTarget?.let { target -> return "$addonName|${target.key()}" }
     infoHash?.lowercase()?.let { hash -> return "$addonName|$hash:${fileIdx ?: ""}" }
     // Use the playable URL as primary key - but for streams without a playable URL
     // (e.g. statistic/informational entries that only have externalUrl), fall back
@@ -1941,12 +2225,17 @@ data class StreamPlaybackInfo(
     val filename: String? = null,
     val videoHash: String? = null,
     val videoSize: Long? = null,
+    val runtimeMinutes: Int? = null,
     val addonName: String? = null,
     val addonLogo: String? = null,
     val streamDescription: String? = null,
     val fileIdx: Int? = null,
     val sources: List<String>? = null,
-    val contentLanguage: String? = null
+    val contentLanguage: String? = null,
+    // Time to first frame: SystemClock.elapsedRealtime() at the press that started this
+    // launch (title press for auto-select, stream selection for manual).
+    val launchStartedAtMs: Long? = null,
+    val isServerStream: Boolean = false
 )
 
 private fun playbackUrlFor(playbackInfo: StreamPlaybackInfo): String? =

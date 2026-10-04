@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import com.nuvio.tv.R
 import com.nuvio.tv.core.poster.withCustomPosterUrls
 import com.nuvio.tv.core.tmdb.TmdbEntityBrowseData
@@ -12,6 +15,9 @@ import com.nuvio.tv.core.tmdb.TmdbEntityRailType
 import com.nuvio.tv.core.tmdb.TmdbEntityMediaType
 import com.nuvio.tv.core.tmdb.TmdbMetadataService
 import com.nuvio.tv.data.local.TmdbSettingsDataStore
+import com.nuvio.tv.data.mdblist.MdbListItemType
+import com.nuvio.tv.data.mdblist.MdbListSyncRepository
+import com.nuvio.tv.data.mdblist.MdbListSyncSnapshot
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +34,7 @@ class TmdbEntityBrowseViewModel @Inject constructor(
     private val tmdbMetadataService: TmdbMetadataService,
     private val tmdbSettingsDataStore: TmdbSettingsDataStore,
     private val watchProgressRepository: com.nuvio.tv.domain.repository.WatchProgressRepository,
+    private val mdbListSync: MdbListSyncRepository,
     private val watchedSeriesStateHolder: com.nuvio.tv.data.local.WatchedSeriesStateHolder,
     private val layoutPreferenceDataStore: com.nuvio.tv.data.local.LayoutPreferenceDataStore,
     val posterOptions: com.nuvio.tv.ui.components.posteroptions.PosterOptionsController,
@@ -47,7 +54,8 @@ class TmdbEntityBrowseViewModel @Inject constructor(
 
     private val _watchedMovieIds = MutableStateFlow<Set<String>>(emptySet())
     val watchedMovieIds: StateFlow<Set<String>> = _watchedMovieIds.asStateFlow()
-    val watchedSeriesIds: StateFlow<Set<String>> = watchedSeriesStateHolder.fullyWatchedSeriesIds
+    private val _watchedSeriesIds = MutableStateFlow<Set<String>>(emptySet())
+    val watchedSeriesIds: StateFlow<Set<String>> = _watchedSeriesIds.asStateFlow()
 
     private val _uiState = MutableStateFlow<TmdbEntityBrowseUiState>(TmdbEntityBrowseUiState.Loading)
     val uiState: StateFlow<TmdbEntityBrowseUiState> = _uiState.asStateFlow()
@@ -61,6 +69,23 @@ class TmdbEntityBrowseViewModel @Inject constructor(
         viewModelScope.launch {
             watchProgressRepository.observeWatchedMovieIds()
                 .collect { ids -> _watchedMovieIds.value = ids }
+        }
+        // The browser's items are keyed "tmdb:N", while fully-watched series
+        // are keyed by the id they were validated under (usually imdb), so
+        // the set is expanded with each show's sibling ids where MDBList
+        // knows them. Shows MDBList has never seen keep their original key
+        // only - the same scope upstream's Simkl aliasing has.
+        viewModelScope.launch {
+            combine(
+                watchedSeriesStateHolder.fullyWatchedSeriesIds,
+                mdbListSync.state.map { mdbListSync.currentSnapshot()?.showSiblingIds().orEmpty() }.distinctUntilChanged()
+            ) { watched, siblings ->
+                if (siblings.isEmpty()) watched
+                else buildSet {
+                    addAll(watched)
+                    for (id in watched) siblings[id]?.let(::addAll)
+                }
+            }.collect { ids -> _watchedSeriesIds.value = ids }
         }
         viewModelScope.launch {
             layoutPreferenceDataStore.posterCardCornerRadiusDp
@@ -177,5 +202,13 @@ class TmdbEntityBrowseViewModel @Inject constructor(
                 }
             }
         )
+    }
+}
+
+private fun MdbListSyncSnapshot.showSiblingIds(): Map<String, Set<String>> = buildMap {
+    for (record in watched) {
+        if (record.type == MdbListItemType.MOVIE) continue
+        val aliases = record.media.ids.aliases()
+        for (alias in aliases) put(alias, aliases)
     }
 }

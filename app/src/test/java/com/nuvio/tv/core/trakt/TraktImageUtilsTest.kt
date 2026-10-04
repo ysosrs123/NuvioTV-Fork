@@ -38,6 +38,20 @@ class TraktImageUtilsTest {
     }
 
     @Test
+    fun `landscape artwork never falls back to the poster`() {
+        val posterOnly = TraktImagesDto(poster = listOf("media.trakt.tv/images/movies/poster.jpg.webp"))
+        assertNull(posterOnly.traktLandscapeOnlyUrl())
+        assertEquals("https://media.trakt.tv/images/movies/poster.jpg.webp", posterOnly.traktBestBackdropUrl())
+
+        val withBanner = posterOnly.copy(banner = listOf("media.trakt.tv/images/movies/banner.jpg.webp"))
+        assertEquals("https://media.trakt.tv/images/movies/banner.jpg.webp", withBanner.traktLandscapeOnlyUrl())
+        val withThumb = withBanner.copy(thumb = listOf("media.trakt.tv/images/movies/thumb.jpg.webp"))
+        assertEquals("https://media.trakt.tv/images/movies/thumb.jpg.webp", withThumb.traktLandscapeOnlyUrl())
+        val withFanart = withThumb.copy(fanart = listOf("media.trakt.tv/images/movies/fanart.jpg.webp"))
+        assertEquals("https://media.trakt.tv/images/movies/fanart.jpg.webp", withFanart.traktLandscapeOnlyUrl())
+    }
+
+    @Test
     fun `keeps missing artwork empty`() {
         assertNull(emptyList<String>().firstTraktImageUrl())
         assertNull(TraktImagesDto().traktBestPosterUrl())

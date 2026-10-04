@@ -701,7 +701,7 @@ class CollectionEditorViewModel @Inject constructor(
                 val resolved = metadata.getOrNull()
                 addTmdbSourceToFolder(
                     source = if (source.title.isBlank()) source.copy(title = resolved?.title.orEmpty()) else source,
-                    coverImageUrl = resolved?.coverImageUrl
+                    coverImageUrl = resolved?.coverFor(editingTileShape())
                 )
             }
             return
@@ -715,12 +715,14 @@ class CollectionEditorViewModel @Inject constructor(
             viewModelScope.launch {
                 val metadata = runCatching { importMetadataFor(metadataSource.sourceType, metadataSource.tmdbId!!) }
                 val resolved = metadata.getOrNull()
-                addTmdbSourcesToFolder(sources, resolved?.coverImageUrl)
+                addTmdbSourcesToFolder(sources, resolved?.coverFor(editingTileShape()))
             }
             return
         }
         addTmdbSourcesToFolder(sources)
     }
+
+    private fun editingTileShape(): PosterShape? = _uiState.value.editingFolder?.tileShape
 
     private fun addTmdbSourceToFolder(source: TmdbCollectionSource, coverImageUrl: String? = null) {
         addTmdbSourcesToFolder(listOf(source), coverImageUrl)
@@ -837,7 +839,7 @@ class CollectionEditorViewModel @Inject constructor(
                         sortBy = state.tmdbSortBy,
                         filters = state.tmdbFilters
                     ),
-                    coverImageUrl = resolved?.coverImageUrl
+                    coverImageUrl = resolved?.coverFor(editingTileShape())
                 )
             }
             return

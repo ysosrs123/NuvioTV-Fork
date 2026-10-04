@@ -55,9 +55,9 @@ class ExperienceModeSelectionViewModel @Inject constructor(
 ) : ViewModel() {
     suspend fun choose(mode: ExperienceMode) {
         experienceModeDataStore.setMode(mode)
-        if (mode == ExperienceMode.ESSENTIAL) {
-            layoutPreferenceDataStore.setLayout(HomeLayout.MODERN)
-        }
+        // Both modes use the Modern layout; setting it here marks
+        // has_chosen_layout so the layout-picker step is skipped.
+        layoutPreferenceDataStore.setLayout(HomeLayout.MODERN)
     }
 }
 

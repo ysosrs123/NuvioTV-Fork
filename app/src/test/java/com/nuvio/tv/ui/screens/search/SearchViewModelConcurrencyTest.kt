@@ -142,6 +142,7 @@ class SearchViewModelConcurrencyTest {
             watchProgressRepository = watchProgress,
             watchedSeriesStateHolder = watchedSeries,
             posterOptions = mockk<PosterOptionsController>(relaxed = true),
+            serverCatalog = mockk { every { searchAddons } returns flowOf(emptyList()) },
             context = mockk<Context>(relaxed = true)
         )
     }
@@ -189,6 +190,8 @@ class SearchViewModelConcurrencyTest {
             emit(NetworkResult.Loading)
             emit(NetworkResult.Success(row(addon, query)))
         }
+
+        override suspend fun clearCaches() = Unit
 
         private fun row(addon: Addon, query: String): CatalogRow = CatalogRow(
             addonId = addon.id,

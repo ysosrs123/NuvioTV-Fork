@@ -1,19 +1,13 @@
 package com.nuvio.tv.ui.screens.library
 
 import android.view.KeyEvent as AndroidKeyEvent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.getValue
@@ -29,10 +23,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -43,6 +35,8 @@ import com.nuvio.tv.domain.model.LibraryListPrivacy
 import kotlinx.coroutines.delay
 import com.nuvio.tv.domain.model.localizedTitle
 import com.nuvio.tv.ui.components.NuvioDialog
+import com.nuvio.tv.ui.components.PanelActionRow
+import com.nuvio.tv.ui.components.PlayerPanelRow
 import com.nuvio.tv.ui.theme.NuvioTheme
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDirection
@@ -78,125 +72,86 @@ internal fun ManageListsDialog(
         }
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Box(
-            modifier = Modifier
-                .width(620.dp)
-                .background(NuvioTheme.colors.BackgroundElevated, RoundedCornerShape(NuvioTheme.radii.xl))
-                .padding(NuvioTheme.spacing.xl)
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Text(
-                    text = stringResource(R.string.library_manage_lists),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = NuvioTheme.colors.TextPrimary
-                )
+    NuvioDialog(
+        onDismiss = onDismiss,
+        title = stringResource(R.string.library_manage_lists),
+        width = 620.dp
+    ) {
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color(0xFFFFB6B6)
+            )
+        }
 
-                if (errorMessage != null) {
-                    Text(
-                        text = errorMessage,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFFFB6B6)
+        if (personalTabs.isEmpty()) {
+            Text(
+                text = stringResource(R.string.library_no_lists),
+                style = MaterialTheme.typography.bodyMedium,
+                color = NuvioTheme.extendedColors.textSecondary
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                items(personalTabs, key = { it.key }) { tab ->
+                    PlayerPanelRow(
+                        title = tab.localizedTitle(),
+                        selected = tab.key == selectedKey,
+                        onClick = { if (!pending) onSelect(tab.key) },
+                        focusRequester = if (tab.key == personalTabs.firstOrNull()?.key) firstFocusRequester else null
                     )
-                }
-
-                if (personalTabs.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.library_no_lists),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = NuvioTheme.extendedColors.textSecondary
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(220.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        items(personalTabs, key = { it.key }) { tab ->
-                            val selected = tab.key == selectedKey
-                            Button(
-                                onClick = { onSelect(tab.key) },
-                                enabled = !pending,
-                                modifier = if (tab.key == personalTabs.firstOrNull()?.key) {
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .focusRequester(firstFocusRequester)
-                                } else {
-                                    Modifier.fillMaxWidth()
-                                },
-                                colors = ButtonDefaults.colors(
-                                    containerColor = if (selected) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                                    contentColor = NuvioTheme.colors.TextPrimary
-                                )
-                            ) {
-                                Text(
-                                    text = tab.localizedTitle(),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Button(
-                        onClick = onCreate,
-                        modifier = if (personalTabs.isEmpty()) Modifier.focusRequester(firstFocusRequester) else Modifier,
-                        enabled = !pending,
-                        colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextPrimary
-                        )
-                    ) { Text(stringResource(R.string.library_list_create)) }
-                    Button(
-                        onClick = onEdit,
-                        enabled = !pending && selectedKey != null,
-                        colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextPrimary
-                        )
-                    ) { Text(stringResource(R.string.library_list_edit)) }
-                    if (capabilities.supportsReordering) {
-                        Button(
-                            onClick = onMoveUp,
-                            enabled = !pending && selectedKey != null,
-                            colors = ButtonDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundCard,
-                                contentColor = NuvioTheme.colors.TextPrimary
-                            )
-                        ) { Text(stringResource(R.string.library_list_move_up)) }
-                        Button(
-                            onClick = onMoveDown,
-                            enabled = !pending && selectedKey != null,
-                            colors = ButtonDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundCard,
-                                contentColor = NuvioTheme.colors.TextPrimary
-                            )
-                        ) { Text(stringResource(R.string.library_list_move_down)) }
-                    }
-                }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Button(
-                        onClick = onDelete,
-                        enabled = !pending && selectedKey != null,
-                        colors = ButtonDefaults.colors(
-                            containerColor = Color(0xFF4A2323),
-                            contentColor = NuvioTheme.colors.TextPrimary
-                        )
-                    ) { Text(stringResource(R.string.library_list_delete)) }
-                    Button(
-                        onClick = onDismiss,
-                        enabled = !pending,
-                        colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextPrimary
-                        )
-                    ) { Text(stringResource(R.string.library_list_close)) }
                 }
             }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            PanelActionRow(
+                label = stringResource(R.string.library_list_create),
+                onClick = onCreate,
+                enabled = !pending,
+                modifier = Modifier.weight(1f),
+                focusRequester = if (personalTabs.isEmpty()) firstFocusRequester else null
+            )
+            PanelActionRow(
+                label = stringResource(R.string.library_list_edit),
+                onClick = onEdit,
+                enabled = !pending && selectedKey != null,
+                modifier = Modifier.weight(1f)
+            )
+            if (capabilities.supportsReordering) {
+                PanelActionRow(
+                    label = stringResource(R.string.library_list_move_up),
+                    onClick = onMoveUp,
+                    enabled = !pending && selectedKey != null,
+                    modifier = Modifier.weight(1f)
+                )
+                PanelActionRow(
+                    label = stringResource(R.string.library_list_move_down),
+                    onClick = onMoveDown,
+                    enabled = !pending && selectedKey != null,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            PanelActionRow(
+                label = stringResource(R.string.library_list_delete),
+                onClick = onDelete,
+                enabled = !pending && selectedKey != null,
+                modifier = Modifier.weight(1f)
+            )
+            PanelActionRow(
+                label = stringResource(R.string.library_list_close),
+                onClick = onDismiss,
+                enabled = !pending,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
@@ -347,16 +302,10 @@ internal fun ListEditorDialog(
             }
         }
 
-        Button(
+        PanelActionRow(
+            label = if (pending) stringResource(R.string.action_saving) else stringResource(R.string.action_save),
             onClick = onSave,
-            enabled = !pending,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
-            )
-        ) {
-            Text(if (pending) stringResource(R.string.action_saving) else stringResource(R.string.action_save))
-        }
+            enabled = !pending
+        )
     }
 }

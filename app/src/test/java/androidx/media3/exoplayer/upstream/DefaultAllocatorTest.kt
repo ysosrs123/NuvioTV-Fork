@@ -41,8 +41,13 @@ class DefaultAllocatorTest {
         allocator.release(a2)
         allocator.release(a3)
 
-        // In the fixed version, memoryFootprint MUST be 0 because trim() was called on release.
-        // In the buggy version, these allocations are leaked into the pool, so memoryFootprint will be 3 * segmentSize.
+        // release() only returns segments to the pool, so they are still held here.
+        assertEquals(0, allocator.totalBytesAllocated)
+        assertEquals(3 * segmentSize, allocator.memoryFootprint)
+
+        // The sample queues call trim() when they are released, and with a zero target that
+        // must free every pooled segment.
+        allocator.trim()
         assertEquals(0, allocator.memoryFootprint)
         assertEquals(0, allocator.availableBytes)
     }

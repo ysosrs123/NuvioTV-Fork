@@ -3,6 +3,8 @@
 package com.nuvio.tv.ui.screens.account
 
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.screens.settings.isV2Settings
+import com.nuvio.tv.ui.screens.settings.settingsItemColor
 import com.nuvio.tv.ui.util.contentTextDirection
 
 import androidx.compose.foundation.BorderStroke
@@ -74,7 +76,8 @@ fun AccountSettingsContent(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = if (com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null)
+            Modifier.fillMaxWidth() else Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = NuvioTheme.spacing.sm),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
@@ -135,14 +138,14 @@ private fun SignedInAccountSettingsContent(
     var showSignOutConfirmation by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = if (isV2Settings()) Modifier.fillMaxWidth() else Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .weight(1f, fill = !isV2Settings()),
             contentPadding = PaddingValues(bottom = NuvioTheme.spacing.xs),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
@@ -201,7 +204,7 @@ private fun SyncOverviewCard(overview: SyncOverview) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = NuvioTheme.colors.BackgroundCard,
+                color = settingsItemColor(NuvioTheme.colors.BackgroundCard),
                 shape = RoundedCornerShape(NuvioTheme.radii.sm)
             )
             .padding(10.dp)
@@ -212,7 +215,7 @@ private fun SyncOverviewCard(overview: SyncOverview) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = NuvioTheme.colors.BackgroundElevated,
+                        color = settingsItemColor(NuvioTheme.colors.BackgroundElevated),
                         shape = RoundedCornerShape(6.dp)
                     )
                     .padding(horizontal = NuvioTheme.spacing.sm, vertical = 6.dp),
@@ -277,7 +280,7 @@ private fun ProfileSyncRow(profile: ProfileSyncStats) {
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
             .background(
-                color = if (isFocused) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundElevated,
+                color = if (isFocused) NuvioTheme.colors.FocusBackground else settingsItemColor(NuvioTheme.colors.BackgroundElevated),
                 shape = rowShape
             )
             .border(
@@ -353,7 +356,7 @@ private fun SyncOverviewLoadingCard() {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = NuvioTheme.colors.BackgroundCard,
+                color = settingsItemColor(NuvioTheme.colors.BackgroundCard),
                 shape = RoundedCornerShape(NuvioTheme.radii.sm)
             )
             .padding(10.dp),

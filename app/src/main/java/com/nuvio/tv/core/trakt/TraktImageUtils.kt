@@ -41,6 +41,10 @@ internal fun TraktImagesDto?.traktBestBackdropUrl(): String? {
     return traktFanartUrl() ?: traktBannerUrl() ?: traktThumbUrl() ?: traktPosterUrl()
 }
 
+internal fun TraktImagesDto?.traktLandscapeOnlyUrl(): String? {
+    return traktFanartUrl() ?: traktThumbUrl() ?: traktBannerUrl()
+}
+
 internal fun TraktImagesDto?.traktBestLandscapeUrl(): String? {
     return traktThumbUrl() ?: traktFanartUrl() ?: traktBannerUrl() ?: traktPosterUrl()
 }

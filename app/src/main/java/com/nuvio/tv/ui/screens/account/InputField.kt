@@ -2,6 +2,10 @@
 
 package com.nuvio.tv.ui.screens.account
 
+import com.nuvio.tv.ui.screens.settings.isV2Settings
+import com.nuvio.tv.ui.screens.settings.settingsItemColor
+import com.nuvio.tv.ui.screens.settings.settingsItemFocus
+import com.nuvio.tv.ui.screens.settings.settingsItemShape
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import androidx.compose.foundation.BorderStroke
@@ -51,6 +55,10 @@ internal fun InputField(
     val textFieldFocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     var isEditing by remember { mutableStateOf(false) }
+    var isFocused by remember { mutableStateOf(false) }
+    val v2 = isV2Settings()
+    val shape = if (v2) settingsItemShape() else RoundedCornerShape(NuvioTheme.radii.md)
+    val container = if (v2) settingsItemColor(NuvioTheme.colors.BackgroundCard) else NuvioTheme.colors.BackgroundCard
 
     LaunchedEffect(isEditing) {
         if (isEditing) {
@@ -61,22 +69,28 @@ internal fun InputField(
 
     Surface(
         onClick = { isEditing = true },
-        modifier = modifier,
+        modifier = modifier
+            .onFocusChanged { isFocused = it.isFocused || it.hasFocus }
+            .settingsItemFocus(isFocused || isEditing),
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+            containerColor = container,
+            focusedContainerColor = container
         ),
-        border = ClickableSurfaceDefaults.border(
-            border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
-            ),
-            focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+        border = if (v2) {
+            ClickableSurfaceDefaults.border(border = Border.None, focusedBorder = Border.None)
+        } else {
+            ClickableSurfaceDefaults.border(
+                border = Border(
+                    border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                    shape = shape
+                ),
+                focusedBorder = Border(
+                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                    shape = shape
+                )
             )
-        ),
-        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        },
+        shape = ClickableSurfaceDefaults.shape(shape),
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
     ) {
         BasicTextField(

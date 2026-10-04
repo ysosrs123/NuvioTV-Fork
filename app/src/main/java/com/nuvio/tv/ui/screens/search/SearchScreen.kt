@@ -1,5 +1,14 @@
 package com.nuvio.tv.ui.screens.search
 
+import com.nuvio.tv.ui.v2.components.sidebarPageContent
+
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
+import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
+import com.nuvio.tv.ui.v2.components.nuvioControlSurface
+import com.nuvio.tv.ui.v2.components.nuvioV2Focus
+import com.nuvio.tv.ui.v2.components.GlassRole
+import com.nuvio.tv.ui.v2.components.nuvioGlass
+
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.screens.home.HeroBackdropState
 
@@ -140,6 +149,9 @@ fun SearchScreen(
     onNavigateToSeeAll: (catalogId: String, addonId: String, type: String) -> Unit = { _, _, _ -> },
     onOpenDiscover: () -> Unit = {}
 ) {
+    val isV2 = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null
+    val artworkAccent = com.nuvio.tv.ui.v2.appearance.LocalArtworkAccent.current
+    var focusedResultsRow by remember { mutableStateOf<String?>(null) }
     val uiState by viewModel.uiState.collectAsState()
     val watchedMovieIds by viewModel.watchedMovieIds.collectAsState()
     val watchedSeriesIds by viewModel.watchedSeriesIds.collectAsState()
@@ -567,13 +579,14 @@ fun SearchScreen(
             .background(NuvioTheme.colors.Background),
         contentAlignment = Alignment.TopCenter
     ) {
+        if (isV2) V2Atmosphere(background = LocalV2Appearance.current!!.settingsBackground)
         val listState = rememberLazyListState()
 
         // Step back within Search before falling through to the root handler.
         val focusedRowKey = lastFocusedRowKey
         val focusedItemIndex = focusedResultItemIndex.intValue
         BackHandler(
-            enabled = !inputRowHasFocus && !backToFieldLatched &&
+            enabled = isScreenActive && !inputRowHasFocus && !backToFieldLatched &&
                 (isRecentSearchSectionFocused || (!isDiscoverMode && focusedRowKey != null))
         ) {
             if (!isRecentSearchSectionFocused && focusedItemIndex > 0 && focusedRowKey != null) {
@@ -589,6 +602,8 @@ fun SearchScreen(
                         ?.let { runCatching { it.requestFocus() } }
                 }
             } else {
+                focusResults = false
+                pendingFocusMoveToResultsQuery = null
                 backToFieldLatched = true
                 coroutineScope.launch {
                     listState.scrollToItem(0)
@@ -616,6 +631,7 @@ fun SearchScreen(
 
         LazyColumn(
             modifier = Modifier
+                .sidebarPageContent()
                 .fillMaxSize()
                 .recompositionHighlighter()
                 .dpadRepeatThrottle(),
@@ -815,6 +831,13 @@ fun SearchScreen(
 
                             CatalogRowSection(
                                 catalogRow = catalogRow,
+                                modifier = if (isV2) Modifier.onFocusChanged { state ->
+                                    if (state.hasFocus) focusedResultsRow = catalogKey
+                                    else if (focusedResultsRow == catalogKey) focusedResultsRow = null
+                                }.focusGroup() else Modifier,
+                                onItemFocus = { item ->
+                                    if (isV2) artworkAccent?.select("${item.apiType}:${item.id}", item.poster)
+                                },
                                 posterCardStyle = posterCardStyle,
                                 showSeeAll = hasEnoughForSeeAll,
                                 showPosterLabels = uiState.posterLabelsEnabled,
@@ -865,6 +888,8 @@ fun SearchScreen(
                                     focusedResultItemIndex.intValue = itemIndex
                                     // Prefetch meta for the focused item to warm cache for detail screen.
                                     catalogRow.items.getOrNull(itemIndex)?.let { item ->
+                                        HeroBackdropState.selectPageArtwork("${item.rawType}:${item.id}",
+                                            viewModel.getCachedBackdrop(item.id, item.rawType) ?: item.backdropUrl)
                                         viewModel.prefetchMetaOnFocus(item.id, item.rawType)
                                     }
                                     lastFocusedRowKey = catalogKey
@@ -1010,15 +1035,16 @@ private fun RecentSearchesSection(
             Button(
                 onClick = onClearHistory,
                 modifier = Modifier
+                    .nuvioControlSurface(RoundedCornerShape(NuvioTheme.radii.md))
                     .focusRequester(clearHistoryFocusRequester)
                     .focusProperties {
                         down = firstSearchFocusRequester
                     },
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
+                    containerColor = if (LocalV2Appearance.current != null) Color.Transparent else NuvioTheme.colors.BackgroundCard,
                     contentColor = NuvioTheme.colors.TextPrimary,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                    focusedContentColor = NuvioTheme.colors.Primary
+                    focusedContainerColor = if (LocalV2Appearance.current != null) Color.Transparent else NuvioTheme.colors.FocusBackground,
+                    focusedContentColor = if (LocalV2Appearance.current != null) Color.White else NuvioTheme.colors.Primary
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
             ) {
@@ -1049,7 +1075,7 @@ private fun RecentSearchesSection(
                 ) {
                     var isSearchFocused by remember(recentQuery) { mutableStateOf(false) }
                     val searchScale by animateFloatAsState(
-                        targetValue = if (isSearchFocused) 1.02f else 1f,
+                        targetValue = if (LocalV2Appearance.current == null && isSearchFocused) 1.02f else 1f,
                         animationSpec = tween(durationMillis = 140),
                         label = "recentSearchScale"
                     )
@@ -1057,6 +1083,7 @@ private fun RecentSearchesSection(
                         onClick = { onSearchSelected(recentQuery) },
                         modifier = Modifier
                             .weight(1f)
+                            .nuvioControlSurface(RoundedCornerShape(NuvioTheme.radii.md))
                             .focusRequester(searchFocusRequester)
                             .focusProperties {
                                 if (isRtl) {
@@ -1075,10 +1102,10 @@ private fun RecentSearchesSection(
                                 )
                             },
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
+                            containerColor = if (LocalV2Appearance.current != null) Color.Transparent else NuvioTheme.colors.BackgroundCard,
                             contentColor = NuvioTheme.colors.TextPrimary,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                            focusedContentColor = NuvioTheme.colors.Primary
+                            focusedContainerColor = if (LocalV2Appearance.current != null) Color.Transparent else NuvioTheme.colors.FocusBackground,
+                            focusedContentColor = if (LocalV2Appearance.current != null) Color.White else NuvioTheme.colors.Primary
                         ),
                         scale = ButtonDefaults.scale(focusedScale = 1f),
                         shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
@@ -1111,6 +1138,7 @@ private fun RecentSearchesSection(
                             onRemoveSearch(recentQuery)
                         },
                         modifier = Modifier
+                            .nuvioControlSurface(RoundedCornerShape(NuvioTheme.radii.md))
                             .focusRequester(removeFocusRequester)
                             .focusProperties {
                                 up = previousRemoveFocusRequester
@@ -1124,7 +1152,7 @@ private fun RecentSearchesSection(
                             .onFocusChanged { isRemoveFocused = it.isFocused }
                             .size(36.dp)
                             .then(
-                                if (isRemoveFocused) {
+                                if (isRemoveFocused && LocalV2Appearance.current == null) {
                                     Modifier.border(
                                         width = NuvioTheme.spacing.xxs,
                                         color = NuvioTheme.colors.FocusRing,
@@ -1136,7 +1164,7 @@ private fun RecentSearchesSection(
                             ),
                         colors = TvIconButtonDefaults.colors(
                             containerColor = Color.Transparent,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground,
+                            focusedContainerColor = if (LocalV2Appearance.current != null) Color.Transparent else NuvioTheme.colors.FocusBackground,
                             contentColor = NuvioTheme.colors.TextPrimary,
                             focusedContentColor = NuvioTheme.colors.TextPrimary
                         ),
@@ -1183,6 +1211,8 @@ private fun SearchInputField(
     clearHistoryFocusRequester: FocusRequester?,
     isScreenActive: Boolean = true
 ) {
+    val isV2 = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null
+    var fieldFocused by remember { mutableStateOf(false) }
     var isDiscoverButtonFocused by remember { mutableStateOf(false) }
     var isVoiceButtonFocused by remember { mutableStateOf(false) }
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
@@ -1202,14 +1232,15 @@ private fun SearchInputField(
                         discoverFocusRequester?.let { Modifier.focusRequester(it) } ?: Modifier
                     )
                     .onFocusChanged { isDiscoverButtonFocused = it.isFocused }
+                    .nuvioControlSurface(RoundedCornerShape(NuvioTheme.radii.md))
                     .size(NuvioTheme.spacing.huge)
                     .border(
                         width = if (isDiscoverButtonFocused) NuvioTheme.spacing.xxs else NuvioTheme.spacing.hairline,
-                        color = if (isDiscoverButtonFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.Border,
+                        color = if (isV2) Color.Transparent else if (isDiscoverButtonFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.Border,
                         shape = RoundedCornerShape(NuvioTheme.radii.md)
                     )
                     .background(
-                        color = NuvioTheme.colors.BackgroundCard,
+                        color = if (isV2) Color.Transparent else NuvioTheme.colors.BackgroundCard,
                         shape = RoundedCornerShape(NuvioTheme.radii.md)
                     )
             ) {
@@ -1295,14 +1326,15 @@ private fun SearchInputField(
                             }
                         )
                         .onFocusChanged { isVoiceButtonFocused = it.isFocused }
+                        .nuvioControlSurface(RoundedCornerShape(NuvioTheme.radii.md))
                         .size(NuvioTheme.spacing.huge)
                         .border(
                             width = if (isVoiceButtonFocused || isVoiceListening) NuvioTheme.spacing.xxs else NuvioTheme.spacing.hairline,
-                            color = if (isVoiceListening) themeAccent else if (isVoiceButtonFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.Border,
+                            color = if (isVoiceListening) themeAccent else if (isV2) Color.Transparent else if (isVoiceButtonFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.Border,
                             shape = RoundedCornerShape(NuvioTheme.radii.md)
                         )
                         .background(
-                            color = if (isVoiceListening) themeAccent.copy(alpha = 0.15f) else NuvioTheme.colors.BackgroundCard,
+                            color = if (isVoiceListening) themeAccent.copy(alpha = 0.15f) else if (isV2) Color.Transparent else NuvioTheme.colors.BackgroundCard,
                             shape = RoundedCornerShape(NuvioTheme.radii.md)
                         )
                 ) {
@@ -1322,11 +1354,15 @@ private fun SearchInputField(
             onValueChange = onQueryChanged,
             modifier = Modifier
                 .weight(1f)
+                .nuvioV2Focus(fieldFocused, RoundedCornerShape(NuvioTheme.radii.md), stationary = true)
+                .then(if (isV2) Modifier.nuvioGlass(com.nuvio.tv.ui.v2.components.GlassRole.CONTROL,
+                    focused = fieldFocused, shape = RoundedCornerShape(NuvioTheme.radii.md)) else Modifier)
                 .focusRequester(searchFocusRequester)
                 .focusProperties {
                     canFocus = isScreenActive
                 }
                 .onFocusChanged { focusState ->
+                    fieldFocused = focusState.isFocused
                     onSearchFieldFocusChanged(focusState.isFocused)
                 }
                 .onPreviewKeyEvent { keyEvent ->
@@ -1386,10 +1422,10 @@ private fun SearchInputField(
                 textDirection = TextDirection.Content
             ),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = NuvioTheme.colors.BackgroundCard,
-                unfocusedContainerColor = NuvioTheme.colors.BackgroundCard,
-                focusedIndicatorColor = NuvioTheme.colors.FocusRing,
-                unfocusedIndicatorColor = NuvioTheme.colors.Border,
+                focusedContainerColor = if (isV2) Color.Transparent else NuvioTheme.colors.BackgroundCard,
+                unfocusedContainerColor = if (isV2) Color.Transparent else NuvioTheme.colors.BackgroundCard,
+                focusedIndicatorColor = if (isV2) Color.Transparent else NuvioTheme.colors.FocusRing,
+                unfocusedIndicatorColor = if (isV2) Color.Transparent else NuvioTheme.colors.Border,
                 focusedTextColor = NuvioTheme.colors.TextPrimary,
                 unfocusedTextColor = NuvioTheme.colors.TextPrimary,
                 cursorColor = NuvioTheme.colors.FocusRing
@@ -1409,14 +1445,15 @@ private fun SearchInputField(
                 },
                 modifier = Modifier
                     .onFocusChanged { isClearButtonFocused = it.isFocused }
+                    .nuvioControlSurface(RoundedCornerShape(NuvioTheme.radii.md))
                     .size(NuvioTheme.spacing.huge)
                     .border(
                         width = if (isClearButtonFocused) NuvioTheme.spacing.xxs else NuvioTheme.spacing.hairline,
-                        color = if (isClearButtonFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.Border,
+                        color = if (isV2) Color.Transparent else if (isClearButtonFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.Border,
                         shape = RoundedCornerShape(NuvioTheme.radii.md)
                     )
                     .background(
-                        color = NuvioTheme.colors.BackgroundCard,
+                        color = if (isV2) Color.Transparent else NuvioTheme.colors.BackgroundCard,
                         shape = RoundedCornerShape(NuvioTheme.radii.md)
                     )
             ) {
