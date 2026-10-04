@@ -55,7 +55,7 @@ jobs:
       - name: Validate release state
         env:
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
-          CURRENT_BUMP: ${{ steps.release.outputs.current_bump }}
+          CURRENT_BUMP: ${{ steps.release.outputs.current_build_bump }}
           RELEASE_COMMIT: ${{ steps.release.outputs.release_commit }}
           RELEASE_REF_TYPE: ${{ github.ref_type }}
           RELEASE_MODE: ${{ inputs.mode }}
@@ -76,7 +76,7 @@ jobs:
 
           unexpected_changes="$(
             git diff --name-only "${CURRENT_BUMP}..${RELEASE_COMMIT}" \
-              | grep -Ev '^(\.github/workflows/(android-release|beta-release)\.yml|scripts/release-metadata\.sh|scripts/generate-release-notes\.sh|scripts/generate_release_notes\.py|scripts/release_notes/.*|scripts/tests/.*)$' \
+              | grep -Ev '^(\.github/workflows/(android-release|beta-release)\.yml|scripts/release-metadata\.sh|scripts/generate-release-notes\.sh|scripts/generate_release_notes\.py|scripts/release_notes/.*|scripts/tests/.*|NUVIO_V2_[A-Z_]+\.md|validation/.*\.(md|json))$' \
               || true
           )"
           if [[ -n "${unexpected_changes}" ]]; then
@@ -110,6 +110,8 @@ jobs:
           CURRENT_BUMP: ${{ steps.release.outputs.current_bump }}
           EXCLUDE_COMMITS: ${{ inputs.exclude_commits }}
           RELEASE_MODE: ${{ inputs.mode }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_VERSION_CODE: ${{ steps.release.outputs.version_code }}
         run: |
           release_note_args=(
             --from "${PREVIOUS_BUMP}"
@@ -123,8 +125,23 @@ jobs:
           fi
 
           generation_status=0
-          ./scripts/generate-release-notes.sh "${release_note_args[@]}" \
-            > release-notes.md || generation_status=$?
+          curated_notes="scripts/release_notes/releases/${RELEASE_VERSION}.md"
+          if [[ -f "${curated_notes}" ]]; then
+            if [[ ! -s "${curated_notes}" ]]; then
+              echo "Curated release notes are empty: ${curated_notes}" >&2
+              exit 1
+            fi
+            cp "${curated_notes}" release-notes.md
+            printf '## Release-note review\n\nUsing checked-in curated notes: `%s`. Review the text and attach the demo before publication.\n' \
+              "${curated_notes}" > release-note-quality.md
+          else
+            ./scripts/generate-release-notes.sh "${release_note_args[@]}" \
+              > release-notes.md || generation_status=$?
+          fi
+
+          if [[ -s release-notes.md ]]; then
+            printf '\n<!-- nuvio-fork-version-code: %s -->\n' "${RELEASE_VERSION_CODE}" >> release-notes.md
+          fi
 
           if [[ ! -s release-notes.md ]]; then
             if [[ "${generation_status}" -ne 0 || "${RELEASE_MODE}" == "publish" ]]; then
@@ -132,17 +149,6 @@ jobs:
               exit 1
             fi
             printf '%s\n' 'Release notes pending. Replace this text before publishing.' > release-notes.md
-          fi
-
-          if [[ "${RELEASE_PRERELEASE}" == "true" ]]; then
-            {
-              printf '%s\n' \
-                '> [!IMPORTANT]' \
-                '> **Beta builds are for testing purposes and may contain bugs, regressions, or unexpected issues.** If you prefer a reliable experience, we recommend staying on the **Stable** channel.' \
-                ''
-              cat release-notes.md
-            } > release-notes.tmp
-            mv release-notes.tmp release-notes.md
           fi
 
           {
@@ -220,6 +226,12 @@ jobs:
         if: inputs.mode != 'dry-run'
         run: ./gradlew :app:testFullReleaseUnitTest --tests 'com.nuvio.tv.updater.*' :app:assembleFullRelease --stacktrace
 
+      - name: Verify native playback features
+        if: inputs.mode != 'dry-run'
+        run: |
+          python scripts/verify_native_apk.py app/build/outputs/apk/full/release/app-full-arm64-v8a-release.apk --abi arm64-v8a
+          python scripts/verify_native_apk.py app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk --abi armeabi-v7a
+
       - name: Upload build artifacts
         if: inputs.mode != 'dry-run'
         uses: actions/upload-artifact@v6
@@ -233,9 +245,8 @@ jobs:
         env:
           RELEASE_MODE: ${{ inputs.mode }}
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
-          RELEASE_TITLE: ${{ steps.release.outputs.title }}
-          RELEASE_TARGET: ${{ steps.release.outputs.current_bump }}
-          RELEASE_PRERELEASE: ${{ steps.release.outputs.prerelease }}
+          RELEASE_TITLE: Nuvio-test ${{ steps.release.outputs.title }}
+          RELEASE_TARGET: ${{ steps.release.outputs.release_commit }}
         run: |
           mapfile -t release_apks < <(find app/build/outputs/apk/full/release -maxdepth 1 -type f -name '*.apk' -print | sort)
           if (( ${#release_apks[@]} == 0 )); then
@@ -249,11 +260,7 @@ jobs:
             --title "${RELEASE_TITLE}"
             --notes-file release-notes.md
           )
-          if [[ "${RELEASE_PRERELEASE}" == "true" ]]; then
-            release_args+=(--prerelease)
-          elif [[ "${RELEASE_MODE}" == "publish" ]]; then
-            release_args+=(--latest)
-          fi
+          release_args+=(--prerelease)
           if [[ "${RELEASE_MODE}" == "draft" ]]; then
             release_args+=(--draft)
           fi

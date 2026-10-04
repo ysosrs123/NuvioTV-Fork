@@ -8,8 +8,11 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.nuvio.tv.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.IOException
+import kotlinx.coroutines.flow.catch
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.MutablePreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -23,37 +26,33 @@ class UpdatePreferences @Inject constructor(
 ) {
     private val dataStore = context.updateDataStore
 
+    private val preferences = dataStore.data.catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+
     private val ignoredTagKey = stringPreferencesKey("ignored_release_tag")
     private val lastCheckAtKey = longPreferencesKey("last_check_at_ms")
     private val updateBannerEnabledKey = booleanPreferencesKey("update_banner_enabled")
-    private val updateChannelKey = stringPreferencesKey("update_channel")
 
-    val ignoredTag: Flow<String?> = dataStore.data.map { prefs ->
+    val ignoredTag: Flow<String?> = preferences.map { prefs ->
         prefs[ignoredTagKey]
     }
 
-    val lastCheckAtMs: Flow<Long> = dataStore.data.map { prefs ->
+    val lastCheckAtMs: Flow<Long> = preferences.map { prefs ->
         prefs[lastCheckAtKey] ?: 0L
     }
 
-    val updateBannerEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
+    val updateBannerEnabled: Flow<Boolean> = preferences.map { prefs ->
         prefs[updateBannerEnabledKey] ?: true
     }
 
-    val updateChannel: Flow<UpdateChannel> = dataStore.data.map { prefs ->
-        UpdateChannel.fromStoredValue(prefs[updateChannelKey])
-            ?: UpdateChannel.defaultForVersion(BuildConfig.VERSION_NAME)
+    // Old stable/beta values are obsolete. Keep banner and skipped-tag preferences.
+    companion object {
+        internal fun migrateForkStream(prefs: MutablePreferences) {
+            prefs.remove(stringPreferencesKey("update_channel"))
+        }
     }
 
-    suspend fun getOrInitializeUpdateChannel(): UpdateChannel {
-        val defaultChannel = UpdateChannel.defaultForVersion(BuildConfig.VERSION_NAME)
-        var resolvedChannel = defaultChannel
-        dataStore.edit { prefs ->
-            resolvedChannel = UpdateChannel.fromStoredValue(prefs[updateChannelKey])
-                ?: defaultChannel
-            prefs[updateChannelKey] = resolvedChannel.storedValue
-        }
-        return resolvedChannel
+    suspend fun initializeForkStream() {
+        dataStore.edit(::migrateForkStream)
     }
 
     suspend fun setIgnoredTag(tag: String?) {
@@ -74,10 +73,4 @@ class UpdatePreferences @Inject constructor(
         }
     }
 
-    suspend fun setUpdateChannel(channel: UpdateChannel) {
-        dataStore.edit { prefs ->
-            prefs[updateChannelKey] = channel.storedValue
-            prefs.remove(ignoredTagKey)
-        }
-    }
 }

@@ -6,6 +6,9 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 
 @Singleton
 class ApkDownloader @Inject constructor(
@@ -38,6 +41,7 @@ class ApkDownloader @Inject constructor(
                         val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                         var downloaded = 0L
                         while (true) {
+                            currentCoroutineContext().ensureActive()
                             val read = input.read(buffer)
                             if (read <= 0) break
                             output.write(buffer, 0, read)
@@ -45,11 +49,15 @@ class ApkDownloader @Inject constructor(
                             onProgress(downloaded, total)
                         }
                         output.flush()
+                        check(total == null || downloaded == total) { "Incomplete update download" }
                     }
                 }
             }
 
             destinationFile
+        }.onFailure {
+            destinationFile.delete()
+            if (it is CancellationException) throw it
         }
     }
 }

@@ -30,7 +30,6 @@ TODO.local.md
 local.dev.properties
 trakt-docss
 docs/trakt-implementation/
-sentry.properties
 Deliverables
 Deliverables 2
 scripts/live_app_logs.sh
@@ -48,6 +47,7 @@ scripts/*
 !scripts/release_notes/*.py
 !scripts/release-metadata.sh
 !scripts/release_beta.py
+!scripts/verify_native_apk.py
 !scripts/tests/
 !scripts/tests/*.py
 /supabase
@@ -63,3 +63,4 @@ AGENTS.md
 /PR.md
 docs/
 status-page/
+sentry.properties

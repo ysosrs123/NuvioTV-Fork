@@ -27,6 +27,7 @@ read_version_code() {
 current_version="$(read_version "$target_ref")"
 current_version_code="$(read_version_code "$target_ref")"
 current_bump=""
+current_build_bump=""
 previous_version=""
 previous_version_code=""
 previous_bump=""
@@ -40,6 +41,9 @@ while IFS= read -r commit; do
     if [[ "$phase" == "current" ]]; then
         if [[ "$version" == "$current_version" ]]; then
             current_bump="$commit"
+            if [[ "$version_code" == "$current_version_code" ]]; then
+                current_build_bump="$commit"
+            fi
             continue
         fi
         previous_version="$version"
@@ -92,11 +96,7 @@ elif [[ "$version_suffix" == "rc" ]]; then
 elif [[ "$version_suffix" == rc.* ]]; then
     release_title="Release Candidate ${version_core} (${version_suffix#rc.})"
 fi
-release_prerelease="false"
-version_major="${current_version%%.*}"
-if [[ -n "$version_suffix" ]] && (( 10#$version_major >= 1 )); then
-    release_prerelease="true"
-fi
+release_prerelease="true"
 current_bump_subject="$(git log -1 --format='%s' "$current_bump")"
 current_bump_subject_lower="$(printf '%s' "$current_bump_subject" | tr '[:upper:]' '[:lower:]')"
 if [[ "$current_bump_subject_lower" == *hotfix* ]]; then
@@ -110,6 +110,7 @@ printf 'title=%s\n' "$release_title"
 printf 'prerelease=%s\n' "$release_prerelease"
 printf 'release_commit=%s\n' "$(git rev-parse "${target_ref}^{commit}")"
 printf 'current_bump=%s\n' "$current_bump"
+printf 'current_build_bump=%s\n' "$current_build_bump"
 printf 'previous_version=%s\n' "$previous_version"
 printf 'previous_version_code=%s\n' "$previous_version_code"
 printf 'previous_bump=%s\n' "$previous_bump"

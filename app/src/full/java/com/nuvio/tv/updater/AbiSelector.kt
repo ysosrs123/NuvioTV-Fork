@@ -4,38 +4,26 @@ import android.os.Build
 import com.nuvio.tv.data.remote.dto.GitHubAssetDto
 
 internal object AbiSelector {
+    /**
+     * The device's ABIs with the kind this install runs as first, so an update keeps the APK type that is
+     * installed (a 32-bit install on a 64-bit box stays 32-bit).
+     */
+    fun installedFirst(
+        deviceAbis: List<String>,
+        is64Bit: Boolean = android.os.Process.is64Bit()
+    ): List<String> {
+        val (same, other) = deviceAbis.partition { it.contains("64") == is64Bit }
+        return same + other
+    }
 
-    private val knownAbis = listOf(
-        "arm64-v8a",
-        "armeabi-v7a",
-        "x86_64",
-        "x86"
-    )
-
-    fun chooseBestApkAsset(assets: List<GitHubAssetDto>): GitHubAssetDto? {
-        val apkAssets = assets.filter { it.name.endsWith(".apk", ignoreCase = true) }
-        if (apkAssets.isEmpty()) return null
-        if (apkAssets.size == 1) return apkAssets.first()
-
-        val supported = Build.SUPPORTED_ABIS?.toList().orEmpty()
-
-        // Prefer exact ABI match (in device preference order)
-        for (abi in supported) {
-            val candidate = apkAssets.firstOrNull { it.name.contains(abi, ignoreCase = true) }
-            if (candidate != null) return candidate
+    fun chooseBestApkAsset(
+        assets: List<GitHubAssetDto>,
+        supportedAbis: List<String> = Build.SUPPORTED_ABIS?.toList().orEmpty()
+    ): GitHubAssetDto? {
+        // Only release/full artifacts from our workflow. Never guess an ABI or flavor.
+        for (abi in supportedAbis) {
+            assets.firstOrNull { it.name == "app-full-$abi-release.apk" }?.let { return it }
         }
-
-        // Fallback to a universal APK if present
-        val universal = apkAssets.firstOrNull {
-            val n = it.name.lowercase()
-            n.contains("universal") || n.contains("all") || n.contains("universal-release")
-        }
-        if (universal != null) return universal
-
-        // If we can at least avoid wrong-ABI picks, prefer APKs that don't mention a known ABI.
-        val noAbiMention = apkAssets.firstOrNull { asset ->
-            knownAbis.none { abi -> asset.name.contains(abi, ignoreCase = true) }
-        }
-        return noAbiMention ?: apkAssets.first()
+        return assets.firstOrNull { it.name == "app-full-universal-release.apk" }
     }
 }

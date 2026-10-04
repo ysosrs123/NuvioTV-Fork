@@ -41,7 +41,7 @@ fun UpdateBannerHost(
     val lifecycleOwner = LocalLifecycleOwner.current
     var showReleaseNotes by remember { mutableStateOf(false) }
 
-    LaunchedEffect(state.update?.tag) {
+    LaunchedEffect(state.update?.dismissalKey) {
         showReleaseNotes = false
     }
 

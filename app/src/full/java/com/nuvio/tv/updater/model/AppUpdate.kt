@@ -7,5 +7,8 @@ data class AppUpdate(
     val releaseUrl: String?,
     val assetName: String,
     val assetUrl: String,
-    val assetSizeBytes: Long?
-)
+    val assetSizeBytes: Long?,
+    val versionCode: Long? = null
+) {
+    val dismissalKey: String get() = versionCode?.let { "$tag#$it" } ?: tag
+}

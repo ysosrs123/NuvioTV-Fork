@@ -39,4 +39,11 @@ class VersionUtilsTest {
     fun `current beta naming is recognized as prerelease`() {
         assertTrue(VersionUtils.isPrerelease("0.8.12-beta"))
     }
+    @Test fun `fork numbered suffixes and rebuild codes order correctly`() {
+        assertTrue(VersionUtils.isRemoteNewer("0.9.4-beta-nt10", "0.9.4-beta-nt9"))
+        assertFalse(VersionUtils.isRemoteNewer("0.9.4-beta-nt2", "0.9.4-beta-nt10"))
+        assertTrue(VersionUtils.isRemoteNewer("0.9.4-beta-nt1", "0.9.4-beta-nt1", 1374, 1373))
+        assertFalse(VersionUtils.isRemoteNewer("0.9.5-beta-nt1", "0.9.4-beta-nt1", 1300, 1373))
+        assertFalse(VersionUtils.isRemoteNewer("0.9.4-beta-nt1", "0.9.4-beta-nt1", 1373, 1373))
+    }
 }

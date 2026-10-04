@@ -39,6 +39,13 @@ internal data class SemanticVersion(
         }
         if (leftNumeric) return -1
         if (rightNumeric) return 1
+        // Fork suffixes such as beta-nt9 / beta-nt10 are numerically ordered.
+        val forkSuffix = Regex("""^(.*-nt)([0-9]+)$""")
+        val l = forkSuffix.matchEntire(left)
+        val r = forkSuffix.matchEntire(right)
+        if (l != null && r != null && l.groupValues[1] == r.groupValues[1]) {
+            return comparePrereleaseIdentifier(l.groupValues[2], r.groupValues[2])
+        }
         return left.compareTo(right)
     }
 }
@@ -70,7 +77,10 @@ internal object VersionUtils {
 
     fun isPrerelease(raw: String?): Boolean = parse(raw)?.prerelease?.isNotEmpty() == true
 
-    fun isRemoteNewer(remote: String?, local: String?): Boolean {
+    fun isRemoteNewer(
+        remote: String?, local: String?, remoteCode: Long? = null, localCode: Long? = null
+    ): Boolean {
+        if (remoteCode != null && localCode != null) return remoteCode > localCode
         val remoteVersion = parse(remote) ?: return false
         val localVersion = parse(local) ?: return false
         return remoteVersion > localVersion

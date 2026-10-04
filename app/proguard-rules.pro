@@ -41,6 +41,8 @@
 # Keep all DTO classes used with Moshi/Retrofit
 -keep class com.nuvio.tv.data.remote.dto.** { *; }
 -keep class com.nuvio.tv.domain.model.** { *; }
+# Gson-serialised health records (nested custom class + enum) must survive R8
+-keep class com.nuvio.tv.core.health.** { *; }
 
 # ── Kotlin ─────────────────────────────────────────────────────────────────────
 -keepattributes *Annotation*
@@ -72,6 +74,13 @@
 -dontwarn androidx.media3.**
 -keep class androidx.media3.** { *; }
 -keep interface androidx.media3.** { *; }
+
+# NuvioAssMatroskaExtractor (libass path) extends the vendored dvmkv
+# MatroskaExtractor and reflects on its private fields (extractorOutput,
+# subtitleSample) via getDeclaredField. The class sits outside the
+# androidx.media3.** blanket keep, so pin it explicitly for minified release
+# builds.
+-keep class com.nuvio.tv.core.player.dvmkv.MatroskaExtractor { *; }
 -keep class androidx.media.** { *; }
 -keep class androidx.media3.decoder.** { *; }
 -keep class androidx.media3.exoplayer.** { *; }
@@ -79,6 +88,11 @@
 -keep class com.google.android.exoplayer2.** { *; }
 -keep interface com.google.android.exoplayer2.** { *; }
 -keep class com.google.android.exoplayer2.ext.** { *; }
+
+# Seek thumbnails: JNI entry points in libnuviothumb (app/src/main/cpp/thumb_shim.cpp)
+-keep class com.nuvio.tv.core.player.thumbnail.ThumbNative {
+    native <methods>;
+}
 
 # Keep native interfaces and handles for Nuvio Engine JNI
 -keep class androidx.media3.exoplayer.upstream.DefaultAllocatorNative {

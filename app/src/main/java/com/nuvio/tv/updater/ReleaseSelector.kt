@@ -3,43 +3,14 @@ package com.nuvio.tv.updater
 import com.nuvio.tv.data.remote.dto.GitHubReleaseDto
 
 internal object ReleaseSelector {
-    private val prereleaseNamePattern = Regex(
-        "(?:^|[\\s._-])(alpha|beta|rc|preview)(?:[\\s._-]|$)",
-        RegexOption.IGNORE_CASE
-    )
+    private val codePattern = Regex("""<!-- nuvio-fork-version-code: ([1-9][0-9]*) -->""")
 
-    fun eligibleReleases(
-        releases: List<GitHubReleaseDto>,
-        channel: UpdateChannel
-    ): List<GitHubReleaseDto> = releases
-        .asSequence()
-        .filterNot(GitHubReleaseDto::draft)
-        .mapNotNull { release ->
-            val version = releaseVersion(release) ?: return@mapNotNull null
-            ReleaseCandidate(
-                release = release,
-                version = version,
-                prerelease = isPrerelease(release, version)
-            )
-        }
-        .filter { candidate -> channel == UpdateChannel.BETA || !candidate.prerelease }
-        .sortedByDescending(ReleaseCandidate::version)
-        .map(ReleaseCandidate::release)
-        .toList()
+    fun versionCode(release: GitHubReleaseDto): Long? =
+        codePattern.find(release.body.orEmpty())?.groupValues?.get(1)?.toLongOrNull()
 
-    private fun releaseVersion(release: GitHubReleaseDto): SemanticVersion? =
-        VersionUtils.parse(release.tagName) ?: VersionUtils.parse(release.name)
-
-    private fun isPrerelease(
-        release: GitHubReleaseDto,
-        version: SemanticVersion
-    ): Boolean = release.prerelease ||
-        version.prerelease.isNotEmpty() ||
-        prereleaseNamePattern.containsMatchIn(release.name.orEmpty())
-
-    private data class ReleaseCandidate(
-        val release: GitHubReleaseDto,
-        val version: SemanticVersion,
-        val prerelease: Boolean
-    )
+    // GitHub prerelease flags never exclude releases from this fork's single stream.
+    fun eligibleReleases(releases: List<GitHubReleaseDto>): List<GitHubReleaseDto> = releases
+        .filter { !it.draft && VersionUtils.parse(it.tagName) != null }
+        .sortedWith(compareByDescending<GitHubReleaseDto> { versionCode(it) ?: Long.MIN_VALUE }
+            .thenByDescending { VersionUtils.parse(it.tagName) })
 }

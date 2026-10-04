@@ -6,10 +6,11 @@ internal object UpdateBannerPolicy {
         force: Boolean,
         bannerEnabled: Boolean,
         dismissedTag: String?,
-        updateTag: String
+        updateTag: String,
+        updateKey: String = updateTag
     ): Boolean {
         if (!isRemoteNewer) return false
         if (force) return true
-        return bannerEnabled && dismissedTag != updateTag
+        return bannerEnabled && dismissedTag != updateTag && dismissedTag != updateKey
     }
 }
