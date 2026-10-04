@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Servery</string>
     <string name="servers_section_add">Přidat server</string>
     <string name="servers_section_account">Účet Nuvio</string>
+    <string name="servers_source_details">Podrobnosti zdroje</string>
+    <string name="servers_source_details_description">Úplné zobrazí název souboru a ikony u zdrojů ze serveru. Přehledné zobrazí jen video, audio a velikost.</string>
+    <string name="servers_source_details_full">Úplné</string>
+    <string name="servers_source_details_clean">Přehledné</string>
     <string name="servers_account_sync">Synchronizovat mediální servery s mým účtem Nuvio</string>
     <string name="servers_account_sync_description">Vypnuto: vaše servery a jejich přihlášení zůstávají na tomto zařízení. Zapnuto: seznam serverů včetně přihlášení se uloží do vašeho účtu Nuvio a sdílí s vašimi dalšími zařízeními.</string>
     <string name="servers_account_remove">Odebrat mé servery z účtu Nuvio</string>

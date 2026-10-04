@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Servere</string>
     <string name="servers_section_add">Legg til server</string>
     <string name="servers_section_account">Nuvio-konto</string>
+    <string name="servers_source_details">Kildedetaljer</string>
+    <string name="servers_source_details_description">Fullstendig viser filnavn og ikoner på serverkilder. Enkel viser bare video, lyd og størrelse.</string>
+    <string name="servers_source_details_full">Fullstendig</string>
+    <string name="servers_source_details_clean">Enkel</string>
     <string name="servers_account_sync">Synkroniser medieservere til Nuvio-kontoen min</string>
     <string name="servers_account_sync_description">Av: serverne dine og innloggingene deres blir på denne enheten. På: serverlisten, med innloggingene, lagres i Nuvio-kontoen din og deles med de andre enhetene dine.</string>
     <string name="servers_account_remove">Fjern serverne mine fra Nuvio-kontoen min</string>

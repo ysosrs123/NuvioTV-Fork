@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Serveriai</string>
     <string name="servers_section_add">Pridėti serverį</string>
     <string name="servers_section_account">„Nuvio“ paskyra</string>
+    <string name="servers_source_details">Šaltinio informacija</string>
+    <string name="servers_source_details_description">Pilna rodo failo pavadinimą ir piktogramas serverio šaltiniuose. Glausta rodo tik vaizdą, garsą ir dydį.</string>
+    <string name="servers_source_details_full">Pilna</string>
+    <string name="servers_source_details_clean">Glausta</string>
     <string name="servers_account_sync">Sinchronizuoti medijos serverius su mano „Nuvio“ paskyra</string>
     <string name="servers_account_sync_description">Išjungta: jūsų serveriai ir prisijungimai prie jų lieka šiame įrenginyje. Įjungta: serverių sąrašas kartu su prisijungimais išsaugomas jūsų „Nuvio“ paskyroje ir bendrinamas su kitais jūsų įrenginiais.</string>
     <string name="servers_account_remove">Pašalinti mano serverius iš „Nuvio“ paskyros</string>

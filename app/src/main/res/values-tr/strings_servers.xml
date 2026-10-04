@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Sunucular</string>
     <string name="servers_section_add">Sunucu ekle</string>
     <string name="servers_section_account">Nuvio hesabı</string>
+    <string name="servers_source_details">Kaynak detayları</string>
+    <string name="servers_source_details_description">Tam, sunucu kaynaklarında dosya adını ve simgeleri gösterir. Sade yalnızca video, ses ve boyutu gösterir.</string>
+    <string name="servers_source_details_full">Tam</string>
+    <string name="servers_source_details_clean">Sade</string>
     <string name="servers_account_sync">Medya sunucularını Nuvio hesabımla senkronize et</string>
     <string name="servers_account_sync_description">Kapalı: sunucularınız ve giriş bilgileri bu cihazda kalır. Açık: sunucu listesi, giriş bilgileriyle birlikte Nuvio hesabınıza kaydedilir ve diğer cihazlarınızla paylaşılır.</string>
     <string name="servers_account_remove">Sunucularımı Nuvio hesabımdan kaldır</string>

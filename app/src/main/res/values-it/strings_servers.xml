@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Server</string>
     <string name="servers_section_add">Aggiungi server</string>
     <string name="servers_section_account">Account Nuvio</string>
+    <string name="servers_source_details">Dettagli sorgente</string>
+    <string name="servers_source_details_description">Completo mostra il nome file e le icone sulle sorgenti del server. Essenziale mostra solo video, audio e dimensione.</string>
+    <string name="servers_source_details_full">Completo</string>
+    <string name="servers_source_details_clean">Essenziale</string>
     <string name="servers_account_sync">Sincronizza i server multimediali con il mio account Nuvio</string>
     <string name="servers_account_sync_description">Disattivato: i server e le relative credenziali restano su questo dispositivo. Attivo: l\'elenco dei server, credenziali comprese, viene salvato nel tuo account Nuvio e condiviso con gli altri tuoi dispositivi.</string>
     <string name="servers_account_remove">Rimuovi i miei server dal mio account Nuvio</string>

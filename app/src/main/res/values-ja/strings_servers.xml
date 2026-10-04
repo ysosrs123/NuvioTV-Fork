@@ -7,6 +7,10 @@
     <string name="servers_section_connected">サーバー</string>
     <string name="servers_section_add">サーバーを追加</string>
     <string name="servers_section_account">Nuvioアカウント</string>
+    <string name="servers_source_details">ソースの詳細</string>
+    <string name="servers_source_details_description">フルではサーバーのソースにファイル名とアイコンを表示します。シンプルでは映像、音声、サイズだけを表示します。</string>
+    <string name="servers_source_details_full">フル</string>
+    <string name="servers_source_details_clean">シンプル</string>
     <string name="servers_account_sync">メディアサーバーをNuvioアカウントに同期</string>
     <string name="servers_account_sync_description">オフ: サーバーとサインイン情報はこのデバイスにのみ保存されます。オン: サインイン情報を含むサーバー一覧がNuvioアカウントに保存され、他のデバイスと共有されます。</string>
     <string name="servers_account_remove">Nuvioアカウントからサーバーを削除</string>

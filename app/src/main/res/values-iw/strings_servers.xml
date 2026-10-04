@@ -7,6 +7,10 @@
     <string name="servers_section_connected">שרתים</string>
     <string name="servers_section_add">הוספת שרת</string>
     <string name="servers_section_account">חשבון Nuvio</string>
+    <string name="servers_source_details">פרטי מקור</string>
+    <string name="servers_source_details_description">מלא מציג את שם הקובץ וסמלים במקורות השרת. נקי מציג רק וידאו, שמע וגודל.</string>
+    <string name="servers_source_details_full">מלא</string>
+    <string name="servers_source_details_clean">נקי</string>
     <string name="servers_account_sync">סנכרון שרתי המדיה לחשבון ה-Nuvio שלי</string>
     <string name="servers_account_sync_description">כבוי: השרתים ופרטי ההתחברות שלהם נשארים במכשיר הזה. פועל: רשימת השרתים, כולל פרטי ההתחברות, נשמרת בחשבון ה-Nuvio ומשותפת עם שאר המכשירים שלך.</string>
     <string name="servers_account_remove">הסרת השרתים שלי מחשבון ה-Nuvio</string>

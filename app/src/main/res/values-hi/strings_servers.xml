@@ -7,6 +7,10 @@
     <string name="servers_section_connected">सर्वर</string>
     <string name="servers_section_add">सर्वर जोड़ें</string>
     <string name="servers_section_account">Nuvio अकाउंट</string>
+    <string name="servers_source_details">सोर्स डिटेल्स</string>
+    <string name="servers_source_details_description">विस्तृत: सर्वर सोर्स पर फ़ाइल नाम और आइकन दिखते हैं। सादा: सिर्फ़ वीडियो, ऑडियो और साइज़ दिखता है।</string>
+    <string name="servers_source_details_full">विस्तृत</string>
+    <string name="servers_source_details_clean">सादा</string>
     <string name="servers_account_sync">मीडिया सर्वर मेरे Nuvio अकाउंट से सिंक करें</string>
     <string name="servers_account_sync_description">बंद: आपके सर्वर और उनके साइन-इन इसी डिवाइस पर रहते हैं। चालू: सर्वर सूची, साइन-इन समेत, आपके Nuvio अकाउंट में सेव होती है और आपके दूसरे डिवाइस के साथ शेयर होती है।</string>
     <string name="servers_account_remove">मेरे सर्वर मेरे Nuvio अकाउंट से हटाएँ</string>

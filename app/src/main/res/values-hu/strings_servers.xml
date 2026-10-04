@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Szerverek</string>
     <string name="servers_section_add">Szerver hozzáadása</string>
     <string name="servers_section_account">Nuvio-fiók</string>
+    <string name="servers_source_details">Forrás részletei</string>
+    <string name="servers_source_details_description">A Teljes megjeleníti a fájlnevet és az ikonokat a szerverforrásoknál. A Letisztult csak a videót, a hangot és a méretet mutatja.</string>
+    <string name="servers_source_details_full">Teljes</string>
+    <string name="servers_source_details_clean">Letisztult</string>
     <string name="servers_account_sync">Médiaszerverek szinkronizálása a Nuvio-fiókomba</string>
     <string name="servers_account_sync_description">Ki: a szervereid és a bejelentkezési adataik ezen az eszközön maradnak. Be: a szerverlista a bejelentkezési adatokkal együtt a Nuvio-fiókodba kerül, és a többi eszközöd is megkapja.</string>
     <string name="servers_account_remove">Szervereim eltávolítása a Nuvio-fiókomból</string>

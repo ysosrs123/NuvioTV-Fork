@@ -7,6 +7,10 @@
     <string name="servers_section_connected">الخوادم</string>
     <string name="servers_section_add">إضافة خادم</string>
     <string name="servers_section_account">حساب Nuvio</string>
+    <string name="servers_source_details">تفاصيل المصدر</string>
+    <string name="servers_source_details_description">كاملة تعرض اسم الملف والأيقونات على مصادر الخادم. مبسطة تعرض الفيديو والصوت والحجم فقط.</string>
+    <string name="servers_source_details_full">كاملة</string>
+    <string name="servers_source_details_clean">مبسطة</string>
     <string name="servers_account_sync">مزامنة خوادم الوسائط مع حسابي في Nuvio</string>
     <string name="servers_account_sync_description">معطل: تبقى خوادمك وبيانات الدخول إليها على هذا الجهاز. مفعل: تُحفظ قائمة الخوادم، مع بيانات الدخول، في حسابك في Nuvio وتُشارك مع أجهزتك الأخرى.</string>
     <string name="servers_account_remove">إزالة خوادمي من حسابي في Nuvio</string>

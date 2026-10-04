@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Serwery</string>
     <string name="servers_section_add">Dodaj serwer</string>
     <string name="servers_section_account">Konto Nuvio</string>
+    <string name="servers_source_details">Szczegóły źródła</string>
+    <string name="servers_source_details_description">Pełne pokazują nazwę pliku i ikony przy źródłach serwera. Przejrzyste pokazują tylko wideo, audio i rozmiar.</string>
+    <string name="servers_source_details_full">Pełne</string>
+    <string name="servers_source_details_clean">Przejrzyste</string>
     <string name="servers_account_sync">Synchronizuj serwery multimediów z moim kontem Nuvio</string>
     <string name="servers_account_sync_description">Wył.: serwery i dane logowania zostają na tym urządzeniu. Wł.: lista serwerów razem z danymi logowania jest zapisywana na koncie Nuvio i udostępniana Twoim innym urządzeniom.</string>
     <string name="servers_account_remove">Usuń moje serwery z konta Nuvio</string>

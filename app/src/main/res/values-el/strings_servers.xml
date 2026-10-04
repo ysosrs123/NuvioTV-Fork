@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Διακομιστές</string>
     <string name="servers_section_add">Προσθήκη διακομιστή</string>
     <string name="servers_section_account">Λογαριασμός Nuvio</string>
+    <string name="servers_source_details">Λεπτομέρειες πηγής</string>
+    <string name="servers_source_details_description">Το Πλήρες δείχνει το όνομα αρχείου και εικονίδια στις πηγές διακομιστή. Το Απλό δείχνει μόνο βίντεο, ήχο και μέγεθος.</string>
+    <string name="servers_source_details_full">Πλήρες</string>
+    <string name="servers_source_details_clean">Απλό</string>
     <string name="servers_account_sync">Συγχρονισμός διακομιστών πολυμέσων στον λογαριασμό μου Nuvio</string>
     <string name="servers_account_sync_description">Ανενεργό: οι διακομιστές και τα στοιχεία σύνδεσής τους μένουν σε αυτή τη συσκευή. Ενεργό: η λίστα διακομιστών, μαζί με τα στοιχεία σύνδεσης, αποθηκεύεται στον λογαριασμό σας Nuvio και μοιράζεται με τις άλλες συσκευές σας.</string>
     <string name="servers_account_remove">Αφαίρεση των διακομιστών μου από τον λογαριασμό μου Nuvio</string>

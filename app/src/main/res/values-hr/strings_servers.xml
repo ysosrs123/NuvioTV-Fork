@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Poslužitelji</string>
     <string name="servers_section_add">Dodaj poslužitelj</string>
     <string name="servers_section_account">Nuvio račun</string>
+    <string name="servers_source_details">Detalji izvora</string>
+    <string name="servers_source_details_description">Detaljno prikazuje naziv datoteke i ikone na izvorima s poslužitelja. Jednostavno prikazuje samo video, zvuk i veličinu.</string>
+    <string name="servers_source_details_full">Detaljno</string>
+    <string name="servers_source_details_clean">Jednostavno</string>
     <string name="servers_account_sync">Sinkroniziraj medijske poslužitelje s mojim Nuvio računom</string>
     <string name="servers_account_sync_description">Isključeno: poslužitelji i njihove prijave ostaju na ovom uređaju. Uključeno: popis poslužitelja, zajedno s prijavama, sprema se u tvoj Nuvio račun i dijeli s tvojim drugim uređajima.</string>
     <string name="servers_account_remove">Ukloni moje poslužitelje iz mog Nuvio računa</string>

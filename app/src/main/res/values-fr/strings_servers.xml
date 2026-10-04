@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Serveurs</string>
     <string name="servers_section_add">Ajouter un serveur</string>
     <string name="servers_section_account">Compte Nuvio</string>
+    <string name="servers_source_details">Détails de la source</string>
+    <string name="servers_source_details_description">Complet affiche le nom du fichier et les icônes sur les sources du serveur. Épuré affiche seulement la vidéo, l\'audio et la taille.</string>
+    <string name="servers_source_details_full">Complet</string>
+    <string name="servers_source_details_clean">Épuré</string>
     <string name="servers_account_sync">Synchroniser les serveurs multimédias avec mon compte Nuvio</string>
     <string name="servers_account_sync_description">Désactivé : vos serveurs et leurs identifiants restent sur cet appareil. Activé : la liste des serveurs, identifiants compris, est enregistrée dans votre compte Nuvio et partagée avec vos autres appareils.</string>
     <string name="servers_account_remove">Retirer mes serveurs de mon compte Nuvio</string>

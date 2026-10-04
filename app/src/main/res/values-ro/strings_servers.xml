@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Servere</string>
     <string name="servers_section_add">Adaugă server</string>
     <string name="servers_section_account">Cont Nuvio</string>
+    <string name="servers_source_details">Detalii sursă</string>
+    <string name="servers_source_details_description">Complet afișează numele fișierului și pictogramele la sursele serverului. Simplu afișează doar video, audio și dimensiunea.</string>
+    <string name="servers_source_details_full">Complet</string>
+    <string name="servers_source_details_clean">Simplu</string>
     <string name="servers_account_sync">Sincronizează serverele media cu contul meu Nuvio</string>
     <string name="servers_account_sync_description">Dezactivat: serverele și autentificările lor rămân pe acest dispozitiv. Activat: lista de servere, inclusiv autentificările, se salvează în contul tău Nuvio și ajunge pe celelalte dispozitive ale tale.</string>
     <string name="servers_account_remove">Elimină serverele mele din contul meu Nuvio</string>

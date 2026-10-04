@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Servrar</string>
     <string name="servers_section_add">Lägg till server</string>
     <string name="servers_section_account">Nuvio-konto</string>
+    <string name="servers_source_details">Källdetaljer</string>
+    <string name="servers_source_details_description">Fullständig visar filnamn och ikoner på serverkällor. Enkel visar bara video, ljud och storlek.</string>
+    <string name="servers_source_details_full">Fullständig</string>
+    <string name="servers_source_details_clean">Enkel</string>
     <string name="servers_account_sync">Synka medieservrar till mitt Nuvio-konto</string>
     <string name="servers_account_sync_description">Av: dina servrar och deras inloggningar stannar på den här enheten. På: serverlistan, med inloggningarna, sparas i ditt Nuvio-konto och delas med dina andra enheter.</string>
     <string name="servers_account_remove">Ta bort mina servrar från mitt Nuvio-konto</string>

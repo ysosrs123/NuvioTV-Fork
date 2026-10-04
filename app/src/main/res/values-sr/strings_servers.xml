@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Сервери</string>
     <string name="servers_section_add">Додај сервер</string>
     <string name="servers_section_account">Nuvio налог</string>
+    <string name="servers_source_details">Детаљи извора</string>
+    <string name="servers_source_details_description">Детаљно приказује назив фајла и иконице на изворима сервера. Једноставно приказује само видео, звук и величину.</string>
+    <string name="servers_source_details_full">Детаљно</string>
+    <string name="servers_source_details_clean">Једноставно</string>
     <string name="servers_account_sync">Синхронизуј медијске сервере са мојим Nuvio налогом</string>
     <string name="servers_account_sync_description">Искључено: ваши сервери и пријаве на њих остају на овом уређају. Укључено: листа сервера, заједно са пријавама, чува се на вашем Nuvio налогу и дели са вашим осталим уређајима.</string>
     <string name="servers_account_remove">Уклони моје сервере са мог Nuvio налога</string>

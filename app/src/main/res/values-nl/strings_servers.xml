@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Servers</string>
     <string name="servers_section_add">Server toevoegen</string>
     <string name="servers_section_account">Nuvio-account</string>
+    <string name="servers_source_details">Brondetails</string>
+    <string name="servers_source_details_description">Volledig toont de bestandsnaam en pictogrammen bij serverbronnen. Beknopt toont alleen video, audio en grootte.</string>
+    <string name="servers_source_details_full">Volledig</string>
+    <string name="servers_source_details_clean">Beknopt</string>
     <string name="servers_account_sync">Mediaservers synchroniseren met mijn Nuvio-account</string>
     <string name="servers_account_sync_description">Uit: je servers en hun aanmeldingen blijven op dit apparaat. Aan: de serverlijst, inclusief de aanmeldingen, wordt opgeslagen in je Nuvio-account en gedeeld met je andere apparaten.</string>
     <string name="servers_account_remove">Mijn servers uit mijn Nuvio-account verwijderen</string>

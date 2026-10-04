@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Strežniki</string>
     <string name="servers_section_add">Dodaj strežnik</string>
     <string name="servers_section_account">Račun Nuvio</string>
+    <string name="servers_source_details">Podrobnosti vira</string>
+    <string name="servers_source_details_description">Podrobno prikazuje ime datoteke in ikone pri virih strežnika. Pregledno prikazuje samo video, zvok in velikost.</string>
+    <string name="servers_source_details_full">Podrobno</string>
+    <string name="servers_source_details_clean">Pregledno</string>
     <string name="servers_account_sync">Sinhroniziraj medijske strežnike z mojim računom Nuvio</string>
     <string name="servers_account_sync_description">Izklopljeno: strežniki in njihove prijave ostanejo na tej napravi. Vklopljeno: seznam strežnikov skupaj s prijavami se shrani v vaš račun Nuvio in deli z vašimi drugimi napravami.</string>
     <string name="servers_account_remove">Odstrani moje strežnike iz mojega računa Nuvio</string>

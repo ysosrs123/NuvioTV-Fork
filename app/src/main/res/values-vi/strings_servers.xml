@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Máy chủ</string>
     <string name="servers_section_add">Thêm máy chủ</string>
     <string name="servers_section_account">Tài khoản Nuvio</string>
+    <string name="servers_source_details">Chi tiết nguồn</string>
+    <string name="servers_source_details_description">Đầy đủ hiển thị tên tệp và biểu tượng trên các nguồn máy chủ. Gọn chỉ hiển thị video, âm thanh và dung lượng.</string>
+    <string name="servers_source_details_full">Đầy đủ</string>
+    <string name="servers_source_details_clean">Gọn</string>
     <string name="servers_account_sync">Đồng bộ máy chủ đa phương tiện với tài khoản Nuvio của tôi</string>
     <string name="servers_account_sync_description">Tắt: máy chủ và thông tin đăng nhập của chúng chỉ nằm trên thiết bị này. Bật: danh sách máy chủ, kể cả thông tin đăng nhập, được lưu vào tài khoản Nuvio và chia sẻ với các thiết bị khác của bạn.</string>
     <string name="servers_account_remove">Xóa máy chủ của tôi khỏi tài khoản Nuvio</string>

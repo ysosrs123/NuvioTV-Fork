@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Сървъри</string>
     <string name="servers_section_add">Добави сървър</string>
     <string name="servers_section_account">Nuvio акаунт</string>
+    <string name="servers_source_details">Подробности за източника</string>
+    <string name="servers_source_details_description">Подробно показва името на файла и иконите на източниците от сървъра. Опростено показва само видео, аудио и размер.</string>
+    <string name="servers_source_details_full">Подробно</string>
+    <string name="servers_source_details_clean">Опростено</string>
     <string name="servers_account_sync">Синхронизирай медийните сървъри с моя Nuvio акаунт</string>
     <string name="servers_account_sync_description">Изкл: сървърите и данните за вход остават на това устройство. Вкл: списъкът със сървъри, заедно с данните за вход, се запазва в твоя Nuvio акаунт и се споделя с другите ти устройства.</string>
     <string name="servers_account_remove">Премахни моите сървъри от Nuvio акаунта</string>

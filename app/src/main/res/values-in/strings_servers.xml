@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Server</string>
     <string name="servers_section_add">Tambah server</string>
     <string name="servers_section_account">Akun Nuvio</string>
+    <string name="servers_source_details">Detail sumber</string>
+    <string name="servers_source_details_description">Lengkap menampilkan nama file dan ikon pada sumber server. Ringkas hanya menampilkan video, audio, dan ukuran.</string>
+    <string name="servers_source_details_full">Lengkap</string>
+    <string name="servers_source_details_clean">Ringkas</string>
     <string name="servers_account_sync">Sinkronkan server media ke akun Nuvio saya</string>
     <string name="servers_account_sync_description">Nonaktif: server dan data loginnya tetap di perangkat ini. Aktif: daftar server, termasuk data loginnya, disimpan ke akun Nuvio Anda dan dibagikan ke perangkat Anda yang lain.</string>
     <string name="servers_account_remove">Hapus server saya dari akun Nuvio saya</string>

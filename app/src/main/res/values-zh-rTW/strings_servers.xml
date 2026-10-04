@@ -7,6 +7,10 @@
     <string name="servers_section_connected">伺服器</string>
     <string name="servers_section_add">新增伺服器</string>
     <string name="servers_section_account">Nuvio 帳戶</string>
+    <string name="servers_source_details">來源詳細資訊</string>
+    <string name="servers_source_details_description">完整會顯示伺服器來源的檔案名稱和圖示。簡潔只顯示影片、音訊和大小。</string>
+    <string name="servers_source_details_full">完整</string>
+    <string name="servers_source_details_clean">簡潔</string>
     <string name="servers_account_sync">將媒體伺服器同步到我的 Nuvio 帳戶</string>
     <string name="servers_account_sync_description">關閉：您的伺服器及其登入資訊保留在此裝置上。開啟：伺服器清單 (包括登入資訊) 會儲存到您的 Nuvio 帳戶，並與您的其他裝置共用。</string>
     <string name="servers_account_remove">從我的 Nuvio 帳戶中移除伺服器</string>

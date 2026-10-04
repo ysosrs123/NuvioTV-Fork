@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Servidores</string>
     <string name="servers_section_add">Adicionar servidor</string>
     <string name="servers_section_account">Conta Nuvio</string>
+    <string name="servers_source_details">Detalhes da fonte</string>
+    <string name="servers_source_details_description">Completo mostra o nome do ficheiro e os ícones nas fontes do servidor. Simples mostra apenas vídeo, áudio e tamanho.</string>
+    <string name="servers_source_details_full">Completo</string>
+    <string name="servers_source_details_clean">Simples</string>
     <string name="servers_account_sync">Sincronizar servidores multimédia com a minha conta Nuvio</string>
     <string name="servers_account_sync_description">Desligado: os teus servidores e os respetivos inícios de sessão ficam neste dispositivo. Ligado: a lista de servidores, incluindo os inícios de sessão, é guardada na tua conta Nuvio e partilhada com os teus outros dispositivos.</string>
     <string name="servers_account_remove">Remover os meus servidores da minha conta Nuvio</string>

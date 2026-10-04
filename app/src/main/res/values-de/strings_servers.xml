@@ -7,6 +7,10 @@
     <string name="servers_section_connected">Server</string>
     <string name="servers_section_add">Server hinzufügen</string>
     <string name="servers_section_account">Nuvio-Konto</string>
+    <string name="servers_source_details">Quellendetails</string>
+    <string name="servers_source_details_description">Ausführlich zeigt bei Server-Quellen den Dateinamen und Symbole. Schlicht zeigt nur Video, Audio und Größe.</string>
+    <string name="servers_source_details_full">Ausführlich</string>
+    <string name="servers_source_details_clean">Schlicht</string>
     <string name="servers_account_sync">Medienserver mit meinem Nuvio-Konto synchronisieren</string>
     <string name="servers_account_sync_description">Aus: Ihre Server und deren Anmeldungen bleiben auf diesem Gerät. Ein: Die Serverliste wird samt Anmeldungen in Ihrem Nuvio-Konto gespeichert und mit Ihren anderen Geräten geteilt.</string>
     <string name="servers_account_remove">Meine Server aus meinem Nuvio-Konto entfernen</string>
