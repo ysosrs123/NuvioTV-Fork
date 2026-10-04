@@ -3,6 +3,8 @@ package com.nuvio.tv.core.debrid
 import com.nuvio.tv.data.local.DebridSettingsDataStore
 import com.nuvio.tv.domain.model.StreamBehaviorHints
 import com.nuvio.tv.domain.model.Stream
+import com.nuvio.tv.core.health.AddonHealthStore
+import com.nuvio.tv.core.health.HealthOutcome
 import com.nuvio.tv.domain.model.StreamClientResolve
 import com.nuvio.tv.domain.model.StreamDebridCacheState
 import kotlinx.coroutines.CoroutineScope
@@ -11,6 +13,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -23,7 +26,8 @@ class DirectDebridResolver @Inject constructor(
     private val torboxResolver: TorboxDirectDebridResolver,
     private val realDebridResolver: RealDebridDirectDebridResolver,
     private val premiumizeResolver: PremiumizeDirectDebridResolver,
-    private val localDebridService: LocalDebridService
+    private val localDebridService: LocalDebridService,
+    private val healthStore: AddonHealthStore
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val mutex = Mutex()
@@ -31,6 +35,17 @@ class DirectDebridResolver @Inject constructor(
     private val inFlightResolves = mutableMapOf<String, Deferred<DirectDebridResolveResult>>()
 
     suspend fun resolve(
+        stream: Stream,
+        season: Int?,
+        episode: Int?
+    ): DirectDebridResolveResult {
+        val t0 = android.os.SystemClock.elapsedRealtime()
+        val result = resolveInternal(stream, season, episode)
+        recordResolverHealth(stream, result, android.os.SystemClock.elapsedRealtime() - t0)
+        return result
+    }
+
+    private suspend fun resolveInternal(
         stream: Stream,
         season: Int?,
         episode: Int?
@@ -139,6 +154,23 @@ class DirectDebridResolver @Inject constructor(
         } else {
             resolvedCache.remove(cacheKey)
             null
+        }
+    }
+
+    private fun recordResolverHealth(
+        stream: Stream,
+        result: DirectDebridResolveResult,
+        latencyMs: Long
+    ) {
+        val providerId = DebridProviders.byId(stream.clientResolve?.service)?.id ?: return
+        val outcome = when (result) {
+            is DirectDebridResolveResult.Success -> HealthOutcome.SUCCESS
+            DirectDebridResolveResult.NotCached -> HealthOutcome.EMPTY
+            DirectDebridResolveResult.Error -> HealthOutcome.FAILURE
+            else -> return
+        }
+        scope.launch {
+            healthStore.record(AddonHealthStore.resolverKey(providerId), outcome, latencyMs)
         }
     }
 

@@ -15,7 +15,14 @@ import org.json.JSONObject
 data class LastPlaybackDiagnostics(
     val timestampMs: Long = 0L,
     val host: String = "",
+    // The host that actually served the bytes -- the
+    // post-redirect host captured live by the NET_CONN listener -- persisted
+    // at first frame. Null when playback never rendered a frame or no call
+    // completed; may equal [host] on cosmetic (same-host) redirects, which
+    // renderers suppress at display time rather than here.
+    val resolvedServingHost: String? = null,
     val streamUrl: String? = null,
+    val filename: String? = null,
     val headersJson: String? = null,
     val videoBitrate: Int = -1,
     val durationMs: Long = 0L,
@@ -53,6 +60,14 @@ data class LastPlaybackDiagnostics(
     val dv7DoviSuccess: Int = 0,
     val dv7DoviSignalRewrites: Int = 0,
     val dvSourceProfile: String? = null,
+    // Enhancement-layer type of the last DV7 stream ("FEL", "MEL",
+    // "unknown", optionally suffixed when preserve-mapping was active), and
+    // the per-playback RPU drop counter, both surfaced in Diagnostics.
+    val dvElType: String? = null,
+    val dv7RpuDrops: Int = 0,
+    // One-line static HDR mastering metadata read from the RPU
+    // (MaxCLL/MaxFALL + MDL peak in nits), or null when unavailable.
+    val dvHdrMastering: String? = null,
     // Set only when a profile 5 or 7 source actually finished converting, so the card can report
     // the last real conversion rather than every playback that merely considered one.
     val dvConvertEndedAtMs: Long = 0L,
@@ -61,6 +76,11 @@ data class LastPlaybackDiagnostics(
     val videoResolution: String? = null, // e.g. "3840x2160"
     val videoCodec: String? = null,       // e.g. "Dolby Vision", "HEVC", "AV1"
     val videoHdrType: String? = null,     // e.g. "Dolby Vision", "HDR10", "HLG", "SDR"
+    val audioPath: String? = null,        // e.g. "TrueHD → Passthrough (TrueHD, 48 kHz, 8ch)"
+    // What the platform claimed the chain could take, captured at sink build. The
+    // per-format passthrough overrides exist because this is sometimes wrong, so the
+    // claim itself is the first thing worth seeing in a report.
+    val audioCapabilities: String? = null, // e.g. "direct: AC3 EAC3 TrueHD · absent: DTS DTS-HD · surround: MANUAL"
 
     // Buffer telemetry (rebuffers counted after first frame; re-persisted at playback end)
     val rebufferCount: Int = 0,
@@ -76,7 +96,9 @@ data class LastPlaybackDiagnostics(
     fun toJson(): String = JSONObject().apply {
         put("timestampMs", timestampMs)
         put("host", host)
+        put("resolvedServingHost", resolvedServingHost ?: JSONObject.NULL)
         put("streamUrl", streamUrl ?: JSONObject.NULL)
+        put("filename", filename ?: JSONObject.NULL)
         put("headersJson", headersJson ?: JSONObject.NULL)
         put("videoBitrate", videoBitrate)
         put("durationMs", durationMs)
@@ -101,10 +123,15 @@ data class LastPlaybackDiagnostics(
         put("dv7DoviSuccess", dv7DoviSuccess)
         put("dv7DoviSignalRewrites", dv7DoviSignalRewrites)
         put("dvSourceProfile", dvSourceProfile ?: JSONObject.NULL)
+        put("dvElType", dvElType ?: JSONObject.NULL)
+        put("dv7RpuDrops", dv7RpuDrops)
+        put("dvHdrMastering", dvHdrMastering ?: JSONObject.NULL)
         put("dvConvertEndedAtMs", dvConvertEndedAtMs)
         put("videoResolution", videoResolution ?: JSONObject.NULL)
         put("videoCodec", videoCodec ?: JSONObject.NULL)
         put("videoHdrType", videoHdrType ?: JSONObject.NULL)
+        put("audioPath", audioPath ?: JSONObject.NULL)
+        put("audioCapabilities", audioCapabilities ?: JSONObject.NULL)
         put("rebufferCount", rebufferCount)
         put("rebufferTotalMs", rebufferTotalMs)
         put("result", result)
@@ -122,7 +149,9 @@ data class LastPlaybackDiagnostics(
             LastPlaybackDiagnostics(
                 timestampMs = o.optLong("timestampMs", 0L),
                 host = o.optString("host", ""),
+                resolvedServingHost = o.optString("resolvedServingHost", "").let { if (it.isBlank() || it == "null") null else it },
                 streamUrl = o.optString("streamUrl", "").let { if (it.isBlank() || it == "null") null else it },
+                filename = o.optString("filename", "").let { if (it.isBlank() || it == "null") null else it },
                 headersJson = o.optString("headersJson", "").let { if (it.isBlank() || it == "null") null else it },
                 videoBitrate = o.optInt("videoBitrate", -1),
                 durationMs = o.optLong("durationMs", 0L),
@@ -147,10 +176,15 @@ data class LastPlaybackDiagnostics(
                 dv7DoviSuccess = o.optInt("dv7DoviSuccess", 0),
                 dv7DoviSignalRewrites = o.optInt("dv7DoviSignalRewrites", 0),
                 dvSourceProfile = o.optString("dvSourceProfile", "").let { if (it.isBlank() || it == "null") null else it },
+                dvElType = o.optString("dvElType", "").let { if (it.isBlank() || it == "null") null else it },
+                dv7RpuDrops = o.optInt("dv7RpuDrops", 0),
+                dvHdrMastering = o.optString("dvHdrMastering", "").let { if (it.isBlank() || it == "null") null else it },
                 dvConvertEndedAtMs = o.optLong("dvConvertEndedAtMs", 0L),
                 videoResolution = o.optString("videoResolution", "").let { if (it.isBlank() || it == "null") null else it },
                 videoCodec = o.optString("videoCodec", "").let { if (it.isBlank() || it == "null") null else it },
                 videoHdrType = o.optString("videoHdrType", "").let { if (it.isBlank() || it == "null") null else it },
+                audioPath = o.optString("audioPath", "").let { if (it.isBlank() || it == "null") null else it },
+                audioCapabilities = o.optString("audioCapabilities", "").let { if (it.isBlank() || it == "null") null else it },
                 rebufferCount = o.optInt("rebufferCount", 0),
                 rebufferTotalMs = o.optLong("rebufferTotalMs", 0L),
                 result = o.optString("result", "Pending")

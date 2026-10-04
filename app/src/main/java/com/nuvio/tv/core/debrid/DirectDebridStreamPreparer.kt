@@ -1,31 +1,23 @@
 package com.nuvio.tv.core.debrid
 
-import android.util.Log
-import com.nuvio.tv.core.player.StreamAutoPlaySelector
+import com.nuvio.tv.core.player.AutoPlaySelection
 import com.nuvio.tv.data.local.DebridSettingsDataStore
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.local.StreamAutoPlayMode
 import com.nuvio.tv.domain.model.AddonStreams
+import com.nuvio.tv.domain.model.DebridStreamPreferences
 import com.nuvio.tv.domain.model.Stream
 import com.nuvio.tv.domain.model.StreamDebridCacheState
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val DIRECT_DEBRID_PREPARER_TAG = "DirectDebridPreparer"
 
 @Singleton
 class DirectDebridStreamPreparer @Inject constructor(
     private val dataStore: DebridSettingsDataStore,
     private val resolver: DirectDebridResolver
 ) {
-    private val budgetMutex = Mutex()
-    private val minuteStarts = ArrayDeque<Long>()
-    private val hourStarts = ArrayDeque<Long>()
-
     suspend fun prepare(
         streams: List<Stream>,
         season: Int?,
@@ -36,39 +28,22 @@ class DirectDebridStreamPreparer @Inject constructor(
     ) {
         val settings = dataStore.settings.first()
         val limit = settings.instantPlaybackPreparationLimit
+        val debridStreamPreferences = settings.streamPreferences
         if (!settings.canResolvePlayableLinks || limit <= 0) return
 
         val candidates = prioritizeCandidates(
             streams = streams,
             limit = limit,
             playerSettings = playerSettings,
-            installedAddonNames = installedAddonNames
+            installedAddonNames = installedAddonNames,
+            debridStreamPreferences = debridStreamPreferences
         )
         for (stream in candidates) {
             if (!resolver.shouldResolveToPlayableStream(stream)) continue
+            // Listing/focus is not playback consent. Reuse an existing link, but
+            // never create, resolve or unrestrict one for an unselected candidate.
             resolver.cachedPlayableStream(stream, season, episode)?.let { cached ->
                 onPrepared(stream, cached)
-                continue
-            }
-
-            if (!consumeBackgroundBudget()) {
-                Log.d(DIRECT_DEBRID_PREPARER_TAG, "Skipping instant playback preparation; local Torbox budget reached")
-                return
-            }
-
-            try {
-                when (val result = resolver.resolveToPlayableStream(stream, season, episode)) {
-                    is DirectDebridPlayableResult.Success -> {
-                        if (result.stream.getStreamUrl() != null) {
-                            onPrepared(stream, result.stream)
-                        }
-                    }
-                    else -> Unit
-                }
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                Log.d(DIRECT_DEBRID_PREPARER_TAG, "Instant playback preparation failed", error)
             }
         }
     }
@@ -77,7 +52,8 @@ class DirectDebridStreamPreparer @Inject constructor(
         streams: List<Stream>,
         limit: Int,
         playerSettings: PlayerSettings,
-        installedAddonNames: Set<String>
+        installedAddonNames: Set<String>,
+        debridStreamPreferences: DebridStreamPreferences? = null
     ): List<Stream> {
         if (limit <= 0) return emptyList()
         val candidates = streams
@@ -86,14 +62,21 @@ class DirectDebridStreamPreparer @Inject constructor(
         if (candidates.isEmpty()) return emptyList()
 
         val prioritized = mutableListOf<Stream>()
-        val autoPlaySelection = StreamAutoPlaySelector.selectAutoPlayStream(
+        // preferredBingeGroup was left at its default (null) here, so the
+        // derived preferBingeGroupInSelection is false -- identical to the
+        // default this call relied on.
+        val autoPlaySelection = AutoPlaySelection.select(
             streams = streams,
-            mode = playerSettings.streamAutoPlayMode,
-            regexPattern = playerSettings.streamAutoPlayRegex,
-            source = playerSettings.streamAutoPlaySource,
-            installedAddonNames = installedAddonNames,
-            selectedAddons = playerSettings.streamAutoPlaySelectedAddons,
-            selectedPlugins = playerSettings.streamAutoPlaySelectedPlugins
+            inputs = AutoPlaySelection.Inputs(
+                mode = playerSettings.streamAutoPlayMode,
+                regexPattern = playerSettings.streamAutoPlayRegex,
+                source = playerSettings.streamAutoPlaySource,
+                installedAddonNames = installedAddonNames,
+                selectedAddons = playerSettings.streamAutoPlaySelectedAddons,
+                selectedPlugins = playerSettings.streamAutoPlaySelectedPlugins,
+                preferredBingeGroup = null
+            ),
+            debridStreamPreferences = debridStreamPreferences
         )
         if (autoPlaySelection?.let { it.isDirectDebrid() || it.isCachedLocalDebridTorrent() } == true) {
             candidates.firstOrNull { it.preparationKey() == autoPlaySelection.preparationKey() }
@@ -145,34 +128,6 @@ class DirectDebridStreamPreparer @Inject constructor(
         }
     }
 
-    private suspend fun consumeBackgroundBudget(): Boolean {
-        val now = System.currentTimeMillis()
-        return budgetMutex.withLock {
-            minuteStarts.removeOlderThan(now - BACKGROUND_PREPARES_PER_MINUTE_WINDOW_MS)
-            hourStarts.removeOlderThan(now - BACKGROUND_PREPARES_PER_HOUR_WINDOW_MS)
-            if (
-                minuteStarts.size >= MAX_BACKGROUND_PREPARES_PER_MINUTE ||
-                hourStarts.size >= MAX_BACKGROUND_PREPARES_PER_HOUR
-            ) {
-                false
-            } else {
-                minuteStarts.addLast(now)
-                hourStarts.addLast(now)
-                true
-            }
-        }
-    }
-}
-
-private const val MAX_BACKGROUND_PREPARES_PER_MINUTE = 6
-private const val MAX_BACKGROUND_PREPARES_PER_HOUR = 30
-private const val BACKGROUND_PREPARES_PER_MINUTE_WINDOW_MS = 60L * 1000L
-private const val BACKGROUND_PREPARES_PER_HOUR_WINDOW_MS = 60L * 60L * 1000L
-
-private fun ArrayDeque<Long>.removeOlderThan(cutoffMs: Long) {
-    while (firstOrNull()?.let { it < cutoffMs } == true) {
-        removeFirst()
-    }
 }
 
 private fun Stream.preparationKey(): String {

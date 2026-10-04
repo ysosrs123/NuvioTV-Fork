@@ -52,7 +52,7 @@ internal fun LazyListScope.diagnosticsCardItems(
                 Text(
                     text = stringResource(R.string.diag_last_playback_title),
                     style = MaterialTheme.typography.labelMedium,
-                    color = NuvioTheme.colors.Primary
+                    color = Color.White
                 )
                 Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
                 Text(
@@ -89,6 +89,14 @@ internal fun LazyListScope.diagnosticsCardItems(
                 stringResource(R.string.diag_section_source_hardware_sub)
             )
             DiagnosticRow(stringResource(R.string.diag_label_host), diagnostics.host)
+            // The host that actually served the bytes after the
+            // redirect. Omitted when nothing was captured (direct/Emby/NAS
+            // sources never redirect) or when a cosmetic redirect resolved back
+            // to the same host -- matching the HUD's suppression convention.
+            diagnostics.resolvedServingHost
+                ?.takeIf { !it.equals(diagnostics.host, ignoreCase = true) }
+                ?.let { DiagnosticRow(stringResource(R.string.diag_label_serving_host), it) }
+            diagnostics.filename?.let { DiagnosticRow(stringResource(R.string.diag_label_file), it) }
             DiagnosticRow(stringResource(R.string.diag_label_when), formatTimestamp(diagnostics.timestampMs))
             DiagnosticRow(stringResource(R.string.diag_label_device), deviceName(unknownLabel))
             DiagnosticRow(
@@ -110,9 +118,30 @@ internal fun LazyListScope.diagnosticsCardItems(
                 stringResource(R.string.diag_label_dv7_decoder),
                 dv(
                     if (diagnostics.codecDv7Supported) stringResource(R.string.diag_value_available)
-                    else stringResource(R.string.diag_value_not_available)
+                    // Not "not available": devices like the S905X4 decode P7
+                    // natively without advertising the profile.
+                    else stringResource(R.string.diag_value_not_advertised)
                 )
             )
+            // Enhancement-layer type of the last DV7 stream, and the
+            // per-playback RPU drop counter (shown only when non-zero).
+            diagnostics.dvElType?.let { elType ->
+                DiagnosticRow(stringResource(R.string.diag_label_dv_el_type), dv(elType))
+            }
+            diagnostics.dvHdrMastering?.let { mastering ->
+                // Render the raw value, exempt from the dvEngaged dash. This
+                // row only ever has a value when an RPU was actually read this
+                // playback (stats reset per-playback, so never stale), and the
+                // strip-to-HDR10 case where dvEngaged is false is exactly where
+                // the source's mastering data is most useful to see.
+                DiagnosticRow(stringResource(R.string.diag_label_dv_hdr_mastering), mastering)
+            }
+            if (diagnostics.dv7RpuDrops > 0) {
+                DiagnosticRow(
+                    stringResource(R.string.diag_label_dv_rpu_drops),
+                    dv(diagnostics.dv7RpuDrops.toString())
+                )
+            }
             DiagnosticRow(
                 stringResource(R.string.diag_label_dv_decoder),
                 dv(
@@ -144,6 +173,31 @@ internal fun LazyListScope.diagnosticsCardItems(
                 DiagnosticRow(stringResource(R.string.diag_label_dv_mode_effective), dv(diagnostics.dv7ModeEffective))
             }
             DiagnosticRow(stringResource(R.string.diag_label_auto_decision), dv(diagnostics.dv7AutoDecision))
+            // Everything above is POLICY: the mode requested, and the decision the AUTO
+            // probe reached from the display's capabilities. None of it says what happened to
+            // this stream. CONVERT_TO_DV81 / DV81_LIBDOVI on a native Profile 8 source that the
+            // extractor never touches (shouldConvert() returns false for any profile but 7)
+            // would read as "conversion applied". This
+            // row is the outcome, derived the way the stats panel derives it: source profile
+            // first, then the live conversion counters.
+            run {
+                val sourceProfileNum = diagnostics.dvSourceProfile?.trim()?.toIntOrNull()
+                val applied: String? = when {
+                    sourceProfileNum != null && sourceProfileNum != 7 -> stringResource(
+                        R.string.diag_value_dv_no_conversion_fmt,
+                        sourceProfileNum.toString()
+                    )
+                    diagnostics.dv7ModeEffective == "DV81_LIBDOVI" &&
+                        (diagnostics.dv7DoviSuccess > 0 || diagnostics.dv7DoviSignalRewrites > 0) ->
+                        stringResource(R.string.diag_value_dv_converted)
+                    diagnostics.dv7ModeEffective == "DV81_LIBDOVI" ->
+                        stringResource(R.string.diag_value_dv_configured_not_observed)
+                    diagnostics.dv7ModeEffective == "HDR10_BASE_LAYER" ->
+                        stringResource(R.string.diag_value_dv_base_layer)
+                    else -> null
+                }
+                applied?.let { DiagnosticRow(stringResource(R.string.diag_label_dv_applied), it) }
+            }
             if (dvEngaged) {
                 diagnostics.dvSourceProfile?.let { DiagnosticRow(stringResource(R.string.diag_label_source_profile), it) }
                 if (diagnostics.dv7DoviCalls > 0) {
@@ -193,6 +247,22 @@ internal fun LazyListScope.diagnosticsCardItems(
         DiagnosticsSectionCard {
             SectionHeader(stringResource(R.string.diag_section_outcome))
             DiagnosticRow(stringResource(R.string.diag_label_hdr_format_intended), diagnostics.videoHdrType?.takeIf { it.isNotBlank() } ?: "-")
+            // Negotiated audio path (passthrough / decode).
+            DiagnosticRow(stringResource(R.string.diag_label_audio_path), diagnostics.audioPath?.takeIf { it.isNotBlank() } ?: "-")
+            // Append encodings the platform refused at AudioTrack open() this
+            // session (AudioTrackRejectionLog, populated by the 5001 recovery path).
+            // Ground truth alongside the policy "direct" claims and the "negotiated"
+            // list - on a TV that advertises DTS but will not open it, this is the
+            // line that names what actually failed.
+            DiagnosticRow(
+                stringResource(R.string.diag_label_audio_caps),
+                (diagnostics.audioCapabilities?.takeIf { it.isNotBlank() } ?: "-").let { base ->
+                    val rejected = com.nuvio.tv.ui.screens.player.AudioTrackRejectionLog
+                        .snapshot().map { it.encoding }.distinct()
+                    if (rejected.isEmpty()) base
+                    else "$base\nRejected: ${rejected.joinToString(" ")}"
+                }
+            )
             DiagnosticRow(
                 stringResource(R.string.diag_label_first_frame),
                 if (diagnostics.firstFrameMs >= 0) "${diagnostics.firstFrameMs} ms"
@@ -223,10 +293,10 @@ private fun DiagnosticsSectionCard(
 ) {
     Card(
         onClick = { /* read-only */ },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().settingsSubmenuSurface(),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = settingsItemColor(Color.Black.copy(alpha = 0.85f)),
+            focusedContainerColor = Color.White.copy(alpha = 0.14f)
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
@@ -251,9 +321,9 @@ private fun DiagnosticsSectionCard(
 @Composable
 private fun SectionHeader(label: String, subtitle: String? = null) {
     Text(
-        text = label.uppercase(),
+        text = label,
         style = MaterialTheme.typography.labelSmall,
-        color = NuvioTheme.colors.Primary
+        color = Color.White
     )
     if (subtitle != null) {
         Text(

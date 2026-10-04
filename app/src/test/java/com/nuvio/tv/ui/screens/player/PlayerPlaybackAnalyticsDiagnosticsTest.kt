@@ -1,11 +1,73 @@
 package com.nuvio.tv.ui.screens.player
 
+import android.os.SystemClock
 import androidx.media3.common.C
+import androidx.media3.common.PlaybackParameters
+import androidx.media3.common.Player
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Before
 import org.junit.Test
 
 class PlayerPlaybackAnalyticsDiagnosticsTest {
+
+    private var nowMs = 1_000_000L
+    private var positionMs = 1_432_000L
+    private var playing = true
+
+    @Before
+    fun setUp() {
+        mockkStatic(SystemClock::class)
+        every { SystemClock.elapsedRealtime() } answers { nowMs }
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(SystemClock::class)
+    }
+
+    private fun player(): Player = mockk(relaxed = true) {
+        every { playWhenReady } answers { playing }
+        every { isPlaying } answers { playing }
+        every { playbackState } returns Player.STATE_READY
+        every { currentPosition } answers { positionMs }
+        every { bufferedPosition } answers { positionMs + 20_000L }
+        every { duration } returns 7_000_000L
+        every { playbackParameters } returns PlaybackParameters.DEFAULT
+    }
+
+    @Test
+    fun `a pause with no samples is not counted as a freeze on resume`() {
+        val diagnostics = PlayerPlaybackAnalyticsDiagnostics()
+        val player = player()
+        diagnostics.recordProgressSnapshot(player, hasRenderedFirstFrame = true)
+        playing = false
+        nowMs += 1_000L
+        diagnostics.recordProgressSnapshot(player, hasRenderedFirstFrame = true)
+        nowMs += 58_600L
+        playing = true
+        diagnostics.recordProgressSnapshot(player, hasRenderedFirstFrame = true)
+        nowMs += 1_000L
+        positionMs += 1_000L
+        diagnostics.recordProgressSnapshot(player, hasRenderedFirstFrame = true)
+        assertEquals(0, diagnostics.hudSample().positionStallCount)
+    }
+
+    @Test
+    fun `position stuck while playing is still counted`() {
+        val diagnostics = PlayerPlaybackAnalyticsDiagnostics()
+        val player = player()
+        repeat(8) {
+            diagnostics.recordProgressSnapshot(player, hasRenderedFirstFrame = true)
+            nowMs += 1_000L
+        }
+        assertEquals(1, diagnostics.hudSample().positionStallCount)
+    }
 
     @Test
     fun `vod buffer below duration reports integer percent`() {

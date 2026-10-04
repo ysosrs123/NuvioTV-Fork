@@ -17,11 +17,15 @@ internal fun PlayerRuntimeController.maybeAutoSwitchInternalPlayerOnStartupError
     if (startupEngineFailoverTriggered) return false
     if (!isStartupPhaseForEngineFailover()) return false
 
-    val targetEngine = when (currentInternalPlayerEngine) {
-        InternalPlayerEngine.EXOPLAYER -> InternalPlayerEngine.MVP_PLAYER
-        InternalPlayerEngine.MVP_PLAYER -> InternalPlayerEngine.EXOPLAYER
-        InternalPlayerEngine.AUTO -> if (mpvView != null) InternalPlayerEngine.EXOPLAYER else InternalPlayerEngine.MVP_PLAYER
-    }
+    // Automatic engine failover is one-directional. Only
+    // an active MPV session (manual switch, or the MPV/AUTO engine settings)
+    // may fail back to ExoPlayer. ExoPlayer startup failures are handled by
+    // the retry ladders and next-source failover instead of silently dropping
+    // into MPV, which loses this fork's passthrough/DV pipeline behaviour.
+    val mpvActive = currentInternalPlayerEngine == InternalPlayerEngine.MVP_PLAYER ||
+        (currentInternalPlayerEngine == InternalPlayerEngine.AUTO && mpvView != null)
+    if (!mpvActive) return false
+    val targetEngine = InternalPlayerEngine.EXOPLAYER
     beginSwitchTraceSession(reason = "startup-failover", targetEngine = targetEngine)
     logSwitchTrace(
         stage = "startup-failover-trigger",

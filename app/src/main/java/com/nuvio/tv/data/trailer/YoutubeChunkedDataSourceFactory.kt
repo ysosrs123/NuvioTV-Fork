@@ -7,6 +7,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.HttpDataSource
 import androidx.media3.datasource.TransferListener
 
 /**
@@ -26,6 +27,7 @@ class YoutubeChunkedDataSourceFactory(
         private const val TAG = "YTChunkedDS"
         /** 10 MB chunks – large enough to avoid too many requests, small enough to dodge throttle. */
         private const val CHUNK_SIZE = 10L * 1024 * 1024
+        private const val HTTP_RANGE_NOT_SATISFIABLE = 416
     }
 
     override fun createDataSource(): DataSource {
@@ -44,11 +46,13 @@ class YoutubeChunkedDataSourceFactory(
 
         private var currentUri: Uri? = null
         private var isYouTubeStream = false
-        private var totalContentLength = C.LENGTH_UNSET.toLong()
-        private var currentChunkStart = 0L
-        private var currentChunkEnd = 0L
-        private var bytesReadInChunk = 0L
         private var originalDataSpec: DataSpec? = null
+        private val chunks = YoutubeChunkReader(
+            chunkSize = chunkSize,
+            openChunk = ::openChunk,
+            readChunk = upstream::read,
+            closeChunk = upstream::close
+        )
 
         override fun addTransferListener(transferListener: TransferListener) {
             upstream.addTransferListener(transferListener)
@@ -64,24 +68,17 @@ class YoutubeChunkedDataSourceFactory(
             }
 
             originalDataSpec = dataSpec
-            currentChunkStart = dataSpec.position
-            totalContentLength = dataSpec.length
-
-            return openNextChunk()
+            chunks.open(dataSpec.position, dataSpec.length)
+            return dataSpec.length
         }
 
-        private fun openNextChunk(): Long {
+        /** False when the server says the range starts past the end of the stream. */
+        private fun openChunk(start: Long, end: Long): Boolean {
             val spec = originalDataSpec ?: throw IllegalStateException("No DataSpec")
-            val end = if (totalContentLength != C.LENGTH_UNSET.toLong()) {
-                minOf(currentChunkStart + chunkSize - 1, currentChunkStart + totalContentLength - 1)
-            } else {
-                currentChunkStart + chunkSize - 1
-            }
-            currentChunkEnd = end
 
             // Append &range=start-end to the URL (YouTube's own range param, not HTTP Range header)
             val rangedUri = spec.uri.buildUpon()
-                .appendQueryParameter("range", "$currentChunkStart-$currentChunkEnd")
+                .appendQueryParameter("range", "$start-$end")
                 .build()
 
             val chunkedSpec = spec.buildUpon()
@@ -90,46 +87,21 @@ class YoutubeChunkedDataSourceFactory(
                 .setLength(C.LENGTH_UNSET.toLong()) // let the server decide
                 .build()
 
-            bytesReadInChunk = 0
-            upstream.open(chunkedSpec)
-            return if (totalContentLength != C.LENGTH_UNSET.toLong()) totalContentLength else C.LENGTH_UNSET.toLong()
+            return try {
+                upstream.open(chunkedSpec)
+                true
+            } catch (e: HttpDataSource.InvalidResponseCodeException) {
+                if (e.responseCode == HTTP_RANGE_NOT_SATISFIABLE) return false
+                Log.w(TAG, "Failed to open chunk at $start: ${e.message}")
+                throw e
+            }
         }
 
         override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
             if (!isYouTubeStream) {
                 return upstream.read(buffer, offset, length)
             }
-
-            val bytesRead = upstream.read(buffer, offset, length)
-            if (bytesRead == C.RESULT_END_OF_INPUT) {
-                // Current chunk exhausted — open the next one
-                val chunkBytesReceived = bytesReadInChunk
-                upstream.close()
-
-                // If this chunk returned fewer bytes than requested, the stream is done
-                if (chunkBytesReceived < (currentChunkEnd - currentChunkStart + 1)) {
-                    return C.RESULT_END_OF_INPUT
-                }
-
-                currentChunkStart += chunkBytesReceived
-                if (totalContentLength != C.LENGTH_UNSET.toLong()) {
-                    totalContentLength -= chunkBytesReceived
-                    if (totalContentLength <= 0) {
-                        return C.RESULT_END_OF_INPUT
-                    }
-                }
-
-                return try {
-                    openNextChunk()
-                    upstream.read(buffer, offset, length)
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to open next chunk at $currentChunkStart: ${e.message}")
-                    C.RESULT_END_OF_INPUT
-                }
-            }
-
-            bytesReadInChunk += bytesRead
-            return bytesRead
+            return chunks.read(buffer, offset, length)
         }
 
         override fun getUri(): Uri? = upstream.uri ?: currentUri

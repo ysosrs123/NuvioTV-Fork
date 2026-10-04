@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.core.util.TtffTrace
 import android.net.Uri
 import android.os.SystemClock
 import androidx.media3.common.Player
@@ -182,6 +183,7 @@ internal fun PlayerRuntimeController.buildPlaybackIssueLoadingInput(reportReason
 }
 
 private fun PlayerRuntimeController.recordLoadingDiagnosticRawEventLine(line: String) {
+    TtffTrace.mirror(line)
     loadingDiagnosticRawEventLines.addLast(line.rawLoadingEventLine())
     while (loadingDiagnosticRawEventLines.size > LOADING_RAW_EVENT_LIMIT) {
         loadingDiagnosticRawEventLines.removeFirst()

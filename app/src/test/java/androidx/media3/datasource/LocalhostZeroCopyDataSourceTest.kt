@@ -196,6 +196,11 @@ class LocalhostZeroCopyDataSourceTest {
         thread {
             try {
                 val client = serverSocket.accept()
+                val reader = client.getInputStream().bufferedReader()
+                while (true) {
+                    val line = reader.readLine()
+                    if (line.isNullOrEmpty()) break
+                }
                 val out = client.getOutputStream()
                 out.write(responseHeaders.toByteArray())
                 out.flush()
@@ -216,10 +221,14 @@ class LocalhostZeroCopyDataSourceTest {
             .setUri(mockUri)
             .build()
         
+        // Known failure: open() catches its own InvalidResponseCodeException and rethrows it wrapped
+        // in a plain HttpDataSourceException, and it reports every status other than 200, 206 and
+        // 416 as 400. Callers that act on 404 or 410 never see them.
         try {
-            assertThrows(HttpDataSource.InvalidResponseCodeException::class.java) {
+            val error = assertThrows(HttpDataSource.InvalidResponseCodeException::class.java) {
                 dataSource.open(dataSpec)
             }
+            assertEquals(404, error.responseCode)
         } finally {
             dataSource.close()
             serverSocket.close()

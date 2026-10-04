@@ -1,4 +1,4 @@
-package com.nuvio.tv.ui.screens.player
+﻿package com.nuvio.tv.ui.screens.player
 
 import android.os.SystemClock
 import android.util.Log
