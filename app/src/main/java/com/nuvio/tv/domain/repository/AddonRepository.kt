@@ -11,4 +11,12 @@ interface AddonRepository {
     suspend fun removeAddon(url: String)
     suspend fun setAddonOrder(urls: List<String>)
     suspend fun setAddonEnabled(url: String, enabled: Boolean)
+
+    /**
+     * Force a manifest re-fetch of every installed, enabled addon, bypassing
+     * the in-memory cache. Heals addons that dropped out of the installed list
+     * because their manifest fetch failed. Default no-op so test doubles and
+     * any other implementors are unaffected.
+     */
+    suspend fun refreshAllManifests() {}
 }

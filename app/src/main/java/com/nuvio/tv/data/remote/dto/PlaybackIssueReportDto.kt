@@ -199,7 +199,6 @@ data class PlaybackIssuePlaybackSettingsDto(
     @Json(name = "showPlayerLoadingStatus") val showPlayerLoadingStatus: Boolean,
     @Json(name = "playbackIssueReportsEnabled") val playbackIssueReportsEnabled: Boolean,
     @Json(name = "dv5ToDv81Enabled") val dv5ToDv81Enabled: Boolean,
-    @Json(name = "dv7ToDv81PreserveMappingEnabled") val dv7ToDv81PreserveMappingEnabled: Boolean,
     @Json(name = "dv7HandlingMode") val dv7HandlingMode: String,
     @Json(name = "dv7LibdoviModeOverride") val dv7LibdoviModeOverride: Int,
     @Json(name = "stripHdr10PlusSei") val stripHdr10PlusSei: Boolean,

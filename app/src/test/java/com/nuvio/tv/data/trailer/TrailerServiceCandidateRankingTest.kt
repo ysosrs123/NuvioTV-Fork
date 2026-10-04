@@ -131,7 +131,9 @@ class TrailerServiceCandidateRankingTest {
             tmdbApi = tmdbApi,
             inAppYouTubeExtractor = extractor,
             tmdbSettingsDataStore = tmdbSettingsDataStore,
-            tmdbService = tmdbService
+            tmdbService = tmdbService,
+            imdbTrailerResolver = mockk(relaxed = true),
+            trailerSettingsDataStore = mockk(relaxed = true)
         )
 
         val result = service.getExternalTrailerUrl(tmdbId = "123", type = "movie")
@@ -173,7 +175,9 @@ class TrailerServiceCandidateRankingTest {
             tmdbApi = tmdbApi,
             inAppYouTubeExtractor = extractor,
             tmdbSettingsDataStore = tmdbSettingsDataStore,
-            tmdbService = tmdbService
+            tmdbService = tmdbService,
+            imdbTrailerResolver = mockk(relaxed = true),
+            trailerSettingsDataStore = mockk(relaxed = true)
         )
 
         val result = service.getExternalTrailerUrl(tmdbId = "123", type = "movie")

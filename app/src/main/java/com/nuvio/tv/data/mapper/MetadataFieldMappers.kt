@@ -6,6 +6,7 @@ import com.nuvio.tv.data.remote.dto.MetaReleaseDateCountryDto
 import com.nuvio.tv.data.remote.dto.MetaReleaseDatesEnvelopeDto
 import com.nuvio.tv.data.remote.dto.MetaTrailerDto
 import com.nuvio.tv.data.remote.dto.TrailerStreamDto
+import com.nuvio.tv.data.trailer.youTubeVideoIdOf
 import com.nuvio.tv.domain.model.MetaBehaviorHints
 import com.nuvio.tv.domain.model.MetaCastMember
 import com.nuvio.tv.domain.model.MetaReleaseDate
@@ -65,13 +66,13 @@ internal fun mapTrailers(
             source = it.source?.takeIf(String::isNotBlank),
             type = it.type?.takeIf(String::isNotBlank),
             name = it.name?.takeIf(String::isNotBlank),
-            ytId = (it.source ?: it.ytId)?.takeIf(String::isNotBlank),
+            ytId = it.source?.let(::youTubeVideoIdOf) ?: it.ytId?.let(::youTubeVideoIdOf),
             lang = it.lang?.takeIf(String::isNotBlank)
         )
     }
     val existingYtIds = fromTrailers.mapNotNull { it.ytId }.toSet()
     val fromStreams = trailerStreams.orEmpty().mapNotNull { stream ->
-        val ytId = stream.ytId?.takeIf(String::isNotBlank) ?: return@mapNotNull null
+        val ytId = stream.ytId?.let(::youTubeVideoIdOf) ?: return@mapNotNull null
         if (ytId in existingYtIds) return@mapNotNull null
         MetaTrailer(ytId = ytId)
     }

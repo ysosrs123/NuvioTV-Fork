@@ -11,6 +11,7 @@ import com.nuvio.tv.data.remote.api.TmdbCompanyDetailsResponse
 import com.nuvio.tv.data.remote.api.TmdbListDetailsResponse
 import com.nuvio.tv.data.remote.api.TmdbListItem
 import com.nuvio.tv.data.remote.api.TmdbNetworkDetailsResponse
+import com.nuvio.tv.domain.model.PosterShape
 import com.nuvio.tv.domain.model.TmdbCollectionFilters
 import com.nuvio.tv.domain.model.TmdbCollectionMediaType
 import com.nuvio.tv.domain.model.TmdbCollectionSource
@@ -19,13 +20,17 @@ import com.nuvio.tv.domain.model.TmdbSettings
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
 import retrofit2.http.Query
@@ -35,6 +40,14 @@ class TmdbCollectionSourceResolverTest {
     private val settings = mockk<TmdbSettingsDataStore> {
         every { this@mockk.settings } returns MutableStateFlow(TmdbSettings(language = "en"))
     }
+
+    // Local JVM tests do not have Android's system display metrics.
+    @Before fun setUpImageSizes() {
+        mockkObject(TmdbImageSizes)
+        every { TmdbImageSizes.backdrop } returns "w1280"
+    }
+
+    @After fun tearDownImageSizes() = unmockkObject(TmdbImageSizes)
 
     @Test
     fun `parseTmdbId accepts ids and tmdb urls`() {
@@ -143,6 +156,11 @@ class TmdbCollectionSourceResolverTest {
 
         assertEquals("Star Wars Collection", metadata.title)
         assertEquals("https://image.tmdb.org/t/p/w500/collection.jpg", metadata.coverImageUrl)
+        assertEquals(true, metadata.wideCoverImageUrl?.endsWith("/collection-backdrop.jpg"))
+        assertEquals(metadata.wideCoverImageUrl, metadata.coverFor(PosterShape.LANDSCAPE))
+        assertEquals(metadata.coverImageUrl, metadata.coverFor(PosterShape.POSTER))
+        assertEquals(metadata.coverImageUrl, metadata.coverFor(PosterShape.SQUARE))
+        assertEquals("poster", TmdbSourceImportMetadata(coverImageUrl = "poster").coverFor(PosterShape.LANDSCAPE))
     }
 
     @Test

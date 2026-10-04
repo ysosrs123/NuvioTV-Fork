@@ -2,8 +2,13 @@ package com.nuvio.tv.data.repository
 
 import android.content.Context
 import android.util.Log
+import com.nuvio.tv.core.network.ADDON_REQUEST_TIMEOUT_MS
 import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.data.mapper.toDomain
+import com.nuvio.tv.data.mediaserver.ServerCatalog
+import com.nuvio.tv.data.mediaserver.ServerItemRef
+import com.nuvio.tv.data.mediaserver.messageRes
+import com.nuvio.tv.data.mediaserver.serverFailure
 import com.nuvio.tv.data.remote.api.AddonApi
 import com.nuvio.tv.domain.model.Addon
 import com.nuvio.tv.domain.model.Meta
@@ -11,14 +16,20 @@ import com.nuvio.tv.domain.model.AddonResource
 import com.nuvio.tv.domain.model.enabledAddons
 import com.nuvio.tv.domain.repository.AddonRepository
 import com.nuvio.tv.domain.repository.MetaRepository
+import com.nuvio.tv.core.health.AddonHealthStore
+import com.nuvio.tv.core.health.HealthOutcome
+import com.nuvio.tv.core.util.canonicalizeAddonUrl
+import kotlinx.coroutines.launch
 import com.nuvio.tv.R
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
@@ -33,7 +44,9 @@ import javax.inject.Singleton
 class MetaRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val api: AddonApi,
-    private val addonRepository: AddonRepository
+    private val addonRepository: AddonRepository,
+    private val healthStore: AddonHealthStore,
+    private val serverCatalog: ServerCatalog
 ) : MetaRepository {
     companion object {
         private const val TAG = "MetaRepository"
@@ -43,8 +56,7 @@ class MetaRepositoryImpl @Inject constructor(
          *  Prevents excessive re-fetching on every details screen visit for addons
          *  that don't set meaningful Cache-Control headers. */
         private const val MIN_META_TTL_MS = 5L * 60 * 1000
-        private const val MAX_META_CACHE_ENTRIES = 32
-        private const val MAX_PRIMARY_META_CACHE_ENTRIES = 16
+        private const val SERVER_META_TTL_MS = 60_000L
         /**
          * How long a meta lookup waits for the installed addon list to populate.
          *
@@ -59,17 +71,6 @@ class MetaRepositoryImpl @Inject constructor(
          * [getMeta] checks its cache first, so a hit never waits.
          */
         private const val INSTALLED_ADDONS_WAIT_MS = 750L
-    }
-
-    /**
-     * Creates a thread-safe LRU map that evicts oldest entries when [maxSize] is exceeded.
-     */
-    private fun <K, V> createLruCacheMap(maxSize: Int): MutableMap<K, V> {
-        val lru = object : LinkedHashMap<K, V>(maxSize, 0.75f, true) {
-            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, V>?): Boolean =
-                size > maxSize
-        }
-        return java.util.Collections.synchronizedMap(lru)
     }
 
     /** Internal result type for the deferred meta lookup to distinguish
@@ -115,12 +116,71 @@ class MetaRepositoryImpl @Inject constructor(
 
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    // In-memory cache: "addonBaseUrl|type:id" -> CachedMeta with TTL.
-    // Respects Cache-Control max-age from addon responses.
-    private val metaCache = createLruCacheMap<String, CachedMeta>(MAX_META_CACHE_ENTRIES)
+    // In-memory cache: "addonBaseUrl|type:id" -> CachedMeta. Keyed per addon so
+    // two addons serving meta for the same content id never overwrite each other.
+    // Two TTL layers compose here:
+    //  - each entry carries the addon-declared Cache-Control
+    //    max-age (CachedMeta.isExpired), so fast-changing meta refreshes without
+    //    an app restart;
+    //  - the cache itself is a bounded, access-ordered
+    //    LRU whose 45-min internal TTL caps any longer declaration -- a series
+    //    Meta is heavy (full episode list, cast, links) and an unbounded cache
+    //    grows for the whole session, competing with the player's
+    //    buffer for RAM on low tiers. The cap also lets a series pick up
+    //    newly-aired episodes within a session.
+    // Net per-entry lifetime: min(declared max-age or the 24 h default, 45 min).
+    private val metaCache = BoundedMetaCache<String, CachedMeta>()
     // Separate cache for full meta fetched from addons (bypasses catalog-level cache)
-    private val addonMetaCache = createLruCacheMap<String, CachedMeta>(MAX_META_CACHE_ENTRIES)
-    private val primaryAddonMetaCache = createLruCacheMap<String, CachedMeta>(MAX_PRIMARY_META_CACHE_ENTRIES)
+    private val addonMetaCache = BoundedMetaCache<String, CachedMeta>()
+    private val primaryAddonMetaCache = BoundedMetaCache<String, CachedMeta>()
+    private val serverMetaCache = BoundedMetaCache<String, CachedMeta>(maxEntries = 32)
+    // Negative cache: without it a genuine miss re-runs the full
+    // candidate loop on every detail-screen visit / enrichment for that title.
+    private val metaMissCache = BoundedMetaCache<String, Long>(
+        maxEntries = 300, ttlMs = 5 * 60 * 1000L
+    )
+
+    /**
+     * Minimal thread-safe LRU with per-entry TTL. Access-ordered so hot titles
+     * stay resident; stale entries are dropped on read.
+     */
+    private class BoundedMetaCache<K : Any, V : Any>(
+        private val maxEntries: Int = 150,
+        private val ttlMs: Long = 45 * 60 * 1000L
+    ) {
+        private class Entry<V>(val value: V, val storedAtMs: Long)
+
+        private val map = object : LinkedHashMap<K, Entry<V>>(32, 0.75f, true) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<K, Entry<V>>): Boolean {
+                return size > maxEntries
+            }
+        }
+
+        @Synchronized
+        operator fun get(key: K): V? {
+            val entry = map[key] ?: return null
+            if (System.currentTimeMillis() - entry.storedAtMs > ttlMs) {
+                map.remove(key)
+                return null
+            }
+            return entry.value
+        }
+
+        @Synchronized
+        operator fun set(key: K, value: V) {
+            map[key] = Entry(value, System.currentTimeMillis())
+        }
+
+        @Synchronized
+        fun remove(key: K) {
+            map.remove(key)
+        }
+
+        @Synchronized
+        fun clear() {
+            map.clear()
+        }
+    }
 
     // In-flight deduplication: prevents concurrent coroutines from firing duplicate requests
     private val inFlightMeta = ConcurrentHashMap<String, Deferred<Meta?>>()
@@ -132,6 +192,14 @@ class MetaRepositoryImpl @Inject constructor(
         type: String,
         id: String
     ): Flow<NetworkResult<Meta>> = flow {
+        ServerItemRef.parse(id)?.let { ref ->
+            emitAll(serverMeta(ref))
+            return@flow
+        }
+        if (ServerCatalog.isServerAddon(addonBaseUrl)) {
+            emitAll(getMetaFromAllAddons(type, id))
+            return@flow
+        }
         val requestedType = type.trim()
         val inferredType = inferCanonicalType(requestedType, id)
 
@@ -183,11 +251,16 @@ class MetaRepositoryImpl @Inject constructor(
 
         emit(NetworkResult.Loading)
 
+        val healthT0 = android.os.SystemClock.elapsedRealtime()
         val url = buildMetaUrl(addonBaseUrl, effectiveType, id)
         val deferred = inFlightMeta.getOrPut(cacheKey) {
             repositoryScope.async {
                 try {
-                    val response = api.getMeta(url)
+                    // Fork: keep the 20 s addon deadline (SafeApiCall.kt) that a raw
+                    // call would drop -- without it a dead addon holds this
+                    // coroutine for the shared client's full 60 s read timeout.
+                    val response = withTimeoutOrNull(ADDON_REQUEST_TIMEOUT_MS) { api.getMeta(url) }
+                        ?: throw java.io.IOException(context.getString(R.string.network_error_addon_timeout))
                     if (response.isSuccessful) {
                         val metaDto = response.body()?.meta ?: return@async null
                         val meta = metaDto.toDomain(context.getString(R.string.episodes_episode))
@@ -211,9 +284,12 @@ class MetaRepositoryImpl @Inject constructor(
         }
 
         val meta = deferred.await()
+        val healthMs = android.os.SystemClock.elapsedRealtime() - healthT0
         if (meta != null) {
+            recordAddonHealth(addonBaseUrl, HealthOutcome.SUCCESS, healthMs)
             emit(NetworkResult.Success(meta))
         } else {
+            recordAddonHealth(addonBaseUrl, HealthOutcome.FAILURE, healthMs)
             emit(NetworkResult.Error(context.getString(R.string.error_meta_not_found)))
         }
     }
@@ -223,6 +299,10 @@ class MetaRepositoryImpl @Inject constructor(
         id: String,
         sourceAddonBaseUrl: String?
     ): Flow<NetworkResult<Meta>> = flow {
+        ServerItemRef.parse(id)?.let { ref ->
+            emitAll(serverMeta(ref))
+            return@flow
+        }
         val cacheKey = metaLookupCacheKey(type, id)
         addonMetaCache[cacheKey]?.let { cached ->
             if (!cached.isExpired()) {
@@ -230,6 +310,11 @@ class MetaRepositoryImpl @Inject constructor(
                 return@flow
             }
             addonMetaCache.remove(cacheKey)
+        }
+        // Fresh negative result: skip re-running the whole candidate loop.
+        if (metaMissCache[cacheKey] != null) {
+            emit(NetworkResult.Error(context.getString(R.string.error_meta_not_found), NetworkResult.META_NOT_FOUND_CODE))
+            return@flow
         }
 
         inFlightAddonMeta[cacheKey]?.let { existingDeferred ->
@@ -309,7 +394,11 @@ class MetaRepositoryImpl @Inject constructor(
                 attemptedAddonNames += addon.displayName
                 val url = buildMetaUrl(addon.baseUrl, requestedType, id)
                 try {
-                    val response = api.getMeta(url)
+                    // Fork: keep the 20 s addon deadline (SafeApiCall.kt); a
+                    // timeout surfaces through the catch below like any other
+                    // request failure.
+                    val response = withTimeoutOrNull(ADDON_REQUEST_TIMEOUT_MS) { api.getMeta(url) }
+                        ?: throw java.io.IOException(context.getString(R.string.network_error_addon_timeout))
                     if (response.isSuccessful) {
                         val metaDto = response.body()?.meta
                         if (metaDto != null) {
@@ -397,7 +486,9 @@ class MetaRepositoryImpl @Inject constructor(
                         loopAddonNames += addon.displayName
                         attempted++
                         try {
-                            val response = api.getMeta(url)
+                            // Fork: keep the 20 s addon deadline (SafeApiCall.kt).
+                            val response = withTimeoutOrNull(ADDON_REQUEST_TIMEOUT_MS) { api.getMeta(url) }
+                                ?: throw java.io.IOException(context.getString(R.string.network_error_addon_timeout))
                             if (response.isSuccessful) {
                                 val metaDto = response.body()?.meta
                                 if (metaDto != null) {
@@ -432,14 +523,17 @@ class MetaRepositoryImpl @Inject constructor(
                             /* try next */
                         }
                     }
+                    val allAttemptsMissing = attempted > 0 &&
+                        attempted == prioritizedCandidates.size && allMissing
+                    // Cache only a definitive absence. A network/server failure must
+                    // remain retryable when focus returns after connectivity recovers.
+                    if (allAttemptsMissing) metaMissCache[cacheKey] = System.currentTimeMillis()
                     // Comparing against the candidate list makes "every candidate was attempted"
                     // explicit rather than implied by the loop never breaking early.
                     MetaLookupResult.NotFound(
                         attemptedAddonNames = loopAddonNames.toList(),
                         failures = loopFailures,
-                        allAttemptsMissing = attempted > 0 &&
-                            attempted == prioritizedCandidates.size &&
-                            allMissing
+                        allAttemptsMissing = allAttemptsMissing
                     )
                 } finally {
                     inFlightAddonMeta.remove(cacheKey)
@@ -480,6 +574,10 @@ class MetaRepositoryImpl @Inject constructor(
         type: String,
         id: String
     ): Flow<NetworkResult<Meta>> = flow {
+        ServerItemRef.parse(id)?.let { ref ->
+            emitAll(serverMeta(ref))
+            return@flow
+        }
         val cacheKey = metaLookupCacheKey(type, id)
         primaryAddonMetaCache[cacheKey]?.let { cached ->
             if (!cached.isExpired()) {
@@ -515,7 +613,11 @@ class MetaRepositoryImpl @Inject constructor(
         val deferred = inFlightPrimaryMeta.getOrPut(cacheKey) {
             repositoryScope.async {
                 try {
-                    val response = api.getMeta(url)
+                    // Fork: keep the 20 s addon deadline (SafeApiCall.kt) that a raw
+                    // call would drop -- without it a dead addon holds this
+                    // coroutine for the shared client's full 60 s read timeout.
+                    val response = withTimeoutOrNull(ADDON_REQUEST_TIMEOUT_MS) { api.getMeta(url) }
+                        ?: throw java.io.IOException(context.getString(R.string.network_error_addon_timeout))
                     if (response.isSuccessful) {
                         val metaDto = response.body()?.meta ?: return@async null
                         val meta = metaDto.toDomain(context.getString(R.string.episodes_episode))
@@ -567,6 +669,12 @@ class MetaRepositoryImpl @Inject constructor(
     private fun addonMetaCacheKey(addonBaseUrl: String, type: String, id: String): String {
         val (basePath, baseQuery) = splitAddonBaseUrl(addonBaseUrl)
         return "$basePath$baseQuery|$type:$id"
+    }
+
+    private fun recordAddonHealth(baseUrl: String, outcome: HealthOutcome, latencyMs: Long) {
+        repositoryScope.launch {
+            healthStore.record(AddonHealthStore.addonKey(canonicalizeAddonUrl(baseUrl)), outcome, latencyMs)
+        }
     }
 
     /** Normalized addon base URL, so two spellings of the same one compare equal. */
@@ -755,12 +863,34 @@ class MetaRepositoryImpl @Inject constructor(
         metaCache.clear()
         addonMetaCache.clear()
         primaryAddonMetaCache.clear()
+        metaMissCache.clear()
+        serverMetaCache.clear()
         inFlightMeta.clear()
         inFlightAddonMeta.clear()
         inFlightPrimaryMeta.clear()
     }
 
+    private fun serverMeta(ref: ServerItemRef): Flow<NetworkResult<Meta>> = flow {
+        val key = ref.encode()
+        serverMetaCache[key]?.takeIf { !it.isExpired() }?.let { cached ->
+            emit(NetworkResult.Success(cached.meta))
+            return@flow
+        }
+        emit(NetworkResult.Loading)
+        val meta = try {
+            serverCatalog.details(ref).meta
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            emit(NetworkResult.Error(context.getString(error.serverFailure().messageRes())))
+            return@flow
+        }
+        serverMetaCache[key] = CachedMeta(meta, System.currentTimeMillis() + SERVER_META_TTL_MS)
+        emit(NetworkResult.Success(meta))
+    }
+
     override fun getCachedMeta(type: String, id: String): Meta? {
+        if (ServerItemRef.isServerId(id)) return serverMetaCache[id]?.takeIf { !it.isExpired() }?.meta
         val cacheKey = metaLookupCacheKey(type, id)
         return addonMetaCache[cacheKey]?.takeIf { !it.isExpired() }?.meta
     }

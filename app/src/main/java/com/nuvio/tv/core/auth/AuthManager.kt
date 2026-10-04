@@ -26,6 +26,8 @@ import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.ServerResponseException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.Json
@@ -135,6 +137,12 @@ class AuthManager @Inject constructor(
                             } else if (!validateAuthenticatedSession(force = false)) {
                                 finishStartupAuthDiagnostics("signed_out", "authenticated_session_invalid")
                             } else {
+                                currentCoroutineContext().ensureActive()
+                                val currentUser = auth.currentUserOrNull()
+                                if (currentUser == null || currentUser.id != user.id || currentUser.email != user.email) {
+                                    Log.d(TAG, "Skipping authentication publication for a superseded user")
+                                    return@collect
+                                }
                                 _authState.value = AuthState.FullAccount(userId = user.id, email = user.email!!)
                                 authSessionNoticeDataStore.markNuvioAuthenticated()
                                 finishStartupAuthDiagnostics("success", "authenticated_session_validated")
@@ -271,16 +279,25 @@ class AuthManager @Inject constructor(
      * For direct users, returns their own user ID.
      */
     suspend fun getEffectiveUserId(fallbackToOwnIdOnFailure: Boolean = true): String? {
+        val lookupContext = currentCoroutineContext()
+        lookupContext.ensureActive()
         val userId = currentUserId ?: return null
+        fun isCurrentUser(): Boolean {
+            lookupContext.ensureActive()
+            return currentUserId == userId && auth.currentUserOrNull()?.id == userId
+        }
         if (cachedEffectiveUserSourceUserId != userId) {
             cachedEffectiveUserId = null
             cachedEffectiveUserSourceUserId = null
         }
-        cachedEffectiveUserId?.let { return it }
+        cachedEffectiveUserId?.let { return if (isCurrentUser()) it else null }
 
-        suspend fun resolveAndCache(): String {
+        suspend fun resolveAndCache(): String? {
+            if (!isCurrentUser()) return null
             val result = postgrest.rpc("get_sync_owner")
+            if (!isCurrentUser()) return null
             val effectiveId = result.decodeAs<String>()
+            if (!isCurrentUser()) return null
             cachedEffectiveUserId = effectiveId
             cachedEffectiveUserSourceUserId = userId
             return effectiveId
@@ -289,10 +306,14 @@ class AuthManager @Inject constructor(
         return try {
             resolveAndCache()
         } catch (e: Exception) {
-            if (refreshSessionIfJwtExpired(e)) {
+            if (!isCurrentUser()) return null
+            val refreshed = refreshSessionIfJwtExpired(e)
+            if (!isCurrentUser()) return null
+            if (refreshed) {
                 return try {
                     resolveAndCache()
                 } catch (retryError: Exception) {
+                    if (!isCurrentUser()) return null
                     if (fallbackToOwnIdOnFailure) {
                         Log.e(TAG, "Failed to get effective user ID after refresh; falling back to own ID", retryError)
                         userId

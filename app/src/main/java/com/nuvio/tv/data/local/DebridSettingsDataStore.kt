@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import com.google.gson.Gson
 import com.nuvio.tv.core.debrid.DebridProviders
 import com.nuvio.tv.core.debrid.DebridStreamFormatterDefaults
+import com.nuvio.tv.core.debrid.TrashReleaseGroups
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.domain.model.DebridSettings
 import com.nuvio.tv.domain.model.DebridStreamCodecFilter
@@ -258,6 +259,7 @@ class DebridSettingsDataStore @Inject constructor(
     suspend fun setStreamPreferences(preferences: DebridStreamPreferences) {
         store().edit {
             val normalized = preferences.normalized()
+                .copy(trashDefaultsVersion = TrashReleaseGroups.DEFAULTS_VERSION)
             it[streamPreferencesKey] = gson.toJson(normalized)
             it[streamMaxResultsKey] = normalizeDebridStreamMaxResults(normalized.maxResults)
             it[streamSortModeKey] = legacyModeForSortCriteria(normalized.sortCriteria).name
@@ -320,7 +322,7 @@ class DebridSettingsDataStore @Inject constructor(
 
     private fun parseStreamPreferences(value: String?): DebridStreamPreferences? {
         return runCatching {
-            gson.fromJson(value, DebridStreamPreferences::class.java)?.normalized()
+            gson.fromJson(value, DebridStreamPreferences::class.java)?.normalized()?.migratedToTrashDefaults()
         }.getOrNull()
     }
 
@@ -337,9 +339,21 @@ class DebridSettingsDataStore @Inject constructor(
         codecFilter: DebridStreamCodecFilter
     ): DebridStreamPreferences {
         var preferences = DebridStreamPreferences(
-            maxResults = normalizeDebridStreamMaxResults(maxResults),
-            sortCriteria = sortCriteriaForLegacyMode(sortMode),
-            requiredResolutions = resolutionsForMinimumQuality(minimumQuality)
+            maxResults = if (maxResults == 0) {
+                DebridStreamPreferences().maxResults
+            } else {
+                normalizeDebridStreamMaxResults(maxResults)
+            },
+            sortCriteria = if (sortMode == DebridStreamSortMode.DEFAULT) {
+                DebridStreamSortCriterion.defaultOrder
+            } else {
+                sortCriteriaForLegacyMode(sortMode)
+            },
+            requiredResolutions = if (minimumQuality == DebridStreamMinimumQuality.ANY) {
+                DebridStreamPreferences().requiredResolutions
+            } else {
+                resolutionsForMinimumQuality(minimumQuality)
+            }
         )
         preferences = when (dolbyVisionFilter) {
             DebridStreamFeatureFilter.ANY -> preferences
@@ -415,6 +429,7 @@ class DebridSettingsDataStore @Inject constructor(
         val excludedLanguagesValue: List<com.nuvio.tv.domain.model.DebridStreamLanguage>? = excludedLanguages
         val requiredReleaseGroupsValue: List<String>? = requiredReleaseGroups
         val excludedReleaseGroupsValue: List<String>? = excludedReleaseGroups
+        val preferredReleaseGroupsValue: List<String>? = preferredReleaseGroups
         val sortCriteriaValue: List<DebridStreamSortCriterion>? = sortCriteria
         return copy(
             maxResults = normalizeDebridStreamMaxResults(maxResults),
@@ -443,9 +458,27 @@ class DebridSettingsDataStore @Inject constructor(
             preferredLanguages = preferredLanguagesValue.orEmpty(),
             requiredLanguages = requiredLanguagesValue.orEmpty(),
             excludedLanguages = excludedLanguagesValue.orEmpty(),
+            preferredReleaseGroups = (preferredReleaseGroupsValue ?: TrashReleaseGroups.PREFERRED_LADDER)
+                .map { it.trim() }.filter { it.isNotBlank() }.distinctBy { it.lowercase() },
             requiredReleaseGroups = requiredReleaseGroupsValue.orEmpty().map { it.trim() }.filter { it.isNotBlank() }.distinct(),
             excludedReleaseGroups = excludedReleaseGroupsValue.orEmpty().map { it.trim() }.filter { it.isNotBlank() }.distinct(),
-            sortCriteria = sortCriteriaValue ?: DebridStreamSortCriterion.originalOrder
+            sortCriteria = sortCriteriaValue ?: DebridStreamSortCriterion.defaultOrder,
+            trashDefaultsVersion = trashDefaultsVersion.coerceAtLeast(0)
         )
+    }
+
+    /**
+     * One-time re-baseline of Filters & Sorting to the shipped TRaSH-aligned
+     * defaults (DEFAULTS_VERSION 2). Version 1 used an additive union, and
+     * stored state from it can differ in ways a merge cannot repair (manual
+     * edits, plus a web-editor save path that skipped normalisation before
+     * writes were version-stamped), so v2 deliberately replaces the whole
+     * preferences object once. Every write through setStreamPreferences
+     * stamps the current version, so later
+     * user edits are never reset again.
+     */
+    private fun DebridStreamPreferences.migratedToTrashDefaults(): DebridStreamPreferences {
+        if (trashDefaultsVersion >= TrashReleaseGroups.DEFAULTS_VERSION) return this
+        return DebridStreamPreferences()
     }
 }

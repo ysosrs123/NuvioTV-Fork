@@ -12,7 +12,7 @@ class ThemeAccessTest {
 
         assertEquals(AppTheme.CUSTOM, themes.first())
         assertEquals(AppTheme.CUSTOM, resolveAppTheme(AppTheme.CUSTOM, CosmeticEntitlements.None))
-        assertEquals(AppTheme.WHITE, resolveAppTheme(null, CosmeticEntitlements.None))
+        assertEquals(AppTheme.GLASS, resolveAppTheme(null, CosmeticEntitlements.None))
         assertEquals(themes.size, themes.distinct().size)
     }
 
@@ -42,7 +42,7 @@ class ThemeAccessTest {
     }
 
     @Test
-    fun supporterAccessUnlocksAllThemesAndDefaultsToGold() {
+    fun supporterAccessUnlocksAllThemesAndDefaultsToGlass() {
         val entitlements = CosmeticEntitlements.SupporterPreview
         val availableThemes = availableAppThemes(entitlements)
 
@@ -51,7 +51,7 @@ class ThemeAccessTest {
         assertTrue(AppTheme.ROSE_GOLD in availableThemes)
         assertTrue(AppTheme.ARCTIC_BLUE in availableThemes)
         assertTrue(AppTheme.GRAPHITE in availableThemes)
-        assertEquals(AppTheme.GOLD, resolveAppTheme(null, entitlements))
+        assertEquals(AppTheme.GLASS, resolveAppTheme(null, entitlements))
     }
 
     @Test
@@ -62,7 +62,7 @@ class ThemeAccessTest {
 
         assertTrue(AppTheme.ARCTIC_BLUE in availableAppThemes(entitlements))
         assertFalse(AppTheme.GOLD in availableAppThemes(entitlements))
-        assertEquals(AppTheme.ARCTIC_BLUE, resolveAppTheme(null, entitlements))
+        assertEquals(AppTheme.GLASS, resolveAppTheme(null, entitlements))
     }
 
     @Test

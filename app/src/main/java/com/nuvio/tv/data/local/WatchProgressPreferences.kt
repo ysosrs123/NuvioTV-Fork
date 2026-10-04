@@ -11,7 +11,18 @@ import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
+import com.nuvio.tv.data.mediaserver.ServerItemRef
 import com.nuvio.tv.domain.model.WatchProgress
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +41,11 @@ import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/** Metadata lookup treats TV and series as aliases; keep other item types distinct. */
+internal fun watchProgressMetadataType(value: String?): String = value.orEmpty().trim().lowercase().let {
+    if (it == "tv") "series" else it
+}
 
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -68,20 +84,66 @@ class WatchProgressPreferences @Inject constructor(
     private val deltaCursorKey = longPreferencesKey("watch_progress_delta_cursor")
     private val deltaInitializedKey = booleanPreferencesKey("watch_progress_delta_initialized")
     private val storageMutex = Mutex()
-    private val initializedProfiles = mutableSetOf<Int>()
-    private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + Dispatchers.IO)
+    private val remoteMerges = MutableSharedFlow<Int>(extraBufferCapacity = 8)
+
+    /** Profiles whose entries were just written from the account. */
+    val remoteProgressMerged: SharedFlow<Int> = remoteMerges.asSharedFlow()
+    private val initializedProfiles = mutableMapOf<Int, DataStore<Preferences>>()
 
     @Volatile private var recentMapCache: ProgressMapCache? = null
     @Volatile private var archiveMapCache: ProgressMapCache? = null
 
-    private val hotProgressSnapshots =
-        ConcurrentHashMap<Int, kotlinx.coroutines.flow.StateFlow<ProgressSnapshot?>>()
+    private data class ProgressListCache(
+        val profileId: Int,
+        val recentJson: String,
+        val archiveJson: String,
+        val result: List<WatchProgress>
+    )
+
+    private val hotProgressSnapshots = ConcurrentHashMap<DataStore<Preferences>, Flow<ProgressSnapshot>>()
+    private fun emptySnapshot() = ProgressSnapshot("{}", "{}", emptyMap(), emptyMap())
 
     private fun progressSnapshots(profileId: Int): Flow<ProgressSnapshot> {
-        return hotProgressSnapshots.computeIfAbsent(profileId) {
-            progressSnapshotsCold(profileId)
-                .stateIn(scope, kotlinx.coroutines.flow.SharingStarted.Eagerly, null)
-        }.mapNotNull { it }
+        val generation = metadataStore(profileId)
+        val result = hotProgressSnapshots.computeIfAbsent(generation) {
+            val child = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + Dispatchers.IO)
+            val retired = (generation as? ProfileStoreLifetime)?.retired ?: MutableStateFlow(false)
+            val state = MutableStateFlow<Result<ProgressSnapshot>?>(null)
+            val publicationLock = Any()
+            val observations = retired.flatMapLatest { ended ->
+                if (ended) flowOf(emptySnapshot()) else state.mapNotNull { it }.map { it.getOrThrow() }
+            }
+            child.launch {
+                try {
+                    progressSnapshotsCold(profileId).collect { snapshot ->
+                        synchronized(publicationLock) {
+                            if (!retired.value) state.value = Result.success(snapshot)
+                        }
+                    }
+                } catch (error: Exception) {
+                    if (error is CancellationException) throw error
+                    synchronized(publicationLock) {
+                        if (!retired.value) state.value = Result.failure(error)
+                    }
+                }
+            }
+            child.launch {
+                retired.first { it }
+                synchronized(publicationLock) { state.value = Result.success(emptySnapshot()) }
+                hotProgressSnapshots.remove(generation, observations)
+                storageMutex.withLock {
+                    if (initializedProfiles[profileId] === generation) initializedProfiles.remove(profileId)
+                    if (recentMapCache?.profileId == profileId) recentMapCache = null
+                    if (archiveMapCache?.profileId == profileId) archiveMapCache = null
+                    if (progressListCache?.profileId == profileId) progressListCache = null
+                    if (rawProgressListCache?.profileId == profileId) rawProgressListCache = null
+                }
+                child.cancel()
+            }
+            observations
+        }
+        if ((generation as? ProfileStoreLifetime)?.retired?.value == true) hotProgressSnapshots.remove(generation, result)
+        return result
     }
 
     /** Persisted timestamp of the last successful push to remote. */
@@ -128,14 +190,26 @@ class WatchProgressPreferences @Inject constructor(
      * JSON parsing, grouping, and sorting are performed off the main thread.
      * Results are cached — re-parsing only happens when the raw JSON actually changes.
      */
-    @Volatile private var cachedProgressJson: String? = null
-    @Volatile private var cachedProgressArchiveJson: String? = null
-    @Volatile private var cachedProgressResult: List<WatchProgress>? = null
-    @Volatile private var cachedProfileId: Int = -1
+    @Volatile private var progressListCache: ProgressListCache? = null
 
-    val allProgress: Flow<List<WatchProgress>> = profileManager.activeProfileId.flatMapLatest { pid ->
-        observeAllProgress(pid)
-    }
+    private fun activeProfileLists(observe: (Int) -> Flow<List<WatchProgress>>): Flow<List<WatchProgress>> =
+        profileManager.activeProfileId.flatMapLatest { pid ->
+            val store = try { metadataStore(pid) } catch (error: CancellationException) {
+                if (!kotlinx.coroutines.currentCoroutineContext().isActive) throw error
+                null
+            }
+            val changes = (store as? ProfileStoreLifetime)?.generations
+                ?: if (store == null) factory.historyGenerationChanges else null
+            if (changes != null) changes.flatMapLatest {
+                if (factory.isProfileDeleted(pid)) flowOf(emptyList<WatchProgress>())
+                else try { observe(pid) } catch (error: CancellationException) {
+                    if (!kotlinx.coroutines.currentCoroutineContext().isActive) throw error
+                    flowOf(emptyList<WatchProgress>())
+                }
+            } else observe(pid)
+        }.distinctUntilChanged()
+
+    val allProgress: Flow<List<WatchProgress>> = activeProfileLists(::observeAllProgress)
 
     fun observeAllProgress(profileId: Int): Flow<List<WatchProgress>> {
         return progressSnapshots(profileId).map { snapshot ->
@@ -143,14 +217,10 @@ class WatchProgressPreferences @Inject constructor(
             val archiveJson = snapshot.archiveJson
 
             // Fast path: if JSON hasn't changed, return cached result immediately.
-            val cached = cachedProgressResult
-            if (
-                recentJson == cachedProgressJson &&
-                archiveJson == cachedProgressArchiveJson &&
-                cached != null &&
-                cachedProfileId == profileId
-            ) {
-                return@map cached
+            val cached = progressListCache
+            if (cached != null && cached.profileId == profileId &&
+                cached.recentJson == recentJson && cached.archiveJson == archiveJson) {
+                return@map cached.result
             }
 
             val allItems = mergeWatchProgressBuckets(snapshot.recent, snapshot.archive)
@@ -172,46 +242,31 @@ class WatchProgressPreferences @Inject constructor(
             val result = latestByContent.sortedByDescending { it.lastWatched }
 
             // Cache for next emission
-            cachedProfileId = profileId
-            cachedProgressJson = recentJson
-            cachedProgressArchiveJson = archiveJson
-            cachedProgressResult = result
+            progressListCache = ProgressListCache(profileId, recentJson, archiveJson, result)
             result
         }.flowOn(Dispatchers.Default)
     }
 
-    @Volatile private var cachedRawProgressJson: String? = null
-    @Volatile private var cachedRawProgressArchiveJson: String? = null
-    @Volatile private var cachedRawProgressResult: List<WatchProgress>? = null
-    @Volatile private var cachedRawProfileId: Int = -1
+    @Volatile private var rawProgressListCache: ProgressListCache? = null
 
-    val allRawProgress: Flow<List<WatchProgress>> = profileManager.activeProfileId.flatMapLatest { pid ->
-        observeAllRawProgress(pid)
-    }
+    val allRawProgress: Flow<List<WatchProgress>> = activeProfileLists(::observeAllRawProgress)
 
     fun observeAllRawProgress(profileId: Int): Flow<List<WatchProgress>> {
         return progressSnapshots(profileId).map { snapshot ->
             val recentJson = snapshot.recentJson
             val archiveJson = snapshot.archiveJson
 
-            val cached = cachedRawProgressResult
-            if (
-                recentJson == cachedRawProgressJson &&
-                archiveJson == cachedRawProgressArchiveJson &&
-                cached != null &&
-                cachedRawProfileId == profileId
-            ) {
-                return@map cached
+            val cached = rawProgressListCache
+            if (cached != null && cached.profileId == profileId &&
+                cached.recentJson == recentJson && cached.archiveJson == archiveJson) {
+                return@map cached.result
             }
 
             val result = mergeWatchProgressBuckets(snapshot.recent, snapshot.archive)
                 .values
                 .sortedByDescending { it.lastWatched }
 
-            cachedRawProfileId = profileId
-            cachedRawProgressJson = recentJson
-            cachedRawProgressArchiveJson = archiveJson
-            cachedRawProgressResult = result
+            rawProgressListCache = ProgressListCache(profileId, recentJson, archiveJson, result)
             result
         }.flowOn(Dispatchers.Default)
     }
@@ -284,6 +339,58 @@ class WatchProgressPreferences @Inject constructor(
                     current = WatchProgressBuckets(recent, archive),
                     updated = splitWatchProgressEntries(entries)
                 )
+            }
+        }
+    }
+
+    /** File identities captured before optional I/O; never reacquire a recreated profile. */
+    internal data class ArtworkStorage(
+        val profileId: Int,
+        val metadata: DataStore<Preferences>,
+        val recent: DataStore<Preferences>,
+        val archive: DataStore<Preferences>
+    )
+
+    internal fun captureArtworkStorage(profileId: Int) = ArtworkStorage(
+        profileId, metadataStore(profileId), recentStore(profileId), archiveStore(profileId)
+    )
+
+    /** Patch display fields on existing entries, preserving current playback and bucket ownership. */
+    internal suspend fun updateArtworkIfPresent(
+        artwork: WatchProgress,
+        storage: ArtworkStorage,
+        isCurrent: () -> Boolean
+    ) {
+        storageMutex.withLock {
+            if (!isCurrent()) return
+            (storage.metadata as? ProfileStoreLifetime)?.checkActive()
+            if (metadataStore(storage.profileId) !== storage.metadata) return
+            ensureStorageLocked(storage.profileId)
+            for (store in listOf(storage.recent, storage.archive)) {
+                if (!isCurrent()) return
+                store.edit { preferences ->
+                    if (!isCurrent()) return@edit
+                    val entries = parseProgressMap(preferences[watchProgressEntriesKey] ?: "{}").toMutableMap()
+                    var changed = false
+                    for (key in listOf(createKey(artwork), artwork.contentId).distinct()) {
+                        val current = entries[key] ?: continue
+                        if (current.contentId != artwork.contentId ||
+                            watchProgressMetadataType(current.contentType) != watchProgressMetadataType(artwork.contentType) ||
+                            current.season != artwork.season ||
+                            current.episode != artwork.episode || current.videoId != artwork.videoId) continue
+                        val enriched = current.copy(
+                            name = current.name.takeIf { it.isNotBlank() && it != current.contentId }
+                                ?: artwork.name,
+                            poster = current.poster ?: artwork.poster,
+                            backdrop = current.backdrop ?: artwork.backdrop,
+                            logo = current.logo ?: artwork.logo,
+                            episodeTitle = current.episodeTitle ?: artwork.episodeTitle,
+                            duration = current.duration.takeIf { it > 0 } ?: artwork.duration
+                        )
+                        if (enriched != current) { entries[key] = enriched; changed = true }
+                    }
+                    if (changed && isCurrent()) preferences[watchProgressEntriesKey] = gson.toJson(entries)
+                }
             }
         }
     }
@@ -468,6 +575,9 @@ class WatchProgressPreferences @Inject constructor(
                 val removedKeys = local.keys - remoteEntries.keys
                 removedKeys.forEach { key ->
                     val localEntry = local[key]
+                    if (localEntry != null && ServerItemRef.isServerId(localEntry.contentId)) {
+                        return@forEach
+                    }
                     if (localEntry != null && isNonTraktId != null && isNonTraktId(localEntry.contentId)) {
                         Log.d("WatchProgressPrefs", "  preserved key=$key (non-Trakt ID: ${localEntry.contentId})")
                         preservedLocalItems = true
@@ -506,6 +616,7 @@ class WatchProgressPreferences @Inject constructor(
             Log.d("WatchProgressPrefs", "mergeRemoteEntries: ${local.size} entries after merge, writing to DataStore")
             writeBucketsLocked(profileId, current, updated)
         }
+        remoteMerges.tryEmit(profileId)
         return preservedLocalItems
     }
 
@@ -558,6 +669,7 @@ class WatchProgressPreferences @Inject constructor(
             afterCount = local.size
             writeBucketsLocked(profileId, current, updated)
         }
+        if (upserts.isNotEmpty()) remoteMerges.tryEmit(profileId)
         Log.d(TAG, "applyRemoteChanges: profile=$profileId before=$beforeCount after=$afterCount upserts=${upserts.size} deletes=${deletes.size} preservedLocal=$preservedLocalItems")
         return preservedLocalItems
     }
@@ -654,8 +766,9 @@ class WatchProgressPreferences @Inject constructor(
     }
 
     private suspend fun ensureStorageLocked(profileId: Int) {
-        if (profileId in initializedProfiles) return
-        val metadata = metadataStore(profileId).data.first()
+        val generation = metadataStore(profileId)
+        if (initializedProfiles[profileId] === generation) return
+        val metadata = generation.data.first()
         if ((metadata[watchProgressStorageVersionKey] ?: 0) < WATCH_PROGRESS_STORAGE_VERSION) {
             val legacy = parseProgressMap(metadata[watchProgressEntriesKey] ?: "{}")
             if (legacy.isNotEmpty()) {
@@ -672,7 +785,7 @@ class WatchProgressPreferences @Inject constructor(
                 preferences[watchProgressStorageVersionKey] = WATCH_PROGRESS_STORAGE_VERSION
             }
         }
-        initializedProfiles += profileId
+        initializedProfiles[profileId] = generation
     }
 
     private suspend fun readBucketsLocked(profileId: Int): WatchProgressBuckets {
@@ -759,9 +872,10 @@ class WatchProgressPreferences @Inject constructor(
             val key = createKey(progress)
             val existing = map[key]
             // Preserve display metadata (poster, backdrop, logo, name) from the existing
-            // entry when the incoming save has null values — prevents a mid-playback
+            // entry of the same item type when the incoming save has null values. This prevents a mid-playback
             // position update from wiping artwork that was saved on first play.
-            map[key] = if (existing != null) {
+            map[key] = if (existing != null &&
+                watchProgressMetadataType(existing.contentType) == watchProgressMetadataType(progress.contentType)) {
                 progress.copy(
                     name = progress.name.takeIf { it.isNotBlank() } ?: existing.name,
                     poster = progress.poster ?: existing.poster,
@@ -785,7 +899,8 @@ class WatchProgressPreferences @Inject constructor(
     }
 
     private fun mergeDisplayMetadata(remote: WatchProgress, existing: WatchProgress?): WatchProgress {
-        if (existing == null) return remote
+        if (existing == null ||
+            watchProgressMetadataType(existing.contentType) != watchProgressMetadataType(remote.contentType)) return remote
         return remote.copy(
             name = existing.name.takeIf { it.isNotBlank() } ?: remote.name.takeIf { it.isNotBlank() } ?: existing.name,
             poster = existing.poster ?: remote.poster,

@@ -3,6 +3,7 @@ package com.nuvio.tv.core.sync
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.profile.ProfileManager
+import com.nuvio.tv.core.util.canonicalizeAddonUrl
 import com.nuvio.tv.data.local.AddonPreferences
 import com.nuvio.tv.data.remote.supabase.SupabaseAddon
 import io.github.jan.supabase.postgrest.Postgrest
@@ -86,7 +87,17 @@ class AddonSyncService @Inject constructor(
         }
     }
 
-    suspend fun getRemoteAddonUrls(): Result<List<String>> = withContext(Dispatchers.IO) {
+    /**
+     * Fetches the remote addon list and, as a side effect, immediately applies
+     * the remote user-set names and enabled/disabled states to local
+     * preferences. Returns the remote URLs (sorted) for the caller to
+     * reconcile installs against.
+     *
+     * All callers rely on the local write (nothing else applies the
+     * name/enabled maps), so the apply stays fused with the fetch. Note:
+     * names/enabled states are only applied when the remote list is non-empty, so an emptied remote does not clear them.
+     */
+    suspend fun fetchAndApplyRemoteAddonUrls(): Result<List<String>> = withContext(Dispatchers.IO) {
         try {
             val effectiveUserId = authManager.getEffectiveUserId(fallbackToOwnIdOnFailure = false)
                 ?: return@withContext Result.failure(
@@ -131,16 +142,7 @@ class AddonSyncService @Inject constructor(
         }
     }
 
-    private fun canonicalizeUrl(url: String): String {
-        val trimmed = url.trim().trimEnd('/')
-        val queryStart = trimmed.indexOf('?')
-        val path = if (queryStart >= 0) trimmed.substring(0, queryStart) else trimmed
-        val query = if (queryStart >= 0) trimmed.substring(queryStart) else ""
-        val cleanPath = if (path.endsWith("/manifest.json", ignoreCase = true)) {
-            path.dropLast("/manifest.json".length).trimEnd('/')
-        } else {
-            path.trimEnd('/')
-        }
-        return cleanPath + query
-    }
+    // Canonicalisation lives in core.util - one implementation
+    // shared with AddonRepositoryImpl and AddonPreferences.
+    private fun canonicalizeUrl(url: String): String = canonicalizeAddonUrl(url)
 }

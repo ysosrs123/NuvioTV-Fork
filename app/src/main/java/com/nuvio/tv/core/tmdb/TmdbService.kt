@@ -300,7 +300,7 @@ class TmdbService @Inject constructor(
                     tmdbApi.getTvDetails(tmdbId, TMDB_API_KEY)
                 val body = response.body() ?: return@runCatching null
                 TmdbImages(
-                    backdropUrl = body.backdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" },
+                    backdropUrl = body.backdropPath?.let { "https://image.tmdb.org/t/p/${TmdbImageSizes.backdrop}$it" },
                     posterUrl = body.posterPath?.let { "https://image.tmdb.org/t/p/w500$it" },
                     runtimeMinutes = body.runtime
                 )

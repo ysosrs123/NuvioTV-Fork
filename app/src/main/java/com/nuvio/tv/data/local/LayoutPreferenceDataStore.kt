@@ -15,6 +15,8 @@ import com.nuvio.tv.core.sync.SyncHomeCatalogPayload
 import com.nuvio.tv.core.sync.buildHomeCatalogSyncPayload
 import com.nuvio.tv.core.sync.homeCatalogKey
 import com.nuvio.tv.core.sync.homeCollectionKey
+import com.nuvio.tv.core.sync.withLocalServerKeys
+import com.nuvio.tv.data.mediaserver.ServerCatalog
 import com.nuvio.tv.domain.model.Addon
 import com.nuvio.tv.domain.model.CardDepthStyle
 import com.nuvio.tv.domain.model.CardDepthSurface
@@ -27,6 +29,7 @@ import com.nuvio.tv.domain.model.DEFAULT_CARD_DEPTH_SHEEN_STRENGTH
 import com.nuvio.tv.domain.model.DiscoverLocation
 import com.nuvio.tv.domain.model.EpisodeOptionsOverlayStyle
 import com.nuvio.tv.domain.model.FocusedPosterTrailerPlaybackTarget
+import com.nuvio.tv.domain.model.LandscapePosterScope
 import com.nuvio.tv.domain.model.DetailImdbRatingsVisibility
 import com.nuvio.tv.domain.model.HomeLayout
 import com.nuvio.tv.domain.model.HomeImdbRatingsVisibility
@@ -78,6 +81,7 @@ class LayoutPreferenceDataStore @Inject constructor(
     private val legacyModernSidebarEnabledKey = booleanPreferencesKey("glass_sidepanel_enabled")
     private val modernSidebarBlurEnabledKey = booleanPreferencesKey("modern_sidebar_blur_enabled")
     private val modernLandscapePostersEnabledKey = booleanPreferencesKey("modern_landscape_posters_enabled")
+    private val landscapePosterScopeKey = stringPreferencesKey("landscape_poster_scope")
     private val heroSectionEnabledKey = booleanPreferencesKey("hero_section_enabled")
     private val posterLabelsEnabledKey = booleanPreferencesKey("poster_labels_enabled")
     private val catalogAddonNameEnabledKey = booleanPreferencesKey("catalog_addon_name_enabled")
@@ -87,6 +91,7 @@ class LayoutPreferenceDataStore @Inject constructor(
     private val focusedPosterBackdropExpandDelaySecondsKey = intPreferencesKey("focused_poster_backdrop_expand_delay_seconds")
     private val focusedPosterBackdropTrailerEnabledKey = booleanPreferencesKey("focused_poster_backdrop_trailer_enabled")
     private val focusedPosterBackdropTrailerMutedKey = booleanPreferencesKey("focused_poster_backdrop_trailer_muted")
+    private val focusedPosterBackdropTrailerLogoKey = booleanPreferencesKey("focused_poster_backdrop_trailer_logo")
     private val focusedPosterBackdropTrailerPlaybackTargetKey =
         stringPreferencesKey("focused_poster_backdrop_trailer_playback_target")
     private val posterCardWidthDpKey = intPreferencesKey("poster_card_width_dp")
@@ -123,6 +128,7 @@ class LayoutPreferenceDataStore @Inject constructor(
     private val memoryOnlyVerticalScrollKey = booleanPreferencesKey("memory_only_vertical_scroll")
     private val smoothBringIntoViewEnabledKey = booleanPreferencesKey("smooth_bring_into_view_enabled")
     private val fastHorizontalNavigationEnabledKey = booleanPreferencesKey("fast_horizontal_navigation_enabled")
+    private val addonHealthEnabledKey = booleanPreferencesKey("addon_health_enabled")
     private val followAddonsOrderKey = booleanPreferencesKey("follow_addons_order")
     private val composeHighlighterEnabledKey = booleanPreferencesKey("compose_highlighter_enabled")
 
@@ -153,14 +159,11 @@ class LayoutPreferenceDataStore @Inject constructor(
     private fun positiveOrDefault(value: Int?, defaultValue: Int): Int =
         value?.takeIf { it > 0 } ?: defaultValue
 
-    val selectedLayout: Flow<HomeLayout> = profileFlow { prefs ->
-        val layoutName = prefs[layoutKey] ?: HomeLayout.MODERN.name
-        try {
-            HomeLayout.valueOf(layoutName)
-        } catch (e: IllegalArgumentException) {
-            HomeLayout.MODERN
-        }
-    }
+    // The fork uses the Modern layout exclusively. Forced read-side so
+    // stored or sync-imported CLASSIC/GRID values are neutralised: "selected_layout"
+    // rides in the synced layout_settings blob, so a write-side migration alone could
+    // be undone by a remote import. setLayout still records the has-chosen flag.
+    val selectedLayout: Flow<HomeLayout> = profileFlow { HomeLayout.MODERN }
 
     val continueWatchingEnabled: Flow<Boolean> = profileFlow { prefs ->
         prefs[continueWatchingEnabledKey] ?: true
@@ -235,6 +238,10 @@ class LayoutPreferenceDataStore @Inject constructor(
         prefs[modernSidebarBlurEnabledKey] ?: false
     }
 
+    val landscapePosterScope: Flow<LandscapePosterScope> = profileFlow { prefs ->
+        LandscapePosterScope.resolve(prefs[landscapePosterScopeKey], prefs[modernLandscapePostersEnabledKey])
+    }
+
     val modernLandscapePostersEnabled: Flow<Boolean> = profileFlow { prefs ->
         prefs[modernLandscapePostersEnabledKey] ?: false
     }
@@ -290,11 +297,15 @@ class LayoutPreferenceDataStore @Inject constructor(
     }
 
     val focusedPosterBackdropTrailerEnabled: Flow<Boolean> = profileFlow { prefs ->
-        prefs[focusedPosterBackdropTrailerEnabledKey] ?: false
+        prefs[focusedPosterBackdropTrailerEnabledKey] ?: true
     }
 
     val focusedPosterBackdropTrailerMuted: Flow<Boolean> = profileFlow { prefs ->
-        prefs[focusedPosterBackdropTrailerMutedKey] ?: true
+        prefs[focusedPosterBackdropTrailerMutedKey] ?: false
+    }
+
+    val focusedPosterBackdropTrailerLogoEnabled: Flow<Boolean> = profileFlow { prefs ->
+        prefs[focusedPosterBackdropTrailerLogoKey] ?: true
     }
 
     val focusedPosterBackdropTrailerPlaybackTarget: Flow<FocusedPosterTrailerPlaybackTarget> =
@@ -422,6 +433,10 @@ class LayoutPreferenceDataStore @Inject constructor(
         prefs[fastHorizontalNavigationEnabledKey] ?: false
     }
 
+    val addonHealthEnabled: Flow<Boolean> = profileFlow { prefs ->
+        prefs[addonHealthEnabledKey] ?: true
+    }
+
     val followAddonsOrder: Flow<Boolean> = profileFlow { prefs ->
         prefs[followAddonsOrderKey] ?: false
     }
@@ -459,6 +474,12 @@ class LayoutPreferenceDataStore @Inject constructor(
     suspend fun setFastHorizontalNavigationEnabled(enabled: Boolean) {
         store().edit { prefs ->
             prefs[fastHorizontalNavigationEnabledKey] = enabled
+        }
+    }
+
+    suspend fun setAddonHealthEnabled(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[addonHealthEnabledKey] = enabled
         }
     }
 
@@ -576,9 +597,10 @@ class LayoutPreferenceDataStore @Inject constructor(
         }
     }
 
-    suspend fun setModernLandscapePostersEnabled(enabled: Boolean) {
+    suspend fun setLandscapePosterScope(scope: LandscapePosterScope) {
         store().edit { prefs ->
-            prefs[modernLandscapePostersEnabledKey] = enabled
+            prefs[landscapePosterScopeKey] = scope.name
+            prefs[modernLandscapePostersEnabledKey] = scope.onHome
         }
     }
 
@@ -657,6 +679,12 @@ class LayoutPreferenceDataStore @Inject constructor(
     suspend fun setFocusedPosterBackdropTrailerMuted(muted: Boolean) {
         store().edit { prefs ->
             prefs[focusedPosterBackdropTrailerMutedKey] = muted
+        }
+    }
+
+    suspend fun setFocusedPosterBackdropTrailerLogoEnabled(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[focusedPosterBackdropTrailerLogoKey] = enabled
         }
     }
 
@@ -902,21 +930,25 @@ class LayoutPreferenceDataStore @Inject constructor(
 
     suspend fun applyCatalogSettingsFromRemote(payload: SyncHomeCatalogPayload) {
         val sortedItems = payload.items.sortedBy { it.order }
-        val orderKeys = sortedItems.map { item ->
+        val remoteOrderKeys = sortedItems.map { item ->
             if (item.isCollection) homeCollectionKey(item.collectionId)
             else homeCatalogKey(item.addonId, item.type, item.catalogId)
         }
-        val disabledKeys = sortedItems.filter { !it.enabled }.map { item ->
+        val remoteDisabledKeys = sortedItems.filter { !it.enabled }.map { item ->
             if (item.isCollection) homeCollectionKey(item.collectionId)
             else homeCatalogKey(item.addonId, item.type, item.catalogId)
         }
-        val titles = sortedItems.associate { item ->
+        val remoteTitles = sortedItems.associate { item ->
             val key = if (item.isCollection) homeCollectionKey(item.collectionId)
             else homeCatalogKey(item.addonId, item.type, item.catalogId)
             key to item.customTitle
         }.filterValues { it.isNotBlank() }
 
         store().edit { prefs ->
+            val local = readHomeCatalogSettingsState(prefs)
+            val orderKeys = remoteOrderKeys.withLocalServerKeys(local.orderKeys)
+            val disabledKeys = remoteDisabledKeys + local.disabledKeys.filter(ServerCatalog::isServerKey)
+            val titles = remoteTitles + local.customTitles.filterKeys(ServerCatalog::isServerKey)
             prefs[hideUnreleasedContentKey] = payload.hideUnreleasedContent
             if (orderKeys.isNotEmpty()) {
                 prefs[homeCatalogOrderKeysKey] = gson.toJson(orderKeys)

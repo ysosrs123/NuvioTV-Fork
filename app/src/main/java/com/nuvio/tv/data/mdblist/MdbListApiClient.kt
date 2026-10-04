@@ -20,8 +20,9 @@ class MdbListApiClient(
         path: String,
         body: String,
         scope: MdbListAuthScope = store.scope(),
-        query: Map<String, String> = emptyMap()
-    ): MdbListHttpResponse = execute(MdbListHttpMethod.POST, path, query, body, scope)
+        query: Map<String, String> = emptyMap(),
+        retrySafe: Boolean = false
+    ): MdbListHttpResponse = execute(MdbListHttpMethod.POST, path, query, body, scope, retrySafe = retrySafe)
 
     suspend fun put(
         path: String,
@@ -53,7 +54,8 @@ class MdbListApiClient(
         query: Map<String, String>,
         body: String,
         scope: MdbListAuthScope,
-        acceptedStatuses: Set<Int> = emptySet()
+        acceptedStatuses: Set<Int> = emptySet(),
+        retrySafe: Boolean = method == MdbListHttpMethod.GET
     ): MdbListHttpResponse {
         var authorization = auth.authorization(scope)
         repeat(2) { attempt ->
@@ -64,7 +66,8 @@ class MdbListApiClient(
                     query = query,
                     body = body,
                     accessToken = authorization.tokens.accessToken,
-                    limitKey = limitKey(scope)
+                    limitKey = limitKey(scope),
+                    retrySafe = retrySafe
                 ),
                 checkScope = { store.checkScope(scope) }
             )

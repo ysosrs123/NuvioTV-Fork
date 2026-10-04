@@ -30,6 +30,9 @@ import com.nuvio.tv.domain.model.ContentType
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,11 +47,65 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.Before
+import org.junit.After
 import retrofit2.Response
 import java.util.concurrent.atomic.AtomicInteger
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TmdbMetadataServiceTest {
+    // Local JVM tests do not have Android's system display metrics.
+    @Before fun setUpImageSizes() {
+        mockkObject(TmdbImageSizes)
+        every { TmdbImageSizes.backdrop } returns "w1280"
+    }
+
+    @After fun tearDownImageSizes() = unmockkObject(TmdbImageSizes)
+
+    @Test
+    fun `details hero publishes before secondary requests and cancellation does not poison cache`() = runTest {
+        val api = mockk<TmdbApi>()
+        coEvery { api.getMovieDetails(any(), any(), any()) } returns Response.success(
+            TmdbDetailsResponse(id = 10, title = "Hero", backdropPath = "/hero.jpg", overview = "Synopsis")
+        )
+        coEvery { api.getMovieImages(any(), any(), any()) } returns Response.success(TmdbImagesResponse())
+        coEvery { api.getMovieCredits(any(), any(), any()) } returns Response.success(TmdbCreditsResponse())
+        coEvery { api.getMovieReleaseDates(any(), any()) } returns Response.success(TmdbMovieReleaseDatesResponse())
+        coEvery { api.getMovieVideos(any(), any(), any()) } returns Response.success(TmdbVideosResponse(id = 10))
+        val service = TmdbMetadataService(api, StandardTestDispatcher(testScheduler))
+        val published = CompletableDeferred<TmdbHeroContent>()
+        val painted = CompletableDeferred<Unit>()
+        val cancelled = async {
+            service.fetchEnrichment("10", ContentType.MOVIE, "en") { hero ->
+                published.complete(hero)
+                painted.await()
+            }
+        }
+        advanceUntilIdle()
+        assertTrue("Primary hero must be published before secondary requests", published.isCompleted)
+        assertEquals("Synopsis", published.await().description)
+        assertTrue(published.await().backdrop!!.endsWith("/hero.jpg"))
+        coVerify(exactly = 0) { api.getMovieCredits(any(), any(), any()) }
+        coVerify(exactly = 0) { api.getMovieVideos(any(), any(), any()) }
+        assertFalse(cancelled.isCompleted)
+        cancelled.cancel()
+        cancelled.join()
+        var heroPublished = false
+        val retried = service.fetchEnrichment("10", ContentType.MOVIE, "en") {
+            heroPublished = true
+            coVerify(exactly = 0) { api.getMovieCredits(any(), any(), any()) }
+        }
+        assertTrue(heroPublished)
+        assertNotNull(retried)
+        coVerify(exactly = 1) { api.getMovieCredits(any(), any(), any()) }
+        // Empty localized results retain the existing English trailer fallback.
+        coVerify(exactly = 1) { api.getMovieVideos(any(), any(), "en") }
+        coVerify(exactly = 1) { api.getMovieVideos(any(), any(), "en-US") }
+        var cachedHero: TmdbHeroContent? = null
+        assertEquals(retried, service.fetchEnrichment("10", ContentType.MOVIE, "en") { cachedHero = it })
+        assertEquals("Synopsis", cachedHero?.description)
+        coVerify(exactly = 2) { api.getMovieDetails(any(), any(), any()) }
+    }
 
     @Test
     fun `fetchEnrichment maps tmdb ids onto production and network companies`() = runTest {

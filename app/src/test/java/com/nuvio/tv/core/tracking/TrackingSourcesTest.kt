@@ -160,6 +160,76 @@ class TrackingSourcesTest {
     }
 
     @Test
+    fun `MDBList maps to its provider and falls back to Nuvio Sync when not configured`() {
+        assertEquals(TrackingProviderId.MDBLIST, WatchProgressSource.MDBLIST.providerId)
+        assertEquals(
+            WatchProgressSource.MDBLIST,
+            WatchProgressSource.fromStorage("MDBLIST")
+        )
+        assertEquals(
+            WatchProgressSource.NUVIO_SYNC,
+            effectiveWatchProgressSource(WatchProgressSource.MDBLIST) { false }
+        )
+        assertEquals(
+            WatchProgressSource.MDBLIST,
+            effectiveWatchProgressSource(WatchProgressSource.MDBLIST) {
+                it == TrackingProviderId.MDBLIST
+            }
+        )
+    }
+
+    @Test
+    fun `MDBList appears in the picker only when configured and never displaces Trakt or Simkl`() {
+        assertEquals(
+            listOf(WatchProgressSource.NUVIO_SYNC),
+            availableWatchProgressSources(setOf())
+        )
+        assertEquals(
+            listOf(WatchProgressSource.NUVIO_SYNC, WatchProgressSource.MDBLIST),
+            availableWatchProgressSources(setOf(TrackingProviderId.MDBLIST))
+        )
+        assertEquals(
+            listOf(
+                WatchProgressSource.NUVIO_SYNC,
+                WatchProgressSource.TRAKT,
+                WatchProgressSource.SIMKL,
+                WatchProgressSource.MDBLIST
+            ),
+            availableWatchProgressSources(
+                setOf(
+                    TrackingProviderId.TRAKT,
+                    TrackingProviderId.SIMKL,
+                    TrackingProviderId.MDBLIST
+                )
+            )
+        )
+        // MDBList is also a library source, listed after Trakt and Simkl.
+        assertEquals(
+            listOf(LibrarySourceMode.LOCAL),
+            availableLibrarySourceModes(setOf())
+        )
+        assertEquals(
+            listOf(LibrarySourceMode.LOCAL, LibrarySourceMode.MDBLIST),
+            availableLibrarySourceModes(setOf(TrackingProviderId.MDBLIST))
+        )
+        assertEquals(
+            listOf(
+                LibrarySourceMode.LOCAL,
+                LibrarySourceMode.TRAKT,
+                LibrarySourceMode.SIMKL,
+                LibrarySourceMode.MDBLIST
+            ),
+            availableLibrarySourceModes(
+                setOf(
+                    TrackingProviderId.TRAKT,
+                    TrackingProviderId.SIMKL,
+                    TrackingProviderId.MDBLIST
+                )
+            )
+        )
+    }
+
+    @Test
     fun `disconnected providers are excluded from source pickers`() {
         assertEquals(
             listOf(WatchProgressSource.NUVIO_SYNC),

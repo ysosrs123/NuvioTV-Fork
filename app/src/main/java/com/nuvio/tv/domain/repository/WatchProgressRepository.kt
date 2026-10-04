@@ -127,6 +127,16 @@ interface WatchProgressRepository {
      * Save or update multiple watch progress entries in a single batch.
      */
     suspend fun saveProgressBatch(progressList: List<WatchProgress>, syncRemote: Boolean = true)
+
+    /** Save an admitted batch to its original profile, even after a profile switch. */
+    suspend fun saveProgressBatch(
+        progressList: List<WatchProgress>,
+        profileId: Int,
+        syncRemote: Boolean = true
+    ) {
+        progressList.forEach { saveProgress(it, profileId, syncRemote) }
+    }
+
     
     suspend fun removeProgress(contentId: String, season: Int? = null, episode: Int? = null)
 

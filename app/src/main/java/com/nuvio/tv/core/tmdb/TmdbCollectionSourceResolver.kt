@@ -33,8 +33,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 
 data class TmdbSourceImportMetadata(
     val title: String? = null,
-    val coverImageUrl: String? = null
-)
+    val coverImageUrl: String? = null,
+    val wideCoverImageUrl: String? = null
+) {
+    fun coverFor(tileShape: PosterShape?): String? =
+        if (tileShape == PosterShape.LANDSCAPE) wideCoverImageUrl ?: coverImageUrl else coverImageUrl
+}
 
 @Singleton
 class TmdbCollectionSourceResolver @Inject constructor(
@@ -92,7 +96,8 @@ class TmdbCollectionSourceResolver @Inject constructor(
             ?: error(string(R.string.tmdb_error_collection_not_found))
         TmdbSourceImportMetadata(
             title = body.name?.takeIf { it.isNotBlank() },
-            coverImageUrl = imageUrl(body.posterPath, "w500") ?: imageUrl(body.backdropPath, "w1280")
+            coverImageUrl = imageUrl(body.posterPath, "w500") ?: imageUrl(body.backdropPath, TmdbImageSizes.backdrop),
+            wideCoverImageUrl = imageUrl(body.backdropPath, TmdbImageSizes.backdrop)
         )
     }
 
@@ -188,7 +193,7 @@ class TmdbCollectionSourceResolver @Inject constructor(
                     name = title,
                     poster = imageUrl(it.posterPath, "w500") ?: imageUrl(it.backdropPath, "w780"),
                     posterShape = PosterShape.POSTER,
-                    background = imageUrl(it.backdropPath, "w1280"),
+                    background = imageUrl(it.backdropPath, TmdbImageSizes.backdrop),
                     logo = null,
                     description = it.overview?.takeIf { value -> value.isNotBlank() },
                     releaseInfo = it.releaseDate?.take(4),
@@ -365,7 +370,7 @@ class TmdbCollectionSourceResolver @Inject constructor(
             name = title,
             poster = imageUrl(posterPath, "w500") ?: imageUrl(backdropPath, "w780"),
             posterShape = PosterShape.POSTER,
-            background = imageUrl(backdropPath, "w1280"),
+            background = imageUrl(backdropPath, TmdbImageSizes.backdrop),
             logo = null,
             description = overview?.takeIf { it.isNotBlank() },
             releaseInfo = (releaseDate ?: firstAirDate)?.take(4),
@@ -391,7 +396,7 @@ class TmdbCollectionSourceResolver @Inject constructor(
             name = title,
             poster = imageUrl(posterPath, "w500") ?: imageUrl(backdropPath, "w780"),
             posterShape = PosterShape.POSTER,
-            background = imageUrl(backdropPath, "w1280"),
+            background = imageUrl(backdropPath, TmdbImageSizes.backdrop),
             logo = null,
             description = overview?.takeIf { it.isNotBlank() },
             releaseInfo = when (mediaType) {
@@ -422,7 +427,7 @@ class TmdbCollectionSourceResolver @Inject constructor(
             name = title,
             poster = imageUrl(posterPath, "w500") ?: imageUrl(backdropPath, "w780"),
             posterShape = PosterShape.POSTER,
-            background = imageUrl(backdropPath, "w1280"),
+            background = imageUrl(backdropPath, TmdbImageSizes.backdrop),
             logo = null,
             description = overview?.takeIf { it.isNotBlank() },
             releaseInfo = when (mediaType) {
@@ -453,7 +458,7 @@ class TmdbCollectionSourceResolver @Inject constructor(
             name = title,
             poster = imageUrl(posterPath, "w500") ?: imageUrl(backdropPath, "w780"),
             posterShape = PosterShape.POSTER,
-            background = imageUrl(backdropPath, "w1280"),
+            background = imageUrl(backdropPath, TmdbImageSizes.backdrop),
             logo = null,
             description = overview?.takeIf { it.isNotBlank() },
             releaseInfo = when (mediaType) {

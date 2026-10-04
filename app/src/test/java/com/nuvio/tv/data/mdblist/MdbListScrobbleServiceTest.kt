@@ -6,6 +6,7 @@ import com.nuvio.tv.core.tracking.TrackingMediaKind
 import com.nuvio.tv.core.tracking.TrackingMediaReference
 import com.nuvio.tv.core.tracking.TrackingScrobbleAction
 import com.nuvio.tv.core.tracking.TrackingScrobbleEvent
+import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
@@ -174,6 +175,28 @@ class MdbListScrobbleServiceTest {
         assertEquals(1, harness.http.engine.requests.size)
         assertTrue(harness.repository.currentSnapshot()?.watched?.isEmpty() == true)
         assertEquals(setOf(MdbListSyncBucket.WATCHED, MdbListSyncBucket.PLAYBACK), harness.repository.currentSnapshot()?.invalidatedBuckets)
+    }
+
+    @Test
+    fun `pause and stop are retried after a dropped connection or a busy server but start is not`() = runTest {
+        for (action in listOf(TrackingScrobbleAction.PAUSE, TrackingScrobbleAction.STOP)) {
+            val harness = MdbListSyncTestHarness(backgroundScope)
+            var dropped = false
+            harness.http.engine.intercept = { if (!dropped) { dropped = true; throw IOException("reset") } }
+            harness.http.reply(503)
+            harness.http.reply(body = """{"action":"pause","progress":40,"paused_at":"$MDBLIST_TEST_TIME"}""")
+
+            service(harness).scrobble(harness.repository.currentScope(), action, event(40.0))
+
+            assertEquals(3, harness.http.engine.requests.size)
+            assertEquals(40f, harness.repository.currentSnapshot()!!.playback.single().progress, 0f)
+        }
+        val harness = MdbListSyncTestHarness(backgroundScope)
+        harness.http.reply(503)
+        expectMdbListFailure<MdbListApiException> {
+            service(harness).scrobble(harness.repository.currentScope(), TrackingScrobbleAction.START, event(40.0))
+        }
+        assertEquals(1, harness.http.engine.requests.size)
     }
 
     @Test

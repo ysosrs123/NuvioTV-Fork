@@ -7,6 +7,7 @@ import com.nuvio.tv.core.tracking.TrackingProgressProviderRegistry
 import com.nuvio.tv.core.tracking.providerId
 import com.nuvio.tv.data.local.TraktSettingsDataStore
 import com.nuvio.tv.data.local.WatchProgressPreferences
+import com.nuvio.tv.data.mediaserver.ServerItemRef
 import com.nuvio.tv.data.remote.supabase.SupabaseWatchProgress
 import com.nuvio.tv.data.remote.supabase.SupabaseWatchProgressEvent
 import com.nuvio.tv.domain.model.WatchProgress
@@ -121,7 +122,7 @@ class WatchProgressSyncService @Inject constructor(
         return try {
             val distinctKeys = keys
                 .map { it.trim() }
-                .filter { it.isNotEmpty() }
+                .filter { it.isNotEmpty() && !ServerItemRef.isServerId(it) }
                 .distinct()
             if (distinctKeys.isEmpty()) {
                 return Result.success(Unit)
@@ -162,7 +163,8 @@ class WatchProgressSyncService @Inject constructor(
             }
             val rawEntries = mutationStore.pendingProgressUpserts(profileId)
             val entries = canonicalizeForRemote(rawEntries).filterValues { progress ->
-                !(progress.position <= 1L && progress.duration <= 1L && progress.duration > 0L)
+                !(progress.position <= 1L && progress.duration <= 1L && progress.duration > 0L) &&
+                    !ServerItemRef.isServerId(progress.contentId)
             }
             Log.d(TAG, "pushToRemote: ${rawEntries.size} pending entries, ${entries.size} canonical entries to push for profile $profileId")
             entries.forEach { (key, progress) ->
@@ -228,6 +230,7 @@ class WatchProgressSyncService @Inject constructor(
         progress: WatchProgress,
         profileId: Int
     ): Result<Unit> {
+        if (ServerItemRef.isServerId(progress.contentId)) return Result.success(Unit)
         return try {
             val params = buildJsonObject {
                 put("p_entries", buildJsonArray {
@@ -302,9 +305,14 @@ class WatchProgressSyncService @Inject constructor(
                 Log.d(TAG, "  pull entry: key=${entry.progressKey} contentId=${entry.contentId} type=${entry.contentType} pos=${entry.position} dur=${entry.duration} lastWatched=${entry.lastWatched}")
             }
 
-            val pulled = remote.map { entry ->
+            val pulled = remote.mapNotNull { entry ->
+            val cid: String? = entry.contentId
+            if (cid == null || cid.isBlank()) {
+                Log.w(TAG, "Dropping pulled entry with missing contentId (key=${entry.progressKey})")
+                return@mapNotNull null
+            }
                 entry.progressKey to WatchProgress(
-                    contentId = entry.contentId,
+                    contentId = cid,
                     contentType = entry.contentType,
                     name = "",
                     poster = null,
@@ -443,7 +451,7 @@ class WatchProgressSyncService @Inject constructor(
                         // key (contentId_s1e5), which would resurrect series entries that were
                         // explicitly deleted remotely. Only apply normalization on full snapshots.
                         val progress = event.toWatchProgress()
-                        pageChanges[event.progressKey] = progress
+                        if (progress != null) pageChanges[event.progressKey] = progress
                     }
                 }
 
@@ -604,9 +612,14 @@ class WatchProgressSyncService @Inject constructor(
         return contentType.lowercase() in setOf("series", "tv")
     }
 
-    private fun SupabaseWatchProgressEvent.toWatchProgress(): WatchProgress {
+    private fun SupabaseWatchProgressEvent.toWatchProgress(): WatchProgress? {
+        val cid: String? = contentId
+        if (cid == null || cid.isBlank()) {
+            Log.w(TAG, "Dropping sync event with missing contentId (progressKey=$progressKey)")
+            return null
+        }
         return WatchProgress(
-            contentId = contentId,
+            contentId = cid,
             contentType = contentType,
             name = "",
             poster = null,

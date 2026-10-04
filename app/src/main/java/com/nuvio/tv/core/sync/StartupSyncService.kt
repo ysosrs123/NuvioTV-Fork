@@ -174,7 +174,7 @@ class StartupSyncService @Inject constructor(
 
             addonRepository.isSyncingFromRemote = true
             try {
-                val remoteAddonUrls = addonSyncService.getRemoteAddonUrls().getOrElse { throw it }
+                val remoteAddonUrls = addonSyncService.fetchAndApplyRemoteAddonUrls().getOrElse { throw it }
 
                 addonRepository.reconcileWithRemoteAddonUrls(
                     remoteUrls = remoteAddonUrls,
@@ -593,7 +593,7 @@ class StartupSyncService @Inject constructor(
             val addonJob = async {
                 addonRepository.isSyncingFromRemote = true
                 try {
-                    val remoteAddonUrls = addonSyncService.getRemoteAddonUrls().getOrElse { throw it }
+                    val remoteAddonUrls = addonSyncService.fetchAndApplyRemoteAddonUrls().getOrElse { throw it }
                     addonRepository.reconcileWithRemoteAddonUrls(
                         remoteUrls = remoteAddonUrls,
                         removeMissingLocal = true
@@ -689,7 +689,7 @@ class StartupSyncService @Inject constructor(
     private suspend fun pullRealtimeAddons(profileId: Int) {
         addonRepository.isSyncingFromRemote = true
         try {
-            val remoteAddonUrls = addonSyncService.getRemoteAddonUrls().getOrElse { throw it }
+            val remoteAddonUrls = addonSyncService.fetchAndApplyRemoteAddonUrls().getOrElse { throw it }
             addonRepository.reconcileWithRemoteAddonUrls(
                 remoteUrls = remoteAddonUrls,
                 removeMissingLocal = true

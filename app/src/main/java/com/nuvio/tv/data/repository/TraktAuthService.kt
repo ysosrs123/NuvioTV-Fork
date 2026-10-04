@@ -42,6 +42,7 @@ class TraktAuthService @Inject constructor(
     private val authSessionNoticeDataStore: AuthSessionNoticeDataStore
 ) {
     private val refreshLeewaySeconds = 60L
+    private val refreshFatalRetryDelayMs = 2_000L
     private val writeRequestMutex = Mutex()
     private val tokenRefreshMutex = Mutex()
     private var lastWriteRequestAtMs = 0L
@@ -270,35 +271,45 @@ class TraktAuthService @Inject constructor(
                 return@withLock true
             }
 
-            trace("refreshTokenIfNeeded: refreshing token (force=$force)")
-            val response = try {
-                traktApi.refreshToken(
-                    TraktRefreshTokenRequestDto(
-                        refreshToken = refreshToken,
-                        clientId = BuildConfig.TRAKT_CLIENT_ID,
-                        clientSecret = BuildConfig.TRAKT_CLIENT_SECRET,
-                        redirectUri = traktRedirectUri()
+            var lastFatalStatusCode: Int? = null
+            for (attempt in 1..2) {
+                trace("refreshTokenIfNeeded: refreshing token (force=$force, attempt=$attempt)")
+                val response = try {
+                    traktApi.refreshToken(
+                        TraktRefreshTokenRequestDto(
+                            refreshToken = refreshToken,
+                            clientId = BuildConfig.TRAKT_CLIENT_ID,
+                            clientSecret = BuildConfig.TRAKT_CLIENT_SECRET,
+                            redirectUri = traktRedirectUri()
+                        )
                     )
-                )
-            } catch (e: IOException) {
-                Log.w("TraktAuthService", "Network error while refreshing token", e)
-                return@withLock false
-            }
-
-            val tokenBody = response.body()
-            if (!response.isSuccessful || tokenBody == null) {
-                trace("refreshTokenIfNeeded: failed code=${response.code()}")
-                if (response.code() == 400 || response.code() == 401 || response.code() == 403) {
-                    invalidateCredentials(response.code())
+                } catch (e: IOException) {
+                    Log.w("TraktAuthService", "Network error while refreshing token", e)
+                    return@withLock false
                 }
-                return@withLock false
-            }
 
-            traktAuthDataStore.saveToken(tokenBody)
-            authSessionNoticeDataStore.markTraktAuthenticated()
-            resetCircuit()
-            trace("refreshTokenIfNeeded: success")
-            true
+                val tokenBody = response.body()
+                if (response.isSuccessful && tokenBody != null) {
+                    traktAuthDataStore.saveToken(tokenBody)
+                    authSessionNoticeDataStore.markTraktAuthenticated()
+                    resetCircuit()
+                    trace("refreshTokenIfNeeded: success")
+                    return@withLock true
+                }
+
+                trace("refreshTokenIfNeeded: failed code=${response.code()} attempt=$attempt")
+                val isCredentialRejection =
+                    response.code() == 400 || response.code() == 401 || response.code() == 403
+                if (!isCredentialRejection) {
+                    return@withLock false
+                }
+                lastFatalStatusCode = response.code()
+                if (attempt < 2) {
+                    delay(refreshFatalRetryDelayMs)
+                }
+            }
+            lastFatalStatusCode?.let { statusCode -> invalidateCredentials(statusCode) }
+            false
         }
     }
 

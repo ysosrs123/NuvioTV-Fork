@@ -28,6 +28,8 @@ data class WatchProgress(
     val traktShowId: Int? = null,
     val traktEpisodeId: Int? = null,
     val simklPlaybackId: Long? = null,
+    /** MDBList paused-session id, used to clear the session server-side. */
+    val mdbListPlaybackId: Long? = null,
     override val trackingProviderId: String? = null,
     override val trackingProviderItemId: String? = null,
     override val trackingSourceUrl: String? = null,
@@ -43,6 +45,9 @@ data class WatchProgress(
         const val SOURCE_TRAKT_HISTORY = "trakt_history"
         const val SOURCE_TRAKT_SHOW_PROGRESS = "trakt_show_progress"
         const val SOURCE_SIMKL_PLAYBACK = "simkl_playback"
+        const val SOURCE_MDBLIST_PLAYBACK = "mdblist_playback"
+        /** Watched history synthesised as a completed entry, not a live session. */
+        const val SOURCE_MDBLIST_HISTORY = "mdblist_history"
         const val SOURCE_REMOTE_PLAYBACK = "remote_playback"
         const val SOURCE_REMOTE_HISTORY = "remote_history"
         const val STARTED_THRESHOLD = 0.02f
@@ -108,5 +113,14 @@ data class NextToWatch(
     val nextVideoId: String?,           // Video ID to play next
     val nextSeason: Int?,               // Next season number
     val nextEpisode: Int?,              // Next episode number
-    val displayText: String             // Text to show on button (e.g., "Resume S1E2", "Play S1E3")
+    val displayText: String,             // Text to show on button (e.g., "Resume S1E2", "Play S1E3")
+    /**
+     * Fork: true when every available episode of a series is
+     * watched and none is resumable - e.g. the newest aired episode was just
+     * finished and the next is unreleased. The Play target is then the LAST
+     * episode (an honest replay) and the details-page hero source line
+     * suppresses itself (no preview, no prefetch). Default false keeps every
+     * other construction site unchanged.
+     */
+    val isCaughtUp: Boolean = false
 )

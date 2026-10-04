@@ -145,7 +145,7 @@ class SimklRelatedService @Inject constructor(
             name = title,
             poster = landscape ?: posterUrl,
             posterShape = PosterShape.LANDSCAPE,
-            background = landscape ?: posterUrl,
+            background = landscape,
             logo = null,
             description = null,
             releaseInfo = year.toString(),

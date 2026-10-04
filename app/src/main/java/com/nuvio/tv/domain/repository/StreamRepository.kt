@@ -7,6 +7,11 @@ import com.nuvio.tv.domain.model.Stream
 import kotlinx.coroutines.flow.Flow
 
 interface StreamRepository {
+    /** Opt-in pre-Play search. Implementations must keep work owned by the collector. */
+    fun getStreamsForPrefetch(
+        type: String, videoId: String, season: Int?, episode: Int?
+    ): Flow<NetworkResult<List<AddonStreams>>> = kotlinx.coroutines.flow.emptyFlow()
+
     /** Suspends local plugin work while playback owns the device, then resumes the same search. */
     fun setLocalPluginSearchPaused(paused: Boolean)
 

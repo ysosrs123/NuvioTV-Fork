@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.nuvio.tv.core.profile.ProfileManager
+import com.nuvio.tv.core.util.canonicalizeAddonUrl
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,20 +49,9 @@ class AddonPreferences @Inject constructor(
     private val legacyUrlsKey = stringSetPreferencesKey("installed_addon_urls")
     private val userSetNamesKey = stringPreferencesKey("addon_user_set_names")
     private val addonEnabledStatesKey = stringPreferencesKey("installed_addon_enabled_states")
-    private val manifestSuffix = "/manifest.json"
-
-    private fun canonicalizeUrl(url: String): String {
-        val trimmed = url.trim().trimEnd('/')
-        val queryStart = trimmed.indexOf('?')
-        val path = if (queryStart >= 0) trimmed.substring(0, queryStart) else trimmed
-        val query = if (queryStart >= 0) trimmed.substring(queryStart) else ""
-        val cleanPath = if (path.endsWith(manifestSuffix, ignoreCase = true)) {
-            path.dropLast(manifestSuffix.length).trimEnd('/')
-        } else {
-            path.trimEnd('/')
-        }
-        return cleanPath + query
-    }
+    // Canonicalisation lives in core.util - one implementation
+    // shared with AddonRepositoryImpl and AddonSyncService.
+    private fun canonicalizeUrl(url: String): String = canonicalizeAddonUrl(url)
 
     val installedAddonUrls: Flow<List<String>> = effectiveProfileIdFlow.flatMapLatest { pid ->
         factory.get(pid, FEATURE).data.map { preferences ->

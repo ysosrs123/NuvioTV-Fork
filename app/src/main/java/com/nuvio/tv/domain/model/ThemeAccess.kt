@@ -25,11 +25,7 @@ fun resolveAppTheme(
     entitlements: CosmeticEntitlements
 ): AppTheme {
     if (selectedTheme == null) {
-        return supporterThemes
-            .filterValues(entitlements::includes)
-            .keys
-            .firstOrNull()
-            ?: AppTheme.WHITE
+        return AppTheme.GLASS
     }
     return if (selectedTheme in availableAppThemes(entitlements)) {
         selectedTheme

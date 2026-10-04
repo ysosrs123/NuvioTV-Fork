@@ -7,7 +7,6 @@ import com.google.gson.reflect.TypeToken
 import com.nuvio.tv.core.profile.ProfileManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -69,7 +68,8 @@ data class CachedInProgressItem(
 @Singleton
 class ContinueWatchingEnrichmentCache @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val profileManager: ProfileManager
+    private val profileManager: ProfileManager,
+    private val snapshotStorage: ContinueWatchingSnapshotStorage = ContinueWatchingSnapshotStorage(context)
 ) {
     companion object {
         private const val TAG = "CwEnrichCache"
@@ -77,36 +77,38 @@ class ContinueWatchingEnrichmentCache @Inject constructor(
     }
 
     private val gson = Gson()
-    private val mutex = Mutex()
-    @Volatile private var lastNextUpWriteMs = 0L
-    @Volatile private var lastInProgressWriteMs = 0L
-    @Volatile private var lastNextUpHash = 0
-    @Volatile private var lastInProgressHash = 0
+    private val mutex = snapshotStorage.mutex
+    // Write throttles belong to a profile and are checked while holding the file lock.
+    private data class WriteStamp(val hash: Int, val atMs: Long, val fileEpoch: Int)
+    private val nextUpWrites = mutableMapOf<Int, WriteStamp>()
+    private val inProgressWrites = mutableMapOf<Int, WriteStamp>()
 
-    /** Incremented when cache is cleared; observers can collect to trigger refresh. */
-    private val _cacheCleared = kotlinx.coroutines.flow.MutableStateFlow(0)
-    val cacheCleared: kotlinx.coroutines.flow.StateFlow<Int> = _cacheCleared
+    /** Incremented when cache is cleared; also invalidates writes admitted before a clear. */
+    private val _cacheCleared get() = snapshotStorage.cacheCleared
+    val cacheCleared: kotlinx.coroutines.flow.StateFlow<Int> = snapshotStorage.cacheCleared
 
     /** Incremented on every successful snapshot write; channel sync observes this. */
     private val _snapshotVersion = kotlinx.coroutines.flow.MutableStateFlow(0)
     val snapshotVersion: kotlinx.coroutines.flow.StateFlow<Int> = _snapshotVersion
 
-    // --- Next Up snapshot cache ---
-
-    private fun nextUpFile(): File {
-        val profileId = profileManager.activeProfileId.value
-        val dir = File(context.filesDir, "cw_enrichment")
-        dir.mkdirs()
-        return File(dir, "nextup_${profileId}.json")
+    private fun snapshotFile(kind: String, profileId: Int): File {
+        return snapshotStorage.snapshotFile(kind, profileId)
     }
 
-    suspend fun getNextUpSnapshot(): List<CachedNextUpItem> = withContext(Dispatchers.IO) {
+    // Keep the existing entry points; capture ownership before dispatching or waiting for the mutex.
+    suspend fun getNextUpSnapshot(): List<CachedNextUpItem> =
+        getNextUpSnapshot(profileManager.activeProfileId.value)
+
+    suspend fun getNextUpSnapshot(profileId: Int): List<CachedNextUpItem> = withContext(Dispatchers.IO) {
         mutex.withLock {
             try {
-                val file = nextUpFile()
+                if (snapshotStorage.isRetired(profileId)) return@withContext emptyList()
+                val file = snapshotFile("nextup", profileId)
                 if (!file.exists()) return@withContext emptyList()
                 gson.fromJson(file.readText(), object : TypeToken<List<CachedNextUpItem>>() {}.type)
                     ?: emptyList()
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to read next-up cache: ${e.message}")
                 emptyList()
@@ -114,45 +116,19 @@ class ContinueWatchingEnrichmentCache @Inject constructor(
         }
     }
 
-    /**
-     * @param force bypass throttle and content-change check (use at end of pipeline or for clears)
-     */
-    suspend fun saveNextUpSnapshot(items: List<CachedNextUpItem>, force: Boolean = false) = withContext(Dispatchers.IO) {
-        val contentHash = items.hashCode()
-        if (!force) {
-            if (contentHash == lastNextUpHash) return@withContext
-            val now = System.currentTimeMillis()
-            if (now - lastNextUpWriteMs < THROTTLE_MS) return@withContext
-        }
+    suspend fun getInProgressSnapshot(): List<CachedInProgressItem> =
+        getInProgressSnapshot(profileManager.activeProfileId.value)
+
+    suspend fun getInProgressSnapshot(profileId: Int): List<CachedInProgressItem> = withContext(Dispatchers.IO) {
         mutex.withLock {
             try {
-                val file = nextUpFile()
-                atomicWrite(file, gson.toJson(items))
-                lastNextUpWriteMs = System.currentTimeMillis()
-                lastNextUpHash = contentHash
-                _snapshotVersion.value++
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to write next-up cache: ${e.message}")
-            }
-        }
-    }
-
-    // --- In-progress snapshot cache ---
-
-    private fun inProgressFile(): File {
-        val profileId = profileManager.activeProfileId.value
-        val dir = File(context.filesDir, "cw_enrichment")
-        dir.mkdirs()
-        return File(dir, "inprogress_${profileId}.json")
-    }
-
-    suspend fun getInProgressSnapshot(): List<CachedInProgressItem> = withContext(Dispatchers.IO) {
-        mutex.withLock {
-            try {
-                val file = inProgressFile()
+                if (snapshotStorage.isRetired(profileId)) return@withContext emptyList()
+                val file = snapshotFile("inprogress", profileId)
                 if (!file.exists()) return@withContext emptyList()
                 gson.fromJson(file.readText(), object : TypeToken<List<CachedInProgressItem>>() {}.type)
                     ?: emptyList()
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
             } catch (e: Exception) {
                 Log.w(TAG, "Failed to read in-progress cache: ${e.message}")
                 emptyList()
@@ -160,45 +136,70 @@ class ContinueWatchingEnrichmentCache @Inject constructor(
         }
     }
 
-    /**
-     * @param force bypass throttle and content-change check (use at end of pipeline or for clears)
-     */
-    suspend fun saveInProgressSnapshot(items: List<CachedInProgressItem>, force: Boolean = false) = withContext(Dispatchers.IO) {
-        val contentHash = items.hashCode()
-        if (!force) {
-            if (contentHash == lastInProgressHash) return@withContext
-            val now = System.currentTimeMillis()
-            if (now - lastInProgressWriteMs < THROTTLE_MS) return@withContext
-        }
-        mutex.withLock {
-            try {
-                val file = inProgressFile()
-                atomicWrite(file, gson.toJson(items))
-                lastInProgressWriteMs = System.currentTimeMillis()
-                lastInProgressHash = contentHash
-                _snapshotVersion.value++
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to write in-progress cache: ${e.message}")
+    suspend fun saveNextUpSnapshot(items: List<CachedNextUpItem>, force: Boolean = false) =
+        saveNextUpSnapshot(items, force, profileManager.activeProfileId.value)
+
+    /** An explicit profile keeps a pipeline's snapshot owned even if the active profile changes. */
+    suspend fun saveNextUpSnapshot(
+        items: List<CachedNextUpItem>,
+        force: Boolean = false,
+        profileId: Int,
+        expectedClearVersion: Int? = null
+    ) = saveSnapshot("nextup", items.toList(), force, profileId, expectedClearVersion, nextUpWrites)
+
+    suspend fun saveInProgressSnapshot(items: List<CachedInProgressItem>, force: Boolean = false) =
+        saveInProgressSnapshot(items, force, profileManager.activeProfileId.value)
+
+    suspend fun saveInProgressSnapshot(
+        items: List<CachedInProgressItem>,
+        force: Boolean = false,
+        profileId: Int,
+        expectedClearVersion: Int? = null
+    ) = saveSnapshot("inprogress", items.toList(), force, profileId, expectedClearVersion, inProgressWrites)
+
+    private suspend fun saveSnapshot(
+        kind: String,
+        items: List<*>,
+        force: Boolean,
+        profileId: Int,
+        expectedClearVersion: Int?,
+        writes: MutableMap<Int, WriteStamp>
+    ) {
+        val clearVersion = expectedClearVersion ?: _cacheCleared.value
+        withContext(Dispatchers.IO) {
+            mutex.withLock {
+                if (clearVersion != _cacheCleared.value || snapshotStorage.isRetired(profileId)) return@withContext
+                val contentHash = items.hashCode()
+                val previous = writes[profileId]
+                val file = snapshotFile(kind, profileId)
+                if (!force && previous != null && previous.fileEpoch == snapshotStorage.fileEpoch(profileId) && file.exists() &&
+                    (contentHash == previous.hash || System.currentTimeMillis() - previous.atMs < THROTTLE_MS)) {
+                    return@withContext
+                }
+                try {
+                    atomicWrite(file, gson.toJson(items))
+                    writes[profileId] = WriteStamp(contentHash, System.currentTimeMillis(), snapshotStorage.fileEpoch(profileId))
+                    _snapshotVersion.value++
+                } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                    throw cancelled
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to write $kind cache: ${e.message}")
+                }
             }
         }
     }
 
-    /**
-     * Deletes all CW enrichment cache files for the active profile.
-     */
-    suspend fun clearAll() = withContext(Dispatchers.IO) {
-        mutex.withLock {
-            try {
-                nextUpFile().delete()
-                inProgressFile().delete()
-                lastNextUpHash = 0
-                lastInProgressHash = 0
-                Log.d(TAG, "Cleared CW enrichment cache for profile ${profileManager.activeProfileId.value}")
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to clear CW enrichment cache: ${e.message}")
-            }
+    /** Deletes snapshots for the profile where the request started. */
+    suspend fun clearAll() = clearAll(profileManager.activeProfileId.value)
+
+    suspend fun clearAll(profileId: Int) {
+        try {
+            snapshotStorage.clearProfile(profileId)
+        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+            throw cancelled
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to clear CW enrichment cache: ${e.message}")
         }
-        _cacheCleared.value++
     }
 
     private fun atomicWrite(target: File, content: String) {

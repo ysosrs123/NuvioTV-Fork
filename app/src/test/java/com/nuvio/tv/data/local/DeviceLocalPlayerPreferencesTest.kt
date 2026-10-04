@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.local
 
 import android.content.Context
+import com.nuvio.tv.core.player.LetterboxRenderPolicy
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.first
@@ -36,10 +37,10 @@ class DeviceLocalPlayerPreferencesTest {
     }
 
     @Test
-    fun defaultValuesAreFalse() = runTest {
+    fun defaultValues() = runTest {
         assertFalse(preferences.playerStatsHudButtonEnabled.first())
         assertFalse(preferences.playerStatsHudActive.first())
-        assertFalse(preferences.transparentLetterbox.first())
+        assertEquals(LetterboxRenderPolicy.defaultTransparentLetterbox(), preferences.transparentLetterbox.first())
     }
 
     @Test

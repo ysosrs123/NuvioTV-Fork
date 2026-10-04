@@ -2,6 +2,7 @@ package com.nuvio.tv.domain.model
 
 import com.nuvio.tv.core.debrid.DebridProviders
 import com.nuvio.tv.core.debrid.DebridStreamFormatterDefaults
+import com.nuvio.tv.core.debrid.TrashReleaseGroups
 import com.nuvio.tv.core.debrid.supports
 
 data class DebridSettings(
@@ -88,20 +89,35 @@ enum class DebridStreamCodecFilter {
 }
 
 data class DebridStreamPreferences(
-    val maxResults: Int = 0,
+    val maxResults: Int = 8,
     val maxPerResolution: Int = 0,
     val maxPerQuality: Int = 0,
     val sizeMinGb: Int = 0,
     val sizeMaxGb: Int = 0,
     val preferredResolutions: List<DebridStreamResolution> = DebridStreamResolution.defaultOrder,
-    val requiredResolutions: List<DebridStreamResolution> = emptyList(),
+    val requiredResolutions: List<DebridStreamResolution> = listOf(
+        DebridStreamResolution.P2160,
+        DebridStreamResolution.P1440,
+        DebridStreamResolution.P1080,
+        DebridStreamResolution.P720
+    ),
     val excludedResolutions: List<DebridStreamResolution> = emptyList(),
     val preferredQualities: List<DebridStreamQuality> = DebridStreamQuality.defaultOrder,
     val requiredQualities: List<DebridStreamQuality> = emptyList(),
-    val excludedQualities: List<DebridStreamQuality> = emptyList(),
+    val excludedQualities: List<DebridStreamQuality> = listOf(
+        DebridStreamQuality.CAM,
+        DebridStreamQuality.TS,
+        DebridStreamQuality.TC,
+        DebridStreamQuality.SCR
+    ),
     val preferredVisualTags: List<DebridStreamVisualTag> = DebridStreamVisualTag.defaultOrder,
     val requiredVisualTags: List<DebridStreamVisualTag> = emptyList(),
-    val excludedVisualTags: List<DebridStreamVisualTag> = emptyList(),
+    val excludedVisualTags: List<DebridStreamVisualTag> = listOf(
+        DebridStreamVisualTag.THREE_D,
+        DebridStreamVisualTag.H_OU,
+        DebridStreamVisualTag.H_SBS,
+        DebridStreamVisualTag.AI
+    ),
     val preferredAudioTags: List<DebridStreamAudioTag> = DebridStreamAudioTag.defaultOrder,
     val requiredAudioTags: List<DebridStreamAudioTag> = emptyList(),
     val excludedAudioTags: List<DebridStreamAudioTag> = emptyList(),
@@ -110,13 +126,15 @@ data class DebridStreamPreferences(
     val excludedAudioChannels: List<DebridStreamAudioChannel> = emptyList(),
     val preferredEncodes: List<DebridStreamEncode> = DebridStreamEncode.defaultOrder,
     val requiredEncodes: List<DebridStreamEncode> = emptyList(),
-    val excludedEncodes: List<DebridStreamEncode> = emptyList(),
+    val excludedEncodes: List<DebridStreamEncode> = listOf(DebridStreamEncode.AV1),
     val preferredLanguages: List<DebridStreamLanguage> = emptyList(),
     val requiredLanguages: List<DebridStreamLanguage> = emptyList(),
     val excludedLanguages: List<DebridStreamLanguage> = emptyList(),
+    val preferredReleaseGroups: List<String> = TrashReleaseGroups.PREFERRED_LADDER,
     val requiredReleaseGroups: List<String> = emptyList(),
-    val excludedReleaseGroups: List<String> = emptyList(),
-    val sortCriteria: List<DebridStreamSortCriterion> = DebridStreamSortCriterion.originalOrder
+    val excludedReleaseGroups: List<String> = TrashReleaseGroups.EXCLUDED_GROUPS,
+    val sortCriteria: List<DebridStreamSortCriterion> = DebridStreamSortCriterion.defaultOrder,
+    val trashDefaultsVersion: Int = TrashReleaseGroups.DEFAULTS_VERSION
 )
 
 enum class DebridStreamResolution(val label: String, val value: Int) {
@@ -193,7 +211,7 @@ enum class DebridStreamAudioTag(val label: String) {
     UNKNOWN("Unknown");
 
     companion object {
-        val defaultOrder = listOf(ATMOS, DD_PLUS, DD, DTS_X, DTS_HD_MA, DTS_HD, DTS_ES, DTS, TRUEHD, OPUS, FLAC, AAC, UNKNOWN)
+        val defaultOrder = listOf(TRUEHD, DTS_HD_MA, ATMOS, DTS_X, FLAC, DTS_HD, DTS_ES, DD_PLUS, DTS, DD, OPUS, AAC, UNKNOWN)
     }
 }
 
@@ -218,7 +236,7 @@ enum class DebridStreamEncode(val label: String) {
     UNKNOWN("Unknown");
 
     companion object {
-        val defaultOrder = listOf(AV1, HEVC, AVC, XVID, DIVX, UNKNOWN)
+        val defaultOrder = listOf(HEVC, AVC, AV1, XVID, DIVX, UNKNOWN)
     }
 }
 
@@ -249,6 +267,7 @@ data class DebridStreamSortCriterion(
         val defaultOrder = listOf(
             DebridStreamSortCriterion(DebridStreamSortKey.RESOLUTION, DebridStreamSortDirection.DESC),
             DebridStreamSortCriterion(DebridStreamSortKey.QUALITY, DebridStreamSortDirection.DESC),
+            DebridStreamSortCriterion(DebridStreamSortKey.RELEASE_GROUP, DebridStreamSortDirection.DESC),
             DebridStreamSortCriterion(DebridStreamSortKey.VISUAL_TAG, DebridStreamSortDirection.DESC),
             DebridStreamSortCriterion(DebridStreamSortKey.AUDIO_TAG, DebridStreamSortDirection.DESC),
             DebridStreamSortCriterion(DebridStreamSortKey.AUDIO_CHANNEL, DebridStreamSortDirection.DESC),

@@ -33,6 +33,32 @@ class MetaRepositoryNotFoundClassificationTest {
     private val contentId = "tt0944947"
 
     @Test
+    fun `transport failure does not poison the negative cache after recovery`() = runTest {
+        val calls = java.util.concurrent.atomic.AtomicInteger()
+        val api = apiAnswering {
+            if (calls.incrementAndGet() == 1) throw IOException("offline")
+            Response.success(com.nuvio.tv.data.remote.dto.MetaResponseDto(
+                meta = com.nuvio.tv.data.remote.dto.MetaDto(id = contentId, type = "movie", name = "Recovered")
+            ))
+        }
+        val repository = newRepository(api, addon("a"))
+        assertNull((repository.getMetaFromAllAddons("movie", contentId).last() as NetworkResult.Error).code)
+        assertTrue(repository.getMetaFromAllAddons("movie", contentId).last() is NetworkResult.Success)
+        assertEquals(2, calls.get())
+    }
+
+    @Test
+    fun `cached genuine absence retains final classification without another request`() = runTest {
+        val calls = java.util.concurrent.atomic.AtomicInteger()
+        val repository = newRepository(apiAnswering { calls.incrementAndGet(); notFound() }, addon("a"))
+        repeat(2) {
+            val result = repository.getMetaFromAllAddons("movie", contentId).last() as NetworkResult.Error
+            assertEquals(NetworkResult.META_NOT_FOUND_CODE, result.code)
+        }
+        assertEquals(1, calls.get())
+    }
+
+    @Test
     fun `every addon reporting the item missing is final`() = runTest {
         val repository = newRepository(apiAnswering { notFound() }, addon("a"), addon("b"))
 
@@ -186,6 +212,6 @@ class MetaRepositoryNotFoundClassificationTest {
         val addonRepository = mockk<AddonRepository>(relaxed = true) {
             every { getInstalledAddons() } returns flowOf(addons.toList())
         }
-        return MetaRepositoryImpl(context = context, api = api, addonRepository = addonRepository)
+        return MetaRepositoryImpl(context = context, api = api, addonRepository = addonRepository, healthStore = mockk(relaxed = true), serverCatalog = mockk(relaxed = true))
     }
 }

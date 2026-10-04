@@ -12,6 +12,8 @@ import com.nuvio.tv.domain.model.UserProfile
 import com.nuvio.tv.domain.model.AuthState
 import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -24,6 +26,8 @@ import javax.inject.Singleton
 
 private const val TAG = "ProfileSyncService"
 private const val PROFILE_PULL_MIN_INTERVAL_MS = 10_000L
+
+private class ProfilePullOwnerRetiredException : IllegalStateException("Profile sync owner changed")
 
 internal data class ProfilePullFreshness(
     val userId: String? = null,
@@ -102,14 +106,22 @@ class ProfileSyncService @Inject constructor(
     suspend fun pullFromRemote(force: Boolean = false): Result<List<UserProfile>> = withContext(Dispatchers.IO) {
         pullMutex.withLock {
             val userId = (authManager.authState.value as? AuthState.FullAccount)?.userId
+                ?: return@withLock Result.failure(ProfilePullOwnerRetiredException())
+            val ownerJob = currentCoroutineContext()[Job]
+            fun isCurrentOwner(): Boolean = ownerJob?.isActive != false &&
+                (authManager.authState.value as? AuthState.FullAccount)?.userId == userId
+            if (!isCurrentOwner()) return@withLock Result.failure(ProfilePullOwnerRetiredException())
             val now = SystemClock.elapsedRealtime()
-            if (!force && userId != null && pullFreshness.isRecent(userId, now)) {
-                return@withLock Result.success(lastPulledProfiles)
+            if (!force && pullFreshness.isRecent(userId, now)) {
+                return@withLock if (isCurrentOwner()) Result.success(lastPulledProfiles)
+                else Result.failure(ProfilePullOwnerRetiredException())
             }
             try {
                 val response = withJwtRefreshRetry {
+                    if (!isCurrentOwner()) throw ProfilePullOwnerRetiredException()
                     postgrest.rpc("sync_pull_profiles")
                 }
+                if (!isCurrentOwner()) return@withLock Result.failure(ProfilePullOwnerRetiredException())
                 val remote = response.decodeList<SupabaseProfile>()
 
                 Log.d(TAG, "pullFromRemote: fetched ${remote.size} profiles from Supabase")
@@ -129,12 +141,17 @@ class ProfileSyncService @Inject constructor(
                 }
 
                 if (profiles.isNotEmpty()) {
-                    profileDataStore.replaceAllProfiles(profiles)
+                    // Recheck inside the actual queued DataStore edit, rather
+                    // than only before its asynchronous mutation admission.
+                    if (!profileDataStore.replaceAllProfilesIfCurrent(profiles, ::isCurrentOwner)) {
+                        return@withLock Result.failure(ProfilePullOwnerRetiredException())
+                    }
                     Log.d(TAG, "Merged ${profiles.size} remote profiles into local store")
                 }
 
+                if (!isCurrentOwner()) return@withLock Result.failure(ProfilePullOwnerRetiredException())
                 val currentUserId = (authManager.authState.value as? AuthState.FullAccount)?.userId
-                if (userId != null && currentUserId == userId) {
+                if (currentUserId == userId) {
                     lastPulledProfiles = profiles
                     pullFreshness = ProfilePullFreshness(
                         userId = userId,
@@ -143,7 +160,8 @@ class ProfileSyncService @Inject constructor(
                 }
                 Result.success(profiles)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to pull profiles from remote", e)
+                if (e is ProfilePullOwnerRetiredException) Log.d(TAG, "Retired profile pull owner")
+                else Log.e(TAG, "Failed to pull profiles from remote", e)
                 Result.failure(e)
             }
         }

@@ -41,7 +41,9 @@ data class MdbListUser(
     @SerialName("is_supporter") val isSupporter: Boolean = false,
     @SerialName("rate_limit") val rateLimit: Int? = null,
     @SerialName("rate_limit_remaining") val rateLimitRemaining: Int? = null,
-    @SerialName("rate_limit_reset") val rateLimitReset: Long? = null
+    @SerialName("rate_limit_reset") val rateLimitReset: Long? = null,
+    val plan: String? = null,
+    @SerialName("api_requests_count") val apiRequestsCount: Int? = null
 )
 
 @Serializable

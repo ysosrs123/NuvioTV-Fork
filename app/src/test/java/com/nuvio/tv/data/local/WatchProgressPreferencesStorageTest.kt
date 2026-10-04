@@ -406,6 +406,142 @@ class WatchProgressPreferencesStorageTest {
         assertFalse(harness.preferences.getAllRawEntries().containsKey("boundary"))
     }
 
+    @Test fun `artwork edits current progress without restoring an old position or completion`() = runTest {
+        val h=harness(emptyMap());val old=progress("item",100)
+        h.preferences.saveProgress(old)
+        val storage=h.preferences.captureArtworkStorage(1)
+        val completed=old.copy(position=10000,duration=10000,lastWatched=900,source="newer",progressPercent=100f)
+        h.preferences.saveProgress(completed)
+        h.preferences.updateArtworkIfPresent(old.copy(poster="art",duration=5400000),storage) { true }
+        assertEquals(completed.copy(poster="art"),h.preferences.getAllRawEntries().getValue("item"))
+    }
+
+    @Test fun `artwork cannot insert a removed entry`() = runTest {
+        val h=harness(emptyMap());val old=progress("item",100)
+        h.preferences.saveProgress(old);val storage=h.preferences.captureArtworkStorage(1)
+        h.preferences.removeProgress("item")
+        h.preferences.updateArtworkIfPresent(old.copy(poster="art"),storage) { true }
+        assertTrue(h.preferences.getAllRawEntries().isEmpty())
+    }
+
+    @Test fun `artwork cannot repopulate cleared history`() = runTest {
+        val h=harness(emptyMap());val old=progress("item",100)
+        h.preferences.saveProgress(old);val storage=h.preferences.captureArtworkStorage(1)
+        h.preferences.clearAll()
+        h.preferences.updateArtworkIfPresent(old.copy(poster="art"),storage) { true }
+        assertTrue(h.preferences.getAllRawEntries().isEmpty())
+    }
+
+    @Test fun `artwork preserves current display fields and fills only missing data`() = runTest {
+        val h=harness(emptyMap());val old=progress("item",100)
+        h.preferences.saveProgress(old);val storage=h.preferences.captureArtworkStorage(1)
+        val latest=old.copy(name="chosen",poster="new",logo="chosen-logo",position=7000)
+        h.preferences.saveProgress(latest)
+        h.preferences.updateArtworkIfPresent(old.copy(name="old",poster="old",logo="old",backdrop="fill"),storage) { true }
+        assertEquals(latest.copy(backdrop="fill"),h.preferences.getAllRawEntries().getValue("item"))
+    }
+
+    @Test fun `artwork on archived history preserves bucket placement and recent entries`() = runTest {
+        val h=harness(legacyEntries());h.preferences.getAllRawEntries();val storage=h.preferences.captureArtworkStorage(1)
+        val recentKeys=h.recent.keys();val archiveKeys=h.archive.keys()
+        h.preferences.updateArtworkIfPresent(progress("item0",0).copy(poster="art"),storage) { true }
+        assertEquals(recentKeys,h.recent.keys());assertEquals(archiveKeys,h.archive.keys())
+        assertEquals("art",h.preferences.getAllRawEntries().getValue("item0").poster)
+    }
+
+    @Test fun `old episode artwork preserves newer episode progress`() = runTest {
+        val h=harness(emptyMap());val old=progress("show",100).copy(contentType="series",season=1,episode=1,videoId="show:1:1")
+        h.preferences.saveProgress(old);val storage=h.preferences.captureArtworkStorage(1)
+        val newer=old.copy(episode=2,videoId="show:1:2",lastWatched=200,position=7000)
+        h.preferences.saveProgress(newer)
+        h.preferences.updateArtworkIfPresent(old.copy(poster="art",episodeTitle="first"),storage) { true }
+        val values=h.preferences.getAllRawEntries()
+        assertEquals(newer,values.getValue("show_s1e2"))
+        assertFalse("show" in values)
+        assertEquals(old.copy(poster="art",episodeTitle="first"),values.getValue("show_s1e1"))
+    }
+
+    @Test fun `old episode artwork preserves a persisted newer legacy parent mirror`() = runTest {
+        val old=progress("show",100).copy(contentType="series",season=1,episode=1,videoId="show:1:1")
+        val newer=old.copy(episode=2,videoId="show:1:2",lastWatched=200,position=7000)
+        val h=harness(mapOf("show" to newer,"show_s1e1" to old));h.preferences.getAllRawEntries()
+        val storage=h.preferences.captureArtworkStorage(1)
+        h.preferences.updateArtworkIfPresent(old.copy(poster="art",episodeTitle="first"),storage) { true }
+        val values=h.preferences.getAllRawEntries()
+        assertEquals(newer,values.getValue("show"))
+        assertEquals(old.copy(poster="art",episodeTitle="first"),values.getValue("show_s1e1"))
+    }
+
+    @Test fun `retired captured stores cannot edit a recreated identical profile`() = runTest {
+        val h=harness(emptyMap());val wrapped=mapOf(
+            WATCH_PROGRESS_METADATA_FEATURE to ProfileStoreLifetime(h.metadata),
+            WATCH_PROGRESS_RECENT_FEATURE to ProfileStoreLifetime(h.recent),
+            WATCH_PROGRESS_ARCHIVE_FEATURE to ProfileStoreLifetime(h.archive))
+        every { h.factory.get(any(),any()) } answers { wrapped.getValue(secondArg<String>()) }
+        val old=progress("item",100);h.preferences.saveProgress(old)
+        val storage=h.preferences.captureArtworkStorage(1)
+        wrapped.values.forEach { it.retire() }
+        val fresh=mapOf(WATCH_PROGRESS_METADATA_FEATURE to TestPreferencesDataStore(),
+            WATCH_PROGRESS_RECENT_FEATURE to TestPreferencesDataStore(),WATCH_PROGRESS_ARCHIVE_FEATURE to TestPreferencesDataStore())
+        every { h.factory.get(any(),any()) } answers { fresh.getValue(secondArg<String>()) }
+        h.preferences.saveProgress(old.copy(position=9000,lastWatched=500))
+        val error=runCatching { h.preferences.updateArtworkIfPresent(old.copy(poster="stale"),storage) { true } }.exceptionOrNull()
+        assertTrue(error is kotlinx.coroutines.CancellationException)
+        assertEquals(old.copy(position=9000,lastWatched=500),h.preferences.getAllRawEntries().getValue("item"))
+    }
+
+    @Test fun `artwork rechecks owner inside a delayed transaction`() = runTest {
+        val h=harness(emptyMap());val old=progress("item",100);h.preferences.saveProgress(old)
+        val storage=h.preferences.captureArtworkStorage(1);var current=true
+        val entered=CompletableDeferred<Unit>();val release=CompletableDeferred<Unit>()
+        h.recent.beforeUpdate={ entered.complete(Unit);release.await() }
+        val update=async { h.preferences.updateArtworkIfPresent(old.copy(poster="stale"),storage) { current } }
+        entered.await();current=false;release.complete(Unit);update.await()
+        assertEquals(old,h.preferences.getAllRawEntries().getValue("item"))
+    }
+
+    @Test fun `old artwork cannot patch a reused ID with a different content type`() = runTest {
+        val h=harness(emptyMap());val old=progress("item",100)
+        h.preferences.saveProgress(old);val storage=h.preferences.captureArtworkStorage(1)
+        val newer=old.copy(contentType="series",position=7000,lastWatched=200)
+        h.preferences.saveProgress(newer)
+        h.preferences.updateArtworkIfPresent(old.copy(poster="stale",name="old movie"),storage) { true }
+        assertEquals(newer,h.preferences.getAllRawEntries().getValue("item"))
+    }
+
+    @Test fun `artwork preserves current TV series type aliases`() = runTest {
+        val h=harness(emptyMap());val old=progress("show",100).copy(contentType="TV",season=1,episode=1,videoId="show:1:1")
+        h.preferences.saveProgress(old);val storage=h.preferences.captureArtworkStorage(1)
+        val newer=old.copy(contentType="series",position=7000,lastWatched=200)
+        h.preferences.saveProgress(newer)
+        h.preferences.updateArtworkIfPresent(old.copy(poster="art"),storage) { true }
+        assertEquals(newer.copy(poster="art"),h.preferences.getAllRawEntries().getValue("show_s1e1"))
+    }
+
+    @Test fun `ordinary progress replacement cannot inherit artwork from another item type`() = runTest {
+        val h=harness(emptyMap());val old=progress("item",100).copy(name="movie",poster="movie-art",backdrop="movie-bg",logo="movie-logo",episodeTitle="movie-title")
+        h.preferences.saveProgress(old)
+        val newer=old.copy(contentType="series",name="series",poster=null,backdrop=null,logo=null,episodeTitle=null,position=7000,lastWatched=200)
+        h.preferences.saveProgress(newer)
+        assertEquals(newer,h.preferences.getAllRawEntries().getValue("item"))
+    }
+
+    @Test fun `remote progress replacement cannot inherit artwork from another item type`() = runTest {
+        val h=harness(emptyMap());val old=progress("item",100).copy(name="movie",poster="movie-art",backdrop="movie-bg",logo="movie-logo",episodeTitle="movie-title")
+        h.preferences.saveProgress(old)
+        val newer=old.copy(contentType="series",name="series",poster=null,backdrop=null,logo=null,episodeTitle=null,position=7000,lastWatched=200)
+        h.preferences.applyRemoteChanges(mapOf("item" to newer),emptyList())
+        assertEquals(newer,h.preferences.getAllRawEntries().getValue("item"))
+    }
+
+    @Test fun `ordinary progress replacement retains artwork for TV series aliases`() = runTest {
+        val h=harness(emptyMap());val old=progress("show",100).copy(contentType="TV",season=1,episode=1,videoId="show:1:1",poster="series-art",backdrop="series-bg",logo="series-logo",episodeTitle="first")
+        h.preferences.saveProgress(old)
+        val newer=old.copy(contentType="series",poster=null,backdrop=null,logo=null,episodeTitle=null,position=7000,lastWatched=200)
+        h.preferences.saveProgress(newer)
+        assertEquals(newer.copy(poster=old.poster,backdrop=old.backdrop,logo=old.logo,episodeTitle=old.episodeTitle),h.preferences.getAllRawEntries().getValue("show_s1e1"))
+    }
+
     private fun harness(entries: Map<String, WatchProgress>): Harness {
         val metadata = TestPreferencesDataStore(preferences(entries = entries))
         val recent = TestPreferencesDataStore()
@@ -515,8 +651,11 @@ class WatchProgressPreferencesStorageTest {
         val value: Preferences
             get() = state.value
 
+        var beforeUpdate: suspend () -> Unit = {}
+
         override suspend fun updateData(transform: suspend (t: Preferences) -> Preferences): Preferences {
             return mutex.withLock {
+                beforeUpdate()
                 transform(state.value).also { updated ->
                     updateCount += 1
                     state.value = updated

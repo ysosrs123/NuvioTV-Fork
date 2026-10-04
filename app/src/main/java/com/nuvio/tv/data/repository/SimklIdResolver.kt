@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.repository
 
 import android.util.Log
+import kotlinx.coroutines.CancellationException
 import com.nuvio.tv.data.simkl.SimklApiConfiguration
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -71,6 +72,8 @@ class SimklIdResolver @Inject constructor(
                 imdb = ids?.optString("imdb")?.takeIf { it.isNotBlank() },
                 tvdbSeason = details.optInt("season", -1).takeIf { it > 0 }
             ).also { idsCache[cacheKey] = it }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.d(TAG, "resolveIds $source:$id failed: ${e.message}")
             null
@@ -96,6 +99,8 @@ class SimklIdResolver @Inject constructor(
                 }
             }
             mapping.also { episodeCache[simklId] = it }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.d(TAG, "getEpisodeMapping $type:$simklId failed: ${e.message}")
             emptyList()
@@ -156,6 +161,8 @@ class SimklIdResolver @Inject constructor(
             }
             animeSeasonCache[cacheKey] = seasons
             seasons.firstOrNull { it.tvdbSeason == tvdbSeason }?.simklId
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.d(TAG, "resolveSeasonSimklId anime:$parentSimklId season:$tvdbSeason failed: ${e.message}")
             null
@@ -180,6 +187,8 @@ class SimklIdResolver @Inject constructor(
                 imdb = ids?.optString("imdb")?.takeIf { it.isNotBlank() },
                 tvdbSeason = details.optInt("season", -1).takeIf { it > 0 }
             ).also { idsCache[cacheKey] = it }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.d(TAG, "resolveIdsBySimklId $type:$simklId failed: ${e.message}")
             null
@@ -211,8 +220,9 @@ class SimklIdResolver @Inject constructor(
     private suspend fun httpGet(url: String): String? {
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             val request = Request.Builder().url(url).get().build()
-            val response = okHttpClient.newCall(request).execute()
-            if (response.isSuccessful) response.body?.string() else null
+            okHttpClient.newCall(request).execute().use { response ->
+                if (response.isSuccessful) response.body?.string() else null
+            }
         }
     }
 

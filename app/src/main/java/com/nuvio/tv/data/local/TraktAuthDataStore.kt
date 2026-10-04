@@ -18,6 +18,9 @@ import javax.inject.Singleton
 private const val TRAKT_LEGACY_FORCED_TOKEN_LIFETIME_SECONDS = 86_400
 private const val TRAKT_DOCUMENTED_TOKEN_LIFETIME_SECONDS = 604_800
 
+// TRAKT_ACCESS_TOKEN_MAX_LIFETIME_SECONDS is only a fallback for an absent or
+// non-positive expires_in. The server-provided lifetime is otherwise trusted
+// as-is: clamping below the real expiry forces premature refresh attempts.
 internal fun normalizeTraktTokenLifetimeSeconds(expiresIn: Int): Int {
     return if (expiresIn == TRAKT_LEGACY_FORCED_TOKEN_LIFETIME_SECONDS) {
         TRAKT_DOCUMENTED_TOKEN_LIFETIME_SECONDS

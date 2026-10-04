@@ -124,14 +124,30 @@ class ProfileDataStore @Inject constructor(
     }
 
     suspend fun replaceAllProfiles(profiles: List<UserProfile>) {
+        replaceAllProfilesIfCurrent(profiles) { true }
+    }
+
+    /** Guard a remote owner's metadata at the queued edit, preserving the
+     * ordinary replacement API. The predicate must be side-effect free. This
+     * does not serialize all authentication/profile lifecycle transactions. */
+    internal suspend fun replaceAllProfilesIfCurrent(
+        profiles: List<UserProfile>,
+        isCurrent: () -> Boolean
+    ): Boolean {
+        var replaced = false
         dataStore.edit { prefs ->
+            if (!isCurrent()) return@edit
             val normalizedProfiles = normalizeProfiles(profiles)
-            prefs[profilesJsonKey] = serializeProfiles(normalizedProfiles)
+            val serialized = serializeProfiles(normalizedProfiles)
+            if (!isCurrent()) return@edit
+            prefs[profilesJsonKey] = serialized
             val activeId = prefs[activeProfileIdKey] ?: 1
             if (normalizedProfiles.none { it.id == activeId }) {
                 prefs[activeProfileIdKey] = 1
             }
+            replaced = true
         }
+        return replaced
     }
 
     suspend fun clearAll() {

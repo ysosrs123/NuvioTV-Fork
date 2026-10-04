@@ -11,6 +11,7 @@ data class MDBListSettings(
     val showAudience: Boolean = true,
     val showMetacritic: Boolean = true,
     val showMal: Boolean = true,
+    val trackingEnabled: Boolean = false,
     val showOnHero: Boolean = false,
     val ratingOrder: List<String> = DEFAULT_RATING_ORDER
 ) {

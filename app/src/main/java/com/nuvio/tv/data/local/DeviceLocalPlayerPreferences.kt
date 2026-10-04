@@ -57,7 +57,7 @@ class DeviceLocalPlayerPreferences @Inject constructor(
     }
 
     val transparentLetterbox: Flow<Boolean> = store.data.map { prefs ->
-        prefs[transparentLetterboxKey] ?: false
+        prefs[transparentLetterboxKey] ?: com.nuvio.tv.core.player.LetterboxRenderPolicy.defaultTransparentLetterbox()
     }
 
     suspend fun setTransparentLetterbox(enabled: Boolean) {

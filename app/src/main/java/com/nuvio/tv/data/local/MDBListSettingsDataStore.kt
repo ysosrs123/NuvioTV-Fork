@@ -33,6 +33,7 @@ class MDBListSettingsDataStore @Inject constructor(
     private val showAudienceKey = booleanPreferencesKey("mdblist_show_audience")
     private val showMetacriticKey = booleanPreferencesKey("mdblist_show_metacritic")
     private val showMalKey = booleanPreferencesKey("mdblist_show_mal")
+    private val trackingEnabledKey = booleanPreferencesKey("mdblist_tracking_enabled")
     private val showOnHeroKey = booleanPreferencesKey("mdblist_show_on_hero")
     private val ratingOrderKey = stringPreferencesKey("mdblist_rating_order")
 
@@ -49,6 +50,7 @@ class MDBListSettingsDataStore @Inject constructor(
                 showAudience = prefs[showAudienceKey] ?: true,
                 showMetacritic = prefs[showMetacriticKey] ?: true,
                 showMal = prefs[showMalKey] ?: true,
+                trackingEnabled = prefs[trackingEnabledKey] ?: false,
                 showOnHero = prefs[showOnHeroKey] ?: false,
                 ratingOrder = prefs[ratingOrderKey]?.split(",")?.filter { it.isNotBlank() }
                     ?: MDBListSettings.DEFAULT_RATING_ORDER

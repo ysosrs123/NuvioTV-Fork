@@ -174,7 +174,13 @@ class StreamRepositoryPluginIsolationTest {
                 debridSettingsDataStore = debridSettingsDataStore,
                 tmdbService = tmdbService,
                 debridStreamPresentation = presentation,
-                localDebridAvailabilityService = availability
+                localDebridAvailabilityService = availability,
+                healthStore = mockk(relaxed = true),
+                serverStreams = mockk {
+                    every { isNativeRequest(any()) } returns false
+                    every { revision } returns 0
+                    every { sources(any(), any(), any(), any(), any()) } returns emptyList()
+                }
             ),
             api = api,
             tmdbService = tmdbService,

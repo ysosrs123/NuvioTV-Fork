@@ -3,6 +3,7 @@ package com.nuvio.tv.data.local
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.nuvio.tv.core.profile.ProfileManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -24,14 +25,16 @@ class TrailerSettingsDataStore @Inject constructor(
 
     private val enabledKey = booleanPreferencesKey("trailer_enabled")
     private val delaySecondsKey = intPreferencesKey("trailer_delay_seconds")
+    private val sourceKey = stringPreferencesKey("trailer_source")
     private val playInBackgroundKey = booleanPreferencesKey("trailer_play_in_background")
     private val pauseOnScrollKey = booleanPreferencesKey("trailer_pause_on_scroll")
 
     val settings: Flow<TrailerSettings> = profileManager.activeProfileId.flatMapLatest { pid ->
         factory.get(pid, FEATURE).data.map { prefs ->
             TrailerSettings(
-                enabled = prefs[enabledKey] ?: true,
+                enabled = prefs[enabledKey] ?: false,
                 delaySeconds = prefs[delaySecondsKey] ?: 7,
+                source = TrailerSource.fromKey(prefs[sourceKey]),
                 playInBackground = prefs[playInBackgroundKey] ?: false,
                 pauseOnScroll = prefs[pauseOnScrollKey] ?: true
             )
@@ -46,6 +49,10 @@ class TrailerSettingsDataStore @Inject constructor(
         store().edit { it[delaySecondsKey] = seconds }
     }
 
+    suspend fun setSource(source: TrailerSource) {
+        store().edit { it[sourceKey] = source.name }
+    }
+
     suspend fun setPlayInBackground(enabled: Boolean) {
         store().edit { it[playInBackgroundKey] = enabled }
     }
@@ -56,8 +63,21 @@ class TrailerSettingsDataStore @Inject constructor(
 }
 
 data class TrailerSettings(
-    val enabled: Boolean = true,
+    val enabled: Boolean = false,
     val delaySeconds: Int = 7,
+    val source: TrailerSource = TrailerSource.YOUTUBE,
     val playInBackground: Boolean = false,
     val pauseOnScroll: Boolean = true
 )
+
+/** Which source resolves hero/detail trailers. YOUTUBE is the default; IMDB is opt-in. */
+enum class TrailerSource {
+    YOUTUBE,
+    IMDB;
+
+    companion object {
+        fun fromKey(raw: String?): TrailerSource =
+            values().firstOrNull { it.name.equals(raw, ignoreCase = true) } ?: YOUTUBE
+    }
+}
+

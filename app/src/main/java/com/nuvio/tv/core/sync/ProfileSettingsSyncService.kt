@@ -1,5 +1,7 @@
 package com.nuvio.tv.core.sync
 
+import com.nuvio.tv.core.util.StartupLatencyTrace
+
 import android.os.SystemClock
 import android.util.Log
 import androidx.datastore.preferences.core.MutablePreferences
@@ -89,13 +91,25 @@ private val localOnlyPlayerProfileSettingsKeys = setOf(
     "maintain_original_audio_on_downmix",
     "downmix_normalization_enabled",
     "tunneling_enabled",
-    "force_optical_passthrough",
     "audio_amplification_db",
     "center_mix_level_db",
     "persist_audio_amplification",
     "remember_audio_delay_per_device",
+    "force_optical_passthrough",
+    "allow_ac3_passthrough",
+    "allow_eac3_passthrough",
+    "allow_truehd_passthrough",
+    "allow_dts_passthrough",
+    "allow_dtshd_passthrough",
+    "allow_dts_hd_passthrough",
+    "denied_codec_handling",
+    "mat_passthrough_enabled",
+    "use_system_passthrough",
+    "surround_format_mode",
+    "surround_channel_target",
+    "tunnel_dead_audio_classes",
+    "tunnel_dead_audio_signature",
     "experimental_dv5_to_dv81_enabled",
-    "experimental_dv7_to_dv81_preserve_mapping_enabled",
     "dv7_handling_mode",
     "map_dv7_to_hevc",
     "dv7_libdovi_mode_override",
@@ -141,7 +155,13 @@ private val localOnlyPlayerProfileSettingsKeys = setOf(
     "migration_allow_large_target_buffer_off_done",
     "migration_buffer_budget_managed_exo_done",
     "migration_vod_cache_back_buffer_zeroed_done",
-    "nuvio_performance_mode_enabled"
+    "nuvio_performance_mode_enabled",
+    "assessment_revert_snapshot",
+    "audio_rejections_seen",
+    "audio_rejections_confirmed",
+    "audio_rejection_reset_token",
+    "migration_back_buffer_budget_done",
+    "inject_hdr10_metadata_on_strip"
 )
 
 private val credentialProfileSettingsKeys = mapOf(
@@ -174,6 +194,7 @@ class ProfileSettingsSyncService @Inject constructor(
     private val profileDataStoreFactory: ProfileDataStoreFactory,
     private val syncClientIdentity: SyncClientIdentity,
     private val providerCredentialSyncService: ProviderCredentialSyncService,
+    private val mediaServerSyncService: MediaServerSyncService,
     private val tmdbSettingsDataStore: TmdbSettingsDataStore,
     private val metaRepository: MetaRepository,
     private val cwEnrichmentCache: ContinueWatchingEnrichmentCache
@@ -201,7 +222,6 @@ class ProfileSettingsSyncService @Inject constructor(
         "mdblist_settings",
         "trakt_settings",
         "debrid_settings",
-        "animeskip_settings",
         "track_preference"
     )
 
@@ -235,10 +255,12 @@ class ProfileSettingsSyncService @Inject constructor(
     suspend fun pullCurrentProfileFromRemote(): Result<Boolean> = withContext(Dispatchers.IO) {
         syncMutex.withLock {
             try {
+                StartupLatencyTrace.mark("settings_pull_start")
                 val profileId = profileManager.activeProfileId.value
                 val inheritedPluginSettingsApplied = pullInheritedPluginSettings(profileId)
                 val blob = pullProfileFromRemote(profileId)
                 lastForegroundPullAtMs = SystemClock.elapsedRealtime()
+                StartupLatencyTrace.mark("settings_pull_response")
                 if (blob == null) {
                     Log.d(TAG, "No remote profile settings blob for profile $profileId; keeping local settings")
                     return@withLock Result.success(inheritedPluginSettingsApplied)
@@ -359,6 +381,7 @@ class ProfileSettingsSyncService @Inject constructor(
 
     fun requestForegroundPull(force: Boolean = false) {
         providerCredentialSyncService.requestForegroundPull(force)
+        mediaServerSyncService.requestForegroundPull(force)
         if (!authManager.isAuthenticated) return
 
         val now = SystemClock.elapsedRealtime()
@@ -485,7 +508,8 @@ class ProfileSettingsSyncService @Inject constructor(
                     return@forEach
                 }
                 profileDataStoreFactory.get(profileId, feature).edit { mutablePrefs ->
-                    val preservedEntries = captureLocalOnlyPreferenceEntries(feature, mutablePrefs)
+                    val preservedEntries = captureLocalOnlyPreferenceEntries(feature, mutablePrefs) +
+                        captureMissingPresentationChoices(feature, mutablePrefs, featureJson.keys)
                     val priorDiscoverLocation = if (feature == "layout_settings") {
                         mutablePrefs[stringPreferencesKey("discover_location")]
                     } else null

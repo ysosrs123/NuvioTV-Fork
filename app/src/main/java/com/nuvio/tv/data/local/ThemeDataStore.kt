@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.local
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.nuvio.tv.core.profile.ProfileManager
@@ -23,6 +24,8 @@ class ThemeDataStore @Inject constructor(
 ) {
     companion object {
         private const val FEATURE = "theme_settings"
+        const val DEFAULT_SCREENSAVER_TIMEOUT_MINUTES = 5
+        const val DEFAULT_SCREENSAVER_DIM_PERCENT = 70
     }
 
     private fun store(profileId: Int = profileManager.activeProfileId.value) =
@@ -34,6 +37,9 @@ class ThemeDataStore @Inject constructor(
     private val amoledModeKey = booleanPreferencesKey("amoled_mode")
     private val amoledSurfacesModeKey = booleanPreferencesKey("amoled_surfaces_mode")
     private val settingsUiStyleKey = stringPreferencesKey("settings_ui_style")
+    private val screensaverEnabledKey = booleanPreferencesKey("oled_screensaver_enabled")
+    private val screensaverTimeoutKey = intPreferencesKey("oled_screensaver_timeout_min")
+    private val screensaverDimKey = intPreferencesKey("oled_screensaver_dim_percent")
 
     val themeSelection: Flow<ThemeSelection> = profileManager.activeProfileId.flatMapLatest { pid ->
         factory.get(pid, FEATURE).data.map { prefs ->
@@ -67,14 +73,28 @@ class ThemeDataStore @Inject constructor(
         }
     }
 
+    val screensaverEnabled: Flow<Boolean> = profileManager.activeProfileId.flatMapLatest { pid ->
+        factory.get(pid, FEATURE).data.map { prefs ->
+            prefs[screensaverEnabledKey] ?: true
+        }
+    }
+
+    val screensaverTimeoutMinutes: Flow<Int> = profileManager.activeProfileId.flatMapLatest { pid ->
+        factory.get(pid, FEATURE).data.map { prefs ->
+            prefs[screensaverTimeoutKey] ?: DEFAULT_SCREENSAVER_TIMEOUT_MINUTES
+        }
+    }
+
+    val screensaverDimPercent: Flow<Int> = profileManager.activeProfileId.flatMapLatest { pid ->
+        factory.get(pid, FEATURE).data.map { prefs ->
+            prefs[screensaverDimKey] ?: DEFAULT_SCREENSAVER_DIM_PERCENT
+        }
+    }
+
     val settingsUiStyle: Flow<SettingsUiStyle> = profileManager.activeProfileId.flatMapLatest { pid ->
         factory.get(pid, FEATURE).data.map { prefs ->
-            val styleName = prefs[settingsUiStyleKey] ?: SettingsUiStyle.CLASSIC.name
-            try {
-                SettingsUiStyle.valueOf(styleName)
-            } catch (e: IllegalArgumentException) {
-                SettingsUiStyle.CLASSIC
-            }
+            prefs[settingsUiStyleKey]
+            SettingsUiStyle.CLASSIC
         }
     }
 
@@ -109,6 +129,24 @@ class ThemeDataStore @Inject constructor(
     suspend fun setAmoledSurfacesMode(enabled: Boolean) {
         store().edit { prefs ->
             prefs[amoledSurfacesModeKey] = enabled
+        }
+    }
+
+    suspend fun setScreensaverEnabled(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[screensaverEnabledKey] = enabled
+        }
+    }
+
+    suspend fun setScreensaverTimeoutMinutes(minutes: Int) {
+        store().edit { prefs ->
+            prefs[screensaverTimeoutKey] = minutes
+        }
+    }
+
+    suspend fun setScreensaverDimPercent(percent: Int) {
+        store().edit { prefs ->
+            prefs[screensaverDimKey] = percent
         }
     }
 
