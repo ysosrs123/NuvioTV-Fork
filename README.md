@@ -115,54 +115,73 @@ of person who tunes buffer settings for fun.
 
 ## Screenshots (Nuvio V2)
 
-<!-- Paste each image link on the line under its caption (drag the image into GitHub's editor to get the link). -->
+
+
+https://github.com/user-attachments/assets/b2063feb-7c4a-4fa1-924d-63686184f5dd
+
 
 **Native Dolby Vision Profile 7 FEL on the Ugoos AM9 Pro** -- the stats overlay showing "Profile 7.6 FEL - RPU + BL + EL" on the native route.
 
-<!-- SCREENSHOT 1: FEL test clip with the stats overlay (Source rows cropped or blanked) -->
+<img width="1920" height="1080" alt="Screenshot_20261004_215744" src="https://github.com/user-attachments/assets/86dba33b-f2c3-496c-a0d6-5b6ba6c9d41f" />
+<img width="4032" height="3024" alt="IMG_4946 - Copy" src="https://github.com/user-attachments/assets/c6bbf874-916c-4433-9a5b-bba6fedd5603" />
+
+
+
 
 **Seek thumbnails** -- the strip and the framed picture while holding left or right.
 
-<!-- SCREENSHOT 2: thumbnail strip during a held seek -->
+<img width="1920" height="1080" alt="Screenshot_20261004_221200" src="https://github.com/user-attachments/assets/7ad837f7-a18a-4f1a-993c-be474099ea9c" />
+<img width="1920" height="1080" alt="Screenshot_20261004_221224" src="https://github.com/user-attachments/assets/17dbaca2-f569-4362-a625-0b195a87ce31" />
+
+
 
 **Watch party** -- the party page with the code, the phone QR codes and the member list.
 
-<!-- SCREENSHOT 3: Watch party page, in a party -->
+
+<img width="1920" height="1080" alt="Screenshot_20261004_223318" src="https://github.com/user-attachments/assets/00567a6b-f6a6-4b2f-9393-847fba1ac0d3" />
+
+
 
 **Your own media server** -- Jellyfin, Emby and Silo rows on Home, and a server stream in the source list.
 
-<!-- SCREENSHOT 4: Home with a "Server - Library" row -->
-<!-- SCREENSHOT 5: stream list with a Jellyfin / Emby source card -->
+
+<img width="1920" height="1080" alt="Screenshot_20261004_220636" src="https://github.com/user-attachments/assets/91100a10-6725-4770-ab40-43db44de17f3" />
+
 
 **Player buttons** -- the editor with its live preview.
 
-<!-- SCREENSHOT 6: Settings > Player buttons -->
+
+<img width="1920" height="1080" alt="Screenshot_20261004_215639" src="https://github.com/user-attachments/assets/f0fa9504-8c06-492a-8f89-4fd6c863b786" />
+
 
 **Surround sound** -- Surround Format on Auto, with the per-format switches.
 
-<!-- SCREENSHOT 7: Settings > Playback > Audio, Surround Sound group (replaces the old per-format switches picture) -->
+<img width="1920" height="1080" alt="Screenshot_20261004_215721" src="https://github.com/user-attachments/assets/be46a0c2-7b62-4370-b270-c70fcee583b3" />
+
 
 ## Stats for Nerds Overlay -
 
-<img width="1920" height="1080" alt="IMG_3835" src="https://github.com/user-attachments/assets/623b334f-01fd-464f-a49a-c58eb5548e59" />
+<img width="1920" height="1080" alt="Screenshot_20261004_220235" src="https://github.com/user-attachments/assets/0107b69c-a463-43ad-9a5f-e3b8162abc07" />
+
+
 
 ## MDBList Tracking Integration -
 
-<!-- REPLACE: this picture shows the old API key screen; new one: Settings > Tracking > MDBList, signed in -->
-
 <img width="1920" height="1080" alt="screenshot2" src="https://github.com/user-attachments/assets/808ff170-cac4-4d0e-9f68-412e761748bc" />
+
 
 ## Revised Last Played Stream Speed Test:
 
-<img width="1920" height="1080" alt="screenshot1" src="https://github.com/user-attachments/assets/1ccb4258-7487-4424-82cb-496a776e3c4f" />
+<img width="1920" height="1080" alt="Screenshot_20261004_224058" src="https://github.com/user-attachments/assets/0b91b0b5-4f54-4e4b-b783-e19ebfac52bb" />
+
 
 ## Device Assessment:
 
 <img width="1920" height="1080" alt="screenshot4" src="https://github.com/user-attachments/assets/eb274129-553c-4b5c-b1ac-665aca9101fa" />
+<img width="1920" height="1080" alt="Screenshot_20261004_224127" src="https://github.com/user-attachments/assets/111b52aa-695c-4fa0-8cea-c9376fb879d4" />
+
 
 ## Per-Format Audio Passthrough Switches:
-
-<!-- REPLACE or remove: superseded by SCREENSHOT 7 above -->
 
 <img width="1920" height="1080" alt="Screenshot_20260826_084841" src="https://github.com/user-attachments/assets/85f3a839-11bb-45f6-9154-3d471efe2319" />
 
