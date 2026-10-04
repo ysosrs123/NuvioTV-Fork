@@ -26,6 +26,141 @@ internal const val AFR_PREFLIGHT_TOTAL_TIMEOUT_MS = 18_000L
 /** Minimum remaining time to attempt NextLib / extractor after OkHttp. */
 internal const val AFR_PREFLIGHT_MIN_STAGE_MS = 2_000L
 
+/**
+ * ExoPlayer engine path: cache-only preflight.
+ *
+ * Applies a display-mode switch before prepare() ONLY when a cached detection
+ * exists (instant). No NextLib probe, no MediaExtractor probe: on a cache miss
+ * the frame rate comes from ExoPlayer's own track format after prepare (see
+ * PlayerRuntimeControllerAfrTrack.kt), so the blocking-native-probe hang on
+ * non-faststart MP4s is structurally impossible on this path. The full probing
+ * preflight below remains in use for the MPV engine only.
+ */
+/**
+ * Derives a video frame rate from the prewarm's already-held head bytes
+ * (MKV only). Returns a provisional FrameRateDetection and records the seeded
+ * raw rate on the controller so the track-format path can validate it against
+ * ExoPlayer's reported rate after prepare (see maybeRunTrackFormatAfr). Gated
+ * on ladder proximity: a rate that is not close to a standard rate is not
+ * trusted to switch the panel, so it is left to the post-prepare path. The
+ * entry is provisional only -- it is NOT written to the persistent cache here;
+ * the track-format path promotes it after validation.
+ */
+private fun PlayerRuntimeController.seedFrameRateFromPrewarmedHead(url: String, headers: Map<String, String>): FrameRateUtils.FrameRateDetection? {
+    val head = com.nuvio.tv.ui.screens.player.PrefetchWindowStore.peekHead(
+        android.net.Uri.parse(url), PlaybackPrewarmIdentity.from(url, headers, mapOf("Icy-MetaData" to "1"))
+    )
+        ?: return null
+    val hint = com.nuvio.tv.core.player.MatroskaAfrProbe.parseVideoFrameRateFromHead(head) ?: return null
+    if (!FrameRateUtils.isNearStandardRate(hint.rawFps)) {
+        Log.d(PlayerRuntimeController.TAG, "AFR seed rejected: fps=${hint.rawFps} not near a standard rate")
+        return null
+    }
+    val snapped = FrameRateUtils.snapToStandardRate(hint.rawFps)
+    afrSeededRateRaw = hint.rawFps
+    Log.i(PlayerRuntimeController.TAG, "AFR seed: fps=${hint.rawFps} snapped=$snapped ${hint.width}x${hint.height} (provisional, from prewarm head)")
+    return FrameRateUtils.FrameRateDetection(
+        raw = hint.rawFps,
+        snapped = snapped,
+        videoWidth = hint.width,
+        videoHeight = hint.height
+    )
+}
+
+internal suspend fun PlayerRuntimeController.runAfrCachePreflightIfEnabled(
+    url: String,
+    headers: Map<String, String>,
+    frameRateMatchingMode: FrameRateMatchingMode,
+    resolutionMatchingEnabled: Boolean
+) {
+    mpvDelayStartAfterAfrSwitch = false
+    exoDelayStartAfterAfrSwitch = false
+
+    if (frameRateMatchingMode == FrameRateMatchingMode.OFF) {
+        _uiState.update {
+            it.copy(
+                detectedFrameRateRaw = 0f,
+                detectedFrameRate = 0f,
+                detectedFrameRateSource = null,
+                afrProbeRunning = false
+            )
+        }
+        return
+    }
+
+    val activity = currentHostActivity()
+    if (activity == null) {
+        Log.w(PlayerRuntimeController.TAG, "AFR cache preflight skipped: host activity unavailable")
+        return
+    }
+
+    if (_uiState.value.afrProbeRunning || _uiState.value.detectedFrameRateSource != null) {
+        Log.d(PlayerRuntimeController.TAG, "AFR cache preflight: already running or completed, skipping")
+        return
+    }
+
+    // Keyed with the filename, as the cache writers key it, so their entries
+    // are visible here. Falls back to the URL-based key when no filename is
+    // known, the same rule the writers use, so the two sides never disagree.
+    val cached = FrameRateUtils.getCachedFrameRate(url, headers, currentFilename)
+        ?: seedFrameRateFromPrewarmedHead(url, headers)
+        ?: run {
+            Log.d(PlayerRuntimeController.TAG, "AFR cache preflight: miss; deferring to track-format AFR after prepare")
+            return
+        }
+
+    Log.d(PlayerRuntimeController.TAG, "AFR cache preflight: cache hit! Using cached FPS=${cached.snapped}")
+    _uiState.update {
+        it.copy(
+            detectedFrameRateRaw = cached.raw,
+            detectedFrameRate = cached.snapped,
+            detectedFrameRateSource = FrameRateSource.PROBE
+        )
+    }
+    val prefer23976ProbeBias = cached.raw in 23.95f..23.999f
+    val targetFrameRate = FrameRateUtils.refineFrameRateForDisplay(
+        activity = activity,
+        detectedFps = cached.snapped,
+        prefer23976Near24 = prefer23976ProbeBias
+    )
+    val initialDisplayModeId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        withContext(Dispatchers.Main) {
+            activity.window?.decorView?.display?.mode?.modeId
+        }
+    } else {
+        null
+    }
+
+    val result = FrameRateUtils.matchFrameRateAndWait(
+        activity = activity,
+        frameRate = targetFrameRate,
+        videoWidth = cached.videoWidth,
+        videoHeight = cached.videoHeight,
+        resolutionMatchingEnabled = resolutionMatchingEnabled
+    )
+
+    if (result != null) {
+        val switchedDisplayMode = initialDisplayModeId != null &&
+            initialDisplayModeId != result.appliedMode.modeId
+        mpvDelayStartAfterAfrSwitch = switchedDisplayMode
+        exoDelayStartAfterAfrSwitch = switchedDisplayMode
+        // Track-format AFR stands down when the cache path already ran a
+        // mode selection for this stream (whether or not the mode changed).
+        afrModeAppliedPreStart = true
+
+        _uiState.update {
+            it.copy(
+                displayModeInfo = DisplayModeInfo(
+                    width = result.appliedMode.physicalWidth,
+                    height = result.appliedMode.physicalHeight,
+                    refreshRate = result.appliedMode.refreshRate
+                ),
+                showDisplayModeInfo = true
+            )
+        }
+    }
+}
+
 internal suspend fun PlayerRuntimeController.runAfrPreflightIfEnabled(
     url: String,
     headers: Map<String, String>,
@@ -34,6 +169,7 @@ internal suspend fun PlayerRuntimeController.runAfrPreflightIfEnabled(
     mimeType: String? = null
 ) {
     mpvDelayStartAfterAfrSwitch = false
+    exoDelayStartAfterAfrSwitch = false
 
     if (frameRateMatchingMode == FrameRateMatchingMode.OFF) {
         _uiState.update {
@@ -116,6 +252,7 @@ internal suspend fun PlayerRuntimeController.runAfrPreflightIfEnabled(
                 val switchedDisplayMode = initialDisplayModeId != null &&
                     initialDisplayModeId != result.appliedMode.modeId
                 mpvDelayStartAfterAfrSwitch = switchedDisplayMode
+                exoDelayStartAfterAfrSwitch = switchedDisplayMode
 
                 _uiState.update {
                     it.copy(
@@ -244,6 +381,7 @@ internal suspend fun PlayerRuntimeController.runAfrPreflightIfEnabled(
             val switchedDisplayMode = initialDisplayModeId != null &&
                 initialDisplayModeId != result.appliedMode.modeId
             mpvDelayStartAfterAfrSwitch = switchedDisplayMode
+            exoDelayStartAfterAfrSwitch = switchedDisplayMode
 
             _uiState.update {
                 it.copy(

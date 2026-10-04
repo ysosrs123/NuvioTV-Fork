@@ -464,7 +464,7 @@ class FrameRateUtilsAfrTest {
     }
 
     @Test
-    fun `cache with filename keys by host and filename not full url`() {
+    fun `cache with filename keys by filename not full url`() {
         val det = detection(23.976f)
         val filename = "Movie.2024.1080p.mkv"
         FrameRateUtils.cacheFrameRate(
@@ -483,7 +483,11 @@ class FrameRateUtilsAfrTest {
     }
 
     @Test
-    fun `cache with same filename on different host is a miss`() {
+    fun `cache with same filename on a different host is a hit`() {
+        // The resolved debrid edge host rotates per resolve, so the filename branch of
+        // buildCacheKey deliberately excludes it -- the filename identifies the
+        // content, the host is transport. Same content on a different edge must
+        // therefore reuse the entry.
         val det = detection(24f)
         val filename = "SameName.mkv"
         FrameRateUtils.cacheFrameRate(
@@ -492,13 +496,13 @@ class FrameRateUtilsAfrTest {
             det,
             filename
         )
-        assertNull(
-            FrameRateUtils.getCachedFrameRate(
-                "https://host-b.example.com/a",
-                emptyMap(),
-                filename
-            )
+        val hit = FrameRateUtils.getCachedFrameRate(
+            "https://host-b.example.com/a",
+            emptyMap(),
+            filename
         )
+        assertNotNull(hit)
+        assertEquals(det.raw, hit!!.raw, 0.0001f)
     }
 
     @Test
@@ -565,13 +569,13 @@ class FrameRateUtilsAfrTest {
     }
 
     @Test
-    fun `buildCacheKey with filename uses file host scheme`() {
+    fun `buildCacheKey with filename excludes the rotating host`() {
         val key = FrameRateUtils.buildCacheKey(
             "https://download.real-debrid.com/d/TOKEN/file",
             emptyMap(),
             "Film.mkv"
         )
-        assertEquals("file://download.real-debrid.com/Film.mkv", key)
+        assertEquals("file://Film.mkv", key)
     }
 
     @Test
@@ -789,10 +793,17 @@ class FrameRateUtilsAfrTest {
 
             // 2. Sparse File (Head at 0, Seek to tailStart, Write Tail)
             val sparseFile = java.io.File(tempDir, "sparse.mp4")
-            java.io.RandomAccessFile(sparseFile, "rw").use { raf ->
-                raf.write(headBytes)
-                raf.seek(tailStart)
-                raf.write(tailBytes)
+            // Seeking alone does not create a sparse file on NTFS: explicitly request
+            // sparse allocation so this host-side test does not allocate nearly 10 GB.
+            java.nio.channels.FileChannel.open(
+                sparseFile.toPath(),
+                java.nio.file.StandardOpenOption.CREATE_NEW,
+                java.nio.file.StandardOpenOption.WRITE,
+                java.nio.file.StandardOpenOption.SPARSE
+            ).use { channel ->
+                channel.write(java.nio.ByteBuffer.wrap(headBytes))
+                channel.position(tailStart)
+                channel.write(java.nio.ByteBuffer.wrap(tailBytes))
             }
             assertEquals(tailStart + tailBytes.size, sparseFile.length())
             assertTrue(sparseFile.length() >= tailStart)

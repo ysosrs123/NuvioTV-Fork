@@ -198,6 +198,7 @@ class MatroskaAfrProbeTest {
 
             val patched = file.readBytes()
             val stub = MatroskaAfrProbe.buildMinimalStubCluster()
+            assertEquals(prefix + stub.size, patchedLength)
             assertArrayEquals(stub, patched.copyOfRange(patched.size - stub.size, patched.size))
 
             // The rewritten Segment must end exactly at EOF instead of the original remote length.

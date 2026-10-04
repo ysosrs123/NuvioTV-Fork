@@ -189,6 +189,12 @@ public class MatroskaExtractor implements Extractor {
     }
 
     /**
+     * Media time (us) of the block whose sample the next {@link #transformHevcSample} call carries
+     * (diagnostics only; laced blocks report the block time).
+     */
+    default void onSampleTimeUs(long timeUs) {}
+
+    /**
      * Optionally rewrites Dolby Vision codec signaling for output {@link Format}.
      *
      * <p>This is used when sample-level metadata conversion changes the effective Dolby Vision
@@ -243,6 +249,7 @@ public class MatroskaExtractor implements Extractor {
   // Bounds for the early DTS mime scan that peeks ahead right after the Tracks element.
   private static final int MAX_EARLY_DTS_SCAN_BYTES = 8 * 1024 * 1024;
   private static final int MAX_EARLY_DTS_FRAME_BYTES = 256 * 1024;
+  private static final int MAX_EARLY_DTS_BLOCK_HEADER_BYTES = 4096;
   private static final int MAX_EBML_HEADER_SIZE = 12; // 4-byte id + 8-byte data size.
   private static final int MAX_SEEK_HEAD_FOLLOWS = 4;
 
@@ -301,6 +308,15 @@ public class MatroskaExtractor implements Extractor {
   private static final int ID_TIMECODE_SCALE = 0x2AD7B1;
   private static final int ID_DURATION = 0x4489;
   private static final int ID_CLUSTER = 0x1F43B675;
+  // NuvioTV fork: malformed-container (Usenet zero-fill) recovery. Budget of
+  // resync attempts per extractor instance, and the forward byte span each
+  // resync scans looking for the next Cluster before giving up.
+  private static final int MAX_RESYNC_ATTEMPTS = 8;
+  private static final long MAX_RESYNC_SCAN_BYTES = 64L * 1024 * 1024;
+  // NuvioTV fork: in-memory search window for the malformed-container resync
+  // scan (see resyncToNextCluster). Bulk-peeked and scanned for the Cluster ID
+  // instead of walking one byte at a time - ~100x faster on device.
+  private static final int RESYNC_BLOCK_BYTES = 64 * 1024;
   private static final int ID_TIME_CODE = 0xE7;
   private static final int ID_SIMPLE_BLOCK = 0xA3;
   private static final int ID_BLOCK_GROUP = 0xA0;
@@ -415,6 +431,12 @@ public class MatroskaExtractor implements Extractor {
   private static final int LACING_EBML = 3;
 
   private static final int FOURCC_COMPRESSION_DIVX = 0x58564944;
+  private static final int FOURCC_COMPRESSION_DIVX_LOWER = 0x78766964;
+  private static final int FOURCC_COMPRESSION_DX50 = 0x30355844;
+  private static final int FOURCC_COMPRESSION_XVID = 0x44495658;
+  private static final int FOURCC_COMPRESSION_XVID_LOWER = 0x64697678;
+  private static final int FOURCC_COMPRESSION_FMP4 = 0x34504D46;
+  private static final int FOURCC_COMPRESSION_MP4V = 0x5634504D;
   private static final int FOURCC_COMPRESSION_H263 = 0x33363248;
   private static final int FOURCC_COMPRESSION_VC1 = 0x31435657;
 
@@ -559,6 +581,12 @@ public class MatroskaExtractor implements Extractor {
   private final ParsableByteArray nalStartCode;
   private final ParsableByteArray nalLength;
   private final ParsableByteArray scratch;
+  // NuvioTV fork: 4-byte peek buffer and remaining resync budget for
+  // malformed-container recovery (see read() / resyncToNextCluster()).
+  private final byte[] resyncScratch = new byte[4];
+  private final byte[] resyncBlock = new byte[RESYNC_BLOCK_BYTES];
+  private int resyncBudget = MAX_RESYNC_ATTEMPTS;
+  private long ebmlFailurePosition = C.POSITION_UNSET;
   private final ParsableByteArray vorbisNumPageSamples;
   private final ParsableByteArray seekEntryIdBytes;
   private final ParsableByteArray sampleStrippedBytes;
@@ -776,6 +804,12 @@ public class MatroskaExtractor implements Extractor {
   @CallSuper
   @Override
   public void seek(long position, long timeUs) {
+    resetParsingState();
+  }
+
+  // NuvioTV fork: extracted verbatim from the original seek() body so the
+  // malformed-container resync path can reuse the exact same clean-slate reset.
+  private void resetParsingState() {
     clusterTimecodeUs = C.TIME_UNSET;
     blockState = BLOCK_STATE_START;
     reader.reset();
@@ -797,6 +831,58 @@ public class MatroskaExtractor implements Extractor {
     }
   }
 
+  // NuvioTV fork: byte-scan forward from the current read position to the next
+  // Cluster (level-1) element, leaving the input positioned at the Cluster ID so
+  // the reader parses it fresh. Targets Cluster specifically (not any level-1 ID)
+  // because a Matroska cluster opens on a keyframe, giving the decoder a clean
+  // entry after the skipped hole. Bounded by MAX_RESYNC_SCAN_BYTES.
+  private boolean resyncToNextCluster(ExtractorInput input) throws IOException {
+    long scanned = 0;
+    while (scanned < MAX_RESYNC_SCAN_BYTES) {
+      input.resetPeekPosition();
+      int want = (int) Math.min((long) RESYNC_BLOCK_BYTES, MAX_RESYNC_SCAN_BYTES - scanned);
+      // Bulk-peek up to a full block from the current read position. peek() may
+      // return short, so loop until the block is full or the input ends.
+      int got = 0;
+      while (got < want) {
+        int r = input.peek(resyncBlock, got, want - got);
+        if (r == C.RESULT_END_OF_INPUT) {
+          break;
+        }
+        got += r;
+      }
+      if (got < 4) {
+        return false;
+      }
+      // Scan the block for the Cluster ID's canonical 4-byte encoding
+      // (0x1F 0x43 0xB6 0x75). The leading-byte compare short-circuits on the
+      // vast majority of positions, so this is far cheaper than a per-byte
+      // peekFully()/skipFully() round-trip through ExtractorInput.
+      for (int i = 0; i + 4 <= got; i++) {
+        if (resyncBlock[i] == (byte) 0x1F
+            && resyncBlock[i + 1] == (byte) 0x43
+            && resyncBlock[i + 2] == (byte) 0xB6
+            && resyncBlock[i + 3] == (byte) 0x75) {
+          // Advance the read position to the Cluster ID so the reader parses it
+          // fresh, exactly as the old byte-walk left it.
+          input.skipFully(i);
+          return true;
+        }
+      }
+      if (got < want) {
+        // Short read means we reached the input end; the whole tail was scanned
+        // above, so there is no further Cluster to find.
+        return false;
+      }
+      // Advance by (block - 3) so a Cluster ID straddling the block boundary is
+      // caught on the next pass.
+      int advance = got - 3;
+      input.skipFully(advance);
+      scanned += advance;
+    }
+    return false;
+  }
+
   @Override
   public final void release() {
     zlibSampleDecompressor.release();
@@ -804,6 +890,7 @@ public class MatroskaExtractor implements Extractor {
 
   @Override
   public final int read(ExtractorInput input, PositionHolder seekPosition) throws IOException {
+    ebmlFailurePosition = C.POSITION_UNSET;
     try {
       return readFromInput(input, seekPosition);
     } catch (EOFException e) {
@@ -831,7 +918,37 @@ public class MatroskaExtractor implements Extractor {
     haveOutputSample = false;
     boolean continueReading = true;
     while (continueReading && !haveOutputSample) {
-      continueReading = reader.read(input);
+      try {
+        continueReading = reader.read(input);
+      } catch (ParserException | IllegalStateException malformed) {
+        // Preserve the parse failure location: a failed fork recovery scan can move
+        // tens of MB toward EOF, but must not turn mid-file corruption into a tail.
+        ebmlFailurePosition = input.getPosition();
+        // NuvioTV fork: Usenet zero-fill holes corrupt an element header or size
+        // varint mid-stream, surfacing here as ParserException (3001) or a varint
+        // IllegalStateException (2000). Skip the padded region and resync to the
+        // next Cluster instead of killing playback. Gated on sentSeekMap so this
+        // only runs past the header (inside cluster data), and budgeted so a
+        // pervasively-damaged stream still fails over via the caller.
+        if (!sentSeekMap || resyncBudget <= 0) {
+          throw malformed;
+        }
+        long failPosition = input.getPosition();
+        resyncBudget--;
+        resetParsingState();
+        if (!resyncToNextCluster(input)) {
+          throw malformed;
+        }
+        Log.w(
+            TAG,
+            "MKV_RESYNC: skipped malformed data near byte "
+                + failPosition
+                + " to next cluster (budget left "
+                + resyncBudget
+                + ")");
+        continueReading = true;
+        continue;
+      }
       if (pendingFinishTracks) {
         pendingFinishTracks = false;
         // Input is positioned right after the Tracks element (typically the first cluster),
@@ -867,7 +984,8 @@ public class MatroskaExtractor implements Extractor {
       return false;
     }
     long length = input.getLength();
-    long position = input.getPosition();
+    long position = ebmlFailurePosition != C.POSITION_UNSET
+        ? ebmlFailurePosition : input.getPosition();
     if (length == C.LENGTH_UNSET || length <= 0L) {
       return true;
     }
@@ -1945,7 +2063,7 @@ public class MatroskaExtractor implements Extractor {
       input.readFully(blockAdditionalData, 0, contentSize);
       track.pendingDolbyVisionBlockAdditionalData = blockAdditionalData;
 
-      if (dolbyVisionSampleTransformer != null) {
+      if (dolbyVisionSampleTransformer != null && !track.hasContentEncryption) {
         try {
           byte[] transformed =
               dolbyVisionSampleTransformer.onDolbyVisionBlockAdditionalData(
@@ -2214,7 +2332,7 @@ public class MatroskaExtractor implements Extractor {
         // If there is supplemental data, the structure of the sample data is:
         // encryption data (if any) || sample size (4 bytes) || sample data || supplemental data
         deferSupplementalMainSampleSizePrefix =
-            track.isHevc && track.requiresDolbyVisionTransform && dolbyVisionSampleTransformer != null;
+            track.isHevc && !track.hasContentEncryption && track.requiresDolbyVisionTransform && dolbyVisionSampleTransformer != null;
         if (!deferSupplementalMainSampleSizePrefix) {
           int sampleSize = size + sampleStrippedBytes.limit() - sampleBytesRead;
           writeSupplementalMainSampleSizePrefix(output, sampleSize);
@@ -2225,7 +2343,7 @@ public class MatroskaExtractor implements Extractor {
       sampleEncodingHandled = true;
     }
     size += sampleStrippedBytes.limit();
-    if (track.isHevc && track.requiresDolbyVisionTransform && dolbyVisionSampleTransformer != null) {
+    if (track.isHevc && !track.hasContentEncryption && track.requiresDolbyVisionTransform && dolbyVisionSampleTransformer != null) {
       try {
         // Phase-2 seam: sample event is surfaced here. Payload replacement is added in a later
         // step once DV conversion is wired for full HEVC access units.
@@ -2236,7 +2354,7 @@ public class MatroskaExtractor implements Extractor {
       }
     }
 
-    if (track.isHevc && track.requiresDolbyVisionTransform && dolbyVisionSampleTransformer != null) {
+    if (track.isHevc && !track.hasContentEncryption && track.requiresDolbyVisionTransform && dolbyVisionSampleTransformer != null) {
       int remainingSampleBytes = size - sampleBytesRead;
       if (dolbyVisionSampleBuffer.length < remainingSampleBytes) {
         int newSize = Math.max(remainingSampleBytes, dolbyVisionSampleBuffer.length * 2);
@@ -2250,6 +2368,7 @@ public class MatroskaExtractor implements Extractor {
       byte[] payloadToWrite = sampleLengthDelimitedData;
       int payloadLength = remainingSampleBytes;
       try {
+        dolbyVisionSampleTransformer.onSampleTimeUs(blockTimeUs);
         byte[] transformedPayload =
             dolbyVisionSampleTransformer.transformHevcSample(
                 sampleLengthDelimitedData,
@@ -2817,6 +2936,7 @@ public class MatroskaExtractor implements Extractor {
       }
       earlyDtsScanBuffer = Arrays.copyOf(earlyDtsScanBuffer, newSize);
     }
+    input.resetPeekPosition();
     return input.peekFully(earlyDtsScanBuffer, 0, length, true);
   }
 
@@ -2883,57 +3003,35 @@ public class MatroskaExtractor implements Extractor {
     if (track == null || !track.waitingForDtsAnalysis) {
       return;
     }
-    int pos = dataStart + trackNumberLength;
-    if (pos + 3 > dataEnd) {
+    int searchStart = dataStart + trackNumberLength + 3;
+    int searchEnd =
+        (int) Math.min((long) dataEnd, (long) searchStart + MAX_EARLY_DTS_BLOCK_HEADER_BYTES);
+    if (searchStart + 4 > dataEnd || !ensureScanBytes(input, searchEnd)) {
       return;
     }
-    int flags = earlyDtsScanBuffer[pos + 2] & 0xFF;
-    pos += 3; // Skip the 2-byte timecode and the flags byte.
-    switch ((flags & 0x06) >> 1) {
-      case 1: { // Xiph lacing.
-        if (pos >= dataEnd) {
-          return;
-        }
-        int laces = earlyDtsScanBuffer[pos++] & 0xFF;
-        for (int i = 0; i < laces && pos < dataEnd; i++) {
-          while (pos < dataEnd && (earlyDtsScanBuffer[pos] & 0xFF) == 0xFF) {
-            pos++;
-          }
-          pos++;
-        }
+    int syncPos = -1;
+    for (int p = searchStart; p + 4 <= searchEnd; p++) {
+      int word =
+          (earlyDtsScanBuffer[p] & 0xFF) << 24
+              | (earlyDtsScanBuffer[p + 1] & 0xFF) << 16
+              | (earlyDtsScanBuffer[p + 2] & 0xFF) << 8
+              | (earlyDtsScanBuffer[p + 3] & 0xFF);
+      if (androidx.media3.extractor.DtsUtil.getFrameType(word)
+          != androidx.media3.extractor.DtsUtil.FRAME_TYPE_UNKNOWN) {
+        syncPos = p;
         break;
       }
-      case 2: { // EBML lacing.
-        if (pos >= dataEnd) {
-          return;
-        }
-        pos++; // Lace count.
-        if (pos >= dataEnd) {
-          return;
-        }
-        int firstSizeLength = ebmlVintLength(earlyDtsScanBuffer[pos] & 0xFF);
-        if (firstSizeLength == 0) {
-          return;
-        }
-        pos += firstSizeLength; // First frame's signed size; frame data follows.
-        break;
-      }
-      case 3: { // Fixed-size lacing.
-        if (pos >= dataEnd) {
-          return;
-        }
-        pos++; // Lace count.
-        break;
-      }
-      default:
-        break; // No lacing.
     }
-    int frameLength = Math.min(dataEnd - pos, MAX_EARLY_DTS_FRAME_BYTES);
-    if (frameLength < 16 || !ensureScanBytes(input, pos + frameLength)) {
+    if (syncPos < 0) {
+      return;
+    }
+    int frameLength = Math.min(dataEnd - syncPos, MAX_EARLY_DTS_FRAME_BYTES);
+    if (frameLength < 16 || !ensureScanBytes(input, syncPos + frameLength)) {
       return;
     }
     String mimeType =
-        DtsUtil.getDtsAudioMimeType(Arrays.copyOfRange(earlyDtsScanBuffer, pos, pos + frameLength));
+        DtsUtil.getDtsAudioMimeType(
+            Arrays.copyOfRange(earlyDtsScanBuffer, syncPos, syncPos + frameLength));
     if (mimeType != null && !mimeType.equals(track.format.sampleMimeType)) {
       track.format = track.format.buildUpon().setSampleMimeType(mimeType).build();
     }
@@ -3321,7 +3419,7 @@ public class MatroskaExtractor implements Extractor {
           } else {
           codecs = dolbyVisionConfig.codecs;
           mimeType = MimeTypes.VIDEO_DOLBY_VISION;
-          if (dolbyVisionSampleTransformer != null) {
+          if (dolbyVisionSampleTransformer != null && !hasContentEncryption) {
             @Nullable
             String transformedCodecs =
                     dolbyVisionSampleTransformer.onDolbyVisionCodecString(
@@ -3344,7 +3442,7 @@ public class MatroskaExtractor implements Extractor {
           }
           }
         }
-      } else if (dolbyVisionSampleTransformer != null && codecs != null) {
+      } else if (dolbyVisionSampleTransformer != null && !hasContentEncryption && codecs != null) {
         String lower = codecs.toLowerCase(Locale.ROOT);
         if (lower.startsWith("dvhe.")
             || lower.startsWith("dvh1.")
@@ -3429,6 +3527,18 @@ public class MatroskaExtractor implements Extractor {
             rotationDegrees = 270;
           }
         }
+        // Fork: surface the container-declared frame rate. Matroska's
+        // TrackEntry DefaultDuration is nanoseconds per frame for fixed-rate
+        // video; media3 parses it into defaultSampleDurationNs but never feeds
+        // Format.frameRate, so MKV (unlike MP4, whose BoxParser sets it)
+        // cannot otherwise trigger the track-format AFR path on ExoPlayer. The
+        // bounds reject malformed values and still-image tracks.
+        if (defaultSampleDurationNs > 0) {
+          float declaredFrameRate = 1_000_000_000f / defaultSampleDurationNs;
+          if (declaredFrameRate >= 5f && declaredFrameRate <= 121f) {
+            formatBuilder.setFrameRate(declaredFrameRate);
+          }
+        }
         formatBuilder
             .setWidth(width)
             .setHeight(height)
@@ -3465,7 +3575,7 @@ public class MatroskaExtractor implements Extractor {
               .setDrmInitData(drmInitData)
               .build();
       requiresDolbyVisionTransform =
-          dolbyVisionSampleTransformer != null
+          dolbyVisionSampleTransformer != null && !hasContentEncryption
               && dolbyVisionSampleTransformer.shouldTransform(codecs, dolbyVisionConfigBytes);
       isHevc = CODEC_ID_H265.equals(codecId);
     }
@@ -3639,8 +3749,15 @@ public class MatroskaExtractor implements Extractor {
       try {
         buffer.skipBytes(16); // size(4), width(4), height(4), planes(2), bitcount(2).
         long compression = buffer.readLittleEndianUnsignedInt();
-        if (compression == FOURCC_COMPRESSION_DIVX) {
-          return new Pair<>(MimeTypes.VIDEO_DIVX, null);
+        if (compression == FOURCC_COMPRESSION_DIVX
+            || compression == FOURCC_COMPRESSION_DIVX_LOWER
+            || compression == FOURCC_COMPRESSION_DX50
+            || compression == FOURCC_COMPRESSION_XVID
+            || compression == FOURCC_COMPRESSION_XVID_LOWER
+            || compression == FOURCC_COMPRESSION_FMP4
+            || compression == FOURCC_COMPRESSION_MP4V) {
+          // MPEG-4 ASP stored the VFW way; the VOL header is in-band.
+          return new Pair<>(MimeTypes.VIDEO_MP4V, null);
         } else if (compression == FOURCC_COMPRESSION_H263) {
           return new Pair<>(MimeTypes.VIDEO_H263, null);
         } else if (compression == FOURCC_COMPRESSION_VC1) {

@@ -467,4 +467,113 @@ internal object MatroskaAfrProbe {
     fun buildSegmentUnknownSize(payload: ByteArray): ByteArray {
         return elementIdBytes(ID_SEGMENT) + encodeUnknownSizeVint8() + payload
     }
+
+    // ------------------------------------------------------------------
+    // Parse the first VIDEO track's frame rate directly
+    // from a Matroska head window, reusing the readElement/readVint model
+    // above. Original fork work, not derived from Stremio's MediaExtractor
+    // second-reader probe. The prewarm already
+    // holds the first 256 KiB of the file, and mkvmerge writes SeekHead ->
+    // Info -> Tracks well inside that window, so the fps the display switch
+    // needs is already in memory. Keys strictly on TrackType == 1 so an audio
+    // track's DefaultDuration (AC-3 32 ms => 31.25, DTS 10.67 ms => 93.75,
+    // both observed in real remuxes) can never be mistaken for the video rate.
+    //
+    // Upstream: NuvioMedia/NuvioTV. Licensed under GPL-3.0.
+    private const val ID_TRACK_ENTRY = 0xAEL
+    private const val ID_TRACK_TYPE = 0x83L
+    private const val ID_DEFAULT_DURATION = 0x23E383L
+    private const val ID_VIDEO = 0xE0L
+    private const val ID_PIXEL_WIDTH = 0xB0L
+    private const val ID_PIXEL_HEIGHT = 0xBAL
+    private const val TRACK_TYPE_VIDEO = 1L
+    private const val NS_PER_SECOND = 1_000_000_000.0
+
+    data class VideoFrameRateHint(
+        val rawFps: Float,
+        val width: Int?,
+        val height: Int?
+    )
+
+    /** Iterate direct EBML children in [start, end); stop at the first torn,
+     *  unknown-size, or window-overrunning child (the safe-prefix rule). */
+    private inline fun forEachChild(bytes: ByteArray, start: Long, end: Long, action: (EbmlElement) -> Unit) {
+        var pos = start
+        while (pos < end) {
+            val child = readElement(bytes, pos) ?: return
+            if (child.unknownSize) return
+            val childEnd = child.endExclusiveOrNull() ?: return
+            if (childEnd > end) return
+            action(child)
+            pos = childEnd
+        }
+    }
+
+    private fun readUintElement(bytes: ByteArray, element: EbmlElement): Long? {
+        if (element.unknownSize || element.dataSize <= 0L || element.dataSize > 8L) return null
+        val start = element.dataOffset.toInt()
+        val end = (element.dataOffset + element.dataSize).toInt()
+        if (start < 0 || end > bytes.size) return null
+        var value = 0L
+        for (i in start until end) {
+            value = (value shl 8) or (bytes[i].toLong() and 0xFFL)
+        }
+        return value
+    }
+
+    /**
+     * Parse the first video TrackEntry's frame rate + pixel dimensions from a
+     * Matroska head [bytes] (the prewarm's 256 KiB window). Returns null when
+     * the head is not Matroska, has no complete Tracks in the window, or the
+     * video track carries no DefaultDuration (some VFR/odd muxes) -- every one
+     * of those falls through to the post-prepare track-format AFR.
+     */
+    fun parseVideoFrameRateFromHead(bytes: ByteArray): VideoFrameRateHint? {
+        if (bytes.size < 4) return null
+        val limit = bytes.size.toLong()
+        val ebml = readElement(bytes, 0L) ?: return null
+        if (ebml.id != ID_EBML) return null
+        val ebmlEnd = ebml.endExclusiveOrNull() ?: return null
+        if (ebmlEnd > limit) return null
+        val segment = readElement(bytes, ebmlEnd) ?: return null
+        if (segment.id != ID_SEGMENT) return null
+        val segEnd = (segment.endExclusiveOrNull() ?: limit).coerceAtMost(limit)
+
+        var tracks: EbmlElement? = null
+        forEachChild(bytes, segment.dataOffset, segEnd) { child ->
+            if (child.id == ID_TRACKS) tracks = child
+        }
+        val tracksEl = tracks ?: return null
+
+        var hint: VideoFrameRateHint? = null
+        forEachChild(bytes, tracksEl.dataOffset, tracksEl.dataOffset + tracksEl.dataSize) { entry ->
+            if (entry.id != ID_TRACK_ENTRY || hint != null) return@forEachChild
+            var type: Long? = null
+            var defaultDuration: Long? = null
+            var width: Int? = null
+            var height: Int? = null
+            forEachChild(bytes, entry.dataOffset, entry.dataOffset + entry.dataSize) { field ->
+                when (field.id) {
+                    ID_TRACK_TYPE -> type = readUintElement(bytes, field)
+                    ID_DEFAULT_DURATION -> defaultDuration = readUintElement(bytes, field)
+                    ID_VIDEO -> forEachChild(bytes, field.dataOffset, field.dataOffset + field.dataSize) { v ->
+                        when (v.id) {
+                            ID_PIXEL_WIDTH -> width = readUintElement(bytes, v)?.toInt()
+                            ID_PIXEL_HEIGHT -> height = readUintElement(bytes, v)?.toInt()
+                        }
+                    }
+                }
+            }
+            val dd = defaultDuration
+            if (type == TRACK_TYPE_VIDEO && dd != null && dd > 0L) {
+                val fps = (NS_PER_SECOND / dd.toDouble()).toFloat()
+                hint = VideoFrameRateHint(
+                    rawFps = fps,
+                    width = width?.takeIf { it > 0 },
+                    height = height?.takeIf { it > 0 }
+                )
+            }
+        }
+        return hint
+    }
 }
