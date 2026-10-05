@@ -20,7 +20,31 @@ host/headless checks overnight; do not wake the TV/AVR or change device settings
 The saved project now opens E:/Codex/NuvioTV/work/NuvioTV-Fork, still the WRONG
 checkout for IPTV. All IPTV source work stays in its separate sibling/branch.
 
-## Retained-media checkpoint — latest continuation
+## Sample-staging checkpoint — latest continuation
+
+Continued from 25395a2a36cf8d8d1ab0e8756886542644e67b46. Read
+IPTV-SAMPLE-STAGING-DESIGN.md and IPTV-SAMPLE-STAGING-VALIDATION-20261006.json first.
+Added bounded transactional compressed-sample staging, one shared extracted PTS
+clock/normalization and actual Media3 Window/Period metadata over staged retained
+batches. Final stable-source full app compile, 178 core tests, all 230 IPTV JVM
+tests (28 suites, zero failures/errors/skips) and final Android harness builds pass.
+Exact durations, source/APK hashes and logs are in the report. The initial compile
+was superseded because hardening occurred during it. No MediaSource/MediaPeriod
+loader, renderer commands, preroll or production sharing is connected yet.
+
+AM9 192.168.10.60:5555 required bounded reconnect; read-only dumpsys power reported
+Asleep. No wake/settings/CEC operation or installation occurred. Six new Android
+extraction fixtures COMPILE but remain UNEXECUTED. JVM SparseArray stubs cannot
+validate the TS reader. Six JVM timeline cases use synthetic batch metadata with
+actual Java Window/Period fields; the 44.1 kHz cases exercise arithmetic only.
+The previous 214-test Android decode result applies to its earlier checkpoint.
+Keep controls disabled. Next: executed staging/normalized-PTS codec gates when the
+authorised device is awake; actual MediaSource/MediaPeriod loading, seek preroll/
+discard and acknowledgements; governed capture/player admission/confirmed cleanup;
+physical storage margins, then the remaining handoff scope. Never replace current
+files with historical staging copies. No dependency versions changed.
+
+## Retained-media checkpoint — historical continuation
 
 Continued from clean 43b1dff41e72638777b4e2476494751f15228101 on codex/iptv.
 Read IPTV-RETAINED-MEDIA-DESIGN.md and its validation report first. Added ephemeral

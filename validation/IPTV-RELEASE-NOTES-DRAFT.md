@@ -1,9 +1,23 @@
 # Nuvio IPTV — draft release notes
 
-Unreleased development branch: codex/iptv. Updated 5 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: retained inspection, sample epochs and seek policy, following TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
+Unreleased development branch: codex/iptv. Updated 6 October 2026.
+Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: transactional sample staging, shared extracted PTS and Media3 timeline metadata, following retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
 
 ## Current checkpoint summary
+
+- Added bounded transactional compressed-sample staging: output stays private until
+  pinned length/hash verification, supported formats, sample counts/keyframe/PTS
+  checks and cancellation succeed. One video reference preserves audio phase,
+  including preroll; limits cover encoded data, sample counts and dimensions.
+- Added actual Media3 Window/Period metadata over retained staged batches with
+  stable epoch identity, eviction offsets, audio-tail duration and explicit
+  discontinuities. This adapter does not yet load or play samples.
+- Final app compile, **178 core tests**, **230 IPTV JVM tests** (28 suites, zero
+  failures/errors/skips) and final Android harness builds pass. Six new Android
+  staging cases remain unexecuted because AM9 was observed Asleep; no install or
+  wake operation occurred. JVM timeline fixtures use synthetic batch metadata.
+  Aggregate heap/codec admission, MediaSource/MediaPeriod loading, preroll and
+  actual player integration remain required before controls can be enabled.
 
 - Retained-media continuation adds ephemeral inspection evidence tied to committed
   rows, pinned hash-verifying inputs, stable actual-PTS/audio epochs and pending
@@ -15,7 +29,7 @@ Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: retained inspection, 
 - New internal components inspect a bounded AVC/AAC MPEG-TS profile, expose explicit local DATA/WAITING/ENDED/EXPIRED/DISCONTINUITY/STOPPED states, and allow local reads/pins during slow capture input. Pins are rechecked at publication.
 - Reproduced a missing final video sample in AM9's platform extractor and the shipped Media3 HLS extractor. A scoped, hash-bound local extraction bridge restores the final sample for inspected complete segments; bundled libraries and dependency versions are unchanged.
 - Preceding TS entry checks: **150 core JVM tests** and **214 AM9 tests** passed. Three independent segments decoded all 50 video frames each and 95/94/94 audio frames. Real capture/store/local-read integration decoded 150 video and 283 audio frames. FFprobe/strict FFmpeg independently agreed. Final full app Kotlin compile, **196 IPTV JVM tests** and the final annotated Android harness build also passed. The 214-test device run precedes only two UnstableApi annotations; final APKs were not reinstalled. Suites overlap.
-- Structural inspection is not a general bitstream safety certificate. There is still no production local Media3 timeline or enabled pause/timeshift/recording. Production sample publication, playback sharing, physical storage margins and durable recording remain unfinished.
+- Structural inspection is not a general bitstream safety certificate. Media3 metadata now exists internally; production sample loading/playback, sharing, physical storage margins and durable recording remain unfinished. Pause/timeshift/recording controls remain disabled.
 
 The preceding HLS milestone:
 

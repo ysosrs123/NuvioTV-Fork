@@ -1,8 +1,28 @@
 # IPTV implementation progress
 
-Updated 5 October 2026, Australia/Brisbane.
+Updated 6 October 2026, Australia/Brisbane.
 
-## Fresh-session checkpoint
+## Latest overnight sample-staging checkpoint
+
+Continued on the authoritative sibling codex/iptv from 25395a2. Added bounded,
+transactional compressed-sample staging tied to the pinned inspection proof,
+shared video/audio PTS validation/normalization, and actual Media3 Window/Period
+metadata with stable epoch identity and retained offsets. Final full app compile,
+178 core tests, 230 IPTV JVM tests (28 suites, no failures/errors/skips) and final
+isolated Android harness builds pass. Exact outcomes/hashes are recorded in
+IPTV-SAMPLE-STAGING-VALIDATION-20261006.json and its companion design.
+
+AM9 was observed Asleep after bounded reconnect/read-only power query. No install,
+wake, power/CEC/settings or provider operation occurred. Six new staging Android
+tests remain unexecuted; host timeline cases use synthetic completed metadata,
+not Android extraction. No MediaSource/MediaPeriod loader or player commands are
+connected; pause/timeshift/recording controls remain disabled. Next gates are
+executed staging/codec validation, loading/preroll/seek acknowledgement, governed
+admission/cleanup and physical storage margins. The new temporary overnight
+heartbeat remains active until its 08:00 Brisbane cutoff; both old jobs stay paused.
+The sections below retain historical milestone observations and test counts.
+
+## Fresh-session checkpoint — historical
 
 Continuation after the fresh-session handover: the clean sibling now has shared producer/store ownership, sequential bounded segment ingestion and a finite pinned local snapshot reader. They remain internal components, not enabled timeshift/recording. Full app compilation and 143 JVM tests passed; the final Android backend rerun passed 164 tests; see the latest section below, `IPTV-SHARED-CAPTURE-DESIGN.md` and `IPTV-SHARED-CAPTURE-VALIDATION-20261005.json`. The preceding checkpoint's separate-run limitations remain historical evidence.
 
