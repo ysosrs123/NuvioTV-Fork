@@ -28,4 +28,23 @@
     <string name="iptv_setup_kept_previous">The update could not be accepted. Your previous data has been kept.</string>
     <string name="iptv_setup_unsupported">This address does not contain a supported channel playlist.</string>
     <string name="iptv_setup_storage_full">There is not enough space to update the guide. Your previous guide has been kept.</string>
+    <string name="iptv_live_title">Live TV</string>
+    <string name="iptv_live_next_source">Next source</string>
+    <string name="iptv_live_all">All channels</string>
+    <string name="iptv_live_favourites">Favourites</string>
+    <string name="iptv_live_add_favourite">Add favourite</string>
+    <string name="iptv_live_remove_favourite">Remove favourite</string>
+    <string name="iptv_live_guide">Guide</string>
+    <string name="iptv_live_fullscreen">Full screen</string>
+    <string name="iptv_live_stop">Stop</string>
+    <string name="iptv_live_choose">Choose a channel to watch</string>
+    <string name="iptv_live_no_programme">Programme information unavailable</string>
+    <string name="iptv_live_playing">Live</string>
+    <string name="iptv_live_connecting">Connecting…</string>
+    <string name="iptv_live_previous">Previous</string>
+    <string name="iptv_live_next">Next</string>
+    <string name="iptv_live_empty">No channels here. Add or refresh a playlist in Live TV sources.</string>
+    <string name="iptv_live_failed">This channel could not play. Choose it again to retry.</string>
+    <string name="iptv_live_capacity">Playback capacity is in use. Stop another session before trying again.</string>
+    <string name="iptv_live_closing">The previous player has not confirmed it stopped. A new stream cannot open yet.</string>
 </resources>

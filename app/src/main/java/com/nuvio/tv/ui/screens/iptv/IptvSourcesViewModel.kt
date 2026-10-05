@@ -74,7 +74,7 @@ class IptvSourcesViewModel @Inject constructor(private val catalogue: IptvCatalo
             selected = oldSelected?.takeIf { ref -> loaded.first.any { it.ref == ref } } ?: loaded.first.firstOrNull()?.ref,
             linked = loaded.third?.feedIds?.toSet().orEmpty(), ready = true) }
     }
-    fun add(guide: Boolean) { if (!mutable.value.busy && session != null) mutable.update { it.copy(form = IptvSourceForm(guide)) } }
+    fun add(guide: Boolean) { if (!mutable.value.busy && session != null) mutable.update { it.copy(form = IptvSourceForm(guide), message = null) } }
     fun dismiss() { if (!mutable.value.busy) mutable.update { it.copy(form = null) } }
     fun select(ref: IptvSourceRef) = runOperation {
         require(ref.profileId == profileId)

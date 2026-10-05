@@ -29,7 +29,7 @@ import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.screens.settings.SettingsGroupCard
 
 @Composable
-fun IptvSourcesScreen(onBack: () -> Unit, viewModel: IptvSourcesViewModel = hiltViewModel()) {
+fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: IptvSourcesViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val first = remember { FocusRequester() }
     var initiallyFocused by remember(state.profileId, state.revision) { mutableStateOf(false) }
@@ -40,6 +40,7 @@ fun IptvSourcesScreen(onBack: () -> Unit, viewModel: IptvSourcesViewModel = hilt
         Text(stringResource(R.string.iptv_sources_title), style = MaterialTheme.typography.headlineMedium, color = NuvioTheme.colors.TextPrimary)
         Text(stringResource(R.string.iptv_sources_description), style = MaterialTheme.typography.bodyMedium, color = NuvioTheme.colors.TextSecondary)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Button(onClick = onLive, enabled = state.sources.isNotEmpty() && !state.busy) { Text(stringResource(R.string.iptv_live_title)) }
             Button(onClick = onBack) { Text(stringResource(R.string.iptv_setup_back)) }
             Button(onClick = { viewModel.add(false) }, enabled = state.ready && !state.busy, modifier = Modifier.focusRequester(first)) { Text(stringResource(R.string.iptv_add_playlist)) }
             Button(onClick = { viewModel.add(true) }, enabled = state.ready && !state.busy) { Text(stringResource(R.string.iptv_add_guide)) }

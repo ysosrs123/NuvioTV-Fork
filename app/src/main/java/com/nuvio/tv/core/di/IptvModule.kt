@@ -14,6 +14,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object IptvModule {
+    // Conservative foreground envelope, not a measured AM9/native-memory capacity guarantee.
+    @Provides @Singleton fun admission() = com.nuvio.tv.core.iptv.LiveSessionAdmission(
+        com.nuvio.tv.core.iptv.DeviceAdmissionLimits(1, 192L * 1024 * 1024, 0))
+    @Provides @Singleton fun liveRuntime(admission: com.nuvio.tv.core.iptv.LiveSessionAdmission) = com.nuvio.tv.core.iptv.LivePlaybackRuntime(admission)
     @Provides @Singleton fun catalogue(@ApplicationContext context: Context) = IptvCatalogueStore(context)
     @Provides @Singleton fun guides(@ApplicationContext context: Context) = IptvGuideStore(context)
     @Provides @Singleton fun access(catalogue: IptvCatalogueStore, guides: IptvGuideStore) = IptvProfileAccess(catalogue, guides)

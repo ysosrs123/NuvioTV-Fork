@@ -4,6 +4,7 @@ import android.os.SystemClock
 import java.net.URLEncoder
 
 sealed class Screen(val route: String) {
+    data object IptvLive : Screen("player/iptv")
     data object IptvSources : Screen("iptv/sources")
     data object Home : Screen("home")
     data object Detail : Screen("detail/{itemId}/{itemType}?addonBaseUrl={addonBaseUrl}&returnFocusSeason={returnFocusSeason}&returnFocusEpisode={returnFocusEpisode}&returnToHomeOnBack={returnToHomeOnBack}&heroBackdropUrl={heroBackdropUrl}&playOnLoad={playOnLoad}&manualSelection={manualSelection}&heroLogoUrl={heroLogoUrl}") {

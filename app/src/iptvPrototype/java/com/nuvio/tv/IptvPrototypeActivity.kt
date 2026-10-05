@@ -3,6 +3,8 @@ package com.nuvio.tv
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.*
+import com.nuvio.tv.ui.screens.iptv.IptvLiveScreen
 import com.nuvio.tv.ui.screens.iptv.IptvSourcesScreen
 import com.nuvio.tv.ui.theme.NuvioTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,6 +20,12 @@ class IptvPrototypeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val presentation = if (intent.getStringExtra("appearance") == "v2")
             ResolvedAppearance(DeviceUiPreferences(), V2AppearancePreferences(), UiScaleDecision(100, "IPTV fixture")) else null
-        setContent { NuvioTheme(presentation = presentation) { IptvSourcesScreen(onBack = ::finish) } }
+        setContent {
+            var live by remember { mutableStateOf(intent.getBooleanExtra("live", false)) }
+            NuvioTheme(presentation = presentation?.copy(playbackActive = live)) {
+                if (live) IptvLiveScreen(onBack = { live = false }, onSources = { live = false })
+                else IptvSourcesScreen(onBack = ::finish, onLive = { live = true })
+            }
+        }
     }
 }
