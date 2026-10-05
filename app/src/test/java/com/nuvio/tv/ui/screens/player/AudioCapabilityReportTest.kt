@@ -53,6 +53,21 @@ class AudioCapabilityReportTest {
     }
 
     @Test
+    fun format_showsThePlugReportWhenAndroidHasOne() {
+        val text = AudioCapabilityReport.format(
+            supported = listOf("AC3", "EAC3"),
+            absent = listOf("DTS"),
+            negotiated = "PCM16 AC3 EAC3",
+            surroundMode = "AUTO",
+            maxPcm = "2 ch",
+            plugReport = "PCM16 AC3 EAC3"
+        )
+        val lines = text.split("\n")
+        assertEquals("HDMI plug report: PCM16 AC3 EAC3", lines[5])
+        assertEquals(hdmiNote, lines.last())
+    }
+
+    @Test
     fun format_isOneLabelledLinePerFacet() {
         val text = AudioCapabilityReport.format(
             listOf("AC3", "EAC3", "EAC3-JOC", "TrueHD", "DTS", "DTS-HD"),

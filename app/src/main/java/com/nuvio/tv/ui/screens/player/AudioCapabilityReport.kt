@@ -69,7 +69,9 @@ object AudioCapabilityReport {
                 }
                 val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
                 val maxPcmLabel = maxPcmChannelCount(audioManager)?.let { "$it ch" } ?: "unknown"
-                format(supported, absent, negotiatedEncodings(audioManager), surroundModeName(audioManager), maxPcmLabel)
+                val plugReport = AudioChainProbe.readHdmiPlugEncodings(context)
+                    ?.asList()?.mapNotNull(::encodingLabel)?.distinct()?.joinToString(" ")
+                format(supported, absent, negotiatedEncodings(audioManager), surroundModeName(audioManager), maxPcmLabel, plugReport)
             }
         } catch (t: Throwable) {
             "unavailable (${t.javaClass.simpleName})"
@@ -137,7 +139,8 @@ object AudioCapabilityReport {
         absent: List<String>,
         negotiated: String,
         surroundMode: String,
-        maxPcm: String
+        maxPcm: String,
+        plugReport: String? = null
     ): String {
         val direct = if (supported.isEmpty()) "none" else supported.joinToString(" ")
         val missing = if (absent.isEmpty()) "none" else absent.joinToString(" ")
@@ -145,6 +148,7 @@ object AudioCapabilityReport {
         return buildString {
             append("Box opens: $direct\nBox cannot open: $missing\nHDMI device lists: $negotiated")
             append("\nAndroid surround: $surroundMode\nHDMI device max PCM: $maxPcm")
+            if (!plugReport.isNullOrBlank()) append("\nHDMI plug report: $plugReport")
             if (listedNotOpened.isNotEmpty()) {
                 append("\nListed by HDMI, not opened by this box: ${listedNotOpened.joinToString(" ")}")
             }
@@ -152,12 +156,6 @@ object AudioCapabilityReport {
         }
     }
 
-    /** HDMI/ARC/eARC output device types whose negotiated encodings we report. */
-    private val HDMI_OUTPUT_TYPES = setOf(
-        AudioDeviceInfo.TYPE_HDMI,
-        AudioDeviceInfo.TYPE_HDMI_ARC,
-        AudioDeviceInfo.TYPE_HDMI_EARC
-    )
 
     /**
      * The encodings the connected HDMI/ARC/eARC output actually negotiated, read from
@@ -176,8 +174,7 @@ object AudioCapabilityReport {
     private fun negotiatedEncodings(audioManager: AudioManager?): String {
         if (audioManager == null) return "unknown"
         val labels = runCatching {
-            audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-                .filter { it.type in HDMI_OUTPUT_TYPES }
+            AudioChainProbe.hdmiOutputDevices(audioManager)
                 .flatMap { it.encodings.asList() }
                 .distinct()
                 .mapNotNull(::encodingLabel)
@@ -218,8 +215,7 @@ object AudioCapabilityReport {
             AudioFormat.ENCODING_PCM_FLOAT
         )
         return runCatching {
-            audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-                .filter { it.type in HDMI_OUTPUT_TYPES }
+            AudioChainProbe.hdmiOutputDevices(audioManager)
                 .flatMap { it.audioProfiles }
                 .filter { it.format in pcmEncodings }
                 // Both positional and index masks resolve to a channel count via
