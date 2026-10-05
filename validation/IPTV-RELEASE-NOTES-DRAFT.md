@@ -1,7 +1,52 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 6 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: owned captured-epoch MediaSource/callback binding, following growing epoch period ed528c6 and exclusive borrowing, following governed incremental reader 34a4937 and cached transport-driven metadata, following incremental inspected-sample loading and TS queue 0b82357, asynchronous reader a960696 and finite sample delivery 6842df1 and physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
+Base: 1.1.0-beta-nt4.1 / build1458. Latest implementation checkpoint: 6ad3799;
+07:05 overnight closure checkpoint: 6f4a01d. Capture code is internal and gated;
+the installed distinct prototype remains the older HUD/guide build. Nothing published.
+
+## Consolidated 5-6 October changes and fixes
+
+- Added a bounded, hash-bound TS inspection/extraction path after reproducing a
+  missing final video sample in both Android and shipped Media3 extractors. The
+  scoped bridge restores the complete inspected segment without upgrading libraries.
+- Bound inspection and reads to immutable committed rows and exact owner/pins;
+  changed, foreign or expired evidence cannot silently substitute another segment.
+  Capture copying no longer blocks local snapshots/opens/pins behind its state lock.
+- Added stable actual-PTS video/audio epochs across eviction/wrap and explicit
+  configuration/timestamp boundaries. Pending seeks use their anchor in both
+  directions; captured-tail selection remains distinct from wall-clock LIVE.
+- Added transactional compressed-sample staging and retained Media3 metadata,
+  including audio phase/preroll. No samples publish before verified EOF, shape /
+  timing and cancellation checks succeed. Logical byte caps are not heap/codec proof.
+- Added fresh space/allocation-unit/volume margins and per-write/index fail-stop
+  fences; fixed the host allocation-unit/sector mismatch. These checks preserve
+  last-good media and existing consumers, but do not preallocate OS space or certify
+  device/USB/SMB margins and power-loss durability.
+- Added asynchronous and incremental readers, exact-row loading, bounded tickets /
+  batch caps, immutable cached timelines and snapshot/reentry fences. Atomic capture
+  hints coalesce; live WAITING cannot become EOF or automatic local polling.
+- Added actual growing MediaPeriod/SampleStream and BaseMediaSource components.
+  Growth preserves cursor/epoch identity, frame seeks feed IDR/audio preroll, and
+  explicit consumed-prefix transfer closes/refills off-thread without rebasing PTS.
+  An initially empty running source remains unresolved instead of publishing EOF.
+- Hardened stale/cancelled completion, failed/blocked input cleanup, one-closer
+  retries, exclusive sample borrowing and playback callback coalescing/quiescence.
+  Reservations stay held through uncertain period/source/reader closure; recorder
+  fixtures remain independent. Queued-before-prepare metadata and init-reference
+  cleanup were fixed. Native renderer shutdown and seek acknowledgement are separate.
+- Consumer encoded-memory floors now apply before transport/consumer start. Actual
+  transient/Java/native/graphics/decoder overhead remains a measured-admission gate.
+
+Latest measured checks: full app compile451s, 317 IPTV JVM tests/38 suites with
+zero failures/errors/skips (8.747s test /381s build), harness53s. Core207 overlaps
+that run. Source callback tests use a synthetic poster and source owner tests stop
+before Looper preparation. New real-stager/period/Looper/storage Android cases are
+compiled but unexecuted; earlier raw-PTS decode evidence does not certify current
+normalized audio, callbacks, rendering, physical capacity or enabled controls.
+Actual admitted player/renderer integration, device validation, durable recording /
+services/schedules/storage, providers/grouping/multiview/catch-up and remaining
+Original/V2 guide/Home/Search/UX still require work. Detailed milestones follow.
 
 ## Current checkpoint summary
 
@@ -183,7 +228,7 @@ The preceding HLS milestone:
 - Progressive MPEG-TS and HLS, including tested sliding TS-segment and byte-range fixtures. Durable per-channel Auto/HLS/MPEG-TS choice supports extensionless HLS when explicitly selected.
 - Disabled automatic failed-load retries and alternate-HLS-rendition fallback. Fixed HTTP/1.0 metadata stale connection handling without enabling retries.
 
-## Added in the latest development milestones
+## Earlier HUD, guide and track development milestones
 
 - IPTV HUD using the fork's existing HUD presentation with a dedicated live sampler: source video/audio format, buffer ahead, manifest live offset when available, HTTP body transfer rate/bytes, open requests, prepare-to-first-frame tune time, rebuffer count/time and renderer dropped buffers.
 - XMLTV files can be selected through Android OpenDocument with a persistent read grant and refreshed through the bounded transactional importer. Malformed or inaccessible documents preserve last-good rows. Devices without a document picker show an explanatory message; AM9 currently has no system picker.
@@ -207,14 +252,14 @@ The preceding HLS milestone:
 - Stalker Portal source adapter and independently validated authentication/channel handling.
 - Complete audio/subtitle preferences and representative rendering checks for subtitles, closed captions, DVB subtitles and teletext. Track-selection UI is implemented; these formats are not all certified.
 - Connect the implemented shared-capture infrastructure to local pause/resume and seekable timeshift; implement durable recording/schedules to internal storage, USB and SMB.
-- Broaden the initial bounded HLS capture adapter, prove decoder-safe entry points, bind incremental TS loading and retained/staged metadata to dynamic MediaSource/epoch periods and actual governed player commands and validate device storage margins/behavior before enabling capture controls.
+- Execute the implemented inspection/stager/growing-period/MediaSource/Looper path on authorized hardware, bind admitted real player/renderers and exact seek acknowledgement, measure aggregate memory and device storage margins before enabling controls. Broaden the narrow capture protocol/profile only with supported entry points and ownership.
 - Multiview with an independent source/playlist per pane, shared account groups and aggregate device/provider limits; provider catch-up.
 - AFR/display handoff, integrated VOD/trailer/IPTV resource ownership, full guide grid, Home/Search, source/feed management, all supported locales and appearance/accessibility checks.
 
 ## Validation and known limitations
 
 - At `0211656`: **112 JVM IPTV tests and 133 AM9 backend fixtures passed** (overlapping suites); full compilation/prototype assembly passed in 8m49s. Device fixture suite passed in 29.168s without network permission. Logs: iptv-core/hud-guides-build.log and hud-guides-am9.txt. Evidence: IPTV-HUD-GUIDES-VALIDATION-20261005.json. Previous video evidence remains in IPTV-HLS-VALIDATION-20261005.json.
-- New AM9 HUD/track/document checks remain pending after earlier HDMI-sleep interruptions. The latest backend session observed AM9 awake without waking it; this does not certify screen availability or those UI paths. No HDMI/CEC/device settings changed. Initial HUD-build Live TV screen rendered before the earlier sleep.
+- HUD/track/document checks remain pending after HDMI-sleep interruptions. The historical backend run observed AM9 Awake; the latest 6 October targeted query observed Asleep. Neither certifies current screen availability or UI paths. No HDMI/CEC/settings changes. Initial HUD-build Live TV screen rendered before the earlier sleep.
 - AM9 controlled video/UI checks cover progressive TS, sliding HLS, byte ranges, extensionless format selection, failure handling, explicit activation, replacement, favourites/paging and background cleanup. No real provider stress or credential copying.
 - Synthetic 640×360/25 FPS H.264/silent AAC evidence is not audible output, HDR/Atmos, UHD decoder capacity or broad provider/codec certification.
 - Current policy allows one foreground IPTV decoder and one acquisition for unknown/shared account capacity. These are estimates, not measured device limits.
@@ -224,7 +269,7 @@ The preceding HLS milestone:
 
 ## Change history
 
-196dcf4 ingest/admission; 9122fc6 catalogue/M3U transport; b8e60e9 XMLTV persistence; 84924e3 guide HTTP/cache; 53bd036 bounded browse/mapping; 7283bf5 source forms/profile cleanup; 7ec290a governed live playback; e636438 Xtream setup/HTTP1.0 fix; a9871c7 durable stream format/HLS fallback fix; 0211656 IPTV HUD/document guides/secure redirects/native tracks; 8f1316e bounded capture spool/reader retention/atomic publication; 4c3e0b0 shared capture ownership/sequential ingestion/finite local snapshot; eaa43e5 bounded HLS capture and HTTP closure fencing; 43b1dff TS inspection/local extraction bridge; 25395a2 pinned inspection/sample epochs/seek policy; 4606418 transactional staging/shared PTS/Media3 metadata. The current physical-storage checkpoint is described above.
+196dcf4 ingest/admission; 9122fc6 catalogue/M3U transport; b8e60e9 XMLTV persistence; 84924e3 guide HTTP/cache; 53bd036 bounded browse/mapping; 7283bf5 source forms/profile cleanup; 7ec290a governed live playback; e636438 Xtream setup/HTTP1.0 fix; a9871c7 durable stream format/HLS fallback fix; 0211656 IPTV HUD/document guides/secure redirects/native tracks; 8f1316e bounded capture spool/reader retention/atomic publication; 4c3e0b0 shared capture ownership/sequential ingestion/finite local snapshot; eaa43e5 bounded HLS capture and HTTP closure fencing; 43b1dff TS inspection/local extraction bridge; 25395a2 pinned inspection/sample epochs/seek policy; 4606418 transactional staging/shared PTS/Media3 metadata. ae0c08b physical-space/unit/volume fences; 6842df1 finite pinned period; a960696 async exact-seek reader; 0b82357 incremental inspection/TS queue; 34a4937 governed incremental reader; ed528c6 growing epoch period/exclusive borrow; 6ad3799 owned MediaSource/playback callbacks; 6f4a01d confirmed overnight pause and summary.
 
 ## Upstream review
 
@@ -239,7 +284,7 @@ Reviewed draft NuvioMedia/NuvioTV PR #3788 at e10c639: reproduced a preview dire
 
 ## Continuation record
 
-Complete implementation context, reproduction locations, device cleanup state, remaining work and fresh-session instructions are saved in [the handover](IPTV-NEXT-SESSION-HANDOFF-20261005.md). The shared capture continuation builds on `27f78ea`; nothing has been published.
+Complete implementation context, reproduction locations, device cleanup state, remaining work and fresh-session instructions are saved in [the current fresh-session handover](IPTV-NEXT-SESSION-HANDOFF-20261006.md). The shared capture continuation builds on `27f78ea`; nothing has been published.
 
 ## Shared capture continuation — historical internal components
 

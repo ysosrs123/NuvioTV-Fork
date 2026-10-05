@@ -55,3 +55,5 @@ following ed528c6 (growing period), 34a4937 (incremental reader) and earlier sav
 checkpoints. All task builds completed; nothing published. Remaining implementation
 scope and successful memory-limited commands are in the comprehensive handoff.
 Continue when the user resumes; leave all automations paused unless requested.
+
+Fresh continuation entry point: [the 6 October handoff](IPTV-NEXT-SESSION-HANDOFF-20261006.md).

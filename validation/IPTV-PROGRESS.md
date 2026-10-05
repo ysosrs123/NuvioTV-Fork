@@ -1,5 +1,8 @@
 # IPTV implementation progress
 
+> Fresh continuation entry point: [IPTV-NEXT-SESSION-HANDOFF-20261006.md](IPTV-NEXT-SESSION-HANDOFF-20261006.md).
+> It supersedes older present-tense/Next statements below; retain this timeline as evidence history.
+
 Updated 6 October 2026, Australia/Brisbane.
 
 ## Owned epoch-source checkpoint - current validated continuation

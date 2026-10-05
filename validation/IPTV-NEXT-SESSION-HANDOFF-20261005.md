@@ -1,5 +1,8 @@
 # Nuvio IPTV — fresh-session handoff, 5 October 2026
 
+> Fresh continuation entry point: [IPTV-NEXT-SESSION-HANDOFF-20261006.md](IPTV-NEXT-SESSION-HANDOFF-20261006.md).
+> It supersedes older present-tense/Next statements below; retain this timeline as evidence history.
+
 ## Overnight authorization, 5–6 October 2026
 
 The user paused the build, then explicitly authorized resuming and continuing all
