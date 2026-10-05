@@ -1399,6 +1399,13 @@ class PlayerSettingsDataStore @Inject constructor(
         }
     }
 
+    suspend fun clearTunnelDeadAudioClasses() {
+        store().edit { prefs ->
+            prefs.remove(tunnelDeadAudioClassesKey)
+            prefs.remove(tunnelDeadAudioSignatureKey)
+        }
+    }
+
     suspend fun setForceOpticalPassthrough(enabled: Boolean) = setForceOpticalPassthrough(enabled, profileManager.activeProfileId.value)
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)

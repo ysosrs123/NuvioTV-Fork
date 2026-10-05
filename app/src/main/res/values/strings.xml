@@ -938,6 +938,10 @@
     <string name="audio_forget_rejections_sub">Formats your receiver refused to open are no longer sent to it as passthrough. This lets them be tried again.</string>
     <string name="audio_forget_rejections_none">Nothing learned</string>
     <string name="audio_forget_rejections_done">Learned audio rejections cleared</string>
+    <string name="audio_forget_tunnel_stalls_title">Forget tunnel stalls</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel off for: %1$s. Lets the next video try tunnelling again.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nothing remembered.</string>
+    <string name="audio_forget_tunnel_stalls_done">Tunnel stalls forgotten</string>
     <!-- DV7 Handling Mode -->
     <string name="dv7_handling_title">Dolby Vision handling</string>
     <string name="dv7_handling_dialog_subtitle">Choose how DV streams are processed at playback time.</string>

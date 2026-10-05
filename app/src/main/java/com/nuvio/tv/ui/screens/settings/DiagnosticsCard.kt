@@ -44,7 +44,8 @@ import java.util.Locale
  */
 internal fun LazyListScope.diagnosticsCardItems(
     diagnostics: LastPlaybackDiagnostics,
-    dvCurrentlyEnabled: Boolean = true
+    dvCurrentlyEnabled: Boolean = true,
+    tunnelStallClasses: Set<String> = emptySet()
 ) {
     if (diagnostics.timestampMs == 0L || diagnostics.host.isBlank()) {
         item(key = "diagnostics_empty_intro") {
@@ -259,8 +260,10 @@ internal fun LazyListScope.diagnosticsCardItems(
                 (diagnostics.audioCapabilities?.takeIf { it.isNotBlank() } ?: "-").let { base ->
                     val rejected = com.nuvio.tv.ui.screens.player.AudioTrackRejectionLog
                         .snapshot().map { it.encoding }.distinct()
-                    if (rejected.isEmpty()) base
+                    val withRejected = if (rejected.isEmpty()) base
                     else "$base\nRejected: ${rejected.joinToString(" ")}"
+                    com.nuvio.tv.ui.screens.player.AudioCapabilityReport.tunnelStallLine(tunnelStallClasses)
+                        ?.let { "$withRejected\n$it" } ?: withRejected
                 }
             )
             DiagnosticRow(

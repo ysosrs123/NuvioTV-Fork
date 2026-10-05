@@ -211,6 +211,11 @@ class PlaybackSettingsViewModel @Inject constructor(
         AudioRejectionReverifier.ledger.invalidate()
     }
 
+    suspend fun forgetTunnelStalls() {
+        PlayerTunnelAvSyncPolicy.resetMemo()
+        playerSettingsDataStore.clearTunnelDeadAudioClasses()
+    }
+
     suspend fun setSurroundChannelTarget(target: SurroundChannelTarget) {
         playerSettingsDataStore.setSurroundChannelTarget(target)
     }

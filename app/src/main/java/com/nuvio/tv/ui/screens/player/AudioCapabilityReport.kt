@@ -156,6 +156,12 @@ object AudioCapabilityReport {
         }
     }
 
+    /** Sound types played without the video tunnel because the tunnel clock stalled with them. */
+    internal fun tunnelStallLine(deadClockClasses: Collection<String>): String? {
+        val labels = PlayerTunnelAvSyncPolicy.memoLabels(deadClockClasses)
+        return if (labels.isEmpty()) null else "Tunnel off after a stall: ${labels.joinToString(", ")}"
+    }
+
 
     /**
      * The encodings the connected HDMI/ARC/eARC output actually negotiated, read from
