@@ -1,9 +1,54 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 6 October 2026.
-Base: 1.1.0-beta-nt4.1 / build1458. Latest implementation checkpoint: 6ad3799;
+Base: 1.1.0-beta-nt4.1 / build1458. Latest continuation: AM9 capture-path fix/evidence below (base81540e1);
+prior overnight implementation: 6ad3799;
 07:05 overnight closure checkpoint: 6f4a01d. Capture code is internal and gated;
 the installed distinct prototype remains the older HUD/guide build. Nothing published.
+
+## AM9 capture-path validation continuation - 6 October 2026
+
+Manual continuation from clean transfer 81540e1 in the IPTV sibling. This section
+supersedes earlier compile-only claims for the cases executed here; historical
+reports retain their original outcomes. Automations remain paused.
+
+The first headless AM9 run executed 21 cases in 53.356s with 12 failures. The
+shipped HLS extractor eagerly creates an empty ID3 track even when the inspected
+PMT contains only AVC/AAC. Strict staging rejected that third track, causing
+upstream reader failures and downstream source/period waits. The scoped local
+factory now declines the synthetic ID3 reader; actual ID3 media remains outside
+the inspected profile. Strict two-track/budget/hash checks and libraries are unchanged.
+
+After the fix, 22 focused cases passed in 7.454s. A final expanded run passed
+27 cases in 14.665s, including a new exact-two-track regression, actual Android
+Source/Handler/period/reader/queue/stager/storage fixtures and all TS codec cases.
+These runs overlap; do not sum them or add them to the existing JVM count.
+
+New normalized codec coverage stages all three original segments transactionally
+and passes their samples to fresh headless codecs. All 150 video and 283 audio
+samples decode with exact input/output PTS agreement. The first audio PTS remains
+-21333us; successor video starts remain 2000000/4000000us and audio starts
+2005333/4010667us. Codecs: c2.amlogic.avc.decoder and c2.android.aac.decoder.
+This is buffer decoding, not audible/visible rendering, renderer preroll discard,
+continuous ExoPlayer playback, exact seek acknowledgement or aggregate memory proof.
+
+AM9 192.168.10.60:5555 stayed Asleep at before/after checks. No activity, wake,
+power/CEC/settings/account/recording/provider operation occurred. Only temporary
+validation packages were installed and both were successfully removed. Reverse
+list was empty; no reverse mapping was changed. The prototype was not replaced.
+The target APK has no permissions; instrumentation has only REORDER_TASKS.
+
+Final whole-app Kotlin compilation passed in 498s (8m18s). All 317 IPTV JVM
+cases across 38 suites passed with zero failures/errors/skips (10.676s test /
+286s build). Final headless harness build passed in 24s. These host suites overlap
+prior core/JVM evidence. Source/components/APKs/logs and fresh XML hashes were
+verified in the device validation report. No task build remains running.
+
+Source/player/renderer binding through one admission and actual shared transport,
+renderer discard/seek acknowledgement, measured aggregate memory and production
+storage margins remain the next gates. Durable recording and remaining provider /
+UX work stay outstanding; controls remain disabled. Exact source/APK/log/build
+results are recorded in IPTV-EPOCH-DEVICE-VALIDATION-20261006.json.
 
 ## Consolidated 5-6 October changes and fixes
 
@@ -38,17 +83,18 @@ the installed distinct prototype remains the older HUD/guide build. Nothing publ
 - Consumer encoded-memory floors now apply before transport/consumer start. Actual
   transient/Java/native/graphics/decoder overhead remains a measured-admission gate.
 
-Latest measured checks: full app compile451s, 317 IPTV JVM tests/38 suites with
+Preceding overnight checks: full app compile451s, 317 IPTV JVM tests/38 suites with
 zero failures/errors/skips (8.747s test /381s build), harness53s. Core207 overlaps
 that run. Source callback tests use a synthetic poster and source owner tests stop
-before Looper preparation. New real-stager/period/Looper/storage Android cases are
-compiled but unexecuted; earlier raw-PTS decode evidence does not certify current
-normalized audio, callbacks, rendering, physical capacity or enabled controls.
+before Looper preparation. The real-stager/period/Looper/storage Android cases were
+compile-only at that checkpoint. The newer AM9 continuation above executes these cases
+and normalized buffer decoding; rendering, production physical capacity and
+enabled controls remain unvalidated.
 Actual admitted player/renderer integration, device validation, durable recording /
 services/schedules/storage, providers/grouping/multiview/catch-up and remaining
 Original/V2 guide/Home/Search/UX still require work. Detailed milestones follow.
 
-## Current checkpoint summary
+## Historical overnight checkpoint summary
 
 Overnight implementation checkpoint: 6ad3799. Temporary continuation was paused at
 07:05 Brisbane before the 08:00 cutoff; both older jobs remain paused. Nothing was
@@ -252,7 +298,7 @@ The preceding HLS milestone:
 - Stalker Portal source adapter and independently validated authentication/channel handling.
 - Complete audio/subtitle preferences and representative rendering checks for subtitles, closed captions, DVB subtitles and teletext. Track-selection UI is implemented; these formats are not all certified.
 - Connect the implemented shared-capture infrastructure to local pause/resume and seekable timeshift; implement durable recording/schedules to internal storage, USB and SMB.
-- Execute the implemented inspection/stager/growing-period/MediaSource/Looper path on authorized hardware, bind admitted real player/renderers and exact seek acknowledgement, measure aggregate memory and device storage margins before enabling controls. Broaden the narrow capture protocol/profile only with supported entry points and ownership.
+- Bind the now device-tested inspection/stager/growing-period/MediaSource path to admitted real player/renderers and exact seek acknowledgement; validate renderer discard and measure aggregate memory/device storage margins before enabling controls. Broaden the narrow capture protocol/profile only with supported entry points and ownership.
 - Multiview with an independent source/playlist per pane, shared account groups and aggregate device/provider limits; provider catch-up.
 - AFR/display handoff, integrated VOD/trailer/IPTV resource ownership, full guide grid, Home/Search, source/feed management, all supported locales and appearance/accessibility checks.
 

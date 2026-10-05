@@ -36,6 +36,10 @@ internal object LocalTsSegmentExtractor {
         val factory = object : TsPayloadReader.Factory {
             override fun createInitialPayloadReaders() = standard.createInitialPayloadReaders()
             override fun createPayloadReader(streamType: Int, esInfo: TsPayloadReader.EsInfo): TsPayloadReader? {
+                // HLS mode eagerly asks for an ID3 reader even when the inspected PMT has
+                // only AVC/AAC. Do not publish that synthetic empty third track. Actual
+                // ID3 streams are outside the inspector profile and cannot reach this path.
+                if (streamType == TsExtractor.TS_STREAM_TYPE_ID3) return null
                 val reader = standard.createPayloadReader(streamType, esInfo)
                 if (streamType == TsExtractor.TS_STREAM_TYPE_H264) {
                     check(video == null)

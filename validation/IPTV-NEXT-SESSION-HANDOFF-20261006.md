@@ -10,7 +10,8 @@ component upgrades, publication or messages to unrelated chats/people are author
 The dependency/component upgrade work is a separate task.
 
 Authoritative implementation is ONLY `E:/Codex/NuvioTV/work/NuvioTV-IPTV`, on
-existing branch `codex/iptv`. Latest implementation: `6ad3799f93eef8e61216998f82b4791af22b3d47`.
+existing branch `codex/iptv`. Latest continuation: AM9 capture-path fix/evidence below, based on transfer `81540e1`.
+Prior overnight implementation: `6ad3799f93eef8e61216998f82b4791af22b3d47`.
 Pre-transfer documentation HEAD: `6f4a01d` (confirmed clean). Read current log/status;
 the transfer itself adds a documentation checkpoint without changing tested source.
 Published base remains nt4.1/build1458 (`574a2d41257ccc667828f54ba0c6ef40d9784984`).
@@ -36,6 +37,50 @@ The temporary overnight job was explicitly paused at 07:05 Brisbane, 6 October,
 before its 08:00 cutoff. Leave all three paused; morning manual continuation is
 not authorization to restart/create recurring automations.
 
+## AM9 capture-path validation continuation - 6 October 2026
+
+Manual continuation from clean transfer 81540e1 in the IPTV sibling. This section
+supersedes earlier compile-only claims for the cases executed here; historical
+reports retain their original outcomes. Automations remain paused.
+
+The first headless AM9 run executed 21 cases in 53.356s with 12 failures. The
+shipped HLS extractor eagerly creates an empty ID3 track even when the inspected
+PMT contains only AVC/AAC. Strict staging rejected that third track, causing
+upstream reader failures and downstream source/period waits. The scoped local
+factory now declines the synthetic ID3 reader; actual ID3 media remains outside
+the inspected profile. Strict two-track/budget/hash checks and libraries are unchanged.
+
+After the fix, 22 focused cases passed in 7.454s. A final expanded run passed
+27 cases in 14.665s, including a new exact-two-track regression, actual Android
+Source/Handler/period/reader/queue/stager/storage fixtures and all TS codec cases.
+These runs overlap; do not sum them or add them to the existing JVM count.
+
+New normalized codec coverage stages all three original segments transactionally
+and passes their samples to fresh headless codecs. All 150 video and 283 audio
+samples decode with exact input/output PTS agreement. The first audio PTS remains
+-21333us; successor video starts remain 2000000/4000000us and audio starts
+2005333/4010667us. Codecs: c2.amlogic.avc.decoder and c2.android.aac.decoder.
+This is buffer decoding, not audible/visible rendering, renderer preroll discard,
+continuous ExoPlayer playback, exact seek acknowledgement or aggregate memory proof.
+
+AM9 192.168.10.60:5555 stayed Asleep at before/after checks. No activity, wake,
+power/CEC/settings/account/recording/provider operation occurred. Only temporary
+validation packages were installed and both were successfully removed. Reverse
+list was empty; no reverse mapping was changed. The prototype was not replaced.
+The target APK has no permissions; instrumentation has only REORDER_TASKS.
+
+Final whole-app Kotlin compilation passed in 498s (8m18s). All 317 IPTV JVM
+cases across 38 suites passed with zero failures/errors/skips (10.676s test /
+286s build). Final headless harness build passed in 24s. These host suites overlap
+prior core/JVM evidence. Source/components/APKs/logs and fresh XML hashes were
+verified in the device validation report. No task build remains running.
+
+Source/player/renderer binding through one admission and actual shared transport,
+renderer discard/seek acknowledgement, measured aggregate memory and production
+storage margins remain the next gates. Durable recording and remaining provider /
+UX work stay outstanding; controls remain disabled. Exact source/APK/log/build
+results are recorded in IPTV-EPOCH-DEVICE-VALIDATION-20261006.json.
+
 ## First actions in the new chat
 
 1. Verify exact sibling, branch, HEAD/status and any running build before starting
@@ -43,10 +88,11 @@ not authorization to restart/create recurring automations.
 2. Read this file, `IPTV-EPOCH-SOURCE-DESIGN.md` and its validation JSON, the
    epoch-period and incremental-reader designs/reports, then `IPTV-TS-ENTRY-DESIGN.md`
    and the current draft release notes. All are in this sibling's validation/.
-3. Inspect authorized device state before device work. Validate the compile-only
-   source/period/stager/offset/preroll fixtures when it is available under the
-   standing restrictions. Otherwise do useful independent implementation around
-   screen/provider blockers. Continue concrete implementation/validation, not a plan.
+3. Read IPTV-EPOCH-DEVICE-VALIDATION-20261006.json for the new executed AM9
+   source/period/stager/storage and normalized codec evidence. Do not repeat the
+   completed checks without a changed source or unresolved issue. Next bind actual
+   admitted player/renderers and validate renderer discard/seek acknowledgement.
+   Recheck authorized device state before any device work; preserve all restrictions.
 4. Keep controls disabled until ownership, decoder, measured memory and physical
    storage gates pass. Save exact evidence and local validated codex/iptv checkpoints.
 
@@ -57,7 +103,8 @@ research or undo newer code because an old milestone says it remains unimplement
 
 ## Latest measured evidence and its limits
 
-Current final report: `IPTV-EPOCH-SOURCE-VALIDATION-20261006.json`.
+Current device continuation: `IPTV-EPOCH-DEVICE-VALIDATION-20261006.json`.
+The following epoch-source evidence is historical: `IPTV-EPOCH-SOURCE-VALIDATION-20261006.json`.
 Full app compile PASS 451s; full IPTV JVM PASS **317 tests / 38 suites**, zero
 errors/failures/skips, 8.747s test / 381s build; headless harness builds PASS 53s.
 The unchanged **207 core cases overlap** the full JVM run; their last standalone
@@ -215,11 +262,11 @@ choices reset per player. No general CC/DVB/teletext rendering certification.
 
 ## Next implementation - current priority and all remaining scope
 
-1. Inspect device and execute new controlled Source/Looper, period, reader/queue /
-   actual-stager, storage-probe and normalized audio/offset/preroll cases when
-   authorized AM9 is available. Assert real JUnit OK output, not adb exit0. Then
-   actual governed ExoPlayer/renderer consumers, one admission +actual shared
-   transport, output/preroll discard and exact pending seek/render acknowledgement.
+1. Source/Looper, period, reader/queue/stager/storage and normalized codec cases
+   now pass on AM9 (see new continuation/report). Next implement actual governed
+   ExoPlayer/renderer consumers with one admission and actual shared transport,
+   output/preroll discard and exact pending seek/render acknowledgement. Preserve
+   reservations through uncertain player release; source close alone is not proof.
 2. Measure aggregate transient/parser/object/staging/Java/native/graphics/decoder
    budgets above encoded floor and real physical margins. Validate pause/resume,
    backpressure/expiry, navigation/profile/background exits and confirmed teardown.
@@ -245,26 +292,30 @@ finished competitor/upstream research or silently fetch real providers.
 ## AM9, fixtures and device boundaries
 
 ONLY serial `192.168.10.60:5555` (AM9PRO Android14/API34), always explicit adb -s.
-Another device .172 is out of scope. Latest query was 06:52:43 Brisbane on 6 October:
-get-state=device; targeted dumpsys power mWakefulness=Asleep. This is historical,
-not a current screen observation. Reinspect state, never wake TV/AVR or change
+Another device .172 is out of scope. Latest cleanup query was about 08:04 Brisbane
+on 6 October: targeted dumpsys power mWakefulness=Asleep. This is historical,
+not a current screen observation. The headless tests did not wake the device. Reinspect state, never wake TV/AVR or change
 power/CEC/accounts/settings/recordings. No credential extraction/copying or provider
 stress. Preserve comparator accounts/preferences and distinct prototype.
 
 Installed `com.nuvio.iptv.prototype` (Nuvio IPTV Prototype) remains older0211656
-HUD/guide build; latest capture code not installed. Current validation packages
-were not installed overnight. Only remove task-owned com.nuvio.iptv.validation
+HUD/guide build; latest capture code not installed in that prototype. The headless
+validation packages were installed for this morning continuation and both removed
+afterward. Only remove task-owned com.nuvio.iptv.validation
 and com.nuvio.iptv.validation.test after tests; no broad cleanup/force-stop/process
-termination. Last TS-phase reverse list was EMPTY; historical8765 is not assured.
+termination. Latest morning cleanup reverse list was EMPTY; historical8765 is not assured.
 No task fixture servers/reverse18767 remain. Reinspect before touching any mapping.
 
-Actual fixture classes in app/src/androidTest/java/com/nuvio/tv/data/iptv:
+Executed fixture classes in app/src/androidTest/java/com/nuvio/tv/data/iptv:
 CaptureEpochMediaSourceAndroidTest (2), CaptureEpochPeriodAndroidTest (2),
 IncrementalCaptureReaderConsumerAndroidTest (2), CaptureSampleBatchQueueAndroidTest
 (3), PinnedCaptureReaderConsumerAndroidTest (2), PinnedCaptureSegmentPeriodAndroidTest
-(2), LocalCaptureSampleStagerAndroidTest (6), AndroidCaptureSpaceProbeTest (2).
-Counts are current compile-only additions, not executed device evidence. Older
-TsCaptureDecodeAndroidTest is distinct historical bridge/codec evidence.
+(2), LocalCaptureSampleStagerAndroidTest (7), AndroidCaptureSpaceProbeTest (2).
+Those 21 original cases now execute successfully in the device continuation;
+LocalCaptureSampleStagerAndroidTest now has 7 cases with the ID3 regression.
+TsCaptureDecodeAndroidTest now has 5 cases including normalized staged decoding.
+The final focused suite is 27 tests, with overlapping earlier runs preserved.
+The older raw-PTS bridge/codec tests also reran successfully in that final suite.
 
 The tools/iptv-device-tests harness Sync compiles ACTUAL app/src production code,
 not scratch copies, with unchanged shipped AARs. Use its README for exact install /

@@ -17,6 +17,21 @@ class LocalCaptureSampleStagerAndroidTest {
     @get:Rule val temp = TemporaryFolder()
     private val normal = CaptureSampleStagingLimits(2L * 1024 * 1024)
 
+    @Test fun inspectedAvcAacExtractionDoesNotInventAnEmptyId3Track() {
+        val bytes = RetainedCaptureFixtures.bytes()
+        val tracks = mutableListOf<Int>()
+        val output = object : androidx.media3.extractor.ExtractorOutput {
+            override fun track(id: Int, type: Int): androidx.media3.extractor.TrackOutput {
+                tracks += type
+                return androidx.media3.extractor.DummyTrackOutput()
+            }
+            override fun endTracks() = Unit
+            override fun seekMap(seekMap: androidx.media3.extractor.SeekMap) = Unit
+        }
+        LocalTsSegmentExtractor.extract(bytes.inputStream(), TsCaptureInspector().inspect(bytes.inputStream()), output)
+        assertEquals(listOf(C.TRACK_TYPE_AUDIO, C.TRACK_TYPE_VIDEO).sorted(), tracks.sorted())
+    }
+
     @Test fun realShippedExtractionReturnsEverySampleOnlyAfterVerifiedEofAndUsesStablePositions() {
         CaptureSegmentStore(temp.newFolder(), 1048576, 524288).use { store ->
             val index = CaptureTsInspectionIndex(store); val timeline = CaptureSampleTimeline(index)

@@ -5,7 +5,51 @@
 
 Updated 6 October 2026, Australia/Brisbane.
 
-## Owned epoch-source checkpoint - current validated continuation
+## AM9 capture-path validation continuation - 6 October 2026
+
+Manual continuation from clean transfer 81540e1 in the IPTV sibling. This section
+supersedes earlier compile-only claims for the cases executed here; historical
+reports retain their original outcomes. Automations remain paused.
+
+The first headless AM9 run executed 21 cases in 53.356s with 12 failures. The
+shipped HLS extractor eagerly creates an empty ID3 track even when the inspected
+PMT contains only AVC/AAC. Strict staging rejected that third track, causing
+upstream reader failures and downstream source/period waits. The scoped local
+factory now declines the synthetic ID3 reader; actual ID3 media remains outside
+the inspected profile. Strict two-track/budget/hash checks and libraries are unchanged.
+
+After the fix, 22 focused cases passed in 7.454s. A final expanded run passed
+27 cases in 14.665s, including a new exact-two-track regression, actual Android
+Source/Handler/period/reader/queue/stager/storage fixtures and all TS codec cases.
+These runs overlap; do not sum them or add them to the existing JVM count.
+
+New normalized codec coverage stages all three original segments transactionally
+and passes their samples to fresh headless codecs. All 150 video and 283 audio
+samples decode with exact input/output PTS agreement. The first audio PTS remains
+-21333us; successor video starts remain 2000000/4000000us and audio starts
+2005333/4010667us. Codecs: c2.amlogic.avc.decoder and c2.android.aac.decoder.
+This is buffer decoding, not audible/visible rendering, renderer preroll discard,
+continuous ExoPlayer playback, exact seek acknowledgement or aggregate memory proof.
+
+AM9 192.168.10.60:5555 stayed Asleep at before/after checks. No activity, wake,
+power/CEC/settings/account/recording/provider operation occurred. Only temporary
+validation packages were installed and both were successfully removed. Reverse
+list was empty; no reverse mapping was changed. The prototype was not replaced.
+The target APK has no permissions; instrumentation has only REORDER_TASKS.
+
+Final whole-app Kotlin compilation passed in 498s (8m18s). All 317 IPTV JVM
+cases across 38 suites passed with zero failures/errors/skips (10.676s test /
+286s build). Final headless harness build passed in 24s. These host suites overlap
+prior core/JVM evidence. Source/components/APKs/logs and fresh XML hashes were
+verified in the device validation report. No task build remains running.
+
+Source/player/renderer binding through one admission and actual shared transport,
+renderer discard/seek acknowledgement, measured aggregate memory and production
+storage margins remain the next gates. Durable recording and remaining provider /
+UX work stay outstanding; controls remain disabled. Exact source/APK/log/build
+results are recorded in IPTV-EPOCH-DEVICE-VALIDATION-20261006.json.
+
+## Owned epoch-source checkpoint - historical validated continuation
 
 From clean ed528c6, added actual BaseMediaSource/OwnedCaptureConsumer over the
 incremental reader, one metadata observer and at most one queued/in-flight playback

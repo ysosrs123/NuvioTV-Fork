@@ -1,0 +1,226 @@
+{
+  "date": "2026-10-06",
+  "timezone": "Australia/Brisbane",
+  "branch": "codex/iptv",
+  "baseCommit": "81540e154629b9cec2f4afc6d64157bad2c60e47",
+  "status": "PASS_APP_JVM_AND_FOCUSED_AM9_CAPTURE_CODEC_FIXTURES",
+  "sourceSha256": {
+    "app/src/main/java/com/nuvio/tv/data/iptv/LocalTsSegmentExtractor.kt": "4da3d90d4f3bc43a6f8bc37318ef3bf837bdfe5f08cb24e859915722e4539617",
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/LocalCaptureSampleStagerAndroidTest.kt": "8376862ea0266d2fed2454244bd8d7b894c0ac0bdc9632c0791256788c1996fb",
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/TsCaptureDecodeAndroidTest.kt": "e5761f12de58acb3e688049a8441390159c19ee5600a98984e7b4d5bccd7563b"
+  },
+  "unchangedComponentSha256": {
+    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureEpochPeriod.kt": "466b72fe7db8b35cbbc4276d80f1594f855d461813e375957205a7d8fbb5fd07",
+    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureEpochMediaSource.kt": "eace1426be91931fb9b9175ddb32763515cf52d18c4b3a3945e1c1b9edd2f934",
+    "app/src/main/java/com/nuvio/tv/data/iptv/CapturePlaybackRefresh.kt": "a6826cc3b58694a9eaa3b8457cc01cad486a8386d7982746a6e3b70f2c85a0e7",
+    "app/src/test/java/com/nuvio/tv/data/iptv/CaptureEpochMediaSourceOwnerTest.kt": "cd10065c4d4cff634e29e10f46085ce170f4d130fe16dd510df0c948719f4895",
+    "app/src/test/java/com/nuvio/tv/data/iptv/CapturePlaybackRefreshTest.kt": "fd7d6345066a01763b185d5282bba3d6eb5c1352736cc24360d20fc3412a5284",
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/CaptureEpochMediaSourceAndroidTest.kt": "c451d9058045a6eb71075a3aa22fe0293aecaeee40281b8afdbf5d25cbb34f54",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IncrementalCaptureReaderConsumer.kt": "d3cb2c03c270deff1af00298dad0af5b173b62661520e92962434703ae76d819",
+    "app/src/test/java/com/nuvio/tv/data/iptv/CaptureEpochPeriodTest.kt": "4f7856255528cb8cb7572cb68b7248456af3c98da9798962f0e358a17aa044f5",
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/CaptureEpochPeriodAndroidTest.kt": "85e417b9025a8f1e438eda0c13fada700d10e1a4dba64f5a08ce7bbae89e85e5",
+    "app/src/main/java/com/nuvio/tv/core/iptv/SharedCaptureRuntime.kt": "3706bf8554e82f8fb891aaf6d56c56557eb897e5903b7fb78cc9a5cb44cc59fb",
+    "app/src/main/java/com/nuvio/tv/core/iptv/SegmentCaptureTransport.kt": "3f149711c7253a4a31ea782a145563f95a800a2b3803329c6d208561055b3e8e",
+    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureSampleBatchQueue.kt": "e3fc22c7068992e4c6ca4a23e2d10d1a586bde004b3ffacb26f9aca8b96bd594",
+    "app/src/test/java/com/nuvio/tv/core/iptv/SharedCaptureRuntimeTest.kt": "46181ee3b23566a0ec92da713a0ad3d56d05c752ff7728331e0eb13086da7a90",
+    "app/src/test/java/com/nuvio/tv/core/iptv/SegmentCaptureTransportTest.kt": "5b37c3d09b201e3c6dc8228c17c2e1f678767659ad4f37e39820f17f1d81a343",
+    "app/src/test/java/com/nuvio/tv/data/iptv/IncrementalCaptureReaderConsumerTest.kt": "25724d0bf7d65460ccad2099ac0ee3f0a0bfacd2cc7457bb12196665d5b44676",
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/IncrementalCaptureReaderConsumerAndroidTest.kt": "5b71ff412669f3b926cef99961bc8146d3bbe9b17619f7d4a0b8b0de8ddb0e04",
+    "app/src/main/java/com/nuvio/tv/core/iptv/CaptureSampleLoadCursor.kt": "e77fb4b9b3c4834488372ea8219839b67aa4eadeadc5f1c46f83ecf6e2ee6fa1",
+    "app/src/main/java/com/nuvio/tv/core/iptv/CaptureSampleTimeline.kt": "61cb6748b0cfa73ff2a55b6dd0579c847843ff48f715fabcd53982e1569acba6",
+    "app/src/main/java/com/nuvio/tv/core/iptv/CaptureTsInspectionIndex.kt": "831118a24337b135056d43cbad1eb802f351b88afb2a8a8c09006940aa784308",
+    "app/src/main/java/com/nuvio/tv/data/iptv/LocalCaptureSampleStager.kt": "b444ff383ebfc3a6d549d6e819604ccd8a05a208742c0e45d130a454882a885a",
+    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureMedia3Timeline.kt": "0c551fb13161dcdb25bb01c0106e3b53515f89963847c58c53d8aa9175b96d18",
+    "app/src/main/java/com/nuvio/tv/data/iptv/PinnedCaptureSegmentPeriod.kt": "236daec9a47f86d33d5d90109334429d6c59107f06f365fd093ad29e64a3e813",
+    "app/src/main/java/com/nuvio/tv/data/iptv/PinnedCaptureReaderConsumer.kt": "0cbc070dcda8d4811dca98ddb6689eb01b6ab3f62872ebb226c2f0e883d25728",
+    "tools/iptv-device-tests/build.gradle.kts": "1aaa2addbebc8a6b0a33d7b271b76e6fa00f36a7a1b517061d3d4180c23fe2e8",
+    "tools/iptv-device-tests/src/main/AndroidManifest.xml": "d06598587207600f8cc14518173e4016bf5f58ba13df40bb67c0536386fcfa0f",
+    "app/libs/lib-common-release.aar": "a01729509ff920e273ee696fc2cdf99ec073b9b5dc039c4d8dec72aa61bcb447",
+    "app/libs/lib-extractor-release.aar": "d611a11f7bc6cef11f789c1cae4fe75ab9332a9e393405e98cfa8e147d698316",
+    "app/libs/lib-exoplayer-release.aar": "b4a9e7052a2d9d06fa164f0232cd9bb714ca8fc77ba7f03a2fb4f951fbf374e7",
+    "app/libs/lib-datasource-release.aar": "5375c0ff43784d210a69e7bfc438b9da9b2f42d6fb3b967ddae9b55902c7bf3d"
+  },
+  "initialAndroidRun": {
+    "result": "FAIL_REPRODUCED_SYNTHETIC_ID3_TRACK",
+    "tests": 21,
+    "failures": 12,
+    "seconds": 53.356,
+    "log": "iptv-core/epoch-device-am9-20261006-initial.txt",
+    "apks": {
+      "tools/iptv-device-tests/build/outputs/apk/debug/NuvioIptvDeviceTests-debug.apk": {
+        "bytes": 5478179,
+        "sha256": "2d7630cee64a16075ed1d83c8c47f9350fa33f2f32dfe283271a16d514924f5b"
+      },
+      "tools/iptv-device-tests/build/outputs/apk/androidTest/debug/NuvioIptvDeviceTests-debug-androidTest.apk": {
+        "bytes": 1458878,
+        "sha256": "55e930ebbf2a8395b02848d5551c0b4b5e2093f0fb7527b1f4b8c0b16b09898e"
+      }
+    }
+  },
+  "fix": "Decline the HLS extractor synthetic empty ID3 reader in the scoped local factory. Inspected media remains AVC/AAC-only; strict staging checks and bundled components unchanged.",
+  "intermediateAndroidRun": {
+    "result": "PASS",
+    "tests": 22,
+    "seconds": 7.454,
+    "log": "iptv-core/epoch-device-am9-20261006-id3.txt"
+  },
+  "androidExecution": {
+    "result": "PASS",
+    "tests": 27,
+    "failures": 0,
+    "seconds": 14.665,
+    "log": "iptv-core/epoch-device-am9-20261006-final.txt",
+    "serial": "192.168.10.60:5555",
+    "powerBefore": "Asleep",
+    "powerAfter": "Asleep",
+    "powerAfterCleanup": "Asleep",
+    "classes": {
+      "LocalCaptureSampleStagerAndroidTest": 7,
+      "CaptureEpochMediaSourceAndroidTest": 2,
+      "CaptureEpochPeriodAndroidTest": 2,
+      "IncrementalCaptureReaderConsumerAndroidTest": 2,
+      "CaptureSampleBatchQueueAndroidTest": 3,
+      "PinnedCaptureReaderConsumerAndroidTest": 2,
+      "PinnedCaptureSegmentPeriodAndroidTest": 2,
+      "AndroidCaptureSpaceProbeTest": 2,
+      "TsCaptureDecodeAndroidTest": 5
+    },
+    "cleanup": "Both task-owned validation packages successfully uninstalled; package paths absent; reverse list empty. No activity/wake/power/CEC/settings/accounts/recordings/provider operations. Prototype preserved."
+  },
+  "normalizedDecode": {
+    "videoCodec": "c2.amlogic.avc.decoder",
+    "audioCodec": "c2.android.aac.decoder",
+    "videoSamples": [
+      50,
+      50,
+      50
+    ],
+    "audioSamples": [
+      95,
+      94,
+      94
+    ],
+    "videoFirstUs": [
+      0,
+      2000000,
+      4000000
+    ],
+    "audioFirstUs": [
+      -21333,
+      2005333,
+      4010667
+    ],
+    "inputOutputPts": "exact agreement for every sample",
+    "log": "iptv-core/epoch-device-codec-20261006.txt",
+    "scope": "Fresh headless buffer codecs per track/segment; no ExoPlayer renderer, audio sink or display. Also reran unchanged raw-PTS and HLS in-process transport/codec cases."
+  },
+  "androidHarnessBuild": {
+    "result": "PASS",
+    "seconds": 24,
+    "log": "iptv-core/epoch-device-harness-final-20261006.log",
+    "apks": {
+      "tools/iptv-device-tests/build/outputs/apk/debug/NuvioIptvDeviceTests-debug.apk": {
+        "bytes": 5478179,
+        "sha256": "4b499f74242e16c4ec1720a157f403f5db96740b4754423b3f054d37e7136531"
+      },
+      "tools/iptv-device-tests/build/outputs/apk/androidTest/debug/NuvioIptvDeviceTests-debug-androidTest.apk": {
+        "bytes": 1458878,
+        "sha256": "170c823ed1394c6938608dd107ecdc7380efc50673fcc5eb91e8ba63835480a5"
+      }
+    },
+    "targetPermissions": [],
+    "instrumentationPermissions": [
+      "android.permission.REORDER_TASKS"
+    ],
+    "permissionsLog": "iptv-core/epoch-device-permissions-20261006.txt"
+  },
+  "priorBuilds": [
+    {
+      "seconds": 44,
+      "log": "iptv-core/epoch-device-harness-id3-20261006.log"
+    },
+    {
+      "seconds": 24,
+      "log": "iptv-core/epoch-device-harness-normalized-20261006.log",
+      "note": "Superseded by correction of new fixture segment end-time argument before execution."
+    }
+  ],
+  "notEstablished": [
+    "Actual admitted ExoPlayer/renderer integration through one admission and shared transport",
+    "Renderer preroll discard, continuous playback, pending seek/render acknowledgement, audibility or visible rendering",
+    "Measured aggregate transient/Java/native/graphics/decoder memory or production physical storage margins",
+    "Durable recording/services/schedules/internal/USB/SMB and remaining provider/grouping/multiview/UX scope"
+  ],
+  "overlap": "The 21/22/27 device runs overlap; raw and normalized decode reuse the same media. Do not sum with JVM/core suites.",
+  "validatedAtUtc": "2026-10-05T22:17:22.195682+00:00",
+  "retainedLogsSha256": {
+    "epoch-device-am9-20261006-final.txt": "2af5f810c9ad4a0c3e328a6a6cf1f79e0bcdeeedac12967dd4ae0694ccfefce5",
+    "epoch-device-am9-20261006-id3.txt": "4007f16a10ba47914ef9a0fdfc09812fd70148bf35dd96997ac6bba24cd13aa7",
+    "epoch-device-am9-20261006-initial.txt": "a31bdb4e2a1dd36976da1d57e1d8b89a8ba533e269327f0d72a039f70ccedc7c",
+    "epoch-device-cleanup-20261006.txt": "88e7a515e7af16eb785cf0901f08a0374a24252042f16aec978d0a31e59d3412",
+    "epoch-device-codec-20261006.txt": "80de4fe7edd7e9afeaf0a3460edac5ae7789c5b52456ecb8bb0e462d66d2dad0",
+    "epoch-device-harness-final-20261006.log": "8920bd5de4156fd358e284502925f82c854962c10fc1b083625e26bce63b7327",
+    "epoch-device-harness-id3-20261006.log": "8b9400cd3b2e7cf43170d2ee7dc5fb65cf784591a194ba1ca5616971841fb4b0",
+    "epoch-device-harness-normalized-20261006.log": "8920bd5de4156fd358e284502925f82c854962c10fc1b083625e26bce63b7327",
+    "epoch-device-permissions-20261006.txt": "ea59b6f52d2347809c477c265e43bf2a6bd66c755eed27bdf5b0cfe24a476c6d",
+    "epoch-device-full-compile-20261006.log": "b993569b6a7c89a52e93385d9f251e27434a4f857ba120f7694474da8063adcc",
+    "epoch-device-full-jvm-20261006.log": "662120eb28b968b1575ab2a020cfb58a062b72f35d9e48aec521722d5ca70276"
+  },
+  "fullAppCompile": {
+    "result": "PASS",
+    "seconds": 498,
+    "log": "iptv-core/epoch-device-full-compile-20261006.log"
+  },
+  "fullJvm": {
+    "result": "PASS",
+    "tests": 317,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "suites": 38,
+    "testSeconds": 10.676,
+    "buildSeconds": 286,
+    "log": "iptv-core/epoch-device-full-jvm-20261006.log",
+    "suiteXmlSha256": {
+      "TEST-com.nuvio.tv.core.iptv.CaptureExtractedSampleTimingTest.xml": "7ea1e71faf02b92f60f933dce3729f0d9ab76735ff7597bcf7e85c9e1a2989b5",
+      "TEST-com.nuvio.tv.core.iptv.CaptureLiveReaderTest.xml": "f1d9d175bca8532f6fa7a4ce41391ba8f788b647c730b3b0659ed55b2eb09db6",
+      "TEST-com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest.xml": "0c34df91676e6b85ffaaf0ed26774409ee3d5080e227825e8eea3f3742f8d3b9",
+      "TEST-com.nuvio.tv.core.iptv.CaptureSampleTimelineTest.xml": "6318bc30ba31d4f8958ddecf4067851a11aa5647530d7c00c40349e9e776d6af",
+      "TEST-com.nuvio.tv.core.iptv.CaptureSeekControllerTest.xml": "c660d597aa8c467d28fbf507e3b0a1078bc4eef50646ed2b1f5c08ecfc706e27",
+      "TEST-com.nuvio.tv.core.iptv.CaptureSegmentStoreTest.xml": "1b13dad0fde26d7d9499928758faef9d45fbd1899b55e2ca3048d60683cb2f62",
+      "TEST-com.nuvio.tv.core.iptv.CaptureSnapshotReaderTest.xml": "f49a014329b35bd5e7bede0f278244b65329af2f1ef7860ad45e3857efffad41",
+      "TEST-com.nuvio.tv.core.iptv.CaptureStoragePolicyTest.xml": "643a09bce2746d01efd3d546566000f88e6ab77b9c81049f4fda0149868cb8ba",
+      "TEST-com.nuvio.tv.core.iptv.CaptureStoreConcurrencyTest.xml": "46d08eee1e8b60870292a4a17ce83440ae9bfe32a3efef3039247cbf2e650498",
+      "TEST-com.nuvio.tv.core.iptv.CaptureTsInspectionIndexTest.xml": "2a7cbc4305d01271d6c90270c909cce346dbfe85bf8041d3c98fed78533073a8",
+      "TEST-com.nuvio.tv.core.iptv.ChannelIdentityTest.xml": "9cc4969f26ab7e1cc177d03b4d2c9189aa004833c44a4a15427cab55b7eff699",
+      "TEST-com.nuvio.tv.core.iptv.GuideInputTest.xml": "4b08e19115846c768019a21a82251669256d4f6e4fc08590f25f2ad6759a44db",
+      "TEST-com.nuvio.tv.core.iptv.GuideMappingTest.xml": "d061fcfdd269779f773ab97704ad40ded1718b17d1dff8e94e6a4d33ec67f35b",
+      "TEST-com.nuvio.tv.core.iptv.HlsCapturePlaylistTest.xml": "e5bc22c1e5216e104834f9a7c9ad9874321487ef71f68a8c17fdcfc2cec9be25",
+      "TEST-com.nuvio.tv.core.iptv.HlsCaptureSegmentSourceTest.xml": "cb4cf377bf906bab8f80801a050b81580aa55010e0e089a214491ae3089f3a59",
+      "TEST-com.nuvio.tv.core.iptv.LivePlaybackRuntimeTest.xml": "56f150d096c8409d058392832928075b8f1c4cdba8761e0f4b3d2c6f0f6e2567",
+      "TEST-com.nuvio.tv.core.iptv.LiveSessionAdmissionTest.xml": "ac555c3fb9cbb2f2c12a963ed1c2f8c594ad3ff44c54b3560486db42af33bd7b",
+      "TEST-com.nuvio.tv.core.iptv.LiveTelemetryTest.xml": "b63978656b15c1d885f9ca815099effde2eb81c9cd78790ca7fb0f86ea678301",
+      "TEST-com.nuvio.tv.core.iptv.PlaybackPurposeBoundaryTest.xml": "24a72ce5f918a41dde5af80f33d6826167d92e3fe3fc0ce8cc1b749cbac95e47",
+      "TEST-com.nuvio.tv.core.iptv.PlaylistCatalogueTest.xml": "ef78afc6d10c6a9c205826891f332c12b6cf71c7b0bc184ca28adaaa55d040c5",
+      "TEST-com.nuvio.tv.core.iptv.SegmentCaptureTransportTest.xml": "520dccbc129baaa9cb209d74a7ade51929f52e21dedb80880699e5c116cd57f9",
+      "TEST-com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest.xml": "10ef3e5478ddfd288d43e8ca624e0ac04a6cde991b01b14efd89468276b62f63",
+      "TEST-com.nuvio.tv.core.iptv.TsCaptureInspectorTest.xml": "99c8ffef2ba50e1fc4a8922de4375847883e1c87ac524fcf551c72892449b1de",
+      "TEST-com.nuvio.tv.core.iptv.XmlTvGuideTest.xml": "3606bd76bf2084dd353d374b59aedb5f2072e38c231491925f1ad1cffb1f71a1",
+      "TEST-com.nuvio.tv.core.iptv.XtreamCatalogueTest.xml": "83112262afc240a6fa889c89ba7675ae8c4fbe902d043b2d99f6d665d59cb2ef",
+      "TEST-com.nuvio.tv.data.iptv.CaptureEpochMediaSourceOwnerTest.xml": "c17a73b0a1834af6f4ec199c182e594c5927d7a59549e4c85030732732bd1a0d",
+      "TEST-com.nuvio.tv.data.iptv.CaptureEpochPeriodTest.xml": "c29713df810a8dca69d9314bb31b7766696172fcc30f0d23e923a4e9442dd1a5",
+      "TEST-com.nuvio.tv.data.iptv.CaptureMedia3TimelineTest.xml": "d197e489718403559a6704a9b9cab4c70e372658db6c63b662d1cd9468d2ef50",
+      "TEST-com.nuvio.tv.data.iptv.CapturePlaybackRefreshTest.xml": "5833af0a80cd7abc82eb84ce506cad4f4a2e13f6793eb5750e0bd2a822ec4601",
+      "TEST-com.nuvio.tv.data.iptv.CaptureSampleBatchQueueTest.xml": "f5710ad4b80f98b29a6306acbf99cd1cac48ccfd0cd40b01ae7daebb4dc6a6c9",
+      "TEST-com.nuvio.tv.data.iptv.CaptureStorageHostTest.xml": "f8770313a998bea56b6d7f1c5e70d5117479a83c3aa86570974e4dcd1747259d",
+      "TEST-com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest.xml": "24aea509bb5c54fbb0f02dc5def1f45114e929dc92add2d0f3c1052b0e82571e",
+      "TEST-com.nuvio.tv.data.iptv.IptvCaptureHttpTest.xml": "9ac894254aeb102887c8d0b86851837607c3298a826f12eeb6112c6ab84732d0",
+      "TEST-com.nuvio.tv.data.iptv.IptvGuideClientTest.xml": "fece8a8783bd9727d561d666083d5ee2919493773eaf8db58d6567ff2e5f3c05",
+      "TEST-com.nuvio.tv.data.iptv.IptvMetadataClientTest.xml": "4c47897bd71c3da05fb7049e46a8e71e36c13f74a191e6e98515f8a8a1ded295",
+      "TEST-com.nuvio.tv.data.iptv.IptvXtreamClientTest.xml": "8f2bdea6256501ab289e249e820c0a2fa90844ff2ea4a9cbeb2c85245360c699",
+      "TEST-com.nuvio.tv.data.iptv.PinnedCaptureReaderConsumerTest.xml": "d5a7ab7ff75deaa156e3b41ef4cecf239c4150f422fa6476c30224e430c19e0e",
+      "TEST-com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest.xml": "c12ac3dcd601939ba1fe5b4adcca0ffc7c0243633630e5cc5aea7d3ef20287a8"
+    }
+  },
+  "deviceCleanupObservedAtUtc": "2026-10-05T22:04:15.9300338Z"
+}

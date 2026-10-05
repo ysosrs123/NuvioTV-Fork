@@ -44,6 +44,35 @@ class TsCaptureDecodeAndroidTest {
         }
     }
 
+    @Test fun normalizedStagedSamplesDecodeWithNegativeAudioAndStableSuccessorOffsets() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val directory = File(context.cacheDir, "capture-normalized-${UUID.randomUUID()}")
+        try {
+            CaptureSegmentStore(directory, 2L * 1024 * 1024, 512L * 1024).use { store ->
+                val index = CaptureTsInspectionIndex(store)
+                val timeline = CaptureSampleTimeline(index)
+                for (segment in 0..2) {
+                    store.append(segment * 2000L, (segment + 1) * 2000L, 0, fixture(segment).inputStream())
+                    val window = timeline.accept(index.inspect(segment.toLong()))
+                    index.open(window.proof).use { input ->
+                        val batch = LocalCaptureSampleStager(CaptureSampleStagingLimits(2L * 1024 * 1024)).stage(window, input)
+                        assertEquals(segment * 2000000L, batch.video.samples.first().timeUs)
+                        assertEquals(listOf(-21333L, 2005333L, 4010667L)[segment], batch.audio.samples.first().timeUs)
+                        for (staged in listOf(batch.video, batch.audio)) {
+                            val track = CollectedTrack().also { it.format = staged.format }
+                            staged.samples.forEach { sample ->
+                                val bytes = ByteBuffer.allocate(sample.size)
+                                sample.copyTo(bytes)
+                                track.samples += Sample(sample.timeUs, sample.flags, bytes.array())
+                            }
+                            decode(track, segment)
+                        }
+                    }
+                }
+            }
+        } finally { assertTrue(!directory.exists() || directory.deleteRecursively()) }
+    }
+
     @Test fun platformExtractorSampleCountIsRecordedSeparatelyFromStructuralBounds() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val file = File(context.cacheDir, "ts-entry-${UUID.randomUUID()}.ts")
