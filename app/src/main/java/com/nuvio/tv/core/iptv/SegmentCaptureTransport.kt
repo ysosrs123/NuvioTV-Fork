@@ -22,7 +22,7 @@ interface CaptureSegmentSource {
     suspend fun close(): Boolean
 }
 
-enum class CaptureTransportState { NEW, RUNNING, COMPLETE, BACKPRESSURE, FAILED, CLOSED }
+enum class CaptureTransportState { NEW, RUNNING, COMPLETE, BACKPRESSURE, STORAGE_BLOCKED, FAILED, CLOSED }
 
 /** One pull/append/body at a time, with no queued segments. Store byte limits apply during streaming. */
 class SegmentCaptureTransport(private val store: CaptureSegmentStore, private val source: CaptureSegmentSource,
@@ -55,6 +55,8 @@ class SegmentCaptureTransport(private val store: CaptureSegmentStore, private va
                     } finally { closeBody() }
                 }
                 stateMutable.value = CaptureTransportState.COMPLETE
+            } catch (_: CaptureStorageUnavailable) {
+                stateMutable.value = CaptureTransportState.STORAGE_BLOCKED
             } catch (_: CaptureRetentionBlocked) {
                 stateMutable.value = CaptureTransportState.BACKPRESSURE
             } catch (_: CancellationException) {

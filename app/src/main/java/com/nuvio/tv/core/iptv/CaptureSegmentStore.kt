@@ -21,7 +21,9 @@ class CaptureRetentionBlocked : IOException("Capture retention is pinned")
  * This store does not establish codec/keyframe independence, capture transport or recording policy.
  */
 class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Long,
-    val maxSegmentBytes: Long) : AutoCloseable {
+    val maxSegmentBytes: Long, storagePolicy: CaptureStoragePolicy? = null) : AutoCloseable {
+    private val storageFence: CaptureStorageFence?
+    val minimumStorageOverheadBytes: Long? get() = storageFence?.overhead(MAX_INDEX_BYTES, MAX_SEGMENTS)
     private val channel: FileChannel
     private val lock: FileLock
     private val appendMutex = Any()
@@ -37,9 +39,11 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
         require(!Files.isSymbolicLink(directory.toPath()))
         if (!directory.exists()) check(directory.mkdirs())
         require(directory.isDirectory)
+        storageFence = storagePolicy?.bind(directory)
         val marker = File(directory, "owner-v1")
         if (!marker.exists()) {
             require(directory.listFiles()?.isEmpty() == true) { "Capture directory must be empty" }
+            storageFence?.growth(0, MARKER.toByteArray().size.toLong(), MAX_INDEX_BYTES)
             FileOutputStream(marker).use { it.write(MARKER.toByteArray()); it.fd.sync() }
         }
         require(!Files.isSymbolicLink(marker.toPath()) && marker.readText() == MARKER)
@@ -51,6 +55,20 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
     }
 
     @Synchronized fun snapshot(): List<CaptureSegment> { checkOpen(); return segments.toList() }
+
+    /** Governed admission requires physical observations, margins and allocation/index overhead.
+     * This is an observation fence, never an OS reservation; repeated write checks and I/O still apply.
+     * Legacy direct stores may omit a guard for isolated byte fixtures; runtime sharing cannot.
+     */
+    @Synchronized fun checkStorageReservation(plan: CaptureStorageReservation) {
+        checkOpen()
+        require(plan.retainedBytes == maxRetainedBytes && plan.segmentBytes == maxSegmentBytes)
+        val fence = storageFence ?: throw CaptureStorageUnavailable(CaptureStorageFailure.UNGUARDED)
+        val overhead = requireNotNull(minimumStorageOverheadBytes)
+        if (plan.overheadBytes < overhead) throw CaptureStorageUnavailable(CaptureStorageFailure.RESERVATION_TOO_SMALL)
+        val remaining = Math.addExact(maxRetainedBytes - segments.sumOf { it.bytes }, maxSegmentBytes)
+        fence.admission(remaining, plan.overheadBytes)
+    }
 
     /**
      * Atomically pin a fixed, uninterrupted snapshot starting at an existing segment. New appends
@@ -121,6 +139,7 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
         var committed = false
         try {
             var count = 0L
+            storageFence?.growth(0, maxSegmentBytes, MAX_INDEX_BYTES)
             FileOutputStream(pending).use { out ->
                 val buffer = ByteArray(64 * 1024)
                 while (true) {
@@ -128,12 +147,15 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
                     val read = input.read(buffer, 0, minOf(buffer.size.toLong(), maxSegmentBytes - count + 1).toInt())
                     if (read < 0) break
                     if (read == 0) throw IOException("Capture source made no progress")
-                    count += read
-                    if (count > maxSegmentBytes) throw IOException("Capture segment byte limit")
+                    val nextCount = count + read
+                    if (nextCount > maxSegmentBytes) throw IOException("Capture segment byte limit")
+                    storageFence?.growth(count, nextCount, MAX_INDEX_BYTES)
                     out.write(buffer, 0, read)
+                    count = nextCount
                 }
                 if (count == 0L) throw IOException("Empty capture segment")
                 out.fd.sync()
+                storageFence?.growth(count, count, MAX_INDEX_BYTES)
             }
             synchronized(this) {
                 val keep = segments.toMutableList()
@@ -211,12 +233,14 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
     }
     private fun persist(rows: List<CaptureSegment>, next: Long) {
         val pending = managedFile("index.new")
+        storageFence?.growth(0, MAX_INDEX_BYTES)
         FileOutputStream(pending).use { raw ->
             val out = DataOutputStream(raw)
             out.writeInt(MAGIC); out.writeLong(next); out.writeInt(rows.size)
             rows.forEach { out.writeLong(it.sequence); out.writeLong(it.startMs); out.writeLong(it.endMs); out.writeLong(it.continuity); out.writeLong(it.bytes); out.writeUTF(it.fileName) }
             out.flush(); raw.fd.sync()
         }
+        storageFence?.growth(0, 0)
         Files.move(pending.toPath(), index.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
     }
     private fun cleanOrphans() {

@@ -1,9 +1,21 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 6 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: transactional sample staging, shared extracted PTS and Media3 timeline metadata, following retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
+Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: physical capture storage fences and governed admission, following sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
 
 ## Current checkpoint summary
+
+- Added fresh physical free-space, allocation-unit and volume checks with explicit
+  caller margins and worst-case file/index overhead. Governed capture sharing now
+  rejects unguarded or under-reserved stores before starting transport/consumers.
+  Per-write and index-publication checks preserve committed media and stop capture
+  without retries; failed joins preserve existing recording consumers and retain
+  reservations through uncertain closure. These checks are not OS preallocation.
+- Final app compile, **191 core tests**, **244 IPTV JVM tests** (30 suites, zero
+  failures/errors/skips) and final Android harness builds pass. A real host
+  FileStore fixture ran in a small task temporary directory. Two Android statvfs
+  fixtures remain unexecuted; no device or provider commands occurred. Device
+  margins/capacity, USB/SMB and power-loss durability are not newly certified.
 
 - Added bounded transactional compressed-sample staging: output stays private until
   pinned length/hash verification, supported formats, sample counts/keyframe/PTS
@@ -29,7 +41,7 @@ Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: transactional sample 
 - New internal components inspect a bounded AVC/AAC MPEG-TS profile, expose explicit local DATA/WAITING/ENDED/EXPIRED/DISCONTINUITY/STOPPED states, and allow local reads/pins during slow capture input. Pins are rechecked at publication.
 - Reproduced a missing final video sample in AM9's platform extractor and the shipped Media3 HLS extractor. A scoped, hash-bound local extraction bridge restores the final sample for inspected complete segments; bundled libraries and dependency versions are unchanged.
 - Preceding TS entry checks: **150 core JVM tests** and **214 AM9 tests** passed. Three independent segments decoded all 50 video frames each and 95/94/94 audio frames. Real capture/store/local-read integration decoded 150 video and 283 audio frames. FFprobe/strict FFmpeg independently agreed. Final full app Kotlin compile, **196 IPTV JVM tests** and the final annotated Android harness build also passed. The 214-test device run precedes only two UnstableApi annotations; final APKs were not reinstalled. Suites overlap.
-- Structural inspection is not a general bitstream safety certificate. Media3 metadata now exists internally; production sample loading/playback, sharing, physical storage margins and durable recording remain unfinished. Pause/timeshift/recording controls remain disabled.
+- Structural inspection is not a general bitstream safety certificate. Media3 metadata now exists internally; production sample loading/playback, sharing and durable recording remain unfinished. Physical observation fences now exist internally; device margins and behavior require validation. Pause/timeshift/recording controls remain disabled.
 
 The preceding HLS milestone:
 
@@ -74,7 +86,7 @@ The preceding HLS milestone:
 - Stalker Portal source adapter and independently validated authentication/channel handling.
 - Complete audio/subtitle preferences and representative rendering checks for subtitles, closed captions, DVB subtitles and teletext. Track-selection UI is implemented; these formats are not all certified.
 - Connect the implemented shared-capture infrastructure to local pause/resume and seekable timeshift; implement durable recording/schedules to internal storage, USB and SMB.
-- Broaden the initial bounded HLS capture adapter, prove decoder-safe entry points, connect the live local reader to an actual Media3 timeline and physical disk/free-space enforcement before enabling capture controls.
+- Broaden the initial bounded HLS capture adapter, prove decoder-safe entry points, connect retained/staged Media3 metadata to actual MediaSource/MediaPeriod/player loading and validate device storage margins/behavior before enabling capture controls.
 - Multiview with an independent source/playlist per pane, shared account groups and aggregate device/provider limits; provider catch-up.
 - AFR/display handoff, integrated VOD/trailer/IPTV resource ownership, full guide grid, Home/Search, source/feed management, all supported locales and appearance/accessibility checks.
 
@@ -91,13 +103,13 @@ The preceding HLS milestone:
 
 ## Change history
 
-196dcf4 ingest/admission; 9122fc6 catalogue/M3U transport; b8e60e9 XMLTV persistence; 84924e3 guide HTTP/cache; 53bd036 bounded browse/mapping; 7283bf5 source forms/profile cleanup; 7ec290a governed live playback; e636438 Xtream setup/HTTP1.0 fix; a9871c7 durable stream format/HLS fallback fix; 0211656 IPTV HUD/document guides/secure redirects/native tracks; 8f1316e bounded capture spool/reader retention/atomic publication; 4c3e0b0 shared capture ownership/sequential ingestion/finite local snapshot; eaa43e5 bounded HLS capture and HTTP closure fencing.
+196dcf4 ingest/admission; 9122fc6 catalogue/M3U transport; b8e60e9 XMLTV persistence; 84924e3 guide HTTP/cache; 53bd036 bounded browse/mapping; 7283bf5 source forms/profile cleanup; 7ec290a governed live playback; e636438 Xtream setup/HTTP1.0 fix; a9871c7 durable stream format/HLS fallback fix; 0211656 IPTV HUD/document guides/secure redirects/native tracks; 8f1316e bounded capture spool/reader retention/atomic publication; 4c3e0b0 shared capture ownership/sequential ingestion/finite local snapshot; eaa43e5 bounded HLS capture and HTTP closure fencing; 43b1dff TS inspection/local extraction bridge; 25395a2 pinned inspection/sample epochs/seek policy; 4606418 transactional staging/shared PTS/Media3 metadata. The current physical-storage checkpoint is described above.
 
 ## Upstream review
 
 Reviewed draft NuvioMedia/NuvioTV PR #3788 at e10c639: reproduced a preview direction-reversal seek error and a live-label delay discrepancy; documented retention/recovery concerns. Not imported. See IPTV-UPSTREAM-PR3788-REVIEW.md. Forthcoming timeshift tests must distinguish RAM load targets, actual playable windows and local capture retention.
 
-## Capture foundation — internal, not yet a playable feature
+## Capture foundation — historical internal milestone
 
 - Added an exclusively owned, bounded segment spool with synced complete-segment/index publication through atomic moves, close/reopen recovery and scoped orphan cleanup. It refuses nonempty unowned directories, unexpected files and managed symlinks. Retained logical bytes, segment sizes/count and index parsing are bounded.
 - Pause/recording anchors and open readers prevent eviction of retained media. Capacity exhaustion reports backpressure; gaps and discontinuities remain separate in actual retained bounds. Cancellation, oversized input and read failure before publication preserve committed data; failed cleanup blocks the next allocation until resolved. Closure is refused while readers/anchors remain.
@@ -108,7 +120,7 @@ Reviewed draft NuvioMedia/NuvioTV PR #3788 at e10c639: reproduced a preview dire
 
 Complete implementation context, reproduction locations, device cleanup state, remaining work and fresh-session instructions are saved in [the handover](IPTV-NEXT-SESSION-HANDOFF-20261005.md). The shared capture continuation builds on `27f78ea`; nothing has been published.
 
-## Shared capture continuation — internal integration components
+## Shared capture continuation — historical internal components
 
 - Added a runtime that owns one producer/store across separate viewer and recording consumers. Closing a viewer leaves remaining consumers running. Uncertain decoder/reader closure retains that consumer's reservation; uncertain producer/store closure retains capture memory, account and full spool storage. Stale consumer tokens cannot close replacement acquisitions. Foreign acquisitions cannot be shared without their actual pipeline.
 - Capture storage admission includes retained bytes, one staged segment and an explicit overhead margin. This remains a logical budget, not measured physical disk usage or a free-space guarantee.
@@ -118,7 +130,7 @@ Complete implementation context, reproduction locations, device cleanup state, r
 - AM9 was not woken. Temporary test packages were removed; pre-existing reverse8765 remains. The installed prototype remains the older HUD build. No new playback, UI, subtitle, document-picker, real-provider, power-loss or USB/SMB validation is claimed.
 - See [the ownership/reader design and remaining integration requirements](IPTV-SHARED-CAPTURE-DESIGN.md) and `IPTV-SHARED-CAPTURE-VALIDATION-20261005.json`.
 
-## HLS capture continuation — bounded protocol ingestion
+## HLS capture continuation — historical protocol milestone
 
 - Added an internal media-playlist parser, sequential HLS capture source and
   dedicated HTTP client. One body is opened at a time; changed or missing media

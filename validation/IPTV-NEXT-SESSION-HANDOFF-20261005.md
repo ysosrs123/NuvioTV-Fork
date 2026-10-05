@@ -20,7 +20,42 @@ host/headless checks overnight; do not wake the TV/AVR or change device settings
 The saved project now opens E:/Codex/NuvioTV/work/NuvioTV-Fork, still the WRONG
 checkout for IPTV. All IPTV source work stays in its separate sibling/branch.
 
-## Sample-staging checkpoint — latest continuation
+## Physical-storage checkpoint — latest continuation
+
+Continued from 460641888181b05cd43ddb058c9c6380785db0fe. Read
+IPTV-STORAGE-FENCE-DESIGN.md and IPTV-STORAGE-FENCE-VALIDATION-20261006.json first.
+Added usable-space/allocation-unit/volume observations, explicit caller margins,
+worst-case file/index overhead and repeated guarded writes. SharedCaptureRuntime
+now refuses unguarded/under-reserved pipelines before transport or consumer start.
+Storage rejection stops capture without retry and preserves last-good rows/pins,
+pending sequence and existing recording consumers. Uncertain closure retains its
+infrastructure lease. Final full app compile, 191 core tests, all 244 IPTV JVM tests
+(30 suites, zero failures/errors/skips) and final Android harness builds pass.
+Exact source/APK hashes, durations and corrected host FileStore/Win32 readings are
+in the report. This JDK reports sector size as blockSize; the host fixture now
+queries actual Windows allocation clusters. Initial sector-based evidence was
+preserved and superseded. Only the host fixture changed after the app/harness
+builds; production/core/Android sources remain identical to those passed builds.
+
+The executed host probe used a small task temporary spool; it does not certify AM9
+capacity or allocation behavior. Two Android statvfs fixtures COMPILE but remain
+UNEXECUTED, as do the previous six sample-staging Android fixtures. No device
+commands, installs, wake/power/CEC/settings/provider/account/recording operations
+occurred here. The previous checkpoint observed AM9 Asleep. This is a fresh-space
+observation fence, not an OS quota/preallocation, universal production margin,
+USB/SMB or power-loss durability certificate. Legacy unguarded direct byte fixtures
+remain compatible but governed runtime sharing refuses them. Keep controls disabled.
+
+Next independent implementation: actual Media3 sample streams/MediaPeriod/loading
+states and explicit seek preroll/discard/acknowledgement; connect owned consumers
+through shared capture admission and confirmed cleanup with measured aggregate
+staging/decoder budgets. Execute new Android staging/probe/normalized-PTS codec
+fixtures only when the authorised device is awake. Durable record-now/services/
+schedules/storage adapters, source/account grouping, Stalker/automatic Xtream EPG,
+multiview/catch-up and Nuvio guide/Home/Search/Original/V2 scope remain outstanding.
+No dependency versions changed. Never overwrite current source with staging copies.
+
+## Sample-staging checkpoint — historical continuation
 
 Continued from 25395a2a36cf8d8d1ab0e8756886542644e67b46. Read
 IPTV-SAMPLE-STAGING-DESIGN.md and IPTV-SAMPLE-STAGING-VALIDATION-20261006.json first.

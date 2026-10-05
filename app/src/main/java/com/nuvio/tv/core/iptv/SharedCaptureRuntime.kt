@@ -106,6 +106,7 @@ class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
         try {
             check(session.pipeline.store.maxRetainedBytes == storage.retainedBytes &&
                 session.pipeline.store.maxSegmentBytes == storage.segmentBytes)
+            session.pipeline.store.checkStorageReservation(storage)
             if (infrastructure != null) session.pipeline.transport.start()
             currentCoroutineContext().ensureActive()
             consumer.handle = createConsumer(session.pipeline.store)

@@ -2,7 +2,28 @@
 
 Updated 6 October 2026, Australia/Brisbane.
 
-## Latest overnight sample-staging checkpoint
+## Latest physical storage checkpoint
+
+On codex/iptv from 4606418, added guarded physical space/unit/volume observations,
+explicit caller margins and allocation/index overhead to capture admission and
+streaming/index publication. Governed runtime sharing rejects unguarded stores;
+storage failures stop without retry while preserving existing consumers and last-
+good media. Final full app compile, 191 core tests, 244 IPTV JVM tests (30 suites,
+zero failures/errors/skips) and final Android harness builds pass. The JVM suite
+also exercised a real host FileStore probe in a small task temporary directory.
+Exact readings, durations/hashes and contract are in IPTV-STORAGE-FENCE-DESIGN.md
+and IPTV-STORAGE-FENCE-VALIDATION-20261006.json.
+
+No device or provider operation occurred. Two new Android statvfs fixtures and
+the previous staging fixtures remain unexecuted after the earlier Asleep observation.
+OS quota/preallocation, validated device margins, USB/SMB and power-loss durability
+remain unestablished. MediaSource/MediaPeriod loading/preroll/governed production
+player integration are still required; controls remain disabled. Next work is
+sample streams/loading/seek acknowledgements, measured aggregate memory/decoder
+and device gates, then durable recording and remaining handoff scope. Temporary
+overnight heartbeat remains active to its 08:00 Brisbane cutoff; older jobs paused.
+
+## Overnight sample-staging checkpoint — historical
 
 Continued on the authoritative sibling codex/iptv from 25395a2. Added bounded,
 transactional compressed-sample staging tied to the pinned inspection proof,

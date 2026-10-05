@@ -9,10 +9,10 @@ import org.junit.rules.TemporaryFolder
 
 class SharedCaptureRuntimeTest {
     @get:Rule val temp = TemporaryFolder()
-    private val admission = LiveSessionAdmission(DeviceAdmissionLimits(2, 1000, 1000))
+    private val admission = LiveSessionAdmission(DeviceAdmissionLimits(2, 1000, 10_000_000))
     private val runtime = SharedCaptureRuntime(admission)
     private val key = AcquisitionKey("account", "one", "ts", 1)
-    private val storage = CaptureStorageReservation(8, 4, 2)
+    private val storage = CaptureStorageReservation(8, 4, 2_200_000)
     private val viewer = ConsumerReservation(LiveConsumerRole.VIEWER, 1, 20)
     private val recorder = ConsumerReservation(LiveConsumerRole.RECORDING, 0, 5)
     private class Transport : OwnedCaptureTransport {
@@ -30,7 +30,8 @@ class SharedCaptureRuntimeTest {
         override fun start() { starts++; if (failStart) error("fixture") }
         override suspend fun close(): Boolean { closes++; return closing() }
     }
-    private fun pipeline(transport: Transport) = CapturePipeline(CaptureSegmentStore(temp.newFolder(), 8, 4), transport)
+    private fun pipeline(transport: Transport) = CapturePipeline(CaptureSegmentStore(temp.newFolder(), 8, 4,
+        CaptureStoragePolicy(1, CaptureSpaceProbe { CaptureSpaceReading(100_000_000, 1, "fixture") })), transport)
     private suspend fun join(pipeline: CapturePipeline, reservation: ConsumerReservation = viewer,
         consumer: OwnedCaptureConsumer = Consumer()): CaptureJoinResult =
         runtime.join(key, 10, 3, storage, reservation, { pipeline }, { consumer })
@@ -41,7 +42,7 @@ class SharedCaptureRuntimeTest {
         val view = token(join(pipeline)); val record = token(join(pipeline, recorder))
         assertEquals(1, transport.starts)
         assertEquals(1, admission.snapshot().upstreamsByAccount["account"])
-        assertEquals(14L, admission.snapshot().storageBytes)
+        assertEquals(storage.totalBytes, admission.snapshot().storageBytes)
         assertEquals(38L, admission.snapshot().memoryBytes)
         assertTrue(runtime.close(view))
         assertEquals(0, transport.closes)
@@ -72,7 +73,7 @@ class SharedCaptureRuntimeTest {
         assertFalse(runtime.close(token(join(pipeline))))
         assertEquals(0, admission.snapshot().decoders)
         assertEquals(13L, admission.snapshot().memoryBytes)
-        assertEquals(14L, admission.snapshot().storageBytes)
+        assertEquals(storage.totalBytes, admission.snapshot().storageBytes)
         assertEquals(CaptureJoinResult.Closing, join(pipeline))
         val denied = admission.acquire(key.copy(channelId = "two"), 10, recorder)
         assertEquals(AdmissionDenial.ACCOUNT_LIMIT, (denied as LiveAdmissionResult.Denied).reason)
@@ -87,7 +88,7 @@ class SharedCaptureRuntimeTest {
         pipeline.store.append(0, 1000, 0, ByteArrayInputStream(byteArrayOf(1, 2)))
         val reader = pipeline.store.openSnapshotFrom(0)
         assertFalse(runtime.close(view))
-        assertEquals(14L, admission.snapshot().storageBytes)
+        assertEquals(storage.totalBytes, admission.snapshot().storageBytes)
         assertEquals(1, reader.read())
         reader.close()
         assertTrue(runtime.retryClosing())
@@ -193,5 +194,36 @@ class SharedCaptureRuntimeTest {
         closed = true
         assertTrue(runtime.closeAll())
         assertEquals(0, admission.snapshot().consumers)
+    }
+    @Test fun unguardedPipelineCannotOpenUpstreamOrConstructAConsumer() = runBlocking {
+        val transport=Transport()
+        val pipeline=CapturePipeline(CaptureSegmentStore(temp.newFolder(),8,4),transport)
+        val result=runtime.join(key,10,3,storage,viewer,{ pipeline },{ error("Cannot construct") })
+        assertEquals(CaptureJoinResult.Failed(),result); assertEquals(0,transport.starts)
+        assertEquals(0,admission.snapshot().consumers); assertEquals(1,transport.closes)
+    }
+
+    @Test fun physicalDenialRetainsInfrastructureUntilTheUnstartedTransportConfirmsClosure() = runBlocking {
+        var usable=100_000_000L
+        val transport=Transport().apply { confirmed=false }
+        val pipeline=CapturePipeline(CaptureSegmentStore(temp.newFolder(),8,4,
+            CaptureStoragePolicy(1,CaptureSpaceProbe { CaptureSpaceReading(usable,1,"fixture") })),transport)
+        usable=0
+        assertEquals(CaptureJoinResult.Failed(),runtime.join(key,10,3,storage,viewer,{ pipeline },{ error("Cannot construct") }))
+        assertEquals(0,transport.starts); assertEquals(0,admission.snapshot().decoders)
+        assertEquals(storage.totalBytes,admission.snapshot().storageBytes)
+        assertEquals(CaptureJoinResult.Closing,join(pipeline))
+        transport.confirmed=true; assertTrue(runtime.retryClosing()); assertEquals(0L,admission.snapshot().storageBytes)
+    }
+    @Test fun storageDenialOfAnotherConsumerDoesNotStopTheExistingRecording() = runBlocking {
+        var usable=100_000_000L
+        val transport=Transport()
+        val pipeline=CapturePipeline(CaptureSegmentStore(temp.newFolder(),8,4,
+            CaptureStoragePolicy(1,CaptureSpaceProbe { CaptureSpaceReading(usable,1,"fixture") })),transport)
+        val record=token(join(pipeline,recorder)); usable=0
+        assertEquals(CaptureJoinResult.Failed(),runtime.join(key,10,3,storage,viewer,{ error("No new pipeline") },{ error("No consumer") }))
+        assertEquals(1,transport.starts); assertEquals(0,transport.closes)
+        assertEquals(2,admission.snapshot().consumers); assertEquals(0,admission.snapshot().decoders)
+        usable=100_000_000; assertTrue(runtime.close(record)); assertEquals(0,admission.snapshot().consumers)
     }
 }
