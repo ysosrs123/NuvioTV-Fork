@@ -2357,6 +2357,8 @@
     <string name="audio_surround_mode_auto_desc">Leitet die Formate durch, die Ihr Audiosystem laut eigener Meldung decodieren kann, und decodiert den Rest in der App.</string>
     <string name="audio_surround_mode_manual">Manuell</string>
     <string name="audio_surround_mode_manual_desc">Pro Format festlegen, ob Ihr Audiosystem es decodieren kann. Verwenden, wenn die automatische Meldung falsch ist.</string>
+    <string name="audio_surround_tv_arc_soundbar">Ton läuft über den Fernseher zu einer Soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Auto sendet Formate, die die Soundbar nicht verarbeiten kann, als Dolby Digital 5.1 und anderen decodierten Ton als Stereo. Dolby Digital und Dolby Digital Plus werden unverändert durchgeleitet.</string>
     <string name="audio_surround_allow_ac3">Receiver kann Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Aus decodiert AC-3 in der App zu PCM. Nur ausschalten, wenn Receiver oder TV AC-3 nicht decodieren kann.</string>
     <string name="audio_surround_allow_eac3">Receiver kann Dolby Digital Plus (E-AC-3)</string>

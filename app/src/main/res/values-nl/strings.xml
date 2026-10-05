@@ -3229,6 +3229,8 @@
     <string name="audio_surround_mode_auto_desc">Geeft de formaten door die je audiosysteem zegt te kunnen decoderen en decodeert de rest in de app.</string>
     <string name="audio_surround_mode_manual">Handmatig</string>
     <string name="audio_surround_mode_manual_desc">Kies per formaat of je audiosysteem het kan decoderen. Gebruik dit als de automatische melding niet klopt.</string>
+    <string name="audio_surround_tv_arc_soundbar">Geluid gaat via de tv naar een soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automatisch zet formaten die de soundbar niet aankan om naar Dolby Digital 5.1 en stuurt ander gedecodeerd geluid als stereo. Dolby Digital en Dolby Digital Plus worden ongewijzigd doorgegeven.</string>
     <string name="audio_surround_allow_ac3">Receiver kan Dolby Digital (AC-3) aan</string>
     <string name="audio_surround_allow_ac3_sub">Uit decodeert AC-3 in de app naar PCM. Zet alleen uit als je receiver of tv AC-3 niet kan decoderen.</string>
     <string name="audio_surround_allow_eac3">Receiver kan Dolby Digital Plus (E-AC-3) aan</string>

@@ -3120,6 +3120,8 @@
     <string name="audio_surround_mode_auto_desc">يمرّر الصيغ التي يفيد نظامك الصوتي بأنه يفكّ ترميزها، ويفكّ ترميز الباقي داخل التطبيق.</string>
     <string name="audio_surround_mode_manual">يدوي</string>
     <string name="audio_surround_mode_manual_desc">حدّد لكل صيغة هل يستطيع نظامك الصوتي فكّ ترميزها. استخدمه عندما يكون التقرير التلقائي خاطئاً.</string>
+    <string name="audio_surround_tv_arc_soundbar">الصوت يمر عبر التلفزيون إلى مكبر الصوت الشريطي (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">في الوضع «تلقائي» تُرسَل الصيغ التي لا يقبلها مكبر الصوت الشريطي بصيغة Dolby Digital 5.1، وبقية الصوت المفكوك ترميزه كصوت ستيريو. وتُمرَّر Dolby Digital و Dolby Digital Plus كما هي دون تغيير.</string>
     <string name="audio_surround_allow_ac3">مستقبل يدعم Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">عند التعطيل يُفكّ ترميز AC-3 إلى PCM داخل التطبيق. عطّله فقط إذا كان المستقبل أو التلفاز لا يفكّ ترميز AC-3.</string>
     <string name="audio_surround_allow_eac3">مستقبل يدعم Dolby Digital Plus (E-AC-3)</string>

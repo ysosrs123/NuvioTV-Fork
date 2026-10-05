@@ -3447,6 +3447,8 @@
     <string name="audio_surround_mode_auto_desc">Ses sisteminizin çözebildiğini bildirdiği formatları doğrudan aktarır, gerisini uygulamada çözer.</string>
     <string name="audio_surround_mode_manual">Manuel</string>
     <string name="audio_surround_mode_manual_desc">Ses sisteminizin çözebildiği formatları tek tek seçin. Otomatik bildirim yanlış olduğunda bunu kullanın.</string>
+    <string name="audio_surround_tv_arc_soundbar">Ses TV üzerinden soundbar\'a gider (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Otomatik, soundbar\'ın desteklemediği formatları Dolby Digital 5.1 olarak, çözülmüş diğer sesleri ise stereo olarak gönderir. Dolby Digital ve Dolby Digital Plus değiştirilmeden doğrudan aktarılır.</string>
     <string name="audio_surround_allow_ac3">Dolby Digital (AC-3) destekli alıcı</string>
     <string name="audio_surround_allow_ac3_sub">Kapalıyken AC-3 uygulamada PCM\'e çözülür. Yalnızca alıcınız veya TV\'niz AC-3 çözemiyorsa kapatın.</string>
     <string name="audio_surround_allow_eac3">Dolby Digital Plus (E-AC-3) destekli alıcı</string>

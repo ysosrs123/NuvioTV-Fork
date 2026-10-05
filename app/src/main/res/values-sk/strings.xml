@@ -3348,6 +3348,8 @@
     <string name="audio_surround_mode_auto_desc">Formáty, ktoré zvukový systém hlási ako podporované, posiela bez zmeny a ostatné dekóduje v aplikácii.</string>
     <string name="audio_surround_mode_manual">Manuálne</string>
     <string name="audio_surround_mode_manual_desc">Pri každom formáte zvoľte, či ho zvukový systém vie dekódovať. Použite, keď je automatické hlásenie nesprávne.</string>
+    <string name="audio_surround_tv_arc_soundbar">Zvuk ide cez TV do soundbaru (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automaticky posiela formáty, ktoré soundbar nezvláda, ako Dolby Digital 5.1 a ostatný dekódovaný zvuk ako stereo. Dolby Digital a Dolby Digital Plus posiela bez zmeny.</string>
     <string name="audio_surround_allow_ac3">Prijímač zvláda Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Vypnuté dekóduje AC-3 na PCM v aplikácii. Vypnite len vtedy, keď prijímač alebo TV nevie AC-3 dekódovať.</string>
     <string name="audio_surround_allow_eac3">Prijímač zvláda Dolby Digital Plus (E-AC-3)</string>

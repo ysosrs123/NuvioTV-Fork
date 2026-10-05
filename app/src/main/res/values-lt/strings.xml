@@ -1087,6 +1087,8 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     <string name="audio_surround_mode_auto_desc">Tiesiogiai perduoda formatus, kuriuos jūsų garso sistema praneša galinti dekoduoti, o kitus dekoduoja programoje.</string>
     <string name="audio_surround_mode_manual">Rankinis</string>
     <string name="audio_surround_mode_manual_desc">Kiekvienam formatui pasirinkite, ar jūsų garso sistema gali jį dekoduoti. Naudokite, kai automatinė ataskaita klaidinga.</string>
+    <string name="audio_surround_tv_arc_soundbar">Garsas eina per televizorių į garso juostą (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automatinis siunčia formatus, kurių garso juosta nepriima, kaip Dolby Digital 5.1, o kitą dekoduotą garsą kaip stereo. Dolby Digital ir Dolby Digital Plus perduodami tiesiogiai, nepakeisti.</string>
     <string name="audio_surround_allow_ac3">Imtuvas palaiko Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Išjungus AC-3 dekoduojamas į PCM programoje. Išjunkite tik jei imtuvas ar televizorius negali dekoduoti AC-3.</string>
     <string name="audio_surround_allow_eac3">Imtuvas palaiko Dolby Digital Plus (E-AC-3)</string>

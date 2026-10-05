@@ -2259,6 +2259,8 @@
     <string name="audio_surround_mode_auto_desc">Nespremenjene pošlje formate, za katere zvočni sistem sporoči, da jih zna dekodirati, ostale dekodira aplikacija.</string>
     <string name="audio_surround_mode_manual">Ročno</string>
     <string name="audio_surround_mode_manual_desc">Za vsak format izberite, ali ga vaš zvočni sistem zna dekodirati. Uporabite, kadar je samodejno poročilo napačno.</string>
+    <string name="audio_surround_tv_arc_soundbar">Zvok gre prek televizorja na zvočno vrstico (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Samodejno pošlje formate, ki jih zvočna vrstica ne sprejme, kot Dolby Digital 5.1, ostali dekodirani zvok pa kot stereo. Dolby Digital in Dolby Digital Plus se pošljeta nespremenjena.</string>
     <string name="audio_surround_allow_ac3">Sprejemnik podpira Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Izklopljeno dekodira AC-3 v PCM v aplikaciji. Izklopite samo, če sprejemnik ali TV ne zna dekodirati AC-3.</string>
     <string name="audio_surround_allow_eac3">Sprejemnik podpira Dolby Digital Plus (E-AC-3)</string>

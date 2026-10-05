@@ -3504,6 +3504,8 @@
     <string name="audio_surround_mode_auto_desc">Przepuszcza formaty, które system audio zgłasza jako obsługiwane, a pozostałe dekoduje w aplikacji.</string>
     <string name="audio_surround_mode_manual">Ręcznie</string>
     <string name="audio_surround_mode_manual_desc">Wybierz dla każdego formatu, czy system audio potrafi go zdekodować. Użyj, gdy automatyczne zgłoszenie jest błędne.</string>
+    <string name="audio_surround_tv_arc_soundbar">Dźwięk idzie przez telewizor do soundbara (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Auto wysyła formaty, których soundbar nie obsługuje, jako Dolby Digital 5.1, a pozostały dekodowany dźwięk jako stereo. Dolby Digital i Dolby Digital Plus są przepuszczane bez zmian.</string>
     <string name="audio_surround_allow_ac3">Amplituner obsługuje Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Wyłączone dekoduje AC-3 do PCM w aplikacji. Wyłącz tylko, jeśli amplituner lub telewizor nie dekoduje AC-3.</string>
     <string name="audio_surround_allow_eac3">Amplituner obsługuje Dolby Digital Plus (E-AC-3)</string>

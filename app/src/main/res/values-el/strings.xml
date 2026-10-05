@@ -3324,6 +3324,8 @@
     <string name="audio_surround_mode_auto_desc">Περνά με passthrough τα φορμά που το ηχοσύστημά σας δηλώνει ότι αποκωδικοποιεί και αποκωδικοποιεί τα υπόλοιπα στην εφαρμογή.</string>
     <string name="audio_surround_mode_manual">Χειροκίνητο</string>
     <string name="audio_surround_mode_manual_desc">Επιλέξτε ανά φορμά αν το ηχοσύστημά σας μπορεί να το αποκωδικοποιήσει. Χρησιμοποιήστε το όταν η αυτόματη αναφορά είναι λάθος.</string>
+    <string name="audio_surround_tv_arc_soundbar">Ο ήχος περνά μέσω της τηλεόρασης σε soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Το Αυτόματο στέλνει ως Dolby Digital 5.1 τα φορμά που το soundbar δεν υποστηρίζει και τον υπόλοιπο αποκωδικοποιημένο ήχο ως στερεοφωνικό. Τα Dolby Digital και Dolby Digital Plus περνούν με passthrough αμετάβλητα.</string>
     <string name="audio_surround_allow_ac3">Receiver με Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Στο Απενεργοποιημένο, το AC-3 αποκωδικοποιείται σε PCM στην εφαρμογή. Απενεργοποιήστε μόνο αν ο receiver ή η τηλεόρασή σας δεν αποκωδικοποιεί AC-3.</string>
     <string name="audio_surround_allow_eac3">Receiver με Dolby Digital Plus (E-AC-3)</string>

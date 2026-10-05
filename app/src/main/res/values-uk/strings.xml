@@ -2820,6 +2820,8 @@
     <string name="audio_surround_mode_auto_desc">Передає без декодування формати, які аудіосистема заявляє як підтримувані, решту декодує в застосунку.</string>
     <string name="audio_surround_mode_manual">Вручну</string>
     <string name="audio_surround_mode_manual_desc">Вкажіть для кожного формату, чи може аудіосистема його декодувати. Використовуйте, якщо автоматичні дані хибні.</string>
+    <string name="audio_surround_tv_arc_soundbar">Звук іде через ТВ на саундбар (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">У режимі «Авто» формати, які саундбар не приймає, надсилаються в Dolby Digital 5.1, а решта декодованого звуку у стерео. Dolby Digital і Dolby Digital Plus передаються без змін.</string>
     <string name="audio_surround_allow_ac3">Ресивер із підтримкою Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Вимк: AC-3 декодується в PCM у застосунку. Вимикайте, лише якщо ресивер або ТВ не декодує AC-3.</string>
     <string name="audio_surround_allow_eac3">Ресивер із підтримкою Dolby Digital Plus (E-AC-3)</string>

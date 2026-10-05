@@ -3431,6 +3431,8 @@
     <string name="audio_surround_mode_auto_desc">מעביר כמות שהם את הפורמטים שמערכת השמע מדווחת שהיא מפענחת, ומפענח את השאר באפליקציה.</string>
     <string name="audio_surround_mode_manual">ידני</string>
     <string name="audio_surround_mode_manual_desc">בחירה לכל פורמט אם מערכת השמע יכולה לפענח אותו. מתאים כשהדיווח האוטומטי שגוי.</string>
+    <string name="audio_surround_tv_arc_soundbar">השמע עובר דרך הטלוויזיה אל מקרן קול (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">במצב אוטומטי נשלחים כ-Dolby Digital 5.1 פורמטים שמקרן הקול אינו תומך בהם, ושמע מפוענח אחר כסטריאו. Dolby Digital ו-Dolby Digital Plus עוברים ללא שינוי.</string>
     <string name="audio_surround_allow_ac3">מקלט תומך Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">כבוי מפענח AC-3 ל-PCM באפליקציה. לכבות רק אם המקלט או הטלוויזיה אינם מפענחים AC-3.</string>
     <string name="audio_surround_allow_eac3">מקלט תומך Dolby Digital Plus (E-AC-3)</string>

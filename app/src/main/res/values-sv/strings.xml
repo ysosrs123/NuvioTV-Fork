@@ -1699,6 +1699,8 @@
     <string name="audio_surround_mode_auto_desc">Skickar vidare de format som ditt ljudsystem uppger att det kan avkoda och avkodar resten i appen.</string>
     <string name="audio_surround_mode_manual">Manuellt</string>
     <string name="audio_surround_mode_manual_desc">Välj per format om ditt ljudsystem kan avkoda det. Använd detta när den automatiska rapporten är fel.</string>
+    <string name="audio_surround_tv_arc_soundbar">Ljudet går via TV:n till en soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Auto gör om format som soundbaren inte klarar till Dolby Digital 5.1 och skickar annat avkodat ljud i stereo. Dolby Digital och Dolby Digital Plus skickas vidare oförändrade.</string>
     <string name="audio_surround_allow_ac3">Receiver med stöd för Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Av avkodar AC-3 till PCM i appen. Stäng bara av om din receiver eller TV inte kan avkoda AC-3.</string>
     <string name="audio_surround_allow_eac3">Receiver med stöd för Dolby Digital Plus (E-AC-3)</string>

@@ -3438,6 +3438,8 @@
     <string name="audio_surround_mode_auto_desc">Truyền thẳng các định dạng mà hệ thống âm thanh báo là giải mã được, phần còn lại giải mã trong ứng dụng.</string>
     <string name="audio_surround_mode_manual">Thủ công</string>
     <string name="audio_surround_mode_manual_desc">Chọn từng định dạng mà hệ thống âm thanh của bạn giải mã được. Dùng khi thông tin tự động bị sai.</string>
+    <string name="audio_surround_tv_arc_soundbar">Âm thanh đi qua TV tới loa thanh (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Tự động chuyển các định dạng loa thanh không nhận được sang Dolby Digital 5.1, còn âm thanh đã giải mã khác thì gửi dưới dạng stereo. Dolby Digital và Dolby Digital Plus được truyền thẳng, không thay đổi.</string>
     <string name="audio_surround_allow_ac3">Bộ thu hỗ trợ Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Khi tắt, AC-3 được giải mã sang PCM trong ứng dụng. Chỉ tắt nếu bộ thu hoặc TV không giải mã được AC-3.</string>
     <string name="audio_surround_allow_eac3">Bộ thu hỗ trợ Dolby Digital Plus (E-AC-3)</string>

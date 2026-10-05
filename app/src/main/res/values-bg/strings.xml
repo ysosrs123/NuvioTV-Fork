@@ -2775,6 +2775,8 @@
     <string name="audio_surround_mode_auto_desc">Предава без декодиране форматите, които аудио системата съобщава, че може да декодира, а останалите декодира в приложението.</string>
     <string name="audio_surround_mode_manual">Ръчно</string>
     <string name="audio_surround_mode_manual_desc">Избери за всеки формат дали аудио системата може да го декодира. Използвай, когато автоматичният отчет е грешен.</string>
+    <string name="audio_surround_tv_arc_soundbar">Звукът минава през телевизора към саундбар (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Автоматично изпраща форматите, които саундбарът не поддържа, като Dolby Digital 5.1, а останалия декодиран звук като стерео. Dolby Digital и Dolby Digital Plus се предават без промяна.</string>
     <string name="audio_surround_allow_ac3">Receiver с поддръжка на Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Изкл: AC-3 се декодира до PCM в приложението. Изключи само ако твоят receiver или телевизор не може да декодира AC-3.</string>
     <string name="audio_surround_allow_eac3">Receiver с поддръжка на Dolby Digital Plus (E-AC-3)</string>

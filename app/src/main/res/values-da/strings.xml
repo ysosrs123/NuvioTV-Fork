@@ -2786,6 +2786,8 @@
     <string name="audio_surround_mode_auto_desc">Sender de formater igennem, som dit lydsystem oplyser, at det kan dekode, og dekoder resten i appen.</string>
     <string name="audio_surround_mode_manual">Manuel</string>
     <string name="audio_surround_mode_manual_desc">Vælg for hvert format, om dit lydsystem kan dekode det. Brug dette, når den automatiske oplysning er forkert.</string>
+    <string name="audio_surround_tv_arc_soundbar">Lyden går via dit TV til en soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automatisk sender formater, som soundbaren ikke understøtter, i Dolby Digital 5.1 og anden dekodet lyd i stereo. Dolby Digital og Dolby Digital Plus sendes igennem uændret.</string>
     <string name="audio_surround_allow_ac3">Receiver med Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Fra dekoder AC-3 til PCM i appen. Slå kun fra, hvis din receiver eller dit TV ikke kan dekode AC-3.</string>
     <string name="audio_surround_allow_eac3">Receiver med Dolby Digital Plus (E-AC-3)</string>

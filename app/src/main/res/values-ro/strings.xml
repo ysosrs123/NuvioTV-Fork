@@ -915,6 +915,8 @@
     <string name="audio_surround_mode_auto_desc">Trimite prin passthrough formatele pe care sistemul tău audio declară că le poate decoda și le decodează pe restul în aplicație.</string>
     <string name="audio_surround_mode_manual">Manual</string>
     <string name="audio_surround_mode_manual_desc">Alege pentru fiecare format dacă sistemul tău audio îl poate decoda. Folosește opțiunea când raportarea automată este greșită.</string>
+    <string name="audio_surround_tv_arc_soundbar">Sunetul trece prin televizor către un soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automat trimite ca Dolby Digital 5.1 formatele pe care soundbarul nu le acceptă, iar restul sunetului decodat ca stereo. Dolby Digital și Dolby Digital Plus sunt trimise prin passthrough, nemodificate.</string>
     <string name="audio_surround_allow_ac3">Receptor compatibil Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Când e dezactivat, aplicația decodează AC-3 în PCM. Dezactivează doar dacă receptorul sau televizorul nu poate decoda AC-3.</string>
     <string name="audio_surround_allow_eac3">Receptor compatibil Dolby Digital Plus (E-AC-3)</string>

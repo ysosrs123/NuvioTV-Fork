@@ -3389,6 +3389,8 @@
     <string name="audio_surround_mode_auto_desc">Prosljeđuje formate za koje audio sustav prijavi da ih može dekodirati, a ostale dekodira u aplikaciji.</string>
     <string name="audio_surround_mode_manual">Ručno</string>
     <string name="audio_surround_mode_manual_desc">Za svaki format odaberi može li ga tvoj audio sustav dekodirati. Koristi kada je automatska prijava pogrešna.</string>
+    <string name="audio_surround_tv_arc_soundbar">Zvuk ide preko TV-a na soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automatski šalje kao Dolby Digital 5.1 formate koje soundbar ne podržava, a ostali dekodirani zvuk kao stereo. Dolby Digital i Dolby Digital Plus prosljeđuju se nepromijenjeni.</string>
     <string name="audio_surround_allow_ac3">Prijemnik podržava Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Isključeno dekodira AC-3 u PCM u aplikaciji. Isključi samo ako prijemnik ili TV ne može dekodirati AC-3.</string>
     <string name="audio_surround_allow_eac3">Prijemnik podržava Dolby Digital Plus (E-AC-3)</string>

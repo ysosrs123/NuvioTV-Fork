@@ -1083,6 +1083,8 @@
     <string name="audio_surround_mode_auto_desc">जो फ़ॉर्मेट आपका ऑडियो सिस्टम डिकोड कर सकता है उन्हें पासथ्रू करता है, बाकी को ऐप में डिकोड करता है।</string>
     <string name="audio_surround_mode_manual">मैनुअल</string>
     <string name="audio_surround_mode_manual_desc">हर फ़ॉर्मेट के लिए चुनें कि आपका ऑडियो सिस्टम उसे डिकोड कर सकता है या नहीं। ऑटोमैटिक रिपोर्ट गलत हो तो इसे इस्तेमाल करें।</string>
+    <string name="audio_surround_tv_arc_soundbar">ऑडियो टीवी से होकर साउंडबार तक जाता है (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">ऑटो उन फ़ॉर्मेट को Dolby Digital 5.1 में भेजता है जिन्हें साउंडबार नहीं ले सकता, और बाकी डिकोड किए गए ऑडियो को स्टीरियो में। Dolby Digital और Dolby Digital Plus बिना बदलाव के पासथ्रू होते हैं।</string>
     <string name="audio_surround_allow_ac3">Dolby Digital (AC-3) सक्षम रिसीवर</string>
     <string name="audio_surround_allow_ac3_sub">बंद होने पर AC-3 ऐप में PCM में डिकोड होता है। तभी बंद करें जब आपका रिसीवर या टीवी AC-3 डिकोड न कर सके।</string>
     <string name="audio_surround_allow_eac3">Dolby Digital Plus (E-AC-3) सक्षम रिसीवर</string>

@@ -2532,6 +2532,8 @@
     <string name="audio_surround_mode_auto_desc">Meneruskan format yang dilaporkan dapat didekode sistem audio Anda, dan mendekode sisanya di aplikasi.</string>
     <string name="audio_surround_mode_manual">Manual</string>
     <string name="audio_surround_mode_manual_desc">Pilih per format apakah sistem audio Anda dapat mendekodenya. Gunakan ini saat laporan otomatis keliru.</string>
+    <string name="audio_surround_tv_arc_soundbar">Suara melewati TV ke soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Otomatis mengubah format yang tidak bisa diterima soundbar menjadi Dolby Digital 5.1, dan mengirim suara hasil dekode lainnya sebagai stereo. Dolby Digital dan Dolby Digital Plus diteruskan apa adanya.</string>
     <string name="audio_surround_allow_ac3">Penerima mendukung Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Saat nonaktif, AC-3 didekode ke PCM di aplikasi. Nonaktifkan hanya jika penerima AV atau TV Anda tidak dapat mendekode AC-3.</string>
     <string name="audio_surround_allow_eac3">Penerima mendukung Dolby Digital Plus (E-AC-3)</string>

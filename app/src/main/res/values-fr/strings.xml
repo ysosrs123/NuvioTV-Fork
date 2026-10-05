@@ -2985,6 +2985,8 @@
     <string name="audio_surround_mode_auto_desc">Transmet en passthrough les formats que votre système audio déclare pouvoir décoder, et décode le reste dans l\'application.</string>
     <string name="audio_surround_mode_manual">Manuel</string>
     <string name="audio_surround_mode_manual_desc">Choisissez pour chaque format si votre système audio peut le décoder. À utiliser quand la détection automatique est erronée.</string>
+    <string name="audio_surround_tv_arc_soundbar">Le son passe par la TV vers une barre de son (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Auto envoie en Dolby Digital 5.1 les formats que la barre de son ne gère pas, et les autres sons décodés en stéréo. Le Dolby Digital et le Dolby Digital Plus sont transmis en passthrough, sans modification.</string>
     <string name="audio_surround_allow_ac3">Récepteur compatible Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Désactivé : l\'AC-3 est décodé en PCM dans l\'application. À désactiver uniquement si votre récepteur ou votre TV ne décode pas l\'AC-3.</string>
     <string name="audio_surround_allow_eac3">Récepteur compatible Dolby Digital Plus (E-AC-3)</string>

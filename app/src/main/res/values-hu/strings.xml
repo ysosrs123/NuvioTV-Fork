@@ -79,6 +79,8 @@
     <string name="audio_surround_mode_auto_desc">Átengedi azokat a formátumokat, amelyeket a hangrendszered a jelentése szerint dekódolni tud, a többit az alkalmazás dekódolja.</string>
     <string name="audio_surround_mode_manual">Kézi</string>
     <string name="audio_surround_mode_manual_desc">Formátumonként megadhatod, hogy a hangrendszered tudja-e dekódolni. Akkor használd, ha az automatikus jelentés hibás.</string>
+    <string name="audio_surround_tv_arc_soundbar">A hang a tévén keresztül jut el a soundbarhoz (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Az Automatikus Dolby Digital 5.1-ben küldi azokat a formátumokat, amelyeket a soundbar nem fogad, a többi dekódolt hangot pedig sztereóként. A Dolby Digitalt és a Dolby Digital Plust változatlanul átengedi.</string>
     <string name="audio_surround_allow_ac3">Dolby Digital (AC-3) képes erősítő</string>
     <string name="audio_surround_allow_ac3_sub">Kikapcsolva az alkalmazás PCM-re dekódolja az AC-3-at. Csak akkor kapcsold ki, ha az erősítőd vagy a tévéd nem tudja dekódolni az AC-3-at.</string>
     <string name="audio_surround_allow_eac3">Dolby Digital Plus (E-AC-3) képes erősítő</string>

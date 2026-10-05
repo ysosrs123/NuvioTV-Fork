@@ -79,6 +79,8 @@
     <string name="audio_surround_mode_auto_desc">音频系统报告可解码的格式直接穿透，其余由应用解码。</string>
     <string name="audio_surround_mode_manual">手动</string>
     <string name="audio_surround_mode_manual_desc">逐个格式选择音频系统能否解码。自动报告有误时使用。</string>
+    <string name="audio_surround_tv_arc_soundbar">声音经电视传到 Soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">自动模式下，Soundbar 不支持的格式以 Dolby Digital 5.1 发送，其他解码后的声音以立体声发送。Dolby Digital 和 Dolby Digital Plus 直接穿透，不做改动。</string>
     <string name="audio_surround_allow_ac3">接收器支持 Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">关闭后由应用将 AC-3 解码为 PCM。仅当接收器或电视无法解码 AC-3 时才关闭。</string>
     <string name="audio_surround_allow_eac3">接收器支持 Dolby Digital Plus (E-AC-3)</string>

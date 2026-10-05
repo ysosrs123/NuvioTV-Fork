@@ -2787,6 +2787,8 @@
     <string name="audio_surround_mode_auto_desc">オーディオ機器がデコードできると報告した形式はパススルーし、それ以外はアプリでデコードします。</string>
     <string name="audio_surround_mode_manual">手動</string>
     <string name="audio_surround_mode_manual_desc">オーディオ機器がデコードできるかを形式ごとに選択します。自動の報告が正しくない場合に使用してください。</string>
+    <string name="audio_surround_tv_arc_soundbar">テレビ経由でサウンドバーに接続（ARC）</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">自動では、サウンドバーが受け付けない形式をDolby Digital 5.1で、それ以外のデコード済み音声をステレオで送ります。Dolby DigitalとDolby Digital Plusはそのままパススルーします。</string>
     <string name="audio_surround_allow_ac3">Dolby Digital（AC-3）対応レシーバー</string>
     <string name="audio_surround_allow_ac3_sub">オフにするとAC-3をアプリでPCMにデコードします。レシーバーやテレビがAC-3をデコードできない場合のみオフにしてください。</string>
     <string name="audio_surround_allow_eac3">Dolby Digital Plus（E-AC-3）対応レシーバー</string>
