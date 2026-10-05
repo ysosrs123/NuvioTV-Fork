@@ -61,6 +61,7 @@ class LibraryRepositoryImpl @Inject constructor(
     private val metaRepository: MetaRepository,
     private val trackingProviders: TrackingLibraryProviderRegistry,
     private val profileManager: ProfileManager,
+    private val genreFill: LibraryGenreFill,
 ) : LibraryRepository {
 
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -109,7 +110,7 @@ class LibraryRepositoryImpl @Inject constructor(
         .flatMapLatest { mode ->
             val provider = mode.providerId?.let(trackingProviders::provider)
             if (provider != null) {
-                provider.items
+                if (provider.providerId == TrackingProviderId.TRAKT) provider.items else genreFill.fill(provider.items)
             } else {
                 libraryPreferences.libraryItems.map { items ->
                     items.map { saved ->

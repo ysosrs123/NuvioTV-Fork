@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.mdblist
 
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -64,12 +65,21 @@ private fun decodeLibraryItem(row: JsonObject, bucket: MdbListItemType? = null):
             backdrop = mdbListImageUrl(row.text("backdrop", "background"), "w1280")
         ),
         description = row.text("description", "overview"),
-        genres = row.arrayValue("genres").mapNotNull {
-            (it as? JsonPrimitive)?.contentOrNull ?: (it as? JsonObject)?.text("name", "slug")
-        }.distinct(),
+        genres = row.genreNames(),
         listedAt = row.timestamp("listed_at", "added_at", "watchlist_at")?.let(::mdbListTimestamp) ?: 0,
         rank = row.integer("rank")?.takeIf { it >= 0 }
     )
+}
+
+private fun JsonObject.genreNames(): List<String> {
+    val names = when (val value = get("genres")?.takeUnless { it is JsonNull } ?: get("genre")) {
+        is JsonArray -> value.mapNotNull {
+            (it as? JsonPrimitive)?.contentOrNull ?: (it as? JsonObject)?.text("name", "title", "slug")
+        }
+        is JsonPrimitive -> value.contentOrNull?.split(',').orEmpty()
+        else -> emptyList()
+    }
+    return names.map(String::trim).filter(String::isNotEmpty).distinct()
 }
 
 internal fun mdbListLibraryType(type: String): MdbListItemType? = when (type.lowercase()) {
