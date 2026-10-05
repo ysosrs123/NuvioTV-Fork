@@ -20,7 +20,45 @@ host/headless checks overnight; do not wake the TV/AVR or change device settings
 The saved project now opens E:/Codex/NuvioTV/work/NuvioTV-Fork, still the WRONG
 checkout for IPTV. All IPTV source work stays in its separate sibling/branch.
 
-## Pinned-period checkpoint — latest continuation
+## Pinned-reader checkpoint — latest continuation
+
+From clean 6842df1, added actual asynchronous OwnedCaptureConsumer staging an exact
+committed/pinned seek into the finite period, identity/cancellation fences and
+retryable worker/cleanup closure. Read IPTV-PINNED-READER-DESIGN.md and its matching
+validation report first. Final full app compile passed in 545s; 191 core tests
+passed in 1.984s; all 265 IPTV JVM tests (32 suites) passed with zero failures,
+errors or skips (7.011s test / 391s build). Final current-source harness builds
+passed in 33s; initial 54s result precedes only explicit Unit fixture return types.
+Exact source/component/APK/log hashes and the twelve-test reader XML hash are saved.
+No build remains running from this phase; unrelated checkout JVM work was untouched.
+
+Twelve new JVM fixtures use real committed pins, inspection, seeks and runtime,
+with SYNTHETIC encoded payloads. Verified cancellation before/after transfer, stale
+and expired loads, blocked sole worker/closer timeouts and failed cleanup retention.
+SharedCaptureRuntime integration preserves reader memory/pins and an independent
+existing recorder until confirmed close; this logical fixture budget and mock
+recorder are not measured production memory or durable recording certification.
+The ready handoff is borrowed, never acknowledges a seek and opens no decoder.
+A future player must fence its commands and confirm renderer shutdown before
+reader closure; this reader cannot confirm decoder/player closure.
+
+Two new real-stager Android reader cases compile but remain unexecuted, as do
+previous staging/period/probe cases. No device/provider commands or installations
+this phase; the prior targeted power query observed AM9 Asleep. Target manifest
+has no permissions or activities. No library/component versions changed; no
+capture controls enabled. Both older automations were checked PAUSED at 03:21
+Brisbane; the temporary overnight heartbeat remains ACTIVE to its cutoff.
+
+Next: actual dynamic MediaSource/epoch-period loading with WAITING vs complete,
+stopped/error/expiry and explicit epoch transitions, then admitted real player /
+renderer ownership, offsets/preroll and exact seek/render acknowledgement. Maintain
+measured aggregate memory/storage/device gates and remaining authorized handoff
+scope. The finite reader/period is NOT live-tail EOF. Finish the current bounded
+operation and pause the temporary automation by 08:00 Brisbane; do not rely on a
+wake after its finite count expires. Reserve the last overnight wake for checkpoint,
+concise morning summary and pause rather than a new lengthy full build.
+
+## Pinned-period checkpoint — historical continuation
 
 Continued from clean ae0c08bb629d4a8f4df6ec4aea13c917de68733e. Read
 IPTV-PINNED-PERIOD-DESIGN.md and IPTV-PINNED-PERIOD-VALIDATION-20261006.json first.

@@ -2,7 +2,23 @@
 
 Updated 6 October 2026, Australia/Brisbane.
 
-## Finite pinned period — latest validated checkpoint
+## Asynchronous pinned reader — latest validated checkpoint
+
+From 6842df1, added the actual owned reader consumer for exact committed seeks,
+IO staging, stale/cancellation fences and retained pins/handles through worker and
+cleanup failures/timeouts. Final full app compile (545s), 191 core tests (1.984s),
+265 IPTV JVM tests (32 suites; zero failures/errors/skips; 7.011s test / 391s build)
+and final harness builds (33s) pass. Twelve new JVM fixtures include actual
+SharedCaptureRuntime ownership: failed reader close retains memory/pins while
+another recording consumer stays active. Samples, recorder and logical budgets in
+this fixture are synthetic, not decoder or durable-recording evidence.
+Two actual-stager Android reader cases compile only; no device/provider operations.
+Read IPTV-PINNED-READER-DESIGN.md and its report for exact hashes and scope. Dynamic
+source/epoch loading, actual decoder/player confirmation and measured admission
+remain required; controls disabled. Existing older automations remain paused;
+temporary overnight continuation must checkpoint/summarize/pause by 08:00 Brisbane.
+
+## Finite pinned period — historical validated checkpoint
 
 From ae0c08b, implemented actual Media3 finite-period/sample-stream APIs over one
 verified, pinned staged segment, frame seeks with full encoded preroll, read flags

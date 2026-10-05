@@ -16,11 +16,13 @@ class CaptureSeekControllerTest {
             for (n in 0..2) { store.add(n); timeline.accept(index.inspect(n.toLong())) }
             val seeks = CaptureSeekController(timeline); val current = CapturePlaybackPosition(0, 360000)
             val left = ready(seeks.move(current, -90000)); assertEquals(270000L, left.position90k)
+            assertFalse(seeks.isCurrentCommitted(left))
             val first = requireNotNull(seeks.commit(left).input)
+            assertTrue(seeks.isCurrentCommitted(left))
             val right = ready(seeks.move(current, 45000)); assertEquals(315000L, right.position90k)
-            assertFalse(seeks.acknowledge(left)); assertEquals(CaptureSeekState.STALE, seeks.commit(left).state)
+            assertFalse(seeks.isCurrentCommitted(left)); assertFalse(seeks.acknowledge(left)); assertEquals(CaptureSeekState.STALE, seeks.commit(left).state)
             val second = requireNotNull(seeks.commit(right).input)
-            assertTrue(seeks.acknowledge(right)); assertFalse(seeks.acknowledge(right))
+            assertTrue(seeks.isCurrentCommitted(right)); assertTrue(seeks.acknowledge(right)); assertFalse(seeks.isCurrentCommitted(right)); assertFalse(seeks.acknowledge(right))
             first.close(); second.close()
             assertEquals(405000L, ready(seeks.move(current, 45000)).position90k)
         }

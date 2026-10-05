@@ -1,9 +1,27 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 6 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: finite pinned Media3 sample delivery, following physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
+Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: asynchronous owned pinned-reader staging, following finite sample delivery 6842df1 and physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
 
 ## Current checkpoint summary
+
+- Added an actual asynchronous pinned-reader consumer for SharedCaptureRuntime.
+  It commits/stages one exact pending seek, fences stale/cancelled completions,
+  keeps a successfully staged owner before cancellation checks, and confirms
+  worker/input/pin closure before releasing ownership. Repeated close timeouts
+  share one closer; failed cleanup retains the exact handles for explicit retry.
+- Final full app compile (545s), **191 core tests**, **265 IPTV JVM tests**
+  (32 suites, zero failures/errors/skips; 7.011s test / 391s build) and final
+  harness builds (33s) pass. Twelve new JVM cases use real files, inspection,
+  seeks and shared runtime with synthetic samples. Failed reader closure retains
+  its memory/pin reservation and preserves an independent recording consumer.
+  Two actual-stager Android reader fixtures compile only; no device or provider
+  operations occurred in this phase. Exact evidence is in the pinned-reader report.
+- READY borrowing is separate from player seek/render acknowledgement and decoder
+  closure. The reader opens no player, codec, audio/display or network and is not
+  a dynamic live MediaSource. Measured aggregate budgets, renderer offsets/preroll,
+  live waiting/terminal/epoch policy and durable recording remain required before
+  enabled controls. JVM reservation/recorder fixtures do not certify those gates.
 
 - Added an actual finite Media3 MediaPeriod/SampleStream for one inspected,
   verified and pinned staged segment. Reads support format, peek/omit, encoded
@@ -104,7 +122,7 @@ The preceding HLS milestone:
 - Stalker Portal source adapter and independently validated authentication/channel handling.
 - Complete audio/subtitle preferences and representative rendering checks for subtitles, closed captions, DVB subtitles and teletext. Track-selection UI is implemented; these formats are not all certified.
 - Connect the implemented shared-capture infrastructure to local pause/resume and seekable timeshift; implement durable recording/schedules to internal storage, USB and SMB.
-- Broaden the initial bounded HLS capture adapter, prove decoder-safe entry points, connect retained/staged Media3 metadata to actual MediaSource/MediaPeriod/player loading and validate device storage margins/behavior before enabling capture controls.
+- Broaden the initial bounded HLS capture adapter, prove decoder-safe entry points, connect retained/staged Media3 metadata and finite reader/period to dynamic MediaSource/epoch loading and actual governed player commands and validate device storage margins/behavior before enabling capture controls.
 - Multiview with an independent source/playlist per pane, shared account groups and aggregate device/provider limits; provider catch-up.
 - AFR/display handoff, integrated VOD/trailer/IPTV resource ownership, full guide grid, Home/Search, source/feed management, all supported locales and appearance/accessibility checks.
 
@@ -220,5 +238,7 @@ automations were left alone. No provider requests or dependency upgrades occurre
   it does not establish wall-clock LIVE or perform player/decoder commands.
 - Measured: 171 core tests, full app compile, 217 IPTV JVM tests and Android harness
   build passed. Core/JVM suites overlap. No new device/decoder execution is claimed.
-  Transactional Media3 sample staging, actual Timeline/MediaPeriod, preroll and
-  governed capture/player sharing remain the next implementation steps.
+  At that checkpoint, transactional staging, actual Timeline/MediaPeriod and
+  governed loading remained next; newer checkpoints now add staging, metadata,
+  finite period and async reader delivery. Dynamic source/player, runtime preroll
+  and aggregate/device gates still remain.

@@ -59,6 +59,10 @@ class CaptureSeekController(private val timeline: CaptureSampleTimeline) {
         } catch (_: CaptureMediaExpired) { CaptureSeekCommit(CaptureSeekState.EXPIRED) }
     }
 
+    /** Publication/readiness check only: never acknowledges or releases a pending seek. */
+    @Synchronized fun isCurrentCommitted(request: CaptureSeekRequest): Boolean =
+        request.owner === owner && pending === request && committed === request
+
     /** A late completion of an older seek cannot clear a newer pending anchor. */
     @Synchronized fun acknowledge(request: CaptureSeekRequest): Boolean {
         if (request.owner !== owner || pending !== request || committed !== request) return false
