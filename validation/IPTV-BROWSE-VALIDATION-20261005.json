@@ -1,0 +1,48 @@
+{
+  "recordedAtUtc": "2026-10-05T01:38:11.011425+00:00",
+  "milestone": "Bounded catalogue browsing and profile-scoped source/guide associations; backend only",
+  "device": "UGOOS AM9PRO Android 14 API 34",
+  "deviceTests": {
+    "total": 109,
+    "core": 64,
+    "catalogueStorage": 13,
+    "guideStorage": 11,
+    "playlistRepository": 2,
+    "guideRepository": 7,
+    "browseAndMapping": 12,
+    "failures": 0,
+    "seconds": 26.531
+  },
+  "jvmTests": {
+    "total": 84,
+    "failures": 0,
+    "overlapWithDeviceCore": true
+  },
+  "finalAppKotlinCompile": "passed",
+  "catalogueDatabaseSchemaVersion": 2,
+  "boundedDecryptionFixture": {
+    "catalogueRows": 401,
+    "pageSize": 10,
+    "decryptedRecords": 11
+  },
+  "fixtureApplicationId": "com.nuvio.iptv.validation",
+  "fixtureNetworkPermission": false,
+  "fixturePackagesRemoved": true,
+  "liveProviderRequests": 0,
+  "limits": [
+    "Backend only; no source/guide UI yet",
+    "No Xtream HTTP or live/capture ownership",
+    "No provider interoperability or full-scale performance claim",
+    "Search is NFKC/root-lowercase substring, not language-specific linguistic collation",
+    "No abrupt process death or recording test",
+    "Logical SQLite limits exclude WAL/journal and total device storage"
+  ],
+  "deviceLogSha256": "0dd7a68faa3ed087d1e3f987672d60385618f45720732081a1e11bd42ae8a9de",
+  "sourceSha256": {
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/IptvBrowseTest.kt": "6f0058c11f52734900ac30bbb3dd4011a8beb0abbe0dc21c231b9e092e01a825",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvBrowseModels.kt": "bd89430cdbc4d3a869e80e74e1ff8d0751bcac2ee3fec7e7dbc4a1a815346ffe",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvBrowseRepository.kt": "6df0101a9123f5d96dfb7cd2ba804093ebb09035ae9efceaf91b4eacccbfcd10",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvCatalogueStore.kt": "4d6ab1b7daeb0d3ea2902bd4089fdf3537834598c47b24395f148d7bbd40cbbd",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvGuideStore.kt": "a909cc1adc6d0cb4edf578635e540fd466d89068931901cfe52ce83e148cb9fe"
+  }
+}

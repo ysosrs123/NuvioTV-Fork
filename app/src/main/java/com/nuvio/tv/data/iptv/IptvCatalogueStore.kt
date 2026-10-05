@@ -16,6 +16,8 @@ import java.io.Closeable
 import java.io.InterruptedIOException
 import java.net.URI
 import java.util.UUID
+import java.text.Normalizer
+import java.util.Locale
 import org.json.JSONObject
 
 /** Blocking repository: use a worker dispatcher. Readers see one coherent SQLite generation. */
@@ -92,6 +94,72 @@ class IptvCatalogueStore(
 
     fun snapshot(ref: IptvSourceRef): IptvCatalogueSnapshot = transaction { db -> snapshot(db, ref) }
 
+    /** Bounded decryption; a changed generation/configuration/overlay never silently shifts a page. */
+    fun page(ref: IptvSourceRef, query: IptvBrowseQuery = IptvBrowseQuery(), cursor: IptvBrowseCursor? = null,
+        limit: Int = 100): IptvCataloguePage = transaction { db ->
+        require(limit in 1..200)
+        val source = source(db, ref)
+        val revision = db.rawQuery("SELECT browse_revision FROM sources WHERE id=?", arrayOf(ref.sourceId)).use {
+            check(it.moveToFirst()); IptvBrowseRevision(ref, source.activeGeneration, source.configurationVersion, it.getLong(0))
+        }
+        if (cursor != null && (cursor.revision != revision || cursor.query != query)) throw IptvCatalogueChangedException()
+        val offset = cursor?.offset ?: 0
+        require(offset in 0..60_000)
+        val args = mutableListOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration?.toString() ?: "-1")
+        val filters = buildString {
+            if (!query.includeUnavailable) append(" AND c.available=1")
+            if (!query.includeHidden) append(" AND COALESCE(o.hidden,0)=0")
+            if (query.favouritesOnly) append(" AND o.favourite_rank IS NOT NULL")
+            if (query.search.isNotBlank()) { append(" AND instr(COALESCE(o.search_name,c.search_name),?)>0"); args += searchName(query.search.trim()) }
+        }
+        val order = if (query.favouritesOnly) "o.favourite_rank," else ""
+        args += (limit + 1).toString(); args += offset.toString()
+        val selected = db.rawQuery("SELECT c.id FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=?$filters ORDER BY ${order}COALESCE(o.search_name,c.search_name),c.id LIMIT ? OFFSET ?", args.toTypedArray()).use { c ->
+            buildList { while (c.moveToNext()) add(c.getString(0)) }
+        }
+        // Sort/filter only IDs and names first. Large encrypted payloads must not enter the sort.
+        // Both queries share this transaction, so an overlay/refresh cannot change the selection.
+        val items = if (selected.isEmpty()) emptyList() else db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id IN (${selected.joinToString(",") { "?" }}) ORDER BY ${order}COALESCE(o.search_name,c.search_name),c.id",
+            arrayOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration.toString(), *selected.toTypedArray())).use { c ->
+            buildList { while (c.moveToNext()) add(readItem(c, ref)) }
+        }
+        IptvCataloguePage(source, revision, items.take(limit), guideAssociations(db, ref),
+            if (items.size > limit) IptvBrowseCursor(revision, query, offset + limit) else null)
+    }
+
+    /** Recheck the current source and row before admission; UI snapshots are not playback authority. */
+    fun playbackItem(ref: IptvSourceRef, channelId: String): IptvCatalogueItem? = transaction { db ->
+        val source = source(db, ref)
+        if (!source.playbackEligible) return@transaction null
+        db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id=? AND c.available=1 AND COALESCE(o.hidden,0)=0",
+            arrayOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration.toString(), channelId)).use { if (it.moveToFirst()) readItem(it, ref) else null }
+    }
+
+    fun setGuideFeeds(ref: IptvSourceRef, feeds: List<IptvGuideRef>, priority: List<IptvGuideRef> = emptyList()) = transaction { db ->
+        source(db, ref)
+        require(feeds.size <= 16 && feeds.distinct().size == feeds.size && feeds.all { it.profileId == ref.profileId })
+        require(priority.distinct().size == priority.size && priority.all { it in feeds })
+        db.delete("source_guides", "source=?", arrayOf(ref.sourceId))
+        for ((position, feed) in feeds.withIndex()) db.insertOrThrow("source_guides", null, ContentValues().apply {
+            put("source", ref.sourceId); put("feed", feed.feedId); put("position", position)
+            put("priority", priority.indexOf(feed).takeIf { it >= 0 })
+        })
+        bumpBrowseRevision(db, ref)
+    }
+
+    fun guideAssociations(ref: IptvSourceRef): IptvGuideAssociations = transaction { db -> source(db, ref); guideAssociations(db, ref) }
+
+    private fun guideAssociations(db: SQLiteDatabase, ref: IptvSourceRef): IptvGuideAssociations =
+        db.rawQuery("SELECT feed,priority FROM source_guides WHERE source=? ORDER BY position", arrayOf(ref.sourceId)).use { c ->
+            val feeds = mutableListOf<String>(); val priority = mutableListOf<Pair<Int, String>>()
+            while (c.moveToNext()) { feeds += c.getString(0); if (!c.isNull(1)) priority += c.getInt(1) to c.getString(0) }
+            IptvGuideAssociations(feeds, priority.sortedBy { it.first }.map { it.second })
+        }
+
+    private fun bumpBrowseRevision(db: SQLiteDatabase, ref: IptvSourceRef) {
+        db.execSQL("UPDATE sources SET browse_revision=browse_revision+1 WHERE id=?", arrayOf(ref.sourceId))
+    }
+
     /**
      * Stage rows, recheck the ticket, promote the pointer and validators in ONE transaction.
      * Exceptions/cancellation roll back every write. Existing acquisitions retain their own immutable
@@ -109,7 +177,8 @@ class IptvCatalogueStore(
         val incoming = records.distinct()
         val valid = complete && incoming.size <= 20_000 && incoming.all(::validRecord) &&
             incoming.map { it.data }.distinct().size == incoming.size && validValidators(validators)
-        val decision = decideCatalogueRefresh(ticket, latest, valid, old.channels.count { it.channel.available }, incoming.size, acceptedLargeChange)
+        val previousCount = if (old.source.activeConfigurationVersion == old.source.configurationVersion) old.channels.count { it.channel.available } else 0
+        val decision = decideCatalogueRefresh(ticket, latest, valid, previousCount, incoming.size, acceptedLargeChange)
         if (decision != RefreshDecision.PUBLISH) return@transaction decision
         // A ticket is single-use, including an accepted empty generation.
         if (old.source.activeGeneration == ticket.requestGeneration) return@transaction RefreshDecision.STALE
@@ -127,6 +196,7 @@ class IptvCatalogueStore(
             db.insertOrThrow("catalogue", null, ContentValues().apply {
                 put("source", ref.sourceId); put("generation", ticket.requestGeneration); put("id", channel.id)
                 put("name", channel.data.name); put("available", if (channel.available) 1 else 0)
+                put("search_name", searchName(channel.data.name))
                 put("payload", secrets.seal(aad(ref, "channel:${channel.id}"), encodeRecord(channel.data, attributes)))
             })
         }
@@ -148,9 +218,11 @@ class IptvCatalogueStore(
         db.rawQuery("SELECT 1 FROM identities WHERE id=? AND source=?", arrayOf(channelId, ref.sourceId)).use { require(it.moveToFirst()) { "Unknown IPTV channel" } }
         db.insertWithOnConflict("overlays", null, ContentValues().apply {
             put("id", channelId); put("profile", ref.profileId); put("custom_name", overlay.customName)
+            put("search_name", overlay.customName?.let(::searchName))
             put("favourite_rank", overlay.favouriteRank); put("hidden", if (overlay.hidden) 1 else 0)
             put("guide_feed", overlay.manualGuide?.feedId); put("guide_id", overlay.manualGuide?.externalId)
         }, SQLiteDatabase.CONFLICT_REPLACE).also { check(it != -1L) }
+        bumpBrowseRevision(db, ref)
         Unit
     }
 
@@ -162,16 +234,20 @@ class IptvCatalogueStore(
         ).use { cursor -> buildList {
             while (cursor.moveToNext()) {
                 checkCancellation()
-                val id = cursor.string("id")
-                val record = JSONObject(secrets.open(aad(ref, "channel:$id"), cursor.getBlob(cursor.getColumnIndexOrThrow("payload"))))
-                val data = ChannelCandidate(record.getString("name"), record.getString("locator"), record.optional("providerId"), record.optional("guideId"), record.optional("variant"))
-                val attributes = record.getJSONObject("attributes").let { attrs -> attrs.keys().asSequence().associateWith { attrs.getString(it) } }
-                val manual = cursor.nullableString("guide_feed")?.let { feed -> cursor.nullableString("guide_id")?.let { GuideKey(feed, it) } }
-                add(IptvCatalogueItem(StoredChannel(id, ref.sourceId, data, cursor.number("available") == 1L), attributes,
-                    IptvChannelOverlay(cursor.nullableString("custom_name"), cursor.nullableNumber("favourite_rank")?.toInt(), cursor.nullableNumber("hidden") == 1L, manual)))
+                add(readItem(cursor, ref))
             }
         } }
         return IptvCatalogueSnapshot(source, rows, cacheValidators(db, source))
+    }
+
+    private fun readItem(cursor: Cursor, ref: IptvSourceRef): IptvCatalogueItem {
+        val id = cursor.string("id")
+        val record = JSONObject(secrets.open(aad(ref, "channel:$id"), cursor.getBlob(cursor.getColumnIndexOrThrow("payload"))))
+        val data = ChannelCandidate(record.getString("name"), record.getString("locator"), record.optional("providerId"), record.optional("guideId"), record.optional("variant"))
+        val attributes = record.getJSONObject("attributes").let { attrs -> attrs.keys().asSequence().associateWith { attrs.getString(it) } }
+        val manual = cursor.nullableString("guide_feed")?.let { feed -> cursor.nullableString("guide_id")?.let { GuideKey(feed, it) } }
+        return IptvCatalogueItem(StoredChannel(id, ref.sourceId, data, cursor.number("available") == 1L), attributes,
+            IptvChannelOverlay(cursor.nullableString("custom_name"), cursor.nullableNumber("favourite_rank")?.toInt(), cursor.nullableNumber("hidden") == 1L, manual))
     }
 
     private fun cacheValidators(db: SQLiteDatabase, source: IptvSource): IptvCacheValidators? =
@@ -218,7 +294,7 @@ class IptvCatalogueStore(
     }
     override fun close() = helper.close()
 
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 1) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 2) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
@@ -228,12 +304,30 @@ class IptvCatalogueStore(
             db.execSQL("CREATE INDEX identity_source ON identities(source)")
             db.execSQL("CREATE TABLE catalogue (source TEXT NOT NULL REFERENCES sources(id), generation INTEGER NOT NULL, id TEXT NOT NULL REFERENCES identities(id), name TEXT NOT NULL, available INTEGER NOT NULL, payload BLOB NOT NULL, PRIMARY KEY(source,generation,id))")
             db.execSQL("CREATE TABLE overlays (id TEXT NOT NULL REFERENCES identities(id), profile INTEGER NOT NULL, custom_name TEXT, favourite_rank INTEGER, hidden INTEGER NOT NULL, guide_feed TEXT, guide_id TEXT, PRIMARY KEY(id,profile))")
+            addBrowseSchema(db)
         }
-        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) { error("Missing IPTV database migration") }
+        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            check(oldVersion == 1 && newVersion == 2) { "Missing IPTV database migration" }
+            addBrowseSchema(db)
+            db.rawQuery("SELECT source,generation,id,name FROM catalogue", null).use { c ->
+                while (c.moveToNext()) db.execSQL("UPDATE catalogue SET search_name=? WHERE source=? AND generation=? AND id=?", arrayOf(searchName(c.getString(3)), c.getString(0), c.getLong(1), c.getString(2)))
+            }
+            db.rawQuery("SELECT id,profile,custom_name FROM overlays WHERE custom_name IS NOT NULL", null).use { c ->
+                while (c.moveToNext()) db.execSQL("UPDATE overlays SET search_name=? WHERE id=? AND profile=?", arrayOf(searchName(c.getString(2)), c.getString(0), c.getInt(1)))
+            }
+        }
+        private fun addBrowseSchema(db: SQLiteDatabase) {
+            db.execSQL("ALTER TABLE sources ADD COLUMN browse_revision INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE catalogue ADD COLUMN search_name TEXT NOT NULL DEFAULT ''")
+            db.execSQL("ALTER TABLE overlays ADD COLUMN search_name TEXT")
+            db.execSQL("CREATE INDEX catalogue_browse ON catalogue(source,generation,available,search_name,id)")
+            db.execSQL("CREATE TABLE source_guides(source TEXT NOT NULL REFERENCES sources(id), feed TEXT NOT NULL, position INTEGER NOT NULL, priority INTEGER, PRIMARY KEY(source,feed), UNIQUE(source,position))")
+        }
     }
 
     private companion object {
         fun aad(ref: IptvSourceRef, field: String) = "iptv.v1:${ref.profileId}:${ref.sourceId}:$field"
+        fun searchName(value: String) = Normalizer.normalize(value, Normalizer.Form.NFKC).lowercase(Locale.ROOT)
         fun Cursor.string(key: String) = getString(getColumnIndexOrThrow(key))
         fun Cursor.number(key: String) = getLong(getColumnIndexOrThrow(key))
         fun Cursor.nullableString(key: String): String? = getColumnIndexOrThrow(key).let { if (isNull(it)) null else getString(it) }

@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.nuvio.tv.core.iptv.GuideChannel
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.GuideParseLimits
+import com.nuvio.tv.core.iptv.GuideFeedIndex
 import com.nuvio.tv.core.iptv.RefreshDecision
 import com.nuvio.tv.core.iptv.parseGuideInput
 import java.io.Closeable
@@ -51,6 +52,29 @@ class IptvGuideStore(
 
     fun endpoint(ref: IptvGuideRef): String = transaction { db -> feed(db, ref); endpoint(db, ref) }
     fun feed(ref: IptvGuideRef): IptvGuideFeed = transaction { db -> feed(db, ref) }
+
+    fun feeds(profileId: Int, offset: Int = 0, limit: Int = 100): List<IptvGuideFeed> = transaction { db ->
+        require(profileId >= 0 && offset >= 0 && limit in 1..200)
+        db.rawQuery("SELECT id,label,version,requested,active_generation FROM feeds WHERE profile=? ORDER BY label COLLATE NOCASE,id LIMIT ? OFFSET ?",
+            arrayOf(profileId.toString(), limit.toString(), offset.toString())).use { c -> buildList {
+                while (c.moveToNext()) add(IptvGuideFeed(IptvGuideRef(profileId, c.getString(0)), c.getString(1), c.getLong(2), c.getLong(3), if (c.isNull(4)) null else c.getLong(4)))
+            } }
+    }
+
+    /** One coherent guide snapshot for a visible channel page; never loads entire feed indexes. */
+    fun matchingIndexes(profileId: Int, feedIds: List<String>, externalIds: Set<String>): List<GuideFeedIndex> = transaction { db ->
+        require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size)
+        feedIds.forEach { IptvGuideRef(profileId, it) }
+        require(externalIds.size <= 400 && externalIds.all { it.isNotBlank() && it.length <= 4096 })
+        val matches = feedIds.associateWith { mutableSetOf<String>() }
+        if (feedIds.isNotEmpty() && externalIds.isNotEmpty()) {
+            val args = arrayOf(profileId.toString(), *feedIds.toTypedArray(), *externalIds.toTypedArray())
+            db.rawQuery("SELECT f.id,c.external_id FROM feeds f JOIN channels c ON c.stage=f.active_stage WHERE f.profile=? AND f.version=f.active_version AND f.id IN (${feedIds.joinToString(",") { "?" }}) AND c.external_id IN (${externalIds.joinToString(",") { "?" }})", args).use { c ->
+                while (c.moveToNext()) matches.getValue(c.getString(0)).add(c.getString(1))
+            }
+        }
+        feedIds.map { GuideFeedIndex(it, matches.getValue(it)) }
+    }
 
     fun beginRefresh(ref: IptvGuideRef): IptvGuideTicket = transaction { db -> beginRefresh(db, ref) }
 
