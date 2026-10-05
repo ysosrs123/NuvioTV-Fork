@@ -29,6 +29,9 @@ import androidx.media3.ui.PlayerView
 import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
+import com.nuvio.tv.data.iptv.IptvListedChannel
+import com.nuvio.tv.data.iptv.IptvStreamFormat
+import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.R
 import com.nuvio.tv.ui.theme.NuvioTheme
 import java.text.DateFormat
@@ -47,6 +50,8 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
     }
     val fallbackFocus = remember { FocusRequester() }
     val first = rowFocus[rows.firstOrNull()?.item?.channel?.id] ?: fallbackFocus
+    var formatChannel by remember(state.source) { mutableStateOf<IptvListedChannel?>(null) }
+    val formatFocus = remember { FocusRequester() }
     val favouriteFocus = remember { FocusRequester() }
     val filterFocus = remember { FocusRequester() }
     DisposableEffect(lifecycle, viewModel) {
@@ -99,8 +104,15 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
                     if (state.focused != null) Button(onClick = viewModel::toggleFavourite, modifier = Modifier.focusRequester(favouriteFocus).focusProperties {
                         right = rowFocus[state.focused?.item?.channel?.id] ?: FocusRequester.Default
                         up = filterFocus
+                        down = formatFocus
                     }) {
                         Text(stringResource(if (state.focused?.item?.overlay?.favouriteRank == null) R.string.iptv_live_add_favourite else R.string.iptv_live_remove_favourite))
+                    }
+                    state.focused?.let { channel ->
+                        Button(onClick = { formatChannel = channel }, modifier = Modifier.focusRequester(formatFocus).focusProperties {
+                            up = favouriteFocus
+                            right = rowFocus[channel.item.channel.id] ?: FocusRequester.Default
+                        }) { Text(stringResource(R.string.iptv_live_format, stringResource(formatLabel(channel.item.overlay.streamFormat)))) }
                     }
                     if (state.programmes.isEmpty()) Text(stringResource(R.string.iptv_live_no_programme), color = NuvioTheme.colors.TextSecondary)
                     val locale = Locale.getDefault().language
@@ -132,6 +144,24 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
             }
         }
     }
+    formatChannel?.let { channel ->
+        NuvioDialog(onDismiss = { formatChannel = null }, title = stringResource(R.string.iptv_live_format_title)) {
+            Text(channel.item.overlay.customName ?: channel.item.channel.data.name, color = NuvioTheme.colors.TextPrimary)
+            Text(stringResource(R.string.iptv_live_format_description), color = NuvioTheme.colors.TextSecondary)
+            IptvStreamFormat.entries.forEach { format ->
+                Button(onClick = { viewModel.setStreamFormat(channel, format); formatChannel = null }) {
+                    Text(stringResource(formatLabel(format)))
+                }
+            }
+            Button(onClick = { formatChannel = null }) { Text(stringResource(R.string.iptv_setup_cancel)) }
+        }
+    }
+}
+
+private fun formatLabel(format: IptvStreamFormat): Int = when (format) {
+    IptvStreamFormat.AUTO -> R.string.iptv_live_format_auto
+    IptvStreamFormat.HLS -> R.string.iptv_live_format_hls
+    IptvStreamFormat.MPEG_TS -> R.string.iptv_live_format_ts
 }
 
 @Composable

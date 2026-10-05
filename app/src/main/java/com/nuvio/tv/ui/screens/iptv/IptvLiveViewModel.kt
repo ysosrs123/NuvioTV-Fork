@@ -83,6 +83,23 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
         }
     }
+    fun setStreamFormat(row: IptvListedChannel, format: IptvStreamFormat) {
+        val current = session ?: return
+        val ref = mutable.value.source ?: return
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) { access.use(current) {
+                    val latest = requireNotNull(catalogue.playbackItem(ref, row.item.channel.id))
+                    catalogue.setOverlay(ref, latest.channel.id, latest.overlay.copy(streamFormat = format))
+                } }
+                if (session === current && mutable.value.source == ref) {
+                    mutable.update { it.copy(message = R.string.iptv_live_format_saved) }
+                    load(currentCursor())
+                }
+            } catch (cancel: CancellationException) { throw cancel }
+            catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
+        }
+    }
     fun nextSource() {
         val current = mutable.value
         if (current.sources.isEmpty()) return
@@ -141,16 +158,19 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             mutable.update { it.copy(tuning = true, player = null, playingTitle = null, playing = false, message = null) }
             try {
                 val source = withContext(Dispatchers.IO) { access.use(current) { catalogue.sources(current.profileId).single { it.ref == ref } } }
-                val key = AcquisitionKey(source.accountId, row.item.channel.id, "main", source.activeGeneration ?: 0)
+                val streamFormat = withContext(Dispatchers.IO) { access.use(current) {
+                    requireNotNull(catalogue.playbackItem(ref, row.item.channel.id)).overlay.streamFormat
+                } }
+                val key = AcquisitionKey(source.accountId, row.item.channel.id, "main:" + streamFormat.name, source.activeGeneration ?: 0)
                 val result = runtime.open(key, 16L * 1024 * 1024, 96L * 1024 * 1024, owner) { purpose ->
                     val item = withContext(Dispatchers.IO) { access.use(current) {
                         val latest = catalogue.sources(current.profileId).single { it.ref == ref }
                         check(latest.configurationVersion == source.configurationVersion && latest.accountId == source.accountId && latest.activeGeneration == source.activeGeneration)
-                        requireNotNull(catalogue.playbackItem(ref, row.item.channel.id))
+                        requireNotNull(catalogue.playbackItem(ref, row.item.channel.id)).also { check(it.overlay.streamFormat == streamFormat) }
                     } }
                     currentCoroutineContext().ensureActive()
                     check(session === current && foreground && request == tuneVersion && profiles.activeProfileId.value == current.profileId && profiles.profileSelectionRevision.value == profileRevision)
-                    IptvLivePlayback(context, item.channel.data.locator, purpose,
+                    IptvLivePlayback(context, item.channel.data.locator, purpose, streamFormat,
                         onPlaying = { playing -> if (request == tuneVersion) mutable.update { it.copy(playing = playing) } },
                         onError = { if (request == tuneVersion) { stop(); mutable.update { it.copy(message = R.string.iptv_live_failed) } } })
                         .also { mutable.update { state -> state.copy(player = it.player, playingTitle = item.overlay.customName ?: item.channel.data.name) } }

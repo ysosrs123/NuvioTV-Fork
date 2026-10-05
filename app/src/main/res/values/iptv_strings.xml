@@ -53,4 +53,11 @@
     <string name="iptv_xtream_username">Username</string>
     <string name="iptv_xtream_password">Password</string>
     <string name="iptv_xtream_auth_failed">The account could not sign in or is no longer active. Check its details and try again.</string>
+    <string name="iptv_live_format">Stream format: %1$s</string>
+    <string name="iptv_live_format_title">Stream format</string>
+    <string name="iptv_live_format_description">Choose a format if this channel fails in Auto. Applies next time you select the channel.</string>
+    <string name="iptv_live_format_auto">Auto</string>
+    <string name="iptv_live_format_hls">HLS</string>
+    <string name="iptv_live_format_ts">MPEG-TS</string>
+    <string name="iptv_live_format_saved">Format saved. Select the channel to play with this format.</string>
 </resources>

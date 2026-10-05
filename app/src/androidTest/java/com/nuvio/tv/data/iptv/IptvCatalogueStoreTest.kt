@@ -42,6 +42,62 @@ class IptvCatalogueStoreTest {
     private fun publish(ref: IptvSourceRef, rows: List<IptvCatalogueRecord> = listOf(row(1)), etag: String = "v1") =
         store.commitCatalogue(ref, store.beginRefresh(ref), rows, true, IptvCacheValidators(etag))
 
+    @Test fun streamFormatIsLocalDurableAndSurvivesRefreshWithoutReplacingOtherPreferences() {
+        val ref = source(); val other = source(2)
+        publish(ref, listOf(row(1), row(2))); publish(other)
+        val item = store.page(ref).items.first()
+        assertEquals(IptvStreamFormat.AUTO, item.overlay.streamFormat)
+        val overlay = IptvChannelOverlay("Personal", 4, false, GuideKey("guide", "one"), IptvStreamFormat.HLS)
+        store.setOverlay(ref, item.channel.id, overlay)
+        assertEquals(overlay, store.playbackItem(ref, item.channel.id)!!.overlay)
+        assertEquals(IptvStreamFormat.AUTO, store.snapshot(other).channels.single().overlay.streamFormat)
+        publish(ref, listOf(row(1, "Changed"), row(2)))
+        assertEquals(overlay, store.snapshot(ref).channels.single { it.channel.id == item.channel.id }.overlay)
+        store.close()
+        store = IptvCatalogueStore(context, name, AndroidIptvSecretBox(alias))
+        assertEquals(overlay, store.playbackItem(ref, item.channel.id)!!.overlay)
+        store.setOverlay(ref, item.channel.id, overlay.copy(streamFormat = IptvStreamFormat.MPEG_TS))
+        assertEquals(IptvStreamFormat.MPEG_TS, store.page(ref).items.single { it.channel.id == item.channel.id }.overlay.streamFormat)
+        store.setOverlay(ref, item.channel.id, overlay.copy(streamFormat = IptvStreamFormat.AUTO))
+        assertEquals(IptvStreamFormat.AUTO, store.playbackItem(ref, item.channel.id)!!.overlay.streamFormat)
+    }
+
+    @Test fun formatChangeInvalidatesPagingAndCannotCrossBindAnotherSource() {
+        val ref = source(); val other = source()
+        publish(ref, listOf(row(1), row(2))); publish(other)
+        val page = store.page(ref, limit = 1)
+        val id = page.items.single().channel.id
+        assertThrows(IllegalArgumentException::class.java) {
+            store.setOverlay(other, id, IptvChannelOverlay(streamFormat = IptvStreamFormat.HLS))
+        }
+        store.setOverlay(ref, id, IptvChannelOverlay(streamFormat = IptvStreamFormat.HLS))
+        assertThrows(IptvCatalogueChangedException::class.java) { store.page(ref, cursor = page.next) }
+        assertEquals(IptvStreamFormat.AUTO, store.snapshot(other).channels.single().overlay.streamFormat)
+    }
+
+    @Test fun v2MigrationPreservesEncryptedCatalogueAndExistingOverlayAndDefaultsFormatToAuto() {
+        val ref = source(); publish(ref)
+        val item = store.snapshot(ref).channels.single()
+        val overlay = IptvChannelOverlay("Custom", 7, false, GuideKey("feed", "channel"))
+        store.setOverlay(ref, item.channel.id, overlay)
+        store.close()
+        context.openOrCreateDatabase(name, 0, null).use { db ->
+            // Reconstruct the exact previous overlay table; all other v2 columns remain unchanged.
+            db.execSQL("ALTER TABLE overlays RENAME TO newer_overlays")
+            db.execSQL("CREATE TABLE overlays (id TEXT NOT NULL REFERENCES identities(id), profile INTEGER NOT NULL, custom_name TEXT, favourite_rank INTEGER, hidden INTEGER NOT NULL, guide_feed TEXT, guide_id TEXT, search_name TEXT, PRIMARY KEY(id,profile))")
+            db.execSQL("INSERT INTO overlays SELECT id,profile,custom_name,favourite_rank,hidden,guide_feed,guide_id,search_name FROM newer_overlays")
+            db.execSQL("DROP TABLE newer_overlays")
+            db.version = 2
+        }
+        store = IptvCatalogueStore(context, name, AndroidIptvSecretBox(alias))
+        assertEquals(connection, store.connection(ref))
+        val migrated = store.page(ref).items.single()
+        assertEquals(item.channel, migrated.channel)
+        assertEquals(overlay, migrated.overlay)
+        store.setOverlay(ref, item.channel.id, overlay.copy(streamFormat = IptvStreamFormat.HLS))
+        assertEquals(IptvStreamFormat.HLS, store.playbackItem(ref, item.channel.id)!!.overlay.streamFormat)
+    }
+
     @Test fun credentialsCatalogueAndOverlaysSurviveCloseAndReopenWithoutPlaintextSecrets() {
         val ref = source()
         assertEquals(RefreshDecision.PUBLISH, publish(ref))

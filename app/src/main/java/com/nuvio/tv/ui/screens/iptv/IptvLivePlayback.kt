@@ -7,6 +7,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.MimeTypes
+import com.nuvio.tv.data.iptv.IptvStreamFormat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -28,6 +30,7 @@ import okhttp3.OkHttpClient
 
 /** Foreground, single-view live adapter. No VOD probes, cache, range prefetch or thumbnail pipeline. */
 class IptvLivePlayback(context: Context, private val locator: String, purpose: PlaybackPurpose,
+    private val streamFormat: IptvStreamFormat = IptvStreamFormat.AUTO,
     private val onPlaying: (Boolean) -> Unit, private val onError: () -> Unit) : OwnedLivePlayback {
     private val fence = LiveRequestFence()
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -46,6 +49,10 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 .setTargetBufferBytes(12 * 1024 * 1024).setPrioritizeTimeOverSizeThresholds(false).build())
             .setMediaSourceFactory(DefaultMediaSourceFactory(sources).setLoadErrorHandlingPolicy(object : DefaultLoadErrorHandlingPolicy(0) {
                 override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long = C.TIME_UNSET
+                // Retry delay alone does not stop HLS from excluding a failed track and opening
+                // another rendition. Unknown account capacity requires an explicit user retry.
+                override fun getFallbackSelectionFor(fallbackOptions: LoadErrorHandlingPolicy.FallbackOptions,
+                    loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): LoadErrorHandlingPolicy.FallbackSelection? = null
             }))
             .build()
         player.setAudioAttributes(AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_MOVIE).build(), true)
@@ -67,7 +74,13 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     }
     override fun start() {
         check(!released)
-        player.setMediaItem(MediaItem.fromUri(locator))
+        val mimeType = when (streamFormat) {
+            IptvStreamFormat.AUTO -> null
+            IptvStreamFormat.HLS -> MimeTypes.APPLICATION_M3U8
+            IptvStreamFormat.MPEG_TS -> MimeTypes.VIDEO_MP2T
+        }
+        // A user-selected format avoids probing and reopening extensionless live entry points.
+        player.setMediaItem(MediaItem.Builder().setUri(locator).setMimeType(mimeType).build())
         player.prepare(); player.playWhenReady = true
     }
     override suspend fun close(): Boolean {

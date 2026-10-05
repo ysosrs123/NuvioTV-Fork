@@ -5,6 +5,8 @@ import com.nuvio.tv.core.iptv.GuideKey
 import com.nuvio.tv.core.iptv.StoredChannel
 import com.nuvio.tv.core.iptv.RefreshTicket
 
+enum class IptvStreamFormat { AUTO, HLS, MPEG_TS }
+
 enum class IptvSourceKind { M3U, XTREAM }
 data class IptvSourceRef(val profileId: Int, val sourceId: String) {
     init { require(profileId >= 0 && sourceId.matches(Regex("[A-Za-z0-9_-]{1,80}"))) }
@@ -24,7 +26,7 @@ data class IptvCatalogueRecord(val data: ChannelCandidate, val attributes: Map<S
 }
 data class IptvChannelOverlay(
     val customName: String? = null, val favouriteRank: Int? = null, val hidden: Boolean = false,
-    val manualGuide: GuideKey? = null,
+    val manualGuide: GuideKey? = null, val streamFormat: IptvStreamFormat = IptvStreamFormat.AUTO,
 )
 data class IptvCatalogueItem(val channel: StoredChannel, val attributes: Map<String, String>, val overlay: IptvChannelOverlay) {
     override fun toString(): String = "IptvCatalogueItem(id=${channel.id}, available=${channel.available})"

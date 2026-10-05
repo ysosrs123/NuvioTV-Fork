@@ -136,7 +136,7 @@ class IptvCatalogueStore(
         }
         // Sort/filter only IDs and names first. Large encrypted payloads must not enter the sort.
         // Both queries share this transaction, so an overlay/refresh cannot change the selection.
-        val items = if (selected.isEmpty()) emptyList() else db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id IN (${selected.joinToString(",") { "?" }}) ORDER BY ${order}COALESCE(o.search_name,c.search_name),c.id",
+        val items = if (selected.isEmpty()) emptyList() else db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id IN (${selected.joinToString(",") { "?" }}) ORDER BY ${order}COALESCE(o.search_name,c.search_name),c.id",
             arrayOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration.toString(), *selected.toTypedArray())).use { c ->
             buildList { while (c.moveToNext()) add(readItem(c, ref)) }
         }
@@ -148,7 +148,7 @@ class IptvCatalogueStore(
     fun playbackItem(ref: IptvSourceRef, channelId: String): IptvCatalogueItem? = transaction { db ->
         val source = source(db, ref)
         if (!source.playbackEligible) return@transaction null
-        db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id=? AND c.available=1 AND COALESCE(o.hidden,0)=0",
+        db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id=? AND c.available=1 AND COALESCE(o.hidden,0)=0",
             arrayOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration.toString(), channelId)).use { if (it.moveToFirst()) readItem(it, ref) else null }
     }
 
@@ -237,6 +237,7 @@ class IptvCatalogueStore(
             put("id", channelId); put("profile", ref.profileId); put("custom_name", overlay.customName)
             put("search_name", overlay.customName?.let(::searchName))
             put("favourite_rank", overlay.favouriteRank); put("hidden", if (overlay.hidden) 1 else 0)
+            put("stream_format", overlay.streamFormat.name)
             put("guide_feed", overlay.manualGuide?.feedId); put("guide_id", overlay.manualGuide?.externalId)
         }, SQLiteDatabase.CONFLICT_REPLACE).also { check(it != -1L) }
         bumpBrowseRevision(db, ref)
@@ -246,7 +247,7 @@ class IptvCatalogueStore(
     private fun snapshot(db: SQLiteDatabase, ref: IptvSourceRef, checkCancellation: () -> Unit = {}): IptvCatalogueSnapshot {
         val source = source(db, ref)
         val rows = if (source.activeGeneration == null) emptyList() else db.rawQuery(
-            "SELECT c.*, o.custom_name, o.favourite_rank, o.hidden, o.guide_feed, o.guide_id FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? ORDER BY c.name COLLATE NOCASE, c.id",
+            "SELECT c.*, o.custom_name, o.favourite_rank, o.hidden, o.guide_feed, o.guide_id, o.stream_format FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? ORDER BY c.name COLLATE NOCASE, c.id",
             arrayOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration.toString()),
         ).use { cursor -> buildList {
             while (cursor.moveToNext()) {
@@ -264,7 +265,8 @@ class IptvCatalogueStore(
         val attributes = record.getJSONObject("attributes").let { attrs -> attrs.keys().asSequence().associateWith { attrs.getString(it) } }
         val manual = cursor.nullableString("guide_feed")?.let { feed -> cursor.nullableString("guide_id")?.let { GuideKey(feed, it) } }
         return IptvCatalogueItem(StoredChannel(id, ref.sourceId, data, cursor.number("available") == 1L), attributes,
-            IptvChannelOverlay(cursor.nullableString("custom_name"), cursor.nullableNumber("favourite_rank")?.toInt(), cursor.nullableNumber("hidden") == 1L, manual))
+            IptvChannelOverlay(cursor.nullableString("custom_name"), cursor.nullableNumber("favourite_rank")?.toInt(), cursor.nullableNumber("hidden") == 1L, manual,
+                cursor.nullableString("stream_format")?.let(IptvStreamFormat::valueOf) ?: IptvStreamFormat.AUTO))
     }
 
     private fun cacheValidators(db: SQLiteDatabase, source: IptvSource): IptvCacheValidators? =
@@ -311,7 +313,7 @@ class IptvCatalogueStore(
     }
     override fun close() = helper.close()
 
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 2) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 3) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
@@ -322,16 +324,23 @@ class IptvCatalogueStore(
             db.execSQL("CREATE TABLE catalogue (source TEXT NOT NULL REFERENCES sources(id), generation INTEGER NOT NULL, id TEXT NOT NULL REFERENCES identities(id), name TEXT NOT NULL, available INTEGER NOT NULL, payload BLOB NOT NULL, PRIMARY KEY(source,generation,id))")
             db.execSQL("CREATE TABLE overlays (id TEXT NOT NULL REFERENCES identities(id), profile INTEGER NOT NULL, custom_name TEXT, favourite_rank INTEGER, hidden INTEGER NOT NULL, guide_feed TEXT, guide_id TEXT, PRIMARY KEY(id,profile))")
             addBrowseSchema(db)
+            addStreamFormatSchema(db)
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(oldVersion == 1 && newVersion == 2) { "Missing IPTV database migration" }
-            addBrowseSchema(db)
-            db.rawQuery("SELECT source,generation,id,name FROM catalogue", null).use { c ->
-                while (c.moveToNext()) db.execSQL("UPDATE catalogue SET search_name=? WHERE source=? AND generation=? AND id=?", arrayOf(searchName(c.getString(3)), c.getString(0), c.getLong(1), c.getString(2)))
+            check(oldVersion in 1..2 && newVersion == 3) { "Missing IPTV database migration" }
+            if (oldVersion == 1) {
+                addBrowseSchema(db)
+                db.rawQuery("SELECT source,generation,id,name FROM catalogue", null).use { c ->
+                    while (c.moveToNext()) db.execSQL("UPDATE catalogue SET search_name=? WHERE source=? AND generation=? AND id=?", arrayOf(searchName(c.getString(3)), c.getString(0), c.getLong(1), c.getString(2)))
+                }
+                db.rawQuery("SELECT id,profile,custom_name FROM overlays WHERE custom_name IS NOT NULL", null).use { c ->
+                    while (c.moveToNext()) db.execSQL("UPDATE overlays SET search_name=? WHERE id=? AND profile=?", arrayOf(searchName(c.getString(2)), c.getString(0), c.getInt(1)))
+                }
             }
-            db.rawQuery("SELECT id,profile,custom_name FROM overlays WHERE custom_name IS NOT NULL", null).use { c ->
-                while (c.moveToNext()) db.execSQL("UPDATE overlays SET search_name=? WHERE id=? AND profile=?", arrayOf(searchName(c.getString(2)), c.getString(0), c.getInt(1)))
-            }
+            addStreamFormatSchema(db)
+        }
+        private fun addStreamFormatSchema(db: SQLiteDatabase) {
+            db.execSQL("ALTER TABLE overlays ADD COLUMN stream_format TEXT NOT NULL DEFAULT 'AUTO' CHECK(stream_format IN ('AUTO','HLS','MPEG_TS'))")
         }
         private fun addBrowseSchema(db: SQLiteDatabase) {
             db.execSQL("ALTER TABLE sources ADD COLUMN browse_revision INTEGER NOT NULL DEFAULT 0")
