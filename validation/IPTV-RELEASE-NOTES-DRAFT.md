@@ -1,9 +1,16 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 5 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Latest implementation: eaa43e5; this fresh-session checkpoint adds documentation only. This is a prototype, not a published release.
+Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: controlled TS inspection/decode, local reader and store concurrency, following eaa43e5 and documentation checkpoint 3ae8882. This is a prototype, not a published release.
 
 ## Current checkpoint summary
+
+- New internal components inspect a bounded AVC/AAC MPEG-TS profile, expose explicit local DATA/WAITING/ENDED/EXPIRED/DISCONTINUITY/STOPPED states, and allow local reads/pins during slow capture input. Pins are rechecked at publication.
+- Reproduced a missing final video sample in AM9's platform extractor and the shipped Media3 HLS extractor. A scoped, hash-bound local extraction bridge restores the final sample for inspected complete segments; bundled libraries and dependency versions are unchanged.
+- Latest controlled checks: **150 core JVM tests** and **214 AM9 tests** passed. Three independent segments decoded all 50 video frames each and 95/94/94 audio frames. Real capture/store/local-read integration decoded 150 video and 283 audio frames. FFprobe/strict FFmpeg independently agreed. Final full app Kotlin compile, **196 IPTV JVM tests** and the final annotated Android harness build also passed. The 214-test device run precedes only two UnstableApi annotations; final APKs were not reinstalled. Suites overlap.
+- Structural inspection is not a general bitstream safety certificate. There is still no production local Media3 timeline or enabled pause/timeshift/recording. Binding inspected PTS to retained windows, production sharing, physical storage margins and durable recording remain unfinished.
+
+The preceding HLS milestone:
 
 - Implemented internal capture: bounded atomic spool and retention pins, independent viewer/recorder leases, one-body-at-a-time ingestion, finite local snapshots, and a bounded single-media-playlist HLS source with dedicated HTTP ownership.
 - Latest fixes prevent capture from silently skipping missing media or accepting changed overlapping segments; recover responses lost on cancellation; retain failed manifest-close handles; and prevent swallowed/no-op HTTP close from falsely releasing ownership.
@@ -124,3 +131,23 @@ Complete implementation context, reproduction locations, device cleanup state, r
   compiler. The final JVM run used the same overhead limits with a 1 GiB heap.
   These were command-line flags only; project/system memory settings and
   unrelated daemons were unchanged.
+
+## TS entry and local-reader continuation
+
+See [the controlled-media/local-reader design](IPTV-TS-ENTRY-DESIGN.md) and
+`IPTV-TS-ENTRY-VALIDATION-20261005.json` for supported profile limits, exact hashes,
+reproduced failures, decoding evidence and remaining integration gates. All suites
+overlap. Header inspection, independent fixture decoding and an internal extraction
+bridge do not certify arbitrary provider content or constitute an enabled player.
+
+Capture no longer holds the store state monitor during source copying/segment sync.
+Snapshots, opens and new pins work while a source is stalled; publication honours
+pins acquired during that copy. Index publication/retirement still involve bounded
+local I/O under the monitor. The live reader retains its anchor while waiting or at
+a terminal boundary, and never interprets a failed producer as successful EOF.
+
+AM9 tests ran headlessly without waking the device or replacing the older prototype.
+Temporary validation packages were removed. The final reverse list was empty;
+this continuation created or removed no reverse mapping, so the historical 8765
+mapping is not claimed present. Accounts, settings, recordings and both paused
+automations were left alone. No provider requests or dependency upgrades occurred.

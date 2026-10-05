@@ -1,10 +1,71 @@
 # Nuvio IPTV — fresh-session handoff, 5 October 2026
 
+## Overnight authorization, 5–6 October 2026
+
+The user paused the build, then explicitly authorized resuming and continuing all
+IPTV work while asleep, checking back tomorrow. The prior Gradle JVM-test run was
+intentionally stopped (not a regression). The resumed final annotated full app
+compile passed in 9m18s and the full IPTV JVM suite passed: 196 tests,
+zero failures/errors/skips. The final annotated isolated Android harness also builds.
+The earlier 214-test Android run precedes only two UnstableApi annotations; no
+further device run/install was needed. Exact outcomes/hashes are in the evidence report.
+
+A NEW temporary heartbeat `nuvio-iptv-overnight-continuation` is active in this chat
+(hourly, finite overnight schedule). Finish the current bounded operation and pause
+it by 08:00 Australia/Brisbane on 6 October, or when the user returns/changes the
+plan. The two OLD automations remain paused and must not be resumed. This new
+user authorization supersedes only the earlier no-new-automation restriction.
+No new subagents or dependency-upgrade work were authorized. Prefer controlled
+host/headless checks overnight; do not wake the TV/AVR or change device settings.
+The saved project now opens E:/Codex/NuvioTV/work/NuvioTV-Fork, still the WRONG
+checkout for IPTV. All IPTV source work stays in its separate sibling/branch.
+
+## Latest continuation — supersedes older status below
+
+Work continued from clean 3ae88829851f23f1a6413e77db88965ebc095ebc on codex/iptv in
+E:/Codex/NuvioTV/work/NuvioTV-IPTV. Read `IPTV-TS-ENTRY-DESIGN.md` and
+`IPTV-TS-ENTRY-VALIDATION-20261005.json` before the older capture reports. The old
+statements that no actual TS decode/local live reader exists and that append holds
+the monitor through source reads are now historical; production playback remains
+unconnected and all larger user requirements/constraints below still apply.
+
+Added bounded TS header inspection (single-program Baseline AVC/AAC with PAT/PMT,
+SPS/PPS/IDR and PTS checks), explicit-state CaptureLiveReader and separate store
+writer ownership. The inspector does not fully validate coded slice/AAC payloads.
+It is not yet attached to persisted capture rows or used to publish seek windows.
+
+AM9 platform MediaExtractor and the exact shipped Media3 HLS extractor each omitted
+the final video sample (49/50). Shipped PesReader reparses header scratch already
+overwritten by timestamp bytes at EOF. `LocalTsSegmentExtractor` restores the final
+AVC sample only after length/hash match a complete inspected resource. Its output
+is TENTATIVE until extraction succeeds; future users must stage/discard on failure.
+This is an internal extraction bridge, not an ExoPlayer MediaSource. Do not patch or
+upgrade the bundled AARs as a shortcut; component upgrades remain separate work.
+
+150 core JVM tests and 214 Android tests passed; FFmpeg independently decoded all
+three original synthetic segments. AM9 decoded 50 video and 95/94/94 audio frames
+per segment, plus 150 video/283 audio frames through the HLS capture -> store ->
+local reader -> bridge -> codec integration. Check the latest evidence report for
+full-app/full-JVM results (196 JVM tests passed); old 176/190 counts describe the HLS baseline.
+
+Temporary test packages were removed; prototype unchanged. Device stayed observed
+Awake without task wake/power changes. Final reverse list was EMPTY; this task made
+no reverse changes. Do not assume the previously observed reverse8765 still exists.
+No fixture servers, provider requests, subagents or goals were started. The new
+temporary overnight heartbeat was created after these device checks, as above.
+
+Next: bind inspection to pinned immutable committed media and budgets; derive a
+Media3 retained-sample timeline across PTS wraps/codec epochs/eviction; implement
+both-direction pending seek and explicit return-live; then governed capture/player
+sharing, physical disk margins, pause/recording and the remaining full scope below.
+Keep the controls disabled until these gates are validated. See latest design.
+
+
 ## Start here
 
 The user explicitly requested a fresh session to continue implementation, a complete handoff and updated comprehensive draft release notes. Continue actual implementation after reading this document; do not stop at a plan. The full IPTV scope remains unfinished. Dependency/component upgrades were handed to another agent and are outside this continuation.
 
-**Authoritative checkout:** `E:/Codex/NuvioTV/work/NuvioTV-IPTV`, **branch `codex/iptv`**. Latest implementation commit: `eaa43e5` (bounded HLS capture), following `4c3e0b0` (shared capture) and `27f78ea` (earlier handover). A documentation-only checkpoint follows this handoff. Verify HEAD, branch and status before editing; keep IPTV on its separate branch. Published base: nt4.1, build 1458, `574a2d41257ccc667828f54ba0c6ef40d9784984`.
+**Authoritative checkout:** `E:/Codex/NuvioTV/work/NuvioTV-IPTV`, **branch `codex/iptv`**. Latest implementation: the TS inspection/local reader checkpoint described above, following `3ae8882` (handoff), `eaa43e5` (bounded HLS capture), `4c3e0b0` (shared capture) and `27f78ea` (earlier handover). Read the current Git log for the checkpoint hash. Verify HEAD, branch and status before editing; keep IPTV on its separate branch. Published base: nt4.1, build 1458, `574a2d41257ccc667828f54ba0c6ef40d9784984`.
 
 The saved Codex project points to the ORIGINAL sibling `NuvioTV-Fork`, not this implementation checkout. Its equivalent saved C: project is `C:/Users/PWR/Documents/Codex/2026-09-13/prior-conversation-with-codex-conversation-role/work/NuvioTV-Fork`; the E: work folder is the operational path used here. The original fork was dirty on `feature/nuvio-v2-ui` with a broken Codex checkpoint ref. Do not reset, repair, stash, commit or implement IPTV there. Only ignored task scratch under its `captures/` was added. Other upgrade work may now be happening there; do not overwrite it.
 

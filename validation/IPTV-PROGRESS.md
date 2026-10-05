@@ -205,3 +205,28 @@ work. Draft notes now include a current summary, latest commit history and fixes
 and remove obsolete present-tense no-adapter/asleep statements. Component upgrades
 remain separate. This checkpoint changes documentation only; previous code/test
 evidence remains applicable. Continue on codex/iptv in the authoritative sibling.
+
+## Controlled TS entry and local-reader continuation, 5 October 2026
+
+Continued from clean 3ae8882 on the existing IPTV branch. Added bounded TS header
+inspection, independent FFprobe/strict FFmpeg and AM9 codec checks, a hash-bound
+local Media3 extraction bridge, explicit live-reader states and store source-I/O
+concurrency correction. Reproduced and scoped a real missing-last-sample issue in
+platform and shipped Media3 extraction. No bundled binary or version was changed.
+150 core tests and 214 Android tests passed; complete capture/local-read integration
+decoded 150 video/283 audio frames. See IPTV-TS-ENTRY-VALIDATION-20261005.json for
+current full build/JVM outcomes and exact hashes. Draft notes/handoff are updated.
+Temporary packages removed, device Awake without task wake, prototype unchanged,
+no provider traffic. Final reverse list empty; this task made no reverse changes.
+Next gates remain inspected retained-sample timeline, production player sharing,
+physical allocation and pause/recording/durable services plus the broader handoff.
+
+Final resumed validation: app Kotlin compile PASS (558s), full IPTV JVM
+suite PASS (196 tests in 23 suites, zero failures/errors/skips), annotated
+Android harness build PASS (75s). The first full JVM run was stopped
+at the user pause; the successful resumed run is separate evidence. Device checks
+were not repeated for the two annotation-only edits; tested APK hashes and final
+compiled APK hashes are distinguished in the report. No device wake/install was
+performed during this resumed verification. Temporary overnight continuation is
+authorized; leave the older automations paused and stop the new one by 08:00
+Brisbane on 6 October. Next implementation gates remain as described above.

@@ -30,7 +30,7 @@ compile_result = subprocess.run([str(JAVA), '-cp', os.pathsep.join(map(str, comp
 (OUT / 'compile.txt').write_text(compile_result.stdout + compile_result.stderr, encoding='utf-8')
 if compile_result.returncode:
     raise SystemExit(compile_result.stdout + compile_result.stderr)
-result = subprocess.run([str(JAVA), '-cp', os.pathsep.join(map(str, [target] + classpath)), 'org.junit.runner.JUnitCore', *['com.nuvio.tv.core.iptv.' + t.stem for t in tests]], capture_output=True, text=True)
+result = subprocess.run([str(JAVA), '-cp', os.pathsep.join(map(str, [target, ROOT / "app/src/test/resources"] + classpath)), 'org.junit.runner.JUnitCore', *['com.nuvio.tv.core.iptv.' + t.stem for t in tests]], capture_output=True, text=True)
 (OUT / 'results.txt').write_text(result.stdout + result.stderr, encoding='utf-8')
 print(result.stdout + result.stderr)
 raise SystemExit(result.returncode)

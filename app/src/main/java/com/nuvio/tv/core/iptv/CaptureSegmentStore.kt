@@ -24,6 +24,8 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
     val maxSegmentBytes: Long) : AutoCloseable {
     private val channel: FileChannel
     private val lock: FileLock
+    private val appendMutex = Any()
+    private var appending = false
     private var closed = false
     private var nextSequence = 0L
     private var segments = emptyList<CaptureSegment>()
@@ -68,6 +70,12 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
         return CaptureSnapshotReader(selected.toList(), pinFrom(sequence), ::open)
     }
 
+    /** Lazy live-tail byte reader. This API does not certify decoder-safe starts or seek times. */
+    @Synchronized fun openLiveFrom(sequence: Long, producerState: () -> CaptureTransportState): CaptureLiveReader {
+        checkOpen(); require(sequence in 0..nextSequence)
+        return CaptureLiveReader(this, sequence, producerState)
+    }
+
     /** Retain this segment AND its successors until the consumer releases its pause/recording anchor. */
     @Synchronized fun pinFrom(sequence: Long): AutoCloseable {
         checkOpen(); require(segments.any { it.sequence == sequence })
@@ -92,17 +100,24 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
         } catch (failure: Exception) { pin.close(); throw failure }
     }
 
-    /** Input stays caller-owned. A failed/cancelled append cannot publish partial media or evict old rows. */
-    @Synchronized fun append(startMs: Long, endMs: Long, continuity: Long, input: InputStream,
-        checkCancellation: () -> Unit = {}): CaptureSegment {
-        checkOpen()
-        require(startMs >= 0 && endMs > startMs && continuity >= 0)
-        segments.lastOrNull()?.let { require(startMs >= it.endMs && continuity >= it.continuity) }
-        check(nextSequence < Long.MAX_VALUE)
-        cleanOrphans()
+    /**
+     * Input stays caller-owned. Source reads and segment sync run outside the state monitor so local
+     * readers/pins remain available. One writer owns staging; publication rechecks current pins.
+     * A failed/cancelled append cannot publish partial media or evict old rows.
+     */
+    fun append(startMs: Long, endMs: Long, continuity: Long, input: InputStream,
+        checkCancellation: () -> Unit = {}): CaptureSegment = synchronized(appendMutex) {
         val id = UUID.randomUUID().toString()
         val pending = managedFile("pending-$id")
         val complete = managedFile("segment-$id.bin")
+        synchronized(this) {
+            checkOpen()
+            require(startMs >= 0 && endMs > startMs && continuity >= 0)
+            segments.lastOrNull()?.let { require(startMs >= it.endMs && continuity >= it.continuity) }
+            check(nextSequence < Long.MAX_VALUE)
+            cleanOrphans()
+            appending = true // close cannot release the directory lock while this writer is outside the monitor.
+        }
         var committed = false
         try {
             var count = 0L
@@ -120,28 +135,31 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
                 if (count == 0L) throw IOException("Empty capture segment")
                 out.fd.sync()
             }
-            val keep = segments.toMutableList()
-            var bytes = keep.sumOf { it.bytes }
-            while (bytes > maxRetainedBytes - count || keep.size >= MAX_SEGMENTS) {
-                val oldest = keep.first()
-                if (pins.values.any { it <= oldest.sequence }) throw CaptureRetentionBlocked()
-                keep.removeAt(0); bytes -= oldest.bytes
+            synchronized(this) {
+                val keep = segments.toMutableList()
+                var bytes = keep.sumOf { it.bytes }
+                while (bytes > maxRetainedBytes - count || keep.size >= MAX_SEGMENTS) {
+                    val oldest = keep.first()
+                    if (pins.values.any { it <= oldest.sequence }) throw CaptureRetentionBlocked()
+                    keep.removeAt(0); bytes -= oldest.bytes
+                }
+                val segment = CaptureSegment(nextSequence, startMs, endMs, continuity, count, complete.name)
+                checkCancellation()
+                Files.move(pending.toPath(), complete.toPath(), StandardCopyOption.ATOMIC_MOVE)
+                val next = keep + segment
+                checkCancellation()
+                persist(next, nextSequence + 1)
+                segments = next; nextSequence++; committed = true
+                // Deletion is after index promotion; a crash leaves removable orphans, never missing indexed rows.
+                // The commit is already authoritative. Do not report a failed append if retiring an
+                // old file fails; the NEXT append must clear those orphans before allocating more.
+                try { cleanOrphans() } catch (_: IOException) { }
+                segment
             }
-            val segment = CaptureSegment(nextSequence, startMs, endMs, continuity, count, complete.name)
-            checkCancellation()
-            Files.move(pending.toPath(), complete.toPath(), StandardCopyOption.ATOMIC_MOVE)
-            val next = keep + segment
-            checkCancellation()
-            persist(next, nextSequence + 1)
-            segments = next; nextSequence++; committed = true
-            // Deletion is after index promotion; a crash leaves removable orphans, never missing indexed rows.
-            // The commit is already authoritative. Do not report a failed append if retiring an
-            // old file fails; the NEXT append must clear those orphans before allocating more.
-            try { cleanOrphans() } catch (_: IOException) { }
-            return segment
         } finally {
             pending.delete()
             if (!committed) complete.delete()
+            synchronized(this) { appending = false }
         }
     }
 
@@ -158,6 +176,7 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
 
     @Synchronized override fun close() {
         if (closed) return
+        check(!appending) { "Capture append is still active" }
         check(pins.isEmpty()) { "Capture consumers are still open" }
         lock.release(); channel.close(); closed = true
     }
