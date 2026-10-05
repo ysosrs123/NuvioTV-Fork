@@ -125,4 +125,41 @@ class AudioRoutingSnapshotTest {
         )
         assertNull(routing)
     }
+
+    private fun tunnelled(
+        sinkMime: String?,
+        sinkChannelCount: Int,
+        sourceMime: String = MimeTypes.AUDIO_E_AC3,
+        sourceChannelCount: Int = 6,
+        isIecActive: Boolean = false,
+        isTranscodingAc3: Boolean = false
+    ) = resolveAudioRoutingSnapshot(
+        sourceMime = sourceMime,
+        sourceChannelCount = sourceChannelCount,
+        isIecActive = isIecActive,
+        isTranscodingAc3 = isTranscodingAc3,
+        isAudioPathActive = true,
+        sinkMime = sinkMime,
+        sinkChannelCount = sinkChannelCount,
+        isTunnelled = true
+    )?.outputFormat
+
+    @Test
+    fun tunnelledPlayback_isNamedInTheLabel() {
+        assertEquals("passthrough (direct, tunnelled)", tunnelled(MimeTypes.AUDIO_E_AC3, 6))
+        assertEquals("PCM 5.1 (tunnelled)", tunnelled(MimeTypes.AUDIO_RAW, 6))
+        assertEquals("PCM 2.0 (fallback, tunnelled)", tunnelled(MimeTypes.AUDIO_RAW, 2))
+        assertEquals(
+            "transcode AC-3 5.1 (tunnelled)",
+            tunnelled(MimeTypes.AUDIO_AC3, 6, sourceMime = MimeTypes.AUDIO_DTS, isTranscodingAc3 = true)
+        )
+    }
+
+    @Test
+    fun iecPassthrough_neverCarriesTheTunnelNote() {
+        assertEquals(
+            "passthrough (IEC)",
+            tunnelled(MimeTypes.AUDIO_TRUEHD, 8, sourceMime = MimeTypes.AUDIO_TRUEHD, sourceChannelCount = 8, isIecActive = true)
+        )
+    }
 }

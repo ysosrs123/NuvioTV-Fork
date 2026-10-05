@@ -776,7 +776,7 @@ class PlayerViewModel @Inject constructor(
                 if (outChannels != null && outChannels != s) "${s}ch→${outChannels}ch" else "${s}ch"
             }
             val rate = format.sampleRate.takeIf { it > 0 }?.let { "${it / 1000} kHz" }
-            val routing = controller.getAudioRoutingSnapshot()
+            val routing = controller.getAudioRoutingSnapshot(isTunnelled = sampleVideoPresentation().isTunnelled)
             val mode = routing?.outputFormat
             val losslessMime = format.sampleMimeType?.let {
                 it.contains("true-hd") || it.contains("truehd") || it.contains("dts")
