@@ -897,7 +897,7 @@
     <string name="audio_surround_mode_manual">Manual</string>
     <string name="audio_surround_mode_manual_desc">Choose per format whether your audio system can decode it. Use this when the automatic report is wrong.</string>
     <string name="audio_surround_tv_arc_soundbar">Sound goes through the TV to a soundbar (ARC)</string>
-    <string name="audio_surround_tv_arc_soundbar_sub">Auto converts DTS and TrueHD to Dolby Digital 5.1 and sends other decoded sound as stereo. Dolby Digital and Dolby Digital Plus pass through untouched.</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Auto sends formats the soundbar cannot take as Dolby Digital 5.1 and other decoded sound as stereo. Dolby Digital and Dolby Digital Plus pass through untouched.</string>
     <!--
       Per-format passthrough labels.
 
