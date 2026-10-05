@@ -79,6 +79,7 @@ class InspectedCaptureInput internal constructor(val proof: InspectedCaptureSegm
     private var finished = false
     private var rejected = false
     val verified: Boolean get() = synchronized(this) { finished }
+    val isClosed: Boolean get() = synchronized(this) { closed }
 
     @Synchronized override fun read(): Int {
         val one = ByteArray(1)

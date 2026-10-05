@@ -20,7 +20,34 @@ host/headless checks overnight; do not wake the TV/AVR or change device settings
 The saved project now opens E:/Codex/NuvioTV/work/NuvioTV-Fork, still the WRONG
 checkout for IPTV. All IPTV source work stays in its separate sibling/branch.
 
-## Physical-storage checkpoint — latest continuation
+## Pinned-period checkpoint — latest continuation
+
+Continued from clean ae0c08bb629d4a8f4df6ec4aea13c917de68733e. Read
+IPTV-PINNED-PERIOD-DESIGN.md and IPTV-PINNED-PERIOD-VALIDATION-20261006.json first.
+Added an actual finite ONE-segment MediaPeriod/SampleStream, exact verified open
+pin transfer, thread/selection fencing, format/peek/omit/EOF reads, real-frame seek
+positions and full initial-IDR/audio preroll, with retryable confirmed pin closure.
+Final full app compile passed in 503s; all 191 core tests passed in 1.868s;
+253 IPTV JVM tests in 31 suites passed with zero failures/errors/skips (6.487s
+test time, 370s build). Final current-source Android harness builds passed in 36s.
+Exact source, unchanged shipped library, APK and retained log hashes are recorded.
+Merged headless target manifest contains no permissions or activities. No controls
+enabled; no dependency/component upgrades. No build remains running from this phase.
+
+Targeted AM9 get-state/read-only power query reported Asleep. No connect/install,
+wake/power/CEC/settings/account/recording/provider operation occurred. Two new
+Android period fixtures remain unexecuted, as do prior staging/probe fixtures.
+Nine JVM period cases use synthetic encoded payloads though file pins/verification,
+Java Media3 APIs and retryable closure are real. The shipped renderer bytecode uses
+output PTS vs reset position for decode-only classification; runtime preroll,
+negative-audio/offset behavior is still unvalidated. This is a finite preloaded
+period, not a live/epoch loader or MediaSource.
+Next: dynamic loading and waiting/error/expiry/epoch policy, an actual owned player
+consumer and aggregate admission/cleanup/device gates. Do not use finite EOF to
+terminate a running capture; do not acknowledge seeks from preparation/sample
+reads. Keep the remaining full handoff scope and 08:00 Brisbane cutoff.
+
+## Physical-storage checkpoint — historical continuation
 
 Continued from 460641888181b05cd43ddb058c9c6380785db0fe. Read
 IPTV-STORAGE-FENCE-DESIGN.md and IPTV-STORAGE-FENCE-VALIDATION-20261006.json first.

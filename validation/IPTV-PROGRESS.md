@@ -2,7 +2,23 @@
 
 Updated 6 October 2026, Australia/Brisbane.
 
-## Latest physical storage checkpoint
+## Finite pinned period — latest validated checkpoint
+
+From ae0c08b, implemented actual Media3 finite-period/sample-stream APIs over one
+verified, pinned staged segment, frame seeks with full encoded preroll, read flags
+and explicit retryable input closure. Final app compile (503s), 191 core tests
+(1.868s), 253 IPTV JVM tests (31 suites, zero failures/errors/skips, 6.487s test /
+370s build) and final current-source Android harness builds (36s) passed.
+Read IPTV-PINNED-PERIOD-DESIGN.md and the matching validation report for exact hashes
+and scope. The headless target manifest has no permissions or activities.
+AM9 was observed Asleep through a targeted read-only query; no installs or
+power/settings/provider operations. Two real Android period fixtures and earlier
+staging/probe fixtures remain unexecuted. JVM sample payloads are synthetic.
+Actual renderer/codec, dynamic loader/source and owned player gates remain
+unvalidated and controls disabled. Next: live waiting/loading/epoch policy and
+confirmed player/decoder/pin closure under measured aggregate admission.
+
+## Physical storage checkpoint — historical
 
 On codex/iptv from 4606418, added guarded physical space/unit/volume observations,
 explicit caller margins and allocation/index overhead to capture admission and

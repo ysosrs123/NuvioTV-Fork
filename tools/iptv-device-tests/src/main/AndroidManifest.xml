@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <!-- OkHttp's library manifest requests this; fixture responses need no sockets. -->
     <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
     <application android:label="Nuvio IPTV Validation" android:allowBackup="false" android:supportsRtl="true" />
 </manifest>

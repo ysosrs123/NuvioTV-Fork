@@ -44,8 +44,10 @@ kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarg
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    // Exact shipped extractor/common AARs. No player UI or native player libraries.
-    implementation(files("../../app/libs/lib-common-release.aar", "../../app/libs/lib-extractor-release.aar"))
+    // Exact shipped Java common/extractor/period/data-source APIs; no UI or native player libraries.
+    implementation(files("../../app/libs/lib-common-release.aar", "../../app/libs/lib-extractor-release.aar",
+        "../../app/libs/lib-exoplayer-release.aar", "../../app/libs/lib-datasource-release.aar"))
+    implementation("androidx.media3:media3-decoder:1.8.0") { isTransitive = false }
     implementation("androidx.media3:media3-container:1.8.0") { isTransitive = false }
     implementation("com.google.guava:guava:33.3.1-android")
     androidTestImplementation("junit:junit:4.13.2")

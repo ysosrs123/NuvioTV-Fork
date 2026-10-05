@@ -1,0 +1,104 @@
+{
+  "date": "2026-10-06",
+  "branch": "codex/iptv",
+  "baseCommit": "ae0c08bb629d4a8f4df6ec4aea13c917de68733e",
+  "status": "PASS_HOST_BUILD_JVM_ANDROID_EXECUTION_DEFERRED",
+  "coreJvm": {
+    "result": "PASS",
+    "tests": 191,
+    "seconds": 1.868,
+    "log": "iptv-core/pinned-period-core.txt"
+  },
+  "fullAppCompile": {
+    "result": "PASS",
+    "seconds": 503,
+    "log": "iptv-core/pinned-period-full-compile.log"
+  },
+  "fullJvm": {
+    "result": "PASS",
+    "tests": 253,
+    "suites": 31,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "testSeconds": 6.487,
+    "buildSeconds": 370,
+    "log": "iptv-core/pinned-period-full-jvm.log",
+    "newPeriodSuite": {
+      "tests": 9,
+      "seconds": 0.189,
+      "payloads": "synthetic"
+    }
+  },
+  "androidHarnessBuild": {
+    "result": "PASS_FINAL_SOURCE",
+    "seconds": 36,
+    "log": "iptv-core/pinned-period-harness-final.log",
+    "preliminaryBuild": {
+      "seconds": 69,
+      "log": "iptv-core/pinned-period-harness-initial.log",
+      "scope": "Before final constructor hardening; superseded by final-source build"
+    },
+    "apks": {
+      "tools/iptv-device-tests/build/outputs/apk/debug/NuvioIptvDeviceTests-debug.apk": {
+        "bytes": 5478179,
+        "sha256": "bd4bd53c978af1445282ad127706f1218ac87093b50d076d1cb1b58f29dcca98"
+      },
+      "tools/iptv-device-tests/build/outputs/apk/androidTest/debug/NuvioIptvDeviceTests-debug-androidTest.apk": {
+        "bytes": 1291765,
+        "sha256": "1adac9f3f074f5fce26a78b4e5d552470f09baf916a6c84ba187f4a16220e812"
+      }
+    },
+    "mergedManifest": {
+      "path": "tools/iptv-device-tests/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml",
+      "sha256": "4e75c5a18984afd5154dfd7a61e72b65bc77646cd3668916bb2ca91cb7eb09b6",
+      "usesPermissions": [],
+      "activities": []
+    }
+  },
+  "androidExecution": {
+    "result": "DEFERRED_DEVICE_ASLEEP",
+    "newPeriodTests": 2,
+    "priorStagingAndSpaceTestsAlsoUnexecuted": true,
+    "serial": "192.168.10.60:5555",
+    "observedWakefulness": "Asleep",
+    "installed": false,
+    "executed": false,
+    "note": "Targeted get-state and read-only dumpsys power only; no connect, install, wake, power/CEC/settings/account/recording/provider operation."
+  },
+  "sourceSha256": {
+    "app/src/main/java/com/nuvio/tv/core/iptv/CaptureTsInspectionIndex.kt": "831118a24337b135056d43cbad1eb802f351b88afb2a8a8c09006940aa784308",
+    "app/src/main/java/com/nuvio/tv/data/iptv/PinnedCaptureSegmentPeriod.kt": "236daec9a47f86d33d5d90109334429d6c59107f06f365fd093ad29e64a3e813",
+    "app/src/test/java/com/nuvio/tv/data/iptv/PinnedCaptureSegmentPeriodTest.kt": "eb8be305714c44a8d2076a0d4cab2a92a7acb25645c584e7df0057aeb096576b",
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/PinnedCaptureSegmentPeriodAndroidTest.kt": "c8384b2b71945c82c1453aae9191f28862a1598b4d2112bd66159268cbceeb3d",
+    "tools/iptv-device-tests/build.gradle.kts": "1aaa2addbebc8a6b0a33d7b271b76e6fa00f36a7a1b517061d3d4180c23fe2e8",
+    "tools/iptv-device-tests/src/main/AndroidManifest.xml": "d06598587207600f8cc14518173e4016bf5f58ba13df40bb67c0536386fcfa0f"
+  },
+  "unchangedShippedLibrarySha256": {
+    "app/libs/lib-common-release.aar": "a01729509ff920e273ee696fc2cdf99ec073b9b5dc039c4d8dec72aa61bcb447",
+    "app/libs/lib-extractor-release.aar": "d611a11f7bc6cef11f789c1cae4fe75ab9332a9e393405e98cfa8e147d698316",
+    "app/libs/lib-exoplayer-release.aar": "b4a9e7052a2d9d06fa164f0232cd9bb714ca8fc77ba7f03a2fb4f951fbf374e7",
+    "app/libs/lib-datasource-release.aar": "5375c0ff43784d210a69e7bfc438b9da9b2f42d6fb3b967ddae9b55902c7bf3d"
+  },
+  "scope": {
+    "period": "Actual Media3 MediaPeriod over one finite pre-staged inspected segment; no MediaSource, dynamic loading or live-tail EOS claim",
+    "jvm": "Real verified/pinned file inputs and actual Java Media3 APIs; compressed sample payloads and formats are synthetic; no Android TS reader/renderer/decoder run",
+    "preroll": "Preserves initial IDR and complete audio phase; seek returns actual video frame time. Shipped renderer bytecode uses output PTS vs lastResetPositionUs, not a decode-only input flag. Runtime discard remains unvalidated.",
+    "ownership": "Only input/pin closure; does not claim decoder/player closure, aggregate memory admission or seek acknowledgement"
+  },
+  "notEstablished": [
+    "Executed real staging through new period on Android, normalized negative audio codec behavior or actual renderer preroll discard",
+    "Dynamic MediaSource/MediaPeriod loading, waiting/error/epoch transitions and governed player consumer integration",
+    "Measured aggregate staging/decoder/renderer memory, production storage margins or enabled timeshift/recording",
+    "Durable schedules/services/internal/USB/SMB, provider capacity or visible UI certification"
+  ],
+  "validatedAtUtc": "2026-10-05T16:56:00Z",
+  "retainedLogsSha256": {
+    "pinned-period-core.txt": "21aeed45be08aa99b1f5d2d3cd5182ff1c4f70bab7d75f15122844a1bd6037f0",
+    "pinned-period-full-compile.log": "f4601c65a01d0e27e9ea4c6c0ddbde34325749d4ec8ac8939dde3fefd3185104",
+    "pinned-period-full-jvm.log": "48569437f8257e6c6db41b31dddf9dabcec23c54fc45007a8ceffb6c4ecc3492",
+    "pinned-period-harness-initial.log": "27383b0f430972e298527f855bf3bc01307b2ba8257f513f9cbc43ade4c93a58",
+    "pinned-period-harness-final.log": "43c6dfe32fdc35d6d2d4e4aa1643ada1246f910566056aa1803e5cb0af9366a8",
+    "pinned-period-renderer-bytecode.txt": "97b7385b1970c89f45ad771e2a5eb4fc3451b552ce4e498d4704d5cc39915f5c"
+  }
+}

@@ -1,9 +1,27 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 6 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: physical capture storage fences and governed admission, following sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
+Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: finite pinned Media3 sample delivery, following physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
 
 ## Current checkpoint summary
+
+- Added an actual finite Media3 MediaPeriod/SampleStream for one inspected,
+  verified and pinned staged segment. Reads support format, peek/omit, encoded
+  payload/time/keyframe and EOF; seeks return actual video-frame positions and
+  retain initial-IDR/audio preroll. Playback-thread/track ownership is fenced,
+  EOF keeps pins, and failed input closure remains reserved for a later retry.
+- Final full app compile (503s), **191 core tests**, **253 IPTV JVM tests**
+  (31 suites, zero failures/errors/skips) and final Android harness builds (36s)
+  pass. Nine new JVM cases use synthetic encoded payloads with real verified file
+  pins and Java Media3 interfaces. Two new Android fixtures compile but remain
+  unexecuted because AM9 is Asleep; only targeted read-only state checks occurred.
+  The headless harness has no target permissions/activities and reuses unchanged
+  shipped player/data-source libraries and the existing decoder dependency.
+- This finite period does not establish live-tail/epoch loading or a MediaSource.
+  Runtime renderer preroll discard, normalized negative audio, player/decoder
+  closure and aggregate memory admission remain required. It never acknowledges
+  a pending seek or enables capture controls. Evidence/hashes are in the new
+  pinned-period design and validation report.
 
 - Added fresh physical free-space, allocation-unit and volume checks with explicit
   caller margins and worst-case file/index overhead. Governed capture sharing now
@@ -28,7 +46,7 @@ Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: physical capture stor
   failures/errors/skips) and final Android harness builds pass. Six new Android
   staging cases remain unexecuted because AM9 was observed Asleep; no install or
   wake operation occurred. JVM timeline fixtures use synthetic batch metadata.
-  Aggregate heap/codec admission, MediaSource/MediaPeriod loading, preroll and
+  Aggregate heap/codec admission, dynamic MediaSource/epoch-period loading, renderer preroll and
   actual player integration remain required before controls can be enabled.
 
 - Retained-media continuation adds ephemeral inspection evidence tied to committed
@@ -41,7 +59,7 @@ Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: physical capture stor
 - New internal components inspect a bounded AVC/AAC MPEG-TS profile, expose explicit local DATA/WAITING/ENDED/EXPIRED/DISCONTINUITY/STOPPED states, and allow local reads/pins during slow capture input. Pins are rechecked at publication.
 - Reproduced a missing final video sample in AM9's platform extractor and the shipped Media3 HLS extractor. A scoped, hash-bound local extraction bridge restores the final sample for inspected complete segments; bundled libraries and dependency versions are unchanged.
 - Preceding TS entry checks: **150 core JVM tests** and **214 AM9 tests** passed. Three independent segments decoded all 50 video frames each and 95/94/94 audio frames. Real capture/store/local-read integration decoded 150 video and 283 audio frames. FFprobe/strict FFmpeg independently agreed. Final full app Kotlin compile, **196 IPTV JVM tests** and the final annotated Android harness build also passed. The 214-test device run precedes only two UnstableApi annotations; final APKs were not reinstalled. Suites overlap.
-- Structural inspection is not a general bitstream safety certificate. Media3 metadata now exists internally; production sample loading/playback, sharing and durable recording remain unfinished. Physical observation fences now exist internally; device margins and behavior require validation. Pause/timeshift/recording controls remain disabled.
+- Structural inspection is not a general bitstream safety certificate. Media3 metadata and finite sample delivery now exist internally; dynamic loading, governed playback and durable recording remain unfinished. Physical observation fences now exist internally; device margins and behavior require validation. Pause/timeshift/recording controls remain disabled.
 
 The preceding HLS milestone:
 
