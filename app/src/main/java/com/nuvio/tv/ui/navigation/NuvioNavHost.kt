@@ -1235,9 +1235,14 @@ private fun PlaybackNavHost(
             )
         }
 
+        composable(Screen.IptvSources.route) {
+            com.nuvio.tv.ui.screens.iptv.IptvSourcesScreen(onBack = { navController.popBackStack() })
+        }
+
         composable(Screen.Settings.route) {
             SettingsScreen(
                 showBuiltInHeader = !hideBuiltInHeaders,
+                onNavigateToIptvSources = { navController.navigate(Screen.IptvSources.route) },
                 onNavigateToAddons = { navController.navigate(Screen.AddonManager.route) },
                 onNavigateToPlugins = { navController.navigate(Screen.Plugins.route) },
                 onNavigateToWatchParty = { navController.navigate(Screen.WatchParty.route) },

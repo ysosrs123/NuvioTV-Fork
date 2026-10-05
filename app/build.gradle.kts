@@ -174,6 +174,14 @@ android {
             buildConfigField("boolean", "FEATURE_CUSTOM_SERVER_CONNECTIONS_ENABLED", "true")
         }
 
+        create("iptvPrototype") {
+            initWith(getByName("full"))
+            applicationId = "com.nuvio.iptv.prototype"
+            versionNameSuffix = "-iptv-prototype"
+            buildConfigField("boolean", "FEATURE_IN_APP_UPDATES_ENABLED", "false")
+            buildConfigField("boolean", "UPDATE_CHECK_ENABLED", "false")
+        }
+
     }
 
     externalNativeBuild {
@@ -302,6 +310,10 @@ android {
     }
 
     sourceSets {
+        getByName("iptvPrototype") {
+            java.srcDir("src/full/java")
+            res.srcDir("src/full/res")
+        }
         getByName("main") {
             jniLibs.srcDirs("src/main/jniLibs")
         }
@@ -329,6 +341,8 @@ android {
     }
 }
 
+
+configurations.getByName("iptvPrototypeImplementation").extendsFrom(configurations.getByName("fullImplementation"))
 
 afterEvaluate {
     tasks.withType<L8DexDesugarLibTask>().configureEach {

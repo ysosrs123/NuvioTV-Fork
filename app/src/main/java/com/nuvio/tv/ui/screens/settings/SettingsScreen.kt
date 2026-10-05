@@ -156,6 +156,7 @@ private sealed interface ExperienceModeLoadState {
 
 @Composable
 private fun settingsSectionSpec(category: SettingsCategory): SettingsSectionSpec = when (category) {
+    SettingsCategory.IPTV -> SettingsSectionSpec(category, stringResource(R.string.iptv_sources_title), Icons.Rounded.PlayArrow, destination = SettingsSectionDestination.External)
     SettingsCategory.ACCOUNT -> SettingsSectionSpec(category, stringResource(R.string.settings_account), Icons.Default.Person, destination = SettingsSectionDestination.Inline)
     SettingsCategory.PROFILES -> SettingsSectionSpec(category, stringResource(R.string.settings_profiles), Icons.Default.People, destination = SettingsSectionDestination.Inline)
     SettingsCategory.APPEARANCE -> SettingsSectionSpec(category, stringResource(R.string.appearance_title), Icons.Default.Palette, destination = SettingsSectionDestination.Inline)
@@ -173,6 +174,7 @@ private fun settingsSectionSpec(category: SettingsCategory): SettingsSectionSpec
 @Composable
 fun SettingsScreen(
     showBuiltInHeader: Boolean = true,
+    onNavigateToIptvSources: () -> Unit = {},
     onNavigateToAddons: () -> Unit = {},
     onNavigateToPlugins: () -> Unit = {},
     onNavigateToWatchParty: () -> Unit = {},
@@ -457,6 +459,7 @@ fun SettingsScreen(
                     // return aims at the options of a category that was never opened.
                     allowDetailAutofocus = false
                     when (section.category) {
+                        SettingsCategory.IPTV -> onNavigateToIptvSources()
                         SettingsCategory.ACCOUNT -> onNavigateToAuthQrSignIn()
                         else -> Unit
                     }
@@ -790,6 +793,7 @@ private fun SettingsDetailPane(
     onNavigateToLicensesAttributions: () -> Unit
 ) {
     when (selectedCategory) {
+        SettingsCategory.IPTV -> Unit // This category opens its own source-management route.
         SettingsCategory.EXPERIENCE -> EssentialAdvancedSettingsContent(
             experienceModeViewModel = experienceModeViewModel,
             initialFocusRequester = if (allowDetailAutofocus) {

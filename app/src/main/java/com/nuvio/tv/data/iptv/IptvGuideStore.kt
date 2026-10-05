@@ -53,6 +53,16 @@ class IptvGuideStore(
     fun endpoint(ref: IptvGuideRef): String = transaction { db -> feed(db, ref); endpoint(db, ref) }
     fun feed(ref: IptvGuideRef): IptvGuideFeed = transaction { db -> feed(db, ref) }
 
+    fun removeProfile(profileId: Int) = transaction { db ->
+        require(profileId >= 0)
+        val args = arrayOf(profileId.toString())
+        db.delete("stages", "feed IN (SELECT id FROM feeds WHERE profile=?)", args)
+        db.delete("feeds", "profile=?", args)
+        Unit
+    }
+
+    fun clearAllProfiles() = transaction { db -> db.delete("stages", null, null); db.delete("feeds", null, null); Unit }
+
     fun feeds(profileId: Int, offset: Int = 0, limit: Int = 100): List<IptvGuideFeed> = transaction { db ->
         require(profileId >= 0 && offset >= 0 && limit in 1..200)
         db.rawQuery("SELECT id,label,version,requested,active_generation FROM feeds WHERE profile=? ORDER BY label COLLATE NOCASE,id LIMIT ? OFFSET ?",

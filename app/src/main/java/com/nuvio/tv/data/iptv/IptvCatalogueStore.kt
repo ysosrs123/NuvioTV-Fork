@@ -64,6 +64,21 @@ class IptvCatalogueStore(
         }
     }
 
+    fun removeProfile(profileId: Int) = transaction { db ->
+        require(profileId >= 0)
+        val args = arrayOf(profileId.toString())
+        db.delete("source_guides", "source IN (SELECT id FROM sources WHERE profile=?)", args)
+        db.delete("overlays", "profile=?", args)
+        db.delete("catalogue", "source IN (SELECT id FROM sources WHERE profile=?)", args)
+        db.delete("identities", "source IN (SELECT id FROM sources WHERE profile=?)", args)
+        db.delete("sources", "profile=?", args)
+        Unit
+    }
+
+    fun clearAllProfiles() = transaction { db ->
+        listOf("source_guides", "overlays", "catalogue", "identities", "sources").forEach { db.delete(it, null, null) }
+    }
+
     fun connection(ref: IptvSourceRef): IptvSourceConnection = transaction { db ->
         source(db, ref)
         readConnection(db, ref)
