@@ -333,7 +333,7 @@ class SurroundFormatResolverTest {
     fun tvArcSoundbar_auto_keepsDtsCorePassthrough_whenTheProbeAllowsIt() {
         val r = resolve(direct = tvReportOverArc.copy(dts = true), rawMaxPcmChannels = 6, tvArcSoundbar = true)
         assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS))
-        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS_HD))
+        assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS_HD))
         assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_TRUEHD))
         assertTrue(r.transcodePreferred)
         assertEquals(2, r.inferredChannelTarget)
@@ -377,6 +377,7 @@ class SurroundFormatResolverTest {
         assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS_HD))
         assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS))
         assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_AC3))
+        assertTrue(r.transcodePreferred)
         assertEquals(2, r.inferredChannelTarget)
     }
 

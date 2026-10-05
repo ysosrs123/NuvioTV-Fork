@@ -81,7 +81,7 @@ object SurroundFormatResolver {
             )
         } else {
             val dtsHdAllowed = when {
-                arcSoundbar -> false
+                arcSoundbar -> direct.dts && !direct.dtsHd
                 direct.dtsHd -> true
                 direct.dts -> !(maxPcmChannels != null && maxPcmChannels > 2)
                 else -> false
@@ -103,7 +103,7 @@ object SurroundFormatResolver {
             !anythingDenied -> false
             manualMode -> manualTranscodePreferred
             maxPcmChannels != null && maxPcmChannels > 2 -> false
-            maxPcmChannels == 2 -> direct?.ac3 == true
+            maxPcmChannels == 2 -> direct?.ac3 ?: arcSoundbar
             maxPcmChannels == null && routeIsHdmiArc -> direct?.ac3 == true
             else -> false
         }
