@@ -30,7 +30,8 @@ class SurroundFormatResolverTest {
         routeIsHdmiArc: Boolean = false,
         softwareDecodersAvailable: Boolean = true,
         forceOpticalActive: Boolean = false,
-        learnedDeniedGroups: Set<Group> = emptySet()
+        learnedDeniedGroups: Set<Group> = emptySet(),
+        tvArcSoundbar: Boolean = false
     ): Resolution = SurroundFormatResolver.resolve(
         manualMode = manualMode,
         allowAc3 = allowAc3,
@@ -46,7 +47,8 @@ class SurroundFormatResolverTest {
         routeIsHdmiArc = routeIsHdmiArc,
         softwareDecodersAvailable = softwareDecodersAvailable,
         forceOpticalActive = forceOpticalActive,
-        learnedDeniedGroups = learnedDeniedGroups
+        learnedDeniedGroups = learnedDeniedGroups,
+        tvArcSoundbar = tvArcSoundbar
     )
 
     @Test
@@ -297,5 +299,126 @@ class SurroundFormatResolverTest {
     fun channelTarget_manualModeWithAutoTarget_stillInfersFromTheSink() {
         val r = resolve(manualMode = true, allowTrueHd = false, rawMaxPcmChannels = 6)
         assertEquals(6, r.inferredChannelTarget)
+    }
+
+    private val tvReportOverArc = DirectSupport(ac3 = true, eac3 = true, trueHd = true, dts = false, dtsHd = false)
+
+    private fun planned(r: Resolution): Set<String> = DeniedTranscodePlanner.effectiveTranscodeMimes(
+        policy = r.policy,
+        transcodeDeniedToAc3 = r.transcodePreferred,
+        forcePassthroughActive = false
+    )
+
+    @Test
+    fun tvArcSoundbar_auto_convertsDtsAndTrueHdToAc3_andDecodesToStereo() {
+        val r = resolve(direct = tvReportOverArc, rawMaxPcmChannels = 6, tvArcSoundbar = true)
+        assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_AC3))
+        assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_E_AC3))
+        assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_E_AC3_JOC))
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_TRUEHD))
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS))
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS_HD))
+        assertTrue(r.transcodePreferred)
+        assertEquals(2, r.inferredChannelTarget)
+        val mimes = planned(r)
+        assertTrue(MimeTypes.AUDIO_TRUEHD in mimes)
+        assertTrue(MimeTypes.AUDIO_DTS in mimes)
+        assertTrue(MimeTypes.AUDIO_DTS_HD in mimes)
+        assertFalse(MimeTypes.AUDIO_AC3 in mimes)
+        assertFalse(MimeTypes.AUDIO_E_AC3 in mimes)
+        assertFalse(MimeTypes.AUDIO_E_AC3_JOC in mimes)
+    }
+
+    @Test
+    fun tvArcSoundbar_auto_keepsDtsCorePassthrough_whenTheProbeAllowsIt() {
+        val r = resolve(direct = tvReportOverArc.copy(dts = true), rawMaxPcmChannels = 6, tvArcSoundbar = true)
+        assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS))
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS_HD))
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_TRUEHD))
+        assertTrue(r.transcodePreferred)
+        assertEquals(2, r.inferredChannelTarget)
+        assertFalse(MimeTypes.AUDIO_DTS in planned(r))
+    }
+
+    @Test
+    fun tvArcSoundbar_auto_deniesLosslessEvenWhenTheProbeClaimsIt() {
+        val r = resolve(direct = allClaimed, rawMaxPcmChannels = 8, tvArcSoundbar = true)
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_TRUEHD))
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS_HD))
+        assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS))
+        assertTrue(r.transcodePreferred)
+        assertEquals(2, r.inferredChannelTarget)
+    }
+
+    @Test
+    fun tvArcSoundbar_auto_decodesWhenAc3IsNotClaimed() {
+        val direct = DirectSupport(ac3 = false, eac3 = false, trueHd = true, dts = false, dtsHd = false)
+        val r = resolve(direct = direct, rawMaxPcmChannels = 6, tvArcSoundbar = true)
+        assertFalse(r.transcodePreferred)
+        assertEquals(2, r.inferredChannelTarget)
+    }
+
+    @Test
+    fun tvArcSoundbar_auto_manualChannelTargetStillWins() {
+        val r = resolve(
+            direct = tvReportOverArc,
+            rawMaxPcmChannels = 6,
+            manualChannelTargetChannels = 6,
+            tvArcSoundbar = true
+        )
+        assertTrue(r.transcodePreferred)
+        assertEquals(6, r.inferredChannelTarget)
+    }
+
+    @Test
+    fun tvArcSoundbar_auto_probeNull_deniesOnlyLossless() {
+        val r = resolve(direct = null, rawMaxPcmChannels = 6, tvArcSoundbar = true)
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_TRUEHD))
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS_HD))
+        assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS))
+        assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_AC3))
+        assertEquals(2, r.inferredChannelTarget)
+    }
+
+    @Test
+    fun tvArcSoundbar_off_auto_matchesTodaysDecisions() {
+        val r = resolve(direct = tvReportOverArc, rawMaxPcmChannels = 6)
+        assertFalse(r.policy.deniesPassthrough(MimeTypes.AUDIO_TRUEHD))
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS))
+        assertTrue(r.policy.deniesPassthrough(MimeTypes.AUDIO_DTS_HD))
+        assertFalse(r.transcodePreferred)
+        assertEquals(6, r.inferredChannelTarget)
+    }
+
+    @Test
+    fun tvArcSoundbar_isANoOp_inManualMode() {
+        val directs = listOf(null, allClaimed, nothingClaimed, tvReportOverArc, tvReportOverArc.copy(dts = true))
+        val pcm = listOf(null, 2, 6, 8)
+        for (direct in directs) for (maxPcm in pcm) for (arc in listOf(false, true)) {
+            for (target in listOf(null, 2, 6)) {
+                for (transcode in listOf(false, true)) {
+                    val manualOff = resolve(
+                        manualMode = true, allowTrueHd = false, allowDts = false, direct = direct,
+                        rawMaxPcmChannels = maxPcm, routeIsHdmiArc = arc, manualTranscodePreferred = transcode,
+                        manualChannelTargetChannels = target
+                    )
+                    val manualOn = resolve(
+                        manualMode = true, allowTrueHd = false, allowDts = false, direct = direct,
+                        rawMaxPcmChannels = maxPcm, routeIsHdmiArc = arc, manualTranscodePreferred = transcode,
+                        manualChannelTargetChannels = target, tvArcSoundbar = true
+                    )
+                    assertEquals(manualOff, manualOn)
+                }
+            }
+        }
+        val allowedManual = resolve(manualMode = true, direct = tvReportOverArc, rawMaxPcmChannels = 6, tvArcSoundbar = true)
+        assertFalse(allowedManual.policy.deniesPassthrough(MimeTypes.AUDIO_TRUEHD))
+        assertNull(allowedManual.inferredChannelTarget)
+    }
+
+    @Test
+    fun tvArcSoundbar_bluetoothAndForceOptical_stayInert() {
+        assertEquals(Resolution.INERT, resolve(routeIsBluetooth = true, tvArcSoundbar = true))
+        assertEquals(Resolution.INERT, resolve(forceOpticalActive = true, tvArcSoundbar = true))
     }
 }

@@ -484,6 +484,7 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport() {
             startupStages = loadingInput.events,
             rawEventLines = snapshot.rawEventLines + listOf(
                 "audio_passthrough_state surroundMode=${currentPlayerSettingsForReport.surroundFormatMode.name} " +
+                    "tvArcSoundbar=${currentPlayerSettingsForReport.surroundTvArcSoundbar} " +
                     "iecActive=${playbackSpeedAwareAudioSink?.isIecHbrActive()} " +
                     "forceOptical=${currentPlayerSettingsForReport.forceOpticalPassthrough} " +
                     "tunnelingEffective=${state.tunnelingEnabled}"

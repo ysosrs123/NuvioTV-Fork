@@ -107,6 +107,7 @@ private val localOnlyPlayerProfileSettingsKeys = setOf(
     "use_system_passthrough",
     "surround_format_mode",
     "surround_channel_target",
+    "surround_tv_arc_soundbar",
     "tunnel_dead_audio_classes",
     "tunnel_dead_audio_signature",
     "experimental_dv5_to_dv81_enabled",

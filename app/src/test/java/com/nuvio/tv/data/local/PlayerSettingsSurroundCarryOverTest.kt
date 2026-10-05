@@ -35,6 +35,7 @@ class PlayerSettingsSurroundCarryOverTest {
     private val trueHdKey = booleanPreferencesKey("allow_truehd_passthrough")
     private val modeKey = stringPreferencesKey("surround_format_mode")
     private val deniedHandlingKey = stringPreferencesKey("denied_codec_handling")
+    private val tvArcSoundbarKey = booleanPreferencesKey("surround_tv_arc_soundbar")
 
     private fun withStore(initial: Preferences, block: suspend (PlayerSettingsDataStore, MemoryStore) -> Unit) {
         val manager = mockk<ProfileManager>()
@@ -58,6 +59,23 @@ class PlayerSettingsSurroundCarryOverTest {
         assertTrue(snapshot.allowDtshdPassthrough)
         assertTrue(snapshot.allowTruehdPassthrough)
         assertFalse(snapshot.useSystemPassthrough)
+    }
+
+    @Test
+    fun `tv arc soundbar switch is off without a stored value`() =
+        withStore(preferencesOf(trueHdKey to false, modeKey to SurroundFormatMode.AUTO.name)) { settings, _ ->
+            assertFalse(settings.playerSettings.first().surroundTvArcSoundbar)
+        }
+
+    @Test
+    fun `tv arc soundbar switch is stored and read back`() = withStore(emptyPreferences()) { settings, store ->
+        assertFalse(settings.playerSettings.first().surroundTvArcSoundbar)
+        settings.setSurroundTvArcSoundbar(true)
+        assertEquals(true, store.data.value[tvArcSoundbarKey])
+        assertTrue(settings.playerSettings.first().surroundTvArcSoundbar)
+        assertEquals(SurroundFormatMode.AUTO, settings.playerSettings.first().surroundFormatMode)
+        settings.setSurroundTvArcSoundbar(false)
+        assertFalse(settings.playerSettings.first().surroundTvArcSoundbar)
     }
 
     @Test

@@ -140,6 +140,16 @@ private fun SurroundSettingsRows(
         onClick = { onOpenDialog(PlaybackDialog.SURROUND_FORMAT_MODE) }
     )
 
+    if (settings.surroundFormatMode == SurroundFormatMode.AUTO) {
+        SettingsToggleRow(
+            title = stringResource(R.string.audio_surround_tv_arc_soundbar),
+            subtitle = stringResource(R.string.audio_surround_tv_arc_soundbar_sub),
+            checked = settings.surroundTvArcSoundbar,
+            onToggle = { onUpdate { setSurroundTvArcSoundbar(!settings.surroundTvArcSoundbar) } },
+            enabled = enabled && settings.decoderPriority != 0
+        )
+    }
+
     if (settings.surroundFormatMode == SurroundFormatMode.MANUAL) {
         val deviceOnly = settings.decoderPriority == 0
         val switchesEnabled = enabled && !deviceOnly

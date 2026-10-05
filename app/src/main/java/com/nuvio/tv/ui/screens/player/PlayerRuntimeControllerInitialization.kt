@@ -1214,14 +1214,14 @@ internal fun PlayerRuntimeController.initializePlayer(
                         "dts=${surroundResolution.policy.allowDts} dtshd=${surroundResolution.policy.allowDtsHd} " +
                         "learned=${surroundResolution.policy.learnedDeniedGroups}] " +
                         "transcodePreferred=${surroundResolution.transcodePreferred} " +
-                        "channelTarget=$surroundTargetChannels"
+                        "channelTarget=$surroundTargetChannels tvArcSoundbar=${surroundSettings.surroundTvArcSoundbar}"
                 )
                 queuePlaybackRawEventLine(
                     "surround_resolve route=$currentRouteKey " +
                         "ac3=${surroundResolution.policy.allowAc3} eac3=${surroundResolution.policy.allowEac3} " +
                         "truehd=${surroundResolution.policy.allowTrueHd} dts=${surroundResolution.policy.allowDts} " +
                         "dtshd=${surroundResolution.policy.allowDtsHd} transcodePreferred=${surroundResolution.transcodePreferred} " +
-                        "channelTarget=$surroundTargetChannels"
+                        "channelTarget=$surroundTargetChannels tvArcSoundbar=${surroundSettings.surroundTvArcSoundbar}"
                 )
             }
 

@@ -256,6 +256,7 @@ data class PlayerSettings(
     val useSystemPassthrough: Boolean = false,
     val surroundFormatMode: SurroundFormatMode = SurroundFormatMode.AUTO,
     val surroundChannelTarget: SurroundChannelTarget = SurroundChannelTarget.AUTO,
+    val surroundTvArcSoundbar: Boolean = false,
     val allowAc3Passthrough: Boolean = true,
     val allowEac3Passthrough: Boolean = true,
     val allowTruehdPassthrough: Boolean = true,
@@ -634,6 +635,7 @@ class PlayerSettingsDataStore @Inject constructor(
     private val useSystemPassthroughKey = booleanPreferencesKey("use_system_passthrough")
     private val surroundFormatModeKey = stringPreferencesKey("surround_format_mode")
     private val surroundChannelTargetKey = stringPreferencesKey("surround_channel_target")
+    private val surroundTvArcSoundbarKey = booleanPreferencesKey("surround_tv_arc_soundbar")
     private val deniedCodecHandlingKey = stringPreferencesKey("denied_codec_handling")
     private val audioRejectionsSeenKey = stringSetPreferencesKey("audio_rejections_seen")
     private val audioRejectionsConfirmedKey = stringSetPreferencesKey("audio_rejections_confirmed")
@@ -1102,6 +1104,7 @@ class PlayerSettingsDataStore @Inject constructor(
                     storedDeniedCodecHandling = prefs[deniedCodecHandlingKey]
                 ),
                 surroundChannelTarget = SurroundChannelTarget.fromStoredString(prefs[surroundChannelTargetKey]),
+                surroundTvArcSoundbar = prefs[surroundTvArcSoundbarKey] ?: false,
                 allowAc3Passthrough = prefs[allowAc3PassthroughKey] ?: true,
                 allowEac3Passthrough = prefs[allowEac3PassthroughKey] ?: true,
                 allowTruehdPassthrough = prefs[allowTruehdPassthroughKey] ?: true,
@@ -1420,6 +1423,12 @@ class PlayerSettingsDataStore @Inject constructor(
     suspend fun setSurroundChannelTarget(target: SurroundChannelTarget) {
         store().edit { prefs ->
             prefs[surroundChannelTargetKey] = target.name
+        }
+    }
+
+    suspend fun setSurroundTvArcSoundbar(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[surroundTvArcSoundbarKey] = enabled
         }
     }
 

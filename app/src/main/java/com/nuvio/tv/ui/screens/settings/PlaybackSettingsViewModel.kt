@@ -215,6 +215,10 @@ class PlaybackSettingsViewModel @Inject constructor(
         playerSettingsDataStore.setSurroundChannelTarget(target)
     }
 
+    suspend fun setSurroundTvArcSoundbar(enabled: Boolean) {
+        playerSettingsDataStore.setSurroundTvArcSoundbar(enabled)
+    }
+
     suspend fun setSkipSilence(enabled: Boolean) {
         playerSettingsDataStore.setSkipSilence(enabled)
     }
