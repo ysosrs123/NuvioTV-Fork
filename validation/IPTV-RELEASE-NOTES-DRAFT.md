@@ -1,9 +1,29 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 6 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: asynchronous owned pinned-reader staging, following finite sample delivery 6842df1 and physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
+Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: incremental inspected-sample loading and TS queue, following asynchronous reader a960696 and finite sample delivery 6842df1 and physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
 
 ## Current checkpoint summary
+
+- Added incremental exact-row inspection and TS sample staging as capture grows.
+  The cursor preserves stable actual-PTS windows and distinguishes a waiting tail
+  from successful completion, stopped capture, capacity, expiry and explicit epoch
+  boundaries. Ticket and tail-anchor pins remain owned until confirmed release.
+- The queue checks the next worst-case encoded batch/slot cap before loading,
+  publishes only successful transactional staging, and retains arrays/pins through
+  cancellation and uncertain cleanup. Callback reentry cannot bypass caps or close
+  active loading. No automatic polling/retry, skipped row or epoch crossing.
+- Final full app compile (448s), **204 core tests**, **285 IPTV JVM tests**
+  (34 suites, zero failures/errors/skips; 7.730s test / 384s build) and final
+  Android harness builds (31s) pass. Thirteen new core cases inspect original TS
+  fixtures; seven JVM queue cases use synthetic compressed batches and real pins.
+  Three real-stager growth/metadata, epoch and cancellation Android cases compile
+  only. Final evidence distinguishes superseded pre-hardening/test-fixture builds.
+- This is blocking local loading/staging, ready for a future governed worker/source
+  binding. Actual dynamic MediaSource/epoch-period callbacks/sample delivery,
+  renderer/player closure, normalized audio/preroll and measured aggregate budgets
+  remain gates. No device/provider operation, dependency upgrade or capture-control
+  enablement occurred. Logical encoded-byte caps do not certify heap/codec memory.
 
 - Added an actual asynchronous pinned-reader consumer for SharedCaptureRuntime.
   It commits/stages one exact pending seek, fences stale/cancelled completions,
@@ -20,7 +40,7 @@ Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: asynchronous owned pi
 - READY borrowing is separate from player seek/render acknowledgement and decoder
   closure. The reader opens no player, codec, audio/display or network and is not
   a dynamic live MediaSource. Measured aggregate budgets, renderer offsets/preroll,
-  live waiting/terminal/epoch policy and durable recording remain required before
+  dynamic source binding of waiting/terminal/epoch outcomes and durable recording remain required before
   enabled controls. JVM reservation/recorder fixtures do not certify those gates.
 
 - Added an actual finite Media3 MediaPeriod/SampleStream for one inspected,
@@ -122,7 +142,7 @@ The preceding HLS milestone:
 - Stalker Portal source adapter and independently validated authentication/channel handling.
 - Complete audio/subtitle preferences and representative rendering checks for subtitles, closed captions, DVB subtitles and teletext. Track-selection UI is implemented; these formats are not all certified.
 - Connect the implemented shared-capture infrastructure to local pause/resume and seekable timeshift; implement durable recording/schedules to internal storage, USB and SMB.
-- Broaden the initial bounded HLS capture adapter, prove decoder-safe entry points, connect retained/staged Media3 metadata and finite reader/period to dynamic MediaSource/epoch loading and actual governed player commands and validate device storage margins/behavior before enabling capture controls.
+- Broaden the initial bounded HLS capture adapter, prove decoder-safe entry points, bind incremental TS loading and retained/staged metadata to dynamic MediaSource/epoch periods and actual governed player commands and validate device storage margins/behavior before enabling capture controls.
 - Multiview with an independent source/playlist per pane, shared account groups and aggregate device/provider limits; provider catch-up.
 - AFR/display handoff, integrated VOD/trailer/IPTV resource ownership, full guide grid, Home/Search, source/feed management, all supported locales and appearance/accessibility checks.
 

@@ -1,6 +1,6 @@
 # IPTV overnight checkpoint summary — 6 October 2026
 
-Latest validated work at 03:28 Australia/Brisbane, branch codex/iptv in the
+Latest validated work at 04:43 Australia/Brisbane, branch codex/iptv in the
 NuvioTV-IPTV sibling. The separate NuvioTV-Fork checkout was not edited.
 
 - Added immutable inspected/pinned segment evidence, stable actual-PTS/audio
@@ -12,18 +12,22 @@ NuvioTV-IPTV sibling. The separate NuvioTV-Fork checkout was not edited.
 - Added an asynchronous actual owned reader consumer: stale/cancelled seeks cannot
   publish, failed/timed-out cleanup retains handles/pins, and confirmed closure
   preserves an independent recorder through the shared runtime.
+- Added incremental inspected-sample/TS loading as capture grows, explicit waiting /
+  completion/stopped/expiry/epoch outcomes, worst-case batch/input caps and callback
+  reentry fences. Failed staging/cleanup retains pins and arrays until confirmed close.
 
-Latest validation: full app compile 545s; 191 core tests; 265 IPTV JVM tests in
-32 suites with zero failures/errors/skips (7.011s test time); final headless
-Android harness builds 33s. Suites overlap. Exact measured evidence and hashes are
-in IPTV-PINNED-READER-VALIDATION-20261006.json and prior milestone reports.
+Latest validation: full app compile 448s; 204 core tests; 285 IPTV JVM tests in
+34 suites with zero failures/errors/skips (7.730s test time); final headless
+Android harness builds 31s. Suites overlap. Exact measured evidence and hashes are
+in IPTV-SAMPLE-LOAD-VALIDATION-20261006.json and prior milestone reports.
 
 No device/provider operations in this phase. AM9 was previously observed Asleep;
 new real-staging/period/storage Android fixtures remain unexecuted. Earlier TS
 bridge decode results do not certify normalized negative audio or current player
 integration. No components upgraded or capture controls enabled.
 
-Next: dynamic live-source/epoch loading and WAITING/terminal/error/expiry policy,
+Next: bind incremental loading to dynamic live-source/epoch periods and governed
+asynchronous refresh while preserving implemented WAITING/terminal/expiry policy;
 actual admitted player/renderer ownership, device offsets/preroll/seek confirmation
 and measured aggregate budgets. Durable pause/timeshift/recording/schedules/storage,
 Stalker/automatic Xtream EPG/grouping and remaining multiview/guide/Home/Search/UX

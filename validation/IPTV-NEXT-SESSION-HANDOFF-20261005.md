@@ -20,7 +20,52 @@ host/headless checks overnight; do not wake the TV/AVR or change device settings
 The saved project now opens E:/Codex/NuvioTV/work/NuvioTV-Fork, still the WRONG
 checkout for IPTV. All IPTV source work stays in its separate sibling/branch.
 
-## Pinned-reader checkpoint — latest continuation
+## Incremental sample-load checkpoint — latest continuation
+
+From clean a960696, added actual incremental inspected-sample cursor and bounded
+transactional TS-staging queue. Read IPTV-SAMPLE-LOAD-DESIGN.md and the matching
+validation report first. Final full app compile passed in 448s; 204 core tests
+passed in 2.186s; all 285 IPTV JVM tests in 34 suites passed with zero failures,
+errors or skips (7.730s test / 384s build); final current-fixture harness builds
+passed in 31s. Exact source/component/APK/log and new-suite XML hashes are saved.
+No build remains running from this phase; no unrelated processes stopped.
+
+Cursor inspection pins exact committed rows, publishes stable PTS windows and
+loads only exact successors. WAITING is distinct from ENDED (only COMPLETE),
+STOPPED, CAPACITY, EXPIRED, DISCONTINUITY, FAILED and CANCELLED. Completed ticket
+pins remain until explicit release; the waiting/terminal anchor remains until
+successor transfer or close. Queue next worst-case encoded batch/slot caps apply
+before opens. Cancellation/failure publishes nothing; uncertain release/close
+retains handles and arrays/charges. Reentrant mutation/loading/closure is fenced.
+Thirteen core cases inspect original TS fixtures; seven JVM queue cases use
+SYNTHETIC compressed batches on real verified pins. Their budgets are logical,
+not measured aggregate heap/decoder memory. Neither completion acknowledges seeks.
+
+Three real-stager Android growing-row/metadata, epoch-boundary and cancellation
+fixtures compile only, and prior staging/period/reader/probe cases remain unexecuted.
+The final cancellation fixture explicitly enters actual TS staging. Earlier 203-
+core / 459s app / 63s harness passes precede reentry hardening; the 54s hardened
+harness precedes only that Android fixture amendment. All superseded outcomes /
+source hashes and distinct logs are retained; final source/APK evidence governs.
+No device/provider command, installation, power/CEC/account/settings/recording
+operation, component upgrade or control enablement occurred. Target manifest has
+no permissions/activities. At 04:43 Brisbane the temporary automation was ACTIVE
+and both older automations PAUSED.
+
+Next: bind this incremental queue to a governed asynchronous owner/refresh and
+actual dynamic MediaSource/epoch MediaPeriod/sample delivery. Preserve WAITING
+rather than publishing finite EOS for a running capture; handle explicit epoch
+navigation/stopped/errors/expiry. Then connect admitted real player/renderers,
+offsets/preroll/normalized audio and exact seek/render acknowledgement with measured
+aggregate memory/storage and confirmed cleanup. The queue is blocking LOCAL IO,
+not an actual source/player; decoder borrowers must stop before pin/batch release.
+Remaining durable recording/services/schedules/internal/USB/SMB, Stalker/automatic
+Xtream EPG/grouping and multiview/guide/Home/Search/Original/V2 scope still stands.
+Keep controls disabled. Reserve the final overnight wake for checkpoint/summary
+and pause; explicitly pause the temporary automation by 08:00 Brisbane, without
+relying on a wake after its finite count expires. Older automations stay paused.
+
+## Pinned-reader checkpoint — historical continuation
 
 From clean 6842df1, added actual asynchronous OwnedCaptureConsumer staging an exact
 committed/pinned seek into the finite period, identity/cancellation fences and

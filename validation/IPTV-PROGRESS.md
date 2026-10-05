@@ -2,7 +2,26 @@
 
 Updated 6 October 2026, Australia/Brisbane.
 
-## Asynchronous pinned reader — latest validated checkpoint
+## Incremental sample loading — latest validated checkpoint
+
+From a960696, added exact-row inspection/PTS-window cursor and actual bounded TS
+queue. It distinguishes waiting/complete/stopped/capacity/expiry/epoch/failure/cancel;
+retains ticket/anchor pins; checks next worst-case encoded batch/slot caps before
+opens; and fences reentrant mutation/closure. Failed/cancelled loads publish nothing,
+while failed cleanup retains handles and arrays until explicit confirmed retry.
+Final app compile (448s), 204 core tests (2.186s), all 285 IPTV JVM tests (34 suites; zero
+failures/errors/skips; 7.730s test / 384s build) and final harness builds (31s) passed.
+Thirteen core cases inspect original TS files; seven JVM queue cases use synthetic
+compressed batches and real pins. Three real-stager Android cases compile only.
+No device/provider operation, upgrade or control enablement. Exact final/superseded
+hashes/outcomes are in IPTV-SAMPLE-LOAD-DESIGN.md and its validation report.
+Next: governed async refresh/ownership plus actual dynamic source/epoch-period
+binding and admitted player/renderers with measured budgets and device offsets /
+preroll/seek acknowledgement. Durable storage/providers/UX remain unfinished.
+Temporary overnight automation remains active; old jobs stay paused. Checkpoint /
+morning summary and explicit pause are due by 08:00 Brisbane.
+
+## Asynchronous pinned reader — historical validated checkpoint
 
 From 6842df1, added the actual owned reader consumer for exact committed seeks,
 IO staging, stale/cancellation fences and retained pins/handles through worker and

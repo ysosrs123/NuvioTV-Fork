@@ -1,0 +1,190 @@
+{
+  "date": "2026-10-06",
+  "branch": "codex/iptv",
+  "baseCommit": "a9606965761a25230d43cc9fa56d101ba00ab67f",
+  "status": "PASS_FINAL_HOST_BUILD_JVM_ANDROID_EXECUTION_DEFERRED",
+  "coreJvm": {
+    "result": "PASS_FINAL_SOURCE",
+    "tests": 204,
+    "seconds": 2.186,
+    "log": "iptv-core/sample-load-core-final.txt"
+  },
+  "fullAppCompile": {
+    "result": "PASS_FINAL_SOURCE",
+    "seconds": 448,
+    "log": "iptv-core/sample-load-full-compile-final.log"
+  },
+  "androidHarnessBuild": {
+    "result": "PASS_FINAL_SOURCE_AND_FIXTURES",
+    "seconds": 31,
+    "log": "iptv-core/sample-load-harness-actual-stage-final.log",
+    "apks": {
+      "tools/iptv-device-tests/build/outputs/apk/debug/NuvioIptvDeviceTests-debug.apk": {
+        "bytes": 5478179,
+        "sha256": "fa71d40dbfc9ee20b5b9cc01ac84242b12e260de8cddaf84473c7a70c6a17e44"
+      },
+      "tools/iptv-device-tests/build/outputs/apk/androidTest/debug/NuvioIptvDeviceTests-debug-androidTest.apk": {
+        "bytes": 1454862,
+        "sha256": "0fcc594bce3479076e45df4412184649929fe292f3f3fd4c1d74e0155416d165"
+      }
+    },
+    "mergedManifest": {
+      "path": "tools/iptv-device-tests/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml",
+      "sha256": "4e75c5a18984afd5154dfd7a61e72b65bc77646cd3668916bb2ca91cb7eb09b6",
+      "usesPermissions": [],
+      "activities": []
+    }
+  },
+  "fullJvm": {
+    "result": "PASS_FINAL_SOURCE",
+    "tests": 285,
+    "suites": 34,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "testSeconds": 7.73,
+    "buildSeconds": 384,
+    "log": "iptv-core/sample-load-full-jvm.log",
+    "newSuites": {
+      "com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest": {
+        "tests": 13,
+        "seconds": 0.431,
+        "xmlSha256": "f3c64cc630bdc3d2081e8d0bb86de47b93d5022b9df1c94f64bef9f7dc268c14"
+      },
+      "com.nuvio.tv.data.iptv.CaptureSampleBatchQueueTest": {
+        "tests": 7,
+        "seconds": 0.215,
+        "xmlSha256": "85623c06107afb1dfbbd2be629d9e53aa8a9d7dfa7fd4cab9926d70d715f0b4d"
+      }
+    }
+  },
+  "sourceSha256": {
+    "app/src/main/java/com/nuvio/tv/core/iptv/CaptureSampleLoadCursor.kt": "e77fb4b9b3c4834488372ea8219839b67aa4eadeadc5f1c46f83ecf6e2ee6fa1",
+    "app/src/test/java/com/nuvio/tv/core/iptv/CaptureSampleLoadCursorTest.kt": "455af6f1682094d226663ec5a009d8cb1477f1cd899862c0072388543c35c6e5",
+    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureSampleBatchQueue.kt": "396ce60dd94a92e015a41fa1041262fbd743c5b0111f2f8b816ac46c661de204",
+    "app/src/test/java/com/nuvio/tv/data/iptv/CaptureSampleBatchQueueTest.kt": "81e2ee2d9eab967dae6ced5212bddc4193721c6ae4d1d355c7c2e6efe8102901",
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/CaptureSampleBatchQueueAndroidTest.kt": "d2da192de74f4a66fc21d1ffec677bb5a5a4497c02dcb756e4c0bf99901d0d5b"
+  },
+  "unchangedComponentSha256": {
+    "app/src/main/java/com/nuvio/tv/core/iptv/CaptureSampleTimeline.kt": "61cb6748b0cfa73ff2a55b6dd0579c847843ff48f715fabcd53982e1569acba6",
+    "app/src/main/java/com/nuvio/tv/core/iptv/CaptureTsInspectionIndex.kt": "831118a24337b135056d43cbad1eb802f351b88afb2a8a8c09006940aa784308",
+    "app/src/main/java/com/nuvio/tv/core/iptv/SharedCaptureRuntime.kt": "71bb097892f806300fb2df103da5a4e46aaebdd1976923eeef0c4c915219d516",
+    "app/src/main/java/com/nuvio/tv/data/iptv/LocalCaptureSampleStager.kt": "b444ff383ebfc3a6d549d6e819604ccd8a05a208742c0e45d130a454882a885a",
+    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureMedia3Timeline.kt": "0c551fb13161dcdb25bb01c0106e3b53515f89963847c58c53d8aa9175b96d18",
+    "app/src/main/java/com/nuvio/tv/data/iptv/PinnedCaptureSegmentPeriod.kt": "236daec9a47f86d33d5d90109334429d6c59107f06f365fd093ad29e64a3e813",
+    "app/src/main/java/com/nuvio/tv/data/iptv/PinnedCaptureReaderConsumer.kt": "0cbc070dcda8d4811dca98ddb6689eb01b6ab3f62872ebb226c2f0e883d25728",
+    "tools/iptv-device-tests/build.gradle.kts": "1aaa2addbebc8a6b0a33d7b271b76e6fa00f36a7a1b517061d3d4180c23fe2e8",
+    "tools/iptv-device-tests/src/main/AndroidManifest.xml": "d06598587207600f8cc14518173e4016bf5f58ba13df40bb67c0536386fcfa0f",
+    "app/libs/lib-common-release.aar": "a01729509ff920e273ee696fc2cdf99ec073b9b5dc039c4d8dec72aa61bcb447",
+    "app/libs/lib-extractor-release.aar": "d611a11f7bc6cef11f789c1cae4fe75ab9332a9e393405e98cfa8e147d698316",
+    "app/libs/lib-exoplayer-release.aar": "b4a9e7052a2d9d06fa164f0232cd9bb714ca8fc77ba7f03a2fb4f951fbf374e7",
+    "app/libs/lib-datasource-release.aar": "5375c0ff43784d210a69e7bfc438b9da9b2f42d6fb3b967ddae9b55902c7bf3d"
+  },
+  "androidExecution": {
+    "result": "DEFERRED_PREVIOUS_DEVICE_ASLEEP",
+    "serial": "192.168.10.60:5555",
+    "newTests": 3,
+    "previousStagingPeriodReaderAndProbeTestsUnexecuted": true,
+    "installed": false,
+    "executed": false,
+    "deviceOperationsThisPhase": []
+  },
+  "scope": {
+    "cursor": "Actual committed-file inspection and pinned inputs, bounded in-flight tickets, stable actual-PTS epoch windows, exact successors and explicit waiting/complete/stopped/expired/discontinuity/failure/cancel states",
+    "queue": "Actual transactional TS stager binding, worst-case next encoded-batch and slot caps before load, explicit release and retryable confirmed closure; blocking local IO on a future governed worker",
+    "jvm": "Thirteen core cases inspect real synthetic TS resources, including callback reentry; seven queue cases use real pinned inputs and SYNTHETIC compressed samples/formats",
+    "android": "Three real-stager growth/epoch/cancellation fixtures compiled only; no renderer/player/codec/network"
+  },
+  "notEstablished": [
+    "Actual dynamic MediaSource/epoch MediaPeriod, asynchronous refresh callbacks and live player integration",
+    "Runtime normalized negative audio, preroll discard, offsets and exact seek/render acknowledgement",
+    "Measured aggregate transient/object/staging/codec memory or production physical margins",
+    "Durable recording/services/schedules/storage/provider and remaining grouping/UX scope"
+  ],
+  "preHardeningSourceSha256": {
+    "app/src/main/java/com/nuvio/tv/core/iptv/CaptureSampleLoadCursor.kt": "2183487dff7c6d78974114937006f35de1bf8ca5112852ab75a501ead3de8177",
+    "app/src/test/java/com/nuvio/tv/core/iptv/CaptureSampleLoadCursorTest.kt": "18185812bb08d8017c6c42d6cc578d1e5e646c8a51a00bc41cc69d21c80d5d26",
+    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureSampleBatchQueue.kt": "65505ab2448b21d1d5cc0e055f446fad0b5da349d98abff00feaa95aaa90fb3e",
+    "app/src/test/java/com/nuvio/tv/data/iptv/CaptureSampleBatchQueueTest.kt": "52504c2c00675eb8a9fb945abfbbd6f1de54e0b6347c1dcf8d5a23196fe40931",
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/CaptureSampleBatchQueueAndroidTest.kt": "bf84c05eabe868a3704e57c4d833783bb032b215b159004ee6803492cd87ddce"
+  },
+  "hardeningNote": "Reviewed callback reentry could allocate another pin/load despite a one-input cap or close an active reader; added mutation fences and explicit regression cases before final checkpoint.",
+  "preHardeningValidation": {
+    "coreJvm": {
+      "result": "PRE_HARDENING_PASS_SUPERSEDED",
+      "tests": 203,
+      "seconds": 2.21,
+      "log": "iptv-core/sample-load-core-initial.txt"
+    },
+    "fullAppCompile": {
+      "result": "PRE_HARDENING_PASS_SUPERSEDED",
+      "log": "iptv-core/sample-load-full-compile.log",
+      "seconds": 459
+    },
+    "androidHarnessBuild": {
+      "result": "PRE_HARDENING_PASS_SUPERSEDED",
+      "seconds": 63,
+      "log": "iptv-core/sample-load-harness.log",
+      "apks": {
+        "tools/iptv-device-tests/build/outputs/apk/debug/NuvioIptvDeviceTests-debug.apk": {
+          "bytes": 5478179,
+          "sha256": "0190d6412af37d2dea42f4f63fbaa4192a59ff5378d794ca9273618c698a90a9"
+        },
+        "tools/iptv-device-tests/build/outputs/apk/androidTest/debug/NuvioIptvDeviceTests-debug-androidTest.apk": {
+          "bytes": 1454262,
+          "sha256": "e92b0ea3f6a5ac15ef55c788b156fa55053ce1df7b933ab286dd5f921b1e05e3"
+        }
+      },
+      "mergedManifest": {
+        "path": "tools/iptv-device-tests/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml",
+        "sha256": "4e75c5a18984afd5154dfd7a61e72b65bc77646cd3668916bb2ca91cb7eb09b6",
+        "usesPermissions": [],
+        "activities": []
+      }
+    }
+  },
+  "androidFixtureAmendment": {
+    "priorSourceSha256": "bf84c05eabe868a3704e57c4d833783bb032b215b159004ee6803492cd87ddce",
+    "note": "Test-only cancellation now explicitly enters the actual TS stager; avoids a fixed callback ordinal cancelling inspection instead. Main/core/JVM sources unchanged."
+  },
+  "priorFinalHarness": {
+    "result": "SUPERSEDED_BY_ACTUAL_STAGE_CANCELLATION_FIXTURE",
+    "seconds": 54,
+    "log": "iptv-core/sample-load-harness-final.log",
+    "apks": {
+      "tools/iptv-device-tests/build/outputs/apk/debug/NuvioIptvDeviceTests-debug.apk": {
+        "bytes": 5478179,
+        "sha256": "fa71d40dbfc9ee20b5b9cc01ac84242b12e260de8cddaf84473c7a70c6a17e44"
+      },
+      "tools/iptv-device-tests/build/outputs/apk/androidTest/debug/NuvioIptvDeviceTests-debug-androidTest.apk": {
+        "bytes": 1454862,
+        "sha256": "9751f29a56e57a3adef0af186e9df39dd862dacc945071c0a88ccc7d4a778a55"
+      }
+    },
+    "mergedManifest": {
+      "path": "tools/iptv-device-tests/build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml",
+      "sha256": "4e75c5a18984afd5154dfd7a61e72b65bc77646cd3668916bb2ca91cb7eb09b6",
+      "usesPermissions": [],
+      "activities": []
+    }
+  },
+  "validatedAtUtc": "2026-10-05T18:43:13Z",
+  "retainedLogsSha256": {
+    "sample-load-core-initial.txt": "65c09e70e633aab3514c02ddb589701ba3089795c7a21832fa3c2111b3fdec90",
+    "sample-load-core-final.txt": "ae4897c86c0fd9caff67c8c39739f819198f1386c8275cd8ca56f968f8215ab2",
+    "sample-load-full-compile.log": "e008ae985d560ba36b1ec6ef02ef846c9886fee1b52941a4f93365f2459073f3",
+    "sample-load-full-compile-final.log": "7402703e8a1289a559ed045fc243a859cf613e1c488028dc29b43dafb86d0c83",
+    "sample-load-full-jvm.log": "3cbd36a6a58429f4f8006c0981095f29b5b73a1e693bc9bb825c6299a1d8b5e2",
+    "sample-load-harness.log": "c15ef834dcbabe48610c119cfd9e7359edf0100e400f1269bc2bc8ad1d084dff",
+    "sample-load-harness-final.log": "d3776311141d2e0fcda3e4463c245579cb3f053149bf016339ac80579db453e7",
+    "sample-load-harness-actual-stage-final.log": "4485087ac755b300f6df9c36aff3dd920c038220f63d2db97782d0e1a4634451"
+  },
+  "automationChecks": {
+    "overnight": "ACTIVE",
+    "olderResearch": "PAUSED",
+    "olderImplementation": "PAUSED",
+    "checkedAtUtc": "2026-10-05T18:43:13Z",
+    "deadlineBrisbane": "2026-10-06T08:00:00+10:00"
+  },
+  "preliminaryArtifactNote": "Preliminary APK hashes record then-measured artifacts; shared output paths were rebuilt with final sources/fixtures. Distinct raw logs and source hashes remain retained; final APK hashes are authoritative."
+}
