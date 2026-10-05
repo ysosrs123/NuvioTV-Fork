@@ -1,9 +1,30 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 6 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: governed incremental reader and cached transport-driven metadata, following incremental inspected-sample loading and TS queue 0b82357, asynchronous reader a960696 and finite sample delivery 6842df1 and physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
+Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: cached growing epoch sample delivery and exclusive borrowing, following governed incremental reader 34a4937 and cached transport-driven metadata, following incremental inspected-sample loading and TS queue 0b82357, asynchronous reader a960696 and finite sample delivery 6842df1 and physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
 
 ## Current checkpoint summary
+
+- Added an actual growing one-epoch MediaPeriod/SampleStream over cached verified
+  staged batches. Live waiting yields NOTHING; only exact completed capture yields
+  EOS. Growth preserves cursors, real video frame seeks and per-batch IDR/audio
+  preroll, with stable absolute epoch PTS and explicit boundary/stop errors.
+- One exclusive reader borrow prevents input/batch release and confirmed reader /
+  runtime closure until period shutdown; independent consumers remain admitted.
+  Explicit consumed-prefix transfer checks selected tracks finished those rows,
+  keeps one row and closes/refills off-thread. Player loading callbacks cannot
+  start automatic local tail polling. EOF retains ownership and never acknowledges
+  a pending seek or decoder shutdown.
+- Final app compile (454s), **307 IPTV JVM tests** (36 suites, zero failures /
+  errors/skips; 8.453s test / 406s build) and final headless harness builds (49s)
+  pass. The 207 unchanged core tests overlap this JVM run. Nine new period cases
+  use real files, pins, queue, reader and runtime with SYNTHETIC encoded batches.
+  Two actual-stager growth/period/EOS Android fixtures compile only; earlier
+  pre-hardening app/harness outcomes and hashes are retained as superseded.
+- Actual MediaSource/Looper dispatch, admitted player/renderer closure and exact
+  seek/render acknowledgement, device offset/negative audio/preroll and measured
+  aggregate budgets remain required. No device/provider operation, component
+  upgrade or enabled control. See the epoch-period design and exact evidence.
 
 - Added the actual persistent owned incremental reader over the bounded queue.
   One IO worker and metadata observer coalesce committed capture/explicit hints,

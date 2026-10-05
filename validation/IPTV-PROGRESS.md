@@ -2,7 +2,37 @@
 
 Updated 6 October 2026, Australia/Brisbane.
 
-## Governed incremental-reader checkpoint - current validated continuation
+## Growing epoch-period checkpoint - current validated continuation
+
+From clean 34a4937, added actual cached growing MediaPeriod/SampleStream with one
+exclusive reader borrow. Live waiting yields NOTHING, only exact COMPLETE yields
+EOS; growth keeps cursors and actual epoch PTS. Explicit consumed-prefix transfer
+requires selected tracks to finish those rows, keeps one owned row and closes
+inputs/refills off-thread. UID/eviction offsets stay stable. Period holds block
+batch release and confirmed reader/runtime closure; independent recorder survives.
+Player continueLoading cannot start automatic local tail polling. Period closure
+confirms its own borrow only; parent must separately confirm renderer shutdown.
+
+Final app compile passed in 454s, all 307 IPTV JVM tests in 36 suites passed with
+zero failures/errors/skips (8.453s test / 406s build), and final headless harness
+builds passed in 49s. Core207 passed at the unchanged preceding checkpoint and
+those core cases passed again within the full JVM suite; no separate core rerun
+is claimed here. Nine new period cases use real ownership/files/inspection/queue /
+reader/runtime with SYNTHETIC encoded payloads. Two actual-stager Android growth /
+period/complete cases compile only. All commands completed. Exact source/component /
+APK/log/XML hashes and superseded app461s/harness49s outcomes are saved in
+IPTV-EPOCH-PERIOD-VALIDATION-20261006.json; read its design first.
+
+Next: actual MediaSource/Looper callback binding to cached reader/period while
+preserving WAITING and explicit boundaries, confirmation of source/player/renderer
+closure and exact pending seek/render acknowledgement. Device normalized audio /
+offset/preroll, measured aggregate memory/physical margins, durable storage /
+recording/services/schedules, providers/grouping and remaining UX scope below
+remain required. No device/provider operation, component upgrade or enabled control.
+Temporary automation must finish bounded work/checkpoint/pause by 08:00 Brisbane;
+both older jobs remain paused.
+
+## Governed incremental-reader checkpoint - historical validated continuation
 
 From clean 0b82357, added an actual persistent OwnedCaptureConsumer over the bounded
 sample queue. One IO worker and a metadata observer coalesce explicit/committed

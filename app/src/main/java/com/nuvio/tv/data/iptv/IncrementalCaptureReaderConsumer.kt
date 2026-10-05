@@ -13,6 +13,9 @@ import kotlinx.coroutines.sync.withLock
 internal enum class IncrementalReaderState { NEW, LOADING, READY, WAITING, CAPACITY, ENDED, STOPPED,
     EXPIRED, DISCONTINUITY, FAILED, CANCELLED, RELEASE_BLOCKED, CLOSING, CLOSED }
 
+/** Identity-only exclusive sample borrower; does not confirm renderer shutdown. */
+internal class CaptureReaderBorrow internal constructor()
+
 @UnstableApi
 internal data class IncrementalReaderSnapshot(val revision: Long, val state: IncrementalReaderState,
     val batches: List<CaptureLoadedBatch> = emptyList(), val timeline: Timeline = Timeline.EMPTY,
@@ -56,6 +59,8 @@ internal class IncrementalCaptureReaderConsumer(private val queue: CaptureSample
     private val pending = linkedSetOf<CaptureLoadedBatch>()
     private val blocked = mutableSetOf<CaptureLoadedBatch>()
     private var activeRelease: CaptureLoadedBatch? = null
+    private var borrower: CaptureReaderBorrow? = null
+    private var borrowed = emptyList<CaptureLoadedBatch>()
 
     @Synchronized override fun start() {
         check(!started && !stopping); started = true; dirty = true
@@ -92,9 +97,36 @@ internal class IncrementalCaptureReaderConsumer(private val queue: CaptureSample
         return expected
     }
 
+    /** One exclusive epoch-period borrower. No IO; owns exact arrays until explicit stop/release. */
+    @Synchronized fun acquireBorrow(expected: IncrementalReaderSnapshot): CaptureReaderBorrow? {
+        if(borrower != null || !borrowable(expected)) return null
+        return CaptureReaderBorrow().also { borrower = it; borrowed = expected.batches }
+    }
+    @Synchronized fun refreshBorrow(lease: CaptureReaderBorrow, expected: IncrementalReaderSnapshot): Boolean {
+        if(borrower !== lease || !borrowable(expected) || borrowed.any { old -> expected.batches.none { it === old } }) return false
+        borrowed = expected.batches; return true
+    }
+    @Synchronized fun isBorrowOpen(lease: CaptureReaderBorrow): Boolean = borrower === lease && !stopping
+    /** Period streams are fenced first; caller separately confirms its renderers before calling. */
+    @Synchronized fun releaseBorrow(lease: CaptureReaderBorrow) {
+        require(borrower === lease) { "Foreign or released capture borrower" }
+        borrower = null; borrowed = emptyList()
+    }
+    /** Explicit consumed-prefix transfer after borrower confirmation; keep at least one owned row. */
+    @Synchronized fun retireBorrowedPrefix(lease: CaptureReaderBorrow, count: Int): Boolean {
+        if(borrower !== lease || stopping || count !in 1 until borrowed.size || retiring.isNotEmpty()) return false
+        val old=borrowed.take(count)
+        if(old.any { row -> known.none { it === row } || row in pending || activeRelease === row }) return false
+        borrowed=borrowed.drop(count); retiring.addAll(old); pending.addAll(old)
+        revision=Math.addExact(revision,1); signals.trySend(Unit); return true
+    }
+    private fun borrowable(expected: IncrementalReaderSnapshot): Boolean = borrowSnapshot(expected) === expected &&
+        expected.batches.isNotEmpty() && expected.state in setOf(IncrementalReaderState.READY,IncrementalReaderState.LOADING,
+            IncrementalReaderState.WAITING,IncrementalReaderState.CAPACITY,IncrementalReaderState.ENDED,IncrementalReaderState.DISCONTINUITY)
+
     /** Asynchronous release after borrower shutdown; true means queued, not confirmed closed. */
     @Synchronized fun requestRelease(batch: CaptureLoadedBatch): Boolean {
-        if(!started || stopping || known.none { it === batch } || batch in pending || activeRelease === batch) return false
+        if(!started || stopping || known.none { it === batch } || borrowed.any { it === batch } || batch in pending || activeRelease === batch) return false
         retiring += batch; pending += batch
         revision = Math.addExact(revision,1) // Fence an already delivered snapshot immediately.
         signals.trySend(Unit); return true
@@ -169,6 +201,7 @@ internal class IncrementalCaptureReaderConsumer(private val queue: CaptureSample
         jobs.forEach { it.cancel() }
         val confirmed = withTimeoutOrNull(closeTimeoutMs) {
             jobs.forEach { it.join() }
+            if(synchronized(this@IncrementalCaptureReaderConsumer) { borrower != null }) return@withTimeoutOrNull false
             val cleanup = synchronized(this@IncrementalCaptureReaderConsumer) {
                 closer?.takeUnless { it.isCompleted } ?: CoroutineScope(dispatcher).launch(start=CoroutineStart.LAZY) {
                     val closed = try { queue.close(); queue.isClosed } catch (_:Exception) { false }
