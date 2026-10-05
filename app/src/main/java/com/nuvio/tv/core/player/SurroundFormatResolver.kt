@@ -59,7 +59,8 @@ object SurroundFormatResolver {
 
         if (!manualMode && forceOpticalActive) return Resolution.INERT
 
-        val arcSoundbar = !manualMode && tvArcSoundbar
+        // Plain ARC carries 2-ch PCM and compressed 5.1 only, whatever the HAL claims.
+        val arcSoundbar = !manualMode && (tvArcSoundbar || routeIsHdmiArc)
         val maxPcmChannels = if (arcSoundbar) 2 else rawMaxPcmChannels
 
         val policy = if (manualMode) {
