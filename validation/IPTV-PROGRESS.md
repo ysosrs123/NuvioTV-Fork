@@ -230,3 +230,23 @@ compiled APK hashes are distinguished in the report. No device wake/install was
 performed during this resumed verification. Temporary overnight continuation is
 authorized; leave the older automations paused and stop the new one by 08:00
 Brisbane on 6 October. Next implementation gates remain as described above.
+
+## Retained inspection and sample/seek policy, 5 October 2026
+
+Added committed-row/index ownership, bounded cache and pinned inputs that recheck
+length/hash through verified EOF, including skip; pins require explicit close.
+Added real-PTS/audio epochs with stable positions across wrap/eviction and explicit
+gap/configuration/timestamp boundaries. Pending seeks use the same anchor in both
+directions, retain it until exact acknowledgement, reject expiry/stale commits,
+and explicitly select the newest captured tail. 171 core tests passed (21 new).
+Full app/JVM validation is running. The initial failed case exposed an overbroad
+fixture SPS mutation matching a TS packet boundary; corrected the fixture helper.
+Production Media3/playback integration and all remaining storage/recording gates
+remain pending. See the retained-media design/evidence report for final results.
+
+Final retained-media checks: app compile PASS (523s); full IPTV JVM PASS, 217 tests
+in 26 suites, zero failures/errors/skips (443s build, 3.522s JUnit execution);
+Android harness build PASS (70s). Source hashes match the exact final working tree.
+No device/installation/provider work during this continuation. Next remains
+transactional sample staging and actual Media3/player integration, as specified
+in the current design/handoff; pause/timeshift/recording controls remain disabled.

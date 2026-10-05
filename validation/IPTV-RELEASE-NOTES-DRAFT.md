@@ -1,14 +1,21 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 5 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: controlled TS inspection/decode, local reader and store concurrency, following eaa43e5 and documentation checkpoint 3ae8882. This is a prototype, not a published release.
+Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: retained inspection, sample epochs and seek policy, following TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
 
 ## Current checkpoint summary
 
+- Retained-media continuation adds ephemeral inspection evidence tied to committed
+  rows, pinned hash-verifying inputs, stable actual-PTS/audio epochs and pending
+  seek/explicit captured-tail policy. The 171-test core suite, full app compile,
+  **217 IPTV JVM tests** and Android harness build passed. The retained-media
+  evidence report records exact outcomes; no new device run is claimed. Media3
+  publication, player commands and decoder preroll remain to be integrated.
+
 - New internal components inspect a bounded AVC/AAC MPEG-TS profile, expose explicit local DATA/WAITING/ENDED/EXPIRED/DISCONTINUITY/STOPPED states, and allow local reads/pins during slow capture input. Pins are rechecked at publication.
 - Reproduced a missing final video sample in AM9's platform extractor and the shipped Media3 HLS extractor. A scoped, hash-bound local extraction bridge restores the final sample for inspected complete segments; bundled libraries and dependency versions are unchanged.
-- Latest controlled checks: **150 core JVM tests** and **214 AM9 tests** passed. Three independent segments decoded all 50 video frames each and 95/94/94 audio frames. Real capture/store/local-read integration decoded 150 video and 283 audio frames. FFprobe/strict FFmpeg independently agreed. Final full app Kotlin compile, **196 IPTV JVM tests** and the final annotated Android harness build also passed. The 214-test device run precedes only two UnstableApi annotations; final APKs were not reinstalled. Suites overlap.
-- Structural inspection is not a general bitstream safety certificate. There is still no production local Media3 timeline or enabled pause/timeshift/recording. Binding inspected PTS to retained windows, production sharing, physical storage margins and durable recording remain unfinished.
+- Preceding TS entry checks: **150 core JVM tests** and **214 AM9 tests** passed. Three independent segments decoded all 50 video frames each and 95/94/94 audio frames. Real capture/store/local-read integration decoded 150 video and 283 audio frames. FFprobe/strict FFmpeg independently agreed. Final full app Kotlin compile, **196 IPTV JVM tests** and the final annotated Android harness build also passed. The 214-test device run precedes only two UnstableApi annotations; final APKs were not reinstalled. Suites overlap.
+- Structural inspection is not a general bitstream safety certificate. There is still no production local Media3 timeline or enabled pause/timeshift/recording. Production sample publication, playback sharing, physical storage margins and durable recording remain unfinished.
 
 The preceding HLS milestone:
 
@@ -53,7 +60,7 @@ The preceding HLS milestone:
 - Stalker Portal source adapter and independently validated authentication/channel handling.
 - Complete audio/subtitle preferences and representative rendering checks for subtitles, closed captions, DVB subtitles and teletext. Track-selection UI is implemented; these formats are not all certified.
 - Connect the implemented shared-capture infrastructure to local pause/resume and seekable timeshift; implement durable recording/schedules to internal storage, USB and SMB.
-- Broaden the initial bounded HLS capture adapter, prove decoder-safe entry points, implement a live local-reader/Media3 timeline and physical disk/free-space enforcement before enabling capture controls.
+- Broaden the initial bounded HLS capture adapter, prove decoder-safe entry points, connect the live local reader to an actual Media3 timeline and physical disk/free-space enforcement before enabling capture controls.
 - Multiview with an independent source/playlist per pane, shared account groups and aggregate device/provider limits; provider catch-up.
 - AFR/display handoff, integrated VOD/trailer/IPTV resource ownership, full guide grid, Home/Search, source/feed management, all supported locales and appearance/accessibility checks.
 
@@ -151,3 +158,23 @@ Temporary validation packages were removed. The final reverse list was empty;
 this continuation created or removed no reverse mapping, so the historical 8765
 mapping is not claimed present. Accounts, settings, recordings and both paused
 automations were left alone. No provider requests or dependency upgrades occurred.
+
+## Retained inspection and seek policy continuation
+
+- Header evidence now belongs to one committed file row and index/store owner.
+  Expired or foreign evidence cannot open another file. Cache entries hold no pins;
+  opening media pins its exact file and successors until the caller closes it.
+- Inputs recheck byte count/hash through verified EOF, including skipped bytes.
+  Early close/cancellation does not certify media, and EOF keeps ownership until
+  explicit close. The inspector remains a header check with a narrow codec profile.
+- Actual video PTS/cadence and audio phase define stable sample epochs. Eviction and
+  an empty retained snapshot keep the epoch origin; sequence/capture/configuration
+  or timestamp breaks produce explicit epochs. Published metadata is bounded.
+- Seek preview uses the pending target for both directions until exact player
+  acknowledgement. Commit rejects stale/expired targets without selecting another
+  file. Explicit return-to-captured-tail selects the newest verified header sample;
+  it does not establish wall-clock LIVE or perform player/decoder commands.
+- Measured: 171 core tests, full app compile, 217 IPTV JVM tests and Android harness
+  build passed. Core/JVM suites overlap. No new device/decoder execution is claimed.
+  Transactional Media3 sample staging, actual Timeline/MediaPeriod, preroll and
+  governed capture/player sharing remain the next implementation steps.

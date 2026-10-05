@@ -20,7 +20,23 @@ host/headless checks overnight; do not wake the TV/AVR or change device settings
 The saved project now opens E:/Codex/NuvioTV/work/NuvioTV-Fork, still the WRONG
 checkout for IPTV. All IPTV source work stays in its separate sibling/branch.
 
-## Latest continuation — supersedes older status below
+## Retained-media checkpoint — latest continuation
+
+Continued from clean 43b1dff41e72638777b4e2476494751f15228101 on codex/iptv.
+Read IPTV-RETAINED-MEDIA-DESIGN.md and its validation report first. Added ephemeral
+committed-row inspection ownership, bounded cache, pinned length/hash-verifying
+inputs, stable PTS/audio epochs across wrap/eviction, and both-direction pending
+seek/explicit captured-tail policy. The 171-test core suite passed (21 new cases).
+Full app compile passed (8m43s), all 217 IPTV JVM tests passed (26 suites, zero
+failures/errors/skips), and the Android harness builds (70s). No device commands
+or installation were performed; no new Android execution result is claimed.
+These are core policies; production Media3 Timeline/MediaPeriod and player commands
+remain unconnected. Keep controls disabled. Next: bounded transactional extracted
+sample staging, actual Media3 period/timeline and preroll, governed sharing/cleanup,
+physical storage margins, then broader pause/recording and main handoff scope.
+Do not replace these current source files with the earlier staging copies.
+
+## Prior TS entry checkpoint — historical status
 
 Work continued from clean 3ae88829851f23f1a6413e77db88965ebc095ebc on codex/iptv in
 E:/Codex/NuvioTV/work/NuvioTV-IPTV. Read `IPTV-TS-ENTRY-DESIGN.md` and
@@ -65,7 +81,7 @@ Keep the controls disabled until these gates are validated. See latest design.
 
 The user explicitly requested a fresh session to continue implementation, a complete handoff and updated comprehensive draft release notes. Continue actual implementation after reading this document; do not stop at a plan. The full IPTV scope remains unfinished. Dependency/component upgrades were handed to another agent and are outside this continuation.
 
-**Authoritative checkout:** `E:/Codex/NuvioTV/work/NuvioTV-IPTV`, **branch `codex/iptv`**. Latest implementation: the TS inspection/local reader checkpoint described above, following `3ae8882` (handoff), `eaa43e5` (bounded HLS capture), `4c3e0b0` (shared capture) and `27f78ea` (earlier handover). Read the current Git log for the checkpoint hash. Verify HEAD, branch and status before editing; keep IPTV on its separate branch. Published base: nt4.1, build 1458, `574a2d41257ccc667828f54ba0c6ef40d9784984`.
+**Authoritative checkout:** `E:/Codex/NuvioTV/work/NuvioTV-IPTV`, **branch `codex/iptv`**. Latest implementation: the retained-media checkpoint described above, following `43b1dff` (TS inspection/local reader), `3ae8882` (handoff), `eaa43e5` (bounded HLS capture), `4c3e0b0` (shared capture) and `27f78ea` (earlier handover). Read the current Git log for the checkpoint hash. Verify HEAD, branch and status before editing; keep IPTV on its separate branch. Published base: nt4.1, build 1458, `574a2d41257ccc667828f54ba0c6ef40d9784984`.
 
 The saved Codex project points to the ORIGINAL sibling `NuvioTV-Fork`, not this implementation checkout. Its equivalent saved C: project is `C:/Users/PWR/Documents/Codex/2026-09-13/prior-conversation-with-codex-conversation-role/work/NuvioTV-Fork`; the E: work folder is the operational path used here. The original fork was dirty on `feature/nuvio-v2-ui` with a broken Codex checkpoint ref. Do not reset, repair, stash, commit or implement IPTV there. Only ignored task scratch under its `captures/` was added. Other upgrade work may now be happening there; do not overwrite it.
 
