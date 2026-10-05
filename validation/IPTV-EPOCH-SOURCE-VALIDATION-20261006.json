@@ -167,5 +167,16 @@
     "epoch-source-harness.log": "6213378627a2fc57d85063b3e9eadfffe78193d0f2180af73a712faebf493ff0",
     "epoch-source-full-compile.log": "f2b34d6b00da5ddc21d02a88f3f109555f188a5c377e262782bf8c2b3a5db674",
     "epoch-source-full-jvm.log": "fafbb2fde69fd858e3076984952a46b064eb52326831be5590362b7ecf36baf8"
+  },
+  "implementationCommit": "6ad3799f93eef8e61216998f82b4791af22b3d47",
+  "automationChecks": {
+    "overnight": "PAUSED",
+    "olderResearch": "PAUSED",
+    "olderImplementation": "PAUSED",
+    "pauseConfirmedAtUtc": "2026-10-05T21:05:09Z",
+    "checkedAtUtc": "2026-10-05T21:07:42Z",
+    "deadlineBrisbane": "2026-10-06T08:00:00+10:00",
+    "pauseConfirmedBeforeDeadline": true,
+    "existingNamePromptScheduleTargetAndCreatedAtPreserved": true
   }
 }

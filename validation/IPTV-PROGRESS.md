@@ -28,8 +28,8 @@ recording operation, provider traffic, component upgrade or control enablement.
 Actual executed Source/Looper/period/normalized audio/offset/preroll tests, admitted
 real player/renderer ownership and exact pending seek/render acknowledgement,
 measured aggregate memory/storage margins and durable/provider/UX scope below
-remain required. Temporary continuation checkpoint/summary and explicit pause
-are due before 08:00 Brisbane; older jobs remain paused.
+remain required. Temporary continuation is PAUSED, confirmed at 07:05 Brisbane before the 08:00
+cutoff; both older jobs remain PAUSED. Implementation checkpoint is 6ad3799.
 
 ## Growing epoch-period checkpoint - historical validated continuation
 

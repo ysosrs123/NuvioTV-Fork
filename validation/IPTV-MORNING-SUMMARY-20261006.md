@@ -49,7 +49,9 @@ and measured aggregate budgets. Durable pause/timeshift/recording/schedules/stor
 Stalker/automatic Xtream EPG/grouping and remaining multiview/guide/Home/Search/UX
 scope are still unfinished. Keep controls disabled until their gates pass.
 
-Temporary overnight continuation remains active for further bounded work, with
-checkpoint/summary and explicit automation pause due by 08:00 Brisbane. Both
-older automations remain paused. Read the comprehensive fresh-session handoff for
-current branch, commands, evidence, remaining work and device restrictions.
+Overnight continuation is PAUSED, confirmed at 07:05 Brisbane before the 08:00
+cutoff. Both older automations remain PAUSED. Implementation checkpoint: 6ad3799,
+following ed528c6 (growing period), 34a4937 (incremental reader) and earlier saved
+checkpoints. All task builds completed; nothing published. Remaining implementation
+scope and successful memory-limited commands are in the comprehensive handoff.
+Continue when the user resumes; leave all automations paused unless requested.

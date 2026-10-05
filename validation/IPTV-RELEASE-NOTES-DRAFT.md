@@ -5,6 +5,10 @@ Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: owned captured-epoch 
 
 ## Current checkpoint summary
 
+Overnight implementation checkpoint: 6ad3799. Temporary continuation was paused at
+07:05 Brisbane before the 08:00 cutoff; both older jobs remain paused. Nothing was
+published and the separate Fork checkout/prototype were preserved.
+
 - Added actual BaseMediaSource plus an admitted OwnedCaptureConsumer over the
   reader: one IO metadata observer, one queued/in-flight playback callback and
   one exclusive epoch period. Initially empty running capture stays unresolved;

@@ -10,11 +10,12 @@ zero failures/errors/skips. The final annotated isolated Android harness also bu
 The earlier 214-test Android run precedes only two UnstableApi annotations; no
 further device run/install was needed. Exact outcomes/hashes are in the evidence report.
 
-A NEW temporary heartbeat `nuvio-iptv-overnight-continuation` is active in this chat
-(hourly, finite overnight schedule). Finish the current bounded operation and pause
-it by 08:00 Australia/Brisbane on 6 October, or when the user returns/changes the
-plan. The two OLD automations remain paused and must not be resumed. This new
-user authorization supersedes only the earlier no-new-automation restriction.
+The temporary heartbeat `nuvio-iptv-overnight-continuation` is PAUSED, confirmed at
+07:05 Australia/Brisbane on 6 October, after the bounded source operation completed.
+Both older automations remain PAUSED. Name/prompt/schedule/target were preserved.
+Final implementation checkpoint is 6ad3799; all app/harness/JVM commands completed.
+Read the morning summary and current source report first. Continue remaining work
+when the user resumes; do not resume any automation without their request.
 No new subagents or dependency-upgrade work were authorized. Prefer controlled
 host/headless checks overnight; do not wake the TV/AVR or change device settings.
 The saved project now opens E:/Codex/NuvioTV/work/NuvioTV-Fork, still the WRONG
@@ -46,8 +47,8 @@ recording operation, provider traffic, component upgrade or control enablement.
 Actual executed Source/Looper/period/normalized audio/offset/preroll tests, admitted
 real player/renderer ownership and exact pending seek/render acknowledgement,
 measured aggregate memory/storage margins and durable/provider/UX scope below
-remain required. Temporary continuation checkpoint/summary and explicit pause
-are due before 08:00 Brisbane; older jobs remain paused.
+remain required. Temporary continuation is PAUSED, confirmed at 07:05 Brisbane before the 08:00
+cutoff; both older jobs remain PAUSED. Implementation checkpoint is 6ad3799.
 
 ## Growing epoch-period checkpoint - historical validated continuation
 
