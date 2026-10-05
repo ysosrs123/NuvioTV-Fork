@@ -459,6 +459,8 @@ internal fun PlayButton(
     onFocusRestored: () -> Unit = {}
 ) {
     val isV2 = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null
+    val v2Cinematic = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current?.visualStyle ==
+        com.nuvio.tv.domain.model.VisualStyle.CINEMATIC_GLASS
     var longPressTriggered by remember { mutableStateOf(false) }
     val longPressKeyTracker = rememberLongPressKeyTracker()
 
@@ -527,7 +529,11 @@ internal fun PlayButton(
         scale = if (isV2) ButtonDefaults.scale(focusedScale = 1f) else ButtonDefaults.scale(),
         colors = ButtonDefaults.colors(
             containerColor = if (isV2) Color.Transparent else NuvioTheme.colors.Secondary,
-            focusedContainerColor = if (isV2) Color.Transparent else NuvioTheme.colors.Secondary,
+            focusedContainerColor = if (isV2) {
+                NuvioTheme.colors.Secondary.copy(alpha = if (v2Cinematic) .16f else .24f)
+            } else {
+                NuvioTheme.colors.Secondary
+            },
             contentColor = if (isV2) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.OnSecondary,
             focusedContentColor = if (isV2) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.OnSecondary
         ),
