@@ -167,4 +167,22 @@ class SegmentCaptureTransportTest {
             assertEquals(2, attempts.get())
         }
     }
+    @Test fun committedSequenceHintNeverAdvancesBeforeAtomicStorePublication() = kotlinx.coroutines.runBlocking<Unit> {
+        CaptureSegmentStore(temp.newFolder(),8,4).use { store ->
+            var opened=false
+            val source=object:CaptureSegmentSource {
+                override suspend fun next():CaptureInput? {
+                    if(opened) return null; opened=true
+                    return CaptureInput(0,1000,0,byteArrayOf(1,2).inputStream())
+                }
+                override suspend fun close()=true
+            }
+            val transport=SegmentCaptureTransport(store,source)
+            assertNull(transport.committedSequence.value); transport.start()
+            kotlinx.coroutines.withTimeout(5000) { transport.state.first { it == CaptureTransportState.COMPLETE } }
+            assertEquals(0L,transport.committedSequence.value); assertEquals(0L,store.snapshot().single().sequence)
+            assertTrue(transport.close())
+        }
+    }
+
 }

@@ -2,7 +2,33 @@
 
 Updated 6 October 2026, Australia/Brisbane.
 
-## Incremental sample loading — latest validated checkpoint
+## Governed incremental-reader checkpoint - current validated continuation
+
+From clean 0b82357, added an actual persistent OwnedCaptureConsumer over the bounded
+sample queue. One IO worker and a metadata observer coalesce explicit/committed
+capture hints, cache immutable batches/Media3 timelines, fence delivered snapshots
+and retain pins/charges through failed release and timed-out cleanup. Mandatory
+encoded-memory floors are checked before transport/consumer start; they do not
+certify aggregate transient/native/decoder memory. Read IPTV-INCREMENTAL-READER-DESIGN.md
+and its exact frozen-source/APK/log/XML report before historical milestones.
+
+Final full app compile passed in 457s; 207 core tests passed in 2.179s; all 298 IPTV
+JVM tests in 35 suites passed with zero failures/errors/skips (8.251s test / 414s
+build); final headless Android harness builds passed in 62s. All build commands
+completed. Ten new reader JVM fixtures use actual file/queue/runtime/transport
+paths with SYNTHETIC encoded batches. Two actual-stager growth/timeline/epoch
+Android fixtures compile only; no device/provider operation or control enablement.
+
+Next bounded work: actual dynamic MediaSource/epoch MediaPeriod/sample-stream
+binding to the cached reader. Keep playback-thread access free of store/queue IO,
+WAITING distinct from finite EOS, stable epoch/eviction offsets, explicit terminal /
+expiry/boundary policy and borrower shutdown before reader release. Admitted
+player/renderer ownership, normalized negative audio/preroll/device seek/render
+acknowledgement and measured budgets remain gates. Durable storage/providers/UX
+scope below remains authorized but unfinished. Old automations remain paused;
+temporary overnight continuation must finish/checkpoint/pause by 08:00 Brisbane.
+
+## Incremental sample loading — historical validated checkpoint
 
 From a960696, added exact-row inspection/PTS-window cursor and actual bounded TS
 queue. It distinguishes waiting/complete/stopped/capacity/expiry/epoch/failure/cancel;

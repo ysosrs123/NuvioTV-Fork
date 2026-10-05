@@ -226,4 +226,31 @@ class SharedCaptureRuntimeTest {
         assertEquals(2,admission.snapshot().consumers); assertEquals(0,admission.snapshot().decoders)
         usable=100_000_000; assertTrue(runtime.close(record)); assertEquals(0,admission.snapshot().consumers)
     }
+    @Test fun consumerMemoryFloorIsValidatedBeforeAnyNewTransportStarts() = runBlocking<Unit> {
+        val transport=Transport(); val pipeline=pipeline(transport); var starts=0; var closes=0
+        val consumer=object:OwnedCaptureConsumer {
+            override val minimumMemoryReservationBytes=21L
+            override fun start() { starts++ }
+            override suspend fun close():Boolean { closes++; return true }
+        }
+        assertEquals(CaptureJoinResult.Failed(),join(pipeline,consumer=consumer))
+        assertEquals(0,starts); assertEquals(1,closes); assertEquals(0,transport.starts)
+        assertEquals(1,transport.closes); assertEquals(0,admission.snapshot().consumers)
+    }
+    @Test fun underReservedJoinCannotStopAnExistingRecorderOrReleaseUnconfirmedMemory() = runBlocking<Unit> {
+        val transport=Transport(); val pipeline=pipeline(transport); val record=token(join(pipeline,recorder))
+        var confirmed=false; var starts=0
+        val consumer=object:OwnedCaptureConsumer {
+            override val minimumMemoryReservationBytes=21L
+            override fun start() { starts++ }
+            override suspend fun close()=confirmed
+        }
+        val result=join(pipeline,consumer=consumer) as CaptureJoinResult.Failed
+        assertNotNull(result.pendingConsumer); assertEquals(0,starts); assertEquals(0,transport.closes)
+        assertEquals(38L,admission.snapshot().memoryBytes)
+        confirmed=true; assertTrue(runtime.close(result.pendingConsumer!!))
+        assertEquals(18L,admission.snapshot().memoryBytes); assertEquals(0,transport.closes)
+        assertTrue(runtime.close(record))
+    }
+
 }

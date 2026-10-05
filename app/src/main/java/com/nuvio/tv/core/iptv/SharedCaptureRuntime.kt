@@ -7,16 +7,22 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import java.util.UUID
 
 /** Construction opens no media. Closure confirms the producer AND all upstream requests stopped. */
 interface OwnedCaptureTransport {
+    /** Commit/terminal hints only; subscribers still inspect exact committed local rows. */
+    val refreshEvents: Flow<Unit> get() = emptyFlow()
     fun start()
     suspend fun close(): Boolean
 }
 
 /** Construction opens no decoder. Closure confirms decoder/file-reader/pin release, as applicable. */
 interface OwnedCaptureConsumer {
+    /** Lower bound only; does not measure aggregate transient/native/decoder memory. */
+    val minimumMemoryReservationBytes: Long get() = 0
     fun start()
     suspend fun close(): Boolean
 }
@@ -107,9 +113,12 @@ class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
             check(session.pipeline.store.maxRetainedBytes == storage.retainedBytes &&
                 session.pipeline.store.maxSegmentBytes == storage.segmentBytes)
             session.pipeline.store.checkStorageReservation(storage)
-            if (infrastructure != null) session.pipeline.transport.start()
             currentCoroutineContext().ensureActive()
             consumer.handle = createConsumer(session.pipeline.store)
+            val minimum = consumer.handle!!.minimumMemoryReservationBytes
+            check(minimum >= 0 && reservation.memoryBytes >= minimum) { "Capture consumer memory is under-reserved" }
+            if (infrastructure != null) session.pipeline.transport.start()
+            currentCoroutineContext().ensureActive()
             consumer.handle!!.start()
             currentCoroutineContext().ensureActive()
             if (reservation.role == LiveConsumerRole.VIEWER) {

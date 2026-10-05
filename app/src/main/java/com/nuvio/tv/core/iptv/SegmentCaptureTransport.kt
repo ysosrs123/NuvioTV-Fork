@@ -4,6 +4,8 @@ import java.io.InputStream
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -32,6 +34,9 @@ class SegmentCaptureTransport(private val store: CaptureSegmentStore, private va
     private val closeMutex = Mutex()
     private val stateMutable = MutableStateFlow(CaptureTransportState.NEW)
     val state: StateFlow<CaptureTransportState> = stateMutable.asStateFlow()
+    private val committedMutable = MutableStateFlow<Long?>(null)
+    val committedSequence: StateFlow<Long?> = committedMutable.asStateFlow()
+    override val refreshEvents: Flow<Unit> = combine(state,committedSequence) { _,_ -> Unit }
     private var worker: Job? = null
     private var stopping = false
     private var body: InputStream? = null
@@ -51,7 +56,8 @@ class SegmentCaptureTransport(private val store: CaptureSegmentStore, private va
                     try {
                         val context = currentCoroutineContext()
                         context.ensureActive()
-                        store.append(next.startMs, next.endMs, next.continuity, next.body) { context.ensureActive() }
+                        val committed = store.append(next.startMs, next.endMs, next.continuity, next.body) { context.ensureActive() }
+                    committedMutable.value = committed.sequence
                     } finally { closeBody() }
                 }
                 stateMutable.value = CaptureTransportState.COMPLETE

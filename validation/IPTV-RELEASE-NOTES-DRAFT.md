@@ -1,9 +1,28 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 6 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: incremental inspected-sample loading and TS queue, following asynchronous reader a960696 and finite sample delivery 6842df1 and physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
+Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: governed incremental reader and cached transport-driven metadata, following incremental inspected-sample loading and TS queue 0b82357, asynchronous reader a960696 and finite sample delivery 6842df1 and physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
 
 ## Current checkpoint summary
+
+- Added the actual persistent owned incremental reader over the bounded queue.
+  One IO worker and metadata observer coalesce committed capture/explicit hints,
+  build cached immutable Media3 metadata off the playback thread, fence stale /
+  retiring views and retain ownership through failed release and blocked cleanup.
+  Explicit epoch/terminal states survive release; no automatic retry or polling.
+- Consumer declared memory floors now apply before new transport/consumer start.
+  The incremental reader declares its encoded resident cap; measured transient,
+  Java/native/renderer/decoder overhead remains required above that lower bound.
+  Failed/under-reserved joins preserve other consumers and uncertain reservations.
+- Final full app compile (457s), **207 core tests**, **298 IPTV JVM tests**
+  (35 suites, zero failures/errors/skips; 8.251s test / 414s build) and final
+  headless harness builds (62s) pass. Ten new reader fixtures use actual file,
+  inspection, queue, runtime and transport notification paths with SYNTHETIC
+  batches. Two actual-stager cached-timeline/epoch Android fixtures compile only.
+- Actual dynamic MediaSource/epoch-period/sample binding, admitted player/renderer
+  closure, normalized audio/preroll/device seek confirmation and measured aggregate
+  budgets remain required. No device/provider operation, component upgrade or
+  control enablement. Exact hashes and evidence are in the incremental-reader report.
 
 - Added incremental exact-row inspection and TS sample staging as capture grows.
   The cursor preserves stable actual-PTS windows and distinguishes a waiting tail

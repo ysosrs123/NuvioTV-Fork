@@ -27,7 +27,7 @@ internal data class CaptureBatchLoadResult(val state: CaptureSampleLoadState,
  */
 @UnstableApi
 internal class CaptureSampleBatchQueue(private val cursor: CaptureSampleLoadCursor,
-    private val limits: CaptureSampleStagingLimits, private val maxResidentBytes: Long,
+    private val limits: CaptureSampleStagingLimits, val maxResidentBytes: Long,
     private val maxBatches: Int = 2,
     private val stage: (CaptureSampleLoadInput, CaptureSampleStagingLimits, () -> Unit) -> CapturedSampleBatch =
         { input,bounds,cancellation -> LocalCaptureSampleStager(bounds).stage(input.window,input.media,cancellation) },
