@@ -61,25 +61,53 @@ class LibraryGenreFillTest {
     )
 
     @Test
-    fun `only simkl and mdblist entries without genres are filled`() = runTest {
+    fun `simkl and mdblist entries get tmdb genre names, mdblist slugs included`() = runTest {
         val lookup = CountingLookup()
         val entries = listOf(
             entry("tmdb:1", tmdb = 1),
             entry("tt2", provider = "simkl", imdb = "tt2", type = "series"),
-            entry("tmdb:3", tmdb = 3, genres = listOf("crime")),
-            entry("tt4", provider = "trakt", imdb = "tt4", tmdb = 4),
-            entry("local", provider = null, tmdb = 5),
+            entry("tmdb:3", tmdb = 3, genres = listOf("crime", "science-fiction")),
             entry("kitsu:6", provider = "simkl")
         )
         val result = genreFill(lookup, FakeStore()).fill(flowOf(entries)).last()
         assertEquals(listOf("Drama", "Crime"), result[0].genres)
         assertEquals(listOf("Drama", "Crime"), result[1].genres)
-        assertEquals(listOf("crime"), result[2].genres)
-        assertEquals(entries.drop(3), result.drop(3))
+        assertEquals(listOf("Drama", "Crime"), result[2].genres)
+        assertEquals(entries[3], result[3])
         assertEquals(
-            setOf(LibraryGenreTarget("movie", 1, null), LibraryGenreTarget("series", null, "tt2")),
+            setOf(LibraryGenreTarget("movie", 1, null), LibraryGenreTarget("series", null, "tt2"), LibraryGenreTarget("movie", 3, null)),
             lookup.calls.map { it.first }.toSet()
         )
+    }
+
+    @Test
+    fun `trakt and local entries are left exactly as they are`() = runTest {
+        val lookup = CountingLookup()
+        val entries = listOf(
+            entry("tt4", provider = "trakt", imdb = "tt4", tmdb = 4, genres = listOf("science-fiction")),
+            entry("tt5", provider = "trakt", tmdb = 5),
+            entry("local", provider = null, tmdb = 6, genres = listOf("drama"))
+        )
+        val emissions = genreFill(lookup, FakeStore()).fill(flowOf(entries)).toList()
+        assertEquals(listOf(entries), emissions)
+        assertEquals(0, lookup.calls.size)
+    }
+
+    @Test
+    fun `provider slugs are shown title cased when tmdb cannot help`() = runTest {
+        val lookup = CountingLookup { target -> if (target.tmdbId == 1) null else emptyList() }
+        val entries = listOf(
+            entry("tmdb:1", tmdb = 1, genres = listOf("science-fiction", "drama")),
+            entry("tmdb:2", tmdb = 2, genres = listOf("tv_movie")),
+            entry("mdblist:9", genres = listOf("war", "Science Fiction", "science-fiction"))
+        )
+        val emissions = genreFill(lookup, FakeStore()).fill(flowOf(entries)).toList()
+        assertEquals(listOf("Science Fiction", "Drama"), emissions.first()[0].genres)
+        val result = emissions.last()
+        assertEquals(listOf("Science Fiction", "Drama"), result[0].genres)
+        assertEquals(listOf("Tv Movie"), result[1].genres)
+        assertEquals(listOf("War", "Science Fiction"), result[2].genres)
+        assertEquals(2, lookup.calls.size)
     }
 
     @Test

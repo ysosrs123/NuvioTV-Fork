@@ -9,6 +9,7 @@ import com.nuvio.tv.domain.model.ContentType
 import com.nuvio.tv.domain.model.LibraryEntry
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -57,8 +58,8 @@ interface LibraryGenreStore {
 }
 
 /**
- * Simkl and MDBList libraries carry few or no genres, so the Library genre filter has nothing to show.
- * Entries from those sources without genres get them from TMDB, looked up once per title and kept on disk.
+ * Simkl and MDBList libraries carry few genres, and MDBList's are slugs, so their Library genre filter uses TMDB
+ * genre names instead, looked up once per title and kept on disk. The provider's own genres are the fallback.
  */
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -90,15 +91,12 @@ class LibraryGenreFill internal constructor(
     fun fill(items: Flow<List<LibraryEntry>>): Flow<List<LibraryEntry>> =
         combine(items, language.distinctUntilChanged(), ::Pair).transformLatest { (entries, language) ->
             val targets = entries.mapNotNull { it.genreTarget() }.associateBy { cacheKey(language, it) }
-            if (targets.isEmpty()) {
-                emit(entries)
-                return@transformLatest
-            }
-            if (!store.isLoaded) {
-                emit(entries)
+            if (!store.isLoaded && targets.isNotEmpty()) {
+                emit(entries.withGenres(language))
                 store.load()
             }
             emit(entries.withGenres(language))
+            if (targets.isEmpty()) return@transformLatest
             val missing = targets.filterKeys { key -> store.get(key) == null && key !in settled }.toList()
             if (missing.isEmpty() || now() < pausedUntil) return@transformLatest
             delay(startDelayMs)
@@ -132,8 +130,10 @@ class LibraryGenreFill internal constructor(
     }
 
     private fun List<LibraryEntry>.withGenres(language: String): List<LibraryEntry> = map { entry ->
-        val target = entry.genreTarget() ?: return@map entry
-        store.get(cacheKey(language, target))?.let { entry.copy(genres = it) } ?: entry
+        if (entry.trackingProviderId !in FILLED_PROVIDERS) return@map entry
+        val genres = entry.genreTarget()?.let { store.get(cacheKey(language, it)) }
+            ?: entry.genres.map(::genreDisplayName).filter(String::isNotEmpty).distinct()
+        if (genres == entry.genres) entry else entry.copy(genres = genres)
     }
 
     private fun cacheKey(language: String, target: LibraryGenreTarget) = "${language.trim()}|${target.key}"
@@ -147,7 +147,7 @@ class LibraryGenreFill internal constructor(
         private val FILLED_PROVIDERS = setOf(TrackingProviderId.SIMKL.storageId, TrackingProviderId.MDBLIST.storageId)
 
         internal fun LibraryEntry.genreTarget(): LibraryGenreTarget? {
-            if (genres.isNotEmpty() || trackingProviderId !in FILLED_PROVIDERS) return null
+            if (trackingProviderId !in FILLED_PROVIDERS) return null
             val kind = when (type) {
                 "movie" -> "movie"
                 "series", "tv" -> "series"
@@ -158,6 +158,13 @@ class LibraryGenreFill internal constructor(
             val imdb = (imdbId ?: id.takeIf { it.startsWith("tt") })?.substringBefore(':')?.takeIf { it.startsWith("tt") }
             if (tmdb == null && imdb == null) return null
             return LibraryGenreTarget(kind, tmdb, imdb)
+        }
+
+        internal fun genreDisplayName(genre: String): String {
+            val name = genre.trim()
+            if (name.any(Char::isUpperCase)) return name
+            return name.split('-', '_', ' ').filter(String::isNotEmpty)
+                .joinToString(" ") { word -> word.replaceFirstChar { it.titlecase(Locale.ROOT) } }
         }
     }
 }
