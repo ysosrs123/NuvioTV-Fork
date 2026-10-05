@@ -107,6 +107,16 @@ class IptvMetadataClientTest {
         }
     }
 
+    @Test fun successiveHttp10RefreshesDoNotReuseClosedConnections() = runBlocking {
+        MockWebServer().use { server ->
+            repeat(2) { server.enqueue(MockResponse().setStatus("HTTP/1.0 200 OK").setBody(catalogue).setSocketPolicy(SocketPolicy.DISCONNECT_AT_END)) }
+            val client = IptvMetadataClient()
+            repeat(2) { assertTrue((client.playlist(server.url("/").toString()) as PlaylistDownload.Candidate).catalogue.canPublish) }
+            assertEquals(2, server.requestCount)
+            repeat(2) { assertEquals("close", server.takeRequest().getHeader("Connection")) }
+        }
+    }
+
     private suspend fun failure(block: suspend () -> Any): MetadataException {
         try { block() } catch (error: MetadataException) { return error }
         throw AssertionError("Expected metadata rejection")

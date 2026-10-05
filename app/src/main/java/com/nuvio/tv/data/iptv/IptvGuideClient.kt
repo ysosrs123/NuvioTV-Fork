@@ -46,6 +46,7 @@ class IptvGuideClient(
                 if (!visited.add(url)) throw MetadataException(MetadataFailure.REDIRECT_LIMIT)
                 val request = Request.Builder().url(url)
                     .header("Accept", "application/xml, text/xml, application/gzip, */*")
+                    .header("Connection", "close") // No stale-socket retry after an HTTP/1.0 response.
                     // Keep wire bytes visible to the budget; parseGuideInput handles gzip once.
                     .header("Accept-Encoding", "identity")
                     .apply {

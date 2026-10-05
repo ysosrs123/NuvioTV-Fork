@@ -32,6 +32,7 @@ class IptvCatalogueStore(
 
     fun createSource(profileId: Int, label: String, kind: IptvSourceKind, accountId: String, connection: IptvSourceConnection): IptvSource = transaction { db ->
         validateConfiguration(label, accountId, connection)
+        if (kind == IptvSourceKind.XTREAM) IptvXtreamClient.serverBase(connection)
         val ref = IptvSourceRef(profileId, UUID.randomUUID().toString())
         db.insertOrThrow("sources", null, ContentValues().apply {
             put("id", ref.sourceId); put("profile", profileId); put("label", label); put("kind", kind.name); put("account_id", accountId)
@@ -44,6 +45,7 @@ class IptvCatalogueStore(
     /** A configuration edit invalidates in-flight imports and cached validators, never user overlays. */
     fun editSource(ref: IptvSourceRef, label: String, kind: IptvSourceKind, accountId: String, connection: IptvSourceConnection): IptvSource = transaction { db ->
         validateConfiguration(label, accountId, connection)
+        if (kind == IptvSourceKind.XTREAM) IptvXtreamClient.serverBase(connection)
         val old = source(db, ref)
         val changedConnection = old.kind != kind || old.accountId != accountId || readConnection(db, ref) != connection
         db.update("sources", ContentValues().apply {

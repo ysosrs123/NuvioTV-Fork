@@ -16,12 +16,17 @@ sealed interface IptvPlaylistRefresh {
 }
 
 /** Errors/cancellation propagate without promoting partial rows or HTTP validators. */
-class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val metadata: IptvMetadataClient = IptvMetadataClient()) {
+class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val metadata: IptvMetadataClient = IptvMetadataClient(), private val xtream: IptvXtreamClient = IptvXtreamClient()) {
     suspend fun refresh(ref: IptvSourceRef): IptvPlaylistRefresh = withContext(Dispatchers.IO) {
         val context = currentCoroutineContext()
         context.ensureActive()
         val request = store.prepareRefresh(ref)
-        if (request.kind != IptvSourceKind.M3U) return@withContext IptvPlaylistRefresh.UnsupportedSourceKind
+        if (request.kind == IptvSourceKind.XTREAM) {
+            val download = xtream.catalogue(request.connection)
+            context.ensureActive()
+            return@withContext IptvPlaylistRefresh.Catalogue(store.commitCatalogue(ref, request.ticket,
+                download.records, download.canPublish) { context.ensureActive() })
+        }
         val validators = request.validators?.let { CatalogueValidators(it.etag, it.lastModified) }
         when (val download = metadata.playlist(request.connection.endpoint, validators)) {
             PlaylistDownload.NotModified -> {

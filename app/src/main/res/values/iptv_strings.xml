@@ -3,7 +3,7 @@
     <string name="iptv_sources_description">Add your channel playlists and programme guides. Sources belong to this profile.</string>
     <string name="iptv_add_playlist">Add playlist</string>
     <string name="iptv_add_guide">Add guide</string>
-    <string name="iptv_sources_empty">Add an M3U playlist, then refresh it to load your channels.</string>
+    <string name="iptv_sources_empty">Add an M3U playlist or Xtream source, then refresh to load your channels.</string>
     <string name="iptv_guides_title">Programme guides</string>
     <string name="iptv_guides_for">Guides for %1$s</string>
     <string name="iptv_choose_guides">Choose guides</string>
@@ -47,4 +47,10 @@
     <string name="iptv_live_failed">This channel could not play. Choose it again to retry.</string>
     <string name="iptv_live_capacity">Playback capacity is in use. Stop another session before trying again.</string>
     <string name="iptv_live_closing">The previous player has not confirmed it stopped. A new stream cannot open yet.</string>
+    <string name="iptv_add_xtream">Add Xtream</string>
+    <string name="iptv_xtream_form">Xtream source</string>
+    <string name="iptv_xtream_server">Server URL (including http:// or https://)</string>
+    <string name="iptv_xtream_username">Username</string>
+    <string name="iptv_xtream_password">Password</string>
+    <string name="iptv_xtream_auth_failed">The account could not sign in or is no longer active. Check its details and try again.</string>
 </resources>

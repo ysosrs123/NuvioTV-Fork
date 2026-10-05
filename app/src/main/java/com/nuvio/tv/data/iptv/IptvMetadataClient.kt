@@ -31,7 +31,7 @@ sealed interface PlaylistDownload {
     }
 }
 
-enum class MetadataFailure { INVALID_ADDRESS, HTTP_STATUS, REDIRECT_REQUIRES_REVIEW, REDIRECT_LIMIT, BODY_LIMIT, INVALID_RESPONSE, NETWORK }
+enum class MetadataFailure { INVALID_ADDRESS, AUTHENTICATION, HTTP_STATUS, REDIRECT_REQUIRES_REVIEW, REDIRECT_LIMIT, BODY_LIMIT, INVALID_RESPONSE, NETWORK }
 class MetadataException(val failure: MetadataFailure, val status: Int? = null) : IOException("IPTV metadata: $failure")
 
 /**
@@ -55,6 +55,8 @@ class IptvMetadataClient(
         repeat(6) {
             if (!visited.add(url)) throw MetadataException(MetadataFailure.REDIRECT_LIMIT)
             val request = Request.Builder().url(url).header("Accept", "application/x-mpegURL, audio/x-mpegurl, text/plain, */*")
+                // Avoid stale pooled sockets from HTTP/1.0 servers without retrying requests.
+                .header("Connection", "close")
                 .apply {
                     validators?.etag?.let { header("If-None-Match", it) }
                     validators?.lastModified?.let { header("If-Modified-Since", it) }

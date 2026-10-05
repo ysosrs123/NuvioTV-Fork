@@ -3,20 +3,28 @@ package com.nuvio.tv.ui.screens.iptv
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.*
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -24,6 +32,7 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
+import com.nuvio.tv.data.iptv.IptvSourceKind
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.screens.settings.SettingsGroupCard
@@ -43,6 +52,7 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
             Button(onClick = onLive, enabled = state.sources.isNotEmpty() && !state.busy) { Text(stringResource(R.string.iptv_live_title)) }
             Button(onClick = onBack) { Text(stringResource(R.string.iptv_setup_back)) }
             Button(onClick = { viewModel.add(false) }, enabled = state.ready && !state.busy, modifier = Modifier.focusRequester(first)) { Text(stringResource(R.string.iptv_add_playlist)) }
+            Button(onClick = { viewModel.add(false, IptvSourceKind.XTREAM) }, enabled = state.ready && !state.busy) { Text(stringResource(R.string.iptv_add_xtream)) }
             Button(onClick = { viewModel.add(true) }, enabled = state.ready && !state.busy) { Text(stringResource(R.string.iptv_add_guide)) }
         }
         if (state.busy) Text(stringResource(R.string.iptv_setup_working), color = NuvioTheme.colors.TextSecondary)
@@ -79,12 +89,21 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
     state.form?.let { form -> key(state.profileId, state.revision, form) {
         var label by remember { mutableStateOf(form.label) }
         var endpoint by remember { mutableStateOf(form.endpoint) }
-        NuvioDialog(onDismiss = viewModel::dismiss, title = stringResource(if (form.guide) R.string.iptv_guide_form else R.string.iptv_playlist_form)) {
-            SourceField(stringResource(R.string.iptv_setup_name), label, { label = it.take(240) })
-            SourceField(stringResource(R.string.iptv_setup_url), endpoint, { endpoint = it.take(16384) }, secret = true)
+        var username by remember { mutableStateOf(form.username) }
+        var password by remember { mutableStateOf(form.password) }
+        val xtream = !form.guide && form.kind == IptvSourceKind.XTREAM
+        NuvioDialog(onDismiss = viewModel::dismiss, title = stringResource(if (form.guide) R.string.iptv_guide_form else if (xtream) R.string.iptv_xtream_form else R.string.iptv_playlist_form)) {
+            Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SourceField(stringResource(R.string.iptv_setup_name), label, { label = it.take(240) })
+                SourceField(stringResource(if (xtream) R.string.iptv_xtream_server else R.string.iptv_setup_url), endpoint, { endpoint = it.take(16384) }, secret = true, last = !xtream)
+                if (xtream) {
+                    SourceField(stringResource(R.string.iptv_xtream_username), username, { username = it.take(4096) }, secret = true)
+                    SourceField(stringResource(R.string.iptv_xtream_password), password, { password = it.take(4096) }, secret = true, last = true)
+                }
+            }
             state.message?.let { Text(stringResource(it), color = NuvioTheme.colors.TextSecondary) }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = { viewModel.save(form, label, endpoint) }, enabled = !state.busy && label.isNotBlank() && endpoint.isNotBlank()) { Text(stringResource(R.string.iptv_setup_save)) }
+                Button(onClick = { viewModel.save(form, label, endpoint, username, password) }, enabled = !state.busy && label.isNotBlank() && endpoint.isNotBlank() && (!xtream || (username.isNotEmpty() && password.isNotEmpty()))) { Text(stringResource(R.string.iptv_setup_save)) }
                 Button(onClick = viewModel::dismiss, enabled = !state.busy) { Text(stringResource(R.string.iptv_setup_cancel)) }
             }
         }
@@ -92,13 +111,24 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
 }
 
 @Composable
-private fun SourceField(label: String, value: String, onChange: (String) -> Unit, secret: Boolean = false) {
+private fun SourceField(label: String, value: String, onChange: (String) -> Unit, secret: Boolean = false, last: Boolean = false) {
+    val focus = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(label, color = NuvioTheme.colors.TextSecondary)
         BasicTextField(value, onChange, singleLine = true, textStyle = MaterialTheme.typography.bodyLarge.copy(color = NuvioTheme.colors.TextPrimary),
-            keyboardOptions = if (secret) KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false) else KeyboardOptions.Default,
+            keyboardOptions = KeyboardOptions(keyboardType = if (secret) KeyboardType.Password else KeyboardType.Text,
+                autoCorrectEnabled = !secret, imeAction = if (last) ImeAction.Done else ImeAction.Next),
+            keyboardActions = KeyboardActions(onNext = { focus.moveFocus(FocusDirection.Next) },
+                onDone = { keyboard?.hide(); focus.moveFocus(FocusDirection.Next) }),
             visualTransformation = if (secret) PasswordVisualTransformation() else VisualTransformation.None,
             cursorBrush = SolidColor(NuvioTheme.colors.TextPrimary),
-            modifier = Modifier.fillMaxWidth().border(1.dp, NuvioTheme.colors.TextSecondary).padding(12.dp))
+            modifier = Modifier.fillMaxWidth().onPreviewKeyEvent { event ->
+                if (event.type != KeyEventType.KeyDown) false else when (event.key) {
+                    Key.DirectionDown -> focus.moveFocus(FocusDirection.Next)
+                    Key.DirectionUp -> focus.moveFocus(FocusDirection.Previous)
+                    else -> false
+                }
+            }.border(1.dp, NuvioTheme.colors.TextSecondary).padding(12.dp))
     }
 }

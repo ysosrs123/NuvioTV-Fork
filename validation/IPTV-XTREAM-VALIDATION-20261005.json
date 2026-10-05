@@ -1,0 +1,323 @@
+{
+  "recordedAtUtc": "2026-10-05T05:22:54.308744+00:00",
+  "milestone": "Xtream account/category/live refresh and native source forms",
+  "jvmTests": {
+    "total": 107,
+    "failures": 0,
+    "newTransportTests": 14
+  },
+  "deviceTests": {
+    "total": 125,
+    "failures": 0,
+    "seconds": 34.366,
+    "newRepositoryTests": 5,
+    "noNetworkPermission": true
+  },
+  "suitesOverlap": true,
+  "providerAccountRequests": 0,
+  "contractReference": "https://xui.live/docs/api/xtream/",
+  "sourceSha256": {
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/IptvXtreamRepositoryTest.kt": "b590bc4f749d07fea8dafcbc6e544b2eecdc06912607ad65a24a25437dcdacfa",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvCatalogueStore.kt": "c37345774f9ccff2a9b49a8b58f52bf4695a5b2e99f17ab28cd6e64ddc490d30",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvGuideClient.kt": "d44ee413b473402a736807204ae1f4663345b982f531335352d46e913e345418",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvMetadataClient.kt": "5d691661893770f6e30ef30dee6d59647271a89c737e470942c02055ac1e1f19",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvPlaylistRepository.kt": "242415198e233c2679a6a1f5788277bba08a4b79f8d4027eb58d62a486c0be71",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvXtreamClient.kt": "6e5d9031727158f055a6c646f86a8a66b79d3683b7fe903286d3f314d1e1ff2b",
+    "app/src/main/java/com/nuvio/tv/ui/screens/iptv/IptvSourcesScreen.kt": "5437504eec13ef88da3c179e33f6a7a8a2da7b32ff833de276bb16df45b4d7b7",
+    "app/src/main/java/com/nuvio/tv/ui/screens/iptv/IptvSourcesViewModel.kt": "328d413449e773d6c11c14ec97f9bb653f1bf09c73f71105d445422585e5fc5f",
+    "app/src/main/res/values/iptv_strings.xml": "811df74bb7d2f51e3eb44f74d352ab65b9df4dc3a5f23416e4091575f366568f",
+    "app/src/test/java/com/nuvio/tv/data/iptv/IptvGuideClientTest.kt": "bb27e8032b9dde235bb1904f93229fc83e8e34c6778ed4bf10b3635dae4a4899",
+    "app/src/test/java/com/nuvio/tv/data/iptv/IptvMetadataClientTest.kt": "a0241d4fbb0e36b1efa03e2bd04346c266b080554269010993af19fdcdc4a613",
+    "app/src/test/java/com/nuvio/tv/data/iptv/IptvXtreamClientTest.kt": "0dc97f3bb589b8e2ab9f76e78f5776764befcb15de476998cc309a1d970675ed"
+  },
+  "prototypeApkSha256": "cacd672efc17bf4d141a0eb38cb45f1d7aa327168f02d10dd0043c4e1e693e66",
+  "deviceLogSha256": "52c177075e5c54d411c8b05788756e52637ac1d9f998b9faaf946678f7dac28d",
+  "httpEvents": [
+    {
+      "time": 1791175896.5637078,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791175998.968552,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176233.6250958,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176233.6260977,
+      "authenticated": true,
+      "responseBytes": 104
+    },
+    {
+      "time": 1791176333.8368895,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176333.8378944,
+      "authenticated": true,
+      "responseBytes": 104
+    },
+    {
+      "time": 1791176380.9769695,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176380.9769695,
+      "authenticated": true,
+      "responseBytes": 104
+    },
+    {
+      "time": 1791176419.9677067,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176419.9677067,
+      "authenticated": true,
+      "responseBytes": 104
+    },
+    {
+      "time": 1791176438.6400065,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176438.6400065,
+      "authenticated": true,
+      "responseBytes": 104
+    },
+    {
+      "time": 1791176489.369462,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176489.369462,
+      "authenticated": true,
+      "responseBytes": 104
+    },
+    {
+      "time": 1791176489.3814616,
+      "path": "/player_api.php",
+      "action": "get_live_categories",
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176489.433248,
+      "path": "/player_api.php",
+      "action": "get_live_streams",
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176536.6096752,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "denied",
+      "range": null
+    },
+    {
+      "time": 1791176536.6096752,
+      "authenticated": false,
+      "responseBytes": 106
+    },
+    {
+      "time": 1791176552.1207428,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "malformed",
+      "range": null
+    },
+    {
+      "time": 1791176552.1207428,
+      "authenticated": true,
+      "responseBytes": 104
+    },
+    {
+      "time": 1791176552.1297421,
+      "path": "/player_api.php",
+      "action": "get_live_categories",
+      "mode": "malformed",
+      "range": null
+    },
+    {
+      "time": 1791176552.137748,
+      "path": "/player_api.php",
+      "action": "get_live_streams",
+      "mode": "malformed",
+      "range": null
+    },
+    {
+      "time": 1791176642.5716703,
+      "path": "/live/fixture/fixture-pass/42.ts",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176692.0510354,
+      "path": "/live/fixture/fixture-pass/43.ts",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176693.208838,
+      "closed": "/live/fixture/fixture-pass/42.ts"
+    },
+    {
+      "time": 1791176712.932679,
+      "closed": "/live/fixture/fixture-pass/43.ts"
+    },
+    {
+      "time": 1791176777.369295,
+      "path": "/live/fixture/fixture-pass/42.ts",
+      "action": null,
+      "mode": "valid",
+      "range": null
+    },
+    {
+      "time": 1791176827.8251028,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "http10-delay",
+      "range": null
+    },
+    {
+      "time": 1791176827.826104,
+      "authenticated": true,
+      "responseBytes": 104
+    },
+    {
+      "time": 1791177097.1698303,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "http10-explicit",
+      "range": null
+    },
+    {
+      "time": 1791177097.1698303,
+      "authenticated": true,
+      "responseBytes": 104
+    },
+    {
+      "time": 1791177097.1839895,
+      "path": "/player_api.php",
+      "action": "get_live_categories",
+      "mode": "http10-explicit",
+      "range": null
+    },
+    {
+      "time": 1791177097.2044141,
+      "path": "/player_api.php",
+      "action": "get_live_streams",
+      "mode": "http10-explicit",
+      "range": null
+    },
+    {
+      "time": 1791177460.674593,
+      "path": "/player_api.php",
+      "action": null,
+      "mode": "http10-bare",
+      "range": null
+    },
+    {
+      "time": 1791177460.6755927,
+      "authenticated": true,
+      "responseBytes": 104
+    },
+    {
+      "time": 1791177460.6935894,
+      "path": "/player_api.php",
+      "action": "get_live_categories",
+      "mode": "http10-bare",
+      "range": null
+    },
+    {
+      "time": 1791177460.7117348,
+      "path": "/player_api.php",
+      "action": "get_live_streams",
+      "mode": "http10-bare",
+      "range": null
+    }
+  ],
+  "limits": [
+    "Controlled compatible fixtures, not real-provider certification or a universal Xtream specification",
+    "Three sequential metadata responses are not a provider-atomic snapshot",
+    "Xtream metadata redirects are rejected; media redirects remain rejected by the prior player adapter",
+    "Account capacity is advertised metadata only and never raises the conservative runtime limit",
+    "Archive flags are advertised metadata only; no catch-up playback",
+    "API short EPG and automatic XMLTV account-feed setup remain; existing manually linked XMLTV feeds work",
+    "No provider VOD/series import or HLS/device/AFR compatibility claim from this milestone",
+    "Missing output list defaults to TS; explicit TS preferred, otherwise advertised HLS; no automatic fallback retries",
+    "Active auth required; malformed or elapsed numeric expiry rejected, absent/null expiry treated as unknown",
+    "English fallback strings; broader locale/appearance/scale certification remains"
+  ],
+  "device": "AM9PRO Android 14 API 34, 192.168.10.60:5555",
+  "prototype": {
+    "package": "com.nuvio.iptv.prototype",
+    "label": "Nuvio IPTV Prototype",
+    "finalBuildInstalled": true,
+    "finalState": "force-stopped"
+  },
+  "uiChecks": [
+    "Original appearance: opened native Nuvio Xtream form and added a synthetic source.",
+    "V2 appearance: edited saved source with masked credentials; remote Down from password now focuses Save after fixing the reproduced focus trap.",
+    "Two Xtream channels coexist with the existing 33-channel M3U fixture; source cycling and favourite filtering work.",
+    "Authentication denial stops after authentication and displays an account error; malformed channel rows retain the previous catalogue.",
+    "Final APK refreshed all three responses from HTTP/1.0 with immediate closure and no response Connection header; status became Up to date.",
+    "Explicit activation of each Xtream channel rendered generated 640x360 25 FPS H.264 TS with silent AAC; requests had no Range header.",
+    "Final cold restart preserved the Xtream source and favourite. Observed source switching and favourite filtering caused no media request.",
+    "Existing XMLTV fixture feed linked to Xtream; its programmes expired at 15:00 Brisbane, so current programme display was not newly validated."
+  ],
+  "traceInterpretation": "The trace retains development failures and host diagnostics as well as passing final checks. A third manual channel activation occurred during batched remote navigation before asynchronous UI state settled; the fixture server was subsequently restarted, so that handler has no closed event. The final cold-restart check used observed state between actions and opened no media.",
+  "privateScreenshotDirectory": "E:/Codex/NuvioTV/work/NuvioTV-Fork/captures/iptv-xtream",
+  "reviewedScreenshots": [
+    "xtream-form.png",
+    "xtream-first-playing.png",
+    "final-restart-favourites.png"
+  ],
+  "otherUiEvidence": [
+    "remote-save-fixed.xml",
+    "final-http10-refresh.xml",
+    "final-restart-xtream.xml",
+    "final-restart-favourites.xml"
+  ],
+  "cleanup": {
+    "fixtureServerStopped": true,
+    "prototypeStopped": true,
+    "temporaryValidationPackagesUninstalled": [
+      "com.nuvio.iptv.validation",
+      "com.nuvio.iptv.validation.test"
+    ],
+    "thisRunReverseRemoved": "tcp:18766",
+    "preExistingReversePreserved": "tcp:8765",
+    "temporaryDeviceUiDumpRemoved": "/sdcard/iptv-xtream-ui.xml",
+    "userAppsAccountsPreferencesRecordingsPreserved": true
+  },
+  "deviceLimits": "Controlled synthetic TS playback only. No real-provider, HLS, audible-output, HDR, AFR, recording, timeshift, catch-up or multiview claim. Broader theme/scale/localisation validation remains."
+}

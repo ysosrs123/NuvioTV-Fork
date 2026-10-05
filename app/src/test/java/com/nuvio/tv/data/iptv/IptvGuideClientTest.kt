@@ -136,6 +136,16 @@ class IptvGuideClientTest {
         withTimeout(5000) { jobs.awaitAll() }
         assertEquals(3, requests.get()); assertEquals(2, peak.get())
     }
+    @Test fun successiveHttp10GuidesDoNotReuseClosedConnections() = runBlocking {
+        MockWebServer().use { server ->
+            repeat(2) { server.enqueue(MockResponse().setStatus("HTTP/1.0 200 OK").setBody(xml).setSocketPolicy(SocketPolicy.DISCONNECT_AT_END)) }
+            val client = IptvGuideClient()
+            repeat(2) { assertEquals(GuideDownload.Imported(1), read(client, server.url("/").toString())) }
+            assertEquals(2, server.requestCount)
+            repeat(2) { assertEquals("close", server.takeRequest().getHeader("Connection")) }
+        }
+    }
+
     private suspend fun failure(block: suspend () -> Any): MetadataException {
         try { block() } catch (error: MetadataException) { return error }
         throw AssertionError("Expected metadata rejection")
