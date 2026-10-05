@@ -91,11 +91,22 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
         var endpoint by remember { mutableStateOf(form.endpoint) }
         var username by remember { mutableStateOf(form.username) }
         var password by remember { mutableStateOf(form.password) }
+        val picker = androidx.activity.compose.rememberLauncherForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri != null && uri.scheme == "content") endpoint = uri.toString()
+        }
         val xtream = !form.guide && form.kind == IptvSourceKind.XTREAM
         NuvioDialog(onDismiss = viewModel::dismiss, title = stringResource(if (form.guide) R.string.iptv_guide_form else if (xtream) R.string.iptv_xtream_form else R.string.iptv_playlist_form)) {
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 SourceField(stringResource(R.string.iptv_setup_name), label, { label = it.take(240) })
                 SourceField(stringResource(if (xtream) R.string.iptv_xtream_server else R.string.iptv_setup_url), endpoint, { endpoint = it.take(16384) }, secret = true, last = !xtream)
+                if (form.guide) {
+                    Button(onClick = {
+                        try { picker.launch(arrayOf("*/*")) }
+                        catch (_: android.content.ActivityNotFoundException) { viewModel.documentUnavailable() }
+                    }, enabled = !state.busy) { Text(stringResource(R.string.iptv_guide_choose_file)) }
+                    Text(stringResource(if (endpoint.startsWith("content:")) R.string.iptv_guide_file_selected else R.string.iptv_guide_file_help), color = NuvioTheme.colors.TextSecondary)
+                }
                 if (xtream) {
                     SourceField(stringResource(R.string.iptv_xtream_username), username, { username = it.take(4096) }, secret = true)
                     SourceField(stringResource(R.string.iptv_xtream_password), password, { password = it.take(4096) }, secret = true, last = true)

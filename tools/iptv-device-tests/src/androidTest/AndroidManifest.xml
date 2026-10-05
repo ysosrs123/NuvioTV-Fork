@@ -1,3 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <application>
+        <activity android:name="com.nuvio.iptv.fixture.FixturePickerActivity" android:exported="true" android:label="XMLTV test fixture">
+            <intent-filter>
+                <action android:name="android.intent.action.OPEN_DOCUMENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.OPENABLE" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+        <provider android:name="com.nuvio.iptv.fixture.FixtureGuideProvider" android:authorities="com.nuvio.iptv.validation.fixture" android:exported="false" android:grantUriPermissions="true" />
+    </application>
 </manifest>

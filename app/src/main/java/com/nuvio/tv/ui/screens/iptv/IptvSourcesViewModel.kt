@@ -30,14 +30,18 @@ data class IptvSourcesState(val profileId: Int = 0, val revision: Long = 0, val 
     val busy: Boolean = false, val message: Int? = null, val form: IptvSourceForm? = null)
 
 @HiltViewModel
-class IptvSourcesViewModel @Inject constructor(private val catalogue: IptvCatalogueStore,
+class IptvSourcesViewModel @Inject constructor(
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
+    private val catalogue: IptvCatalogueStore,
     private val guides: IptvGuideStore, private val access: IptvProfileAccess, profiles: ProfileManager) : ViewModel() {
     private val mutable = MutableStateFlow(IptvSourcesState())
     val state = mutable.asStateFlow()
     private var session: IptvProfileAccess.Session? = null
     private var operation: Job? = null
     private val playlists = IptvPlaylistRepository(catalogue)
-    private val guideRepository = IptvGuideRepository(guides)
+    private val guideRepository = IptvGuideRepository(guides, openDocument = { address ->
+        requireNotNull(context.contentResolver.openInputStream(android.net.Uri.parse(address)))
+    })
     init {
         viewModelScope.launch {
             combine(profiles.activeProfileId, profiles.activeProfileReady, profiles.profileSelectionRevision) { id, ready, revision -> Triple(id, ready, revision) }
@@ -77,6 +81,7 @@ class IptvSourcesViewModel @Inject constructor(private val catalogue: IptvCatalo
             linked = loaded.third?.feedIds?.toSet().orEmpty(), ready = true) }
     }
     fun add(guide: Boolean, kind: IptvSourceKind = IptvSourceKind.M3U) { if (!mutable.value.busy && session != null) mutable.update { it.copy(form = IptvSourceForm(guide, kind = kind), message = null) } }
+    fun documentUnavailable() { mutable.update { it.copy(message = R.string.iptv_guide_picker_unavailable) } }
     fun dismiss() { if (!mutable.value.busy) mutable.update { it.copy(form = null) } }
     fun select(ref: IptvSourceRef) = runOperation {
         require(ref.profileId == profileId)
@@ -101,6 +106,9 @@ class IptvSourcesViewModel @Inject constructor(private val catalogue: IptvCatalo
     fun save(form: IptvSourceForm, label: String, endpoint: String, username: String = "", password: String = "") = runOperation {
         withContext(Dispatchers.IO) { access.use(this@runOperation) {
             if (form.guide) {
+                if (endpoint.trim().startsWith("content:")) {
+                    context.contentResolver.takePersistableUriPermission(android.net.Uri.parse(endpoint.trim()), android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
                 if (form.feed == null) guides.createFeed(profileId, label.trim(), endpoint.trim())
                 else { require(form.feed.profileId == profileId); guides.editFeed(form.feed, label.trim(), endpoint.trim()) }
             } else {

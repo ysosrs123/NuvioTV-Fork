@@ -161,6 +161,31 @@ class IptvGuideRepositoryTest {
         assertEquals(IptvGuideRefresh.StorageFull, repo.refresh(ref, window))
         assertEquals("Fixture", store.programmes(ref, "one", window).programmes.single().titles.single().text)
     }
+    @Test fun localDocumentImportsClosesAndRefreshesWithoutHttpOrCacheValidators() = fixture { store, ref ->
+        store.editFeed(ref, "Local", "content://fixture.documents/guide.xml")
+        var closed = false; var text = xml("Local first")
+        val http = IptvMetadataClient.newClient().newBuilder().addInterceptor { error("Local guide must not use HTTP") }.build()
+        val repo = IptvGuideRepository(store, IptvGuideClient(http), openDocument = { address ->
+            assertEquals("content://fixture.documents/guide.xml", address)
+            object : java.io.ByteArrayInputStream(text.toByteArray()) { override fun close() { closed = true; super.close() } }
+        })
+        assertEquals(IptvGuideRefresh.Guide(RefreshDecision.PUBLISH), repo.refresh(ref, window))
+        assertTrue(closed); assertNull(store.validators(ref)?.etag)
+        text = xml("Local second"); repo.refresh(ref, window)
+        assertEquals("Local second", store.programmes(ref,"one",window).programmes.single().titles.single().text)
+        text = "<tv><secret"
+        assertEquals(MetadataFailure.INVALID_RESPONSE, failure { repo.refresh(ref, window) }.failure)
+        assertEquals("Local second", store.programmes(ref,"one",window).programmes.single().titles.single().text)
+    }
+    @Test fun missingDocumentPermissionKeepsLastGoodGuideAndRedactsProviderErrors() = fixture { store, ref ->
+        store.editFeed(ref, "Local", "content://fixture.documents/guide.xml")
+        store.importGuide(store.beginRefresh(ref), xml().byteInputStream(), window)
+        val repo = IptvGuideRepository(store, openDocument = { throw SecurityException("PRIVATE_DOCUMENT_PATH") })
+        val error = failure { repo.refresh(ref, window) }
+        assertNull(error.cause); assertFalse(error.toString().contains("PRIVATE_DOCUMENT_PATH"))
+        assertEquals("Fixture",store.programmes(ref,"one",window).programmes.single().titles.single().text)
+    }
+
     private suspend fun failure(block: suspend () -> Any): MetadataException {
         try { block() } catch (error: MetadataException) { return error }
         throw AssertionError("Expected rejection")

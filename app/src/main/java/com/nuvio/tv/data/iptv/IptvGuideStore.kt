@@ -284,7 +284,8 @@ class IptvGuideStore(
         fun validate(label: String, endpoint: String) {
             require(label.isNotBlank() && label.length <= 240 && endpoint.length <= 16_384)
             val uri = try { URI(endpoint) } catch (_: Exception) { throw IllegalArgumentException("Invalid guide endpoint") }
-            require(uri.scheme in setOf("http", "https") && !uri.host.isNullOrBlank() && uri.rawUserInfo == null && uri.rawFragment == null) { "Invalid guide endpoint" }
+            require(((uri.scheme in setOf("http", "https") && !uri.host.isNullOrBlank()) ||
+                (uri.scheme == "content" && !uri.rawAuthority.isNullOrBlank())) && uri.rawUserInfo == null && uri.rawFragment == null) { "Invalid guide endpoint" }
         }
     }
 }

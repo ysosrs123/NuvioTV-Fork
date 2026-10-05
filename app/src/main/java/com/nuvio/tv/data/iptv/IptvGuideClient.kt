@@ -40,6 +40,7 @@ class IptvGuideClient(
         require(listOf(validators?.etag, validators?.lastModified).all { it == null || (it.length <= 4096 && '\r' !in it && '\n' !in it) })
         permits.withPermit {
             var url = address.toHttpUrlOrNull()?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+            var redirected = false
             val visited = mutableSetOf<HttpUrl>()
             repeat(6) {
                 currentCoroutineContext().ensureActive()
@@ -50,14 +51,22 @@ class IptvGuideClient(
                     // Keep wire bytes visible to the budget; parseGuideInput handles gzip once.
                     .header("Accept-Encoding", "identity")
                     .apply {
-                        validators?.etag?.let { header("If-None-Match", it) }
-                        validators?.lastModified?.let { header("If-Modified-Since", it) }
+                        validators?.takeUnless { redirected }?.etag?.let { header("If-None-Match", it) }
+                        validators?.takeUnless { redirected }?.lastModified?.let { header("If-Modified-Since", it) }
                     }.build()
-                when (val step = response(request, validators?.let { it.etag != null || it.lastModified != null } == true, consume)) {
+                when (val step = response(request, !redirected && validators?.let { it.etag != null || it.lastModified != null } == true) { input, received, check ->
+                    // A redirect may resolve somewhere else on the next refresh. Do not store the
+                    // destination's validators against the original short URL or forward them.
+                    consume(input, if (redirected) CatalogueValidators() else received, check)
+                }) {
                     is Step.Done -> return@withPermit step.value
                     is Step.Redirect -> {
                         val next = url.resolve(step.location)?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
-                        if (next.scheme != url.scheme || next.host != url.host || next.port != url.port) throw MetadataException(MetadataFailure.REDIRECT_REQUIRES_REVIEW)
+                        val sameOrigin = next.scheme == url.scheme && next.host == url.host && next.port == url.port
+                        // Support HTTPS short links, without downgrade, cookies, authorization,
+                        // referrer, inherited query parameters or conditional headers.
+                        if (!sameOrigin && next.scheme != "https") throw MetadataException(MetadataFailure.REDIRECT_REQUIRES_REVIEW)
+                        redirected = true
                         url = next
                     }
                 }

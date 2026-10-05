@@ -24,3 +24,7 @@ Remove only these test packages when finished:
 & $adb -s 192.168.10.60:5555 uninstall com.nuvio.iptv.validation.test
 & $adb -s 192.168.10.60:5555 uninstall com.nuvio.iptv.validation
 ```
+
+## Optional XMLTV document-picker fixture
+
+The instrumentation APK also exposes a temporary OPEN_DOCUMENT handler labelled **XMLTV test fixture**, with a single **Use synthetic XMLTV fixture** button. It returns only its own generated XMLTV content URI with read/persistable grants. It never lists or reads personal device files. This can validate the prototype's picker/save/refresh/cold-restart path on TV firmware without DocumentsUI. It is test infrastructure, not a shipping picker or proof of USB/document-provider compatibility. Remove the instrumentation and target test packages after checks. Uninstalling the provider invalidates access; last-good imported guide data should remain.

@@ -146,6 +146,37 @@ class IptvGuideClientTest {
         }
     }
 
+    @Test fun httpsShortLinkFollowsOnlyLocationWithoutForwardingValidatorsOrStoringDestinationEtag() = runBlocking {
+        val requests = mutableListOf<okhttp3.Request>()
+        val http = IptvMetadataClient.newClient().newBuilder().addInterceptor { chain ->
+            requests += chain.request()
+            Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).message("Fixture")
+                .code(if (requests.size == 1) 302 else 200)
+                .header("Location", "https://guide.invalid/feed.xml")
+                .header("ETag", "destination-private-tag").body(xml.toResponseBody()).build()
+        }.build()
+        val result = IptvGuideClient(http).fetch("https://short.invalid/code?token=PRIVATE", CatalogueValidators("old")) { input, cache, _ ->
+            assertNull(cache.etag); assertNull(cache.lastModified); input.readBytes().size
+        }
+        assertTrue(result is GuideDownload.Imported)
+        assertEquals(2, requests.size)
+        assertEquals("https://guide.invalid/feed.xml", requests.last().url.toString())
+        for (header in listOf("If-None-Match", "If-Modified-Since", "Authorization", "Cookie", "Referer")) assertNull(requests.last().header(header))
+    }
+    @Test fun shortLinkCannotDowngradeOrAcceptAnUnsolicited304() = runBlocking {
+        for (target in listOf("http://guide.invalid/feed", "https://guide.invalid/feed")) {
+            var requests = 0
+            val http = IptvMetadataClient.newClient().newBuilder().addInterceptor { chain ->
+                requests++
+                Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).message("Fixture")
+                    .code(if (requests == 1) 302 else 304).header("Location", target).body("".toResponseBody()).build()
+            }.build()
+            val error = failure { read(IptvGuideClient(http), "https://short.invalid/code", CatalogueValidators("old")) }
+            assertEquals(if (target.startsWith("http:")) MetadataFailure.REDIRECT_REQUIRES_REVIEW else MetadataFailure.INVALID_RESPONSE, error.failure)
+            assertEquals(if (target.startsWith("http:")) 1 else 2, requests)
+        }
+    }
+
     private suspend fun failure(block: suspend () -> Any): MetadataException {
         try { block() } catch (error: MetadataException) { return error }
         throw AssertionError("Expected metadata rejection")

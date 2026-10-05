@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.*
 data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source: IptvSourceRef? = null,
     val page: IptvBrowsePage? = null, val offset: Int = 0, val favourites: Boolean = false,
     val focused: IptvListedChannel? = null, val programmes: List<GuideProgramme> = emptyList(),
+    val playback: IptvLivePlayback? = null,
     val player: ExoPlayer? = null, val playingTitle: String? = null, val playing: Boolean = false,
     val loading: Boolean = false, val tuning: Boolean = false, val message: Int? = null)
 
@@ -155,7 +156,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         tuneJob?.cancel()
         val request = ++tuneVersion
         tuneJob = viewModelScope.launch {
-            mutable.update { it.copy(tuning = true, player = null, playingTitle = null, playing = false, message = null) }
+            mutable.update { it.copy(tuning = true, playback = null, player = null, playingTitle = null, playing = false, message = null) }
             try {
                 val source = withContext(Dispatchers.IO) { access.use(current) { catalogue.sources(current.profileId).single { it.ref == ref } } }
                 val streamFormat = withContext(Dispatchers.IO) { access.use(current) {
@@ -173,9 +174,9 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     IptvLivePlayback(context, item.channel.data.locator, purpose, streamFormat,
                         onPlaying = { playing -> if (request == tuneVersion) mutable.update { it.copy(playing = playing) } },
                         onError = { if (request == tuneVersion) { stop(); mutable.update { it.copy(message = R.string.iptv_live_failed) } } })
-                        .also { mutable.update { state -> state.copy(player = it.player, playingTitle = item.overlay.customName ?: item.channel.data.name) } }
+                        .also { mutable.update { state -> state.copy(playback = it, player = it.player, playingTitle = item.overlay.customName ?: item.channel.data.name) } }
                 }
-                if (request == tuneVersion && result != LiveOpenResult.OPENED) mutable.update { it.copy(player = null, playingTitle = null,
+                if (request == tuneVersion && result != LiveOpenResult.OPENED) mutable.update { it.copy(playback = null, player = null, playingTitle = null,
                     message = if (result == LiveOpenResult.CLOSE_UNCONFIRMED) R.string.iptv_live_closing else if (result == LiveOpenResult.CAPACITY || result == LiveOpenResult.SHARING_UNAVAILABLE) R.string.iptv_live_capacity else R.string.iptv_live_failed) }
             } catch (cancel: CancellationException) { throw cancel }
             catch (_: Exception) { if (request == tuneVersion) mutable.update { it.copy(message = R.string.iptv_live_failed) } }
@@ -184,7 +185,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     }
     fun stop() {
         ++tuneVersion; tuneJob?.cancel()
-        mutable.update { it.copy(player = null, playingTitle = null, playing = false, tuning = false) }
+        mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, tuning = false) }
         viewModelScope.launch { if (!runtime.stop(owner)) mutable.update { it.copy(message = R.string.iptv_live_closing) } }
     }
     override fun onCleared() {

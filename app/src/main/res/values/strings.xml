@@ -4019,4 +4019,16 @@
     <string name="party_avatar_set_pixel_art">Pixel art</string>
     <string name="party_avatar_set_thumbs">Thumbs</string>
     <string name="party_invite_leaves_current">Joining leaves the party you are in now.</string>
+    <string name="iptv_live_hud">HUD</string>
+    <string name="iptv_guide_choose_file">Choose XMLTV file</string>
+    <string name="iptv_guide_file_selected">XMLTV file selected. Save, then refresh to import its listings.</string>
+    <string name="iptv_guide_file_help">Enter a guide URL or select a local XMLTV file (.xml or .xml.gz).</string>
+    <string name="iptv_guide_picker_unavailable">This device has no document picker. You can enter a guide URL instead.</string>
+    <string name="iptv_live_tracks">Tracks</string>
+    <string name="iptv_live_audio">Audio</string>
+    <string name="iptv_live_subtitles">Subtitles and closed captions</string>
+    <string name="iptv_live_tracks_auto">Automatic</string>
+    <string name="iptv_live_tracks_off">Off</string>
+    <string name="iptv_live_tracks_none">No tracks reported by this stream.</string>
+    <string name="iptv_live_tracks_unsupported">Unsupported by this player</string>
 </resources>

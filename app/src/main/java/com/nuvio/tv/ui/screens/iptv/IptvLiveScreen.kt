@@ -42,6 +42,8 @@ import java.util.Locale
 fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiveViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    var showTracks by remember(state.player) { mutableStateOf(false) }
+    var showHud by remember { mutableStateOf(false) }
     var fullscreen by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val rows = state.page?.channels.orEmpty()
@@ -73,7 +75,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
     }
     LaunchedEffect(state.player) { if (state.player == null) fullscreen = false }
     Column(Modifier.fillMaxSize().background(NuvioTheme.colors.Background).padding(if (fullscreen) 12.dp else 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = { if (fullscreen) fullscreen = false else onBack() }) { Text(stringResource(R.string.iptv_setup_back)) }
             if (!fullscreen) {
                 Button(onClick = onSources) { Text(stringResource(R.string.iptv_sources_title)) }
@@ -84,18 +86,20 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
             }
             if (state.player != null) {
                 Button(onClick = { fullscreen = !fullscreen }) { Text(stringResource(if (fullscreen) R.string.iptv_live_guide else R.string.iptv_live_fullscreen)) }
+                Button(onClick = { showTracks = true }) { Text(stringResource(R.string.iptv_live_tracks)) }
+                Button(onClick = { showHud = !showHud }) { Text(stringResource(R.string.iptv_live_hud)) }
                 Button(onClick = viewModel::stop) { Text(stringResource(R.string.iptv_live_stop)) }
             }
         }
         state.message?.let { Text(stringResource(it), color = NuvioTheme.colors.TextSecondary) }
         if (fullscreen) {
-            LiveVideo(state.player, Modifier.fillMaxWidth().weight(1f))
+            LiveVideo(state.player, state.playback.takeIf { showHud }, Modifier.fillMaxWidth().weight(1f))
         } else {
             Text(state.sources.firstOrNull { it.ref == state.source }?.label ?: stringResource(R.string.iptv_live_title),
                 style = MaterialTheme.typography.titleLarge, color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                 Column(Modifier.weight(1.25f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    LiveVideo(state.player, Modifier.fillMaxWidth().weight(1f))
+                    LiveVideo(state.player, state.playback.takeIf { showHud }, Modifier.fillMaxWidth().weight(1f))
                     Text(state.playingTitle ?: stringResource(R.string.iptv_live_choose), color = NuvioTheme.colors.TextPrimary,
                         style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (state.player != null) Text(stringResource(if (state.playing) R.string.iptv_live_playing else R.string.iptv_live_connecting), color = NuvioTheme.colors.TextSecondary)
@@ -124,7 +128,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
                     }
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(onClick = viewModel::previousPage, enabled = state.offset > 0 && !state.loading) { Text(stringResource(R.string.iptv_live_previous)) }
                         Button(onClick = viewModel::nextPage, enabled = state.page?.catalogue?.next != null && !state.loading) { Text(stringResource(R.string.iptv_live_next)) }
                     }
@@ -144,6 +148,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
             }
         }
     }
+    if (showTracks) state.player?.let { IptvTrackDialog(it) { showTracks = false } }
     formatChannel?.let { channel ->
         NuvioDialog(onDismiss = { formatChannel = null }, title = stringResource(R.string.iptv_live_format_title)) {
             Text(channel.item.overlay.customName ?: channel.item.channel.data.name, color = NuvioTheme.colors.TextPrimary)
@@ -165,9 +170,12 @@ private fun formatLabel(format: IptvStreamFormat): Int = when (format) {
 }
 
 @Composable
-private fun LiveVideo(player: ExoPlayer?, modifier: Modifier) {
+private fun LiveVideo(player: ExoPlayer?, playback: IptvLivePlayback?, modifier: Modifier) {
+    Box(modifier) {
     AndroidView(factory = { context -> PlayerView(context).apply {
         useController = false; isFocusable = false; descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
-    } }, modifier = modifier.background(androidx.compose.ui.graphics.Color.Black),
+    } }, modifier = Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color.Black),
         update = { it.player = player; it.keepScreenOn = player != null }, onRelease = { it.player = null; it.keepScreenOn = false })
+        playback?.let { IptvStatsOverlay(it, Modifier.padding(8.dp)) }
+    }
 }

@@ -33,6 +33,8 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private val streamFormat: IptvStreamFormat = IptvStreamFormat.AUTO,
     private val onPlaying: (Boolean) -> Unit, private val onError: () -> Unit) : OwnedLivePlayback {
     private val fence = LiveRequestFence()
+    val telemetry = LiveTelemetry()
+    val activeRequests: Int get() = fence.active.value
     private val mainHandler = Handler(Looper.getMainLooper())
     private val client = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS)
         .retryOnConnectionFailure(false).followRedirects(false).followSslRedirects(false).build()
@@ -43,6 +45,14 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         require(purpose == PlaybackPurpose.LIVE_CHANNEL)
         require(Uri.parse(locator).scheme?.lowercase() in setOf("http", "https"))
         val upstream = OkHttpDataSource.Factory(client).setUserAgent("Nuvio-Live/1")
+        upstream.setTransferListener(object : TransferListener {
+            override fun onTransferInitializing(source: DataSource, spec: DataSpec, network: Boolean) = Unit
+            override fun onTransferStart(source: DataSource, spec: DataSpec, network: Boolean) = Unit
+            override fun onTransferEnd(source: DataSource, spec: DataSpec, network: Boolean) = Unit
+            override fun onBytesTransferred(source: DataSource, spec: DataSpec, network: Boolean, count: Int) {
+                if (network) telemetry.transferred(count)
+            }
+        })
         val sources = DataSource.Factory { FencedSource(upstream.createDataSource(), fence, Uri.parse(locator)) }
         player = ExoPlayer.Builder(context)
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 8000, 500, 1000)
@@ -64,7 +74,11 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 // rather than throwing from release(). Never acknowledge that as decoder closure.
                 if (released) releaseFailed = true else reportFailure()
             }
-            override fun onPlaybackStateChanged(playbackState: Int) { if (!released && playbackState == Player.STATE_ENDED) reportFailure() }
+            override fun onRenderedFirstFrame() { telemetry.firstFrame(android.os.SystemClock.elapsedRealtime()) }
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                telemetry.buffering(playbackState == Player.STATE_BUFFERING, android.os.SystemClock.elapsedRealtime())
+                if (!released && playbackState == Player.STATE_ENDED) reportFailure()
+            }
         })
     }
     private fun reportFailure() {
@@ -81,6 +95,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         }
         // A user-selected format avoids probing and reopening extensionless live entry points.
         player.setMediaItem(MediaItem.Builder().setUri(locator).setMimeType(mimeType).build())
+        telemetry.start(android.os.SystemClock.elapsedRealtime())
         player.prepare(); player.playWhenReady = true
     }
     override suspend fun close(): Boolean {
