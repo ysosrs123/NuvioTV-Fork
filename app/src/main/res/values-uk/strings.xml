@@ -2848,6 +2848,10 @@
     <string name="audio_forget_rejections_sub">Формати, які ресивер відмовився відкрити, більше не надсилаються на нього без декодування. Це дає змогу спробувати їх знову.</string>
     <string name="audio_forget_rejections_none">Нічого не запам\'ятано</string>
     <string name="audio_forget_rejections_done">Запам\'ятані відмови аудіо очищено</string>
+    <string name="audio_forget_tunnel_stalls_title">Забути зависання тунелю</string>
+    <string name="audio_forget_tunnel_stalls_sub">Тунель вимкнено для: %1$s. Це дає змогу наступному відео спробувати його знову.</string>
+    <string name="audio_forget_tunnel_stalls_none">Нічого не запам\'ятано.</string>
+    <string name="audio_forget_tunnel_stalls_done">Зависання тунелю забуто</string>
     <string name="audio_inject_hdr10_sei_title">Додавати метадані HDR10 при видаленні DV</string>
     <string name="audio_inject_hdr10_sei_sub">Для контенту DV8 (Profile 8), зведеного до базового шару HDR10, додає метадані мастерингу джерела (MaxCLL/MaxFALL і пікову яскравість), щоб HDR10-ТВ без DV правильно виконували тональне відображення. Працює, лише коли в обробці DV вибрано «Завжди видаляти DV» або «Базовий шар HDR10»; не впливає на Profile 7 і відтворення Dolby Vision.</string>
     <string name="diag_value_not_advertised">Не заявлено (нативне відтворення може працювати)</string>

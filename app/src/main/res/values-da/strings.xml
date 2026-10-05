@@ -2814,6 +2814,10 @@
     <string name="audio_forget_rejections_sub">Formater, som din receiver har afvist at åbne, sendes ikke længere til den som passthrough. Her kan de blive prøvet igen.</string>
     <string name="audio_forget_rejections_none">Intet lært</string>
     <string name="audio_forget_rejections_done">Lærte lydafvisninger ryddet</string>
+    <string name="audio_forget_tunnel_stalls_title">Glem tunnelstop</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel slået fra for: %1$s. Her kan næste video prøve tunneleret afspilning igen.</string>
+    <string name="audio_forget_tunnel_stalls_none">Intet husket.</string>
+    <string name="audio_forget_tunnel_stalls_done">Tunnelstop glemt</string>
     <string name="audio_inject_hdr10_sei_title">Indsæt HDR10-metadata ved fjernelse</string>
     <string name="audio_inject_hdr10_sei_sub">For DV8-indhold (Profil 8), der er skåret ned til et HDR10-basislag, tilføjes kildens mastering-metadata (MaxCLL/MaxFALL og spidsluminans), så HDR10-TV uden DV tone-mapper korrekt. Kun aktiv, når DV-håndtering er Fjern altid DV eller HDR10-basislag; ingen effekt på Profil 7 eller ved Dolby Vision-afspilning.</string>
     <string name="diag_value_not_advertised">Ikke oplyst (nativ afspilning kan stadig virke)</string>

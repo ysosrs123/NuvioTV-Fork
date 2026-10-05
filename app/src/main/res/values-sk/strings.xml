@@ -3376,6 +3376,10 @@
     <string name="audio_forget_rejections_sub">Formáty, ktoré prijímač odmietol otvoriť, sa mu už priechodom neposielajú. Táto voľba ich umožní skúsiť znova.</string>
     <string name="audio_forget_rejections_none">Nič uložené</string>
     <string name="audio_forget_rejections_done">Odmietnuté zvukové formáty vymazané</string>
+    <string name="audio_forget_tunnel_stalls_title">Zabudnúť zasekávanie tunela</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunelovanie vypnuté pre: %1$s. Táto voľba ho ďalšiemu videu umožní skúsiť znova.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nič uložené.</string>
+    <string name="audio_forget_tunnel_stalls_done">Zasekávanie tunela zabudnuté</string>
     <string name="audio_inject_hdr10_sei_title">Vložiť metadáta HDR10 pri odstránení DV</string>
     <string name="audio_inject_hdr10_sei_sub">Pri obsahu DV8 (Profile 8) zredukovanom na základnú vrstvu HDR10 pridá masteringové metadáta zdroja (MaxCLL/MaxFALL a špičkový jas), aby TV s HDR10 bez DV správne mapovali tóny. Aktívne len pri spracovaní DV nastavenom na Odstrániť DV alebo Základná vrstva HDR10; nemá vplyv na Profile 7 ani na prehrávanie Dolby Vision.</string>
     <string name="diag_value_not_advertised">Nehlásené (natívne prehrávanie môže napriek tomu fungovať)</string>

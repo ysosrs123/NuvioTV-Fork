@@ -3466,6 +3466,10 @@
     <string name="audio_forget_rejections_sub">Các định dạng mà bộ thu từ chối mở sẽ không còn được truyền thẳng đến nó. Tùy chọn này cho phép thử lại chúng.</string>
     <string name="audio_forget_rejections_none">Chưa ghi nhận gì</string>
     <string name="audio_forget_rejections_done">Đã xóa các định dạng âm thanh bị từ chối</string>
+    <string name="audio_forget_tunnel_stalls_title">Quên các lần treo đường hầm</string>
+    <string name="audio_forget_tunnel_stalls_sub">Đã tắt đường hầm cho: %1$s. Tùy chọn này cho phép video sau thử lại.</string>
+    <string name="audio_forget_tunnel_stalls_none">Chưa ghi nhận gì.</string>
+    <string name="audio_forget_tunnel_stalls_done">Đã quên các lần treo đường hầm</string>
     <string name="audio_inject_hdr10_sei_title">Chèn siêu dữ liệu HDR10 khi loại bỏ DV</string>
     <string name="audio_inject_hdr10_sei_sub">Với nội dung DV8 (Profile 8) bị loại bỏ về lớp nền HDR10, thêm siêu dữ liệu mastering của nguồn (MaxCLL/MaxFALL và độ sáng đỉnh) để TV HDR10 không hỗ trợ DV ánh xạ tông màu đúng. Chỉ hoạt động khi Xử lý DV là Loại bỏ DV hoặc Lớp nền HDR10; không ảnh hưởng đến Profile 7 hay phát Dolby Vision.</string>
     <string name="diag_value_not_advertised">Không được công bố (phát gốc vẫn có thể hoạt động)</string>

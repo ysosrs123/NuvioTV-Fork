@@ -2385,6 +2385,10 @@
     <string name="audio_forget_rejections_sub">Formate, die Ihr Receiver nicht öffnen wollte, werden nicht mehr als Passthrough gesendet. Hiermit werden sie erneut versucht.</string>
     <string name="audio_forget_rejections_none">Nichts gelernt</string>
     <string name="audio_forget_rejections_done">Gelernte Audio-Ablehnungen gelöscht</string>
+    <string name="audio_forget_tunnel_stalls_title">Tunnel-Hänger vergessen</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel aus für: %1$s. Hiermit wird er beim nächsten Video erneut versucht.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nichts gemerkt.</string>
+    <string name="audio_forget_tunnel_stalls_done">Tunnel-Hänger vergessen</string>
     <string name="audio_inject_hdr10_sei_title">HDR10-Metadaten beim Entfernen einfügen</string>
     <string name="audio_inject_hdr10_sei_sub">Fügt bei DV8-Inhalten (Profile 8), die auf die HDR10-Basisschicht reduziert werden, die Mastering-Metadaten der Quelle hinzu (MaxCLL/MaxFALL und Spitzenhelligkeit), damit HDR10-TVs ohne DV das Tone-Mapping korrekt ausführen. Nur aktiv, wenn die DV-Verarbeitung auf DV entfernen oder HDR10-Basisschicht steht; keine Wirkung bei Profile 7 oder bei Dolby Vision-Wiedergabe.</string>
     <string name="diag_value_not_advertised">Nicht gemeldet (native Wiedergabe kann trotzdem funktionieren)</string>

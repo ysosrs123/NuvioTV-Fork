@@ -3257,6 +3257,10 @@
     <string name="audio_forget_rejections_sub">Formaten die je receiver weigerde te openen, worden niet meer als passthrough verstuurd. Hiermee worden ze opnieuw geprobeerd.</string>
     <string name="audio_forget_rejections_none">Niets geleerd</string>
     <string name="audio_forget_rejections_done">Geleerde audioweigeringen gewist</string>
+    <string name="audio_forget_tunnel_stalls_title">Tunnelhaperingen vergeten</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel uit voor: %1$s. Hiermee probeert de volgende video het opnieuw.</string>
+    <string name="audio_forget_tunnel_stalls_none">Niets onthouden.</string>
+    <string name="audio_forget_tunnel_stalls_done">Tunnelhaperingen vergeten</string>
     <string name="audio_inject_hdr10_sei_title">HDR10-metadata toevoegen bij verwijderen</string>
     <string name="audio_inject_hdr10_sei_sub">Voegt bij DV8-inhoud (Profile 8) die tot een HDR10-basislaag is teruggebracht de mastering-metadata van de bron toe (MaxCLL/MaxFALL en piekhelderheid), zodat HDR10-tv-toestellen zonder DV correct tonemappen. Alleen actief als Dolby Vision-verwerking op DV verwijderen of HDR10-basislaag staat; geen effect op Profile 7 of op Dolby Vision-weergave.</string>
     <string name="diag_value_not_advertised">Niet gemeld (native afspelen kan toch werken)</string>

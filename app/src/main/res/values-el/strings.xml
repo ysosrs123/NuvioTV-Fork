@@ -3352,6 +3352,10 @@
     <string name="audio_forget_rejections_sub">Τα φορμά που ο receiver σας αρνήθηκε να ανοίξει δεν στέλνονται πλέον ως passthrough. Αυτό επιτρέπει να δοκιμαστούν ξανά.</string>
     <string name="audio_forget_rejections_none">Καμία καταγραφή</string>
     <string name="audio_forget_rejections_done">Οι καταγεγραμμένες απορρίψεις ήχου διαγράφηκαν</string>
+    <string name="audio_forget_tunnel_stalls_title">Διαγραφή κολλημάτων tunnel</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel ανενεργό για: %1$s. Αυτό επιτρέπει στο επόμενο βίντεο να το δοκιμάσει ξανά.</string>
+    <string name="audio_forget_tunnel_stalls_none">Καμία καταγραφή.</string>
+    <string name="audio_forget_tunnel_stalls_done">Τα κολλήματα tunnel διαγράφηκαν</string>
     <string name="audio_inject_hdr10_sei_title">Προσθήκη μεταδεδομένων HDR10 κατά την αφαίρεση</string>
     <string name="audio_inject_hdr10_sei_sub">Για περιεχόμενο DV8 (Profile 8) που περιορίζεται στη βασική στρώση HDR10, προσθέτει τα μεταδεδομένα mastering της πηγής (MaxCLL/MaxFALL και μέγιστη φωτεινότητα), ώστε οι τηλεοράσεις HDR10 χωρίς DV να κάνουν σωστό tone mapping. Ενεργό μόνο όταν ο Χειρισμός DV είναι Αφαίρεση DV ή Βασική στρώση HDR10· δεν επηρεάζει το Profile 7 ούτε την αναπαραγωγή Dolby Vision.</string>
     <string name="diag_value_not_advertised">Δεν δηλώνεται (η εγγενής αναπαραγωγή ίσως λειτουργεί)</string>

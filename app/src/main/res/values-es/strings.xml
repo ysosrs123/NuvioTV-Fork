@@ -3345,6 +3345,10 @@
     <string name="audio_forget_rejections_sub">Los formatos que tu receptor rechazó abrir ya no se le envían por passthrough. Esto permite probarlos de nuevo.</string>
     <string name="audio_forget_rejections_none">Nada aprendido</string>
     <string name="audio_forget_rejections_done">Rechazos de audio aprendidos borrados</string>
+    <string name="audio_forget_tunnel_stalls_title">Olvidar bloqueos en túnel</string>
+    <string name="audio_forget_tunnel_stalls_sub">Túnel desactivado para: %1$s. Esto permite que el próximo vídeo lo pruebe de nuevo.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nada guardado.</string>
+    <string name="audio_forget_tunnel_stalls_done">Bloqueos en túnel olvidados</string>
     <string name="audio_inject_hdr10_sei_title">Inyectar metadatos HDR10 al eliminar DV</string>
     <string name="audio_inject_hdr10_sei_sub">Para contenido DV8 (perfil 8) reducido a una capa base HDR10, añade los metadatos de masterización de la fuente (MaxCLL/MaxFALL y luminancia máxima) para que los televisores HDR10 sin DV hagan bien el mapeo de tonos. Solo activo cuando la gestión de DV es Eliminar DV o Capa base HDR10; sin efecto en el perfil 7 ni en la reproducción Dolby Vision.</string>
     <string name="diag_value_not_advertised">No anunciado (la reproducción nativa aún puede funcionar)</string>

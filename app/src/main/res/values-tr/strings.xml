@@ -3475,6 +3475,10 @@
     <string name="audio_forget_rejections_sub">Alıcınızın açmayı reddettiği formatlar artık ona ses geçidiyle gönderilmiyor. Bu, onların yeniden denenmesini sağlar.</string>
     <string name="audio_forget_rejections_none">Öğrenilen bir şey yok</string>
     <string name="audio_forget_rejections_done">Öğrenilen ses retleri temizlendi</string>
+    <string name="audio_forget_tunnel_stalls_title">Tünel takılmalarını unut</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tünel kapalı: %1$s. Bu, sonraki videonun yeniden denemesini sağlar.</string>
+    <string name="audio_forget_tunnel_stalls_none">Hatırlanan bir şey yok.</string>
+    <string name="audio_forget_tunnel_stalls_done">Tünel takılmaları unutuldu</string>
     <string name="audio_inject_hdr10_sei_title">Katman kaldırılınca HDR10 meta verisi ekle</string>
     <string name="audio_inject_hdr10_sei_sub">HDR10 temel katmanına indirilen DV8 (Profile 8) içeriğe kaynağın mastering meta verisini (MaxCLL/MaxFALL ve tepe parlaklık) ekler; böylece DV desteklemeyen HDR10 TV\'ler ton eşlemeyi doğru yapar. Yalnızca DV İşleme, DV Katmanını Kaldır veya HDR10 temel katmanı iken etkindir; Profile 7\'ye ve Dolby Vision oynatmaya etkisi yoktur.</string>
     <string name="diag_value_not_advertised">Bildirilmiyor (yerel oynatma yine de çalışabilir)</string>

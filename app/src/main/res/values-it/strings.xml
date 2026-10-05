@@ -3250,6 +3250,10 @@
     <string name="audio_forget_rejections_sub">I formati che il ricevitore ha rifiutato di aprire non gli vengono più inviati in passthrough. Così possono essere riprovati.</string>
     <string name="audio_forget_rejections_none">Nessun formato memorizzato</string>
     <string name="audio_forget_rejections_done">Formati audio rifiutati dimenticati</string>
+    <string name="audio_forget_tunnel_stalls_title">Dimentica blocchi tunneled</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunneled disattivato per: %1$s. Così il prossimo video potrà riprovarlo.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nulla memorizzato.</string>
+    <string name="audio_forget_tunnel_stalls_done">Blocchi tunneled dimenticati</string>
     <string name="audio_inject_hdr10_sei_title">Inserisci metadati HDR10 alla rimozione</string>
     <string name="audio_inject_hdr10_sei_sub">Per i contenuti DV8 (Profile 8) ridotti al livello base HDR10, aggiunge i metadati di mastering della sorgente (MaxCLL/MaxFALL e luminanza di picco) così le TV HDR10 senza DV applicano il tone-mapping corretto. Attivo solo quando la gestione DV è su Rimuovi sempre DV o Livello base HDR10; nessun effetto sul Profile 7 né sulla riproduzione Dolby Vision.</string>
     <string name="diag_value_not_advertised">Non dichiarato (la riproduzione nativa può funzionare comunque)</string>

@@ -2803,6 +2803,10 @@
     <string name="audio_forget_rejections_sub">Форматите, които твоят receiver е отказал да отвори, вече не се изпращат към него като passthrough. Това позволява да бъдат опитани отново.</string>
     <string name="audio_forget_rejections_none">Няма нищо запомнено</string>
     <string name="audio_forget_rejections_done">Запомнените аудио откази са изчистени</string>
+    <string name="audio_forget_tunnel_stalls_title">Забрави засичанията в tunneled режим</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunneled режимът е изключен за: %1$s. Така следващото видео може да опита отново.</string>
+    <string name="audio_forget_tunnel_stalls_none">Няма нищо запомнено.</string>
+    <string name="audio_forget_tunnel_stalls_done">Засичанията в tunneled режим са забравени</string>
     <string name="audio_inject_hdr10_sei_title">Добавяй HDR10 метаданни при премахване на DV</string>
     <string name="audio_inject_hdr10_sei_sub">За DV8 (Profile 8) съдържание, сведено до HDR10 базов слой, добавя mastering метаданните на източника (MaxCLL/MaxFALL и пикова яркост), за да правят HDR10 телевизорите без DV правилен tone mapping. Активно само когато обработката на DV е „Винаги премахвай DV“ или „HDR10 базов слой“; няма ефект върху Profile 7 или при възпроизвеждане на Dolby Vision.</string>
     <string name="diag_value_not_advertised">Не е обявено (нативното възпроизвеждане може да работи)</string>

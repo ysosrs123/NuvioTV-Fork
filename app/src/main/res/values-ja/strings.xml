@@ -2815,6 +2815,10 @@
     <string name="audio_forget_rejections_sub">レシーバーが開けなかった形式は、パススルーで送られなくなっています。消去するともう一度試せます。</string>
     <string name="audio_forget_rejections_none">学習済みの項目なし</string>
     <string name="audio_forget_rejections_done">学習した音声の拒否を消去しました</string>
+    <string name="audio_forget_tunnel_stalls_title">トンネル再生のフリーズ記録を消去</string>
+    <string name="audio_forget_tunnel_stalls_sub">トンネル再生オフ: %1$s。消去すると次の動画でもう一度試します。</string>
+    <string name="audio_forget_tunnel_stalls_none">記録なし。</string>
+    <string name="audio_forget_tunnel_stalls_done">トンネル再生のフリーズ記録を消去しました</string>
     <string name="audio_inject_hdr10_sei_title">削除時にHDR10メタデータを挿入</string>
     <string name="audio_inject_hdr10_sei_sub">DVを削除してHDR10ベースレイヤーにしたDV8（Profile 8）コンテンツに、ソースのマスタリングメタデータ（MaxCLL/MaxFALLとピーク輝度）を追加し、DV非対応のHDR10テレビで正しくトーンマップされるようにします。DV処理が「DVを削除」または「HDR10ベースレイヤー」のときのみ有効です。Profile 7やDolby Vision再生には影響しません。</string>
     <string name="diag_value_not_advertised">報告なし（ネイティブ再生は動作する可能性あり）</string>

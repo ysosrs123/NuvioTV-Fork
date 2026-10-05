@@ -2560,6 +2560,10 @@
     <string name="audio_forget_rejections_sub">Format yang ditolak penerima AV Anda tidak lagi dikirim sebagai passthrough. Ini memungkinkan format itu dicoba lagi.</string>
     <string name="audio_forget_rejections_none">Tidak ada yang dipelajari</string>
     <string name="audio_forget_rejections_done">Penolakan audio yang dipelajari dihapus</string>
+    <string name="audio_forget_tunnel_stalls_title">Lupakan riwayat macet tunnel</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel nonaktif untuk: %1$s. Ini memungkinkan video berikutnya mencoba tunnel lagi.</string>
+    <string name="audio_forget_tunnel_stalls_none">Tidak ada yang diingat.</string>
+    <string name="audio_forget_tunnel_stalls_done">Riwayat macet tunnel dihapus</string>
     <string name="audio_inject_hdr10_sei_title">Sisipkan metadata HDR10 saat strip</string>
     <string name="audio_inject_hdr10_sei_sub">Untuk konten DV8 (Profile 8) yang di-strip ke lapisan dasar HDR10, tambahkan metadata mastering sumber (MaxCLL/MaxFALL dan luminans puncak) agar TV HDR10 non-DV melakukan tone-map dengan benar. Hanya aktif saat Penanganan DV adalah Strip DV atau Lapisan Dasar HDR10; tidak berpengaruh pada Profile 7 atau pemutaran Dolby Vision.</string>
     <string name="diag_value_not_advertised">Tidak diumumkan (pemutaran native mungkin tetap berfungsi)</string>

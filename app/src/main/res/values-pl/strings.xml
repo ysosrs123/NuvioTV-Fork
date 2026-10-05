@@ -3532,6 +3532,10 @@
     <string name="audio_forget_rejections_sub">Formaty, których amplituner nie chciał otworzyć, nie są już do niego przepuszczane. Ta opcja pozwala spróbować ich ponownie.</string>
     <string name="audio_forget_rejections_none">Nic nie zapamiętano</string>
     <string name="audio_forget_rejections_done">Wyczyszczono odrzucone formaty audio</string>
+    <string name="audio_forget_tunnel_stalls_title">Zapomnij zacięcia tunelu</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunelowanie wyłączone dla: %1$s. Ta opcja pozwala kolejnemu filmowi spróbować ponownie.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nic nie zapamiętano.</string>
+    <string name="audio_forget_tunnel_stalls_done">Zapomniano zacięcia tunelu</string>
     <string name="audio_inject_hdr10_sei_title">Dodaj metadane HDR10 przy usuwaniu DV</string>
     <string name="audio_inject_hdr10_sei_sub">Dla treści DV8 (Profile 8) sprowadzonych do warstwy bazowej HDR10 dodaje metadane masteringu źródła (MaxCLL/MaxFALL i luminancję szczytową), aby telewizory HDR10 bez DV poprawnie mapowały tony. Działa tylko, gdy obsługa DV to Usuń DV lub Warstwa bazowa HDR10; nie wpływa na Profile 7 ani na odtwarzanie Dolby Vision.</string>
     <string name="diag_value_not_advertised">Nie zgłoszono (natywne odtwarzanie może mimo to działać)</string>

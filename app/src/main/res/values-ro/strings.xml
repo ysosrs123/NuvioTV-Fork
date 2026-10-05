@@ -943,6 +943,10 @@
     <string name="audio_forget_rejections_sub">Formatele pe care receptorul a refuzat să le deschidă nu îi mai sunt trimise prin passthrough. Opțiunea permite să fie încercate din nou.</string>
     <string name="audio_forget_rejections_none">Nimic învățat</string>
     <string name="audio_forget_rejections_done">Refuzurile audio învățate au fost șterse</string>
+    <string name="audio_forget_tunnel_stalls_title">Uită blocările în tunel</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunel dezactivat pentru: %1$s. Opțiunea permite următorului video să încerce din nou.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nimic reținut.</string>
+    <string name="audio_forget_tunnel_stalls_done">Blocările în tunel au fost uitate</string>
     <string name="audio_inject_hdr10_sei_title">Inserează metadate HDR10 la eliminare</string>
     <string name="audio_inject_hdr10_sei_sub">Pentru conținutul DV8 (Profile 8) redus la stratul de bază HDR10, adaugă metadatele de masterizare ale sursei (MaxCLL/MaxFALL și luminanța de vârf), astfel încât televizoarele HDR10 fără DV să facă tone mapping corect. Activ doar când Gestionarea DV este Elimină DV sau Strat de bază HDR10; fără efect pe Profile 7 sau la redarea Dolby Vision.</string>
     <string name="diag_value_not_advertised">Nedeclarat (redarea nativă poate funcționa totuși)</string>

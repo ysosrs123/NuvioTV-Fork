@@ -107,6 +107,10 @@
     <string name="audio_forget_rejections_sub">Azokat a formátumokat, amelyeket az erősítőd nem volt hajlandó megnyitni, az alkalmazás már nem küldi passthrough-ként. Ezzel újra kipróbálhatók.</string>
     <string name="audio_forget_rejections_none">Nincs megtanult adat</string>
     <string name="audio_forget_rejections_done">A megtanult hangelutasítások törölve</string>
+    <string name="audio_forget_tunnel_stalls_title">Alagút-akadások elfelejtése</string>
+    <string name="audio_forget_tunnel_stalls_sub">Alagút kikapcsolva: %1$s. Ezzel a következő videó újra megpróbálhatja.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nincs megjegyzett adat.</string>
+    <string name="audio_forget_tunnel_stalls_done">Alagút-akadások elfelejtve</string>
     <string name="audio_inject_hdr10_sei_title">HDR10 metaadatok beszúrása eltávolításkor</string>
     <string name="audio_inject_hdr10_sei_sub">A HDR10 alaprétegre csupaszított DV8 (Profile 8) tartalomhoz hozzáadja a forrás mastering metaadatait (MaxCLL/MaxFALL és csúcsfényerő), hogy a DV nélküli HDR10 tévék helyesen végezzék a tone mappinget. Csak akkor aktív, ha a DV kezelése DV eltávolítása vagy HDR10 alapréteg; a Profile 7-re és a Dolby Vision lejátszásra nincs hatással.</string>
     <string name="diag_value_not_advertised">Nincs jelezve (a natív lejátszás ettől még működhet)</string>

@@ -3285,6 +3285,10 @@
     <string name="audio_forget_rejections_sub">Formati koje je prijemnik odbio da otvori više mu se ne šalju kao passthrough. Ovo omogućava da se ponovo probaju.</string>
     <string name="audio_forget_rejections_none">Ništa nije naučeno</string>
     <string name="audio_forget_rejections_done">Naučena odbijanja zvuka su obrisana</string>
+    <string name="audio_forget_tunnel_stalls_title">Zaboravi zastoje tunela</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunel isključen za: %1$s. Ovo omogućava sledećem videu novi pokušaj tunela.</string>
+    <string name="audio_forget_tunnel_stalls_none">Ništa nije zapamćeno.</string>
+    <string name="audio_forget_tunnel_stalls_done">Zastoji tunela zaboravljeni</string>
     <string name="audio_inject_hdr10_sei_title">Dodaj HDR10 metapodatke pri uklanjanju</string>
     <string name="audio_inject_hdr10_sei_sub">Za DV8 (profil 8) sadržaj sveden na HDR10 osnovni sloj dodaje mastering metapodatke izvora (MaxCLL/MaxFALL i vršnu osvetljenost) da HDR10 TV bez DV ispravno mapiraju tonove. Aktivno samo kada je Rukovanje Dolby Vision sadržajem postavljeno na Uvek ukloni DV ili HDR10 osnovni sloj; bez uticaja na profil 7 i Dolby Vision reprodukciju.</string>
     <string name="diag_value_not_advertised">Nije prijavljeno (nativna reprodukcija možda ipak radi)</string>

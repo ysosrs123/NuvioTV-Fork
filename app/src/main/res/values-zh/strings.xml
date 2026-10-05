@@ -107,6 +107,10 @@
     <string name="audio_forget_rejections_sub">接收器拒绝打开的格式不会再以穿透方式发送。清除后可重新尝试。</string>
     <string name="audio_forget_rejections_none">没有记录</string>
     <string name="audio_forget_rejections_done">已清除记录的音频拒绝</string>
+    <string name="audio_forget_tunnel_stalls_title">清除通道化卡顿</string>
+    <string name="audio_forget_tunnel_stalls_sub">已对以下格式关闭通道化：%1$s。清除后下个视频可重新尝试。</string>
+    <string name="audio_forget_tunnel_stalls_none">没有记录。</string>
+    <string name="audio_forget_tunnel_stalls_done">已清除通道化卡顿</string>
     <string name="audio_inject_hdr10_sei_title">移除时注入 HDR10 元数据</string>
     <string name="audio_inject_hdr10_sei_sub">对于移除为 HDR10 基础层的 DV8 (Profile 8) 内容，加入来源的母版元数据 (MaxCLL/MaxFALL 和峰值亮度)，让不支持 DV 的 HDR10 电视正确进行色调映射。仅当 DV 处理为「移除 DV」或「HDR10 基础层」时生效；对 Profile 7 和 Dolby Vision 播放无影响。</string>
     <string name="diag_value_not_advertised">未声明 (原生播放仍可能正常)</string>

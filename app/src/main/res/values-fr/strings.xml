@@ -3013,6 +3013,10 @@
     <string name="audio_forget_rejections_sub">Les formats que votre récepteur a refusé d\'ouvrir ne lui sont plus envoyés en passthrough. Ceci permet de les réessayer.</string>
     <string name="audio_forget_rejections_none">Rien de mémorisé</string>
     <string name="audio_forget_rejections_done">Refus audio mémorisés effacés</string>
+    <string name="audio_forget_tunnel_stalls_title">Oublier les blocages en tunnel</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel désactivé pour : %1$s. Ceci permet à la prochaine vidéo de le réessayer.</string>
+    <string name="audio_forget_tunnel_stalls_none">Rien de mémorisé.</string>
+    <string name="audio_forget_tunnel_stalls_done">Blocages en tunnel oubliés</string>
     <string name="audio_inject_hdr10_sei_title">Injecter les métadonnées HDR10 lors de la suppression</string>
     <string name="audio_inject_hdr10_sei_sub">Pour le contenu DV8 (Profile 8) réduit à une couche de base HDR10, ajoute les métadonnées de mastering de la source (MaxCLL/MaxFALL et luminance maximale) pour que les TV HDR10 sans DV appliquent un tone-mapping correct. Actif uniquement quand la gestion DV est sur Toujours supprimer la DV ou Couche HDR10 de base ; sans effet sur le Profile 7 ni sur la lecture Dolby Vision.</string>
     <string name="diag_value_not_advertised">Non annoncé (la lecture native peut tout de même fonctionner)</string>
