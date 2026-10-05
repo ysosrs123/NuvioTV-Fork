@@ -335,6 +335,10 @@ class PlaybackSettingsViewModel @Inject constructor(
         playerSettingsDataStore.setSubtitleSecondaryLanguage(language)
     }
 
+    suspend fun setSubtitleTertiaryLanguage(language: String?) {
+        playerSettingsDataStore.setSubtitleTertiaryLanguage(language)
+    }
+
     suspend fun setUseForcedSubtitles(enabled: Boolean) {
         playerSettingsDataStore.setUseForcedSubtitles(enabled)
     }

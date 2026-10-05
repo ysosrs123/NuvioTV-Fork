@@ -187,6 +187,7 @@ data class PlaybackIssuePlaybackSettingsDto(
     @Json(name = "secondaryPreferredAudioLanguage") val secondaryPreferredAudioLanguage: String?,
     @Json(name = "preferredSubtitleLanguage") val preferredSubtitleLanguage: String,
     @Json(name = "secondaryPreferredSubtitleLanguage") val secondaryPreferredSubtitleLanguage: String?,
+    @Json(name = "tertiaryPreferredSubtitleLanguage") val tertiaryPreferredSubtitleLanguage: String? = null,
     @Json(name = "useForcedSubtitles") val useForcedSubtitles: Boolean,
     @Json(name = "showOnlyPreferredSubtitleLanguages") val showOnlyPreferredSubtitleLanguages: Boolean,
     @Json(name = "useLibass") val useLibass: Boolean,

@@ -999,6 +999,7 @@
     <string name="sub_forced_lang">Forced</string>
     <string name="sub_preferred_lang">Preferred language</string>
     <string name="sub_secondary_lang">Secondary preferred language</string>
+    <string name="sub_tertiary_lang">Third preferred language</string>
     <string name="sub_use_forced_subtitles">Use Forced Subtitles</string>
     <string name="sub_addon_subtitles">Addon subtitles</string>
     <string name="sub_addon_subtitles_desc">Fetch subtitles from installed addons during playback. When off, only subtitles embedded in the file are available.</string>

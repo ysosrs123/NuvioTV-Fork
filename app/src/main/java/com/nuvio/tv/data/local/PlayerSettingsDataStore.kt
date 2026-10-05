@@ -145,6 +145,7 @@ data class SubtitleStyleSettings(
     val preferredLanguage: String = "en",
     val isPreferredLanguageSystemDefault: Boolean = true,
     val secondaryPreferredLanguage: String? = null,
+    val tertiaryPreferredLanguage: String? = null,
     val useForcedSubtitles: Boolean = false,
     val showOnlyPreferredLanguages: Boolean = false,
     val stripSdh: Boolean = false,
@@ -724,6 +725,7 @@ class PlayerSettingsDataStore @Inject constructor(
     // Subtitle style keys
     private val subtitlePreferredLanguageKey = stringPreferencesKey("subtitle_preferred_language")
     private val subtitleSecondaryLanguageKey = stringPreferencesKey("subtitle_secondary_language")
+    private val subtitleTertiaryLanguageKey = stringPreferencesKey("subtitle_tertiary_language")
     private val subtitleUseForcedSubtitlesKey = booleanPreferencesKey("subtitle_use_forced_subtitles")
     private val subtitleShowOnlyPreferredLanguagesKey = booleanPreferencesKey("subtitle_show_only_preferred_languages")
     private val subtitleStripSdhKey = booleanPreferencesKey("subtitle_strip_sdh")
@@ -977,6 +979,18 @@ class PlayerSettingsDataStore @Inject constructor(
                     normalizeSelectableLanguageCode(secondarySubtitleLanguage)
                 if (normalizedSecondarySubtitleLanguage != secondarySubtitleLanguage) {
                     prefs[subtitleSecondaryLanguageKey] = normalizedSecondarySubtitleLanguage
+                }
+            }
+
+            val tertiarySubtitleLanguage = prefs[subtitleTertiaryLanguageKey]
+            if (tertiarySubtitleLanguage != null) {
+                val normalizedTertiarySubtitleLanguage =
+                    normalizeSelectableLanguageCode(tertiarySubtitleLanguage)
+                if (normalizedTertiarySubtitleLanguage == SUBTITLE_LANGUAGE_FORCED) {
+                    prefs[subtitleUseForcedSubtitlesKey] = true
+                    prefs.remove(subtitleTertiaryLanguageKey)
+                } else if (normalizedTertiarySubtitleLanguage != tertiarySubtitleLanguage) {
+                    prefs[subtitleTertiaryLanguageKey] = normalizedTertiarySubtitleLanguage
                 }
             }
 
@@ -1244,10 +1258,14 @@ class PlayerSettingsDataStore @Inject constructor(
                         secondaryPreferredLanguage = prefs[subtitleSecondaryLanguageKey]
                             ?.let(::normalizeSelectableLanguageCode)
                             ?.takeUnless { it == SUBTITLE_LANGUAGE_FORCED },
+                        tertiaryPreferredLanguage = prefs[subtitleTertiaryLanguageKey]
+                            ?.let(::normalizeSelectableLanguageCode)
+                            ?.takeUnless { it == SUBTITLE_LANGUAGE_FORCED },
                         useForcedSubtitles = (prefs[subtitleUseForcedSubtitlesKey]
                             ?: (prefs[subtitlePreferredLanguageKey] == null)) ||
                             prefs[subtitlePreferredLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED ||
-                            prefs[subtitleSecondaryLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED,
+                            prefs[subtitleSecondaryLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED ||
+                            prefs[subtitleTertiaryLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED,
                         showOnlyPreferredLanguages = prefs[subtitleShowOnlyPreferredLanguagesKey] ?: false,
                         stripSdh = prefs[subtitleStripSdhKey] ?: false,
                         size = prefs[subtitleSizeKey] ?: SubtitleStyleSettings().size,
@@ -2018,6 +2036,13 @@ class PlayerSettingsDataStore @Inject constructor(
             val normalizedLanguage = language?.takeIf { it.isNotBlank() }?.let(::normalizeSelectableLanguageCode)
             if (normalizedLanguage != null) prefs[subtitleSecondaryLanguageKey] = normalizedLanguage
             else prefs.remove(subtitleSecondaryLanguageKey)
+        }
+    }
+    suspend fun setSubtitleTertiaryLanguage(language: String?) {
+        store().edit { prefs ->
+            val normalizedLanguage = language?.takeIf { it.isNotBlank() }?.let(::normalizeSelectableLanguageCode)
+            if (normalizedLanguage != null) prefs[subtitleTertiaryLanguageKey] = normalizedLanguage
+            else prefs.remove(subtitleTertiaryLanguageKey)
         }
     }
     suspend fun setSubtitleBitmapSize(size: Int) { store().edit { it[subtitleBitmapSizeKey] = size.coerceIn(50, 200) } }

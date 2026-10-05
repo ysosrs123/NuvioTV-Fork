@@ -1526,7 +1526,8 @@ internal fun PlayerRuntimeController.initializePlayer(
 
                 val preferred = playerSettings.subtitleStyle.preferredLanguage
                 val secondary = playerSettings.subtitleStyle.secondaryPreferredLanguage
-                applySubtitlePreferences(preferred, secondary)
+                val tertiary = playerSettings.subtitleStyle.tertiaryPreferredLanguage
+                applySubtitlePreferences(preferred, secondary, tertiary)
                 applyStartupSubtitlePreparation(startupSubtitlePreparation)
                 val startupSubtitleConfigurations = buildStartupSubtitleConfigurations(startupSubtitlePreparation)
                 // Join the saved-progress read before the

@@ -623,6 +623,7 @@ class PlayerRuntimeController(
     internal var isUserExplicitSubtitleSelection: Boolean = false
     internal var lastSubtitlePreferredLanguage: String? = null
     internal var lastSubtitleSecondaryLanguage: String? = null
+    internal var lastSubtitleTertiaryLanguage: String? = null
     internal var lastUseForcedSubtitles: Boolean? = null
     internal var pendingAddonSubtitleLanguage: String? = null
     internal var pendingAddonSubtitleTrackId: String? = null

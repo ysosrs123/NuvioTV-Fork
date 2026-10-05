@@ -13,6 +13,7 @@ import androidx.media3.common.util.UnstableApi
 import com.nuvio.tv.core.player.FrameRateUtils
 import com.nuvio.tv.data.local.AVAILABLE_SUBTITLE_LANGUAGES
 import com.nuvio.tv.data.local.InternalPlayerEngine
+import com.nuvio.tv.data.local.SubtitleStyleSettings
 import com.nuvio.tv.domain.model.Subtitle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -1219,11 +1220,15 @@ internal fun PlayerRuntimeController.applyPersistedTrackPreference(
     }
 }
 
-internal fun PlayerRuntimeController.subtitleLanguageTargets(): List<String> {
-    val preferred = _uiState.value.subtitleStyle.preferredLanguage.lowercase()
+internal fun PlayerRuntimeController.subtitleLanguageTargets(): List<String> =
+    subtitleLanguageTargets(_uiState.value.subtitleStyle)
+
+internal fun subtitleLanguageTargets(style: SubtitleStyleSettings): List<String> {
+    val preferred = style.preferredLanguage.lowercase()
     if (preferred == "none") return emptyList()
-    val secondary = _uiState.value.subtitleStyle.secondaryPreferredLanguage?.lowercase()
-    return listOfNotNull(preferred, secondary)
+    val secondary = style.secondaryPreferredLanguage?.lowercase()
+    val tertiary = style.tertiaryPreferredLanguage?.lowercase()
+    return listOfNotNull(preferred, secondary, tertiary)
 }
 
 internal fun PlayerRuntimeController.findBestInternalSubtitleTrackIndex(
@@ -1719,11 +1724,12 @@ internal fun PlayerRuntimeController.tryAutoSelectPreferredSubtitleFromAvailable
             )
             return
         }
-        // If internal match is secondary and a primary addon match exists, prefer the addon.
+        // If an addon matches a language ranked above the internal match, prefer the addon.
         if (matchedTargetPosition > 0 && addonSubtitlesLoaded) {
-            val primaryTarget = targets.first()
-            val primaryAddonMatch = state.addonSubtitles.firstOrNull { subtitle ->
-                PlayerSubtitleUtils.matchesLanguageCode(subtitle.lang, primaryTarget)
+            val primaryAddonMatch = targets.take(matchedTargetPosition).firstNotNullOfOrNull { higherTarget ->
+                state.addonSubtitles.firstOrNull { subtitle ->
+                    PlayerSubtitleUtils.matchesLanguageCode(subtitle.lang, higherTarget)
+                }
             }
             if (primaryAddonMatch != null) {
                 autoSubtitleSelected = true
@@ -1928,10 +1934,14 @@ internal fun PlayerRuntimeController.startFrameRateProbe(
     }
 }
 
-internal fun PlayerRuntimeController.applySubtitlePreferences(preferred: String, secondary: String?) {
+internal fun PlayerRuntimeController.applySubtitlePreferences(
+    preferred: String,
+    secondary: String?,
+    tertiary: String? = null
+) {
     if (isUserExplicitSubtitleSelection) return
     if (isUsingMpvEngine()) {
-        mpvView?.applySubtitleLanguagePreferences(preferred, secondary)
+        mpvView?.applySubtitleLanguagePreferences(preferred, secondary, tertiary)
         if (preferred == "none") {
             mpvView?.disableSubtitles()
             _uiState.update {

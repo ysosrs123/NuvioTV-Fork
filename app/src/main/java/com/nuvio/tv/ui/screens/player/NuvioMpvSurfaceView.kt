@@ -548,11 +548,12 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         }
     }
 
-    fun applySubtitleLanguagePreferences(preferred: String, secondary: String?) {
+    fun applySubtitleLanguagePreferences(preferred: String, secondary: String?, tertiary: String? = null) {
         if (!initialized) return
         val languages = listOfNotNull(
             preferred.takeIf { it.isNotBlank() && !it.equals("none", ignoreCase = true) },
-            secondary?.takeIf { it.isNotBlank() && !it.equals("none", ignoreCase = true) }
+            secondary?.takeIf { it.isNotBlank() && !it.equals("none", ignoreCase = true) },
+            tertiary?.takeIf { it.isNotBlank() && !it.equals("none", ignoreCase = true) }
         )
         if (languages.isEmpty()) {
             disableSubtitles()

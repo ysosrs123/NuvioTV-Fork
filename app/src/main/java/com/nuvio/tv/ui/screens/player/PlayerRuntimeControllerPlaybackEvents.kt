@@ -587,6 +587,7 @@ private fun PlayerRuntimeController.buildPlaybackIssuePlaybackSettingsInput(): P
         secondaryPreferredAudioLanguage = settings.secondaryPreferredAudioLanguage,
         preferredSubtitleLanguage = settings.subtitleStyle.preferredLanguage,
         secondaryPreferredSubtitleLanguage = settings.subtitleStyle.secondaryPreferredLanguage,
+        tertiaryPreferredSubtitleLanguage = settings.subtitleStyle.tertiaryPreferredLanguage,
         useForcedSubtitles = settings.subtitleStyle.useForcedSubtitles,
         showOnlyPreferredSubtitleLanguages = settings.subtitleStyle.showOnlyPreferredLanguages,
         useLibass = settings.useLibass,
