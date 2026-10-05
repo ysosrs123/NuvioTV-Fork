@@ -539,6 +539,31 @@ class TmdbMetadataService(
         }
 
     /**
+     * Genre names from one TMDB details call, not kept in memory here. Empty when TMDB has none or does not know the
+     * title, null when the request failed.
+     */
+    suspend fun fetchGenres(tmdbId: Int, contentType: ContentType, language: String = "en"): List<String>? =
+        withContext(ioDispatcher) {
+            val normalizedLanguage = normalizeTmdbLanguage(language)
+            try {
+                val response = when (contentType) {
+                    ContentType.SERIES, ContentType.TV -> tmdbApi.getTvDetails(tmdbId, TMDB_API_KEY, normalizedLanguage)
+                    else -> tmdbApi.getMovieDetails(tmdbId, TMDB_API_KEY, normalizedLanguage)
+                }
+                when {
+                    response.code() == 404 -> emptyList()
+                    !response.isSuccessful -> null
+                    else -> response.body()?.genres?.mapNotNull { genre -> genre.name.trim().takeIf(String::isNotBlank) }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to fetch TMDB genres: ${e.message}")
+                null
+            }
+        }
+
+    /**
      * Lightweight artwork fetch for grids: a single TMDB details call (no
      * credits/images/ratings/alt-title fan-out), cached and in-flight-deduped.
      * Use instead of [fetchEnrichment] when only poster/backdrop (and basic
