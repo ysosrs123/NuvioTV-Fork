@@ -50,6 +50,24 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
 
     @Synchronized fun snapshot(): List<CaptureSegment> { checkOpen(); return segments.toList() }
 
+    /**
+     * Atomically pin a fixed, uninterrupted snapshot starting at an existing segment. New appends
+     * are outside this reader, so EOF means snapshot completion, not a temporarily empty live tail.
+     * This is a byte reader for capture/export adapters, not a claim of decoder-safe seeking.
+     */
+    @Synchronized fun openSnapshotFrom(sequence: Long): CaptureSnapshotReader {
+        checkOpen()
+        val start = segments.indexOfFirst { it.sequence == sequence }
+        require(start >= 0) { "Capture segment is no longer retained" }
+        val selected = mutableListOf(segments[start])
+        for (next in segments.drop(start + 1)) {
+            val previous = selected.last()
+            if (next.startMs != previous.endMs || next.continuity != previous.continuity) break
+            selected += next
+        }
+        return CaptureSnapshotReader(selected.toList(), pinFrom(sequence), ::open)
+    }
+
     /** Retain this segment AND its successors until the consumer releases its pause/recording anchor. */
     @Synchronized fun pinFrom(sequence: Long): AutoCloseable {
         checkOpen(); require(segments.any { it.sequence == sequence })

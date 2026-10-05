@@ -22,6 +22,7 @@ Base: 1.1.0-beta-nt4.1 / build 1458. This is a prototype, not a published releas
 - Native Nuvio audio/subtitle track dialog with Automatic, subtitle Off, current-track selection and player-reported unsupported tracks. Stale selections are checked against the current player; choices reset with the player. Controls alone are not codec certification.
 - Shared HUD presentation now supports both the existing player and IPTV. Live counters reset per acquisition, separate startup from rebuffering, and report ongoing stalls and idle transfer rates. Toolbar controls wrap to accommodate the additional actions; remote/layout verification remains pending.
 - Statistics never include provider URLs/credentials. Transfer rate is measured body consumption, not a speed test; live offset is not glass-to-glass latency; source frame rate is not HDMI output rate.
+- Shared capture foundation now includes independently closing viewer/recorder ownership, a one-segment-at-a-time ingestion loop and a pinned local snapshot reader. These components are not yet enabled in the foreground player and do not constitute playable timeshift or recording.
 
 ## Correctness and reliability improvements
 
@@ -37,6 +38,7 @@ Base: 1.1.0-beta-nt4.1 / build 1458. This is a prototype, not a published releas
 - Stalker Portal source adapter and independently validated authentication/channel handling.
 - Complete audio/subtitle preferences and representative rendering checks for subtitles, closed captions, DVB subtitles and teletext. Track-selection UI is implemented; these formats are not all certified.
 - Shared capture, local pause/resume and seekable timeshift; durable recording/schedules to internal storage, USB and SMB.
+- Protocol-specific capture parsing, decoder-safe entry points, a live local-reader/Media3 timeline and physical disk/free-space enforcement are still required before enabling that capture foundation.
 - Multiview with an independent source/playlist per pane, shared account groups and aggregate device/provider limits; provider catch-up.
 - AFR/display handoff, integrated VOD/trailer/IPTV resource ownership, full guide grid, Home/Search, source/feed management, all supported locales and appearance/accessibility checks.
 
@@ -63,9 +65,19 @@ Reviewed draft NuvioMedia/NuvioTV PR #3788 at e10c639: reproduced a preview dire
 
 - Added an exclusively owned, bounded segment spool with synced complete-segment/index publication through atomic moves, close/reopen recovery and scoped orphan cleanup. It refuses nonempty unowned directories, unexpected files and managed symlinks. Retained logical bytes, segment sizes/count and index parsing are bounded.
 - Pause/recording anchors and open readers prevent eviction of retained media. Capacity exhaustion reports backpressure; gaps and discontinuities remain separate in actual retained bounds. Cancellation, oversized input and read failure before publication preserve committed data; failed cleanup blocks the next allocation until resolved. Closure is refused while readers/anchors remain.
-- Seven focused filesystem tests passed separately on JVM (0.223s) and AM9 (0.39s), using the actual production class. The previous full 112/133 suites were not rerun after this addition; do not combine the counts into a whole-app validation claim. See IPTV-CAPTURE-STORE-VALIDATION-20261005.json.
+- At `8f1316e`, seven focused filesystem tests passed separately on JVM (0.223s) and AM9 (0.39s), using the actual production class. The full 112/133 suites were not rerun at that checkpoint. The latest shared-capture section below records the subsequent full reruns. See IPTV-CAPTURE-STORE-VALIDATION-20261005.json for the historical evidence.
 - Capture transport, seekable player integration, durable schedules/leases and internal/USB/SMB recording are still unfinished. File sync/atomic rename testing does not establish physical-power-loss durability. This store has not yet been included in the installed prototype APK. Extra staged-segment/index/filesystem space, physical disk allocation and decoder-safe seek entry points still need the transport/storage integration.
 
 ## Continuation record
 
-Complete implementation context, reproduction locations, device cleanup state, remaining work and fresh-session instructions are saved in [the handover](IPTV-NEXT-SESSION-HANDOFF-20261005.md). This draft covers committed implementation through `8f1316e`; nothing has been published.
+Complete implementation context, reproduction locations, device cleanup state, remaining work and fresh-session instructions are saved in [the handover](IPTV-NEXT-SESSION-HANDOFF-20261005.md). The shared capture continuation builds on `27f78ea`; nothing has been published.
+
+## Shared capture continuation — internal integration components
+
+- Added a runtime that owns one producer/store across separate viewer and recording consumers. Closing a viewer leaves remaining consumers running. Uncertain decoder/reader closure retains that consumer's reservation; uncertain producer/store closure retains capture memory, account and full spool storage. Stale consumer tokens cannot close replacement acquisitions. Foreign acquisitions cannot be shared without their actual pipeline.
+- Capture storage admission includes retained bytes, one staged segment and an explicit overhead margin. This remains a logical budget, not measured physical disk usage or a free-space guarantee.
+- Added sequential segment ingestion with bounded store writes, body closure before the next pull, explicit backpressure/failure states and no automatic retry. Cancellation closes late bodies without publishing them; failed body closure remains retryable. HTTP/HLS/TS protocol adapters remain to be implemented.
+- Added a finite local snapshot byte reader that pins before reading, crosses only contiguous segments, excludes future appends and retains its pin until explicit close. This is not yet a live-tail Media3 reader, a keyframe-safe seek window or a finished export feature.
+- Twenty-four new regression tests cover sharing, final-consumer closure, cancelled joins/stops, failed construction/start/closure, foreign acquisitions, snapshot boundaries/retention, oversize input, backpressure, late bodies and blocked cleanup retries. Thirty-one focused JVM tests, including the original seven store tests, passed in 1.112s. Full app compilation and **143 JVM tests** passed; the final Android backend suite passed **164 tests in 30.233s** with no network permission. The suites overlap. Memory-related build/test-worker startup failures and the successful bounded reruns are recorded in the evidence report.
+- AM9 was not woken. Temporary test packages were removed; pre-existing reverse8765 remains. The installed prototype remains the older HUD build. No new playback, UI, subtitle, document-picker, real-provider, power-loss or USB/SMB validation is claimed.
+- See [the ownership/reader design and remaining integration requirements](IPTV-SHARED-CAPTURE-DESIGN.md) and `IPTV-SHARED-CAPTURE-VALIDATION-20261005.json`.
