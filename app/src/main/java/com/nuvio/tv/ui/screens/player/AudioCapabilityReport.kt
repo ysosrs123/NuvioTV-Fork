@@ -141,7 +141,15 @@ object AudioCapabilityReport {
     ): String {
         val direct = if (supported.isEmpty()) "none" else supported.joinToString(" ")
         val missing = if (absent.isEmpty()) "none" else absent.joinToString(" ")
-        return "Direct: $direct\nAbsent: $missing\nNegotiated: $negotiated\nSurround: $surroundMode\nMax PCM: $maxPcm"
+        val listedNotOpened = negotiated.split(' ').filter { it in absent }
+        return buildString {
+            append("Box opens: $direct\nBox cannot open: $missing\nHDMI device lists: $negotiated")
+            append("\nAndroid surround: $surroundMode\nHDMI device max PCM: $maxPcm")
+            if (listedNotOpened.isNotEmpty()) {
+                append("\nListed by HDMI, not opened by this box: ${listedNotOpened.joinToString(" ")}")
+            }
+            append("\nHDMI device = the TV or receiver this box is plugged into, not a soundbar behind its ARC")
+        }
     }
 
     /** HDMI/ARC/eARC output device types whose negotiated encodings we report. */
@@ -156,8 +164,9 @@ object AudioCapabilityReport {
      * [AudioDeviceInfo.getEncodings]. A different oracle from isDirectPlaybackSupported
      * above: that reads the vendor audio-policy profiles (static, and on some TVs still
      * advertising formats the licence-stripped HAL will not open); this reflects what the
-     * HDMI link reported after EDID negotiation. When the two disagree - a TV that claims
-     * DTS it cannot open - this is the row that tends to be honest. PCM16 is included
+     * HDMI link reported after EDID negotiation, i.e. the TV or receiver the box is plugged
+     * into. A soundbar behind that TV's ARC is invisible here. When the two disagree, the
+     * direct probe decides what the box will actually open. PCM16 is included
      * deliberately: its presence is what makes the line legible at a glance.
      *
      * Best-effort. getEncodings() returns an empty array when the platform does not

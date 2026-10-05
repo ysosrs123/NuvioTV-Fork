@@ -1,15 +1,18 @@
 package com.nuvio.tv.ui.screens.player
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AudioCapabilityReportTest {
+    private val hdmiNote = "HDMI device = the TV or receiver this box is plugged into, not a soundbar behind its ARC"
 
     @Test
     fun format_listsSupportedAndAbsentAndMode() {
         assertEquals(
-            "Direct: AC3 EAC3 TrueHD\nAbsent: DTS DTS-HD\nNegotiated: AC3 EAC3 PCM16\nSurround: MANUAL\nMax PCM: 8 ch",
+            "Box opens: AC3 EAC3 TrueHD\nBox cannot open: DTS DTS-HD\nHDMI device lists: AC3 EAC3 PCM16\n" +
+                "Android surround: MANUAL\nHDMI device max PCM: 8 ch\n$hdmiNote",
             AudioCapabilityReport.format(
                 supported = listOf("AC3", "EAC3", "TrueHD"),
                 absent = listOf("DTS", "DTS-HD"),
@@ -23,13 +26,30 @@ class AudioCapabilityReportTest {
     @Test
     fun format_saysNoneRatherThanEmptyList() {
         assertEquals(
-            "Direct: none\nAbsent: AC3\nNegotiated: unknown\nSurround: NEVER\nMax PCM: unknown",
+            "Box opens: none\nBox cannot open: AC3\nHDMI device lists: unknown\n" +
+                "Android surround: NEVER\nHDMI device max PCM: unknown\n$hdmiNote",
             AudioCapabilityReport.format(emptyList(), listOf("AC3"), "unknown", "NEVER", "unknown")
         )
         assertEquals(
-            "Direct: AC3\nAbsent: none\nNegotiated: AC3\nSurround: AUTO\nMax PCM: 2 ch",
+            "Box opens: AC3\nBox cannot open: none\nHDMI device lists: AC3\n" +
+                "Android surround: AUTO\nHDMI device max PCM: 2 ch\n$hdmiNote",
             AudioCapabilityReport.format(listOf("AC3"), emptyList(), "AC3", "AUTO", "2 ch")
         )
+    }
+
+    @Test
+    fun format_namesFormatsTheHdmiDeviceListsButTheBoxCannotOpen() {
+        val text = AudioCapabilityReport.format(
+            supported = listOf("AC3", "EAC3", "EAC3-JOC", "TrueHD"),
+            absent = listOf("DTS", "DTS-HD"),
+            negotiated = "PCM16 AC3 DTS",
+            surroundMode = "AUTO",
+            maxPcm = "6 ch"
+        )
+        val lines = text.split("\n")
+        assertEquals(7, lines.size)
+        assertEquals("Listed by HDMI, not opened by this box: DTS", lines[5])
+        assertEquals(hdmiNote, lines[6])
     }
 
     @Test
@@ -42,12 +62,13 @@ class AudioCapabilityReportTest {
             "8 ch"
         )
         val lines = text.split("\n")
-        assertEquals(5, lines.size)
-        assertTrue(lines[0].startsWith("Direct: "))
-        assertTrue(lines[1].startsWith("Absent: "))
-        assertTrue(lines[2].startsWith("Negotiated: "))
-        assertTrue(lines[3].startsWith("Surround: "))
-        assertTrue(lines[4].startsWith("Max PCM: "))
+        assertEquals(6, lines.size)
+        assertTrue(lines[0].startsWith("Box opens: "))
+        assertTrue(lines[1].startsWith("Box cannot open: "))
+        assertTrue(lines[2].startsWith("HDMI device lists: "))
+        assertTrue(lines[3].startsWith("Android surround: "))
+        assertTrue(lines[4].startsWith("HDMI device max PCM: "))
+        assertFalse(text.contains("not opened by this box"))
     }
 
     @Test
