@@ -81,3 +81,38 @@ Complete implementation context, reproduction locations, device cleanup state, r
 - Twenty-four new regression tests cover sharing, final-consumer closure, cancelled joins/stops, failed construction/start/closure, foreign acquisitions, snapshot boundaries/retention, oversize input, backpressure, late bodies and blocked cleanup retries. Thirty-one focused JVM tests, including the original seven store tests, passed in 1.112s. Full app compilation and **143 JVM tests** passed; the final Android backend suite passed **164 tests in 30.233s** with no network permission. The suites overlap. Memory-related build/test-worker startup failures and the successful bounded reruns are recorded in the evidence report.
 - AM9 was not woken. Temporary test packages were removed; pre-existing reverse8765 remains. The installed prototype remains the older HUD build. No new playback, UI, subtitle, document-picker, real-provider, power-loss or USB/SMB validation is claimed.
 - See [the ownership/reader design and remaining integration requirements](IPTV-SHARED-CAPTURE-DESIGN.md) and `IPTV-SHARED-CAPTURE-VALIDATION-20261005.json`.
+
+## HLS capture continuation — bounded protocol ingestion
+
+- Added an internal media-playlist parser, sequential HLS capture source and
+  dedicated HTTP client. One body is opened at a time; changed or missing media
+  halts capture, with paced bounded live reloads and no failed-request retry.
+- The initial subset rejects master/rendition selection, encryption, maps,
+  ranges, gaps, partial segments and cross-origin media before fetching those
+  resources. It is not general HLS support or an enabled player feature.
+- Cancellation fences late connects and reclaims responses never delivered to
+  their caller. Manifest bodies remain owned on failed close. Uncertain underlying
+  HTTP body closure cannot become a successful release through a later no-op close.
+- Manifest-derived times and discontinuities are retained as metadata. No codec,
+  init/keyframe, actual PTS or decoder-safe seek claim is made.
+- Final checks: 130 pure-core tests, 10 host HTTP fixtures and 190 Android backend
+  tests (35.827s). Suites overlap. The host HTTP integration captured synthetic
+  byte resources and read committed bytes locally; it did not validate playback.
+- Android harness built with 1 GiB heap. Its test packages have no INTERNET
+  permission and were removed afterward. AM9 was observed awake; this task did
+  not wake it, reinstall the prototype or change its settings/accounts.
+- Full-app build outcomes are recorded separately in the evidence report; an
+  initial 3 GiB run failed from JVM native-memory allocation. No unrelated daemon
+  was stopped and no system memory setting was changed.
+- Decoder-safe media validation, local live-reader/player integration, pause,
+  recording/services/schedules and physical/USB/SMB storage remain outstanding.
+  See `IPTV-HLS-CAPTURE-DESIGN.md` and `IPTV-HLS-CAPTURE-VALIDATION-20261005.json`.
+
+- Final whole-app checks passed: full application Kotlin compilation (6m28s)
+  and all **176 IPTV JVM tests**, with zero failures/errors/skips. These overlap
+  the focused host and Android suites; counts are not independent.
+- Successful compilation used a 3 GiB heap, 512 MiB metaspace, SerialGC,
+  128 MiB code cache, two reported processors, one worker and the in-process
+  compiler. The final JVM run used the same overhead limits with a 1 GiB heap.
+  These were command-line flags only; project/system memory settings and
+  unrelated daemons were unchanged.

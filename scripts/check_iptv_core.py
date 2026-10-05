@@ -20,6 +20,7 @@ compiler = [jar('org.jetbrains.kotlin', a, '2.3.0') for a in ['kotlin-compiler-e
 compiler += [jar('org.jetbrains.kotlin', 'kotlin-reflect', '2.2.0'), jar('org.jetbrains.kotlinx', 'kotlinx-coroutines-core-jvm', '1.8.0'), jar('org.jetbrains', 'annotations', '23.0.0')]
 classpath = [compiler[1], compiler[-1], jar('junit', 'junit', '4.13.2'), jar('org.hamcrest', 'hamcrest-core', '1.3'), jar('org.json', 'json', '20250517')]
 classpath += [jar('net.sf.kxml', 'kxml2', '2.3.0')]
+classpath += [jar('org.jetbrains.kotlinx', 'kotlinx-coroutines-core-jvm', '1.10.2')]
 package = Path('com/nuvio/tv/core/iptv')
 sources = sorted((ROOT / 'app/src/main/java' / package).glob('*.kt'))
 sources += [ROOT / 'app/src/main/java/com/nuvio/tv/core/player/thumbnail/ThumbSourcePolicy.kt']

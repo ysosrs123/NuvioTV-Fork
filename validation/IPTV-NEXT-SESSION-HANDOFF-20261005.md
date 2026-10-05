@@ -1,5 +1,28 @@
 # Nuvio IPTV continuation handover — 5 October 2026
 
+## Latest continuation — HLS capture
+
+The HLS capture milestone supersedes earlier statements that no HLS capture
+protocol adapter exists. Read `IPTV-HLS-CAPTURE-DESIGN.md` and
+`IPTV-HLS-CAPTURE-VALIDATION-20261005.json` first. Bounded single-playlist/full-resource
+ingestion now exists internally; it is not wired into the foreground player.
+130 core, 10 host HTTP and 190 Android backend tests passed (overlapping suites).
+Decoder-safe entry validation and local live-reader/player integration are next.
+AM9 reported awake; this task did not wake it or change settings. Both temporary
+test packages were removed, reverse8765 preserved and the prototype was not
+reinstalled. Original Fork source remains untouched. New scratch is
+`captures/iptv-hls-capture`; never resync old staging. Read the latest evidence
+for full-app build outcomes; the initial native-memory failure is recorded there.
+
+### Latest successful build settings
+
+Full app compilation and 176 IPTV JVM tests passed after the two recorded
+memory-related failures. For compilation use one worker, in-process Kotlin and
+`-Dorg.gradle.jvmargs=-Xmx3072m -XX:MaxMetaspaceSize=512m -XX:+UseSerialGC -XX:ReservedCodeCacheSize=128m -XX:ActiveProcessorCount=2 -Dfile.encoding=UTF-8`.
+For tests against unchanged compiled outputs, the same flags with `-Xmx1024m`
+passed. These latest settings supersede the older default-GC memory suggestion
+below. Do not stop unrelated daemons or change system memory settings.
+
 ## Start here
 
 **Continuation addendum:** The new chat continued from clean `27f78ea`. Read `IPTV-SHARED-CAPTURE-DESIGN.md` and `IPTV-SHARED-CAPTURE-VALIDATION-20261005.json` after this handover. Shared capture ownership, sequential bounded segment ingestion and a finite pinned local byte reader are now implemented as internal components. They are not wired into the foreground player and do not yet supply protocol parsing, decoder-safe seeks or playable timeshift/recording. Full app compilation and 143 JVM tests passed; the final Android backend suite passed 164 tests; full-app/JVM evidence is in the new report. AM9 remained asleep; test packages removed; reverse8765 preserved; installed prototype remains the HUD build. Original handover descriptions below are historical where superseded by this addendum. New scratch is `captures/iptv-shared`; do not resync old staging. Next is controlled protocol ingestion/decoder-safe bounds, followed by local live-reader/player integration. All larger scope remains outstanding.
