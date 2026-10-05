@@ -363,6 +363,7 @@ baselineProfile {
     baselineProfileOutputDir = "generated/baselineProfiles"
     filter {
         include("com.nuvio.tv.**")
+        include("androidx.media3.**")
     }
 }
 
