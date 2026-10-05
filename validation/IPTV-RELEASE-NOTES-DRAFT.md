@@ -49,3 +49,10 @@ Base: 1.1.0-beta-nt4.1 / build 1458. This is a prototype, not a published releas
 ## Upstream review
 
 Reviewed draft NuvioMedia/NuvioTV PR #3788 at e10c639: reproduced a preview direction-reversal seek error and a live-label delay discrepancy; documented retention/recovery concerns. Not imported. See IPTV-UPSTREAM-PR3788-REVIEW.md. Forthcoming timeshift tests must distinguish RAM load targets, actual playable windows and local capture retention.
+
+## Capture foundation — internal, not yet a playable feature
+
+- Added an exclusively owned, bounded segment spool with atomic complete-segment/index publication, close/reopen recovery and scoped orphan cleanup.
+- Pause/recording anchors and open readers prevent eviction of retained media. Capacity exhaustion reports backpressure; gaps and discontinuities remain separate in actual retained bounds.
+- Seven focused filesystem tests passed on both JVM and AM9, in addition to the prior HUD/guide suite. See IPTV-CAPTURE-STORE-VALIDATION-20261005.json.
+- Capture transport, seekable player integration, durable schedules/leases and internal/USB/SMB recording are still unfinished. File sync/atomic rename testing does not establish physical-power-loss durability. This store has not yet been included in the installed prototype APK.
