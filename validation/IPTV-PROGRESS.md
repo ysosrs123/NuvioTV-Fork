@@ -193,3 +193,15 @@ AM9 remained asleep, last sleep reason HDMI. Temporary test packages removed; pr
   compiler. The final JVM run used the same overhead limits with a 1 GiB heap.
   These were command-line flags only; project/system memory settings and
   unrelated daemons were unchanged.
+
+## Fresh-session documentation checkpoint
+
+User requested a fresh continuation session, complete handoff and updated draft
+release notes. Reconciled `IPTV-NEXT-SESSION-HANDOFF-20261005.md` into one current
+entry point covering implementation eaa43e5, request/body ownership findings,
+bounded HLS limitations, overlapping 176 JVM/190 Android results, successful
+memory flags, device cleanup, earlier PR/comparator findings and ordered remaining
+work. Draft notes now include a current summary, latest commit history and fixes,
+and remove obsolete present-tense no-adapter/asleep statements. Component upgrades
+remain separate. This checkpoint changes documentation only; previous code/test
+evidence remains applicable. Continue on codex/iptv in the authoritative sibling.
