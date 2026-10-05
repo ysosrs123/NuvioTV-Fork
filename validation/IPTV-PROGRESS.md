@@ -2,6 +2,14 @@
 
 Updated 5 October 2026, Australia/Brisbane.
 
+## Fresh-session checkpoint
+
+Read [the complete continuation handover](IPTV-NEXT-SESSION-HANDOFF-20261005.md) first. The user requested a fresh chat, continued implementation and updated comprehensive draft release notes. Authoritative source is the sibling `E:/Codex/NuvioTV/work/NuvioTV-IPTV`, branch `codex/iptv`, implementation HEAD `8f1316e` (followed by the documentation handover commit). The original dirty Fork remains preserved.
+
+Latest delivered code: `0211656` adds IPTV HUD, local-document XMLTV imports, bounded secure guide redirects and native audio/subtitle controls; `8f1316e` adds the bounded capture-store foundation. Playable timeshift/recording, Stalker and multiview remain unfinished. Full build/112 JVM/133 Android tests passed at the HUD milestone; capture separately passed seven focused tests on each platform, without a combined full-suite rerun. The installed prototype is the HUD build, not the newer capture source.
+
+**Current cleanup state:** prototype force-stopped; validation packages removed; all fixture servers stopped; this run's reverse18767 and own UI dump removed; pre-existing reverse8765 preserved. AM9 remains asleep with last sleep reason HDMI. HUD/track/document UI checks await an active TV/AVR; no device power/CEC/security settings changed. The temporary away-time heartbeat remains PAUSED. The sections below are milestone history; test counts and device observations apply to their stated checkpoints.
+
 ## Workspace and scope
 
 - Dedicated clean sibling clone: `NuvioTV-IPTV`, branch `codex/iptv`.
@@ -20,7 +28,7 @@ Updated 5 October 2026, Australia/Brisbane.
 - Initial AM9 evidence is in the original checkout's `validation/iptv-research/evidence/am9-reference-20261005.json`; private screenshots under `captures/iptv-am9-reference-20261005`.
 - Physical HDMI/audio route and representative channels remain unknown. No HDR/Atmos, provider quota, throughput or decoder-capacity claim.
 
-## Current milestone
+## Foreground playback milestone (historical checkpoint)
 
 Earlier milestones: ingest/admission `196dcf4`, source/catalogue persistence and M3U HTTP `9122fc6`, transactional XMLTV `b8e60e9`, bounded guide HTTP/cache `84924e3`, bounded browsing/mapping `53bd036`, native source setup/profile cleanup `7283bf5`. This continuation connects admission to a real foreground Media3 player and adds a first Nuvio live screen.
 
@@ -76,7 +84,7 @@ The final prototype is installed and stopped. Only synthetic sources were used. 
 ## Validation and workspace commands
 
 - Java: `E:/Android Studio/jbr`; Gradle cache: `D:/DevData/Gradle`; AM9 only: `192.168.10.60:5555`.
-- Latest full compile, prototype build and JVM suite: `validation/iptv-core/hls-verified-build.log` (107 IPTV tests); device run: `hls-am9.txt` (128 tests, zero failures, 36.495 seconds). Durable evidence: `validation/IPTV-HLS-VALIDATION-20261005.json`. Earlier Xtream/live/setup evidence remains in its JSON files.
+- HLS milestone full compile, prototype build and JVM suite: `validation/iptv-core/hls-verified-build.log` (107 IPTV tests); device run: `hls-am9.txt` (128 tests, zero failures, 36.495 seconds). Durable evidence: `validation/IPTV-HLS-VALIDATION-20261005.json`. Earlier Xtream/live/setup evidence remains in its JSON files.
 - Device harness instructions: `tools/iptv-device-tests/README.md`. It builds actual production sources through Gradle Sync tasks and runs separately from the Nuvio app. Check the JUnit summary because adb can exit zero on a failed test run. Fixtures cover close/reopen, not abrupt process death or physical power loss; no recording/playback/performance claims.
 - Full compile: `gradlew.bat :app:compileFullDebugKotlin --offline --no-daemon --max-workers=2`. Existing JVM suite: `:app:testFullDebugUnitTest --tests com.nuvio.tv.core.iptv.* --tests com.nuvio.tv.data.iptv.*`. Redirect verbose baseline warnings to a log.
 - Clean sibling checkout is also available at `E:/Codex/NuvioTV/work/NuvioTV-IPTV`; use its branch `codex/iptv`. The active chat's sandbox still covers the original Fork checkout, so sibling writes required escalation.
@@ -105,7 +113,7 @@ The user returned and explicitly authorised continued implementation. The tempor
 
 Additional requirements: IPTV adaptation of the existing ExoPlayer HUD with live metrics; local XMLTV .xml files and URLs (including shortened links); Stalker Portal alongside M3U and Xtream Codes API; subtitles/CC/DVB subtitles/teletext; timeshift; multiview with a different source/playlist per pane. XMLTV is the guide format. No new work is certified merely because a comparator implements it.
 
-HUD implementation is in progress; guide-file/redirect work and all larger milestones remain. A public HEAD request to the exact supplied https://tinyurl.com/epg-ss11 returned HTTP 404 at 06:29 UTC; no guide data was obtained.
+At that checkpoint HUD and guide-file/redirect implementation was in progress; these are now committed in `0211656`, with screen validation still pending. Larger milestones remain. A public HEAD request to the exact supplied https://tinyurl.com/epg-ss11 returned HTTP 404 at 06:29 UTC; no guide data was obtained.
 
 ## HUD, guide files, track controls and upstream review continuation
 
@@ -117,11 +125,11 @@ Full application compile, distinct prototype assembly and 112 JVM tests passed (
 
 Prototype installed on AM9. Initial Live TV UI rendered, but screen tests encountered HDMI sleep 15 seconds after wake; `dumpsys power` reported `mLastSleepReason=hdmi`. An asynchronous question asks the user to leave the TV/AVR on or defer screen tests. No CEC/security/power preferences changed. Backend and independent work continue. Do not trust `next-source.xml` from this attempt: uiautomator failed but the old helper read a stale dump. Helper now removes its own prior dump and requires a successful fresh dump. No new playback/track/HUD visual success is claimed yet.
 
-AM9 has no native OPEN_DOCUMENT or GET_CONTENT picker. A test-only picker/provider was added to the instrumentation APK to allow a real URI-grant/cold-restart import check with one synthetic XMLTV document and no personal files. It is NOT a shipping file picker and does not resolve the AM9 product limitation. Compilation initially failed on heterogeneous array type inference; explicit `arrayOf<Any>` fixed it. Updated test APK is installed temporarily; remove both validation packages at cleanup. No backend test rerun needed for this test-only UI addition.
+AM9 has no native OPEN_DOCUMENT or GET_CONTENT picker. A test-only picker/provider was added to the instrumentation APK to allow a real URI-grant/cold-restart import check with one synthetic XMLTV document and no personal files. It is NOT a shipping file picker and does not resolve the AM9 product limitation. Compilation initially failed on heterogeneous array type inference; explicit `arrayOf<Any>` fixed it. The updated test APK was installed temporarily and both validation packages were subsequently removed at cleanup. No backend test rerun needed for this test-only UI addition.
 
 User additionally requested review of upstream PR https://github.com/NuvioMedia/NuvioTV/pull/3788. Attached to this chat. Focused review is saved in `IPTV-UPSTREAM-PR3788-REVIEW.md`; pinned head e10c639200d5821d1cbc71bdd438ccbd6b1ff7ff. Exact policy was compiled in an isolated scratch JVM harness with unrelated settings stubs. Reproductions show backward-then-forward preview selects 60s instead of 30s, and measured 20s offset displays LIVE; RAM load target is also conflated with retainable window in recovery. No PR changes were imported, no comments/reviews posted, no PR APK installed. Useful requirements are retained for our actual capture/timeshift model.
 
-Active scratch: original `captures/iptv-hud` and `captures/iptv-guides-local`; source already synced. Do not rerun prepare scripts over newer code. Temporary HLS/WebVTT server is running on loopback 18767 using `captures/iptv-hud/fixture.py --directory captures/iptv-hud --subtitles`; ADB reverse 18767 exists. Preserve the old reverse 8765. Generated test media copied from earlier fixture. Current helper screenshots/dumps remain private. Release notes are in `IPTV-RELEASE-NOTES-DRAFT.md` and must be kept current.
+Active scratch: original `captures/iptv-hud` and `captures/iptv-guides-local`; source already synced. Do not rerun prepare scripts over newer code. The temporary HLS/WebVTT server used loopback 18767 with `captures/iptv-hud/fixture.py --directory captures/iptv-hud --subtitles`; both the server and reverse18767 were stopped/removed at cleanup. Preserve the old reverse8765. Generated test media copied from earlier fixture. Current helper screenshots/dumps remain private. Release notes are in `IPTV-RELEASE-NOTES-DRAFT.md` and must be kept current.
 
 Cleanup checkpoint: prototype stopped; temporary validation packages and reverse 18767 removed; pre-existing reverse 8765 preserved; HLS/WebVTT fixture server stopped; own UI dump removed. Device remains asleep as initially observed. Synthetic picker was compiled/installed but not exercised. Durable evidence: `IPTV-HUD-GUIDES-VALIDATION-20261005.json`. Next independent work is actual capture retention/seek bounds; outstanding screen tests remain queued for an active HDMI display.
 
