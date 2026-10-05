@@ -28,7 +28,7 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
 ) : MediaPeriod, AutoCloseable {
     private var snapshot = initial
     private var batches = initial.batches
-    private val groups = TrackGroupArray(TrackGroup("capture-epoch-video",batches.first().samples.video.format),
+    private var groups = TrackGroupArray(TrackGroup("capture-epoch-video",batches.first().samples.video.format),
         TrackGroup("capture-epoch-audio",batches.first().samples.audio.format))
     private var callback: MediaPeriod.Callback? = null
     private var thread: Thread? = null
@@ -37,9 +37,12 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
     private var startBatch = 0
     private val streams = mutableSetOf<Stream>()
 
+    val isPrepared: Boolean get() = synchronized(this) { thread != null && !closed }
+
     override fun prepare(callback: MediaPeriod.Callback, positionUs: Long) {
         synchronized(this) { check(thread == null && !closed); thread = Thread.currentThread(); access(); this.callback = callback; reset(positionUs) }
         callback.onPrepared(this)
+        if(!closed) refresh(reader.state.value) // Cover a source update queued before period preparation.
     }
     /** Cached-only, on playback thread. Stale/foreign/reordered/other epoch data never replaces owner. */
     fun refresh(next: IncrementalReaderSnapshot): Boolean {
@@ -108,7 +111,7 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
     @Synchronized override fun reevaluateBuffer(positionUs: Long) { access() }
     @Synchronized override fun close() {
         if(closed) return
-        closed=true; streams.clear(); batches=emptyList(); snapshot=IncrementalReaderSnapshot(snapshot.revision,IncrementalReaderState.CLOSED); callback=null
+        closed=true; streams.clear(); groups=TrackGroupArray.EMPTY; batches=emptyList(); snapshot=IncrementalReaderSnapshot(snapshot.revision,IncrementalReaderState.CLOSED); callback=null
         reader.releaseBorrow(lease) // Only period ownership, never decoder confirmation.
     }
     private fun access() {

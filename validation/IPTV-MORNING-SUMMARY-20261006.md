@@ -1,6 +1,6 @@
 # IPTV overnight checkpoint summary — 6 October 2026
 
-Latest validated work at 06:39 Australia/Brisbane, branch codex/iptv in the
+Latest validated work at 07:04 Australia/Brisbane, branch codex/iptv in the
 NuvioTV-IPTV sibling. The separate NuvioTV-Fork checkout was not edited.
 
 - Added immutable inspected/pinned segment evidence, stable actual-PTS/audio
@@ -25,19 +25,25 @@ NuvioTV-IPTV sibling. The separate NuvioTV-Fork checkout was not edited.
   consumed-prefix refill. Period ownership prevents confirmed reader/runtime
   closure; loading callbacks cannot start local tail polling.
 
-Latest validation: full app compile 454s; 307 IPTV JVM tests in 36 suites with zero
-failures/errors/skips (8.453s test / 406s build); headless harness builds 49s. The
-207 unchanged core cases overlap this JVM run. Exact final/superseded evidence
-and source/component/APK/log/XML hashes are in IPTV-EPOCH-PERIOD-VALIDATION-20261006.json
-and prior milestone reports.
+- Added actual owned MediaSource and coalesced playback callback binding, with
+  unresolved initial live tails and confirmed source/period/callback/reader
+  cleanup gates. Period preparation covers queued metadata races and clears own
+  format/init references on closure.
 
-No device/provider operations in this phase. AM9 was previously observed Asleep;
-new real-staging/period/storage Android fixtures remain unexecuted. Earlier TS
-bridge decode results do not certify normalized negative audio or current player
-integration. No components upgraded or capture controls enabled.
+Latest validation: full app compile 451s; 317 IPTV JVM tests in 38 suites with zero
+failures/errors/skips (8.747s test / 381s build); headless harness builds 53s. The
+207 unchanged core cases overlap this JVM run. Exact evidence/hashes are in
+IPTV-EPOCH-SOURCE-VALIDATION-20261006.json and prior milestone reports.
 
-Next: bind the cached growing period to an actual dynamic MediaSource/Looper
-callback owner while preserving WAITING/terminal/expiry policy;
+A targeted read-only AM9 query reports Asleep. No install, instrumentation,
+wake/power/CEC/account/settings/recording/provider operation or upgrade occurred.
+New actual Source/Looper/stager/period Android fixtures compile only; source-owner
+host tests exercise startup/cleanup before Looper preparation. Earlier bridge
+raw-PTS decode results do not certify normalized negative audio, source callbacks
+or current admitted player integration. Capture controls remain disabled.
+
+Next: execute the actual Source/Looper and normalized period/offset/preroll fixtures
+when authorized AM9 is awake, then bind admitted real player/renderer owners;
 actual admitted player/renderer ownership, device offsets/preroll/seek confirmation
 and measured aggregate budgets. Durable pause/timeshift/recording/schedules/storage,
 Stalker/automatic Xtream EPG/grouping and remaining multiview/guide/Home/Search/UX

@@ -1,9 +1,30 @@
 # Nuvio IPTV — draft release notes
 
 Unreleased development branch: codex/iptv. Updated 6 October 2026.
-Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: cached growing epoch sample delivery and exclusive borrowing, following governed incremental reader 34a4937 and cached transport-driven metadata, following incremental inspected-sample loading and TS queue 0b82357, asynchronous reader a960696 and finite sample delivery 6842df1 and physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
+Base: 1.1.0-beta-nt4.1 / build 1458. Current continuation: owned captured-epoch MediaSource/callback binding, following growing epoch period ed528c6 and exclusive borrowing, following governed incremental reader 34a4937 and cached transport-driven metadata, following incremental inspected-sample loading and TS queue 0b82357, asynchronous reader a960696 and finite sample delivery 6842df1 and physical storage ae0c08b, sample staging 4606418, retained-media 25395a2, TS entry 43b1dff and bounded HLS capture eaa43e5. This is a prototype, not a published release.
 
 ## Current checkpoint summary
+
+- Added actual BaseMediaSource plus an admitted OwnedCaptureConsumer over the
+  reader: one IO metadata observer, one queued/in-flight playback callback and
+  one exclusive epoch period. Initially empty running capture stays unresolved;
+  exact UID/target and explicit boundary errors prevent automatic substitution.
+- Source closure confirms observer/callback quiescence, actual period and
+  BaseMediaSource lifecycle release plus reader/input closure before releasing
+  ownership. Uncertain close keeps reservations and independent consumers.
+  Preparation covers queued metadata updates; period close clears own format /
+  init references. No source/period action certifies renderer shutdown or seek ack.
+- Full app compile (451s), **317 IPTV JVM tests** (38 suites, zero failures/errors /
+  skips; 8.747s test / 381s build) and headless harness builds (53s) pass. The 207
+  unchanged core cases overlap this run. Seven host callback-gate and three actual
+  pre-Looper source/runtime cases pass with synthetic poster/samples. They do NOT
+  execute Android Handler or BaseMediaSource.prepareSource callbacks. Two actual
+  Looper/Source/stager/period Android fixtures compile only.
+- Targeted read-only AM9 query reports Asleep; no installation, instrumentation,
+  power/CEC/settings/account/recording/provider operation, upgrade or control
+  enablement. Executed source/period/device offsets/preroll, actual admitted
+  player/renderers, pending seek/render acknowledgement and measured aggregate
+  budgets remain required. Exact evidence is in the epoch-source report.
 
 - Added an actual growing one-epoch MediaPeriod/SampleStream over cached verified
   staged batches. Live waiting yields NOTHING; only exact completed capture yields

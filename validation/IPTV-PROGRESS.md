@@ -2,7 +2,36 @@
 
 Updated 6 October 2026, Australia/Brisbane.
 
-## Growing epoch-period checkpoint - current validated continuation
+## Owned epoch-source checkpoint - current validated continuation
+
+From clean ed528c6, added actual BaseMediaSource/OwnedCaptureConsumer over the
+incremental reader, one metadata observer and at most one queued/in-flight playback
+callback. Exact cached UID/period ownership, unresolved initial running tail and
+explicit boundaries preserve semantics. Source close joins observer and confirms
+callback quiescence, period/BaseMediaSource caller release and reader/input closure;
+uncertain close retains runtime reservations and independent consumers. Period
+preparation covers queued metadata updates; close clears own format/init references.
+
+Full app compile passed in 451s, all 317 IPTV JVM tests in 38 suites passed with
+zero failures/errors/skips (8.747s test / 381s build), and headless harness builds
+passed in 53s. Core207 is unchanged and overlaps the full JVM suite. Ten new host
+cases comprise seven callback-gate cases with synthetic asynchronous poster and
+three actual pre-Looper MediaSource owner/runtime cases with synthetic samples.
+They do NOT exercise BaseMediaSource.prepareSource or Android Handler callbacks.
+Two actual Looper/Source/stager/period Android fixtures compile only. Read
+IPTV-EPOCH-SOURCE-DESIGN.md and the exact source/component/APK/log/XML report first.
+All commands completed; no task build remains running.
+
+Read-only get-state/targeted power query on authorized AM9 at 20:52:43 UTC reported
+device/Asleep. No connect/install/instrumentation, wake/power/CEC/account/settings /
+recording operation, provider traffic, component upgrade or control enablement.
+Actual executed Source/Looper/period/normalized audio/offset/preroll tests, admitted
+real player/renderer ownership and exact pending seek/render acknowledgement,
+measured aggregate memory/storage margins and durable/provider/UX scope below
+remain required. Temporary continuation checkpoint/summary and explicit pause
+are due before 08:00 Brisbane; older jobs remain paused.
+
+## Growing epoch-period checkpoint - historical validated continuation
 
 From clean 34a4937, added actual cached growing MediaPeriod/SampleStream with one
 exclusive reader borrow. Live waiting yields NOTHING, only exact COMPLETE yields
