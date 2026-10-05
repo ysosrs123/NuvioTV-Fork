@@ -3356,6 +3356,7 @@
     <string name="diag_label_dv_el_type">Τύπος EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">Απώλειες DV RPU</string>
+    <string name="sub_tertiary_lang">Τρίτη προτιμώμενη γλώσσα</string>
     <string name="sub_addon_subtitles">Υπότιτλοι πρόσθετων</string>
     <string name="sub_addon_subtitles_desc">Λήψη υποτίτλων από τα εγκατεστημένα πρόσθετα κατά την αναπαραγωγή. Όταν είναι απενεργοποιημένο, διατίθενται μόνο οι υπότιτλοι που είναι ενσωματωμένοι στο αρχείο.</string>
     <string name="autoplay_quality_rules_title">Κανόνες ποιότητας</string>

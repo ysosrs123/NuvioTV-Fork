@@ -1115,6 +1115,7 @@
     <string name="diag_label_dv_el_type">DV7 EL प्रकार</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR मास्टरिंग</string>
     <string name="diag_label_dv_rpu_drops">DV RPU ड्रॉप</string>
+    <string name="sub_tertiary_lang">तीसरी पसंदीदा भाषा</string>
     <string name="sub_addon_subtitles">ऐडऑन सबटाइटल</string>
     <string name="sub_addon_subtitles_desc">प्लेबैक के दौरान इंस्टॉल किए ऐडऑन से सबटाइटल लाएँ। बंद होने पर केवल फ़ाइल में मौजूद सबटाइटल उपलब्ध रहते हैं।</string>
     <string name="autoplay_quality_rules_title">क्वालिटी नियम</string>

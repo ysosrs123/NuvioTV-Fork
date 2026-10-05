@@ -3479,6 +3479,7 @@
     <string name="diag_label_dv_el_type">DV7 EL türü</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">DV RPU kayıpları</string>
+    <string name="sub_tertiary_lang">Üçüncü Tercih Edilen Dil</string>
     <string name="sub_addon_subtitles">Eklenti altyazıları</string>
     <string name="sub_addon_subtitles_desc">Oynatma sırasında yüklü eklentilerden altyazı getirir. Kapalıyken yalnızca dosyaya gömülü altyazılar kullanılabilir.</string>
     <string name="autoplay_quality_rules_title">Kalite kuralları</string>

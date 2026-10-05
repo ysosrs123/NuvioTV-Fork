@@ -947,6 +947,7 @@
     <string name="diag_label_dv_el_type">Tip EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">Pierderi DV RPU</string>
+    <string name="sub_tertiary_lang">Limba preferată terțiară</string>
     <string name="sub_addon_subtitles">Subtitrări din suplimente</string>
     <string name="sub_addon_subtitles_desc">Preia subtitrări din suplimentele instalate în timpul redării. Când e dezactivat, sunt disponibile doar subtitrările încorporate în fișier.</string>
     <string name="autoplay_quality_rules_title">Reguli de calitate</string>

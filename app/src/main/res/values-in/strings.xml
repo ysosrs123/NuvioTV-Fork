@@ -2564,6 +2564,7 @@
     <string name="diag_label_dv_el_type">Tipe EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">Mastering HDR DV</string>
     <string name="diag_label_dv_rpu_drops">RPU DV terbuang</string>
+    <string name="sub_tertiary_lang">Bahasa Ketiga yang Diutamakan</string>
     <string name="sub_addon_subtitles">Subtitle addon</string>
     <string name="sub_addon_subtitles_desc">Ambil subtitle dari addon terpasang selama pemutaran. Saat nonaktif, hanya subtitle yang tertanam di file yang tersedia.</string>
     <string name="autoplay_quality_rules_title">Aturan kualitas</string>

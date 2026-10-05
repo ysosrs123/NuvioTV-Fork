@@ -3470,6 +3470,7 @@
     <string name="diag_label_dv_el_type">Loại EL của DV7</string>
     <string name="diag_label_dv_hdr_mastering">Mastering HDR của DV</string>
     <string name="diag_label_dv_rpu_drops">RPU DV bị rớt</string>
+    <string name="sub_tertiary_lang">Ngôn ngữ ưu tiên thứ ba</string>
     <string name="sub_addon_subtitles">Phụ đề từ tiện ích</string>
     <string name="sub_addon_subtitles_desc">Lấy phụ đề từ các tiện ích đã cài đặt trong khi phát. Khi tắt, chỉ có phụ đề nhúng sẵn trong tệp.</string>
     <string name="autoplay_quality_rules_title">Quy tắc chất lượng</string>

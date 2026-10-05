@@ -3152,6 +3152,7 @@
     <string name="diag_label_dv_el_type">نوع EL في DV7</string>
     <string name="diag_label_dv_hdr_mastering">ماسترينغ HDR في DV</string>
     <string name="diag_label_dv_rpu_drops">إسقاطات RPU في DV</string>
+    <string name="sub_tertiary_lang">اللغة المفضلة الثالثة</string>
     <string name="sub_addon_subtitles">ترجمات الإضافات</string>
     <string name="sub_addon_subtitles_desc">جلب الترجمات من الإضافات المثبتة أثناء التشغيل. عند التعطيل تتاح فقط الترجمات المضمّنة في الملف.</string>
     <string name="autoplay_quality_rules_title">قواعد الجودة</string>

@@ -2291,6 +2291,7 @@
     <string name="diag_label_dv_el_type">Vrsta DV7 EL</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">Izpadi DV RPU</string>
+    <string name="sub_tertiary_lang">Tretji prednostni jezik</string>
     <string name="sub_addon_subtitles">Podnapisi iz dodatkov</string>
     <string name="sub_addon_subtitles_desc">Med predvajanjem pridobi podnapise iz nameščenih dodatkov. Ko je izklopljeno, so na voljo samo podnapisi, vgrajeni v datoteko.</string>
     <string name="autoplay_quality_rules_title">Pravila kakovosti</string>

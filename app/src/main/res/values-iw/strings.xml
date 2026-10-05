@@ -3463,6 +3463,7 @@
     <string name="diag_label_dv_el_type">סוג EL של DV7</string>
     <string name="diag_label_dv_hdr_mastering">מאסטרינג HDR של DV</string>
     <string name="diag_label_dv_rpu_drops">השמטות RPU של DV</string>
+    <string name="sub_tertiary_lang">שפה מועדפת שלישית</string>
     <string name="sub_addon_subtitles">כתוביות מתוספים</string>
     <string name="sub_addon_subtitles_desc">משיכת כתוביות מתוספים מותקנים במהלך ההפעלה. כשכבוי, זמינות רק הכתוביות המוטמעות בקובץ.</string>
     <string name="autoplay_quality_rules_title">כללי איכות</string>

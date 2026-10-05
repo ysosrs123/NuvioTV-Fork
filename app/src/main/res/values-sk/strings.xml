@@ -3380,6 +3380,7 @@
     <string name="diag_label_dv_el_type">Typ EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">HDR mastering DV</string>
     <string name="diag_label_dv_rpu_drops">Zahodené RPU DV</string>
+    <string name="sub_tertiary_lang">Tretí preferovaný jazyk</string>
     <string name="sub_addon_subtitles">Titulky z doplnkov</string>
     <string name="sub_addon_subtitles_desc">Počas prehrávania načítavať titulky z nainštalovaných doplnkov. Pri vypnutí sú dostupné len titulky vložené v súbore.</string>
     <string name="autoplay_quality_rules_title">Pravidlá kvality</string>

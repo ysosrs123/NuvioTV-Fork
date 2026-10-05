@@ -2818,6 +2818,7 @@
     <string name="diag_label_dv_el_type">DV7 EL-type</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR-mastering</string>
     <string name="diag_label_dv_rpu_drops">DV RPU-tab</string>
+    <string name="sub_tertiary_lang">Tredje foretrukne sprog</string>
     <string name="sub_addon_subtitles">Addon-undertekster</string>
     <string name="sub_addon_subtitles_desc">Hent undertekster fra installerede addons under afspilning. Når dette er slået fra, er kun undertekster indlejret i filen tilgængelige.</string>
     <string name="autoplay_quality_rules_title">Kvalitetsregler</string>

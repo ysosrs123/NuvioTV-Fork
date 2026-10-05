@@ -3288,6 +3288,7 @@
     <string name="diag_label_dv_el_type">Tipo de EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">Masterização HDR DV</string>
     <string name="diag_label_dv_rpu_drops">RPU DV perdidos</string>
+    <string name="sub_tertiary_lang">Idioma terciário</string>
     <string name="sub_addon_subtitles">Legendas de addons</string>
     <string name="sub_addon_subtitles_desc">Busca legendas nos addons instalados durante a reprodução. Quando desativado, só ficam disponíveis as legendas embutidas no arquivo.</string>
     <string name="autoplay_quality_rules_title">Regras de qualidade</string>

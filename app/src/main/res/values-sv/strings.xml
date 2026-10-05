@@ -1731,6 +1731,7 @@
     <string name="diag_label_dv_el_type">DV7 EL-typ</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR-mastring</string>
     <string name="diag_label_dv_rpu_drops">DV RPU-tapp</string>
+    <string name="sub_tertiary_lang">Tredje föredragna språk</string>
     <string name="sub_addon_subtitles">Undertexter från tillägg</string>
     <string name="sub_addon_subtitles_desc">Hämta undertexter från installerade tillägg under uppspelning. När detta är av finns bara undertexter som är inbäddade i filen.</string>
     <string name="autoplay_quality_rules_title">Kvalitetsregler</string>

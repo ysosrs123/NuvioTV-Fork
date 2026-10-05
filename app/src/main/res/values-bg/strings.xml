@@ -2807,6 +2807,7 @@
     <string name="diag_label_dv_el_type">DV7 EL тип</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">Пропуснати DV RPU</string>
+    <string name="sub_tertiary_lang">Трети предпочитан език</string>
     <string name="sub_addon_subtitles">Субтитри от добавки</string>
     <string name="sub_addon_subtitles_desc">Извличай субтитри от инсталираните добавки по време на възпроизвеждане. Когато е изключено, са налични само вградените във файла субтитри.</string>
     <string name="autoplay_quality_rules_title">Правила за качество</string>

@@ -111,6 +111,7 @@
     <string name="diag_label_dv_el_type">DV7 EL тип</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR мастеринг</string>
     <string name="diag_label_dv_rpu_drops">DV RPU губици</string>
+    <string name="sub_tertiary_lang">Трећи жељени језик</string>
     <string name="sub_addon_subtitles">Титлови из додатака</string>
     <string name="sub_addon_subtitles_desc">Преузима титлове из инсталираних додатака током репродукције. Када је искључено, доступни су само титлови уграђени у фајл.</string>
     <string name="autoplay_quality_rules_title">Правила квалитета</string>

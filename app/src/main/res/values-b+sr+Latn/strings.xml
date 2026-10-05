@@ -3289,6 +3289,7 @@
     <string name="diag_label_dv_el_type">DV7 EL tip</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">DV RPU gubici</string>
+    <string name="sub_tertiary_lang">Treći željeni jezik</string>
     <string name="sub_addon_subtitles">Titlovi iz dodataka</string>
     <string name="sub_addon_subtitles_desc">Preuzima titlove iz instaliranih dodataka tokom reprodukcije. Kada je isključeno, dostupni su samo titlovi ugrađeni u fajl.</string>
     <string name="autoplay_quality_rules_title">Pravila kvaliteta</string>

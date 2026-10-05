@@ -2819,6 +2819,7 @@
     <string name="diag_label_dv_el_type">DV7 ELタイプ</string>
     <string name="diag_label_dv_hdr_mastering">DV HDRマスタリング</string>
     <string name="diag_label_dv_rpu_drops">DV RPUドロップ</string>
+    <string name="sub_tertiary_lang">第3優先言語</string>
     <string name="sub_addon_subtitles">アドオン字幕</string>
     <string name="sub_addon_subtitles_desc">再生中にインストール済みアドオンから字幕を取得します。オフの場合はファイルに埋め込まれた字幕のみ利用できます。</string>
     <string name="autoplay_quality_rules_title">品質ルール</string>

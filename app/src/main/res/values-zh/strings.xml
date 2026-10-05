@@ -111,6 +111,7 @@
     <string name="diag_label_dv_el_type">DV7 EL 类型</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR 母版</string>
     <string name="diag_label_dv_rpu_drops">DV RPU 丢失</string>
+    <string name="sub_tertiary_lang">第三偏好语言</string>
     <string name="sub_addon_subtitles">扩展字幕</string>
     <string name="sub_addon_subtitles_desc">播放时从已安装的扩展获取字幕。关闭后仅可使用文件内嵌的字幕。</string>
     <string name="autoplay_quality_rules_title">品质规则</string>

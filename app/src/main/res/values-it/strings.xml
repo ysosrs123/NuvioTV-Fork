@@ -3254,6 +3254,7 @@
     <string name="diag_label_dv_el_type">Tipo EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">Mastering HDR DV</string>
     <string name="diag_label_dv_rpu_drops">RPU DV persi</string>
+    <string name="sub_tertiary_lang">Terza lingua preferita</string>
     <string name="sub_addon_subtitles">Sottotitoli degli addon</string>
     <string name="sub_addon_subtitles_desc">Recupera i sottotitoli dagli addon installati durante la riproduzione. Se disattivato, sono disponibili solo i sottotitoli incorporati nel file.</string>
     <string name="autoplay_quality_rules_title">Regole di qualità</string>

@@ -3536,6 +3536,7 @@
     <string name="diag_label_dv_el_type">Typ EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">Mastering HDR DV</string>
     <string name="diag_label_dv_rpu_drops">Utracone RPU DV</string>
+    <string name="sub_tertiary_lang">Trzeci preferowany język</string>
     <string name="sub_addon_subtitles">Napisy z dodatków</string>
     <string name="sub_addon_subtitles_desc">Pobieraj napisy z zainstalowanych dodatków podczas odtwarzania. Po wyłączeniu dostępne są tylko napisy osadzone w pliku.</string>
     <string name="autoplay_quality_rules_title">Reguły jakości</string>

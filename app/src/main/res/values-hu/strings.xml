@@ -111,6 +111,7 @@
     <string name="diag_label_dv_el_type">DV7 EL típus</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">DV RPU eldobások</string>
+    <string name="sub_tertiary_lang">Harmadlagos nyelv</string>
     <string name="sub_addon_subtitles">Bővítményfeliratok</string>
     <string name="sub_addon_subtitles_desc">Lejátszás közben feliratokat kér le a telepített bővítményekből. Kikapcsolva csak a fájlba ágyazott feliratok érhetők el.</string>
     <string name="autoplay_quality_rules_title">Minőségi szabályok</string>

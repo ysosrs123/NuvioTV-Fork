@@ -3261,6 +3261,7 @@
     <string name="diag_label_dv_el_type">DV7 EL-type</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR-mastering</string>
     <string name="diag_label_dv_rpu_drops">DV RPU-verlies</string>
+    <string name="sub_tertiary_lang">Derde voorkeurstaal</string>
     <string name="sub_addon_subtitles">Ondertiteling van add-ons</string>
     <string name="sub_addon_subtitles_desc">Haal tijdens het afspelen ondertiteling op bij geïnstalleerde add-ons. Als dit uitstaat, is alleen de in het bestand ingesloten ondertiteling beschikbaar.</string>
     <string name="autoplay_quality_rules_title">Kwaliteitsregels</string>

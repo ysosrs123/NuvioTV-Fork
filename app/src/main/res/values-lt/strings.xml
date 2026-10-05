@@ -1119,6 +1119,7 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     <string name="diag_label_dv_el_type">DV7 EL tipas</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR masteringas</string>
     <string name="diag_label_dv_rpu_drops">DV RPU praradimai</string>
+    <string name="sub_tertiary_lang">Trečia pageidaujama kalba</string>
     <string name="sub_addon_subtitles">Priedų subtitrai</string>
     <string name="sub_addon_subtitles_desc">Atkūrimo metu gauti subtitrus iš įdiegtų priedų. Išjungus pasiekiami tik į failą įterpti subtitrai.</string>
     <string name="autoplay_quality_rules_title">Kokybės taisyklės</string>
