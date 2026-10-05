@@ -11,3 +11,7 @@ data class IptvGuideWindow(val fromMillis: Long, val untilMillis: Long) {
     init { require(untilMillis > fromMillis && untilMillis - fromMillis in 1..(31L * 24 * 60 * 60 * 1000)) }
 }
 data class IptvProgrammePage(val programmes: List<GuideProgramme>, val hasMore: Boolean)
+
+class IptvGuideRefreshRequest(val ticket: IptvGuideTicket, val endpoint: String, val validators: IptvCacheValidators?) {
+    override fun toString() = "IptvGuideRefreshRequest(endpoint and validators withheld)"
+}

@@ -52,18 +52,37 @@ class IptvGuideStore(
     fun endpoint(ref: IptvGuideRef): String = transaction { db -> feed(db, ref); endpoint(db, ref) }
     fun feed(ref: IptvGuideRef): IptvGuideFeed = transaction { db -> feed(db, ref) }
 
-    fun beginRefresh(ref: IptvGuideRef): IptvGuideTicket = transaction { db ->
+    fun beginRefresh(ref: IptvGuideRef): IptvGuideTicket = transaction { db -> beginRefresh(db, ref) }
+
+    /** A cached representation is usable only for windows that were actually retained. */
+    fun prepareRefresh(ref: IptvGuideRef, window: IptvGuideWindow): IptvGuideRefreshRequest = transaction { db ->
+        val ticket = beginRefresh(db, ref)
+        IptvGuideRefreshRequest(ticket, endpoint(db, ref), if (covers(db, ref, window)) validators(db, ref) else null)
+    }
+
+    fun acceptNotModified(ticket: IptvGuideTicket, window: IptvGuideWindow): Boolean = transaction { db ->
+        val cache = validators(db, ticket.ref)
+        current(db, ticket) && covers(db, ticket.ref, window) && cache != null && (cache.etag != null || cache.lastModified != null)
+    }
+
+    private fun covers(db: SQLiteDatabase, ref: IptvGuideRef, window: IptvGuideWindow): Boolean =
+        db.rawQuery("SELECT 1 FROM feeds WHERE id=? AND profile=? AND version=active_version AND window_from<=? AND window_until>=?",
+            arrayOf(ref.feedId, ref.profileId.toString(), window.fromMillis.toString(), window.untilMillis.toString())).use { it.moveToFirst() }
+
+    private fun beginRefresh(db: SQLiteDatabase, ref: IptvGuideRef): IptvGuideTicket {
         val old = feed(db, ref)
         val generation = Math.addExact(old.requestedGeneration, 1)
         db.update("feeds", ContentValues().apply { put("requested", generation) }, "id=?", arrayOf(ref.feedId))
         // Abandoned or superseded imports cannot be active. Cascades discard their staging rows.
         db.delete("stages", "feed=? AND generation<? AND id NOT IN (SELECT active_stage FROM feeds WHERE active_stage IS NOT NULL)", arrayOf(ref.feedId, generation.toString()))
-        IptvGuideTicket(ref, old.configurationVersion, generation)
+        return IptvGuideTicket(ref, old.configurationVersion, generation)
     }
 
-    fun validators(ref: IptvGuideRef): IptvCacheValidators? = transaction { db ->
+    fun validators(ref: IptvGuideRef): IptvCacheValidators? = transaction { db -> validators(db, ref) }
+
+    private fun validators(db: SQLiteDatabase, ref: IptvGuideRef): IptvCacheValidators? {
         feed(db, ref)
-        db.rawQuery("SELECT validators FROM feeds WHERE id=? AND version=active_version", arrayOf(ref.feedId)).use {
+        return db.rawQuery("SELECT validators FROM feeds WHERE id=? AND version=active_version", arrayOf(ref.feedId)).use {
             if (!it.moveToFirst() || it.isNull(0)) null else JSONObject(secrets.open(aad(ref, "validators"), it.getBlob(0))).let { json ->
                 IptvCacheValidators(json.optional("etag"), json.optional("lastModified"))
             }
@@ -141,6 +160,7 @@ class IptvGuideStore(
                 checkCancellation()
                 db.update("feeds", ContentValues().apply {
                     put("active_stage", stage); put("active_generation", ticket.generation); put("active_version", ticket.configurationVersion)
+                    put("window_from", window.fromMillis); put("window_until", window.untilMillis)
                     put("validators", secrets.seal(aad(ticket.ref, "validators"), JSONObject().put("etag", validators.etag).put("lastModified", validators.lastModified).toString()))
                 }, "id=? AND version=? AND requested=?", arrayOf(ticket.ref.feedId, ticket.configurationVersion.toString(), ticket.generation.toString())).also { check(it == 1) }
                 db.delete("stages", "feed=? AND id<>?", arrayOf(ticket.ref.feedId, stage))
@@ -200,17 +220,22 @@ class IptvGuideStore(
     }
     override fun close() = helper.close()
     private class StaleImport : RuntimeException()
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 1) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 2) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
-            db.execSQL("CREATE TABLE feeds(id TEXT PRIMARY KEY, profile INTEGER NOT NULL, label TEXT NOT NULL, endpoint BLOB NOT NULL, version INTEGER NOT NULL, requested INTEGER NOT NULL, active_stage TEXT, active_generation INTEGER, active_version INTEGER, validators BLOB)")
+            db.execSQL("CREATE TABLE feeds(id TEXT PRIMARY KEY, profile INTEGER NOT NULL, label TEXT NOT NULL, endpoint BLOB NOT NULL, version INTEGER NOT NULL, requested INTEGER NOT NULL, active_stage TEXT, active_generation INTEGER, active_version INTEGER, validators BLOB, window_from INTEGER, window_until INTEGER)")
             db.execSQL("CREATE TABLE stages(id TEXT PRIMARY KEY, feed TEXT NOT NULL REFERENCES feeds(id), generation INTEGER NOT NULL, UNIQUE(feed,generation))")
             db.execSQL("CREATE TABLE channels(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, external_id TEXT NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(stage,external_id))")
             db.execSQL("CREATE TABLE programmes(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, id TEXT NOT NULL, external_id TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER, precise INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(stage,id))")
             db.execSQL("CREATE INDEX guide_window ON programmes(stage,external_id,start,stop)")
         }
-        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) { error("Missing guide database migration") }
+        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            check(oldVersion == 1 && newVersion == 2) { "Missing guide database migration" }
+            // Old rows stay readable, but unknown retention coverage must force a full refresh.
+            db.execSQL("ALTER TABLE feeds ADD COLUMN window_from INTEGER")
+            db.execSQL("ALTER TABLE feeds ADD COLUMN window_until INTEGER")
+        }
     }
     private companion object {
         fun aad(ref: IptvGuideRef, field: String) = "iptv.guide.v1:${ref.profileId}:${ref.feedId}:$field"

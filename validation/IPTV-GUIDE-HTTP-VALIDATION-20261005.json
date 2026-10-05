@@ -1,0 +1,44 @@
+{
+  "recordedAtUtc": "2026-10-05T00:38:09.066802+00:00",
+  "milestone": "Bounded guide HTTP-to-store coordination and retention-aware conditional refresh; backend only",
+  "device": "UGOOS AM9PRO Android 14 API 34",
+  "deviceTests": {
+    "total": 97,
+    "core": 64,
+    "catalogueStorage": 13,
+    "guideStorage": 11,
+    "playlistRepository": 2,
+    "guideRepository": 7,
+    "failures": 0,
+    "seconds": 14.638
+  },
+  "jvmTests": {
+    "total": 84,
+    "guideHttp": 11,
+    "failures": 0,
+    "overlapWithDeviceCore": true
+  },
+  "fullAppKotlinCompile": "passed",
+  "guideDatabaseSchemaVersion": 2,
+  "fixtureApplicationId": "com.nuvio.iptv.validation",
+  "fixtureNetworkPermission": false,
+  "fixturePackagesRemoved": true,
+  "liveProviderRequests": 0,
+  "limits": [
+    "No source/feed management UI or persisted associations",
+    "No Xtream HTTP or live/capture runtime",
+    "No provider interoperability claim",
+    "No abrupt process death, recording, or full-scale performance testing",
+    "Logical SQLite limits do not bound WAL/journal or total device storage",
+    "No scheduled refresh/pruning yet"
+  ],
+  "deviceLogSha256": "d12a4827c51dd0de4f9c9b3c385e3c91dea66c08e08d48d19a8db578470c3765",
+  "sourceSha256": {
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/IptvGuideRepositoryTest.kt": "87cc236ba3a89fc17f853b63bf53a558a06c8fcb1b8c287e4c398f5a3fac52e3",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvGuideClient.kt": "a1c694227a6a7b7140fbec32c52c3f4b31004a401fc735f9afbb037895551186",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvGuideModels.kt": "430ab37325b7bc2e78223309a21503013ecc867b427382bb181524c9ddafa4df",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvGuideRepository.kt": "401ede3365f9414b92d03aaff8e9496758d3027cc69fc301c502746e1d8347cc",
+    "app/src/main/java/com/nuvio/tv/data/iptv/IptvGuideStore.kt": "98670fd6ff70350fdc1ca54e26841305b687d3f509d24bc777560af904766297",
+    "app/src/test/java/com/nuvio/tv/data/iptv/IptvGuideClientTest.kt": "1834f222c9908a83b95652bcbdcf977bb3128c923d166b391386cb4b984ee71e"
+  }
+}
