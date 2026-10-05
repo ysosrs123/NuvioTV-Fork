@@ -13,7 +13,6 @@ import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
-import androidx.test.uiautomator.Until
 import java.io.File
 import java.util.regex.Pattern
 import org.junit.Rule
@@ -110,7 +109,7 @@ private fun MacrobenchmarkScope.browseHome(targetPackage: String) {
     repeat(3) { device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_DOWN); device.settle(500) }
     repeat(3) { device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_UP); device.settle(300) }
     device.profileKey(targetPackage, KeyEvent.KEYCODE_BACK)
-    check(device.wait(Until.hasObject(By.text(HOME_ROW)), 8_000) == true) { "Back from Details did not return to Home" }
+    check(device.waitFor(By.text(HOME_ROW), 8_000) == true) { "Back from Details did not return to Home" }
     device.settle(600)
 
     if (device.openSidebar(targetPackage)) {
@@ -125,12 +124,12 @@ private fun MacrobenchmarkScope.browseHome(targetPackage: String) {
 private fun MacrobenchmarkScope.openDetailsFromHome(targetPackage: String) {
     repeat(3) {
         device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
-        if (device.wait(Until.hasObject(By.text(DETAILS_MARKER)), 10_000) == true) {
+        if (device.waitFor(By.text(DETAILS_MARKER), 10_000) == true) {
             device.settle(2_000)
             return
         }
         device.profileKey(targetPackage, KeyEvent.KEYCODE_BACK)
-        device.wait(Until.hasObject(By.text(HOME_ROW)), 5_000)
+        device.waitFor(By.text(HOME_ROW), 5_000)
         device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_DOWN)
         device.settle(500)
     }
@@ -140,13 +139,14 @@ private fun MacrobenchmarkScope.openDetailsFromHome(targetPackage: String) {
 
 private fun MacrobenchmarkScope.visitSearch(targetPackage: String) {
     check(device.openSection(targetPackage, "Search")) { "Search not reachable" }
-    val field = device.wait(Until.findObject(By.clazz("android.widget.EditText")), 5_000)
+    val editText = By.clazz("android.widget.EditText")
+    val field = if (device.waitFor(editText, 5_000)) device.findObject(editText) else null
     if (field == null) {
         Log.w(TAG, "Search field not found")
         return
     }
     runCatching { field.text = "batman" }.onFailure { Log.w(TAG, "Search text not set", it) }
-    device.wait(Until.hasObject(By.desc(Pattern.compile(".*Batman.*", Pattern.CASE_INSENSITIVE))), 10_000)
+    device.waitFor(By.desc(Pattern.compile(".*Batman.*", Pattern.CASE_INSENSITIVE)), 10_000)
     device.settle(1_000)
     device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_DOWN)
     device.settle(400)
@@ -164,7 +164,7 @@ private fun MacrobenchmarkScope.visitLibrary(targetPackage: String) {
 
 private fun MacrobenchmarkScope.visitSettings(targetPackage: String) {
     check(device.openSection(targetPackage, "Settings")) { "Settings not reachable" }
-    check(device.wait(Until.hasObject(By.text("Account and sync status")), 10_000) == true) { "Settings did not open" }
+    check(device.waitFor(By.text("Account and sync status"), 10_000) == true) { "Settings did not open" }
     device.settle(800)
     // Focusing a rail entry renders its page inline.
     repeat(9) { device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_DOWN); device.settle(700) }
@@ -180,7 +180,7 @@ private fun MacrobenchmarkScope.visitSettings(targetPackage: String) {
         device.settle(400)
         if (device.moveFocusTo(targetPackage, "Addons", KeyEvent.KEYCODE_DPAD_UP, 4)) {
             device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
-            if (device.wait(Until.hasObject(By.text("Install addon")), 5_000) == true) {
+            if (device.waitFor(By.text("Install addon"), 5_000) == true) {
                 device.settle(800)
                 repeat(3) { device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_DOWN); device.settle(300) }
                 device.profileKey(targetPackage, KeyEvent.KEYCODE_BACK)
@@ -217,13 +217,13 @@ private fun MacrobenchmarkScope.visitProfilePicker(targetPackage: String) {
     if (!device.openSidebar(targetPackage)) return
     repeat(5) { device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_UP); device.settle(200) }
     device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
-    if (device.wait(Until.hasObject(By.text("Who's watching?")), 6_000) != true) {
+    if (device.waitFor(By.text("Who's watching?"), 6_000) != true) {
         Log.w(TAG, "Profile picker did not open")
         return
     }
     device.settle(1_500)
     device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
-    device.wait(Until.hasObject(By.text(HOME_ROW)), 15_000)
+    device.waitFor(By.text(HOME_ROW), 15_000)
     device.settle(1_500)
 }
 
@@ -238,19 +238,19 @@ private fun MacrobenchmarkScope.playClip(targetPackage: String, clipId: String, 
         putExtra("videoId", clipId)
         putExtra("name", "Profile clip")
     })
-    if (device.wait(Until.hasObject(By.text(streamLabel)), 20_000) != true) {
+    if (device.waitFor(By.text(streamLabel), 20_000) != true) {
         saveFailure("streams")
         error("No '$streamLabel' source: install the local clip addon in the validation app and keep adb reverse tcp:8765")
     }
     device.settle(1_000)
     device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
     // Loading screen, first frames and the hidden controls; pausing then brings the control row up.
-    device.wait(Until.gone(By.text(streamLabel)), 10_000)
+    device.waitGone(By.text(streamLabel), 10_000)
     Thread.sleep(8_000)
     device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
-    if (device.wait(Until.hasObject(By.desc("Subtitles")), 5_000) != true) {
+    if (device.waitFor(By.desc("Subtitles"), 5_000) != true) {
         device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_DOWN)
-        if (device.wait(Until.hasObject(By.desc("Subtitles")), 5_000) != true) {
+        if (device.waitFor(By.desc("Subtitles"), 5_000) != true) {
             saveFailure("player")
             error("Player controls did not appear")
         }
@@ -290,16 +290,16 @@ private fun MacrobenchmarkScope.openPlayerPanel(
     marker: String?,
     inside: () -> Unit
 ) {
-    if (!device.hasObject(By.desc(control))) {
+    if (!device.freshHas(By.desc(control))) {
         device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_DOWN)
-        device.wait(Until.hasObject(By.desc(control)), 3_000)
+        device.waitFor(By.desc(control), 3_000)
     }
     if (!device.focusControl(targetPackage, control)) {
         Log.w(TAG, "Player control $control not focusable")
         return
     }
     device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
-    if (marker != null && device.wait(Until.hasObject(By.text(marker)), 5_000) != true) {
+    if (marker != null && device.waitFor(By.text(marker), 5_000) != true) {
         Log.w(TAG, "Player panel $control did not open")
     }
     device.settle(800)
@@ -318,13 +318,13 @@ private fun MacrobenchmarkScope.openPreparedHome(targetPackage: String) {
 }
 
 private fun UiDevice.waitForPreparedHome(targetPackage: String) {
-    wait(Until.hasObject(By.pkg(targetPackage)), 5_000)
+    waitFor(By.pkg(targetPackage), 5_000)
     waitForIdle()
-    if (wait(Until.hasObject(By.text(ONBOARDING_FIRST_LABEL)), 2_000) == true) {
+    if (waitFor(By.text(ONBOARDING_FIRST_LABEL), 2_000) == true) {
         check(focusAndSelect(ONBOARDING_FIRST_LABEL))
         check(focusAndSelect("Advanced"))
     }
-    if (wait(Until.hasObject(By.text(HOME_ROW)), 30_000) != true) {
+    if (waitFor(By.text(HOME_ROW), 30_000) != true) {
         saveFailure("home")
         error("Prepare the isolated validation app with English labels and populated Home; foreground=$currentPackageName")
     }
@@ -340,11 +340,11 @@ private fun ensureInterface(targetPackage: String, style: String) {
     device.executeShellCommand("am start -W -n $targetPackage/com.nuvio.tv.MainActivity -f 0x10008000")
     device.waitForPreparedHome(targetPackage)
     check(device.openSection(targetPackage, "Settings")) { "Settings not reachable for the interface switch" }
-    check(device.wait(Until.hasObject(By.text("Account and sync status")), 10_000) == true)
+    check(device.waitFor(By.text("Account and sync status"), 10_000) == true)
     check(device.moveFocusTo(targetPackage, "Appearance", KeyEvent.KEYCODE_DPAD_DOWN, 6)) { "Appearance not found" }
     Thread.sleep(800)
     val other = if (style == STYLE_V2) STYLE_ORIGINAL else STYLE_V2
-    if (device.hasObject(By.text(style)) && !device.hasObject(By.text(other))) {
+    if (device.freshHas(By.text(style)) && !device.freshHas(By.text(other))) {
         device.pressHome()
         return
     }
@@ -352,11 +352,11 @@ private fun ensureInterface(targetPackage: String, style: String) {
     Thread.sleep(400)
     check(device.focusedHas("Interface experience")) { "Interface experience row not focused" }
     device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
-    check(device.wait(Until.hasObject(By.text(other)), 5_000) == true)
+    check(device.waitFor(By.text(other), 5_000) == true)
     check(device.moveFocusTo(targetPackage, style, KeyEvent.KEYCODE_DPAD_DOWN, 3) ||
         device.moveFocusTo(targetPackage, style, KeyEvent.KEYCODE_DPAD_UP, 3)) { "$style option not found" }
     device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
-    check(device.wait(Until.hasObject(By.text(HOME_ROW)), 20_000) == true) { "Home did not return after the switch" }
+    check(device.waitFor(By.text(HOME_ROW), 20_000) == true) { "Home did not return after the switch" }
     Thread.sleep(1_500)
     device.pressHome()
 }
@@ -368,8 +368,35 @@ private fun UiDevice.settle(pauseMs: Long) {
 
 // Compose does not always report focus moves to the accessibility cache, so read focus from a fresh tree.
 private fun UiDevice.freshFocused(): UiObject2? {
-    if (Build.VERSION.SDK_INT >= 34) InstrumentationRegistry.getInstrumentation().uiAutomation.clearCache()
+    clearAccessibilityCache()
     return findObject(By.focused(true))
+}
+
+private fun clearAccessibilityCache() {
+    if (Build.VERSION.SDK_INT >= 34) InstrumentationRegistry.getInstrumentation().uiAutomation.clearCache()
+}
+
+private fun UiDevice.freshHas(selector: BySelector): Boolean {
+    clearAccessibilityCache()
+    return hasObject(selector)
+}
+
+private fun UiDevice.waitFor(selector: BySelector, timeoutMs: Long): Boolean {
+    val end = System.currentTimeMillis() + timeoutMs
+    while (true) {
+        if (freshHas(selector)) return true
+        if (System.currentTimeMillis() > end) return false
+        Thread.sleep(400)
+    }
+}
+
+private fun UiDevice.waitGone(selector: BySelector, timeoutMs: Long): Boolean {
+    val end = System.currentTimeMillis() + timeoutMs
+    while (true) {
+        if (!freshHas(selector)) return true
+        if (System.currentTimeMillis() > end) return false
+        Thread.sleep(400)
+    }
 }
 
 private fun UiDevice.focusedHas(label: String): Boolean = try {
@@ -401,7 +428,7 @@ private fun UiDevice.moveFocusTo(targetPackage: String, label: String, key: Int,
 // The expanded sidebar shows its labels; its entries, including the profile one, sit at the left edge.
 private fun UiDevice.sidebarFocused(): Boolean = try {
     val bounds = freshFocused()?.visibleBounds
-    bounds != null && bounds.left < 60 && bounds.right < 400 && SIDEBAR_LABELS.all { hasObject(By.text(it)) }
+    bounds != null && bounds.left < 60 && bounds.right < 400 && SIDEBAR_LABELS.all { freshHas(By.text(it)) }
 } catch (e: StaleObjectException) {
     false
 }
@@ -415,8 +442,17 @@ private fun UiDevice.openSidebar(targetPackage: String): Boolean {
     return sidebarFocused()
 }
 
+// Some screens keep Left inside their content (text fields, tabs), so Back is tried before giving up.
 private fun UiDevice.openSection(targetPackage: String, label: String): Boolean {
-    if (!openSidebar(targetPackage)) return false
+    var attempts = 0
+    while (!openSidebar(targetPackage)) {
+        if (++attempts > 3) {
+            saveFailure("section-$label")
+            return false
+        }
+        profileKey(targetPackage, KeyEvent.KEYCODE_BACK)
+        settle(800)
+    }
     if (!moveFocusTo(targetPackage, label, KeyEvent.KEYCODE_DPAD_DOWN, 5) &&
         !moveFocusTo(targetPackage, label, KeyEvent.KEYCODE_DPAD_UP, 6)) return false
     profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
@@ -431,9 +467,9 @@ private fun UiDevice.railTo(targetPackage: String, label: String): Boolean =
 private fun UiDevice.backToSettingsRail(targetPackage: String) {
     profileKey(targetPackage, KeyEvent.KEYCODE_BACK)
     settle(600)
-    if (!hasObject(By.text("Account"))) {
+    if (!freshHas(By.text("Account"))) {
         openSection(targetPackage, "Settings")
-        wait(Until.hasObject(By.text("Account and sync status")), 8_000)
+        waitFor(By.text("Account and sync status"), 8_000)
     }
 }
 
@@ -465,14 +501,14 @@ private fun UiDevice.saveFailure(name: String) {
 // Moves D-pad focus until the control carrying the given label is focused and then selects it, since TV devices have no touch input.
 private fun UiDevice.focusAndSelect(label: String, maxSteps: Int = 24): Boolean {
     val pattern = Pattern.compile(Pattern.quote(label), Pattern.CASE_INSENSITIVE)
-    if (wait(Until.hasObject(By.text(pattern)), 10_000) != true) return false
+    if (waitFor(By.text(pattern), 10_000) != true) return false
     repeat(maxSteps) { step ->
         if (isFocusedLabel(label, pattern)) {
             pressDPadCenter()
             waitForIdle()
             Thread.sleep(1_500)
             // Treat the step as done only once the label is gone, so a mis-selection keeps searching instead of moving on.
-            if (wait(Until.gone(By.text(pattern)), 5_000) == true) return true
+            if (waitGone(By.text(pattern), 5_000) == true) return true
         }
         // Alternate directions so both vertical lists and side-by-side cards are reachable.
         if (step % 2 == 0) pressDPadDown() else pressDPadRight()
