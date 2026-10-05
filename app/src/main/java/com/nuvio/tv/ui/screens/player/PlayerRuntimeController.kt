@@ -485,6 +485,13 @@ class PlayerRuntimeController(
     internal var vodTelemetryJob: Job? = null
     internal var firstFrameWatchdogJob: Job? = null
     internal var tunnelAvSyncWatchdogJob: Job? = null
+    internal var pausedOutputCheckJob: Job? = null
+    internal var lateVideoWatchJob: Job? = null
+    internal var lateVideoBaselineFps: Float? = null
+    internal var lateVideoBaselineFormatFps: Float = -1f
+    internal var lateVideoLastNotPlayingMs: Long = 0L
+    internal var lateVideoResyncPending: Boolean = false
+    internal var lateVideoResyncFailed: Boolean = false
     internal var stallWatchdogJob: Job? = null
     internal var startupWatchdogJob: Job? = null
     internal var seekSourceLogJob: Job? = null

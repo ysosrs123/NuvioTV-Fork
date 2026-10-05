@@ -1283,12 +1283,14 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
                         userPausedManually = true
                         player.pause()
                         schedulePauseOverlay()
+                        schedulePausedOutputCheck()
                         // A parked auto-restore subtitle attaches here,
                         // while paused, so the reload lands invisibly.
                         maybeAttachDeferredAddonSubtitle()
                     } else {
                         userPausedManually = false
                         cancelPauseOverlay()
+                        cancelPausedOutputCheck()
                         player.play()
                     }
                 }

@@ -130,6 +130,8 @@ internal class PlaybackSpeedAwareAudioSink(
 
     fun sampleAudioRoute(): AudioRouteSnapshot? = monitor.sampleAudioRoute()
 
+    fun platformOutputTimestamp(): AudioOutputTimestamp? = monitor.platformOutputTimestamp()
+
     fun demandsNonTunnelledVideo(format: Format): Boolean = iecSink?.claimsHbr(format) == true
 
     fun hbrDemandsNonTunnelledVideo(format: Format): Boolean =
