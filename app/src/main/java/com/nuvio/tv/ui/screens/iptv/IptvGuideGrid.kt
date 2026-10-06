@@ -281,6 +281,7 @@ private fun ProgrammeCell(cell: GuideProgrammeCell, now: Long, selected: Boolean
         else -> NuvioTheme.colors.TextPrimary.copy(alpha = if (rowFocused) .08f else .05f)
     }
     BoxWithConstraints(modifier.then(if (selected) Modifier.cellFocus(CellShape) else Modifier).clip(CellShape).background(fill)) {
+        val wide = maxWidth >= 96.dp
         Column(Modifier.fillMaxSize().padding(horizontal = 10.dp), verticalArrangement = Arrangement.Center) {
             Text(title(cell.programme), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
                 fontWeight = if (selected || airing) FontWeight.SemiBold else FontWeight.Normal,
@@ -290,7 +291,7 @@ private fun ProgrammeCell(cell: GuideProgrammeCell, now: Long, selected: Boolean
                     airing -> NuvioTheme.colors.TextPrimary
                     else -> NuvioTheme.colors.TextSecondary
                 })
-            if (maxWidth >= 96.dp) Text(timeRange(cell.programme), maxLines = 1, style = MaterialTheme.typography.labelSmall,
+            if (wide) Text(timeRange(cell.programme), maxLines = 1, style = MaterialTheme.typography.labelSmall,
                 color = if (selected) itemContent(true).copy(alpha = .8f) else NuvioTheme.colors.TextTertiary)
         }
         if (airing && !cell.openEnded) {
