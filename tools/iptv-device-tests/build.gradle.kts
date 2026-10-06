@@ -3,8 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.3.0"
 }
 
-// Small isolated fixture app, compiling the actual production sources. No player UI/native player libraries,
-// accounts, activities, INTERNET permission or application startup services from the full app.
 val productionSources = tasks.register<Sync>("syncProductionSources") {
     from("../../app/src/main/java") {
         include("com/nuvio/tv/core/iptv/**", "com/nuvio/tv/core/player/thumbnail/ThumbSourcePolicy.kt",
@@ -44,9 +42,11 @@ kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarg
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    // Exact shipped Java common/extractor/period/data-source APIs; no UI or native player libraries.
+
     implementation(files("../../app/libs/lib-common-release.aar", "../../app/libs/lib-extractor-release.aar",
         "../../app/libs/lib-exoplayer-release.aar", "../../app/libs/lib-datasource-release.aar"))
+
+    implementation("androidx.collection:collection-jvm:1.5.0") { isTransitive = false }
     implementation("androidx.media3:media3-decoder:1.8.0") { isTransitive = false }
     implementation("androidx.media3:media3-container:1.8.0") { isTransitive = false }
     implementation("com.google.guava:guava:33.3.1-android")

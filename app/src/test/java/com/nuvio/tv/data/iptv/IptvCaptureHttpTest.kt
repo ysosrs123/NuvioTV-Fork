@@ -154,7 +154,7 @@ class IptvCaptureHttpTest {
             val request = scope.async { client.open(URI("https://fixture.invalid/list"), 4) }
             assertNotNull(queue.poll(5, TimeUnit.SECONDS)?.also { it.run() })
             val resume = queue.poll(5, TimeUnit.SECONDS)
-            assertNotNull(resume) // Response is ready, but the caller has not received its stream.
+            assertNotNull(resume)
             request.cancel(); resume!!.run()
             assertTrue(request.isCancelled)
             assertTrue(client.close()); assertEquals(1, closes.get())

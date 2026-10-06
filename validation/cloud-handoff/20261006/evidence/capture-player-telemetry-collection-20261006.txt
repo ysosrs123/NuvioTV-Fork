@@ -1,0 +1,6 @@
+--------- beginning of main
+         1791240209.693  6611  6632 I IptvCapturePlayer: before startMs=0 totalPssKb=46241 javaHeapKb=8944 nativeHeapKb=2572 graphicsKb=0
+         1791240331.268  6933  6954 I IptvCapturePlayer: before startMs=0 totalPssKb=48722 javaHeapKb=8936 nativeHeapKb=2568 graphicsKb=0
+         1791240361.571  6933  6954 I IptvCapturePlayer: closed startMs=0 totalPssKb=54779 javaHeapKb=9640 nativeHeapKb=3596 graphicsKb=0
+         1791240361.652  6933  6954 I IptvCapturePlayer: before startMs=1000 totalPssKb=54944 javaHeapKb=9732 nativeHeapKb=3596 graphicsKb=0
+         1791240391.776  6933  6954 I IptvCapturePlayer: closed startMs=1000 totalPssKb=53783 javaHeapKb=9280 nativeHeapKb=2960 graphicsKb=0

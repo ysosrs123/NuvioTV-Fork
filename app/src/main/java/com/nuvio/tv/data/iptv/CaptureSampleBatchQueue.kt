@@ -17,14 +17,6 @@ internal data class CaptureBatchLoadResult(val state: CaptureSampleLoadState,
     val batch: CaptureLoadedBatch? = null, val boundary: CaptureSampleWindow? = null,
     val producerState: CaptureTransportState? = null)
 
-/**
- * Blocking LOCAL incremental staging queue; use a governed IO worker, never the playback thread.
- * No MediaSource/decoder/network, asynchronous callbacks, automatic polling/retries or seek ack.
- * Reserves worst-case next encoded batch within its logical aggregate byte/slot caps BEFORE loading;
- * transient/parser/object/decoder memory still requires separate measured parent admission.
- * Cursor/tickets/pins remain owned here; batches are borrowed until explicit release after borrowers
- * stop. WAITING is not EOF. Failed staging/cancellation is sticky; failed closure retains arrays/pins.
- */
 @UnstableApi
 internal class CaptureSampleBatchQueue(private val cursor: CaptureSampleLoadCursor,
     private val limits: CaptureSampleStagingLimits, val maxResidentBytes: Long,
@@ -66,9 +58,9 @@ internal class CaptureSampleBatchQueue(private val cursor: CaptureSampleLoadCurs
             val input = requireNotNull(next.input)
             val staged = stage(input,limits,checkCancellation)
             require(staged.window === input.window && staged.chargedBytes in 1..limits.maxBatchBytes)
-            candidate = staged // Keep the bounded successful stage before cancellation.
+            candidate = staged
             checkCancellation()
-            cursor.complete(input) // Verification/staging only; never acknowledges a player seek.
+            cursor.complete(input)
             val loaded = CaptureLoadedBatch(owner,input,staged)
             batches[loaded] = loaded; candidate = null
             return CaptureBatchLoadResult(CaptureSampleLoadState.READY,loaded,producerState=next.producerState)
@@ -84,13 +76,13 @@ internal class CaptureSampleBatchQueue(private val cursor: CaptureSampleLoadCurs
         check(!loading && !closing && !closed)
         require(batch.owner === owner && batches[batch] === batch)
         cursor.release(batch.ticket)
-        batches.remove(batch) // Only after confirmed input closure; failure retains its byte charge.
+        batches.remove(batch)
     }
     @Synchronized override fun close() {
         check(!loading) { "Cannot close inside a staging callback" }
         if (closed) return
         closing = true
-        cursor.close() // A blocked/failing close keeps all arrays/reservations until explicit retry.
+        cursor.close()
         check(cursor.isClosed)
         batches.clear(); candidate = null; closed = true
     }

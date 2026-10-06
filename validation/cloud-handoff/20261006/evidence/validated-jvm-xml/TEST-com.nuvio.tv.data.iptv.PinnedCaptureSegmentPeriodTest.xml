@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:56.865Z" hostname="PWR_PC" time="0.177">
+  <properties/>
+  <testcase name="skipNeverStartsVideoAtDependentDataAndAudioAdvancesToAPrecedingFrame" classname="com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest" time="0.018"/>
+  <testcase name="failedPinClosureFencesReadsAndKeepsRetentionUntilConfirmedRetry" classname="com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest" time="0.023"/>
+  <testcase name="failedDecoderBufferAllocationDoesNotConsumeTheSampleOrExposeMutablePayload" classname="com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest" time="0.019"/>
+  <testcase name="retainedSelectionPreservesItsCursorAndDeselectedStreamsAreFenced" classname="com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest" time="0.016"/>
+  <testcase name="formatPeekOmitPayloadsAndRepeatedEofKeepTheRealPinUntilExplicitClose" classname="com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest" time="0.023"/>
+  <testcase name="finitePreloadedPeriodHasNoNetworkLoadingAndRejectsUnderBudgetConstruction" classname="com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest" time="0.017"/>
+  <testcase name="foreignDuplicateAndWrongSizedSelectionsFailWithoutChangingValidStreams" classname="com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest" time="0.018"/>
+  <testcase name="unexpectedExternalCloseAndCrossThreadAccessCannotServeStaleSamples" classname="com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest" time="0.022"/>
+  <testcase name="seekReturnsRealVideoFrameButFeedsInitialIdrAndNegativeAudioPreroll" classname="com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest" time="0.021"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

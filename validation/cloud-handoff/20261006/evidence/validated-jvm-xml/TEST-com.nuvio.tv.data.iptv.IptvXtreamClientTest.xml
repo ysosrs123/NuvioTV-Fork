@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.data.iptv.IptvXtreamClientTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:55.738Z" hostname="PWR_PC" time="0.559">
+  <properties/>
+  <testcase name="redirectDoesNotForwardCredentialsOrContactDestination" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.083"/>
+  <testcase name="http10WithImmediateConnectionClosureReadsCompleteMetadata" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.044"/>
+  <testcase name="cancellationStopsPendingAuthenticationRequest" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.14"/>
+  <testcase name="invalidUtf8IsRejectedBeforeJsonParsing" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.018"/>
+  <testcase name="absentOutputDefaultsToTsAndExplicitHlsIsRespected" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.011"/>
+  <testcase name="failuresAreRedactedAndDoNotRetryOrAcceptPartialOr304" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.009"/>
+  <testcase name="onlyThreeMetadataCallsAndEncodedPathSegmentsUseEnteredOrigin" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.006"/>
+  <testcase name="malformedJsonIsRejectedEquallyAcrossRuntimes" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.099"/>
+  <testcase name="sizeLimitIncludesChunkedAndGzipExpandedBodies" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.048"/>
+  <testcase name="ambiguousCategoriesAndInvalidRowsCannotPublish" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.062"/>
+  <testcase name="rejectedAccountsStopBeforeCatalogueRequests" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.036"/>
+  <testcase name="invalidBaseOrCredentialsAreRejectedWithoutRequests" classname="com.nuvio.tv.data.iptv.IptvXtreamClientTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Oct 06, 2026 8:16:55 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response MetadataException REDIRECT_REQUIRES_REVIEW at com.nuvio.tv.data.iptv.IptvXtreamClient$json$2$2.onResponse:120
+Oct 06, 2026 8:16:55 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: network SocketException  at sun.nio.ch.NioSocketImpl.endRead:-1
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response MalformedInputException  at java.nio.charset.CoderResult.throwException:-1
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response MetadataException HTTP_STATUS at com.nuvio.tv.data.iptv.IptvXtreamClient$json$2$2.onResponse:121
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response MetadataException HTTP_STATUS at com.nuvio.tv.data.iptv.IptvXtreamClient$json$2$2.onResponse:121
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response MetadataException HTTP_STATUS at com.nuvio.tv.data.iptv.IptvXtreamClient$json$2$2.onResponse:121
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response IllegalArgumentException  at com.nuvio.tv.data.iptv.StrictJson.validate:181
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response IllegalArgumentException  at com.nuvio.tv.data.iptv.StrictJson.value:192
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response IllegalArgumentException  at com.nuvio.tv.data.iptv.StrictJson.value:192
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response IllegalArgumentException  at com.nuvio.tv.data.iptv.StrictJson.string:216
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response IllegalArgumentException  at com.nuvio.tv.data.iptv.StrictJson.value:184
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response IllegalArgumentException  at com.nuvio.tv.data.iptv.StrictJson.string:219
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response IllegalArgumentException  at com.nuvio.tv.data.iptv.StrictJson.take:178
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response MetadataException BODY_LIMIT at com.nuvio.tv.data.iptv.IptvXtreamClient$json$2$2.onResponse:131
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: response MetadataException BODY_LIMIT at com.nuvio.tv.data.iptv.IptvXtreamClient$json$2$2.onResponse:131
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: metadata IllegalArgumentException  at com.nuvio.tv.data.iptv.IptvXtreamClient.parseCategories:98
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: metadata MetadataException AUTHENTICATION at com.nuvio.tv.data.iptv.IptvXtreamClient.parseAccount:73
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: metadata MetadataException AUTHENTICATION at com.nuvio.tv.data.iptv.IptvXtreamClient.parseAccount:73
+Oct 06, 2026 8:16:56 AM com.nuvio.tv.data.iptv.IptvXtreamClient$Companion diagnose
+WARNING: metadata MetadataException AUTHENTICATION at com.nuvio.tv.data.iptv.IptvXtreamClient.parseAccount:78
+]]></system-err>
+</testsuite>

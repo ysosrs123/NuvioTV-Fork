@@ -2,7 +2,6 @@ package com.nuvio.tv.core.iptv
 
 import java.util.UUID
 
-/** Shared aliases must be assigned the same accountId by source setup. No URLs or secrets here. */
 data class AcquisitionKey(val accountId: String, val channelId: String, val variantId: String, val contextVersion: Long) {
     init { require(accountId.isNotBlank() && channelId.isNotBlank() && variantId.isNotBlank() && contextVersion >= 0) }
 }
@@ -30,12 +29,6 @@ data class LiveAdmissionSnapshot(
     val audioOwner: String?, val displayOwner: String?,
 )
 
-/**
- * Atomic reservations, not network or Android lifecycle ownership. Callers reserve before opening
- * media and confirm closure only after their transport has actually stopped. Closing counts against
- * account/memory capacity, so rapid channel changes cannot create fictitious spare provider slots.
- * Estimates include native/graphics resources; this is not a measurement or process memory cap.
- */
 class LiveSessionAdmission(private val limits: DeviceAdmissionLimits) {
     private data class Acquisition(val id: String, val key: AcquisitionKey, val memoryBytes: Long, var closing: Boolean = false)
     private data class Consumer(val lease: LiveConsumerLease, val reservation: ConsumerReservation)
@@ -48,7 +41,7 @@ class LiveSessionAdmission(private val limits: DeviceAdmissionLimits) {
     @Synchronized fun setAccountLimit(accountId: String, maxUpstreams: Int) {
         require(accountId.isNotBlank() && maxUpstreams > 0)
         accountLimits[accountId] = maxUpstreams
-        // Lowering a limit does not terminate existing consumers; it blocks further acquisitions.
+
     }
 
     @Synchronized fun acquire(key: AcquisitionKey, acquisitionMemoryBytes: Long, reservation: ConsumerReservation): LiveAdmissionResult {
@@ -73,7 +66,6 @@ class LiveSessionAdmission(private val limits: DeviceAdmissionLimits) {
         return LiveAdmissionResult.Admitted(lease, existing == null)
     }
 
-    /** Idempotent. A final consumer returns the close fence; the upstream reservation remains held. */
     @Synchronized fun release(lease: LiveConsumerLease): AcquisitionCloseTicket? {
         val consumer = consumers[lease.id]?.takeIf { it.lease == lease } ?: return null
         consumers.remove(consumer.lease.id)
@@ -91,7 +83,6 @@ class LiveSessionAdmission(private val limits: DeviceAdmissionLimits) {
         return true
     }
 
-    /** Playback layer performs actual audio/display handover; stale or capture-only leases cannot own either. */
     @Synchronized fun selectAudioOwner(lease: LiveConsumerLease): Boolean {
         if (!isViewer(lease)) return false
         audioOwner = lease.id

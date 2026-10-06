@@ -8,7 +8,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-/** Construction must not open media. close confirms BOTH decoder release and upstream closure. */
 interface OwnedLivePlayback {
     fun start()
     suspend fun close(): Boolean
@@ -16,7 +15,6 @@ interface OwnedLivePlayback {
 
 enum class LiveOpenResult { OPENED, CAPACITY, SHARING_UNAVAILABLE, CLOSE_UNCONFIRMED, FAILED }
 
-/** One foreground viewer. Capture sharing needs a shared transport before it can be enabled here. */
 class LivePlaybackRuntime(private val admission: LiveSessionAdmission) {
     private data class Active(val owner: String, val lease: LiveConsumerLease, val playback: OwnedLivePlayback)
     private val mutex = Mutex()
@@ -30,7 +28,7 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission) {
         val result = admission.acquire(key, acquisitionBytes, ConsumerReservation(LiveConsumerRole.VIEWER, 1, viewerBytes))
         if (result !is LiveAdmissionResult.Admitted) return@withLock LiveOpenResult.CAPACITY
         if (!result.openUpstream) {
-            admission.release(result.lease) // The existing capture/viewer still owns this acquisition.
+            admission.release(result.lease)
             return@withLock LiveOpenResult.SHARING_UNAVAILABLE
         }
         val playback = try { create(PlaybackPurpose.LIVE_CHANNEL) } catch (cancel: CancellationException) {
@@ -55,7 +53,7 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission) {
 
     private suspend fun closeActive(): Boolean = withContext(NonCancellable) {
         val previous = active ?: return@withContext true
-        // Retain decoder, memory and account reservations until the transport confirms closure.
+
         val closed = try { previous.playback.close() } catch (_: Exception) { false }
         if (closed) { release(previous.lease); active = null }
         closed

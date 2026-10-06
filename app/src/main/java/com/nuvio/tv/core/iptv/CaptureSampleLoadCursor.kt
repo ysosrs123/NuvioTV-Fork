@@ -4,7 +4,6 @@ import java.util.concurrent.CancellationException
 
 enum class CaptureSampleLoadState { READY, WAITING, CAPACITY, ENDED, STOPPED, EXPIRED, DISCONTINUITY, FAILED, CANCELLED }
 
-/** Borrowed from its cursor; complete/release/close belong to that cursor, not a decoder or player. */
 class CaptureSampleLoadInput internal constructor(internal val owner: Any,
     val window: CaptureSampleWindow, val media: InspectedCaptureInput)
 
@@ -12,17 +11,6 @@ data class CaptureSampleLoadResult(val state: CaptureSampleLoadState,
     val input: CaptureSampleLoadInput? = null, val boundary: CaptureSampleWindow? = null,
     val producerState: CaptureTransportState? = null)
 
-/**
- * Bounded incremental inspected-sample loading, not MediaSource/MediaPeriod or playback ownership.
- * Poll/complete/release/close perform blocking LOCAL I/O: use one governed IO worker with cancellation
- * and confirmed join/cleanup, never the playback thread. Constructor opens no input or retention pin.
- * READY inputs are borrowed; successful staging verifies EOF, then complete permits the next exact
- * sequence while retaining this input until explicit release. Byte verification is not decode proof.
- * The caller must admit ALL resident batches/transient/decoder memory independently of this input cap.
- * A separate anchor retains the tail even after tickets release. Successor pins precede anchor transfer.
- * Only COMPLETE may report ENDED; other producer termination is STOPPED after committed rows drain.
- * Epoch changes/expiry/failure are sticky and never jump or retry. EOF never releases ownership.
- */
 class CaptureSampleLoadCursor(private val store: CaptureSegmentStore,
     private val index: CaptureTsInspectionIndex, private val timeline: CaptureSampleTimeline,
     startingSequence: Long, private val producerState: () -> CaptureTransportState,
@@ -65,7 +53,7 @@ class CaptureSampleLoadCursor(private val store: CaptureSegmentStore,
         if (inputs.size >= maxOpenInputs) return CaptureSampleLoadResult(CaptureSampleLoadState.CAPACITY)
         try {
             checkCancellation()
-            // COMPLETE must be sampled before the snapshot containing its final publications.
+
             val state = producerState()
             val row = synchronized(store) {
                 val rows = store.snapshot()
@@ -91,11 +79,11 @@ class CaptureSampleLoadCursor(private val store: CaptureSegmentStore,
                 if (window.epoch != it.epoch || row.sequence != it.proof.segment.sequence + 1 || window.start90k != it.endExclusive90k)
                     return stop(CaptureSampleLoadResult(CaptureSampleLoadState.DISCONTINUITY,boundary=window,producerState=state))
             }
-            candidateInput = openMedia(window) // Keep every returned owner before validation/cancellation.
+            candidateInput = openMedia(window)
             val opened = requireNotNull(candidateInput)
             require(opened.proof === window.proof && !opened.isClosed && !opened.verified)
             checkCancellation()
-            // Both successor pins exist before the old anchor releases. Input remains cursor-owned.
+
             anchor?.close(); anchor = candidatePin; candidatePin = null
             val ticket = CaptureSampleLoadInput(owner,window,opened)
             inputs[ticket] = false; current = ticket; candidateInput = null
@@ -111,7 +99,6 @@ class CaptureSampleLoadCursor(private val store: CaptureSegmentStore,
         }
     }
 
-    /** Staging completion only, never player seek/render acknowledgement or decoder confirmation. */
     @Synchronized fun complete(ticket: CaptureSampleLoadInput) {
         check(!polling && !closing && !closed && terminal == null)
         require(ticket.owner === owner && current === ticket && inputs[ticket] == false)
@@ -120,18 +107,17 @@ class CaptureSampleLoadCursor(private val store: CaptureSegmentStore,
         inputs[ticket] = true; previous = ticket.window; expectedSequence = next; current = null
     }
 
-    /** Only completed tickets can release. Stop any decoder borrower before releasing its input. */
     @Synchronized fun release(ticket: CaptureSampleLoadInput) {
         check(!polling && !closing && !closed)
         require(ticket.owner === owner && inputs[ticket] == true)
         ticket.media.close(); check(ticket.media.isClosed)
-        inputs.remove(ticket) // Failed closure retains the exact handle and capacity charge.
+        inputs.remove(ticket)
     }
 
     @Synchronized override fun close() {
         check(!polling) { "Cannot close inside a sample-loading callback" }
         if (closed) return
-        closing = true // Fence all later poll/complete/release even if closure fails.
+        closing = true
         for (ticket in inputs.keys.toList()) {
             ticket.media.close(); check(ticket.media.isClosed); inputs.remove(ticket)
         }

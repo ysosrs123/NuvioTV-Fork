@@ -15,7 +15,6 @@ import org.junit.runner.RunWith
 import java.security.KeyStore
 import java.util.UUID
 
-/** Actual Xtream adapter, generation fence, Android JSON/Keystore/SQLite; no network permission. */
 @RunWith(AndroidJUnit4::class)
 class IptvXtreamRepositoryTest {
     private val connection = IptvSourceConnection("https://fixture.invalid", "fixture", "not-real")

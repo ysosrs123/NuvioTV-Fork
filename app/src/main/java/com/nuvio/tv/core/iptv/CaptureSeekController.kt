@@ -8,7 +8,6 @@ class CaptureSeekRequest internal constructor(internal val owner: Any,
 data class CaptureSeekPreview(val state: CaptureSeekState, val request: CaptureSeekRequest? = null)
 data class CaptureSeekCommit(val state: CaptureSeekState, val input: CaptureSeekInput? = null)
 
-/** Caller owns closure even at verified EOF; decoding starts at the segment's initial IDR. */
 class CaptureSeekInput internal constructor(val request: CaptureSeekRequest,
     val media: InspectedCaptureInput) : AutoCloseable {
     val decodeStart90k get() = request.window.start90k
@@ -17,13 +16,6 @@ class CaptureSeekInput internal constructor(val request: CaptureSeekRequest,
     override fun close() = media.close()
 }
 
-/**
- * One pending seek anchor, used for BOTH directions until the player acknowledges that exact request.
- * Preview holds no disk pin. Commit pins its exact retained row or reports expiry; never clamps an
- * expired commit or chooses another segment. Explicit return-to-tail uses the latest inspected video
- * sample (not wall-clock LIVE). Caller must stage/verify/decode and govern ownership before exposure.
- * This policy does not issue player commands, discard preroll or release a superseded player's input.
- */
 class CaptureSeekController(private val timeline: CaptureSampleTimeline) {
     private val owner = Any()
     private var pending: CaptureSeekRequest? = null
@@ -59,11 +51,9 @@ class CaptureSeekController(private val timeline: CaptureSampleTimeline) {
         } catch (_: CaptureMediaExpired) { CaptureSeekCommit(CaptureSeekState.EXPIRED) }
     }
 
-    /** Publication/readiness check only: never acknowledges or releases a pending seek. */
     @Synchronized fun isCurrentCommitted(request: CaptureSeekRequest): Boolean =
         request.owner === owner && pending === request && committed === request
 
-    /** A late completion of an older seek cannot clear a newer pending anchor. */
     @Synchronized fun acknowledge(request: CaptureSeekRequest): Boolean {
         if (request.owner !== owner || pending !== request || committed !== request) return false
         pending = null; committed = null; return true

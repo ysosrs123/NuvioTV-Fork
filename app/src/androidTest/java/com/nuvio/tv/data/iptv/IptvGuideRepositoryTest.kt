@@ -97,7 +97,7 @@ class IptvGuideRepositoryTest {
                     override fun read(sink: Buffer, byteCount: Long): Long {
                         if (pending.size > 0) return pending.read(sink, byteCount)
                         entered.complete(Unit)
-                        // A controlled blocking response: cancellation must cancel its owning call.
+
                         while (!chain.call().isCanceled()) Thread.sleep(5)
                         throw java.io.IOException("cancelled fixture stream")
                     }
@@ -129,7 +129,7 @@ class IptvGuideRepositoryTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val id = UUID.randomUUID().toString(); val name = "guide-migration-$id.db"; val alias = "guide.migration.$id"
         try {
-            // Frozen v1 fixture. It has no retention coverage columns.
+
             context.openOrCreateDatabase(name, 0, null).use { db ->
                 db.execSQL("CREATE TABLE feeds(id TEXT PRIMARY KEY, profile INTEGER NOT NULL, label TEXT NOT NULL, endpoint BLOB NOT NULL, version INTEGER NOT NULL, requested INTEGER NOT NULL, active_stage TEXT, active_generation INTEGER, active_version INTEGER, validators BLOB)")
                 db.execSQL("CREATE TABLE stages(id TEXT PRIMARY KEY, feed TEXT NOT NULL REFERENCES feeds(id), generation INTEGER NOT NULL, UNIQUE(feed,generation))")

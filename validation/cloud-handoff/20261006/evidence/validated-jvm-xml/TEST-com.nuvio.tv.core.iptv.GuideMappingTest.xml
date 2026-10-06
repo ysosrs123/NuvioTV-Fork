@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.GuideMappingTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:48.292Z" hostname="PWR_PC" time="0.004">
+  <properties/>
+  <testcase name="duplicateIdsRequireAnExplicitPriority" classname="com.nuvio.tv.core.iptv.GuideMappingTest" time="0.001"/>
+  <testcase name="manualMappingWinsOverSourceIdAndPriority" classname="com.nuvio.tv.core.iptv.GuideMappingTest" time="0.0"/>
+  <testcase name="missingManualTargetDoesNotRebindToAnotherFeed" classname="com.nuvio.tv.core.iptv.GuideMappingTest" time="0.001"/>
+  <testcase name="feedCompletionOrderDoesNotChangeAnExplicitChoice" classname="com.nuvio.tv.core.iptv.GuideMappingTest" time="0.0"/>
+  <testcase name="nowUsesHalfOpenIntervalsAndDoesNotGuessMissingStops" classname="com.nuvio.tv.core.iptv.GuideMappingTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

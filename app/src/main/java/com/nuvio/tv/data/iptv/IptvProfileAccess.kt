@@ -1,6 +1,5 @@
 package com.nuvio.tv.data.iptv
 
-/** UI sessions are revoked before credential cleanup; a late form save cannot recreate deleted data. */
 class IptvProfileAccess(private val catalogue: IptvCatalogueStore, private val guides: IptvGuideStore) {
     class Session internal constructor(val profileId: Int, internal val revision: Long, internal val global: Long)
     private val revisions = mutableMapOf<Int, Long>()

@@ -16,16 +16,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.security.MessageDigest
 
-/**
- * Internal bridge for a COMPLETE local segment inspected by TsCaptureInspector. Caller owns input.
- * Output is tentative: stage samples and discard on failure/cancellation; do not render/commit until
- * extract returns. Length/hash must match the inspection before the final video sample can flush.
- * The shipped PesReader's HLS EOF header recheck reads overwritten PTS scratch and can omit the last
- * AVC sample. For this inspected one-AU/PES profile, an empty PUSI safely terminates the final PES.
- * It is harmless if a newer extractor already flushed (reader is then at its next-header state).
- * No patch to bundled libraries, network access, manifest-duration inference, seek or retry.
- * This is not an ExoPlayer MediaSource, a live timeline or a general TS decoder-safety certificate.
- */
 @androidx.media3.common.util.UnstableApi
 internal object LocalTsSegmentExtractor {
     fun extract(input: InputStream, inspection: TsCaptureInspection, output: ExtractorOutput,
@@ -36,9 +26,7 @@ internal object LocalTsSegmentExtractor {
         val factory = object : TsPayloadReader.Factory {
             override fun createInitialPayloadReaders() = standard.createInitialPayloadReaders()
             override fun createPayloadReader(streamType: Int, esInfo: TsPayloadReader.EsInfo): TsPayloadReader? {
-                // HLS mode eagerly asks for an ID3 reader even when the inspected PMT has
-                // only AVC/AAC. Do not publish that synthetic empty third track. Actual
-                // ID3 streams are outside the inspector profile and cannot reach this path.
+
                 if (streamType == TsExtractor.TS_STREAM_TYPE_ID3) return null
                 val reader = standard.createPayloadReader(streamType, esInfo)
                 if (streamType == TsExtractor.TS_STREAM_TYPE_H264) {

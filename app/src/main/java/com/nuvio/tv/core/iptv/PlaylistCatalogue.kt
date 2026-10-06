@@ -6,7 +6,6 @@ import java.io.Reader
 import java.net.URI
 import java.nio.charset.CodingErrorAction
 
-/** Metadata only. Parsing never opens channel, logo, guide or catch-up URLs. */
 data class PlaylistChannel(
     val name: String,
     val locator: String,
@@ -14,7 +13,7 @@ data class PlaylistChannel(
 ) {
     val guideId: String? get() = attributes["tvg-id"]?.takeIf { it.isNotBlank() }
     val group: String? get() = attributes["group-title"]?.takeIf { it.isNotBlank() }
-    // Playback locators can contain credentials; never expose them in routine logging.
+
     override fun toString(): String = "PlaylistChannel(metadata withheld)"
 }
 
@@ -44,7 +43,6 @@ data class PlaylistLimits(
     }
 }
 
-/** Bounded staging parser; only a complete, unambiguous catalogue is publishable. */
 class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimits()) {
     fun parse(input: InputStream, finalResponseUri: URI? = null): PlaylistCatalogue =
         parse(InputStreamReader(input, Charsets.UTF_8.newDecoder()
@@ -109,7 +107,7 @@ class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimit
                         name to if ("group-title" in attrs) attrs else attrs + ("group-title" to line.substringAfter(':'))
                     }
                 } else if (line.startsWith("#EXTVLCOPT:") || line.startsWith("#KODIPROP:")) {
-                    // Do not silently drop authentication/header semantics and publish broken channels.
+
                     issue(PlaylistIssue.UNSUPPORTED_EXTENSION)
                 } else if (!line.startsWith('#')) {
                     val record = pending
@@ -127,7 +125,7 @@ class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimit
         } catch (_: java.nio.charset.CharacterCodingException) {
             return PlaylistCatalogue(PlaylistKind.INVALID, emptyList(), listOf(PlaylistDiagnostic(lineNumber, PlaylistIssue.INVALID_ENCODING)))
         }
-        // HLS evidence anywhere invalidates every staged catalogue row, including late evidence.
+
         if (sawHls) return PlaylistCatalogue(PlaylistKind.HLS, emptyList(), emptyList())
         if (!header) return PlaylistCatalogue(PlaylistKind.INVALID, emptyList(), listOf(PlaylistDiagnostic(0, PlaylistIssue.MISSING_HEADER)))
         if (channels.isEmpty() && issues.isEmpty()) issues += PlaylistDiagnostic(lineNumber, PlaylistIssue.EMPTY_CATALOGUE)

@@ -16,7 +16,6 @@ import okio.buffer
 import org.junit.Assert.*
 import org.junit.Test
 
-/** Android OkHttp path using in-process fixtures only; no INTERNET permission or provider traffic. */
 class IptvCaptureHttpAndroidTest {
     @Test fun returnedBodyRemainsReadableUntilExplicitClose() = runBlocking {
         var requests = 0

@@ -16,7 +16,7 @@ internal fun IptvStatsOverlay(playback: IptvLivePlayback, modifier: Modifier = M
     var stats by remember(playback) { mutableStateOf(emptyList<DebugStat>()) }
     LaunchedEffect(playback) {
         while (true) {
-            val p = playback.player // All player reads stay on its main application thread.
+            val p = playback.player
             val sample = playback.telemetry.sample(SystemClock.elapsedRealtime())
             val video = p.videoFormat
             val audio = p.audioFormat

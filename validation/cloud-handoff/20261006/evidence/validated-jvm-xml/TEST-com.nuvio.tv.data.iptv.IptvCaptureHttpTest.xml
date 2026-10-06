@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:54.165Z" hostname="PWR_PC" time="0.81">
+  <properties/>
+  <testcase name="closingConnectCancelsAndWaitsForActualResponseCleanup" classname="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" time="0.418"/>
+  <testcase name="unsupportedManifestNeverFetchesItsMedia" classname="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" time="0.054"/>
+  <testcase name="unknownLengthStreamCannotExceedByteBudget" classname="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" time="0.036"/>
+  <testcase name="advertisedOversizeAndCompressedBodiesAreRejected" classname="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" time="0.036"/>
+  <testcase name="suppressedResponseCloseFailureCannotAuthorizeReservationRelease" classname="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" time="0.108"/>
+  <testcase name="controlledHttpSegmentsArePublishedAndReadLocallyThroughRealCaptureLoop" classname="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" time="0.039"/>
+  <testcase name="cancellationBeforeDispatchBackReclaimsTheUndeliveredResponse" classname="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" time="0.039"/>
+  <testcase name="redirectIsNotFollowedAndFailureIsNotRetried" classname="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" time="0.013"/>
+  <testcase name="outstandingBodyPreventsSuccessfulCloseAndLateOpenIsFenced" classname="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" time="0.051"/>
+  <testcase name="responseRemainsReadableAfterOpenAndOnlyOneBodyIsAllowed" classname="com.nuvio.tv.data.iptv.IptvCaptureHttpTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

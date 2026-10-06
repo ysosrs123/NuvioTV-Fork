@@ -5,7 +5,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.security.MessageDigest
 
-/** Structural evidence, NOT a decoder certificate. No manifest timing or random-access flag is trusted. */
 data class TsCaptureInspection(
     val sha256: String, val initializationSha256: String, val bytes: Long,
     val program: Int, val pmtPid: Int, val videoPid: Int, val audioPid: Int,
@@ -17,16 +16,6 @@ data class TsCaptureInspection(
 enum class TsCaptureRejection { LIMIT, TRANSPORT, PROGRAM, PES, INITIALIZATION, VIDEO, AUDIO, TIMESTAMP }
 class TsCaptureInspectionException(val reason: TsCaptureRejection) : IOException("Capture TS inspection: $reason")
 
-/**
- * Fail-closed, bounded inspection of an intentionally narrow complete HLS-TS segment profile:
- * one program, AVC Baseline, one slice/access unit/PES, AUD, in-band SPS/PPS then initial IDR,
- * no reordered video, constant video PTS cadence, AAC-LC ADTS (mono/stereo), complete audio PES.
- * PAT/PMT must each fit one packet, precede media and stay byte-identical. No resynchronization,
- * damaged/duplicate packets, encryption, partial PES starts or undeclared elementary streams.
- * Parses headers only; coded slice/AAC payload corruption still requires decoder validation.
- * Buffers and transient parse copies are bounded by maxPesBytes; no whole-segment buffer is kept.
- * The caller owns input and closure. This inspector neither opens network nor enables playback.
- */
 class TsCaptureInspector(private val maxBytes: Long = 8L * 1024 * 1024,
     private val maxPesBytes: Int = 1024 * 1024) {
     init { require(maxBytes in 188..(64L * 1024 * 1024)); require(maxPesBytes in 64..(4 * 1024 * 1024)) }
@@ -69,7 +58,7 @@ class TsCaptureInspector(private val maxBytes: Long = 8L * 1024 * 1024,
             need(pat != null && pmt != null, TsCaptureRejection.PROGRAM)
             finish(video, true); finish(audio, false)
             need(videoFrames >= 2 && videoStep > 0 && audioFrames > 0, TsCaptureRejection.TIMESTAMP)
-            // Place audio on the same 33-bit wrap epoch as the first video sample.
+
             val audioOffset = signedDelta(audioFirst, videoFirst)
             need(kotlin.math.abs(audioOffset) <= 90_000, TsCaptureRejection.TIMESTAMP)
             val audioSpan = audioEnd - audioFirst
@@ -96,7 +85,7 @@ class TsCaptureInspector(private val maxBytes: Long = 8L * 1024 * 1024,
                 val length = u(b, offset++)
                 need(offset + length <= 188, TsCaptureRejection.TRANSPORT)
                 if (length > 0) {
-                    // Discontinuity requires a new inspected segment/epoch, never silent timestamp repair.
+
                     need(u(b, offset) and 0x80 == 0, TsCaptureRejection.TRANSPORT)
                     need(u(b, offset) and 0x10 == 0 || length >= 7, TsCaptureRejection.TRANSPORT)
                 }
@@ -104,7 +93,7 @@ class TsCaptureInspector(private val maxBytes: Long = 8L * 1024 * 1024,
             }
             if (control and 1 == 0) { need(offset == 188, TsCaptureRejection.TRANSPORT); return }
             need(offset < 188, TsCaptureRejection.TRANSPORT)
-            // SDT and null packets are outside this single-program evidence; all other PIDs must be declared.
+
             if (pid == 17 || pid == 8191) return
             need(pid == 0 || pid == pmtPid || pid == videoPid || pid == audioPid, TsCaptureRejection.PROGRAM)
             val counter = u(b, 3) and 15
@@ -142,7 +131,7 @@ class TsCaptureInspector(private val maxBytes: Long = 8L * 1024 * 1024,
         }
 
         fun parsePat(data: ByteArray) {
-            need(data.size == 16, TsCaptureRejection.PROGRAM) // exactly one non-network program
+            need(data.size == 16, TsCaptureRejection.PROGRAM)
             val number = u(data, 8) * 256 + u(data, 9)
             val pid = (u(data, 10) and 31) * 256 + u(data, 11)
             need(number != 0 && pid in 32..8190, TsCaptureRejection.PROGRAM)
@@ -209,7 +198,7 @@ class TsCaptureInspector(private val maxBytes: Long = 8L * 1024 * 1024,
                         pps?.let { need(it.contentEquals(nal), TsCaptureRejection.INITIALIZATION) }
                         val bits = Bits(rbsp(nal)); val id = bits.ue()
                         need(id <= 255 && bits.ue() == spsId && bits.read(1) == 0, TsCaptureRejection.INITIALIZATION)
-                        bits.read(1); need(bits.ue() == 0, TsCaptureRejection.INITIALIZATION) // no slice groups
+                        bits.read(1); need(bits.ue() == 0, TsCaptureRejection.INITIALIZATION)
                         ppsId = id; pps = nal
                     }
                     1, 5 -> {

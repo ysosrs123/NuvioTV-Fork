@@ -1,8 +1,5 @@
 package com.nuvio.tv.data.iptv
 
-/** One queued/in-flight playback callback, no timers, media or IO. Close fences queued/late callbacks;
- * false retains ownership while a callback/removal is uncertain. Poster must dispatch asynchronously.
- */
 internal class CapturePlaybackRefresh(private val post: (Runnable)->Boolean,
     private val remove: (Runnable)->Unit, publish: ()->Unit, private val failure: (Exception)->Unit) {
     private var publish: (() -> Unit)? = publish

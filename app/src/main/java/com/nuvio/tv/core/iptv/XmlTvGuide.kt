@@ -33,11 +33,6 @@ data class GuideParseLimits(
     init { require(expandedBytes > 0 && depth > 0 && textCharacters > 0 && channels > 0 && programmes > 0) }
 }
 
-/**
- * Streaming XMLTV into caller-owned staging. Callbacks must not publish active rows: an exception
- * or cancellation invalidates the entire candidate. Input must already be decompressed; the byte
- * limit therefore covers expanded input. No DTD/entity/network resolution is permitted.
- */
 class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()) {
     fun parse(input: InputStream, channel: (GuideChannel) -> Unit, programme: (GuideProgramme) -> Unit): GuideParseSummary {
         val parser = XmlPullParserFactory.newInstance().newPullParser()
@@ -45,8 +40,7 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
         try {
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, false)
         } catch (unsupported: org.xmlpull.v1.XmlPullParserException) {
-            // KXml on the standalone JVM does not implement this feature at all. Android's
-            // implementation does. Accept an unsupported switch only if processing is disabled.
+
             if (parser.getFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL)) throw unsupported
         }
         parser.setInput(LimitedInput(input, limits.expandedBytes), null)
@@ -73,7 +67,7 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                 XmlPullParser.END_DOCUMENT -> break
                 XmlPullParser.DOCDECL -> throw IllegalArgumentException("XMLTV DTD declarations are not accepted")
                 XmlPullParser.ENTITY_REF -> {
-                    // Only the five predefined XML entities are permitted (no document definitions).
+
                     require((parser.name in setOf("amp", "lt", "gt", "quot", "apos") || parser.name.startsWith("#")) && parser.text != null) { "XMLTV entity is not allowed" }
                     if (textType != null) {
                         text.append(parser.text)
@@ -146,7 +140,7 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
     }
 
     companion object {
-        /** Missing offset is UTC, never the box locale/timezone. Reduced precision remains explicit. */
+
         internal fun parseTimestamp(raw: String): GuideTimestamp? {
             val match = Regex("^(\\d{4}(?:\\d{2}){0,5})(?:\\s+([+-]\\d{4}|UTC|GMT))?$").matchEntire(raw.trim()) ?: return null
             val digits = match.groupValues[1]

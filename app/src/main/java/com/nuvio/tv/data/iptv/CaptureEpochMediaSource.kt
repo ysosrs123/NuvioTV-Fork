@@ -17,13 +17,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-/** Actual internal MediaSource + admitted OwnedCaptureConsumer over the incremental reader.
- * Start owns reader/metadata observer; prepare binds the playback Looper, without file IO.
- * At most one queued/in-flight callback and one epoch period. No player/decoder/network is opened.
- * Source/period release alone cannot certify renderer closure. Parent stops/confirms its renderer
- * owners before releasing period/source and retrying runtime close; uncertain closure stays reserved.
- * Controls remain disabled until executed source/player/renderer and measured aggregate gates pass.
- */
 @UnstableApi
 internal class CaptureEpochMediaSource(private val reader: IncrementalCaptureReaderConsumer,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO, private val closeTimeoutMs: Long=15_000,
@@ -69,7 +62,7 @@ internal class CaptureEpochMediaSource(private val reader: IncrementalCaptureRea
             if(s.state==IncrementalReaderState.DISCONTINUITY && current?.isPrepared==true) current.refresh(s)
             failed(IOException("Capture source boundary: ${s.state}")); return
         }
-        // An initially empty running capture is unresolved; never publish temporary empty EOF.
+
         if(s.batches.isEmpty() && s.state!=IncrementalReaderState.ENDED) return
         if(current?.isPrepared==true && !current.refresh(s) && reader.borrowSnapshot(s) !== s) return
         if(reader.borrowSnapshot(s) !== s || synchronized(this) { stopping || !prepared }) return
@@ -94,7 +87,7 @@ internal class CaptureEpochMediaSource(private val reader: IncrementalCaptureRea
     }
     override fun releaseSourceInternal() {
         val jobs=synchronized(this) { access(); prepared=false; stopping=true; refresh to observer }
-        jobs.first?.close(); jobs.second?.cancel() // No file IO/join on playback thread.
+        jobs.first?.close(); jobs.second?.cancel()
     }
     private fun access() { check(Thread.currentThread() === playbackThread) { "Capture source playback thread changed" } }
     override suspend fun close():Boolean = closeMutex.withLock {
@@ -105,7 +98,7 @@ internal class CaptureEpochMediaSource(private val reader: IncrementalCaptureRea
         jobs?.cancel()
         val joined=withTimeoutOrNull(closeTimeoutMs) { jobs?.join(); true } ?: false
         if(!joined || synchronized(this) { refresh?.close()==false }) return@withLock false
-        val closed=reader.close() // Borrowed period prevents confirmed queue closure.
+        val closed=reader.close()
         synchronized(this) {
             if(!closed || prepared || period!=null) return@withLock false
             refresh=null; observer=null; confirmed=true; true

@@ -20,7 +20,6 @@ import java.text.Normalizer
 import java.util.Locale
 import org.json.JSONObject
 
-/** Blocking repository: use a worker dispatcher. Readers see one coherent SQLite generation. */
 class IptvCatalogueStore(
     context: Context,
     databaseName: String = "iptv-catalogue.db",
@@ -42,7 +41,6 @@ class IptvCatalogueStore(
         source(db, ref)
     }
 
-    /** A configuration edit invalidates in-flight imports and cached validators, never user overlays. */
     fun editSource(ref: IptvSourceRef, label: String, kind: IptvSourceKind, accountId: String, connection: IptvSourceConnection): IptvSource = transaction { db ->
         validateConfiguration(label, accountId, connection)
         if (kind == IptvSourceKind.XTREAM) IptvXtreamClient.serverBase(connection)
@@ -88,7 +86,6 @@ class IptvCatalogueStore(
 
     fun beginRefresh(ref: IptvSourceRef): RefreshTicket = transaction { db -> beginRefresh(db, ref) }
 
-    /** Capture credentials, kind, validators and ticket under the same configuration fence. */
     fun prepareRefresh(ref: IptvSourceRef): IptvRefreshRequest = transaction { db ->
         val ticket = beginRefresh(db, ref)
         val current = source(db, ref)
@@ -111,7 +108,6 @@ class IptvCatalogueStore(
 
     fun snapshot(ref: IptvSourceRef): IptvCatalogueSnapshot = transaction { db -> snapshot(db, ref) }
 
-    /** Bounded decryption; a changed generation/configuration/overlay never silently shifts a page. */
     fun page(ref: IptvSourceRef, query: IptvBrowseQuery = IptvBrowseQuery(), cursor: IptvBrowseCursor? = null,
         limit: Int = 100): IptvCataloguePage = transaction { db ->
         require(limit in 1..200)
@@ -134,8 +130,7 @@ class IptvCatalogueStore(
         val selected = db.rawQuery("SELECT c.id FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=?$filters ORDER BY ${order}COALESCE(o.search_name,c.search_name),c.id LIMIT ? OFFSET ?", args.toTypedArray()).use { c ->
             buildList { while (c.moveToNext()) add(c.getString(0)) }
         }
-        // Sort/filter only IDs and names first. Large encrypted payloads must not enter the sort.
-        // Both queries share this transaction, so an overlay/refresh cannot change the selection.
+
         val items = if (selected.isEmpty()) emptyList() else db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id IN (${selected.joinToString(",") { "?" }}) ORDER BY ${order}COALESCE(o.search_name,c.search_name),c.id",
             arrayOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration.toString(), *selected.toTypedArray())).use { c ->
             buildList { while (c.moveToNext()) add(readItem(c, ref)) }
@@ -144,7 +139,6 @@ class IptvCatalogueStore(
             if (items.size > limit) IptvBrowseCursor(revision, query, offset + limit) else null)
     }
 
-    /** Recheck the current source and row before admission; UI snapshots are not playback authority. */
     fun playbackItem(ref: IptvSourceRef, channelId: String): IptvCatalogueItem? = transaction { db ->
         val source = source(db, ref)
         if (!source.playbackEligible) return@transaction null
@@ -177,11 +171,6 @@ class IptvCatalogueStore(
         db.execSQL("UPDATE sources SET browse_revision=browse_revision+1 WHERE id=?", arrayOf(ref.sourceId))
     }
 
-    /**
-     * Stage rows, recheck the ticket, promote the pointer and validators in ONE transaction.
-     * Exceptions/cancellation roll back every write. Existing acquisitions retain their own immutable
-     * locator handles, so obsolete catalogue generations can be removed after pointer promotion.
-     */
     fun commitCatalogue(
         ref: IptvSourceRef, ticket: RefreshTicket, records: List<IptvCatalogueRecord>, complete: Boolean,
         validators: IptvCacheValidators = IptvCacheValidators(), acceptedLargeChange: Boolean = false,
@@ -197,7 +186,7 @@ class IptvCatalogueStore(
         val previousCount = if (old.source.activeConfigurationVersion == old.source.configurationVersion) old.channels.count { it.channel.available } else 0
         val decision = decideCatalogueRefresh(ticket, latest, valid, previousCount, incoming.size, acceptedLargeChange)
         if (decision != RefreshDecision.PUBLISH) return@transaction decision
-        // A ticket is single-use, including an accepted empty generation.
+
         if (old.source.activeGeneration == ticket.requestGeneration) return@transaction RefreshDecision.STALE
         val reconciliation = try { ChannelIdentityReconciler().reconcile(ref.sourceId, old.channels.map { it.channel }, incoming.map { it.data }) }
             catch (_: IllegalArgumentException) { return@transaction RefreshDecision.INVALID }
@@ -294,9 +283,7 @@ class IptvCatalogueStore(
         db.beginTransactionNonExclusive()
         var failure: Throwable? = null
         return try {
-            // max_page_count is connection-local. Pin the primary connection with a transaction
-            // before setting it; setting it in onConfigure can target a WAL reader instead.
-            // This limits logical DB pages, not WAL/journal or other app files.
+
             db.setMaximumSize(maxDatabaseBytes)
             block(db).also { db.setTransactionSuccessful() }
         } catch (error: Throwable) {
@@ -304,9 +291,7 @@ class IptvCatalogueStore(
             throw error
         } finally {
             try { db.endTransaction() } catch (cleanup: Throwable) {
-                // SQLITE_FULL can roll itself back before Android's transaction wrapper ends.
-                // Preserve the original actionable storage error instead of masking it with
-                // "cannot rollback - no transaction is active" from wrapper cleanup.
+
                 if (failure == null) throw cleanup else failure.addSuppressed(cleanup)
             }
         }

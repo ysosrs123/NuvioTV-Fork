@@ -14,14 +14,6 @@ import androidx.media3.exoplayer.trackselection.ExoTrackSelection
 import com.nuvio.tv.core.iptv.CaptureSeekInput
 import java.io.IOException
 
-/**
- * Finite, already staged ONE-segment MediaPeriod. Not an epoch/live-tail MediaSource or a player.
- * Successful construction transfers this exact verified input/pin; failed construction/staging does
- * not. EOF retains ownership. Close fences reads before attempting input closure, and is retryable.
- * It confirms input/pin closure only, never decoder/player closure or seek acknowledgement.
- * All MediaPeriod/SampleStream access is confined to the thread that calls prepare; close may be
- * called after renderer shutdown from another thread. Staging must run off the playback thread.
- */
 @UnstableApi
 internal class PinnedCaptureSegmentPeriod internal constructor(batch: CapturedSampleBatch,
     private val seek: CaptureSeekInput, private val limits: CaptureSampleStagingLimits) : MediaPeriod, AutoCloseable {
@@ -72,7 +64,7 @@ internal class PinnedCaptureSegmentPeriod internal constructor(batch: CapturedSa
         output: Array<SampleStream?>, streamResetFlags: BooleanArray, positionUs: Long): Long {
         access()
         require(selections.size in 1..16 && selections.size == mayRetainStreamFlags.size && selections.size == output.size && output.size == streamResetFlags.size)
-        // Validate all choices/owners before changing any cursor or selection.
+
         val chosen = selections.map { selection -> selection?.let {
             val kind=(0..1).singleOrNull { k -> it.trackGroup === groups[k] }
                 ?: throw IllegalArgumentException("Foreign capture track group")
@@ -109,7 +101,7 @@ internal class PinnedCaptureSegmentPeriod internal constructor(batch: CapturedSa
         return floor(seekParameters.resolveSeekPositionUs(position,before.timeUs,after.timeUs))
     }
     @Synchronized override fun readDiscontinuity(): Long { access(); return C.TIME_UNSET }
-    @Synchronized override fun discardBuffer(positionUs: Long, toKeyframe: Boolean) { access() } // finite seek/preroll remains retained
+    @Synchronized override fun discardBuffer(positionUs: Long, toKeyframe: Boolean) { access() }
     @Synchronized override fun getBufferedPositionUs(): Long { access(); return C.TIME_END_OF_SOURCE }
     @Synchronized override fun getNextLoadPositionUs(): Long { access(); return C.TIME_END_OF_SOURCE }
     @Synchronized override fun continueLoading(loadingInfo: LoadingInfo): Boolean { access(); return false }
@@ -119,7 +111,7 @@ internal class PinnedCaptureSegmentPeriod internal constructor(batch: CapturedSa
     @Synchronized override fun close() {
         if(ownerReleased) return
         fenced=true
-        seek.close() // retain handle/pin and the fence on failure; a later close retries
+        seek.close()
         batch=null; streams.clear(); ownerReleased=true
     }
     private fun access() {
@@ -133,8 +125,7 @@ internal class PinnedCaptureSegmentPeriod internal constructor(batch: CapturedSa
     }
     private fun reset(position: Long) {
         presentationUs=floor(position)
-        // Feed initial IDR AND audio phase/preroll. The shipped renderer uses output PTS vs reset
-        // position, not an invented decode-only input flag. Actual renderer/codec checks are pending.
+
         streams.forEach { it.cursor=0; it.formatSent=false }
     }
     private fun track(kind: Int) = if(kind==0) requireNotNull(batch).video else requireNotNull(batch).audio
@@ -180,7 +171,7 @@ internal class PinnedCaptureSegmentPeriod internal constructor(batch: CapturedSa
     }
 
     companion object {
-        /** On failure, caller still owns seek.close(). On success, transfer it exclusively to period. */
+
         fun stage(seek: CaptureSeekInput, limits: CaptureSampleStagingLimits, checkCancellation: () -> Unit = {}): PinnedCaptureSegmentPeriod {
             val staged=LocalCaptureSampleStager(limits).stage(seek.request.window,seek.media,checkCancellation)
             checkCancellation()

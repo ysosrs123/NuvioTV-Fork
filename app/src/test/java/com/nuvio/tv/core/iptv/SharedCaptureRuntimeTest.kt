@@ -253,4 +253,15 @@ class SharedCaptureRuntimeTest {
         assertTrue(runtime.close(record))
     }
 
+    @Test fun decoderFloorRejectsCaptureOnlyReservationBeforeTransportOrPlayerStart() = runBlocking<Unit> {
+        val transport=Transport(); val pipeline=pipeline(transport); var starts=0
+        val consumer=object:OwnedCaptureConsumer {
+            override val minimumDecoderReservationCount=1
+            override fun start() { starts++ }
+            override suspend fun close()=true
+        }
+        assertEquals(CaptureJoinResult.Failed(),join(pipeline,recorder,consumer))
+        assertEquals(0,starts); assertEquals(0,transport.starts); assertEquals(0,admission.snapshot().consumers)
+    }
+
 }

@@ -14,14 +14,6 @@ import androidx.media3.exoplayer.source.TrackGroupArray
 import androidx.media3.exoplayer.trackselection.ExoTrackSelection
 import java.io.IOException
 
-/** Growing ONE-epoch MediaPeriod over cached, verified queue batches. No file IO or decoder.
- * Explicit playback-thread refresh is required; future MediaSource owns callback dispatch.
- * WAITING/CAPACITY/LOADING return NOTHING at the tail, never finite EOS. Only ENDED emits EOS.
- * An exclusive reader borrow prevents batch/input release until this period is fenced/closed.
- * Caller must stop/confirm its renderer borrowers BEFORE close; this confirms period ownership only.
- * Growth preserves stream cursors, absolute epoch PTS and audio phase; seeks start at selected batch
- * IDR/audio preroll. No automatic epoch crossing or pending seek acknowledgement.
- */
 @UnstableApi
 internal class CaptureEpochPeriod private constructor(private val reader: IncrementalCaptureReaderConsumer,
     private val lease: CaptureReaderBorrow, initial: IncrementalReaderSnapshot, val uid: Any, val epoch: Long,
@@ -42,9 +34,9 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
     override fun prepare(callback: MediaPeriod.Callback, positionUs: Long) {
         synchronized(this) { check(thread == null && !closed); thread = Thread.currentThread(); access(); this.callback = callback; reset(positionUs) }
         callback.onPrepared(this)
-        if(!closed) refresh(reader.state.value) // Cover a source update queued before period preparation.
+        if(!closed) refresh(reader.state.value)
     }
-    /** Cached-only, on playback thread. Stale/foreign/reordered/other epoch data never replaces owner. */
+
     fun refresh(next: IncrementalReaderSnapshot): Boolean {
         val cb = synchronized(this) {
             access()
@@ -56,10 +48,7 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
         cb?.onContinueLoadingRequested(this)
         return true
     }
-    /** Caller confirms consumed buffers/renderers; only fully read selected tracks can retire rows.
-     * Explicit, not discardBuffer's automatic policy. Reader closes inputs off-thread then refills.
-     * The remaining epoch origin/PTS stays unchanged; retired media cannot be sought through this owner.
-     */
+
     @Synchronized fun retireConsumedPrefix(beforeUs: Long): Boolean {
         access()
         val count=batches.takeWhile { it.samples.video.samples.last().timeUs<beforeUs &&
@@ -103,16 +92,16 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
         return floor(seekParameters.resolveSeekPositionUs(position,before.timeUs,after.timeUs))
     }
     @Synchronized override fun readDiscontinuity(): Long { access(); errorState(); return C.TIME_UNSET }
-    @Synchronized override fun discardBuffer(positionUs: Long, toKeyframe: Boolean) { access() } // retained seek/preroll; explicit future owner eviction
+    @Synchronized override fun discardBuffer(positionUs: Long, toKeyframe: Boolean) { access() }
     @Synchronized override fun getBufferedPositionUs(): Long { access(); return if(ended()) C.TIME_END_OF_SOURCE else endUs() }
     @Synchronized override fun getNextLoadPositionUs(): Long { access(); return if(ended()) C.TIME_END_OF_SOURCE else endUs() }
-    @Synchronized override fun continueLoading(loadingInfo: LoadingInfo): Boolean { access(); return false } // capture hints/explicit owner drive IO; no player tail polling
+    @Synchronized override fun continueLoading(loadingInfo: LoadingInfo): Boolean { access(); return false }
     @Synchronized override fun isLoading(): Boolean { access(); return reader.state.value.state==IncrementalReaderState.LOADING }
     @Synchronized override fun reevaluateBuffer(positionUs: Long) { access() }
     @Synchronized override fun close() {
         if(closed) return
         closed=true; streams.clear(); groups=TrackGroupArray.EMPTY; batches=emptyList(); snapshot=IncrementalReaderSnapshot(snapshot.revision,IncrementalReaderState.CLOSED); callback=null
-        reader.releaseBorrow(lease) // Only period ownership, never decoder confirmation.
+        reader.releaseBorrow(lease)
     }
     private fun access() {
         check(Thread.currentThread() === thread) { "Epoch period playback thread changed" }
@@ -191,7 +180,7 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
                 it.samples.video.format == s.batches.first().samples.video.format && it.samples.audio.format == s.batches.first().samples.audio.format } &&
                 s.batches.zipWithNext().all { (a,b) -> b.samples.window.proof.segment.sequence==a.samples.window.proof.segment.sequence+1 && b.samples.window.start90k==a.samples.window.endExclusive90k }
         }
-        /** Failure retains reader ownership. No job, input, codec or player is opened here. */
+
         fun create(reader: IncrementalCaptureReaderConsumer, snapshot: IncrementalReaderSnapshot, uid: Any): CaptureEpochPeriod {
             val index=snapshot.timeline.getIndexOfPeriod(uid); require(index>=0)
             val epoch=snapshot.timeline.getPeriod(index,Timeline.Period(),true).id as? Long ?: error("Missing epoch")

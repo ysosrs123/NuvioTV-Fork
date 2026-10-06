@@ -1,0 +1,43 @@
+Started UTC 2026-10-05T22:43:25.3609387Z
+
+  mWakefulness=Awake
+
+Performing Streamed Install
+Success
+Performing Streamed Install
+Success
+
+com.nuvio.tv.data.iptv.CaptureVideoPlayerAndroidTest:
+Process crashed while executing actualAdmittedVideoAndIndependentLeaseShareOneTransportUntilFinalClose(com.nuvio.tv.data.iptv.CaptureVideoPlayerAndroidTest):
+java.lang.NoClassDefFoundError: Failed resolution of: Landroidx/collection/CircularIntArray;
+	at androidx.media3.exoplayer.mediacodec.AsynchronousMediaCodecCallback.<init>(AsynchronousMediaCodecCallback.java:93)
+	at androidx.media3.exoplayer.mediacodec.AsynchronousMediaCodecAdapter.<init>(AsynchronousMediaCodecAdapter.java:182)
+	at androidx.media3.exoplayer.mediacodec.AsynchronousMediaCodecAdapter.<init>(AsynchronousMediaCodecAdapter.java:54)
+	at androidx.media3.exoplayer.mediacodec.AsynchronousMediaCodecAdapter$Factory.createAdapter(AsynchronousMediaCodecAdapter.java:126)
+	at androidx.media3.exoplayer.mediacodec.DefaultMediaCodecAdapterFactory.createAdapter(DefaultMediaCodecAdapterFactory.java:164)
+	at androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.initCodec(MediaCodecRenderer.java:1307)
+	at androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.maybeInitCodecWithFallback(MediaCodecRenderer.java:1219)
+	at androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.maybeInitCodecOrBypass(MediaCodecRenderer.java:597)
+	at androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.onInputFormatChanged(MediaCodecRenderer.java:1671)
+	at androidx.media3.exoplayer.video.MediaCodecVideoRenderer.onInputFormatChanged(MediaCodecVideoRenderer.java:1541)
+	at androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.readSourceOmittingSampleData(MediaCodecRenderer.java:1120)
+	at androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.render(MediaCodecRenderer.java:883)
+	at androidx.media3.exoplayer.video.MediaCodecVideoRenderer.render(MediaCodecVideoRenderer.java:1325)
+	at androidx.media3.exoplayer.RendererHolder.render(RendererHolder.java:391)
+	at androidx.media3.exoplayer.ExoPlayerImplInternal.doSomeWork(ExoPlayerImplInternal.java:1367)
+	at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:697)
+	at android.os.Handler.dispatchMessage(Handler.java:102)
+	at android.os.Looper.loopOnce(Looper.java:205)
+	at android.os.Looper.loop(Looper.java:294)
+	at android.os.HandlerThread.run(HandlerThread.java:67)
+Caused by: java.lang.ClassNotFoundException: Didn't find class "androidx.collection.CircularIntArray" on path: DexPathList[[zip file "/system/framework/android.test.runner.jar", zip file "/system/framework/android.test.mock.jar", zip file "/system/framework/android.test.base.jar", zip file "/data/app/~~9g_VcQZDdwZv8b_93x8YAA==/com.nuvio.iptv.validation.test-u_Oxv7XvNHHvN05f8lPhyg==/base.apk", zip file "/data/app/~~bhdl18oMs7bPueUhC5rf8A==/com.nuvio.iptv.validation-QMPa9mVmKekfFgHXnYTWaQ==/base.apk"],nativeLibraryDirectories=[/data/app/~~9g_VcQZDdwZv8b_93x8YAA==/com.nuvio.iptv.validation.test-u_Oxv7XvNHHvN05f8lPhyg==/lib/arm64, /data/app/~~bhdl18oMs7bPueUhC5rf8A==/com.nuvio.iptv.validation-QMPa9mVmKekfFgHXnYTWaQ==/lib/arm64, /data/app/~~9g_VcQZDdwZv8b_93x8YAA==/com.nuvio.iptv.validation.test-u_Oxv7XvNHHvN05f8lPhyg==/base.apk!/lib/arm64-v8a, /data/app/~~bhdl18oMs7bPueUhC5rf8A==/com.nuvio.iptv.validation-QMPa9mVmKekfFgHXnYTWaQ==/base.apk!/lib/arm64-v8a, /system/lib64, /system_ext/lib64]]
+	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:259)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:379)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:312)
+	... 20 more
+INSTRUMENTATION_RESULT: shortMsg=Process crashed.
+INSTRUMENTATION_CODE: 0
+
+  mWakefulness=Awake
+
+Finished UTC 2026-10-05T22:43:31.4658617Z

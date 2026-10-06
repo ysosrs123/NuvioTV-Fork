@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.CaptureSeekControllerTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:47.416Z" hostname="PWR_PC" time="0.179">
+  <properties/>
+  <testcase name="previewMayClampButCommitOfAnEvictedTargetReportsExpiryWithoutJumping" classname="com.nuvio.tv.core.iptv.CaptureSeekControllerTest" time="0.042"/>
+  <testcase name="committedSeekPinsItsDecodeStartAndAlignsTheRequestedPositionToARealSample" classname="com.nuvio.tv.core.iptv.CaptureSeekControllerTest" time="0.024"/>
+  <testcase name="foreignSupersededCancelledAndUncommittedAcknowledgementsCannotAct" classname="com.nuvio.tv.core.iptv.CaptureSeekControllerTest" time="0.016"/>
+  <testcase name="publishedWindowBudgetExpiryIsReportedEvenIfTheFileStillExists" classname="com.nuvio.tv.core.iptv.CaptureSeekControllerTest" time="0.028"/>
+  <testcase name="returnToTailExplicitlySelectsTheNewestEpochAndEmptyTimelineIsUnavailable" classname="com.nuvio.tv.core.iptv.CaptureSeekControllerTest" time="0.028"/>
+  <testcase name="bothDirectionsUseThePendingAnchorUntilThatExactSeekIsAcknowledged" classname="com.nuvio.tv.core.iptv.CaptureSeekControllerTest" time="0.04"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

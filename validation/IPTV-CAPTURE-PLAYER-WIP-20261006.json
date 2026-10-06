@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-06",
+  "timezone": "Australia/Brisbane",
+  "branch": "codex/iptv-wip",
+  "baseCommit": "b68985aafcd78f2b096e7073082f98c3c85bb874",
+  "status": "WIP_CORE_PASS_ANDROID_PLAYER_TIMEOUTS",
+  "sourceSha256": {
+    "app/src/main/java/com/nuvio/tv/core/iptv/SharedCaptureRuntime.kt": "33b525452eaf7b0f90dd280773b0084ce7c6c5ddeb60ef81652fc918892665c3",
+    "app/src/main/java/com/nuvio/tv/core/iptv/CapturePlaybackConsumer.kt": "61752c5dd73a07a239529fafe89134af45cfd00737b1ebe7fdc7f258e1342833",
+    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureVideoPlayer.kt": "3ce4f9ed0f5690826a4e074172a1edbcf38b14871f7714569c4daab5b570bdbd",
+    "app/src/test/java/com/nuvio/tv/core/iptv/SharedCaptureRuntimeTest.kt": "b2bd5a980c6c36d72fb5d30e45c16a12e30141ce4714eda3221c9eb2bcbbbaff",
+    "app/src/test/java/com/nuvio/tv/core/iptv/CapturePlaybackConsumerTest.kt": "71a971c9d03def463525287fd53ececf1708816810b220c1a8a81b109ea70696",
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/CaptureVideoPlayerAndroidTest.kt": "65aaf652c23d36ad1a197312aa9f2941db649397fde1749ed04409f3684a783c",
+    "tools/iptv-device-tests/build.gradle.kts": "a305ebbc6c9ab41f6c064ad5e611330b1ed6591d7bd49f0788a789046ffd15b7"
+  },
+  "core": {
+    "result": "PASS",
+    "tests": 211,
+    "seconds": 2.326,
+    "log": "iptv-core/capture-player-core-20261006.txt"
+  },
+  "harness": {
+    "result": "PASS_CURRENT_WIP",
+    "seconds": 56,
+    "log": "iptv-core/capture-player-harness-collection-20261006.log",
+    "existingDependencyAddedToIsolatedHarness": "androidx.collection:collection-jvm:1.5.0, already present in the full app; cached offline; no upgrade",
+    "apks": {
+      "tools/iptv-device-tests/build/outputs/apk/debug/NuvioIptvDeviceTests-debug.apk": {
+        "bytes": 5857776,
+        "sha256": "e016ea62605bd82261e8b44dc7fbb7df00a51193e327b1cc16c4e63c60fc172f"
+      },
+      "tools/iptv-device-tests/build/outputs/apk/androidTest/debug/NuvioIptvDeviceTests-debug-androidTest.apk": {
+        "bytes": 1793986,
+        "sha256": "c6275530c451bf1eb4577a41a26facaf625170eb33112760ec0d3003cfbaa98d"
+      }
+    }
+  },
+  "android": {
+    "result": "FAIL_TIMEOUTS_UNRESOLVED",
+    "tests": 2,
+    "failures": 2,
+    "seconds": 60.733,
+    "serial": "192.168.10.60:5555",
+    "log": "iptv-core/capture-player-am9-collection-20261006.txt",
+    "initialRun": "iptv-core/capture-player-am9-initial-20261006.txt",
+    "initialRunResult": "PROCESS_CRASH_MISSING_ANDROIDX_COLLECTION_RUNTIME_CLASS",
+    "scope": "Real shared transport/store/source/ExoPlayer/video-only renderer and offscreen ImageReader. No successful rendering, preroll or blocked-release result is established by these failed runs."
+  },
+  "hostChecks": "No full app compile or full JVM rerun for these uncommitted changes. Last validated checkpoint remains b68985a with its own report.",
+  "cleanup": "Both task-owned validation packages uninstalled successfully; package paths absent; reverse list empty; power Dreaming at cleanup. No wake/settings/account/provider/prototype operations.",
+  "retainedLogsSha256": {
+    "capture-player-am9-collection-20261006.txt": "1ffcd3244566b9b9124db0c0ff48f009a825b4a707bcf667462bdc88a4dbf30e",
+    "capture-player-am9-initial-20261006.txt": "b43e6a3fc12588fbd69372ce77640da19c40a1dd7e766bddc483d98a7c86e711",
+    "capture-player-cleanup-20261006.txt": "f8fed97f2a25f350c710fe279581f19e07ffa6e887a5756deb62be69e47fb1af",
+    "capture-player-core-20261006.txt": "d6417780d95ab88608dd364422710e664b31087b07dd4a3083f382ef73949708",
+    "capture-player-harness-20261006.log": "1fd4d3265b3f5f5088bd071cb2ce50790c533acf5d4337fb0a522e23b0c7f451",
+    "capture-player-harness-closure-20261006.log": "bcdf060c577ec8b2af045c8f2066db6de4c4e51aa599f355d9bc265d4ee80623",
+    "capture-player-harness-collection-20261006.log": "5b599e53fab02c5c70310fed482f162dbe6c0e70097d0ba7b9d08f27e85a5221",
+    "capture-player-harness-initial-20261006.log": "99f715d3742c4c59c0728df59d54912323e462428311049310231bc9a50560d1",
+    "capture-player-telemetry-collection-20261006.txt": "6d12a2bea1bc8f7b81a74c40453b6189e07a6674bcc731fb73fdad4b2f726b6f",
+    "capture-player-telemetry-initial-20261006.txt": "c3950c46ea5ced3b416c4e49125746dd694e6edc5af2a80bc0f31e1c85e1fafc"
+  },
+  "recordedAtUtc": "2026-10-06T00:58:51.142545+00:00",
+  "sourceSha256BeforeCommentCleanup": {
+    "app/src/main/java/com/nuvio/tv/core/iptv/SharedCaptureRuntime.kt": "337e028fb033a7979db025226e066501e4ccf56525cb23e7ddb9480c0f0d9c86",
+    "app/src/main/java/com/nuvio/tv/core/iptv/CapturePlaybackConsumer.kt": "d90364a45c4e81b1e9331a9beaf52bd922fa0b31354605900d72ba6f9eeb7a44",
+    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureVideoPlayer.kt": "3f92ea7ec147622f19f56af726fbdf6eaa35b823d0f5580c18e5028250cb2bdc",
+    "app/src/test/java/com/nuvio/tv/core/iptv/SharedCaptureRuntimeTest.kt": "7e83562dd91b9cf305678b7e44db999d9a291b1f3541b0963064b7501fbb0fd3",
+    "app/src/test/java/com/nuvio/tv/core/iptv/CapturePlaybackConsumerTest.kt": "419c3335a791527ca34fb979d098344864c043778812b58d0308f835bdbe2abd",
+    "app/src/androidTest/java/com/nuvio/tv/data/iptv/CaptureVideoPlayerAndroidTest.kt": "6b11ccdc704199e945dd785a6cb339b5137455428ffa7a7369f672f7899d224f",
+    "tools/iptv-device-tests/build.gradle.kts": "1d9f9cf908c4126aafb3a9aece9f1a525e51717e3b347f9b1a4ddaffd9ab36ad"
+  },
+  "sourceSha256Encoding": "UTF-8 LF, repository checkout bytes after verified comment-only cleanup",
+  "cloudEvidenceDirectory": "validation/cloud-handoff/20261006/evidence"
+}

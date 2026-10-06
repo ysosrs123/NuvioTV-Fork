@@ -7,17 +7,11 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-/** Dedicated transport; one body at a time. close fences/cancels connects and confirms body closure. */
 interface HlsCaptureHttp {
     suspend fun open(address: URI, maxBytes: Long): InputStream
     suspend fun close(): Boolean
 }
 
-/**
- * Sequential bounded HLS ingestion. Starts at the oldest currently advertised segment, then follows
- * that one media playlist. Lost sequence/changed overlap stops capture; there is no hidden gap,
- * master/rendition fallback, failed-request retry or decoder-safety claim. Construction opens nothing.
- */
 class HlsCaptureSegmentSource(private val address: URI, private val http: HlsCaptureHttp,
     private val maxSegmentBytes: Long, private val parser: HlsCapturePlaylistParser = HlsCapturePlaylistParser(),
     private val stallTimeoutMs: Long = 60_000,
@@ -58,7 +52,7 @@ class HlsCaptureSegmentSource(private val address: URI, private val http: HlsCap
                         catch (_: ArithmeticException) { throw HlsCaptureException(HlsCaptureFailure.LIMIT) }
                     val input = http.open(segment.address, maxSegmentBytes)
                     val body = TrackedBody(input)
-                    // Install even a late result so close/transport cleanup can account for it.
+
                     synchronized(this) { lastBody = body; bodyDelivered = false }
                     try {
                         currentCoroutineContext().ensureActive()
@@ -143,7 +137,7 @@ class HlsCaptureSegmentSource(private val address: URI, private val http: HlsCap
             }
         }
         if (retry != null && withTimeoutOrNull(5000) { retry.join(); true } != true) return false
-        // Transport is responsible for closing the handed-out body; do not race its store read.
+
         val confirmed = http.close()
         return confirmed && synchronized(this) { owner == null && lastBody == null }
     }
@@ -154,7 +148,7 @@ class HlsCaptureSegmentSource(private val address: URI, private val http: HlsCap
         override fun read(bytes: ByteArray, offset: Int, length: Int) = input.read(bytes, offset, length)
         @Synchronized override fun close() {
             if (closed) return
-            input.close() // Failure retains this handle for an explicit close retry.
+            input.close()
             closed = true
             synchronized(this@HlsCaptureSegmentSource) { if (lastBody === this) lastBody = null }
         }

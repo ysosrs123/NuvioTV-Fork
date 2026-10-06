@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.data.iptv.CaptureMedia3TimelineTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:50.100Z" hostname="PWR_PC" time="0.179">
+  <properties/>
+  <testcase name="emptyRetainedSnapshotKeepsUidForAdjacentFutureMediaAndForeignBatchIsIgnored" classname="com.nuvio.tv.data.iptv.CaptureMedia3TimelineTest" time="0.03"/>
+  <testcase name="projectionNeverInventsUncapturedSamplesAndCompletionRemovesDynamicFlag" classname="com.nuvio.tv.data.iptv.CaptureMedia3TimelineTest" time="0.018"/>
+  <testcase name="periodUidsAreScopedToTheSourceFactoryAndIdentityLookupIsStable" classname="com.nuvio.tv.data.iptv.CaptureMedia3TimelineTest" time="0.018"/>
+  <testcase name="incompleteStagedRunsCannotPublishASeekRangeAcrossAMissingSegment" classname="com.nuvio.tv.data.iptv.CaptureMedia3TimelineTest" time="0.046"/>
+  <testcase name="realMedia3WindowAndPeriodOffsetsRetainEpochOriginAndIncludeAudioTail" classname="com.nuvio.tv.data.iptv.CaptureMedia3TimelineTest" time="0.039"/>
+  <testcase name="explicitEpochWindowsNeverAutomaticallyNavigateAcrossADiscontinuity" classname="com.nuvio.tv.data.iptv.CaptureMedia3TimelineTest" time="0.028"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

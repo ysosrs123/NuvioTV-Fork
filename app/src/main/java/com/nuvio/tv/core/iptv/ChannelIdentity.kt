@@ -2,7 +2,6 @@ package com.nuvio.tv.core.iptv
 
 import java.util.UUID
 
-/** Local source and account IDs are opaque persisted IDs, never endpoint/credential strings. */
 data class ChannelCandidate(
     val name: String,
     val locator: String,
@@ -24,7 +23,6 @@ enum class IdentityMatch { PROVIDER_ID, GUIDE_VARIANT, EXACT_LOCATOR, NEW }
 data class ReconciledChannel(val channel: StoredChannel, val match: IdentityMatch)
 data class ChannelReconciliation(val channels: List<ReconciledChannel>, val unavailable: List<StoredChannel>)
 
-/** Pure reconciliation; the repository must commit this with its generation fence in one transaction. */
 class ChannelIdentityReconciler(private val newId: () -> String = { UUID.randomUUID().toString() }) {
     fun reconcile(sourceId: String, previous: List<StoredChannel>, incoming: List<ChannelCandidate>): ChannelReconciliation {
         require(sourceId.isNotBlank())
@@ -40,7 +38,7 @@ class ChannelIdentityReconciler(private val newId: () -> String = { UUID.randomU
         fun compatible(old: StoredChannel, candidate: ChannelCandidate): Boolean {
             val oldProvider = old.data.providerId?.takeIf(String::isNotBlank)
             val newProvider = candidate.providerId?.takeIf(String::isNotBlank)
-            // A missing ID cannot steal a row whose authoritative ID is present elsewhere in this refresh.
+
             if (oldProvider != null && oldProvider in providerGroups && newProvider != oldProvider) return false
             return oldProvider == null || newProvider == null || oldProvider == newProvider
         }
@@ -72,7 +70,7 @@ class ChannelIdentityReconciler(private val newId: () -> String = { UUID.randomU
                     match = old; reason = IdentityMatch.EXACT_LOCATOR
                 }
             }
-            // Never transfer one saved favourite to two new rows.
+
             if (match?.id in used) { match = null; reason = IdentityMatch.NEW }
             val id = match?.id ?: newId().also { require(it.isNotBlank() && allIds.add(it)) { "Duplicate generated identity" } }
             used += id
@@ -85,7 +83,6 @@ class ChannelIdentityReconciler(private val newId: () -> String = { UUID.randomU
 data class RefreshTicket(val sourceId: String, val configurationVersion: Long, val requestGeneration: Long)
 enum class RefreshDecision { PUBLISH, STALE, INVALID, EMPTY_REQUIRES_REVIEW, SHRINK_REQUIRES_REVIEW }
 
-/** No I/O: used again inside the database transaction, not merely after downloading. */
 fun decideCatalogueRefresh(
     candidate: RefreshTicket,
     latest: RefreshTicket,
@@ -98,7 +95,7 @@ fun decideCatalogueRefresh(
     if (candidate != latest) return RefreshDecision.STALE
     if (!complete) return RefreshDecision.INVALID
     if (candidateCount == 0 && !acceptedLargeChange) return RefreshDecision.EMPTY_REQUIRES_REVIEW
-    // Conservative review threshold; expose review to the user rather than authorising deletions.
+
     if (previousCount > 0 && candidateCount.toLong() * 2 < previousCount && !acceptedLargeChange) return RefreshDecision.SHRINK_REQUIRES_REVIEW
     return RefreshDecision.PUBLISH
 }

@@ -24,7 +24,6 @@ sealed interface GuideDownload<out T> {
     data class Imported<T>(val result: T) : GuideDownload<T>
 }
 
-/** Response and import share a structured lifetime: cancellation closes the call and awaits cleanup. */
 class IptvGuideClient(
     private val http: OkHttpClient = IptvMetadataClient.newClient(),
     private val maxTransferBytes: Long = 64L * 1024 * 1024,
@@ -34,7 +33,6 @@ class IptvGuideClient(
         require(!http.followRedirects && !http.followSslRedirects)
     }
 
-    /** Consumer must fully validate its stream and check cancellation immediately before promotion. */
     suspend fun <T> fetch(address: String, validators: CatalogueValidators? = null,
         consume: (InputStream, CatalogueValidators, () -> Unit) -> T): GuideDownload<T> = withContext(Dispatchers.IO) {
         require(listOf(validators?.etag, validators?.lastModified).all { it == null || (it.length <= 4096 && '\r' !in it && '\n' !in it) })
@@ -47,24 +45,22 @@ class IptvGuideClient(
                 if (!visited.add(url)) throw MetadataException(MetadataFailure.REDIRECT_LIMIT)
                 val request = Request.Builder().url(url)
                     .header("Accept", "application/xml, text/xml, application/gzip, */*")
-                    .header("Connection", "close") // No stale-socket retry after an HTTP/1.0 response.
-                    // Keep wire bytes visible to the budget; parseGuideInput handles gzip once.
+                    .header("Connection", "close")
+
                     .header("Accept-Encoding", "identity")
                     .apply {
                         validators?.takeUnless { redirected }?.etag?.let { header("If-None-Match", it) }
                         validators?.takeUnless { redirected }?.lastModified?.let { header("If-Modified-Since", it) }
                     }.build()
                 when (val step = response(request, !redirected && validators?.let { it.etag != null || it.lastModified != null } == true) { input, received, check ->
-                    // A redirect may resolve somewhere else on the next refresh. Do not store the
-                    // destination's validators against the original short URL or forward them.
+
                     consume(input, if (redirected) CatalogueValidators() else received, check)
                 }) {
                     is Step.Done -> return@withPermit step.value
                     is Step.Redirect -> {
                         val next = url.resolve(step.location)?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
                         val sameOrigin = next.scheme == url.scheme && next.host == url.host && next.port == url.port
-                        // Support HTTPS short links, without downgrade, cookies, authorization,
-                        // referrer, inherited query parameters or conditional headers.
+
                         if (!sameOrigin && next.scheme != "https") throw MetadataException(MetadataFailure.REDIRECT_REQUIRES_REVIEW)
                         redirected = true
                         url = next
@@ -120,7 +116,7 @@ class IptvGuideClient(
         } catch (error: Exception) {
             context.ensureActive()
             if (error is CancellationException || error is MetadataException) throw error
-            // Never expose credential-bearing URLs, parser excerpts, or network-stack causes.
+
             throw MetadataException(MetadataFailure.INVALID_RESPONSE)
         } finally { cancellation.cancel() }
     }
@@ -130,7 +126,7 @@ class IptvGuideClient(
         class Redirect(val location: String) : Step<Nothing>
     }
     private companion object {
-        val permits = Semaphore(2) // Synchronous OkHttp calls do not use Dispatcher admission limits.
+        val permits = Semaphore(2)
         fun usable(url: HttpUrl) = url.username.isEmpty() && url.password.isEmpty() && url.fragment == null
     }
 }

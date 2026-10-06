@@ -10,7 +10,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Actual TS staging in the async owner; no player, codec, display, audio or network. */
 @UnstableApi
 class PinnedCaptureReaderConsumerAndroidTest {
     @get:Rule val temp = TemporaryFolder()

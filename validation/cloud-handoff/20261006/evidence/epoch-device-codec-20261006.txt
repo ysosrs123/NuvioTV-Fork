@@ -1,0 +1,16 @@
+--------- beginning of main
+         1791237818.210 11777 11797 I IptvTsDecode: platformExtractor videoFrames=49 structuralFrames=50
+         1791237819.030 11777 11797 I IptvTsDecode: segment=0 mime=video/avc decoder=c2.amlogic.avc.decoder frames=50 firstUs=0 lastUs=1960000 decodedBytes=4608000
+         1791237819.210 11777 11797 I IptvTsDecode: segment=0 mime=audio/mp4a-latm decoder=c2.android.aac.decoder frames=95 firstUs=-21333 lastUs=1983996 decodedBytes=389120
+         1791237819.790 11777 11797 I IptvTsDecode: segment=1 mime=video/avc decoder=c2.amlogic.avc.decoder frames=50 firstUs=2000000 lastUs=3960000 decodedBytes=4608000
+         1791237819.959 11777 11797 I IptvTsDecode: segment=1 mime=audio/mp4a-latm decoder=c2.android.aac.decoder frames=94 firstUs=2005333 lastUs=3989329 decodedBytes=385024
+         1791237820.555 11777 11797 I IptvTsDecode: segment=2 mime=video/avc decoder=c2.amlogic.avc.decoder frames=50 firstUs=4000000 lastUs=5960000 decodedBytes=4608000
+         1791237820.731 11777 11797 I IptvTsDecode: segment=2 mime=audio/mp4a-latm decoder=c2.android.aac.decoder frames=94 firstUs=4010667 lastUs=5994662 decodedBytes=385024
+         1791237822.499 11777 11797 I IptvTsDecode: segment=-1 mime=video/avc decoder=c2.amlogic.avc.decoder frames=150 firstUs=1421333 lastUs=7381333 decodedBytes=13824000
+         1791237822.841 11777 11797 I IptvTsDecode: segment=-1 mime=audio/mp4a-latm decoder=c2.android.aac.decoder frames=283 firstUs=1400000 lastUs=7415995 decodedBytes=1159168
+         1791237823.440 11777 11797 I IptvTsDecode: segment=0 mime=video/avc decoder=c2.amlogic.avc.decoder frames=50 firstUs=1421333 lastUs=3381333 decodedBytes=4608000
+         1791237823.619 11777 11797 I IptvTsDecode: segment=0 mime=audio/mp4a-latm decoder=c2.android.aac.decoder frames=95 firstUs=1400000 lastUs=3405329 decodedBytes=389120
+         1791237824.226 11777 11797 I IptvTsDecode: segment=1 mime=video/avc decoder=c2.amlogic.avc.decoder frames=50 firstUs=3421333 lastUs=5381333 decodedBytes=4608000
+         1791237824.403 11777 11797 I IptvTsDecode: segment=1 mime=audio/mp4a-latm decoder=c2.android.aac.decoder frames=94 firstUs=3426666 lastUs=5410662 decodedBytes=385024
+         1791237824.979 11777 11797 I IptvTsDecode: segment=2 mime=video/avc decoder=c2.amlogic.avc.decoder frames=50 firstUs=5421333 lastUs=7381333 decodedBytes=4608000
+         1791237825.146 11777 11797 I IptvTsDecode: segment=2 mime=audio/mp4a-latm decoder=c2.android.aac.decoder frames=94 firstUs=5432000 lastUs=7415995 decodedBytes=385024

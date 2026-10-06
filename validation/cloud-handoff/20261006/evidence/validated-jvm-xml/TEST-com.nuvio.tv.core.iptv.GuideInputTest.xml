@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.GuideInputTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:48.252Z" hostname="PWR_PC" time="0.039">
+  <properties/>
+  <testcase name="plainAndGzipHaveIdenticalResultsAndDoNotCloseCallerStream" classname="com.nuvio.tv.core.iptv.GuideInputTest" time="0.036"/>
+  <testcase name="cancellationInterruptsStreamingReads" classname="com.nuvio.tv.core.iptv.GuideInputTest" time="0.0"/>
+  <testcase name="compressedExpansionIsBoundedIndependentlyOfDownloadBytes" classname="com.nuvio.tv.core.iptv.GuideInputTest" time="0.001"/>
+  <testcase name="corruptGzipTrailerCannotProduceASuccessfulImport" classname="com.nuvio.tv.core.iptv.GuideInputTest" time="0.0"/>
+  <testcase name="rawDownloadBudgetRejectsBeforeAcceptingTheFeed" classname="com.nuvio.tv.core.iptv.GuideInputTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

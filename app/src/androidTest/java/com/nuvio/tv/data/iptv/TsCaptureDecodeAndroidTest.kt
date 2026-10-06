@@ -23,7 +23,6 @@ import java.util.UUID
 import org.junit.Assert.*
 import org.junit.Test
 
-/** Local synthetic media only. Exact shipped Media3 AARs, fresh extractor/decoder per segment. */
 @androidx.media3.common.util.UnstableApi
 class TsCaptureDecodeAndroidTest {
     private fun fixture(n: Int) = requireNotNull(javaClass.getResourceAsStream("/iptv-ts/segment0$n.ts")).use { it.readBytes() }
@@ -83,8 +82,7 @@ class TsCaptureDecodeAndroidTest {
             extractor.selectTrack(track)
             var frames = 0
             while (extractor.sampleTime >= 0) { frames++; extractor.advance() }
-            // Firmware-dependent observation, not playback bounds. AM9 delivered 49/50;
-            // the primary test requires all 50 through the shipped Media3 HLS extractor.
+
             assertTrue(frames in 1..50)
             Log.i("IptvTsDecode", "platformExtractor videoFrames=$frames structuralFrames=50")
         } finally { extractor.release(); assertTrue(!file.exists() || file.delete()) }
@@ -145,8 +143,7 @@ class TsCaptureDecodeAndroidTest {
             override fun endTracks() = Unit
             override fun seekMap(seekMap: SeekMap) = Unit
         }
-        // First TS packet is SDT: changing its opaque payload preserves the elementary streams,
-        // so only the inspection/hash fence should reject this same-length replacement.
+
         val changed = original.copyOf().also { it[100] = (it[100].toInt() xor 1).toByte() }
         for (bytes in listOf(changed, original.copyOf(original.size - 188), original + byteArrayOf(0))) {
             try { LocalTsSegmentExtractor.extract(bytes.inputStream(), inspection, output()); fail("Changed inspected bytes accepted") }

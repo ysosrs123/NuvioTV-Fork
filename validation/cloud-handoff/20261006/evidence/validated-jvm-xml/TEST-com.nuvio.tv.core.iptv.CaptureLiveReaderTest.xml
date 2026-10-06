@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.CaptureLiveReaderTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:46.417Z" hostname="PWR_PC" time="0.146">
+  <properties/>
+  <testcase name="readingAndWaitingPinRetentionAndAdvancementReleasesOnlyOldSegments" classname="com.nuvio.tv.core.iptv.CaptureLiveReaderTest" time="0.046"/>
+  <testcase name="failuresBackpressureAndClosureAreNotSuccessfulEofAndCommittedMediaCanDrain" classname="com.nuvio.tv.core.iptv.CaptureLiveReaderTest" time="0.03"/>
+  <testcase name="gapAndDiscontinuityRequireAnExplicitNewReader" classname="com.nuvio.tv.core.iptv.CaptureLiveReaderTest" time="0.029"/>
+  <testcase name="producerCompletionSampleCannotHideAPublicationAndInvalidFutureStartsAreRejected" classname="com.nuvio.tv.core.iptv.CaptureLiveReaderTest" time="0.011"/>
+  <testcase name="lazyReaderReportsEvictionInsteadOfSilentlySkippingToAvailableData" classname="com.nuvio.tv.core.iptv.CaptureLiveReaderTest" time="0.014"/>
+  <testcase name="temporarilyEmptyTailIsWaitingAndCanReadFuturePublicationsUntilActualCompletion" classname="com.nuvio.tv.core.iptv.CaptureLiveReaderTest" time="0.015"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

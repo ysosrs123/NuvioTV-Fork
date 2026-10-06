@@ -17,7 +17,6 @@ import java.security.MessageDigest
 import java.util.UUID
 import org.json.JSONObject
 
-/** Blocking worker-only store. Parsing writes bounded batches to an invisible staging generation. */
 class IptvGuideStore(
     context: Context, databaseName: String = "iptv-guide.db",
     private val secrets: IptvSecretBox = AndroidIptvSecretBox(),
@@ -71,7 +70,6 @@ class IptvGuideStore(
             } }
     }
 
-    /** One coherent guide snapshot for a visible channel page; never loads entire feed indexes. */
     fun matchingIndexes(profileId: Int, feedIds: List<String>, externalIds: Set<String>): List<GuideFeedIndex> = transaction { db ->
         require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size)
         feedIds.forEach { IptvGuideRef(profileId, it) }
@@ -88,7 +86,6 @@ class IptvGuideStore(
 
     fun beginRefresh(ref: IptvGuideRef): IptvGuideTicket = transaction { db -> beginRefresh(db, ref) }
 
-    /** A cached representation is usable only for windows that were actually retained. */
     fun prepareRefresh(ref: IptvGuideRef, window: IptvGuideWindow): IptvGuideRefreshRequest = transaction { db ->
         val ticket = beginRefresh(db, ref)
         IptvGuideRefreshRequest(ticket, endpoint(db, ref), if (covers(db, ref, window)) validators(db, ref) else null)
@@ -107,7 +104,7 @@ class IptvGuideStore(
         val old = feed(db, ref)
         val generation = Math.addExact(old.requestedGeneration, 1)
         db.update("feeds", ContentValues().apply { put("requested", generation) }, "id=?", arrayOf(ref.feedId))
-        // Abandoned or superseded imports cannot be active. Cascades discard their staging rows.
+
         db.delete("stages", "feed=? AND generation<? AND id NOT IN (SELECT active_stage FROM feeds WHERE active_stage IS NOT NULL)", arrayOf(ref.feedId, generation.toString()))
         return IptvGuideTicket(ref, old.configurationVersion, generation)
     }
@@ -123,7 +120,6 @@ class IptvGuideStore(
         }
     }
 
-    /** Caller owns input. Neither incomplete XML nor a rejected programme can activate a candidate. */
     fun importGuide(
         ticket: IptvGuideTicket, input: InputStream, window: IptvGuideWindow,
         validators: IptvCacheValidators = IptvCacheValidators(),
@@ -134,7 +130,7 @@ class IptvGuideStore(
         val stage = UUID.randomUUID().toString()
         val claimed = transaction { db ->
             if (!current(db, ticket)) return@transaction false
-            // Claim one importer per ticket; never interleave two parses into the same candidate.
+
             db.insertWithOnConflict("stages", null, ContentValues().apply { put("id", stage); put("feed", ticket.ref.feedId); put("generation", ticket.generation) }, SQLiteDatabase.CONFLICT_IGNORE) != -1L
         }
         if (!claimed) return RefreshDecision.STALE
@@ -206,13 +202,12 @@ class IptvGuideStore(
             importFailure = error
             throw error
         } finally {
-            // Never delete a promoted stage, including when cancellation races the return to a caller.
+
             try { transaction { db -> db.delete("stages", "id=? AND id NOT IN (SELECT active_stage FROM feeds WHERE active_stage IS NOT NULL)", arrayOf(stage)) } }
             catch (cleanup: Throwable) { if (importFailure == null) throw cleanup else importFailure.addSuppressed(cleanup) }
         }
     }
 
-    /** Exact feed/channel scope and half-open intervals. Unknown end times are never invented. */
     fun programmes(ref: IptvGuideRef, externalId: String, window: IptvGuideWindow, offset: Int = 0, limit: Int = 100): IptvProgrammePage = transaction { db ->
         require(offset >= 0 && limit in 1..200 && externalId.isNotBlank())
         feed(db, ref)
@@ -266,7 +261,7 @@ class IptvGuideStore(
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
             check(oldVersion == 1 && newVersion == 2) { "Missing guide database migration" }
-            // Old rows stay readable, but unknown retention coverage must force a full refresh.
+
             db.execSQL("ALTER TABLE feeds ADD COLUMN window_from INTEGER")
             db.execSQL("ALTER TABLE feeds ADD COLUMN window_until INTEGER")
         }

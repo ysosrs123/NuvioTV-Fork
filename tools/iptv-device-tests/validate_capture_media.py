@@ -49,8 +49,8 @@ def main():
         assert len(vp) == 50 and 'K' in vp[0]['flags']
         assert all(p['pts'] == p['dts'] and p['duration'] == 3600 for p in vp)
         assert all(b['pts'] - a['pts'] == 3600 for a, b in zip(vp, vp[1:]))
-        # Fresh process per segment, strict decode errors, both selected tracks. Framehash provides
-        # decoded output counts and reproducible reference hashes rather than a successful probe only.
+
+
         decoded = run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-nostdin', '-xerror', '-err_detect', 'explode',
                        '-i', str(path), '-map', '0:v:0', '-map', '0:a:0', '-f', 'framehash', '-hash', 'sha256', '-'])
         assert not decoded.stderr.strip(), decoded.stderr

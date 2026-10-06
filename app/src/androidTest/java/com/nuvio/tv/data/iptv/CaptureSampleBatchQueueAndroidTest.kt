@@ -10,7 +10,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Real incremental TS staging/metadata; no renderer, codec, audio, display or network. */
 @UnstableApi
 class CaptureSampleBatchQueueAndroidTest {
     @get:Rule val temp=TemporaryFolder()

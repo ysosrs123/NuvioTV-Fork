@@ -3,7 +3,6 @@ package com.nuvio.tv.core.iptv
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/** Counts requests entering open(), including blocked connects; rejects late Media3 loader work. */
 class LiveRequestFence {
     class Ticket internal constructor()
     private var accepting = true

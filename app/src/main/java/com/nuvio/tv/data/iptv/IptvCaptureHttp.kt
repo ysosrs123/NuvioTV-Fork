@@ -14,7 +14,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
-/** A dedicated, single-request capture client; does not borrow or cancel unrelated player calls. */
 class IptvCaptureHttp(private val http: OkHttpClient = newClient(), private val closeTimeoutMs: Long = 5000) : HlsCaptureHttp {
     init {
         require(!http.followRedirects && !http.followSslRedirects && !http.retryOnConnectionFailure)
@@ -107,16 +106,15 @@ class IptvCaptureHttp(private val http: OkHttpClient = newClient(), private val 
                 throw HlsCaptureException(HlsCaptureFailure.NETWORK)
             } finally {
                 cancel.cancel()
-                // connecting stays true until this attempt has finished, including response cleanup.
+
                 if (!slot.delivered) {
-                    try { closeSlot(slot) } catch (_: Exception) { /* Retain for close retry. */ }
+                    try { closeSlot(slot) } catch (_: Exception) {                               }
                 }
                 slot.connecting = false
             }
         }
         } } catch (error: Exception) {
-            // withContext has prompt cancellation on return: a stream may never reach its caller.
-            // Reclaim that undelivered response through the client's single-owner cleanup path.
+
             opened?.delivered = false
             throw error
         }
@@ -148,11 +146,9 @@ class IptvCaptureHttp(private val http: OkHttpClient = newClient(), private val 
     }
 
     private fun closeSlot(slot: Slot) {
-        // The returned stream or one retained cleanup worker is the sole owner of body close.
+
         if (slot.closeUncertain) throw HlsCaptureException(HlsCaptureFailure.NETWORK)
-        // Response.close()/ResponseBody.close() quietly swallow IOException. Close the actual
-        // buffered source instead. It can mark itself closed before throwing, so a second close
-        // returning normally cannot establish that the underlying resource was released.
+
         try { slot.response?.body?.source()?.close() }
         catch (_: Exception) { slot.closeUncertain = true; throw HlsCaptureException(HlsCaptureFailure.NETWORK) }
         synchronized(this) { slots.remove(slot) }

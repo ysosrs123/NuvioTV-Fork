@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:48.648Z" hostname="PWR_PC" time="0.007">
+  <properties/>
+  <testcase name="relativeLocatorsUseFinalRedirectBaseAndPreserveEscapes" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.003"/>
+  <testcase name="conflictingDuplicateAttributesAreNotGuessed" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.001"/>
+  <testcase name="localRelativeAndUnsupportedSchemesAreRejected" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.0"/>
+  <testcase name="malformedPercentEscapeQuarantinesOnlyThatRecordButPreventsPublication" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.001"/>
+  <testcase name="authenticationExtensionsAreNotSilentlyIgnored" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.0"/>
+  <testcase name="logRepresentationDoesNotLeakLocatorCredentials" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.0"/>
+  <testcase name="bomCrLfUnicodeAndQuotedCommaArePreserved" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.0"/>
+  <testcase name="incompleteRecordPreventsPublication" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.001"/>
+  <testcase name="lateHlsEvidenceDiscardsStagedRows" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.0"/>
+  <testcase name="boundedLinesAndCatalogueSizeFailClosed" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.0"/>
+  <testcase name="invalidUtf8DoesNotBecomeReplacementText" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.0"/>
+  <testcase name="explicitArchiveDisableOverridesPlaylistDefault" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.001"/>
+  <testcase name="htmlAndPlainUrlsAreRejected" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.0"/>
+  <testcase name="hlsMasterIsClassifiedWithoutOpeningVariants" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.0"/>
+  <testcase name="hlsSegmentsAreNeverChannels" classname="com.nuvio.tv.core.iptv.PlaylistCatalogueTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

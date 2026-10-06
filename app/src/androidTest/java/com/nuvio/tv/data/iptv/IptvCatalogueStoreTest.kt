@@ -82,7 +82,7 @@ class IptvCatalogueStoreTest {
         store.setOverlay(ref, item.channel.id, overlay)
         store.close()
         context.openOrCreateDatabase(name, 0, null).use { db ->
-            // Reconstruct the exact previous overlay table; all other v2 columns remain unchanged.
+
             db.execSQL("ALTER TABLE overlays RENAME TO newer_overlays")
             db.execSQL("CREATE TABLE overlays (id TEXT NOT NULL REFERENCES identities(id), profile INTEGER NOT NULL, custom_name TEXT, favourite_rank INTEGER, hidden INTEGER NOT NULL, guide_feed TEXT, guide_id TEXT, search_name TEXT, PRIMARY KEY(id,profile))")
             db.execSQL("INSERT INTO overlays SELECT id,profile,custom_name,favourite_rank,hidden,guide_feed,guide_id,search_name FROM newer_overlays")

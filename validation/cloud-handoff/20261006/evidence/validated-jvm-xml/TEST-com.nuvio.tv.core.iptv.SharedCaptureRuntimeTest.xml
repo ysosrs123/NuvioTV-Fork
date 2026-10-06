@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:49.245Z" hostname="PWR_PC" time="0.31">
+  <properties/>
+  <testcase name="capacityAndIncompatiblePlansAreRejectedBeforeFactoriesRun" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.033"/>
+  <testcase name="failedViewerStartDoesNotStopRecordingAndReturnsCleanupToken" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.006"/>
+  <testcase name="failedStartupCanBeRetriedOnlyAfterActualClosure" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.015"/>
+  <testcase name="forgottenLocalReaderKeepsInfrastructureEvenAfterTransportCloses" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.052"/>
+  <testcase name="underReservedJoinCannotStopAnExistingRecorderOrReleaseUnconfirmedMemory" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.019"/>
+  <testcase name="physicalDenialRetainsInfrastructureUntilTheUnstartedTransportConfirmsClosure" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.014"/>
+  <testcase name="uncertainTransportCloseHoldsStorageMemoryAndAccountAndRejectsNewJoin" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.006"/>
+  <testcase name="cancelledJoinWithUncertainConsumerCanBeRecoveredByShutdown" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.026"/>
+  <testcase name="foreignAcquisitionCannotBeSharedWithoutItsActualPipeline" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.006"/>
+  <testcase name="sharedRecordingOutlivesViewerAndFinalCloseReleasesInfrastructure" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.01"/>
+  <testcase name="factoryFailureAndConsumerCapacityFailureReturnUnusedReservations" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.033"/>
+  <testcase name="unguardedPipelineCannotOpenUpstreamOrConstructAConsumer" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.014"/>
+  <testcase name="staleTokensCannotCloseReplacementAndShutdownCanRetryFailedConsumers" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.01"/>
+  <testcase name="storageDenialOfAnotherConsumerDoesNotStopTheExistingRecording" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.006"/>
+  <testcase name="cancelledCloseStillFinishesReleaseAndNeverStopsRemainingRecording" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.024"/>
+  <testcase name="uncertainConsumerCloseRetainsDecoderUntilConfirmed" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.018"/>
+  <testcase name="consumerMemoryFloorIsValidatedBeforeAnyNewTransportStarts" classname="com.nuvio.tv.core.iptv.SharedCaptureRuntimeTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,6 +1,5 @@
 package com.nuvio.tv.core.iptv
 
-/** Per-acquisition measurements. Monotonic milliseconds are supplied by the adapter. */
 class LiveTelemetry {
     private var startedAt: Long? = null
     private var firstFrameAt: Long? = null
@@ -13,7 +12,7 @@ class LiveTelemetry {
     @Synchronized fun start(now: Long) { check(startedAt == null); startedAt = now }
     @Synchronized fun firstFrame(now: Long) { if (startedAt != null && firstFrameAt == null) firstFrameAt = now }
     @Synchronized fun buffering(active: Boolean, now: Long) {
-        // Initial preparation is tune latency, not a rebuffer. Duplicate callbacks add nothing.
+
         if (active && firstFrameAt != null && bufferStartedAt == null) { bufferStartedAt = now; stalls++ }
         if (!active) bufferStartedAt?.let { bufferTotal += (now - it).coerceAtLeast(0); bufferStartedAt = null }
     }

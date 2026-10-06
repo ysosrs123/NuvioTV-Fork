@@ -15,7 +15,6 @@ import org.junit.runner.RunWith
 import java.security.KeyStore
 import java.util.UUID
 
-/** Production HTTP parser -> repository -> real SQLite, with in-process fixture responses only. */
 @RunWith(AndroidJUnit4::class)
 class IptvPlaylistRepositoryTest {
     private val valid = "#EXTM3U\n#EXTINF:-1 tvg-id=\"one\" group-title=\"News\",Fixture\nhttps://fixture.invalid/live?secret=not-real\n"
@@ -44,7 +43,7 @@ class IptvPlaylistRepositoryTest {
         assertEquals(IptvPlaylistRefresh.Unchanged, repository.refresh(ref))
         assertEquals("v1", requests.last().header("If-None-Match"))
         assertEquals(before.channels, store.snapshot(ref).channels)
-        assertEquals(3, requests.size) // No logo, guide or media fetches.
+        assertEquals(3, requests.size)
     }
 
     @Test fun sourceEditDuringHttpResponsePreventsPromotionAndHlsNeverBecomesCatalogue() = fixture { store, ref ->

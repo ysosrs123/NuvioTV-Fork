@@ -5,7 +5,6 @@ import java.io.InputStream
 import java.io.PushbackInputStream
 import java.util.zip.GZIPInputStream
 
-/** Sniff bytes, not file extensions. Both the download and expanded XML have independent limits. */
 fun parseGuideInput(
     input: InputStream,
     channel: (GuideChannel) -> Unit,
@@ -23,7 +22,7 @@ fun parseGuideInput(
             return `in`.read(bytes, offset, minOf(length.toLong(), maxInputBytes - count + 1).toInt()).also { if (it > 0) count(it) }
         }
         fun count(amount: Int) { count += amount; require(count <= maxInputBytes) { "Guide input byte limit" } }
-        override fun close() = Unit // The caller owns the source stream.
+        override fun close() = Unit
     }
     val peek = PushbackInputStream(bounded, 2)
     val first = peek.read(); val second = peek.read()

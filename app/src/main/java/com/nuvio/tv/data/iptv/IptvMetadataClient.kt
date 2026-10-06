@@ -19,7 +19,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
-/** Cache validators belong to a successfully activated generation, never a failed candidate. */
 data class CatalogueValidators(val etag: String? = null, val lastModified: String? = null) {
     override fun toString(): String = "CatalogueValidators(values withheld)"
 }
@@ -34,11 +33,6 @@ sealed interface PlaylistDownload {
 enum class MetadataFailure { INVALID_ADDRESS, AUTHENTICATION, HTTP_STATUS, REDIRECT_REQUIRES_REVIEW, REDIRECT_LIMIT, BODY_LIMIT, INVALID_RESPONSE, NETWORK }
 class MetadataException(val failure: MetadataFailure, val status: Int? = null) : IOException("IPTV metadata: $failure")
 
-/**
- * Dedicated metadata-only transport. It never requests channel/logo/EPG URLs discovered in a
- * playlist. No inherited player interceptors, cookies, disk cache, range probes or automatic retry.
- * Run repository promotion separately after validating the complete candidate and refresh ticket.
- */
 class IptvMetadataClient(
     private val http: OkHttpClient = newClient(),
     private val parser: PlaylistCatalogueParser = PlaylistCatalogueParser(),
@@ -55,7 +49,7 @@ class IptvMetadataClient(
         repeat(6) {
             if (!visited.add(url)) throw MetadataException(MetadataFailure.REDIRECT_LIMIT)
             val request = Request.Builder().url(url).header("Accept", "application/x-mpegURL, audio/x-mpegurl, text/plain, */*")
-                // Avoid stale pooled sockets from HTTP/1.0 servers without retrying requests.
+
                 .header("Connection", "close")
                 .apply {
                     validators?.etag?.let { header("If-None-Match", it) }
@@ -65,8 +59,7 @@ class IptvMetadataClient(
                 is Step.Done -> return result.result
                 is Step.Redirect -> {
                     val next = url.resolve(result.location)?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
-                    // Signed cross-host migrations require an explicit source edit/review. Do not
-                    // silently forward credentials or allow an HTTPS-to-HTTP downgrade.
+
                     if (url.scheme != next.scheme || url.host != next.host || url.port != next.port) {
                         throw MetadataException(MetadataFailure.REDIRECT_REQUIRES_REVIEW)
                     }
@@ -82,7 +75,7 @@ class IptvMetadataClient(
         continuation.invokeOnCancellation { call.cancel() }
         call.enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                // Exceptions from the HTTP stack can contain a credential-bearing endpoint.
+
                 if (continuation.isActive) continuation.resumeWithException(MetadataException(MetadataFailure.NETWORK))
             }
 

@@ -24,7 +24,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Real reader/cursor/queue/pins and Java MediaPeriod APIs; SYNTHETIC encoded payloads, no codecs. */
 @UnstableApi
 class CaptureEpochPeriodTest {
     @get:Rule val temp=TemporaryFolder()
@@ -107,7 +106,7 @@ class CaptureEpochPeriodTest {
         for(boundary in listOf(false,true)) Fixture().use { f -> f.store.add(0); val p=f.open(); val v=select(p)[0]!!; drain(v,50,0)
             if(boundary) f.store.add(1,continuity=1) else f.producer.value=CaptureTransportState.FAILED
             f.events.emit(Unit); val next=f.ready(if(boundary) IncrementalReaderState.DISCONTINUITY else IncrementalReaderState.STOPPED,1)
-            if(boundary) assertTrue(p.refresh(next)) else assertFalse(p.refresh(next)) // STOPPED cannot extend a borrow.
+            if(boundary) assertTrue(p.refresh(next)) else assertFalse(p.refresh(next))
             try { v.readData(FormatHolder(),buffer(),0); fail() } catch(_:IOException) { }
             try { v.maybeThrowError(); fail() } catch(_:IOException) { }
         }

@@ -11,7 +11,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Actual incremental TS stager and cached metadata; no renderer, codec, audio/display or network. */
 @UnstableApi
 class IncrementalCaptureReaderConsumerAndroidTest {
     @get:Rule val temp=TemporaryFolder()

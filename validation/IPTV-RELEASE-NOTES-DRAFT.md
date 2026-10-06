@@ -6,6 +6,18 @@ prior overnight implementation: 6ad3799;
 07:05 overnight closure checkpoint: 6f4a01d. Capture code is internal and gated;
 the installed distinct prototype remains the older HUD/guide build. Nothing published.
 
+## Player-binding WIP — cloud transfer status
+
+Last validated committed checkpoint is b68985a. Subsequent player-binding source /
+tests are included on codex/iptv-wip for the authorized cloud review.
+Read [the current WIP transfer note](IPTV-CAPTURE-PLAYER-WIP-20261006.md) and its
+JSON report before editing or building. Core211 passes; the current harness builds,
+but both actual AM9 player fixtures time out. No new successful player/rendering
+claim or full app/JVM run is established. Both test packages are removed; no task
+build/test is running. Continue cloud review from codex/iptv-wip.
+See ../IPTV-CLOUD-HANDOFF.md for the entry point and versioned evidence.
+The committed AM9 capture-path checkpoint below remains valid historical evidence.
+
 ## AM9 capture-path validation continuation - 6 October 2026
 
 Manual continuation from clean transfer 81540e1 in the IPTV sibling. This section

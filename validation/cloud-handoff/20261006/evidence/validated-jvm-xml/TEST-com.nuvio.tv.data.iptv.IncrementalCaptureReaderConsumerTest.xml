@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:53.437Z" hostname="PWR_PC" time="0.726">
+  <properties/>
+  <testcase name="explicitEpochBoundarySurvivesBatchReleaseWithoutAutomaticNavigation" classname="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" time="0.072"/>
+  <testcase name="failedReleaseRetainsRuntimeMemoryAndPreservesTheIndependentRecorder" classname="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" time="0.032"/>
+  <testcase name="failedObserverCannotPublishALateSuccessfulStage" classname="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" time="0.137"/>
+  <testcase name="captureHintsGrowCachedTimelineWithoutPollingOrBlockingBorrowers" classname="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" time="0.044"/>
+  <testcase name="cancellationWaitsForTheSoleStagerAndKeepsPinUntilConfirmedCleanup" classname="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" time="0.074"/>
+  <testcase name="hintsDuringBlockedStagingAreCoalescedAndCachedReadsDoNotTouchTheQueue" classname="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" time="0.047"/>
+  <testcase name="releaseInvalidatesDeliveredSnapshotThenRefillsAndPublishesStableOffset" classname="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" time="0.042"/>
+  <testcase name="blockedCloserIsSharedAndLateConfirmationStillClearsCachedArrays" classname="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" time="0.237"/>
+  <testcase name="actualTransportPublicationHintsDriveTheReaderThroughSharedAdmission" classname="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" time="0.036"/>
+  <testcase name="closeBeforeStartFencesRestartAndEncodedFloorIsImmutableWithoutIo" classname="com.nuvio.tv.data.iptv.IncrementalCaptureReaderConsumerTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

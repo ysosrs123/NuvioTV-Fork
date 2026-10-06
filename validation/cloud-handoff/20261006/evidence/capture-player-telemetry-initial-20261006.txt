@@ -1,0 +1,2 @@
+--------- beginning of main
+         1791240209.693  6611  6632 I IptvCapturePlayer: before startMs=0 totalPssKb=46241 javaHeapKb=8944 nativeHeapKb=2572 graphicsKb=0

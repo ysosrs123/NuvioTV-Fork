@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:46.567Z" hostname="PWR_PC" time="0.458">
+  <properties/>
+  <testcase name="cancellationAfterAcquiringRetentionIsStickyAndRequiresExplicitCleanup" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.022"/>
+  <testcase name="completionIsSampledBeforeTheSnapshotOfItsFinalPublication" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.021"/>
+  <testcase name="prepublishedWindowsReuseTheirIdentityAndCannotAutomaticallyCrossEpochs" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.034"/>
+  <testcase name="waitingTailCanGrowAndOnlyActualCompletionEndsWithoutReleasingAnchor" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.066"/>
+  <testcase name="capRetainsCompletedInputsAndExplicitReleaseAllowsExactSuccessor" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.045"/>
+  <testcase name="stoppedStatesDrainPublishedRowsButNeverManufactureSuccessfulEof" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.069"/>
+  <testcase name="repeatedReadyUsesSameInputAndOnlyVerifiedCompletionAllowsAdvancement" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.018"/>
+  <testcase name="foreignTicketsAndInvalidBoundsCannotAdvanceOrReleaseTheWrongCursor" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.021"/>
+  <testcase name="captureAndActualPtsEpochChangesAreExplicitStickyBoundaries" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.059"/>
+  <testcase name="reentrantCallbacksCannotBypassTheInputCapOrCloseAnInFlightOwner" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.017"/>
+  <testcase name="inspectionFailureRetainsItsCandidateAndNeverRetriesOrExposesPartialMedia" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.022"/>
+  <testcase name="failedInputReleaseRetainsCapacityAndFailedCursorCloseFencesUntilRetry" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.047"/>
+  <testcase name="anEvictedLazyStartIsExpiredAndNeverSubstitutesTheAvailableRow" classname="com.nuvio.tv.core.iptv.CaptureSampleLoadCursorTest" time="0.015"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -4,13 +4,11 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.CancellationException
 
-/** Fresh filesystem observation, not a quota or a preallocation guarantee. */
 data class CaptureSpaceReading(val usableBytes: Long, val allocationUnitBytes: Long, val volumeId: String)
 fun interface CaptureSpaceProbe { fun read(directory: File): CaptureSpaceReading }
 enum class CaptureStorageFailure { PROBE_FAILED, INVALID_READING, VOLUME_CHANGED, INSUFFICIENT_SPACE, RESERVATION_TOO_SMALL, UNGUARDED }
 class CaptureStorageUnavailable(val reason: CaptureStorageFailure) : IOException("Capture storage unavailable: $reason")
 
-/** Caller chooses its minimum free-space margin; production probes must report actual allocation units. */
 class CaptureStoragePolicy(val minimumFreeBytes: Long, private val probe: CaptureSpaceProbe) {
     init { require(minimumFreeBytes > 0) }
     internal fun bind(directory: File): CaptureStorageFence = CaptureStorageFence(directory, minimumFreeBytes, probe)
@@ -45,7 +43,7 @@ internal class CaptureStorageFence(private val directory: File, private val mini
         require(additionalPayloadBytes >= 0 && overheadBytes > 0)
         demand(exact { Math.addExact(additionalPayloadBytes, overheadBytes) })
     }
-    /** Existing physical allocation is already reflected by usableBytes. No credit for future eviction. */
+
     fun growth(oldBytes: Long, newBytes: Long, metadataBytes: Long = 0) {
         require(oldBytes >= 0 && newBytes >= oldBytes && metadataBytes >= 0)
         demand(exact { Math.addExact(minimumFreeBytes, Math.addExact(rounded(newBytes) - rounded(oldBytes), rounded(metadataBytes))) })

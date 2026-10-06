@@ -1,15 +1,10 @@
 package com.nuvio.tv.core.iptv
 
-/** External guide IDs are only meaningful inside a particular feed. */
 data class GuideKey(val feedId: String, val externalId: String)
 data class GuideFeedIndex(val feedId: String, val channelIds: Set<String>)
 enum class GuideMatchReason { MANUAL, EXACT_ID, MISSING_MANUAL_TARGET, AMBIGUOUS, NONE }
 data class GuideMatch(val key: GuideKey?, val reason: GuideMatchReason, val candidates: List<GuideKey> = emptyList())
 
-/**
- * Feed order is explicit source configuration, not download completion order. A missing manual
- * target stays missing instead of silently transferring to another feed. Names are not identities.
- */
 fun resolveGuideMapping(
     guideId: String?,
     manual: GuideKey?,
@@ -33,7 +28,6 @@ fun resolveGuideMapping(
     }, candidates)
 }
 
-/** Caller supplies one feed's records. Half-open intervals preserve exact programme boundaries. */
 fun programmesAt(programmes: List<GuideProgramme>, channelExternalId: String, instantMillis: Long): List<GuideProgramme> =
     programmes.filter { it.channelExternalId == channelExternalId && it.start.precise && it.stop?.precise == true && it.start.epochMillis <= instantMillis && it.stop.epochMillis > instantMillis }
         .sortedWith(compareBy({ it.start.epochMillis }, { it.stop!!.epochMillis }))

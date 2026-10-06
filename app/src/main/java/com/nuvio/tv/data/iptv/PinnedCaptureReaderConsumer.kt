@@ -11,16 +11,6 @@ import kotlinx.coroutines.sync.withLock
 
 internal enum class CaptureReaderState { NEW, LOADING, READY, EXPIRED, STALE, FAILED, CLEANUP_REQUIRED, CLOSING, CLOSED }
 
-/**
- * One asynchronous, exact-request pinned reader consumer for SharedCaptureRuntime. Construction opens
- * nothing; start commits/stages off the caller thread. No decoder, player, network or polling loop.
- * The parent must admit staging/transient memory and retain its lease until close confirms true.
- * READY never acknowledges a seek. Borrowing requires the still-current exact request; the future
- * player must fence commands again, then stop/confirm its renderers BEFORE closing this reader.
- * A stale/cancelled load cannot publish. Failed/timed-out cleanup retains the pin/period and lease;
- * explicit close retries only after the sole existing worker/closer finishes. Never use as live EOF.
- * Injectable staging is an internal fixture seam and must transfer the input only on success.
- */
 @UnstableApi
 internal class PinnedCaptureReaderConsumer(
     private val seeks: CaptureSeekController,
@@ -58,7 +48,7 @@ internal class PinnedCaptureReaderConsumer(
                     synchronized(this@PinnedCaptureReaderConsumer) { input = opened }
                     context.ensureActive()
                     val staged = stage(opened, limits) { context.ensureActive() }
-                    // Keep the returned owner BEFORE any cancellation or stale publication check.
+
                     synchronized(this@PinnedCaptureReaderConsumer) { period = staged; input = null }
                     context.ensureActive()
                     synchronized(this@PinnedCaptureReaderConsumer) {
@@ -80,12 +70,11 @@ internal class PinnedCaptureReaderConsumer(
         }.also { it.start() }
     }
 
-    /** Borrowed only; this consumer still owns closure. Does not prepare, select or acknowledge. */
     @Synchronized fun readyPeriod(expected: CaptureSeekRequest): PinnedCaptureSegmentPeriod? {
         if (expected !== request || stopping || stateMutable.value != CaptureReaderState.READY) return null
         if (!seeks.isCurrentCommitted(request)) {
             stateMutable.value = CaptureReaderState.STALE
-            return null // Existing borrowed use must be fenced by its future player owner.
+            return null
         }
         return period?.takeUnless { it.released }
     }
@@ -97,7 +86,7 @@ internal class PinnedCaptureReaderConsumer(
         }
         active?.cancel()
         val confirmed = withTimeoutOrNull(closeTimeoutMs) {
-            active?.join() // Never close a file while the sole staging worker might still read it.
+            active?.join()
             val closing = synchronized(this@PinnedCaptureReaderConsumer) {
                 cleanup?.takeUnless { it.isCompleted } ?: CoroutineScope(dispatcher).launch(start = CoroutineStart.LAZY) {
                     cleanupOwned()
@@ -120,6 +109,6 @@ internal class PinnedCaptureReaderConsumer(
                 if (input === handles.second) input = null
             }
             true
-        } catch (_: Exception) { false } // Keep exact handles for explicit retry; no error URL leakage.
+        } catch (_: Exception) { false }
     }
 }

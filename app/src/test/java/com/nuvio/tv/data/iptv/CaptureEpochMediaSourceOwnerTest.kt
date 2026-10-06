@@ -12,9 +12,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Actual owned MediaSource/reader lifecycle before Looper preparation; SYNTHETIC encoded data.
- * Host cannot validate BaseMediaSource/Handler playback callbacks; real Android cases compile only.
- */
 @UnstableApi
 class CaptureEpochMediaSourceOwnerTest {
     @get:Rule val temp=TemporaryFolder()

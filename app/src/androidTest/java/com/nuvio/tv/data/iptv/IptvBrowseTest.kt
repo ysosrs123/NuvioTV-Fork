@@ -50,7 +50,7 @@ class IptvBrowseTest {
         val ref = source(); publish(ref, (1..401).map { row(it) })
         secrets.opens = 0
         val first = catalogue.page(ref, limit = 10)
-        assertEquals(11, secrets.opens) // Ten visible rows plus one lookahead, not 401 payloads.
+        assertEquals(11, secrets.opens)
         assertEquals(10, first.items.size); assertNotNull(first.next)
         val ids = mutableListOf<String>(); var cursor: IptvBrowseCursor? = null
         do {

@@ -6,11 +6,10 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
-/** Cross-store reads are independent snapshots; later guide refreshes require a UI requery. */
 class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private val guides: IptvGuideStore) {
     suspend fun setGuideFeeds(ref: IptvSourceRef, feeds: List<IptvGuideRef>, priority: List<IptvGuideRef> = emptyList()) = withContext(Dispatchers.IO) {
         require(feeds.all { it.profileId == ref.profileId })
-        feeds.forEach { guides.feed(it) } // Reject unknown/foreign-profile targets without copying feed credentials.
+        feeds.forEach { guides.feed(it) }
         currentCoroutineContext().ensureActive()
         catalogue.setGuideFeeds(ref, feeds, priority)
     }

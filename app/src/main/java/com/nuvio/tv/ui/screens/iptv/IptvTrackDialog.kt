@@ -21,7 +21,6 @@ import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.theme.NuvioTheme
 import java.util.Locale
 
-/** Select only tracks exposed by the active player. A new channel gets its own selection state. */
 @Composable
 internal fun IptvTrackDialog(player: ExoPlayer, onDismiss: () -> Unit) {
     var tracks by remember(player) { mutableStateOf(player.currentTracks) }
@@ -55,7 +54,7 @@ internal fun IptvTrackDialog(player: ExoPlayer, onDismiss: () -> Unit) {
                         val label = listOfNotNull(format.label?.take(80), language, format.sampleMimeType).filter { it.isNotBlank() }.distinct().joinToString(" · ")
                         val supported = group.isTrackSupported(index)
                         Button(enabled = supported, onClick = {
-                            // A manifest update can remove this group while the dialog has focus.
+
                             if (player.currentTracks.groups.any { it.mediaTrackGroup == group.mediaTrackGroup && it.isTrackSupported(index) }) {
                                 player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
                                     .setTrackTypeDisabled(type, false)

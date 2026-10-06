@@ -13,7 +13,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Actual cursor/pinned files, SYNTHETIC compressed batches. No Android TS reader/decoder. */
 @UnstableApi
 class CaptureSampleBatchQueueTest {
     @get:Rule val temp=TemporaryFolder()

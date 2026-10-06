@@ -12,7 +12,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Host JDK filesystem evidence only; Android statvfs has its own unexecuted fixtures. */
 class CaptureStorageHostTest {
     @get:Rule val temp=TemporaryFolder()
     @Test fun realHostFilesystemProbeChecksTheTaskSpoolWithoutFillingOrChangingItsVolume() {
@@ -31,8 +30,7 @@ class CaptureStorageHostTest {
     }
     private fun allocationUnit(directory: File, fs: FileStore): Long {
         if (!System.getProperty("os.name").startsWith("Windows")) return fs.blockSize
-        // This host JDK returns bytesPerSector from getBlockSize, not sectorsPerCluster * bytesPerSector.
-        // Read the actual Windows cluster via a task-owned noninteractive helper; no writes to the volume.
+
         val root=directory.toPath().root.toString().replace("'","''")
         val script="""
             ${'$'}ErrorActionPreference='Stop'

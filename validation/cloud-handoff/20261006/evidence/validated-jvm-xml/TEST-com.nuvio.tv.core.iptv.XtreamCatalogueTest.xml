@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.XtreamCatalogueTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:49.633Z" hostname="PWR_PC" time="0.006">
+  <properties/>
+  <testcase name="absentArchiveFlagStaysUnknown" classname="com.nuvio.tv.core.iptv.XtreamCatalogueTest" time="0.005"/>
+  <testcase name="booleanFractionalAndNullIdsAreInvalid" classname="com.nuvio.tv.core.iptv.XtreamCatalogueTest" time="0.0"/>
+  <testcase name="positiveArchiveFlagIsAdvertisedNotProven" classname="com.nuvio.tv.core.iptv.XtreamCatalogueTest" time="0.0"/>
+  <testcase name="emptyResponseDoesNotAuthoriseDeletion" classname="com.nuvio.tv.core.iptv.XtreamCatalogueTest" time="0.0"/>
+  <testcase name="channelLimitIsEnforced" classname="com.nuvio.tv.core.iptv.XtreamCatalogueTest" time="0.0"/>
+  <testcase name="disabledArchiveCannotBeRevivedByPositiveDuration" classname="com.nuvio.tv.core.iptv.XtreamCatalogueTest" time="0.0"/>
+  <testcase name="integerAndStringIdsCollapseButLeadingZeroIsDistinct" classname="com.nuvio.tv.core.iptv.XtreamCatalogueTest" time="0.001"/>
+  <testcase name="conflictingIdentityPreventsPromotion" classname="com.nuvio.tv.core.iptv.XtreamCatalogueTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

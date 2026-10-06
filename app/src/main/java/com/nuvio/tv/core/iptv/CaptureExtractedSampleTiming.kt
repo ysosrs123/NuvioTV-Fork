@@ -4,13 +4,12 @@ import java.io.IOException
 
 class CaptureSampleTimingException : IOException("Extracted capture timestamps differ from inspection")
 
-/** One shared video reference; audio retains its real phase, including before epoch zero. */
 class CaptureExtractedSampleTiming private constructor(private val videoOriginUs: Long) {
     fun normalize(windowStart90k: Long, rawTimeUs: Long): Long =
         Math.addExact(ticksToUs(windowStart90k), Math.subtractExact(rawTimeUs, videoOriginUs))
 
     companion object {
-        /** Header/sample-clock agreement only; this does not certify coded payloads or a decoder. */
+
         fun validate(media: TsCaptureInspection, videoUs: List<Long>, audioUs: List<Long>): CaptureExtractedSampleTiming {
             try {
                 need(videoUs.size == media.videoFrames && audioUs.size == media.audioFrames && videoUs.isNotEmpty() && audioUs.isNotEmpty())
@@ -27,8 +26,7 @@ class CaptureExtractedSampleTiming private constructor(private val videoOriginUs
                     ticksToUs(media.audioFirstPts90k - media.videoFirstPts90k), 2))
                 for ((i, time) in audioUs.withIndex()) {
                     if (i > 0) need(time > audioUs[i - 1])
-                    // ADTS readers round each sample to microseconds; PES PTS re-anchor that clock.
-                    // At most one microsecond per sample plus one 90 kHz tick of anchor rounding.
+
                     val expected = i * 1024_000_000L / media.audioSampleRate
                     need(within(Math.subtractExact(time, audioOrigin), expected, i + 12L))
                 }

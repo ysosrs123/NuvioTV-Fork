@@ -13,7 +13,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Synthetic batch metadata only: does not execute Android TS extraction or any decoder. */
 @UnstableApi
 class CaptureMedia3TimelineTest {
     @get:Rule val temp = TemporaryFolder()

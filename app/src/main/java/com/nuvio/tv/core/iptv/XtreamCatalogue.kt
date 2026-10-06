@@ -16,7 +16,6 @@ data class XtreamCatalogue(val channels: List<XtreamChannel>, val invalidRows: I
     val canPublish: Boolean get() = channels.isNotEmpty() && invalidRows == 0
 }
 
-/** Metadata interpretation only; flags advertise archive availability, never prove playback. */
 class XtreamCatalogueParser(private val maxCharacters: Int = 8 * 1024 * 1024, private val maxChannels: Int = 20_000) {
     init { require(maxCharacters > 0 && maxChannels > 0) }
     fun parse(json: String): XtreamCatalogue {
@@ -50,7 +49,7 @@ class XtreamCatalogueParser(private val maxCharacters: Int = 8 * 1024 * 1024, pr
             is String -> value.takeIf { it.isNotEmpty() && it.all { char -> char in '0'..'9' } }
             is Int -> value.takeIf { it >= 0 }?.toString()
             is Long -> value.takeIf { it >= 0 }?.toString()
-            else -> null // Reject null/JSON null, booleans, fractional and floating point IDs.
+            else -> null
         }
     }
 }

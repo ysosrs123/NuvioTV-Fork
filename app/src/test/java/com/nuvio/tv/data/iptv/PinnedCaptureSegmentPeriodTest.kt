@@ -23,8 +23,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Actual Java MediaPeriod/DecoderInputBuffer APIs, real verified pins, SYNTHETIC encoded samples.
- * Does not execute Android TS extraction, a renderer or codec. */
 @UnstableApi
 class PinnedCaptureSegmentPeriodTest {
     @get:Rule val temp=TemporaryFolder()
@@ -95,7 +93,7 @@ class PinnedCaptureSegmentPeriodTest {
             assertEquals(1080000L,f.period.getAdjustedSeekPositionUs(1111111,SeekParameters.EXACT))
             assertEquals(0L,f.period.getAdjustedSeekPositionUs(1111111,SeekParameters.CLOSEST_SYNC))
             assertEquals(1960000L,f.period.seekToUs(Long.MAX_VALUE)); assertEquals(0L,f.period.seekToUs(Long.MIN_VALUE))
-            // Preparing/reading/seeking this period did not acknowledge the core pending request.
+
             assertEquals(13600L,f.seeks.move(CapturePlaybackPosition(0,0),3600).request!!.position90k)
             assertFalse(f.seeks.acknowledge(f.input.request))
         }

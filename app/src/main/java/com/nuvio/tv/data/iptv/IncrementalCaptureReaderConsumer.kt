@@ -13,7 +13,6 @@ import kotlinx.coroutines.sync.withLock
 internal enum class IncrementalReaderState { NEW, LOADING, READY, WAITING, CAPACITY, ENDED, STOPPED,
     EXPIRED, DISCONTINUITY, FAILED, CANCELLED, RELEASE_BLOCKED, CLOSING, CLOSED }
 
-/** Identity-only exclusive sample borrower; does not confirm renderer shutdown. */
 internal class CaptureReaderBorrow internal constructor()
 
 @UnstableApi
@@ -21,15 +20,6 @@ internal data class IncrementalReaderSnapshot(val revision: Long, val state: Inc
     val batches: List<CaptureLoadedBatch> = emptyList(), val timeline: Timeline = Timeline.EMPTY,
     val boundary: CaptureSampleWindow? = null)
 
-/**
- * Actual incremental OwnedCaptureConsumer: one persistent IO worker and a metadata-only observer.
- * Coalesced explicit/transport hints trigger bounded loading; WAITING never starts polling or EOS.
- * Cached snapshots/borrow fences perform no queue/store IO on the playback thread. No decoder/player.
- * Parent admission must include measured transient/decoder overhead above the encoded queue floor.
- * Borrowers stop/confirm their renderers before release/close. Neither load nor release acknowledges
- * a seek. Failed release hides retiring batches and retains their pins/charges for explicit retry.
- * Close fences publication, cancels/joins both jobs, then runs one retryable queue closer off-thread.
- */
 @UnstableApi
 internal class IncrementalCaptureReaderConsumer(private val queue: CaptureSampleBatchQueue,
     private val timelineFactory: CaptureMedia3TimelineFactory, private val producerState: () -> CaptureTransportState,
@@ -85,19 +75,16 @@ internal class IncrementalCaptureReaderConsumer(private val queue: CaptureSample
         signals.trySend(Unit)
     }
 
-    /** No IO or automatic timer; notifications during active loading coalesce without being lost. */
     @Synchronized fun requestLoad(): Boolean {
         if(!started || stopping || terminal || blocked.isNotEmpty()) return false
         dirty = true; signals.trySend(Unit); return true
     }
 
-    /** Cached borrowed view only. A retiring/closing or stale revision cannot start a new borrower. */
     @Synchronized fun borrowSnapshot(expected: IncrementalReaderSnapshot): IncrementalReaderSnapshot? {
         if(stopping || retiring.isNotEmpty() || expected.revision != revision || expected !== stateMutable.value) return null
         return expected
     }
 
-    /** One exclusive epoch-period borrower. No IO; owns exact arrays until explicit stop/release. */
     @Synchronized fun acquireBorrow(expected: IncrementalReaderSnapshot): CaptureReaderBorrow? {
         if(borrower != null || !borrowable(expected)) return null
         return CaptureReaderBorrow().also { borrower = it; borrowed = expected.batches }
@@ -107,12 +94,12 @@ internal class IncrementalCaptureReaderConsumer(private val queue: CaptureSample
         borrowed = expected.batches; return true
     }
     @Synchronized fun isBorrowOpen(lease: CaptureReaderBorrow): Boolean = borrower === lease && !stopping
-    /** Period streams are fenced first; caller separately confirms its renderers before calling. */
+
     @Synchronized fun releaseBorrow(lease: CaptureReaderBorrow) {
         require(borrower === lease) { "Foreign or released capture borrower" }
         borrower = null; borrowed = emptyList()
     }
-    /** Explicit consumed-prefix transfer after borrower confirmation; keep at least one owned row. */
+
     @Synchronized fun retireBorrowedPrefix(lease: CaptureReaderBorrow, count: Int): Boolean {
         if(borrower !== lease || stopping || count !in 1 until borrowed.size || retiring.isNotEmpty()) return false
         val old=borrowed.take(count)
@@ -124,11 +111,10 @@ internal class IncrementalCaptureReaderConsumer(private val queue: CaptureSample
         expected.batches.isNotEmpty() && expected.state in setOf(IncrementalReaderState.READY,IncrementalReaderState.LOADING,
             IncrementalReaderState.WAITING,IncrementalReaderState.CAPACITY,IncrementalReaderState.ENDED,IncrementalReaderState.DISCONTINUITY)
 
-    /** Asynchronous release after borrower shutdown; true means queued, not confirmed closed. */
     @Synchronized fun requestRelease(batch: CaptureLoadedBatch): Boolean {
         if(!started || stopping || known.none { it === batch } || borrowed.any { it === batch } || batch in pending || activeRelease === batch) return false
         retiring += batch; pending += batch
-        revision = Math.addExact(revision,1) // Fence an already delivered snapshot immediately.
+        revision = Math.addExact(revision,1)
         signals.trySend(Unit); return true
     }
 
@@ -169,7 +155,6 @@ internal class IncrementalCaptureReaderConsumer(private val queue: CaptureSample
         }
     }
 
-    /** Queue/store reads and timeline construction stay on the sole IO worker. */
     private fun publish(result: IncrementalReaderState?, boundary: CaptureSampleWindow? = null) {
         val all = queue.snapshotBatches()
         val (generation,visible) = synchronized(this) {
@@ -177,10 +162,10 @@ internal class IncrementalCaptureReaderConsumer(private val queue: CaptureSample
             if(stopping || observerFailed) return
             revision to all.filterNot { it in retiring }
         }
-        val producer = producerState() // Sample before the factory's retained-row snapshot.
+        val producer = producerState()
         val timeline = timelineFactory.snapshot(visible.map { it.samples },producer)
         synchronized(this) {
-            if(stopping || observerFailed || generation != revision) return // Release/close raced metadata work.
+            if(stopping || observerFailed || generation != revision) return
             revision = Math.addExact(revision,1)
             stateMutable.value = IncrementalReaderSnapshot(revision,result ?: lastLoadState,Collections.unmodifiableList(visible.toList()),timeline,
                 if(result == null) lastBoundary else boundary)

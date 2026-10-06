@@ -3,7 +3,6 @@ package com.nuvio.tv.core.iptv
 import java.io.IOException
 import java.io.InputStream
 
-/** Finite local bytes, pinned until close. Segment time metadata is not a keyframe/codec guarantee. */
 class CaptureSnapshotReader internal constructor(
     val segments: List<CaptureSegment>,
     private val pin: AutoCloseable,
@@ -44,7 +43,7 @@ class CaptureSnapshotReader internal constructor(
 
     @Synchronized override fun close() {
         if (closed) return
-        // Keep the retention pin when file closure is uncertain, so the owner cannot free storage.
+
         current?.close(); current = null
         pin.close(); closed = true
     }

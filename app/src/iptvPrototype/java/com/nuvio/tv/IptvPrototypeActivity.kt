@@ -13,7 +13,6 @@ import com.nuvio.tv.domain.model.V2AppearancePreferences
 import com.nuvio.tv.ui.v2.appearance.ResolvedAppearance
 import com.nuvio.tv.ui.v2.scale.UiScaleDecision
 
-/** Isolated QA entry point; this activity and package exist only in the prototype flavor. */
 @AndroidEntryPoint
 class IptvPrototypeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

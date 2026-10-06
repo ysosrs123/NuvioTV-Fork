@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.data.iptv.IptvMetadataClientTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:55.442Z" hostname="PWR_PC" time="0.295">
+  <properties/>
+  <testcase name="successiveHttp10RefreshesDoNotReuseClosedConnections" classname="com.nuvio.tv.data.iptv.IptvMetadataClientTest" time="0.032"/>
+  <testcase name="byteBudgetAppliesAfterTransparentGzipExpansion" classname="com.nuvio.tv.data.iptv.IptvMetadataClientTest" time="0.019"/>
+  <testcase name="hlsRemainsPlaybackInputAndNeverPublishesAsChannelRows" classname="com.nuvio.tv.data.iptv.IptvMetadataClientTest" time="0.011"/>
+  <testcase name="redirectLoopHasABoundedRequestCount" classname="com.nuvio.tv.data.iptv.IptvMetadataClientTest" time="0.03"/>
+  <testcase name="notModifiedRequiresAConditionalRequest" classname="com.nuvio.tv.data.iptv.IptvMetadataClientTest" time="0.04"/>
+  <testcase name="partialHttpResponseCannotBecomeCatalogue" classname="com.nuvio.tv.data.iptv.IptvMetadataClientTest" time="0.005"/>
+  <testcase name="followsSameOriginAndResolvesAgainstFinalResponseWithoutOpeningMedia" classname="com.nuvio.tv.data.iptv.IptvMetadataClientTest" time="0.018"/>
+  <testcase name="byteBudgetAlsoBoundsChunkedBodies" classname="com.nuvio.tv.data.iptv.IptvMetadataClientTest" time="0.004"/>
+  <testcase name="crossOriginRedirectDoesNotContactOtherServer" classname="com.nuvio.tv.data.iptv.IptvMetadataClientTest" time="0.004"/>
+  <testcase name="cancellationCancelsTheSocketCall" classname="com.nuvio.tv.data.iptv.IptvMetadataClientTest" time="0.132"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

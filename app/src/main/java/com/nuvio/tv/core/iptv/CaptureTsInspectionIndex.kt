@@ -6,15 +6,9 @@ import java.security.MessageDigest
 
 class CaptureMediaExpired : IOException("Inspected capture media is no longer retained")
 
-/** Instance-scoped structural evidence for one committed UUID-backed row. Not a decoder certificate. */
 class InspectedCaptureSegment internal constructor(internal val owner: Any,
     val segment: CaptureSegment, val inspection: TsCaptureInspection)
 
-/**
- * One bounded inspector at a time; file reads run outside the store/state monitors. Cache entries
- * hold no retention pins. Every open atomically checks the exact row and pins its file/successors.
- * Evidence is ephemeral and belongs to this index/store instance, never a reopened spool.
- */
 class CaptureTsInspectionIndex(private val store: CaptureSegmentStore,
     private val inspector: TsCaptureInspector = TsCaptureInspector(), private val maxEntries: Int = 256) {
     private val owner = Any()
@@ -64,11 +58,6 @@ class CaptureTsInspectionIndex(private val store: CaptureSegmentStore,
     private fun prune(retained: Set<CaptureSegment>) { cache.keys.retainAll(retained) }
 }
 
-/**
- * Caller-owned pinned input. Bytes remain tentative until verified EOF; early close/cancellation
- * releases the reader without certifying it. Length/hash are checked again during every complete
- * read, including skip. Mark/reset are unsupported. No automatic retention release at EOF.
- */
 class InspectedCaptureInput internal constructor(val proof: InspectedCaptureSegment,
     private val raw: InputStream) : InputStream() {
     val segment get() = proof.segment

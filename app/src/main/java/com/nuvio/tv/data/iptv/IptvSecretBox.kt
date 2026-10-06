@@ -14,7 +14,6 @@ interface IptvSecretBox {
     fun open(context: String, ciphertext: ByteArray): String
 }
 
-/** Each blob is authenticated against its profile/source/row identity to prevent substitution. */
 class AndroidIptvSecretBox(private val alias: String = "com.nuvio.tv.iptv.v1") : IptvSecretBox {
     private val key: SecretKey by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { synchronized(keyLock) {
         val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
@@ -42,7 +41,7 @@ class AndroidIptvSecretBox(private val alias: String = "com.nuvio.tv.iptv.v1") :
     }
 
     private fun <T> protect(block: () -> T): T = try { block() } catch (_: Exception) {
-        // Preserve stored data if the key is unavailable. Do not silently erase credentials.
+
         throw IOException("IPTV protected storage unavailable")
     }
     private companion object { val keyLock = Any() }

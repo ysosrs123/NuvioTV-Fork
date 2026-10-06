@@ -146,7 +146,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 if (session === current && mutable.value.focused?.item?.channel?.id == row.item.channel.id)
                     mutable.update { it.copy(programmes = programmes) }
             } catch (cancel: CancellationException) { throw cancel }
-            catch (_: Exception) { /* A missing/changed feed leaves programme information unavailable. */ }
+            catch (_: Exception) {                                                                        }
         }
     }
     fun watch(row: IptvListedChannel) {
@@ -190,7 +190,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     }
     override fun onCleared() {
         screensaver.setPlaybackActive(false)
-        // viewModelScope is already cancelled; cleanup must finish outside it.
+
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate).launch { runtime.stop(owner) }
         super.onCleared()
     }

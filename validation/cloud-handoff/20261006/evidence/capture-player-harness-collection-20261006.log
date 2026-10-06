@@ -1,0 +1,97 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.13/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :syncFixtureTests UP-TO-DATE
+> Task :syncProductionSources UP-TO-DATE
+> Task :preBuild UP-TO-DATE
+> Task :preDebugBuild UP-TO-DATE
+> Task :mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :checkDebugAarMetadata UP-TO-DATE
+> Task :processDebugNavigationResources UP-TO-DATE
+> Task :compileDebugNavigationResources UP-TO-DATE
+> Task :generateDebugResValues UP-TO-DATE
+> Task :mapDebugSourceSetPaths UP-TO-DATE
+> Task :generateDebugResources UP-TO-DATE
+> Task :mergeDebugResources UP-TO-DATE
+> Task :packageDebugResources UP-TO-DATE
+> Task :parseDebugLocalResources UP-TO-DATE
+> Task :createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :extractDeepLinksDebug UP-TO-DATE
+> Task :processDebugMainManifest UP-TO-DATE
+> Task :processDebugManifest UP-TO-DATE
+> Task :processDebugManifestForPackage UP-TO-DATE
+> Task :processDebugResources UP-TO-DATE
+
+> Task :compileDebugKotlin
+w: file:///E:/Codex/NuvioTV/work/NuvioTV-IPTV/tools/iptv-device-tests/build/generated/fixture-main/com/nuvio/tv/data/iptv/CaptureVideoPlayer.kt:61:21 'constructor(p0: Context, p1: MediaCodecSelector, p2: Long, p3: Boolean, p4: Handler?, p5: VideoRendererEventListener?, p6: Int): MediaCodecVideoRenderer' is deprecated. Deprecated in Java.
+w: file:///E:/Codex/NuvioTV/work/NuvioTV-IPTV/tools/iptv-device-tests/build/generated/fixture-main/com/nuvio/tv/data/iptv/IptvMetadataClient.kt:99:58 Elvis operator (?:) always returns the left operand of non-nullable type 'ResponseBody'.
+w: file:///E:/Codex/NuvioTV/work/NuvioTV-IPTV/tools/iptv-device-tests/build/generated/fixture-main/com/nuvio/tv/data/iptv/IptvXtreamClient.kt:122:50 Elvis operator (?:) always returns the left operand of non-nullable type 'ResponseBody'.
+w: file:///E:/Codex/NuvioTV/work/NuvioTV-IPTV/tools/iptv-device-tests/build/generated/fixture-main/com/nuvio/tv/data/iptv/LocalTsSegmentExtractor.kt:51:25 'constructor(p0: Int, p1: TimestampAdjuster, p2: TsPayloadReader.Factory): TsExtractor' is deprecated. Deprecated in Java.
+
+> Task :javaPreCompileDebug UP-TO-DATE
+> Task :compileDebugJavaWithJavac NO-SOURCE
+> Task :mergeDebugShaders UP-TO-DATE
+> Task :compileDebugShaders NO-SOURCE
+> Task :generateDebugAssets UP-TO-DATE
+> Task :mergeDebugAssets UP-TO-DATE
+> Task :compressDebugAssets UP-TO-DATE
+> Task :desugarDebugFileDependencies UP-TO-DATE
+> Task :dexBuilderDebug UP-TO-DATE
+> Task :mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :processDebugJavaRes UP-TO-DATE
+> Task :mergeDebugJavaResource
+> Task :checkDebugDuplicateClasses
+> Task :mergeExtDexDebug
+> Task :mergeLibDexDebug UP-TO-DATE
+> Task :mergeProjectDexDebug UP-TO-DATE
+> Task :mergeDebugJniLibFolders UP-TO-DATE
+> Task :mergeDebugNativeLibs UP-TO-DATE
+> Task :stripDebugDebugSymbols UP-TO-DATE
+> Task :validateSigningDebug UP-TO-DATE
+> Task :writeDebugAppMetadata UP-TO-DATE
+> Task :writeDebugSigningConfigVersions UP-TO-DATE
+> Task :packageDebug
+> Task :createDebugApkListingFileRedirect UP-TO-DATE
+> Task :assembleDebug
+> Task :bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :preDebugAndroidTestBuild SKIPPED
+> Task :checkDebugAndroidTestAarMetadata UP-TO-DATE
+> Task :processDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :compileDebugAndroidTestNavigationResources UP-TO-DATE
+> Task :generateDebugAndroidTestResValues UP-TO-DATE
+> Task :mapDebugAndroidTestSourceSetPaths UP-TO-DATE
+> Task :generateDebugAndroidTestResources UP-TO-DATE
+> Task :mergeDebugAndroidTestResources UP-TO-DATE
+> Task :processDebugAndroidTestManifest UP-TO-DATE
+> Task :processDebugAndroidTestResources UP-TO-DATE
+
+> Task :compileDebugAndroidTestKotlin
+w: file:///E:/Codex/NuvioTV/work/NuvioTV-IPTV/tools/iptv-device-tests/build/generated/fixture-tests/com/nuvio/tv/data/iptv/LocalCaptureSampleStagerAndroidTest.kt:26:50 'constructor(): DummyTrackOutput' is deprecated. Deprecated in Java.
+
+> Task :javaPreCompileDebugAndroidTest UP-TO-DATE
+> Task :compileDebugAndroidTestJavaWithJavac NO-SOURCE
+> Task :mergeDebugAndroidTestShaders UP-TO-DATE
+> Task :compileDebugAndroidTestShaders NO-SOURCE
+> Task :generateDebugAndroidTestAssets UP-TO-DATE
+> Task :mergeDebugAndroidTestAssets UP-TO-DATE
+> Task :compressDebugAndroidTestAssets UP-TO-DATE
+> Task :desugarDebugAndroidTestFileDependencies UP-TO-DATE
+> Task :dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :mergeDebugAndroidTestGlobalSynthetics UP-TO-DATE
+> Task :processDebugAndroidTestJavaRes UP-TO-DATE
+> Task :mergeDebugAndroidTestJavaResource UP-TO-DATE
+> Task :checkDebugAndroidTestDuplicateClasses UP-TO-DATE
+> Task :mergeExtDexDebugAndroidTest UP-TO-DATE
+> Task :mergeLibDexDebugAndroidTest UP-TO-DATE
+> Task :mergeProjectDexDebugAndroidTest UP-TO-DATE
+> Task :mergeDebugAndroidTestJniLibFolders UP-TO-DATE
+> Task :mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :validateSigningDebugAndroidTest UP-TO-DATE
+> Task :writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
+> Task :packageDebugAndroidTest UP-TO-DATE
+> Task :createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
+> Task :assembleDebugAndroidTest UP-TO-DATE
+
+BUILD SUCCESSFUL in 56s
+68 actionable tasks: 6 executed, 62 up-to-date

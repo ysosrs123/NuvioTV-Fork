@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:48.297Z" hostname="PWR_PC" time="0.011">
+  <properties/>
+  <testcase name="byteAndSegmentBudgetsFail" classname="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" time="0.002"/>
+  <testcase name="discontinuitySequenceSurvivesSlidingWindow" classname="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" time="0.001"/>
+  <testcase name="strictUtf8ControlCharactersAndMissingHeaderFail" classname="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" time="0.0"/>
+  <testcase name="relativeUrisSequencesAndDiscontinuitiesAreExplicit" classname="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" time="0.004"/>
+  <testcase name="targetDurationIsRequiredBoundedAndNotDuplicated" classname="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" time="0.0"/>
+  <testcase name="crossOriginUserinfoAndDowngradeAreRejected" classname="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" time="0.001"/>
+  <testcase name="malformedDurationsAndDanglingSegmentsAreRejected" classname="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" time="0.001"/>
+  <testcase name="unsupportedTransportFeaturesAreRejectedBeforeMediaFetch" classname="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" time="0.001"/>
+  <testcase name="sequenceOverflowAndDuplicateOrLateSequenceFail" classname="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" time="0.0"/>
+  <testcase name="commentsAndCrLfAreAcceptedButMediaAfterEndIsNot" classname="com.nuvio.tv.core.iptv.HlsCapturePlaylistTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

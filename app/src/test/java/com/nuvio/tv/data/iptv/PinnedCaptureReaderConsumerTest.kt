@@ -17,7 +17,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Real pins/inspection/seek/runtime; SYNTHETIC encoded samples. No Android extraction/decoder. */
 @UnstableApi
 class PinnedCaptureReaderConsumerTest {
     @get:Rule val temp = TemporaryFolder()

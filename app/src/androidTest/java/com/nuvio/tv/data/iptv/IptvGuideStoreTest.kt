@@ -76,7 +76,7 @@ class IptvGuideStoreTest {
         assertEquals(RefreshDecision.STALE, store.importGuide(changed, xml().byteInputStream(), window))
         assertTrue(store.channelPage(ref).isEmpty())
         assertNull(store.validators(ref))
-        assertEquals(RefreshDecision.PUBLISH, publish(ref)) // A different endpoint has no comparable old baseline.
+        assertEquals(RefreshDecision.PUBLISH, publish(ref))
     }
     @Test fun paginationPreservesOverlapsAndDoesNotInventMissingEnds() {
         val ref = feed()

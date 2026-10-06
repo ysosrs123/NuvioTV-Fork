@@ -7,7 +7,7 @@ import org.junit.Test
 class PlaybackPurposeBoundaryTest {
     @Test fun rawTsAndExtensionlessLiveUrlsCannotEnterThumbnailFetch() {
         for (url in listOf("https://example.invalid/live/101.ts", "https://example.invalid/101")) {
-            assertTrue(isThumbnailSource(url)) // Existing VOD default is intentionally preserved.
+            assertTrue(isThumbnailSource(url))
             for (purpose in PlaybackPurpose.entries.filter { it != PlaybackPurpose.VOD }) {
                 assertFalse(isThumbnailSource(url, purpose = purpose))
             }

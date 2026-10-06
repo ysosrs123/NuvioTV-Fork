@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.ChannelIdentityTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:48.247Z" hostname="PWR_PC" time="0.004">
+  <properties/>
+  <testcase name="missingIdCannotStealAuthoritativeMatchByAppearingFirst" classname="com.nuvio.tv.core.iptv.ChannelIdentityTest" time="0.002"/>
+  <testcase name="equalGuideIdWithConflictingProviderIdCannotStealFavourite" classname="com.nuvio.tv.core.iptv.ChannelIdentityTest" time="0.0"/>
+  <testcase name="ambiguousGuideIdsAbstainWithoutExactLocator" classname="com.nuvio.tv.core.iptv.ChannelIdentityTest" time="0.0"/>
+  <testcase name="rotatingLocatorAndNamePreserveAuthoritativeIdentity" classname="com.nuvio.tv.core.iptv.ChannelIdentityTest" time="0.0"/>
+  <testcase name="conflictingDuplicateProviderIdBlocksRefresh" classname="com.nuvio.tv.core.iptv.ChannelIdentityTest" time="0.001"/>
+  <testcase name="staleOrPartialRefreshNeverPublishes" classname="com.nuvio.tv.core.iptv.ChannelIdentityTest" time="0.0"/>
+  <testcase name="nameAloneNeverBinds" classname="com.nuvio.tv.core.iptv.ChannelIdentityTest" time="0.0"/>
+  <testcase name="crossSourceMixIsRejected" classname="com.nuvio.tv.core.iptv.ChannelIdentityTest" time="0.0"/>
+  <testcase name="uniqueGuideAndExplicitVariantSurviveRotation" classname="com.nuvio.tv.core.iptv.ChannelIdentityTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

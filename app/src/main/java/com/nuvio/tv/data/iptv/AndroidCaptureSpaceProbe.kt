@@ -5,7 +5,6 @@ import com.nuvio.tv.core.iptv.CaptureSpaceProbe
 import com.nuvio.tv.core.iptv.CaptureSpaceReading
 import java.io.File
 
-/** Internal/private filesystem probe. Does not establish SAF, USB or SMB support. */
 internal object AndroidCaptureSpaceProbe : CaptureSpaceProbe {
     override fun read(directory: File): CaptureSpaceReading {
         val before = Os.stat(directory.absolutePath).st_dev

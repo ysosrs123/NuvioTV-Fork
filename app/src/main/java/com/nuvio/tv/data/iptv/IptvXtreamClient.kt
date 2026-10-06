@@ -23,13 +23,11 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
 
-/** Advertised account capacity is evidence only: it never raises the runtime's admission limit. */
 data class XtreamAccount(val advertisedConnections: Int?, val expiresAtSeconds: Long?, val output: String)
 data class XtreamDownload(val account: XtreamAccount, val records: List<IptvCatalogueRecord>, val canPublish: Boolean) {
     override fun toString() = "XtreamDownload(channels=${records.size}, canPublish=$canPublish)"
 }
 
-/** Three sequential metadata requests; no discovered server, media, logo or direct_source requests. */
 class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newClient(),
     private val maxBodyBytes: Int = 8 * 1024 * 1024,
     private val nowSeconds: () -> Long = { System.currentTimeMillis() / 1000 }) {
@@ -105,8 +103,7 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
         catch (error: Exception) { diagnose("metadata", error); throw error as? MetadataException ?: MetadataException(MetadataFailure.INVALID_RESPONSE) }
 
     private suspend fun json(url: HttpUrl, budget: Int): String = suspendCancellableCoroutine { continuation ->
-        // Sequential no-retry metadata calls must not reuse a just-closed HTTP/1.0 socket.
-        // Request explicit closure instead of relying on a retry to recover a stale pooled socket.
+
         val call = http.newCall(Request.Builder().url(url).header("Accept", "application/json").header("Connection", "close").build())
         continuation.invokeOnCancellation { call.cancel() }
         call.enqueue(object : Callback {
@@ -147,12 +144,12 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
 
     companion object {
         private fun diagnose(stage: String, error: Exception) {
-            // Never log messages, causes, URLs or response text: each may carry credentials.
+
             val location = error.stackTrace.firstOrNull()?.let { "${it.className}.${it.methodName}:${it.lineNumber}" }.orEmpty()
             val failure = (error as? MetadataException)?.failure?.name.orEmpty()
             Logger.getLogger("NuvioXtream").warning("$stage ${error.javaClass.simpleName} $failure at $location")
         }
-        /** The form accepts a server base (including a directory), not a credential-bearing API URL. */
+
         fun serverBase(connection: IptvSourceConnection): HttpUrl {
             val url = connection.endpoint.toHttpUrlOrNull()
                 ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
@@ -163,14 +160,12 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
             return if (url.encodedPath.endsWith('/')) url else url.newBuilder().addPathSegment("").build()
         }
 
-        /** Bound nesting before org.json parses recursively; reject extra documents/trailing junk. */
         private fun checkJsonEnvelope(text: String) {
             StrictJson(text).validate()
         }
     }
 }
 
-/** org.json accepts non-JSON syntax on some runtimes; validate identically before either parser. */
 private class StrictJson(private val text: String) {
     private var offset = 0
     private fun peek(): Char = text.getOrNull(offset) ?: '\u0000'

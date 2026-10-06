@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.LiveTelemetryTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:48.645Z" hostname="PWR_PC" time="0.001">
+  <properties/>
+  <testcase name="preparationIsNotAStallAndFirstFrameIsMeasuredOnce" classname="com.nuvio.tv.core.iptv.LiveTelemetryTest" time="0.001"/>
+  <testcase name="transferRateIncludesIdlePeriodsAndNewSessionsDoNotInheritTotals" classname="com.nuvio.tv.core.iptv.LiveTelemetryTest" time="0.0"/>
+  <testcase name="repeatedBufferingCallbacksDoNotDoubleCountAndOngoingStallsRemainVisible" classname="com.nuvio.tv.core.iptv.LiveTelemetryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

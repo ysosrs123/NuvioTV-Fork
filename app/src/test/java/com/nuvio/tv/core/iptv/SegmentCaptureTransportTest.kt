@@ -138,7 +138,7 @@ class SegmentCaptureTransportTest {
                 assertFalse(withTimeout(5000) { transport.close() })
                 assertNotEquals(CaptureTransportState.CLOSED, transport.state.value)
             } finally { release.countDown() }
-            // Allow a generous timeout for the retry, independent of device scheduler timing.
+
             withTimeout(5000) {
                 while (!transport.close()) yield()
             }

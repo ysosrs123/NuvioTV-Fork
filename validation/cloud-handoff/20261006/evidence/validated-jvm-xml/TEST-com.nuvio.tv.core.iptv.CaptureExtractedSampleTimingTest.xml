@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.CaptureExtractedSampleTimingTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:46.304Z" hostname="PWR_PC" time="0.108">
+  <properties/>
+  <testcase name="missingDuplicatedAndUnevenVideoSamplesAreRejected" classname="com.nuvio.tv.core.iptv.CaptureExtractedSampleTimingTest" time="0.075"/>
+  <testcase name="perFrameMicrosecondRoundingIsAllowedForBothDeclaredSampleRates" classname="com.nuvio.tv.core.iptv.CaptureExtractedSampleTimingTest" time="0.013"/>
+  <testcase name="independentWrapNormalizationOfAudioAndVideoIsRejected" classname="com.nuvio.tv.core.iptv.CaptureExtractedSampleTimingTest" time="0.004"/>
+  <testcase name="missingResetAndJumpedAudioClocksAreRejected" classname="com.nuvio.tv.core.iptv.CaptureExtractedSampleTimingTest" time="0.003"/>
+  <testcase name="wrongRawPtsAndArithmeticOverflowCannotValidate" classname="com.nuvio.tv.core.iptv.CaptureExtractedSampleTimingTest" time="0.003"/>
+  <testcase name="oneVideoReferencePreservesNegativeAudioPhaseAndStableWindowPosition" classname="com.nuvio.tv.core.iptv.CaptureExtractedSampleTimingTest" time="0.006"/>
+  <testcase name="alternateUnwrappedBaseAtAudioFirstBoundaryProducesTheSamePositions" classname="com.nuvio.tv.core.iptv.CaptureExtractedSampleTimingTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

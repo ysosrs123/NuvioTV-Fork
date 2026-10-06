@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 
-/** Foreground, single-view live adapter. No VOD probes, cache, range prefetch or thumbnail pipeline. */
 class IptvLivePlayback(context: Context, private val locator: String, purpose: PlaybackPurpose,
     private val streamFormat: IptvStreamFormat = IptvStreamFormat.AUTO,
     private val onPlaying: (Boolean) -> Unit, private val onError: () -> Unit) : OwnedLivePlayback {
@@ -59,8 +58,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 .setTargetBufferBytes(12 * 1024 * 1024).setPrioritizeTimeOverSizeThresholds(false).build())
             .setMediaSourceFactory(DefaultMediaSourceFactory(sources).setLoadErrorHandlingPolicy(object : DefaultLoadErrorHandlingPolicy(0) {
                 override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long = C.TIME_UNSET
-                // Retry delay alone does not stop HLS from excluding a failed track and opening
-                // another rendition. Unknown account capacity requires an explicit user retry.
+
                 override fun getFallbackSelectionFor(fallbackOptions: LoadErrorHandlingPolicy.FallbackOptions,
                     loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): LoadErrorHandlingPolicy.FallbackSelection? = null
             }))
@@ -70,8 +68,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) { if (!released) onPlaying(isPlaying) }
             override fun onPlayerError(error: PlaybackException) {
-                // The bundled Media3 engine reports release timeout synchronously via this callback,
-                // rather than throwing from release(). Never acknowledge that as decoder closure.
+
                 if (released) releaseFailed = true else reportFailure()
             }
             override fun onRenderedFirstFrame() { telemetry.firstFrame(android.os.SystemClock.elapsedRealtime()) }
@@ -82,8 +79,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         })
     }
     private fun reportFailure() {
-        // Release outside ListenerSet dispatch so release-timeout callbacks are delivered before
-        // release() returns, rather than being queued behind the currently dispatching error.
+
         mainHandler.post { if (!released) onError() }
     }
     override fun start() {
@@ -93,7 +89,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             IptvStreamFormat.HLS -> MimeTypes.APPLICATION_M3U8
             IptvStreamFormat.MPEG_TS -> MimeTypes.VIDEO_MP2T
         }
-        // A user-selected format avoids probing and reopening extensionless live entry points.
+
         player.setMediaItem(MediaItem.Builder().setUri(locator).setMimeType(mimeType).build())
         telemetry.start(android.os.SystemClock.elapsedRealtime())
         player.prepare(); player.playWhenReady = true
@@ -105,7 +101,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             released = true
             try { player.release() } catch (_: Exception) { releaseFailed = true }
         }
-        // An uncertain decoder release retains the entire reservation, even if HTTP has closed.
+
         if (releaseFailed) return false
         val closed = withTimeoutOrNull(15_000) { fence.active.first { it == 0 }; true } ?: false
         if (closed) client.connectionPool.evictAll()
@@ -115,8 +111,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         private var ticket: LiveRequestFence.Ticket? = null
         override fun open(dataSpec: DataSpec): Long {
             check(ticket == null)
-            // A finite Content-Length on a live TS endpoint must not trigger extractor tail/range
-            // probes. HLS segment byte ranges remain available on their distinct segment URIs.
+
             val entry = dataSpec.uri == entryPoint
             if (entry && dataSpec.position != 0L) throw IOException("Live entry point cannot be range-probed")
             ticket = fence.enter() ?: throw IOException("Live session has closed")
@@ -124,7 +119,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 val length = delegate.open(dataSpec)
                 if (entry && dataSpec.length == C.LENGTH_UNSET.toLong()) C.LENGTH_UNSET.toLong() else length
             } catch (failure: Exception) {
-                try { close() } catch (_: Exception) { /* Retain request fence when close is uncertain. */ }
+                try { close() } catch (_: Exception) {                                                     }
                 throw failure
             }
         }

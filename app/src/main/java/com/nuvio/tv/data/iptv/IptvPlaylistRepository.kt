@@ -15,7 +15,6 @@ sealed interface IptvPlaylistRefresh {
     data class Catalogue(val decision: RefreshDecision) : IptvPlaylistRefresh
 }
 
-/** Errors/cancellation propagate without promoting partial rows or HTTP validators. */
 class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val metadata: IptvMetadataClient = IptvMetadataClient(), private val xtream: IptvXtreamClient = IptvXtreamClient()) {
     suspend fun refresh(ref: IptvSourceRef): IptvPlaylistRefresh = withContext(Dispatchers.IO) {
         val context = currentCoroutineContext()

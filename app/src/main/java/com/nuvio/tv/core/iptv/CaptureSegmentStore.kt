@@ -14,12 +14,6 @@ data class CaptureBounds(val startMs: Long, val endExclusiveMs: Long)
 
 class CaptureRetentionBlocked : IOException("Capture retention is pinned")
 
-/**
- * Private, exclusively owned spool of COMPLETE segments supplied by a transport adapter.
- * Bounds describe actual committed media, never a player's configured load-ahead target.
- * One pending segment needs maxSegmentBytes of additional reserved disk beyond maxRetainedBytes.
- * This store does not establish codec/keyframe independence, capture transport or recording policy.
- */
 class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Long,
     val maxSegmentBytes: Long, storagePolicy: CaptureStoragePolicy? = null) : AutoCloseable {
     private val storageFence: CaptureStorageFence?
@@ -56,10 +50,6 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
 
     @Synchronized fun snapshot(): List<CaptureSegment> { checkOpen(); return segments.toList() }
 
-    /** Governed admission requires physical observations, margins and allocation/index overhead.
-     * This is an observation fence, never an OS reservation; repeated write checks and I/O still apply.
-     * Legacy direct stores may omit a guard for isolated byte fixtures; runtime sharing cannot.
-     */
     @Synchronized fun checkStorageReservation(plan: CaptureStorageReservation) {
         checkOpen()
         require(plan.retainedBytes == maxRetainedBytes && plan.segmentBytes == maxSegmentBytes)
@@ -70,11 +60,6 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
         fence.admission(remaining, plan.overheadBytes)
     }
 
-    /**
-     * Atomically pin a fixed, uninterrupted snapshot starting at an existing segment. New appends
-     * are outside this reader, so EOF means snapshot completion, not a temporarily empty live tail.
-     * This is a byte reader for capture/export adapters, not a claim of decoder-safe seeking.
-     */
     @Synchronized fun openSnapshotFrom(sequence: Long): CaptureSnapshotReader {
         checkOpen()
         val start = segments.indexOfFirst { it.sequence == sequence }
@@ -88,20 +73,17 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
         return CaptureSnapshotReader(selected.toList(), pinFrom(sequence), ::open)
     }
 
-    /** Lazy live-tail byte reader. This API does not certify decoder-safe starts or seek times. */
     @Synchronized fun openLiveFrom(sequence: Long, producerState: () -> CaptureTransportState): CaptureLiveReader {
         checkOpen(); require(sequence in 0..nextSequence)
         return CaptureLiveReader(this, sequence, producerState)
     }
 
-    /** Retain this segment AND its successors until the consumer releases its pause/recording anchor. */
     @Synchronized fun pinFrom(sequence: Long): AutoCloseable {
         checkOpen(); require(segments.any { it.sequence == sequence })
         val id = UUID.randomUUID().toString(); pins[id] = sequence
         return AutoCloseable { synchronized(this) { pins.remove(id) } }
     }
 
-    /** Reader lifetime pins retention too; releasing a separate pause anchor cannot evict an open reader. */
     @Synchronized fun open(sequence: Long): InputStream {
         checkOpen()
         val segment = segments.single { it.sequence == sequence }
@@ -118,11 +100,6 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
         } catch (failure: Exception) { pin.close(); throw failure }
     }
 
-    /**
-     * Input stays caller-owned. Source reads and segment sync run outside the state monitor so local
-     * readers/pins remain available. One writer owns staging; publication rechecks current pins.
-     * A failed/cancelled append cannot publish partial media or evict old rows.
-     */
     fun append(startMs: Long, endMs: Long, continuity: Long, input: InputStream,
         checkCancellation: () -> Unit = {}): CaptureSegment = synchronized(appendMutex) {
         val id = UUID.randomUUID().toString()
@@ -134,7 +111,7 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
             segments.lastOrNull()?.let { require(startMs >= it.endMs && continuity >= it.continuity) }
             check(nextSequence < Long.MAX_VALUE)
             cleanOrphans()
-            appending = true // close cannot release the directory lock while this writer is outside the monitor.
+            appending = true
         }
         var committed = false
         try {
@@ -172,9 +149,7 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
                 checkCancellation()
                 persist(next, nextSequence + 1)
                 segments = next; nextSequence++; committed = true
-                // Deletion is after index promotion; a crash leaves removable orphans, never missing indexed rows.
-                // The commit is already authoritative. Do not report a failed append if retiring an
-                // old file fails; the NEXT append must clear those orphans before allocating more.
+
                 try { cleanOrphans() } catch (_: IOException) { }
                 segment
             }
@@ -185,7 +160,6 @@ class CaptureSegmentStore(private val directory: File, val maxRetainedBytes: Lon
         }
     }
 
-    /** Latest uninterrupted range only. Adapters must still establish decoder/keyframe-safe seek points. */
     @Synchronized fun contiguousBounds(): CaptureBounds? {
         checkOpen(); val last = segments.lastOrNull() ?: return null
         var start = last.startMs

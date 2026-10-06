@@ -11,7 +11,6 @@ enum class HlsCaptureFailure { INVALID_PLAYLIST, UNSUPPORTED_PLAYLIST, ADDRESS, 
     EXPIRED, STALLED, CLOSED, HTTP, NETWORK }
 class HlsCaptureException(val failure: HlsCaptureFailure) : IOException("HLS capture: $failure")
 
-/** Durations are manifest metadata, NOT verified media timestamps or decoder-safe entry points. */
 data class HlsCaptureSegment(val sequence: Long, val durationMs: Long, val discontinuity: Long,
     val address: URI) {
     override fun toString() = "HlsCaptureSegment(sequence=$sequence, address withheld)"
@@ -21,7 +20,6 @@ data class HlsCapturePlaylist(val targetMs: Long, val mediaSequence: Long,
     override fun toString() = "HlsCapturePlaylist(segments=${segments.size}, ended=$ended)"
 }
 
-/** Deliberately narrow full-resource media playlists. No master selection, keys, maps or ranges. */
 class HlsCapturePlaylistParser(val maxBytes: Int = 256 * 1024, private val maxSegments: Int = 1024) {
     init { require(maxBytes in 1..1024 * 1024 && maxSegments in 1..4096) }
 
@@ -53,7 +51,7 @@ class HlsCapturePlaylistParser(val maxBytes: Int = 256 * 1024, private val maxSe
                     if (segments.size >= maxSegments) fail(HlsCaptureFailure.LIMIT)
                     val resolved = address.resolve(line)
                     validateAddress(resolved)
-                    // Match the current media redirect policy. Cross-origin media needs explicit support.
+
                     if (!sameOrigin(address, resolved)) fail(HlsCaptureFailure.ADDRESS)
                     val sequence = Math.addExact(firstSequence, segments.size.toLong())
                     if (sequence == Long.MAX_VALUE) fail(HlsCaptureFailure.LIMIT)
@@ -91,7 +89,7 @@ class HlsCapturePlaylistParser(val maxBytes: Int = 256 * 1024, private val maxSe
                     "#EXT-X-VERSION" -> { unique(tag); if (integer(value) !in 1..7) fail(HlsCaptureFailure.UNSUPPORTED_PLAYLIST) }
                     "#EXT-X-PLAYLIST-TYPE" -> { unique(tag); if (value !in setOf("EVENT", "VOD")) fail() }
                     "#EXT-X-INDEPENDENT-SEGMENTS" -> { unique(tag); if (line != tag) fail() }
-                    "#EXT-X-PROGRAM-DATE-TIME" -> Unit // Never promoted to measured capture/wall-clock timing.
+                    "#EXT-X-PROGRAM-DATE-TIME" -> Unit
                     else -> if (tag.startsWith("#EXT")) fail(HlsCaptureFailure.UNSUPPORTED_PLAYLIST)
                 }
             }
@@ -101,7 +99,7 @@ class HlsCapturePlaylistParser(val maxBytes: Int = 256 * 1024, private val maxSe
             if ("#EXT-X-PLAYLIST-TYPE" in seen && text.contains("#EXT-X-PLAYLIST-TYPE:VOD") && !ended) fail()
             return HlsCapturePlaylist(duration, firstSequence, segments.toList(), ended)
         } catch (error: HlsCaptureException) { throw error }
-        catch (_: Exception) { fail() } // No endpoint/parser excerpt/cause can escape.
+        catch (_: Exception) { fail() }
     }
 
     private fun integer(value: String): Long {

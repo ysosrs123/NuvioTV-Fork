@@ -8,7 +8,6 @@ import com.nuvio.tv.core.iptv.CaptureSampleTimeline
 import com.nuvio.tv.core.iptv.CaptureTransportState
 import java.io.IOException
 
-/** Metadata adapter over completed staged batches. No player/source/period commands or byte ownership. */
 @UnstableApi
 internal class CaptureMedia3TimelineFactory(private val source: CaptureSampleTimeline) {
     private val uids = mutableMapOf<Long, Any>()
@@ -20,7 +19,7 @@ internal class CaptureMedia3TimelineFactory(private val source: CaptureSampleTim
         retained.latestEpoch?.let { lastEpoch = it }
         val currentEpochs = retained.windows.map { it.epoch }.toSet() + listOfNotNull(lastEpoch)
         uids.keys.retainAll(currentEpochs)
-        // A completed batch cannot enlarge the retained window after its exact row has expired.
+
         val eligible = retained.windows.mapNotNull { window -> batches.lastOrNull { it.window === window } }
         val epochs = eligible.groupBy { it.window.epoch }.map { (epoch, rows) ->
             rows.zipWithNext().forEach { (a,b) ->
@@ -40,13 +39,12 @@ internal class CaptureMedia3TimelineFactory(private val source: CaptureSampleTim
     private data class Epoch(val uid: Any, val epoch: Long, val startUs: Long, val endUs: Long,
         val defaultUs: Long, val dynamic: Boolean)
 
-    /** One period/window per epoch. Explicit navigation owns transitions; no automatic epoch crossing. */
     private class StagedTimeline(private val epochs: List<Epoch>) : Timeline() {
         override fun getWindowCount() = epochs.size
         override fun getPeriodCount() = epochs.size
         override fun getWindow(windowIndex: Int, window: Window, defaultPositionProjectionUs: Long): Window {
             val e = at(windowIndex)
-            // Projection cannot invent future captured media. No wall-clock live configuration.
+
             return window.set(e.uid, MediaItem.EMPTY, null, C.TIME_UNSET, C.TIME_UNSET, C.TIME_UNSET,
                 true, e.dynamic, null, e.defaultUs, e.endUs - e.startUs, windowIndex, windowIndex, e.startUs)
         }

@@ -42,13 +42,6 @@ internal class CapturedSampleTrack(val format: Format, samples: List<CapturedEnc
 internal class CapturedSampleBatch(val window: CaptureSampleWindow, val video: CapturedSampleTrack,
     val audio: CapturedSampleTrack, val chargedBytes: Long)
 
-/**
- * Transactional compressed-sample staging only. No output escapes until extraction, verified EOF,
- * shape/clock checks and final cancellation all pass. Caller owns the pinned input and admission.
- * Limits cover incoming encoded data/init data, per-track pending data, samples and format dimensions;
- * parser/transient copies, object overhead, decoder buffers and aggregate heap remain admission gates.
- * Does not close input, decode, discard preroll, open a network, publish a MediaSource or enable UI.
- */
 @UnstableApi
 internal class LocalCaptureSampleStager(private val limits: CaptureSampleStagingLimits) {
     fun stage(window: CaptureSampleWindow, input: InspectedCaptureInput,
@@ -57,7 +50,7 @@ internal class LocalCaptureSampleStager(private val limits: CaptureSampleStaging
         checkCancellation()
         val output = StagingOutput(limits)
         LocalTsSegmentExtractor.extract(input, input.inspection, output, checkCancellation)
-        // An extractor may use its declared length without requesting the underlying EOF itself.
+
         if (input.read() != -1 || !input.verified) throw IOException("Capture staging did not verify complete input")
         val video = output.tracks.values.singleOrNull { it.type == C.TRACK_TYPE_VIDEO }
             ?: throw IOException("Capture video track missing")

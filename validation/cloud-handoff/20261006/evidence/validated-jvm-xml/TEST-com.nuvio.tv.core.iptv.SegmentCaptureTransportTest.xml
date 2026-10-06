@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.SegmentCaptureTransportTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:48.656Z" hostname="PWR_PC" time="0.587">
+  <properties/>
+  <testcase name="committedSequenceHintNeverAdvancesBeforeAtomicStorePublication" classname="com.nuvio.tv.core.iptv.SegmentCaptureTransportTest" time="0.053"/>
+  <testcase name="blockedBodyCloseCannotPreventTheTransportCloseTimeout" classname="com.nuvio.tv.core.iptv.SegmentCaptureTransportTest" time="0.229"/>
+  <testcase name="lateBodyAfterCancellationIsClosedWithoutAppend" classname="com.nuvio.tv.core.iptv.SegmentCaptureTransportTest" time="0.027"/>
+  <testcase name="segmentBodiesCloseBeforeNextPullAndCommittedLocalBytesAreReadable" classname="com.nuvio.tv.core.iptv.SegmentCaptureTransportTest" time="0.05"/>
+  <testcase name="failedBodyClosureRetainsHandleForCleanupRetry" classname="com.nuvio.tv.core.iptv.SegmentCaptureTransportTest" time="0.019"/>
+  <testcase name="unconfirmedSourceClosureCannotBecomeClosed" classname="com.nuvio.tv.core.iptv.SegmentCaptureTransportTest" time="0.029"/>
+  <testcase name="oversizedInputClosesBodyAndStopsWithoutPublishingPartialData" classname="com.nuvio.tv.core.iptv.SegmentCaptureTransportTest" time="0.008"/>
+  <testcase name="pinnedCapacityStopsWithoutRetryOrDroppingCommittedMedia" classname="com.nuvio.tv.core.iptv.SegmentCaptureTransportTest" time="0.061"/>
+  <testcase name="blockedCleanupRetryAlsoTimesOutWithoutConcurrentBodyCloses" classname="com.nuvio.tv.core.iptv.SegmentCaptureTransportTest" time="0.11"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -24,7 +24,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Actual BaseMediaSource/Handler/TS staging/period APIs. No ExoPlayer, codec, audio/display/network. */
 @UnstableApi
 class CaptureEpochMediaSourceAndroidTest {
     @get:Rule val temp=TemporaryFolder()
@@ -81,7 +80,7 @@ class CaptureEpochMediaSourceAndroidTest {
         Fixture().use { f -> f.source.start(); f.ready(IncrementalReaderState.WAITING,0); f.prepare(); on(f.handler) { Unit }; assertNull(f.published.value)
             f.producer.value=CaptureTransportState.COMPLETE; f.events.emit(Unit); f.ready(IncrementalReaderState.ENDED,0)
             val complete=withTimeout(10000) { f.published.first { it!=null } }!!; assertTrue(complete.isEmpty)
-            assertFalse(f.source.close()) // BaseMediaSource caller still owns the source lifecycle.
+            assertFalse(f.source.close())
         }
     }
 }

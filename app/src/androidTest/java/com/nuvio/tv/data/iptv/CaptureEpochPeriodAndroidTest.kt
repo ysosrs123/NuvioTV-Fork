@@ -16,7 +16,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Actual TS staging and Java MediaPeriod delivery; no codec/renderer/player/audio/display/network. */
 @UnstableApi
 class CaptureEpochPeriodAndroidTest {
     @get:Rule val temp=TemporaryFolder()

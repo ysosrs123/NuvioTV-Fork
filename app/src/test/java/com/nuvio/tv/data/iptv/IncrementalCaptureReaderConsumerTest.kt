@@ -20,7 +20,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
-/** Real cursor/store/runtime/notifications; SYNTHETIC compressed batches, no Android extractor/codec. */
 @UnstableApi
 class IncrementalCaptureReaderConsumerTest {
     @get:Rule val temp=TemporaryFolder()

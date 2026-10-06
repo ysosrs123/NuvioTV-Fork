@@ -7,15 +7,6 @@ enum class CaptureLiveReadState { DATA, WAITING, ENDED, EXPIRED, DISCONTINUITY, 
 data class CaptureLiveRead(val state: CaptureLiveReadState, val bytes: Int = 0,
     val segment: CaptureSegment? = null, val producerState: CaptureTransportState? = null)
 
-/**
- * Local committed-byte reader, NOT a decoder-safe seek or Media3 timeline. No network or polling loop.
- * WAITING is a live tail; only producer COMPLETE can yield ENDED. Failed/backpressured/closed producers
- * yield STOPPED after draining committed bytes. An unavailable old start yields EXPIRED, never a jump.
- * Gap/discontinuity requires explicit close and a new reader. Metadata remains caller/manifest timing.
- * Reading starts lazily. Once started, a pin retains the current segment and successors, including at
- * a waiting/terminal tail, until advancement or explicit close. Consumer ownership must include this
- * reader's close; reaching a terminal state does not release retention or infrastructure reservations.
- */
 class CaptureLiveReader internal constructor(private val store: CaptureSegmentStore,
     private var expectedSequence: Long, private val producerState: () -> CaptureTransportState,
 ) : AutoCloseable {
@@ -37,8 +28,7 @@ class CaptureLiveReader internal constructor(private val store: CaptureSegmentSt
                 previous = current; current = null
                 expectedSequence = requireNotNull(previous).sequence + 1
             }
-            // Read the producer state BEFORE the store snapshot. COMPLETE implies all publications
-            // already happened; sampling it after a stale snapshot could manufacture premature EOF.
+
             val state = producerState()
             synchronized(store) {
                 val rows = store.snapshot()

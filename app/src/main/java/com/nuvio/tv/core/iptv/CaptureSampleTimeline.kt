@@ -4,7 +4,6 @@ import kotlin.math.abs
 
 enum class CaptureEpochStart { INITIAL, SEQUENCE_GAP, CAPTURE_DISCONTINUITY, INITIALIZATION_CHANGE, TIMESTAMP_CHANGE }
 
-/** Positions are 90 kHz ticks relative to this epoch's first video PTS, stable across eviction. */
 class CaptureSampleWindow internal constructor(val proof: InspectedCaptureSegment,
     val epoch: Long, val start90k: Long, val endExclusive90k: Long, val audioStart90k: Long,
     val audioEnd90k: Long, val epochStart: CaptureEpochStart?) {
@@ -15,14 +14,6 @@ data class CaptureSampleSnapshot(val revision: Long, val windows: List<CaptureSa
     val latestEpoch: Long? get() = windows.lastOrNull()?.epoch
 }
 
-/**
- * Structural sample timeline over retained, inspected complete files; no Media3 publication or
- * decode guarantee. Manifest times only detect capture gaps, never set sample durations/positions.
- * Exact video cadence and audio adjacency (one tick rounding allowance), configuration and capture
- * continuity are required to join rows. A gap starts an explicit epoch; old epochs remain distinct.
- * Keep the accepted tail after pruning so PTS wrap/eviction cannot rebase positions. On process/store
- * reopen create a new owner/timeline; epochs are not persisted. No pins are held between operations.
- */
 class CaptureSampleTimeline(private val index: CaptureTsInspectionIndex, private val maxWindows: Int = 256) {
     private val state = Any()
     private var windows = emptyList<CaptureSampleWindow>()
@@ -60,7 +51,6 @@ class CaptureSampleTimeline(private val index: CaptureTsInspectionIndex, private
         return synchronized(state) { prune(retained); CaptureSampleSnapshot(revision, windows.toList()) }
     }
 
-    /** Pin the exact published start before the caller stages/decodes. Expiry never substitutes a row. */
     internal fun open(window: CaptureSampleWindow): InspectedCaptureInput = synchronized(state) {
         if (windows.none { it == window }) throw CaptureMediaExpired()
         index.open(window.proof)

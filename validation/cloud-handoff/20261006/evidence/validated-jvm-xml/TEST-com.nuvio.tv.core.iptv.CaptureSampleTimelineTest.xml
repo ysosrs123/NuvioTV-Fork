@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.nuvio.tv.core.iptv.CaptureSampleTimelineTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:47.028Z" hostname="PWR_PC" time="0.386">
+  <properties/>
+  <testcase name="evictionNeverRebasesPositionsAndExpiredWindowsCannotOpenAnotherFile" classname="com.nuvio.tv.core.iptv.CaptureSampleTimelineTest" time="0.042"/>
+  <testcase name="cadenceChangeStartsAnEpochAndBudgetPruningKeepsPositionsStable" classname="com.nuvio.tv.core.iptv.CaptureSampleTimelineTest" time="0.042"/>
+  <testcase name="captureGapAndDeclaredDiscontinuityStartExplicitEpochsDespiteAdjacentPts" classname="com.nuvio.tv.core.iptv.CaptureSampleTimelineTest" time="0.056"/>
+  <testcase name="missingInspectionAndChangedInitializationCannotBeJoined" classname="com.nuvio.tv.core.iptv.CaptureSampleTimelineTest" time="0.059"/>
+  <testcase name="ptsWrapAcrossAndWithinSegmentsUsesTheSameStableEpoch" classname="com.nuvio.tv.core.iptv.CaptureSampleTimelineTest" time="0.039"/>
+  <testcase name="realVideoOrAudioTimestampGapsStartNewEpochsWithoutManifestInference" classname="com.nuvio.tv.core.iptv.CaptureSampleTimelineTest" time="0.055"/>
+  <testcase name="actualSamplesDeterminePositionsWhileAudioKeepsItsIndependentPhase" classname="com.nuvio.tv.core.iptv.CaptureSampleTimelineTest" time="0.041"/>
+  <testcase name="acceptedTailSurvivesEvenWhenAllPublishedRowsAreEvictedBeforeNextInspection" classname="com.nuvio.tv.core.iptv.CaptureSampleTimelineTest" time="0.03"/>
+  <testcase name="duplicateEvidenceIsIdempotentAndForeignOwnershipIsRejected" classname="com.nuvio.tv.core.iptv.CaptureSampleTimelineTest" time="0.02"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -11,18 +11,18 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import java.util.UUID
 
-/** Construction opens no media. Closure confirms the producer AND all upstream requests stopped. */
 interface OwnedCaptureTransport {
-    /** Commit/terminal hints only; subscribers still inspect exact committed local rows. */
+
     val refreshEvents: Flow<Unit> get() = emptyFlow()
     fun start()
     suspend fun close(): Boolean
 }
 
-/** Construction opens no decoder. Closure confirms decoder/file-reader/pin release, as applicable. */
 interface OwnedCaptureConsumer {
-    /** Lower bound only; does not measure aggregate transient/native/decoder memory. */
+
     val minimumMemoryReservationBytes: Long get() = 0
+
+    val minimumDecoderReservationCount: Int get() = 0
     fun start()
     suspend fun close(): Boolean
 }
@@ -36,7 +36,6 @@ data class CaptureStorageReservation(val retainedBytes: Long, val segmentBytes: 
     val totalBytes: Long get() = retainedBytes + segmentBytes + overheadBytes
 }
 
-/** The store is exclusive to this pipeline; its limits must match the admitted storage plan. */
 data class CapturePipeline(val store: CaptureSegmentStore, val transport: OwnedCaptureTransport)
 class CaptureConsumerToken internal constructor(val id: String, val acquisitionId: String)
 
@@ -45,18 +44,10 @@ sealed interface CaptureJoinResult {
     data class Denied(val reason: AdmissionDenial) : CaptureJoinResult
     data object SharingUnavailable : CaptureJoinResult
     data object Closing : CaptureJoinResult
-    /** A token means this consumer still needs close(token); otherwise retryClosing handles cleanup. */
+
     data class Failed(val pendingConsumer: CaptureConsumerToken? = null) : CaptureJoinResult
 }
 
-/**
- * Coordinates one shared producer/store and independently closing viewers/recorders. The infrastructure
- * lease holds account, capture memory and the entire spool reservation until both transport and store
- * actually close. Decoder reservations stay with consumers until their close is confirmed.
- *
- * This is not a media adapter or background service. Factories must clean up partially constructed
- * objects if they throw, and must not reenter this runtime. No acquisition is silently retried.
- */
 class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
     private data class Consumer(val token: CaptureConsumerToken, val lease: LiveConsumerLease,
         var handle: OwnedCaptureConsumer? = null)
@@ -117,6 +108,8 @@ class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
             consumer.handle = createConsumer(session.pipeline.store)
             val minimum = consumer.handle!!.minimumMemoryReservationBytes
             check(minimum >= 0 && reservation.memoryBytes >= minimum) { "Capture consumer memory is under-reserved" }
+            val decoders = consumer.handle!!.minimumDecoderReservationCount
+            check(decoders >= 0 && reservation.decoders >= decoders) { "Capture consumer decoder is under-reserved" }
             if (infrastructure != null) session.pipeline.transport.start()
             currentCoroutineContext().ensureActive()
             consumer.handle!!.start()
@@ -133,7 +126,6 @@ class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
         }
     }
 
-    /** Idempotent, fenced by acquisition identity. Closing one viewer never stops another consumer. */
     suspend fun close(token: CaptureConsumerToken): Boolean = mutex.withLock {
         val session = sessions.values.singleOrNull { it.lease.acquisitionId == token.acquisitionId }
             ?: return@withLock true
@@ -143,7 +135,6 @@ class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
         } else closeConsumer(session, consumer)
     }
 
-    /** For profile/runtime shutdown, including a cancelled join whose token was never delivered. */
     suspend fun closeAll(): Boolean = mutex.withLock {
         var closed = true
         for (session in sessions.values.toList()) {
@@ -159,7 +150,6 @@ class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
         closed
     }
 
-    /** Retry only abandoned/final closures; does not stop healthy active recordings or viewers. */
     suspend fun retryClosing(): Boolean = mutex.withLock {
         var closed = true
         for (session in sessions.values.filter { it.closing && it.consumers.isEmpty() }.toList()) {
@@ -186,7 +176,7 @@ class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
             session.transportClosed = try { session.pipeline.transport.close() } catch (_: Exception) { false }
         }
         if (!session.transportClosed) return@withContext false
-        // Store closure refuses forgotten reader/pause pins. Keep the storage/account lease on failure.
+
         try { session.pipeline.store.close() } catch (_: Exception) { return@withContext false }
         releaseClosed(session.lease)
         sessions.remove(session.lease.key)

@@ -13,7 +13,6 @@ import android.provider.OpenableColumns
 import android.widget.Button
 import java.io.File
 
-/** Test APK only: grants access to one synthetic file. Does not browse device storage. */
 class FixturePickerActivity : Activity() {
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
