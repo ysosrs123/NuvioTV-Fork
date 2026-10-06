@@ -23,6 +23,9 @@ class IptvGuideStore(
     context: Context, databaseName: String = "iptv-guide.db",
     private val secrets: IptvSecretBox = AndroidIptvSecretBox(),
     private val maxDatabaseBytes: Long = 256L * 1024 * 1024,
+    private val releaseDocument: (String) -> Unit = { uri ->
+        context.applicationContext.contentResolver.releasePersistableUriPermission(android.net.Uri.parse(uri), android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    },
 ) : Closeable {
     init { require(maxDatabaseBytes >= 64 * 1024) }
     private val helper = Database(context.applicationContext, databaseName)
@@ -40,7 +43,8 @@ class IptvGuideStore(
     fun editFeed(ref: IptvGuideRef, label: String, endpoint: String) = transaction { db ->
         validate(label, endpoint)
         val old = feed(db, ref)
-        val changed = endpoint(db, ref) != endpoint
+        val previous = endpoint(db, ref)
+        val changed = previous != endpoint
         db.update("feeds", ContentValues().apply {
             put("label", label)
             if (changed) {
@@ -48,8 +52,8 @@ class IptvGuideStore(
                 put("endpoint", secrets.seal(aad(ref, "endpoint"), endpoint)); putNull("validators")
             }
         }, "id=?", arrayOf(ref.feedId))
-        Unit
-    }
+        if (changed && isDocument(previous) && previous.trim() !in documents(db)) listOf(previous.trim()) else emptyList()
+    }.let(::release)
 
     fun endpoint(ref: IptvGuideRef): String = transaction { db -> feed(db, ref); endpoint(db, ref) }
     fun feed(ref: IptvGuideRef): IptvGuideFeed = transaction { db -> feed(db, ref) }
@@ -57,12 +61,28 @@ class IptvGuideStore(
     fun removeProfile(profileId: Int) = transaction { db ->
         require(profileId >= 0)
         val args = arrayOf(profileId.toString())
+        val removed = documents(db, profileId)
         db.delete("stages", "feed IN (SELECT id FROM feeds WHERE profile=?)", args)
         db.delete("feeds", "profile=?", args)
-        Unit
-    }
+        removed - documents(db)
+    }.let(::release)
 
-    fun clearAllProfiles() = transaction { db -> db.delete("stages", null, null); db.delete("feeds", null, null); Unit }
+    fun clearAllProfiles() = transaction { db ->
+        val removed = documents(db)
+        db.delete("stages", null, null); db.delete("feeds", null, null)
+        removed
+    }.let(::release)
+
+    private fun isDocument(endpoint: String) = endpoint.trim().startsWith("content:")
+    private fun documents(db: SQLiteDatabase, profileId: Int? = null): Set<String> =
+        db.rawQuery("SELECT id,profile,endpoint FROM feeds" + if (profileId == null) "" else " WHERE profile=?",
+            profileId?.let { arrayOf(it.toString()) }).use { c -> buildSet {
+            while (c.moveToNext()) {
+                val endpoint = secrets.open(aad(IptvGuideRef(c.getInt(1), c.getString(0)), "endpoint"), c.getBlob(2))
+                if (isDocument(endpoint)) add(endpoint.trim())
+            }
+        } }
+    private fun release(uris: Collection<String>) { for (uri in uris) runCatching { releaseDocument(uri) } }
 
     fun feeds(profileId: Int, offset: Int = 0, limit: Int = 100): List<IptvGuideFeed> = transaction { db ->
         require(profileId >= 0 && offset >= 0 && limit in 1..200)
@@ -208,7 +228,6 @@ class IptvGuideStore(
             importFailure = error
             throw error
         } finally {
-
             try { transaction { db -> db.delete("stages", "id=? AND id NOT IN (SELECT active_stage FROM feeds WHERE active_stage IS NOT NULL)", arrayOf(stage)) } }
             catch (cleanup: Throwable) { if (importFailure == null) throw cleanup else importFailure.addSuppressed(cleanup) }
         }

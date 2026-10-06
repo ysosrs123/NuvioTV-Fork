@@ -793,7 +793,7 @@ private fun SettingsDetailPane(
     onNavigateToLicensesAttributions: () -> Unit
 ) {
     when (selectedCategory) {
-        SettingsCategory.IPTV -> Unit // This category opens its own source-management route.
+        SettingsCategory.IPTV -> Unit
         SettingsCategory.EXPERIENCE -> EssentialAdvancedSettingsContent(
             experienceModeViewModel = experienceModeViewModel,
             initialFocusRequester = if (allowDetailAutofocus) {

@@ -171,7 +171,6 @@ internal class PinnedCaptureSegmentPeriod internal constructor(batch: CapturedSa
     }
 
     companion object {
-
         fun stage(seek: CaptureSeekInput, limits: CaptureSampleStagingLimits, checkCancellation: () -> Unit = {}): PinnedCaptureSegmentPeriod {
             val staged=LocalCaptureSampleStager(limits).stage(seek.request.window,seek.media,checkCancellation)
             checkCancellation()

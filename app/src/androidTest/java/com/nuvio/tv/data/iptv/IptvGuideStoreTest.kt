@@ -104,6 +104,15 @@ class IptvGuideStoreTest {
         assertEquals(RefreshDecision.PUBLISH, publish(ref, "<tv>$channel<channel id=\"one\"><display-name>Different</display-name></channel>${programme()}</tv>"))
         assertEquals(1, store.channelPage(ref).size)
     }
+    @Test fun documentGrantsAreReleasedOnlyWhenNoFeedStillUsesThem() {
+        val released = mutableListOf<String>(); store.close()
+        store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias), releaseDocument = { released += it })
+        val doc = "content://fixture.documents/guide.xml"
+        val one = store.createFeed(1, "One", doc); val two = store.createFeed(2, "Two", doc)
+        store.editFeed(one, "One", "https://fixture.invalid/epg"); assertTrue(released.isEmpty())
+        store.removeProfile(2); assertEquals(listOf(doc), released)
+        store.editFeed(one, "One", doc); store.clearAllProfiles(); assertEquals(listOf(doc, doc), released)
+    }
     @Test fun cancellationAfterAFlushedBatchLeavesNoVisiblePartialGuide() {
         val ref = feed(); publish(ref)
         val text = xml((1..150).joinToString("") { programme("Candidate $it") })

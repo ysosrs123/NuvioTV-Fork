@@ -41,7 +41,6 @@ class AndroidIptvSecretBox(private val alias: String = "com.nuvio.tv.iptv.v1") :
     }
 
     private fun <T> protect(block: () -> T): T = try { block() } catch (_: Exception) {
-
         throw IOException("IPTV protected storage unavailable")
     }
     private companion object { val keyLock = Any() }

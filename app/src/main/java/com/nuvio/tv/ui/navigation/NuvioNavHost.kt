@@ -1237,11 +1237,19 @@ private fun PlaybackNavHost(
 
         composable(Screen.IptvLive.route) {
             com.nuvio.tv.ui.screens.iptv.IptvLiveScreen(onBack = { navController.popBackStack() },
-                onSources = { navController.navigate(Screen.IptvSources.route) { launchSingleTop = true } })
+                onSources = {
+                    if (!navController.popBackStack(Screen.IptvSources.route, inclusive = false)) {
+                        navController.navigate(Screen.IptvSources.route) { launchSingleTop = true }
+                    }
+                })
         }
         composable(Screen.IptvSources.route) {
             com.nuvio.tv.ui.screens.iptv.IptvSourcesScreen(onBack = { navController.popBackStack() },
-                onLive = { navController.navigate(Screen.IptvLive.route) { launchSingleTop = true } })
+                onLive = {
+                    if (!navController.popBackStack(Screen.IptvLive.route, inclusive = false)) {
+                        navController.navigate(Screen.IptvLive.route) { launchSingleTop = true }
+                    }
+                })
         }
 
         composable(Screen.Settings.route) {

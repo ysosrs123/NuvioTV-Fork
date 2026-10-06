@@ -50,7 +50,6 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
         try {
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, false)
         } catch (unsupported: org.xmlpull.v1.XmlPullParserException) {
-
             if (parser.getFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL)) throw unsupported
         }
         parser.setInput(LimitedInput(input, limits.expandedBytes, limits.textCharacters * 4L + 64 * 1024), null)
@@ -77,7 +76,6 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                 XmlPullParser.END_DOCUMENT -> break
                 XmlPullParser.DOCDECL -> throw IllegalArgumentException("XMLTV DTD declarations are not accepted")
                 XmlPullParser.ENTITY_REF -> {
-
                     require((parser.name in setOf("amp", "lt", "gt", "quot", "apos") || parser.name.startsWith("#")) && parser.text != null) { "XMLTV entity is not allowed" }
                     if (textType != null) {
                         text.append(parser.text)
@@ -157,7 +155,6 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
     }
 
     companion object {
-
         internal fun parseTimestamp(raw: String): GuideTimestamp? {
             val match = Regex("^(\\d{4}(?:\\d{2}){0,5})(?:\\s+([+-]\\d{4}|UTC|GMT))?$").matchEntire(raw.trim()) ?: return null
             val digits = match.groupValues[1]

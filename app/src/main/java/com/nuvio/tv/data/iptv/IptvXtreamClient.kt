@@ -144,7 +144,6 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
 
     companion object {
         private fun diagnose(stage: String, error: Exception) {
-
             val location = error.stackTrace.firstOrNull()?.let { "${it.className}.${it.methodName}:${it.lineNumber}" }.orEmpty()
             val failure = (error as? MetadataException)?.failure?.name.orEmpty()
             Logger.getLogger("NuvioXtream").warning("$stage ${error.javaClass.simpleName} $failure at $location")

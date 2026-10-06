@@ -17,6 +17,7 @@ import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.TransferListener
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
@@ -53,7 +54,8 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             }
         })
         val sources = DataSource.Factory { FencedSource(upstream.createDataSource(), fence, Uri.parse(locator)) }
-        player = ExoPlayer.Builder(context)
+        val renderers = DefaultRenderersFactory(context).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+        player = ExoPlayer.Builder(context, renderers)
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 8000, 500, 1000)
                 .setTargetBufferBytes(12 * 1024 * 1024).setPrioritizeTimeOverSizeThresholds(false).build())
             .setMediaSourceFactory(DefaultMediaSourceFactory(sources).setLoadErrorHandlingPolicy(object : DefaultLoadErrorHandlingPolicy(0) {
@@ -68,7 +70,6 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) { if (!released) onPlaying(isPlaying) }
             override fun onPlayerError(error: PlaybackException) {
-
                 if (released) releaseFailed = true else reportFailure()
             }
             override fun onRenderedFirstFrame() { telemetry.firstFrame(android.os.SystemClock.elapsedRealtime()) }
@@ -79,7 +80,6 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         })
     }
     private fun reportFailure() {
-
         mainHandler.post { if (!released) onError() }
     }
     override fun start() {

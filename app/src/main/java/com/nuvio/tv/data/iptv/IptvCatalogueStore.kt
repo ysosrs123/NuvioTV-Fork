@@ -289,7 +289,6 @@ class IptvCatalogueStore(
         db.beginTransactionNonExclusive()
         var failure: Throwable? = null
         return try {
-
             db.setMaximumSize(maxDatabaseBytes)
             block(db).also { db.setTransactionSuccessful() }
         } catch (error: Throwable) {
@@ -297,7 +296,6 @@ class IptvCatalogueStore(
             throw error
         } finally {
             try { db.endTransaction() } catch (cleanup: Throwable) {
-
                 if (failure == null) throw cleanup else failure.addSuppressed(cleanup)
             }
         }

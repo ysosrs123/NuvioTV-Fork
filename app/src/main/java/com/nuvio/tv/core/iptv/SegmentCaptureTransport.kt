@@ -61,11 +61,9 @@ class SegmentCaptureTransport(private val store: CaptureSegmentStore, private va
             } catch (_: CaptureRetentionBlocked) {
                 stateMutable.value = CaptureTransportState.BACKPRESSURE
             } catch (_: CancellationException) {
-
             } catch (_: Exception) {
                 stateMutable.value = CaptureTransportState.FAILED
             } finally {
-
                 withContext(NonCancellable) {
                     try { source.close() } catch (_: Exception) { }
                 }

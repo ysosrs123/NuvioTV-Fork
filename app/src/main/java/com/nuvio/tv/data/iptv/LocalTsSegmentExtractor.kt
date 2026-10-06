@@ -27,7 +27,6 @@ internal object LocalTsSegmentExtractor {
         val factory = object : TsPayloadReader.Factory {
             override fun createInitialPayloadReaders() = standard.createInitialPayloadReaders()
             override fun createPayloadReader(streamType: Int, esInfo: TsPayloadReader.EsInfo): TsPayloadReader? {
-
                 if (streamType == TsExtractor.TS_STREAM_TYPE_ID3) return null
                 val reader = standard.createPayloadReader(streamType, esInfo)
                 if (streamType == TsExtractor.TS_STREAM_TYPE_H264) {

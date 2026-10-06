@@ -108,7 +108,6 @@ class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimit
                         name to if ("group-title" in attrs) attrs else attrs + ("group-title" to line.substringAfter(':'))
                     }
                 } else if (line.startsWith("#EXTVLCOPT:") || line.startsWith("#KODIPROP:")) {
-
                     issue(PlaylistIssue.UNSUPPORTED_EXTENSION)
                 } else if (!line.startsWith('#')) {
                     val record = pending

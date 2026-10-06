@@ -49,13 +49,13 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     session = null; profileRevision = revision
                     pageJob?.cancel(); guideJob?.cancel(); stop()
                     mutable.value = IptvLiveState()
-                    if (ready) { session = access.open(id); load(null) }
+                    if (ready) { session = withContext(Dispatchers.IO) { access.open(id) }; load(null) }
                 }
         }
         viewModelScope.launch {
             while (isActive) {
                 delay(30_000)
-                if (foreground && pageJob?.isActive != true) load(currentCursor())
+                if (foreground && pageJob?.isActive != true) load(currentCursor(), background = true)
             }
         }
     }
@@ -108,12 +108,12 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         mutable.update { it.copy(source = current.sources[(index + 1) % current.sources.size].ref, focused = null, programmes = emptyList()) }
         load(null)
     }
-    private fun load(cursor: IptvBrowseCursor?) {
+    private fun load(cursor: IptvBrowseCursor?, background: Boolean = false) {
         val current = session ?: return
         pageJob?.cancel()
         val request = ++pageVersion
         pageJob = viewModelScope.launch {
-            mutable.update { it.copy(loading = true) }
+            if (!background) mutable.update { it.copy(loading = true) }
             try {
                 val sources = withContext(Dispatchers.IO) { access.use(current) { catalogue.sources(current.profileId) } }
                 val ref = mutable.value.source?.takeIf { chosen -> sources.any { it.ref == chosen } } ?: sources.firstOrNull()?.ref
@@ -124,18 +124,20 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 if (session === current && request == pageVersion) {
                     val focusedId = mutable.value.focused?.item?.channel?.id
                     val focused = page?.channels?.firstOrNull { it.item.channel.id == focusedId } ?: page?.channels?.firstOrNull()
-                    mutable.update { it.copy(sources = sources, source = ref, page = page, offset = actualCursor?.offset ?: 0, focused = focused, programmes = emptyList()) }
-                    focused?.let(::focus)
+                    val sameFocus = background && focused != null && focused.item.channel.id == focusedId
+                    mutable.update { it.copy(sources = sources, source = ref, page = page, offset = actualCursor?.offset ?: 0, focused = focused,
+                        programmes = if (sameFocus) it.programmes else emptyList()) }
+                    focused?.let { focus(it, keepProgrammes = sameFocus) }
                 }
             } catch (cancel: CancellationException) { throw cancel }
             catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
             finally { if (session === current && request == pageVersion) mutable.update { it.copy(loading = false) } }
         }
     }
-    fun focus(row: IptvListedChannel) {
+    fun focus(row: IptvListedChannel, keepProgrammes: Boolean = false) {
         val current = session ?: return
         guideJob?.cancel()
-        mutable.update { it.copy(focused = row, programmes = emptyList()) }
+        mutable.update { it.copy(focused = row, programmes = if (keepProgrammes) it.programmes else emptyList()) }
         val key = row.guide.key ?: return
         guideJob = viewModelScope.launch {
             try {

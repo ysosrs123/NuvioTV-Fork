@@ -80,28 +80,28 @@ through callers/callees once and not independently re-checked.
 
 ## Foreground UI and integration
 
-19. Medium (checked): Sources and Live push each other with launchSingleTop only, so
+19. FIXED (pop back to an existing Sources/Live entry; compile-unverified). Medium (checked): Sources and Live push each other with launchSingleTop only, so
     alternating grows the back stack and each Live entry keeps its own ViewModel loop.
-20. Medium (checked): Settings always lists IPTV, so full-flavour builds expose the
+20. OPEN (product decision: keep IPTV visible in full builds or gate it). Medium (checked): Settings always lists IPTV, so full-flavour builds expose the
     unfinished screens. Gate on the prototype flavour or a build flag before release.
-21. Medium (traced): a release timeout reported through onPlayerError makes
+21. NO CHANGE (no later signal can confirm a timed-out release). Medium (traced): a release timeout reported through onPlayerError makes
     IptvLivePlayback.close return false permanently; LivePlaybackRuntime then answers
     CLOSE_UNCONFIRMED to every later open until the process restarts. Consistent with
     retain-on-uncertain, but there is no recovery path or user-visible reset.
-22. Medium (traced): profile deletion runs IPTV store deletes on the main thread inside
+22. FIXED (credential-store removal runs on IO; Live opens its session on IO; compile-unverified). Medium (traced): profile deletion runs IPTV store deletes on the main thread inside
     the profile lock, and an exception skips the remaining cleanup.
-23. Low-medium (traced): the 30s live refresh sets loading, disabling the focused
+23. FIXED (background refresh keeps loading/focus/programmes; compile-unverified). Low-medium (traced): the 30s live refresh sets loading, disabling the focused
     Previous/Next button (focus loss) and blanking the programme list.
-24. Low-medium (traced): the live player uses default renderers without the bundled
+24. FIXED (live player uses extension renderers ON; class compile-checked). Low-medium (traced): the live player uses default renderers without the bundled
     ffmpeg extension that VOD uses, so AC-3/E-AC-3 channels can be silent on TVs
     without those decoders.
-25. Low (traced): persisted document URI permissions are never released on feed edit or
+25. FIXED (dropped document grants released when no feed uses them; device test added). Low (traced): persisted document URI permissions are never released on feed edit or
     profile removal.
 
 ## Repository hygiene
 
-- New KDoc at PlayerDebugStatsOverlay.kt and a trailing comment in SettingsScreen.kt;
-  several emptied catch blocks keep whitespace-only lines.
+- FIXED: added KDoc/trailing comment removed; 26 blank lines left after opening braces
+  by comment stripping removed (only lines the IPTV diff added).
 - Validation documents, scripts and evidence carry local machine paths, a LAN device
   address and earlier tooling names; evidence XML records the host name. Decide what
   stays versioned before any pull request.

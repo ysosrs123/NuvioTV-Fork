@@ -12,14 +12,12 @@ import kotlinx.coroutines.flow.emptyFlow
 import java.util.UUID
 
 interface OwnedCaptureTransport {
-
     val refreshEvents: Flow<Unit> get() = emptyFlow()
     fun start()
     suspend fun close(): Boolean
 }
 
 interface OwnedCaptureConsumer {
-
     val minimumMemoryReservationBytes: Long get() = 0
 
     val minimumDecoderReservationCount: Int get() = 0

@@ -85,7 +85,6 @@ class TsCaptureInspector(private val maxBytes: Long = 8L * 1024 * 1024,
                 val length = u(b, offset++)
                 need(offset + length <= 188, TsCaptureRejection.TRANSPORT)
                 if (length > 0) {
-
                     need(u(b, offset) and 0x80 == 0, TsCaptureRejection.TRANSPORT)
                     need(u(b, offset) and 0x10 == 0 || length >= 7, TsCaptureRejection.TRANSPORT)
                 }

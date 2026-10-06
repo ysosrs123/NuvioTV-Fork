@@ -114,7 +114,6 @@ class IptvCaptureHttp(private val http: OkHttpClient = newClient(), private val 
             }
         }
         } } catch (error: Exception) {
-
             opened?.delivered = false
             throw error
         }
@@ -146,7 +145,6 @@ class IptvCaptureHttp(private val http: OkHttpClient = newClient(), private val 
     }
 
     private fun closeSlot(slot: Slot) {
-
         if (slot.closeUncertain) throw HlsCaptureException(HlsCaptureFailure.NETWORK)
 
         try { slot.response?.body?.source()?.close() }

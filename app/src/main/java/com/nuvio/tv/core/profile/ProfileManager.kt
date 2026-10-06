@@ -133,7 +133,7 @@ class ProfileManager @Inject constructor(
         if (profileDataStore.profilesList.first().none { it.id == id }) return@withLock false
         // A cancelled waiter cannot enter. An admitted retirement must finish its metadata cleanup.
         withContext(NonCancellable) {
-            credentialStores.forEach { store -> store.removeProfile(id) }
+            withContext(Dispatchers.IO) { credentialStores.forEach { store -> store.removeProfile(id) } }
             snapshotStorage.clearProfile(id, retire = true)
             deleteProfileDataAsync(id)
             profileDataStore.deleteProfile(id)

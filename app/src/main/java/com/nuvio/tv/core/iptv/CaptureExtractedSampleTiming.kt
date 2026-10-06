@@ -9,7 +9,6 @@ class CaptureExtractedSampleTiming private constructor(private val videoOriginUs
         Math.addExact(ticksToUs(windowStart90k), Math.subtractExact(rawTimeUs, videoOriginUs))
 
     companion object {
-
         fun validate(media: TsCaptureInspection, videoUs: List<Long>, audioUs: List<Long>): CaptureExtractedSampleTiming {
             try {
                 need(videoUs.size == media.videoFrames && audioUs.size == media.audioFrames && videoUs.isNotEmpty() && audioUs.isNotEmpty())

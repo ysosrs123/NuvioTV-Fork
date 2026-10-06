@@ -117,7 +117,6 @@ internal fun PlayerDebugStatsOverlay(
     DebugStatsPanel(stats, modifier)
 }
 
-/** Shared presentation for VOD and IPTV; each route owns its actual measurements. */
 @Composable
 internal fun DebugStatsPanel(stats: List<DebugStat>, modifier: Modifier = Modifier) {
     if (stats.isEmpty()) return

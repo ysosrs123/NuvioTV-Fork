@@ -54,7 +54,6 @@ internal fun IptvTrackDialog(player: ExoPlayer, onDismiss: () -> Unit) {
                         val label = listOfNotNull(format.label?.take(80), language, format.sampleMimeType).filter { it.isNotBlank() }.distinct().joinToString(" · ")
                         val supported = group.isTrackSupported(index)
                         Button(enabled = supported, onClick = {
-
                             if (player.currentTracks.groups.any { it.mediaTrackGroup == group.mediaTrackGroup && it.isTrackSupported(index) }) {
                                 player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
                                     .setTrackTypeDisabled(type, false)

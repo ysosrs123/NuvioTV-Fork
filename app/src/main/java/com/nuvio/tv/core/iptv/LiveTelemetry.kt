@@ -12,7 +12,6 @@ class LiveTelemetry {
     @Synchronized fun start(now: Long) { check(startedAt == null); startedAt = now }
     @Synchronized fun firstFrame(now: Long) { if (startedAt != null && firstFrameAt == null) firstFrameAt = now }
     @Synchronized fun buffering(active: Boolean, now: Long) {
-
         if (active && firstFrameAt != null && bufferStartedAt == null) { bufferStartedAt = now; stalls++ }
         if (!active) bufferStartedAt?.let { bufferTotal += (now - it).coerceAtLeast(0); bufferStartedAt = null }
     }
