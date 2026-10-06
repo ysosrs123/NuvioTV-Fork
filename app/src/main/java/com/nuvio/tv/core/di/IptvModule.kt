@@ -19,6 +19,7 @@ object IptvModule {
     @Provides @Singleton fun liveRuntime(admission: com.nuvio.tv.core.iptv.LiveSessionAdmission) = com.nuvio.tv.core.iptv.LivePlaybackRuntime(admission)
     @Provides @Singleton fun catalogue(@ApplicationContext context: Context) = IptvCatalogueStore(context)
     @Provides @Singleton fun guides(@ApplicationContext context: Context) = IptvGuideStore(context)
+    @Provides @Singleton fun shortGuides(catalogue: IptvCatalogueStore) = IptvShortGuideRepository(catalogue)
     @Provides @Singleton fun access(catalogue: IptvCatalogueStore, guides: IptvGuideStore) = IptvProfileAccess(catalogue, guides)
     @Provides @IntoSet fun credentials(access: IptvProfileAccess): ProfileScopedCredentialStore = object : ProfileScopedCredentialStore {
         override fun removeProfile(profileId: Int) = access.removeProfile(profileId)
