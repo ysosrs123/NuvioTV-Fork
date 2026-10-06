@@ -30,8 +30,20 @@ class SetupDraft(val kind: SetupKind, val targetId: String?, val label: String, 
         }
     }
 
+    fun movesServer(currentOrigin: String?): Boolean = edit && address.isNotEmpty() && SetupText.origin(address) != currentOrigin
+
+    fun missingLogin(currentOrigin: String?): String? {
+        if (!movesServer(currentOrigin)) return null
+        return when (kind) {
+            SetupKind.XTREAM -> if (username.isEmpty()) "username" else if (password.isEmpty()) "password" else null
+            SetupKind.STALKER -> if (username.isEmpty()) "mac" else null
+            else -> null
+        }
+    }
+
     fun connection(stored: SetupConnection?): SetupConnection {
         require(edit == (stored != null))
+        missingLogin(stored?.endpoint?.let(SetupText::origin))?.let { throw SetupInputException(it) }
         val endpoint = address.ifEmpty { stored?.endpoint.orEmpty() }
         require(endpoint.isNotEmpty())
         return when (kind) {
@@ -47,7 +59,7 @@ class SetupConnection(val endpoint: String, val username: String? = null, val pa
     override fun toString() = "SetupConnection(values withheld)"
 }
 
-data class SetupListingItem(val id: String, val label: String, val kind: SetupKind, val host: String?, val editable: Boolean)
+data class SetupListingItem(val id: String, val label: String, val kind: SetupKind, val host: String?, val editable: Boolean, val origin: String? = null)
 
 data class SetupListing(val sources: List<SetupListingItem> = emptyList(), val guides: List<SetupListingItem> = emptyList()) {
     fun find(kind: SetupKind, id: String): SetupListingItem? = (if (kind.guide) guides else sources).firstOrNull { it.id == id }
@@ -102,6 +114,11 @@ object SetupDrafts {
         return if (draft.changes(current).isEmpty()) "unchanged" else null
     }
 
+    fun checkLogin(draft: SetupDraft, listing: SetupListing): String? {
+        val current = draft.targetId?.let { listing.find(draft.kind, it) } ?: return null
+        return draft.missingLogin(current.origin)
+    }
+
     fun address(kind: SetupKind, value: String): String? {
         if (value.length > MAX_ADDRESS || value.any { it.isWhitespace() || it.isISOControl() }) return null
         val address = if ("://" in value) value else "http://$value"
@@ -133,12 +150,22 @@ object SetupText {
         return if (uri.port >= 0) "$host:${uri.port}" else host
     }
 
+    fun origin(address: String?): String? {
+        val uri = try { URI(address ?: return null) } catch (_: Exception) { return null }
+        val scheme = uri.scheme?.lowercase(Locale.ROOT)?.takeIf { it == "http" || it == "https" } ?: return null
+        val host = uri.host?.takeIf { it.isNotBlank() }?.lowercase(Locale.ROOT) ?: return null
+        val port = uri.port.takeIf { it >= 0 && it != if (scheme == "https") 443 else 80 }
+        return "$scheme://$host" + if (port != null) ":$port" else ""
+    }
+
+    fun server(address: String?): String? = origin(address)?.removePrefix("http://")
+
     fun displayAddress(address: String, limit: Int = 120): String {
         val uri = try { URI(address) } catch (_: Exception) { return "" }
         val host = host(address) ?: return ""
-        val path = uri.rawPath.orEmpty().takeIf { it != "/" }.orEmpty()
-        val text = host + path + if (uri.rawQuery != null) "?…" else ""
-        return if (text.length <= limit) text else text.take(limit - 1) + "…"
+        val rest = uri.rawPath.orEmpty().takeIf { it != "/" }.orEmpty() + if (uri.rawQuery != null) "?…" else ""
+        val room = (limit - host.length).coerceAtLeast(16)
+        return host + if (rest.length <= room) rest else rest.take(room - 1) + "…"
     }
 }
 

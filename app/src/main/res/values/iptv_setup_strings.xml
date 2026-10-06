@@ -32,6 +32,9 @@
     <string name="iptv_remote_field_name">Name</string>
     <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
     <string name="iptv_remote_field_address">Address</string>
+    <string name="iptv_remote_field_server">Server</string>
+    <string name="iptv_remote_server_changes">Changes from %1$s to %2$s</string>
+    <string name="iptv_remote_server_new">Changes to %1$s</string>
     <string name="iptv_remote_field_username">Username</string>
     <string name="iptv_remote_field_password">Password</string>
     <string name="iptv_remote_field_mac">MAC address</string>

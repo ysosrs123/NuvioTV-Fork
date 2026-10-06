@@ -255,13 +255,15 @@ class IptvSetupViewModel @Inject constructor(
     private suspend fun reload(current: IptvProfileAccess.Session) {
         val loaded = withContext(Dispatchers.IO) { access.use(current) {
             val sources = catalogue.sources(current.profileId).map { source ->
+                val endpoint = catalogue.connection(source.ref).endpoint
                 SetupListingItem(source.ref.sourceId, source.label, SetupKind.valueOf(source.kind.name),
-                    SetupText.host(catalogue.connection(source.ref).endpoint), editable = true)
+                    SetupText.host(endpoint), editable = true, origin = SetupText.origin(endpoint))
             }
             val feeds = guides.feeds(current.profileId, limit = 200).map { feed ->
                 val endpoint = guides.endpoint(feed.ref)
                 val automatic = XtreamGuideReference.sourceId(endpoint) != null
-                SetupListingItem(feed.ref.feedId, feed.label, SetupKind.GUIDE, if (automatic) null else SetupText.host(endpoint), editable = !automatic)
+                SetupListingItem(feed.ref.feedId, feed.label, SetupKind.GUIDE, if (automatic) null else SetupText.host(endpoint), editable = !automatic,
+                    origin = SetupText.origin(endpoint))
             }
             SetupListing(sources, feeds)
         } }
@@ -273,6 +275,12 @@ class IptvSetupViewModel @Inject constructor(
         if (target == null) add(IptvSetupLine(R.string.iptv_remote_field_name, draft.label))
         else if (target.label != draft.label) add(IptvSetupLine(R.string.iptv_remote_field_name,
             context.getString(R.string.iptv_remote_field_renamed, target.label, draft.label)))
+        if (target != null && draft.movesServer(target.origin)) {
+            val next = SetupText.server(draft.address).orEmpty()
+            val previous = SetupText.server(target.origin)
+            add(IptvSetupLine(R.string.iptv_remote_field_server, if (previous == null) context.getString(R.string.iptv_remote_server_new, next)
+                else context.getString(R.string.iptv_remote_server_changes, previous, next)))
+        }
         if (draft.address.isNotEmpty()) add(IptvSetupLine(R.string.iptv_remote_field_address, SetupText.displayAddress(draft.address)))
         when (draft.kind) {
             SetupKind.XTREAM -> {

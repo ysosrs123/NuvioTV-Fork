@@ -138,6 +138,9 @@ class IptvSetupServer private constructor(
             }
             return json(status, error(problem))
         }
+        SetupDrafts.checkLogin(draft, listing())?.let { field ->
+            return json(Response.Status.BAD_REQUEST, JSONObject().put("error", "invalid").put("field", field).put("reason", "server").toString())
+        }
         val id = changes.propose(owner, draft) ?: return json(Response.Status.CONFLICT, error("busy"))
         try {
             onChangeProposed(id, draft)

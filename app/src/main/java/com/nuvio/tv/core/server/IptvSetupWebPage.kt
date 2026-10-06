@@ -118,7 +118,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
 <input id="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="4096" autocomplete="off">
 <label for="password">Password</label>
 <div class="row"><input id="password" type="password" maxlength="4096" autocomplete="new-password"><button type="button" id="reveal" aria-pressed="false">Show</button></div>
-<p id="credentialHint" class="hint" hidden>Leave blank to keep what's saved on the TV.</p>
+<p id="credentialHint" class="hint" hidden>Leave blank to keep what's saved on the TV. If you change the server address, enter both again.</p>
 </div>
 <div id="stalkerFields" hidden>
 <label for="mac">MAC address</label>
@@ -268,7 +268,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
     el('username').placeholder = editing ? 'Unchanged' : '';
     el('password').placeholder = editing ? 'Unchanged' : '';
     el('mac').placeholder = editing ? 'Unchanged' : '00:1A:79:00:00:00';
-    el('macHint').textContent = 'Six pairs separated by colons, as registered with your provider.' + (editing ? ' Leave blank to keep the saved one.' : '');
+    el('macHint').textContent = 'Six pairs separated by colons, as registered with your provider.' + (editing ? ' Leave blank to keep the saved one. If you change the portal address, enter it again.' : '');
   }
 
   function openEditor(kind, entry) {
@@ -324,7 +324,10 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
       if (common(result)) return;
       if (result.status === 202 && result.data.id) { waitFor(result.data.id); return; }
       var error = result.data.error;
-      if (error === 'invalid') setText('formError', result.data.field === 'address' ? addressErrors[current.kind] : (fieldErrors[result.data.field] || fieldErrors.body));
+      if (error === 'invalid' && result.data.reason === 'server') setText('formError', current.kind === 'stalker'
+        ? 'The portal address has changed, so enter the MAC address again.'
+        : 'The server address has changed, so enter the username and password again.');
+      else if (error === 'invalid') setText('formError', result.data.field === 'address' ? addressErrors[current.kind] : (fieldErrors[result.data.field] || fieldErrors.body));
       else if (error === 'unchanged') setText('formError', 'Nothing has changed. Fill in what you want to change.');
       else if (error === 'busy') setText('formError', 'The TV is still waiting for you to confirm or reject another change.');
       else if (error === 'missing') setText('formError', 'That entry no longer exists on the TV.');

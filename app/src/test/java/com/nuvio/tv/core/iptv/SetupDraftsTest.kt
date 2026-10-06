@@ -97,6 +97,43 @@ class SetupDraftsTest {
         assertEquals(setOf(SetupField.USERNAME), changes)
     }
 
+    @Test fun movingALoginToAnotherServerNeedsTheLoginAgain() {
+        val listing = SetupListing(listOf(
+            SetupListingItem("x", "X", SetupKind.XTREAM, "x.example:8080", true, SetupText.origin("http://X.example:8080/")),
+            SetupListingItem("s", "S", SetupKind.STALKER, "portal.example", true, SetupText.origin("http://portal.example/c/")),
+            SetupListingItem("m", "M", SetupKind.M3U, "lists.example", true, SetupText.origin("http://lists.example/a.m3u"))))
+        fun login(vararg values: Pair<String, Any?>) = SetupDrafts.checkLogin(SetupDrafts.parse(body(*values)), listing)
+        assertEquals("username", login("kind" to "xtream", "id" to "x", "label" to "X", "address" to "http://evil.example:8080"))
+        assertEquals("password", login("kind" to "xtream", "id" to "x", "label" to "X", "address" to "http://evil.example:8080", "username" to "u"))
+        assertEquals("username", login("kind" to "xtream", "id" to "x", "label" to "X", "address" to "http://x.example:8081"))
+        assertEquals("username", login("kind" to "xtream", "id" to "x", "label" to "X", "address" to "https://x.example:8080"))
+        assertNull(login("kind" to "xtream", "id" to "x", "label" to "X", "address" to "http://evil.example", "username" to "u", "password" to "p"))
+        assertNull(login("kind" to "xtream", "id" to "x", "label" to "X", "address" to "http://x.example:8080/live/"))
+        assertNull(login("kind" to "xtream", "id" to "x", "label" to "Renamed"))
+        assertEquals("mac", login("kind" to "stalker", "id" to "s", "label" to "S", "address" to "http://other.example/c/"))
+        assertNull(login("kind" to "stalker", "id" to "s", "label" to "S", "address" to "http://portal.example/stalker_portal/c/"))
+        assertNull(login("kind" to "m3u", "id" to "m", "label" to "M", "address" to "http://other.example/a.m3u"))
+        val moved = SetupDrafts.parse(body("kind" to "xtream", "id" to "x", "label" to "X", "address" to "http://evil.example"))
+        try { moved.connection(SetupConnection("http://x.example:8080", "me", "secret")); fail() } catch (error: SetupInputException) { assertEquals("username", error.field) }
+        assertNull(SetupDrafts.checkLogin(SetupDrafts.parse(body("kind" to "xtream", "id" to "gone", "label" to "X", "address" to "http://e.example")), listing))
+    }
+
+    @Test fun originsIgnoreCaseAndDefaultPorts() {
+        assertEquals("http://x.example", SetupText.origin("HTTP://X.Example:80/live"))
+        assertEquals("https://x.example", SetupText.origin("https://x.example:443"))
+        assertEquals("http://x.example:8080", SetupText.origin("http://x.example:8080"))
+        assertEquals("https://x.example", SetupText.server("https://x.example/a"))
+        assertEquals("x.example:8080", SetupText.server("http://x.example:8080/a"))
+        assertNull(SetupText.origin("content://media/guide"))
+    }
+
+    @Test fun displayedAddressesNeverCutTheHost() {
+        val host = "very-long-subdomain-name.provider-with-a-long-name.example"
+        val shown = SetupText.displayAddress("http://$host/" + "p".repeat(200), limit = 40)
+        assertTrue(shown.startsWith("$host/"))
+        assertTrue(shown.endsWith("…"))
+    }
+
     @Test fun listingsShowOnlyLabelKindAndHost() {
         val listing = SetupListing(listOf(SetupListingItem("a", "Lounge", SetupKind.XTREAM, SetupText.host("http://x.example:8080/live/"), true)))
         val json = JSONObject(listing.toJson(pending = true))
