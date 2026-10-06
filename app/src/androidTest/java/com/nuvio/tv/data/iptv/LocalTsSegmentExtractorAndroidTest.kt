@@ -4,13 +4,13 @@ import androidx.media3.common.util.UnstableApi
 import com.nuvio.tv.core.iptv.*
 import com.nuvio.tv.core.iptv.RetainedCaptureFixtures.add
 import org.junit.Assert.*
-import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 @UnstableApi
-class LocalTsSegmentExtractorTest {
+@org.junit.runner.RunWith(androidx.test.ext.junit.runners.AndroidJUnit4::class)
+class LocalTsSegmentExtractorAndroidTest {
     @get:Rule val temp=TemporaryFolder()
     private fun u(b:ByteArray,i:Int)=b[i].toInt() and 255
 
@@ -49,7 +49,6 @@ class LocalTsSegmentExtractorTest {
     }
 
     @Test fun declaredLengthVideoPesKeepsTheFinalAccessUnit() {
-        assumeTrue("Needs working android.util containers", android.util.SparseArray<Any>().apply { put(1, Unit) }.get(1) != null)
         val original=RetainedCaptureFixtures.bytes(0)
         val (declared,count)=declaredVideoLengths(original)
         assertTrue(count>=40)
