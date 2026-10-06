@@ -69,7 +69,8 @@ language (fonts, `NuvioTheme` colours and typography, themes, focus treatment,
 glass/frost presentation), built without waiting for device tests. The user also
 asked for the fork's player button customisation and its stats HUD in Live TV.
 
-Done since 1b7952c (host-tested; CI status below; nothing device-tested):
+Done since 1b7952c (host-tested: core 276, data-layer 137; CI status below; nothing
+device-tested):
 - Data layer (written in a separate worktree, reviewed, cherry-picked): chunked
   catalogue save into an unpublished generation with one publish step (schema 7,
   catalogue id index, timing log line); remove source / remove guide (removing an
@@ -91,10 +92,11 @@ Done since 1b7952c (host-tested; CI status below; nothing device-tested):
 
 Work queue, in order:
 1. Get CI green on the UI rewrite; fix compile errors.
-2. Cherry-pick the remaining data commits (M3U `url-tvg`/`x-tvg-url` feeds,
-   per-channel programme and description caps, Xtream `get_short_epg` now/next
-   fallback, guide format detection) and wire short EPG into the info panel/banner
-   when a channel has no guide data.
+2. Done: remaining data commits cherry-picked (header guides, caps, short guide,
+   format detection; the 64 MB parse cap was the likely cause of "unexpected
+   format") and short guide wired into Live TV. Header-linked guides are not removed
+   with their M3U source yet. On device, Android's XML parser may still reject
+   unknown entities such as `&nbsp;` before our code sees them.
 3. Device pass by the user; then fix what they find. Ask for
    `adb -s <AM9>:5555 logcat -d -s NuvioIptv NuvioXtream` after a refresh.
 4. Favourites ordering, hide categories, default landing category, "now on" search.

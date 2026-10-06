@@ -83,6 +83,15 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 - Channel logos from M3U tvg-logo, Xtream stream_icon and Stalker logo fields
   (http/https only).
 - Guide ids with a feed suffix (for example abc.uk@SD) match the base guide channel.
+- Guides named in an M3U header (url-tvg, x-tvg-url) are added and linked when the
+  playlist loads (up to four; an address already added is reused) and refresh with it.
+- Xtream channels without guide programmes show now and next from the provider's
+  short guide (one channel at a time, cached for five minutes).
+- Large guides: the parse limit now matches the 512 MB download limit (the cause of
+  the 145 MB provider guide failing as "unexpected format"); a DOCTYPE line, a byte
+  order mark, leading spaces, UTF-16 and double gzip are accepted; failures name the
+  reason (empty, web page, JSON, ZIP, not XML, not XMLTV). At most 200 programmes per
+  channel and 50,000 channels are stored, and descriptions are cut to 400 characters.
 - Audio/subtitle track dialog with Automatic, Off and per-player choices.
 - Search ignores case and compatibility forms (for example ß/ss, final sigma).
 
