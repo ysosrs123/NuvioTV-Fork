@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,6 +24,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,11 +44,12 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
-import com.nuvio.tv.core.iptv.GuideGapCell
+import com.nuvio.tv.core.iptv.GuideMatchReason
 import com.nuvio.tv.core.iptv.GuideGridRow
 import com.nuvio.tv.core.iptv.GuideGridWindow
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.GuideProgrammeCell
+import com.nuvio.tv.data.iptv.IptvGuideRef
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.data.iptv.IptvStreamFormat
 import com.nuvio.tv.ui.components.NuvioDialog
@@ -135,6 +140,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
             Button(onClick = { viewModel.focus(row); viewModel.toggleFavourite(); menuFor = null }) {
                 Text(stringResource(if (row.item.overlay.favouriteRank == null) R.string.iptv_live_add_favourite else R.string.iptv_live_remove_favourite))
             }
+            Button(onClick = { viewModel.openGuidePicker(row); menuFor = null }) { Text(stringResource(R.string.iptv_guide_pick_title)) }
             Button(onClick = { formatFor = row; menuFor = null }) {
                 Text(stringResource(R.string.iptv_live_format, stringResource(formatLabel(row.item.overlay.streamFormat))))
             }
@@ -146,6 +152,10 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
             Button(onClick = { menuFor = null; onSources() }) { Text(stringResource(R.string.iptv_sources_title)) }
         }
     }
+    state.guidePicker?.let { picker ->
+        GuidePickerDialog(picker, onAutomatic = { viewModel.chooseGuideChannel(null) }, onFeed = viewModel::pickGuideFeed,
+            onSearch = viewModel::searchGuide, onChannel = { viewModel.chooseGuideChannel(it) }, onDismiss = viewModel::closeGuidePicker)
+    }
     formatFor?.let { channel ->
         NuvioDialog(onDismiss = { formatFor = null }, title = stringResource(R.string.iptv_live_format_title)) {
             Text(channelName(channel), color = NuvioTheme.colors.TextPrimary)
@@ -153,6 +163,46 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
             IptvStreamFormat.entries.forEach { format ->
                 Button(onClick = { viewModel.setStreamFormat(channel, format); formatFor = null }) { Text(stringResource(formatLabel(format))) }
             }
+        }
+    }
+}
+
+@Composable
+private fun GuidePickerDialog(picker: IptvGuidePicker, onAutomatic: () -> Unit, onFeed: (IptvGuideRef?) -> Unit, onSearch: (String) -> Unit,
+    onChannel: (String) -> Unit, onDismiss: () -> Unit) {
+    NuvioDialog(onDismiss = onDismiss, title = stringResource(R.string.iptv_guide_pick_title)) {
+        Text(channelName(picker.row), color = NuvioTheme.colors.TextPrimary)
+        Text(stringResource(when (picker.row.guide.reason) {
+            GuideMatchReason.MANUAL -> R.string.iptv_guide_match_manual
+            GuideMatchReason.EXACT_ID -> R.string.iptv_guide_match_id
+            GuideMatchReason.NAME -> R.string.iptv_guide_match_name
+            else -> R.string.iptv_guide_match_none
+        }), color = NuvioTheme.colors.TextSecondary)
+        val feed = picker.feed
+        if (feed == null) {
+            Button(onClick = onAutomatic) { Text(stringResource(R.string.iptv_guide_pick_automatic)) }
+            if (picker.feeds.isEmpty()) Text(stringResource(R.string.iptv_guide_pick_none), color = NuvioTheme.colors.TextSecondary)
+            picker.feeds.forEach { item -> Button(onClick = { onFeed(item.ref) }) { Text(item.label, maxLines = 1, overflow = TextOverflow.Ellipsis) } }
+        } else {
+            val first = remember { FocusRequester() }
+            LaunchedEffect(feed) { runCatching { first.requestFocus() } }
+            BasicTextField(picker.query, onSearch, singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = NuvioTheme.colors.TextPrimary),
+                keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Search),
+                cursorBrush = SolidColor(NuvioTheme.colors.TextPrimary),
+                decorationBox = { inner ->
+                    Box { if (picker.query.isEmpty()) Text(stringResource(R.string.iptv_guide_pick_search), color = NuvioTheme.colors.TextTertiary); inner() }
+                },
+                modifier = Modifier.fillMaxWidth().focusRequester(first).clip(RoundedCornerShape(8.dp))
+                    .background(NuvioTheme.colors.Field).padding(12.dp))
+            LazyColumn(Modifier.fillMaxWidth().heightIn(max = 300.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                items(picker.results, key = { it.externalId }) { channel ->
+                    Button(onClick = { onChannel(channel.externalId) }, modifier = Modifier.fillMaxWidth()) {
+                        Text((channel.names.firstOrNull()?.text ?: channel.externalId) + "  ·  " + channel.externalId, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+            }
+            Button(onClick = { onFeed(null) }) { Text(stringResource(R.string.iptv_guide_pick_back)) }
         }
     }
 }

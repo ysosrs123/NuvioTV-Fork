@@ -26,7 +26,7 @@ data class IptvSourceForm(val guide: Boolean, val source: IptvSourceRef? = null,
 }
 data class IptvSourcesState(val profileId: Int = 0, val revision: Long = 0, val ready: Boolean = false,
     val sources: List<IptvSource> = emptyList(), val feeds: List<IptvGuideFeed> = emptyList(),
-    val selected: IptvSourceRef? = null, val linked: Set<String> = emptySet(),
+    val selected: IptvSourceRef? = null, val linked: Set<String> = emptySet(), val linkedOrder: List<String> = emptyList(),
     val busy: Boolean = false, val message: Int? = null, val form: IptvSourceForm? = null,
     val refresh: Map<String, IptvRefreshStatus> = emptyMap())
 
@@ -89,7 +89,8 @@ class IptvSourcesViewModel @Inject constructor(
         } }
         if (session === current) mutable.update { it.copy(sources = loaded.first, feeds = loaded.second,
             selected = oldSelected?.takeIf { ref -> loaded.first.any { it.ref == ref } } ?: loaded.first.firstOrNull()?.ref,
-            linked = loaded.third?.feedIds?.toSet().orEmpty(), ready = true) }
+            linked = loaded.third?.feedIds?.toSet().orEmpty(),
+            linkedOrder = loaded.third?.let { (it.priority + it.feedIds).distinct() }.orEmpty(), ready = true) }
     }
     fun add(guide: Boolean, kind: IptvSourceKind = IptvSourceKind.M3U) { if (!mutable.value.busy && session != null) mutable.update { it.copy(form = IptvSourceForm(guide, kind = kind), message = null) } }
     fun documentUnavailable() { mutable.update { it.copy(message = R.string.iptv_guide_picker_unavailable) } }
@@ -153,6 +154,20 @@ class IptvSourcesViewModel @Inject constructor(
             val previous = catalogue.guideAssociations(selected)
             val ids = if (feed.ref.feedId in previous.feedIds) previous.feedIds - feed.ref.feedId else previous.feedIds + feed.ref.feedId
             catalogue.setGuideFeeds(selected, ids.map { IptvGuideRef(profileId, it) }, previous.priority.filter { it in ids }.map { IptvGuideRef(profileId, it) })
+        } }
+        reload(this)
+    }
+    fun moveGuideUp(feed: IptvGuideFeed) = runOperation {
+        val selected = mutable.value.selected ?: return@runOperation
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            require(selected.profileId == profileId && feed.ref.profileId == profileId)
+            val previous = catalogue.guideAssociations(selected)
+            val order = (previous.priority + previous.feedIds).distinct().toMutableList()
+            val index = order.indexOf(feed.ref.feedId)
+            if (index > 0) {
+                order.add(index - 1, order.removeAt(index))
+                catalogue.setGuideFeeds(selected, previous.feedIds.map { IptvGuideRef(profileId, it) }, order.map { IptvGuideRef(profileId, it) })
+            }
         } }
         reload(this)
     }

@@ -59,6 +59,16 @@
     <string name="iptv_refresh_saving">Saving channels…</string>
     <string name="iptv_refresh_guide">Updating programme guide…</string>
     <string name="iptv_refresh_updated">Updated %1$s</string>
+    <string name="iptv_guide_pick_title">Guide channel</string>
+    <string name="iptv_guide_pick_automatic">Match automatically</string>
+    <string name="iptv_guide_pick_none">No guides are linked to this source yet. Link one in Live TV sources.</string>
+    <string name="iptv_guide_pick_search">Search this guide</string>
+    <string name="iptv_guide_pick_back">Choose another guide</string>
+    <string name="iptv_guide_match_manual">Guide chosen manually</string>
+    <string name="iptv_guide_match_id">Guide matched by channel ID</string>
+    <string name="iptv_guide_match_name">Guide matched by name</string>
+    <string name="iptv_guide_match_none">No guide matched</string>
+    <string name="iptv_guide_move_up">Move up</string>
     <string name="iptv_password_show">Show</string>
     <string name="iptv_password_hide">Hide</string>
     <string name="iptv_error_address">This server address is not valid. Enter only the address and port, without the username, password or page name.</string>

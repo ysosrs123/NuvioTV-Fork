@@ -8,6 +8,9 @@ import com.nuvio.tv.core.iptv.GuideChannel
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.GuideParseLimits
 import com.nuvio.tv.core.iptv.GuideFeedIndex
+import com.nuvio.tv.core.iptv.GuideNameIndex
+import com.nuvio.tv.core.iptv.guideIdMatchName
+import com.nuvio.tv.core.iptv.guideMatchName
 import com.nuvio.tv.core.iptv.RefreshDecision
 import com.nuvio.tv.core.iptv.XtreamGuideReference
 import com.nuvio.tv.core.iptv.guideQuarantineAccepted
@@ -109,6 +112,28 @@ class IptvGuideStore(
         feedIds.map { GuideFeedIndex(it, matches.getValue(it)) }
     }
 
+    fun nameIndexes(profileId: Int, feedIds: List<String>, names: Set<String>): List<GuideNameIndex> = transaction { db ->
+        require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && names.size <= 400)
+        val found = feedIds.associateWith { mutableMapOf<String, MutableSet<String>>() }
+        if (feedIds.isNotEmpty() && names.isNotEmpty()) {
+            db.rawQuery("SELECT f.id,n.name,n.external_id FROM feeds f JOIN channel_names n ON n.stage=f.active_stage WHERE f.profile=? AND f.version=f.active_version AND f.id IN (${feedIds.joinToString(",") { "?" }}) AND n.name IN (${names.joinToString(",") { "?" }})",
+                arrayOf(profileId.toString(), *feedIds.toTypedArray(), *names.toTypedArray())).use { c ->
+                while (c.moveToNext()) found.getValue(c.getString(0)).getOrPut(c.getString(1)) { mutableSetOf() }.add(c.getString(2))
+            }
+        }
+        feedIds.map { GuideNameIndex(it, found.getValue(it)) }
+    }
+
+    fun searchChannels(ref: IptvGuideRef, query: String, limit: Int = 60): List<GuideChannel> = transaction { db ->
+        require(limit in 1..200 && query.length <= 256)
+        feed(db, ref)
+        val name = guideMatchName(query)
+        val sql = if (name.isEmpty()) "SELECT c.payload FROM channels c JOIN feeds f ON c.stage=f.active_stage WHERE f.id=? AND f.profile=? AND f.version=f.active_version ORDER BY c.external_id LIMIT ?"
+            else "SELECT c.payload FROM channels c JOIN feeds f ON c.stage=f.active_stage WHERE f.id=? AND f.profile=? AND f.version=f.active_version AND c.external_id IN (SELECT n.external_id FROM channel_names n WHERE n.stage=f.active_stage AND instr(n.name,?)>0) ORDER BY c.external_id LIMIT ?"
+        val args = if (name.isEmpty()) arrayOf(ref.feedId, ref.profileId.toString(), limit.toString()) else arrayOf(ref.feedId, ref.profileId.toString(), name, limit.toString())
+        db.rawQuery(sql, args).use { c -> buildList { while (c.moveToNext()) add(IptvGuideJson.channel(c.getString(0))) } }
+    }
+
     fun beginRefresh(ref: IptvGuideRef): IptvGuideTicket = transaction { db -> beginRefresh(db, ref) }
 
     fun prepareRefresh(ref: IptvGuideRef, window: IptvGuideWindow): IptvGuideRefreshRequest = transaction { db ->
@@ -172,6 +197,9 @@ class IptvGuideStore(
                 if (!current(db, ticket)) throw StaleImport()
                 for (channel in channels) {
                     checkCancellation()
+                    (channel.names.map { guideMatchName(it.text) } + guideIdMatchName(channel.externalId)).filter { it.length >= 2 }.distinct().forEach { name ->
+                        db.insertWithOnConflict("channel_names", null, ContentValues().apply { put("stage", stage); put("external_id", channel.externalId); put("name", name) }, SQLiteDatabase.CONFLICT_IGNORE)
+                    }
                     val payload = IptvGuideJson.channel(channel)
                     val existing = db.rawQuery("SELECT payload FROM channels WHERE stage=? AND external_id=?", arrayOf(stage, channel.externalId)).use {
                         if (it.moveToFirst()) it.getString(0) else null
@@ -290,6 +318,10 @@ class IptvGuideStore(
             db.execSQL("CREATE TABLE channels(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, external_id TEXT NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(stage,external_id))")
             db.execSQL("CREATE TABLE programmes(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, id TEXT NOT NULL, external_id TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER, precise INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(stage,id))")
             db.execSQL("CREATE INDEX guide_window ON programmes(stage,external_id,start,stop)")
+            addNameSchema(db)
+        }
+        private fun addNameSchema(db: SQLiteDatabase) {
+            db.execSQL("CREATE TABLE channel_names(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, external_id TEXT NOT NULL, name TEXT NOT NULL, PRIMARY KEY(stage,name,external_id))")
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
             check(oldVersion in 1..2 && newVersion == 3) { "Missing guide database migration" }
@@ -298,6 +330,7 @@ class IptvGuideStore(
                 db.execSQL("ALTER TABLE feeds ADD COLUMN window_until INTEGER")
             }
             db.execSQL("ALTER TABLE feeds ADD COLUMN refreshed_at INTEGER")
+            addNameSchema(db)
         }
     }
     private companion object {

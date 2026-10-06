@@ -85,6 +85,7 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
                         Button(onClick = { viewModel.refresh(feed) }, enabled = status?.running != true) { Text(stringResource(R.string.iptv_setup_refresh)) }
                         Button(onClick = { viewModel.edit(feed) }, enabled = !state.busy) { Text(stringResource(R.string.iptv_setup_edit)) }
                         Button(onClick = { viewModel.link(feed) }, enabled = !state.busy && state.selected != null) { Text(stringResource(if (feed.ref.feedId in state.linked) R.string.iptv_guide_unlink else R.string.iptv_guide_link)) }
+                        if (state.linkedOrder.indexOf(feed.ref.feedId) > 0) Button(onClick = { viewModel.moveGuideUp(feed) }, enabled = !state.busy) { Text(stringResource(R.string.iptv_guide_move_up)) }
                     }
                 }
             }

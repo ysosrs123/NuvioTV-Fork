@@ -1,10 +1,14 @@
 package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.GuideGridRow
+import com.nuvio.tv.core.iptv.GuideMatch
+import com.nuvio.tv.core.iptv.GuideMatchReason
 import com.nuvio.tv.core.iptv.GuideGridWindow
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.layoutGuideRow
+import com.nuvio.tv.core.iptv.guideMatchName
 import com.nuvio.tv.core.iptv.resolveGuideMapping
+import com.nuvio.tv.core.iptv.uniqueNameMatch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -24,9 +28,16 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
         val page = catalogue.page(ref, query, cursor, limit)
         val ids = page.items.flatMap { listOfNotNull(it.channel.data.guideId?.takeIf(String::isNotBlank), it.overlay.manualGuide?.externalId) }.toSet()
         val feeds = guides.matchingIndexes(ref.profileId, page.guides.feedIds, ids)
+        val order = (page.guides.priority + page.guides.feedIds).distinct()
         currentCoroutineContext().ensureActive()
-        IptvBrowsePage(page, page.items.map { row ->
-            IptvListedChannel(row, resolveGuideMapping(row.channel.data.guideId, row.overlay.manualGuide, feeds, page.guides.priority))
+        val matches = page.items.map { row -> resolveGuideMapping(row.channel.data.guideId, row.overlay.manualGuide, feeds, order) }
+        val unmatched = page.items.indices.filter { matches[it].reason == GuideMatchReason.NONE }
+        val names = unmatched.map { guideMatchName(page.items[it].channel.data.name) }.filter { it.length >= 2 }.toSet()
+        val indexes = if (names.isEmpty()) emptyList() else guides.nameIndexes(ref.profileId, order, names)
+        currentCoroutineContext().ensureActive()
+        IptvBrowsePage(page, page.items.mapIndexed { index, row ->
+            val byName = if (index in unmatched) uniqueNameMatch(row.channel.data.name, indexes) else null
+            IptvListedChannel(row, byName?.let { GuideMatch(it, GuideMatchReason.NAME) } ?: matches[index])
         })
     }
 

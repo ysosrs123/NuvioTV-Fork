@@ -116,11 +116,24 @@ class IptvBrowseTest {
         assertEquals("9", catalogue.page(ref).items.single().channel.data.providerId)
         assertNotNull(catalogue.playbackItem(ref, catalogue.page(ref).items.single().channel.id))
     }
-    @Test fun multipleFeedsStayAmbiguousUntilPriorityOrManualMappingIsExplicit() = runBlocking {
+    @Test fun unmatchedChannelsUseAUniqueNormalisedGuideName() = runBlocking {
+        val ref = source()
+        publish(ref, listOf(IptvCatalogueRecord(ChannelCandidate("UK: One HD", "https://fixture.invalid/1", providerId = "1")),
+            IptvCatalogueRecord(ChannelCandidate("Two", "https://fixture.invalid/2", providerId = "2"))))
+        val a = feed(externalId = "one.uk"); val repo = IptvBrowseRepository(catalogue, guides)
+        repo.setGuideFeeds(ref, listOf(a))
+        val rows = repo.page(ref).channels.associateBy { it.item.channel.data.name }
+        assertEquals(GuideKey(a.feedId, "one.uk"), rows.getValue("UK: One HD").guide.key)
+        assertEquals(GuideMatchReason.NAME, rows.getValue("UK: One HD").guide.reason)
+        assertEquals(GuideMatchReason.NONE, rows.getValue("Two").guide.reason)
+        assertEquals(listOf("one.uk"), guides.searchChannels(a, "on").map { it.externalId })
+    }
+    @Test fun linkedOrderDecidesBetweenFeedsUntilPriorityOrManualMappingIsExplicit() = runBlocking {
         val ref = source(); publish(ref, listOf(row(1)))
         val a = feed(); val b = feed(); val repo = IptvBrowseRepository(catalogue, guides)
         repo.setGuideFeeds(ref, listOf(a, b))
-        assertEquals(GuideMatchReason.AMBIGUOUS, repo.page(ref).channels.single().guide.reason)
+        assertEquals(a.feedId, repo.page(ref).channels.single().guide.key!!.feedId)
+        assertEquals(GuideMatchReason.EXACT_ID, repo.page(ref).channels.single().guide.reason)
         repo.setGuideFeeds(ref, listOf(a, b), listOf(b))
         assertEquals(b.feedId, repo.page(ref).channels.single().guide.key!!.feedId)
         val id = catalogue.page(ref).items.single().channel.id

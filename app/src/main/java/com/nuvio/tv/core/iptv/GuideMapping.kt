@@ -2,7 +2,7 @@ package com.nuvio.tv.core.iptv
 
 data class GuideKey(val feedId: String, val externalId: String)
 data class GuideFeedIndex(val feedId: String, val channelIds: Set<String>)
-enum class GuideMatchReason { MANUAL, EXACT_ID, MISSING_MANUAL_TARGET, AMBIGUOUS, NONE }
+enum class GuideMatchReason { MANUAL, EXACT_ID, NAME, MISSING_MANUAL_TARGET, AMBIGUOUS, NONE }
 data class GuideMatch(val key: GuideKey?, val reason: GuideMatchReason, val candidates: List<GuideKey> = emptyList())
 
 fun resolveGuideMapping(

@@ -22,7 +22,11 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
     val focused: IptvListedChannel? = null, val playingId: String? = null,
     val playback: IptvLivePlayback? = null,
     val player: ExoPlayer? = null, val playingTitle: String? = null, val playing: Boolean = false,
-    val loading: Boolean = false, val tuning: Boolean = false, val message: Int? = null, val updating: Int? = null)
+    val loading: Boolean = false, val tuning: Boolean = false, val message: Int? = null, val updating: Int? = null,
+    val guidePicker: IptvGuidePicker? = null)
+
+data class IptvGuidePicker(val row: IptvListedChannel, val feeds: List<IptvGuideFeed>, val feed: IptvGuideRef? = null,
+    val query: String = "", val results: List<GuideChannel> = emptyList())
 
 @HiltViewModel
 class IptvLiveViewModel @Inject constructor(@ApplicationContext private val context: Context,
@@ -40,6 +44,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var profileRevision = -1L
     private var foreground = false
     private var pageJob: Job? = null
+    private var searchJob: Job? = null
     private var tuneJob: Job? = null
     private var tuneVersion = 0L
     private var pageVersion = 0L
@@ -114,6 +119,52 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
         }
     }
+    fun openGuidePicker(row: IptvListedChannel) {
+        val current = session ?: return
+        val ref = mutable.value.source ?: return
+        viewModelScope.launch {
+            val feeds = runCatching { withContext(Dispatchers.IO) { access.use(current) {
+                val linked = catalogue.guideAssociations(ref)
+                (linked.priority + linked.feedIds).distinct().map { guides.feed(IptvGuideRef(current.profileId, it)) }
+            } } }.getOrElse { if (it is CancellationException) throw it; emptyList() }
+            if (session === current) mutable.update { it.copy(guidePicker = IptvGuidePicker(row, feeds)) }
+        }
+    }
+    fun pickGuideFeed(feed: IptvGuideRef?) {
+        mutable.update { state -> state.copy(guidePicker = state.guidePicker?.copy(feed = feed, query = "", results = emptyList())) }
+        if (feed != null) searchGuide("")
+    }
+    fun searchGuide(query: String) {
+        val current = session ?: return
+        val picker = mutable.value.guidePicker ?: return
+        val feed = picker.feed ?: return
+        mutable.update { it.copy(guidePicker = picker.copy(query = query)) }
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(200)
+            val results = runCatching { withContext(Dispatchers.IO) { access.use(current) { guides.searchChannels(feed, query.take(256)) } } }
+                .getOrElse { if (it is CancellationException) throw it; emptyList() }
+            mutable.update { state -> state.copy(guidePicker = state.guidePicker?.takeIf { it.feed == feed && it.query == query }?.copy(results = results) ?: state.guidePicker) }
+        }
+    }
+    fun chooseGuideChannel(externalId: String?) {
+        val current = session ?: return
+        val ref = mutable.value.source ?: return
+        val picker = mutable.value.guidePicker ?: return
+        val key = externalId?.let { GuideKey(requireNotNull(picker.feed).feedId, it) }
+        mutable.update { it.copy(guidePicker = null) }
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) { access.use(current) {
+                    val latest = requireNotNull(catalogue.playbackItem(ref, picker.row.item.channel.id))
+                    catalogue.setOverlay(ref, latest.channel.id, latest.overlay.copy(manualGuide = key))
+                } }
+                if (session === current) load(background = true)
+            } catch (cancel: CancellationException) { throw cancel }
+            catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
+        }
+    }
+    fun closeGuidePicker() { mutable.update { it.copy(guidePicker = null) } }
     fun setStreamFormat(row: IptvListedChannel, format: IptvStreamFormat) {
         val current = session ?: return
         val ref = mutable.value.source ?: return
