@@ -1,6 +1,6 @@
 {
   "date": "2026-10-06",
-  "branch": "codex/iptv",
+  "branch": "iptv",
   "baseCommit": "0b823573b4e91dc01a34ec9ff81c195f54408138",
   "status": "PASS_FINAL_HOST_BUILD_JVM_ANDROID_EXECUTION_DEFERRED",
   "coreJvm": {
@@ -116,7 +116,7 @@
   },
   "androidExecution": {
     "result": "DEFERRED_PREVIOUS_DEVICE_ASLEEP",
-    "serial": "192.168.10.60:5555",
+    "serial": "AM9",
     "newTests": 2,
     "priorStagingPeriodReaderQueueAndProbeTestsUnexecuted": true,
     "installed": false,
@@ -140,12 +140,5 @@
     "incremental-reader-full-compile.log": "c4e882a2cb7da96074f3660fe6aee15e02a4d0de904159781b34023d4881e7cf",
     "incremental-reader-full-jvm.log": "3de983f3bd4a23062658a2f0cd0c94a7f573d18843fd0678dccc6e86a7c98156",
     "incremental-reader-harness.log": "7d9f4a83bbdfc2930e2e1702a6c17302f51c4cdf4b3d185ae8c90887dc3b635c"
-  },
-  "automationChecks": {
-    "overnight": "ACTIVE",
-    "olderResearch": "PAUSED",
-    "olderImplementation": "PAUSED",
-    "checkedAtUtc": "2026-10-05T19:46:31Z",
-    "deadlineBrisbane": "2026-10-06T08:00:00+10:00"
   }
 }

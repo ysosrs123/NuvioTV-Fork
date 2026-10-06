@@ -1,7 +1,7 @@
 {
   "date": "2026-10-05",
   "baseCommit": "4c3e0b00adc1e66135f78525384922cdf21842fc",
-  "branch": "codex/iptv",
+  "branch": "iptv",
   "status": "PASS_BOUNDED_INTERNAL_ADAPTER",
   "coreJvm": {
     "tests": 130,
@@ -43,7 +43,7 @@
     "heapMiB": 2048,
     "reason": "Gradle stopped the 2 GiB JVM because its garbage collector was thrashing"
   },
-  "device": "192.168.10.60:5555",
+  "device": "AM9",
   "cleanup": {
     "testPackagesRemoved": true,
     "preExistingReverse8765Preserved": true,

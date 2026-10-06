@@ -1,21 +1,48 @@
 {
   "date": "2026-10-06",
   "branch": "iptv/player-binding",
-  "baseCommit": "8b84c1172c8144f87bd79e2735bfc7ee5c90d1cd",
   "lastDeviceValidatedCommit": "b68985aafcd78f2b096e7073082f98c3c85bb874",
-  "status": "SOURCE_FIXES_JVM_PASS_DEVICE_NOT_RERUN",
-  "rootCause": "CaptureSampleBatchQueue maxBatches=2 and CaptureSampleLoadCursor maxOpenInputs=2; no played-row retirement during playback, so the three-segment fixture stopped at CAPACITY after two rows and never reached ENDED.",
+  "status": "SOURCE_FIXES_HOST_TESTS_PASS_DEVICE_NOT_RERUN",
+  "playerTimeoutCause": "CaptureSampleBatchQueue maxBatches=2 and CaptureSampleLoadCursor maxOpenInputs=2; no played-row retirement during playback, so the three-segment fixture stopped at CAPACITY after two rows and never reached ENDED.",
   "changes": [
     "CaptureEpochMediaSource.retiresPlayedBatches opt-in; CaptureEpochPeriod.discardBuffer retires played rows through retireConsumedPrefix",
     "CaptureVideoPlayer requires retiresPlayedBatches; startPositionMs nullable (null=live edge, 0 sent as 1ms to avoid MaskingMediaSource default-position override)",
     "CaptureVideoPlayer.describe() and fixture timeout diagnostics; fixture asserts first rendered frame follows the requested start",
     "CaptureEpochPeriod raises boundary/stop states only at the stream tail (readDiscontinuity and SampleStream.maybeThrowError)"
   ],
+  "reviewFixes": "See IPTV-CODE-REVIEW-20261006.md; fixed items name their tests.",
+  "hostTests": {
+    "core": {
+      "result": "PASS",
+      "tests": 222,
+      "runner": "scripts/check_iptv_core.py (Kotlin 2.3.0, JDK 21)"
+    },
+    "dataLayer": {
+      "result": "PASS",
+      "tests": 117,
+      "scope": "every com.nuvio.tv.data.iptv JVM suite, including the real stager/extractor and MockWebServer HTTP clients",
+      "classpath": "app/libs Media3 AARs; Media3 1.8.0 decoder and container modules; guava 33.3.1-android; okhttp 5.3.2 / okio 3.16.4; a default-value android.jar equivalent with pure-Java android.util containers. Equivalent to unitTests.isReturnDefaultValues; not the Gradle unit-test task."
+    },
+    "regressionChecks": "Each fix with a test was confirmed to fail without its change."
+  },
+  "compileChecks": "All 18 IPTV androidTest classes and IptvLivePlayback compiled with kotlinc against the same classes and test-runner stubs. Compose/Hilt UI files, ProfileManager and build scripts were not compiled.",
+  "notRun": [
+    "full app compile",
+    "Gradle unit tests",
+    "tools/iptv-device-tests APK build",
+    "AM9 instrumentation"
+  ],
+  "claimsNotMade": [
+    "rendering",
+    "renderer preroll discard",
+    "seek acknowledgement",
+    "blocked-release retention on device",
+    "measured memory or capacity"
+  ],
   "sourceSha256": {
     "app/src/androidTest/java/com/nuvio/tv/data/iptv/CaptureVideoPlayerAndroidTest.kt": "21d0e446772baf98e422a7f10ad334b7eccb7c44d9c98b6b93a000a89cd9144e",
     "app/src/androidTest/java/com/nuvio/tv/data/iptv/IptvGuideRepositoryTest.kt": "da8f307706078f021b6d4b1fe07888409aef6819f0d1ce77485b2802c241e7c9",
     "app/src/androidTest/java/com/nuvio/tv/data/iptv/IptvGuideStoreTest.kt": "b46ad8e88d4bb9d55e52c03e27121f2327186a86e18dfdd6b0061741cb9ba93e",
-    "app/src/main/java/com/nuvio/tv/core/di/IptvModule.kt": "9500b0b253a36ec0b3d4598cf198e582be9ecda6fc88480024a10ffd61ef52ca",
     "app/src/main/java/com/nuvio/tv/core/iptv/CaptureExtractedSampleTiming.kt": "8ec03baa93bf09728f8a43ad90ef884478b0f919381d3e75735bed15035dae91",
     "app/src/main/java/com/nuvio/tv/core/iptv/CaptureSampleTimeline.kt": "e3ecb1317f06fe9cf450c125463a31811ebd40c75db9abb71e3fc34b848356a1",
     "app/src/main/java/com/nuvio/tv/core/iptv/ChannelIdentity.kt": "a898645cf9b85d6b98e2f2ede3351754ffa9371d32e3c275ff791206427ec0df",
@@ -27,7 +54,6 @@
     "app/src/main/java/com/nuvio/tv/core/iptv/SharedCaptureRuntime.kt": "e1209fdee4680c70b6f08c0a44cce37012aa88f5d501bf84c0d5306368c02abd",
     "app/src/main/java/com/nuvio/tv/core/iptv/TsCaptureInspector.kt": "ae975a854b615f4e4f615ec1205018f9496a5be6c976c291d5da8ad3a9914bbb",
     "app/src/main/java/com/nuvio/tv/core/iptv/XmlTvGuide.kt": "9e55d9b598bc6617c208036dca4b30fa0ca383cfdb5de28d44c799e7edf3fc95",
-    "app/src/main/java/com/nuvio/tv/core/profile/ProfileManager.kt": "f7ca5a25b3cef11fc06f4d3c1d236cf56dc04af22338dba42fde7d293a82b457",
     "app/src/main/java/com/nuvio/tv/data/iptv/CaptureEpochMediaSource.kt": "f04c2d485f478e995538e3ed19e2431674a892004becbe7519d9f1d365dc9e5c",
     "app/src/main/java/com/nuvio/tv/data/iptv/CaptureEpochPeriod.kt": "36ec1342101ff1a05396c21b945bdac79bc0d15fc06b118fcf06139430ac835f",
     "app/src/main/java/com/nuvio/tv/data/iptv/CaptureVideoPlayer.kt": "b92ddb6a91ce52e79e0f84a7e880106c829958aae94e943f47ff479e73f78791",
@@ -41,12 +67,9 @@
     "app/src/main/java/com/nuvio/tv/data/iptv/IptvXtreamClient.kt": "c3ad0bc2dbf5bd5841da70c9ff65817f85c51c89056485b836d1de39f65e53e5",
     "app/src/main/java/com/nuvio/tv/data/iptv/LocalTsSegmentExtractor.kt": "3af5fdd30d1de058b6113f78b9fcf1730dee3edbd2c7c1b0f9fd62c62c70406b",
     "app/src/main/java/com/nuvio/tv/data/iptv/PinnedCaptureSegmentPeriod.kt": "30797618c00569569300c4e8173959d0fa3e5551b510071067f836b774a8c76c",
-    "app/src/main/java/com/nuvio/tv/ui/navigation/NuvioNavHost.kt": "8e716cb7a85a188ae542b2ef817674ad1f87999ad74779fc61ba89b95f0b9fd0",
     "app/src/main/java/com/nuvio/tv/ui/screens/iptv/IptvLivePlayback.kt": "762da41b23bd7715b655888c4cc3bdb12a2fdcd26131f1d742737d3ce540f4da",
     "app/src/main/java/com/nuvio/tv/ui/screens/iptv/IptvLiveViewModel.kt": "3a903fcaa5685c6aee9e10f9dcfe73d6e02fba771c0508b08477ba3dc1631c37",
     "app/src/main/java/com/nuvio/tv/ui/screens/iptv/IptvTrackDialog.kt": "2b2a0f9f222ddba67b3a3565362ee50be4b21627427f73ae85fc723301885903",
-    "app/src/main/java/com/nuvio/tv/ui/screens/player/PlayerDebugStatsOverlay.kt": "6adb7f7d585ba96c27d50a5a3c89241f3b904494a6859d09209ae6a0cc311971",
-    "app/src/main/java/com/nuvio/tv/ui/screens/settings/SettingsScreen.kt": "c04b5f5e55915723541da6824893d8312f88918a26ec478df7f32f2a98749f6a",
     "app/src/test/java/com/nuvio/tv/core/iptv/CaptureSampleTimelineTest.kt": "ba6405084db68e1bb6515e3b87e232c6ee99552a0b56f4b5a43ec259a37f03c6",
     "app/src/test/java/com/nuvio/tv/core/iptv/ChannelIdentityTest.kt": "e97b248b16aefccc9a14374f49f732bd1dfe91d538ed28932f2db90de458b832",
     "app/src/test/java/com/nuvio/tv/core/iptv/HlsCaptureSegmentSourceTest.kt": "91ec3d20ee7bd087605734f58aa882dd47ac24e63d494c63c5f08295a4c07272",
@@ -59,46 +82,5 @@
     "app/src/test/java/com/nuvio/tv/data/iptv/IptvGuideClientTest.kt": "8e410cf76589e9e44202b3e13ae66cacb0757888d2e9a503f1ce49193ee8ac25",
     "app/src/test/java/com/nuvio/tv/data/iptv/IptvMetadataClientTest.kt": "2588174e97929b371281b89b2dc60ab8f511c22d694959b3c351f34ee20251bd",
     "app/src/test/java/com/nuvio/tv/data/iptv/LocalTsSegmentExtractorTest.kt": "2da33cc3e5db5c07316e316b9193bc114b719c200533d024fe752c3ce7b35d98"
-  },
-  "core": {
-    "result": "PASS",
-    "tests": 222,
-    "runner": "scripts/check_iptv_core.py with GRADLE_MODULE_CACHE pointing at Maven Central copies of the pinned jars, OpenJDK 21",
-    "log": "cloud-handoff/20261006/evidence/cloud-player-core-20261006.txt",
-    "logSha256": "8f78ba250613df755cbdfc9c869f1bd54562141b0990d669a06e122865e188f9"
-  },
-  "captureJvm": {
-    "result": "PASS",
-    "suites": "all com.nuvio.tv.data.iptv JVM suites",
-    "tests": 117,
-    "newTests": [
-      "CaptureEpochPeriodTest.videoOnlyPlaybackReachesEosOnlyWhenPlayedBatchesAreRetired",
-      "CaptureEpochPeriodTest.boundaryAndStopRaiseOnlyAfterBufferedRowsArePlayed"
-    ],
-    "regressionFailsWithoutFix": true,
-    "classpath": "app/libs Media3 AARs (common, exoplayer, extractor, datasource, exoplayer-hls, datasource-okhttp); Media3 1.8.0 libraries/decoder and libraries/container built from the androidx/media 1.8.0 tag; guava 33.3.1-android; okhttp-jvm/mockwebserver 5.3.2 and okio-jvm 3.16.4 (the versions the existing tests already use); default-value android stub generated from org.robolectric:android-all:16-robolectric-13921718 plus pure-Java SparseArray/SparseIntArray/SparseBooleanArray/SparseLongArray/Pair/TextUtils stand-ins; androidx.annotation stubs. Scratch only; nothing added to the repository build.",
-    "log": "cloud-handoff/20261006/evidence/cloud-player-capture-jvm-20261006.txt",
-    "logSha256": "e900d1d9a65fcc3508d9ea180b1cd619362ecf164108a90b5cdc8701cdad0ff0"
-  },
-  "androidFixture": {
-    "result": "COMPILE_CHECK_ONLY",
-    "detail": "All 18 IPTV androidTest classes and ui/screens/iptv/IptvLivePlayback.kt compiled with kotlinc against the same classes plus stub InstrumentationRegistry/AndroidJUnit4/OptIn. Compose/Hilt UI files and ProfileManager were not compiled."
-  },
-  "notRun": [
-    "full app compileFullDebugKotlin",
-    "Gradle unit tests",
-    "tools/iptv-device-tests APK build",
-    "AM9 instrumentation",
-    "Compose/Hilt UI compile"
-  ],
-  "notRunReason": "Android SDK and Google Maven downloads (dl.google.com) are blocked by the cloud egress policy.",
-  "claimsNotMade": [
-    "rendering",
-    "renderer preroll discard",
-    "seek acknowledgement",
-    "blocked-release retention on device",
-    "measured memory or capacity"
-  ],
-  "deviceOperations": "None. No device, provider, account or automation was touched.",
-  "reviewFixes": "See IPTV-CODE-REVIEW-20261006.md; fixed items are marked FIXED with their tests."
+  }
 }

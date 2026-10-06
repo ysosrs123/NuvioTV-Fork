@@ -1,6 +1,6 @@
 {
   "date": "2026-10-06",
-  "branch": "codex/iptv",
+  "branch": "iptv",
   "baseCommit": "460641888181b05cd43ddb058c9c6380785db0fe",
   "status": "PASS_HOST_PHYSICAL_STORAGE_FENCE_ANDROID_EXECUTION_DEFERRED",
   "coreJvm": {
@@ -42,7 +42,7 @@
   "androidExecution": {
     "result": "NOT_RUN_DEVICE_PREVIOUSLY_OBSERVED_ASLEEP",
     "newTests": 2,
-    "serial": "192.168.10.60:5555",
+    "serial": "AM9",
     "installed": false,
     "executed": false,
     "note": "No device commands during this continuation. Previous staging checkpoint observed Asleep. No wake, power, CEC, settings, account or recording operations."

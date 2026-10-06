@@ -1,15 +1,18 @@
 """Compile and execute production IPTV core + JUnit tests using cached Kotlin/JVM.
 
 This bypasses Android/Gradle: no Android, player, filesystem durability or provider claims.
-Set GRADLE_MODULE_CACHE and JAVA_HOME to use another installed toolchain.
+Requires JAVA_HOME and GRADLE_MODULE_CACHE (a Gradle modules-2/files-2.1 cache).
 """
 from pathlib import Path
 import os
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
-CACHE = Path(os.environ.get('GRADLE_MODULE_CACHE', 'D:/DevData/Gradle/caches/modules-2/files-2.1'))
-JAVA = Path(os.environ.get('JAVA_HOME', 'E:/Android Studio/jbr')) / 'bin' / ('java.exe' if os.name == 'nt' else 'java')
+missing = [name for name in ('GRADLE_MODULE_CACHE', 'JAVA_HOME') if not os.environ.get(name)]
+if missing:
+    raise SystemExit('Set ' + ', '.join(missing))
+CACHE = Path(os.environ['GRADLE_MODULE_CACHE'])
+JAVA = Path(os.environ['JAVA_HOME']) / 'bin' / ('java.exe' if os.name == 'nt' else 'java')
 OUT = ROOT / 'validation/iptv-core'
 OUT.mkdir(parents=True, exist_ok=True)
 

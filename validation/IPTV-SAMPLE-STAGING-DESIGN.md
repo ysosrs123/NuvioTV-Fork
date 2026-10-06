@@ -44,7 +44,7 @@ run the Android TS reader: real SparseArray behavior is required. Six Android
 fixtures cover full extraction/sample counts, both first-track orders at wrap,
 budgets, cancellation/pin ownership, replacement hash and wrong-proof rejection.
 AM9 was observed Asleep after bounded reconnect/power query. Device installation
-and execution are deferred to preserve the user's overnight power constraints.
+and execution are deferred while the device is unavailable overnight.
 Never present compiled fixtures as an executed extraction/decoder result.
 
 Next, run the Android extraction fixtures when the authorised device is awake,

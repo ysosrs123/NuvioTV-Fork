@@ -1,6 +1,6 @@
 {
   "date": "2026-10-06",
-  "branch": "codex/iptv",
+  "branch": "iptv",
   "baseCommit": "ae0c08bb629d4a8f4df6ec4aea13c917de68733e",
   "status": "PASS_HOST_BUILD_JVM_ANDROID_EXECUTION_DEFERRED",
   "coreJvm": {
@@ -60,7 +60,7 @@
     "result": "DEFERRED_DEVICE_ASLEEP",
     "newPeriodTests": 2,
     "priorStagingAndSpaceTestsAlsoUnexecuted": true,
-    "serial": "192.168.10.60:5555",
+    "serial": "AM9",
     "observedWakefulness": "Asleep",
     "installed": false,
     "executed": false,

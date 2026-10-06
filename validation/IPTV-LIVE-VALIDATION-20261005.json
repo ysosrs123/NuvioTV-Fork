@@ -80,7 +80,7 @@
       "openPeersAtSecondChannelOpen": 1,
       "explanation": "The old writer detects client closure later than the client closes its socket. Peer inspection at the second open showed only the new live peer. Real-provider quota cleanup latency is unverified."
     },
-    "privateScreenshotDirectory": "E:/Codex/NuvioTV/work/NuvioTV-Fork/captures/iptv-live",
+    "privateScreenshotDirectory": "captures/iptv-live",
     "reviewedScreenshots": [
       "live-initial.png",
       "live-one.png",

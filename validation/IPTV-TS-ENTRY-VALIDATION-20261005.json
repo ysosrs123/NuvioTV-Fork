@@ -1,6 +1,6 @@
 {
   "date": "2026-10-05",
-  "branch": "codex/iptv",
+  "branch": "iptv",
   "baseCommit": "3ae88829851f23f1a6413e77db88965ebc095ebc",
   "status": "PASS_CONTROLLED_DECODE_INTERNAL_COMPONENTS",
   "coreJvm": {
@@ -15,7 +15,7 @@
     "result": "PASS",
     "log": "iptv-core/ts-entry-am9-final.txt",
     "decoderLog": "iptv-core/ts-entry-am9-decode-logcat-final.txt",
-    "device": "192.168.10.60:5555",
+    "device": "AM9",
     "targetPermissions": [
       "android.permission.ACCESS_NETWORK_STATE"
     ],

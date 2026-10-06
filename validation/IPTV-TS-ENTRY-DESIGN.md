@@ -115,7 +115,7 @@ ExoPlayer rendering while capture is running.
    Validate paused anchors, recording consumers, cancellation/profile/background exit,
    physical free-space/allocation margins and bounded staging before exposing controls.
 4. Continue durable recording/services/leases/schedules, USB/SMB, source/account work,
-   multiview/catch-up and the guide/Home/Search/UI requirements in the main handoff.
+   multiview/catch-up and the guide/Home/Search/UI requirements in IPTV-HANDOVER.md.
 
 References: [HLS transport initialization and segment rules](https://www.rfc-editor.org/rfc/rfc8216.html#section-3.2),
 [MPEG-2 Systems](https://www.itu.int/rec/T-REC-H.222.0),

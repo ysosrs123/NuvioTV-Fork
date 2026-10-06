@@ -82,7 +82,7 @@ through callers/callees once and not independently re-checked.
 
 19. FIXED (pop back to an existing Sources/Live entry; compile-unverified). Medium (checked): Sources and Live push each other with launchSingleTop only, so
     alternating grows the back stack and each Live entry keeps its own ViewModel loop.
-20. OPEN (product decision: keep IPTV visible in full builds or gate it). Medium (checked): Settings always lists IPTV, so full-flavour builds expose the
+20. FIXED (FEATURE_IPTV_ENABLED: on for iptvPrototype, off for full; test). Medium (checked): Settings always lists IPTV, so full-flavour builds expose the
     unfinished screens. Gate on the prototype flavour or a build flag before release.
 21. NO CHANGE (no later signal can confirm a timed-out release). Medium (traced): a release timeout reported through onPlayerError makes
     IptvLivePlayback.close return false permanently; LivePlaybackRuntime then answers
@@ -106,7 +106,7 @@ through callers/callees once and not independently re-checked.
   address and earlier tooling names; evidence XML records the host name. Decide what
   stays versioned before any pull request.
 - tools/iptv-device-tests pins okhttp 5.3.2 / coroutines 1.10.2 directly rather than
-  the catalogue versions; the handoff states these match the app's resolved runtime,
+  the catalogue versions; earlier notes state these match the app's resolved runtime,
   which needs a Gradle dependency report to confirm.
 
 ## Media inspection, staging and Media3 period

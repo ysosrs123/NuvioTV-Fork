@@ -1,6 +1,6 @@
 {
   "date": "2026-10-05",
-  "branch": "codex/iptv",
+  "branch": "iptv",
   "baseCommit": "43b1dff41e72638777b4e2476494751f15228101",
   "status": "PASS_RETAINED_MEDIA_CORE_COMPONENTS",
   "coreJvm": {

@@ -277,7 +277,7 @@
     "Active auth required; malformed or elapsed numeric expiry rejected, absent/null expiry treated as unknown",
     "English fallback strings; broader locale/appearance/scale certification remains"
   ],
-  "device": "AM9PRO Android 14 API 34, 192.168.10.60:5555",
+  "device": "AM9PRO Android 14 API 34",
   "prototype": {
     "package": "com.nuvio.iptv.prototype",
     "label": "Nuvio IPTV Prototype",
@@ -295,7 +295,7 @@
     "Existing XMLTV fixture feed linked to Xtream; its programmes expired at 15:00 Brisbane, so current programme display was not newly validated."
   ],
   "traceInterpretation": "The trace retains development failures and host diagnostics as well as passing final checks. A third manual channel activation occurred during batched remote navigation before asynchronous UI state settled; the fixture server was subsequently restarted, so that handler has no closed event. The final cold-restart check used observed state between actions and opened no media.",
-  "privateScreenshotDirectory": "E:/Codex/NuvioTV/work/NuvioTV-Fork/captures/iptv-xtream",
+  "privateScreenshotDirectory": "captures/iptv-xtream",
   "reviewedScreenshots": [
     "xtream-form.png",
     "xtream-first-playing.png",

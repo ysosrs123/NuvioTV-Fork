@@ -1,6 +1,6 @@
 {
   "date": "2026-10-06",
-  "branch": "codex/iptv",
+  "branch": "iptv",
   "baseCommit": "ed528c6ab57d7067b4c5d94ef61f6d5ac60096ca",
   "status": "PASS_FINAL_HOST_BUILD_JVM_ANDROID_EXECUTION_DEFERRED",
   "sourceSha256": {
@@ -133,13 +133,13 @@
   },
   "androidExecution": {
     "result": "DEFERRED_DEVICE_ASLEEP",
-    "serial": "192.168.10.60:5555",
+    "serial": "AM9",
     "newTests": 2,
     "installed": false,
     "executed": false,
     "deviceOperationsThisPhase": [
       {
-        "operation": "adb -s 192.168.10.60:5555 get-state",
+        "operation": "adb get-state",
         "result": "device"
       },
       {
@@ -168,15 +168,5 @@
     "epoch-source-full-compile.log": "f2b34d6b00da5ddc21d02a88f3f109555f188a5c377e262782bf8c2b3a5db674",
     "epoch-source-full-jvm.log": "fafbb2fde69fd858e3076984952a46b064eb52326831be5590362b7ecf36baf8"
   },
-  "implementationCommit": "6ad3799f93eef8e61216998f82b4791af22b3d47",
-  "automationChecks": {
-    "overnight": "PAUSED",
-    "olderResearch": "PAUSED",
-    "olderImplementation": "PAUSED",
-    "pauseConfirmedAtUtc": "2026-10-05T21:05:09Z",
-    "checkedAtUtc": "2026-10-05T21:07:42Z",
-    "deadlineBrisbane": "2026-10-06T08:00:00+10:00",
-    "pauseConfirmedBeforeDeadline": true,
-    "existingNamePromptScheduleTargetAndCreatedAtPreserved": true
-  }
+  "implementationCommit": "6ad3799f93eef8e61216998f82b4791af22b3d47"
 }

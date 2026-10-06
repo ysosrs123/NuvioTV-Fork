@@ -1,7 +1,7 @@
 {
   "date": "2026-10-06",
   "timezone": "Australia/Brisbane",
-  "branch": "codex/iptv",
+  "branch": "iptv",
   "baseCommit": "81540e154629b9cec2f4afc6d64157bad2c60e47",
   "status": "PASS_APP_JVM_AND_FOCUSED_AM9_CAPTURE_CODEC_FIXTURES",
   "sourceSha256": {
@@ -70,7 +70,7 @@
     "failures": 0,
     "seconds": 14.665,
     "log": "iptv-core/epoch-device-am9-20261006-final.txt",
-    "serial": "192.168.10.60:5555",
+    "serial": "AM9",
     "powerBefore": "Asleep",
     "powerAfter": "Asleep",
     "powerAfterCleanup": "Asleep",

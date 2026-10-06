@@ -811,7 +811,7 @@
     "final-extensionless-playing.png",
     "final-ranges-playing.png"
   ],
-  "privateEvidenceDirectory": "E:\\Codex\\NuvioTV\\work\\NuvioTV-Fork\\captures\\iptv-hls",
+  "privateEvidenceDirectory": "captures/iptv-hls",
   "limits": [
     "Generated 640x360 25 FPS H.264 with silent AAC, not a real-provider compatibility result",
     "HLS TS segments and byte ranges only; no fMP4, DRM/encrypted HLS, LL-HLS, separate audio or ABR quality claim",
@@ -821,7 +821,7 @@
     "English fallback resources and inspected default Original/V2 layouts only; all locale/scale combinations remain",
     "No timeshift, recording, catch-up, multiview, HDR, audible-output or AFR claim"
   ],
-  "device": "AM9PRO Android 14 API 34, 192.168.10.60:5555",
+  "device": "AM9PRO Android 14 API 34",
   "uiChecks": [
     "Native M3U source import added four controlled HLS channels without opening media.",
     "Initial build rendered sliding TS segments and explicit byte-range segments; focusing other rows did not replace playback.",

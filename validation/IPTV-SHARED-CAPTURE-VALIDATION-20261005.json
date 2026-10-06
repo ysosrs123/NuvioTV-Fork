@@ -42,7 +42,7 @@
     "USB/SMB delivery or abrupt power-loss durability",
     "New HUD, subtitle/CC/DVB/teletext or document-picker UI validation"
   ],
-  "device": "192.168.10.60:5555",
+  "device": "AM9",
   "deviceCleanup": {
     "temporaryTestPackagesRemoved": true,
     "deviceWasNotWoken": true,

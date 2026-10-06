@@ -1,6 +1,6 @@
 # Retained inspection, sample epochs and seek ownership
 
-Internal development continuation from 43b1dff on codex/iptv, 5 October 2026.
+Internal development continuation from 43b1dff on iptv, 5 October 2026.
 These components supply structural media evidence and seek policy. Production
 Media3 playback, pause/timeshift and recording controls remain unconnected.
 
@@ -86,7 +86,7 @@ Next implement bounded transactional sample staging over the exact shipped Media
 extractor, then an actual retained-media Timeline/MediaPeriod and decode/preroll
 path. Connect it through the same governed capture/player owner, validate cleanup,
 physical storage margins and measured decoder/memory limits, then enable controls.
-Durable recording/services/schedules, USB/SMB and the broader handoff remain pending.
+Durable recording/services/schedules, USB/SMB and the broader scope remain pending.
 
 ## Transactional staging contract for the next integration
 

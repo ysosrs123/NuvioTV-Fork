@@ -18,7 +18,7 @@
     "duration": "8m49s",
     "log": "iptv-core/hud-guides-build.log"
   },
-  "device": "192.168.10.60:5555",
+  "device": "AM9",
   "prototypePackage": "com.nuvio.iptv.prototype",
   "uiObserved": [
     "New-build Live TV source/channel screen rendered before HDMI sleep"

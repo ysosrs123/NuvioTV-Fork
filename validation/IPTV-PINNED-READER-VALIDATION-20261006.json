@@ -1,6 +1,6 @@
 {
   "date": "2026-10-06",
-  "branch": "codex/iptv",
+  "branch": "iptv",
   "baseCommit": "6842df16c90fbdfb078390e1aa04c30eeaf69431",
   "status": "PASS_HOST_BUILD_JVM_ANDROID_EXECUTION_DEFERRED",
   "coreJvm": {
@@ -77,7 +77,7 @@
   },
   "androidExecution": {
     "result": "DEFERRED_PREVIOUS_DEVICE_ASLEEP",
-    "serial": "192.168.10.60:5555",
+    "serial": "AM9",
     "newTests": 2,
     "previousStagingPeriodAndProbeTestsUnexecuted": true,
     "installed": false,
@@ -96,13 +96,6 @@
     "Measured aggregate transient/staging/decoder memory, production physical storage margins and enabled capture controls",
     "Durable recording/services/schedules/USB/SMB, provider/account grouping and remaining UX"
   ],
-  "automationChecks": {
-    "overnight": "ACTIVE",
-    "olderResearch": "PAUSED",
-    "olderImplementation": "PAUSED",
-    "checkedAtUtc": "2026-10-05T17:21:51Z",
-    "deadlineBrisbane": "2026-10-06T08:00:00+10:00"
-  },
   "validatedAtUtc": "2026-10-05T17:27:52Z",
   "retainedLogsSha256": {
     "reader-consumer-core.txt": "f7327104f18c7000b6eed14958fb0d5beef410474560710b1aef3fa7eb52bc04",
