@@ -90,9 +90,18 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 - Multiview: up to four channels at once from the channel options ("Add to
   multiview"); sound follows the focused picture, OK goes full screen on it, and each
   picture can be changed or removed. Each picture uses a connection on its account.
-  The number of pictures follows the device (memory and hardware decoders: one on
-  low-memory devices, two on 2 GB boxes, up to four on 4 GB), pictures are limited
-  to 720p or 540p, and multiview is hidden where only one picture fits.
+  The number of pictures follows the device (memory, hardware decoders and their
+  reported decode capacity: one on low-memory devices, two on 2 GB boxes, up to four
+  on 4 GB), and multiview is hidden where only one picture fits.
+  Each picture asks for the quality matching its size on the TV's actual output, so
+  a 4K TV gets 1080p per picture and a 1080p TV 540p, within what the box can decode
+  (on Android 10 and later from the decoder's reported capacity; Android 9 uses a
+  cautious single-stream check). If capacity is short the other pictures step down
+  before the focused one. Two layouts: Grid and One large (one big picture with up to
+  three small ones; Show large picks which). Picture quality can be Automatic,
+  Sharpest or Lightest; it applies to channels that offer several qualities (most
+  single-quality MPEG-TS channels play as sent), and a new picture is refused when
+  the decoder has no room left.
 - Recording: record the programme on now (or the channel), schedule a programme from
   the guide, stop or cancel from the channel options; the guide marks recordings, and
   Recordings (from the rail) lists scheduled, running and finished recordings and plays
