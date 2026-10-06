@@ -243,7 +243,12 @@ class IptvSetupViewModel @Inject constructor(
             IptvSourceKind.STALKER -> IptvSourceConnection(merged.endpoint, merged.username)
             IptvSourceKind.M3U -> IptvSourceConnection(merged.endpoint)
         }
-        return SavedEntry(source = if (existing == null) catalogue.createSource(profileId, draft.label, kind, "shared-default", connection)
+        return SavedEntry(source = if (existing == null) catalogue.createSource(profileId, draft.label, kind, "shared-default", connection).let { created ->
+                val account = "src-" + created.ref.sourceId.take(76)
+                catalogue.saveAccount(profileId, account, created.label, 1)
+                catalogue.assignAccount(created.ref, account)
+                catalogue.sources(profileId).single { it.ref == created.ref }
+            }
             else catalogue.editSource(existing.ref, draft.label, existing.kind, existing.accountId, connection))
     }
 

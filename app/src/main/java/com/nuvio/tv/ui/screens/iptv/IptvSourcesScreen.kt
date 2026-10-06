@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LiveTv
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Router
@@ -69,7 +70,7 @@ import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
 import com.nuvio.tv.ui.v2.components.NuvioActionPill
 
 @Composable
-fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: IptvSourcesViewModel = hiltViewModel()) {
+fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -> Unit = {}, viewModel: IptvSourcesViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val first = remember { FocusRequester() }
     var initiallyFocused by remember(state.profileId, state.revision) { mutableStateOf(false) }
@@ -98,6 +99,8 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
                     modifier = if (state.sources.isEmpty()) Modifier.focusRequester(first) else Modifier)
                 SettingsActionRow(title = stringResource(R.string.iptv_add_guide), subtitle = stringResource(R.string.iptv_sources_guide_subtitle),
                     onClick = { viewModel.add(true) }, enabled = state.ready && !state.busy, leadingIcon = Icons.Filled.Schedule)
+                SettingsActionRow(title = stringResource(R.string.iptv_remote_entry_title), subtitle = stringResource(R.string.iptv_remote_entry_subtitle),
+                    onClick = onSetup, enabled = state.ready, leadingIcon = Icons.Filled.PhoneAndroid)
                 Spacer(Modifier.weight(1f))
                 if (state.busy) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     LoadingIndicator(Modifier.size(20.dp))

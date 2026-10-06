@@ -1249,7 +1249,8 @@ private fun PlaybackNavHost(
                     if (!navController.popBackStack(Screen.IptvLive.route, inclusive = false)) {
                         navController.navigate(Screen.IptvLive.route) { launchSingleTop = true }
                     }
-                })
+                },
+                onSetup = { navController.navigate(Screen.IptvSetup.route) { launchSingleTop = true } })
         }
         if (com.nuvio.tv.BuildConfig.FEATURE_IPTV_ENABLED) {
             composable(Screen.IptvSetup.route) {
