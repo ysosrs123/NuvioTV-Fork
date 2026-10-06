@@ -54,6 +54,8 @@
     <string name="iptv_recording_refused_duplicate">This channel is already being recorded at that time</string>
     <string name="iptv_recording_refused_full">The recordings list is full. Delete some recordings first.</string>
     <string name="iptv_recording_refused_profile">The profile changed. Try again.</string>
+    <string name="iptv_recording_refused_exact_alarms">Scheduled recordings need the alarms and reminders permission. Allow it for Nuvio, or record while watching.</string>
+    <string name="iptv_recording_alarm_settings">Allow alarms and reminders</string>
 
     <string name="iptv_recording_play">Play</string>
     <string name="iptv_recording_stop">Stop recording</string>

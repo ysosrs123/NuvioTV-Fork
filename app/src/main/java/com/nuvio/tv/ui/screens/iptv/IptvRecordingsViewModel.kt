@@ -103,6 +103,7 @@ fun iptvRecordRefusalMessage(reason: IptvRecordRefusal): Int = when (reason) {
     IptvRecordRefusal.LIST_FULL -> R.string.iptv_recording_refused_full
     IptvRecordRefusal.START_BLOCKED -> R.string.iptv_recording_failure_start_blocked
     IptvRecordRefusal.PROFILE_CHANGED -> R.string.iptv_recording_refused_profile
+    IptvRecordRefusal.EXACT_ALARMS_DENIED -> R.string.iptv_recording_refused_exact_alarms
 }
 
 fun iptvRecordingFailureMessage(failure: RecordingFailure): Int = when (failure) {

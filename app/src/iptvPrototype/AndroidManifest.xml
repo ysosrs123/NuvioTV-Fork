@@ -1,7 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <application android:label="@string/iptv_prototype_name" tools:replace="android:label">
         <activity android:name="com.nuvio.tv.IptvPrototypeActivity" android:exported="true" android:label="@string/iptv_prototype_name" />
         <activity android:name=".launcher.AppIconDefault" android:label="@string/iptv_prototype_name" tools:replace="android:label" />

@@ -1,7 +1,11 @@
 package com.nuvio.tv.core.recording
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Environment
+import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.nuvio.tv.core.iptv.AcquisitionKey
 import com.nuvio.tv.core.iptv.AdmissionDenial
@@ -69,7 +73,7 @@ import kotlinx.coroutines.withContext
 
 enum class IptvRecordRefusal {
     CONNECTION_LIMIT, NO_FREE_CONNECTION, LOW_STORAGE, PROGRAMME_ENDED, CHANNEL_UNAVAILABLE,
-    ALREADY_RECORDING, LIST_FULL, START_BLOCKED, PROFILE_CHANGED,
+    ALREADY_RECORDING, LIST_FULL, START_BLOCKED, PROFILE_CHANGED, EXACT_ALARMS_DENIED,
 }
 
 sealed interface IptvRecordResult {
@@ -164,6 +168,15 @@ class IptvRecorder @Inject constructor(
 
     fun file(recording: IptvRecording): File? =
         recording.file?.let(::File)?.takeIf { recording.status.finished && it.isFile && it.length() > 0 }
+
+    fun exactAlarmsAllowed(): Boolean = IptvRecordingAlarms.exactAllowed(context)
+
+    fun exactAlarmSettings(): Intent? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return null
+        val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:${context.packageName}"))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return intent.takeIf { context.packageManager.resolveActivity(it, 0) != null }
+    }
 
     fun freeBytes(): Long = runCatching { directory().usableSpace }.getOrDefault(0L)
 
@@ -264,6 +277,7 @@ class IptvRecorder @Inject constructor(
             return IptvRecordResult.Refused(IptvRecordRefusal.CONNECTION_LIMIT)
         }
         val immediate = window.startMillis <= now
+        if (!immediate && !IptvRecordingAlarms.exactAllowed(context)) return IptvRecordResult.Refused(IptvRecordRefusal.EXACT_ALARMS_DENIED)
         if (immediate) {
             if ((admission.snapshot().upstreamsByAccount[stored.accountId] ?: 0) >= streams) return IptvRecordResult.Refused(IptvRecordRefusal.NO_FREE_CONNECTION)
             if (!RecordingStorage.canStart(freeBytes())) return IptvRecordResult.Refused(IptvRecordRefusal.LOW_STORAGE)
