@@ -30,6 +30,8 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
    per-row Keystore sealing.
 4. Then measure aggregate memory and storage margins, validate renderer preroll
    discard and seek acknowledgement, and only then enable capture controls.
+5. Once steps 1–2 pass, squash-merge `iptv/player-binding` into `main` as one commit
+   and delete the `iptv/wip` and `iptv/player-binding` branches.
 
 ## Review fixes — 6 October 2026
 
