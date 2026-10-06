@@ -41,7 +41,8 @@ class IptvSourcesViewModel @Inject constructor(
     private val playlists = IptvPlaylistRepository(catalogue, xtreamGuides = IptvXtreamGuides(catalogue, guides))
     private val guideRepository = IptvGuideRepository(guides, openDocument = { address ->
         requireNotNull(context.contentResolver.openInputStream(android.net.Uri.parse(address)))
-    }, xtreamConnection = catalogue::connection)
+    }, xtreamConnection = catalogue::connection, openLocal = { localGuides.open(it) })
+    val localGuides = com.nuvio.tv.core.iptv.LocalGuideFiles({ context.getExternalFilesDirs("iptv-guides").filterNotNull() })
     init {
         viewModelScope.launch {
             combine(profiles.activeProfileId, profiles.activeProfileReady, profiles.profileSelectionRevision) { id, ready, revision -> Triple(id, ready, revision) }

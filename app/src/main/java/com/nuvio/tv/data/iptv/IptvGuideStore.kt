@@ -307,7 +307,9 @@ class IptvGuideStore(
             if (XtreamGuideReference.sourceId(endpoint) != null) return
             val uri = try { URI(endpoint) } catch (_: Exception) { throw IllegalArgumentException("Invalid guide endpoint") }
             require(((uri.scheme in setOf("http", "https") && !uri.host.isNullOrBlank()) ||
-                (uri.scheme == "content" && !uri.rawAuthority.isNullOrBlank())) && uri.rawUserInfo == null && uri.rawFragment == null) { "Invalid guide endpoint" }
+                (uri.scheme == "content" && !uri.rawAuthority.isNullOrBlank()) ||
+                (uri.scheme == "file" && uri.rawAuthority == null && uri.rawQuery == null && uri.path?.startsWith("/") == true)) &&
+                uri.rawUserInfo == null && uri.rawFragment == null) { "Invalid guide endpoint" }
         }
     }
 }

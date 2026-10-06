@@ -59,6 +59,30 @@ class IptvGuideRepositoryTest {
         }
     }
 
+    @Test fun localImportFolderGuidesImportAndOtherPathsAreRefused() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val root = java.io.File(context.cacheDir, "guide-import-${UUID.randomUUID()}").apply { mkdirs() }
+        val outside = java.io.File(context.cacheDir, "guide-outside-${UUID.randomUUID()}.xml")
+        val id = UUID.randomUUID().toString(); val name = "guide-local-$id.db"; val alias = "guide.local.$id"
+        try {
+            val inside = java.io.File(root, "provider.xml").apply { writeText(xml()) }
+            outside.writeText(xml("Outside"))
+            val local = com.nuvio.tv.core.iptv.LocalGuideFiles({ listOf(root) })
+            assertEquals(listOf("provider.xml"), local.list().map { it.name })
+            IptvGuideStore(context, name, AndroidIptvSecretBox(alias)).use { store ->
+                val repository = IptvGuideRepository(store, openLocal = { local.open(it) })
+                val ref = store.createFeed(1, "USB guide", inside.toURI().toString())
+                assertEquals(IptvGuideRefresh.Guide(RefreshDecision.PUBLISH), repository.refresh(ref, window))
+                assertEquals("Fixture", store.programmes(ref, "one", window).programmes.single().titles.first().text)
+                val escaped = store.createFeed(1, "Elsewhere", outside.toURI().toString())
+                assertEquals(MetadataFailure.INVALID_RESPONSE, failure { repository.refresh(escaped, window) }.failure)
+            }
+        } finally {
+            root.deleteRecursively(); outside.delete(); context.deleteDatabase(name)
+            java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null); deleteEntry(alias) }
+        }
+    }
+
     @Test fun validResponsePersistsAnd304RequiresRetainedWindowCoverage() = fixture { store, ref ->
         val requests = mutableListOf<Request>(); var status = 200
         val http = IptvMetadataClient.newClient().newBuilder().addInterceptor { chain ->

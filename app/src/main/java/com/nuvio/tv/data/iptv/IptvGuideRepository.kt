@@ -18,14 +18,16 @@ sealed interface IptvGuideRefresh {
 class IptvGuideRepository(private val store: IptvGuideStore, private val client: IptvGuideClient = IptvGuideClient(),
     private val limits: GuideParseLimits = GuideParseLimits(),
     private val openDocument: ((String) -> java.io.InputStream)? = null,
-    private val xtreamConnection: ((IptvSourceRef) -> IptvSourceConnection)? = null) {
+    private val xtreamConnection: ((IptvSourceRef) -> IptvSourceConnection)? = null,
+    private val openLocal: ((String) -> java.io.InputStream)? = null) {
     suspend fun refresh(ref: IptvGuideRef, window: IptvGuideWindow): IptvGuideRefresh = withContext(Dispatchers.IO) {
         currentCoroutineContext().ensureActive()
         try {
             val request = store.prepareRefresh(ref, window)
-            if (request.endpoint.startsWith("content:")) {
+            if (request.endpoint.startsWith("content:") || request.endpoint.startsWith("file:")) {
                 val check = currentCoroutineContext()
-                val opener = openDocument ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+                val opener = (if (request.endpoint.startsWith("file:")) openLocal else openDocument)
+                    ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
                 return@withContext try {
                     opener(request.endpoint).use { input ->
                         IptvGuideRefresh.Guide(store.importGuide(request.ticket, input, window, IptvCacheValidators(), limits) { check.ensureActive() })
