@@ -17,6 +17,22 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
 - The capture player is wired to a real ExoPlayer in test fixtures. The cause of the
   two AM9 player-fixture timeouts is fixed in source; the device rerun is pending.
 
+## In flight at handover (6 October 2026)
+
+- GitHub Actions run 37418154407 (`PR Full Debug Build`, variant `iptvPrototype`,
+  commit 581bfc1) is the first full Gradle compile and IPTV unit-test run since
+  `b68985a`. The previous run (37416586107) failed after 17 min; its cause was not
+  readable, so the workflow now prints a filtered error summary at the end of the log.
+  `get_job_logs` with `return_content` shows the last 8 KB.
+- Known: `LocalTsSegmentExtractorTest` needs working `android.util.SparseArray`;
+  commit 99c0ee8 (after that run started) makes it skip under Gradle and adds
+  `LocalTsSegmentExtractorAndroidTest`. Expect other failures to be Kotlin compile
+  errors in Compose/Hilt files changed without a compiler (IptvLiveViewModel,
+  IptvSourcesViewModel, NuvioNavHost, SettingsScreen, ProfileManager).
+- Once it builds: the APK artifact installs as "Nuvio IPTV Prototype"
+  (`com.nuvio.iptv.prototype`) alongside the normal app. CI signs with a throwaway
+  key, so an older prototype on the AM9 must be uninstalled first.
+
 ## Next steps
 
 1. Build locally: full app compile, full IPTV unit tests, `tools/iptv-device-tests`.
