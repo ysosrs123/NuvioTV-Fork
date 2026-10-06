@@ -40,7 +40,7 @@ class IptvGuideClient(
             var url = address.toHttpUrlOrNull()?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
             var redirected = false
             val visited = mutableSetOf<HttpUrl>()
-            repeat(6) {
+            repeat(IptvMetadataClient.MAX_REDIRECTS + 1) {
                 currentCoroutineContext().ensureActive()
                 if (!visited.add(url)) throw MetadataException(MetadataFailure.REDIRECT_LIMIT)
                 val request = Request.Builder().url(url)

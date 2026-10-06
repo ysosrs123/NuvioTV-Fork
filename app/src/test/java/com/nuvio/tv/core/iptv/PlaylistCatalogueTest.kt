@@ -81,4 +81,9 @@ class PlaylistCatalogueTest {
         val c = parse("#EXTM3U\n#EXTINF:-1,One\nhttps://example.invalid/secret/token").channels.single()
         assertFalse(c.toString().contains("secret"))
     }
+    @Test fun catalogueLogRepresentationDoesNotLeakGuideCredentials() {
+        val p = parse("#EXTM3U url-tvg=\"https://example.invalid/xmltv.php?username=user&password=secret\"\n#EXTINF:-1,One\nhttps://example.invalid/one")
+        assertEquals(1, p.guideUrls.size)
+        assertFalse(p.toString().contains("secret")); assertFalse(p.toString().contains("example.invalid"))
+    }
 }

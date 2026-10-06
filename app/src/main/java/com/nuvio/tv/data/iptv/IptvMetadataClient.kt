@@ -46,16 +46,16 @@ class IptvMetadataClient(
     suspend fun playlist(address: String, validators: CatalogueValidators? = null): PlaylistDownload {
         var url = address.toHttpUrlOrNull()?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
         val visited = mutableSetOf<HttpUrl>()
-        repeat(6) {
+        var redirected = false
+        repeat(MAX_REDIRECTS + 1) {
             if (!visited.add(url)) throw MetadataException(MetadataFailure.REDIRECT_LIMIT)
             val request = Request.Builder().url(url).header("Accept", "application/x-mpegURL, audio/x-mpegurl, text/plain, */*")
-
                 .header("Connection", "close")
                 .apply {
-                    validators?.etag?.let { header("If-None-Match", it) }
-                    validators?.lastModified?.let { header("If-Modified-Since", it) }
+                    validators?.takeUnless { redirected }?.etag?.let { header("If-None-Match", it) }
+                    validators?.takeUnless { redirected }?.lastModified?.let { header("If-Modified-Since", it) }
                 }.build()
-            when (val result = download(request, validators != null && (validators.etag != null || validators.lastModified != null))) {
+            when (val result = download(request, !redirected && validators != null && (validators.etag != null || validators.lastModified != null))) {
                 is Step.Done -> return result.result
                 is Step.Redirect -> {
                     val next = url.resolve(result.location)?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
@@ -63,7 +63,7 @@ class IptvMetadataClient(
                     if (url.scheme != next.scheme || url.host != next.host || url.port != next.port) {
                         throw MetadataException(MetadataFailure.REDIRECT_REQUIRES_REVIEW)
                     }
-                    url = next
+                    url = next; redirected = true
                 }
             }
         }
@@ -113,6 +113,7 @@ class IptvMetadataClient(
     }
 
     companion object {
+        const val MAX_REDIRECTS = 6
         fun newClient(): OkHttpClient = OkHttpClient.Builder()
             .dispatcher(Dispatcher().apply { maxRequests = 2; maxRequestsPerHost = 2 })
             .followRedirects(false).followSslRedirects(false).retryOnConnectionFailure(false)

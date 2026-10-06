@@ -31,6 +31,22 @@ class IptvMetadataClientTest {
         }
     }
 
+    @Test fun validatorsAreNotSentAfterARedirectAndSixRedirectsAreFollowed() = runBlocking {
+        MockWebServer().use { server ->
+            server.enqueue(MockResponse().setResponseCode(302).addHeader("Location", "/moved"))
+            server.enqueue(MockResponse().setResponseCode(304))
+            assertEquals(MetadataFailure.INVALID_RESPONSE, failure { IptvMetadataClient().playlist(server.url("/").toString(), CatalogueValidators("\"v1\"")) }.failure)
+            assertEquals("\"v1\"", server.takeRequest().getHeader("If-None-Match")); assertNull(server.takeRequest().getHeader("If-None-Match"))
+            for (count in listOf(6, 7)) {
+                repeat(count) { server.enqueue(MockResponse().setResponseCode(302).addHeader("Location", "/hop${count}_$it")) }
+                if (count == 6) server.enqueue(MockResponse().setBody(catalogue))
+                val result = runCatching { IptvMetadataClient().playlist(server.url("/start$count").toString()) }
+                if (count == 6) assertTrue((result.getOrThrow() as PlaylistDownload.Candidate).catalogue.canPublish)
+                else assertEquals(MetadataFailure.REDIRECT_LIMIT, (result.exceptionOrNull() as MetadataException).failure)
+            }
+        }
+    }
+
     @Test fun crossOriginRedirectDoesNotContactOtherServer() = runBlocking {
         MockWebServer().use { first -> MockWebServer().use { other ->
             first.enqueue(MockResponse().setResponseCode(302).addHeader("Location", other.url("/secret")))

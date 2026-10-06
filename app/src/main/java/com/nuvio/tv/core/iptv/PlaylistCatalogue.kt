@@ -30,6 +30,7 @@ data class PlaylistCatalogue(
     val guideUrls: List<String> = emptyList(),
 ) {
     val canPublish: Boolean get() = kind == PlaylistKind.CATALOGUE && channels.isNotEmpty() && diagnostics.isEmpty()
+    override fun toString(): String = "PlaylistCatalogue(kind=$kind, channels=${channels.size}, diagnostics=${diagnostics.size}, guideUrls=${guideUrls.size})"
 }
 
 data class PlaylistLimits(

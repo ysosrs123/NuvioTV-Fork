@@ -54,27 +54,29 @@ through callers/callees once and not independently re-checked.
 
 ## Ingest, catalogue and guide
 
-10. High (checked): catalogue tombstones are never pruned. Every unmatched old row is
+10. FIXED (overlay-less tombstones dropped with their identities; over-cap returns INVALID; churn test). High (checked): catalogue tombstones are never pruned. Every unmatched old row is
     carried forward as unavailable; IptvCatalogueStore requires channels+unavailable
     <= 60,000 and throws. M3U rows have no guide key, so token-rotating locators mint new
     IDs each refresh; a 10,000-channel list with rotating tokens fails permanently after
     about five refreshes and its favourites/hidden/mapping overlays stay on tombstones.
-11. Medium (traced): XMLTV size limits are applied after the parser has materialised a
+11. FIXED (byte runs without '<' bounded at 4x text budget + 64KiB; test). Medium (traced): XMLTV size limits are applied after the parser has materialised a
     whole text/comment/attribute token; a small gzip with one 60MiB comment can raise
     OutOfMemoryError, which the Exception handlers do not catch.
-12. Medium (traced): each catalogue commit decrypts/seals every row through Keystore
+12. OPEN (needs device timing before redesigning per-row Keystore sealing). Medium (traced): each catalogue commit decrypts/seals every row through Keystore
     inside one BEGIN IMMEDIATE transaction that also serialises all reads; large
     refreshes can block browsing and zapping for a long time. Needs device timing.
-13. Medium (checked): one zero-length or out-of-window programme, or a duplicated channel
+13. FIXED (malformed/orphan programmes quarantined up to max(16, 2%); duplicate channels merge names; device tests updated). Medium (checked): one zero-length or out-of-window programme, or a duplicated channel
     id with different names, rejects the whole guide feed. Common in merged feeds.
-14. Low (traced): PlaylistCatalogue's generated toString includes guideUrls, which for
+14. FIXED (toString withholds guide URLs; test). Low (traced): PlaylistCatalogue's generated toString includes guideUrls, which for
     providers usually carry username/password. Not logged today; field is unused.
-15. Low (traced): the playlist metadata client resends If-None-Match/If-Modified-Since
+15. FIXED (validators sent only before any redirect; test). Low (traced): the playlist metadata client resends If-None-Match/If-Modified-Since
     across redirects and accepts a 304 after redirect; the guide client strips them.
-16. Low (traced): repeat(6) permits five redirects, not six. Decide intent; add a test.
-17. Low (traced): search uses NFKC + lowercase, not case folding (final sigma, ß).
-18. Low (traced): source refresh and live browse run outside the profile access fence;
-    store-level profile checks make a late commit fail rather than leak.
+16. FIXED (both clients follow up to six redirects; tests for six and seven). Low (traced): repeat(6) permits five redirects, not six. Decide intent; add a test.
+17. FIXED (NFKC + upper/lower folding; schema v4 re-indexes; test). Low (traced): search uses NFKC + lowercase, not case folding (final sigma, ß).
+18. NO CHANGE (documented). Low (traced): source refresh and live browse run outside the profile access fence;
+    store-level profile checks make a late commit fail rather than leak. Holding the
+    access lock across network refreshes would block profile removal, so the store
+    checks plus the ViewModels' session identity checks are the intended protection.
 
 ## Foreground UI and integration
 

@@ -29,6 +29,17 @@ class IptvGuideClientTest {
         client.fetch(url, validators) { input, _, check -> parseGuideInput(input, {}, {}, checkCancellation = check).channels }
     private fun gzip(text: String): ByteArray = ByteArrayOutputStream().also { out -> GZIPOutputStream(out).use { it.write(text.toByteArray()) } }.toByteArray()
 
+    @Test fun sixDistinctRedirectsAreFollowedAndASeventhIsRefused() = runBlocking {
+        MockWebServer().use { server ->
+            for (count in listOf(6, 7)) {
+                repeat(count) { server.enqueue(MockResponse().setResponseCode(302).addHeader("Location", "/hop${count}_$it")) }
+                if (count == 6) server.enqueue(MockResponse().setBody(xml))
+                val result = runCatching { read(IptvGuideClient(), server.url("/start$count").toString()) }
+                if (count == 6) assertEquals(GuideDownload.Imported(1), result.getOrThrow())
+                else assertEquals(MetadataFailure.REDIRECT_LIMIT, (result.exceptionOrNull() as MetadataException).failure)
+            }
+        }
+    }
     @Test fun sameOriginRedirectUsesFinalBodyAndClosesIt() = runBlocking {
         MockWebServer().use { server ->
             server.enqueue(MockResponse().setResponseCode(302).addHeader("Location", "/guide"))

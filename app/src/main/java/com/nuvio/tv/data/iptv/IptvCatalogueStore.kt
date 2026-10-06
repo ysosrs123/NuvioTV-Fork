@@ -12,13 +12,12 @@ import com.nuvio.tv.core.iptv.RefreshDecision
 import com.nuvio.tv.core.iptv.RefreshTicket
 import com.nuvio.tv.core.iptv.StoredChannel
 import com.nuvio.tv.core.iptv.decideCatalogueRefresh
+import com.nuvio.tv.core.iptv.foldSearchText
 import com.nuvio.tv.core.iptv.retainTombstones
 import java.io.Closeable
 import java.io.InterruptedIOException
 import java.net.URI
 import java.util.UUID
-import java.text.Normalizer
-import java.util.Locale
 import org.json.JSONObject
 
 class IptvCatalogueStore(
@@ -305,7 +304,7 @@ class IptvCatalogueStore(
     }
     override fun close() = helper.close()
 
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 3) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 4) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
@@ -319,17 +318,15 @@ class IptvCatalogueStore(
             addStreamFormatSchema(db)
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(oldVersion in 1..2 && newVersion == 3) { "Missing IPTV database migration" }
-            if (oldVersion == 1) {
-                addBrowseSchema(db)
-                db.rawQuery("SELECT source,generation,id,name FROM catalogue", null).use { c ->
-                    while (c.moveToNext()) db.execSQL("UPDATE catalogue SET search_name=? WHERE source=? AND generation=? AND id=?", arrayOf(searchName(c.getString(3)), c.getString(0), c.getLong(1), c.getString(2)))
-                }
-                db.rawQuery("SELECT id,profile,custom_name FROM overlays WHERE custom_name IS NOT NULL", null).use { c ->
-                    while (c.moveToNext()) db.execSQL("UPDATE overlays SET search_name=? WHERE id=? AND profile=?", arrayOf(searchName(c.getString(2)), c.getString(0), c.getInt(1)))
-                }
+            check(oldVersion in 1..3 && newVersion == 4) { "Missing IPTV database migration" }
+            if (oldVersion == 1) addBrowseSchema(db)
+            if (oldVersion <= 2) addStreamFormatSchema(db)
+            db.rawQuery("SELECT source,generation,id,name FROM catalogue", null).use { c ->
+                while (c.moveToNext()) db.execSQL("UPDATE catalogue SET search_name=? WHERE source=? AND generation=? AND id=?", arrayOf(searchName(c.getString(3)), c.getString(0), c.getLong(1), c.getString(2)))
             }
-            addStreamFormatSchema(db)
+            db.rawQuery("SELECT id,profile,custom_name FROM overlays WHERE custom_name IS NOT NULL", null).use { c ->
+                while (c.moveToNext()) db.execSQL("UPDATE overlays SET search_name=? WHERE id=? AND profile=?", arrayOf(searchName(c.getString(2)), c.getString(0), c.getInt(1)))
+            }
         }
         private fun addStreamFormatSchema(db: SQLiteDatabase) {
             db.execSQL("ALTER TABLE overlays ADD COLUMN stream_format TEXT NOT NULL DEFAULT 'AUTO' CHECK(stream_format IN ('AUTO','HLS','MPEG_TS'))")
@@ -345,7 +342,7 @@ class IptvCatalogueStore(
 
     private companion object {
         fun aad(ref: IptvSourceRef, field: String) = "iptv.v1:${ref.profileId}:${ref.sourceId}:$field"
-        fun searchName(value: String) = Normalizer.normalize(value, Normalizer.Form.NFKC).lowercase(Locale.ROOT)
+        fun searchName(value: String) = foldSearchText(value)
         fun Cursor.string(key: String) = getString(getColumnIndexOrThrow(key))
         fun Cursor.number(key: String) = getLong(getColumnIndexOrThrow(key))
         fun Cursor.nullableString(key: String): String? = getColumnIndexOrThrow(key).let { if (isNull(it)) null else getString(it) }
