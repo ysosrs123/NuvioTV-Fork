@@ -29,6 +29,28 @@ class IptvGuideClientTest {
         client.fetch(url, validators) { input, _, check -> parseGuideInput(input, {}, {}, checkCancellation = check).channels }
     private fun gzip(text: String): ByteArray = ByteArrayOutputStream().also { out -> GZIPOutputStream(out).use { it.write(text.toByteArray()) } }.toByteArray()
 
+    @Test fun nonGuideBodyIsLoggedWithItsFormatButNotItsAddress() = runBlocking {
+        val records = mutableListOf<String>()
+        val handler = object : java.util.logging.Handler() {
+            override fun publish(record: java.util.logging.LogRecord) { records += record.message }
+            override fun flush() = Unit
+            override fun close() = Unit
+        }
+        val logger = java.util.logging.Logger.getLogger("NuvioIptv")
+        logger.addHandler(handler)
+        try {
+            MockWebServer().use { server ->
+                server.enqueue(MockResponse().setBody("<html><body>Bad credentials</body></html>"))
+                server.enqueue(MockResponse().setBody(Buffer().write(gzip("\uFEFF\n<?xml version=\"1.0\"?>\n<!DOCTYPE tv SYSTEM \"xmltv.dtd\">$xml"))))
+                val address = server.url("/xmltv.php?username=u&password=SECRET_GUIDE_PASSWORD").toString()
+                assertEquals(MetadataFailure.INVALID_RESPONSE, (runCatching { read(IptvGuideClient(), address) }.exceptionOrNull() as MetadataException).failure)
+                assertEquals(GuideDownload.Imported(1), read(IptvGuideClient(), address))
+            }
+        } finally { logger.removeHandler(handler) }
+        assertTrue(records.any { it.startsWith("guide GuideFormatException HTML") })
+        assertTrue(records.none { "SECRET_GUIDE_PASSWORD" in it })
+    }
+
     @Test fun sixDistinctRedirectsAreFollowedAndASeventhIsRefused() = runBlocking {
         MockWebServer().use { server ->
             for (count in listOf(6, 7)) {

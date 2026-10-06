@@ -74,11 +74,15 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
             if (Thread.currentThread().isInterrupted) throw java.io.InterruptedIOException("Guide import cancelled")
             when (parser.nextToken()) {
                 XmlPullParser.END_DOCUMENT -> break
-                XmlPullParser.DOCDECL -> throw IllegalArgumentException("XMLTV DTD declarations are not accepted")
+                XmlPullParser.DOCDECL -> {
+                    val declaration = parser.text
+                    require(!rootSeen && declaration != null && '[' !in declaration && declaration.trim().startsWith("tv")) { "XMLTV DTD declarations are not accepted" }
+                }
                 XmlPullParser.ENTITY_REF -> {
-                    require((parser.name in setOf("amp", "lt", "gt", "quot", "apos") || parser.name.startsWith("#")) && parser.text != null) { "XMLTV entity is not allowed" }
+                    val known = parser.name in setOf("amp", "lt", "gt", "quot", "apos") || parser.name.startsWith("#")
+                    require(if (known) parser.text != null else parser.name.matches(entityName)) { "XMLTV entity is not allowed" }
                     if (textType != null) {
-                        text.append(parser.text)
+                        text.append(if (known) parser.text else "&${parser.name};")
                         require(text.length <= limits.textCharacters) { "Guide text limit" }
                     }
                 }
@@ -86,7 +90,8 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                     require(parser.depth <= limits.depth) { "Guide nesting limit" }
                     for (index in 0 until parser.attributeCount) require(parser.getAttributeValue(index).length <= limits.textCharacters) { "Guide attribute limit" }
                     if (parser.depth == 1) {
-                        require(!rootSeen && parser.name == "tv" && parser.namespace.isNullOrEmpty()) { "Expected XMLTV root" }
+                        require(!rootSeen) { "Expected XMLTV root" }
+                        if (parser.name != "tv" || !parser.namespace.isNullOrEmpty()) throw GuideFormatException(GuideFormatIssue.NOT_XMLTV)
                         rootSeen = true
                     } else if (parser.depth == 2 && parser.name in setOf("channel", "programme")) {
                         recordType = parser.name
@@ -155,6 +160,7 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
     }
 
     companion object {
+        private val entityName = Regex("[A-Za-z][A-Za-z0-9]{0,31}")
         internal fun parseTimestamp(raw: String): GuideTimestamp? {
             val match = Regex("^(\\d{4}(?:\\d{2}){0,5})(?:\\s+([+-]\\d{4}|UTC|GMT))?$").matchEntire(raw.trim()) ?: return null
             val digits = match.groupValues[1]

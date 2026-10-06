@@ -35,7 +35,7 @@ class IptvGuideRepository(private val store: IptvGuideStore, private val client:
                     }
                 } catch (cancel: kotlinx.coroutines.CancellationException) { throw cancel }
                 catch (_: SQLiteFullException) { IptvGuideRefresh.StorageFull }
-                catch (_: Exception) { throw MetadataException(MetadataFailure.INVALID_RESPONSE) }
+                catch (error: Exception) { IptvLog.failure("guide file", error); throw MetadataException(MetadataFailure.INVALID_RESPONSE) }
             }
             val provider = XtreamGuideReference.sourceId(request.endpoint)?.let { IptvSourceRef(ref.profileId, it) }
             val address = provider?.let { source ->

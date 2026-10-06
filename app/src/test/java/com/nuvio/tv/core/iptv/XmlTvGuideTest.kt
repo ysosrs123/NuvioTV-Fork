@@ -37,8 +37,22 @@ class XmlTvGuideTest {
         val result = XmlTvGuideParser().parse("""<tv><programme channel="one" start="20260230070000"/><programme channel="one" start="20261005080000" stop="20261005070000"/><programme channel="one" start="20261005080000" stop="bad"/></tv>""".byteInputStream(), {}, { fail("No invalid programme should publish") })
         assertEquals(3, result.rejectedProgrammes)
     }
-    @Test(expected = IllegalArgumentException::class) fun externalDtdIsRejected() {
-        XmlTvGuideParser().parse("""<!DOCTYPE tv SYSTEM "http://127.0.0.1:9/never"><tv/>""".byteInputStream(), {}, {})
+    @Test fun externalDtdReferenceIsIgnoredWithoutBeingFetched() {
+        val channels = mutableListOf<GuideChannel>()
+        XmlTvGuideParser().parse("""<?xml version="1.0"?><!DOCTYPE tv SYSTEM "http://127.0.0.1:9/never"><tv><channel id="a"/></tv>""".byteInputStream(), channels::add, {})
+        assertEquals("a", channels.single().externalId)
+    }
+    @Test(expected = IllegalArgumentException::class) fun doctypeForAnotherRootIsRejected() {
+        XmlTvGuideParser().parse("""<!DOCTYPE html><tv/>""".byteInputStream(), {}, {})
+    }
+    @Test fun unknownNamedEntitiesStayLiteralInsteadOfFailingTheGuide() {
+        val channels = mutableListOf<GuideChannel>()
+        XmlTvGuideParser().parse("""<tv><channel id="a"><display-name>News&nbsp;24 &amp; more</display-name></channel></tv>""".byteInputStream(), channels::add, {})
+        assertEquals("News&nbsp;24 & more", channels.single().names.single().text)
+    }
+    @Test fun wrongRootIsReportedAsNotXmltv() {
+        try { XmlTvGuideParser().parse("<rss><channel/></rss>".byteInputStream(), {}, {}); fail() }
+        catch (error: GuideFormatException) { assertEquals(GuideFormatIssue.NOT_XMLTV, error.issue) }
     }
     @Test(expected = IllegalArgumentException::class) fun internalEntityExpansionIsRejected() {
         XmlTvGuideParser().parse("""<!DOCTYPE tv [<!ENTITY secret SYSTEM "file:///never">]><tv/>""".byteInputStream(), {}, {})
