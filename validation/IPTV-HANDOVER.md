@@ -57,55 +57,49 @@ channels, 4.8 MB list, 145 MB provider guide taking over two minutes to download
 - The Live TV and Sources screens need a full visual and usability redesign
   (user feedback); planned after the device fixes.
 
-## Overnight plan and state — 6 October 2026 (read first)
+## Current state — 6 October 2026, evening (read first)
 
-The user asked for a complete, polished, fully working Live TV solution by the next
-day, built without waiting for their device tests, with UI/UX that matches the fork
-(fonts, `NuvioTheme` colours and typography, themes, and the glass/frost/blur
-presentation options) and does not look generated. Keep the handover and the draft
-release notes current after each piece of work.
+Goal from the user: a complete, polished, fully working Live TV in the fork's design
+language (fonts, `NuvioTheme` colours and typography, themes, focus treatment,
+glass/frost presentation), built without waiting for device tests. The user also
+asked for the fork's player button customisation and its stats HUD in Live TV.
 
-Latest device report (230b425 installed): the provider guide failed after about 35 s
-with "unexpected format"; "Saving channels" took about 95 s; Live TV then showed no
-channels, categories, guide or preview. Not yet explained. Since then (CI not yet
-run on these): c979431 adds `NuvioIptv` logging (refresh decisions, counts, timings,
-guide failure causes, Live load failures) and shows non-accepted refresh results;
-4d74967 opens the first source that has channels (an older empty source listed first
-is a likely cause of the empty screen) and shows channel counts; a2a1643 follows media
-redirects (Xtream /live/ commonly redirects; they were rejected before) and adds live
-reconnect with backoff and a stall watchdog; d89cec6 adds the catch-up URL builder
-(`CatchupUrl.kt`, host-tested, not wired to UI yet).
-
-Ask the user for: `adb -s <AM9>:5555 logcat -d -s NuvioIptv NuvioXtream` after a
-refresh and opening Live TV.
+Done since 1b7952c (host-tested; CI status below; nothing device-tested):
+- Data layer (written in a separate worktree, reviewed, cherry-picked): chunked
+  catalogue save into an unpublished generation with one publish step (schema 7,
+  catalogue id index, timing log line); remove source / remove guide (removing an
+  Xtream source removes its automatic guide; in-flight refreshes end stale);
+  channel logos as `tvg-logo` for M3U, Xtream `stream_icon` and Stalker `logo`;
+  guide ids with feed suffixes (`@SD`) fall back to the base id.
+- `IptvCatchup` (data): Xtream timeshift and M3U catch-up addresses, archive days.
+- UI rewrite, split into `IptvLiveScreen` (scaffold, info panel, preview, rail,
+  empty states, menus, guide picker, search), `IptvGuideGrid`, `IptvLiveFullscreen`
+  (banner, number entry, channel panel, reconnecting pill, catch-up keys),
+  `IptvLiveControls` (reuses `PlayerControlDeck`/`PlayerControlChrome` with the saved
+  `PlayerControlLayout`), `IptvStatsOverlay` (feeds `PlaybackStatsOverlay`),
+  `IptvLiveParts` (shared surfaces: `iptvPanel` uses `nuvioGlass` under V2 and the
+  classic card otherwise; `iptvItem` uses `nuvioV2Focus` or the classic focus ring).
+  Sources: kind chooser → form → "Save and load channels"; per-source and per-guide
+  option dialogs built from `SettingsActionRow`; Stalker form with MAC check.
+- Live TV entry in the main navigation when `FEATURE_IPTV_ENABLED`.
+- Live channel search (catalogue folded search) from the rail.
 
 Work queue, in order:
-1. Run CI on the current head; fix any compile errors.
-2. Catalogue save speed: chunked transactions (about 2,500 rows) into an unpublished
-   generation with a final publish step, as in the Debrify notes; measure with the
-   new log lines. The current commit is one transaction with per-row work.
-3. Guide import: "unexpected format" now logs the real cause; also add url-tvg /
-   x-tvg-url from M3U headers, feed-suffix id matching (e.g. "@SD"), a per-channel
-   programme cap and description length cap, and Xtream get_short_epg as a now/next
-   fallback when no XMLTV is available.
-4. UI/UX polish to the fork's design language: study the existing Home, detail and
-   player screens and the theme package (`ui/theme`, glass presentation flags,
-   `nuvioV2Focus`, card depth styles, `NuvioDialog`, settings cards) and restyle
-   `IptvLiveScreen`, `IptvSourcesScreen` and dialogs with the same components,
-   spacing, typography and focus treatment; add channel logos (tvg-logo /
-   stream_icon via the app's image loader), loading skeletons, empty states, a
-   "Reconnecting…" indicator, smooth focus scrolling, and a proper source setup flow
-   (choose type → fields → test → save) instead of raw forms.
-5. Catch-up wiring: archive badge on channels with archive data; OK on a past
-   programme plays catch-up; "Watch from start" in the full-screen menu; Xtream
-   timeshift URL via the encrypted connection; return to live.
-6. Search across channels and "now on" programme titles; favourites ordering;
-   hide categories; default landing category.
-7. Secure phone/PC setup (pairing code exchanged for a session, CSRF/origin checks,
-   LAN-only, idle timeout, no secrets echoed) — only if time allows; it is security
-   sensitive and must be reviewed.
-8. Recording, multiview and sports only after the above; recording costs a provider
-   connection and needs the capture device gates.
+1. Get CI green on the UI rewrite; fix compile errors.
+2. Cherry-pick the remaining data commits (M3U `url-tvg`/`x-tvg-url` feeds,
+   per-channel programme and description caps, Xtream `get_short_epg` now/next
+   fallback, guide format detection) and wire short EPG into the info panel/banner
+   when a channel has no guide data.
+3. Device pass by the user; then fix what they find. Ask for
+   `adb -s <AM9>:5555 logcat -d -s NuvioIptv NuvioXtream` after a refresh.
+4. Favourites ordering, hide categories, default landing category, "now on" search.
+5. Secure phone/PC setup (pairing code, CSRF/origin checks, LAN only, idle timeout,
+   no secrets echoed) — security sensitive, needs review.
+6. Recording, multiview and sports only after the above.
+
+Open questions and risks: Xtream catch-up uses the device time zone (server zone is
+not stored); the guide shows about four to five rows at 1080p because the top area
+takes 188 dp; channel panel and control deck focus need checking with a real remote.
 
 ## Redesign work — 6 October 2026
 
@@ -131,9 +125,6 @@ recovery, live retry backoff, HLS live speed), catch-up, search, sports, multivi
 
 ## Small open items
 
-- The automatic Xtream guide feed stores `xtream-guide:<sourceId>` as its endpoint.
-  The feed list and edit form must show it as an automatic provider guide and not
-  offer endpoint editing.
 - `suggestAccountGroups` distinguishes only Xtream and M3U; Stalker sources should
   group by portal host and MAC (as Xtream with the MAC as the user).
 - `IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json` source hashes predate later commits;

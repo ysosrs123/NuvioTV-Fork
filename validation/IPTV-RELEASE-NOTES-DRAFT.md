@@ -7,8 +7,19 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 
 ## Live TV
 
-- Multiple independent M3U and Xtream Codes live sources with Original/V2 source
-  forms and per-profile isolation. Server and username are visible while typing; the
+- Live TV has its own entry in the main navigation (IPTV build only).
+- Redesigned Live TV and Live TV sources screens in the app's own style: theme
+  colours and typography, glass/frost panels when the V2 glass presentation is on,
+  the V2 focus edge (or the classic focus ring), channel logos with initials as a
+  fallback, loading placeholders and empty states with a next step (add a source,
+  refresh, open categories).
+- Adding a source starts with a choice of M3U playlist, Xtream account or Stalker
+  portal, then a form with examples and hints (MAC address checked as you type);
+  "Save and load channels" starts the first refresh. Each source and guide has
+  options to watch, refresh, choose guides, edit, move up or remove (with
+  confirmation). The automatic provider guide is labelled and cannot be edited.
+- Multiple independent M3U, Xtream Codes and Stalker portal live sources with
+  per-profile isolation. Server and username are visible while typing; the
   password has a Show/Hide toggle; a missing `http://` is added and spaces trimmed.
 - Background refresh: sources and guides refresh one at a time outside the screens,
   show their stage ("Downloading channels…", "Saving channels…", "Updating programme
@@ -30,36 +41,55 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   cache validators, feed linking and manual channel mapping. A few malformed or
   unmatched programmes are skipped instead of rejecting the whole guide; duplicate
   channel entries merge their names.
-- Guide-first Live TV: live preview and programme panel above a channel guide in
-  provider order with a time bar and now line. Left/right move a shared time cursor
+- Guide-first Live TV: programme panel and live preview above a channel guide in
+  provider order with logos, programme times, progress on what is airing, a time bar
+  with the current time and a now line; the focused row stays about a third of the
+  way down while scrolling, and channel up/down page through the guide. Left/right move a shared time cursor
   across programmes; a category rail offers favourites, all channels, provider
   categories, source switching and source settings. OK previews a channel; OK again
   goes full screen without re-tuning. Long-press or Menu opens channel options.
-- Full screen: up/down and channel keys zap, OK shows a banner with programme
-  progress, what is next and quality badges, right recalls the last channel, left
+- Full screen: up/down and channel keys zap (held keys do not repeat), a banner
+  shows the channel logo, programme progress, minutes left, what is next and quality
+  badges; OK opens the player's control deck, which follows the button layout,
+  order, visibility and icon or labelled style chosen in the player settings
+  (play/pause, start over, stats, audio, subtitles, aspect ratio, info and the More
+  menu; actions that only apply to films and episodes are left out); "Reconnecting…"
+  appears when a reconnect takes more than two seconds; right recalls the last channel, left
   opens a panel with recent channels, all channels and the focused channel's
   schedule, and number keys jump to a channel.
 - Guide matching: channels without a guide ID match by a normalised name when exactly
   one guide channel matches; linked guides follow their linked order (Move up in
   Sources); a guide channel can be chosen from a searchable list per channel.
-- Large catalogues save quickly: rows are sealed with a Keystore-wrapped data key, and
-  Xtream rows store no login (it is added from the encrypted connection when tuning).
+- Large catalogues save quickly: rows are sealed with a Keystore-wrapped data key,
+  Xtream rows store no login (it is added from the encrypted connection when tuning),
+  and channels are written in chunks of about 2,500 rows into an unpublished list
+  that replaces the old one in a single final step, so Live TV keeps showing the
+  previous list until the new one is complete. Save timings are logged.
 - The provider's own Xtream guide downloads in the background, keeps only that
   provider's channels and allows large guides (512 MB, 15 minutes).
 - Foreground playback of progressive MPEG-TS and HLS (including extensionless HLS
   when chosen), with a per-channel Auto/HLS/MPEG-TS choice. AC-3/E-AC-3 audio falls
   back to the bundled decoder on TVs without hardware support.
-- HUD with format, buffer, live offset, transfer rate, open requests, tune time,
-  rebuffers and dropped frames. No URLs or credentials are shown.
+- Playback stats use the player's stats HUD: provider, server host, format, live or
+  catch-up, video, HDR, bitrate, dropped frames, audio, buffer, live offset, speed,
+  loaded data, open requests, tune time, rebuffers, state and memory, with the same
+  quality dots. Only the host name is shown, never full addresses or credentials.
+- Catch-up: channels with an archive show a catch-up mark; OK on a past programme
+  plays it, "Watch from the start" restarts the current programme, left/right and
+  the media keys skip 30 seconds, the end of a programme returns to live, and
+  "Return to live" is in the channel options. Xtream archives use the timeshift
+  address with the device's time zone as the provider time; M3U channels use their
+  catch-up attributes.
+- Channel logos from M3U tvg-logo, Xtream stream_icon and Stalker logo fields
+  (http/https only).
+- Guide ids with a feed suffix (for example abc.uk@SD) match the base guide channel.
 - Audio/subtitle track dialog with Automatic, Off and per-player choices.
 - Search ignores case and compatibility forms (for example ß/ss, final sigma).
 
 ## Ready below the UI (screens pending)
 
 - Stalker Portal (MAC-based) sources with stream links created at tune time.
-- Provider account groups with per-group stream limits, and source ordering.
-- Catch-up addresses for Xtream archives and the M3U default, append, shift and
-  Flussonic catch-up types (screens pending).
+- Provider account groups with per-group stream limits.
 - Guide import from a folder on internal storage or a USB drive for TVs without a
   file picker.
 
@@ -147,10 +177,11 @@ Screens and app
 
 - One foreground IPTV decoder and one acquisition per account are allowed by
   default; these are estimates, not measured device limits.
-- Media redirects are rejected. No DRM, encrypted HLS, fMP4 or separate-audio
+- No DRM, encrypted HLS, fMP4 or separate-audio
   support has been validated.
-- No timeshift, recording, multiview or catch-up yet. Stalker Portal, automatic Xtream
-  guides and account groups have no UI yet.
+- No timeshift, recording or multiview yet. Account groups have no UI yet. Stalker
+  portals have no catch-up. Xtream catch-up assumes the provider uses the device's
+  time zone.
 - Subtitles, closed captions, DVB subtitles and teletext are not all validated.
 - English fallback strings remain; on-screen keyboard focus in source forms needs
   device checks. Devices without a document picker need the folder import UI.
