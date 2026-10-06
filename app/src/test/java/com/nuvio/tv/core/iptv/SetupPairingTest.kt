@@ -128,11 +128,17 @@ class SetupPairingTest {
         val limiter = SetupRateLimiter(3, 1000, { now }, maxKeys = 2)
         repeat(3) { assertTrue(limiter.allow("a")) }
         assertFalse(limiter.allow("a"))
+        now = 10
         assertTrue(limiter.allow("b"))
-        assertFalse(limiter.allow("c"))
-        now = 1000
-        assertTrue(limiter.allow("a"))
+        now = 20
         assertTrue(limiter.allow("c"))
+        now = 30
+        repeat(3) { assertTrue(limiter.allow("a")) }
+        assertFalse(limiter.allow("a"))
+        repeat(2) { assertTrue(limiter.allow("c")) }
+        assertFalse(limiter.allow("c"))
+        now = 1030
+        assertTrue(limiter.allow("a"))
     }
 
     @Test fun connectionsAreCappedInTotalAndPerAddress() {

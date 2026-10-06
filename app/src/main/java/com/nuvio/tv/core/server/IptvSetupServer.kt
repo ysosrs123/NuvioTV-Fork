@@ -84,8 +84,8 @@ class IptvSetupServer private constructor(
     private fun route(session: IHTTPSession): Response {
         val remote = session.remoteIpAddress
         if (!SetupLan.isLanAddress(remote)) return text(Response.Status.FORBIDDEN, "Forbidden")
-        if (!requests.allow(remote)) return json(Response.Status.TOO_MANY_REQUESTS, error("rate"))
         if (!SetupGuard.hostMatches(session.headers["host"], authority)) return text(Response.Status.BAD_REQUEST, "Bad request")
+        if (!requests.allow(remote)) return json(Response.Status.TOO_MANY_REQUESTS, error("rate"))
         val match = PATH.matchEntire(session.uri) ?: return ended()
         val token = match.groupValues[1]
         val rest = match.groupValues[2]

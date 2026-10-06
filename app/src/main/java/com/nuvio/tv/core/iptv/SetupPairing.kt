@@ -133,7 +133,7 @@ class SetupRateLimiter(private val limit: Int, private val windowMillis: Long, p
         val time = now()
         val window = windows[key] ?: run {
             if (windows.size >= maxKeys) windows.values.removeAll { time - it.start >= windowMillis }
-            if (windows.size >= maxKeys) return false
+            if (windows.size >= maxKeys) windows.entries.minByOrNull { it.value.start }?.let { windows.remove(it.key) }
             Window(time, 0).also { windows[key] = it }
         }
         if (time - window.start >= windowMillis) { window.start = time; window.count = 0 }
