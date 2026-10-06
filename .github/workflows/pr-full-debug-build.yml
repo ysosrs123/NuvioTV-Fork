@@ -5,6 +5,12 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     branches: [dev]
   workflow_dispatch:
+    inputs:
+      variant:
+        description: App variant to build
+        type: choice
+        options: [full, iptvPrototype]
+        default: full
 
 permissions:
   contents: read
@@ -66,13 +72,20 @@ jobs:
             echo "NUVIO_RELEASE_STORE_PASSWORD=android"
           } >> "$GITHUB_ENV"
 
-      - name: Test updater and build fullDebug APK
-        run: ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.updater.*' :app:assembleFullDebug --stacktrace
+      - name: Test and build debug APK
+        env:
+          VARIANT: ${{ inputs.variant || 'full' }}
+        run: |
+          if [ "$VARIANT" = "iptvPrototype" ]; then
+            ./gradlew :app:testIptvPrototypeDebugUnitTest --tests 'com.nuvio.tv.core.iptv.*' --tests 'com.nuvio.tv.data.iptv.*' :app:assembleIptvPrototypeDebug --stacktrace
+          else
+            ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.updater.*' :app:assembleFullDebug --stacktrace
+          fi
 
-      - name: Upload fullDebug APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v7
         with:
-          path: app/build/outputs/apk/full/debug/app-full-universal-debug.apk
+          path: app/build/outputs/apk/${{ inputs.variant || 'full' }}/debug/app-${{ inputs.variant || 'full' }}-universal-debug.apk
           archive: false
           if-no-files-found: error
           retention-days: 7
