@@ -12,7 +12,8 @@ sealed interface IptvPlaylistRefresh {
     data object Unchanged : IptvPlaylistRefresh
     data object HlsPlaybackInput : IptvPlaylistRefresh
     data object UnsupportedSourceKind : IptvPlaylistRefresh
-    data class Catalogue(val decision: RefreshDecision, val guide: IptvGuideRef? = null) : IptvPlaylistRefresh
+    data class Catalogue(val decision: RefreshDecision, val guide: IptvGuideRef? = null,
+        val guides: List<IptvGuideRef> = listOfNotNull(guide)) : IptvPlaylistRefresh
 }
 
 class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val metadata: IptvMetadataClient = IptvMetadataClient(),
@@ -54,8 +55,12 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
                 val records = download.catalogue.channels.map { row ->
                     IptvCatalogueRecord(ChannelCandidate(row.name, row.locator, guideId = row.guideId), row.attributes)
                 }
-                IptvPlaylistRefresh.Catalogue(store.commitCatalogue(ref, request.ticket, records, download.catalogue.canPublish,
-                    IptvCacheValidators(download.validators.etag, download.validators.lastModified)) { context.ensureActive() })
+                val decision = store.commitCatalogue(ref, request.ticket, records, download.catalogue.canPublish,
+                    IptvCacheValidators(download.validators.etag, download.validators.lastModified)) { context.ensureActive() }
+                val guides = if (decision == RefreshDecision.PUBLISH && download.catalogue.guideUrls.isNotEmpty())
+                    xtreamGuides?.ensurePlaylist(ref, download.catalogue.guideUrls).orEmpty() else emptyList()
+                if (guides.isNotEmpty()) IptvLog.info("playlist guides linked=${guides.size}")
+                IptvPlaylistRefresh.Catalogue(decision, guides.firstOrNull(), guides)
             }
         }
     }

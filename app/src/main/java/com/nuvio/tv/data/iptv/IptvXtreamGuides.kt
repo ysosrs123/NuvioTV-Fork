@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.XtreamGuideReference
+import com.nuvio.tv.core.iptv.playlistGuideAddresses
 
 class IptvXtreamGuides(private val catalogue: IptvCatalogueStore, private val guides: IptvGuideStore) {
     fun ensure(source: IptvSourceRef): IptvGuideRef {
@@ -17,6 +18,21 @@ class IptvXtreamGuides(private val catalogue: IptvCatalogueStore, private val gu
         catalogue.setGuideFeeds(source, linked.feedIds.map { IptvGuideRef(source.profileId, it) } + feed,
             linked.priority.map { IptvGuideRef(source.profileId, it) })
         return feed
+    }
+
+    fun ensurePlaylist(source: IptvSourceRef, addresses: List<String>): List<IptvGuideRef> {
+        val usable = playlistGuideAddresses(addresses)
+        if (usable.isEmpty()) return emptyList()
+        val linked = catalogue.guideAssociations(source)
+        val known = allFeeds(source.profileId).mapNotNull { feed -> runCatching { guides.endpoint(feed).trim() }.getOrNull()?.let { it to feed } }.toMap()
+        val label = catalogue.sources(source.profileId).single { it.ref == source }.label
+        val feeds = linked.feedIds.map { IptvGuideRef(source.profileId, it) }.toMutableList()
+        val found = usable.mapIndexed { index, address ->
+            known[address] ?: guides.createFeed(source.profileId, "$label guide${if (index == 0) "" else " ${index + 1}"}".take(240), address)
+        }
+        val added = found.filter { it !in feeds }.take(MAX_LINKED_FEEDS - feeds.size)
+        if (added.isNotEmpty()) catalogue.setGuideFeeds(source, feeds + added, linked.priority.map { IptvGuideRef(source.profileId, it) })
+        return found
     }
 
     fun removeSource(source: IptvSourceRef) {

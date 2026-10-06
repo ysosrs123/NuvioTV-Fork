@@ -64,6 +64,36 @@ class IptvPlaylistRepositoryTest {
         assertNull(store.snapshot(ref).validators)
     }
 
+    @Test fun playlistHeaderGuidesAreLinkedOnceAndReuseAnExistingFeed() = fixture { store, ref ->
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val name = "iptv-playlist-guide-${UUID.randomUUID()}.db"
+        val alias = "nuvio.iptv.playlist.guide.$name"
+        val header = "#EXTM3U url-tvg=\"https://guides.invalid/one.xml.gz,https://user:pw@guides.invalid/bad.xml\" x-tvg-url=\"https://guides.invalid/two.xml\"\n"
+        val client = IptvMetadataClient.newClient().newBuilder().addInterceptor { chain ->
+            Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("Fixture")
+                .body((header + valid.removePrefix("#EXTM3U\n")).toResponseBody("text/plain".toMediaType())).build()
+        }.build()
+        try {
+            IptvGuideStore(context, name, EnvelopeIptvSecretBox(AndroidIptvSecretBox(alias))).use { guides ->
+                val existing = guides.createFeed(1, "Mine", "https://guides.invalid/two.xml")
+                val repository = IptvPlaylistRepository(store, IptvMetadataClient(client), xtreamGuides = IptvXtreamGuides(store, guides))
+                val first = repository.refresh(ref) as IptvPlaylistRefresh.Catalogue
+                assertEquals(RefreshDecision.PUBLISH, first.decision)
+                assertEquals(2, first.guides.size)
+                assertEquals(existing, first.guides[1])
+                assertEquals("https://guides.invalid/one.xml.gz", guides.endpoint(first.guides[0]))
+                assertEquals(first.guides.map { it.feedId }, store.guideAssociations(ref).feedIds)
+                val second = repository.refresh(ref) as IptvPlaylistRefresh.Catalogue
+                assertEquals(first.guides, second.guides)
+                assertEquals(2, guides.feeds(1).size)
+                assertEquals(first.guides.map { it.feedId }, store.guideAssociations(ref).feedIds)
+            }
+        } finally {
+            context.deleteDatabase(name)
+            KeyStore.getInstance("AndroidKeyStore").apply { load(null); deleteEntry(alias) }
+        }
+    }
+
     private fun fixture(block: suspend (IptvCatalogueStore, IptvSourceRef) -> Unit) = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val id = UUID.randomUUID().toString()
