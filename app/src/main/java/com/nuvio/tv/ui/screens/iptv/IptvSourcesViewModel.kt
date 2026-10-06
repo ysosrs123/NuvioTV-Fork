@@ -38,11 +38,13 @@ class IptvSourcesViewModel @Inject constructor(
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val catalogue: IptvCatalogueStore,
     private val guides: IptvGuideStore, private val access: IptvProfileAccess, profiles: ProfileManager,
-    private val refresher: IptvRefreshCoordinator) : ViewModel() {
+    private val refresher: IptvRefreshCoordinator,
+    private val liveLaunch: IptvLiveLaunch) : ViewModel() {
     private val mutable = MutableStateFlow(IptvSourcesState())
     val state = mutable.asStateFlow()
     private var session: IptvProfileAccess.Session? = null
     private var operation: Job? = null
+    private var statusReload: Job? = null
     private val xtreamGuides = IptvXtreamGuides(catalogue, guides)
     val localGuides get() = refresher.localGuides
     init {
@@ -53,7 +55,7 @@ class IptvSourcesViewModel @Inject constructor(
                 val changed = statuses.any { (key, value) -> previous[key]?.phase != value.phase && value.phase in RELOAD_PHASES }
                 previous = statuses
                 val current = session
-                if (changed && current != null && operation?.isActive != true) operation = viewModelScope.launch {
+                if (changed && current != null && statusReload?.isActive != true) statusReload = viewModelScope.launch {
                     runCatching { reload(current) }.onFailure { if (it is CancellationException) throw it }
                 }
             }
@@ -208,6 +210,7 @@ class IptvSourcesViewModel @Inject constructor(
         if (session === this) mutable.update { it.copy(message = R.string.iptv_guide_removed) }
         reload(this)
     }
+    fun watch(source: IptvSource) { liveLaunch.source.value = source.ref }
     fun refresh(source: IptvSource) { session?.let { refresher.refresh(it, source) } }
     fun refresh(feed: IptvGuideFeed) { session?.let { refresher.refresh(it, feed) } }
     private companion object {

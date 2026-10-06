@@ -57,13 +57,12 @@ internal const val SLOT = GuideGridWindow.SLOT_MILLIS
 private const val PAGE_ROWS = 8
 
 @Composable
-internal fun GuideGrid(state: IptvLiveState, now: Long, cursor: Long, viewStart: Long, rowFocus: MutableMap<String, FocusRequester>,
+internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long, cursor: Long, viewStart: Long, rowFocus: MutableMap<String, FocusRequester>,
     heading: String, modifier: Modifier, onCursor: (Long, Long) -> Unit, onRail: () -> Unit, onFocus: (IptvListedChannel) -> Unit,
     onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onNearEnd: () -> Unit) {
     BoxWithConstraints(modifier.iptvPanel().padding(horizontal = 12.dp, vertical = 10.dp)) {
         val stripWidth = maxWidth - ChannelColumn
         val visibleMillis = (stripWidth.value / MinuteWidth.value * MINUTE_MILLIS).toLong().coerceAtLeast(SLOT)
-        val listState = rememberGuideListState(state)
         val scope = rememberCoroutineScope()
         fun page(index: Int, delta: Int) {
             val target = (index + delta).coerceIn(0, state.channels.lastIndex)
@@ -102,10 +101,6 @@ internal fun GuideGrid(state: IptvLiveState, now: Long, cursor: Long, viewStart:
         }
     }
 }
-
-@Composable
-private fun rememberGuideListState(state: IptvLiveState): LazyListState =
-    remember(state.source, state.category, state.favourites) { LazyListState() }
 
 @Composable
 private fun rememberPivotSpec(): BringIntoViewSpec {
@@ -197,6 +192,7 @@ private fun GuideRow(row: IptvListedChannel, grid: GuideGridRow?, index: Int, no
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocus(row) }
         .onPreviewKeyEvent { event ->
             val native = event.nativeKeyEvent
+            if (native.action == AndroidKeyEvent.ACTION_DOWN && native.repeatCount == 0 && isSelect(native.keyCode)) longPressed = false
             if (longPress.handle(native, ::isSelect) { longPressed = true; onMenu(row) }) {
                 if (native.action == AndroidKeyEvent.ACTION_UP) longPressed = false
                 return@onPreviewKeyEvent true

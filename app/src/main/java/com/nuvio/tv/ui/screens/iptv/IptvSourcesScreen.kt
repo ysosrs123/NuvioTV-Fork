@@ -149,7 +149,7 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
         val index = state.sources.indexOf(source)
         val running = state.refresh[IptvRefreshCoordinator.key(source.ref)]?.running == true
         OptionsDialog(source.label, kindLabel(source.kind), onDismiss = { sourceMenu = null }) {
-            Option(stringResource(R.string.iptv_live_watch), Icons.Filled.LiveTv, enabled = source.playbackEligible) { sourceMenu = null; onLive() }
+            Option(stringResource(R.string.iptv_live_watch), Icons.Filled.LiveTv, enabled = source.playbackEligible) { sourceMenu = null; viewModel.watch(source); onLive() }
             Option(stringResource(R.string.iptv_setup_refresh), Icons.Filled.Refresh, enabled = !running) { sourceMenu = null; viewModel.refresh(source) }
             Option(stringResource(R.string.iptv_choose_guides), Icons.Filled.Schedule, enabled = state.selected != source.ref) { sourceMenu = null; viewModel.select(source.ref) }
             Option(stringResource(R.string.iptv_setup_edit), Icons.Filled.Edit) { sourceMenu = null; viewModel.edit(source) }
@@ -162,14 +162,14 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
         val automatic = feed.ref.feedId in state.automatic
         val running = state.refresh[IptvRefreshCoordinator.key(feed.ref)]?.running == true
         OptionsDialog(feed.label, stringResource(if (automatic) R.string.iptv_guide_provider else R.string.iptv_guide_xmltv), onDismiss = { feedMenu = null }) {
-            if (state.selected != null) Option(stringResource(if (linked) R.string.iptv_guide_unlink else R.string.iptv_guide_link),
+            if (state.selected != null && !automatic) Option(stringResource(if (linked) R.string.iptv_guide_unlink else R.string.iptv_guide_link),
                 if (linked) Icons.Filled.RadioButtonUnchecked else Icons.Filled.CheckCircle) { feedMenu = null; viewModel.link(feed) }
             if (linked && state.linkedOrder.indexOf(feed.ref.feedId) > 0) Option(stringResource(R.string.iptv_guide_move_up), Icons.Filled.KeyboardArrowUp) {
                 feedMenu = null; viewModel.moveGuideUp(feed)
             }
             Option(stringResource(R.string.iptv_setup_refresh), Icons.Filled.Refresh, enabled = !running) { feedMenu = null; viewModel.refresh(feed) }
             if (!automatic) Option(stringResource(R.string.iptv_setup_edit), Icons.Filled.Edit) { feedMenu = null; viewModel.edit(feed) }
-            Option(stringResource(R.string.iptv_guide_remove), Icons.Filled.Delete) { feedMenu = null; confirmFeed = feed }
+            if (!automatic) Option(stringResource(R.string.iptv_guide_remove), Icons.Filled.Delete) { feedMenu = null; confirmFeed = feed }
         }
     }
     confirmSource?.let { source ->

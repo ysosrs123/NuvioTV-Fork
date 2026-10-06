@@ -139,8 +139,36 @@ through callers/callees once and not independently re-checked.
     use period or absolute capture time.
 
 
+## Review of the Live TV redesign (1b7952c..ccf3931)
+
+Independent read-only review; status after the follow-up commit.
+
+1. FIXED. Full screen closed on every zap, number entry, last channel, start over and
+   catch-up end (player briefly null while tuning). Now closes only when nothing is
+   tuning or playing.
+2. FIXED. Search results took focus from the search field.
+3. FIXED. Back with the category rail open left Live TV; it now closes the rail.
+4. FIXED. Catch-up skips and reconnects restarted the programme: catch-up streams now
+   allow ranged requests with a real length (seekable TS), and reconnects keep the
+   position outside live.
+5. FIXED. Returning from full screen lost focus and scroll; the guide list state is
+   held by the screen and scrolls to the row before focusing.
+6. FIXED. Background reloads cut the list to 200 rows; they now reload up to the
+   loaded length (at most 1,000 rows).
+7. FIXED. The first OK after a long-press menu was swallowed.
+8. FIXED. Hiding a category or choosing the current one in the rail lost focus.
+9. FIXED. Watch from a source's options now opens that source.
+10. FIXED. Sources actions were ignored during a status-triggered reload.
+11. OPEN (mitigated). Automatic provider guides are re-linked on refresh, so they can
+    no longer be unlinked or removed on their own; they go with their source.
+    Header-linked M3U guides can still be removed but come back on the next refresh.
+12. FIXED. The Xtream short guide is fetched again when nothing covers the current
+    time.
+13. FIXED: Automatic shows its check when no track is overridden. OPEN: number entry
+    reaches only loaded channels; the short guide uses `java.util.Base64` (API 26)
+    like other code in the app.
+
 ## After the review
 
-Work after 1b7952c (chunked save, removal, guide import changes, short guide, catch-up,
-Live TV and Sources redesign) has not had an independent review yet; it is host-tested
-and CI-built only.
+Work after 1b7952c was reviewed once (above); later commits are host-tested and
+CI-built only.

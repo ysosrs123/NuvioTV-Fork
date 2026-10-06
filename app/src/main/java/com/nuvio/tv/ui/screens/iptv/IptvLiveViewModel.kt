@@ -39,7 +39,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private val screensaver: com.nuvio.tv.core.player.ScreensaverController,
     private val refresher: IptvRefreshCoordinator,
     private val playerSettings: com.nuvio.tv.data.local.PlayerSettingsDataStore,
-    private val shortGuides: IptvShortGuideRepository) : ViewModel() {
+    private val shortGuides: IptvShortGuideRepository,
+    private val liveLaunch: IptvLiveLaunch) : ViewModel() {
     private val mutable = MutableStateFlow(IptvLiveState())
     val state = mutable.asStateFlow()
     private val owner = UUID.randomUUID().toString()
@@ -65,6 +66,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
 
     init {
         viewModelScope.launch { state.map { it.player != null }.distinctUntilChanged().collect(screensaver::setPlaybackActive) }
+        viewModelScope.launch { liveLaunch.source.collect { ref -> if (ref != null && session != null) { liveLaunch.source.value = null; showSource(ref) } } }
         viewModelScope.launch { playerSettings.controlLayoutSnapshot.collect { snapshot -> mutable.update { it.copy(controlLayout = snapshot.layout) } } }
         viewModelScope.launch {
             combine(profiles.activeProfileId, profiles.activeProfileReady, profiles.profileSelectionRevision) { id, ready, revision -> Triple(id, ready, revision) }
@@ -74,7 +76,11 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     mutable.value = IptvLiveState(controlLayout = mutable.value.controlLayout)
                     if (ready) {
                         val current = withContext(Dispatchers.IO) { access.open(id) }
-                        session = current; load(); refresher.refreshStale(current)
+                        session = current
+                        val requested = liveLaunch.source.value?.takeIf { it.profileId == current.profileId }
+                        liveLaunch.source.value = null
+                        if (requested != null) mutable.update { it.copy(source = requested) }
+                        load(); refresher.refreshStale(current)
                     }
                 }
         }
@@ -284,9 +290,17 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     excludedCategories = if (state.favourites || state.category != null) emptySet() else state.hiddenCategories.take(500).toSet())
                 val cursor = state.next?.takeIf { append && it.revision.ref == ref && it.query == query }
                 if (append && cursor == null) return@launch
-                val limit = if (background) state.channels.size.coerceIn(PAGE, 200) else PAGE
-                val page = if (ref == null) null else try { browse.page(ref, query, cursor, limit) }
-                    catch (_: IptvCatalogueChangedException) { if (append) return@launch else browse.page(ref, query, null, limit) }
+                val wanted = if (background && !append) state.channels.size.coerceIn(PAGE, BACKGROUND_ROWS) else PAGE
+                var page = if (ref == null) null else try { browse.page(ref, query, cursor, wanted.coerceAtMost(200)) }
+                    catch (_: IptvCatalogueChangedException) { if (append) return@launch else browse.page(ref, query, null, wanted.coerceAtMost(200)) }
+                var extra = emptyList<IptvListedChannel>()
+                while (ref != null && page != null && !append && page.channels.size + extra.size < wanted) {
+                    val more = page.catalogue.next ?: break
+                    val nextPage = try { browse.page(ref, query, more, (wanted - page.channels.size - extra.size).coerceAtMost(200)) }
+                        catch (_: IptvCatalogueChangedException) { break }
+                    extra = extra + nextPage.channels
+                    page = page.copy(catalogue = page.catalogue.copy(next = nextPage.catalogue.next))
+                }
                 val categories = if (ref == null) emptyList() else if (append) state.categories
                     else withContext(Dispatchers.IO) { access.use(current) { catalogue.categories(ref) } }
                 if (!append && state.category != null && state.search.isBlank() && categories.none { it.name == state.category }) {
@@ -297,9 +311,10 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 }
                 val now = System.currentTimeMillis()
                 val window = state.window?.takeIf { append || now <= it.startMillis + WINDOW_SHIFT } ?: guideWindow(now)
-                val rows = page?.let { browse.guideRows(current.profileId, it.channels, window) }.orEmpty()
+                val loaded = page?.channels.orEmpty() + extra
+                val rows = if (page == null) emptyMap() else loaded.chunked(200).fold(emptyMap<String, GuideGridRow>()) { acc, part -> acc + browse.guideRows(current.profileId, part, window) }
                 if (session === current && request == pageVersion) {
-                    val channels = if (append) state.channels + page?.channels.orEmpty() else page?.channels.orEmpty()
+                    val channels = if (append) state.channels + loaded else loaded
                     val focusedId = mutable.value.focused?.item?.channel?.id
                     val focused = channels.firstOrNull { it.item.channel.id == focusedId }
                         ?: channels.firstOrNull { it.item.channel.id == state.playingId } ?: channels.firstOrNull()
@@ -320,7 +335,9 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val state = mutable.value
         val ref = state.source ?: return
         val id = row.item.channel.id
-        if (state.guide[id]?.cells?.any { it is GuideProgrammeCell } == true || id in state.shortGuide) return
+        val now = System.currentTimeMillis()
+        if (state.guide[id]?.cells?.any { it is GuideProgrammeCell } == true ||
+            state.shortGuide[id]?.any { it.start.epochMillis <= now && (it.stop?.epochMillis ?: Long.MAX_VALUE) > now } == true) return
         if (state.sources.firstOrNull { it.ref == ref }?.kind != IptvSourceKind.XTREAM) return
         shortGuideJob?.cancel()
         shortGuideJob = viewModelScope.launch {
@@ -410,6 +427,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         const val WINDOW_SHIFT = 4 * 60 * 60 * 1000L
         const val CATCHUP_FALLBACK = 60 * 60 * 1000L
         const val SHORT_GUIDE_CACHE = 200
+        const val BACKGROUND_ROWS = 1_000
         const val FAVOURITES_KEY = "\u0000favourites"
         const val ALL_KEY = "\u0000all"
     }

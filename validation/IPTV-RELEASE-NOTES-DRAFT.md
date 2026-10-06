@@ -195,6 +195,9 @@ Screens and app
   default; these are estimates, not measured device limits.
 - No DRM, encrypted HLS, fMP4 or separate-audio
   support has been validated.
+- Number entry reaches only channels already loaded in the guide (pages of 60).
+- Automatic provider guides cannot be unlinked or removed on their own; guides named
+  in an M3U header come back on the next refresh if removed.
 - No timeshift, recording or multiview yet. Account groups have no UI yet. Stalker
   portals have no catch-up. Xtream catch-up assumes the provider uses the device's
   time zone.

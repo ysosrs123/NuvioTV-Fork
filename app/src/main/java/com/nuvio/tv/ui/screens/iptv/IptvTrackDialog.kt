@@ -42,7 +42,7 @@ internal fun IptvTrackDialog(player: ExoPlayer, onDismiss: () -> Unit) {
         Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).focusRequester(first), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             for (type in listOf(C.TRACK_TYPE_AUDIO, C.TRACK_TYPE_TEXT)) {
                 val groups = tracks.groups.filter { it.type == type }
-                val overridden = groups.any { group -> (0 until group.length).any(group::isTrackSelected) }
+                val overridden = player.trackSelectionParameters.overrides.values.any { it.type == type }
                 SectionLabel(stringResource(if (type == C.TRACK_TYPE_AUDIO) R.string.iptv_live_audio else R.string.iptv_live_subtitles))
                 SettingsActionRow(title = stringResource(R.string.iptv_live_tracks_auto), subtitle = null, trailingIcon = null,
                     titleTrailingIcon = Icons.Filled.Check.takeIf { !overridden && !player.trackSelectionParameters.disabledTrackTypes.contains(type) },

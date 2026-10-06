@@ -44,7 +44,9 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         .retryOnConnectionFailure(false).followRedirects(true).followSslRedirects(true).build()
     private var released = false
     private var attempts = 0
-    private val reconnect = Runnable { if (!released) { player.seekToDefaultPosition(); player.prepare(); player.playWhenReady = true } }
+    private val reconnect = Runnable {
+        if (!released) { if (isLive) player.seekToDefaultPosition() else player.seekTo(player.currentPosition); player.prepare(); player.playWhenReady = true }
+    }
     private val stall = Runnable { if (!released && player.playbackState == Player.STATE_BUFFERING) retry() }
     private var releaseFailed = false
     val player: ExoPlayer
@@ -60,7 +62,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 if (network) telemetry.transferred(count)
             }
         })
-        val sources = DataSource.Factory { FencedSource(upstream.createDataSource(), fence, Uri.parse(locator)) }
+        val sources = DataSource.Factory { FencedSource(upstream.createDataSource(), fence, Uri.parse(locator), !isLive) }
         val renderers = DefaultRenderersFactory(context).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
         player = ExoPlayer.Builder(context, renderers)
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 8000, 500, 1000)
@@ -137,17 +139,18 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         if (closed) client.connectionPool.evictAll()
         return closed
     }
-    private class FencedSource(private val delegate: DataSource, private val fence: LiveRequestFence, private val entryPoint: Uri) : DataSource {
+    private class FencedSource(private val delegate: DataSource, private val fence: LiveRequestFence, private val entryPoint: Uri,
+        private val seekable: Boolean) : DataSource {
         private var ticket: LiveRequestFence.Ticket? = null
         override fun open(dataSpec: DataSpec): Long {
             check(ticket == null)
 
             val entry = dataSpec.uri == entryPoint
-            if (entry && dataSpec.position != 0L) throw IOException("Live entry point cannot be range-probed")
+            if (entry && !seekable && dataSpec.position != 0L) throw IOException("Live entry point cannot be range-probed")
             ticket = fence.enter() ?: throw IOException("Live session has closed")
             return try {
                 val length = delegate.open(dataSpec)
-                if (entry && dataSpec.length == C.LENGTH_UNSET.toLong()) C.LENGTH_UNSET.toLong() else length
+                if (entry && !seekable && dataSpec.length == C.LENGTH_UNSET.toLong()) C.LENGTH_UNSET.toLong() else length
             } catch (failure: Exception) {
                 try { close() } catch (_: Exception) {}
                 throw failure

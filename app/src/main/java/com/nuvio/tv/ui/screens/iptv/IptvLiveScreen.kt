@@ -79,6 +79,7 @@ import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
 import com.nuvio.tv.ui.v2.components.GlassRole
 import com.nuvio.tv.ui.v2.components.NuvioActionPill
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiveViewModel = hiltViewModel()) {
@@ -96,6 +97,8 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
     var cursor by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var viewStart by remember { mutableLongStateOf(Math.floorDiv(System.currentTimeMillis(), SLOT) * SLOT) }
     val rowFocus = remember(state.source, state.category, state.favourites) { mutableMapOf<String, FocusRequester>() }
+    val guideList = remember(state.source, state.category, state.favourites, state.search) { androidx.compose.foundation.lazy.LazyListState() }
+    val scope = rememberCoroutineScope()
     val railFocus = remember { FocusRequester() }
     val emptyFocus = remember { FocusRequester() }
     DisposableEffect(lifecycle, viewModel) {
@@ -107,24 +110,29 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
         viewModel.foreground(lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
         onDispose { lifecycle.removeObserver(observer); viewModel.foreground(false) }
     }
-    LaunchedEffect(state.player) { if (state.player == null) fullscreen = false }
+    LaunchedEffect(state.player, state.tuning) { if (state.player == null && !state.tuning) fullscreen = false }
     LaunchedEffect(state.message) { if (state.message != null) { delay(6_000); viewModel.clearMessage() } }
+    suspend fun focusGridNow() {
+        val id = state.focused?.item?.channel?.id ?: state.channels.firstOrNull()?.item?.channel?.id ?: return
+        val index = state.channels.indexOfFirst { it.item.channel.id == id }
+        if (index >= 0 && guideList.layoutInfo.visibleItemsInfo.none { it.index == index }) guideList.scrollToItem((index - 2).coerceAtLeast(0))
+        repeat(2) { withFrameNanos { } }
+        rowFocus[id]?.let { runCatching { it.requestFocus() } }
+    }
+    fun focusGrid() { scope.launch { focusGridNow() } }
     BackHandler {
         when {
             fullscreen -> fullscreen = false
             searching -> { searching = false; viewModel.search("") }
+            railOpen -> { railOpen = false; focusGrid() }
             !railOpen && (state.channels.isNotEmpty() || state.search.isNotEmpty()) -> railOpen = true
             else -> onBack()
         }
     }
-    fun focusGrid() {
-        val id = state.focused?.item?.channel?.id ?: state.channels.firstOrNull()?.item?.channel?.id
-        id?.let { rowFocus[it] }?.let { runCatching { it.requestFocus() } }
-    }
     LaunchedEffect(railOpen) { if (railOpen) { withFrameNanos { }; runCatching { railFocus.requestFocus() } } }
     LaunchedEffect(searching) { if (searching) { withFrameNanos { }; runCatching { searchFocus.requestFocus() } } }
     LaunchedEffect(state.source, state.category, state.favourites, state.channels.firstOrNull()?.item?.channel?.id, fullscreen) {
-        if (!fullscreen && !railOpen && state.channels.isNotEmpty()) { withFrameNanos { }; focusGrid() }
+        if (!fullscreen && !railOpen && !searching && state.channels.isNotEmpty()) { withFrameNanos { }; focusGridNow() }
     }
     val empty = emptyState(state)
     LaunchedEffect(empty) { if (empty != null && !railOpen && !searching) { withFrameNanos { }; runCatching { emptyFocus.requestFocus() } } }
@@ -160,7 +168,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
                     EmptyPanel(empty, state, emptyFocus, Modifier.fillMaxWidth().weight(1f), onSources = onSources,
                         onRefresh = viewModel::refreshSource, onAll = { viewModel.showCategory(null) }, onRail = { railOpen = true })
                 } else {
-                    GuideGrid(state, now, cursor, viewStart, rowFocus, heading(state), Modifier.fillMaxWidth().weight(1f),
+                    GuideGrid(state, guideList, now, cursor, viewStart, rowFocus, heading(state), Modifier.fillMaxWidth().weight(1f),
                         onCursor = { time, start -> cursor = time; viewStart = start },
                         onRail = { railOpen = true },
                         onFocus = viewModel::focus,
@@ -181,9 +189,9 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
             AnimatedVisibility(railOpen, Modifier.align(Alignment.CenterStart),
                 enter = fadeIn() + slideInHorizontally { -it / 3 }, exit = fadeOut() + slideOutHorizontally { -it / 3 }) {
                 CategoryRail(state, railFocus, Modifier.padding(start = 24.dp, top = 20.dp, bottom = 20.dp).width(340.dp).fillMaxHeight(),
-                    onFavourites = { viewModel.showFavourites(); railOpen = false },
-                    onCategory = { viewModel.showCategory(it); railOpen = false },
-                    onSource = { viewModel.showSource(it); railOpen = false },
+                    onFavourites = { viewModel.showFavourites(); railOpen = false; focusGrid() },
+                    onCategory = { viewModel.showCategory(it); railOpen = false; focusGrid() },
+                    onSource = { viewModel.showSource(it); railOpen = false; focusGrid() },
                     onSources = { railOpen = false; onSources() },
                     onSearch = { railOpen = false; searching = true },
                     onHide = viewModel::toggleHidden,
@@ -397,7 +405,7 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
             val hidden = state.categories.filter { it.name in state.hiddenCategories }
             if (hidden.isNotEmpty()) {
                 item { SectionLabel(stringResource(R.string.iptv_live_hidden_categories)) }
-                items(hidden, key = { "hidden-${it.name}" }) { category ->
+                items(hidden, key = { "category-${it.name}" }) { category ->
                     RailItem(category.name.ifEmpty { stringResource(R.string.iptv_live_uncategorised) }, category.channels,
                         !state.favourites && state.category == category.name, Modifier, { onCategory(category.name) }, onHold = { onHide(category.name) }, dim = true)
                 }
