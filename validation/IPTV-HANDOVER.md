@@ -4,7 +4,7 @@ Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
 Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built
 (`def2b19`), not device-tested; device reruns are listed under "Next steps".
 Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
-[code review](IPTV-CODE-REVIEW-20261006.md),
+[code review](IPTV-CODE-REVIEW-20261006.md), [reference app notes](IPTV-UX-REFERENCE.md),
 [player validation report](IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json).
 
 ## Status
