@@ -138,7 +138,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
     LaunchedEffect(empty) { if (empty != null && !railOpen && !searching) { withFrameNanos { }; runCatching { emptyFocus.requestFocus() } } }
 
     if (fullscreen) {
-        val playingRow = state.channels.firstOrNull { it.item.channel.id == state.playingId }
+        val playingRow = (state.channels.firstOrNull { it.item.channel.id == state.playingId } ?: state.playingRow?.takeIf { it.item.channel.id == state.playingId })
         val current = playingRow?.let { liveProgramme(state, it.item.channel.id, now) }
         val v2 = LocalV2Appearance.current != null
         FullscreenLive(state, now, showHud, onZap = viewModel::zap, onMenu = { playingRow?.let { menuFor = it } },

@@ -22,7 +22,7 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
     val focused: IptvListedChannel? = null, val playingId: String? = null, val previousId: String? = null,
     val recent: List<String> = emptyList(),
     val playback: IptvLivePlayback? = null,
-    val player: ExoPlayer? = null, val playingTitle: String? = null, val playing: Boolean = false, val reconnecting: Boolean = false, val catchup: GuideProgramme? = null,
+    val player: ExoPlayer? = null, val playingTitle: String? = null, val playing: Boolean = false, val reconnecting: Boolean = false, val playingRow: IptvListedChannel? = null, val catchup: GuideProgramme? = null,
     val loading: Boolean = false, val loaded: Boolean = false, val tuning: Boolean = false, val message: Int? = null, val updating: Int? = null,
     val guidePicker: IptvGuidePicker? = null, val refresh: Map<String, IptvRefreshStatus> = emptyMap(),
     val controlLayout: com.nuvio.tv.data.local.PlayerControlLayout? = null, val shortGuide: Map<String, List<GuideProgramme>> = emptyMap(),
@@ -129,7 +129,23 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         current.channels.firstOrNull { it.item.channel.id == current.previousId }?.let { mutable.update { state -> state.copy(focused = it) }; watch(it) }
     }
     fun watchNumber(number: Int) {
-        mutable.value.channels.getOrNull(number - 1)?.let { mutable.update { state -> state.copy(focused = it) }; watch(it) }
+        val state = mutable.value
+        state.channels.getOrNull(number - 1)?.let { mutable.update { current -> current.copy(focused = it) }; watch(it); return }
+        val ref = state.source ?: return
+        val next = state.next ?: return
+        if (number < 1 || number > MAX_NUMBER) return
+        viewModelScope.launch {
+            val row = runCatching { browse.page(ref, next.query, next.copy(offset = number - 1), 1).channels.firstOrNull() }
+                .getOrElse { if (it is CancellationException) throw it; null }
+            if (row == null) mutable.update { it.copy(message = R.string.iptv_live_number_missing) }
+            else if (mutable.value.source == ref) {
+                if (mutable.value.guide[row.item.channel.id] == null) mutable.value.window?.let { window ->
+                    val rows = runCatching { browse.guideRows(ref.profileId, listOf(row), window) }.getOrElse { if (it is CancellationException) throw it; emptyMap() }
+                    mutable.update { it.copy(guide = it.guide + rows) }
+                }
+                watch(row)
+            }
+        }
     }
     fun zap(delta: Int) {
         val current = mutable.value
@@ -355,7 +371,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         loadShortGuide(row)
         val request = ++tuneVersion
         tuneJob = viewModelScope.launch {
-            mutable.update { it.copy(tuning = true, playback = null, player = null, playingTitle = null, playing = false, reconnecting = false, catchup = catchup, message = null, playingId = row.item.channel.id,
+            mutable.update { it.copy(tuning = true, playback = null, player = null, playingTitle = null, playing = false, reconnecting = false, catchup = catchup, message = null, playingId = row.item.channel.id, playingRow = row,
                 previousId = it.playingId?.takeIf { id -> id != row.item.channel.id } ?: it.previousId,
                 recent = (listOf(row.item.channel.id) + it.recent.filter { id -> id != row.item.channel.id }).take(RECENT)) }
             try {
@@ -428,6 +444,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         const val CATCHUP_FALLBACK = 60 * 60 * 1000L
         const val SHORT_GUIDE_CACHE = 200
         const val BACKGROUND_ROWS = 1_000
+        const val MAX_NUMBER = 60_000
         const val FAVOURITES_KEY = "\u0000favourites"
         const val ALL_KEY = "\u0000all"
     }

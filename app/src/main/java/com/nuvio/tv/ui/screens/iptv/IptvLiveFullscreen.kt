@@ -170,7 +170,7 @@ private fun NumberEntry(digits: String, state: IptvLiveState, modifier: Modifier
     Column(modifier.iptvPanel(RoundedCornerShape(16.dp), GlassRole.HUD).padding(horizontal = 22.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.End) {
         Text(digits, style = MaterialTheme.typography.displaySmall, color = NuvioTheme.colors.TextPrimary, fontWeight = FontWeight.SemiBold)
-        Text(target?.let(::channelName) ?: stringResource(R.string.iptv_live_number_missing), style = MaterialTheme.typography.labelMedium,
+        if (target != null || state.next == null) Text(target?.let(::channelName) ?: stringResource(R.string.iptv_live_number_missing), style = MaterialTheme.typography.labelMedium,
             color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 280.dp))
     }
 }
@@ -178,7 +178,7 @@ private fun NumberEntry(digits: String, state: IptvLiveState, modifier: Modifier
 @Composable
 private fun Banner(state: IptvLiveState, now: Long) {
     val index = state.channels.indexOfFirst { it.item.channel.id == state.playingId }
-    val row = state.channels.getOrNull(index)
+    val row = state.channels.getOrNull(index) ?: state.playingRow?.takeIf { it.item.channel.id == state.playingId }
     val catchup = state.catchup
     val programme = catchup ?: row?.let { liveProgramme(state, it.item.channel.id, now) }
     val following = if (catchup == null) row?.let { nextProgramme(state, it.item.channel.id, programme, now) } else null

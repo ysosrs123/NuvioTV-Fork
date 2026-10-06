@@ -164,8 +164,8 @@ Independent read-only review; status after the follow-up commit.
     Header-linked M3U guides can still be removed but come back on the next refresh.
 12. FIXED. The Xtream short guide is fetched again when nothing covers the current
     time.
-13. FIXED: Automatic shows its check when no track is overridden. OPEN: number entry
-    reaches only loaded channels; the short guide uses `java.util.Base64` (API 26)
+13. FIXED: Automatic shows its check when no track is overridden. FIXED: number entry
+    reaches channels beyond the loaded pages. OPEN: the short guide uses `java.util.Base64` (API 26)
     like other code in the app.
 
 ## After the review
