@@ -170,7 +170,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
                     InfoPanel(state, now, cursor, Modifier.weight(1f).fillMaxHeight())
                     Preview(state, Modifier.fillMaxHeight().aspectRatio(16f / 9f))
                 }
-                if (searching) SearchField(state.search, searchFocus, onChange = viewModel::search, onDone = { focusGrid() })
+                if (searching) SearchField(state.search, state.airingSearch, searchFocus, onChange = viewModel::search, onDone = { focusGrid() })
                 if (empty != null) {
                     EmptyPanel(empty, state, emptyFocus, Modifier.fillMaxWidth().weight(1f), onSources = onSources,
                         onRefresh = viewModel::refreshSource, onAll = { viewModel.showCategory(null) }, onRail = { railOpen = true })
@@ -200,7 +200,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
                     onCategory = { viewModel.showCategory(it); railOpen = false; focusGrid() },
                     onSource = { viewModel.showSource(it); railOpen = false; focusGrid() },
                     onSources = { railOpen = false; onSources() },
-                    onSearch = { railOpen = false; searching = true },
+                    onSearch = { airing -> viewModel.searchMode(airing); railOpen = false; searching = true },
                     onHide = viewModel::toggleHidden,
                     onClose = { railOpen = false; focusGrid() })
             }
@@ -250,7 +250,7 @@ private fun emptyState(state: IptvLiveState): EmptyKind? {
 
 @Composable
 private fun heading(state: IptvLiveState): String {
-    if (state.search.isNotBlank()) return stringResource(R.string.iptv_live_results, state.search.trim())
+    if (state.search.isNotBlank()) return stringResource(if (state.airingSearch) R.string.iptv_live_airing_results else R.string.iptv_live_results, state.search.trim())
     val name = when {
         state.favourites -> stringResource(R.string.iptv_live_favourites)
         state.category != null -> state.category.ifEmpty { stringResource(R.string.iptv_live_uncategorised) }
@@ -390,7 +390,7 @@ private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, modifier: M
 
 @Composable
 private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: Modifier, onFavourites: () -> Unit, onCategory: (String?) -> Unit,
-    onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit, onSources: () -> Unit, onSearch: () -> Unit, onHide: (String) -> Unit, onClose: () -> Unit) {
+    onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit, onSources: () -> Unit, onSearch: (Boolean) -> Unit, onHide: (String) -> Unit, onClose: () -> Unit) {
     Column(modifier.iptvPanel(role = GlassRole.NAVIGATION).padding(vertical = 14.dp, horizontal = 10.dp)
         .onPreviewKeyEvent { event ->
             val native = event.nativeKeyEvent
@@ -399,7 +399,8 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
         Text(stringResource(R.string.iptv_live_title), style = MaterialTheme.typography.titleLarge, color = NuvioTheme.colors.TextPrimary,
             fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 10.dp, bottom = 8.dp))
         LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            item { RailItem(stringResource(R.string.iptv_live_search), null, state.search.isNotBlank(), Modifier, onSearch, Icons.Filled.Search) }
+            item { RailItem(stringResource(R.string.iptv_live_search), null, state.search.isNotBlank() && !state.airingSearch, Modifier, { onSearch(false) }, Icons.Filled.Search) }
+            item { RailItem(stringResource(R.string.iptv_live_search_airing), null, state.search.isNotBlank() && state.airingSearch, Modifier, { onSearch(true) }, Icons.Filled.Schedule) }
             item { RailItem(stringResource(R.string.iptv_live_favourites), null, state.favourites, Modifier.focusRequester(first), onFavourites, Icons.Filled.Star) }
             item { RailItem(stringResource(R.string.iptv_live_all), state.categories.filter { it.name !in state.hiddenCategories }.sumOf { it.channels }.takeIf { it > 0 }, !state.favourites && state.category == null,
                 Modifier, { onCategory(null) }, Icons.AutoMirrored.Filled.List) }
@@ -558,7 +559,7 @@ private fun GuidePickerDialog(picker: IptvGuidePicker, onAutomatic: () -> Unit, 
 }
 
 @Composable
-private fun SearchField(value: String, focus: FocusRequester, onChange: (String) -> Unit, onDone: () -> Unit) {
+private fun SearchField(value: String, airing: Boolean, focus: FocusRequester, onChange: (String) -> Unit, onDone: () -> Unit) {
     var focused by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(14.dp)
     val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
@@ -572,7 +573,7 @@ private fun SearchField(value: String, focus: FocusRequester, onChange: (String)
             keyboardActions = androidx.compose.foundation.text.KeyboardActions(onSearch = { keyboard?.hide(); onDone() }),
             cursorBrush = SolidColor(NuvioTheme.colors.TextPrimary),
             decorationBox = { inner ->
-                Box { if (value.isEmpty()) Text(stringResource(R.string.iptv_live_search_hint), color = NuvioTheme.colors.TextTertiary); inner() }
+                Box { if (value.isEmpty()) Text(stringResource(if (airing) R.string.iptv_live_search_airing_hint else R.string.iptv_live_search_hint), color = NuvioTheme.colors.TextTertiary); inner() }
             },
             modifier = Modifier.weight(1f).focusRequester(focus).onFocusChanged { focused = it.isFocused }
                 .onPreviewKeyEvent { event ->

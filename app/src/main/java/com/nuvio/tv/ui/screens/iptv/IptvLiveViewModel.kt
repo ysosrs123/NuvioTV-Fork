@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.*
 
 data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source: IptvSourceRef? = null,
     val channels: List<IptvListedChannel> = emptyList(), val next: IptvBrowseCursor? = null,
-    val categories: List<IptvCategory> = emptyList(), val category: String? = null, val favourites: Boolean = false, val search: String = "",
+    val categories: List<IptvCategory> = emptyList(), val category: String? = null, val favourites: Boolean = false, val search: String = "", val airingSearch: Boolean = false,
     val guide: Map<String, GuideGridRow> = emptyMap(), val window: GuideGridWindow? = null,
     val focused: IptvListedChannel? = null, val playingId: String? = null, val previousId: String? = null,
     val recent: List<String> = emptyList(),
@@ -265,6 +265,11 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
         }
     }
+    fun searchMode(airing: Boolean) {
+        if (airing == mutable.value.airingSearch) return
+        mutable.update { it.copy(airingSearch = airing) }
+        if (mutable.value.search.isNotBlank()) load()
+    }
     fun search(text: String) {
         val value = text.take(256)
         if (value == mutable.value.search) return
@@ -314,7 +319,10 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 val cursor = state.next?.takeIf { append && it.revision.ref == ref && it.query == query }
                 if (append && cursor == null) return@launch
                 val wanted = if (background && !append) state.channels.size.coerceIn(PAGE, BACKGROUND_ROWS) else PAGE
-                var page = if (ref == null) null else try { browse.page(ref, query, cursor, wanted.coerceAtMost(200)) }
+                val airing = if (ref != null && !append && state.airingSearch && query.search.isNotBlank())
+                    browse.searchAiring(ref, query.search, System.currentTimeMillis(), AIRING_RESULTS,
+                        state.hiddenCategories.take(500).toSet()) else null
+                var page = if (ref == null || airing != null) null else try { browse.page(ref, query, cursor, wanted.coerceAtMost(200)) }
                     catch (_: IptvCatalogueChangedException) { if (append) return@launch else browse.page(ref, query, null, wanted.coerceAtMost(200)) }
                 var extra = emptyList<IptvListedChannel>()
                 while (ref != null && page != null && !append && page.channels.size + extra.size < wanted) {
@@ -334,8 +342,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 }
                 val now = System.currentTimeMillis()
                 val window = state.window?.takeIf { append || now <= it.startMillis + WINDOW_SHIFT } ?: guideWindow(now)
-                val loaded = page?.channels.orEmpty() + extra
-                val rows = if (page == null) emptyMap() else loaded.chunked(200).fold(emptyMap<String, GuideGridRow>()) { acc, part -> acc + browse.guideRows(current.profileId, part, window) }
+                val loaded = airing?.map { it.channel } ?: (page?.channels.orEmpty() + extra)
+                val rows = if (ref == null || loaded.isEmpty()) emptyMap() else loaded.chunked(200).fold(emptyMap<String, GuideGridRow>()) { acc, part -> acc + browse.guideRows(current.profileId, part, window) }
                 if (session === current && request == pageVersion) {
                     val channels = if (append) state.channels + loaded else loaded
                     val focusedId = mutable.value.focused?.item?.channel?.id
@@ -549,6 +557,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private companion object {
         const val PAGE = 60
         const val MAX_TILES = 4
+        const val AIRING_RESULTS = 120
         const val RECENT = 8
         const val WINDOW_SPAN = 12 * 60 * 60 * 1000L
         const val WINDOW_SHIFT = 4 * 60 * 60 * 1000L
