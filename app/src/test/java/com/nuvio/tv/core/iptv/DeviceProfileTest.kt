@@ -16,10 +16,15 @@ class DeviceProfileTest {
         assertEquals(4, iptvDeviceProfile(4 * gib, lowRamDevice = false, videoDecoderInstances = 0).maxTiles)
     }
 
+    @Test fun aSmallDecodeBudgetLimitsPictures() {
+        assertEquals(1, iptvDeviceProfile(4 * gib, false, 16, decodeBudget = multiviewPixelRate(360)).maxTiles)
+        assertEquals(4, iptvDeviceProfile(4 * gib, false, 16, decodeBudget = multiviewPixelRate(2160, 60)).maxTiles)
+    }
+
     @Test fun smallerPicturesAndBuffersOnSmallerDevices() {
         val two = iptvDeviceProfile(2 * gib - 100 * 1024 * 1024, lowRamDevice = false, videoDecoderInstances = null)
-        assertEquals(720, two.tileMaxHeight); assertEquals(4 * 1024 * 1024, two.tileBufferBytes); assertEquals(500, two.backgroundRows)
+        assertEquals(4 * 1024 * 1024, two.tileBufferBytes); assertEquals(500, two.backgroundRows)
         val four = iptvDeviceProfile(4 * gib, lowRamDevice = false, videoDecoderInstances = null)
-        assertEquals(540, four.tileMaxHeight); assertEquals(1_000, four.backgroundRows)
+        assertEquals(1_000, four.backgroundRows)
     }
 }

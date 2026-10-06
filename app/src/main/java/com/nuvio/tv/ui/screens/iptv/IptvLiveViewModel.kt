@@ -28,7 +28,9 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
     val controlLayout: com.nuvio.tv.data.local.PlayerControlLayout? = null, val shortGuide: Map<String, List<GuideProgramme>> = emptyMap(),
     val hiddenCategories: Set<String> = emptySet(), val multiview: List<IptvTile>? = null, val tileFocus: Int = 0,
     val recordings: List<IptvRecording> = emptyList(), val maxTiles: Int = 1,
-    val alarmPrompt: Boolean = false)
+    val alarmPrompt: Boolean = false, val multiviewLayout: MultiviewLayout = MultiviewLayout.GRID,
+    val multiviewQuality: MultiviewQuality = MultiviewQuality.AUTO, val mainTile: Int = 0, val panelHeight: Int = 1080,
+    val tileHeights: List<Int> = emptyList())
 
 data class IptvTile(val row: IptvListedChannel, val playback: IptvLivePlayback? = null, val player: ExoPlayer? = null,
     val playing: Boolean = false, val failure: Int? = null)
@@ -65,6 +67,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private val tileJobs = arrayOfNulls<Job>(MAX_TILES)
     private val tileVersions = LongArray(MAX_TILES)
     private var multiviewJob: Job? = null
+    private var tileSizes: List<Int> = emptyList()
     private var multiviewGeneration = 0L
     private var restored: IptvSourceRef? = null
     private val preferences = context.getSharedPreferences("iptv-live", Context.MODE_PRIVATE)
@@ -484,7 +487,11 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         if (device.maxTiles < 2 || tiles.isEmpty() || session == null || !foreground) return
         ++tuneVersion; tuneJob?.cancel()
         mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, reconnecting = false, catchup = null, tuning = false,
-            playingId = null, previousId = it.playingId ?: it.previousId, multiview = tiles.map { row -> IptvTile(row) }, tileFocus = 0) }
+            playingId = null, previousId = it.playingId ?: it.previousId, multiview = tiles.map { row -> IptvTile(row) }, tileFocus = 0, mainTile = 0,
+            panelHeight = AndroidDeviceProfile.panelHeight(context), tileHeights = emptyList(),
+            multiviewLayout = preferences.getString(LAYOUT_KEY, null)?.let { name -> MultiviewLayout.entries.firstOrNull { it.name == name } } ?: MultiviewLayout.GRID,
+            multiviewQuality = preferences.getString(QUALITY_KEY, null)?.let { name -> MultiviewQuality.entries.firstOrNull { it.name == name } } ?: MultiviewQuality.AUTO) }
+        tileSizes = emptyList()
         val previous = multiviewJob
         val generation = ++multiviewGeneration
         multiviewJob = viewModelScope.launch {
@@ -501,6 +508,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             return
         }
         if (tiles.size >= device.maxTiles || tiles.any { it.row.item.channel.id == row.item.channel.id }) return
+        val load = tiles.mapIndexed { i, tile -> tile.playback?.pixelRate ?: multiviewPixelRate(tileHeight(i)) }
+        if (!multiviewHasRoom(load, device.decodeBudget)) { mutable.update { it.copy(message = R.string.iptv_multiview_decoder_full) }; return }
         mutable.update { it.copy(multiview = tiles + IptvTile(row), tileFocus = tiles.size) }
         afterMultiviewJob { openTile(tiles.size) }
     }
@@ -517,7 +526,9 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         tileJobs.forEach { it?.cancel() }
         tileVersions.indices.forEach { tileVersions[it]++ }
         val remaining = tiles.filterIndexed { i, _ -> i != index }.map { IptvTile(it.row) }
-        mutable.update { it.copy(multiview = remaining, tileFocus = it.tileFocus.coerceAtMost(remaining.lastIndex)) }
+        mutable.update { it.copy(multiview = remaining, tileFocus = it.tileFocus.coerceAtMost(remaining.lastIndex),
+            mainTile = if (it.mainTile == index) 0 else if (it.mainTile > index) it.mainTile - 1 else it.mainTile) }
+        tileSizes = emptyList()
         val previous = multiviewJob
         val generation = ++multiviewGeneration
         multiviewJob = viewModelScope.launch {
@@ -531,10 +542,37 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val generation = multiviewGeneration
         viewModelScope.launch { previous.join(); if (generation == multiviewGeneration) block() }
     }
+    fun setTileSizes(physicalHeights: List<Int>) {
+        tileSizes = physicalHeights
+        applyTileHeights()
+    }
+    fun setMultiviewLayout(layout: MultiviewLayout) {
+        preferences.edit().putString(LAYOUT_KEY, layout.name).apply()
+        mutable.update { it.copy(multiviewLayout = layout) }
+    }
+    fun setMultiviewQuality(quality: MultiviewQuality) {
+        preferences.edit().putString(QUALITY_KEY, quality.name).apply()
+        mutable.update { it.copy(multiviewQuality = quality) }
+        applyTileHeights()
+    }
+    fun showLarge(index: Int) {
+        if (mutable.value.multiview?.indices?.contains(index) == true) mutable.update { it.copy(mainTile = index) }
+    }
+    private fun applyTileHeights() {
+        val state = mutable.value
+        val tiles = state.multiview ?: return
+        val sizes = tiles.indices.map { tileSizes.getOrNull(it) ?: state.panelHeight / 2 }
+        val heights = multiviewHeights(sizes, state.tileFocus, state.multiviewQuality, device.decodeBudget)
+        mutable.update { it.copy(tileHeights = heights) }
+        tiles.forEachIndexed { i, tile -> tile.playback?.limitHeight(heights[i]) }
+    }
+    private fun tileHeight(index: Int): Int = mutable.value.tileHeights.getOrNull(index)
+        ?: multiviewRung(mutable.value.panelHeight / 2, mutable.value.multiviewQuality)
     fun focusTile(index: Int) {
         val tiles = mutable.value.multiview ?: return
         if (index !in tiles.indices) return
         mutable.update { it.copy(tileFocus = index) }
+        applyTileHeights()
         tiles.forEachIndexed { i, tile -> tile.player?.volume = if (i == index) 1f else 0f }
     }
     fun exitMultiview(continueWith: IptvListedChannel? = null) {
@@ -581,7 +619,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                             patch { it.copy(failure = R.string.iptv_live_failed, playing = false, player = null, playback = null) }
                             if (tileVersions[index] == version) viewModelScope.launch { tileRuntimes[index].stop(owner) }
                         }, handleAudioFocus = false,
-                        maxVideoHeight = device.tileMaxHeight, targetBufferBytes = device.tileBufferBytes)
+                        maxVideoHeight = tileHeight(index), targetBufferBytes = device.tileBufferBytes)
                         .also { playback ->
                             playback.player.volume = if (mutable.value.tileFocus == index) 1f else 0f
                             patch { it.copy(playback = playback, player = playback.player) }
@@ -613,6 +651,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private companion object {
         const val PAGE = 60
         const val MAX_TILES = 4
+        const val LAYOUT_KEY = "multiview-layout"
+        const val QUALITY_KEY = "multiview-quality"
         const val AIRING_RESULTS = 120
         const val RECENT = 8
         const val WINDOW_SPAN = 12 * 60 * 60 * 1000L

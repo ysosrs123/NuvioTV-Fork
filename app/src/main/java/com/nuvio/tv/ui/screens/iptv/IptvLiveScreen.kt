@@ -146,7 +146,9 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
         Multiview(state, tiles, now, onFocusTile = viewModel::focusTile,
             onFull = { index -> tiles.getOrNull(index)?.row?.let { row -> fullscreen = true; viewModel.exitMultiview(row) } },
             onAdd = viewModel::addToMultiview, onReplace = viewModel::replaceTile, onRemove = viewModel::removeTile,
-            onExit = { viewModel.exitMultiview(tiles.getOrNull(state.tileFocus)?.row) })
+            onExit = { viewModel.exitMultiview(tiles.getOrNull(state.tileFocus)?.row) },
+            onSizes = viewModel::setTileSizes, onShowLarge = viewModel::showLarge,
+            onLayout = viewModel::setMultiviewLayout, onQuality = viewModel::setMultiviewQuality)
     } else if (fullscreen) {
         val playingRow = (state.channels.firstOrNull { it.item.channel.id == state.playingId } ?: state.playingRow?.takeIf { it.item.channel.id == state.playingId })
         val current = playingRow?.let { liveProgramme(state, it.item.channel.id, now) }

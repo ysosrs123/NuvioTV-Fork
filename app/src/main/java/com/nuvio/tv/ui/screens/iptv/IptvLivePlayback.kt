@@ -111,6 +111,16 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private fun reportFailure() {
         mainHandler.post { if (!released) onError() }
     }
+    fun limitHeight(height: Int?) {
+        mainHandler.post {
+            if (released) return@post
+            val builder = player.trackSelectionParameters.buildUpon()
+            player.trackSelectionParameters = (if (height == null) builder.clearVideoSizeConstraints() else builder.setMaxVideoSize(height * 16 / 9, height)).build()
+        }
+    }
+    val pixelRate: Long? get() = player.videoFormat?.takeIf { it.width > 0 && it.height > 0 }?.let {
+        it.width.toLong() * it.height * (it.frameRate.takeIf { rate -> rate > 0 }?.toInt() ?: MULTIVIEW_FRAME_RATE)
+    }
     override fun start() {
         check(!released)
         maxVideoHeight?.let { height ->
