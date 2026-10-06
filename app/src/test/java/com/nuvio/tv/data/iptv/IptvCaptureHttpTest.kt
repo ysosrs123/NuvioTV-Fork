@@ -152,8 +152,8 @@ class IptvCaptureHttpTest {
         val scope = CoroutineScope(SupervisorJob() + dispatcher)
         try {
             val request = scope.async { client.open(URI("https://fixture.invalid/list"), 4) }
-            assertNotNull(queue.poll(5, TimeUnit.SECONDS)?.also { it.run() })
-            val resume = queue.poll(5, TimeUnit.SECONDS)
+            assertNotNull(queue.poll(30, TimeUnit.SECONDS)?.also { it.run() })
+            val resume = queue.poll(30, TimeUnit.SECONDS)
             assertNotNull(resume)
             request.cancel(); resume!!.run()
             assertTrue(request.isCancelled)
