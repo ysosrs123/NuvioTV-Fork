@@ -13,6 +13,7 @@ Updated 6 October 2026.
 | 6 Oct | b68985a | Synthetic ID3 track excluded; AM9 capture-path validation | 27 AM9 fixtures incl. normalised codec decode |
 | 6 Oct | iptv/player-binding | Video player binding; played-batch retirement (player timeout cause); 26 review fixes; `main` merged; IPTV flavour gate | 222 core + 117 data-layer host tests; device rerun pending |
 | 6 Oct | iptv/player-binding | Guide grid model, automatic Xtream guide, account groups and source order, Stalker Portal, local guide folder import (logic only) | 238 core + 121 data-layer host tests |
+| 6 Oct | def2b19 | Host test runner; CI builds the prototype APK | First full Gradle compile and IPTV JVM run since b68985a pass on GitHub Actions; device pending |
 
 Design notes and per-checkpoint reports are in this folder
 (`IPTV-*-DESIGN.md`, `IPTV-*-VALIDATION-*.json`). Review findings and their status:

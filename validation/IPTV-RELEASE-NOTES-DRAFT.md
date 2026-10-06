@@ -2,7 +2,7 @@
 
 Unreleased. Branch `iptv/player-binding` (includes `main` as of 6 October 2026,
 1.1.0-beta-nt4.2 / build 1461). IPTV is enabled only in the `iptvPrototype`
-flavour (package `com.nuvio.iptv.prototype`, shown as "Nuvio IPTV Prototype", installs
+flavour (package `com.nuvio.iptv.prototype`, `.debug` suffix on debug builds, shown as "Nuvio IPTV Prototype", installs
 alongside the normal app); the `full` flavour hides it. Nothing published.
 
 ## Live TV
@@ -127,8 +127,10 @@ Screens and app
 
 - Last full device validation: commit `b68985a` (full app compile, 317 IPTV JVM tests,
   27 AM9 capture/codec fixtures).
-- Since then: 238 core and 121 data-layer JVM tests pass on a host harness; the full
-  app build and device fixtures are pending. See IPTV-HANDOVER.md.
+- Since then: 238 core and 121 data-layer JVM tests pass on a host harness. GitHub
+  Actions builds the prototype APK at `def2b19` with the IPTV JVM suites under Gradle
+  passing (the SparseArray-dependent extractor case runs on device instead). Device
+  fixtures and AM9 use are pending. See IPTV-HANDOVER.md.
 
 ## Change history
 

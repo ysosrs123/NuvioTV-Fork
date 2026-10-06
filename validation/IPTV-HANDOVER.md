@@ -1,8 +1,8 @@
 # Nuvio IPTV — handover
 
 Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
-Last device-validated commit: `b68985a`. Everything after it has passed host tests
-only; device reruns are listed under "Next steps".
+Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built
+(`def2b19`), not device-tested; device reruns are listed under "Next steps".
 Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
 [code review](IPTV-CODE-REVIEW-20261006.md),
 [player validation report](IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json).
@@ -17,26 +17,38 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
 - The capture player is wired to a real ExoPlayer in test fixtures. The cause of the
   two AM9 player-fixture timeouts is fixed in source; the device rerun is pending.
 
-## In flight at handover (6 October 2026)
+## CI build — 6 October 2026
 
-- GitHub Actions run 37418154407 (`PR Full Debug Build`, variant `iptvPrototype`,
-  commit 581bfc1) is the first full Gradle compile and IPTV unit-test run since
-  `b68985a`. The previous run (37416586107) failed after 17 min; its cause was not
-  readable, so the workflow now prints a filtered error summary at the end of the log.
-  `get_job_logs` with `return_content` shows the last 8 KB.
-- Known: `LocalTsSegmentExtractorTest` needs working `android.util.SparseArray`;
-  commit 99c0ee8 (after that run started) makes it skip under Gradle and adds
-  `LocalTsSegmentExtractorAndroidTest`. Expect other failures to be Kotlin compile
-  errors in Compose/Hilt files changed without a compiler (IptvLiveViewModel,
-  IptvSourcesViewModel, NuvioNavHost, SettingsScreen, ProfileManager).
-- Once it builds: the APK artifact installs as "Nuvio IPTV Prototype"
-  (`com.nuvio.iptv.prototype`) alongside the normal app. CI signs with a throwaway
-  key, so an older prototype on the AM9 must be uninstalled first.
+- GitHub Actions run 37419887574 (`PR Full Debug Build`, variant `iptvPrototype`,
+  commit def2b19) is green: full app compile including the Compose/Hilt UI changes,
+  IPTV core and data-layer unit tests under Gradle, and the APK. This is the first
+  Gradle build since `b68985a`. Not device-tested yet.
+- `LocalTsSegmentExtractorTest` skips under Gradle (stubbed `android.util.SparseArray`);
+  `LocalTsSegmentExtractorAndroidTest` covers it on device.
+- The app builds per-ABI APKs only (`isUniversalApk = false`); the workflow uploads
+  `app-<variant>-arm64-v8a-debug.apk`.
+- Debug builds install as `com.nuvio.iptv.prototype.debug` ("Nuvio IPTV Prototype")
+  alongside the normal app. CI signs with a throwaway key, so a prototype signed with
+  another key must be uninstalled first (this clears its sources).
+- Logs: `get_job_logs` with `return_content` shows the last 8 KB; the workflow prints
+  a filtered error summary on failure. Without GitHub tools, run status is readable
+  from the public REST API, but logs and re-runs need the user.
+
+## Small open items
+
+- The automatic Xtream guide feed stores `xtream-guide:<sourceId>` as its endpoint.
+  The feed list and edit form must show it as an automatic provider guide and not
+  offer endpoint editing.
+- `suggestAccountGroups` distinguishes only Xtream and M3U; Stalker sources should
+  group by portal host and MAC (as Xtream with the MAC as the user).
+- `IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json` source hashes predate later commits;
+  refresh them with the next recorded validation.
+- The workflow changes and `tools/iptv-host-tests` ship with the squash merge.
 
 ## Next steps
 
-1. Build locally: full app compile, full IPTV unit tests, `tools/iptv-device-tests`.
-   Compose/Hilt UI changes since `b68985a` have not been compiled yet.
+1. Install the CI APK on the AM9 and check Live TV. Build `tools/iptv-device-tests`
+   locally (not built in CI).
 2. On the AM9 rerun: `CaptureVideoPlayerAndroidTest` (both cases),
    `LocalCaptureSampleStagerAndroidTest`, `TsCaptureDecodeAndroidTest`,
    `IptvGuideStoreTest`, `IptvCatalogueStoreTest`, then the full fixture suite.
