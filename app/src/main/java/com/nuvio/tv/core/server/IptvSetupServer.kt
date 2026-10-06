@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.server
 
 import com.nuvio.tv.core.iptv.SetupChangeBook
+import com.nuvio.tv.core.iptv.SetupConnectionLimiter
 import com.nuvio.tv.core.iptv.SetupCookies
 import com.nuvio.tv.core.iptv.SetupDraft
 import com.nuvio.tv.core.iptv.SetupDrafts
@@ -16,6 +17,11 @@ import fi.iki.elonen.NanoHTTPD
 import java.io.InputStream
 import java.net.Socket
 import java.security.SecureRandom
+import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.TimeUnit
 import org.json.JSONObject
 
 class IptvSetupServer private constructor(
@@ -32,9 +38,10 @@ class IptvSetupServer private constructor(
     private val idle = SetupIdleTimer(IDLE_TIMEOUT_MILLIS, now)
     private val requests = SetupRateLimiter(REQUESTS_PER_MINUTE, MINUTE, now)
     private val pairAttempts = SetupRateLimiter(PAIR_ATTEMPTS_PER_MINUTE, MINUTE, now)
+    private val runner = BoundedRunner(SetupConnectionLimiter(MAX_CLIENTS, MAX_CLIENTS_PER_ADDRESS), CONNECTION_DEADLINE_MILLIS)
 
     init {
-        setAsyncRunner(BoundedRunner(MAX_CLIENTS))
+        setAsyncRunner(runner)
     }
 
     private val authority: String get() = "$host:$listeningPort"
@@ -57,8 +64,9 @@ class IptvSetupServer private constructor(
     override fun useGzipWhenAccepted(r: Response): Boolean = false
 
     override fun createClientHandler(finalAccept: Socket, inputStream: InputStream): ClientHandler {
-        if (!SetupLan.isLanAddress(finalAccept.inetAddress?.hostAddress)) runCatching { finalAccept.close() }
-        return super.createClientHandler(finalAccept, inputStream)
+        val address = finalAccept.inetAddress?.hostAddress
+        if (!SetupLan.isLanAddress(address)) runCatching { finalAccept.close() }
+        return super.createClientHandler(finalAccept, inputStream).also { runner.address(it, address.orEmpty()) }
     }
 
     override fun serve(session: IHTTPSession): Response {
@@ -203,20 +211,45 @@ class IptvSetupServer private constructor(
 
     private class BodyRejected(val status: Response.Status) : Exception()
 
-    private class BoundedRunner(private val limit: Int) : AsyncRunner {
-        private val running = ArrayList<ClientHandler>()
+    private class BoundedRunner(private val connections: SetupConnectionLimiter, private val deadlineMillis: Long) : AsyncRunner {
+        private val addresses = HashMap<ClientHandler, String>()
+        private val running = HashMap<ClientHandler, String>()
+        private val deadlines = HashMap<ClientHandler, ScheduledFuture<*>>()
+        private val timer = ScheduledThreadPoolExecutor(1, ThreadFactory { task ->
+            Thread(task, "IptvSetupDeadline").apply { isDaemon = true }
+        }).apply { removeOnCancelPolicy = true }
+
+        fun address(clientHandler: ClientHandler, address: String) {
+            synchronized(this) { addresses[clientHandler] = address }
+        }
 
         override fun closeAll() {
-            val handlers = synchronized(running) { ArrayList(running) }
+            val handlers = synchronized(this) { ArrayList(running.keys) }
             handlers.forEach { it.close() }
+            timer.shutdownNow()
         }
 
         override fun closed(clientHandler: ClientHandler) {
-            synchronized(running) { running.remove(clientHandler) }
+            synchronized(this) {
+                addresses.remove(clientHandler)
+                deadlines.remove(clientHandler)?.cancel(false)
+                running.remove(clientHandler)?.let(connections::release)
+            }
         }
 
         override fun exec(clientHandler: ClientHandler) {
-            val accepted = synchronized(running) { (running.size < limit).also { if (it) running.add(clientHandler) } }
+            val accepted = synchronized(this) {
+                val address = addresses.remove(clientHandler).orEmpty()
+                if (!connections.admit(address)) return@synchronized false
+                try {
+                    deadlines[clientHandler] = timer.schedule(Runnable { clientHandler.close() }, deadlineMillis, TimeUnit.MILLISECONDS)
+                } catch (_: RejectedExecutionException) {
+                    connections.release(address)
+                    return@synchronized false
+                }
+                running[clientHandler] = address
+                true
+            }
             if (!accepted) {
                 clientHandler.close()
                 return
@@ -235,6 +268,8 @@ class IptvSetupServer private constructor(
         const val IDLE_TIMEOUT_MILLIS = 10 * 60_000L
         private const val MINUTE = 60_000L
         private const val MAX_CLIENTS = 8
+        private const val MAX_CLIENTS_PER_ADDRESS = 2
+        private const val CONNECTION_DEADLINE_MILLIS = 10_000L
         private const val REQUESTS_PER_MINUTE = 120
         private const val PAIR_ATTEMPTS_PER_MINUTE = 10
         private val PATH = Regex("/s/([^/]+)(.*)")

@@ -142,6 +142,25 @@ class SetupRateLimiter(private val limit: Int, private val windowMillis: Long, p
     }
 }
 
+class SetupConnectionLimiter(private val limit: Int, private val perAddress: Int) {
+    private val open = HashMap<String, Int>()
+    private var total = 0
+
+    @Synchronized fun admit(address: String): Boolean {
+        val current = open[address] ?: 0
+        if (total >= limit || current >= perAddress) return false
+        open[address] = current + 1
+        total++
+        return true
+    }
+
+    @Synchronized fun release(address: String) {
+        val current = open[address] ?: return
+        if (current <= 1) open.remove(address) else open[address] = current - 1
+        total--
+    }
+}
+
 class SetupIdleTimer(private val timeoutMillis: Long, private val now: () -> Long) {
     @Volatile private var last = now()
     fun touch() { last = now() }

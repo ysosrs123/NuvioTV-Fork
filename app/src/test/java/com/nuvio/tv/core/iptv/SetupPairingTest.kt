@@ -135,6 +135,22 @@ class SetupPairingTest {
         assertTrue(limiter.allow("c"))
     }
 
+    @Test fun connectionsAreCappedInTotalAndPerAddress() {
+        val connections = SetupConnectionLimiter(limit = 3, perAddress = 2)
+        assertTrue(connections.admit("a")); assertTrue(connections.admit("a"))
+        assertFalse(connections.admit("a"))
+        assertTrue(connections.admit("b"))
+        assertFalse(connections.admit("c"))
+        connections.release("a")
+        assertTrue(connections.admit("c"))
+        assertFalse(connections.admit("a"))
+        connections.release("zzz")
+        assertFalse(connections.admit("d"))
+        connections.release("b")
+        assertTrue(connections.admit("a"))
+        assertFalse(connections.admit("a"))
+    }
+
     @Test fun idleTimerExpiresWithoutActivity() {
         var now = 0L
         val idle = SetupIdleTimer(600_000, { now })
