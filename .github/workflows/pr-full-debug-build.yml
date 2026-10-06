@@ -91,7 +91,7 @@ jobs:
       - name: Upload debug APK
         uses: actions/upload-artifact@v7
         with:
-          path: app/build/outputs/apk/${{ inputs.variant || 'full' }}/debug/app-${{ inputs.variant || 'full' }}-universal-debug.apk
+          path: app/build/outputs/apk/${{ inputs.variant || 'full' }}/debug/app-${{ inputs.variant || 'full' }}-arm64-v8a-debug.apk
           archive: false
           if-no-files-found: error
           retention-days: 7
