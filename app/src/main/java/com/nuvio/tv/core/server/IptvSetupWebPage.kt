@@ -330,6 +330,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
       else if (error === 'invalid') setText('formError', result.data.field === 'address' ? addressErrors[current.kind] : (fieldErrors[result.data.field] || fieldErrors.body));
       else if (error === 'unchanged') setText('formError', 'Nothing has changed. Fill in what you want to change.');
       else if (error === 'busy') setText('formError', 'The TV is still waiting for you to confirm or reject another change.');
+      else if (error === 'cooldown') setText('formError', 'Your last change was rejected on the TV. Wait a few seconds before sending another.');
       else if (error === 'missing') setText('formError', 'That entry no longer exists on the TV.');
       else if (error === 'locked') setText('formError', fieldErrors.id);
       else setText('formError', 'The TV couldn\'t take that request. Nothing was saved.');

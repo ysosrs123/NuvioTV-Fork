@@ -28,6 +28,7 @@
     <string name="iptv_remote_confirm_add_title">Add this from your phone?</string>
     <string name="iptv_remote_confirm_edit_title">Change %1$s from your phone?</string>
     <string name="iptv_remote_confirm_subtitle">Check the details. Nothing is saved unless you choose Save on this TV.</string>
+    <string name="iptv_remote_field_device">Sent from</string>
     <string name="iptv_remote_field_type">Type</string>
     <string name="iptv_remote_field_name">Name</string>
     <string name="iptv_remote_field_renamed">%1$s → %2$s</string>

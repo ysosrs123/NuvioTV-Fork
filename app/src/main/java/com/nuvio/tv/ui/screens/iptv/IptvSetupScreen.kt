@@ -175,8 +175,8 @@ private fun Note(icon: ImageVector?, text: String) {
 
 @Composable
 private fun PendingDialog(pending: IptvSetupPending, onSave: () -> Unit, onReject: () -> Unit) {
-    val save = remember { FocusRequester() }
-    LaunchedEffect(pending.id) { withFrameNanos { }; runCatching { save.requestFocus() } }
+    val reject = remember { FocusRequester() }
+    LaunchedEffect(pending.id) { withFrameNanos { }; runCatching { reject.requestFocus() } }
     val title = pending.previousLabel?.let { stringResource(R.string.iptv_remote_confirm_edit_title, it) }
         ?: stringResource(R.string.iptv_remote_confirm_add_title)
     NuvioDialog(onDismiss = onReject, title = title, subtitle = stringResource(R.string.iptv_remote_confirm_subtitle), width = 640.dp) {
@@ -191,8 +191,8 @@ private fun PendingDialog(pending: IptvSetupPending, onSave: () -> Unit, onRejec
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            NuvioActionPill(onSave, Modifier.focusRequester(save), enabled = !pending.applying) { Text(stringResource(R.string.iptv_remote_save)) }
-            NuvioActionPill(onReject, enabled = !pending.applying) { Text(stringResource(R.string.iptv_remote_reject)) }
+            NuvioActionPill(onReject, Modifier.focusRequester(reject), enabled = !pending.applying) { Text(stringResource(R.string.iptv_remote_reject)) }
+            NuvioActionPill(onSave, enabled = !pending.applying) { Text(stringResource(R.string.iptv_remote_save)) }
             if (pending.applying) LoadingIndicator(Modifier.size(24.dp))
         }
     }

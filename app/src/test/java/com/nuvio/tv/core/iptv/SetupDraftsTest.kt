@@ -164,6 +164,23 @@ class SetupDraftsTest {
         assertEquals(40, SetupText.displayAddress("http://a.example/" + "p".repeat(100), limit = 40).length)
     }
 
+    @Test fun aRejectionMakesThatSessionWaitBeforeSendingAgain() {
+        var now = 0L
+        val book = SetupChangeBook(now = { now }, cooldownMillis = 10_000)
+        val draft = SetupDrafts.parse(body("kind" to "m3u", "label" to "A", "address" to "http://a.example"))
+        val saved = book.propose("a", draft)!!
+        book.resolve(saved, SetupChangeBook.Status.SAVED)
+        assertFalse(book.coolingDown("a"))
+        book.resolve(book.propose("a", draft)!!, SetupChangeBook.Status.REJECTED)
+        assertTrue(book.coolingDown("a"))
+        assertFalse(book.coolingDown("b"))
+        now = 9_999; assertTrue(book.coolingDown("a"))
+        now = 10_000; assertFalse(book.coolingDown("a"))
+        book.propose("a", draft)
+        book.rejectPending()
+        assertFalse(book.coolingDown("a"))
+    }
+
     @Test fun changeBookHoldsOnePendingChangeAndOnlyItsOwnerSeesIt() {
         val book = SetupChangeBook()
         val draft = SetupDrafts.parse(body("kind" to "m3u", "label" to "A", "address" to "http://a.example"))

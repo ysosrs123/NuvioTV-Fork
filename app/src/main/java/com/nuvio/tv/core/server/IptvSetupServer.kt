@@ -22,13 +22,13 @@ class IptvSetupServer private constructor(
     private val host: String,
     port: Int,
     private val listing: () -> SetupListing,
-    private val onChangeProposed: (String, SetupDraft) -> Unit,
+    private val onChangeProposed: (String, SetupDraft, String) -> Unit,
     now: () -> Long,
 ) : NanoHTTPD(host, port) {
 
     private val random = SecureRandom()
     private val pairing = SetupPairing(random)
-    private val changes = SetupChangeBook(random)
+    private val changes = SetupChangeBook(random, now = now)
     private val idle = SetupIdleTimer(IDLE_TIMEOUT_MILLIS, now)
     private val requests = SetupRateLimiter(REQUESTS_PER_MINUTE, MINUTE, now)
     private val pairAttempts = SetupRateLimiter(PAIR_ATTEMPTS_PER_MINUTE, MINUTE, now)
@@ -99,7 +99,7 @@ class IptvSetupServer private constructor(
             ?: return json(Response.Status.UNAUTHORIZED, error("session"))
         return when {
             path == "state" && !post -> json(Response.Status.OK, listing().toJson(pending = changes.hasPending()))
-            path == "changes" && post -> propose(session, owner)
+            path == "changes" && post -> propose(session, owner, remote)
             path.startsWith("changes/") && !post -> status(owner, path.removePrefix("changes/"))
             else -> json(Response.Status.NOT_FOUND, error("missing"))
         }
@@ -126,7 +126,7 @@ class IptvSetupServer private constructor(
         }
     }
 
-    private fun propose(session: IHTTPSession, owner: String): Response {
+    private fun propose(session: IHTTPSession, owner: String, remote: String): Response {
         val draft = try {
             SetupDrafts.parse(readBody(session))
         } catch (invalid: SetupInputException) {
@@ -143,9 +143,10 @@ class IptvSetupServer private constructor(
         SetupDrafts.checkLogin(draft, listing())?.let { field ->
             return json(Response.Status.BAD_REQUEST, JSONObject().put("error", "invalid").put("field", field).put("reason", "server").toString())
         }
+        if (changes.coolingDown(owner)) return json(Response.Status.CONFLICT, error("cooldown"))
         val id = changes.propose(owner, draft) ?: return json(Response.Status.CONFLICT, error("busy"))
         try {
-            onChangeProposed(id, draft)
+            onChangeProposed(id, draft, remote)
         } catch (_: Exception) {
             changes.resolve(id, SetupChangeBook.Status.FAILED)
             return json(Response.Status.INTERNAL_ERROR, error("server"))
@@ -242,7 +243,7 @@ class IptvSetupServer private constructor(
         fun start(
             host: String,
             listing: () -> SetupListing,
-            onChangeProposed: (String, SetupDraft) -> Unit,
+            onChangeProposed: (String, SetupDraft, String) -> Unit,
             now: () -> Long = System::currentTimeMillis,
             startPort: Int = 8100,
             maxAttempts: Int = 10

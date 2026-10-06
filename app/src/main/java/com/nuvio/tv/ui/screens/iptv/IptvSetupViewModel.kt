@@ -137,7 +137,7 @@ class IptvSetupViewModel @Inject constructor(
         val started = IptvSetupServer.start(
             host = ip,
             listing = { listing },
-            onChangeProposed = { id, draft -> viewModelScope.launch { propose(current, id, draft) } }
+            onChangeProposed = { id, draft, from -> viewModelScope.launch { propose(current, id, draft, from) } }
         )
         if (started == null) {
             mutable.update { it.copy(phase = IptvSetupPhase.PORTS_BUSY, address = null, qr = null, code = null, devices = 0) }
@@ -176,7 +176,7 @@ class IptvSetupViewModel @Inject constructor(
         mutable.update { it.copy(address = null, qr = null, code = null, devices = 0, pending = null) }
     }
 
-    private fun propose(current: IptvProfileAccess.Session, id: String, draft: SetupDraft) {
+    private fun propose(current: IptvProfileAccess.Session, id: String, draft: SetupDraft, from: String) {
         val active = server ?: return
         if (session !== current || mutable.value.pending != null) {
             active.resolve(id, SetupChangeBook.Status.REJECTED)
@@ -187,7 +187,7 @@ class IptvSetupViewModel @Inject constructor(
             active.resolve(id, SetupChangeBook.Status.FAILED)
             return
         }
-        mutable.update { it.copy(pending = IptvSetupPending(id, draft, target?.label, lines(draft, target)), message = null) }
+        mutable.update { it.copy(pending = IptvSetupPending(id, draft, target?.label, lines(draft, target, from)), message = null) }
     }
 
     fun confirm() {
@@ -270,7 +270,8 @@ class IptvSetupViewModel @Inject constructor(
         if (session === current) listing = loaded
     }
 
-    private fun lines(draft: SetupDraft, target: SetupListingItem?): List<IptvSetupLine> = buildList {
+    private fun lines(draft: SetupDraft, target: SetupListingItem?, from: String): List<IptvSetupLine> = buildList {
+        add(IptvSetupLine(R.string.iptv_remote_field_device, from))
         add(IptvSetupLine(R.string.iptv_remote_field_type, valueRes = kindLabel(draft.kind)))
         if (target == null) add(IptvSetupLine(R.string.iptv_remote_field_name, draft.label))
         else if (target.label != draft.label) add(IptvSetupLine(R.string.iptv_remote_field_name,

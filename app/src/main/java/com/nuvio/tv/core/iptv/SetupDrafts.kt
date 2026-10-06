@@ -194,10 +194,18 @@ object SetupText {
     }
 }
 
-class SetupChangeBook(private val random: SecureRandom = SecureRandom(), private val maxEntries: Int = 16) {
+class SetupChangeBook(
+    private val random: SecureRandom = SecureRandom(),
+    private val maxEntries: Int = 16,
+    private val now: () -> Long = System::currentTimeMillis,
+    private val cooldownMillis: Long = 10_000,
+) {
     enum class Status { PENDING, SAVED, REJECTED, FAILED }
     private class Entry(val owner: String, val draft: SetupDraft, var status: Status)
     private val entries = LinkedHashMap<String, Entry>()
+    private val rejectedAt = HashMap<String, Long>()
+
+    @Synchronized fun coolingDown(owner: String): Boolean = rejectedAt[owner]?.let { now() - it < cooldownMillis } == true
 
     @Synchronized fun propose(owner: String, draft: SetupDraft): String? {
         if (entries.values.any { it.status == Status.PENDING }) return null
@@ -217,6 +225,7 @@ class SetupChangeBook(private val random: SecureRandom = SecureRandom(), private
         require(status != Status.PENDING)
         val entry = entries[id]?.takeIf { it.status == Status.PENDING } ?: return false
         entry.status = status
+        if (status == Status.REJECTED) rejectedAt[entry.owner] = now()
         return true
     }
 
