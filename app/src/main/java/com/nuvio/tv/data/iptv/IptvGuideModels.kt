@@ -1,5 +1,7 @@
 package com.nuvio.tv.data.iptv
 
+import com.nuvio.tv.core.iptv.GuideChannel
+import com.nuvio.tv.core.iptv.GuideKey
 import com.nuvio.tv.core.iptv.GuideProgramme
 
 data class IptvGuideRef(val profileId: Int, val feedId: String) {
@@ -12,6 +14,7 @@ data class IptvGuideWindow(val fromMillis: Long, val untilMillis: Long) {
     init { require(untilMillis > fromMillis && untilMillis - fromMillis in 1..(31L * 24 * 60 * 60 * 1000)) }
 }
 data class IptvProgrammePage(val programmes: List<GuideProgramme>, val hasMore: Boolean)
+data class IptvAiringMatch(val key: GuideKey, val channel: GuideChannel, val programme: GuideProgramme)
 
 class IptvGuideRefreshRequest(val ticket: IptvGuideTicket, val endpoint: String, val validators: IptvCacheValidators?) {
     override fun toString() = "IptvGuideRefreshRequest(endpoint and validators withheld)"

@@ -9,10 +9,15 @@ import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.GuideParseLimits
 import com.nuvio.tv.core.iptv.GuideProgrammeCap
 import com.nuvio.tv.core.iptv.GuideStorageCaps
+import com.nuvio.tv.core.iptv.GUIDE_AIRING_LOOKBACK_MILLIS
 import com.nuvio.tv.core.iptv.GuideFeedIndex
+import com.nuvio.tv.core.iptv.GuideKey
 import com.nuvio.tv.core.iptv.GuideNameIndex
-import com.nuvio.tv.core.iptv.guideIdMatchName
+import com.nuvio.tv.core.iptv.guideAiringAt
+import com.nuvio.tv.core.iptv.guideChannelNameKeys
 import com.nuvio.tv.core.iptv.guideMatchName
+import com.nuvio.tv.core.iptv.guideSearchQuery
+import com.nuvio.tv.core.iptv.guideSearchTitle
 import com.nuvio.tv.core.iptv.RefreshDecision
 import com.nuvio.tv.core.iptv.XtreamGuideReference
 import com.nuvio.tv.core.iptv.guideQuarantineAccepted
@@ -144,6 +149,25 @@ class IptvGuideStore(
         db.rawQuery(sql, args).use { c -> buildList { while (c.moveToNext()) add(IptvGuideJson.channel(c.getString(0))) } }
     }
 
+    fun airingMatches(profileId: Int, feedIds: List<String>, query: String, nowMillis: Long, limit: Int = 200): List<IptvAiringMatch> = transaction { db ->
+        require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && limit in 1..500)
+        feedIds.forEach { IptvGuideRef(profileId, it) }
+        val text = guideSearchQuery(query) ?: return@transaction emptyList()
+        val now = nowMillis.toString(); val since = (nowMillis - GUIDE_AIRING_LOOKBACK_MILLIS).toString()
+        val found = mutableListOf<IptvAiringMatch>()
+        for (feed in feedIds) {
+            if (found.size >= limit) break
+            db.rawQuery("SELECT c.payload,p.payload FROM feeds f CROSS JOIN channels c CROSS JOIN programmes p WHERE f.id=? AND f.profile=? AND f.version=f.active_version AND c.stage=f.active_stage AND p.stage=c.stage AND p.external_id=c.external_id AND p.start<=? AND p.start>? AND (p.stop>? OR (p.stop IS NULL AND NOT EXISTS (SELECT 1 FROM programmes q WHERE q.stage=p.stage AND q.external_id=p.external_id AND q.start>p.start AND q.start<=?))) AND instr(p.search_title,?)>0 ORDER BY c.external_id,p.start,p.id LIMIT ?",
+                arrayOf(feed, profileId.toString(), now, since, now, now, text, (limit - found.size).toString())).use { c ->
+                while (c.moveToNext()) {
+                    val channel = IptvGuideJson.channel(c.getString(0)); val programme = IptvGuideJson.programme(c.getString(1))
+                    if (guideAiringAt(programme, nowMillis)) found += IptvAiringMatch(GuideKey(feed, channel.externalId), channel, programme)
+                }
+            }
+        }
+        found
+    }
+
     fun beginRefresh(ref: IptvGuideRef): IptvGuideTicket = transaction { db -> beginRefresh(db, ref) }
 
     fun prepareRefresh(ref: IptvGuideRef, window: IptvGuideWindow): IptvGuideRefreshRequest = transaction { db ->
@@ -210,7 +234,7 @@ class IptvGuideStore(
                 if (!current(db, ticket)) throw StaleImport()
                 for (channel in channels) {
                     checkCancellation()
-                    (channel.names.map { guideMatchName(it.text) } + guideIdMatchName(channel.externalId)).filter { it.length >= 2 }.distinct().forEach { name ->
+                    guideChannelNameKeys(channel).forEach { name ->
                         db.insertWithOnConflict("channel_names", null, ContentValues().apply { put("stage", stage); put("external_id", channel.externalId); put("name", name) }, SQLiteDatabase.CONFLICT_IGNORE)
                     }
                     val payload = IptvGuideJson.channel(channel)
@@ -231,6 +255,7 @@ class IptvGuideStore(
                         put("stage", stage); put("id", digest(payload)); put("external_id", programme.channelExternalId)
                         put("start", programme.start.epochMillis); put("stop", programme.stop?.epochMillis)
                         put("precise", if (programme.canSchedulePrecisely) 1 else 0); put("payload", payload)
+                        put("search_title", guideSearchTitle(programme.titles))
                     }, SQLiteDatabase.CONFLICT_IGNORE).also { check(it != -1L || db.rawQuery("SELECT 1 FROM programmes WHERE stage=? AND id=?", arrayOf(stage, digest(payload))).use { c -> c.moveToFirst() }) }
                 }
             }
@@ -325,7 +350,7 @@ class IptvGuideStore(
     }
     override fun close() = helper.close()
     private class StaleImport : RuntimeException()
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 3) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 4) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
@@ -335,18 +360,25 @@ class IptvGuideStore(
             db.execSQL("CREATE TABLE programmes(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, id TEXT NOT NULL, external_id TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER, precise INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(stage,id))")
             db.execSQL("CREATE INDEX guide_window ON programmes(stage,external_id,start,stop)")
             addNameSchema(db)
+            addSearchSchema(db)
         }
         private fun addNameSchema(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE channel_names(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, external_id TEXT NOT NULL, name TEXT NOT NULL, PRIMARY KEY(stage,name,external_id))")
         }
+        private fun addSearchSchema(db: SQLiteDatabase) {
+            db.execSQL("ALTER TABLE programmes ADD COLUMN search_title TEXT")
+        }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(oldVersion in 1..2 && newVersion == 3) { "Missing guide database migration" }
+            check(oldVersion in 1..3 && newVersion == 4) { "Missing guide database migration" }
             if (oldVersion == 1) {
                 db.execSQL("ALTER TABLE feeds ADD COLUMN window_from INTEGER")
                 db.execSQL("ALTER TABLE feeds ADD COLUMN window_until INTEGER")
             }
-            db.execSQL("ALTER TABLE feeds ADD COLUMN refreshed_at INTEGER")
-            addNameSchema(db)
+            if (oldVersion <= 2) {
+                db.execSQL("ALTER TABLE feeds ADD COLUMN refreshed_at INTEGER")
+                addNameSchema(db)
+            }
+            addSearchSchema(db)
         }
     }
     private companion object {
