@@ -86,6 +86,39 @@ class IptvCatalogueStore(
         listOf("source_guides", "overlays", "catalogue", "identities", "sources", "accounts").forEach { db.delete(it, null, null) }
     }
 
+    fun removeSource(ref: IptvSourceRef) = transaction { db ->
+        source(db, ref)
+        val args = arrayOf(ref.sourceId)
+        db.delete("source_guides", "source=?", args)
+        db.delete("overlays", "id IN (SELECT id FROM identities WHERE source=?)", args)
+        db.delete("catalogue", "source=?", args)
+        db.delete("identities", "source=?", args)
+        db.delete("sources", "id=? AND profile=?", arrayOf(ref.sourceId, ref.profileId.toString())).also { check(it == 1) }
+        val ids = db.query("sources", arrayOf("id"), "profile=?", arrayOf(ref.profileId.toString()), null, null, "position, label COLLATE NOCASE, id").use { c ->
+            buildList { while (c.moveToNext()) add(c.getString(0)) }
+        }
+        for ((position, id) in ids.withIndex()) db.update("sources", ContentValues().apply { put("position", position) }, "id=?", arrayOf(id))
+        Unit
+    }
+
+    fun removeGuideFeed(feed: IptvGuideRef) = transaction { db ->
+        val sources = db.rawQuery("SELECT DISTINCT g.source FROM source_guides g JOIN sources s ON s.id=g.source WHERE s.profile=? AND g.feed=?",
+            arrayOf(feed.profileId.toString(), feed.feedId)).use { c -> buildList { while (c.moveToNext()) add(IptvSourceRef(feed.profileId, c.getString(0))) } }
+        for (ref in sources) {
+            val (feeds, priority) = guideAssociations(db, ref).without(feed.feedId)
+            db.delete("source_guides", "source=?", arrayOf(ref.sourceId))
+            for ((position, id) in feeds.withIndex()) db.insertOrThrow("source_guides", null, ContentValues().apply {
+                put("source", ref.sourceId); put("feed", id); put("position", position)
+                put("priority", priority.indexOf(id).takeIf { it >= 0 })
+            })
+            bumpBrowseRevision(db, ref)
+        }
+        val cleared = db.update("overlays", ContentValues().apply { putNull("guide_feed"); putNull("guide_id") }, "profile=? AND guide_feed=?",
+            arrayOf(feed.profileId.toString(), feed.feedId))
+        if (cleared > 0) db.execSQL("UPDATE sources SET browse_revision=browse_revision+1 WHERE profile=?", arrayOf(feed.profileId))
+        Unit
+    }
+
     fun moveSource(ref: IptvSourceRef, toIndex: Int) = transaction { db ->
         source(db, ref)
         val ids = db.query("sources", arrayOf("id"), "profile=?", arrayOf(ref.profileId.toString()), null, null, "position, label COLLATE NOCASE, id").use { c ->
@@ -139,6 +172,7 @@ class IptvCatalogueStore(
     }
 
     fun acceptNotModified(ref: IptvSourceRef, ticket: RefreshTicket): Boolean = transaction { db ->
+        if (!sourceExists(db, ref)) return@transaction false
         val current = source(db, ref)
         val validators = cacheValidators(db, current)
         (current.playbackEligible && ticket == RefreshTicket(ref.sourceId, current.configurationVersion, current.requestedGeneration) &&

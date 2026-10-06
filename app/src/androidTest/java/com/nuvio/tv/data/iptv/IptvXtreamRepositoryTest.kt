@@ -105,6 +105,30 @@ class IptvXtreamRepositoryTest {
         assertTrue(store.snapshot(ref).source.playbackEligible)
     }
 
+    @Test fun removingAnXtreamSourceAlsoRemovesItsAutomaticGuideOnly() = fixture { store, ref ->
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val name = "iptv-xtream-guide-${UUID.randomUUID()}.db"
+        try {
+            IptvGuideStore(context, name, EnvelopeIptvSecretBox(AndroidIptvSecretBox("nuvio.iptv.xtream.guide.$name"))).use { guides ->
+                val links = IptvXtreamGuides(store, guides)
+                val other = store.createSource(1, "Second", IptvSourceKind.XTREAM, "shared", connection).ref
+                val automatic = links.ensure(ref); val kept = links.ensure(other)
+                val shared = guides.createFeed(1, "Shared", "https://fixture.invalid/guide.xml")
+                store.setGuideFeeds(other, listOf(kept, automatic, shared), listOf(automatic))
+                links.removeSource(ref)
+                assertEquals(listOf(other), store.sources(1).map { it.ref })
+                assertEquals(setOf(kept, shared), guides.feeds(1).map { it.ref }.toSet())
+                assertEquals(IptvGuideAssociations(listOf(kept.feedId, shared.feedId)), store.guideAssociations(other))
+                links.removeFeed(shared)
+                assertEquals(listOf(kept), guides.feeds(1).map { it.ref })
+                assertEquals(listOf(kept.feedId), store.guideAssociations(other).feedIds)
+            }
+        } finally {
+            context.deleteDatabase(name)
+            KeyStore.getInstance("AndroidKeyStore").apply { load(null); deleteEntry("nuvio.iptv.xtream.guide.$name") }
+        }
+    }
+
     private fun fixture(block: suspend (IptvCatalogueStore, IptvSourceRef) -> Unit) = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val id = UUID.randomUUID().toString()

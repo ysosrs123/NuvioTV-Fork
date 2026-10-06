@@ -332,6 +332,50 @@ class IptvCatalogueStoreTest {
         assertEquals(RefreshDecision.PUBLISH, store.commitCatalogue(ref, newer!!, listOf(row(1), row(2)), true))
     }
 
+    @Test fun removingASourceDropsItsDataRenumbersAndCannotBeResurrectedByARefresh() {
+        val a = source(); val b = source(); val c = source(); val other = source(2)
+        publish(a, listOf(row(1), row(2))); publish(b); publish(other)
+        val id = store.snapshot(a).channels.first().channel.id
+        store.setOverlay(a, id, IptvChannelOverlay(favouriteRank = 0))
+        store.setGuideFeeds(a, listOf(IptvGuideRef(1, "feed-a")))
+        val ticket = store.beginRefresh(a)
+        store.removeSource(a)
+        assertEquals(listOf(b, c), store.sources(1).map { it.ref })
+        assertEquals(RefreshDecision.STALE, store.commitCatalogue(a, ticket, listOf(row(3)), true))
+        assertFalse(store.acceptNotModified(a, ticket))
+        assertEquals(listOf(b, c), store.sources(1).map { it.ref })
+        assertThrows(IllegalArgumentException::class.java) { store.snapshot(a) }
+        assertThrows(IllegalArgumentException::class.java) { store.removeSource(IptvSourceRef(2, b.sourceId)) }
+        assertEquals(1, store.snapshot(other).channels.size)
+        store.moveSource(c, 0)
+        assertEquals(listOf(c, b), store.sources(1).map { it.ref })
+        store.close()
+        context.openOrCreateDatabase(name, 0, null).use { db ->
+            db.rawQuery("SELECT (SELECT COUNT(*) FROM catalogue WHERE source=?),(SELECT COUNT(*) FROM identities WHERE source=?),(SELECT COUNT(*) FROM overlays),(SELECT COUNT(*) FROM source_guides)",
+                arrayOf(a.sourceId, a.sourceId)).use {
+                assertTrue(it.moveToFirst()); (0..3).forEach { column -> assertEquals(0, it.getInt(column)) }
+            }
+        }
+        store = IptvCatalogueStore(context, name, secrets)
+    }
+
+    @Test fun removingAGuideFeedDropsItFromEverySourceInTheProfileOnly() {
+        val a = source(); val b = source(); val other = source(2)
+        publish(a)
+        val gone = IptvGuideRef(1, "gone"); val kept = IptvGuideRef(1, "kept")
+        store.setGuideFeeds(a, listOf(gone, kept), listOf(gone, kept))
+        store.setGuideFeeds(b, listOf(kept, gone))
+        store.setGuideFeeds(other, listOf(IptvGuideRef(2, "gone")))
+        val id = store.snapshot(a).channels.single().channel.id
+        store.setOverlay(a, id, IptvChannelOverlay(manualGuide = GuideKey("gone", "x"), favouriteRank = 1))
+        store.removeGuideFeed(gone)
+        assertEquals(IptvGuideAssociations(listOf("kept"), listOf("kept")), store.guideAssociations(a))
+        assertEquals(IptvGuideAssociations(listOf("kept"), emptyList()), store.guideAssociations(b))
+        assertEquals(listOf("gone"), store.guideAssociations(other).feedIds)
+        val overlay = store.snapshot(a).channels.single().overlay
+        assertNull(overlay.manualGuide); assertEquals(1, overlay.favouriteRank)
+    }
+
     @Test fun authenticatedEncryptionRejectsWrongProfileAndTamperingWithoutErasingData() {
         val blob = realSecrets.seal("profile:one", "SECRET")
         assertEquals("SECRET", realSecrets.open("profile:one", blob))

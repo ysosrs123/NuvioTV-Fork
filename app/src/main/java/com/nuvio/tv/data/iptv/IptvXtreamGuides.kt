@@ -19,6 +19,26 @@ class IptvXtreamGuides(private val catalogue: IptvCatalogueStore, private val gu
         return feed
     }
 
+    fun removeSource(source: IptvSourceRef) {
+        val reference = XtreamGuideReference.of(source.sourceId)
+        val automatic = allFeeds(source.profileId).filter { feed -> runCatching { guides.endpoint(feed) == reference }.getOrDefault(false) }
+        catalogue.removeSource(source)
+        automatic.forEach(::removeFeed)
+    }
+
+    fun removeFeed(feed: IptvGuideRef) {
+        catalogue.removeGuideFeed(feed)
+        guides.removeFeed(feed)
+    }
+
+    private fun allFeeds(profileId: Int): List<IptvGuideRef> = buildList {
+        while (true) {
+            val page = guides.feeds(profileId, offset = size, limit = 200)
+            addAll(page.map { it.ref })
+            if (page.size < 200) break
+        }
+    }
+
     private companion object {
         const val MAX_LINKED_FEEDS = 16
     }

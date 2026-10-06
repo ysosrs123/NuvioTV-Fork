@@ -61,6 +61,25 @@ class IptvGuideStoreTest {
         assertTrue(store.programmes(ref, "two", window).programmes.isEmpty())
         assertEquals(1234L, store.feeds(1).single().refreshedAtMillis)
     }
+    @Test fun removingAFeedDropsItsGuideAndAnImportInFlightIsStale() {
+        val ref = feed(); val other = feed(); val otherProfile = feed(2)
+        publish(ref); publish(other)
+        val ticket = store.beginRefresh(ref)
+        store.removeFeed(ref)
+        assertEquals(listOf(other, otherProfile).map { it.feedId }.toSet(), (store.feeds(1) + store.feeds(2)).map { it.ref.feedId }.toSet())
+        assertEquals(RefreshDecision.STALE, store.importGuide(ticket, xml().byteInputStream(), window))
+        assertFalse(store.acceptNotModified(ticket, window))
+        assertThrows(IllegalArgumentException::class.java) { store.programmes(ref, "one", window) }
+        assertThrows(IllegalArgumentException::class.java) { store.removeFeed(IptvGuideRef(2, other.feedId)) }
+        assertEquals(1, store.programmes(other, "one", window).programmes.size)
+        store.close()
+        context.openOrCreateDatabase(name, 0, null).use { db ->
+            db.rawQuery("SELECT (SELECT COUNT(*) FROM stages WHERE feed=?),(SELECT COUNT(*) FROM channels),(SELECT COUNT(*) FROM programmes)", arrayOf(ref.feedId)).use {
+                assertTrue(it.moveToFirst()); assertEquals(0, it.getInt(0)); assertEquals(1, it.getInt(1)); assertEquals(1, it.getInt(2))
+            }
+        }
+        store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias))
+    }
     @Test fun sameGuideIdInAnotherFeedOrProfileCannotBleedIntoQueries() {
         val one = feed(); val two = feed(); val otherProfile = feed(2)
         publish(one); publish(two, xml(programme("Different"))); publish(otherProfile, xml(programme("Private")))

@@ -60,6 +60,14 @@ class IptvGuideStore(
         if (changed && isDocument(previous) && previous.trim() !in documents(db)) listOf(previous.trim()) else emptyList()
     }.let(::release)
 
+    fun removeFeed(ref: IptvGuideRef) = transaction { db ->
+        feed(db, ref)
+        val previous = endpoint(db, ref)
+        db.delete("stages", "feed=?", arrayOf(ref.feedId))
+        db.delete("feeds", "id=? AND profile=?", arrayOf(ref.feedId, ref.profileId.toString())).also { check(it == 1) }
+        if (isDocument(previous) && previous.trim() !in documents(db)) listOf(previous.trim()) else emptyList()
+    }.let(::release)
+
     fun endpoint(ref: IptvGuideRef): String = transaction { db -> feed(db, ref); endpoint(db, ref) }
     fun feed(ref: IptvGuideRef): IptvGuideFeed = transaction { db -> feed(db, ref) }
 
@@ -142,6 +150,7 @@ class IptvGuideStore(
     }
 
     fun acceptNotModified(ticket: IptvGuideTicket, window: IptvGuideWindow): Boolean = transaction { db ->
+        if (!current(db, ticket)) return@transaction false
         val cache = validators(db, ticket.ref)
         (current(db, ticket) && covers(db, ticket.ref, window) && cache != null && (cache.etag != null || cache.lastModified != null)).also { accepted ->
             if (accepted) db.update("feeds", ContentValues().apply { put("refreshed_at", now()) }, "id=?", arrayOf(ticket.ref.feedId))
@@ -286,6 +295,7 @@ class IptvGuideStore(
     }
 
     private fun current(db: SQLiteDatabase, ticket: IptvGuideTicket): Boolean {
+        if (db.rawQuery("SELECT 1 FROM feeds WHERE id=? AND profile=?", arrayOf(ticket.ref.feedId, ticket.ref.profileId.toString())).use { !it.moveToFirst() }) return false
         val current = feed(db, ticket.ref)
         return ticket.generation > 0 && current.configurationVersion == ticket.configurationVersion && current.requestedGeneration == ticket.generation && current.activeGeneration != ticket.generation
     }
