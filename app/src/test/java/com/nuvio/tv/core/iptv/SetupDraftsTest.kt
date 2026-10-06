@@ -66,6 +66,17 @@ class SetupDraftsTest {
         rejects("username", body("kind" to "xtream", "label" to "X", "address" to "http://x.example", "username" to "u".repeat(4097), "password" to "p"))
     }
 
+    @Test fun invisibleFormattingCharactersAreRejected() {
+        for (mark in listOf("‮", "⁦", "​", "﻿", "­")) {
+            rejects("label", body("kind" to "m3u", "label" to "Lounge${mark}gpj", "address" to "http://a.example/x"))
+            rejects("address", body("kind" to "m3u", "label" to "A", "address" to "http://a.example/${mark}x"))
+            rejects("username", body("kind" to "xtream", "label" to "X", "address" to "http://x.example", "username" to "u$mark", "password" to "p"))
+            rejects("password", body("kind" to "xtream", "label" to "X", "address" to "http://x.example", "username" to "u", "password" to "p$mark"))
+            rejects("mac", body("kind" to "stalker", "label" to "S", "address" to "http://p.example/c/", "mac" to "00:1A:79:AB:CD:EF$mark"))
+        }
+        assertEquals("Café – Sport", SetupDrafts.parse(body("kind" to "m3u", "label" to "Café – Sport", "address" to "http://a.example")).label)
+    }
+
     @Test fun deeplyNestedOrLenientJsonIsRejectedBeforeParsing() {
         assertTrue(SetupDrafts.shallowJson(body("kind" to "xtream", "label" to "a{[\"]}", "password" to "p\\\"[[[[[[")))
         assertTrue(SetupDrafts.shallowJson("""{"a":[{"b":[1]}]}"""))

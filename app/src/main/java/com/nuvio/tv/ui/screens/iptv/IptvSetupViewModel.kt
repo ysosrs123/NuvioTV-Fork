@@ -47,7 +47,9 @@ import kotlinx.coroutines.withContext
 
 enum class IptvSetupPhase { STARTING, RUNNING, NO_NETWORK, NOT_HOME_NETWORK, PORTS_BUSY, IDLE_STOPPED, PAUSED }
 
-data class IptvSetupLine(@StringRes val label: Int, val value: String = "", @StringRes val valueRes: Int? = null)
+data class IptvSetupLine(@StringRes val label: Int, val value: String = "", @StringRes val valueRes: Int? = null) {
+    override fun toString() = "IptvSetupLine(value withheld)"
+}
 
 class IptvSetupPending(val id: String, val draft: SetupDraft, val previousLabel: String?, val lines: List<IptvSetupLine>, val applying: Boolean = false) {
     fun applying() = IptvSetupPending(id, draft, previousLabel, lines, true)

@@ -162,7 +162,7 @@ object SetupDrafts {
     private fun text(json: JSONObject, key: String, limit: Int): String {
         if (!json.has(key) || json.isNull(key)) return ""
         val value = json.opt(key) as? String ?: throw SetupInputException(key)
-        if (value.length > limit) throw SetupInputException(key)
+        if (value.length > limit || value.any { it.category == CharCategory.FORMAT }) throw SetupInputException(key)
         return value
     }
 }
@@ -201,7 +201,7 @@ class SetupChangeBook(
     private val cooldownMillis: Long = 10_000,
 ) {
     enum class Status { PENDING, SAVED, REJECTED, FAILED }
-    private class Entry(val owner: String, val draft: SetupDraft, var status: Status)
+    private class Entry(val owner: String, var draft: SetupDraft?, var status: Status)
     private val entries = LinkedHashMap<String, Entry>()
     private val rejectedAt = HashMap<String, Long>()
 
@@ -225,9 +225,12 @@ class SetupChangeBook(
         require(status != Status.PENDING)
         val entry = entries[id]?.takeIf { it.status == Status.PENDING } ?: return false
         entry.status = status
+        entry.draft = null
         if (status == Status.REJECTED) rejectedAt[entry.owner] = now()
         return true
     }
 
-    @Synchronized fun rejectPending() { entries.values.filter { it.status == Status.PENDING }.forEach { it.status = Status.REJECTED } }
+    @Synchronized fun rejectPending() {
+        entries.values.filter { it.status == Status.PENDING }.forEach { it.status = Status.REJECTED; it.draft = null }
+    }
 }
