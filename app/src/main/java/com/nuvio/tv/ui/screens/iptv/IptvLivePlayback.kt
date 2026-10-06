@@ -37,8 +37,11 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     val activeRequests: Int get() = fence.active.value
     private val mainHandler = Handler(Looper.getMainLooper())
     private val client = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS)
-        .retryOnConnectionFailure(false).followRedirects(false).followSslRedirects(false).build()
+        .retryOnConnectionFailure(false).followRedirects(true).followSslRedirects(true).build()
     private var released = false
+    private var attempts = 0
+    private val reconnect = Runnable { if (!released) { player.seekToDefaultPosition(); player.prepare(); player.playWhenReady = true } }
+    private val stall = Runnable { if (!released && player.playbackState == Player.STATE_BUFFERING) retry() }
     private var releaseFailed = false
     val player: ExoPlayer
     init {
@@ -70,14 +73,32 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) { if (!released) onPlaying(isPlaying) }
             override fun onPlayerError(error: PlaybackException) {
-                if (released) releaseFailed = true else reportFailure()
+                when {
+                    released -> releaseFailed = true
+                    error.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW || error.errorCode == PlaybackException.ERROR_CODE_TIMEOUT ||
+                        error.errorCode in 2000..2999 -> retry()
+                    else -> reportFailure()
+                }
             }
             override fun onRenderedFirstFrame() { telemetry.firstFrame(android.os.SystemClock.elapsedRealtime()) }
             override fun onPlaybackStateChanged(playbackState: Int) {
                 telemetry.buffering(playbackState == Player.STATE_BUFFERING, android.os.SystemClock.elapsedRealtime())
-                if (!released && playbackState == Player.STATE_ENDED) reportFailure()
+                mainHandler.removeCallbacks(stall)
+                if (released) return
+                when (playbackState) {
+                    Player.STATE_READY -> attempts = 0
+                    Player.STATE_BUFFERING -> mainHandler.postDelayed(stall, STALL_MS)
+                    Player.STATE_ENDED -> retry()
+                }
             }
         })
+    }
+    private fun retry() {
+        if (released) return
+        if (attempts >= RETRY_DELAYS_MS.size) { reportFailure(); return }
+        val delay = RETRY_DELAYS_MS[attempts++]
+        mainHandler.removeCallbacks(reconnect)
+        mainHandler.postDelayed(reconnect, delay)
     }
     private fun reportFailure() {
         mainHandler.post { if (!released) onError() }
@@ -90,11 +111,14 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             IptvStreamFormat.MPEG_TS -> MimeTypes.VIDEO_MP2T
         }
 
-        player.setMediaItem(MediaItem.Builder().setUri(locator).setMimeType(mimeType).build())
+        player.setMediaItem(MediaItem.Builder().setUri(locator).setMimeType(mimeType)
+            .setLiveConfiguration(MediaItem.LiveConfiguration.Builder().setTargetOffsetMs(6_000).setMinOffsetMs(2_000).setMaxOffsetMs(15_000)
+                .setMinPlaybackSpeed(0.97f).setMaxPlaybackSpeed(1.03f).build()).build())
         telemetry.start(android.os.SystemClock.elapsedRealtime())
         player.prepare(); player.playWhenReady = true
     }
     override suspend fun close(): Boolean {
+        mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(stall)
         fence.stopAccepting()
         client.dispatcher.cancelAll()
         if (!released) {
@@ -131,5 +155,9 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             delegate.close()
             ticket?.let { fence.leave(it); ticket = null }
         }
+    }
+    private companion object {
+        val RETRY_DELAYS_MS = longArrayOf(1_000, 2_000, 3_000, 5_000, 5_000, 5_000)
+        const val STALL_MS = 20_000L
     }
 }
