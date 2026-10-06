@@ -119,7 +119,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 val length = delegate.open(dataSpec)
                 if (entry && dataSpec.length == C.LENGTH_UNSET.toLong()) C.LENGTH_UNSET.toLong() else length
             } catch (failure: Exception) {
-                try { close() } catch (_: Exception) {                                                     }
+                try { close() } catch (_: Exception) {}
                 throw failure
             }
         }

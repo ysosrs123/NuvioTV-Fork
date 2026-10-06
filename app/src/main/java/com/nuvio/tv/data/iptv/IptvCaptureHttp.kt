@@ -108,7 +108,7 @@ class IptvCaptureHttp(private val http: OkHttpClient = newClient(), private val 
                 cancel.cancel()
 
                 if (!slot.delivered) {
-                    try { closeSlot(slot) } catch (_: Exception) {                               }
+                    try { closeSlot(slot) } catch (_: Exception) {}
                 }
                 slot.connecting = false
             }
