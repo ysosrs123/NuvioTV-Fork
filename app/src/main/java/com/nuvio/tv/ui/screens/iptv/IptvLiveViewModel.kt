@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.*
 
 data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source: IptvSourceRef? = null,
     val channels: List<IptvListedChannel> = emptyList(), val next: IptvBrowseCursor? = null,
-    val categories: List<IptvCategory> = emptyList(), val category: String? = null, val favourites: Boolean = false,
+    val categories: List<IptvCategory> = emptyList(), val category: String? = null, val favourites: Boolean = false, val search: String = "",
     val guide: Map<String, GuideGridRow> = emptyMap(), val window: GuideGridWindow? = null,
     val focused: IptvListedChannel? = null, val playingId: String? = null, val previousId: String? = null,
     val recent: List<String> = emptyList(),
@@ -48,6 +48,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var foreground = false
     private var pageJob: Job? = null
     private var searchJob: Job? = null
+    private var channelSearch: Job? = null
     private var tuneJob: Job? = null
     private var tuneVersion = 0L
     private var pageVersion = 0L
@@ -193,6 +194,13 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
         }
     }
+    fun search(text: String) {
+        val value = text.take(256)
+        if (value == mutable.value.search) return
+        mutable.update { it.copy(search = value) }
+        channelSearch?.cancel()
+        channelSearch = viewModelScope.launch { delay(300); load() }
+    }
     fun clearMessage() { mutable.update { it.copy(message = null) } }
     fun showSource(ref: IptvSourceRef) {
         if (ref == mutable.value.source) return
@@ -223,7 +231,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 val state = mutable.value
                 val ref = state.source?.takeIf { chosen -> sources.any { it.ref == chosen } }
                     ?: sources.firstOrNull { it.playbackEligible }?.ref ?: sources.firstOrNull()?.ref
-                val query = IptvBrowseQuery(favouritesOnly = state.favourites, category = state.category.takeUnless { state.favourites })
+                val query = IptvBrowseQuery(search = state.search.trim().take(256), favouritesOnly = state.favourites, category = state.category.takeUnless { state.favourites })
                 val cursor = state.next?.takeIf { append && it.revision.ref == ref && it.query == query }
                 if (append && cursor == null) return@launch
                 val limit = if (background) state.channels.size.coerceIn(PAGE, 200) else PAGE

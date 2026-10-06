@@ -151,6 +151,11 @@
     <string name="iptv_live_from_start">Watch from the start</string>
     <string name="iptv_live_catchup_hint">Left and right skip 30 seconds, up and down change channel</string>
     <string name="iptv_live_catchup_unavailable">Catch-up is not available for this programme.</string>
+    <string name="iptv_live_search">Search channels</string>
+    <string name="iptv_live_search_hint">Channel name</string>
+    <string name="iptv_live_results">Results for “%1$s”</string>
+    <string name="iptv_live_no_results">No channels match “%1$s”</string>
+    <string name="iptv_live_no_results_description">Try part of the name, or search another category or source.</string>
     <plurals name="iptv_source_channels">
         <item quantity="one">%1$d channel</item>
         <item quantity="other">%1$d channels</item>
