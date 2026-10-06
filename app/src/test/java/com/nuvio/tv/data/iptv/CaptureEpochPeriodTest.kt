@@ -111,6 +111,18 @@ class CaptureEpochPeriodTest {
             try { v.maybeThrowError(); fail() } catch(_:IOException) { }
         }
     }
+    @Test fun boundaryAndStopRaiseOnlyAfterBufferedRowsArePlayed() = runBlocking<Unit> {
+        for(boundary in listOf(false,true)) Fixture().use { f -> f.store.add(0); val p=f.open(); val v=select(p)[0]!!
+            if(boundary) f.store.add(1,continuity=1) else f.producer.value=CaptureTransportState.FAILED
+            f.events.emit(Unit); val next=f.ready(if(boundary) IncrementalReaderState.DISCONTINUITY else IncrementalReaderState.STOPPED,1)
+            if(boundary) assertTrue(p.refresh(next))
+            assertEquals(C.TIME_UNSET,p.readDiscontinuity()); v.maybeThrowError(); assertTrue(v.isReady)
+            drain(v,50,0,40000)
+            assertEquals(C.TIME_UNSET,p.readDiscontinuity())
+            try { v.maybeThrowError(); fail() } catch(_:IOException) { }
+            try { v.readData(FormatHolder(),buffer(),0); fail() } catch(_:IOException) { }
+        }
+    }
     @Test fun closeFencesReaderButCannotReleaseBorrowedArrays() = runBlocking<Unit> {
         Fixture().use { f -> f.store.add(0); val p=f.open(); val v=select(p)[0]!!
             assertFalse(f.reader.close()); assertEquals(IncrementalReaderState.CLOSING,f.reader.state.value.state)

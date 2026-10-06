@@ -31,12 +31,15 @@ the reader never reached ENDED and the video stream returned NOTHING_READ after 
 - CaptureVideoPlayer.describe() and the fixture's timeout path now report player,
   window, decoder-counter, reader, transport and render state instead of a bare timeout.
   The fixture also asserts the first rendered frame comes from the requested start.
+- Epoch boundaries and STOPPED readers no longer abort playback early:
+  readDiscontinuity and SampleStream.maybeThrowError raise them only once the stream
+  has played all staged rows (review finding 3a). Ownership loss still fails at once.
 
 Cloud evidence: core 211/211 pass with the existing runner and pinned Kotlin 2.3.0.
-A cloud JVM harness ran the 13 data-layer capture suites (65 cases: 64 existing plus
-one new regression) against the shipped Media3 AAR classes, Media3 1.8.0 lib-decoder
+A cloud JVM harness ran the 13 data-layer capture suites (66 cases: 64 existing plus
+two new regressions) against the shipped Media3 AAR classes, Media3 1.8.0 lib-decoder
 built from source and a default-value android stub generated from android-all. The new
-case fails without the change and passes with it. The AM9 fixture compiles against the
+cases fail without their changes and pass with them. The AM9 fixture compiles against the
 same classes with a stub InstrumentationRegistry. These are not Gradle/AGP builds: the
 Android SDK host is blocked in the cloud, so no full app compile, full 317-case JVM
 run, harness APK or device execution has been done for this change.

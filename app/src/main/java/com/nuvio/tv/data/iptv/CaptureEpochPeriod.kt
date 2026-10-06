@@ -92,7 +92,7 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
         val after=sync.firstOrNull { it.timeUs>=position } ?: sync.last()
         return floor(seekParameters.resolveSeekPositionUs(position,before.timeUs,after.timeUs))
     }
-    @Synchronized override fun readDiscontinuity(): Long { access(); errorState(); return C.TIME_UNSET }
+    @Synchronized override fun readDiscontinuity(): Long { access(); return C.TIME_UNSET }
     @Synchronized override fun discardBuffer(positionUs: Long, toKeyframe: Boolean) {
         access()
         if(retirePlayedBatches && batches.size>1) retireConsumedPrefix(positionUs)
@@ -139,7 +139,10 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
             if(closed || !reader.isBorrowOpen(lease) || this !in streams) false
             else { access(); normalize(); !formatSent || row<batches.size || ended() }
         }
-        override fun maybeThrowError() = synchronized(this@CaptureEpochPeriod) { access(); check(this in streams); errorState() }
+        override fun maybeThrowError() = synchronized(this@CaptureEpochPeriod) {
+            access(); check(this in streams); normalize()
+            if(row==batches.size) errorState()
+        }
         override fun readData(holder: FormatHolder, buffer: DecoderInputBuffer, readFlags: Int): Int = synchronized(this@CaptureEpochPeriod) {
             access(); check(this in streams); require(readFlags and 7.inv()==0)
             if(!formatSent || readFlags and SampleStream.FLAG_REQUIRE_FORMAT!=0) {

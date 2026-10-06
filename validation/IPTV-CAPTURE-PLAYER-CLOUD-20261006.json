@@ -8,13 +8,14 @@
   "changes": [
     "CaptureEpochMediaSource.retiresPlayedBatches opt-in; CaptureEpochPeriod.discardBuffer retires played rows through retireConsumedPrefix",
     "CaptureVideoPlayer requires retiresPlayedBatches; startPositionMs nullable (null=live edge, 0 sent as 1ms to avoid MaskingMediaSource default-position override)",
-    "CaptureVideoPlayer.describe() and fixture timeout diagnostics; fixture asserts first rendered frame follows the requested start"
+    "CaptureVideoPlayer.describe() and fixture timeout diagnostics; fixture asserts first rendered frame follows the requested start",
+    "CaptureEpochPeriod raises boundary/stop states only at the stream tail (readDiscontinuity and SampleStream.maybeThrowError)"
   ],
   "sourceSha256": {
-    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureEpochPeriod.kt": "f0f3c8e35cbc866021acf8430905afbaff56fd31192374f2a9d5953f40ca6e07",
+    "app/src/main/java/com/nuvio/tv/data/iptv/CaptureEpochPeriod.kt": "5cac87568658f469eec19a2a728786f9f4d93621005aa9e3879e80217de7b64c",
     "app/src/main/java/com/nuvio/tv/data/iptv/CaptureEpochMediaSource.kt": "d3a9f6ffc8ba3f2d6a2ef3fa935a43df272d77f379bf049052748cbb7c5c64b9",
     "app/src/main/java/com/nuvio/tv/data/iptv/CaptureVideoPlayer.kt": "b92ddb6a91ce52e79e0f84a7e880106c829958aae94e943f47ff479e73f78791",
-    "app/src/test/java/com/nuvio/tv/data/iptv/CaptureEpochPeriodTest.kt": "14ae7db4e109dc91c82944b9ce80f37e07c5656e42cce04ea3e274724552c68d",
+    "app/src/test/java/com/nuvio/tv/data/iptv/CaptureEpochPeriodTest.kt": "83ccb9b12ebfe445eacce333ea95b6da29f7a9da63e83c982288b742f1059cde",
     "app/src/androidTest/java/com/nuvio/tv/data/iptv/CaptureVideoPlayerAndroidTest.kt": "21d0e446772baf98e422a7f10ad334b7eccb7c44d9c98b6b93a000a89cd9144e"
   },
   "core": {
@@ -27,14 +28,15 @@
   "captureJvm": {
     "result": "PASS",
     "suites": 13,
-    "tests": 65,
+    "tests": 66,
     "newTests": [
-      "CaptureEpochPeriodTest.videoOnlyPlaybackReachesEosOnlyWhenPlayedBatchesAreRetired"
+      "CaptureEpochPeriodTest.videoOnlyPlaybackReachesEosOnlyWhenPlayedBatchesAreRetired",
+      "CaptureEpochPeriodTest.boundaryAndStopRaiseOnlyAfterBufferedRowsArePlayed"
     ],
     "regressionFailsWithoutFix": true,
     "classpath": "app/libs Media3 AAR classes (common, exoplayer, extractor, datasource, exoplayer-hls); Media3 1.8.0 libraries/decoder built from the androidx/media 1.8.0 tag; guava 33.3.1-android; default-value android stub generated from org.robolectric:android-all:16-robolectric-13921718 (equivalent to unitTests.isReturnDefaultValues)",
     "log": "cloud-handoff/20261006/evidence/cloud-player-capture-jvm-20261006.txt",
-    "logSha256": "ae0f30e5936f4f959117be72a5281daad60be40e46285ce78fcece90fd2e78a3"
+    "logSha256": "c2a105cc4612dad034010f7caa2a47a8b957902c89de5b4bdbf15f05658a2ccf"
   },
   "androidFixture": {
     "result": "COMPILE_CHECK_ONLY",

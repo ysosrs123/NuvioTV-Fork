@@ -14,6 +14,12 @@ through callers/callees once and not independently re-checked.
 2. Explicit start 0 became the live edge (checked against the shipped
    MaskingMediaSource bytecode). Start is now nullable; explicit 0 is sent as 1ms.
 
+3a. Medium-high (checked): epoch boundary or STOPPED aborted playback early.
+   CaptureEpochPeriod.readDiscontinuity and SampleStream.maybeThrowError raised the
+   boundary/stop error as soon as the snapshot changed, discarding staged rows. Both now
+   raise only once the stream has reached the tail; ownership loss still fails at once.
+   JVM regression added.
+
 ## Capture ownership, storage and transport
 
 3. High, latent (checked): dropped admission close ticket. SharedCaptureRuntime.join
@@ -98,3 +104,28 @@ through callers/callees once and not independently re-checked.
 - tools/iptv-device-tests pins okhttp 5.3.2 / coroutines 1.10.2 directly rather than
   the catalogue versions; the handoff states these match the app's resolved runtime,
   which needs a Gradle dependency report to confirm.
+
+## Media inspection, staging and Media3 period
+
+26. High (checked in inspector; Media3 behaviour traced from the shipped AAR bytecode):
+    TsCaptureInspector accepts video PES with a declared length, but the end-of-segment
+    flush in LocalTsSegmentExtractor only finalises an unbounded (length 0) video PES.
+    With a declared length PesReader finishes the packet as not-end-of-input and the
+    synthetic PUSI does nothing, so the last access unit is never emitted. Timing
+    validation then fails and staging fails. The fixtures pass because ffmpeg writes
+    length 0; many hardware encoders write lengths. Options: reject declared-length video
+    at inspection (explicit, narrows the profile) or signal end of input to the H.264
+    reader directly. Needs a declared-length fixture and device decoding.
+27. Medium-low (traced): CaptureEpochMediaSource.createPeriod reads reader.state.value
+    and then borrows it; an IO-worker publish between the two makes the borrow fail and
+    createPeriod throw a fatal "Stale or owned capture snapshot". Fix: bounded retry or
+    an atomic borrow-current method on the reader.
+28. Low (traced): skipData moves past the last buffered sample while still live; Media3
+    queues only do that once loading has ended. A late-frame keyframe drop near the live
+    edge can discard the rest of the buffered GOP. Fix: skip to the end only when ENDED.
+29. Low, latent (traced): CaptureSampleTimeline keeps 256 windows while the store can
+    retain up to 4096 segments, so a cursor anchored on an older retained segment fails.
+30. Note: each played-batch retirement moves the window start forward, so the
+    window-relative currentPosition steps back by one segment. UI position/seek code must
+    use period or absolute capture time.
+

@@ -76,3 +76,8 @@ actual governed player/renderer ownership, device offset/preroll/seek validation
 measured budgets and durable pause/record/storage/provider/UX scope remain required.
 The matching evidence report contains final results and exact source/APK/XML/log
 hashes. No component upgrade, device/provider operation or enabled control.
+
+Boundary update (6 October, iptv/player-binding): DISCONTINUITY, STOPPED and other
+reader end states are raised by readData and SampleStream.maybeThrowError only once
+that stream has consumed every staged row; readDiscontinuity raises only ownership
+loss. Staged rows before a boundary therefore play out before the explicit error.
