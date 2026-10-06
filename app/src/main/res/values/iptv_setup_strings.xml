@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Set up from phone or computer</string>
+    <string name="iptv_remote_entry_subtitle">Type addresses and logins on a proper keyboard</string>
+    <string name="iptv_remote_title">Set up from your phone</string>
+    <string name="iptv_remote_description">Scan the QR code with your phone, or open the address on a computer on the same network. Then enter the pairing code shown here.</string>
+    <string name="iptv_remote_code">Pairing code</string>
+    <string name="iptv_remote_address">Or open this address</string>
+    <string name="iptv_remote_qr_description">QR code for phone setup</string>
+    <string name="iptv_remote_home_network">Only use this on your home network. The setup page isn\'t encrypted.</string>
+    <string name="iptv_remote_idle_note">Stops when you leave this screen, or after 10 minutes without activity.</string>
+    <string name="iptv_remote_confirm_note">Nothing is saved until you confirm it here on the TV. Sources and guides can only be removed on the TV.</string>
+    <string name="iptv_remote_starting">Starting phone setup…</string>
+    <string name="iptv_remote_waiting">Waiting for a phone or computer</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d device connected</item>
+        <item quantity="other">%d devices connected</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Connect the TV to your home network to set up from your phone.</string>
+    <string name="iptv_remote_not_home_network">The TV isn\'t on a private home network address, so phone setup stays off.</string>
+    <string name="iptv_remote_ports_busy">Phone setup couldn\'t start because its network ports are in use. Try again in a moment.</string>
+    <string name="iptv_remote_idle_stopped">Phone setup stopped after 10 minutes without activity.</string>
+    <string name="iptv_remote_paused">Phone setup stopped while the app was in the background.</string>
+    <string name="iptv_remote_start_again">Start again</string>
+    <string name="iptv_remote_start_again_subtitle">Shows a new QR code and pairing code</string>
+    <string name="iptv_remote_done">Done</string>
+    <string name="iptv_remote_done_subtitle">Stops phone setup and goes back</string>
+    <string name="iptv_remote_confirm_add_title">Add this from your phone?</string>
+    <string name="iptv_remote_confirm_edit_title">Change %1$s from your phone?</string>
+    <string name="iptv_remote_confirm_subtitle">Check the details. Nothing is saved unless you choose Save on this TV.</string>
+    <string name="iptv_remote_field_type">Type</string>
+    <string name="iptv_remote_field_name">Name</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Address</string>
+    <string name="iptv_remote_field_username">Username</string>
+    <string name="iptv_remote_field_password">Password</string>
+    <string name="iptv_remote_field_mac">MAC address</string>
+    <string name="iptv_remote_password_set">Entered on the phone (hidden)</string>
+    <string name="iptv_remote_password_new">New password (hidden)</string>
+    <string name="iptv_remote_save">Save on this TV</string>
+    <string name="iptv_remote_reject">Reject</string>
+    <string name="iptv_remote_saved">Saved. Loading channels now.</string>
+    <string name="iptv_remote_guide_saved">Saved. Loading the guide now.</string>
+    <string name="iptv_remote_rejected">Rejected. Nothing was saved.</string>
+</resources>

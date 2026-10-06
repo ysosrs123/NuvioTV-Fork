@@ -1251,6 +1251,11 @@ private fun PlaybackNavHost(
                     }
                 })
         }
+        if (com.nuvio.tv.BuildConfig.FEATURE_IPTV_ENABLED) {
+            composable(Screen.IptvSetup.route) {
+                com.nuvio.tv.ui.screens.iptv.IptvSetupScreen(onBack = { navController.popBackStack() })
+            }
+        }
 
         composable(Screen.Settings.route) {
             SettingsScreen(
