@@ -19,7 +19,8 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
     val channels: List<IptvListedChannel> = emptyList(), val next: IptvBrowseCursor? = null,
     val categories: List<IptvCategory> = emptyList(), val category: String? = null, val favourites: Boolean = false,
     val guide: Map<String, GuideGridRow> = emptyMap(), val window: GuideGridWindow? = null,
-    val focused: IptvListedChannel? = null, val playingId: String? = null,
+    val focused: IptvListedChannel? = null, val playingId: String? = null, val previousId: String? = null,
+    val recent: List<String> = emptyList(),
     val playback: IptvLivePlayback? = null,
     val player: ExoPlayer? = null, val playingTitle: String? = null, val playing: Boolean = false,
     val loading: Boolean = false, val tuning: Boolean = false, val message: Int? = null, val updating: Int? = null,
@@ -96,6 +97,13 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     fun loadMore() { if (mutable.value.next != null) load(append = true) }
     fun showFavourites() { mutable.update { it.copy(favourites = true, category = null, focused = null) }; load() }
     fun showCategory(name: String?) { mutable.update { it.copy(favourites = false, category = name, focused = null) }; load() }
+    fun lastChannel() {
+        val current = mutable.value
+        current.channels.firstOrNull { it.item.channel.id == current.previousId }?.let { mutable.update { state -> state.copy(focused = it) }; watch(it) }
+    }
+    fun watchNumber(number: Int) {
+        mutable.value.channels.getOrNull(number - 1)?.let { mutable.update { state -> state.copy(focused = it) }; watch(it) }
+    }
     fun zap(delta: Int) {
         val current = mutable.value
         if (current.channels.isEmpty()) return
@@ -234,7 +242,9 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         tuneJob?.cancel()
         val request = ++tuneVersion
         tuneJob = viewModelScope.launch {
-            mutable.update { it.copy(tuning = true, playback = null, player = null, playingTitle = null, playing = false, message = null, playingId = row.item.channel.id) }
+            mutable.update { it.copy(tuning = true, playback = null, player = null, playingTitle = null, playing = false, message = null, playingId = row.item.channel.id,
+                previousId = it.playingId?.takeIf { id -> id != row.item.channel.id } ?: it.previousId,
+                recent = (listOf(row.item.channel.id) + it.recent.filter { id -> id != row.item.channel.id }).take(RECENT)) }
             try {
                 val source = withContext(Dispatchers.IO) { access.use(current) { catalogue.sources(current.profileId).single { it.ref == ref } } }
                 val streamFormat = withContext(Dispatchers.IO) { access.use(current) {
@@ -274,7 +284,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     }
     fun stop() {
         ++tuneVersion; tuneJob?.cancel()
-        mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, tuning = false, playingId = null) }
+        mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, tuning = false, playingId = null, previousId = it.playingId ?: it.previousId) }
         viewModelScope.launch { if (!runtime.stop(owner)) mutable.update { it.copy(message = R.string.iptv_live_closing) } }
     }
     private fun guideWindow(now: Long): GuideGridWindow {
@@ -288,6 +298,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     }
     private companion object {
         const val PAGE = 60
+        const val RECENT = 8
         const val WINDOW_SPAN = 12 * 60 * 60 * 1000L
         const val WINDOW_SHIFT = 4 * 60 * 60 * 1000L
     }

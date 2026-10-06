@@ -31,6 +31,8 @@
     <string name="iptv_live_title">Live TV</string>
     <string name="iptv_live_now_playing">Playing</string>
     <string name="iptv_live_uncategorised">Other channels</string>
+    <string name="iptv_live_recent">Recent channels</string>
+    <string name="iptv_live_up_next">Next: %1$s at %2$s</string>
     <string name="iptv_live_next_source">Next source</string>
     <string name="iptv_live_all">All channels</string>
     <string name="iptv_live_favourites">Favourites</string>

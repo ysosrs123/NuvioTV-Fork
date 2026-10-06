@@ -38,6 +38,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.media3.common.C
+import androidx.media3.common.MimeTypes
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.tv.material3.Button
@@ -108,7 +110,8 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
     }
 
     if (fullscreen) {
-        FullscreenLive(state, now, showHud, onZap = viewModel::zap, onMenu = { state.channels.firstOrNull { it.item.channel.id == state.playingId }?.let { menuFor = it } })
+        FullscreenLive(state, now, showHud, onZap = viewModel::zap, onMenu = { state.channels.firstOrNull { it.item.channel.id == state.playingId }?.let { menuFor = it } },
+            onLastChannel = viewModel::lastChannel, onNumber = viewModel::watchNumber, onWatch = viewModel::watch)
     } else {
         Column(Modifier.fillMaxSize().background(NuvioTheme.colors.Background).padding(horizontal = 32.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -401,38 +404,171 @@ private fun GuideRow(row: IptvListedChannel, grid: GuideGridRow?, index: Int, no
 }
 
 @Composable
-private fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, onZap: (Int) -> Unit, onMenu: () -> Unit) {
+private fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, onZap: (Int) -> Unit, onMenu: () -> Unit,
+    onLastChannel: () -> Unit, onNumber: (Int) -> Unit, onWatch: (IptvListedChannel) -> Unit) {
     var banner by remember { mutableIntStateOf(0) }
+    var panel by remember { mutableStateOf(false) }
+    var digits by remember { mutableStateOf("") }
     val focus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
-    LaunchedEffect(banner, state.playingId) { if (banner >= 0) { delay(4_000); banner = -1 } }
+    LaunchedEffect(panel) { if (!panel) runCatching { focus.requestFocus() } }
+    LaunchedEffect(banner, state.playingId) { if (banner >= 0) { delay(5_000); banner = -1 } }
+    LaunchedEffect(digits) {
+        if (digits.isNotEmpty()) { delay(1_500); digits.toIntOrNull()?.let(onNumber); digits = ""; banner = 0 }
+    }
+    BackHandler(panel) { panel = false }
     val longPress = rememberLongPressKeyTracker()
     Box(Modifier.fillMaxSize().background(Color.Black).focusRequester(focus).onPreviewKeyEvent { event ->
         val native = event.nativeKeyEvent
+        if (panel) return@onPreviewKeyEvent false
         if (longPress.handle(native, ::isSelect) { onMenu() }) return@onPreviewKeyEvent true
         if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) {
             banner = if (banner < 0) 0 else -1
             return@onPreviewKeyEvent true
         }
         if (native.action != AndroidKeyEvent.ACTION_DOWN) return@onPreviewKeyEvent false
+        val digit = native.keyCode - AndroidKeyEvent.KEYCODE_0
+        if (digit in 0..9) { if (digits.length < 4) digits += digit; return@onPreviewKeyEvent true }
         when (native.keyCode) {
             AndroidKeyEvent.KEYCODE_DPAD_UP, AndroidKeyEvent.KEYCODE_CHANNEL_UP -> { onZap(-1); banner++; true }
             AndroidKeyEvent.KEYCODE_DPAD_DOWN, AndroidKeyEvent.KEYCODE_CHANNEL_DOWN -> { onZap(1); banner++; true }
+            AndroidKeyEvent.KEYCODE_DPAD_RIGHT, AndroidKeyEvent.KEYCODE_LAST_CHANNEL -> { onLastChannel(); banner++; true }
+            AndroidKeyEvent.KEYCODE_DPAD_LEFT, AndroidKeyEvent.KEYCODE_GUIDE -> { panel = true; true }
             AndroidKeyEvent.KEYCODE_MENU -> { onMenu(); true }
             else -> false
         }
     }.focusable()) {
         LiveVideo(state.player, state.playback.takeIf { showHud }, Modifier.fillMaxSize())
-        if (banner >= 0) {
-            val row = state.channels.firstOrNull { it.item.channel.id == state.playingId }
+        if (digits.isNotEmpty()) {
+            Text(digits, style = MaterialTheme.typography.displaySmall, color = NuvioTheme.colors.TextPrimary,
+                modifier = Modifier.align(Alignment.TopEnd).padding(32.dp).clip(RoundedCornerShape(10.dp))
+                    .background(NuvioTheme.colors.VideoControlsScrim).padding(horizontal = 20.dp, vertical = 8.dp))
+        }
+        if (banner >= 0 && !panel) {
+            val index = state.channels.indexOfFirst { it.item.channel.id == state.playingId }
+            val row = state.channels.getOrNull(index)
             val programme = row?.let { programmeAt(state.guide[it.item.channel.id], now) }
+            val following = row?.let { channel -> state.guide[channel.item.channel.id]?.cells?.filterIsInstance<GuideProgrammeCell>()
+                ?.firstOrNull { it.startMillis >= (programme?.stop?.epochMillis ?: now) }?.programme }
             Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().background(NuvioTheme.colors.VideoControlsScrim).padding(horizontal = 40.dp, vertical = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(row?.let(::channelName) ?: state.playingTitle.orEmpty(), style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextSecondary)
+                verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (index >= 0) Text("${index + 1}", style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextTertiary)
+                    Text(row?.let(::channelName) ?: state.playingTitle.orEmpty(), style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextSecondary)
+                    qualityBadges(state.player).forEach { Badge(it) }
+                }
                 Text(programme?.let(::title) ?: stringResource(R.string.iptv_live_no_programme), style = MaterialTheme.typography.headlineSmall, color = NuvioTheme.colors.TextPrimary)
-                programme?.let { Text(timeRange(it), color = NuvioTheme.colors.TextSecondary) }
+                programme?.let { item ->
+                    Text(timeRange(item), color = NuvioTheme.colors.TextSecondary)
+                    item.stop?.epochMillis?.let { stop ->
+                        val fraction = ((now - item.start.epochMillis).toFloat() / (stop - item.start.epochMillis)).coerceIn(0f, 1f)
+                        Box(Modifier.fillMaxWidth(0.5f).height(4.dp).clip(RoundedCornerShape(2.dp)).background(NuvioTheme.colors.Border)) {
+                            Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().background(NuvioTheme.colors.FocusRing))
+                        }
+                    }
+                }
+                following?.let { Text(stringResource(R.string.iptv_live_up_next, title(it), DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(it.start.epochMillis))),
+                    color = NuvioTheme.colors.TextTertiary) }
                 if (!state.playing) Text(stringResource(R.string.iptv_live_connecting), color = NuvioTheme.colors.TextTertiary)
             }
+        }
+        if (panel) ChannelPanel(state, now, Modifier.align(Alignment.CenterStart).fillMaxHeight(), onWatch = { panel = false; onWatch(it) })
+    }
+}
+
+@Composable
+private fun ChannelPanel(state: IptvLiveState, now: Long, modifier: Modifier, onWatch: (IptvListedChannel) -> Unit) {
+    var selected by remember { mutableStateOf(state.channels.firstOrNull { it.item.channel.id == state.playingId }) }
+    val recent = state.recent.drop(1).mapNotNull { id -> state.channels.firstOrNull { it.item.channel.id == id } }.take(4)
+    val start = remember { FocusRequester() }
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = (state.channels.indexOfFirst { it.item.channel.id == state.playingId }).coerceAtLeast(0))
+    LaunchedEffect(Unit) { withFrameNanos { }; runCatching { start.requestFocus() } }
+    Row(modifier.background(NuvioTheme.colors.VideoControlsScrim).padding(24.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+        Column(Modifier.width(420.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (recent.isNotEmpty()) {
+                Text(stringResource(R.string.iptv_live_recent), style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextTertiary)
+                recent.forEach { row -> PanelChannel(row, state, now, Modifier, { selected = row }, { onWatch(row) }) }
+                Text(stringResource(R.string.iptv_live_all), style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextTertiary)
+            }
+            LazyColumn(state = listState, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                items(state.channels, key = { it.item.channel.id }) { row ->
+                    PanelChannel(row, state, now, if (row.item.channel.id == state.playingId) Modifier.focusRequester(start) else Modifier,
+                        { selected = row }, { onWatch(row) })
+                }
+            }
+        }
+        Column(Modifier.width(360.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            val row = selected
+            Text(row?.let(::channelName).orEmpty(), style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            val schedule = row?.let { channel -> state.guide[channel.item.channel.id]?.cells?.filterIsInstance<GuideProgrammeCell>()?.filter { it.endMillis > now }?.take(8) }.orEmpty()
+            if (schedule.isEmpty()) Text(stringResource(R.string.iptv_live_no_programme), color = NuvioTheme.colors.TextSecondary)
+            schedule.forEach { cell ->
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(cell.programme.start.epochMillis)), color = NuvioTheme.colors.TextTertiary,
+                        style = MaterialTheme.typography.bodyMedium, modifier = Modifier.width(72.dp))
+                    Text(title(cell.programme), color = if (airing(cell.programme, now)) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary,
+                        style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PanelChannel(row: IptvListedChannel, state: IptvLiveState, now: Long, modifier: Modifier, onFocused: () -> Unit, onClick: () -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    val number = state.channels.indexOf(row) + 1
+    Row(modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp))
+        .background(if (focused) NuvioTheme.colors.FocusBackground else Color.Transparent)
+        .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
+        .onPreviewKeyEvent { event ->
+            val native = event.nativeKeyEvent
+            if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) { onClick(); true } else false
+        }
+        .focusable().padding(horizontal = 12.dp, vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("$number", color = NuvioTheme.colors.TextTertiary, style = MaterialTheme.typography.labelMedium, modifier = Modifier.width(36.dp))
+        Column(Modifier.weight(1f)) {
+            Text(channelName(row), color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                fontWeight = if (row.item.channel.id == state.playingId) FontWeight.SemiBold else FontWeight.Normal)
+            Text(programmeAt(state.guide[row.item.channel.id], now)?.let(::title) ?: "—", color = NuvioTheme.colors.TextSecondary,
+                style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+@Composable
+private fun Badge(text: String) {
+    Text(text, color = NuvioTheme.colors.TextPrimary, style = MaterialTheme.typography.labelSmall,
+        modifier = Modifier.clip(RoundedCornerShape(4.dp)).background(NuvioTheme.colors.SurfaceVariant).padding(horizontal = 6.dp, vertical = 2.dp))
+}
+
+private fun qualityBadges(player: ExoPlayer?): List<String> {
+    val video = player?.videoFormat
+    val audio = player?.audioFormat
+    return buildList {
+        if (video != null && video.height > 0) add(when {
+            video.height >= 2000 -> "4K"
+            video.height >= 1000 -> "1080p"
+            video.height >= 700 -> "720p"
+            else -> "${video.height}p"
+        })
+        video?.frameRate?.takeIf { it > 0 }?.let { add("${kotlin.math.round(it).toInt()} fps") }
+        when (video?.sampleMimeType) {
+            MimeTypes.VIDEO_H264 -> add("H.264")
+            MimeTypes.VIDEO_H265 -> add("HEVC")
+            MimeTypes.VIDEO_AV1 -> add("AV1")
+            MimeTypes.VIDEO_MPEG2 -> add("MPEG-2")
+        }
+        when (video?.colorInfo?.colorTransfer) {
+            C.COLOR_TRANSFER_ST2084 -> add("HDR10")
+            C.COLOR_TRANSFER_HLG -> add("HLG")
+        }
+        val channels = audio?.channelCount?.takeIf { it > 0 }?.let { if (it >= 6) "5.1" else if (it == 2) "2.0" else "$it ch" }
+        when (audio?.sampleMimeType) {
+            MimeTypes.AUDIO_AAC -> add(listOfNotNull("AAC", channels).joinToString(" "))
+            MimeTypes.AUDIO_AC3 -> add(listOfNotNull("Dolby Digital", channels).joinToString(" "))
+            MimeTypes.AUDIO_E_AC3, MimeTypes.AUDIO_E_AC3_JOC -> add(listOfNotNull("Dolby Digital Plus", channels).joinToString(" "))
+            MimeTypes.AUDIO_MPEG, MimeTypes.AUDIO_MPEG_L2 -> add(listOfNotNull("MPEG audio", channels).joinToString(" "))
+            else -> channels?.let(::add)
         }
     }
 }
