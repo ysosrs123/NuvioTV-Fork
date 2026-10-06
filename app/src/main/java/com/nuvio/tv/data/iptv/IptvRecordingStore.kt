@@ -43,7 +43,7 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
         val entries = entries()
         require(recording.id !in entries)
         check(entries.size < maxEntries) { "Recording list is full" }
-        save(LinkedHashMap(entries).apply { put(recording.id, recording) })
+        save(LinkedHashMap(entries).apply { put(recording.id, recording) }, keepOnFailure = false)
     }
 
     @Synchronized fun update(id: String, transform: (IptvRecording) -> IptvRecording): IptvRecording? {
@@ -98,7 +98,16 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
         return result
     }
 
-    private fun save(entries: LinkedHashMap<String, IptvRecording>) {
+    private fun save(entries: LinkedHashMap<String, IptvRecording>, keepOnFailure: Boolean = true) {
+        val previous = loaded
+        loaded = entries
+        try { write(entries) } catch (error: Exception) {
+            if (!keepOnFailure) loaded = previous
+            throw error
+        }
+    }
+
+    private fun write(entries: LinkedHashMap<String, IptvRecording>) {
         val text = JSONObject().put("version", VERSION).put("recordings", JSONArray().apply { entries.values.forEach { put(encode(it)) } }).toString()
         val parent = file.parentFile
         if (parent != null && !parent.isDirectory && !parent.mkdirs()) throw IOException("Recording list folder unavailable")
@@ -112,7 +121,6 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
             temporary.delete()
             throw IOException("Recording list could not be saved")
         }
-        loaded = entries
     }
 
     private fun encode(entry: IptvRecording) = JSONObject().apply {

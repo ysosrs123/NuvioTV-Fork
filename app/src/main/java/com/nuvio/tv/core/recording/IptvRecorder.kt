@@ -144,7 +144,7 @@ class IptvRecorder @Inject constructor(
             val current = store.get(id) ?: return@withLock null
             if (current.status == RecordingStatus.SCHEDULED) {
                 IptvRecordingAlarms.cancel(context, current.id)
-                store.update(id) { it.copy(status = RecordingStatus.CANCELLED, finishedAtMillis = System.currentTimeMillis()) }
+                update(id) { it.copy(status = RecordingStatus.CANCELLED, finishedAtMillis = System.currentTimeMillis()) }
                 publish()
             }
             current.status
@@ -166,7 +166,7 @@ class IptvRecorder @Inject constructor(
         val job = synchronized(this@IptvRecorder) { jobs[id]?.also { stops[id] = RecordingStop.REMOVED } }
         val removed = mutex.withLock {
             load()
-            store.remove(id)?.also { IptvRecordingAlarms.cancel(context, it.id); deleteFiles(it); publish() }
+            remove(id)?.also { IptvRecordingAlarms.cancel(context, it.id); deleteFiles(it); publish() }
         }
         job?.cancel()
         removed != null
@@ -317,6 +317,21 @@ class IptvRecorder @Inject constructor(
         return IptvRecordResult.Accepted(store.get(entry.id) ?: entry, immediate)
     }
 
+    private fun update(id: String, transform: (IptvRecording) -> IptvRecording): IptvRecording? = try {
+        store.update(id, transform)
+    } catch (error: Exception) {
+        IptvLog.failure("recording save", error)
+        store.get(id)
+    }
+
+    private fun remove(id: String): IptvRecording? {
+        val entry = store.get(id)
+        return try { store.remove(id) } catch (error: Exception) {
+            IptvLog.failure("recording save", error)
+            entry
+        }
+    }
+
     private fun retime(entry: IptvRecording, span: RecordingSpan, now: Long) {
         if (span.startMillis == entry.startMillis && span.stopMillis == entry.stopMillis) return
         val scheduled = entry.status == RecordingStatus.SCHEDULED && entry.startMillis > now
@@ -324,7 +339,7 @@ class IptvRecorder @Inject constructor(
         val stop = maxOf(span.stopMillis, now + 1)
         if (stop <= start) return
         try {
-            store.update(entry.id) { it.copy(startMillis = start, stopMillis = stop) }
+            update(entry.id) { it.copy(startMillis = start, stopMillis = stop) }
             if (scheduled && start != entry.startMillis) IptvRecordingAlarms.arm(context, entry.id, start)
         } catch (error: Exception) { IptvLog.failure("recording retime", error) }
     }
@@ -346,13 +361,14 @@ class IptvRecorder @Inject constructor(
                 val now = System.currentTimeMillis()
                 if (current.stopMillis <= now) { fail(id, RecordingFailure.MISSED); publish(); return }
                 val file = File(directory(), RecordingFiles.name(current.channelName, current.title, now, current.id, ZoneId.systemDefault()))
-                store.update(id) { it.copy(status = RecordingStatus.RECORDING, startedAtMillis = now, file = file.path) }.also { publish() }
+                update(id) { it.copy(status = RecordingStatus.RECORDING, startedAtMillis = now, file = file.path) }
+                    ?.takeIf { it.status == RecordingStatus.RECORDING && it.file != null }.also { publish() }
             }
         } catch (cancel: CancellationException) {
             withContext(NonCancellable) {
                 val stop = synchronized(this@IptvRecorder) { stops[id] }
                 mutex.withLock {
-                    if (stop == RecordingStop.USER) store.update(id) { current ->
+                    if (stop == RecordingStop.USER) update(id) { current ->
                         if (current.status != RecordingStatus.SCHEDULED) current
                         else current.copy(status = RecordingStatus.CANCELLED, finishedAtMillis = System.currentTimeMillis())
                     } else if (stop != RecordingStop.REMOVED) fail(id, RecordingFailure.INTERRUPTED)
@@ -369,7 +385,7 @@ class IptvRecorder @Inject constructor(
             var ticks = 0
             while (isActive) {
                 delay(PROGRESS_MILLIS)
-                if (++ticks % PERSIST_TICKS == 0) mutex.withLock { store.update(id) { it.copy(bytes = holder.bytes, gaps = holder.gaps) } }
+                if (++ticks % PERSIST_TICKS == 0) mutex.withLock { update(id) { it.copy(bytes = holder.bytes, gaps = holder.gaps) } }
                 if ((store.get(id)?.stopMillis ?: Long.MAX_VALUE) <= System.currentTimeMillis()) stop(id)
                 publish()
             }
@@ -424,7 +440,7 @@ class IptvRecorder @Inject constructor(
             return@withLock
         }
         val outcome = RecordingTransitions.outcome(bytes, failure ?: storage, gaps, stop)
-        store.update(entry.id) {
+        update(entry.id) {
             it.copy(status = outcome.status, failure = outcome.failure, bytes = bytes, gaps = gaps, file = file?.path, finishedAtMillis = System.currentTimeMillis())
         }
         IptvLog.info("recording finished ${outcome.status}${outcome.failure?.let { " $it" }.orEmpty()}")
@@ -454,7 +470,8 @@ class IptvRecorder @Inject constructor(
         val removed = withContext(Dispatchers.IO) {
             mutex.withLock {
                 load()
-                val list = if (profileId == null) store.clear() else store.removeProfile(profileId)
+                val list = store.all().filter { profileId == null || it.profileId == profileId }
+                try { if (profileId == null) store.clear() else store.removeProfile(profileId) } catch (error: Exception) { IptvLog.failure("recordings save", error) }
                 list.forEach { IptvRecordingAlarms.cancel(context, it.id); deleteFiles(it) }
                 publish()
                 list
@@ -486,7 +503,7 @@ class IptvRecorder @Inject constructor(
         part?.takeIf { it.isFile && it != file }?.delete()
         val bytes = file?.length() ?: 0L
         val outcome = RecordingTransitions.interrupted(bytes)
-        store.update(entry.id) { it.copy(status = outcome.status, failure = outcome.failure, bytes = bytes, file = file?.path, finishedAtMillis = now) }
+        update(entry.id) { it.copy(status = outcome.status, failure = outcome.failure, bytes = bytes, file = file?.path, finishedAtMillis = now) }
         IptvLog.info("recording interrupted ${outcome.status}")
     }
 
@@ -500,7 +517,7 @@ class IptvRecorder @Inject constructor(
     }
 
     private fun fail(id: String, failure: RecordingFailure) {
-        store.update(id) { current ->
+        update(id) { current ->
             if (current.status != RecordingStatus.SCHEDULED) current
             else current.copy(status = RecordingStatus.FAILED, failure = failure, finishedAtMillis = System.currentTimeMillis())
         }

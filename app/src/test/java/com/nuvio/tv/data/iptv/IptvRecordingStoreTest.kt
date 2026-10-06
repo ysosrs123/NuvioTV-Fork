@@ -65,4 +65,18 @@ class IptvRecordingStoreTest {
         file.writeText(file.readText().replace("]", ",{\"id\":\"../x\"}]"))
         assertEquals(listOf("aaaaaaaa-1"), IptvRecordingStore(file).all().map { it.id })
     }
+
+    @Test fun failedWritesKeepUpdatesInMemoryButNotInserts() {
+        val folder = File(temp.root, "list")
+        val store = IptvRecordingStore(File(folder, "r.json"))
+        store.insert(entry("aaaaaaaa-1"))
+        folder.deleteRecursively()
+        folder.writeText("not a folder")
+        try { store.update("aaaaaaaa-1") { it.copy(status = RecordingStatus.RECORDING) }; fail() } catch (_: java.io.IOException) { }
+        assertEquals(RecordingStatus.RECORDING, store.get("aaaaaaaa-1")?.status)
+        try { store.insert(entry("bbbbbbbb-2")); fail() } catch (_: java.io.IOException) { }
+        assertNull(store.get("bbbbbbbb-2"))
+        try { store.remove("aaaaaaaa-1"); fail() } catch (_: java.io.IOException) { }
+        assertNull(store.get("aaaaaaaa-1"))
+    }
 }
