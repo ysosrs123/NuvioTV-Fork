@@ -91,7 +91,6 @@ class IptvSetupServer private constructor(
         val rest = match.groupValues[2]
         val api = rest.startsWith("/api/")
         if (!pairing.knowsLink(token)) return if (api) json(Response.Status.NOT_FOUND, error("link")) else ended()
-        idle.touch()
         if (!api) return when {
             session.method != Method.GET -> text(Response.Status.METHOD_NOT_ALLOWED, "Method not allowed")
             rest.isEmpty() -> redirect("/s/$token/")
@@ -105,6 +104,7 @@ class IptvSetupServer private constructor(
         if (path == "pair") return if (post) pair(session, token, remote) else json(Response.Status.METHOD_NOT_ALLOWED, error("method"))
         val owner = pairing.session(token, SetupCookies.read(session.headers["cookie"]))
             ?: return json(Response.Status.UNAUTHORIZED, error("session"))
+        idle.touch()
         return when {
             path == "state" && !post -> json(Response.Status.OK, listing().toJson(pending = changes.hasPending()))
             path == "changes" && post -> propose(session, owner, remote)
@@ -126,6 +126,7 @@ class IptvSetupServer private constructor(
         }
         return when (val result = pairing.pair(token, code)) {
             is SetupPairing.Result.Paired -> json(Response.Status.OK, JSONObject().put("paired", true).toString()).also {
+                idle.touch()
                 it.addHeader("Set-Cookie", SetupCookies.session(result.sessionId, token))
             }
             is SetupPairing.Result.WrongCode -> json(Response.Status.FORBIDDEN, JSONObject().put("error", "code").put("attemptsLeft", result.attemptsLeft).toString())
