@@ -83,7 +83,15 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 - Channel logos from M3U tvg-logo, Xtream stream_icon and Stalker logo fields
   (http/https only).
 - Guide ids with a feed suffix (for example abc.uk@SD) match the base guide channel.
-- Channel search from the rail (folded, within the current category).
+- Channel search from the rail (folded, within the current category), and "Search
+  what's on now", which finds channels whose current programme title matches (from
+  guides imported with this version; older guide data becomes searchable after its
+  next refresh, sources after theirs).
+- Multiview: up to four channels at once from the channel options ("Add to
+  multiview"); sound follows the focused picture, OK goes full screen on it, and each
+  picture can be changed or removed. Each picture uses a connection on its account.
+- Each source has its own connection limit (1 to 4) under its options in Live TV
+  sources; new sources no longer share one limit with other providers.
 - Each source opens on the category, favourites or all channels last chosen for it.
   Holding OK (or Menu) on a category hides it from the rail into a "Hidden
   categories" section and its channels leave All channels (they still open from
@@ -197,7 +205,8 @@ Screens and app
   default; these are estimates, not measured device limits.
 - No DRM, encrypted HLS, fMP4 or separate-audio
   support has been validated.
-- No timeshift, recording or multiview yet. Account groups have no UI yet. Stalker
+- No timeshift yet. Multiview depends on how many decoders the TV has; four pictures
+  are untested. Account groups have no UI yet. Stalker
   portals have no catch-up. Xtream catch-up assumes the provider uses the device's
   time zone.
 - Subtitles, closed captions, DVB subtitles and teletext are not all validated.

@@ -102,12 +102,20 @@ Work queue, in order:
    unknown entities such as `&nbsp;` before our code sees them.
 3. Device pass by the user; then fix what they find. Ask for
    `adb -s <AM9>:5555 logcat -d -s NuvioIptv NuvioXtream` after a refresh.
-4. Done (CI pending): favourites ordering, hidden categories (excluded from All channels via
+4. Done: "now on" search (guide schema 4 `search_title`, catalogue schema 8
+   `epg_id`/`epg_base`/`name_key`; rows fill on the next guide import / source
+   refresh; programmes longer than 24 h are not found), multiview (up to four tiles,
+   each its own `LivePlaybackRuntime` sharing the admission; device decoder limit
+   raised from 1 to 4 — unmeasured on the AM9) and per-source connection limits
+   (sources get their own account `src-<sourceId>`). Also done: favourites ordering, hidden categories (excluded from All channels via
    `IptvBrowseQuery.excludedCategories`; stored in the
    `iptv-live` shared preferences per profile and source, not removed with the
-   profile yet), last category as the landing category. Remaining: "now on" search.
+   profile yet), last category as the landing category. 
    CI note: starting a workflow run cancels the one in progress (concurrency group);
-   run one at a time.
+   run one at a time. NanoHTTPD and ZXing are app dependencies (used by the existing
+   phone configuration servers in `core/server`); the phone/PC setup reuses them.
+   Device test `IptvCatalogueStoreTest.v2MigrationPreserves…` appears to fail
+   already (it sets version 2 on a current database); not yet checked on device.
 5. Secure phone/PC setup (pairing code, CSRF/origin checks, LAN only, idle timeout,
    no secrets echoed) — security sensitive, needs review.
 6. Recording, multiview and sports only after the above.
