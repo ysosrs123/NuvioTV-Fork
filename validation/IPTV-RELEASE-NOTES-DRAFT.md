@@ -58,6 +58,8 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 
 - Stalker Portal (MAC-based) sources with stream links created at tune time.
 - Provider account groups with per-group stream limits, and source ordering.
+- Catch-up addresses for Xtream archives and the M3U default, append, shift and
+  Flussonic catch-up types (screens pending).
 - Guide import from a folder on internal storage or a USB drive for TVs without a
   file picker.
 
@@ -65,7 +67,11 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 
 - A stream is replaced only after the previous decoder and HTTP connections have
   closed; an uncertain release keeps its reservation rather than over-committing.
-- Failed loads do not retry automatically and HLS does not fall back to other
+- Live streams follow provider redirects (common for Xtream) and reconnect after
+  network drops, provider-ended streams, falling behind the live window or a stall
+  of more than 20 seconds (after 1, 2, 3 then 5 seconds, six attempts) before an
+  error is shown. Decoder errors still fail at once. HLS keeps about six seconds
+  behind live with small speed adjustments. HLS does not fall back to other
   renditions after a failure. HTTP/1.0 metadata servers no longer hit stale
   connections.
 - Guide redirects are limited to six, never downgrade to HTTP, never carry userinfo,
