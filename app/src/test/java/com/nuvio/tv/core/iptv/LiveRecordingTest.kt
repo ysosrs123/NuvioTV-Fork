@@ -1,0 +1,108 @@
+package com.nuvio.tv.core.iptv
+
+import java.time.ZoneId
+import org.junit.Assert.*
+import org.junit.Test
+
+class LiveRecordingTest {
+    private val now = 1_791_331_200_000L
+    private val minute = 60_000L
+    private val hour = 60 * minute
+
+    @Test fun transitionsOnlyMoveForward() {
+        assertTrue(RecordingTransitions.allowed(RecordingStatus.SCHEDULED, RecordingStatus.RECORDING))
+        assertTrue(RecordingTransitions.allowed(RecordingStatus.SCHEDULED, RecordingStatus.CANCELLED))
+        assertTrue(RecordingTransitions.allowed(RecordingStatus.RECORDING, RecordingStatus.PARTIAL))
+        assertFalse(RecordingTransitions.allowed(RecordingStatus.SCHEDULED, RecordingStatus.DONE))
+        assertFalse(RecordingTransitions.allowed(RecordingStatus.RECORDING, RecordingStatus.SCHEDULED))
+        RecordingStatus.entries.filter { it.finished }.forEach { from ->
+            RecordingStatus.entries.forEach { to -> assertFalse("$from -> $to", RecordingTransitions.allowed(from, to)) }
+        }
+        assertEquals(setOf(RecordingStatus.SCHEDULED, RecordingStatus.RECORDING), RecordingStatus.entries.filter { it.holdsConnection }.toSet())
+    }
+
+    @Test fun outcomeReflectsBytesGapsAndStops() {
+        assertEquals(RecordingOutcome(RecordingStatus.DONE, null), RecordingTransitions.outcome(10, null, 0, null))
+        assertEquals(RecordingOutcome(RecordingStatus.DONE, null), RecordingTransitions.outcome(10, null, 0, RecordingStop.USER))
+        assertEquals(RecordingOutcome(RecordingStatus.PARTIAL, RecordingFailure.NETWORK), RecordingTransitions.outcome(10, null, 2, RecordingStop.USER))
+        assertEquals(RecordingOutcome(RecordingStatus.PARTIAL, RecordingFailure.LOW_STORAGE), RecordingTransitions.outcome(10, RecordingFailure.LOW_STORAGE, 0, null))
+        assertEquals(RecordingOutcome(RecordingStatus.PARTIAL, RecordingFailure.TIME_LIMIT), RecordingTransitions.outcome(10, null, 0, RecordingStop.TIME_LIMIT))
+        assertEquals(RecordingOutcome(RecordingStatus.CANCELLED, null), RecordingTransitions.outcome(0, null, 0, RecordingStop.USER))
+        assertEquals(RecordingOutcome(RecordingStatus.FAILED, RecordingFailure.NETWORK), RecordingTransitions.outcome(0, null, 0, null))
+        assertEquals(RecordingOutcome(RecordingStatus.FAILED, RecordingFailure.NO_CONNECTION), RecordingTransitions.outcome(0, RecordingFailure.NO_CONNECTION, 0, null))
+        assertEquals(RecordingOutcome(RecordingStatus.PARTIAL, RecordingFailure.INTERRUPTED), RecordingTransitions.interrupted(1))
+        assertEquals(RecordingOutcome(RecordingStatus.FAILED, RecordingFailure.INTERRUPTED), RecordingTransitions.interrupted(0))
+    }
+
+    @Test fun recordNowFollowsProgrammeEndWithPostRollAndCap() {
+        assertEquals(RecordingWindow(now, now + 30 * minute + RecordingPlan.POST_ROLL_MILLIS), RecordingPlan.now(now, now + 30 * minute))
+        assertEquals(RecordingWindow(now, now + RecordingPlan.DEFAULT_DURATION_MILLIS), RecordingPlan.now(now))
+        assertEquals(RecordingWindow(now, now + 6 * hour), RecordingPlan.now(now, now + 9 * hour))
+        assertNull(RecordingPlan.now(now, now))
+    }
+
+    @Test fun programmeWindowAddsRollsStartsNowWhenLateAndCapsSixHours() {
+        assertEquals(RecordingWindow(now + hour - RecordingPlan.PRE_ROLL_MILLIS, now + 2 * hour + RecordingPlan.POST_ROLL_MILLIS),
+            RecordingPlan.programme(now, now + hour, now + 2 * hour))
+        assertEquals(RecordingWindow(now, now + hour + RecordingPlan.POST_ROLL_MILLIS), RecordingPlan.programme(now, now - hour, now + hour))
+        assertEquals(RecordingWindow(now + hour - RecordingPlan.PRE_ROLL_MILLIS, now + hour - RecordingPlan.PRE_ROLL_MILLIS + 6 * hour),
+            RecordingPlan.programme(now, now + hour, now + 10 * hour))
+        assertEquals(RecordingWindow(now + hour - RecordingPlan.PRE_ROLL_MILLIS, now + 2 * hour + RecordingPlan.POST_ROLL_MILLIS),
+            RecordingPlan.programme(now, now + hour, null))
+        assertNull(RecordingPlan.programme(now, now - 2 * hour, now - hour))
+        assertNull(RecordingPlan.programme(now, now + hour, now + hour))
+    }
+
+    @Test fun conflictCountsPeakOverlapPerAccount() {
+        val candidate = RecordingSlot("a", now, now + 2 * hour)
+        val sequential = listOf(RecordingSlot("a", now - hour, now + hour), RecordingSlot("a", now + hour, now + 3 * hour))
+        assertEquals(1, recordingPeak(sequential, candidate))
+        assertFalse(recordingConflicts(sequential, candidate, 2))
+        assertTrue(recordingConflicts(sequential, candidate, 1))
+        val stacked = sequential + RecordingSlot("a", now + 30 * minute, now + 90 * minute)
+        assertEquals(2, recordingPeak(stacked, candidate))
+        assertTrue(recordingConflicts(stacked, candidate, 2))
+        assertFalse(recordingConflicts(stacked, candidate, 3))
+        val other = listOf(RecordingSlot("b", now, now + 2 * hour), RecordingSlot("a", now + 2 * hour, now + 3 * hour), RecordingSlot("a", now - hour, now))
+        assertEquals(0, recordingPeak(other, candidate))
+        assertFalse(recordingConflicts(other, candidate, 1))
+    }
+
+    @Test fun alarmActionDistinguishesFutureDueAndMissed() {
+        val window = RecordingWindow(now + hour, now + 2 * hour)
+        assertEquals(RecordingAlarmAction.ARM, recordingAlarmAction(window, now))
+        assertEquals(RecordingAlarmAction.START_NOW, recordingAlarmAction(window, now + hour))
+        assertEquals(RecordingAlarmAction.START_NOW, recordingAlarmAction(window, now + hour - minute, earlyMillis = 2 * minute))
+        assertEquals(RecordingAlarmAction.START_NOW, recordingAlarmAction(window, now + 2 * hour - 1))
+        assertEquals(RecordingAlarmAction.MISSED, recordingAlarmAction(window, now + 2 * hour))
+    }
+
+    @Test fun retryBacksOffAndGivesUpOnlyWithoutData() {
+        assertEquals(listOf(1_000L, 2_000L, 4_000L, 8_000L, 15_000L, 30_000L, 30_000L), (0..6).map(RecordingRetry::delayMillis))
+        assertEquals(1_000L, RecordingRetry.delayMillis(-1))
+        assertFalse(RecordingRetry.giveUp(5, everReceived = false))
+        assertTrue(RecordingRetry.giveUp(6, everReceived = false))
+        assertFalse(RecordingRetry.giveUp(100, everReceived = true))
+    }
+
+    @Test fun storageKeepsReserveAndStartMargin() {
+        val reserve = RecordingStorage.RESERVE_BYTES
+        assertTrue(RecordingStorage.canContinue(reserve))
+        assertFalse(RecordingStorage.canContinue(reserve - 1))
+        assertFalse(RecordingStorage.canStart(reserve))
+        assertTrue(RecordingStorage.canStart(reserve + RecordingStorage.START_MARGIN_BYTES))
+        assertTrue(RecordingStorage.canStart(RecordingStorage.START_MARGIN_BYTES, reserveBytes = 0))
+    }
+
+    @Test fun fileNamesAreSafeBoundedAndUnique() {
+        val zone = ZoneId.of("Australia/Sydney")
+        val name = RecordingFiles.name("UK: BBC One/HD", "News at Six: \"Special\" <live>", now, "0f3c9a2e-1111-2222-3333-444455556666", zone)
+        assertEquals("UK BBC One HD - News at Six Special live - 2026-10-07 1100 - 0f3c9a2e.ts", name)
+        assertEquals("$name.part", RecordingFiles.partial(name))
+        assertFalse(name.contains('/') || name.contains(':') || name.contains('"'))
+        val long = RecordingFiles.name("x".repeat(500), "y".repeat(500), now, "abcdef0123456789", zone)
+        assertTrue(long.length < 200)
+        assertEquals("2026-10-07 1100 - abcdef01.ts", RecordingFiles.name("///", null, now, "abcdef0123456789", zone))
+        try { RecordingFiles.name("a", null, now, "../escape", zone); fail() } catch (_: IllegalArgumentException) { }
+    }
+}
