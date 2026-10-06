@@ -84,6 +84,8 @@ class IptvCatalogueStoreTest {
         assertEquals(listOf(IptvCategory("News", 2), IptvCategory("Sport", 1), IptvCategory("", 1)), store.categories(ref))
         assertEquals(listOf("Zulu", "Mike"), store.page(ref, IptvBrowseQuery(category = "News")).items.map { it.channel.data.name })
         assertEquals(listOf("Bravo"), store.page(ref, IptvBrowseQuery(category = "")).items.map { it.channel.data.name })
+        assertEquals(listOf("Alpha"), store.page(ref, IptvBrowseQuery(excludedCategories = setOf("News", ""))).items.map { it.channel.data.name })
+        assertEquals(listOf("Zulu", "Mike"), store.page(ref, IptvBrowseQuery(category = "News", excludedCategories = setOf("News"))).items.map { it.channel.data.name })
         assertEquals(listOf("Alpha", "Bravo"), store.page(ref, IptvBrowseQuery(search = "a")).items.map { it.channel.data.name }.filter { it in setOf("Alpha", "Bravo") })
     }
 

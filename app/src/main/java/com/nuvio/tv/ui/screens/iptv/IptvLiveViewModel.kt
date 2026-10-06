@@ -116,6 +116,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val hidden = mutable.value.hiddenCategories.let { if (name in it) it - name else it + name }
         preferences.edit().putStringSet(prefix(ref) + "hidden", hidden).apply()
         mutable.update { it.copy(hiddenCategories = hidden) }
+        if (mutable.value.category == null && !mutable.value.favourites) load()
     }
     fun lastChannel() {
         val current = mutable.value
@@ -279,7 +280,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                         category = saved?.takeIf { value -> value != FAVOURITES_KEY && value != ALL_KEY }) }
                 }
                 val state = mutable.value
-                val query = IptvBrowseQuery(search = state.search.trim().take(256), favouritesOnly = state.favourites, category = state.category.takeUnless { state.favourites })
+                val query = IptvBrowseQuery(search = state.search.trim().take(256), favouritesOnly = state.favourites, category = state.category.takeUnless { state.favourites },
+                    excludedCategories = if (state.favourites || state.category != null) emptySet() else state.hiddenCategories.take(500).toSet())
                 val cursor = state.next?.takeIf { append && it.revision.ref == ref && it.query == query }
                 if (append && cursor == null) return@launch
                 val limit = if (background) state.channels.size.coerceIn(PAGE, 200) else PAGE

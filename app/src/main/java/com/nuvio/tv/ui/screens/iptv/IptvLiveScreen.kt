@@ -241,7 +241,7 @@ private fun heading(state: IptvLiveState): String {
         else -> stringResource(R.string.iptv_live_all)
     }
     val count = if (state.favourites) null else state.category?.let { category -> state.categories.firstOrNull { it.name == category }?.channels }
-        ?: state.categories.sumOf { it.channels }.takeIf { it > 0 }
+        ?: state.categories.filter { it.name !in state.hiddenCategories }.sumOf { it.channels }.takeIf { it > 0 }
     return if (count == null) name else "$name · " + pluralStringResource(R.plurals.iptv_source_channels, count, count)
 }
 
@@ -385,7 +385,7 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
         LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             item { RailItem(stringResource(R.string.iptv_live_search), null, state.search.isNotBlank(), Modifier, onSearch, Icons.Filled.Search) }
             item { RailItem(stringResource(R.string.iptv_live_favourites), null, state.favourites, Modifier.focusRequester(first), onFavourites, Icons.Filled.Star) }
-            item { RailItem(stringResource(R.string.iptv_live_all), state.categories.sumOf { it.channels }.takeIf { it > 0 }, !state.favourites && state.category == null,
+            item { RailItem(stringResource(R.string.iptv_live_all), state.categories.filter { it.name !in state.hiddenCategories }.sumOf { it.channels }.takeIf { it > 0 }, !state.favourites && state.category == null,
                 Modifier, { onCategory(null) }, Icons.AutoMirrored.Filled.List) }
             if (state.categories.isNotEmpty()) item { SectionLabel(stringResource(R.string.iptv_live_categories)) }
             if (state.categories.isNotEmpty()) item { Text(stringResource(R.string.iptv_live_hide_hint), style = MaterialTheme.typography.labelSmall,

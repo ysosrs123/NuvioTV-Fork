@@ -99,7 +99,8 @@ Work queue, in order:
    unknown entities such as `&nbsp;` before our code sees them.
 3. Device pass by the user; then fix what they find. Ask for
    `adb -s <AM9>:5555 logcat -d -s NuvioIptv NuvioXtream` after a refresh.
-4. Done (CI pending): favourites ordering, hidden categories (rail only; stored in the
+4. Done (CI pending): favourites ordering, hidden categories (excluded from All channels via
+   `IptvBrowseQuery.excludedCategories`; stored in the
    `iptv-live` shared preferences per profile and source, not removed with the
    profile yet), last category as the landing category. Remaining: "now on" search.
    CI note: starting a workflow run cancels the one in progress (concurrency group);

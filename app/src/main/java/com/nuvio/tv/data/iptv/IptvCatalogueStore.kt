@@ -223,6 +223,9 @@ class IptvCatalogueStore(
             if (!query.includeHidden) append(" AND COALESCE(o.hidden,0)=0")
             if (query.favouritesOnly) append(" AND o.favourite_rank IS NOT NULL")
             if (query.category != null) { append(" AND COALESCE(c.category,'')=?"); args += query.category }
+            if (query.category == null && query.excludedCategories.isNotEmpty()) {
+                append(" AND COALESCE(c.category,'') NOT IN (${query.excludedCategories.joinToString(",") { "?" }})"); args += query.excludedCategories
+            }
             if (query.search.isNotBlank()) { append(" AND instr(COALESCE(o.search_name,c.search_name),?)>0"); args += searchName(query.search.trim()) }
         }
         val order = when {

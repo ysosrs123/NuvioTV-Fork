@@ -3,8 +3,9 @@ package com.nuvio.tv.data.iptv
 import com.nuvio.tv.core.iptv.GuideMatch
 
 data class IptvBrowseQuery(val search: String = "", val favouritesOnly: Boolean = false,
-    val includeHidden: Boolean = false, val includeUnavailable: Boolean = false, val category: String? = null) {
-    init { require(search.length <= 256 && (category?.length ?: 0) <= 240) }
+    val includeHidden: Boolean = false, val includeUnavailable: Boolean = false, val category: String? = null,
+    val excludedCategories: Set<String> = emptySet()) {
+    init { require(search.length <= 256 && (category?.length ?: 0) <= 240 && excludedCategories.size <= 500 && excludedCategories.all { it.length <= 240 }) }
 }
 data class IptvCategory(val name: String, val channels: Int)
 data class IptvBrowseRevision(val ref: IptvSourceRef, val generation: Long?, val configuration: Long, val overlays: Long)
