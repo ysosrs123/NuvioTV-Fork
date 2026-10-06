@@ -30,4 +30,8 @@ class GuideNameMatchingTest {
         assertNull(uniqueNameMatch("Unknown", listOf(first, second)))
         assertNull(uniqueNameMatch("+", listOf(first, second)))
     }
+    @Test fun idNamesIgnoreFeedSuffixes() {
+        assertEquals("bbcone", guideIdMatchName("BBCOne.uk@HD"))
+        assertEquals(guideIdMatchName("BBCOne.uk"), guideIdMatchName("BBCOne.uk@SD"))
+    }
 }

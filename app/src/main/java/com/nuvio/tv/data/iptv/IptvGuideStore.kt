@@ -109,7 +109,7 @@ class IptvGuideStore(
     fun matchingIndexes(profileId: Int, feedIds: List<String>, externalIds: Set<String>): List<GuideFeedIndex> = transaction { db ->
         require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size)
         feedIds.forEach { IptvGuideRef(profileId, it) }
-        require(externalIds.size <= 400 && externalIds.all { it.isNotBlank() && it.length <= 4096 })
+        require(externalIds.size <= 600 && externalIds.all { it.isNotBlank() && it.length <= 4096 })
         val matches = feedIds.associateWith { mutableSetOf<String>() }
         if (feedIds.isNotEmpty() && externalIds.isNotEmpty()) {
             val args = arrayOf(profileId.toString(), *feedIds.toTypedArray(), *externalIds.toTypedArray())

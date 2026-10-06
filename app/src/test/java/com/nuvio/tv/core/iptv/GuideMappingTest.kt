@@ -33,4 +33,22 @@ class GuideMappingTest {
         val otherChannel = current.copy(channelExternalId = "two")
         assertEquals(listOf(current), programmesAt(listOf(previous, current, unknown, otherChannel), "one", 100))
     }
+    @Test fun feedSuffixesFallBackToTheBaseIdOnlyWithoutAnExactMatch() {
+        val index = listOf(GuideFeedIndex("f", setOf("abc.uk", "news.uk@HD")))
+        assertEquals(GuideMatch(GuideKey("f", "abc.uk"), GuideMatchReason.EXACT_ID, listOf(GuideKey("f", "abc.uk"))), resolveGuideMapping("abc.uk@SD", null, index))
+        assertEquals(GuideKey("f", "news.uk@HD"), resolveGuideMapping("news.uk@HD", null, index).key)
+        assertEquals(GuideMatchReason.NONE, resolveGuideMapping("other.uk@SD", null, index).reason)
+        assertEquals(GuideMatchReason.NONE, resolveGuideMapping("@SD", null, listOf(GuideFeedIndex("f", setOf("")))).reason)
+        val two = listOf(GuideFeedIndex("a", setOf("abc.uk")), GuideFeedIndex("b", setOf("abc.uk")))
+        assertEquals(GuideMatchReason.AMBIGUOUS, resolveGuideMapping("abc.uk@SD", null, two).reason)
+        assertEquals(GuideKey("b", "abc.uk"), resolveGuideMapping("abc.uk@SD", null, two, listOf("b")).key)
+    }
+    @Test fun feedSuffixIsOnlyATrailingAtToken() {
+        assertEquals("abc.uk", guideIdWithoutFeedSuffix(" abc.uk@SD "))
+        assertEquals("abc.uk", guideIdWithoutFeedSuffix("abc.uk@East-1"))
+        assertNull(guideIdWithoutFeedSuffix("abc.uk"))
+        assertNull(guideIdWithoutFeedSuffix("@SD"))
+        assertNull(guideIdWithoutFeedSuffix("abc@ex ample"))
+        assertNull(guideIdWithoutFeedSuffix("abc.uk@" + "x".repeat(17)))
+    }
 }

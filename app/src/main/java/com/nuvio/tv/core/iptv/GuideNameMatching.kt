@@ -8,6 +8,7 @@ private val bracketed = Regex("[\\[(][^\\])]*[\\])]")
 private val separators = Regex("[^\\p{L}\\p{N}]+")
 private val marks = Regex("\\p{M}+")
 private val countrySuffix = Regex("\\.[A-Za-z]{2,3}$")
+private val feedSuffix = Regex("@[\\p{L}\\p{N}_-]{1,16}$")
 private val qualityTags = setOf("hd", "sd", "fhd", "uhd", "qhd", "hdr", "4k", "8k", "hevc", "h264", "h265", "x264", "x265",
     "720p", "1080p", "1080i", "2160p", "50fps", "60fps", "raw", "backup", "hq", "lq")
 
@@ -20,7 +21,14 @@ fun guideMatchName(value: String): String {
     return tokens.joinToString("").take(240)
 }
 
-fun guideIdMatchName(externalId: String): String = guideMatchName(countrySuffix.replace(externalId.trim(), ""))
+fun guideIdMatchName(externalId: String): String =
+    guideMatchName(countrySuffix.replace(guideIdWithoutFeedSuffix(externalId) ?: externalId.trim(), ""))
+
+fun guideIdWithoutFeedSuffix(externalId: String): String? {
+    val id = externalId.trim()
+    val suffix = feedSuffix.find(id) ?: return null
+    return id.substring(0, suffix.range.first).trim().takeIf(String::isNotEmpty)
+}
 
 fun uniqueNameMatch(name: String, feeds: List<GuideNameIndex>): GuideKey? {
     val key = guideMatchName(name).takeIf { it.length >= 2 } ?: return null

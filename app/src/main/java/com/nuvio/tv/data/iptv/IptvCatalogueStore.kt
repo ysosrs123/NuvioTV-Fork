@@ -13,6 +13,7 @@ import com.nuvio.tv.core.iptv.RefreshDecision
 import com.nuvio.tv.core.iptv.RefreshTicket
 import com.nuvio.tv.core.iptv.StoredChannel
 import com.nuvio.tv.core.iptv.decideCatalogueRefresh
+import com.nuvio.tv.core.iptv.guideIdWithoutFeedSuffix
 import com.nuvio.tv.core.iptv.foldSearchText
 import com.nuvio.tv.core.iptv.moveItem
 import com.nuvio.tv.core.iptv.retainTombstones
@@ -189,7 +190,7 @@ class IptvCatalogueStore(
             db.rawQuery("SELECT id,payload FROM catalogue WHERE source=? AND generation=?", arrayOf(ref.sourceId, generation.toString())).use { c ->
                 while (c.moveToNext()) {
                     val record = JSONObject(secrets.open(aad(ref, "channel:${c.getString(0)}"), c.getBlob(1)))
-                    record.optional("guideId")?.takeIf(String::isNotBlank)?.let(::add)
+                    record.optional("guideId")?.takeIf(String::isNotBlank)?.let { add(it); guideIdWithoutFeedSuffix(it)?.let(::add) }
                 }
             }
             db.rawQuery("SELECT o.guide_id FROM overlays o JOIN identities i ON o.id=i.id WHERE i.source=? AND o.profile=? AND o.guide_feed=? AND o.guide_id IS NOT NULL",

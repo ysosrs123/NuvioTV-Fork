@@ -18,7 +18,10 @@ fun resolveGuideMapping(
         return GuideMatch(manual.takeIf { exists }, if (exists) GuideMatchReason.MANUAL else GuideMatchReason.MISSING_MANUAL_TARGET)
     }
     if (guideId.isNullOrBlank()) return GuideMatch(null, GuideMatchReason.NONE)
-    val candidates = feeds.filter { guideId in it.channelIds }.map { GuideKey(it.feedId, guideId) }
+    val exact = feeds.filter { guideId in it.channelIds }.map { GuideKey(it.feedId, guideId) }
+    val candidates = exact.ifEmpty {
+        guideIdWithoutFeedSuffix(guideId)?.let { base -> feeds.filter { base in it.channelIds }.map { GuideKey(it.feedId, base) } }.orEmpty()
+    }
     val prioritized = orderedFeedPriority.firstNotNullOfOrNull { feed -> candidates.find { it.feedId == feed } }
     val chosen = prioritized ?: candidates.singleOrNull()
     return GuideMatch(chosen, when {

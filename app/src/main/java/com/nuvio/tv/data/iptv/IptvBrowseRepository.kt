@@ -6,6 +6,7 @@ import com.nuvio.tv.core.iptv.GuideMatchReason
 import com.nuvio.tv.core.iptv.GuideGridWindow
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.layoutGuideRow
+import com.nuvio.tv.core.iptv.guideIdWithoutFeedSuffix
 import com.nuvio.tv.core.iptv.guideMatchName
 import com.nuvio.tv.core.iptv.resolveGuideMapping
 import com.nuvio.tv.core.iptv.uniqueNameMatch
@@ -26,7 +27,10 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
         limit: Int = 100): IptvBrowsePage = withContext(Dispatchers.IO) {
         currentCoroutineContext().ensureActive()
         val page = catalogue.page(ref, query, cursor, limit)
-        val ids = page.items.flatMap { listOfNotNull(it.channel.data.guideId?.takeIf(String::isNotBlank), it.overlay.manualGuide?.externalId) }.toSet()
+        val ids = page.items.flatMap { row ->
+            val guideId = row.channel.data.guideId?.takeIf(String::isNotBlank)
+            listOfNotNull(guideId, guideId?.let(::guideIdWithoutFeedSuffix), row.overlay.manualGuide?.externalId)
+        }.toSet()
         val feeds = guides.matchingIndexes(ref.profileId, page.guides.feedIds, ids)
         val order = (page.guides.priority + page.guides.feedIds).distinct()
         currentCoroutineContext().ensureActive()
