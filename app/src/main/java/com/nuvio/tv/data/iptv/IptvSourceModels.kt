@@ -21,6 +21,7 @@ data class IptvSource(
 ) {
     val playbackEligible: Boolean get() = activeGeneration != null && configurationVersion == activeConfigurationVersion
 }
+data class IptvAccountGroup(val id: String, val label: String, val maxStreams: Int, val sources: List<IptvSourceRef>)
 data class IptvCatalogueRecord(val data: ChannelCandidate, val attributes: Map<String, String> = emptyMap()) {
     override fun toString(): String = "IptvCatalogueRecord(metadata withheld)"
 }

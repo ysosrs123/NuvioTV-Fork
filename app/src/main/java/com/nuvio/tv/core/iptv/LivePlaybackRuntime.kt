@@ -21,10 +21,12 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission) {
     private var active: Active? = null
 
     suspend fun open(key: AcquisitionKey, acquisitionBytes: Long, viewerBytes: Long, owner: String = "foreground",
-        create: suspend (PlaybackPurpose) -> OwnedLivePlayback): LiveOpenResult = mutex.withLock {
+        maxUpstreams: Int? = null, create: suspend (PlaybackPurpose) -> OwnedLivePlayback): LiveOpenResult = mutex.withLock {
+        require(maxUpstreams == null || maxUpstreams in 1..16)
         currentCoroutineContext().ensureActive()
         if (!closeActive()) return@withLock LiveOpenResult.CLOSE_UNCONFIRMED
         currentCoroutineContext().ensureActive()
+        maxUpstreams?.let { admission.setAccountLimit(key.accountId, it) }
         val result = admission.acquire(key, acquisitionBytes, ConsumerReservation(LiveConsumerRole.VIEWER, 1, viewerBytes))
         if (result !is LiveAdmissionResult.Admitted) return@withLock LiveOpenResult.CAPACITY
         if (!result.openUpstream) {

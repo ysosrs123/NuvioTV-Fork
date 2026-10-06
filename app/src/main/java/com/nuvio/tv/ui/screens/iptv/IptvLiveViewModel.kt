@@ -164,8 +164,11 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 val streamFormat = withContext(Dispatchers.IO) { access.use(current) {
                     requireNotNull(catalogue.playbackItem(ref, row.item.channel.id)).overlay.streamFormat
                 } }
+                val streams = withContext(Dispatchers.IO) { access.use(current) {
+                    catalogue.accounts(current.profileId).firstOrNull { it.id == source.accountId }?.maxStreams ?: 1
+                } }
                 val key = AcquisitionKey(source.accountId, row.item.channel.id, "main:" + streamFormat.name, source.activeGeneration ?: 0)
-                val result = runtime.open(key, 16L * 1024 * 1024, 96L * 1024 * 1024, owner) { purpose ->
+                val result = runtime.open(key, 16L * 1024 * 1024, 96L * 1024 * 1024, owner, streams) { purpose ->
                     val item = withContext(Dispatchers.IO) { access.use(current) {
                         val latest = catalogue.sources(current.profileId).single { it.ref == ref }
                         check(latest.configurationVersion == source.configurationVersion && latest.accountId == source.accountId && latest.activeGeneration == source.activeGeneration)

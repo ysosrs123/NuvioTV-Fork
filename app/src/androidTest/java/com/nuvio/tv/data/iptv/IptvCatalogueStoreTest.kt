@@ -62,6 +62,22 @@ class IptvCatalogueStoreTest {
         assertEquals(IptvStreamFormat.AUTO, store.playbackItem(ref, item.channel.id)!!.overlay.streamFormat)
     }
 
+    @Test fun accountGroupsAndSourceOrderPersistWithoutInvalidatingCatalogues() {
+        val a = source(); val b = source(); val c = source(); val other = source(2)
+        publish(a)
+        assertEquals(listOf(a, b, c), store.sources(1).map { it.ref })
+        store.moveSource(c, 0); assertEquals(listOf(c, a, b), store.sources(1).map { it.ref })
+        assertEquals(listOf(IptvAccountGroup("account-shared", "account-shared", 1, listOf(c, a, b))), store.accounts(1))
+        store.saveAccount(1, "provider-one", "Provider one", 2)
+        store.assignAccount(a, "provider-one")
+        assertTrue(store.sources(1).single { it.ref == a }.playbackEligible)
+        val groups = store.accounts(1).associateBy { it.id }
+        assertEquals(IptvAccountGroup("provider-one", "Provider one", 2, listOf(a)), groups["provider-one"])
+        assertEquals(listOf(c, b), groups.getValue("account-shared").sources)
+        assertEquals(listOf(other), store.accounts(2).single().sources)
+        assertThrows(IllegalArgumentException::class.java) { store.saveAccount(1, "provider-one", "Provider one", 17) }
+        store.removeProfile(1); assertTrue(store.accounts(1).isEmpty())
+    }
     @Test fun formatChangeInvalidatesPagingAndCannotCrossBindAnotherSource() {
         val ref = source(); val other = source()
         publish(ref, listOf(row(1), row(2))); publish(other)

@@ -13,6 +13,7 @@ import com.nuvio.tv.core.iptv.RefreshTicket
 import com.nuvio.tv.core.iptv.StoredChannel
 import com.nuvio.tv.core.iptv.decideCatalogueRefresh
 import com.nuvio.tv.core.iptv.foldSearchText
+import com.nuvio.tv.core.iptv.moveItem
 import com.nuvio.tv.core.iptv.retainTombstones
 import java.io.Closeable
 import java.io.InterruptedIOException
@@ -36,6 +37,7 @@ class IptvCatalogueStore(
         db.insertOrThrow("sources", null, ContentValues().apply {
             put("id", ref.sourceId); put("profile", profileId); put("label", label); put("kind", kind.name); put("account_id", accountId)
             put("config_version", 1L); put("requested", 0L)
+            put("position", db.rawQuery("SELECT COALESCE(MAX(position)+1,0) FROM sources WHERE profile=?", arrayOf(profileId.toString())).use { it.moveToFirst(); it.getLong(0) })
             put("connection", secrets.seal(aad(ref, "connection"), encodeConnection(connection)))
         })
         source(db, ref)
@@ -59,7 +61,7 @@ class IptvCatalogueStore(
 
     fun sources(profileId: Int): List<IptvSource> = transaction { db ->
         require(profileId >= 0)
-        db.query("sources", null, "profile=?", arrayOf(profileId.toString()), null, null, "label COLLATE NOCASE, id").use { cursor ->
+        db.query("sources", null, "profile=?", arrayOf(profileId.toString()), null, null, "position, label COLLATE NOCASE, id").use { cursor ->
             buildList { while (cursor.moveToNext()) add(readSource(cursor)) }
         }
     }
@@ -72,11 +74,51 @@ class IptvCatalogueStore(
         db.delete("catalogue", "source IN (SELECT id FROM sources WHERE profile=?)", args)
         db.delete("identities", "source IN (SELECT id FROM sources WHERE profile=?)", args)
         db.delete("sources", "profile=?", args)
+        db.delete("accounts", "profile=?", args)
         Unit
     }
 
     fun clearAllProfiles() = transaction { db ->
-        listOf("source_guides", "overlays", "catalogue", "identities", "sources").forEach { db.delete(it, null, null) }
+        listOf("source_guides", "overlays", "catalogue", "identities", "sources", "accounts").forEach { db.delete(it, null, null) }
+    }
+
+    fun moveSource(ref: IptvSourceRef, toIndex: Int) = transaction { db ->
+        source(db, ref)
+        val ids = db.query("sources", arrayOf("id"), "profile=?", arrayOf(ref.profileId.toString()), null, null, "position, label COLLATE NOCASE, id").use { c ->
+            buildList { while (c.moveToNext()) add(c.getString(0)) }
+        }
+        val ordered = moveItem(ids, ids.indexOf(ref.sourceId), toIndex)
+        for ((position, id) in ordered.withIndex()) db.update("sources", ContentValues().apply { put("position", position) }, "id=?", arrayOf(id))
+        Unit
+    }
+
+    fun accounts(profileId: Int): List<IptvAccountGroup> = transaction { db ->
+        require(profileId >= 0)
+        val sources = db.query("sources", arrayOf("id", "account_id"), "profile=?", arrayOf(profileId.toString()), null, null, "position, label COLLATE NOCASE, id").use { c ->
+            buildList { while (c.moveToNext()) add(c.getString(1) to IptvSourceRef(profileId, c.getString(0))) }
+        }
+        val saved = db.query("accounts", arrayOf("id", "label", "max_streams"), "profile=?", arrayOf(profileId.toString()), null, null, "label COLLATE NOCASE, id").use { c ->
+            buildMap { while (c.moveToNext()) put(c.getString(0), c.getString(1) to c.getInt(2)) }
+        }
+        (saved.keys + sources.map { it.first }).distinct().map { id ->
+            val (label, maxStreams) = saved[id] ?: (id to 1)
+            IptvAccountGroup(id, label, maxStreams, sources.filter { it.first == id }.map { it.second })
+        }
+    }
+
+    fun saveAccount(profileId: Int, id: String, label: String, maxStreams: Int) = transaction { db ->
+        require(profileId >= 0 && id.matches(Regex("[A-Za-z0-9_-]{1,80}")) && label.isNotBlank() && label.length <= 240 && maxStreams in 1..16)
+        db.insertWithOnConflict("accounts", null, ContentValues().apply {
+            put("profile", profileId); put("id", id); put("label", label); put("max_streams", maxStreams)
+        }, SQLiteDatabase.CONFLICT_REPLACE).also { check(it != -1L) }
+        Unit
+    }
+
+    fun assignAccount(ref: IptvSourceRef, accountId: String) = transaction { db ->
+        require(accountId.matches(Regex("[A-Za-z0-9_-]{1,80}")))
+        source(db, ref)
+        db.update("sources", ContentValues().apply { put("account_id", accountId) }, "id=?", arrayOf(ref.sourceId)).also { check(it == 1) }
+        Unit
     }
 
     fun connection(ref: IptvSourceRef): IptvSourceConnection = transaction { db ->
@@ -302,7 +344,7 @@ class IptvCatalogueStore(
     }
     override fun close() = helper.close()
 
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 4) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 5) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
@@ -314,17 +356,26 @@ class IptvCatalogueStore(
             db.execSQL("CREATE TABLE overlays (id TEXT NOT NULL REFERENCES identities(id), profile INTEGER NOT NULL, custom_name TEXT, favourite_rank INTEGER, hidden INTEGER NOT NULL, guide_feed TEXT, guide_id TEXT, PRIMARY KEY(id,profile))")
             addBrowseSchema(db)
             addStreamFormatSchema(db)
+            addGroupingSchema(db)
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(oldVersion in 1..3 && newVersion == 4) { "Missing IPTV database migration" }
+            check(oldVersion in 1..4 && newVersion == 5) { "Missing IPTV database migration" }
             if (oldVersion == 1) addBrowseSchema(db)
             if (oldVersion <= 2) addStreamFormatSchema(db)
+            if (oldVersion <= 4) addGroupingSchema(db)
+            if (oldVersion <= 3) reindexSearch(db)
+        }
+        private fun reindexSearch(db: SQLiteDatabase) {
             db.rawQuery("SELECT source,generation,id,name FROM catalogue", null).use { c ->
                 while (c.moveToNext()) db.execSQL("UPDATE catalogue SET search_name=? WHERE source=? AND generation=? AND id=?", arrayOf(searchName(c.getString(3)), c.getString(0), c.getLong(1), c.getString(2)))
             }
             db.rawQuery("SELECT id,profile,custom_name FROM overlays WHERE custom_name IS NOT NULL", null).use { c ->
                 while (c.moveToNext()) db.execSQL("UPDATE overlays SET search_name=? WHERE id=? AND profile=?", arrayOf(searchName(c.getString(2)), c.getString(0), c.getInt(1)))
             }
+        }
+        private fun addGroupingSchema(db: SQLiteDatabase) {
+            db.execSQL("ALTER TABLE sources ADD COLUMN position INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("CREATE TABLE accounts(profile INTEGER NOT NULL, id TEXT NOT NULL, label TEXT NOT NULL, max_streams INTEGER NOT NULL CHECK(max_streams BETWEEN 1 AND 16), PRIMARY KEY(profile,id))")
         }
         private fun addStreamFormatSchema(db: SQLiteDatabase) {
             db.execSQL("ALTER TABLE overlays ADD COLUMN stream_format TEXT NOT NULL DEFAULT 'AUTO' CHECK(stream_format IN ('AUTO','HLS','MPEG_TS'))")

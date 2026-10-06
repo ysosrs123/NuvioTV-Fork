@@ -72,6 +72,12 @@ class LivePlaybackRuntimeTest {
         admission.acquire(key("capture"), 10, ConsumerReservation(LiveConsumerRole.RECORDING, 0, 0))
         assertEquals(LiveOpenResult.CAPACITY, runtime.open(key("one"), 10, 20) { error("No capacity") })
     }
+    @Test fun groupStreamLimitAppliesToTheAccountBeforeAdmission() = runBlocking {
+        admission.acquire(key("capture"), 10, ConsumerReservation(LiveConsumerRole.RECORDING, 0, 0))
+        assertEquals(LiveOpenResult.CAPACITY, runtime.open(key("one"), 10, 20, maxUpstreams = 1) { error("No capacity") })
+        assertEquals(LiveOpenResult.OPENED, runtime.open(key("one"), 10, 20, maxUpstreams = 2) { Handle() })
+        assertEquals(2, admission.snapshot().upstreamsByAccount.values.single())
+    }
     @Test fun oldScreenCannotStopTheNewOwner() = runBlocking {
         runtime.open(key("one"), 10, 20, "old-screen") { Handle() }
         runtime.open(key("two"), 10, 20, "new-screen") { Handle() }
