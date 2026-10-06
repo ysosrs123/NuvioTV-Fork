@@ -35,6 +35,19 @@ class IptvXtreamGuides(private val catalogue: IptvCatalogueStore, private val gu
         return found
     }
 
+    fun linked(source: IptvSourceRef): IptvGuideRef? {
+        val reference = XtreamGuideReference.of(source.sourceId)
+        return catalogue.guideAssociations(source).feedIds.map { IptvGuideRef(source.profileId, it) }
+            .firstOrNull { feed -> runCatching { guides.endpoint(feed) == reference }.getOrDefault(false) }
+    }
+
+    fun linkedPlaylist(source: IptvSourceRef, addresses: List<String>): List<IptvGuideRef> {
+        val usable = playlistGuideAddresses(addresses).toSet()
+        if (usable.isEmpty()) return emptyList()
+        return catalogue.guideAssociations(source).feedIds.map { IptvGuideRef(source.profileId, it) }
+            .filter { feed -> runCatching { guides.endpoint(feed).trim() in usable }.getOrDefault(false) }
+    }
+
     fun removeSource(source: IptvSourceRef) {
         val reference = XtreamGuideReference.of(source.sourceId)
         val automatic = allFeeds(source.profileId).filter { feed -> runCatching { guides.endpoint(feed) == reference }.getOrDefault(false) }

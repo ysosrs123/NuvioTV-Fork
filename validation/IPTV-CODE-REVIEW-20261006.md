@@ -159,9 +159,9 @@ Independent read-only review; status after the follow-up commit.
 8. FIXED. Hiding a category or choosing the current one in the rail lost focus.
 9. FIXED. Watch from a source's options now opens that source.
 10. FIXED. Sources actions were ignored during a status-triggered reload.
-11. OPEN (mitigated). Automatic provider guides are re-linked on refresh, so they can
-    no longer be unlinked or removed on their own; they go with their source.
-    Header-linked M3U guides can still be removed but come back on the next refresh.
+11. FIXED. Automatic provider guides and guides named in an M3U header are added on a
+    source's first load only; later refreshes refresh the ones still linked, so
+    unlinking or removing them sticks (device test added).
 12. FIXED. The Xtream short guide is fetched again when nothing covers the current
     time.
 13. FIXED: Automatic shows its check when no track is overridden. FIXED: number entry

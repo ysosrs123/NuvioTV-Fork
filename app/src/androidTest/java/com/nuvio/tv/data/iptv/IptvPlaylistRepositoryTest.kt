@@ -87,6 +87,11 @@ class IptvPlaylistRepositoryTest {
                 assertEquals(first.guides, second.guides)
                 assertEquals(2, guides.feeds(1).size)
                 assertEquals(first.guides.map { it.feedId }, store.guideAssociations(ref).feedIds)
+                IptvXtreamGuides(store, guides).removeFeed(first.guides[0])
+                val third = repository.refresh(ref) as IptvPlaylistRefresh.Catalogue
+                assertEquals(listOf(first.guides[1]), third.guides)
+                assertEquals(1, guides.feeds(1).size)
+                assertEquals(listOf(first.guides[1].feedId), store.guideAssociations(ref).feedIds)
             }
         } finally {
             context.deleteDatabase(name)

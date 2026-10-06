@@ -91,7 +91,9 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 - Favourites keep their order: new ones go to the end and can be moved up or down
   from the channel options in the favourites view.
 - Guides named in an M3U header (url-tvg, x-tvg-url) are added and linked when the
-  playlist loads (up to four; an address already added is reused) and refresh with it.
+  playlist first loads (up to four; an address already added is reused) and refresh
+  with it. The automatic Xtream guide and these guides can be unlinked or removed and
+  stay that way.
 - Xtream channels without guide programmes show now and next from the provider's
   short guide (one channel at a time, cached for five minutes).
 - Large guides: the parse limit now matches the 512 MB download limit (the cause of
@@ -195,8 +197,6 @@ Screens and app
   default; these are estimates, not measured device limits.
 - No DRM, encrypted HLS, fMP4 or separate-audio
   support has been validated.
-- Automatic provider guides cannot be unlinked or removed on their own; guides named
-  in an M3U header come back on the next refresh if removed.
 - No timeshift, recording or multiview yet. Account groups have no UI yet. Stalker
   portals have no catch-up. Xtream catch-up assumes the provider uses the device's
   time zone.

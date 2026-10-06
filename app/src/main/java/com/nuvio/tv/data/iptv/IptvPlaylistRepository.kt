@@ -23,6 +23,7 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
         val context = currentCoroutineContext()
         context.ensureActive()
         val request = store.prepareRefresh(ref)
+        val firstLoad = store.sources(ref.profileId).firstOrNull { it.ref == ref }?.activeGeneration == null
         if (request.kind == IptvSourceKind.XTREAM) {
             val started = System.currentTimeMillis()
             val download = xtream.catalogue(request.connection)
@@ -32,7 +33,7 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
             val saving = System.currentTimeMillis()
             val decision = store.commitCatalogue(ref, request.ticket, download.records, download.canPublish) { context.ensureActive() }
             IptvLog.info("catalogue commit decision=$decision ms=${System.currentTimeMillis() - saving}")
-            val guide = if (decision == RefreshDecision.PUBLISH) xtreamGuides?.ensure(ref) else null
+            val guide = if (decision != RefreshDecision.PUBLISH) null else if (firstLoad) xtreamGuides?.ensure(ref) else xtreamGuides?.linked(ref)
             return@withContext IptvPlaylistRefresh.Catalogue(decision, guide)
         }
         if (request.kind == IptvSourceKind.STALKER) {
@@ -57,8 +58,9 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
                 }
                 val decision = store.commitCatalogue(ref, request.ticket, records, download.catalogue.canPublish,
                     IptvCacheValidators(download.validators.etag, download.validators.lastModified)) { context.ensureActive() }
-                val guides = if (decision == RefreshDecision.PUBLISH && download.catalogue.guideUrls.isNotEmpty())
-                    xtreamGuides?.ensurePlaylist(ref, download.catalogue.guideUrls).orEmpty() else emptyList()
+                val guides = if (decision != RefreshDecision.PUBLISH || download.catalogue.guideUrls.isEmpty()) emptyList()
+                    else if (firstLoad) xtreamGuides?.ensurePlaylist(ref, download.catalogue.guideUrls).orEmpty()
+                    else xtreamGuides?.linkedPlaylist(ref, download.catalogue.guideUrls).orEmpty()
                 if (guides.isNotEmpty()) IptvLog.info("playlist guides linked=${guides.size}")
                 IptvPlaylistRefresh.Catalogue(decision, guides.firstOrNull(), guides)
             }
