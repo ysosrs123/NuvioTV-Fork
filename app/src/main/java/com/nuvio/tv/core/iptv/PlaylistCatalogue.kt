@@ -116,7 +116,8 @@ class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimit
                     val locator = resolveHttp(line, finalResponseUri)
                     if (locator == null) { issue(PlaylistIssue.INVALID_LOCATOR); continue }
                     if (channels.size >= limits.maxChannels) throw LimitExceeded()
-                    channels += PlaylistChannel(record.first, locator, record.second)
+                    val logo = record.second[CHANNEL_LOGO_ATTRIBUTE]?.let { channelLogoUrl(it, finalResponseUri?.toString()) }
+                    channels += PlaylistChannel(record.first, locator, record.second - CHANNEL_LOGO_ATTRIBUTE + listOfNotNull(logo?.let { CHANNEL_LOGO_ATTRIBUTE to it }))
                 }
             }
             if (pending != null) issue(PlaylistIssue.MISSING_LOCATOR)

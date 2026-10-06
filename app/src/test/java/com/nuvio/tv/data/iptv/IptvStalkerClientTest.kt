@@ -16,7 +16,7 @@ class IptvStalkerClientTest {
                 "handshake" -> MockResponse().setBody("""{"js":{"token":"TOKEN1"}}""")
                 "get_profile" -> MockResponse().setBody(profile)
                 "get_genres" -> MockResponse().setBody("""{"js":[{"id":"*","title":"All"},{"id":"3","title":"News"}]}""")
-                "get_all_channels" -> MockResponse().setBody("""{"js":{"data":[{"id":"1","name":"One","number":"101","cmd":"ffmpeg http://localhost/ch/1_","tv_genre_id":"3","xmltv_id":"one.uk"}]}}""")
+                "get_all_channels" -> MockResponse().setBody("""{"js":{"data":[{"id":"1","name":"One","number":"101","cmd":"ffmpeg http://localhost/ch/1_","tv_genre_id":"3","xmltv_id":"one.uk","logo":"/misc/logos/320/1.png"}]}}""")
                 "create_link" -> MockResponse().setBody("""{"js":{"cmd":"ffmpeg http://media.invalid/live/1.ts?play_token=abc"}}""")
                 else -> MockResponse().setResponseCode(404)
             }
@@ -33,6 +33,7 @@ class IptvStalkerClientTest {
             assertEquals("1", record.data.providerId); assertEquals("one.uk", record.data.guideId); assertEquals("http://localhost/ch/1_", record.data.locator)
             assertEquals("ffmpeg http://localhost/ch/1_", record.attributes[IptvStalkerClient.COMMAND_ATTRIBUTE])
             assertEquals("News", record.attributes["group-title"]); assertEquals("101", record.attributes["channel-number"])
+            assertEquals(server.url("/misc/logos/320/1.png").toString(), record.attributes["tvg-logo"])
             val requests = (0 until server.requestCount).map { server.takeRequest() }
             assertEquals(listOf("handshake", "get_profile", "get_genres", "get_all_channels"), requests.map { it.requestUrl!!.queryParameter("action") })
             assertTrue(requests.all { it.requestUrl!!.encodedPath == "/portal.php" })

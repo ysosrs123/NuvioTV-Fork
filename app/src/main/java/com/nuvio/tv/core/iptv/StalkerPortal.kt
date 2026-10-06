@@ -6,7 +6,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 data class StalkerChannel(val id: String, val name: String, val number: Int?, val command: String,
-    val genreId: String?, val guideId: String?) {
+    val genreId: String?, val guideId: String?, val logo: String? = null) {
     override fun toString(): String = "StalkerChannel(id=$id)"
 }
 
@@ -59,7 +59,7 @@ object StalkerPortal {
         }
     }
 
-    fun parseChannels(json: String, maxChannels: Int = 20_000): StalkerCatalogue {
+    fun parseChannels(json: String, maxChannels: Int = 20_000, logoBase: String? = null): StalkerCatalogue {
         val js = JSONObject(json).get("js")
         val array = when (js) {
             is JSONArray -> js
@@ -77,7 +77,8 @@ object StalkerPortal {
             if (row == null || id == null || name.isNullOrEmpty() || name.length > 4096 || command.isNullOrEmpty() ||
                 command.length > 16_384 || streamUrl(command) == null) { invalid++; continue }
             val channel = StalkerChannel(id, name, identifier(row.opt("number"))?.toIntOrNull(), command,
-                identifier(row.opt("tv_genre_id")), (row.opt("xmltv_id") as? String)?.takeIf { it.isNotBlank() && it.length <= 4096 })
+                identifier(row.opt("tv_genre_id")), (row.opt("xmltv_id") as? String)?.takeIf { it.isNotBlank() && it.length <= 4096 },
+                channelLogoUrl(row.opt("logo") as? String, logoBase))
             val previous = channels[id]
             if (previous != null && previous != channel) invalid++ else channels[id] = channel
         }

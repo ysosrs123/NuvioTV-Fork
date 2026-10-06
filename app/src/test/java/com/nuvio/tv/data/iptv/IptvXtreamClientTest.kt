@@ -34,6 +34,7 @@ class IptvXtreamClientTest {
             assertEquals("guide.one", record.data.guideId)
             assertEquals("News", record.attributes["group-title"])
             assertEquals("ADVERTISED", record.attributes["archive-availability"])
+            assertEquals("https://do-not-contact.invalid/logo", record.attributes["tvg-logo"])
             assertEquals(server.url("/panel/live/42.ts").toString(), record.data.locator)
             assertEquals(server.url("/panel/live/user%20%2F+&/pass%3F%23%25/42.ts").toString(), IptvXtreamClient.streamUrl(connection(server), record.data.locator))
             val requests = (0..2).map { server.takeRequest().requestUrl!! }

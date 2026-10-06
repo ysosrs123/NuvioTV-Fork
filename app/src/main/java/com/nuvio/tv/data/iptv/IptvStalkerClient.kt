@@ -1,5 +1,6 @@
 package com.nuvio.tv.data.iptv
 
+import com.nuvio.tv.core.iptv.CHANNEL_LOGO_ATTRIBUTE
 import com.nuvio.tv.core.iptv.ChannelCandidate
 import com.nuvio.tv.core.iptv.StalkerPortal
 import java.io.ByteArrayOutputStream
@@ -34,12 +35,13 @@ class IptvStalkerClient(private val http: OkHttpClient = IptvMetadataClient.newC
         val session = open(connection)
         val genres = parse { StalkerPortal.parseGenres(session.call("itv", "get_genres", budget = 1024 * 1024)) }
         currentCoroutineContext().ensureActive()
-        val catalogue = parse { StalkerPortal.parseChannels(session.call("itv", "get_all_channels", budget = maxBodyBytes)) }
+        val catalogue = parse { StalkerPortal.parseChannels(session.call("itv", "get_all_channels", budget = maxBodyBytes), logoBase = connection.endpoint) }
         val records = catalogue.channels.map { channel ->
             val attributes = buildMap {
                 put(COMMAND_ATTRIBUTE, channel.command)
                 channel.genreId?.let { id -> put("category-id", id); genres[id]?.let { put("group-title", it) } }
                 channel.number?.let { put("channel-number", it.toString()) }
+                channel.logo?.let { put(CHANNEL_LOGO_ATTRIBUTE, it) }
             }
             IptvCatalogueRecord(ChannelCandidate(channel.name, requireNotNull(StalkerPortal.streamUrl(channel.command)),
                 providerId = channel.id, guideId = channel.guideId), attributes)

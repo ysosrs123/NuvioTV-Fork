@@ -11,6 +11,7 @@ data class XtreamChannel(
     val guideId: String?,
     val archive: ArchiveAvailability,
     val archiveDays: Int?,
+    val logo: String? = null,
 )
 data class XtreamCatalogue(val channels: List<XtreamChannel>, val invalidRows: Int) {
     val canPublish: Boolean get() = channels.isNotEmpty() && invalidRows == 0
@@ -37,7 +38,7 @@ class XtreamCatalogueParser(private val maxCharacters: Int = 8 * 1024 * 1024, pr
             val days = identifier(row.opt("tv_archive_duration"))?.toIntOrNull()?.takeIf { it > 0 }
             val channel = XtreamChannel(id, name, identifier(row.opt("category_id")),
                 (row.opt("epg_channel_id") as? String)?.takeIf(String::isNotBlank), flag,
-                days.takeIf { flag == ArchiveAvailability.ADVERTISED })
+                days.takeIf { flag == ArchiveAvailability.ADVERTISED }, channelLogoUrl(row.opt("stream_icon") as? String))
             val previous = channels[id]
             if (previous != null && previous != channel) invalid++ else channels[id] = channel
         }

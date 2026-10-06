@@ -1,5 +1,6 @@
 package com.nuvio.tv.data.iptv
 
+import com.nuvio.tv.core.iptv.CHANNEL_LOGO_ATTRIBUTE
 import com.nuvio.tv.core.iptv.ChannelCandidate
 import com.nuvio.tv.core.iptv.XtreamCatalogueParser
 import java.io.ByteArrayOutputStream
@@ -57,6 +58,7 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
                 row.categoryId?.let { id -> put("category-id", id); categories[id]?.let { put("group-title", it) } }
                 put("archive-availability", row.archive.name)
                 row.archiveDays?.let { put("archive-days", it.toString()) }
+                row.logo?.let { put(CHANNEL_LOGO_ATTRIBUTE, it) }
             }
             IptvCatalogueRecord(ChannelCandidate(row.name, locator, providerId = row.providerId, guideId = row.guideId), attributes)
         }
