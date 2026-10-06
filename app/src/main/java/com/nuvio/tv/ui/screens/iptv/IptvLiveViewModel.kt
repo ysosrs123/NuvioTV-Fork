@@ -27,7 +27,8 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
     val guidePicker: IptvGuidePicker? = null, val refresh: Map<String, IptvRefreshStatus> = emptyMap(),
     val controlLayout: com.nuvio.tv.data.local.PlayerControlLayout? = null, val shortGuide: Map<String, List<GuideProgramme>> = emptyMap(),
     val hiddenCategories: Set<String> = emptySet(), val multiview: List<IptvTile>? = null, val tileFocus: Int = 0,
-    val recordings: List<IptvRecording> = emptyList(), val maxTiles: Int = 1)
+    val recordings: List<IptvRecording> = emptyList(), val maxTiles: Int = 1,
+    val alarmPrompt: Boolean = false)
 
 data class IptvTile(val row: IptvListedChannel, val playback: IptvLivePlayback? = null, val player: ExoPlayer? = null,
     val playing: Boolean = false, val failure: Int? = null)
@@ -302,9 +303,13 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 is com.nuvio.tv.core.recording.IptvRecordResult.Refused -> iptvRecordRefusalMessage(result.reason)
                 null -> R.string.iptv_setup_failed
             }
-            if (session === current) mutable.update { it.copy(message = message) }
+            val alarms = (result as? com.nuvio.tv.core.recording.IptvRecordResult.Refused)?.reason ==
+                com.nuvio.tv.core.recording.IptvRecordRefusal.EXACT_ALARMS_DENIED
+            if (session === current) mutable.update { it.copy(message = if (alarms) null else message, alarmPrompt = alarms) }
         }
     }
+    fun alarmSettings(): android.content.Intent? = recorder.exactAlarmSettings()
+    fun dismissAlarmPrompt() { mutable.update { it.copy(alarmPrompt = false) } }
     fun cancelRecording(id: String) {
         viewModelScope.launch { runCatching { recorder.cancel(id) }.onFailure { if (it is CancellationException) throw it } }
     }

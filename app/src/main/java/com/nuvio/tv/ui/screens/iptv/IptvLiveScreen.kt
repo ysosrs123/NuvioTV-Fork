@@ -229,6 +229,24 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
             onRecord = { programme -> menuFor = null; viewModel.record(row, programme) },
             onCancelRecording = { id -> menuFor = null; viewModel.cancelRecording(id) })
     }
+    if (state.alarmPrompt) {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val settings = remember { viewModel.alarmSettings() }
+        val first = remember { FocusRequester() }
+        LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
+        NuvioDialog(onDismiss = viewModel::dismissAlarmPrompt, title = stringResource(R.string.iptv_recording_alarm_settings),
+            subtitle = stringResource(R.string.iptv_recording_refused_exact_alarms), width = 560.dp) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (settings != null) NuvioActionPill({
+                    viewModel.dismissAlarmPrompt()
+                    runCatching { context.startActivity(settings.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                }, Modifier.focusRequester(first)) { Text(stringResource(R.string.iptv_recording_alarm_settings)) }
+                NuvioActionPill(viewModel::dismissAlarmPrompt, if (settings == null) Modifier.focusRequester(first) else Modifier) {
+                    Text(stringResource(R.string.iptv_setup_back))
+                }
+            }
+        }
+    }
     state.guidePicker?.let { picker ->
         GuidePickerDialog(picker, onAutomatic = { viewModel.chooseGuideChannel(null) }, onFeed = viewModel::pickGuideFeed,
             onSearch = viewModel::searchGuide, onChannel = { viewModel.chooseGuideChannel(it) }, onDismiss = viewModel::closeGuidePicker)
