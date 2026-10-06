@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.nuvio.tv.core.iptv.GuideChannel
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.GuideParseLimits
+import com.nuvio.tv.core.iptv.GuideProgrammeCap
+import com.nuvio.tv.core.iptv.GuideStorageCaps
 import com.nuvio.tv.core.iptv.GuideFeedIndex
 import com.nuvio.tv.core.iptv.GuideNameIndex
 import com.nuvio.tv.core.iptv.guideIdMatchName
@@ -187,6 +189,7 @@ class IptvGuideStore(
         limits: GuideParseLimits = GuideParseLimits(),
         channelFilter: Set<String>? = null,
         checkCancellation: () -> Unit = {},
+        caps: GuideStorageCaps = GuideStorageCaps(),
     ): RefreshDecision {
         require(listOf(validators.etag, validators.lastModified).all { it == null || (it.length <= 4096 && '\r' !in it && '\n' !in it) })
         val stage = UUID.randomUUID().toString()
@@ -198,6 +201,7 @@ class IptvGuideStore(
         if (!claimed) return RefreshDecision.STALE
         val channels = mutableListOf<GuideChannel>()
         val programmes = mutableListOf<GuideProgramme>()
+        val cap = GuideProgrammeCap(caps)
         var bufferedCharacters = 0
         fun flush() {
             if (channels.isEmpty() && programmes.isEmpty()) return
@@ -240,8 +244,9 @@ class IptvGuideStore(
                 channels += channel
                 bufferedCharacters += channel.names.sumOf { it.text.length } + channel.externalId.length
                 if (channels.size + programmes.size >= 100 || bufferedCharacters >= 256 * 1024) flush()
-            }, programme = { programme ->
-                if ((channelFilter == null || programme.channelExternalId in channelFilter) && programme.start.epochMillis < window.untilMillis && (programme.stop?.epochMillis?.let { it > window.fromMillis } ?: (programme.start.epochMillis >= window.fromMillis))) {
+            }, programme = programme@{ parsed ->
+                if ((channelFilter == null || parsed.channelExternalId in channelFilter) && parsed.start.epochMillis < window.untilMillis && (parsed.stop?.epochMillis?.let { it > window.fromMillis } ?: (parsed.start.epochMillis >= window.fromMillis))) {
+                    val programme = cap.admit(parsed) ?: return@programme
                     programmes += programme
                     bufferedCharacters += programme.titles.sumOf { it.text.length } + programme.descriptions.sumOf { it.text.length }
                     if (channels.size + programmes.size >= 100 || bufferedCharacters >= 256 * 1024) flush()
@@ -256,6 +261,7 @@ class IptvGuideStore(
                 val candidateCount = count(db, "SELECT COUNT(*) FROM programmes WHERE stage=?", arrayOf(stage))
                 if (candidateCount == 0L || summary.channels == 0) return@transaction RefreshDecision.EMPTY_REQUIRES_REVIEW
                 val previous = count(db, "SELECT COUNT(*) FROM programmes p JOIN feeds f ON f.active_stage=p.stage WHERE f.id=? AND f.version=f.active_version AND p.start<? AND (p.stop>? OR (p.stop IS NULL AND p.start>=?))", arrayOf(ticket.ref.feedId, window.untilMillis.toString(), window.fromMillis.toString(), window.fromMillis.toString()))
+                IptvLog.info("guide import channels=${summary.channels} programmes=$candidateCount capped=${cap.dropped} previous=$previous")
                 if (previous > 0 && candidateCount * 2 < previous) return@transaction RefreshDecision.SHRINK_REQUIRES_REVIEW
                 checkCancellation()
                 db.update("feeds", ContentValues().apply {

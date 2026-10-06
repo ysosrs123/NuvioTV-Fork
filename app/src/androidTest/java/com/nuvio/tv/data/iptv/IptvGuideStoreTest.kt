@@ -80,6 +80,17 @@ class IptvGuideStoreTest {
         }
         store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias))
     }
+    @Test fun importKeepsAPerChannelProgrammeCapAndShortDescriptions() {
+        val ref = feed()
+        val rows = (0 until 6).joinToString("") { slot ->
+            "<programme channel=\"one\" start=\"2026100500${slot}000 +0000\" stop=\"2026100500${slot}500 +0000\"><title>Show $slot</title><desc>${"long ".repeat(200)}</desc></programme>"
+        }
+        assertEquals(RefreshDecision.PUBLISH, store.importGuide(store.beginRefresh(ref), xml(rows).byteInputStream(), window,
+            caps = com.nuvio.tv.core.iptv.GuideStorageCaps(programmesPerChannel = 4, descriptionCharacters = 50)))
+        val stored = store.programmes(ref, "one", window).programmes
+        assertEquals(4, stored.size)
+        assertTrue(stored.all { it.descriptions.single().text.length <= 50 })
+    }
     @Test fun sameGuideIdInAnotherFeedOrProfileCannotBleedIntoQueries() {
         val one = feed(); val two = feed(); val otherProfile = feed(2)
         publish(one); publish(two, xml(programme("Different"))); publish(otherProfile, xml(programme("Private")))

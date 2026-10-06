@@ -31,7 +31,7 @@ class IptvGuideRepository(private val store: IptvGuideStore, private val client:
                     ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
                 return@withContext try {
                     opener(request.endpoint).use { input ->
-                        IptvGuideRefresh.Guide(store.importGuide(request.ticket, input, window, IptvCacheValidators(), limits) { check.ensureActive() })
+                        IptvGuideRefresh.Guide(store.importGuide(request.ticket, input, window, IptvCacheValidators(), limits, checkCancellation = { check.ensureActive() }))
                     }
                 } catch (cancel: kotlinx.coroutines.CancellationException) { throw cancel }
                 catch (_: SQLiteFullException) { IptvGuideRefresh.StorageFull }
