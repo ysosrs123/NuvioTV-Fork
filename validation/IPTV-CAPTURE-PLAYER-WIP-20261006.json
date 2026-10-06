@@ -1,7 +1,7 @@
 {
   "date": "2026-10-06",
   "timezone": "Australia/Brisbane",
-  "branch": "codex/iptv-wip",
+  "branch": "iptv/wip",
   "baseCommit": "b68985aafcd78f2b096e7073082f98c3c85bb874",
   "status": "WIP_CORE_PASS_ANDROID_PLAYER_TIMEOUTS",
   "sourceSha256": {

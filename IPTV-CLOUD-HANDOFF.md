@@ -1,12 +1,12 @@
 # IPTV cloud review and continuation
 
 Repository: ysosrs123/NuvioTV-Fork
-Branch: codex/iptv-wip
+Branch: iptv/wip
 Last fully validated local checkpoint: b68985aafcd78f2b096e7073082f98c3c85bb874
 
 The user explicitly authorized publishing this WIP branch on 6 October 2026 for
 another agent to review and continue in a cloud container. Use this repository
-on codex/iptv-wip. The repository name NuvioTV-Fork is correct for this transfer;
+on iptv/wip. The repository name NuvioTV-Fork is correct for this transfer;
 the warnings about the wrong Fork folder refer to a separate dirty local checkout.
 The Windows-only workspace and offline toolchain instructions apply to local PC
 operations. Cloud work uses its own repository directory; do not try to access E:.

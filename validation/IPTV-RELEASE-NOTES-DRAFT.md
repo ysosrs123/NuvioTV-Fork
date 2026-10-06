@@ -9,12 +9,12 @@ the installed distinct prototype remains the older HUD/guide build. Nothing publ
 ## Player-binding WIP — cloud transfer status
 
 Last validated committed checkpoint is b68985a. Subsequent player-binding source /
-tests are included on codex/iptv-wip for the authorized cloud review.
+tests are included on iptv/wip for the authorized cloud review.
 Read [the current WIP transfer note](IPTV-CAPTURE-PLAYER-WIP-20261006.md) and its
 JSON report before editing or building. Core211 passes; the current harness builds,
 but both actual AM9 player fixtures time out. No new successful player/rendering
 claim or full app/JVM run is established. Both test packages are removed; no task
-build/test is running. Continue cloud review from codex/iptv-wip.
+build/test is running. Continue cloud review from iptv/wip.
 See ../IPTV-CLOUD-HANDOFF.md for the entry point and versioned evidence.
 The committed AM9 capture-path checkpoint below remains valid historical evidence.
 

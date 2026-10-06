@@ -1,6 +1,6 @@
 # Nuvio IPTV - authoritative fresh-session handoff, 6 October 2026
 
-> Cloud transfer: use `ysosrs123/NuvioTV-Fork` branch `codex/iptv-wip` and read
+> Cloud transfer: use `ysosrs123/NuvioTV-Fork` branch `iptv/wip` and read
 > [IPTV-CLOUD-HANDOFF.md](../IPTV-CLOUD-HANDOFF.md) first. Current player WIP is
 > included in that branch. Windows paths and local-only restrictions below apply
 > to the PC checkout; they do not require cloud access to E:. The user authorized
@@ -46,7 +46,7 @@ not authorization to restart/create recurring automations.
 ## Player-binding WIP — cloud transfer status
 
 Last validated committed checkpoint is b68985a. Subsequent player-binding source /
-tests are included on codex/iptv-wip for the authorized cloud review.
+tests are included on iptv/wip for the authorized cloud review.
 Read [the current WIP transfer note](IPTV-CAPTURE-PLAYER-WIP-20261006.md) and its
 JSON report before editing or building. Core211 passes; the current harness builds,
 but both actual AM9 player fixtures time out. No new successful player/rendering

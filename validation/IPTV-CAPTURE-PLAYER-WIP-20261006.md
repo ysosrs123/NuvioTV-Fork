@@ -1,12 +1,12 @@
 # Nuvio IPTV current player-binding work in progress — 6 October 2026
 
-Authoritative folder: E:/Codex/NuvioTV/work/NuvioTV-IPTV. Cloud transfer branch: codex/iptv-wip.
+Authoritative folder: E:/Codex/NuvioTV/work/NuvioTV-IPTV. Cloud transfer branch: iptv/wip.
 Last validated committed checkpoint: b68985aafcd78f2b096e7073082f98c3c85bb874.
 Read IPTV-NEXT-SESSION-HANDOFF-20261006.md first for all standing restrictions.
 
 ## Current transfer state
 
-The seven implementation/test/build files below are included on codex/iptv-wip
+The seven implementation/test/build files below are included on iptv/wip
 for the user-authorized GitHub/cloud transfer. Read ../IPTV-CLOUD-HANDOFF.md first.
 The last validated implementation remains b68985a; the newer player code is WIP.
 There is no active task build or instrumentation session. All automations stay
