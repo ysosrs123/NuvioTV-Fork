@@ -66,6 +66,18 @@ class SetupDraftsTest {
         rejects("username", body("kind" to "xtream", "label" to "X", "address" to "http://x.example", "username" to "u".repeat(4097), "password" to "p"))
     }
 
+    @Test fun deeplyNestedOrLenientJsonIsRejectedBeforeParsing() {
+        assertTrue(SetupDrafts.shallowJson(body("kind" to "xtream", "label" to "a{[\"]}", "password" to "p\\\"[[[[[[")))
+        assertTrue(SetupDrafts.shallowJson("""{"a":[{"b":[1]}]}"""))
+        assertFalse(SetupDrafts.shallowJson("""{"a":[{"b":[{"c":1}]}]}"""))
+        for (lenient in listOf("""{'a':'"', "b":1}""", """{"a":x'y, "b":1}""", """{/* " */ "a":1}""", """{# "
+"a":1}""", """{"a":"open"""))
+            assertFalse(lenient, SetupDrafts.shallowJson(lenient))
+        val deep = "[".repeat(30_000) + "]".repeat(30_000)
+        rejects("body", deep)
+        rejects("body", """{"kind":"m3u","label":"A","address":"http://a.example","x":""" + deep + "}")
+    }
+
     @Test fun blankFieldsKeepTheStoredValues() {
         val stored = SetupConnection("http://x.example", "me", "stored-secret")
         val renamed = SetupDrafts.parse(body("kind" to "xtream", "id" to "a", "label" to "New"))

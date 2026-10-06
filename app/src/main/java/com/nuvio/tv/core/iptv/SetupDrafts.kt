@@ -80,7 +80,7 @@ object SetupDrafts {
     private val ID = Regex("[A-Za-z0-9_-]{1,80}")
 
     fun parse(body: String): SetupDraft {
-        if (body.length > MAX_BODY_BYTES) throw SetupInputException("body")
+        if (body.length > MAX_BODY_BYTES || !shallowJson(body)) throw SetupInputException("body")
         val json = try { JSONObject(body) } catch (_: Exception) { throw SetupInputException("body") }
         val kind = SetupKind.of(text(json, "kind", 16)) ?: throw SetupInputException("kind")
         val target = text(json, "id", 80).ifEmpty { null }?.also { if (!ID.matches(it)) throw SetupInputException("id") }
@@ -105,6 +105,31 @@ object SetupDrafts {
             else -> Unit
         }
         return SetupDraft(kind, target, label, address, username, password)
+    }
+
+    fun shallowJson(body: String, maxDepth: Int = 4): Boolean {
+        var depth = 0
+        var inString = false
+        var escaped = false
+        for (char in body) {
+            if (inString) {
+                when {
+                    escaped -> escaped = false
+                    char == '\\' -> escaped = true
+                    char == '"' -> inString = false
+                }
+                continue
+            }
+            when (char) {
+                '"' -> inString = true
+                '{', '[' -> if (++depth > maxDepth) return false
+                '}', ']' -> depth--
+                ' ', '\t', '\n', '\r', ':', ',', '-', '+', '.' -> Unit
+                in '0'..'9', in 'a'..'z', in 'A'..'Z' -> Unit
+                else -> return false
+            }
+        }
+        return !inString
     }
 
     fun checkTarget(draft: SetupDraft, listing: SetupListing): String? {

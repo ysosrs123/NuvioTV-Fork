@@ -66,7 +66,7 @@ class IptvSetupServer private constructor(
             route(session)
         } catch (rejected: BodyRejected) {
             json(rejected.status, error("body"))
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             json(Response.Status.INTERNAL_ERROR, error("server"))
         }
         response.closeConnection(true)
@@ -108,7 +108,9 @@ class IptvSetupServer private constructor(
     private fun pair(session: IHTTPSession, token: String, remote: String): Response {
         if (!pairAttempts.allow(remote)) return json(Response.Status.TOO_MANY_REQUESTS, error("rate"))
         val code = try {
-            JSONObject(readBody(session)).opt("code") as? String ?: ""
+            val body = readBody(session)
+            if (!SetupDrafts.shallowJson(body)) return json(Response.Status.BAD_REQUEST, error("body"))
+            JSONObject(body).opt("code") as? String ?: ""
         } catch (rejected: BodyRejected) {
             throw rejected
         } catch (_: Exception) {
@@ -218,7 +220,13 @@ class IptvSetupServer private constructor(
                 clientHandler.close()
                 return
             }
-            Thread(clientHandler, "IptvSetupClient").apply { isDaemon = true }.start()
+            Thread(clientHandler, "IptvSetupClient").apply {
+                isDaemon = true
+                setUncaughtExceptionHandler { _, _ ->
+                    clientHandler.close()
+                    closed(clientHandler)
+                }
+            }.start()
         }
     }
 
