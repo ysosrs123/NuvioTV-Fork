@@ -2,7 +2,9 @@ package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.CHANNEL_LOGO_ATTRIBUTE
 import com.nuvio.tv.core.iptv.ChannelCandidate
+import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.XtreamCatalogueParser
+import com.nuvio.tv.core.iptv.XtreamShortGuide
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -64,6 +66,18 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
         }
         if (catalogue.invalidRows > 0) diagnose("catalogue", IllegalStateException("skipped rows ${catalogue.invalidRows}"))
         return XtreamDownload(account, records, catalogue.canPublish)
+    }
+
+    suspend fun shortGuide(connection: IptvSourceConnection, streamId: String, limit: Int = 4): List<GuideProgramme> {
+        require(limit in 1..20)
+        if (!streamId.matches(Regex("[0-9]{1,20}"))) throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+        val base = serverBase(connection)
+        val url = base.newBuilder().addPathSegment("player_api.php")
+            .addQueryParameter("username", connection.username).addQueryParameter("password", connection.password)
+            .addQueryParameter("action", "get_short_epg").addQueryParameter("stream_id", streamId)
+            .addQueryParameter("limit", limit.toString()).build()
+        val text = json(url, minOf(maxBodyBytes, SHORT_GUIDE_BYTES))
+        return parseSafely { XtreamShortGuide.parse(text, streamId, maxListings = limit * 2) }
     }
 
     private fun parseAccount(text: String): XtreamAccount = parseSafely {
@@ -145,6 +159,8 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
     }
 
     companion object {
+        private const val SHORT_GUIDE_BYTES = 256 * 1024
+
         private fun diagnose(stage: String, error: Exception) {
             val location = error.stackTrace.firstOrNull()?.let { "${it.className}.${it.methodName}:${it.lineNumber}" }.orEmpty()
             val failure = (error as? MetadataException)?.let { listOfNotNull(it.failure.name, it.status).joinToString(" ") }.orEmpty()

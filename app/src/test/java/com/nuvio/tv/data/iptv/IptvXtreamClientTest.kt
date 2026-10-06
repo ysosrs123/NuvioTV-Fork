@@ -179,6 +179,25 @@ class IptvXtreamClientTest {
         }
     }
 
+    @Test fun shortGuideUsesTheEncryptedConnectionAndBoundsTheResponse() = runBlocking {
+        val title = java.util.Base64.getEncoder().encodeToString("Now showing".toByteArray())
+        MockWebServer().use { server ->
+            server.enqueue(MockResponse().setBody("""{"epg_listings":[{"title":"$title","start_timestamp":"1700000000","stop_timestamp":"1700003600"}]}"""))
+            val programmes = IptvXtreamClient().shortGuide(connection(server), "42", limit = 3)
+            assertEquals("Now showing", programmes.single().titles.single().text)
+            val url = server.takeRequest().requestUrl!!
+            assertEquals("/panel/player_api.php", url.encodedPath)
+            assertEquals(listOf("user /+&", "pass?#%", "get_short_epg", "42", "3"),
+                listOf("username", "password", "action", "stream_id", "limit").map { url.queryParameter(it) })
+            server.enqueue(MockResponse().setBody("{\"epg_listings\":[" + List(4_000) { "{\"title\":\"${"x".repeat(60)}\"}" }.joinToString(",") + "]}"))
+            assertEquals(MetadataFailure.BODY_LIMIT, failure { IptvXtreamClient().shortGuide(connection(server), "42") }.failure)
+            server.enqueue(MockResponse().setBody("""{"epg_listings":"broken"}"""))
+            assertEquals(MetadataFailure.INVALID_RESPONSE, failure { IptvXtreamClient().shortGuide(connection(server), "42") }.failure)
+            assertEquals(MetadataFailure.INVALID_ADDRESS, failure { IptvXtreamClient().shortGuide(connection(server), "../42") }.failure)
+            assertEquals(3, server.requestCount)
+        }
+    }
+
     private suspend fun failure(block: suspend () -> Any): MetadataException {
         try { block() } catch (error: MetadataException) { return error }
         throw AssertionError("Expected metadata rejection")
