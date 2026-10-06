@@ -309,6 +309,10 @@ python3 scripts/check_iptv_core.py
 Low-memory machines can add `--no-daemon --max-workers=1` and a smaller
 `-Dorg.gradle.jvmargs` heap. Do not upgrade dependency versions to make a check pass.
 Instrumentation steps are in `tools/iptv-device-tests/README.md`.
+Without the Android SDK (for example in a cloud session), `python3
+tools/iptv-host-tests/run.py` runs the core and data-layer JVM tests and compile-checks
+the device tests; see its README. The `PR Full Debug Build` workflow can build the
+prototype APK on GitHub Actions (manual run, variant `iptvPrototype`).
 
 ## Device test rules
 
