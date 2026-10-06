@@ -141,6 +141,59 @@ class IptvCatalogueStoreTest {
         assertEquals(IptvStreamFormat.HLS, store.playbackItem(ref, item.channel.id)!!.overlay.streamFormat)
     }
 
+    @Test fun guideMatchCandidatesFindIdsFeedSuffixesNamesAndManualGuidesInChannelOrder() {
+        val ref = source(); val other = source(2)
+        fun channel(id: Int, name: String, guide: String?, group: String? = null) = IptvCatalogueRecord(ChannelCandidate(name, "https://fixture.invalid/live/$id", providerId = id.toString(), guideId = guide),
+            group?.let { mapOf("group-title" to it) }.orEmpty())
+        publish(ref, listOf(channel(1, "UK: ABC HD", "abc.uk@SD"), channel(2, "ABC", "abc.uk"), channel(3, "Hidden", "abc.uk"),
+            channel(4, "BBC One FHD", null), channel(5, "Manual", "zzz"), channel(6, "Unrelated", "xyz"), channel(7, "ABC Late", "abc.uk", "Late")))
+        publish(other, listOf(channel(1, "ABC", "abc.uk")))
+        val items = store.page(ref).items.associateBy { it.channel.data.name }
+        store.setOverlay(ref, items.getValue("Hidden").channel.id, IptvChannelOverlay(hidden = true))
+        store.setOverlay(ref, items.getValue("Manual").channel.id, IptvChannelOverlay(customName = "Mine", manualGuide = GuideKey("feed", "manual.id")))
+        fun names(guideIds: Set<String> = emptySet(), nameKeys: Set<String> = emptySet(), manual: Set<GuideKey> = emptySet(), limit: Int = 400,
+            source: IptvSourceRef = ref, excluded: Set<String> = emptySet()) = store.guideMatchCandidates(source, guideIds, nameKeys, manual, limit, excluded).map { it.channel.data.name }
+        assertEquals(listOf("UK: ABC HD", "ABC", "ABC Late"), names(setOf("abc.uk")))
+        assertEquals(listOf("UK: ABC HD", "ABC"), names(setOf("abc.uk"), excluded = setOf("Late")))
+        assertEquals(listOf("ABC Late"), names(setOf("abc.uk"), excluded = setOf("")))
+        assertEquals(listOf("UK: ABC HD"), names(setOf("abc.uk@SD")))
+        assertEquals(listOf("BBC One FHD"), names(nameKeys = setOf("bbcone")))
+        assertEquals(listOf("Manual"), names(manual = setOf(GuideKey("feed", "manual.id"))))
+        assertEquals("Mine", store.guideMatchCandidates(ref, emptySet(), emptySet(), setOf(GuideKey("feed", "manual.id"))).single().overlay.customName)
+        assertTrue(names(manual = setOf(GuideKey("other", "manual.id"))).isEmpty())
+        assertEquals(listOf("UK: ABC HD", "ABC", "BBC One FHD", "Manual", "ABC Late"), names(setOf("abc.uk", "missing"), setOf("bbcone", "abc"), setOf(GuideKey("feed", "manual.id"))))
+        assertEquals(listOf("UK: ABC HD", "ABC"), names(setOf("abc.uk"), setOf("bbcone"), limit = 2))
+        assertEquals(listOf("ABC"), names(setOf("abc.uk"), source = other))
+        assertTrue(names(manual = setOf(GuideKey("feed", "manual.id")), source = other).isEmpty())
+        assertThrows(IllegalArgumentException::class.java) { names((1..501).map { "id$it" }.toSet()) }
+        assertThrows(IllegalArgumentException::class.java) { names(setOf("abc.uk"), limit = 0) }
+        assertThrows(IllegalArgumentException::class.java) { names(setOf(" ")) }
+    }
+
+    @Test fun v7MigrationLeavesGuideKeysEmptyUntilTheNextRefresh() {
+        val ref = source()
+        val record = IptvCatalogueRecord(ChannelCandidate("UK: ABC HD", "https://fixture.invalid/live/1", providerId = "1", guideId = "abc.uk@SD"))
+        publish(ref, listOf(record))
+        store.close()
+        context.openOrCreateDatabase(name, 0, null).use { db ->
+            db.execSQL("ALTER TABLE catalogue RENAME TO newer_catalogue")
+            db.execSQL("CREATE TABLE catalogue (source TEXT NOT NULL REFERENCES sources(id), generation INTEGER NOT NULL, id TEXT NOT NULL REFERENCES identities(id), name TEXT NOT NULL, available INTEGER NOT NULL, payload BLOB NOT NULL, search_name TEXT NOT NULL DEFAULT '', position INTEGER NOT NULL DEFAULT 0, category TEXT, PRIMARY KEY(source,generation,id))")
+            db.execSQL("INSERT INTO catalogue SELECT source,generation,id,name,available,payload,search_name,position,category FROM newer_catalogue")
+            db.execSQL("DROP TABLE newer_catalogue")
+            db.execSQL("CREATE INDEX catalogue_browse ON catalogue(source,generation,available,search_name,id)")
+            db.execSQL("CREATE INDEX catalogue_order ON catalogue(source,generation,category,position)")
+            db.execSQL("CREATE INDEX catalogue_identity ON catalogue(id)")
+            db.version = 7
+        }
+        store = IptvCatalogueStore(context, name, secrets)
+        val item = store.page(ref).items.single()
+        assertEquals("abc.uk@SD", item.channel.data.guideId)
+        assertTrue(store.guideMatchCandidates(ref, setOf("abc.uk"), setOf("abc"), emptySet()).isEmpty())
+        publish(ref, listOf(record), etag = "v2")
+        assertEquals(listOf(item.channel.id), store.guideMatchCandidates(ref, setOf("abc.uk"), emptySet(), emptySet()).map { it.channel.id })
+        assertEquals(listOf(item.channel.id), store.guideMatchCandidates(ref, emptySet(), setOf("abc"), emptySet()).map { it.channel.id })
+    }
+
     @Test fun credentialsCatalogueAndOverlaysSurviveCloseAndReopenWithoutPlaintextSecrets() {
         val ref = source()
         assertEquals(RefreshDecision.PUBLISH, publish(ref))

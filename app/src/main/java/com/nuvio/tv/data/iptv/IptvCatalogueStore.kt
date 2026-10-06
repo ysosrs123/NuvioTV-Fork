@@ -12,6 +12,7 @@ import com.nuvio.tv.core.iptv.GuideKey
 import com.nuvio.tv.core.iptv.RefreshDecision
 import com.nuvio.tv.core.iptv.RefreshTicket
 import com.nuvio.tv.core.iptv.StoredChannel
+import com.nuvio.tv.core.iptv.channelNameKey
 import com.nuvio.tv.core.iptv.decideCatalogueRefresh
 import com.nuvio.tv.core.iptv.guideIdWithoutFeedSuffix
 import com.nuvio.tv.core.iptv.foldSearchText
@@ -246,6 +247,38 @@ class IptvCatalogueStore(
             if (items.size > limit) IptvBrowseCursor(revision, query, offset + limit) else null)
     }
 
+    fun guideMatchCandidates(ref: IptvSourceRef, guideIds: Set<String>, nameKeys: Set<String>, manualGuides: Set<GuideKey>,
+        limit: Int = 400, excludedCategories: Set<String> = emptySet()): List<IptvCatalogueItem> = transaction { db ->
+        require(limit in 1..1000 && guideIds.size <= 500 && nameKeys.size <= 500 && manualGuides.size <= 500)
+        require(excludedCategories.size <= 500 && excludedCategories.all { it.length <= 240 })
+        require((guideIds + nameKeys + manualGuides.flatMap { listOf(it.feedId, it.externalId) }).all { it.isNotBlank() && it.length <= 4096 })
+        val generation = source(db, ref).activeGeneration ?: return@transaction emptyList()
+        val scope = arrayOf(ref.sourceId, generation.toString())
+        fun marks(values: Collection<String>) = values.joinToString(",") { "?" }
+        val matched = buildSet {
+            fun collect(sql: String, args: Array<String>) = db.rawQuery(sql, args).use { c -> while (c.moveToNext()) add(c.getString(0)) }
+            if (guideIds.isNotEmpty()) {
+                collect("SELECT id FROM catalogue WHERE source=? AND generation=? AND epg_id IN (${marks(guideIds)})", scope + guideIds)
+                collect("SELECT id FROM catalogue WHERE source=? AND generation=? AND epg_base IN (${marks(guideIds)})", scope + guideIds)
+            }
+            if (nameKeys.isNotEmpty()) collect("SELECT id FROM catalogue WHERE source=? AND generation=? AND name_key IN (${marks(nameKeys)})", scope + nameKeys)
+            for ((feed, keys) in manualGuides.groupBy({ it.feedId }, { it.externalId })) {
+                collect("SELECT o.id FROM overlays o JOIN identities i ON o.id=i.id WHERE i.source=? AND o.profile=? AND o.guide_feed=? AND o.guide_id IN (${marks(keys)})",
+                    arrayOf(ref.sourceId, ref.profileId.toString(), feed, *keys.toTypedArray()))
+            }
+        }
+        val excluded = if (excludedCategories.isEmpty()) "" else " AND COALESCE(c.category,'') NOT IN (${marks(excludedCategories)})"
+        val visible = matched.chunked(400).flatMap { chunk ->
+            db.rawQuery("SELECT c.id,c.position FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.available=1 AND COALESCE(o.hidden,0)=0$excluded AND c.id IN (${marks(chunk)})",
+                arrayOf(ref.profileId.toString(), *scope, *excludedCategories.toTypedArray(), *chunk.toTypedArray())).use { c -> buildList { while (c.moveToNext()) add(c.getString(0) to c.getLong(1)) } }
+        }.sortedWith(compareBy({ it.second }, { it.first })).take(limit).map { it.first }
+        val items = visible.chunked(500).flatMap { chunk ->
+            db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id IN (${marks(chunk)})",
+                arrayOf(ref.profileId.toString(), *scope, *chunk.toTypedArray())).use { c -> buildList { while (c.moveToNext()) add(readItem(c, ref)) } }
+        }.associateBy { it.channel.id }
+        visible.mapNotNull(items::get)
+    }
+
     fun channelCounts(profileId: Int): Map<String, Int> = transaction { db ->
         require(profileId >= 0)
         db.rawQuery("SELECT s.id,COUNT(c.id) FROM sources s LEFT JOIN catalogue c ON c.source=s.id AND c.generation=s.active_generation AND c.available=1 WHERE s.profile=? AND s.config_version=s.active_config GROUP BY s.id",
@@ -309,7 +342,7 @@ class IptvCatalogueStore(
         val db = helper.writableDatabase
         var written = planned
         val published = db.compileStatement("INSERT OR IGNORE INTO identities(id,source) VALUES(?,?)").use { identity ->
-            db.compileStatement("INSERT INTO catalogue(source,generation,id,name,available,search_name,position,category,payload) VALUES(?,?,?,?,?,?,?,?,?)").use { row ->
+            db.compileStatement("INSERT INTO catalogue(source,generation,id,name,available,search_name,position,category,payload,epg_id,epg_base,name_key) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)").use { row ->
                 try {
                     saveGeneration(next, object : GenerationWriter<PlannedRow> {
                         override fun write(rows: List<PlannedRow>) {
@@ -332,6 +365,10 @@ class IptvCatalogueStore(
                                     row.bindString(6, searchName(channel.data.name)); row.bindLong(7, planned.position.toLong())
                                     planned.attributes[CATEGORY_ATTRIBUTE]?.trim()?.takeIf { it.isNotEmpty() }?.take(240)?.let { row.bindString(8, it) } ?: row.bindNull(8)
                                     row.bindBlob(9, sealed[index])
+                                    val guideId = channel.data.guideId?.takeIf { it.isNotBlank() && it.length <= 4096 }
+                                    guideId?.let { row.bindString(10, it) } ?: row.bindNull(10)
+                                    guideId?.let(::guideIdWithoutFeedSuffix)?.let { row.bindString(11, it) } ?: row.bindNull(11)
+                                    channelNameKey(channel.data.name)?.let { row.bindString(12, it) } ?: row.bindNull(12)
                                     row.executeInsert()
                                 }
                             }
@@ -500,7 +537,7 @@ class IptvCatalogueStore(
         class Write(val rows: List<PlannedRow>) : CataloguePlan
     }
 
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 7) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 8) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
@@ -515,15 +552,25 @@ class IptvCatalogueStore(
             addGroupingSchema(db)
             addRefreshSchema(db)
             addIdentityIndex(db)
+            addGuideKeySchema(db)
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(oldVersion in 1..6 && newVersion == 7) { "Missing IPTV database migration" }
+            check(oldVersion in 1..7 && newVersion == 8) { "Missing IPTV database migration" }
             if (oldVersion == 1) addBrowseSchema(db)
             if (oldVersion <= 2) addStreamFormatSchema(db)
             if (oldVersion <= 4) addGroupingSchema(db)
             if (oldVersion <= 3) reindexSearch(db)
             if (oldVersion <= 5) addRefreshSchema(db)
             if (oldVersion <= 6) addIdentityIndex(db)
+            if (oldVersion <= 7) addGuideKeySchema(db)
+        }
+        private fun addGuideKeySchema(db: SQLiteDatabase) {
+            db.execSQL("ALTER TABLE catalogue ADD COLUMN epg_id TEXT")
+            db.execSQL("ALTER TABLE catalogue ADD COLUMN epg_base TEXT")
+            db.execSQL("ALTER TABLE catalogue ADD COLUMN name_key TEXT")
+            db.execSQL("CREATE INDEX catalogue_epg ON catalogue(source,generation,epg_id)")
+            db.execSQL("CREATE INDEX catalogue_epg_base ON catalogue(source,generation,epg_base)")
+            db.execSQL("CREATE INDEX catalogue_name_key ON catalogue(source,generation,name_key)")
         }
         private fun addIdentityIndex(db: SQLiteDatabase) {
             db.execSQL("CREATE INDEX catalogue_identity ON catalogue(id)")
