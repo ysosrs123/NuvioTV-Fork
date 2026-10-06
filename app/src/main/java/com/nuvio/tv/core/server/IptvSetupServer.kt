@@ -28,7 +28,7 @@ class IptvSetupServer private constructor(
     private val host: String,
     port: Int,
     private val listing: () -> SetupListing,
-    private val onChangeProposed: (String, SetupDraft, String) -> Unit,
+    private val onChangeProposed: (IptvSetupServer, String, SetupDraft, String) -> Unit,
     now: () -> Long,
 ) : NanoHTTPD(host, port) {
 
@@ -155,7 +155,7 @@ class IptvSetupServer private constructor(
         if (changes.coolingDown(owner)) return json(Response.Status.CONFLICT, error("cooldown"))
         val id = changes.propose(owner, draft) ?: return json(Response.Status.CONFLICT, error("busy"))
         try {
-            onChangeProposed(id, draft, remote)
+            onChangeProposed(this, id, draft, remote)
         } catch (_: Exception) {
             changes.resolve(id, SetupChangeBook.Status.FAILED)
             return json(Response.Status.INTERNAL_ERROR, error("server"))
@@ -279,7 +279,7 @@ class IptvSetupServer private constructor(
         fun start(
             host: String,
             listing: () -> SetupListing,
-            onChangeProposed: (String, SetupDraft, String) -> Unit,
+            onChangeProposed: (IptvSetupServer, String, SetupDraft, String) -> Unit,
             now: () -> Long = System::currentTimeMillis,
             startPort: Int = 8100,
             maxAttempts: Int = 10

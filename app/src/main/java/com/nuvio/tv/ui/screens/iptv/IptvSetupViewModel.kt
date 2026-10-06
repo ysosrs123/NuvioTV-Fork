@@ -137,7 +137,7 @@ class IptvSetupViewModel @Inject constructor(
         val started = IptvSetupServer.start(
             host = ip,
             listing = { listing },
-            onChangeProposed = { id, draft, from -> viewModelScope.launch { propose(current, id, draft, from) } }
+            onChangeProposed = { origin, id, draft, from -> viewModelScope.launch { propose(origin, current, id, draft, from) } }
         )
         if (started == null) {
             mutable.update { it.copy(phase = IptvSetupPhase.PORTS_BUSY, address = null, qr = null, code = null, devices = 0) }
@@ -176,15 +176,15 @@ class IptvSetupViewModel @Inject constructor(
         mutable.update { it.copy(address = null, qr = null, code = null, devices = 0, pending = null) }
     }
 
-    private fun propose(current: IptvProfileAccess.Session, id: String, draft: SetupDraft, from: String) {
-        val active = server ?: return
-        if (session !== current || mutable.value.pending != null) {
-            active.resolve(id, SetupChangeBook.Status.REJECTED)
+    private fun propose(origin: IptvSetupServer, current: IptvProfileAccess.Session, id: String, draft: SetupDraft, from: String) {
+        val active = server
+        if (active !== origin || session !== current || mutable.value.pending != null) {
+            origin.resolve(id, SetupChangeBook.Status.REJECTED)
             return
         }
         val target = draft.targetId?.let { listing.find(draft.kind, it) }
         if (draft.edit && target == null) {
-            active.resolve(id, SetupChangeBook.Status.FAILED)
+            origin.resolve(id, SetupChangeBook.Status.FAILED)
             return
         }
         mutable.update { it.copy(pending = IptvSetupPending(id, draft, target?.label, lines(draft, target, from)), message = null) }
