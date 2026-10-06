@@ -14,7 +14,7 @@ Updated 6 October 2026.
 | 6 Oct | iptv/player-binding | Video player binding; played-batch retirement (player timeout cause); 26 review fixes; `main` merged; IPTV flavour gate | 222 core + 117 data-layer host tests; device rerun pending |
 | 6 Oct | iptv/player-binding | Guide grid model, automatic Xtream guide, account groups and source order, Stalker Portal, local guide folder import (logic only) | 238 core + 121 data-layer host tests |
 | 6 Oct | def2b19 | Host test runner; CI builds the prototype APK | First full Gradle compile and IPTV JVM run since b68985a pass on GitHub Actions; device pending |
-| 6 Oct | 1c9b744 – 230b425 | First real-account findings fixed (errors, form, envelope sealing, credential-free Xtream rows, background provider guide); background refresh; guide-first Live TV; guide name matching and picker; full-screen banner, channel panel, last channel, number entry | 241 core + 125 data-layer host tests; CI green to ac71506; device pending |
+| 6 Oct | 1c9b744 – 230b425 | First real-account findings fixed (errors, form, envelope sealing, credential-free Xtream rows, background provider guide); background refresh; guide-first Live TV; guide name matching and picker; full-screen banner, channel panel, last channel, number entry | 241 core + 125 data-layer host tests; CI green to 230b425 (run 37456242102); device pending |
 
 Design notes and per-checkpoint reports are in this folder
 (`IPTV-*-DESIGN.md`, `IPTV-*-VALIDATION-*.json`). Review findings and their status:
