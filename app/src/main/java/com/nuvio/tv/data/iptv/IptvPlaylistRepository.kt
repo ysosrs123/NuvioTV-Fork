@@ -23,10 +23,14 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
         context.ensureActive()
         val request = store.prepareRefresh(ref)
         if (request.kind == IptvSourceKind.XTREAM) {
+            val started = System.currentTimeMillis()
             val download = xtream.catalogue(request.connection)
             context.ensureActive()
+            IptvLog.info("xtream download channels=${download.records.size} complete=${download.canPublish} ms=${System.currentTimeMillis() - started}")
             onSaving()
+            val saving = System.currentTimeMillis()
             val decision = store.commitCatalogue(ref, request.ticket, download.records, download.canPublish) { context.ensureActive() }
+            IptvLog.info("catalogue commit decision=$decision ms=${System.currentTimeMillis() - saving}")
             val guide = if (decision == RefreshDecision.PUBLISH) xtreamGuides?.ensure(ref) else null
             return@withContext IptvPlaylistRefresh.Catalogue(decision, guide)
         }

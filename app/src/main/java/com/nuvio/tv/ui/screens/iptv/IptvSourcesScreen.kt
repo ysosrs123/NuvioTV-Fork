@@ -136,18 +136,21 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
 
 @Composable
 private fun RefreshLine(status: IptvRefreshStatus?, refreshedAt: Long?, loaded: Boolean) {
+    val idle = when {
+        refreshedAt != null -> stringResource(R.string.iptv_refresh_updated, android.text.format.DateUtils.getRelativeTimeSpanString(
+            refreshedAt, System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS).toString())
+        loaded -> stringResource(R.string.iptv_setup_imported)
+        else -> stringResource(R.string.iptv_setup_refresh_needed)
+    }
+    val outcome = status?.message?.takeIf { it != R.string.iptv_setup_refreshed }?.let { stringResource(it) }
     val text = when (status?.phase) {
         IptvRefreshPhase.QUEUED -> stringResource(R.string.iptv_refresh_queued)
         IptvRefreshPhase.DOWNLOADING -> stringResource(R.string.iptv_refresh_downloading)
         IptvRefreshPhase.SAVING -> stringResource(R.string.iptv_refresh_saving)
         IptvRefreshPhase.GUIDE -> stringResource(R.string.iptv_refresh_guide)
-        IptvRefreshPhase.FAILED -> status.message?.let { stringResource(it) } ?: stringResource(R.string.iptv_setup_failed)
-        else -> when {
-            refreshedAt != null -> stringResource(R.string.iptv_refresh_updated, android.text.format.DateUtils.getRelativeTimeSpanString(
-                refreshedAt, System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS).toString())
-            loaded -> stringResource(R.string.iptv_setup_imported)
-            else -> stringResource(R.string.iptv_setup_refresh_needed)
-        }
+        IptvRefreshPhase.FAILED -> outcome ?: stringResource(R.string.iptv_setup_failed)
+        IptvRefreshPhase.DONE -> outcome ?: idle
+        null -> idle
     }
     Text(text, color = if (status?.phase == IptvRefreshPhase.FAILED) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary)
 }

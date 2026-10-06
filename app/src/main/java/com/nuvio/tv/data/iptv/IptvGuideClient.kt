@@ -26,7 +26,7 @@ sealed interface GuideDownload<out T> {
 }
 
 class IptvGuideClient(
-    private val http: OkHttpClient = IptvMetadataClient.newClient().newBuilder().callTimeout(15, TimeUnit.MINUTES).build(),
+    private val http: OkHttpClient = IptvMetadataClient.newClient().newBuilder().readTimeout(60, TimeUnit.SECONDS).callTimeout(15, TimeUnit.MINUTES).build(),
     private val maxTransferBytes: Long = 512L * 1024 * 1024,
 ) {
     init {
@@ -116,8 +116,9 @@ class IptvGuideClient(
             }
         } catch (error: Exception) {
             context.ensureActive()
-            if (error is CancellationException || error is MetadataException) throw error
-
+            if (error is CancellationException) throw error
+            IptvLog.failure("guide", error)
+            if (error is MetadataException) throw error
             throw MetadataException(MetadataFailure.INVALID_RESPONSE)
         } finally { cancellation.cancel() }
     }

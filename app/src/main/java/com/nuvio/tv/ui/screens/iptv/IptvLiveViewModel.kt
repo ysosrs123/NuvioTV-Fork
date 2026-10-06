@@ -228,7 +228,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                         categories = categories, guide = if (append) it.guide + rows else rows, window = window, focused = focused) }
                 }
             } catch (cancel: CancellationException) { throw cancel }
-            catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
+            catch (error: Exception) { IptvLog.failure("live load", error); if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
             finally { if (session === current && request == pageVersion) mutable.update { it.copy(loading = false) } }
         }
     }

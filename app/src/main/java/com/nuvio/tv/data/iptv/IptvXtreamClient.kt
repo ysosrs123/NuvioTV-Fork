@@ -60,6 +60,7 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
             }
             IptvCatalogueRecord(ChannelCandidate(row.name, locator, providerId = row.providerId, guideId = row.guideId), attributes)
         }
+        if (catalogue.invalidRows > 0) diagnose("catalogue", IllegalStateException("skipped rows ${catalogue.invalidRows}"))
         return XtreamDownload(account, records, catalogue.canPublish)
     }
 
