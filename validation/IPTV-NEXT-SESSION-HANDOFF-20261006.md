@@ -43,7 +43,47 @@ The temporary overnight job was explicitly paused at 07:05 Brisbane, 6 October,
 before its 08:00 cutoff. Leave all three paused; morning manual continuation is
 not authorization to restart/create recurring automations.
 
-## Player-binding WIP — cloud transfer status
+## Player-binding cloud continuation — 6 October 2026
+
+Branch iptv/player-binding, derived from iptv/wip 8b84c11. The last device-validated
+checkpoint remains b68985a. Details, hashes and limits:
+[IPTV-CAPTURE-PLAYER-CLOUD-20261006.json](IPTV-CAPTURE-PLAYER-CLOUD-20261006.json);
+code review findings: [IPTV-CODE-REVIEW-20261006.md](IPTV-CODE-REVIEW-20261006.md).
+
+Probable cause of both AM9 player timeouts, from code inspection and a JVM reproduction
+(not yet confirmed on device): CaptureSampleBatchQueue (maxBatches 2) and
+CaptureSampleLoadCursor (maxOpenInputs 2) stage at most two rows. The three-segment
+fixture staged segments 0-1 and stopped at CAPACITY. Only tests called
+retireConsumedPrefix, so no played row was ever returned; segment 2 was never staged,
+the reader never reached ENDED and the video stream returned NOTHING_READ after about
+4s. ExoPlayer stayed BUFFERING until the 30s wait expired.
+
+- CaptureEpochMediaSource(retiresPlayedBatches = true) makes period discardBuffer
+  retire rows wholly before the playback position through the existing checked
+  retireConsumedPrefix path. Default remains off; CaptureVideoPlayer requires it.
+- Media3 MaskingMediaSource replaces an explicit start of 0 with the window default
+  position (the live edge). CaptureVideoPlayer startPositionMs is now nullable: null
+  starts at the live edge; explicit positions are honoured, with 0 sent as 1ms, which
+  frame-floors to the first retained frame.
+- CaptureVideoPlayer.describe() and the fixture's timeout path now report player,
+  window, decoder-counter, reader, transport and render state instead of a bare timeout.
+  The fixture also asserts the first rendered frame comes from the requested start.
+
+Cloud evidence: core 211/211 pass with the existing runner and pinned Kotlin 2.3.0.
+A cloud JVM harness ran the 13 data-layer capture suites (65 cases: 64 existing plus
+one new regression) against the shipped Media3 AAR classes, Media3 1.8.0 lib-decoder
+built from source and a default-value android stub generated from android-all. The new
+case fails without the change and passes with it. The AM9 fixture compiles against the
+same classes with a stub InstrumentationRegistry. These are not Gradle/AGP builds: the
+Android SDK host is blocked in the cloud, so no full app compile, full 317-case JVM
+run, harness APK or device execution has been done for this change.
+
+Next local steps: full app compile, full IPTV JVM run, harness build, then the two
+CaptureVideoPlayerAndroidTest cases on AM9 using the existing README commands and
+device rules. Controls stay disabled. Rendering, preroll discard, seek acknowledgement,
+blocked-release retention and measured memory remain unclaimed until those pass.
+
+## Player-binding WIP — cloud transfer status (superseded by the section above)
 
 Last validated committed checkpoint is b68985a. Subsequent player-binding source /
 tests are included on iptv/wip for the authorized cloud review.

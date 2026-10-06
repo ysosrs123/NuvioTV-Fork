@@ -1,8 +1,16 @@
 # IPTV cloud review and continuation
 
 Repository: ysosrs123/NuvioTV-Fork
-Branch: iptv/wip
+Branch: iptv/player-binding (continues iptv/wip 8b84c11; iptv/wip is unchanged)
 Last fully validated local checkpoint: b68985aafcd78f2b096e7073082f98c3c85bb874
+
+Current status: read the "Player-binding cloud continuation" section of
+validation/IPTV-NEXT-SESSION-HANDOFF-20261006.md, then
+validation/IPTV-CAPTURE-PLAYER-CLOUD-20261006.json and
+validation/IPTV-CODE-REVIEW-20261006.md. The probable cause of the two player-fixture
+timeouts is fixed in source and covered by a JVM regression; the device fixtures have
+not been rerun. The text below describes the iptv/wip transfer and remains accurate
+for that commit.
 
 The user explicitly authorized publishing this WIP branch on 6 October 2026 for
 another agent to review and continue in a cloud container. Use this repository

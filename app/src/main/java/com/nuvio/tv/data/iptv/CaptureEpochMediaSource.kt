@@ -20,6 +20,7 @@ import kotlinx.coroutines.sync.withLock
 @UnstableApi
 internal class CaptureEpochMediaSource(private val reader: IncrementalCaptureReaderConsumer,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO, private val closeTimeoutMs: Long=15_000,
+    val retiresPlayedBatches: Boolean = false,
 ) : BaseMediaSource(), OwnedCaptureConsumer {
     init { require(closeTimeoutMs in 1..120_000) }
     override val minimumMemoryReservationBytes = reader.minimumMemoryReservationBytes
@@ -79,7 +80,7 @@ internal class CaptureEpochMediaSource(private val reader: IncrementalCaptureRea
         val s=reader.state.value
         if(s.batches.isEmpty() || s.timeline.getIndexOfPeriod(id.periodUid)<0 ||
             startPositionUs < s.batches.first().samples.video.samples.first().timeUs) throw IOException("Capture period target expired or unresolved")
-        return CaptureEpochPeriod.create(reader,s,id.periodUid).also { period=it }
+        return CaptureEpochPeriod.create(reader,s,id.periodUid,retiresPlayedBatches).also { period=it }
     }
     @Synchronized override fun releasePeriod(mediaPeriod:MediaPeriod) {
         access(); require(period === mediaPeriod) { "Foreign capture period" }

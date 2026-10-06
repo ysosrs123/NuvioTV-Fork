@@ -244,6 +244,14 @@
     "validated-jvm-xml/TEST-com.nuvio.tv.data.iptv.PinnedCaptureSegmentPeriodTest.xml": {
       "bytes": 1871,
       "sha256": "c12ac3dcd601939ba1fe5b4adcca0ffc7c0243633630e5cc5aea7d3ef20287a8"
+    },
+    "cloud-player-core-20261006.txt": {
+      "bytes": 337,
+      "sha256": "17c8d4dd802775e36e2461e6ec407fde2e794fbcecc221b3b6aba3489ebcf987"
+    },
+    "cloud-player-capture-jvm-20261006.txt": {
+      "bytes": 280,
+      "sha256": "ae0f30e5936f4f959117be72a5281daad60be40e46285ce78fcece90fd2e78a3"
     }
   }
 }

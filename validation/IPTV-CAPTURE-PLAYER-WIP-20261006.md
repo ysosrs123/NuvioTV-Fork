@@ -1,4 +1,8 @@
-# Nuvio IPTV current player-binding work in progress — 6 October 2026
+# Nuvio IPTV player-binding work in progress — 6 October 2026
+
+> Superseded for current status by the "Player-binding cloud continuation" section in
+> IPTV-NEXT-SESSION-HANDOFF-20261006.md and IPTV-CAPTURE-PLAYER-CLOUD-20261006.json.
+> The timeout outcome below is the recorded device result for the iptv/wip source.
 
 Authoritative folder: E:/Codex/NuvioTV/work/NuvioTV-IPTV. Cloud transfer branch: iptv/wip.
 Last validated committed checkpoint: b68985aafcd78f2b096e7073082f98c3c85bb874.

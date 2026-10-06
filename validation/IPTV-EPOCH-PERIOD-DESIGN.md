@@ -49,8 +49,19 @@ keeps at least one row, atomically transfers only that prefix back to the reader
 fences cached snapshots and queues input closure off-thread. Input-close failure
 retains pins/charges and blocks further loading. Confirmed release permits bounded
 refill; refreshed Timeline eviction offset and UID preserve the epoch origin/PTS.
-Old rows cannot be sought through this period after retirement. discardBuffer does
-not silently make this policy decision; no automatic eviction or provider retry.
+Old rows cannot be sought through this period after retirement. By default
+discardBuffer does not make this policy decision; no automatic eviction or provider retry.
+
+Player-binding update (6 October, iptv/player-binding): the policy is now an
+explicit owner choice. CaptureEpochMediaSource(retiresPlayedBatches = true) creates
+periods whose discardBuffer(positionUs) calls retireConsumedPrefix(positionUs), so
+rows whose last video AND audio samples precede the playback position are returned
+to the reader with all existing checks (selected cursors past, one row kept,
+off-thread close, failure blocks loading). CaptureVideoPlayer requires this mode.
+Without it a reader capped at two batches/open inputs stops at CAPACITY once two
+rows are staged and a renderer can never reach a later row or ENDED; this was the
+cause of the AM9 player-fixture timeouts found by code inspection. Rewind beyond
+retained rows needs a re-anchored reader at an earlier stored sequence (not built).
 
 Nine JVM period cases exercise live waiting then growth, true complete EOS,
 stop/epoch errors, borrow-retained reader/runtime closure and independent recording

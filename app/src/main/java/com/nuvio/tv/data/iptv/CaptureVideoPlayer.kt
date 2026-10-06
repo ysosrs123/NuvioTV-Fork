@@ -6,6 +6,7 @@ import android.os.Looper
 import android.view.Surface
 import androidx.media3.common.Player
 import androidx.media3.common.PlaybackException
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.DefaultLoadControl
@@ -26,12 +27,15 @@ internal enum class CaptureVideoState { NEW, BUFFERING, READY, ENDED, FAILED, CL
 @UnstableApi
 internal class CaptureVideoPlayer(context: Context, private val source: CaptureEpochMediaSource,
     private val surface: Surface, override val minimumMemoryReservationBytes: Long,
-    private val startPositionMs: Long = 0,
+    private val startPositionMs: Long? = null,
     private val frameListener: VideoFrameMetadataListener? = null,
     private val applicationLooper: Looper = Looper.getMainLooper(),
     private val closeTimeoutMs: Long = 15_000,
 ) : OwnedCaptureConsumer {
-    init { require(minimumMemoryReservationBytes > 0 && startPositionMs >= 0 && closeTimeoutMs in 1..120_000) }
+    init {
+        require(minimumMemoryReservationBytes > 0 && (startPositionMs ?: 0) >= 0 && closeTimeoutMs in 1..120_000)
+        require(source.retiresPlayedBatches) { "Capture playback requires played batch retirement" }
+    }
     override val minimumDecoderReservationCount = 1
     private val context = context.applicationContext
     private val mutableState = MutableStateFlow(CaptureVideoState.NEW)
@@ -76,8 +80,21 @@ internal class CaptureVideoPlayer(context: Context, private val source: CaptureE
         })
         next.setVideoSurface(surface)
         frameListener?.let(next::setVideoFrameMetadataListener)
-        next.setMediaSource(source, startPositionMs)
+        if (startPositionMs == null) next.setMediaSource(source) else next.setMediaSource(source, maxOf(startPositionMs, 1))
         next.prepare(); next.playWhenReady = true
+    }
+
+    fun describe(): String {
+        check(Looper.myLooper() === applicationLooper)
+        val owned = synchronized(this) { player } ?: return "state=${mutableState.value} player=none"
+        val timeline = owned.currentTimeline
+        val window = if (timeline.isEmpty) null else timeline.getWindow(owned.currentMediaItemIndex, Timeline.Window())
+        val counters = owned.videoDecoderCounters
+        return "state=${mutableState.value} playback=${owned.playbackState} playWhenReady=${owned.playWhenReady} " +
+            "positionMs=${owned.currentPosition} bufferedMs=${owned.bufferedPosition} loading=${owned.isLoading} " +
+            "windowDynamic=${window?.isDynamic} windowPlaceholder=${window?.isPlaceholder} windowDurationMs=${window?.durationMs} " +
+            "queued=${counters?.queuedInputBufferCount} rendered=${counters?.renderedOutputBufferCount} " +
+            "skipped=${counters?.skippedOutputBufferCount} dropped=${counters?.droppedBufferCount} failure=$failureCode"
     }
 
     override suspend fun close(): Boolean = closeMutex.withLock {

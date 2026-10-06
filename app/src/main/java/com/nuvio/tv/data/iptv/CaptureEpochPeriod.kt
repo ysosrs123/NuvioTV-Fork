@@ -17,6 +17,7 @@ import java.io.IOException
 @UnstableApi
 internal class CaptureEpochPeriod private constructor(private val reader: IncrementalCaptureReaderConsumer,
     private val lease: CaptureReaderBorrow, initial: IncrementalReaderSnapshot, val uid: Any, val epoch: Long,
+    private val retirePlayedBatches: Boolean = false,
 ) : MediaPeriod, AutoCloseable {
     private var snapshot = initial
     private var batches = initial.batches
@@ -92,7 +93,10 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
         return floor(seekParameters.resolveSeekPositionUs(position,before.timeUs,after.timeUs))
     }
     @Synchronized override fun readDiscontinuity(): Long { access(); errorState(); return C.TIME_UNSET }
-    @Synchronized override fun discardBuffer(positionUs: Long, toKeyframe: Boolean) { access() }
+    @Synchronized override fun discardBuffer(positionUs: Long, toKeyframe: Boolean) {
+        access()
+        if(retirePlayedBatches && batches.size>1) retireConsumedPrefix(positionUs)
+    }
     @Synchronized override fun getBufferedPositionUs(): Long { access(); return if(ended()) C.TIME_END_OF_SOURCE else endUs() }
     @Synchronized override fun getNextLoadPositionUs(): Long { access(); return if(ended()) C.TIME_END_OF_SOURCE else endUs() }
     @Synchronized override fun continueLoading(loadingInfo: LoadingInfo): Boolean { access(); return false }
@@ -181,12 +185,13 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
                 s.batches.zipWithNext().all { (a,b) -> b.samples.window.proof.segment.sequence==a.samples.window.proof.segment.sequence+1 && b.samples.window.start90k==a.samples.window.endExclusive90k }
         }
 
-        fun create(reader: IncrementalCaptureReaderConsumer, snapshot: IncrementalReaderSnapshot, uid: Any): CaptureEpochPeriod {
+        fun create(reader: IncrementalCaptureReaderConsumer, snapshot: IncrementalReaderSnapshot, uid: Any,
+            retirePlayedBatches: Boolean = false): CaptureEpochPeriod {
             val index=snapshot.timeline.getIndexOfPeriod(uid); require(index>=0)
             val epoch=snapshot.timeline.getPeriod(index,Timeline.Period(),true).id as? Long ?: error("Missing epoch")
             require(valid(snapshot,uid,epoch))
             val lease=reader.acquireBorrow(snapshot) ?: throw IOException("Stale or owned capture snapshot")
-            try { return CaptureEpochPeriod(reader,lease,snapshot,uid,epoch) }
+            try { return CaptureEpochPeriod(reader,lease,snapshot,uid,epoch,retirePlayedBatches) }
             catch(t:Throwable) { reader.releaseBorrow(lease); throw t }
         }
     }

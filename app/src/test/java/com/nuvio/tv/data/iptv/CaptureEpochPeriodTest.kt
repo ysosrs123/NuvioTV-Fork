@@ -154,6 +154,36 @@ class CaptureEpochPeriodTest {
             assertEquals(2000000L,p.seekToUs(0)); assertEquals(4960000L,p.seekToUs(4999999))
         }
     }
+    @Test fun videoOnlyPlaybackReachesEosOnlyWhenPlayedBatchesAreRetired() = runBlocking<Unit> {
+        for(retire in listOf(false,true)) Fixture().use { f ->
+            (0..2).forEach { f.store.add(it) }; f.producer.value=CaptureTransportState.COMPLETE
+            f.reader.start(); val two=f.ready(IncrementalReaderState.CAPACITY,2)
+            val p=CaptureEpochPeriod.create(f.reader,two,two.timeline.getUidOfPeriod(0),retire); f.period=p
+            p.prepare(object:MediaPeriod.Callback {
+                override fun onPrepared(mediaPeriod:MediaPeriod) { assertSame(p,mediaPeriod) }
+                override fun onContinueLoadingRequested(source:MediaPeriod) { assertSame(p,source) }
+            },0)
+            val s=arrayOfNulls<SampleStream>(1)
+            p.selectTracks(arrayOf(FixedTrackSelection(p.trackGroups[0],0)),BooleanArray(1),s,BooleanArray(1),0)
+            val v=s[0]!!; drain(v,100,0,40000); val b=buffer()
+            assertEquals(C.RESULT_NOTHING_READ,v.readData(FormatHolder(),b,0)); assertFalse(v.isReady)
+            p.discardBuffer(2000000,false)
+            if(!retire) {
+                delay(200); assertEquals(IncrementalReaderState.CAPACITY,f.reader.state.value.state)
+                assertEquals(2,f.reader.state.value.batches.size); assertNotEquals(C.TIME_END_OF_SOURCE,p.bufferedPositionUs)
+                b.clear(); assertEquals(C.RESULT_NOTHING_READ,v.readData(FormatHolder(),b,0))
+                return@use
+            }
+            val grown=f.ready(IncrementalReaderState.CAPACITY,2); assertTrue(p.refresh(grown))
+            b.clear(); assertEquals(C.RESULT_BUFFER_READ,v.readData(FormatHolder(),b,0)); assertEquals(4000000L,b.timeUs); assertTrue(b.isKeyFrame)
+            p.discardBuffer(4000000,false)
+            val done=f.ready(IncrementalReaderState.ENDED,1); assertTrue(p.refresh(done))
+            assertEquals(C.TIME_END_OF_SOURCE,p.bufferedPositionUs)
+            repeat(49) { b.clear(); assertEquals(C.RESULT_BUFFER_READ,v.readData(FormatHolder(),b,0)); assertEquals(4040000L+it*40000L,b.timeUs); assertEquals(it==48,b.isLastSample) }
+            b.clear(); assertEquals(C.RESULT_BUFFER_READ,v.readData(FormatHolder(),b,0)); assertTrue(b.isEndOfStream)
+            assertEquals(4000000L,done.timeline.getWindow(0,Timeline.Window()).positionInFirstPeriodUs); assertFalse(done.timeline.getWindow(0,Timeline.Window()).isDynamic)
+        }
+    }
     @Test fun duplicateOrForeignBorrowAndPlaybackThreadOrSelectionAreFenced() = runBlocking<Unit> {
         Fixture().use { f -> f.store.add(0); val p=f.open(); val now=f.reader.state.value
             assertNull(f.reader.acquireBorrow(now)); try { CaptureEpochPeriod.create(f.reader,now.copy(),p.uid); fail() } catch(_:IOException) { }

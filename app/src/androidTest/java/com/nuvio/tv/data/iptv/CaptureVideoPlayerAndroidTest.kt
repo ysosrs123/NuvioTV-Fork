@@ -61,7 +61,7 @@ class CaptureVideoPlayerAndroidTest {
         val index=CaptureTsInspectionIndex(store); val timeline=CaptureSampleTimeline(index)
         val reader=IncrementalCaptureReaderConsumer(CaptureSampleBatchQueue(CaptureSampleLoadCursor(store,index,timeline,0,{transport.state.value}),stageLimits,4*stageLimits.maxBatchBytes),
             CaptureMedia3TimelineFactory(timeline),{transport.state.value},transport.refreshEvents)
-        val source=CaptureEpochMediaSource(reader)
+        val source=CaptureEpochMediaSource(reader,retiresPlayedBatches=true)
         val player=CaptureVideoPlayer(context,source,output.surface,96L*1024*1024,startMs,
             VideoFrameMetadataListener { timeUs,_,_,_ -> pts += timeUs },closeTimeoutMs=100)
         val owner=CapturePlaybackConsumer(source,player)
@@ -78,7 +78,13 @@ class CaptureVideoPlayerAndroidTest {
             val joined=main { runBlocking { runtime.join(key,1024*1024,1024*1024,storage,
                 ConsumerReservation(LiveConsumerRole.VIEWER,1,owner.minimumMemoryReservationBytes),{ error("Must share actual pipeline") },{ assertSame(store,it); owner }) } }
             assertTrue("Admission: $joined",joined is CaptureJoinResult.Joined)
-            val end=withTimeout(30000) { player.state.first { it==CaptureVideoState.ENDED || it==CaptureVideoState.FAILED } }
+            val end=withTimeoutOrNull(30000) { player.state.first { it==CaptureVideoState.ENDED || it==CaptureVideoState.FAILED } }
+            if(end==null) {
+                val r=reader.state.value; val seen=synchronized(pts) { pts.toList() }
+                throw AssertionError("Player did not finish startMs=$startMs ${main { player.describe() }} reader=${r.state} revision=${r.revision} " +
+                    "batches=${r.batches.size} transport=${transport.state.value} pulls=$pulls upstreamClosed=$upstreamClosed stored=${store.snapshot().size} " +
+                    "images=${frames.get()} rendered=${seen.size} firstUs=${seen.firstOrNull()} lastUs=${seen.lastOrNull()}")
+            }
             if(end==CaptureVideoState.FAILED) throw AssertionError("Player failed code=${player.failureCode}",player.failure)
             assertEquals(CaptureVideoState.ENDED,end)
             assertEquals(3,pulls); assertTrue(upstreamClosed)
@@ -86,6 +92,7 @@ class CaptureVideoPlayerAndroidTest {
             val rendered=synchronized(pts) { pts.toList() }
             assertTrue("No renderer timestamps",rendered.isNotEmpty())
             assertTrue("Preroll rendered: ${rendered.first()}",rendered.all { it>=startMs*1000 })
+            assertTrue("Start position not honoured: ${rendered.first()}",rendered.first()<startMs*1000+2000000)
             assertTrue("Last frame missing: ${rendered.last()}",rendered.last()>=5960000L)
             assertTrue(rendered.zipWithNext().all { (a,b)->b>=a })
             assertEquals(1,admission.snapshot().decoders)
