@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.*
 
 data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source: IptvSourceRef? = null,
     val channels: List<IptvListedChannel> = emptyList(), val next: IptvBrowseCursor? = null,
-    val categories: List<IptvCategory> = emptyList(), val category: String? = null, val favourites: Boolean = false, val search: String = "", val airingSearch: Boolean = false,
+    val categories: List<IptvCategory> = emptyList(), val category: String? = null, val favourites: Boolean = false, val sports: Boolean = false, val search: String = "", val airingSearch: Boolean = false,
     val guide: Map<String, GuideGridRow> = emptyMap(), val window: GuideGridWindow? = null,
     val focused: IptvListedChannel? = null, val playingId: String? = null, val previousId: String? = null,
     val recent: List<String> = emptyList(),
@@ -74,7 +74,11 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private val preferences = livePreferences.preferences
     private fun remember(state: IptvLiveState) {
         val ref = state.source ?: return
-        preferences.edit().putString(livePreferences.key(ref, "category"), if (state.favourites) FAVOURITES_KEY else state.category ?: ALL_KEY).apply()
+        preferences.edit().putString(livePreferences.key(ref, "category"), when {
+            state.favourites -> FAVOURITES_KEY
+            state.sports -> SPORTS_KEY
+            else -> state.category ?: ALL_KEY
+        }).apply()
     }
     private var tuneJob: Job? = null
     private var tuneVersion = 0L
@@ -135,8 +139,9 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         if (active) load(background = mutable.value.channels.isNotEmpty()) else { exitMultiview(); stop() }
     }
     fun loadMore() { if (mutable.value.next != null) load(append = true) }
-    fun showFavourites() { mutable.update { it.copy(favourites = true, category = null, focused = null) }; remember(mutable.value); load() }
-    fun showCategory(name: String?) { mutable.update { it.copy(favourites = false, category = name, focused = null) }; remember(mutable.value); load() }
+    fun showFavourites() { mutable.update { it.copy(favourites = true, sports = false, category = null, focused = null) }; remember(mutable.value); load() }
+    fun showSports() { mutable.update { it.copy(favourites = false, sports = true, category = null, focused = null) }; remember(mutable.value); load() }
+    fun showCategory(name: String?) { mutable.update { it.copy(favourites = false, sports = false, category = name, focused = null) }; remember(mutable.value); load() }
     fun toggleHidden(name: String) {
         val ref = mutable.value.source ?: return
         val hidden = mutable.value.hiddenCategories.let { if (name in it) it - name else it + name }
@@ -319,7 +324,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     fun clearMessage() { mutable.update { it.copy(message = null) } }
     fun showSource(ref: IptvSourceRef) {
         if (ref == mutable.value.source) return
-        mutable.update { it.copy(source = ref, focused = null, category = null, favourites = false, channels = emptyList(), next = null, guide = emptyMap(), loading = true) }
+        mutable.update { it.copy(source = ref, focused = null, category = null, favourites = false, sports = false, channels = emptyList(), next = null, guide = emptyMap(), loading = true) }
         load()
     }
     fun refreshSource() {
@@ -331,7 +336,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val current = mutable.value
         if (current.sources.isEmpty()) return
         val index = current.sources.indexOfFirst { it.ref == current.source }
-        mutable.update { it.copy(source = current.sources[(index + 1) % current.sources.size].ref, focused = null, category = null, favourites = false) }
+        mutable.update { it.copy(source = current.sources[(index + 1) % current.sources.size].ref, focused = null, category = null, favourites = false, sports = false) }
         load()
     }
     private fun load(append: Boolean = false, background: Boolean = false) {
@@ -349,8 +354,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     restored = ref
                     val saved = preferences.getString(livePreferences.key(ref, "category"), null)
                     val hidden = preferences.getStringSet(livePreferences.key(ref, "hidden"), null).orEmpty().toSet()
-                    mutable.update { it.copy(hiddenCategories = hidden, favourites = saved == FAVOURITES_KEY,
-                        category = saved?.takeIf { value -> value != FAVOURITES_KEY && value != ALL_KEY }) }
+                    mutable.update { it.copy(hiddenCategories = hidden, favourites = saved == FAVOURITES_KEY, sports = saved == SPORTS_KEY,
+                        category = saved?.takeIf { value -> value != FAVOURITES_KEY && value != ALL_KEY && value != SPORTS_KEY }) }
                 }
                 val state = mutable.value
                 val query = IptvBrowseQuery(search = state.search.trim().take(256), favouritesOnly = state.favourites, category = state.category.takeUnless { state.favourites },
@@ -360,7 +365,10 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 val wanted = if (background && !append) state.channels.size.coerceIn(PAGE, device.backgroundRows) else PAGE
                 val airing = if (ref != null && !append && state.airingSearch && query.search.isNotBlank())
                     browse.searchAiring(ref, query.search, System.currentTimeMillis(), AIRING_RESULTS,
-                        state.hiddenCategories.take(500).toSet()) else null
+                        state.hiddenCategories.take(500).toSet())
+                else if (ref != null && !append && state.sports && query.search.isBlank())
+                    browse.sports(ref, System.currentTimeMillis(), limit = AIRING_RESULTS, excludedCategories = state.hiddenCategories.take(500).toSet())
+                else null
                 var page = if (ref == null || airing != null) null else try { browse.page(ref, query, cursor, wanted.coerceAtMost(200)) }
                     catch (_: IptvCatalogueChangedException) { if (append) return@launch else browse.page(ref, query, null, wanted.coerceAtMost(200)) }
                 var extra = emptyList<IptvListedChannel>()
@@ -661,6 +669,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         const val SHORT_GUIDE_CACHE = 200
         const val MAX_NUMBER = 60_000
         const val FAVOURITES_KEY = "\u0000favourites"
+        const val SPORTS_KEY = "\u0000sports"
         const val ALL_KEY = "\u0000all"
     }
     private class CatchupUnavailableException : IllegalStateException()

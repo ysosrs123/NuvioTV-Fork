@@ -19,6 +19,8 @@ import com.nuvio.tv.core.iptv.guideMatchName
 import com.nuvio.tv.core.iptv.guideSearchQuery
 import com.nuvio.tv.core.iptv.guideSearchTitle
 import com.nuvio.tv.core.iptv.RefreshDecision
+import com.nuvio.tv.core.iptv.SPORTS_OPEN_ENDED_MILLIS
+import com.nuvio.tv.core.iptv.SportsGuide
 import com.nuvio.tv.core.iptv.XtreamGuideReference
 import com.nuvio.tv.core.iptv.guideQuarantineAccepted
 import com.nuvio.tv.core.iptv.mergeGuideChannel
@@ -168,6 +170,24 @@ class IptvGuideStore(
         found
     }
 
+    fun sportsMatches(profileId: Int, feedIds: List<String>, nowMillis: Long, untilMillis: Long, limit: Int = 400): List<IptvAiringMatch> = transaction { db ->
+        require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && limit in 1..1000 && untilMillis >= nowMillis)
+        feedIds.forEach { IptvGuideRef(profileId, it) }
+        val found = mutableListOf<IptvAiringMatch>()
+        for (feed in feedIds) {
+            if (found.size >= limit) break
+            db.rawQuery("SELECT c.payload,p.payload FROM feeds f CROSS JOIN programmes p CROSS JOIN channels c WHERE f.id=? AND f.profile=? AND f.version=f.active_version AND p.stage=f.active_stage AND p.sport=1 AND p.start<=? AND p.start>? AND (p.stop>? OR (p.stop IS NULL AND p.start>?)) AND c.stage=p.stage AND c.external_id=p.external_id ORDER BY p.start,p.id LIMIT ?",
+                arrayOf(feed, profileId.toString(), untilMillis.toString(), (nowMillis - GUIDE_AIRING_LOOKBACK_MILLIS).toString(), nowMillis.toString(),
+                    (nowMillis - SPORTS_OPEN_ENDED_MILLIS).toString(), (limit - found.size).toString())).use { c ->
+                while (c.moveToNext()) {
+                    val channel = IptvGuideJson.channel(c.getString(0)); val programme = IptvGuideJson.programme(c.getString(1))
+                    if (programme.start.precise) found += IptvAiringMatch(GuideKey(feed, channel.externalId), channel, programme)
+                }
+            }
+        }
+        found
+    }
+
     fun beginRefresh(ref: IptvGuideRef): IptvGuideTicket = transaction { db -> beginRefresh(db, ref) }
 
     fun prepareRefresh(ref: IptvGuideRef, window: IptvGuideWindow): IptvGuideRefreshRequest = transaction { db ->
@@ -226,6 +246,7 @@ class IptvGuideStore(
         val channels = mutableListOf<GuideChannel>()
         val programmes = mutableListOf<GuideProgramme>()
         val cap = GuideProgrammeCap(caps)
+        val sportsChannels = HashSet<String>()
         var bufferedCharacters = 0
         fun flush() {
             if (channels.isEmpty() && programmes.isEmpty()) return
@@ -256,6 +277,7 @@ class IptvGuideStore(
                         put("start", programme.start.epochMillis); put("stop", programme.stop?.epochMillis)
                         put("precise", if (programme.canSchedulePrecisely) 1 else 0); put("payload", payload)
                         put("search_title", guideSearchTitle(programme.titles))
+                        if (SportsGuide.isSportsProgramme(programme.titles, programme.categories, programme.channelExternalId in sportsChannels)) put("sport", 1)
                     }, SQLiteDatabase.CONFLICT_IGNORE).also { check(it != -1L || db.rawQuery("SELECT 1 FROM programmes WHERE stage=? AND id=?", arrayOf(stage, digest(payload))).use { c -> c.moveToFirst() }) }
                 }
             }
@@ -267,6 +289,7 @@ class IptvGuideStore(
             val summary = parseGuideInput(input, channel = channel@{ channel ->
                 if (channelFilter != null && channel.externalId !in channelFilter) return@channel
                 channels += channel
+                if (SportsGuide.isSportsChannel(channel.names)) sportsChannels += channel.externalId
                 bufferedCharacters += channel.names.sumOf { it.text.length } + channel.externalId.length
                 if (channels.size + programmes.size >= 100 || bufferedCharacters >= 256 * 1024) flush()
             }, programme = programme@{ parsed ->
@@ -350,7 +373,7 @@ class IptvGuideStore(
     }
     override fun close() = helper.close()
     private class StaleImport : RuntimeException()
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 4) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 5) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
@@ -361,6 +384,7 @@ class IptvGuideStore(
             db.execSQL("CREATE INDEX guide_window ON programmes(stage,external_id,start,stop)")
             addNameSchema(db)
             addSearchSchema(db)
+            addSportsSchema(db)
         }
         private fun addNameSchema(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE channel_names(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, external_id TEXT NOT NULL, name TEXT NOT NULL, PRIMARY KEY(stage,name,external_id))")
@@ -368,8 +392,12 @@ class IptvGuideStore(
         private fun addSearchSchema(db: SQLiteDatabase) {
             db.execSQL("ALTER TABLE programmes ADD COLUMN search_title TEXT")
         }
+        private fun addSportsSchema(db: SQLiteDatabase) {
+            db.execSQL("ALTER TABLE programmes ADD COLUMN sport INTEGER")
+            db.execSQL("CREATE INDEX guide_sport ON programmes(stage,start) WHERE sport=1")
+        }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(oldVersion in 1..3 && newVersion == 4) { "Missing guide database migration" }
+            check(oldVersion in 1..4 && newVersion == 5) { "Missing guide database migration" }
             if (oldVersion == 1) {
                 db.execSQL("ALTER TABLE feeds ADD COLUMN window_from INTEGER")
                 db.execSQL("ALTER TABLE feeds ADD COLUMN window_until INTEGER")
@@ -378,7 +406,8 @@ class IptvGuideStore(
                 db.execSQL("ALTER TABLE feeds ADD COLUMN refreshed_at INTEGER")
                 addNameSchema(db)
             }
-            addSearchSchema(db)
+            if (oldVersion <= 3) addSearchSchema(db)
+            addSportsSchema(db)
         }
     }
     private companion object {

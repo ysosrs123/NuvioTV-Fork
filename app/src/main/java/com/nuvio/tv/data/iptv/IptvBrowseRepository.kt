@@ -13,6 +13,8 @@ import com.nuvio.tv.core.iptv.layoutGuideRow
 import com.nuvio.tv.core.iptv.guideIdWithoutFeedSuffix
 import com.nuvio.tv.core.iptv.guideMatchName
 import com.nuvio.tv.core.iptv.resolveGuideMapping
+import com.nuvio.tv.core.iptv.SPORTS_AHEAD_MILLIS
+import com.nuvio.tv.core.iptv.sportsOrder
 import com.nuvio.tv.core.iptv.uniqueNameMatch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
@@ -50,6 +52,23 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
         val channels = items.chunked(200).flatMap { listed(ref.profileId, associations, it) }
         airingChannels(channels, { it.item.channel.id }, { it.guide.key }, earliestAiring(matches.map { it.key to it.programme }), limit)
             .map { (channel, programme) -> IptvAiringResult(channel, programme) }
+    }
+
+    suspend fun sports(ref: IptvSourceRef, nowMillis: Long, aheadMillis: Long = SPORTS_AHEAD_MILLIS, limit: Int = 60,
+        excludedCategories: Set<String> = emptySet()): List<IptvAiringResult> = withContext(Dispatchers.IO) {
+        require(limit in 1..200 && aheadMillis >= 0)
+        val associations = catalogue.guideAssociations(ref)
+        val order = (associations.priority + associations.feedIds).distinct()
+        if (order.isEmpty()) return@withContext emptyList()
+        currentCoroutineContext().ensureActive()
+        val matches = guides.sportsMatches(ref.profileId, order, nowMillis, nowMillis + aheadMillis, 600)
+        if (matches.isEmpty()) return@withContext emptyList()
+        val wanted = guideAiringCandidates(matches.map { it.key to it.channel })
+        currentCoroutineContext().ensureActive()
+        val items = catalogue.guideMatchCandidates(ref, wanted.guideIds, wanted.nameKeys, wanted.keys, 600, excludedCategories)
+        val channels = items.chunked(200).flatMap { listed(ref.profileId, associations, it) }
+        val listings = airingChannels(channels, { it.item.channel.id }, { it.guide.key }, earliestAiring(matches.map { it.key to it.programme }), 600)
+        sportsOrder(listings, nowMillis).take(limit).map { (channel, programme) -> IptvAiringResult(channel, programme) }
     }
 
     private suspend fun listed(profileId: Int, associations: IptvGuideAssociations, items: List<IptvCatalogueItem>): List<IptvListedChannel> {

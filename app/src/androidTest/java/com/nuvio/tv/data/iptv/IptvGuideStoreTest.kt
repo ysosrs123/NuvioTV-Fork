@@ -266,6 +266,40 @@ class IptvGuideStoreTest {
         assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(programme("Fresh news"))))
         assertEquals("Fresh news", store.airingMatches(1, listOf(ref.feedId), "NEWS", start).single().programme.titles.first().text)
     }
+    @Test fun sportsMatchesListLiveAndUpcomingSportOnly() {
+        val ref = feed()
+        val rows = programme("Premier League: Leeds v Hull", "20261005000000 +0000", "20261005020000 +0000") +
+            programme("Premier League Highlights", "20261005020000 +0000", "20261005030000 +0000") +
+            programme("Cooking at Home", "20261005030000 +0000", "20261005040000 +0000") +
+            "<programme channel=\"one\" start=\"20261005040000 +0000\" stop=\"20261005060000 +0000\"><title>Saturday Rugby</title><category>Sports</category></programme>" +
+            programme("AFL: Carlton v Geelong", "20261005100000 +0000", "20261005120000 +0000")
+        assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(rows)))
+        val now = start + 30 * 60_000
+        val found = store.sportsMatches(1, listOf(ref.feedId), now, now + 6 * 3_600_000)
+        assertEquals(listOf("Premier League: Leeds v Hull", "Saturday Rugby"), found.map { it.programme.titles.first().text })
+        assertEquals(listOf("Sports"), found[1].programme.categories)
+        assertEquals(GuideKey(ref.feedId, "one"), found.first().key)
+        assertTrue(store.sportsMatches(1, listOf(ref.feedId), start + 7 * 3_600_000, start + 8 * 3_600_000).isEmpty())
+        assertTrue(store.sportsMatches(2, emptyList(), now, now).isEmpty())
+    }
+    @Test fun v4MigrationAddsTheSportsFlagOnTheNextImport() {
+        val ref = feed(); assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(programme("Premier League: Leeds v Hull"))))
+        store.close()
+        context.openOrCreateDatabase(name, 0, null).use { db ->
+            db.execSQL("DROP INDEX guide_sport")
+            db.execSQL("ALTER TABLE programmes RENAME TO newer_programmes")
+            db.execSQL("CREATE TABLE programmes(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, id TEXT NOT NULL, external_id TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER, precise INTEGER NOT NULL, payload TEXT NOT NULL, search_title TEXT, PRIMARY KEY(stage,id))")
+            db.execSQL("INSERT INTO programmes SELECT stage,id,external_id,start,stop,precise,payload,search_title FROM newer_programmes")
+            db.execSQL("DROP TABLE newer_programmes")
+            db.execSQL("CREATE INDEX guide_window ON programmes(stage,external_id,start,stop)")
+            db.version = 4
+        }
+        store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias))
+        assertEquals("Premier League: Leeds v Hull", store.programmes(ref, "one", window).programmes.single().titles.first().text)
+        assertTrue(store.sportsMatches(1, listOf(ref.feedId), start, start + 3_600_000).isEmpty())
+        assertEquals(RefreshDecision.PUBLISH, store.importGuide(store.beginRefresh(ref), xml(programme("Premier League: Leeds v Hull")).byteInputStream(), window, IptvCacheValidators("v2")))
+        assertEquals(1, store.sportsMatches(1, listOf(ref.feedId), start, start + 3_600_000).size)
+    }
     @Test fun gzipInputAndExactDuplicatesAreHandledWithoutDuplicateRows() {
         val ref = feed()
         val bytes = ByteArrayOutputStream().also { out -> GZIPOutputStream(out).use { it.write(xml(programme() + programme()).toByteArray()) } }.toByteArray()

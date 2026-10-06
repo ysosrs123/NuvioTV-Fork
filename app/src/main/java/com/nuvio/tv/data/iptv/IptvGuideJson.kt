@@ -12,10 +12,12 @@ internal object IptvGuideJson {
     fun channel(value: String): GuideChannel = JSONObject(value).let { GuideChannel(it.getString("id"), texts(it.getJSONArray("names"))) }
     fun programme(value: GuideProgramme): String = JSONObject().put("channel", value.channelExternalId)
         .put("start", timestamp(value.start)).put("stop", value.stop?.let(::timestamp))
-        .put("titles", texts(value.titles)).put("descriptions", texts(value.descriptions)).toString()
+        .put("titles", texts(value.titles)).put("descriptions", texts(value.descriptions))
+        .apply { if (value.categories.isNotEmpty()) put("categories", JSONArray(value.categories)) }.toString()
     fun programme(value: String): GuideProgramme = JSONObject(value).let {
         GuideProgramme(it.getString("channel"), timestamp(it.getJSONObject("start")), it.optJSONObject("stop")?.let(::timestamp),
-            texts(it.getJSONArray("titles")), texts(it.getJSONArray("descriptions")))
+            texts(it.getJSONArray("titles")), texts(it.getJSONArray("descriptions")),
+            it.optJSONArray("categories")?.let { values -> (0 until values.length()).map(values::getString) }.orEmpty())
     }
     private fun timestamp(value: GuideTimestamp) = JSONObject().put("ms", value.epochMillis).put("precision", value.precisionDigits).put("raw", value.raw)
     private fun timestamp(value: JSONObject) = GuideTimestamp(value.getLong("ms"), value.getInt("precision"), value.getString("raw"))

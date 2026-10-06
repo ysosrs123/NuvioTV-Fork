@@ -33,6 +33,15 @@ class XmlTvGuideTest {
         assertEquals(listOf("en", "fr"), programmes.single().titles.map { it.language })
         assertTrue(programmes.single().canSchedulePrecisely)
     }
+    @Test fun programmeCategoriesAreKeptDistinctAndBounded() {
+        val programmes = mutableListOf<GuideProgramme>()
+        val categories = (1..10).joinToString("") { "<category lang=\"en\">Genre $it</category>" }
+        XmlTvGuideParser().parse("""<tv><programme channel="one" start="20261005070000 +0000"><title>Match</title><category>Sports</category><category>Sports</category>$categories</programme></tv>""".byteInputStream(), {}, programmes::add)
+        val parsed = programmes.single().categories
+        assertEquals(8, parsed.size)
+        assertEquals(listOf("Sports", "Genre 1"), parsed.take(2))
+        assertEquals(listOf(LocalizedGuideText("Match", null)), programmes.single().titles)
+    }
     @Test fun malformedAndReversedTimesAreQuarantined() {
         val result = XmlTvGuideParser().parse("""<tv><programme channel="one" start="20260230070000"/><programme channel="one" start="20261005080000" stop="20261005070000"/><programme channel="one" start="20261005080000" stop="bad"/></tv>""".byteInputStream(), {}, { fail("No invalid programme should publish") })
         assertEquals(3, result.rejectedProgrammes)

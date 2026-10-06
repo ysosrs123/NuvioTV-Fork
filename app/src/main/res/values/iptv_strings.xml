@@ -98,6 +98,10 @@
     <string name="iptv_live_setup_description">Add an M3U playlist, an Xtream account or a Stalker portal to start watching. Channels and the programme guide load in the background.</string>
     <string name="iptv_live_no_favourites">No favourites yet</string>
     <string name="iptv_live_no_favourites_description">Hold OK on a channel in the guide and choose Add favourite.</string>
+    <string name="iptv_live_sports">Sport</string>
+    <string name="iptv_live_sports_window">on now and in the next 6 hours</string>
+    <string name="iptv_live_no_sports">No sport on right now</string>
+    <string name="iptv_live_no_sports_description">Matches appear here when a linked guide lists sport on now or in the next six hours. Guides that include programme categories give the best results.</string>
     <string name="iptv_live_source_failed">%1$s could not be updated</string>
     <string name="iptv_live_no_channels">No channels in %1$s yet</string>
     <string name="iptv_live_no_channels_description">Refresh the source to load its channels. Large lists can take a few minutes.</string>

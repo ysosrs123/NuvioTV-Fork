@@ -19,6 +19,7 @@ data class GuideProgramme(
     val stop: GuideTimestamp?,
     val titles: List<LocalizedGuideText>,
     val descriptions: List<LocalizedGuideText>,
+    val categories: List<String> = emptyList(),
 ) {
     val canSchedulePrecisely: Boolean get() = start.precise && stop?.precise == true
 }
@@ -66,6 +67,7 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
         var text = StringBuilder()
         val names = mutableListOf<LocalizedGuideText>()
         val descriptions = mutableListOf<LocalizedGuideText>()
+        val categories = mutableListOf<String>()
         var rootSeen = false
         var rootEnded = false
         var recordTextCharacters = 0
@@ -100,8 +102,8 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                         val stop = parser.getAttributeValue(null, "stop")
                         recordStop = stop?.let(::parseTimestamp)
                         badStop = stop != null && recordStop == null
-                        names.clear(); descriptions.clear(); recordTextCharacters = 0
-                    } else if (parser.depth == 3 && recordType != null && parser.name in setOf("display-name", "title", "desc")) {
+                        names.clear(); descriptions.clear(); categories.clear(); recordTextCharacters = 0
+                    } else if (parser.depth == 3 && recordType != null && parser.name in setOf("display-name", "title", "desc", "category")) {
                         textType = parser.name
                         textLanguage = parser.getAttributeValue(null, "lang")
                         text = StringBuilder()
@@ -118,7 +120,11 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                         require(recordTextCharacters <= limits.textCharacters) { "Guide record text limit" }
                         if (value.isNotEmpty()) {
                             val localized = LocalizedGuideText(value, textLanguage)
-                            if (textType == "desc") descriptions += localized else names += localized
+                            when (textType) {
+                                "desc" -> descriptions += localized
+                                "category" -> if (recordType == "programme" && categories.size < MAX_CATEGORIES && value !in categories) categories += value.take(MAX_CATEGORY_CHARACTERS)
+                                else -> names += localized
+                            }
                         }
                         textType = null
                     } else if (parser.depth == 2 && parser.name == recordType) {
@@ -131,7 +137,7 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                             val start = recordStart
                             val stop = recordStop
                             if (recordId == null || start == null || badStop || (stop != null && stop.epochMillis <= start.epochMillis)) rejected++
-                            else programme(GuideProgramme(recordId, start, stop, names.toList(), descriptions.toList()))
+                            else programme(GuideProgramme(recordId, start, stop, names.toList(), descriptions.toList(), categories.toList()))
                         }
                         recordType = null
                     } else if (parser.depth == 1) rootEnded = true
@@ -160,6 +166,8 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
     }
 
     companion object {
+        private const val MAX_CATEGORIES = 8
+        private const val MAX_CATEGORY_CHARACTERS = 128
         private val entityName = Regex("[A-Za-z][A-Za-z0-9]{0,31}")
         internal fun parseTimestamp(raw: String): GuideTimestamp? {
             val match = Regex("^(\\d{4}(?:\\d{2}){0,5})(?:\\s+([+-]\\d{4}|UTC|GMT))?$").matchEntire(raw.trim()) ?: return null
