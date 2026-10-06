@@ -21,6 +21,23 @@ class ChannelIdentityTest {
         assertNotEquals("saved", result.channels[0].channel.id)
         assertEquals("saved", result.channels[1].channel.id)
     }
+    @Test fun rotatingTokenChurnKeepsOnlyOverlaidTombstonesWithinTheLimit() {
+        val reconciler = ChannelIdentityReconciler()
+        var stored = emptyList<StoredChannel>(); var favourite: String? = null
+        repeat(8) { refresh ->
+            val incoming = (0 until 10_000).map { ChannelCandidate("Channel $it", "https://example.invalid/$it?token=$refresh") }
+            val result = reconciler.reconcile("source", stored, incoming)
+            if (refresh == 0) favourite = result.channels.first().channel.id
+            val kept = requireNotNull(result.retainTombstones(setOfNotNull(favourite)))
+            if (refresh > 0) { assertEquals(listOf(favourite), kept.retained.map { it.id }); assertTrue(kept.dropped.size >= 9_999) }
+            stored = result.channels.map { it.channel } + kept.retained
+            assertTrue(stored.size <= 10_001)
+        }
+        val full = ChannelReconciliation((0 until 3).map { ReconciledChannel(StoredChannel("n$it", "source", ChannelCandidate("N", "https://example.invalid/n$it")), IdentityMatch.NEW) },
+            (0 until 3).map { StoredChannel("t$it", "source", ChannelCandidate("T", "https://example.invalid/t$it"), available = false) })
+        assertNull(full.retainTombstones(setOf("t0", "t1"), limit = 4))
+        assertEquals(listOf("t0"), full.retainTombstones(setOf("t0"), limit = 4)!!.retained.map { it.id })
+    }
     @Test fun nameAloneNeverBinds() {
         val result = ChannelIdentityReconciler().reconcile("source", listOf(initial), listOf(ChannelCandidate("Old", "https://example.invalid/new")))
         assertNotEquals("saved", result.channels.single().channel.id)

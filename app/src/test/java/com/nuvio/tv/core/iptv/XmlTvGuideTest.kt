@@ -49,6 +49,28 @@ class XmlTvGuideTest {
     @Test(expected = IllegalArgumentException::class) fun manyTextVariantsCannotEvadePerRecordLimit() {
         XmlTvGuideParser(GuideParseLimits(textCharacters = 10)).parse("""<tv><channel id="one"><display-name>123456</display-name><display-name>123456</display-name></channel></tv>""".byteInputStream(), {}, {})
     }
+    @Test fun oversizedCommentTextOrAttributeStopsBeforeTheTokenIsBuilt() {
+        val limits = GuideParseLimits(textCharacters = 16)
+        val oversized = "x".repeat(16 * 4 + 64 * 1024 + 1)
+        for (document in listOf("<tv><!--$oversized--></tv>", "<tv>$oversized</tv>", "<tv a=\"$oversized\"></tv>", "<tv a=\"${">".repeat(16 * 4 + 64 * 1024 + 1)}\"></tv>")) {
+            try { XmlTvGuideParser(limits).parse(document.byteInputStream(), {}, {}); fail() }
+            catch (error: IllegalArgumentException) { assertEquals("Guide token limit", error.message) }
+        }
+        val ok = "<tv><channel id=\"a\"><display-name>${"y".repeat(16)}</display-name></channel></tv>"
+        assertEquals(1, XmlTvGuideParser(limits).parse(ok.byteInputStream(), {}, {}).channels)
+    }
+    @Test fun smallQuarantineIsAcceptedButMostlyBrokenFeedsAreNot() {
+        assertTrue(guideQuarantineAccepted(1, 1)); assertTrue(guideQuarantineAccepted(0, 16)); assertFalse(guideQuarantineAccepted(1, 17))
+        assertTrue(guideQuarantineAccepted(9_800, 200)); assertFalse(guideQuarantineAccepted(9_799, 201))
+    }
+    @Test fun duplicateChannelBlocksMergeBoundedDistinctNames() {
+        val one = GuideChannel("one", listOf(LocalizedGuideText("One", "en")))
+        val merged = mergeGuideChannel(one, GuideChannel("one", listOf(LocalizedGuideText("One", "en"), LocalizedGuideText("Un", "fr"))))
+        assertEquals(listOf("One", "Un"), merged.names.map { it.text })
+        val many = GuideChannel("one", (0 until 40).map { LocalizedGuideText("N$it", null) })
+        assertEquals(32, mergeGuideChannel(one, many).names.size)
+        try { mergeGuideChannel(one, GuideChannel("two", emptyList())); fail() } catch (_: IllegalArgumentException) { }
+    }
     @Test(expected = IllegalArgumentException::class) fun nestingLimitIsEnforced() {
         XmlTvGuideParser(GuideParseLimits(depth = 2)).parse("<tv><channel id=\"one\"><display-name>A</display-name></channel></tv>".byteInputStream(), {}, {})
     }

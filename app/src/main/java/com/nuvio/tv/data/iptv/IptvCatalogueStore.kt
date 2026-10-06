@@ -12,6 +12,7 @@ import com.nuvio.tv.core.iptv.RefreshDecision
 import com.nuvio.tv.core.iptv.RefreshTicket
 import com.nuvio.tv.core.iptv.StoredChannel
 import com.nuvio.tv.core.iptv.decideCatalogueRefresh
+import com.nuvio.tv.core.iptv.retainTombstones
 import java.io.Closeable
 import java.io.InterruptedIOException
 import java.net.URI
@@ -190,11 +191,13 @@ class IptvCatalogueStore(
         if (old.source.activeGeneration == ticket.requestGeneration) return@transaction RefreshDecision.STALE
         val reconciliation = try { ChannelIdentityReconciler().reconcile(ref.sourceId, old.channels.map { it.channel }, incoming.map { it.data }) }
             catch (_: IllegalArgumentException) { return@transaction RefreshDecision.INVALID }
-        require(reconciliation.channels.size + reconciliation.unavailable.size <= 60_000) { "IPTV retained identity limit" }
+        val withOverlays = db.rawQuery("SELECT DISTINCT o.id FROM overlays o JOIN identities i ON o.id=i.id WHERE i.source=?",
+            arrayOf(ref.sourceId)).use { c -> buildSet { while (c.moveToNext()) add(c.getString(0)) } }
+        val tombstones = reconciliation.retainTombstones(withOverlays) ?: return@transaction RefreshDecision.INVALID
         val byData = incoming.associateBy { it.data }
         val previous = old.channels.associateBy { it.channel.id }
         val next = reconciliation.channels.map { row -> row.channel to byData.getValue(row.channel.data).attributes } +
-            reconciliation.unavailable.map { row -> row to previous.getValue(row.id).attributes }
+            tombstones.retained.map { row -> row to previous.getValue(row.id).attributes }
         for ((channel, attributes) in next) {
             checkCancellation()
             if (channel.id !in previous) db.insertOrThrow("identities", null,
@@ -212,6 +215,10 @@ class IptvCatalogueStore(
             put("validators", secrets.seal(aad(ref, "validators"), JSONObject().put("etag", validators.etag).put("lastModified", validators.lastModified).toString()))
         }, "id=? AND config_version=? AND requested=?", arrayOf(ref.sourceId, ticket.configurationVersion.toString(), ticket.requestGeneration.toString())).also { check(it == 1) }
         db.delete("catalogue", "source=? AND generation<>?", arrayOf(ref.sourceId, ticket.requestGeneration.toString()))
+        for (row in tombstones.dropped) {
+            checkCancellation()
+            db.delete("identities", "id=? AND source=?", arrayOf(row.id, ref.sourceId))
+        }
         checkCancellation()
         RefreshDecision.PUBLISH
     }

@@ -61,9 +61,11 @@ class IptvGuideStoreTest {
         val ref = feed(); publish(ref)
         val before = store.programmes(ref, "one", window)
         assertThrows(Exception::class.java) { publish(ref, xml().dropLast(4)) }
-        assertEquals(RefreshDecision.INVALID, publish(ref, xml(programme() + programme("bad", to = "not-a-date"))))
+        assertEquals(RefreshDecision.INVALID, publish(ref, xml(programme() + (1..17).joinToString("") { programme("bad $it", to = "not-a-date") })))
         assertEquals(before, store.programmes(ref, "one", window))
         assertEquals("v1", store.validators(ref)!!.etag)
+        assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(programme() + programme("bad", to = "not-a-date"))))
+        assertEquals(before, store.programmes(ref, "one", window))
     }
     @Test fun olderTicketCannotPublishAndSourceEditInvalidatesVisibleGuide() {
         val ref = feed(); publish(ref, xml((1..4).joinToString("") { programme("Old $it") }))
@@ -94,10 +96,12 @@ class IptvGuideStoreTest {
         assertEquals(RefreshDecision.EMPTY_REQUIRES_REVIEW, publish(ref, "<tv>$channel</tv>"))
         assertEquals(4, store.programmes(ref, "one", window).programmes.size)
     }
-    @Test fun unknownChannelAndConflictingChannelDefinitionsAreRejected() {
+    @Test fun unknownChannelProgrammesAreDroppedAndDuplicateChannelNamesMerge() {
         val ref = feed(); publish(ref)
-        assertEquals(RefreshDecision.INVALID, publish(ref, xml(programme(id = "missing"))))
-        assertThrows(IllegalArgumentException::class.java) { publish(ref, "<tv>$channel<channel id=\"one\"><display-name>Different</display-name></channel>${programme()}</tv>") }
+        assertEquals(RefreshDecision.EMPTY_REQUIRES_REVIEW, publish(ref, xml(programme(id = "missing"))))
+        assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(programme() + programme("Elsewhere", id = "missing"))))
+        assertEquals(1, store.programmes(ref, "one", window).programmes.size)
+        assertEquals(RefreshDecision.PUBLISH, publish(ref, "<tv>$channel<channel id=\"one\"><display-name>Different</display-name></channel>${programme()}</tv>"))
         assertEquals(1, store.channelPage(ref).size)
     }
     @Test fun cancellationAfterAFlushedBatchLeavesNoVisiblePartialGuide() {

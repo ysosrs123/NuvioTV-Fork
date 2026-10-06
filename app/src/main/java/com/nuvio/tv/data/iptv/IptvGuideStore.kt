@@ -9,6 +9,8 @@ import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.GuideParseLimits
 import com.nuvio.tv.core.iptv.GuideFeedIndex
 import com.nuvio.tv.core.iptv.RefreshDecision
+import com.nuvio.tv.core.iptv.guideQuarantineAccepted
+import com.nuvio.tv.core.iptv.mergeGuideChannel
 import com.nuvio.tv.core.iptv.parseGuideInput
 import java.io.Closeable
 import java.io.InputStream
@@ -145,9 +147,14 @@ class IptvGuideStore(
                 for (channel in channels) {
                     checkCancellation()
                     val payload = IptvGuideJson.channel(channel)
-                    db.rawQuery("SELECT payload FROM channels WHERE stage=? AND external_id=?", arrayOf(stage, channel.externalId)).use {
-                        if (it.moveToFirst()) require(it.getString(0) == payload) { "Conflicting guide channel identity" }
-                        else db.insertOrThrow("channels", null, ContentValues().apply { put("stage", stage); put("external_id", channel.externalId); put("payload", payload) })
+                    val existing = db.rawQuery("SELECT payload FROM channels WHERE stage=? AND external_id=?", arrayOf(stage, channel.externalId)).use {
+                        if (it.moveToFirst()) it.getString(0) else null
+                    }
+                    if (existing == null) db.insertOrThrow("channels", null, ContentValues().apply { put("stage", stage); put("external_id", channel.externalId); put("payload", payload) })
+                    else if (existing != payload) {
+                        val merged = IptvGuideJson.channel(mergeGuideChannel(IptvGuideJson.channel(existing), channel))
+                        if (merged != existing) db.update("channels", ContentValues().apply { put("payload", merged) },
+                            "stage=? AND external_id=?", arrayOf(stage, channel.externalId)).also { check(it == 1) }
                     }
                 }
                 for (programme in programmes) {
@@ -180,11 +187,10 @@ class IptvGuideStore(
             checkCancellation()
             return transaction { db ->
                 if (!current(db, ticket)) return@transaction RefreshDecision.STALE
-                if (summary.rejectedProgrammes > 0) return@transaction RefreshDecision.INVALID
+                val orphans = db.delete("programmes", "stage=? AND NOT EXISTS (SELECT 1 FROM channels c WHERE c.stage=programmes.stage AND c.external_id=programmes.external_id)", arrayOf(stage)).toLong()
+                if (!guideQuarantineAccepted(summary.programmes.toLong(), summary.rejectedProgrammes + orphans)) return@transaction RefreshDecision.INVALID
                 val candidateCount = count(db, "SELECT COUNT(*) FROM programmes WHERE stage=?", arrayOf(stage))
                 if (candidateCount == 0L || summary.channels == 0) return@transaction RefreshDecision.EMPTY_REQUIRES_REVIEW
-                val orphans = count(db, "SELECT COUNT(*) FROM programmes p WHERE p.stage=? AND NOT EXISTS (SELECT 1 FROM channels c WHERE c.stage=p.stage AND c.external_id=p.external_id)", arrayOf(stage))
-                if (orphans != 0L) return@transaction RefreshDecision.INVALID
                 val previous = count(db, "SELECT COUNT(*) FROM programmes p JOIN feeds f ON f.active_stage=p.stage WHERE f.id=? AND f.version=f.active_version AND p.start<? AND (p.stop>? OR (p.stop IS NULL AND p.start>=?))", arrayOf(ticket.ref.feedId, window.untilMillis.toString(), window.fromMillis.toString(), window.fromMillis.toString()))
                 if (previous > 0 && candidateCount * 2 < previous) return@transaction RefreshDecision.SHRINK_REQUIRES_REVIEW
                 checkCancellation()

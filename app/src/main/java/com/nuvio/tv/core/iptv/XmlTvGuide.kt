@@ -23,6 +23,16 @@ data class GuideProgramme(
     val canSchedulePrecisely: Boolean get() = start.precise && stop?.precise == true
 }
 data class GuideParseSummary(val channels: Int, val programmes: Int, val rejectedProgrammes: Int)
+
+fun guideQuarantineAccepted(acceptedProgrammes: Long, quarantinedProgrammes: Long): Boolean {
+    require(acceptedProgrammes >= 0 && quarantinedProgrammes >= 0)
+    return quarantinedProgrammes <= maxOf(16L, (acceptedProgrammes + quarantinedProgrammes) / 50)
+}
+
+fun mergeGuideChannel(existing: GuideChannel, duplicate: GuideChannel, maxNames: Int = 32): GuideChannel {
+    require(existing.externalId == duplicate.externalId && maxNames > 0)
+    return GuideChannel(existing.externalId, (existing.names + duplicate.names).distinct().take(maxNames))
+}
 data class GuideParseLimits(
     val expandedBytes: Long = 64L * 1024 * 1024,
     val depth: Int = 16,
@@ -43,7 +53,7 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
 
             if (parser.getFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL)) throw unsupported
         }
-        parser.setInput(LimitedInput(input, limits.expandedBytes), null)
+        parser.setInput(LimitedInput(input, limits.expandedBytes, limits.textCharacters * 4L + 64 * 1024), null)
         var channelCount = 0
         var programmeCount = 0
         var rejected = 0
@@ -129,14 +139,21 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
         return GuideParseSummary(channelCount, programmeCount - rejected, rejected)
     }
 
-    private class LimitedInput(input: InputStream, private val maximum: Long) : FilterInputStream(input) {
+    private class LimitedInput(input: InputStream, private val maximum: Long, private val maximumRun: Long) : FilterInputStream(input) {
         private var consumed = 0L
+        private var run = 0L
         private fun count(amount: Int): Int {
             if (amount > 0) { consumed += amount; require(consumed <= maximum) { "Expanded guide byte limit" } }
             return amount
         }
-        override fun read(): Int = `in`.read().also { if (it >= 0) count(1) }
-        override fun read(buffer: ByteArray, offset: Int, length: Int): Int = count(`in`.read(buffer, offset, length))
+        private fun scan(byte: Int) {
+            run = if (byte == '<'.code) 0 else run + 1
+            require(run <= maximumRun) { "Guide token limit" }
+        }
+        override fun read(): Int = `in`.read().also { if (it >= 0) { count(1); scan(it) } }
+        override fun read(buffer: ByteArray, offset: Int, length: Int): Int = count(`in`.read(buffer, offset, length)).also { n ->
+            for (index in offset until offset + n) scan(buffer[index].toInt() and 255)
+        }
     }
 
     companion object {

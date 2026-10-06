@@ -22,6 +22,14 @@ data class StoredChannel(
 enum class IdentityMatch { PROVIDER_ID, GUIDE_VARIANT, EXACT_LOCATOR, NEW }
 data class ReconciledChannel(val channel: StoredChannel, val match: IdentityMatch)
 data class ChannelReconciliation(val channels: List<ReconciledChannel>, val unavailable: List<StoredChannel>)
+data class TombstoneRetention(val retained: List<StoredChannel>, val dropped: List<StoredChannel>)
+
+fun ChannelReconciliation.retainTombstones(withOverlays: Set<String>, limit: Int = 60_000): TombstoneRetention? {
+    require(limit > 0)
+    val (retained, dropped) = unavailable.partition { it.id in withOverlays }
+    if (channels.size + retained.size > limit) return null
+    return TombstoneRetention(retained, dropped)
+}
 
 class ChannelIdentityReconciler(private val newId: () -> String = { UUID.randomUUID().toString() }) {
     fun reconcile(sourceId: String, previous: List<StoredChannel>, incoming: List<ChannelCandidate>): ChannelReconciliation {
