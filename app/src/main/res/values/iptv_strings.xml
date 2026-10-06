@@ -29,6 +29,8 @@
     <string name="iptv_setup_unsupported">This address does not contain a supported channel playlist.</string>
     <string name="iptv_setup_storage_full">There is not enough space to update the guide. Your previous guide has been kept.</string>
     <string name="iptv_live_title">Live TV</string>
+    <string name="iptv_live_now_playing">Playing</string>
+    <string name="iptv_live_uncategorised">Other channels</string>
     <string name="iptv_live_next_source">Next source</string>
     <string name="iptv_live_all">All channels</string>
     <string name="iptv_live_favourites">Favourites</string>

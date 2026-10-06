@@ -16,8 +16,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source: IptvSourceRef? = null,
-    val page: IptvBrowsePage? = null, val offset: Int = 0, val favourites: Boolean = false,
-    val focused: IptvListedChannel? = null, val programmes: List<GuideProgramme> = emptyList(),
+    val channels: List<IptvListedChannel> = emptyList(), val next: IptvBrowseCursor? = null,
+    val categories: List<IptvCategory> = emptyList(), val category: String? = null, val favourites: Boolean = false,
+    val guide: Map<String, GuideGridRow> = emptyMap(), val window: GuideGridWindow? = null,
+    val focused: IptvListedChannel? = null, val playingId: String? = null,
     val playback: IptvLivePlayback? = null,
     val player: ExoPlayer? = null, val playingTitle: String? = null, val playing: Boolean = false,
     val loading: Boolean = false, val tuning: Boolean = false, val message: Int? = null, val updating: Int? = null)
@@ -38,7 +40,6 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var profileRevision = -1L
     private var foreground = false
     private var pageJob: Job? = null
-    private var guideJob: Job? = null
     private var tuneJob: Job? = null
     private var tuneVersion = 0L
     private var pageVersion = 0L
@@ -49,11 +50,11 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             combine(profiles.activeProfileId, profiles.activeProfileReady, profiles.profileSelectionRevision) { id, ready, revision -> Triple(id, ready, revision) }
                 .collect { (id, ready, revision) ->
                     session = null; profileRevision = revision
-                    pageJob?.cancel(); guideJob?.cancel(); stop()
+                    pageJob?.cancel(); stop()
                     mutable.value = IptvLiveState()
                     if (ready) {
                         val current = withContext(Dispatchers.IO) { access.open(id) }
-                        session = current; load(null); refresher.refreshStale(current)
+                        session = current; load(); refresher.refreshStale(current)
                     }
                 }
         }
@@ -70,28 +71,34 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 }) }
                 val landed = mine.any { (key, value) -> previous[key]?.phase != value.phase && value.phase in setOf(IptvRefreshPhase.GUIDE, IptvRefreshPhase.DONE) }
                 previous = mine
-                if (landed && foreground && pageJob?.isActive != true) load(currentCursor(), background = true)
+                if (landed && foreground && pageJob?.isActive != true) load(background = true)
             }
         }
         viewModelScope.launch {
             var ticks = 0
             while (isActive) {
-                delay(30_000)
-                if (foreground && pageJob?.isActive != true) load(currentCursor(), background = true)
+                delay(60_000)
+                val window = mutable.value.window
+                if (foreground && pageJob?.isActive != true && window != null && System.currentTimeMillis() > window.startMillis + WINDOW_SHIFT) load(background = true)
                 if (foreground && ++ticks % 60 == 0) session?.let { refresher.refreshStale(it) }
             }
         }
     }
     fun foreground(active: Boolean) {
         foreground = active
-        if (active) load(currentCursor()) else stop()
+        if (active) load(background = mutable.value.channels.isNotEmpty()) else stop()
     }
-    private fun currentCursor(): IptvBrowseCursor? = mutable.value.let { value ->
-        value.page?.let { IptvBrowseCursor(it.catalogue.revision, IptvBrowseQuery(favouritesOnly = value.favourites), value.offset) }
+    fun loadMore() { if (mutable.value.next != null) load(append = true) }
+    fun showFavourites() { mutable.update { it.copy(favourites = true, category = null, focused = null) }; load() }
+    fun showCategory(name: String?) { mutable.update { it.copy(favourites = false, category = name, focused = null) }; load() }
+    fun zap(delta: Int) {
+        val current = mutable.value
+        if (current.channels.isEmpty()) return
+        val index = current.channels.indexOfFirst { it.item.channel.id == (current.playingId ?: current.focused?.item?.channel?.id) }
+        val target = current.channels[Math.floorMod((if (index < 0) 0 else index) + delta, current.channels.size)]
+        mutable.update { it.copy(focused = target) }
+        watch(target)
     }
-    fun nextPage() { mutable.value.page?.catalogue?.next?.let(::load) }
-    fun previousPage() { currentCursor()?.let { load(it.copy(offset = (it.offset - 24).coerceAtLeast(0))) } }
-    fun favourites() { mutable.update { it.copy(favourites = !it.favourites, focused = null, programmes = emptyList()) }; load(null) }
     fun toggleFavourite() {
         val current = session ?: return
         val ref = mutable.value.source ?: return
@@ -102,7 +109,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     val latest = requireNotNull(catalogue.playbackItem(ref, row.item.channel.id))
                     catalogue.setOverlay(ref, latest.channel.id, latest.overlay.copy(favouriteRank = if (latest.overlay.favouriteRank == null) 0 else null))
                 } }
-                if (session === current) load(currentCursor())
+                if (session === current) load(background = true)
             } catch (cancel: CancellationException) { throw cancel }
             catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
         }
@@ -118,7 +125,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 } }
                 if (session === current && mutable.value.source == ref) {
                     mutable.update { it.copy(message = R.string.iptv_live_format_saved) }
-                    load(currentCursor())
+                    load(background = true)
                 }
             } catch (cancel: CancellationException) { throw cancel }
             catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
@@ -128,51 +135,46 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val current = mutable.value
         if (current.sources.isEmpty()) return
         val index = current.sources.indexOfFirst { it.ref == current.source }
-        mutable.update { it.copy(source = current.sources[(index + 1) % current.sources.size].ref, focused = null, programmes = emptyList()) }
-        load(null)
+        mutable.update { it.copy(source = current.sources[(index + 1) % current.sources.size].ref, focused = null, category = null, favourites = false) }
+        load()
     }
-    private fun load(cursor: IptvBrowseCursor?, background: Boolean = false) {
+    private fun load(append: Boolean = false, background: Boolean = false) {
         val current = session ?: return
+        if (append && pageJob?.isActive == true) return
         pageJob?.cancel()
         val request = ++pageVersion
         pageJob = viewModelScope.launch {
-            if (!background) mutable.update { it.copy(loading = true) }
+            if (!background && !append) mutable.update { it.copy(loading = true) }
             try {
                 val sources = withContext(Dispatchers.IO) { access.use(current) { catalogue.sources(current.profileId) } }
-                val ref = mutable.value.source?.takeIf { chosen -> sources.any { it.ref == chosen } } ?: sources.firstOrNull()?.ref
-                val query = IptvBrowseQuery(favouritesOnly = mutable.value.favourites)
-                var actualCursor = cursor?.takeIf { it.revision.ref == ref && it.query == query }
-                val page = if (ref == null) null else try { browse.page(ref, query, actualCursor, 24) }
-                    catch (_: IptvCatalogueChangedException) { actualCursor = null; browse.page(ref, query, null, 24) }
+                val state = mutable.value
+                val ref = state.source?.takeIf { chosen -> sources.any { it.ref == chosen } } ?: sources.firstOrNull()?.ref
+                val query = IptvBrowseQuery(favouritesOnly = state.favourites, category = state.category.takeUnless { state.favourites })
+                val cursor = state.next?.takeIf { append && it.revision.ref == ref && it.query == query }
+                if (append && cursor == null) return@launch
+                val limit = if (background) state.channels.size.coerceIn(PAGE, 200) else PAGE
+                val page = if (ref == null) null else try { browse.page(ref, query, cursor, limit) }
+                    catch (_: IptvCatalogueChangedException) { if (append) return@launch else browse.page(ref, query, null, limit) }
+                val categories = if (ref == null) emptyList() else if (append) state.categories
+                    else withContext(Dispatchers.IO) { access.use(current) { catalogue.categories(ref) } }
+                val now = System.currentTimeMillis()
+                val window = state.window?.takeIf { append || now <= it.startMillis + WINDOW_SHIFT } ?: guideWindow(now)
+                val rows = page?.let { browse.guideRows(current.profileId, it.channels, window) }.orEmpty()
                 if (session === current && request == pageVersion) {
+                    val channels = if (append) state.channels + page?.channels.orEmpty() else page?.channels.orEmpty()
                     val focusedId = mutable.value.focused?.item?.channel?.id
-                    val focused = page?.channels?.firstOrNull { it.item.channel.id == focusedId } ?: page?.channels?.firstOrNull()
-                    val sameFocus = background && focused != null && focused.item.channel.id == focusedId
-                    mutable.update { it.copy(sources = sources, source = ref, page = page, offset = actualCursor?.offset ?: 0, focused = focused,
-                        programmes = if (sameFocus) it.programmes else emptyList()) }
-                    focused?.let { focus(it, keepProgrammes = sameFocus) }
+                    val focused = channels.firstOrNull { it.item.channel.id == focusedId }
+                        ?: channels.firstOrNull { it.item.channel.id == state.playingId } ?: channels.firstOrNull()
+                    mutable.update { it.copy(sources = sources, source = ref, channels = channels, next = page?.catalogue?.next,
+                        categories = categories, guide = if (append) it.guide + rows else rows, window = window, focused = focused) }
                 }
             } catch (cancel: CancellationException) { throw cancel }
             catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
             finally { if (session === current && request == pageVersion) mutable.update { it.copy(loading = false) } }
         }
     }
-    fun focus(row: IptvListedChannel, keepProgrammes: Boolean = false) {
-        val current = session ?: return
-        guideJob?.cancel()
-        mutable.update { it.copy(focused = row, programmes = if (keepProgrammes) it.programmes else emptyList()) }
-        val key = row.guide.key ?: return
-        guideJob = viewModelScope.launch {
-            try {
-                val now = System.currentTimeMillis()
-                val programmes = withContext(Dispatchers.IO) { access.use(current) {
-                    guides.programmes(IptvGuideRef(current.profileId, key.feedId), key.externalId, IptvGuideWindow(now, now + 6 * 60 * 60 * 1000), limit = 4).programmes
-                } }
-                if (session === current && mutable.value.focused?.item?.channel?.id == row.item.channel.id)
-                    mutable.update { it.copy(programmes = programmes) }
-            } catch (cancel: CancellationException) { throw cancel }
-            catch (_: Exception) {}
-        }
+    fun focus(row: IptvListedChannel) {
+        if (session != null) mutable.update { it.copy(focused = row) }
     }
     fun watch(row: IptvListedChannel) {
         val current = session ?: return
@@ -181,7 +183,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         tuneJob?.cancel()
         val request = ++tuneVersion
         tuneJob = viewModelScope.launch {
-            mutable.update { it.copy(tuning = true, playback = null, player = null, playingTitle = null, playing = false, message = null) }
+            mutable.update { it.copy(tuning = true, playback = null, player = null, playingTitle = null, playing = false, message = null, playingId = row.item.channel.id) }
             try {
                 val source = withContext(Dispatchers.IO) { access.use(current) { catalogue.sources(current.profileId).single { it.ref == ref } } }
                 val streamFormat = withContext(Dispatchers.IO) { access.use(current) {
@@ -221,12 +223,21 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     }
     fun stop() {
         ++tuneVersion; tuneJob?.cancel()
-        mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, tuning = false) }
+        mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, tuning = false, playingId = null) }
         viewModelScope.launch { if (!runtime.stop(owner)) mutable.update { it.copy(message = R.string.iptv_live_closing) } }
+    }
+    private fun guideWindow(now: Long): GuideGridWindow {
+        val start = Math.floorDiv(now, GuideGridWindow.SLOT_MILLIS) * GuideGridWindow.SLOT_MILLIS - GuideGridWindow.SLOT_MILLIS
+        return GuideGridWindow(start, start + WINDOW_SPAN)
     }
     override fun onCleared() {
         screensaver.setPlaybackActive(false)
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate).launch { runtime.stop(owner) }
         super.onCleared()
+    }
+    private companion object {
+        const val PAGE = 60
+        const val WINDOW_SPAN = 12 * 60 * 60 * 1000L
+        const val WINDOW_SHIFT = 4 * 60 * 60 * 1000L
     }
 }
