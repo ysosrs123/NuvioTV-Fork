@@ -75,6 +75,18 @@ class IptvCatalogueStoreTest {
         assertEquals(setOf("guide-1", "guide-2"), store.guideChannelIds(ref, IptvGuideRef(1, "other-feed")))
     }
 
+    @Test fun browsingFollowsProviderOrderAndFiltersByCategory() {
+        val ref = source()
+        fun grouped(id: Int, name: String, group: String?) = IptvCatalogueRecord(ChannelCandidate(name, "https://fixture.invalid/live/$id", providerId = id.toString()),
+            group?.let { mapOf("group-title" to it) } ?: emptyMap())
+        publish(ref, listOf(grouped(1, "Zulu", "News"), grouped(2, "Alpha", "Sport"), grouped(3, "Mike", "News"), grouped(4, "Bravo", null)))
+        assertEquals(listOf("Zulu", "Alpha", "Mike", "Bravo"), store.page(ref).items.map { it.channel.data.name })
+        assertEquals(listOf(IptvCategory("News", 2), IptvCategory("Sport", 1), IptvCategory("", 1)), store.categories(ref))
+        assertEquals(listOf("Zulu", "Mike"), store.page(ref, IptvBrowseQuery(category = "News")).items.map { it.channel.data.name })
+        assertEquals(listOf("Bravo"), store.page(ref, IptvBrowseQuery(category = "")).items.map { it.channel.data.name })
+        assertEquals(listOf("Alpha", "Bravo"), store.page(ref, IptvBrowseQuery(search = "a")).items.map { it.channel.data.name }.filter { it in setOf("Alpha", "Bravo") })
+    }
+
     @Test fun accountGroupsAndSourceOrderPersistWithoutInvalidatingCatalogues() {
         val a = source(); val b = source(); val c = source(); val other = source(2)
         publish(a)

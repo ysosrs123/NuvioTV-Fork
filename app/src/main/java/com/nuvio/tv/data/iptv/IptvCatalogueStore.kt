@@ -184,9 +184,14 @@ class IptvCatalogueStore(
             if (!query.includeUnavailable) append(" AND c.available=1")
             if (!query.includeHidden) append(" AND COALESCE(o.hidden,0)=0")
             if (query.favouritesOnly) append(" AND o.favourite_rank IS NOT NULL")
+            if (query.category != null) { append(" AND COALESCE(c.category,'')=?"); args += query.category }
             if (query.search.isNotBlank()) { append(" AND instr(COALESCE(o.search_name,c.search_name),?)>0"); args += searchName(query.search.trim()) }
         }
-        val order = if (query.favouritesOnly) "o.favourite_rank," else ""
+        val order = when {
+            query.favouritesOnly -> "o.favourite_rank,"
+            query.search.isBlank() -> "c.position,"
+            else -> ""
+        }
         args += (limit + 1).toString(); args += offset.toString()
         val selected = db.rawQuery("SELECT c.id FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=?$filters ORDER BY ${order}COALESCE(o.search_name,c.search_name),c.id LIMIT ? OFFSET ?", args.toTypedArray()).use { c ->
             buildList { while (c.moveToNext()) add(c.getString(0)) }
@@ -198,6 +203,15 @@ class IptvCatalogueStore(
         }
         IptvCataloguePage(source, revision, items.take(limit), guideAssociations(db, ref),
             if (items.size > limit) IptvBrowseCursor(revision, query, offset + limit) else null)
+    }
+
+    fun categories(ref: IptvSourceRef): List<IptvCategory> = transaction { db ->
+        val source = source(db, ref)
+        val generation = source.activeGeneration ?: return@transaction emptyList()
+        db.rawQuery("SELECT COALESCE(c.category,''),COUNT(*) FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.available=1 AND COALESCE(o.hidden,0)=0 GROUP BY COALESCE(c.category,'') ORDER BY MIN(c.position) LIMIT 2000",
+            arrayOf(ref.profileId.toString(), ref.sourceId, generation.toString())).use { c ->
+            buildList { while (c.moveToNext()) add(IptvCategory(c.getString(0), c.getInt(1))) }
+        }
     }
 
     fun playbackItem(ref: IptvSourceRef, channelId: String): IptvCatalogueItem? = transaction { db ->
@@ -258,14 +272,16 @@ class IptvCatalogueStore(
         val previous = old.channels.associateBy { it.channel.id }
         val next = reconciliation.channels.map { row -> row.channel to byData.getValue(row.channel.data).attributes } +
             tombstones.retained.map { row -> row to previous.getValue(row.id).attributes }
-        for ((channel, attributes) in next) {
+        for ((position, entry) in next.withIndex()) {
+            val (channel, attributes) = entry
             checkCancellation()
             if (channel.id !in previous) db.insertOrThrow("identities", null,
                 ContentValues().apply { put("id", channel.id); put("source", ref.sourceId) })
             db.insertOrThrow("catalogue", null, ContentValues().apply {
                 put("source", ref.sourceId); put("generation", ticket.requestGeneration); put("id", channel.id)
                 put("name", channel.data.name); put("available", if (channel.available) 1 else 0)
-                put("search_name", searchName(channel.data.name))
+                put("search_name", searchName(channel.data.name)); put("position", position)
+                put("category", attributes[CATEGORY_ATTRIBUTE]?.trim()?.takeIf { it.isNotEmpty() }?.take(240))
                 put("payload", secrets.seal(aad(ref, "channel:${channel.id}"), encodeRecord(channel.data, attributes)))
             })
         }
@@ -389,6 +405,9 @@ class IptvCatalogueStore(
         }
         private fun addRefreshSchema(db: SQLiteDatabase) {
             db.execSQL("ALTER TABLE sources ADD COLUMN refreshed_at INTEGER")
+            db.execSQL("ALTER TABLE catalogue ADD COLUMN position INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("ALTER TABLE catalogue ADD COLUMN category TEXT")
+            db.execSQL("CREATE INDEX catalogue_order ON catalogue(source,generation,category,position)")
         }
         private fun reindexSearch(db: SQLiteDatabase) {
             db.rawQuery("SELECT source,generation,id,name FROM catalogue", null).use { c ->
@@ -415,6 +434,7 @@ class IptvCatalogueStore(
     }
 
     private companion object {
+        const val CATEGORY_ATTRIBUTE = "group-title"
         fun aad(ref: IptvSourceRef, field: String) = "iptv.v1:${ref.profileId}:${ref.sourceId}:$field"
         fun searchName(value: String) = foldSearchText(value)
         fun Cursor.string(key: String) = getString(getColumnIndexOrThrow(key))
