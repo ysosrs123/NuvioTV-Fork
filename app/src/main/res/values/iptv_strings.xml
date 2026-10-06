@@ -20,7 +20,7 @@
     <string name="iptv_setup_edit">Edit</string>
     <string name="iptv_setup_refresh">Refresh</string>
     <string name="iptv_setup_working">Working…</string>
-    <string name="iptv_setup_saved">Saved. Refresh to load the latest channels or programmes.</string>
+    <string name="iptv_setup_saved">Saved. Loading channels and programmes in the background.</string>
     <string name="iptv_setup_refreshed">Up to date.</string>
     <string name="iptv_setup_imported">Channels loaded</string>
     <string name="iptv_setup_refresh_needed">Refresh needed</string>
@@ -52,6 +52,11 @@
     <string name="iptv_xtream_server">Server address, for example http://example.com:8080</string>
     <string name="iptv_xtream_username">Username</string>
     <string name="iptv_xtream_password">Password</string>
+    <string name="iptv_refresh_queued">Waiting to update…</string>
+    <string name="iptv_refresh_downloading">Downloading channels…</string>
+    <string name="iptv_refresh_saving">Saving channels…</string>
+    <string name="iptv_refresh_guide">Updating programme guide…</string>
+    <string name="iptv_refresh_updated">Updated %1$s</string>
     <string name="iptv_password_show">Show</string>
     <string name="iptv_password_hide">Hide</string>
     <string name="iptv_error_address">This server address is not valid. Enter only the address and port, without the username, password or page name.</string>

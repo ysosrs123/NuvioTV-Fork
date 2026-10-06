@@ -18,6 +18,7 @@ data class IptvSource(
     val ref: IptvSourceRef, val label: String, val kind: IptvSourceKind, val accountId: String,
     val configurationVersion: Long, val requestedGeneration: Long,
     val activeGeneration: Long?, val activeConfigurationVersion: Long?,
+    val refreshedAtMillis: Long? = null,
 ) {
     val playbackEligible: Boolean get() = activeGeneration != null && configurationVersion == activeConfigurationVersion
 }

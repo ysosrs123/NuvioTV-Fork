@@ -62,6 +62,19 @@ class IptvCatalogueStoreTest {
         assertEquals(IptvStreamFormat.AUTO, store.playbackItem(ref, item.channel.id)!!.overlay.streamFormat)
     }
 
+    @Test fun publishRecordsRefreshTimeAndProviderGuideIdsIncludeManualMappings() {
+        store.close(); store = IptvCatalogueStore(context, name, secrets, now = { 4321L })
+        val ref = source()
+        assertNull(store.sources(1).single().refreshedAtMillis)
+        publish(ref, listOf(row(1), row(2)))
+        assertEquals(4321L, store.sources(1).single().refreshedAtMillis)
+        val feed = IptvGuideRef(1, "provider-feed")
+        val item = store.page(ref).items.first()
+        store.setOverlay(ref, item.channel.id, item.overlay.copy(manualGuide = GuideKey(feed.feedId, "manual-id")))
+        assertEquals(setOf("guide-1", "guide-2", "manual-id"), store.guideChannelIds(ref, feed))
+        assertEquals(setOf("guide-1", "guide-2"), store.guideChannelIds(ref, IptvGuideRef(1, "other-feed")))
+    }
+
     @Test fun accountGroupsAndSourceOrderPersistWithoutInvalidatingCatalogues() {
         val a = source(); val b = source(); val c = source(); val other = source(2)
         publish(a)

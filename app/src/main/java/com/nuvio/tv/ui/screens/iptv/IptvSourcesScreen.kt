@@ -63,9 +63,10 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
             items(state.sources, key = { "source-${it.ref.sourceId}" }) { source ->
                 SettingsGroupCard(Modifier.fillMaxWidth()) {
                     Text(source.label, style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextPrimary)
-                    Text(stringResource(if (source.playbackEligible) R.string.iptv_setup_imported else R.string.iptv_setup_refresh_needed), color = NuvioTheme.colors.TextSecondary)
+                    val status = state.refresh[IptvRefreshCoordinator.key(source.ref)]
+                    RefreshLine(status, source.refreshedAtMillis, source.playbackEligible)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Button(onClick = { viewModel.refresh(source) }, enabled = !state.busy) { Text(stringResource(R.string.iptv_setup_refresh)) }
+                        Button(onClick = { viewModel.refresh(source) }, enabled = status?.running != true) { Text(stringResource(R.string.iptv_setup_refresh)) }
                         Button(onClick = { viewModel.edit(source) }, enabled = !state.busy) { Text(stringResource(R.string.iptv_setup_edit)) }
                         Button(onClick = { viewModel.select(source.ref) }, enabled = !state.busy) { Text(stringResource(if (state.selected == source.ref) R.string.iptv_guides_selected else R.string.iptv_choose_guides)) }
                     }
@@ -78,8 +79,10 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
             items(state.feeds, key = { "feed-${it.ref.feedId}" }) { feed ->
                 SettingsGroupCard(Modifier.fillMaxWidth()) {
                     Text(feed.label, style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextPrimary)
+                    val status = state.refresh[IptvRefreshCoordinator.key(feed.ref)]
+                    RefreshLine(status, feed.refreshedAtMillis, feed.activeGeneration != null)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Button(onClick = { viewModel.refresh(feed) }, enabled = !state.busy) { Text(stringResource(R.string.iptv_setup_refresh)) }
+                        Button(onClick = { viewModel.refresh(feed) }, enabled = status?.running != true) { Text(stringResource(R.string.iptv_setup_refresh)) }
                         Button(onClick = { viewModel.edit(feed) }, enabled = !state.busy) { Text(stringResource(R.string.iptv_setup_edit)) }
                         Button(onClick = { viewModel.link(feed) }, enabled = !state.busy && state.selected != null) { Text(stringResource(if (feed.ref.feedId in state.linked) R.string.iptv_guide_unlink else R.string.iptv_guide_link)) }
                     }
@@ -128,6 +131,24 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
             }
         }
     } }
+}
+
+@Composable
+private fun RefreshLine(status: IptvRefreshStatus?, refreshedAt: Long?, loaded: Boolean) {
+    val text = when (status?.phase) {
+        IptvRefreshPhase.QUEUED -> stringResource(R.string.iptv_refresh_queued)
+        IptvRefreshPhase.DOWNLOADING -> stringResource(R.string.iptv_refresh_downloading)
+        IptvRefreshPhase.SAVING -> stringResource(R.string.iptv_refresh_saving)
+        IptvRefreshPhase.GUIDE -> stringResource(R.string.iptv_refresh_guide)
+        IptvRefreshPhase.FAILED -> status.message?.let { stringResource(it) } ?: stringResource(R.string.iptv_setup_failed)
+        else -> when {
+            refreshedAt != null -> stringResource(R.string.iptv_refresh_updated, android.text.format.DateUtils.getRelativeTimeSpanString(
+                refreshedAt, System.currentTimeMillis(), android.text.format.DateUtils.MINUTE_IN_MILLIS).toString())
+            loaded -> stringResource(R.string.iptv_setup_imported)
+            else -> stringResource(R.string.iptv_setup_refresh_needed)
+        }
+    }
+    Text(text, color = if (status?.phase == IptvRefreshPhase.FAILED) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary)
 }
 
 @Composable

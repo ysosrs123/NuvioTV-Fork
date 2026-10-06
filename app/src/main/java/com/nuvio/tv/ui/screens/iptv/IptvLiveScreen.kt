@@ -92,6 +92,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
             }
         }
         state.message?.let { Text(stringResource(it), color = NuvioTheme.colors.TextSecondary) }
+        state.updating?.let { Text(stringResource(it), color = NuvioTheme.colors.TextSecondary) }
         if (fullscreen) {
             LiveVideo(state.player, state.playback.takeIf { showHud }, Modifier.fillMaxWidth().weight(1f))
         } else {

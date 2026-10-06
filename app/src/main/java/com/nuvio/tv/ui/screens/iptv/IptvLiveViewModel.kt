@@ -20,14 +20,15 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
     val focused: IptvListedChannel? = null, val programmes: List<GuideProgramme> = emptyList(),
     val playback: IptvLivePlayback? = null,
     val player: ExoPlayer? = null, val playingTitle: String? = null, val playing: Boolean = false,
-    val loading: Boolean = false, val tuning: Boolean = false, val message: Int? = null)
+    val loading: Boolean = false, val tuning: Boolean = false, val message: Int? = null, val updating: Int? = null)
 
 @HiltViewModel
 class IptvLiveViewModel @Inject constructor(@ApplicationContext private val context: Context,
     private val catalogue: IptvCatalogueStore, private val guides: IptvGuideStore,
     private val access: IptvProfileAccess, private val runtime: LivePlaybackRuntime,
     private val profiles: ProfileManager,
-    private val screensaver: com.nuvio.tv.core.player.ScreensaverController) : ViewModel() {
+    private val screensaver: com.nuvio.tv.core.player.ScreensaverController,
+    private val refresher: IptvRefreshCoordinator) : ViewModel() {
     private val mutable = MutableStateFlow(IptvLiveState())
     val state = mutable.asStateFlow()
     private val owner = UUID.randomUUID().toString()
@@ -50,13 +51,34 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     session = null; profileRevision = revision
                     pageJob?.cancel(); guideJob?.cancel(); stop()
                     mutable.value = IptvLiveState()
-                    if (ready) { session = withContext(Dispatchers.IO) { access.open(id) }; load(null) }
+                    if (ready) {
+                        val current = withContext(Dispatchers.IO) { access.open(id) }
+                        session = current; load(null); refresher.refreshStale(current)
+                    }
                 }
         }
         viewModelScope.launch {
+            var previous = emptyMap<String, IptvRefreshStatus>()
+            refresher.status.collect { statuses ->
+                val profile = session?.profileId
+                val mine = statuses.filterKeys { profile != null && it.contains(":$profile:") }
+                val running = mine.values.filter { it.running }
+                mutable.update { it.copy(updating = when {
+                    running.any { it.phase == IptvRefreshPhase.DOWNLOADING || it.phase == IptvRefreshPhase.SAVING } -> R.string.iptv_refresh_downloading
+                    running.any { it.phase == IptvRefreshPhase.GUIDE } -> R.string.iptv_refresh_guide
+                    else -> null
+                }) }
+                val landed = mine.any { (key, value) -> previous[key]?.phase != value.phase && value.phase in setOf(IptvRefreshPhase.GUIDE, IptvRefreshPhase.DONE) }
+                previous = mine
+                if (landed && foreground && pageJob?.isActive != true) load(currentCursor(), background = true)
+            }
+        }
+        viewModelScope.launch {
+            var ticks = 0
             while (isActive) {
                 delay(30_000)
                 if (foreground && pageJob?.isActive != true) load(currentCursor(), background = true)
+                if (foreground && ++ticks % 60 == 0) session?.let { refresher.refreshStale(it) }
             }
         }
     }

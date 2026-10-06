@@ -27,6 +27,7 @@ class IptvGuideStore(
     private val releaseDocument: (String) -> Unit = { uri ->
         context.applicationContext.contentResolver.releasePersistableUriPermission(android.net.Uri.parse(uri), android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
     },
+    private val now: () -> Long = System::currentTimeMillis,
 ) : Closeable {
     init { require(maxDatabaseBytes >= 64 * 1024) }
     private val helper = Database(context.applicationContext, databaseName)
@@ -87,9 +88,10 @@ class IptvGuideStore(
 
     fun feeds(profileId: Int, offset: Int = 0, limit: Int = 100): List<IptvGuideFeed> = transaction { db ->
         require(profileId >= 0 && offset >= 0 && limit in 1..200)
-        db.rawQuery("SELECT id,label,version,requested,active_generation FROM feeds WHERE profile=? ORDER BY label COLLATE NOCASE,id LIMIT ? OFFSET ?",
+        db.rawQuery("SELECT id,label,version,requested,active_generation,refreshed_at FROM feeds WHERE profile=? ORDER BY label COLLATE NOCASE,id LIMIT ? OFFSET ?",
             arrayOf(profileId.toString(), limit.toString(), offset.toString())).use { c -> buildList {
-                while (c.moveToNext()) add(IptvGuideFeed(IptvGuideRef(profileId, c.getString(0)), c.getString(1), c.getLong(2), c.getLong(3), if (c.isNull(4)) null else c.getLong(4)))
+                while (c.moveToNext()) add(IptvGuideFeed(IptvGuideRef(profileId, c.getString(0)), c.getString(1), c.getLong(2), c.getLong(3),
+                    if (c.isNull(4)) null else c.getLong(4), if (c.isNull(5)) null else c.getLong(5)))
             } }
     }
 
@@ -116,7 +118,9 @@ class IptvGuideStore(
 
     fun acceptNotModified(ticket: IptvGuideTicket, window: IptvGuideWindow): Boolean = transaction { db ->
         val cache = validators(db, ticket.ref)
-        current(db, ticket) && covers(db, ticket.ref, window) && cache != null && (cache.etag != null || cache.lastModified != null)
+        (current(db, ticket) && covers(db, ticket.ref, window) && cache != null && (cache.etag != null || cache.lastModified != null)).also { accepted ->
+            if (accepted) db.update("feeds", ContentValues().apply { put("refreshed_at", now()) }, "id=?", arrayOf(ticket.ref.feedId))
+        }
     }
 
     private fun covers(db: SQLiteDatabase, ref: IptvGuideRef, window: IptvGuideWindow): Boolean =
@@ -147,6 +151,7 @@ class IptvGuideStore(
         ticket: IptvGuideTicket, input: InputStream, window: IptvGuideWindow,
         validators: IptvCacheValidators = IptvCacheValidators(),
         limits: GuideParseLimits = GuideParseLimits(),
+        channelFilter: Set<String>? = null,
         checkCancellation: () -> Unit = {},
     ): RefreshDecision {
         require(listOf(validators.etag, validators.lastModified).all { it == null || (it.length <= 4096 && '\r' !in it && '\n' !in it) })
@@ -193,12 +198,13 @@ class IptvGuideStore(
         var importFailure: Throwable? = null
         try {
             checkCancellation()
-            val summary = parseGuideInput(input, channel = { channel ->
+            val summary = parseGuideInput(input, channel = channel@{ channel ->
+                if (channelFilter != null && channel.externalId !in channelFilter) return@channel
                 channels += channel
                 bufferedCharacters += channel.names.sumOf { it.text.length } + channel.externalId.length
                 if (channels.size + programmes.size >= 100 || bufferedCharacters >= 256 * 1024) flush()
             }, programme = { programme ->
-                if (programme.start.epochMillis < window.untilMillis && (programme.stop?.epochMillis?.let { it > window.fromMillis } ?: (programme.start.epochMillis >= window.fromMillis))) {
+                if ((channelFilter == null || programme.channelExternalId in channelFilter) && programme.start.epochMillis < window.untilMillis && (programme.stop?.epochMillis?.let { it > window.fromMillis } ?: (programme.start.epochMillis >= window.fromMillis))) {
                     programmes += programme
                     bufferedCharacters += programme.titles.sumOf { it.text.length } + programme.descriptions.sumOf { it.text.length }
                     if (channels.size + programmes.size >= 100 || bufferedCharacters >= 256 * 1024) flush()
@@ -216,7 +222,7 @@ class IptvGuideStore(
                 if (previous > 0 && candidateCount * 2 < previous) return@transaction RefreshDecision.SHRINK_REQUIRES_REVIEW
                 checkCancellation()
                 db.update("feeds", ContentValues().apply {
-                    put("active_stage", stage); put("active_generation", ticket.generation); put("active_version", ticket.configurationVersion)
+                    put("active_stage", stage); put("active_generation", ticket.generation); put("active_version", ticket.configurationVersion); put("refreshed_at", now())
                     put("window_from", window.fromMillis); put("window_until", window.untilMillis)
                     put("validators", secrets.seal(aad(ticket.ref, "validators"), JSONObject().put("etag", validators.etag).put("lastModified", validators.lastModified).toString()))
                 }, "id=? AND version=? AND requested=?", arrayOf(ticket.ref.feedId, ticket.configurationVersion.toString(), ticket.generation.toString())).also { check(it == 1) }
@@ -255,9 +261,9 @@ class IptvGuideStore(
         val current = feed(db, ticket.ref)
         return ticket.generation > 0 && current.configurationVersion == ticket.configurationVersion && current.requestedGeneration == ticket.generation && current.activeGeneration != ticket.generation
     }
-    private fun feed(db: SQLiteDatabase, ref: IptvGuideRef): IptvGuideFeed = db.rawQuery("SELECT label,version,requested,active_generation FROM feeds WHERE id=? AND profile=?", arrayOf(ref.feedId, ref.profileId.toString())).use {
+    private fun feed(db: SQLiteDatabase, ref: IptvGuideRef): IptvGuideFeed = db.rawQuery("SELECT label,version,requested,active_generation,refreshed_at FROM feeds WHERE id=? AND profile=?", arrayOf(ref.feedId, ref.profileId.toString())).use {
         require(it.moveToFirst()) { "Unknown IPTV guide feed" }
-        IptvGuideFeed(ref, it.getString(0), it.getLong(1), it.getLong(2), if (it.isNull(3)) null else it.getLong(3))
+        IptvGuideFeed(ref, it.getString(0), it.getLong(1), it.getLong(2), if (it.isNull(3)) null else it.getLong(3), if (it.isNull(4)) null else it.getLong(4))
     }
     private fun endpoint(db: SQLiteDatabase, ref: IptvGuideRef): String = db.rawQuery("SELECT endpoint FROM feeds WHERE id=? AND profile=?", arrayOf(ref.feedId, ref.profileId.toString())).use {
         require(it.moveToFirst()); secrets.open(aad(ref, "endpoint"), it.getBlob(0))
@@ -275,21 +281,23 @@ class IptvGuideStore(
     }
     override fun close() = helper.close()
     private class StaleImport : RuntimeException()
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 2) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 3) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
-            db.execSQL("CREATE TABLE feeds(id TEXT PRIMARY KEY, profile INTEGER NOT NULL, label TEXT NOT NULL, endpoint BLOB NOT NULL, version INTEGER NOT NULL, requested INTEGER NOT NULL, active_stage TEXT, active_generation INTEGER, active_version INTEGER, validators BLOB, window_from INTEGER, window_until INTEGER)")
+            db.execSQL("CREATE TABLE feeds(id TEXT PRIMARY KEY, profile INTEGER NOT NULL, label TEXT NOT NULL, endpoint BLOB NOT NULL, version INTEGER NOT NULL, requested INTEGER NOT NULL, active_stage TEXT, active_generation INTEGER, active_version INTEGER, validators BLOB, window_from INTEGER, window_until INTEGER, refreshed_at INTEGER)")
             db.execSQL("CREATE TABLE stages(id TEXT PRIMARY KEY, feed TEXT NOT NULL REFERENCES feeds(id), generation INTEGER NOT NULL, UNIQUE(feed,generation))")
             db.execSQL("CREATE TABLE channels(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, external_id TEXT NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(stage,external_id))")
             db.execSQL("CREATE TABLE programmes(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, id TEXT NOT NULL, external_id TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER, precise INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(stage,id))")
             db.execSQL("CREATE INDEX guide_window ON programmes(stage,external_id,start,stop)")
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(oldVersion == 1 && newVersion == 2) { "Missing guide database migration" }
-
-            db.execSQL("ALTER TABLE feeds ADD COLUMN window_from INTEGER")
-            db.execSQL("ALTER TABLE feeds ADD COLUMN window_until INTEGER")
+            check(oldVersion in 1..2 && newVersion == 3) { "Missing guide database migration" }
+            if (oldVersion == 1) {
+                db.execSQL("ALTER TABLE feeds ADD COLUMN window_from INTEGER")
+                db.execSQL("ALTER TABLE feeds ADD COLUMN window_until INTEGER")
+            }
+            db.execSQL("ALTER TABLE feeds ADD COLUMN refreshed_at INTEGER")
         }
     }
     private companion object {

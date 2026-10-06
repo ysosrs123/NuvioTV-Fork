@@ -50,6 +50,17 @@ class IptvGuideStoreTest {
         store.close()
         assertFalse(context.getDatabasePath(name).readBytes().toString(Charsets.ISO_8859_1).contains("UNIQUE_GUIDE_SECRET"))
     }
+    @Test fun channelFilterKeepsOnlyListedChannelsAndPublishRecordsRefreshTime() {
+        store.close(); store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias), now = { 1234L })
+        val ref = feed()
+        assertNull(store.feeds(1).single().refreshedAtMillis)
+        val other = "<channel id=\"two\"><display-name>Two</display-name></channel>"
+        val value = "<tv>$channel$other${programme()}${programme("Elsewhere", id = "two")}</tv>"
+        assertEquals(RefreshDecision.PUBLISH, store.importGuide(store.beginRefresh(ref), value.byteInputStream(), window, channelFilter = setOf("one")))
+        assertEquals(listOf("one"), store.channelPage(ref).map { it.externalId })
+        assertTrue(store.programmes(ref, "two", window).programmes.isEmpty())
+        assertEquals(1234L, store.feeds(1).single().refreshedAtMillis)
+    }
     @Test fun sameGuideIdInAnotherFeedOrProfileCannotBleedIntoQueries() {
         val one = feed(); val two = feed(); val otherProfile = feed(2)
         publish(one); publish(two, xml(programme("Different"))); publish(otherProfile, xml(programme("Private")))

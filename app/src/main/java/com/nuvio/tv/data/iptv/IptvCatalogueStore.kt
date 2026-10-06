@@ -26,6 +26,7 @@ class IptvCatalogueStore(
     databaseName: String = "iptv-catalogue.db",
     private val secrets: IptvSecretBox = EnvelopeIptvSecretBox(AndroidIptvSecretBox()),
     private val maxDatabaseBytes: Long = 256L * 1024 * 1024,
+    private val now: () -> Long = System::currentTimeMillis,
 ) : Closeable {
     init { require(maxDatabaseBytes >= 64 * 1024) }
     private val helper = Database(context.applicationContext, databaseName)
@@ -137,8 +138,26 @@ class IptvCatalogueStore(
     fun acceptNotModified(ref: IptvSourceRef, ticket: RefreshTicket): Boolean = transaction { db ->
         val current = source(db, ref)
         val validators = cacheValidators(db, current)
-        current.playbackEligible && ticket == RefreshTicket(ref.sourceId, current.configurationVersion, current.requestedGeneration) &&
-            ticket.requestGeneration > 0 && validators != null && (validators.etag != null || validators.lastModified != null)
+        (current.playbackEligible && ticket == RefreshTicket(ref.sourceId, current.configurationVersion, current.requestedGeneration) &&
+            ticket.requestGeneration > 0 && validators != null && (validators.etag != null || validators.lastModified != null)).also { accepted ->
+            if (accepted) db.update("sources", ContentValues().apply { put("refreshed_at", now()) }, "id=?", arrayOf(ref.sourceId))
+        }
+    }
+
+    fun guideChannelIds(ref: IptvSourceRef, feed: IptvGuideRef): Set<String> = transaction { db ->
+        require(feed.profileId == ref.profileId)
+        val current = source(db, ref)
+        val generation = current.activeGeneration ?: return@transaction emptySet()
+        buildSet {
+            db.rawQuery("SELECT id,payload FROM catalogue WHERE source=? AND generation=?", arrayOf(ref.sourceId, generation.toString())).use { c ->
+                while (c.moveToNext()) {
+                    val record = JSONObject(secrets.open(aad(ref, "channel:${c.getString(0)}"), c.getBlob(1)))
+                    record.optional("guideId")?.takeIf(String::isNotBlank)?.let(::add)
+                }
+            }
+            db.rawQuery("SELECT o.guide_id FROM overlays o JOIN identities i ON o.id=i.id WHERE i.source=? AND o.profile=? AND o.guide_feed=? AND o.guide_id IS NOT NULL",
+                arrayOf(ref.sourceId, ref.profileId.toString(), feed.feedId)).use { c -> while (c.moveToNext()) add(c.getString(0)) }
+        }
     }
 
     private fun beginRefresh(db: SQLiteDatabase, ref: IptvSourceRef): RefreshTicket {
@@ -252,7 +271,7 @@ class IptvCatalogueStore(
         }
         checkCancellation()
         db.update("sources", ContentValues().apply {
-            put("active_generation", ticket.requestGeneration); put("active_config", ticket.configurationVersion)
+            put("active_generation", ticket.requestGeneration); put("active_config", ticket.configurationVersion); put("refreshed_at", now())
             put("validators", secrets.seal(aad(ref, "validators"), JSONObject().put("etag", validators.etag).put("lastModified", validators.lastModified).toString()))
         }, "id=? AND config_version=? AND requested=?", arrayOf(ref.sourceId, ticket.configurationVersion.toString(), ticket.requestGeneration.toString())).also { check(it == 1) }
         db.delete("catalogue", "source=? AND generation<>?", arrayOf(ref.sourceId, ticket.requestGeneration.toString()))
@@ -324,7 +343,8 @@ class IptvCatalogueStore(
             require(it.moveToFirst()) { "Unknown IPTV source" }; readSource(it)
         }
     private fun readSource(c: Cursor) = IptvSource(IptvSourceRef(c.number("profile").toInt(), c.string("id")), c.string("label"),
-        IptvSourceKind.valueOf(c.string("kind")), c.string("account_id"), c.number("config_version"), c.number("requested"), c.nullableNumber("active_generation"), c.nullableNumber("active_config"))
+        IptvSourceKind.valueOf(c.string("kind")), c.string("account_id"), c.number("config_version"), c.number("requested"), c.nullableNumber("active_generation"), c.nullableNumber("active_config"),
+        c.nullableNumber("refreshed_at"))
 
     private fun <T> transaction(block: (SQLiteDatabase) -> T): T {
         val db = helper.writableDatabase
@@ -344,7 +364,7 @@ class IptvCatalogueStore(
     }
     override fun close() = helper.close()
 
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 5) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 6) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
@@ -357,13 +377,18 @@ class IptvCatalogueStore(
             addBrowseSchema(db)
             addStreamFormatSchema(db)
             addGroupingSchema(db)
+            addRefreshSchema(db)
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(oldVersion in 1..4 && newVersion == 5) { "Missing IPTV database migration" }
+            check(oldVersion in 1..5 && newVersion == 6) { "Missing IPTV database migration" }
             if (oldVersion == 1) addBrowseSchema(db)
             if (oldVersion <= 2) addStreamFormatSchema(db)
             if (oldVersion <= 4) addGroupingSchema(db)
             if (oldVersion <= 3) reindexSearch(db)
+            if (oldVersion <= 5) addRefreshSchema(db)
+        }
+        private fun addRefreshSchema(db: SQLiteDatabase) {
+            db.execSQL("ALTER TABLE sources ADD COLUMN refreshed_at INTEGER")
         }
         private fun reindexSearch(db: SQLiteDatabase) {
             db.rawQuery("SELECT source,generation,id,name FROM catalogue", null).use { c ->

@@ -19,7 +19,8 @@ class IptvGuideRepository(private val store: IptvGuideStore, private val client:
     private val limits: GuideParseLimits = GuideParseLimits(),
     private val openDocument: ((String) -> java.io.InputStream)? = null,
     private val xtreamConnection: ((IptvSourceRef) -> IptvSourceConnection)? = null,
-    private val openLocal: ((String) -> java.io.InputStream)? = null) {
+    private val openLocal: ((String) -> java.io.InputStream)? = null,
+    private val providerChannels: ((IptvSourceRef, IptvGuideRef) -> Set<String>)? = null) {
     suspend fun refresh(ref: IptvGuideRef, window: IptvGuideWindow): IptvGuideRefresh = withContext(Dispatchers.IO) {
         currentCoroutineContext().ensureActive()
         try {
@@ -36,14 +37,16 @@ class IptvGuideRepository(private val store: IptvGuideStore, private val client:
                 catch (_: SQLiteFullException) { IptvGuideRefresh.StorageFull }
                 catch (_: Exception) { throw MetadataException(MetadataFailure.INVALID_RESPONSE) }
             }
-            val address = XtreamGuideReference.sourceId(request.endpoint)?.let { sourceId ->
+            val provider = XtreamGuideReference.sourceId(request.endpoint)?.let { IptvSourceRef(ref.profileId, it) }
+            val address = provider?.let { source ->
                 val resolve = xtreamConnection ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
-                IptvXtreamClient.guideUrl(resolve(IptvSourceRef(ref.profileId, sourceId)))
+                IptvXtreamClient.guideUrl(resolve(source))
             } ?: request.endpoint
+            val filter = provider?.let { source -> providerChannels?.invoke(source, ref)?.takeIf(Set<String>::isNotEmpty) }
             when (val result = client.fetch(address, request.validators?.let { CatalogueValidators(it.etag, it.lastModified) }) { input, validators, check ->
                 try {
                     IptvGuideRefresh.Guide(store.importGuide(request.ticket, input, window,
-                        IptvCacheValidators(validators.etag, validators.lastModified), limits, check))
+                        IptvCacheValidators(validators.etag, validators.lastModified), limits, filter, check))
                 } catch (_: SQLiteFullException) { IptvGuideRefresh.StorageFull }
             }) {
                 GuideDownload.NotModified -> {

@@ -18,13 +18,14 @@ sealed interface IptvPlaylistRefresh {
 class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val metadata: IptvMetadataClient = IptvMetadataClient(),
     private val xtream: IptvXtreamClient = IptvXtreamClient(), private val xtreamGuides: IptvXtreamGuides? = null,
     private val stalker: IptvStalkerClient = IptvStalkerClient()) {
-    suspend fun refresh(ref: IptvSourceRef): IptvPlaylistRefresh = withContext(Dispatchers.IO) {
+    suspend fun refresh(ref: IptvSourceRef, onSaving: () -> Unit = {}): IptvPlaylistRefresh = withContext(Dispatchers.IO) {
         val context = currentCoroutineContext()
         context.ensureActive()
         val request = store.prepareRefresh(ref)
         if (request.kind == IptvSourceKind.XTREAM) {
             val download = xtream.catalogue(request.connection)
             context.ensureActive()
+            onSaving()
             val decision = store.commitCatalogue(ref, request.ticket, download.records, download.canPublish) { context.ensureActive() }
             val guide = if (decision == RefreshDecision.PUBLISH) xtreamGuides?.ensure(ref) else null
             return@withContext IptvPlaylistRefresh.Catalogue(decision, guide)
@@ -32,6 +33,7 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
         if (request.kind == IptvSourceKind.STALKER) {
             val download = stalker.catalogue(request.connection)
             context.ensureActive()
+            onSaving()
             return@withContext IptvPlaylistRefresh.Catalogue(store.commitCatalogue(ref, request.ticket,
                 download.records, download.canPublish) { context.ensureActive() })
         }
@@ -44,6 +46,7 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
             is PlaylistDownload.Candidate -> {
                 context.ensureActive()
                 if (download.catalogue.kind == PlaylistKind.HLS) return@withContext IptvPlaylistRefresh.HlsPlaybackInput
+                onSaving()
                 val records = download.catalogue.channels.map { row ->
                     IptvCatalogueRecord(ChannelCandidate(row.name, row.locator, guideId = row.guideId), row.attributes)
                 }
