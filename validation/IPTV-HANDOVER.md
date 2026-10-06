@@ -57,6 +57,28 @@ channels, 4.8 MB list, 145 MB provider guide taking over two minutes to download
 - The Live TV and Sources screens need a full visual and usability redesign
   (user feedback); planned after the device fixes.
 
+## Redesign work — 6 October 2026
+
+Following the reference app study ([IPTV-UX-REFERENCE.md](IPTV-UX-REFERENCE.md)),
+items 1–4 of its recommended order are implemented; none is device-tested.
+
+1. `IptvRefreshCoordinator` (app-wide singleton, one heavy refresh at a time, stage
+   statuses, stale refresh on screen open: sources 12 h, guides 6 h, failed attempts
+   retried after 30 min). WorkManager is not used: it is not a dependency of the app.
+   Catalogue schema 6 adds `refreshed_at`, `position`, `category`; guide schema 3 adds
+   `refreshed_at` and `channel_names`.
+2. Guide-first `IptvLiveScreen`: row-focus guide grid with shared time cursor, 12-hour
+   window from 30 minutes ago, category rail, channel options, full screen on the same
+   player. Channels page in 60s and append near the end of the list.
+3. Name matching (`GuideNameMatching.kt`), linked order as default guide priority
+   (changes the earlier "ambiguous until explicit priority" rule), Move up in Sources,
+   guide channel picker.
+4. Full-screen banner with quality badges, channel panel with recent channels and
+   schedule, last channel, number entry.
+
+Next from the study: secure phone/PC setup, playback hardening (behind-live-window
+recovery, live retry backoff, HLS live speed), catch-up, search, sports, multiview.
+
 ## Small open items
 
 - The automatic Xtream guide feed stores `xtream-guide:<sourceId>` as its endpoint.

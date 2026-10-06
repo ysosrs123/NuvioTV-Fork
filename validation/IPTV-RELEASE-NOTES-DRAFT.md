@@ -8,7 +8,14 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 ## Live TV
 
 - Multiple independent M3U and Xtream Codes live sources with Original/V2 source
-  forms, masked credentials and per-profile isolation.
+  forms and per-profile isolation. Server and username are visible while typing; the
+  password has a Show/Hide toggle; a missing `http://` is added and spaces trimmed.
+- Background refresh: sources and guides refresh one at a time outside the screens,
+  show their stage ("Downloading channels…", "Saving channels…", "Updating programme
+  guide…") and "Updated … ago", and refresh automatically when older than 12 hours
+  (sources) or 6 hours (guides). Saving a source or guide starts its refresh.
+- Clear refresh errors naming the failed step (address, network, server status,
+  redirect, size, format or sign-in).
 - Bounded playlist parsing and refresh, stable channel identities across refreshes,
   favourites, hidden channels, custom names, last-good catalogues and review before
   large shrinks. Unused identities of removed channels are pruned so token-rotating
@@ -20,8 +27,22 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   cache validators, feed linking and manual channel mapping. A few malformed or
   unmatched programmes are skipped instead of rejecting the whole guide; duplicate
   channel entries merge their names.
-- Live TV screen: preview and expanded video, 24-channel pages, source switching,
-  favourites and now/next programme info. Focusing a channel does not open a stream.
+- Guide-first Live TV: live preview and programme panel above a channel guide in
+  provider order with a time bar and now line. Left/right move a shared time cursor
+  across programmes; a category rail offers favourites, all channels, provider
+  categories, source switching and source settings. OK previews a channel; OK again
+  goes full screen without re-tuning. Long-press or Menu opens channel options.
+- Full screen: up/down and channel keys zap, OK shows a banner with programme
+  progress, what is next and quality badges, right recalls the last channel, left
+  opens a panel with recent channels, all channels and the focused channel's
+  schedule, and number keys jump to a channel.
+- Guide matching: channels without a guide ID match by a normalised name when exactly
+  one guide channel matches; linked guides follow their linked order (Move up in
+  Sources); a guide channel can be chosen from a searchable list per channel.
+- Large catalogues save quickly: rows are sealed with a Keystore-wrapped data key, and
+  Xtream rows store no login (it is added from the encrypted connection when tuning).
+- The provider's own Xtream guide downloads in the background, keeps only that
+  provider's channels and allows large guides (512 MB, 15 minutes).
 - Foreground playback of progressive MPEG-TS and HLS (including extensionless HLS
   when chosen), with a per-channel Auto/HLS/MPEG-TS choice. AC-3/E-AC-3 audio falls
   back to the bundled decoder on TVs without hardware support.
@@ -32,8 +53,6 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 
 ## Ready below the UI (screens pending)
 
-- Guide grid layout for a channels-by-time EPG.
-- Automatic guide for Xtream sources from the provider's own XMLTV.
 - Stalker Portal (MAC-based) sources with stream links created at tune time.
 - Provider account groups with per-group stream limits, and source ordering.
 - Guide import from a folder on internal storage or a USB drive for TVs without a
