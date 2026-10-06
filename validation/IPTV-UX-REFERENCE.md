@@ -152,3 +152,46 @@ local capture chain that local timeshift and recording will build on.
    backoff, HLS live speed adjustment, format probe; check against Nuvio's player.
 7. Catch-up builder and bar; search with full-text index and "now airing".
 8. Sports matching, then multiview and picture-in-picture within decoder admission.
+
+# Second reference: Debrify (AGPL-3.0, Flutter; Android TV playback is native Media3)
+
+Studied 6 October 2026 for ideas only; AGPL code must not be copied.
+
+- Catalogue ingest: stream the Xtream list to a temp file and split it one object at a
+  time; insert with one prepared statement in about 2,500-row transactions (WAL,
+  synchronous NORMAL) into an unpublished generation, then publish with one pointer
+  update and keep one previous generation for screens still showing it. One giant
+  transaction caused stalls there. Build heavy indexes after bulk insert.
+- An order-sensitive content digest skips publishing when nothing changed.
+- UI reads channels through 60-row pages with a small page cache; zapping walks a
+  200-channel window and pages more in.
+- Stable channel numbers per provider keyed by stream ID / tvg-id / normalised name
+  + group, with tombstones; user ordering, hidden categories and a default landing
+  category per source keyed by identity.
+- XMLTV: download to file (30 s header, 60 s idle, 5 min deadline, 300 MB cap), gzip by
+  magic bytes, streaming parse filtered to the playlist's ids and normalised names
+  (also ids with feed suffixes such as "@SD" removed), window −6 h/+48 h, at most 80
+  programmes per channel and 120,000 total, descriptions cut to 400 characters; 12 h
+  TTL, keep old data on failure, 30 min negative cache. Guide URL priority: user URL,
+  playlist url-tvg / x-tvg-url, provider xmltv.php. Status distinguishes "no match",
+  "no programmes in window" and "failed".
+- Xtream short EPG (get_short_epg) for now/next when no XMLTV, with request limits.
+- Live URL format probed once per server (ts first; HLS ladders can start low).
+- Catch-up: provider-local start string, minutes rounded up and clamped 1–1440, three
+  URL forms probed and remembered per server (timeshift .ts, .m3u8, timeshift.php).
+- Playback: one recovery state machine fed by EOF, errors, a 20 s tune watchdog, a
+  12 s stall window and a frozen-video detector; retune after 0, 1, 3, 5 then every
+  10 s; "Reconnecting…" shown only after 2 s; give up after 75 s with Retry; auth
+  errors stop at once; 401/403/404 fatal, 429/503 honour Retry-After. TS extractor
+  allows non-IDR keyframes for faster zaps, with fallback to strict on stall. User
+  agent set through default request properties so per-channel headers win. Per-
+  channel headers from #EXTVLCOPT, #EXTHTTP and pipe suffixes.
+- Zapping: only the first key press counts (no repeat storms); banner 4.5 s; last
+  channel recorded only after 1 s of real playback.
+- Recording: foreground service with its own connection and a plain byte copy of TS
+  into MediaStore, 6 h cap, 200 MB free minimum, stall reconnects, crash
+  reconciliation, exact alarms re-armed after boot, capacity conflict check. Costs an
+  extra provider connection.
+- Device transfer: X25519 handshake with a 6-digit code derived on both devices and
+  never sent, AES-GCM per direction; backups encrypted with Argon2id + AES-GCM, with
+  an option to leave credentials out.
