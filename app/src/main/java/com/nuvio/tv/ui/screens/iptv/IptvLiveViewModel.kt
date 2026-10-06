@@ -25,7 +25,7 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
     val player: ExoPlayer? = null, val playingTitle: String? = null, val playing: Boolean = false, val reconnecting: Boolean = false, val catchup: GuideProgramme? = null,
     val loading: Boolean = false, val loaded: Boolean = false, val tuning: Boolean = false, val message: Int? = null, val updating: Int? = null,
     val guidePicker: IptvGuidePicker? = null, val refresh: Map<String, IptvRefreshStatus> = emptyMap(),
-    val controlLayout: com.nuvio.tv.data.local.PlayerControlLayout? = null)
+    val controlLayout: com.nuvio.tv.data.local.PlayerControlLayout? = null, val shortGuide: Map<String, List<GuideProgramme>> = emptyMap())
 
 data class IptvGuidePicker(val row: IptvListedChannel, val feeds: List<IptvGuideFeed>, val feed: IptvGuideRef? = null,
     val query: String = "", val results: List<GuideChannel> = emptyList())
@@ -37,7 +37,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private val profiles: ProfileManager,
     private val screensaver: com.nuvio.tv.core.player.ScreensaverController,
     private val refresher: IptvRefreshCoordinator,
-    private val playerSettings: com.nuvio.tv.data.local.PlayerSettingsDataStore) : ViewModel() {
+    private val playerSettings: com.nuvio.tv.data.local.PlayerSettingsDataStore,
+    private val shortGuides: IptvShortGuideRepository) : ViewModel() {
     private val mutable = MutableStateFlow(IptvLiveState())
     val state = mutable.asStateFlow()
     private val owner = UUID.randomUUID().toString()
@@ -49,6 +50,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var pageJob: Job? = null
     private var searchJob: Job? = null
     private var channelSearch: Job? = null
+    private var shortGuideJob: Job? = null
     private var tuneJob: Job? = null
     private var tuneVersion = 0L
     private var pageVersion = 0L
@@ -257,12 +259,29 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     }
     fun focus(row: IptvListedChannel) {
         if (session != null) mutable.update { it.copy(focused = row) }
+        loadShortGuide(row)
+    }
+    private fun loadShortGuide(row: IptvListedChannel) {
+        val current = session ?: return
+        val state = mutable.value
+        val ref = state.source ?: return
+        val id = row.item.channel.id
+        if (state.guide[id]?.cells?.any { it is GuideProgrammeCell } == true || id in state.shortGuide) return
+        if (state.sources.firstOrNull { it.ref == ref }?.kind != IptvSourceKind.XTREAM) return
+        shortGuideJob?.cancel()
+        shortGuideJob = viewModelScope.launch {
+            delay(400)
+            val programmes = runCatching { withContext(Dispatchers.IO) { access.use(current) { } }; shortGuides.nowNext(ref, id) }
+                .getOrElse { if (it is CancellationException) throw it; emptyList() }
+            if (session === current && mutable.value.source == ref) mutable.update { it.copy(shortGuide = (it.shortGuide + (id to programmes)).entries.toList().takeLast(SHORT_GUIDE_CACHE).associate { e -> e.key to e.value }) }
+        }
     }
     fun watch(row: IptvListedChannel, catchup: GuideProgramme? = null) {
         val current = session ?: return
         val ref = mutable.value.source ?: return
         if (!foreground) return
         tuneJob?.cancel()
+        loadShortGuide(row)
         val request = ++tuneVersion
         tuneJob = viewModelScope.launch {
             mutable.update { it.copy(tuning = true, playback = null, player = null, playingTitle = null, playing = false, reconnecting = false, catchup = catchup, message = null, playingId = row.item.channel.id,
@@ -336,6 +355,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         const val WINDOW_SPAN = 12 * 60 * 60 * 1000L
         const val WINDOW_SHIFT = 4 * 60 * 60 * 1000L
         const val CATCHUP_FALLBACK = 60 * 60 * 1000L
+        const val SHORT_GUIDE_CACHE = 200
     }
     private class CatchupUnavailableException : IllegalStateException()
 }

@@ -56,8 +56,7 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
     }
     LaunchedEffect(interaction, moreExpanded) { if (!moreExpanded) { delay(8_000); onHide() } }
     val row = state.channels.firstOrNull { it.item.channel.id == state.playingId }
-    val guide = row?.let { state.guide[it.item.channel.id] }
-    val programme = state.catchup ?: programmeAt(guide, now)
+    val programme = state.catchup ?: row?.let { liveProgramme(state, it.item.channel.id, now) }
     val position by produceState(0L, state.player, state.catchup) {
         while (state.catchup != null) { value = state.player?.currentPosition ?: 0L; delay(1_000) }
     }

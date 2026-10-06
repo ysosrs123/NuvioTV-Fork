@@ -62,7 +62,7 @@ class IptvRefreshCoordinator @Inject constructor(
         }
         IptvLog.info("source refresh result=${result.javaClass.simpleName}${(result as? IptvPlaylistRefresh.Catalogue)?.let { " decision=${it.decision}" }.orEmpty()}")
         finish(key(source.ref), IptvRefreshPhase.DONE, message)
-        (result as? IptvPlaylistRefresh.Catalogue)?.guide?.let { feed -> refreshGuide(session, feed) }
+        (result as? IptvPlaylistRefresh.Catalogue)?.let { published -> (listOfNotNull(published.guide) + published.guides).distinct().forEach { refreshGuide(session, it) } }
     }
 
     fun refresh(session: IptvProfileAccess.Session, feed: IptvGuideFeed): Boolean = start(key(feed.ref)) {

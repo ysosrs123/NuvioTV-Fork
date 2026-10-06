@@ -128,7 +128,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
 
     if (fullscreen) {
         val playingRow = state.channels.firstOrNull { it.item.channel.id == state.playingId }
-        val current = playingRow?.let { programmeAt(state.guide[it.item.channel.id], now) }
+        val current = playingRow?.let { liveProgramme(state, it.item.channel.id, now) }
         val v2 = LocalV2Appearance.current != null
         FullscreenLive(state, now, showHud, onZap = viewModel::zap, onMenu = { playingRow?.let { menuFor = it } },
             onLastChannel = viewModel::lastChannel, onNumber = viewModel::watchNumber, onWatch = { viewModel.watch(it) },
@@ -318,8 +318,7 @@ private fun Preview(state: IptvLiveState, modifier: Modifier) {
 @Composable
 private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, modifier: Modifier) {
     val row = state.focused
-    val guide = row?.let { state.guide[it.item.channel.id] }
-    val programme = programmeAt(guide, cursor) ?: programmeAt(guide, now)
+    val programme = row?.let { liveProgramme(state, it.item.channel.id, cursor) ?: liveProgramme(state, it.item.channel.id, now) }
     val index = row?.let { state.channels.indexOf(it) } ?: -1
     Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -429,13 +428,13 @@ private fun ChannelMenu(row: IptvListedChannel, state: IptvLiveState, onDismiss:
     val playing = state.player != null && row.item.channel.id == state.playingId
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
-    NuvioDialog(onDismiss = onDismiss, title = channelName(row), subtitle = programmeAt(state.guide[row.item.channel.id], System.currentTimeMillis())?.let(::title),
+    NuvioDialog(onDismiss = onDismiss, title = channelName(row), subtitle = liveProgramme(state, row.item.channel.id, System.currentTimeMillis())?.let(::title),
         width = 560.dp) {
         Column(Modifier.weight(1f, fill = false).verticalScrollable(), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             SettingsActionRow(title = stringResource(if (playing) R.string.iptv_live_fullscreen else R.string.iptv_live_watch), subtitle = null,
                 onClick = onWatch, leadingIcon = if (playing) Icons.Filled.Fullscreen else Icons.Filled.PlayArrow, trailingIcon = null,
                 modifier = Modifier.focusRequester(first))
-            val current = programmeAt(state.guide[row.item.channel.id], System.currentTimeMillis())
+            val current = liveProgramme(state, row.item.channel.id, System.currentTimeMillis())
             if (playing && state.catchup != null) SettingsActionRow(title = stringResource(R.string.iptv_live_return), subtitle = null,
                 onClick = onLive, leadingIcon = Icons.Filled.LiveTv, trailingIcon = null)
             if (current != null && hasArchive(row)) SettingsActionRow(title = stringResource(R.string.iptv_live_from_start), subtitle = title(current),

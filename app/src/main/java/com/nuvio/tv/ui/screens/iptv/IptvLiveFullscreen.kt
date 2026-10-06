@@ -179,10 +179,9 @@ private fun NumberEntry(digits: String, state: IptvLiveState, modifier: Modifier
 private fun Banner(state: IptvLiveState, now: Long) {
     val index = state.channels.indexOfFirst { it.item.channel.id == state.playingId }
     val row = state.channels.getOrNull(index)
-    val guide = row?.let { state.guide[it.item.channel.id] }
     val catchup = state.catchup
-    val programme = catchup ?: programmeAt(guide, now)
-    val following = if (catchup == null) programmeAfter(guide, programme, now) else null
+    val programme = catchup ?: row?.let { liveProgramme(state, it.item.channel.id, now) }
+    val following = if (catchup == null) row?.let { nextProgramme(state, it.item.channel.id, programme, now) } else null
     val position by produceState(0L, state.player, catchup) {
         while (catchup != null) { value = state.player?.currentPosition ?: 0L; delay(1_000) }
     }
@@ -283,7 +282,7 @@ internal fun SectionLabel(text: String, modifier: Modifier = Modifier) {
 private fun PanelChannel(row: IptvListedChannel, state: IptvLiveState, now: Long, modifier: Modifier, onFocused: () -> Unit, onClick: () -> Unit) {
     var focused by remember { mutableStateOf(false) }
     val number = state.channels.indexOf(row) + 1
-    val programme = programmeAt(state.guide[row.item.channel.id], now)
+    val programme = liveProgramme(state, row.item.channel.id, now)
     val playing = row.item.channel.id == state.playingId
     Row(modifier.fillMaxWidth()
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }

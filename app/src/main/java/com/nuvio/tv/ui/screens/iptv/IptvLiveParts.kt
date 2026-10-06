@@ -132,6 +132,13 @@ internal fun programmeAt(row: GuideGridRow?, time: Long): GuideProgramme? =
 internal fun programmeAfter(row: GuideGridRow?, programme: GuideProgramme?, now: Long): GuideProgramme? =
     row?.cells?.filterIsInstance<GuideProgrammeCell>()?.firstOrNull { it.startMillis >= (programme?.stop?.epochMillis ?: now) }?.programme
 
+internal fun liveProgramme(state: IptvLiveState, id: String, time: Long): GuideProgramme? =
+    programmeAt(state.guide[id], time) ?: state.shortGuide[id]?.firstOrNull { it.start.epochMillis <= time && (it.stop?.epochMillis ?: Long.MAX_VALUE) > time }
+
+internal fun nextProgramme(state: IptvLiveState, id: String, programme: GuideProgramme?, now: Long): GuideProgramme? =
+    programmeAfter(state.guide[id], programme, now)
+        ?: state.shortGuide[id]?.firstOrNull { it.start.epochMillis >= (programme?.stop?.epochMillis ?: now) }
+
 internal fun airing(programme: GuideProgramme, now: Long) = programme.start.epochMillis <= now && (programme.stop?.epochMillis ?: Long.MAX_VALUE) > now
 
 internal fun progress(programme: GuideProgramme, now: Long): Float? = programme.stop?.epochMillis?.let { stop ->
