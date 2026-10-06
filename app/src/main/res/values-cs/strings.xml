@@ -2922,6 +2922,8 @@
     <string name="audio_surround_mode_auto_desc">Formáty, které zvukový systém hlásí jako podporované, posílá beze změny a ostatní dekóduje v aplikaci.</string>
     <string name="audio_surround_mode_manual">Ručně</string>
     <string name="audio_surround_mode_manual_desc">U každého formátu zvolte, zda ho zvukový systém umí dekódovat. Použijte, když je automatické hlášení chybné.</string>
+    <string name="audio_surround_tv_arc_soundbar">Zvuk jde přes TV do soundbaru (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automaticky posílá formáty, které soundbar nezvládá, jako Dolby Digital 5.1 a ostatní dekódovaný zvuk jako stereo. Dolby Digital a Dolby Digital Plus posílá beze změny.</string>
     <string name="audio_surround_allow_ac3">Receiver umí Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Vypnuto dekóduje AC-3 na PCM v aplikaci. Vypněte jen tehdy, když receiver nebo TV neumí AC-3 dekódovat.</string>
     <string name="audio_surround_allow_eac3">Receiver umí Dolby Digital Plus (E-AC-3)</string>
@@ -2948,12 +2950,17 @@
     <string name="audio_forget_rejections_sub">Formáty, které receiver odmítl otevřít, se mu už jako passthrough neposílají. Tato volba je umožní zkusit znovu.</string>
     <string name="audio_forget_rejections_none">Nic uloženého</string>
     <string name="audio_forget_rejections_done">Odmítnuté zvukové formáty vymazány</string>
+    <string name="audio_forget_tunnel_stalls_title">Zapomenout zasekávání tunelu</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunelování vypnuto pro: %1$s. Tato volba ho dalšímu videu umožní zkusit znovu.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nic uloženého.</string>
+    <string name="audio_forget_tunnel_stalls_done">Zasekávání tunelu zapomenuto</string>
     <string name="audio_inject_hdr10_sei_title">Vložit metadata HDR10 při odstranění DV</string>
     <string name="audio_inject_hdr10_sei_sub">U obsahu DV8 (Profile 8) převedeného na HDR10 base layer přidá masteringová metadata zdroje (MaxCLL/MaxFALL a špičkový jas), aby TV s HDR10 bez DV správně mapovaly tóny. Aktivní jen při zpracování DV nastaveném na Odstranit DV nebo HDR10 base layer; nemá vliv na Profile 7 ani na přehrávání Dolby Vision.</string>
     <string name="diag_value_not_advertised">Nehlášeno (nativní přehrávání může přesto fungovat)</string>
     <string name="diag_label_dv_el_type">Typ EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">HDR mastering DV</string>
     <string name="diag_label_dv_rpu_drops">Zahozená RPU DV</string>
+    <string name="sub_tertiary_lang">Třetí preferovaný jazyk</string>
     <string name="sub_addon_subtitles">Titulky z doplňků</string>
     <string name="sub_addon_subtitles_desc">Během přehrávání načítat titulky z nainstalovaných doplňků. Při vypnutí jsou dostupné jen titulky vložené v souboru.</string>
     <string name="autoplay_quality_rules_title">Pravidla kvality</string>

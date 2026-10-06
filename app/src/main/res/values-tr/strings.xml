@@ -3447,6 +3447,8 @@
     <string name="audio_surround_mode_auto_desc">Ses sisteminizin çözebildiğini bildirdiği formatları doğrudan aktarır, gerisini uygulamada çözer.</string>
     <string name="audio_surround_mode_manual">Manuel</string>
     <string name="audio_surround_mode_manual_desc">Ses sisteminizin çözebildiği formatları tek tek seçin. Otomatik bildirim yanlış olduğunda bunu kullanın.</string>
+    <string name="audio_surround_tv_arc_soundbar">Ses TV üzerinden soundbar\'a gider (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Otomatik, soundbar\'ın desteklemediği formatları Dolby Digital 5.1 olarak, çözülmüş diğer sesleri ise stereo olarak gönderir. Dolby Digital ve Dolby Digital Plus değiştirilmeden doğrudan aktarılır.</string>
     <string name="audio_surround_allow_ac3">Dolby Digital (AC-3) destekli alıcı</string>
     <string name="audio_surround_allow_ac3_sub">Kapalıyken AC-3 uygulamada PCM\'e çözülür. Yalnızca alıcınız veya TV\'niz AC-3 çözemiyorsa kapatın.</string>
     <string name="audio_surround_allow_eac3">Dolby Digital Plus (E-AC-3) destekli alıcı</string>
@@ -3473,12 +3475,17 @@
     <string name="audio_forget_rejections_sub">Alıcınızın açmayı reddettiği formatlar artık ona ses geçidiyle gönderilmiyor. Bu, onların yeniden denenmesini sağlar.</string>
     <string name="audio_forget_rejections_none">Öğrenilen bir şey yok</string>
     <string name="audio_forget_rejections_done">Öğrenilen ses retleri temizlendi</string>
+    <string name="audio_forget_tunnel_stalls_title">Tünel takılmalarını unut</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tünel kapalı: %1$s. Bu, sonraki videonun yeniden denemesini sağlar.</string>
+    <string name="audio_forget_tunnel_stalls_none">Hatırlanan bir şey yok.</string>
+    <string name="audio_forget_tunnel_stalls_done">Tünel takılmaları unutuldu</string>
     <string name="audio_inject_hdr10_sei_title">Katman kaldırılınca HDR10 meta verisi ekle</string>
     <string name="audio_inject_hdr10_sei_sub">HDR10 temel katmanına indirilen DV8 (Profile 8) içeriğe kaynağın mastering meta verisini (MaxCLL/MaxFALL ve tepe parlaklık) ekler; böylece DV desteklemeyen HDR10 TV\'ler ton eşlemeyi doğru yapar. Yalnızca DV İşleme, DV Katmanını Kaldır veya HDR10 temel katmanı iken etkindir; Profile 7\'ye ve Dolby Vision oynatmaya etkisi yoktur.</string>
     <string name="diag_value_not_advertised">Bildirilmiyor (yerel oynatma yine de çalışabilir)</string>
     <string name="diag_label_dv_el_type">DV7 EL türü</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">DV RPU kayıpları</string>
+    <string name="sub_tertiary_lang">Üçüncü Tercih Edilen Dil</string>
     <string name="sub_addon_subtitles">Eklenti altyazıları</string>
     <string name="sub_addon_subtitles_desc">Oynatma sırasında yüklü eklentilerden altyazı getirir. Kapalıyken yalnızca dosyaya gömülü altyazılar kullanılabilir.</string>
     <string name="autoplay_quality_rules_title">Kalite kuralları</string>

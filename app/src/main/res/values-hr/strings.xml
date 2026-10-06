@@ -3389,6 +3389,8 @@
     <string name="audio_surround_mode_auto_desc">Prosljeđuje formate za koje audio sustav prijavi da ih može dekodirati, a ostale dekodira u aplikaciji.</string>
     <string name="audio_surround_mode_manual">Ručno</string>
     <string name="audio_surround_mode_manual_desc">Za svaki format odaberi može li ga tvoj audio sustav dekodirati. Koristi kada je automatska prijava pogrešna.</string>
+    <string name="audio_surround_tv_arc_soundbar">Zvuk ide preko TV-a na soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automatski šalje kao Dolby Digital 5.1 formate koje soundbar ne podržava, a ostali dekodirani zvuk kao stereo. Dolby Digital i Dolby Digital Plus prosljeđuju se nepromijenjeni.</string>
     <string name="audio_surround_allow_ac3">Prijemnik podržava Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Isključeno dekodira AC-3 u PCM u aplikaciji. Isključi samo ako prijemnik ili TV ne može dekodirati AC-3.</string>
     <string name="audio_surround_allow_eac3">Prijemnik podržava Dolby Digital Plus (E-AC-3)</string>
@@ -3415,12 +3417,17 @@
     <string name="audio_forget_rejections_sub">Formati koje je prijemnik odbio otvoriti više mu se ne šalju kao passthrough. Ovo omogućuje da se ponovno pokušaju.</string>
     <string name="audio_forget_rejections_none">Ništa naučeno</string>
     <string name="audio_forget_rejections_done">Naučena audio odbijanja obrisana</string>
+    <string name="audio_forget_tunnel_stalls_title">Zaboravi zastoje tunela</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunel isključen za: %1$s. Ovo omogućuje sljedećem videu novi pokušaj tunela.</string>
+    <string name="audio_forget_tunnel_stalls_none">Ništa zapamćeno.</string>
+    <string name="audio_forget_tunnel_stalls_done">Zastoji tunela zaboravljeni</string>
     <string name="audio_inject_hdr10_sei_title">Umetni HDR10 metapodatke pri uklanjanju</string>
     <string name="audio_inject_hdr10_sei_sub">Za DV8 (Profil 8) sadržaj sveden na HDR10 osnovni sloj dodaje metapodatke masteringa izvora (MaxCLL/MaxFALL i vršnu svjetlinu) kako bi HDR10 TV-i bez DV-a ispravno tone-mapirali. Aktivno samo kada je Obrada DV-a postavljena na Ukloni DV ili HDR10 osnovni sloj; nema učinka na Profil 7 ni na Dolby Vision reprodukciju.</string>
     <string name="diag_value_not_advertised">Nije prijavljeno (nativna reprodukcija možda ipak radi)</string>
     <string name="diag_label_dv_el_type">DV7 EL tip</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">DV RPU ispadi</string>
+    <string name="sub_tertiary_lang">Treći preferirani jezik</string>
     <string name="sub_addon_subtitles">Titlovi iz dodataka</string>
     <string name="sub_addon_subtitles_desc">Dohvaćaj titlove iz instaliranih dodataka tijekom reprodukcije. Kada je isključeno, dostupni su samo titlovi ugrađeni u datoteku.</string>
     <string name="autoplay_quality_rules_title">Pravila kvalitete</string>

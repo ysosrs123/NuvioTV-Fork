@@ -1087,6 +1087,8 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     <string name="audio_surround_mode_auto_desc">Tiesiogiai perduoda formatus, kuriuos jūsų garso sistema praneša galinti dekoduoti, o kitus dekoduoja programoje.</string>
     <string name="audio_surround_mode_manual">Rankinis</string>
     <string name="audio_surround_mode_manual_desc">Kiekvienam formatui pasirinkite, ar jūsų garso sistema gali jį dekoduoti. Naudokite, kai automatinė ataskaita klaidinga.</string>
+    <string name="audio_surround_tv_arc_soundbar">Garsas eina per televizorių į garso juostą (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automatinis siunčia formatus, kurių garso juosta nepriima, kaip Dolby Digital 5.1, o kitą dekoduotą garsą kaip stereo. Dolby Digital ir Dolby Digital Plus perduodami tiesiogiai, nepakeisti.</string>
     <string name="audio_surround_allow_ac3">Imtuvas palaiko Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Išjungus AC-3 dekoduojamas į PCM programoje. Išjunkite tik jei imtuvas ar televizorius negali dekoduoti AC-3.</string>
     <string name="audio_surround_allow_eac3">Imtuvas palaiko Dolby Digital Plus (E-AC-3)</string>
@@ -1113,12 +1115,17 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     <string name="audio_forget_rejections_sub">Formatai, kurių imtuvas atsisakė atidaryti, jam nebesiunčiami kaip passthrough. Tai leidžia juos išbandyti dar kartą.</string>
     <string name="audio_forget_rejections_none">Nieko neįsiminta</string>
     <string name="audio_forget_rejections_done">Įsiminti garso atmetimai išvalyti</string>
+    <string name="audio_forget_tunnel_stalls_title">Pamiršti tunelio strigimus</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunelis išjungtas: %1$s. Tai leidžia kitam vaizdo įrašui vėl išbandyti tunelį.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nieko neįsiminta.</string>
+    <string name="audio_forget_tunnel_stalls_done">Tunelio strigimai pamiršti</string>
     <string name="audio_inject_hdr10_sei_title">Pašalinant įterpti HDR10 metaduomenis</string>
     <string name="audio_inject_hdr10_sei_sub">DV8 (Profile 8) turiniui, sumažintam iki HDR10 bazinio sluoksnio, prideda šaltinio masteringo metaduomenis (MaxCLL/MaxFALL ir didžiausią skaistį), kad HDR10 televizoriai be DV teisingai atvaizduotų tonus. Veikia tik kai Dolby Vision apdorojimas nustatytas šalinti DV arba naudoti HDR10 bazinį sluoksnį; neturi įtakos Profile 7 ar Dolby Vision atkūrimui.</string>
     <string name="diag_value_not_advertised">Nepranešta (savasis atkūrimas vis tiek gali veikti)</string>
     <string name="diag_label_dv_el_type">DV7 EL tipas</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR masteringas</string>
     <string name="diag_label_dv_rpu_drops">DV RPU praradimai</string>
+    <string name="sub_tertiary_lang">Trečia pageidaujama kalba</string>
     <string name="sub_addon_subtitles">Priedų subtitrai</string>
     <string name="sub_addon_subtitles_desc">Atkūrimo metu gauti subtitrus iš įdiegtų priedų. Išjungus pasiekiami tik į failą įterpti subtitrai.</string>
     <string name="autoplay_quality_rules_title">Kokybės taisyklės</string>

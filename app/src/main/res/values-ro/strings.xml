@@ -915,6 +915,8 @@
     <string name="audio_surround_mode_auto_desc">Trimite prin passthrough formatele pe care sistemul tău audio declară că le poate decoda și le decodează pe restul în aplicație.</string>
     <string name="audio_surround_mode_manual">Manual</string>
     <string name="audio_surround_mode_manual_desc">Alege pentru fiecare format dacă sistemul tău audio îl poate decoda. Folosește opțiunea când raportarea automată este greșită.</string>
+    <string name="audio_surround_tv_arc_soundbar">Sunetul trece prin televizor către un soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automat trimite ca Dolby Digital 5.1 formatele pe care soundbarul nu le acceptă, iar restul sunetului decodat ca stereo. Dolby Digital și Dolby Digital Plus sunt trimise prin passthrough, nemodificate.</string>
     <string name="audio_surround_allow_ac3">Receptor compatibil Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Când e dezactivat, aplicația decodează AC-3 în PCM. Dezactivează doar dacă receptorul sau televizorul nu poate decoda AC-3.</string>
     <string name="audio_surround_allow_eac3">Receptor compatibil Dolby Digital Plus (E-AC-3)</string>
@@ -941,12 +943,17 @@
     <string name="audio_forget_rejections_sub">Formatele pe care receptorul a refuzat să le deschidă nu îi mai sunt trimise prin passthrough. Opțiunea permite să fie încercate din nou.</string>
     <string name="audio_forget_rejections_none">Nimic învățat</string>
     <string name="audio_forget_rejections_done">Refuzurile audio învățate au fost șterse</string>
+    <string name="audio_forget_tunnel_stalls_title">Uită blocările în tunel</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunel dezactivat pentru: %1$s. Opțiunea permite următorului video să încerce din nou.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nimic reținut.</string>
+    <string name="audio_forget_tunnel_stalls_done">Blocările în tunel au fost uitate</string>
     <string name="audio_inject_hdr10_sei_title">Inserează metadate HDR10 la eliminare</string>
     <string name="audio_inject_hdr10_sei_sub">Pentru conținutul DV8 (Profile 8) redus la stratul de bază HDR10, adaugă metadatele de masterizare ale sursei (MaxCLL/MaxFALL și luminanța de vârf), astfel încât televizoarele HDR10 fără DV să facă tone mapping corect. Activ doar când Gestionarea DV este Elimină DV sau Strat de bază HDR10; fără efect pe Profile 7 sau la redarea Dolby Vision.</string>
     <string name="diag_value_not_advertised">Nedeclarat (redarea nativă poate funcționa totuși)</string>
     <string name="diag_label_dv_el_type">Tip EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">Pierderi DV RPU</string>
+    <string name="sub_tertiary_lang">Limba preferată terțiară</string>
     <string name="sub_addon_subtitles">Subtitrări din suplimente</string>
     <string name="sub_addon_subtitles_desc">Preia subtitrări din suplimentele instalate în timpul redării. Când e dezactivat, sunt disponibile doar subtitrările încorporate în fișier.</string>
     <string name="autoplay_quality_rules_title">Reguli de calitate</string>

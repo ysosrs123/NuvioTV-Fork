@@ -71,6 +71,6 @@ internal class LibraryViewModelTestFixture(sorter: TrackingLibrarySorter? = null
         watchProgressRepository = mockk<WatchProgressRepository> { every { observeWatchedMovieIds() } returns flowOf(emptySet()) },
         watchedSeriesStateHolder = mockk<WatchedSeriesStateHolder> { every { fullyWatchedSeriesIds } returns MutableStateFlow(emptySet()) },
         profileManager = mockk<ProfileManager> { every { activeProfileId } returns profile },
-        posterOptions = mockk(relaxed = true), context = mockk(relaxed = true)
+        posterOptions = mockk(relaxed = true), libraryGenreFill = mockk(relaxed = true), context = mockk(relaxed = true)
     )
 }

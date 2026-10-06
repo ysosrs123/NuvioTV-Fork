@@ -2,6 +2,10 @@ package com.nuvio.tv.ui.screens.settings
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -15,6 +19,7 @@ import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.local.SurroundChannelTarget
 import com.nuvio.tv.data.local.SurroundFormatMode
 import com.nuvio.tv.data.local.displayName
+import com.nuvio.tv.ui.screens.player.PlayerTunnelAvSyncPolicy
 
 /** Format names in learned rejection entries ("route::GROUP"), in passthrough settings order. */
 internal fun learnedRejectionFormatLabels(entries: Set<String>): String {
@@ -22,6 +27,19 @@ internal fun learnedRejectionFormatLabels(entries: Set<String>): String {
     return listOf("AC3" to "AC-3", "EAC3" to "E-AC-3", "TRUEHD" to "TrueHD", "DTS" to "DTS", "DTS_HD" to "DTS-HD")
         .filter { (group, _) -> group in groups }
         .joinToString(", ") { (_, label) -> label }
+}
+
+/** Sound types the player plays without the video tunnel: stored for this profile plus any found this run. */
+internal fun rememberedTunnelStallClasses(settings: PlayerSettings): Set<String> =
+    settings.tunnelDeadAudioClasses + PlayerTunnelAvSyncPolicy.deadAudioClasses
+
+internal fun tunnelStallSubtitle(
+    classes: Set<String>,
+    remembered: (String) -> String,
+    nothingRemembered: String
+): String {
+    val labels = PlayerTunnelAvSyncPolicy.memoLabels(classes)
+    return if (labels.isEmpty()) nothingRemembered else remembered(labels.joinToString(", "))
 }
 
 @Composable
@@ -140,6 +158,16 @@ private fun SurroundSettingsRows(
         onClick = { onOpenDialog(PlaybackDialog.SURROUND_FORMAT_MODE) }
     )
 
+    if (settings.surroundFormatMode == SurroundFormatMode.AUTO) {
+        SettingsToggleRow(
+            title = stringResource(R.string.audio_surround_tv_arc_soundbar),
+            subtitle = stringResource(R.string.audio_surround_tv_arc_soundbar_sub),
+            checked = settings.surroundTvArcSoundbar,
+            onToggle = { onUpdate { setSurroundTvArcSoundbar(!settings.surroundTvArcSoundbar) } },
+            enabled = enabled && settings.decoderPriority != 0
+        )
+    }
+
     if (settings.surroundFormatMode == SurroundFormatMode.MANUAL) {
         val deviceOnly = settings.decoderPriority == 0
         val switchesEnabled = enabled && !deviceOnly
@@ -221,6 +249,26 @@ private fun SurroundSettingsRows(
         onClick = {
             onUpdate { forgetLearnedAudioRejections() }
             Toast.makeText(context, clearedMessage, Toast.LENGTH_SHORT).show()
+        }
+    )
+
+    val stallsClearedMessage = stringResource(R.string.audio_forget_tunnel_stalls_done)
+    val nothingRemembered = stringResource(R.string.audio_forget_tunnel_stalls_none)
+    var stallMemoCleared by remember { mutableStateOf(false) }
+    val stallClasses = if (stallMemoCleared) settings.tunnelDeadAudioClasses else rememberedTunnelStallClasses(settings)
+    SettingsActionRow(
+        title = stringResource(R.string.audio_forget_tunnel_stalls_title),
+        subtitle = tunnelStallSubtitle(
+            stallClasses,
+            remembered = { formats -> context.getString(R.string.audio_forget_tunnel_stalls_sub, formats) },
+            nothingRemembered = nothingRemembered
+        ),
+        trailingIcon = null,
+        enabled = enabled && stallClasses.isNotEmpty(),
+        onClick = {
+            stallMemoCleared = true
+            onUpdate { forgetTunnelStalls() }
+            Toast.makeText(context, stallsClearedMessage, Toast.LENGTH_SHORT).show()
         }
     )
 }

@@ -211,8 +211,17 @@ class PlaybackSettingsViewModel @Inject constructor(
         AudioRejectionReverifier.ledger.invalidate()
     }
 
+    suspend fun forgetTunnelStalls() {
+        PlayerTunnelAvSyncPolicy.resetMemo()
+        playerSettingsDataStore.clearTunnelDeadAudioClasses()
+    }
+
     suspend fun setSurroundChannelTarget(target: SurroundChannelTarget) {
         playerSettingsDataStore.setSurroundChannelTarget(target)
+    }
+
+    suspend fun setSurroundTvArcSoundbar(enabled: Boolean) {
+        playerSettingsDataStore.setSurroundTvArcSoundbar(enabled)
     }
 
     suspend fun setSkipSilence(enabled: Boolean) {
@@ -333,6 +342,10 @@ class PlaybackSettingsViewModel @Inject constructor(
 
     suspend fun setSubtitleSecondaryLanguage(language: String?) {
         playerSettingsDataStore.setSubtitleSecondaryLanguage(language)
+    }
+
+    suspend fun setSubtitleTertiaryLanguage(language: String?) {
+        playerSettingsDataStore.setSubtitleTertiaryLanguage(language)
     }
 
     suspend fun setUseForcedSubtitles(enabled: Boolean) {

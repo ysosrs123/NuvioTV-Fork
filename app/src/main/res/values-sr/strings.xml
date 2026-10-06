@@ -79,6 +79,8 @@
     <string name="audio_surround_mode_auto_desc">Прослеђује формате за које аудио систем пријављује да их декодира, а остале декодира у апликацији.</string>
     <string name="audio_surround_mode_manual">Ручно</string>
     <string name="audio_surround_mode_manual_desc">Изаберите за сваки формат да ли га ваш аудио систем декодира. Користите када је аутоматски извештај погрешан.</string>
+    <string name="audio_surround_tv_arc_soundbar">Звук иде преко ТВ-а до звучне траке (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Аутоматски шаље као Dolby Digital 5.1 формате које звучна трака не подржава, а остали декодирани звук као стерео. Dolby Digital и Dolby Digital Plus прослеђују се непромењени.</string>
     <string name="audio_surround_allow_ac3">Пријемник подржава Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Искључено декодира AC-3 у PCM у апликацији. Искључите само ако пријемник или ТВ не декодира AC-3.</string>
     <string name="audio_surround_allow_eac3">Пријемник подржава Dolby Digital Plus (E-AC-3)</string>
@@ -105,12 +107,17 @@
     <string name="audio_forget_rejections_sub">Формати које је пријемник одбио да отвори више му се не шаљу као passthrough. Ово омогућава да се поново пробају.</string>
     <string name="audio_forget_rejections_none">Ништа није научено</string>
     <string name="audio_forget_rejections_done">Научена одбијања звука су обрисана</string>
+    <string name="audio_forget_tunnel_stalls_title">Заборави застоје тунела</string>
+    <string name="audio_forget_tunnel_stalls_sub">Тунел искључен за: %1$s. Ово омогућава следећем видеу нови покушај тунела.</string>
+    <string name="audio_forget_tunnel_stalls_none">Ништа није запамћено.</string>
+    <string name="audio_forget_tunnel_stalls_done">Застоји тунела заборављени</string>
     <string name="audio_inject_hdr10_sei_title">Додај HDR10 метаподатке при уклањању</string>
     <string name="audio_inject_hdr10_sei_sub">За DV8 (профил 8) садржај сведен на HDR10 основни слој додаје мастеринг метаподатке извора (MaxCLL/MaxFALL и вршну осветљеност) да HDR10 ТВ без DV исправно мапирају тонове. Активно само када је Руковање Dolby Vision садржајем постављено на Увек уклони DV или HDR10 основни слој; без утицаја на профил 7 и Dolby Vision репродукцију.</string>
     <string name="diag_value_not_advertised">Није пријављено (нативна репродукција можда ипак ради)</string>
     <string name="diag_label_dv_el_type">DV7 EL тип</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR мастеринг</string>
     <string name="diag_label_dv_rpu_drops">DV RPU губици</string>
+    <string name="sub_tertiary_lang">Трећи жељени језик</string>
     <string name="sub_addon_subtitles">Титлови из додатака</string>
     <string name="sub_addon_subtitles_desc">Преузима титлове из инсталираних додатака током репродукције. Када је искључено, доступни су само титлови уграђени у фајл.</string>
     <string name="autoplay_quality_rules_title">Правила квалитета</string>

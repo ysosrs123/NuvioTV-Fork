@@ -2775,6 +2775,8 @@
     <string name="audio_surround_mode_auto_desc">Предава без декодиране форматите, които аудио системата съобщава, че може да декодира, а останалите декодира в приложението.</string>
     <string name="audio_surround_mode_manual">Ръчно</string>
     <string name="audio_surround_mode_manual_desc">Избери за всеки формат дали аудио системата може да го декодира. Използвай, когато автоматичният отчет е грешен.</string>
+    <string name="audio_surround_tv_arc_soundbar">Звукът минава през телевизора към саундбар (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Автоматично изпраща форматите, които саундбарът не поддържа, като Dolby Digital 5.1, а останалия декодиран звук като стерео. Dolby Digital и Dolby Digital Plus се предават без промяна.</string>
     <string name="audio_surround_allow_ac3">Receiver с поддръжка на Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Изкл: AC-3 се декодира до PCM в приложението. Изключи само ако твоят receiver или телевизор не може да декодира AC-3.</string>
     <string name="audio_surround_allow_eac3">Receiver с поддръжка на Dolby Digital Plus (E-AC-3)</string>
@@ -2801,12 +2803,17 @@
     <string name="audio_forget_rejections_sub">Форматите, които твоят receiver е отказал да отвори, вече не се изпращат към него като passthrough. Това позволява да бъдат опитани отново.</string>
     <string name="audio_forget_rejections_none">Няма нищо запомнено</string>
     <string name="audio_forget_rejections_done">Запомнените аудио откази са изчистени</string>
+    <string name="audio_forget_tunnel_stalls_title">Забрави засичанията в tunneled режим</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunneled режимът е изключен за: %1$s. Така следващото видео може да опита отново.</string>
+    <string name="audio_forget_tunnel_stalls_none">Няма нищо запомнено.</string>
+    <string name="audio_forget_tunnel_stalls_done">Засичанията в tunneled режим са забравени</string>
     <string name="audio_inject_hdr10_sei_title">Добавяй HDR10 метаданни при премахване на DV</string>
     <string name="audio_inject_hdr10_sei_sub">За DV8 (Profile 8) съдържание, сведено до HDR10 базов слой, добавя mastering метаданните на източника (MaxCLL/MaxFALL и пикова яркост), за да правят HDR10 телевизорите без DV правилен tone mapping. Активно само когато обработката на DV е „Винаги премахвай DV“ или „HDR10 базов слой“; няма ефект върху Profile 7 или при възпроизвеждане на Dolby Vision.</string>
     <string name="diag_value_not_advertised">Не е обявено (нативното възпроизвеждане може да работи)</string>
     <string name="diag_label_dv_el_type">DV7 EL тип</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">Пропуснати DV RPU</string>
+    <string name="sub_tertiary_lang">Трети предпочитан език</string>
     <string name="sub_addon_subtitles">Субтитри от добавки</string>
     <string name="sub_addon_subtitles_desc">Извличай субтитри от инсталираните добавки по време на възпроизвеждане. Когато е изключено, са налични само вградените във файла субтитри.</string>
     <string name="autoplay_quality_rules_title">Правила за качество</string>

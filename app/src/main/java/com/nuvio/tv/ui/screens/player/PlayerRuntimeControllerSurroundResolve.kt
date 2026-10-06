@@ -62,7 +62,8 @@ internal fun resolveSurroundForRoute(
             routeIsHdmiArc = SurroundFormatResolver.routeKeyIsHdmiArc(currentRouteKey),
             softwareDecodersAvailable = inputs.softwareDecodersAvailable,
             forceOpticalActive = inputs.forceOpticalActive,
-            learnedDeniedGroups = learnedDeniedGroups
+            learnedDeniedGroups = learnedDeniedGroups,
+            tvArcSoundbar = playerSettings.surroundTvArcSoundbar
         )
     }
     val surroundTargetChannels = surroundResolution.inferredChannelTarget
@@ -117,14 +118,14 @@ internal fun PlayerRuntimeController.applySurroundResolutionInPlace(reason: Stri
             "policy=[ac3=${policy.allowAc3} eac3=${policy.allowEac3} truehd=${policy.allowTrueHd} " +
             "dts=${policy.allowDts} dtshd=${policy.allowDtsHd} learned=${policy.learnedDeniedGroups}] " +
             "transcodePreferred=${surround.resolution.transcodePreferred} " +
-            "channelTarget=${surround.targetChannels}"
+            "channelTarget=${surround.targetChannels} tvArcSoundbar=${settings.surroundTvArcSoundbar}"
     )
     queuePlaybackRawEventLine(
         "surround_resolve_inplace reason=$reason changed=$changed " +
             "ac3=${policy.allowAc3} eac3=${policy.allowEac3} truehd=${policy.allowTrueHd} " +
             "dts=${policy.allowDts} dtshd=${policy.allowDtsHd} " +
             "transcodePreferred=${surround.resolution.transcodePreferred} " +
-            "channelTarget=${surround.targetChannels}"
+            "channelTarget=${surround.targetChannels} tvArcSoundbar=${settings.surroundTvArcSoundbar}"
     )
     if (!changed) return
     val wasPlaying = hasActivePlayIntent() && !userPausedManually

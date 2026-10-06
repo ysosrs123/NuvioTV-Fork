@@ -19,7 +19,7 @@ import kotlinx.coroutines.withContext
 object PlayerMemoryReporter {
 
     private const val TAG = "PlayerMemory"
-    private const val SAMPLE_INTERVAL_MS = 10_000L
+    private const val SAMPLE_INTERVAL_MS = 60_000L
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 

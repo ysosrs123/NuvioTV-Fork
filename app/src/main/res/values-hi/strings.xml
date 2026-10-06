@@ -1083,6 +1083,8 @@
     <string name="audio_surround_mode_auto_desc">जो फ़ॉर्मेट आपका ऑडियो सिस्टम डिकोड कर सकता है उन्हें पासथ्रू करता है, बाकी को ऐप में डिकोड करता है।</string>
     <string name="audio_surround_mode_manual">मैनुअल</string>
     <string name="audio_surround_mode_manual_desc">हर फ़ॉर्मेट के लिए चुनें कि आपका ऑडियो सिस्टम उसे डिकोड कर सकता है या नहीं। ऑटोमैटिक रिपोर्ट गलत हो तो इसे इस्तेमाल करें।</string>
+    <string name="audio_surround_tv_arc_soundbar">ऑडियो टीवी से होकर साउंडबार तक जाता है (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">ऑटो उन फ़ॉर्मेट को Dolby Digital 5.1 में भेजता है जिन्हें साउंडबार नहीं ले सकता, और बाकी डिकोड किए गए ऑडियो को स्टीरियो में। Dolby Digital और Dolby Digital Plus बिना बदलाव के पासथ्रू होते हैं।</string>
     <string name="audio_surround_allow_ac3">Dolby Digital (AC-3) सक्षम रिसीवर</string>
     <string name="audio_surround_allow_ac3_sub">बंद होने पर AC-3 ऐप में PCM में डिकोड होता है। तभी बंद करें जब आपका रिसीवर या टीवी AC-3 डिकोड न कर सके।</string>
     <string name="audio_surround_allow_eac3">Dolby Digital Plus (E-AC-3) सक्षम रिसीवर</string>
@@ -1109,12 +1111,17 @@
     <string name="audio_forget_rejections_sub">जिन फ़ॉर्मेट को आपके रिसीवर ने खोलने से मना किया, वे अब उसे पासथ्रू से नहीं भेजे जाते। इससे उन्हें फिर आज़माया जा सकता है।</string>
     <string name="audio_forget_rejections_none">कुछ सीखा नहीं गया</string>
     <string name="audio_forget_rejections_done">सीखी गई ऑडियो अस्वीकृतियाँ साफ़ हुईं</string>
+    <string name="audio_forget_tunnel_stalls_title">टनल रुकावटें भूलें</string>
+    <string name="audio_forget_tunnel_stalls_sub">इनके लिए टनल बंद: %1$s। इससे अगला वीडियो टनल फिर आज़मा सकेगा।</string>
+    <string name="audio_forget_tunnel_stalls_none">कुछ याद नहीं।</string>
+    <string name="audio_forget_tunnel_stalls_done">टनल रुकावटें भुला दी गईं</string>
     <string name="audio_inject_hdr10_sei_title">स्ट्रिप पर HDR10 मेटाडेटा जोड़ें</string>
     <string name="audio_inject_hdr10_sei_sub">HDR10 बेस लेयर तक स्ट्रिप किए गए DV8 (Profile 8) कंटेंट में सोर्स का मास्टरिंग मेटाडेटा (MaxCLL/MaxFALL और पीक ल्यूमिनेंस) जोड़ता है ताकि बिना DV वाले HDR10 टीवी सही टोन-मैप करें। तभी सक्रिय जब DV हैंडलिंग Strip DV या HDR10 बेस लेयर पर हो; Profile 7 या Dolby Vision प्लेबैक पर कोई असर नहीं।</string>
     <string name="diag_value_not_advertised">घोषित नहीं (नेटिव प्लेबैक फिर भी चल सकता है)</string>
     <string name="diag_label_dv_el_type">DV7 EL प्रकार</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR मास्टरिंग</string>
     <string name="diag_label_dv_rpu_drops">DV RPU ड्रॉप</string>
+    <string name="sub_tertiary_lang">तीसरी पसंदीदा भाषा</string>
     <string name="sub_addon_subtitles">ऐडऑन सबटाइटल</string>
     <string name="sub_addon_subtitles_desc">प्लेबैक के दौरान इंस्टॉल किए ऐडऑन से सबटाइटल लाएँ। बंद होने पर केवल फ़ाइल में मौजूद सबटाइटल उपलब्ध रहते हैं।</string>
     <string name="autoplay_quality_rules_title">क्वालिटी नियम</string>

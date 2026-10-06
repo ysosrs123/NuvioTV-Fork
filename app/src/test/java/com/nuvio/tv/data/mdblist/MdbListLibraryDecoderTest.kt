@@ -60,6 +60,21 @@ class MdbListLibraryDecoderTest {
     }
 
     @Test
+    fun `genres are read from every shape MDBList uses without failing the page`() {
+        val page = decodeMdbListLibraryPage("""[
+          {"id":1,"mediatype":"movie","genres":[{"id":18,"title":"Drama"},{"id":80,"title":"Crime"}]},
+          {"id":2,"mediatype":"movie","genre":["thriller"," drama "]},
+          {"id":3,"mediatype":"show","genres":"comedy, family"},
+          {"id":4,"mediatype":"show","genres":null},
+          {"id":5,"mediatype":"movie","genres":{"unexpected":true}}
+        ]""")
+        assertEquals(
+            listOf(listOf("Drama", "Crime"), listOf("thriller", "drama"), listOf("comedy", "family"), emptyList(), emptyList()),
+            page.items.map { it.genres }
+        )
+    }
+
+    @Test
     fun `watchlist timestamps use the provider local datetime`() {
         val page = decodeMdbListLibraryPage("""[{"id":1,"mediatype":"movie","watchlist_at":"2025-02-02 17:28:22.000000"}]""")
         assertEquals(mdbListTimestamp("2025-02-02 17:28:22.000000"), page.items.single().listedAt)

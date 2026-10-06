@@ -145,6 +145,7 @@ data class SubtitleStyleSettings(
     val preferredLanguage: String = "en",
     val isPreferredLanguageSystemDefault: Boolean = true,
     val secondaryPreferredLanguage: String? = null,
+    val tertiaryPreferredLanguage: String? = null,
     val useForcedSubtitles: Boolean = false,
     val showOnlyPreferredLanguages: Boolean = false,
     val stripSdh: Boolean = false,
@@ -255,6 +256,7 @@ data class PlayerSettings(
     val useSystemPassthrough: Boolean = false,
     val surroundFormatMode: SurroundFormatMode = SurroundFormatMode.AUTO,
     val surroundChannelTarget: SurroundChannelTarget = SurroundChannelTarget.AUTO,
+    val surroundTvArcSoundbar: Boolean = false,
     val allowAc3Passthrough: Boolean = true,
     val allowEac3Passthrough: Boolean = true,
     val allowTruehdPassthrough: Boolean = true,
@@ -633,6 +635,7 @@ class PlayerSettingsDataStore @Inject constructor(
     private val useSystemPassthroughKey = booleanPreferencesKey("use_system_passthrough")
     private val surroundFormatModeKey = stringPreferencesKey("surround_format_mode")
     private val surroundChannelTargetKey = stringPreferencesKey("surround_channel_target")
+    private val surroundTvArcSoundbarKey = booleanPreferencesKey("surround_tv_arc_soundbar")
     private val deniedCodecHandlingKey = stringPreferencesKey("denied_codec_handling")
     private val audioRejectionsSeenKey = stringSetPreferencesKey("audio_rejections_seen")
     private val audioRejectionsConfirmedKey = stringSetPreferencesKey("audio_rejections_confirmed")
@@ -724,6 +727,7 @@ class PlayerSettingsDataStore @Inject constructor(
     // Subtitle style keys
     private val subtitlePreferredLanguageKey = stringPreferencesKey("subtitle_preferred_language")
     private val subtitleSecondaryLanguageKey = stringPreferencesKey("subtitle_secondary_language")
+    private val subtitleTertiaryLanguageKey = stringPreferencesKey("subtitle_tertiary_language")
     private val subtitleUseForcedSubtitlesKey = booleanPreferencesKey("subtitle_use_forced_subtitles")
     private val subtitleShowOnlyPreferredLanguagesKey = booleanPreferencesKey("subtitle_show_only_preferred_languages")
     private val subtitleStripSdhKey = booleanPreferencesKey("subtitle_strip_sdh")
@@ -980,6 +984,18 @@ class PlayerSettingsDataStore @Inject constructor(
                 }
             }
 
+            val tertiarySubtitleLanguage = prefs[subtitleTertiaryLanguageKey]
+            if (tertiarySubtitleLanguage != null) {
+                val normalizedTertiarySubtitleLanguage =
+                    normalizeSelectableLanguageCode(tertiarySubtitleLanguage)
+                if (normalizedTertiarySubtitleLanguage == SUBTITLE_LANGUAGE_FORCED) {
+                    prefs[subtitleUseForcedSubtitlesKey] = true
+                    prefs.remove(subtitleTertiaryLanguageKey)
+                } else if (normalizedTertiarySubtitleLanguage != tertiarySubtitleLanguage) {
+                    prefs[subtitleTertiaryLanguageKey] = normalizedTertiarySubtitleLanguage
+                }
+            }
+
             val normalizedPreferredSubtitleLanguage =
                 preferredSubtitleLanguage?.let(::normalizeSelectableLanguageCode)
             val normalizedSecondarySubtitleLanguage =
@@ -1088,6 +1104,7 @@ class PlayerSettingsDataStore @Inject constructor(
                     storedDeniedCodecHandling = prefs[deniedCodecHandlingKey]
                 ),
                 surroundChannelTarget = SurroundChannelTarget.fromStoredString(prefs[surroundChannelTargetKey]),
+                surroundTvArcSoundbar = prefs[surroundTvArcSoundbarKey] ?: false,
                 allowAc3Passthrough = prefs[allowAc3PassthroughKey] ?: true,
                 allowEac3Passthrough = prefs[allowEac3PassthroughKey] ?: true,
                 allowTruehdPassthrough = prefs[allowTruehdPassthroughKey] ?: true,
@@ -1244,10 +1261,14 @@ class PlayerSettingsDataStore @Inject constructor(
                         secondaryPreferredLanguage = prefs[subtitleSecondaryLanguageKey]
                             ?.let(::normalizeSelectableLanguageCode)
                             ?.takeUnless { it == SUBTITLE_LANGUAGE_FORCED },
+                        tertiaryPreferredLanguage = prefs[subtitleTertiaryLanguageKey]
+                            ?.let(::normalizeSelectableLanguageCode)
+                            ?.takeUnless { it == SUBTITLE_LANGUAGE_FORCED },
                         useForcedSubtitles = (prefs[subtitleUseForcedSubtitlesKey]
                             ?: (prefs[subtitlePreferredLanguageKey] == null)) ||
                             prefs[subtitlePreferredLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED ||
-                            prefs[subtitleSecondaryLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED,
+                            prefs[subtitleSecondaryLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED ||
+                            prefs[subtitleTertiaryLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED,
                         showOnlyPreferredLanguages = prefs[subtitleShowOnlyPreferredLanguagesKey] ?: false,
                         stripSdh = prefs[subtitleStripSdhKey] ?: false,
                         size = prefs[subtitleSizeKey] ?: SubtitleStyleSettings().size,
@@ -1378,6 +1399,13 @@ class PlayerSettingsDataStore @Inject constructor(
         }
     }
 
+    suspend fun clearTunnelDeadAudioClasses() {
+        store().edit { prefs ->
+            prefs.remove(tunnelDeadAudioClassesKey)
+            prefs.remove(tunnelDeadAudioSignatureKey)
+        }
+    }
+
     suspend fun setForceOpticalPassthrough(enabled: Boolean) = setForceOpticalPassthrough(enabled, profileManager.activeProfileId.value)
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
@@ -1402,6 +1430,12 @@ class PlayerSettingsDataStore @Inject constructor(
     suspend fun setSurroundChannelTarget(target: SurroundChannelTarget) {
         store().edit { prefs ->
             prefs[surroundChannelTargetKey] = target.name
+        }
+    }
+
+    suspend fun setSurroundTvArcSoundbar(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[surroundTvArcSoundbarKey] = enabled
         }
     }
 
@@ -2018,6 +2052,13 @@ class PlayerSettingsDataStore @Inject constructor(
             val normalizedLanguage = language?.takeIf { it.isNotBlank() }?.let(::normalizeSelectableLanguageCode)
             if (normalizedLanguage != null) prefs[subtitleSecondaryLanguageKey] = normalizedLanguage
             else prefs.remove(subtitleSecondaryLanguageKey)
+        }
+    }
+    suspend fun setSubtitleTertiaryLanguage(language: String?) {
+        store().edit { prefs ->
+            val normalizedLanguage = language?.takeIf { it.isNotBlank() }?.let(::normalizeSelectableLanguageCode)
+            if (normalizedLanguage != null) prefs[subtitleTertiaryLanguageKey] = normalizedLanguage
+            else prefs.remove(subtitleTertiaryLanguageKey)
         }
     }
     suspend fun setSubtitleBitmapSize(size: Int) { store().edit { it[subtitleBitmapSizeKey] = size.coerceIn(50, 200) } }

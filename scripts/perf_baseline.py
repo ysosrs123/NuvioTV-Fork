@@ -12,6 +12,18 @@ import uuid
 REPOSITORY = Path(__file__).resolve().parents[1]
 PACKAGES = ("com.nuvio.tv.v2.validation", "com.nuvio.tv.v2.baseline")
 RUNNER = "com.nuvio.tv.baselineprofile/androidx.test.runner.AndroidJUnitRunner"
+TEST_PACKAGE = "com.nuvio.tv.baselineprofile"
+PROFILE_TESTS = ("generateStartup", "generateHomeV2", "generateHomeOriginal", "generateScreens", "generatePlayer")
+
+
+def apk_package(sdk, apk):
+    tools = sorted((Path(sdk) / "build-tools").glob("*/aapt2*"), reverse=True) if sdk else []
+    if not tools:
+        raise SystemExit("aapt2 not found; cannot check the APK package before installing")
+    badging = subprocess.check_output([str(tools[0]), "dump", "badging", str(apk)], text=True, encoding="utf-8",
+                                      errors="replace")
+    first = badging.splitlines()[0] if badging else ""
+    return first.split("name='", 1)[1].split("'", 1)[0] if "name='" in first else ""
 
 
 def main():
@@ -24,7 +36,7 @@ def main():
     parser.add_argument("--output", type=Path, default=REPOSITORY / "build" / "nuvio-performance")
     parser.add_argument("--skip-build", action="store_true", help="Use the already built benchmark APK")
     parser.add_argument("--profile-apk", type=Path, help="Matching isolated fullNonMinifiedRelease APK for reusable source-profile collection")
-    parser.add_argument("--profile-test", choices=("generateStartup", "generateBrowsing"), help="Repeat one profile journey while preserving other collected results")
+    parser.add_argument("--profile-test", choices=PROFILE_TESTS, help="Repeat one profile journey while preserving other collected results")
     args = parser.parse_args()
     gradle = str(REPOSITORY / ("gradlew.bat" if os.name == "nt" else "gradlew"))
     if args.command == "release-with-profile":
@@ -39,6 +51,12 @@ def main():
     adb = [adb_path, "-s", args.serial]
     def read(*command):
         return subprocess.check_output(adb + list(command), text=True, encoding="utf-8", errors="replace").strip()
+    def install(apk, expected):
+        package = apk_package(sdk, apk)
+        print(f"Installing {apk.name}: package {package}", flush=True)
+        if package != expected:
+            raise SystemExit(f"Refusing to install {apk}: package {package!r}, expected {expected}")
+        subprocess.run(adb + ["install", "-r", str(apk)], check=True)
     if read("get-state") != "device":
         parser.error("ADB device must be authorized and ready")
     if not read("shell", "pm", "path", args.package).startswith("package:"):
@@ -57,11 +75,13 @@ def main():
         if int(read("shell", "getprop", "ro.build.version.sdk")) < 34:
             parser.error("Use API 34+ for profile collection without resetting prepared app data")
         profile_sha = hashlib.sha256(args.profile_apk.read_bytes()).hexdigest()
-        subprocess.run(adb + ["install", "-r", str(args.profile_apk)], check=True)
+        installed = read("shell", "pm", "path", args.package).splitlines()[0].removeprefix("package:")
+        if read("shell", "sha256sum", installed).split()[0] != profile_sha:
+            install(args.profile_apk, args.package)
     apk = REPOSITORY / "baselineprofile/build/outputs/apk/benchmarkRelease/baselineprofile-benchmarkRelease.apk"
     if not args.skip_build:
         subprocess.run([gradle, ":baselineprofile:assembleBenchmarkRelease"], cwd=REPOSITORY, check=True)
-    subprocess.run(adb + ["install", "-r", str(apk)], check=True)
+    install(apk, TEST_PACKAGE)
     if args.command == "benchmark":
         compiled = read("shell", "cmd", "package", "compile", "-m", "speed", "-f", args.package)
         if compiled != "Success":

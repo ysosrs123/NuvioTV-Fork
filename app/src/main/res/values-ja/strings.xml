@@ -2787,6 +2787,8 @@
     <string name="audio_surround_mode_auto_desc">オーディオ機器がデコードできると報告した形式はパススルーし、それ以外はアプリでデコードします。</string>
     <string name="audio_surround_mode_manual">手動</string>
     <string name="audio_surround_mode_manual_desc">オーディオ機器がデコードできるかを形式ごとに選択します。自動の報告が正しくない場合に使用してください。</string>
+    <string name="audio_surround_tv_arc_soundbar">テレビ経由でサウンドバーに接続（ARC）</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">自動では、サウンドバーが受け付けない形式をDolby Digital 5.1で、それ以外のデコード済み音声をステレオで送ります。Dolby DigitalとDolby Digital Plusはそのままパススルーします。</string>
     <string name="audio_surround_allow_ac3">Dolby Digital（AC-3）対応レシーバー</string>
     <string name="audio_surround_allow_ac3_sub">オフにするとAC-3をアプリでPCMにデコードします。レシーバーやテレビがAC-3をデコードできない場合のみオフにしてください。</string>
     <string name="audio_surround_allow_eac3">Dolby Digital Plus（E-AC-3）対応レシーバー</string>
@@ -2813,12 +2815,17 @@
     <string name="audio_forget_rejections_sub">レシーバーが開けなかった形式は、パススルーで送られなくなっています。消去するともう一度試せます。</string>
     <string name="audio_forget_rejections_none">学習済みの項目なし</string>
     <string name="audio_forget_rejections_done">学習した音声の拒否を消去しました</string>
+    <string name="audio_forget_tunnel_stalls_title">トンネル再生のフリーズ記録を消去</string>
+    <string name="audio_forget_tunnel_stalls_sub">トンネル再生オフ: %1$s。消去すると次の動画でもう一度試します。</string>
+    <string name="audio_forget_tunnel_stalls_none">記録なし。</string>
+    <string name="audio_forget_tunnel_stalls_done">トンネル再生のフリーズ記録を消去しました</string>
     <string name="audio_inject_hdr10_sei_title">削除時にHDR10メタデータを挿入</string>
     <string name="audio_inject_hdr10_sei_sub">DVを削除してHDR10ベースレイヤーにしたDV8（Profile 8）コンテンツに、ソースのマスタリングメタデータ（MaxCLL/MaxFALLとピーク輝度）を追加し、DV非対応のHDR10テレビで正しくトーンマップされるようにします。DV処理が「DVを削除」または「HDR10ベースレイヤー」のときのみ有効です。Profile 7やDolby Vision再生には影響しません。</string>
     <string name="diag_value_not_advertised">報告なし（ネイティブ再生は動作する可能性あり）</string>
     <string name="diag_label_dv_el_type">DV7 ELタイプ</string>
     <string name="diag_label_dv_hdr_mastering">DV HDRマスタリング</string>
     <string name="diag_label_dv_rpu_drops">DV RPUドロップ</string>
+    <string name="sub_tertiary_lang">第3優先言語</string>
     <string name="sub_addon_subtitles">アドオン字幕</string>
     <string name="sub_addon_subtitles_desc">再生中にインストール済みアドオンから字幕を取得します。オフの場合はファイルに埋め込まれた字幕のみ利用できます。</string>
     <string name="autoplay_quality_rules_title">品質ルール</string>

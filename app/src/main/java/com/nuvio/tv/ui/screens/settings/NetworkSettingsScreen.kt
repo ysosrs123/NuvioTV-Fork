@@ -825,7 +825,8 @@ fun AdvancedSettingsContent(
 
             diagnosticsCardItems(
                 diagnostics = dvDiagnostics,
-                dvCurrentlyEnabled = dvPlayerSettings.dv7HandlingMode != Dv7HandlingMode.OFF
+                dvCurrentlyEnabled = dvPlayerSettings.dv7HandlingMode != Dv7HandlingMode.OFF,
+                tunnelStallClasses = rememberedTunnelStallClasses(dvPlayerSettings)
             )
         }
     }

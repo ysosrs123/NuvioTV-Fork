@@ -2259,6 +2259,8 @@
     <string name="audio_surround_mode_auto_desc">Nespremenjene pošlje formate, za katere zvočni sistem sporoči, da jih zna dekodirati, ostale dekodira aplikacija.</string>
     <string name="audio_surround_mode_manual">Ročno</string>
     <string name="audio_surround_mode_manual_desc">Za vsak format izberite, ali ga vaš zvočni sistem zna dekodirati. Uporabite, kadar je samodejno poročilo napačno.</string>
+    <string name="audio_surround_tv_arc_soundbar">Zvok gre prek televizorja na zvočno vrstico (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Samodejno pošlje formate, ki jih zvočna vrstica ne sprejme, kot Dolby Digital 5.1, ostali dekodirani zvok pa kot stereo. Dolby Digital in Dolby Digital Plus se pošljeta nespremenjena.</string>
     <string name="audio_surround_allow_ac3">Sprejemnik podpira Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Izklopljeno dekodira AC-3 v PCM v aplikaciji. Izklopite samo, če sprejemnik ali TV ne zna dekodirati AC-3.</string>
     <string name="audio_surround_allow_eac3">Sprejemnik podpira Dolby Digital Plus (E-AC-3)</string>
@@ -2285,12 +2287,17 @@
     <string name="audio_forget_rejections_sub">Formati, ki jih je sprejemnik zavrnil, se mu ne pošiljajo več nespremenjeni. S tem jih je mogoče poskusiti znova.</string>
     <string name="audio_forget_rejections_none">Nič naučenega</string>
     <string name="audio_forget_rejections_done">Naučene zavrnitve zvoka so počiščene</string>
+    <string name="audio_forget_tunnel_stalls_title">Pozabi zastoje tunela</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunel izklopljen za: %1$s. S tem lahko naslednji video poskusi znova.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nič zapomnjenega.</string>
+    <string name="audio_forget_tunnel_stalls_done">Zastoji tunela pozabljeni</string>
     <string name="audio_inject_hdr10_sei_title">Ob odstranitvi vstavi metapodatke HDR10</string>
     <string name="audio_inject_hdr10_sei_sub">Vsebini DV8 (profil 8), skrčeni na osnovno plast HDR10, doda metapodatke masteringa vira (MaxCLL/MaxFALL in najvišjo svetilnost), da televizorji HDR10 brez DV pravilno preslikajo tone. Dejavno samo, kadar je obravnava DV nastavljena na Odstrani DV ali Osnovna plast HDR10; ne vpliva na profil 7 ali predvajanje Dolby Vision.</string>
     <string name="diag_value_not_advertised">Ni oglaševano (izvorno predvajanje morda vseeno deluje)</string>
     <string name="diag_label_dv_el_type">Vrsta DV7 EL</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">Izpadi DV RPU</string>
+    <string name="sub_tertiary_lang">Tretji prednostni jezik</string>
     <string name="sub_addon_subtitles">Podnapisi iz dodatkov</string>
     <string name="sub_addon_subtitles_desc">Med predvajanjem pridobi podnapise iz nameščenih dodatkov. Ko je izklopljeno, so na voljo samo podnapisi, vgrajeni v datoteko.</string>
     <string name="autoplay_quality_rules_title">Pravila kakovosti</string>

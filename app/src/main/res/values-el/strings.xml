@@ -3324,6 +3324,8 @@
     <string name="audio_surround_mode_auto_desc">Περνά με passthrough τα φορμά που το ηχοσύστημά σας δηλώνει ότι αποκωδικοποιεί και αποκωδικοποιεί τα υπόλοιπα στην εφαρμογή.</string>
     <string name="audio_surround_mode_manual">Χειροκίνητο</string>
     <string name="audio_surround_mode_manual_desc">Επιλέξτε ανά φορμά αν το ηχοσύστημά σας μπορεί να το αποκωδικοποιήσει. Χρησιμοποιήστε το όταν η αυτόματη αναφορά είναι λάθος.</string>
+    <string name="audio_surround_tv_arc_soundbar">Ο ήχος περνά μέσω της τηλεόρασης σε soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Το Αυτόματο στέλνει ως Dolby Digital 5.1 τα φορμά που το soundbar δεν υποστηρίζει και τον υπόλοιπο αποκωδικοποιημένο ήχο ως στερεοφωνικό. Τα Dolby Digital και Dolby Digital Plus περνούν με passthrough αμετάβλητα.</string>
     <string name="audio_surround_allow_ac3">Receiver με Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Στο Απενεργοποιημένο, το AC-3 αποκωδικοποιείται σε PCM στην εφαρμογή. Απενεργοποιήστε μόνο αν ο receiver ή η τηλεόρασή σας δεν αποκωδικοποιεί AC-3.</string>
     <string name="audio_surround_allow_eac3">Receiver με Dolby Digital Plus (E-AC-3)</string>
@@ -3350,12 +3352,17 @@
     <string name="audio_forget_rejections_sub">Τα φορμά που ο receiver σας αρνήθηκε να ανοίξει δεν στέλνονται πλέον ως passthrough. Αυτό επιτρέπει να δοκιμαστούν ξανά.</string>
     <string name="audio_forget_rejections_none">Καμία καταγραφή</string>
     <string name="audio_forget_rejections_done">Οι καταγεγραμμένες απορρίψεις ήχου διαγράφηκαν</string>
+    <string name="audio_forget_tunnel_stalls_title">Διαγραφή κολλημάτων tunnel</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel ανενεργό για: %1$s. Αυτό επιτρέπει στο επόμενο βίντεο να το δοκιμάσει ξανά.</string>
+    <string name="audio_forget_tunnel_stalls_none">Καμία καταγραφή.</string>
+    <string name="audio_forget_tunnel_stalls_done">Τα κολλήματα tunnel διαγράφηκαν</string>
     <string name="audio_inject_hdr10_sei_title">Προσθήκη μεταδεδομένων HDR10 κατά την αφαίρεση</string>
     <string name="audio_inject_hdr10_sei_sub">Για περιεχόμενο DV8 (Profile 8) που περιορίζεται στη βασική στρώση HDR10, προσθέτει τα μεταδεδομένα mastering της πηγής (MaxCLL/MaxFALL και μέγιστη φωτεινότητα), ώστε οι τηλεοράσεις HDR10 χωρίς DV να κάνουν σωστό tone mapping. Ενεργό μόνο όταν ο Χειρισμός DV είναι Αφαίρεση DV ή Βασική στρώση HDR10· δεν επηρεάζει το Profile 7 ούτε την αναπαραγωγή Dolby Vision.</string>
     <string name="diag_value_not_advertised">Δεν δηλώνεται (η εγγενής αναπαραγωγή ίσως λειτουργεί)</string>
     <string name="diag_label_dv_el_type">Τύπος EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">Απώλειες DV RPU</string>
+    <string name="sub_tertiary_lang">Τρίτη προτιμώμενη γλώσσα</string>
     <string name="sub_addon_subtitles">Υπότιτλοι πρόσθετων</string>
     <string name="sub_addon_subtitles_desc">Λήψη υποτίτλων από τα εγκατεστημένα πρόσθετα κατά την αναπαραγωγή. Όταν είναι απενεργοποιημένο, διατίθενται μόνο οι υπότιτλοι που είναι ενσωματωμένοι στο αρχείο.</string>
     <string name="autoplay_quality_rules_title">Κανόνες ποιότητας</string>

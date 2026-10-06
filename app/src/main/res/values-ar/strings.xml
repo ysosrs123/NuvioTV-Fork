@@ -3120,6 +3120,8 @@
     <string name="audio_surround_mode_auto_desc">يمرّر الصيغ التي يفيد نظامك الصوتي بأنه يفكّ ترميزها، ويفكّ ترميز الباقي داخل التطبيق.</string>
     <string name="audio_surround_mode_manual">يدوي</string>
     <string name="audio_surround_mode_manual_desc">حدّد لكل صيغة هل يستطيع نظامك الصوتي فكّ ترميزها. استخدمه عندما يكون التقرير التلقائي خاطئاً.</string>
+    <string name="audio_surround_tv_arc_soundbar">الصوت يمر عبر التلفزيون إلى مكبر الصوت الشريطي (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">في الوضع «تلقائي» تُرسَل الصيغ التي لا يقبلها مكبر الصوت الشريطي بصيغة Dolby Digital 5.1، وبقية الصوت المفكوك ترميزه كصوت ستيريو. وتُمرَّر Dolby Digital و Dolby Digital Plus كما هي دون تغيير.</string>
     <string name="audio_surround_allow_ac3">مستقبل يدعم Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">عند التعطيل يُفكّ ترميز AC-3 إلى PCM داخل التطبيق. عطّله فقط إذا كان المستقبل أو التلفاز لا يفكّ ترميز AC-3.</string>
     <string name="audio_surround_allow_eac3">مستقبل يدعم Dolby Digital Plus (E-AC-3)</string>
@@ -3146,12 +3148,17 @@
     <string name="audio_forget_rejections_sub">الصيغ التي رفض مستقبلك فتحها لم تعد تُرسل إليه بتمرير الصوت. هذا يسمح بتجربتها من جديد.</string>
     <string name="audio_forget_rejections_none">لا شيء محفوظ</string>
     <string name="audio_forget_rejections_done">تم مسح حالات رفض الصوت المحفوظة</string>
+    <string name="audio_forget_tunnel_stalls_title">نسيان تعثرات التشغيل النفقي</string>
+    <string name="audio_forget_tunnel_stalls_sub">التشغيل النفقي معطّل لـ: %1$s. يتيح هذا للفيديو التالي تجربته مجددًا.</string>
+    <string name="audio_forget_tunnel_stalls_none">لا شيء محفوظ.</string>
+    <string name="audio_forget_tunnel_stalls_done">تم نسيان تعثرات التشغيل النفقي</string>
     <string name="audio_inject_hdr10_sei_title">إدراج بيانات HDR10 الوصفية عند الإزالة</string>
     <string name="audio_inject_hdr10_sei_sub">لمحتوى DV8 (Profile 8) المُختزَل إلى طبقة HDR10 الأساسية، تُضاف بيانات الماسترينغ للمصدر (MaxCLL/MaxFALL وذروة السطوع) لتضبط تلفزيونات HDR10 غير الداعمة لـ DV درجات اللون بشكل صحيح. يعمل فقط عندما تكون معالجة DV على إزالة DV أو طبقة HDR10 الأساسية؛ لا تأثير على Profile 7 أو تشغيل Dolby Vision.</string>
     <string name="diag_value_not_advertised">غير معلن (قد يعمل التشغيل الأصلي مع ذلك)</string>
     <string name="diag_label_dv_el_type">نوع EL في DV7</string>
     <string name="diag_label_dv_hdr_mastering">ماسترينغ HDR في DV</string>
     <string name="diag_label_dv_rpu_drops">إسقاطات RPU في DV</string>
+    <string name="sub_tertiary_lang">اللغة المفضلة الثالثة</string>
     <string name="sub_addon_subtitles">ترجمات الإضافات</string>
     <string name="sub_addon_subtitles_desc">جلب الترجمات من الإضافات المثبتة أثناء التشغيل. عند التعطيل تتاح فقط الترجمات المضمّنة في الملف.</string>
     <string name="autoplay_quality_rules_title">قواعد الجودة</string>

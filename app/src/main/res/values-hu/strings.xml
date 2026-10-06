@@ -79,6 +79,8 @@
     <string name="audio_surround_mode_auto_desc">Átengedi azokat a formátumokat, amelyeket a hangrendszered a jelentése szerint dekódolni tud, a többit az alkalmazás dekódolja.</string>
     <string name="audio_surround_mode_manual">Kézi</string>
     <string name="audio_surround_mode_manual_desc">Formátumonként megadhatod, hogy a hangrendszered tudja-e dekódolni. Akkor használd, ha az automatikus jelentés hibás.</string>
+    <string name="audio_surround_tv_arc_soundbar">A hang a tévén keresztül jut el a soundbarhoz (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Az Automatikus Dolby Digital 5.1-ben küldi azokat a formátumokat, amelyeket a soundbar nem fogad, a többi dekódolt hangot pedig sztereóként. A Dolby Digitalt és a Dolby Digital Plust változatlanul átengedi.</string>
     <string name="audio_surround_allow_ac3">Dolby Digital (AC-3) képes erősítő</string>
     <string name="audio_surround_allow_ac3_sub">Kikapcsolva az alkalmazás PCM-re dekódolja az AC-3-at. Csak akkor kapcsold ki, ha az erősítőd vagy a tévéd nem tudja dekódolni az AC-3-at.</string>
     <string name="audio_surround_allow_eac3">Dolby Digital Plus (E-AC-3) képes erősítő</string>
@@ -105,12 +107,17 @@
     <string name="audio_forget_rejections_sub">Azokat a formátumokat, amelyeket az erősítőd nem volt hajlandó megnyitni, az alkalmazás már nem küldi passthrough-ként. Ezzel újra kipróbálhatók.</string>
     <string name="audio_forget_rejections_none">Nincs megtanult adat</string>
     <string name="audio_forget_rejections_done">A megtanult hangelutasítások törölve</string>
+    <string name="audio_forget_tunnel_stalls_title">Alagút-akadások elfelejtése</string>
+    <string name="audio_forget_tunnel_stalls_sub">Alagút kikapcsolva: %1$s. Ezzel a következő videó újra megpróbálhatja.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nincs megjegyzett adat.</string>
+    <string name="audio_forget_tunnel_stalls_done">Alagút-akadások elfelejtve</string>
     <string name="audio_inject_hdr10_sei_title">HDR10 metaadatok beszúrása eltávolításkor</string>
     <string name="audio_inject_hdr10_sei_sub">A HDR10 alaprétegre csupaszított DV8 (Profile 8) tartalomhoz hozzáadja a forrás mastering metaadatait (MaxCLL/MaxFALL és csúcsfényerő), hogy a DV nélküli HDR10 tévék helyesen végezzék a tone mappinget. Csak akkor aktív, ha a DV kezelése DV eltávolítása vagy HDR10 alapréteg; a Profile 7-re és a Dolby Vision lejátszásra nincs hatással.</string>
     <string name="diag_value_not_advertised">Nincs jelezve (a natív lejátszás ettől még működhet)</string>
     <string name="diag_label_dv_el_type">DV7 EL típus</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR mastering</string>
     <string name="diag_label_dv_rpu_drops">DV RPU eldobások</string>
+    <string name="sub_tertiary_lang">Harmadlagos nyelv</string>
     <string name="sub_addon_subtitles">Bővítményfeliratok</string>
     <string name="sub_addon_subtitles_desc">Lejátszás közben feliratokat kér le a telepített bővítményekből. Kikapcsolva csak a fájlba ágyazott feliratok érhetők el.</string>
     <string name="autoplay_quality_rules_title">Minőségi szabályok</string>

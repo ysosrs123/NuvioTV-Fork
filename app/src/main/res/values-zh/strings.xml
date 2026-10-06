@@ -79,6 +79,8 @@
     <string name="audio_surround_mode_auto_desc">音频系统报告可解码的格式直接穿透，其余由应用解码。</string>
     <string name="audio_surround_mode_manual">手动</string>
     <string name="audio_surround_mode_manual_desc">逐个格式选择音频系统能否解码。自动报告有误时使用。</string>
+    <string name="audio_surround_tv_arc_soundbar">声音经电视传到 Soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">自动模式下，Soundbar 不支持的格式以 Dolby Digital 5.1 发送，其他解码后的声音以立体声发送。Dolby Digital 和 Dolby Digital Plus 直接穿透，不做改动。</string>
     <string name="audio_surround_allow_ac3">接收器支持 Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">关闭后由应用将 AC-3 解码为 PCM。仅当接收器或电视无法解码 AC-3 时才关闭。</string>
     <string name="audio_surround_allow_eac3">接收器支持 Dolby Digital Plus (E-AC-3)</string>
@@ -105,12 +107,17 @@
     <string name="audio_forget_rejections_sub">接收器拒绝打开的格式不会再以穿透方式发送。清除后可重新尝试。</string>
     <string name="audio_forget_rejections_none">没有记录</string>
     <string name="audio_forget_rejections_done">已清除记录的音频拒绝</string>
+    <string name="audio_forget_tunnel_stalls_title">清除通道化卡顿</string>
+    <string name="audio_forget_tunnel_stalls_sub">已对以下格式关闭通道化：%1$s。清除后下个视频可重新尝试。</string>
+    <string name="audio_forget_tunnel_stalls_none">没有记录。</string>
+    <string name="audio_forget_tunnel_stalls_done">已清除通道化卡顿</string>
     <string name="audio_inject_hdr10_sei_title">移除时注入 HDR10 元数据</string>
     <string name="audio_inject_hdr10_sei_sub">对于移除为 HDR10 基础层的 DV8 (Profile 8) 内容，加入来源的母版元数据 (MaxCLL/MaxFALL 和峰值亮度)，让不支持 DV 的 HDR10 电视正确进行色调映射。仅当 DV 处理为「移除 DV」或「HDR10 基础层」时生效；对 Profile 7 和 Dolby Vision 播放无影响。</string>
     <string name="diag_value_not_advertised">未声明 (原生播放仍可能正常)</string>
     <string name="diag_label_dv_el_type">DV7 EL 类型</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR 母版</string>
     <string name="diag_label_dv_rpu_drops">DV RPU 丢失</string>
+    <string name="sub_tertiary_lang">第三偏好语言</string>
     <string name="sub_addon_subtitles">扩展字幕</string>
     <string name="sub_addon_subtitles_desc">播放时从已安装的扩展获取字幕。关闭后仅可使用文件内嵌的字幕。</string>
     <string name="autoplay_quality_rules_title">品质规则</string>

@@ -58,6 +58,7 @@ class ProfileSettingsCredentialPolicyTest {
     fun `surround format settings stay device local under player settings`() {
         assertTrue(shouldExcludePreferenceFromProfileSettingsSync("player_settings", "surround_format_mode"))
         assertTrue(shouldExcludePreferenceFromProfileSettingsSync("player_settings", "surround_channel_target"))
+        assertTrue(shouldExcludePreferenceFromProfileSettingsSync("player_settings", "surround_tv_arc_soundbar"))
         assertTrue(shouldExcludePreferenceFromProfileSettingsSync("player_settings", "allow_ac3_passthrough"))
         assertTrue(shouldExcludePreferenceFromProfileSettingsSync("player_settings", "allow_eac3_passthrough"))
         assertTrue(shouldExcludePreferenceFromProfileSettingsSync("player_settings", "allow_truehd_passthrough"))

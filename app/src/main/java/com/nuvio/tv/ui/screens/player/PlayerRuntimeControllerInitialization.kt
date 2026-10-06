@@ -316,6 +316,25 @@ private fun PlayerRuntimeController.startPlaybackThroughAfrGates(
     }
 }
 
+private fun PlayerRuntimeController.applyPendingSeeksAtReady(player: ExoPlayer) {
+    tryApplyPendingResumeProgress(player)
+    _uiState.value.pendingSeekPosition?.let { position ->
+        player.seekTo(position)
+        if (NuvioExoPlayerPerformanceHelper.enabled) {
+            seekBufferingUiDeferred = true
+            seekBufferingUiJob?.cancel()
+            seekBufferingUiJob = scope.launch {
+                delay(seekBufferingUiDelayMs)
+                seekBufferingUiDeferred = false
+                if (pendingSeekFlush) {
+                    _uiState.update { it.copy(isBuffering = true) }
+                }
+            }
+        }
+        _uiState.update { it.copy(pendingSeekPosition = null) }
+    }
+}
+
 @androidx.annotation.OptIn(UnstableApi::class)
 internal fun PlayerRuntimeController.initializePlayer(
     url: String,
@@ -550,6 +569,8 @@ internal fun PlayerRuntimeController.initializePlayer(
             rebufferTotalMs = 0L
             rebufferStartedAtMs = 0L
             lastSeekWallMs = 0L
+            resetLateVideoWatch()
+            cancelPausedOutputCheck()
             seekReadyLogPending = false
             currentRebufferSeekInduced = false
 
@@ -1214,14 +1235,14 @@ internal fun PlayerRuntimeController.initializePlayer(
                         "dts=${surroundResolution.policy.allowDts} dtshd=${surroundResolution.policy.allowDtsHd} " +
                         "learned=${surroundResolution.policy.learnedDeniedGroups}] " +
                         "transcodePreferred=${surroundResolution.transcodePreferred} " +
-                        "channelTarget=$surroundTargetChannels"
+                        "channelTarget=$surroundTargetChannels tvArcSoundbar=${surroundSettings.surroundTvArcSoundbar}"
                 )
                 queuePlaybackRawEventLine(
                     "surround_resolve route=$currentRouteKey " +
                         "ac3=${surroundResolution.policy.allowAc3} eac3=${surroundResolution.policy.allowEac3} " +
                         "truehd=${surroundResolution.policy.allowTrueHd} dts=${surroundResolution.policy.allowDts} " +
                         "dtshd=${surroundResolution.policy.allowDtsHd} transcodePreferred=${surroundResolution.transcodePreferred} " +
-                        "channelTarget=$surroundTargetChannels"
+                        "channelTarget=$surroundTargetChannels tvArcSoundbar=${surroundSettings.surroundTvArcSoundbar}"
                 )
             }
 
@@ -1526,7 +1547,8 @@ internal fun PlayerRuntimeController.initializePlayer(
 
                 val preferred = playerSettings.subtitleStyle.preferredLanguage
                 val secondary = playerSettings.subtitleStyle.secondaryPreferredLanguage
-                applySubtitlePreferences(preferred, secondary)
+                val tertiary = playerSettings.subtitleStyle.tertiaryPreferredLanguage
+                applySubtitlePreferences(preferred, secondary, tertiary)
                 applyStartupSubtitlePreparation(startupSubtitlePreparation)
                 val startupSubtitleConfigurations = buildStartupSubtitleConfigurations(startupSubtitlePreparation)
                 // Join the saved-progress read before the
@@ -1772,6 +1794,18 @@ internal fun PlayerRuntimeController.initializePlayer(
                                     if (_uiState.value.postPlayDismissedForCurrentEpisode) {
                                         _uiState.update { it.copy(postPlayDismissedForCurrentEpisode = false) }
                                     }
+                                    // Force MediaCodec video decoder & AudioSink flush/re-alignment on initial
+                                    // tunneled startup behind the loading overlay so playback starts immediately.
+                                    // Note: ExoPlayer ignores seeks if target position == current position,
+                                    // so we add a 100ms delta to guarantee an actual MediaCodec flush.
+                                    // The seeks go in before play: a tunnelled audio track that is started,
+                                    // paused and replaced within a few milliseconds leaves some TVs ignoring
+                                    // the first pause of the stream.
+                                    if (_uiState.value.pendingSeekPosition == null) {
+                                        val initialPos = currentPosition
+                                        seekTo((initialPos + 100L).coerceAtLeast(100L))
+                                    }
+                                    applyPendingSeeksAtReady(this@apply)
                                     // The policy already folds startPaused and
                                     // userPausedManually into the action; the fork's
                                     // track-AFR gate and display-AFR settle hold wrap it.
@@ -1782,14 +1816,6 @@ internal fun PlayerRuntimeController.initializePlayer(
                                         holdForAfrSettle = afrSettleHoldPending
                                     )
                                     afrSettleHoldPending = false
-                                    // Force MediaCodec video decoder & AudioSink flush/re-alignment on initial
-                                    // tunneled startup behind the loading overlay so playback starts immediately.
-                                    // Note: ExoPlayer ignores seeks if target position == current position,
-                                    // so we add a 100ms delta to guarantee an actual MediaCodec flush.
-                                    if (_uiState.value.pendingSeekPosition == null) {
-                                        val initialPos = currentPosition
-                                        seekTo((initialPos + 100L).coerceAtLeast(100L))
-                                    }
                                     finishLoadingDiagnostics("first_frame_ready")
                                     currentDiagnostics = recordFirstFrameDiagnostics(this@apply, currentDiagnostics, playerSettings)
                                     _uiState.update {
@@ -1832,22 +1858,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                                 }
                                 PlayerStartupPlaybackPolicy.ReadyAction.None -> Unit
                             }
-                            tryApplyPendingResumeProgress(this@apply)
-                            _uiState.value.pendingSeekPosition?.let { position ->
-                                seekTo(position)
-                                if (NuvioExoPlayerPerformanceHelper.enabled) {
-                                    seekBufferingUiDeferred = true
-                                    seekBufferingUiJob?.cancel()
-                                    seekBufferingUiJob = scope.launch {
-                                        delay(seekBufferingUiDelayMs)
-                                        seekBufferingUiDeferred = false
-                                        if (pendingSeekFlush) {
-                                            _uiState.update { it.copy(isBuffering = true) }
-                                        }
-                                    }
-                                }
-                                _uiState.update { it.copy(pendingSeekPosition = null) }
-                            }
+                            applyPendingSeeksAtReady(this@apply)
                             tryAutoSelectPreferredSubtitleFromAvailableTracks()
                             if (!NuvioExoPlayerPerformanceHelper.shouldGuardTrackRebuild() || !hasRenderedFirstFrame) {
                                 trackSelectionParameters = trackSelectionParameters.buildUpon().build()
@@ -1891,6 +1902,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         // Gate the audio-clock jitter sensor on actual playback -
                         // paused/rebuffering time must not count as clock jitter.
                         playbackSpeedAwareAudioSink?.setPlaybackActive(isPlaying)
+                        if (!isPlaying) lateVideoLastNotPlayingMs = SystemClock.elapsedRealtime()
                         logScrobbleDiagnostic(
                             "exo_is_playing_changed",
                             "isPlaying=$isPlaying playbackState=$playbackState playWhenReady=$playWhenReady " +
@@ -2737,6 +2749,8 @@ internal fun PlayerRuntimeController.initializePlayer(
                         )
                         if (reason == Player.DISCONTINUITY_REASON_SEEK) {
                             lastSeekWallMs = SystemClock.elapsedRealtime()
+                            onSeekForLateVideoWatch()
+                            cancelPausedOutputCheck()
                             seekReadyLogPending = true
                             seekReadyLogTargetMs = newPosition.positionMs
                         }

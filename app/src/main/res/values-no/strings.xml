@@ -1208,6 +1208,8 @@
     <string name="audio_surround_mode_auto_desc">Sender gjennom formatene lydsystemet ditt oppgir at det kan dekode, og dekoder resten i appen.</string>
     <string name="audio_surround_mode_manual">Manuell</string>
     <string name="audio_surround_mode_manual_desc">Velg for hvert format om lydsystemet ditt kan dekode det. Bruk dette når den automatiske rapporten er feil.</string>
+    <string name="audio_surround_tv_arc_soundbar">Lyden går via TV-en til en lydplanke (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Auto gjør om formater som lydplanken ikke støtter, til Dolby Digital 5.1 og sender annen dekodet lyd som stereo. Dolby Digital og Dolby Digital Plus sendes gjennom uendret.</string>
     <string name="audio_surround_allow_ac3">Mottaker med Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Av dekoder AC-3 til PCM i appen. Slå bare av hvis mottakeren eller TV-en din ikke kan dekode AC-3.</string>
     <string name="audio_surround_allow_eac3">Mottaker med Dolby Digital Plus (E-AC-3)</string>
@@ -1234,12 +1236,17 @@
     <string name="audio_forget_rejections_sub">Formater som mottakeren din har nektet å åpne, sendes ikke lenger til den som gjennomgang. Her kan de prøves på nytt.</string>
     <string name="audio_forget_rejections_none">Ingenting lært</string>
     <string name="audio_forget_rejections_done">Lærte lydavvisninger nullstilt</string>
+    <string name="audio_forget_tunnel_stalls_title">Glem tunnelstopp</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel av for: %1$s. Her kan neste video prøve tunnelert avspilling igjen.</string>
+    <string name="audio_forget_tunnel_stalls_none">Ingenting husket.</string>
+    <string name="audio_forget_tunnel_stalls_done">Tunnelstopp glemt</string>
     <string name="audio_inject_hdr10_sei_title">Sett inn HDR10-metadata ved fjerning</string>
     <string name="audio_inject_hdr10_sei_sub">For DV8-innhold (Profil 8) som er strippet til et HDR10-basislag, legges kildens mastringsmetadata (MaxCLL/MaxFALL og toppluminans) til, slik at HDR10-TV-er uten DV tonemapper riktig. Bare aktiv når DV-håndtering er Fjern DV eller HDR10-basislag; ingen effekt på Profil 7 eller ved Dolby Vision-avspilling.</string>
     <string name="diag_value_not_advertised">Ikke oppgitt (innebygd avspilling kan likevel fungere)</string>
     <string name="diag_label_dv_el_type">DV7 EL-type</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR-mastring</string>
     <string name="diag_label_dv_rpu_drops">DV RPU-tap</string>
+    <string name="sub_tertiary_lang">Tredje foretrukne språk</string>
     <string name="sub_addon_subtitles">Undertekster fra tillegg</string>
     <string name="sub_addon_subtitles_desc">Hent undertekster fra installerte tillegg under avspilling. Når dette er av, er bare undertekster som ligger i filen tilgjengelige.</string>
     <string name="autoplay_quality_rules_title">Kvalitetsregler</string>

@@ -3222,6 +3222,8 @@
     <string name="audio_surround_mode_auto_desc">Invia in passthrough i formati che il tuo impianto audio dichiara di saper decodificare e decodifica gli altri nell\'app.</string>
     <string name="audio_surround_mode_manual">Manuale</string>
     <string name="audio_surround_mode_manual_desc">Scegli formato per formato se il tuo impianto audio sa decodificarlo. Usalo quando il rilevamento automatico è sbagliato.</string>
+    <string name="audio_surround_tv_arc_soundbar">Il suono passa dalla TV a una soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Auto invia come Dolby Digital 5.1 i formati che la soundbar non supporta e il resto dell\'audio decodificato in stereo. Dolby Digital e Dolby Digital Plus passano in passthrough senza modifiche.</string>
     <string name="audio_surround_allow_ac3">Ricevitore compatibile Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Disattivato: l\'AC-3 viene decodificato in PCM nell\'app. Disattiva solo se il ricevitore o la TV non decodifica l\'AC-3.</string>
     <string name="audio_surround_allow_eac3">Ricevitore compatibile Dolby Digital Plus (E-AC-3)</string>
@@ -3248,12 +3250,17 @@
     <string name="audio_forget_rejections_sub">I formati che il ricevitore ha rifiutato di aprire non gli vengono più inviati in passthrough. Così possono essere riprovati.</string>
     <string name="audio_forget_rejections_none">Nessun formato memorizzato</string>
     <string name="audio_forget_rejections_done">Formati audio rifiutati dimenticati</string>
+    <string name="audio_forget_tunnel_stalls_title">Dimentica blocchi tunneled</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunneled disattivato per: %1$s. Così il prossimo video potrà riprovarlo.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nulla memorizzato.</string>
+    <string name="audio_forget_tunnel_stalls_done">Blocchi tunneled dimenticati</string>
     <string name="audio_inject_hdr10_sei_title">Inserisci metadati HDR10 alla rimozione</string>
     <string name="audio_inject_hdr10_sei_sub">Per i contenuti DV8 (Profile 8) ridotti al livello base HDR10, aggiunge i metadati di mastering della sorgente (MaxCLL/MaxFALL e luminanza di picco) così le TV HDR10 senza DV applicano il tone-mapping corretto. Attivo solo quando la gestione DV è su Rimuovi sempre DV o Livello base HDR10; nessun effetto sul Profile 7 né sulla riproduzione Dolby Vision.</string>
     <string name="diag_value_not_advertised">Non dichiarato (la riproduzione nativa può funzionare comunque)</string>
     <string name="diag_label_dv_el_type">Tipo EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">Mastering HDR DV</string>
     <string name="diag_label_dv_rpu_drops">RPU DV persi</string>
+    <string name="sub_tertiary_lang">Terza lingua preferita</string>
     <string name="sub_addon_subtitles">Sottotitoli degli addon</string>
     <string name="sub_addon_subtitles_desc">Recupera i sottotitoli dagli addon installati durante la riproduzione. Se disattivato, sono disponibili solo i sottotitoli incorporati nel file.</string>
     <string name="autoplay_quality_rules_title">Regole di qualità</string>

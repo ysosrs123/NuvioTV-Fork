@@ -3438,6 +3438,8 @@
     <string name="audio_surround_mode_auto_desc">Truyền thẳng các định dạng mà hệ thống âm thanh báo là giải mã được, phần còn lại giải mã trong ứng dụng.</string>
     <string name="audio_surround_mode_manual">Thủ công</string>
     <string name="audio_surround_mode_manual_desc">Chọn từng định dạng mà hệ thống âm thanh của bạn giải mã được. Dùng khi thông tin tự động bị sai.</string>
+    <string name="audio_surround_tv_arc_soundbar">Âm thanh đi qua TV tới loa thanh (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Tự động chuyển các định dạng loa thanh không nhận được sang Dolby Digital 5.1, còn âm thanh đã giải mã khác thì gửi dưới dạng stereo. Dolby Digital và Dolby Digital Plus được truyền thẳng, không thay đổi.</string>
     <string name="audio_surround_allow_ac3">Bộ thu hỗ trợ Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Khi tắt, AC-3 được giải mã sang PCM trong ứng dụng. Chỉ tắt nếu bộ thu hoặc TV không giải mã được AC-3.</string>
     <string name="audio_surround_allow_eac3">Bộ thu hỗ trợ Dolby Digital Plus (E-AC-3)</string>
@@ -3464,12 +3466,17 @@
     <string name="audio_forget_rejections_sub">Các định dạng mà bộ thu từ chối mở sẽ không còn được truyền thẳng đến nó. Tùy chọn này cho phép thử lại chúng.</string>
     <string name="audio_forget_rejections_none">Chưa ghi nhận gì</string>
     <string name="audio_forget_rejections_done">Đã xóa các định dạng âm thanh bị từ chối</string>
+    <string name="audio_forget_tunnel_stalls_title">Quên các lần treo đường hầm</string>
+    <string name="audio_forget_tunnel_stalls_sub">Đã tắt đường hầm cho: %1$s. Tùy chọn này cho phép video sau thử lại.</string>
+    <string name="audio_forget_tunnel_stalls_none">Chưa ghi nhận gì.</string>
+    <string name="audio_forget_tunnel_stalls_done">Đã quên các lần treo đường hầm</string>
     <string name="audio_inject_hdr10_sei_title">Chèn siêu dữ liệu HDR10 khi loại bỏ DV</string>
     <string name="audio_inject_hdr10_sei_sub">Với nội dung DV8 (Profile 8) bị loại bỏ về lớp nền HDR10, thêm siêu dữ liệu mastering của nguồn (MaxCLL/MaxFALL và độ sáng đỉnh) để TV HDR10 không hỗ trợ DV ánh xạ tông màu đúng. Chỉ hoạt động khi Xử lý DV là Loại bỏ DV hoặc Lớp nền HDR10; không ảnh hưởng đến Profile 7 hay phát Dolby Vision.</string>
     <string name="diag_value_not_advertised">Không được công bố (phát gốc vẫn có thể hoạt động)</string>
     <string name="diag_label_dv_el_type">Loại EL của DV7</string>
     <string name="diag_label_dv_hdr_mastering">Mastering HDR của DV</string>
     <string name="diag_label_dv_rpu_drops">RPU DV bị rớt</string>
+    <string name="sub_tertiary_lang">Ngôn ngữ ưu tiên thứ ba</string>
     <string name="sub_addon_subtitles">Phụ đề từ tiện ích</string>
     <string name="sub_addon_subtitles_desc">Lấy phụ đề từ các tiện ích đã cài đặt trong khi phát. Khi tắt, chỉ có phụ đề nhúng sẵn trong tệp.</string>
     <string name="autoplay_quality_rules_title">Quy tắc chất lượng</string>

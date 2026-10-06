@@ -3229,6 +3229,8 @@
     <string name="audio_surround_mode_auto_desc">Geeft de formaten door die je audiosysteem zegt te kunnen decoderen en decodeert de rest in de app.</string>
     <string name="audio_surround_mode_manual">Handmatig</string>
     <string name="audio_surround_mode_manual_desc">Kies per formaat of je audiosysteem het kan decoderen. Gebruik dit als de automatische melding niet klopt.</string>
+    <string name="audio_surround_tv_arc_soundbar">Geluid gaat via de tv naar een soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Automatisch zet formaten die de soundbar niet aankan om naar Dolby Digital 5.1 en stuurt ander gedecodeerd geluid als stereo. Dolby Digital en Dolby Digital Plus worden ongewijzigd doorgegeven.</string>
     <string name="audio_surround_allow_ac3">Receiver kan Dolby Digital (AC-3) aan</string>
     <string name="audio_surround_allow_ac3_sub">Uit decodeert AC-3 in de app naar PCM. Zet alleen uit als je receiver of tv AC-3 niet kan decoderen.</string>
     <string name="audio_surround_allow_eac3">Receiver kan Dolby Digital Plus (E-AC-3) aan</string>
@@ -3255,12 +3257,17 @@
     <string name="audio_forget_rejections_sub">Formaten die je receiver weigerde te openen, worden niet meer als passthrough verstuurd. Hiermee worden ze opnieuw geprobeerd.</string>
     <string name="audio_forget_rejections_none">Niets geleerd</string>
     <string name="audio_forget_rejections_done">Geleerde audioweigeringen gewist</string>
+    <string name="audio_forget_tunnel_stalls_title">Tunnelhaperingen vergeten</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel uit voor: %1$s. Hiermee probeert de volgende video het opnieuw.</string>
+    <string name="audio_forget_tunnel_stalls_none">Niets onthouden.</string>
+    <string name="audio_forget_tunnel_stalls_done">Tunnelhaperingen vergeten</string>
     <string name="audio_inject_hdr10_sei_title">HDR10-metadata toevoegen bij verwijderen</string>
     <string name="audio_inject_hdr10_sei_sub">Voegt bij DV8-inhoud (Profile 8) die tot een HDR10-basislaag is teruggebracht de mastering-metadata van de bron toe (MaxCLL/MaxFALL en piekhelderheid), zodat HDR10-tv-toestellen zonder DV correct tonemappen. Alleen actief als Dolby Vision-verwerking op DV verwijderen of HDR10-basislaag staat; geen effect op Profile 7 of op Dolby Vision-weergave.</string>
     <string name="diag_value_not_advertised">Niet gemeld (native afspelen kan toch werken)</string>
     <string name="diag_label_dv_el_type">DV7 EL-type</string>
     <string name="diag_label_dv_hdr_mastering">DV HDR-mastering</string>
     <string name="diag_label_dv_rpu_drops">DV RPU-verlies</string>
+    <string name="sub_tertiary_lang">Derde voorkeurstaal</string>
     <string name="sub_addon_subtitles">Ondertiteling van add-ons</string>
     <string name="sub_addon_subtitles_desc">Haal tijdens het afspelen ondertiteling op bij geïnstalleerde add-ons. Als dit uitstaat, is alleen de in het bestand ingesloten ondertiteling beschikbaar.</string>
     <string name="autoplay_quality_rules_title">Kwaliteitsregels</string>

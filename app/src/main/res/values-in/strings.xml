@@ -2532,6 +2532,8 @@
     <string name="audio_surround_mode_auto_desc">Meneruskan format yang dilaporkan dapat didekode sistem audio Anda, dan mendekode sisanya di aplikasi.</string>
     <string name="audio_surround_mode_manual">Manual</string>
     <string name="audio_surround_mode_manual_desc">Pilih per format apakah sistem audio Anda dapat mendekodenya. Gunakan ini saat laporan otomatis keliru.</string>
+    <string name="audio_surround_tv_arc_soundbar">Suara melewati TV ke soundbar (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Otomatis mengubah format yang tidak bisa diterima soundbar menjadi Dolby Digital 5.1, dan mengirim suara hasil dekode lainnya sebagai stereo. Dolby Digital dan Dolby Digital Plus diteruskan apa adanya.</string>
     <string name="audio_surround_allow_ac3">Penerima mendukung Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Saat nonaktif, AC-3 didekode ke PCM di aplikasi. Nonaktifkan hanya jika penerima AV atau TV Anda tidak dapat mendekode AC-3.</string>
     <string name="audio_surround_allow_eac3">Penerima mendukung Dolby Digital Plus (E-AC-3)</string>
@@ -2558,12 +2560,17 @@
     <string name="audio_forget_rejections_sub">Format yang ditolak penerima AV Anda tidak lagi dikirim sebagai passthrough. Ini memungkinkan format itu dicoba lagi.</string>
     <string name="audio_forget_rejections_none">Tidak ada yang dipelajari</string>
     <string name="audio_forget_rejections_done">Penolakan audio yang dipelajari dihapus</string>
+    <string name="audio_forget_tunnel_stalls_title">Lupakan riwayat macet tunnel</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunnel nonaktif untuk: %1$s. Ini memungkinkan video berikutnya mencoba tunnel lagi.</string>
+    <string name="audio_forget_tunnel_stalls_none">Tidak ada yang diingat.</string>
+    <string name="audio_forget_tunnel_stalls_done">Riwayat macet tunnel dihapus</string>
     <string name="audio_inject_hdr10_sei_title">Sisipkan metadata HDR10 saat strip</string>
     <string name="audio_inject_hdr10_sei_sub">Untuk konten DV8 (Profile 8) yang di-strip ke lapisan dasar HDR10, tambahkan metadata mastering sumber (MaxCLL/MaxFALL dan luminans puncak) agar TV HDR10 non-DV melakukan tone-map dengan benar. Hanya aktif saat Penanganan DV adalah Strip DV atau Lapisan Dasar HDR10; tidak berpengaruh pada Profile 7 atau pemutaran Dolby Vision.</string>
     <string name="diag_value_not_advertised">Tidak diumumkan (pemutaran native mungkin tetap berfungsi)</string>
     <string name="diag_label_dv_el_type">Tipe EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">Mastering HDR DV</string>
     <string name="diag_label_dv_rpu_drops">RPU DV terbuang</string>
+    <string name="sub_tertiary_lang">Bahasa Ketiga yang Diutamakan</string>
     <string name="sub_addon_subtitles">Subtitle addon</string>
     <string name="sub_addon_subtitles_desc">Ambil subtitle dari addon terpasang selama pemutaran. Saat nonaktif, hanya subtitle yang tertanam di file yang tersedia.</string>
     <string name="autoplay_quality_rules_title">Aturan kualitas</string>

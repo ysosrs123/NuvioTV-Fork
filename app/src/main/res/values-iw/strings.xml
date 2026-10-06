@@ -3431,6 +3431,8 @@
     <string name="audio_surround_mode_auto_desc">מעביר כמות שהם את הפורמטים שמערכת השמע מדווחת שהיא מפענחת, ומפענח את השאר באפליקציה.</string>
     <string name="audio_surround_mode_manual">ידני</string>
     <string name="audio_surround_mode_manual_desc">בחירה לכל פורמט אם מערכת השמע יכולה לפענח אותו. מתאים כשהדיווח האוטומטי שגוי.</string>
+    <string name="audio_surround_tv_arc_soundbar">השמע עובר דרך הטלוויזיה אל מקרן קול (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">במצב אוטומטי נשלחים כ-Dolby Digital 5.1 פורמטים שמקרן הקול אינו תומך בהם, ושמע מפוענח אחר כסטריאו. Dolby Digital ו-Dolby Digital Plus עוברים ללא שינוי.</string>
     <string name="audio_surround_allow_ac3">מקלט תומך Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">כבוי מפענח AC-3 ל-PCM באפליקציה. לכבות רק אם המקלט או הטלוויזיה אינם מפענחים AC-3.</string>
     <string name="audio_surround_allow_eac3">מקלט תומך Dolby Digital Plus (E-AC-3)</string>
@@ -3457,12 +3459,17 @@
     <string name="audio_forget_rejections_sub">פורמטים שהמקלט סירב לפתוח אינם נשלחים אליו עוד במעבר שמע. כאן אפשר לנסות אותם שוב.</string>
     <string name="audio_forget_rejections_none">לא נלמד דבר</string>
     <string name="audio_forget_rejections_done">דחיות השמע שנלמדו נוקו</string>
+    <string name="audio_forget_tunnel_stalls_title">שכחת תקיעות בהפעלה ממונרת</string>
+    <string name="audio_forget_tunnel_stalls_sub">הפעלה ממונרת כבויה עבור: %1$s. זה מאפשר לסרטון הבא לנסות שוב.</string>
+    <string name="audio_forget_tunnel_stalls_none">לא נשמר דבר.</string>
+    <string name="audio_forget_tunnel_stalls_done">התקיעות נשכחו</string>
     <string name="audio_inject_hdr10_sei_title">הזרקת מטא-דאטה של HDR10 בהסרה</string>
     <string name="audio_inject_hdr10_sei_sub">בתוכן DV8 (Profile 8) שצומצם לשכבת בסיס HDR10, מוסיף את נתוני המאסטרינג של המקור (MaxCLL/MaxFALL ובהירות שיא) כדי שטלוויזיות HDR10 ללא DV יבצעו מיפוי גוונים נכון. פעיל רק כשטיפול ב-DV מוגדר להסרת DV או לשכבת בסיס HDR10; אין השפעה על Profile 7 או על הפעלת Dolby Vision.</string>
     <string name="diag_value_not_advertised">לא מוצהר (ייתכן שהפעלה טבעית עדיין תעבוד)</string>
     <string name="diag_label_dv_el_type">סוג EL של DV7</string>
     <string name="diag_label_dv_hdr_mastering">מאסטרינג HDR של DV</string>
     <string name="diag_label_dv_rpu_drops">השמטות RPU של DV</string>
+    <string name="sub_tertiary_lang">שפה מועדפת שלישית</string>
     <string name="sub_addon_subtitles">כתוביות מתוספים</string>
     <string name="sub_addon_subtitles_desc">משיכת כתוביות מתוספים מותקנים במהלך ההפעלה. כשכבוי, זמינות רק הכתוביות המוטמעות בקובץ.</string>
     <string name="autoplay_quality_rules_title">כללי איכות</string>

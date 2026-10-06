@@ -38,12 +38,13 @@ internal fun resolveAudioRoutingSnapshot(
     isTranscodingAc3: Boolean,
     isAudioPathActive: Boolean,
     sinkMime: String?,
-    sinkChannelCount: Int
+    sinkChannelCount: Int,
+    isTunnelled: Boolean = false
 ): AudioRoutingSnapshot? {
     if (sourceMime == null) return null
     val isSourceSurroundOrHbr = isSurroundOrHbrMime(sourceMime, sourceChannelCount)
 
-    return when {
+    val snapshot = when {
         isIecActive -> {
             AudioRoutingSnapshot(
                 mode = AudioRoutingMode.PASSTHROUGH_IEC,
@@ -90,9 +91,14 @@ internal fun resolveAudioRoutingSnapshot(
         }
         else -> null
     }
+    if (!isTunnelled || snapshot == null || snapshot.mode == AudioRoutingMode.PASSTHROUGH_IEC) return snapshot
+    return snapshot.copy(outputFormat = withTunnelNote(snapshot.outputFormat))
 }
 
-internal fun PlayerRuntimeController.getAudioRoutingSnapshot(): AudioRoutingSnapshot? {
+internal fun withTunnelNote(label: String): String =
+    if (label.endsWith(")")) "${label.dropLast(1)}, tunnelled)" else "$label (tunnelled)"
+
+internal fun PlayerRuntimeController.getAudioRoutingSnapshot(isTunnelled: Boolean = false): AudioRoutingSnapshot? {
     val player = _exoPlayer ?: return null
     val sourceFormat = player.audioFormat ?: return null
     val sourceMime = sourceFormat.sampleMimeType ?: return null
@@ -111,6 +117,7 @@ internal fun PlayerRuntimeController.getAudioRoutingSnapshot(): AudioRoutingSnap
         isTranscodingAc3 = isTranscodingAc3,
         isAudioPathActive = ffmpeg?.isAudioPathActive() == true,
         sinkMime = sinkFormat?.sampleMimeType,
-        sinkChannelCount = sinkFormat?.channelCount ?: -1
+        sinkChannelCount = sinkFormat?.channelCount ?: -1,
+        isTunnelled = isTunnelled
     )
 }

@@ -3504,6 +3504,8 @@
     <string name="audio_surround_mode_auto_desc">Przepuszcza formaty, które system audio zgłasza jako obsługiwane, a pozostałe dekoduje w aplikacji.</string>
     <string name="audio_surround_mode_manual">Ręcznie</string>
     <string name="audio_surround_mode_manual_desc">Wybierz dla każdego formatu, czy system audio potrafi go zdekodować. Użyj, gdy automatyczne zgłoszenie jest błędne.</string>
+    <string name="audio_surround_tv_arc_soundbar">Dźwięk idzie przez telewizor do soundbara (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Auto wysyła formaty, których soundbar nie obsługuje, jako Dolby Digital 5.1, a pozostały dekodowany dźwięk jako stereo. Dolby Digital i Dolby Digital Plus są przepuszczane bez zmian.</string>
     <string name="audio_surround_allow_ac3">Amplituner obsługuje Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Wyłączone dekoduje AC-3 do PCM w aplikacji. Wyłącz tylko, jeśli amplituner lub telewizor nie dekoduje AC-3.</string>
     <string name="audio_surround_allow_eac3">Amplituner obsługuje Dolby Digital Plus (E-AC-3)</string>
@@ -3530,12 +3532,17 @@
     <string name="audio_forget_rejections_sub">Formaty, których amplituner nie chciał otworzyć, nie są już do niego przepuszczane. Ta opcja pozwala spróbować ich ponownie.</string>
     <string name="audio_forget_rejections_none">Nic nie zapamiętano</string>
     <string name="audio_forget_rejections_done">Wyczyszczono odrzucone formaty audio</string>
+    <string name="audio_forget_tunnel_stalls_title">Zapomnij zacięcia tunelu</string>
+    <string name="audio_forget_tunnel_stalls_sub">Tunelowanie wyłączone dla: %1$s. Ta opcja pozwala kolejnemu filmowi spróbować ponownie.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nic nie zapamiętano.</string>
+    <string name="audio_forget_tunnel_stalls_done">Zapomniano zacięcia tunelu</string>
     <string name="audio_inject_hdr10_sei_title">Dodaj metadane HDR10 przy usuwaniu DV</string>
     <string name="audio_inject_hdr10_sei_sub">Dla treści DV8 (Profile 8) sprowadzonych do warstwy bazowej HDR10 dodaje metadane masteringu źródła (MaxCLL/MaxFALL i luminancję szczytową), aby telewizory HDR10 bez DV poprawnie mapowały tony. Działa tylko, gdy obsługa DV to Usuń DV lub Warstwa bazowa HDR10; nie wpływa na Profile 7 ani na odtwarzanie Dolby Vision.</string>
     <string name="diag_value_not_advertised">Nie zgłoszono (natywne odtwarzanie może mimo to działać)</string>
     <string name="diag_label_dv_el_type">Typ EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">Mastering HDR DV</string>
     <string name="diag_label_dv_rpu_drops">Utracone RPU DV</string>
+    <string name="sub_tertiary_lang">Trzeci preferowany język</string>
     <string name="sub_addon_subtitles">Napisy z dodatków</string>
     <string name="sub_addon_subtitles_desc">Pobieraj napisy z zainstalowanych dodatków podczas odtwarzania. Po wyłączeniu dostępne są tylko napisy osadzone w pliku.</string>
     <string name="autoplay_quality_rules_title">Reguły jakości</string>

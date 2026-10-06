@@ -73,6 +73,15 @@ internal fun PlaybackSubtitlesSection(
         enabled = languageSelectionEnabled,
         onClick = { onOpenDialog(PlaybackDialog.SECONDARY_SUBTITLE_LANGUAGE) }
     )
+    SettingsActionRow(
+        title = stringResource(R.string.sub_tertiary_lang),
+        subtitle = null,
+        value = style.tertiaryPreferredLanguage
+            ?.let { code -> AVAILABLE_SUBTITLE_LANGUAGES.find { it.code == code }?.displayName }
+            ?: stringResource(R.string.sub_not_set),
+        enabled = languageSelectionEnabled,
+        onClick = { onOpenDialog(PlaybackDialog.TERTIARY_SUBTITLE_LANGUAGE) }
+    )
     autoSyncSettingsItems(enabled = enabled) // AutoSync hook
 
     SettingsToggleRow(
@@ -263,6 +272,16 @@ internal fun SubtitleSettingsDialogs(
             showNoneOption = true,
             onLanguageSelected = { language ->
                 onUpdate { setSubtitleSecondaryLanguage(language) }
+                onDismiss()
+            },
+            onDismiss = onDismiss
+        )
+        PlaybackDialog.TERTIARY_SUBTITLE_LANGUAGE -> LanguageSelectionDialog(
+            title = stringResource(R.string.sub_tertiary_lang),
+            selectedLanguage = style.tertiaryPreferredLanguage,
+            showNoneOption = true,
+            onLanguageSelected = { language ->
+                onUpdate { setSubtitleTertiaryLanguage(language) }
                 onDismiss()
             },
             onDismiss = onDismiss

@@ -2656,6 +2656,8 @@
     <string name="audio_surround_mode_auto_desc">Envia em passthrough os formatos que o teu sistema de áudio indica conseguir descodificar e descodifica os restantes na app.</string>
     <string name="audio_surround_mode_manual">Manual</string>
     <string name="audio_surround_mode_manual_desc">Escolhe, formato a formato, se o teu sistema de áudio o consegue descodificar. Utiliza quando a indicação automática está errada.</string>
+    <string name="audio_surround_tv_arc_soundbar">O som passa pela TV até uma barra de som (ARC)</string>
+    <string name="audio_surround_tv_arc_soundbar_sub">Auto envia em Dolby Digital 5.1 os formatos que a barra de som não aceita e o resto do som descodificado em estéreo. Dolby Digital e Dolby Digital Plus são enviados em passthrough, sem alterações.</string>
     <string name="audio_surround_allow_ac3">Recetor compatível com Dolby Digital (AC-3)</string>
     <string name="audio_surround_allow_ac3_sub">Desligado descodifica AC-3 para PCM na app. Desliga apenas se o teu recetor ou a TV não descodificar AC-3.</string>
     <string name="audio_surround_allow_eac3">Recetor compatível com Dolby Digital Plus (E-AC-3)</string>
@@ -2682,12 +2684,17 @@
     <string name="audio_forget_rejections_sub">Os formatos que o teu recetor recusou abrir deixam de lhe ser enviados em passthrough. Isto permite voltar a tentá-los.</string>
     <string name="audio_forget_rejections_none">Nada aprendido</string>
     <string name="audio_forget_rejections_done">Rejeições de áudio aprendidas limpas</string>
+    <string name="audio_forget_tunnel_stalls_title">Esquecer bloqueios em túnel</string>
+    <string name="audio_forget_tunnel_stalls_sub">Túnel desativado para: %1$s. Isto permite ao próximo vídeo voltar a tentá-lo.</string>
+    <string name="audio_forget_tunnel_stalls_none">Nada memorizado.</string>
+    <string name="audio_forget_tunnel_stalls_done">Bloqueios em túnel esquecidos</string>
     <string name="audio_inject_hdr10_sei_title">Injetar metadados HDR10 ao remover DV</string>
     <string name="audio_inject_hdr10_sei_sub">Para conteúdo DV8 (Profile 8) reduzido à camada base HDR10, adiciona os metadados de masterização da fonte (MaxCLL/MaxFALL e luminância de pico) para que TVs HDR10 sem DV façam o mapeamento de tons corretamente. Só fica ativo quando o Tratamento DV é Remover DV ou Camada base HDR10; sem efeito no Profile 7 nem na reprodução Dolby Vision.</string>
     <string name="diag_value_not_advertised">Não anunciado (a reprodução nativa pode funcionar na mesma)</string>
     <string name="diag_label_dv_el_type">Tipo de EL DV7</string>
     <string name="diag_label_dv_hdr_mastering">Masterização HDR DV</string>
     <string name="diag_label_dv_rpu_drops">RPU DV perdidos</string>
+    <string name="sub_tertiary_lang">Idioma preferido terciário</string>
     <string name="sub_addon_subtitles">Legendas de addons</string>
     <string name="sub_addon_subtitles_desc">Obtém legendas dos addons instalados durante a reprodução. Quando desligado, só ficam disponíveis as legendas incluídas no ficheiro.</string>
     <string name="autoplay_quality_rules_title">Regras de qualidade</string>

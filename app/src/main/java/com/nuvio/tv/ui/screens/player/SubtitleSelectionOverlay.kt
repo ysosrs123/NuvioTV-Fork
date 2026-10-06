@@ -150,6 +150,7 @@ internal fun SubtitleSelectionOverlay(
             addonSubtitles = sessionAddonSubtitles,
             preferredLanguage = subtitleStyle.preferredLanguage,
             secondaryPreferredLanguage = subtitleStyle.secondaryPreferredLanguage,
+            tertiaryPreferredLanguage = subtitleStyle.tertiaryPreferredLanguage,
             showOnlyPreferredLanguages = subtitleStyle.showOnlyPreferredLanguages,
             currentLanguageKey = openLanguageKey,
             noneLabel = noneLabel,
@@ -1120,6 +1121,7 @@ private fun buildSubtitleLanguageRailItems(
     addonSubtitles: List<Subtitle>,
     preferredLanguage: String,
     secondaryPreferredLanguage: String?,
+    tertiaryPreferredLanguage: String?,
     showOnlyPreferredLanguages: Boolean,
     currentLanguageKey: String,
     noneLabel: String,
@@ -1137,7 +1139,8 @@ private fun buildSubtitleLanguageRailItems(
 
     val preferredOrder = preferredOverlayLanguageOrder(
         preferredLanguage = preferredLanguage,
-        secondaryPreferredLanguage = secondaryPreferredLanguage
+        secondaryPreferredLanguage = secondaryPreferredLanguage,
+        tertiaryPreferredLanguage = tertiaryPreferredLanguage
     )
 
     val languageEntries = if (showOnlyPreferredLanguages) {
@@ -1178,7 +1181,8 @@ private fun buildSubtitleLanguageRailItems(
 
 private fun preferredOverlayLanguageOrder(
     preferredLanguage: String,
-    secondaryPreferredLanguage: String?
+    secondaryPreferredLanguage: String?,
+    tertiaryPreferredLanguage: String?
 ): List<String> {
     fun toOverlayLanguageKey(language: String?): String? {
         if (language.isNullOrBlank()) return null
@@ -1190,7 +1194,8 @@ private fun preferredOverlayLanguageOrder(
 
     return listOfNotNull(
         toOverlayLanguageKey(preferredLanguage),
-        toOverlayLanguageKey(secondaryPreferredLanguage)
+        toOverlayLanguageKey(secondaryPreferredLanguage),
+        toOverlayLanguageKey(tertiaryPreferredLanguage)
     ).distinct()
 }
 

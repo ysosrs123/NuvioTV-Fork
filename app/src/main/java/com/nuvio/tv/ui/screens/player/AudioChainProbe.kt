@@ -106,6 +106,28 @@ object AudioChainProbe {
         AudioDeviceInfo.TYPE_HDMI_EARC
     )
 
+    /**
+     * The HDMI output the box is plugged into. Some boxes also list ARC / eARC outputs with
+     * fixed capabilities next to the real port; mixing those in adds formats and PCM channel
+     * counts the connected TV never reported. They are used only when no HDMI port is listed.
+     */
+    internal fun <T> preferHdmiPort(devices: List<T>, typeOf: (T) -> Int): List<T> {
+        val hdmi = devices.filter { typeOf(it) == AudioDeviceInfo.TYPE_HDMI }
+        return hdmi.ifEmpty { devices.filter { typeOf(it) in HDMI_OUTPUT_TYPES } }
+    }
+
+    fun hdmiOutputDevices(audioManager: AudioManager): List<AudioDeviceInfo> =
+        preferHdmiPort(audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).asList()) { it.type }
+
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    fun readHdmiPlugEncodings(context: Context): IntArray? {
+        val report = runCatching {
+            context.registerReceiver(null, IntentFilter(AudioManager.ACTION_HDMI_AUDIO_PLUG))
+        }.getOrNull() ?: return null
+        if (report.getIntExtra(AudioManager.EXTRA_AUDIO_PLUG_STATE, -1) != 1) return null
+        return report.getIntArrayExtra(AudioManager.EXTRA_ENCODINGS)
+    }
+
     @SuppressLint("NewApi", "InlinedApi")
     fun readMaxPcmChannelCount(context: Context): Int? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return null
@@ -119,8 +141,7 @@ object AudioChainProbe {
             AudioFormat.ENCODING_PCM_FLOAT
         )
         return runCatching {
-            audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
-                .filter { it.type in HDMI_OUTPUT_TYPES }
+            hdmiOutputDevices(audioManager)
                 .flatMap { it.audioProfiles }
                 .filter { it.format in pcmEncodings }
                 .flatMap { profile ->

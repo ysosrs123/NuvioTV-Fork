@@ -484,6 +484,7 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport() {
             startupStages = loadingInput.events,
             rawEventLines = snapshot.rawEventLines + listOf(
                 "audio_passthrough_state surroundMode=${currentPlayerSettingsForReport.surroundFormatMode.name} " +
+                    "tvArcSoundbar=${currentPlayerSettingsForReport.surroundTvArcSoundbar} " +
                     "iecActive=${playbackSpeedAwareAudioSink?.isIecHbrActive()} " +
                     "forceOptical=${currentPlayerSettingsForReport.forceOpticalPassthrough} " +
                     "tunnelingEffective=${state.tunnelingEnabled}"
@@ -587,6 +588,7 @@ private fun PlayerRuntimeController.buildPlaybackIssuePlaybackSettingsInput(): P
         secondaryPreferredAudioLanguage = settings.secondaryPreferredAudioLanguage,
         preferredSubtitleLanguage = settings.subtitleStyle.preferredLanguage,
         secondaryPreferredSubtitleLanguage = settings.subtitleStyle.secondaryPreferredLanguage,
+        tertiaryPreferredSubtitleLanguage = settings.subtitleStyle.tertiaryPreferredLanguage,
         useForcedSubtitles = settings.subtitleStyle.useForcedSubtitles,
         showOnlyPreferredSubtitleLanguages = settings.subtitleStyle.showOnlyPreferredLanguages,
         useLibass = settings.useLibass,
@@ -1281,12 +1283,14 @@ fun PlayerRuntimeController.onEvent(event: PlayerEvent) {
                         userPausedManually = true
                         player.pause()
                         schedulePauseOverlay()
+                        schedulePausedOutputCheck()
                         // A parked auto-restore subtitle attaches here,
                         // while paused, so the reload lands invisibly.
                         maybeAttachDeferredAddonSubtitle()
                     } else {
                         userPausedManually = false
                         cancelPauseOverlay()
+                        cancelPausedOutputCheck()
                         player.play()
                     }
                 }

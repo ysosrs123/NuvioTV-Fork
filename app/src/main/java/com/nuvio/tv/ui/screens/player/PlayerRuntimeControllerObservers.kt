@@ -292,6 +292,7 @@ internal fun PlayerRuntimeController.filterToVisibleAddonSubtitles(
     val preferredTargets = when (PlayerSubtitleUtils.normalizeLanguageCode(style.preferredLanguage)) {
         "none" -> listOfNotNull(
             style.secondaryPreferredLanguage?.takeIf { it.isNotBlank() },
+            style.tertiaryPreferredLanguage?.takeIf { it.isNotBlank() },
             if (style.useForcedSubtitles) {
                 selectedAudioTrackForSubtitleMatching(_uiState.value)
                     ?.takeIf { selectedAudioMatchesResolvedPreferredAudio(it) }
@@ -302,7 +303,8 @@ internal fun PlayerRuntimeController.filterToVisibleAddonSubtitles(
         )
         else -> listOfNotNull(
             style.preferredLanguage,
-            style.secondaryPreferredLanguage?.takeIf { it.isNotBlank() }
+            style.secondaryPreferredLanguage?.takeIf { it.isNotBlank() },
+            style.tertiaryPreferredLanguage?.takeIf { it.isNotBlank() }
         )
     }.map { PlayerSubtitleUtils.normalizeLanguageCode(it) }
         .distinct()
@@ -507,16 +509,19 @@ internal fun PlayerRuntimeController.observeSubtitleSettings() {
 
             applySubtitlePreferences(
                 settings.subtitleStyle.preferredLanguage,
-                settings.subtitleStyle.secondaryPreferredLanguage
+                settings.subtitleStyle.secondaryPreferredLanguage,
+                settings.subtitleStyle.tertiaryPreferredLanguage
             )
             val subtitlePreferenceChanged =
                 lastSubtitlePreferredLanguage != settings.subtitleStyle.preferredLanguage ||
                     lastSubtitleSecondaryLanguage != settings.subtitleStyle.secondaryPreferredLanguage ||
+                    lastSubtitleTertiaryLanguage != settings.subtitleStyle.tertiaryPreferredLanguage ||
                     lastUseForcedSubtitles != settings.subtitleStyle.useForcedSubtitles
             if (subtitlePreferenceChanged) {
                 if (!subtitleDisabledByPersistedPreference && !subtitleAddonRestoredByPersistedPreference) autoSubtitleSelected = false
                 lastSubtitlePreferredLanguage = settings.subtitleStyle.preferredLanguage
                 lastSubtitleSecondaryLanguage = settings.subtitleStyle.secondaryPreferredLanguage
+                lastSubtitleTertiaryLanguage = settings.subtitleStyle.tertiaryPreferredLanguage
                 lastUseForcedSubtitles = settings.subtitleStyle.useForcedSubtitles
                 tryAutoSelectPreferredSubtitleFromAvailableTracks()
             }

@@ -1,6 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
 import android.media.AudioDeviceInfo
+import android.media.AudioTimestamp
 import android.media.AudioTrack
 import android.os.Build
 import android.os.SystemClock
@@ -29,6 +30,8 @@ internal data class AudioClockJitter(
     val driftMaxAbsMs: Long,
     val driftMeanAbsMs: Long
 )
+
+internal data class AudioOutputTimestamp(val trackId: Int, val positionUs: Long)
 
 internal data class AudioRouteSnapshot(val deviceLabel: String, val changeCount: Int)
 
@@ -222,6 +225,23 @@ internal class PlaybackAudioSinkMonitor(
         } catch (t: Throwable) {
             audioTrackFieldLookupFailed = true
             Log.w(TAG, "native AudioTrack underrun count unavailable: ${t.message}")
+            null
+        }
+    }
+
+    /**
+     * The platform track's own output timestamp, with the track it was read from. Null while the
+     * IEC track plays or the output gives no timestamp.
+     */
+    fun platformOutputTimestamp(): AudioOutputTimestamp? {
+        if (iecSink?.isIecActive == true) return null
+        return try {
+            val track = platformAudioTrack() ?: return null
+            val sampleRate = track.sampleRate
+            val timestamp = AudioTimestamp()
+            if (sampleRate <= 0 || !track.getTimestamp(timestamp)) return null
+            AudioOutputTimestamp(System.identityHashCode(track), timestamp.framePosition * 1_000_000L / sampleRate)
+        } catch (t: Throwable) {
             null
         }
     }
