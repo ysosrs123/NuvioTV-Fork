@@ -57,7 +57,7 @@ through callers/callees once and not independently re-checked.
 12. Medium (traced): each catalogue commit decrypts/seals every row through Keystore
     inside one BEGIN IMMEDIATE transaction that also serialises all reads; large
     refreshes can block browsing and zapping for a long time. Needs device timing.
-13. Medium (traced): one zero-length or out-of-window programme, or a duplicated channel
+13. Medium (checked): one zero-length or out-of-window programme, or a duplicated channel
     id with different names, rejects the whole guide feed. Common in merged feeds.
 14. Low (traced): PlaylistCatalogue's generated toString includes guideUrls, which for
     providers usually carry username/password. Not logged today; field is unused.
