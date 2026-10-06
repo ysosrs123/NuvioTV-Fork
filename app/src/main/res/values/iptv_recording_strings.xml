@@ -48,7 +48,7 @@
 
     <string name="iptv_recording_refused_conflict">Other recordings already use all of this account\'s connections at that time</string>
     <string name="iptv_recording_refused_no_connection">No free connection on this account. Stop watching or recording another channel first.</string>
-    <string name="iptv_recording_refused_storage">Not enough free storage to record</string>
+    <string name="iptv_recording_refused_storage">Not enough free storage for this recording. Allow about 2.5 GB for each hour of HD, and 500 MB is always kept free for the device. Delete old recordings or free some space.</string>
     <string name="iptv_recording_refused_ended">This programme has already ended</string>
     <string name="iptv_recording_refused_channel">This channel cannot be recorded right now</string>
     <string name="iptv_recording_refused_duplicate">This channel is already being recorded at that time</string>

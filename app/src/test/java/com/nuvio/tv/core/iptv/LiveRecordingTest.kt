@@ -92,6 +92,16 @@ class LiveRecordingTest {
         assertFalse(RecordingStorage.canStart(reserve))
         assertTrue(RecordingStorage.canStart(reserve + RecordingStorage.START_MARGIN_BYTES))
         assertTrue(RecordingStorage.canStart(RecordingStorage.START_MARGIN_BYTES, reserveBytes = 0))
+        val gigabyte = 1024L * 1024 * 1024
+        assertEquals(2_500L * 1024 * 1024, RecordingStorage.estimatedBytes(hour))
+        assertEquals(RecordingStorage.estimatedBytes(6 * hour), RecordingStorage.estimatedBytes(9 * hour))
+        assertEquals(0L, RecordingStorage.estimatedBytes(-1))
+        val needed = reserve + RecordingStorage.START_MARGIN_BYTES + RecordingStorage.estimatedBytes(hour)
+        assertTrue(RecordingStorage.hasRoomFor(needed, hour))
+        assertFalse(RecordingStorage.hasRoomFor(needed - 1, hour))
+        assertFalse(RecordingStorage.hasRoomFor(needed, hour, committedBytes = gigabyte))
+        assertTrue(RecordingStorage.hasRoomFor(4 * gigabyte, hour))
+        assertFalse(RecordingStorage.hasRoomFor(4 * gigabyte, 2 * hour))
     }
 
     @Test fun fileNamesAreSafeBoundedAndUnique() {

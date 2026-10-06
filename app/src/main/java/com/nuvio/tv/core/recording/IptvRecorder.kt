@@ -288,9 +288,13 @@ class IptvRecorder @Inject constructor(
         val trim = trimRecordingPadding(requested, neighbours.map { it.span })
         val immediate = trim.candidate.startMillis <= now
         if (!immediate && !IptvRecordingAlarms.exactAllowed(context)) return IptvRecordResult.Refused(IptvRecordRefusal.EXACT_ALARMS_DENIED)
+        val committed = active.filter { it.status == RecordingStatus.RECORDING }
+            .sumOf { RecordingStorage.estimatedBytes(it.stopMillis - now) }
+        if (!RecordingStorage.hasRoomFor(freeBytes(), trim.candidate.stopMillis - trim.candidate.startMillis, committed)) {
+            return IptvRecordResult.Refused(IptvRecordRefusal.LOW_STORAGE)
+        }
         if (immediate) {
             if ((admission.snapshot().upstreamsByAccount[admissionAccount(source.profileId, stored.accountId)] ?: 0) >= streams) return IptvRecordResult.Refused(IptvRecordRefusal.NO_FREE_CONNECTION)
-            if (!RecordingStorage.canStart(freeBytes())) return IptvRecordResult.Refused(IptvRecordRefusal.LOW_STORAGE)
         }
         val language = Locale.getDefault().language
         val title = programme?.let { p -> (p.titles.firstOrNull { it.language?.substringBefore('-') == language } ?: p.titles.firstOrNull())?.text }

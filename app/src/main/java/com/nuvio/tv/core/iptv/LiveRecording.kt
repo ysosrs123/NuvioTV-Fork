@@ -146,7 +146,12 @@ object RecordingStorage {
     const val RESERVE_BYTES = 500L * 1024 * 1024
     const val START_MARGIN_BYTES = 100L * 1024 * 1024
     const val CHECK_INTERVAL_BYTES = 8L * 1024 * 1024
+    const val ESTIMATED_BYTES_PER_HOUR = 2_500L * 1024 * 1024
     fun canStart(freeBytes: Long, reserveBytes: Long = RESERVE_BYTES): Boolean = freeBytes >= reserveBytes + START_MARGIN_BYTES
+    fun estimatedBytes(durationMillis: Long): Long =
+        durationMillis.coerceIn(0, RecordingPlan.MAX_DURATION_MILLIS) / 1000 * ESTIMATED_BYTES_PER_HOUR / 3600
+    fun hasRoomFor(freeBytes: Long, durationMillis: Long, committedBytes: Long = 0, reserveBytes: Long = RESERVE_BYTES): Boolean =
+        freeBytes >= reserveBytes + START_MARGIN_BYTES + estimatedBytes(durationMillis) + committedBytes
     fun canContinue(freeBytes: Long, reserveBytes: Long = RESERVE_BYTES): Boolean = freeBytes >= reserveBytes
 }
 
