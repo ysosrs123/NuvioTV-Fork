@@ -34,11 +34,11 @@ fun mergeGuideChannel(existing: GuideChannel, duplicate: GuideChannel, maxNames:
     return GuideChannel(existing.externalId, (existing.names + duplicate.names).distinct().take(maxNames))
 }
 data class GuideParseLimits(
-    val expandedBytes: Long = 64L * 1024 * 1024,
+    val expandedBytes: Long = 512L * 1024 * 1024,
     val depth: Int = 16,
     val textCharacters: Int = 32 * 1024,
-    val channels: Int = 20_000,
-    val programmes: Int = 300_000,
+    val channels: Int = 50_000,
+    val programmes: Int = 2_000_000,
 ) {
     init { require(expandedBytes > 0 && depth > 0 && textCharacters > 0 && channels > 0 && programmes > 0) }
 }

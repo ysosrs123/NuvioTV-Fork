@@ -181,6 +181,9 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                         val command = requireNotNull(item.attributes[IptvStalkerClient.COMMAND_ATTRIBUTE])
                         val connection = withContext(Dispatchers.IO) { access.use(current) { catalogue.connection(ref) } }
                         stalker.streamUrl(connection, command).also { currentCoroutineContext().ensureActive() }
+                    } else if (source.kind == IptvSourceKind.XTREAM) {
+                        val connection = withContext(Dispatchers.IO) { access.use(current) { catalogue.connection(ref) } }
+                        IptvXtreamClient.streamUrl(connection, item.channel.data.locator)
                     } else item.channel.data.locator
                     IptvLivePlayback(context, locator, purpose, streamFormat,
                         onPlaying = { playing -> if (request == tuneVersion) mutable.update { it.copy(playing = playing) } },

@@ -3,6 +3,7 @@ package com.nuvio.tv.data.iptv
 import java.io.FilterInputStream
 import java.io.InputStream
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -25,8 +26,8 @@ sealed interface GuideDownload<out T> {
 }
 
 class IptvGuideClient(
-    private val http: OkHttpClient = IptvMetadataClient.newClient(),
-    private val maxTransferBytes: Long = 64L * 1024 * 1024,
+    private val http: OkHttpClient = IptvMetadataClient.newClient().newBuilder().callTimeout(15, TimeUnit.MINUTES).build(),
+    private val maxTransferBytes: Long = 512L * 1024 * 1024,
 ) {
     init {
         require(maxTransferBytes in 1 until Long.MAX_VALUE)

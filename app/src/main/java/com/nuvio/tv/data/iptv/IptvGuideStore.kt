@@ -22,7 +22,7 @@ import org.json.JSONObject
 
 class IptvGuideStore(
     context: Context, databaseName: String = "iptv-guide.db",
-    private val secrets: IptvSecretBox = AndroidIptvSecretBox(),
+    private val secrets: IptvSecretBox = EnvelopeIptvSecretBox(AndroidIptvSecretBox()),
     private val maxDatabaseBytes: Long = 256L * 1024 * 1024,
     private val releaseDocument: (String) -> Unit = { uri ->
         context.applicationContext.contentResolver.releasePersistableUriPermission(android.net.Uri.parse(uri), android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)

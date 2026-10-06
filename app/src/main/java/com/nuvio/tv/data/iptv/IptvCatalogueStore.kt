@@ -24,7 +24,7 @@ import org.json.JSONObject
 class IptvCatalogueStore(
     context: Context,
     databaseName: String = "iptv-catalogue.db",
-    private val secrets: IptvSecretBox = AndroidIptvSecretBox(),
+    private val secrets: IptvSecretBox = EnvelopeIptvSecretBox(AndroidIptvSecretBox()),
     private val maxDatabaseBytes: Long = 256L * 1024 * 1024,
 ) : Closeable {
     init { require(maxDatabaseBytes >= 64 * 1024) }

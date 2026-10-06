@@ -34,7 +34,8 @@ class IptvXtreamClientTest {
             assertEquals("guide.one", record.data.guideId)
             assertEquals("News", record.attributes["group-title"])
             assertEquals("ADVERTISED", record.attributes["archive-availability"])
-            assertEquals(server.url("/panel/live/user%20%2F+&/pass%3F%23%25/42.ts").toString(), record.data.locator)
+            assertEquals(server.url("/panel/live/42.ts").toString(), record.data.locator)
+            assertEquals(server.url("/panel/live/user%20%2F+&/pass%3F%23%25/42.ts").toString(), IptvXtreamClient.streamUrl(connection(server), record.data.locator))
             val requests = (0..2).map { server.takeRequest().requestUrl!! }
             assertEquals(listOf(null, "get_live_categories", "get_live_streams"), requests.map { it.queryParameter("action") })
             assertTrue(requests.all { it.encodedPath == "/panel/player_api.php" && it.queryParameter("username") == "user /+&" && it.queryParameter("password") == "pass?#%" })
@@ -50,6 +51,13 @@ class IptvXtreamClientTest {
             IptvXtreamClient.guideUrl(IptvSourceConnection("https://example.invalid/", "u", "p")))
         for (endpoint in listOf("https://example.invalid/player_api.php", "https://u:p@example.invalid/"))
             try { IptvXtreamClient.guideUrl(IptvSourceConnection(endpoint, "u", "p")); fail() } catch (_: MetadataException) { }
+    }
+    @Test fun streamUrlUsesTheCurrentConnectionForStoredAndOlderLocators() {
+        val connection = IptvSourceConnection("http://example.invalid:8080", "u", "p/w")
+        assertEquals("http://example.invalid:8080/live/u/p%2Fw/42.m3u8", IptvXtreamClient.streamUrl(connection, "http://old.invalid/live/42.m3u8"))
+        assertEquals("http://example.invalid:8080/live/u/p%2Fw/42.ts", IptvXtreamClient.streamUrl(connection, "http://example.invalid:8080/live/old/secret/42.ts"))
+        for (locator in listOf("http://example.invalid/live/", "http://example.invalid/live/42", "not a url"))
+            try { IptvXtreamClient.streamUrl(connection, locator); fail() } catch (_: MetadataException) { }
     }
     @Test fun rejectedAccountsStopBeforeCatalogueRequests() = runBlocking {
         for (account in listOf("""{"auth":0,"status":"Active"}""", """{"auth":1,"status":"Expired"}""", """{"auth":1,"status":"Active","exp_date":"20"}""")) {

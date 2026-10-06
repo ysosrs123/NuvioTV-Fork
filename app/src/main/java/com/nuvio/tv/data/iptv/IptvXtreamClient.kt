@@ -52,8 +52,7 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
             catch (_: Exception) { throw MetadataException(MetadataFailure.INVALID_RESPONSE) }
         currentCoroutineContext().ensureActive()
         val records = catalogue.channels.map { row ->
-            val locator = base.newBuilder().addPathSegment("live").addPathSegment(user).addPathSegment(pass)
-                .addPathSegment("${row.providerId}.${account.output}").build().toString()
+            val locator = base.newBuilder().addPathSegment("live").addPathSegment("${row.providerId}.${account.output}").build().toString()
             val attributes = buildMap {
                 row.categoryId?.let { id -> put("category-id", id); categories[id]?.let { put("group-title", it) } }
                 put("archive-availability", row.archive.name)
@@ -152,6 +151,13 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
         fun guideUrl(connection: IptvSourceConnection): String = serverBase(connection).newBuilder()
             .addPathSegment("xmltv.php").addQueryParameter("username", connection.username)
             .addQueryParameter("password", connection.password).build().toString()
+
+        fun streamUrl(connection: IptvSourceConnection, locator: String): String {
+            val stream = locator.toHttpUrlOrNull()?.pathSegments?.lastOrNull()
+                ?.takeIf { it.matches(Regex("[0-9]+\\.[A-Za-z0-9]{1,8}")) } ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+            return serverBase(connection).newBuilder().addPathSegment("live").addPathSegment(requireNotNull(connection.username))
+                .addPathSegment(requireNotNull(connection.password)).addPathSegment(stream).build().toString()
+        }
 
         fun serverBase(connection: IptvSourceConnection): HttpUrl {
             val url = connection.endpoint.toHttpUrlOrNull()

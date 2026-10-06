@@ -38,6 +38,7 @@ class IptvSourcesViewModel @Inject constructor(
     val state = mutable.asStateFlow()
     private var session: IptvProfileAccess.Session? = null
     private var operation: Job? = null
+    private var background: Job? = null
     private val playlists = IptvPlaylistRepository(catalogue, xtreamGuides = IptvXtreamGuides(catalogue, guides))
     private val guideRepository = IptvGuideRepository(guides, openDocument = { address ->
         requireNotNull(context.contentResolver.openInputStream(android.net.Uri.parse(address)))
@@ -50,6 +51,7 @@ class IptvSourcesViewModel @Inject constructor(
                     session = null
                     mutable.value = IptvSourcesState(profileId = id, revision = revision)
                     operation?.cancelAndJoin()
+                    background?.cancelAndJoin()
                     if (ready) {
                         val current = withContext(Dispatchers.IO) { access.open(id) }
                         session = current
@@ -159,9 +161,12 @@ class IptvSourcesViewModel @Inject constructor(
         withContext(Dispatchers.IO) { access.use(current) { catalogue.connection(source.ref) } }
         val result = playlists.refresh(source.ref)
         (result as? IptvPlaylistRefresh.Catalogue)?.guide?.let { feed ->
-            val day = Math.floorDiv(System.currentTimeMillis(), 86_400_000L) * 86_400_000L
-            runCatching { guideRepository.refresh(feed, IptvGuideWindow(day - 86_400_000, day + 7 * 86_400_000)) }
-                .onFailure { if (it is CancellationException) throw it }
+            if (background?.isActive != true) background = viewModelScope.launch {
+                val day = Math.floorDiv(System.currentTimeMillis(), 86_400_000L) * 86_400_000L
+                runCatching { guideRepository.refresh(feed, IptvGuideWindow(day - 86_400_000, day + 7 * 86_400_000)) }
+                    .onFailure { if (it is CancellationException) throw it }
+                if (session === current && operation?.isActive != true) reload(current)
+            }
         }
         val message = when (result) {
             IptvPlaylistRefresh.Unchanged -> R.string.iptv_setup_refreshed
