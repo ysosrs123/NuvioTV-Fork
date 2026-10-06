@@ -19,6 +19,7 @@ import com.nuvio.tv.core.iptv.RecordingAlarmAction
 import com.nuvio.tv.core.iptv.RecordingFailure
 import com.nuvio.tv.core.iptv.RecordingFiles
 import com.nuvio.tv.core.iptv.RecordingPlan
+import com.nuvio.tv.core.iptv.RecordingRetry
 import com.nuvio.tv.core.iptv.RecordingSlot
 import com.nuvio.tv.core.iptv.RecordingSpan
 import com.nuvio.tv.core.iptv.RecordingStatus
@@ -328,6 +329,15 @@ class IptvRecorder @Inject constructor(
 
     private suspend fun record(id: String, holder: IptvRecordingProgress) {
         val entry = try {
+            while (true) {
+                val wait = mutex.withLock {
+                    load()
+                    val current = store.get(id)?.takeIf { it.status == RecordingStatus.SCHEDULED } ?: return
+                    current.startMillis - System.currentTimeMillis()
+                }
+                if (wait <= 0) break
+                delay(minOf(wait, START_CHECK_MILLIS))
+            }
             mutex.withLock {
                 load()
                 val current = store.get(id)?.takeIf { it.status == RecordingStatus.SCHEDULED } ?: return
@@ -370,7 +380,14 @@ class IptvRecorder @Inject constructor(
                     ?: return@run RecordingFailure.CHANNEL_UNAVAILABLE
                 admission.setAccountLimit(target.accountId, target.streams)
                 val key = AcquisitionKey(target.accountId, entry.channelId, "record:${entry.id}", target.generation)
-                when (val result = admission.acquire(key, ACQUISITION_BYTES, ConsumerReservation(LiveConsumerRole.RECORDING, 0, BUFFER_BYTES))) {
+                val reservation = ConsumerReservation(LiveConsumerRole.RECORDING, 0, BUFFER_BYTES)
+                val grace = minOf(System.currentTimeMillis() + RecordingRetry.ADMISSION_GRACE_MILLIS, entry.stopMillis)
+                var admitted = admission.acquire(key, ACQUISITION_BYTES, reservation)
+                while (admitted is LiveAdmissionResult.Denied && admitted.reason == AdmissionDenial.ACCOUNT_LIMIT && System.currentTimeMillis() < grace) {
+                    delay(RecordingRetry.ADMISSION_RETRY_MILLIS)
+                    admitted = admission.acquire(key, ACQUISITION_BYTES, reservation)
+                }
+                when (val result = admitted) {
                     is LiveAdmissionResult.Denied -> return@run if (result.reason == AdmissionDenial.ACCOUNT_LIMIT) RecordingFailure.NO_CONNECTION else RecordingFailure.DEVICE_BUSY
                     is LiveAdmissionResult.Admitted -> lease = result.lease
                 }
@@ -527,5 +544,6 @@ class IptvRecorder @Inject constructor(
         const val ALARM_EARLY_MILLIS = 3 * 60 * 1000L
         const val PROGRESS_MILLIS = 2_000L
         const val PERSIST_TICKS = 30
+        const val START_CHECK_MILLIS = 30_000L
     }
 }

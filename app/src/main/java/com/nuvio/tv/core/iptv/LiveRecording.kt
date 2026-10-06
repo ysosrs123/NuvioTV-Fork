@@ -136,6 +136,8 @@ fun recordingAlarmAction(window: RecordingWindow, nowMillis: Long, earlyMillis: 
 object RecordingRetry {
     private val DELAYS = longArrayOf(1_000, 2_000, 4_000, 8_000, 15_000, 30_000)
     const val ATTEMPTS_WITHOUT_DATA = 6
+    const val ADMISSION_GRACE_MILLIS = 45_000L
+    const val ADMISSION_RETRY_MILLIS = 3_000L
     fun delayMillis(attempt: Int): Long = DELAYS[attempt.coerceIn(0, DELAYS.size - 1)]
     fun giveUp(attempt: Int, everReceived: Boolean): Boolean = !everReceived && attempt >= ATTEMPTS_WITHOUT_DATA
 }
