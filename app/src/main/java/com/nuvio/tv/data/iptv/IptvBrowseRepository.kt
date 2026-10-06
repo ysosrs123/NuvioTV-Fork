@@ -5,6 +5,10 @@ import com.nuvio.tv.core.iptv.GuideMatch
 import com.nuvio.tv.core.iptv.GuideMatchReason
 import com.nuvio.tv.core.iptv.GuideGridWindow
 import com.nuvio.tv.core.iptv.GuideProgramme
+import com.nuvio.tv.core.iptv.airingChannels
+import com.nuvio.tv.core.iptv.earliestAiring
+import com.nuvio.tv.core.iptv.guideAiringCandidates
+import com.nuvio.tv.core.iptv.guideSearchQuery
 import com.nuvio.tv.core.iptv.layoutGuideRow
 import com.nuvio.tv.core.iptv.guideIdWithoutFeedSuffix
 import com.nuvio.tv.core.iptv.guideMatchName
@@ -27,22 +31,45 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
         limit: Int = 100): IptvBrowsePage = withContext(Dispatchers.IO) {
         currentCoroutineContext().ensureActive()
         val page = catalogue.page(ref, query, cursor, limit)
-        val ids = page.items.flatMap { row ->
+        IptvBrowsePage(page, listed(ref.profileId, page.guides, page.items))
+    }
+
+    suspend fun searchAiring(ref: IptvSourceRef, query: String, nowMillis: Long, limit: Int = 60,
+        excludedCategories: Set<String> = emptySet()): List<IptvAiringResult> = withContext(Dispatchers.IO) {
+        require(limit in 1..200)
+        if (guideSearchQuery(query) == null) return@withContext emptyList()
+        val associations = catalogue.guideAssociations(ref)
+        val order = (associations.priority + associations.feedIds).distinct()
+        if (order.isEmpty()) return@withContext emptyList()
+        currentCoroutineContext().ensureActive()
+        val matches = guides.airingMatches(ref.profileId, order, query, nowMillis, 400)
+        if (matches.isEmpty()) return@withContext emptyList()
+        val wanted = guideAiringCandidates(matches.map { it.key to it.channel })
+        currentCoroutineContext().ensureActive()
+        val items = catalogue.guideMatchCandidates(ref, wanted.guideIds, wanted.nameKeys, wanted.keys, 600, excludedCategories)
+        val channels = items.chunked(200).flatMap { listed(ref.profileId, associations, it) }
+        airingChannels(channels, { it.item.channel.id }, { it.guide.key }, earliestAiring(matches.map { it.key to it.programme }), limit)
+            .map { (channel, programme) -> IptvAiringResult(channel, programme) }
+    }
+
+    private suspend fun listed(profileId: Int, associations: IptvGuideAssociations, items: List<IptvCatalogueItem>): List<IptvListedChannel> {
+        currentCoroutineContext().ensureActive()
+        val ids = items.flatMap { row ->
             val guideId = row.channel.data.guideId?.takeIf(String::isNotBlank)
             listOfNotNull(guideId, guideId?.let(::guideIdWithoutFeedSuffix), row.overlay.manualGuide?.externalId)
         }.toSet()
-        val feeds = guides.matchingIndexes(ref.profileId, page.guides.feedIds, ids)
-        val order = (page.guides.priority + page.guides.feedIds).distinct()
+        val feeds = guides.matchingIndexes(profileId, associations.feedIds, ids)
+        val order = (associations.priority + associations.feedIds).distinct()
         currentCoroutineContext().ensureActive()
-        val matches = page.items.map { row -> resolveGuideMapping(row.channel.data.guideId, row.overlay.manualGuide, feeds, order) }
-        val unmatched = page.items.indices.filter { matches[it].reason == GuideMatchReason.NONE }
-        val names = unmatched.map { guideMatchName(page.items[it].channel.data.name) }.filter { it.length >= 2 }.toSet()
-        val indexes = if (names.isEmpty()) emptyList() else guides.nameIndexes(ref.profileId, order, names)
+        val matches = items.map { row -> resolveGuideMapping(row.channel.data.guideId, row.overlay.manualGuide, feeds, order) }
+        val unmatched = items.indices.filter { matches[it].reason == GuideMatchReason.NONE }
+        val names = unmatched.map { guideMatchName(items[it].channel.data.name) }.filter { it.length >= 2 }.toSet()
+        val indexes = if (names.isEmpty()) emptyList() else guides.nameIndexes(profileId, order, names)
         currentCoroutineContext().ensureActive()
-        IptvBrowsePage(page, page.items.mapIndexed { index, row ->
+        return items.mapIndexed { index, row ->
             val byName = if (index in unmatched) uniqueNameMatch(row.channel.data.name, indexes) else null
             IptvListedChannel(row, byName?.let { GuideMatch(it, GuideMatchReason.NAME) } ?: matches[index])
-        })
+        }
     }
 
     suspend fun guideRows(profileId: Int, channels: List<IptvListedChannel>, window: GuideGridWindow,

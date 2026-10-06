@@ -46,6 +46,44 @@ class IptvBrowseTest {
         assertEquals(RefreshDecision.PUBLISH, guides.importGuide(guides.beginRefresh(ref), xml.byteInputStream(), IptvGuideWindow(from, from + 86400000)))
         return ref
     }
+    private fun guide(vararg channels: Triple<String, String, String>): IptvGuideRef {
+        val ref = guides.createFeed(1, "Guide", "https://fixture.invalid/guide")
+        val from = Instant.parse("2026-10-05T00:00:00Z").toEpochMilli()
+        val xml = "<tv>" + channels.joinToString("") { (id, name, _) -> "<channel id=\"$id\"><display-name>$name</display-name></channel>" } +
+            channels.joinToString("") { (id, _, title) -> "<programme channel=\"$id\" start=\"20261005000000 +0000\" stop=\"20261005010000 +0000\"><title>$title</title></programme>" } + "</tv>"
+        assertEquals(RefreshDecision.PUBLISH, guides.importGuide(guides.beginRefresh(ref), xml.byteInputStream(), IptvGuideWindow(from, from + 86400000)))
+        return ref
+    }
+    @Test fun airingSearchFollowsTheResolvedGuideOfEachChannel() = runBlocking {
+        val ref = source()
+        fun channel(id: Int, name: String, guide: String?) = IptvCatalogueRecord(ChannelCandidate(name, "https://fixture.invalid/$id", providerId = id.toString(), guideId = guide))
+        publish(ref, listOf(channel(1, "UK: One HD", null), channel(2, "Two", "two.uk@SD"), channel(3, "Three", "three"), channel(4, "Four", "four"),
+            channel(5, "Five", "five"), channel(6, "Hidden", "two.uk"), channel(7, "Two backup", "two.uk")))
+        val a = guide(Triple("one.uk", "One", "Evening News"), Triple("two.uk", "Two", "News at Ten"), Triple("three", "Three", "Quiz"),
+            Triple("four", "Four", "Cartoons"), Triple("five", "Five", "Sport"), Triple("nine", "Nine", "News Nine"))
+        val b = guide(Triple("three", "Three", "News Hour"), Triple("four", "Four", "World News"))
+        val repo = IptvBrowseRepository(catalogue, guides)
+        val now = Instant.parse("2026-10-05T00:30:00Z").toEpochMilli()
+        val ids = catalogue.page(ref).items.associate { it.channel.data.name to it.channel.id }
+        catalogue.setOverlay(ref, ids.getValue("Hidden"), IptvChannelOverlay(hidden = true))
+        catalogue.setOverlay(ref, ids.getValue("Four"), IptvChannelOverlay(manualGuide = GuideKey(b.feedId, "four")))
+        suspend fun search(query: String = "news") = repo.searchAiring(ref, query, now).map { it.channel.item.channel.data.name to it.programme.titles.single().text }
+        assertTrue(search().isEmpty())
+        repo.setGuideFeeds(ref, listOf(a, b))
+        assertEquals(listOf("UK: One HD" to "Evening News", "Two" to "News at Ten", "Four" to "World News", "Two backup" to "News at Ten"), search())
+        val one = repo.searchAiring(ref, "NEWS", now).first()
+        assertEquals(GuideMatchReason.NAME, one.channel.guide.reason); assertEquals(GuideKey(a.feedId, "one.uk"), one.channel.guide.key)
+        repo.setGuideFeeds(ref, listOf(a, b), listOf(b))
+        assertEquals(listOf("UK: One HD", "Two", "Three", "Four", "Two backup"), search().map { it.first })
+        assertEquals("News Hour", search().single { it.first == "Three" }.second)
+        assertTrue(search("quiz").isEmpty())
+        assertEquals(listOf("Five" to "Sport"), search("SPORT"))
+        assertTrue(search("  ").isEmpty())
+        assertEquals(2, repo.searchAiring(ref, "news", now, limit = 2).size)
+        assertTrue(repo.searchAiring(ref, "news", now + 3_600_000).isEmpty())
+        repo.setGuideFeeds(ref, listOf(b))
+        assertEquals(listOf("Three" to "News Hour", "Four" to "World News"), search())
+    }
     @Test fun pagingDecryptsOnlyTheBoundedPageAndVisitsEachIdentityOnce() {
         val ref = source(); publish(ref, (1..401).map { row(it) })
         secrets.opens = 0

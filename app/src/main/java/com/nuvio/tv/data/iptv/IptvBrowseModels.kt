@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.GuideMatch
+import com.nuvio.tv.core.iptv.GuideProgramme
 
 data class IptvBrowseQuery(val search: String = "", val favouritesOnly: Boolean = false,
     val includeHidden: Boolean = false, val includeUnavailable: Boolean = false, val category: String? = null,
@@ -18,3 +19,4 @@ data class IptvCataloguePage(val source: IptvSource, val revision: IptvBrowseRev
     val items: List<IptvCatalogueItem>, val guides: IptvGuideAssociations, val next: IptvBrowseCursor?)
 data class IptvListedChannel(val item: IptvCatalogueItem, val guide: GuideMatch)
 data class IptvBrowsePage(val catalogue: IptvCataloguePage, val channels: List<IptvListedChannel>)
+data class IptvAiringResult(val channel: IptvListedChannel, val programme: GuideProgramme)
