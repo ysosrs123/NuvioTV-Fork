@@ -55,8 +55,8 @@ class IptvRecordingService : Service() {
         }
         if (id != null) recorder.begin(id)
         if (observing == null) observing = scope.launch {
-            recorder.running.collect { ids ->
-                if (ids.isEmpty()) {
+            recorder.changes.collect {
+                if (recorder.running.value.isEmpty()) {
                     ServiceCompat.stopForeground(this@IptvRecordingService, ServiceCompat.STOP_FOREGROUND_REMOVE)
                     stopSelf(lastStartId)
                 } else {

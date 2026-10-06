@@ -110,7 +110,9 @@ class IptvRecorder @Inject constructor(
     private val runningIds = MutableStateFlow<Set<String>>(emptySet())
     private var loaded = false
 
+    private val runningChanges = MutableStateFlow(0L)
     val running: StateFlow<Set<String>> = runningIds.asStateFlow()
+    internal val changes: StateFlow<Long> = runningChanges.asStateFlow()
     val all: StateFlow<List<IptvRecording>> = entries.asStateFlow()
 
     init { scope.launch { mutex.withLock { load() } } }
@@ -195,12 +197,12 @@ class IptvRecorder @Inject constructor(
             progress[id] = holder
             val job = scope.launch { record(id, holder) }
             jobs[id] = job
-            runningIds.value = jobs.keys.toSet()
+            runningIds.value = jobs.keys.toSet(); runningChanges.value += 1
             job.invokeOnCompletion {
                 synchronized(this) {
                     if (jobs[id] === job) { jobs.remove(id); progress.remove(id) }
                     stops.remove(id)
-                    runningIds.value = jobs.keys.toSet()
+                    runningIds.value = jobs.keys.toSet(); runningChanges.value += 1
                 }
             }
         }
