@@ -1,0 +1,69 @@
+<resources>
+    <string name="iptv_recording_channel">Recordings</string>
+    <string name="iptv_recording_channel_description">Shown while Live TV programmes are being recorded</string>
+    <string name="iptv_recording_notification_title">Recording Live TV</string>
+    <string name="iptv_recording_notification_starting">Starting recording…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d programme</item>
+        <item quantity="other">%1$d programmes</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Record</string>
+    <string name="iptv_recording_record_now">Record now</string>
+    <string name="iptv_recording_record_programme">Record this programme</string>
+    <string name="iptv_recording_started">Recording started</string>
+    <string name="iptv_recording_scheduled">Recording scheduled</string>
+    <string name="iptv_recordings_open">Recordings</string>
+
+    <string name="iptv_recordings_title">Recordings</string>
+    <string name="iptv_recordings_description">Programmes recorded or scheduled from Live TV. Recordings are kept on this device and belong to this profile.</string>
+    <string name="iptv_recordings_hint">Press OK to play a recording. Hold OK or press Menu for more options.</string>
+    <string name="iptv_recordings_free">%1$s free on this device</string>
+    <string name="iptv_recordings_empty">Nothing recorded yet. Record a programme from the Live TV guide or while watching.</string>
+    <string name="iptv_recordings_group_now">Recording now</string>
+    <string name="iptv_recordings_group_scheduled">Scheduled</string>
+    <string name="iptv_recordings_group_recorded">Recorded</string>
+
+    <string name="iptv_recording_status_scheduled">Scheduled</string>
+    <string name="iptv_recording_status_recording">Recording</string>
+    <string name="iptv_recording_status_done">Recorded</string>
+    <string name="iptv_recording_status_partial">Partly recorded</string>
+    <string name="iptv_recording_status_failed">Failed</string>
+    <string name="iptv_recording_status_cancelled">Cancelled</string>
+    <string name="iptv_recording_gaps">Has gaps</string>
+
+    <string name="iptv_recording_failure_no_connection">No free connection on this account</string>
+    <string name="iptv_recording_failure_device_busy">The device is busy with other streams</string>
+    <string name="iptv_recording_failure_source">The source could not be reached</string>
+    <string name="iptv_recording_failure_channel">The channel is no longer available</string>
+    <string name="iptv_recording_failure_unsupported">This stream format cannot be recorded</string>
+    <string name="iptv_recording_failure_encrypted">Encrypted streams cannot be recorded</string>
+    <string name="iptv_recording_failure_network">The stream was interrupted</string>
+    <string name="iptv_recording_failure_low_storage">Storage is almost full</string>
+    <string name="iptv_recording_failure_storage">The recording could not be saved</string>
+    <string name="iptv_recording_failure_time_limit">The recording time limit was reached</string>
+    <string name="iptv_recording_failure_interrupted">The app or device stopped during the recording</string>
+    <string name="iptv_recording_failure_start_blocked">Android did not allow the recording to start. Allow alarms and reminders for Nuvio, or keep Nuvio open.</string>
+    <string name="iptv_recording_failure_missed">The programme ended before the recording could start</string>
+
+    <string name="iptv_recording_refused_conflict">Other recordings already use all of this account\'s connections at that time</string>
+    <string name="iptv_recording_refused_no_connection">No free connection on this account. Stop watching or recording another channel first.</string>
+    <string name="iptv_recording_refused_storage">Not enough free storage to record</string>
+    <string name="iptv_recording_refused_ended">This programme has already ended</string>
+    <string name="iptv_recording_refused_channel">This channel cannot be recorded right now</string>
+    <string name="iptv_recording_refused_duplicate">This channel is already being recorded at that time</string>
+    <string name="iptv_recording_refused_full">The recordings list is full. Delete some recordings first.</string>
+    <string name="iptv_recording_refused_profile">The profile changed. Try again.</string>
+
+    <string name="iptv_recording_play">Play</string>
+    <string name="iptv_recording_stop">Stop recording</string>
+    <string name="iptv_recording_cancel">Cancel recording</string>
+    <string name="iptv_recording_delete">Delete recording</string>
+    <string name="iptv_recording_delete_title">Delete \"%1$s\"?</string>
+    <string name="iptv_recording_delete_description">The recording and its file will be removed from this device.</string>
+    <string name="iptv_recording_delete_confirm">Delete</string>
+    <string name="iptv_recording_keep">Keep</string>
+    <string name="iptv_recording_file_missing">The recording file is no longer on this device</string>
+    <string name="iptv_recording_paused">Paused</string>
+    <string name="iptv_recording_skip_hint">Left and right skip 30 seconds</string>
+</resources>
