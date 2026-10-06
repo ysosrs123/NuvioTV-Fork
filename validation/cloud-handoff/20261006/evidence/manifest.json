@@ -246,12 +246,12 @@
       "sha256": "c12ac3dcd601939ba1fe5b4adcca0ffc7c0243633630e5cc5aea7d3ef20287a8"
     },
     "cloud-player-core-20261006.txt": {
-      "bytes": 337,
-      "sha256": "17c8d4dd802775e36e2461e6ec407fde2e794fbcecc221b3b6aba3489ebcf987"
+      "bytes": 340,
+      "sha256": "8f78ba250613df755cbdfc9c869f1bd54562141b0990d669a06e122865e188f9"
     },
     "cloud-player-capture-jvm-20261006.txt": {
-      "bytes": 281,
-      "sha256": "c2a105cc4612dad034010f7caa2a47a8b957902c89de5b4bdbf15f05658a2ccf"
+      "bytes": 3856,
+      "sha256": "e900d1d9a65fcc3508d9ea180b1cd619362ecf164108a90b5cdc8701cdad0ff0"
     }
   }
 }

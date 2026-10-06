@@ -4,7 +4,7 @@ Repository: ysosrs123/NuvioTV-Fork
 Branch: iptv/player-binding (continues iptv/wip 8b84c11; iptv/wip is unchanged)
 Last fully validated local checkpoint: b68985aafcd78f2b096e7073082f98c3c85bb874
 
-Current status: read the "Player-binding cloud continuation" section of
+Current status: read the "Review fixes" and "Player-binding cloud continuation" sections of
 validation/IPTV-NEXT-SESSION-HANDOFF-20261006.md, then
 validation/IPTV-CAPTURE-PLAYER-CLOUD-20261006.json and
 validation/IPTV-CODE-REVIEW-20261006.md. The probable cause of the two player-fixture

@@ -43,6 +43,38 @@ The temporary overnight job was explicitly paused at 07:05 Brisbane, 6 October,
 before its 08:00 cutoff. Leave all three paused; morning manual continuation is
 not authorization to restart/create recurring automations.
 
+## Review fixes — cloud continuation, 6 October 2026
+
+Branch iptv/player-binding. Full findings and per-item status:
+[IPTV-CODE-REVIEW-20261006.md](IPTV-CODE-REVIEW-20261006.md). Fixed in source:
+
+- Capture/period: final frame kept for declared-length video PES (packet-fed
+  extractor clears video PES lengths after hashing); atomic current-snapshot borrow
+  for createPeriod; live-tail skipData stops at the last keyframe; timeline keeps up
+  to 4096 windows; boundary/stop errors raised only at the stream tail.
+- Ownership: admission close tickets completed at non-owner release; transport close
+  joins the worker and re-confirms the HLS source; failed body close retried; primary
+  BACKPRESSURE/STORAGE_BLOCKED kept; later joiners start an unstarted transport.
+- Ingest: overlay-less catalogue tombstones dropped (over-cap returns INVALID); XMLTV
+  byte runs bounded before token construction; bounded guide quarantine and duplicate
+  channel merge; folded search with schema v4 re-index; guide URLs withheld from logs;
+  validators not sent after redirects; six redirects followed.
+- UI: Sources/Live back stack; profile credential removal and Live session open off
+  the main thread; background refresh keeps focus/programmes; extension renderers for
+  live audio; guide document grants released when unused.
+
+Open: 12 (Keystore cost per catalogue row needs device timing), 20 (whether full
+builds should show IPTV). No change by design: 7, 8, 18, 21 (reasons in the review).
+
+Verification in the cloud: core 222/222; data-layer JVM 117/117 across every
+com.nuvio.tv.data.iptv suite (real stager/extractor, MockWebServer HTTP clients).
+Each fix with a test was checked to fail without its change. All 18 IPTV androidTest
+classes and IptvLivePlayback compile against the shipped Media3 classes with stubs.
+Not compiled here: Compose/Hilt UI files (navigation, ViewModels, settings) and
+ProfileManager; not run: full app compile, Gradle unit tests, device instrumentation.
+Run those locally before trusting UI changes; device reruns needed for the capture
+player, stager/codec, guide store and catalogue store fixtures.
+
 ## Player-binding cloud continuation — 6 October 2026
 
 Branch iptv/player-binding, derived from iptv/wip 8b84c11. The last device-validated
