@@ -22,32 +22,34 @@ through callers/callees once and not independently re-checked.
 
 ## Capture ownership, storage and transport
 
-3. High, latent (checked): dropped admission close ticket. SharedCaptureRuntime.join
+3. FIXED. High, latent (checked): dropped admission close ticket. SharedCaptureRuntime.join
    (openUpstream=false path) and LivePlaybackRuntime.open call admission.release and
    ignore the returned AcquisitionCloseTicket. If the other runtime's last lease is
    released between acquire and release, the acquisition stays closing for the process
-   lifetime and keeps counting against the account upstream limit. Completing the ticket
-   at those call sites is not safe on its own: the other runtime may still be closing
-   its upstream. Needs ticket hand-off to the actual upstream owner. Live when both
-   runtimes share one admission (SharedCaptureRuntime is not yet wired in IptvModule).
-4. Medium-high (checked): SegmentCaptureTransport.close cancels the worker then calls
+   lifetime and keeps counting against the account upstream limit. Both upstream owners
+   release their lease only after confirmed close (playback close / transport and store
+   close), so a ticket received by a non-owner always follows confirmed closure; both
+   sites now complete it. No deterministic test: the window has no injection point.
+4. FIXED. Medium-high (checked): SegmentCaptureTransport.close cancels the worker then calls
    HlsCaptureSegmentSource.close, which returns false while owner != null. owner clears
    only after the cancelled worker resumes, so closing a live HLS capture usually reports
    unconfirmed, the session stays closing and nothing in production calls retryClosing.
-   Fix: treat the first source close as an unblock, join the worker, then require a
-   confirming close. No test covers close during an active HLS poll.
-5. Medium (traced): the transport's body-close retry (cleanupBody) is only reached after
+   Fix: the first source close is an unblock; the transport joins the worker, retries
+   body cleanup, then requires a confirming close. Test closes during a reload wait with
+   a deliberately slow unwind (fails without the fix).
+5. FIXED (same change; test retries a failed segment body close). Medium (traced): the transport's body-close retry (cleanupBody) is only reached after
    source.close returns true, but the HLS source returns false while its last body is
    unclosed, so the retry can never run for that source.
-6. Low-medium (traced): a session whose first join failed after pipeline creation (for
+6. FIXED (session records transportStarted; test). Low-medium (traced): a session whose first join failed after pipeline creation (for
    example under-reserved consumer with uncertain close) keeps its transport in NEW;
    later joiners never start it and their readers WAIT indefinitely.
-7. Low (traced): CaptureSegmentStore stream close calls super.close before releasing the
+7. NO CHANGE (by design). Low (traced): CaptureSegmentStore stream close calls super.close before releasing the
    pin; a throwing close retains the pin. This matches the documented retain-on-uncertain
    rule, so it is noted rather than changed; it does block eviction and store close.
 8. Low (traced): IptvCaptureHttp callTimeout(30s) also bounds body streaming; a slow
-   segment transfer fails the transport with no retry.
-9. Low (traced): a throwing body close in the transport's inner finally replaces
+   segment transfer fails the transport with no retry. NO CHANGE: it is the only bound
+   on a slow-drip body, and a segment slower than 30s cannot sustain live capture.
+9. FIXED (primary failure kept, body retained for retry; test). Low (traced): a throwing body close in the transport's inner finally replaces
    BACKPRESSURE/STORAGE_BLOCKED with FAILED.
 
 ## Ingest, catalogue and guide
