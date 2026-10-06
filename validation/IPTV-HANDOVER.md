@@ -27,8 +27,8 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
   `LocalTsSegmentExtractorAndroidTest` covers it on device.
 - The app builds per-ABI APKs only (`isUniversalApk = false`); the workflow uploads
   `app-<variant>-arm64-v8a-debug.apk`.
-- Debug builds install as `com.nuvio.iptv.prototype.debug` ("Nuvio IPTV Prototype")
-  alongside the normal app. CI signs with a throwaway key, so a prototype signed with
+- The prototype installs as `com.nuvio.iptv.prototype` ("Nuvio IPTV Prototype")
+  alongside the normal app; debug builds add no suffix. CI signs with a throwaway key, so a prototype signed with
   another key must be uninstalled first (this clears its sources).
 - Logs: `get_job_logs` with `return_content` shows the last 8 KB; the workflow prints
   a filtered error summary on failure. Without GitHub tools, run status is readable

@@ -2,7 +2,7 @@
 
 Unreleased. Branch `iptv/player-binding` (includes `main` as of 6 October 2026,
 1.1.0-beta-nt4.2 / build 1461). IPTV is enabled only in the `iptvPrototype`
-flavour (package `com.nuvio.iptv.prototype`, `.debug` suffix on debug builds, shown as "Nuvio IPTV Prototype", installs
+flavour (package `com.nuvio.iptv.prototype`, shown as "Nuvio IPTV Prototype", installs
 alongside the normal app); the `full` flavour hides it. Nothing published.
 
 ## Live TV
