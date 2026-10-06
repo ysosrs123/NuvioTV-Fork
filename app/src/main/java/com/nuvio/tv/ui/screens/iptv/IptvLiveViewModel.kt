@@ -298,7 +298,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             catch (error: Exception) { IptvLog.failure("record", error); null }
             val message = when (result) {
                 is com.nuvio.tv.core.recording.IptvRecordResult.Accepted ->
-                    if (result.recording.status == RecordingStatus.SCHEDULED) R.string.iptv_recording_scheduled else R.string.iptv_recording_started
+                    if (result.immediate) R.string.iptv_recording_started else R.string.iptv_recording_scheduled
                 is com.nuvio.tv.core.recording.IptvRecordResult.Refused -> iptvRecordRefusalMessage(result.reason)
                 null -> R.string.iptv_setup_failed
             }

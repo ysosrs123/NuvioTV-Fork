@@ -81,7 +81,7 @@ enum class IptvRecordRefusal {
 }
 
 sealed interface IptvRecordResult {
-    data class Accepted(val recording: IptvRecording) : IptvRecordResult
+    data class Accepted(val recording: IptvRecording, val immediate: Boolean) : IptvRecordResult
     data class Refused(val reason: IptvRecordRefusal) : IptvRecordResult
 }
 
@@ -314,7 +314,7 @@ class IptvRecorder @Inject constructor(
         } else IptvRecordingAlarms.arm(context, entry.id, entry.startMillis)
         publish()
         IptvLog.info("recording ${if (immediate) "started" else "scheduled"}")
-        return IptvRecordResult.Accepted(store.get(entry.id) ?: entry)
+        return IptvRecordResult.Accepted(store.get(entry.id) ?: entry, immediate)
     }
 
     private fun retime(entry: IptvRecording, span: RecordingSpan, now: Long) {
