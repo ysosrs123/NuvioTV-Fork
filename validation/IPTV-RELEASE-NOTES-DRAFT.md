@@ -83,6 +83,12 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 - Channel logos from M3U tvg-logo, Xtream stream_icon and Stalker logo fields
   (http/https only).
 - Guide ids with a feed suffix (for example abc.uk@SD) match the base guide channel.
+- Channel search from the rail (folded, within the current category).
+- Each source opens on the category, favourites or all channels last chosen for it.
+  Holding OK (or Menu) on a category hides it from the rail into a "Hidden
+  categories" section; its channels still appear in All channels.
+- Favourites keep their order: new ones go to the end and can be moved up or down
+  from the channel options in the favourites view.
 - Guides named in an M3U header (url-tvg, x-tvg-url) are added and linked when the
   playlist loads (up to four; an address already added is reused) and refresh with it.
 - Xtream channels without guide programmes show now and next from the provider's
