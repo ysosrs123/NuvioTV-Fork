@@ -78,6 +78,7 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
     var feedMenu by remember { mutableStateOf<IptvGuideFeed?>(null) }
     var confirmSource by remember { mutableStateOf<IptvSource?>(null) }
     var confirmFeed by remember { mutableStateOf<IptvGuideFeed?>(null) }
+    var connectionsFor by remember { mutableStateOf<IptvSource?>(null) }
     LaunchedEffect(state.ready, state.busy, state.revision) {
         if (state.ready && !state.busy && !initiallyFocused) { withFrameNanos { }; runCatching { first.requestFocus() }; initiallyFocused = true }
     }
@@ -153,6 +154,9 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
             Option(stringResource(R.string.iptv_setup_refresh), Icons.Filled.Refresh, enabled = !running) { sourceMenu = null; viewModel.refresh(source) }
             Option(stringResource(R.string.iptv_choose_guides), Icons.Filled.Schedule, enabled = state.selected != source.ref) { sourceMenu = null; viewModel.select(source.ref) }
             Option(stringResource(R.string.iptv_setup_edit), Icons.Filled.Edit) { sourceMenu = null; viewModel.edit(source) }
+            SettingsActionRow(title = stringResource(R.string.iptv_source_connections), subtitle = null,
+                value = (state.connections[source.ref.sourceId] ?: 1).toString(), onClick = { sourceMenu = null; connectionsFor = source },
+                leadingIcon = Icons.Filled.Dns)
             if (index > 0) Option(stringResource(R.string.iptv_guide_move_up), Icons.Filled.KeyboardArrowUp) { sourceMenu = null; viewModel.moveUp(source) }
             Option(stringResource(R.string.iptv_source_remove), Icons.Filled.Delete) { sourceMenu = null; confirmSource = source }
         }
@@ -171,6 +175,14 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
             if (!automatic) Option(stringResource(R.string.iptv_setup_edit), Icons.Filled.Edit) { feedMenu = null; viewModel.edit(feed) }
             Option(stringResource(R.string.iptv_guide_remove), Icons.Filled.Delete) { feedMenu = null; confirmFeed = feed }
         }
+    }
+    connectionsFor?.let { source ->
+        com.nuvio.tv.ui.screens.settings.SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_source_connections),
+            subtitle = stringResource(R.string.iptv_source_connections_description),
+            options = (1..4).map { com.nuvio.tv.ui.screens.settings.SettingsPickerOption(it, pluralStringResource(R.plurals.iptv_connections, it, it)) },
+            selectedValue = state.connections[source.ref.sourceId] ?: 1,
+            onOptionSelected = { viewModel.setConnections(source, it); connectionsFor = null },
+            onDismiss = { connectionsFor = null })
     }
     confirmSource?.let { source ->
         ConfirmDialog(stringResource(R.string.iptv_source_remove_title, source.label), stringResource(R.string.iptv_source_remove_description),

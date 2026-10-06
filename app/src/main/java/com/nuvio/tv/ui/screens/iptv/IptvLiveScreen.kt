@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -137,7 +138,13 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
     val empty = emptyState(state)
     LaunchedEffect(empty) { if (empty != null && !railOpen && !searching) { withFrameNanos { }; runCatching { emptyFocus.requestFocus() } } }
 
-    if (fullscreen) {
+    val tiles = state.multiview
+    if (tiles != null) {
+        Multiview(state, tiles, now, onFocusTile = viewModel::focusTile,
+            onFull = { index -> tiles.getOrNull(index)?.row?.let { row -> fullscreen = true; viewModel.exitMultiview(row) } },
+            onAdd = viewModel::addToMultiview, onReplace = viewModel::replaceTile, onRemove = viewModel::removeTile,
+            onExit = { viewModel.exitMultiview(tiles.getOrNull(state.tileFocus)?.row) })
+    } else if (fullscreen) {
         val playingRow = (state.channels.firstOrNull { it.item.channel.id == state.playingId } ?: state.playingRow?.takeIf { it.item.channel.id == state.playingId })
         val current = playingRow?.let { liveProgramme(state, it.item.channel.id, now) }
         val v2 = LocalV2Appearance.current != null
@@ -212,7 +219,8 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
             onHud = { showHud = !showHud; menuFor = null },
             onStop = { viewModel.stop(); menuFor = null },
             onSources = { menuFor = null; onSources() },
-            onMove = { delta -> menuFor = null; viewModel.moveFavourite(row, delta) })
+            onMove = { delta -> menuFor = null; viewModel.moveFavourite(row, delta) },
+            onMultiview = { menuFor = null; fullscreen = false; viewModel.addToMultiview(row) })
     }
     state.guidePicker?.let { picker ->
         GuidePickerDialog(picker, onAutomatic = { viewModel.chooseGuideChannel(null) }, onFeed = viewModel::pickGuideFeed,
@@ -456,7 +464,7 @@ private fun RailItem(text: String, count: Int?, selected: Boolean, modifier: Mod
 private fun ChannelMenu(row: IptvListedChannel, state: IptvLiveState, onDismiss: () -> Unit, onWatch: () -> Unit,
     onFromStart: (com.nuvio.tv.core.iptv.GuideProgramme) -> Unit, onLive: () -> Unit, onFavourite: () -> Unit,
     onGuide: () -> Unit, onFormat: () -> Unit, onTracks: () -> Unit, onHud: () -> Unit, onStop: () -> Unit, onSources: () -> Unit,
-    onMove: (Int) -> Unit) {
+    onMove: (Int) -> Unit, onMultiview: () -> Unit) {
     val playing = state.player != null && row.item.channel.id == state.playingId
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
@@ -480,6 +488,8 @@ private fun ChannelMenu(row: IptvListedChannel, state: IptvLiveState, onDismiss:
                 if (index in 0 until state.channels.lastIndex) SettingsActionRow(title = stringResource(R.string.iptv_live_favourite_down), subtitle = null,
                     onClick = { onMove(1) }, leadingIcon = Icons.Filled.KeyboardArrowDown, trailingIcon = null)
             }
+            if ((state.multiview?.size ?: 0) < 4) SettingsActionRow(title = stringResource(R.string.iptv_multiview_add_channel), subtitle = null,
+                onClick = onMultiview, leadingIcon = Icons.Filled.ViewModule, trailingIcon = null)
             SettingsActionRow(title = stringResource(R.string.iptv_guide_pick_title), subtitle = stringResource(matchLabel(row.guide.reason)),
                 onClick = onGuide, leadingIcon = Icons.Filled.Schedule)
             SettingsActionRow(title = stringResource(R.string.iptv_live_format_title), subtitle = null,

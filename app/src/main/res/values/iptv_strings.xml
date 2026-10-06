@@ -160,6 +160,22 @@
     <string name="iptv_live_hide_hint">Hold OK to hide or show a category</string>
     <string name="iptv_live_favourite_up">Move up in favourites</string>
     <string name="iptv_live_favourite_down">Move down in favourites</string>
+    <string name="iptv_source_connections">Connections</string>
+    <string name="iptv_source_connections_description">How many channels this account can play or record at the same time. Check your provider\'s plan; most allow one.</string>
+    <string name="iptv_multiview_title">Multiview</string>
+    <string name="iptv_multiview_hint">Audio follows the focused picture · OK for full screen · Hold OK for options</string>
+    <string name="iptv_multiview_add">Add a channel</string>
+    <string name="iptv_multiview_add_hint">Up to four channels. Each one uses a connection on its account.</string>
+    <string name="iptv_multiview_add_channel">Add to multiview</string>
+    <string name="iptv_multiview_replace">Change channel</string>
+    <string name="iptv_multiview_remove">Remove from multiview</string>
+    <string name="iptv_multiview_exit">Leave multiview</string>
+    <string name="iptv_multiview_audio">Sound from this picture</string>
+    <string name="iptv_multiview_capacity">No free connection for this account, or this TV cannot decode another picture. Raise the account\'s connections in Live TV sources if your plan allows it.</string>
+    <plurals name="iptv_connections">
+        <item quantity="one">%1$d connection</item>
+        <item quantity="other">%1$d connections</item>
+    </plurals>
     <plurals name="iptv_source_channels">
         <item quantity="one">%1$d channel</item>
         <item quantity="other">%1$d channels</item>

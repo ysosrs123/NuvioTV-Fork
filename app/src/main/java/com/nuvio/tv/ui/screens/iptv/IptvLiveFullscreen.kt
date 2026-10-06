@@ -223,7 +223,7 @@ private fun Banner(state: IptvLiveState, now: Long) {
 }
 
 @Composable
-private fun ChannelPanel(state: IptvLiveState, now: Long, onWatch: (IptvListedChannel) -> Unit) {
+internal fun ChannelPanel(state: IptvLiveState, now: Long, onWatch: (IptvListedChannel) -> Unit) {
     var selected by remember { mutableStateOf(state.channels.firstOrNull { it.item.channel.id == state.playingId }) }
     val recent = state.recent.drop(1).mapNotNull { id -> state.channels.firstOrNull { it.item.channel.id == id } }.take(4)
     val start = remember { FocusRequester() }

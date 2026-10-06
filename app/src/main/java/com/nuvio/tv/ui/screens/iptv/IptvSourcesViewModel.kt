@@ -31,7 +31,7 @@ data class IptvSourcesState(val profileId: Int = 0, val revision: Long = 0, val 
     val selected: IptvSourceRef? = null, val linked: Set<String> = emptySet(), val linkedOrder: List<String> = emptyList(),
     val busy: Boolean = false, val message: Int? = null, val form: IptvSourceForm? = null,
     val refresh: Map<String, IptvRefreshStatus> = emptyMap(), val counts: Map<String, Int> = emptyMap(),
-    val automatic: Set<String> = emptySet())
+    val automatic: Set<String> = emptySet(), val connections: Map<String, Int> = emptyMap())
 
 @HiltViewModel
 class IptvSourcesViewModel @Inject constructor(
@@ -89,14 +89,17 @@ class IptvSourcesViewModel @Inject constructor(
     private suspend fun reload(current: IptvProfileAccess.Session) {
         val oldSelected = mutable.value.selected
         var automatic = emptySet<String>()
+        var connections = emptyMap<String, Int>()
         val (loaded, counts) = withContext(Dispatchers.IO) { access.use(current) {
             val sources = catalogue.sources(current.profileId)
             val selected = oldSelected?.takeIf { ref -> sources.any { it.ref == ref } } ?: sources.firstOrNull()?.ref
             val feeds = guides.feeds(current.profileId, limit = 200)
             automatic = feeds.filter { XtreamGuideReference.sourceId(guides.endpoint(it.ref)) != null }.map { it.ref.feedId }.toSet()
+            val accounts = catalogue.accounts(current.profileId)
+            connections = sources.associate { source -> source.ref.sourceId to (accounts.firstOrNull { it.id == source.accountId }?.maxStreams ?: 1) }
             Triple(sources, feeds, selected?.let(catalogue::guideAssociations)) to catalogue.channelCounts(current.profileId)
         } }
-        if (session === current) mutable.update { it.copy(sources = loaded.first, feeds = loaded.second, counts = counts, automatic = automatic,
+        if (session === current) mutable.update { it.copy(sources = loaded.first, feeds = loaded.second, counts = counts, automatic = automatic, connections = connections,
             selected = oldSelected?.takeIf { ref -> loaded.first.any { it.ref == ref } } ?: loaded.first.firstOrNull()?.ref,
             linked = loaded.third?.feedIds?.toSet().orEmpty(),
             linkedOrder = loaded.third?.let { (it.priority + it.feedIds).distinct() }.orEmpty(), ready = true) }
@@ -144,7 +147,12 @@ class IptvSourcesViewModel @Inject constructor(
                         StalkerPortal.normalizeMac(username) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS))
                     IptvSourceKind.M3U -> IptvSourceConnection(address)
                 }
-                SavedEntry(source = if (form.source == null) catalogue.createSource(profileId, label.trim(), form.kind, "shared-default", connection)
+                SavedEntry(source = if (form.source == null) catalogue.createSource(profileId, label.trim(), form.kind, "shared-default", connection).let { created ->
+                    val account = ownAccount(created.ref)
+                    catalogue.saveAccount(profileId, account, created.label, 1)
+                    catalogue.assignAccount(created.ref, account)
+                    catalogue.sources(profileId).single { it.ref == created.ref }
+                }
                 else {
                     require(form.source.profileId == profileId)
                     val source = catalogue.sources(profileId).single { it.ref == form.source }
@@ -184,6 +192,18 @@ class IptvSourcesViewModel @Inject constructor(
         } }
         reload(this)
     }
+    fun setConnections(source: IptvSource, count: Int) = runOperation {
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            require(source.ref.profileId == profileId && count in 1..MAX_CONNECTIONS)
+            val latest = catalogue.sources(profileId).single { it.ref == source.ref }
+            val shared = catalogue.accounts(profileId).firstOrNull { it.id == latest.accountId }?.sources.orEmpty().size > 1
+            val account = if (shared || latest.accountId == "shared-default") ownAccount(latest.ref) else latest.accountId
+            catalogue.saveAccount(profileId, account, latest.label, count)
+            if (account != latest.accountId) catalogue.assignAccount(latest.ref, account)
+        } }
+        reload(this)
+    }
+    private fun ownAccount(ref: IptvSourceRef) = "src-" + ref.sourceId.take(76)
     fun moveUp(source: IptvSource) = runOperation {
         val index = mutable.value.sources.indexOfFirst { it.ref == source.ref }
         if (index > 0) withContext(Dispatchers.IO) { access.use(this@runOperation) {
@@ -214,6 +234,7 @@ class IptvSourcesViewModel @Inject constructor(
     fun refresh(source: IptvSource) { session?.let { refresher.refresh(it, source) } }
     fun refresh(feed: IptvGuideFeed) { session?.let { refresher.refresh(it, feed) } }
     private companion object {
+        const val MAX_CONNECTIONS = 4
         val RELOAD_PHASES = setOf(IptvRefreshPhase.GUIDE, IptvRefreshPhase.DONE, IptvRefreshPhase.FAILED)
     }
 }
