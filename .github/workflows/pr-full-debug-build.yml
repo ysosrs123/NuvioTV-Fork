@@ -76,10 +76,16 @@ jobs:
         env:
           VARIANT: ${{ inputs.variant || 'full' }}
         run: |
+          set -o pipefail
           if [ "$VARIANT" = "iptvPrototype" ]; then
-            ./gradlew :app:testIptvPrototypeDebugUnitTest --tests 'com.nuvio.tv.core.iptv.*' --tests 'com.nuvio.tv.data.iptv.*' :app:assembleIptvPrototypeDebug --stacktrace
+            tasks=":app:testIptvPrototypeDebugUnitTest --tests com.nuvio.tv.core.iptv.* --tests com.nuvio.tv.data.iptv.* :app:assembleIptvPrototypeDebug"
           else
-            ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.updater.*' :app:assembleFullDebug --stacktrace
+            tasks=":app:testFullDebugUnitTest --tests com.nuvio.tv.updater.* :app:assembleFullDebug"
+          fi
+          if ! ./gradlew $tasks --continue 2>&1 | tee build.log; then
+            echo "---- build errors ----"
+            grep -E "^e: |^w: .*error|What went wrong|FAILED|Execution failed|> .*Exception|expected:<" build.log | grep -v "^\s*at " | tail -80
+            exit 1
           fi
 
       - name: Upload debug APK
