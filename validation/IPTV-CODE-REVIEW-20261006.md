@@ -138,3 +138,9 @@ through callers/callees once and not independently re-checked.
     window-relative currentPosition steps back by one segment. UI position/seek code must
     use period or absolute capture time.
 
+
+## After the review
+
+Work after 1b7952c (chunked save, removal, guide import changes, short guide, catch-up,
+Live TV and Sources redesign) has not had an independent review yet; it is host-tested
+and CI-built only.

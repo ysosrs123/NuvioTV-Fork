@@ -91,7 +91,8 @@ device-tested):
 - Live channel search (catalogue folded search) from the rail.
 
 Work queue, in order:
-1. Get CI green on the UI rewrite; fix compile errors.
+1. Done: CI green at 105791e (run 37467974960: full compile including the new
+   screens, IPTV JVM suites under Gradle, APK). Later commits need their own run.
 2. Done: remaining data commits cherry-picked (header guides, caps, short guide,
    format detection; the 64 MB parse cap was the likely cause of "unexpected
    format") and short guide wired into Live TV. Header-linked guides are not removed
