@@ -77,10 +77,9 @@ internal class CaptureEpochMediaSource(private val reader: IncrementalCaptureRea
     @Synchronized override fun createPeriod(id:MediaSource.MediaPeriodId, allocator:Allocator, startPositionUs:Long):MediaPeriod {
         access(); check(prepared && !stopping && period==null); require(!id.isAd)
         failure?.let { throw it }
-        val s=reader.state.value
-        if(s.batches.isEmpty() || s.timeline.getIndexOfPeriod(id.periodUid)<0 ||
-            startPositionUs < s.batches.first().samples.video.samples.first().timeUs) throw IOException("Capture period target expired or unresolved")
-        return CaptureEpochPeriod.create(reader,s,id.periodUid,retiresPlayedBatches).also { period=it }
+        return CaptureEpochPeriod.createCurrent(reader,id.periodUid,retiresPlayedBatches) { s ->
+            s.batches.isNotEmpty() && startPositionUs >= s.batches.first().samples.video.samples.first().timeUs
+        }.also { period=it }
     }
     @Synchronized override fun releasePeriod(mediaPeriod:MediaPeriod) {
         access(); require(period === mediaPeriod) { "Foreign capture period" }

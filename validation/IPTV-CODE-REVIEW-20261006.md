@@ -107,7 +107,7 @@ through callers/callees once and not independently re-checked.
 
 ## Media inspection, staging and Media3 period
 
-26. High (checked in inspector; Media3 behaviour traced from the shipped AAR bytecode):
+26. FIXED. High (checked against the shipped PesReader bytecode):
     TsCaptureInspector accepts video PES with a declared length, but the end-of-segment
     flush in LocalTsSegmentExtractor only finalises an unbounded (length 0) video PES.
     With a declared length PesReader finishes the packet as not-end-of-input and the
@@ -115,15 +115,20 @@ through callers/callees once and not independently re-checked.
     validation then fails and staging fails. The fixtures pass because ffmpeg writes
     length 0; many hardware encoders write lengths. Options: reject declared-length video
     at inspection (explicit, narrows the profile) or signal end of input to the H.264
-    reader directly. Needs a declared-length fixture and device decoding.
-27. Medium-low (traced): CaptureEpochMediaSource.createPeriod reads reader.state.value
+    reader directly. Fix: LocalTsSegmentExtractor now feeds whole packets, hashes the
+    original bytes, then clears the length of each video PES header so every video PES is
+    unbounded and the existing end-of-input flush emits the final access unit. The
+    inspector already guarantees declared lengths match the assembled PES exactly. JVM
+    test stages a declared-length copy of segment00 through the real stager and gets the
+    same 50 video frames, timestamps, flags and sizes. Device decode still to rerun.
+27. FIXED (atomic acquireCurrentBorrow/createCurrent). Medium-low (traced): CaptureEpochMediaSource.createPeriod reads reader.state.value
     and then borrows it; an IO-worker publish between the two makes the borrow fail and
     createPeriod throw a fatal "Stale or owned capture snapshot". Fix: bounded retry or
     an atomic borrow-current method on the reader.
-28. Low (traced): skipData moves past the last buffered sample while still live; Media3
+28. FIXED. Low (traced): skipData moves past the last buffered sample while still live; Media3
     queues only do that once loading has ended. A late-frame keyframe drop near the live
     edge can discard the rest of the buffered GOP. Fix: skip to the end only when ENDED.
-29. Low, latent (traced): CaptureSampleTimeline keeps 256 windows while the store can
+29. FIXED (default window limit now 4096, matching store retention). Low, latent (traced): CaptureSampleTimeline keeps 256 windows while the store can
     retain up to 4096 segments, so a cursor anchored on an older retained segment fails.
 30. Note: each played-batch retirement moves the window start forward, so the
     window-relative currentPosition steps back by one segment. UI position/seek code must

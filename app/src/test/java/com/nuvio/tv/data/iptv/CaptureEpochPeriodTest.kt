@@ -123,6 +123,26 @@ class CaptureEpochPeriodTest {
             try { v.readData(FormatHolder(),buffer(),0); fail() } catch(_:IOException) { }
         }
     }
+    @Test fun skipPastLiveTailStopsAtLastKeyframeButCompleteSkipsToEnd() = runBlocking<Unit> {
+        for(complete in listOf(false,true)) Fixture().use { f -> f.store.add(0); val p=f.open(); val s=select(p)
+            if(complete) { f.producer.value=CaptureTransportState.COMPLETE; f.events.emit(Unit); assertTrue(p.refresh(f.ready(IncrementalReaderState.ENDED,1))) }
+            val b=buffer(); assertEquals(C.RESULT_FORMAT_READ,s[0]!!.readData(FormatHolder(),b,0)); assertEquals(C.RESULT_FORMAT_READ,s[1]!!.readData(FormatHolder(),b,0))
+            assertEquals(if(complete) 50 else 0,s[0]!!.skipData(Long.MAX_VALUE)); assertEquals(if(complete) 95 else 94,s[1]!!.skipData(Long.MAX_VALUE))
+            b.clear(); assertEquals(C.RESULT_BUFFER_READ,s[0]!!.readData(FormatHolder(),b,0))
+            if(complete) assertTrue(b.isEndOfStream) else { assertEquals(0L,b.timeUs); assertTrue(b.isKeyFrame) }
+            b.clear(); assertEquals(C.RESULT_BUFFER_READ,s[1]!!.readData(FormatHolder(),b,0))
+            if(complete) assertTrue(b.isEndOfStream) else assertFalse(b.isEndOfStream)
+        }
+    }
+    @Test fun currentSnapshotBorrowIsAtomicAndRejectsOwnedOrUnacceptedTargets() = runBlocking<Unit> {
+        Fixture().use { f -> f.store.add(0); f.reader.start(); val s=f.ready(IncrementalReaderState.WAITING,1); val uid=s.timeline.getUidOfPeriod(0)
+            try { CaptureEpochPeriod.createCurrent(f.reader,uid,false) { false }; fail() } catch(_:IOException) { }
+            try { CaptureEpochPeriod.createCurrent(f.reader,Any(),false) { true }; fail() } catch(_:IOException) { }
+            val p=CaptureEpochPeriod.createCurrent(f.reader,uid,false) { it===f.reader.state.value }; f.period=p
+            assertSame(uid,p.uid); assertNull(f.reader.acquireCurrentBorrow { true })
+            try { CaptureEpochPeriod.createCurrent(f.reader,uid,false) { true }; fail() } catch(_:IOException) { }
+        }
+    }
     @Test fun closeFencesReaderButCannotReleaseBorrowedArrays() = runBlocking<Unit> {
         Fixture().use { f -> f.store.add(0); val p=f.open(); val v=select(p)[0]!!
             assertFalse(f.reader.close()); assertEquals(IncrementalReaderState.CLOSING,f.reader.state.value.state)

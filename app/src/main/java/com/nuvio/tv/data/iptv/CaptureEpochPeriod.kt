@@ -173,7 +173,7 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
                     traversed++
                 }
             }
-            if(positionUs>track(batches.lastIndex,kind).samples.last().timeUs) { row=batches.size; sample=0; traversed }
+            if(ended() && positionUs>track(batches.lastIndex,kind).samples.last().timeUs) { row=batches.size; sample=0; traversed }
             else { row=candidateRow; sample=candidateSample; count }
         }
     }
@@ -188,12 +188,31 @@ internal class CaptureEpochPeriod private constructor(private val reader: Increm
                 s.batches.zipWithNext().all { (a,b) -> b.samples.window.proof.segment.sequence==a.samples.window.proof.segment.sequence+1 && b.samples.window.start90k==a.samples.window.endExclusive90k }
         }
 
+        private fun epochOf(snapshot: IncrementalReaderSnapshot, uid: Any): Long? {
+            val index=snapshot.timeline.getIndexOfPeriod(uid)
+            if(index<0) return null
+            return (snapshot.timeline.getPeriod(index,Timeline.Period(),true).id as? Long)?.takeIf { valid(snapshot,uid,it) }
+        }
+
         fun create(reader: IncrementalCaptureReaderConsumer, snapshot: IncrementalReaderSnapshot, uid: Any,
             retirePlayedBatches: Boolean = false): CaptureEpochPeriod {
             val index=snapshot.timeline.getIndexOfPeriod(uid); require(index>=0)
             val epoch=snapshot.timeline.getPeriod(index,Timeline.Period(),true).id as? Long ?: error("Missing epoch")
             require(valid(snapshot,uid,epoch))
             val lease=reader.acquireBorrow(snapshot) ?: throw IOException("Stale or owned capture snapshot")
+            return open(reader,lease,snapshot,uid,epoch,retirePlayedBatches)
+        }
+
+        fun createCurrent(reader: IncrementalCaptureReaderConsumer, uid: Any, retirePlayedBatches: Boolean,
+            accept: (IncrementalReaderSnapshot) -> Boolean): CaptureEpochPeriod {
+            var epoch=0L
+            val (snapshot,lease)=reader.acquireCurrentBorrow { s -> accept(s) && epochOf(s,uid)?.also { epoch=it } != null }
+                ?: throw IOException("Capture period target expired, unresolved or owned")
+            return open(reader,lease,snapshot,uid,epoch,retirePlayedBatches)
+        }
+
+        private fun open(reader: IncrementalCaptureReaderConsumer, lease: CaptureReaderBorrow, snapshot: IncrementalReaderSnapshot,
+            uid: Any, epoch: Long, retirePlayedBatches: Boolean): CaptureEpochPeriod {
             try { return CaptureEpochPeriod(reader,lease,snapshot,uid,epoch,retirePlayedBatches) }
             catch(t:Throwable) { reader.releaseBorrow(lease); throw t }
         }

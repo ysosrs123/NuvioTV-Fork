@@ -14,7 +14,7 @@ data class CaptureSampleSnapshot(val revision: Long, val windows: List<CaptureSa
     val latestEpoch: Long? get() = windows.lastOrNull()?.epoch
 }
 
-class CaptureSampleTimeline(private val index: CaptureTsInspectionIndex, private val maxWindows: Int = 256) {
+class CaptureSampleTimeline(private val index: CaptureTsInspectionIndex, private val maxWindows: Int = 4096) {
     private val state = Any()
     private var windows = emptyList<CaptureSampleWindow>()
     private var tail: CaptureSampleWindow? = null

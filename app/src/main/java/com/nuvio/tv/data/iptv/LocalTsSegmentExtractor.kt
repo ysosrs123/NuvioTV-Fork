@@ -1,5 +1,6 @@
 package com.nuvio.tv.data.iptv
 
+import androidx.media3.common.C
 import androidx.media3.common.DataReader
 import androidx.media3.common.util.ParsableByteArray
 import androidx.media3.common.util.TimestampAdjuster
@@ -39,15 +40,34 @@ internal object LocalTsSegmentExtractor {
         val extractor = TsExtractor(TsExtractor.MODE_HLS, TimestampAdjuster(TimestampAdjuster.MODE_NO_OFFSET), factory)
         val digest = MessageDigest.getInstance("SHA-256")
         var count = 0L
+        val packet = ByteArray(PACKET)
+        var available = 0
+        var served = 0
+        fun fill(): Boolean {
+            var filled = 0
+            while (filled < PACKET) {
+                checkCancellation()
+                val n = input.read(packet, filled, PACKET - filled)
+                if (n < 0) {
+                    if (filled == 0) return false
+                    throw IOException("Local capture differs from inspection")
+                }
+                if (n == 0) throw IOException("Local capture read made no progress")
+                filled += n
+            }
+            count += PACKET
+            if (count > inspection.bytes) throw IOException("Local capture differs from inspection")
+            digest.update(packet, 0, PACKET)
+            unboundVideoPes(packet, inspection.videoPid)
+            available = PACKET; served = 0
+            return true
+        }
         val data = DataReader { bytes, offset, length ->
             checkCancellation()
-            val n = input.read(bytes, offset, minOf(length.toLong(), inspection.bytes - count + 1).toInt())
-            if (n == 0) throw IOException("Local capture read made no progress")
-            if (n > 0) {
-                count += n
-                if (count > inspection.bytes) throw IOException("Local capture differs from inspection")
-                digest.update(bytes, offset, n)
-            }
+            if (served == available && !fill()) return@DataReader C.RESULT_END_OF_INPUT
+            val n = minOf(length, available - served)
+            System.arraycopy(packet, served, bytes, offset, n)
+            served += n
             n
         }
         try {
@@ -67,5 +87,17 @@ internal object LocalTsSegmentExtractor {
             val finalVideo = video ?: throw IOException("Local capture video missing")
             finalVideo.consume(ParsableByteArray(), TsPayloadReader.FLAG_PAYLOAD_UNIT_START_INDICATOR)
         } finally { extractor.release() }
+    }
+
+    private const val PACKET = 188
+
+    private fun unboundVideoPes(p: ByteArray, videoPid: Int) {
+        fun u(i: Int) = p[i].toInt() and 255
+        if (u(0) != 0x47 || u(1) and 0x40 == 0 || ((u(1) and 0x1f) shl 8 or u(2)) != videoPid) return
+        val control = (u(3) shr 4) and 3
+        if (control and 1 == 0) return
+        val start = 4 + if (control and 2 != 0) 1 + u(4) else 0
+        if (start + 6 > PACKET || u(start) != 0 || u(start + 1) != 0 || u(start + 2) != 1 || u(start + 3) !in 0xe0..0xef) return
+        p[start + 4] = 0; p[start + 5] = 0
     }
 }

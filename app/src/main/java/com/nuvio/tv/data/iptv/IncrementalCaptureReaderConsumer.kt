@@ -89,6 +89,11 @@ internal class IncrementalCaptureReaderConsumer(private val queue: CaptureSample
         if(borrower != null || !borrowable(expected)) return null
         return CaptureReaderBorrow().also { borrower = it; borrowed = expected.batches }
     }
+    @Synchronized fun acquireCurrentBorrow(accept: (IncrementalReaderSnapshot) -> Boolean): Pair<IncrementalReaderSnapshot, CaptureReaderBorrow>? {
+        val current=stateMutable.value
+        if(borrower != null || !borrowable(current) || !accept(current)) return null
+        return current to requireNotNull(acquireBorrow(current))
+    }
     @Synchronized fun refreshBorrow(lease: CaptureReaderBorrow, expected: IncrementalReaderSnapshot): Boolean {
         if(borrower !== lease || !borrowable(expected) || borrowed.any { old -> expected.batches.none { it === old } }) return false
         borrowed = expected.batches; return true

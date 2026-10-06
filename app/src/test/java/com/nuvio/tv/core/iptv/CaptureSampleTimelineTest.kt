@@ -107,6 +107,17 @@ class CaptureSampleTimelineTest {
         }
     }
 
+    @Test fun defaultWindowLimitKeepsEveryRetainedSegmentOpenable() {
+        CaptureSegmentStore(temp.newFolder(), 60_000_000, 210000).use { store ->
+            val index = CaptureTsInspectionIndex(store); val timeline = CaptureSampleTimeline(index)
+            val media = RetainedCaptureFixtures.bytes(0)
+            for (n in 0..256) { store.add(0, n * 2000L, media = media); timeline.accept(index.inspect(n.toLong())) }
+            val rows = timeline.snapshot().windows
+            assertEquals(257, rows.size)
+            timeline.open(rows.first()).use { assertEquals(0L, it.segment.sequence) }
+        }
+    }
+
     @Test fun duplicateEvidenceIsIdempotentAndForeignOwnershipIsRejected() {
         CaptureSegmentStore(temp.newFolder(), 1048576, 524288).use { store ->
             store.add(0); val index = CaptureTsInspectionIndex(store); val timeline = CaptureSampleTimeline(index)
