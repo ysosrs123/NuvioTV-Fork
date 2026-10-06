@@ -241,10 +241,10 @@ Screens and app
 
 - Last full device validation: commit `b68985a` (full app compile, 317 IPTV JVM tests,
   27 AM9 capture/codec fixtures).
-- Since then: 276 core and 137 data-layer JVM tests pass on a host harness; the
+- Since then: 335 core and 151 data-layer JVM tests pass on a host harness; the
   device tests compile. GitHub Actions builds the prototype APK with the IPTV JVM
-  suites under Gradle passing, most recently at `105791e` (Live TV redesign, catch-up,
-  control deck, stats HUD, short guide). Store, removal and catalogue-save tests that
+  suites under Gradle passing, most recently at `2484181` (adds now-on search, multiview,
+  recording and phone setup). Store, removal and catalogue-save tests that
   need real SQLite and Keystore run only on device. Device fixtures and AM9 use are
   pending. See IPTV-HANDOVER.md.
 

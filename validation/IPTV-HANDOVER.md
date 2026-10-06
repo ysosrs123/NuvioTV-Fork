@@ -103,7 +103,9 @@ Work queue, in order:
 1. Done: CI green at 105791e (run 37467974960), ef6f3d7 (run 37469731575) and
    dccb7fb with the review fixes (run 37472049158) and f435994 (run 37474346067,
    number entry and sticky guide removal): full compile, IPTV JVM suites under
-   Gradle, APK. The user should install the f435994 APK for the device pass.
+   Gradle, APK. Latest: 2484181 (run 37537338609) with now-on search, multiview,
+   recording and phone setup plus all review fixes — the APK to install for the device
+   pass (later commits are docs only).
 2. Done: remaining data commits cherry-picked (header guides, caps, short guide,
    format detection; the 64 MB parse cap was the likely cause of "unexpected
    format") and short guide wired into Live TV. Header-linked guides are not removed
