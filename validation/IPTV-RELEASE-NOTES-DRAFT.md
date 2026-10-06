@@ -29,6 +29,15 @@ flavour; the `full` flavour hides it. Nothing published.
 - Audio/subtitle track dialog with Automatic, Off and per-player choices.
 - Search ignores case and compatibility forms (for example ß/ss, final sigma).
 
+## Ready below the UI (screens pending)
+
+- Guide grid layout for a channels-by-time EPG.
+- Automatic guide for Xtream sources from the provider's own XMLTV.
+- Stalker Portal (MAC-based) sources with stream links created at tune time.
+- Provider account groups with per-group stream limits, and source ordering.
+- Guide import from a folder on internal storage or a USB drive for TVs without a
+  file picker.
+
 ## Reliability
 
 - A stream is replaced only after the previous decoder and HTTP connections have
@@ -68,11 +77,11 @@ recording services and USB/SMB storage.
   default; these are estimates, not measured device limits.
 - Media redirects are rejected. No DRM, encrypted HLS, fMP4 or separate-audio
   support has been validated.
-- No timeshift, recording, multiview or catch-up yet. Stalker Portal and automatic
-  Xtream EPG are not implemented.
+- No timeshift, recording, multiview or catch-up yet. Stalker Portal, automatic Xtream
+  guides and account groups have no UI yet.
 - Subtitles, closed captions, DVB subtitles and teletext are not all validated.
 - English fallback strings remain; on-screen keyboard focus in source forms needs
-  device checks. Devices without a document picker need another guide import route.
+  device checks. Devices without a document picker need the folder import UI.
 
 ## Validation
 

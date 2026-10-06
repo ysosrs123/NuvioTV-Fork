@@ -33,6 +33,31 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
 5. Once steps 1–2 pass, squash-merge `iptv/player-binding` into `main` as one commit
    and delete the `iptv/wip` and `iptv/player-binding` branches.
 
+## Logic layer added for the next UI work — 6 October 2026
+
+Host-tested (core 238, data-layer 121); the screens that use them are not built yet.
+
+- Guide grid: `GuideGrid.kt` lays out a slot-aligned time window per channel
+  (clamping, overlap trimming, no-information gaps, open-ended programmes, focus time
+  anchor). `IptvBrowseRepository.guideRows` loads a page of channels into rows.
+- Automatic Xtream guide: after a published Xtream refresh the source gets a linked
+  feed whose endpoint is `xtream-guide:<sourceId>`, resolved at refresh time to the
+  provider's `xmltv.php` from the encrypted connection. Large provider guides may hit
+  the 64 MiB parse budget.
+- Account groups: catalogue schema v5 adds source positions and per-profile account
+  groups (label, 1-16 streams). The live runtime applies the group limit at open.
+  `suggestAccountGroups` proposes groups by provider host (and Xtream user).
+- Stalker Portal: `STALKER` source kind (MAC in the connection's username field),
+  handshake/profile/genres/channels refresh, `create_link` at tune time. Profile
+  status codes other than 0 fail closed; real portals still need checking.
+- Local guide import: `.xml/.xmltv/.xml.gz/.gz` files in the app's `iptv-guides`
+  folder on internal storage or USB are listed and used via `file:` endpoints;
+  paths outside those folders are refused.
+
+UI still needed for these: guide grid screen; Stalker option and MAC field in the
+source form; account group editing and source ordering; local guide file chooser;
+showing the automatic Xtream guide in the feed list.
+
 ## Review fixes — 6 October 2026
 
 Branch iptv/player-binding. Full findings and per-item status:
@@ -256,9 +281,9 @@ choices reset per player. No general CC/DVB/teletext rendering certification.
    delivery. Mock recorder survival and atomic spool sync are NOT durable recording
    or physical power-loss evidence. Broaden progressive TS/HLS init/ranges/renditions
    only with supported entry points, ownership and budgets.
-4. Stalker Portal fixtures/user-configured adapter; automatic Xtream XMLTV/API EPG;
-   explicit source/account groups, feed/source management, priority/mapping/facets /
-   paging and rejected-candidate review. Preserve overlays/profile isolation.
+4. Stalker Portal, automatic Xtream guide and account groups exist as logic (see
+   above); remaining: their UI, feed/source management, mapping/facets/paging and
+   rejected-candidate review. Preserve overlays/profile isolation.
 5. Different-source multiview, catch-up and aggregate VOD/trailer/IPTV ownership,
    single audio/display owner, provider limits and AFR/display handoff.
 6. Full guide grid, Home favourites/sports/recordings, Search, immersive watch-first
