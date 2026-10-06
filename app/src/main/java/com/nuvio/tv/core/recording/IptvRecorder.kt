@@ -45,6 +45,7 @@ import com.nuvio.tv.data.iptv.IptvSourceRef
 import com.nuvio.tv.data.iptv.IptvStalkerClient
 import com.nuvio.tv.data.iptv.IptvStreamFormat
 import com.nuvio.tv.data.iptv.IptvXtreamClient
+import com.nuvio.tv.data.iptv.admissionAccount
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.time.ZoneId
@@ -277,7 +278,7 @@ class IptvRecorder @Inject constructor(
         if (active.any { it.source == source && it.channelId == channelId && it.slot.startMillis < core.stopMillis && it.slot.stopMillis > core.startMillis }) {
             return IptvRecordResult.Refused(IptvRecordRefusal.ALREADY_RECORDING)
         }
-        if (recordingConflicts(active.map { it.slot }, core, streams)) {
+        if (recordingConflicts(active.filter { it.profileId == source.profileId }.map { it.slot }, core, streams)) {
             return IptvRecordResult.Refused(IptvRecordRefusal.CONNECTION_LIMIT)
         }
         val neighbours = active.filter { it.profileId == source.profileId && ((it.source == source && it.channelId == channelId) || it.accountId == stored.accountId) }
@@ -285,7 +286,7 @@ class IptvRecorder @Inject constructor(
         val immediate = trim.candidate.startMillis <= now
         if (!immediate && !IptvRecordingAlarms.exactAllowed(context)) return IptvRecordResult.Refused(IptvRecordRefusal.EXACT_ALARMS_DENIED)
         if (immediate) {
-            if ((admission.snapshot().upstreamsByAccount[stored.accountId] ?: 0) >= streams) return IptvRecordResult.Refused(IptvRecordRefusal.NO_FREE_CONNECTION)
+            if ((admission.snapshot().upstreamsByAccount[admissionAccount(source.profileId, stored.accountId)] ?: 0) >= streams) return IptvRecordResult.Refused(IptvRecordRefusal.NO_FREE_CONNECTION)
             if (!RecordingStorage.canStart(freeBytes())) return IptvRecordResult.Refused(IptvRecordRefusal.LOW_STORAGE)
         }
         val language = Locale.getDefault().language
@@ -427,7 +428,7 @@ class IptvRecorder @Inject constructor(
             IptvSourceKind.XTREAM -> IptvXtreamClient.streamUrl(requireNotNull(found.connection), found.item.channel.data.locator)
             IptvSourceKind.M3U -> found.item.channel.data.locator
         }
-        return Target(found.source.accountId, found.streams, found.source.activeGeneration ?: 0, address, found.item.overlay.streamFormat)
+        return Target(admissionAccount(entry.profileId, found.source.accountId), found.streams, found.source.activeGeneration ?: 0, address, found.item.overlay.streamFormat)
     }
 
     private suspend fun removeWhere(profileId: Int?) {
