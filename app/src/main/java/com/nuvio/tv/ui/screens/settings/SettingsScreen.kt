@@ -209,7 +209,8 @@ fun SettingsScreen(
         visibleSettingsCategories(
             isPrimaryProfile = isPrimaryProfileActive,
             isEssentialMode = isEssentialMode,
-            isDebugBuild = BuildConfig.IS_DEBUG_BUILD
+            isDebugBuild = BuildConfig.IS_DEBUG_BUILD,
+            isIptvEnabled = BuildConfig.FEATURE_IPTV_ENABLED
         )
     }
     val visibleSections = visibleCategories.map { category -> settingsSectionSpec(category) }

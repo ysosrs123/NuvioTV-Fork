@@ -119,4 +119,10 @@ class SettingsCatalogTest {
                 }
             }
         }
+
+    @Test
+    fun `iptv category is hidden unless the build enables it`() {
+        assertFalse(SettingsCategory.IPTV in visibleSettingsCategories(true, isEssentialMode = false, isDebugBuild = true, isIptvEnabled = false))
+        assertTrue(SettingsCategory.IPTV in visibleSettingsCategories(true, isEssentialMode = false, isDebugBuild = true, isIptvEnabled = true))
+    }
 }

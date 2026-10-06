@@ -27,12 +27,14 @@ internal enum class SettingsCategory(val group: SettingsRailGroup) {
 internal fun visibleSettingsCategories(
     isPrimaryProfile: Boolean,
     isEssentialMode: Boolean,
-    isDebugBuild: Boolean
+    isDebugBuild: Boolean,
+    isIptvEnabled: Boolean = true
 ): List<SettingsCategory> = SettingsCategory.entries.filter { category ->
     when (category) {
         SettingsCategory.ACCOUNT,
         SettingsCategory.PROFILES -> isPrimaryProfile
         SettingsCategory.DEBUG -> isDebugBuild && !isEssentialMode
+        SettingsCategory.IPTV -> isIptvEnabled
         SettingsCategory.EXPERIENCE -> false
         else -> true
     }

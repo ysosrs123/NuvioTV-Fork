@@ -172,6 +172,7 @@ android {
             buildConfigField("boolean", "FEATURE_EXTERNAL_TRAILERS_ENABLED", "true")
             buildConfigField("boolean", "FEATURE_EXTERNAL_PLAYBACK_KEEP_ALIVE_ENABLED", "true")
             buildConfigField("boolean", "FEATURE_CUSTOM_SERVER_CONNECTIONS_ENABLED", "true")
+            buildConfigField("boolean", "FEATURE_IPTV_ENABLED", "false")
         }
 
         create("iptvPrototype") {
@@ -180,6 +181,7 @@ android {
             versionNameSuffix = "-iptv-prototype"
             buildConfigField("boolean", "FEATURE_IN_APP_UPDATES_ENABLED", "false")
             buildConfigField("boolean", "UPDATE_CHECK_ENABLED", "false")
+            buildConfigField("boolean", "FEATURE_IPTV_ENABLED", "true")
         }
 
     }
