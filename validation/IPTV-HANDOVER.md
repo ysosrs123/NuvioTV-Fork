@@ -104,7 +104,8 @@ Work queue, in order:
    dccb7fb with the review fixes (run 37472049158) and f435994 (run 37474346067,
    number entry and sticky guide removal): full compile, IPTV JVM suites under
    Gradle, APK. 2484181 (run 37537338609) has now-on search, multiview, recording and
-   phone setup plus all review fixes. 73b59de (multiview sizing) is building.
+   phone setup plus all review fixes. 73b59de (multiview sizing; run 37545837449) is
+   green — the APK to install for the device pass.
 2. Done: remaining data commits cherry-picked (header guides, caps, short guide,
    format detection; the 64 MB parse cap was the likely cause of "unexpected
    format") and short guide wired into Live TV. Header-linked guides are not removed
@@ -144,6 +145,15 @@ Work queue, in order:
    Grid and One large (`mainTile`). Layout and quality live in the `iptv-live`
    preferences. Unverified on devices: what Display.Mode reports on each box (some may
    report the UI size) and real multi-decoder capacity.
+7. Before merge and release: clean device pass; a minified release build with IPTV
+   enabled built and smoke-tested (R8 has never processed the IPTV code; NanoHTTPD and
+   org.json are the likely risks); a decision on how IPTV ships — the release workflow
+   builds only `fullRelease`, where `FEATURE_IPTV_ENABLED` is false (options: enable in
+   `full` and move the recording manifest entries to main, keep the separate prototype
+   app, or enable in `full` behind a setting); upgrade from an existing install checked
+   (catalogue schema to 8, guide schema to 4); then squash-merge into `main` as one
+   commit and delete `iptv/wip` and `iptv/player-binding` only on the user's
+   confirmation. Translations are English only.
 6. Remaining: device validation of all of the above on the AM9 and smaller boxes;
    sports matching; timeshift (capture chain still disabled). The host runner uses
    desktop org.json, so Android-only org.json differences (such as no `keySet`) show
