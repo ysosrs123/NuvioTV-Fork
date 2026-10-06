@@ -51,6 +51,9 @@ channels, 4.8 MB list, 145 MB provider guide taking over two minutes to download
   (`IptvXtreamClient.streamUrl` adds it at tune time), provider guide refreshed in
   the background with 512 MB, 50,000-channel, 2,000,000-programme limits and a
   15 min call timeout. Why no channels appeared is not yet confirmed on device.
+- Pending on device: install a build of 6de391f or later (CI run 37444353656 is green;
+  local Windows builds hit out-of-memory with the 6 GB Gradle heap), then time the
+  Xtream refresh, confirm channels appear and the provider guide imports.
 - The Live TV and Sources screens need a full visual and usability redesign
   (user feedback); planned after the device fixes.
 
