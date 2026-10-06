@@ -140,7 +140,32 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             try {
                 withContext(Dispatchers.IO) { access.use(current) {
                     val latest = requireNotNull(catalogue.playbackItem(ref, row.item.channel.id))
-                    catalogue.setOverlay(ref, latest.channel.id, latest.overlay.copy(favouriteRank = if (latest.overlay.favouriteRank == null) 0 else null))
+                    val next = catalogue.page(ref, IptvBrowseQuery(favouritesOnly = true), null, 200).items
+                        .mapNotNull { it.overlay.favouriteRank }.maxOrNull()?.plus(1) ?: 0
+                    catalogue.setOverlay(ref, latest.channel.id, latest.overlay.copy(favouriteRank = if (latest.overlay.favouriteRank == null) next else null))
+                } }
+                if (session === current) load(background = true)
+            } catch (cancel: CancellationException) { throw cancel }
+            catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
+        }
+    }
+    fun moveFavourite(row: IptvListedChannel, delta: Int) {
+        val current = session ?: return
+        val state = mutable.value
+        val ref = state.source ?: return
+        if (!state.favourites || state.search.isNotBlank()) return
+        val order = state.channels.map { it.item.channel.id }.toMutableList()
+        val index = order.indexOf(row.item.channel.id)
+        val target = index + delta
+        if (index < 0 || target !in order.indices) return
+        order.add(target, order.removeAt(index))
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) { access.use(current) {
+                    order.forEachIndexed { rank, id ->
+                        val latest = catalogue.playbackItem(ref, id) ?: return@forEachIndexed
+                        if (latest.overlay.favouriteRank != rank) catalogue.setOverlay(ref, id, latest.overlay.copy(favouriteRank = rank))
+                    }
                 } }
                 if (session === current) load(background = true)
             } catch (cancel: CancellationException) { throw cancel }

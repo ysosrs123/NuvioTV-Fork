@@ -22,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
@@ -201,7 +203,8 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
             onTracks = { showTracks = true; menuFor = null },
             onHud = { showHud = !showHud; menuFor = null },
             onStop = { viewModel.stop(); menuFor = null },
-            onSources = { menuFor = null; onSources() })
+            onSources = { menuFor = null; onSources() },
+            onMove = { delta -> menuFor = null; viewModel.moveFavourite(row, delta) })
     }
     state.guidePicker?.let { picker ->
         GuidePickerDialog(picker, onAutomatic = { viewModel.chooseGuideChannel(null) }, onFeed = viewModel::pickGuideFeed,
@@ -444,7 +447,8 @@ private fun RailItem(text: String, count: Int?, selected: Boolean, modifier: Mod
 @Composable
 private fun ChannelMenu(row: IptvListedChannel, state: IptvLiveState, onDismiss: () -> Unit, onWatch: () -> Unit,
     onFromStart: (com.nuvio.tv.core.iptv.GuideProgramme) -> Unit, onLive: () -> Unit, onFavourite: () -> Unit,
-    onGuide: () -> Unit, onFormat: () -> Unit, onTracks: () -> Unit, onHud: () -> Unit, onStop: () -> Unit, onSources: () -> Unit) {
+    onGuide: () -> Unit, onFormat: () -> Unit, onTracks: () -> Unit, onHud: () -> Unit, onStop: () -> Unit, onSources: () -> Unit,
+    onMove: (Int) -> Unit) {
     val playing = state.player != null && row.item.channel.id == state.playingId
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
@@ -461,6 +465,13 @@ private fun ChannelMenu(row: IptvListedChannel, state: IptvLiveState, onDismiss:
                 onClick = { onFromStart(current) }, leadingIcon = Icons.Filled.Replay, trailingIcon = null)
             SettingsActionRow(title = stringResource(if (row.item.overlay.favouriteRank == null) R.string.iptv_live_add_favourite else R.string.iptv_live_remove_favourite),
                 subtitle = null, onClick = onFavourite, leadingIcon = if (row.item.overlay.favouriteRank == null) Icons.Filled.StarBorder else Icons.Filled.Star, trailingIcon = null)
+            if (state.favourites && state.search.isBlank() && row.item.overlay.favouriteRank != null) {
+                val index = state.channels.indexOf(row)
+                if (index > 0) SettingsActionRow(title = stringResource(R.string.iptv_live_favourite_up), subtitle = null, onClick = { onMove(-1) },
+                    leadingIcon = Icons.Filled.KeyboardArrowUp, trailingIcon = null)
+                if (index in 0 until state.channels.lastIndex) SettingsActionRow(title = stringResource(R.string.iptv_live_favourite_down), subtitle = null,
+                    onClick = { onMove(1) }, leadingIcon = Icons.Filled.KeyboardArrowDown, trailingIcon = null)
+            }
             SettingsActionRow(title = stringResource(R.string.iptv_guide_pick_title), subtitle = stringResource(matchLabel(row.guide.reason)),
                 onClick = onGuide, leadingIcon = Icons.Filled.Schedule)
             SettingsActionRow(title = stringResource(R.string.iptv_live_format_title), subtitle = null,
