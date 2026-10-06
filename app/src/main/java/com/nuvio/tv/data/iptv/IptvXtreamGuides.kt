@@ -51,8 +51,11 @@ class IptvXtreamGuides(private val catalogue: IptvCatalogueStore, private val gu
     fun removeSource(source: IptvSourceRef) {
         val reference = XtreamGuideReference.of(source.sourceId)
         val automatic = allFeeds(source.profileId).filter { feed -> runCatching { guides.endpoint(feed) == reference }.getOrDefault(false) }
+        val others = catalogue.sources(source.profileId).filter { it.ref != source }
+            .flatMapTo(HashSet()) { catalogue.guideAssociations(it.ref).feedIds }
+        val unused = catalogue.guideAssociations(source).feedIds.filter { it !in others }.map { IptvGuideRef(source.profileId, it) }
         catalogue.removeSource(source)
-        automatic.forEach(::removeFeed)
+        (automatic + unused).distinct().forEach(::removeFeed)
     }
 
     fun removeFeed(feed: IptvGuideRef) {

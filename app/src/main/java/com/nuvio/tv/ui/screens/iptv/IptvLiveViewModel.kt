@@ -50,7 +50,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private val liveLaunch: IptvLiveLaunch,
     private val admission: LiveSessionAdmission,
     private val recorder: com.nuvio.tv.core.recording.IptvRecorder,
-    private val device: IptvDeviceProfile) : ViewModel() {
+    private val device: IptvDeviceProfile,
+    private val livePreferences: IptvLivePreferences) : ViewModel() {
     private val mutable = MutableStateFlow(IptvLiveState(maxTiles = device.maxTiles))
     val state = mutable.asStateFlow()
     private val owner = UUID.randomUUID().toString()
@@ -70,11 +71,10 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var tileSizes: List<Int> = emptyList()
     private var multiviewGeneration = 0L
     private var restored: IptvSourceRef? = null
-    private val preferences = context.getSharedPreferences("iptv-live", Context.MODE_PRIVATE)
-    private fun prefix(ref: IptvSourceRef) = "${ref.profileId}:${ref.sourceId}:"
+    private val preferences = livePreferences.preferences
     private fun remember(state: IptvLiveState) {
         val ref = state.source ?: return
-        preferences.edit().putString(prefix(ref) + "category", if (state.favourites) FAVOURITES_KEY else state.category ?: ALL_KEY).apply()
+        preferences.edit().putString(livePreferences.key(ref, "category"), if (state.favourites) FAVOURITES_KEY else state.category ?: ALL_KEY).apply()
     }
     private var tuneJob: Job? = null
     private var tuneVersion = 0L
@@ -140,7 +140,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     fun toggleHidden(name: String) {
         val ref = mutable.value.source ?: return
         val hidden = mutable.value.hiddenCategories.let { if (name in it) it - name else it + name }
-        preferences.edit().putStringSet(prefix(ref) + "hidden", hidden).apply()
+        preferences.edit().putStringSet(livePreferences.key(ref, "hidden"), hidden).apply()
         mutable.update { it.copy(hiddenCategories = hidden) }
         if (mutable.value.category == null && !mutable.value.favourites) load()
     }
@@ -347,8 +347,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     ?: sources.firstOrNull { it.playbackEligible }?.ref ?: sources.firstOrNull()?.ref
                 if (ref != null && ref != restored && !append) {
                     restored = ref
-                    val saved = preferences.getString(prefix(ref) + "category", null)
-                    val hidden = preferences.getStringSet(prefix(ref) + "hidden", null).orEmpty().toSet()
+                    val saved = preferences.getString(livePreferences.key(ref, "category"), null)
+                    val hidden = preferences.getStringSet(livePreferences.key(ref, "hidden"), null).orEmpty().toSet()
                     mutable.update { it.copy(hiddenCategories = hidden, favourites = saved == FAVOURITES_KEY,
                         category = saved?.takeIf { value -> value != FAVOURITES_KEY && value != ALL_KEY }) }
                 }

@@ -39,14 +39,17 @@ class IptvSourcesViewModel @Inject constructor(
     private val catalogue: IptvCatalogueStore,
     private val guides: IptvGuideStore, private val access: IptvProfileAccess, profiles: ProfileManager,
     private val refresher: IptvRefreshCoordinator,
-    private val liveLaunch: IptvLiveLaunch) : ViewModel() {
+    private val liveLaunch: IptvLiveLaunch,
+    private val livePreferences: IptvLivePreferences) : ViewModel() {
     private val mutable = MutableStateFlow(IptvSourcesState())
     val state = mutable.asStateFlow()
     private var session: IptvProfileAccess.Session? = null
     private var operation: Job? = null
     private var statusReload: Job? = null
     private val xtreamGuides = IptvXtreamGuides(catalogue, guides)
-    val localGuides get() = refresher.localGuides
+    suspend fun guideFiles(): Pair<List<com.nuvio.tv.core.iptv.LocalGuideFile>, List<String>> = withContext(Dispatchers.IO) {
+        runCatching { refresher.localGuides.list() }.getOrDefault(emptyList()) to runCatching { refresher.localGuideFolders().map { it.path } }.getOrDefault(emptyList())
+    }
     init {
         viewModelScope.launch {
             var previous = emptyMap<String, IptvRefreshStatus>()
@@ -217,6 +220,7 @@ class IptvSourcesViewModel @Inject constructor(
         withContext(Dispatchers.IO) { access.use(this@runOperation) {
             require(source.ref.profileId == profileId)
             xtreamGuides.removeSource(source.ref)
+            livePreferences.removeSource(source.ref)
         } }
         if (session === this) mutable.update { it.copy(message = R.string.iptv_source_removed) }
         reload(this)

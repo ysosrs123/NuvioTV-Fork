@@ -125,20 +125,33 @@ class IptvCatalogueStoreTest {
         store.setOverlay(ref, item.channel.id, overlay)
         store.close()
         context.openOrCreateDatabase(name, 0, null).use { db ->
-
-            db.execSQL("ALTER TABLE overlays RENAME TO newer_overlays")
-            db.execSQL("CREATE TABLE overlays (id TEXT NOT NULL REFERENCES identities(id), profile INTEGER NOT NULL, custom_name TEXT, favourite_rank INTEGER, hidden INTEGER NOT NULL, guide_feed TEXT, guide_id TEXT, search_name TEXT, PRIMARY KEY(id,profile))")
-            db.execSQL("INSERT INTO overlays SELECT id,profile,custom_name,favourite_rank,hidden,guide_feed,guide_id,search_name FROM newer_overlays")
-            db.execSQL("DROP TABLE newer_overlays")
+            db.execSQL("CREATE TABLE v2_sources (id TEXT PRIMARY KEY, profile INTEGER NOT NULL, label TEXT NOT NULL, kind TEXT NOT NULL, account_id TEXT NOT NULL, config_version INTEGER NOT NULL, requested INTEGER NOT NULL, active_generation INTEGER, active_config INTEGER, connection BLOB NOT NULL, validators BLOB, browse_revision INTEGER NOT NULL DEFAULT 0)")
+            db.execSQL("INSERT INTO v2_sources SELECT id,profile,label,kind,account_id,config_version,requested,active_generation,active_config,connection,validators,browse_revision FROM sources")
+            db.execSQL("DROP TABLE sources")
+            db.execSQL("ALTER TABLE v2_sources RENAME TO sources")
+            db.execSQL("CREATE INDEX source_profile ON sources(profile)")
+            db.execSQL("CREATE TABLE v2_catalogue (source TEXT NOT NULL REFERENCES sources(id), generation INTEGER NOT NULL, id TEXT NOT NULL REFERENCES identities(id), name TEXT NOT NULL, available INTEGER NOT NULL, payload BLOB NOT NULL, search_name TEXT NOT NULL DEFAULT '', PRIMARY KEY(source,generation,id))")
+            db.execSQL("INSERT INTO v2_catalogue SELECT source,generation,id,name,available,payload,search_name FROM catalogue")
+            db.execSQL("DROP TABLE catalogue")
+            db.execSQL("ALTER TABLE v2_catalogue RENAME TO catalogue")
+            db.execSQL("CREATE INDEX catalogue_browse ON catalogue(source,generation,available,search_name,id)")
+            db.execSQL("CREATE TABLE v2_overlays (id TEXT NOT NULL REFERENCES identities(id), profile INTEGER NOT NULL, custom_name TEXT, favourite_rank INTEGER, hidden INTEGER NOT NULL, guide_feed TEXT, guide_id TEXT, search_name TEXT, PRIMARY KEY(id,profile))")
+            db.execSQL("INSERT INTO v2_overlays SELECT id,profile,custom_name,favourite_rank,hidden,guide_feed,guide_id,search_name FROM overlays")
+            db.execSQL("DROP TABLE overlays")
+            db.execSQL("ALTER TABLE v2_overlays RENAME TO overlays")
+            db.execSQL("DROP TABLE accounts")
             db.version = 2
         }
         store = IptvCatalogueStore(context, name, AndroidIptvSecretBox(alias))
         assertEquals(connection, store.connection(ref))
+        assertEquals(listOf(ref), store.sources(1).map { it.ref })
         val migrated = store.page(ref).items.single()
         assertEquals(item.channel, migrated.channel)
         assertEquals(overlay, migrated.overlay)
         store.setOverlay(ref, item.channel.id, overlay.copy(streamFormat = IptvStreamFormat.HLS))
         assertEquals(IptvStreamFormat.HLS, store.playbackItem(ref, item.channel.id)!!.overlay.streamFormat)
+        assertEquals(RefreshDecision.PUBLISH, publish(ref, listOf(row(1), row(2)), etag = "v2"))
+        assertEquals(2, store.page(ref).items.size)
     }
 
     @Test fun guideMatchCandidatesFindIdsFeedSuffixesNamesAndManualGuidesInChannelOrder() {

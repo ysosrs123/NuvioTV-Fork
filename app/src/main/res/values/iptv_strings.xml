@@ -123,7 +123,7 @@
     <string name="iptv_source_remove">Remove source</string>
     <string name="iptv_guide_remove">Remove guide</string>
     <string name="iptv_source_remove_title">Remove %1$s?</string>
-    <string name="iptv_source_remove_description">Its channels, favourites and guide choices are deleted from this profile, along with its automatic provider guide.</string>
+    <string name="iptv_source_remove_description">Its channels, favourites and guide choices are deleted from this profile, along with its provider guide and any guide no other source uses.</string>
     <string name="iptv_guide_remove_title">Remove %1$s?</string>
     <string name="iptv_guide_remove_description">Its programme information is deleted and it is unlinked from every source.</string>
     <string name="iptv_remove">Remove</string>
@@ -147,6 +147,12 @@
     <string name="iptv_form_save_load">Save and load channels</string>
     <string name="iptv_source_removed">Source removed.</string>
     <string name="iptv_guide_removed">Guide removed.</string>
+    <string name="iptv_guide_choose_folder">Guide folder</string>
+    <string name="iptv_guide_folder_title">Guide files</string>
+    <string name="iptv_guide_folder_description">XMLTV files copied into the iptv-guides folder on this device or on a USB drive.</string>
+    <string name="iptv_guide_folder_empty">No guide files yet. Copy an .xml or .xml.gz file into one of these folders, then open this list again:\n%1$s</string>
+    <string name="iptv_guide_folder_device">This device</string>
+    <string name="iptv_guide_folder_usb">USB drive</string>
     <string name="iptv_live_return">Return to live</string>
     <string name="iptv_live_from_start">Watch from the start</string>
     <string name="iptv_live_catchup_hint">Left and right skip 30 seconds, up and down change channel</string>

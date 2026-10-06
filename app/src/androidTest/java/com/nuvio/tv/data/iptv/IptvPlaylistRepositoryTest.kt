@@ -99,6 +99,27 @@ class IptvPlaylistRepositoryTest {
         }
     }
 
+    @Test fun removingAPlaylistRemovesGuidesNoOtherSourceUses() = fixture { store, ref ->
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val name = "iptv-playlist-remove-${UUID.randomUUID()}.db"
+        val alias = "nuvio.iptv.playlist.remove.$name"
+        try {
+            IptvGuideStore(context, name, EnvelopeIptvSecretBox(AndroidIptvSecretBox(alias))).use { guides ->
+                val links = IptvXtreamGuides(store, guides)
+                val other = store.createSource(1, "Other", IptvSourceKind.M3U, "shared", IptvSourceConnection("https://fixture.invalid/other")).ref
+                val header = links.ensurePlaylist(ref, listOf("https://guides.invalid/one.xml", "https://guides.invalid/two.xml"))
+                val unlinked = guides.createFeed(1, "Spare", "https://guides.invalid/spare.xml")
+                store.setGuideFeeds(other, listOf(header[1]), emptyList())
+                links.removeSource(ref)
+                assertEquals(setOf(header[1], unlinked), guides.feeds(1).map { it.ref }.toSet())
+                assertEquals(listOf(header[1].feedId), store.guideAssociations(other).feedIds)
+            }
+        } finally {
+            context.deleteDatabase(name)
+            KeyStore.getInstance("AndroidKeyStore").apply { load(null); deleteEntry(alias) }
+        }
+    }
+
     private fun fixture(block: suspend (IptvCatalogueStore, IptvSourceRef) -> Unit) = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val id = UUID.randomUUID().toString()

@@ -22,8 +22,9 @@ object IptvModule {
     @Provides @Singleton fun guides(@ApplicationContext context: Context) = IptvGuideStore(context)
     @Provides @Singleton fun shortGuides(catalogue: IptvCatalogueStore) = IptvShortGuideRepository(catalogue)
     @Provides @Singleton fun access(catalogue: IptvCatalogueStore, guides: IptvGuideStore) = IptvProfileAccess(catalogue, guides)
-    @Provides @IntoSet fun credentials(access: IptvProfileAccess): ProfileScopedCredentialStore = object : ProfileScopedCredentialStore {
-        override fun removeProfile(profileId: Int) = access.removeProfile(profileId)
-        override fun clearAllProfiles() = access.clearAllProfiles()
+    @Provides @Singleton fun livePreferences(@ApplicationContext context: Context) = IptvLivePreferences(context)
+    @Provides @IntoSet fun credentials(access: IptvProfileAccess, live: IptvLivePreferences): ProfileScopedCredentialStore = object : ProfileScopedCredentialStore {
+        override fun removeProfile(profileId: Int) { access.removeProfile(profileId); live.removeProfile(profileId) }
+        override fun clearAllProfiles() { access.clearAllProfiles(); live.clearAllProfiles() }
     }
 }

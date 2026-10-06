@@ -44,7 +44,8 @@ class IptvRefreshCoordinator @Inject constructor(
     private val mutable = MutableStateFlow<Map<String, IptvRefreshStatus>>(emptyMap())
     val status: StateFlow<Map<String, IptvRefreshStatus>> = mutable.asStateFlow()
 
-    val localGuides = LocalGuideFiles({ context.getExternalFilesDirs("iptv-guides").filterNotNull() })
+    fun localGuideFolders(): List<java.io.File> = context.getExternalFilesDirs("iptv-guides").filterNotNull()
+    val localGuides = LocalGuideFiles(::localGuideFolders)
     private val playlists = IptvPlaylistRepository(catalogue, xtreamGuides = IptvXtreamGuides(catalogue, guides))
     private val guideRepository = IptvGuideRepository(guides, openDocument = { address ->
         requireNotNull(context.contentResolver.openInputStream(android.net.Uri.parse(address)))

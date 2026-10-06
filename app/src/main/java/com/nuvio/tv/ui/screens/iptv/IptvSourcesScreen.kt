@@ -17,7 +17,9 @@ import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.PhoneAndroid
@@ -56,6 +58,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.LocalGuideFile
 import com.nuvio.tv.core.iptv.StalkerPortal
 import com.nuvio.tv.data.iptv.IptvGuideFeed
 import com.nuvio.tv.data.iptv.IptvSource
@@ -291,6 +294,7 @@ private fun SourceForm(form: IptvSourceForm, state: IptvSourcesState, viewModel:
     var username by remember { mutableStateOf(form.username) }
     var password by remember { mutableStateOf(form.password) }
     var showPassword by remember { mutableStateOf(false) }
+    var choosingFolder by remember { mutableStateOf(false) }
     val picker = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null && uri.scheme == "content") endpoint = uri.toString()
@@ -331,7 +335,12 @@ private fun SourceForm(form: IptvSourceForm, state: IptvSourcesState, viewModel:
                         try { picker.launch(arrayOf("*/*")) }
                         catch (_: android.content.ActivityNotFoundException) { viewModel.documentUnavailable() }
                     }, enabled = !state.busy) { Text(stringResource(R.string.iptv_guide_choose_file)) }
-                    if (endpoint.startsWith("content:")) Text(stringResource(R.string.iptv_guide_file_selected), color = NuvioTheme.colors.TextSecondary,
+                    NuvioActionPill({ choosingFolder = true }, enabled = !state.busy) {
+                        Icon(Icons.Filled.FolderOpen, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.iptv_guide_choose_folder))
+                    }
+                    if (endpoint.startsWith("content:") || endpoint.startsWith("file:")) Text(stringResource(R.string.iptv_guide_file_selected), color = NuvioTheme.colors.TextSecondary,
                         style = MaterialTheme.typography.bodySmall)
                 }
             }
@@ -359,6 +368,46 @@ private fun SourceForm(form: IptvSourceForm, state: IptvSourcesState, viewModel:
             }
             NuvioActionPill(viewModel::dismiss, enabled = !state.busy) { Text(stringResource(R.string.iptv_setup_cancel)) }
             if (state.busy) LoadingIndicator(Modifier.size(24.dp))
+        }
+    }
+    if (choosingFolder) GuideFolderDialog(viewModel, onDismiss = { choosingFolder = false }) { file ->
+        choosingFolder = false
+        endpoint = file.uri
+        if (label.isBlank()) label = file.name.substringBefore('.').ifBlank { file.name }.take(240)
+    }
+}
+
+@Composable
+private fun GuideFolderDialog(viewModel: IptvSourcesViewModel, onDismiss: () -> Unit, onChoose: (LocalGuideFile) -> Unit) {
+    var listing by remember { mutableStateOf<Pair<List<LocalGuideFile>, List<String>>?>(null) }
+    LaunchedEffect(Unit) { listing = viewModel.guideFiles() }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    NuvioDialog(onDismiss = onDismiss, title = stringResource(R.string.iptv_guide_folder_title),
+        subtitle = stringResource(R.string.iptv_guide_folder_description), width = 640.dp) {
+        val first = remember { FocusRequester() }
+        val current = listing
+        when {
+            current == null -> Box(Modifier.fillMaxWidth().height(96.dp), contentAlignment = Alignment.Center) { LoadingIndicator(Modifier.size(32.dp)) }
+            current.first.isEmpty() -> {
+                LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
+                Text(stringResource(R.string.iptv_guide_folder_empty, current.second.joinToString("\n")),
+                    color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
+                NuvioActionPill(onDismiss, Modifier.focusRequester(first)) { Text(stringResource(R.string.iptv_setup_cancel)) }
+            }
+            else -> {
+                LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
+                Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    current.first.forEachIndexed { index, file ->
+                        val modified = android.text.format.DateUtils.getRelativeTimeSpanString(file.modifiedMillis, System.currentTimeMillis(),
+                            android.text.format.DateUtils.MINUTE_IN_MILLIS).toString()
+                        SettingsActionRow(title = file.name,
+                            subtitle = listOf(android.text.format.Formatter.formatShortFileSize(context, file.bytes), modified).joinToString(" · "),
+                            value = stringResource(if (file.rootIndex == 0) R.string.iptv_guide_folder_device else R.string.iptv_guide_folder_usb),
+                            onClick = { onChoose(file) }, leadingIcon = Icons.Filled.Description, trailingIcon = null,
+                            modifier = if (index == 0) Modifier.focusRequester(first) else Modifier)
+                    }
+                }
+            }
         }
     }
 }
