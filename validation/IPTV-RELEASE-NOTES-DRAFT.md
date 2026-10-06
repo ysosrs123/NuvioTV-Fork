@@ -2,7 +2,8 @@
 
 Unreleased. Branch `iptv/player-binding` (includes `main` as of 6 October 2026,
 1.1.0-beta-nt4.2 / build 1461). IPTV is enabled only in the `iptvPrototype`
-flavour; the `full` flavour hides it. Nothing published.
+flavour (package `com.nuvio.iptv.prototype`, shown as "Nuvio IPTV Prototype", installs
+alongside the normal app); the `full` flavour hides it. Nothing published.
 
 ## Live TV
 
@@ -71,6 +72,45 @@ Still required before enabling: device validation of the player path, renderer
 preroll and seek acknowledgement, measured memory and storage margins, durable
 recording services and USB/SMB storage.
 
+## Fixes and improvements since the last device validation (b68985a)
+
+Playback and capture
+- Long captures now play to the end: played batches are released so the reader can
+  load later segments (cause of the capture-player test timeouts).
+- An explicit start at the beginning of a capture is honoured instead of jumping to
+  the live edge.
+- Segments whose video packets declare their length no longer lose their last frame.
+- Buffered segments play out before an epoch boundary or stop is reported.
+- Removed a start-up race that could fail playback with a stale-snapshot error;
+  skipping late frames at the live edge no longer discards the rest of the picture
+  group; all retained segments stay reachable.
+- AC-3/E-AC-3 channels fall back to the bundled decoder on TVs without hardware
+  support.
+
+Ownership and reliability
+- An account's stream slot can no longer stay "closing" until restart.
+- Stopping a live HLS capture now confirms properly, retries a failed segment-body
+  close, and keeps the real BACKPRESSURE/STORAGE_BLOCKED state.
+- Later joiners start a capture that an interrupted first join left unstarted.
+
+Sources and guides
+- Playlists with rotating stream tokens keep refreshing (unused removed-channel
+  records are pruned).
+- Oversized guide comments, text or attributes are rejected before they use memory.
+- A few malformed or unmatched programmes no longer reject a whole guide; duplicate
+  channel entries merge their names.
+- Search matches regardless of case and compatibility forms (ß/ss, final sigma).
+- Guide URLs (which often carry credentials) are kept out of logs; cache headers
+  are not sent after redirects; redirects follow up to six hops.
+- Guide file permissions are released when no feed uses them.
+
+Screens and app
+- Sources and Live no longer stack on each other; the 30-second refresh keeps focus
+  and programme info; profile clean-up and session opening run off the main thread.
+- IPTV settings appear only in the prototype build (`FEATURE_IPTV_ENABLED`).
+- Includes `main` as of 6 October 2026 (1.1.0-beta-nt4.2, build 1461).
+- The debug build workflow can build the prototype variant on GitHub Actions.
+
 ## Known limitations
 
 - One foreground IPTV decoder and one acquisition per account are allowed by
@@ -87,8 +127,8 @@ recording services and USB/SMB storage.
 
 - Last full device validation: commit `b68985a` (full app compile, 317 IPTV JVM tests,
   27 AM9 capture/codec fixtures).
-- Since then: 222 core and 117 data-layer JVM tests pass on a host harness; device
-  fixtures and Compose UI compilation are pending. See IPTV-HANDOVER.md.
+- Since then: 238 core and 121 data-layer JVM tests pass on a host harness; the full
+  app build and device fixtures are pending. See IPTV-HANDOVER.md.
 
 ## Change history
 
