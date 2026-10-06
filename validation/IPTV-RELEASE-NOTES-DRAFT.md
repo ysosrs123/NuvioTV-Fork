@@ -15,7 +15,10 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   guide…") and "Updated … ago", and refresh automatically when older than 12 hours
   (sources) or 6 hours (guides). Saving a source or guide starts its refresh.
 - Clear refresh errors naming the failed step (address, network, server status,
-  redirect, size, format or sign-in).
+  redirect, size, format or sign-in); a refresh that is not accepted says so on the
+  source. Live TV sources shows each source's channel count.
+- Live TV opens the first source that has channels; an empty source explains how to
+  switch sources or refresh.
 - Bounded playlist parsing and refresh, stable channel identities across refreshes,
   favourites, hidden channels, custom names, last-good catalogues and review before
   large shrinks. Unused identities of removed channels are pruned so token-rotating
@@ -72,6 +75,10 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 - Switching between Sources and Live no longer stacks screens; the periodic refresh
   keeps focus and programme info.
 - Guide file permissions are released when no feed uses them.
+- Refresh failures, guide import failures and Live TV load failures are logged
+  (tag `NuvioIptv`) with the failing step and error type only, never addresses or
+  credentials. Sources refresh before guides, and provider guides refresh after
+  their source so they can be filtered to its channels.
 
 ## Capture, timeshift and recording (internal, disabled)
 
