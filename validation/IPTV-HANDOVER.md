@@ -62,6 +62,15 @@ channels, 4.8 MB list, 145 MB provider guide taking over two minutes to download
 - The Live TV and Sources screens need a full visual and usability redesign
   (user feedback); planned after the device fixes.
 
+## Target devices
+
+Android 9 to 14 (API 28–34), 2–4 GB RAM: Amazon Fire TV Stick 4K Max 2nd gen (Fire OS 8,
+Android 11, no Google services), Nvidia Shield Pro, Xiaomi Box S 3rd gen, TVs with
+Android TV / Google TV built in, and the user's own Ugoos AM9 Pro (the main test device;
+4 GB RAM, Android 14 assumed — unconfirmed). Guard every API above 28, keep memory per
+player small, and size multiview from `IptvDeviceProfile` (memory, low-RAM flag,
+hardware AVC decoder instances) rather than fixed numbers.
+
 ## Current state — 6 October 2026, evening (read first)
 
 Goal from the user: a complete, polished, fully working Live TV in the fork's design
