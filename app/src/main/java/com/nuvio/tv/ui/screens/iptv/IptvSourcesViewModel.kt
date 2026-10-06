@@ -191,6 +191,7 @@ class IptvSourcesViewModel @Inject constructor(
         reload(this)
     }
     fun remove(source: IptvSource) = runOperation {
+        refresher.cancel(source.ref)
         withContext(Dispatchers.IO) { access.use(this@runOperation) {
             require(source.ref.profileId == profileId)
             xtreamGuides.removeSource(source.ref)
@@ -199,6 +200,7 @@ class IptvSourcesViewModel @Inject constructor(
         reload(this)
     }
     fun remove(feed: IptvGuideFeed) = runOperation {
+        refresher.cancel(feed.ref)
         withContext(Dispatchers.IO) { access.use(this@runOperation) {
             require(feed.ref.profileId == profileId)
             xtreamGuides.removeFeed(feed.ref)

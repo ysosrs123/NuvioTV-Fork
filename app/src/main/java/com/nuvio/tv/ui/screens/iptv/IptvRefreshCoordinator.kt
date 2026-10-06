@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -95,6 +96,14 @@ class IptvRefreshCoordinator @Inject constructor(
             finish(key(feed), IptvRefreshPhase.DONE, message)
         } catch (cancel: CancellationException) { throw cancel }
         catch (error: Exception) { IptvLog.failure("guide refresh", error); finish(key(feed), IptvRefreshPhase.FAILED, failureMessage(error)) }
+    }
+
+    suspend fun cancel(ref: IptvSourceRef) = cancel(key(ref))
+    suspend fun cancel(ref: IptvGuideRef) = cancel(key(ref))
+    private suspend fun cancel(key: String) {
+        val job = synchronized(jobs) { jobs.remove(key) }
+        job?.cancelAndJoin()
+        mutable.update { it - key }
     }
 
     private fun start(key: String, block: suspend () -> Unit): Boolean = synchronized(jobs) {
