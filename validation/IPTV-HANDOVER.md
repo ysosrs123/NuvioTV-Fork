@@ -34,6 +34,26 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
   a filtered error summary on failure. Without GitHub tools, run status is readable
   from the public REST API, but logs and re-runs need the user.
 
+## Device findings — 6 October 2026
+
+First AM9 run of the CI-built prototype with a real Xtream account (13,740 live
+channels, 4.8 MB list, 145 MB provider guide taking over two minutes to download).
+
+- A wrong username produced the generic failure message. Source errors now name the
+  failed step (address, network, HTTP status, redirect, size, format, sign-in) and the
+  Xtream log line includes the HTTP status. Server and username are no longer masked;
+  the password has a Show/Hide toggle; missing `http://` is added; credentials are
+  trimmed; a new source loads its channels on save.
+- Refresh sat on "Working…" for minutes and no channels appeared. Causes found in
+  code: one Keystore operation per channel row, and the automatic provider guide
+  (capped at 64 MB and a 60 s call timeout) ran inside the same operation. Fixed:
+  envelope sealing (`EnvelopeIptvSecretBox`), Xtream rows stored without the login
+  (`IptvXtreamClient.streamUrl` adds it at tune time), provider guide refreshed in
+  the background with 512 MB, 50,000-channel, 2,000,000-programme limits and a
+  15 min call timeout. Why no channels appeared is not yet confirmed on device.
+- The Live TV and Sources screens need a full visual and usability redesign
+  (user feedback); planned after the device fixes.
+
 ## Small open items
 
 - The automatic Xtream guide feed stores `xtream-guide:<sourceId>` as its endpoint.
@@ -106,7 +126,7 @@ Branch iptv/player-binding. Full findings and per-item status:
   the main thread; background refresh keeps focus/programmes; extension renderers for
   live audio; guide document grants released when unused.
 
-Open: 12 (Keystore cost per catalogue row needs device timing). Item 20 resolved by
+Item 12 fixed after device testing (see "Device findings"). Item 20 resolved by
 the `FEATURE_IPTV_ENABLED` flavour gate. No change by design: 7, 8, 18, 21 (reasons
 in the review).
 

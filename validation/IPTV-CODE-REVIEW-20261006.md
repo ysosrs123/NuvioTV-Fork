@@ -62,7 +62,7 @@ through callers/callees once and not independently re-checked.
 11. FIXED (byte runs without '<' bounded at 4x text budget + 64KiB; test). Medium (traced): XMLTV size limits are applied after the parser has materialised a
     whole text/comment/attribute token; a small gzip with one 60MiB comment can raise
     OutOfMemoryError, which the Exception handlers do not catch.
-12. OPEN (needs device timing before redesigning per-row Keystore sealing). Medium (traced): each catalogue commit decrypts/seals every row through Keystore
+12. FIXED (rows sealed with a Keystore-wrapped data key, one Keystore operation per process; a 13,740-channel Xtream refresh on the AM9 was slow before the change; timing after it pending). Medium (traced): each catalogue commit decrypts/seals every row through Keystore
     inside one BEGIN IMMEDIATE transaction that also serialises all reads; large
     refreshes can block browsing and zapping for a long time. Needs device timing.
 13. FIXED (malformed/orphan programmes quarantined up to max(16, 2%); duplicate channels merge names; device tests updated). Medium (checked): one zero-length or out-of-window programme, or a duplicated channel
