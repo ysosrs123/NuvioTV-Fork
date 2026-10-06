@@ -161,7 +161,7 @@ class SetupDraftsTest {
         val listing = SetupListing(listOf(SetupListingItem("a", "Lounge", SetupKind.XTREAM, SetupText.host("http://x.example:8080/live/"), true)))
         val json = JSONObject(listing.toJson(pending = true))
         val item = json.getJSONArray("sources").getJSONObject(0)
-        assertEquals(setOf("id", "label", "kind", "host", "editable"), item.keySet())
+        assertEquals(setOf("id", "label", "kind", "host", "editable"), item.keys().asSequence().toSet())
         assertEquals("x.example:8080", item.getString("host"))
         assertTrue(json.getBoolean("pending"))
     }
