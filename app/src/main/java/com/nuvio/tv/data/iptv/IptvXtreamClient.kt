@@ -149,6 +149,10 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
             Logger.getLogger("NuvioXtream").warning("$stage ${error.javaClass.simpleName} $failure at $location")
         }
 
+        fun guideUrl(connection: IptvSourceConnection): String = serverBase(connection).newBuilder()
+            .addPathSegment("xmltv.php").addQueryParameter("username", connection.username)
+            .addQueryParameter("password", connection.password).build().toString()
+
         fun serverBase(connection: IptvSourceConnection): HttpUrl {
             val url = connection.endpoint.toHttpUrlOrNull()
                 ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)

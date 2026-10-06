@@ -43,6 +43,14 @@ class IptvXtreamClientTest {
         }
     }
 
+    @Test fun guideUrlUsesTheEnteredOriginAndEncodesCredentials() {
+        val url = IptvXtreamClient.guideUrl(IptvSourceConnection("https://example.invalid:8080/base", "user name", "p&ss/word"))
+        assertEquals("https://example.invalid:8080/base/xmltv.php?username=user%20name&password=p%26ss%2Fword", url)
+        assertEquals("https://example.invalid/xmltv.php?username=u&password=p",
+            IptvXtreamClient.guideUrl(IptvSourceConnection("https://example.invalid/", "u", "p")))
+        for (endpoint in listOf("https://example.invalid/player_api.php", "https://u:p@example.invalid/"))
+            try { IptvXtreamClient.guideUrl(IptvSourceConnection(endpoint, "u", "p")); fail() } catch (_: MetadataException) { }
+    }
     @Test fun rejectedAccountsStopBeforeCatalogueRequests() = runBlocking {
         for (account in listOf("""{"auth":0,"status":"Active"}""", """{"auth":1,"status":"Expired"}""", """{"auth":1,"status":"Active","exp_date":"20"}""")) {
             MockWebServer().use { server ->

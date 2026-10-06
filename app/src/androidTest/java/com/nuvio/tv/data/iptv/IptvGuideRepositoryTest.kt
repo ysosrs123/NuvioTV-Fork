@@ -36,6 +36,29 @@ class IptvGuideRepositoryTest {
     private fun response(request: Request, body: String = xml(), status: Int = 200) = Response.Builder().request(request).protocol(Protocol.HTTP_1_1)
         .message("Fixture").code(status).header("ETag", "v1").body(body.toResponseBody("application/xml".toMediaType()))
 
+    @Test fun xtreamGuideReferenceResolvesToTheProviderXmltvEndpoint() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val id = UUID.randomUUID().toString(); val name = "guide-xtream-$id.db"; val alias = "guide.xtream.$id"
+        try {
+            IptvGuideStore(context, name, AndroidIptvSecretBox(alias)).use { store ->
+                val ref = store.createFeed(1, "Provider guide", com.nuvio.tv.core.iptv.XtreamGuideReference.of("source-1"))
+                val requests = mutableListOf<Request>()
+                val http = IptvMetadataClient.newClient().newBuilder().addInterceptor { chain -> requests += chain.request(); response(chain.request()).build() }.build()
+                val resolved = mutableListOf<IptvSourceRef>()
+                val repository = IptvGuideRepository(store, IptvGuideClient(http), xtreamConnection = {
+                    resolved += it; IptvSourceConnection("https://fixture.invalid/", "user", "secret")
+                })
+                assertEquals(IptvGuideRefresh.Guide(RefreshDecision.PUBLISH), repository.refresh(ref, window))
+                assertEquals(listOf(IptvSourceRef(1, "source-1")), resolved)
+                assertEquals("https://fixture.invalid/xmltv.php?username=user&password=secret", requests.single().url.toString())
+                assertEquals(MetadataFailure.INVALID_ADDRESS, failure { IptvGuideRepository(store, IptvGuideClient(http)).refresh(ref, window) }.failure)
+            }
+        } finally {
+            context.deleteDatabase(name)
+            java.security.KeyStore.getInstance("AndroidKeyStore").apply { load(null); deleteEntry(alias) }
+        }
+    }
+
     @Test fun validResponsePersistsAnd304RequiresRetainedWindowCoverage() = fixture { store, ref ->
         val requests = mutableListOf<Request>(); var status = 200
         val http = IptvMetadataClient.newClient().newBuilder().addInterceptor { chain ->

@@ -38,10 +38,10 @@ class IptvSourcesViewModel @Inject constructor(
     val state = mutable.asStateFlow()
     private var session: IptvProfileAccess.Session? = null
     private var operation: Job? = null
-    private val playlists = IptvPlaylistRepository(catalogue)
+    private val playlists = IptvPlaylistRepository(catalogue, xtreamGuides = IptvXtreamGuides(catalogue, guides))
     private val guideRepository = IptvGuideRepository(guides, openDocument = { address ->
         requireNotNull(context.contentResolver.openInputStream(android.net.Uri.parse(address)))
-    })
+    }, xtreamConnection = catalogue::connection)
     init {
         viewModelScope.launch {
             combine(profiles.activeProfileId, profiles.activeProfileReady, profiles.profileSelectionRevision) { id, ready, revision -> Triple(id, ready, revision) }
@@ -140,6 +140,11 @@ class IptvSourcesViewModel @Inject constructor(
         require(source.ref.profileId == profileId)
         withContext(Dispatchers.IO) { access.use(this@runOperation) { catalogue.connection(source.ref) } }
         val result = playlists.refresh(source.ref)
+        (result as? IptvPlaylistRefresh.Catalogue)?.guide?.let { feed ->
+            val day = Math.floorDiv(System.currentTimeMillis(), 86_400_000L) * 86_400_000L
+            runCatching { guideRepository.refresh(feed, IptvGuideWindow(day - 86_400_000, day + 7 * 86_400_000)) }
+                .onFailure { if (it is CancellationException) throw it }
+        }
         val message = when (result) {
             IptvPlaylistRefresh.Unchanged -> R.string.iptv_setup_refreshed
             is IptvPlaylistRefresh.Catalogue -> if (result.decision == RefreshDecision.PUBLISH) R.string.iptv_setup_refreshed else R.string.iptv_setup_kept_previous

@@ -12,10 +12,11 @@ sealed interface IptvPlaylistRefresh {
     data object Unchanged : IptvPlaylistRefresh
     data object HlsPlaybackInput : IptvPlaylistRefresh
     data object UnsupportedSourceKind : IptvPlaylistRefresh
-    data class Catalogue(val decision: RefreshDecision) : IptvPlaylistRefresh
+    data class Catalogue(val decision: RefreshDecision, val guide: IptvGuideRef? = null) : IptvPlaylistRefresh
 }
 
-class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val metadata: IptvMetadataClient = IptvMetadataClient(), private val xtream: IptvXtreamClient = IptvXtreamClient()) {
+class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val metadata: IptvMetadataClient = IptvMetadataClient(),
+    private val xtream: IptvXtreamClient = IptvXtreamClient(), private val xtreamGuides: IptvXtreamGuides? = null) {
     suspend fun refresh(ref: IptvSourceRef): IptvPlaylistRefresh = withContext(Dispatchers.IO) {
         val context = currentCoroutineContext()
         context.ensureActive()
@@ -23,8 +24,9 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
         if (request.kind == IptvSourceKind.XTREAM) {
             val download = xtream.catalogue(request.connection)
             context.ensureActive()
-            return@withContext IptvPlaylistRefresh.Catalogue(store.commitCatalogue(ref, request.ticket,
-                download.records, download.canPublish) { context.ensureActive() })
+            val decision = store.commitCatalogue(ref, request.ticket, download.records, download.canPublish) { context.ensureActive() }
+            val guide = if (decision == RefreshDecision.PUBLISH) xtreamGuides?.ensure(ref) else null
+            return@withContext IptvPlaylistRefresh.Catalogue(decision, guide)
         }
         val validators = request.validators?.let { CatalogueValidators(it.etag, it.lastModified) }
         when (val download = metadata.playlist(request.connection.endpoint, validators)) {
