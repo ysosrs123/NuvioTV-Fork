@@ -58,6 +58,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.movableContentOf
@@ -1112,7 +1113,9 @@ open class MainActivity : ComponentActivity() {
                     val strNavSearch = stringResource(R.string.nav_search)
                     val strNavLibrary = stringResource(R.string.nav_library)
                     val strNavSettings = stringResource(R.string.nav_settings)
+                    val strNavLive = stringResource(R.string.iptv_live_title)
                     val drawerItems = remember(
+                        strNavLive,
                         strNavHome,
                         strNavDiscover,
                         strNavSearch,
@@ -1128,6 +1131,15 @@ open class MainActivity : ComponentActivity() {
                                     icon = Icons.Default.Home
                                 )
                             )
+                            if (BuildConfig.FEATURE_IPTV_ENABLED) {
+                                add(
+                                    DrawerItem(
+                                        route = Screen.IptvLive.route,
+                                        label = strNavLive,
+                                        icon = Icons.Default.LiveTv
+                                    )
+                                )
+                            }
                             if (discoverLocation == DiscoverLocation.IN_SIDEBAR) {
                                 add(
                                     DrawerItem(

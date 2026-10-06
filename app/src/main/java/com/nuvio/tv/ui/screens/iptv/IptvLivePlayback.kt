@@ -30,10 +30,14 @@ import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 
 class IptvLivePlayback(context: Context, private val locator: String, purpose: PlaybackPurpose,
-    private val streamFormat: IptvStreamFormat = IptvStreamFormat.AUTO,
-    private val onPlaying: (Boolean) -> Unit, private val onError: () -> Unit) : OwnedLivePlayback {
+    val streamFormat: IptvStreamFormat = IptvStreamFormat.AUTO,
+    private val onPlaying: (Boolean) -> Unit, private val onError: () -> Unit,
+    private val onReconnecting: (Boolean) -> Unit = {}, private val isLive: Boolean = true,
+    private val onEnded: () -> Unit = {}) : OwnedLivePlayback {
     private val fence = LiveRequestFence()
     val telemetry = LiveTelemetry()
+    val host: String? get() = Uri.parse(locator).host
+    val live: Boolean get() = isLive
     val activeRequests: Int get() = fence.active.value
     private val mainHandler = Handler(Looper.getMainLooper())
     private val client = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS)
@@ -86,9 +90,9 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 mainHandler.removeCallbacks(stall)
                 if (released) return
                 when (playbackState) {
-                    Player.STATE_READY -> attempts = 0
+                    Player.STATE_READY -> { if (attempts > 0) onReconnecting(false); attempts = 0 }
                     Player.STATE_BUFFERING -> mainHandler.postDelayed(stall, STALL_MS)
-                    Player.STATE_ENDED -> retry()
+                    Player.STATE_ENDED -> if (isLive) retry() else mainHandler.post { if (!released) onEnded() }
                 }
             }
         })
@@ -97,6 +101,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         if (released) return
         if (attempts >= RETRY_DELAYS_MS.size) { reportFailure(); return }
         val delay = RETRY_DELAYS_MS[attempts++]
+        onReconnecting(true)
         mainHandler.removeCallbacks(reconnect)
         mainHandler.postDelayed(reconnect, delay)
     }
@@ -111,9 +116,10 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             IptvStreamFormat.MPEG_TS -> MimeTypes.VIDEO_MP2T
         }
 
-        player.setMediaItem(MediaItem.Builder().setUri(locator).setMimeType(mimeType)
-            .setLiveConfiguration(MediaItem.LiveConfiguration.Builder().setTargetOffsetMs(6_000).setMinOffsetMs(2_000).setMaxOffsetMs(15_000)
-                .setMinPlaybackSpeed(0.97f).setMaxPlaybackSpeed(1.03f).build()).build())
+        player.setMediaItem(MediaItem.Builder().setUri(locator).setMimeType(mimeType).apply {
+            if (isLive) setLiveConfiguration(MediaItem.LiveConfiguration.Builder().setTargetOffsetMs(6_000).setMinOffsetMs(2_000).setMaxOffsetMs(15_000)
+                .setMinPlaybackSpeed(0.97f).setMaxPlaybackSpeed(1.03f).build())
+        }.build())
         telemetry.start(android.os.SystemClock.elapsedRealtime())
         player.prepare(); player.playWhenReady = true
     }

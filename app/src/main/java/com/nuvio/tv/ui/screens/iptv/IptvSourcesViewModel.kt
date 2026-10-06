@@ -6,6 +6,8 @@ import com.nuvio.tv.R
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.iptv.*
 import com.nuvio.tv.core.iptv.RefreshDecision
+import com.nuvio.tv.core.iptv.StalkerPortal
+import com.nuvio.tv.core.iptv.XtreamGuideReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -28,7 +30,8 @@ data class IptvSourcesState(val profileId: Int = 0, val revision: Long = 0, val 
     val sources: List<IptvSource> = emptyList(), val feeds: List<IptvGuideFeed> = emptyList(),
     val selected: IptvSourceRef? = null, val linked: Set<String> = emptySet(), val linkedOrder: List<String> = emptyList(),
     val busy: Boolean = false, val message: Int? = null, val form: IptvSourceForm? = null,
-    val refresh: Map<String, IptvRefreshStatus> = emptyMap(), val counts: Map<String, Int> = emptyMap())
+    val refresh: Map<String, IptvRefreshStatus> = emptyMap(), val counts: Map<String, Int> = emptyMap(),
+    val automatic: Set<String> = emptySet())
 
 @HiltViewModel
 class IptvSourcesViewModel @Inject constructor(
@@ -40,6 +43,7 @@ class IptvSourcesViewModel @Inject constructor(
     val state = mutable.asStateFlow()
     private var session: IptvProfileAccess.Session? = null
     private var operation: Job? = null
+    private val xtreamGuides = IptvXtreamGuides(catalogue, guides)
     val localGuides get() = refresher.localGuides
     init {
         viewModelScope.launch {
@@ -82,12 +86,15 @@ class IptvSourcesViewModel @Inject constructor(
     }
     private suspend fun reload(current: IptvProfileAccess.Session) {
         val oldSelected = mutable.value.selected
+        var automatic = emptySet<String>()
         val (loaded, counts) = withContext(Dispatchers.IO) { access.use(current) {
             val sources = catalogue.sources(current.profileId)
             val selected = oldSelected?.takeIf { ref -> sources.any { it.ref == ref } } ?: sources.firstOrNull()?.ref
-            Triple(sources, guides.feeds(current.profileId, limit = 200), selected?.let(catalogue::guideAssociations)) to catalogue.channelCounts(current.profileId)
+            val feeds = guides.feeds(current.profileId, limit = 200)
+            automatic = feeds.filter { XtreamGuideReference.sourceId(guides.endpoint(it.ref)) != null }.map { it.ref.feedId }.toSet()
+            Triple(sources, feeds, selected?.let(catalogue::guideAssociations)) to catalogue.channelCounts(current.profileId)
         } }
-        if (session === current) mutable.update { it.copy(sources = loaded.first, feeds = loaded.second, counts = counts,
+        if (session === current) mutable.update { it.copy(sources = loaded.first, feeds = loaded.second, counts = counts, automatic = automatic,
             selected = oldSelected?.takeIf { ref -> loaded.first.any { it.ref == ref } } ?: loaded.first.firstOrNull()?.ref,
             linked = loaded.third?.feedIds?.toSet().orEmpty(),
             linkedOrder = loaded.third?.let { (it.priority + it.feedIds).distinct() }.orEmpty(), ready = true) }
@@ -129,8 +136,12 @@ class IptvSourcesViewModel @Inject constructor(
                 val uri = runCatching { java.net.URI(address) }.getOrNull()
                 if (uri == null || uri.scheme !in setOf("http", "https") || uri.host.isNullOrBlank() || uri.rawUserInfo != null)
                     throw MetadataException(MetadataFailure.INVALID_ADDRESS)
-                val connection = IptvSourceConnection(address, username.trim().takeIf { form.kind == IptvSourceKind.XTREAM },
-                    password.trim().takeIf { form.kind == IptvSourceKind.XTREAM })
+                val connection = when (form.kind) {
+                    IptvSourceKind.XTREAM -> IptvSourceConnection(address, username.trim(), password.trim())
+                    IptvSourceKind.STALKER -> IptvSourceConnection(address,
+                        StalkerPortal.normalizeMac(username) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS))
+                    IptvSourceKind.M3U -> IptvSourceConnection(address)
+                }
                 SavedEntry(source = if (form.source == null) catalogue.createSource(profileId, label.trim(), form.kind, "shared-default", connection)
                 else {
                     require(form.source.profileId == profileId)
@@ -169,6 +180,30 @@ class IptvSourcesViewModel @Inject constructor(
                 catalogue.setGuideFeeds(selected, previous.feedIds.map { IptvGuideRef(profileId, it) }, order.map { IptvGuideRef(profileId, it) })
             }
         } }
+        reload(this)
+    }
+    fun moveUp(source: IptvSource) = runOperation {
+        val index = mutable.value.sources.indexOfFirst { it.ref == source.ref }
+        if (index > 0) withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            require(source.ref.profileId == profileId)
+            catalogue.moveSource(source.ref, index - 1)
+        } }
+        reload(this)
+    }
+    fun remove(source: IptvSource) = runOperation {
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            require(source.ref.profileId == profileId)
+            xtreamGuides.removeSource(source.ref)
+        } }
+        if (session === this) mutable.update { it.copy(message = R.string.iptv_source_removed) }
+        reload(this)
+    }
+    fun remove(feed: IptvGuideFeed) = runOperation {
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            require(feed.ref.profileId == profileId)
+            xtreamGuides.removeFeed(feed.ref)
+        } }
+        if (session === this) mutable.update { it.copy(message = R.string.iptv_guide_removed) }
         reload(this)
     }
     fun refresh(source: IptvSource) { session?.let { refresher.refresh(it, source) } }
