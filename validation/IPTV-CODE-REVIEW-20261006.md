@@ -201,11 +201,16 @@ someone who sees the link can force a new link by guessing wrong codes.
 Multiview items FIXED in d23f16c: tile players took audio focus from each other (only
 the last tile played); exit/remove/add races; failed tiles kept their connection;
 connection limits shared across profiles (now per profile and account). Recording items
-(Android 14 exact alarms, back-to-back programmes, acquire retry, service stop race,
-"record now" message, store failure, startForeground order, player errors) are being
-fixed.
+FIXED in 0be3a7f..474b252: Android 14 exact alarms (`USE_EXACT_ALARM` on 33+),
+back-to-back programmes, waiting for the start and a free connection, service stop
+race, "record now" message, store failure, startForeground order, player errors.
+Added after the review: storage check before recording (39303f7) and the alarm
+settings prompt (4cfea7b).
 
 ## After the review
 
-Work after 1b7952c was reviewed once (above); later commits are host-tested and
-CI-built only.
+Work after 1b7952c was reviewed once (above). Not independently reviewed: the fixes
+themselves, 39303f7, 4cfea7b and multiview sizing (f00e635, 73b59de); these are
+host-tested and CI-built only. Known small gaps (queued in the handover): guides named
+in an M3U header are not removed with their playlist; `iptv-live` preferences (last
+category, hidden categories) are not removed with the profile.

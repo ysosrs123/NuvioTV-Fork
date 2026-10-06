@@ -145,10 +145,12 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 
 ## Ready below the UI (screens pending)
 
-- Stalker Portal (MAC-based) sources with stream links created at tune time.
-- Provider account groups with per-group stream limits.
+- Provider account groups shared by several sources (each source has its own
+  connection limit in Live TV sources; grouping sources under one shared limit has
+  no screen yet).
 - Guide import from a folder on internal storage or a USB drive for TVs without a
-  file picker.
+  file picker (files there can be read as guides, but there is no screen to choose
+  one yet).
 
 ## Reliability
 
@@ -173,9 +175,10 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   credentials. Sources refresh before guides, and provider guides refresh after
   their source so they can be filtered to its channels.
 
-## Capture, timeshift and recording (internal, disabled)
+## Capture and timeshift (internal, disabled)
 
-Built and host-tested, not yet exposed in the UI:
+Built and host-tested, not exposed in the UI (recording, above, uses its own simpler
+stream copier and does not depend on this):
 
 - Bounded local segment store with atomic publication, retention pins, backpressure
   and physical free-space fences.
@@ -188,8 +191,7 @@ Built and host-tested, not yet exposed in the UI:
   binding. Played batches are released during playback so long captures reach EOS.
 
 Still required before enabling: device validation of the player path, renderer
-preroll and seek acknowledgement, measured memory and storage margins, durable
-recording services and USB/SMB storage.
+preroll and seek acknowledgement, measured memory and storage margins.
 
 ## Fixes and improvements since the last device validation (b68985a)
 
@@ -230,21 +232,76 @@ Screens and app
 - Includes `main` as of 6 October 2026 (1.1.0-beta-nt4.2, build 1461).
 - The debug build workflow can build the prototype variant on GitHub Actions.
 
+Live TV, after the redesign (review fixes)
+- Zapping, number entry, last channel, start over and the end of a catch-up
+  programme no longer drop out of full screen.
+- Returning from full screen keeps the guide position and focus; search results no
+  longer take focus from the search field; the first OK after a long-press menu is
+  no longer lost; hiding a category keeps focus in the rail.
+- Back with the category rail open closes the rail instead of leaving Live TV.
+- Skipping or reconnecting during catch-up no longer restarts the programme.
+- Background reloads keep every loaded row (up to 1,000) instead of cutting to 200.
+- Watch from a source's options opens that source; Sources actions are no longer
+  ignored during a reload; removing a source or guide cancels its running refresh.
+- The short guide is fetched again when nothing covers the current time; number entry
+  reaches channels that are not loaded yet; removed or unlinked automatic and
+  playlist guides stay removed; the track dialog marks Automatic when nothing is
+  overridden.
+
+Multiview and connections
+- Every picture keeps playing; before, each picture took audio focus from the others,
+  so only the last one played. Sound follows the focused picture.
+- Adding, removing and leaving no longer race each other, and a picture that fails to
+  open frees its connection.
+- Connection limits are counted per profile and source account, so two profiles or
+  two providers no longer share one limit.
+- The number of pictures, background guide rows and buffer sizes follow the device
+  (memory, low-RAM flag, hardware decoders and their reported decode capacity), for
+  boxes from 2 GB sticks to 4 GB players on Android 9 to 14.
+
+Recording
+- Scheduled recordings use exact alarms on Android 13 and later (Android 14 no longer
+  grants the older permission at install); where exact alarms are not allowed the app
+  offers to open the system setting.
+- Back-to-back programmes on one channel can both be scheduled; padding is trimmed
+  instead of overlapping.
+- Recordings wait for their start time and for a free connection; short recordings
+  stop the service; the service always enters the foreground; record now confirms
+  that it started; the list stays consistent when a save fails; a recording that
+  cannot be played says so; recordings that will not fit on the device are refused
+  with the space needed.
+
+Phone setup (security review)
+- Pointing an existing account at a different server needs its login (or MAC) again,
+  so a saved login is never sent to another server; the TV shows the server change.
+- Deeply nested or lenient requests are refused; slow or parallel connections are
+  limited; the rate-limit table cannot fill up; only paired activity keeps the server
+  running; changes from a stopped server are ignored.
+- The TV confirmation starts on Reject, names the sending device and pauses after a
+  rejection; the address shown skips VPN interfaces; finished drafts drop passwords.
+
 ## Known limitations
 
-- One foreground IPTV decoder and one acquisition per account are allowed by
-  default; these are estimates, not measured device limits.
-- No DRM, encrypted HLS, fMP4 or separate-audio
-  support has been validated.
-- No timeshift yet. Multiview and recording are untested on devices; four pictures,
-  exact alarms in deep sleep on Fire OS, and recording across stream gaps are
+- Nothing after `b68985a` has been tested on a device. Device limits for multiview
+  (pictures, decode capacity, what each box reports as its output height) come from
+  what Android reports, not from measurements.
+- No DRM, encrypted HLS, fMP4 or separate-audio support has been validated.
+- No timeshift (pausing or rewinding live TV) yet; catch-up covers channels with a
+  provider archive. No sports view.
+- Exact alarms in deep sleep on Fire OS and recording across stream gaps are
   unverified. With one connection on an account, watching and recording block each
-  other. Stalker streams that need extra headers may not record. Account groups have no UI yet. Stalker
-  portals have no catch-up. Xtream catch-up assumes the provider uses the device's
-  time zone.
+  other. Stalker streams that need extra headers may not record. Encrypted HLS and
+  fMP4 HLS cannot be recorded. Recordings are kept in app storage only (no USB/SMB).
+- Stalker portals have no catch-up. Xtream catch-up assumes the provider uses the
+  device's time zone. "Search what's on now" does not find programmes longer than
+  24 hours.
 - Subtitles, closed captions, DVB subtitles and teletext are not all validated.
-- English fallback strings remain; on-screen keyboard focus in source forms needs
-  device checks. Devices without a document picker need the folder import UI.
+- New Live TV text is English only; other languages fall back to English.
+- On-screen keyboard focus in source forms needs device checks. Devices without a
+  document picker (such as the AM9) can add guides by address but not from a file.
+- Phone setup uses plain HTTP on the home network (pairing code, single-use token and
+  confirmation on the TV); it is not meant for untrusted networks.
+- The minified release build has never processed the IPTV code.
 
 ## Validation
 
@@ -252,10 +309,13 @@ Screens and app
   27 AM9 capture/codec fixtures).
 - Since then: 340 core and 151 data-layer JVM tests pass on a host harness; the
   device tests compile. GitHub Actions builds the prototype APK with the IPTV JVM
-  suites under Gradle passing, most recently at `73b59de` (adds now-on search, multiview,
-  recording, phone setup and multiview sizing). Store, removal and catalogue-save tests that
-  need real SQLite and Keystore run only on device. Device fixtures and AM9 use are
-  pending. See IPTV-HANDOVER.md.
+  suites under Gradle passing, most recently at `73b59de` (run 37545837449; adds
+  now-on search, multiview, recording, phone setup and multiview sizing). Store,
+  removal and catalogue-save tests that need real SQLite and Keystore run only on
+  device. Three independent code reviews (Live TV redesign; phone setup security;
+  recording and multiview) were done and every finding fixed or answered (see
+  IPTV-CODE-REVIEW-20261006.md). Device fixtures and AM9 use are pending. See
+  IPTV-HANDOVER.md.
 
 ## Change history
 
