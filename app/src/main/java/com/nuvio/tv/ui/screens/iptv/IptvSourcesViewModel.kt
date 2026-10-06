@@ -65,10 +65,19 @@ class IptvSourcesViewModel @Inject constructor(
         operation = viewModelScope.launch {
             try { current.block() }
             catch (cancel: CancellationException) { throw cancel }
-            catch (error: Exception) { if (session === current) mutable.update { it.copy(message =
-                if (error is MetadataException && error.failure == MetadataFailure.AUTHENTICATION) R.string.iptv_xtream_auth_failed else R.string.iptv_setup_failed) } }
+            catch (error: Exception) { if (session === current) mutable.update { it.copy(message = failureMessage(error)) } }
             finally { if (session === current) mutable.update { it.copy(busy = false, ready = true) } }
         }
+    }
+    private fun failureMessage(error: Exception): Int = when ((error as? MetadataException)?.failure) {
+        MetadataFailure.AUTHENTICATION -> R.string.iptv_xtream_auth_failed
+        MetadataFailure.INVALID_ADDRESS -> R.string.iptv_error_address
+        MetadataFailure.NETWORK -> R.string.iptv_error_network
+        MetadataFailure.HTTP_STATUS -> R.string.iptv_error_http
+        MetadataFailure.REDIRECT_REQUIRES_REVIEW, MetadataFailure.REDIRECT_LIMIT -> R.string.iptv_error_redirect
+        MetadataFailure.BODY_LIMIT -> R.string.iptv_error_too_large
+        MetadataFailure.INVALID_RESPONSE -> R.string.iptv_error_response
+        null -> R.string.iptv_setup_failed
     }
     private suspend fun reload(current: IptvProfileAccess.Session) {
         val oldSelected = mutable.value.selected
@@ -105,7 +114,7 @@ class IptvSourcesViewModel @Inject constructor(
         if (session === this) mutable.update { it.copy(form = form) }
     }
     fun save(form: IptvSourceForm, label: String, endpoint: String, username: String = "", password: String = "") = runOperation {
-        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+        val created = withContext(Dispatchers.IO) { access.use(this@runOperation) {
             if (form.guide) {
                 if (endpoint.trim().startsWith("content:")) {
                     context.contentResolver.takePersistableUriPermission(android.net.Uri.parse(endpoint.trim()), android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -113,8 +122,13 @@ class IptvSourcesViewModel @Inject constructor(
                 if (form.feed == null) guides.createFeed(profileId, label.trim(), endpoint.trim())
                 else { require(form.feed.profileId == profileId); guides.editFeed(form.feed, label.trim(), endpoint.trim()) }
             } else {
-                val connection = IptvSourceConnection(endpoint.trim(), username.takeIf { form.kind == IptvSourceKind.XTREAM }, password.takeIf { form.kind == IptvSourceKind.XTREAM })
-                if (form.source == null) catalogue.createSource(profileId, label.trim(), form.kind, "shared-default", connection)
+                val address = endpoint.trim().let { if ("://" in it) it else "http://$it" }
+                val uri = runCatching { java.net.URI(address) }.getOrNull()
+                if (uri == null || uri.scheme !in setOf("http", "https") || uri.host.isNullOrBlank() || uri.rawUserInfo != null)
+                    throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+                val connection = IptvSourceConnection(address, username.trim().takeIf { form.kind == IptvSourceKind.XTREAM },
+                    password.trim().takeIf { form.kind == IptvSourceKind.XTREAM })
+                if (form.source == null) return@use catalogue.createSource(profileId, label.trim(), form.kind, "shared-default", connection)
                 else {
                     require(form.source.profileId == profileId)
                     val source = catalogue.sources(profileId).single { it.ref == form.source }
@@ -122,9 +136,11 @@ class IptvSourcesViewModel @Inject constructor(
                     catalogue.editSource(source.ref, label.trim(), source.kind, source.accountId, connection)
                 }
             }
+            null
         } }
         if (session === this) mutable.update { it.copy(form = null, message = R.string.iptv_setup_saved) }
         reload(this)
+        if (created != null) refreshSource(this, created)
     }
     fun link(feed: IptvGuideFeed) = runOperation {
         val selected = mutable.value.selected ?: return@runOperation
@@ -137,9 +153,10 @@ class IptvSourcesViewModel @Inject constructor(
         } }
         reload(this)
     }
-    fun refresh(source: IptvSource) = runOperation {
+    fun refresh(source: IptvSource) = runOperation { refreshSource(this, source) }
+    private suspend fun refreshSource(current: IptvProfileAccess.Session, source: IptvSource) = with(current) {
         require(source.ref.profileId == profileId)
-        withContext(Dispatchers.IO) { access.use(this@runOperation) { catalogue.connection(source.ref) } }
+        withContext(Dispatchers.IO) { access.use(current) { catalogue.connection(source.ref) } }
         val result = playlists.refresh(source.ref)
         (result as? IptvPlaylistRefresh.Catalogue)?.guide?.let { feed ->
             val day = Math.floorDiv(System.currentTimeMillis(), 86_400_000L) * 86_400_000L
