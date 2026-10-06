@@ -156,6 +156,8 @@
     <string name="iptv_live_results">Results for “%1$s”</string>
     <string name="iptv_live_no_results">No channels match “%1$s”</string>
     <string name="iptv_live_no_results_description">Try part of the name, or search another category or source.</string>
+    <string name="iptv_live_hidden_categories">Hidden categories</string>
+    <string name="iptv_live_hide_hint">Hold OK to hide or show a category</string>
     <plurals name="iptv_source_channels">
         <item quantity="one">%1$d channel</item>
         <item quantity="other">%1$d channels</item>

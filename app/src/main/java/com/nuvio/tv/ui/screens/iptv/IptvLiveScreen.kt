@@ -37,6 +37,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -183,6 +184,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, viewModel: IptvLiv
                     onSource = { viewModel.showSource(it); railOpen = false },
                     onSources = { railOpen = false; onSources() },
                     onSearch = { railOpen = false; searching = true },
+                    onHide = viewModel::toggleHidden,
                     onClose = { railOpen = false; focusGrid() })
             }
         }
@@ -369,7 +371,7 @@ private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, modifier: M
 
 @Composable
 private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: Modifier, onFavourites: () -> Unit, onCategory: (String?) -> Unit,
-    onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit, onSources: () -> Unit, onSearch: () -> Unit, onClose: () -> Unit) {
+    onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit, onSources: () -> Unit, onSearch: () -> Unit, onHide: (String) -> Unit, onClose: () -> Unit) {
     Column(modifier.iptvPanel(role = GlassRole.NAVIGATION).padding(vertical = 14.dp, horizontal = 10.dp)
         .onPreviewKeyEvent { event ->
             val native = event.nativeKeyEvent
@@ -383,9 +385,19 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
             item { RailItem(stringResource(R.string.iptv_live_all), state.categories.sumOf { it.channels }.takeIf { it > 0 }, !state.favourites && state.category == null,
                 Modifier, { onCategory(null) }, Icons.AutoMirrored.Filled.List) }
             if (state.categories.isNotEmpty()) item { SectionLabel(stringResource(R.string.iptv_live_categories)) }
-            items(state.categories, key = { "category-${it.name}" }) { category ->
+            if (state.categories.isNotEmpty()) item { Text(stringResource(R.string.iptv_live_hide_hint), style = MaterialTheme.typography.labelSmall,
+                color = NuvioTheme.colors.TextTertiary, modifier = Modifier.padding(start = 10.dp, bottom = 4.dp)) }
+            items(state.categories.filter { it.name !in state.hiddenCategories }, key = { "category-${it.name}" }) { category ->
                 RailItem(category.name.ifEmpty { stringResource(R.string.iptv_live_uncategorised) }, category.channels,
-                    !state.favourites && state.category == category.name, Modifier, { onCategory(category.name) })
+                    !state.favourites && state.category == category.name, Modifier, { onCategory(category.name) }, onHold = { onHide(category.name) })
+            }
+            val hidden = state.categories.filter { it.name in state.hiddenCategories }
+            if (hidden.isNotEmpty()) {
+                item { SectionLabel(stringResource(R.string.iptv_live_hidden_categories)) }
+                items(hidden, key = { "hidden-${it.name}" }) { category ->
+                    RailItem(category.name.ifEmpty { stringResource(R.string.iptv_live_uncategorised) }, category.channels,
+                        !state.favourites && state.category == category.name, Modifier, { onCategory(category.name) }, onHold = { onHide(category.name) }, dim = true)
+                }
             }
             if (state.sources.size > 1) {
                 item { SectionLabel(stringResource(R.string.iptv_live_sources)) }
@@ -401,14 +413,22 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
 
 @Composable
 private fun RailItem(text: String, count: Int?, selected: Boolean, modifier: Modifier, onClick: () -> Unit,
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null) {
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null, onHold: (() -> Unit)? = null, dim: Boolean = false) {
     var focused by remember { mutableStateOf(false) }
+    val longPress = com.nuvio.tv.ui.util.rememberLongPressKeyTracker()
+    var held by remember { mutableStateOf(false) }
     Row(modifier.fillMaxWidth()
         .onFocusChanged { focused = it.isFocused }
         .iptvItem(focused, selected)
+        .graphicsLayer { alpha = if (dim && !focused) .55f else 1f }
         .onPreviewKeyEvent { event ->
             val native = event.nativeKeyEvent
-            if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) { onClick(); true } else false
+            if (onHold != null && longPress.handle(native, ::isSelect) { held = true; onHold() }) {
+                if (native.action == AndroidKeyEvent.ACTION_UP) held = false
+                return@onPreviewKeyEvent true
+            }
+            if (onHold != null && native.action == AndroidKeyEvent.ACTION_DOWN && native.keyCode == AndroidKeyEvent.KEYCODE_MENU) { onHold(); return@onPreviewKeyEvent true }
+            if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) { if (!held) onClick(); held = false; true } else false
         }
         .focusable().padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)) {
