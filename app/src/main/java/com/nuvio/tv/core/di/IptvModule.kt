@@ -14,8 +14,9 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object IptvModule {
-    @Provides @Singleton fun admission() = com.nuvio.tv.core.iptv.LiveSessionAdmission(
-        com.nuvio.tv.core.iptv.DeviceAdmissionLimits(4, 192L * 1024 * 1024, 0))
+    @Provides @Singleton fun deviceProfile(@ApplicationContext context: Context) = AndroidDeviceProfile.read(context)
+    @Provides @Singleton fun admission(profile: com.nuvio.tv.core.iptv.IptvDeviceProfile) = com.nuvio.tv.core.iptv.LiveSessionAdmission(
+        com.nuvio.tv.core.iptv.DeviceAdmissionLimits(profile.maxTiles, 192L * 1024 * 1024, 0))
     @Provides @Singleton fun liveRuntime(admission: com.nuvio.tv.core.iptv.LiveSessionAdmission) = com.nuvio.tv.core.iptv.LivePlaybackRuntime(admission)
     @Provides @Singleton fun catalogue(@ApplicationContext context: Context) = IptvCatalogueStore(context)
     @Provides @Singleton fun guides(@ApplicationContext context: Context) = IptvGuideStore(context)

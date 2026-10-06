@@ -512,7 +512,7 @@ private fun ChannelMenu(row: IptvListedChannel, state: IptvLiveState, onDismiss:
                 else SettingsActionRow(title = stringResource(R.string.iptv_recording_schedule, clock(selected.start.epochMillis)), subtitle = title(selected),
                     onClick = { onRecord(selected) }, leadingIcon = Icons.Filled.Schedule, trailingIcon = null)
             }
-            if ((state.multiview?.size ?: 0) < 4) SettingsActionRow(title = stringResource(R.string.iptv_multiview_add_channel), subtitle = null,
+            if (state.maxTiles >= 2 && (state.multiview?.size ?: 0) < state.maxTiles) SettingsActionRow(title = stringResource(R.string.iptv_multiview_add_channel), subtitle = null,
                 onClick = onMultiview, leadingIcon = Icons.Filled.ViewModule, trailingIcon = null)
             SettingsActionRow(title = stringResource(R.string.iptv_guide_pick_title), subtitle = stringResource(matchLabel(row.guide.reason)),
                 onClick = onGuide, leadingIcon = Icons.Filled.Schedule)

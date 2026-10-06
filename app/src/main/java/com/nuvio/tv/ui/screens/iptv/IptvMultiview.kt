@@ -60,7 +60,7 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
     var pick by remember { mutableStateOf<TilePick?>(null) }
     var menuFor by remember { mutableStateOf<Int?>(null) }
     val requesters = remember { List(MAX_SLOTS) { FocusRequester() } }
-    val slots = (tiles.size + 1).coerceAtMost(MAX_SLOTS)
+    val slots = (tiles.size + if (tiles.size < state.maxTiles) 1 else 0).coerceIn(1, MAX_SLOTS)
     LaunchedEffect(pick, tiles.size) {
         if (pick == null) { repeat(2) { withFrameNanos { } }; runCatching { requesters[state.tileFocus.coerceIn(0, slots - 1)].requestFocus() } }
     }
@@ -91,7 +91,7 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
                                 when {
                                     index < tiles.size -> Tile(state, tiles[index], index, index == state.tileFocus, now, requesters[index], modifier,
                                         onFocus = { onFocusTile(index) }, onSelect = { onFull(index) }, onMenu = { menuFor = index })
-                                    index == tiles.size && tiles.size < MAX_SLOTS -> AddSlot(requesters[index], modifier) { pick = TilePick.Add }
+                                    index == tiles.size && tiles.size < state.maxTiles -> AddSlot(requesters[index], modifier) { pick = TilePick.Add }
                                     else -> Spacer(modifier)
                                 }
                             }

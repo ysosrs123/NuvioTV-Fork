@@ -33,7 +33,8 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     val streamFormat: IptvStreamFormat = IptvStreamFormat.AUTO,
     private val onPlaying: (Boolean) -> Unit, private val onError: () -> Unit,
     private val onReconnecting: (Boolean) -> Unit = {}, private val isLive: Boolean = true,
-    private val onEnded: () -> Unit = {}, private val handleAudioFocus: Boolean = true) : OwnedLivePlayback {
+    private val onEnded: () -> Unit = {}, private val handleAudioFocus: Boolean = true,
+    private val maxVideoHeight: Int? = null, private val targetBufferBytes: Int = 12 * 1024 * 1024) : OwnedLivePlayback {
     private val fence = LiveRequestFence()
     val telemetry = LiveTelemetry()
     val host: String? get() = Uri.parse(locator).host
@@ -66,7 +67,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         val renderers = DefaultRenderersFactory(context).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
         player = ExoPlayer.Builder(context, renderers)
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 8000, 500, 1000)
-                .setTargetBufferBytes(12 * 1024 * 1024).setPrioritizeTimeOverSizeThresholds(false).build())
+                .setTargetBufferBytes(targetBufferBytes).setPrioritizeTimeOverSizeThresholds(false).build())
             .setMediaSourceFactory(DefaultMediaSourceFactory(sources).setLoadErrorHandlingPolicy(object : DefaultLoadErrorHandlingPolicy(0) {
                 override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long = C.TIME_UNSET
 
@@ -112,6 +113,9 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     }
     override fun start() {
         check(!released)
+        maxVideoHeight?.let { height ->
+            player.trackSelectionParameters = player.trackSelectionParameters.buildUpon().setMaxVideoSize(height * 16 / 9, height).build()
+        }
         val mimeType = when (streamFormat) {
             IptvStreamFormat.AUTO -> null
             IptvStreamFormat.HLS -> MimeTypes.APPLICATION_M3U8
