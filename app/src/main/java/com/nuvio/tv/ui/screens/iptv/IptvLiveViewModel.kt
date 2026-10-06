@@ -207,7 +207,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             try {
                 val sources = withContext(Dispatchers.IO) { access.use(current) { catalogue.sources(current.profileId) } }
                 val state = mutable.value
-                val ref = state.source?.takeIf { chosen -> sources.any { it.ref == chosen } } ?: sources.firstOrNull()?.ref
+                val ref = state.source?.takeIf { chosen -> sources.any { it.ref == chosen } }
+                    ?: sources.firstOrNull { it.playbackEligible }?.ref ?: sources.firstOrNull()?.ref
                 val query = IptvBrowseQuery(favouritesOnly = state.favourites, category = state.category.takeUnless { state.favourites })
                 val cursor = state.next?.takeIf { append && it.revision.ref == ref && it.query == query }
                 if (append && cursor == null) return@launch

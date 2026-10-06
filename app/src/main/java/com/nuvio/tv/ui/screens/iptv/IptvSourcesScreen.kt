@@ -21,6 +21,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -65,6 +66,7 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, viewModel: Ip
                     Text(source.label, style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextPrimary)
                     val status = state.refresh[IptvRefreshCoordinator.key(source.ref)]
                     RefreshLine(status, source.refreshedAtMillis, source.playbackEligible)
+                    state.counts[source.ref.sourceId]?.let { Text(pluralStringResource(R.plurals.iptv_source_channels, it, it), color = NuvioTheme.colors.TextTertiary) }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Button(onClick = { viewModel.refresh(source) }, enabled = status?.running != true) { Text(stringResource(R.string.iptv_setup_refresh)) }
                         Button(onClick = { viewModel.edit(source) }, enabled = !state.busy) { Text(stringResource(R.string.iptv_setup_edit)) }

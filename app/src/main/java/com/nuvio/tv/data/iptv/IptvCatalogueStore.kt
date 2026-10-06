@@ -205,6 +205,12 @@ class IptvCatalogueStore(
             if (items.size > limit) IptvBrowseCursor(revision, query, offset + limit) else null)
     }
 
+    fun channelCounts(profileId: Int): Map<String, Int> = transaction { db ->
+        require(profileId >= 0)
+        db.rawQuery("SELECT s.id,COUNT(c.id) FROM sources s LEFT JOIN catalogue c ON c.source=s.id AND c.generation=s.active_generation AND c.available=1 WHERE s.profile=? AND s.config_version=s.active_config GROUP BY s.id",
+            arrayOf(profileId.toString())).use { c -> buildMap { while (c.moveToNext()) put(c.getString(0), c.getInt(1)) } }
+    }
+
     fun categories(ref: IptvSourceRef): List<IptvCategory> = transaction { db ->
         val source = source(db, ref)
         val generation = source.activeGeneration ?: return@transaction emptyList()

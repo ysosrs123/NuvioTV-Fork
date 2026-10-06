@@ -28,7 +28,7 @@ data class IptvSourcesState(val profileId: Int = 0, val revision: Long = 0, val 
     val sources: List<IptvSource> = emptyList(), val feeds: List<IptvGuideFeed> = emptyList(),
     val selected: IptvSourceRef? = null, val linked: Set<String> = emptySet(), val linkedOrder: List<String> = emptyList(),
     val busy: Boolean = false, val message: Int? = null, val form: IptvSourceForm? = null,
-    val refresh: Map<String, IptvRefreshStatus> = emptyMap())
+    val refresh: Map<String, IptvRefreshStatus> = emptyMap(), val counts: Map<String, Int> = emptyMap())
 
 @HiltViewModel
 class IptvSourcesViewModel @Inject constructor(
@@ -82,12 +82,12 @@ class IptvSourcesViewModel @Inject constructor(
     }
     private suspend fun reload(current: IptvProfileAccess.Session) {
         val oldSelected = mutable.value.selected
-        val loaded = withContext(Dispatchers.IO) { access.use(current) {
+        val (loaded, counts) = withContext(Dispatchers.IO) { access.use(current) {
             val sources = catalogue.sources(current.profileId)
             val selected = oldSelected?.takeIf { ref -> sources.any { it.ref == ref } } ?: sources.firstOrNull()?.ref
-            Triple(sources, guides.feeds(current.profileId, limit = 200), selected?.let(catalogue::guideAssociations))
+            Triple(sources, guides.feeds(current.profileId, limit = 200), selected?.let(catalogue::guideAssociations)) to catalogue.channelCounts(current.profileId)
         } }
-        if (session === current) mutable.update { it.copy(sources = loaded.first, feeds = loaded.second,
+        if (session === current) mutable.update { it.copy(sources = loaded.first, feeds = loaded.second, counts = counts,
             selected = oldSelected?.takeIf { ref -> loaded.first.any { it.ref == ref } } ?: loaded.first.firstOrNull()?.ref,
             linked = loaded.third?.feedIds?.toSet().orEmpty(),
             linkedOrder = loaded.third?.let { (it.priority + it.feedIds).distinct() }.orEmpty(), ready = true) }

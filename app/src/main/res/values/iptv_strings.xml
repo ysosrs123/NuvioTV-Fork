@@ -33,6 +33,7 @@
     <string name="iptv_live_uncategorised">Other channels</string>
     <string name="iptv_live_recent">Recent channels</string>
     <string name="iptv_live_up_next">Next: %1$s at %2$s</string>
+    <string name="iptv_live_empty_source">No channels in %1$s yet. Press Back for categories and other sources, or refresh it in Live TV sources.</string>
     <string name="iptv_live_next_source">Next source</string>
     <string name="iptv_live_all">All channels</string>
     <string name="iptv_live_favourites">Favourites</string>
@@ -87,4 +88,8 @@
     <string name="iptv_live_format_hls">HLS</string>
     <string name="iptv_live_format_ts">MPEG-TS</string>
     <string name="iptv_live_format_saved">Format saved. Select the channel to play with this format.</string>
+    <plurals name="iptv_source_channels">
+        <item quantity="one">%1$d channel</item>
+        <item quantity="other">%1$d channels</item>
+    </plurals>
 </resources>

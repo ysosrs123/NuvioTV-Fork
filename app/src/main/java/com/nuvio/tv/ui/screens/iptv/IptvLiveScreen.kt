@@ -292,7 +292,8 @@ private fun GuideGrid(state: IptvLiveState, now: Long, cursor: Long, viewStart: 
         Column(Modifier.fillMaxSize()) {
             TimeBar(viewStart, visibleMillis, Modifier.padding(start = ChannelColumn).fillMaxWidth().height(28.dp))
             if (state.channels.isEmpty()) {
-                Text(stringResource(if (state.loading) R.string.iptv_setup_working else R.string.iptv_live_empty),
+                Text(if (state.loading) stringResource(R.string.iptv_setup_working) else stringResource(R.string.iptv_live_empty_source,
+                    state.sources.firstOrNull { it.ref == state.source }?.label.orEmpty()),
                     color = NuvioTheme.colors.TextSecondary, modifier = Modifier.padding(16.dp))
             }
             Box(Modifier.fillMaxSize()) {
