@@ -48,8 +48,12 @@ class SegmentCaptureTransport(private val store: CaptureSegmentStore, private va
                         val context = currentCoroutineContext()
                         context.ensureActive()
                         val committed = store.append(next.startMs, next.endMs, next.continuity, next.body) { context.ensureActive() }
-                    committedMutable.value = committed.sequence
-                    } finally { closeBody() }
+                        committedMutable.value = committed.sequence
+                    } catch (primary: Throwable) {
+                        try { closeBody() } catch (_: Exception) { }
+                        throw primary
+                    }
+                    closeBody()
                 }
                 stateMutable.value = CaptureTransportState.COMPLETE
             } catch (_: CaptureStorageUnavailable) {
@@ -76,10 +80,11 @@ class SegmentCaptureTransport(private val store: CaptureSegmentStore, private va
 
         val confirmed = try {
             withTimeoutOrNull(closeTimeoutMs) {
-                if (!source.close()) return@withTimeoutOrNull false
+                val stopped = source.close()
                 active?.join()
                 cleanupBody()?.join()
-                synchronized(this@SegmentCaptureTransport) { body == null }
+                val sourceClosed = stopped || source.close()
+                sourceClosed && synchronized(this@SegmentCaptureTransport) { body == null }
             } ?: false
         } catch (cancel: CancellationException) { throw cancel }
         catch (_: Exception) { false }

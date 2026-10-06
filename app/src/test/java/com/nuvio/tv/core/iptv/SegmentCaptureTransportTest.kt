@@ -46,6 +46,20 @@ class SegmentCaptureTransportTest {
         }
     }
 
+    @Test fun failedBodyCloseKeepsTheBackpressureOutcomeAndRetainsTheBody() = runBlocking {
+        CaptureSegmentStore(temp.newFolder(), 4, 4).use { store ->
+            store.append(0, 1000, 0, ByteArrayInputStream(byteArrayOf(1,2,3,4)))
+            val pin = store.pinFrom(0); val attempts = AtomicInteger()
+            val source = Source { CaptureInput(1000, 2000, 0, object : ByteArrayInputStream(byteArrayOf(5,6,7,8)) {
+                override fun close() { if (attempts.incrementAndGet() == 1) throw IOException("close failed"); super.close() }
+            }) }
+            val transport = SegmentCaptureTransport(store, source)
+            transport.start(); transport.await(CaptureTransportState.BACKPRESSURE)
+            assertEquals(1, attempts.get()); assertTrue(transport.close()); assertEquals(2, attempts.get())
+            pin.close()
+        }
+    }
+
     @Test fun pinnedCapacityStopsWithoutRetryOrDroppingCommittedMedia() = runBlocking {
         CaptureSegmentStore(temp.newFolder(), 4, 4).use { store ->
             store.append(0, 1000, 0, ByteArrayInputStream(byteArrayOf(1,2,3,4)))

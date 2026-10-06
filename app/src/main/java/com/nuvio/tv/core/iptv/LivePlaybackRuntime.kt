@@ -28,7 +28,7 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission) {
         val result = admission.acquire(key, acquisitionBytes, ConsumerReservation(LiveConsumerRole.VIEWER, 1, viewerBytes))
         if (result !is LiveAdmissionResult.Admitted) return@withLock LiveOpenResult.CAPACITY
         if (!result.openUpstream) {
-            admission.release(result.lease)
+            release(result.lease)
             return@withLock LiveOpenResult.SHARING_UNAVAILABLE
         }
         val playback = try { create(PlaybackPurpose.LIVE_CHANNEL) } catch (cancel: CancellationException) {

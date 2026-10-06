@@ -37,6 +37,18 @@ class SharedCaptureRuntimeTest {
         runtime.join(key, 10, 3, storage, reservation, { pipeline }, { consumer })
     private fun token(result: CaptureJoinResult) = (result as CaptureJoinResult.Joined).token
 
+    @Test fun laterJoinerStartsATransportLeftUnstartedByAnUncertainFirstJoin() = runBlocking {
+        val transport = Transport(); val pipeline = pipeline(transport)
+        val underReserved = object : OwnedCaptureConsumer {
+            override val minimumMemoryReservationBytes = 100L
+            override fun start() = Unit
+            override suspend fun close() = false
+        }
+        val failed = join(pipeline, consumer = underReserved) as CaptureJoinResult.Failed
+        assertNotNull(failed.pendingConsumer); assertEquals(0, transport.starts)
+        token(join(pipeline, recorder)); assertEquals(1, transport.starts)
+    }
+
     @Test fun sharedRecordingOutlivesViewerAndFinalCloseReleasesInfrastructure() = runBlocking {
         val transport = Transport(); val pipeline = pipeline(transport)
         val view = token(join(pipeline)); val record = token(join(pipeline, recorder))

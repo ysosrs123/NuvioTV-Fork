@@ -54,7 +54,7 @@ class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
     private data class Session(val lease: LiveConsumerLease, val acquisitionBytes: Long,
         val captureBytes: Long, val storage: CaptureStorageReservation, val pipeline: CapturePipeline,
         val consumers: MutableMap<String, Consumer> = linkedMapOf(), var closing: Boolean = false,
-        var transportClosed: Boolean = false)
+        var transportStarted: Boolean = false, var transportClosed: Boolean = false)
     private val mutex = Mutex()
     private val sessions = linkedMapOf<AcquisitionKey, Session>()
 
@@ -77,7 +77,7 @@ class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
             if (acquired is LiveAdmissionResult.Denied) return@withLock CaptureJoinResult.Denied(acquired.reason)
             acquired as LiveAdmissionResult.Admitted
             if (!acquired.openUpstream) {
-                admission.release(acquired.lease)
+                releaseClosed(acquired.lease)
                 return@withLock CaptureJoinResult.SharingUnavailable
             }
             infrastructure = acquired.lease
@@ -110,7 +110,7 @@ class SharedCaptureRuntime(private val admission: LiveSessionAdmission) {
             check(minimum >= 0 && reservation.memoryBytes >= minimum) { "Capture consumer memory is under-reserved" }
             val decoders = consumer.handle!!.minimumDecoderReservationCount
             check(decoders >= 0 && reservation.decoders >= decoders) { "Capture consumer decoder is under-reserved" }
-            if (infrastructure != null) session.pipeline.transport.start()
+            if (!session.transportStarted) { session.pipeline.transport.start(); session.transportStarted = true }
             currentCoroutineContext().ensureActive()
             consumer.handle!!.start()
             currentCoroutineContext().ensureActive()

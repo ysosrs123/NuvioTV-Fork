@@ -5,6 +5,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.URI
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
@@ -98,6 +99,41 @@ class HlsCaptureSegmentSourceTest {
         val pull = async { source.next() }; waiting.await()
         source.close(); pull.join(); assertTrue(pull.isCancelled); assertTrue(source.close())
         assertEquals(1, http.count)
+    }
+    @Test fun transportCloseDuringReloadWaitConfirmsAfterTheWorkerUnwinds() = runBlocking {
+        val http = Http(listOf(playlist(0, listOf("a.ts")))); val waiting = CompletableDeferred<Unit>()
+        val source = HlsCaptureSegmentSource(address, http, 4, wait = {
+            waiting.complete(Unit)
+            try { awaitCancellation() } finally { withContext(NonCancellable) { delay(200) } }
+        })
+        CaptureSegmentStore(temp.newFolder(), 12, 4).use { store ->
+            val transport = SegmentCaptureTransport(store, source); transport.start()
+            withTimeout(5000) { waiting.await() }
+            assertEquals(1, store.snapshot().size)
+            assertTrue(transport.close()); assertEquals(CaptureTransportState.CLOSED, transport.state.value)
+            assertEquals(1, http.count); assertTrue(http.stopped); assertEquals(0, http.active)
+        }
+    }
+    @Test fun transportCloseRetriesAFailedSegmentBodyCloseBeforeConfirming() = runBlocking {
+        var attempts = 0; var open = 0; var stopped = false
+        val http = object : HlsCaptureHttp {
+            override suspend fun open(address: URI, maxBytes: Long): InputStream {
+                open++
+                if (address.path.endsWith("m3u8")) return object : ByteArrayInputStream(playlist(0, listOf("a.ts"), true).toByteArray()) {
+                    override fun close() { open--; super.close() }
+                }
+                return object : ByteArrayInputStream(byteArrayOf(1, 2, 3, 4)) {
+                    override fun close() { if (++attempts == 1) throw IOException("close failed"); open--; super.close() }
+                }
+            }
+            override suspend fun close(): Boolean { stopped = true; return open == 0 }
+        }
+        val source = HlsCaptureSegmentSource(address, http, 4)
+        CaptureSegmentStore(temp.newFolder(), 12, 4).use { store ->
+            val transport = SegmentCaptureTransport(store, source); transport.start()
+            withTimeout(5000) { transport.state.first { it == CaptureTransportState.FAILED } }
+            assertTrue(transport.close()); assertEquals(2, attempts); assertEquals(0, open); assertTrue(stopped)
+        }
     }
     @Test fun lateMediaAfterCancellationClosesWithoutReturningIt() = runBlocking {
         val entered = CompletableDeferred<Unit>(); val release = CompletableDeferred<Unit>(); var active = 0
