@@ -20,6 +20,7 @@ import com.nuvio.tv.core.iptv.RecordingFailure
 import com.nuvio.tv.core.iptv.RecordingFiles
 import com.nuvio.tv.core.iptv.RecordingPlan
 import com.nuvio.tv.core.iptv.RecordingSlot
+import com.nuvio.tv.core.iptv.RecordingSpan
 import com.nuvio.tv.core.iptv.RecordingStatus
 import com.nuvio.tv.core.iptv.RecordingStop
 import com.nuvio.tv.core.iptv.RecordingStorage
@@ -27,6 +28,7 @@ import com.nuvio.tv.core.iptv.RecordingTransitions
 import com.nuvio.tv.core.iptv.RecordingWindow
 import com.nuvio.tv.core.iptv.recordingAlarmAction
 import com.nuvio.tv.core.iptv.recordingConflicts
+import com.nuvio.tv.core.iptv.trimRecordingPadding
 import com.nuvio.tv.core.profile.ProfileScopedCredentialStore
 import com.nuvio.tv.data.iptv.IptvCatalogueItem
 import com.nuvio.tv.data.iptv.IptvCatalogueStore
@@ -270,13 +272,17 @@ class IptvRecorder @Inject constructor(
             ?: return IptvRecordResult.Refused(IptvRecordRefusal.CHANNEL_UNAVAILABLE)
         val (stored, item, streams) = found
         val active = store.all().filter { it.status.holdsConnection }
-        if (active.any { it.source == source && it.channelId == channelId && it.startMillis < window.stopMillis && it.stopMillis > window.startMillis }) {
+        val requested = RecordingSpan.of(window.startMillis, window.stopMillis, programme?.start?.epochMillis, programme?.stop?.epochMillis)
+        val core = RecordingSlot(stored.accountId, requested.coreStartMillis, requested.coreStopMillis)
+        if (active.any { it.source == source && it.channelId == channelId && it.slot.startMillis < core.stopMillis && it.slot.stopMillis > core.startMillis }) {
             return IptvRecordResult.Refused(IptvRecordRefusal.ALREADY_RECORDING)
         }
-        if (recordingConflicts(active.map { it.slot }, RecordingSlot(stored.accountId, window.startMillis, window.stopMillis), streams)) {
+        if (recordingConflicts(active.map { it.slot }, core, streams)) {
             return IptvRecordResult.Refused(IptvRecordRefusal.CONNECTION_LIMIT)
         }
-        val immediate = window.startMillis <= now
+        val neighbours = active.filter { it.profileId == source.profileId && ((it.source == source && it.channelId == channelId) || it.accountId == stored.accountId) }
+        val trim = trimRecordingPadding(requested, neighbours.map { it.span })
+        val immediate = trim.candidate.startMillis <= now
         if (!immediate && !IptvRecordingAlarms.exactAllowed(context)) return IptvRecordResult.Refused(IptvRecordRefusal.EXACT_ALARMS_DENIED)
         if (immediate) {
             if ((admission.snapshot().upstreamsByAccount[stored.accountId] ?: 0) >= streams) return IptvRecordResult.Refused(IptvRecordRefusal.NO_FREE_CONNECTION)
@@ -288,12 +294,13 @@ class IptvRecorder @Inject constructor(
         val entry = IptvRecording(id = UUID.randomUUID().toString(), profileId = source.profileId, sourceId = source.sourceId,
             accountId = stored.accountId, channelId = channelId, channelName = (item.overlay.customName ?: item.channel.data.name).take(240),
             title = title?.trim()?.takeIf { it.isNotEmpty() }?.take(500), description = description?.trim()?.takeIf { it.isNotEmpty() }?.take(4000),
-            startMillis = window.startMillis, stopMillis = window.stopMillis, status = RecordingStatus.SCHEDULED,
+            startMillis = trim.candidate.startMillis, stopMillis = trim.candidate.stopMillis, status = RecordingStatus.SCHEDULED,
             programmeStartMillis = programme?.start?.epochMillis, programmeStopMillis = programme?.stop?.epochMillis, createdAtMillis = now)
         try { store.insert(entry) } catch (error: Exception) {
             IptvLog.failure("recording save", error)
             return IptvRecordResult.Refused(if (error is IllegalStateException) IptvRecordRefusal.LIST_FULL else IptvRecordRefusal.LOW_STORAGE)
         }
+        neighbours.zip(trim.neighbours).forEach { (neighbour, span) -> retime(neighbour, span, now) }
         if (immediate) {
             if (!startService(entry.id)) {
                 fail(entry.id, RecordingFailure.START_BLOCKED)
@@ -304,6 +311,18 @@ class IptvRecorder @Inject constructor(
         publish()
         IptvLog.info("recording ${if (immediate) "started" else "scheduled"}")
         return IptvRecordResult.Accepted(store.get(entry.id) ?: entry)
+    }
+
+    private fun retime(entry: IptvRecording, span: RecordingSpan, now: Long) {
+        if (span.startMillis == entry.startMillis && span.stopMillis == entry.stopMillis) return
+        val scheduled = entry.status == RecordingStatus.SCHEDULED && entry.startMillis > now
+        val start = if (scheduled) span.startMillis else entry.startMillis
+        val stop = maxOf(span.stopMillis, now + 1)
+        if (stop <= start) return
+        try {
+            store.update(entry.id) { it.copy(startMillis = start, stopMillis = stop) }
+            if (scheduled && start != entry.startMillis) IptvRecordingAlarms.arm(context, entry.id, start)
+        } catch (error: Exception) { IptvLog.failure("recording retime", error) }
     }
 
     private suspend fun record(id: String, holder: IptvRecordingProgress) {
@@ -338,6 +357,7 @@ class IptvRecorder @Inject constructor(
             while (isActive) {
                 delay(PROGRESS_MILLIS)
                 if (++ticks % PERSIST_TICKS == 0) mutex.withLock { store.update(id) { it.copy(bytes = holder.bytes, gaps = holder.gaps) } }
+                if ((store.get(id)?.stopMillis ?: Long.MAX_VALUE) <= System.currentTimeMillis()) stop(id)
                 publish()
             }
         }

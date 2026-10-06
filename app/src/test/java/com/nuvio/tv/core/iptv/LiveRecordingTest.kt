@@ -105,4 +105,40 @@ class LiveRecordingTest {
         assertEquals("2026-10-07 1100 - abcdef01.ts", RecordingFiles.name("///", null, now, "abcdef0123456789", zone))
         try { RecordingFiles.name("a", null, now, "../escape", zone); fail() } catch (_: IllegalArgumentException) { }
     }
+
+    @Test fun spanUsesProgrammeTimesInsidePadding() {
+        val pre = RecordingPlan.PRE_ROLL_MILLIS
+        val post = RecordingPlan.POST_ROLL_MILLIS
+        assertEquals(RecordingSpan(now - pre, now + hour + post, now, now + hour), RecordingSpan.of(now - pre, now + hour + post, now, now + hour))
+        assertEquals(RecordingSpan(now, now + hour, now, now + hour), RecordingSpan.of(now, now + hour, null, null))
+        assertEquals(RecordingSpan(now, now + hour, now, now + hour - post), RecordingSpan.of(now, now + hour, now - hour, now + hour - post))
+    }
+
+    @Test fun backToBackProgrammesSplitPaddingAtTheBoundary() {
+        val first = RecordingPlan.programme(now, now + hour, now + 2 * hour)!!
+        val second = RecordingPlan.programme(now, now + 2 * hour, now + 3 * hour)!!
+        val existing = RecordingSpan.of(first.startMillis, first.stopMillis, now + hour, now + 2 * hour)
+        val candidate = RecordingSpan.of(second.startMillis, second.stopMillis, now + 2 * hour, now + 3 * hour)
+        assertTrue(existing.stopMillis > candidate.startMillis)
+        assertFalse(recordingConflicts(listOf(RecordingSlot("a", existing.coreStartMillis, existing.coreStopMillis)),
+            RecordingSlot("a", candidate.coreStartMillis, candidate.coreStopMillis), 1))
+        val trim = trimRecordingPadding(candidate, listOf(existing))
+        assertEquals(now + 2 * hour, trim.candidate.startMillis)
+        assertEquals(candidate.stopMillis, trim.candidate.stopMillis)
+        assertEquals(now + 2 * hour, trim.neighbours.single().stopMillis)
+        assertEquals(existing.startMillis, trim.neighbours.single().startMillis)
+        val earlier = trimRecordingPadding(existing, listOf(candidate))
+        assertEquals(now + 2 * hour, earlier.candidate.stopMillis)
+        assertEquals(now + 2 * hour, earlier.neighbours.single().startMillis)
+    }
+
+    @Test fun trimLeavesGapsOverlapsAndDistantRecordingsAlone() {
+        val candidate = RecordingSpan.of(now + hour - minute, now + 2 * hour + 2 * minute, now + hour, now + 2 * hour)
+        val far = RecordingSpan.of(now + 3 * hour, now + 4 * hour, now + 3 * hour, now + 4 * hour)
+        val overlapping = RecordingSpan.of(now + 90 * minute, now + 3 * hour, now + 90 * minute, now + 3 * hour)
+        val gap = RecordingSpan.of(now, now + hour - 5 * minute, now, now + hour - 5 * minute)
+        val trim = trimRecordingPadding(candidate, listOf(far, overlapping, gap))
+        assertEquals(candidate, trim.candidate)
+        assertEquals(listOf(far, overlapping, gap), trim.neighbours)
+    }
 }

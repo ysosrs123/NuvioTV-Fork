@@ -2,6 +2,7 @@ package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.RecordingFailure
 import com.nuvio.tv.core.iptv.RecordingSlot
+import com.nuvio.tv.core.iptv.RecordingSpan
 import com.nuvio.tv.core.iptv.RecordingStatus
 import com.nuvio.tv.core.iptv.RecordingTransitions
 import com.nuvio.tv.core.iptv.RecordingWindow
@@ -25,7 +26,8 @@ data class IptvRecording(
     }
     val source: IptvSourceRef get() = IptvSourceRef(profileId, sourceId)
     val window: RecordingWindow get() = RecordingWindow(startMillis, stopMillis)
-    val slot: RecordingSlot get() = RecordingSlot(accountId, startMillis, stopMillis)
+    val span: RecordingSpan get() = RecordingSpan.of(startMillis, stopMillis, programmeStartMillis, programmeStopMillis)
+    val slot: RecordingSlot get() = span.let { RecordingSlot(accountId, it.coreStartMillis, it.coreStopMillis) }
     override fun toString(): String = "IptvRecording(id=$id, status=$status, failure=$failure, bytes=$bytes)"
 }
 

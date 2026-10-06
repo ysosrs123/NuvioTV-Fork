@@ -90,6 +90,41 @@ fun recordingConflicts(existing: List<RecordingSlot>, candidate: RecordingSlot, 
     return recordingPeak(existing, candidate) + 1 > maxStreams
 }
 
+data class RecordingSpan(val startMillis: Long, val stopMillis: Long, val coreStartMillis: Long, val coreStopMillis: Long) {
+    init { require(startMillis <= coreStartMillis && coreStartMillis < coreStopMillis && coreStopMillis <= stopMillis) }
+
+    companion object {
+        fun of(startMillis: Long, stopMillis: Long, programmeStartMillis: Long?, programmeStopMillis: Long?): RecordingSpan {
+            val coreStart = maxOf(startMillis, programmeStartMillis ?: startMillis).coerceAtMost(stopMillis - 1)
+            val coreStop = minOf(stopMillis, programmeStopMillis ?: stopMillis).coerceAtLeast(coreStart + 1)
+            return RecordingSpan(startMillis, stopMillis, coreStart, coreStop)
+        }
+    }
+}
+
+data class RecordingTrim(val candidate: RecordingSpan, val neighbours: List<RecordingSpan>)
+
+fun trimRecordingPadding(candidate: RecordingSpan, neighbours: List<RecordingSpan>): RecordingTrim {
+    var start = candidate.startMillis
+    var stop = candidate.stopMillis
+    val trimmed = neighbours.map { neighbour ->
+        when {
+            neighbour.coreStopMillis <= candidate.coreStartMillis && neighbour.stopMillis > start -> {
+                val boundary = maxOf(candidate.coreStartMillis, neighbour.coreStopMillis)
+                start = maxOf(start, boundary)
+                neighbour.copy(stopMillis = minOf(neighbour.stopMillis, boundary))
+            }
+            neighbour.coreStartMillis >= candidate.coreStopMillis && neighbour.startMillis < stop -> {
+                val boundary = neighbour.coreStartMillis
+                stop = minOf(stop, boundary)
+                neighbour.copy(startMillis = maxOf(neighbour.startMillis, boundary))
+            }
+            else -> neighbour
+        }
+    }
+    return RecordingTrim(candidate.copy(startMillis = start, stopMillis = stop), trimmed)
+}
+
 enum class RecordingAlarmAction { ARM, START_NOW, MISSED }
 
 fun recordingAlarmAction(window: RecordingWindow, nowMillis: Long, earlyMillis: Long = 0): RecordingAlarmAction = when {
