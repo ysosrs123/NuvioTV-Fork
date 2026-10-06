@@ -168,6 +168,43 @@ Independent read-only review; status after the follow-up commit.
     reaches channels beyond the loaded pages. OPEN: the short guide uses `java.util.Base64` (API 26)
     like other code in the app.
 
+## Security review of phone/PC setup (478bc8d..638844c)
+
+Independent read-only review; all items FIXED
+(cherry-picked; the series ends at 8672cca):
+
+1. Editing an Xtream/Stalker source to point at another server reused the stored login
+   (credential redirection). Changing scheme, host or port now requires the username
+   and password (Xtream) or MAC (Stalker) again, checked on the server and at save; the
+   TV dialog shows "Server: changes from X to Y"; hosts are never truncated.
+2. Deeply nested JSON could overflow the stack and kill the app. Bodies nesting deeper
+   than four levels (or using lenient JSON) are refused before parsing; serve() and the
+   client threads catch everything.
+3. The TV dialog focused Save first. It now starts on Reject, names the sending device,
+   and a session waits 10 s after a rejection.
+4. Slow clients could hold all connections: 10 s per connection, two per address, eight
+   in total.
+5. Unauthenticated requests kept the server alive: only paired requests or a successful
+   pairing reset the idle timer.
+6. The rate-limit table could be filled: oldest entries are evicted, after the Host check.
+7. A change from a stopped server could still be saved: changes carry their server.
+8. The address could come from a VPN interface: phone setup has its own Wi-Fi/Ethernet
+   resolver that skips virtual interfaces.
+9. Hygiene: resolved drafts drop their passwords, display lines hide values, and Unicode
+   format characters are refused.
+
+Remaining by design: plain HTTP on the home network (the page and TV warn about it);
+someone who sees the link can force a new link by guessing wrong codes.
+
+## Review of recording and multiview (6161519..c4c8e4a, 02ed6e9)
+
+Multiview items FIXED in d23f16c: tile players took audio focus from each other (only
+the last tile played); exit/remove/add races; failed tiles kept their connection;
+connection limits shared across profiles (now per profile and account). Recording items
+(Android 14 exact alarms, back-to-back programmes, acquire retry, service stop race,
+"record now" message, store failure, startForeground order, player errors) are being
+fixed.
+
 ## After the review
 
 Work after 1b7952c was reviewed once (above); later commits are host-tested and
