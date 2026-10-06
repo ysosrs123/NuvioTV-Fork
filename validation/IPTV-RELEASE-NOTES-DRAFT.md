@@ -90,6 +90,28 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 - Multiview: up to four channels at once from the channel options ("Add to
   multiview"); sound follows the focused picture, OK goes full screen on it, and each
   picture can be changed or removed. Each picture uses a connection on its account.
+  The number of pictures follows the device (memory and hardware decoders: one on
+  low-memory devices, two on 2 GB boxes, up to four on 4 GB), pictures are limited
+  to 720p or 540p, and multiview is hidden where only one picture fits.
+- Recording: record the programme on now (or the channel), schedule a programme from
+  the guide, stop or cancel from the channel options; the guide marks recordings, and
+  Recordings (from the rail) lists scheduled, running and finished recordings and plays
+  them with 30-second skips. Each recording uses its own connection on the account,
+  waits up to 45 seconds for one to free up, starts a minute early and runs two minutes
+  over unless that would overlap a neighbouring recording, and stops at six hours.
+  MPEG-TS is copied as is; HLS appends TS segments (encrypted HLS and fMP4 are refused).
+  Files stay on the device (app storage) and are removed with the profile. A recording
+  needs room for about 2.5 GB per hour plus a 500 MB reserve. Scheduled recordings use
+  exact alarms (granted at install on Android 13 and later), survive restarts and are
+  re-armed after a reboot.
+- Phone or computer setup: Live TV sources has "Set up from phone or computer", which
+  shows a QR code, an address and a six-digit code. A phone or computer on the home
+  network can add or edit playlists, Xtream accounts, Stalker portals and guides with a
+  real keyboard; every change is shown on the TV and saved only when confirmed there.
+  Saved passwords are never sent to the phone, and pointing an existing account at a
+  different server needs its login typed again. The page works only on the home
+  network, over plain HTTP, while the setup screen is open (it stops after 10 minutes
+  without use).
 - Each source has its own connection limit (1 to 4) under its options in Live TV
   sources; new sources no longer share one limit with other providers.
 - Each source opens on the category, favourites or all channels last chosen for it.
@@ -205,8 +227,10 @@ Screens and app
   default; these are estimates, not measured device limits.
 - No DRM, encrypted HLS, fMP4 or separate-audio
   support has been validated.
-- No timeshift yet. Multiview depends on how many decoders the TV has; four pictures
-  are untested. Account groups have no UI yet. Stalker
+- No timeshift yet. Multiview and recording are untested on devices; four pictures,
+  exact alarms in deep sleep on Fire OS, and recording across stream gaps are
+  unverified. With one connection on an account, watching and recording block each
+  other. Stalker streams that need extra headers may not record. Account groups have no UI yet. Stalker
   portals have no catch-up. Xtream catch-up assumes the provider uses the device's
   time zone.
 - Subtitles, closed captions, DVB subtitles and teletext are not all validated.
