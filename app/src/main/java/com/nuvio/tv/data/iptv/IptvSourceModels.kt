@@ -7,7 +7,7 @@ import com.nuvio.tv.core.iptv.RefreshTicket
 
 enum class IptvStreamFormat { AUTO, HLS, MPEG_TS }
 
-enum class IptvSourceKind { M3U, XTREAM }
+enum class IptvSourceKind { M3U, XTREAM, STALKER }
 data class IptvSourceRef(val profileId: Int, val sourceId: String) {
     init { require(profileId >= 0 && sourceId.matches(Regex("[A-Za-z0-9_-]{1,80}"))) }
 }

@@ -32,7 +32,7 @@ class IptvCatalogueStore(
 
     fun createSource(profileId: Int, label: String, kind: IptvSourceKind, accountId: String, connection: IptvSourceConnection): IptvSource = transaction { db ->
         validateConfiguration(label, accountId, connection)
-        if (kind == IptvSourceKind.XTREAM) IptvXtreamClient.serverBase(connection)
+        validateKind(kind, connection)
         val ref = IptvSourceRef(profileId, UUID.randomUUID().toString())
         db.insertOrThrow("sources", null, ContentValues().apply {
             put("id", ref.sourceId); put("profile", profileId); put("label", label); put("kind", kind.name); put("account_id", accountId)
@@ -45,7 +45,7 @@ class IptvCatalogueStore(
 
     fun editSource(ref: IptvSourceRef, label: String, kind: IptvSourceKind, accountId: String, connection: IptvSourceConnection): IptvSource = transaction { db ->
         validateConfiguration(label, accountId, connection)
-        if (kind == IptvSourceKind.XTREAM) IptvXtreamClient.serverBase(connection)
+        validateKind(kind, connection)
         val old = source(db, ref)
         val changedConnection = old.kind != kind || old.accountId != accountId || readConnection(db, ref) != connection
         db.update("sources", ContentValues().apply {
@@ -402,6 +402,13 @@ class IptvCatalogueStore(
             require(label.isNotBlank() && label.length <= 240 && accountId.matches(Regex("[A-Za-z0-9_-]{1,80}"))) { "Invalid IPTV source metadata" }
             require(connection.endpoint.length <= 16_384 && validHttp(connection.endpoint)) { "Invalid IPTV source address" }
             require((connection.username?.length ?: 0) <= 4096 && (connection.password?.length ?: 0) <= 4096) { "IPTV credential limit" }
+        }
+        fun validateKind(kind: IptvSourceKind, connection: IptvSourceConnection) {
+            when (kind) {
+                IptvSourceKind.XTREAM -> IptvXtreamClient.serverBase(connection)
+                IptvSourceKind.STALKER -> IptvStalkerClient.apiUrl(connection)
+                IptvSourceKind.M3U -> Unit
+            }
         }
         fun validRecord(row: IptvCatalogueRecord): Boolean = row.data.let {
             it.name.isNotBlank() && it.name.length <= 4096 && it.locator.length <= 16_384 && validHttp(it.locator) &&

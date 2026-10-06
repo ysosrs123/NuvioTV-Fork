@@ -32,6 +32,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     val state = mutable.asStateFlow()
     private val owner = UUID.randomUUID().toString()
     private val browse = IptvBrowseRepository(catalogue, guides)
+    private val stalker = IptvStalkerClient()
     private var session: IptvProfileAccess.Session? = null
     private var profileRevision = -1L
     private var foreground = false
@@ -176,7 +177,12 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     } }
                     currentCoroutineContext().ensureActive()
                     check(session === current && foreground && request == tuneVersion && profiles.activeProfileId.value == current.profileId && profiles.profileSelectionRevision.value == profileRevision)
-                    IptvLivePlayback(context, item.channel.data.locator, purpose, streamFormat,
+                    val locator = if (source.kind == IptvSourceKind.STALKER) {
+                        val command = requireNotNull(item.attributes[IptvStalkerClient.COMMAND_ATTRIBUTE])
+                        val connection = withContext(Dispatchers.IO) { access.use(current) { catalogue.connection(ref) } }
+                        stalker.streamUrl(connection, command).also { currentCoroutineContext().ensureActive() }
+                    } else item.channel.data.locator
+                    IptvLivePlayback(context, locator, purpose, streamFormat,
                         onPlaying = { playing -> if (request == tuneVersion) mutable.update { it.copy(playing = playing) } },
                         onError = { if (request == tuneVersion) { stop(); mutable.update { it.copy(message = R.string.iptv_live_failed) } } })
                         .also { mutable.update { state -> state.copy(playback = it, player = it.player, playingTitle = item.overlay.customName ?: item.channel.data.name) } }

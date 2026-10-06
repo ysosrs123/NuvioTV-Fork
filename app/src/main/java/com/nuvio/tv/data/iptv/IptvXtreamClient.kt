@@ -169,7 +169,7 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
     }
 }
 
-private class StrictJson(private val text: String) {
+internal class StrictJson(private val text: String) {
     private var offset = 0
     private fun peek(): Char = text.getOrNull(offset) ?: '\u0000'
     private fun space() { while (peek() in listOf(' ', '\t', '\r', '\n')) offset++ }
