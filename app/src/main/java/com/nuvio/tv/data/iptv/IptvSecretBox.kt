@@ -57,11 +57,12 @@ class EnvelopeIptvSecretBox(private val root: IptvSecretBox, private val random:
         SecretKeySpec(raw, "AES") to wrapped
     }
     private val opened = ConcurrentHashMap<String, SecretKey>()
+    private val ciphers = ThreadLocal.withInitial { Cipher.getInstance("AES/GCM/NoPadding") }
 
     override fun seal(context: String, plaintext: String): ByteArray = protect {
         val (key, wrapped) = current
         val iv = ByteArray(12).also(random::nextBytes)
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        val cipher = ciphers.get()
         cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(128, iv))
         cipher.updateAAD(context.toByteArray(Charsets.UTF_8))
         byteArrayOf(2, wrapped.size.toByte()) + wrapped + iv + cipher.doFinal(plaintext.toByteArray(Charsets.UTF_8))
@@ -74,7 +75,7 @@ class EnvelopeIptvSecretBox(private val root: IptvSecretBox, private val random:
             require(ciphertext.size >= 2 + length + 12 + 16)
             val wrapped = ciphertext.copyOfRange(2, 2 + length)
             val key = keyFor(wrapped)
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            val cipher = ciphers.get()
             cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, ciphertext, 2 + length, 12))
             cipher.updateAAD(context.toByteArray(Charsets.UTF_8))
             cipher.doFinal(ciphertext, 14 + length, ciphertext.size - 14 - length).toString(Charsets.UTF_8)

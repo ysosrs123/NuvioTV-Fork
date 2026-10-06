@@ -35,6 +35,20 @@ class EnvelopeIptvSecretBoxTest {
         assertThrows(IOException::class.java) { box.open("channel:1", sealed.copyOf(20)) }
     }
 
+    @Test fun reusedCipherRecoversAfterARejectedValueAndAcrossThreads() {
+        val box = EnvelopeIptvSecretBox(CountingRoot())
+        val first = box.seal("channel:1", "one")
+        assertThrows(IOException::class.java) { box.open("channel:1", first.copyOf().also { it[it.size - 1] = (it[it.size - 1].toInt() xor 1).toByte() }) }
+        val second = box.seal("channel:2", "two")
+        assertEquals("one", box.open("channel:1", first))
+        assertEquals("two", box.open("channel:2", second))
+        val results = java.util.concurrent.ConcurrentHashMap<Int, String>()
+        (0 until 4).map { worker -> Thread { repeat(200) { results[worker * 1000 + it] = box.open("w$worker:$it", box.seal("w$worker:$it", "v$it")) } } }
+            .onEach(Thread::start).forEach(Thread::join)
+        assertEquals(800, results.size)
+        assertTrue(results.all { (key, value) -> value == "v${key % 1000}" })
+    }
+
     @Test fun olderRootSealedValuesStillOpen() {
         val root = CountingRoot()
         val legacy = root.seal("connection", "value")

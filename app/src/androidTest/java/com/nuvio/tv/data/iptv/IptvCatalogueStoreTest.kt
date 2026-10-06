@@ -286,6 +286,52 @@ class IptvCatalogueStoreTest {
         assertEquals(100, store.snapshot(ref).channels.count { it.channel.available })
     }
 
+    @Test fun chunkedSaveKeepsThePreviousListVisibleUntilPublish() {
+        store.close(); store = IptvCatalogueStore(context, name, secrets, saveChunkRows = 2)
+        val ref = source(); publish(ref, (1..3).map { row(it) })
+        val ticket = store.beginRefresh(ref)
+        val seen = mutableSetOf<Int>()
+        assertEquals(RefreshDecision.PUBLISH, store.commitCatalogue(ref, ticket, (1..7).map { row(it) }, true) {
+            seen += store.snapshot(ref).channels.count { it.channel.available }
+        })
+        assertEquals(setOf(3), seen)
+        assertEquals(7, store.snapshot(ref).channels.count { it.channel.available })
+    }
+
+    @Test fun failureInALaterChunkKeepsThePreviousListAndLeavesNoPartialRows() {
+        store.close(); store = IptvCatalogueStore(context, name, secrets, saveChunkRows = 2)
+        val ref = source(); publish(ref, (1..3).map { row(it) })
+        val before = store.snapshot(ref)
+        val ticket = store.beginRefresh(ref)
+        secrets.sealsBeforeFailure = 3
+        assertThrows(IOException::class.java) { store.commitCatalogue(ref, ticket, (4..9).map { row(it) }, true, acceptedLargeChange = true) }
+        secrets.sealsBeforeFailure = null
+        assertEquals(before.channels, store.snapshot(ref).channels)
+        store.close()
+        context.openOrCreateDatabase(name, 0, null).use { db ->
+            db.rawQuery("SELECT (SELECT COUNT(*) FROM catalogue),(SELECT COUNT(*) FROM identities)", null).use {
+                assertTrue(it.moveToFirst()); assertEquals(3, it.getInt(0)); assertEquals(3, it.getInt(1))
+            }
+        }
+        store = IptvCatalogueStore(context, name, secrets, saveChunkRows = 2)
+        assertEquals(RefreshDecision.PUBLISH, store.commitCatalogue(ref, ticket, (4..9).map { row(it) }, true, acceptedLargeChange = true))
+        assertEquals((4..9).map { it.toString() }.toSet(), store.snapshot(ref).channels.filter { it.channel.available }.map { it.channel.data.providerId }.toSet())
+    }
+
+    @Test fun newerRefreshDuringAChunkedSaveMakesTheOlderSaveStale() {
+        store.close(); store = IptvCatalogueStore(context, name, secrets, saveChunkRows = 2)
+        val ref = source(); publish(ref)
+        val before = store.snapshot(ref)
+        val older = store.beginRefresh(ref)
+        var newer: com.nuvio.tv.core.iptv.RefreshTicket? = null
+        var checks = 0
+        assertEquals(RefreshDecision.STALE, store.commitCatalogue(ref, older, (1..6).map { row(it) }, true) {
+            if (++checks == 9) newer = store.beginRefresh(ref)
+        })
+        assertEquals(before.channels, store.snapshot(ref).channels)
+        assertEquals(RefreshDecision.PUBLISH, store.commitCatalogue(ref, newer!!, listOf(row(1), row(2)), true))
+    }
+
     @Test fun authenticatedEncryptionRejectsWrongProfileAndTamperingWithoutErasingData() {
         val blob = realSecrets.seal("profile:one", "SECRET")
         assertEquals("SECRET", realSecrets.open("profile:one", blob))

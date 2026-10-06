@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.nuvio.tv.core.iptv.ChannelCandidate
 import com.nuvio.tv.core.iptv.ChannelIdentityReconciler
+import com.nuvio.tv.core.iptv.GenerationWriter
 import com.nuvio.tv.core.iptv.GuideKey
 import com.nuvio.tv.core.iptv.RefreshDecision
 import com.nuvio.tv.core.iptv.RefreshTicket
@@ -15,6 +16,7 @@ import com.nuvio.tv.core.iptv.decideCatalogueRefresh
 import com.nuvio.tv.core.iptv.foldSearchText
 import com.nuvio.tv.core.iptv.moveItem
 import com.nuvio.tv.core.iptv.retainTombstones
+import com.nuvio.tv.core.iptv.saveGeneration
 import java.io.Closeable
 import java.io.InterruptedIOException
 import java.net.URI
@@ -27,8 +29,9 @@ class IptvCatalogueStore(
     private val secrets: IptvSecretBox = EnvelopeIptvSecretBox(AndroidIptvSecretBox()),
     private val maxDatabaseBytes: Long = 256L * 1024 * 1024,
     private val now: () -> Long = System::currentTimeMillis,
+    private val saveChunkRows: Int = 2_500,
 ) : Closeable {
-    init { require(maxDatabaseBytes >= 64 * 1024) }
+    init { require(maxDatabaseBytes >= 64 * 1024 && saveChunkRows > 0) }
     private val helper = Database(context.applicationContext, databaseName)
 
     fun createSource(profileId: Int, label: String, kind: IptvSourceKind, accountId: String, connection: IptvSourceConnection): IptvSource = transaction { db ->
@@ -256,53 +259,119 @@ class IptvCatalogueStore(
         ref: IptvSourceRef, ticket: RefreshTicket, records: List<IptvCatalogueRecord>, complete: Boolean,
         validators: IptvCacheValidators = IptvCacheValidators(), acceptedLargeChange: Boolean = false,
         checkCancellation: () -> Unit = { if (Thread.currentThread().isInterrupted) throw InterruptedIOException("IPTV import cancelled") },
-    ): RefreshDecision = transaction { db ->
+    ): RefreshDecision {
         checkCancellation()
+        val started = System.nanoTime()
+        val next = when (val plan = transaction { db -> planCatalogue(db, ref, ticket, records, complete, validators, acceptedLargeChange, checkCancellation) }) {
+            is CataloguePlan.Decided -> return plan.decision
+            is CataloguePlan.Write -> plan.rows
+        }
+        val planned = System.nanoTime()
+        val sealedValidators = secrets.seal(aad(ref, "validators"), JSONObject().put("etag", validators.etag).put("lastModified", validators.lastModified).toString())
+        val db = helper.writableDatabase
+        var written = planned
+        val published = db.compileStatement("INSERT OR IGNORE INTO identities(id,source) VALUES(?,?)").use { identity ->
+            db.compileStatement("INSERT INTO catalogue(source,generation,id,name,available,search_name,position,category,payload) VALUES(?,?,?,?,?,?,?,?,?)").use { row ->
+                try {
+                    saveGeneration(next, object : GenerationWriter<PlannedRow> {
+                        override fun write(rows: List<PlannedRow>) {
+                            val sealed = rows.map { planned ->
+                                checkCancellation()
+                                secrets.seal(aad(ref, "channel:${planned.channel.id}"), encodeRecord(planned.channel.data, planned.attributes))
+                            }
+                            transaction { db ->
+                                if (!pending(db, ref, ticket)) throw StaleSave()
+                                for ((index, planned) in rows.withIndex()) {
+                                    checkCancellation()
+                                    val channel = planned.channel
+                                    if (planned.newIdentity) {
+                                        identity.clearBindings(); identity.bindString(1, channel.id); identity.bindString(2, ref.sourceId)
+                                        identity.executeInsert()
+                                    }
+                                    row.clearBindings()
+                                    row.bindString(1, ref.sourceId); row.bindLong(2, ticket.requestGeneration); row.bindString(3, channel.id)
+                                    row.bindString(4, channel.data.name); row.bindLong(5, if (channel.available) 1 else 0)
+                                    row.bindString(6, searchName(channel.data.name)); row.bindLong(7, planned.position.toLong())
+                                    planned.attributes[CATEGORY_ATTRIBUTE]?.trim()?.takeIf { it.isNotEmpty() }?.take(240)?.let { row.bindString(8, it) } ?: row.bindNull(8)
+                                    row.bindBlob(9, sealed[index])
+                                    row.executeInsert()
+                                }
+                            }
+                        }
+
+                        override fun publish(): Boolean = transaction { db ->
+                            written = System.nanoTime()
+                            checkCancellation()
+                            if (count(db, "SELECT COUNT(*) FROM catalogue WHERE source=? AND generation=?", ref.sourceId, ticket.requestGeneration.toString()) != next.size.toLong())
+                                return@transaction false
+                            val updated = db.update("sources", ContentValues().apply {
+                                put("active_generation", ticket.requestGeneration); put("active_config", ticket.configurationVersion); put("refreshed_at", now())
+                                put("validators", sealedValidators)
+                            }, "id=? AND profile=? AND config_version=? AND requested=? AND COALESCE(active_generation,-1)<>?",
+                                arrayOf(ref.sourceId, ref.profileId.toString(), ticket.configurationVersion.toString(), ticket.requestGeneration.toString(), ticket.requestGeneration.toString()))
+                            if (updated != 1) return@transaction false
+                            db.delete("catalogue", "source=? AND generation<>?", arrayOf(ref.sourceId, ticket.requestGeneration.toString()))
+                            deleteOrphanIdentities(db, ref)
+                            checkCancellation()
+                            true
+                        }
+
+                        override fun discard() = transaction { db ->
+                            db.delete("catalogue", "source=? AND generation=? AND generation<>COALESCE((SELECT active_generation FROM sources WHERE id=?),-1)",
+                                arrayOf(ref.sourceId, ticket.requestGeneration.toString(), ref.sourceId))
+                            deleteOrphanIdentities(db, ref)
+                        }
+                    }, saveChunkRows, checkCancellation)
+                } catch (_: StaleSave) { false }
+            }
+        }
+        val finished = System.nanoTime()
+        IptvLog.info("catalogue save rows=${next.size} chunks=${(next.size + saveChunkRows - 1) / saveChunkRows} published=$published " +
+            "plan ms=${(planned - started) / 1_000_000} write ms=${(written - planned) / 1_000_000} publish ms=${(finished - written) / 1_000_000}")
+        return if (published) RefreshDecision.PUBLISH else RefreshDecision.STALE
+    }
+
+    private fun planCatalogue(db: SQLiteDatabase, ref: IptvSourceRef, ticket: RefreshTicket, records: List<IptvCatalogueRecord>, complete: Boolean,
+        validators: IptvCacheValidators, acceptedLargeChange: Boolean, checkCancellation: () -> Unit): CataloguePlan {
+        checkCancellation()
+        if (!sourceExists(db, ref)) return CataloguePlan.Decided(RefreshDecision.STALE)
         val old = snapshot(db, ref, checkCancellation)
         val latest = RefreshTicket(ref.sourceId, old.source.configurationVersion, old.source.requestedGeneration)
-        if (records.size > 20_000 || ticket.requestGeneration <= 0) return@transaction RefreshDecision.INVALID
+        if (records.size > 20_000 || ticket.requestGeneration <= 0) return CataloguePlan.Decided(RefreshDecision.INVALID)
         val incoming = records.distinct()
         val valid = complete && incoming.size <= 20_000 && incoming.all(::validRecord) &&
             incoming.map { it.data }.distinct().size == incoming.size && validValidators(validators)
         val previousCount = if (old.source.activeConfigurationVersion == old.source.configurationVersion) old.channels.count { it.channel.available } else 0
         val decision = decideCatalogueRefresh(ticket, latest, valid, previousCount, incoming.size, acceptedLargeChange)
-        if (decision != RefreshDecision.PUBLISH) return@transaction decision
+        if (decision != RefreshDecision.PUBLISH) return CataloguePlan.Decided(decision)
 
-        if (old.source.activeGeneration == ticket.requestGeneration) return@transaction RefreshDecision.STALE
+        if (old.source.activeGeneration == ticket.requestGeneration) return CataloguePlan.Decided(RefreshDecision.STALE)
         val reconciliation = try { ChannelIdentityReconciler().reconcile(ref.sourceId, old.channels.map { it.channel }, incoming.map { it.data }) }
-            catch (_: IllegalArgumentException) { return@transaction RefreshDecision.INVALID }
+            catch (_: IllegalArgumentException) { return CataloguePlan.Decided(RefreshDecision.INVALID) }
         val withOverlays = db.rawQuery("SELECT DISTINCT o.id FROM overlays o JOIN identities i ON o.id=i.id WHERE i.source=?",
             arrayOf(ref.sourceId)).use { c -> buildSet { while (c.moveToNext()) add(c.getString(0)) } }
-        val tombstones = reconciliation.retainTombstones(withOverlays) ?: return@transaction RefreshDecision.INVALID
+        val tombstones = reconciliation.retainTombstones(withOverlays) ?: return CataloguePlan.Decided(RefreshDecision.INVALID)
         val byData = incoming.associateBy { it.data }
         val previous = old.channels.associateBy { it.channel.id }
         val next = reconciliation.channels.map { row -> row.channel to byData.getValue(row.channel.data).attributes } +
             tombstones.retained.map { row -> row to previous.getValue(row.id).attributes }
-        for ((position, entry) in next.withIndex()) {
-            val (channel, attributes) = entry
-            checkCancellation()
-            if (channel.id !in previous) db.insertOrThrow("identities", null,
-                ContentValues().apply { put("id", channel.id); put("source", ref.sourceId) })
-            db.insertOrThrow("catalogue", null, ContentValues().apply {
-                put("source", ref.sourceId); put("generation", ticket.requestGeneration); put("id", channel.id)
-                put("name", channel.data.name); put("available", if (channel.available) 1 else 0)
-                put("search_name", searchName(channel.data.name)); put("position", position)
-                put("category", attributes[CATEGORY_ATTRIBUTE]?.trim()?.takeIf { it.isNotEmpty() }?.take(240))
-                put("payload", secrets.seal(aad(ref, "channel:${channel.id}"), encodeRecord(channel.data, attributes)))
-            })
-        }
-        checkCancellation()
-        db.update("sources", ContentValues().apply {
-            put("active_generation", ticket.requestGeneration); put("active_config", ticket.configurationVersion); put("refreshed_at", now())
-            put("validators", secrets.seal(aad(ref, "validators"), JSONObject().put("etag", validators.etag).put("lastModified", validators.lastModified).toString()))
-        }, "id=? AND config_version=? AND requested=?", arrayOf(ref.sourceId, ticket.configurationVersion.toString(), ticket.requestGeneration.toString())).also { check(it == 1) }
-        db.delete("catalogue", "source=? AND generation<>?", arrayOf(ref.sourceId, ticket.requestGeneration.toString()))
-        for (row in tombstones.dropped) {
-            checkCancellation()
-            db.delete("identities", "id=? AND source=?", arrayOf(row.id, ref.sourceId))
-        }
-        checkCancellation()
-        RefreshDecision.PUBLISH
+        db.delete("catalogue", "source=? AND generation<=? AND generation<>COALESCE((SELECT active_generation FROM sources WHERE id=?),-1)",
+            arrayOf(ref.sourceId, ticket.requestGeneration.toString(), ref.sourceId))
+        deleteOrphanIdentities(db, ref)
+        return CataloguePlan.Write(next.mapIndexed { position, (channel, attributes) -> PlannedRow(channel, attributes, position, channel.id !in previous) })
+    }
+
+    private fun pending(db: SQLiteDatabase, ref: IptvSourceRef, ticket: RefreshTicket): Boolean =
+        db.rawQuery("SELECT 1 FROM sources WHERE id=? AND profile=? AND config_version=? AND requested=? AND COALESCE(active_generation,-1)<>?",
+            arrayOf(ref.sourceId, ref.profileId.toString(), ticket.configurationVersion.toString(), ticket.requestGeneration.toString(), ticket.requestGeneration.toString()))
+            .use { it.moveToFirst() }
+
+    private fun sourceExists(db: SQLiteDatabase, ref: IptvSourceRef): Boolean =
+        db.rawQuery("SELECT 1 FROM sources WHERE id=? AND profile=?", arrayOf(ref.sourceId, ref.profileId.toString())).use { it.moveToFirst() }
+
+    private fun deleteOrphanIdentities(db: SQLiteDatabase, ref: IptvSourceRef) {
+        db.delete("identities", "source=? AND NOT EXISTS (SELECT 1 FROM catalogue c WHERE c.id=identities.id) AND NOT EXISTS (SELECT 1 FROM overlays o WHERE o.id=identities.id)",
+            arrayOf(ref.sourceId))
     }
 
     fun setOverlay(ref: IptvSourceRef, channelId: String, overlay: IptvChannelOverlay) = transaction { db ->
@@ -386,7 +455,14 @@ class IptvCatalogueStore(
     }
     override fun close() = helper.close()
 
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 6) {
+    private class StaleSave : RuntimeException()
+    private class PlannedRow(val channel: StoredChannel, val attributes: Map<String, String>, val position: Int, val newIdentity: Boolean)
+    private sealed interface CataloguePlan {
+        class Decided(val decision: RefreshDecision) : CataloguePlan
+        class Write(val rows: List<PlannedRow>) : CataloguePlan
+    }
+
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 7) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
@@ -400,14 +476,19 @@ class IptvCatalogueStore(
             addStreamFormatSchema(db)
             addGroupingSchema(db)
             addRefreshSchema(db)
+            addIdentityIndex(db)
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(oldVersion in 1..5 && newVersion == 6) { "Missing IPTV database migration" }
+            check(oldVersion in 1..6 && newVersion == 7) { "Missing IPTV database migration" }
             if (oldVersion == 1) addBrowseSchema(db)
             if (oldVersion <= 2) addStreamFormatSchema(db)
             if (oldVersion <= 4) addGroupingSchema(db)
             if (oldVersion <= 3) reindexSearch(db)
             if (oldVersion <= 5) addRefreshSchema(db)
+            if (oldVersion <= 6) addIdentityIndex(db)
+        }
+        private fun addIdentityIndex(db: SQLiteDatabase) {
+            db.execSQL("CREATE INDEX catalogue_identity ON catalogue(id)")
         }
         private fun addRefreshSchema(db: SQLiteDatabase) {
             db.execSQL("ALTER TABLE sources ADD COLUMN refreshed_at INTEGER")
@@ -443,6 +524,7 @@ class IptvCatalogueStore(
         const val CATEGORY_ATTRIBUTE = "group-title"
         fun aad(ref: IptvSourceRef, field: String) = "iptv.v1:${ref.profileId}:${ref.sourceId}:$field"
         fun searchName(value: String) = foldSearchText(value)
+        fun count(db: SQLiteDatabase, sql: String, vararg args: String): Long = db.rawQuery(sql, arrayOf(*args)).use { check(it.moveToFirst()); it.getLong(0) }
         fun Cursor.string(key: String) = getString(getColumnIndexOrThrow(key))
         fun Cursor.number(key: String) = getLong(getColumnIndexOrThrow(key))
         fun Cursor.nullableString(key: String): String? = getColumnIndexOrThrow(key).let { if (isNull(it)) null else getString(it) }
