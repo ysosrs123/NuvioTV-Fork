@@ -37,6 +37,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -220,7 +223,12 @@ private fun RecordingPlayer(playback: IptvRecordingPlayback, onClose: () -> Unit
             playWhenReady = true
         }
     }
-    DisposableEffect(player) { onDispose { player.release() } }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(player, lifecycle) {
+        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) player.playWhenReady = false }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer); player.release() }
+    }
     val focus = remember { FocusRequester() }
     var bar by remember { mutableStateOf(true) }
     var shownAt by remember { mutableLongStateOf(0L) }

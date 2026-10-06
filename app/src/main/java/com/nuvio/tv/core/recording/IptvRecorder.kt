@@ -47,6 +47,7 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -91,7 +92,7 @@ class IptvRecorder @Inject constructor(
     }
 
     private val store = IptvRecordingStore(File(context.filesDir, "iptv/recordings.json"))
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { _, error -> IptvLog.failure("recorder", error) })
     private val mutex = Mutex()
     private val jobs = HashMap<String, Job>()
     private val progress = HashMap<String, IptvRecordingProgress>()
@@ -275,7 +276,10 @@ class IptvRecorder @Inject constructor(
             title = title?.trim()?.takeIf { it.isNotEmpty() }?.take(500), description = description?.trim()?.takeIf { it.isNotEmpty() }?.take(4000),
             startMillis = window.startMillis, stopMillis = window.stopMillis, status = RecordingStatus.SCHEDULED,
             programmeStartMillis = programme?.start?.epochMillis, programmeStopMillis = programme?.stop?.epochMillis, createdAtMillis = now)
-        try { store.insert(entry) } catch (_: IllegalStateException) { return IptvRecordResult.Refused(IptvRecordRefusal.LIST_FULL) }
+        try { store.insert(entry) } catch (error: Exception) {
+            IptvLog.failure("recording save", error)
+            return IptvRecordResult.Refused(if (error is IllegalStateException) IptvRecordRefusal.LIST_FULL else IptvRecordRefusal.LOW_STORAGE)
+        }
         if (immediate) {
             if (!startService(entry.id)) {
                 fail(entry.id, RecordingFailure.START_BLOCKED)
