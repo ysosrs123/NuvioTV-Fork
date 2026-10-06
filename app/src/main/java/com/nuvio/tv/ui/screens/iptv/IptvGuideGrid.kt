@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.*
@@ -87,8 +88,11 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
                     LazyColumn(state = listState, modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         itemsIndexed(state.channels, key = { _, row -> row.item.channel.id }) { index, row ->
                             if (index >= state.channels.size - 8) LaunchedEffect(state.channels.size) { onNearEnd() }
+                            val recordings = state.recordings.filter { it.channelId == row.item.channel.id && it.sourceId == state.source?.sourceId }
                             GuideRow(row, state.guide[row.item.channel.id], index, now, cursor, viewStart, visibleMillis,
-                                row.item.channel.id == state.playingId, rowFocus.getOrPut(row.item.channel.id) { FocusRequester() },
+                                row.item.channel.id == state.playingId,
+                                recordings.any { it.status == com.nuvio.tv.core.iptv.RecordingStatus.RECORDING },
+                                recordings.filter { it.status == com.nuvio.tv.core.iptv.RecordingStatus.SCHEDULED }.mapNotNull { it.programmeStartMillis }.toSet(), rowFocus.getOrPut(row.item.channel.id) { FocusRequester() },
                                 onCursor, onRail, onFocus, onSelect, onMenu, onPage = { delta -> page(index, delta) })
                         }
                     }
@@ -164,7 +168,7 @@ private fun TimeBar(start: Long, span: Long, now: Long, modifier: Modifier) {
 
 @Composable
 private fun GuideRow(row: IptvListedChannel, grid: GuideGridRow?, index: Int, now: Long, cursor: Long, viewStart: Long, visibleMillis: Long,
-    playing: Boolean, focusRequester: FocusRequester, onCursor: (Long, Long) -> Unit, onRail: () -> Unit,
+    playing: Boolean, recording: Boolean, scheduled: Set<Long>, focusRequester: FocusRequester, onCursor: (Long, Long) -> Unit, onRail: () -> Unit,
     onFocus: (IptvListedChannel) -> Unit, onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onPage: (Int) -> Unit) {
     var focused by remember { mutableStateOf(false) }
     val longPress = rememberLongPressKeyTracker()
@@ -212,7 +216,7 @@ private fun GuideRow(row: IptvListedChannel, grid: GuideGridRow?, index: Int, no
             }
         }
         .focusable(), verticalAlignment = Alignment.CenterVertically) {
-        ChannelCell(row, index, playing, focused, Modifier.width(ChannelColumn).fillMaxHeight())
+        ChannelCell(row, index, playing, recording, focused, Modifier.width(ChannelColumn).fillMaxHeight())
         Box(Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
             if (cells.none { it is GuideProgrammeCell }) {
                 Box(Modifier.fillMaxSize().padding(vertical = 4.dp).clip(CellShape).background(NuvioTheme.colors.TextPrimary.copy(alpha = .03f))
@@ -230,6 +234,7 @@ private fun GuideRow(row: IptvListedChannel, grid: GuideGridRow?, index: Int, no
                 val width = minuteOffset(end - start) - 3.dp
                 if (width <= 0.dp) continue
                 ProgrammeCell(cell, now, selected = focused && cursor >= cell.startMillis && cursor < cell.endMillis, rowFocused = focused,
+                    scheduled = cell.programme.start.epochMillis in scheduled,
                     modifier = Modifier.padding(start = minuteOffset(start - viewStart), top = 4.dp, bottom = 4.dp).width(width).fillMaxHeight())
             }
         }
@@ -242,7 +247,7 @@ private fun Modifier.cellFocus(shape: RoundedCornerShape): Modifier =
     else border(2.dp, NuvioTheme.colors.FocusRing, shape)
 
 @Composable
-private fun ChannelCell(row: IptvListedChannel, index: Int, playing: Boolean, focused: Boolean, modifier: Modifier) {
+private fun ChannelCell(row: IptvListedChannel, index: Int, playing: Boolean, recording: Boolean, focused: Boolean, modifier: Modifier) {
     Row(modifier.padding(start = 8.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Box(Modifier.width(3.dp).height(28.dp).clip(RoundedCornerShape(2.dp))
             .then(if (playing) Modifier.background(NuvioTheme.palette.accentBrush()) else Modifier))
@@ -255,9 +260,10 @@ private fun ChannelCell(row: IptvListedChannel, index: Int, playing: Boolean, fo
                 fontWeight = if (focused || playing) FontWeight.SemiBold else FontWeight.Normal)
             val favourite = row.item.overlay.favouriteRank != null
             val archive = hasArchive(row)
-            if (favourite || archive || playing) Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (favourite || archive || playing || recording) Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (playing) Text(stringResource(R.string.iptv_live_now_playing), style = MaterialTheme.typography.labelSmall,
                     color = NuvioTheme.colors.Secondary, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                if (recording) Icon(Icons.Filled.FiberManualRecord, null, Modifier.size(10.dp), tint = NuvioTheme.colors.Error)
                 if (favourite) Icon(Icons.Filled.Star, null, Modifier.size(12.dp), tint = NuvioTheme.colors.Rating)
                 if (archive) Icon(Icons.Filled.History, null, Modifier.size(12.dp), tint = NuvioTheme.colors.TextTertiary)
             }
@@ -266,7 +272,7 @@ private fun ChannelCell(row: IptvListedChannel, index: Int, playing: Boolean, fo
 }
 
 @Composable
-private fun ProgrammeCell(cell: GuideProgrammeCell, now: Long, selected: Boolean, rowFocused: Boolean, modifier: Modifier) {
+private fun ProgrammeCell(cell: GuideProgrammeCell, now: Long, selected: Boolean, rowFocused: Boolean, scheduled: Boolean, modifier: Modifier) {
     val airing = now >= cell.startMillis && now < cell.endMillis
     val past = cell.endMillis <= now
     val v2 = LocalV2Appearance.current != null
@@ -290,6 +296,7 @@ private fun ProgrammeCell(cell: GuideProgrammeCell, now: Long, selected: Boolean
             if (wide) Text(timeRange(cell.programme), maxLines = 1, style = MaterialTheme.typography.labelSmall,
                 color = if (selected) itemContent(true).copy(alpha = .8f) else NuvioTheme.colors.TextTertiary)
         }
+        if (scheduled) Icon(Icons.Filled.FiberManualRecord, null, Modifier.align(Alignment.TopEnd).padding(5.dp).size(8.dp), tint = NuvioTheme.colors.Error)
         if (airing && !cell.openEnded) {
             val fraction = ((now - cell.programme.start.epochMillis).toFloat() /
                 ((cell.programme.stop?.epochMillis ?: cell.endMillis) - cell.programme.start.epochMillis).coerceAtLeast(1)).coerceIn(0f, 1f)

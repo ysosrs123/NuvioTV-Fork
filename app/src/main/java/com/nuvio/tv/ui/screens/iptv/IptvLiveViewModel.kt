@@ -26,7 +26,8 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
     val loading: Boolean = false, val loaded: Boolean = false, val tuning: Boolean = false, val message: Int? = null, val updating: Int? = null,
     val guidePicker: IptvGuidePicker? = null, val refresh: Map<String, IptvRefreshStatus> = emptyMap(),
     val controlLayout: com.nuvio.tv.data.local.PlayerControlLayout? = null, val shortGuide: Map<String, List<GuideProgramme>> = emptyMap(),
-    val hiddenCategories: Set<String> = emptySet(), val multiview: List<IptvTile>? = null, val tileFocus: Int = 0)
+    val hiddenCategories: Set<String> = emptySet(), val multiview: List<IptvTile>? = null, val tileFocus: Int = 0,
+    val recordings: List<IptvRecording> = emptyList())
 
 data class IptvTile(val row: IptvListedChannel, val playback: IptvLivePlayback? = null, val player: ExoPlayer? = null,
     val playing: Boolean = false, val failure: Int? = null)
@@ -44,7 +45,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private val playerSettings: com.nuvio.tv.data.local.PlayerSettingsDataStore,
     private val shortGuides: IptvShortGuideRepository,
     private val liveLaunch: IptvLiveLaunch,
-    private val admission: LiveSessionAdmission) : ViewModel() {
+    private val admission: LiveSessionAdmission,
+    private val recorder: com.nuvio.tv.core.recording.IptvRecorder) : ViewModel() {
     private val mutable = MutableStateFlow(IptvLiveState())
     val state = mutable.asStateFlow()
     private val owner = UUID.randomUUID().toString()
@@ -74,6 +76,9 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     init {
         viewModelScope.launch { state.map { it.player != null || it.multiview?.any { tile -> tile.player != null } == true }.distinctUntilChanged().collect(screensaver::setPlaybackActive) }
         viewModelScope.launch { liveLaunch.source.collect { ref -> if (ref != null && session != null) { liveLaunch.source.value = null; showSource(ref) } } }
+        viewModelScope.launch {
+            recorder.all.collect { all -> val profile = session?.profileId; mutable.update { it.copy(recordings = all.filter { r -> r.profileId == profile }) } }
+        }
         viewModelScope.launch { playerSettings.controlLayoutSnapshot.collect { snapshot -> mutable.update { it.copy(controlLayout = snapshot.layout) } } }
         viewModelScope.launch {
             combine(profiles.activeProfileId, profiles.activeProfileReady, profiles.profileSelectionRevision) { id, ready, revision -> Triple(id, ready, revision) }
@@ -87,6 +92,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                         val requested = liveLaunch.source.value?.takeIf { it.profileId == current.profileId }
                         liveLaunch.source.value = null
                         if (requested != null) mutable.update { it.copy(source = requested) }
+                        mutable.update { it.copy(recordings = recorder.all.value.filter { r -> r.profileId == current.profileId }) }
                         load(); refresher.refreshStale(current)
                     }
                 }
@@ -276,6 +282,28 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         mutable.update { it.copy(search = value) }
         channelSearch?.cancel()
         channelSearch = viewModelScope.launch { delay(300); load() }
+    }
+    fun record(row: IptvListedChannel, programme: GuideProgramme?) {
+        val current = session ?: return
+        val ref = mutable.value.source ?: return
+        viewModelScope.launch {
+            val now = System.currentTimeMillis()
+            val result = try {
+                if (programme != null && programme.start.epochMillis > now) recorder.schedule(current, ref, row.item.channel.id, programme)
+                else recorder.recordNow(current, ref, row.item.channel.id, programme?.takeIf { airing(it, now) })
+            } catch (cancel: CancellationException) { throw cancel }
+            catch (error: Exception) { IptvLog.failure("record", error); null }
+            val message = when (result) {
+                is com.nuvio.tv.core.recording.IptvRecordResult.Accepted ->
+                    if (result.recording.status == RecordingStatus.SCHEDULED) R.string.iptv_recording_scheduled else R.string.iptv_recording_started
+                is com.nuvio.tv.core.recording.IptvRecordResult.Refused -> iptvRecordRefusalMessage(result.reason)
+                null -> R.string.iptv_setup_failed
+            }
+            if (session === current) mutable.update { it.copy(message = message) }
+        }
+    }
+    fun cancelRecording(id: String) {
+        viewModelScope.launch { runCatching { recorder.cancel(id) }.onFailure { if (it is CancellationException) throw it } }
     }
     fun clearMessage() { mutable.update { it.copy(message = null) } }
     fun showSource(ref: IptvSourceRef) {

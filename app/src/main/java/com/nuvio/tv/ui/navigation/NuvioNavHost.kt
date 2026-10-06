@@ -1237,6 +1237,7 @@ private fun PlaybackNavHost(
 
         composable(Screen.IptvLive.route) {
             com.nuvio.tv.ui.screens.iptv.IptvLiveScreen(onBack = { navController.popBackStack() },
+                onRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } },
                 onSources = {
                     if (!navController.popBackStack(Screen.IptvSources.route, inclusive = false)) {
                         navController.navigate(Screen.IptvSources.route) { launchSingleTop = true }

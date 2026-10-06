@@ -175,6 +175,8 @@
     <string name="iptv_live_search_airing">Search what\'s on now</string>
     <string name="iptv_live_search_airing_hint">Programme title</string>
     <string name="iptv_live_airing_results">On now: “%1$s”</string>
+    <string name="iptv_recording_cancel_scheduled">Cancel scheduled recording</string>
+    <string name="iptv_recording_schedule">Record at %1$s</string>
     <plurals name="iptv_connections">
         <item quantity="one">%1$d connection</item>
         <item quantity="other">%1$d connections</item>
