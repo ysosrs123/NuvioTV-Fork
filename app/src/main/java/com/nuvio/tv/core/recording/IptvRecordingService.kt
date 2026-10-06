@@ -44,11 +44,7 @@ class IptvRecordingService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         lastStartId = startId
         val id = intent?.getStringExtra(IptvRecordingAlarms.EXTRA_ID)
-        try {
-            ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(recorder.runningTitles()),
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC else 0)
-        } catch (error: Exception) {
-            IptvLog.failure("recording foreground", error)
+        if (!enterForeground()) {
             if (id != null) recorder.blocked(id)
             if (recorder.running.value.isEmpty()) stopSelf(startId)
             return START_NOT_STICKY
@@ -65,6 +61,22 @@ class IptvRecordingService : Service() {
             }
         }
         return START_NOT_STICKY
+    }
+
+    private fun enterForeground(): Boolean {
+        val notification = try { notification(recorder.runningTitles()) } catch (error: Exception) {
+            IptvLog.failure("recording notification", error)
+            NotificationCompat.Builder(this, CHANNEL_ID).setSmallIcon(R.drawable.ic_launcher).setOngoing(true).setSilent(true).build()
+        }
+        try {
+            ServiceCompat.startForeground(this, NOTIFICATION_ID, notification,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC else 0)
+            return true
+        } catch (error: Exception) { IptvLog.failure("recording foreground", error) }
+        return try { startForeground(NOTIFICATION_ID, notification); true } catch (error: Exception) {
+            IptvLog.failure("recording foreground", error)
+            false
+        }
     }
 
     override fun onTimeout(startId: Int, fgsType: Int) {
