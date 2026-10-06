@@ -18,7 +18,7 @@ import com.nuvio.tv.core.iptv.SetupText
 import com.nuvio.tv.core.iptv.XtreamGuideReference
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.qr.QrCodeGenerator
-import com.nuvio.tv.core.server.DeviceIpAddress
+import com.nuvio.tv.core.server.IptvSetupAddress
 import com.nuvio.tv.core.server.IptvSetupServer
 import com.nuvio.tv.data.iptv.IptvCatalogueStore
 import com.nuvio.tv.data.iptv.IptvGuideFeed
@@ -124,7 +124,7 @@ class IptvSetupViewModel @Inject constructor(
             mutable.update { it.copy(phase = IptvSetupPhase.STARTING) }
             return
         }
-        val ip = DeviceIpAddress.get(context)
+        val ip = IptvSetupAddress.get(context)
         val failure = when {
             ip == null -> IptvSetupPhase.NO_NETWORK
             !SetupLan.isLanAddress(ip) -> IptvSetupPhase.NOT_HOME_NETWORK

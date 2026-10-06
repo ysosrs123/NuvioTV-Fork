@@ -20,6 +20,22 @@ object SetupLan {
         val (a, b) = ipv4(address) ?: return false
         return a == 10 || (a == 172 && b in 16..31) || (a == 192 && b == 168) || (a == 169 && b == 254)
     }
+
+    private val VIRTUAL = listOf("tun", "tap", "ppp", "wg", "ipsec", "l2tp", "gre", "clat", "dummy", "lo", "v4-", "rmnet", "ccmni")
+
+    fun isVirtualInterface(name: String?): Boolean = name != null && name.lowercase(Locale.ROOT).let { lower -> VIRTUAL.any(lower::startsWith) }
+
+    fun preferred(candidates: List<Pair<String?, String?>>): String? = candidates
+        .filter { (name, address) -> !isVirtualInterface(name) && isLanAddress(address) }
+        .sortedBy { (name) ->
+            val lower = name.orEmpty().lowercase(Locale.ROOT)
+            when {
+                lower.startsWith("eth") -> 0
+                lower.startsWith("wlan") -> 1
+                else -> 2
+            }
+        }
+        .firstOrNull()?.second
 }
 
 class SetupPairing(

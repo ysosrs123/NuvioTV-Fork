@@ -14,6 +14,15 @@ class SetupPairingTest {
             assertFalse(bad.toString(), SetupLan.isLanAddress(bad))
     }
 
+    @Test fun setupAddressSkipsVpnAndVirtualInterfacesAndPrefersWiredThenWifi() {
+        for (name in listOf("tun0", "ppp0", "wg0", "ipsec1", "tap0", "clat4", "lo", "v4-wlan0", "rmnet_data0")) assertTrue(name, SetupLan.isVirtualInterface(name))
+        for (name in listOf("eth0", "eth1", "wlan0", "usb0", null)) assertFalse(name.toString(), SetupLan.isVirtualInterface(name))
+        assertEquals("192.168.1.40", SetupLan.preferred(listOf("tun0" to "10.8.0.2", "wlan0" to "192.168.1.30", "eth1" to "192.168.1.40")))
+        assertEquals("192.168.1.30", SetupLan.preferred(listOf("tun0" to "10.8.0.2", "wlan0" to "192.168.1.30", "eth0" to "100.64.1.2")))
+        assertEquals("10.0.0.5", SetupLan.preferred(listOf("usb0" to "10.0.0.5")))
+        assertNull(SetupLan.preferred(listOf("tun0" to "10.8.0.2", "wlan0" to "8.8.8.8", "eth0" to null)))
+    }
+
     @Test fun linksAndCodesHaveTheExpectedShape() {
         val pairing = SetupPairing()
         val first = pairing.credentials
