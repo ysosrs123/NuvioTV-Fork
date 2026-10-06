@@ -1257,6 +1257,9 @@ private fun PlaybackNavHost(
                 com.nuvio.tv.ui.screens.iptv.IptvSetupScreen(onBack = { navController.popBackStack() })
             }
         }
+        composable(Screen.IptvRecordings.route) {
+            com.nuvio.tv.ui.screens.iptv.IptvRecordingsScreen(onBack = { navController.popBackStack() })
+        }
 
         composable(Screen.Settings.route) {
             SettingsScreen(
