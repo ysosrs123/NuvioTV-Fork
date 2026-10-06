@@ -45,6 +45,8 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -52,6 +54,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.RecordingStatus
+import com.nuvio.tv.data.iptv.IptvLog
 import com.nuvio.tv.data.iptv.IptvRecording
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
@@ -230,6 +233,17 @@ private fun RecordingPlayer(playback: IptvRecordingPlayback, onClose: () -> Unit
         onDispose { lifecycle.removeObserver(observer); player.release() }
     }
     val focus = remember { FocusRequester() }
+    var failed by remember { mutableStateOf(false) }
+    DisposableEffect(player) {
+        val listener = object : Player.Listener {
+            override fun onPlayerError(error: PlaybackException) {
+                IptvLog.failure("recording playback", error)
+                failed = true
+            }
+        }
+        player.addListener(listener)
+        onDispose { player.removeListener(listener) }
+    }
     var bar by remember { mutableStateOf(true) }
     var shownAt by remember { mutableLongStateOf(0L) }
     var position by remember { mutableLongStateOf(0L) }
@@ -272,6 +286,10 @@ private fun RecordingPlayer(playback: IptvRecordingPlayback, onClose: () -> Unit
             setShutterBackgroundColor(android.graphics.Color.BLACK)
         } }, modifier = Modifier.fillMaxSize(),
             update = { it.player = player; it.keepScreenOn = true }, onRelease = { it.player = null; it.keepScreenOn = false })
+        if (failed) {
+            Text(stringResource(R.string.iptv_recording_playback_failed), color = NuvioTheme.colors.TextPrimary, style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.align(Alignment.Center).iptvPanel().padding(horizontal = 28.dp, vertical = 18.dp))
+        }
         if (bar) {
             Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()
                 .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .85f))))

@@ -67,5 +67,6 @@
     <string name="iptv_recording_keep">Keep</string>
     <string name="iptv_recording_file_missing">The recording file is no longer on this device</string>
     <string name="iptv_recording_paused">Paused</string>
+    <string name="iptv_recording_playback_failed">This recording cannot be played. The file may be incomplete or in a format this device cannot decode.</string>
     <string name="iptv_recording_skip_hint">Left and right skip 30 seconds</string>
 </resources>
