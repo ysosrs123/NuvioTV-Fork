@@ -103,9 +103,8 @@ Work queue, in order:
 1. Done: CI green at 105791e (run 37467974960), ef6f3d7 (run 37469731575) and
    dccb7fb with the review fixes (run 37472049158) and f435994 (run 37474346067,
    number entry and sticky guide removal): full compile, IPTV JVM suites under
-   Gradle, APK. Latest: 2484181 (run 37537338609) with now-on search, multiview,
-   recording and phone setup plus all review fixes — the APK to install for the device
-   pass (later commits are docs only).
+   Gradle, APK. 2484181 (run 37537338609) has now-on search, multiview, recording and
+   phone setup plus all review fixes. 73b59de (multiview sizing) is building.
 2. Done: remaining data commits cherry-picked (header guides, caps, short guide,
    format detection; the 64 MB parse cap was the likely cause of "unexpected
    format") and short guide wired into Live TV. Header-linked guides are not removed
@@ -116,8 +115,8 @@ Work queue, in order:
 4. Done: "now on" search (guide schema 4 `search_title`, catalogue schema 8
    `epg_id`/`epg_base`/`name_key`; rows fill on the next guide import / source
    refresh; programmes longer than 24 h are not found), multiview (up to four tiles,
-   each its own `LivePlaybackRuntime` sharing the admission; device decoder limit
-   raised from 1 to 4 — unmeasured on the AM9) and per-source connection limits
+   each its own `LivePlaybackRuntime` sharing the admission; device decoder limit now
+   from `IptvDeviceProfile`, see item 5) and per-source connection limits
    (sources get their own account `src-<sourceId>`). Also done: favourites ordering, hidden categories (excluded from All channels via
    `IptvBrowseQuery.excludedCategories`; stored in the
    `iptv-live` shared preferences per profile and source, not removed with the
@@ -127,9 +126,28 @@ Work queue, in order:
    phone configuration servers in `core/server`); the phone/PC setup reuses them.
    Device test `IptvCatalogueStoreTest.v2MigrationPreserves…` appears to fail
    already (it sets version 2 on a current database); not yet checked on device.
-5. Secure phone/PC setup (pairing code, CSRF/origin checks, LAN only, idle timeout,
-   no secrets echoed) — security sensitive, needs review.
-6. Recording, multiview and sports only after the above.
+5. Done: phone/PC setup (`core/server/IptvSetupServer.kt`, `IptvSetupWebPage.kt`,
+   `core/server/IptvSetupAddress.kt`, `core/iptv/Setup*.kt`, `ui/screens/iptv/IptvSetup*`;
+   entry in Live TV sources), security-reviewed and fixed (see the code review file).
+   Recording (`core/recording/`, `data/iptv/IptvRecordingStore.kt`,
+   `core/iptv/LiveRecording.kt`, `ui/screens/iptv/IptvRecordings*`; manifest entries
+   only in the iptvPrototype manifest; `USE_EXACT_ALARM` on 33+, `SCHEDULE_EXACT_ALARM`
+   up to 32; dataSync service capped at 6 h), reviewed and fixed. Multiview reviewed and
+   fixed; connection keys use `admissionAccount(profileId, accountId)`.
+   Multiview sizing: `IptvDeviceProfile` (`AndroidDeviceProfile.read`: memory, low-RAM
+   flag, AVC decoder instances, decode budget from `PerformancePoint.covers` on API 29+
+   or `areSizeAndRateSupported` on 28) sets 1–4 pictures; `core/iptv/MultiviewSizing.kt`
+   turns each picture's height on the panel (UI size × Display.Mode physical height ÷
+   UI height) into 360/540/720/1080 by quality (Automatic/Sharpest/Lightest) and steps
+   non-focused pictures down to fit the budget; `IptvLivePlayback.limitHeight` applies
+   it without re-tuning (HLS ladders only; single-quality TS plays as sent). Layouts:
+   Grid and One large (`mainTile`). Layout and quality live in the `iptv-live`
+   preferences. Unverified on devices: what Display.Mode reports on each box (some may
+   report the UI size) and real multi-decoder capacity.
+6. Remaining: device validation of all of the above on the AM9 and smaller boxes;
+   sports matching; timeshift (capture chain still disabled). The host runner uses
+   desktop org.json, so Android-only org.json differences (such as no `keySet`) show
+   only in CI.
 
 Open questions and risks: Xtream catch-up uses the device time zone (server zone is
 not stored); the guide shows about four to five rows at 1080p because the top area
