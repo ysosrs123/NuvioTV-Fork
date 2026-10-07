@@ -1,7 +1,7 @@
 # Nuvio IPTV — progress
 
 Current status and next steps: [IPTV-HANDOVER.md](IPTV-HANDOVER.md).
-Updated 7 October 2026.
+Updated 7 October 2026 (wave 1).
 
 | Date | Commits | Work | Validation |
 | --- | --- | --- | --- |
@@ -21,6 +21,8 @@ Updated 7 October 2026.
 | 6 Oct | 73b59de | Multiview sized to the TV's output and the decoder (Grid / One large, Automatic / Sharpest / Lightest) | 340 core + 151 data-layer host tests; CI green (run 37545837449); device pending |
 | 7 Oct | fd03110 – head | Work list: guides and Live TV choices removed with their source/profile, guide folder chooser, v2 upgrade test fixed, guide 4→5 upgrade test; Sport from the guide (XMLTV categories, sport flag, guide schema 5); catch-up-based pause and rewind; 40 locales translated; optional minified release build in CI; review fixes | 349 core + 152 data-layer host tests, device tests compile; CI debug green at f465328 (run 37552365804); minified release (R8) green at d8d4a03 (run 37550880901); device pending |
 | 7 Oct | 8e5f67e – head | Live TV settings on the Live TV side (playback, guide, multiview, recordings); IPTV removed from the main Settings; translations of the new strings | 350 core + 152 data-layer host tests; CI green at 5276c31 (run 37555640125); device pending |
+| 7 Oct | 6ef6eb2 – 205f453 | First device pass feedback (17 items) fixed; redesigned phone setup page with Live TV settings; guides without channel IDs accepted; box kept awake while recording | Host tests; CI green; device pending |
+| 7 Oct | 277489d – d263b18 | Wave 1: sturdier live playback; recording to USB and SMB; guide, catch-up and multiview upgrades; setup transfer, backup and guide assignment; translations | 461 core + 185 data-layer host tests; CI green at 8461799 (run 37578739181); device pending |
 
 Design notes and per-checkpoint reports are in this folder
 (`IPTV-*-DESIGN.md`, `IPTV-*-VALIDATION-*.json`). Review findings and their status:

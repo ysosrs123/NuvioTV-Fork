@@ -185,6 +185,30 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   removing a profile clears its remembered categories too.
 - Search ignores case and compatibility forms (for example ß/ss, final sigma).
 
+## Recording locations, guide, playback and setup (7 October 2026, not device-tested)
+
+- Recording location: this device, a USB drive (thumb drive, HDD or SSD; FAT32, exFAT
+  and NTFS; FAT32 recordings are split into 4 GB parts and play back as one; read-only
+  drives are detected) or a network share (SMB 2 and 3, guest or account login).
+  Network recordings go to a small local buffer first and upload as they record, so a
+  short network drop does not lose the recording; uploads resume where they stopped.
+  File names are made safe for every file system. SMB1-only servers are reported as
+  such.
+- Guide: compact, comfortable and large densities, programme titles that stay visible
+  while scrolling, programme artwork where the guide has it, channel and category
+  reordering, categories from all sources together, multiview across sources with more
+  layouts, and picture-in-picture.
+- Catch-up: scrub across programme boundaries; playback returns to live near the end.
+  The Xtream catch-up address style is probed and remembered per source.
+- Playback: per-channel headers from the playlist (user agent, referrer, other
+  headers), endless reconnect with frozen-picture detection, a per-server format check,
+  faster start on TS channels, and the display frame rate handed over as in the main
+  player.
+- Setup: assign guides to channels and manage profiles from the phone, copy the whole
+  Live TV setup to another TV, encrypted backup and restore with a passphrase, an
+  account groups screen, Stalker grouping by portal, and a review screen when a refresh
+  would remove many channels.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
@@ -348,7 +372,7 @@ Phone setup (security review)
 - Exact alarms in deep sleep on Fire OS and recording across stream gaps are
   unverified. With one connection on an account, watching and recording block each
   other. Stalker streams that need extra headers may not record. Encrypted HLS and
-  fMP4 HLS cannot be recorded. Recordings are kept in app storage only (no USB/SMB).
+  fMP4 HLS cannot be recorded. USB and network-share recording is untested on devices; WebDAV and FTP targets are in progress.
 - Stalker portals have no catch-up. Xtream catch-up assumes the provider uses the
   device's time zone. "Search what's on now" does not find programmes longer than
   24 hours.

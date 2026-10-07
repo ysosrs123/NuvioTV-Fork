@@ -2,10 +2,10 @@
 
 Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
 Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built
-(latest green debug build: `5276c31`, run 37555640125, includes Live TV settings and
-all translations; minified release build with IPTV green at `d8d4a03`, run
-37550880901), not device-tested. Start with "Next session
-— work list" below; older sections further down are history and are kept for context.
+(latest green debug build: `8461799`, run 37578739181, includes wave 1 below; translations
+for wave 1 added afterwards in `d263b18`; minified release build with IPTV last green at
+`d8d4a03`, run 37550880901, before wave 1), not device-tested. Start with "Current work
+plan" and "Next session — work list" below; older sections further down are history.
 Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
 [code review](IPTV-CODE-REVIEW-20261006.md), [reference app notes](IPTV-UX-REFERENCE.md),
 [player validation report](IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json).
@@ -42,26 +42,40 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
 
 ## Current work plan (7 October 2026, user asked for everything below)
 
-Wave 1 (in progress, parallel helpers with separate file ownership; strings in their
-own files, translated afterwards):
+Wave 1 — done, CI-built (run 37578739181), not device-tested; strings translated into
+all 40 locales:
 - Storage: recording location internal / USB (FAT32 split into parts, exFAT, NTFS,
   read-only detection) / SMB 2-3 via smbj (user approved the dependency) with local
   spool and resumable upload; safe file names.
 - Live TV screen: catch-up scrubbing across programmes, auto return to live, guide
   densities, sticky titles, programme artwork, channel and category reorder, all
   sources together, multiview across sources and more layouts, picture-in-picture.
-  Strings: `iptv_guide_strings.xml`.
 - Playback: per-channel headers, endless retry, frozen-video detection, format
   probe, faster TS zap, Xtream catch-up address styles, display frame-rate handoff.
-  Strings: `iptv_playback_strings.xml`. View-model wiring done afterwards.
 - Setup: phone guide assignment and profiles, device-to-device copy, encrypted
   backup/restore, account groups screen, Stalker grouping, refresh review.
-Wave 2 (after storage): WebDAV and FTP recording targets (user approved), recordings
-download/watch from the phone setup page (user approved), shared media storage.
+- CI fixes after wave 1: unescaped apostrophes in setup strings; missing `clip` import.
+
+Wave 2 — in progress (parallel helpers, briefs kept outside the repo):
+- WebDAV (OkHttp; SabreDAV partial-update append when offered, else one PUT after the
+  recording ends) and FTP/FTPS (own minimal client, APPE append) recording targets,
+  certificate pinning for self-signed NAS certificates. Strings: `iptv_network_strings.xml`.
+- Recordings list, download and "Open in VLC" from the phone setup page (signed,
+  time-limited file links, HTTP range support). Strings: `iptv_phone_strings.xml`.
+- Sports data setting: Off (default) / ESPN (unofficial) / TheSportsDB (user's own key),
+  fixtures matched to channels by guide titles and broadcaster names. Strings:
+  `iptv_sport_strings.xml`. Opta/Stats Perform, Sportradar, Flashscore, Sofascore and
+  similar were checked: contract-only or no public API.
+- Experimental local timeshift from the capture chain, off by default, buffer 15/30/60
+  min or automatic, internal or USB. Strings: `iptv_timeshift_strings.xml`.
+- After the network targets: shared Movies folder as a recording location (Android 10+,
+  record to the spool, copy into MediaStore at the end).
+Settings sections for sport and timeshift are separate files to be wired into
+`IptvSettingsScreen` by the integrator.
 Wave 3: Live TV rows on the Nuvio Home screen.
-Needs the user: a sports fixtures data source; local timeshift from the capture chain
-can only be enabled as an experimental, off-by-default option until device-validated;
-device validation items can only be prepared here.
+Waiting on the user: IPTV VOD with Nuvio add-on metadata (stream source inside Nuvio's
+pages, recommended, or a separate section).
+Device validation items can only be prepared here.
 
 ## Planned but not done (compared on 7 October 2026)
 
