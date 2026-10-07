@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Vendndodhje në rrjet</string>
+    <string name="iptv_network_subtitle">Regjistro në një NAS ose kompjuter me SMB, WebDAV ose FTP. Regjistrimet ruhen fillimisht në këtë pajisje dhe pastaj kopjohen.</string>
+    <string name="iptv_network_protocol">Lloji i lidhjes</string>
+    <string name="iptv_network_webdav_address">Adresa</string>
+    <string name="iptv_network_webdav_address_hint">Adresa WebDAV, për shembull https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Një dosje nën adresë, për shembull TV/Live. Krijohet nëse mungon.</string>
+    <string name="iptv_network_ftp_server_hint">Emri ose adresa IP, për shembull nas.local. Shto :portë vetëm nëse serveri përdor një portë tjetër nga 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Një dosje në dosjen e hyrjes, për shembull TV/Live. Krijohet nëse mungon.</string>
+    <string name="iptv_network_ftp_secure">E sigurt (TLS eksplicit)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Enkripton hyrjen dhe regjistrimet. Serveri duhet të mbështesë FTPS.</string>
+    <string name="iptv_network_username_hint">Lëre bosh për t\'u lidhur pa hyrë</string>
+    <string name="iptv_network_plain_warning">Kjo lidhje nuk është e enkriptuar. Të tjerët në rrjet mund ta shohin fjalëkalimin.</string>
+    <string name="iptv_network_invalid">Kontrollo adresën dhe emrat e dosjeve. Nuk mund të përmbajnë &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Nuk u gjet asgjë në këtë adresë. Kontrollo shtegun pas emrit të serverit.</string>
+    <string name="iptv_network_certificate_untrusted">Certifikata e serverit nuk mund të verifikohej. Nëse është certifikata e vetë NAS-it tënd, krahaso gjurmën me atë që shfaqet në NAS para se t\'i besosh.</string>
+    <string name="iptv_network_certificate_fingerprint">Gjurma SHA-256: %1$s</string>
+    <string name="iptv_network_trust">Besoji kësaj certifikate</string>
+    <string name="iptv_network_no_tls">Serveri nuk ofron enkriptim. Çaktivizo E sigurt ose aktivizo FTPS në server.</string>
+    <string name="iptv_network_tls_reuse">Serveri kërkon ripërdorimin e sesionit TLS në lidhjet e të dhënave, gjë që nuk mbështetet. Çaktivizoje këtë kërkesë në server.</string>
+</resources>

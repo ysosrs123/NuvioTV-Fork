@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">Filma dhe seriale IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">Shfaq titujt që përputhen nga burimet e TV-së live si burim transmetimi</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Të gjitha lidhjet për %1$s janë në përdorim. Ndalo TV-në live ose një regjistrim në këtë burim dhe provo përsëri.</string>
+    <string name="iptv_vod_provider_refused">Ofruesi e refuzoi këtë titull. Të gjitha lidhjet e tij mund të jenë në përdorim ose llogaria mund të ketë skaduar.</string>
+    <string name="iptv_vod_unavailable">Ky titull IPTV nuk është më i disponueshëm. Rifresko burimin te TV live dhe provo përsëri.</string>
+</resources>

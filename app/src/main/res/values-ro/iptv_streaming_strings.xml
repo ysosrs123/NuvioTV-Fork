@@ -1,0 +1,30 @@
+<resources>
+    <string name="iptv_stream_title">Streaming</string>
+    <string name="iptv_stream_description">Cum fac buffer canalele live. Modificările se aplică următorului canal deschis.</string>
+    <string name="iptv_stream_start">Pornește redarea după</string>
+    <string name="iptv_stream_start_subtitle">Cât video se încarcă înainte să pornească un canal. O așteptare mai scurtă pornește mai repede, dar poate sacada pe o conexiune slabă.</string>
+    <string name="iptv_stream_start_fast">Rapid (circa 1 s)</string>
+    <string name="iptv_stream_start_normal">Normal (circa 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Sigur (circa 5 s)</string>
+    <string name="iptv_stream_cushion">Creează un buffer de siguranță în timpul vizionării</string>
+    <string name="iptv_stream_cushion_subtitle">Redă cu 3% mai lent, cu tonalitate normală, până se umple bufferul, ca scurtele căderi de rețea să nu întrerupă imaginea. TV live rulează apoi cu acea întârziere.</string>
+    <string name="iptv_stream_cushion_off">Dezactivat</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d secundă</item>
+        <item quantity="few">%d secunde</item>
+        <item quantity="other">%d de secunde</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">Canalele HLS pornesc mai în urmă față de live în loc să încetinească.</string>
+    <string name="iptv_stream_cushion_memory">Limitat la circa %1$d MB de memorie pe acest dispozitiv.</string>
+    <string name="iptv_stream_behind_live">În urmă față de live cu %1$d s</string>
+    <string name="iptv_stream_go_live_hint">Apasă derulare înainte pentru live</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Trimis la redarea canalelor, catch-up și filmelor din această sursă. Setările din playlist ale unui canal au în continuare prioritate.</string>
+    <string name="iptv_user_agent_default">Implicit aplicație</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Generic (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Personalizat</string>
+    <string name="iptv_user_agent_custom_hint">Doar caractere imprimabile, maximum 200.</string>
+</resources>

@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Locație în rețea</string>
+    <string name="iptv_network_subtitle">Înregistrează pe un NAS sau computer prin SMB, WebDAV sau FTP. Înregistrările se salvează mai întâi pe acest dispozitiv și apoi se copiază.</string>
+    <string name="iptv_network_protocol">Tip de conexiune</string>
+    <string name="iptv_network_webdav_address">Adresă</string>
+    <string name="iptv_network_webdav_address_hint">Adresa WebDAV, de exemplu https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Un folder sub adresă, de exemplu TV/Live. Este creat dacă lipsește.</string>
+    <string name="iptv_network_ftp_server_hint">Nume sau adresă IP, de exemplu nas.local. Adaugă :port doar dacă serverul folosește alt port decât 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Un folder din folderul de conectare, de exemplu TV/Live. Este creat dacă lipsește.</string>
+    <string name="iptv_network_ftp_secure">Securizat (TLS explicit)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Criptează autentificarea și înregistrările. Serverul trebuie să accepte FTPS.</string>
+    <string name="iptv_network_username_hint">Lasă gol pentru conectare fără autentificare</string>
+    <string name="iptv_network_plain_warning">Această conexiune nu este criptată. Alții din rețea ar putea vedea parola.</string>
+    <string name="iptv_network_invalid">Verifică adresa și numele folderelor. Nu pot conține &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Nu s-a găsit nimic la această adresă. Verifică calea de după numele serverului.</string>
+    <string name="iptv_network_certificate_untrusted">Certificatul serverului nu a putut fi verificat. Dacă este certificatul propriu al NAS-ului tău, compară amprenta cu cea afișată pe NAS înainte de a-l accepta.</string>
+    <string name="iptv_network_certificate_fingerprint">Amprentă SHA-256: %1$s</string>
+    <string name="iptv_network_trust">Acceptă acest certificat</string>
+    <string name="iptv_network_no_tls">Serverul nu oferă criptare. Dezactivează Securizat sau activează FTPS pe server.</string>
+    <string name="iptv_network_tls_reuse">Serverul cere reutilizarea sesiunii TLS pe conexiunile de date, ceea ce nu este acceptat. Dezactivează această cerință pe server.</string>
+</resources>

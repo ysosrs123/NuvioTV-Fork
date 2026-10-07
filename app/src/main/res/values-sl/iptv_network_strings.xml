@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Omrežna lokacija</string>
+    <string name="iptv_network_subtitle">Snemajte na NAS ali računalnik prek SMB, WebDAV ali FTP. Posnetki se najprej shranijo na tej napravi in nato kopirajo.</string>
+    <string name="iptv_network_protocol">Vrsta povezave</string>
+    <string name="iptv_network_webdav_address">Naslov</string>
+    <string name="iptv_network_webdav_address_hint">Naslov WebDAV, na primer https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Mapa pod naslovom, na primer TV/Live. Če manjka, se ustvari.</string>
+    <string name="iptv_network_ftp_server_hint">Ime ali naslov IP, na primer nas.local. :vrata dodajte le, če strežnik uporablja druga vrata kot 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Mapa v mapi za prijavo, na primer TV/Live. Če manjka, se ustvari.</string>
+    <string name="iptv_network_ftp_secure">Varno (eksplicitni TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Šifrira prijavo in posnetke. Strežnik mora podpirati FTPS.</string>
+    <string name="iptv_network_username_hint">Pustite prazno za povezavo brez prijave</string>
+    <string name="iptv_network_plain_warning">Ta povezava ni šifrirana. Drugi v omrežju bi lahko videli geslo.</string>
+    <string name="iptv_network_invalid">Preverite naslov in imena map. Ne smejo vsebovati &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Na tem naslovu ni bilo najdenega ničesar. Preverite pot za imenom strežnika.</string>
+    <string name="iptv_network_certificate_untrusted">Potrdila strežnika ni bilo mogoče preveriti. Če je to lastno potrdilo vašega NAS, pred zaupanjem primerjajte prstni odtis s tistim, ki ga prikazuje NAS.</string>
+    <string name="iptv_network_certificate_fingerprint">Prstni odtis SHA-256: %1$s</string>
+    <string name="iptv_network_trust">Zaupaj temu potrdilu</string>
+    <string name="iptv_network_no_tls">Strežnik ne ponuja šifriranja. Izklopite Varno ali na strežniku omogočite FTPS.</string>
+    <string name="iptv_network_tls_reuse">Strežnik zahteva ponovno uporabo seje TLS v podatkovnih povezavah, kar ni podprto. Na strežniku izklopite to zahtevo.</string>
+</resources>

@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Localização de rede</string>
+    <string name="iptv_network_subtitle">Grava num NAS ou computador por SMB, WebDAV ou FTP. As gravações são guardadas primeiro neste dispositivo e depois copiadas.</string>
+    <string name="iptv_network_protocol">Tipo de ligação</string>
+    <string name="iptv_network_webdav_address">Endereço</string>
+    <string name="iptv_network_webdav_address_hint">O endereço WebDAV, por exemplo https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Uma pasta dentro do endereço, por exemplo TV/Live. É criada se não existir.</string>
+    <string name="iptv_network_ftp_server_hint">Nome ou endereço IP, por exemplo nas.local. Adiciona :porta só se o servidor usar uma porta diferente de 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Uma pasta dentro da pasta de início de sessão, por exemplo TV/Live. É criada se não existir.</string>
+    <string name="iptv_network_ftp_secure">Seguro (TLS explícito)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Encripta o início de sessão e as gravações. O servidor tem de suportar FTPS.</string>
+    <string name="iptv_network_username_hint">Deixa vazio para ligar sem iniciar sessão</string>
+    <string name="iptv_network_plain_warning">Esta ligação não é encriptada. Outras pessoas na rede podem ver a palavra-passe.</string>
+    <string name="iptv_network_invalid">Verifica o endereço e os nomes das pastas. Não podem conter &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Não foi encontrado nada neste endereço. Verifica o caminho depois do nome do servidor.</string>
+    <string name="iptv_network_certificate_untrusted">Não foi possível verificar o certificado do servidor. Se for o certificado do teu próprio NAS, compara a impressão digital com a apresentada no NAS antes de confiares nele.</string>
+    <string name="iptv_network_certificate_fingerprint">Impressão digital SHA-256: %1$s</string>
+    <string name="iptv_network_trust">Confiar neste certificado</string>
+    <string name="iptv_network_no_tls">O servidor não oferece encriptação. Desativa Seguro ou ativa o FTPS no servidor.</string>
+    <string name="iptv_network_tls_reuse">O servidor exige a reutilização da sessão TLS nas ligações de dados, o que não é suportado. Desativa essa exigência no servidor.</string>
+</resources>

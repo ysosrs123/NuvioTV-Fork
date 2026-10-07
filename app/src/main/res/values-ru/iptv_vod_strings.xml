@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">Фильмы и сериалы IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">Показывает подходящие названия из ваших источников ТВ-эфира как источник потоков</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Все подключения для %1$s заняты. Остановите ТВ-эфир или запись на этом источнике и повторите попытку.</string>
+    <string name="iptv_vod_provider_refused">Провайдер отклонил это название. Возможно, все его подключения заняты или срок действия аккаунта истёк.</string>
+    <string name="iptv_vod_unavailable">Это название IPTV больше недоступно. Обновите источник в ТВ-эфире и повторите попытку.</string>
+</resources>

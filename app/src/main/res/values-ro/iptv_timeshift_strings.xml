@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Timeshift local (experimental)</string>
+    <string name="iptv_timeshift_subtitle">Experimental. Pune în buffer canalul pe care îl urmărești pe tot ecranul, ca să-l poți pune pe pauză și derula înapoi. Folosește spațiu de stocare cât urmărești și necesită o conexiune liberă, ca la vizionarea normală. Funcționează doar cu canale MPEG-TS; canalele HLS, multiview, previzualizarea și un canal în curs de înregistrare se redau normal. Dacă ceva eșuează, redarea revine la live normal.</string>
+    <string name="iptv_timeshift_length">Durata bufferului</string>
+    <string name="iptv_timeshift_length_subtitle">Se scurtează când spațiul liber este redus. Bufferul este șters când schimbi canalul sau oprești vizionarea.</string>
+    <string name="iptv_timeshift_length_15">15 minute</string>
+    <string name="iptv_timeshift_length_30">30 de minute</string>
+    <string name="iptv_timeshift_length_60">60 de minute</string>
+    <string name="iptv_timeshift_length_auto">Automat</string>
+    <string name="iptv_timeshift_length_auto_description">30 de minute când există suficient spațiu liber, altfel mai puțin</string>
+    <string name="iptv_timeshift_location">Locația bufferului</string>
+    <string name="iptv_timeshift_location_subtitle">Unde se scrie bufferul cât urmărești</string>
+    <string name="iptv_timeshift_fallback">Timeshift local oprit. Se redă live.</string>
+</resources>

@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Sieťové umiestnenie</string>
+    <string name="iptv_network_subtitle">Nahrávajte na NAS alebo počítač cez SMB, WebDAV alebo FTP. Nahrávky sa najprv ukladajú v tomto zariadení a potom sa skopírujú.</string>
+    <string name="iptv_network_protocol">Typ pripojenia</string>
+    <string name="iptv_network_webdav_address">Adresa</string>
+    <string name="iptv_network_webdav_address_hint">Adresa WebDAV, napríklad https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Priečinok pod adresou, napríklad TV/Live. Ak chýba, vytvorí sa.</string>
+    <string name="iptv_network_ftp_server_hint">Názov alebo IP adresa, napríklad nas.local. :port pridajte len vtedy, ak server používa iný port ako 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Priečinok v prihlasovacom priečinku, napríklad TV/Live. Ak chýba, vytvorí sa.</string>
+    <string name="iptv_network_ftp_secure">Zabezpečené (explicitné TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Šifruje prihlásenie aj nahrávky. Server musí podporovať FTPS.</string>
+    <string name="iptv_network_username_hint">Nechajte prázdne na pripojenie bez prihlásenia</string>
+    <string name="iptv_network_plain_warning">Toto pripojenie nie je šifrované. Ostatní v sieti môžu vidieť heslo.</string>
+    <string name="iptv_network_invalid">Skontrolujte adresu a názvy priečinkov. Nemôžu obsahovať &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Na tejto adrese sa nič nenašlo. Skontrolujte cestu za názvom servera.</string>
+    <string name="iptv_network_certificate_untrusted">Certifikát servera sa nepodarilo overiť. Ak ide o vlastný certifikát vášho NAS, pred dôverovaním porovnajte odtlačok s tým, ktorý zobrazuje NAS.</string>
+    <string name="iptv_network_certificate_fingerprint">Odtlačok SHA-256: %1$s</string>
+    <string name="iptv_network_trust">Dôverovať tomuto certifikátu</string>
+    <string name="iptv_network_no_tls">Server neponúka šifrovanie. Vypnite Zabezpečené alebo na serveri zapnite FTPS.</string>
+    <string name="iptv_network_tls_reuse">Server vyžaduje opätovné použitie relácie TLS v dátových pripojeniach, čo nie je podporované. Vypnite túto požiadavku na serveri.</string>
+</resources>

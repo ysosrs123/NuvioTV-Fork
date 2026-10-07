@@ -1,0 +1,31 @@
+<resources>
+    <string name="iptv_stream_title">Streamovanie</string>
+    <string name="iptv_stream_description">Ako sa živé kanály ukladajú do buffera. Zmeny platia pre ďalší otvorený kanál.</string>
+    <string name="iptv_stream_start">Spustiť prehrávanie po</string>
+    <string name="iptv_stream_start_subtitle">Koľko videa sa načíta pred spustením kanála. Kratšie čakanie spustí kanál skôr, ale pri slabom pripojení sa môže zasekávať.</string>
+    <string name="iptv_stream_start_fast">Rýchlo (asi 1 s)</string>
+    <string name="iptv_stream_start_normal">Normálne (asi 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Bezpečne (asi 5 s)</string>
+    <string name="iptv_stream_cushion">Vytvárať bezpečnostný buffer počas sledovania</string>
+    <string name="iptv_stream_cushion_subtitle">Prehráva o 3% pomalšie s normálnou výškou tónu, kým sa buffer nenaplní, aby krátke výpadky siete neprerušili obraz. Živá TV potom beží s takým oneskorením.</string>
+    <string name="iptv_stream_cushion_off">Vypnuté</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d sekunda</item>
+        <item quantity="few">%d sekundy</item>
+        <item quantity="many">%d sekundy</item>
+        <item quantity="other">%d sekúnd</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">Kanály HLS namiesto spomalenia začínajú ďalej za živým vysielaním.</string>
+    <string name="iptv_stream_cushion_memory">Obmedzené na približne %1$d MB pamäte v tomto zariadení.</string>
+    <string name="iptv_stream_behind_live">Za živým vysielaním o %1$d s</string>
+    <string name="iptv_stream_go_live_hint">Stlačte pretáčanie dopredu pre živé vysielanie</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Odosiela sa pri prehrávaní kanálov, catch-up a filmov z tohto zdroja. Vlastné nastavenia kanála v playliste majú stále prednosť.</string>
+    <string name="iptv_user_agent_default">Predvolené aplikáciou</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Všeobecný (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Vlastný</string>
+    <string name="iptv_user_agent_custom_hint">Len tlačiteľné znaky, najviac 200.</string>
+</resources>

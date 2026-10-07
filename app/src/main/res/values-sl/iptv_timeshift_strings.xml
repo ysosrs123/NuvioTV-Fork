@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Lokalni timeshift (preizkusno)</string>
+    <string name="iptv_timeshift_subtitle">Preizkusno. Medpomni kanal, ki ga gledate na celotnem zaslonu, da ga lahko začasno ustavite in previjete nazaj. Med gledanjem porablja prostor za shranjevanje in potrebuje prosto povezavo kot običajno gledanje. Deluje samo s kanali MPEG-TS; kanali HLS, multiview, predogled in kanal, ki se snema, se predvajajo običajno. Če karkoli spodleti, se predvajanje vrne na običajno predvajanje v živo.</string>
+    <string name="iptv_timeshift_length">Dolžina medpomnilnika</string>
+    <string name="iptv_timeshift_length_subtitle">Skrajša se, ko je prostora malo. Medpomnilnik se izbriše, ko zamenjate kanal ali nehate gledati.</string>
+    <string name="iptv_timeshift_length_15">15 minut</string>
+    <string name="iptv_timeshift_length_30">30 minut</string>
+    <string name="iptv_timeshift_length_60">60 minut</string>
+    <string name="iptv_timeshift_length_auto">Samodejno</string>
+    <string name="iptv_timeshift_length_auto_description">30 minut, če je dovolj prostora, sicer manj</string>
+    <string name="iptv_timeshift_location">Mesto medpomnilnika</string>
+    <string name="iptv_timeshift_location_subtitle">Kam se med gledanjem zapisuje medpomnilnik</string>
+    <string name="iptv_timeshift_fallback">Lokalni timeshift se je ustavil. Predvajanje v živo.</string>
+</resources>

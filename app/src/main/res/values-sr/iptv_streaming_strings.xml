@@ -1,0 +1,30 @@
+<resources>
+    <string name="iptv_stream_title">Стриминг</string>
+    <string name="iptv_stream_description">Како се канали уживо баферују. Измене важе за следећи канал који отворите.</string>
+    <string name="iptv_stream_start">Покрени репродукцију после</string>
+    <string name="iptv_stream_start_subtitle">Колико видеа се учита пре почетка канала. Краће чекање почиње раније, али може да сецка на слабој вези.</string>
+    <string name="iptv_stream_start_fast">Брзо (око 1 с)</string>
+    <string name="iptv_stream_start_normal">Нормално (око 2,5 с)</string>
+    <string name="iptv_stream_start_safe">Безбедно (око 5 с)</string>
+    <string name="iptv_stream_cushion">Прави сигурносни бафер током гледања</string>
+    <string name="iptv_stream_cushion_subtitle">Пушта 3% спорије, уз нормалну висину тона, док се бафер не напуни, да кратки прекиди мреже не би прекинули слику. ТВ уживо затим касни толико.</string>
+    <string name="iptv_stream_cushion_off">Искључено</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d секунда</item>
+        <item quantity="few">%d секунде</item>
+        <item quantity="other">%d секунди</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS канали почињу даље иза преноса уживо уместо да успоре.</string>
+    <string name="iptv_stream_cushion_memory">Ограничено на око %1$d MB меморије на овом уређају.</string>
+    <string name="iptv_stream_behind_live">Кашњење за преносом уживо: %1$d с</string>
+    <string name="iptv_stream_go_live_hint">Притисните премотавање унапред за пренос уживо</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Шаље се при пуштању канала, catch-up садржаја и филмова из овог извора. Подешавања плејлисте самог канала и даље имају предност.</string>
+    <string name="iptv_user_agent_default">Подразумевано у апликацији</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Општи (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Прилагођено</string>
+    <string name="iptv_user_agent_custom_hint">Само знакови за штампу, највише 200.</string>
+</resources>

@@ -1,0 +1,31 @@
+<resources>
+    <string name="iptv_stream_title">Pretakanje</string>
+    <string name="iptv_stream_description">Kako se kanali v živo medpomnijo. Spremembe veljajo za naslednji kanal, ki ga odprete.</string>
+    <string name="iptv_stream_start">Začni predvajanje po</string>
+    <string name="iptv_stream_start_subtitle">Koliko videa se naloži, preden se kanal začne. Krajše čakanje začne prej, a se lahko pri šibki povezavi zatika.</string>
+    <string name="iptv_stream_start_fast">Hitro (približno 1 s)</string>
+    <string name="iptv_stream_start_normal">Običajno (približno 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Varno (približno 5 s)</string>
+    <string name="iptv_stream_cushion">Med gledanjem ustvari varnostni medpomnilnik</string>
+    <string name="iptv_stream_cushion_subtitle">Predvaja 3% počasneje z običajno višino tona, dokler se medpomnilnik ne napolni, da kratki izpadi omrežja ne prekinejo slike. TV v živo nato teče s tolikšno zamudo.</string>
+    <string name="iptv_stream_cushion_off">Izklopljeno</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d sekunda</item>
+        <item quantity="two">%d sekundi</item>
+        <item quantity="few">%d sekunde</item>
+        <item quantity="other">%d sekund</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">Kanali HLS se namesto upočasnitve začnejo bolj za živim prenosom.</string>
+    <string name="iptv_stream_cushion_memory">Omejeno na približno %1$d MB pomnilnika na tej napravi.</string>
+    <string name="iptv_stream_behind_live">Zamik za živim prenosom: %1$d s</string>
+    <string name="iptv_stream_go_live_hint">Pritisnite previjanje naprej za prenos v živo</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Pošlje se pri predvajanju kanalov, catch-up in filmov iz tega vira. Lastne nastavitve kanala na seznamu predvajanja imajo še vedno prednost.</string>
+    <string name="iptv_user_agent_default">Privzeto v aplikaciji</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Splošno (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Po meri</string>
+    <string name="iptv_user_agent_custom_hint">Samo natisljivi znaki, največ 200.</string>
+</resources>

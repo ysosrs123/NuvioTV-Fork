@@ -1,0 +1,31 @@
+<resources>
+    <string name="iptv_stream_title">Потоковая передача</string>
+    <string name="iptv_stream_description">Как буферизуются каналы эфира. Изменения применятся к следующему открытому каналу.</string>
+    <string name="iptv_stream_start">Начинать воспроизведение через</string>
+    <string name="iptv_stream_start_subtitle">Сколько видео загружается перед запуском канала. Короткое ожидание запускает быстрее, но при слабом подключении возможны рывки.</string>
+    <string name="iptv_stream_start_fast">Быстро (около 1 с)</string>
+    <string name="iptv_stream_start_normal">Обычно (около 2,5 с)</string>
+    <string name="iptv_stream_start_safe">Надёжно (около 5 с)</string>
+    <string name="iptv_stream_cushion">Создавать резервный буфер во время просмотра</string>
+    <string name="iptv_stream_cushion_subtitle">Воспроизводит на 3% медленнее, с обычной высотой звука, пока буфер не заполнится, чтобы короткие сбои сети не прерывали изображение. После этого ТВ-эфир идёт с таким отставанием.</string>
+    <string name="iptv_stream_cushion_off">Выкл.</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d секунда</item>
+        <item quantity="few">%d секунды</item>
+        <item quantity="many">%d секунд</item>
+        <item quantity="other">%d секунды</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">Каналы HLS начинаются с большим отставанием от эфира вместо замедления.</string>
+    <string name="iptv_stream_cushion_memory">Не более %1$d МБ памяти на этом устройстве.</string>
+    <string name="iptv_stream_behind_live">Отставание от эфира: %1$d с</string>
+    <string name="iptv_stream_go_live_hint">Нажмите перемотку вперёд, чтобы вернуться в эфир</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Отправляется при воспроизведении каналов, архива и фильмов из этого источника. Собственные настройки канала в плейлисте по-прежнему имеют приоритет.</string>
+    <string name="iptv_user_agent_default">По умолчанию</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Общий (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Свой</string>
+    <string name="iptv_user_agent_custom_hint">Только печатаемые символы, не более 200.</string>
+</resources>

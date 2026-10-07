@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">Filmi in serije IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">Prikaže ujemajoče se naslove iz virov TV v živo kot vir pretoka</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Vse povezave za %1$s so v uporabi. Ustavite TV v živo ali snemanje na tem viru in poskusite znova.</string>
+    <string name="iptv_vod_provider_refused">Ponudnik je zavrnil ta naslov. Morda so vse njegove povezave v uporabi ali pa je račun potekel.</string>
+    <string name="iptv_vod_unavailable">Ta naslov IPTV ni več na voljo. Osvežite vir v TV v živo in poskusite znova.</string>
+</resources>

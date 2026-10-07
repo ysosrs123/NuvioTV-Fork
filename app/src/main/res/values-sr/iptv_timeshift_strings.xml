@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Локални timeshift (експериментално)</string>
+    <string name="iptv_timeshift_subtitle">Експериментално. Баферује канал који гледате преко целог екрана да бисте могли да га паузирате и премотате уназад. Током гледања користи складиште и захтева слободну везу као обично гледање. Ради само са MPEG-TS каналима; HLS канали, multiview, преглед и канал који се снима пуштају се нормално. Ако нешто не успе, репродукција се враћа на обичан пренос уживо.</string>
+    <string name="iptv_timeshift_length">Дужина бафера</string>
+    <string name="iptv_timeshift_length_subtitle">Скраћује се када има мало слободног простора. Бафер се брише када промените канал или престанете да гледате.</string>
+    <string name="iptv_timeshift_length_15">15 минута</string>
+    <string name="iptv_timeshift_length_30">30 минута</string>
+    <string name="iptv_timeshift_length_60">60 минута</string>
+    <string name="iptv_timeshift_length_auto">Аутоматски</string>
+    <string name="iptv_timeshift_length_auto_description">30 минута када има довољно слободног простора, иначе мање</string>
+    <string name="iptv_timeshift_location">Локација бафера</string>
+    <string name="iptv_timeshift_location_subtitle">Где се бафер уписује током гледања</string>
+    <string name="iptv_timeshift_fallback">Локални timeshift је заустављен. Пушта се уживо.</string>
+</resources>

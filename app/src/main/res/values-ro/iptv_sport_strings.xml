@@ -1,0 +1,40 @@
+<resources>
+    <string name="iptv_sport_fixtures">Meciuri</string>
+    <string name="iptv_sport_live_now">Live acum</string>
+    <string name="iptv_sport_later_today">Mai târziu azi</string>
+    <string name="iptv_sport_tomorrow">Mâine</string>
+    <string name="iptv_sport_live">LIVE</string>
+    <string name="iptv_sport_loading">Se încarcă meciurile…</string>
+    <string name="iptv_sport_failed">Meciurile nu au putut fi încărcate. Se afișează doar rezultatele din ghid.</string>
+    <string name="iptv_sport_key_missing">Adaugă cheia TheSportsDB în setările TV live.</string>
+    <string name="iptv_sport_no_leagues">Alege ligile în setările TV live.</string>
+    <string name="iptv_sport_none">Niciun meci din ligile tale în următoarele trei zile.</string>
+    <string name="iptv_sport_no_channel">Niciun canal găsit</string>
+    <string name="iptv_sport_no_channel_description">Niciunul dintre canalele tale nu are acest meci în ghid și nu difuzează un post menționat.</string>
+    <string name="iptv_sport_choose_channel">Alege un canal</string>
+    <string name="iptv_sport_broadcaster">Post menționat: %1$s</string>
+    <string name="iptv_sport_close">Închide</string>
+    <string name="iptv_sport_data">Date sportive</string>
+    <string name="iptv_sport_data_subtitle">Meciurile sunt preluate de la serviciul ales. Feedul ESPN este neoficial și poate înceta să funcționeze.</string>
+    <string name="iptv_sport_data_off">Dezactivat</string>
+    <string name="iptv_sport_data_off_description">Sport folosește doar ghidul tău. Nu se fac cereri.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Feed neoficial, fără cheie. Poate înceta să funcționeze oricând.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Necesită propria cheie API. Cheia de test gratuită 123 funcționează cu limite.</string>
+    <string name="iptv_sport_leagues">Ligi</string>
+    <string name="iptv_sport_leagues_subtitle">Se afișează meciuri din aceste ligi</string>
+    <string name="iptv_sport_leagues_none">Niciuna</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d ligă</item>
+        <item quantity="few">%d ligi</item>
+        <item quantity="other">%d de ligi</item>
+    </plurals>
+    <string name="iptv_sport_key">Cheie TheSportsDB</string>
+    <string name="iptv_sport_key_subtitle">Stocată criptat pe acest dispozitiv. Cheia de test gratuită 123 funcționează cu limite.</string>
+    <string name="iptv_sport_key_set">Salvată</string>
+    <string name="iptv_sport_key_not_set">Nesetată</string>
+    <string name="iptv_sport_key_hint">Introdu 123 pentru a folosi cheia de test gratuită</string>
+    <string name="iptv_sport_key_invalid">Folosește doar litere și cifre.</string>
+    <string name="iptv_sport_key_remove">Elimină cheia</string>
+</resources>
