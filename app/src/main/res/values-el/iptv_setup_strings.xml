@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Ρύθμιση από κινητό ή υπολογιστή</string>
+    <string name="iptv_remote_entry_subtitle">Πληκτρολογήστε διευθύνσεις και στοιχεία σύνδεσης σε κανονικό πληκτρολόγιο</string>
+    <string name="iptv_remote_title">Ρύθμιση από το κινητό σας</string>
+    <string name="iptv_remote_description">Σαρώστε τον κωδικό QR με το κινητό σας ή ανοίξτε τη διεύθυνση σε υπολογιστή στο ίδιο δίκτυο. Μετά εισαγάγετε τον κωδικό σύζευξης που εμφανίζεται εδώ.</string>
+    <string name="iptv_remote_code">Κωδικός σύζευξης</string>
+    <string name="iptv_remote_address">Ή ανοίξτε αυτή τη διεύθυνση</string>
+    <string name="iptv_remote_qr_description">Κωδικός QR για ρύθμιση από κινητό</string>
+    <string name="iptv_remote_home_network">Χρησιμοποιήστε το μόνο στο οικιακό σας δίκτυο. Η σελίδα ρύθμισης δεν είναι κρυπτογραφημένη.</string>
+    <string name="iptv_remote_idle_note">Σταματά όταν φύγετε από αυτή την οθόνη ή μετά από 10 λεπτά αδράνειας.</string>
+    <string name="iptv_remote_confirm_note">Τίποτα δεν αποθηκεύεται μέχρι να το επιβεβαιώσετε εδώ στην τηλεόραση. Πηγές και οδηγοί αφαιρούνται μόνο από την τηλεόραση.</string>
+    <string name="iptv_remote_starting">Έναρξη ρύθμισης από κινητό…</string>
+    <string name="iptv_remote_waiting">Αναμονή για κινητό ή υπολογιστή</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d συσκευή συνδεδεμένη</item>
+        <item quantity="other">%d συσκευές συνδεδεμένες</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Συνδέστε την τηλεόραση στο οικιακό σας δίκτυο για ρύθμιση από το κινητό.</string>
+    <string name="iptv_remote_not_home_network">Η τηλεόραση δεν έχει ιδιωτική διεύθυνση οικιακού δικτύου, οπότε η ρύθμιση από κινητό παραμένει ανενεργή.</string>
+    <string name="iptv_remote_ports_busy">Η ρύθμιση από κινητό δεν ξεκίνησε επειδή οι θύρες δικτύου της χρησιμοποιούνται. Δοκιμάστε ξανά σε λίγο.</string>
+    <string name="iptv_remote_idle_stopped">Η ρύθμιση από κινητό σταμάτησε μετά από 10 λεπτά αδράνειας.</string>
+    <string name="iptv_remote_paused">Η ρύθμιση από κινητό σταμάτησε όσο η εφαρμογή ήταν στο παρασκήνιο.</string>
+    <string name="iptv_remote_start_again">Έναρξη ξανά</string>
+    <string name="iptv_remote_start_again_subtitle">Εμφανίζει νέο κωδικό QR και κωδικό σύζευξης</string>
+    <string name="iptv_remote_done">Τέλος</string>
+    <string name="iptv_remote_done_subtitle">Σταματά τη ρύθμιση από κινητό και επιστρέφει</string>
+    <string name="iptv_remote_confirm_add_title">Προσθήκη από το κινητό σας;</string>
+    <string name="iptv_remote_confirm_edit_title">Αλλαγή του %1$s από το κινητό σας;</string>
+    <string name="iptv_remote_confirm_subtitle">Ελέγξτε τα στοιχεία. Τίποτα δεν αποθηκεύεται αν δεν επιλέξετε Αποθήκευση σε αυτή την τηλεόραση.</string>
+    <string name="iptv_remote_field_device">Στάλθηκε από</string>
+    <string name="iptv_remote_field_type">Τύπος</string>
+    <string name="iptv_remote_field_name">Όνομα</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Διεύθυνση</string>
+    <string name="iptv_remote_field_server">Διακομιστής</string>
+    <string name="iptv_remote_server_changes">Αλλάζει από %1$s σε %2$s</string>
+    <string name="iptv_remote_server_new">Αλλάζει σε %1$s</string>
+    <string name="iptv_remote_field_username">Όνομα χρήστη</string>
+    <string name="iptv_remote_field_password">Κωδικός πρόσβασης</string>
+    <string name="iptv_remote_field_mac">Διεύθυνση MAC</string>
+    <string name="iptv_remote_password_set">Καταχωρίστηκε στο κινητό (κρυφός)</string>
+    <string name="iptv_remote_password_new">Νέος κωδικός (κρυφός)</string>
+    <string name="iptv_remote_save">Αποθήκευση σε αυτή την TV</string>
+    <string name="iptv_remote_reject">Απόρριψη</string>
+    <string name="iptv_remote_saved">Αποθηκεύτηκε. Φόρτωση καναλιών.</string>
+    <string name="iptv_remote_guide_saved">Αποθηκεύτηκε. Φόρτωση οδηγού.</string>
+    <string name="iptv_remote_rejected">Απορρίφθηκε. Δεν αποθηκεύτηκε τίποτα.</string>
+</resources>

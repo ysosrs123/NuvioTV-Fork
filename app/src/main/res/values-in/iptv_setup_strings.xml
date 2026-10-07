@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Siapkan dari ponsel atau komputer</string>
+    <string name="iptv_remote_entry_subtitle">Ketik alamat dan info login dengan keyboard sungguhan</string>
+    <string name="iptv_remote_title">Siapkan dari ponsel Anda</string>
+    <string name="iptv_remote_description">Pindai kode QR dengan ponsel Anda, atau buka alamatnya di komputer pada jaringan yang sama. Lalu masukkan kode penyandingan yang ditampilkan di sini.</string>
+    <string name="iptv_remote_code">Kode penyandingan</string>
+    <string name="iptv_remote_address">Atau buka alamat ini</string>
+    <string name="iptv_remote_qr_description">Kode QR untuk penyiapan lewat ponsel</string>
+    <string name="iptv_remote_home_network">Gunakan hanya di jaringan rumah Anda. Halaman penyiapan tidak dienkripsi.</string>
+    <string name="iptv_remote_idle_note">Berhenti saat Anda meninggalkan layar ini, atau setelah 10 menit tanpa aktivitas.</string>
+    <string name="iptv_remote_confirm_note">Tidak ada yang disimpan sampai Anda mengonfirmasinya di TV ini. Sumber dan panduan hanya dapat dihapus di TV.</string>
+    <string name="iptv_remote_starting">Memulai penyiapan lewat ponsel…</string>
+    <string name="iptv_remote_waiting">Menunggu ponsel atau komputer</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="other">%d perangkat terhubung</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Hubungkan TV ke jaringan rumah Anda untuk menyiapkan dari ponsel.</string>
+    <string name="iptv_remote_not_home_network">TV tidak berada di alamat jaringan rumah pribadi, jadi penyiapan lewat ponsel tetap nonaktif.</string>
+    <string name="iptv_remote_ports_busy">Penyiapan lewat ponsel tidak dapat dimulai karena port jaringannya sedang digunakan. Coba lagi sebentar lagi.</string>
+    <string name="iptv_remote_idle_stopped">Penyiapan lewat ponsel berhenti setelah 10 menit tanpa aktivitas.</string>
+    <string name="iptv_remote_paused">Penyiapan lewat ponsel berhenti saat aplikasi berada di latar belakang.</string>
+    <string name="iptv_remote_start_again">Mulai lagi</string>
+    <string name="iptv_remote_start_again_subtitle">Menampilkan kode QR dan kode penyandingan baru</string>
+    <string name="iptv_remote_done">Selesai</string>
+    <string name="iptv_remote_done_subtitle">Menghentikan penyiapan lewat ponsel dan kembali</string>
+    <string name="iptv_remote_confirm_add_title">Tambahkan ini dari ponsel Anda?</string>
+    <string name="iptv_remote_confirm_edit_title">Ubah %1$s dari ponsel Anda?</string>
+    <string name="iptv_remote_confirm_subtitle">Periksa detailnya. Tidak ada yang disimpan kecuali Anda memilih Simpan di TV ini.</string>
+    <string name="iptv_remote_field_device">Dikirim dari</string>
+    <string name="iptv_remote_field_type">Jenis</string>
+    <string name="iptv_remote_field_name">Nama</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Alamat</string>
+    <string name="iptv_remote_field_server">Server</string>
+    <string name="iptv_remote_server_changes">Berubah dari %1$s ke %2$s</string>
+    <string name="iptv_remote_server_new">Berubah ke %1$s</string>
+    <string name="iptv_remote_field_username">Nama pengguna</string>
+    <string name="iptv_remote_field_password">Kata sandi</string>
+    <string name="iptv_remote_field_mac">Alamat MAC</string>
+    <string name="iptv_remote_password_set">Dimasukkan di ponsel (tersembunyi)</string>
+    <string name="iptv_remote_password_new">Kata sandi baru (tersembunyi)</string>
+    <string name="iptv_remote_save">Simpan di TV ini</string>
+    <string name="iptv_remote_reject">Tolak</string>
+    <string name="iptv_remote_saved">Tersimpan. Memuat saluran sekarang.</string>
+    <string name="iptv_remote_guide_saved">Tersimpan. Memuat panduan sekarang.</string>
+    <string name="iptv_remote_rejected">Ditolak. Tidak ada yang disimpan.</string>
+</resources>

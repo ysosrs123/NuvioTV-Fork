@@ -1,0 +1,72 @@
+<resources>
+    <string name="iptv_recording_channel">Kayıtlar</string>
+    <string name="iptv_recording_channel_description">Canlı TV programları kaydedilirken gösterilir</string>
+    <string name="iptv_recording_notification_title">Canlı TV kaydediliyor</string>
+    <string name="iptv_recording_notification_starting">Kayıt başlatılıyor…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d program</item>
+        <item quantity="other">%1$d program</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Kaydet</string>
+    <string name="iptv_recording_record_now">Şimdi kaydet</string>
+    <string name="iptv_recording_record_programme">Bu programı kaydet</string>
+    <string name="iptv_recording_started">Kayıt başladı</string>
+    <string name="iptv_recording_scheduled">Kayıt zamanlandı</string>
+    <string name="iptv_recordings_open">Kayıtlar</string>
+
+    <string name="iptv_recordings_title">Kayıtlar</string>
+    <string name="iptv_recordings_description">Canlı TV\'den kaydedilen veya zamanlanan programlar. Kayıtlar bu cihazda saklanır ve bu profile aittir.</string>
+    <string name="iptv_recordings_hint">Bir kaydı oynatmak için OK tuşuna basın. Diğer seçenekler için OK tuşunu basılı tutun veya Menü tuşuna basın.</string>
+    <string name="iptv_recordings_free">Bu cihazda %1$s boş</string>
+    <string name="iptv_recordings_empty">Henüz kayıt yok. Canlı TV yayın akışından veya izlerken bir program kaydedin.</string>
+    <string name="iptv_recordings_group_now">Şimdi kaydediliyor</string>
+    <string name="iptv_recordings_group_scheduled">Zamanlanmış</string>
+    <string name="iptv_recordings_group_recorded">Kaydedilmiş</string>
+
+    <string name="iptv_recording_status_scheduled">Zamanlandı</string>
+    <string name="iptv_recording_status_recording">Kaydediliyor</string>
+    <string name="iptv_recording_status_done">Kaydedildi</string>
+    <string name="iptv_recording_status_partial">Kısmen kaydedildi</string>
+    <string name="iptv_recording_status_failed">Başarısız</string>
+    <string name="iptv_recording_status_cancelled">İptal edildi</string>
+    <string name="iptv_recording_gaps">Boşluklar var</string>
+
+    <string name="iptv_recording_failure_no_connection">Bu hesapta boş bağlantı yok</string>
+    <string name="iptv_recording_failure_device_busy">Cihaz başka yayınlarla meşgul</string>
+    <string name="iptv_recording_failure_source">Kaynağa ulaşılamadı</string>
+    <string name="iptv_recording_failure_channel">Kanal artık kullanılamıyor</string>
+    <string name="iptv_recording_failure_unsupported">Bu yayın biçimi kaydedilemez</string>
+    <string name="iptv_recording_failure_encrypted">Şifreli yayınlar kaydedilemez</string>
+    <string name="iptv_recording_failure_network">Yayın kesildi</string>
+    <string name="iptv_recording_failure_low_storage">Depolama alanı neredeyse dolu</string>
+    <string name="iptv_recording_failure_storage">Kayıt kaydedilemedi</string>
+    <string name="iptv_recording_failure_time_limit">Kayıt süresi sınırına ulaşıldı</string>
+    <string name="iptv_recording_failure_interrupted">Kayıt sırasında uygulama veya cihaz durdu</string>
+    <string name="iptv_recording_failure_start_blocked">Android kaydın başlamasına izin vermedi. Nuvio için alarmlara ve hatırlatıcılara izin verin veya Nuvio\'yu açık tutun.</string>
+    <string name="iptv_recording_failure_missed">Program, kayıt başlamadan sona erdi</string>
+
+    <string name="iptv_recording_refused_conflict">O saatte diğer kayıtlar bu hesabın tüm bağlantılarını kullanıyor</string>
+    <string name="iptv_recording_refused_no_connection">Bu hesapta boş bağlantı yok. Önce başka bir kanalı izlemeyi veya kaydetmeyi durdurun.</string>
+    <string name="iptv_recording_refused_storage">Bu kayıt için yeterli boş alan yok. Her HD saati için yaklaşık 2,5 GB ayırın; cihaz için her zaman 500 MB boş bırakılır. Eski kayıtları silin veya yer açın.</string>
+    <string name="iptv_recording_refused_ended">Bu program zaten sona erdi</string>
+    <string name="iptv_recording_refused_channel">Bu kanal şu anda kaydedilemiyor</string>
+    <string name="iptv_recording_refused_duplicate">Bu kanal o saatte zaten kaydediliyor</string>
+    <string name="iptv_recording_refused_full">Kayıt listesi dolu. Önce bazı kayıtları silin.</string>
+    <string name="iptv_recording_refused_profile">Profil değişti. Tekrar deneyin.</string>
+    <string name="iptv_recording_refused_exact_alarms">Zamanlanmış kayıtlar için alarm ve hatırlatıcı izni gerekir. Nuvio için izin verin veya izlerken kaydedin.</string>
+    <string name="iptv_recording_alarm_settings">Alarmlara ve hatırlatıcılara izin ver</string>
+
+    <string name="iptv_recording_play">Oynat</string>
+    <string name="iptv_recording_stop">Kaydı durdur</string>
+    <string name="iptv_recording_cancel">Kaydı iptal et</string>
+    <string name="iptv_recording_delete">Kaydı sil</string>
+    <string name="iptv_recording_delete_title">\"%1$s\" silinsin mi?</string>
+    <string name="iptv_recording_delete_description">Kayıt ve dosyası bu cihazdan kaldırılacak.</string>
+    <string name="iptv_recording_delete_confirm">Sil</string>
+    <string name="iptv_recording_keep">Sakla</string>
+    <string name="iptv_recording_file_missing">Kayıt dosyası artık bu cihazda değil</string>
+    <string name="iptv_recording_paused">Duraklatıldı</string>
+    <string name="iptv_recording_playback_failed">Bu kayıt oynatılamıyor. Dosya eksik olabilir veya bu cihazın çözemediği bir biçimde olabilir.</string>
+    <string name="iptv_recording_skip_hint">Sol ve sağ 30 saniye atlar</string>
+</resources>

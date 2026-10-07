@@ -1,0 +1,71 @@
+<resources>
+    <string name="iptv_recording_channel">Rekaman</string>
+    <string name="iptv_recording_channel_description">Ditampilkan saat acara TV Live sedang direkam</string>
+    <string name="iptv_recording_notification_title">Merekam TV Live</string>
+    <string name="iptv_recording_notification_starting">Memulai rekaman…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="other">%1$d acara</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Rekam</string>
+    <string name="iptv_recording_record_now">Rekam sekarang</string>
+    <string name="iptv_recording_record_programme">Rekam acara ini</string>
+    <string name="iptv_recording_started">Rekaman dimulai</string>
+    <string name="iptv_recording_scheduled">Rekaman dijadwalkan</string>
+    <string name="iptv_recordings_open">Rekaman</string>
+
+    <string name="iptv_recordings_title">Rekaman</string>
+    <string name="iptv_recordings_description">Acara yang direkam atau dijadwalkan dari TV Live. Rekaman disimpan di perangkat ini dan terikat pada profil ini.</string>
+    <string name="iptv_recordings_hint">Tekan OK untuk memutar rekaman. Tahan OK atau tekan Menu untuk opsi lainnya.</string>
+    <string name="iptv_recordings_free">%1$s kosong di perangkat ini</string>
+    <string name="iptv_recordings_empty">Belum ada rekaman. Rekam acara dari panduan TV Live atau saat menonton.</string>
+    <string name="iptv_recordings_group_now">Sedang merekam</string>
+    <string name="iptv_recordings_group_scheduled">Terjadwal</string>
+    <string name="iptv_recordings_group_recorded">Terekam</string>
+
+    <string name="iptv_recording_status_scheduled">Terjadwal</string>
+    <string name="iptv_recording_status_recording">Merekam</string>
+    <string name="iptv_recording_status_done">Terekam</string>
+    <string name="iptv_recording_status_partial">Terekam sebagian</string>
+    <string name="iptv_recording_status_failed">Gagal</string>
+    <string name="iptv_recording_status_cancelled">Dibatalkan</string>
+    <string name="iptv_recording_gaps">Ada bagian yang hilang</string>
+
+    <string name="iptv_recording_failure_no_connection">Tidak ada koneksi kosong di akun ini</string>
+    <string name="iptv_recording_failure_device_busy">Perangkat sedang sibuk dengan stream lain</string>
+    <string name="iptv_recording_failure_source">Sumber tidak dapat dijangkau</string>
+    <string name="iptv_recording_failure_channel">Saluran sudah tidak tersedia</string>
+    <string name="iptv_recording_failure_unsupported">Format stream ini tidak dapat direkam</string>
+    <string name="iptv_recording_failure_encrypted">Stream terenkripsi tidak dapat direkam</string>
+    <string name="iptv_recording_failure_network">Stream terputus</string>
+    <string name="iptv_recording_failure_low_storage">Penyimpanan hampir penuh</string>
+    <string name="iptv_recording_failure_storage">Rekaman tidak dapat disimpan</string>
+    <string name="iptv_recording_failure_time_limit">Batas waktu rekaman tercapai</string>
+    <string name="iptv_recording_failure_interrupted">Aplikasi atau perangkat berhenti selama perekaman</string>
+    <string name="iptv_recording_failure_start_blocked">Android tidak mengizinkan rekaman dimulai. Izinkan alarm dan pengingat untuk Nuvio, atau biarkan Nuvio tetap terbuka.</string>
+    <string name="iptv_recording_failure_missed">Acara berakhir sebelum rekaman dapat dimulai</string>
+
+    <string name="iptv_recording_refused_conflict">Rekaman lain sudah memakai semua koneksi akun ini pada waktu tersebut</string>
+    <string name="iptv_recording_refused_no_connection">Tidak ada koneksi kosong di akun ini. Hentikan dulu menonton atau merekam saluran lain.</string>
+    <string name="iptv_recording_refused_storage">Penyimpanan kosong tidak cukup untuk rekaman ini. Sediakan sekitar 2,5 GB untuk setiap jam HD, dan 500 MB selalu dibiarkan kosong untuk perangkat. Hapus rekaman lama atau kosongkan ruang.</string>
+    <string name="iptv_recording_refused_ended">Acara ini sudah berakhir</string>
+    <string name="iptv_recording_refused_channel">Saluran ini tidak dapat direkam saat ini</string>
+    <string name="iptv_recording_refused_duplicate">Saluran ini sudah direkam pada waktu tersebut</string>
+    <string name="iptv_recording_refused_full">Daftar rekaman penuh. Hapus beberapa rekaman terlebih dahulu.</string>
+    <string name="iptv_recording_refused_profile">Profil berubah. Coba lagi.</string>
+    <string name="iptv_recording_refused_exact_alarms">Rekaman terjadwal memerlukan izin alarm dan pengingat. Izinkan untuk Nuvio, atau rekam saat menonton.</string>
+    <string name="iptv_recording_alarm_settings">Izinkan alarm dan pengingat</string>
+
+    <string name="iptv_recording_play">Putar</string>
+    <string name="iptv_recording_stop">Hentikan rekaman</string>
+    <string name="iptv_recording_cancel">Batalkan rekaman</string>
+    <string name="iptv_recording_delete">Hapus rekaman</string>
+    <string name="iptv_recording_delete_title">Hapus \"%1$s\"?</string>
+    <string name="iptv_recording_delete_description">Rekaman dan filenya akan dihapus dari perangkat ini.</string>
+    <string name="iptv_recording_delete_confirm">Hapus</string>
+    <string name="iptv_recording_keep">Simpan</string>
+    <string name="iptv_recording_file_missing">File rekaman sudah tidak ada di perangkat ini</string>
+    <string name="iptv_recording_paused">Dijeda</string>
+    <string name="iptv_recording_playback_failed">Rekaman ini tidak dapat diputar. File mungkin tidak lengkap atau dalam format yang tidak dapat didekode perangkat ini.</string>
+    <string name="iptv_recording_skip_hint">Kiri dan kanan melompat 30 detik</string>
+</resources>

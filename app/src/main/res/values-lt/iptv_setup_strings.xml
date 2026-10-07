@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Nustatyti telefonu arba kompiuteriu</string>
+    <string name="iptv_remote_entry_subtitle">Adresus ir prisijungimo duomenis rinkite tikra klaviatūra</string>
+    <string name="iptv_remote_title">Nustatyti telefonu</string>
+    <string name="iptv_remote_description">Nuskaitykite QR kodą telefonu arba atverkite adresą kompiuteryje, prijungtame prie to paties tinklo. Tada įveskite čia rodomą susiejimo kodą.</string>
+    <string name="iptv_remote_code">Susiejimo kodas</string>
+    <string name="iptv_remote_address">Arba atverkite šį adresą</string>
+    <string name="iptv_remote_qr_description">QR kodas nustatymui telefonu</string>
+    <string name="iptv_remote_home_network">Naudokite tik namų tinkle. Nustatymo puslapis nešifruojamas.</string>
+    <string name="iptv_remote_idle_note">Sustoja, kai išeinate iš šio ekrano arba po 10 minučių neveiklumo.</string>
+    <string name="iptv_remote_confirm_note">Niekas neišsaugoma, kol nepatvirtinsite čia, televizoriuje. Šaltinius ir TV programas galima pašalinti tik televizoriuje.</string>
+    <string name="iptv_remote_starting">Paleidžiamas nustatymas telefonu…</string>
+    <string name="iptv_remote_waiting">Laukiama telefono arba kompiuterio</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">Prijungtas %d įrenginys</item>
+        <item quantity="few">Prijungti %d įrenginiai</item>
+        <item quantity="many">Prijungta %d įrenginio</item>
+        <item quantity="other">Prijungta %d įrenginių</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Prijunkite televizorių prie namų tinklo, kad galėtumėte nustatyti telefonu.</string>
+    <string name="iptv_remote_not_home_network">Televizorius neturi privataus namų tinklo adreso, todėl nustatymas telefonu išjungtas.</string>
+    <string name="iptv_remote_ports_busy">Nustatymo telefonu paleisti nepavyko, nes jo tinklo prievadai užimti. Netrukus bandykite dar kartą.</string>
+    <string name="iptv_remote_idle_stopped">Nustatymas telefonu sustabdytas po 10 minučių neveiklumo.</string>
+    <string name="iptv_remote_paused">Nustatymas telefonu sustabdytas, kol programėlė veikė fone.</string>
+    <string name="iptv_remote_start_again">Pradėti iš naujo</string>
+    <string name="iptv_remote_start_again_subtitle">Parodo naują QR kodą ir susiejimo kodą</string>
+    <string name="iptv_remote_done">Atlikta</string>
+    <string name="iptv_remote_done_subtitle">Sustabdo nustatymą telefonu ir grįžta atgal</string>
+    <string name="iptv_remote_confirm_add_title">Pridėti tai iš telefono?</string>
+    <string name="iptv_remote_confirm_edit_title">Keisti %1$s iš telefono?</string>
+    <string name="iptv_remote_confirm_subtitle">Patikrinkite duomenis. Niekas neišsaugoma, kol šiame televizoriuje nepasirinksite „Išsaugoti“.</string>
+    <string name="iptv_remote_field_device">Išsiųsta iš</string>
+    <string name="iptv_remote_field_type">Tipas</string>
+    <string name="iptv_remote_field_name">Pavadinimas</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adresas</string>
+    <string name="iptv_remote_field_server">Serveris</string>
+    <string name="iptv_remote_server_changes">Keičiama iš %1$s į %2$s</string>
+    <string name="iptv_remote_server_new">Keičiama į %1$s</string>
+    <string name="iptv_remote_field_username">Naudotojo vardas</string>
+    <string name="iptv_remote_field_password">Slaptažodis</string>
+    <string name="iptv_remote_field_mac">MAC adresas</string>
+    <string name="iptv_remote_password_set">Įvestas telefone (paslėptas)</string>
+    <string name="iptv_remote_password_new">Naujas slaptažodis (paslėptas)</string>
+    <string name="iptv_remote_save">Išsaugoti šiame TV</string>
+    <string name="iptv_remote_reject">Atmesti</string>
+    <string name="iptv_remote_saved">Išsaugota. Įkeliami kanalai.</string>
+    <string name="iptv_remote_guide_saved">Išsaugota. Įkeliama TV programa.</string>
+    <string name="iptv_remote_rejected">Atmesta. Niekas neišsaugota.</string>
+</resources>

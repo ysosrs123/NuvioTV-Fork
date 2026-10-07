@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Telefon veya bilgisayardan kur</string>
+    <string name="iptv_remote_entry_subtitle">Adresleri ve giriş bilgilerini gerçek bir klavyeyle yazın</string>
+    <string name="iptv_remote_title">Telefonunuzdan kurun</string>
+    <string name="iptv_remote_description">QR kodunu telefonunuzla tarayın veya adresi aynı ağdaki bir bilgisayarda açın. Ardından burada gösterilen eşleştirme kodunu girin.</string>
+    <string name="iptv_remote_code">Eşleştirme kodu</string>
+    <string name="iptv_remote_address">Veya bu adresi açın</string>
+    <string name="iptv_remote_qr_description">Telefonla kurulum için QR kodu</string>
+    <string name="iptv_remote_home_network">Bunu yalnızca ev ağınızda kullanın. Kurulum sayfası şifrelenmemiştir.</string>
+    <string name="iptv_remote_idle_note">Bu ekrandan ayrıldığınızda veya 10 dakika işlem yapılmadığında durur.</string>
+    <string name="iptv_remote_confirm_note">Burada, TV\'de onaylayana kadar hiçbir şey kaydedilmez. Kaynaklar ve yayın akışları yalnızca TV\'den kaldırılabilir.</string>
+    <string name="iptv_remote_starting">Telefonla kurulum başlatılıyor…</string>
+    <string name="iptv_remote_waiting">Telefon veya bilgisayar bekleniyor</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d cihaz bağlı</item>
+        <item quantity="other">%d cihaz bağlı</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Telefonunuzdan kurmak için TV\'yi ev ağınıza bağlayın.</string>
+    <string name="iptv_remote_not_home_network">TV özel bir ev ağı adresinde değil, bu yüzden telefonla kurulum kapalı kalıyor.</string>
+    <string name="iptv_remote_ports_busy">Ağ bağlantı noktaları kullanımda olduğu için telefonla kurulum başlatılamadı. Biraz sonra tekrar deneyin.</string>
+    <string name="iptv_remote_idle_stopped">Telefonla kurulum 10 dakika işlem yapılmadığı için durdu.</string>
+    <string name="iptv_remote_paused">Uygulama arka plandayken telefonla kurulum durdu.</string>
+    <string name="iptv_remote_start_again">Yeniden başlat</string>
+    <string name="iptv_remote_start_again_subtitle">Yeni bir QR kodu ve eşleştirme kodu gösterir</string>
+    <string name="iptv_remote_done">Bitti</string>
+    <string name="iptv_remote_done_subtitle">Telefonla kurulumu durdurur ve geri döner</string>
+    <string name="iptv_remote_confirm_add_title">Telefonunuzdan eklensin mi?</string>
+    <string name="iptv_remote_confirm_edit_title">%1$s telefonunuzdan değiştirilsin mi?</string>
+    <string name="iptv_remote_confirm_subtitle">Bilgileri kontrol edin. Bu TV\'de Kaydet seçeneğini seçmediğiniz sürece hiçbir şey kaydedilmez.</string>
+    <string name="iptv_remote_field_device">Gönderen</string>
+    <string name="iptv_remote_field_type">Tür</string>
+    <string name="iptv_remote_field_name">Ad</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adres</string>
+    <string name="iptv_remote_field_server">Sunucu</string>
+    <string name="iptv_remote_server_changes">%1$s yerine %2$s olacak</string>
+    <string name="iptv_remote_server_new">Yeni değer: %1$s</string>
+    <string name="iptv_remote_field_username">Kullanıcı adı</string>
+    <string name="iptv_remote_field_password">Şifre</string>
+    <string name="iptv_remote_field_mac">MAC adresi</string>
+    <string name="iptv_remote_password_set">Telefonda girildi (gizli)</string>
+    <string name="iptv_remote_password_new">Yeni şifre (gizli)</string>
+    <string name="iptv_remote_save">Bu TV\'ye kaydet</string>
+    <string name="iptv_remote_reject">Reddet</string>
+    <string name="iptv_remote_saved">Kaydedildi. Kanallar şimdi yükleniyor.</string>
+    <string name="iptv_remote_guide_saved">Kaydedildi. Yayın akışı şimdi yükleniyor.</string>
+    <string name="iptv_remote_rejected">Reddedildi. Hiçbir şey kaydedilmedi.</string>
+</resources>

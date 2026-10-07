@@ -1,0 +1,72 @@
+<resources>
+    <string name="iptv_recording_channel">Εγγραφές</string>
+    <string name="iptv_recording_channel_description">Εμφανίζεται όσο εγγράφονται προγράμματα ζωντανής TV</string>
+    <string name="iptv_recording_notification_title">Εγγραφή ζωντανής TV</string>
+    <string name="iptv_recording_notification_starting">Έναρξη εγγραφής…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d πρόγραμμα</item>
+        <item quantity="other">%1$d προγράμματα</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Εγγραφή</string>
+    <string name="iptv_recording_record_now">Εγγραφή τώρα</string>
+    <string name="iptv_recording_record_programme">Εγγραφή αυτού του προγράμματος</string>
+    <string name="iptv_recording_started">Η εγγραφή ξεκίνησε</string>
+    <string name="iptv_recording_scheduled">Η εγγραφή προγραμματίστηκε</string>
+    <string name="iptv_recordings_open">Εγγραφές</string>
+
+    <string name="iptv_recordings_title">Εγγραφές</string>
+    <string name="iptv_recordings_description">Προγράμματα που εγγράφηκαν ή προγραμματίστηκαν από τη ζωντανή TV. Οι εγγραφές φυλάσσονται σε αυτή τη συσκευή και ανήκουν σε αυτό το προφίλ.</string>
+    <string name="iptv_recordings_hint">Πατήστε OK για αναπαραγωγή εγγραφής. Κρατήστε το OK ή πατήστε Μενού για περισσότερες επιλογές.</string>
+    <string name="iptv_recordings_free">%1$s ελεύθερα σε αυτή τη συσκευή</string>
+    <string name="iptv_recordings_empty">Δεν υπάρχουν ακόμα εγγραφές. Εγγράψτε ένα πρόγραμμα από τον οδηγό ζωντανής TV ή κατά την παρακολούθηση.</string>
+    <string name="iptv_recordings_group_now">Εγγραφή τώρα</string>
+    <string name="iptv_recordings_group_scheduled">Προγραμματισμένες</string>
+    <string name="iptv_recordings_group_recorded">Εγγεγραμμένες</string>
+
+    <string name="iptv_recording_status_scheduled">Προγραμματισμένη</string>
+    <string name="iptv_recording_status_recording">Εγγράφεται</string>
+    <string name="iptv_recording_status_done">Εγγράφηκε</string>
+    <string name="iptv_recording_status_partial">Μερική εγγραφή</string>
+    <string name="iptv_recording_status_failed">Απέτυχε</string>
+    <string name="iptv_recording_status_cancelled">Ακυρώθηκε</string>
+    <string name="iptv_recording_gaps">Έχει κενά</string>
+
+    <string name="iptv_recording_failure_no_connection">Καμία ελεύθερη σύνδεση σε αυτόν τον λογαριασμό</string>
+    <string name="iptv_recording_failure_device_busy">Η συσκευή είναι απασχολημένη με άλλες ροές</string>
+    <string name="iptv_recording_failure_source">Δεν ήταν δυνατή η πρόσβαση στην πηγή</string>
+    <string name="iptv_recording_failure_channel">Το κανάλι δεν είναι πλέον διαθέσιμο</string>
+    <string name="iptv_recording_failure_unsupported">Αυτή η μορφή ροής δεν μπορεί να εγγραφεί</string>
+    <string name="iptv_recording_failure_encrypted">Οι κρυπτογραφημένες ροές δεν μπορούν να εγγραφούν</string>
+    <string name="iptv_recording_failure_network">Η ροή διακόπηκε</string>
+    <string name="iptv_recording_failure_low_storage">Ο αποθηκευτικός χώρος έχει σχεδόν γεμίσει</string>
+    <string name="iptv_recording_failure_storage">Δεν ήταν δυνατή η αποθήκευση της εγγραφής</string>
+    <string name="iptv_recording_failure_time_limit">Συμπληρώθηκε το χρονικό όριο εγγραφής</string>
+    <string name="iptv_recording_failure_interrupted">Η εφαρμογή ή η συσκευή σταμάτησε κατά την εγγραφή</string>
+    <string name="iptv_recording_failure_start_blocked">Το Android δεν επέτρεψε την έναρξη της εγγραφής. Επιτρέψτε τα ξυπνητήρια και υπενθυμίσεις για το Nuvio ή κρατήστε το Nuvio ανοιχτό.</string>
+    <string name="iptv_recording_failure_missed">Το πρόγραμμα τελείωσε πριν ξεκινήσει η εγγραφή</string>
+
+    <string name="iptv_recording_refused_conflict">Άλλες εγγραφές χρησιμοποιούν ήδη όλες τις συνδέσεις του λογαριασμού εκείνη την ώρα</string>
+    <string name="iptv_recording_refused_no_connection">Καμία ελεύθερη σύνδεση σε αυτόν τον λογαριασμό. Σταματήστε πρώτα την παρακολούθηση ή εγγραφή άλλου καναλιού.</string>
+    <string name="iptv_recording_refused_storage">Δεν υπάρχει αρκετός ελεύθερος χώρος για αυτή την εγγραφή. Υπολογίστε περίπου 2,5 GB για κάθε ώρα HD, ενώ 500 MB μένουν πάντα ελεύθερα για τη συσκευή. Διαγράψτε παλιές εγγραφές ή ελευθερώστε χώρο.</string>
+    <string name="iptv_recording_refused_ended">Αυτό το πρόγραμμα έχει ήδη τελειώσει</string>
+    <string name="iptv_recording_refused_channel">Αυτό το κανάλι δεν μπορεί να εγγραφεί αυτή τη στιγμή</string>
+    <string name="iptv_recording_refused_duplicate">Αυτό το κανάλι εγγράφεται ήδη εκείνη την ώρα</string>
+    <string name="iptv_recording_refused_full">Η λίστα εγγραφών είναι πλήρης. Διαγράψτε πρώτα κάποιες εγγραφές.</string>
+    <string name="iptv_recording_refused_profile">Το προφίλ άλλαξε. Δοκιμάστε ξανά.</string>
+    <string name="iptv_recording_refused_exact_alarms">Οι προγραμματισμένες εγγραφές χρειάζονται την άδεια για ξυπνητήρια και υπενθυμίσεις. Επιτρέψτε την για το Nuvio ή κάντε εγγραφή κατά την παρακολούθηση.</string>
+    <string name="iptv_recording_alarm_settings">Να επιτρέπονται ξυπνητήρια και υπενθυμίσεις</string>
+
+    <string name="iptv_recording_play">Αναπαραγωγή</string>
+    <string name="iptv_recording_stop">Διακοπή εγγραφής</string>
+    <string name="iptv_recording_cancel">Ακύρωση εγγραφής</string>
+    <string name="iptv_recording_delete">Διαγραφή εγγραφής</string>
+    <string name="iptv_recording_delete_title">Διαγραφή του «%1$s»;</string>
+    <string name="iptv_recording_delete_description">Η εγγραφή και το αρχείο της θα αφαιρεθούν από αυτή τη συσκευή.</string>
+    <string name="iptv_recording_delete_confirm">Διαγραφή</string>
+    <string name="iptv_recording_keep">Διατήρηση</string>
+    <string name="iptv_recording_file_missing">Το αρχείο εγγραφής δεν βρίσκεται πλέον σε αυτή τη συσκευή</string>
+    <string name="iptv_recording_paused">Σε παύση</string>
+    <string name="iptv_recording_playback_failed">Δεν είναι δυνατή η αναπαραγωγή της εγγραφής. Το αρχείο μπορεί να είναι ελλιπές ή σε μορφή που η συσκευή δεν μπορεί να αποκωδικοποιήσει.</string>
+    <string name="iptv_recording_skip_hint">Αριστερά και δεξιά για μεταπήδηση 30 δευτερολέπτων</string>
+</resources>

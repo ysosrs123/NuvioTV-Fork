@@ -1,0 +1,74 @@
+<resources>
+    <string name="iptv_recording_channel">Įrašai</string>
+    <string name="iptv_recording_channel_description">Rodoma, kol įrašomos tiesioginės TV laidos</string>
+    <string name="iptv_recording_notification_title">Įrašoma tiesioginė TV</string>
+    <string name="iptv_recording_notification_starting">Pradedamas įrašymas…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d laida</item>
+        <item quantity="few">%1$d laidos</item>
+        <item quantity="many">%1$d laidos</item>
+        <item quantity="other">%1$d laidų</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Įrašyti</string>
+    <string name="iptv_recording_record_now">Įrašyti dabar</string>
+    <string name="iptv_recording_record_programme">Įrašyti šią laidą</string>
+    <string name="iptv_recording_started">Įrašymas pradėtas</string>
+    <string name="iptv_recording_scheduled">Įrašymas suplanuotas</string>
+    <string name="iptv_recordings_open">Įrašai</string>
+
+    <string name="iptv_recordings_title">Įrašai</string>
+    <string name="iptv_recordings_description">Iš tiesioginės TV įrašytos arba suplanuotos laidos. Įrašai laikomi šiame įrenginyje ir priklauso šiam profiliui.</string>
+    <string name="iptv_recordings_hint">Paspauskite OK, kad paleistumėte įrašą. Laikykite OK arba paspauskite „Meniu“, kad matytumėte daugiau parinkčių.</string>
+    <string name="iptv_recordings_free">Šiame įrenginyje laisva: %1$s</string>
+    <string name="iptv_recordings_empty">Įrašų dar nėra. Įrašykite laidą iš tiesioginės TV programos arba žiūrėdami.</string>
+    <string name="iptv_recordings_group_now">Įrašoma dabar</string>
+    <string name="iptv_recordings_group_scheduled">Suplanuoti</string>
+    <string name="iptv_recordings_group_recorded">Įrašyti</string>
+
+    <string name="iptv_recording_status_scheduled">Suplanuota</string>
+    <string name="iptv_recording_status_recording">Įrašoma</string>
+    <string name="iptv_recording_status_done">Įrašyta</string>
+    <string name="iptv_recording_status_partial">Įrašyta iš dalies</string>
+    <string name="iptv_recording_status_failed">Nepavyko</string>
+    <string name="iptv_recording_status_cancelled">Atšaukta</string>
+    <string name="iptv_recording_gaps">Yra spragų</string>
+
+    <string name="iptv_recording_failure_no_connection">Šioje paskyroje nėra laisvos jungties</string>
+    <string name="iptv_recording_failure_device_busy">Įrenginys užimtas kitais srautais</string>
+    <string name="iptv_recording_failure_source">Nepavyko pasiekti šaltinio</string>
+    <string name="iptv_recording_failure_channel">Kanalas nebepasiekiamas</string>
+    <string name="iptv_recording_failure_unsupported">Šio srauto formato negalima įrašyti</string>
+    <string name="iptv_recording_failure_encrypted">Šifruotų srautų negalima įrašyti</string>
+    <string name="iptv_recording_failure_network">Srautas nutrūko</string>
+    <string name="iptv_recording_failure_low_storage">Saugykla beveik pilna</string>
+    <string name="iptv_recording_failure_storage">Nepavyko išsaugoti įrašo</string>
+    <string name="iptv_recording_failure_time_limit">Pasiektas įrašymo laiko limitas</string>
+    <string name="iptv_recording_failure_interrupted">Įrašymo metu programėlė ar įrenginys sustojo</string>
+    <string name="iptv_recording_failure_start_blocked">Android neleido pradėti įrašymo. Leiskite Nuvio naudoti signalus ir priminimus arba laikykite Nuvio atvertą.</string>
+    <string name="iptv_recording_failure_missed">Laida baigėsi, kol įrašymas dar neprasidėjo</string>
+
+    <string name="iptv_recording_refused_conflict">Tuo metu kiti įrašai jau naudoja visas šios paskyros jungtis</string>
+    <string name="iptv_recording_refused_no_connection">Šioje paskyroje nėra laisvos jungties. Pirmiausia nustokite žiūrėti ar įrašinėti kitą kanalą.</string>
+    <string name="iptv_recording_refused_storage">Šiam įrašui nepakanka laisvos vietos. Kiekvienai HD valandai skirkite apie 2,5 GB, o 500 MB visada paliekama laisva įrenginiui. Ištrinkite senus įrašus arba atlaisvinkite vietos.</string>
+    <string name="iptv_recording_refused_ended">Ši laida jau baigėsi</string>
+    <string name="iptv_recording_refused_channel">Šio kanalo dabar negalima įrašyti</string>
+    <string name="iptv_recording_refused_duplicate">Šis kanalas tuo metu jau įrašomas</string>
+    <string name="iptv_recording_refused_full">Įrašų sąrašas pilnas. Pirmiausia ištrinkite keletą įrašų.</string>
+    <string name="iptv_recording_refused_profile">Profilis pasikeitė. Bandykite dar kartą.</string>
+    <string name="iptv_recording_refused_exact_alarms">Suplanuotiems įrašams reikia signalų ir priminimų leidimo. Suteikite jį Nuvio arba įrašinėkite žiūrėdami.</string>
+    <string name="iptv_recording_alarm_settings">Leisti signalus ir priminimus</string>
+
+    <string name="iptv_recording_play">Leisti</string>
+    <string name="iptv_recording_stop">Stabdyti įrašymą</string>
+    <string name="iptv_recording_cancel">Atšaukti įrašymą</string>
+    <string name="iptv_recording_delete">Ištrinti įrašą</string>
+    <string name="iptv_recording_delete_title">Ištrinti „%1$s“?</string>
+    <string name="iptv_recording_delete_description">Įrašas ir jo failas bus pašalinti iš šio įrenginio.</string>
+    <string name="iptv_recording_delete_confirm">Ištrinti</string>
+    <string name="iptv_recording_keep">Palikti</string>
+    <string name="iptv_recording_file_missing">Įrašo failo šiame įrenginyje nebėra</string>
+    <string name="iptv_recording_paused">Pristabdyta</string>
+    <string name="iptv_recording_playback_failed">Šio įrašo paleisti negalima. Failas gali būti nepilnas arba tokio formato, kurio šis įrenginys negali dekoduoti.</string>
+    <string name="iptv_recording_skip_hint">Kairėn ir dešinėn – peršokti 30 sekundžių</string>
+</resources>
