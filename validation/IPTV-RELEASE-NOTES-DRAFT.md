@@ -147,14 +147,18 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   programmes count as sport from their guide categories (for example "Sports",
   "Football"), competition names (Premier League, AFL, NRL, NFL, NBA, Formula 1 and
   others) or fixture titles such as "A v B" on a sports channel or marked live;
-  highlights, previews, news, talk shows and films are left out. Guides refreshed
-  with this version are needed (older guide data counts after its next refresh).
+  highlights, previews, news, magazines, talk shows, documentaries and films are left
+  out. The list refreshes every five minutes while shown. After updating, guides
+  refresh once on first opening Live TV so Sport can fill (provider guides follow
+  their source's next refresh).
 - Pause and rewind live TV: Play/Pause pauses a live channel ("Paused" is shown). On
   channels with catch-up, resuming after more than 20 seconds carries on from the
-  minute it was paused, and Rewind steps back about a minute, both through the
-  provider's archive ("Behind live"; Return to live in the channel options; the end
-  of the programme returns to live). Channels without catch-up resume where they were
-  while the stream is still held, otherwise from live.
+  minute it was paused, and Rewind steps back about a minute at a time, both through
+  the provider's archive ("Behind live"; Return to live in the channel options). If
+  the archive has nothing for that moment yet, playback returns to live and says so.
+  Channels without catch-up resume where they were while the stream is still held,
+  otherwise from live. A pause caused by the system (another app taking the sound,
+  headphones unplugged) shows as paused too.
 - Guide folder: Add guide can pick an XMLTV file from the iptv-guides folder on the
   device or a USB drive (listed with size and date), for TVs without a file picker.
 - Removing a source also removes the guides no other source uses (such as guides
@@ -328,18 +332,26 @@ Phone setup (security review)
   device's time zone. "Search what's on now" does not find programmes longer than
   24 hours.
 - Subtitles, closed captions, DVB subtitles and teletext are not all validated.
-- New Live TV text is English only; other languages fall back to English.
+- Live TV text is translated into all 40 app languages by the developer, not by
+  native speakers; wording may need polishing.
 - On-screen keyboard focus in source forms needs device checks. Devices without a
   document picker (such as the AM9) add guide files through the iptv-guides folder.
 - Phone setup uses plain HTTP on the home network (pairing code, single-use token and
   confirmation on the TV); it is not meant for untrusted networks.
-- The minified release build has never processed the IPTV code.
+- The minified release build with IPTV is built in CI (see Validation) but has not
+  been installed or smoke-tested on a device.
 
 ## Validation
 
 - Last full device validation: commit `b68985a` (full app compile, 317 IPTV JVM tests,
   27 AM9 capture/codec fixtures).
-- Since then: 340 core and 151 data-layer JVM tests pass on a host harness; the
+- 7 October work list: 349 core and 152 data-layer JVM tests pass on the host
+  harness and the device tests compile; GitHub Actions debug build green at `e4fd054`
+  (run 37549887460: Sport, pause and rewind, removal fixes, guide folder). A fourth
+  independent review covered this work; its 10 findings are fixed (host-tested; the
+  fixes' CI result is in the handover). New device tests (header-guide removal, Sport
+  query, guide 4→5 and catalogue 2→8 upgrades) run only on a device.
+- Before that: 340 core and 151 data-layer JVM tests pass on a host harness; the
   device tests compile. GitHub Actions builds the prototype APK with the IPTV JVM
   suites under Gradle passing, most recently at `73b59de` (run 37545837449; adds
   now-on search, multiview, recording, phone setup and multiview sizing). Store,

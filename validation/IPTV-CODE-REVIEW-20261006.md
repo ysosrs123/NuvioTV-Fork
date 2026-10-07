@@ -211,6 +211,39 @@ settings prompt (4cfea7b).
 
 Work after 1b7952c was reviewed once (above). Not independently reviewed: the fixes
 themselves, 39303f7, 4cfea7b and multiview sizing (f00e635, 73b59de); these are
-host-tested and CI-built only. Known small gaps (queued in the handover): guides named
-in an M3U header are not removed with their playlist; `iptv-live` preferences (last
-category, hidden categories) are not removed with the profile.
+host-tested and CI-built only. The two small gaps noted here (header guides kept after
+their playlist; `iptv-live` preferences kept after the profile) were fixed on 7 October
+(fd03110).
+
+## Review of the 7 October work list (b94c7e4..e4fd054)
+
+Independent read-only review of the small-gap fixes, Sport, timeshift and the workflow
+input. No compile, migration (guide 1..4 → 5, catalogue v2 test) or workflow problems
+found. Findings, all FIXED in the commit after the translations ("review fixes for
+sport and timeshift"):
+
+1. High (performance): fixture regex was quadratic per title inside the guide import
+   transaction (8 s per 2 M titles on a desktop JVM). Now a linear pattern, evaluated
+   only when another signal is present.
+2. Medium: Sport rows were capped at 600 for all feeds before the playlist filter; the
+   first feed could starve the rest. Each feed now gets a share of 3,000 rows and at
+   most 500 guide channels are matched (the catalogue lookup accepts 500 ids).
+3. Medium (performance): the partial index lacked `stop`; now (stage,start,stop).
+4. Medium: sports films and documentaries (Movie + Sports), "Sports non-event" and
+   "Sports magazines" counted as sport; "A – B" fixtures and "LaLiga" were missed. Hard
+   non-sport categories now veto, dashes are fixture separators, LaLiga added.
+5. Medium: a failed timeshift tune left a black screen. It now returns to live with a
+   message.
+6. Medium: a resumed timeshift stopped at the programme's scheduled end and jumped to
+   live. It now runs an hour past max(end, now).
+7. Medium: `paused` drifted when the player paused itself (audio focus, headphones).
+   It now follows `onPlayWhenReadyChanged`.
+8. Low: Sport stayed empty after upgrade until the next guide refresh. The upgrade
+   now clears `refreshed_at` so guides re-import on first open.
+9. Low: the Sport list went stale. It reloads every five minutes while shown.
+10. Low: repeated Rewind could not go further back. It now re-tunes a minute earlier
+    while behind live.
+
+Not changed: Brazilian "A x B" titles are not treated as fixtures ("The X Factor
+Live" would match); Brazilian competitions are recognised by name instead. The fixes
+are host-tested (core 349, data-layer 152) and CI-built; not re-reviewed.

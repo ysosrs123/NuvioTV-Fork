@@ -2,7 +2,7 @@
 
 Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
 Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built
-(latest green: `73b59de`, run 37545837449), not device-tested. Start with "Next session
+(latest green debug build: `e4fd054`, run 37549887460), not device-tested. Start with "Next session
 — work list" below; older sections further down are history and are kept for context.
 Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
 [code review](IPTV-CODE-REVIEW-20261006.md), [reference app notes](IPTV-UX-REFERENCE.md),
@@ -76,65 +76,52 @@ hardware AVC decoder instances) rather than fixed numbers.
 
 ## Next session — work list (read first)
 
-The user wants these done before they build, install and test. Work through them in
-order, keep this file, IPTV-PROGRESS.md, IPTV-RELEASE-NOTES-DRAFT.md and the code
-review file current after each piece, and run CI once at the end of a batch.
+Status on 7 October 2026 (branch head after the work list; nothing device-tested):
 
-1. Small gaps.
-   - Guides named in an M3U header are not removed with their playlist.
-     `IptvXtreamGuides.removeSource` removes only the automatic Xtream guide (endpoint
-     `xtream-guide:<sourceId>`). Header guides are ordinary feeds created by
-     `ensurePlaylist` with the label "<source> guide[ n]"; there is no marker of their
-     origin. Suggested: before `catalogue.removeSource`, take the source's linked feeds
-     and remove those no other source links (a feed the user also linked elsewhere
-     must stay). Add a device test next to the existing removal tests.
-   - Hidden categories and last category are not removed with the profile. They live
-     in the `iptv-live` shared preferences (`IptvLiveViewModel`, keys
-     `"<profileId>:<sourceId>:category"` and `"…:hidden"` from `prefix(ref)`). Also
-     drop a source's keys when the source is removed. Remove keys with that profile's prefix in the
-     profile clean-up path (`IptvProfileAccess.removeProfile`, wired from
-     `core/di/IptvModule.kt`); keep `multiview-layout` / `multiview-quality` (device-wide).
-     Consider moving the key code out of the ViewModel so both use one function.
-   - Device test `IptvCatalogueStoreTest.v2MigrationPreservesEncryptedCatalogueAnd…`
-     (app/src/androidTest/.../data/iptv) likely fails before this work: it sets
-     version 2 on a current-schema database, so the upgrade re-adds columns that
-     exist (for example `sources.position`). Fix the test to build a real v2 schema
-     (or make the upgrade steps idempotent if a real install could hit this), and add
-     an upgrade test from 7 to 8 (catalogue) and 3 to 4 (guide).
-   - Guide folder import has no screen. `IptvSourcesViewModel.localGuides` exists;
-     the AM9 has no document picker, so on it guides can be added only by address.
-     Add a chooser in Add guide listing files in the `iptv-guides` folders.
-2. Sports. Not started. Needs a fixtures source; do not add a paid or keyed API
-   without asking the user. Ideas in IPTV-UX-REFERENCE.md ("Sports"): match guide
-   programme titles against team/competition names, a Sports view of what is on now
-   and next, record or remind. A guide-only version (no external data) is possible
-   with the existing `search_title` index and is the low-risk first step.
-3. Timeshift (pause and rewind live). The capture chain (`core/iptv` capture classes,
-   `CaptureVideoPlayer`) is unvalidated on devices and must stay off until the AM9
-   fixtures pass. Lower-risk options to weigh and present honestly: a bounded
-   ExoPlayer back buffer (`DefaultLoadControl.setBackBuffer`, memory-bound, minutes
-   only on 2 GB boxes), pause-by-reconnect using catch-up where the channel has an
-   archive, or recording-to-disk with playback of the growing file (reuses the
-   recorder; needs its own connection). Whatever ships must respect admission and
-   the device profile.
-4. Translations. All new IPTV strings are English only: `res/values/iptv_strings.xml`
-   (191), `iptv_setup_strings.xml` (42), `iptv_recording_strings.xml` (60), 8 plurals,
-   plus 12 `iptv_*` entries in `values/strings.xml`. The app has 38 locales
-   (`values-ar` … `values-zh-rTW`, plus `values-b+es+419`, `values-b+sr+Latn`). Keep
-   placeholders, plurals and `translatable="false"` entries intact. Existing locales
-   are partial (for example `values/strings.xml` has 3,770 strings, German 2,668,
-   Tamil 2,039), so match the app's terminology in each locale and put the IPTV
-   translations in matching `iptv_*.xml` files per locale. Locale groups can be done in
-   parallel; spot-check each (placeholders, escaped apostrophes, plurals).
-   Lint (`MissingTranslation`) settings decide whether partial coverage is allowed.
-5. Release-variant check. R8 has never processed the IPTV code. Build a minified
-   variant with IPTV enabled (for example a temporary local `iptvPrototypeRelease`
-   build, or a workflow input) and add keep rules only where needed (NanoHTTPD,
-   org.json, reflection-free code should be fine). Do not change the release workflow
-   without the user.
-6. Second pass before handing over: re-read the diff of the session, update the
-   release notes (Fixes and improvements, Known limitations, Validation), the
-   progress table and the review file, and run the host tests and one CI build.
+1. Small gaps — done (fd03110). Removing a source removes linked guides no other
+   source links (`IptvXtreamGuides.removeSource`; covers M3U header guides; the
+   confirmation text says so). `IptvLivePreferences` (data/iptv) owns the
+   `iptv-live` keys; source removal, profile removal and "clear all profiles" drop
+   that profile's/source's keys (`LivePreferenceKeys`, host-tested); multiview keys
+   stay. The v2 catalogue upgrade test now builds a real v2 schema (the old one set
+   version 2 on a current database and would fail with duplicate columns). Upgrade
+   tests 7→8 (catalogue) and 3→4 (guide) already existed; 4→5 (guide) added. Add
+   guide has a Guide folder chooser listing XMLTV files in the `iptv-guides`
+   folders (internal storage and USB), with the folder paths shown when empty.
+2. Sport — done, guide-only (ff1a94b, review fixes in the next commits). XMLTV
+   `<category>` kept (8 per programme); `SportsGuide` marks sport at import
+   (categories, competitions, fixture titles with a live marker / sports channel /
+   sport word; films, documentaries, magazines, talk, news, highlights excluded);
+   guide schema 5 adds `programmes.sport` with partial index (stage,start,stop);
+   upgrading clears `feeds.refreshed_at` so guides re-import on first open (provider
+   guides follow their source's 12 h refresh). Sport rail entry lists channels with
+   sport on now or within 6 h, live first; reloads every 5 min. No external data,
+   no reminders.
+3. Timeshift — done as catch-up-based pause/rewind (bcb8742 + review fixes).
+   `LiveTimeshift` (host-tested): resume after > 20 s on archive channels continues
+   from the paused minute; Rewind on live goes back about a minute and keeps
+   stepping back while behind live; the timeshift stream runs an hour past
+   max(programme end, now); a failed archive tune returns to live with a message.
+   Non-archive channels resume in place while the player holds the stream. The
+   paused state follows the player (audio focus, headphones). Options weighed and
+   not built: an ExoPlayer back buffer (it counts against the 12 MB target buffer,
+   so minutes of 1080p need 60+ MB of heap per player: too much for 2 GB boxes and
+   multiview), and playing a growing recording (needs a second provider connection
+   or the unvalidated capture chain). The capture chain stays disabled.
+4. Translations — done for all 40 locale folders (`values-ar` … `values-zh-rTW`,
+   including `zh`, `pt`, `b+es+419`, `b+sr+Latn`; the earlier "38" was a miscount)
+   as `values-<locale>/iptv_strings.xml`, `iptv_setup_strings.xml`,
+   `iptv_recording_strings.xml` (the 12 `iptv_*` entries from `values/strings.xml`
+   are in each locale's `iptv_strings.xml`). Checked by script for names,
+   placeholders, apostrophe escaping and plurals (CLDR forms per language);
+   spot-checked by hand, not reviewed by native speakers. Any new English IPTV
+   string must be added to all 40.
+5. Release-variant check — the PR Full Debug Build workflow has a `build_type`
+   input (`debug` default, `release` builds the minified APK with the throwaway CI
+   key). IPTV code uses no reflection or serialisation libraries; NanoHTTPD and
+   Media3 already have keep rules; no IPTV keep rules added. Result: see "CI build".
+6. Second pass — independent review of this session's diff (10 findings, all
+   fixed; see the review file), host tests, CI.
 
 Then the user's device pass (Ugoos AM9 Pro first, then smaller boxes):
 - Install the CI APK (`app-iptvPrototype-arm64-v8a-debug.apk`; uninstall an older
@@ -147,7 +134,7 @@ Then the user's device pass (Ugoos AM9 Pro first, then smaller boxes):
 
 Before merge and release (only on the user's confirmation):
 - Clean device pass; minified release build with IPTV enabled built and smoke-tested;
-  upgrade from an existing install checked (catalogue schema to 8, guide schema to 4).
+  upgrade from an existing install checked (catalogue schema to 8, guide schema to 5).
 - The user decides how IPTV ships. The release workflow builds only `fullRelease`,
   where `FEATURE_IPTV_ENABLED` is false. Options: enable in `full` (move the recording
   permissions, service and receivers from `src/iptvPrototype/AndroidManifest.xml` to
@@ -172,6 +159,7 @@ Before merge and release (only on the user's confirmation):
 
 ## How to build and check
 
+- Release check: same workflow with `build_type: release` (minified, R8).
 - Host tests: `python3 tools/iptv-host-tests/run.py` (core, data-layer, androidTest
   compile). It uses desktop org.json; Android-only differences (no `keySet`) and all
   Compose/Hilt code show only in CI.
@@ -182,6 +170,9 @@ Before merge and release (only on the user's confirmation):
 
 ## Code map (app/src/main/java/com/nuvio/tv)
 
+- New on 7 October: `core/iptv/SportsGuide.kt`, `LiveTimeshift.kt`,
+  `LivePreferenceKeys.kt`; `data/iptv/IptvLivePreferences.kt`; translations in
+  `res/values-*/iptv_*.xml`.
 - `ui/screens/iptv`: `IptvLiveScreen` (scaffold, info panel, preview, rail, empty
   states, channel menu, guide picker, search), `IptvLiveViewModel` (state, playback,
   multiview, recording actions, `iptv-live` preferences), `IptvGuideGrid`,
@@ -194,7 +185,7 @@ Before merge and release (only on the user's confirmation):
 - `core/iptv`: models and pure logic (guide grid, matching, admission, device profile
   `DeviceProfile.kt`, `MultiviewSizing.kt`, `LiveRecording.kt`, setup drafts and
   pairing, capture chain).
-- `data/iptv`: stores (catalogue schema 8, guide schema 4, recordings JSON), clients
+- `data/iptv`: stores (catalogue schema 8, guide schema 5, recordings JSON), clients
   (M3U, Xtream, Stalker, XMLTV), `IptvXtreamGuides`, `IptvCatchup`,
   `AndroidDeviceProfile`, `IptvProfileAccess`.
 - `core/recording`: `IptvRecorder`, `IptvRecordingService`, `IptvRecordingAlarms`.
@@ -212,6 +203,10 @@ Before merge and release (only on the user's confirmation):
   each box (some may report the UI size, which makes multiview pick lower qualities);
   real multi-decoder capacity; Fire OS exact alarms in deep sleep; recording across
   stream gaps; schema upgrades on existing installs; R8.
+- Sport depends on guide text; check it with the user's real provider guide (are
+  categories present, are fixtures titled "A v B"?). Timeshift depends on the
+  provider's archive delay; a fresh pause may hit "no recording yet".
+- Translations are machine-quality and unreviewed by native speakers.
 - Android's XML parser may reject unknown entities such as `&nbsp;` in guides.
 - Xtream catch-up uses the device time zone (the server zone is not stored).
 - The guide shows about four to five rows at 1080p (the top area takes 188 dp).
