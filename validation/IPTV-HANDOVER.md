@@ -146,10 +146,18 @@ Done after `e20d157` (host-tested, CI pending):
   69"): smbj 0.15.0 depends on bcprov-jdk18on 1.85.2, a multi-release jar with Java 25
   classes, which the Compose mapping task cannot read. This also affects the `full`
   release build. Fixed in `ec6f16f` with `includeComposeMappingFile = false` (the file
-  only improves Compose stack traces in minified builds). Alternative if the mapping
+  only improves Compose stack traces in minified builds). Minified release build green
+  at `ec6f16f` (run 37596443549). Alternative if the mapping
   file is wanted: pin an older bcprov without `META-INF/versions/25`.
 
-Next: a full review pass; device test checklist.
+Next (not started; the review helpers stopped at an account usage limit before
+reporting, resets 10 October 2026 00:00 UTC):
+- Debug CI build of `2a8942b`+ (Home rows, VOD gaps, Return to live, Home translations);
+  nothing after `a2eeb57` has a green debug build yet.
+- Independent review of `d263b18..HEAD` in three areas (storage and setup server;
+  playback, streaming and navigation; VOD, sport and Home). Brief kept outside the repo:
+  read-only reviewers, concrete failure paths only.
+- Device test checklist covering everything since `b68985a`.
 - Decisions recorded: tracking for matched titles uses Nuvio's normal history and
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
