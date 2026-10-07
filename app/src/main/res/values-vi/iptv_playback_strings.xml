@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">Nhà cung cấp đã từ chối kênh này. Hãy kiểm tra gói đăng ký rồi thử lại.</string>
+    <string name="iptv_playback_missing">Kênh này không còn được nhà cung cấp cung cấp.</string>
+    <string name="iptv_playback_unsupported">Định dạng của kênh này không phát được trên thiết bị này.</string>
+    <string name="iptv_playback_decoder">Không thể khởi động bộ giải mã video. Hãy đóng các khung hình khác rồi thử lại.</string>
+</resources>

@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">Leverantören nekade kanalen. Kontrollera ditt abonnemang och försök igen.</string>
+    <string name="iptv_playback_missing">Kanalen är inte längre tillgänglig hos leverantören.</string>
+    <string name="iptv_playback_unsupported">Kanalens format kan inte spelas upp på den här enheten.</string>
+    <string name="iptv_playback_decoder">Videoavkodaren kunde inte starta. Stäng andra bilder och försök igen.</string>
+</resources>

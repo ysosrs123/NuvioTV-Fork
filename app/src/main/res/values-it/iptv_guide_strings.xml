@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Tutte le sorgenti</string>
+    <string name="iptv_all_sources_favourites">Preferiti da tutte le sorgenti</string>
+    <string name="iptv_density">Densità della guida</string>
+    <string name="iptv_density_subtitle">Quanti canali entrano nello schermo</string>
+    <string name="iptv_density_comfortable">Comoda</string>
+    <string name="iptv_density_comfortable_description">Righe e loghi più grandi con gli orari dei programmi</string>
+    <string name="iptv_density_compact">Compatta</string>
+    <string name="iptv_density_compact_description">Righe e loghi più piccoli per mostrare più canali</string>
+    <string name="iptv_inset_show">Mostra nell\'angolo</string>
+    <string name="iptv_inset_show_subtitle">Mantiene %1$s a schermo intero con questo canale in un piccolo riquadro</string>
+    <string name="iptv_inset_swap">Scambia con il riquadro d\'angolo</string>
+    <string name="iptv_inset_close">Chiudi il riquadro d\'angolo</string>
+    <string name="iptv_inset_hint">Il tasto giallo scambia le immagini, Indietro chiude il riquadro d\'angolo</string>
+    <string name="iptv_inset_unsupported">Questo TV box può riprodurre un solo canale alla volta.</string>
+    <string name="iptv_inset_decoder">Questo TV box non può decodificare una seconda immagine accanto a questo canale.</string>
+    <string name="iptv_inset_capacity">Nessuna connessione libera per questo account. Aumenta le connessioni dell\'account in Sorgenti TV in diretta se il tuo piano lo consente.</string>
+    <string name="iptv_move_channel">Sposta canale</string>
+    <string name="iptv_move_channel_subtitle">Cambia la posizione di questo canale nell\'elenco</string>
+    <string name="iptv_move_channel_title">Spostamento di %1$s</string>
+    <string name="iptv_move_key_step">▲▼ Una posizione</string>
+    <string name="iptv_move_key_top">◀ In cima</string>
+    <string name="iptv_move_key_bottom">▶ In fondo</string>
+    <string name="iptv_move_key_done">OK o Indietro: fatto</string>
+    <string name="iptv_move_moved_bottom">Spostato in fondo all\'elenco</string>
+    <string name="iptv_move_category">Sposta categoria</string>
+    <string name="iptv_move_category_subtitle">Cambia la posizione di questa categoria nel menu</string>
+    <string name="iptv_move_category_keys">▲▼ una posizione · ◀ in cima · ▶ in fondo · OK o Indietro: fatto</string>
+    <string name="iptv_multiview_layout_side">Affiancati</string>
+    <string name="iptv_multiview_layout_one_over_two">Uno sopra due</string>
+    <string name="iptv_multiview_layout_description">Affiancati mostra due immagini. Uno grande e Uno sopra due usano l\'immagine scelta con Mostra in grande.</string>
+    <string name="iptv_scrub_behind">%1$s indietro</string>
+    <string name="iptv_scrub_live_edge">In diretta %1$s</string>
+    <string name="iptv_scrub_hint">Sinistra e destra spostano di 30 secondi, tieni premuto per andare più veloce</string>
+    <string name="iptv_scrub_deck_hint">Su verso la timeline per scorrere i programmi precedenti</string>
+    <string name="iptv_scrub_banner_hint">Sinistra e destra scorrono i programmi, su e giù cambiano canale</string>
+</resources>

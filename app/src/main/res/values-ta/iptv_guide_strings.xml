@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">எல்லா மூலங்களும்</string>
+    <string name="iptv_all_sources_favourites">எல்லா மூலங்களிலிருந்தும் பிடித்தவை</string>
+    <string name="iptv_density">வழிகாட்டி அடர்த்தி</string>
+    <string name="iptv_density_subtitle">திரையில் எத்தனை சேனல்கள் பொருந்தும்</string>
+    <string name="iptv_density_comfortable">வசதியானது</string>
+    <string name="iptv_density_comfortable_description">நிகழ்ச்சி நேரங்களுடன் பெரிய வரிசைகளும் லோகோக்களும்</string>
+    <string name="iptv_density_compact">கச்சிதமானது</string>
+    <string name="iptv_density_compact_description">அதிக சேனல்கள் பொருந்த சிறிய வரிசைகளும் லோகோக்களும்</string>
+    <string name="iptv_inset_show">மூலையில் காட்டு</string>
+    <string name="iptv_inset_show_subtitle">%1$s முழுத்திரையில் இருக்கும், இந்தச் சேனல் சிறிய படத்தில் காட்டப்படும்</string>
+    <string name="iptv_inset_swap">மூலைப் படத்துடன் மாற்று</string>
+    <string name="iptv_inset_close">மூலைப் படத்தை மூடு</string>
+    <string name="iptv_inset_hint">மஞ்சள் பொத்தான் படங்களை மாற்றும், Back மூலைப் படத்தை மூடும்</string>
+    <string name="iptv_inset_unsupported">இந்த டிவி பெட்டி ஒரே நேரத்தில் ஒரு சேனலை மட்டுமே இயக்க முடியும்.</string>
+    <string name="iptv_inset_decoder">இந்த டிவி பெட்டியால் இந்தச் சேனலுக்கு அருகில் இரண்டாவது படத்தை டிகோட் செய்ய முடியாது.</string>
+    <string name="iptv_inset_capacity">இந்தக் கணக்கில் காலியான இணைப்பு இல்லை. உங்கள் திட்டம் அனுமதித்தால், நேரலை டிவி மூலங்களில் கணக்கின் இணைப்புகளை அதிகரிக்கவும்.</string>
+    <string name="iptv_move_channel">சேனலை நகர்த்து</string>
+    <string name="iptv_move_channel_subtitle">பட்டியலில் இந்தச் சேனல் இருக்கும் இடத்தை மாற்றவும்</string>
+    <string name="iptv_move_channel_title">%1$s நகர்த்தப்படுகிறது</string>
+    <string name="iptv_move_key_step">▲▼ ஒரு இடம்</string>
+    <string name="iptv_move_key_top">◀ மேலே</string>
+    <string name="iptv_move_key_bottom">▶ கீழே</string>
+    <string name="iptv_move_key_done">OK அல்லது Back: முடிந்தது</string>
+    <string name="iptv_move_moved_bottom">பட்டியலின் கீழே நகர்த்தப்பட்டது</string>
+    <string name="iptv_move_category">வகையை நகர்த்து</string>
+    <string name="iptv_move_category_subtitle">மெனுவில் இந்த வகை இருக்கும் இடத்தை மாற்றவும்</string>
+    <string name="iptv_move_category_keys">▲▼ ஒரு இடம் · ◀ மேலே · ▶ கீழே · OK அல்லது Back: முடிந்தது</string>
+    <string name="iptv_multiview_layout_side">அருகருகே</string>
+    <string name="iptv_multiview_layout_one_over_two">இரண்டின் மேல் ஒன்று</string>
+    <string name="iptv_multiview_layout_description">அருகருகே இரண்டு படங்களைக் காட்டும். ஒன்று பெரிதாக மற்றும் இரண்டின் மேல் ஒன்று, பெரிதாகக் காட்டு மூலம் தேர்ந்தெடுத்த படத்தைப் பயன்படுத்தும்.</string>
+    <string name="iptv_scrub_behind">%1$s பின்னால்</string>
+    <string name="iptv_scrub_live_edge">நேரலை %1$s</string>
+    <string name="iptv_scrub_hint">இடது, வலது 30 விநாடிகள் நகர்த்தும், வேகமாக நகர்த்த அழுத்திப் பிடிக்கவும்</string>
+    <string name="iptv_scrub_deck_hint">முந்தைய நிகழ்ச்சிகளுக்குச் செல்ல மேலே காலவரிசைக்குச் செல்லவும்</string>
+    <string name="iptv_scrub_banner_hint">இடது, வலது நிகழ்ச்சிகளிடையே நகர்த்தும், மேல், கீழ் சேனலை மாற்றும்</string>
+</resources>

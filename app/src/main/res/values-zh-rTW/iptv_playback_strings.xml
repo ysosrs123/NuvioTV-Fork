@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">供應商拒絕了此頻道。請檢查您的訂閱，然後再試一次。</string>
+    <string name="iptv_playback_missing">供應商已不再提供此頻道。</string>
+    <string name="iptv_playback_unsupported">此裝置無法播放此頻道的格式。</string>
+    <string name="iptv_playback_decoder">無法啟動視訊解碼器。請關閉其他畫面後再試一次。</string>
+</resources>

@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">所有來源</string>
+    <string name="iptv_all_sources_favourites">所有來源中的我的最愛</string>
+    <string name="iptv_density">節目表密度</string>
+    <string name="iptv_density_subtitle">螢幕上可容納的頻道數量</string>
+    <string name="iptv_density_comfortable">舒適</string>
+    <string name="iptv_density_comfortable_description">較大的列和台標，並顯示節目時間</string>
+    <string name="iptv_density_compact">緊湊</string>
+    <string name="iptv_density_compact_description">較小的列和台標，可顯示更多頻道</string>
+    <string name="iptv_inset_show">在角落顯示</string>
+    <string name="iptv_inset_show_subtitle">%1$s 維持全螢幕，此頻道以小畫面顯示</string>
+    <string name="iptv_inset_swap">與角落畫面交換</string>
+    <string name="iptv_inset_close">關閉角落畫面</string>
+    <string name="iptv_inset_hint">黃色按鈕交換畫面，返回鍵關閉角落畫面</string>
+    <string name="iptv_inset_unsupported">此電視盒一次只能播放一個頻道。</string>
+    <string name="iptv_inset_decoder">此電視盒無法在此頻道旁解碼第二個畫面。</string>
+    <string name="iptv_inset_capacity">此帳戶沒有空閒連線。如果您的方案允許，請在直播電視來源中提高該帳戶的連線數。</string>
+    <string name="iptv_move_channel">移動頻道</string>
+    <string name="iptv_move_channel_subtitle">變更此頻道在清單中的位置</string>
+    <string name="iptv_move_channel_title">正在移動 %1$s</string>
+    <string name="iptv_move_key_step">▲▼ 移動一格</string>
+    <string name="iptv_move_key_top">◀ 移到最上方</string>
+    <string name="iptv_move_key_bottom">▶ 移到最下方</string>
+    <string name="iptv_move_key_done">OK 或返回：完成</string>
+    <string name="iptv_move_moved_bottom">已移到清單最下方</string>
+    <string name="iptv_move_category">移動分類</string>
+    <string name="iptv_move_category_subtitle">變更此分類在選單中的位置</string>
+    <string name="iptv_move_category_keys">▲▼ 移動一格 · ◀ 移到最上方 · ▶ 移到最下方 · OK 或返回：完成</string>
+    <string name="iptv_multiview_layout_side">並排</string>
+    <string name="iptv_multiview_layout_one_over_two">上一下二</string>
+    <string name="iptv_multiview_layout_description">「並排」顯示兩個畫面。「一大多小」和「上一下二」使用透過「放大顯示」選擇的畫面。</string>
+    <string name="iptv_scrub_behind">落後 %1$s</string>
+    <string name="iptv_scrub_live_edge">直播 %1$s</string>
+    <string name="iptv_scrub_hint">左右鍵移動 30 秒，長按可快速移動</string>
+    <string name="iptv_scrub_deck_hint">向上進入時間軸，可瀏覽先前的節目</string>
+    <string name="iptv_scrub_banner_hint">左右鍵瀏覽節目，上下鍵切換頻道</string>
+</resources>

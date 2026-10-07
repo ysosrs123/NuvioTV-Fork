@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Tất cả nguồn</string>
+    <string name="iptv_all_sources_favourites">Yêu thích từ tất cả nguồn</string>
+    <string name="iptv_density">Mật độ lịch phát sóng</string>
+    <string name="iptv_density_subtitle">Số kênh hiển thị vừa trên màn hình</string>
+    <string name="iptv_density_comfortable">Thoải mái</string>
+    <string name="iptv_density_comfortable_description">Hàng và logo lớn hơn, kèm giờ chương trình</string>
+    <string name="iptv_density_compact">Gọn</string>
+    <string name="iptv_density_compact_description">Hàng và logo nhỏ hơn để hiển thị nhiều kênh hơn</string>
+    <string name="iptv_inset_show">Hiển thị ở góc</string>
+    <string name="iptv_inset_show_subtitle">Giữ %1$s toàn màn hình, kênh này hiện trong khung hình nhỏ</string>
+    <string name="iptv_inset_swap">Đổi với khung hình góc</string>
+    <string name="iptv_inset_close">Đóng khung hình góc</string>
+    <string name="iptv_inset_hint">Nút vàng đổi hai khung hình, Quay lại đóng khung hình góc</string>
+    <string name="iptv_inset_unsupported">TV box này chỉ phát được một kênh mỗi lúc.</string>
+    <string name="iptv_inset_decoder">TV box này không giải mã được khung hình thứ hai bên cạnh kênh này.</string>
+    <string name="iptv_inset_capacity">Tài khoản này không còn kết nối trống. Hãy tăng số kết nối của tài khoản trong Nguồn TV trực tiếp nếu gói của bạn cho phép.</string>
+    <string name="iptv_move_channel">Di chuyển kênh</string>
+    <string name="iptv_move_channel_subtitle">Thay đổi vị trí của kênh này trong danh sách</string>
+    <string name="iptv_move_channel_title">Đang di chuyển %1$s</string>
+    <string name="iptv_move_key_step">▲▼ Một vị trí</string>
+    <string name="iptv_move_key_top">◀ Lên đầu</string>
+    <string name="iptv_move_key_bottom">▶ Xuống cuối</string>
+    <string name="iptv_move_key_done">OK hoặc Quay lại: xong</string>
+    <string name="iptv_move_moved_bottom">Đã chuyển xuống cuối danh sách</string>
+    <string name="iptv_move_category">Di chuyển danh mục</string>
+    <string name="iptv_move_category_subtitle">Thay đổi vị trí của danh mục này trong menu</string>
+    <string name="iptv_move_category_keys">▲▼ một vị trí · ◀ lên đầu · ▶ xuống cuối · OK hoặc Quay lại: xong</string>
+    <string name="iptv_multiview_layout_side">Cạnh nhau</string>
+    <string name="iptv_multiview_layout_one_over_two">Một trên hai dưới</string>
+    <string name="iptv_multiview_layout_description">Cạnh nhau hiển thị hai khung hình. Một khung lớn và Một trên hai dưới dùng khung hình được chọn bằng Hiển thị lớn.</string>
+    <string name="iptv_scrub_behind">Chậm %1$s</string>
+    <string name="iptv_scrub_live_edge">Trực tiếp %1$s</string>
+    <string name="iptv_scrub_hint">Trái và phải di chuyển 30 giây, giữ để di chuyển nhanh hơn</string>
+    <string name="iptv_scrub_deck_hint">Lên thanh thời gian để xem các chương trình trước</string>
+    <string name="iptv_scrub_banner_hint">Trái và phải chuyển giữa các chương trình, lên và xuống đổi kênh</string>
+</resources>

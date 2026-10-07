@@ -266,16 +266,4 @@
         <item quantity="one">%1$d Sender</item>
         <item quantity="other">%1$d Sender</item>
     </plurals>
-    <string name="iptv_live_hud">HUD</string>
-    <string name="iptv_guide_choose_file">XMLTV-Datei wählen</string>
-    <string name="iptv_guide_file_selected">XMLTV-Datei ausgewählt. Speichern und dann aktualisieren, um das Programm zu importieren.</string>
-    <string name="iptv_guide_file_help">Geben Sie eine Programmführer-URL ein oder wählen Sie eine lokale XMLTV-Datei (.xml oder .xml.gz).</string>
-    <string name="iptv_guide_picker_unavailable">Dieses Gerät hat keine Dateiauswahl. Sie können stattdessen eine Programmführer-URL eingeben.</string>
-    <string name="iptv_live_tracks">Spuren</string>
-    <string name="iptv_live_audio">Audio</string>
-    <string name="iptv_live_subtitles">Untertitel und Closed Captions</string>
-    <string name="iptv_live_tracks_auto">Automatisch</string>
-    <string name="iptv_live_tracks_off">Aus</string>
-    <string name="iptv_live_tracks_none">Dieser Stream meldet keine Spuren.</string>
-    <string name="iptv_live_tracks_unsupported">Von diesem Player nicht unterstützt</string>
 </resources>

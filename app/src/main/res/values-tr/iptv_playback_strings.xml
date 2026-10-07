@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">Sağlayıcı bu kanalı reddetti. Aboneliğinizi kontrol edip tekrar deneyin.</string>
+    <string name="iptv_playback_missing">Bu kanal artık sağlayıcıda mevcut değil.</string>
+    <string name="iptv_playback_unsupported">Bu kanalın biçimi bu cihazda oynatılamıyor.</string>
+    <string name="iptv_playback_decoder">Video kod çözücü başlatılamadı. Diğer resimleri kapatıp tekrar deneyin.</string>
+</resources>

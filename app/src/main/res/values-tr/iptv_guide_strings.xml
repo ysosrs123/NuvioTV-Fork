@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Tüm kaynaklar</string>
+    <string name="iptv_all_sources_favourites">Tüm kaynaklardaki favoriler</string>
+    <string name="iptv_density">Yayın akışı yoğunluğu</string>
+    <string name="iptv_density_subtitle">Ekrana kaç kanal sığacağı</string>
+    <string name="iptv_density_comfortable">Rahat</string>
+    <string name="iptv_density_comfortable_description">Program saatleriyle daha büyük satırlar ve logolar</string>
+    <string name="iptv_density_compact">Sıkı</string>
+    <string name="iptv_density_compact_description">Daha fazla kanal sığması için daha küçük satırlar ve logolar</string>
+    <string name="iptv_inset_show">Köşede göster</string>
+    <string name="iptv_inset_show_subtitle">%1$s tam ekranda kalır, bu kanal küçük bir resimde gösterilir</string>
+    <string name="iptv_inset_swap">Köşe resmiyle değiştir</string>
+    <string name="iptv_inset_close">Köşe resmini kapat</string>
+    <string name="iptv_inset_hint">Sarı düğme resimleri değiştirir, Geri köşe resmini kapatır</string>
+    <string name="iptv_inset_unsupported">Bu TV kutusu aynı anda yalnızca bir kanal oynatabilir.</string>
+    <string name="iptv_inset_decoder">Bu TV kutusu bu kanalın yanında ikinci bir resmin kodunu çözemez.</string>
+    <string name="iptv_inset_capacity">Bu hesapta boş bağlantı yok. Paketiniz izin veriyorsa Canlı TV kaynaklarında hesabın bağlantılarını artırın.</string>
+    <string name="iptv_move_channel">Kanalı taşı</string>
+    <string name="iptv_move_channel_subtitle">Bu kanalın listedeki yerini değiştirin</string>
+    <string name="iptv_move_channel_title">%1$s taşınıyor</string>
+    <string name="iptv_move_key_step">▲▼ Bir sıra</string>
+    <string name="iptv_move_key_top">◀ En üste</string>
+    <string name="iptv_move_key_bottom">▶ En alta</string>
+    <string name="iptv_move_key_done">OK veya Geri: bitti</string>
+    <string name="iptv_move_moved_bottom">Listenin en altına taşındı</string>
+    <string name="iptv_move_category">Kategoriyi taşı</string>
+    <string name="iptv_move_category_subtitle">Bu kategorinin menüdeki yerini değiştirin</string>
+    <string name="iptv_move_category_keys">▲▼ bir sıra · ◀ en üste · ▶ en alta · OK veya Geri: bitti</string>
+    <string name="iptv_multiview_layout_side">Yan yana</string>
+    <string name="iptv_multiview_layout_one_over_two">Bir üstte iki altta</string>
+    <string name="iptv_multiview_layout_description">Yan yana iki resim gösterir. Bir büyük ile Bir üstte iki altta, Büyük göster ile seçilen resmi kullanır.</string>
+    <string name="iptv_scrub_behind">%1$s geride</string>
+    <string name="iptv_scrub_live_edge">Canlı %1$s</string>
+    <string name="iptv_scrub_hint">Sol ve sağ 30 saniye ilerletir, daha hızlı için basılı tutun</string>
+    <string name="iptv_scrub_deck_hint">Önceki programlarda gezinmek için yukarı ile zaman çizelgesine çıkın</string>
+    <string name="iptv_scrub_banner_hint">Sol ve sağ programlar arasında gezinir, yukarı ve aşağı kanal değiştirir</string>
+</resources>

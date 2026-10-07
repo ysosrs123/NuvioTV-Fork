@@ -270,16 +270,4 @@
         <item quantity="many">%1$d canali</item>
         <item quantity="other">%1$d canali</item>
     </plurals>
-    <string name="iptv_live_hud">HUD</string>
-    <string name="iptv_guide_choose_file">Scegli file XMLTV</string>
-    <string name="iptv_guide_file_selected">File XMLTV selezionato. Salva, poi aggiorna per importarne i programmi.</string>
-    <string name="iptv_guide_file_help">Inserisci l\'URL di una guida o seleziona un file XMLTV locale (.xml o .xml.gz).</string>
-    <string name="iptv_guide_picker_unavailable">Questo dispositivo non ha un selettore di documenti. Puoi invece inserire l\'URL di una guida.</string>
-    <string name="iptv_live_tracks">Tracce</string>
-    <string name="iptv_live_audio">Audio</string>
-    <string name="iptv_live_subtitles">Sottotitoli e sottotitoli per non udenti</string>
-    <string name="iptv_live_tracks_auto">Automatico</string>
-    <string name="iptv_live_tracks_off">Disattivati</string>
-    <string name="iptv_live_tracks_none">Nessuna traccia segnalata da questo stream.</string>
-    <string name="iptv_live_tracks_unsupported">Non supportato da questo player</string>
 </resources>
