@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV filmleri ve dizileri</string>
+    <string name="iptv_vod_streams_setting_sub">Canlı TV kaynaklarınızdaki eşleşen içerikleri yayın kaynağı olarak gösterir</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">%1$s için tüm bağlantılar kullanımda. Bu kaynaktaki Canlı TV\'yi veya bir kaydı durdurup tekrar deneyin.</string>
+    <string name="iptv_vod_provider_refused">Sağlayıcı bu içeriği reddetti. Tüm bağlantıları kullanımda olabilir veya hesabın süresi dolmuş olabilir.</string>
+    <string name="iptv_vod_unavailable">Bu IPTV içeriği artık mevcut değil. Kaynağı Canlı TV\'de yenileyip tekrar deneyin.</string>
+</resources>

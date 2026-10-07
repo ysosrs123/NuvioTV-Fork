@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Мережеве розташування</string>
+    <string name="iptv_network_subtitle">Запис на NAS або комп\'ютер через SMB, WebDAV чи FTP. Записи спочатку зберігаються на цьому пристрої, а потім копіюються туди.</string>
+    <string name="iptv_network_protocol">Тип з\'єднання</string>
+    <string name="iptv_network_webdav_address">Адреса</string>
+    <string name="iptv_network_webdav_address_hint">Адреса WebDAV, наприклад https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Папка за цією адресою, наприклад TV/Live. Її буде створено, якщо її немає.</string>
+    <string name="iptv_network_ftp_server_hint">Ім\'я або IP-адреса, наприклад nas.local. Додайте :порт, лише якщо сервер використовує порт, відмінний від 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Папка в папці входу, наприклад TV/Live. Її буде створено, якщо її немає.</string>
+    <string name="iptv_network_ftp_secure">Захищене (явний TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Шифрує дані входу й записи. Сервер має підтримувати FTPS.</string>
+    <string name="iptv_network_username_hint">Залиште порожнім, щоб підключатися без входу</string>
+    <string name="iptv_network_plain_warning">Це з\'єднання не зашифроване. Інші користувачі мережі можуть побачити пароль.</string>
+    <string name="iptv_network_invalid">Перевірте адресу й назви папок. Вони не можуть містити &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">За цією адресою нічого не знайдено. Перевірте шлях після імені сервера.</string>
+    <string name="iptv_network_certificate_untrusted">Не вдалося перевірити сертифікат сервера. Якщо це власний сертифікат вашого NAS, перш ніж довіряти йому, порівняйте відбиток із тим, що показано на NAS.</string>
+    <string name="iptv_network_certificate_fingerprint">Відбиток SHA-256: %1$s</string>
+    <string name="iptv_network_trust">Довіряти цьому сертифікату</string>
+    <string name="iptv_network_no_tls">Сервер не пропонує шифрування. Вимкніть «Захищене» або увімкніть FTPS на сервері.</string>
+    <string name="iptv_network_tls_reuse">Сервер вимагає повторного використання сеансу TLS для з\'єднань даних, що не підтримується. Вимкніть цю вимогу на сервері.</string>
+</resources>

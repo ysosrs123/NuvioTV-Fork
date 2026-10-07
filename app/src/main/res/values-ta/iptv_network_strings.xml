@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">நெட்வொர்க் இருப்பிடம்</string>
+    <string name="iptv_network_subtitle">SMB, WebDAV அல்லது FTP மூலம் NAS அல்லது கணினிக்குப் பதிவுசெய்யவும். பதிவுகள் முதலில் இந்தச் சாதனத்தில் சேமிக்கப்பட்டு, பின்னர் அங்கு நகலெடுக்கப்படும்.</string>
+    <string name="iptv_network_protocol">இணைப்பு வகை</string>
+    <string name="iptv_network_webdav_address">முகவரி</string>
+    <string name="iptv_network_webdav_address_hint">WebDAV முகவரி, எடுத்துக்காட்டாக https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">முகவரியின் கீழ் உள்ள ஒரு கோப்புறை, எடுத்துக்காட்டாக TV/Live. இல்லையெனில் உருவாக்கப்படும்.</string>
+    <string name="iptv_network_ftp_server_hint">பெயர் அல்லது IP முகவரி, எடுத்துக்காட்டாக nas.local. சர்வர் 21 அல்லாத போர்ட்டைப் பயன்படுத்தினால் மட்டும் :port சேர்க்கவும்.</string>
+    <string name="iptv_network_ftp_folder_hint">உள்நுழைவுக் கோப்புறையில் உள்ள ஒரு கோப்புறை, எடுத்துக்காட்டாக TV/Live. இல்லையெனில் உருவாக்கப்படும்.</string>
+    <string name="iptv_network_ftp_secure">பாதுகாப்பானது (வெளிப்படையான TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">உள்நுழைவையும் பதிவுகளையும் குறியாக்கும். சர்வர் FTPS-ஐ ஆதரிக்க வேண்டும்.</string>
+    <string name="iptv_network_username_hint">உள்நுழையாமல் இணைக்கக் காலியாக விடவும்</string>
+    <string name="iptv_network_plain_warning">இந்த இணைப்பு குறியாக்கப்படவில்லை. நெட்வொர்க்கில் உள்ள மற்றவர்கள் கடவுச்சொல்லைப் பார்க்கக்கூடும்.</string>
+    <string name="iptv_network_invalid">முகவரி மற்றும் கோப்புறைப் பெயர்களைச் சரிபார்க்கவும். அவற்றில் &lt; &gt; : \" | ? * இருக்கக்கூடாது</string>
+    <string name="iptv_network_address_not_found">இந்த முகவரியில் எதுவும் கிடைக்கவில்லை. சர்வர் பெயருக்குப் பிறகு உள்ள பாதையைச் சரிபார்க்கவும்.</string>
+    <string name="iptv_network_certificate_untrusted">சர்வரின் சான்றிதழைச் சரிபார்க்க முடியவில்லை. இது உங்கள் NAS-இன் சொந்தச் சான்றிதழ் என்றால், நம்புவதற்கு முன் அதன் கைரேகையை NAS-இல் காட்டப்படும் கைரேகையுடன் ஒப்பிடவும்.</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 கைரேகை: %1$s</string>
+    <string name="iptv_network_trust">இந்தச் சான்றிதழை நம்பு</string>
+    <string name="iptv_network_no_tls">சர்வர் குறியாக்கத்தை வழங்கவில்லை. பாதுகாப்பானது என்பதை முடக்கவும், அல்லது சர்வரில் FTPS-ஐ இயக்கவும்.</string>
+    <string name="iptv_network_tls_reuse">தரவு இணைப்புகளில் TLS அமர்வு மறுபயன்பாட்டை சர்வர் கோருகிறது, இது ஆதரிக்கப்படவில்லை. சர்வரில் அந்தத் தேவையை முடக்கவும்.</string>
+</resources>

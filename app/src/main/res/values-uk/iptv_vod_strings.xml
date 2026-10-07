@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">Фільми й серіали IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">Показує відповідні назви з ваших джерел ТВ наживо як джерело потоку</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Усі з\'єднання для %1$s зайняті. Зупиніть ТВ наживо або запис на цьому джерелі й спробуйте ще раз.</string>
+    <string name="iptv_vod_provider_refused">Провайдер відхилив цю назву. Можливо, усі його з\'єднання зайняті або термін дії облікового запису минув.</string>
+    <string name="iptv_vod_unavailable">Ця назва IPTV більше недоступна. Оновіть джерело в ТВ наживо й спробуйте ще раз.</string>
+</resources>

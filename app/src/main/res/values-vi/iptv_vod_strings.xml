@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">Phim và phim bộ IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">Hiển thị các tựa phù hợp từ nguồn TV trực tiếp của bạn dưới dạng nguồn phát</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Tất cả kết nối cho %1$s đang được dùng. Hãy dừng TV trực tiếp hoặc một bản ghi trên nguồn này rồi thử lại.</string>
+    <string name="iptv_vod_provider_refused">Nhà cung cấp đã từ chối tựa này. Có thể tất cả kết nối đang được dùng hoặc tài khoản đã hết hạn.</string>
+    <string name="iptv_vod_unavailable">Tựa IPTV này không còn khả dụng. Hãy làm mới nguồn trong TV trực tiếp rồi thử lại.</string>
+</resources>

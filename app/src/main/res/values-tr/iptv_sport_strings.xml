@@ -1,0 +1,39 @@
+<resources>
+    <string name="iptv_sport_fixtures">Maçlar</string>
+    <string name="iptv_sport_live_now">Şimdi canlı</string>
+    <string name="iptv_sport_later_today">Bugün daha sonra</string>
+    <string name="iptv_sport_tomorrow">Yarın</string>
+    <string name="iptv_sport_live">CANLI</string>
+    <string name="iptv_sport_loading">Maçlar yükleniyor…</string>
+    <string name="iptv_sport_failed">Maçlar yüklenemedi. Yalnızca yayın akışı sonuçları gösteriliyor.</string>
+    <string name="iptv_sport_key_missing">TheSportsDB anahtarınızı Canlı TV ayarlarına ekleyin.</string>
+    <string name="iptv_sport_no_leagues">Canlı TV ayarlarında ligleri seçin.</string>
+    <string name="iptv_sport_none">Önümüzdeki üç gün içinde liglerinizde maç yok.</string>
+    <string name="iptv_sport_no_channel">Kanal bulunamadı</string>
+    <string name="iptv_sport_no_channel_description">Kanallarınızın hiçbiri bu maçı yayın akışında listelemiyor veya listelenen bir yayıncıyı yayınlamıyor.</string>
+    <string name="iptv_sport_choose_channel">Bir kanal seçin</string>
+    <string name="iptv_sport_broadcaster">Listelenen yayıncı: %1$s</string>
+    <string name="iptv_sport_close">Kapat</string>
+    <string name="iptv_sport_data">Spor verileri</string>
+    <string name="iptv_sport_data_subtitle">Maçlar seçilen hizmetten alınır. ESPN veri kaynağı resmî değildir ve çalışmayı durdurabilir.</string>
+    <string name="iptv_sport_data_off">Kapalı</string>
+    <string name="iptv_sport_data_off_description">Spor yalnızca yayın akışınızı kullanır. Hiçbir istek gönderilmez.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Resmî olmayan veri kaynağı, anahtar gerekmez. Her an çalışmayı durdurabilir.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Kendi API anahtarınız gerekir. Ücretsiz test anahtarı 123 sınırlı olarak çalışır.</string>
+    <string name="iptv_sport_leagues">Ligler</string>
+    <string name="iptv_sport_leagues_subtitle">Maçlar bu ligler için gösterilir</string>
+    <string name="iptv_sport_leagues_none">Yok</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d lig</item>
+        <item quantity="other">%d lig</item>
+    </plurals>
+    <string name="iptv_sport_key">TheSportsDB anahtarı</string>
+    <string name="iptv_sport_key_subtitle">Bu cihazda şifreli olarak saklanır. Ücretsiz test anahtarı 123 sınırlı olarak çalışır.</string>
+    <string name="iptv_sport_key_set">Kaydedildi</string>
+    <string name="iptv_sport_key_not_set">Ayarlanmadı</string>
+    <string name="iptv_sport_key_hint">Ücretsiz test anahtarını kullanmak için 123 girin</string>
+    <string name="iptv_sport_key_invalid">Yalnızca harf ve rakam kullanın.</string>
+    <string name="iptv_sport_key_remove">Anahtarı kaldır</string>
+</resources>

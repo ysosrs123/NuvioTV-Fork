@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">本地时移（实验性）</string>
+    <string name="iptv_timeshift_subtitle">实验性功能。缓冲您全屏观看的频道，以便暂停和倒回。观看时会占用存储空间，并且和普通观看一样需要一个空闲连接。仅适用于 MPEG-TS 频道；HLS 频道、多画面、预览和正在录制的频道按正常方式播放。如果出现任何故障，将回退到正常直播播放。</string>
+    <string name="iptv_timeshift_length">缓冲长度</string>
+    <string name="iptv_timeshift_length_subtitle">可用空间不足时会缩短。切换频道或停止观看时会删除缓冲。</string>
+    <string name="iptv_timeshift_length_15">15 分钟</string>
+    <string name="iptv_timeshift_length_30">30 分钟</string>
+    <string name="iptv_timeshift_length_60">60 分钟</string>
+    <string name="iptv_timeshift_length_auto">自动</string>
+    <string name="iptv_timeshift_length_auto_description">可用空间充足时为 30 分钟，否则更短</string>
+    <string name="iptv_timeshift_location">缓冲位置</string>
+    <string name="iptv_timeshift_location_subtitle">观看时写入缓冲的位置</string>
+    <string name="iptv_timeshift_fallback">本地时移已停止。正在播放直播。</string>
+</resources>

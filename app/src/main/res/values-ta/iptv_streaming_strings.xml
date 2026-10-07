@@ -1,0 +1,29 @@
+<resources>
+    <string name="iptv_stream_title">ஸ்ட்ரீமிங்</string>
+    <string name="iptv_stream_description">நேரலைச் சேனல்கள் எப்படி பஃபர் ஆகின்றன. மாற்றங்கள் நீங்கள் திறக்கும் அடுத்த சேனலுக்குப் பொருந்தும்.</string>
+    <string name="iptv_stream_start">இயக்கத்தைத் தொடங்கும் நேரம்</string>
+    <string name="iptv_stream_start_subtitle">சேனல் தொடங்கும் முன் எவ்வளவு வீடியோ ஏற்றப்படும். குறைந்த காத்திருப்பு விரைவில் தொடங்கும், ஆனால் பலவீனமான இணைப்பில் தடுமாறலாம்.</string>
+    <string name="iptv_stream_start_fast">வேகம் (சுமார் 1 வி)</string>
+    <string name="iptv_stream_start_normal">இயல்பு (சுமார் 2.5 வி)</string>
+    <string name="iptv_stream_start_safe">பாதுகாப்பானது (சுமார் 5 வி)</string>
+    <string name="iptv_stream_cushion">பார்க்கும்போது பாதுகாப்பு பஃபரை உருவாக்கு</string>
+    <string name="iptv_stream_cushion_subtitle">பஃபர் நிரம்பும் வரை இயல்பான சுருதியுடன் 3% மெதுவாக இயக்கும், இதனால் சிறிய நெட்வொர்க் தடைகள் படத்தைத் தடுக்காது. அதன் பிறகு நேரலை டிவி அவ்வளவு பின்தங்கி இயங்கும்.</string>
+    <string name="iptv_stream_cushion_off">ஆஃப்</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d வினாடி</item>
+        <item quantity="other">%d வினாடிகள்</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS சேனல்கள் வேகத்தைக் குறைப்பதற்குப் பதிலாக நேரலையிலிருந்து மேலும் பின்தங்கித் தொடங்கும்.</string>
+    <string name="iptv_stream_cushion_memory">இந்தச் சாதனத்தில் சுமார் %1$d MB நினைவகத்துக்கு வரம்பிடப்பட்டது.</string>
+    <string name="iptv_stream_behind_live">நேரலையிலிருந்து %1$d வி பின்தங்கியுள்ளது</string>
+    <string name="iptv_stream_go_live_hint">நேரலைக்குச் செல்ல ஃபாஸ்ட்-ஃபார்வர்டை அழுத்தவும்</string>
+    <string name="iptv_user_agent">பயனர் முகவர்</string>
+    <string name="iptv_user_agent_description">இந்த மூலத்திலிருந்து சேனல்கள், கேட்ச்-அப், திரைப்படங்களை இயக்கும்போது அனுப்பப்படும். சேனலின் சொந்த பிளேலிஸ்ட் அமைப்புகளுக்கே முன்னுரிமை.</string>
+    <string name="iptv_user_agent_default">ஆப்ஸ் இயல்புநிலை</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">பொதுவானது (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">தனிப்பயன்</string>
+    <string name="iptv_user_agent_custom_hint">அச்சிடக்கூடிய எழுத்துகள் மட்டும், அதிகபட்சம் 200.</string>
+</resources>

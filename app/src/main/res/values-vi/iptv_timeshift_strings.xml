@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Timeshift cục bộ (thử nghiệm)</string>
+    <string name="iptv_timeshift_subtitle">Thử nghiệm. Tạo bộ đệm cho kênh bạn xem toàn màn hình để có thể tạm dừng và tua lại. Dùng bộ nhớ lưu trữ khi xem và cần một kết nối trống như khi xem bình thường. Chỉ hoạt động với kênh MPEG-TS; kênh HLS, xem nhiều kênh, bản xem trước và kênh đang được ghi sẽ phát bình thường. Nếu có lỗi, sẽ quay lại phát trực tiếp bình thường.</string>
+    <string name="iptv_timeshift_length">Độ dài bộ đệm</string>
+    <string name="iptv_timeshift_length_subtitle">Được rút ngắn khi dung lượng trống thấp. Bộ đệm bị xóa khi bạn chuyển kênh hoặc ngừng xem.</string>
+    <string name="iptv_timeshift_length_15">15 phút</string>
+    <string name="iptv_timeshift_length_30">30 phút</string>
+    <string name="iptv_timeshift_length_60">60 phút</string>
+    <string name="iptv_timeshift_length_auto">Tự động</string>
+    <string name="iptv_timeshift_length_auto_description">30 phút khi đủ dung lượng trống, nếu không thì ít hơn</string>
+    <string name="iptv_timeshift_location">Vị trí bộ đệm</string>
+    <string name="iptv_timeshift_location_subtitle">Nơi ghi bộ đệm trong khi bạn xem</string>
+    <string name="iptv_timeshift_fallback">Đã dừng timeshift cục bộ. Đang phát trực tiếp.</string>
+</resources>

@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Yerel zaman kaydırma (deneysel)</string>
+    <string name="iptv_timeshift_subtitle">Deneysel. Tam ekran izlediğiniz kanalı arabelleğe alır, böylece duraklatıp geri sarabilirsiniz. İzlerken depolama alanı kullanır ve normal izlemede olduğu gibi boş bir bağlantı gerektirir. Yalnızca MPEG-TS kanallarla çalışır; HLS kanallar, çoklu görünüm, önizleme ve kaydedilen kanal normal oynatılır. Bir sorun olursa normal canlı oynatmaya dönülür.</string>
+    <string name="iptv_timeshift_length">Arabellek uzunluğu</string>
+    <string name="iptv_timeshift_length_subtitle">Boş alan azaldığında kısaltılır. Kanal değiştirdiğinizde veya izlemeyi bıraktığınızda arabellek silinir.</string>
+    <string name="iptv_timeshift_length_15">15 dakika</string>
+    <string name="iptv_timeshift_length_30">30 dakika</string>
+    <string name="iptv_timeshift_length_60">60 dakika</string>
+    <string name="iptv_timeshift_length_auto">Otomatik</string>
+    <string name="iptv_timeshift_length_auto_description">Yeterli boş alan varsa 30 dakika, yoksa daha az</string>
+    <string name="iptv_timeshift_location">Arabellek konumu</string>
+    <string name="iptv_timeshift_location_subtitle">İzlerken arabelleğin yazıldığı yer</string>
+    <string name="iptv_timeshift_fallback">Yerel zaman kaydırma durduruldu. Canlı oynatılıyor.</string>
+</resources>

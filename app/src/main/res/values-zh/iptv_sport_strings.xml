@@ -1,0 +1,38 @@
+<resources>
+    <string name="iptv_sport_fixtures">赛程</string>
+    <string name="iptv_sport_live_now">正在直播</string>
+    <string name="iptv_sport_later_today">今天稍后</string>
+    <string name="iptv_sport_tomorrow">明天</string>
+    <string name="iptv_sport_live">直播</string>
+    <string name="iptv_sport_loading">正在加载赛程…</string>
+    <string name="iptv_sport_failed">无法加载赛程。仅显示节目单结果。</string>
+    <string name="iptv_sport_key_missing">请在直播电视设置中添加您的 TheSportsDB 密钥。</string>
+    <string name="iptv_sport_no_leagues">请在直播电视设置中选择联赛。</string>
+    <string name="iptv_sport_none">未来三天内您的联赛没有赛事。</string>
+    <string name="iptv_sport_no_channel">未找到频道</string>
+    <string name="iptv_sport_no_channel_description">您的频道均未在节目单中列出此赛事，也不是列出的转播方。</string>
+    <string name="iptv_sport_choose_channel">选择频道</string>
+    <string name="iptv_sport_broadcaster">列出的转播方：%1$s</string>
+    <string name="iptv_sport_close">关闭</string>
+    <string name="iptv_sport_data">体育数据</string>
+    <string name="iptv_sport_data_subtitle">赛程从所选服务获取。ESPN 的数据源为非官方，可能停止工作。</string>
+    <string name="iptv_sport_data_off">关闭</string>
+    <string name="iptv_sport_data_off_description">体育仅使用您的节目单，不发送任何请求。</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">非官方数据源，无需密钥。可能随时停止工作。</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">需要您自己的 API 密钥。免费测试密钥 123 可有限使用。</string>
+    <string name="iptv_sport_leagues">联赛</string>
+    <string name="iptv_sport_leagues_subtitle">显示这些联赛的赛程</string>
+    <string name="iptv_sport_leagues_none">无</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="other">%d 个联赛</item>
+    </plurals>
+    <string name="iptv_sport_key">TheSportsDB 密钥</string>
+    <string name="iptv_sport_key_subtitle">加密存储在此设备上。免费测试密钥 123 可有限使用。</string>
+    <string name="iptv_sport_key_set">已保存</string>
+    <string name="iptv_sport_key_not_set">未设置</string>
+    <string name="iptv_sport_key_hint">输入 123 以使用免费测试密钥</string>
+    <string name="iptv_sport_key_invalid">只能使用字母和数字。</string>
+    <string name="iptv_sport_key_remove">移除密钥</string>
+</resources>

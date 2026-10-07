@@ -1,0 +1,29 @@
+<resources>
+    <string name="iptv_stream_title">Akış</string>
+    <string name="iptv_stream_description">Canlı kanalların nasıl arabelleğe alındığı. Değişiklikler açtığınız sonraki kanala uygulanır.</string>
+    <string name="iptv_stream_start">Oynatmayı başlatma süresi</string>
+    <string name="iptv_stream_start_subtitle">Bir kanal başlamadan önce ne kadar video yükleneceği. Daha kısa bekleme daha erken başlar ancak zayıf bağlantıda takılabilir.</string>
+    <string name="iptv_stream_start_fast">Hızlı (yaklaşık 1 sn)</string>
+    <string name="iptv_stream_start_normal">Normal (yaklaşık 2,5 sn)</string>
+    <string name="iptv_stream_start_safe">Güvenli (yaklaşık 5 sn)</string>
+    <string name="iptv_stream_cushion">İzlerken güvenlik arabelleği oluştur</string>
+    <string name="iptv_stream_cushion_subtitle">Arabellek dolana kadar normal ses perdesiyle 3% daha yavaş oynatır, böylece kısa ağ kesintileri görüntüyü bozmaz. Canlı TV ardından o kadar geriden gelir.</string>
+    <string name="iptv_stream_cushion_off">Kapalı</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d saniye</item>
+        <item quantity="other">%d saniye</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS kanallar yavaşlamak yerine canlı yayının daha gerisinden başlar.</string>
+    <string name="iptv_stream_cushion_memory">Bu cihazda yaklaşık %1$d MB bellekle sınırlıdır.</string>
+    <string name="iptv_stream_behind_live">Canlının %1$d sn gerisinde</string>
+    <string name="iptv_stream_go_live_hint">Canlıya geçmek için ileri sarma tuşuna basın</string>
+    <string name="iptv_user_agent">Kullanıcı aracısı</string>
+    <string name="iptv_user_agent_description">Bu kaynaktan kanallar, geriye dönük izleme ve filmler oynatılırken gönderilir. Bir kanalın kendi çalma listesi ayarları yine önceliklidir.</string>
+    <string name="iptv_user_agent_default">Uygulama varsayılanı</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Genel (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Özel</string>
+    <string name="iptv_user_agent_custom_hint">Yalnızca yazdırılabilir karakterler, en fazla 200.</string>
+</resources>

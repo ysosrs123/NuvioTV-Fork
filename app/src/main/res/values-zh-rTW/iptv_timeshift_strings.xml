@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">本機時移（實驗性）</string>
+    <string name="iptv_timeshift_subtitle">實驗性功能。緩衝您全螢幕觀看的頻道，以便暫停和倒轉。觀看時會占用儲存空間，並且和一般觀看一樣需要一個空閒連線。僅適用於 MPEG-TS 頻道；HLS 頻道、多畫面、預覽和正在錄影的頻道會正常播放。如果發生任何問題，將改回一般直播播放。</string>
+    <string name="iptv_timeshift_length">緩衝長度</string>
+    <string name="iptv_timeshift_length_subtitle">可用空間不足時會縮短。切換頻道或停止觀看時會刪除緩衝。</string>
+    <string name="iptv_timeshift_length_15">15 分鐘</string>
+    <string name="iptv_timeshift_length_30">30 分鐘</string>
+    <string name="iptv_timeshift_length_60">60 分鐘</string>
+    <string name="iptv_timeshift_length_auto">自動</string>
+    <string name="iptv_timeshift_length_auto_description">可用空間足夠時為 30 分鐘，否則更短</string>
+    <string name="iptv_timeshift_location">緩衝位置</string>
+    <string name="iptv_timeshift_location_subtitle">觀看時寫入緩衝的位置</string>
+    <string name="iptv_timeshift_fallback">本機時移已停止。正在播放直播。</string>
+</resources>

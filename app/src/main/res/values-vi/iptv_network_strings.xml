@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Vị trí mạng</string>
+    <string name="iptv_network_subtitle">Ghi hình vào NAS hoặc máy tính qua SMB, WebDAV hoặc FTP. Bản ghi được lưu trên thiết bị này trước rồi sao chép sang.</string>
+    <string name="iptv_network_protocol">Loại kết nối</string>
+    <string name="iptv_network_webdav_address">Địa chỉ</string>
+    <string name="iptv_network_webdav_address_hint">Địa chỉ WebDAV, ví dụ https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Một thư mục bên dưới địa chỉ, ví dụ TV/Live. Sẽ được tạo nếu chưa có.</string>
+    <string name="iptv_network_ftp_server_hint">Tên hoặc địa chỉ IP, ví dụ nas.local. Chỉ thêm :port nếu máy chủ dùng cổng khác 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Một thư mục trong thư mục đăng nhập, ví dụ TV/Live. Sẽ được tạo nếu chưa có.</string>
+    <string name="iptv_network_ftp_secure">Bảo mật (TLS tường minh)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Mã hóa thông tin đăng nhập và bản ghi. Máy chủ phải hỗ trợ FTPS.</string>
+    <string name="iptv_network_username_hint">Để trống để kết nối mà không đăng nhập</string>
+    <string name="iptv_network_plain_warning">Kết nối này không được mã hóa. Người khác trong mạng có thể thấy mật khẩu.</string>
+    <string name="iptv_network_invalid">Hãy kiểm tra địa chỉ và tên thư mục. Tên không được chứa &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Không tìm thấy gì tại địa chỉ này. Hãy kiểm tra đường dẫn sau tên máy chủ.</string>
+    <string name="iptv_network_certificate_untrusted">Không thể xác minh chứng chỉ của máy chủ. Nếu đây là chứng chỉ riêng của NAS, hãy so sánh dấu vân tay với dấu vân tay hiển thị trên NAS trước khi tin cậy.</string>
+    <string name="iptv_network_certificate_fingerprint">Dấu vân tay SHA-256: %1$s</string>
+    <string name="iptv_network_trust">Tin cậy chứng chỉ này</string>
+    <string name="iptv_network_no_tls">Máy chủ không hỗ trợ mã hóa. Hãy tắt Bảo mật hoặc bật FTPS trên máy chủ.</string>
+    <string name="iptv_network_tls_reuse">Máy chủ yêu cầu dùng lại phiên TLS trên kết nối dữ liệu, điều này không được hỗ trợ. Hãy tắt yêu cầu đó trên máy chủ.</string>
+</resources>

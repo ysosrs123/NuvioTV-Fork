@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">உள்ளூர் டைம்ஷிஃப்ட் (சோதனை)</string>
+    <string name="iptv_timeshift_subtitle">சோதனை அம்சம். முழுத்திரையில் பார்க்கும் சேனலை பஃபர் செய்வதால் இடைநிறுத்தவும் பின்னோக்கிச் செல்லவும் முடியும். பார்க்கும்போது சேமிப்பகத்தைப் பயன்படுத்தும், வழக்கமான பார்வையைப் போலவே ஒரு காலி இணைப்பு தேவை. MPEG-TS சேனல்களில் மட்டுமே வேலை செய்யும்; HLS சேனல்கள், மல்டிவியூ, முன்னோட்டம், பதிவாகும் சேனல் ஆகியவை வழக்கம்போல் இயங்கும். ஏதேனும் தோல்வியடைந்தால், வழக்கமான நேரலை இயக்கத்துக்குத் திரும்பும்.</string>
+    <string name="iptv_timeshift_length">பஃபர் நீளம்</string>
+    <string name="iptv_timeshift_length_subtitle">காலி இடம் குறைவாக இருக்கும்போது குறைக்கப்படும். சேனலை மாற்றும்போது அல்லது பார்ப்பதை நிறுத்தும்போது பஃபர் நீக்கப்படும்.</string>
+    <string name="iptv_timeshift_length_15">15 நிமிடங்கள்</string>
+    <string name="iptv_timeshift_length_30">30 நிமிடங்கள்</string>
+    <string name="iptv_timeshift_length_60">60 நிமிடங்கள்</string>
+    <string name="iptv_timeshift_length_auto">தானியங்கு</string>
+    <string name="iptv_timeshift_length_auto_description">போதுமான காலி இடம் இருந்தால் 30 நிமிடங்கள், இல்லையெனில் குறைவாக</string>
+    <string name="iptv_timeshift_location">பஃபர் இருப்பிடம்</string>
+    <string name="iptv_timeshift_location_subtitle">பார்க்கும்போது பஃபர் எழுதப்படும் இடம்</string>
+    <string name="iptv_timeshift_fallback">உள்ளூர் டைம்ஷிஃப்ட் நிறுத்தப்பட்டது. நேரலையில் இயங்குகிறது.</string>
+</resources>

@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Ağ konumu</string>
+    <string name="iptv_network_subtitle">SMB, WebDAV veya FTP üzerinden bir NAS ya da bilgisayara kaydedin. Kayıtlar önce bu cihaza kaydedilir, ardından oraya kopyalanır.</string>
+    <string name="iptv_network_protocol">Bağlantı türü</string>
+    <string name="iptv_network_webdav_address">Adres</string>
+    <string name="iptv_network_webdav_address_hint">WebDAV adresi, örneğin https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Adresin altındaki bir klasör, örneğin TV/Live. Yoksa oluşturulur.</string>
+    <string name="iptv_network_ftp_server_hint">Ad veya IP adresi, örneğin nas.local. Sunucu 21 dışında bir bağlantı noktası kullanıyorsa :port ekleyin.</string>
+    <string name="iptv_network_ftp_folder_hint">Oturum açma klasöründeki bir klasör, örneğin TV/Live. Yoksa oluşturulur.</string>
+    <string name="iptv_network_ftp_secure">Güvenli (açık TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Oturum açma bilgilerini ve kayıtları şifreler. Sunucu FTPS desteklemelidir.</string>
+    <string name="iptv_network_username_hint">Oturum açmadan bağlanmak için boş bırakın</string>
+    <string name="iptv_network_plain_warning">Bu bağlantı şifrelenmemiş. Ağdaki diğer kişiler parolayı görebilir.</string>
+    <string name="iptv_network_invalid">Adresi ve klasör adlarını kontrol edin. Şunları içeremezler: &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Bu adreste hiçbir şey bulunamadı. Sunucu adından sonraki yolu kontrol edin.</string>
+    <string name="iptv_network_certificate_untrusted">Sunucunun sertifikası doğrulanamadı. NAS\'ınızın kendi sertifikasıysa, güvenmeden önce parmak izini NAS\'ta gösterilenle karşılaştırın.</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 parmak izi: %1$s</string>
+    <string name="iptv_network_trust">Bu sertifikaya güven</string>
+    <string name="iptv_network_no_tls">Sunucu şifreleme sunmuyor. Güvenli seçeneğini kapatın veya sunucuda FTPS\'yi etkinleştirin.</string>
+    <string name="iptv_network_tls_reuse">Sunucu, veri bağlantılarında TLS oturumunun yeniden kullanılmasını gerektiriyor; bu desteklenmiyor. Sunucuda bu gereksinimi kapatın.</string>
+</resources>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV 电影和剧集</string>
+    <string name="iptv_vod_streams_setting_sub">将直播电视来源中匹配的影片显示为串流来源</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">%1$s 的所有连接都在使用中。请停止此来源上的直播电视或录制，然后重试。</string>
+    <string name="iptv_vod_provider_refused">提供商拒绝了此影片。可能其所有连接都在使用中，或账户已过期。</string>
+    <string name="iptv_vod_unavailable">此 IPTV 影片已不可用。请在直播电视中刷新来源后重试。</string>
+</resources>

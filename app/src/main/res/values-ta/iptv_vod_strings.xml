@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV திரைப்படங்கள் மற்றும் தொடர்கள்</string>
+    <string name="iptv_vod_streams_setting_sub">உங்கள் நேரலை டிவி மூலங்களிலிருந்து பொருந்தும் தலைப்புகளை ஸ்ட்ரீம் மூலமாகக் காட்டும்</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">%1$s-க்கான எல்லா இணைப்புகளும் பயன்பாட்டில் உள்ளன. இந்த மூலத்தில் நேரலை டிவியையோ பதிவையோ நிறுத்திவிட்டு மீண்டும் முயலவும்.</string>
+    <string name="iptv_vod_provider_refused">வழங்குநர் இந்தத் தலைப்பை மறுத்தார். அதன் எல்லா இணைப்புகளும் பயன்பாட்டில் இருக்கலாம், அல்லது கணக்கு காலாவதியாகியிருக்கலாம்.</string>
+    <string name="iptv_vod_unavailable">இந்த IPTV தலைப்பு இனி கிடைக்காது. நேரலை டிவியில் மூலத்தைப் புதுப்பித்து மீண்டும் முயலவும்.</string>
+</resources>

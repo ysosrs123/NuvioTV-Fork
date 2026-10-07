@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV-filmer och serier</string>
+    <string name="iptv_vod_streams_setting_sub">Visar matchande titlar från dina Live-TV-källor som strömkälla</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Alla anslutningar för %1$s används. Stoppa Live-TV eller en inspelning på den här källan och försök igen.</string>
+    <string name="iptv_vod_provider_refused">Leverantören nekade titeln. Alla dess anslutningar kan vara upptagna, eller så har kontot gått ut.</string>
+    <string name="iptv_vod_unavailable">Den här IPTV-titeln är inte längre tillgänglig. Uppdatera källan i Live-TV och försök igen.</string>
+</resources>

@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">網路位置</string>
+    <string name="iptv_network_subtitle">透過 SMB、WebDAV 或 FTP 錄影到 NAS 或電腦。錄影會先儲存在此裝置上，再複製過去。</string>
+    <string name="iptv_network_protocol">連線類型</string>
+    <string name="iptv_network_webdav_address">位址</string>
+    <string name="iptv_network_webdav_address_hint">WebDAV 位址，例如 https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">此位址下的資料夾，例如 TV/Live。如不存在會自動建立。</string>
+    <string name="iptv_network_ftp_server_hint">名稱或 IP 位址，例如 nas.local。只有伺服器使用 21 以外的連接埠時才加上 :連接埠。</string>
+    <string name="iptv_network_ftp_folder_hint">登入資料夾中的資料夾，例如 TV/Live。如不存在會自動建立。</string>
+    <string name="iptv_network_ftp_secure">安全（明確 TLS）</string>
+    <string name="iptv_network_ftp_secure_subtitle">加密登入資訊和錄影。伺服器必須支援 FTPS。</string>
+    <string name="iptv_network_username_hint">留空則不登入直接連線</string>
+    <string name="iptv_network_plain_warning">此連線未加密。網路上的其他人可能看到密碼。</string>
+    <string name="iptv_network_invalid">請檢查位址和資料夾名稱。名稱中不能包含 &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">此位址找不到任何內容。請檢查伺服器名稱後的路徑。</string>
+    <string name="iptv_network_certificate_untrusted">無法驗證伺服器的憑證。如果這是您 NAS 自己的憑證，請在信任前將指紋與 NAS 上顯示的指紋比對。</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 指紋：%1$s</string>
+    <string name="iptv_network_trust">信任此憑證</string>
+    <string name="iptv_network_no_tls">伺服器不提供加密。請關閉「安全」，或在伺服器上啟用 FTPS。</string>
+    <string name="iptv_network_tls_reuse">伺服器要求在資料連線上重複使用 TLS 工作階段，此功能不受支援。請在伺服器上關閉該要求。</string>
+</resources>

@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">网络位置</string>
+    <string name="iptv_network_subtitle">通过 SMB、WebDAV 或 FTP 录制到 NAS 或电脑。录像先保存在此设备上，再复制过去。</string>
+    <string name="iptv_network_protocol">连接类型</string>
+    <string name="iptv_network_webdav_address">地址</string>
+    <string name="iptv_network_webdav_address_hint">WebDAV 地址，例如 https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">该地址下的文件夹，例如 TV/Live。如不存在将自动创建。</string>
+    <string name="iptv_network_ftp_server_hint">名称或 IP 地址，例如 nas.local。仅当服务器使用 21 以外的端口时才添加 :端口。</string>
+    <string name="iptv_network_ftp_folder_hint">登录文件夹中的文件夹，例如 TV/Live。如不存在将自动创建。</string>
+    <string name="iptv_network_ftp_secure">安全（显式 TLS）</string>
+    <string name="iptv_network_ftp_secure_subtitle">加密登录信息和录像。服务器必须支持 FTPS。</string>
+    <string name="iptv_network_username_hint">留空则不登录直接连接</string>
+    <string name="iptv_network_plain_warning">此连接未加密。网络中的其他人可能看到密码。</string>
+    <string name="iptv_network_invalid">请检查地址和文件夹名称。名称中不能包含 &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">此地址下未找到任何内容。请检查服务器名称后的路径。</string>
+    <string name="iptv_network_certificate_untrusted">无法验证服务器的证书。如果这是您 NAS 自己的证书，请在信任前将指纹与 NAS 上显示的指纹进行比较。</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 指纹：%1$s</string>
+    <string name="iptv_network_trust">信任此证书</string>
+    <string name="iptv_network_no_tls">服务器不提供加密。请关闭“安全”，或在服务器上启用 FTPS。</string>
+    <string name="iptv_network_tls_reuse">服务器要求在数据连接上重用 TLS 会话，此功能不受支持。请在服务器上关闭该要求。</string>
+</resources>

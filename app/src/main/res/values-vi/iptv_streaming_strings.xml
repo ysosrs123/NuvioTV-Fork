@@ -1,0 +1,28 @@
+<resources>
+    <string name="iptv_stream_title">Phát trực tuyến</string>
+    <string name="iptv_stream_description">Cách các kênh trực tiếp tạo bộ đệm. Thay đổi áp dụng cho kênh tiếp theo bạn mở.</string>
+    <string name="iptv_stream_start">Bắt đầu phát sau</string>
+    <string name="iptv_stream_start_subtitle">Lượng video được tải trước khi kênh bắt đầu. Chờ ngắn hơn thì bắt đầu sớm hơn nhưng có thể giật trên kết nối yếu.</string>
+    <string name="iptv_stream_start_fast">Nhanh (khoảng 1 giây)</string>
+    <string name="iptv_stream_start_normal">Bình thường (khoảng 2,5 giây)</string>
+    <string name="iptv_stream_start_safe">An toàn (khoảng 5 giây)</string>
+    <string name="iptv_stream_cushion">Tạo bộ đệm an toàn khi xem</string>
+    <string name="iptv_stream_cushion_subtitle">Phát chậm hơn 3%, giữ nguyên cao độ, cho đến khi bộ đệm đầy để sự cố mạng ngắn không làm gián đoạn hình ảnh. Sau đó TV trực tiếp sẽ chậm hơn chừng ấy.</string>
+    <string name="iptv_stream_cushion_off">Tắt</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="other">%d giây</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">Kênh HLS bắt đầu lùi xa hơn so với trực tiếp thay vì phát chậm lại.</string>
+    <string name="iptv_stream_cushion_memory">Giới hạn khoảng %1$d MB bộ nhớ trên thiết bị này.</string>
+    <string name="iptv_stream_behind_live">Chậm %1$d giây so với trực tiếp</string>
+    <string name="iptv_stream_go_live_hint">Nhấn tua nhanh để về trực tiếp</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Được gửi khi phát kênh, nội dung xem lại và phim từ nguồn này. Cài đặt danh sách phát riêng của kênh vẫn được ưu tiên.</string>
+    <string name="iptv_user_agent_default">Mặc định của ứng dụng</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Chung (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Tùy chỉnh</string>
+    <string name="iptv_user_agent_custom_hint">Chỉ ký tự in được, tối đa 200.</string>
+</resources>

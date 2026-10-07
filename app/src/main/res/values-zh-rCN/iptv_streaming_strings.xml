@@ -1,0 +1,28 @@
+<resources>
+    <string name="iptv_stream_title">串流</string>
+    <string name="iptv_stream_description">直播频道的缓冲方式。更改将应用于您打开的下一个频道。</string>
+    <string name="iptv_stream_start">开始播放前缓冲</string>
+    <string name="iptv_stream_start_subtitle">频道开始前加载多少视频。等待越短启动越快，但在网络较弱时可能卡顿。</string>
+    <string name="iptv_stream_start_fast">快速（约 1 秒）</string>
+    <string name="iptv_stream_start_normal">正常（约 2.5 秒）</string>
+    <string name="iptv_stream_start_safe">稳定（约 5 秒）</string>
+    <string name="iptv_stream_cushion">观看时建立安全缓冲</string>
+    <string name="iptv_stream_cushion_subtitle">在缓冲填满之前以慢 3% 的速度播放（音调不变），这样短暂的网络中断不会打断画面。之后直播电视会相应延后。</string>
+    <string name="iptv_stream_cushion_off">关闭</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="other">%d 秒</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS 频道会从更落后于直播的位置开始，而不是放慢播放。</string>
+    <string name="iptv_stream_cushion_memory">在此设备上限制为约 %1$d MB 内存。</string>
+    <string name="iptv_stream_behind_live">落后直播 %1$d 秒</string>
+    <string name="iptv_stream_go_live_hint">按快进键回到直播</string>
+    <string name="iptv_user_agent">用户代理</string>
+    <string name="iptv_user_agent_description">从此来源播放频道、回看和电影时发送。频道自身的播放列表设置仍然优先。</string>
+    <string name="iptv_user_agent_default">应用默认</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">通用 (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">自定义</string>
+    <string name="iptv_user_agent_custom_hint">仅限可打印字符，最多 200 个。</string>
+</resources>
