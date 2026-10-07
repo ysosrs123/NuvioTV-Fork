@@ -130,7 +130,13 @@ In progress (after `e20d157`):
   Go live button in the control deck.
 - Live TV rows on the Nuvio Home screen (favourites, sport on now, recently added
   movies/series, recordings) with a toggle per row.
-- Minified release build check (R8) with all new code.
+- Minified release build check (R8) with all new code. Run 37594253652 failed in
+  `produceIptvPrototypeReleaseComposeMapping` ("Unsupported class file major version
+  69"): smbj 0.15.0 depends on bcprov-jdk18on 1.85.2, a multi-release jar with Java 25
+  classes, which the Compose mapping task cannot read. This also affects the `full`
+  release build. Fixed in `ec6f16f` with `includeComposeMappingFile = false` (the file
+  only improves Compose stack traces in minified builds). Alternative if the mapping
+  file is wanted: pin an older bcprov without `META-INF/versions/25`.
 
 Next: a full review pass; device test checklist.
 - Decisions recorded: tracking for matched titles uses Nuvio's normal history and
