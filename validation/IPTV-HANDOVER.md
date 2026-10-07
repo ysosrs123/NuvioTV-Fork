@@ -90,6 +90,15 @@ destination; Left from the guide opens the Live TV menu, Left again the Nuvio si
 Back as on other Nuvio pages; the Exit item goes; IPTV settings move into the main
 Settings as a "Live TV" category, with a shortcut from the Live TV menu. The guide
 stays full width. This reverses the earlier "IPTV settings only on the Live TV side".
+Streaming stability (proposed 7 October 2026, after wave 2): seamless TS reconnect that
+keeps the buffer; Live buffer setting (Fast zapping / Balanced / Stable / Maximum;
+current fixed values 1.5 s start, 8 s max); optional slow-start cushion building at
+0.98x; HLS live offset of at least three segments (now fixed at 6 s); Wi-Fi
+high-performance lock while watching; larger socket receive buffer; per-source user
+agent; network details in the stats HUD (HTTP version, reconnects, buffer, Alt-Svc h3).
+Not for live: parallel range connections (continuous TS has no ranges; connection
+limits), HTTP/2 (plain-http panels; OkHttp already negotiates h2 on https). HTTP/3 needs
+https and Cronet (new dependency); measure Alt-Svc first.
 Local timeshift: the capture chain was found unsuitable (HLS-only, baseline-AVC test
 streams, no audio, connection hold on failure); built instead as a capped TS ring file
 read by the normal live player.
