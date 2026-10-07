@@ -151,6 +151,27 @@
     <string name="iptv_form_save_load">儲存並載入頻道</string>
     <string name="iptv_source_removed">來源已移除。</string>
     <string name="iptv_guide_removed">節目表已移除。</string>
+    <string name="iptv_settings_title">直播電視設定</string>
+    <string name="iptv_settings_description">此電視上的直播電視設定。來源和節目表屬於目前的個人資料。</string>
+    <string name="iptv_settings_sources">來源和節目表</string>
+    <string name="iptv_settings_sources_subtitle">播放清單、Xtream 帳戶、Stalker 入口網站和節目表</string>
+    <string name="iptv_settings_recordings_subtitle">已排程、錄影中和已完成的錄影</string>
+    <string name="iptv_settings_playback">播放</string>
+    <string name="iptv_settings_format_subtitle">用於設為自動的頻道。為單一頻道選擇的格式仍對該頻道生效。</string>
+    <string name="iptv_settings_timeshift">透過回看暫停和倒轉</string>
+    <string name="iptv_settings_timeshift_subtitle">在支援回看的頻道上，從暫停處繼續播放，並在供應商的存檔中倒轉</string>
+    <string name="iptv_settings_stats">播放統計</string>
+    <string name="iptv_settings_stats_subtitle">開啟直播電視時顯示統計資訊疊加層</string>
+    <string name="iptv_settings_start">開啟時顯示</string>
+    <string name="iptv_settings_start_last">上次查看的分類</string>
+    <string name="iptv_settings_sport">在選單中顯示體育</string>
+    <string name="iptv_settings_sport_subtitle">根據節目表，顯示正在播出或未來六小時內有體育節目的頻道</string>
+    <string name="iptv_settings_hidden_subtitle">選擇以重新顯示此個人資料中隱藏的分類</string>
+    <string name="iptv_settings_hidden_none">在直播電視選單中長按分類上的 OK 即可隱藏</string>
+    <string name="iptv_settings_record_early">提前開始錄影</string>
+    <string name="iptv_settings_record_late">結束後繼續錄影</string>
+    <string name="iptv_settings_record_late_subtitle">節目表時間常有些許誤差。適用於新的錄影。</string>
+    <string name="iptv_settings_none">無</string>
     <string name="iptv_guide_choose_folder">節目表資料夾</string>
     <string name="iptv_guide_folder_title">節目表檔案</string>
     <string name="iptv_guide_folder_description">複製到此裝置或 USB 隨身碟上 iptv-guides 資料夾中的 XMLTV 檔案。</string>
@@ -206,6 +227,9 @@
     <string name="iptv_multiview_quality_sharpest_description">在盒子能力允許時提高一級；使用更多網路頻寬</string>
     <string name="iptv_multiview_quality_lightest">最省頻寬</string>
     <string name="iptv_multiview_quality_lightest_description">降低一級，適合較慢的網路或忙碌的盒子</string>
+    <plurals name="iptv_settings_minutes">
+        <item quantity="other">%1$d 分鐘</item>
+    </plurals>
     <plurals name="iptv_connections">
         <item quantity="other">%1$d 個連線</item>
     </plurals>

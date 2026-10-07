@@ -151,6 +151,27 @@
     <string name="iptv_form_save_load">保存してチャンネルを読み込む</string>
     <string name="iptv_source_removed">ソースを削除しました。</string>
     <string name="iptv_guide_removed">番組表を削除しました。</string>
+    <string name="iptv_settings_title">ライブTV設定</string>
+    <string name="iptv_settings_description">このテレビでのライブTVの設定です。ソースと番組表は現在のプロフィールに属します。</string>
+    <string name="iptv_settings_sources">ソースと番組表</string>
+    <string name="iptv_settings_sources_subtitle">プレイリスト、Xtreamアカウント、Stalkerポータル、番組表</string>
+    <string name="iptv_settings_recordings_subtitle">予約済み、録画中、完了した録画</string>
+    <string name="iptv_settings_playback">再生</string>
+    <string name="iptv_settings_format_subtitle">自動に設定されたチャンネルに使用します。チャンネルごとに選んだ形式はそのまま適用されます。</string>
+    <string name="iptv_settings_timeshift">見逃し視聴で一時停止と巻き戻し</string>
+    <string name="iptv_settings_timeshift_subtitle">見逃し視聴に対応したチャンネルで、一時停止した位置から再開し、プロバイダーのアーカイブを巻き戻せます</string>
+    <string name="iptv_settings_stats">再生統計</string>
+    <string name="iptv_settings_stats_subtitle">ライブTVを開いたときに統計オーバーレイを表示</string>
+    <string name="iptv_settings_start">起動時の表示</string>
+    <string name="iptv_settings_start_last">最後に見たカテゴリ</string>
+    <string name="iptv_settings_sport">メニューにスポーツを表示</string>
+    <string name="iptv_settings_sport_subtitle">番組表をもとに、放送中または6時間以内にスポーツがあるチャンネル</string>
+    <string name="iptv_settings_hidden_subtitle">選択すると、このプロフィールの非表示カテゴリを再表示します</string>
+    <string name="iptv_settings_hidden_none">ライブTVメニューでカテゴリのOKを長押しすると非表示にできます</string>
+    <string name="iptv_settings_record_early">録画を早めに開始</string>
+    <string name="iptv_settings_record_late">終了後も録画を続ける</string>
+    <string name="iptv_settings_record_late_subtitle">番組表の時刻は少しずれることがあります。新しい録画に適用されます。</string>
+    <string name="iptv_settings_none">なし</string>
     <string name="iptv_guide_choose_folder">番組表フォルダー</string>
     <string name="iptv_guide_folder_title">番組表ファイル</string>
     <string name="iptv_guide_folder_description">このデバイスまたはUSBドライブの iptv-guides フォルダーにコピーしたXMLTVファイル。</string>
@@ -206,6 +227,9 @@
     <string name="iptv_multiview_quality_sharpest_description">ボックスが対応できる場合は1段階高画質に。帯域を多く使用します</string>
     <string name="iptv_multiview_quality_lightest">軽量</string>
     <string name="iptv_multiview_quality_lightest_description">1段階低画質に。低速回線や負荷の高いボックス向け</string>
+    <plurals name="iptv_settings_minutes">
+        <item quantity="other">%1$d分</item>
+    </plurals>
     <plurals name="iptv_connections">
         <item quantity="other">%1$d 接続</item>
     </plurals>

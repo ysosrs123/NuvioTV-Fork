@@ -151,6 +151,27 @@
     <string name="iptv_form_save_load">Lưu và tải kênh</string>
     <string name="iptv_source_removed">Đã xóa nguồn.</string>
     <string name="iptv_guide_removed">Đã xóa lịch phát sóng.</string>
+    <string name="iptv_settings_title">Cài đặt TV trực tiếp</string>
+    <string name="iptv_settings_description">Cài đặt TV trực tiếp trên TV này. Nguồn và lịch phát sóng thuộc về hồ sơ hiện tại.</string>
+    <string name="iptv_settings_sources">Nguồn và lịch phát sóng</string>
+    <string name="iptv_settings_sources_subtitle">Danh sách phát, tài khoản Xtream, cổng Stalker và lịch phát sóng</string>
+    <string name="iptv_settings_recordings_subtitle">Bản ghi đã lên lịch, đang ghi và đã hoàn tất</string>
+    <string name="iptv_settings_playback">Phát lại</string>
+    <string name="iptv_settings_format_subtitle">Dùng cho các kênh đặt ở Tự động. Định dạng đã chọn cho từng kênh vẫn áp dụng cho kênh đó.</string>
+    <string name="iptv_settings_timeshift">Tạm dừng và tua lại với Xem lại</string>
+    <string name="iptv_settings_timeshift_subtitle">Trên các kênh có Xem lại, tiếp tục từ chỗ đã tạm dừng và tua lại trong kho lưu trữ của nhà cung cấp</string>
+    <string name="iptv_settings_stats">Thống kê phát</string>
+    <string name="iptv_settings_stats_subtitle">Hiện lớp phủ thống kê khi mở TV trực tiếp</string>
+    <string name="iptv_settings_start">Mở tại</string>
+    <string name="iptv_settings_start_last">Danh mục xem gần nhất</string>
+    <string name="iptv_settings_sport">Hiện Thể thao trong menu</string>
+    <string name="iptv_settings_sport_subtitle">Các kênh có thể thao đang phát hoặc trong sáu giờ tới, theo lịch phát sóng</string>
+    <string name="iptv_settings_hidden_subtitle">Chọn để hiện lại các danh mục đã ẩn của hồ sơ này</string>
+    <string name="iptv_settings_hidden_none">Giữ OK trên một danh mục trong menu TV trực tiếp để ẩn danh mục đó</string>
+    <string name="iptv_settings_record_early">Bắt đầu ghi sớm</string>
+    <string name="iptv_settings_record_late">Tiếp tục ghi sau khi kết thúc</string>
+    <string name="iptv_settings_record_late_subtitle">Giờ trong lịch phát sóng thường lệch một chút. Áp dụng cho bản ghi mới.</string>
+    <string name="iptv_settings_none">Không có</string>
     <string name="iptv_guide_choose_folder">Thư mục lịch phát sóng</string>
     <string name="iptv_guide_folder_title">Tệp lịch phát sóng</string>
     <string name="iptv_guide_folder_description">Các tệp XMLTV được sao chép vào thư mục iptv-guides trên thiết bị này hoặc trên ổ USB.</string>
@@ -206,6 +227,9 @@
     <string name="iptv_multiview_quality_sharpest_description">Cao hơn một bậc khi box đáp ứng được; dùng nhiều tốc độ internet hơn</string>
     <string name="iptv_multiview_quality_lightest">Nhẹ nhất</string>
     <string name="iptv_multiview_quality_lightest_description">Thấp hơn một bậc, cho kết nối chậm hoặc box đang bận</string>
+    <plurals name="iptv_settings_minutes">
+        <item quantity="other">%1$d phút</item>
+    </plurals>
     <plurals name="iptv_connections">
         <item quantity="other">%1$d kết nối</item>
     </plurals>
