@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Konfigurer fra telefon eller computer</string>
+    <string name="iptv_remote_entry_subtitle">Skriv adresser og logins på et rigtigt tastatur</string>
+    <string name="iptv_remote_title">Konfigurer fra din telefon</string>
+    <string name="iptv_remote_description">Scan QR-koden med din telefon, eller åbn adressen på en computer på samme netværk. Indtast derefter parringskoden, der vises her.</string>
+    <string name="iptv_remote_code">Parringskode</string>
+    <string name="iptv_remote_address">Eller åbn denne adresse</string>
+    <string name="iptv_remote_qr_description">QR-kode til konfiguration fra telefon</string>
+    <string name="iptv_remote_home_network">Brug kun dette på dit hjemmenetværk. Konfigurationssiden er ikke krypteret.</string>
+    <string name="iptv_remote_idle_note">Stopper, når du forlader denne skærm, eller efter 10 minutter uden aktivitet.</string>
+    <string name="iptv_remote_confirm_note">Intet gemmes, før du bekræfter det her på TV\'et. Kilder og guider kan kun fjernes på TV\'et.</string>
+    <string name="iptv_remote_starting">Starter konfiguration fra telefon…</string>
+    <string name="iptv_remote_waiting">Venter på en telefon eller computer</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d enhed forbundet</item>
+        <item quantity="other">%d enheder forbundet</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Forbind TV\'et til dit hjemmenetværk for at konfigurere fra din telefon.</string>
+    <string name="iptv_remote_not_home_network">TV\'et har ikke en privat hjemmenetværksadresse, så konfiguration fra telefon forbliver slået fra.</string>
+    <string name="iptv_remote_ports_busy">Konfiguration fra telefon kunne ikke starte, fordi netværksportene er i brug. Prøv igen om et øjeblik.</string>
+    <string name="iptv_remote_idle_stopped">Konfiguration fra telefon stoppede efter 10 minutter uden aktivitet.</string>
+    <string name="iptv_remote_paused">Konfiguration fra telefon stoppede, mens appen var i baggrunden.</string>
+    <string name="iptv_remote_start_again">Start igen</string>
+    <string name="iptv_remote_start_again_subtitle">Viser en ny QR-kode og parringskode</string>
+    <string name="iptv_remote_done">Færdig</string>
+    <string name="iptv_remote_done_subtitle">Stopper konfiguration fra telefon og går tilbage</string>
+    <string name="iptv_remote_confirm_add_title">Tilføj dette fra din telefon?</string>
+    <string name="iptv_remote_confirm_edit_title">Ændr %1$s fra din telefon?</string>
+    <string name="iptv_remote_confirm_subtitle">Tjek oplysningerne. Intet gemmes, medmindre du vælger Gem på dette TV.</string>
+    <string name="iptv_remote_field_device">Sendt fra</string>
+    <string name="iptv_remote_field_type">Type</string>
+    <string name="iptv_remote_field_name">Navn</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adresse</string>
+    <string name="iptv_remote_field_server">Server</string>
+    <string name="iptv_remote_server_changes">Ændres fra %1$s til %2$s</string>
+    <string name="iptv_remote_server_new">Ændres til %1$s</string>
+    <string name="iptv_remote_field_username">Brugernavn</string>
+    <string name="iptv_remote_field_password">Adgangskode</string>
+    <string name="iptv_remote_field_mac">MAC-adresse</string>
+    <string name="iptv_remote_password_set">Indtastet på telefonen (skjult)</string>
+    <string name="iptv_remote_password_new">Ny adgangskode (skjult)</string>
+    <string name="iptv_remote_save">Gem på dette TV</string>
+    <string name="iptv_remote_reject">Afvis</string>
+    <string name="iptv_remote_saved">Gemt. Indlæser kanaler nu.</string>
+    <string name="iptv_remote_guide_saved">Gemt. Indlæser guiden nu.</string>
+    <string name="iptv_remote_rejected">Afvist. Intet blev gemt.</string>
+</resources>

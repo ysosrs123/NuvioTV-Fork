@@ -1,0 +1,72 @@
+<resources>
+    <string name="iptv_recording_channel">Opnamen</string>
+    <string name="iptv_recording_channel_description">Getoond terwijl live-tv-programma\'s worden opgenomen</string>
+    <string name="iptv_recording_notification_title">Live-tv opnemen</string>
+    <string name="iptv_recording_notification_starting">Opname starten…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d programma</item>
+        <item quantity="other">%1$d programma\'s</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Opnemen</string>
+    <string name="iptv_recording_record_now">Nu opnemen</string>
+    <string name="iptv_recording_record_programme">Dit programma opnemen</string>
+    <string name="iptv_recording_started">Opname gestart</string>
+    <string name="iptv_recording_scheduled">Opname gepland</string>
+    <string name="iptv_recordings_open">Opnamen</string>
+
+    <string name="iptv_recordings_title">Opnamen</string>
+    <string name="iptv_recordings_description">Programma\'s die vanuit Live-tv zijn opgenomen of gepland. Opnamen blijven op dit apparaat en horen bij dit profiel.</string>
+    <string name="iptv_recordings_hint">Druk op OK om een opname af te spelen. Houd OK ingedrukt of druk op Menu voor meer opties.</string>
+    <string name="iptv_recordings_free">%1$s vrij op dit apparaat</string>
+    <string name="iptv_recordings_empty">Nog niets opgenomen. Neem een programma op vanuit de live-tv-gids of tijdens het kijken.</string>
+    <string name="iptv_recordings_group_now">Wordt nu opgenomen</string>
+    <string name="iptv_recordings_group_scheduled">Gepland</string>
+    <string name="iptv_recordings_group_recorded">Opgenomen</string>
+
+    <string name="iptv_recording_status_scheduled">Gepland</string>
+    <string name="iptv_recording_status_recording">Opnemen</string>
+    <string name="iptv_recording_status_done">Opgenomen</string>
+    <string name="iptv_recording_status_partial">Gedeeltelijk opgenomen</string>
+    <string name="iptv_recording_status_failed">Mislukt</string>
+    <string name="iptv_recording_status_cancelled">Geannuleerd</string>
+    <string name="iptv_recording_gaps">Bevat onderbrekingen</string>
+
+    <string name="iptv_recording_failure_no_connection">Geen vrije verbinding op dit account</string>
+    <string name="iptv_recording_failure_device_busy">Het apparaat is bezig met andere streams</string>
+    <string name="iptv_recording_failure_source">De bron was niet bereikbaar</string>
+    <string name="iptv_recording_failure_channel">De zender is niet meer beschikbaar</string>
+    <string name="iptv_recording_failure_unsupported">Deze streamindeling kan niet worden opgenomen</string>
+    <string name="iptv_recording_failure_encrypted">Versleutelde streams kunnen niet worden opgenomen</string>
+    <string name="iptv_recording_failure_network">De stream werd onderbroken</string>
+    <string name="iptv_recording_failure_low_storage">De opslag is bijna vol</string>
+    <string name="iptv_recording_failure_storage">De opname kon niet worden opgeslagen</string>
+    <string name="iptv_recording_failure_time_limit">De tijdslimiet voor opnamen is bereikt</string>
+    <string name="iptv_recording_failure_interrupted">De app of het apparaat stopte tijdens de opname</string>
+    <string name="iptv_recording_failure_start_blocked">Android stond niet toe dat de opname startte. Sta wekkers en herinneringen toe voor Nuvio, of houd Nuvio open.</string>
+    <string name="iptv_recording_failure_missed">Het programma was afgelopen voordat de opname kon starten</string>
+
+    <string name="iptv_recording_refused_conflict">Andere opnamen gebruiken op dat moment al alle verbindingen van dit account</string>
+    <string name="iptv_recording_refused_no_connection">Geen vrije verbinding op dit account. Stop eerst met het kijken naar of opnemen van een andere zender.</string>
+    <string name="iptv_recording_refused_storage">Niet genoeg vrije opslag voor deze opname. Reken op ongeveer 2,5 GB per uur HD; 500 MB blijft altijd vrij voor het apparaat. Verwijder oude opnamen of maak ruimte vrij.</string>
+    <string name="iptv_recording_refused_ended">Dit programma is al afgelopen</string>
+    <string name="iptv_recording_refused_channel">Deze zender kan nu niet worden opgenomen</string>
+    <string name="iptv_recording_refused_duplicate">Deze zender wordt op dat moment al opgenomen</string>
+    <string name="iptv_recording_refused_full">De lijst met opnamen is vol. Verwijder eerst enkele opnamen.</string>
+    <string name="iptv_recording_refused_profile">Het profiel is gewijzigd. Probeer het opnieuw.</string>
+    <string name="iptv_recording_refused_exact_alarms">Geplande opnamen hebben de toestemming voor wekkers en herinneringen nodig. Sta die toe voor Nuvio, of neem op tijdens het kijken.</string>
+    <string name="iptv_recording_alarm_settings">Wekkers en herinneringen toestaan</string>
+
+    <string name="iptv_recording_play">Afspelen</string>
+    <string name="iptv_recording_stop">Opname stoppen</string>
+    <string name="iptv_recording_cancel">Opname annuleren</string>
+    <string name="iptv_recording_delete">Opname verwijderen</string>
+    <string name="iptv_recording_delete_title">\"%1$s\" verwijderen?</string>
+    <string name="iptv_recording_delete_description">De opname en het bestand worden van dit apparaat verwijderd.</string>
+    <string name="iptv_recording_delete_confirm">Verwijderen</string>
+    <string name="iptv_recording_keep">Behouden</string>
+    <string name="iptv_recording_file_missing">Het opnamebestand staat niet meer op dit apparaat</string>
+    <string name="iptv_recording_paused">Gepauzeerd</string>
+    <string name="iptv_recording_playback_failed">Deze opname kan niet worden afgespeeld. Het bestand is mogelijk onvolledig of heeft een indeling die dit apparaat niet kan decoderen.</string>
+    <string name="iptv_recording_skip_hint">Links en rechts springen 30 seconden</string>
+</resources>

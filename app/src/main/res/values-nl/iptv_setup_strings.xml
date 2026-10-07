@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Instellen via telefoon of computer</string>
+    <string name="iptv_remote_entry_subtitle">Typ adressen en inloggegevens op een echt toetsenbord</string>
+    <string name="iptv_remote_title">Instellen via je telefoon</string>
+    <string name="iptv_remote_description">Scan de QR-code met je telefoon, of open het adres op een computer in hetzelfde netwerk. Voer daarna de koppelcode in die hier wordt getoond.</string>
+    <string name="iptv_remote_code">Koppelcode</string>
+    <string name="iptv_remote_address">Of open dit adres</string>
+    <string name="iptv_remote_qr_description">QR-code voor instellen via telefoon</string>
+    <string name="iptv_remote_home_network">Gebruik dit alleen op je thuisnetwerk. De instelpagina is niet versleuteld.</string>
+    <string name="iptv_remote_idle_note">Stopt wanneer je dit scherm verlaat, of na 10 minuten zonder activiteit.</string>
+    <string name="iptv_remote_confirm_note">Er wordt niets opgeslagen totdat je het hier op de tv bevestigt. Bronnen en gidsen kunnen alleen op de tv worden verwijderd.</string>
+    <string name="iptv_remote_starting">Instellen via telefoon starten…</string>
+    <string name="iptv_remote_waiting">Wachten op een telefoon of computer</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d apparaat verbonden</item>
+        <item quantity="other">%d apparaten verbonden</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Verbind de tv met je thuisnetwerk om via je telefoon in te stellen.</string>
+    <string name="iptv_remote_not_home_network">De tv heeft geen privéthuisnetwerkadres, dus instellen via telefoon blijft uit.</string>
+    <string name="iptv_remote_ports_busy">Instellen via telefoon kon niet starten omdat de netwerkpoorten in gebruik zijn. Probeer het zo meteen opnieuw.</string>
+    <string name="iptv_remote_idle_stopped">Instellen via telefoon is gestopt na 10 minuten zonder activiteit.</string>
+    <string name="iptv_remote_paused">Instellen via telefoon is gestopt terwijl de app op de achtergrond stond.</string>
+    <string name="iptv_remote_start_again">Opnieuw starten</string>
+    <string name="iptv_remote_start_again_subtitle">Toont een nieuwe QR-code en koppelcode</string>
+    <string name="iptv_remote_done">Klaar</string>
+    <string name="iptv_remote_done_subtitle">Stopt instellen via telefoon en gaat terug</string>
+    <string name="iptv_remote_confirm_add_title">Dit toevoegen vanaf je telefoon?</string>
+    <string name="iptv_remote_confirm_edit_title">%1$s wijzigen vanaf je telefoon?</string>
+    <string name="iptv_remote_confirm_subtitle">Controleer de gegevens. Er wordt niets opgeslagen tenzij je Opslaan op deze tv kiest.</string>
+    <string name="iptv_remote_field_device">Verzonden vanaf</string>
+    <string name="iptv_remote_field_type">Type</string>
+    <string name="iptv_remote_field_name">Naam</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adres</string>
+    <string name="iptv_remote_field_server">Server</string>
+    <string name="iptv_remote_server_changes">Wijzigt van %1$s naar %2$s</string>
+    <string name="iptv_remote_server_new">Wijzigt naar %1$s</string>
+    <string name="iptv_remote_field_username">Gebruikersnaam</string>
+    <string name="iptv_remote_field_password">Wachtwoord</string>
+    <string name="iptv_remote_field_mac">MAC-adres</string>
+    <string name="iptv_remote_password_set">Ingevoerd op de telefoon (verborgen)</string>
+    <string name="iptv_remote_password_new">Nieuw wachtwoord (verborgen)</string>
+    <string name="iptv_remote_save">Opslaan op deze tv</string>
+    <string name="iptv_remote_reject">Weigeren</string>
+    <string name="iptv_remote_saved">Opgeslagen. Zenders worden nu geladen.</string>
+    <string name="iptv_remote_guide_saved">Opgeslagen. De gids wordt nu geladen.</string>
+    <string name="iptv_remote_rejected">Geweigerd. Er is niets opgeslagen.</string>
+</resources>

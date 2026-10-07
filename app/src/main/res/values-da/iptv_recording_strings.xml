@@ -1,0 +1,72 @@
+<resources>
+    <string name="iptv_recording_channel">Optagelser</string>
+    <string name="iptv_recording_channel_description">Vises, mens live-TV-programmer optages</string>
+    <string name="iptv_recording_notification_title">Optager live-TV</string>
+    <string name="iptv_recording_notification_starting">Starter optagelse…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d program</item>
+        <item quantity="other">%1$d programmer</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Optag</string>
+    <string name="iptv_recording_record_now">Optag nu</string>
+    <string name="iptv_recording_record_programme">Optag dette program</string>
+    <string name="iptv_recording_started">Optagelse startet</string>
+    <string name="iptv_recording_scheduled">Optagelse planlagt</string>
+    <string name="iptv_recordings_open">Optagelser</string>
+
+    <string name="iptv_recordings_title">Optagelser</string>
+    <string name="iptv_recordings_description">Programmer optaget eller planlagt fra live-TV. Optagelser gemmes på denne enhed og hører til denne profil.</string>
+    <string name="iptv_recordings_hint">Tryk på OK for at afspille en optagelse. Hold OK, eller tryk på Menu for flere muligheder.</string>
+    <string name="iptv_recordings_free">%1$s ledig på denne enhed</string>
+    <string name="iptv_recordings_empty">Intet optaget endnu. Optag et program fra live-TV-guiden eller mens du ser.</string>
+    <string name="iptv_recordings_group_now">Optager nu</string>
+    <string name="iptv_recordings_group_scheduled">Planlagt</string>
+    <string name="iptv_recordings_group_recorded">Optaget</string>
+
+    <string name="iptv_recording_status_scheduled">Planlagt</string>
+    <string name="iptv_recording_status_recording">Optager</string>
+    <string name="iptv_recording_status_done">Optaget</string>
+    <string name="iptv_recording_status_partial">Delvist optaget</string>
+    <string name="iptv_recording_status_failed">Mislykkedes</string>
+    <string name="iptv_recording_status_cancelled">Annulleret</string>
+    <string name="iptv_recording_gaps">Har huller</string>
+
+    <string name="iptv_recording_failure_no_connection">Ingen ledig forbindelse på denne konto</string>
+    <string name="iptv_recording_failure_device_busy">Enheden er optaget af andre streams</string>
+    <string name="iptv_recording_failure_source">Kilden kunne ikke nås</string>
+    <string name="iptv_recording_failure_channel">Kanalen er ikke længere tilgængelig</string>
+    <string name="iptv_recording_failure_unsupported">Dette streamformat kan ikke optages</string>
+    <string name="iptv_recording_failure_encrypted">Krypterede streams kan ikke optages</string>
+    <string name="iptv_recording_failure_network">Streamen blev afbrudt</string>
+    <string name="iptv_recording_failure_low_storage">Lageret er næsten fyldt</string>
+    <string name="iptv_recording_failure_storage">Optagelsen kunne ikke gemmes</string>
+    <string name="iptv_recording_failure_time_limit">Tidsgrænsen for optagelsen blev nået</string>
+    <string name="iptv_recording_failure_interrupted">Appen eller enheden stoppede under optagelsen</string>
+    <string name="iptv_recording_failure_start_blocked">Android tillod ikke, at optagelsen startede. Tillad alarmer og påmindelser for Nuvio, eller hold Nuvio åben.</string>
+    <string name="iptv_recording_failure_missed">Programmet sluttede, før optagelsen kunne starte</string>
+
+    <string name="iptv_recording_refused_conflict">Andre optagelser bruger allerede alle kontoens forbindelser på det tidspunkt</string>
+    <string name="iptv_recording_refused_no_connection">Ingen ledig forbindelse på denne konto. Stop først med at se eller optage en anden kanal.</string>
+    <string name="iptv_recording_refused_storage">Ikke nok ledig lagerplads til denne optagelse. Regn med ca. 2,5 GB pr. time i HD, og 500 MB holdes altid ledigt til enheden. Slet gamle optagelser, eller frigør plads.</string>
+    <string name="iptv_recording_refused_ended">Dette program er allerede slut</string>
+    <string name="iptv_recording_refused_channel">Denne kanal kan ikke optages lige nu</string>
+    <string name="iptv_recording_refused_duplicate">Denne kanal optages allerede på det tidspunkt</string>
+    <string name="iptv_recording_refused_full">Listen over optagelser er fuld. Slet først nogle optagelser.</string>
+    <string name="iptv_recording_refused_profile">Profilen er ændret. Prøv igen.</string>
+    <string name="iptv_recording_refused_exact_alarms">Planlagte optagelser kræver tilladelsen til alarmer og påmindelser. Tillad den for Nuvio, eller optag mens du ser.</string>
+    <string name="iptv_recording_alarm_settings">Tillad alarmer og påmindelser</string>
+
+    <string name="iptv_recording_play">Afspil</string>
+    <string name="iptv_recording_stop">Stop optagelse</string>
+    <string name="iptv_recording_cancel">Annuller optagelse</string>
+    <string name="iptv_recording_delete">Slet optagelse</string>
+    <string name="iptv_recording_delete_title">Slet \"%1$s\"?</string>
+    <string name="iptv_recording_delete_description">Optagelsen og dens fil fjernes fra denne enhed.</string>
+    <string name="iptv_recording_delete_confirm">Slet</string>
+    <string name="iptv_recording_keep">Behold</string>
+    <string name="iptv_recording_file_missing">Optagelsesfilen findes ikke længere på denne enhed</string>
+    <string name="iptv_recording_paused">Sat på pause</string>
+    <string name="iptv_recording_playback_failed">Denne optagelse kan ikke afspilles. Filen kan være ufuldstændig eller i et format, som denne enhed ikke kan afkode.</string>
+    <string name="iptv_recording_skip_hint">Venstre og højre springer 30 sekunder</string>
+</resources>

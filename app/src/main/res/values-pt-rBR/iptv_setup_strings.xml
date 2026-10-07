@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Configurar pelo celular ou computador</string>
+    <string name="iptv_remote_entry_subtitle">Digite endereços e logins em um teclado de verdade</string>
+    <string name="iptv_remote_title">Configurar pelo celular</string>
+    <string name="iptv_remote_description">Escaneie o código QR com o celular, ou abra o endereço em um computador na mesma rede. Depois digite o código de pareamento mostrado aqui.</string>
+    <string name="iptv_remote_code">Código de pareamento</string>
+    <string name="iptv_remote_address">Ou abra este endereço</string>
+    <string name="iptv_remote_qr_description">Código QR para configuração pelo celular</string>
+    <string name="iptv_remote_home_network">Use isto apenas na sua rede doméstica. A página de configuração não é criptografada.</string>
+    <string name="iptv_remote_idle_note">Para quando você sai desta tela ou após 10 minutos sem atividade.</string>
+    <string name="iptv_remote_confirm_note">Nada é salvo até você confirmar aqui na TV. Fontes e guias só podem ser removidos na TV.</string>
+    <string name="iptv_remote_starting">Iniciando a configuração pelo celular…</string>
+    <string name="iptv_remote_waiting">Aguardando um celular ou computador</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d dispositivo conectado</item>
+        <item quantity="many">%d dispositivos conectados</item>
+        <item quantity="other">%d dispositivos conectados</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Conecte a TV à sua rede doméstica para configurar pelo celular.</string>
+    <string name="iptv_remote_not_home_network">A TV não está em um endereço de rede doméstica privada, então a configuração pelo celular fica desativada.</string>
+    <string name="iptv_remote_ports_busy">Não foi possível iniciar a configuração pelo celular porque as portas de rede estão em uso. Tente novamente em instantes.</string>
+    <string name="iptv_remote_idle_stopped">A configuração pelo celular parou após 10 minutos sem atividade.</string>
+    <string name="iptv_remote_paused">A configuração pelo celular parou enquanto o app estava em segundo plano.</string>
+    <string name="iptv_remote_start_again">Começar de novo</string>
+    <string name="iptv_remote_start_again_subtitle">Mostra um novo código QR e código de pareamento</string>
+    <string name="iptv_remote_done">Concluído</string>
+    <string name="iptv_remote_done_subtitle">Encerra a configuração pelo celular e volta</string>
+    <string name="iptv_remote_confirm_add_title">Adicionar isto pelo celular?</string>
+    <string name="iptv_remote_confirm_edit_title">Alterar %1$s pelo celular?</string>
+    <string name="iptv_remote_confirm_subtitle">Confira os dados. Nada é salvo a menos que você escolha Salvar nesta TV.</string>
+    <string name="iptv_remote_field_device">Enviado de</string>
+    <string name="iptv_remote_field_type">Tipo</string>
+    <string name="iptv_remote_field_name">Nome</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Endereço</string>
+    <string name="iptv_remote_field_server">Servidor</string>
+    <string name="iptv_remote_server_changes">Muda de %1$s para %2$s</string>
+    <string name="iptv_remote_server_new">Muda para %1$s</string>
+    <string name="iptv_remote_field_username">Nome de usuário</string>
+    <string name="iptv_remote_field_password">Senha</string>
+    <string name="iptv_remote_field_mac">Endereço MAC</string>
+    <string name="iptv_remote_password_set">Digitada no celular (oculta)</string>
+    <string name="iptv_remote_password_new">Nova senha (oculta)</string>
+    <string name="iptv_remote_save">Salvar nesta TV</string>
+    <string name="iptv_remote_reject">Rejeitar</string>
+    <string name="iptv_remote_saved">Salvo. Carregando canais agora.</string>
+    <string name="iptv_remote_guide_saved">Salvo. Carregando o guia agora.</string>
+    <string name="iptv_remote_rejected">Rejeitado. Nada foi salvo.</string>
+</resources>
