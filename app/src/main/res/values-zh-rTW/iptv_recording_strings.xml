@@ -1,0 +1,71 @@
+<resources>
+    <string name="iptv_recording_channel">錄影</string>
+    <string name="iptv_recording_channel_description">錄製直播電視節目時顯示</string>
+    <string name="iptv_recording_notification_title">正在錄製直播電視</string>
+    <string name="iptv_recording_notification_starting">正在開始錄影…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="other">%1$d 個節目</item>
+    </plurals>
+
+    <string name="iptv_recording_record">錄影</string>
+    <string name="iptv_recording_record_now">立即錄影</string>
+    <string name="iptv_recording_record_programme">錄製此節目</string>
+    <string name="iptv_recording_started">已開始錄影</string>
+    <string name="iptv_recording_scheduled">已預約錄影</string>
+    <string name="iptv_recordings_open">錄影內容</string>
+
+    <string name="iptv_recordings_title">錄影內容</string>
+    <string name="iptv_recordings_description">從直播電視錄製或預約的節目。錄影儲存在此裝置上，屬於此個人資料。</string>
+    <string name="iptv_recordings_hint">按 OK 播放錄影。長按 OK 或按選單鍵查看更多選項。</string>
+    <string name="iptv_recordings_free">此裝置可用空間 %1$s</string>
+    <string name="iptv_recordings_empty">尚無錄影。可在直播電視節目表中或觀看時錄製節目。</string>
+    <string name="iptv_recordings_group_now">正在錄影</string>
+    <string name="iptv_recordings_group_scheduled">已預約</string>
+    <string name="iptv_recordings_group_recorded">已錄製</string>
+
+    <string name="iptv_recording_status_scheduled">已預約</string>
+    <string name="iptv_recording_status_recording">錄影中</string>
+    <string name="iptv_recording_status_done">已錄製</string>
+    <string name="iptv_recording_status_partial">部分錄製</string>
+    <string name="iptv_recording_status_failed">失敗</string>
+    <string name="iptv_recording_status_cancelled">已取消</string>
+    <string name="iptv_recording_gaps">有中斷</string>
+
+    <string name="iptv_recording_failure_no_connection">此帳戶沒有空閒連線</string>
+    <string name="iptv_recording_failure_device_busy">裝置正忙於處理其他串流</string>
+    <string name="iptv_recording_failure_source">無法連線到來源</string>
+    <string name="iptv_recording_failure_channel">該頻道已無法使用</string>
+    <string name="iptv_recording_failure_unsupported">無法錄製此串流格式</string>
+    <string name="iptv_recording_failure_encrypted">無法錄製加密的串流</string>
+    <string name="iptv_recording_failure_network">串流已中斷</string>
+    <string name="iptv_recording_failure_low_storage">儲存空間即將用盡</string>
+    <string name="iptv_recording_failure_storage">無法儲存錄影</string>
+    <string name="iptv_recording_failure_time_limit">已達錄影時間上限</string>
+    <string name="iptv_recording_failure_interrupted">錄影期間應用程式或裝置已停止</string>
+    <string name="iptv_recording_failure_start_blocked">Android 不允許開始錄影。請允許 Nuvio 使用鬧鐘和提醒，或保持 Nuvio 開啟。</string>
+    <string name="iptv_recording_failure_missed">節目在錄影開始前已結束</string>
+
+    <string name="iptv_recording_refused_conflict">該時段其他錄影已占用此帳戶的所有連線</string>
+    <string name="iptv_recording_refused_no_connection">此帳戶沒有空閒連線。請先停止觀看或錄製其他頻道。</string>
+    <string name="iptv_recording_refused_storage">可用儲存空間不足以進行此次錄影。每小時 HD 節目約需 2.5 GB，且一律為裝置保留 500 MB。請刪除舊錄影或釋放空間。</string>
+    <string name="iptv_recording_refused_ended">此節目已結束</string>
+    <string name="iptv_recording_refused_channel">此頻道目前無法錄影</string>
+    <string name="iptv_recording_refused_duplicate">該時段已在錄製此頻道</string>
+    <string name="iptv_recording_refused_full">錄影清單已滿。請先刪除一些錄影。</string>
+    <string name="iptv_recording_refused_profile">個人資料已變更。請再試一次。</string>
+    <string name="iptv_recording_refused_exact_alarms">預約錄影需要鬧鐘和提醒權限。請為 Nuvio 授予該權限，或在觀看時錄影。</string>
+    <string name="iptv_recording_alarm_settings">允許鬧鐘和提醒</string>
+
+    <string name="iptv_recording_play">播放</string>
+    <string name="iptv_recording_stop">停止錄影</string>
+    <string name="iptv_recording_cancel">取消錄影</string>
+    <string name="iptv_recording_delete">刪除錄影</string>
+    <string name="iptv_recording_delete_title">要刪除「%1$s」嗎？</string>
+    <string name="iptv_recording_delete_description">錄影及其檔案將從此裝置中移除。</string>
+    <string name="iptv_recording_delete_confirm">刪除</string>
+    <string name="iptv_recording_keep">保留</string>
+    <string name="iptv_recording_file_missing">錄影檔案已不在此裝置上</string>
+    <string name="iptv_recording_paused">已暫停</string>
+    <string name="iptv_recording_playback_failed">無法播放此錄影。檔案可能不完整，或格式無法在此裝置上解碼。</string>
+    <string name="iptv_recording_skip_hint">左右鍵跳過 30 秒</string>
+</resources>

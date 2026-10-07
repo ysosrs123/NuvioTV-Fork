@@ -1,0 +1,71 @@
+<resources>
+    <string name="iptv_recording_channel">録画</string>
+    <string name="iptv_recording_channel_description">ライブTVの番組を録画中に表示されます</string>
+    <string name="iptv_recording_notification_title">ライブTVを録画中</string>
+    <string name="iptv_recording_notification_starting">録画を開始中…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="other">%1$d 番組</item>
+    </plurals>
+
+    <string name="iptv_recording_record">録画</string>
+    <string name="iptv_recording_record_now">今すぐ録画</string>
+    <string name="iptv_recording_record_programme">この番組を録画</string>
+    <string name="iptv_recording_started">録画を開始しました</string>
+    <string name="iptv_recording_scheduled">録画を予約しました</string>
+    <string name="iptv_recordings_open">録画</string>
+
+    <string name="iptv_recordings_title">録画</string>
+    <string name="iptv_recordings_description">ライブTVから録画または予約した番組です。録画はこのデバイスに保存され、このプロフィールに属します。</string>
+    <string name="iptv_recordings_hint">OKで録画を再生します。OK長押しまたはメニューでその他のオプションを表示します。</string>
+    <string name="iptv_recordings_free">このデバイスの空き容量 %1$s</string>
+    <string name="iptv_recordings_empty">録画はまだありません。ライブTVの番組表や視聴中に番組を録画できます。</string>
+    <string name="iptv_recordings_group_now">録画中</string>
+    <string name="iptv_recordings_group_scheduled">予約済み</string>
+    <string name="iptv_recordings_group_recorded">録画済み</string>
+
+    <string name="iptv_recording_status_scheduled">予約済み</string>
+    <string name="iptv_recording_status_recording">録画中</string>
+    <string name="iptv_recording_status_done">録画済み</string>
+    <string name="iptv_recording_status_partial">一部のみ録画</string>
+    <string name="iptv_recording_status_failed">失敗</string>
+    <string name="iptv_recording_status_cancelled">キャンセル済み</string>
+    <string name="iptv_recording_gaps">欠落あり</string>
+
+    <string name="iptv_recording_failure_no_connection">このアカウントに空き接続がありません</string>
+    <string name="iptv_recording_failure_device_busy">デバイスが他のストリームで使用中です</string>
+    <string name="iptv_recording_failure_source">ソースに接続できませんでした</string>
+    <string name="iptv_recording_failure_channel">このチャンネルは利用できなくなりました</string>
+    <string name="iptv_recording_failure_unsupported">このストリーム形式は録画できません</string>
+    <string name="iptv_recording_failure_encrypted">暗号化されたストリームは録画できません</string>
+    <string name="iptv_recording_failure_network">ストリームが中断されました</string>
+    <string name="iptv_recording_failure_low_storage">ストレージの空きがほとんどありません</string>
+    <string name="iptv_recording_failure_storage">録画を保存できませんでした</string>
+    <string name="iptv_recording_failure_time_limit">録画時間の上限に達しました</string>
+    <string name="iptv_recording_failure_interrupted">録画中にアプリまたはデバイスが停止しました</string>
+    <string name="iptv_recording_failure_start_blocked">Androidが録画の開始を許可しませんでした。Nuvioにアラームとリマインダーを許可するか、Nuvioを開いたままにしてください。</string>
+    <string name="iptv_recording_failure_missed">録画を開始する前に番組が終了しました</string>
+
+    <string name="iptv_recording_refused_conflict">その時間帯は他の録画がこのアカウントのすべての接続を使用しています</string>
+    <string name="iptv_recording_refused_no_connection">このアカウントに空き接続がありません。先に別のチャンネルの視聴または録画を停止してください。</string>
+    <string name="iptv_recording_refused_storage">この録画に必要な空き容量がありません。HD 1時間あたり約2.5 GBが必要で、デバイス用に常に500 MBが確保されます。古い録画を削除するか、空き容量を増やしてください。</string>
+    <string name="iptv_recording_refused_ended">この番組はすでに終了しています</string>
+    <string name="iptv_recording_refused_channel">このチャンネルは現在録画できません</string>
+    <string name="iptv_recording_refused_duplicate">このチャンネルはその時間帯にすでに録画予定です</string>
+    <string name="iptv_recording_refused_full">録画リストがいっぱいです。先に録画をいくつか削除してください。</string>
+    <string name="iptv_recording_refused_profile">プロフィールが変更されました。もう一度お試しください。</string>
+    <string name="iptv_recording_refused_exact_alarms">録画予約にはアラームとリマインダーの権限が必要です。Nuvioに許可するか、視聴中に録画してください。</string>
+    <string name="iptv_recording_alarm_settings">アラームとリマインダーを許可</string>
+
+    <string name="iptv_recording_play">再生</string>
+    <string name="iptv_recording_stop">録画を停止</string>
+    <string name="iptv_recording_cancel">録画をキャンセル</string>
+    <string name="iptv_recording_delete">録画を削除</string>
+    <string name="iptv_recording_delete_title">「%1$s」を削除しますか？</string>
+    <string name="iptv_recording_delete_description">録画とそのファイルがこのデバイスから削除されます。</string>
+    <string name="iptv_recording_delete_confirm">削除</string>
+    <string name="iptv_recording_keep">残す</string>
+    <string name="iptv_recording_file_missing">録画ファイルがこのデバイスにありません</string>
+    <string name="iptv_recording_paused">一時停止中</string>
+    <string name="iptv_recording_playback_failed">この録画は再生できません。ファイルが不完全か、このデバイスでデコードできない形式の可能性があります。</string>
+    <string name="iptv_recording_skip_hint">左右で30秒スキップ</string>
+</resources>

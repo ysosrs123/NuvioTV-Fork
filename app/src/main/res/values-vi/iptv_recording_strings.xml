@@ -1,0 +1,71 @@
+<resources>
+    <string name="iptv_recording_channel">Bản ghi</string>
+    <string name="iptv_recording_channel_description">Hiển thị khi đang ghi hình chương trình TV trực tiếp</string>
+    <string name="iptv_recording_notification_title">Đang ghi hình TV trực tiếp</string>
+    <string name="iptv_recording_notification_starting">Đang bắt đầu ghi hình…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="other">%1$d chương trình</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Ghi hình</string>
+    <string name="iptv_recording_record_now">Ghi hình ngay</string>
+    <string name="iptv_recording_record_programme">Ghi hình chương trình này</string>
+    <string name="iptv_recording_started">Đã bắt đầu ghi hình</string>
+    <string name="iptv_recording_scheduled">Đã lên lịch ghi hình</string>
+    <string name="iptv_recordings_open">Bản ghi</string>
+
+    <string name="iptv_recordings_title">Bản ghi</string>
+    <string name="iptv_recordings_description">Các chương trình đã ghi hoặc đã lên lịch từ TV trực tiếp. Bản ghi được lưu trên thiết bị này và thuộc về hồ sơ này.</string>
+    <string name="iptv_recordings_hint">Nhấn OK để phát bản ghi. Giữ OK hoặc nhấn Menu để xem thêm tùy chọn.</string>
+    <string name="iptv_recordings_free">Còn trống %1$s trên thiết bị này</string>
+    <string name="iptv_recordings_empty">Chưa có bản ghi nào. Hãy ghi hình chương trình từ lịch phát sóng TV trực tiếp hoặc khi đang xem.</string>
+    <string name="iptv_recordings_group_now">Đang ghi hình</string>
+    <string name="iptv_recordings_group_scheduled">Đã lên lịch</string>
+    <string name="iptv_recordings_group_recorded">Đã ghi</string>
+
+    <string name="iptv_recording_status_scheduled">Đã lên lịch</string>
+    <string name="iptv_recording_status_recording">Đang ghi</string>
+    <string name="iptv_recording_status_done">Đã ghi</string>
+    <string name="iptv_recording_status_partial">Ghi một phần</string>
+    <string name="iptv_recording_status_failed">Thất bại</string>
+    <string name="iptv_recording_status_cancelled">Đã hủy</string>
+    <string name="iptv_recording_gaps">Có đoạn bị thiếu</string>
+
+    <string name="iptv_recording_failure_no_connection">Tài khoản này không còn kết nối trống</string>
+    <string name="iptv_recording_failure_device_busy">Thiết bị đang bận với các luồng khác</string>
+    <string name="iptv_recording_failure_source">Không thể kết nối tới nguồn</string>
+    <string name="iptv_recording_failure_channel">Kênh không còn khả dụng</string>
+    <string name="iptv_recording_failure_unsupported">Không thể ghi định dạng luồng này</string>
+    <string name="iptv_recording_failure_encrypted">Không thể ghi luồng đã mã hóa</string>
+    <string name="iptv_recording_failure_network">Luồng bị gián đoạn</string>
+    <string name="iptv_recording_failure_low_storage">Bộ nhớ gần đầy</string>
+    <string name="iptv_recording_failure_storage">Không thể lưu bản ghi</string>
+    <string name="iptv_recording_failure_time_limit">Đã đạt giới hạn thời gian ghi hình</string>
+    <string name="iptv_recording_failure_interrupted">Ứng dụng hoặc thiết bị đã dừng trong khi ghi hình</string>
+    <string name="iptv_recording_failure_start_blocked">Android không cho phép bắt đầu ghi hình. Hãy cho phép Nuvio dùng báo thức và lời nhắc, hoặc giữ Nuvio mở.</string>
+    <string name="iptv_recording_failure_missed">Chương trình đã kết thúc trước khi bắt đầu ghi hình</string>
+
+    <string name="iptv_recording_refused_conflict">Vào thời điểm đó, các bản ghi khác đã dùng hết kết nối của tài khoản này</string>
+    <string name="iptv_recording_refused_no_connection">Tài khoản này không còn kết nối trống. Hãy dừng xem hoặc ghi một kênh khác trước.</string>
+    <string name="iptv_recording_refused_storage">Không đủ bộ nhớ trống cho bản ghi này. Mỗi giờ HD cần khoảng 2.5 GB, và luôn giữ trống 500 MB cho thiết bị. Hãy xóa bản ghi cũ hoặc giải phóng dung lượng.</string>
+    <string name="iptv_recording_refused_ended">Chương trình này đã kết thúc</string>
+    <string name="iptv_recording_refused_channel">Hiện không thể ghi kênh này</string>
+    <string name="iptv_recording_refused_duplicate">Kênh này đã được ghi vào thời điểm đó</string>
+    <string name="iptv_recording_refused_full">Danh sách bản ghi đã đầy. Hãy xóa bớt một số bản ghi trước.</string>
+    <string name="iptv_recording_refused_profile">Hồ sơ đã thay đổi. Hãy thử lại.</string>
+    <string name="iptv_recording_refused_exact_alarms">Ghi hình theo lịch cần quyền báo thức và lời nhắc. Hãy cấp quyền cho Nuvio, hoặc ghi hình khi đang xem.</string>
+    <string name="iptv_recording_alarm_settings">Cho phép báo thức và lời nhắc</string>
+
+    <string name="iptv_recording_play">Phát</string>
+    <string name="iptv_recording_stop">Dừng ghi hình</string>
+    <string name="iptv_recording_cancel">Hủy ghi hình</string>
+    <string name="iptv_recording_delete">Xóa bản ghi</string>
+    <string name="iptv_recording_delete_title">Xóa \"%1$s\"?</string>
+    <string name="iptv_recording_delete_description">Bản ghi và tệp của nó sẽ bị xóa khỏi thiết bị này.</string>
+    <string name="iptv_recording_delete_confirm">Xóa</string>
+    <string name="iptv_recording_keep">Giữ lại</string>
+    <string name="iptv_recording_file_missing">Tệp bản ghi không còn trên thiết bị này</string>
+    <string name="iptv_recording_paused">Đã tạm dừng</string>
+    <string name="iptv_recording_playback_failed">Không thể phát bản ghi này. Tệp có thể chưa hoàn chỉnh hoặc ở định dạng mà thiết bị không giải mã được.</string>
+    <string name="iptv_recording_skip_hint">Trái và phải để tua 30 giây</string>
+</resources>

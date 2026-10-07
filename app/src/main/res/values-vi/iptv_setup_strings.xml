@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Thiết lập từ điện thoại hoặc máy tính</string>
+    <string name="iptv_remote_entry_subtitle">Nhập địa chỉ và thông tin đăng nhập bằng bàn phím thật</string>
+    <string name="iptv_remote_title">Thiết lập từ điện thoại</string>
+    <string name="iptv_remote_description">Quét mã QR bằng điện thoại, hoặc mở địa chỉ trên máy tính cùng mạng. Sau đó nhập mã ghép nối hiển thị tại đây.</string>
+    <string name="iptv_remote_code">Mã ghép nối</string>
+    <string name="iptv_remote_address">Hoặc mở địa chỉ này</string>
+    <string name="iptv_remote_qr_description">Mã QR để thiết lập bằng điện thoại</string>
+    <string name="iptv_remote_home_network">Chỉ sử dụng trên mạng gia đình. Trang thiết lập không được mã hóa.</string>
+    <string name="iptv_remote_idle_note">Dừng khi bạn rời màn hình này hoặc sau 10 phút không hoạt động.</string>
+    <string name="iptv_remote_confirm_note">Không có gì được lưu cho đến khi bạn xác nhận trên TV. Chỉ có thể xóa nguồn và lịch phát sóng trên TV.</string>
+    <string name="iptv_remote_starting">Đang bắt đầu thiết lập bằng điện thoại…</string>
+    <string name="iptv_remote_waiting">Đang chờ điện thoại hoặc máy tính</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="other">%d thiết bị đã kết nối</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Hãy kết nối TV với mạng gia đình để thiết lập từ điện thoại.</string>
+    <string name="iptv_remote_not_home_network">TV không dùng địa chỉ mạng gia đình riêng tư, nên tính năng thiết lập bằng điện thoại bị tắt.</string>
+    <string name="iptv_remote_ports_busy">Không thể bắt đầu thiết lập bằng điện thoại vì cổng mạng đang được sử dụng. Hãy thử lại sau giây lát.</string>
+    <string name="iptv_remote_idle_stopped">Thiết lập bằng điện thoại đã dừng sau 10 phút không hoạt động.</string>
+    <string name="iptv_remote_paused">Thiết lập bằng điện thoại đã dừng khi ứng dụng chạy nền.</string>
+    <string name="iptv_remote_start_again">Bắt đầu lại</string>
+    <string name="iptv_remote_start_again_subtitle">Hiển thị mã QR và mã ghép nối mới</string>
+    <string name="iptv_remote_done">Xong</string>
+    <string name="iptv_remote_done_subtitle">Dừng thiết lập bằng điện thoại và quay lại</string>
+    <string name="iptv_remote_confirm_add_title">Thêm mục này từ điện thoại?</string>
+    <string name="iptv_remote_confirm_edit_title">Thay đổi %1$s từ điện thoại?</string>
+    <string name="iptv_remote_confirm_subtitle">Hãy kiểm tra thông tin. Không có gì được lưu trừ khi bạn chọn Lưu trên TV này.</string>
+    <string name="iptv_remote_field_device">Gửi từ</string>
+    <string name="iptv_remote_field_type">Loại</string>
+    <string name="iptv_remote_field_name">Tên</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Địa chỉ</string>
+    <string name="iptv_remote_field_server">Máy chủ</string>
+    <string name="iptv_remote_server_changes">Đổi từ %1$s sang %2$s</string>
+    <string name="iptv_remote_server_new">Đổi sang %1$s</string>
+    <string name="iptv_remote_field_username">Tên người dùng</string>
+    <string name="iptv_remote_field_password">Mật khẩu</string>
+    <string name="iptv_remote_field_mac">Địa chỉ MAC</string>
+    <string name="iptv_remote_password_set">Đã nhập trên điện thoại (ẩn)</string>
+    <string name="iptv_remote_password_new">Mật khẩu mới (ẩn)</string>
+    <string name="iptv_remote_save">Lưu trên TV này</string>
+    <string name="iptv_remote_reject">Từ chối</string>
+    <string name="iptv_remote_saved">Đã lưu. Đang tải kênh.</string>
+    <string name="iptv_remote_guide_saved">Đã lưu. Đang tải lịch phát sóng.</string>
+    <string name="iptv_remote_rejected">Đã từ chối. Không có gì được lưu.</string>
+</resources>

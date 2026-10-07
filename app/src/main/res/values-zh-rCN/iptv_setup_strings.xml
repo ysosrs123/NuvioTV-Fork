@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">通过手机或电脑设置</string>
+    <string name="iptv_remote_entry_subtitle">用真正的键盘输入地址和登录信息</string>
+    <string name="iptv_remote_title">通过手机设置</string>
+    <string name="iptv_remote_description">用手机扫描二维码，或在同一网络中的电脑上打开该地址。然后输入此处显示的配对码。</string>
+    <string name="iptv_remote_code">配对码</string>
+    <string name="iptv_remote_address">或打开此地址</string>
+    <string name="iptv_remote_qr_description">用于手机设置的 QR 码</string>
+    <string name="iptv_remote_home_network">请仅在家庭网络中使用。设置页面未加密。</string>
+    <string name="iptv_remote_idle_note">离开此页面或 10 分钟无操作后将停止。</string>
+    <string name="iptv_remote_confirm_note">在电视上确认之前不会保存任何内容。来源和节目单只能在电视上移除。</string>
+    <string name="iptv_remote_starting">正在启动手机设置…</string>
+    <string name="iptv_remote_waiting">正在等待手机或电脑</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="other">已连接 %d 台设备</item>
+    </plurals>
+    <string name="iptv_remote_no_network">请将电视连接到家庭网络，以便通过手机设置。</string>
+    <string name="iptv_remote_not_home_network">电视不在私有家庭网络地址上，因此手机设置保持关闭。</string>
+    <string name="iptv_remote_ports_busy">网络端口被占用，无法启动手机设置。请稍后重试。</string>
+    <string name="iptv_remote_idle_stopped">10 分钟无操作，手机设置已停止。</string>
+    <string name="iptv_remote_paused">应用转入后台，手机设置已停止。</string>
+    <string name="iptv_remote_start_again">重新开始</string>
+    <string name="iptv_remote_start_again_subtitle">显示新的二维码和配对码</string>
+    <string name="iptv_remote_done">完成</string>
+    <string name="iptv_remote_done_subtitle">停止手机设置并返回</string>
+    <string name="iptv_remote_confirm_add_title">添加来自手机的内容？</string>
+    <string name="iptv_remote_confirm_edit_title">通过手机更改 %1$s？</string>
+    <string name="iptv_remote_confirm_subtitle">请核对详细信息。除非您在此电视上选择“保存”，否则不会保存任何内容。</string>
+    <string name="iptv_remote_field_device">发送自</string>
+    <string name="iptv_remote_field_type">类型</string>
+    <string name="iptv_remote_field_name">名称</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">地址</string>
+    <string name="iptv_remote_field_server">服务器</string>
+    <string name="iptv_remote_server_changes">从 %1$s 更改为 %2$s</string>
+    <string name="iptv_remote_server_new">更改为 %1$s</string>
+    <string name="iptv_remote_field_username">用户名</string>
+    <string name="iptv_remote_field_password">密码</string>
+    <string name="iptv_remote_field_mac">MAC 地址</string>
+    <string name="iptv_remote_password_set">已在手机上输入（已隐藏）</string>
+    <string name="iptv_remote_password_new">新密码（已隐藏）</string>
+    <string name="iptv_remote_save">保存到此电视</string>
+    <string name="iptv_remote_reject">拒绝</string>
+    <string name="iptv_remote_saved">已保存。正在加载频道。</string>
+    <string name="iptv_remote_guide_saved">已保存。正在加载节目单。</string>
+    <string name="iptv_remote_rejected">已拒绝。未保存任何内容。</string>
+</resources>

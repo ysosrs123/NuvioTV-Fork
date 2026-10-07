@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">スマートフォンやパソコンから設定</string>
+    <string name="iptv_remote_entry_subtitle">アドレスやログイン情報を使いやすいキーボードで入力</string>
+    <string name="iptv_remote_title">スマートフォンから設定</string>
+    <string name="iptv_remote_description">スマートフォンでQRコードをスキャンするか、同じネットワーク上のパソコンでアドレスを開いてください。次に、ここに表示されているペアリングコードを入力します。</string>
+    <string name="iptv_remote_code">ペアリングコード</string>
+    <string name="iptv_remote_address">またはこのアドレスを開く</string>
+    <string name="iptv_remote_qr_description">スマートフォン設定用のQRコード</string>
+    <string name="iptv_remote_home_network">自宅のネットワークでのみ使用してください。設定ページは暗号化されていません。</string>
+    <string name="iptv_remote_idle_note">この画面を離れるか、10分間操作がないと停止します。</string>
+    <string name="iptv_remote_confirm_note">TVで確認するまで何も保存されません。ソースと番組表の削除はTVでのみ行えます。</string>
+    <string name="iptv_remote_starting">スマートフォン設定を開始中…</string>
+    <string name="iptv_remote_waiting">スマートフォンまたはパソコンを待機中</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="other">%d 台のデバイスが接続中</item>
+    </plurals>
+    <string name="iptv_remote_no_network">スマートフォンから設定するには、TVを自宅のネットワークに接続してください。</string>
+    <string name="iptv_remote_not_home_network">TVがプライベートな家庭用ネットワークのアドレスにないため、スマートフォン設定は無効です。</string>
+    <string name="iptv_remote_ports_busy">ネットワークポートが使用中のため、スマートフォン設定を開始できませんでした。しばらくしてから再試行してください。</string>
+    <string name="iptv_remote_idle_stopped">10分間操作がなかったため、スマートフォン設定を停止しました。</string>
+    <string name="iptv_remote_paused">アプリがバックグラウンドに移ったため、スマートフォン設定を停止しました。</string>
+    <string name="iptv_remote_start_again">再開</string>
+    <string name="iptv_remote_start_again_subtitle">新しいQRコードとペアリングコードを表示</string>
+    <string name="iptv_remote_done">完了</string>
+    <string name="iptv_remote_done_subtitle">スマートフォン設定を停止して戻る</string>
+    <string name="iptv_remote_confirm_add_title">スマートフォンからこれを追加しますか？</string>
+    <string name="iptv_remote_confirm_edit_title">スマートフォンから %1$s を変更しますか？</string>
+    <string name="iptv_remote_confirm_subtitle">内容を確認してください。このTVで「保存」を選択するまで何も保存されません。</string>
+    <string name="iptv_remote_field_device">送信元</string>
+    <string name="iptv_remote_field_type">種類</string>
+    <string name="iptv_remote_field_name">名前</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">アドレス</string>
+    <string name="iptv_remote_field_server">サーバー</string>
+    <string name="iptv_remote_server_changes">%1$s から %2$s に変更</string>
+    <string name="iptv_remote_server_new">%1$s に変更</string>
+    <string name="iptv_remote_field_username">ユーザー名</string>
+    <string name="iptv_remote_field_password">パスワード</string>
+    <string name="iptv_remote_field_mac">MACアドレス</string>
+    <string name="iptv_remote_password_set">スマートフォンで入力済み（非表示）</string>
+    <string name="iptv_remote_password_new">新しいパスワード（非表示）</string>
+    <string name="iptv_remote_save">このTVに保存</string>
+    <string name="iptv_remote_reject">拒否</string>
+    <string name="iptv_remote_saved">保存しました。チャンネルを読み込んでいます。</string>
+    <string name="iptv_remote_guide_saved">保存しました。番組表を読み込んでいます。</string>
+    <string name="iptv_remote_rejected">拒否しました。何も保存されていません。</string>
+</resources>
