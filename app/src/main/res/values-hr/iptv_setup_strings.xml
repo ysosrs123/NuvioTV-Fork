@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Postavi s mobitela ili računala</string>
+    <string name="iptv_remote_entry_subtitle">Upiši adrese i podatke za prijavu na pravoj tipkovnici</string>
+    <string name="iptv_remote_title">Postavljanje s mobitela</string>
+    <string name="iptv_remote_description">Skeniraj QR kôd mobitelom ili otvori adresu na računalu u istoj mreži. Zatim unesi kôd za uparivanje prikazan ovdje.</string>
+    <string name="iptv_remote_code">Kôd za uparivanje</string>
+    <string name="iptv_remote_address">Ili otvori ovu adresu</string>
+    <string name="iptv_remote_qr_description">QR kôd za postavljanje s mobitela</string>
+    <string name="iptv_remote_home_network">Koristi samo na kućnoj mreži. Stranica za postavljanje nije šifrirana.</string>
+    <string name="iptv_remote_idle_note">Zaustavlja se kad napustiš ovaj zaslon ili nakon 10 minuta neaktivnosti.</string>
+    <string name="iptv_remote_confirm_note">Ništa se ne sprema dok to ne potvrdiš ovdje na TV-u. Izvori i vodiči mogu se ukloniti samo na TV-u.</string>
+    <string name="iptv_remote_starting">Pokretanje postavljanja s mobitela…</string>
+    <string name="iptv_remote_waiting">Čeka se mobitel ili računalo</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d povezan uređaj</item>
+        <item quantity="few">%d povezana uređaja</item>
+        <item quantity="other">%d povezanih uređaja</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Poveži TV s kućnom mrežom za postavljanje s mobitela.</string>
+    <string name="iptv_remote_not_home_network">TV nema adresu privatne kućne mreže pa postavljanje s mobitela ostaje isključeno.</string>
+    <string name="iptv_remote_ports_busy">Postavljanje s mobitela nije se moglo pokrenuti jer su njegovi mrežni portovi zauzeti. Pokušaj ponovno za trenutak.</string>
+    <string name="iptv_remote_idle_stopped">Postavljanje s mobitela zaustavljeno je nakon 10 minuta neaktivnosti.</string>
+    <string name="iptv_remote_paused">Postavljanje s mobitela zaustavljeno je dok je aplikacija bila u pozadini.</string>
+    <string name="iptv_remote_start_again">Pokreni ponovno</string>
+    <string name="iptv_remote_start_again_subtitle">Prikazuje novi QR kôd i kôd za uparivanje</string>
+    <string name="iptv_remote_done">Gotovo</string>
+    <string name="iptv_remote_done_subtitle">Zaustavlja postavljanje s mobitela i vraća natrag</string>
+    <string name="iptv_remote_confirm_add_title">Dodati ovo s mobitela?</string>
+    <string name="iptv_remote_confirm_edit_title">Promijeniti %1$s s mobitela?</string>
+    <string name="iptv_remote_confirm_subtitle">Provjeri pojedinosti. Ništa se ne sprema dok na ovom TV-u ne odabereš Spremi.</string>
+    <string name="iptv_remote_field_device">Poslano s</string>
+    <string name="iptv_remote_field_type">Vrsta</string>
+    <string name="iptv_remote_field_name">Naziv</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adresa</string>
+    <string name="iptv_remote_field_server">Poslužitelj</string>
+    <string name="iptv_remote_server_changes">Mijenja se iz %1$s u %2$s</string>
+    <string name="iptv_remote_server_new">Mijenja se u %1$s</string>
+    <string name="iptv_remote_field_username">Korisničko ime</string>
+    <string name="iptv_remote_field_password">Lozinka</string>
+    <string name="iptv_remote_field_mac">MAC adresa</string>
+    <string name="iptv_remote_password_set">Uneseno na mobitelu (skriveno)</string>
+    <string name="iptv_remote_password_new">Nova lozinka (skrivena)</string>
+    <string name="iptv_remote_save">Spremi na ovom TV-u</string>
+    <string name="iptv_remote_reject">Odbij</string>
+    <string name="iptv_remote_saved">Spremljeno. Učitavanje kanala.</string>
+    <string name="iptv_remote_guide_saved">Spremljeno. Učitavanje vodiča.</string>
+    <string name="iptv_remote_rejected">Odbijeno. Ništa nije spremljeno.</string>
+</resources>

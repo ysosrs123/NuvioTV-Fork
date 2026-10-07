@@ -1,0 +1,74 @@
+<resources>
+    <string name="iptv_recording_channel">Nagrania</string>
+    <string name="iptv_recording_channel_description">Wyświetlane podczas nagrywania programów telewizji na żywo</string>
+    <string name="iptv_recording_notification_title">Nagrywanie telewizji na żywo</string>
+    <string name="iptv_recording_notification_starting">Rozpoczynanie nagrywania…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d program</item>
+        <item quantity="few">%1$d programy</item>
+        <item quantity="many">%1$d programów</item>
+        <item quantity="other">%1$d programu</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Nagraj</string>
+    <string name="iptv_recording_record_now">Nagraj teraz</string>
+    <string name="iptv_recording_record_programme">Nagraj ten program</string>
+    <string name="iptv_recording_started">Nagrywanie rozpoczęte</string>
+    <string name="iptv_recording_scheduled">Nagranie zaplanowane</string>
+    <string name="iptv_recordings_open">Nagrania</string>
+
+    <string name="iptv_recordings_title">Nagrania</string>
+    <string name="iptv_recordings_description">Programy nagrane lub zaplanowane w telewizji na żywo. Nagrania są przechowywane na tym urządzeniu i należą do tego profilu.</string>
+    <string name="iptv_recordings_hint">Naciśnij OK, aby odtworzyć nagranie. Przytrzymaj OK lub naciśnij Menu, aby zobaczyć więcej opcji.</string>
+    <string name="iptv_recordings_free">%1$s wolnego miejsca na tym urządzeniu</string>
+    <string name="iptv_recordings_empty">Brak nagrań. Nagraj program z przewodnika telewizji na żywo lub podczas oglądania.</string>
+    <string name="iptv_recordings_group_now">Nagrywane teraz</string>
+    <string name="iptv_recordings_group_scheduled">Zaplanowane</string>
+    <string name="iptv_recordings_group_recorded">Nagrane</string>
+
+    <string name="iptv_recording_status_scheduled">Zaplanowane</string>
+    <string name="iptv_recording_status_recording">Nagrywanie</string>
+    <string name="iptv_recording_status_done">Nagrane</string>
+    <string name="iptv_recording_status_partial">Nagrane częściowo</string>
+    <string name="iptv_recording_status_failed">Niepowodzenie</string>
+    <string name="iptv_recording_status_cancelled">Anulowane</string>
+    <string name="iptv_recording_gaps">Zawiera luki</string>
+
+    <string name="iptv_recording_failure_no_connection">Brak wolnego połączenia na tym koncie</string>
+    <string name="iptv_recording_failure_device_busy">Urządzenie jest zajęte innymi strumieniami</string>
+    <string name="iptv_recording_failure_source">Nie można połączyć się ze źródłem</string>
+    <string name="iptv_recording_failure_channel">Kanał nie jest już dostępny</string>
+    <string name="iptv_recording_failure_unsupported">Tego formatu strumienia nie można nagrać</string>
+    <string name="iptv_recording_failure_encrypted">Zaszyfrowanych strumieni nie można nagrywać</string>
+    <string name="iptv_recording_failure_network">Strumień został przerwany</string>
+    <string name="iptv_recording_failure_low_storage">Pamięć jest prawie pełna</string>
+    <string name="iptv_recording_failure_storage">Nie udało się zapisać nagrania</string>
+    <string name="iptv_recording_failure_time_limit">Osiągnięto limit czasu nagrywania</string>
+    <string name="iptv_recording_failure_interrupted">Aplikacja lub urządzenie zatrzymało się podczas nagrywania</string>
+    <string name="iptv_recording_failure_start_blocked">Android nie pozwolił rozpocząć nagrywania. Zezwól aplikacji Nuvio na alarmy i przypomnienia lub pozostaw Nuvio otwarte.</string>
+    <string name="iptv_recording_failure_missed">Program zakończył się, zanim nagrywanie mogło się rozpocząć</string>
+
+    <string name="iptv_recording_refused_conflict">Inne nagrania wykorzystują już wtedy wszystkie połączenia tego konta</string>
+    <string name="iptv_recording_refused_no_connection">Brak wolnego połączenia na tym koncie. Najpierw przestań oglądać lub nagrywać inny kanał.</string>
+    <string name="iptv_recording_refused_storage">Za mało wolnego miejsca na to nagranie. Przyjmij około 2,5 GB na każdą godzinę HD; 500 MB jest zawsze zostawiane wolne dla urządzenia. Usuń stare nagrania lub zwolnij miejsce.</string>
+    <string name="iptv_recording_refused_ended">Ten program już się zakończył</string>
+    <string name="iptv_recording_refused_channel">Tego kanału nie można teraz nagrać</string>
+    <string name="iptv_recording_refused_duplicate">Ten kanał jest już wtedy nagrywany</string>
+    <string name="iptv_recording_refused_full">Lista nagrań jest pełna. Najpierw usuń niektóre nagrania.</string>
+    <string name="iptv_recording_refused_profile">Profil się zmienił. Spróbuj ponownie.</string>
+    <string name="iptv_recording_refused_exact_alarms">Zaplanowane nagrania wymagają uprawnienia do alarmów i przypomnień. Zezwól na nie aplikacji Nuvio lub nagrywaj podczas oglądania.</string>
+    <string name="iptv_recording_alarm_settings">Zezwól na alarmy i przypomnienia</string>
+
+    <string name="iptv_recording_play">Odtwórz</string>
+    <string name="iptv_recording_stop">Zatrzymaj nagrywanie</string>
+    <string name="iptv_recording_cancel">Anuluj nagranie</string>
+    <string name="iptv_recording_delete">Usuń nagranie</string>
+    <string name="iptv_recording_delete_title">Usunąć „%1$s”?</string>
+    <string name="iptv_recording_delete_description">Nagranie i jego plik zostaną usunięte z tego urządzenia.</string>
+    <string name="iptv_recording_delete_confirm">Usuń</string>
+    <string name="iptv_recording_keep">Zachowaj</string>
+    <string name="iptv_recording_file_missing">Pliku nagrania nie ma już na tym urządzeniu</string>
+    <string name="iptv_recording_paused">Wstrzymano</string>
+    <string name="iptv_recording_playback_failed">Nie można odtworzyć tego nagrania. Plik może być niekompletny lub w formacie, którego to urządzenie nie dekoduje.</string>
+    <string name="iptv_recording_skip_hint">W lewo i w prawo: przewiń o 30 sekund</string>
+</resources>

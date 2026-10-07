@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Konfiguracja z telefonu lub komputera</string>
+    <string name="iptv_remote_entry_subtitle">Wpisuj adresy i dane logowania na wygodnej klawiaturze</string>
+    <string name="iptv_remote_title">Konfiguracja z telefonu</string>
+    <string name="iptv_remote_description">Zeskanuj kod QR telefonem lub otwórz adres na komputerze w tej samej sieci. Następnie wpisz wyświetlony tutaj kod parowania.</string>
+    <string name="iptv_remote_code">Kod parowania</string>
+    <string name="iptv_remote_address">Lub otwórz ten adres</string>
+    <string name="iptv_remote_qr_description">Kod QR do konfiguracji z telefonu</string>
+    <string name="iptv_remote_home_network">Używaj tylko w sieci domowej. Strona konfiguracji nie jest szyfrowana.</string>
+    <string name="iptv_remote_idle_note">Wyłącza się po opuszczeniu tego ekranu lub po 10 minutach bezczynności.</string>
+    <string name="iptv_remote_confirm_note">Nic nie zostanie zapisane, dopóki tego nie potwierdzisz na telewizorze. Źródła i przewodniki można usuwać tylko na telewizorze.</string>
+    <string name="iptv_remote_starting">Uruchamianie konfiguracji z telefonu…</string>
+    <string name="iptv_remote_waiting">Oczekiwanie na telefon lub komputer</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d urządzenie połączone</item>
+        <item quantity="few">%d urządzenia połączone</item>
+        <item quantity="many">%d urządzeń połączonych</item>
+        <item quantity="other">%d urządzenia połączonego</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Połącz telewizor z siecią domową, aby skonfigurować go z telefonu.</string>
+    <string name="iptv_remote_not_home_network">Telewizor nie ma prywatnego adresu sieci domowej, więc konfiguracja z telefonu jest wyłączona.</string>
+    <string name="iptv_remote_ports_busy">Nie udało się uruchomić konfiguracji z telefonu, bo jej porty sieciowe są zajęte. Spróbuj ponownie za chwilę.</string>
+    <string name="iptv_remote_idle_stopped">Konfiguracja z telefonu wyłączyła się po 10 minutach bezczynności.</string>
+    <string name="iptv_remote_paused">Konfiguracja z telefonu wyłączyła się, gdy aplikacja działała w tle.</string>
+    <string name="iptv_remote_start_again">Uruchom ponownie</string>
+    <string name="iptv_remote_start_again_subtitle">Wyświetla nowy kod QR i kod parowania</string>
+    <string name="iptv_remote_done">Gotowe</string>
+    <string name="iptv_remote_done_subtitle">Kończy konfigurację z telefonu i wraca</string>
+    <string name="iptv_remote_confirm_add_title">Dodać to z telefonu?</string>
+    <string name="iptv_remote_confirm_edit_title">Zmienić %1$s z telefonu?</string>
+    <string name="iptv_remote_confirm_subtitle">Sprawdź szczegóły. Nic nie zostanie zapisane, dopóki nie wybierzesz Zapisz na tym telewizorze.</string>
+    <string name="iptv_remote_field_device">Wysłano z</string>
+    <string name="iptv_remote_field_type">Typ</string>
+    <string name="iptv_remote_field_name">Nazwa</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adres</string>
+    <string name="iptv_remote_field_server">Serwer</string>
+    <string name="iptv_remote_server_changes">Zmiana z %1$s na %2$s</string>
+    <string name="iptv_remote_server_new">Zmiana na %1$s</string>
+    <string name="iptv_remote_field_username">Nazwa użytkownika</string>
+    <string name="iptv_remote_field_password">Hasło</string>
+    <string name="iptv_remote_field_mac">Adres MAC</string>
+    <string name="iptv_remote_password_set">Wpisane na telefonie (ukryte)</string>
+    <string name="iptv_remote_password_new">Nowe hasło (ukryte)</string>
+    <string name="iptv_remote_save">Zapisz na tym telewizorze</string>
+    <string name="iptv_remote_reject">Odrzuć</string>
+    <string name="iptv_remote_saved">Zapisano. Wczytywanie kanałów.</string>
+    <string name="iptv_remote_guide_saved">Zapisano. Wczytywanie przewodnika.</string>
+    <string name="iptv_remote_rejected">Odrzucono. Nic nie zostało zapisane.</string>
+</resources>

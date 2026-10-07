@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Nastavitev s telefonom ali računalnikom</string>
+    <string name="iptv_remote_entry_subtitle">Naslove in prijavne podatke vnesite na pravi tipkovnici</string>
+    <string name="iptv_remote_title">Nastavitev s telefonom</string>
+    <string name="iptv_remote_description">S telefonom skenirajte kodo QR ali odprite naslov v računalniku v istem omrežju. Nato vnesite kodo za seznanjanje, prikazano tukaj.</string>
+    <string name="iptv_remote_code">Koda za seznanjanje</string>
+    <string name="iptv_remote_address">Ali odprite ta naslov</string>
+    <string name="iptv_remote_qr_description">Koda QR za nastavitev s telefonom</string>
+    <string name="iptv_remote_home_network">Uporabljajte samo v domačem omrežju. Stran za nastavitev ni šifrirana.</string>
+    <string name="iptv_remote_idle_note">Ustavi se, ko zapustite ta zaslon, ali po 10 minutah nedejavnosti.</string>
+    <string name="iptv_remote_confirm_note">Nič se ne shrani, dokler tega ne potrdite tukaj na TV-ju. Vire in vodnike je mogoče odstraniti samo na TV-ju.</string>
+    <string name="iptv_remote_starting">Zagon nastavitve s telefonom…</string>
+    <string name="iptv_remote_waiting">Čakanje na telefon ali računalnik</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d povezana naprava</item>
+        <item quantity="two">%d povezani napravi</item>
+        <item quantity="few">%d povezane naprave</item>
+        <item quantity="other">%d povezanih naprav</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Za nastavitev s telefonom povežite TV z domačim omrežjem.</string>
+    <string name="iptv_remote_not_home_network">TV nima zasebnega naslova domačega omrežja, zato nastavitev s telefonom ostane izklopljena.</string>
+    <string name="iptv_remote_ports_busy">Nastavitve s telefonom ni bilo mogoče zagnati, ker so njena omrežna vrata zasedena. Poskusite znova čez trenutek.</string>
+    <string name="iptv_remote_idle_stopped">Nastavitev s telefonom se je ustavila po 10 minutah nedejavnosti.</string>
+    <string name="iptv_remote_paused">Nastavitev s telefonom se je ustavila, ko je bila aplikacija v ozadju.</string>
+    <string name="iptv_remote_start_again">Začni znova</string>
+    <string name="iptv_remote_start_again_subtitle">Prikaže novo kodo QR in kodo za seznanjanje</string>
+    <string name="iptv_remote_done">Končano</string>
+    <string name="iptv_remote_done_subtitle">Ustavi nastavitev s telefonom in se vrne</string>
+    <string name="iptv_remote_confirm_add_title">Dodam to s telefona?</string>
+    <string name="iptv_remote_confirm_edit_title">Spremenim %1$s s telefona?</string>
+    <string name="iptv_remote_confirm_subtitle">Preverite podatke. Nič se ne shrani, dokler na tem TV-ju ne izberete Shrani.</string>
+    <string name="iptv_remote_field_device">Poslano iz</string>
+    <string name="iptv_remote_field_type">Vrsta</string>
+    <string name="iptv_remote_field_name">Ime</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Naslov</string>
+    <string name="iptv_remote_field_server">Strežnik</string>
+    <string name="iptv_remote_server_changes">Sprememba iz %1$s v %2$s</string>
+    <string name="iptv_remote_server_new">Sprememba v %1$s</string>
+    <string name="iptv_remote_field_username">Uporabniško ime</string>
+    <string name="iptv_remote_field_password">Geslo</string>
+    <string name="iptv_remote_field_mac">Naslov MAC</string>
+    <string name="iptv_remote_password_set">Vneseno na telefonu (skrito)</string>
+    <string name="iptv_remote_password_new">Novo geslo (skrito)</string>
+    <string name="iptv_remote_save">Shrani na tem TV-ju</string>
+    <string name="iptv_remote_reject">Zavrni</string>
+    <string name="iptv_remote_saved">Shranjeno. Nalaganje kanalov.</string>
+    <string name="iptv_remote_guide_saved">Shranjeno. Nalaganje vodnika.</string>
+    <string name="iptv_remote_rejected">Zavrnjeno. Nič ni bilo shranjeno.</string>
+</resources>

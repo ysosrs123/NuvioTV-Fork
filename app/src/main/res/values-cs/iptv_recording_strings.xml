@@ -1,0 +1,74 @@
+<resources>
+    <string name="iptv_recording_channel">Nahrávky</string>
+    <string name="iptv_recording_channel_description">Zobrazuje se během nahrávání pořadů živé TV</string>
+    <string name="iptv_recording_notification_title">Nahrávání živé TV</string>
+    <string name="iptv_recording_notification_starting">Spouštění nahrávání…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d pořad</item>
+        <item quantity="few">%1$d pořady</item>
+        <item quantity="many">%1$d pořadu</item>
+        <item quantity="other">%1$d pořadů</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Nahrát</string>
+    <string name="iptv_recording_record_now">Nahrát nyní</string>
+    <string name="iptv_recording_record_programme">Nahrát tento pořad</string>
+    <string name="iptv_recording_started">Nahrávání zahájeno</string>
+    <string name="iptv_recording_scheduled">Nahrávání naplánováno</string>
+    <string name="iptv_recordings_open">Nahrávky</string>
+
+    <string name="iptv_recordings_title">Nahrávky</string>
+    <string name="iptv_recordings_description">Pořady nahrané nebo naplánované z živé TV. Nahrávky se ukládají v tomto zařízení a patří k tomuto profilu.</string>
+    <string name="iptv_recordings_hint">Stisknutím OK přehrajete nahrávku. Podržením OK nebo stisknutím Menu zobrazíte další možnosti.</string>
+    <string name="iptv_recordings_free">V zařízení volno %1$s</string>
+    <string name="iptv_recordings_empty">Zatím nic nenahráno. Nahrajte pořad z programu živé TV nebo během sledování.</string>
+    <string name="iptv_recordings_group_now">Právě se nahrává</string>
+    <string name="iptv_recordings_group_scheduled">Naplánováno</string>
+    <string name="iptv_recordings_group_recorded">Nahráno</string>
+
+    <string name="iptv_recording_status_scheduled">Naplánováno</string>
+    <string name="iptv_recording_status_recording">Nahrává se</string>
+    <string name="iptv_recording_status_done">Nahráno</string>
+    <string name="iptv_recording_status_partial">Nahráno částečně</string>
+    <string name="iptv_recording_status_failed">Selhalo</string>
+    <string name="iptv_recording_status_cancelled">Zrušeno</string>
+    <string name="iptv_recording_gaps">Obsahuje mezery</string>
+
+    <string name="iptv_recording_failure_no_connection">Účet nemá volné připojení</string>
+    <string name="iptv_recording_failure_device_busy">Zařízení je vytížené jinými streamy</string>
+    <string name="iptv_recording_failure_source">Zdroj je nedostupný</string>
+    <string name="iptv_recording_failure_channel">Kanál už není k dispozici</string>
+    <string name="iptv_recording_failure_unsupported">Tento formát streamu nelze nahrávat</string>
+    <string name="iptv_recording_failure_encrypted">Šifrované streamy nelze nahrávat</string>
+    <string name="iptv_recording_failure_network">Stream byl přerušen</string>
+    <string name="iptv_recording_failure_low_storage">Úložiště je téměř plné</string>
+    <string name="iptv_recording_failure_storage">Nahrávku se nepodařilo uložit</string>
+    <string name="iptv_recording_failure_time_limit">Byl dosažen časový limit nahrávání</string>
+    <string name="iptv_recording_failure_interrupted">Aplikace nebo zařízení se během nahrávání zastavily</string>
+    <string name="iptv_recording_failure_start_blocked">Android nepovolil spustit nahrávání. Povolte Nuvio budíky a připomenutí nebo nechte Nuvio otevřené.</string>
+    <string name="iptv_recording_failure_missed">Pořad skončil dříve, než mohlo nahrávání začít</string>
+
+    <string name="iptv_recording_refused_conflict">Jiné nahrávky v tu dobu již využívají všechna připojení tohoto účtu</string>
+    <string name="iptv_recording_refused_no_connection">Účet nemá volné připojení. Nejprve přestaňte sledovat nebo nahrávat jiný kanál.</string>
+    <string name="iptv_recording_refused_storage">Na tuto nahrávku není dost volného místa. Počítejte asi s 2,5 GB na každou hodinu HD; 500 MB zůstává vždy volných pro zařízení. Smažte staré nahrávky nebo uvolněte místo.</string>
+    <string name="iptv_recording_refused_ended">Tento pořad již skončil</string>
+    <string name="iptv_recording_refused_channel">Tento kanál teď nelze nahrávat</string>
+    <string name="iptv_recording_refused_duplicate">Tento kanál se v tu dobu již nahrává</string>
+    <string name="iptv_recording_refused_full">Seznam nahrávek je plný. Nejprve některé nahrávky smažte.</string>
+    <string name="iptv_recording_refused_profile">Profil se změnil. Zkuste to znovu.</string>
+    <string name="iptv_recording_refused_exact_alarms">Naplánované nahrávání vyžaduje oprávnění pro budíky a připomenutí. Povolte ho pro Nuvio, nebo nahrávejte během sledování.</string>
+    <string name="iptv_recording_alarm_settings">Povolit budíky a připomenutí</string>
+
+    <string name="iptv_recording_play">Přehrát</string>
+    <string name="iptv_recording_stop">Zastavit nahrávání</string>
+    <string name="iptv_recording_cancel">Zrušit nahrávání</string>
+    <string name="iptv_recording_delete">Smazat nahrávku</string>
+    <string name="iptv_recording_delete_title">Smazat „%1$s“?</string>
+    <string name="iptv_recording_delete_description">Nahrávka a její soubor budou z tohoto zařízení odstraněny.</string>
+    <string name="iptv_recording_delete_confirm">Smazat</string>
+    <string name="iptv_recording_keep">Ponechat</string>
+    <string name="iptv_recording_file_missing">Soubor nahrávky už v tomto zařízení není</string>
+    <string name="iptv_recording_paused">Pozastaveno</string>
+    <string name="iptv_recording_playback_failed">Tuto nahrávku nelze přehrát. Soubor může být neúplný nebo ve formátu, který toto zařízení neumí dekódovat.</string>
+    <string name="iptv_recording_skip_hint">Vlevo a vpravo posun o 30 sekund</string>
+</resources>

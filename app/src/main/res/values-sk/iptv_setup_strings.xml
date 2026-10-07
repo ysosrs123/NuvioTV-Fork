@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Nastaviť z telefónu alebo počítača</string>
+    <string name="iptv_remote_entry_subtitle">Zadávajte adresy a prihlasovacie údaje na pohodlnej klávesnici</string>
+    <string name="iptv_remote_title">Nastavenie z telefónu</string>
+    <string name="iptv_remote_description">Naskenujte QR kód telefónom alebo otvorte adresu na počítači v rovnakej sieti. Potom zadajte párovací kód zobrazený tu.</string>
+    <string name="iptv_remote_code">Párovací kód</string>
+    <string name="iptv_remote_address">Alebo otvorte túto adresu</string>
+    <string name="iptv_remote_qr_description">QR kód na nastavenie z telefónu</string>
+    <string name="iptv_remote_home_network">Používajte iba v domácej sieti. Stránka nastavenia nie je šifrovaná.</string>
+    <string name="iptv_remote_idle_note">Ukončí sa, keď opustíte túto obrazovku, alebo po 10 minútach nečinnosti.</string>
+    <string name="iptv_remote_confirm_note">Nič sa neuloží, kým to nepotvrdíte tu na TV. Zdroje a programy možno odstrániť iba na TV.</string>
+    <string name="iptv_remote_starting">Spúšťa sa nastavenie z telefónu…</string>
+    <string name="iptv_remote_waiting">Čaká sa na telefón alebo počítač</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d pripojené zariadenie</item>
+        <item quantity="few">%d pripojené zariadenia</item>
+        <item quantity="many">%d pripojeného zariadenia</item>
+        <item quantity="other">%d pripojených zariadení</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Na nastavenie z telefónu pripojte TV k domácej sieti.</string>
+    <string name="iptv_remote_not_home_network">TV nemá adresu súkromnej domácej siete, preto zostáva nastavenie z telefónu vypnuté.</string>
+    <string name="iptv_remote_ports_busy">Nastavenie z telefónu sa nepodarilo spustiť, pretože jeho sieťové porty sú obsadené. Skúste to o chvíľu znova.</string>
+    <string name="iptv_remote_idle_stopped">Nastavenie z telefónu sa ukončilo po 10 minútach nečinnosti.</string>
+    <string name="iptv_remote_paused">Nastavenie z telefónu sa ukončilo, keď aplikácia bežala na pozadí.</string>
+    <string name="iptv_remote_start_again">Spustiť znova</string>
+    <string name="iptv_remote_start_again_subtitle">Zobrazí nový QR kód a párovací kód</string>
+    <string name="iptv_remote_done">Hotovo</string>
+    <string name="iptv_remote_done_subtitle">Ukončí nastavenie z telefónu a vráti sa späť</string>
+    <string name="iptv_remote_confirm_add_title">Pridať toto z telefónu?</string>
+    <string name="iptv_remote_confirm_edit_title">Zmeniť %1$s z telefónu?</string>
+    <string name="iptv_remote_confirm_subtitle">Skontrolujte údaje. Nič sa neuloží, kým na tomto TV nezvolíte Uložiť.</string>
+    <string name="iptv_remote_field_device">Odoslané z</string>
+    <string name="iptv_remote_field_type">Typ</string>
+    <string name="iptv_remote_field_name">Názov</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adresa</string>
+    <string name="iptv_remote_field_server">Server</string>
+    <string name="iptv_remote_server_changes">Zmena z %1$s na %2$s</string>
+    <string name="iptv_remote_server_new">Zmena na %1$s</string>
+    <string name="iptv_remote_field_username">Používateľské meno</string>
+    <string name="iptv_remote_field_password">Heslo</string>
+    <string name="iptv_remote_field_mac">MAC adresa</string>
+    <string name="iptv_remote_password_set">Zadané v telefóne (skryté)</string>
+    <string name="iptv_remote_password_new">Nové heslo (skryté)</string>
+    <string name="iptv_remote_save">Uložiť na tomto TV</string>
+    <string name="iptv_remote_reject">Odmietnuť</string>
+    <string name="iptv_remote_saved">Uložené. Načítavajú sa kanály.</string>
+    <string name="iptv_remote_guide_saved">Uložené. Načítava sa program.</string>
+    <string name="iptv_remote_rejected">Odmietnuté. Nič sa neuložilo.</string>
+</resources>

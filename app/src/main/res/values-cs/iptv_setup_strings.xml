@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Nastavit z telefonu nebo počítače</string>
+    <string name="iptv_remote_entry_subtitle">Zadávejte adresy a přihlašovací údaje na pohodlné klávesnici</string>
+    <string name="iptv_remote_title">Nastavení z telefonu</string>
+    <string name="iptv_remote_description">Naskenujte QR kód telefonem nebo otevřete adresu na počítači ve stejné síti. Pak zadejte párovací kód zobrazený zde.</string>
+    <string name="iptv_remote_code">Párovací kód</string>
+    <string name="iptv_remote_address">Nebo otevřete tuto adresu</string>
+    <string name="iptv_remote_qr_description">QR kód pro nastavení z telefonu</string>
+    <string name="iptv_remote_home_network">Používejte jen v domácí síti. Stránka nastavení není šifrovaná.</string>
+    <string name="iptv_remote_idle_note">Ukončí se, když opustíte tuto obrazovku, nebo po 10 minutách nečinnosti.</string>
+    <string name="iptv_remote_confirm_note">Nic se neuloží, dokud to nepotvrdíte zde na TV. Zdroje a programy lze odebrat jen na TV.</string>
+    <string name="iptv_remote_starting">Spouštění nastavení z telefonu…</string>
+    <string name="iptv_remote_waiting">Čeká se na telefon nebo počítač</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d připojené zařízení</item>
+        <item quantity="few">%d připojená zařízení</item>
+        <item quantity="many">%d připojeného zařízení</item>
+        <item quantity="other">%d připojených zařízení</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Pro nastavení z telefonu připojte TV k domácí síti.</string>
+    <string name="iptv_remote_not_home_network">TV nemá adresu privátní domácí sítě, proto zůstává nastavení z telefonu vypnuté.</string>
+    <string name="iptv_remote_ports_busy">Nastavení z telefonu nelze spustit, protože jeho síťové porty jsou obsazené. Zkuste to za chvíli znovu.</string>
+    <string name="iptv_remote_idle_stopped">Nastavení z telefonu bylo ukončeno po 10 minutách nečinnosti.</string>
+    <string name="iptv_remote_paused">Nastavení z telefonu bylo ukončeno, když aplikace běžela na pozadí.</string>
+    <string name="iptv_remote_start_again">Spustit znovu</string>
+    <string name="iptv_remote_start_again_subtitle">Zobrazí nový QR kód a párovací kód</string>
+    <string name="iptv_remote_done">Hotovo</string>
+    <string name="iptv_remote_done_subtitle">Ukončí nastavení z telefonu a vrátí se zpět</string>
+    <string name="iptv_remote_confirm_add_title">Přidat toto z telefonu?</string>
+    <string name="iptv_remote_confirm_edit_title">Změnit %1$s z telefonu?</string>
+    <string name="iptv_remote_confirm_subtitle">Zkontrolujte údaje. Nic se neuloží, dokud na této TV nezvolíte Uložit.</string>
+    <string name="iptv_remote_field_device">Odesláno z</string>
+    <string name="iptv_remote_field_type">Typ</string>
+    <string name="iptv_remote_field_name">Název</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adresa</string>
+    <string name="iptv_remote_field_server">Server</string>
+    <string name="iptv_remote_server_changes">Změna z %1$s na %2$s</string>
+    <string name="iptv_remote_server_new">Změna na %1$s</string>
+    <string name="iptv_remote_field_username">Uživatelské jméno</string>
+    <string name="iptv_remote_field_password">Heslo</string>
+    <string name="iptv_remote_field_mac">MAC adresa</string>
+    <string name="iptv_remote_password_set">Zadáno na telefonu (skryto)</string>
+    <string name="iptv_remote_password_new">Nové heslo (skryto)</string>
+    <string name="iptv_remote_save">Uložit na této TV</string>
+    <string name="iptv_remote_reject">Odmítnout</string>
+    <string name="iptv_remote_saved">Uloženo. Načítají se kanály.</string>
+    <string name="iptv_remote_guide_saved">Uloženo. Načítá se program.</string>
+    <string name="iptv_remote_rejected">Odmítnuto. Nic nebylo uloženo.</string>
+</resources>
