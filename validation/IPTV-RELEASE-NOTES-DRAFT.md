@@ -141,6 +141,25 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   reason (empty, web page, JSON, ZIP, not XML, not XMLTV). At most 200 programmes per
   channel and 50,000 channels are stored, and descriptions are cut to 400 characters.
 - Audio/subtitle track dialog with Automatic, Off and per-player choices.
+- Sport: a Sport entry in the Live TV rail lists channels with sport on now or in
+  the next six hours, live matches first, in the usual guide (watch, record,
+  catch-up). It works from the linked guides only, with no outside sports data:
+  programmes count as sport from their guide categories (for example "Sports",
+  "Football"), competition names (Premier League, AFL, NRL, NFL, NBA, Formula 1 and
+  others) or fixture titles such as "A v B" on a sports channel or marked live;
+  highlights, previews, news, talk shows and films are left out. Guides refreshed
+  with this version are needed (older guide data counts after its next refresh).
+- Pause and rewind live TV: Play/Pause pauses a live channel ("Paused" is shown). On
+  channels with catch-up, resuming after more than 20 seconds carries on from the
+  minute it was paused, and Rewind steps back about a minute, both through the
+  provider's archive ("Behind live"; Return to live in the channel options; the end
+  of the programme returns to live). Channels without catch-up resume where they were
+  while the stream is still held, otherwise from live.
+- Guide folder: Add guide can pick an XMLTV file from the iptv-guides folder on the
+  device or a USB drive (listed with size and date), for TVs without a file picker.
+- Removing a source also removes the guides no other source uses (such as guides
+  named in its playlist header) and its remembered category and hidden categories;
+  removing a profile clears its remembered categories too.
 - Search ignores case and compatibility forms (for example ß/ss, final sigma).
 
 ## Ready below the UI (screens pending)
@@ -148,9 +167,6 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 - Provider account groups shared by several sources (each source has its own
   connection limit in Live TV sources; grouping sources under one shared limit has
   no screen yet).
-- Guide import from a folder on internal storage or a USB drive for TVs without a
-  file picker (files there can be read as guides, but there is no screen to choose
-  one yet).
 
 ## Reliability
 
@@ -194,6 +210,17 @@ Still required before enabling: device validation of the player path, renderer
 preroll and seek acknowledgement, measured memory and storage margins.
 
 ## Fixes and improvements since the last device validation (b68985a)
+
+Latest work list (7 October)
+- Guides named in an M3U header are removed with their playlist when no other source
+  uses them; Live TV's remembered category and hidden categories are removed with
+  their source or profile (multiview settings stay, they are device-wide).
+- The catalogue upgrade test from schema 2 now builds a real schema 2 database
+  (it set version 2 on a current database before, so the upgrade re-added columns).
+- A paused live picture no longer shows the "Connecting" spinner, and a reconnect no
+  longer unpauses it.
+- The PR Full Debug Build workflow can build a minified release APK
+  (`build_type: release`) to check R8 with IPTV enabled.
 
 Playback and capture
 - Long captures now play to the end: played batches are released so the reader can
@@ -286,8 +313,13 @@ Phone setup (security review)
   (pictures, decode capacity, what each box reports as its output height) come from
   what Android reports, not from measurements.
 - No DRM, encrypted HLS, fMP4 or separate-audio support has been validated.
-- No timeshift (pausing or rewinding live TV) yet; catch-up covers channels with a
-  provider archive. No sports view.
+- Pause and rewind beyond what the player holds work only on channels with a
+  provider archive and a guide programme, at one-minute steps (Xtream archive
+  addresses take minutes). Without an archive a long pause may resume from live;
+  there is no local time-shift buffer (the capture chain stays disabled).
+- Sport is matched from guide text only: titles and categories in other languages,
+  or guides without categories, can miss matches or include the odd non-sport
+  programme. No reminders, team favourites or fixtures from a sports data service.
 - Exact alarms in deep sleep on Fire OS and recording across stream gaps are
   unverified. With one connection on an account, watching and recording block each
   other. Stalker streams that need extra headers may not record. Encrypted HLS and
@@ -298,7 +330,7 @@ Phone setup (security review)
 - Subtitles, closed captions, DVB subtitles and teletext are not all validated.
 - New Live TV text is English only; other languages fall back to English.
 - On-screen keyboard focus in source forms needs device checks. Devices without a
-  document picker (such as the AM9) can add guides by address but not from a file.
+  document picker (such as the AM9) add guide files through the iptv-guides folder.
 - Phone setup uses plain HTTP on the home network (pairing code, single-use token and
   confirmation on the TV); it is not meant for untrusted networks.
 - The minified release build has never processed the IPTV code.
