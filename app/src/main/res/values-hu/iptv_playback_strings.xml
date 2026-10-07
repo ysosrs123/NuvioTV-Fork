@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">A szolgáltató elutasította ezt a csatornát. Ellenőrizd az előfizetésedet, majd próbáld újra.</string>
+    <string name="iptv_playback_missing">Ez a csatorna már nem érhető el a szolgáltatónál.</string>
+    <string name="iptv_playback_unsupported">Ennek a csatornának a formátuma nem játszható le ezen az eszközön.</string>
+    <string name="iptv_playback_decoder">A videodekóder nem tudott elindulni. Zárd be a többi képet, és próbáld újra.</string>
+</resources>

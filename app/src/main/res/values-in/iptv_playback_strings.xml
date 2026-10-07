@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">Penyedia menolak saluran ini. Periksa langganan Anda, lalu coba lagi.</string>
+    <string name="iptv_playback_missing">Saluran ini tidak lagi tersedia dari penyedia.</string>
+    <string name="iptv_playback_unsupported">Format saluran ini tidak dapat diputar di perangkat ini.</string>
+    <string name="iptv_playback_decoder">Dekoder video tidak dapat dimulai. Tutup gambar lain dan coba lagi.</string>
+</resources>

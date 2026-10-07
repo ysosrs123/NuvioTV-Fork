@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Svi izvori</string>
+    <string name="iptv_all_sources_favourites">Omiljeni iz svih izvora</string>
+    <string name="iptv_density">Gustoća vodiča</string>
+    <string name="iptv_density_subtitle">Koliko kanala stane na zaslon</string>
+    <string name="iptv_density_comfortable">Udobno</string>
+    <string name="iptv_density_comfortable_description">Veći redovi i logotipi s vremenima emisija</string>
+    <string name="iptv_density_compact">Kompaktno</string>
+    <string name="iptv_density_compact_description">Manji redovi i logotipi da stane više kanala</string>
+    <string name="iptv_inset_show">Prikaži u kutu</string>
+    <string name="iptv_inset_show_subtitle">Zadržava %1$s preko cijelog zaslona, a ovaj kanal u maloj slici</string>
+    <string name="iptv_inset_swap">Zamijeni s kutnom slikom</string>
+    <string name="iptv_inset_close">Zatvori kutnu sliku</string>
+    <string name="iptv_inset_hint">Žuta tipka zamjenjuje slike, Natrag zatvara kutnu sliku</string>
+    <string name="iptv_inset_unsupported">Ovaj TV box može reproducirati samo jedan kanal odjednom.</string>
+    <string name="iptv_inset_decoder">Ovaj TV box ne može dekodirati drugu sliku uz ovaj kanal.</string>
+    <string name="iptv_inset_capacity">Nema slobodne veze za ovaj račun. Povećaj broj veza računa u Izvorima TV-a uživo ako tvoj paket to dopušta.</string>
+    <string name="iptv_move_channel">Premjesti kanal</string>
+    <string name="iptv_move_channel_subtitle">Promijeni gdje se ovaj kanal pojavljuje na popisu</string>
+    <string name="iptv_move_channel_title">Premještanje: %1$s</string>
+    <string name="iptv_move_key_step">▲▼ Jedno mjesto</string>
+    <string name="iptv_move_key_top">◀ Na vrh</string>
+    <string name="iptv_move_key_bottom">▶ Na dno</string>
+    <string name="iptv_move_key_done">OK ili Natrag: gotovo</string>
+    <string name="iptv_move_moved_bottom">Premješteno na dno popisa</string>
+    <string name="iptv_move_category">Premjesti kategoriju</string>
+    <string name="iptv_move_category_subtitle">Promijeni gdje se ova kategorija pojavljuje u izborniku</string>
+    <string name="iptv_move_category_keys">▲▼ jedno mjesto · ◀ na vrh · ▶ na dno · OK ili Natrag: gotovo</string>
+    <string name="iptv_multiview_layout_side">Jedna uz drugu</string>
+    <string name="iptv_multiview_layout_one_over_two">Jedna iznad dvije</string>
+    <string name="iptv_multiview_layout_description">Jedna uz drugu prikazuje dvije slike. Jedna velika i Jedna iznad dvije koriste sliku odabranu s Prikaži veliko.</string>
+    <string name="iptv_scrub_behind">%1$s iza</string>
+    <string name="iptv_scrub_live_edge">Uživo %1$s</string>
+    <string name="iptv_scrub_hint">Lijevo i desno pomiču 30 sekundi, drži za brže</string>
+    <string name="iptv_scrub_deck_hint">Gore na vremensku traku za kretanje kroz ranije emisije</string>
+    <string name="iptv_scrub_banner_hint">Lijevo i desno mijenjaju emisiju, gore i dolje mijenjaju kanal</string>
+</resources>

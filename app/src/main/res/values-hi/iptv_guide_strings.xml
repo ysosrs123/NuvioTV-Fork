@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">सभी सोर्स</string>
+    <string name="iptv_all_sources_favourites">सभी सोर्स के पसंदीदा</string>
+    <string name="iptv_density">गाइड डेंसिटी</string>
+    <string name="iptv_density_subtitle">स्क्रीन पर कितने चैनल आते हैं</string>
+    <string name="iptv_density_comfortable">आरामदायक</string>
+    <string name="iptv_density_comfortable_description">प्रोग्राम के समय के साथ बड़ी पंक्तियाँ और लोगो</string>
+    <string name="iptv_density_compact">कॉम्पैक्ट</string>
+    <string name="iptv_density_compact_description">छोटी पंक्तियाँ और लोगो, ताकि ज़्यादा चैनल आएँ</string>
+    <string name="iptv_inset_show">कोने में दिखाएँ</string>
+    <string name="iptv_inset_show_subtitle">%1$s को फ़ुल स्क्रीन रखता है और इस चैनल को छोटी तस्वीर में दिखाता है</string>
+    <string name="iptv_inset_swap">कोने की तस्वीर से बदलें</string>
+    <string name="iptv_inset_close">कोने की तस्वीर बंद करें</string>
+    <string name="iptv_inset_hint">पीला बटन तस्वीरें बदलता है, Back कोने की तस्वीर बंद करता है</string>
+    <string name="iptv_inset_unsupported">यह टीवी बॉक्स एक बार में सिर्फ़ एक चैनल चला सकता है।</string>
+    <string name="iptv_inset_decoder">यह टीवी बॉक्स इस चैनल के साथ दूसरी तस्वीर डिकोड नहीं कर सकता।</string>
+    <string name="iptv_inset_capacity">इस अकाउंट के लिए कोई कनेक्शन खाली नहीं है। अगर आपका प्लान अनुमति देता है तो लाइव टीवी सोर्स में अकाउंट के कनेक्शन बढ़ाएँ।</string>
+    <string name="iptv_move_channel">चैनल खिसकाएँ</string>
+    <string name="iptv_move_channel_subtitle">लिस्ट में यह चैनल कहाँ दिखे, बदलें</string>
+    <string name="iptv_move_channel_title">%1$s को खिसकाया जा रहा है</string>
+    <string name="iptv_move_key_step">▲▼ एक जगह</string>
+    <string name="iptv_move_key_top">◀ सबसे ऊपर</string>
+    <string name="iptv_move_key_bottom">▶ सबसे नीचे</string>
+    <string name="iptv_move_key_done">OK या Back: हो गया</string>
+    <string name="iptv_move_moved_bottom">लिस्ट में सबसे नीचे ले जाया गया</string>
+    <string name="iptv_move_category">कैटेगरी खिसकाएँ</string>
+    <string name="iptv_move_category_subtitle">मेन्यू में यह कैटेगरी कहाँ दिखे, बदलें</string>
+    <string name="iptv_move_category_keys">▲▼ एक जगह · ◀ सबसे ऊपर · ▶ सबसे नीचे · OK या Back: हो गया</string>
+    <string name="iptv_multiview_layout_side">साथ-साथ</string>
+    <string name="iptv_multiview_layout_one_over_two">दो के ऊपर एक</string>
+    <string name="iptv_multiview_layout_description">साथ-साथ दो तस्वीरें दिखाता है। एक बड़ी और दो के ऊपर एक, बड़ा दिखाएँ से चुनी गई तस्वीर इस्तेमाल करते हैं।</string>
+    <string name="iptv_scrub_behind">%1$s पीछे</string>
+    <string name="iptv_scrub_live_edge">लाइव %1$s</string>
+    <string name="iptv_scrub_hint">बाएँ और दाएँ 30 सेकंड खिसकाते हैं, तेज़ी के लिए दबाकर रखें</string>
+    <string name="iptv_scrub_deck_hint">पहले के प्रोग्राम देखने के लिए ऊपर टाइमलाइन पर जाएँ</string>
+    <string name="iptv_scrub_banner_hint">बाएँ और दाएँ प्रोग्राम बदलते हैं, ऊपर और नीचे चैनल बदलते हैं</string>
+</resources>

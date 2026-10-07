@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">Ο πάροχος απέρριψε αυτό το κανάλι. Ελέγξτε τη συνδρομή σας και δοκιμάστε ξανά.</string>
+    <string name="iptv_playback_missing">Αυτό το κανάλι δεν είναι πλέον διαθέσιμο από τον πάροχο.</string>
+    <string name="iptv_playback_unsupported">Η μορφή αυτού του καναλιού δεν μπορεί να αναπαραχθεί σε αυτή τη συσκευή.</string>
+    <string name="iptv_playback_decoder">Ο αποκωδικοποιητής βίντεο δεν μπόρεσε να ξεκινήσει. Κλείστε άλλες εικόνες και δοκιμάστε ξανά.</string>
+</resources>

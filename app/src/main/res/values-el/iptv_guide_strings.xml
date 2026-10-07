@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Όλες οι πηγές</string>
+    <string name="iptv_all_sources_favourites">Αγαπημένα από όλες τις πηγές</string>
+    <string name="iptv_density">Πυκνότητα οδηγού</string>
+    <string name="iptv_density_subtitle">Πόσα κανάλια χωρούν στην οθόνη</string>
+    <string name="iptv_density_comfortable">Άνετη</string>
+    <string name="iptv_density_comfortable_description">Μεγαλύτερες γραμμές και λογότυπα με ώρες προγραμμάτων</string>
+    <string name="iptv_density_compact">Συμπαγής</string>
+    <string name="iptv_density_compact_description">Μικρότερες γραμμές και λογότυπα ώστε να χωρούν περισσότερα κανάλια</string>
+    <string name="iptv_inset_show">Εμφάνιση στη γωνία</string>
+    <string name="iptv_inset_show_subtitle">Κρατά το %1$s σε πλήρη οθόνη με αυτό το κανάλι σε μικρή εικόνα</string>
+    <string name="iptv_inset_swap">Εναλλαγή με τη γωνιακή εικόνα</string>
+    <string name="iptv_inset_close">Κλείσιμο γωνιακής εικόνας</string>
+    <string name="iptv_inset_hint">Το κίτρινο πλήκτρο εναλλάσσει τις εικόνες, το Πίσω κλείνει τη γωνιακή εικόνα</string>
+    <string name="iptv_inset_unsupported">Αυτή η συσκευή TV μπορεί να παίζει μόνο ένα κανάλι κάθε φορά.</string>
+    <string name="iptv_inset_decoder">Αυτή η συσκευή TV δεν μπορεί να αποκωδικοποιήσει δεύτερη εικόνα δίπλα σε αυτό το κανάλι.</string>
+    <string name="iptv_inset_capacity">Δεν υπάρχει ελεύθερη σύνδεση για αυτόν τον λογαριασμό. Αυξήστε τις συνδέσεις του λογαριασμού στις Πηγές ζωντανής TV, αν το επιτρέπει το πακέτο σας.</string>
+    <string name="iptv_move_channel">Μετακίνηση καναλιού</string>
+    <string name="iptv_move_channel_subtitle">Αλλάξτε τη θέση του καναλιού στη λίστα</string>
+    <string name="iptv_move_channel_title">Μετακίνηση: %1$s</string>
+    <string name="iptv_move_key_step">▲▼ Μία θέση</string>
+    <string name="iptv_move_key_top">◀ Στην κορυφή</string>
+    <string name="iptv_move_key_bottom">▶ Στο τέλος</string>
+    <string name="iptv_move_key_done">OK ή Πίσω: τέλος</string>
+    <string name="iptv_move_moved_bottom">Μετακινήθηκε στο τέλος της λίστας</string>
+    <string name="iptv_move_category">Μετακίνηση κατηγορίας</string>
+    <string name="iptv_move_category_subtitle">Αλλάξτε τη θέση της κατηγορίας στο μενού</string>
+    <string name="iptv_move_category_keys">▲▼ μία θέση · ◀ στην κορυφή · ▶ στο τέλος · OK ή Πίσω: τέλος</string>
+    <string name="iptv_multiview_layout_side">Δίπλα δίπλα</string>
+    <string name="iptv_multiview_layout_one_over_two">Μία πάνω από δύο</string>
+    <string name="iptv_multiview_layout_description">Η διάταξη Δίπλα δίπλα δείχνει δύο εικόνες. Οι διατάξεις Μία μεγάλη και Μία πάνω από δύο χρησιμοποιούν την εικόνα που επιλέχθηκε με το Εμφάνιση σε μεγάλο.</string>
+    <string name="iptv_scrub_behind">%1$s πίσω</string>
+    <string name="iptv_scrub_live_edge">Ζωντανά %1$s</string>
+    <string name="iptv_scrub_hint">Αριστερά και δεξιά για 30 δευτερόλεπτα, κρατήστε για πιο γρήγορα</string>
+    <string name="iptv_scrub_deck_hint">Πάνω στη γραμμή χρόνου για να περιηγηθείτε σε προηγούμενα προγράμματα</string>
+    <string name="iptv_scrub_banner_hint">Αριστερά και δεξιά αλλάζουν πρόγραμμα, πάνω και κάτω αλλάζουν κανάλι</string>
+</resources>

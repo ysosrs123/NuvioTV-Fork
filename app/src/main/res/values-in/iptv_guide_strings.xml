@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Semua sumber</string>
+    <string name="iptv_all_sources_favourites">Favorit dari semua sumber</string>
+    <string name="iptv_density">Kepadatan panduan</string>
+    <string name="iptv_density_subtitle">Berapa banyak saluran yang muat di layar</string>
+    <string name="iptv_density_comfortable">Lega</string>
+    <string name="iptv_density_comfortable_description">Baris dan logo lebih besar dengan jam acara</string>
+    <string name="iptv_density_compact">Ringkas</string>
+    <string name="iptv_density_compact_description">Baris dan logo lebih kecil agar lebih banyak saluran muat</string>
+    <string name="iptv_inset_show">Tampilkan di sudut</string>
+    <string name="iptv_inset_show_subtitle">Mempertahankan %1$s di layar penuh dengan saluran ini dalam gambar kecil</string>
+    <string name="iptv_inset_swap">Tukar dengan gambar sudut</string>
+    <string name="iptv_inset_close">Tutup gambar sudut</string>
+    <string name="iptv_inset_hint">Tombol kuning menukar gambar, Kembali menutup gambar sudut</string>
+    <string name="iptv_inset_unsupported">TV box ini hanya dapat memutar satu saluran dalam satu waktu.</string>
+    <string name="iptv_inset_decoder">TV box ini tidak dapat mendekode gambar kedua di samping saluran ini.</string>
+    <string name="iptv_inset_capacity">Tidak ada koneksi kosong untuk akun ini. Tambah koneksi akun di Sumber TV Live jika paket Anda mengizinkan.</string>
+    <string name="iptv_move_channel">Pindahkan saluran</string>
+    <string name="iptv_move_channel_subtitle">Ubah posisi saluran ini dalam daftar</string>
+    <string name="iptv_move_channel_title">Memindahkan %1$s</string>
+    <string name="iptv_move_key_step">▲▼ Satu posisi</string>
+    <string name="iptv_move_key_top">◀ Ke paling atas</string>
+    <string name="iptv_move_key_bottom">▶ Ke paling bawah</string>
+    <string name="iptv_move_key_done">OK atau Kembali: selesai</string>
+    <string name="iptv_move_moved_bottom">Dipindahkan ke bagian bawah daftar</string>
+    <string name="iptv_move_category">Pindahkan kategori</string>
+    <string name="iptv_move_category_subtitle">Ubah posisi kategori ini di menu</string>
+    <string name="iptv_move_category_keys">▲▼ satu posisi · ◀ ke paling atas · ▶ ke paling bawah · OK atau Kembali: selesai</string>
+    <string name="iptv_multiview_layout_side">Berdampingan</string>
+    <string name="iptv_multiview_layout_one_over_two">Satu di atas dua</string>
+    <string name="iptv_multiview_layout_description">Berdampingan menampilkan dua gambar. Satu besar dan Satu di atas dua menggunakan gambar yang dipilih dengan Tampilkan besar.</string>
+    <string name="iptv_scrub_behind">%1$s di belakang</string>
+    <string name="iptv_scrub_live_edge">Live %1$s</string>
+    <string name="iptv_scrub_hint">Kiri dan kanan bergeser 30 detik, tahan untuk lebih cepat</string>
+    <string name="iptv_scrub_deck_hint">Naik ke linimasa untuk menelusuri acara sebelumnya</string>
+    <string name="iptv_scrub_banner_hint">Kiri dan kanan berpindah acara, atas dan bawah mengganti saluran</string>
+</resources>

@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">प्रोवाइडर ने यह चैनल देने से मना कर दिया। अपना सब्सक्रिप्शन जाँचें, फिर कोशिश करें।</string>
+    <string name="iptv_playback_missing">यह चैनल अब प्रोवाइडर के पास उपलब्ध नहीं है।</string>
+    <string name="iptv_playback_unsupported">इस चैनल का फ़ॉर्मेट इस डिवाइस पर नहीं चल सकता।</string>
+    <string name="iptv_playback_decoder">वीडियो डिकोडर शुरू नहीं हो सका। दूसरी तस्वीरें बंद करें और फिर कोशिश करें।</string>
+</resources>

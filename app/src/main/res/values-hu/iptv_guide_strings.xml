@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Összes forrás</string>
+    <string name="iptv_all_sources_favourites">Kedvencek az összes forrásból</string>
+    <string name="iptv_density">Műsorújság sűrűsége</string>
+    <string name="iptv_density_subtitle">Hány csatorna fér el a képernyőn</string>
+    <string name="iptv_density_comfortable">Kényelmes</string>
+    <string name="iptv_density_comfortable_description">Nagyobb sorok és logók a műsoridőkkel</string>
+    <string name="iptv_density_compact">Tömör</string>
+    <string name="iptv_density_compact_description">Kisebb sorok és logók, hogy több csatorna férjen el</string>
+    <string name="iptv_inset_show">Megjelenítés a sarokban</string>
+    <string name="iptv_inset_show_subtitle">A(z) %1$s teljes képernyőn marad, ez a csatorna pedig kis képben látszik</string>
+    <string name="iptv_inset_swap">Csere a sarokképpel</string>
+    <string name="iptv_inset_close">Sarokkép bezárása</string>
+    <string name="iptv_inset_hint">A sárga gomb felcseréli a képeket, a Vissza bezárja a sarokképet</string>
+    <string name="iptv_inset_unsupported">Ez a TV-box egyszerre csak egy csatornát tud lejátszani.</string>
+    <string name="iptv_inset_decoder">Ez a TV-box nem tud második képet dekódolni e csatorna mellett.</string>
+    <string name="iptv_inset_capacity">Nincs szabad kapcsolat ehhez a fiókhoz. Növeld a fiók kapcsolatainak számát az Élő TV-források között, ha a csomagod engedi.</string>
+    <string name="iptv_move_channel">Csatorna áthelyezése</string>
+    <string name="iptv_move_channel_subtitle">Módosítsd, hol jelenjen meg ez a csatorna a listában</string>
+    <string name="iptv_move_channel_title">Áthelyezés: %1$s</string>
+    <string name="iptv_move_key_step">▲▼ Egy hely</string>
+    <string name="iptv_move_key_top">◀ A tetejére</string>
+    <string name="iptv_move_key_bottom">▶ Az aljára</string>
+    <string name="iptv_move_key_done">OK vagy Vissza: kész</string>
+    <string name="iptv_move_moved_bottom">Áthelyezve a lista aljára</string>
+    <string name="iptv_move_category">Kategória áthelyezése</string>
+    <string name="iptv_move_category_subtitle">Módosítsd, hol jelenjen meg ez a kategória a menüben</string>
+    <string name="iptv_move_category_keys">▲▼ egy hely · ◀ a tetejére · ▶ az aljára · OK vagy Vissza: kész</string>
+    <string name="iptv_multiview_layout_side">Egymás mellett</string>
+    <string name="iptv_multiview_layout_one_over_two">Egy kettő felett</string>
+    <string name="iptv_multiview_layout_description">Az Egymás mellett két képet mutat. Az Egy nagy és az Egy kettő felett a Megjelenítés nagyban funkcióval kiválasztott képet használja.</string>
+    <string name="iptv_scrub_behind">%1$s lemaradás</string>
+    <string name="iptv_scrub_live_edge">Élő %1$s</string>
+    <string name="iptv_scrub_hint">Balra és jobbra 30 másodperc, tartsd lenyomva a gyorsabb léptetéshez</string>
+    <string name="iptv_scrub_deck_hint">Fel az idővonalhoz a korábbi műsorok közötti lépkedéshez</string>
+    <string name="iptv_scrub_banner_hint">Balra és jobbra a műsorok között léptet, fel és le csatornát vált</string>
+</resources>

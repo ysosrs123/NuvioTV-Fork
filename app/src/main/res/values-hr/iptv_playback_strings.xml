@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">Pružatelj je odbio ovaj kanal. Provjeri pretplatu i pokušaj ponovno.</string>
+    <string name="iptv_playback_missing">Ovaj kanal više nije dostupan kod pružatelja.</string>
+    <string name="iptv_playback_unsupported">Format ovog kanala ne može se reproducirati na ovom uređaju.</string>
+    <string name="iptv_playback_decoder">Video dekoder se nije mogao pokrenuti. Zatvori druge slike i pokušaj ponovno.</string>
+</resources>
