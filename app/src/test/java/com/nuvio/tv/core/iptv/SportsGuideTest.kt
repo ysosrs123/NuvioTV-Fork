@@ -17,6 +17,9 @@ class SportsGuideTest {
         assertTrue(sport("Lakers @ Celtics", channel = true))
         assertTrue(sport("Live Tennis", channel = true))
         assertTrue(sport("Real Madrid vs. Barcelona", listOf("Fútbol")))
+        assertTrue(sport("Real Madrid – Barcelona", channel = true))
+        assertTrue(sport("LaLiga: Girona v Betis"))
+        assertTrue(sport("Football: Leeds v Hull"))
     }
 
     @Test fun ordinaryProgrammesHighlightsAndFilmsAreNotSport() {
@@ -31,6 +34,11 @@ class SportsGuideTest {
         assertFalse(sport("The X Factor Live"))
         assertFalse(sport("MasterChef Australia", channel = true))
         assertFalse(sport("Saturday Night Live"))
+        assertFalse(sport("Rocky", listOf("Movie", "Sports", "Drama")))
+        assertFalse(sport("SportsCenter", listOf("Sports non-event"), channel = true))
+        assertFalse(sport("Racing Weekly", listOf("Sports magazines")))
+        assertFalse(sport("Coronation Street - Episode 5"))
+        assertFalse(sport("A Long Title Without Any Separator At All " + "word ".repeat(200)))
         assertFalse(sport(""))
     }
 

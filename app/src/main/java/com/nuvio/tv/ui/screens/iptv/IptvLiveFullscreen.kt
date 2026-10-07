@@ -91,7 +91,10 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
                 AndroidKeyEvent.KEYCODE_DPAD_LEFT, AndroidKeyEvent.KEYCODE_MEDIA_REWIND -> -SEEK_STEP
                 else -> 0L
             }
-            if (step != 0L) { player.seekTo((player.currentPosition + step).coerceAtLeast(0)); banner++; return@onPreviewKeyEvent true }
+            if (step != 0L) {
+                if (step < 0 && player.currentPosition + step < 0 && state.catchupFrom != null && onRewind()) { banner++; return@onPreviewKeyEvent true }
+                player.seekTo((player.currentPosition + step).coerceAtLeast(0)); banner++; return@onPreviewKeyEvent true
+            }
         }
         if (player != null) when (native.keyCode) {
             AndroidKeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> { onPause(null); banner++; return@onPreviewKeyEvent true }

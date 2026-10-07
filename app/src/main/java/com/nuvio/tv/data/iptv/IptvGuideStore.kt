@@ -171,14 +171,15 @@ class IptvGuideStore(
     }
 
     fun sportsMatches(profileId: Int, feedIds: List<String>, nowMillis: Long, untilMillis: Long, limit: Int = 400): List<IptvAiringMatch> = transaction { db ->
-        require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && limit in 1..1000 && untilMillis >= nowMillis)
+        require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && limit in 1..5000 && untilMillis >= nowMillis)
         feedIds.forEach { IptvGuideRef(profileId, it) }
         val found = mutableListOf<IptvAiringMatch>()
-        for (feed in feedIds) {
-            if (found.size >= limit) break
+        for ((index, feed) in feedIds.withIndex()) {
+            val share = (limit - found.size) / (feedIds.size - index)
+            if (share <= 0) break
             db.rawQuery("SELECT c.payload,p.payload FROM feeds f CROSS JOIN programmes p CROSS JOIN channels c WHERE f.id=? AND f.profile=? AND f.version=f.active_version AND p.stage=f.active_stage AND p.sport=1 AND p.start<=? AND p.start>? AND (p.stop>? OR (p.stop IS NULL AND p.start>?)) AND c.stage=p.stage AND c.external_id=p.external_id ORDER BY p.start,p.id LIMIT ?",
                 arrayOf(feed, profileId.toString(), untilMillis.toString(), (nowMillis - GUIDE_AIRING_LOOKBACK_MILLIS).toString(), nowMillis.toString(),
-                    (nowMillis - SPORTS_OPEN_ENDED_MILLIS).toString(), (limit - found.size).toString())).use { c ->
+                    (nowMillis - SPORTS_OPEN_ENDED_MILLIS).toString(), share.toString())).use { c ->
                 while (c.moveToNext()) {
                     val channel = IptvGuideJson.channel(c.getString(0)); val programme = IptvGuideJson.programme(c.getString(1))
                     if (programme.start.precise) found += IptvAiringMatch(GuideKey(feed, channel.externalId), channel, programme)
@@ -394,7 +395,7 @@ class IptvGuideStore(
         }
         private fun addSportsSchema(db: SQLiteDatabase) {
             db.execSQL("ALTER TABLE programmes ADD COLUMN sport INTEGER")
-            db.execSQL("CREATE INDEX guide_sport ON programmes(stage,start) WHERE sport=1")
+            db.execSQL("CREATE INDEX guide_sport ON programmes(stage,start,stop) WHERE sport=1")
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
             check(oldVersion in 1..4 && newVersion == 5) { "Missing guide database migration" }
@@ -408,6 +409,7 @@ class IptvGuideStore(
             }
             if (oldVersion <= 3) addSearchSchema(db)
             addSportsSchema(db)
+            db.execSQL("UPDATE feeds SET refreshed_at=NULL")
         }
     }
     private companion object {

@@ -1,7 +1,6 @@
 package com.nuvio.tv.core.iptv
 
 import java.text.Normalizer
-import java.util.Locale
 
 const val SPORTS_AHEAD_MILLIS = 6L * 60 * 60 * 1000
 const val SPORTS_OPEN_ENDED_MILLIS = 3L * 60 * 60 * 1000
@@ -15,7 +14,7 @@ object SportsGuide {
         "darts", "snooker", "volleyball", "handball", "netball", "afl", "nrl", "nfl", "nba", "nhl", "mlb", "ufc", "f1", "superbike")
     private val COMPETITIONS = listOf(
         "premier league", "champions league", "europa league", "conference league", "a league", "a leagues", "la liga", "serie a", "bundesliga",
-        "ligue 1", "eredivisie", "primeira liga", "mls", "world cup", "fa cup", "efl", "copa", "libertadores", "brasileirao", "campeonato",
+        "laliga", "ligue 1", "eredivisie", "primeira liga", "mls", "world cup", "fa cup", "efl", "copa", "libertadores", "brasileirao", "campeonato",
         "nrl", "afl", "aflw", "nrlw", "nfl", "nba", "wnba", "nhl", "mlb", "ufc", "formula 1", "formula one", "f1", "grand prix",
         "motogp", "supercars", "nascar", "indycar", "super rugby", "six nations", "rugby championship", "state of origin",
         "test match", "the ashes", "big bash", "bbl", "wbbl", "ipl", "odi", "t20", "wimbledon", "us open", "australian open",
@@ -27,29 +26,31 @@ object SportsGuide {
         "highlights", "highlight", "preview", "previews", "review", "magazine", "news", "betting", "odds", "tips", "tipping",
         "podcast", "talk", "debate", "documentary", "resumen", "resumo", "zusammenfassung", "sintesi", "melhores momentos", "resume",
         "draft", "awards", "quiz").map(::normalise)
-    private val NON_SPORT_CATEGORIES = listOf(
-        "movie", "movies", "film", "films", "drama", "comedy", "news", "documentary", "documentaries", "children", "kids",
-        "animation", "cartoon", "soap", "reality", "magazine", "talk", "music", "cooking", "lifestyle", "travel", "series").map(::normalise)
+    private val NOT_SPORT_CATEGORIES = listOf(
+        "movie", "movies", "film", "films", "drama", "news", "documentary", "documentaries", "children", "kids", "animation", "cartoon",
+        "soap", "reality", "magazine", "magazines", "talk", "non event", "nonevent", "cooking").map(::normalise)
+    private val OTHER_CATEGORIES = listOf("comedy", "music", "lifestyle", "travel", "series", "entertainment").map(::normalise)
     private val LIVE_MARKERS = listOf("live", "en vivo", "en directo", "ao vivo", "en direct", "in diretta", "direkt").map(::normalise)
     private val SPORT_CHANNELS = listOf(
         "sport", "sports", "espn", "bein", "dazn", "eurosport", "kayo", "optus sport", "supersport", "sportsnet", "tsn",
         "arena sport", "fox league", "fox footy", "fox cricket", "nba tv", "nfl network", "mlb network", "nhl network",
         "golf", "racing", "premier league", "laliga", "motogp", "f1 tv", "stan sport", "setanta", "match", "deportes", "esporte").map(::normalise)
-    private val FIXTURE = Regex("""\S.*\s(?:v|vs|vs\.|versus|@|contra|gegen)\s+\S""")
+    private val FIXTURE = Regex("""\S\s+(?:v|vs\.?|versus|@|contra|gegen|-|–)\s+\S""")
 
     fun isSportsProgramme(titles: List<LocalizedGuideText>, categories: List<String>, sportsChannel: Boolean): Boolean {
         val words = titles.map { normalise(it.text) }.filter(String::isNotEmpty)
         if (words.isEmpty()) return false
         val genres = categories.map(::normalise).filter(String::isNotEmpty)
         if (words.any { title -> EXCLUDED_TITLE.any { contains(title, it) } }) return false
-        val sportGenre = genres.any { genre -> genre.split(' ').any { it in SPORT_WORDS } && NON_SPORT_CATEGORIES.none { contains(genre, it) } }
-        if (!sportGenre && genres.any { genre -> NON_SPORT_CATEGORIES.any { contains(genre, it) } }) return false
+        if (genres.any { genre -> NOT_SPORT_CATEGORIES.any { contains(genre, it) } }) return false
+        val sportGenre = genres.any { genre -> genre.split(' ').any { it in SPORT_WORDS } }
         if (sportGenre) return true
+        if (genres.any { genre -> OTHER_CATEGORIES.any { contains(genre, it) } }) return false
         if (words.any { title -> COMPETITIONS.any { contains(title, it) } }) return true
-        val fixture = titles.any { FIXTURE.containsMatchIn(it.text.lowercase(Locale.ROOT)) }
         val live = words.any { title -> LIVE_MARKERS.any { contains(title, it) } }
         val sportWord = words.any { title -> title.split(' ').any { it in SPORT_WORDS } }
-        return (fixture && (live || sportsChannel || sportWord)) || (sportsChannel && (sportWord || live))
+        if (sportsChannel && (sportWord || live)) return true
+        return (live || sportsChannel || sportWord) && titles.any { FIXTURE.containsMatchIn(it.text) }
     }
 
     fun isSportsChannel(names: List<LocalizedGuideText>): Boolean =

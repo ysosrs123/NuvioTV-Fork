@@ -34,6 +34,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private val onPlaying: (Boolean) -> Unit, private val onError: () -> Unit,
     private val onReconnecting: (Boolean) -> Unit = {}, private val isLive: Boolean = true,
     private val onEnded: () -> Unit = {}, private val handleAudioFocus: Boolean = true,
+    private val onPlayWhenReady: (Boolean) -> Unit = {},
     private val maxVideoHeight: Int? = null, private val targetBufferBytes: Int = 12 * 1024 * 1024) : OwnedLivePlayback {
     private val fence = LiveRequestFence()
     val telemetry = LiveTelemetry()
@@ -79,6 +80,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         player.setHandleAudioBecomingNoisy(true)
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) { if (!released) onPlaying(isPlaying) }
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) { if (!released) onPlayWhenReady(playWhenReady) }
             override fun onPlayerError(error: PlaybackException) {
                 when {
                     released -> releaseFailed = true

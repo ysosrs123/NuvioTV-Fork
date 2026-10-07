@@ -61,13 +61,13 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
         val order = (associations.priority + associations.feedIds).distinct()
         if (order.isEmpty()) return@withContext emptyList()
         currentCoroutineContext().ensureActive()
-        val matches = guides.sportsMatches(ref.profileId, order, nowMillis, nowMillis + aheadMillis, 600)
+        val matches = guides.sportsMatches(ref.profileId, order, nowMillis, nowMillis + aheadMillis, 3000)
         if (matches.isEmpty()) return@withContext emptyList()
-        val wanted = guideAiringCandidates(matches.map { it.key to it.channel })
+        val wanted = guideAiringCandidates(matches.distinctBy { it.key }.take(MAX_SPORTS_CHANNELS).map { it.key to it.channel })
         currentCoroutineContext().ensureActive()
         val items = catalogue.guideMatchCandidates(ref, wanted.guideIds, wanted.nameKeys, wanted.keys, 600, excludedCategories)
         val channels = items.chunked(200).flatMap { listed(ref.profileId, associations, it) }
-        val listings = airingChannels(channels, { it.item.channel.id }, { it.guide.key }, earliestAiring(matches.map { it.key to it.programme }), 600)
+        val listings = airingChannels(channels, { it.item.channel.id }, { it.guide.key }, earliestAiring(matches.map { it.key to it.programme }), 3000)
         sportsOrder(listings, nowMillis).take(limit).map { (channel, programme) -> IptvAiringResult(channel, programme) }
     }
 
@@ -110,5 +110,9 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
             }
             row.item.channel.id to layoutGuideRow(programmes.take(maxPerChannel), window)
         }
+    }
+
+    private companion object {
+        const val MAX_SPORTS_CHANNELS = 500
     }
 }

@@ -297,6 +297,7 @@ class IptvGuideStoreTest {
         store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias))
         assertEquals("Premier League: Leeds v Hull", store.programmes(ref, "one", window).programmes.single().titles.first().text)
         assertTrue(store.sportsMatches(1, listOf(ref.feedId), start, start + 3_600_000).isEmpty())
+        assertNull(store.feed(ref).refreshedAtMillis)
         assertEquals(RefreshDecision.PUBLISH, store.importGuide(store.beginRefresh(ref), xml(programme("Premier League: Leeds v Hull")).byteInputStream(), window, IptvCacheValidators("v2")))
         assertEquals(1, store.sportsMatches(1, listOf(ref.feedId), start, start + 3_600_000).size)
     }
