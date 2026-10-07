@@ -28,6 +28,12 @@ import java.net.URI
 import java.util.UUID
 import org.json.JSONObject
 
+interface IptvSourceRemovalListener {
+    fun removeSource(ref: IptvSourceRef)
+    fun removeProfile(profileId: Int)
+    fun clearAllProfiles()
+}
+
 class IptvCatalogueStore(
     context: Context,
     databaseName: String = "iptv-catalogue.db",
@@ -39,6 +45,13 @@ class IptvCatalogueStore(
     init { require(maxDatabaseBytes >= 64 * 1024 && saveChunkRows > 0) }
     private val helper = Database(context.applicationContext, databaseName)
     val pending: IptvPendingFiles by lazy { IptvPendingFiles(context.applicationContext, databaseName, secrets) }
+    private val removalListeners = java.util.concurrent.CopyOnWriteArrayList<IptvSourceRemovalListener>()
+
+    fun addRemovalListener(listener: IptvSourceRemovalListener) { removalListeners.addIfAbsent(listener) }
+
+    private fun removed(action: (IptvSourceRemovalListener) -> Unit) {
+        for (listener in removalListeners) runCatching { action(listener) }.onFailure { IptvLog.failure("source removal", it) }
+    }
 
     fun createSource(profileId: Int, label: String, kind: IptvSourceKind, accountId: String, connection: IptvSourceConnection): IptvSource = transaction { db ->
         validateConfiguration(label, accountId, connection)
@@ -76,7 +89,12 @@ class IptvCatalogueStore(
         }
     }
 
-    fun removeProfile(profileId: Int) = transaction { db ->
+    fun removeProfile(profileId: Int) {
+        removeProfileRows(profileId)
+        removed { it.removeProfile(profileId) }
+    }
+
+    private fun removeProfileRows(profileId: Int) = transaction { db ->
         require(profileId >= 0)
         val args = arrayOf(profileId.toString())
         db.delete("source_guides", "source IN (SELECT id FROM sources WHERE profile=?)", args)
@@ -88,11 +106,17 @@ class IptvCatalogueStore(
         Unit
     }
 
-    fun clearAllProfiles() = transaction { db ->
-        listOf("source_guides", "overlays", "catalogue", "identities", "sources", "accounts").forEach { db.delete(it, null, null) }
+    fun clearAllProfiles() {
+        transaction { db -> listOf("source_guides", "overlays", "catalogue", "identities", "sources", "accounts").forEach { db.delete(it, null, null) } }
+        removed { it.clearAllProfiles() }
     }
 
-    fun removeSource(ref: IptvSourceRef) = transaction { db ->
+    fun removeSource(ref: IptvSourceRef) {
+        removeSourceRows(ref)
+        removed { it.removeSource(ref) }
+    }
+
+    private fun removeSourceRows(ref: IptvSourceRef) = transaction { db ->
         source(db, ref)
         val args = arrayOf(ref.sourceId)
         db.delete("source_guides", "source=?", args)

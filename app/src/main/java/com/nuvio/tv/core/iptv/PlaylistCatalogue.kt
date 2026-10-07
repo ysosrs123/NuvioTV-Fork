@@ -28,9 +28,10 @@ data class PlaylistCatalogue(
     val channels: List<PlaylistChannel>,
     val diagnostics: List<PlaylistDiagnostic>,
     val guideUrls: List<String> = emptyList(),
+    val vod: List<PlaylistVodEntry> = emptyList(),
 ) {
     val canPublish: Boolean get() = kind == PlaylistKind.CATALOGUE && channels.isNotEmpty() && diagnostics.isEmpty()
-    override fun toString(): String = "PlaylistCatalogue(kind=$kind, channels=${channels.size}, diagnostics=${diagnostics.size}, guideUrls=${guideUrls.size})"
+    override fun toString(): String = "PlaylistCatalogue(kind=$kind, channels=${channels.size}, vod=${vod.size}, diagnostics=${diagnostics.size}, guideUrls=${guideUrls.size})"
 }
 
 data class PlaylistLimits(
@@ -38,9 +39,10 @@ data class PlaylistLimits(
     val maxLineCharacters: Int = 16 * 1024,
     val maxChannels: Int = 20_000,
     val maxDiagnostics: Int = 100,
+    val maxVodEntries: Int = 100_000,
 ) {
     init {
-        require(maxCharacters > 0 && maxLineCharacters > 0 && maxChannels > 0 && maxDiagnostics > 0)
+        require(maxCharacters > 0 && maxLineCharacters > 0 && maxChannels > 0 && maxDiagnostics > 0 && maxVodEntries > 0)
     }
 }
 
@@ -52,6 +54,7 @@ class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimit
 
     fun parse(input: Reader, finalResponseUri: URI? = null): PlaylistCatalogue {
         val channels = mutableListOf<PlaylistChannel>()
+        val vod = mutableListOf<PlaylistVodEntry>()
         val issues = mutableListOf<PlaylistDiagnostic>()
         var header = false
         var sawHls = false
@@ -119,9 +122,16 @@ class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimit
                     if (record == null) { issue(PlaylistIssue.MALFORMED_RECORD); continue }
                     val locator = resolveHttp(address, finalResponseUri)
                     if (locator == null) { issue(PlaylistIssue.INVALID_LOCATOR); continue }
-                    if (channels.size >= limits.maxChannels) throw LimitExceeded()
                     val logo = record.second[CHANNEL_LOGO_ATTRIBUTE]?.let { channelLogoUrl(it, finalResponseUri?.toString()) }
-                    channels += PlaylistChannel(record.first, locator, record.second - CHANNEL_LOGO_ATTRIBUTE + listOfNotNull(logo?.let { CHANNEL_LOGO_ATTRIBUTE to it }) + extra)
+                    val attributes = record.second - CHANNEL_LOGO_ATTRIBUTE + listOfNotNull(logo?.let { CHANNEL_LOGO_ATTRIBUTE to it }) + extra
+                    val entry = PlaylistVod.entry(record.first, locator, attributes)
+                    if (entry != null) {
+                        if (vod.size >= limits.maxVodEntries) throw LimitExceeded()
+                        vod += entry
+                        continue
+                    }
+                    if (channels.size >= limits.maxChannels) throw LimitExceeded()
+                    channels += PlaylistChannel(record.first, locator, attributes)
                 }
             }
             if (pending != null) issue(PlaylistIssue.MISSING_LOCATOR)
@@ -133,8 +143,8 @@ class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimit
 
         if (sawHls) return PlaylistCatalogue(PlaylistKind.HLS, emptyList(), emptyList())
         if (!header) return PlaylistCatalogue(PlaylistKind.INVALID, emptyList(), listOf(PlaylistDiagnostic(0, PlaylistIssue.MISSING_HEADER)))
-        if (channels.isEmpty() && issues.isEmpty()) issues += PlaylistDiagnostic(lineNumber, PlaylistIssue.EMPTY_CATALOGUE)
-        return PlaylistCatalogue(PlaylistKind.CATALOGUE, channels.toList(), issues.toList(), guideUrls)
+        if (channels.isEmpty() && vod.isEmpty() && issues.isEmpty()) issues += PlaylistDiagnostic(lineNumber, PlaylistIssue.EMPTY_CATALOGUE)
+        return PlaylistCatalogue(PlaylistKind.CATALOGUE, channels.toList(), issues.toList(), guideUrls, vod.toList())
     }
 
     private fun outsideQuoteComma(text: String): Int {

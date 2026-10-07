@@ -3,18 +3,40 @@ package com.nuvio.tv.data.iptv
 import com.nuvio.tv.core.iptv.CHANNEL_LOGO_ATTRIBUTE
 import com.nuvio.tv.core.iptv.ChannelCandidate
 import com.nuvio.tv.core.iptv.GuideProgramme
+import com.nuvio.tv.core.iptv.VodCategory
+import com.nuvio.tv.core.iptv.VodKind
+import com.nuvio.tv.core.iptv.VodMovie
+import com.nuvio.tv.core.iptv.VodMovieInfo
+import com.nuvio.tv.core.iptv.VodParseCount
+import com.nuvio.tv.core.iptv.VodSeries
+import com.nuvio.tv.core.iptv.VodSeriesInfo
 import com.nuvio.tv.core.iptv.XtreamCatalogueParser
 import com.nuvio.tv.core.iptv.XtreamShortGuide
+import com.nuvio.tv.core.iptv.XtreamVodParser
 import java.io.ByteArrayOutputStream
+import java.io.FilterInputStream
 import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.Reader
+import java.io.StringReader
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
+import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl
@@ -78,6 +100,64 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
             .addQueryParameter("limit", limit.toString()).build()
         val text = json(url, minOf(maxBodyBytes, SHORT_GUIDE_BYTES))
         return parseSafely { XtreamShortGuide.parse(text, streamId, maxListings = limit * 2) }
+    }
+
+    suspend fun vodCategories(connection: IptvSourceConnection, kind: VodKind): List<VodCategory> {
+        require(kind != VodKind.EPISODE)
+        val text = json(api(connection, if (kind == VodKind.MOVIE) "get_vod_categories" else "get_series_categories"), minOf(maxBodyBytes, 1024 * 1024))
+        return parseSafely { XtreamVodParser.categories(StringReader(text), kind) }
+    }
+
+    suspend fun movies(connection: IptvSourceConnection, sink: (VodMovie) -> Unit): VodParseCount =
+        streamJson(api(connection, "get_vod_streams")) { reader, check -> XtreamVodParser.movies(reader, checkCancellation = check, sink = sink) }
+
+    suspend fun series(connection: IptvSourceConnection, sink: (VodSeries) -> Unit): VodParseCount =
+        streamJson(api(connection, "get_series")) { reader, check -> XtreamVodParser.series(reader, checkCancellation = check, sink = sink) }
+
+    suspend fun seriesInfo(connection: IptvSourceConnection, seriesId: String): VodSeriesInfo {
+        if (!seriesId.matches(Regex("[0-9]{1,20}"))) throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+        val url = api(connection, "get_series_info").newBuilder().addQueryParameter("series_id", seriesId).build()
+        val text = json(url, minOf(maxBodyBytes, INFO_BYTES))
+        return parseSafely { XtreamVodParser.seriesInfo(StringReader(text), seriesId) }
+    }
+
+    suspend fun movieInfo(connection: IptvSourceConnection, streamId: String): VodMovieInfo? {
+        if (!streamId.matches(Regex("[0-9]{1,20}"))) throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+        val url = api(connection, "get_vod_info").newBuilder().addQueryParameter("vod_id", streamId).build()
+        val text = json(url, minOf(maxBodyBytes, INFO_BYTES))
+        return parseSafely { XtreamVodParser.movieInfo(StringReader(text)) }
+    }
+
+    private fun api(connection: IptvSourceConnection, action: String): HttpUrl = serverBase(connection).newBuilder().addPathSegment("player_api.php")
+        .addQueryParameter("username", requireNotNull(connection.username)).addQueryParameter("password", requireNotNull(connection.password))
+        .addQueryParameter("action", action).build()
+
+    private val listHttp: OkHttpClient by lazy { http.newBuilder().callTimeout(15, TimeUnit.MINUTES).readTimeout(60, TimeUnit.SECONDS).build() }
+
+    private suspend fun <T> streamJson(url: HttpUrl, read: (Reader, () -> Unit) -> T): T = coroutineScope {
+        val call = listHttp.newCall(Request.Builder().url(url).header("Accept", "application/json").header("Connection", "close").build())
+        val watcher = launch(start = CoroutineStart.UNDISPATCHED) { try { awaitCancellation() } finally { call.cancel() } }
+        val job = coroutineContext.job
+        try {
+            withContext(Dispatchers.IO) {
+                val response = try { call.execute() } catch (error: IOException) {
+                    diagnose("network", error); throw MetadataException(MetadataFailure.NETWORK)
+                }
+                response.use {
+                    if (response.code in listOf(301, 302, 303, 307, 308)) throw MetadataException(MetadataFailure.REDIRECT_REQUIRES_REVIEW)
+                    if (response.code != 200) throw MetadataException(MetadataFailure.HTTP_STATUS, response.code)
+                    val body = response.body ?: throw MetadataException(MetadataFailure.INVALID_RESPONSE)
+                    if (body.contentLength() > LIST_BYTES) throw MetadataException(MetadataFailure.BODY_LIMIT)
+                    val reader = InputStreamReader(ListBudget(body.byteStream(), LIST_BYTES), Charsets.UTF_8.newDecoder()
+                        .onMalformedInput(CodingErrorAction.REPLACE).onUnmappableCharacter(CodingErrorAction.REPLACE))
+                    try { read(reader) { if (!job.isActive) throw CancellationException("IPTV list cancelled") } }
+                    catch (error: CancellationException) { throw error }
+                    catch (error: MetadataException) { diagnose("response", error); throw error }
+                    catch (error: IOException) { diagnose("network", error); throw MetadataException(MetadataFailure.NETWORK) }
+                    catch (error: Exception) { diagnose("response", error); throw MetadataException(MetadataFailure.INVALID_RESPONSE) }
+                }
+            }
+        } finally { watcher.cancel() }
     }
 
     private fun parseAccount(text: String): XtreamAccount = parseSafely {
@@ -160,6 +240,8 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
 
     companion object {
         private const val SHORT_GUIDE_BYTES = 256 * 1024
+        private const val INFO_BYTES = 4 * 1024 * 1024
+        private const val LIST_BYTES = 192L * 1024 * 1024
 
         private fun diagnose(stage: String, error: Exception) {
             val location = error.stackTrace.firstOrNull()?.let { "${it.className}.${it.methodName}:${it.lineNumber}" }.orEmpty()
@@ -176,6 +258,16 @@ class IptvXtreamClient(private val http: OkHttpClient = IptvMetadataClient.newCl
                 ?.takeIf { it.matches(Regex("[0-9]+\\.[A-Za-z0-9]{1,8}")) } ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
             return serverBase(connection).newBuilder().addPathSegment("live").addPathSegment(requireNotNull(connection.username))
                 .addPathSegment(requireNotNull(connection.password)).addPathSegment(stream).build().toString()
+        }
+
+        fun movieUrl(connection: IptvSourceConnection, streamId: String, extension: String): String = vodUrl(connection, "movie", streamId, extension)
+
+        fun episodeUrl(connection: IptvSourceConnection, episodeId: String, extension: String): String = vodUrl(connection, "series", episodeId, extension)
+
+        private fun vodUrl(connection: IptvSourceConnection, folder: String, id: String, extension: String): String {
+            if (!id.matches(Regex("[0-9]{1,20}")) || !extension.matches(Regex("[A-Za-z0-9]{1,8}"))) throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+            return serverBase(connection).newBuilder().addPathSegment(folder).addPathSegment(requireNotNull(connection.username))
+                .addPathSegment(requireNotNull(connection.password)).addPathSegment("$id.$extension").build().toString()
         }
 
         fun serverBase(connection: IptvSourceConnection): HttpUrl {
@@ -257,4 +349,15 @@ internal class StrictJson(private val text: String) {
         if (peek() == 'e' || peek() == 'E') { offset++; if (peek() == '+' || peek() == '-') offset++; digits() }
     }
     private fun digits() { require(peek() in '0'..'9'); while (peek() in '0'..'9') offset++ }
+}
+
+private class ListBudget(input: InputStream, private val maximum: Long) : FilterInputStream(input) {
+    private var count = 0L
+    override fun read(): Int = `in`.read().also { if (it >= 0) consumed(1) }
+    override fun read(bytes: ByteArray, offset: Int, length: Int): Int =
+        `in`.read(bytes, offset, minOf(length.toLong(), maximum - count + 1).toInt()).also { if (it > 0) consumed(it) }
+    private fun consumed(bytes: Int) {
+        count += bytes
+        if (count > maximum) throw MetadataException(MetadataFailure.BODY_LIMIT)
+    }
 }

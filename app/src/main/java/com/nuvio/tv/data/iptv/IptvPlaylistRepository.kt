@@ -21,7 +21,7 @@ sealed interface IptvPlaylistRefresh {
 class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val metadata: IptvMetadataClient = IptvMetadataClient(),
     private val xtream: IptvXtreamClient = IptvXtreamClient(), private val xtreamGuides: IptvXtreamGuides? = null,
     private val stalker: IptvStalkerClient = IptvStalkerClient(), private val connections: IptvSourceConnections? = null,
-    private val now: () -> Long = System::currentTimeMillis) {
+    private val now: () -> Long = System::currentTimeMillis, private val vod: IptvVodRepository? = null) {
     suspend fun refresh(ref: IptvSourceRef, onSaving: () -> Unit = {}): IptvPlaylistRefresh = withContext(Dispatchers.IO) {
         val context = currentCoroutineContext()
         context.ensureActive()
@@ -65,7 +65,12 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
                     IptvCatalogueRecord(ChannelCandidate(row.name, row.locator, guideId = row.guideId), row.attributes)
                 }
                 val cache = IptvCacheValidators(download.validators.etag, download.validators.lastModified)
-                val decision = store.commitCatalogue(ref, request.ticket, records, download.catalogue.canPublish, cache) { context.ensureActive() }
+                val moved = download.catalogue.vod.size
+                if (moved > 0) IptvLog.info("playlist vod entries=$moved live=${records.size}")
+                val previous = if (moved > 0) store.channelCounts(ref.profileId)[ref.sourceId] ?: 0 else 0
+                val explained = moved > 0 && previous > 0 && vod?.detected(ref) == false && (records.size.toLong() + moved) * 2 >= previous
+                val decision = store.commitCatalogue(ref, request.ticket, records, download.catalogue.canPublish, cache, acceptedLargeChange = explained) { context.ensureActive() }
+                vod?.let { repository -> runCatching { repository.savePlaylist(ref, download.catalogue.vod) }.onFailure { IptvLog.failure("playlist vod", it) } }
                 settle(ref, decision, records, cache, download.catalogue.guideUrls)
                 val guides = playlistGuides(ref, decision, firstLoad, download.catalogue.guideUrls)
                 if (guides.isNotEmpty()) IptvLog.info("playlist guides linked=${guides.size}")

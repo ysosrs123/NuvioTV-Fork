@@ -37,6 +37,7 @@ class IptvRefreshCoordinator @Inject constructor(
     private val guides: IptvGuideStore,
     private val access: IptvProfileAccess,
     livePreferences: IptvLivePreferences,
+    private val vod: IptvVodRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val heavy = Mutex()
@@ -48,7 +49,7 @@ class IptvRefreshCoordinator @Inject constructor(
     fun localGuideFolders(): List<java.io.File> = context.getExternalFilesDirs("iptv-guides").filterNotNull()
     val localGuides = LocalGuideFiles(::localGuideFolders)
     private val playlists = IptvPlaylistRepository(catalogue, xtreamGuides = IptvXtreamGuides(catalogue, guides),
-        connections = IptvSourceConnections(catalogue, livePreferences))
+        connections = IptvSourceConnections(catalogue, livePreferences), vod = vod)
     private val guideRepository = IptvGuideRepository(guides, openDocument = { address ->
         requireNotNull(context.contentResolver.openInputStream(android.net.Uri.parse(address)))
     }, xtreamConnection = catalogue::connection, openLocal = { localGuides.open(it) }, providerChannels = catalogue::guideChannelIds)
@@ -66,6 +67,16 @@ class IptvRefreshCoordinator @Inject constructor(
         IptvLog.info("source refresh result=${result.javaClass.simpleName}${(result as? IptvPlaylistRefresh.Catalogue)?.let { " decision=${it.decision}" }.orEmpty()}")
         finish(key(source.ref), IptvRefreshPhase.DONE, message)
         (result as? IptvPlaylistRefresh.Catalogue)?.let { published -> (listOfNotNull(published.guide) + published.guides).distinct().forEach { refreshGuide(session, it) } }
+        if (source.kind == IptvSourceKind.XTREAM) refreshVod(session, source.ref)
+    }
+
+    private suspend fun refreshVod(session: IptvProfileAccess.Session, ref: IptvSourceRef) {
+        try {
+            withContext(Dispatchers.IO) { access.use(session) { catalogue.connection(ref) } }
+            val result = vod.refresh(ref)
+            IptvLog.info("vod refresh result=${result.javaClass.simpleName}")
+        } catch (cancel: CancellationException) { throw cancel }
+        catch (error: Exception) { IptvLog.failure("vod refresh", error) }
     }
 
     fun refresh(session: IptvProfileAccess.Session, feed: IptvGuideFeed): Boolean = start(key(feed.ref)) {
