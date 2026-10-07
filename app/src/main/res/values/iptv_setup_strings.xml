@@ -73,7 +73,7 @@
     <string name="iptv_review_counts">Channels now: %1$d · new list: %2$d</string>
     <string name="iptv_review_empty">Channels now: %1$d · the new list is empty</string>
     <string name="iptv_review_dialog_title">Use the new channel list for %1$s?</string>
-    <string name="iptv_review_dialog_note">Providers sometimes send a short list by mistake. Keep the current list if you're not sure; the next refresh checks again.</string>
+    <string name="iptv_review_dialog_note">Providers sometimes send a short list by mistake. Keep the current list if you\'re not sure; the next refresh checks again.</string>
     <string name="iptv_review_accept">Use the new list</string>
     <string name="iptv_review_keep">Keep the current list</string>
     <string name="iptv_review_accepted">New channel list in use.</string>
@@ -95,10 +95,10 @@
     <string name="iptv_group_remove">Remove group</string>
     <string name="iptv_group_removed">Group removed. Its sources have their own connections again.</string>
     <string name="iptv_group_sources_choose">Choose sources</string>
-    <string name="iptv_group_sources_description">Ticked sources share this group's connections. A source can be in one group.</string>
+    <string name="iptv_group_sources_description">Ticked sources share this group\'s connections. A source can be in one group.</string>
     <string name="iptv_group_limit_description">How many channels the sources in this group can play or record at once, all together.</string>
     <string name="iptv_transfer_title">Copy and back up</string>
-    <string name="iptv_transfer_description">Move this profile's Live TV setup to another TV, or keep a copy in a locked file.</string>
+    <string name="iptv_transfer_description">Move this profile\'s Live TV setup to another TV, or keep a copy in a locked file.</string>
     <string name="iptv_transfer_logins">Include logins</string>
     <string name="iptv_transfer_logins_subtitle">Usernames, passwords, MAC addresses and addresses with logins in them. Without them, those sources are left out.</string>
     <string name="iptv_transfer_back">Back</string>
@@ -108,7 +108,7 @@
     <string name="iptv_copy_found">TVs on this network</string>
     <string name="iptv_copy_searching">Looking for TVs…</string>
     <string name="iptv_copy_enter_address">Enter the address</string>
-    <string name="iptv_copy_enter_address_subtitle">If the other TV isn't listed, type the address it shows</string>
+    <string name="iptv_copy_enter_address_subtitle">If the other TV isn\'t listed, type the address it shows</string>
     <string name="iptv_copy_address">Address of the other TV</string>
     <string name="iptv_copy_address_hint">For example 192.168.1.20:8210</string>
     <string name="iptv_copy_sending_to">Sending to %1$s</string>
@@ -118,11 +118,11 @@
     <string name="iptv_copy_sent">Sent. Finish on the other TV.</string>
     <string name="iptv_copy_address_invalid">Enter an address on your home network, such as 192.168.1.20:8210.</string>
     <string name="iptv_copy_code_invalid">Enter all 6 digits.</string>
-    <string name="iptv_copy_wrong_code">That code didn't match. Check the code on the other TV.</string>
+    <string name="iptv_copy_wrong_code">That code didn\'t match. Check the code on the other TV.</string>
     <string name="iptv_copy_code_renewed">The other TV has a new code. Enter the code it shows now.</string>
     <string name="iptv_copy_busy">The other TV is busy with another copy. Try again in a moment.</string>
-    <string name="iptv_copy_unreachable">Couldn't reach the other TV. Check that both TVs are on the same network.</string>
-    <string name="iptv_copy_refused">The other TV didn't accept the setup. Nothing was sent.</string>
+    <string name="iptv_copy_unreachable">Couldn\'t reach the other TV. Check that both TVs are on the same network.</string>
+    <string name="iptv_copy_refused">The other TV didn\'t accept the setup. Nothing was sent.</string>
     <string name="iptv_copy_too_large">This setup is too large to copy. Use a backup file instead.</string>
     <string name="iptv_copy_receive_title">Receive setup from another TV</string>
     <string name="iptv_copy_receive_row">Shows a code to enter on the other TV</string>
@@ -133,7 +133,7 @@
     <string name="iptv_copy_receive_stopped">Stopped after 10 minutes without activity.</string>
     <string name="iptv_import_title_tv">Import the setup from the other TV?</string>
     <string name="iptv_import_title_file">Restore this backup?</string>
-    <string name="iptv_import_subtitle">Merge adds to this profile's Live TV setup. Replace starts again with only what's imported.</string>
+    <string name="iptv_import_subtitle">Merge adds to this profile\'s Live TV setup. Replace starts again with only what\'s imported.</string>
     <string name="iptv_import_sources">Sources</string>
     <plurals name="iptv_import_count_sources">
         <item quantity="one">%1$d source</item>
@@ -157,22 +157,22 @@
     </plurals>
     <string name="iptv_import_merge">Merge</string>
     <string name="iptv_import_replace">Replace</string>
-    <string name="iptv_import_replace_title">Replace this profile's Live TV setup?</string>
-    <string name="iptv_import_replace_description">All sources, guides and channel changes in this profile are removed first. This can't be undone.</string>
+    <string name="iptv_import_replace_title">Replace this profile\'s Live TV setup?</string>
+    <string name="iptv_import_replace_description">All sources, guides and channel changes in this profile are removed first. This can\'t be undone.</string>
     <string name="iptv_import_done">Imported. The channels and guides are loading now.</string>
     <string name="iptv_import_declined">Nothing was imported.</string>
     <string name="iptv_backup_title">Back up to a file</string>
     <string name="iptv_backup_row">Saves a copy locked with a passphrase</string>
     <string name="iptv_backup_subtitle">The file holds sources, guides, channel changes and Live TV settings, locked with your passphrase.</string>
     <string name="iptv_backup_passphrase">Passphrase</string>
-    <string name="iptv_backup_passphrase_hint">At least 8 characters. Without it the backup can't be opened.</string>
+    <string name="iptv_backup_passphrase_hint">At least 8 characters. Without it the backup can\'t be opened.</string>
     <string name="iptv_backup_passphrase_again">Passphrase again</string>
     <string name="iptv_backup_save_to">Save to</string>
     <string name="iptv_backup_device">This TV</string>
     <string name="iptv_backup_usb">USB drive</string>
     <string name="iptv_backup_choose">Choose a location</string>
     <string name="iptv_backup_choose_subtitle">Uses the file picker, if this TV has one</string>
-    <string name="iptv_backup_mismatch">The two passphrases don't match.</string>
+    <string name="iptv_backup_mismatch">The two passphrases don\'t match.</string>
     <string name="iptv_backup_weak">Use a passphrase of at least 8 characters.</string>
     <string name="iptv_backup_saved">Saved as %1$s.</string>
     <string name="iptv_backup_saved_choice">Backup saved.</string>
@@ -184,7 +184,7 @@
     <string name="iptv_restore_file">File: %1$s</string>
     <string name="iptv_restore_open">Open</string>
     <string name="iptv_restore_wrong_passphrase">Wrong passphrase, or the file has been changed.</string>
-    <string name="iptv_restore_not_backup">That file isn't a Live TV backup.</string>
+    <string name="iptv_restore_not_backup">That file isn\'t a Live TV backup.</string>
     <string name="iptv_restore_unsupported">This backup was made by a newer version of the app.</string>
     <string name="iptv_restore_damaged">The backup is damaged or too large.</string>
 </resources>
