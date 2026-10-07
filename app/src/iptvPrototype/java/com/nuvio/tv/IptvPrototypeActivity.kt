@@ -2,6 +2,7 @@ package com.nuvio.tv
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import com.nuvio.tv.ui.screens.iptv.IptvLiveScreen
@@ -22,7 +23,10 @@ class IptvPrototypeActivity : ComponentActivity() {
         setContent {
             var live by remember { mutableStateOf(intent.getBooleanExtra("live", false)) }
             NuvioTheme(presentation = presentation?.copy(playbackActive = live)) {
-                if (live) IptvLiveScreen(onBack = { live = false }, onSources = { live = false })
+                if (live) {
+                    BackHandler { live = false }
+                    IptvLiveScreen(onSources = { live = false })
+                }
                 else IptvSourcesScreen(onBack = ::finish, onLive = { live = true })
             }
         }
