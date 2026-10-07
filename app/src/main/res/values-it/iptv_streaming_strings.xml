@@ -1,0 +1,30 @@
+<resources>
+    <string name="iptv_stream_title">Streaming</string>
+    <string name="iptv_stream_description">Come i canali in diretta usano il buffer. Le modifiche valgono dal prossimo canale che apri.</string>
+    <string name="iptv_stream_start">Avvia la riproduzione dopo</string>
+    <string name="iptv_stream_start_subtitle">Quanto video viene caricato prima che un canale parta. Un\'attesa più breve parte prima, ma può scattare con una connessione debole.</string>
+    <string name="iptv_stream_start_fast">Veloce (circa 1 s)</string>
+    <string name="iptv_stream_start_normal">Normale (circa 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Sicuro (circa 5 s)</string>
+    <string name="iptv_stream_cushion">Crea un buffer di sicurezza durante la visione</string>
+    <string name="iptv_stream_cushion_subtitle">Riproduce il 3% più lentamente, con tono normale, finché il buffer è pieno, così brevi cali di rete non interrompono l\'immagine. La TV in diretta resta poi indietro di altrettanto.</string>
+    <string name="iptv_stream_cushion_off">Disattivo</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d secondo</item>
+        <item quantity="many">%d secondi</item>
+        <item quantity="other">%d secondi</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">I canali HLS partono più indietro rispetto alla diretta invece di rallentare.</string>
+    <string name="iptv_stream_cushion_memory">Limitato a circa %1$d MB di memoria su questo dispositivo.</string>
+    <string name="iptv_stream_behind_live">Indietro di %1$d s rispetto alla diretta</string>
+    <string name="iptv_stream_go_live_hint">Premi avanti veloce per andare in diretta</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Inviato durante la riproduzione di canali, catch-up e film da questa sorgente. Le impostazioni della playlist di un canale hanno comunque la priorità.</string>
+    <string name="iptv_user_agent_default">Predefinito dell\'app</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Generico (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Personalizzato</string>
+    <string name="iptv_user_agent_custom_hint">Solo caratteri stampabili, fino a 200.</string>
+</resources>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">Film e serie IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">Mostra i titoli corrispondenti delle tue sorgenti TV in diretta come sorgente di stream</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Tutte le connessioni di %1$s sono in uso. Interrompi la TV in diretta o una registrazione su questa sorgente, poi riprova.</string>
+    <string name="iptv_vod_provider_refused">Il provider ha rifiutato questo titolo. Tutte le sue connessioni potrebbero essere in uso, oppure l\'account potrebbe essere scaduto.</string>
+    <string name="iptv_vod_unavailable">Questo titolo IPTV non è più disponibile. Aggiorna la sorgente in TV in diretta e riprova.</string>
+</resources>

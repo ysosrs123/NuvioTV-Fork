@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">ネットワーク上の場所</string>
+    <string name="iptv_network_subtitle">SMB、WebDAV、FTP で NAS やパソコンに録画します。録画はまずこのデバイスに保存され、その後コピーされます。</string>
+    <string name="iptv_network_protocol">接続の種類</string>
+    <string name="iptv_network_webdav_address">アドレス</string>
+    <string name="iptv_network_webdav_address_hint">WebDAV のアドレス（例: https://nas.local:5006/recordings）</string>
+    <string name="iptv_network_webdav_folder_hint">アドレス配下のフォルダ（例: TV/Live）。存在しない場合は作成されます。</string>
+    <string name="iptv_network_ftp_server_hint">名前または IP アドレス（例: nas.local）。サーバーが 21 以外のポートを使う場合のみ :ポート を追加します。</string>
+    <string name="iptv_network_ftp_folder_hint">ログインフォルダ内のフォルダ（例: TV/Live）。存在しない場合は作成されます。</string>
+    <string name="iptv_network_ftp_secure">安全な接続（明示的 TLS）</string>
+    <string name="iptv_network_ftp_secure_subtitle">ログイン情報と録画を暗号化します。サーバーが FTPS に対応している必要があります。</string>
+    <string name="iptv_network_username_hint">ログインせずに接続する場合は空欄のままにします</string>
+    <string name="iptv_network_plain_warning">この接続は暗号化されていません。ネットワーク上の他の人にパスワードを見られる可能性があります。</string>
+    <string name="iptv_network_invalid">アドレスとフォルダ名を確認してください。&lt; &gt; : \" | ? * は使用できません</string>
+    <string name="iptv_network_address_not_found">このアドレスには何も見つかりませんでした。サーバー名の後のパスを確認してください。</string>
+    <string name="iptv_network_certificate_untrusted">サーバーの証明書を検証できませんでした。NAS 自身の証明書の場合は、信頼する前に NAS に表示されるフィンガープリントと照合してください。</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 フィンガープリント: %1$s</string>
+    <string name="iptv_network_trust">この証明書を信頼する</string>
+    <string name="iptv_network_no_tls">サーバーは暗号化に対応していません。安全な接続をオフにするか、サーバーで FTPS を有効にしてください。</string>
+    <string name="iptv_network_tls_reuse">サーバーがデータ接続での TLS セッション再利用を要求していますが、これには対応していません。サーバー側でこの要件をオフにしてください。</string>
+</resources>

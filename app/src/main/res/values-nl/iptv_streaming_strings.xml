@@ -1,0 +1,29 @@
+<resources>
+    <string name="iptv_stream_title">Streaming</string>
+    <string name="iptv_stream_description">Hoe livezenders bufferen. Wijzigingen gelden voor de volgende zender die je opent.</string>
+    <string name="iptv_stream_start">Afspelen starten na</string>
+    <string name="iptv_stream_start_subtitle">Hoeveel video wordt geladen voordat een zender start. Korter wachten start sneller, maar kan haperen bij een zwakke verbinding.</string>
+    <string name="iptv_stream_start_fast">Snel (ongeveer 1 s)</string>
+    <string name="iptv_stream_start_normal">Normaal (ongeveer 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Veilig (ongeveer 5 s)</string>
+    <string name="iptv_stream_cushion">Veiligheidsbuffer opbouwen tijdens het kijken</string>
+    <string name="iptv_stream_cushion_subtitle">Speelt 3% langzamer af, met normale toonhoogte, tot de buffer vol is, zodat korte netwerkonderbrekingen het beeld niet verstoren. Live-tv loopt daarna zoveel achter.</string>
+    <string name="iptv_stream_cushion_off">Uit</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d seconde</item>
+        <item quantity="other">%d seconden</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS-zenders starten verder achter live in plaats van te vertragen.</string>
+    <string name="iptv_stream_cushion_memory">Beperkt tot ongeveer %1$d MB geheugen op dit apparaat.</string>
+    <string name="iptv_stream_behind_live">%1$d s achter live</string>
+    <string name="iptv_stream_go_live_hint">Druk op vooruitspoelen om live te kijken</string>
+    <string name="iptv_user_agent">User-agent</string>
+    <string name="iptv_user_agent_description">Wordt meegestuurd bij het afspelen van zenders, terugkijken en films van deze bron. De eigen playlistinstellingen van een zender hebben nog steeds voorrang.</string>
+    <string name="iptv_user_agent_default">Standaard van de app</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Algemeen (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Aangepast</string>
+    <string name="iptv_user_agent_custom_hint">Alleen afdrukbare tekens, maximaal 200.</string>
+</resources>

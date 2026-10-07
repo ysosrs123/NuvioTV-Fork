@@ -1,0 +1,41 @@
+<resources>
+    <string name="iptv_sport_fixtures">Mecze</string>
+    <string name="iptv_sport_live_now">Teraz na żywo</string>
+    <string name="iptv_sport_later_today">Później dzisiaj</string>
+    <string name="iptv_sport_tomorrow">Jutro</string>
+    <string name="iptv_sport_live">NA ŻYWO</string>
+    <string name="iptv_sport_loading">Wczytywanie meczów…</string>
+    <string name="iptv_sport_failed">Nie udało się wczytać meczów. Wyświetlane są tylko wyniki z przewodnika.</string>
+    <string name="iptv_sport_key_missing">Dodaj swój klucz TheSportsDB w ustawieniach telewizji na żywo.</string>
+    <string name="iptv_sport_no_leagues">Wybierz ligi w ustawieniach telewizji na żywo.</string>
+    <string name="iptv_sport_none">Brak meczów w Twoich ligach w ciągu najbliższych trzech dni.</string>
+    <string name="iptv_sport_no_channel">Nie znaleziono kanału</string>
+    <string name="iptv_sport_no_channel_description">Żaden z Twoich kanałów nie ma tego meczu w przewodniku ani nie nadaje wymienionego nadawcy.</string>
+    <string name="iptv_sport_choose_channel">Wybierz kanał</string>
+    <string name="iptv_sport_broadcaster">Wymieniony nadawca: %1$s</string>
+    <string name="iptv_sport_close">Zamknij</string>
+    <string name="iptv_sport_data">Dane sportowe</string>
+    <string name="iptv_sport_data_subtitle">Mecze są pobierane z wybranej usługi. Kanał danych ESPN jest nieoficjalny i może przestać działać.</string>
+    <string name="iptv_sport_data_off">Wył.</string>
+    <string name="iptv_sport_data_off_description">Sport korzysta tylko z Twojego przewodnika. Żadne żądania nie są wysyłane.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Nieoficjalny kanał danych, klucz nie jest potrzebny. Może w każdej chwili przestać działać.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Wymaga własnego klucza API. Darmowy klucz testowy 123 działa z ograniczeniami.</string>
+    <string name="iptv_sport_leagues">Ligi</string>
+    <string name="iptv_sport_leagues_subtitle">Mecze są wyświetlane dla tych lig</string>
+    <string name="iptv_sport_leagues_none">Brak</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d liga</item>
+        <item quantity="few">%d ligi</item>
+        <item quantity="many">%d lig</item>
+        <item quantity="other">%d ligi</item>
+    </plurals>
+    <string name="iptv_sport_key">Klucz TheSportsDB</string>
+    <string name="iptv_sport_key_subtitle">Przechowywany w postaci zaszyfrowanej na tym urządzeniu. Darmowy klucz testowy 123 działa z ograniczeniami.</string>
+    <string name="iptv_sport_key_set">Zapisano</string>
+    <string name="iptv_sport_key_not_set">Nie ustawiono</string>
+    <string name="iptv_sport_key_hint">Wpisz 123, aby użyć darmowego klucza testowego</string>
+    <string name="iptv_sport_key_invalid">Używaj tylko liter i cyfr.</string>
+    <string name="iptv_sport_key_remove">Usuń klucz</string>
+</resources>

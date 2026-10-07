@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Lokal tidsforskyvning (eksperimentell)</string>
+    <string name="iptv_timeshift_subtitle">Eksperimentell. Bufrer kanalen du ser på i fullskjerm, slik at du kan pause og spole tilbake. Bruker lagringsplass mens du ser og trenger en ledig tilkobling som vanlig visning. Fungerer bare med MPEG-TS-kanaler; HLS-kanaler, multivisning, forhåndsvisningen og en kanal som tas opp spilles av som vanlig. Hvis noe feiler, går avspillingen tilbake til vanlig direkteavspilling.</string>
+    <string name="iptv_timeshift_length">Bufferlengde</string>
+    <string name="iptv_timeshift_length_subtitle">Forkortes når det er lite ledig plass. Bufferen slettes når du bytter kanal eller slutter å se.</string>
+    <string name="iptv_timeshift_length_15">15 minutter</string>
+    <string name="iptv_timeshift_length_30">30 minutter</string>
+    <string name="iptv_timeshift_length_60">60 minutter</string>
+    <string name="iptv_timeshift_length_auto">Automatisk</string>
+    <string name="iptv_timeshift_length_auto_description">30 minutter når det er nok ledig plass, ellers mindre</string>
+    <string name="iptv_timeshift_location">Bufferplassering</string>
+    <string name="iptv_timeshift_location_subtitle">Hvor bufferen skrives mens du ser</string>
+    <string name="iptv_timeshift_fallback">Lokal tidsforskyvning stoppet. Spiller av direkte.</string>
+</resources>

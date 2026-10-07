@@ -1,0 +1,40 @@
+<resources>
+    <string name="iptv_sport_fixtures">Partite</string>
+    <string name="iptv_sport_live_now">In diretta ora</string>
+    <string name="iptv_sport_later_today">Più tardi oggi</string>
+    <string name="iptv_sport_tomorrow">Domani</string>
+    <string name="iptv_sport_live">LIVE</string>
+    <string name="iptv_sport_loading">Caricamento partite…</string>
+    <string name="iptv_sport_failed">Impossibile caricare le partite. Vengono mostrati solo i risultati della guida.</string>
+    <string name="iptv_sport_key_missing">Aggiungi la tua chiave TheSportsDB nelle impostazioni TV in diretta.</string>
+    <string name="iptv_sport_no_leagues">Scegli i campionati nelle impostazioni TV in diretta.</string>
+    <string name="iptv_sport_none">Nessuna partita dei tuoi campionati nei prossimi tre giorni.</string>
+    <string name="iptv_sport_no_channel">Nessun canale trovato</string>
+    <string name="iptv_sport_no_channel_description">Nessuno dei tuoi canali riporta questa partita nella guida o trasmette un\'emittente indicata.</string>
+    <string name="iptv_sport_choose_channel">Scegli un canale</string>
+    <string name="iptv_sport_broadcaster">Emittente indicata: %1$s</string>
+    <string name="iptv_sport_close">Chiudi</string>
+    <string name="iptv_sport_data">Dati sportivi</string>
+    <string name="iptv_sport_data_subtitle">Le partite vengono recuperate dal servizio scelto. Il feed di ESPN non è ufficiale e potrebbe smettere di funzionare.</string>
+    <string name="iptv_sport_data_off">Disattivo</string>
+    <string name="iptv_sport_data_off_description">Lo sport usa solo la tua guida. Non viene inviata alcuna richiesta.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Feed non ufficiale, nessuna chiave richiesta. Potrebbe smettere di funzionare in qualsiasi momento.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Richiede una tua chiave API. La chiave di prova gratuita 123 funziona con dei limiti.</string>
+    <string name="iptv_sport_leagues">Campionati</string>
+    <string name="iptv_sport_leagues_subtitle">Le partite vengono mostrate per questi campionati</string>
+    <string name="iptv_sport_leagues_none">Nessuno</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d campionato</item>
+        <item quantity="many">%d campionati</item>
+        <item quantity="other">%d campionati</item>
+    </plurals>
+    <string name="iptv_sport_key">Chiave TheSportsDB</string>
+    <string name="iptv_sport_key_subtitle">Salvata cifrata su questo dispositivo. La chiave di prova gratuita 123 funziona con dei limiti.</string>
+    <string name="iptv_sport_key_set">Salvata</string>
+    <string name="iptv_sport_key_not_set">Non impostata</string>
+    <string name="iptv_sport_key_hint">Inserisci 123 per usare la chiave di prova gratuita</string>
+    <string name="iptv_sport_key_invalid">Usa solo lettere e numeri.</string>
+    <string name="iptv_sport_key_remove">Rimuovi chiave</string>
+</resources>

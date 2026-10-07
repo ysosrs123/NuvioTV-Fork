@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Vietinis laiko poslinkis (eksperimentinis)</string>
+    <string name="iptv_timeshift_subtitle">Eksperimentinė funkcija. Buferizuoja per visą ekraną žiūrimą kanalą, kad galėtumėte jį pristabdyti ir atsukti. Žiūrint naudoja saugyklą ir, kaip ir įprastai žiūrint, reikia laisvo ryšio. Veikia tik su MPEG-TS kanalais; HLS kanalai, keli vaizdai, peržiūra ir įrašomas kanalas leidžiami įprastai. Jei kas nors nepavyksta, grįžtama prie įprasto tiesioginio atkūrimo.</string>
+    <string name="iptv_timeshift_length">Buferio trukmė</string>
+    <string name="iptv_timeshift_length_subtitle">Sutrumpinama, kai mažai laisvos vietos. Buferis ištrinamas, kai perjungiate kanalą arba baigiate žiūrėti.</string>
+    <string name="iptv_timeshift_length_15">15 minučių</string>
+    <string name="iptv_timeshift_length_30">30 minučių</string>
+    <string name="iptv_timeshift_length_60">60 minučių</string>
+    <string name="iptv_timeshift_length_auto">Automatiškai</string>
+    <string name="iptv_timeshift_length_auto_description">30 minučių, kai pakanka laisvos vietos, kitaip mažiau</string>
+    <string name="iptv_timeshift_location">Buferio vieta</string>
+    <string name="iptv_timeshift_location_subtitle">Kur buferis rašomas žiūrint</string>
+    <string name="iptv_timeshift_fallback">Vietinis laiko poslinkis sustabdytas. Rodoma tiesiogiai.</string>
+</resources>

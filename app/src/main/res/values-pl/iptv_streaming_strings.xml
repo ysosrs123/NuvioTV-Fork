@@ -1,0 +1,31 @@
+<resources>
+    <string name="iptv_stream_title">Streaming</string>
+    <string name="iptv_stream_description">Jak buforują się kanały na żywo. Zmiany obowiązują od następnego otwartego kanału.</string>
+    <string name="iptv_stream_start">Rozpocznij odtwarzanie po</string>
+    <string name="iptv_stream_start_subtitle">Ile wideo wczytuje się przed startem kanału. Krótsze oczekiwanie startuje szybciej, ale przy słabym połączeniu obraz może się zacinać.</string>
+    <string name="iptv_stream_start_fast">Szybko (ok. 1 s)</string>
+    <string name="iptv_stream_start_normal">Normalnie (ok. 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Bezpiecznie (ok. 5 s)</string>
+    <string name="iptv_stream_cushion">Buduj bufor bezpieczeństwa podczas oglądania</string>
+    <string name="iptv_stream_cushion_subtitle">Odtwarza o 3% wolniej, z normalną wysokością dźwięku, aż bufor się zapełni, aby krótkie przerwy w sieci nie przerywały obrazu. Telewizja na żywo jest potem o tyle opóźniona.</string>
+    <string name="iptv_stream_cushion_off">Wył.</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d sekunda</item>
+        <item quantity="few">%d sekundy</item>
+        <item quantity="many">%d sekund</item>
+        <item quantity="other">%d sekundy</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">Kanały HLS startują dalej od transmisji na żywo zamiast zwalniać.</string>
+    <string name="iptv_stream_cushion_memory">Ograniczone do ok. %1$d MB pamięci na tym urządzeniu.</string>
+    <string name="iptv_stream_behind_live">%1$d s za transmisją na żywo</string>
+    <string name="iptv_stream_go_live_hint">Naciśnij przewijanie do przodu, aby przejść na żywo</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Wysyłany podczas odtwarzania kanałów, catch-up i filmów z tego źródła. Własne ustawienia playlisty kanału nadal mają pierwszeństwo.</string>
+    <string name="iptv_user_agent_default">Domyślny aplikacji</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Ogólny (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Własny</string>
+    <string name="iptv_user_agent_custom_hint">Tylko znaki drukowalne, maksymalnie 200.</string>
+</resources>

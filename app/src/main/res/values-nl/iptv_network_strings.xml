@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Netwerklocatie</string>
+    <string name="iptv_network_subtitle">Neem op naar een NAS of computer via SMB, WebDAV of FTP. Opnamen worden eerst op dit apparaat opgeslagen en daarna gekopieerd.</string>
+    <string name="iptv_network_protocol">Verbindingstype</string>
+    <string name="iptv_network_webdav_address">Adres</string>
+    <string name="iptv_network_webdav_address_hint">Het WebDAV-adres, bijvoorbeeld https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Een map onder het adres, bijvoorbeeld TV/Live. Wordt aangemaakt als die ontbreekt.</string>
+    <string name="iptv_network_ftp_server_hint">Naam of IP-adres, bijvoorbeeld nas.local. Voeg alleen :poort toe als de server een andere poort dan 21 gebruikt.</string>
+    <string name="iptv_network_ftp_folder_hint">Een map in de inlogmap, bijvoorbeeld TV/Live. Wordt aangemaakt als die ontbreekt.</string>
+    <string name="iptv_network_ftp_secure">Beveiligd (expliciete TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Versleutelt de inloggegevens en opnamen. De server moet FTPS ondersteunen.</string>
+    <string name="iptv_network_username_hint">Laat leeg om zonder inloggen te verbinden</string>
+    <string name="iptv_network_plain_warning">Deze verbinding is niet versleuteld. Anderen in het netwerk kunnen het wachtwoord zien.</string>
+    <string name="iptv_network_invalid">Controleer het adres en de mapnamen. Ze mogen geen &lt; &gt; : \" | ? * bevatten</string>
+    <string name="iptv_network_address_not_found">Op dit adres is niets gevonden. Controleer het pad na de servernaam.</string>
+    <string name="iptv_network_certificate_untrusted">Het certificaat van de server kon niet worden geverifieerd. Is het het eigen certificaat van je NAS, vergelijk dan de vingerafdruk met die op de NAS voordat je het vertrouwt.</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256-vingerafdruk: %1$s</string>
+    <string name="iptv_network_trust">Dit certificaat vertrouwen</string>
+    <string name="iptv_network_no_tls">De server biedt geen versleuteling. Zet Beveiligd uit of schakel FTPS in op de server.</string>
+    <string name="iptv_network_tls_reuse">De server vereist hergebruik van de TLS-sessie op dataverbindingen, en dat wordt niet ondersteund. Zet die eis uit op de server.</string>
+</resources>

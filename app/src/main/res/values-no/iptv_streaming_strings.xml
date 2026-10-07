@@ -1,0 +1,29 @@
+<resources>
+    <string name="iptv_stream_title">Strømming</string>
+    <string name="iptv_stream_description">Hvordan direktekanaler bufres. Endringer gjelder fra neste kanal du åpner.</string>
+    <string name="iptv_stream_start">Start avspilling etter</string>
+    <string name="iptv_stream_start_subtitle">Hvor mye video som lastes inn før en kanal starter. Kortere ventetid starter raskere, men kan hakke på en svak tilkobling.</string>
+    <string name="iptv_stream_start_fast">Rask (ca. 1 s)</string>
+    <string name="iptv_stream_start_normal">Normal (ca. 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Sikker (ca. 5 s)</string>
+    <string name="iptv_stream_cushion">Bygg en sikkerhetsbuffer mens du ser</string>
+    <string name="iptv_stream_cushion_subtitle">Spiller 3% saktere, med normal tonehøyde, til bufferen er full, slik at korte nettverksbrudd ikke avbryter bildet. Direkte-TV ligger deretter like langt bak.</string>
+    <string name="iptv_stream_cushion_off">Av</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d sekund</item>
+        <item quantity="other">%d sekunder</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS-kanaler starter lenger bak direkte i stedet for å senke farten.</string>
+    <string name="iptv_stream_cushion_memory">Begrenset til omtrent %1$d MB minne på denne enheten.</string>
+    <string name="iptv_stream_behind_live">%1$d s bak direkte</string>
+    <string name="iptv_stream_go_live_hint">Trykk på spol fremover for å gå til direkte</string>
+    <string name="iptv_user_agent">Brukeragent</string>
+    <string name="iptv_user_agent_description">Sendes ved avspilling av kanaler, catch-up og filmer fra denne kilden. En kanals egne spillelisteinnstillinger har fortsatt forrang.</string>
+    <string name="iptv_user_agent_default">Appens standard</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Generisk (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Egendefinert</string>
+    <string name="iptv_user_agent_custom_hint">Bare utskrivbare tegn, opptil 200.</string>
+</resources>

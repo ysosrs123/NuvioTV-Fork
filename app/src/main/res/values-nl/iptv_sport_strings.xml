@@ -1,0 +1,39 @@
+<resources>
+    <string name="iptv_sport_fixtures">Wedstrijden</string>
+    <string name="iptv_sport_live_now">Nu live</string>
+    <string name="iptv_sport_later_today">Later vandaag</string>
+    <string name="iptv_sport_tomorrow">Morgen</string>
+    <string name="iptv_sport_live">LIVE</string>
+    <string name="iptv_sport_loading">Wedstrijden laden…</string>
+    <string name="iptv_sport_failed">Kan wedstrijden niet laden. Alleen resultaten uit de gids worden getoond.</string>
+    <string name="iptv_sport_key_missing">Voeg je TheSportsDB-sleutel toe in de live-tv-instellingen.</string>
+    <string name="iptv_sport_no_leagues">Kies competities in de live-tv-instellingen.</string>
+    <string name="iptv_sport_none">Geen wedstrijden in je competities in de komende drie dagen.</string>
+    <string name="iptv_sport_no_channel">Geen zender gevonden</string>
+    <string name="iptv_sport_no_channel_description">Geen van je zenders heeft deze wedstrijd in de gids of zendt een vermelde omroep uit.</string>
+    <string name="iptv_sport_choose_channel">Kies een zender</string>
+    <string name="iptv_sport_broadcaster">Vermelde omroep: %1$s</string>
+    <string name="iptv_sport_close">Sluiten</string>
+    <string name="iptv_sport_data">Sportgegevens</string>
+    <string name="iptv_sport_data_subtitle">Wedstrijden worden opgehaald bij de gekozen dienst. De feed van ESPN is onofficieel en kan stoppen met werken.</string>
+    <string name="iptv_sport_data_off">Uit</string>
+    <string name="iptv_sport_data_off_description">Sport gebruikt alleen je gids. Er worden geen verzoeken verstuurd.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Onofficiële feed, geen sleutel nodig. Kan op elk moment stoppen met werken.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Vereist je eigen API-sleutel. De gratis testsleutel 123 werkt met beperkingen.</string>
+    <string name="iptv_sport_leagues">Competities</string>
+    <string name="iptv_sport_leagues_subtitle">Er worden wedstrijden getoond voor deze competities</string>
+    <string name="iptv_sport_leagues_none">Geen</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d competitie</item>
+        <item quantity="other">%d competities</item>
+    </plurals>
+    <string name="iptv_sport_key">TheSportsDB-sleutel</string>
+    <string name="iptv_sport_key_subtitle">Versleuteld opgeslagen op dit apparaat. De gratis testsleutel 123 werkt met beperkingen.</string>
+    <string name="iptv_sport_key_set">Opgeslagen</string>
+    <string name="iptv_sport_key_not_set">Niet ingesteld</string>
+    <string name="iptv_sport_key_hint">Voer 123 in om de gratis testsleutel te gebruiken</string>
+    <string name="iptv_sport_key_invalid">Gebruik alleen letters en cijfers.</string>
+    <string name="iptv_sport_key_remove">Sleutel verwijderen</string>
+</resources>

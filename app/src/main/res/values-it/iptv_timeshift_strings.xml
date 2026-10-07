@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Timeshift locale (sperimentale)</string>
+    <string name="iptv_timeshift_subtitle">Sperimentale. Memorizza nel buffer il canale che guardi a schermo intero, così puoi metterlo in pausa e riavvolgerlo. Usa spazio di archiviazione durante la visione e richiede una connessione libera come la visione normale. Funziona solo con canali MPEG-TS; i canali HLS, il multiview, l\'anteprima e un canale in registrazione vengono riprodotti normalmente. In caso di errore si torna alla normale riproduzione in diretta.</string>
+    <string name="iptv_timeshift_length">Durata del buffer</string>
+    <string name="iptv_timeshift_length_subtitle">Ridotta quando lo spazio libero è poco. Il buffer viene eliminato quando cambi canale o smetti di guardare.</string>
+    <string name="iptv_timeshift_length_15">15 minuti</string>
+    <string name="iptv_timeshift_length_30">30 minuti</string>
+    <string name="iptv_timeshift_length_60">60 minuti</string>
+    <string name="iptv_timeshift_length_auto">Automatico</string>
+    <string name="iptv_timeshift_length_auto_description">30 minuti se c\'è abbastanza spazio libero, altrimenti meno</string>
+    <string name="iptv_timeshift_location">Posizione del buffer</string>
+    <string name="iptv_timeshift_location_subtitle">Dove viene scritto il buffer durante la visione</string>
+    <string name="iptv_timeshift_fallback">Timeshift locale interrotto. Riproduzione in diretta.</string>
+</resources>

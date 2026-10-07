@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV-films en -series</string>
+    <string name="iptv_vod_streams_setting_sub">Toont overeenkomende titels uit je live-tv-bronnen als streambron</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Alle verbindingen voor %1$s zijn in gebruik. Stop live-tv of een opname op deze bron en probeer het opnieuw.</string>
+    <string name="iptv_vod_provider_refused">De provider heeft deze titel geweigerd. Mogelijk zijn alle verbindingen in gebruik of is het account verlopen.</string>
+    <string name="iptv_vod_unavailable">Deze IPTV-titel is niet meer beschikbaar. Vernieuw de bron in live-tv en probeer het opnieuw.</string>
+</resources>

@@ -1,0 +1,41 @@
+<resources>
+    <string name="iptv_sport_fixtures">Varžybos</string>
+    <string name="iptv_sport_live_now">Dabar tiesiogiai</string>
+    <string name="iptv_sport_later_today">Vėliau šiandien</string>
+    <string name="iptv_sport_tomorrow">Rytoj</string>
+    <string name="iptv_sport_live">TIESIOGIAI</string>
+    <string name="iptv_sport_loading">Įkeliamos varžybos…</string>
+    <string name="iptv_sport_failed">Nepavyko įkelti varžybų. Rodomi tik TV programos rezultatai.</string>
+    <string name="iptv_sport_key_missing">Pridėkite savo TheSportsDB raktą tiesioginės TV nustatymuose.</string>
+    <string name="iptv_sport_no_leagues">Pasirinkite lygas tiesioginės TV nustatymuose.</string>
+    <string name="iptv_sport_none">Per artimiausias tris dienas jūsų lygose varžybų nėra.</string>
+    <string name="iptv_sport_no_channel">Kanalas nerastas</string>
+    <string name="iptv_sport_no_channel_description">Nė vienas jūsų kanalas neturi šių varžybų savo TV programoje ir netransliuoja nurodyto transliuotojo.</string>
+    <string name="iptv_sport_choose_channel">Pasirinkite kanalą</string>
+    <string name="iptv_sport_broadcaster">Nurodytas transliuotojas: %1$s</string>
+    <string name="iptv_sport_close">Uždaryti</string>
+    <string name="iptv_sport_data">Sporto duomenys</string>
+    <string name="iptv_sport_data_subtitle">Varžybos gaunamos iš pasirinktos paslaugos. ESPN sklaidos kanalas neoficialus ir gali nustoti veikti.</string>
+    <string name="iptv_sport_data_off">Išjungta</string>
+    <string name="iptv_sport_data_off_description">Sportas naudoja tik jūsų TV programą. Užklausos nesiunčiamos.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Neoficialus sklaidos kanalas, rakto nereikia. Gali bet kada nustoti veikti.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Reikia savo API rakto. Nemokamas bandomasis raktas 123 veikia su apribojimais.</string>
+    <string name="iptv_sport_leagues">Lygos</string>
+    <string name="iptv_sport_leagues_subtitle">Rodomos šių lygų varžybos</string>
+    <string name="iptv_sport_leagues_none">Nėra</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d lyga</item>
+        <item quantity="few">%d lygos</item>
+        <item quantity="many">%d lygos</item>
+        <item quantity="other">%d lygų</item>
+    </plurals>
+    <string name="iptv_sport_key">TheSportsDB raktas</string>
+    <string name="iptv_sport_key_subtitle">Šiame įrenginyje saugomas užšifruotas. Nemokamas bandomasis raktas 123 veikia su apribojimais.</string>
+    <string name="iptv_sport_key_set">Išsaugotas</string>
+    <string name="iptv_sport_key_not_set">Nenustatytas</string>
+    <string name="iptv_sport_key_hint">Įveskite 123, kad naudotumėte nemokamą bandomąjį raktą</string>
+    <string name="iptv_sport_key_invalid">Naudokite tik raides ir skaičius.</string>
+    <string name="iptv_sport_key_remove">Pašalinti raktą</string>
+</resources>

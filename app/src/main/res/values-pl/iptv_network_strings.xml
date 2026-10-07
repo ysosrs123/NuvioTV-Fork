@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Lokalizacja sieciowa</string>
+    <string name="iptv_network_subtitle">Nagrywaj na NAS lub komputer przez SMB, WebDAV albo FTP. Nagrania są najpierw zapisywane na tym urządzeniu, a potem kopiowane.</string>
+    <string name="iptv_network_protocol">Typ połączenia</string>
+    <string name="iptv_network_webdav_address">Adres</string>
+    <string name="iptv_network_webdav_address_hint">Adres WebDAV, np. https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Folder pod tym adresem, np. TV/Live. Zostanie utworzony, jeśli nie istnieje.</string>
+    <string name="iptv_network_ftp_server_hint">Nazwa lub adres IP, np. nas.local. Dodaj :port tylko wtedy, gdy serwer używa portu innego niż 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Folder w folderze logowania, np. TV/Live. Zostanie utworzony, jeśli nie istnieje.</string>
+    <string name="iptv_network_ftp_secure">Bezpieczne (jawne TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Szyfruje dane logowania i nagrania. Serwer musi obsługiwać FTPS.</string>
+    <string name="iptv_network_username_hint">Zostaw puste, aby połączyć się bez logowania</string>
+    <string name="iptv_network_plain_warning">To połączenie nie jest szyfrowane. Inne osoby w sieci mogą zobaczyć hasło.</string>
+    <string name="iptv_network_invalid">Sprawdź adres i nazwy folderów. Nie mogą zawierać &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Pod tym adresem nic nie znaleziono. Sprawdź ścieżkę po nazwie serwera.</string>
+    <string name="iptv_network_certificate_untrusted">Nie udało się zweryfikować certyfikatu serwera. Jeśli to własny certyfikat Twojego NAS-a, porównaj odcisk z tym wyświetlanym na NAS-ie, zanim mu zaufasz.</string>
+    <string name="iptv_network_certificate_fingerprint">Odcisk SHA-256: %1$s</string>
+    <string name="iptv_network_trust">Zaufaj temu certyfikatowi</string>
+    <string name="iptv_network_no_tls">Serwer nie oferuje szyfrowania. Wyłącz opcję Bezpieczne lub włącz FTPS na serwerze.</string>
+    <string name="iptv_network_tls_reuse">Serwer wymaga ponownego użycia sesji TLS w połączeniach danych, co nie jest obsługiwane. Wyłącz ten wymóg na serwerze.</string>
+</resources>

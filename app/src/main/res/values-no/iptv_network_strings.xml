@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Nettverksplassering</string>
+    <string name="iptv_network_subtitle">Ta opp til en NAS eller datamaskin via SMB, WebDAV eller FTP. Opptak lagres først på denne enheten og kopieres deretter over.</string>
+    <string name="iptv_network_protocol">Tilkoblingstype</string>
+    <string name="iptv_network_webdav_address">Adresse</string>
+    <string name="iptv_network_webdav_address_hint">WebDAV-adressen, for eksempel https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">En mappe under adressen, for eksempel TV/Live. Den opprettes hvis den mangler.</string>
+    <string name="iptv_network_ftp_server_hint">Navn eller IP-adresse, for eksempel nas.local. Legg bare til :port hvis serveren bruker en annen port enn 21.</string>
+    <string name="iptv_network_ftp_folder_hint">En mappe i påloggingsmappen, for eksempel TV/Live. Den opprettes hvis den mangler.</string>
+    <string name="iptv_network_ftp_secure">Sikker (eksplisitt TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Krypterer påloggingen og opptakene. Serveren må støtte FTPS.</string>
+    <string name="iptv_network_username_hint">La stå tomt for å koble til uten å logge inn</string>
+    <string name="iptv_network_plain_warning">Denne tilkoblingen er ikke kryptert. Andre på nettverket kan se passordet.</string>
+    <string name="iptv_network_invalid">Sjekk adressen og mappenavnene. De kan ikke inneholde &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Fant ingenting på denne adressen. Sjekk stien etter servernavnet.</string>
+    <string name="iptv_network_certificate_untrusted">Serverens sertifikat kunne ikke bekreftes. Hvis det er NAS-ens eget sertifikat, sammenlign fingeravtrykket med det som vises på NAS-en før du stoler på det.</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256-fingeravtrykk: %1$s</string>
+    <string name="iptv_network_trust">Stol på dette sertifikatet</string>
+    <string name="iptv_network_no_tls">Serveren tilbyr ikke kryptering. Slå av Sikker, eller aktiver FTPS på serveren.</string>
+    <string name="iptv_network_tls_reuse">Serveren krever gjenbruk av TLS-økten på datatilkoblinger, noe som ikke støttes. Slå av dette kravet på serveren.</string>
+</resources>

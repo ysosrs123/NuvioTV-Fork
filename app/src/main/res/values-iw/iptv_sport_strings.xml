@@ -1,0 +1,41 @@
+<resources>
+    <string name="iptv_sport_fixtures">משחקים</string>
+    <string name="iptv_sport_live_now">בשידור חי עכשיו</string>
+    <string name="iptv_sport_later_today">מאוחר יותר היום</string>
+    <string name="iptv_sport_tomorrow">מחר</string>
+    <string name="iptv_sport_live">בשידור חי</string>
+    <string name="iptv_sport_loading">המשחקים בטעינה…</string>
+    <string name="iptv_sport_failed">לא ניתן היה לטעון את המשחקים. מוצגות רק תוצאות מהמדריך.</string>
+    <string name="iptv_sport_key_missing">יש להוסיף את מפתח TheSportsDB שלך בהגדרות הטלוויזיה החיה.</string>
+    <string name="iptv_sport_no_leagues">יש לבחור ליגות בהגדרות הטלוויזיה החיה.</string>
+    <string name="iptv_sport_none">אין משחקים בליגות שלך בשלושת הימים הקרובים.</string>
+    <string name="iptv_sport_no_channel">לא נמצא ערוץ</string>
+    <string name="iptv_sport_no_channel_description">אף אחד מהערוצים שלך לא מציג את המשחק הזה במדריך שלו או משדר גוף שידור רשום.</string>
+    <string name="iptv_sport_choose_channel">בחירת ערוץ</string>
+    <string name="iptv_sport_broadcaster">גוף שידור רשום: %1$s</string>
+    <string name="iptv_sport_close">סגירה</string>
+    <string name="iptv_sport_data">נתוני ספורט</string>
+    <string name="iptv_sport_data_subtitle">המשחקים נטענים מהשירות שנבחר. הפיד של ESPN אינו רשמי ועלול להפסיק לעבוד.</string>
+    <string name="iptv_sport_data_off">כבוי</string>
+    <string name="iptv_sport_data_off_description">ספורט משתמש רק במדריך שלך. לא נשלחות בקשות.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">פיד לא רשמי, לא נדרש מפתח. הוא עלול להפסיק לעבוד בכל רגע.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">נדרש מפתח API משלך. מפתח הבדיקה החינמי 123 עובד עם מגבלות.</string>
+    <string name="iptv_sport_leagues">ליגות</string>
+    <string name="iptv_sport_leagues_subtitle">יוצגו משחקים מהליגות האלה</string>
+    <string name="iptv_sport_leagues_none">אין</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">ליגה אחת</item>
+        <item quantity="two">שתי ליגות</item>
+        <item quantity="many">%d ליגות</item>
+        <item quantity="other">%d ליגות</item>
+    </plurals>
+    <string name="iptv_sport_key">מפתח TheSportsDB</string>
+    <string name="iptv_sport_key_subtitle">נשמר מוצפן במכשיר הזה. מפתח הבדיקה החינמי 123 עובד עם מגבלות.</string>
+    <string name="iptv_sport_key_set">נשמר</string>
+    <string name="iptv_sport_key_not_set">לא הוגדר</string>
+    <string name="iptv_sport_key_hint">יש להזין 123 כדי להשתמש במפתח הבדיקה החינמי</string>
+    <string name="iptv_sport_key_invalid">יש להשתמש באותיות ובספרות בלבד.</string>
+    <string name="iptv_sport_key_remove">הסרת המפתח</string>
+</resources>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV の映画とシリーズ</string>
+    <string name="iptv_vod_streams_setting_sub">ライブTVソースの一致するタイトルをストリームソースとして表示します</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">%1$s の接続はすべて使用中です。このソースのライブTVまたは録画を停止してから、もう一度お試しください。</string>
+    <string name="iptv_vod_provider_refused">プロバイダーがこのタイトルを拒否しました。接続がすべて使用中か、アカウントの有効期限が切れている可能性があります。</string>
+    <string name="iptv_vod_unavailable">この IPTV タイトルは利用できなくなりました。ライブTVでソースを更新して、もう一度お試しください。</string>
+</resources>

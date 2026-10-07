@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">מיקום ברשת</string>
+    <string name="iptv_network_subtitle">הקלטה ל-NAS או למחשב דרך SMB, WebDAV או FTP. ההקלטות נשמרות קודם במכשיר הזה ואז מועתקות.</string>
+    <string name="iptv_network_protocol">סוג חיבור</string>
+    <string name="iptv_network_webdav_address">כתובת</string>
+    <string name="iptv_network_webdav_address_hint">כתובת ה-WebDAV, לדוגמה https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">תיקייה מתחת לכתובת, לדוגמה TV/Live. היא תיווצר אם אינה קיימת.</string>
+    <string name="iptv_network_ftp_server_hint">שם או כתובת IP, לדוגמה nas.local. יש להוסיף :port רק אם השרת משתמש ביציאה אחרת מ-21.</string>
+    <string name="iptv_network_ftp_folder_hint">תיקייה בתוך תיקיית הכניסה, לדוגמה TV/Live. היא תיווצר אם אינה קיימת.</string>
+    <string name="iptv_network_ftp_secure">מאובטח (TLS מפורש)</string>
+    <string name="iptv_network_ftp_secure_subtitle">מצפין את פרטי הכניסה ואת ההקלטות. השרת חייב לתמוך ב-FTPS.</string>
+    <string name="iptv_network_username_hint">יש להשאיר ריק כדי להתחבר בלי כניסה לחשבון</string>
+    <string name="iptv_network_plain_warning">החיבור הזה אינו מוצפן. אחרים ברשת עלולים לראות את הסיסמה.</string>
+    <string name="iptv_network_invalid">יש לבדוק את הכתובת ואת שמות התיקיות. הם לא יכולים להכיל &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">לא נמצא דבר בכתובת הזו. יש לבדוק את הנתיב שאחרי שם השרת.</string>
+    <string name="iptv_network_certificate_untrusted">לא ניתן היה לאמת את האישור של השרת. אם זה האישור של ה-NAS שלך, יש להשוות את טביעת האצבע לזו שמוצגת ב-NAS לפני שנותנים בו אמון.</string>
+    <string name="iptv_network_certificate_fingerprint">טביעת אצבע SHA-256: %1$s</string>
+    <string name="iptv_network_trust">לתת אמון באישור הזה</string>
+    <string name="iptv_network_no_tls">השרת אינו מציע הצפנה. יש לכבות את \'מאובטח\' או להפעיל FTPS בשרת.</string>
+    <string name="iptv_network_tls_reuse">השרת דורש שימוש חוזר בסשן TLS בחיבורי נתונים, ואין לכך תמיכה. יש לכבות את הדרישה הזו בשרת.</string>
+</resources>

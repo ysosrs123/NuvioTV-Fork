@@ -1,0 +1,31 @@
+<resources>
+    <string name="iptv_stream_title">Srautinis perdavimas</string>
+    <string name="iptv_stream_description">Kaip buferizuojami tiesioginiai kanalai. Pakeitimai taikomi kitam atidarytam kanalui.</string>
+    <string name="iptv_stream_start">Pradėti atkūrimą po</string>
+    <string name="iptv_stream_start_subtitle">Kiek vaizdo įkeliama prieš paleidžiant kanalą. Trumpesnis laukimas paleidžia greičiau, bet esant silpnam ryšiui vaizdas gali strigti.</string>
+    <string name="iptv_stream_start_fast">Greitai (apie 1 s)</string>
+    <string name="iptv_stream_start_normal">Įprastai (apie 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Saugiai (apie 5 s)</string>
+    <string name="iptv_stream_cushion">Kaupti atsarginį buferį žiūrint</string>
+    <string name="iptv_stream_cushion_subtitle">Leidžia 3% lėčiau, išlaikant įprastą garso aukštį, kol buferis prisipildo, kad trumpi tinklo trikdžiai nenutrauktų vaizdo. Tada tiesioginė TV atsilieka tiek pat.</string>
+    <string name="iptv_stream_cushion_off">Išjungta</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d sekundė</item>
+        <item quantity="few">%d sekundės</item>
+        <item quantity="many">%d sekundės</item>
+        <item quantity="other">%d sekundžių</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS kanalai užuot sulėtėję pradedami toliau nuo tiesioginio vaizdo.</string>
+    <string name="iptv_stream_cushion_memory">Šiame įrenginyje ribojama iki maždaug %1$d MB atminties.</string>
+    <string name="iptv_stream_behind_live">Atsilieka nuo tiesioginio %1$d s</string>
+    <string name="iptv_stream_go_live_hint">Paspauskite prasukimą pirmyn, kad grįžtumėte į tiesioginį</string>
+    <string name="iptv_user_agent">Naudotojo agentas</string>
+    <string name="iptv_user_agent_description">Siunčiamas leidžiant kanalus, archyvą ir filmus iš šio šaltinio. Kanalo grojaraščio nustatymai vis tiek turi pirmenybę.</string>
+    <string name="iptv_user_agent_default">Programos numatytasis</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Bendrasis (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Pasirinktinis</string>
+    <string name="iptv_user_agent_custom_hint">Tik spausdinami simboliai, iki 200.</string>
+</resources>

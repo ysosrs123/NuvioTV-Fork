@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">Filmy i seriale IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">Pokazuje pasujące tytuły z Twoich źródeł telewizji na żywo jako źródło streamu</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Wszystkie połączenia dla %1$s są w użyciu. Zatrzymaj telewizję na żywo lub nagrywanie z tego źródła i spróbuj ponownie.</string>
+    <string name="iptv_vod_provider_refused">Dostawca odrzucił ten tytuł. Wszystkie jego połączenia mogą być w użyciu albo konto mogło wygasnąć.</string>
+    <string name="iptv_vod_unavailable">Ten tytuł IPTV nie jest już dostępny. Odśwież źródło w telewizji na żywo i spróbuj ponownie.</string>
+</resources>

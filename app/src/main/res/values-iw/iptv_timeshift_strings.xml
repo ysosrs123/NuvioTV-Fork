@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">השהיה מקומית (ניסיוני)</string>
+    <string name="iptv_timeshift_subtitle">ניסיוני. שומר בבאפר את הערוץ שצופים בו במסך מלא, כדי שאפשר יהיה להשהות ולהריץ אחורה. משתמש בנפח אחסון בזמן הצפייה ודורש חיבור פנוי כמו צפייה רגילה. עובד רק עם ערוצי MPEG-TS; ערוצי HLS, ריבוי תצוגות, התצוגה המקדימה וערוץ שמוקלט מתנגנים כרגיל. אם משהו נכשל, ההפעלה חוזרת לשידור חי רגיל.</string>
+    <string name="iptv_timeshift_length">אורך הבאפר</string>
+    <string name="iptv_timeshift_length_subtitle">מתקצר כשאין מספיק מקום פנוי. הבאפר נמחק כשמחליפים ערוץ או מפסיקים לצפות.</string>
+    <string name="iptv_timeshift_length_15">15 דקות</string>
+    <string name="iptv_timeshift_length_30">30 דקות</string>
+    <string name="iptv_timeshift_length_60">60 דקות</string>
+    <string name="iptv_timeshift_length_auto">אוטומטי</string>
+    <string name="iptv_timeshift_length_auto_description">30 דקות כשיש מספיק מקום פנוי, אחרת פחות</string>
+    <string name="iptv_timeshift_location">מיקום הבאפר</string>
+    <string name="iptv_timeshift_location_subtitle">לאן הבאפר נכתב בזמן הצפייה</string>
+    <string name="iptv_timeshift_fallback">ההשהיה המקומית הופסקה. מתנגן בשידור חי.</string>
+</resources>

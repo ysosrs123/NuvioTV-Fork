@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV filmai ir serialai</string>
+    <string name="iptv_vod_streams_setting_sub">Rodo atitinkančius pavadinimus iš jūsų tiesioginės TV šaltinių kaip srauto šaltinį</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Visi %1$s ryšiai užimti. Sustabdykite tiesioginę TV arba įrašymą šiame šaltinyje ir bandykite dar kartą.</string>
+    <string name="iptv_vod_provider_refused">Teikėjas atmetė šį pavadinimą. Gali būti, kad visi jo ryšiai užimti arba baigėsi paskyros galiojimas.</string>
+    <string name="iptv_vod_unavailable">Šis IPTV pavadinimas nebepasiekiamas. Atnaujinkite šaltinį tiesioginėje TV ir bandykite dar kartą.</string>
+</resources>

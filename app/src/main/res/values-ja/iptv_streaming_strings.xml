@@ -1,0 +1,28 @@
+<resources>
+    <string name="iptv_stream_title">ストリーミング</string>
+    <string name="iptv_stream_description">ライブチャンネルのバッファ方法です。変更は次に開くチャンネルから適用されます。</string>
+    <string name="iptv_stream_start">再生開始までの待ち時間</string>
+    <string name="iptv_stream_start_subtitle">チャンネルの再生開始前に読み込む映像の量です。短いほど早く始まりますが、回線が弱いと途切れることがあります。</string>
+    <string name="iptv_stream_start_fast">高速（約 1 秒）</string>
+    <string name="iptv_stream_start_normal">標準（約 2.5 秒）</string>
+    <string name="iptv_stream_start_safe">安定（約 5 秒）</string>
+    <string name="iptv_stream_cushion">視聴中に予備のバッファを確保</string>
+    <string name="iptv_stream_cushion_subtitle">バッファがいっぱいになるまで、音程はそのままで 3% 遅く再生し、短いネットワークの途切れで映像が止まらないようにします。その分、ライブTVは遅れて再生されます。</string>
+    <string name="iptv_stream_cushion_off">オフ</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="other">%d 秒</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS チャンネルは速度を落とす代わりに、ライブより遅れた位置から再生を始めます。</string>
+    <string name="iptv_stream_cushion_memory">このデバイスではメモリ約 %1$d MB までに制限されます。</string>
+    <string name="iptv_stream_behind_live">ライブから %1$d 秒遅れ</string>
+    <string name="iptv_stream_go_live_hint">早送りを押すとライブに戻ります</string>
+    <string name="iptv_user_agent">ユーザーエージェント</string>
+    <string name="iptv_user_agent_description">このソースのチャンネル、見逃し視聴、映画の再生時に送信されます。チャンネル個別のプレイリスト設定が引き続き優先されます。</string>
+    <string name="iptv_user_agent_default">アプリのデフォルト</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">汎用（okhttp）</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">カスタム</string>
+    <string name="iptv_user_agent_custom_hint">印刷可能な文字のみ、200 文字まで。</string>
+</resources>

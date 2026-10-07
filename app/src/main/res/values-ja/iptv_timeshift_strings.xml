@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">ローカルタイムシフト（試験運用）</string>
+    <string name="iptv_timeshift_subtitle">試験運用中の機能です。全画面で視聴中のチャンネルをバッファし、一時停止や巻き戻しができるようにします。視聴中はストレージを使用し、通常の視聴と同様に空き接続が必要です。MPEG-TS チャンネルのみ対応で、HLS チャンネル、マルチビュー、プレビュー、録画中のチャンネルは通常どおり再生されます。問題が発生した場合は、通常のライブ再生に戻ります。</string>
+    <string name="iptv_timeshift_length">バッファの長さ</string>
+    <string name="iptv_timeshift_length_subtitle">空き容量が少ない場合は短くなります。チャンネルを変更するか視聴をやめると、バッファは削除されます。</string>
+    <string name="iptv_timeshift_length_15">15 分</string>
+    <string name="iptv_timeshift_length_30">30 分</string>
+    <string name="iptv_timeshift_length_60">60 分</string>
+    <string name="iptv_timeshift_length_auto">自動</string>
+    <string name="iptv_timeshift_length_auto_description">空き容量が十分なら 30 分、それ以外はより短く</string>
+    <string name="iptv_timeshift_location">バッファの保存先</string>
+    <string name="iptv_timeshift_location_subtitle">視聴中にバッファを書き込む場所</string>
+    <string name="iptv_timeshift_fallback">ローカルタイムシフトを停止しました。ライブで再生しています。</string>
+</resources>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">סרטים וסדרות IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">הצגת כותרים תואמים ממקורות הטלוויזיה החיה שלך כמקור סטרימינג</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">כל החיבורים של %1$s בשימוש. יש לעצור את הטלוויזיה החיה או הקלטה במקור הזה ולנסות שוב.</string>
+    <string name="iptv_vod_provider_refused">הספק דחה את הכותר הזה. ייתכן שכל החיבורים שלו בשימוש, או שתוקף החשבון פג.</string>
+    <string name="iptv_vod_unavailable">כותר ה-IPTV הזה כבר לא זמין. יש לרענן את המקור בטלוויזיה החיה ולנסות שוב.</string>
+</resources>

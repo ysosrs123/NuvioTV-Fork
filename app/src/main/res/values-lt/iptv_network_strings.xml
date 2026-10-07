@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Tinklo vieta</string>
+    <string name="iptv_network_subtitle">Įrašykite į NAS ar kompiuterį per SMB, WebDAV arba FTP. Įrašai pirmiausia išsaugomi šiame įrenginyje, tada nukopijuojami.</string>
+    <string name="iptv_network_protocol">Ryšio tipas</string>
+    <string name="iptv_network_webdav_address">Adresas</string>
+    <string name="iptv_network_webdav_address_hint">WebDAV adresas, pvz., https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Aplankas po adresu, pvz., TV/Live. Jei jo nėra, jis sukuriamas.</string>
+    <string name="iptv_network_ftp_server_hint">Pavadinimas arba IP adresas, pvz., nas.local. Pridėkite :prievadas tik jei serveris naudoja ne 21 prievadą.</string>
+    <string name="iptv_network_ftp_folder_hint">Aplankas prisijungimo aplanke, pvz., TV/Live. Jei jo nėra, jis sukuriamas.</string>
+    <string name="iptv_network_ftp_secure">Saugus (aiškus TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Šifruoja prisijungimą ir įrašus. Serveris turi palaikyti FTPS.</string>
+    <string name="iptv_network_username_hint">Palikite tuščią, kad prisijungtumėte be prisijungimo duomenų</string>
+    <string name="iptv_network_plain_warning">Šis ryšys nešifruotas. Kiti tinklo naudotojai gali matyti slaptažodį.</string>
+    <string name="iptv_network_invalid">Patikrinkite adresą ir aplankų pavadinimus. Juose negali būti &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Šiuo adresu nieko nerasta. Patikrinkite kelią po serverio pavadinimo.</string>
+    <string name="iptv_network_certificate_untrusted">Nepavyko patvirtinti serverio sertifikato. Jei tai jūsų NAS sertifikatas, prieš juo pasitikėdami palyginkite piršto atspaudą su rodomu NAS.</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 piršto atspaudas: %1$s</string>
+    <string name="iptv_network_trust">Pasitikėti šiuo sertifikatu</string>
+    <string name="iptv_network_no_tls">Serveris nesiūlo šifravimo. Išjunkite „Saugus“ arba įjunkite FTPS serveryje.</string>
+    <string name="iptv_network_tls_reuse">Serveris reikalauja pakartotinai naudoti TLS seansą duomenų ryšiams, o tai nepalaikoma. Išjunkite šį reikalavimą serveryje.</string>
+</resources>

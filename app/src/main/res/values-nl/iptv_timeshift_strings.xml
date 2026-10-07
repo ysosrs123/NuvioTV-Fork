@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Lokale timeshift (experimenteel)</string>
+    <string name="iptv_timeshift_subtitle">Experimenteel. Buffert de zender die je schermvullend bekijkt, zodat je kunt pauzeren en terugspoelen. Gebruikt opslag tijdens het kijken en heeft net als normaal kijken een vrije verbinding nodig. Werkt alleen met MPEG-TS-zenders; HLS-zenders, multiview, de preview en een zender die wordt opgenomen spelen normaal af. Als er iets misgaat, valt het afspelen terug op normaal live afspelen.</string>
+    <string name="iptv_timeshift_length">Bufferlengte</string>
+    <string name="iptv_timeshift_length_subtitle">Wordt ingekort als er weinig vrije ruimte is. De buffer wordt verwijderd als je van zender wisselt of stopt met kijken.</string>
+    <string name="iptv_timeshift_length_15">15 minuten</string>
+    <string name="iptv_timeshift_length_30">30 minuten</string>
+    <string name="iptv_timeshift_length_60">60 minuten</string>
+    <string name="iptv_timeshift_length_auto">Automatisch</string>
+    <string name="iptv_timeshift_length_auto_description">30 minuten als er genoeg vrije ruimte is, anders minder</string>
+    <string name="iptv_timeshift_location">Bufferlocatie</string>
+    <string name="iptv_timeshift_location_subtitle">Waar de buffer tijdens het kijken wordt weggeschreven</string>
+    <string name="iptv_timeshift_fallback">Lokale timeshift gestopt. Live afspelen.</string>
+</resources>

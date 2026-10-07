@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Lokalne przesunięcie czasowe (eksperymentalne)</string>
+    <string name="iptv_timeshift_subtitle">Funkcja eksperymentalna. Buforuje kanał oglądany na pełnym ekranie, aby można go było wstrzymać i przewinąć. Podczas oglądania używa pamięci i, tak jak zwykłe oglądanie, wymaga wolnego połączenia. Działa tylko z kanałami MPEG-TS; kanały HLS, multiview, podgląd i nagrywany kanał są odtwarzane normalnie. Jeśli coś zawiedzie, odtwarzanie wraca do zwykłego trybu na żywo.</string>
+    <string name="iptv_timeshift_length">Długość bufora</string>
+    <string name="iptv_timeshift_length_subtitle">Skracana, gdy brakuje wolnego miejsca. Bufor jest usuwany po zmianie kanału lub zakończeniu oglądania.</string>
+    <string name="iptv_timeshift_length_15">15 minut</string>
+    <string name="iptv_timeshift_length_30">30 minut</string>
+    <string name="iptv_timeshift_length_60">60 minut</string>
+    <string name="iptv_timeshift_length_auto">Automatycznie</string>
+    <string name="iptv_timeshift_length_auto_description">30 minut, gdy jest dość wolnego miejsca, w przeciwnym razie mniej</string>
+    <string name="iptv_timeshift_location">Lokalizacja bufora</string>
+    <string name="iptv_timeshift_location_subtitle">Gdzie bufor jest zapisywany podczas oglądania</string>
+    <string name="iptv_timeshift_fallback">Zatrzymano lokalne przesunięcie czasowe. Odtwarzanie na żywo.</string>
+</resources>
