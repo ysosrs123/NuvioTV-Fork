@@ -23,7 +23,6 @@ class SettingsCatalogTest {
                 SettingsCategory.LAYOUT,
                 SettingsCategory.CONTENT_DISCOVERY,
                 SettingsCategory.PLAYBACK,
-                SettingsCategory.IPTV,
                 SettingsCategory.INTEGRATION,
                 SettingsCategory.TRACKING,
                 SettingsCategory.ADVANCED,
@@ -119,10 +118,4 @@ class SettingsCatalogTest {
                 }
             }
         }
-
-    @Test
-    fun `iptv category is hidden unless the build enables it`() {
-        assertFalse(SettingsCategory.IPTV in visibleSettingsCategories(true, isEssentialMode = false, isDebugBuild = true, isIptvEnabled = false))
-        assertTrue(SettingsCategory.IPTV in visibleSettingsCategories(true, isEssentialMode = false, isDebugBuild = true, isIptvEnabled = true))
-    }
 }

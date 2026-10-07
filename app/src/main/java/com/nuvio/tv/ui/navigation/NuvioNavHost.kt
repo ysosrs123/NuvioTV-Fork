@@ -1238,6 +1238,7 @@ private fun PlaybackNavHost(
         composable(Screen.IptvLive.route) {
             com.nuvio.tv.ui.screens.iptv.IptvLiveScreen(onBack = { navController.popBackStack() },
                 onRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } },
+                onSettings = { navController.navigate(Screen.IptvSettings.route) { launchSingleTop = true } },
                 onSources = {
                     if (!navController.popBackStack(Screen.IptvSources.route, inclusive = false)) {
                         navController.navigate(Screen.IptvSources.route) { launchSingleTop = true }
@@ -1258,6 +1259,12 @@ private fun PlaybackNavHost(
                 com.nuvio.tv.ui.screens.iptv.IptvSetupScreen(onBack = { navController.popBackStack() })
             }
         }
+        composable(Screen.IptvSettings.route) {
+            com.nuvio.tv.ui.screens.iptv.IptvSettingsScreen(
+                onSources = { navController.navigate(Screen.IptvSources.route) { launchSingleTop = true } },
+                onSetup = { navController.navigate(Screen.IptvSetup.route) { launchSingleTop = true } },
+                onRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } })
+        }
         composable(Screen.IptvRecordings.route) {
             com.nuvio.tv.ui.screens.iptv.IptvRecordingsScreen(onBack = { navController.popBackStack() })
         }
@@ -1265,7 +1272,6 @@ private fun PlaybackNavHost(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 showBuiltInHeader = !hideBuiltInHeaders,
-                onNavigateToIptvSources = { navController.navigate(Screen.IptvSources.route) },
                 onNavigateToAddons = { navController.navigate(Screen.AddonManager.route) },
                 onNavigateToPlugins = { navController.navigate(Screen.Plugins.route) },
                 onNavigateToWatchParty = { navController.navigate(Screen.WatchParty.route) },

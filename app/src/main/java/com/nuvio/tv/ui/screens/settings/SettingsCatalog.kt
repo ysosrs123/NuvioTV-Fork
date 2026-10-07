@@ -15,7 +15,6 @@ internal enum class SettingsCategory(val group: SettingsRailGroup) {
     LAYOUT(SettingsRailGroup.LOOK),
     CONTENT_DISCOVERY(SettingsRailGroup.WATCH),
     PLAYBACK(SettingsRailGroup.WATCH),
-    IPTV(SettingsRailGroup.WATCH),
     INTEGRATION(SettingsRailGroup.SERVICES),
     TRACKING(SettingsRailGroup.SERVICES),
     ADVANCED(SettingsRailGroup.SYSTEM),
@@ -27,14 +26,12 @@ internal enum class SettingsCategory(val group: SettingsRailGroup) {
 internal fun visibleSettingsCategories(
     isPrimaryProfile: Boolean,
     isEssentialMode: Boolean,
-    isDebugBuild: Boolean,
-    isIptvEnabled: Boolean = true
+    isDebugBuild: Boolean
 ): List<SettingsCategory> = SettingsCategory.entries.filter { category ->
     when (category) {
         SettingsCategory.ACCOUNT,
         SettingsCategory.PROFILES -> isPrimaryProfile
         SettingsCategory.DEBUG -> isDebugBuild && !isEssentialMode
-        SettingsCategory.IPTV -> isIptvEnabled
         SettingsCategory.EXPERIENCE -> false
         else -> true
     }

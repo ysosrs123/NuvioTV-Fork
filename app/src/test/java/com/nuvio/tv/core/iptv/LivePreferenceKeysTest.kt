@@ -11,5 +11,7 @@ class LivePreferenceKeysTest {
         assertEquals(listOf("1:a:category", "1:a:hidden"), LivePreferenceKeys.ofSource(keys, 1, "a"))
         assertEquals(keys.take(5), LivePreferenceKeys.ofAllProfiles(keys))
         assertEquals("3:x:hidden", LivePreferenceKeys.source(3, "x", "hidden"))
+        assertEquals(listOf("1:a:hidden"), LivePreferenceKeys.hiddenOfProfile(keys, 1))
+        assertEquals(keys.take(5), LivePreferenceKeys.ofAllProfiles(keys + "settings-format"))
     }
 }

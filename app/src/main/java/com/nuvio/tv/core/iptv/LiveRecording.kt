@@ -58,17 +58,20 @@ object RecordingPlan {
     const val POST_ROLL_MILLIS = 2 * 60 * 1000L
     const val DEFAULT_DURATION_MILLIS = 60 * 60 * 1000L
 
-    fun now(nowMillis: Long, programmeStopMillis: Long? = null, durationMillis: Long = DEFAULT_DURATION_MILLIS): RecordingWindow? {
-        require(durationMillis > 0)
-        val stop = programmeStopMillis?.let { if (it <= nowMillis) return null; it + POST_ROLL_MILLIS } ?: (nowMillis + durationMillis)
+    fun now(nowMillis: Long, programmeStopMillis: Long? = null, durationMillis: Long = DEFAULT_DURATION_MILLIS,
+        postRollMillis: Long = POST_ROLL_MILLIS): RecordingWindow? {
+        require(durationMillis > 0 && postRollMillis >= 0)
+        val stop = programmeStopMillis?.let { if (it <= nowMillis) return null; it + postRollMillis } ?: (nowMillis + durationMillis)
         return RecordingWindow(nowMillis, minOf(stop, nowMillis + MAX_DURATION_MILLIS))
     }
 
-    fun programme(nowMillis: Long, startMillis: Long, stopMillis: Long?): RecordingWindow? {
+    fun programme(nowMillis: Long, startMillis: Long, stopMillis: Long?, preRollMillis: Long = PRE_ROLL_MILLIS,
+        postRollMillis: Long = POST_ROLL_MILLIS): RecordingWindow? {
+        require(preRollMillis >= 0 && postRollMillis >= 0)
         val end = stopMillis ?: (startMillis + DEFAULT_DURATION_MILLIS)
         if (end <= startMillis || end <= nowMillis) return null
-        val start = maxOf(startMillis - PRE_ROLL_MILLIS, nowMillis)
-        return RecordingWindow(start, minOf(end + POST_ROLL_MILLIS, start + MAX_DURATION_MILLIS))
+        val start = maxOf(startMillis - preRollMillis, nowMillis)
+        return RecordingWindow(start, minOf(end + postRollMillis, start + MAX_DURATION_MILLIS))
     }
 }
 

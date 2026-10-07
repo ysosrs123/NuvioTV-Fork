@@ -151,4 +151,12 @@ class LiveRecordingTest {
         assertEquals(candidate, trim.candidate)
         assertEquals(listOf(far, overlapping, gap), trim.neighbours)
     }
+
+    @Test fun customStartEarlyAndRunOverAreUsed() {
+        val now = 1_800_000_000_000L; val minute = 60_000L; val hour = 60 * minute
+        assertEquals(RecordingWindow(now + hour - 5 * minute, now + 2 * hour + 15 * minute),
+            RecordingPlan.programme(now, now + hour, now + 2 * hour, 5 * minute, 15 * minute))
+        assertEquals(RecordingWindow(now + hour, now + 2 * hour), RecordingPlan.programme(now, now + hour, now + 2 * hour, 0, 0))
+        assertEquals(RecordingWindow(now, now + 30 * minute), RecordingPlan.now(now, now + 30 * minute, postRollMillis = 0))
+    }
 }

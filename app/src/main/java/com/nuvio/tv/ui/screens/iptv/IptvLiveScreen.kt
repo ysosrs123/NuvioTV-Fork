@@ -87,7 +87,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -> Unit = {}, viewModel: IptvLiveViewModel = hiltViewModel()) {
+fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -> Unit = {}, onSettings: () -> Unit = onSources,
+    viewModel: IptvLiveViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     var fullscreen by remember { mutableStateOf(false) }
@@ -95,7 +96,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
     var searching by remember { mutableStateOf(false) }
     val searchFocus = remember { FocusRequester() }
     var showTracks by remember(state.player) { mutableStateOf(false) }
-    var showHud by remember { mutableStateOf(false) }
+    var showHud by remember { mutableStateOf(viewModel.showStatsByDefault) }
     var menuFor by remember { mutableStateOf<IptvListedChannel?>(null) }
     var formatFor by remember { mutableStateOf<IptvListedChannel?>(null) }
     val now by produceState(System.currentTimeMillis()) { while (true) { delay(15_000); value = System.currentTimeMillis() } }
@@ -212,7 +213,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
                     onSports = { viewModel.showSports(); railOpen = false; focusGrid() },
                     onCategory = { viewModel.showCategory(it); railOpen = false; focusGrid() },
                     onSource = { viewModel.showSource(it); railOpen = false; focusGrid() },
-                    onSources = { railOpen = false; onSources() },
+                    onSources = { railOpen = false; onSettings() },
                     onRecordings = { railOpen = false; onRecordings() },
                     onSearch = { airing -> viewModel.searchMode(airing); railOpen = false; searching = true },
                     onHide = viewModel::toggleHidden,
@@ -445,7 +446,7 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
             item { RailItem(stringResource(R.string.iptv_live_search), null, state.search.isNotBlank() && !state.airingSearch, Modifier, { onSearch(false) }, Icons.Filled.Search) }
             item { RailItem(stringResource(R.string.iptv_live_search_airing), null, state.search.isNotBlank() && state.airingSearch, Modifier, { onSearch(true) }, Icons.Filled.Schedule) }
             item { RailItem(stringResource(R.string.iptv_live_favourites), null, state.favourites, Modifier.focusRequester(first), onFavourites, Icons.Filled.Star) }
-            item { RailItem(stringResource(R.string.iptv_live_sports), null, state.sports, Modifier, onSports, Icons.Filled.EmojiEvents) }
+            if (state.sportEnabled) item { RailItem(stringResource(R.string.iptv_live_sports), null, state.sports, Modifier, onSports, Icons.Filled.EmojiEvents) }
             item { RailItem(stringResource(R.string.iptv_live_all), state.categories.filter { it.name !in state.hiddenCategories }.sumOf { it.channels }.takeIf { it > 0 }, !state.favourites && !state.sports && state.category == null,
                 Modifier, { onCategory(null) }, Icons.AutoMirrored.Filled.List) }
             if (state.categories.isNotEmpty()) item { SectionLabel(stringResource(R.string.iptv_live_categories)) }
@@ -471,7 +472,7 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
             }
             item { Spacer(Modifier.height(6.dp)) }
             item { RailItem(stringResource(R.string.iptv_recordings_open), state.recordings.count { it.status.holdsConnection }.takeIf { it > 0 }, false, Modifier, onRecordings, Icons.Filled.VideoLibrary) }
-            item { RailItem(stringResource(R.string.iptv_sources_manage), null, false, Modifier, onSources, Icons.Filled.Settings) }
+            item { RailItem(stringResource(R.string.iptv_settings_title), null, false, Modifier, onSources, Icons.Filled.Settings) }
         }
     }
 }

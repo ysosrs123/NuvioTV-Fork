@@ -23,7 +23,7 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
     val recent: List<String> = emptyList(),
     val playback: IptvLivePlayback? = null,
     val player: ExoPlayer? = null, val playingTitle: String? = null, val playing: Boolean = false, val reconnecting: Boolean = false, val playingRow: IptvListedChannel? = null, val catchup: GuideProgramme? = null,
-    val catchupFrom: Long? = null, val paused: Boolean = false, val pausedAt: Long? = null, val pausedProgramme: GuideProgramme? = null,
+    val sportEnabled: Boolean = true, val timeshiftEnabled: Boolean = true, val catchupFrom: Long? = null, val paused: Boolean = false, val pausedAt: Long? = null, val pausedProgramme: GuideProgramme? = null,
     val loading: Boolean = false, val loaded: Boolean = false, val tuning: Boolean = false, val message: Int? = null, val updating: Int? = null,
     val guidePicker: IptvGuidePicker? = null, val refresh: Map<String, IptvRefreshStatus> = emptyMap(),
     val controlLayout: com.nuvio.tv.data.local.PlayerControlLayout? = null, val shortGuide: Map<String, List<GuideProgramme>> = emptyMap(),
@@ -352,9 +352,17 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 val sources = withContext(Dispatchers.IO) { access.use(current) { catalogue.sources(current.profileId) } }
                 val ref = mutable.value.source?.takeIf { chosen -> sources.any { it.ref == chosen } }
                     ?: sources.firstOrNull { it.playbackEligible }?.ref ?: sources.firstOrNull()?.ref
+                val sportEnabled = livePreferences.sport
+                if (!sportEnabled && mutable.value.sports) mutable.update { it.copy(sports = false) }
+                mutable.update { it.copy(sportEnabled = sportEnabled, timeshiftEnabled = livePreferences.timeshift) }
                 if (ref != null && ref != restored && !append) {
                     restored = ref
-                    val saved = preferences.getString(livePreferences.key(ref, "category"), null)
+                    val saved = when (livePreferences.startView) {
+                        IptvStartView.LAST -> preferences.getString(livePreferences.key(ref, "category"), null)
+                        IptvStartView.ALL -> ALL_KEY
+                        IptvStartView.FAVOURITES -> FAVOURITES_KEY
+                        IptvStartView.SPORT -> SPORTS_KEY
+                    }?.takeIf { sportEnabled || it != SPORTS_KEY }
                     val hidden = preferences.getStringSet(livePreferences.key(ref, "hidden"), null).orEmpty().toSet()
                     mutable.update { it.copy(hiddenCategories = hidden, favourites = saved == FAVOURITES_KEY, sports = saved == SPORTS_KEY,
                         category = saved?.takeIf { value -> value != FAVOURITES_KEY && value != ALL_KEY && value != SPORTS_KEY }) }
@@ -443,7 +451,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val row = state.playingRow
         val pausedAt = state.pausedAt
         val from = if (state.catchup == null && row != null && pausedAt != null)
-            LiveTimeshift.resumeFrom(pausedAt, System.currentTimeMillis(), state.pausedProgramme, hasArchive(row)) else null
+            LiveTimeshift.resumeFrom(pausedAt, System.currentTimeMillis(), state.pausedProgramme, hasArchive(row) && livePreferences.timeshift) else null
         mutable.update { it.copy(paused = false, pausedAt = null, pausedProgramme = null) }
         if (from != null && row != null) watch(row, state.pausedProgramme, from) else player.playWhenReady = true
     }
@@ -456,16 +464,17 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val behind = state.catchupFrom
         if (catchup != null) {
             if (behind == null) return false
-            val from = LiveTimeshift.rewindFrom(behind, catchup, hasArchive(row)) ?: return false
+            val from = LiveTimeshift.rewindFrom(behind, catchup, hasArchive(row) && livePreferences.timeshift) ?: return false
             if (from >= behind) return false
             watch(row, catchup, from)
             return true
         }
         val programme = liveProgramme(state, row.item.channel.id, now)
-        val from = LiveTimeshift.rewindFrom(now, programme, hasArchive(row)) ?: return false
+        val from = LiveTimeshift.rewindFrom(now, programme, hasArchive(row) && livePreferences.timeshift) ?: return false
         watch(row, programme, from)
         return true
     }
+    val showStatsByDefault: Boolean get() = livePreferences.showStats
     private fun playWhenReadyChanged(ready: Boolean) {
         val state = mutable.value
         if (ready && state.paused) mutable.update { it.copy(paused = false, pausedAt = null, pausedProgramme = null) }
@@ -494,7 +503,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 if (catchup != null && !IptvCatchup.reaches(source.kind, stored.attributes, requireNotNull(catchupStart), System.currentTimeMillis()))
                     throw CatchupUnavailableException()
                 val overlayFormat = stored.overlay.streamFormat
-                val streamFormat = if (catchup != null && source.kind == IptvSourceKind.XTREAM) IptvStreamFormat.MPEG_TS else overlayFormat
+                val streamFormat = if (catchup != null && source.kind == IptvSourceKind.XTREAM) IptvStreamFormat.MPEG_TS
+                    else overlayFormat.takeIf { it != IptvStreamFormat.AUTO } ?: livePreferences.defaultFormat
                 val streams = withContext(Dispatchers.IO) { access.use(current) {
                     catalogue.accounts(current.profileId).firstOrNull { it.id == source.accountId }?.maxStreams ?: 1
                 } }
@@ -558,8 +568,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             paused = false, pausedAt = null, pausedProgramme = null, tuning = false,
             playingId = null, previousId = it.playingId ?: it.previousId, multiview = tiles.map { row -> IptvTile(row) }, tileFocus = 0, mainTile = 0,
             panelHeight = AndroidDeviceProfile.panelHeight(context), tileHeights = emptyList(),
-            multiviewLayout = preferences.getString(LAYOUT_KEY, null)?.let { name -> MultiviewLayout.entries.firstOrNull { it.name == name } } ?: MultiviewLayout.GRID,
-            multiviewQuality = preferences.getString(QUALITY_KEY, null)?.let { name -> MultiviewQuality.entries.firstOrNull { it.name == name } } ?: MultiviewQuality.AUTO) }
+            multiviewLayout = livePreferences.multiviewLayout, multiviewQuality = livePreferences.multiviewQuality) }
         tileSizes = emptyList()
         val previous = multiviewJob
         val generation = ++multiviewGeneration
@@ -616,11 +625,11 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         applyTileHeights()
     }
     fun setMultiviewLayout(layout: MultiviewLayout) {
-        preferences.edit().putString(LAYOUT_KEY, layout.name).apply()
+        livePreferences.multiviewLayout = layout
         mutable.update { it.copy(multiviewLayout = layout) }
     }
     fun setMultiviewQuality(quality: MultiviewQuality) {
-        preferences.edit().putString(QUALITY_KEY, quality.name).apply()
+        livePreferences.multiviewQuality = quality
         mutable.update { it.copy(multiviewQuality = quality) }
         applyTileHeights()
     }
@@ -677,7 +686,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 val streams = withContext(Dispatchers.IO) { access.use(current) {
                     catalogue.accounts(current.profileId).firstOrNull { it.id == source.accountId }?.maxStreams ?: 1
                 } }
-                val format = item.overlay.streamFormat
+                val format = item.overlay.streamFormat.takeIf { it != IptvStreamFormat.AUTO } ?: livePreferences.defaultFormat
                 val key = AcquisitionKey(admissionAccount(current.profileId, source.accountId), row.item.channel.id, "tile:" + format.name, source.activeGeneration ?: 0)
                 val result = tileRuntimes[index].open(key, device.tileBufferBytes.toLong(), 4L * device.tileBufferBytes, owner, streams) { purpose ->
                     currentCoroutineContext().ensureActive()
@@ -721,8 +730,6 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private companion object {
         const val PAGE = 60
         const val MAX_TILES = 4
-        const val LAYOUT_KEY = "multiview-layout"
-        const val QUALITY_KEY = "multiview-quality"
         const val AIRING_RESULTS = 120
         const val RECENT = 8
         const val WINDOW_SPAN = 12 * 60 * 60 * 1000L

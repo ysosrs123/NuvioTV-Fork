@@ -33,6 +33,7 @@ import com.nuvio.tv.core.iptv.trimRecordingPadding
 import com.nuvio.tv.core.profile.ProfileScopedCredentialStore
 import com.nuvio.tv.data.iptv.IptvCatalogueItem
 import com.nuvio.tv.data.iptv.IptvCatalogueStore
+import com.nuvio.tv.data.iptv.IptvLivePreferences
 import com.nuvio.tv.data.iptv.IptvLog
 import com.nuvio.tv.data.iptv.IptvProfileAccess
 import com.nuvio.tv.data.iptv.IptvRecording
@@ -91,6 +92,7 @@ class IptvRecorder @Inject constructor(
     private val catalogue: IptvCatalogueStore,
     private val access: IptvProfileAccess,
     private val admission: LiveSessionAdmission,
+    private val livePreferences: IptvLivePreferences,
 ) : ProfileScopedCredentialStore {
     private class Resolved(val source: IptvSource, val item: IptvCatalogueItem, val streams: Int, val connection: IptvSourceConnection?) {
         override fun toString() = "Resolved(connection withheld)"
@@ -126,14 +128,16 @@ class IptvRecorder @Inject constructor(
 
     suspend fun recordNow(session: IptvProfileAccess.Session, source: IptvSourceRef, channelId: String,
         programme: GuideProgramme? = null): IptvRecordResult {
-        val window = RecordingPlan.now(System.currentTimeMillis(), programme?.stop?.epochMillis)
+        val window = RecordingPlan.now(System.currentTimeMillis(), programme?.stop?.epochMillis,
+            postRollMillis = livePreferences.recordLateMinutes * 60_000L)
             ?: return IptvRecordResult.Refused(IptvRecordRefusal.PROGRAMME_ENDED)
         return create(session, source, channelId, programme, window)
     }
 
     suspend fun schedule(session: IptvProfileAccess.Session, source: IptvSourceRef, channelId: String,
         programme: GuideProgramme): IptvRecordResult {
-        val window = RecordingPlan.programme(System.currentTimeMillis(), programme.start.epochMillis, programme.stop?.epochMillis)
+        val window = RecordingPlan.programme(System.currentTimeMillis(), programme.start.epochMillis, programme.stop?.epochMillis,
+            livePreferences.recordEarlyMinutes * 60_000L, livePreferences.recordLateMinutes * 60_000L)
             ?: return IptvRecordResult.Refused(IptvRecordRefusal.PROGRAMME_ENDED)
         return create(session, source, channelId, programme, window)
     }
@@ -467,7 +471,8 @@ class IptvRecorder @Inject constructor(
             IptvSourceKind.XTREAM -> IptvXtreamClient.streamUrl(requireNotNull(found.connection), found.item.channel.data.locator)
             IptvSourceKind.M3U -> found.item.channel.data.locator
         }
-        return Target(admissionAccount(entry.profileId, found.source.accountId), found.streams, found.source.activeGeneration ?: 0, address, found.item.overlay.streamFormat)
+        return Target(admissionAccount(entry.profileId, found.source.accountId), found.streams, found.source.activeGeneration ?: 0, address,
+            found.item.overlay.streamFormat.takeIf { it != IptvStreamFormat.AUTO } ?: livePreferences.defaultFormat)
     }
 
     private suspend fun removeWhere(profileId: Int?) {

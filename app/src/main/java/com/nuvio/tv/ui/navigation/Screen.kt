@@ -8,6 +8,7 @@ sealed class Screen(val route: String) {
     data object IptvSources : Screen("iptv/sources")
     data object IptvSetup : Screen("iptv/setup")
     data object IptvRecordings : Screen("iptv/recordings")
+    data object IptvSettings : Screen("iptv/settings")
     data object Home : Screen("home")
     data object Detail : Screen("detail/{itemId}/{itemType}?addonBaseUrl={addonBaseUrl}&returnFocusSeason={returnFocusSeason}&returnFocusEpisode={returnFocusEpisode}&returnToHomeOnBack={returnToHomeOnBack}&heroBackdropUrl={heroBackdropUrl}&playOnLoad={playOnLoad}&manualSelection={manualSelection}&heroLogoUrl={heroLogoUrl}") {
         private fun encode(value: String): String =

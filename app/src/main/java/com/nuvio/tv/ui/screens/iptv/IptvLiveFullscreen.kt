@@ -235,9 +235,9 @@ private fun Banner(state: IptvLiveState, now: Long) {
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(clock(now), style = MaterialTheme.typography.headlineSmall, color = NuvioTheme.colors.TextPrimary)
                 Text(stringResource(when {
-                    state.paused && catchup == null -> if (row != null && hasArchive(row) && programme != null) R.string.iptv_live_paused_archive_hint else R.string.iptv_live_paused_live_hint
+                    state.paused && catchup == null -> if (row != null && hasArchive(row) && state.timeshiftEnabled && programme != null) R.string.iptv_live_paused_archive_hint else R.string.iptv_live_paused_live_hint
                     catchup != null -> R.string.iptv_live_catchup_hint
-                    row != null && hasArchive(row) -> R.string.iptv_live_archive_hint
+                    row != null && hasArchive(row) && state.timeshiftEnabled -> R.string.iptv_live_archive_hint
                     else -> R.string.iptv_live_fullscreen_hint
                 }), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary,
                     maxLines = 2, modifier = Modifier.widthIn(max = 220.dp))
