@@ -2,9 +2,9 @@
 
 Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
 Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built,
-not device-tested. Last fully green debug build: `a2eeb57` (run 37592762574: everything
-up to Movies/Series in the Live TV menu and the Movies folder location; their
-translations followed in `e20d157`). Before that: `d263b18` (run 37580266979, wave 1). Run 37589504762 at `d0d0dbb` (everything up to streaming stability)
+not device-tested. Last fully green debug build: `f29cbe2` (run 37599069380: everything,
+including Home rows, VOD fixes, Return to live and all translations); minified release
+build green at `ec6f16f` (run 37596443549). Before that: `d263b18` (run 37580266979, wave 1). Run 37589504762 at `d0d0dbb` (everything up to streaming stability)
 compiled the whole app and assembled the APK; one unit test failed
 (`IptvWebDavShareTest` self-signed certificate case), fixed in `2bef868` and not yet
 confirmed by CI. Minified release build with IPTV last green at `d8d4a03` (run
@@ -152,8 +152,6 @@ Done after `e20d157` (host-tested, CI pending):
 
 Next (not started; the review helpers stopped at an account usage limit before
 reporting, resets 10 October 2026 00:00 UTC):
-- Debug CI build of `2a8942b`+ (Home rows, VOD gaps, Return to live, Home translations);
-  nothing after `a2eeb57` has a green debug build yet.
 - Independent review of `d263b18..HEAD` in three areas (storage and setup server;
   playback, streaming and navigation; VOD, sport and Home). Brief kept outside the repo:
   read-only reviewers, concrete failure paths only.

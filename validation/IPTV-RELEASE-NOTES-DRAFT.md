@@ -439,6 +439,8 @@ Phone setup (security review)
 
 ## Validation
 
+- Latest: debug build green at `f29cbe2` (run 37599069380) and minified release build
+  green at `ec6f16f` (run 37596443549), with every feature above and all 40 locales.
 - 7 October work after wave 1: 565 core and 233 data-layer JVM tests pass on the host
   harness; device tests compile. CI run 37589504762 at `d0d0dbb` compiled the whole app
   and built the APK with one failing unit test, since fixed (`2bef868`). Not device-tested.
