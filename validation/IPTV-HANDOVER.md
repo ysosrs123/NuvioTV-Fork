@@ -40,6 +40,29 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
   a filtered error summary on failure. Without GitHub tools, run status is readable
   from the public REST API, but logs and re-runs need the user.
 
+## Current work plan (7 October 2026, user asked for everything below)
+
+Wave 1 (in progress, parallel helpers with separate file ownership; strings in their
+own files, translated afterwards):
+- Storage: recording location internal / USB (FAT32 split into parts, exFAT, NTFS,
+  read-only detection) / SMB 2-3 via smbj (user approved the dependency) with local
+  spool and resumable upload; safe file names.
+- Live TV screen: catch-up scrubbing across programmes, auto return to live, guide
+  densities, sticky titles, programme artwork, channel and category reorder, all
+  sources together, multiview across sources and more layouts, picture-in-picture.
+  Strings: `iptv_guide_strings.xml`.
+- Playback: per-channel headers, endless retry, frozen-video detection, format
+  probe, faster TS zap, Xtream catch-up address styles, display frame-rate handoff.
+  Strings: `iptv_playback_strings.xml`. View-model wiring done afterwards.
+- Setup: phone guide assignment and profiles, device-to-device copy, encrypted
+  backup/restore, account groups screen, Stalker grouping, refresh review.
+Wave 2 (after storage): WebDAV and FTP recording targets (user approved), recordings
+download/watch from the phone setup page (user approved), shared media storage.
+Wave 3: Live TV rows on the Nuvio Home screen.
+Needs the user: a sports fixtures data source; local timeshift from the capture chain
+can only be enabled as an experimental, off-by-default option until device-validated;
+device validation items can only be prepared here.
+
 ## Planned but not done (compared on 7 October 2026)
 
 From the earlier plan and the reference study; none of these is built yet.
