@@ -151,6 +151,27 @@
     <string name="iptv_form_save_load">Simpan dan muat saluran</string>
     <string name="iptv_source_removed">Sumber dihapus.</string>
     <string name="iptv_guide_removed">Panduan dihapus.</string>
+    <string name="iptv_settings_title">Pengaturan TV Live</string>
+    <string name="iptv_settings_description">Pengaturan TV Live di TV ini. Sumber dan panduan milik profil saat ini.</string>
+    <string name="iptv_settings_sources">Sumber dan panduan</string>
+    <string name="iptv_settings_sources_subtitle">Playlist, akun Xtream, portal Stalker, dan panduan acara</string>
+    <string name="iptv_settings_recordings_subtitle">Rekaman terjadwal, berjalan, dan selesai</string>
+    <string name="iptv_settings_playback">Pemutaran</string>
+    <string name="iptv_settings_format_subtitle">Dipakai untuk saluran yang disetel ke Otomatis. Format yang dipilih untuk satu saluran tetap berlaku untuk saluran itu.</string>
+    <string name="iptv_settings_timeshift">Jeda dan mundur dengan catch-up</string>
+    <string name="iptv_settings_timeshift_subtitle">Di saluran dengan catch-up, lanjutkan dari titik jeda dan mundur melalui arsip penyedia</string>
+    <string name="iptv_settings_stats">Statistik pemutaran</string>
+    <string name="iptv_settings_stats_subtitle">Tampilkan statistik saat TV Live dibuka</string>
+    <string name="iptv_settings_start">Buka di</string>
+    <string name="iptv_settings_start_last">Kategori terakhir dilihat</string>
+    <string name="iptv_settings_sport">Tampilkan Olahraga di menu</string>
+    <string name="iptv_settings_sport_subtitle">Saluran dengan olahraga sekarang atau dalam enam jam ke depan, dari panduan acara</string>
+    <string name="iptv_settings_hidden_subtitle">Pilih untuk menampilkan lagi kategori tersembunyi profil ini</string>
+    <string name="iptv_settings_hidden_none">Tahan OK pada kategori di menu TV Live untuk menyembunyikannya</string>
+    <string name="iptv_settings_record_early">Mulai rekaman lebih awal</string>
+    <string name="iptv_settings_record_late">Lanjutkan rekaman setelah selesai</string>
+    <string name="iptv_settings_record_late_subtitle">Jam di panduan sering sedikit meleset. Berlaku untuk rekaman baru.</string>
+    <string name="iptv_settings_none">Tidak ada</string>
     <string name="iptv_guide_choose_folder">Folder panduan</string>
     <string name="iptv_guide_folder_title">File panduan</string>
     <string name="iptv_guide_folder_description">File XMLTV yang disalin ke folder iptv-guides di perangkat ini atau di drive USB.</string>
@@ -206,6 +227,9 @@
     <string name="iptv_multiview_quality_sharpest_description">Satu tingkat lebih tajam jika box mampu; memakai lebih banyak kecepatan internet</string>
     <string name="iptv_multiview_quality_lightest">Teringan</string>
     <string name="iptv_multiview_quality_lightest_description">Satu tingkat lebih rendah, untuk koneksi lambat atau box yang sibuk</string>
+    <plurals name="iptv_settings_minutes">
+        <item quantity="other">%1$d menit</item>
+    </plurals>
     <plurals name="iptv_connections">
         <item quantity="other">%1$d koneksi</item>
     </plurals>
