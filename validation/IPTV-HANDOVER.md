@@ -81,6 +81,15 @@ TMDB/IMDb id with a title+year fallback; (b) Movies and Series in the Live TV me
 with artwork either from the provider or from Nuvio metadata (TMDB / meta add-ons),
 opening Nuvio's detail page when a title is matched. VOD is not ingested at all today.
 Stream URLs carry Xtream credentials: resolve at play time, never store them in history.
+Tracking (user agreed 7 October 2026): matched IPTV titles use Nuvio's normal Continue
+Watching, Watchlist, Library, Trakt, Simkl and MDBList (keyed by title id); unmatched
+titles resume locally only. `StreamLinkCacheDataStore` must hold an IPTV reference
+(source + stream id), never an Xtream URL.
+Navigation and settings (user agreed 7 October 2026): Live TV becomes a sidebar
+destination; Left from the guide opens the Live TV menu, Left again the Nuvio sidebar;
+Back as on other Nuvio pages; the Exit item goes; IPTV settings move into the main
+Settings as a "Live TV" category, with a shortcut from the Live TV menu. The guide
+stays full width. This reverses the earlier "IPTV settings only on the Live TV side".
 Local timeshift: the capture chain was found unsuitable (HLS-only, baseline-AVC test
 streams, no audio, connection hold on failure); built instead as a capped TS ring file
 read by the normal live player.
