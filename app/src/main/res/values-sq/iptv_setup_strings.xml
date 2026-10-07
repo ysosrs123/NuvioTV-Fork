@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Konfiguro nga telefoni ose kompjuteri</string>
+    <string name="iptv_remote_entry_subtitle">Shkruaj adresat dhe kredencialet me një tastierë të vërtetë</string>
+    <string name="iptv_remote_title">Konfiguro nga telefoni</string>
+    <string name="iptv_remote_description">Skano kodin QR me telefonin, ose hap adresën në një kompjuter në të njëjtin rrjet. Pastaj fut kodin e çiftimit që shfaqet këtu.</string>
+    <string name="iptv_remote_code">Kodi i çiftimit</string>
+    <string name="iptv_remote_address">Ose hap këtë adresë</string>
+    <string name="iptv_remote_qr_description">Kodi QR për konfigurimin nga telefoni</string>
+    <string name="iptv_remote_home_network">Përdore vetëm në rrjetin e shtëpisë. Faqja e konfigurimit nuk është e enkriptuar.</string>
+    <string name="iptv_remote_idle_note">Ndalet kur del nga ky ekran, ose pas 10 minutash pa aktivitet.</string>
+    <string name="iptv_remote_confirm_note">Asgjë nuk ruhet derisa ta konfirmosh këtu në televizor. Burimet dhe udhëzuesit mund të hiqen vetëm në televizor.</string>
+    <string name="iptv_remote_starting">Duke nisur konfigurimin nga telefoni…</string>
+    <string name="iptv_remote_waiting">Në pritje të një telefoni ose kompjuteri</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d pajisje e lidhur</item>
+        <item quantity="other">%d pajisje të lidhura</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Lidhe televizorin me rrjetin e shtëpisë për ta konfiguruar nga telefoni.</string>
+    <string name="iptv_remote_not_home_network">Televizori nuk ka një adresë rrjeti privat shtëpiak, ndaj konfigurimi nga telefoni mbetet i çaktivizuar.</string>
+    <string name="iptv_remote_ports_busy">Konfigurimi nga telefoni nuk mund të nisej sepse portat e rrjetit janë në përdorim. Provo përsëri pas pak.</string>
+    <string name="iptv_remote_idle_stopped">Konfigurimi nga telefoni u ndal pas 10 minutash pa aktivitet.</string>
+    <string name="iptv_remote_paused">Konfigurimi nga telefoni u ndal ndërsa aplikacioni ishte në sfond.</string>
+    <string name="iptv_remote_start_again">Nis përsëri</string>
+    <string name="iptv_remote_start_again_subtitle">Shfaq një kod QR dhe kod çiftimi të ri</string>
+    <string name="iptv_remote_done">U krye</string>
+    <string name="iptv_remote_done_subtitle">Ndalon konfigurimin nga telefoni dhe kthehet prapa</string>
+    <string name="iptv_remote_confirm_add_title">Të shtohet kjo nga telefoni?</string>
+    <string name="iptv_remote_confirm_edit_title">Të ndryshohet %1$s nga telefoni?</string>
+    <string name="iptv_remote_confirm_subtitle">Kontrollo të dhënat. Asgjë nuk ruhet nëse nuk zgjedh Ruaj në këtë televizor.</string>
+    <string name="iptv_remote_field_device">Dërguar nga</string>
+    <string name="iptv_remote_field_type">Lloji</string>
+    <string name="iptv_remote_field_name">Emri</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adresa</string>
+    <string name="iptv_remote_field_server">Serveri</string>
+    <string name="iptv_remote_server_changes">Ndryshon nga %1$s në %2$s</string>
+    <string name="iptv_remote_server_new">Ndryshon në %1$s</string>
+    <string name="iptv_remote_field_username">Emri i përdoruesit</string>
+    <string name="iptv_remote_field_password">Fjalëkalimi</string>
+    <string name="iptv_remote_field_mac">Adresa MAC</string>
+    <string name="iptv_remote_password_set">Futur në telefon (i fshehur)</string>
+    <string name="iptv_remote_password_new">Fjalëkalim i ri (i fshehur)</string>
+    <string name="iptv_remote_save">Ruaj në këtë televizor</string>
+    <string name="iptv_remote_reject">Refuzo</string>
+    <string name="iptv_remote_saved">U ruajt. Kanalet po ngarkohen tani.</string>
+    <string name="iptv_remote_guide_saved">U ruajt. Udhëzuesi po ngarkohet tani.</string>
+    <string name="iptv_remote_rejected">U refuzua. Asgjë nuk u ruajt.</string>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Beállítás telefonról vagy számítógépről</string>
+    <string name="iptv_remote_entry_subtitle">Címek és bejelentkezési adatok beírása rendes billentyűzeten</string>
+    <string name="iptv_remote_title">Beállítás telefonról</string>
+    <string name="iptv_remote_description">Olvasd be a QR-kódot a telefonoddal, vagy nyisd meg a címet egy azonos hálózaton lévő számítógépen. Ezután add meg az itt látható párosítási kódot.</string>
+    <string name="iptv_remote_code">Párosítási kód</string>
+    <string name="iptv_remote_address">Vagy nyisd meg ezt a címet</string>
+    <string name="iptv_remote_qr_description">QR-kód a telefonos beállításhoz</string>
+    <string name="iptv_remote_home_network">Csak az otthoni hálózatodon használd. A beállítóoldal nem titkosított.</string>
+    <string name="iptv_remote_idle_note">Leáll, ha elhagyod ezt a képernyőt, vagy 10 perc tétlenség után.</string>
+    <string name="iptv_remote_confirm_note">Semmi sem kerül mentésre, amíg itt, a tévén meg nem erősíted. Forrásokat és műsorújságokat csak a tévén lehet eltávolítani.</string>
+    <string name="iptv_remote_starting">Telefonos beállítás indítása…</string>
+    <string name="iptv_remote_waiting">Várakozás telefonra vagy számítógépre</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d eszköz csatlakozva</item>
+        <item quantity="other">%d eszköz csatlakozva</item>
+    </plurals>
+    <string name="iptv_remote_no_network">A telefonos beállításhoz csatlakoztasd a tévét az otthoni hálózatodhoz.</string>
+    <string name="iptv_remote_not_home_network">A tévé nem privát otthoni hálózati címen van, ezért a telefonos beállítás kikapcsolva marad.</string>
+    <string name="iptv_remote_ports_busy">A telefonos beállítás nem indult el, mert a hálózati portjai foglaltak. Próbáld újra kicsit később.</string>
+    <string name="iptv_remote_idle_stopped">A telefonos beállítás 10 perc tétlenség után leállt.</string>
+    <string name="iptv_remote_paused">A telefonos beállítás leállt, amíg az alkalmazás a háttérben volt.</string>
+    <string name="iptv_remote_start_again">Újraindítás</string>
+    <string name="iptv_remote_start_again_subtitle">Új QR-kódot és párosítási kódot jelenít meg</string>
+    <string name="iptv_remote_done">Kész</string>
+    <string name="iptv_remote_done_subtitle">Leállítja a telefonos beállítást, és visszalép</string>
+    <string name="iptv_remote_confirm_add_title">Hozzáadod ezt a telefonról?</string>
+    <string name="iptv_remote_confirm_edit_title">Módosítod a telefonról: %1$s?</string>
+    <string name="iptv_remote_confirm_subtitle">Ellenőrizd az adatokat. Semmi sem kerül mentésre, hacsak nem a Mentés lehetőséget választod ezen a tévén.</string>
+    <string name="iptv_remote_field_device">Küldő</string>
+    <string name="iptv_remote_field_type">Típus</string>
+    <string name="iptv_remote_field_name">Név</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Cím</string>
+    <string name="iptv_remote_field_server">Szerver</string>
+    <string name="iptv_remote_server_changes">Változás: %1$s → %2$s</string>
+    <string name="iptv_remote_server_new">Új érték: %1$s</string>
+    <string name="iptv_remote_field_username">Felhasználónév</string>
+    <string name="iptv_remote_field_password">Jelszó</string>
+    <string name="iptv_remote_field_mac">MAC-cím</string>
+    <string name="iptv_remote_password_set">A telefonon megadva (rejtett)</string>
+    <string name="iptv_remote_password_new">Új jelszó (rejtett)</string>
+    <string name="iptv_remote_save">Mentés ezen a tévén</string>
+    <string name="iptv_remote_reject">Elutasítás</string>
+    <string name="iptv_remote_saved">Mentve. A csatornák betöltése folyamatban.</string>
+    <string name="iptv_remote_guide_saved">Mentve. A műsorújság betöltése folyamatban.</string>
+    <string name="iptv_remote_rejected">Elutasítva. Semmi sem lett mentve.</string>
+</resources>

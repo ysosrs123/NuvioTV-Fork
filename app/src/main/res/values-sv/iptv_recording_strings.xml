@@ -1,0 +1,72 @@
+<resources>
+    <string name="iptv_recording_channel">Inspelningar</string>
+    <string name="iptv_recording_channel_description">Visas medan Live-TV-program spelas in</string>
+    <string name="iptv_recording_notification_title">Spelar in Live-TV</string>
+    <string name="iptv_recording_notification_starting">Startar inspelning…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d program</item>
+        <item quantity="other">%1$d program</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Spela in</string>
+    <string name="iptv_recording_record_now">Spela in nu</string>
+    <string name="iptv_recording_record_programme">Spela in det här programmet</string>
+    <string name="iptv_recording_started">Inspelningen har startat</string>
+    <string name="iptv_recording_scheduled">Inspelningen är schemalagd</string>
+    <string name="iptv_recordings_open">Inspelningar</string>
+
+    <string name="iptv_recordings_title">Inspelningar</string>
+    <string name="iptv_recordings_description">Program som spelats in eller schemalagts från Live-TV. Inspelningar sparas på den här enheten och hör till den här profilen.</string>
+    <string name="iptv_recordings_hint">Tryck OK för att spela upp en inspelning. Håll OK eller tryck Meny för fler alternativ.</string>
+    <string name="iptv_recordings_free">%1$s ledigt på enheten</string>
+    <string name="iptv_recordings_empty">Inget inspelat än. Spela in ett program från Live-TV-guiden eller medan du tittar.</string>
+    <string name="iptv_recordings_group_now">Spelas in nu</string>
+    <string name="iptv_recordings_group_scheduled">Schemalagda</string>
+    <string name="iptv_recordings_group_recorded">Inspelade</string>
+
+    <string name="iptv_recording_status_scheduled">Schemalagd</string>
+    <string name="iptv_recording_status_recording">Spelar in</string>
+    <string name="iptv_recording_status_done">Inspelad</string>
+    <string name="iptv_recording_status_partial">Delvis inspelad</string>
+    <string name="iptv_recording_status_failed">Misslyckades</string>
+    <string name="iptv_recording_status_cancelled">Avbruten</string>
+    <string name="iptv_recording_gaps">Har luckor</string>
+
+    <string name="iptv_recording_failure_no_connection">Ingen ledig anslutning på kontot</string>
+    <string name="iptv_recording_failure_device_busy">Enheten är upptagen med andra strömmar</string>
+    <string name="iptv_recording_failure_source">Källan kunde inte nås</string>
+    <string name="iptv_recording_failure_channel">Kanalen är inte längre tillgänglig</string>
+    <string name="iptv_recording_failure_unsupported">Det här strömformatet kan inte spelas in</string>
+    <string name="iptv_recording_failure_encrypted">Krypterade strömmar kan inte spelas in</string>
+    <string name="iptv_recording_failure_network">Strömmen avbröts</string>
+    <string name="iptv_recording_failure_low_storage">Lagringsutrymmet är nästan fullt</string>
+    <string name="iptv_recording_failure_storage">Inspelningen kunde inte sparas</string>
+    <string name="iptv_recording_failure_time_limit">Tidsgränsen för inspelning nåddes</string>
+    <string name="iptv_recording_failure_interrupted">Appen eller enheten stoppades under inspelningen</string>
+    <string name="iptv_recording_failure_start_blocked">Android tillät inte att inspelningen startade. Tillåt alarm och påminnelser för Nuvio, eller håll Nuvio öppet.</string>
+    <string name="iptv_recording_failure_missed">Programmet slutade innan inspelningen kunde starta</string>
+
+    <string name="iptv_recording_refused_conflict">Andra inspelningar använder redan alla kontots anslutningar vid den tiden</string>
+    <string name="iptv_recording_refused_no_connection">Ingen ledig anslutning på kontot. Sluta titta på eller spela in en annan kanal först.</string>
+    <string name="iptv_recording_refused_storage">Inte tillräckligt med ledigt utrymme för inspelningen. Räkna med cirka 2,5 GB per timme HD, och 500 MB hålls alltid ledigt för enheten. Radera gamla inspelningar eller frigör utrymme.</string>
+    <string name="iptv_recording_refused_ended">Programmet har redan slutat</string>
+    <string name="iptv_recording_refused_channel">Kanalen kan inte spelas in just nu</string>
+    <string name="iptv_recording_refused_duplicate">Kanalen spelas redan in vid den tiden</string>
+    <string name="iptv_recording_refused_full">Inspelningslistan är full. Radera några inspelningar först.</string>
+    <string name="iptv_recording_refused_profile">Profilen har ändrats. Försök igen.</string>
+    <string name="iptv_recording_refused_exact_alarms">Schemalagda inspelningar kräver behörigheten för alarm och påminnelser. Tillåt den för Nuvio, eller spela in medan du tittar.</string>
+    <string name="iptv_recording_alarm_settings">Tillåt alarm och påminnelser</string>
+
+    <string name="iptv_recording_play">Spela upp</string>
+    <string name="iptv_recording_stop">Stoppa inspelning</string>
+    <string name="iptv_recording_cancel">Avbryt inspelning</string>
+    <string name="iptv_recording_delete">Radera inspelning</string>
+    <string name="iptv_recording_delete_title">Radera ”%1$s”?</string>
+    <string name="iptv_recording_delete_description">Inspelningen och dess fil tas bort från enheten.</string>
+    <string name="iptv_recording_delete_confirm">Radera</string>
+    <string name="iptv_recording_keep">Behåll</string>
+    <string name="iptv_recording_file_missing">Inspelningsfilen finns inte längre på enheten</string>
+    <string name="iptv_recording_paused">Pausad</string>
+    <string name="iptv_recording_playback_failed">Inspelningen kan inte spelas upp. Filen kan vara ofullständig eller i ett format som enheten inte kan avkoda.</string>
+    <string name="iptv_recording_skip_hint">Vänster och höger hoppar 30 sekunder</string>
+</resources>

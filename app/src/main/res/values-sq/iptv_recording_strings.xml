@@ -1,0 +1,72 @@
+<resources>
+    <string name="iptv_recording_channel">Regjistrimet</string>
+    <string name="iptv_recording_channel_description">Shfaqet ndërsa regjistrohen programe të TV-së live</string>
+    <string name="iptv_recording_notification_title">Duke regjistruar TV live</string>
+    <string name="iptv_recording_notification_starting">Duke nisur regjistrimin…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d program</item>
+        <item quantity="other">%1$d programe</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Regjistro</string>
+    <string name="iptv_recording_record_now">Regjistro tani</string>
+    <string name="iptv_recording_record_programme">Regjistro këtë program</string>
+    <string name="iptv_recording_started">Regjistrimi filloi</string>
+    <string name="iptv_recording_scheduled">Regjistrimi u planifikua</string>
+    <string name="iptv_recordings_open">Regjistrimet</string>
+
+    <string name="iptv_recordings_title">Regjistrimet</string>
+    <string name="iptv_recordings_description">Programe të regjistruara ose të planifikuara nga TV live. Regjistrimet ruhen në këtë pajisje dhe i përkasin këtij profili.</string>
+    <string name="iptv_recordings_hint">Shtyp OK për të luajtur një regjistrim. Mbaj OK ose shtyp Menu për më shumë opsione.</string>
+    <string name="iptv_recordings_free">%1$s të lira në këtë pajisje</string>
+    <string name="iptv_recordings_empty">Ende asgjë e regjistruar. Regjistro një program nga udhëzuesi i TV-së live ose gjatë shikimit.</string>
+    <string name="iptv_recordings_group_now">Po regjistrohet tani</string>
+    <string name="iptv_recordings_group_scheduled">Të planifikuara</string>
+    <string name="iptv_recordings_group_recorded">Të regjistruara</string>
+
+    <string name="iptv_recording_status_scheduled">I planifikuar</string>
+    <string name="iptv_recording_status_recording">Po regjistrohet</string>
+    <string name="iptv_recording_status_done">I regjistruar</string>
+    <string name="iptv_recording_status_partial">Pjesërisht i regjistruar</string>
+    <string name="iptv_recording_status_failed">Dështoi</string>
+    <string name="iptv_recording_status_cancelled">Anuluar</string>
+    <string name="iptv_recording_gaps">Ka boshllëqe</string>
+
+    <string name="iptv_recording_failure_no_connection">Nuk ka lidhje të lirë në këtë llogari</string>
+    <string name="iptv_recording_failure_device_busy">Pajisja është e zënë me transmetime të tjera</string>
+    <string name="iptv_recording_failure_source">Burimi nuk u arrit</string>
+    <string name="iptv_recording_failure_channel">Kanali nuk është më i disponueshëm</string>
+    <string name="iptv_recording_failure_unsupported">Ky format transmetimi nuk mund të regjistrohet</string>
+    <string name="iptv_recording_failure_encrypted">Transmetimet e enkriptuara nuk mund të regjistrohen</string>
+    <string name="iptv_recording_failure_network">Transmetimi u ndërpre</string>
+    <string name="iptv_recording_failure_low_storage">Hapësira ruajtëse është gati plot</string>
+    <string name="iptv_recording_failure_storage">Regjistrimi nuk mund të ruhej</string>
+    <string name="iptv_recording_failure_time_limit">U arrit kufiri kohor i regjistrimit</string>
+    <string name="iptv_recording_failure_interrupted">Aplikacioni ose pajisja u ndal gjatë regjistrimit</string>
+    <string name="iptv_recording_failure_start_blocked">Android nuk lejoi nisjen e regjistrimit. Lejo alarmet dhe kujtesat për Nuvio, ose mbaje Nuvio të hapur.</string>
+    <string name="iptv_recording_failure_missed">Programi përfundoi para se regjistrimi të mund të nisej</string>
+
+    <string name="iptv_recording_refused_conflict">Regjistrime të tjera po përdorin tashmë të gjitha lidhjet e kësaj llogarie në atë kohë</string>
+    <string name="iptv_recording_refused_no_connection">Nuk ka lidhje të lirë në këtë llogari. Ndalo së pari shikimin ose regjistrimin e një kanali tjetër.</string>
+    <string name="iptv_recording_refused_storage">Nuk ka hapësirë të mjaftueshme për këtë regjistrim. Llogarit rreth 2,5 GB për çdo orë HD, dhe 500 MB mbahen gjithmonë të lira për pajisjen. Fshi regjistrime të vjetra ose liro hapësirë.</string>
+    <string name="iptv_recording_refused_ended">Ky program ka përfunduar tashmë</string>
+    <string name="iptv_recording_refused_channel">Ky kanal nuk mund të regjistrohet tani</string>
+    <string name="iptv_recording_refused_duplicate">Ky kanal po regjistrohet tashmë në atë kohë</string>
+    <string name="iptv_recording_refused_full">Lista e regjistrimeve është plot. Fshi së pari disa regjistrime.</string>
+    <string name="iptv_recording_refused_profile">Profili ndryshoi. Provo përsëri.</string>
+    <string name="iptv_recording_refused_exact_alarms">Regjistrimet e planifikuara kërkojnë lejen për alarme dhe kujtesa. Lejoje për Nuvio, ose regjistro gjatë shikimit.</string>
+    <string name="iptv_recording_alarm_settings">Lejo alarmet dhe kujtesat</string>
+
+    <string name="iptv_recording_play">Luaj</string>
+    <string name="iptv_recording_stop">Ndalo regjistrimin</string>
+    <string name="iptv_recording_cancel">Anulo regjistrimin</string>
+    <string name="iptv_recording_delete">Fshi regjistrimin</string>
+    <string name="iptv_recording_delete_title">Të fshihet “%1$s”?</string>
+    <string name="iptv_recording_delete_description">Regjistrimi dhe skedari i tij do të hiqen nga kjo pajisje.</string>
+    <string name="iptv_recording_delete_confirm">Fshi</string>
+    <string name="iptv_recording_keep">Mbaje</string>
+    <string name="iptv_recording_file_missing">Skedari i regjistrimit nuk ndodhet më në këtë pajisje</string>
+    <string name="iptv_recording_paused">Në pauzë</string>
+    <string name="iptv_recording_playback_failed">Ky regjistrim nuk mund të luhet. Skedari mund të jetë i paplotë ose në një format që kjo pajisje nuk mund ta dekodojë.</string>
+    <string name="iptv_recording_skip_hint">Majtas dhe djathtas kapërcejnë 30 sekonda</string>
+</resources>

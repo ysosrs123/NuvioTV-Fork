@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Configurează de pe telefon sau computer</string>
+    <string name="iptv_remote_entry_subtitle">Scrie adresele și datele de conectare pe o tastatură adevărată</string>
+    <string name="iptv_remote_title">Configurează de pe telefon</string>
+    <string name="iptv_remote_description">Scanează codul QR cu telefonul sau deschide adresa pe un computer din aceeași rețea. Apoi introdu codul de asociere afișat aici.</string>
+    <string name="iptv_remote_code">Cod de asociere</string>
+    <string name="iptv_remote_address">Sau deschide această adresă</string>
+    <string name="iptv_remote_qr_description">Cod QR pentru configurarea de pe telefon</string>
+    <string name="iptv_remote_home_network">Folosește această funcție doar în rețeaua de acasă. Pagina de configurare nu este criptată.</string>
+    <string name="iptv_remote_idle_note">Se oprește când părăsești acest ecran sau după 10 minute de inactivitate.</string>
+    <string name="iptv_remote_confirm_note">Nimic nu se salvează până nu confirmi aici, pe televizor. Sursele și ghidurile pot fi eliminate doar de pe televizor.</string>
+    <string name="iptv_remote_starting">Se pornește configurarea de pe telefon…</string>
+    <string name="iptv_remote_waiting">Se așteaptă un telefon sau un computer</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d dispozitiv conectat</item>
+        <item quantity="few">%d dispozitive conectate</item>
+        <item quantity="other">%d de dispozitive conectate</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Conectează televizorul la rețeaua de acasă pentru a configura de pe telefon.</string>
+    <string name="iptv_remote_not_home_network">Televizorul nu are o adresă de rețea privată de acasă, așa că configurarea de pe telefon rămâne dezactivată.</string>
+    <string name="iptv_remote_ports_busy">Configurarea de pe telefon nu a putut porni deoarece porturile de rețea sunt ocupate. Încearcă din nou peste puțin timp.</string>
+    <string name="iptv_remote_idle_stopped">Configurarea de pe telefon s-a oprit după 10 minute de inactivitate.</string>
+    <string name="iptv_remote_paused">Configurarea de pe telefon s-a oprit cât timp aplicația era în fundal.</string>
+    <string name="iptv_remote_start_again">Pornește din nou</string>
+    <string name="iptv_remote_start_again_subtitle">Afișează un cod QR și un cod de asociere noi</string>
+    <string name="iptv_remote_done">Gata</string>
+    <string name="iptv_remote_done_subtitle">Oprește configurarea de pe telefon și revine</string>
+    <string name="iptv_remote_confirm_add_title">Adaugi asta de pe telefon?</string>
+    <string name="iptv_remote_confirm_edit_title">Modifici %1$s de pe telefon?</string>
+    <string name="iptv_remote_confirm_subtitle">Verifică detaliile. Nimic nu se salvează dacă nu alegi Salvează pe acest televizor.</string>
+    <string name="iptv_remote_field_device">Trimis de pe</string>
+    <string name="iptv_remote_field_type">Tip</string>
+    <string name="iptv_remote_field_name">Nume</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adresă</string>
+    <string name="iptv_remote_field_server">Server</string>
+    <string name="iptv_remote_server_changes">Se schimbă din %1$s în %2$s</string>
+    <string name="iptv_remote_server_new">Se schimbă în %1$s</string>
+    <string name="iptv_remote_field_username">Nume de utilizator</string>
+    <string name="iptv_remote_field_password">Parolă</string>
+    <string name="iptv_remote_field_mac">Adresă MAC</string>
+    <string name="iptv_remote_password_set">Introdusă pe telefon (ascunsă)</string>
+    <string name="iptv_remote_password_new">Parolă nouă (ascunsă)</string>
+    <string name="iptv_remote_save">Salvează pe acest televizor</string>
+    <string name="iptv_remote_reject">Respinge</string>
+    <string name="iptv_remote_saved">Salvat. Se încarcă acum canalele.</string>
+    <string name="iptv_remote_guide_saved">Salvat. Se încarcă acum ghidul.</string>
+    <string name="iptv_remote_rejected">Respins. Nu s-a salvat nimic.</string>
+</resources>

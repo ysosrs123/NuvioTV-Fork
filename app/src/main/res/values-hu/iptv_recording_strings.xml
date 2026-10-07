@@ -1,0 +1,72 @@
+<resources>
+    <string name="iptv_recording_channel">Felvételek</string>
+    <string name="iptv_recording_channel_description">Élő TV-műsorok rögzítése közben jelenik meg</string>
+    <string name="iptv_recording_notification_title">Élő TV rögzítése</string>
+    <string name="iptv_recording_notification_starting">Felvétel indítása…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d műsor</item>
+        <item quantity="other">%1$d műsor</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Felvétel</string>
+    <string name="iptv_recording_record_now">Felvétel most</string>
+    <string name="iptv_recording_record_programme">Műsor rögzítése</string>
+    <string name="iptv_recording_started">A felvétel elindult</string>
+    <string name="iptv_recording_scheduled">Felvétel ütemezve</string>
+    <string name="iptv_recordings_open">Felvételek</string>
+
+    <string name="iptv_recordings_title">Felvételek</string>
+    <string name="iptv_recordings_description">Az Élő TV-ből rögzített vagy ütemezett műsorok. A felvételek ezen az eszközön tárolódnak, és ehhez a profilhoz tartoznak.</string>
+    <string name="iptv_recordings_hint">Nyomd meg az OK gombot egy felvétel lejátszásához. Tartsd lenyomva az OK gombot, vagy nyomd meg a Menü gombot további lehetőségekért.</string>
+    <string name="iptv_recordings_free">%1$s szabad ezen az eszközön</string>
+    <string name="iptv_recordings_empty">Még nincs felvétel. Rögzíts egy műsort az Élő TV műsorújságából vagy nézés közben.</string>
+    <string name="iptv_recordings_group_now">Rögzítés folyamatban</string>
+    <string name="iptv_recordings_group_scheduled">Ütemezett</string>
+    <string name="iptv_recordings_group_recorded">Rögzített</string>
+
+    <string name="iptv_recording_status_scheduled">Ütemezve</string>
+    <string name="iptv_recording_status_recording">Rögzítés</string>
+    <string name="iptv_recording_status_done">Rögzítve</string>
+    <string name="iptv_recording_status_partial">Részben rögzítve</string>
+    <string name="iptv_recording_status_failed">Sikertelen</string>
+    <string name="iptv_recording_status_cancelled">Megszakítva</string>
+    <string name="iptv_recording_gaps">Hiányos</string>
+
+    <string name="iptv_recording_failure_no_connection">Nincs szabad kapcsolat ezen a fiókon</string>
+    <string name="iptv_recording_failure_device_busy">Az eszközt más streamek foglalják</string>
+    <string name="iptv_recording_failure_source">A forrás nem érhető el</string>
+    <string name="iptv_recording_failure_channel">A csatorna már nem érhető el</string>
+    <string name="iptv_recording_failure_unsupported">Ez a streamformátum nem rögzíthető</string>
+    <string name="iptv_recording_failure_encrypted">A titkosított streamek nem rögzíthetők</string>
+    <string name="iptv_recording_failure_network">A stream megszakadt</string>
+    <string name="iptv_recording_failure_low_storage">A tárhely majdnem megtelt</string>
+    <string name="iptv_recording_failure_storage">A felvételt nem sikerült menteni</string>
+    <string name="iptv_recording_failure_time_limit">Elérte a felvétel időkorlátját</string>
+    <string name="iptv_recording_failure_interrupted">Az alkalmazás vagy az eszköz leállt a felvétel közben</string>
+    <string name="iptv_recording_failure_start_blocked">Az Android nem engedte elindítani a felvételt. Engedélyezd az ébresztéseket és emlékeztetőket a Nuvio számára, vagy hagyd nyitva a Nuviót.</string>
+    <string name="iptv_recording_failure_missed">A műsor véget ért, mielőtt a felvétel elindulhatott volna</string>
+
+    <string name="iptv_recording_refused_conflict">Abban az időpontban más felvételek már a fiók összes kapcsolatát használják</string>
+    <string name="iptv_recording_refused_no_connection">Nincs szabad kapcsolat ezen a fiókon. Előbb hagyd abba egy másik csatorna nézését vagy rögzítését.</string>
+    <string name="iptv_recording_refused_storage">Nincs elég szabad tárhely ehhez a felvételhez. Számolj óránként kb. 2,5 GB-tal HD esetén, és 500 MB mindig szabadon marad az eszköznek. Törölj régi felvételeket, vagy szabadíts fel helyet.</string>
+    <string name="iptv_recording_refused_ended">Ez a műsor már véget ért</string>
+    <string name="iptv_recording_refused_channel">Ez a csatorna most nem rögzíthető</string>
+    <string name="iptv_recording_refused_duplicate">Ezt a csatornát abban az időpontban már rögzíted</string>
+    <string name="iptv_recording_refused_full">A felvételek listája megtelt. Előbb törölj néhány felvételt.</string>
+    <string name="iptv_recording_refused_profile">A profil megváltozott. Próbáld újra.</string>
+    <string name="iptv_recording_refused_exact_alarms">Az ütemezett felvételekhez szükség van az ébresztések és emlékeztetők engedélyre. Engedélyezd a Nuvio számára, vagy rögzíts nézés közben.</string>
+    <string name="iptv_recording_alarm_settings">Ébresztések és emlékeztetők engedélyezése</string>
+
+    <string name="iptv_recording_play">Lejátszás</string>
+    <string name="iptv_recording_stop">Felvétel leállítása</string>
+    <string name="iptv_recording_cancel">Felvétel megszakítása</string>
+    <string name="iptv_recording_delete">Felvétel törlése</string>
+    <string name="iptv_recording_delete_title">Törlöd: „%1$s”?</string>
+    <string name="iptv_recording_delete_description">A felvétel és a fájlja törlődik erről az eszközről.</string>
+    <string name="iptv_recording_delete_confirm">Törlés</string>
+    <string name="iptv_recording_keep">Megtartás</string>
+    <string name="iptv_recording_file_missing">A felvétel fájlja már nincs ezen az eszközön</string>
+    <string name="iptv_recording_paused">Szüneteltetve</string>
+    <string name="iptv_recording_playback_failed">Ez a felvétel nem játszható le. A fájl hiányos lehet, vagy olyan formátumú, amelyet ez az eszköz nem tud dekódolni.</string>
+    <string name="iptv_recording_skip_hint">Balra és jobbra 30 másodperc ugrás</string>
+</resources>

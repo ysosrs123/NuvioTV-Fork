@@ -1,0 +1,73 @@
+<resources>
+    <string name="iptv_recording_channel">Înregistrări</string>
+    <string name="iptv_recording_channel_description">Afișat cât timp se înregistrează programe TV live</string>
+    <string name="iptv_recording_notification_title">Se înregistrează TV live</string>
+    <string name="iptv_recording_notification_starting">Se pornește înregistrarea…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d program</item>
+        <item quantity="few">%1$d programe</item>
+        <item quantity="other">%1$d de programe</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Înregistrează</string>
+    <string name="iptv_recording_record_now">Înregistrează acum</string>
+    <string name="iptv_recording_record_programme">Înregistrează acest program</string>
+    <string name="iptv_recording_started">Înregistrarea a început</string>
+    <string name="iptv_recording_scheduled">Înregistrare programată</string>
+    <string name="iptv_recordings_open">Înregistrări</string>
+
+    <string name="iptv_recordings_title">Înregistrări</string>
+    <string name="iptv_recordings_description">Programe înregistrate sau programate din TV live. Înregistrările sunt păstrate pe acest dispozitiv și aparțin acestui profil.</string>
+    <string name="iptv_recordings_hint">Apasă OK pentru a reda o înregistrare. Ține apăsat OK sau apasă Meniu pentru mai multe opțiuni.</string>
+    <string name="iptv_recordings_free">%1$s liber pe acest dispozitiv</string>
+    <string name="iptv_recordings_empty">Nimic înregistrat încă. Înregistrează un program din ghidul TV live sau în timp ce urmărești.</string>
+    <string name="iptv_recordings_group_now">Se înregistrează acum</string>
+    <string name="iptv_recordings_group_scheduled">Programate</string>
+    <string name="iptv_recordings_group_recorded">Înregistrate</string>
+
+    <string name="iptv_recording_status_scheduled">Programată</string>
+    <string name="iptv_recording_status_recording">Se înregistrează</string>
+    <string name="iptv_recording_status_done">Înregistrată</string>
+    <string name="iptv_recording_status_partial">Înregistrată parțial</string>
+    <string name="iptv_recording_status_failed">Eșuată</string>
+    <string name="iptv_recording_status_cancelled">Anulată</string>
+    <string name="iptv_recording_gaps">Are întreruperi</string>
+
+    <string name="iptv_recording_failure_no_connection">Nicio conexiune liberă pe acest cont</string>
+    <string name="iptv_recording_failure_device_busy">Dispozitivul este ocupat cu alte streamuri</string>
+    <string name="iptv_recording_failure_source">Sursa nu a putut fi accesată</string>
+    <string name="iptv_recording_failure_channel">Canalul nu mai este disponibil</string>
+    <string name="iptv_recording_failure_unsupported">Acest format de stream nu poate fi înregistrat</string>
+    <string name="iptv_recording_failure_encrypted">Streamurile criptate nu pot fi înregistrate</string>
+    <string name="iptv_recording_failure_network">Streamul a fost întrerupt</string>
+    <string name="iptv_recording_failure_low_storage">Spațiul de stocare este aproape plin</string>
+    <string name="iptv_recording_failure_storage">Înregistrarea nu a putut fi salvată</string>
+    <string name="iptv_recording_failure_time_limit">S-a atins limita de timp a înregistrării</string>
+    <string name="iptv_recording_failure_interrupted">Aplicația sau dispozitivul s-a oprit în timpul înregistrării</string>
+    <string name="iptv_recording_failure_start_blocked">Android nu a permis pornirea înregistrării. Permite alarme și mementouri pentru Nuvio sau ține Nuvio deschis.</string>
+    <string name="iptv_recording_failure_missed">Programul s-a încheiat înainte ca înregistrarea să poată porni</string>
+
+    <string name="iptv_recording_refused_conflict">Alte înregistrări folosesc deja toate conexiunile acestui cont la ora respectivă</string>
+    <string name="iptv_recording_refused_no_connection">Nicio conexiune liberă pe acest cont. Oprește mai întâi vizionarea sau înregistrarea altui canal.</string>
+    <string name="iptv_recording_refused_storage">Spațiu de stocare insuficient pentru această înregistrare. Calculează aproximativ 2,5 GB pentru fiecare oră HD, iar 500 MB rămân mereu liberi pentru dispozitiv. Șterge înregistrări vechi sau eliberează spațiu.</string>
+    <string name="iptv_recording_refused_ended">Acest program s-a încheiat deja</string>
+    <string name="iptv_recording_refused_channel">Acest canal nu poate fi înregistrat acum</string>
+    <string name="iptv_recording_refused_duplicate">Acest canal este deja înregistrat la ora respectivă</string>
+    <string name="iptv_recording_refused_full">Lista de înregistrări este plină. Șterge mai întâi câteva înregistrări.</string>
+    <string name="iptv_recording_refused_profile">Profilul s-a schimbat. Încearcă din nou.</string>
+    <string name="iptv_recording_refused_exact_alarms">Înregistrările programate necesită permisiunea pentru alarme și mementouri. Permite-o pentru Nuvio sau înregistrează în timp ce urmărești.</string>
+    <string name="iptv_recording_alarm_settings">Permite alarme și mementouri</string>
+
+    <string name="iptv_recording_play">Redă</string>
+    <string name="iptv_recording_stop">Oprește înregistrarea</string>
+    <string name="iptv_recording_cancel">Anulează înregistrarea</string>
+    <string name="iptv_recording_delete">Șterge înregistrarea</string>
+    <string name="iptv_recording_delete_title">Ștergi „%1$s”?</string>
+    <string name="iptv_recording_delete_description">Înregistrarea și fișierul ei vor fi eliminate de pe acest dispozitiv.</string>
+    <string name="iptv_recording_delete_confirm">Șterge</string>
+    <string name="iptv_recording_keep">Păstrează</string>
+    <string name="iptv_recording_file_missing">Fișierul înregistrării nu mai există pe acest dispozitiv</string>
+    <string name="iptv_recording_paused">Pauză</string>
+    <string name="iptv_recording_playback_failed">Această înregistrare nu poate fi redată. Fișierul poate fi incomplet sau într-un format pe care acest dispozitiv nu îl poate decoda.</string>
+    <string name="iptv_recording_skip_hint">Stânga și dreapta sar 30 de secunde</string>
+</resources>
