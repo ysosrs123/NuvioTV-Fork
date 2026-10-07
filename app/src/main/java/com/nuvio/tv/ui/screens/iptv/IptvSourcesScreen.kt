@@ -93,6 +93,7 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
     var confirmSource by remember { mutableStateOf<IptvSource?>(null) }
     var confirmFeed by remember { mutableStateOf<IptvGuideFeed?>(null) }
     var connectionsFor by remember { mutableStateOf<IptvSource?>(null) }
+    var userAgentFor by remember { mutableStateOf<IptvSource?>(null) }
     var reviewFor by remember { mutableStateOf<IptvSource?>(null) }
     var groupMenu by remember { mutableStateOf<IptvGroupView?>(null) }
     var naming by remember { mutableStateOf<IptvGroupView?>(null) }
@@ -216,6 +217,7 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
             SettingsActionRow(title = stringResource(R.string.iptv_source_connections), subtitle = null,
                 value = (state.connections[source.ref.sourceId] ?: 1).toString(), onClick = { sourceMenu = null; connectionsFor = source },
                 leadingIcon = Icons.Filled.Dns)
+            IptvUserAgentRow(source.ref) { sourceMenu = null; userAgentFor = source }
             if (index > 0) Option(stringResource(R.string.iptv_guide_move_up), Icons.Filled.KeyboardArrowUp) { sourceMenu = null; viewModel.moveUp(source) }
             Option(stringResource(R.string.iptv_source_remove), Icons.Filled.Delete) { sourceMenu = null; confirmSource = source }
         }
@@ -235,6 +237,7 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
             Option(stringResource(R.string.iptv_guide_remove), Icons.Filled.Delete) { feedMenu = null; confirmFeed = feed }
         }
     }
+    userAgentFor?.let { source -> IptvUserAgentDialog(source.ref, onDismiss = { userAgentFor = null }) }
     connectionsFor?.let { source ->
         val id = source.ref.sourceId
         val provider = state.providerConnections[id]

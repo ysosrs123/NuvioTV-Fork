@@ -4,6 +4,7 @@ import android.content.Context
 import com.nuvio.tv.core.iptv.CategoryOrder
 import com.nuvio.tv.core.iptv.GuideDensity
 import com.nuvio.tv.core.iptv.LivePreferenceKeys
+import com.nuvio.tv.core.iptv.LiveUserAgent
 import com.nuvio.tv.core.iptv.MultiviewLayout
 import com.nuvio.tv.core.iptv.MultiviewQuality
 import com.nuvio.tv.core.iptv.RecordingLocations
@@ -94,6 +95,14 @@ class IptvLivePreferences(context: Context) {
 
     fun setProviderConnections(ref: IptvSourceRef, reported: Int) = preferences.edit().putInt(key(ref, PROVIDER_CONNECTIONS), reported.coerceAtLeast(0)).apply()
 
+    fun userAgentChoice(ref: IptvSourceRef): String? = preferences.getString(key(ref, USER_AGENT), null)
+
+    fun userAgent(ref: IptvSourceRef): String? = LiveUserAgent.resolve(userAgentChoice(ref))
+
+    fun setUserAgent(ref: IptvSourceRef, choice: String?) = preferences.edit().apply {
+        if (choice == null || LiveUserAgent.kind(choice) == LiveUserAgent.DEFAULT) remove(key(ref, USER_AGENT)) else putString(key(ref, USER_AGENT), choice)
+    }.apply()
+
     fun hiddenCategoryCount(profileId: Int): Int =
         LivePreferenceKeys.hiddenOfProfile(preferences.all.keys, profileId).sumOf { preferences.getStringSet(it, null)?.size ?: 0 }
 
@@ -147,5 +156,6 @@ class IptvLivePreferences(context: Context) {
         private const val BOOST_PREFIX = "boost-"
         private const val DENSITY_KEY = "settings-density"
         private const val CATEGORY_ORDER = "category-order"
+        private const val USER_AGENT = "user-agent"
     }
 }

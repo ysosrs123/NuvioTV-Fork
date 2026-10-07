@@ -20,7 +20,8 @@ object IptvModule {
     @Provides @Singleton fun liveRuntime(admission: com.nuvio.tv.core.iptv.LiveSessionAdmission) = com.nuvio.tv.core.iptv.LivePlaybackRuntime(admission)
     @Provides @Singleton fun vodStore(@ApplicationContext context: Context) = IptvVodStore(context)
     @Provides @Singleton fun catalogue(@ApplicationContext context: Context, vod: IptvVodStore) = IptvCatalogueStore(context).also { it.addRemovalListener(vod) }
-    @Provides @Singleton fun vod(store: IptvVodStore, catalogue: IptvCatalogueStore) = IptvVodRepository(store, catalogue)
+    @Provides @Singleton fun vod(store: IptvVodStore, catalogue: IptvCatalogueStore, live: IptvLivePreferences) =
+        IptvVodRepository(store, catalogue, userAgent = live::userAgent)
     @Provides @Singleton fun guides(@ApplicationContext context: Context) = IptvGuideStore(context)
     @Provides @Singleton fun shortGuides(catalogue: IptvCatalogueStore) = IptvShortGuideRepository(catalogue)
     @Provides @Singleton fun access(catalogue: IptvCatalogueStore, guides: IptvGuideStore) = IptvProfileAccess(catalogue, guides)

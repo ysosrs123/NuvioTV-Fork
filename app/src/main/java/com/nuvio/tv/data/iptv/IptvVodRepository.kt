@@ -32,6 +32,7 @@ class IptvVodRepository(
     private val xtream: IptvXtreamClient = IptvXtreamClient(),
     private val now: () -> Long = System::currentTimeMillis,
     private val episodeMaxAge: Long = DAY,
+    private val userAgent: (IptvSourceRef) -> String? = { null },
 ) {
     private val fetches = Mutex()
 
@@ -156,6 +157,7 @@ class IptvVodRepository(
     suspend fun playback(ref: VodRef): IptvVodPlayback = withContext(Dispatchers.IO) {
         require(ref.kind != VodKind.SERIES)
         val source = source(ref) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+        val agent = userAgent(source.ref)
         when (source.kind) {
             IptvSourceKind.XTREAM -> {
                 val connection = catalogue.connection(source.ref)
@@ -172,6 +174,9 @@ class IptvVodRepository(
             IptvSourceKind.M3U -> store.locator(ref)?.let { IptvVodPlayback(ref, it.url, it.headers) }
                 ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
             IptvSourceKind.STALKER -> throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+        }.let { playback ->
+            if (agent == null || playback.headers.keys.any { it.equals("User-Agent", ignoreCase = true) }) playback
+            else playback.copy(headers = playback.headers + ("User-Agent" to agent))
         }
     }
 

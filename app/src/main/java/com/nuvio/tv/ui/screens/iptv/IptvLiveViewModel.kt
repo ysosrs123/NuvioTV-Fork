@@ -676,7 +676,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     } else liveLocator(current, ref, source, item)
                     var failure: LiveFailure? = null
                     IptvLivePlayback(context, locator, purpose, plan.firstOrNull()?.format ?: streamFormat, boostDb = livePreferences.boost(ref, row.item.channel.id),
-                        headers = StreamHeaders.requestHeaders(item.attributes),
+                        headers = StreamHeaders.requestHeaders(item.attributes), sourceUserAgent = livePreferences.userAgent(ref),
                         alternatives = plan.drop(1).map { it.url to (it.format ?: streamFormat) },
                         onAlternative = { index -> catchupConnection?.let { styles.worked(it, plan.getOrNull(index)?.style) } },
                         onFailure = { failure = it },
@@ -917,6 +917,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 currentCoroutineContext().ensureActive()
                 check(session === current && foreground && version == insetVersion)
                 IptvLivePlayback(context, liveLocator(current, ref, source, item), purpose, format, headers = StreamHeaders.requestHeaders(item.attributes),
+                    sourceUserAgent = livePreferences.userAgent(ref),
                     onPlaying = { playing -> patch { it.copy(playing = playing) } },
                     onError = {
                         patch { it.copy(failure = R.string.iptv_live_failed, playing = false, player = null, playback = null) }
@@ -1109,6 +1110,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     currentCoroutineContext().ensureActive()
                     check(session === current && foreground && tileVersions[index] == version)
                     IptvLivePlayback(context, liveLocator(current, ref, source, item), purpose, format, headers = StreamHeaders.requestHeaders(item.attributes),
+                        sourceUserAgent = livePreferences.userAgent(ref),
                         onPlaying = { playing -> patch { it.copy(playing = playing) } },
                         onError = {
                             patch { it.copy(failure = R.string.iptv_live_failed, playing = false, player = null, playback = null) }

@@ -90,6 +90,7 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
                             checked = state.stats, onToggle = viewModel::toggleStats)
                     }
                 }
+                item(key = "streaming") { IptvStreamingSettingsSection() }
                 item(key = "local-timeshift") { IptvTimeshiftSettingsSection() }
                 item(key = "appearance") {
                     SettingsGroupCard(title = stringResource(R.string.iptv_settings_appearance), subtitle = stringResource(R.string.iptv_settings_appearance_subtitle)) {

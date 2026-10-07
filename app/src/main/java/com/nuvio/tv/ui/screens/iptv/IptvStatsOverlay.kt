@@ -57,13 +57,20 @@ internal fun IptvStatsOverlay(playback: IptvLivePlayback, provider: String?, mod
                 counters?.let { StatsRow("Dropped", "${it.droppedBufferCount}",
                     if (it.droppedBufferCount == 0) StatsDot.GOOD else if (now - droppedAt < RECENT_MS) StatsDot.BAD else StatsDot.WARN) })
             val audioRows = listOf(StatsRow("Audio", audio?.let { audioLabel(it) } ?: "Unavailable"))
+            val target = playback.bufferTargetMs
+            val playbackSpeed = playback.playbackSpeed
             val network = listOfNotNull(
-                StatsRow("Buffer", seconds(buffered), when {
+                StatsRow("Buffer", if (target > 0) "${seconds(buffered)} / ${seconds(target)}" else seconds(buffered), when {
                     buffered >= 6_000 -> StatsDot.GOOD
                     buffered >= 1_500 -> StatsDot.WARN
                     else -> StatsDot.BAD
                 }),
-                offset?.let { StatsRow("Live offset", seconds(it)) },
+                playback.behindLiveMs()?.takeIf { it >= 1_000 }?.let { StatsRow("Behind live", seconds(it)) }
+                    ?: offset?.let { StatsRow("Live offset", seconds(it)) },
+                playbackSpeed.takeIf { it != 1f }?.let { StatsRow("Playback", String.format(Locale.US, "%.2f×", it), StatsDot.WARN) },
+                playback.protocol?.let { StatsRow("Protocol", it) },
+                playback.altSvcH3?.let { StatsRow("HTTP/3", if (it) "Advertised" else "Not advertised") },
+                StatsRow("Reconnects", "${playback.reconnects}", if (playback.reconnects == 0) StatsDot.GOOD else StatsDot.WARN),
                 StatsRow("Speed", telemetry.bitsPerSecond?.let { mbps(it) } ?: "Sampling",
                     telemetry.bitsPerSecond?.let { rate -> val needed = (video?.bitrate?.takeIf { it > 0 } ?: 0).toDouble()
                         if (needed <= 0) StatsDot.NONE else if (rate >= needed * 1.5) StatsDot.GOOD else if (rate >= needed) StatsDot.WARN else StatsDot.BAD } ?: StatsDot.NONE),

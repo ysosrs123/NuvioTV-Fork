@@ -102,6 +102,10 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
             AndroidKeyEvent.KEYCODE_MEDIA_PLAY -> { onPause(false); banner++; return@onPreviewKeyEvent true }
             AndroidKeyEvent.KEYCODE_MEDIA_PAUSE -> { onPause(true); banner++; return@onPreviewKeyEvent true }
             AndroidKeyEvent.KEYCODE_MEDIA_REWIND -> if (state.catchup == null) { if (onRewind()) banner++; return@onPreviewKeyEvent true }
+            AndroidKeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> if (state.catchup == null && !state.localBehind) {
+                if (state.playback?.goLive() == true) banner++
+                return@onPreviewKeyEvent true
+            }
         }
         when (native.keyCode) {
             AndroidKeyEvent.KEYCODE_DPAD_UP, AndroidKeyEvent.KEYCODE_CHANNEL_UP -> { onZap(-1); banner++; true }
@@ -247,10 +251,31 @@ private fun Banner(state: IptvLiveState, now: Long) {
                     else -> R.string.iptv_live_fullscreen_hint
                 }), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary,
                     maxLines = 2, modifier = Modifier.widthIn(max = 220.dp))
+                rememberBehindLive(state)?.let { behind ->
+                    Text(stringResource(R.string.iptv_stream_behind_live, behind), style = MaterialTheme.typography.labelMedium,
+                        color = NuvioTheme.colors.TextSecondary, maxLines = 1)
+                    Text(stringResource(R.string.iptv_stream_go_live_hint), style = MaterialTheme.typography.labelSmall,
+                        color = NuvioTheme.colors.TextTertiary, maxLines = 2, modifier = Modifier.widthIn(max = 220.dp))
+                }
             }
         }
     }
 }
+
+@Composable
+private fun rememberBehindLive(state: IptvLiveState): Int? {
+    val playback = state.playback?.takeIf { state.catchup == null && !state.localBehind && !state.localTimeshift }
+    var seconds by remember(playback) { mutableStateOf<Int?>(null) }
+    LaunchedEffect(playback) {
+        while (playback != null) {
+            seconds = playback.behindLiveMs()?.takeIf { it >= BEHIND_HINT_MS && playback.bufferTargetMs > 0 }?.let { (it / 1_000).toInt() }
+            delay(1_000)
+        }
+    }
+    return seconds
+}
+
+private const val BEHIND_HINT_MS = 5_000L
 
 @Composable
 internal fun ChannelPanel(state: IptvLiveState, now: Long, onWatch: (IptvListedChannel) -> Unit, channels: List<IptvListedChannel> = state.channels,

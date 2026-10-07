@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_stream_title">Streaming</string>
+    <string name="iptv_stream_description">How live channels buffer. Changes apply to the next channel you open.</string>
+    <string name="iptv_stream_start">Start playback after</string>
+    <string name="iptv_stream_start_subtitle">How much video loads before a channel starts. A shorter wait starts sooner but may stutter on a weak connection.</string>
+    <string name="iptv_stream_start_fast">Fast (about 1 s)</string>
+    <string name="iptv_stream_start_normal">Normal (about 2.5 s)</string>
+    <string name="iptv_stream_start_safe">Safe (about 5 s)</string>
+    <string name="iptv_stream_cushion">Build a safety buffer while watching</string>
+    <string name="iptv_stream_cushion_subtitle">Plays 3% slower, with normal pitch, until the buffer is full, so short network drops don\'t interrupt the picture. Live TV then runs that far behind.</string>
+    <string name="iptv_stream_cushion_off">Off</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d second</item>
+        <item quantity="other">%d seconds</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS channels start further behind live instead of slowing down.</string>
+    <string name="iptv_stream_cushion_memory">Limited to about %1$d MB of memory on this device.</string>
+    <string name="iptv_stream_behind_live">Behind live by %1$d s</string>
+    <string name="iptv_stream_go_live_hint">Press fast-forward to go live</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Sent when playing channels, catch-up and films from this source. A channel\'s own playlist settings still take priority.</string>
+    <string name="iptv_user_agent_default">App default</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Generic (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Custom</string>
+    <string name="iptv_user_agent_custom_hint">Printable characters only, up to 200.</string>
+</resources>
