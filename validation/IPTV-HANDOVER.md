@@ -40,6 +40,29 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
   a filtered error summary on failure. Without GitHub tools, run status is readable
   from the public REST API, but logs and re-runs need the user.
 
+## Planned but not done (compared on 7 October 2026)
+
+From the earlier plan and the reference study; none of these is built yet.
+- Recording: USB and SMB/NAS (in progress), crash/power-loss recovery validation,
+  shared media storage. Possible extras discussed with the user: WebDAV and FTP
+  targets; downloading recordings to a phone from the setup page.
+- Playback: local timeshift from the capture chain (disabled until validated) and
+  its memory/storage measurements; per-channel headers (#EXTVLCOPT user-agent and
+  referrer, #EXTHTTP, pipe suffixes are parsed but ignored); endless retry and
+  frozen-video detection (gives up after six attempts); per-server format probe; fast
+  TS zap; display frame-rate/HDR mode handoff with the main player.
+- Catch-up: scrubbing across programme boundaries, automatic return to live near the
+  edge, probing and remembering the Xtream catch-up address style.
+- Guide: densities, sticky titles, programme artwork, channel and category
+  reordering, categories from several sources together, multiview across sources and
+  more layouts, picture-in-picture, Live TV rows on the Nuvio Home screen.
+- Sport from a fixtures service (needs the user's approval for a data source).
+- Setup: guide assignment and profiles from the phone, device-to-device copy,
+  encrypted backup/restore, account group screen, Stalker grouping by portal and
+  MAC, review screen when a refresh would drop many channels.
+- Validation: device fixtures, schema upgrades on an existing install, subtitles/CC/
+  teletext, accessibility, minified build on a device.
+
 ## User feedback after the first device pass — 7 October 2026
 
 Seventeen items from the AM9 run of 5276c31. Status (all host-tested where testable,
