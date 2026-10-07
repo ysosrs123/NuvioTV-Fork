@@ -41,7 +41,7 @@ data class IptvSettingsState(val format: IptvStreamFormat = IptvStreamFormat.AUT
 data class IptvLocationSummary(val kind: IptvLocationKind = IptvLocationKind.DEVICE, val label: String? = null, val available: Boolean = true,
     val value: String = RecordingLocations.INTERNAL)
 
-enum class IptvLocationKind { DEVICE, DRIVE, SHARE }
+enum class IptvLocationKind { DEVICE, DRIVE, SHARE, MEDIA }
 
 data class IptvLocationOption(val value: String, val kind: IptvLocationKind, val label: String?, val freeBytes: Long?, val fileSystem: RecordingFileSystem?)
 
@@ -115,7 +115,9 @@ class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLiv
                     runCatching { targets.internalDirectory().usableSpace }.getOrNull(), null)
                 val drives = targets.volumes().map { IptvLocationOption(RecordingLocations.volume(it.id), IptvLocationKind.DRIVE, it.label, it.freeBytes, it.fileSystem) }
                 val share = IptvLocationOption(RecordingLocations.SHARE, IptvLocationKind.SHARE, targets.shares.settings()?.label, preferences.shareFreeBytes, null)
-                listOf(internal) + drives + share
+                val media = if (targets.media.available) listOf(IptvLocationOption(RecordingLocations.MEDIA, IptvLocationKind.MEDIA, null,
+                    targets.media.freeBytes().takeIf { it > 0 }, null)) else emptyList()
+                listOf(internal) + drives + media + share
             }
         }
     }
@@ -126,6 +128,16 @@ class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLiv
         when (option.kind) {
             IptvLocationKind.DEVICE -> { preferences.recordLocation = RecordingLocations.INTERNAL; locationOptions.value = null; reload() }
             IptvLocationKind.SHARE -> { locationOptions.value = null; openShare() }
+            IptvLocationKind.MEDIA -> viewModelScope.launch {
+                val ready = withContext(Dispatchers.IO) { targets.media.available && targets.media.mounted() }
+                locationOptions.value = null
+                if (ready) {
+                    val changed = preferences.recordLocation != RecordingLocations.MEDIA
+                    preferences.recordLocation = RecordingLocations.MEDIA
+                    notices.value = if (changed) R.string.iptv_media_notice else null
+                } else notices.value = R.string.iptv_media_unavailable
+                reload()
+            }
             IptvLocationKind.DRIVE -> viewModelScope.launch {
                 val id = RecordingLocations.volumeId(option.value) ?: return@launch
                 val check = withContext(Dispatchers.IO) { targets.volumes().firstOrNull { it.id == id }?.let(targets::check) ?: IptvVolumeCheck.MISSING }
@@ -225,6 +237,7 @@ class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLiv
             val volume = targets.volumes().firstOrNull { it.id == id }
             return IptvLocationSummary(IptvLocationKind.DRIVE, volume?.label, volume?.mounted == true, choice)
         }
+        if (choice == RecordingLocations.MEDIA) return IptvLocationSummary(IptvLocationKind.MEDIA, null, targets.media.available && targets.media.mounted(), choice)
         if (choice == RecordingLocations.SHARE) return targets.shares.settings().let { IptvLocationSummary(IptvLocationKind.SHARE, it?.label, it != null, choice) }
         return IptvLocationSummary()
     }

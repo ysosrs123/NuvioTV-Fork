@@ -766,6 +766,11 @@ internal fun PlayerRuntimeController.saveWatchProgressInternal(position: Long, d
         saveCloudLibraryProgress(position, duration, completed = false)
         return
     }
+    if (com.nuvio.tv.ui.screens.iptv.IptvVodPlayerResume.applies(contentId, currentStreamUrl)) {
+        val url = currentStreamUrl
+        scope.launch(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.NonCancellable) { com.nuvio.tv.ui.screens.iptv.IptvVodPlayerResume.save(context, url, position, duration) }
+        return
+    }
     val parentContentId = contentId?.takeIf { it.isNotEmpty() } ?: return
     val parentContentType = contentType?.takeIf { it.isNotEmpty() } ?: return
 

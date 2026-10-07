@@ -240,7 +240,10 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   "IPTV movies and series" on (Settings → Playback → Stream selection), matching titles
   appear as a stream source on Nuvio's movie and episode pages; continue watching and
   Trakt/Simkl/MDBList work as for other streams, and provider addresses with account
-  details are never stored.
+  details are never stored. Movies and Series also appear in the Live TV menu with a
+  poster grid, categories and search; artwork can come from the provider or from Nuvio
+  (TMDB). Titles that match open Nuvio's own page; others open a Live TV page with play
+  and resume.
 
 ## Ready below the UI (screens pending)
 
@@ -421,8 +424,8 @@ Phone setup (security review)
   confirmation on the TV); it is not meant for untrusted networks.
 - IPTV movies and series as a Nuvio stream source: a playing movie is not counted by
   Live TV's connection limit; "open in external player" does not work for them;
-  automatic failover to the next stream skips them. Movies and Series browsing in the
-  Live TV menu is in progress.
+  automatic failover to the next stream skips them. Resume for titles without a TMDB/IMDb match
+  stays on the TV and is not sent to Trakt, Simkl or MDBList.
 - The safety buffer relies on playing at 97% speed; with AC-3/E-AC-3 passthrough to a
   receiver the speed change may be ignored, so the buffer would not grow.
 - The minified release build with IPTV is built in CI (see Validation) but has not

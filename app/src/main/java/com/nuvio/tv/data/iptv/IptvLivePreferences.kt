@@ -49,8 +49,7 @@ class IptvLivePreferences(context: Context) {
         set(value) = preferences.edit().putInt(LATE_KEY, value.coerceIn(0, MAX_LATE_MINUTES)).apply()
 
     var recordLocation: String
-        get() = preferences.getString(LOCATION_KEY, null)?.takeIf { it == RecordingLocations.INTERNAL || it == RecordingLocations.SHARE ||
-            RecordingLocations.volumeId(it) != null } ?: RecordingLocations.INTERNAL
+        get() = RecordingLocations.choice(preferences.getString(LOCATION_KEY, null))
         set(value) = putString(LOCATION_KEY, value)
     var shareFreeBytes: Long?
         get() = preferences.getLong(SHARE_FREE_KEY, -1).takeIf { it >= 0 }

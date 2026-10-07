@@ -40,6 +40,7 @@ data class IptvVodEpisodes(val episodes: List<IptvVodEpisode>, val fetchedAtMill
 data class IptvVodLocator(val url: String, val headers: Map<String, String>) {
     override fun toString(): String = "IptvVodLocator(withheld)"
 }
+data class IptvVodResume(val ref: VodRef, val positionMillis: Long, val durationMillis: Long, val updatedAtMillis: Long)
 
 class IptvVodStore(
     context: Context,
@@ -222,12 +223,13 @@ class IptvVodStore(
         }
     }
 
-    fun page(ref: IptvSourceRef, kind: VodKind, categoryId: String?, offset: Int = 0, limit: Int = 100): IptvVodPage = transaction { db ->
+    fun page(ref: IptvSourceRef, kind: VodKind, categoryId: String?, offset: Int = 0, limit: Int = 100, recent: Boolean = false): IptvVodPage = transaction { db ->
         require(limit in 1..200 && offset in 0..MAX_OFFSET && kind != VodKind.EPISODE)
         val args = mutableListOf(ref.profileId.toString(), ref.sourceId, kind.wire)
         val category = categoryId?.let { args += it; " AND t.category=?" }.orEmpty()
+        val order = if (recent) "t.added IS NULL, t.added DESC, t.position" else "t.position"
         args += (limit + 1).toString(); args += offset.toString()
-        val items = db.rawQuery("SELECT t.* FROM titles t JOIN vod_sources s ON s.source=t.source AND t.generation=s.active WHERE s.profile=? AND t.source=? AND t.kind=?$category ORDER BY t.position LIMIT ? OFFSET ?",
+        val items = db.rawQuery("SELECT t.* FROM titles t JOIN vod_sources s ON s.source=t.source AND t.generation=s.active WHERE s.profile=? AND t.source=? AND t.kind=?$category ORDER BY $order LIMIT ? OFFSET ?",
             args.toTypedArray()).use { c -> buildList { while (c.moveToNext()) add(readTitle(c, ref.profileId)) } }
         IptvVodPage(items.take(limit), if (items.size > limit) offset + limit else null)
     }
@@ -274,6 +276,46 @@ class IptvVodStore(
         true
     }
 
+    fun saveIds(ref: VodRef, tmdbId: String?, imdbId: String?) = transaction { db ->
+        require(ref.kind != VodKind.EPISODE)
+        val args = arrayOf(ref.sourceId, ref.sourceId, ref.kind.wire, ref.id)
+        val where = "source=? AND generation=(SELECT active FROM vod_sources WHERE source=?) AND kind=? AND id=?"
+        tmdbId?.let { db.execSQL("UPDATE titles SET tmdb=? WHERE $where AND tmdb IS NULL", arrayOf<Any>(it, *args)) }
+        imdbId?.let { db.execSQL("UPDATE titles SET imdb=? WHERE $where AND imdb IS NULL", arrayOf<Any>(it, *args)) }
+        Unit
+    }
+
+    fun resume(ref: VodRef): IptvVodResume? = transaction { db ->
+        require(ref.kind != VodKind.SERIES)
+        db.rawQuery("SELECT position,duration,updated FROM resume WHERE source=? AND profile=? AND kind=? AND id=?",
+            arrayOf(ref.sourceId, ref.profileId.toString(), ref.kind.wire, ref.id)).use {
+            if (it.moveToFirst()) IptvVodResume(ref, it.getLong(0), it.getLong(1), it.getLong(2)) else null
+        }
+    }
+
+    fun resumes(series: VodRef): List<IptvVodResume> = transaction { db ->
+        require(series.kind == VodKind.SERIES)
+        db.rawQuery("SELECT id,position,duration,updated FROM resume WHERE source=? AND profile=? AND kind='episode' AND substr(id,1,?)=? ORDER BY updated DESC LIMIT 2000",
+            arrayOf(series.sourceId, series.profileId.toString(), (series.id.length + 1).toString(), "${series.id}.")).use { c ->
+            buildList { while (c.moveToNext()) add(IptvVodResume(VodRef(series.profileId, series.sourceId, VodKind.EPISODE, c.getString(0)), c.getLong(1), c.getLong(2), c.getLong(3))) }
+        }
+    }
+
+    fun saveResume(ref: VodRef, positionMillis: Long, durationMillis: Long) = transaction { db ->
+        require(ref.kind != VodKind.SERIES && positionMillis >= 0 && durationMillis >= 0)
+        db.insertWithOnConflict("resume", null, ContentValues().apply {
+            put("source", ref.sourceId); put("profile", ref.profileId); put("kind", ref.kind.wire); put("id", ref.id)
+            put("position", positionMillis); put("duration", durationMillis); put("updated", now())
+        }, SQLiteDatabase.CONFLICT_REPLACE)
+        db.execSQL("DELETE FROM resume WHERE profile=? AND rowid NOT IN (SELECT rowid FROM resume WHERE profile=? ORDER BY updated DESC LIMIT $MAX_RESUME)",
+            arrayOf<Any>(ref.profileId, ref.profileId))
+    }
+
+    fun clearResume(ref: VodRef) = transaction { db ->
+        db.delete("resume", "source=? AND profile=? AND kind=? AND id=?", arrayOf(ref.sourceId, ref.profileId.toString(), ref.kind.wire, ref.id))
+        Unit
+    }
+
     fun locator(ref: VodRef): IptvVodLocator? = transaction { db ->
         val (sql, args) = if (ref.kind == VodKind.EPISODE)
             "SELECT e.locator FROM episodes e JOIN vod_sources s ON s.source=e.source WHERE s.profile=? AND e.source=? AND e.series=? AND e.id=?" to
@@ -289,7 +331,9 @@ class IptvVodStore(
         }
     }
 
-    override fun removeSource(ref: IptvSourceRef) { transaction { db -> clearRows(db, ref.sourceId); db.delete("vod_sources", "source=?", arrayOf(ref.sourceId)) } }
+    override fun removeSource(ref: IptvSourceRef) {
+        transaction { db -> clearRows(db, ref.sourceId); db.delete("vod_sources", "source=?", arrayOf(ref.sourceId)); db.delete("resume", "source=?", arrayOf(ref.sourceId)) }
+    }
 
     override fun removeProfile(profileId: Int) {
         transaction { db ->
@@ -298,10 +342,11 @@ class IptvVodStore(
             }
             for (source in sources) clearRows(db, source)
             db.delete("vod_sources", "profile=?", arrayOf(profileId.toString()))
+            db.delete("resume", "profile=?", arrayOf(profileId.toString()))
         }
     }
 
-    override fun clearAllProfiles() { transaction { db -> listOf("titles", "categories", "episodes", "episode_fetch", "vod_sources").forEach { db.delete(it, null, null) } } }
+    override fun clearAllProfiles() { transaction { db -> listOf("titles", "categories", "episodes", "episode_fetch", "vod_sources", "resume").forEach { db.delete(it, null, null) } } }
 
     private fun clearRows(db: SQLiteDatabase, source: String) {
         listOf("titles", "categories", "episodes", "episode_fetch").forEach { db.delete(it, "source=?", arrayOf(source)) }
@@ -375,7 +420,7 @@ class IptvVodStore(
     )
     private class EpisodeRow(val seriesId: String, val episode: VodEpisode, val locator: IptvVodLocator?)
 
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 1) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 2) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
             db.execSQL("CREATE TABLE vod_sources (source TEXT PRIMARY KEY, profile INTEGER NOT NULL, enabled INTEGER, detected INTEGER NOT NULL, pending INTEGER NOT NULL, active INTEGER, refreshed_at INTEGER, movies INTEGER NOT NULL, series INTEGER NOT NULL)")
@@ -389,14 +434,21 @@ class IptvVodStore(
             db.execSQL("CREATE TABLE episodes (source TEXT NOT NULL, series TEXT NOT NULL, id TEXT NOT NULL, generation INTEGER, season INTEGER NOT NULL, episode INTEGER NOT NULL, title TEXT, ext TEXT, duration INTEGER, plot TEXT, still TEXT, tmdb TEXT, locator BLOB, PRIMARY KEY(source,series,id))")
             db.execSQL("CREATE INDEX episodes_number ON episodes(source,series,season,episode)")
             db.execSQL("CREATE TABLE episode_fetch (source TEXT NOT NULL, series TEXT NOT NULL, fetched_at INTEGER NOT NULL, PRIMARY KEY(source,series))")
+            createResume(db)
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(newVersion == 1) { "Missing IPTV VOD database migration" }
+            check(newVersion == 2) { "Missing IPTV VOD database migration" }
+            if (oldVersion < 2) createResume(db)
+        }
+        private fun createResume(db: SQLiteDatabase) {
+            db.execSQL("CREATE TABLE resume (source TEXT NOT NULL, profile INTEGER NOT NULL, kind TEXT NOT NULL, id TEXT NOT NULL, position INTEGER NOT NULL, duration INTEGER NOT NULL, updated INTEGER NOT NULL, PRIMARY KEY(source,kind,id))")
+            db.execSQL("CREATE INDEX resume_updated ON resume(profile,updated)")
         }
     }
 
     private companion object {
         const val MAX_OFFSET = 250_000
+        const val MAX_RESUME = 1_000
         const val EPISODE_INSERT = "INSERT OR REPLACE INTO episodes(source,series,id,generation,season,episode,title,ext,duration,plot,still,tmdb,locator) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)"
         fun aad(ref: VodRef) = "iptv-vod.v1:${ref.profileId}:${ref.sourceId}:${ref.kind.wire}:${ref.id}"
         fun bindString(statement: SQLiteStatement, index: Int, value: String?) { if (value == null) statement.bindNull(index) else statement.bindString(index, value) }

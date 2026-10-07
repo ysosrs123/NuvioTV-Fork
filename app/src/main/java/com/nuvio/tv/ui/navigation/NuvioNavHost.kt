@@ -1238,6 +1238,7 @@ private fun PlaybackNavHost(
         composable(Screen.IptvLive.route) {
             com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvLiveScreen(
                 onRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } },
+                onVod = { kind -> navController.navigate(Screen.IptvVod.createRoute(kind.wire)) { launchSingleTop = true } },
                 onSettings = {
                     com.nuvio.tv.ui.screens.settings.SettingsCategoryRequest.open(com.nuvio.tv.ui.screens.settings.SettingsCategory.LIVE_TV)
                     navController.openRootDestination(Screen.Settings.route)
@@ -1264,6 +1265,20 @@ private fun PlaybackNavHost(
         }
         composable(Screen.IptvRecordings.route) {
             com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvRecordingsScreen(onBack = { navController.popBackStack() }) }
+        }
+        composable(Screen.IptvVod.route, arguments = listOf(navArgument("kind") { type = NavType.StringType })) {
+            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvVodBrowseScreen(onBack = { navController.popBackStack() },
+                onTitle = { ref -> navController.navigate(Screen.IptvVodTitle.createRoute(ref.format())) },
+                onDetail = { target -> navController.navigate(Screen.Detail.createRoute(itemId = target.itemId, itemType = target.itemType)) }) }
+        }
+        composable(Screen.IptvVodTitle.route, arguments = listOf(navArgument("ref") { type = NavType.StringType })) {
+            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvVodTitleScreen(
+                onPlay = { play ->
+                    navController.navigate(Screen.Player.createRoute(streamUrl = play.ref.format(), title = play.title, streamName = play.source,
+                        year = play.year?.toString(), poster = play.poster, backdrop = play.backdrop, startFromBeginning = play.fromStart,
+                        addonName = play.source))
+                },
+                onDetail = { target -> navController.navigate(Screen.Detail.createRoute(itemId = target.itemId, itemType = target.itemType)) }) }
         }
 
         composable(Screen.Settings.route) {

@@ -108,16 +108,20 @@ Done — wave 2 and later (`7b26803` – `0c7ebe8`):
   activity used the removed `onBack`; certificate failures on a later route were
   reported as "unreachable" (real bug, `2bef868`).
 
-Built, not yet committed (waiting on the screens below, which share a settings file):
+Done — committed together with the screens below:
 - "Movies folder" recording location (Android 10+): records to the spool, then copies
   into MediaStore `Movies/Nuvio Recordings/` (pending entry, published after the size
-  check); list, play, delete and phone download work through the content id.
-  Strings: `iptv_media_strings.xml` (not translated yet).
-
-In progress:
-- Movies and Series in the Live TV menu with a "Posters and details from: Provider /
-  Nuvio" setting; matched titles open Nuvio's detail page; unmatched ones a simple Live
-  TV page with local resume. Strings: `iptv_vod_browse_strings.xml`.
+  check); list, play, delete and phone download work through the content id. Delete of
+  a file the app no longer owns (after a reinstall) shows a message instead of failing.
+- Movies and Series in the Live TV menu (`iptv/vod/{kind}`, `iptv/vod-title/{ref}`):
+  category rail, poster grid with paging, search, source filter; matched titles open
+  Nuvio's detail page (a small in-memory allow list makes the IPTV stream source show
+  there even when the global setting is off); unmatched titles get a Live TV page with
+  play/resume and episodes, resume stored per VodRef in `iptv-vod.db` (schema 2) and
+  never sent to Nuvio history. "Movies and series" settings group: artwork from Provider
+  (default) or Nuvio (TMDB lookups for visible posters only, cached 30 days, honours
+  TMDB 429), and a switch per source.
+- Strings `iptv_media_strings.xml` and `iptv_vod_browse_strings.xml` are not translated yet.
 
 Next:
 - Fix the VOD gaps above; Go live button in the control deck; Live TV rows on the

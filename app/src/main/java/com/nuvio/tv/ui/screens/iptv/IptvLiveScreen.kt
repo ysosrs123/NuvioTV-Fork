@@ -28,6 +28,8 @@ import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.LiveTv
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Schedule
@@ -97,8 +99,10 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSettings: () -> Unit = onSources,
+    onVod: (com.nuvio.tv.core.iptv.VodKind) -> Unit = {},
     viewModel: IptvLiveViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val vod = rememberIptvVodAvailability()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     var fullscreen by remember { mutableStateOf(false) }
     var railOpen by remember { mutableStateOf(false) }
@@ -263,6 +267,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                     onSource = { viewModel.showSource(it); railOpen = false; focusGrid() },
                     onSources = { railOpen = false; onSettings() },
                     onRecordings = { railOpen = false; onRecordings() },
+                    vod = vod, onVod = { kind -> railOpen = false; onVod(kind) },
                     onSearch = { airing -> viewModel.searchMode(airing); railOpen = false; searching = true },
                     onHide = { categoryMenu = it },
                     onClose = { railOpen = false; focusContent() },
@@ -533,6 +538,7 @@ private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, modifier: M
 @Composable
 private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: Modifier, onFavourites: () -> Unit, onSports: () -> Unit, onCategory: (String?) -> Unit,
     onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit, onSources: () -> Unit, onRecordings: () -> Unit, onSearch: (Boolean) -> Unit, onHide: (String) -> Unit, onClose: () -> Unit,
+    vod: IptvVodAvailability, onVod: (com.nuvio.tv.core.iptv.VodKind) -> Unit,
     onSidebar: (() -> Unit)?, onAllSources: () -> Unit, onSourceCategory: (com.nuvio.tv.data.iptv.IptvSourceRef, String?) -> Unit,
     movingCategory: String?, onMoveCategory: (String, ListMove) -> Unit, onMoveCategoryDone: () -> Unit) {
     val list = rememberLazyListState()
@@ -541,7 +547,8 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
     val movingIndex = movingCategory?.let { name -> visibleCategories.indexOfFirst { it.name == name } } ?: -1
     LaunchedEffect(movingCategory, movingIndex) {
         if (movingIndex < 0) return@LaunchedEffect
-        val target = movingIndex + RAIL_HEADER_ITEMS + (if (state.sportEnabled) 1 else 0) + (if (state.sources.size > 1) 1 else 0)
+        val target = movingIndex + RAIL_HEADER_ITEMS + (if (state.sportEnabled) 1 else 0) + (if (state.sources.size > 1) 1 else 0) +
+            (if (vod.movies) 1 else 0) + (if (vod.series) 1 else 0)
         val visible = list.layoutInfo.visibleItemsInfo
         if (visible.isEmpty() || target <= visible.first().index || target >= visible.last().index) list.scrollToItem((target - 3).coerceAtLeast(0))
         withFrameNanos { }
@@ -576,6 +583,8 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
             item { RailItem(stringResource(R.string.iptv_live_search), null, state.search.isNotBlank() && !state.airingSearch, Modifier, { onSearch(false) }, Icons.Filled.Search) }
             item { RailItem(stringResource(R.string.iptv_live_search_airing), null, state.search.isNotBlank() && state.airingSearch, Modifier, { onSearch(true) }, Icons.Filled.Schedule) }
             item { RailItem(stringResource(R.string.iptv_recordings_open), state.recordings.count { it.status.holdsConnection }.takeIf { it > 0 }, false, Modifier, onRecordings, Icons.Filled.VideoLibrary) }
+            if (vod.movies) item { RailItem(stringResource(R.string.iptv_vod_browse_movies), null, false, Modifier, { onVod(com.nuvio.tv.core.iptv.VodKind.MOVIE) }, Icons.Filled.Movie) }
+            if (vod.series) item { RailItem(stringResource(R.string.iptv_vod_browse_series), null, false, Modifier, { onVod(com.nuvio.tv.core.iptv.VodKind.SERIES) }, Icons.Filled.Tv) }
             item { RailItem(stringResource(R.string.iptv_settings_title), null, false, Modifier, onSources, Icons.Filled.Settings) }
             item { Spacer(Modifier.height(6.dp)) }
             item { RailItem(stringResource(if (state.allSources) R.string.iptv_all_sources_favourites else R.string.iptv_live_favourites), null, state.favourites,

@@ -33,6 +33,8 @@ data class IptvRecording(
     val span: RecordingSpan get() = RecordingSpan.of(startMillis, stopMillis, programmeStartMillis, programmeStopMillis)
     val slot: RecordingSlot get() = span.let { RecordingSlot(accountId, it.coreStartMillis, it.coreStopMillis) }
     val onShare: Boolean get() = RecordingLocations.shareId(storage) != null
+    val onMedia: Boolean get() = storage == RecordingLocations.MEDIA
+    val spooled: Boolean get() = onShare || onMedia
     override fun toString(): String = "IptvRecording(id=$id, status=$status, failure=$failure, bytes=$bytes, parts=$parts, upload=$upload)"
 }
 

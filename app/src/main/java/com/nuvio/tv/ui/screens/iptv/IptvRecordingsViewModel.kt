@@ -10,6 +10,7 @@ import com.nuvio.tv.core.recording.IptvFreeSpace
 import com.nuvio.tv.core.recording.IptvRecordRefusal
 import com.nuvio.tv.core.recording.IptvRecorder
 import com.nuvio.tv.core.recording.IptvRecordingAvailability
+import com.nuvio.tv.core.recording.IptvRecordingDeletion
 import com.nuvio.tv.data.iptv.IptvRecording
 import com.nuvio.tv.data.iptv.IptvRecordingReader
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -89,7 +90,10 @@ class IptvRecordingsViewModel @Inject constructor(
 
     fun delete(recording: IptvRecording) {
         if (playing.value?.recording?.id == recording.id) closePlayer()
-        viewModelScope.launch { recorder.delete(recording.id); refreshFree() }
+        viewModelScope.launch {
+            if (recorder.delete(recording.id) == IptvRecordingDeletion.FILE_KEPT) message.value = R.string.iptv_media_delete_not_owned
+            refreshFree()
+        }
     }
 
     private fun refreshFree() {

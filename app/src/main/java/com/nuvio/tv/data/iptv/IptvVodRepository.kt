@@ -3,6 +3,8 @@ package com.nuvio.tv.data.iptv
 import com.nuvio.tv.core.iptv.PlaylistVod
 import com.nuvio.tv.core.iptv.PlaylistVodEntry
 import com.nuvio.tv.core.iptv.VodKind
+import com.nuvio.tv.core.iptv.VodMovieInfo
+import com.nuvio.tv.core.iptv.VodResume
 import com.nuvio.tv.core.iptv.VodRef
 import com.nuvio.tv.core.iptv.VodTitleCandidate
 import com.nuvio.tv.core.iptv.VodTitles
@@ -35,6 +37,9 @@ class IptvVodRepository(
     private val userAgent: (IptvSourceRef) -> String? = { null },
 ) {
     private val fetches = Mutex()
+    private val movieInfos = object : LinkedHashMap<VodRef, VodMovieInfo>(16, .75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<VodRef, VodMovieInfo>?): Boolean = size > 32
+    }
 
     fun enabled(source: IptvSource): Boolean = enabled(source.kind, store.state(source.ref))
 
@@ -122,8 +127,33 @@ class IptvVodRepository(
 
     fun categories(ref: IptvSourceRef, kind: VodKind): List<IptvVodCategory> = store.categories(ref, kind)
 
-    fun page(ref: IptvSourceRef, kind: VodKind, categoryId: String?, offset: Int = 0, limit: Int = 100): IptvVodPage =
-        store.page(ref, kind, categoryId, offset, limit)
+    fun page(ref: IptvSourceRef, kind: VodKind, categoryId: String?, offset: Int = 0, limit: Int = 100, recent: Boolean = false): IptvVodPage =
+        store.page(ref, kind, categoryId, offset, limit, recent)
+
+    suspend fun movieInfo(ref: VodRef): VodMovieInfo? = withContext(Dispatchers.IO) {
+        require(ref.kind == VodKind.MOVIE)
+        synchronized(movieInfos) { movieInfos[ref] }?.let { return@withContext it }
+        val source = source(ref) ?: return@withContext null
+        if (source.kind != IptvSourceKind.XTREAM) return@withContext null
+        val info = xtream.movieInfo(catalogue.connection(source.ref), ref.id) ?: return@withContext null
+        if (info.tmdbId != null || info.imdbId != null) store.saveIds(ref, info.tmdbId, info.imdbId)
+        synchronized(movieInfos) { movieInfos[ref] = info }
+        info
+    }
+
+    fun resume(ref: VodRef): IptvVodResume? = store.resume(ref)
+
+    fun resumes(series: VodRef): List<IptvVodResume> = store.resumes(series)
+
+    fun saveResume(ref: VodRef, positionMillis: Long, durationMillis: Long) {
+        require(ref.kind != VodKind.SERIES)
+        when {
+            VodResume.keep(positionMillis, durationMillis) -> store.saveResume(ref, positionMillis, durationMillis.coerceAtLeast(0))
+            VodResume.finished(positionMillis, durationMillis) -> store.clearResume(ref)
+        }
+    }
+
+    fun clearResume(ref: VodRef) = store.clearResume(ref)
 
     fun search(profileId: Int, kind: VodKind?, text: String, limit: Int = 100): List<IptvVodTitle> =
         ordered(profileId, store.search(profileId, kind, text, limit), keepOrder = true)

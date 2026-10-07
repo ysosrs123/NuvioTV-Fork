@@ -155,8 +155,11 @@ fun IptvRecordingsScreen(onBack: () -> Unit, viewModel: IptvRecordingsViewModel 
         val cancel = remember { FocusRequester() }
         LaunchedEffect(Unit) { withFrameNanos { }; runCatching { cancel.requestFocus() } }
         NuvioDialog(onDismiss = { confirmDelete = null }, title = stringResource(R.string.iptv_recording_delete_title, recording.title ?: recording.channelName),
-            subtitle = stringResource(if (recording.storage == null) R.string.iptv_recording_delete_description
-                else R.string.iptv_recording_delete_description_elsewhere), width = 520.dp) {
+            subtitle = stringResource(when {
+                recording.storage == null -> R.string.iptv_recording_delete_description
+                recording.onMedia -> R.string.iptv_media_delete_description
+                else -> R.string.iptv_recording_delete_description_elsewhere
+            }), width = 520.dp) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 NuvioActionPill({ confirmDelete = null }, Modifier.focusRequester(cancel)) { Text(stringResource(R.string.iptv_recording_keep)) }
                 NuvioActionPill({ confirmDelete = null; viewModel.delete(recording) }) {
@@ -206,13 +209,17 @@ private fun RecordingLine(recording: IptvRecording, availability: IptvRecordingA
         if (recording.gaps > 0 && recording.failure == null) stringResource(R.string.iptv_recording_gaps) else null,
         when {
             recording.storage == null -> null
+            recording.onMedia -> stringResource(R.string.iptv_media_label)
             recording.onShare -> stringResource(R.string.iptv_recording_on_share)
             else -> recording.storageLabel ?: stringResource(R.string.iptv_recording_on_drive)
         },
         when (availability) {
             IptvRecordingAvailability.DRIVE_MISSING -> stringResource(R.string.iptv_recording_drive_missing)
             IptvRecordingAvailability.SHARE_MISSING -> stringResource(R.string.iptv_recording_share_missing)
-            IptvRecordingAvailability.UPLOADING -> stringResource(if (uploading) R.string.iptv_recording_uploading else R.string.iptv_recording_upload_waiting)
+            IptvRecordingAvailability.UPLOADING -> stringResource(when {
+                recording.onMedia -> if (uploading) R.string.iptv_media_copying else R.string.iptv_media_copy_waiting
+                else -> if (uploading) R.string.iptv_recording_uploading else R.string.iptv_recording_upload_waiting
+            })
             else -> null
         },
     )

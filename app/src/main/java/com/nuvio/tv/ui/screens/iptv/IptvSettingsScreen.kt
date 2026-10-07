@@ -118,6 +118,7 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
                     }
                 }
                 if (state.sport) item(key = "sports") { IptvSportsSettingsSection() }
+                item(key = "vod") { IptvVodSettingsSection() }
                 if (state.multiview) item(key = "multiview") {
                     SettingsGroupCard(title = stringResource(R.string.iptv_multiview_title)) {
                         SettingsActionRow(title = stringResource(R.string.iptv_multiview_layout), subtitle = null,
@@ -189,6 +190,7 @@ private fun locationLabel(summary: IptvLocationSummary): String = when (summary.
     IptvLocationKind.DEVICE -> stringResource(R.string.iptv_location_device)
     IptvLocationKind.DRIVE -> if (summary.available) summary.label ?: stringResource(R.string.iptv_location_drive) else stringResource(R.string.iptv_location_drive_missing)
     IptvLocationKind.SHARE -> if (summary.available) stringResource(R.string.iptv_network_location) else stringResource(R.string.iptv_location_share_not_set)
+    IptvLocationKind.MEDIA -> stringResource(if (summary.available) R.string.iptv_media_label else R.string.iptv_media_missing)
 }
 
 @Composable
@@ -196,6 +198,7 @@ private fun locationTitle(option: IptvLocationOption): String = when (option.kin
     IptvLocationKind.DEVICE -> stringResource(R.string.iptv_location_device)
     IptvLocationKind.DRIVE -> option.label ?: stringResource(R.string.iptv_location_drive)
     IptvLocationKind.SHARE -> stringResource(R.string.iptv_network_location)
+    IptvLocationKind.MEDIA -> stringResource(R.string.iptv_media_location)
 }
 
 @Composable
@@ -206,6 +209,7 @@ private fun locationDescription(option: IptvLocationOption, context: android.con
         IptvLocationKind.DRIVE -> listOfNotNull(free, option.fileSystem?.label,
             if (option.fileSystem?.largeFiles == false) stringResource(R.string.iptv_location_parts) else null).joinToString(" · ")
         IptvLocationKind.SHARE -> option.label ?: stringResource(R.string.iptv_location_share_setup)
+        IptvLocationKind.MEDIA -> free
     }
 }
 

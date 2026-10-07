@@ -43,17 +43,35 @@ class IptvVodStreamSources @Inject constructor(
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, TmdbTitles>?): Boolean = size > 64
     }
 
+    private val opened = object : LinkedHashMap<String, Boolean>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Boolean>?): Boolean = size > 64
+    }
+
     suspend fun enabled(): Boolean = BuildConfig.FEATURE_IPTV_ENABLED && settings.playerSettings.first().iptvVodStreamsEnabled
 
+    fun allow(kind: VodKind, tmdbId: String?, imdbId: String?) {
+        synchronized(opened) {
+            tmdbId?.let { opened["${kind.wire}:tmdb:$it"] = true }
+            imdbId?.let { opened["${kind.wire}:imdb:${it.lowercase()}"] = true }
+        }
+    }
+
+    private fun allowed(request: VodStreamRequest): Boolean = synchronized(opened) {
+        request.tmdbId?.let { "${request.kind.wire}:tmdb:$it" in opened } == true || request.imdbId?.let { "${request.kind.wire}:imdb:$it" in opened } == true
+    }
+
     suspend fun revision(): String {
-        if (!enabled()) return VodStreams.revision(false, emptyList())
+        val global = enabled()
+        val extra = if (global || !BuildConfig.FEATURE_IPTV_ENABLED) emptyList() else synchronized(opened) { opened.keys.toList() }
+        if (!global && extra.isEmpty()) return VodStreams.revision(false, emptyList())
         val profileId = profiles.activeProfileId.value
-        return VodStreams.revision(true, io(listOf("unavailable")) { streams.revision(profileId) })
+        return VodStreams.revision(true, io(listOf("unavailable")) { streams.revision(profileId) } + extra)
     }
 
     suspend fun sources(type: String, videoId: String, season: Int?, episode: Int?): List<ServerStreamSource> {
-        if (!enabled()) return emptyList()
+        if (!BuildConfig.FEATURE_IPTV_ENABLED) return emptyList()
         val request = VodStreams.request(type, videoId, season, episode) ?: return emptyList()
+        if (!enabled() && !allowed(request)) return emptyList()
         val profileId = profiles.activeProfileId.value
         val available = io(emptyList()) { streams.sources(profileId, request.kind) }
         if (available.isEmpty()) return emptyList()

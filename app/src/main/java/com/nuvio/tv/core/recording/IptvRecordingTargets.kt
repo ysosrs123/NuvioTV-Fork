@@ -3,6 +3,7 @@ package com.nuvio.tv.core.recording
 import android.content.Context
 import android.os.Environment
 import android.os.storage.StorageManager
+import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.RecordingFileSystem
 import com.nuvio.tv.core.iptv.RecordingFiles
 import com.nuvio.tv.core.iptv.RecordingLocations
@@ -15,6 +16,7 @@ import com.nuvio.tv.data.iptv.EnvelopeIptvSecretBox
 import com.nuvio.tv.data.iptv.IptvFtpConnector
 import com.nuvio.tv.data.iptv.IptvLivePreferences
 import com.nuvio.tv.data.iptv.IptvLog
+import com.nuvio.tv.data.iptv.IptvMediaStoreTarget
 import com.nuvio.tv.data.iptv.IptvRecordingShareStore
 import com.nuvio.tv.data.iptv.IptvShareConnector
 import com.nuvio.tv.data.iptv.IptvShareSettings
@@ -39,6 +41,9 @@ sealed interface IptvRecordingPlace {
     class Share(override val storage: String, override val label: String, val settings: IptvShareSettings, val connector: IptvShareConnector) : IptvRecordingPlace {
         override fun toString(): String = "Share(withheld)"
     }
+    class Media(override val label: String?, val target: IptvMediaStoreTarget) : IptvRecordingPlace {
+        override val storage: String get() = RecordingLocations.MEDIA
+    }
 }
 
 sealed interface IptvPlaceResult {
@@ -52,6 +57,7 @@ sealed interface IptvPlaceResult {
 class IptvRecordingTargets @Inject constructor(@ApplicationContext private val context: Context, private val preferences: IptvLivePreferences) {
     private val box by lazy { EnvelopeIptvSecretBox(AndroidIptvSecretBox(SHARE_KEY_ALIAS)) }
     val shares = IptvRecordingShareStore(File(context.filesDir, "iptv/recording-share.json")) { box }
+    val media = IptvMediaStoreTarget.create(context)
 
     fun internalDirectory(): File {
         val external = context.getExternalFilesDir(DIRECTORY)?.takeIf {
@@ -138,12 +144,17 @@ class IptvRecordingTargets @Inject constructor(@ApplicationContext private val c
         val choice = preferences.recordLocation
         return when {
             choice == RecordingLocations.SHARE -> shares.settings()?.let { resolve(RecordingLocations.share(it.id)) } ?: IptvPlaceResult.ShareMissing
+            choice == RecordingLocations.MEDIA -> resolve(choice)
             RecordingLocations.volumeId(choice) != null -> resolve(choice)
             else -> resolve(null)
         }
     }
 
     fun resolve(storage: String?): IptvPlaceResult {
+        if (storage == RecordingLocations.MEDIA) {
+            return if (media.available && media.mounted()) IptvPlaceResult.Ready(IptvRecordingPlace.Media(context.getString(R.string.iptv_media_label), media))
+                else IptvPlaceResult.Missing
+        }
         RecordingLocations.shareId(storage)?.let { id ->
             val settings = shares.settings()?.takeIf { it.id == id } ?: return IptvPlaceResult.ShareMissing
             val connector = connector(settings) ?: return IptvPlaceResult.ShareMissing
@@ -161,6 +172,7 @@ class IptvRecordingTargets @Inject constructor(@ApplicationContext private val c
     fun freeBytes(place: IptvRecordingPlace): Long = when (place) {
         is IptvRecordingPlace.Local -> runCatching { place.directory.usableSpace }.getOrDefault(0L)
         is IptvRecordingPlace.Share -> spoolFreeBytes()
+        is IptvRecordingPlace.Media -> minOf(spoolFreeBytes(), place.target.freeBytes())
     }
 
     fun mountedVolumeIds(): Set<String> = volumes().filter { it.mounted }.map { it.id }.toSet()

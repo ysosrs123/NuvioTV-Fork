@@ -627,6 +627,11 @@ internal fun PlayerRuntimeController.loadSavedProgressFor(season: Int?, episode:
 internal suspend fun PlayerRuntimeController.loadSavedProgressSuspend(season: Int?, episode: Int?) {
     val isCloudLibraryPlayback = contentType.equals("cloud", ignoreCase = true)
     val progressContentId = contentId
+    if (com.nuvio.tv.ui.screens.iptv.IptvVodPlayerResume.applies(progressContentId, currentStreamUrl)) {
+        val url = currentStreamUrl
+        pendingResumeProgress = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { com.nuvio.tv.ui.screens.iptv.IptvVodPlayerResume.load(context, url) }
+        return
+    }
     if (!isCloudLibraryPlayback && progressContentId == null) return
 
     pendingResumeProgress = null

@@ -280,6 +280,7 @@ object RecordingShareAddress {
 object RecordingLocations {
     const val INTERNAL = "internal"
     const val SHARE = "share"
+    const val MEDIA = "media"
     private const val VOLUME_PREFIX = "volume:"
     private const val SHARE_PREFIX = "share:"
     private val ID = Regex("[A-Za-z0-9-]{1,64}")
@@ -288,5 +289,32 @@ object RecordingLocations {
     fun volumeId(value: String?): String? = value?.takeIf { it.startsWith(VOLUME_PREFIX) }?.substring(VOLUME_PREFIX.length)?.takeIf { it.matches(ID) }
     fun share(id: String): String { require(id.matches(ID)); return SHARE_PREFIX + id }
     fun shareId(value: String?): String? = value?.takeIf { it.startsWith(SHARE_PREFIX) }?.substring(SHARE_PREFIX.length)?.takeIf { it.matches(ID) }
-    fun valid(value: String?): Boolean = value == null || volumeId(value) != null || shareId(value) != null
+    fun valid(value: String?): Boolean = value == null || value == MEDIA || volumeId(value) != null || shareId(value) != null
+    fun choice(value: String?): String = value?.takeIf { it == INTERNAL || it == SHARE || it == MEDIA || volumeId(it) != null } ?: INTERNAL
+}
+
+enum class RecordingMediaState { COPYING, PRESENT, MISSING }
+
+object RecordingMedia {
+    const val MIN_SDK = 29
+    const val RELATIVE_PATH = "Movies/Nuvio Recordings/"
+    const val MIME_TYPE = "video/mp2t"
+
+    fun supported(sdk: Int): Boolean = sdk >= MIN_SDK
+
+    fun id(file: String?): Long? = file?.takeIf { it.length in 1..18 && it.all { c -> c in '0'..'9' } }?.toLong()?.takeIf { it > 0 }
+
+    fun pending(path: String): Boolean = path.endsWith(RecordingFiles.PARTIAL_SUFFIX)
+
+    fun displayName(path: String): String {
+        val name = path.substringAfterLast('/').removeSuffix(RecordingFiles.PARTIAL_SUFFIX).trim()
+        require(name.isNotEmpty() && name.none { it < ' ' || it in "<>:\"/\\|?*" })
+        return RecordingFiles.safe(if (name.endsWith(RecordingFiles.EXTENSION)) name else name + RecordingFiles.EXTENSION)
+    }
+
+    fun state(upload: Boolean, file: String?, present: Set<Long>): RecordingMediaState = when {
+        upload -> RecordingMediaState.COPYING
+        id(file)?.let { it in present } == true -> RecordingMediaState.PRESENT
+        else -> RecordingMediaState.MISSING
+    }
 }

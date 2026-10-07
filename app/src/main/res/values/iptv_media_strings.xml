@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_media_location">Movies folder (visible to other apps)</string>
+    <string name="iptv_media_label">Movies folder</string>
+    <string name="iptv_media_missing">Movies folder not available</string>
+    <string name="iptv_media_unavailable">The shared Movies folder is not available on this device right now.</string>
+    <string name="iptv_media_notice">Recordings are saved on this device first and copied to Movies/Nuvio Recordings when they finish. Other apps, such as media players, can see them there.</string>
+    <string name="iptv_media_copying">Copying to the Movies folder</string>
+    <string name="iptv_media_copy_waiting">Waiting to copy to the Movies folder</string>
+    <string name="iptv_media_delete_description">The recording will be removed from the list and from the Movies folder.</string>
+    <string name="iptv_media_delete_not_owned">Removed from the list. The file in the Movies folder belongs to an earlier installation of this app, so it was kept. Delete it with a file manager.</string>
+</resources>

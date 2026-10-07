@@ -18,6 +18,8 @@ import com.nuvio.tv.core.iptv.RecordingAlarmAction
 import com.nuvio.tv.core.iptv.RecordingFailure
 import com.nuvio.tv.core.iptv.RecordingFiles
 import com.nuvio.tv.core.iptv.RecordingLocations
+import com.nuvio.tv.core.iptv.RecordingMedia
+import com.nuvio.tv.core.iptv.RecordingMediaState
 import com.nuvio.tv.core.iptv.RecordingParts
 import com.nuvio.tv.core.iptv.RecordingPlan
 import com.nuvio.tv.core.iptv.RecordingRetry
@@ -36,6 +38,8 @@ import com.nuvio.tv.data.iptv.IptvCatalogueItem
 import com.nuvio.tv.data.iptv.IptvCatalogueStore
 import com.nuvio.tv.data.iptv.IptvLivePreferences
 import com.nuvio.tv.data.iptv.IptvLog
+import com.nuvio.tv.data.iptv.IptvMediaDelete
+import com.nuvio.tv.data.iptv.IptvMediaStoreConnector
 import com.nuvio.tv.data.iptv.IptvProfileAccess
 import com.nuvio.tv.data.iptv.IptvRecording
 import com.nuvio.tv.data.iptv.IptvPartsReader
@@ -45,6 +49,7 @@ import com.nuvio.tv.data.iptv.IptvRecordingProgress
 import com.nuvio.tv.data.iptv.IptvRecordingReader
 import com.nuvio.tv.data.iptv.IptvRecordingStore
 import com.nuvio.tv.data.iptv.IptvRecordingUploader
+import com.nuvio.tv.data.iptv.IptvShareConnector
 import com.nuvio.tv.data.iptv.IptvShareReader
 import com.nuvio.tv.data.iptv.IptvSource
 import com.nuvio.tv.data.iptv.IptvSourceConnection
@@ -94,6 +99,8 @@ enum class IptvRecordRefusal {
 }
 
 enum class IptvRecordingAvailability { PLAYABLE, NOT_READY, MISSING, DRIVE_MISSING, SHARE_MISSING, UPLOADING }
+
+enum class IptvRecordingDeletion { REMOVED, NOT_FOUND, FILE_KEPT }
 
 data class IptvFreeSpace(val bytes: Long, val drive: String?, val share: Boolean)
 
@@ -191,25 +198,36 @@ class IptvRecorder @Inject constructor(
         return true
     }
 
-    suspend fun delete(id: String): Boolean = withContext(Dispatchers.IO) {
+    suspend fun delete(id: String): IptvRecordingDeletion = withContext(Dispatchers.IO) {
         val (job, upload) = synchronized(this@IptvRecorder) { jobs[id]?.also { stops[id] = RecordingStop.REMOVED } to uploadJobs[id] }
         upload?.cancel()
+        var kept = false
         val removed = mutex.withLock {
             load()
-            remove(id)?.also { IptvRecordingAlarms.cancel(context, it.id); deleteFiles(it); publish() }
+            remove(id)?.also { IptvRecordingAlarms.cancel(context, it.id); kept = !deleteFiles(it); publish() }
         }
         job?.cancel()
-        removed != null
+        when {
+            removed == null -> IptvRecordingDeletion.NOT_FOUND
+            kept -> IptvRecordingDeletion.FILE_KEPT
+            else -> IptvRecordingDeletion.REMOVED
+        }
     }
 
     fun availability(list: List<IptvRecording>): Map<String, IptvRecordingAvailability> {
         val mounted by lazy { targets.mountedVolumeIds() }
         val share by lazy { targets.shares.settings()?.id }
-        return list.associate { recording -> recording.id to availability(recording, { mounted }, { share }) }
+        val media by lazy { targets.media.present(list.filter { it.onMedia && !it.upload && it.status.finished }.mapNotNull { RecordingMedia.id(it.file) }) }
+        return list.associate { recording -> recording.id to availability(recording, { mounted }, { share }, { media }) }
     }
 
-    private fun availability(recording: IptvRecording, mounted: () -> Set<String>, share: () -> String?): IptvRecordingAvailability {
+    private fun availability(recording: IptvRecording, mounted: () -> Set<String>, share: () -> String?, media: () -> Set<Long>): IptvRecordingAvailability {
         if (!recording.status.finished) return IptvRecordingAvailability.NOT_READY
+        if (recording.onMedia) return when (RecordingMedia.state(recording.upload, recording.file, if (recording.upload) emptySet() else media())) {
+            RecordingMediaState.COPYING -> IptvRecordingAvailability.UPLOADING
+            RecordingMediaState.PRESENT -> IptvRecordingAvailability.PLAYABLE
+            RecordingMediaState.MISSING -> IptvRecordingAvailability.MISSING
+        }
         RecordingLocations.shareId(recording.storage)?.let { id ->
             return when {
                 recording.upload -> IptvRecordingAvailability.UPLOADING
@@ -226,6 +244,7 @@ class IptvRecorder @Inject constructor(
     fun reader(recording: IptvRecording): IptvRecordingReader? {
         if (!recording.status.finished || recording.upload) return null
         val path = recording.file ?: return null
+        if (recording.onMedia) return RecordingMedia.id(path)?.let { targets.media.reader(it) }
         if (recording.onShare) {
             val place = (targets.resolve(recording.storage) as? IptvPlaceResult.Ready)?.place as? IptvRecordingPlace.Share ?: return null
             return IptvShareReader(place.connector, path)
@@ -254,6 +273,7 @@ class IptvRecorder @Inject constructor(
         is IptvPlaceResult.Ready -> when (val place = result.place) {
             is IptvRecordingPlace.Local -> IptvFreeSpace(targets.freeBytes(place), place.label, false)
             is IptvRecordingPlace.Share -> livePreferences.shareFreeBytes?.let { IptvFreeSpace(it, null, true) }
+            is IptvRecordingPlace.Media -> IptvFreeSpace(place.target.freeBytes(), place.label, false)
         }
         else -> null
     }
@@ -373,6 +393,8 @@ class IptvRecorder @Inject constructor(
             if (!RecordingStorage.canStart(targets.spoolFreeBytes())) return IptvRecordResult.Refused(IptvRecordRefusal.LOW_STORAGE)
             val shareFree = livePreferences.shareFreeBytes
             if (shareFree != null && !RecordingStorage.hasRoomFor(shareFree, duration, committed, 0)) return IptvRecordResult.Refused(IptvRecordRefusal.LOW_STORAGE)
+        } else if (place is IptvRecordingPlace.Media && !RecordingStorage.canStart(targets.spoolFreeBytes())) {
+            return IptvRecordResult.Refused(IptvRecordRefusal.LOW_STORAGE)
         } else if (!RecordingStorage.hasRoomFor(targets.freeBytes(place), duration, committed)) {
             return IptvRecordResult.Refused(IptvRecordRefusal.LOW_STORAGE)
         }
@@ -458,6 +480,7 @@ class IptvRecorder @Inject constructor(
                 val path = when (place) {
                     is IptvRecordingPlace.Local -> File(place.directory, name).path
                     is IptvRecordingPlace.Share -> place.settings.target.path(name)
+                    is IptvRecordingPlace.Media -> name
                 }
                 update(id) { it.copy(status = RecordingStatus.RECORDING, startedAtMillis = now, file = path, storageLabel = place.label?.take(240) ?: it.storageLabel) }
                     ?.takeIf { it.status == RecordingStatus.RECORDING && it.file != null }?.let { it to place }.also { publish() }
@@ -484,11 +507,12 @@ class IptvRecorder @Inject constructor(
                 IptvRecordingOutput(place.directory, { index, _ -> File(place.directory, RecordingFiles.partial(RecordingParts.name(main.name, index))) },
                     place.partBytes, if (place.partBytes == Long.MAX_VALUE) 0 else RecordingParts.SEGMENT_HEADROOM_BYTES)
             }
-            is IptvRecordingPlace.Share -> { spool.mkdirs(); IptvRecordingUploader.spoolOutput(spool) }
+            is IptvRecordingPlace.Share, is IptvRecordingPlace.Media -> { spool.mkdirs(); IptvRecordingUploader.spoolOutput(spool) }
         }
-        val upload = (place as? IptvRecordingPlace.Share)?.let { share ->
+        val link = connector(place)
+        val upload = link?.let { remote ->
             scope.async(start = CoroutineStart.LAZY) {
-                uploader(share).upload(spool, path, { holder.committed }, { copied.get() }, UPLOAD_PATIENCE_MILLIS)
+                uploader(place, remote).upload(spool, path, { holder.committed }, { copied.get() }, UPLOAD_PATIENCE_MILLIS)
             }.also { track(id, it); it.start() }
         }
         var failure: RecordingFailure? = null
@@ -539,7 +563,7 @@ class IptvRecorder @Inject constructor(
                 copied.set(true)
                 val stop = synchronized(this@IptvRecorder) { stops[id] }
                 if (upload == null) finishLocal(entry, output, holder.bytes, failure, holder.gaps, stop)
-                else finishShare(entry, spool, upload, holder, failure, stop)
+                else finishShare(entry, spool, upload, holder, failure, stop, link)
             }
         }
     }
@@ -585,7 +609,7 @@ class IptvRecorder @Inject constructor(
     }
 
     private suspend fun finishShare(entry: IptvRecording, spool: File, upload: Deferred<IptvUploadOutcome>, holder: IptvRecordingProgress,
-        failure: RecordingFailure?, stop: RecordingStop?) {
+        failure: RecordingFailure?, stop: RecordingStop?, link: IptvShareConnector?) {
         val bytes = holder.committed
         val outcome = RecordingTransitions.outcome(bytes, failure, holder.gaps, stop)
         val present = mutex.withLock {
@@ -594,7 +618,7 @@ class IptvRecorder @Inject constructor(
                 it.copy(status = outcome.status, failure = outcome.failure, bytes = bytes, gaps = holder.gaps, file = if (bytes > 0) it.file else null,
                     upload = bytes > 0, finishedAtMillis = System.currentTimeMillis())
             }
-            IptvLog.info("recording finished ${outcome.status}${outcome.failure?.let { " $it" }.orEmpty()}${stop?.let { " stop=$it" }.orEmpty()} share")
+            IptvLog.info("recording finished ${outcome.status}${outcome.failure?.let { " $it" }.orEmpty()}${stop?.let { " stop=$it" }.orEmpty()} ${if (entry.onMedia) "media" else "share"}")
             publish()
             true
         }
@@ -605,14 +629,22 @@ class IptvRecorder @Inject constructor(
             return
         }
         val result = try { upload.await() } catch (_: CancellationException) { null }
-        applyUpload(entry.id, result, spool)
+        applyUpload(entry.id, result, spool, (link as? IptvMediaStoreConnector)?.published)
     }
 
-    private suspend fun applyUpload(id: String, result: IptvUploadOutcome?, spool: File) = mutex.withLock {
-        if (store.get(id) == null) { spool.deleteRecursively(); publish(); return@withLock }
+    private suspend fun applyUpload(id: String, result: IptvUploadOutcome?, spool: File, media: Long? = null) = mutex.withLock {
+        if (store.get(id) == null) {
+            spool.deleteRecursively()
+            if (result?.result == IptvUploadResult.DONE && media != null) targets.media.delete(media)
+            publish()
+            return@withLock
+        }
         when {
             result == null || result.result == IptvUploadResult.PENDING -> Unit
-            result.result == IptvUploadResult.DONE -> update(id) { it.copy(upload = false, bytes = result.bytes.takeIf { bytes -> bytes > 0 } ?: it.bytes) }
+            result.result == IptvUploadResult.DONE -> update(id) {
+                it.copy(upload = false, bytes = result.bytes.takeIf { bytes -> bytes > 0 } ?: it.bytes,
+                    file = if (it.onMedia) media?.toString() else it.file)
+            }
             else -> {
                 spool.deleteRecursively()
                 update(id) { it.copy(upload = false, file = null, failure = RecordingFailure.STORAGE_ERROR) }
@@ -622,7 +654,14 @@ class IptvRecorder @Inject constructor(
         publish()
     }
 
-    private fun uploader(share: IptvRecordingPlace.Share) = IptvRecordingUploader(share.connector, onFree = { livePreferences.shareFreeBytes = it })
+    private fun uploader(place: IptvRecordingPlace, connector: IptvShareConnector) =
+        IptvRecordingUploader(connector, onFree = { if (place is IptvRecordingPlace.Share) livePreferences.shareFreeBytes = it })
+
+    private fun connector(place: IptvRecordingPlace): IptvShareConnector? = when (place) {
+        is IptvRecordingPlace.Local -> null
+        is IptvRecordingPlace.Share -> place.connector
+        is IptvRecordingPlace.Media -> place.target.connector()
+    }
 
     private fun track(id: String, job: Job) {
         synchronized(this) {
@@ -648,10 +687,11 @@ class IptvRecorder @Inject constructor(
     private suspend fun uploadPending(id: String) {
         val entry = mutex.withLock { load(); store.get(id)?.takeIf { it.upload && it.status.finished } } ?: return
         val path = entry.file ?: return
-        val share = (targets.resolve(entry.storage) as? IptvPlaceResult.Ready)?.place as? IptvRecordingPlace.Share ?: return
+        val place = (targets.resolve(entry.storage) as? IptvPlaceResult.Ready)?.place ?: return
+        val link = connector(place) ?: return
         val spool = targets.spool(id)
-        val result = uploader(share).upload(spool, path, { Long.MAX_VALUE }, { true }, RETRY_PATIENCE_MILLIS)
-        applyUpload(id, result, spool)
+        val result = uploader(place, link).upload(spool, path, { Long.MAX_VALUE }, { true }, RETRY_PATIENCE_MILLIS)
+        applyUpload(id, result, spool, (link as? IptvMediaStoreConnector)?.published)
     }
 
     private suspend fun resolve(entry: IptvRecording): Target? {
@@ -704,13 +744,13 @@ class IptvRecorder @Inject constructor(
     }
 
     private fun interrupted(entry: IptvRecording, now: Long) {
-        if (entry.onShare) {
+        if (entry.spooled) {
             val spool = targets.spool(entry.id)
             val pending = spool.listFiles()?.any { it.isFile } == true
             val outcome = RecordingTransitions.interrupted(if (pending) maxOf(entry.bytes, 1) else 0)
             if (!pending) spool.deleteRecursively()
             update(entry.id) { it.copy(status = outcome.status, failure = outcome.failure, upload = pending, file = if (pending) it.file else null, finishedAtMillis = now) }
-            IptvLog.info("recording interrupted ${outcome.status} share")
+            IptvLog.info("recording interrupted ${outcome.status} ${if (entry.onMedia) "media" else "share"}")
             return
         }
         val main = entry.file?.let(::File)
@@ -760,22 +800,28 @@ class IptvRecorder @Inject constructor(
         false
     }
 
-    private fun deleteFiles(entry: IptvRecording) {
+    private fun deleteFiles(entry: IptvRecording): Boolean {
+        if (entry.onMedia) {
+            targets.spool(entry.id).deleteRecursively()
+            val id = RecordingMedia.id(entry.file) ?: return true
+            return targets.media.delete(id) != IptvMediaDelete.NOT_OWNED
+        }
         if (entry.onShare) {
             targets.spool(entry.id).deleteRecursively()
-            val path = entry.file ?: return
-            val share = (targets.resolve(entry.storage) as? IptvPlaceResult.Ready)?.place as? IptvRecordingPlace.Share ?: return
+            val path = entry.file ?: return true
+            val share = (targets.resolve(entry.storage) as? IptvPlaceResult.Ready)?.place as? IptvRecordingPlace.Share ?: return true
             scope.launch {
                 try { share.connector.connect().use { it.delete(RecordingFiles.partial(path)); it.delete(path) } }
                 catch (error: Exception) { IptvLog.failure("recording remote delete", error) }
             }
-            return
+            return true
         }
-        val file = entry.file?.let(::File) ?: return
-        if (!targets.owns(file.absoluteFile.parentFile ?: return)) return
+        val file = entry.file?.let(::File) ?: return true
+        if (!targets.owns(file.absoluteFile.parentFile ?: return true)) return true
         targets.localParts(file).forEach { it.delete() }
         File(RecordingFiles.partial(file.path)).delete()
         file.delete()
+        return true
     }
 
     private fun publish() = synchronized(this) {
