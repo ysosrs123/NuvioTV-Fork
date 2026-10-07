@@ -45,4 +45,11 @@
     <string name="iptv_remote_saved">已儲存。正在載入頻道。</string>
     <string name="iptv_remote_guide_saved">已儲存。正在載入節目表。</string>
     <string name="iptv_remote_rejected">已拒絕。未儲存任何內容。</string>
+    <string name="iptv_remote_confirm_settings_title">要從手機變更直播電視設定嗎？</string>
+    <string name="iptv_remote_setting_start">直播電視開啟時顯示</string>
+    <string name="iptv_remote_setting_layout">多畫面版面配置</string>
+    <string name="iptv_remote_setting_quality">多畫面畫質</string>
+    <string name="iptv_remote_on">開啟</string>
+    <string name="iptv_remote_off">關閉</string>
+    <string name="iptv_remote_settings_saved">設定已儲存。</string>
 </resources>

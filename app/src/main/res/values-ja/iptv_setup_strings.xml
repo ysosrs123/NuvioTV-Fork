@@ -45,4 +45,11 @@
     <string name="iptv_remote_saved">保存しました。チャンネルを読み込んでいます。</string>
     <string name="iptv_remote_guide_saved">保存しました。番組表を読み込んでいます。</string>
     <string name="iptv_remote_rejected">拒否しました。何も保存されていません。</string>
+    <string name="iptv_remote_confirm_settings_title">スマホからライブTV設定を変更しますか？</string>
+    <string name="iptv_remote_setting_start">ライブTVの起動時の表示</string>
+    <string name="iptv_remote_setting_layout">マルチビューのレイアウト</string>
+    <string name="iptv_remote_setting_quality">マルチビューの画質</string>
+    <string name="iptv_remote_on">オン</string>
+    <string name="iptv_remote_off">オフ</string>
+    <string name="iptv_remote_settings_saved">設定を保存しました。</string>
 </resources>

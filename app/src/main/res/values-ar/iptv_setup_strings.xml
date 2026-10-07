@@ -50,4 +50,11 @@
     <string name="iptv_remote_saved">تم الحفظ. جارٍ تحميل القنوات الآن.</string>
     <string name="iptv_remote_guide_saved">تم الحفظ. جارٍ تحميل الدليل الآن.</string>
     <string name="iptv_remote_rejected">تم الرفض. لم يُحفظ شيء.</string>
+    <string name="iptv_remote_confirm_settings_title">هل تريد تغيير إعدادات البث المباشر من هاتفك؟</string>
+    <string name="iptv_remote_setting_start">يفتح البث المباشر على</string>
+    <string name="iptv_remote_setting_layout">تخطيط العرض المتعدد</string>
+    <string name="iptv_remote_setting_quality">جودة صورة العرض المتعدد</string>
+    <string name="iptv_remote_on">تشغيل</string>
+    <string name="iptv_remote_off">إيقاف</string>
+    <string name="iptv_remote_settings_saved">تم حفظ الإعدادات.</string>
 </resources>

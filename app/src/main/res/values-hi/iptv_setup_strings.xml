@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">सेव हो गया। चैनल अब लोड हो रहे हैं।</string>
     <string name="iptv_remote_guide_saved">सेव हो गया। गाइड अब लोड हो रही है।</string>
     <string name="iptv_remote_rejected">अस्वीकार किया गया। कुछ भी सेव नहीं हुआ।</string>
+    <string name="iptv_remote_confirm_settings_title">फ़ोन से लाइव टीवी सेटिंग बदलें?</string>
+    <string name="iptv_remote_setting_start">लाइव टीवी खुलने पर</string>
+    <string name="iptv_remote_setting_layout">मल्टीव्यू लेआउट</string>
+    <string name="iptv_remote_setting_quality">मल्टीव्यू तस्वीर क्वालिटी</string>
+    <string name="iptv_remote_on">चालू</string>
+    <string name="iptv_remote_off">बंद</string>
+    <string name="iptv_remote_settings_saved">सेटिंग सेव हो गईं।</string>
 </resources>

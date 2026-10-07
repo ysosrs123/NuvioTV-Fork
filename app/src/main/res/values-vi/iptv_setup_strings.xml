@@ -45,4 +45,11 @@
     <string name="iptv_remote_saved">Đã lưu. Đang tải kênh.</string>
     <string name="iptv_remote_guide_saved">Đã lưu. Đang tải lịch phát sóng.</string>
     <string name="iptv_remote_rejected">Đã từ chối. Không có gì được lưu.</string>
+    <string name="iptv_remote_confirm_settings_title">Thay đổi cài đặt TV trực tiếp từ điện thoại?</string>
+    <string name="iptv_remote_setting_start">TV trực tiếp mở tại</string>
+    <string name="iptv_remote_setting_layout">Bố cục đa màn hình</string>
+    <string name="iptv_remote_setting_quality">Chất lượng hình ảnh đa màn hình</string>
+    <string name="iptv_remote_on">Bật</string>
+    <string name="iptv_remote_off">Tắt</string>
+    <string name="iptv_remote_settings_saved">Đã lưu cài đặt.</string>
 </resources>

@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">সেভ হয়েছে। এখন চ্যানেল লোড হচ্ছে।</string>
     <string name="iptv_remote_guide_saved">সেভ হয়েছে। এখন গাইড লোড হচ্ছে।</string>
     <string name="iptv_remote_rejected">প্রত্যাখ্যাত। কিছুই সেভ হয়নি।</string>
+    <string name="iptv_remote_confirm_settings_title">ফোন থেকে লাইভ টিভি সেটিংস বদলাবেন?</string>
+    <string name="iptv_remote_setting_start">লাইভ টিভি খুলবে</string>
+    <string name="iptv_remote_setting_layout">মাল্টিভিউ লেআউট</string>
+    <string name="iptv_remote_setting_quality">মাল্টিভিউ ছবির মান</string>
+    <string name="iptv_remote_on">চালু</string>
+    <string name="iptv_remote_off">বন্ধ</string>
+    <string name="iptv_remote_settings_saved">সেটিংস সেভ হয়েছে।</string>
 </resources>

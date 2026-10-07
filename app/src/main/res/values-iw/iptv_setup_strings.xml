@@ -48,4 +48,11 @@
     <string name="iptv_remote_saved">נשמר. הערוצים נטענים עכשיו.</string>
     <string name="iptv_remote_guide_saved">נשמר. המדריך נטען עכשיו.</string>
     <string name="iptv_remote_rejected">נדחה. שום דבר לא נשמר.</string>
+    <string name="iptv_remote_confirm_settings_title">לשנות את הגדרות טלוויזיה חיה מהטלפון?</string>
+    <string name="iptv_remote_setting_start">טלוויזיה חיה נפתחת ב</string>
+    <string name="iptv_remote_setting_layout">פריסת ריבוי תצוגות</string>
+    <string name="iptv_remote_setting_quality">איכות תמונה בריבוי תצוגות</string>
+    <string name="iptv_remote_on">מופעל</string>
+    <string name="iptv_remote_off">כבוי</string>
+    <string name="iptv_remote_settings_saved">ההגדרות נשמרו.</string>
 </resources>

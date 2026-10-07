@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">சேமிக்கப்பட்டது. இப்போது சேனல்கள் ஏற்றப்படுகின்றன.</string>
     <string name="iptv_remote_guide_saved">சேமிக்கப்பட்டது. இப்போது வழிகாட்டி ஏற்றப்படுகிறது.</string>
     <string name="iptv_remote_rejected">நிராகரிக்கப்பட்டது. எதுவும் சேமிக்கப்படவில்லை.</string>
+    <string name="iptv_remote_confirm_settings_title">போனிலிருந்து நேரலை டிவி அமைப்புகளை மாற்றவா?</string>
+    <string name="iptv_remote_setting_start">நேரலை டிவி திறக்கும் இடம்</string>
+    <string name="iptv_remote_setting_layout">மல்டிவியூ தளவமைப்பு</string>
+    <string name="iptv_remote_setting_quality">மல்டிவியூ படத் தரம்</string>
+    <string name="iptv_remote_on">ஆன்</string>
+    <string name="iptv_remote_off">ஆஃப்</string>
+    <string name="iptv_remote_settings_saved">அமைப்புகள் சேமிக்கப்பட்டன.</string>
 </resources>
