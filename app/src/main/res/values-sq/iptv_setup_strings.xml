@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">U ruajt. Kanalet po ngarkohen tani.</string>
     <string name="iptv_remote_guide_saved">U ruajt. Udhëzuesi po ngarkohet tani.</string>
     <string name="iptv_remote_rejected">U refuzua. Asgjë nuk u ruajt.</string>
+    <string name="iptv_remote_confirm_settings_title">Të ndryshohen cilësimet e TV-së live nga telefoni?</string>
+    <string name="iptv_remote_setting_start">TV live hapet te</string>
+    <string name="iptv_remote_setting_layout">Paraqitja e Multiview</string>
+    <string name="iptv_remote_setting_quality">Cilësia e pamjes në Multiview</string>
+    <string name="iptv_remote_on">Aktiv</string>
+    <string name="iptv_remote_off">Joaktiv</string>
+    <string name="iptv_remote_settings_saved">Cilësimet u ruajtën.</string>
 </resources>

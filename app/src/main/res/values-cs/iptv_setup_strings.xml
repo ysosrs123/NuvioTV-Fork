@@ -48,4 +48,11 @@
     <string name="iptv_remote_saved">Uloženo. Načítají se kanály.</string>
     <string name="iptv_remote_guide_saved">Uloženo. Načítá se program.</string>
     <string name="iptv_remote_rejected">Odmítnuto. Nic nebylo uloženo.</string>
+    <string name="iptv_remote_confirm_settings_title">Změnit nastavení živé TV z telefonu?</string>
+    <string name="iptv_remote_setting_start">Živá TV se otevře na</string>
+    <string name="iptv_remote_setting_layout">Rozvržení Multiview</string>
+    <string name="iptv_remote_setting_quality">Kvalita obrazu v Multiview</string>
+    <string name="iptv_remote_on">Zapnuto</string>
+    <string name="iptv_remote_off">Vypnuto</string>
+    <string name="iptv_remote_settings_saved">Nastavení uloženo.</string>
 </resources>

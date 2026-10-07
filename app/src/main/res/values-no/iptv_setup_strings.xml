@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">Lagret. Laster inn kanaler nå.</string>
     <string name="iptv_remote_guide_saved">Lagret. Laster inn guiden nå.</string>
     <string name="iptv_remote_rejected">Avvist. Ingenting ble lagret.</string>
+    <string name="iptv_remote_confirm_settings_title">Endre direkte-TV-innstillinger fra telefonen?</string>
+    <string name="iptv_remote_setting_start">Direkte-TV åpnes på</string>
+    <string name="iptv_remote_setting_layout">Oppsett for multivisning</string>
+    <string name="iptv_remote_setting_quality">Bildekvalitet for multivisning</string>
+    <string name="iptv_remote_on">På</string>
+    <string name="iptv_remote_off">Av</string>
+    <string name="iptv_remote_settings_saved">Innstillingene er lagret.</string>
 </resources>

@@ -48,4 +48,11 @@
     <string name="iptv_remote_saved">Shranjeno. Nalaganje kanalov.</string>
     <string name="iptv_remote_guide_saved">Shranjeno. Nalaganje vodnika.</string>
     <string name="iptv_remote_rejected">Zavrnjeno. Nič ni bilo shranjeno.</string>
+    <string name="iptv_remote_confirm_settings_title">Spremenim nastavitve TV v živo s telefona?</string>
+    <string name="iptv_remote_setting_start">TV v živo se odpre na</string>
+    <string name="iptv_remote_setting_layout">Postavitev Multiview</string>
+    <string name="iptv_remote_setting_quality">Kakovost slike v Multiview</string>
+    <string name="iptv_remote_on">Vklopljeno</string>
+    <string name="iptv_remote_off">Izklopljeno</string>
+    <string name="iptv_remote_settings_saved">Nastavitve shranjene.</string>
 </resources>

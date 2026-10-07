@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">Mentve. A csatornák betöltése folyamatban.</string>
     <string name="iptv_remote_guide_saved">Mentve. A műsorújság betöltése folyamatban.</string>
     <string name="iptv_remote_rejected">Elutasítva. Semmi sem lett mentve.</string>
+    <string name="iptv_remote_confirm_settings_title">Módosítod az Élő TV beállításait a telefonról?</string>
+    <string name="iptv_remote_setting_start">Az Élő TV megnyitása itt</string>
+    <string name="iptv_remote_setting_layout">Többképes nézet elrendezése</string>
+    <string name="iptv_remote_setting_quality">Többképes nézet képminősége</string>
+    <string name="iptv_remote_on">Be</string>
+    <string name="iptv_remote_off">Ki</string>
+    <string name="iptv_remote_settings_saved">Beállítások mentve.</string>
 </resources>

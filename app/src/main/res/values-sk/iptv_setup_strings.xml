@@ -48,4 +48,11 @@
     <string name="iptv_remote_saved">Uložené. Načítavajú sa kanály.</string>
     <string name="iptv_remote_guide_saved">Uložené. Načítava sa program.</string>
     <string name="iptv_remote_rejected">Odmietnuté. Nič sa neuložilo.</string>
+    <string name="iptv_remote_confirm_settings_title">Zmeniť nastavenia živej TV z telefónu?</string>
+    <string name="iptv_remote_setting_start">Živá TV sa otvorí na</string>
+    <string name="iptv_remote_setting_layout">Rozloženie Multiview</string>
+    <string name="iptv_remote_setting_quality">Kvalita obrazu v Multiview</string>
+    <string name="iptv_remote_on">Zapnuté</string>
+    <string name="iptv_remote_off">Vypnuté</string>
+    <string name="iptv_remote_settings_saved">Nastavenia uložené.</string>
 </resources>

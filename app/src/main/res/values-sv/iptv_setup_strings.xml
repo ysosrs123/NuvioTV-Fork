@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">Sparat. Kanalerna läses in nu.</string>
     <string name="iptv_remote_guide_saved">Sparat. Guiden läses in nu.</string>
     <string name="iptv_remote_rejected">Avvisat. Inget sparades.</string>
+    <string name="iptv_remote_confirm_settings_title">Ändra Live-TV-inställningar från telefonen?</string>
+    <string name="iptv_remote_setting_start">Live-TV öppnas på</string>
+    <string name="iptv_remote_setting_layout">Multivy-layout</string>
+    <string name="iptv_remote_setting_quality">Bildkvalitet i multivy</string>
+    <string name="iptv_remote_on">På</string>
+    <string name="iptv_remote_off">Av</string>
+    <string name="iptv_remote_settings_saved">Inställningarna har sparats.</string>
 </resources>

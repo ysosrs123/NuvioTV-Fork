@@ -47,4 +47,11 @@
     <string name="iptv_remote_saved">Salvat. Se încarcă acum canalele.</string>
     <string name="iptv_remote_guide_saved">Salvat. Se încarcă acum ghidul.</string>
     <string name="iptv_remote_rejected">Respins. Nu s-a salvat nimic.</string>
+    <string name="iptv_remote_confirm_settings_title">Modifici setările TV live de pe telefon?</string>
+    <string name="iptv_remote_setting_start">TV live se deschide la</string>
+    <string name="iptv_remote_setting_layout">Aranjament Multiview</string>
+    <string name="iptv_remote_setting_quality">Calitatea imaginii în Multiview</string>
+    <string name="iptv_remote_on">Activat</string>
+    <string name="iptv_remote_off">Dezactivat</string>
+    <string name="iptv_remote_settings_saved">Setări salvate.</string>
 </resources>

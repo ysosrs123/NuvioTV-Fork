@@ -48,4 +48,11 @@
     <string name="iptv_remote_saved">Zapisano. Wczytywanie kanałów.</string>
     <string name="iptv_remote_guide_saved">Zapisano. Wczytywanie przewodnika.</string>
     <string name="iptv_remote_rejected">Odrzucono. Nic nie zostało zapisane.</string>
+    <string name="iptv_remote_confirm_settings_title">Zmienić ustawienia telewizji na żywo z telefonu?</string>
+    <string name="iptv_remote_setting_start">Telewizja na żywo otwiera się na</string>
+    <string name="iptv_remote_setting_layout">Układ Multiview</string>
+    <string name="iptv_remote_setting_quality">Jakość obrazu w Multiview</string>
+    <string name="iptv_remote_on">Wł.</string>
+    <string name="iptv_remote_off">Wył.</string>
+    <string name="iptv_remote_settings_saved">Zapisano ustawienia.</string>
 </resources>
