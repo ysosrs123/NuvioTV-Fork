@@ -360,14 +360,14 @@ private fun SourceForm(form: IptvSourceForm, state: IptvSourcesState, viewModel:
                 SourceField(stringResource(R.string.iptv_form_mac), username, { username = it.take(17) }, keyboardType = KeyboardType.Ascii, last = true,
                     hint = stringResource(R.string.iptv_form_mac_hint), error = username.isNotEmpty() && !macValid)
             }
-        }
-        state.message?.let { Text(stringResource(it), color = NuvioTheme.colors.Error, style = MaterialTheme.typography.bodyMedium) }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            NuvioActionPill({ viewModel.save(form, label, endpoint, username, password) }, enabled = !state.busy && complete) {
-                Text(stringResource(if (form.guide) R.string.iptv_setup_save else R.string.iptv_form_save_load))
+            state.message?.let { Text(stringResource(it), color = NuvioTheme.colors.Error, style = MaterialTheme.typography.bodyMedium) }
+            Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                NuvioActionPill({ viewModel.save(form, label, endpoint, username, password) }, enabled = !state.busy && complete) {
+                    Text(stringResource(if (form.guide) R.string.iptv_setup_save else R.string.iptv_form_save_load))
+                }
+                NuvioActionPill(viewModel::dismiss, enabled = !state.busy) { Text(stringResource(R.string.iptv_setup_cancel)) }
+                if (state.busy) LoadingIndicator(Modifier.size(24.dp))
             }
-            NuvioActionPill(viewModel::dismiss, enabled = !state.busy) { Text(stringResource(R.string.iptv_setup_cancel)) }
-            if (state.busy) LoadingIndicator(Modifier.size(24.dp))
         }
     }
     if (choosingFolder) GuideFolderDialog(viewModel, onDismiss = { choosingFolder = false }) { file ->
