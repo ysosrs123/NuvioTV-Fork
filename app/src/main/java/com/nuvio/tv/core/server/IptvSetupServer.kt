@@ -1,9 +1,9 @@
 package com.nuvio.tv.core.server
 
+import com.nuvio.tv.core.iptv.SetupChange
 import com.nuvio.tv.core.iptv.SetupChangeBook
 import com.nuvio.tv.core.iptv.SetupConnectionLimiter
 import com.nuvio.tv.core.iptv.SetupCookies
-import com.nuvio.tv.core.iptv.SetupDraft
 import com.nuvio.tv.core.iptv.SetupDrafts
 import com.nuvio.tv.core.iptv.SetupGuard
 import com.nuvio.tv.core.iptv.SetupHeaders
@@ -13,6 +13,8 @@ import com.nuvio.tv.core.iptv.SetupLan
 import com.nuvio.tv.core.iptv.SetupListing
 import com.nuvio.tv.core.iptv.SetupPairing
 import com.nuvio.tv.core.iptv.SetupRateLimiter
+import com.nuvio.tv.core.iptv.SetupSettings
+import com.nuvio.tv.core.iptv.SetupSettingsInput
 import fi.iki.elonen.NanoHTTPD
 import java.io.InputStream
 import java.net.Socket
@@ -28,7 +30,8 @@ class IptvSetupServer private constructor(
     private val host: String,
     port: Int,
     private val listing: () -> SetupListing,
-    private val onChangeProposed: (IptvSetupServer, String, SetupDraft, String) -> Unit,
+    private val settings: () -> SetupSettings,
+    private val onChangeProposed: (IptvSetupServer, String, SetupChange, String) -> Unit,
     now: () -> Long,
 ) : NanoHTTPD(host, port) {
 
@@ -107,6 +110,8 @@ class IptvSetupServer private constructor(
         idle.touch()
         return when {
             path == "state" && !post -> json(Response.Status.OK, listing().toJson(pending = changes.hasPending()))
+            path == "settings" && !post -> json(Response.Status.OK, settings().toJson())
+            path == "settings" && post -> proposeSettings(session, owner, remote)
             path == "changes" && post -> propose(session, owner, remote)
             path.startsWith("changes/") && !post -> status(owner, path.removePrefix("changes/"))
             else -> json(Response.Status.NOT_FOUND, error("missing"))
@@ -152,10 +157,28 @@ class IptvSetupServer private constructor(
         SetupDrafts.checkLogin(draft, listing())?.let { field ->
             return json(Response.Status.BAD_REQUEST, JSONObject().put("error", "invalid").put("field", field).put("reason", "server").toString())
         }
+        return submit(owner, draft, remote)
+    }
+
+    private fun proposeSettings(session: IHTTPSession, owner: String, remote: String): Response {
+        val change = try {
+            SetupSettingsInput.parse(readBody(session))
+        } catch (invalid: SetupInputException) {
+            return json(Response.Status.BAD_REQUEST, JSONObject().put("error", "invalid").put("field", invalid.field).toString())
+        }
+        val current = settings()
+        SetupSettingsInput.check(change, current)?.let { field ->
+            return json(Response.Status.BAD_REQUEST, JSONObject().put("error", "invalid").put("field", field).toString())
+        }
+        if (change.changes(current).isEmpty()) return json(Response.Status.BAD_REQUEST, error("unchanged"))
+        return submit(owner, change, remote)
+    }
+
+    private fun submit(owner: String, change: SetupChange, remote: String): Response {
         if (changes.coolingDown(owner)) return json(Response.Status.CONFLICT, error("cooldown"))
-        val id = changes.propose(owner, draft) ?: return json(Response.Status.CONFLICT, error("busy"))
+        val id = changes.propose(owner, change) ?: return json(Response.Status.CONFLICT, error("busy"))
         try {
-            onChangeProposed(this, id, draft, remote)
+            onChangeProposed(this, id, change, remote)
         } catch (_: Exception) {
             changes.resolve(id, SetupChangeBook.Status.FAILED)
             return json(Response.Status.INTERNAL_ERROR, error("server"))
@@ -279,7 +302,8 @@ class IptvSetupServer private constructor(
         fun start(
             host: String,
             listing: () -> SetupListing,
-            onChangeProposed: (IptvSetupServer, String, SetupDraft, String) -> Unit,
+            settings: () -> SetupSettings,
+            onChangeProposed: (IptvSetupServer, String, SetupChange, String) -> Unit,
             now: () -> Long = System::currentTimeMillis,
             startPort: Int = 8100,
             maxAttempts: Int = 10
@@ -287,7 +311,7 @@ class IptvSetupServer private constructor(
             if (!SetupLan.isLanAddress(host)) return null
             for (port in startPort until startPort + maxAttempts) {
                 try {
-                    val server = IptvSetupServer(host, port, listing, onChangeProposed, now)
+                    val server = IptvSetupServer(host, port, listing, settings, onChangeProposed, now)
                     server.start(SOCKET_READ_TIMEOUT, false)
                     return server
                 } catch (_: Exception) {

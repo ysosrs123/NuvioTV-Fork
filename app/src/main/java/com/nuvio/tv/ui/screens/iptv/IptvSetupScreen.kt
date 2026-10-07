@@ -86,7 +86,7 @@ fun IptvSetupScreen(onBack: () -> Unit, viewModel: IptvSetupViewModel = hiltView
         if (state.pending == null) { withFrameNanos { }; runCatching { first.requestFocus() } }
     }
     Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
-        LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
+        if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
             Column(Modifier.width(340.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(R.string.iptv_remote_title), style = MaterialTheme.typography.headlineMedium,
@@ -177,14 +177,14 @@ private fun Note(icon: ImageVector?, text: String) {
 private fun PendingDialog(pending: IptvSetupPending, onSave: () -> Unit, onReject: () -> Unit) {
     val reject = remember { FocusRequester() }
     LaunchedEffect(pending.id) { withFrameNanos { }; runCatching { reject.requestFocus() } }
-    val title = pending.previousLabel?.let { stringResource(R.string.iptv_remote_confirm_edit_title, it) }
-        ?: stringResource(R.string.iptv_remote_confirm_add_title)
+    val title = if (pending.settings) stringResource(R.string.iptv_remote_confirm_settings_title)
+        else pending.previousLabel?.let { stringResource(R.string.iptv_remote_confirm_edit_title, it) } ?: stringResource(R.string.iptv_remote_confirm_add_title)
     NuvioDialog(onDismiss = onReject, title = title, subtitle = stringResource(R.string.iptv_remote_confirm_subtitle), width = 640.dp) {
         Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             pending.lines.forEach { line ->
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(stringResource(line.label), color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.width(150.dp))
+                        modifier = Modifier.width(if (pending.settings) 220.dp else 150.dp))
                     Text(line.valueRes?.let { stringResource(it) } ?: line.value, color = NuvioTheme.colors.TextPrimary,
                         style = MaterialTheme.typography.bodyMedium, maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                 }

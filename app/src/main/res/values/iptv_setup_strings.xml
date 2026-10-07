@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">Saved. Loading channels now.</string>
     <string name="iptv_remote_guide_saved">Saved. Loading the guide now.</string>
     <string name="iptv_remote_rejected">Rejected. Nothing was saved.</string>
+    <string name="iptv_remote_confirm_settings_title">Change Live TV settings from your phone?</string>
+    <string name="iptv_remote_setting_start">Live TV opens on</string>
+    <string name="iptv_remote_setting_layout">Multiview layout</string>
+    <string name="iptv_remote_setting_quality">Multiview picture quality</string>
+    <string name="iptv_remote_on">On</string>
+    <string name="iptv_remote_off">Off</string>
+    <string name="iptv_remote_settings_saved">Settings saved.</string>
 </resources>

@@ -7,6 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.IptvDeviceProfile
+import com.nuvio.tv.core.iptv.MultiviewLayout
+import com.nuvio.tv.core.iptv.MultiviewQuality
+import com.nuvio.tv.core.iptv.SetupChange
 import com.nuvio.tv.core.iptv.SetupChangeBook
 import com.nuvio.tv.core.iptv.SetupConnection
 import com.nuvio.tv.core.iptv.SetupDraft
@@ -14,6 +18,9 @@ import com.nuvio.tv.core.iptv.SetupKind
 import com.nuvio.tv.core.iptv.SetupLan
 import com.nuvio.tv.core.iptv.SetupListing
 import com.nuvio.tv.core.iptv.SetupListingItem
+import com.nuvio.tv.core.iptv.SetupSetting
+import com.nuvio.tv.core.iptv.SetupSettings
+import com.nuvio.tv.core.iptv.SetupSettingsChange
 import com.nuvio.tv.core.iptv.SetupText
 import com.nuvio.tv.core.iptv.XtreamGuideReference
 import com.nuvio.tv.core.profile.ProfileManager
@@ -24,10 +31,13 @@ import com.nuvio.tv.data.iptv.IptvCatalogueStore
 import com.nuvio.tv.data.iptv.IptvGuideFeed
 import com.nuvio.tv.data.iptv.IptvGuideRef
 import com.nuvio.tv.data.iptv.IptvGuideStore
+import com.nuvio.tv.data.iptv.IptvLivePreferences
 import com.nuvio.tv.data.iptv.IptvProfileAccess
 import com.nuvio.tv.data.iptv.IptvSource
 import com.nuvio.tv.data.iptv.IptvSourceConnection
 import com.nuvio.tv.data.iptv.IptvSourceKind
+import com.nuvio.tv.data.iptv.IptvStartView
+import com.nuvio.tv.data.iptv.IptvStreamFormat
 import com.nuvio.tv.data.iptv.MetadataException
 import com.nuvio.tv.data.iptv.MetadataFailure
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,8 +61,9 @@ data class IptvSetupLine(@StringRes val label: Int, val value: String = "", @Str
     override fun toString() = "IptvSetupLine(value withheld)"
 }
 
-class IptvSetupPending(val id: String, val draft: SetupDraft, val previousLabel: String?, val lines: List<IptvSetupLine>, val applying: Boolean = false) {
-    fun applying() = IptvSetupPending(id, draft, previousLabel, lines, true)
+class IptvSetupPending(val id: String, val change: SetupChange, val previousLabel: String?, val lines: List<IptvSetupLine>, val applying: Boolean = false) {
+    val settings: Boolean get() = change is SetupSettingsChange
+    fun applying() = IptvSetupPending(id, change, previousLabel, lines, true)
     override fun toString() = "IptvSetupPending(values withheld)"
 }
 
@@ -76,6 +87,8 @@ class IptvSetupViewModel @Inject constructor(
     private val access: IptvProfileAccess,
     profiles: ProfileManager,
     private val refresher: IptvRefreshCoordinator,
+    private val livePreferences: IptvLivePreferences,
+    private val device: IptvDeviceProfile,
 ) : ViewModel() {
     private val mutable = MutableStateFlow(IptvSetupState())
     val state = mutable.asStateFlow()
@@ -139,7 +152,8 @@ class IptvSetupViewModel @Inject constructor(
         val started = IptvSetupServer.start(
             host = ip,
             listing = { listing },
-            onChangeProposed = { origin, id, draft, from -> viewModelScope.launch { propose(origin, current, id, draft, from) } }
+            settings = ::settings,
+            onChangeProposed = { origin, id, change, from -> viewModelScope.launch { propose(origin, current, id, change, from) } }
         )
         if (started == null) {
             mutable.update { it.copy(phase = IptvSetupPhase.PORTS_BUSY, address = null, qr = null, code = null, devices = 0) }
@@ -178,11 +192,20 @@ class IptvSetupViewModel @Inject constructor(
         mutable.update { it.copy(address = null, qr = null, code = null, devices = 0, pending = null) }
     }
 
-    private fun propose(origin: IptvSetupServer, current: IptvProfileAccess.Session, id: String, draft: SetupDraft, from: String) {
+    private fun propose(origin: IptvSetupServer, current: IptvProfileAccess.Session, id: String, change: SetupChange, from: String) {
         val active = server
         if (active !== origin || session !== current || mutable.value.pending != null) {
             origin.resolve(id, SetupChangeBook.Status.REJECTED)
             return
+        }
+        val draft = when (change) {
+            is SetupDraft -> change
+            is SetupSettingsChange -> {
+                val lines = settingLines(change, settings(), from)
+                if (lines.size < 2) origin.resolve(id, SetupChangeBook.Status.FAILED)
+                else mutable.update { it.copy(pending = IptvSetupPending(id, change, null, lines), message = null) }
+                return
+            }
         }
         val target = draft.targetId?.let { listing.find(draft.kind, it) }
         if (draft.edit && target == null) {
@@ -200,11 +223,20 @@ class IptvSetupViewModel @Inject constructor(
         mutable.update { it.copy(pending = pending.applying()) }
         viewModelScope.launch {
             val message = try {
-                val saved = withContext(Dispatchers.IO) { access.use(current) { save(current.profileId, pending.draft) } }
-                active?.resolve(pending.id, SetupChangeBook.Status.SAVED)
-                saved.source?.let { refresher.refresh(current, it) }
-                saved.feed?.let { refresher.refresh(current, it) }
-                if (pending.draft.kind.guide) R.string.iptv_remote_guide_saved else R.string.iptv_remote_saved
+                when (val change = pending.change) {
+                    is SetupSettingsChange -> {
+                        withContext(Dispatchers.IO) { applySettings(change) }
+                        active?.resolve(pending.id, SetupChangeBook.Status.SAVED)
+                        R.string.iptv_remote_settings_saved
+                    }
+                    is SetupDraft -> {
+                        val saved = withContext(Dispatchers.IO) { access.use(current) { save(current.profileId, change) } }
+                        active?.resolve(pending.id, SetupChangeBook.Status.SAVED)
+                        saved.source?.let { refresher.refresh(current, it) }
+                        saved.feed?.let { refresher.refresh(current, it) }
+                        if (change.kind.guide) R.string.iptv_remote_guide_saved else R.string.iptv_remote_saved
+                    }
+                }
             } catch (cancel: CancellationException) {
                 throw cancel
             } catch (error: Exception) {
@@ -222,6 +254,69 @@ class IptvSetupViewModel @Inject constructor(
         server?.resolve(pending.id, SetupChangeBook.Status.REJECTED)
         mutable.update { it.copy(pending = null, message = R.string.iptv_remote_rejected) }
     }
+
+    private fun settings(): SetupSettings = SetupSettings(SetupSettings.wire(livePreferences.defaultFormat), livePreferences.timeshift,
+        livePreferences.sport, SetupSettings.wire(livePreferences.startView), SetupSettings.wire(livePreferences.multiviewLayout),
+        SetupSettings.wire(livePreferences.multiviewQuality), livePreferences.recordEarlyMinutes, livePreferences.recordLateMinutes, device.maxTiles >= 2)
+
+    private fun applySettings(change: SetupSettingsChange) {
+        change.format?.let { livePreferences.defaultFormat = SetupSettings.choice(IptvStreamFormat.entries, it) }
+        change.timeshift?.let { livePreferences.timeshift = it }
+        change.sport?.let { livePreferences.sport = it }
+        change.startView?.let { livePreferences.startView = SetupSettings.choice(IptvStartView.entries, it) }
+        change.layout?.let { livePreferences.multiviewLayout = SetupSettings.choice(MultiviewLayout.entries, it) }
+        change.quality?.let { livePreferences.multiviewQuality = SetupSettings.choice(MultiviewQuality.entries, it) }
+        change.recordEarly?.let { livePreferences.recordEarlyMinutes = it }
+        change.recordLate?.let { livePreferences.recordLateMinutes = it }
+    }
+
+    private fun settingLines(change: SetupSettingsChange, current: SetupSettings, from: String): List<IptvSetupLine> {
+        val next = change.applied(current)
+        return listOf(IptvSetupLine(R.string.iptv_remote_field_device, from)) + change.changes(current).map { setting ->
+            when (setting) {
+                SetupSetting.FORMAT -> line(R.string.iptv_live_format_title, formatName(current.format), formatName(next.format))
+                SetupSetting.TIMESHIFT -> line(R.string.iptv_settings_timeshift, onOff(current.timeshift), onOff(next.timeshift))
+                SetupSetting.SPORT -> line(R.string.iptv_settings_sport, onOff(current.sport), onOff(next.sport))
+                SetupSetting.START_VIEW -> line(R.string.iptv_remote_setting_start, startName(current.startView), startName(next.startView))
+                SetupSetting.LAYOUT -> line(R.string.iptv_remote_setting_layout, layoutName(current.layout), layoutName(next.layout))
+                SetupSetting.QUALITY -> line(R.string.iptv_remote_setting_quality, qualityName(current.quality), qualityName(next.quality))
+                SetupSetting.RECORD_EARLY -> line(R.string.iptv_settings_record_early, minutes(current.recordEarly), minutes(next.recordEarly))
+                SetupSetting.RECORD_LATE -> line(R.string.iptv_settings_record_late, minutes(current.recordLate), minutes(next.recordLate))
+            }
+        }
+    }
+
+    private fun line(@StringRes label: Int, before: String, after: String) =
+        IptvSetupLine(label, context.getString(R.string.iptv_remote_field_renamed, before, after))
+
+    private fun onOff(value: Boolean): String = context.getString(if (value) R.string.iptv_remote_on else R.string.iptv_remote_off)
+
+    private fun minutes(value: Int): String =
+        if (value == 0) context.getString(R.string.iptv_settings_none) else context.resources.getQuantityString(R.plurals.iptv_settings_minutes, value, value)
+
+    private fun formatName(wire: String): String = context.getString(when (SetupSettings.choice(IptvStreamFormat.entries, wire)) {
+        IptvStreamFormat.AUTO -> R.string.iptv_live_format_auto
+        IptvStreamFormat.HLS -> R.string.iptv_live_format_hls
+        IptvStreamFormat.MPEG_TS -> R.string.iptv_live_format_ts
+    })
+
+    private fun startName(wire: String): String = context.getString(when (SetupSettings.choice(IptvStartView.entries, wire)) {
+        IptvStartView.LAST -> R.string.iptv_settings_start_last
+        IptvStartView.ALL -> R.string.iptv_live_all
+        IptvStartView.FAVOURITES -> R.string.iptv_live_favourites
+        IptvStartView.SPORT -> R.string.iptv_live_sports
+    })
+
+    private fun layoutName(wire: String): String = context.getString(when (SetupSettings.choice(MultiviewLayout.entries, wire)) {
+        MultiviewLayout.GRID -> R.string.iptv_multiview_layout_grid
+        MultiviewLayout.FOCUS -> R.string.iptv_multiview_layout_focus
+    })
+
+    private fun qualityName(wire: String): String = context.getString(when (SetupSettings.choice(MultiviewQuality.entries, wire)) {
+        MultiviewQuality.AUTO -> R.string.iptv_multiview_quality_auto
+        MultiviewQuality.SHARPEST -> R.string.iptv_multiview_quality_sharpest
+        MultiviewQuality.LIGHTEST -> R.string.iptv_multiview_quality_lightest
+    })
 
     private fun save(profileId: Int, draft: SetupDraft): SavedEntry {
         if (draft.kind.guide) {

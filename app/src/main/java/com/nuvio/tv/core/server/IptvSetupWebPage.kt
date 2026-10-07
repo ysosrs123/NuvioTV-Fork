@@ -14,132 +14,256 @@ object IptvSetupWebPage {
 <meta name="referrer" content="same-origin">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="dark">
-<title>Nuvio Live TV setup</title>
+<meta name="theme-color" content="#080a0c">
+<link rel="icon" href="data:,">
+<title>Nuvio · Live TV setup</title>
 <style nonce="NONCE_VALUE">
-:root{--bg:#0b0d10;--card:#15181d;--raised:#1c2027;--line:#2a2f38;--text:#f4f6f8;--muted:#a3abb6;--faint:#737c88;--accent:#7cc4ff;--accent-ink:#06121c;--good:#5fd39a;--bad:#ff7a7a;--warn:#ffc46b;--r:16px}
+:root{--bg:#080a0c;--surface:#14181c;--raised:#1b2026;--field:#222222;--line:#2d3238;--line-strong:#3a4047;--text:#ffffff;--soft:#dce2e7;--muted:#b3b3b3;--faint:#8a9097;--accent:#d5dde3;--accent-hi:#f3f6f8;--ink:#111111;--good:#4caf50;--bad:#cf6679;--warn:#ffb74d;--r:20px;--rs:12px}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
-body{min-height:100vh;background:radial-gradient(1200px 600px at 10% -10%,#1a2633 0%,transparent 60%),var(--bg)}
-main{max-width:640px;margin:0 auto;padding:24px 18px 48px}
-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7cc4ff,#3f7cff);display:grid;place-items:center;color:#05101a;font-weight:800;font-size:20px}
-h1{font-size:20px;margin:0;font-weight:700;letter-spacing:.01em}
-.sub{color:var(--muted);font-size:14px;margin:0}
-h2{font-size:17px;margin:0 0 4px;font-weight:650}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:16px}
-.note{font-size:13px;color:var(--muted);border:1px solid #3a3322;background:#1d1a12;border-radius:12px;padding:10px 12px;margin-bottom:16px}
-.note strong{color:var(--warn)}
-.hint{font-size:13px;color:var(--faint);margin:6px 0 0}
-label{display:block;font-size:14px;color:var(--muted);margin:14px 0 6px}
-input{width:100%;font:inherit;color:var(--text);background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:12px 14px;outline:none}
-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,196,255,.18)}
-input.code{font-size:28px;letter-spacing:.35em;text-align:center;font-variant-numeric:tabular-nums}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+body{min-height:100vh;background:radial-gradient(900px 520px at 85% -10%,rgba(213,221,227,.08),transparent 60%),radial-gradient(700px 420px at -10% 0%,rgba(74,79,89,.22),transparent 60%),var(--bg)}
+main{max-width:1080px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 56px max(16px,env(safe-area-inset-left))}
+.top{display:flex;align-items:center;gap:14px;margin:4px 0 20px}
+.mark{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#f3f6f8,#9aa6b0);color:var(--ink);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.mark svg{width:22px;height:22px}
+.brand{flex:1;min-width:0}
+.brand b{display:block;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:24px;line-height:1.2;margin:0;font-weight:700;letter-spacing:-.01em}
+.chip{flex:none;display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--soft);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+.chip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px rgba(76,175,80,.2)}
+h2{font-size:18px;line-height:1.3;margin:0;font-weight:650}
+h3{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:22px 0 4px}
+h3:first-of-type{margin-top:14px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01)),var(--surface);border:1px solid rgba(255,255,255,.07);border-radius:var(--r);padding:20px;margin-bottom:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.head{display:flex;align-items:flex-start;gap:12px}
+.head .grow p{margin:2px 0 0}
+.note{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--soft);border:1px solid rgba(255,183,77,.28);background:rgba(255,183,77,.07);border-radius:14px;padding:12px 14px;margin:0 0 16px}
+.note svg{flex:none;width:18px;height:18px;margin-top:2px;color:var(--warn)}
+.note strong{color:var(--warn);font-weight:650}
+.banner{font-size:14px;color:var(--soft);background:rgba(213,221,227,.07);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 16px}
+.hint{font-size:13px;line-height:1.45;color:var(--faint);margin:6px 0 0}
+.lead{font-size:14px;color:var(--muted);margin:4px 0 0}
+label,legend{display:block;font-size:14px;font-weight:600;color:var(--soft);margin:16px 0 6px;padding:0}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+input,select{width:100%;font:inherit;color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:var(--rs);padding:12px 14px;outline:none;min-height:48px;transition:border-color .15s,box-shadow .15s}
+input::placeholder{color:#6b7178}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(213,221,227,.18)}
+input[aria-invalid="true"]{border-color:var(--bad)}
+input.code{font-size:30px;letter-spacing:.4em;text-indent:.4em;text-align:center;font-variant-numeric:tabular-nums;font-weight:700;padding:14px}
 .row{display:flex;gap:8px;align-items:stretch}
-.row input{flex:1}
-button{font:inherit;font-weight:600;border-radius:12px;border:1px solid var(--line);background:var(--raised);color:var(--text);padding:11px 16px;cursor:pointer}
-button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.row input{flex:1;min-width:0}
+.pick{position:relative}
+.pick select{appearance:none;-webkit-appearance:none;padding-right:42px;cursor:pointer}
+.pick::after{content:"";position:absolute;right:18px;top:50%;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+button{font:inherit;font-weight:600;border-radius:999px;border:1px solid var(--line-strong);background:var(--raised);color:var(--text);padding:11px 18px;min-height:44px;cursor:pointer;transition:background .15s,transform .05s}
+button:hover{background:#242a31}
+button:active{transform:scale(.98)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--ink)}
+button.primary:hover{background:var(--accent-hi)}
+button.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+button.small{padding:7px 14px;min-height:36px;font-size:14px}
 button.wide{width:100%;margin-top:18px}
-button:disabled{opacity:.5;cursor:default}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--raised);border:1px solid var(--line);border-radius:12px;padding:4px;margin-top:12px}
-.seg button{border:0;background:transparent;color:var(--muted);padding:9px 6px;font-size:14px}
-.seg button[aria-pressed="true"]{background:var(--card);color:var(--text);box-shadow:0 1px 0 rgba(255,255,255,.05)}
-.list{list-style:none;margin:12px 0 0;padding:0}
-.list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
-.list li:first-child{border-top:0}
+button:disabled{opacity:.45;cursor:default;transform:none}
+:focus-visible{outline:2px solid var(--accent-hi);outline-offset:2px}
+input:focus-visible,select:focus-visible{outline:none}
+.seg{display:grid;gap:4px;background:var(--field);border:1px solid var(--line);border-radius:14px;padding:4px}
+.c2{grid-template-columns:repeat(2,1fr)}
+.c3{grid-template-columns:repeat(3,1fr)}
+.c4{grid-template-columns:repeat(2,1fr)}
+.seg label{position:relative;margin:0;font-weight:500;font-size:14px;color:var(--muted)}
+.seg input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;min-height:0;cursor:pointer}
+.seg span{display:flex;align-items:center;justify-content:center;text-align:center;min-height:40px;padding:8px 6px;border-radius:10px;line-height:1.25}
+.seg input:checked+span{background:var(--accent);color:var(--ink);font-weight:650}
+.seg input:focus-visible+span{outline:2px solid var(--accent-hi);outline-offset:1px}
+.seg input:disabled+span{opacity:.4}
+.seg input:disabled{cursor:default}
+.seg button{border:0;background:transparent;color:var(--muted);border-radius:10px;min-height:40px;padding:8px 6px;font-size:14px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--ink);font-weight:650}
+.toggle{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--line)}
+.toggle label{margin:0;cursor:pointer}
+.toggle .hint{margin-top:2px}
+input.switch{appearance:none;-webkit-appearance:none;flex:none;width:52px;height:32px;min-height:0;padding:0;border-radius:999px;background:var(--line-strong);border:0;position:relative;cursor:pointer;transition:background .2s}
+input.switch::before{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#f3f6f8;box-shadow:0 1px 3px rgba(0,0,0,.4);transition:transform .2s}
+input.switch:checked{background:var(--good)}
+input.switch:checked::before{transform:translateX(20px)}
+input.switch:focus{box-shadow:0 0 0 3px rgba(213,221,227,.25)}
+.pair2{display:grid;grid-template-columns:1fr;gap:0 12px}
+.list{list-style:none;margin:14px 0 0;padding:0}
+.list li{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);margin-top:8px}
+.badge{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--soft);background:var(--raised);border:1px solid var(--line)}
 .grow{flex:1;min-width:0}
 .name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .meta{font-size:13px;color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.empty{color:var(--faint);font-size:14px;margin:12px 0 0}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.empty{color:var(--faint);font-size:14px;margin:14px 0 0;padding:16px;border:1px dashed var(--line-strong);border-radius:14px;text-align:center}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .center{justify-content:center}
-.error{color:var(--bad);font-size:14px;margin:10px 0 0}
-.status{text-align:center;padding:28px 18px}
-.status .big{font-size:20px;font-weight:700;margin:10px 0 4px}
-.dot{width:14px;height:14px;border-radius:50%;margin:0 auto;background:var(--accent);animation:pulse 1.2s ease-in-out infinite}
-.ok .dot{background:var(--good);animation:none}
-.no .dot{background:var(--bad);animation:none}
-@keyframes pulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1)}}
+.error{color:var(--bad);font-size:14px;margin:12px 0 0;padding:10px 12px;border-radius:12px;background:rgba(207,102,121,.1);border:1px solid rgba(207,102,121,.3)}
+.savebar{position:sticky;bottom:max(12px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:8px;margin-top:18px;padding:10px 10px 10px 16px;border-radius:999px;background:rgba(27,32,38,.94);border:1px solid var(--line-strong);box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.savebar .grow{font-size:14px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status{text-align:center;padding:36px 20px}
+.status .big{font-size:22px;font-weight:700;margin:16px 0 4px}
+.status .hint{font-size:15px;color:var(--muted);max-width:420px;margin-left:auto;margin-right:auto}
+.orb{width:64px;height:64px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:rgba(213,221,227,.1);color:var(--accent)}
+.orb svg{width:30px;height:30px}
+.orb .i-ok,.orb .i-no{display:none}
+.wait .orb{animation:pulse 1.4s ease-in-out infinite}
+.ok .orb{background:rgba(76,175,80,.14);color:var(--good)}
+.no .orb{background:rgba(207,102,121,.14);color:var(--bad)}
+.ok .i-tv,.no .i-tv{display:none}
+.ok .i-ok,.no .i-no{display:block}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(213,221,227,.25)}50%{box-shadow:0 0 0 14px rgba(213,221,227,0)}}
+.narrow{max-width:560px;margin-left:auto;margin-right:auto}
 [hidden]{display:none!important}
-footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
+footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
+@media (min-width:560px){.c4{grid-template-columns:repeat(4,1fr)}.pair2{grid-template-columns:1fr 1fr}main{padding-top:32px}.card{padding:24px}}
+@media (min-width:900px){#home:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}#home .card{margin-bottom:0}#home .col{display:grid;gap:16px}#home .banner{grid-column:1/-1;margin:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 """
 
+    private const val MARK = """<div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="13" rx="3"/><path d="M8 21h8M9 9.5v5l4.5-2.5z"/></svg></div>"""
+
+    private const val ORB = """<div class="orb" aria-hidden="true"><svg class="i-tv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="13" rx="3"/><path d="M8 21h8"/></svg><svg class="i-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><svg class="i-no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg></div>"""
+
     private const val PAGE = HEAD + """<body>
 <main>
-<header><div class="mark" aria-hidden="true">N</div><div><h1>Live TV setup</h1><p class="sub">Add or change sources and guides on your TV</p></div></header>
-<p class="note"><strong>Home network only.</strong> This page talks to your TV over your local network without encryption. Don't use it on public or shared Wi-Fi.</p>
+<header class="top">""" + MARK + """<div class="brand"><b>Nuvio</b><h1>Live TV setup</h1></div><span id="connected" class="chip" hidden>Connected to TV</span></header>
+<p class="note" role="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg><span><strong>Home network only.</strong> This page talks to your TV over your local network without encryption. Don't use it on public or shared Wi-Fi.</span></p>
 
-<section id="pair" class="card" hidden>
-<h2>Enter the code on your TV</h2>
-<p class="hint">Your TV shows a 6-digit code next to the QR code.</p>
+<section id="pair" class="card narrow" hidden aria-labelledby="pairTitle">
+<h2 id="pairTitle">Enter the code on your TV</h2>
+<p class="lead">Your TV shows a 6-digit pairing code next to the QR code.</p>
 <form id="pairForm" method="post" novalidate>
 <label for="code">Pairing code</label>
-<input id="code" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required>
+<input id="code" class="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="000000" required aria-describedby="pairError">
 <p id="pairError" class="error" role="alert" hidden></p>
 <button class="primary wide" type="submit" id="pairButton">Connect</button>
 </form>
 </section>
 
 <section id="home" hidden>
-<div class="card">
-<h2>Sources</h2>
-<p class="hint">Playlists and accounts that provide your channels.</p>
-<ul id="sources" class="list"></ul>
-<p id="sourcesEmpty" class="empty" hidden>No sources yet.</p>
+<p id="busy" class="banner" role="status" hidden>Your TV is waiting for you to save or reject another change.</p>
+<div class="col">
+<div class="card" aria-labelledby="sourcesTitle">
+<div class="head"><div class="grow"><h2 id="sourcesTitle">Sources</h2><p class="lead">Playlists and accounts that provide your channels.</p></div></div>
+<ul id="sources" class="list" aria-labelledby="sourcesTitle"></ul>
+<p id="sourcesEmpty" class="empty" hidden>No sources yet. Add an M3U playlist, Xtream account or Stalker portal.</p>
 <div class="actions"><button class="primary" type="button" id="addSource">Add a source</button></div>
 </div>
-<div class="card">
-<h2>Programme guides</h2>
-<p class="hint">XMLTV guides that fill in what's on.</p>
-<ul id="guides" class="list"></ul>
-<p id="guidesEmpty" class="empty" hidden>No guides yet.</p>
+<div class="card" aria-labelledby="guidesTitle">
+<div class="head"><div class="grow"><h2 id="guidesTitle">Programme guides</h2><p class="lead">XMLTV guides that fill in what's on.</p></div></div>
+<ul id="guides" class="list" aria-labelledby="guidesTitle"></ul>
+<p id="guidesEmpty" class="empty" hidden>No guides yet. Xtream and Stalker sources usually bring their own.</p>
 <div class="actions"><button type="button" id="addGuide">Add a guide</button></div>
-</div>
 <p class="hint">To remove a source or guide, use the TV.</p>
+</div>
+</div>
+
+<form id="settings" class="card" novalidate aria-labelledby="settingsTitle" hidden>
+<div class="head"><div class="grow"><h2 id="settingsTitle">Live TV settings</h2><p class="lead">These apply to Live TV on this TV. Your TV asks you to confirm any change.</p></div></div>
+
+<h3>Playback</h3>
+<fieldset>
+<legend>Stream format</legend>
+<div class="seg c3">
+<label><input type="radio" name="format" value="auto"><span>Auto</span></label>
+<label><input type="radio" name="format" value="hls"><span>HLS</span></label>
+<label><input type="radio" name="format" value="mpegts"><span>MPEG-TS</span></label>
+</div>
+<p class="hint">Used for channels set to Auto. Try HLS or MPEG-TS if channels don't play.</p>
+</fieldset>
+<div class="toggle"><div class="grow"><label for="timeshift">Pause and rewind with catch-up</label><p class="hint" id="timeshiftHint">On channels with catch-up, carry on from where you paused and rewind through the provider's archive.</p></div><input type="checkbox" role="switch" id="timeshift" class="switch" aria-describedby="timeshiftHint"></div>
+
+<h3>Menu</h3>
+<div class="toggle"><div class="grow"><label for="sport">Show Sport in the menu</label><p class="hint" id="sportHint">Channels with sport on now or in the next six hours, from the programme guide.</p></div><input type="checkbox" role="switch" id="sport" class="switch" aria-describedby="sportHint"></div>
+<fieldset>
+<legend>Live TV opens on</legend>
+<div class="seg c4">
+<label><input type="radio" name="startView" value="last"><span>Last category</span></label>
+<label><input type="radio" name="startView" value="all"><span>All channels</span></label>
+<label><input type="radio" name="startView" value="favourites"><span>Favourites</span></label>
+<label><input type="radio" name="startView" value="sport"><span>Sport</span></label>
+</div>
+<p class="hint" id="startHint"></p>
+</fieldset>
+
+<div id="multiview">
+<h3>Multiview</h3>
+<fieldset>
+<legend>Layout</legend>
+<div class="seg c2">
+<label><input type="radio" name="layout" value="grid"><span>Grid</span></label>
+<label><input type="radio" name="layout" value="focus"><span>One large</span></label>
+</div>
+</fieldset>
+<fieldset>
+<legend>Picture quality</legend>
+<div class="seg c3">
+<label><input type="radio" name="quality" value="auto"><span>Automatic</span></label>
+<label><input type="radio" name="quality" value="sharpest"><span>Sharpest</span></label>
+<label><input type="radio" name="quality" value="lightest"><span>Lightest</span></label>
+</div>
+</fieldset>
+<p class="hint" id="qualityHint"></p>
+</div>
+
+<h3>Recordings</h3>
+<div class="pair2">
+<div><label for="recordEarly">Start recordings early</label>
+<div class="pick"><select id="recordEarly"><option value="0">None</option><option value="1">1 minute</option><option value="2">2 minutes</option><option value="5">5 minutes</option><option value="10">10 minutes</option></select></div></div>
+<div><label for="recordLate">Keep recording after the end</label>
+<div class="pick"><select id="recordLate" aria-describedby="lateHint"><option value="0">None</option><option value="2">2 minutes</option><option value="5">5 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="30">30 minutes</option></select></div></div>
+</div>
+<p class="hint" id="lateHint">Guide times are often a little out. Applies to new recordings.</p>
+
+<p id="settingsError" class="error" role="alert" hidden></p>
+<div class="savebar" id="savebar" hidden><span class="grow" id="changeCount" role="status"></span><button type="button" class="ghost small" id="undo">Undo</button><button type="submit" class="primary small" id="sendSettings">Send to TV</button></div>
+</form>
 </section>
 
-<section id="editor" class="card" hidden>
+<section id="editor" class="card narrow" hidden aria-labelledby="formTitle">
 <h2 id="formTitle">Add a source</h2>
-<p id="formHint" class="hint"></p>
-<div id="kinds" class="seg" role="group" aria-label="Source type">
+<p id="formHint" class="lead"></p>
+<div id="kinds" class="seg c3" role="group" aria-label="Source type">
 <button type="button" data-kind="m3u">M3U playlist</button>
 <button type="button" data-kind="xtream">Xtream</button>
 <button type="button" data-kind="stalker">Stalker</button>
 </div>
 <form id="entryForm" method="post" novalidate autocomplete="off">
 <label for="label">Name</label>
-<input id="label" maxlength="240" autocomplete="off" required>
+<input id="label" maxlength="240" autocomplete="off" required placeholder="For example, Home playlist">
 <label for="address" id="addressLabel">Playlist address</label>
-<input id="address" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16384">
+<input id="address" type="url" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="16384" aria-describedby="addressHint">
 <p id="addressHint" class="hint"></p>
 <div id="xtreamFields" hidden>
 <label for="username">Username</label>
 <input id="username" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="4096" autocomplete="off">
 <label for="password">Password</label>
-<div class="row"><input id="password" type="password" maxlength="4096" autocomplete="new-password"><button type="button" id="reveal" aria-pressed="false">Show</button></div>
+<div class="row"><input id="password" type="password" maxlength="4096" autocomplete="new-password" aria-describedby="credentialHint"><button type="button" id="reveal" aria-pressed="false" aria-controls="password">Show</button></div>
 <p id="credentialHint" class="hint" hidden>Leave blank to keep what's saved on the TV. If you change the server address, enter both again.</p>
 </div>
 <div id="stalkerFields" hidden>
 <label for="mac">MAC address</label>
-<input id="mac" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="17" placeholder="00:1A:79:00:00:00">
+<input id="mac" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="17" placeholder="00:1A:79:00:00:00" aria-describedby="macHint">
 <p id="macHint" class="hint">Six pairs separated by colons, as registered with your provider.</p>
 </div>
 <p id="formError" class="error" role="alert" hidden></p>
 <button class="primary wide" type="submit" id="send">Send to TV</button>
-<button class="wide" type="button" id="cancel">Cancel</button>
+<button class="wide ghost" type="button" id="cancel">Cancel</button>
 </form>
 </section>
 
-<section id="progress" class="card status" hidden>
-<div class="dot"></div>
-<p class="big" id="progressTitle">Check your TV</p>
+<section id="progress" class="card status narrow wait" hidden>
+""" + ORB + """
+<p class="big" id="progressTitle" role="status">Check your TV</p>
 <p class="hint" id="progressText">Confirm the change on your TV to save it.</p>
 <div class="actions center"><button class="primary" type="button" id="done" hidden>Done</button></div>
 </section>
 
-<section id="ended" class="card status no" hidden>
-<div class="dot"></div>
+<section id="ended" class="card status narrow no" hidden>
+""" + ORB + """
 <p class="big" id="endedTitle">This setup link has ended</p>
 <p class="hint" id="endedText">Open Live TV setup on your TV and scan the new QR code.</p>
 </section>
@@ -152,12 +276,16 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
   var base = location.pathname.replace(/[^\/]*$/, '');
   var views = ['pair', 'home', 'editor', 'progress', 'ended'];
   var kindNames = { m3u: 'M3U playlist', xtream: 'Xtream account', stalker: 'Stalker portal', guide: 'XMLTV guide' };
+  var badges = { m3u: 'M3U', xtream: 'XT', stalker: 'STB', guide: 'EPG' };
+  var settingKeys = ['format', 'timeshift', 'sport', 'startView', 'layout', 'quality', 'recordEarly', 'recordLate'];
   var current = null;
+  var saved = null;
   var polling = null;
 
   function el(id) { return document.getElementById(id); }
   function show(name) {
     views.forEach(function (v) { el(v).hidden = v !== name; });
+    el('connected').hidden = name === 'pair' || name === 'ended';
     window.scrollTo(0, 0);
   }
   function setText(id, text) { var node = el(id); node.textContent = text || ''; node.hidden = !text; }
@@ -181,16 +309,11 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
     ended('Lost touch with the TV', 'The setup screen on the TV may have closed. Check the TV to see what was saved, then scan the QR code again.');
   }
 
-  function common(result) {
+  function common(result, errorId) {
     if (result.status === 401) { askForCode('Your session has ended. Enter the code shown on your TV.'); return true; }
     if (result.status === 404 && result.data.error === 'link') { ended(); return true; }
-    if (result.status === 429) { alertBox('Too many requests. Wait a minute, then try again.'); return true; }
+    if (result.status === 429) { setText(errorId, 'Too many requests. Wait a minute, then try again.'); return true; }
     return false;
-  }
-
-  function alertBox(text) {
-    if (!el('editor').hidden) setText('formError', text);
-    else if (!el('pair').hidden) setText('pairError', text);
   }
 
   function askForCode(message) {
@@ -203,15 +326,23 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
 
   function load() {
     return api('GET', 'api/state').then(function (result) {
-      if (common(result)) return;
+      if (common(result, 'pairError')) return;
       if (result.status !== 200) { lost(); return; }
       render(result.data);
-      show('home');
-    }, lost);
+      return api('GET', 'api/settings').then(function (answer) {
+        if (common(answer, 'pairError')) return;
+        if (answer.status === 200) renderSettings(answer.data); else el('settings').hidden = true;
+        show('home');
+      });
+    }).catch(lost);
   }
 
   function item(entry, isGuide) {
     var li = document.createElement('li');
+    var badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.setAttribute('aria-hidden', 'true');
+    badge.textContent = badges[entry.kind] || '';
     var text = document.createElement('div');
     text.className = 'grow';
     var name = document.createElement('div');
@@ -223,10 +354,12 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
     meta.textContent = entry.host ? kind + ' · ' + entry.host : kind;
     text.appendChild(name);
     text.appendChild(meta);
+    li.appendChild(badge);
     li.appendChild(text);
     if (entry.editable) {
       var edit = document.createElement('button');
       edit.type = 'button';
+      edit.className = 'small';
       edit.textContent = 'Edit';
       edit.setAttribute('aria-label', 'Edit ' + entry.label);
       edit.addEventListener('click', function () { openEditor(entry.kind, entry); });
@@ -241,8 +374,65 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
       var entries = Array.isArray(group[1]) ? group[1] : [];
       list.textContent = '';
       entries.forEach(function (entry) { list.appendChild(item(entry, group[2])); });
+      list.hidden = entries.length === 0;
       el(group[0] + 'Empty').hidden = entries.length > 0;
     });
+    el('busy').hidden = !state.pending;
+  }
+
+  function radios(name) { return Array.prototype.slice.call(el('settings').querySelectorAll('input[name="' + name + '"]')); }
+  function radioValue(name) { var on = radios(name).filter(function (r) { return r.checked; })[0]; return on ? on.value : null; }
+  function setRadio(name, value) { radios(name).forEach(function (r) { r.checked = r.value === value; }); }
+
+  function renderSettings(values) {
+    saved = values;
+    ['format', 'startView', 'layout', 'quality'].forEach(function (key) { setRadio(key, values[key]); });
+    el('timeshift').checked = !!values.timeshift;
+    el('sport').checked = !!values.sport;
+    el('recordEarly').value = String(values.recordEarly);
+    el('recordLate').value = String(values.recordLate);
+    el('multiview').hidden = values.multiview === false;
+    el('settings').hidden = false;
+    setText('settingsError', '');
+    refreshSettings();
+  }
+
+  function readSettings() {
+    return {
+      format: radioValue('format'), timeshift: el('timeshift').checked, sport: el('sport').checked, startView: radioValue('startView'),
+      layout: radioValue('layout'), quality: radioValue('quality'),
+      recordEarly: minutes('recordEarly'), recordLate: minutes('recordLate')
+    };
+  }
+
+  function minutes(id) { var value = parseInt(el(id).value, 10); return isNaN(value) ? null : value; }
+
+  function settingsDiff() {
+    var now = readSettings();
+    var diff = {};
+    var count = 0;
+    settingKeys.forEach(function (key) {
+      if (now[key] !== null && now[key] !== saved[key] && !(key === 'startView' && now[key] === 'sport' && !now.sport)) { diff[key] = now[key]; count += 1; }
+    });
+    return { values: diff, count: count };
+  }
+
+  var qualityHints = {
+    auto: 'Matches each picture to its size on your TV and what the TV can decode.',
+    sharpest: 'One step sharper where the TV can manage it. Uses more internet speed.',
+    lightest: 'One step lower, for slower connections or busy TV boxes.'
+  };
+
+  function refreshSettings() {
+    if (!saved) return;
+    var sportOn = el('sport').checked;
+    radios('startView').forEach(function (r) { if (r.value === 'sport') r.disabled = !sportOn && saved.startView !== 'sport'; });
+    if (!sportOn && radioValue('startView') === 'sport' && saved.startView !== 'sport') setRadio('startView', saved.startView);
+    el('startHint').textContent = sportOn ? 'Last category opens where you left off.' : 'Turn on Show Sport to open Live TV on Sport.';
+    el('qualityHint').textContent = (qualityHints[radioValue('quality')] || '') + ' Applies to channels that offer more than one quality.';
+    var diff = settingsDiff();
+    el('savebar').hidden = diff.count === 0;
+    el('changeCount').textContent = diff.count === 1 ? '1 change to send' : diff.count + ' changes to send';
   }
 
   function setKind(kind) {
@@ -253,14 +443,15 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
     var editing = !!current.entry;
     var keep = editing ? ' Leave blank to keep the current address' + (current.entry.host ? ' (' + current.entry.host + ').' : '.') : '';
     var labels = { m3u: 'Playlist address', xtream: 'Server address', stalker: 'Portal address', guide: 'Guide address' };
+    var examples = { m3u: 'https://example.com/playlist.m3u', xtream: 'http://example.com:8080', stalker: 'http://example.com/c/', guide: 'https://example.com/guide.xml.gz' };
     var hints = {
-      m3u: 'The full link to your M3U playlist.',
+      m3u: 'The full link to your M3U playlist, for example https://example.com/playlist.m3u.',
       xtream: 'Only the server, for example http://example.com:8080. Leave out player_api.php and anything after a question mark.',
       stalker: 'The portal link from your provider, for example http://example.com/c/.',
       guide: 'A link to an XMLTV file, for example https://example.com/guide.xml.gz.'
     };
     el('addressLabel').textContent = labels[kind];
-    el('address').placeholder = editing ? 'Unchanged' : '';
+    el('address').placeholder = editing ? 'Unchanged' : examples[kind];
     el('addressHint').textContent = hints[kind] + keep;
     el('xtreamFields').hidden = kind !== 'xtream';
     el('stalkerFields').hidden = kind !== 'stalker';
@@ -301,6 +492,11 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
     kind: 'Choose a source type.',
     body: 'Something went wrong with that request. Reload the page and try again.'
   };
+  var settingErrors = {
+    startView: 'Turn on Show Sport to open Live TV on Sport.',
+    layout: 'This TV can\'t show multiview.',
+    quality: 'This TV can\'t show multiview.'
+  };
   var addressErrors = {
     m3u: 'Enter a web address starting with http:// or https://.',
     guide: 'Enter a web address starting with http:// or https://. Files on the TV can only be added on the TV.',
@@ -308,57 +504,86 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
     stalker: 'Enter the portal address, such as http://example.com/c/.'
   };
 
+  function refused(error, errorId) {
+    if (error === 'unchanged') setText(errorId, 'Nothing has changed. Change something first.');
+    else if (error === 'busy') setText(errorId, 'The TV is still waiting for you to save or reject another change.');
+    else if (error === 'cooldown') setText(errorId, 'Your last change was rejected on the TV. Wait a few seconds before sending another.');
+    else if (error === 'missing') setText(errorId, 'That entry no longer exists on the TV.');
+    else if (error === 'locked') setText(errorId, fieldErrors.id);
+    else setText(errorId, 'The TV couldn\'t take that request. Nothing was saved.');
+  }
+
   function submit(event) {
     event.preventDefault();
     var body = { kind: current.kind, label: el('label').value.trim(), address: el('address').value.trim() };
     if (current.entry) body.id = current.entry.id;
     if (current.kind === 'xtream') { body.username = el('username').value.trim(); body.password = el('password').value; }
     if (current.kind === 'stalker') body.mac = el('mac').value.trim();
-    if (!body.label) { setText('formError', fieldErrors.label); return; }
-    if (!current.entry && !body.address) { setText('formError', addressErrors[current.kind]); return; }
+    el('label').removeAttribute('aria-invalid');
+    el('address').removeAttribute('aria-invalid');
+    if (!body.label) { setText('formError', fieldErrors.label); el('label').setAttribute('aria-invalid', 'true'); el('label').focus(); return; }
+    if (!current.entry && !body.address) { setText('formError', addressErrors[current.kind]); el('address').setAttribute('aria-invalid', 'true'); el('address').focus(); return; }
     el('send').disabled = true;
     api('POST', 'api/changes', body).then(function (result) {
       el('send').disabled = false;
       el('password').value = '';
       body = null;
-      if (common(result)) return;
-      if (result.status === 202 && result.data.id) { waitFor(result.data.id); return; }
+      if (common(result, 'formError')) return;
+      if (result.status === 202 && result.data.id) { waitFor(result.data.id, current.kind === 'guide' ? 'guide' : 'source'); return; }
       var error = result.data.error;
       if (error === 'invalid' && result.data.reason === 'server') setText('formError', current.kind === 'stalker'
         ? 'The portal address has changed, so enter the MAC address again.'
         : 'The server address has changed, so enter the username and password again.');
-      else if (error === 'invalid') setText('formError', result.data.field === 'address' ? addressErrors[current.kind] : (fieldErrors[result.data.field] || fieldErrors.body));
-      else if (error === 'unchanged') setText('formError', 'Nothing has changed. Fill in what you want to change.');
-      else if (error === 'busy') setText('formError', 'The TV is still waiting for you to confirm or reject another change.');
-      else if (error === 'cooldown') setText('formError', 'Your last change was rejected on the TV. Wait a few seconds before sending another.');
-      else if (error === 'missing') setText('formError', 'That entry no longer exists on the TV.');
-      else if (error === 'locked') setText('formError', fieldErrors.id);
-      else setText('formError', 'The TV couldn\'t take that request. Nothing was saved.');
+      else if (error === 'invalid') {
+        var field = result.data.field;
+        setText('formError', field === 'address' ? addressErrors[current.kind] : (fieldErrors[field] || fieldErrors.body));
+        if (field === 'address' || field === 'label') el(field).setAttribute('aria-invalid', 'true');
+      }
+      else refused(error, 'formError');
     }, function () { el('send').disabled = false; el('password').value = ''; lost(); });
   }
 
+  function sendSettings(event) {
+    event.preventDefault();
+    if (!saved) return;
+    var diff = settingsDiff();
+    setText('settingsError', '');
+    if (diff.count === 0) { refused('unchanged', 'settingsError'); return; }
+    el('sendSettings').disabled = true;
+    api('POST', 'api/settings', diff.values).then(function (result) {
+      el('sendSettings').disabled = false;
+      if (common(result, 'settingsError')) return;
+      if (result.status === 202 && result.data.id) { waitFor(result.data.id, 'settings'); return; }
+      var error = result.data.error;
+      if (error === 'invalid') setText('settingsError', settingErrors[result.data.field] || fieldErrors.body);
+      else refused(error, 'settingsError');
+    }, function () { el('sendSettings').disabled = false; lost(); });
+  }
+
   function progress(state, title, text) {
-    var box = el('progress');
-    box.className = 'card status' + (state === 'ok' ? ' ok' : state === 'no' ? ' no' : '');
+    el('progress').className = 'card status narrow ' + state;
     el('progressTitle').textContent = title;
     el('progressText').textContent = text;
     el('done').hidden = state === 'wait';
     show('progress');
+    if (state !== 'wait') el('done').focus();
   }
 
   function stopPolling() { if (polling) { clearTimeout(polling); polling = null; } }
 
-  function waitFor(id) {
-    var guide = current.kind === 'guide';
+  function waitFor(id, what) {
     var misses = 0;
-    progress('wait', 'Check your TV', 'Your TV is asking whether to save this. Choose Save or Reject on the TV.');
+    var savedText = { source: 'The TV is loading the channels now.', guide: 'The TV is loading the guide now.', settings: 'Your new settings are saved. Some apply the next time you open Live TV.' };
+    progress('wait', 'Check your TV', what === 'settings'
+      ? 'Your TV is showing the settings you changed. Choose Save on this TV or Reject.'
+      : 'Your TV is asking whether to save this. Choose Save on this TV or Reject.');
     function poll() {
       api('GET', 'api/changes/' + encodeURIComponent(id)).then(function (result) {
         var status = result.data.status;
         if ((result.status === 200 && status === 'pending') || result.status === 429 || result.status >= 500) { polling = setTimeout(poll, 1500); return; }
         polling = null;
-        if (common(result)) return;
-        if (status === 'saved') progress('ok', 'Saved on the TV', guide ? 'The TV is loading the guide now.' : 'The TV is loading the channels now.');
+        if (common(result, 'formError')) return;
+        if (status === 'saved') progress('ok', 'Saved on the TV', savedText[what]);
         else if (status === 'rejected') progress('no', 'Rejected on the TV', 'Nothing was saved.');
         else if (status === 'failed') progress('no', 'The TV couldn\'t save this', 'Nothing was saved. Check the details and try again.');
         else progress('no', 'The TV no longer has this change', 'Check the TV to see whether it was saved.');
@@ -380,7 +605,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
       el('code').value = '';
       if (result.status === 200) { setText('pairError', ''); load(); return; }
       if (result.status === 410) { ended('Too many wrong codes', 'For safety this link has been turned off. Scan the new QR code on your TV.'); return; }
-      if (common(result)) return;
+      if (common(result, 'pairError')) return;
       if (result.data.error === 'code') {
         var left = result.data.attemptsLeft;
         setText('pairError', 'That code didn\'t match. ' + (left === 1 ? '1 try left.' : left + ' tries left.'));
@@ -398,6 +623,9 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
   el('reveal').addEventListener('click', function () { revealPassword(el('password').type === 'password'); });
   el('entryForm').addEventListener('submit', submit);
   el('cancel').addEventListener('click', function () { el('password').value = ''; load(); });
+  el('settings').addEventListener('change', function () { setText('settingsError', ''); refreshSettings(); });
+  el('settings').addEventListener('submit', sendSettings);
+  el('undo').addEventListener('click', function () { if (saved) renderSettings(saved); });
   el('done').addEventListener('click', load);
   load();
 })();
@@ -408,9 +636,9 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
 
     private const val ENDED = HEAD + """<body>
 <main>
-<header><div class="mark" aria-hidden="true">N</div><div><h1>Live TV setup</h1><p class="sub">Nuvio</p></div></header>
-<section class="card status no">
-<div class="dot"></div>
+<header class="top">""" + MARK + """<div class="brand"><b>Nuvio</b><h1>Live TV setup</h1></div></header>
+<section class="card status narrow no">
+""" + ORB + """
 <p class="big">This setup link has ended</p>
 <p class="hint">Open Live TV setup on your TV and scan the QR code it shows. Each link works only while the setup screen is open.</p>
 </section>

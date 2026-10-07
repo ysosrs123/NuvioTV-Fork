@@ -16,7 +16,9 @@ enum class SetupField { LABEL, ADDRESS, USERNAME, PASSWORD, MAC }
 
 class SetupInputException(val field: String) : IllegalArgumentException("Invalid setup field")
 
-class SetupDraft(val kind: SetupKind, val targetId: String?, val label: String, val address: String, val username: String, val password: String) {
+sealed interface SetupChange
+
+class SetupDraft(val kind: SetupKind, val targetId: String?, val label: String, val address: String, val username: String, val password: String) : SetupChange {
     val edit: Boolean get() = targetId != null
     override fun toString() = "SetupDraft(kind=$kind, edit=$edit, values withheld)"
 
@@ -201,16 +203,16 @@ class SetupChangeBook(
     private val cooldownMillis: Long = 10_000,
 ) {
     enum class Status { PENDING, SAVED, REJECTED, FAILED }
-    private class Entry(val owner: String, var draft: SetupDraft?, var status: Status)
+    private class Entry(val owner: String, var change: SetupChange?, var status: Status)
     private val entries = LinkedHashMap<String, Entry>()
     private val rejectedAt = HashMap<String, Long>()
 
     @Synchronized fun coolingDown(owner: String): Boolean = rejectedAt[owner]?.let { now() - it < cooldownMillis } == true
 
-    @Synchronized fun propose(owner: String, draft: SetupDraft): String? {
+    @Synchronized fun propose(owner: String, change: SetupChange): String? {
         if (entries.values.any { it.status == Status.PENDING }) return null
         val id = SetupPairing.hex(ByteArray(16).also(random::nextBytes))
-        entries[id] = Entry(owner, draft, Status.PENDING)
+        entries[id] = Entry(owner, change, Status.PENDING)
         while (entries.size > maxEntries) entries.remove(entries.keys.first())
         return id
     }
@@ -219,18 +221,18 @@ class SetupChangeBook(
 
     @Synchronized fun status(owner: String, id: String): Status? = entries[id]?.takeIf { SetupPairing.same(it.owner, owner) }?.status
 
-    @Synchronized fun pending(id: String): SetupDraft? = entries[id]?.takeIf { it.status == Status.PENDING }?.draft
+    @Synchronized fun pending(id: String): SetupChange? = entries[id]?.takeIf { it.status == Status.PENDING }?.change
 
     @Synchronized fun resolve(id: String, status: Status): Boolean {
         require(status != Status.PENDING)
         val entry = entries[id]?.takeIf { it.status == Status.PENDING } ?: return false
         entry.status = status
-        entry.draft = null
+        entry.change = null
         if (status == Status.REJECTED) rejectedAt[entry.owner] = now()
         return true
     }
 
     @Synchronized fun rejectPending() {
-        entries.values.filter { it.status == Status.PENDING }.forEach { it.status = Status.REJECTED; it.draft = null }
+        entries.values.filter { it.status == Status.PENDING }.forEach { it.status = Status.REJECTED; it.change = null }
     }
 }

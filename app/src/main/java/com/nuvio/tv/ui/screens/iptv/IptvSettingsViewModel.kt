@@ -33,7 +33,7 @@ class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLiv
 
     init { reload() }
 
-    private fun reload() {
+    fun reload() {
         viewModelScope.launch {
             val profile = profiles.activeProfileId.value
             mutable.value = withContext(Dispatchers.IO) {
