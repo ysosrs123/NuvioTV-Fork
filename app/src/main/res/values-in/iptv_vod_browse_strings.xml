@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Film</string>
+    <string name="iptv_vod_browse_series">Serial</string>
+    <string name="iptv_vod_browse_search">Cari</string>
+    <string name="iptv_vod_browse_search_hint">Cari berdasarkan judul</string>
+    <string name="iptv_vod_browse_recent">Baru ditambahkan</string>
+    <string name="iptv_vod_browse_all">Semua</string>
+    <string name="iptv_vod_browse_categories">Kategori</string>
+    <string name="iptv_vod_browse_sources">Sumber</string>
+    <string name="iptv_vod_browse_results">Hasil untuk “%1$s”</string>
+    <string name="iptv_vod_browse_empty">Tidak ada judul di daftar ini.</string>
+    <string name="iptv_vod_browse_no_results">Tidak ada judul yang cocok dengan pencarian Anda.</string>
+    <string name="iptv_vod_browse_none">Belum ada film atau serial di sumber TV Live Anda. Film dan serial akan muncul setelah sumber disegarkan berikutnya.</string>
+    <string name="iptv_vod_browse_play">Putar</string>
+    <string name="iptv_vod_browse_resume">Lanjutkan dari %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Lanjutkan %1$s</string>
+    <string name="iptv_vod_browse_from_start">Putar dari awal</string>
+    <string name="iptv_vod_browse_full_details">Detail lengkap</string>
+    <string name="iptv_vod_browse_season">Musim %1$d</string>
+    <string name="iptv_vod_browse_specials">Spesial</string>
+    <string name="iptv_vod_browse_episodes_failed">Episode tidak dapat dimuat.</string>
+    <string name="iptv_vod_browse_retry">Coba lagi</string>
+    <string name="iptv_vod_browse_no_episodes">Tidak ada episode untuk serial ini.</string>
+    <string name="iptv_vod_browse_missing">Judul ini tidak lagi tersedia. Segarkan sumber dan coba lagi.</string>
+    <string name="iptv_vod_browse_runtime">%1$d mnt</string>
+    <string name="iptv_vod_browse_settings_title">Film dan serial</string>
+    <string name="iptv_vod_browse_settings_artwork">Poster dan detail dari</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Digunakan untuk Film dan Serial di TV Live</string>
+    <string name="iptv_vod_browse_artwork_provider">Penyedia</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Poster dan nama sesuai daftar sumber IPTV</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB dan addon meta)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Poster, latar, sinopsis, dan rating untuk judul yang cocok; judul lain tetap memakai gambar penyedia</string>
+    <string name="iptv_vod_browse_settings_sources">Tampilkan film dan serial dari sumber IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">Film: %1$d · Serial: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Disembunyikan</string>
+    <string name="iptv_vod_browse_settings_pending">Ditampilkan setelah penyegaran berikutnya</string>
+</resources>

@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">फ़िल्में</string>
+    <string name="iptv_vod_browse_series">सीरीज़</string>
+    <string name="iptv_vod_browse_search">खोज</string>
+    <string name="iptv_vod_browse_search_hint">टाइटल से खोजें</string>
+    <string name="iptv_vod_browse_recent">हाल ही में जोड़े गए</string>
+    <string name="iptv_vod_browse_all">सभी</string>
+    <string name="iptv_vod_browse_categories">कैटेगरी</string>
+    <string name="iptv_vod_browse_sources">सोर्स</string>
+    <string name="iptv_vod_browse_results">“%1$s” के नतीजे</string>
+    <string name="iptv_vod_browse_empty">इस सूची में कोई टाइटल नहीं है।</string>
+    <string name="iptv_vod_browse_no_results">आपकी खोज से कोई टाइटल मेल नहीं खाता।</string>
+    <string name="iptv_vod_browse_none">आपके लाइव टीवी सोर्स में अभी कोई फ़िल्म या सीरीज़ नहीं है। वे अगली बार सोर्स रिफ्रेश होने के बाद दिखेंगी।</string>
+    <string name="iptv_vod_browse_play">चलाएँ</string>
+    <string name="iptv_vod_browse_resume">%1$s से जारी रखें</string>
+    <string name="iptv_vod_browse_resume_episode">%1$s जारी रखें</string>
+    <string name="iptv_vod_browse_from_start">शुरू से चलाएँ</string>
+    <string name="iptv_vod_browse_full_details">पूरी जानकारी</string>
+    <string name="iptv_vod_browse_season">सीज़न %1$d</string>
+    <string name="iptv_vod_browse_specials">स्पेशल</string>
+    <string name="iptv_vod_browse_episodes_failed">एपिसोड लोड नहीं हो सके।</string>
+    <string name="iptv_vod_browse_retry">दोबारा कोशिश करें</string>
+    <string name="iptv_vod_browse_no_episodes">इस सीरीज़ के लिए कोई एपिसोड नहीं है।</string>
+    <string name="iptv_vod_browse_missing">यह टाइटल अब उपलब्ध नहीं है। सोर्स रिफ्रेश करें और दोबारा कोशिश करें।</string>
+    <string name="iptv_vod_browse_runtime">%1$d मिनट</string>
+    <string name="iptv_vod_browse_settings_title">फ़िल्में और सीरीज़</string>
+    <string name="iptv_vod_browse_settings_artwork">पोस्टर और जानकारी का स्रोत</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">लाइव टीवी में फ़िल्मों और सीरीज़ के लिए इस्तेमाल होता है</string>
+    <string name="iptv_vod_browse_artwork_provider">प्रोवाइडर</string>
+    <string name="iptv_vod_browse_artwork_provider_description">पोस्टर और नाम वैसे ही, जैसे IPTV सोर्स उन्हें देता है</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB और मेटा ऐडऑन)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">मेल खाने वाले टाइटल के लिए पोस्टर, बैकड्रॉप, कहानी और रेटिंग; बाकी टाइटल पर प्रोवाइडर की इमेज रहती है</string>
+    <string name="iptv_vod_browse_settings_sources">IPTV सोर्स की फ़िल्में और सीरीज़ दिखाएँ</string>
+    <string name="iptv_vod_browse_settings_counts">फ़िल्में: %1$d · सीरीज़: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">छिपी हुई</string>
+    <string name="iptv_vod_browse_settings_pending">अगले रिफ्रेश के बाद दिखेंगी</string>
+</resources>

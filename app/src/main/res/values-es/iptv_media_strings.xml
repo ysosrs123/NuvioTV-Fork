@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Carpeta Movies (visible para otras apps)</string>
+    <string name="iptv_media_label">Carpeta Movies</string>
+    <string name="iptv_media_missing">Carpeta Movies no disponible</string>
+    <string name="iptv_media_unavailable">La carpeta compartida Movies no está disponible ahora en este dispositivo.</string>
+    <string name="iptv_media_notice">Las grabaciones se guardan primero en este dispositivo y se copian a Movies/Nuvio Recordings al terminar. Allí pueden verlas otras apps, como reproductores multimedia.</string>
+    <string name="iptv_media_copying">Copiando a la carpeta Movies</string>
+    <string name="iptv_media_copy_waiting">Esperando para copiar a la carpeta Movies</string>
+    <string name="iptv_media_delete_description">La grabación se quitará de la lista y de la carpeta Movies.</string>
+    <string name="iptv_media_delete_not_owned">Se quitó de la lista. El archivo de la carpeta Movies pertenece a una instalación anterior de esta app, así que se ha conservado. Bórralo con un gestor de archivos.</string>
+</resources>

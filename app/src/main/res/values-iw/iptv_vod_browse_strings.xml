@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">סרטים</string>
+    <string name="iptv_vod_browse_series">סדרות</string>
+    <string name="iptv_vod_browse_search">חיפוש</string>
+    <string name="iptv_vod_browse_search_hint">חיפוש לפי שם</string>
+    <string name="iptv_vod_browse_recent">נוספו לאחרונה</string>
+    <string name="iptv_vod_browse_all">הכול</string>
+    <string name="iptv_vod_browse_categories">קטגוריות</string>
+    <string name="iptv_vod_browse_sources">מקורות</string>
+    <string name="iptv_vod_browse_results">תוצאות עבור „%1$s”</string>
+    <string name="iptv_vod_browse_empty">אין כותרים ברשימה הזו.</string>
+    <string name="iptv_vod_browse_no_results">אין כותרים שתואמים לחיפוש.</string>
+    <string name="iptv_vod_browse_none">עדיין אין סרטים או סדרות במקורות הטלוויזיה החיה שלך. הם יופיעו אחרי הרענון הבא של המקור.</string>
+    <string name="iptv_vod_browse_play">הפעלה</string>
+    <string name="iptv_vod_browse_resume">המשך מ-%1$s</string>
+    <string name="iptv_vod_browse_resume_episode">המשך %1$s</string>
+    <string name="iptv_vod_browse_from_start">הפעלה מההתחלה</string>
+    <string name="iptv_vod_browse_full_details">כל הפרטים</string>
+    <string name="iptv_vod_browse_season">עונה %1$d</string>
+    <string name="iptv_vod_browse_specials">ספיישלים</string>
+    <string name="iptv_vod_browse_episodes_failed">לא ניתן לטעון את הפרקים.</string>
+    <string name="iptv_vod_browse_retry">ניסיון חוזר</string>
+    <string name="iptv_vod_browse_no_episodes">אין פרקים לסדרה הזו.</string>
+    <string name="iptv_vod_browse_missing">הכותר הזה כבר לא זמין. יש לרענן את המקור ולנסות שוב.</string>
+    <string name="iptv_vod_browse_runtime">%1$d דק׳</string>
+    <string name="iptv_vod_browse_settings_title">סרטים וסדרות</string>
+    <string name="iptv_vod_browse_settings_artwork">פוסטרים ופרטים מ-</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">משמש לסרטים ולסדרות בטלוויזיה החיה</string>
+    <string name="iptv_vod_browse_artwork_provider">ספק</string>
+    <string name="iptv_vod_browse_artwork_provider_description">פוסטרים ושמות כפי שמקור ה-IPTV מציג אותם</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB ותוספי מטא)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">פוסטרים, רקעים, תקצירים ודירוגים לכותרים תואמים; השאר שומרים על התמונות של הספק</string>
+    <string name="iptv_vod_browse_settings_sources">הצגת סרטים וסדרות ממקורות IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">סרטים: %1$d · סדרות: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">מוסתר</string>
+    <string name="iptv_vod_browse_settings_pending">יוצג אחרי הרענון הבא</string>
+</resources>

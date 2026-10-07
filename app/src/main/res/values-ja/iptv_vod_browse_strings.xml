@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">映画</string>
+    <string name="iptv_vod_browse_series">シリーズ</string>
+    <string name="iptv_vod_browse_search">検索</string>
+    <string name="iptv_vod_browse_search_hint">タイトルで検索</string>
+    <string name="iptv_vod_browse_recent">最近追加</string>
+    <string name="iptv_vod_browse_all">すべて</string>
+    <string name="iptv_vod_browse_categories">カテゴリ</string>
+    <string name="iptv_vod_browse_sources">ソース</string>
+    <string name="iptv_vod_browse_results">「%1$s」の検索結果</string>
+    <string name="iptv_vod_browse_empty">このリストにタイトルはありません。</string>
+    <string name="iptv_vod_browse_no_results">検索に一致するタイトルはありません。</string>
+    <string name="iptv_vod_browse_none">ライブTVソースにはまだ映画やシリーズがありません。次回のソース更新後に表示されます。</string>
+    <string name="iptv_vod_browse_play">再生</string>
+    <string name="iptv_vod_browse_resume">%1$s から再開</string>
+    <string name="iptv_vod_browse_resume_episode">%1$s を再開</string>
+    <string name="iptv_vod_browse_from_start">最初から再生</string>
+    <string name="iptv_vod_browse_full_details">詳細をすべて表示</string>
+    <string name="iptv_vod_browse_season">シーズン %1$d</string>
+    <string name="iptv_vod_browse_specials">スペシャル</string>
+    <string name="iptv_vod_browse_episodes_failed">エピソードを読み込めませんでした。</string>
+    <string name="iptv_vod_browse_retry">再試行</string>
+    <string name="iptv_vod_browse_no_episodes">このシリーズにはエピソードがありません。</string>
+    <string name="iptv_vod_browse_missing">このタイトルは利用できなくなりました。ソースを更新して、もう一度お試しください。</string>
+    <string name="iptv_vod_browse_runtime">%1$d 分</string>
+    <string name="iptv_vod_browse_settings_title">映画とシリーズ</string>
+    <string name="iptv_vod_browse_settings_artwork">ポスターと詳細の取得元</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">ライブTVの映画とシリーズで使用</string>
+    <string name="iptv_vod_browse_artwork_provider">プロバイダー</string>
+    <string name="iptv_vod_browse_artwork_provider_description">IPTV ソースが提供するポスターと名前</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio（TMDB とメタアドオン）</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">一致するタイトルのポスター、背景、あらすじ、評価。それ以外はプロバイダーの画像のまま</string>
+    <string name="iptv_vod_browse_settings_sources">IPTV ソースの映画とシリーズを表示</string>
+    <string name="iptv_vod_browse_settings_counts">映画: %1$d · シリーズ: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">非表示</string>
+    <string name="iptv_vod_browse_settings_pending">次回の更新後に表示</string>
+</resources>

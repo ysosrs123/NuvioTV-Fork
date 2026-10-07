@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Movies mappa (más alkalmazások is látják)</string>
+    <string name="iptv_media_label">Movies mappa</string>
+    <string name="iptv_media_missing">A Movies mappa nem érhető el</string>
+    <string name="iptv_media_unavailable">A megosztott Movies mappa most nem érhető el ezen az eszközön.</string>
+    <string name="iptv_media_notice">A felvételek először erre az eszközre kerülnek, majd elkészültük után a Movies/Nuvio Recordings mappába másolódnak. Ott más alkalmazások, például médialejátszók is látják őket.</string>
+    <string name="iptv_media_copying">Másolás a Movies mappába</string>
+    <string name="iptv_media_copy_waiting">Másolásra vár a Movies mappába</string>
+    <string name="iptv_media_delete_description">A felvétel törlődik a listából és a Movies mappából.</string>
+    <string name="iptv_media_delete_not_owned">Eltávolítva a listából. A Movies mappában lévő fájl az alkalmazás egy korábbi telepítéséhez tartozik, ezért megmaradt. Töröld fájlkezelővel.</string>
+</resources>

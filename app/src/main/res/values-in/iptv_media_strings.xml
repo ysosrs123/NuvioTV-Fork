@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Folder Movies (terlihat oleh aplikasi lain)</string>
+    <string name="iptv_media_label">Folder Movies</string>
+    <string name="iptv_media_missing">Folder Movies tidak tersedia</string>
+    <string name="iptv_media_unavailable">Folder bersama Movies sedang tidak tersedia di perangkat ini.</string>
+    <string name="iptv_media_notice">Rekaman disimpan di perangkat ini terlebih dahulu, lalu disalin ke Movies/Nuvio Recordings setelah selesai. Aplikasi lain, seperti pemutar media, dapat melihatnya di sana.</string>
+    <string name="iptv_media_copying">Menyalin ke folder Movies</string>
+    <string name="iptv_media_copy_waiting">Menunggu untuk menyalin ke folder Movies</string>
+    <string name="iptv_media_delete_description">Rekaman akan dihapus dari daftar dan dari folder Movies.</string>
+    <string name="iptv_media_delete_not_owned">Dihapus dari daftar. File di folder Movies milik instalasi aplikasi ini sebelumnya, jadi file tersebut disimpan. Hapus dengan pengelola file.</string>
+</resources>

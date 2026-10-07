@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Films</string>
+    <string name="iptv_vod_browse_series">Séries</string>
+    <string name="iptv_vod_browse_search">Rechercher</string>
+    <string name="iptv_vod_browse_search_hint">Rechercher par titre</string>
+    <string name="iptv_vod_browse_recent">Ajouts récents</string>
+    <string name="iptv_vod_browse_all">Tout</string>
+    <string name="iptv_vod_browse_categories">Catégories</string>
+    <string name="iptv_vod_browse_sources">Sources</string>
+    <string name="iptv_vod_browse_results">Résultats pour « %1$s »</string>
+    <string name="iptv_vod_browse_empty">Aucun titre dans cette liste.</string>
+    <string name="iptv_vod_browse_no_results">Aucun titre ne correspond à votre recherche.</string>
+    <string name="iptv_vod_browse_none">Aucun film ni série dans vos sources TV en direct pour l’instant. Ils apparaîtront après la prochaine mise à jour de la source.</string>
+    <string name="iptv_vod_browse_play">Regarder</string>
+    <string name="iptv_vod_browse_resume">Reprendre à %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Reprendre %1$s</string>
+    <string name="iptv_vod_browse_from_start">Regarder depuis le début</string>
+    <string name="iptv_vod_browse_full_details">Tous les détails</string>
+    <string name="iptv_vod_browse_season">Saison %1$d</string>
+    <string name="iptv_vod_browse_specials">Épisodes spéciaux</string>
+    <string name="iptv_vod_browse_episodes_failed">Impossible de charger les épisodes.</string>
+    <string name="iptv_vod_browse_retry">Réessayer</string>
+    <string name="iptv_vod_browse_no_episodes">Aucun épisode pour cette série.</string>
+    <string name="iptv_vod_browse_missing">Ce titre n’est plus disponible. Actualisez la source et réessayez.</string>
+    <string name="iptv_vod_browse_runtime">%1$d min</string>
+    <string name="iptv_vod_browse_settings_title">Films et séries</string>
+    <string name="iptv_vod_browse_settings_artwork">Affiches et détails depuis</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Utilisé pour Films et Séries dans la TV en direct</string>
+    <string name="iptv_vod_browse_artwork_provider">Fournisseur</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Affiches et noms tels que la source IPTV les fournit</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB et addons de métadonnées)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Affiches, arrière-plans, résumés et notes pour les titres correspondants ; les autres gardent les visuels du fournisseur</string>
+    <string name="iptv_vod_browse_settings_sources">Afficher les films et séries des sources IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">Films : %1$d · Séries : %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Masqués</string>
+    <string name="iptv_vod_browse_settings_pending">Affichés après la prochaine mise à jour</string>
+</resources>

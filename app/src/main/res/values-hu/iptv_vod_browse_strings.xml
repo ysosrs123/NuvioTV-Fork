@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Filmek</string>
+    <string name="iptv_vod_browse_series">Sorozatok</string>
+    <string name="iptv_vod_browse_search">Keresés</string>
+    <string name="iptv_vod_browse_search_hint">Keresés cím szerint</string>
+    <string name="iptv_vod_browse_recent">Nemrég hozzáadva</string>
+    <string name="iptv_vod_browse_all">Összes</string>
+    <string name="iptv_vod_browse_categories">Kategóriák</string>
+    <string name="iptv_vod_browse_sources">Források</string>
+    <string name="iptv_vod_browse_results">Találatok erre: „%1$s”</string>
+    <string name="iptv_vod_browse_empty">Nincs cím ebben a listában.</string>
+    <string name="iptv_vod_browse_no_results">Egy cím sem felel meg a keresésnek.</string>
+    <string name="iptv_vod_browse_none">Az Élő TV-forrásaidban még nincsenek filmek vagy sorozatok. A következő forrásfrissítés után jelennek meg.</string>
+    <string name="iptv_vod_browse_play">Lejátszás</string>
+    <string name="iptv_vod_browse_resume">Folytatás innen: %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">%1$s folytatása</string>
+    <string name="iptv_vod_browse_from_start">Lejátszás az elejétől</string>
+    <string name="iptv_vod_browse_full_details">Minden részlet</string>
+    <string name="iptv_vod_browse_season">%1$d. évad</string>
+    <string name="iptv_vod_browse_specials">Különkiadások</string>
+    <string name="iptv_vod_browse_episodes_failed">Nem sikerült betölteni az epizódokat.</string>
+    <string name="iptv_vod_browse_retry">Próbáld újra</string>
+    <string name="iptv_vod_browse_no_episodes">Ehhez a sorozathoz nincsenek epizódok.</string>
+    <string name="iptv_vod_browse_missing">Ez a cím már nem érhető el. Frissítsd a forrást, és próbáld újra.</string>
+    <string name="iptv_vod_browse_runtime">%1$d perc</string>
+    <string name="iptv_vod_browse_settings_title">Filmek és sorozatok</string>
+    <string name="iptv_vod_browse_settings_artwork">Plakátok és részletek forrása</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Az Élő TV Filmek és Sorozatok részében használatos</string>
+    <string name="iptv_vod_browse_artwork_provider">Szolgáltató</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Plakátok és nevek úgy, ahogy az IPTV-forrás megadja</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB és meta bővítmények)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Plakátok, hátterek, cselekmények és értékelések az egyező címekhez; a többi a szolgáltató képeit tartja meg</string>
+    <string name="iptv_vod_browse_settings_sources">IPTV-források filmjeinek és sorozatainak megjelenítése</string>
+    <string name="iptv_vod_browse_settings_counts">Filmek: %1$d · Sorozatok: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Rejtve</string>
+    <string name="iptv_vod_browse_settings_pending">A következő frissítés után jelenik meg</string>
+</resources>

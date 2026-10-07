@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Aplankas Movies (matomas kitoms programoms)</string>
+    <string name="iptv_media_label">Aplankas Movies</string>
+    <string name="iptv_media_missing">Aplankas Movies nepasiekiamas</string>
+    <string name="iptv_media_unavailable">Bendrinamas aplankas Movies šiuo metu šiame įrenginyje nepasiekiamas.</string>
+    <string name="iptv_media_notice">Įrašai pirmiausia išsaugomi šiame įrenginyje, o baigus nukopijuojami į Movies/Nuvio Recordings. Ten juos mato kitos programos, pavyzdžiui, medijos leistuvai.</string>
+    <string name="iptv_media_copying">Kopijuojama į aplanką Movies</string>
+    <string name="iptv_media_copy_waiting">Laukiama kopijavimo į aplanką Movies</string>
+    <string name="iptv_media_delete_description">Įrašas bus pašalintas iš sąrašo ir iš aplanko Movies.</string>
+    <string name="iptv_media_delete_not_owned">Pašalinta iš sąrašo. Failas aplanke Movies priklauso ankstesniam šios programos diegimui, todėl jis paliktas. Ištrinkite jį failų tvarkytuve.</string>
+</resources>

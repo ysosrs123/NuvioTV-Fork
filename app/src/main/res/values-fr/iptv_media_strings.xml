@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Dossier Movies (visible par les autres applis)</string>
+    <string name="iptv_media_label">Dossier Movies</string>
+    <string name="iptv_media_missing">Dossier Movies indisponible</string>
+    <string name="iptv_media_unavailable">Le dossier partagé Movies n’est pas disponible sur cet appareil pour le moment.</string>
+    <string name="iptv_media_notice">Les enregistrements sont d’abord sauvegardés sur cet appareil, puis copiés dans Movies/Nuvio Recordings une fois terminés. D’autres applis, comme les lecteurs multimédias, peuvent les y voir.</string>
+    <string name="iptv_media_copying">Copie vers le dossier Movies</string>
+    <string name="iptv_media_copy_waiting">En attente de copie vers le dossier Movies</string>
+    <string name="iptv_media_delete_description">L’enregistrement sera supprimé de la liste et du dossier Movies.</string>
+    <string name="iptv_media_delete_not_owned">Supprimé de la liste. Le fichier du dossier Movies appartient à une installation précédente de cette appli, il a donc été conservé. Supprimez-le avec un gestionnaire de fichiers.</string>
+</resources>

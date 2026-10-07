@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">תיקיית Movies (גלויה לאפליקציות אחרות)</string>
+    <string name="iptv_media_label">תיקיית Movies</string>
+    <string name="iptv_media_missing">תיקיית Movies לא זמינה</string>
+    <string name="iptv_media_unavailable">תיקיית Movies המשותפת לא זמינה כרגע במכשיר הזה.</string>
+    <string name="iptv_media_notice">ההקלטות נשמרות קודם במכשיר הזה ומועתקות אל Movies/Nuvio Recordings בסיומן. אפליקציות אחרות, כמו נגני מדיה, יכולות לראות אותן שם.</string>
+    <string name="iptv_media_copying">מתבצעת העתקה לתיקיית Movies</string>
+    <string name="iptv_media_copy_waiting">ממתין להעתקה לתיקיית Movies</string>
+    <string name="iptv_media_delete_description">ההקלטה תוסר מהרשימה ומתיקיית Movies.</string>
+    <string name="iptv_media_delete_not_owned">הוסר מהרשימה. הקובץ בתיקיית Movies שייך להתקנה קודמת של האפליקציה, ולכן הוא נשמר. אפשר למחוק אותו בעזרת מנהל קבצים.</string>
+</resources>

@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Movies フォルダ（他のアプリから表示可能）</string>
+    <string name="iptv_media_label">Movies フォルダ</string>
+    <string name="iptv_media_missing">Movies フォルダを利用できません</string>
+    <string name="iptv_media_unavailable">共有の Movies フォルダは現在このデバイスで利用できません。</string>
+    <string name="iptv_media_notice">録画はまずこのデバイスに保存され、完了後に Movies/Nuvio Recordings にコピーされます。メディアプレーヤーなどの他のアプリからも表示できます。</string>
+    <string name="iptv_media_copying">Movies フォルダにコピー中</string>
+    <string name="iptv_media_copy_waiting">Movies フォルダへのコピーを待機中</string>
+    <string name="iptv_media_delete_description">録画はリストと Movies フォルダから削除されます。</string>
+    <string name="iptv_media_delete_not_owned">リストから削除しました。Movies フォルダ内のファイルはこのアプリの以前のインストールに属するため、残してあります。ファイルマネージャーで削除してください。</string>
+</resources>

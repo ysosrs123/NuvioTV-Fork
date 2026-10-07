@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Movies फ़ोल्डर (दूसरे ऐप को दिखता है)</string>
+    <string name="iptv_media_label">Movies फ़ोल्डर</string>
+    <string name="iptv_media_missing">Movies फ़ोल्डर उपलब्ध नहीं है</string>
+    <string name="iptv_media_unavailable">शेयर किया गया Movies फ़ोल्डर अभी इस डिवाइस पर उपलब्ध नहीं है।</string>
+    <string name="iptv_media_notice">रिकॉर्डिंग पहले इस डिवाइस पर सेव होती हैं और पूरी होने पर Movies/Nuvio Recordings में कॉपी हो जाती हैं। मीडिया प्लेयर जैसे दूसरे ऐप उन्हें वहाँ देख सकते हैं।</string>
+    <string name="iptv_media_copying">Movies फ़ोल्डर में कॉपी हो रही है</string>
+    <string name="iptv_media_copy_waiting">Movies फ़ोल्डर में कॉपी होने की प्रतीक्षा</string>
+    <string name="iptv_media_delete_description">रिकॉर्डिंग सूची से और Movies फ़ोल्डर से हटा दी जाएगी।</string>
+    <string name="iptv_media_delete_not_owned">सूची से हटा दी गई। Movies फ़ोल्डर की फ़ाइल इस ऐप के पिछले इंस्टॉलेशन की है, इसलिए उसे रखा गया है। उसे फ़ाइल मैनेजर से डिलीट करें।</string>
+</resources>

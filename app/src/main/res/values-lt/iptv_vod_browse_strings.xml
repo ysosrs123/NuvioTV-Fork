@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Filmai</string>
+    <string name="iptv_vod_browse_series">Serialai</string>
+    <string name="iptv_vod_browse_search">Paieška</string>
+    <string name="iptv_vod_browse_search_hint">Ieškoti pagal pavadinimą</string>
+    <string name="iptv_vod_browse_recent">Neseniai pridėti</string>
+    <string name="iptv_vod_browse_all">Visi</string>
+    <string name="iptv_vod_browse_categories">Kategorijos</string>
+    <string name="iptv_vod_browse_sources">Šaltiniai</string>
+    <string name="iptv_vod_browse_results">Rezultatai pagal „%1$s“</string>
+    <string name="iptv_vod_browse_empty">Šiame sąraše pavadinimų nėra.</string>
+    <string name="iptv_vod_browse_no_results">Paieškos atitinkančių pavadinimų nėra.</string>
+    <string name="iptv_vod_browse_none">Jūsų tiesioginės TV šaltiniuose dar nėra filmų ar serialų. Jie atsiras po kito šaltinio atnaujinimo.</string>
+    <string name="iptv_vod_browse_play">Leisti</string>
+    <string name="iptv_vod_browse_resume">Tęsti nuo %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Tęsti %1$s</string>
+    <string name="iptv_vod_browse_from_start">Leisti nuo pradžių</string>
+    <string name="iptv_vod_browse_full_details">Visa informacija</string>
+    <string name="iptv_vod_browse_season">%1$d sezonas</string>
+    <string name="iptv_vod_browse_specials">Specialieji epizodai</string>
+    <string name="iptv_vod_browse_episodes_failed">Nepavyko įkelti epizodų.</string>
+    <string name="iptv_vod_browse_retry">Bandyti dar kartą</string>
+    <string name="iptv_vod_browse_no_episodes">Šiam serialui epizodų nėra.</string>
+    <string name="iptv_vod_browse_missing">Šis pavadinimas nebepasiekiamas. Atnaujinkite šaltinį ir bandykite dar kartą.</string>
+    <string name="iptv_vod_browse_runtime">%1$d min.</string>
+    <string name="iptv_vod_browse_settings_title">Filmai ir serialai</string>
+    <string name="iptv_vod_browse_settings_artwork">Plakatai ir informacija iš</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Naudojama tiesioginės TV skiltyse Filmai ir Serialai</string>
+    <string name="iptv_vod_browse_artwork_provider">Teikėjas</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Plakatai ir pavadinimai, kaip juos pateikia IPTV šaltinis</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB ir meta priedai)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Plakatai, fonai, siužetai ir įvertinimai atitinkantiems pavadinimams; kiti išlaiko teikėjo vaizdus</string>
+    <string name="iptv_vod_browse_settings_sources">Rodyti IPTV šaltinių filmus ir serialus</string>
+    <string name="iptv_vod_browse_settings_counts">Filmai: %1$d · Serialai: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Paslėpta</string>
+    <string name="iptv_vod_browse_settings_pending">Bus rodoma po kito atnaujinimo</string>
+</resources>
