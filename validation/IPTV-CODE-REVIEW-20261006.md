@@ -246,4 +246,5 @@ sport and timeshift"):
 
 Not changed: Brazilian "A x B" titles are not treated as fixtures ("The X Factor
 Live" would match); Brazilian competitions are recognised by name instead. The fixes
-are host-tested (core 349, data-layer 152) and CI-built; not re-reviewed.
+are host-tested (core 349, data-layer 152) and CI-built (run 37552365804); not
+re-reviewed.

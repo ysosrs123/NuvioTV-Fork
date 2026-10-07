@@ -2,7 +2,8 @@
 
 Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
 Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built
-(latest green debug build: `e4fd054`, run 37549887460), not device-tested. Start with "Next session
+(latest green debug build: `f465328`, run 37552365804; minified release build with IPTV
+green at `d8d4a03`, run 37550880901), not device-tested. Start with "Next session
 — work list" below; older sections further down are history and are kept for context.
 Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
 [code review](IPTV-CODE-REVIEW-20261006.md), [reference app notes](IPTV-UX-REFERENCE.md),
@@ -119,9 +120,14 @@ Status on 7 October 2026 (branch head after the work list; nothing device-tested
 5. Release-variant check — the PR Full Debug Build workflow has a `build_type`
    input (`debug` default, `release` builds the minified APK with the throwaway CI
    key). IPTV code uses no reflection or serialisation libraries; NanoHTTPD and
-   Media3 already have keep rules; no IPTV keep rules added. Result: see "CI build".
-6. Second pass — independent review of this session's diff (10 findings, all
-   fixed; see the review file), host tests, CI.
+   Media3 already have keep rules; no IPTV keep rules added. The minified
+   `iptvPrototype` release APK built cleanly at `d8d4a03` (run 37550880901; R8 with
+   all feature code; the later review fixes add no reflection). Not installed or
+   smoke-tested on a device; download `app-iptvPrototype-arm64-v8a-release.apk` from
+   that run to try it (signed with the throwaway CI key).
+6. Second pass — done. Independent review of this session's diff (10 findings, all
+   fixed; see the review file); host tests core 349, data-layer 152, device tests
+   compile; CI debug build green at `f465328` (run 37552365804).
 
 Then the user's device pass (Ugoos AM9 Pro first, then smaller boxes):
 - Install the CI APK (`app-iptvPrototype-arm64-v8a-debug.apk`; uninstall an older
