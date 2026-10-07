@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Links voor zenders, Terugspoelen om terug te gaan, houd OK ingedrukt voor opties</string>
     <string name="iptv_live_paused">Gepauzeerd</string>
     <string name="iptv_live_behind">Achter op live</string>
+    <string name="iptv_live_timeshift_unavailable">Het archief heeft dat moment nog niet. Terug naar live.</string>
     <string name="iptv_live_paused_archive_hint">Druk op Afspelen om hier verder te gaan</string>
     <string name="iptv_live_paused_live_hint">Na een lange pauze kan deze zender verdergaan vanaf live</string>
     <string name="iptv_live_catchup_unavailable">Terugkijken is niet beschikbaar voor dit programma.</string>

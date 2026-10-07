@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Majtas për kanalet, Rikthe për të shkuar pas, mbaj OK për opsionet</string>
     <string name="iptv_live_paused">Në pauzë</string>
     <string name="iptv_live_behind">Pas transmetimit live</string>
+    <string name="iptv_live_timeshift_unavailable">Arkivi ende nuk e ka atë moment. Kthim te drejtpërdrejti.</string>
     <string name="iptv_live_paused_archive_hint">Shtyp Luaj për të vazhduar nga këtu</string>
     <string name="iptv_live_paused_live_hint">Pas një pauze të gjatë, ky kanal mund të vazhdojë nga transmetimi live</string>
     <string name="iptv_live_catchup_unavailable">Catch-up nuk është i disponueshëm për këtë program.</string>

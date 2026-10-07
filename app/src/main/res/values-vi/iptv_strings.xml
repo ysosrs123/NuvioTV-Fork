@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Trái để xem kênh, Tua lại để lùi, giữ OK để xem tùy chọn</string>
     <string name="iptv_live_paused">Đã tạm dừng</string>
     <string name="iptv_live_behind">Chậm hơn trực tiếp</string>
+    <string name="iptv_live_timeshift_unavailable">Kho lưu trữ chưa có thời điểm đó. Đang quay lại trực tiếp.</string>
     <string name="iptv_live_paused_archive_hint">Nhấn Phát để tiếp tục từ đây</string>
     <string name="iptv_live_paused_live_hint">Sau khi tạm dừng lâu, kênh này có thể tiếp tục từ phần đang phát trực tiếp</string>
     <string name="iptv_live_catchup_unavailable">Chương trình này không hỗ trợ xem lại.</string>

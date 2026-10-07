@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Sinistra per i canali, Riavvolgi per tornare indietro, tieni premuto OK per le opzioni</string>
     <string name="iptv_live_paused">In pausa</string>
     <string name="iptv_live_behind">In differita</string>
+    <string name="iptv_live_timeshift_unavailable">L\'archivio non ha ancora questo momento. Torno alla diretta.</string>
     <string name="iptv_live_paused_archive_hint">Premi Play per continuare da qui</string>
     <string name="iptv_live_paused_live_hint">Dopo una lunga pausa questo canale potrebbe riprendere dalla diretta</string>
     <string name="iptv_live_catchup_unavailable">Il catch-up non è disponibile per questo programma.</string>

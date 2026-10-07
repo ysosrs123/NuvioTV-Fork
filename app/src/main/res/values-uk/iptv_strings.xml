@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Ліворуч — канали, перемотка назад — повернення, утримуйте OK для параметрів</string>
     <string name="iptv_live_paused">Пауза</string>
     <string name="iptv_live_behind">Відставання від ефіру</string>
+    <string name="iptv_live_timeshift_unavailable">В архіві ще немає цього моменту. Повернення до прямого ефіру.</string>
     <string name="iptv_live_paused_archive_hint">Натисніть Play, щоб продовжити звідси</string>
     <string name="iptv_live_paused_live_hint">Після довгої паузи канал може продовжитися з прямого ефіру</string>
     <string name="iptv_live_catchup_unavailable">Catch-up недоступний для цієї передачі.</string>

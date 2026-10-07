@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Αριστερά για κανάλια, Γρήγορη επιστροφή για πίσω, κρατήστε το OK για επιλογές</string>
     <string name="iptv_live_paused">Σε παύση</string>
     <string name="iptv_live_behind">Πίσω από το ζωντανό</string>
+    <string name="iptv_live_timeshift_unavailable">Το αρχείο δεν έχει ακόμη αυτή τη στιγμή. Επιστροφή στη ζωντανή μετάδοση.</string>
     <string name="iptv_live_paused_archive_hint">Πατήστε Αναπαραγωγή για να συνεχίσετε από εδώ</string>
     <string name="iptv_live_paused_live_hint">Μετά από μεγάλη παύση το κανάλι μπορεί να συνεχίσει από το ζωντανό</string>
     <string name="iptv_live_catchup_unavailable">Το catch-up δεν είναι διαθέσιμο για αυτό το πρόγραμμα.</string>

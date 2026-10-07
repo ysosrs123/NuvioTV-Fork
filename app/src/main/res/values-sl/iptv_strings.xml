@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Levo za kanale, Previj nazaj za vrnitev, pridržite OK za možnosti</string>
     <string name="iptv_live_paused">Zaustavljeno</string>
     <string name="iptv_live_behind">Za živim prenosom</string>
+    <string name="iptv_live_timeshift_unavailable">Arhiv tega trenutka še nima. Nazaj v živo.</string>
     <string name="iptv_live_paused_archive_hint">Pritisnite Predvajaj za nadaljevanje od tu</string>
     <string name="iptv_live_paused_live_hint">Po daljšem premoru se lahko kanal nadaljuje v živo</string>
     <string name="iptv_live_catchup_unavailable">Catch-up za to oddajo ni na voljo.</string>

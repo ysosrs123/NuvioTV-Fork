@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">左鍵查看頻道，倒轉鍵返回，長按 OK 顯示選項</string>
     <string name="iptv_live_paused">已暫停</string>
     <string name="iptv_live_behind">落後於直播</string>
+    <string name="iptv_live_timeshift_unavailable">回看中還沒有該時刻的內容。正在返回直播。</string>
     <string name="iptv_live_paused_archive_hint">按播放鍵從此處繼續</string>
     <string name="iptv_live_paused_live_hint">暫停較久後，此頻道可能會從直播處繼續</string>
     <string name="iptv_live_catchup_unavailable">此節目不支援回看。</string>

@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">W lewo: kanały, Przewiń do tyłu: cofnij, przytrzymaj OK: opcje</string>
     <string name="iptv_live_paused">Wstrzymano</string>
     <string name="iptv_live_behind">Za transmisją na żywo</string>
+    <string name="iptv_live_timeshift_unavailable">Archiwum nie ma jeszcze tego momentu. Powrót do transmisji na żywo.</string>
     <string name="iptv_live_paused_archive_hint">Naciśnij Odtwórz, aby kontynuować od tego miejsca</string>
     <string name="iptv_live_paused_live_hint">Po dłuższej pauzie ten kanał może wznowić od bieżącej transmisji</string>
     <string name="iptv_live_catchup_unavailable">Catch-up nie jest dostępny dla tego programu.</string>

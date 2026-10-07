@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">שמאלה לערוצים, הרצה אחורה לחזרה, לחיצה ארוכה על OK לאפשרויות</string>
     <string name="iptv_live_paused">מושהה</string>
     <string name="iptv_live_behind">מאחורי השידור החי</string>
+    <string name="iptv_live_timeshift_unavailable">בארכיון עדיין אין את הרגע הזה. חוזרים לשידור החי.</string>
     <string name="iptv_live_paused_archive_hint">יש ללחוץ על הפעלה כדי להמשיך מכאן</string>
     <string name="iptv_live_paused_live_hint">אחרי השהיה ארוכה הערוץ עשוי להמשיך מהשידור החי</string>
     <string name="iptv_live_catchup_unavailable">צפייה לאחור לא זמינה לתוכנית הזו.</string>

@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">左でチャンネル一覧、巻き戻しで戻る、OK長押しでオプション</string>
     <string name="iptv_live_paused">一時停止中</string>
     <string name="iptv_live_behind">ライブより遅れています</string>
+    <string name="iptv_live_timeshift_unavailable">アーカイブにはまだこの時点の録画がありません。ライブに戻ります。</string>
     <string name="iptv_live_paused_archive_hint">再生を押すとここから再開します</string>
     <string name="iptv_live_paused_live_hint">長時間一時停止すると、このチャンネルはライブから再開することがあります</string>
     <string name="iptv_live_catchup_unavailable">この番組は見逃し視聴に対応していません。</string>

@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">चैनलों के लिए बाएँ, पीछे जाने के लिए Rewind, विकल्पों के लिए OK दबाकर रखें</string>
     <string name="iptv_live_paused">रुका हुआ</string>
     <string name="iptv_live_behind">लाइव से पीछे</string>
+    <string name="iptv_live_timeshift_unavailable">संग्रह में यह पल अभी उपलब्ध नहीं है। लाइव पर वापस जा रहे हैं।</string>
     <string name="iptv_live_paused_archive_hint">यहीं से जारी रखने के लिए Play दबाएँ</string>
     <string name="iptv_live_paused_live_hint">लंबे पॉज़ के बाद यह चैनल लाइव से जारी हो सकता है</string>
     <string name="iptv_live_catchup_unavailable">इस प्रोग्राम के लिए कैच-अप उपलब्ध नहीं है।</string>

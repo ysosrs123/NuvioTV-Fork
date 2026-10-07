@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Наляво за канали, превъртане назад за връщане, задръжте OK за опции</string>
     <string name="iptv_live_paused">На пауза</string>
     <string name="iptv_live_behind">Изоставане от живо</string>
+    <string name="iptv_live_timeshift_unavailable">Архивът все още няма този момент. Връщане към живо.</string>
     <string name="iptv_live_paused_archive_hint">Натиснете Play, за да продължите оттук</string>
     <string name="iptv_live_paused_live_hint">След дълга пауза този канал може да продължи от живото излъчване</string>
     <string name="iptv_live_catchup_unavailable">Catch-up не е наличен за това предаване.</string>

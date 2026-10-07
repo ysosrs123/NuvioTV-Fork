@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">சேனல்களுக்கு இடது, பின்செல்ல Rewind, விருப்பங்களுக்கு OK-ஐ அழுத்திப் பிடி</string>
     <string name="iptv_live_paused">இடைநிறுத்தப்பட்டது</string>
     <string name="iptv_live_behind">நேரலையை விடப் பின்னால்</string>
+    <string name="iptv_live_timeshift_unavailable">காப்பகத்தில் இந்தத் தருணம் இன்னும் இல்லை. நேரலைக்குத் திரும்புகிறது.</string>
     <string name="iptv_live_paused_archive_hint">இங்கிருந்து தொடர Play அழுத்தவும்</string>
     <string name="iptv_live_paused_live_hint">நீண்ட இடைநிறுத்தத்துக்குப் பிறகு இந்தச் சேனல் நேரலையிலிருந்து தொடரலாம்</string>
     <string name="iptv_live_catchup_unavailable">இந்த நிகழ்ச்சிக்குக் கேட்ச்-அப் கிடைக்காது.</string>

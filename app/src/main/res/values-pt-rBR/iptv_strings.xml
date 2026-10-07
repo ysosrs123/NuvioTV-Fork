@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Esquerda para canais, Retroceder para voltar, segure OK para opções</string>
     <string name="iptv_live_paused">Pausado</string>
     <string name="iptv_live_behind">Atrás do ao vivo</string>
+    <string name="iptv_live_timeshift_unavailable">O arquivo ainda não tem esse momento. Voltando ao ao vivo.</string>
     <string name="iptv_live_paused_archive_hint">Pressione Play para continuar daqui</string>
     <string name="iptv_live_paused_live_hint">Após uma pausa longa, este canal pode continuar a partir do ao vivo</string>
     <string name="iptv_live_catchup_unavailable">O catch-up não está disponível para este programa.</string>

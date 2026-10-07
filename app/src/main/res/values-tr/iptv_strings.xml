@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Sol: kanallar, Geri sar: geri git, seçenekler için OK tuşunu basılı tutun</string>
     <string name="iptv_live_paused">Duraklatıldı</string>
     <string name="iptv_live_behind">Canlının gerisinde</string>
+    <string name="iptv_live_timeshift_unavailable">Arşivde bu an henüz yok. Canlı yayına dönülüyor.</string>
     <string name="iptv_live_paused_archive_hint">Buradan devam etmek için Oynat tuşuna basın</string>
     <string name="iptv_live_paused_live_hint">Uzun bir duraklatmadan sonra bu kanal canlıdan devam edebilir</string>
     <string name="iptv_live_catchup_unavailable">Bu program için geriye dönük izleme kullanılamıyor.</string>

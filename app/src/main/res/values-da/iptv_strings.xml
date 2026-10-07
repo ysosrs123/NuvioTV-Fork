@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Venstre for kanaler, Spol tilbage for at gå tilbage, hold OK for indstillinger</string>
     <string name="iptv_live_paused">Sat på pause</string>
     <string name="iptv_live_behind">Bagud for live</string>
+    <string name="iptv_live_timeshift_unavailable">Arkivet har ikke det tidspunkt endnu. Tilbage til live.</string>
     <string name="iptv_live_paused_archive_hint">Tryk på Afspil for at fortsætte herfra</string>
     <string name="iptv_live_paused_live_hint">Efter en lang pause kan kanalen fortsætte fra live</string>
     <string name="iptv_live_catchup_unavailable">Catch-up er ikke tilgængelig for dette program.</string>

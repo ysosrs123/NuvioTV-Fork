@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">يسار للقنوات، الترجيع للعودة، اضغط مطولاً على OK للخيارات</string>
     <string name="iptv_live_paused">متوقف مؤقتاً</string>
     <string name="iptv_live_behind">متأخر عن البث المباشر</string>
+    <string name="iptv_live_timeshift_unavailable">لا يحتوي الأرشيف على هذه اللحظة بعد. العودة إلى البث المباشر.</string>
     <string name="iptv_live_paused_archive_hint">اضغط تشغيل للمتابعة من هنا</string>
     <string name="iptv_live_paused_live_hint">بعد إيقاف مؤقت طويل قد تستأنف هذه القناة من البث المباشر</string>
     <string name="iptv_live_catchup_unavailable">المشاهدة المؤجلة غير متاحة لهذا البرنامج.</string>

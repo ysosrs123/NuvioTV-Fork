@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Links für Sender, Zurückspulen zum Zurückgehen, OK halten für Optionen</string>
     <string name="iptv_live_paused">Pausiert</string>
     <string name="iptv_live_behind">Zeitversetzt</string>
+    <string name="iptv_live_timeshift_unavailable">Das Archiv hat für diesen Zeitpunkt noch keine Aufnahme. Zurück zu Live.</string>
     <string name="iptv_live_paused_archive_hint">Drücken Sie Play, um hier fortzufahren</string>
     <string name="iptv_live_paused_live_hint">Nach einer langen Pause setzt dieser Sender eventuell live fort</string>
     <string name="iptv_live_catchup_unavailable">Catch-up ist für diese Sendung nicht verfügbar.</string>

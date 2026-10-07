@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Balra a csatornák, Visszatekerés a visszalépéshez, OK nyomva tartása a lehetőségekhez</string>
     <string name="iptv_live_paused">Szüneteltetve</string>
     <string name="iptv_live_behind">Késleltetve</string>
+    <string name="iptv_live_timeshift_unavailable">Az archívumban még nincs meg ez az időpont. Vissza az élő adáshoz.</string>
     <string name="iptv_live_paused_archive_hint">Nyomd meg a Lejátszás gombot a folytatáshoz innen</string>
     <string name="iptv_live_paused_live_hint">Hosszú szünet után a csatorna az élő adástól folytatódhat</string>
     <string name="iptv_live_catchup_unavailable">Ehhez a műsorhoz nem érhető el visszanézés.</string>

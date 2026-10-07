@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Kairėn – kanalai, „Atsukti“ – atgal, laikykite OK – parinktys</string>
     <string name="iptv_live_paused">Pristabdyta</string>
     <string name="iptv_live_behind">Atsilieka nuo tiesioginio</string>
+    <string name="iptv_live_timeshift_unavailable">Archyve šios akimirkos dar nėra. Grįžtama į tiesioginę transliaciją.</string>
     <string name="iptv_live_paused_archive_hint">Paspauskite „Leisti“, kad tęstumėte nuo čia</string>
     <string name="iptv_live_paused_live_hint">Po ilgos pauzės šis kanalas gali tęsti nuo tiesioginės transliacijos</string>
     <string name="iptv_live_catchup_unavailable">Šiai laidai archyvas nepasiekiamas.</string>

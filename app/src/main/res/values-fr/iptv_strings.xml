@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Gauche pour les chaînes, Retour arrière pour reculer, maintenez OK pour les options</string>
     <string name="iptv_live_paused">En pause</string>
     <string name="iptv_live_behind">En différé</string>
+    <string name="iptv_live_timeshift_unavailable">Le replay n’a pas encore ce moment. Retour au direct.</string>
     <string name="iptv_live_paused_archive_hint">Appuyez sur Lecture pour reprendre ici</string>
     <string name="iptv_live_paused_live_hint">Après une longue pause, cette chaîne peut reprendre en direct</string>
     <string name="iptv_live_catchup_unavailable">Le replay n’est pas disponible pour ce programme.</string>

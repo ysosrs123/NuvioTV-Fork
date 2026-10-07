@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Vänster för kanaler, Spola tillbaka för att gå bakåt, håll OK för alternativ</string>
     <string name="iptv_live_paused">Pausad</string>
     <string name="iptv_live_behind">Efter live</string>
+    <string name="iptv_live_timeshift_unavailable">Arkivet har inte den tidpunkten än. Tillbaka till live.</string>
     <string name="iptv_live_paused_archive_hint">Tryck Spela för att fortsätta härifrån</string>
     <string name="iptv_live_paused_live_hint">Efter en lång paus kan kanalen fortsätta från live</string>
     <string name="iptv_live_catchup_unavailable">Catch-up är inte tillgängligt för det här programmet.</string>

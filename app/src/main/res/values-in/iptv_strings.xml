@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Kiri untuk saluran, Rewind untuk mundur, tahan OK untuk opsi</string>
     <string name="iptv_live_paused">Dijeda</string>
     <string name="iptv_live_behind">Tertinggal dari live</string>
+    <string name="iptv_live_timeshift_unavailable">Arsip belum memiliki momen itu. Kembali ke siaran langsung.</string>
     <string name="iptv_live_paused_archive_hint">Tekan Putar untuk melanjutkan dari sini</string>
     <string name="iptv_live_paused_live_hint">Setelah jeda lama, saluran ini mungkin berlanjut dari siaran live</string>
     <string name="iptv_live_catchup_unavailable">Catch-up tidak tersedia untuk acara ini.</string>

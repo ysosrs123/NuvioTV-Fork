@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Vlevo kanály, Přetočit zpět pro návrat, podržením OK možnosti</string>
     <string name="iptv_live_paused">Pozastaveno</string>
     <string name="iptv_live_behind">Za živým vysíláním</string>
+    <string name="iptv_live_timeshift_unavailable">Archiv tento okamžik ještě nemá. Zpět na živé vysílání.</string>
     <string name="iptv_live_paused_archive_hint">Stiskněte Přehrát a pokračujte odsud</string>
     <string name="iptv_live_paused_live_hint">Po dlouhé pauze může kanál pokračovat živým vysíláním</string>
     <string name="iptv_live_catchup_unavailable">Catch-up není pro tento pořad k dispozici.</string>

@@ -163,6 +163,7 @@
     <string name="iptv_live_archive_hint">Stânga pentru canale, Derulare înapoi pentru a reveni, ține apăsat OK pentru opțiuni</string>
     <string name="iptv_live_paused">Pauză</string>
     <string name="iptv_live_behind">În urma emisiei live</string>
+    <string name="iptv_live_timeshift_unavailable">Arhiva nu are încă acel moment. Revenire la live.</string>
     <string name="iptv_live_paused_archive_hint">Apasă Redare pentru a continua de aici</string>
     <string name="iptv_live_paused_live_hint">După o pauză lungă, acest canal poate continua de la emisia live</string>
     <string name="iptv_live_catchup_unavailable">Catch-up nu este disponibil pentru acest program.</string>
