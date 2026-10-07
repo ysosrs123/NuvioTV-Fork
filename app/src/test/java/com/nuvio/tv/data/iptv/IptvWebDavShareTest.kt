@@ -257,6 +257,13 @@ class IptvWebDavShareTest {
         assertTrue(dav.requests.any { it.method == "PUT" })
     }
 
+    @Test fun certificateFailureOnALaterRouteIsStillReported() {
+        val handshake = javax.net.ssl.SSLHandshakeException("handshake").apply { initCause(java.security.cert.CertificateException("untrusted")) }
+        val error = java.io.IOException("first route", java.net.ConnectException("refused")).apply { addSuppressed(handshake) }
+        assertEquals(IptvShareError.CERTIFICATE, networkError(error))
+        assertEquals(IptvShareError.UNREACHABLE, networkError(java.net.ConnectException("refused")))
+    }
+
     @Test fun targetsAreWithheldFromText() {
         val target = RecordingShareTarget("nas", 1, "a", "b")
         assertFalse(IptvShareSettings(target, "u", "", false, "probe0000").toString().contains("nas"))

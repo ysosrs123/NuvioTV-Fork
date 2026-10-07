@@ -108,15 +108,15 @@ class IptvShareTrust(private val pin: String?) : X509TrustManager {
 
 internal fun networkError(error: Throwable, trust: IptvShareTrust? = null): IptvShareError {
     val chain = generateSequence(error) { it.cause }.take(8).toList()
+    chain.firstOrNull { it is IptvShareException }?.let { return (it as IptvShareException).error }
+    val tried = chain + chain.flatMap { it.suppressed.flatMap { other -> generateSequence(other) { it.cause }.take(8).toList() } }
+    if (tried.any { it is CertificateException } || trust?.presented != null && tried.any { it is SSLException }) return IptvShareError.CERTIFICATE
     for (cause in chain) {
         when (cause) {
-            is IptvShareException -> return cause.error
             is SocketTimeoutException -> return IptvShareError.TIMEOUT
             is UnknownHostException, is ConnectException, is NoRouteToHostException, is PortUnreachableException -> return IptvShareError.UNREACHABLE
-            is CertificateException -> return IptvShareError.CERTIFICATE
         }
     }
-    if (trust?.presented != null && chain.any { it is SSLException }) return IptvShareError.CERTIFICATE
     return if (chain.any { it is EOFException || it is SSLException || it is java.net.SocketException || it is IOException && it.message?.contains("reset", true) == true })
         IptvShareError.DISCONNECTED else IptvShareError.OTHER
 }
