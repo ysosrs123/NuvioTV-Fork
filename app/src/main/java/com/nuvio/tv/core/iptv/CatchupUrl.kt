@@ -75,3 +75,13 @@ fun xtreamTimeshiftPath(window: CatchupWindow): Pair<Long, String> {
     val start = Instant.ofEpochMilli(window.startMillis).atOffset(ZoneOffset.ofTotalSeconds(window.offsetMinutes * 60))
     return minutes to DateTimeFormatter.ofPattern("yyyy-MM-dd:HH-mm").format(start)
 }
+
+enum class XtreamCatchupStyle {
+    TIMESHIFT_TS, TIMESHIFT_HLS, TIMESHIFT_PHP;
+
+    companion object {
+        fun parse(value: String?): XtreamCatchupStyle? = entries.firstOrNull { it.name == value }
+        fun order(remembered: XtreamCatchupStyle?): List<XtreamCatchupStyle> = listOfNotNull(remembered) + entries.filter { it != remembered }
+        fun worked(remembered: XtreamCatchupStyle?, playing: XtreamCatchupStyle): XtreamCatchupStyle? = playing.takeIf { it != remembered }
+    }
+}

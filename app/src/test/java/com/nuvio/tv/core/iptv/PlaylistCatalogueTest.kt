@@ -61,9 +61,10 @@ class PlaylistCatalogueTest {
         assertFalse(parse("#EXTM3U\n#EXTINF:-1,Missing").canPublish)
         assertFalse(parse("#EXTM3U").canPublish)
     }
-    @Test fun authenticationExtensionsAreNotSilentlyIgnored() {
-        val p = parse("#EXTM3U\n#EXTINF:-1,One\n#EXTVLCOPT:http-referrer=https://example.invalid\nhttps://example.invalid/one")
-        assertFalse(p.canPublish); assertEquals(PlaylistIssue.UNSUPPORTED_EXTENSION, p.diagnostics.single().issue)
+    @Test fun playerDirectivesNoLongerBlockPublication() {
+        val p = parse("#EXTM3U\n#EXTINF:-1,One\n#EXTVLCOPT:http-referrer=https://example.invalid\n#KODIPROP:inputstream.adaptive.license_type=x\nhttps://example.invalid/one")
+        assertTrue(p.canPublish); assertTrue(p.diagnostics.isEmpty())
+        assertEquals("https://example.invalid", p.channels.single().attributes[StreamHeaders.REFERRER])
     }
     @Test fun boundedLinesAndCatalogueSizeFailClosed() {
         for (limits in listOf(PlaylistLimits(maxLineCharacters = 8), PlaylistLimits(maxCharacters = 10), PlaylistLimits(maxChannels = 1))) {

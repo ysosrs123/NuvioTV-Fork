@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_playback_denied">The provider refused this channel. Check your subscription, then try again.</string>
+    <string name="iptv_playback_missing">This channel is no longer available from the provider.</string>
+    <string name="iptv_playback_unsupported">This channel\'s format can\'t be played on this device.</string>
+    <string name="iptv_playback_decoder">The video decoder couldn\'t start. Close other pictures and try again.</string>
+</resources>

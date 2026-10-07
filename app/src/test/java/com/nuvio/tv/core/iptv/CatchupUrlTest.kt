@@ -36,4 +36,15 @@ class CatchupUrlTest {
         assertEquals(60L to "2026-10-07:00-00", xtreamTimeshiftPath(window))
         assertEquals(60L to "2026-10-07:10-00", xtreamTimeshiftPath(window.copy(offsetMinutes = 600)))
     }
+
+    @Test fun xtreamStylesTryRememberedFirstThenTheRestInOrder() {
+        assertEquals(listOf(XtreamCatchupStyle.TIMESHIFT_TS, XtreamCatchupStyle.TIMESHIFT_HLS, XtreamCatchupStyle.TIMESHIFT_PHP), XtreamCatchupStyle.order(null))
+        assertEquals(listOf(XtreamCatchupStyle.TIMESHIFT_PHP, XtreamCatchupStyle.TIMESHIFT_TS, XtreamCatchupStyle.TIMESHIFT_HLS),
+            XtreamCatchupStyle.order(XtreamCatchupStyle.TIMESHIFT_PHP))
+        assertEquals(XtreamCatchupStyle.TIMESHIFT_HLS, XtreamCatchupStyle.parse("TIMESHIFT_HLS"))
+        assertNull(XtreamCatchupStyle.parse("other"))
+        assertNull(XtreamCatchupStyle.worked(XtreamCatchupStyle.TIMESHIFT_TS, XtreamCatchupStyle.TIMESHIFT_TS))
+        assertEquals(XtreamCatchupStyle.TIMESHIFT_PHP, XtreamCatchupStyle.worked(XtreamCatchupStyle.TIMESHIFT_TS, XtreamCatchupStyle.TIMESHIFT_PHP))
+        assertEquals(XtreamCatchupStyle.TIMESHIFT_TS, XtreamCatchupStyle.worked(null, XtreamCatchupStyle.TIMESHIFT_TS))
+    }
 }

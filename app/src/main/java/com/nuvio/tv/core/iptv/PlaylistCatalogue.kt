@@ -57,6 +57,7 @@ class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimit
         var sawHls = false
         var lineNumber = 0
         var pending: Pair<String, Map<String, String>>? = null
+        var headers = emptyMap<String, String>()
         var defaults = emptyMap<String, String>()
         var guideUrls = emptyList<String>()
         fun issue(reason: PlaylistIssue) {
@@ -101,23 +102,26 @@ class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimit
                         issue(PlaylistIssue.MALFORMED_RECORD)
                         continue
                     }
-                    val inherited = defaults.filterKeys { it in catchupAttributes } + attrs
+                    val inherited = defaults.filterKeys { it in inheritedAttributes } + attrs
                     pending = name to inherited
                 } else if (line.startsWith("#EXTGRP:")) {
                     pending = pending?.let { (name, attrs) ->
                         name to if ("group-title" in attrs) attrs else attrs + ("group-title" to line.substringAfter(':'))
                     }
-                } else if (line.startsWith("#EXTVLCOPT:") || line.startsWith("#KODIPROP:")) {
-                    issue(PlaylistIssue.UNSUPPORTED_EXTENSION)
+                } else if (line.startsWith("#EXTVLCOPT:") || line.startsWith("#KODIPROP:") || line.startsWith("#EXTHTTP:")) {
+                    headers = headers + StreamHeaders.directive(line)
                 } else if (!line.startsWith('#')) {
                     val record = pending
                     pending = null
+                    val (address, suffix) = StreamHeaders.splitLocator(line)
+                    val extra = headers + suffix
+                    headers = emptyMap()
                     if (record == null) { issue(PlaylistIssue.MALFORMED_RECORD); continue }
-                    val locator = resolveHttp(line, finalResponseUri)
+                    val locator = resolveHttp(address, finalResponseUri)
                     if (locator == null) { issue(PlaylistIssue.INVALID_LOCATOR); continue }
                     if (channels.size >= limits.maxChannels) throw LimitExceeded()
                     val logo = record.second[CHANNEL_LOGO_ATTRIBUTE]?.let { channelLogoUrl(it, finalResponseUri?.toString()) }
-                    channels += PlaylistChannel(record.first, locator, record.second - CHANNEL_LOGO_ATTRIBUTE + listOfNotNull(logo?.let { CHANNEL_LOGO_ATTRIBUTE to it }))
+                    channels += PlaylistChannel(record.first, locator, record.second - CHANNEL_LOGO_ATTRIBUTE + listOfNotNull(logo?.let { CHANNEL_LOGO_ATTRIBUTE to it }) + extra)
                 }
             }
             if (pending != null) issue(PlaylistIssue.MISSING_LOCATOR)
@@ -191,7 +195,7 @@ class PlaylistCatalogueParser(private val limits: PlaylistLimits = PlaylistLimit
     }
 
     companion object {
-        private val catchupAttributes = setOf("catchup", "catchup-source", "catchup-days", "catchup-correction")
+        private val inheritedAttributes = setOf("catchup", "catchup-source", "catchup-days", "catchup-correction") + StreamHeaders.attributes
         internal fun resolveHttp(value: String, base: URI?): String? = try {
             val uri = URI(value)
             val resolved = if (uri.isAbsolute) uri else base?.resolve(uri)
