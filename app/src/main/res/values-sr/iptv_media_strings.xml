@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Фасцикла Movies (видљива другим апликацијама)</string>
+    <string name="iptv_media_label">Фасцикла Movies</string>
+    <string name="iptv_media_missing">Фасцикла Movies није доступна</string>
+    <string name="iptv_media_unavailable">Дељена фасцикла Movies тренутно није доступна на овом уређају.</string>
+    <string name="iptv_media_notice">Снимци се прво чувају на овом уређају, а када се заврше, копирају се у Movies/Nuvio Recordings. Друге апликације, као што су медија плејери, могу их тамо видети.</string>
+    <string name="iptv_media_copying">Копирање у фасциклу Movies</string>
+    <string name="iptv_media_copy_waiting">Чека се копирање у фасциклу Movies</string>
+    <string name="iptv_media_delete_description">Снимак ће бити уклоњен са листе и из фасцикле Movies.</string>
+    <string name="iptv_media_delete_not_owned">Уклоњено са листе. Датотека у фасцикли Movies припада ранијој инсталацији ове апликације, па је задржана. Обришите је помоћу менаџера датотека.</string>
+</resources>

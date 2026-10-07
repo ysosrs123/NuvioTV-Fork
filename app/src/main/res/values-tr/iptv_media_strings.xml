@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Movies klasörü (diğer uygulamalar görebilir)</string>
+    <string name="iptv_media_label">Movies klasörü</string>
+    <string name="iptv_media_missing">Movies klasörü kullanılamıyor</string>
+    <string name="iptv_media_unavailable">Paylaşılan Movies klasörü şu anda bu cihazda kullanılamıyor.</string>
+    <string name="iptv_media_notice">Kayıtlar önce bu cihaza kaydedilir ve bittiğinde Movies/Nuvio Recordings klasörüne kopyalanır. Medya oynatıcılar gibi diğer uygulamalar onları orada görebilir.</string>
+    <string name="iptv_media_copying">Movies klasörüne kopyalanıyor</string>
+    <string name="iptv_media_copy_waiting">Movies klasörüne kopyalanmayı bekliyor</string>
+    <string name="iptv_media_delete_description">Kayıt listeden ve Movies klasöründen kaldırılacak.</string>
+    <string name="iptv_media_delete_not_owned">Listeden kaldırıldı. Movies klasöründeki dosya bu uygulamanın önceki bir kurulumuna ait olduğu için saklandı. Bir dosya yöneticisiyle silin.</string>
+</resources>

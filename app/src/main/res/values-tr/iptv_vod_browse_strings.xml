@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Filmler</string>
+    <string name="iptv_vod_browse_series">Diziler</string>
+    <string name="iptv_vod_browse_search">Ara</string>
+    <string name="iptv_vod_browse_search_hint">Başlığa göre ara</string>
+    <string name="iptv_vod_browse_recent">Son eklenenler</string>
+    <string name="iptv_vod_browse_all">Tümü</string>
+    <string name="iptv_vod_browse_categories">Kategoriler</string>
+    <string name="iptv_vod_browse_sources">Kaynaklar</string>
+    <string name="iptv_vod_browse_results">“%1$s” için sonuçlar</string>
+    <string name="iptv_vod_browse_empty">Bu listede içerik yok.</string>
+    <string name="iptv_vod_browse_no_results">Aramanızla eşleşen içerik yok.</string>
+    <string name="iptv_vod_browse_none">Canlı TV kaynaklarınızda henüz film veya dizi yok. Bir sonraki kaynak yenilemesinden sonra görünürler.</string>
+    <string name="iptv_vod_browse_play">Oynat</string>
+    <string name="iptv_vod_browse_resume">%1$s noktasından devam et</string>
+    <string name="iptv_vod_browse_resume_episode">Devam et: %1$s</string>
+    <string name="iptv_vod_browse_from_start">Baştan oynat</string>
+    <string name="iptv_vod_browse_full_details">Tüm ayrıntılar</string>
+    <string name="iptv_vod_browse_season">Sezon %1$d</string>
+    <string name="iptv_vod_browse_specials">Özel Bölümler</string>
+    <string name="iptv_vod_browse_episodes_failed">Bölümler yüklenemedi.</string>
+    <string name="iptv_vod_browse_retry">Tekrar dene</string>
+    <string name="iptv_vod_browse_no_episodes">Bu dizi için listelenmiş bölüm yok.</string>
+    <string name="iptv_vod_browse_missing">Bu içerik artık mevcut değil. Kaynağı yenileyip tekrar deneyin.</string>
+    <string name="iptv_vod_browse_runtime">%1$d dk</string>
+    <string name="iptv_vod_browse_settings_title">Filmler ve diziler</string>
+    <string name="iptv_vod_browse_settings_artwork">Poster ve ayrıntı kaynağı</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Canlı TV\'deki Filmler ve Diziler için kullanılır</string>
+    <string name="iptv_vod_browse_artwork_provider">Sağlayıcı</string>
+    <string name="iptv_vod_browse_artwork_provider_description">IPTV kaynağının listelediği posterler ve adlar</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB ve meta eklentileri)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Eşleşen içerikler için posterler, arka planlar, özetler ve puanlar; diğerleri sağlayıcının görsellerini korur</string>
+    <string name="iptv_vod_browse_settings_sources">IPTV kaynaklarının filmlerini ve dizilerini göster</string>
+    <string name="iptv_vod_browse_settings_counts">Filmler: %1$d · Diziler: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Gizli</string>
+    <string name="iptv_vod_browse_settings_pending">Bir sonraki yenilemeden sonra gösterilir</string>
+</resources>

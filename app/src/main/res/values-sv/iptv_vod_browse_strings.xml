@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Filmer</string>
+    <string name="iptv_vod_browse_series">Serier</string>
+    <string name="iptv_vod_browse_search">Sök</string>
+    <string name="iptv_vod_browse_search_hint">Sök efter titel</string>
+    <string name="iptv_vod_browse_recent">Nyligen tillagda</string>
+    <string name="iptv_vod_browse_all">Alla</string>
+    <string name="iptv_vod_browse_categories">Kategorier</string>
+    <string name="iptv_vod_browse_sources">Källor</string>
+    <string name="iptv_vod_browse_results">Resultat för ”%1$s”</string>
+    <string name="iptv_vod_browse_empty">Inga titlar i den här listan.</string>
+    <string name="iptv_vod_browse_no_results">Inga titlar matchar din sökning.</string>
+    <string name="iptv_vod_browse_none">Inga filmer eller serier i dina Live-TV-källor än. De visas efter nästa uppdatering av källan.</string>
+    <string name="iptv_vod_browse_play">Spela</string>
+    <string name="iptv_vod_browse_resume">Återuppta från %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Återuppta %1$s</string>
+    <string name="iptv_vod_browse_from_start">Spela från början</string>
+    <string name="iptv_vod_browse_full_details">Alla detaljer</string>
+    <string name="iptv_vod_browse_season">Säsong %1$d</string>
+    <string name="iptv_vod_browse_specials">Special</string>
+    <string name="iptv_vod_browse_episodes_failed">Avsnitten kunde inte läsas in.</string>
+    <string name="iptv_vod_browse_retry">Försök igen</string>
+    <string name="iptv_vod_browse_no_episodes">Inga avsnitt listade för den här serien.</string>
+    <string name="iptv_vod_browse_missing">Titeln är inte längre tillgänglig. Uppdatera källan och försök igen.</string>
+    <string name="iptv_vod_browse_runtime">%1$d min</string>
+    <string name="iptv_vod_browse_settings_title">Filmer och serier</string>
+    <string name="iptv_vod_browse_settings_artwork">Affischer och detaljer från</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Används för Filmer och Serier i Live-TV</string>
+    <string name="iptv_vod_browse_artwork_provider">Leverantör</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Affischer och namn som IPTV-källan listar dem</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB och metatillägg)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Affischer, bakgrunder, handlingar och betyg för titlar som matchar; övriga behåller leverantörens bilder</string>
+    <string name="iptv_vod_browse_settings_sources">Visa IPTV-källornas filmer och serier</string>
+    <string name="iptv_vod_browse_settings_counts">Filmer: %1$d · Serier: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Dold</string>
+    <string name="iptv_vod_browse_settings_pending">Visas efter nästa uppdatering</string>
+</resources>

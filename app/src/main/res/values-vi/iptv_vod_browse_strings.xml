@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Phim</string>
+    <string name="iptv_vod_browse_series">Phim bộ</string>
+    <string name="iptv_vod_browse_search">Tìm kiếm</string>
+    <string name="iptv_vod_browse_search_hint">Tìm theo tên</string>
+    <string name="iptv_vod_browse_recent">Mới thêm gần đây</string>
+    <string name="iptv_vod_browse_all">Tất cả</string>
+    <string name="iptv_vod_browse_categories">Danh mục</string>
+    <string name="iptv_vod_browse_sources">Nguồn</string>
+    <string name="iptv_vod_browse_results">Kết quả cho “%1$s”</string>
+    <string name="iptv_vod_browse_empty">Không có tựa nào trong danh sách này.</string>
+    <string name="iptv_vod_browse_no_results">Không có tựa nào khớp với tìm kiếm.</string>
+    <string name="iptv_vod_browse_none">Chưa có phim hay phim bộ nào trong nguồn TV trực tiếp của bạn. Chúng sẽ xuất hiện sau lần làm mới nguồn tiếp theo.</string>
+    <string name="iptv_vod_browse_play">Phát</string>
+    <string name="iptv_vod_browse_resume">Xem tiếp từ %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Xem tiếp %1$s</string>
+    <string name="iptv_vod_browse_from_start">Phát từ đầu</string>
+    <string name="iptv_vod_browse_full_details">Chi tiết đầy đủ</string>
+    <string name="iptv_vod_browse_season">Mùa %1$d</string>
+    <string name="iptv_vod_browse_specials">Tập đặc biệt</string>
+    <string name="iptv_vod_browse_episodes_failed">Không thể tải các tập.</string>
+    <string name="iptv_vod_browse_retry">Thử lại</string>
+    <string name="iptv_vod_browse_no_episodes">Không có tập nào cho phim bộ này.</string>
+    <string name="iptv_vod_browse_missing">Tựa này không còn khả dụng. Hãy làm mới nguồn rồi thử lại.</string>
+    <string name="iptv_vod_browse_runtime">%1$d phút</string>
+    <string name="iptv_vod_browse_settings_title">Phim và phim bộ</string>
+    <string name="iptv_vod_browse_settings_artwork">Poster và chi tiết từ</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Dùng cho Phim và Phim bộ trong TV trực tiếp</string>
+    <string name="iptv_vod_browse_artwork_provider">Nhà cung cấp</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Poster và tên theo danh sách của nguồn IPTV</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB và tiện ích meta)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Poster, ảnh nền, nội dung và đánh giá cho các tựa khớp; các tựa khác giữ hình ảnh của nhà cung cấp</string>
+    <string name="iptv_vod_browse_settings_sources">Hiển thị phim và phim bộ từ nguồn IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">Phim: %1$d · Phim bộ: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Ẩn</string>
+    <string name="iptv_vod_browse_settings_pending">Hiển thị sau lần làm mới tiếp theo</string>
+</resources>

@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">电影</string>
+    <string name="iptv_vod_browse_series">剧集</string>
+    <string name="iptv_vod_browse_search">搜索</string>
+    <string name="iptv_vod_browse_search_hint">按标题搜索</string>
+    <string name="iptv_vod_browse_recent">最近添加</string>
+    <string name="iptv_vod_browse_all">全部</string>
+    <string name="iptv_vod_browse_categories">分类</string>
+    <string name="iptv_vod_browse_sources">来源</string>
+    <string name="iptv_vod_browse_results">“%1$s”的搜索结果</string>
+    <string name="iptv_vod_browse_empty">此列表中没有影片。</string>
+    <string name="iptv_vod_browse_no_results">没有与搜索匹配的影片。</string>
+    <string name="iptv_vod_browse_none">您的直播电视来源中还没有电影或剧集。它们将在下次刷新来源后显示。</string>
+    <string name="iptv_vod_browse_play">播放</string>
+    <string name="iptv_vod_browse_resume">从 %1$s 继续播放</string>
+    <string name="iptv_vod_browse_resume_episode">继续播放 %1$s</string>
+    <string name="iptv_vod_browse_from_start">从头播放</string>
+    <string name="iptv_vod_browse_full_details">完整详情</string>
+    <string name="iptv_vod_browse_season">第 %1$d 季</string>
+    <string name="iptv_vod_browse_specials">特别篇</string>
+    <string name="iptv_vod_browse_episodes_failed">无法加载分集。</string>
+    <string name="iptv_vod_browse_retry">重试</string>
+    <string name="iptv_vod_browse_no_episodes">此剧集没有列出任何分集。</string>
+    <string name="iptv_vod_browse_missing">此影片已不可用。请刷新来源后重试。</string>
+    <string name="iptv_vod_browse_runtime">%1$d 分钟</string>
+    <string name="iptv_vod_browse_settings_title">电影和剧集</string>
+    <string name="iptv_vod_browse_settings_artwork">海报和详情来源</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">用于直播电视中的电影和剧集</string>
+    <string name="iptv_vod_browse_artwork_provider">提供者</string>
+    <string name="iptv_vod_browse_artwork_provider_description">按 IPTV 来源列出的海报和名称</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio（TMDB 和元数据扩展）</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">匹配影片的海报、背景图、简介和评分；其他影片保留提供者的图片</string>
+    <string name="iptv_vod_browse_settings_sources">显示 IPTV 来源的电影和剧集</string>
+    <string name="iptv_vod_browse_settings_counts">电影：%1$d · 剧集：%2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">已隐藏</string>
+    <string name="iptv_vod_browse_settings_pending">下次刷新后显示</string>
+</resources>

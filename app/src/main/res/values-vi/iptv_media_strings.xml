@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Thư mục Movies (ứng dụng khác có thể thấy)</string>
+    <string name="iptv_media_label">Thư mục Movies</string>
+    <string name="iptv_media_missing">Thư mục Movies không khả dụng</string>
+    <string name="iptv_media_unavailable">Thư mục Movies dùng chung hiện không khả dụng trên thiết bị này.</string>
+    <string name="iptv_media_notice">Bản ghi được lưu trên thiết bị này trước, rồi được sao chép vào Movies/Nuvio Recordings khi hoàn tất. Các ứng dụng khác, như trình phát media, có thể thấy chúng tại đó.</string>
+    <string name="iptv_media_copying">Đang sao chép vào thư mục Movies</string>
+    <string name="iptv_media_copy_waiting">Đang chờ sao chép vào thư mục Movies</string>
+    <string name="iptv_media_delete_description">Bản ghi sẽ bị xóa khỏi danh sách và khỏi thư mục Movies.</string>
+    <string name="iptv_media_delete_not_owned">Đã xóa khỏi danh sách. Tệp trong thư mục Movies thuộc về một lần cài đặt trước của ứng dụng này nên được giữ lại. Hãy xóa tệp bằng trình quản lý tệp.</string>
+</resources>

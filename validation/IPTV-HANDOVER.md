@@ -121,7 +121,7 @@ Done — committed together with the screens below:
   never sent to Nuvio history. "Movies and series" settings group: artwork from Provider
   (default) or Nuvio (TMDB lookups for visible posters only, cached 30 days, honours
   TMDB 429), and a switch per source.
-- Strings `iptv_media_strings.xml` and `iptv_vod_browse_strings.xml` are not translated yet.
+- Strings `iptv_media_strings.xml` and `iptv_vod_browse_strings.xml` are translated into all 40 locales.
 
 Next:
 - Fix the VOD gaps above; Go live button in the control deck; Live TV rows on the

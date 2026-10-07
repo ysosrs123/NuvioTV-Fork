@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Фільми</string>
+    <string name="iptv_vod_browse_series">Серіали</string>
+    <string name="iptv_vod_browse_search">Пошук</string>
+    <string name="iptv_vod_browse_search_hint">Пошук за назвою</string>
+    <string name="iptv_vod_browse_recent">Нещодавно додані</string>
+    <string name="iptv_vod_browse_all">Усі</string>
+    <string name="iptv_vod_browse_categories">Категорії</string>
+    <string name="iptv_vod_browse_sources">Джерела</string>
+    <string name="iptv_vod_browse_results">Результати для «%1$s»</string>
+    <string name="iptv_vod_browse_empty">У цьому списку немає назв.</string>
+    <string name="iptv_vod_browse_no_results">Немає назв, що відповідають пошуку.</string>
+    <string name="iptv_vod_browse_none">У ваших джерелах ТВ наживо ще немає фільмів чи серіалів. Вони з\'являться після наступного оновлення джерела.</string>
+    <string name="iptv_vod_browse_play">Дивитися</string>
+    <string name="iptv_vod_browse_resume">Продовжити з %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Продовжити %1$s</string>
+    <string name="iptv_vod_browse_from_start">Дивитися з початку</string>
+    <string name="iptv_vod_browse_full_details">Усі подробиці</string>
+    <string name="iptv_vod_browse_season">Сезон %1$d</string>
+    <string name="iptv_vod_browse_specials">Спецвипуски</string>
+    <string name="iptv_vod_browse_episodes_failed">Не вдалося завантажити епізоди.</string>
+    <string name="iptv_vod_browse_retry">Повторити</string>
+    <string name="iptv_vod_browse_no_episodes">Для цього серіалу немає епізодів.</string>
+    <string name="iptv_vod_browse_missing">Ця назва більше недоступна. Оновіть джерело й спробуйте ще раз.</string>
+    <string name="iptv_vod_browse_runtime">%1$d хв</string>
+    <string name="iptv_vod_browse_settings_title">Фільми й серіали</string>
+    <string name="iptv_vod_browse_settings_artwork">Постери й деталі з</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Використовується для фільмів і серіалів у ТВ наживо</string>
+    <string name="iptv_vod_browse_artwork_provider">Провайдер</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Постери й назви, як їх подає джерело IPTV</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB і мета-адони)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Постери, фони, сюжети й рейтинги для відповідних назв; інші зберігають зображення провайдера</string>
+    <string name="iptv_vod_browse_settings_sources">Показувати фільми й серіали джерел IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">Фільми: %1$d · Серіали: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Приховано</string>
+    <string name="iptv_vod_browse_settings_pending">З\'явиться після наступного оновлення</string>
+</resources>

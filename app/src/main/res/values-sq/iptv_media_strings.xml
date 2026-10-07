@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Dosja Movies (e dukshme për aplikacionet e tjera)</string>
+    <string name="iptv_media_label">Dosja Movies</string>
+    <string name="iptv_media_missing">Dosja Movies nuk është e disponueshme</string>
+    <string name="iptv_media_unavailable">Dosja e përbashkët Movies nuk është e disponueshme në këtë pajisje tani.</string>
+    <string name="iptv_media_notice">Regjistrimet ruhen fillimisht në këtë pajisje dhe kopjohen te Movies/Nuvio Recordings kur përfundojnë. Aplikacionet e tjera, si luajtësit e medias, mund t\'i shohin atje.</string>
+    <string name="iptv_media_copying">Duke kopjuar te dosja Movies</string>
+    <string name="iptv_media_copy_waiting">Në pritje për t\'u kopjuar te dosja Movies</string>
+    <string name="iptv_media_delete_description">Regjistrimi do të hiqet nga lista dhe nga dosja Movies.</string>
+    <string name="iptv_media_delete_not_owned">U hoq nga lista. Skedari në dosjen Movies i përket një instalimi të mëparshëm të këtij aplikacioni, prandaj u ruajt. Fshije me një menaxher skedarësh.</string>
+</resources>

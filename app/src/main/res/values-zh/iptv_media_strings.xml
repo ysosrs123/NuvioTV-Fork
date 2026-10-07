@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Movies 文件夹（其他应用可见）</string>
+    <string name="iptv_media_label">Movies 文件夹</string>
+    <string name="iptv_media_missing">Movies 文件夹不可用</string>
+    <string name="iptv_media_unavailable">此设备上的共享 Movies 文件夹当前不可用。</string>
+    <string name="iptv_media_notice">录像会先保存在此设备上，完成后复制到 Movies/Nuvio Recordings。其他应用（如媒体播放器）可以在那里看到它们。</string>
+    <string name="iptv_media_copying">正在复制到 Movies 文件夹</string>
+    <string name="iptv_media_copy_waiting">等待复制到 Movies 文件夹</string>
+    <string name="iptv_media_delete_description">录像将从列表和 Movies 文件夹中移除。</string>
+    <string name="iptv_media_delete_not_owned">已从列表中移除。Movies 文件夹中的文件属于此应用之前的安装，因此已保留。请使用文件管理器删除。</string>
+</resources>

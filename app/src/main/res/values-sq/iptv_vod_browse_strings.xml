@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Filma</string>
+    <string name="iptv_vod_browse_series">Seriale</string>
+    <string name="iptv_vod_browse_search">Kërko</string>
+    <string name="iptv_vod_browse_search_hint">Kërko sipas titullit</string>
+    <string name="iptv_vod_browse_recent">Shtuar së fundi</string>
+    <string name="iptv_vod_browse_all">Të gjitha</string>
+    <string name="iptv_vod_browse_categories">Kategoritë</string>
+    <string name="iptv_vod_browse_sources">Burimet</string>
+    <string name="iptv_vod_browse_results">Rezultatet për “%1$s”</string>
+    <string name="iptv_vod_browse_empty">Nuk ka tituj në këtë listë.</string>
+    <string name="iptv_vod_browse_no_results">Asnjë titull nuk përputhet me kërkimin.</string>
+    <string name="iptv_vod_browse_none">Ende nuk ka filma ose seriale në burimet e TV-së live. Ato shfaqen pas rifreskimit të ardhshëm të burimit.</string>
+    <string name="iptv_vod_browse_play">Luaj</string>
+    <string name="iptv_vod_browse_resume">Vazhdo nga %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Vazhdo %1$s</string>
+    <string name="iptv_vod_browse_from_start">Luaj nga fillimi</string>
+    <string name="iptv_vod_browse_full_details">Të gjitha detajet</string>
+    <string name="iptv_vod_browse_season">Sezoni %1$d</string>
+    <string name="iptv_vod_browse_specials">Speciale</string>
+    <string name="iptv_vod_browse_episodes_failed">Episodet nuk mund të ngarkoheshin.</string>
+    <string name="iptv_vod_browse_retry">Provo përsëri</string>
+    <string name="iptv_vod_browse_no_episodes">Nuk ka episode për këtë serial.</string>
+    <string name="iptv_vod_browse_missing">Ky titull nuk është më i disponueshëm. Rifresko burimin dhe provo përsëri.</string>
+    <string name="iptv_vod_browse_runtime">%1$d min</string>
+    <string name="iptv_vod_browse_settings_title">Filma dhe seriale</string>
+    <string name="iptv_vod_browse_settings_artwork">Posterat dhe detajet nga</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Përdoret për Filmat dhe Serialet në TV live</string>
+    <string name="iptv_vod_browse_artwork_provider">Ofruesi</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Posterat dhe emrat siç i liston burimi IPTV</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB dhe shtesat meta)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Postera, sfonde, përmbledhje dhe vlerësime për titujt që përputhen; të tjerët ruajnë imazhet e ofruesit</string>
+    <string name="iptv_vod_browse_settings_sources">Shfaq filmat dhe serialet e burimeve IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">Filma: %1$d · Seriale: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Fshehur</string>
+    <string name="iptv_vod_browse_settings_pending">Shfaqet pas rifreskimit të ardhshëm</string>
+</resources>

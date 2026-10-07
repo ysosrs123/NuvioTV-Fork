@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Филмови</string>
+    <string name="iptv_vod_browse_series">Серије</string>
+    <string name="iptv_vod_browse_search">Претрага</string>
+    <string name="iptv_vod_browse_search_hint">Претражи по наслову</string>
+    <string name="iptv_vod_browse_recent">Недавно додато</string>
+    <string name="iptv_vod_browse_all">Све</string>
+    <string name="iptv_vod_browse_categories">Категорије</string>
+    <string name="iptv_vod_browse_sources">Извори</string>
+    <string name="iptv_vod_browse_results">Резултати за „%1$s“</string>
+    <string name="iptv_vod_browse_empty">Нема наслова на овој листи.</string>
+    <string name="iptv_vod_browse_no_results">Ниједан наслов не одговара претрази.</string>
+    <string name="iptv_vod_browse_none">Још нема филмова ни серија у вашим изворима ТВ уживо. Појавиће се после следећег освежавања извора.</string>
+    <string name="iptv_vod_browse_play">Пусти</string>
+    <string name="iptv_vod_browse_resume">Настави од %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Настави %1$s</string>
+    <string name="iptv_vod_browse_from_start">Пусти од почетка</string>
+    <string name="iptv_vod_browse_full_details">Сви детаљи</string>
+    <string name="iptv_vod_browse_season">Сезона %1$d</string>
+    <string name="iptv_vod_browse_specials">Специјали</string>
+    <string name="iptv_vod_browse_episodes_failed">Епизоде није могуће учитати.</string>
+    <string name="iptv_vod_browse_retry">Покушај поново</string>
+    <string name="iptv_vod_browse_no_episodes">Нема епизода за ову серију.</string>
+    <string name="iptv_vod_browse_missing">Овај наслов више није доступан. Освежите извор и покушајте поново.</string>
+    <string name="iptv_vod_browse_runtime">%1$d мин</string>
+    <string name="iptv_vod_browse_settings_title">Филмови и серије</string>
+    <string name="iptv_vod_browse_settings_artwork">Постери и детаљи из</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Користи се за филмове и серије у ТВ уживо</string>
+    <string name="iptv_vod_browse_artwork_provider">Провајдер</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Постери и називи онако како их наводи IPTV извор</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB и мета додаци)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Постери, позадине, радње и оцене за наслове који се подударају; остали задржавају слике провајдера</string>
+    <string name="iptv_vod_browse_settings_sources">Прикажи филмове и серије из IPTV извора</string>
+    <string name="iptv_vod_browse_settings_counts">Филмови: %1$d · Серије: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Скривено</string>
+    <string name="iptv_vod_browse_settings_pending">Приказује се после следећег освежавања</string>
+</resources>

@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">திரைப்படங்கள்</string>
+    <string name="iptv_vod_browse_series">தொடர்கள்</string>
+    <string name="iptv_vod_browse_search">தேடல்</string>
+    <string name="iptv_vod_browse_search_hint">தலைப்பின்படி தேடவும்</string>
+    <string name="iptv_vod_browse_recent">சமீபத்தில் சேர்க்கப்பட்டவை</string>
+    <string name="iptv_vod_browse_all">அனைத்தும்</string>
+    <string name="iptv_vod_browse_categories">வகைகள்</string>
+    <string name="iptv_vod_browse_sources">மூலங்கள்</string>
+    <string name="iptv_vod_browse_results">“%1$s”-க்கான முடிவுகள்</string>
+    <string name="iptv_vod_browse_empty">இந்தப் பட்டியலில் தலைப்புகள் இல்லை.</string>
+    <string name="iptv_vod_browse_no_results">உங்கள் தேடலுக்குப் பொருந்தும் தலைப்புகள் இல்லை.</string>
+    <string name="iptv_vod_browse_none">உங்கள் நேரலை டிவி மூலங்களில் இன்னும் திரைப்படங்களோ தொடர்களோ இல்லை. அடுத்த மூலப் புதுப்பிப்புக்குப் பிறகு அவை தோன்றும்.</string>
+    <string name="iptv_vod_browse_play">இயக்கு</string>
+    <string name="iptv_vod_browse_resume">%1$s-இலிருந்து தொடர்க</string>
+    <string name="iptv_vod_browse_resume_episode">தொடர்க: %1$s</string>
+    <string name="iptv_vod_browse_from_start">தொடக்கத்திலிருந்து இயக்கு</string>
+    <string name="iptv_vod_browse_full_details">முழு விவரங்கள்</string>
+    <string name="iptv_vod_browse_season">சீசன் %1$d</string>
+    <string name="iptv_vod_browse_specials">சிறப்புகள்</string>
+    <string name="iptv_vod_browse_episodes_failed">அத்தியாயங்களை ஏற்ற முடியவில்லை.</string>
+    <string name="iptv_vod_browse_retry">மீண்டும் முயற்சி</string>
+    <string name="iptv_vod_browse_no_episodes">இந்தத் தொடருக்கு அத்தியாயங்கள் எதுவும் பட்டியலிடப்படவில்லை.</string>
+    <string name="iptv_vod_browse_missing">இந்தத் தலைப்பு இனி கிடைக்காது. மூலத்தைப் புதுப்பித்து மீண்டும் முயலவும்.</string>
+    <string name="iptv_vod_browse_runtime">%1$d நிமி</string>
+    <string name="iptv_vod_browse_settings_title">திரைப்படங்கள் மற்றும் தொடர்கள்</string>
+    <string name="iptv_vod_browse_settings_artwork">போஸ்டர்கள், விவரங்களின் மூலம்</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">நேரலை டிவியில் திரைப்படங்கள், தொடர்களுக்குப் பயன்படும்</string>
+    <string name="iptv_vod_browse_artwork_provider">வழங்குநர்</string>
+    <string name="iptv_vod_browse_artwork_provider_description">IPTV மூலம் பட்டியலிடும்படியே போஸ்டர்களும் பெயர்களும்</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB மற்றும் மெட்டா அடான்கள்)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">பொருந்தும் தலைப்புகளுக்குப் போஸ்டர்கள், பின்னணிகள், கதைச்சுருக்கங்கள், மதிப்பீடுகள்; மற்றவை வழங்குநரின் படங்களையே வைத்திருக்கும்</string>
+    <string name="iptv_vod_browse_settings_sources">IPTV மூலங்களின் திரைப்படங்களையும் தொடர்களையும் காட்டு</string>
+    <string name="iptv_vod_browse_settings_counts">திரைப்படங்கள்: %1$d · தொடர்கள்: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">மறைக்கப்பட்டது</string>
+    <string name="iptv_vod_browse_settings_pending">அடுத்த புதுப்பிப்புக்குப் பிறகு காட்டப்படும்</string>
+</resources>

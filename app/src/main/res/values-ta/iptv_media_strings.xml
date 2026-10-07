@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Movies கோப்புறை (பிற செயலிகளுக்குத் தெரியும்)</string>
+    <string name="iptv_media_label">Movies கோப்புறை</string>
+    <string name="iptv_media_missing">Movies கோப்புறை கிடைக்கவில்லை</string>
+    <string name="iptv_media_unavailable">பகிரப்பட்ட Movies கோப்புறை இப்போது இந்தச் சாதனத்தில் கிடைக்கவில்லை.</string>
+    <string name="iptv_media_notice">பதிவுகள் முதலில் இந்தச் சாதனத்தில் சேமிக்கப்பட்டு, முடிந்ததும் Movies/Nuvio Recordings-க்கு நகலெடுக்கப்படும். மீடியா பிளேயர்கள் போன்ற பிற செயலிகள் அவற்றை அங்கே பார்க்கலாம்.</string>
+    <string name="iptv_media_copying">Movies கோப்புறைக்கு நகலெடுக்கிறது</string>
+    <string name="iptv_media_copy_waiting">Movies கோப்புறைக்கு நகலெடுக்கக் காத்திருக்கிறது</string>
+    <string name="iptv_media_delete_description">பதிவு பட்டியலிலிருந்தும் Movies கோப்புறையிலிருந்தும் அகற்றப்படும்.</string>
+    <string name="iptv_media_delete_not_owned">பட்டியலிலிருந்து அகற்றப்பட்டது. Movies கோப்புறையில் உள்ள கோப்பு இந்தச் செயலியின் முந்தைய நிறுவலுக்குச் சொந்தமானது, எனவே அது வைக்கப்பட்டது. கோப்பு மேலாளர் மூலம் அதை நீக்கவும்.</string>
+</resources>
