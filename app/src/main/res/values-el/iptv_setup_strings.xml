@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">Αποθηκεύτηκε. Φόρτωση καναλιών.</string>
     <string name="iptv_remote_guide_saved">Αποθηκεύτηκε. Φόρτωση οδηγού.</string>
     <string name="iptv_remote_rejected">Απορρίφθηκε. Δεν αποθηκεύτηκε τίποτα.</string>
+    <string name="iptv_remote_confirm_settings_title">Αλλαγή ρυθμίσεων ζωντανής TV από το τηλέφωνο;</string>
+    <string name="iptv_remote_setting_start">Η ζωντανή TV ανοίγει σε</string>
+    <string name="iptv_remote_setting_layout">Διάταξη πολλαπλής προβολής</string>
+    <string name="iptv_remote_setting_quality">Ποιότητα εικόνας πολλαπλής προβολής</string>
+    <string name="iptv_remote_on">Ενεργό</string>
+    <string name="iptv_remote_off">Ανενεργό</string>
+    <string name="iptv_remote_settings_saved">Οι ρυθμίσεις αποθηκεύτηκαν.</string>
 </resources>

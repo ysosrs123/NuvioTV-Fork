@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">Kaydedildi. Kanallar şimdi yükleniyor.</string>
     <string name="iptv_remote_guide_saved">Kaydedildi. Yayın akışı şimdi yükleniyor.</string>
     <string name="iptv_remote_rejected">Reddedildi. Hiçbir şey kaydedilmedi.</string>
+    <string name="iptv_remote_confirm_settings_title">Canlı TV ayarları telefonunuzdan değiştirilsin mi?</string>
+    <string name="iptv_remote_setting_start">Canlı TV açılışı</string>
+    <string name="iptv_remote_setting_layout">Çoklu görünüm düzeni</string>
+    <string name="iptv_remote_setting_quality">Çoklu görünüm görüntü kalitesi</string>
+    <string name="iptv_remote_on">Açık</string>
+    <string name="iptv_remote_off">Kapalı</string>
+    <string name="iptv_remote_settings_saved">Ayarlar kaydedildi.</string>
 </resources>

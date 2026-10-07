@@ -48,4 +48,11 @@
     <string name="iptv_remote_saved">Išsaugota. Įkeliami kanalai.</string>
     <string name="iptv_remote_guide_saved">Išsaugota. Įkeliama TV programa.</string>
     <string name="iptv_remote_rejected">Atmesta. Niekas neišsaugota.</string>
+    <string name="iptv_remote_confirm_settings_title">Keisti tiesioginės TV nustatymus iš telefono?</string>
+    <string name="iptv_remote_setting_start">Tiesioginė TV atidaroma</string>
+    <string name="iptv_remote_setting_layout">Kelių vaizdų išdėstymas</string>
+    <string name="iptv_remote_setting_quality">Kelių vaizdų vaizdo kokybė</string>
+    <string name="iptv_remote_on">Įjungta</string>
+    <string name="iptv_remote_off">Išjungta</string>
+    <string name="iptv_remote_settings_saved">Nustatymai išsaugoti.</string>
 </resources>

@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">Запазено. Каналите се зареждат.</string>
     <string name="iptv_remote_guide_saved">Запазено. Справочникът се зарежда.</string>
     <string name="iptv_remote_rejected">Отхвърлено. Нищо не е запазено.</string>
+    <string name="iptv_remote_confirm_settings_title">Промяна на настройките на ТВ на живо от телефона?</string>
+    <string name="iptv_remote_setting_start">ТВ на живо се отваря на</string>
+    <string name="iptv_remote_setting_layout">Оформление на Multiview</string>
+    <string name="iptv_remote_setting_quality">Качество на картината в Multiview</string>
+    <string name="iptv_remote_on">Вкл.</string>
+    <string name="iptv_remote_off">Изкл.</string>
+    <string name="iptv_remote_settings_saved">Настройките са запазени.</string>
 </resources>

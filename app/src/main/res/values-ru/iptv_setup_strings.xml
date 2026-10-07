@@ -48,4 +48,11 @@
     <string name="iptv_remote_saved">Сохранено. Загрузка каналов.</string>
     <string name="iptv_remote_guide_saved">Сохранено. Загрузка телепрограммы.</string>
     <string name="iptv_remote_rejected">Отклонено. Ничего не сохранено.</string>
+    <string name="iptv_remote_confirm_settings_title">Изменить настройки ТВ-эфира с телефона?</string>
+    <string name="iptv_remote_setting_start">ТВ-эфир открывается на</string>
+    <string name="iptv_remote_setting_layout">Раскладка мультиэкрана</string>
+    <string name="iptv_remote_setting_quality">Качество изображения мультиэкрана</string>
+    <string name="iptv_remote_on">Вкл.</string>
+    <string name="iptv_remote_off">Выкл.</string>
+    <string name="iptv_remote_settings_saved">Настройки сохранены.</string>
 </resources>

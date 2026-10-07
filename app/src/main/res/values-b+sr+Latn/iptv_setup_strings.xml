@@ -47,4 +47,11 @@
     <string name="iptv_remote_saved">Sačuvano. Kanali se sada učitavaju.</string>
     <string name="iptv_remote_guide_saved">Sačuvano. Vodič se sada učitava.</string>
     <string name="iptv_remote_rejected">Odbijeno. Ništa nije sačuvano.</string>
+    <string name="iptv_remote_confirm_settings_title">Promeniti podešavanja TV uživo sa telefona?</string>
+    <string name="iptv_remote_setting_start">TV uživo se otvara na</string>
+    <string name="iptv_remote_setting_layout">Raspored za Multiview</string>
+    <string name="iptv_remote_setting_quality">Kvalitet slike za Multiview</string>
+    <string name="iptv_remote_on">Uključeno</string>
+    <string name="iptv_remote_off">Isključeno</string>
+    <string name="iptv_remote_settings_saved">Podešavanja su sačuvana.</string>
 </resources>

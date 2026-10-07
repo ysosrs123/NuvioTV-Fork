@@ -45,4 +45,11 @@
     <string name="iptv_remote_saved">Tersimpan. Memuat saluran sekarang.</string>
     <string name="iptv_remote_guide_saved">Tersimpan. Memuat panduan sekarang.</string>
     <string name="iptv_remote_rejected">Ditolak. Tidak ada yang disimpan.</string>
+    <string name="iptv_remote_confirm_settings_title">Ubah pengaturan TV Live dari ponsel Anda?</string>
+    <string name="iptv_remote_setting_start">TV Live dibuka di</string>
+    <string name="iptv_remote_setting_layout">Tata letak Multiview</string>
+    <string name="iptv_remote_setting_quality">Kualitas gambar Multiview</string>
+    <string name="iptv_remote_on">Aktif</string>
+    <string name="iptv_remote_off">Nonaktif</string>
+    <string name="iptv_remote_settings_saved">Pengaturan disimpan.</string>
 </resources>

@@ -48,4 +48,11 @@
     <string name="iptv_remote_saved">Збережено. Канали завантажуються.</string>
     <string name="iptv_remote_guide_saved">Збережено. Телепрограма завантажується.</string>
     <string name="iptv_remote_rejected">Відхилено. Нічого не збережено.</string>
+    <string name="iptv_remote_confirm_settings_title">Змінити налаштування ТВ наживо з телефона?</string>
+    <string name="iptv_remote_setting_start">ТВ наживо відкривається на</string>
+    <string name="iptv_remote_setting_layout">Розкладка Multiview</string>
+    <string name="iptv_remote_setting_quality">Якість зображення Multiview</string>
+    <string name="iptv_remote_on">Увімк.</string>
+    <string name="iptv_remote_off">Вимк.</string>
+    <string name="iptv_remote_settings_saved">Налаштування збережено.</string>
 </resources>
