@@ -34,8 +34,10 @@ import com.nuvio.tv.core.iptv.SetupText
 import com.nuvio.tv.core.iptv.XtreamGuideReference
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.qr.QrCodeGenerator
+import com.nuvio.tv.core.recording.IptvRecorder
 import com.nuvio.tv.core.server.IptvSetupAddress
 import com.nuvio.tv.core.server.IptvSetupServer
+import com.nuvio.tv.core.server.SetupRecorderSource
 import com.nuvio.tv.data.iptv.IptvBrowseQuery
 import com.nuvio.tv.data.iptv.IptvCatalogueItem
 import com.nuvio.tv.data.iptv.IptvCatalogueStore
@@ -107,6 +109,7 @@ class IptvSetupViewModel @Inject constructor(
     private val livePreferences: IptvLivePreferences,
     private val device: IptvDeviceProfile,
     private val locks: ProfileLockStateDataStore,
+    private val recorder: IptvRecorder,
 ) : ViewModel() {
     private val mutable = MutableStateFlow(IptvSetupState())
     val state = mutable.asStateFlow()
@@ -186,7 +189,8 @@ class IptvSetupViewModel @Inject constructor(
             listing = { listing },
             settings = ::settings,
             lookup = lookup,
-            onChangeProposed = { origin, id, change, from, profile -> viewModelScope.launch { propose(origin, id, change, from, profile) } }
+            onChangeProposed = { origin, id, change, from, profile -> viewModelScope.launch { propose(origin, id, change, from, profile) } },
+            recordings = SetupRecorderSource(recorder)
         )
         if (started == null) {
             mutable.update { it.copy(phase = IptvSetupPhase.PORTS_BUSY, address = null, qr = null, code = null, devices = 0) }

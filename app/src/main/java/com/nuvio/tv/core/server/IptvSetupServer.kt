@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.server
 
 import com.nuvio.tv.core.iptv.SetupAssignments
+import com.nuvio.tv.core.iptv.SetupByteRange
 import com.nuvio.tv.core.iptv.SetupChange
 import com.nuvio.tv.core.iptv.SetupChangeBook
 import com.nuvio.tv.core.iptv.SetupConnectionLimiter
@@ -12,21 +13,29 @@ import com.nuvio.tv.core.iptv.SetupIdleTimer
 import com.nuvio.tv.core.iptv.SetupInputException
 import com.nuvio.tv.core.iptv.SetupKind
 import com.nuvio.tv.core.iptv.SetupLan
+import com.nuvio.tv.core.iptv.SetupLinkSigner
 import com.nuvio.tv.core.iptv.SetupListing
 import com.nuvio.tv.core.iptv.SetupLookup
 import com.nuvio.tv.core.iptv.SetupPairing
+import com.nuvio.tv.core.iptv.SetupRangeStream
 import com.nuvio.tv.core.iptv.SetupRateLimiter
+import com.nuvio.tv.core.iptv.SetupRecordingDownloads
 import com.nuvio.tv.core.iptv.SetupSettings
 import com.nuvio.tv.core.iptv.SetupSettingsInput
 import fi.iki.elonen.NanoHTTPD
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.net.Socket
 import java.security.SecureRandom
+import java.time.ZoneId
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.Semaphore
 import java.util.concurrent.ThreadFactory
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 import org.json.JSONObject
 
 class IptvSetupServer private constructor(
@@ -36,7 +45,8 @@ class IptvSetupServer private constructor(
     private val settings: () -> SetupSettings,
     private val lookup: SetupLookup,
     private val onChangeProposed: (IptvSetupServer, String, SetupChange, String, Int) -> Unit,
-    now: () -> Long,
+    private val recordings: SetupRecordingSource?,
+    private val now: () -> Long,
 ) : NanoHTTPD(host, port) {
 
     private val random = SecureRandom()
@@ -45,6 +55,8 @@ class IptvSetupServer private constructor(
     private val idle = SetupIdleTimer(IDLE_TIMEOUT_MILLIS, now)
     private val requests = SetupRateLimiter(REQUESTS_PER_MINUTE, MINUTE, now)
     private val pairAttempts = SetupRateLimiter(PAIR_ATTEMPTS_PER_MINUTE, MINUTE, now)
+    private val signer = SetupLinkSigner(random)
+    private val streams = Semaphore(MAX_STREAMS)
     private val runner = SetupBoundedRunner(SetupConnectionLimiter(MAX_CLIENTS, MAX_CLIENTS_PER_ADDRESS), CONNECTION_DEADLINE_MILLIS, "IptvSetup")
 
     init {
@@ -104,10 +116,11 @@ class IptvSetupServer private constructor(
             rest == "/" -> page()
             else -> text(Response.Status.NOT_FOUND, "Not found")
         }
+        val path = rest.removePrefix("/api/")
+        RECORDING_FILE.matchEntire(path)?.let { return recordingFile(session, it.groupValues[1]) }
         val post = session.method == Method.POST
         if (!post && session.method != Method.GET) return json(Response.Status.METHOD_NOT_ALLOWED, error("method"))
         if (SetupGuard.check(session.headers, origin, stateChanging = post) != null) return json(Response.Status.FORBIDDEN, error("request"))
-        val path = rest.removePrefix("/api/")
         if (path == "pair") return if (post) pair(session, token, remote) else json(Response.Status.METHOD_NOT_ALLOWED, error("method"))
         val owner = pairing.session(token, SetupCookies.read(session.headers["cookie"]))
             ?: return json(Response.Status.UNAUTHORIZED, error("session"))
@@ -122,6 +135,7 @@ class IptvSetupServer private constructor(
             path == "profile" && post -> proposeProfile(session, owner, remote)
             path == "channels" && !post -> channels(session)
             path == "guide-channels" && !post -> guideChannels(session)
+            path == "recordings" && !post -> recordingList()
             path.startsWith("changes/") && !post -> status(owner, path.removePrefix("changes/"))
             else -> json(Response.Status.NOT_FOUND, error("missing"))
         }
@@ -223,6 +237,63 @@ class IptvSetupServer private constructor(
         return json(Response.Status.OK, SetupAssignments.guideChannelsJson(found.take(SetupAssignments.MAX_RESULTS)))
     }
 
+    private fun recordingList(): Response {
+        val profile = listing().profile
+        val time = now()
+        val entries = recordings?.list(profile).orEmpty()
+        return json(Response.Status.OK, SetupRecordingDownloads.json(entries) { "api/recordings/${it.id}/file?" + signer.query(profile, it.id, time) })
+    }
+
+    private fun recordingFile(session: IHTTPSession, id: String): Response {
+        val head = session.method == Method.HEAD
+        if (!head && session.method != Method.GET) return text(Response.Status.METHOD_NOT_ALLOWED, "Method not allowed")
+        val source = recordings
+        val profile = listing().profile
+        if (source == null || !SetupRecordingDownloads.ID.matches(id)) return text(Response.Status.NOT_FOUND, "Not found")
+        if (!signer.verify(profile, id, session.parameters["e"]?.singleOrNull(), session.parameters["t"]?.singleOrNull(), now()))
+            return text(Response.Status.FORBIDDEN, "This link has expired. Open the recordings list on the setup page again.")
+        if (!streams.tryAcquire()) return text(Response.Status.SERVICE_UNAVAILABLE, "Busy").also { it.addHeader("Retry-After", "15") }
+        idle.touch()
+        var file: SetupRecordingFile? = null
+        val finished = AtomicBoolean(false)
+        val finish = {
+            if (finished.compareAndSet(false, true)) {
+                try { file?.close() } catch (_: Exception) { }
+                streams.release()
+            }
+        }
+        try {
+            val opened = source.open(profile, id) ?: return text(Response.Status.NOT_FOUND, "Not found").also { finish() }
+            file = opened
+            val length = opened.reader.length()
+            val range = SetupRecordingDownloads.range(session.headers["range"], length, session.headers["if-range"])
+            if (range == SetupByteRange.Unsatisfiable) {
+                finish()
+                return text(Response.Status.RANGE_NOT_SATISFIABLE, "Range not satisfiable").also {
+                    it.addHeader("Content-Range", SetupRecordingDownloads.unsatisfiedRange(length))
+                    it.addHeader("Accept-Ranges", "bytes")
+                }
+            }
+            val part = range as? SetupByteRange.Part
+            val count = part?.length ?: length
+            val lastRead = AtomicLong(now())
+            val body: InputStream = if (head) ByteArrayInputStream(ByteArray(0)).also { finish() } else SetupRangeStream(
+                { position, buffer, offset, size -> opened.reader.read(position, buffer, offset, size) }, part?.first ?: 0L, count,
+                onClose = finish, onRead = { lastRead.set(now()); idle.touch() })
+            val response = secured(newFixedLengthResponse(if (part == null) Response.Status.OK else Response.Status.PARTIAL_CONTENT, MIME_TS, body, count))
+            response.addHeader("Accept-Ranges", "bytes")
+            response.addHeader("Content-Disposition", SetupRecordingDownloads.disposition(
+                SetupRecordingDownloads.fileName(opened.entry.title, opened.entry.startMillis, ZoneId.systemDefault()),
+                attachment = session.parameters["inline"]?.singleOrNull() != "1"))
+            part?.let { response.addHeader("Content-Range", SetupRecordingDownloads.contentRange(it, length)) }
+            if (!head) runner.stream(STREAM_CHECK_MILLIS) { now() - lastRead.get() > STREAM_STALL_MILLIS }
+            return response
+        } catch (error: Exception) {
+            finish()
+            throw error
+        }
+    }
+
     private fun invalid(invalid: SetupInputException): Response =
         json(Response.Status.BAD_REQUEST, JSONObject().put("error", "invalid").put("field", invalid.field).toString())
 
@@ -297,13 +368,18 @@ class IptvSetupServer private constructor(
         const val IDLE_TIMEOUT_MILLIS = 10 * 60_000L
         private const val MINUTE = 60_000L
         private const val MAX_CLIENTS = 8
-        private const val MAX_CLIENTS_PER_ADDRESS = 2
+        private const val MAX_CLIENTS_PER_ADDRESS = 4
+        private const val MAX_STREAMS = 3
+        private const val STREAM_CHECK_MILLIS = 15_000L
+        private const val STREAM_STALL_MILLIS = 120_000L
+        private const val MIME_TS = "video/mp2t"
         private const val CONNECTION_DEADLINE_MILLIS = 10_000L
         private const val REQUESTS_PER_MINUTE = 120
         private const val PAIR_ATTEMPTS_PER_MINUTE = 10
         private val PATH = Regex("/s/([^/]+)(.*)")
         private val CHANGE_ID = Regex("[0-9a-f]{32}")
         private val ID = Regex("[A-Za-z0-9_-]{1,80}")
+        private val RECORDING_FILE = Regex("recordings/([^/]{1,80})/file")
 
         fun start(
             host: String,
@@ -311,6 +387,7 @@ class IptvSetupServer private constructor(
             settings: () -> SetupSettings,
             lookup: SetupLookup,
             onChangeProposed: (IptvSetupServer, String, SetupChange, String, Int) -> Unit,
+            recordings: SetupRecordingSource? = null,
             now: () -> Long = System::currentTimeMillis,
             startPort: Int = 8100,
             maxAttempts: Int = 10
@@ -318,7 +395,7 @@ class IptvSetupServer private constructor(
             if (!SetupLan.isLanAddress(host)) return null
             for (port in startPort until startPort + maxAttempts) {
                 try {
-                    val server = IptvSetupServer(host, port, listing, settings, lookup, onChangeProposed, now)
+                    val server = IptvSetupServer(host, port, listing, settings, lookup, onChangeProposed, recordings, now)
                     server.start(SOCKET_READ_TIMEOUT, false)
                     return server
                 } catch (_: Exception) {
@@ -333,12 +410,25 @@ internal class SetupBoundedRunner(private val connections: SetupConnectionLimite
     private val addresses = HashMap<NanoHTTPD.ClientHandler, String>()
     private val running = HashMap<NanoHTTPD.ClientHandler, String>()
     private val deadlines = HashMap<NanoHTTPD.ClientHandler, ScheduledFuture<*>>()
+    private val threads = HashMap<NanoHTTPD.ClientHandler, Thread>()
     private val timer = ScheduledThreadPoolExecutor(1, ThreadFactory { task ->
         Thread(task, "${name}Deadline").apply { isDaemon = true }
     }).apply { removeOnCancelPolicy = true }
 
     fun address(clientHandler: NanoHTTPD.ClientHandler, address: String) {
         synchronized(this) { addresses[clientHandler] = address }
+    }
+
+    fun stream(periodMillis: Long, stalled: () -> Boolean) {
+        synchronized(this) {
+            val handler = threads.entries.firstOrNull { it.value === Thread.currentThread() }?.key ?: return
+            deadlines.remove(handler)?.cancel(false) ?: return
+            try {
+                deadlines[handler] = timer.scheduleWithFixedDelay({ if (stalled()) handler.close() }, periodMillis, periodMillis, TimeUnit.MILLISECONDS)
+            } catch (_: RejectedExecutionException) {
+                handler.close()
+            }
+        }
     }
 
     override fun closeAll() {
@@ -351,6 +441,7 @@ internal class SetupBoundedRunner(private val connections: SetupConnectionLimite
         synchronized(this) {
             addresses.remove(clientHandler)
             deadlines.remove(clientHandler)?.cancel(false)
+            threads.remove(clientHandler)
             running.remove(clientHandler)?.let(connections::release)
         }
     }
@@ -372,12 +463,14 @@ internal class SetupBoundedRunner(private val connections: SetupConnectionLimite
             clientHandler.close()
             return
         }
-        Thread(clientHandler, "${name}Client").apply {
+        val thread = Thread(clientHandler, "${name}Client").apply {
             isDaemon = true
             setUncaughtExceptionHandler { _, _ ->
                 clientHandler.close()
                 closed(clientHandler)
             }
-        }.start()
+        }
+        synchronized(this) { if (clientHandler in running) threads[clientHandler] = thread }
+        thread.start()
     }
 }

@@ -116,9 +116,18 @@ input.switch:focus{box-shadow:0 0 0 3px rgba(213,221,227,.25)}
 .ok .i-ok,.no .i-no{display:block}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(213,221,227,.25)}50%{box-shadow:0 0 0 14px rgba(213,221,227,0)}}
 .narrow{max-width:560px;margin-left:auto;margin-right:auto}
+a.btn{display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;line-height:1.2;border-radius:999px;border:1px solid var(--line-strong);background:var(--raised);color:var(--text);padding:7px 14px;min-height:36px;text-decoration:none;white-space:nowrap}
+a.btn:hover{background:#242a31}
+a.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--ink)}
+a.btn.primary:hover{background:var(--accent-hi)}
+.list li.rec{flex-wrap:wrap}
+.list li.rec .grow{flex:1 1 160px}
+.list li.rec .tools{flex:1 1 100%;justify-content:flex-end}
+.rec .off{font-size:13px;color:var(--warn)}
+.gap{margin-top:14px}
 [hidden]{display:none!important}
 footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
-@media (min-width:560px){.c4{grid-template-columns:repeat(4,1fr)}.pair2{grid-template-columns:1fr 1fr}main{padding-top:32px}.card{padding:24px}}
+@media (min-width:560px){.list li.rec{flex-wrap:nowrap}.list li.rec .tools{flex:none}.c4{grid-template-columns:repeat(4,1fr)}.pair2{grid-template-columns:1fr 1fr}main{padding-top:32px}.card{padding:24px}}
 @media (min-width:900px){#home:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}#home .card{margin-bottom:0}#home .col{display:grid;gap:16px}#home .banner{grid-column:1/-1;margin:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -167,6 +176,10 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 <p id="guidesEmpty" class="empty" hidden>No guides yet. Xtream and Stalker sources usually bring their own.</p>
 <div class="actions"><button type="button" id="addGuide">Add a guide</button></div>
 <p class="hint">To remove a source or guide, use the TV. Use Guides next to a source to choose its guides and their order.</p>
+</div>
+<div class="card" aria-labelledby="recordingsTitle">
+<div class="head"><div class="grow"><h2 id="recordingsTitle">Recordings</h2><p class="lead">Download recordings to this phone or tablet, or watch them in VLC.</p></div></div>
+<div class="actions"><button type="button" id="openRecordings">Show recordings</button></div>
 </div>
 </div>
 
@@ -299,6 +312,18 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 <button class="wide ghost" type="button" id="assignBack">Back</button>
 </section>
 
+<section id="recordings" class="narrow" hidden aria-labelledby="recTitle">
+<div class="card">
+<div class="head"><div class="grow"><h2 id="recTitle">Recordings</h2><p class="lead">Finished recordings of the profile this page changes.</p></div><button type="button" class="small" id="recRefresh">Refresh</button></div>
+<p class="banner gap" id="recNote">Phone and tablet browsers can't play this video format. Download a recording and open it in a player such as VLC, or choose Open in VLC to watch it now. Keep Live TV setup open on your TV until the download finishes.</p>
+<p id="recLoading" class="hint" role="status" hidden>Loading recordings…</p>
+<ul id="recList" class="list" aria-labelledby="recTitle"></ul>
+<p id="recEmpty" class="empty" hidden>No finished recordings yet.</p>
+<p id="recError" class="error" role="alert" hidden></p>
+</div>
+<button class="wide ghost" type="button" id="recBack">Back</button>
+</section>
+
 <section id="progress" class="card status narrow wait" hidden>
 """ + ORB + """
 <p class="big" id="progressTitle" role="status">Check your TV</p>
@@ -318,7 +343,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 (function () {
   'use strict';
   var base = location.pathname.replace(/[^\/]*$/, '');
-  var views = ['pair', 'home', 'editor', 'assign', 'progress', 'ended'];
+  var views = ['pair', 'home', 'editor', 'assign', 'recordings', 'progress', 'ended'];
   var kindNames = { m3u: 'M3U playlist', xtream: 'Xtream account', stalker: 'Stalker portal', guide: 'XMLTV guide' };
   var badges = { m3u: 'M3U', xtream: 'XT', stalker: 'STB', guide: 'EPG' };
   var settingKeys = ['format', 'timeshift', 'sport', 'startView', 'layout', 'quality', 'recordEarly', 'recordLate'];
@@ -650,6 +675,102 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
     }, lost);
   }
 
+  var recordingFile = /^api\/recordings\/[A-Za-z0-9-]{8,64}\/file\?e=[0-9]{1,18}&t=[0-9a-f]{64}$/;
+
+  function openRecordings() {
+    show('recordings');
+    loadRecordings();
+    el('recRefresh').focus();
+  }
+
+  function duration(ms) {
+    var minutes = Math.round((ms || 0) / 60000);
+    if (minutes < 1) return 'Under 1 min';
+    var hours = Math.floor(minutes / 60);
+    return hours ? hours + ' h' + (minutes % 60 ? ' ' + (minutes % 60) + ' min' : '') : minutes + ' min';
+  }
+
+  function size(bytes) {
+    if (!(bytes > 0)) return '';
+    if (bytes >= 1e9) return (bytes / 1e9).toFixed(1) + ' GB';
+    if (bytes >= 1e6) return Math.round(bytes / 1e6) + ' MB';
+    return Math.max(1, Math.round(bytes / 1e3)) + ' kB';
+  }
+
+  function when(ms) {
+    var date = new Date(ms);
+    if (isNaN(date.getTime())) return '';
+    try { return date.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }); }
+    catch (e) { return date.toLocaleString(); }
+  }
+
+  function link(text, label, href, primary, download) {
+    var a = document.createElement('a');
+    a.className = primary ? 'btn primary' : 'btn';
+    a.textContent = text;
+    a.href = href;
+    a.setAttribute('aria-label', label);
+    if (download) a.setAttribute('download', '');
+    return a;
+  }
+
+  function recordingRow(r) {
+    var li = document.createElement('li');
+    li.className = 'rec';
+    var mark = document.createElement('span');
+    mark.className = 'badge';
+    mark.setAttribute('aria-hidden', 'true');
+    mark.textContent = 'REC';
+    var text = document.createElement('div');
+    text.className = 'grow';
+    var name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = r.title;
+    var first = document.createElement('div');
+    first.className = 'meta';
+    first.textContent = [r.channel !== r.title ? r.channel : '', when(r.start)].filter(Boolean).join(' · ');
+    var second = document.createElement('div');
+    second.className = 'meta';
+    second.textContent = [duration(r.duration), size(r.size), r.status === 'partial' ? 'Incomplete' : ''].filter(Boolean).join(' · ');
+    text.appendChild(name);
+    text.appendChild(first);
+    text.appendChild(second);
+    li.appendChild(mark);
+    li.appendChild(text);
+    var file = typeof r.file === 'string' && recordingFile.test(r.file) ? r.file : null;
+    if (r.available && file) {
+      var tools = document.createElement('div');
+      tools.className = 'tools';
+      tools.appendChild(link('Download', 'Download ' + r.title, base + file, true, true));
+      tools.appendChild(link('Open in VLC', 'Open ' + r.title + ' in VLC', 'vlc://' + location.origin + base + file + '&inline=1', false, false));
+      li.appendChild(tools);
+    } else {
+      var off = document.createElement('div');
+      off.className = 'off';
+      off.textContent = 'Not available right now. Connect the drive or network folder it\'s saved on.';
+      text.appendChild(off);
+    }
+    return li;
+  }
+
+  function loadRecordings() {
+    setText('recError', '');
+    el('recLoading').hidden = false;
+    el('recRefresh').disabled = true;
+    api('GET', 'api/recordings').then(function (result) {
+      el('recLoading').hidden = true;
+      el('recRefresh').disabled = false;
+      if (common(result, 'recError')) return;
+      var list = el('recList');
+      list.textContent = '';
+      if (result.status !== 200) { el('recEmpty').hidden = true; setText('recError', 'The TV couldn\'t list its recordings. Try again.'); return; }
+      var items = Array.isArray(result.data.recordings) ? result.data.recordings : [];
+      items.forEach(function (r) { if (r && typeof r.title === 'string') list.appendChild(recordingRow(r)); });
+      list.hidden = items.length === 0;
+      el('recEmpty').hidden = items.length > 0;
+    }, function () { el('recLoading').hidden = true; el('recRefresh').disabled = false; lost(); });
+  }
+
   function radios(name) { return Array.prototype.slice.call(el('settings').querySelectorAll('input[name="' + name + '"]')); }
   function radioValue(name) { var on = radios(name).filter(function (r) { return r.checked; })[0]; return on ? on.value : null; }
   function setRadio(name, value) { radios(name).forEach(function (r) { r.checked = r.value === value; }); }
@@ -903,6 +1024,9 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
   el('sendLinks').addEventListener('click', sendLinks);
   el('linksUndo').addEventListener('click', function () { assign.order = assign.saved.slice(); renderAssign(); });
   el('assignBack').addEventListener('click', function () { assign = null; load(); });
+  el('openRecordings').addEventListener('click', openRecordings);
+  el('recRefresh').addEventListener('click', loadRecordings);
+  el('recBack').addEventListener('click', load);
   el('channelQuery').addEventListener('input', function () { later('channels', searchChannels); });
   el('guideQuery').addEventListener('input', function () { later('guide', searchGuide); });
   el('guideFeed').addEventListener('change', searchGuide);
