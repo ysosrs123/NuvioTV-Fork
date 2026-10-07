@@ -42,6 +42,13 @@ class XmlTvGuideTest {
         assertEquals(listOf("Sports", "Genre 1"), parsed.take(2))
         assertEquals(listOf(LocalizedGuideText("Match", null)), programmes.single().titles)
     }
+    @Test fun channelsWithoutAnIdAreSkippedAndTheRestOfTheGuideKept() {
+        val channels = mutableListOf<GuideChannel>(); val programmes = mutableListOf<GuideProgramme>()
+        val result = XmlTvGuideParser().parse("""<tv><channel><display-name>No id</display-name></channel><channel id=""><display-name>Blank</display-name></channel><channel id="one"><display-name>One</display-name></channel><programme channel="one" start="20261005070000 +0000"><title>News</title></programme></tv>""".byteInputStream(), channels::add, programmes::add)
+        assertEquals(listOf("one"), channels.map { it.externalId })
+        assertEquals(1, programmes.size)
+        assertEquals(3, result.channels)
+    }
     @Test fun malformedAndReversedTimesAreQuarantined() {
         val result = XmlTvGuideParser().parse("""<tv><programme channel="one" start="20260230070000"/><programme channel="one" start="20261005080000" stop="20261005070000"/><programme channel="one" start="20261005080000" stop="bad"/></tv>""".byteInputStream(), {}, { fail("No invalid programme should publish") })
         assertEquals(3, result.rejectedProgrammes)

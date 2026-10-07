@@ -225,6 +225,8 @@ preroll and seek acknowledgement, measured memory and storage margins.
 ## Fixes and improvements since the last device validation (b68985a)
 
 Latest work list (7 October)
+- A provider guide containing a channel entry without an ID is no longer rejected
+  as a whole; that entry is skipped (found on the first device run of this build).
 - Guides named in an M3U header are removed with their playlist when no other source
   uses them; Live TV's remembered category and hidden categories are removed with
   their source or profile (multiview settings stay, they are device-wide).

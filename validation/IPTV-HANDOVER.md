@@ -40,6 +40,17 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
   a filtered error summary on failure. Without GitHub tools, run status is readable
   from the public REST API, but logs and re-runs need the user.
 
+## Device findings — 7 October 2026 (AM9, CI build 5276c31)
+
+- Xtream refresh is fast now: 13,745 channels downloaded in 5.2 s and saved in 5.2 s
+  (six 2,500-row chunks), down from minutes on 6 October.
+- The provider guide failed twice with "Missing guide channel ID": the provider's
+  XMLTV has a `<channel>` without an `id`, which rejected the whole guide. Fixed: such
+  channels are skipped (host-tested); needs a device recheck.
+- `StreamResetException` (HTTP/2 stream reset) appears in NuvioXtream lines and at the
+  end of a 70-second recording that finished DONE; probably cancelled requests
+  (zapping, Stop). Not yet confirmed.
+
 ## Device findings — 6 October 2026
 
 First AM9 run of the CI-built prototype with a real Xtream account (13,740 live

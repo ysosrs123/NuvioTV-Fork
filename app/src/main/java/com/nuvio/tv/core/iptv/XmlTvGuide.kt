@@ -130,8 +130,7 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                     } else if (parser.depth == 2 && parser.name == recordType) {
                         if (recordType == "channel") {
                             require(++channelCount <= limits.channels) { "Guide channel limit" }
-                            require(recordId != null) { "Missing guide channel ID" }
-                            channel(GuideChannel(recordId, names.toList()))
+                            if (recordId != null) channel(GuideChannel(recordId, names.toList()))
                         } else {
                             require(++programmeCount <= limits.programmes) { "Guide programme limit" }
                             val start = recordStart
