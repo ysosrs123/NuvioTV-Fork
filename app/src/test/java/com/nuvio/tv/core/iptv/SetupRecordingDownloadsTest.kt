@@ -109,7 +109,7 @@ class SetupRecordingDownloadsTest {
         assertEquals("partial", second.getString("status"))
         assertFalse(second.has("size") || second.has("file"))
         assertFalse(second.getBoolean("available"))
-        assertEquals(setOf("id", "title", "channel", "start", "duration", "status", "available", "size", "file"), first.keySet())
+        assertEquals(setOf("id", "title", "channel", "start", "duration", "status", "available", "size", "file"), first.keys().asSequence().toSet())
     }
 
     @Test fun rangeStreamReadsOnlyTheRequestedBytesAndClosesOnce() {
