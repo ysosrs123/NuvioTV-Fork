@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">প্রোভাইডার এই চ্যানেলটি প্রত্যাখ্যান করেছে। আপনার সাবস্ক্রিপশন দেখে আবার চেষ্টা করুন।</string>
+    <string name="iptv_playback_missing">এই চ্যানেলটি প্রোভাইডারের কাছে আর পাওয়া যায় না।</string>
+    <string name="iptv_playback_unsupported">এই চ্যানেলের ফরম্যাট এই ডিভাইসে চালানো যায় না।</string>
+    <string name="iptv_playback_decoder">ভিডিও ডিকোডার চালু হয়নি। অন্য ছবিগুলো বন্ধ করে আবার চেষ্টা করুন।</string>
+</resources>

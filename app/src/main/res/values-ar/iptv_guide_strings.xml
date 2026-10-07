@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">كل المصادر</string>
+    <string name="iptv_all_sources_favourites">المفضلة من كل المصادر</string>
+    <string name="iptv_density">كثافة الدليل</string>
+    <string name="iptv_density_subtitle">عدد القنوات التي تظهر على الشاشة</string>
+    <string name="iptv_density_comfortable">مريح</string>
+    <string name="iptv_density_comfortable_description">صفوف وشعارات أكبر مع أوقات البرامج</string>
+    <string name="iptv_density_compact">مضغوط</string>
+    <string name="iptv_density_compact_description">صفوف وشعارات أصغر لعرض قنوات أكثر</string>
+    <string name="iptv_inset_show">عرض في الزاوية</string>
+    <string name="iptv_inset_show_subtitle">يُبقي %1$s بملء الشاشة مع هذه القناة في صورة صغيرة</string>
+    <string name="iptv_inset_swap">تبديل مع صورة الزاوية</string>
+    <string name="iptv_inset_close">إغلاق صورة الزاوية</string>
+    <string name="iptv_inset_hint">الزر الأصفر يبدّل الصورتين، والرجوع يغلق صورة الزاوية</string>
+    <string name="iptv_inset_unsupported">لا يستطيع جهاز التلفاز هذا تشغيل أكثر من قناة واحدة في الوقت نفسه.</string>
+    <string name="iptv_inset_decoder">لا يستطيع جهاز التلفاز هذا فك ترميز صورة ثانية بجانب هذه القناة.</string>
+    <string name="iptv_inset_capacity">لا يوجد اتصال متاح لهذا الحساب. زِد اتصالات الحساب من مصادر البث المباشر إذا كانت باقتك تسمح بذلك.</string>
+    <string name="iptv_move_channel">نقل القناة</string>
+    <string name="iptv_move_channel_subtitle">تغيير موضع هذه القناة في القائمة</string>
+    <string name="iptv_move_channel_title">نقل %1$s</string>
+    <string name="iptv_move_key_step">▲▼ موضع واحد</string>
+    <string name="iptv_move_key_top">◀ إلى الأعلى</string>
+    <string name="iptv_move_key_bottom">▶ إلى الأسفل</string>
+    <string name="iptv_move_key_done">OK أو الرجوع: تم</string>
+    <string name="iptv_move_moved_bottom">نُقلت إلى أسفل القائمة</string>
+    <string name="iptv_move_category">نقل الفئة</string>
+    <string name="iptv_move_category_subtitle">تغيير موضع هذه الفئة في القائمة</string>
+    <string name="iptv_move_category_keys">▲▼ موضع واحد · ◀ إلى الأعلى · ▶ إلى الأسفل · OK أو الرجوع: تم</string>
+    <string name="iptv_multiview_layout_side">جنباً إلى جنب</string>
+    <string name="iptv_multiview_layout_one_over_two">واحدة فوق اثنتين</string>
+    <string name="iptv_multiview_layout_description">جنباً إلى جنب يعرض صورتين. صورة كبيرة واحدة وواحدة فوق اثنتين يستخدمان الصورة المختارة بـ عرض بحجم كبير.</string>
+    <string name="iptv_scrub_behind">متأخر %1$s</string>
+    <string name="iptv_scrub_live_edge">مباشر %1$s</string>
+    <string name="iptv_scrub_hint">يسار ويمين للتنقل 30 ثانية، اضغط مطولاً للتنقل أسرع</string>
+    <string name="iptv_scrub_deck_hint">للأعلى إلى الخط الزمني للتنقل بين البرامج السابقة</string>
+    <string name="iptv_scrub_banner_hint">يسار ويمين للتنقل بين البرامج، أعلى وأسفل لتغيير القناة</string>
+</resources>

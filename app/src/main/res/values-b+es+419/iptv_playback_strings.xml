@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">El proveedor rechazó este canal. Revisa tu suscripción e inténtalo de nuevo.</string>
+    <string name="iptv_playback_missing">Este canal ya no está disponible en el proveedor.</string>
+    <string name="iptv_playback_unsupported">El formato de este canal no se puede reproducir en este dispositivo.</string>
+    <string name="iptv_playback_decoder">No se pudo iniciar el decodificador de video. Cierra otras imágenes e inténtalo de nuevo.</string>
+</resources>

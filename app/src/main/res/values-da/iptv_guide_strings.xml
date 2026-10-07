@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Alle kilder</string>
+    <string name="iptv_all_sources_favourites">Favoritter fra alle kilder</string>
+    <string name="iptv_density">Guidetæthed</string>
+    <string name="iptv_density_subtitle">Hvor mange kanaler der er plads til på skærmen</string>
+    <string name="iptv_density_comfortable">Komfortabel</string>
+    <string name="iptv_density_comfortable_description">Større rækker og logoer med programtider</string>
+    <string name="iptv_density_compact">Kompakt</string>
+    <string name="iptv_density_compact_description">Mindre rækker og logoer, så flere kanaler er synlige</string>
+    <string name="iptv_inset_show">Vis i hjørnet</string>
+    <string name="iptv_inset_show_subtitle">Beholder %1$s i fuld skærm med denne kanal i et lille billede</string>
+    <string name="iptv_inset_swap">Byt med hjørnebilledet</string>
+    <string name="iptv_inset_close">Luk hjørnebilledet</string>
+    <string name="iptv_inset_hint">Den gule knap bytter billederne, Tilbage lukker hjørnebilledet</string>
+    <string name="iptv_inset_unsupported">Denne TV-boks kan kun afspille én kanal ad gangen.</string>
+    <string name="iptv_inset_decoder">Denne TV-boks kan ikke afkode et ekstra billede ved siden af denne kanal.</string>
+    <string name="iptv_inset_capacity">Ingen ledig forbindelse til denne konto. Øg kontoens forbindelser under Kilder til live-TV, hvis dit abonnement tillader det.</string>
+    <string name="iptv_move_channel">Flyt kanal</string>
+    <string name="iptv_move_channel_subtitle">Skift, hvor kanalen vises på listen</string>
+    <string name="iptv_move_channel_title">Flytter %1$s</string>
+    <string name="iptv_move_key_step">▲▼ Én plads</string>
+    <string name="iptv_move_key_top">◀ Til toppen</string>
+    <string name="iptv_move_key_bottom">▶ Til bunden</string>
+    <string name="iptv_move_key_done">OK eller Tilbage: færdig</string>
+    <string name="iptv_move_moved_bottom">Flyttet til bunden af listen</string>
+    <string name="iptv_move_category">Flyt kategori</string>
+    <string name="iptv_move_category_subtitle">Skift, hvor kategorien vises i menuen</string>
+    <string name="iptv_move_category_keys">▲▼ én plads · ◀ til toppen · ▶ til bunden · OK eller Tilbage: færdig</string>
+    <string name="iptv_multiview_layout_side">Side om side</string>
+    <string name="iptv_multiview_layout_one_over_two">Ét over to</string>
+    <string name="iptv_multiview_layout_description">Side om side viser to billeder. Ét stort og Ét over to bruger det billede, der er valgt med Vis stort.</string>
+    <string name="iptv_scrub_behind">%1$s bagud</string>
+    <string name="iptv_scrub_live_edge">Live %1$s</string>
+    <string name="iptv_scrub_hint">Venstre og højre flytter 30 sekunder, hold for at flytte hurtigere</string>
+    <string name="iptv_scrub_deck_hint">Op til tidslinjen for at gå gennem tidligere programmer</string>
+    <string name="iptv_scrub_banner_hint">Venstre og højre går gennem programmerne, op og ned skifter kanal</string>
+</resources>

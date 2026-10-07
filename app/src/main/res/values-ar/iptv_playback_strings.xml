@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">رفض المزوّد هذه القناة. تحقق من اشتراكك ثم حاول مرة أخرى.</string>
+    <string name="iptv_playback_missing">لم تعد هذه القناة متاحة لدى المزوّد.</string>
+    <string name="iptv_playback_unsupported">لا يمكن تشغيل تنسيق هذه القناة على هذا الجهاز.</string>
+    <string name="iptv_playback_decoder">تعذّر بدء فك ترميز الفيديو. أغلق الصور الأخرى وحاول مرة أخرى.</string>
+</resources>

@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">Доставчикът отказа този канал. Проверете абонамента си и опитайте отново.</string>
+    <string name="iptv_playback_missing">Този канал вече не е наличен при доставчика.</string>
+    <string name="iptv_playback_unsupported">Форматът на този канал не може да се възпроизведе на това устройство.</string>
+    <string name="iptv_playback_decoder">Видео декодерът не можа да стартира. Затворете другите картини и опитайте отново.</string>
+</resources>
