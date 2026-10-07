@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Φάκελος Movies (ορατός σε άλλες εφαρμογές)</string>
+    <string name="iptv_media_label">Φάκελος Movies</string>
+    <string name="iptv_media_missing">Ο φάκελος Movies δεν είναι διαθέσιμος</string>
+    <string name="iptv_media_unavailable">Ο κοινόχρηστος φάκελος Movies δεν είναι διαθέσιμος σε αυτή τη συσκευή αυτή τη στιγμή.</string>
+    <string name="iptv_media_notice">Οι εγγραφές αποθηκεύονται πρώτα σε αυτή τη συσκευή και αντιγράφονται στο Movies/Nuvio Recordings όταν ολοκληρωθούν. Άλλες εφαρμογές, όπως οι αναπαραγωγείς πολυμέσων, μπορούν να τις δουν εκεί.</string>
+    <string name="iptv_media_copying">Αντιγραφή στον φάκελο Movies</string>
+    <string name="iptv_media_copy_waiting">Αναμονή για αντιγραφή στον φάκελο Movies</string>
+    <string name="iptv_media_delete_description">Η εγγραφή θα αφαιρεθεί από τη λίστα και από τον φάκελο Movies.</string>
+    <string name="iptv_media_delete_not_owned">Αφαιρέθηκε από τη λίστα. Το αρχείο στον φάκελο Movies ανήκει σε προηγούμενη εγκατάσταση αυτής της εφαρμογής, οπότε διατηρήθηκε. Διαγράψτε το με μια εφαρμογή διαχείρισης αρχείων.</string>
+</resources>

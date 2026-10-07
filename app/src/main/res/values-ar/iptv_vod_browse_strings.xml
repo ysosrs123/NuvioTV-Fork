@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">أفلام</string>
+    <string name="iptv_vod_browse_series">مسلسلات</string>
+    <string name="iptv_vod_browse_search">البحث</string>
+    <string name="iptv_vod_browse_search_hint">البحث حسب العنوان</string>
+    <string name="iptv_vod_browse_recent">أُضيف مؤخراً</string>
+    <string name="iptv_vod_browse_all">الكل</string>
+    <string name="iptv_vod_browse_categories">الفئات</string>
+    <string name="iptv_vod_browse_sources">المصادر</string>
+    <string name="iptv_vod_browse_results">نتائج \"%1$s\"</string>
+    <string name="iptv_vod_browse_empty">لا توجد عناوين في هذه القائمة.</string>
+    <string name="iptv_vod_browse_no_results">لا توجد عناوين تطابق بحثك.</string>
+    <string name="iptv_vod_browse_none">لا توجد أفلام أو مسلسلات في مصادر البث المباشر بعد. ستظهر بعد التحديث التالي للمصادر.</string>
+    <string name="iptv_vod_browse_play">تشغيل</string>
+    <string name="iptv_vod_browse_resume">استئناف من %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">استئناف %1$s</string>
+    <string name="iptv_vod_browse_from_start">التشغيل من البداية</string>
+    <string name="iptv_vod_browse_full_details">التفاصيل الكاملة</string>
+    <string name="iptv_vod_browse_season">الموسم %1$d</string>
+    <string name="iptv_vod_browse_specials">الحلقات الخاصة</string>
+    <string name="iptv_vod_browse_episodes_failed">تعذّر تحميل الحلقات.</string>
+    <string name="iptv_vod_browse_retry">إعادة المحاولة</string>
+    <string name="iptv_vod_browse_no_episodes">لا توجد حلقات مدرجة لهذا المسلسل.</string>
+    <string name="iptv_vod_browse_missing">لم يعد هذا العنوان متاحاً. حدّث المصدر وأعد المحاولة.</string>
+    <string name="iptv_vod_browse_runtime">%1$d دقيقة</string>
+    <string name="iptv_vod_browse_settings_title">الأفلام والمسلسلات</string>
+    <string name="iptv_vod_browse_settings_artwork">الملصقات والتفاصيل من</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">تُستخدم للأفلام والمسلسلات في البث المباشر</string>
+    <string name="iptv_vod_browse_artwork_provider">مزود الخدمة</string>
+    <string name="iptv_vod_browse_artwork_provider_description">الملصقات والأسماء كما يدرجها مصدر IPTV</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB وإضافات البيانات الوصفية)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">الملصقات والخلفيات والقصص والتقييمات للعناوين المطابقة، وتحتفظ العناوين الأخرى بصور مزود الخدمة</string>
+    <string name="iptv_vod_browse_settings_sources">عرض أفلام ومسلسلات مصادر IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">الأفلام: %1$d · المسلسلات: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">مخفية</string>
+    <string name="iptv_vod_browse_settings_pending">تظهر بعد التحديث التالي</string>
+</resources>

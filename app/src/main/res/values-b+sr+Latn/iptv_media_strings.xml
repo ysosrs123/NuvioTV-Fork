@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Folder Movies (vidljiv drugim aplikacijama)</string>
+    <string name="iptv_media_label">Folder Movies</string>
+    <string name="iptv_media_missing">Folder Movies nije dostupan</string>
+    <string name="iptv_media_unavailable">Deljeni folder Movies trenutno nije dostupan na ovom uređaju.</string>
+    <string name="iptv_media_notice">Snimci se prvo čuvaju na ovom uređaju, a kada se završe kopiraju se u Movies/Nuvio Recordings. Druge aplikacije, poput medija plejera, mogu ih tamo videti.</string>
+    <string name="iptv_media_copying">Kopiranje u folder Movies</string>
+    <string name="iptv_media_copy_waiting">Čeka se kopiranje u folder Movies</string>
+    <string name="iptv_media_delete_description">Snimak će biti uklonjen sa liste i iz foldera Movies.</string>
+    <string name="iptv_media_delete_not_owned">Uklonjeno sa liste. Fajl u folderu Movies pripada ranijoj instalaciji ove aplikacije, pa je zadržan. Obrišite ga pomoću menadžera fajlova.</string>
+</resources>

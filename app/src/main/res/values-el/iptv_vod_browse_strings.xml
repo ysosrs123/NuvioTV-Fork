@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Ταινίες</string>
+    <string name="iptv_vod_browse_series">Σειρές</string>
+    <string name="iptv_vod_browse_search">Αναζήτηση</string>
+    <string name="iptv_vod_browse_search_hint">Αναζήτηση με τίτλο</string>
+    <string name="iptv_vod_browse_recent">Προστέθηκαν πρόσφατα</string>
+    <string name="iptv_vod_browse_all">Όλα</string>
+    <string name="iptv_vod_browse_categories">Κατηγορίες</string>
+    <string name="iptv_vod_browse_sources">Πηγές</string>
+    <string name="iptv_vod_browse_results">Αποτελέσματα για «%1$s»</string>
+    <string name="iptv_vod_browse_empty">Δεν υπάρχουν τίτλοι σε αυτή τη λίστα.</string>
+    <string name="iptv_vod_browse_no_results">Κανένας τίτλος δεν ταιριάζει με την αναζήτηση.</string>
+    <string name="iptv_vod_browse_none">Δεν υπάρχουν ακόμη ταινίες ή σειρές στις πηγές ζωντανής TV. Θα εμφανιστούν μετά την επόμενη ανανέωση των πηγών.</string>
+    <string name="iptv_vod_browse_play">Αναπαραγωγή</string>
+    <string name="iptv_vod_browse_resume">Συνέχεια από %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Συνέχεια %1$s</string>
+    <string name="iptv_vod_browse_from_start">Αναπαραγωγή από την αρχή</string>
+    <string name="iptv_vod_browse_full_details">Όλες οι λεπτομέρειες</string>
+    <string name="iptv_vod_browse_season">Σεζόν %1$d</string>
+    <string name="iptv_vod_browse_specials">Ειδικά</string>
+    <string name="iptv_vod_browse_episodes_failed">Δεν ήταν δυνατή η φόρτωση των επεισοδίων.</string>
+    <string name="iptv_vod_browse_retry">Δοκιμάστε ξανά</string>
+    <string name="iptv_vod_browse_no_episodes">Δεν υπάρχουν επεισόδια για αυτή τη σειρά.</string>
+    <string name="iptv_vod_browse_missing">Αυτός ο τίτλος δεν είναι πλέον διαθέσιμος. Ανανεώστε την πηγή και δοκιμάστε ξανά.</string>
+    <string name="iptv_vod_browse_runtime">%1$d λεπ.</string>
+    <string name="iptv_vod_browse_settings_title">Ταινίες και σειρές</string>
+    <string name="iptv_vod_browse_settings_artwork">Αφίσες και λεπτομέρειες από</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Για Ταινίες και Σειρές στη ζωντανή TV</string>
+    <string name="iptv_vod_browse_artwork_provider">Πάροχος</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Αφίσες και ονόματα όπως τα παρέχει η πηγή IPTV</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB και πρόσθετα μεταδεδομένων)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Αφίσες, φόντα, περιλήψεις και βαθμολογίες για τίτλους που ταιριάζουν· οι υπόλοιποι κρατούν τις εικόνες του παρόχου</string>
+    <string name="iptv_vod_browse_settings_sources">Εμφάνιση ταινιών και σειρών από πηγές IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">Ταινίες: %1$d · Σειρές: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Κρυφά</string>
+    <string name="iptv_vod_browse_settings_pending">Εμφανίζονται μετά την επόμενη ανανέωση</string>
+</resources>

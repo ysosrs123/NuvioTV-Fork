@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Film</string>
+    <string name="iptv_vod_browse_series">Serier</string>
+    <string name="iptv_vod_browse_search">Søg</string>
+    <string name="iptv_vod_browse_search_hint">Søg efter titel</string>
+    <string name="iptv_vod_browse_recent">Nyligt tilføjet</string>
+    <string name="iptv_vod_browse_all">Alle</string>
+    <string name="iptv_vod_browse_categories">Kategorier</string>
+    <string name="iptv_vod_browse_sources">Kilder</string>
+    <string name="iptv_vod_browse_results">Resultater for \"%1$s\"</string>
+    <string name="iptv_vod_browse_empty">Ingen titler på denne liste.</string>
+    <string name="iptv_vod_browse_no_results">Ingen titler matcher din søgning.</string>
+    <string name="iptv_vod_browse_none">Der er endnu ingen film eller serier i dine live-TV-kilder. De vises efter næste opdatering af kilderne.</string>
+    <string name="iptv_vod_browse_play">Afspil</string>
+    <string name="iptv_vod_browse_resume">Genoptag fra %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Genoptag %1$s</string>
+    <string name="iptv_vod_browse_from_start">Afspil fra start</string>
+    <string name="iptv_vod_browse_full_details">Alle detaljer</string>
+    <string name="iptv_vod_browse_season">Sæson %1$d</string>
+    <string name="iptv_vod_browse_specials">Specials</string>
+    <string name="iptv_vod_browse_episodes_failed">Afsnittene kunne ikke indlæses.</string>
+    <string name="iptv_vod_browse_retry">Prøv igen</string>
+    <string name="iptv_vod_browse_no_episodes">Ingen afsnit for denne serie.</string>
+    <string name="iptv_vod_browse_missing">Denne titel er ikke længere tilgængelig. Opdater kilden, og prøv igen.</string>
+    <string name="iptv_vod_browse_runtime">%1$d min.</string>
+    <string name="iptv_vod_browse_settings_title">Film og serier</string>
+    <string name="iptv_vod_browse_settings_artwork">Plakater og detaljer fra</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Bruges til Film og Serier i live-TV</string>
+    <string name="iptv_vod_browse_artwork_provider">Udbyder</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Plakater og navne, som IPTV-kilden angiver dem</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB og meta-addons)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Plakater, baggrunde, handlinger og bedømmelser for titler, der matcher; andre beholder udbyderens billeder</string>
+    <string name="iptv_vod_browse_settings_sources">Vis IPTV-kilders film og serier</string>
+    <string name="iptv_vod_browse_settings_counts">Film: %1$d · Serier: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Skjult</string>
+    <string name="iptv_vod_browse_settings_pending">Vises efter næste opdatering</string>
+</resources>

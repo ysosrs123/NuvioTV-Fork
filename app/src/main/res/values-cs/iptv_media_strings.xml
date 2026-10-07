@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Složka Movies (viditelná pro jiné aplikace)</string>
+    <string name="iptv_media_label">Složka Movies</string>
+    <string name="iptv_media_missing">Složka Movies není k dispozici</string>
+    <string name="iptv_media_unavailable">Sdílená složka Movies teď na tomto zařízení není k dispozici.</string>
+    <string name="iptv_media_notice">Nahrávky se nejprve ukládají do tohoto zařízení a po dokončení se zkopírují do Movies/Nuvio Recordings. Jiné aplikace, například přehrávače médií, je tam uvidí.</string>
+    <string name="iptv_media_copying">Kopírování do složky Movies</string>
+    <string name="iptv_media_copy_waiting">Čeká na zkopírování do složky Movies</string>
+    <string name="iptv_media_delete_description">Nahrávka bude odebrána ze seznamu i ze složky Movies.</string>
+    <string name="iptv_media_delete_not_owned">Odebráno ze seznamu. Soubor ve složce Movies patří k dřívější instalaci této aplikace, proto byl zachován. Smažte ho pomocí správce souborů.</string>
+</resources>

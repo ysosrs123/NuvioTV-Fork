@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Filme</string>
+    <string name="iptv_vod_browse_series">Serien</string>
+    <string name="iptv_vod_browse_search">Suchen</string>
+    <string name="iptv_vod_browse_search_hint">Nach Titel suchen</string>
+    <string name="iptv_vod_browse_recent">Kürzlich hinzugefügt</string>
+    <string name="iptv_vod_browse_all">Alle</string>
+    <string name="iptv_vod_browse_categories">Kategorien</string>
+    <string name="iptv_vod_browse_sources">Quellen</string>
+    <string name="iptv_vod_browse_results">Ergebnisse für „%1$s“</string>
+    <string name="iptv_vod_browse_empty">Keine Titel in dieser Liste.</string>
+    <string name="iptv_vod_browse_no_results">Keine Titel entsprechen Ihrer Suche.</string>
+    <string name="iptv_vod_browse_none">Noch keine Filme oder Serien in Ihren Live-TV-Quellen. Sie erscheinen nach der nächsten Aktualisierung der Quellen.</string>
+    <string name="iptv_vod_browse_play">Abspielen</string>
+    <string name="iptv_vod_browse_resume">Fortsetzen ab %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">%1$s fortsetzen</string>
+    <string name="iptv_vod_browse_from_start">Von Anfang an abspielen</string>
+    <string name="iptv_vod_browse_full_details">Alle Details</string>
+    <string name="iptv_vod_browse_season">Staffel %1$d</string>
+    <string name="iptv_vod_browse_specials">Specials</string>
+    <string name="iptv_vod_browse_episodes_failed">Folgen konnten nicht geladen werden.</string>
+    <string name="iptv_vod_browse_retry">Erneut versuchen</string>
+    <string name="iptv_vod_browse_no_episodes">Für diese Serie sind keine Folgen aufgeführt.</string>
+    <string name="iptv_vod_browse_missing">Dieser Titel ist nicht mehr verfügbar. Aktualisieren Sie die Quelle und versuchen Sie es erneut.</string>
+    <string name="iptv_vod_browse_runtime">%1$d Min.</string>
+    <string name="iptv_vod_browse_settings_title">Filme und Serien</string>
+    <string name="iptv_vod_browse_settings_artwork">Poster und Details von</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Für Filme und Serien in Live-TV</string>
+    <string name="iptv_vod_browse_artwork_provider">Anbieter</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Poster und Namen wie von der IPTV-Quelle angegeben</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB und Meta-Addons)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Poster, Hintergründe, Handlungen und Bewertungen für passende Titel; andere behalten die Bilder des Anbieters</string>
+    <string name="iptv_vod_browse_settings_sources">Filme und Serien der IPTV-Quellen anzeigen</string>
+    <string name="iptv_vod_browse_settings_counts">Filme: %1$d · Serien: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Ausgeblendet</string>
+    <string name="iptv_vod_browse_settings_pending">Nach der nächsten Aktualisierung sichtbar</string>
+</resources>

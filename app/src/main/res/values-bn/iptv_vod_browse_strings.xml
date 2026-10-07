@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">মুভি</string>
+    <string name="iptv_vod_browse_series">সিরিজ</string>
+    <string name="iptv_vod_browse_search">সার্চ</string>
+    <string name="iptv_vod_browse_search_hint">টাইটেল দিয়ে সার্চ করুন</string>
+    <string name="iptv_vod_browse_recent">সম্প্রতি যোগ করা</string>
+    <string name="iptv_vod_browse_all">সব</string>
+    <string name="iptv_vod_browse_categories">ক্যাটাগরি</string>
+    <string name="iptv_vod_browse_sources">সোর্স</string>
+    <string name="iptv_vod_browse_results">\"%1$s\"-এর ফলাফল</string>
+    <string name="iptv_vod_browse_empty">এই তালিকায় কোনো টাইটেল নেই।</string>
+    <string name="iptv_vod_browse_no_results">আপনার সার্চের সাথে কোনো টাইটেল মেলেনি।</string>
+    <string name="iptv_vod_browse_none">আপনার লাইভ টিভি সোর্সে এখনো কোনো মুভি বা সিরিজ নেই। পরের সোর্স রিফ্রেশের পর এগুলো দেখা যাবে।</string>
+    <string name="iptv_vod_browse_play">প্লে</string>
+    <string name="iptv_vod_browse_resume">%1$s থেকে আবার শুরু করুন</string>
+    <string name="iptv_vod_browse_resume_episode">%1$s আবার শুরু করুন</string>
+    <string name="iptv_vod_browse_from_start">শুরু থেকে প্লে</string>
+    <string name="iptv_vod_browse_full_details">সম্পূর্ণ বিবরণ</string>
+    <string name="iptv_vod_browse_season">সিজন %1$d</string>
+    <string name="iptv_vod_browse_specials">বিশেষ</string>
+    <string name="iptv_vod_browse_episodes_failed">এপিসোড লোড করা যায়নি।</string>
+    <string name="iptv_vod_browse_retry">আবার চেষ্টা করুন</string>
+    <string name="iptv_vod_browse_no_episodes">এই সিরিজের কোনো এপিসোড নেই।</string>
+    <string name="iptv_vod_browse_missing">এই টাইটেল আর উপলব্ধ নেই। সোর্সটি রিফ্রেশ করে আবার চেষ্টা করুন।</string>
+    <string name="iptv_vod_browse_runtime">%1$d মিনিট</string>
+    <string name="iptv_vod_browse_settings_title">মুভি ও সিরিজ</string>
+    <string name="iptv_vod_browse_settings_artwork">পোস্টার ও বিবরণের উৎস</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">লাইভ টিভির মুভি ও সিরিজে ব্যবহৃত হয়</string>
+    <string name="iptv_vod_browse_artwork_provider">প্রোভাইডার</string>
+    <string name="iptv_vod_browse_artwork_provider_description">IPTV সোর্সে যেমন আছে তেমন পোস্টার ও নাম</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB ও মেটা অ্যাডন)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">মিলে যাওয়া টাইটেলের পোস্টার, ব্যাকড্রপ, কাহিনি ও রেটিং; বাকিগুলো প্রোভাইডারের ছবি রাখে</string>
+    <string name="iptv_vod_browse_settings_sources">IPTV সোর্সের মুভি ও সিরিজ দেখান</string>
+    <string name="iptv_vod_browse_settings_counts">মুভি: %1$d · সিরিজ: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">হাইড করা</string>
+    <string name="iptv_vod_browse_settings_pending">পরের রিফ্রেশের পর দেখা যাবে</string>
+</resources>

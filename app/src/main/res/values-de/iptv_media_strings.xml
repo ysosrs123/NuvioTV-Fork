@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Ordner „Movies“ (für andere Apps sichtbar)</string>
+    <string name="iptv_media_label">Ordner „Movies“</string>
+    <string name="iptv_media_missing">Ordner „Movies“ nicht verfügbar</string>
+    <string name="iptv_media_unavailable">Der freigegebene Ordner „Movies“ ist auf diesem Gerät gerade nicht verfügbar.</string>
+    <string name="iptv_media_notice">Aufnahmen werden zuerst auf diesem Gerät gespeichert und nach Abschluss nach Movies/Nuvio Recordings kopiert. Andere Apps, etwa Mediaplayer, können sie dort sehen.</string>
+    <string name="iptv_media_copying">Wird in den Ordner „Movies“ kopiert</string>
+    <string name="iptv_media_copy_waiting">Warte auf Kopieren in den Ordner „Movies“</string>
+    <string name="iptv_media_delete_description">Die Aufnahme wird aus der Liste und aus dem Ordner „Movies“ entfernt.</string>
+    <string name="iptv_media_delete_not_owned">Aus der Liste entfernt. Die Datei im Ordner „Movies“ stammt von einer früheren Installation dieser App und wurde daher behalten. Löschen Sie sie mit einem Dateimanager.</string>
+</resources>

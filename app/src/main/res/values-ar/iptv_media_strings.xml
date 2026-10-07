@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">مجلد Movies (مرئي للتطبيقات الأخرى)</string>
+    <string name="iptv_media_label">مجلد Movies</string>
+    <string name="iptv_media_missing">مجلد Movies غير متاح</string>
+    <string name="iptv_media_unavailable">مجلد Movies المشترك غير متاح على هذا الجهاز حالياً.</string>
+    <string name="iptv_media_notice">تُحفظ التسجيلات على هذا الجهاز أولاً ثم تُنسخ إلى Movies/Nuvio Recordings عند انتهائها. يمكن للتطبيقات الأخرى، مثل مشغلات الوسائط، رؤيتها هناك.</string>
+    <string name="iptv_media_copying">جارٍ النسخ إلى مجلد Movies</string>
+    <string name="iptv_media_copy_waiting">في انتظار النسخ إلى مجلد Movies</string>
+    <string name="iptv_media_delete_description">سيُزال التسجيل من القائمة ومن مجلد Movies.</string>
+    <string name="iptv_media_delete_not_owned">أُزيل من القائمة. الملف في مجلد Movies يعود إلى تثبيت سابق لهذا التطبيق، لذا تم الاحتفاظ به. احذفه باستخدام مدير الملفات.</string>
+</resources>

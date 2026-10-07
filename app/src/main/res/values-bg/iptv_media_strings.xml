@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Папка Movies (видима за други приложения)</string>
+    <string name="iptv_media_label">Папка Movies</string>
+    <string name="iptv_media_missing">Папката Movies не е налична</string>
+    <string name="iptv_media_unavailable">Споделената папка Movies в момента не е налична на това устройство.</string>
+    <string name="iptv_media_notice">Записите първо се запазват на това устройство и след приключване се копират в Movies/Nuvio Recordings. Други приложения, например медийни плейъри, могат да ги виждат там.</string>
+    <string name="iptv_media_copying">Копиране в папка Movies</string>
+    <string name="iptv_media_copy_waiting">Изчакване за копиране в папка Movies</string>
+    <string name="iptv_media_delete_description">Записът ще бъде премахнат от списъка и от папка Movies.</string>
+    <string name="iptv_media_delete_not_owned">Премахнато от списъка. Файлът в папка Movies принадлежи на по-ранна инсталация на приложението, затова е запазен. Изтрийте го с файлов мениджър.</string>
+</resources>
