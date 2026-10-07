@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Dosarul Movies (vizibil pentru alte aplicații)</string>
+    <string name="iptv_media_label">Dosarul Movies</string>
+    <string name="iptv_media_missing">Dosarul Movies nu este disponibil</string>
+    <string name="iptv_media_unavailable">Dosarul partajat Movies nu este disponibil acum pe acest dispozitiv.</string>
+    <string name="iptv_media_notice">Înregistrările sunt salvate mai întâi pe acest dispozitiv și copiate în Movies/Nuvio Recordings la final. Alte aplicații, precum playerele media, le pot vedea acolo.</string>
+    <string name="iptv_media_copying">Se copiază în dosarul Movies</string>
+    <string name="iptv_media_copy_waiting">Se așteaptă copierea în dosarul Movies</string>
+    <string name="iptv_media_delete_description">Înregistrarea va fi eliminată din listă și din dosarul Movies.</string>
+    <string name="iptv_media_delete_not_owned">Eliminată din listă. Fișierul din dosarul Movies aparține unei instalări anterioare a acestei aplicații, așa că a fost păstrat. Șterge-l cu un manager de fișiere.</string>
+</resources>

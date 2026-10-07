@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Filmi</string>
+    <string name="iptv_vod_browse_series">Serije</string>
+    <string name="iptv_vod_browse_search">Iskanje</string>
+    <string name="iptv_vod_browse_search_hint">Iskanje po naslovu</string>
+    <string name="iptv_vod_browse_recent">Nedavno dodano</string>
+    <string name="iptv_vod_browse_all">Vse</string>
+    <string name="iptv_vod_browse_categories">Kategorije</string>
+    <string name="iptv_vod_browse_sources">Viri</string>
+    <string name="iptv_vod_browse_results">Rezultati za »%1$s«</string>
+    <string name="iptv_vod_browse_empty">Na tem seznamu ni naslovov.</string>
+    <string name="iptv_vod_browse_no_results">Iskanju ne ustreza noben naslov.</string>
+    <string name="iptv_vod_browse_none">V vaših virih TV v živo še ni filmov ali serij. Prikazali se bodo po naslednji osvežitvi vira.</string>
+    <string name="iptv_vod_browse_play">Predvajaj</string>
+    <string name="iptv_vod_browse_resume">Nadaljuj od %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Nadaljuj %1$s</string>
+    <string name="iptv_vod_browse_from_start">Predvajaj od začetka</string>
+    <string name="iptv_vod_browse_full_details">Vse podrobnosti</string>
+    <string name="iptv_vod_browse_season">Sezona %1$d</string>
+    <string name="iptv_vod_browse_specials">Posebne epizode</string>
+    <string name="iptv_vod_browse_episodes_failed">Epizod ni bilo mogoče naložiti.</string>
+    <string name="iptv_vod_browse_retry">Poskusi znova</string>
+    <string name="iptv_vod_browse_no_episodes">Za to serijo ni navedenih epizod.</string>
+    <string name="iptv_vod_browse_missing">Ta naslov ni več na voljo. Osvežite vir in poskusite znova.</string>
+    <string name="iptv_vod_browse_runtime">%1$d min</string>
+    <string name="iptv_vod_browse_settings_title">Filmi in serije</string>
+    <string name="iptv_vod_browse_settings_artwork">Plakati in podrobnosti iz</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Uporablja se za Filme in Serije v TV v živo</string>
+    <string name="iptv_vod_browse_artwork_provider">Ponudnik</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Plakati in imena, kot jih navaja vir IPTV</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB in meta dodatki)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Plakati, ozadja, vsebine in ocene za ujemajoče se naslove; drugi obdržijo slike ponudnika</string>
+    <string name="iptv_vod_browse_settings_sources">Prikaži filme in serije virov IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">Filmi: %1$d · Serije: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Skrito</string>
+    <string name="iptv_vod_browse_settings_pending">Prikazano po naslednji osvežitvi</string>
+</resources>

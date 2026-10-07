@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Filmy</string>
+    <string name="iptv_vod_browse_series">Seriály</string>
+    <string name="iptv_vod_browse_search">Hľadať</string>
+    <string name="iptv_vod_browse_search_hint">Hľadať podľa názvu</string>
+    <string name="iptv_vod_browse_recent">Nedávno pridané</string>
+    <string name="iptv_vod_browse_all">Všetko</string>
+    <string name="iptv_vod_browse_categories">Kategórie</string>
+    <string name="iptv_vod_browse_sources">Zdroje</string>
+    <string name="iptv_vod_browse_results">Výsledky pre „%1$s“</string>
+    <string name="iptv_vod_browse_empty">V tomto zozname nie sú žiadne tituly.</string>
+    <string name="iptv_vod_browse_no_results">Hľadaniu nezodpovedajú žiadne tituly.</string>
+    <string name="iptv_vod_browse_none">Vo vašich zdrojoch živej TV zatiaľ nie sú filmy ani seriály. Zobrazia sa po ďalšom obnovení zdroja.</string>
+    <string name="iptv_vod_browse_play">Prehrať</string>
+    <string name="iptv_vod_browse_resume">Pokračovať od %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Pokračovať %1$s</string>
+    <string name="iptv_vod_browse_from_start">Prehrať od začiatku</string>
+    <string name="iptv_vod_browse_full_details">Všetky podrobnosti</string>
+    <string name="iptv_vod_browse_season">Séria %1$d</string>
+    <string name="iptv_vod_browse_specials">Špeciály</string>
+    <string name="iptv_vod_browse_episodes_failed">Epizódy sa nepodarilo načítať.</string>
+    <string name="iptv_vod_browse_retry">Skúsiť znova</string>
+    <string name="iptv_vod_browse_no_episodes">Pre tento seriál nie sú uvedené žiadne epizódy.</string>
+    <string name="iptv_vod_browse_missing">Tento titul už nie je k dispozícii. Obnovte zdroj a skúste to znova.</string>
+    <string name="iptv_vod_browse_runtime">%1$d min</string>
+    <string name="iptv_vod_browse_settings_title">Filmy a seriály</string>
+    <string name="iptv_vod_browse_settings_artwork">Plagáty a podrobnosti z</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Používa sa pre Filmy a Seriály v živej TV</string>
+    <string name="iptv_vod_browse_artwork_provider">Poskytovateľ</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Plagáty a názvy podľa zdroja IPTV</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB a meta doplnky)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Plagáty, pozadia, deje a hodnotenia pre zodpovedajúce tituly; ostatné si ponechajú obrázky poskytovateľa</string>
+    <string name="iptv_vod_browse_settings_sources">Zobraziť filmy a seriály zo zdrojov IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">Filmy: %1$d · Seriály: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Skryté</string>
+    <string name="iptv_vod_browse_settings_pending">Zobrazí sa po ďalšom obnovení</string>
+</resources>

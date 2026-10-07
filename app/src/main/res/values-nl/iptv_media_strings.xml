@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Map Movies (zichtbaar voor andere apps)</string>
+    <string name="iptv_media_label">Map Movies</string>
+    <string name="iptv_media_missing">Map Movies niet beschikbaar</string>
+    <string name="iptv_media_unavailable">De gedeelde map Movies is nu niet beschikbaar op dit apparaat.</string>
+    <string name="iptv_media_notice">Opnamen worden eerst op dit apparaat opgeslagen en na afloop gekopieerd naar Movies/Nuvio Recordings. Andere apps, zoals mediaspelers, kunnen ze daar zien.</string>
+    <string name="iptv_media_copying">Kopiëren naar de map Movies</string>
+    <string name="iptv_media_copy_waiting">Wacht op kopiëren naar de map Movies</string>
+    <string name="iptv_media_delete_description">De opname wordt verwijderd uit de lijst en uit de map Movies.</string>
+    <string name="iptv_media_delete_not_owned">Verwijderd uit de lijst. Het bestand in de map Movies hoort bij een eerdere installatie van deze app en is daarom bewaard. Verwijder het met een bestandsbeheerder.</string>
+</resources>

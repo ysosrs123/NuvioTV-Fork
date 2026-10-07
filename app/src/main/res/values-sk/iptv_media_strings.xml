@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Priečinok Movies (viditeľný pre iné aplikácie)</string>
+    <string name="iptv_media_label">Priečinok Movies</string>
+    <string name="iptv_media_missing">Priečinok Movies nie je k dispozícii</string>
+    <string name="iptv_media_unavailable">Zdieľaný priečinok Movies teraz nie je v tomto zariadení k dispozícii.</string>
+    <string name="iptv_media_notice">Nahrávky sa najprv uložia v tomto zariadení a po dokončení sa skopírujú do Movies/Nuvio Recordings. Iné aplikácie, napríklad prehrávače médií, ich tam uvidia.</string>
+    <string name="iptv_media_copying">Kopíruje sa do priečinka Movies</string>
+    <string name="iptv_media_copy_waiting">Čaká sa na skopírovanie do priečinka Movies</string>
+    <string name="iptv_media_delete_description">Nahrávka sa odstráni zo zoznamu aj z priečinka Movies.</string>
+    <string name="iptv_media_delete_not_owned">Odstránené zo zoznamu. Súbor v priečinku Movies patrí staršej inštalácii tejto aplikácie, preto bol ponechaný. Odstráňte ho správcom súborov.</string>
+</resources>

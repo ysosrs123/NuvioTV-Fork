@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Films</string>
+    <string name="iptv_vod_browse_series">Series</string>
+    <string name="iptv_vod_browse_search">Zoeken</string>
+    <string name="iptv_vod_browse_search_hint">Zoeken op titel</string>
+    <string name="iptv_vod_browse_recent">Onlangs toegevoegd</string>
+    <string name="iptv_vod_browse_all">Alle</string>
+    <string name="iptv_vod_browse_categories">Categorieën</string>
+    <string name="iptv_vod_browse_sources">Bronnen</string>
+    <string name="iptv_vod_browse_results">Resultaten voor “%1$s”</string>
+    <string name="iptv_vod_browse_empty">Geen titels in deze lijst.</string>
+    <string name="iptv_vod_browse_no_results">Geen titels gevonden voor je zoekopdracht.</string>
+    <string name="iptv_vod_browse_none">Nog geen films of series in je live-tv-bronnen. Ze verschijnen na de volgende vernieuwing van de bron.</string>
+    <string name="iptv_vod_browse_play">Afspelen</string>
+    <string name="iptv_vod_browse_resume">Hervatten vanaf %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">%1$s hervatten</string>
+    <string name="iptv_vod_browse_from_start">Afspelen vanaf begin</string>
+    <string name="iptv_vod_browse_full_details">Alle details</string>
+    <string name="iptv_vod_browse_season">Seizoen %1$d</string>
+    <string name="iptv_vod_browse_specials">Specials</string>
+    <string name="iptv_vod_browse_episodes_failed">Afleveringen konden niet worden geladen.</string>
+    <string name="iptv_vod_browse_retry">Opnieuw proberen</string>
+    <string name="iptv_vod_browse_no_episodes">Geen afleveringen voor deze serie.</string>
+    <string name="iptv_vod_browse_missing">Deze titel is niet meer beschikbaar. Vernieuw de bron en probeer het opnieuw.</string>
+    <string name="iptv_vod_browse_runtime">%1$d min</string>
+    <string name="iptv_vod_browse_settings_title">Films en series</string>
+    <string name="iptv_vod_browse_settings_artwork">Posters en details van</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Gebruikt voor Films en Series in live-tv</string>
+    <string name="iptv_vod_browse_artwork_provider">Provider</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Posters en namen zoals de IPTV-bron ze vermeldt</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB en meta-add-ons)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Posters, achtergronden, samenvattingen en beoordelingen voor overeenkomende titels; andere houden de afbeeldingen van de provider</string>
+    <string name="iptv_vod_browse_settings_sources">Films en series van IPTV-bronnen tonen</string>
+    <string name="iptv_vod_browse_settings_counts">Films: %1$d · Series: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Verborgen</string>
+    <string name="iptv_vod_browse_settings_pending">Zichtbaar na de volgende vernieuwing</string>
+</resources>

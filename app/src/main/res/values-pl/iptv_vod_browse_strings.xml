@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Filmy</string>
+    <string name="iptv_vod_browse_series">Seriale</string>
+    <string name="iptv_vod_browse_search">Szukaj</string>
+    <string name="iptv_vod_browse_search_hint">Szukaj po tytule</string>
+    <string name="iptv_vod_browse_recent">Ostatnio dodane</string>
+    <string name="iptv_vod_browse_all">Wszystkie</string>
+    <string name="iptv_vod_browse_categories">Kategorie</string>
+    <string name="iptv_vod_browse_sources">Źródła</string>
+    <string name="iptv_vod_browse_results">Wyniki dla „%1$s”</string>
+    <string name="iptv_vod_browse_empty">Brak tytułów na tej liście.</string>
+    <string name="iptv_vod_browse_no_results">Żaden tytuł nie pasuje do wyszukiwania.</string>
+    <string name="iptv_vod_browse_none">Brak jeszcze filmów i seriali w Twoich źródłach telewizji na żywo. Pojawią się po następnym odświeżeniu źródła.</string>
+    <string name="iptv_vod_browse_play">Odtwórz</string>
+    <string name="iptv_vod_browse_resume">Wznów od %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Wznów %1$s</string>
+    <string name="iptv_vod_browse_from_start">Odtwórz od początku</string>
+    <string name="iptv_vod_browse_full_details">Pełne szczegóły</string>
+    <string name="iptv_vod_browse_season">Sezon %1$d</string>
+    <string name="iptv_vod_browse_specials">Odcinki specjalne</string>
+    <string name="iptv_vod_browse_episodes_failed">Nie udało się wczytać odcinków.</string>
+    <string name="iptv_vod_browse_retry">Spróbuj ponownie</string>
+    <string name="iptv_vod_browse_no_episodes">Brak odcinków dla tego serialu.</string>
+    <string name="iptv_vod_browse_missing">Ten tytuł nie jest już dostępny. Odśwież źródło i spróbuj ponownie.</string>
+    <string name="iptv_vod_browse_runtime">%1$d min</string>
+    <string name="iptv_vod_browse_settings_title">Filmy i seriale</string>
+    <string name="iptv_vod_browse_settings_artwork">Plakaty i szczegóły z</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Używane dla Filmów i Seriali w telewizji na żywo</string>
+    <string name="iptv_vod_browse_artwork_provider">Dostawca</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Plakaty i nazwy tak, jak podaje je źródło IPTV</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB i dodatki meta)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Plakaty, tła, opisy i oceny dla pasujących tytułów; pozostałe zachowują grafiki dostawcy</string>
+    <string name="iptv_vod_browse_settings_sources">Pokazuj filmy i seriale ze źródeł IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">Filmy: %1$d · Seriale: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Ukryte</string>
+    <string name="iptv_vod_browse_settings_pending">Widoczne po następnym odświeżeniu</string>
+</resources>

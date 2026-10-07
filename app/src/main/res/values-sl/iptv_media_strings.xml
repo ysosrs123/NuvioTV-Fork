@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Mapa Movies (vidna drugim aplikacijam)</string>
+    <string name="iptv_media_label">Mapa Movies</string>
+    <string name="iptv_media_missing">Mapa Movies ni na voljo</string>
+    <string name="iptv_media_unavailable">Skupna mapa Movies trenutno ni na voljo v tej napravi.</string>
+    <string name="iptv_media_notice">Posnetki se najprej shranijo v tej napravi in se po koncu kopirajo v Movies/Nuvio Recordings. Tam jih vidijo druge aplikacije, na primer predvajalniki predstavnosti.</string>
+    <string name="iptv_media_copying">Kopiranje v mapo Movies</string>
+    <string name="iptv_media_copy_waiting">Čakanje na kopiranje v mapo Movies</string>
+    <string name="iptv_media_delete_description">Posnetek bo odstranjen s seznama in iz mape Movies.</string>
+    <string name="iptv_media_delete_not_owned">Odstranjeno s seznama. Datoteka v mapi Movies pripada prejšnji namestitvi te aplikacije, zato je bila ohranjena. Izbrišite jo z upraviteljem datotek.</string>
+</resources>

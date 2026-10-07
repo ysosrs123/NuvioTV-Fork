@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Folder Movies (widoczny dla innych aplikacji)</string>
+    <string name="iptv_media_label">Folder Movies</string>
+    <string name="iptv_media_missing">Folder Movies jest niedostępny</string>
+    <string name="iptv_media_unavailable">Udostępniony folder Movies jest teraz niedostępny na tym urządzeniu.</string>
+    <string name="iptv_media_notice">Nagrania są najpierw zapisywane na tym urządzeniu, a po zakończeniu kopiowane do Movies/Nuvio Recordings. Inne aplikacje, np. odtwarzacze multimediów, widzą je tam.</string>
+    <string name="iptv_media_copying">Kopiowanie do folderu Movies</string>
+    <string name="iptv_media_copy_waiting">Oczekiwanie na skopiowanie do folderu Movies</string>
+    <string name="iptv_media_delete_description">Nagranie zostanie usunięte z listy i z folderu Movies.</string>
+    <string name="iptv_media_delete_not_owned">Usunięto z listy. Plik w folderze Movies należy do wcześniejszej instalacji tej aplikacji, więc został zachowany. Usuń go menedżerem plików.</string>
+</resources>

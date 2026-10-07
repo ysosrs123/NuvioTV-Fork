@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Pasta Movies (visível para outras apps)</string>
+    <string name="iptv_media_label">Pasta Movies</string>
+    <string name="iptv_media_missing">Pasta Movies indisponível</string>
+    <string name="iptv_media_unavailable">A pasta partilhada Movies não está disponível neste dispositivo de momento.</string>
+    <string name="iptv_media_notice">As gravações são guardadas primeiro neste dispositivo e copiadas para Movies/Nuvio Recordings quando terminam. Outras apps, como leitores multimédia, podem vê-las aí.</string>
+    <string name="iptv_media_copying">A copiar para a pasta Movies</string>
+    <string name="iptv_media_copy_waiting">A aguardar cópia para a pasta Movies</string>
+    <string name="iptv_media_delete_description">A gravação será removida da lista e da pasta Movies.</string>
+    <string name="iptv_media_delete_not_owned">Removida da lista. O ficheiro na pasta Movies pertence a uma instalação anterior desta app, por isso foi mantido. Elimina-o com um gestor de ficheiros.</string>
+</resources>

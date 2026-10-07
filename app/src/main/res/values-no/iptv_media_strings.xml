@@ -1,0 +1,11 @@
+<resources>
+    <string name="iptv_media_location">Movies-mappen (synlig for andre apper)</string>
+    <string name="iptv_media_label">Movies-mappen</string>
+    <string name="iptv_media_missing">Movies-mappen er ikke tilgjengelig</string>
+    <string name="iptv_media_unavailable">Den delte Movies-mappen er ikke tilgjengelig på denne enheten akkurat nå.</string>
+    <string name="iptv_media_notice">Opptak lagres først på denne enheten og kopieres til Movies/Nuvio Recordings når de er ferdige. Andre apper, som mediespillere, kan se dem der.</string>
+    <string name="iptv_media_copying">Kopierer til Movies-mappen</string>
+    <string name="iptv_media_copy_waiting">Venter på kopiering til Movies-mappen</string>
+    <string name="iptv_media_delete_description">Opptaket fjernes fra listen og fra Movies-mappen.</string>
+    <string name="iptv_media_delete_not_owned">Fjernet fra listen. Filen i Movies-mappen tilhører en tidligere installasjon av denne appen, så den ble beholdt. Slett den med en filbehandler.</string>
+</resources>

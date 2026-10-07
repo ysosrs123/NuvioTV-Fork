@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_vod_browse_movies">Filme</string>
+    <string name="iptv_vod_browse_series">Seriale</string>
+    <string name="iptv_vod_browse_search">Căutare</string>
+    <string name="iptv_vod_browse_search_hint">Caută după titlu</string>
+    <string name="iptv_vod_browse_recent">Adăugate recent</string>
+    <string name="iptv_vod_browse_all">Toate</string>
+    <string name="iptv_vod_browse_categories">Categorii</string>
+    <string name="iptv_vod_browse_sources">Surse</string>
+    <string name="iptv_vod_browse_results">Rezultate pentru „%1$s”</string>
+    <string name="iptv_vod_browse_empty">Niciun titlu în această listă.</string>
+    <string name="iptv_vod_browse_no_results">Niciun titlu nu corespunde căutării.</string>
+    <string name="iptv_vod_browse_none">Încă nu există filme sau seriale în sursele TV live. Apar după următoarea reîmprospătare a sursei.</string>
+    <string name="iptv_vod_browse_play">Redă</string>
+    <string name="iptv_vod_browse_resume">Reia de la %1$s</string>
+    <string name="iptv_vod_browse_resume_episode">Reia %1$s</string>
+    <string name="iptv_vod_browse_from_start">Redă de la început</string>
+    <string name="iptv_vod_browse_full_details">Toate detaliile</string>
+    <string name="iptv_vod_browse_season">Sezonul %1$d</string>
+    <string name="iptv_vod_browse_specials">Speciale</string>
+    <string name="iptv_vod_browse_episodes_failed">Episoadele nu au putut fi încărcate.</string>
+    <string name="iptv_vod_browse_retry">Reîncearcă</string>
+    <string name="iptv_vod_browse_no_episodes">Niciun episod listat pentru acest serial.</string>
+    <string name="iptv_vod_browse_missing">Acest titlu nu mai este disponibil. Reîmprospătează sursa și încearcă din nou.</string>
+    <string name="iptv_vod_browse_runtime">%1$d min</string>
+    <string name="iptv_vod_browse_settings_title">Filme și seriale</string>
+    <string name="iptv_vod_browse_settings_artwork">Postere și detalii de la</string>
+    <string name="iptv_vod_browse_settings_artwork_subtitle">Folosit pentru Filme și Seriale în TV live</string>
+    <string name="iptv_vod_browse_artwork_provider">Furnizor</string>
+    <string name="iptv_vod_browse_artwork_provider_description">Postere și nume așa cum le listează sursa IPTV</string>
+    <string name="iptv_vod_browse_artwork_nuvio">Nuvio (TMDB și suplimente meta)</string>
+    <string name="iptv_vod_browse_artwork_nuvio_description">Postere, fundaluri, rezumate și evaluări pentru titlurile potrivite; celelalte păstrează imaginile furnizorului</string>
+    <string name="iptv_vod_browse_settings_sources">Afișează filmele și serialele surselor IPTV</string>
+    <string name="iptv_vod_browse_settings_counts">Filme: %1$d · Seriale: %2$d</string>
+    <string name="iptv_vod_browse_settings_hidden">Ascunse</string>
+    <string name="iptv_vod_browse_settings_pending">Afișate după următoarea reîmprospătare</string>
+</resources>
