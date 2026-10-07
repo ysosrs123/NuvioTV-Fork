@@ -30,12 +30,13 @@ import com.nuvio.tv.ui.theme.accentBrush
 import kotlinx.coroutines.delay
 
 @Composable
-internal fun rememberCatchupPosition(state: IptvLiveState): State<Long?> = produceState<Long?>(null, state.player, state.catchup, state.catchupFrom, state.scrubTarget) {
+internal fun rememberCatchupPosition(state: IptvLiveState): State<Long?> = produceState<Long?>(null, state.player, state.catchup, state.catchupFrom, state.scrubTarget, state.localBehind) {
     while (true) {
         val catchup = state.catchup
         val player = state.player
-        value = state.scrubTarget ?: if (catchup != null && player != null) LiveTimeshift.position(catchup, state.catchupFrom, player.currentPosition) else null
-        if (catchup == null) break
+        value = state.scrubTarget ?: if (catchup != null && player != null) LiveTimeshift.position(catchup, state.catchupFrom, player.currentPosition)
+            else if (state.localBehind) state.playback?.localPosition() else null
+        if (catchup == null && !state.localBehind) break
         delay(500)
     }
 }
@@ -48,11 +49,12 @@ internal fun behindLive(millis: Long): String {
 
 @Composable
 internal fun ScrubTimeline(programme: GuideProgramme?, position: Long?, now: Long, pending: Boolean, modifier: Modifier,
-    focus: FocusRequester? = null, onScrub: ((Long) -> Unit)? = null, onFocused: () -> Unit = {}) {
+    focus: FocusRequester? = null, onScrub: ((Long) -> Unit)? = null, onFocused: () -> Unit = {}, buffered: (() -> Long?)? = null) {
     val ticking by produceState(maxOf(now, System.currentTimeMillis())) { while (true) { delay(1_000); value = System.currentTimeMillis() } }
     val current = maxOf(now, ticking)
     val at = position ?: current
     val bar = CatchupScrub.bar(programme, at, current)
+    val bufferedFrom = buffered?.invoke()?.let { ((it - bar.startMillis).toDouble() / (bar.endMillis - bar.startMillis)).toFloat().coerceIn(0f, 1f) }
     var focused by remember { mutableStateOf(false) }
     val interactive = onScrub != null
     Column(modifier.then(if (interactive) Modifier
@@ -75,6 +77,8 @@ internal fun ScrubTimeline(programme: GuideProgramme?, position: Long?, now: Lon
             Box(Modifier.align(Alignment.CenterStart).fillMaxWidth().height(if (focused) 6.dp else 4.dp).clip(track)
                 .background(NuvioTheme.colors.TextPrimary.copy(alpha = .16f))) {
                 bar.live?.let { live -> Box(Modifier.fillMaxWidth(live).fillMaxHeight().background(NuvioTheme.colors.TextPrimary.copy(alpha = .14f))) }
+                bufferedFrom?.let { from -> Box(Modifier.padding(start = width * from).width(width * ((bar.live ?: 1f) - from).coerceAtLeast(0f))
+                    .fillMaxHeight().background(NuvioTheme.colors.TextPrimary.copy(alpha = .32f))) }
                 Box(Modifier.fillMaxWidth(bar.position).fillMaxHeight().background(NuvioTheme.palette.accentBrush()))
             }
             bar.live?.let { live ->

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_timeshift_title">Local timeshift (experimental)</string>
+    <string name="iptv_timeshift_subtitle">Experimental. Buffers the channel you watch full screen so you can pause and rewind it. Uses storage while you watch and needs a free connection like normal viewing. Works with MPEG-TS channels only; HLS channels, multiview, the preview and a channel being recorded play normally. If anything fails, playback falls back to normal live playback.</string>
+    <string name="iptv_timeshift_length">Buffer length</string>
+    <string name="iptv_timeshift_length_subtitle">Shortened when free space is low. The buffer is deleted when you change channel or stop watching.</string>
+    <string name="iptv_timeshift_length_15">15 minutes</string>
+    <string name="iptv_timeshift_length_30">30 minutes</string>
+    <string name="iptv_timeshift_length_60">60 minutes</string>
+    <string name="iptv_timeshift_length_auto">Automatic</string>
+    <string name="iptv_timeshift_length_auto_description">30 minutes when there is enough free space, otherwise less</string>
+    <string name="iptv_timeshift_location">Buffer location</string>
+    <string name="iptv_timeshift_location_subtitle">Where the buffer is written while you watch</string>
+    <string name="iptv_timeshift_fallback">Local timeshift stopped. Playing live.</string>
+</resources>

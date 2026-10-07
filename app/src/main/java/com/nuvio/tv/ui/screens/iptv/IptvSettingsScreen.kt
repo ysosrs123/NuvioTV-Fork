@@ -93,6 +93,7 @@ fun IptvSettingsScreen(onSources: () -> Unit, onSetup: () -> Unit, onRecordings:
                             checked = state.stats, onToggle = viewModel::toggleStats)
                     }
                 }
+                item(key = "local-timeshift") { IptvTimeshiftSettingsSection() }
                 item(key = "appearance") {
                     SettingsGroupCard(title = stringResource(R.string.iptv_settings_appearance), subtitle = stringResource(R.string.iptv_settings_appearance_subtitle)) {
                         SettingsActionRow(title = stringResource(R.string.iptv_settings_theme), subtitle = null,
@@ -118,6 +119,7 @@ fun IptvSettingsScreen(onSources: () -> Unit, onSetup: () -> Unit, onRecordings:
                             onClick = viewModel::unhideCategories, trailingIcon = null)
                     }
                 }
+                if (state.sport) item(key = "sports") { IptvSportsSettingsSection() }
                 if (state.multiview) item(key = "multiview") {
                     SettingsGroupCard(title = stringResource(R.string.iptv_multiview_title)) {
                         SettingsActionRow(title = stringResource(R.string.iptv_multiview_layout), subtitle = null,

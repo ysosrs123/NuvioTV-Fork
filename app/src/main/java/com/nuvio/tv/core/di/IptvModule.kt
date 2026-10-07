@@ -19,6 +19,10 @@ object IptvModule {
         com.nuvio.tv.core.iptv.DeviceAdmissionLimits(profile.maxTiles, 192L * 1024 * 1024, 0))
     @Provides @Singleton fun liveRuntime(admission: com.nuvio.tv.core.iptv.LiveSessionAdmission) = com.nuvio.tv.core.iptv.LivePlaybackRuntime(admission)
     @Provides @Singleton fun catalogue(@ApplicationContext context: Context) = IptvCatalogueStore(context)
+    @Provides @Singleton fun sportsPreferences(@ApplicationContext context: Context) = IptvSportsPreferences(context)
+    @Provides @Singleton fun sportsFixtures(@ApplicationContext context: Context, preferences: IptvSportsPreferences, catalogue: IptvCatalogueStore,
+        guides: IptvGuideStore) = IptvSportsFixturesRepository(preferences, catalogue, guides, IptvSportsFixturesClient(),
+        IptvSportsFixturesStore(java.io.File(context.cacheDir, "iptv-sports")))
     @Provides @Singleton fun guides(@ApplicationContext context: Context) = IptvGuideStore(context)
     @Provides @Singleton fun shortGuides(catalogue: IptvCatalogueStore) = IptvShortGuideRepository(catalogue)
     @Provides @Singleton fun access(catalogue: IptvCatalogueStore, guides: IptvGuideStore) = IptvProfileAccess(catalogue, guides)

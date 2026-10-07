@@ -76,11 +76,12 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
                 }
             }
         }, timeline = {
-            if (state.catchup != null) ScrubTimeline(programme, position, now, state.scrubTarget != null, Modifier.fillMaxWidth(),
-                onScrub = { interaction++; onScrub(it) }, onFocused = { interaction++ })
+            if (state.catchup != null || state.localTimeshift) ScrubTimeline(programme, position, now, state.scrubTarget != null, Modifier.fillMaxWidth(),
+                onScrub = { interaction++; onScrub(it) }, onFocused = { interaction++ },
+                buffered = state.playback?.takeIf { state.localTimeshift }?.let { playback -> playback::localOldest })
             else ScrubTimeline(programme, null, now, false, Modifier.fillMaxWidth())
         }, time = {
-            if (state.catchup != null) Text(stringResource(R.string.iptv_scrub_deck_hint), style = MaterialTheme.typography.labelSmall,
+            if (state.catchup != null || state.localTimeshift) Text(stringResource(R.string.iptv_scrub_deck_hint), style = MaterialTheme.typography.labelSmall,
                 color = NuvioTheme.colors.TextTertiary, maxLines = 1)
         }, deck = {
             Row(Modifier.fillMaxWidth().focusGroup()) {

@@ -71,6 +71,15 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
         sportsOrder(listings, nowMillis).take(limit).map { (channel, programme) -> IptvAiringResult(channel, programme) }
     }
 
+    suspend fun guideChannels(ref: IptvSourceRef, matches: List<IptvAiringMatch>, excludedCategories: Set<String> = emptySet()): List<IptvListedChannel> = withContext(Dispatchers.IO) {
+        if (matches.isEmpty()) return@withContext emptyList()
+        val associations = catalogue.guideAssociations(ref)
+        val wanted = guideAiringCandidates(matches.distinctBy { it.key }.take(MAX_SPORTS_CHANNELS).map { it.key to it.channel })
+        currentCoroutineContext().ensureActive()
+        val items = catalogue.guideMatchCandidates(ref, wanted.guideIds, wanted.nameKeys, wanted.keys, 600, excludedCategories)
+        items.chunked(200).flatMap { listed(ref.profileId, associations, it) }.filter { row -> row.guide.key?.let { it in wanted.keys } == true }
+    }
+
     private suspend fun listed(profileId: Int, associations: IptvGuideAssociations, items: List<IptvCatalogueItem>): List<IptvListedChannel> {
         currentCoroutineContext().ensureActive()
         val ids = items.flatMap { row ->

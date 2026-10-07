@@ -131,7 +131,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
         onDispose { lifecycle.removeObserver(observer); viewModel.foreground(false) }
     }
     LaunchedEffect(state.playingId, state.tuning) { if (state.playingId == null && !state.tuning) fullscreen = false }
-    LaunchedEffect(fullscreen) { if (!fullscreen) viewModel.closeInset() }
+    LaunchedEffect(fullscreen) { viewModel.setFullscreen(fullscreen); if (!fullscreen) viewModel.closeInset() }
     LaunchedEffect(state.source, state.category, state.favourites, state.sports, state.search) { if (moving != null) { moving = null; viewModel.finishMove() } }
     LaunchedEffect(state.message) { if (state.message != null) { delay(6_000); viewModel.clearMessage() } }
     suspend fun focusGridNow() {
@@ -210,6 +210,9 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
                 }
                 if (searching) SearchField(state.search, state.airingSearch, searchFocus, onChange = viewModel::search, onDone = { focusGrid() })
                 moving?.let { id -> MoveHint(state.channels.firstOrNull { it.item.channel.id == id }?.let(::channelName).orEmpty()) }
+                if (state.sports && state.search.isBlank()) IptvSportsFixturesRow(state.source, state.hiddenCategories, state.playingId, onWatch = { row ->
+                    if (row.item.channel.id == state.playingId && state.player != null && state.catchup == null) fullscreen = true else viewModel.watch(row)
+                })
                 if (empty != null) {
                     EmptyPanel(empty, state, emptyFocus, Modifier.fillMaxWidth().weight(1f), onSources = onSources,
                         onRefresh = viewModel::refreshSource, onAll = { viewModel.showCategory(null) }, onRail = { railOpen = true })

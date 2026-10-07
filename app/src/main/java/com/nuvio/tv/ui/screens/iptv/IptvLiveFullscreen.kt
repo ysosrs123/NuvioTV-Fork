@@ -86,10 +86,10 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
         if (native.action != AndroidKeyEvent.ACTION_DOWN) return@onPreviewKeyEvent false
         val digit = native.keyCode - AndroidKeyEvent.KEYCODE_0
         if (digit in 0..9) { if (digits.length < 5) digits += digit; return@onPreviewKeyEvent true }
-        if (native.repeatCount > 0 && native.keyCode in ZAP_KEYS && !(state.catchup != null && native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_RIGHT)) return@onPreviewKeyEvent true
+        if (native.repeatCount > 0 && native.keyCode in ZAP_KEYS && !((state.catchup != null || state.localBehind) && native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_RIGHT)) return@onPreviewKeyEvent true
         val player = state.player
         if (state.inset != null && native.keyCode in SWAP_KEYS) { onSwapInset(); return@onPreviewKeyEvent true }
-        if (state.catchup != null && (player != null || state.tuning)) {
+        if ((state.catchup != null || state.localBehind) && (player != null || state.tuning)) {
             val step = when (native.keyCode) {
                 AndroidKeyEvent.KEYCODE_DPAD_RIGHT, AndroidKeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> SEEK_STEP
                 AndroidKeyEvent.KEYCODE_DPAD_LEFT, AndroidKeyEvent.KEYCODE_MEDIA_REWIND -> -SEEK_STEP
@@ -224,7 +224,8 @@ private fun Banner(state: IptvLiveState, now: Long) {
                 }
                 Text(programme?.let(::title) ?: stringResource(R.string.iptv_live_no_programme), style = MaterialTheme.typography.headlineSmall,
                     color = NuvioTheme.colors.TextPrimary, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (catchup != null) ScrubTimeline(programme, position, now, state.scrubTarget != null, Modifier.fillMaxWidth())
+                if (catchup != null || state.localBehind) ScrubTimeline(programme, position, now, state.scrubTarget != null, Modifier.fillMaxWidth(),
+                    buffered = state.playback?.takeIf { state.localTimeshift }?.let { playback -> playback::localOldest })
                 else programme?.let { item ->
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(timeRange(item), color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.bodyMedium)

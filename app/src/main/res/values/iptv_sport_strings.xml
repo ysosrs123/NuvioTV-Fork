@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport_fixtures">Fixtures</string>
+    <string name="iptv_sport_live_now">Live now</string>
+    <string name="iptv_sport_later_today">Later today</string>
+    <string name="iptv_sport_tomorrow">Tomorrow</string>
+    <string name="iptv_sport_live">LIVE</string>
+    <string name="iptv_sport_loading">Loading fixtures…</string>
+    <string name="iptv_sport_failed">Couldn\'t load fixtures. Showing guide results only.</string>
+    <string name="iptv_sport_key_missing">Add your TheSportsDB key in Live TV settings.</string>
+    <string name="iptv_sport_no_leagues">Choose leagues in Live TV settings.</string>
+    <string name="iptv_sport_none">No fixtures for your leagues in the next three days.</string>
+    <string name="iptv_sport_no_channel">No channel found</string>
+    <string name="iptv_sport_no_channel_description">None of your channels lists this fixture in its guide or carries a listed broadcaster.</string>
+    <string name="iptv_sport_choose_channel">Choose a channel</string>
+    <string name="iptv_sport_broadcaster">Listed broadcaster: %1$s</string>
+    <string name="iptv_sport_close">Close</string>
+    <string name="iptv_sport_data">Sports data</string>
+    <string name="iptv_sport_data_subtitle">Fixtures are fetched from the chosen service. ESPN\'s feed is unofficial and may stop working.</string>
+    <string name="iptv_sport_data_off">Off</string>
+    <string name="iptv_sport_data_off_description">Sport uses your guide only. No requests are made.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Unofficial feed, no key needed. It may stop working at any time.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Needs your own API key. The free test key 123 works with limits.</string>
+    <string name="iptv_sport_leagues">Leagues</string>
+    <string name="iptv_sport_leagues_subtitle">Fixtures are shown for these leagues</string>
+    <string name="iptv_sport_leagues_none">None</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d league</item>
+        <item quantity="other">%d leagues</item>
+    </plurals>
+    <string name="iptv_sport_key">TheSportsDB key</string>
+    <string name="iptv_sport_key_subtitle">Stored encrypted on this device. The free test key 123 works with limits.</string>
+    <string name="iptv_sport_key_set">Saved</string>
+    <string name="iptv_sport_key_not_set">Not set</string>
+    <string name="iptv_sport_key_hint">Enter 123 to use the free test key</string>
+    <string name="iptv_sport_key_invalid">Use letters and numbers only.</string>
+    <string name="iptv_sport_key_remove">Remove key</string>
+</resources>

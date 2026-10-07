@@ -29,6 +29,14 @@ import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.text.SubtitleParser
 import androidx.media3.extractor.ts.DefaultTsPayloadReaderFactory
 import com.nuvio.tv.data.iptv.IptvFormatProbe
+import com.nuvio.tv.data.iptv.IptvLocalTimeshiftBehindException
+import com.nuvio.tv.data.iptv.IptvLocalTimeshiftClosedException
+import com.nuvio.tv.data.iptv.IptvLocalTimeshiftConfig
+import com.nuvio.tv.data.iptv.IptvLocalTimeshiftInput
+import com.nuvio.tv.data.iptv.IptvLocalTimeshiftRouter
+import com.nuvio.tv.data.iptv.IptvLocalTimeshiftSession
+import com.nuvio.tv.data.iptv.IptvLocalTimeshiftStalledException
+import com.nuvio.tv.data.iptv.IptvLog
 import com.nuvio.tv.core.iptv.*
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -45,7 +53,8 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private val onPlayWhenReady: (Boolean) -> Unit = {}, boostDb: Int = 0,
     private val maxVideoHeight: Int? = null, private val targetBufferBytes: Int = 12 * 1024 * 1024,
     headers: Map<String, String> = emptyMap(), private val alternatives: List<Pair<String, IptvStreamFormat>> = emptyList(),
-    private val onAlternative: (Int) -> Unit = {}, private val onFailure: (LiveFailure) -> Unit = {}) : OwnedLivePlayback {
+    private val onAlternative: (Int) -> Unit = {}, private val onFailure: (LiveFailure) -> Unit = {},
+    localTimeshift: IptvLocalTimeshiftConfig? = null, private val onLocalTimeshift: (Boolean) -> Unit = {}) : OwnedLivePlayback {
     private val fence = LiveRequestFence()
     val telemetry = LiveTelemetry()
     val host: String? get() = Uri.parse(locator).host
@@ -68,16 +77,26 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private var readyReported = false
     private var firstFrame = false
     private var attempts = 0
+    private var localConfig = localTimeshift
+    @Volatile private var ring: IptvLocalTimeshiftSession? = null
+    private var localGeneration = 0
+    private var localAnchorTime: Long? = null
+    private var behindJumps = 0
+    private var currentFormat: IptvStreamFormat? = null
     private val reconnect = Runnable {
         if (!released && !failed) {
             val position = player.currentPosition
             if (player.playbackState != Player.STATE_IDLE) player.stop()
-            if (isLive) player.seekToDefaultPosition() else player.seekTo(position)
-            player.prepare()
+            val local = ring
+            if (local != null) playRing(local, local.liveAnchor())
+            else {
+                if (isLive) player.seekToDefaultPosition() else player.seekTo(position)
+                player.prepare()
+            }
         }
     }
     private val stall = Runnable { if (!released && player.playbackState == Player.STATE_BUFFERING) retry() }
-    private val steady = Runnable { attempts = 0 }
+    private val steady = Runnable { attempts = 0; behindJumps = 0 }
     private val startCheck = Runnable {
         if (!released && !failed && !firstFrame && extractors.lenient && player.videoFormat != null) {
             extractors.lenient = false
@@ -116,7 +135,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 if (network) telemetry.transferred(count)
             }
         })
-        val sources = DataSource.Factory { FencedSource(upstream.createDataSource(), fence, { Uri.parse(current) }, !isLive) }
+        val sources = DataSource.Factory { FencedSource(IptvLocalTimeshiftRouter(upstream.createDataSource()) { ring }, fence, { Uri.parse(current) }, !isLive) }
         val renderers = DefaultRenderersFactory(context).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
         player = ExoPlayer.Builder(context, renderers)
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 8000, 500, 1000)
@@ -137,6 +156,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) { if (!released) onPlayWhenReady(playWhenReady) }
             override fun onPlayerError(error: PlaybackException) {
                 if (released) { releaseFailed = true; return }
+                if (localError(error)) return
                 val response = generateSequence<Throwable>(error) { it.cause }.take(8).filterIsInstance<HttpDataSource.InvalidResponseCodeException>().firstOrNull()
                 retry(error.errorCode, response?.responseCode,
                     response?.headerFields?.entries?.firstOrNull { it.key.equals("Retry-After", ignoreCase = true) }?.value?.firstOrNull())
@@ -176,6 +196,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     }
     private fun fail(failure: LiveFailure) {
         mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(startCheck)
+        if (ring != null) { attempts = 0; fallbackDirect("exhausted"); return }
         if (failure == LiveFailure.UNSUPPORTED && probed) probe.forget(current)
         if (alternative < alternatives.size) {
             val (next, format) = alternatives[alternative++]
@@ -221,8 +242,9 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         }
     }
     private fun play(url: String, format: IptvStreamFormat) {
-        current = url; readyReported = false; firstFrame = false
+        current = url; readyReported = false; firstFrame = false; currentFormat = format
         mainHandler.removeCallbacks(startCheck)
+        if (isLive && format == IptvStreamFormat.MPEG_TS && url == locator && localConfig != null && ring == null) { player.playWhenReady = true; startLocal(url); return }
         val mimeType = when (format) {
             IptvStreamFormat.AUTO -> null
             IptvStreamFormat.HLS -> MimeTypes.APPLICATION_M3U8
@@ -235,11 +257,129 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         player.prepare(); player.playWhenReady = true
         if (format != IptvStreamFormat.HLS && extractors.lenient) mainHandler.postDelayed(startCheck, START_CHECK_MS)
     }
+    val localTimeshift: Boolean get() = ring != null
+    fun localPosition(): Long? = if (ring == null) null else localAnchorTime?.let { it + player.currentPosition.coerceAtLeast(0) }
+    fun localOldest(): Long? = ring?.oldestTime()
+    fun localSeek(timeMillis: Long): Boolean {
+        val local = ring ?: return false
+        behindJumps = 0
+        playRing(local, local.anchorAt(timeMillis))
+        return true
+    }
+    fun localLive(): Boolean {
+        val local = ring ?: return false
+        behindJumps = 0
+        playRing(local, local.liveAnchor())
+        return true
+    }
+    fun armLocalTimeshift(config: IptvLocalTimeshiftConfig) {
+        if (released || failed || !isLive || ring != null || localConfig != null) return
+        localConfig = config
+        if (currentFormat == IptvStreamFormat.MPEG_TS && current == locator) startLocal(locator)
+    }
+    private fun startLocal(url: String) {
+        val config = localConfig ?: return
+        val generation = ++localGeneration
+        mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(startCheck)
+        if (player.playbackState != Player.STATE_IDLE) player.stop()
+        if (!reconnecting) { reconnecting = true; onReconnecting(true) }
+        thread(name = "IptvTimeshiftStart", isDaemon = true) {
+            val idle = awaitIdle()
+            if (idle) client.connectionPool.evictAll()
+            val session = if (!idle) null else try { IptvLocalTimeshiftSession.create(config) } catch (error: Exception) {
+                IptvLog.failure("local timeshift start", error); null
+            }
+            mainHandler.post {
+                if (released || generation != localGeneration || session == null) {
+                    session?.close()
+                    if (!released && generation == localGeneration) {
+                        localConfig = null
+                        IptvLog.info("local timeshift unavailable reason=${if (idle) "storage" else "busy"}")
+                        play(url, IptvStreamFormat.MPEG_TS)
+                    }
+                    return@post
+                }
+                ring = session
+                behindJumps = 0
+                session.start(LocalInput(url)) { reason -> mainHandler.post { if (ring === session) fallbackDirect(reason?.name?.lowercase() ?: "ended") } }
+                IptvLog.info("local timeshift started length=${config.length.name.lowercase()}")
+                onLocalTimeshift(true)
+                playRing(session, 0)
+            }
+        }
+    }
+    private fun awaitIdle(): Boolean {
+        val deadline = android.os.SystemClock.elapsedRealtime() + IDLE_WAIT_MS
+        while (fence.active.value != 0) {
+            if (android.os.SystemClock.elapsedRealtime() >= deadline) return false
+            try { Thread.sleep(50) } catch (_: InterruptedException) { return false }
+        }
+        return true
+    }
+    private fun playRing(session: IptvLocalTimeshiftSession, anchor: Long) {
+        mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(startCheck)
+        firstFrame = false
+        localAnchorTime = session.timeAt(anchor) ?: System.currentTimeMillis()
+        if (player.playbackState != Player.STATE_IDLE) player.stop()
+        player.setMediaItem(MediaItem.Builder().setUri(session.uri(anchor)).setMimeType(MimeTypes.VIDEO_MP2T).build())
+        player.prepare()
+        if (extractors.lenient) mainHandler.postDelayed(startCheck, START_CHECK_MS)
+    }
+    private fun localError(error: PlaybackException): Boolean {
+        val local = ring ?: return false
+        val causes = generateSequence<Throwable>(error) { it.cause }.take(8).toList()
+        val action = when {
+            local.failure != null || causes.any { it is IptvLocalTimeshiftClosedException } -> LocalTimeshiftAction.Direct
+            causes.any { it is IptvLocalTimeshiftBehindException } -> LocalTimeshiftPolicy.onReaderBehind(behindJumps++)
+            causes.any { it is IptvLocalTimeshiftStalledException } -> LocalTimeshiftPolicy.onReaderStalled(local.running)
+            else -> return false
+        }
+        when (action) {
+            LocalTimeshiftAction.Direct -> fallbackDirect("reader")
+            LocalTimeshiftAction.Oldest -> { IptvLog.info("local timeshift reader behind"); playRing(local, local.oldest()) }
+            LocalTimeshiftAction.Live -> playRing(local, local.liveAnchor())
+        }
+        return true
+    }
+    private fun fallbackDirect(reason: String) {
+        val session = ring ?: return
+        ring = null; localConfig = null; localAnchorTime = null
+        val generation = ++localGeneration
+        IptvLog.info("local timeshift fallback reason=$reason")
+        onLocalTimeshift(false)
+        mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(startCheck)
+        if (player.playbackState != Player.STATE_IDLE) player.stop()
+        if (!reconnecting) { reconnecting = true; onReconnecting(true) }
+        thread(name = "IptvTimeshiftStop", isDaemon = true) {
+            session.stop()
+            session.awaitStopped(IDLE_WAIT_MS)
+            session.close()
+            mainHandler.post { if (!released && !failed && generation == localGeneration) play(locator, IptvStreamFormat.MPEG_TS) }
+        }
+    }
+    private inner class LocalInput(private val url: String) : IptvLocalTimeshiftInput {
+        @Volatile private var call: okhttp3.Call? = null
+        @Volatile private var cancelled = false
+        @Volatile private var ticket: LiveRequestFence.Ticket? = null
+        override fun open(): java.io.InputStream {
+            ticket = fence.enter() ?: throw IOException("Live session has closed")
+            val request = okhttp3.Request.Builder().url(url).apply { (requestHeaders + ("User-Agent" to userAgent)).forEach { (name, value) -> header(name, value) } }.build()
+            val response = client.newCall(request).also { call = it; if (cancelled) it.cancel() }.execute()
+            if (!response.isSuccessful) { response.close(); throw IOException("Local timeshift HTTP ${response.code}") }
+            return object : java.io.FilterInputStream(response.body.byteStream()) {
+                override fun read(buffer: ByteArray, offset: Int, length: Int): Int = super.read(buffer, offset, length).also { telemetry.transferred(it) }
+            }
+        }
+        override fun cancel() { cancelled = true; call?.cancel() }
+        override fun release() { ticket?.let { fence.leave(it); ticket = null } }
+    }
     override suspend fun close(): Boolean {
         mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(stall); mainHandler.removeCallbacks(steady)
         mainHandler.removeCallbacks(startCheck); mainHandler.removeCallbacks(watchdog)
         fence.stopAccepting()
         client.dispatcher.cancelAll()
+        localGeneration++
+        ring?.let { session -> ring = null; session.stop(); thread(name = "IptvTimeshiftClose", isDaemon = true) { session.awaitStopped(IDLE_WAIT_MS); session.close() } }
         if (!released) {
             released = true
             runCatching { enhancer?.release() }; enhancer = null
@@ -304,5 +444,6 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         const val FROZEN_MS = 8_000L
         const val WATCH_MS = 1_000L
         const val MAX_BOOST_DB = 12
+        const val IDLE_WAIT_MS = 5_000L
     }
 }
