@@ -1635,4 +1635,16 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     <string name="party_avatar_set_pixel_art">Pikselių menas</string>
     <string name="party_avatar_set_thumbs">Nykščiai</string>
     <string name="party_invite_leaves_current">Prisijungę paliksite grupę, kurioje esate dabar.</string>
+    <string name="iptv_live_hud">HUD</string>
+    <string name="iptv_guide_choose_file">Pasirinkti XMLTV failą</string>
+    <string name="iptv_guide_file_selected">XMLTV failas pasirinktas. Išsaugokite, tada atnaujinkite, kad importuotumėte programą.</string>
+    <string name="iptv_guide_file_help">Įveskite TV programos URL arba pasirinkite vietinį XMLTV failą (.xml arba .xml.gz).</string>
+    <string name="iptv_guide_picker_unavailable">Šiame įrenginyje nėra dokumentų parinkiklio. Vietoj to galite įvesti TV programos URL.</string>
+    <string name="iptv_live_tracks">Takeliai</string>
+    <string name="iptv_live_audio">Garsas</string>
+    <string name="iptv_live_subtitles">Subtitrai ir paslėptieji subtitrai</string>
+    <string name="iptv_live_tracks_auto">Automatiškai</string>
+    <string name="iptv_live_tracks_off">Išjungta</string>
+    <string name="iptv_live_tracks_none">Šis srautas nepateikia takelių.</string>
+    <string name="iptv_live_tracks_unsupported">Šis grotuvas nepalaiko</string>
 </resources>

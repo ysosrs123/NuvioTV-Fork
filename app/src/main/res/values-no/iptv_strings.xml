@@ -266,16 +266,4 @@
         <item quantity="one">%1$d kanal</item>
         <item quantity="other">%1$d kanaler</item>
     </plurals>
-    <string name="iptv_live_hud">HUD</string>
-    <string name="iptv_guide_choose_file">Velg XMLTV-fil</string>
-    <string name="iptv_guide_file_selected">XMLTV-fil valgt. Lagre, og oppdater for å importere sendeplanen.</string>
-    <string name="iptv_guide_file_help">Skriv inn en guide-URL eller velg en lokal XMLTV-fil (.xml eller .xml.gz).</string>
-    <string name="iptv_guide_picker_unavailable">Denne enheten har ingen filvelger. Du kan skrive inn en guide-URL i stedet.</string>
-    <string name="iptv_live_tracks">Spor</string>
-    <string name="iptv_live_audio">Lyd</string>
-    <string name="iptv_live_subtitles">Undertekster og teksting</string>
-    <string name="iptv_live_tracks_auto">Automatisk</string>
-    <string name="iptv_live_tracks_off">Av</string>
-    <string name="iptv_live_tracks_none">Strømmen rapporterer ingen spor.</string>
-    <string name="iptv_live_tracks_unsupported">Støttes ikke av denne spilleren</string>
 </resources>

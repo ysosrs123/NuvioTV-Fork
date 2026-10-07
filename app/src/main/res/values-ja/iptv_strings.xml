@@ -262,16 +262,4 @@
     <plurals name="iptv_source_channels">
         <item quantity="other">%1$d チャンネル</item>
     </plurals>
-    <string name="iptv_live_hud">HUD</string>
-    <string name="iptv_guide_choose_file">XMLTVファイルを選択</string>
-    <string name="iptv_guide_file_selected">XMLTVファイルを選択しました。保存してから更新すると番組情報を取り込みます。</string>
-    <string name="iptv_guide_file_help">番組表のURLを入力するか、ローカルのXMLTVファイル（.xml または .xml.gz）を選択してください。</string>
-    <string name="iptv_guide_picker_unavailable">このデバイスにはファイル選択機能がありません。代わりに番組表のURLを入力できます。</string>
-    <string name="iptv_live_tracks">トラック</string>
-    <string name="iptv_live_audio">音声</string>
-    <string name="iptv_live_subtitles">字幕とクローズドキャプション</string>
-    <string name="iptv_live_tracks_auto">自動</string>
-    <string name="iptv_live_tracks_off">オフ</string>
-    <string name="iptv_live_tracks_none">このストリームにはトラック情報がありません。</string>
-    <string name="iptv_live_tracks_unsupported">このプレーヤーでは非対応</string>
 </resources>

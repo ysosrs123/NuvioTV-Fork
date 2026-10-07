@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">כל המקורות</string>
+    <string name="iptv_all_sources_favourites">מועדפים מכל המקורות</string>
+    <string name="iptv_density">צפיפות המדריך</string>
+    <string name="iptv_density_subtitle">כמה ערוצים נכנסים במסך</string>
+    <string name="iptv_density_comfortable">נוחה</string>
+    <string name="iptv_density_comfortable_description">שורות ולוגואים גדולים יותר עם שעות התוכניות</string>
+    <string name="iptv_density_compact">דחוסה</string>
+    <string name="iptv_density_compact_description">שורות ולוגואים קטנים יותר כדי שיותר ערוצים ייכנסו</string>
+    <string name="iptv_inset_show">הצגה בפינה</string>
+    <string name="iptv_inset_show_subtitle">משאיר את %1$s במסך מלא עם הערוץ הזה בתמונה קטנה</string>
+    <string name="iptv_inset_swap">החלפה עם התמונה בפינה</string>
+    <string name="iptv_inset_close">סגירת התמונה בפינה</string>
+    <string name="iptv_inset_hint">הכפתור הצהוב מחליף בין התמונות, חזרה סוגרת את התמונה בפינה</string>
+    <string name="iptv_inset_unsupported">הממיר הזה יכול לנגן רק ערוץ אחד בכל פעם.</string>
+    <string name="iptv_inset_decoder">הממיר הזה לא יכול לפענח תמונה שנייה לצד הערוץ הזה.</string>
+    <string name="iptv_inset_capacity">אין חיבור פנוי לחשבון הזה. אפשר להגדיל את מספר החיבורים של החשבון במקורות טלוויזיה חיה אם החבילה שלך מאפשרת.</string>
+    <string name="iptv_move_channel">הזזת ערוץ</string>
+    <string name="iptv_move_channel_subtitle">שינוי המיקום של הערוץ הזה ברשימה</string>
+    <string name="iptv_move_channel_title">מזיז את %1$s</string>
+    <string name="iptv_move_key_step">▲▼ מקום אחד</string>
+    <string name="iptv_move_key_top">◀ לראש הרשימה</string>
+    <string name="iptv_move_key_bottom">▶ לסוף הרשימה</string>
+    <string name="iptv_move_key_done">OK או חזרה: סיום</string>
+    <string name="iptv_move_moved_bottom">הועבר לסוף הרשימה</string>
+    <string name="iptv_move_category">הזזת קטגוריה</string>
+    <string name="iptv_move_category_subtitle">שינוי המיקום של הקטגוריה הזו בתפריט</string>
+    <string name="iptv_move_category_keys">▲▼ מקום אחד · ◀ לראש · ▶ לסוף · OK או חזרה: סיום</string>
+    <string name="iptv_multiview_layout_side">זו לצד זו</string>
+    <string name="iptv_multiview_layout_one_over_two">אחת מעל שתיים</string>
+    <string name="iptv_multiview_layout_description">זו לצד זו מציגה שתי תמונות. אחת גדולה ואחת מעל שתיים משתמשות בתמונה שנבחרה בהצגה בגדול.</string>
+    <string name="iptv_scrub_behind">%1$s מאחור</string>
+    <string name="iptv_scrub_live_edge">חי %1$s</string>
+    <string name="iptv_scrub_hint">שמאלה וימינה זזים 30 שניות, לחיצה ארוכה לתזוזה מהירה יותר</string>
+    <string name="iptv_scrub_deck_hint">למעלה לציר הזמן כדי לעבור בין תוכניות קודמות</string>
+    <string name="iptv_scrub_banner_hint">שמאלה וימינה לדפדוף בין התוכניות, למעלה ולמטה להחלפת ערוץ</string>
+</resources>

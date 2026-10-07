@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">De provider heeft deze zender geweigerd. Controleer je abonnement en probeer het opnieuw.</string>
+    <string name="iptv_playback_missing">Deze zender is niet meer beschikbaar bij de provider.</string>
+    <string name="iptv_playback_unsupported">Het formaat van deze zender kan niet op dit apparaat worden afgespeeld.</string>
+    <string name="iptv_playback_decoder">De videodecoder kon niet starten. Sluit andere beelden en probeer het opnieuw.</string>
+</resources>

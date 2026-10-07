@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Alle bronnen</string>
+    <string name="iptv_all_sources_favourites">Favorieten van alle bronnen</string>
+    <string name="iptv_density">Gidsdichtheid</string>
+    <string name="iptv_density_subtitle">Hoeveel zenders er op het scherm passen</string>
+    <string name="iptv_density_comfortable">Ruim</string>
+    <string name="iptv_density_comfortable_description">Grotere rijen en logo\'s met programmatijden</string>
+    <string name="iptv_density_compact">Compact</string>
+    <string name="iptv_density_compact_description">Kleinere rijen en logo\'s zodat er meer zenders passen</string>
+    <string name="iptv_inset_show">In hoek tonen</string>
+    <string name="iptv_inset_show_subtitle">Houdt %1$s schermvullend met deze zender in een klein beeld</string>
+    <string name="iptv_inset_swap">Wisselen met hoekbeeld</string>
+    <string name="iptv_inset_close">Hoekbeeld sluiten</string>
+    <string name="iptv_inset_hint">Gele knop wisselt de beelden, Terug sluit het hoekbeeld</string>
+    <string name="iptv_inset_unsupported">Dit tv-kastje kan maar één zender tegelijk afspelen.</string>
+    <string name="iptv_inset_decoder">Dit tv-kastje kan geen tweede beeld naast deze zender decoderen.</string>
+    <string name="iptv_inset_capacity">Geen vrije verbinding voor dit account. Verhoog de verbindingen van het account in Bronnen voor live-tv als je abonnement dat toestaat.</string>
+    <string name="iptv_move_channel">Zender verplaatsen</string>
+    <string name="iptv_move_channel_subtitle">Wijzig waar deze zender in de lijst staat</string>
+    <string name="iptv_move_channel_title">%1$s verplaatsen</string>
+    <string name="iptv_move_key_step">▲▼ Eén plek</string>
+    <string name="iptv_move_key_top">◀ Naar boven</string>
+    <string name="iptv_move_key_bottom">▶ Naar onderen</string>
+    <string name="iptv_move_key_done">OK of Terug: klaar</string>
+    <string name="iptv_move_moved_bottom">Naar onderen in de lijst verplaatst</string>
+    <string name="iptv_move_category">Categorie verplaatsen</string>
+    <string name="iptv_move_category_subtitle">Wijzig waar deze categorie in het menu staat</string>
+    <string name="iptv_move_category_keys">▲▼ één plek · ◀ naar boven · ▶ naar onderen · OK of Terug: klaar</string>
+    <string name="iptv_multiview_layout_side">Naast elkaar</string>
+    <string name="iptv_multiview_layout_one_over_two">Eén boven twee</string>
+    <string name="iptv_multiview_layout_description">Naast elkaar toont twee beelden. Eén groot en Eén boven twee gebruiken het beeld dat met Groot tonen is gekozen.</string>
+    <string name="iptv_scrub_behind">%1$s achter</string>
+    <string name="iptv_scrub_live_edge">Live %1$s</string>
+    <string name="iptv_scrub_hint">Links en rechts gaan 30 seconden, houd ingedrukt om sneller te gaan</string>
+    <string name="iptv_scrub_deck_hint">Omhoog naar de tijdlijn om door eerdere programma\'s te gaan</string>
+    <string name="iptv_scrub_banner_hint">Links en rechts gaan door de programma\'s, omhoog en omlaag wisselen van zender</string>
+</resources>

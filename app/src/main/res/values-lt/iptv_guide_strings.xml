@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Visi šaltiniai</string>
+    <string name="iptv_all_sources_favourites">Mėgstami iš visų šaltinių</string>
+    <string name="iptv_density">TV programos tankis</string>
+    <string name="iptv_density_subtitle">Kiek kanalų telpa ekrane</string>
+    <string name="iptv_density_comfortable">Patogus</string>
+    <string name="iptv_density_comfortable_description">Didesnės eilutės ir logotipai su laidų laikais</string>
+    <string name="iptv_density_compact">Kompaktiškas</string>
+    <string name="iptv_density_compact_description">Mažesnės eilutės ir logotipai, kad tilptų daugiau kanalų</string>
+    <string name="iptv_inset_show">Rodyti kampe</string>
+    <string name="iptv_inset_show_subtitle">Palieka %1$s per visą ekraną, o šį kanalą rodo mažame vaizde</string>
+    <string name="iptv_inset_swap">Sukeisti su kampiniu vaizdu</string>
+    <string name="iptv_inset_close">Uždaryti kampinį vaizdą</string>
+    <string name="iptv_inset_hint">Geltonas mygtukas sukeičia vaizdus, „Atgal“ uždaro kampinį vaizdą</string>
+    <string name="iptv_inset_unsupported">Šis TV priedėlis vienu metu gali leisti tik vieną kanalą.</string>
+    <string name="iptv_inset_decoder">Šis TV priedėlis negali dekoduoti antro vaizdo šalia šio kanalo.</string>
+    <string name="iptv_inset_capacity">Šiai paskyrai nėra laisvos jungties. Jei planas leidžia, padidinkite paskyros jungčių skaičių tiesioginės TV šaltiniuose.</string>
+    <string name="iptv_move_channel">Perkelti kanalą</string>
+    <string name="iptv_move_channel_subtitle">Pakeisti šio kanalo vietą sąraše</string>
+    <string name="iptv_move_channel_title">Perkeliama: %1$s</string>
+    <string name="iptv_move_key_step">▲▼ Per vieną vietą</string>
+    <string name="iptv_move_key_top">◀ Į viršų</string>
+    <string name="iptv_move_key_bottom">▶ Į apačią</string>
+    <string name="iptv_move_key_done">OK arba „Atgal“: baigti</string>
+    <string name="iptv_move_moved_bottom">Perkelta į sąrašo apačią</string>
+    <string name="iptv_move_category">Perkelti kategoriją</string>
+    <string name="iptv_move_category_subtitle">Pakeisti šios kategorijos vietą meniu</string>
+    <string name="iptv_move_category_keys">▲▼ per vieną vietą · ◀ į viršų · ▶ į apačią · OK arba „Atgal“: baigti</string>
+    <string name="iptv_multiview_layout_side">Greta</string>
+    <string name="iptv_multiview_layout_one_over_two">Vienas virš dviejų</string>
+    <string name="iptv_multiview_layout_description">„Greta“ rodo du vaizdus. „Vienas didelis“ ir „Vienas virš dviejų“ naudoja vaizdą, pasirinktą su „Rodyti didelį“.</string>
+    <string name="iptv_scrub_behind">Atsilikta %1$s</string>
+    <string name="iptv_scrub_live_edge">Tiesiogiai %1$s</string>
+    <string name="iptv_scrub_hint">Kairėn ir dešinėn – 30 sekundžių, palaikykite, kad judėtų greičiau</string>
+    <string name="iptv_scrub_deck_hint">Aukštyn į laiko juostą, kad naršytumėte ankstesnes laidas</string>
+    <string name="iptv_scrub_banner_hint">Kairėn ir dešinėn – naršyti laidas, aukštyn ir žemyn – keisti kanalą</string>
+</resources>

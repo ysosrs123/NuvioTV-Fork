@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">プロバイダーがこのチャンネルを拒否しました。契約を確認してから、もう一度お試しください。</string>
+    <string name="iptv_playback_missing">このチャンネルはプロバイダーから提供されなくなりました。</string>
+    <string name="iptv_playback_unsupported">このチャンネルの形式はこのデバイスで再生できません。</string>
+    <string name="iptv_playback_decoder">ビデオデコーダーを開始できませんでした。他の画面を閉じてもう一度お試しください。</string>
+</resources>

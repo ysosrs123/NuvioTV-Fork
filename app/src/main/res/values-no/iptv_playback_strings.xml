@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">Leverandøren avviste denne kanalen. Sjekk abonnementet, og prøv igjen.</string>
+    <string name="iptv_playback_missing">Denne kanalen er ikke lenger tilgjengelig fra leverandøren.</string>
+    <string name="iptv_playback_unsupported">Formatet til denne kanalen kan ikke spilles av på denne enheten.</string>
+    <string name="iptv_playback_decoder">Videodekoderen kunne ikke starte. Lukk andre bilder og prøv igjen.</string>
+</resources>

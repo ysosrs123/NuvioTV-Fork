@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">すべてのソース</string>
+    <string name="iptv_all_sources_favourites">すべてのソースのお気に入り</string>
+    <string name="iptv_density">番組表の表示密度</string>
+    <string name="iptv_density_subtitle">画面に表示するチャンネル数</string>
+    <string name="iptv_density_comfortable">ゆったり</string>
+    <string name="iptv_density_comfortable_description">行とロゴを大きくし、番組の時間を表示</string>
+    <string name="iptv_density_compact">コンパクト</string>
+    <string name="iptv_density_compact_description">行とロゴを小さくして、より多くのチャンネルを表示</string>
+    <string name="iptv_inset_show">隅に表示</string>
+    <string name="iptv_inset_show_subtitle">%1$s を全画面のまま、このチャンネルを小さな画面で表示</string>
+    <string name="iptv_inset_swap">隅の画面と入れ替え</string>
+    <string name="iptv_inset_close">隅の画面を閉じる</string>
+    <string name="iptv_inset_hint">黄色ボタンで画面を入れ替え、戻るで隅の画面を閉じます</string>
+    <string name="iptv_inset_unsupported">このTVボックスは一度に1チャンネルしか再生できません。</string>
+    <string name="iptv_inset_decoder">このTVボックスでは、このチャンネルと並べて2つ目の画面をデコードできません。</string>
+    <string name="iptv_inset_capacity">このアカウントに空き接続がありません。プランで許可されていれば、ライブTVソースでアカウントの接続数を増やしてください。</string>
+    <string name="iptv_move_channel">チャンネルを移動</string>
+    <string name="iptv_move_channel_subtitle">リスト内でのこのチャンネルの位置を変更</string>
+    <string name="iptv_move_channel_title">%1$s を移動中</string>
+    <string name="iptv_move_key_step">▲▼ 1つ移動</string>
+    <string name="iptv_move_key_top">◀ 先頭へ</string>
+    <string name="iptv_move_key_bottom">▶ 末尾へ</string>
+    <string name="iptv_move_key_done">OKまたは戻る: 完了</string>
+    <string name="iptv_move_moved_bottom">リストの末尾に移動しました</string>
+    <string name="iptv_move_category">カテゴリを移動</string>
+    <string name="iptv_move_category_subtitle">メニュー内でのこのカテゴリの位置を変更</string>
+    <string name="iptv_move_category_keys">▲▼ 1つ移動 · ◀ 先頭へ · ▶ 末尾へ · OKまたは戻る: 完了</string>
+    <string name="iptv_multiview_layout_side">左右に並べる</string>
+    <string name="iptv_multiview_layout_one_over_two">上に1つ、下に2つ</string>
+    <string name="iptv_multiview_layout_description">「左右に並べる」は2画面を表示します。「1画面を大きく」と「上に1つ、下に2つ」は「大きく表示」で選んだ画面を使用します。</string>
+    <string name="iptv_scrub_behind">%1$s 遅れ</string>
+    <string name="iptv_scrub_live_edge">ライブ %1$s</string>
+    <string name="iptv_scrub_hint">左右で30秒移動、長押しで速く移動</string>
+    <string name="iptv_scrub_deck_hint">上でタイムラインに移動し、以前の番組をさかのぼる</string>
+    <string name="iptv_scrub_banner_hint">左右で番組を移動、上下でチャンネル切替</string>
+</resources>

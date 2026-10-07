@@ -274,16 +274,4 @@
         <item quantity="many">%1$d ערוצים</item>
         <item quantity="other">%1$d ערוצים</item>
     </plurals>
-    <string name="iptv_live_hud">HUD</string>
-    <string name="iptv_guide_choose_file">בחירת קובץ XMLTV</string>
-    <string name="iptv_guide_file_selected">נבחר קובץ XMLTV. יש לשמור ואז לרענן כדי לייבא את לוח השידורים.</string>
-    <string name="iptv_guide_file_help">יש להזין URL של מדריך או לבחור קובץ XMLTV מקומי (.xml או .xml.gz).</string>
-    <string name="iptv_guide_picker_unavailable">אין במכשיר הזה בוחר מסמכים. אפשר להזין URL של מדריך במקום.</string>
-    <string name="iptv_live_tracks">רצועות</string>
-    <string name="iptv_live_audio">אודיו</string>
-    <string name="iptv_live_subtitles">כתוביות וכתוביות סגורות</string>
-    <string name="iptv_live_tracks_auto">אוטומטי</string>
-    <string name="iptv_live_tracks_off">כבוי</string>
-    <string name="iptv_live_tracks_none">השידור לא דיווח על רצועות.</string>
-    <string name="iptv_live_tracks_unsupported">לא נתמך בנגן הזה</string>
 </resources>

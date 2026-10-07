@@ -266,16 +266,4 @@
         <item quantity="one">%1$d zender</item>
         <item quantity="other">%1$d zenders</item>
     </plurals>
-    <string name="iptv_live_hud">HUD</string>
-    <string name="iptv_guide_choose_file">XMLTV-bestand kiezen</string>
-    <string name="iptv_guide_file_selected">XMLTV-bestand geselecteerd. Sla op en vernieuw daarna om de programmering te importeren.</string>
-    <string name="iptv_guide_file_help">Voer een gids-URL in of selecteer een lokaal XMLTV-bestand (.xml of .xml.gz).</string>
-    <string name="iptv_guide_picker_unavailable">Dit apparaat heeft geen documentkiezer. Je kunt in plaats daarvan een gids-URL invoeren.</string>
-    <string name="iptv_live_tracks">Sporen</string>
-    <string name="iptv_live_audio">Audio</string>
-    <string name="iptv_live_subtitles">Ondertiteling en closed captions</string>
-    <string name="iptv_live_tracks_auto">Automatisch</string>
-    <string name="iptv_live_tracks_off">Uit</string>
-    <string name="iptv_live_tracks_none">Deze stream meldt geen sporen.</string>
-    <string name="iptv_live_tracks_unsupported">Niet ondersteund door deze speler</string>
 </resources>
