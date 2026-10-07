@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">Canlı TV favorileri</string>
+    <string name="iptv_home_sport">Şimdi yayında: Spor</string>
+    <string name="iptv_home_movies">Son eklenen filmler</string>
+    <string name="iptv_home_series">Son eklenen diziler</string>
+    <string name="iptv_home_recordings">Kayıtlar</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">Ana ekran</string>
+    <string name="iptv_home_settings_favourites">Şu an yayında olanlarla favori kanallar</string>
+    <string name="iptv_home_settings_sport">Yayın akışından canlı spor</string>
+    <string name="iptv_home_settings_movies">Sağlayıcılarınızdan en yeni filmler</string>
+    <string name="iptv_home_settings_series">Sağlayıcılarınızdan en yeni diziler</string>
+    <string name="iptv_home_settings_recordings">Son tamamlanan kayıtlarınız</string>
+</resources>

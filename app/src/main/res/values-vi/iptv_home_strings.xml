@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">TV trực tiếp yêu thích</string>
+    <string name="iptv_home_sport">Đang phát: Thể thao</string>
+    <string name="iptv_home_movies">Phim mới thêm gần đây</string>
+    <string name="iptv_home_series">Phim bộ mới thêm gần đây</string>
+    <string name="iptv_home_recordings">Bản ghi</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">Màn hình chính</string>
+    <string name="iptv_home_settings_favourites">Kênh yêu thích kèm chương trình đang phát</string>
+    <string name="iptv_home_settings_sport">Thể thao trực tiếp từ lịch phát sóng</string>
+    <string name="iptv_home_settings_movies">Phim mới nhất từ các nhà cung cấp của bạn</string>
+    <string name="iptv_home_settings_series">Phim bộ mới nhất từ các nhà cung cấp của bạn</string>
+    <string name="iptv_home_settings_recordings">Các bản ghi đã hoàn tất gần đây của bạn</string>
+</resources>

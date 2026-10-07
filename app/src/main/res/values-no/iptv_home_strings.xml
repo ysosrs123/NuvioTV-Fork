@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">Direkte-TV-favoritter</string>
+    <string name="iptv_home_sport">Nå: sport</string>
+    <string name="iptv_home_movies">Nylig lagt til filmer</string>
+    <string name="iptv_home_series">Nylig lagt til serier</string>
+    <string name="iptv_home_recordings">Opptak</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">Startskjerm</string>
+    <string name="iptv_home_settings_favourites">Favorittkanaler med det som går nå</string>
+    <string name="iptv_home_settings_sport">Direkte sport fra guiden</string>
+    <string name="iptv_home_settings_movies">Nyeste filmer fra leverandørene dine</string>
+    <string name="iptv_home_settings_series">Nyeste serier fra leverandørene dine</string>
+    <string name="iptv_home_settings_recordings">Dine siste fullførte opptak</string>
+</resources>

@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">நேரலை டிவி பிடித்தவை</string>
+    <string name="iptv_home_sport">இப்போது: விளையாட்டு</string>
+    <string name="iptv_home_movies">சமீபத்தில் சேர்க்கப்பட்ட திரைப்படங்கள்</string>
+    <string name="iptv_home_series">சமீபத்தில் சேர்க்கப்பட்ட தொடர்கள்</string>
+    <string name="iptv_home_recordings">பதிவுகள்</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">முகப்புத் திரை</string>
+    <string name="iptv_home_settings_favourites">இப்போது ஒளிபரப்பாவதுடன் பிடித்த சேனல்கள்</string>
+    <string name="iptv_home_settings_sport">வழிகாட்டியிலிருந்து நேரலை விளையாட்டு</string>
+    <string name="iptv_home_settings_movies">உங்கள் வழங்குநர்களின் புதிய திரைப்படங்கள்</string>
+    <string name="iptv_home_settings_series">உங்கள் வழங்குநர்களின் புதிய தொடர்கள்</string>
+    <string name="iptv_home_settings_recordings">நீங்கள் சமீபத்தில் முடித்த பதிவுகள்</string>
+</resources>

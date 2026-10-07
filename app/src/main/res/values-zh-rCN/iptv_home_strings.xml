@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">直播电视最爱</string>
+    <string name="iptv_home_sport">正在播出：体育</string>
+    <string name="iptv_home_movies">最近添加的电影</string>
+    <string name="iptv_home_series">最近添加的剧集</string>
+    <string name="iptv_home_recordings">录像</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">主屏幕</string>
+    <string name="iptv_home_settings_favourites">最爱频道及正在播出的节目</string>
+    <string name="iptv_home_settings_sport">节目单中的体育直播</string>
+    <string name="iptv_home_settings_movies">来自提供商的最新电影</string>
+    <string name="iptv_home_settings_series">来自提供商的最新剧集</string>
+    <string name="iptv_home_settings_recordings">最近完成的录像</string>
+</resources>

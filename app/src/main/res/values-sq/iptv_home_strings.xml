@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">Të preferuarat e TV-së live</string>
+    <string name="iptv_home_sport">Tani: sport</string>
+    <string name="iptv_home_movies">Filma të shtuar së fundi</string>
+    <string name="iptv_home_series">Seriale të shtuara së fundi</string>
+    <string name="iptv_home_recordings">Regjistrimet</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">Ekrani kryesor</string>
+    <string name="iptv_home_settings_favourites">Kanalet e preferuara me atë që po transmetohet tani</string>
+    <string name="iptv_home_settings_sport">Sport live nga udhëzuesi</string>
+    <string name="iptv_home_settings_movies">Filmat më të rinj nga ofruesit e tu</string>
+    <string name="iptv_home_settings_series">Serialet më të reja nga ofruesit e tu</string>
+    <string name="iptv_home_settings_recordings">Regjistrimet e tua më të fundit të përfunduara</string>
+</resources>
