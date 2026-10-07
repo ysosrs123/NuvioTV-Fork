@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Emplacement réseau</string>
+    <string name="iptv_network_subtitle">Enregistrez sur un NAS ou un ordinateur via SMB, WebDAV ou FTP. Les enregistrements sont d’abord sauvegardés sur cet appareil, puis copiés.</string>
+    <string name="iptv_network_protocol">Type de connexion</string>
+    <string name="iptv_network_webdav_address">Adresse</string>
+    <string name="iptv_network_webdav_address_hint">L’adresse WebDAV, par exemple https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Un dossier sous l’adresse, par exemple TV/Live. Il est créé s’il n’existe pas.</string>
+    <string name="iptv_network_ftp_server_hint">Nom ou adresse IP, par exemple nas.local. Ajoutez :port seulement si le serveur n’utilise pas le port 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Un dossier dans le dossier de connexion, par exemple TV/Live. Il est créé s’il n’existe pas.</string>
+    <string name="iptv_network_ftp_secure">Sécurisé (TLS explicite)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Chiffre l’identification et les enregistrements. Le serveur doit prendre en charge FTPS.</string>
+    <string name="iptv_network_username_hint">Laissez vide pour vous connecter sans identification</string>
+    <string name="iptv_network_plain_warning">Cette connexion n’est pas chiffrée. D’autres personnes sur le réseau pourraient voir le mot de passe.</string>
+    <string name="iptv_network_invalid">Vérifiez l’adresse et les noms de dossier. Ils ne peuvent pas contenir &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Rien n’a été trouvé à cette adresse. Vérifiez le chemin après le nom du serveur.</string>
+    <string name="iptv_network_certificate_untrusted">Le certificat du serveur n’a pas pu être vérifié. S’il s’agit du certificat propre à votre NAS, comparez l’empreinte avec celle affichée sur le NAS avant de lui faire confiance.</string>
+    <string name="iptv_network_certificate_fingerprint">Empreinte SHA-256 : %1$s</string>
+    <string name="iptv_network_trust">Faire confiance à ce certificat</string>
+    <string name="iptv_network_no_tls">Le serveur ne propose pas de chiffrement. Désactivez Sécurisé ou activez FTPS sur le serveur.</string>
+    <string name="iptv_network_tls_reuse">Le serveur exige la réutilisation de la session TLS sur les connexions de données, ce qui n’est pas pris en charge. Désactivez cette exigence sur le serveur.</string>
+</resources>

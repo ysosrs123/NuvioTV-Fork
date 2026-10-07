@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Netzwerkspeicherort</string>
+    <string name="iptv_network_subtitle">Auf einem NAS oder Computer über SMB, WebDAV oder FTP aufnehmen. Aufnahmen werden zuerst auf diesem Gerät gespeichert und dann übertragen.</string>
+    <string name="iptv_network_protocol">Verbindungstyp</string>
+    <string name="iptv_network_webdav_address">Adresse</string>
+    <string name="iptv_network_webdav_address_hint">Die WebDAV-Adresse, zum Beispiel https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Ein Ordner unter der Adresse, zum Beispiel TV/Live. Er wird erstellt, falls er fehlt.</string>
+    <string name="iptv_network_ftp_server_hint">Name oder IP-Adresse, zum Beispiel nas.local. Fügen Sie :Port nur hinzu, wenn der Server nicht Port 21 verwendet.</string>
+    <string name="iptv_network_ftp_folder_hint">Ein Ordner im Anmeldeordner, zum Beispiel TV/Live. Er wird erstellt, falls er fehlt.</string>
+    <string name="iptv_network_ftp_secure">Sicher (explizites TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Verschlüsselt Anmeldung und Aufnahmen. Der Server muss FTPS unterstützen.</string>
+    <string name="iptv_network_username_hint">Leer lassen, um ohne Anmeldung zu verbinden</string>
+    <string name="iptv_network_plain_warning">Diese Verbindung ist nicht verschlüsselt. Andere im Netzwerk könnten das Passwort sehen.</string>
+    <string name="iptv_network_invalid">Prüfen Sie Adresse und Ordnernamen. Sie dürfen nicht &lt; &gt; : \" | ? * enthalten</string>
+    <string name="iptv_network_address_not_found">Unter dieser Adresse wurde nichts gefunden. Prüfen Sie den Pfad nach dem Servernamen.</string>
+    <string name="iptv_network_certificate_untrusted">Das Zertifikat des Servers konnte nicht überprüft werden. Wenn es das eigene Zertifikat Ihres NAS ist, vergleichen Sie den Fingerabdruck mit dem auf dem NAS angezeigten, bevor Sie ihm vertrauen.</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256-Fingerabdruck: %1$s</string>
+    <string name="iptv_network_trust">Diesem Zertifikat vertrauen</string>
+    <string name="iptv_network_no_tls">Der Server bietet keine Verschlüsselung an. Schalten Sie „Sicher“ aus oder aktivieren Sie FTPS auf dem Server.</string>
+    <string name="iptv_network_tls_reuse">Der Server verlangt bei Datenverbindungen die Wiederverwendung der TLS-Sitzung, was nicht unterstützt wird. Schalten Sie diese Anforderung auf dem Server aus.</string>
+</resources>

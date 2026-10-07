@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">Ταινίες και σειρές IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">Εμφανίζει τίτλους που ταιριάζουν από τις πηγές ζωντανής TV ως πηγή ροής</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Όλες οι συνδέσεις για %1$s χρησιμοποιούνται. Σταματήστε τη ζωντανή TV ή μια εγγραφή σε αυτή την πηγή και δοκιμάστε ξανά.</string>
+    <string name="iptv_vod_provider_refused">Ο πάροχος απέρριψε αυτόν τον τίτλο. Ίσως χρησιμοποιούνται όλες οι συνδέσεις του ή ο λογαριασμός έχει λήξει.</string>
+    <string name="iptv_vod_unavailable">Αυτός ο τίτλος IPTV δεν είναι πλέον διαθέσιμος. Ανανεώστε την πηγή στη ζωντανή TV και δοκιμάστε ξανά.</string>
+</resources>

@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">लोकल टाइमशिफ़्ट (एक्सपेरिमेंटल)</string>
+    <string name="iptv_timeshift_subtitle">एक्सपेरिमेंटल। फ़ुल स्क्रीन पर देखे जा रहे चैनल को बफ़र करता है, ताकि आप उसे रोक और पीछे कर सकें। देखते समय स्टोरेज इस्तेमाल करता है और सामान्य देखने की तरह एक खाली कनेक्शन चाहिए। सिर्फ़ MPEG-TS चैनलों के साथ काम करता है; HLS चैनल, मल्टीव्यू, प्रीव्यू और रिकॉर्ड हो रहा चैनल सामान्य रूप से चलते हैं। कुछ भी फ़ेल होने पर प्लेबैक सामान्य लाइव प्लेबैक पर लौट आता है।</string>
+    <string name="iptv_timeshift_length">बफ़र की लंबाई</string>
+    <string name="iptv_timeshift_length_subtitle">खाली जगह कम होने पर छोटा कर दिया जाता है। चैनल बदलने या देखना बंद करने पर बफ़र हटा दिया जाता है।</string>
+    <string name="iptv_timeshift_length_15">15 मिनट</string>
+    <string name="iptv_timeshift_length_30">30 मिनट</string>
+    <string name="iptv_timeshift_length_60">60 मिनट</string>
+    <string name="iptv_timeshift_length_auto">ऑटोमैटिक</string>
+    <string name="iptv_timeshift_length_auto_description">काफ़ी खाली जगह होने पर 30 मिनट, नहीं तो कम</string>
+    <string name="iptv_timeshift_location">बफ़र की जगह</string>
+    <string name="iptv_timeshift_location_subtitle">देखते समय बफ़र कहाँ लिखा जाता है</string>
+    <string name="iptv_timeshift_fallback">लोकल टाइमशिफ़्ट रुक गया। लाइव चल रहा है।</string>
+</resources>

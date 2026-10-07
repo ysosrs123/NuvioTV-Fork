@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">Film dan serial IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">Menampilkan judul yang cocok dari sumber TV Live Anda sebagai sumber stream</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Semua koneksi untuk %1$s sedang dipakai. Hentikan TV Live atau rekaman di sumber ini, lalu coba lagi.</string>
+    <string name="iptv_vod_provider_refused">Penyedia menolak judul ini. Semua koneksinya mungkin sedang dipakai, atau akun mungkin sudah kedaluwarsa.</string>
+    <string name="iptv_vod_unavailable">Judul IPTV ini tidak lagi tersedia. Segarkan sumber di TV Live dan coba lagi.</string>
+</resources>

@@ -1,0 +1,39 @@
+<resources>
+    <string name="iptv_sport_fixtures">मैच</string>
+    <string name="iptv_sport_live_now">अभी लाइव</string>
+    <string name="iptv_sport_later_today">आज बाद में</string>
+    <string name="iptv_sport_tomorrow">कल</string>
+    <string name="iptv_sport_live">लाइव</string>
+    <string name="iptv_sport_loading">मैच लोड हो रहे हैं…</string>
+    <string name="iptv_sport_failed">मैच लोड नहीं हो सके। सिर्फ़ गाइड के नतीजे दिखाए जा रहे हैं।</string>
+    <string name="iptv_sport_key_missing">लाइव टीवी सेटिंग में अपनी TheSportsDB की जोड़ें।</string>
+    <string name="iptv_sport_no_leagues">लाइव टीवी सेटिंग में लीग चुनें।</string>
+    <string name="iptv_sport_none">अगले तीन दिनों में आपकी लीग का कोई मैच नहीं है।</string>
+    <string name="iptv_sport_no_channel">कोई चैनल नहीं मिला</string>
+    <string name="iptv_sport_no_channel_description">आपके किसी भी चैनल की गाइड में यह मैच नहीं है और न ही कोई चैनल सूचीबद्ध ब्रॉडकास्टर है।</string>
+    <string name="iptv_sport_choose_channel">चैनल चुनें</string>
+    <string name="iptv_sport_broadcaster">सूचीबद्ध ब्रॉडकास्टर: %1$s</string>
+    <string name="iptv_sport_close">बंद करें</string>
+    <string name="iptv_sport_data">खेल डेटा</string>
+    <string name="iptv_sport_data_subtitle">मैच चुनी गई सर्विस से लिए जाते हैं। ESPN की फ़ीड अनौपचारिक है और काम करना बंद कर सकती है।</string>
+    <string name="iptv_sport_data_off">बंद</string>
+    <string name="iptv_sport_data_off_description">स्पोर्ट सिर्फ़ आपकी गाइड का इस्तेमाल करता है। कोई रिक्वेस्ट नहीं भेजी जाती।</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">अनौपचारिक फ़ीड, की की ज़रूरत नहीं। यह कभी भी काम करना बंद कर सकती है।</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">आपकी अपनी API की चाहिए। मुफ़्त टेस्ट की 123 सीमाओं के साथ काम करती है।</string>
+    <string name="iptv_sport_leagues">लीग</string>
+    <string name="iptv_sport_leagues_subtitle">इन लीग के मैच दिखाए जाते हैं</string>
+    <string name="iptv_sport_leagues_none">कोई नहीं</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d लीग</item>
+        <item quantity="other">%d लीग</item>
+    </plurals>
+    <string name="iptv_sport_key">TheSportsDB की</string>
+    <string name="iptv_sport_key_subtitle">इस डिवाइस पर एन्क्रिप्ट करके रखी जाती है। मुफ़्त टेस्ट की 123 सीमाओं के साथ काम करती है।</string>
+    <string name="iptv_sport_key_set">सेव की गई</string>
+    <string name="iptv_sport_key_not_set">सेट नहीं है</string>
+    <string name="iptv_sport_key_hint">मुफ़्त टेस्ट की इस्तेमाल करने के लिए 123 डालें</string>
+    <string name="iptv_sport_key_invalid">सिर्फ़ अक्षर और अंक इस्तेमाल करें।</string>
+    <string name="iptv_sport_key_remove">की हटाएँ</string>
+</resources>

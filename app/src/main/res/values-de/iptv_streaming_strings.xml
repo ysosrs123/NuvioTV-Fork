@@ -1,0 +1,29 @@
+<resources>
+    <string name="iptv_stream_title">Streaming</string>
+    <string name="iptv_stream_description">Wie Live-Sender puffern. Änderungen gelten für den nächsten geöffneten Sender.</string>
+    <string name="iptv_stream_start">Wiedergabe starten nach</string>
+    <string name="iptv_stream_start_subtitle">Wie viel Video geladen wird, bevor ein Sender startet. Eine kürzere Wartezeit startet schneller, kann bei schwacher Verbindung aber ruckeln.</string>
+    <string name="iptv_stream_start_fast">Schnell (ca. 1 s)</string>
+    <string name="iptv_stream_start_normal">Normal (ca. 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Sicher (ca. 5 s)</string>
+    <string name="iptv_stream_cushion">Beim Ansehen Sicherheitspuffer aufbauen</string>
+    <string name="iptv_stream_cushion_subtitle">Spielt 3% langsamer bei normaler Tonhöhe ab, bis der Puffer voll ist, damit kurze Netzwerkaussetzer das Bild nicht unterbrechen. Live-TV läuft dann entsprechend verzögert.</string>
+    <string name="iptv_stream_cushion_off">Aus</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d Sekunde</item>
+        <item quantity="other">%d Sekunden</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS-Sender starten weiter hinter live, statt langsamer zu laufen.</string>
+    <string name="iptv_stream_cushion_memory">Auf etwa %1$d MB Arbeitsspeicher auf diesem Gerät begrenzt.</string>
+    <string name="iptv_stream_behind_live">%1$d s hinter live</string>
+    <string name="iptv_stream_go_live_hint">Vorspulen drücken, um live zu gehen</string>
+    <string name="iptv_user_agent">User-Agent</string>
+    <string name="iptv_user_agent_description">Wird beim Abspielen von Sendern, Catch-up und Filmen dieser Quelle gesendet. Die Playlist-Einstellungen eines Senders haben weiterhin Vorrang.</string>
+    <string name="iptv_user_agent_default">App-Standard</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Generisch (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Benutzerdefiniert</string>
+    <string name="iptv_user_agent_custom_hint">Nur druckbare Zeichen, bis zu 200.</string>
+</resources>

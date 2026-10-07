@@ -1,0 +1,29 @@
+<resources>
+    <string name="iptv_stream_title">Streamelés</string>
+    <string name="iptv_stream_description">Hogyan pufferelnek az élő csatornák. A módosítások a következő megnyitott csatornára érvényesek.</string>
+    <string name="iptv_stream_start">Lejátszás indítása ennyi után</string>
+    <string name="iptv_stream_start_subtitle">Mennyi videó töltődik be a csatorna indulása előtt. A rövidebb várakozás hamarabb indul, de gyenge kapcsolaton akadozhat.</string>
+    <string name="iptv_stream_start_fast">Gyors (kb. 1 s)</string>
+    <string name="iptv_stream_start_normal">Normál (kb. 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Biztonságos (kb. 5 s)</string>
+    <string name="iptv_stream_cushion">Biztonsági puffer építése nézés közben</string>
+    <string name="iptv_stream_cushion_subtitle">3%-kal lassabban játszik le, normál hangmagassággal, amíg a puffer meg nem telik, így a rövid hálózati kiesések nem szakítják meg a képet. Az Élő TV ezután ennyivel le van maradva.</string>
+    <string name="iptv_stream_cushion_off">Ki</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d másodperc</item>
+        <item quantity="other">%d másodperc</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">A HLS csatornák lassítás helyett távolabb indulnak az élő adástól.</string>
+    <string name="iptv_stream_cushion_memory">Ezen az eszközön kb. %1$d MB memóriára korlátozva.</string>
+    <string name="iptv_stream_behind_live">%1$d s lemaradás az élő adáshoz képest</string>
+    <string name="iptv_stream_go_live_hint">Nyomd meg a gyors előretekerést az élő adáshoz</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Ennek a forrásnak a csatornái, visszanézése és filmjei lejátszásakor kerül elküldésre. Egy csatorna saját lejátszásilista-beállításai továbbra is elsőbbséget élveznek.</string>
+    <string name="iptv_user_agent_default">Alkalmazás alapértelmezése</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Általános (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Egyéni</string>
+    <string name="iptv_user_agent_custom_hint">Csak nyomtatható karakterek, legfeljebb 200.</string>
+</resources>

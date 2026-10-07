@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Mrežna lokacija</string>
+    <string name="iptv_network_subtitle">Snimaj na NAS ili računalo putem SMB-a, WebDAV-a ili FTP-a. Snimke se najprije spremaju na ovaj uređaj, a zatim kopiraju.</string>
+    <string name="iptv_network_protocol">Vrsta veze</string>
+    <string name="iptv_network_webdav_address">Adresa</string>
+    <string name="iptv_network_webdav_address_hint">WebDAV adresa, na primjer https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Mapa unutar adrese, na primjer TV/Live. Stvara se ako ne postoji.</string>
+    <string name="iptv_network_ftp_server_hint">Naziv ili IP adresa, na primjer nas.local. Dodaj :port samo ako poslužitelj ne koristi port 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Mapa unutar mape za prijavu, na primjer TV/Live. Stvara se ako ne postoji.</string>
+    <string name="iptv_network_ftp_secure">Sigurno (eksplicitni TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Šifrira prijavu i snimke. Poslužitelj mora podržavati FTPS.</string>
+    <string name="iptv_network_username_hint">Ostavi prazno za povezivanje bez prijave</string>
+    <string name="iptv_network_plain_warning">Ova veza nije šifrirana. Drugi na mreži mogli bi vidjeti lozinku.</string>
+    <string name="iptv_network_invalid">Provjeri adresu i nazive mapa. Ne smiju sadržavati &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Na ovoj adresi nije ništa pronađeno. Provjeri putanju nakon naziva poslužitelja.</string>
+    <string name="iptv_network_certificate_untrusted">Certifikat poslužitelja nije moguće provjeriti. Ako je to vlastiti certifikat tvog NAS-a, usporedi otisak s onim prikazanim na NAS-u prije nego što mu vjeruješ.</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 otisak: %1$s</string>
+    <string name="iptv_network_trust">Vjeruj ovom certifikatu</string>
+    <string name="iptv_network_no_tls">Poslužitelj ne nudi šifriranje. Isključi Sigurno ili uključi FTPS na poslužitelju.</string>
+    <string name="iptv_network_tls_reuse">Poslužitelj zahtijeva ponovnu upotrebu TLS sesije na podatkovnim vezama, što nije podržano. Isključi taj zahtjev na poslužitelju.</string>
+</resources>

@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Timeshift lokal (eksperimental)</string>
+    <string name="iptv_timeshift_subtitle">Eksperimental. Mem-buffer saluran yang Anda tonton di layar penuh agar bisa dijeda dan diputar mundur. Menggunakan penyimpanan saat menonton dan memerlukan koneksi kosong seperti menonton biasa. Hanya berfungsi dengan saluran MPEG-TS; saluran HLS, multiview, pratinjau, dan saluran yang sedang direkam diputar seperti biasa. Jika ada yang gagal, pemutaran kembali ke pemutaran live biasa.</string>
+    <string name="iptv_timeshift_length">Durasi buffer</string>
+    <string name="iptv_timeshift_length_subtitle">Dipersingkat saat ruang kosong sedikit. Buffer dihapus saat Anda mengganti saluran atau berhenti menonton.</string>
+    <string name="iptv_timeshift_length_15">15 menit</string>
+    <string name="iptv_timeshift_length_30">30 menit</string>
+    <string name="iptv_timeshift_length_60">60 menit</string>
+    <string name="iptv_timeshift_length_auto">Otomatis</string>
+    <string name="iptv_timeshift_length_auto_description">30 menit jika ruang kosong cukup, jika tidak lebih sedikit</string>
+    <string name="iptv_timeshift_location">Lokasi buffer</string>
+    <string name="iptv_timeshift_location_subtitle">Tempat buffer ditulis saat Anda menonton</string>
+    <string name="iptv_timeshift_fallback">Timeshift lokal berhenti. Memutar live.</string>
+</resources>

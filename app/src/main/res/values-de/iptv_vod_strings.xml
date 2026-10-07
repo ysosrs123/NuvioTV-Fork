@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV-Filme und -Serien</string>
+    <string name="iptv_vod_streams_setting_sub">Zeigt passende Titel aus Ihren Live-TV-Quellen als Stream-Quelle</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Alle Verbindungen für %1$s sind belegt. Beenden Sie Live-TV oder eine Aufnahme dieser Quelle und versuchen Sie es erneut.</string>
+    <string name="iptv_vod_provider_refused">Der Anbieter hat diesen Titel abgelehnt. Möglicherweise sind alle Verbindungen belegt oder das Konto ist abgelaufen.</string>
+    <string name="iptv_vod_unavailable">Dieser IPTV-Titel ist nicht mehr verfügbar. Aktualisieren Sie die Quelle in Live-TV und versuchen Sie es erneut.</string>
+</resources>

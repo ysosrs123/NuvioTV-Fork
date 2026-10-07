@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV फ़िल्में और सीरीज़</string>
+    <string name="iptv_vod_streams_setting_sub">आपके लाइव टीवी सोर्स से मिलते-जुलते टाइटल को स्ट्रीम सोर्स के रूप में दिखाता है</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">%1$s के सभी कनेक्शन इस्तेमाल में हैं। इस सोर्स पर लाइव टीवी या रिकॉर्डिंग रोकें, फिर दोबारा कोशिश करें।</string>
+    <string name="iptv_vod_provider_refused">प्रोवाइडर ने यह टाइटल अस्वीकार कर दिया। हो सकता है उसके सभी कनेक्शन इस्तेमाल में हों या अकाउंट की मियाद खत्म हो गई हो।</string>
+    <string name="iptv_vod_unavailable">यह IPTV टाइटल अब उपलब्ध नहीं है। लाइव टीवी में सोर्स रिफ्रेश करें और दोबारा कोशिश करें।</string>
+</resources>

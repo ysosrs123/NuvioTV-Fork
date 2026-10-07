@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Lokales Timeshift (experimentell)</string>
+    <string name="iptv_timeshift_subtitle">Experimentell. Puffert den Sender, den Sie im Vollbild ansehen, damit Sie pausieren und zurückspulen können. Belegt beim Ansehen Speicherplatz und benötigt wie normales Ansehen eine freie Verbindung. Funktioniert nur mit MPEG-TS-Sendern; HLS-Sender, Multiview, die Vorschau und ein Sender, der gerade aufgenommen wird, laufen normal. Bei einem Fehler wird normal live weitergespielt.</string>
+    <string name="iptv_timeshift_length">Pufferlänge</string>
+    <string name="iptv_timeshift_length_subtitle">Wird bei wenig freiem Speicher verkürzt. Der Puffer wird gelöscht, wenn Sie den Sender wechseln oder das Ansehen beenden.</string>
+    <string name="iptv_timeshift_length_15">15 Minuten</string>
+    <string name="iptv_timeshift_length_30">30 Minuten</string>
+    <string name="iptv_timeshift_length_60">60 Minuten</string>
+    <string name="iptv_timeshift_length_auto">Automatisch</string>
+    <string name="iptv_timeshift_length_auto_description">30 Minuten bei genügend freiem Speicher, sonst weniger</string>
+    <string name="iptv_timeshift_location">Pufferort</string>
+    <string name="iptv_timeshift_location_subtitle">Wohin der Puffer beim Ansehen geschrieben wird</string>
+    <string name="iptv_timeshift_fallback">Lokales Timeshift beendet. Live-Wiedergabe.</string>
+</resources>

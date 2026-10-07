@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Hálózati hely</string>
+    <string name="iptv_network_subtitle">Felvétel NAS-ra vagy számítógépre SMB, WebDAV vagy FTP használatával. A felvételek először erre az eszközre kerülnek, majd át lesznek másolva.</string>
+    <string name="iptv_network_protocol">Kapcsolat típusa</string>
+    <string name="iptv_network_webdav_address">Cím</string>
+    <string name="iptv_network_webdav_address_hint">A WebDAV-cím, például https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Egy mappa a cím alatt, például TV/Live. Ha hiányzik, létrejön.</string>
+    <string name="iptv_network_ftp_server_hint">Név vagy IP-cím, például nas.local. A :port csak akkor kell, ha a szerver nem a 21-es portot használja.</string>
+    <string name="iptv_network_ftp_folder_hint">Egy mappa a bejelentkezési mappán belül, például TV/Live. Ha hiányzik, létrejön.</string>
+    <string name="iptv_network_ftp_secure">Biztonságos (explicit TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Titkosítja a bejelentkezést és a felvételeket. A szervernek támogatnia kell az FTPS-t.</string>
+    <string name="iptv_network_username_hint">Hagyd üresen a bejelentkezés nélküli csatlakozáshoz</string>
+    <string name="iptv_network_plain_warning">Ez a kapcsolat nincs titkosítva. A hálózaton mások is láthatják a jelszót.</string>
+    <string name="iptv_network_invalid">Ellenőrizd a címet és a mappaneveket. Nem tartalmazhatják ezeket: &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Ezen a címen nem található semmi. Ellenőrizd a szervernév utáni elérési utat.</string>
+    <string name="iptv_network_certificate_untrusted">A szerver tanúsítványa nem ellenőrizhető. Ha ez a NAS saját tanúsítványa, megbízás előtt hasonlítsd össze az ujjlenyomatot a NAS-on megjelenítettel.</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 ujjlenyomat: %1$s</string>
+    <string name="iptv_network_trust">Megbízom ebben a tanúsítványban</string>
+    <string name="iptv_network_no_tls">A szerver nem kínál titkosítást. Kapcsold ki a Biztonságos opciót, vagy engedélyezd az FTPS-t a szerveren.</string>
+    <string name="iptv_network_tls_reuse">A szerver megköveteli a TLS-munkamenet újrahasználatát az adatkapcsolatokon, ami nem támogatott. Kapcsold ki ezt a követelményt a szerveren.</string>
+</resources>

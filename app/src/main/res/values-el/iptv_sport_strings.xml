@@ -1,0 +1,39 @@
+<resources>
+    <string name="iptv_sport_fixtures">Αγώνες</string>
+    <string name="iptv_sport_live_now">Ζωντανά τώρα</string>
+    <string name="iptv_sport_later_today">Αργότερα σήμερα</string>
+    <string name="iptv_sport_tomorrow">Αύριο</string>
+    <string name="iptv_sport_live">ΖΩΝΤΑΝΑ</string>
+    <string name="iptv_sport_loading">Φόρτωση αγώνων…</string>
+    <string name="iptv_sport_failed">Δεν ήταν δυνατή η φόρτωση των αγώνων. Εμφανίζονται μόνο αποτελέσματα από τον οδηγό.</string>
+    <string name="iptv_sport_key_missing">Προσθέστε το κλειδί TheSportsDB στις Ρυθμίσεις ζωντανής TV.</string>
+    <string name="iptv_sport_no_leagues">Επιλέξτε πρωταθλήματα στις Ρυθμίσεις ζωντανής TV.</string>
+    <string name="iptv_sport_none">Δεν υπάρχουν αγώνες για τα πρωταθλήματά σας τις επόμενες τρεις ημέρες.</string>
+    <string name="iptv_sport_no_channel">Δεν βρέθηκε κανάλι</string>
+    <string name="iptv_sport_no_channel_description">Κανένα από τα κανάλια σας δεν έχει αυτόν τον αγώνα στον οδηγό του ούτε είναι καταχωρισμένος μεταδότης.</string>
+    <string name="iptv_sport_choose_channel">Επιλέξτε κανάλι</string>
+    <string name="iptv_sport_broadcaster">Καταχωρισμένος μεταδότης: %1$s</string>
+    <string name="iptv_sport_close">Κλείσιμο</string>
+    <string name="iptv_sport_data">Αθλητικά δεδομένα</string>
+    <string name="iptv_sport_data_subtitle">Οι αγώνες λαμβάνονται από την επιλεγμένη υπηρεσία. Η ροή του ESPN είναι ανεπίσημη και μπορεί να σταματήσει να λειτουργεί.</string>
+    <string name="iptv_sport_data_off">Ανενεργό</string>
+    <string name="iptv_sport_data_off_description">Τα αθλητικά χρησιμοποιούν μόνο τον οδηγό σας. Δεν γίνονται αιτήματα.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Ανεπίσημη ροή, χωρίς κλειδί. Μπορεί να σταματήσει να λειτουργεί ανά πάσα στιγμή.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Χρειάζεται δικό σας κλειδί API. Το δωρεάν δοκιμαστικό κλειδί 123 λειτουργεί με περιορισμούς.</string>
+    <string name="iptv_sport_leagues">Πρωταθλήματα</string>
+    <string name="iptv_sport_leagues_subtitle">Εμφανίζονται αγώνες για αυτά τα πρωταθλήματα</string>
+    <string name="iptv_sport_leagues_none">Κανένα</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d πρωτάθλημα</item>
+        <item quantity="other">%d πρωταθλήματα</item>
+    </plurals>
+    <string name="iptv_sport_key">Κλειδί TheSportsDB</string>
+    <string name="iptv_sport_key_subtitle">Αποθηκεύεται κρυπτογραφημένο σε αυτή τη συσκευή. Το δωρεάν δοκιμαστικό κλειδί 123 λειτουργεί με περιορισμούς.</string>
+    <string name="iptv_sport_key_set">Αποθηκεύτηκε</string>
+    <string name="iptv_sport_key_not_set">Δεν έχει οριστεί</string>
+    <string name="iptv_sport_key_hint">Εισαγάγετε 123 για το δωρεάν δοκιμαστικό κλειδί</string>
+    <string name="iptv_sport_key_invalid">Χρησιμοποιήστε μόνο γράμματα και αριθμούς.</string>
+    <string name="iptv_sport_key_remove">Αφαίρεση κλειδιού</string>
+</resources>

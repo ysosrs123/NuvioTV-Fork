@@ -1,0 +1,29 @@
+<resources>
+    <string name="iptv_stream_title">Ροή</string>
+    <string name="iptv_stream_description">Πώς φορτώνουν τα ζωντανά κανάλια. Οι αλλαγές ισχύουν για το επόμενο κανάλι που ανοίγετε.</string>
+    <string name="iptv_stream_start">Έναρξη αναπαραγωγής μετά από</string>
+    <string name="iptv_stream_start_subtitle">Πόσο βίντεο φορτώνεται πριν ξεκινήσει ένα κανάλι. Μικρότερη αναμονή ξεκινά νωρίτερα, αλλά μπορεί να κολλάει σε αδύναμη σύνδεση.</string>
+    <string name="iptv_stream_start_fast">Γρήγορα (περίπου 1 s)</string>
+    <string name="iptv_stream_start_normal">Κανονικά (περίπου 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Ασφαλώς (περίπου 5 s)</string>
+    <string name="iptv_stream_cushion">Δημιουργία buffer ασφαλείας κατά την παρακολούθηση</string>
+    <string name="iptv_stream_cushion_subtitle">Παίζει 3% πιο αργά, με κανονικό τόνο, μέχρι να γεμίσει το buffer, ώστε σύντομες διακοπές δικτύου να μη διακόπτουν την εικόνα. Η ζωντανή TV τότε καθυστερεί τόσο.</string>
+    <string name="iptv_stream_cushion_off">Ανενεργό</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d δευτερόλεπτο</item>
+        <item quantity="other">%d δευτερόλεπτα</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">Τα κανάλια HLS ξεκινούν πιο πίσω από το ζωντανό αντί να επιβραδύνονται.</string>
+    <string name="iptv_stream_cushion_memory">Περιορίζεται σε περίπου %1$d MB μνήμης σε αυτή τη συσκευή.</string>
+    <string name="iptv_stream_behind_live">Πίσω από το ζωντανό κατά %1$d s</string>
+    <string name="iptv_stream_go_live_hint">Πατήστε γρήγορη προώθηση για μετάβαση στο ζωντανό</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Αποστέλλεται κατά την αναπαραγωγή καναλιών, catch-up και ταινιών από αυτή την πηγή. Οι ρυθμίσεις playlist ενός καναλιού εξακολουθούν να έχουν προτεραιότητα.</string>
+    <string name="iptv_user_agent_default">Προεπιλογή εφαρμογής</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Γενικό (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Προσαρμοσμένο</string>
+    <string name="iptv_user_agent_custom_hint">Μόνο εκτυπώσιμοι χαρακτήρες, έως 200.</string>
+</resources>

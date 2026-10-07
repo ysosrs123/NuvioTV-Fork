@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV filmovi i serije</string>
+    <string name="iptv_vod_streams_setting_sub">Prikazuje odgovarajuće naslove iz tvojih izvora TV-a uživo kao izvor streama</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Sve veze za %1$s su zauzete. Zaustavi TV uživo ili snimanje na ovom izvoru pa pokušaj ponovno.</string>
+    <string name="iptv_vod_provider_refused">Pružatelj je odbio ovaj naslov. Možda su sve njegove veze zauzete ili je račun istekao.</string>
+    <string name="iptv_vod_unavailable">Ovaj IPTV naslov više nije dostupan. Osvježi izvor u TV-u uživo i pokušaj ponovno.</string>
+</resources>

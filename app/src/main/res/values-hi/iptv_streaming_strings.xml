@@ -1,0 +1,29 @@
+<resources>
+    <string name="iptv_stream_title">स्ट्रीमिंग</string>
+    <string name="iptv_stream_description">लाइव चैनल कैसे बफ़र होते हैं। बदलाव अगली बार खोले गए चैनल पर लागू होते हैं।</string>
+    <string name="iptv_stream_start">इतनी देर बाद प्लेबैक शुरू करें</string>
+    <string name="iptv_stream_start_subtitle">चैनल शुरू होने से पहले कितना वीडियो लोड होता है। कम इंतज़ार से जल्दी शुरू होता है, पर कमज़ोर कनेक्शन पर अटक सकता है।</string>
+    <string name="iptv_stream_start_fast">तेज़ (लगभग 1 s)</string>
+    <string name="iptv_stream_start_normal">सामान्य (लगभग 2.5 s)</string>
+    <string name="iptv_stream_start_safe">सुरक्षित (लगभग 5 s)</string>
+    <string name="iptv_stream_cushion">देखते समय सेफ़्टी बफ़र बनाएँ</string>
+    <string name="iptv_stream_cushion_subtitle">बफ़र भरने तक सामान्य पिच के साथ 3% धीमा चलाता है, ताकि नेटवर्क की छोटी रुकावटें तस्वीर न रोकें। फिर लाइव टीवी उतना पीछे चलता है।</string>
+    <string name="iptv_stream_cushion_off">बंद</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d सेकंड</item>
+        <item quantity="other">%d सेकंड</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS चैनल धीमे होने के बजाय लाइव से और पीछे शुरू होते हैं।</string>
+    <string name="iptv_stream_cushion_memory">इस डिवाइस पर लगभग %1$d MB मेमोरी तक सीमित।</string>
+    <string name="iptv_stream_behind_live">लाइव से %1$d s पीछे</string>
+    <string name="iptv_stream_go_live_hint">लाइव पर जाने के लिए फ़ास्ट-फ़ॉरवर्ड दबाएँ</string>
+    <string name="iptv_user_agent">यूज़र एजेंट</string>
+    <string name="iptv_user_agent_description">इस सोर्स से चैनल, कैच-अप और फ़िल्में चलाते समय भेजा जाता है। चैनल की अपनी प्लेलिस्ट सेटिंग को फिर भी प्राथमिकता मिलती है।</string>
+    <string name="iptv_user_agent_default">ऐप डिफ़ॉल्ट</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">सामान्य (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">कस्टम</string>
+    <string name="iptv_user_agent_custom_hint">सिर्फ़ प्रिंट होने वाले अक्षर, 200 तक।</string>
+</resources>

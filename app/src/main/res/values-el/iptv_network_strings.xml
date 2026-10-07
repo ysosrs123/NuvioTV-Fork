@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Τοποθεσία δικτύου</string>
+    <string name="iptv_network_subtitle">Εγγραφή σε NAS ή υπολογιστή μέσω SMB, WebDAV ή FTP. Οι εγγραφές αποθηκεύονται πρώτα σε αυτή τη συσκευή και μετά αντιγράφονται.</string>
+    <string name="iptv_network_protocol">Τύπος σύνδεσης</string>
+    <string name="iptv_network_webdav_address">Διεύθυνση</string>
+    <string name="iptv_network_webdav_address_hint">Η διεύθυνση WebDAV, για παράδειγμα https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Ένας φάκελος κάτω από τη διεύθυνση, για παράδειγμα TV/Live. Δημιουργείται αν δεν υπάρχει.</string>
+    <string name="iptv_network_ftp_server_hint">Όνομα ή διεύθυνση IP, για παράδειγμα nas.local. Προσθέστε :θύρα μόνο αν ο διακομιστής δεν χρησιμοποιεί τη θύρα 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Ένας φάκελος μέσα στον φάκελο σύνδεσης, για παράδειγμα TV/Live. Δημιουργείται αν δεν υπάρχει.</string>
+    <string name="iptv_network_ftp_secure">Ασφαλής (ρητό TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Κρυπτογραφεί τη σύνδεση και τις εγγραφές. Ο διακομιστής πρέπει να υποστηρίζει FTPS.</string>
+    <string name="iptv_network_username_hint">Αφήστε το κενό για σύνδεση χωρίς είσοδο</string>
+    <string name="iptv_network_plain_warning">Αυτή η σύνδεση δεν είναι κρυπτογραφημένη. Άλλοι στο δίκτυο μπορεί να δουν τον κωδικό πρόσβασης.</string>
+    <string name="iptv_network_invalid">Ελέγξτε τη διεύθυνση και τα ονόματα φακέλων. Δεν μπορούν να περιέχουν &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Δεν βρέθηκε τίποτα σε αυτή τη διεύθυνση. Ελέγξτε τη διαδρομή μετά το όνομα του διακομιστή.</string>
+    <string name="iptv_network_certificate_untrusted">Δεν ήταν δυνατή η επαλήθευση του πιστοποιητικού του διακομιστή. Αν είναι το πιστοποιητικό του NAS σας, συγκρίνετε το αποτύπωμα με αυτό που εμφανίζεται στο NAS πριν το εμπιστευτείτε.</string>
+    <string name="iptv_network_certificate_fingerprint">Αποτύπωμα SHA-256: %1$s</string>
+    <string name="iptv_network_trust">Εμπιστοσύνη σε αυτό το πιστοποιητικό</string>
+    <string name="iptv_network_no_tls">Ο διακομιστής δεν προσφέρει κρυπτογράφηση. Απενεργοποιήστε το Ασφαλής ή ενεργοποιήστε το FTPS στον διακομιστή.</string>
+    <string name="iptv_network_tls_reuse">Ο διακομιστής απαιτεί επαναχρησιμοποίηση συνεδρίας TLS στις συνδέσεις δεδομένων, κάτι που δεν υποστηρίζεται. Απενεργοποιήστε αυτή την απαίτηση στον διακομιστή.</string>
+</resources>

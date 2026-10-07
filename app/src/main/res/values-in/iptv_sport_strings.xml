@@ -1,0 +1,38 @@
+<resources>
+    <string name="iptv_sport_fixtures">Jadwal pertandingan</string>
+    <string name="iptv_sport_live_now">Live sekarang</string>
+    <string name="iptv_sport_later_today">Nanti hari ini</string>
+    <string name="iptv_sport_tomorrow">Besok</string>
+    <string name="iptv_sport_live">LIVE</string>
+    <string name="iptv_sport_loading">Memuat jadwal pertandingan…</string>
+    <string name="iptv_sport_failed">Tidak dapat memuat jadwal pertandingan. Hanya menampilkan hasil dari panduan.</string>
+    <string name="iptv_sport_key_missing">Tambahkan kunci TheSportsDB Anda di pengaturan TV Live.</string>
+    <string name="iptv_sport_no_leagues">Pilih liga di pengaturan TV Live.</string>
+    <string name="iptv_sport_none">Tidak ada pertandingan untuk liga Anda dalam tiga hari ke depan.</string>
+    <string name="iptv_sport_no_channel">Saluran tidak ditemukan</string>
+    <string name="iptv_sport_no_channel_description">Tidak ada saluran Anda yang mencantumkan pertandingan ini di panduannya atau merupakan penyiar yang tercantum.</string>
+    <string name="iptv_sport_choose_channel">Pilih saluran</string>
+    <string name="iptv_sport_broadcaster">Penyiar tercantum: %1$s</string>
+    <string name="iptv_sport_close">Tutup</string>
+    <string name="iptv_sport_data">Data olahraga</string>
+    <string name="iptv_sport_data_subtitle">Jadwal pertandingan diambil dari layanan yang dipilih. Feed ESPN tidak resmi dan bisa berhenti berfungsi.</string>
+    <string name="iptv_sport_data_off">Nonaktif</string>
+    <string name="iptv_sport_data_off_description">Olahraga hanya menggunakan panduan Anda. Tidak ada permintaan yang dikirim.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Feed tidak resmi, tanpa kunci. Bisa berhenti berfungsi kapan saja.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Memerlukan kunci API sendiri. Kunci uji gratis 123 berfungsi dengan batasan.</string>
+    <string name="iptv_sport_leagues">Liga</string>
+    <string name="iptv_sport_leagues_subtitle">Pertandingan ditampilkan untuk liga ini</string>
+    <string name="iptv_sport_leagues_none">Tidak ada</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="other">%d liga</item>
+    </plurals>
+    <string name="iptv_sport_key">Kunci TheSportsDB</string>
+    <string name="iptv_sport_key_subtitle">Disimpan terenkripsi di perangkat ini. Kunci uji gratis 123 berfungsi dengan batasan.</string>
+    <string name="iptv_sport_key_set">Tersimpan</string>
+    <string name="iptv_sport_key_not_set">Belum diatur</string>
+    <string name="iptv_sport_key_hint">Masukkan 123 untuk menggunakan kunci uji gratis</string>
+    <string name="iptv_sport_key_invalid">Gunakan huruf dan angka saja.</string>
+    <string name="iptv_sport_key_remove">Hapus kunci</string>
+</resources>

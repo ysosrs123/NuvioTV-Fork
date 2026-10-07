@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV filmek és sorozatok</string>
+    <string name="iptv_vod_streams_setting_sub">Az Élő TV-forrásaid egyező címeit streamforrásként jeleníti meg</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">A(z) %1$s összes kapcsolata foglalt. Állítsd le az Élő TV-t vagy egy felvételt ezen a forráson, majd próbáld újra.</string>
+    <string name="iptv_vod_provider_refused">A szolgáltató elutasította ezt a címet. Lehet, hogy minden kapcsolata foglalt, vagy lejárt a fiók.</string>
+    <string name="iptv_vod_unavailable">Ez az IPTV-cím már nem érhető el. Frissítsd a forrást az Élő TV-ben, és próbáld újra.</string>
+</resources>

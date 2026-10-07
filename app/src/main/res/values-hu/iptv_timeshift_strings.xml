@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Helyi időcsúsztatás (kísérleti)</string>
+    <string name="iptv_timeshift_subtitle">Kísérleti. Pufferbe menti a teljes képernyőn nézett csatornát, így szüneteltetheted és visszatekerheted. Nézés közben tárhelyet használ, és a normál nézéshez hasonlóan szabad kapcsolat kell hozzá. Csak MPEG-TS csatornákkal működik; a HLS csatornák, a többképes nézet, az előnézet és a rögzítés alatt álló csatorna normálisan játszódik le. Ha valami nem sikerül, a lejátszás visszaáll a normál élő lejátszásra.</string>
+    <string name="iptv_timeshift_length">Puffer hossza</string>
+    <string name="iptv_timeshift_length_subtitle">Kevés szabad hely esetén rövidebb. A puffer törlődik, ha csatornát váltasz vagy befejezed a nézést.</string>
+    <string name="iptv_timeshift_length_15">15 perc</string>
+    <string name="iptv_timeshift_length_30">30 perc</string>
+    <string name="iptv_timeshift_length_60">60 perc</string>
+    <string name="iptv_timeshift_length_auto">Automatikus</string>
+    <string name="iptv_timeshift_length_auto_description">30 perc, ha van elég szabad hely, különben kevesebb</string>
+    <string name="iptv_timeshift_location">Puffer helye</string>
+    <string name="iptv_timeshift_location_subtitle">Hova íródik a puffer nézés közben</string>
+    <string name="iptv_timeshift_fallback">A helyi időcsúsztatás leállt. Élő lejátszás.</string>
+</resources>

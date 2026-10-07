@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">Películas y series IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">Muestra títulos coincidentes de tus fuentes de TV en directo como fuente de transmisión</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Todas las conexiones de %1$s están en uso. Detén TV en directo o una grabación de esta fuente y vuelve a intentarlo.</string>
+    <string name="iptv_vod_provider_refused">El proveedor rechazó este título. Puede que todas sus conexiones estén en uso o que la cuenta haya caducado.</string>
+    <string name="iptv_vod_unavailable">Este título IPTV ya no está disponible. Actualiza la fuente en TV en directo y vuelve a intentarlo.</string>
+</resources>

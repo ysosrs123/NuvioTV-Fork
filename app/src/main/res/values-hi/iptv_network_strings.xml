@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">नेटवर्क लोकेशन</string>
+    <string name="iptv_network_subtitle">SMB, WebDAV या FTP से NAS या कंप्यूटर पर रिकॉर्ड करें। रिकॉर्डिंग पहले इस डिवाइस पर सेव होती हैं और फिर कॉपी की जाती हैं।</string>
+    <string name="iptv_network_protocol">कनेक्शन का प्रकार</string>
+    <string name="iptv_network_webdav_address">पता</string>
+    <string name="iptv_network_webdav_address_hint">WebDAV पता, जैसे https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">पते के अंदर का फ़ोल्डर, जैसे TV/Live। न हो तो बना दिया जाता है।</string>
+    <string name="iptv_network_ftp_server_hint">नाम या IP पता, जैसे nas.local। :port सिर्फ़ तब जोड़ें जब सर्वर 21 के अलावा कोई और पोर्ट इस्तेमाल करता हो।</string>
+    <string name="iptv_network_ftp_folder_hint">लॉगिन फ़ोल्डर के अंदर का फ़ोल्डर, जैसे TV/Live। न हो तो बना दिया जाता है।</string>
+    <string name="iptv_network_ftp_secure">सुरक्षित (explicit TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">लॉगिन और रिकॉर्डिंग को एन्क्रिप्ट करता है। सर्वर पर FTPS सपोर्ट होना चाहिए।</string>
+    <string name="iptv_network_username_hint">बिना साइन इन किए कनेक्ट करने के लिए खाली छोड़ें</string>
+    <string name="iptv_network_plain_warning">यह कनेक्शन एन्क्रिप्टेड नहीं है। नेटवर्क पर दूसरे लोग पासवर्ड देख सकते हैं।</string>
+    <string name="iptv_network_invalid">पता और फ़ोल्डर के नाम जाँचें। उनमें &lt; &gt; : \" | ? * नहीं हो सकते</string>
+    <string name="iptv_network_address_not_found">इस पते पर कुछ नहीं मिला। सर्वर के नाम के बाद का पाथ जाँचें।</string>
+    <string name="iptv_network_certificate_untrusted">सर्वर का सर्टिफ़िकेट वेरिफ़ाई नहीं हो सका। अगर यह आपके NAS का अपना सर्टिफ़िकेट है, तो भरोसा करने से पहले फ़िंगरप्रिंट को NAS पर दिखाए गए फ़िंगरप्रिंट से मिलाएँ।</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 फ़िंगरप्रिंट: %1$s</string>
+    <string name="iptv_network_trust">इस सर्टिफ़िकेट पर भरोसा करें</string>
+    <string name="iptv_network_no_tls">सर्वर एन्क्रिप्शन नहीं देता। सुरक्षित बंद करें या सर्वर पर FTPS चालू करें।</string>
+    <string name="iptv_network_tls_reuse">सर्वर डेटा कनेक्शन पर TLS सेशन दोबारा इस्तेमाल करना ज़रूरी मानता है, जो सपोर्टेड नहीं है। सर्वर पर यह शर्त बंद करें।</string>
+</resources>

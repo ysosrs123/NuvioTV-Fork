@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Timeshift local (expérimental)</string>
+    <string name="iptv_timeshift_subtitle">Expérimental. Met en mémoire tampon la chaîne regardée en plein écran pour pouvoir la mettre en pause et revenir en arrière. Utilise de l’espace de stockage pendant le visionnage et nécessite une connexion libre comme un visionnage normal. Fonctionne uniquement avec les chaînes MPEG-TS ; les chaînes HLS, la multivue, l’aperçu et une chaîne en cours d’enregistrement sont lus normalement. En cas d’échec, la lecture repasse en direct normal.</string>
+    <string name="iptv_timeshift_length">Durée du tampon</string>
+    <string name="iptv_timeshift_length_subtitle">Réduite si l’espace libre est faible. Le tampon est supprimé quand vous changez de chaîne ou arrêtez de regarder.</string>
+    <string name="iptv_timeshift_length_15">15 minutes</string>
+    <string name="iptv_timeshift_length_30">30 minutes</string>
+    <string name="iptv_timeshift_length_60">60 minutes</string>
+    <string name="iptv_timeshift_length_auto">Automatique</string>
+    <string name="iptv_timeshift_length_auto_description">30 minutes si l’espace libre est suffisant, sinon moins</string>
+    <string name="iptv_timeshift_location">Emplacement du tampon</string>
+    <string name="iptv_timeshift_location_subtitle">Où le tampon est écrit pendant le visionnage</string>
+    <string name="iptv_timeshift_fallback">Timeshift local arrêté. Lecture en direct.</string>
+</resources>

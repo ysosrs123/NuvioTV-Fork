@@ -1,0 +1,28 @@
+<resources>
+    <string name="iptv_stream_title">Streaming</string>
+    <string name="iptv_stream_description">Cara saluran live melakukan buffer. Perubahan berlaku untuk saluran berikutnya yang Anda buka.</string>
+    <string name="iptv_stream_start">Mulai pemutaran setelah</string>
+    <string name="iptv_stream_start_subtitle">Banyaknya video yang dimuat sebelum saluran dimulai. Waktu tunggu lebih singkat mulai lebih cepat, tetapi bisa tersendat pada koneksi lemah.</string>
+    <string name="iptv_stream_start_fast">Cepat (sekitar 1 s)</string>
+    <string name="iptv_stream_start_normal">Normal (sekitar 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Aman (sekitar 5 s)</string>
+    <string name="iptv_stream_cushion">Bangun buffer pengaman saat menonton</string>
+    <string name="iptv_stream_cushion_subtitle">Memutar 3% lebih lambat, dengan nada normal, sampai buffer penuh, agar gangguan jaringan singkat tidak memutus gambar. TV Live lalu tertinggal sejauh itu.</string>
+    <string name="iptv_stream_cushion_off">Nonaktif</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="other">%d detik</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">Saluran HLS dimulai lebih jauh di belakang live alih-alih melambat.</string>
+    <string name="iptv_stream_cushion_memory">Dibatasi sekitar %1$d MB memori di perangkat ini.</string>
+    <string name="iptv_stream_behind_live">Tertinggal %1$d s dari live</string>
+    <string name="iptv_stream_go_live_hint">Tekan maju cepat untuk ke live</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Dikirim saat memutar saluran, catch-up, dan film dari sumber ini. Pengaturan playlist milik saluran tetap diutamakan.</string>
+    <string name="iptv_user_agent_default">Default aplikasi</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Generik (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Kustom</string>
+    <string name="iptv_user_agent_custom_hint">Hanya karakter yang dapat dicetak, hingga 200.</string>
+</resources>

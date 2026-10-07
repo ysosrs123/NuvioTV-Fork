@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">Lokasi jaringan</string>
+    <string name="iptv_network_subtitle">Rekam ke NAS atau komputer melalui SMB, WebDAV, atau FTP. Rekaman disimpan dulu di perangkat ini lalu disalin.</string>
+    <string name="iptv_network_protocol">Jenis koneksi</string>
+    <string name="iptv_network_webdav_address">Alamat</string>
+    <string name="iptv_network_webdav_address_hint">Alamat WebDAV, misalnya https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">Folder di bawah alamat, misalnya TV/Live. Dibuat jika belum ada.</string>
+    <string name="iptv_network_ftp_server_hint">Nama atau alamat IP, misalnya nas.local. Tambahkan :port hanya jika server tidak menggunakan port 21.</string>
+    <string name="iptv_network_ftp_folder_hint">Folder di dalam folder login, misalnya TV/Live. Dibuat jika belum ada.</string>
+    <string name="iptv_network_ftp_secure">Aman (TLS eksplisit)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Mengenkripsi login dan rekaman. Server harus mendukung FTPS.</string>
+    <string name="iptv_network_username_hint">Kosongkan untuk terhubung tanpa login</string>
+    <string name="iptv_network_plain_warning">Koneksi ini tidak dienkripsi. Orang lain di jaringan dapat melihat sandi.</string>
+    <string name="iptv_network_invalid">Periksa alamat dan nama folder. Tidak boleh berisi &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Tidak ada apa pun di alamat ini. Periksa jalur setelah nama server.</string>
+    <string name="iptv_network_certificate_untrusted">Sertifikat server tidak dapat diverifikasi. Jika ini sertifikat milik NAS Anda sendiri, bandingkan sidik jarinya dengan yang ditampilkan di NAS sebelum memercayainya.</string>
+    <string name="iptv_network_certificate_fingerprint">Sidik jari SHA-256: %1$s</string>
+    <string name="iptv_network_trust">Percayai sertifikat ini</string>
+    <string name="iptv_network_no_tls">Server tidak menyediakan enkripsi. Matikan Aman, atau aktifkan FTPS di server.</string>
+    <string name="iptv_network_tls_reuse">Server mewajibkan penggunaan ulang sesi TLS pada koneksi data, yang tidak didukung. Matikan persyaratan itu di server.</string>
+</resources>
