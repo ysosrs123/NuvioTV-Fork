@@ -40,6 +40,41 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
   a filtered error summary on failure. Without GitHub tools, run status is readable
   from the public REST API, but logs and re-runs need the user.
 
+## User feedback after the first device pass — 7 October 2026
+
+Seventeen items from the AM9 run of 5276c31. Status (all host-tested where testable,
+CI-built; none device-tested yet):
+1. Guide form Save/Cancel unreachable — buttons now inside the scrolling form.
+2. Provider guide "unexpected format" — channel entries without an ID are skipped
+   (6ef6eb2).
+3. Connections automatic — Xtream `max_connections` applied unless a number is
+   chosen (`IptvSourceConnections`, per-source keys in `IptvLivePreferences`).
+   Sources set manually before this change count as Automatic once.
+4. Preview plays the channel in focus after 800 ms (setting "Play in the preview").
+5. Slow start — the preview itself pre-warms; tune timings are now logged
+   (`tune kind=… prepare ms=… play ms=… total ms=…`). No further speed change
+   until those numbers come back from the device. Prefetching neighbours is not
+   done: it would take a second provider connection.
+6. Phone setup — served by the TV app itself (NanoHTTPD on the box, same Wi-Fi; no
+   PC or server needed). Page redesigned; Live TV settings can be changed from it
+   (confirmed on the TV).
+7. Transparent layers — Live TV appearance of its own: solid panels and plain
+   background by default, colour theme, pure black, optional artwork (`IptvTheme`).
+8. Multiview fills the screen with 2 dp gaps; title shows for five seconds.
+9. Hold OK on a category opens Open/Hide/Show options.
+10. Recordings and Live TV settings moved to the top of the menu.
+11. Back from the menu leaves Live TV; "Exit Live TV" at the top of the menu.
+12. Quiet channel — per-channel volume boost (+3 to +12 dB, `LoudnessEnhancer`).
+    The likely cause is the broadcast's lower loudness, not decoding.
+13. HDR in the preview — the corner picture uses a TextureView so the TV should stay
+    in SDR until full screen. Unverified: some Android 14 builds may still switch.
+14. Sport empty — caused by item 2.
+15. Preview focus — Up from the guide focuses the picture; OK opens full screen.
+16. Arrow keys in full screen dropped to the guide — a failed zap now keeps full
+    screen and shows the reason (likely cause: the new channel failed to open).
+17. Recording to local storage works. The 70 s recording in the log was a stop
+    (user or scheduled end), not a lost connection; logs now say which.
+
 ## Device findings — 7 October 2026 (AM9, CI build 5276c31)
 
 - Xtream refresh is fast now: 13,745 channels downloaded in 5.2 s and saved in 5.2 s

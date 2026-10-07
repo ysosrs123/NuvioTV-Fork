@@ -9,7 +9,16 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 
 - Live TV has its own entry in the main navigation (IPTV build only); IPTV has no
   entry in the main Settings.
-- Live TV settings, at the bottom of the Live TV menu, brings together sources and
+- After the first device pass: the corner picture plays the channel in focus after a
+  short pause and opens full screen from Up then OK; HDR channels stay SDR in the
+  corner picture; the menu has Exit Live TV, Recordings and Live TV settings at the
+  top and Back leaves Live TV; category options on hold; multiview fills the screen;
+  per-channel volume boost; Live TV appearance (colour theme, pure black, solid
+  panels and plain background by default, optional artwork); automatic connection
+  limit for Xtream; a failed channel change stays in full screen and says why;
+  forms keep Save and Cancel reachable; the phone setup page is redesigned and can
+  change Live TV settings.
+- Live TV settings, at the top of the Live TV menu, brings together sources and
   guides, phone or computer setup and recordings, plus: default stream format for
   channels on Auto; pause and rewind with catch-up (on by default); the stats overlay
   on open; which view Live TV opens on (last category, all channels, favourites or
