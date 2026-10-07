@@ -1,0 +1,91 @@
+package com.nuvio.tv.data.iptv
+
+import com.nuvio.tv.core.iptv.LiveSessionAdmission
+import com.nuvio.tv.core.iptv.VodKind
+import com.nuvio.tv.core.iptv.VodRef
+import com.nuvio.tv.core.iptv.VodStreamRequest
+import com.nuvio.tv.core.iptv.VodStreamText
+import com.nuvio.tv.core.iptv.VodStreams
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
+data class IptvVodStreamItem(val source: IptvSource, val ref: VodRef, val text: VodStreamText) {
+    override fun toString(): String = "IptvVodStreamItem(ref=$ref)"
+}
+
+sealed interface IptvVodResolution {
+    data class Ready(val playback: IptvVodPlayback) : IptvVodResolution
+    data class Busy(val sourceLabel: String) : IptvVodResolution
+    data object Unavailable : IptvVodResolution
+}
+
+class IptvVodStreams(private val repository: IptvVodRepository, private val catalogue: IptvCatalogueStore, private val store: IptvVodStore) {
+    fun sources(profileId: Int, kind: VodKind): List<IptvSource> {
+        val states = store.states(profileId).associateBy { it.ref.sourceId }
+        return catalogue.sources(profileId).filter { source ->
+            val state = states[source.ref.sourceId] ?: return@filter false
+            IptvVodRepository.enabled(source.kind, state) && (if (kind == VodKind.MOVIE) state.movies else state.series) > 0
+        }
+    }
+
+    fun revision(profileId: Int): List<String> =
+        store.states(profileId).map { "${it.ref.sourceId}:${it.enabled}:${it.refreshedAtMillis}:${it.movies}:${it.series}" } +
+            catalogue.sources(profileId).map { "${it.ref.sourceId}=${it.label}" }
+
+    fun direct(profileId: Int, kind: VodKind, tmdbId: String?, imdbId: String?): List<IptvVodTitle> =
+        if (tmdbId == null && imdbId == null) emptyList() else repository.find(profileId, kind, tmdbId, imdbId, null, null)
+
+    fun byTitles(profileId: Int, kind: VodKind, titles: List<String>, year: Int?, tmdbId: String?): List<IptvVodTitle> =
+        titles.map { it.trim() }.filter { it.isNotEmpty() }.distinct()
+            .flatMap { repository.byTitle(profileId, kind, it, year, tmdbId) }.distinctBy { it.ref }
+
+    suspend fun items(source: IptvSource, request: VodStreamRequest, titles: List<IptvVodTitle>): List<IptvVodStreamItem> {
+        if (request.kind == VodKind.MOVIE) return titles.map { title ->
+            IptvVodStreamItem(source, title.ref, VodStreams.movie(title.name, title.year, extension(source, title.ref, title.extension)))
+        }
+        val season = request.season ?: return emptyList()
+        val number = request.episode ?: return emptyList()
+        var failure: Exception? = null
+        val items = titles.mapNotNull { series ->
+            try {
+                val episode = repository.episode(series.ref, season, number) ?: return@mapNotNull null
+                IptvVodStreamItem(source, episode.ref,
+                    VodStreams.episode(series.name, season, number, episode.title, extension(source, episode.ref, episode.extension)))
+            } catch (cancel: CancellationException) { throw cancel }
+            catch (error: Exception) {
+                if (failure == null) failure = error
+                null
+            }
+        }
+        failure?.let { if (items.isEmpty()) throw it else IptvLog.failure("vod streams episode", it) }
+        return items
+    }
+
+    private suspend fun extension(source: IptvSource, ref: VodRef, stored: String?): String? {
+        VodStreams.extension(stored)?.let { return it }
+        if (source.kind != IptvSourceKind.M3U) return null
+        return try { VodStreams.extensionOfUrl(repository.playback(ref).url) } catch (cancel: CancellationException) { throw cancel } catch (_: Exception) { null }
+    }
+}
+
+class IptvVodResolver(private val repository: IptvVodRepository, private val catalogue: IptvCatalogueStore, private val admission: LiveSessionAdmission) {
+    suspend fun resolve(ref: VodRef): IptvVodResolution = withContext(Dispatchers.IO) {
+        try {
+            val source = catalogue.sources(ref.profileId).firstOrNull { it.ref.sourceId == ref.sourceId } ?: return@withContext IptvVodResolution.Unavailable
+            val limit = catalogue.accounts(ref.profileId).firstOrNull { it.id == source.accountId }?.maxStreams ?: 1
+            val inUse = admission.snapshot().upstreamsByAccount[admissionAccount(ref.profileId, source.accountId)] ?: 0
+            if (VodStreams.connectionsBusy(inUse, limit)) {
+                IptvLog.info("vod play refused in_use=$inUse limit=$limit")
+                return@withContext IptvVodResolution.Busy(source.label)
+            }
+            val playback = repository.playback(ref)
+            IptvLog.info("vod play kind=${ref.kind.wire} source=${source.kind}")
+            IptvVodResolution.Ready(playback)
+        } catch (cancel: CancellationException) { throw cancel }
+        catch (error: Exception) {
+            IptvLog.failure("vod play", error)
+            IptvVodResolution.Unavailable
+        }
+    }
+}

@@ -11,6 +11,7 @@ import com.nuvio.tv.core.plugin.PluginManager
 import com.nuvio.tv.core.plugin.resolvePluginSeasonEpisode
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.tmdb.TmdbService
+import com.nuvio.tv.data.iptvvod.IptvVodStreamSources
 import com.nuvio.tv.data.local.DebridSettingsDataStore
 import com.nuvio.tv.data.mapper.toDomain
 import com.nuvio.tv.data.mediaserver.ServerException
@@ -85,7 +86,8 @@ class StreamRepositoryImpl @Inject constructor(
     private val debridStreamPresentation: DebridStreamPresentation,
     private val localDebridAvailabilityService: LocalDebridAvailabilityService,
     private val healthStore: AddonHealthStore,
-    private val serverStreams: ServerStreams
+    private val serverStreams: ServerStreams,
+    private val iptvVodStreams: IptvVodStreamSources
 ) : StreamRepository {
 
     // Detached scope for passive health writes so recording a stream
@@ -151,6 +153,7 @@ class StreamRepositoryImpl @Inject constructor(
     ): Flow<NetworkResult<List<AddonStreams>>> = flow {
         val sourceConfiguration = captureSourceConfiguration()
         val isNativeServerRequest = serverStreams.isNativeRequest(videoId)
+        val iptvSources = if (isNativeServerRequest) emptyList() else iptvVodStreams.sources(type, videoId, season, episode)
         val requestKey = StreamSearchRequestKey(
             profileId = sourceConfiguration.profileId,
             type = type.lowercase(),
@@ -166,7 +169,8 @@ class StreamRepositoryImpl @Inject constructor(
                 debridPresentationConfiguration = sourceConfiguration.debridSettings
                     .withoutRawCredentials()
                     .toString(),
-                serverRevision = serverStreams.revision
+                serverRevision = serverStreams.revision,
+                iptvRevision = iptvVodStreams.revision()
             )
         )
 
@@ -185,7 +189,7 @@ class StreamRepositoryImpl @Inject constructor(
                     hasCompatiblePlugins = !isNativeServerRequest &&
                         sourceConfiguration.pluginsEnabled &&
                         sourceConfiguration.enabledScrapers.any { scraper -> scraper.supportsType(type) },
-                    serverSources = serverStreams.sources(type, videoId, season, episode, forceRefresh)
+                    serverSources = serverStreams.sources(type, videoId, season, episode, forceRefresh) + iptvSources
                 )
             }
         )
@@ -196,12 +200,13 @@ class StreamRepositoryImpl @Inject constructor(
     ): Flow<NetworkResult<List<AddonStreams>>> = flow {
         val config = captureSourceConfiguration()
         val isNativeServerRequest = serverStreams.isNativeRequest(videoId)
+        val iptvSources = if (isNativeServerRequest) emptyList() else iptvVodStreams.sources(type, videoId, season, episode)
         emitAll(fetchStreamsFromAllSources(
             type, videoId, season, episode,
             if (isNativeServerRequest) emptyList() else config.addons,
             config.debridSettings,
             !isNativeServerRequest && config.pluginsEnabled && config.enabledScrapers.any { it.supportsType(type) },
-            serverStreams.sources(type, videoId, season, episode)
+            serverStreams.sources(type, videoId, season, episode) + iptvSources
         ))
     }
 
@@ -523,7 +528,8 @@ class StreamRepositoryImpl @Inject constructor(
         groupPluginsByRepository: Boolean,
         pluginRepositories: List<PluginRepository>,
         debridPresentationConfiguration: String,
-        serverRevision: Int
+        serverRevision: Int,
+        iptvRevision: String
     ): String = buildString {
         append("addons:")
         addons.forEach { addon ->
@@ -541,6 +547,7 @@ class StreamRepositoryImpl @Inject constructor(
         }
         append("|debrid:").append(debridPresentationConfiguration)
         append("|servers:").append(serverRevision)
+        append("|iptv:").append(iptvRevision)
     }.sha256()
 
     private fun DebridSettings.withoutRawCredentials(): DebridSettings = copy(

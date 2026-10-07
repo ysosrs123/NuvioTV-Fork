@@ -617,6 +617,10 @@ class PlaybackSettingsViewModel @Inject constructor(
         playerSettingsDataStore.setSpeculativeStreamSearchEnabled(enabled)
     }
 
+    suspend fun setIptvVodStreamsEnabled(enabled: Boolean) {
+        playerSettingsDataStore.setIptvVodStreamsEnabled(enabled)
+    }
+
     suspend fun setStreamAutoPlayEagerReadyEnabled(enabled: Boolean) {
         playerSettingsDataStore.setStreamAutoPlayEagerReadyEnabled(enabled)
     }

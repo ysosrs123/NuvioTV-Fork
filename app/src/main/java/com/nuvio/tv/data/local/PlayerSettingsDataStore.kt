@@ -327,6 +327,7 @@ data class PlayerSettings(
      */
     val streamAutoPlayEagerReadyEnabled: Boolean = true,
     val speculativeStreamSearchEnabled: Boolean = false,
+    val iptvVodStreamsEnabled: Boolean = false,
     val preloadNextEpisodeSources: Boolean = false,
     val stillWatchingEnabled: Boolean = false,
     val stillWatchingEpisodeThreshold: Int = DEFAULT_STILL_WATCHING_EPISODE_THRESHOLD,
@@ -690,6 +691,7 @@ class PlayerSettingsDataStore @Inject constructor(
     private val streamAutoPlayReuseBingeGroupKey = booleanPreferencesKey("stream_auto_play_reuse_binge_group")
     private val streamAutoPlayTimeoutSecondsKey = intPreferencesKey("stream_auto_play_timeout_seconds")
     private val speculativeStreamSearchEnabledKey = booleanPreferencesKey("speculative_stream_search_enabled")
+    private val iptvVodStreamsEnabledKey = booleanPreferencesKey("iptv_vod_streams_enabled")
     private val streamAutoPlayEagerReadyEnabledKey = booleanPreferencesKey("stream_auto_play_eager_ready_enabled")
     private val preloadNextEpisodeSourcesKey = booleanPreferencesKey("preload_next_episode_sources")
     private val stillWatchingEnabledKey = booleanPreferencesKey("still_watching_enabled")
@@ -1188,6 +1190,7 @@ class PlayerSettingsDataStore @Inject constructor(
                     prefs[streamAutoPlayTimeoutSecondsKey]
                 ),
                 speculativeStreamSearchEnabled = prefs[speculativeStreamSearchEnabledKey] ?: false,
+                iptvVodStreamsEnabled = prefs[iptvVodStreamsEnabledKey] ?: false,
                 streamAutoPlayEagerReadyEnabled = prefs[streamAutoPlayEagerReadyEnabledKey] ?: true,
                 preloadNextEpisodeSources = prefs[preloadNextEpisodeSourcesKey] ?: false,
                 stillWatchingEnabled = prefs[stillWatchingEnabledKey] ?: false,
@@ -1776,6 +1779,10 @@ class PlayerSettingsDataStore @Inject constructor(
         val pid = profileManager.activeProfileId.value
         if (!enabled) com.nuvio.tv.core.stream.StreamPrefetchCache.updatePolicy(pid, false)
         store(pid).edit { it[speculativeStreamSearchEnabledKey] = enabled }
+    }
+
+    suspend fun setIptvVodStreamsEnabled(enabled: Boolean) {
+        store().edit { it[iptvVodStreamsEnabledKey] = enabled }
     }
 
     suspend fun setStreamAutoPlayEagerReadyEnabled(enabled: Boolean) {

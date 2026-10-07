@@ -1,6 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
 import com.nuvio.tv.core.iptv.PlaybackPurpose
+import com.nuvio.tv.core.iptv.VodRef
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -209,9 +210,10 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         val isHls = resolvedMimeType == MimeTypes.APPLICATION_M3U8
         val isDash = resolvedMimeType == MimeTypes.APPLICATION_MPD
         // A loopback engine can hold a read while it fetches pieces, so it keeps the long-timeout plain path.
-        val mp4SessionMode = purpose.allowsVodNetworkOptimizations && !useParallelConnections && !isHls && !isDash &&
+        val rangeSessions = purpose.allowsVodNetworkOptimizations && !VodRef.isVod(url)
+        val mp4SessionMode = rangeSessions && !useParallelConnections && !isHls && !isDash &&
             resolvedMimeType == MimeTypes.VIDEO_MP4 && !isLoopbackUrl(url)
-        val useChunkSessionSource = purpose.allowsVodNetworkOptimizations && (useParallelConnections || mp4SessionMode) && !isHls && !isDash
+        val useChunkSessionSource = rangeSessions && (useParallelConnections || mp4SessionMode) && !isHls && !isDash
         return ChunkSessionShape(
             resolvedMimeType = resolvedMimeType,
             isHls = isHls,
@@ -286,6 +288,7 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
     ): MediaSource {
         val sanitizedHeaders = sanitizeHeaders(headers)
         val httpDataSourceFactory = PlayerPlaybackNetworking.createDataSourceFactory(context, sanitizedHeaders)
+            .let { if (VodRef.isVod(url)) IptvVodDataSourceFactory(context, it) else it }
 
         val chunkSessionShape = resolveChunkSessionShape(
             url = url,

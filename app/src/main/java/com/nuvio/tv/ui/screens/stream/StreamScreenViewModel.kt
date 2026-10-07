@@ -110,6 +110,7 @@ class StreamScreenViewModel @Inject constructor(
     private val torrentService: TorrentService,
     private val serverStreams: ServerStreams,
     private val serverPlayback: ServerPlayback,
+    private val iptvVodStreams: com.nuvio.tv.data.iptvvod.IptvVodStreamSources,
     partyRuntime: com.nuvio.tv.core.party.PartyRuntime,
     profileManager: com.nuvio.tv.core.profile.ProfileManager,
     savedStateHandle: SavedStateHandle
@@ -464,7 +465,7 @@ class StreamScreenViewModel @Inject constructor(
                 val cached = streamLinkCacheDataStore.getValid(
                     contentKey = streamCacheKey,
                     maxAgeMs = playerSettings.streamReuseLastLinkCacheHours * 60L * 60L * 1000L
-                )
+                )?.takeUnless { com.nuvio.tv.core.iptv.VodRef.isVod(it.url) && playerSettings.playerPreference != PlayerPreference.INTERNAL }
                 if (cached != null) {
                     autoPlayHandledForSession = true
                     resolvedAutoPlayTarget = true
@@ -519,6 +520,7 @@ class StreamScreenViewModel @Inject constructor(
             val isNativeServerRequest = serverStreams.isNativeRequest(videoId)
             val serverSourceNames = serverStreams.sources(contentType, videoId, season, episode).map { it.name }
             val preferredServerNames = serverStreams.preferredSourceNames(contentType, videoId)
+            val iptvSourceNames = if (isNativeServerRequest) emptyList() else iptvVodStreams.sourceNames(contentType, videoId, season, episode)
             val addonsSplitT0 = SystemClock.elapsedRealtime()
             val installedAddons = if (isNativeServerRequest) {
                 emptyList()
@@ -761,7 +763,7 @@ class StreamScreenViewModel @Inject constructor(
             updateSourceChipsForFetchStart(
                 installedAddons = installedAddons,
                 directDebridSourceNames = directDebridSourceNames,
-                serverSourceNames = serverSourceNames,
+                serverSourceNames = serverSourceNames + iptvSourceNames,
                 includePlugins = !isNativeServerRequest,
                 alreadySucceededNames = alreadySucceededNames
             )
@@ -1708,7 +1710,8 @@ class StreamScreenViewModel @Inject constructor(
             fileIdx = stream.getEffectiveFileIdx(),
             sources = stream.sources,
             contentLanguage = contentLanguage,
-            launchStartedAtMs = TtffTrace.t0ElapsedMsOrNull()
+            launchStartedAtMs = TtffTrace.t0ElapsedMsOrNull(),
+            isServerStream = com.nuvio.tv.core.iptv.VodRef.isVod(stream.getStreamUrl())
         )
         StreamSidecarSubtitles.set(playbackUrlFor(playbackInfo), stream.subtitles)
 

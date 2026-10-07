@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV movies and series</string>
+    <string name="iptv_vod_streams_setting_sub">Shows matching titles from your Live TV sources as a stream source</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">All connections for %1$s are in use. Stop Live TV or a recording on this source, then try again.</string>
+    <string name="iptv_vod_provider_refused">The provider refused this title. All its connections may be in use, or the account may have expired.</string>
+    <string name="iptv_vod_unavailable">This IPTV title is no longer available. Refresh the source in Live TV and try again.</string>
+</resources>

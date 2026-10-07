@@ -191,6 +191,14 @@ internal fun PlaybackStreamSelectionSection(
         checked = settings.speculativeStreamSearchEnabled,
         onToggle = { onUpdate { setSpeculativeStreamSearchEnabled(!settings.speculativeStreamSearchEnabled) } }
     )
+    if (com.nuvio.tv.BuildConfig.FEATURE_IPTV_ENABLED) {
+        SettingsToggleRow(
+            title = stringResource(R.string.iptv_vod_streams_setting),
+            subtitle = stringResource(R.string.iptv_vod_streams_setting_sub),
+            checked = settings.iptvVodStreamsEnabled,
+            onToggle = { onUpdate { setIptvVodStreamsEnabled(!settings.iptvVodStreamsEnabled) } }
+        )
+    }
 }
 
 @Composable

@@ -27,7 +27,8 @@ internal fun PlayerRuntimeController.attachMpvView(view: NuvioMpvSurfaceView?) {
         view.applyHi10pGnextSoftwareFallback(shouldUseMpvHi10pGnextSoftwareFallback())
         view.applyHardwareDecodeMode(mpvHardwareDecodeModeSetting)
         registerMpvEventRelay(view)
-        view.setMedia(currentStreamUrl, currentHeaders)
+        val (mpvUrl, mpvHeaders) = IptvVodDataSourceFactory.resolveForMpv(context, currentStreamUrl, currentHeaders)
+        view.setMedia(mpvUrl, mpvHeaders)
         view.setPlaybackSpeed(_uiState.value.playbackSpeed)
         view.applyAudioAmplificationDb(_uiState.value.audioAmplificationDb)
         view.applyAudioLanguagePreferences(mpvPreferredAudioLanguages)
@@ -137,7 +138,8 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
             .takeIf { it > 0L }
             ?: (_uiState.value.pendingSeekPosition?.coerceAtLeast(0L) ?: 0L)
         playbackAnalyticsDiagnostics.setStartupStartPosition(initialResumePosition)
-        view.setMedia(url, headers, initialResumePosition)
+        val (mpvUrl, mpvHeaders) = IptvVodDataSourceFactory.resolveForMpv(context, url, headers)
+        view.setMedia(mpvUrl, mpvHeaders, initialResumePosition)
         val playerInitLine =
             "PLAYER_INIT: engine=MPV host=${url.safeMpvTraceHost()} " +
                 "playbackSpeed=${_uiState.value.playbackSpeed} resumePositionMs=$initialResumePosition"
