@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">Opgeslagen. Zenders worden nu geladen.</string>
     <string name="iptv_remote_guide_saved">Opgeslagen. De gids wordt nu geladen.</string>
     <string name="iptv_remote_rejected">Geweigerd. Er is niets opgeslagen.</string>
+    <string name="iptv_remote_confirm_settings_title">Live-tv-instellingen wijzigen vanaf je telefoon?</string>
+    <string name="iptv_remote_setting_start">Live-tv opent op</string>
+    <string name="iptv_remote_setting_layout">Multiview-indeling</string>
+    <string name="iptv_remote_setting_quality">Multiview-beeldkwaliteit</string>
+    <string name="iptv_remote_on">Aan</string>
+    <string name="iptv_remote_off">Uit</string>
+    <string name="iptv_remote_settings_saved">Instellingen opgeslagen.</string>
 </resources>

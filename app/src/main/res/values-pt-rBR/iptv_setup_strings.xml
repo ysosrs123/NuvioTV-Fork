@@ -47,4 +47,11 @@
     <string name="iptv_remote_saved">Salvo. Carregando canais agora.</string>
     <string name="iptv_remote_guide_saved">Salvo. Carregando o guia agora.</string>
     <string name="iptv_remote_rejected">Rejeitado. Nada foi salvo.</string>
+    <string name="iptv_remote_confirm_settings_title">Alterar as configurações da TV ao vivo pelo celular?</string>
+    <string name="iptv_remote_setting_start">A TV ao vivo abre em</string>
+    <string name="iptv_remote_setting_layout">Layout da Multivisão</string>
+    <string name="iptv_remote_setting_quality">Qualidade de imagem da Multivisão</string>
+    <string name="iptv_remote_on">Ativado</string>
+    <string name="iptv_remote_off">Desativado</string>
+    <string name="iptv_remote_settings_saved">Configurações salvas.</string>
 </resources>

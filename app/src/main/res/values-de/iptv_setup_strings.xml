@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">Gespeichert. Sender werden geladen.</string>
     <string name="iptv_remote_guide_saved">Gespeichert. Programmführer wird geladen.</string>
     <string name="iptv_remote_rejected">Abgelehnt. Nichts wurde gespeichert.</string>
+    <string name="iptv_remote_confirm_settings_title">Live-TV-Einstellungen vom Smartphone ändern?</string>
+    <string name="iptv_remote_setting_start">Live-TV startet mit</string>
+    <string name="iptv_remote_setting_layout">Multiview-Layout</string>
+    <string name="iptv_remote_setting_quality">Multiview-Bildqualität</string>
+    <string name="iptv_remote_on">An</string>
+    <string name="iptv_remote_off">Aus</string>
+    <string name="iptv_remote_settings_saved">Einstellungen gespeichert.</string>
 </resources>

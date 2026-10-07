@@ -46,4 +46,11 @@
     <string name="iptv_remote_saved">Gemt. Indlæser kanaler nu.</string>
     <string name="iptv_remote_guide_saved">Gemt. Indlæser guiden nu.</string>
     <string name="iptv_remote_rejected">Afvist. Intet blev gemt.</string>
+    <string name="iptv_remote_confirm_settings_title">Vil du ændre Live-TV-indstillinger fra din telefon?</string>
+    <string name="iptv_remote_setting_start">Live-TV åbner på</string>
+    <string name="iptv_remote_setting_layout">Multivisningslayout</string>
+    <string name="iptv_remote_setting_quality">Billedkvalitet i multivisning</string>
+    <string name="iptv_remote_on">Til</string>
+    <string name="iptv_remote_off">Fra</string>
+    <string name="iptv_remote_settings_saved">Indstillinger gemt.</string>
 </resources>

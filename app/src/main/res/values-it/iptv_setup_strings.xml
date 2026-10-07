@@ -47,4 +47,11 @@
     <string name="iptv_remote_saved">Salvato. Caricamento dei canali in corso.</string>
     <string name="iptv_remote_guide_saved">Salvato. Caricamento della guida in corso.</string>
     <string name="iptv_remote_rejected">Rifiutato. Non è stato salvato nulla.</string>
+    <string name="iptv_remote_confirm_settings_title">Modificare le impostazioni della TV in diretta dal telefono?</string>
+    <string name="iptv_remote_setting_start">La TV in diretta si apre su</string>
+    <string name="iptv_remote_setting_layout">Layout Multiview</string>
+    <string name="iptv_remote_setting_quality">Qualità immagine Multiview</string>
+    <string name="iptv_remote_on">Attivo</string>
+    <string name="iptv_remote_off">Disattivo</string>
+    <string name="iptv_remote_settings_saved">Impostazioni salvate.</string>
 </resources>

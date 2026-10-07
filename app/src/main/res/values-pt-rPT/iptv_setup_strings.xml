@@ -47,4 +47,11 @@
     <string name="iptv_remote_saved">Guardado. A carregar canais agora.</string>
     <string name="iptv_remote_guide_saved">Guardado. A carregar o guia agora.</string>
     <string name="iptv_remote_rejected">Rejeitado. Nada foi guardado.</string>
+    <string name="iptv_remote_confirm_settings_title">Alterar as definições da TV em direto a partir do telemóvel?</string>
+    <string name="iptv_remote_setting_start">A TV em direto abre em</string>
+    <string name="iptv_remote_setting_layout">Disposição da Multivista</string>
+    <string name="iptv_remote_setting_quality">Qualidade de imagem da Multivista</string>
+    <string name="iptv_remote_on">Ligado</string>
+    <string name="iptv_remote_off">Desligado</string>
+    <string name="iptv_remote_settings_saved">Definições guardadas.</string>
 </resources>

@@ -47,4 +47,11 @@
     <string name="iptv_remote_saved">Enregistré. Chargement des chaînes en cours.</string>
     <string name="iptv_remote_guide_saved">Enregistré. Chargement du guide en cours.</string>
     <string name="iptv_remote_rejected">Refusé. Rien n’a été enregistré.</string>
+    <string name="iptv_remote_confirm_settings_title">Modifier les réglages de la TV en direct depuis votre téléphone ?</string>
+    <string name="iptv_remote_setting_start">La TV en direct s’ouvre sur</string>
+    <string name="iptv_remote_setting_layout">Disposition de la multivue</string>
+    <string name="iptv_remote_setting_quality">Qualité d’image de la multivue</string>
+    <string name="iptv_remote_on">Activé</string>
+    <string name="iptv_remote_off">Désactivé</string>
+    <string name="iptv_remote_settings_saved">Réglages enregistrés.</string>
 </resources>
