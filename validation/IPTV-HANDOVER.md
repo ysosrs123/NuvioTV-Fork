@@ -155,7 +155,7 @@ reporting, resets 10 October 2026 00:00 UTC):
 - Independent review of `d263b18..HEAD` in three areas (storage and setup server;
   playback, streaming and navigation; VOD, sport and Home). Brief kept outside the repo:
   read-only reviewers, concrete failure paths only.
-- Device test checklist covering everything since `b68985a`.
+- Device test checklist: [IPTV-DEVICE-TEST-CHECKLIST.md](IPTV-DEVICE-TEST-CHECKLIST.md) (build `f29cbe2`).
 - Decisions recorded: tracking for matched titles uses Nuvio's normal history and
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
