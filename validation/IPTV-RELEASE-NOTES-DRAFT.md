@@ -358,7 +358,8 @@ Phone setup (security review)
   harness and the device tests compile; GitHub Actions debug build green at `e4fd054`
   (run 37549887460: Sport, pause and rewind, removal fixes, guide folder). A fourth
   independent review covered this work; its 10 findings are fixed; debug build green
-  at `f465328` (run 37552365804). The minified release build with IPTV enabled (R8)
+  at `f465328` (run 37552365804); with Live TV settings and all translations at
+  `5276c31` (run 37555640125). The minified release build with IPTV enabled (R8)
   built cleanly at `d8d4a03` (run 37550880901) without new keep rules. New device tests (header-guide removal, Sport
   query, guide 4→5 and catalogue 2→8 upgrades) run only on a device.
 - Before that: 340 core and 151 data-layer JVM tests pass on a host harness; the

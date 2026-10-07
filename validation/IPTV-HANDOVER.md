@@ -2,8 +2,9 @@
 
 Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
 Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built
-(latest green debug build: `f465328`, run 37552365804; minified release build with IPTV
-green at `d8d4a03`, run 37550880901), not device-tested. Start with "Next session
+(latest green debug build: `5276c31`, run 37555640125, includes Live TV settings and
+all translations; minified release build with IPTV green at `d8d4a03`, run
+37550880901), not device-tested. Start with "Next session
 — work list" below; older sections further down are history and are kept for context.
 Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
 [code review](IPTV-CODE-REVIEW-20261006.md), [reference app notes](IPTV-UX-REFERENCE.md),
