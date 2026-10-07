@@ -1,0 +1,41 @@
+<resources>
+    <string name="iptv_sport_fixtures">Zápasy</string>
+    <string name="iptv_sport_live_now">Právě živě</string>
+    <string name="iptv_sport_later_today">Později dnes</string>
+    <string name="iptv_sport_tomorrow">Zítra</string>
+    <string name="iptv_sport_live">ŽIVĚ</string>
+    <string name="iptv_sport_loading">Načítání zápasů…</string>
+    <string name="iptv_sport_failed">Zápasy se nepodařilo načíst. Zobrazují se jen výsledky z programu.</string>
+    <string name="iptv_sport_key_missing">Přidejte klíč TheSportsDB v Nastavení živé TV.</string>
+    <string name="iptv_sport_no_leagues">Vyberte ligy v Nastavení živé TV.</string>
+    <string name="iptv_sport_none">Ve vašich ligách nejsou v příštích třech dnech žádné zápasy.</string>
+    <string name="iptv_sport_no_channel">Nenalezen žádný kanál</string>
+    <string name="iptv_sport_no_channel_description">Žádný z vašich kanálů nemá tento zápas v programu ani není uvedeným vysílatelem.</string>
+    <string name="iptv_sport_choose_channel">Vyberte kanál</string>
+    <string name="iptv_sport_broadcaster">Uvedený vysílatel: %1$s</string>
+    <string name="iptv_sport_close">Zavřít</string>
+    <string name="iptv_sport_data">Sportovní data</string>
+    <string name="iptv_sport_data_subtitle">Zápasy se načítají ze zvolené služby. Feed ESPN je neoficiální a může přestat fungovat.</string>
+    <string name="iptv_sport_data_off">Vypnuto</string>
+    <string name="iptv_sport_data_off_description">Sport používá jen váš program. Neodesílají se žádné požadavky.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Neoficiální feed, klíč není potřeba. Může kdykoli přestat fungovat.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Vyžaduje vlastní klíč API. Bezplatný testovací klíč 123 funguje s omezeními.</string>
+    <string name="iptv_sport_leagues">Ligy</string>
+    <string name="iptv_sport_leagues_subtitle">Zápasy se zobrazují pro tyto ligy</string>
+    <string name="iptv_sport_leagues_none">Žádné</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d liga</item>
+        <item quantity="few">%d ligy</item>
+        <item quantity="many">%d ligy</item>
+        <item quantity="other">%d lig</item>
+    </plurals>
+    <string name="iptv_sport_key">Klíč TheSportsDB</string>
+    <string name="iptv_sport_key_subtitle">Uložen šifrovaně v tomto zařízení. Bezplatný testovací klíč 123 funguje s omezeními.</string>
+    <string name="iptv_sport_key_set">Uloženo</string>
+    <string name="iptv_sport_key_not_set">Nenastaveno</string>
+    <string name="iptv_sport_key_hint">Zadejte 123 pro bezplatný testovací klíč</string>
+    <string name="iptv_sport_key_invalid">Použijte jen písmena a číslice.</string>
+    <string name="iptv_sport_key_remove">Odebrat klíč</string>
+</resources>

@@ -1,0 +1,29 @@
+<resources>
+    <string name="iptv_stream_title">Стрийминг</string>
+    <string name="iptv_stream_description">Как каналите на живо буферират. Промените важат за следващия канал, който отворите.</string>
+    <string name="iptv_stream_start">Пускане след</string>
+    <string name="iptv_stream_start_subtitle">Колко видео се зарежда, преди каналът да започне. По-краткото чакане започва по-рано, но може да насича при слаба връзка.</string>
+    <string name="iptv_stream_start_fast">Бързо (около 1 с)</string>
+    <string name="iptv_stream_start_normal">Нормално (около 2,5 с)</string>
+    <string name="iptv_stream_start_safe">Сигурно (около 5 с)</string>
+    <string name="iptv_stream_cushion">Изграждане на предпазен буфер при гледане</string>
+    <string name="iptv_stream_cushion_subtitle">Пуска с 3% по-бавно, с нормална височина на звука, докато буферът се напълни, за да не прекъсват кратките смущения в мрежата картината. След това ТВ на живо изостава с толкова.</string>
+    <string name="iptv_stream_cushion_off">Изключено</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d секунда</item>
+        <item quantity="other">%d секунди</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS каналите започват по-назад от живото, вместо да забавят.</string>
+    <string name="iptv_stream_cushion_memory">Ограничено до около %1$d MB памет на това устройство.</string>
+    <string name="iptv_stream_behind_live">Изостава от живото с %1$d с</string>
+    <string name="iptv_stream_go_live_hint">Натиснете превъртане напред, за да минете на живо</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Изпраща се при пускане на канали, catch-up и филми от този източник. Собствените настройки на плейлиста на канала остават с предимство.</string>
+    <string name="iptv_user_agent_default">По подразбиране в приложението</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Общ (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Персонализиран</string>
+    <string name="iptv_user_agent_custom_hint">Само печатни знаци, до 200.</string>
+</resources>

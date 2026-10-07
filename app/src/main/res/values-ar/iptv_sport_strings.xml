@@ -1,0 +1,43 @@
+<resources>
+    <string name="iptv_sport_fixtures">المباريات</string>
+    <string name="iptv_sport_live_now">مباشر الآن</string>
+    <string name="iptv_sport_later_today">لاحقاً اليوم</string>
+    <string name="iptv_sport_tomorrow">غداً</string>
+    <string name="iptv_sport_live">مباشر</string>
+    <string name="iptv_sport_loading">جارٍ تحميل المباريات…</string>
+    <string name="iptv_sport_failed">تعذّر تحميل المباريات. تُعرض نتائج الدليل فقط.</string>
+    <string name="iptv_sport_key_missing">أضف مفتاح TheSportsDB في إعدادات البث المباشر.</string>
+    <string name="iptv_sport_no_leagues">اختر الدوريات في إعدادات البث المباشر.</string>
+    <string name="iptv_sport_none">لا توجد مباريات لدورياتك خلال الأيام الثلاثة القادمة.</string>
+    <string name="iptv_sport_no_channel">لم يُعثر على قناة</string>
+    <string name="iptv_sport_no_channel_description">لا تعرض أي من قنواتك هذه المباراة في دليلها، ولا تمثّل أي منها جهة بث مدرجة.</string>
+    <string name="iptv_sport_choose_channel">اختر قناة</string>
+    <string name="iptv_sport_broadcaster">جهة البث المدرجة: %1$s</string>
+    <string name="iptv_sport_close">إغلاق</string>
+    <string name="iptv_sport_data">بيانات رياضية</string>
+    <string name="iptv_sport_data_subtitle">تُجلب المباريات من الخدمة المختارة. خلاصة ESPN غير رسمية وقد تتوقف عن العمل.</string>
+    <string name="iptv_sport_data_off">إيقاف</string>
+    <string name="iptv_sport_data_off_description">تستخدم الرياضة دليلك فقط. لا تُرسل أي طلبات.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">خلاصة غير رسمية، لا تحتاج إلى مفتاح. قد تتوقف عن العمل في أي وقت.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">تحتاج إلى مفتاح API خاص بك. يعمل مفتاح الاختبار المجاني 123 بحدود.</string>
+    <string name="iptv_sport_leagues">الدوريات</string>
+    <string name="iptv_sport_leagues_subtitle">تُعرض مباريات هذه الدوريات</string>
+    <string name="iptv_sport_leagues_none">لا شيء</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="zero">%d دوري</item>
+        <item quantity="one">دوري واحد</item>
+        <item quantity="two">دوريان</item>
+        <item quantity="few">%d دوريات</item>
+        <item quantity="many">%d دورياً</item>
+        <item quantity="other">%d دوري</item>
+    </plurals>
+    <string name="iptv_sport_key">مفتاح TheSportsDB</string>
+    <string name="iptv_sport_key_subtitle">يُخزَّن مشفّراً على هذا الجهاز. يعمل مفتاح الاختبار المجاني 123 بحدود.</string>
+    <string name="iptv_sport_key_set">محفوظ</string>
+    <string name="iptv_sport_key_not_set">غير مضبوط</string>
+    <string name="iptv_sport_key_hint">أدخل 123 لاستخدام مفتاح الاختبار المجاني</string>
+    <string name="iptv_sport_key_invalid">استخدم الحروف والأرقام فقط.</string>
+    <string name="iptv_sport_key_remove">إزالة المفتاح</string>
+</resources>

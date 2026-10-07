@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV филми и сериали</string>
+    <string name="iptv_vod_streams_setting_sub">Показва съвпадащи заглавия от източниците ви за ТВ на живо като източник на поток</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Всички връзки за %1$s се използват. Спрете ТВ на живо или запис от този източник и опитайте отново.</string>
+    <string name="iptv_vod_provider_refused">Доставчикът отказа това заглавие. Може всички негови връзки да се използват или акаунтът да е изтекъл.</string>
+    <string name="iptv_vod_unavailable">Това IPTV заглавие вече не е налично. Обновете източника в ТВ на живо и опитайте отново.</string>
+</resources>

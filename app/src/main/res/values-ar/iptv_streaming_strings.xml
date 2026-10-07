@@ -1,0 +1,33 @@
+<resources>
+    <string name="iptv_stream_title">البث</string>
+    <string name="iptv_stream_description">كيف تخزّن القنوات المباشرة مؤقتاً. تُطبَّق التغييرات على القناة التالية التي تفتحها.</string>
+    <string name="iptv_stream_start">بدء التشغيل بعد</string>
+    <string name="iptv_stream_start_subtitle">كمية الفيديو المحمّلة قبل بدء القناة. الانتظار الأقصر يبدأ أسرع لكنه قد يتقطع مع اتصال ضعيف.</string>
+    <string name="iptv_stream_start_fast">سريع (نحو 1 ث)</string>
+    <string name="iptv_stream_start_normal">عادي (نحو 2.5 ث)</string>
+    <string name="iptv_stream_start_safe">آمن (نحو 5 ث)</string>
+    <string name="iptv_stream_cushion">بناء مخزن مؤقت احتياطي أثناء المشاهدة</string>
+    <string name="iptv_stream_cushion_subtitle">يُشغّل أبطأ بنسبة 3% مع درجة صوت عادية حتى يمتلئ المخزن المؤقت، كي لا تقطع انقطاعات الشبكة القصيرة الصورة. بعدها يتأخر البث المباشر بالقدر نفسه.</string>
+    <string name="iptv_stream_cushion_off">إيقاف</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="zero">%d ثانية</item>
+        <item quantity="one">ثانية واحدة</item>
+        <item quantity="two">ثانيتان</item>
+        <item quantity="few">%d ثوانٍ</item>
+        <item quantity="many">%d ثانية</item>
+        <item quantity="other">%d ثانية</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">تبدأ قنوات HLS متأخرة أكثر عن البث المباشر بدلاً من الإبطاء.</string>
+    <string name="iptv_stream_cushion_memory">محدود بنحو %1$d MB من الذاكرة على هذا الجهاز.</string>
+    <string name="iptv_stream_behind_live">متأخر عن البث المباشر %1$d ث</string>
+    <string name="iptv_stream_go_live_hint">اضغط التقديم السريع للانتقال إلى البث المباشر</string>
+    <string name="iptv_user_agent">وكيل المستخدم</string>
+    <string name="iptv_user_agent_description">يُرسل عند تشغيل القنوات والمشاهدة المؤجلة والأفلام من هذا المصدر. تبقى الأولوية لإعدادات قائمة التشغيل الخاصة بالقناة.</string>
+    <string name="iptv_user_agent_default">افتراضي التطبيق</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">عام (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">مخصص</string>
+    <string name="iptv_user_agent_custom_hint">أحرف قابلة للطباعة فقط، حتى 200.</string>
+</resources>

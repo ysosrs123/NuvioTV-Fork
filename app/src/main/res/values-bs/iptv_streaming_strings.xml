@@ -1,0 +1,30 @@
+<resources>
+    <string name="iptv_stream_title">Streaming</string>
+    <string name="iptv_stream_description">Kako kanali uživo bufferuju. Promjene važe za sljedeći kanal koji otvorite.</string>
+    <string name="iptv_stream_start">Pokreni reprodukciju nakon</string>
+    <string name="iptv_stream_start_subtitle">Koliko videa se učita prije nego što kanal počne. Kraće čekanje počinje ranije, ali može zastajkivati na slaboj vezi.</string>
+    <string name="iptv_stream_start_fast">Brzo (oko 1 s)</string>
+    <string name="iptv_stream_start_normal">Normalno (oko 2,5 s)</string>
+    <string name="iptv_stream_start_safe">Sigurno (oko 5 s)</string>
+    <string name="iptv_stream_cushion">Pravi sigurnosni buffer tokom gledanja</string>
+    <string name="iptv_stream_cushion_subtitle">Pušta 3% sporije, uz normalnu visinu tona, dok se buffer ne napuni, kako kratki prekidi mreže ne bi prekidali sliku. TV uživo zatim kasni toliko.</string>
+    <string name="iptv_stream_cushion_off">Isključeno</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d sekunda</item>
+        <item quantity="few">%d sekunde</item>
+        <item quantity="other">%d sekundi</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS kanali počinju dalje iza uživo umjesto da usporavaju.</string>
+    <string name="iptv_stream_cushion_memory">Ograničeno na oko %1$d MB memorije na ovom uređaju.</string>
+    <string name="iptv_stream_behind_live">Kasni za uživo %1$d s</string>
+    <string name="iptv_stream_go_live_hint">Pritisnite premotavanje naprijed za prelazak na uživo</string>
+    <string name="iptv_user_agent">User agent</string>
+    <string name="iptv_user_agent_description">Šalje se pri puštanju kanala, catch-up sadržaja i filmova s ovog izvora. Postavke playliste samog kanala i dalje imaju prednost.</string>
+    <string name="iptv_user_agent_default">Zadano u aplikaciji</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">Generički (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">Prilagođeno</string>
+    <string name="iptv_user_agent_custom_hint">Samo znakovi koji se mogu ispisati, do 200.</string>
+</resources>

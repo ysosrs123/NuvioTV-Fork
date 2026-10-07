@@ -1,0 +1,29 @@
+<resources>
+    <string name="iptv_stream_title">স্ট্রিমিং</string>
+    <string name="iptv_stream_description">লাইভ চ্যানেল কীভাবে বাফার করে। পরিবর্তন পরের খোলা চ্যানেলে প্রযোজ্য হয়।</string>
+    <string name="iptv_stream_start">প্লেব্যাক শুরু হবে</string>
+    <string name="iptv_stream_start_subtitle">চ্যানেল শুরুর আগে কতটা ভিডিও লোড হয়। কম অপেক্ষায় তাড়াতাড়ি শুরু হয়, তবে দুর্বল সংযোগে আটকে যেতে পারে।</string>
+    <string name="iptv_stream_start_fast">দ্রুত (প্রায় ১ সেকেন্ড পরে)</string>
+    <string name="iptv_stream_start_normal">সাধারণ (প্রায় ২.৫ সেকেন্ড পরে)</string>
+    <string name="iptv_stream_start_safe">নিরাপদ (প্রায় ৫ সেকেন্ড পরে)</string>
+    <string name="iptv_stream_cushion">দেখার সময় একটি সুরক্ষা বাফার তৈরি করুন</string>
+    <string name="iptv_stream_cushion_subtitle">বাফার পূর্ণ না হওয়া পর্যন্ত স্বাভাবিক পিচে 3% ধীরে চালায়, যাতে নেটওয়ার্কের ছোট বিঘ্নে ছবি না থামে। এরপর লাইভ টিভি ততটা পিছিয়ে চলে।</string>
+    <string name="iptv_stream_cushion_off">বন্ধ</string>
+    <plurals name="iptv_stream_cushion_seconds">
+        <item quantity="one">%d সেকেন্ড</item>
+        <item quantity="other">%d সেকেন্ড</item>
+    </plurals>
+    <string name="iptv_stream_cushion_hls">HLS চ্যানেল ধীর হওয়ার বদলে লাইভ থেকে আরও পিছিয়ে শুরু হয়।</string>
+    <string name="iptv_stream_cushion_memory">এই ডিভাইসে প্রায় %1$d MB মেমরিতে সীমিত।</string>
+    <string name="iptv_stream_behind_live">লাইভ থেকে %1$d সেকেন্ড পিছিয়ে</string>
+    <string name="iptv_stream_go_live_hint">লাইভে যেতে ফাস্ট-ফরওয়ার্ড চাপুন</string>
+    <string name="iptv_user_agent">ইউজার এজেন্ট</string>
+    <string name="iptv_user_agent_description">এই সোর্স থেকে চ্যানেল, ক্যাচ-আপ ও মুভি চালানোর সময় পাঠানো হয়। চ্যানেলের নিজস্ব প্লেলিস্ট সেটিংস তবুও অগ্রাধিকার পায়।</string>
+    <string name="iptv_user_agent_default">অ্যাপ ডিফল্ট</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
+    <string name="iptv_user_agent_okhttp">জেনেরিক (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
+    <string name="iptv_user_agent_custom">কাস্টম</string>
+    <string name="iptv_user_agent_custom_hint">শুধু প্রিন্টযোগ্য অক্ষর, সর্বোচ্চ 200টি।</string>
+</resources>

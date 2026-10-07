@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">লোকাল টাইমশিফট (পরীক্ষামূলক)</string>
+    <string name="iptv_timeshift_subtitle">পরীক্ষামূলক। ফুল স্ক্রিনে দেখা চ্যানেলটি বাফার করে, যাতে আপনি পজ ও রিওয়াইন্ড করতে পারেন। দেখার সময় স্টোরেজ ব্যবহার করে এবং সাধারণ দেখার মতোই একটি খালি সংযোগ লাগে। শুধু MPEG-TS চ্যানেলে কাজ করে; HLS চ্যানেল, মাল্টিভিউ, প্রিভিউ এবং রেকর্ড হতে থাকা চ্যানেল সাধারণভাবে চলে। কিছু ব্যর্থ হলে সাধারণ লাইভ প্লেব্যাকে ফিরে যায়।</string>
+    <string name="iptv_timeshift_length">বাফারের দৈর্ঘ্য</string>
+    <string name="iptv_timeshift_length_subtitle">খালি জায়গা কম থাকলে ছোট করা হয়। চ্যানেল বদলালে বা দেখা বন্ধ করলে বাফার মুছে যায়।</string>
+    <string name="iptv_timeshift_length_15">১৫ মিনিট</string>
+    <string name="iptv_timeshift_length_30">৩০ মিনিট</string>
+    <string name="iptv_timeshift_length_60">৬০ মিনিট</string>
+    <string name="iptv_timeshift_length_auto">স্বয়ংক্রিয়</string>
+    <string name="iptv_timeshift_length_auto_description">যথেষ্ট খালি জায়গা থাকলে ৩০ মিনিট, না হলে কম</string>
+    <string name="iptv_timeshift_location">বাফারের অবস্থান</string>
+    <string name="iptv_timeshift_location_subtitle">দেখার সময় বাফার কোথায় লেখা হয়</string>
+    <string name="iptv_timeshift_fallback">লোকাল টাইমশিফট বন্ধ হয়েছে। লাইভ চলছে।</string>
+</resources>

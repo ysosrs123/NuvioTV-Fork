@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">নেটওয়ার্ক অবস্থান</string>
+    <string name="iptv_network_subtitle">SMB, WebDAV বা FTP দিয়ে NAS বা কম্পিউটারে রেকর্ড করুন। রেকর্ডিং আগে এই ডিভাইসে সেভ হয়, তারপর কপি করা হয়।</string>
+    <string name="iptv_network_protocol">সংযোগের ধরন</string>
+    <string name="iptv_network_webdav_address">ঠিকানা</string>
+    <string name="iptv_network_webdav_address_hint">WebDAV ঠিকানা, যেমন https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">ঠিকানার নিচের একটি ফোল্ডার, যেমন TV/Live। না থাকলে তৈরি করা হবে।</string>
+    <string name="iptv_network_ftp_server_hint">নাম বা IP ঠিকানা, যেমন nas.local। সার্ভার 21 ছাড়া অন্য পোর্ট ব্যবহার করলে তবেই :port যোগ করুন।</string>
+    <string name="iptv_network_ftp_folder_hint">লগইন ফোল্ডারের ভেতরের একটি ফোল্ডার, যেমন TV/Live। না থাকলে তৈরি করা হবে।</string>
+    <string name="iptv_network_ftp_secure">নিরাপদ (explicit TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">লগইন ও রেকর্ডিং এনক্রিপ্ট করে। সার্ভারকে FTPS সমর্থন করতে হবে।</string>
+    <string name="iptv_network_username_hint">সাইন ইন ছাড়া সংযোগ করতে খালি রাখুন</string>
+    <string name="iptv_network_plain_warning">এই সংযোগ এনক্রিপ্ট করা নয়। নেটওয়ার্কের অন্যরা পাসওয়ার্ড দেখতে পারে।</string>
+    <string name="iptv_network_invalid">ঠিকানা ও ফোল্ডারের নাম দেখুন। এতে &lt; &gt; : \" | ? * থাকতে পারবে না</string>
+    <string name="iptv_network_address_not_found">এই ঠিকানায় কিছু পাওয়া যায়নি। সার্ভারের নামের পরের পাথ দেখুন।</string>
+    <string name="iptv_network_certificate_untrusted">সার্ভারের সার্টিফিকেট যাচাই করা যায়নি। এটি আপনার NAS-এর নিজস্ব সার্টিফিকেট হলে, বিশ্বাস করার আগে NAS-এ দেখানো ফিঙ্গারপ্রিন্টের সঙ্গে মিলিয়ে নিন।</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 ফিঙ্গারপ্রিন্ট: %1$s</string>
+    <string name="iptv_network_trust">এই সার্টিফিকেট বিশ্বাস করুন</string>
+    <string name="iptv_network_no_tls">সার্ভার এনক্রিপশন দেয় না। নিরাপদ বন্ধ করুন, অথবা সার্ভারে FTPS চালু করুন।</string>
+    <string name="iptv_network_tls_reuse">সার্ভার ডেটা সংযোগে TLS সেশন পুনরায় ব্যবহারের দাবি করে, যা সমর্থিত নয়। সার্ভারে এই শর্তটি বন্ধ করুন।</string>
+</resources>

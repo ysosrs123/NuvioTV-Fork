@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_network_location">موقع على الشبكة</string>
+    <string name="iptv_network_subtitle">سجّل على NAS أو كمبيوتر عبر SMB أو WebDAV أو FTP. تُحفظ التسجيلات على هذا الجهاز أولاً ثم تُنسخ إليه.</string>
+    <string name="iptv_network_protocol">نوع الاتصال</string>
+    <string name="iptv_network_webdav_address">العنوان</string>
+    <string name="iptv_network_webdav_address_hint">عنوان WebDAV، مثل https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">مجلد تحت العنوان، مثل TV/Live. يُنشأ إذا لم يكن موجوداً.</string>
+    <string name="iptv_network_ftp_server_hint">الاسم أو عنوان IP، مثل nas.local. أضف :المنفذ فقط إذا كان الخادم يستخدم منفذاً غير 21.</string>
+    <string name="iptv_network_ftp_folder_hint">مجلد داخل مجلد تسجيل الدخول، مثل TV/Live. يُنشأ إذا لم يكن موجوداً.</string>
+    <string name="iptv_network_ftp_secure">آمن (TLS صريح)</string>
+    <string name="iptv_network_ftp_secure_subtitle">يشفّر بيانات الدخول والتسجيلات. يجب أن يدعم الخادم FTPS.</string>
+    <string name="iptv_network_username_hint">اتركه فارغاً للاتصال دون تسجيل الدخول</string>
+    <string name="iptv_network_plain_warning">هذا الاتصال غير مشفّر. قد يرى الآخرون على الشبكة كلمة المرور.</string>
+    <string name="iptv_network_invalid">تحقق من العنوان وأسماء المجلدات. لا يمكن أن تحتوي على &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">لم يُعثر على شيء في هذا العنوان. تحقق من المسار بعد اسم الخادم.</string>
+    <string name="iptv_network_certificate_untrusted">تعذّر التحقق من شهادة الخادم. إذا كانت الشهادة الخاصة بجهاز NAS لديك، فقارن البصمة بالبصمة المعروضة على NAS قبل الوثوق بها.</string>
+    <string name="iptv_network_certificate_fingerprint">بصمة SHA-256: %1$s</string>
+    <string name="iptv_network_trust">الوثوق بهذه الشهادة</string>
+    <string name="iptv_network_no_tls">لا يوفّر الخادم التشفير. أوقف خيار آمن، أو فعّل FTPS على الخادم.</string>
+    <string name="iptv_network_tls_reuse">يتطلب الخادم إعادة استخدام جلسة TLS في اتصالات البيانات، وهذا غير مدعوم. أوقف هذا الشرط على الخادم.</string>
+</resources>

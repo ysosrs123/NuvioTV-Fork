@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">أفلام ومسلسلات IPTV</string>
+    <string name="iptv_vod_streams_setting_sub">يعرض العناوين المطابقة من مصادر البث المباشر لديك كمصدر تشغيل</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">كل اتصالات %1$s قيد الاستخدام. أوقف البث المباشر أو تسجيلاً على هذا المصدر، ثم أعد المحاولة.</string>
+    <string name="iptv_vod_provider_refused">رفض المزوّد هذا العنوان. قد تكون كل اتصالاته قيد الاستخدام، أو قد يكون الحساب منتهي الصلاحية.</string>
+    <string name="iptv_vod_unavailable">لم يعد عنوان IPTV هذا متاحاً. حدّث المصدر في البث المباشر وأعد المحاولة.</string>
+</resources>

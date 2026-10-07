@@ -1,0 +1,39 @@
+<resources>
+    <string name="iptv_sport_fixtures">Мачове</string>
+    <string name="iptv_sport_live_now">На живо сега</string>
+    <string name="iptv_sport_later_today">По-късно днес</string>
+    <string name="iptv_sport_tomorrow">Утре</string>
+    <string name="iptv_sport_live">НА ЖИВО</string>
+    <string name="iptv_sport_loading">Зареждане на мачове…</string>
+    <string name="iptv_sport_failed">Мачовете не можаха да се заредят. Показват се само резултати от справочника.</string>
+    <string name="iptv_sport_key_missing">Добавете ключа си за TheSportsDB в настройките на ТВ на живо.</string>
+    <string name="iptv_sport_no_leagues">Изберете лиги в настройките на ТВ на живо.</string>
+    <string name="iptv_sport_none">Няма мачове от вашите лиги през следващите три дни.</string>
+    <string name="iptv_sport_no_channel">Не е намерен канал</string>
+    <string name="iptv_sport_no_channel_description">Никой от каналите ви няма този мач в справочника си и не е посочен като излъчващ.</string>
+    <string name="iptv_sport_choose_channel">Изберете канал</string>
+    <string name="iptv_sport_broadcaster">Посочен излъчващ: %1$s</string>
+    <string name="iptv_sport_close">Затвори</string>
+    <string name="iptv_sport_data">Спортни данни</string>
+    <string name="iptv_sport_data_subtitle">Мачовете се зареждат от избраната услуга. Емисията на ESPN е неофициална и може да спре да работи.</string>
+    <string name="iptv_sport_data_off">Изключено</string>
+    <string name="iptv_sport_data_off_description">Спорт използва само вашия справочник. Не се изпращат заявки.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Неофициална емисия, не е нужен ключ. Може да спре да работи по всяко време.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Нужен е ваш собствен API ключ. Безплатният тестов ключ 123 работи с ограничения.</string>
+    <string name="iptv_sport_leagues">Лиги</string>
+    <string name="iptv_sport_leagues_subtitle">Показват се мачове за тези лиги</string>
+    <string name="iptv_sport_leagues_none">Няма</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d лига</item>
+        <item quantity="other">%d лиги</item>
+    </plurals>
+    <string name="iptv_sport_key">Ключ за TheSportsDB</string>
+    <string name="iptv_sport_key_subtitle">Пази се шифрован на това устройство. Безплатният тестов ключ 123 работи с ограничения.</string>
+    <string name="iptv_sport_key_set">Запазен</string>
+    <string name="iptv_sport_key_not_set">Не е зададен</string>
+    <string name="iptv_sport_key_hint">Въведете 123, за да използвате безплатния тестов ключ</string>
+    <string name="iptv_sport_key_invalid">Използвайте само букви и цифри.</string>
+    <string name="iptv_sport_key_remove">Премахни ключа</string>
+</resources>

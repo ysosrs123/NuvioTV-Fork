@@ -1,0 +1,40 @@
+<resources>
+    <string name="iptv_sport_fixtures">Utakmice</string>
+    <string name="iptv_sport_live_now">Uživo sada</string>
+    <string name="iptv_sport_later_today">Kasnije danas</string>
+    <string name="iptv_sport_tomorrow">Sutra</string>
+    <string name="iptv_sport_live">UŽIVO</string>
+    <string name="iptv_sport_loading">Učitavanje utakmica…</string>
+    <string name="iptv_sport_failed">Učitavanje utakmica nije uspelo. Prikazuju se samo rezultati iz vodiča.</string>
+    <string name="iptv_sport_key_missing">Dodajte TheSportsDB ključ u podešavanjima TV uživo.</string>
+    <string name="iptv_sport_no_leagues">Izaberite lige u podešavanjima TV uživo.</string>
+    <string name="iptv_sport_none">Nema utakmica vaših liga u naredna tri dana.</string>
+    <string name="iptv_sport_no_channel">Nije pronađen kanal</string>
+    <string name="iptv_sport_no_channel_description">Nijedan vaš kanal nema ovu utakmicu u vodiču niti je naveden kao emiter.</string>
+    <string name="iptv_sport_choose_channel">Izaberite kanal</string>
+    <string name="iptv_sport_broadcaster">Navedeni emiter: %1$s</string>
+    <string name="iptv_sport_close">Zatvori</string>
+    <string name="iptv_sport_data">Sportski podaci</string>
+    <string name="iptv_sport_data_subtitle">Utakmice se preuzimaju sa izabrane usluge. ESPN feed nije zvaničan i može prestati da radi.</string>
+    <string name="iptv_sport_data_off">Isključeno</string>
+    <string name="iptv_sport_data_off_description">Sport koristi samo vaš vodič. Ne šalju se nikakvi zahtevi.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Nezvanični feed, ključ nije potreban. Može prestati da radi u bilo kom trenutku.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Potreban je vaš API ključ. Besplatni probni ključ 123 radi uz ograničenja.</string>
+    <string name="iptv_sport_leagues">Lige</string>
+    <string name="iptv_sport_leagues_subtitle">Utakmice se prikazuju za ove lige</string>
+    <string name="iptv_sport_leagues_none">Nijedna</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d liga</item>
+        <item quantity="few">%d lige</item>
+        <item quantity="other">%d liga</item>
+    </plurals>
+    <string name="iptv_sport_key">TheSportsDB ključ</string>
+    <string name="iptv_sport_key_subtitle">Čuva se šifrovan na ovom uređaju. Besplatni probni ključ 123 radi uz ograničenja.</string>
+    <string name="iptv_sport_key_set">Sačuvano</string>
+    <string name="iptv_sport_key_not_set">Nije podešeno</string>
+    <string name="iptv_sport_key_hint">Unesite 123 za besplatni probni ključ</string>
+    <string name="iptv_sport_key_invalid">Koristite samo slova i brojeve.</string>
+    <string name="iptv_sport_key_remove">Ukloni ključ</string>
+</resources>

@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">Локален timeshift (експериментално)</string>
+    <string name="iptv_timeshift_subtitle">Експериментално. Буферира канала, който гледате на цял екран, за да можете да го паузирате и превъртате назад. Използва място за съхранение, докато гледате, и изисква свободна връзка като при обикновено гледане. Работи само с MPEG-TS канали; HLS канали, multiview, прегледът и канал, който се записва, се пускат нормално. Ако нещо се провали, се връща обикновеното възпроизвеждане на живо.</string>
+    <string name="iptv_timeshift_length">Дължина на буфера</string>
+    <string name="iptv_timeshift_length_subtitle">Скъсява се при малко свободно място. Буферът се изтрива, когато смените канала или спрете да гледате.</string>
+    <string name="iptv_timeshift_length_15">15 минути</string>
+    <string name="iptv_timeshift_length_30">30 минути</string>
+    <string name="iptv_timeshift_length_60">60 минути</string>
+    <string name="iptv_timeshift_length_auto">Автоматично</string>
+    <string name="iptv_timeshift_length_auto_description">30 минути, ако има достатъчно свободно място, иначе по-малко</string>
+    <string name="iptv_timeshift_location">Местоположение на буфера</string>
+    <string name="iptv_timeshift_location_subtitle">Къде се записва буферът, докато гледате</string>
+    <string name="iptv_timeshift_fallback">Локалният timeshift спря. Пуска се на живо.</string>
+</resources>

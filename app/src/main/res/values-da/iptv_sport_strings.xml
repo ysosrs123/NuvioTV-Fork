@@ -1,0 +1,39 @@
+<resources>
+    <string name="iptv_sport_fixtures">Kampe</string>
+    <string name="iptv_sport_live_now">Live nu</string>
+    <string name="iptv_sport_later_today">Senere i dag</string>
+    <string name="iptv_sport_tomorrow">I morgen</string>
+    <string name="iptv_sport_live">LIVE</string>
+    <string name="iptv_sport_loading">Indlæser kampe…</string>
+    <string name="iptv_sport_failed">Kunne ikke indlæse kampe. Viser kun resultater fra guiden.</string>
+    <string name="iptv_sport_key_missing">Tilføj din TheSportsDB-nøgle i Live-TV-indstillinger.</string>
+    <string name="iptv_sport_no_leagues">Vælg ligaer i Live-TV-indstillinger.</string>
+    <string name="iptv_sport_none">Ingen kampe i dine ligaer de næste tre dage.</string>
+    <string name="iptv_sport_no_channel">Ingen kanal fundet</string>
+    <string name="iptv_sport_no_channel_description">Ingen af dine kanaler har denne kamp i guiden eller sender via en angivet tv-station.</string>
+    <string name="iptv_sport_choose_channel">Vælg en kanal</string>
+    <string name="iptv_sport_broadcaster">Angivet tv-station: %1$s</string>
+    <string name="iptv_sport_close">Luk</string>
+    <string name="iptv_sport_data">Sportsdata</string>
+    <string name="iptv_sport_data_subtitle">Kampe hentes fra den valgte tjeneste. ESPN\'s feed er uofficielt og kan holde op med at virke.</string>
+    <string name="iptv_sport_data_off">Fra</string>
+    <string name="iptv_sport_data_off_description">Sport bruger kun din guide. Der sendes ingen forespørgsler.</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">Uofficielt feed, ingen nøgle nødvendig. Det kan holde op med at virke når som helst.</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">Kræver din egen API-nøgle. Den gratis testnøgle 123 virker med begrænsninger.</string>
+    <string name="iptv_sport_leagues">Ligaer</string>
+    <string name="iptv_sport_leagues_subtitle">Kampe vises for disse ligaer</string>
+    <string name="iptv_sport_leagues_none">Ingen</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d liga</item>
+        <item quantity="other">%d ligaer</item>
+    </plurals>
+    <string name="iptv_sport_key">TheSportsDB-nøgle</string>
+    <string name="iptv_sport_key_subtitle">Gemmes krypteret på denne enhed. Den gratis testnøgle 123 virker med begrænsninger.</string>
+    <string name="iptv_sport_key_set">Gemt</string>
+    <string name="iptv_sport_key_not_set">Ikke angivet</string>
+    <string name="iptv_sport_key_hint">Indtast 123 for at bruge den gratis testnøgle</string>
+    <string name="iptv_sport_key_invalid">Brug kun bogstaver og tal.</string>
+    <string name="iptv_sport_key_remove">Fjern nøgle</string>
+</resources>

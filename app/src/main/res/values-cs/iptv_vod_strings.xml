@@ -1,0 +1,8 @@
+<resources>
+    <string name="iptv_vod_streams_setting">IPTV filmy a seriály</string>
+    <string name="iptv_vod_streams_setting_sub">Zobrazuje odpovídající tituly z vašich zdrojů živé TV jako zdroj streamu</string>
+    <string name="iptv_vod_stream_source">IPTV · %1$s</string>
+    <string name="iptv_vod_connections_busy">Všechna připojení pro %1$s se používají. Zastavte živou TV nebo nahrávání z tohoto zdroje a zkuste to znovu.</string>
+    <string name="iptv_vod_provider_refused">Poskytovatel tento titul odmítl. Všechna jeho připojení mohou být obsazena nebo mohl účet vypršet.</string>
+    <string name="iptv_vod_unavailable">Tento IPTV titul už není k dispozici. Obnovte zdroj v živé TV a zkuste to znovu.</string>
+</resources>

@@ -1,0 +1,39 @@
+<resources>
+    <string name="iptv_sport_fixtures">ম্যাচসূচি</string>
+    <string name="iptv_sport_live_now">এখন লাইভ</string>
+    <string name="iptv_sport_later_today">আজ পরে</string>
+    <string name="iptv_sport_tomorrow">আগামীকাল</string>
+    <string name="iptv_sport_live">লাইভ</string>
+    <string name="iptv_sport_loading">ম্যাচসূচি লোড হচ্ছে…</string>
+    <string name="iptv_sport_failed">ম্যাচসূচি লোড করা যায়নি। শুধু গাইডের ফলাফল দেখানো হচ্ছে।</string>
+    <string name="iptv_sport_key_missing">লাইভ টিভি সেটিংসে আপনার TheSportsDB কী যোগ করুন।</string>
+    <string name="iptv_sport_no_leagues">লাইভ টিভি সেটিংসে লিগ বাছুন।</string>
+    <string name="iptv_sport_none">আগামী তিন দিনে আপনার লিগগুলোর কোনো ম্যাচ নেই।</string>
+    <string name="iptv_sport_no_channel">কোনো চ্যানেল পাওয়া যায়নি</string>
+    <string name="iptv_sport_no_channel_description">আপনার কোনো চ্যানেলের গাইডে এই ম্যাচ নেই, আর কোনোটি তালিকাভুক্ত সম্প্রচারকও নয়।</string>
+    <string name="iptv_sport_choose_channel">একটি চ্যানেল বাছুন</string>
+    <string name="iptv_sport_broadcaster">তালিকাভুক্ত সম্প্রচারক: %1$s</string>
+    <string name="iptv_sport_close">বন্ধ করুন</string>
+    <string name="iptv_sport_data">স্পোর্টস ডেটা</string>
+    <string name="iptv_sport_data_subtitle">বাছাই করা সার্ভিস থেকে ম্যাচসূচি আনা হয়। ESPN-এর ফিড অনানুষ্ঠানিক এবং কাজ করা বন্ধ করতে পারে।</string>
+    <string name="iptv_sport_data_off">বন্ধ</string>
+    <string name="iptv_sport_data_off_description">স্পোর্টস শুধু আপনার গাইড ব্যবহার করে। কোনো রিকোয়েস্ট পাঠানো হয় না।</string>
+    <string name="iptv_sport_data_espn">ESPN</string>
+    <string name="iptv_sport_data_espn_description">অনানুষ্ঠানিক ফিড, কী লাগে না। যেকোনো সময় কাজ করা বন্ধ করতে পারে।</string>
+    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport_data_sportsdb_description">আপনার নিজের API কী লাগবে। ফ্রি টেস্ট কী 123 সীমিতভাবে কাজ করে।</string>
+    <string name="iptv_sport_leagues">লিগ</string>
+    <string name="iptv_sport_leagues_subtitle">এই লিগগুলোর ম্যাচসূচি দেখানো হয়</string>
+    <string name="iptv_sport_leagues_none">কোনোটি নয়</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%dটি লিগ</item>
+        <item quantity="other">%dটি লিগ</item>
+    </plurals>
+    <string name="iptv_sport_key">TheSportsDB কী</string>
+    <string name="iptv_sport_key_subtitle">এই ডিভাইসে এনক্রিপ্ট করে রাখা হয়। ফ্রি টেস্ট কী 123 সীমিতভাবে কাজ করে।</string>
+    <string name="iptv_sport_key_set">সেভ করা হয়েছে</string>
+    <string name="iptv_sport_key_not_set">সেট করা নেই</string>
+    <string name="iptv_sport_key_hint">ফ্রি টেস্ট কী ব্যবহার করতে 123 লিখুন</string>
+    <string name="iptv_sport_key_invalid">শুধু অক্ষর ও সংখ্যা ব্যবহার করুন।</string>
+    <string name="iptv_sport_key_remove">কী সরান</string>
+</resources>

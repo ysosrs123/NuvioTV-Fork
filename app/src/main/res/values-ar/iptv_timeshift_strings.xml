@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_timeshift_title">الإزاحة الزمنية المحلية (تجريبية)</string>
+    <string name="iptv_timeshift_subtitle">تجريبية. تخزّن القناة التي تشاهدها بملء الشاشة مؤقتاً لتتمكن من إيقافها مؤقتاً وترجيعها. تستخدم مساحة التخزين أثناء المشاهدة وتحتاج إلى اتصال متاح كالمشاهدة العادية. تعمل مع قنوات MPEG-TS فقط؛ أما قنوات HLS والعرض المتعدد والمعاينة والقناة قيد التسجيل فتُشغَّل بشكل عادي. إذا فشل أي شيء، يعود التشغيل إلى البث المباشر العادي.</string>
+    <string name="iptv_timeshift_length">طول المخزن المؤقت</string>
+    <string name="iptv_timeshift_length_subtitle">يُقصَّر عند انخفاض المساحة الفارغة. يُحذف المخزن المؤقت عند تغيير القناة أو إيقاف المشاهدة.</string>
+    <string name="iptv_timeshift_length_15">15 دقيقة</string>
+    <string name="iptv_timeshift_length_30">30 دقيقة</string>
+    <string name="iptv_timeshift_length_60">60 دقيقة</string>
+    <string name="iptv_timeshift_length_auto">تلقائي</string>
+    <string name="iptv_timeshift_length_auto_description">30 دقيقة عند توفر مساحة كافية، وإلا فأقل</string>
+    <string name="iptv_timeshift_location">موقع المخزن المؤقت</string>
+    <string name="iptv_timeshift_location_subtitle">مكان كتابة المخزن المؤقت أثناء المشاهدة</string>
+    <string name="iptv_timeshift_fallback">توقفت الإزاحة الزمنية المحلية. جارٍ التشغيل مباشرة.</string>
+</resources>
