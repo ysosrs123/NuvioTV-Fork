@@ -241,7 +241,13 @@ class IptvWebDavShareTest {
         server.useHttps(TestCertificate.context.socketFactory, false)
         val dav = start(FakeDav())
         val plain = IptvWebDavConnector(settings("", secure = true), "")
-        assertEquals(IptvShareError.CERTIFICATE, IptvShareProbe.run(plain, "").error)
+        val first = IptvShareProbe.run(plain, "")
+        if (first.error != IptvShareError.CERTIFICATE) {
+            val chain = try { plain.connect().use { it.list("") }; "connected" } catch (error: Exception) {
+                generateSequence<Throwable>(error) { it.cause }.take(8).joinToString(" <- ") { "${it.javaClass.name}: ${it.message}" }
+            }
+            fail("probe ${first.error}, presented ${plain.certificate}, ${chain}")
+        }
         assertEquals(TestCertificate.fingerprint, plain.certificate)
         val other = IptvWebDavConnector(settings("", secure = true, pin = TestCertificate.fingerprint.replaceRange(0, 2, "00")), "")
         assertEquals(IptvShareError.CERTIFICATE, IptvShareProbe.run(other, "").error)
