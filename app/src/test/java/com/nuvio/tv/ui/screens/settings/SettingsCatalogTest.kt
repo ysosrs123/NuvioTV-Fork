@@ -110,6 +110,35 @@ class SettingsCatalogTest {
         assertTrue(categories.startsNewGroup(categories.indexOf(SettingsCategory.CONTENT_DISCOVERY)))
     }
 
+    @Test
+    fun `live tv is hidden unless the feature is enabled`() {
+        allCombinations().forEach { categories ->
+            assertFalse(SettingsCategory.LIVE_TV in categories)
+        }
+    }
+
+    @Test
+    fun `live tv follows playback in the watch group`() {
+        val categories = visibleSettingsCategories(
+            isPrimaryProfile = true,
+            isEssentialMode = true,
+            isDebugBuild = false,
+            isLiveTvEnabled = true
+        )
+        assertEquals(categories.indexOf(SettingsCategory.PLAYBACK) + 1, categories.indexOf(SettingsCategory.LIVE_TV))
+        assertEquals(SettingsRailGroup.WATCH, SettingsCategory.LIVE_TV.group)
+        assertFalse(categories.startsNewGroup(categories.indexOf(SettingsCategory.LIVE_TV)))
+    }
+
+    @Test
+    fun `category request is consumed once`() {
+        SettingsCategoryRequest.open(SettingsCategory.LIVE_TV)
+        SettingsCategoryRequest.consume(SettingsCategory.PLAYBACK)
+        assertEquals(SettingsCategory.LIVE_TV, SettingsCategoryRequest.category.value)
+        SettingsCategoryRequest.consume(SettingsCategory.LIVE_TV)
+        assertEquals(null, SettingsCategoryRequest.category.value)
+    }
+
     private fun allCombinations(): List<List<SettingsCategory>> =
         listOf(true, false).flatMap { primary ->
             listOf(true, false).flatMap { essential ->

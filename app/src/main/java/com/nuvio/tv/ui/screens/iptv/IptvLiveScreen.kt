@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -97,7 +96,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -> Unit = {}, onSettings: () -> Unit = onSources,
+fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSettings: () -> Unit = onSources,
     viewModel: IptvLiveViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -121,6 +120,14 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
     val scope = rememberCoroutineScope()
     val railFocus = remember { FocusRequester() }
     val emptyFocus = remember { FocusRequester() }
+    val openSidebar = com.nuvio.tv.LocalOpenSidebar.current
+    val sidebarExpanded = com.nuvio.tv.LocalSidebarExpanded.current
+    val hideChrome = com.nuvio.tv.LocalHideNavigationChrome.current
+    val immersive = fullscreen || state.multiview != null
+    DisposableEffect(immersive, hideChrome) {
+        hideChrome(immersive)
+        onDispose { hideChrome(false) }
+    }
     DisposableEffect(lifecycle, viewModel) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START) viewModel.foreground(true)
@@ -142,16 +149,27 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
         rowFocus[id]?.let { runCatching { it.requestFocus() } }
     }
     fun focusGrid() { scope.launch { focusGridNow() } }
-    BackHandler {
+    fun focusContent() {
+        scope.launch {
+            if (state.channels.isNotEmpty()) focusGridNow() else { withFrameNanos { }; runCatching { emptyFocus.requestFocus() } }
+        }
+    }
+    BackHandler(enabled = !sidebarExpanded && (moving != null || movingCategory != null || fullscreen || searching || railOpen)) {
         when {
             moving != null -> { moving = null; viewModel.finishMove() }
             movingCategory != null -> movingCategory = null
             fullscreen -> fullscreen = false
             searching -> { searching = false; viewModel.search("") }
-            railOpen -> onBack()
-            !railOpen && (state.channels.isNotEmpty() || state.search.isNotEmpty()) -> railOpen = true
-            else -> onBack()
+            else -> { railOpen = false; focusContent() }
         }
+    }
+    var sidebarWasOpen by remember { mutableStateOf(false) }
+    LaunchedEffect(sidebarExpanded) {
+        if (sidebarExpanded) { sidebarWasOpen = true; return@LaunchedEffect }
+        if (!sidebarWasOpen) return@LaunchedEffect
+        sidebarWasOpen = false
+        repeat(2) { withFrameNanos { } }
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) && !railOpen && !searching && !fullscreen && state.multiview == null) focusContent()
     }
     LaunchedEffect(railOpen) { if (railOpen) { withFrameNanos { }; if (movingCategory == null) runCatching { railFocus.requestFocus() } } else movingCategory = null }
     LaunchedEffect(searching) { if (searching) { withFrameNanos { }; runCatching { searchFocus.requestFocus() } } }
@@ -247,8 +265,8 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
                     onRecordings = { railOpen = false; onRecordings() },
                     onSearch = { airing -> viewModel.searchMode(airing); railOpen = false; searching = true },
                     onHide = { categoryMenu = it },
-                    onClose = { railOpen = false; focusGrid() },
-                    onExit = onBack,
+                    onClose = { railOpen = false; focusContent() },
+                    onSidebar = openSidebar?.let { open -> { railOpen = false; open() } },
                     onAllSources = viewModel::toggleAllSources,
                     onSourceCategory = { ref, name -> viewModel.showSourceCategory(ref, name); railOpen = false; focusGrid() },
                     movingCategory = movingCategory,
@@ -515,7 +533,7 @@ private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, modifier: M
 @Composable
 private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: Modifier, onFavourites: () -> Unit, onSports: () -> Unit, onCategory: (String?) -> Unit,
     onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit, onSources: () -> Unit, onRecordings: () -> Unit, onSearch: (Boolean) -> Unit, onHide: (String) -> Unit, onClose: () -> Unit,
-    onExit: () -> Unit, onAllSources: () -> Unit, onSourceCategory: (com.nuvio.tv.data.iptv.IptvSourceRef, String?) -> Unit,
+    onSidebar: (() -> Unit)?, onAllSources: () -> Unit, onSourceCategory: (com.nuvio.tv.data.iptv.IptvSourceRef, String?) -> Unit,
     movingCategory: String?, onMoveCategory: (String, ListMove) -> Unit, onMoveCategoryDone: () -> Unit) {
     val list = rememberLazyListState()
     val moveFocus = remember { FocusRequester() }
@@ -544,6 +562,10 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
                 if (move != null && native.action == AndroidKeyEvent.ACTION_DOWN && (native.repeatCount == 0 || move == ListMove.UP || move == ListMove.DOWN)) onMoveCategory(movingCategory, move)
                 return@onPreviewKeyEvent move != null || isSelect(native.keyCode)
             }
+            if (native.action == AndroidKeyEvent.ACTION_DOWN && native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_LEFT && onSidebar != null) {
+                if (native.repeatCount == 0) onSidebar()
+                return@onPreviewKeyEvent true
+            }
             if (native.action == AndroidKeyEvent.ACTION_DOWN && native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_RIGHT) { onClose(); true } else false
         }) {
         Text(stringResource(R.string.iptv_live_title), style = MaterialTheme.typography.titleLarge, color = NuvioTheme.colors.TextPrimary,
@@ -551,7 +573,6 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
         if (movingCategory != null) Text(stringResource(R.string.iptv_move_category_keys), style = MaterialTheme.typography.labelSmall,
             color = NuvioTheme.colors.Secondary, modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 8.dp))
         LazyColumn(Modifier.weight(1f), state = list, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            item { RailItem(stringResource(R.string.iptv_live_exit), null, false, Modifier, onExit, Icons.AutoMirrored.Filled.ArrowBack) }
             item { RailItem(stringResource(R.string.iptv_live_search), null, state.search.isNotBlank() && !state.airingSearch, Modifier, { onSearch(false) }, Icons.Filled.Search) }
             item { RailItem(stringResource(R.string.iptv_live_search_airing), null, state.search.isNotBlank() && state.airingSearch, Modifier, { onSearch(true) }, Icons.Filled.Schedule) }
             item { RailItem(stringResource(R.string.iptv_recordings_open), state.recordings.count { it.status.holdsConnection }.takeIf { it > 0 }, false, Modifier, onRecordings, Icons.Filled.VideoLibrary) }
@@ -607,7 +628,7 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
     }
 }
 
-private const val RAIL_HEADER_ITEMS = 10
+private const val RAIL_HEADER_ITEMS = 9
 
 @Composable
 private fun MoveHint(name: String) {

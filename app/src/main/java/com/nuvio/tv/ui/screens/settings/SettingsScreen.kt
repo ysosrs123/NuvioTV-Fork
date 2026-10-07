@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
@@ -162,6 +163,7 @@ private fun settingsSectionSpec(category: SettingsCategory): SettingsSectionSpec
     SettingsCategory.LAYOUT -> SettingsSectionSpec(category, stringResource(R.string.settings_layout), Icons.Default.GridView, destination = SettingsSectionDestination.Inline)
     SettingsCategory.CONTENT_DISCOVERY -> SettingsSectionSpec(category, stringResource(R.string.settings_content_discovery), Icons.Default.Explore, destination = SettingsSectionDestination.Inline)
     SettingsCategory.PLAYBACK -> SettingsSectionSpec(category, stringResource(R.string.settings_playback), Icons.Rounded.PlayArrow, destination = SettingsSectionDestination.Inline)
+    SettingsCategory.LIVE_TV -> SettingsSectionSpec(category, stringResource(R.string.iptv_live_title), Icons.Default.LiveTv, destination = SettingsSectionDestination.Inline)
     SettingsCategory.INTEGRATION -> SettingsSectionSpec(category, stringResource(R.string.settings_integration), Icons.Default.Link, destination = SettingsSectionDestination.Inline)
     SettingsCategory.TRACKING -> SettingsSectionSpec(category, stringResource(R.string.settings_tracking_title), Icons.Default.Sync, destination = SettingsSectionDestination.Inline)
     SettingsCategory.ADVANCED -> SettingsSectionSpec(category, stringResource(R.string.settings_advanced), Icons.Default.Build, destination = SettingsSectionDestination.Inline)
@@ -180,6 +182,9 @@ fun SettingsScreen(
     onNavigateToManageProfiles: () -> Unit = {},
     onNavigateToSupportersContributors: () -> Unit = {},
     onNavigateToLicensesAttributions: () -> Unit = {},
+    onNavigateToIptvSources: () -> Unit = {},
+    onNavigateToIptvSetup: () -> Unit = {},
+    onNavigateToIptvRecordings: () -> Unit = {},
     profileViewModel: ProfileSettingsViewModel = hiltViewModel(),
     experienceModeViewModel: ExperienceModeSettingsViewModel = hiltViewModel()
 ) {
@@ -207,7 +212,8 @@ fun SettingsScreen(
         visibleSettingsCategories(
             isPrimaryProfile = isPrimaryProfileActive,
             isEssentialMode = isEssentialMode,
-            isDebugBuild = BuildConfig.IS_DEBUG_BUILD
+            isDebugBuild = BuildConfig.IS_DEBUG_BUILD,
+            isLiveTvEnabled = BuildConfig.FEATURE_IPTV_ENABLED
         )
     }
     val visibleSections = visibleCategories.map { category -> settingsSectionSpec(category) }
@@ -231,6 +237,7 @@ fun SettingsScreen(
             SettingsCategory.CONTENT_DISCOVERY to FocusRequester(),
             SettingsCategory.INTEGRATION to FocusRequester(),
             SettingsCategory.PLAYBACK to FocusRequester(),
+            SettingsCategory.LIVE_TV to FocusRequester(),
             SettingsCategory.TRACKING to FocusRequester(),
             SettingsCategory.ADVANCED to FocusRequester(),
             SettingsCategory.ABOUT to FocusRequester(),
@@ -359,6 +366,18 @@ fun SettingsScreen(
     }
 
     val focusManager = LocalFocusManager.current
+
+    val requestedCategory by SettingsCategoryRequest.category.collectAsStateWithLifecycle()
+    LaunchedEffect(requestedCategory) {
+        val category = requestedCategory ?: return@LaunchedEffect
+        SettingsCategoryRequest.consume(category)
+        if (visibleSections.none { it.category == category }) return@LaunchedEffect
+        selectedCategory = category
+        railFocusCategoryName = category.name
+        allowDetailAutofocus = true
+        pendingContentFocusCategory = category
+        pendingContentFocusRequestId += 1L
+    }
 
     LaunchedEffect(visibleSections) {
         if (visibleSections.none { it.category == selectedCategory }) {
@@ -623,7 +642,10 @@ fun SettingsScreen(
                                 onNavigateToWatchParty = onNavigateToWatchParty,
                                 onNavigateToAuthQrSignIn = onNavigateToAuthQrSignIn,
                                 onNavigateToSupportersContributors = onNavigateToSupportersContributors,
-                                onNavigateToLicensesAttributions = onNavigateToLicensesAttributions
+                                onNavigateToLicensesAttributions = onNavigateToLicensesAttributions,
+                                onNavigateToIptvSources = onNavigateToIptvSources,
+                                onNavigateToIptvSetup = onNavigateToIptvSetup,
+                                onNavigateToIptvRecordings = onNavigateToIptvRecordings
                             )
                         }
                     }
@@ -757,7 +779,10 @@ fun SettingsScreen(
                         onNavigateToWatchParty = onNavigateToWatchParty,
                         onNavigateToAuthQrSignIn = onNavigateToAuthQrSignIn,
                         onNavigateToSupportersContributors = onNavigateToSupportersContributors,
-                        onNavigateToLicensesAttributions = onNavigateToLicensesAttributions
+                        onNavigateToLicensesAttributions = onNavigateToLicensesAttributions,
+                        onNavigateToIptvSources = onNavigateToIptvSources,
+                        onNavigateToIptvSetup = onNavigateToIptvSetup,
+                        onNavigateToIptvRecordings = onNavigateToIptvRecordings
                     )
                 }
             }
@@ -787,7 +812,10 @@ private fun SettingsDetailPane(
     onNavigateToWatchParty: () -> Unit,
     onNavigateToAuthQrSignIn: () -> Unit,
     onNavigateToSupportersContributors: () -> Unit,
-    onNavigateToLicensesAttributions: () -> Unit
+    onNavigateToLicensesAttributions: () -> Unit,
+    onNavigateToIptvSources: () -> Unit,
+    onNavigateToIptvSetup: () -> Unit,
+    onNavigateToIptvRecordings: () -> Unit
 ) {
     when (selectedCategory) {
         SettingsCategory.EXPERIENCE -> EssentialAdvancedSettingsContent(
@@ -839,6 +867,16 @@ private fun SettingsDetailPane(
                 }
             )
         }
+        SettingsCategory.LIVE_TV -> com.nuvio.tv.ui.screens.iptv.IptvSettingsContent(
+            onSources = onNavigateToIptvSources,
+            onSetup = onNavigateToIptvSetup,
+            onRecordings = onNavigateToIptvRecordings,
+            initialFocusRequester = if (allowDetailAutofocus) {
+                contentFocusRequesters[SettingsCategory.LIVE_TV]
+            } else {
+                null
+            }
+        )
         SettingsCategory.ADVANCED -> if (isEssentialMode) {
             EssentialAdvancedSettingsContent(
                 experienceModeViewModel = experienceModeViewModel,

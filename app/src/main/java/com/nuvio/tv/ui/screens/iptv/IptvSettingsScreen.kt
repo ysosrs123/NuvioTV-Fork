@@ -2,11 +2,9 @@
 package com.nuvio.tv.ui.screens.iptv
 
 import android.text.format.Formatter
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.PhoneAndroid
@@ -37,19 +35,20 @@ import com.nuvio.tv.data.iptv.IptvStreamFormat
 import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
+import com.nuvio.tv.ui.screens.settings.SettingsDetailHeader
 import com.nuvio.tv.ui.screens.settings.SettingsGroupCard
 import com.nuvio.tv.ui.screens.settings.SettingsPickerOption
 import com.nuvio.tv.ui.screens.settings.SettingsSingleChoiceDialog
 import com.nuvio.tv.ui.screens.settings.SettingsToggleRow
+import com.nuvio.tv.ui.screens.settings.SettingsVerticalScrollIndicators
 import com.nuvio.tv.ui.theme.NuvioTheme
-import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
-import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
 import com.nuvio.tv.ui.v2.components.NuvioActionPill
 
 private enum class IptvSettingsChoice { FORMAT, START, LAYOUT, QUALITY, EARLY, LATE, THEME }
 
 @Composable
-fun IptvSettingsScreen(onSources: () -> Unit, onSetup: () -> Unit, onRecordings: () -> Unit, viewModel: IptvSettingsViewModel = hiltViewModel()) {
+internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onRecordings: () -> Unit, initialFocusRequester: FocusRequester? = null,
+    viewModel: IptvSettingsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val locations by viewModel.locations.collectAsStateWithLifecycle()
     val notice by viewModel.notice.collectAsStateWithLifecycle()
@@ -57,30 +56,28 @@ fun IptvSettingsScreen(onSources: () -> Unit, onSetup: () -> Unit, onRecordings:
     val shareStatus by viewModel.shareStatus.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var choosing by remember { mutableStateOf<IptvSettingsChoice?>(null) }
-    val first = remember { FocusRequester() }
-    LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event -> if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) viewModel.reload() }
         lifecycle.addObserver(observer)
         onDispose { lifecycle.removeObserver(observer) }
     }
-    Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
-        if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
-        Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-            Column(Modifier.width(340.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(stringResource(R.string.iptv_settings_title), style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary)
-                Text(stringResource(R.string.iptv_settings_description), style = MaterialTheme.typography.bodyMedium, color = NuvioTheme.colors.TextSecondary)
-                Spacer(Modifier.height(18.dp))
-                SettingsActionRow(title = stringResource(R.string.iptv_settings_sources), subtitle = stringResource(R.string.iptv_settings_sources_subtitle),
-                    onClick = onSources, leadingIcon = Icons.AutoMirrored.Filled.PlaylistPlay, modifier = Modifier.focusRequester(first))
-                SettingsActionRow(title = stringResource(R.string.iptv_remote_entry_title), subtitle = stringResource(R.string.iptv_remote_entry_subtitle),
-                    onClick = onSetup, leadingIcon = Icons.Filled.PhoneAndroid)
-                SettingsActionRow(title = stringResource(R.string.iptv_recordings_open), subtitle = stringResource(R.string.iptv_settings_recordings_subtitle),
-                    onClick = onRecordings, leadingIcon = Icons.Filled.VideoLibrary)
-            }
-            LazyColumn(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(bottom = 32.dp)) {
+    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        SettingsDetailHeader(title = stringResource(R.string.iptv_live_title), subtitle = stringResource(R.string.iptv_settings_description))
+        val list = rememberLazyListState()
+        Box(Modifier.fillMaxWidth().weight(1f)) {
+            LazyColumn(Modifier.fillMaxSize(), state = list, verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(bottom = 32.dp)) {
+                item(key = "links") {
+                    SettingsGroupCard {
+                        SettingsActionRow(title = stringResource(R.string.iptv_settings_sources), subtitle = stringResource(R.string.iptv_settings_sources_subtitle),
+                            onClick = onSources, leadingIcon = Icons.AutoMirrored.Filled.PlaylistPlay,
+                            modifier = if (initialFocusRequester != null) Modifier.focusRequester(initialFocusRequester) else Modifier)
+                        SettingsActionRow(title = stringResource(R.string.iptv_remote_entry_title), subtitle = stringResource(R.string.iptv_remote_entry_subtitle),
+                            onClick = onSetup, leadingIcon = Icons.Filled.PhoneAndroid)
+                        SettingsActionRow(title = stringResource(R.string.iptv_recordings_open), subtitle = stringResource(R.string.iptv_settings_recordings_subtitle),
+                            onClick = onRecordings, leadingIcon = Icons.Filled.VideoLibrary)
+                    }
+                }
                 item(key = "playback") {
                     SettingsGroupCard(title = stringResource(R.string.iptv_settings_playback)) {
                         SettingsActionRow(title = stringResource(R.string.iptv_live_format_title), subtitle = stringResource(R.string.iptv_settings_format_subtitle),
@@ -140,6 +137,7 @@ fun IptvSettingsScreen(onSources: () -> Unit, onSetup: () -> Unit, onRecordings:
                     }
                 }
             }
+            SettingsVerticalScrollIndicators(state = list)
         }
     }
     val dismiss = { choosing = null }

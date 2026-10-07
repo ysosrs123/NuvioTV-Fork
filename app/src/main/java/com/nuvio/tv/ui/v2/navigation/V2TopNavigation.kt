@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.nuvio.tv.DrawerItem
 import com.nuvio.tv.LocalContentFocusRequester
+import com.nuvio.tv.LocalOpenSidebar
 import com.nuvio.tv.LocalSidebarExpanded
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.components.AvatarModel
@@ -100,6 +101,7 @@ fun V2TopNavigation(
             }.focusGroup()) {
             CompositionLocalProvider(LocalContentFocusRequester provides contentFocus,
                 LocalSidebarExpanded provides navFocused,
+                LocalOpenSidebar provides (if (visible) { { runCatching { entryFocus.requestFocus() } } } else null),
                 LocalV2TopChrome provides visible) {
                 navigationContent(true)
             }

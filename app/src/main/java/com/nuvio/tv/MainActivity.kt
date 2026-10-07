@@ -220,6 +220,8 @@ import kotlinx.coroutines.launch
 
 val LocalSidebarExpanded = compositionLocalOf { false }
 val LocalContentFocusRequester = compositionLocalOf { FocusRequester.Default }
+val LocalOpenSidebar = compositionLocalOf<(() -> Unit)?> { null }
+val LocalHideNavigationChrome = compositionLocalOf<(Boolean) -> Unit> { {} }
 
 private const val SIDEBAR_AUTO_COLLAPSE_DELAY_MS = 3_000L
 
@@ -1091,8 +1093,13 @@ open class MainActivity : ComponentActivity() {
                             if (discoverLocation == DiscoverLocation.IN_SIDEBAR) {
                                 add(Screen.Discover.route)
                             }
+                            if (BuildConfig.FEATURE_IPTV_ENABLED) add(Screen.IptvLive.route)
                         }
                     }
+                    var liveTvImmersive by remember { mutableStateOf(false) }
+                    val hideNavigationChrome = remember { { hidden: Boolean -> liveTvImmersive = hidden } }
+                    val chromeRootRoutes = if (liveTvImmersive) rootRoutes - Screen.IptvLive.route else rootRoutes
+                    val chromeSidebarCollapsed = sidebarCollapsed || currentRoute == Screen.IptvLive.route
 
                     SideEffect {
                         qualityGovernor.context(
@@ -1220,10 +1227,11 @@ open class MainActivity : ComponentActivity() {
                             Box(Modifier.fillMaxSize().graphicsLayer {
                                 alpha = if (profileEntry.pending && !profileEntry.revealing) 0f else 1f
                             }) {
+                            CompositionLocalProvider(LocalHideNavigationChrome provides hideNavigationChrome) {
                             if (v2Appearance?.navigationStyle == com.nuvio.tv.domain.model.NavigationStyle.TOP_NAVIGATION) {
                                 com.nuvio.tv.ui.v2.navigation.V2TopNavigation(
                                     navigationContent = navigationContent,
-                                    currentRoute = currentRoute, rootRoutes = rootRoutes, items = drawerItems,
+                                    currentRoute = currentRoute, rootRoutes = chromeRootRoutes, items = drawerItems,
                                     selectedRoute = selectedDrawerRoute,
                                     profile = activeProfile?.let {
                                         com.nuvio.tv.ui.v2.components.AvatarModel(it.id.toString(), it.name, it.avatarColorHex, activeProfileAvatarImageUrl)
@@ -1244,11 +1252,11 @@ open class MainActivity : ComponentActivity() {
                                     navController = navController,
                                     navigationContent = navigationContent,
                                     currentRoute = currentRoute,
-                                    rootRoutes = rootRoutes,
+                                    rootRoutes = chromeRootRoutes,
                                     drawerItems = drawerItems,
                                     selectedDrawerRoute = selectedDrawerRoute,
                                     selectedDrawerItem = selectedDrawerItem,
-                                    sidebarCollapsed = sidebarCollapsed,
+                                    sidebarCollapsed = chromeSidebarCollapsed,
                                     modernSidebarBlurEnabled = modernSidebarBlurEnabled,
                                     hideBuiltInHeaders = hideBuiltInHeadersForFloatingPill,
                                     activeProfileName = activeProfile?.name ?: "",
@@ -1268,10 +1276,10 @@ open class MainActivity : ComponentActivity() {
                                     navController = navController,
                                     navigationContent = navigationContent,
                                     currentRoute = currentRoute,
-                                    rootRoutes = rootRoutes,
+                                    rootRoutes = chromeRootRoutes,
                                     drawerItems = drawerItems,
                                     selectedDrawerRoute = selectedDrawerRoute,
-                                    sidebarCollapsed = sidebarCollapsed,
+                                    sidebarCollapsed = chromeSidebarCollapsed,
                                     hideBuiltInHeaders = false,
                                     activeProfileName = activeProfile?.name ?: "",
                                     activeProfileColorHex = activeProfile?.avatarColorHex ?: "#1E88E5",
@@ -1284,6 +1292,7 @@ open class MainActivity : ComponentActivity() {
                                     onNavigate = { optimisticRoute = it },
                                     onExitApp = handleExitApp
                                 )
+                            }
                             }
 
                             }
@@ -1763,7 +1772,13 @@ private fun LegacySidebarScaffold(
         ) {
             CompositionLocalProvider(
                 LocalSidebarExpanded provides (drawerState.currentValue == DrawerValue.Open),
-                LocalContentFocusRequester provides contentFocusRequester
+                LocalContentFocusRequester provides contentFocusRequester,
+                LocalOpenSidebar provides (if (showSidebar) {
+                    {
+                        pendingSidebarFocusRequest = true
+                        drawerState.setValue(DrawerValue.Open)
+                    }
+                } else null)
             ) {
                 navigationContent(hideBuiltInHeaders)
             }
@@ -2196,7 +2211,14 @@ private fun ModernSidebarScaffold(
                 com.nuvio.tv.ui.v2.components.LocalSidebarPageLayout provides
                     sidebarPageLayout,
                 LocalSidebarExpanded provides isSidebarExpanded,
-                LocalContentFocusRequester provides contentFocusRequester
+                LocalContentFocusRequester provides contentFocusRequester,
+                LocalOpenSidebar provides (if (showSidebar) {
+                    {
+                        isSidebarExpanded = true
+                        sidebarCollapsePending = false
+                        pendingSidebarFocusRequest = true
+                    }
+                } else null)
             ) {
                 navigationContent(hideBuiltInHeaders)
             }

@@ -90,6 +90,9 @@ destination; Left from the guide opens the Live TV menu, Left again the Nuvio si
 Back as on other Nuvio pages; the Exit item goes; IPTV settings move into the main
 Settings as a "Live TV" category, with a shortcut from the Live TV menu. The guide
 stays full width. This reverses the earlier "IPTV settings only on the Live TV side".
+Done in `IptvSettingsContent` (SettingsCatalog `LIVE_TV`, Watch group); the
+`iptv/settings` route is gone; Back closes Live TV layers, then opens the sidebar,
+then exits like Home; sidebar and top bar are hidden in full screen and multiview.
 Streaming stability (proposed 7 October 2026, after wave 2): seamless TS reconnect that
 keeps the buffer; Live buffer setting (Fast zapping / Balanced / Stable / Maximum;
 current fixed values 1.5 s start, 8 s max); optional slow-start cushion building at
