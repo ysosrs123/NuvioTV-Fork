@@ -362,6 +362,7 @@ composeCompiler {
     metricsDestination = layout.buildDirectory.dir("compose_metrics")
     reportsDestination = layout.buildDirectory.dir("compose_reports")
     stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability_config.conf"))
+    includeComposeMappingFile = false
 }
 
 // Globally exclude stock media3 modules — replaced by local :nuvio-exoplayer-engine module
