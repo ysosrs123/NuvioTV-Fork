@@ -46,14 +46,14 @@ class IptvRecordingService : Service() {
         val id = intent?.getStringExtra(IptvRecordingAlarms.EXTRA_ID)
         if (!enterForeground()) {
             if (id != null) recorder.blocked(id)
-            if (recorder.running.value.isEmpty()) stopSelf(startId)
+            if (!recorder.busy()) stopSelf(startId)
             return START_NOT_STICKY
         }
         if (id != null) recorder.begin(id)
         holdAwake()
         if (observing == null) observing = scope.launch {
             recorder.changes.collect {
-                if (recorder.running.value.isEmpty()) {
+                if (!recorder.busy()) {
                     releaseAwake()
                     ServiceCompat.stopForeground(this@IptvRecordingService, ServiceCompat.STOP_FOREGROUND_REMOVE)
                     stopSelf(lastStartId)
@@ -120,6 +120,7 @@ class IptvRecordingService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun notification(titles: List<String>): Notification {
+        val uploading = recorder.running.value.isEmpty() && recorder.uploading.value.isNotEmpty()
         val launch = packageManager.getLeanbackLaunchIntentForPackage(packageName) ?: packageManager.getLaunchIntentForPackage(packageName)
         val text = when (titles.size) {
             0 -> getString(R.string.iptv_recording_notification_starting)
@@ -127,7 +128,7 @@ class IptvRecordingService : Service() {
             else -> resources.getQuantityString(R.plurals.iptv_recording_notification_count, titles.size, titles.size)
         }
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.iptv_recording_notification_title))
+            .setContentTitle(getString(if (uploading) R.string.iptv_recording_notification_uploading else R.string.iptv_recording_notification_title))
             .setContentText(text)
             .setSmallIcon(R.drawable.ic_launcher)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -144,7 +145,7 @@ class IptvRecordingService : Service() {
         private const val NOTIFICATION_ID = 9530
         private const val WAKE_LIMIT_MS = 7 * 60 * 60 * 1000L
 
-        fun intent(context: Context, id: String): Intent =
-            Intent(context, IptvRecordingService::class.java).putExtra(IptvRecordingAlarms.EXTRA_ID, id)
+        fun intent(context: Context, id: String?): Intent =
+            Intent(context, IptvRecordingService::class.java).apply { if (id != null) putExtra(IptvRecordingAlarms.EXTRA_ID, id) }
     }
 }

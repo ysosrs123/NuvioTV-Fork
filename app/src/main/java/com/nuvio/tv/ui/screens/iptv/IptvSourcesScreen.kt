@@ -15,6 +15,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
@@ -59,6 +66,9 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.LocalGuideFile
+import com.nuvio.tv.core.iptv.AccountGroups
+import com.nuvio.tv.core.iptv.DEFAULT_ACCOUNT_ID
+import com.nuvio.tv.core.iptv.HeldCatalogue
 import com.nuvio.tv.core.iptv.StalkerPortal
 import com.nuvio.tv.data.iptv.IptvGuideFeed
 import com.nuvio.tv.data.iptv.IptvSource
@@ -83,6 +93,13 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
     var confirmSource by remember { mutableStateOf<IptvSource?>(null) }
     var confirmFeed by remember { mutableStateOf<IptvGuideFeed?>(null) }
     var connectionsFor by remember { mutableStateOf<IptvSource?>(null) }
+    var reviewFor by remember { mutableStateOf<IptvSource?>(null) }
+    var groupMenu by remember { mutableStateOf<IptvGroupView?>(null) }
+    var naming by remember { mutableStateOf<IptvGroupView?>(null) }
+    var creating by remember { mutableStateOf(false) }
+    var limitFor by remember { mutableStateOf<IptvGroupView?>(null) }
+    var membersFor by remember { mutableStateOf<IptvGroupView?>(null) }
+    var transfer by remember { mutableStateOf<IptvTransferMode?>(null) }
     LaunchedEffect(state.ready, state.busy, state.revision) {
         if (state.ready && !state.busy && !initiallyFocused) { withFrameNanos { }; runCatching { first.requestFocus() }; initiallyFocused = true }
     }
@@ -114,6 +131,14 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
                 }
             }
             LazyColumn(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(bottom = 32.dp)) {
+                if (state.reviews.isNotEmpty()) item(key = "reviews") {
+                    SettingsGroupCard(title = stringResource(R.string.iptv_review_title), subtitle = stringResource(R.string.iptv_review_description)) {
+                        state.sources.filter { it.ref.sourceId in state.reviews }.forEach { source ->
+                            SettingsActionRow(title = source.label, subtitle = reviewText(state.reviews.getValue(source.ref.sourceId)),
+                                onClick = { reviewFor = source }, leadingIcon = Icons.Filled.Warning)
+                        }
+                    }
+                }
                 item(key = "sources") {
                     SettingsGroupCard(title = stringResource(R.string.iptv_live_sources)) {
                         if (state.ready && state.sources.isEmpty()) Text(stringResource(R.string.iptv_sources_empty), color = NuvioTheme.colors.TextSecondary,
@@ -146,6 +171,34 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
                                 onClick = { feedMenu = feed },
                                 leadingIcon = if (linked) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked)
                         }
+                    }
+                }
+                if (state.ready && state.sources.isNotEmpty()) item(key = "groups") {
+                    SettingsGroupCard(title = stringResource(R.string.iptv_groups_title), subtitle = stringResource(R.string.iptv_groups_description)) {
+                        state.groups.forEach { group ->
+                            SettingsActionRow(title = groupLabel(group), subtitle = pluralStringResource(R.plurals.iptv_group_sources, group.sources.size, group.sources.size),
+                                value = pluralStringResource(R.plurals.iptv_connections, group.limit, group.limit), onClick = { groupMenu = group },
+                                leadingIcon = Icons.Filled.Groups)
+                        }
+                        state.suggestions.forEach { suggestion ->
+                            SettingsActionRow(title = stringResource(R.string.iptv_group_suggested, suggestion.label),
+                                subtitle = suggestion.sources.mapNotNull { ref -> state.sources.firstOrNull { it.ref == ref }?.label }.joinToString(", "),
+                                onClick = { viewModel.applySuggestion(suggestion) }, leadingIcon = Icons.Filled.Lightbulb)
+                        }
+                        SettingsActionRow(title = stringResource(R.string.iptv_group_create), subtitle = stringResource(R.string.iptv_group_create_subtitle),
+                            onClick = { creating = true }, leadingIcon = Icons.Filled.Add)
+                    }
+                }
+                if (state.ready) item(key = "transfer") {
+                    SettingsGroupCard(title = stringResource(R.string.iptv_transfer_title), subtitle = stringResource(R.string.iptv_transfer_description)) {
+                        SettingsActionRow(title = stringResource(R.string.iptv_copy_send_title), subtitle = stringResource(R.string.iptv_copy_send_row),
+                            onClick = { transfer = IptvTransferMode.SEND }, enabled = state.sources.isNotEmpty(), leadingIcon = Icons.Filled.Tv)
+                        SettingsActionRow(title = stringResource(R.string.iptv_copy_receive_title), subtitle = stringResource(R.string.iptv_copy_receive_row),
+                            onClick = { transfer = IptvTransferMode.RECEIVE }, leadingIcon = Icons.Filled.Download)
+                        SettingsActionRow(title = stringResource(R.string.iptv_backup_title), subtitle = stringResource(R.string.iptv_backup_row),
+                            onClick = { transfer = IptvTransferMode.BACKUP }, enabled = state.sources.isNotEmpty(), leadingIcon = Icons.Filled.Backup)
+                        SettingsActionRow(title = stringResource(R.string.iptv_restore_title), subtitle = stringResource(R.string.iptv_restore_row),
+                            onClick = { transfer = IptvTransferMode.RESTORE }, leadingIcon = Icons.Filled.Restore)
                     }
                 }
             }
@@ -208,6 +261,78 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
             onConfirm = { confirmFeed = null; viewModel.remove(feed) }, onDismiss = { confirmFeed = null })
     }
     state.form?.let { form -> key(state.profileId, state.revision, form) { SourceForm(form, state, viewModel) } }
+    reviewFor?.let { source ->
+        val held = state.reviews[source.ref.sourceId]
+        if (held != null) ReviewDialog(source.label, reviewText(held), onAccept = { reviewFor = null; viewModel.acceptReview(source) },
+            onKeep = { reviewFor = null; viewModel.keepReview(source) }, onDismiss = { reviewFor = null })
+    }
+    groupMenu?.let { group ->
+        OptionsDialog(groupLabel(group), pluralStringResource(R.plurals.iptv_group_sources, group.sources.size, group.sources.size), onDismiss = { groupMenu = null }) {
+            Option(stringResource(R.string.iptv_group_sources_choose), Icons.Filled.CheckCircle) { groupMenu = null; membersFor = group }
+            SettingsActionRow(title = stringResource(R.string.iptv_source_connections), subtitle = null,
+                value = pluralStringResource(R.plurals.iptv_connections, group.limit, group.limit), onClick = { groupMenu = null; limitFor = group },
+                leadingIcon = Icons.Filled.Dns)
+            Option(stringResource(R.string.iptv_group_rename), Icons.Filled.Edit) { groupMenu = null; naming = group }
+            Option(stringResource(R.string.iptv_group_remove), Icons.Filled.Delete) { groupMenu = null; viewModel.removeGroup(group) }
+        }
+    }
+    limitFor?.let { group ->
+        com.nuvio.tv.ui.screens.settings.SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_source_connections),
+            subtitle = stringResource(R.string.iptv_group_limit_description),
+            options = (1..AccountGroups.MAX_LIMIT).map { com.nuvio.tv.ui.screens.settings.SettingsPickerOption(it, pluralStringResource(R.plurals.iptv_connections, it, it)) },
+            selectedValue = group.limit, onOptionSelected = { viewModel.setGroupLimit(group, it); limitFor = null }, onDismiss = { limitFor = null })
+    }
+    membersFor?.let { group ->
+        val current = state.groups.firstOrNull { it.id == group.id } ?: group
+        OptionsDialog(groupLabel(current), stringResource(R.string.iptv_group_sources_description), onDismiss = { membersFor = null }) {
+            state.sources.forEach { source ->
+                val member = source.accountId == current.id
+                SettingsActionRow(title = source.label, subtitle = kindLabel(source.kind), onClick = { viewModel.toggleInGroup(current, source) },
+                    trailingIcon = null, leadingIcon = if (member) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked)
+            }
+        }
+    }
+    if (creating || naming != null) GroupNameDialog(naming?.let { groupLabel(it) } ?: "", onSave = { label ->
+        naming?.let { viewModel.renameGroup(it, label) } ?: viewModel.createGroup(label)
+        creating = false; naming = null
+    }, onDismiss = { creating = false; naming = null })
+    transfer?.let { mode -> IptvTransferDialog(mode, onClose = { transfer = null; viewModel.reloadNow() }) }
+}
+
+@Composable
+private fun groupLabel(group: IptvGroupView): String =
+    if (group.id == DEFAULT_ACCOUNT_ID && group.label == group.id) stringResource(R.string.iptv_group_default) else group.label
+
+@Composable
+private fun reviewText(held: HeldCatalogue): String =
+    if (held.candidate == 0) stringResource(R.string.iptv_review_empty, held.previous) else stringResource(R.string.iptv_review_counts, held.previous, held.candidate)
+
+@Composable
+private fun ReviewDialog(label: String, description: String, onAccept: () -> Unit, onKeep: () -> Unit, onDismiss: () -> Unit) {
+    val keep = remember { FocusRequester() }
+    LaunchedEffect(Unit) { withFrameNanos { }; runCatching { keep.requestFocus() } }
+    NuvioDialog(onDismiss = onDismiss, title = stringResource(R.string.iptv_review_dialog_title, label), subtitle = description, width = 560.dp) {
+        Text(stringResource(R.string.iptv_review_dialog_note), color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            NuvioActionPill(onKeep, Modifier.focusRequester(keep)) { Text(stringResource(R.string.iptv_review_keep)) }
+            NuvioActionPill(onAccept) { Text(stringResource(R.string.iptv_review_accept)) }
+        }
+    }
+}
+
+@Composable
+private fun GroupNameDialog(initial: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
+    var label by remember { mutableStateOf(initial) }
+    val first = remember { FocusRequester() }
+    LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
+    NuvioDialog(onDismiss = onDismiss, title = stringResource(if (initial.isEmpty()) R.string.iptv_group_create else R.string.iptv_group_rename),
+        subtitle = stringResource(R.string.iptv_group_name_hint), width = 560.dp) {
+        SourceField(stringResource(R.string.iptv_setup_name), label, { label = it.take(240) }, last = true, modifier = Modifier.focusRequester(first))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            NuvioActionPill({ onSave(label) }, enabled = label.isNotBlank()) { Text(stringResource(R.string.iptv_setup_save)) }
+            NuvioActionPill(onDismiss) { Text(stringResource(R.string.iptv_setup_cancel)) }
+        }
+    }
 }
 
 private fun orderedFeeds(state: IptvSourcesState): List<IptvGuideFeed> {
@@ -422,7 +547,7 @@ private fun GuideFolderDialog(viewModel: IptvSourcesViewModel, onDismiss: () -> 
 }
 
 @Composable
-private fun SourceField(label: String, value: String, onChange: (String) -> Unit, modifier: Modifier = Modifier, hint: String? = null,
+internal fun SourceField(label: String, value: String, onChange: (String) -> Unit, modifier: Modifier = Modifier, hint: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text, masked: Boolean = false, last: Boolean = false, error: Boolean = false) {
     val focus = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current

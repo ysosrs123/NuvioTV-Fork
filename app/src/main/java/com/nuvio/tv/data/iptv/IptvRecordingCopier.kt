@@ -9,7 +9,6 @@ import com.nuvio.tv.core.iptv.RecordingSegmentCursor
 import com.nuvio.tv.core.iptv.RecordingStorage
 import com.nuvio.tv.core.iptv.RecordingStreamException
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URI
 import java.util.concurrent.TimeUnit
@@ -34,9 +33,13 @@ class IptvRecordingProgress {
         internal set
     @Volatile var gaps: Int = 0
         internal set
+    @Volatile var committed: Long = 0
+        internal set
+    @Volatile var parts: Int = 1
+        internal set
 }
 
-data class IptvRecordingCopy(val bytes: Long, val gaps: Int, val failure: RecordingFailure?)
+data class IptvRecordingCopy(val bytes: Long, val gaps: Int, val failure: RecordingFailure?, val parts: Int = 1)
 
 class IptvRecordingCopier(
     private val client: OkHttpClient = newClient(),
@@ -53,7 +56,7 @@ class IptvRecordingCopier(
         @Volatile var reached = false
     }
 
-    private inner class Sink(private val stream: FileOutputStream, private val directory: File, private val progress: IptvRecordingProgress) {
+    private inner class Sink(private val output: IptvRecordingOutput, private val progress: IptvRecordingProgress) {
         private var sinceCheck = 0L
         var hls = false
         val position: Long get() = progress.bytes
@@ -61,41 +64,56 @@ class IptvRecordingCopier(
         fun write(buffer: ByteArray, length: Int) {
             if (length <= 0) return
             if (progress.bytes == 0L) checkSpace()
-            try { stream.write(buffer, 0, length) } catch (_: IOException) { throw RecordingStreamException(RecordingFailure.STORAGE_ERROR) }
-            progress.bytes += length
+            try { output.write(buffer, 0, length, split = !hls) } catch (full: IptvRecordingPartFullException) {
+                progress.bytes = output.bytes
+                throw full
+            } catch (_: IOException) { throw RecordingStreamException(RecordingFailure.STORAGE_ERROR) }
+            progress.bytes = output.bytes
+            progress.parts = output.parts
+            if (!hls) progress.committed = output.bytes
             sinceCheck += length
             if (sinceCheck >= RecordingStorage.CHECK_INTERVAL_BYTES) { sinceCheck = 0; checkSpace() }
         }
 
+        fun beginSegment() {
+            try { output.beforeSegment() } catch (_: IOException) { throw RecordingStreamException(RecordingFailure.STORAGE_ERROR) }
+            progress.parts = output.parts
+        }
+
+        fun commit() { progress.committed = output.bytes }
+
         fun rollback(position: Long) {
             if (position >= progress.bytes) return
-            try { stream.flush(); stream.channel.truncate(position) } catch (_: IOException) { return }
-            progress.bytes = position
+            if (output.rollback(position)) progress.bytes = output.bytes
         }
 
-        fun sync() {
-            try { stream.flush(); stream.fd.sync() } catch (_: IOException) { }
-        }
+        fun sync() = output.sync()
 
         private fun checkSpace() {
-            val free = try { freeBytes(directory) } catch (_: Exception) { Long.MAX_VALUE }
+            val free = try { freeBytes(output.directory) } catch (_: Exception) { Long.MAX_VALUE }
             if (!RecordingStorage.canContinue(free, reserveBytes)) throw RecordingStreamException(RecordingFailure.LOW_STORAGE)
         }
     }
 
     suspend fun copy(address: String, format: IptvStreamFormat, output: File, stopAtMillis: Long,
+        progress: IptvRecordingProgress = IptvRecordingProgress()): IptvRecordingCopy {
+        val directory = output.absoluteFile.parentFile ?: return IptvRecordingCopy(0, 0, RecordingFailure.STORAGE_ERROR)
+        return copy(address, format, IptvRecordingOutput(directory, { index, _ -> if (index == 1) output.absoluteFile else File(directory, "${output.name}.$index") }),
+            stopAtMillis, progress)
+    }
+
+    suspend fun copy(address: String, format: IptvStreamFormat, output: IptvRecordingOutput, stopAtMillis: Long,
         progress: IptvRecordingProgress = IptvRecordingProgress()): IptvRecordingCopy = withContext(Dispatchers.IO) {
         val url = address.toHttpUrlOrNull() ?: return@withContext IptvRecordingCopy(0, 0, RecordingFailure.SOURCE_UNAVAILABLE)
         if (url.username.isNotEmpty() || url.password.isNotEmpty()) return@withContext IptvRecordingCopy(0, 0, RecordingFailure.SOURCE_UNAVAILABLE)
-        val directory = output.absoluteFile.parentFile ?: return@withContext IptvRecordingCopy(0, 0, RecordingFailure.STORAGE_ERROR)
-        val stream = try { FileOutputStream(output, true) } catch (_: IOException) {
-            return@withContext IptvRecordingCopy(0, 0, RecordingFailure.STORAGE_ERROR)
-        }
-        progress.bytes = output.length()
+        try { output.open() } catch (_: IOException) { return@withContext IptvRecordingCopy(0, 0, RecordingFailure.STORAGE_ERROR) }
+        progress.bytes = output.bytes
+        progress.committed = output.bytes
+        progress.parts = output.parts
         val cursor = RecordingSegmentCursor()
         var failure: RecordingFailure? = null
-        stream.use {
-            val sink = Sink(stream, directory, progress)
+        output.use {
+            val sink = Sink(output, progress)
             try {
                 var attempt = 0
                 var received = progress.bytes > 0
@@ -110,7 +128,9 @@ class IptvRecordingCopier(
                     catch (error: RecordingStreamException) {
                         if (error.failure != RecordingFailure.NETWORK) { failure = error.failure; break }
                     } catch (error: IOException) {
-                        if (!deadline.reached && now() < stopAtMillis && currentCoroutineContext().isActive) IptvLog.failure("recording connection", error)
+                        if (error !is IptvRecordingPartFullException && !deadline.reached && now() < stopAtMillis && currentCoroutineContext().isActive) {
+                            IptvLog.failure("recording connection", error)
+                        }
                     }
                     currentCoroutineContext().ensureActive()
                     if (ended || deadline.reached || now() >= stopAtMillis) break
@@ -127,7 +147,7 @@ class IptvRecordingCopier(
                 client.connectionPool.evictAll()
             }
         }
-        IptvRecordingCopy(progress.bytes, progress.gaps, failure)
+        IptvRecordingCopy(progress.bytes, progress.gaps, failure, progress.parts)
     }
 
     private suspend fun session(address: String, format: IptvStreamFormat, sink: Sink, deadline: Deadline,
@@ -200,6 +220,7 @@ class IptvRecordingCopier(
     }
 
     private suspend fun append(segment: RecordingSegment, sink: Sink, deadline: Deadline) {
+        sink.beginSegment()
         val mark = sink.position
         try {
             call(segment.address.toString(), deadline) { response ->
@@ -219,6 +240,7 @@ class IptvRecordingCopier(
                 }
                 if (declared >= 0 && count != declared) throw IOException("Short segment")
             }
+            sink.commit()
         } catch (error: Throwable) {
             sink.rollback(mark)
             throw error

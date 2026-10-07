@@ -322,6 +322,9 @@ android {
     }
 
     packaging {
+        resources {
+            excludes += listOf("META-INF/versions/9/module-info.class", "META-INF/versions/*/OSGI-INF/MANIFEST.MF", "META-INF/LICENSE.md")
+        }
         jniLibs {
             useLegacyPackaging = true
             // Keep one consistent native set across dependencies.
@@ -520,6 +523,7 @@ dependencies {
     // QR code + local server for addon management
     implementation(libs.nanohttpd)
     implementation(libs.zxing.core)
+    implementation(libs.smbj)
 
 
     // Supabase

@@ -63,14 +63,20 @@ class SetupConnection(val endpoint: String, val username: String? = null, val pa
 
 data class SetupListingItem(val id: String, val label: String, val kind: SetupKind, val host: String?, val editable: Boolean, val origin: String? = null)
 
-data class SetupListing(val sources: List<SetupListingItem> = emptyList(), val guides: List<SetupListingItem> = emptyList()) {
+data class SetupListing(val sources: List<SetupListingItem> = emptyList(), val guides: List<SetupListingItem> = emptyList(),
+    val profile: Int = 0, val profiles: List<SetupProfile> = emptyList(), val links: Map<String, List<String>> = emptyMap()) {
     fun find(kind: SetupKind, id: String): SetupListingItem? = (if (kind.guide) guides else sources).firstOrNull { it.id == id }
 
     fun toJson(pending: Boolean): String = JSONObject()
-        .put("sources", items(sources)).put("guides", items(guides)).put("pending", pending).toString()
+        .put("sources", items(sources)).put("guides", items(guides)).put("pending", pending).put("profile", profile)
+        .put("profiles", JSONArray().apply { profiles.forEach { put(JSONObject().put("id", it.id).put("name", it.name).put("locked", it.locked)) } })
+        .toString()
 
     private fun items(list: List<SetupListingItem>) = JSONArray().apply {
-        list.forEach { put(JSONObject().put("id", it.id).put("label", it.label).put("kind", it.kind.wire).put("host", it.host ?: "").put("editable", it.editable)) }
+        list.forEach { item ->
+            put(JSONObject().put("id", item.id).put("label", item.label).put("kind", item.kind.wire).put("host", item.host ?: "").put("editable", item.editable)
+                .apply { if (!item.kind.guide) put("guides", JSONArray(links[item.id].orEmpty())) })
+        }
     }
 }
 

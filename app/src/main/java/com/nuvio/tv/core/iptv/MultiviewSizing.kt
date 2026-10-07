@@ -1,7 +1,7 @@
 package com.nuvio.tv.core.iptv
 
 enum class MultiviewQuality { AUTO, SHARPEST, LIGHTEST }
-enum class MultiviewLayout { GRID, FOCUS }
+enum class MultiviewLayout { GRID, FOCUS, SIDE_BY_SIDE, ONE_OVER_TWO }
 
 val MULTIVIEW_RUNGS = intArrayOf(360, 540, 720, 1080)
 const val MULTIVIEW_FRAME_RATE = 50

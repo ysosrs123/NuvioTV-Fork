@@ -5,7 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.R
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.iptv.*
+import com.nuvio.tv.core.iptv.AccountGroupHint
+import com.nuvio.tv.core.iptv.AccountGroups
+import com.nuvio.tv.core.iptv.HeldCatalogue
 import com.nuvio.tv.core.iptv.RefreshDecision
+import com.nuvio.tv.core.iptv.SetupText
+import com.nuvio.tv.core.iptv.suggestAccountGroups
 import com.nuvio.tv.core.iptv.SourceConnections
 import com.nuvio.tv.core.iptv.StalkerPortal
 import com.nuvio.tv.core.iptv.XtreamGuideReference
@@ -33,7 +38,11 @@ data class IptvSourcesState(val profileId: Int = 0, val revision: Long = 0, val 
     val busy: Boolean = false, val message: Int? = null, val form: IptvSourceForm? = null,
     val refresh: Map<String, IptvRefreshStatus> = emptyMap(), val counts: Map<String, Int> = emptyMap(),
     val automatic: Set<String> = emptySet(), val connections: Map<String, Int> = emptyMap(),
-    val manualConnections: Set<String> = emptySet(), val providerConnections: Map<String, Int> = emptyMap())
+    val manualConnections: Set<String> = emptySet(), val providerConnections: Map<String, Int> = emptyMap(),
+    val groups: List<IptvGroupView> = emptyList(), val suggestions: List<IptvGroupView> = emptyList(),
+    val reviews: Map<String, HeldCatalogue> = emptyMap())
+
+data class IptvGroupView(val id: String, val label: String, val limit: Int, val sources: List<IptvSourceRef>)
 
 @HiltViewModel
 class IptvSourcesViewModel @Inject constructor(
@@ -50,6 +59,8 @@ class IptvSourcesViewModel @Inject constructor(
     private var statusReload: Job? = null
     private val xtreamGuides = IptvXtreamGuides(catalogue, guides)
     private val sourceConnections = IptvSourceConnections(catalogue, livePreferences)
+    private val playlists = IptvPlaylistRepository(catalogue, xtreamGuides = xtreamGuides, connections = sourceConnections)
+    private val random = java.security.SecureRandom()
     suspend fun guideFiles(): Pair<List<com.nuvio.tv.core.iptv.LocalGuideFile>, List<String>> = withContext(Dispatchers.IO) {
         runCatching { refresher.localGuides.list() }.getOrDefault(emptyList()) to runCatching { refresher.localGuideFolders().map { it.path } }.getOrDefault(emptyList())
     }
@@ -98,6 +109,9 @@ class IptvSourcesViewModel @Inject constructor(
         var connections = emptyMap<String, Int>()
         var manual = emptySet<String>()
         var provider = emptyMap<String, Int>()
+        var groups = emptyList<IptvGroupView>()
+        var suggestions = emptyList<IptvGroupView>()
+        var reviews = emptyMap<String, HeldCatalogue>()
         val (loaded, counts) = withContext(Dispatchers.IO) { access.use(current) {
             val sources = catalogue.sources(current.profileId)
             val selected = oldSelected?.takeIf { ref -> sources.any { it.ref == ref } } ?: sources.firstOrNull()?.ref
@@ -107,10 +121,22 @@ class IptvSourcesViewModel @Inject constructor(
             connections = sources.associate { source -> source.ref.sourceId to (accounts.firstOrNull { it.id == source.accountId }?.maxStreams ?: 1) }
             manual = sources.filter { livePreferences.connectionsManual(it.ref) }.map { it.ref.sourceId }.toSet()
             provider = sources.mapNotNull { source -> livePreferences.providerConnections(source.ref)?.let { source.ref.sourceId to it } }.toMap()
+            groups = accounts.filter { AccountGroups.isGroup(it.id, it.sources.size) }.map { IptvGroupView(it.id, it.label, it.maxStreams, it.sources) }
+            val endpoints = sources.associate { it.ref.sourceId to runCatching { catalogue.connection(it.ref) }.getOrNull() }
+            val suggested = suggestAccountGroups(sources.mapNotNull { source -> endpoints[source.ref.sourceId]?.let { c ->
+                AccountGroupHint(source.ref.sourceId, source.kind == IptvSourceKind.XTREAM, c.endpoint, c.username, source.kind == IptvSourceKind.STALKER)
+            } })
+            suggestions = AccountGroups.suggestions(suggested, sources.associate { it.ref.sourceId to it.accountId }).map { (id, members) ->
+                val refs = members.map { IptvSourceRef(current.profileId, it) }
+                IptvGroupView(id, SetupText.host(endpoints[members.first()]?.endpoint) ?: sources.first { it.ref == refs.first() }.label,
+                    refs.maxOf { ref -> connections[ref.sourceId] ?: 1 }.coerceIn(1, AccountGroups.MAX_LIMIT), refs)
+            }
+            catalogue.pending.prune(current.profileId, sources.map { it.ref.sourceId }.toSet())
+            reviews = sources.mapNotNull { source -> playlists.held(source.ref)?.let { source.ref.sourceId to it } }.toMap()
             Triple(sources, feeds, selected?.let(catalogue::guideAssociations)) to catalogue.channelCounts(current.profileId)
         } }
         if (session === current) mutable.update { it.copy(sources = loaded.first, feeds = loaded.second, counts = counts, automatic = automatic, connections = connections,
-            manualConnections = manual, providerConnections = provider,
+            manualConnections = manual, providerConnections = provider, groups = groups, suggestions = suggestions, reviews = reviews,
             selected = oldSelected?.takeIf { ref -> loaded.first.any { it.ref == ref } } ?: loaded.first.firstOrNull()?.ref,
             linked = loaded.third?.feedIds?.toSet().orEmpty(),
             linkedOrder = loaded.third?.let { (it.priority + it.feedIds).distinct() }.orEmpty(), ready = true) }
@@ -224,6 +250,7 @@ class IptvSourcesViewModel @Inject constructor(
             require(source.ref.profileId == profileId)
             xtreamGuides.removeSource(source.ref)
             livePreferences.removeSource(source.ref)
+            catalogue.pending.removeSource(source.ref)
         } }
         if (session === this) mutable.update { it.copy(message = R.string.iptv_source_removed) }
         reload(this)
@@ -237,6 +264,87 @@ class IptvSourcesViewModel @Inject constructor(
         if (session === this) mutable.update { it.copy(message = R.string.iptv_guide_removed) }
         reload(this)
     }
+    fun acceptReview(source: IptvSource) = runOperation {
+        refresher.cancel(source.ref)
+        withContext(Dispatchers.IO) { access.use(this@runOperation) { require(source.ref.profileId == profileId) } }
+        val result = playlists.acceptHeld(source.ref)
+        val published = (result as? IptvPlaylistRefresh.Catalogue)?.decision == RefreshDecision.PUBLISH
+        if (session === this) mutable.update { it.copy(message = if (published) R.string.iptv_review_accepted else R.string.iptv_review_outdated) }
+        reload(this)
+        if (published) (result as IptvPlaylistRefresh.Catalogue).guides.distinct().forEach { feed ->
+            runCatching { withContext(Dispatchers.IO) { access.use(this@runOperation) { guides.feed(feed) } } }.getOrNull()?.let { refresher.refresh(this, it) }
+        }
+    }
+    fun keepReview(source: IptvSource) = runOperation {
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            require(source.ref.profileId == profileId)
+            playlists.keepCurrent(source.ref)
+        } }
+        if (session === this) mutable.update { it.copy(message = R.string.iptv_review_kept) }
+        reload(this)
+    }
+    fun createGroup(label: String) = runOperation {
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            catalogue.saveAccount(profileId, AccountGroups.newId(random), label.trim().take(240).ifBlank { throw IllegalArgumentException() }, 1)
+        } }
+        reload(this)
+    }
+    fun renameGroup(group: IptvGroupView, label: String) = runOperation {
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            catalogue.saveAccount(profileId, group.id, label.trim().take(240).ifBlank { throw IllegalArgumentException() }, group.limit)
+        } }
+        reload(this)
+    }
+    fun setGroupLimit(group: IptvGroupView, limit: Int) = runOperation {
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            require(limit in 1..AccountGroups.MAX_LIMIT)
+            catalogue.saveAccount(profileId, group.id, group.label, limit)
+            group.sources.forEach { livePreferences.setConnectionsManual(it, true) }
+        } }
+        reload(this)
+    }
+    fun toggleInGroup(group: IptvGroupView, source: IptvSource) = runOperation {
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            require(source.ref.profileId == profileId)
+            val latest = catalogue.sources(profileId).single { it.ref == source.ref }
+            if (latest.accountId == group.id) leaveGroup(latest)
+            else {
+                catalogue.saveAccount(profileId, group.id, group.label, group.limit)
+                catalogue.assignAccount(latest.ref, group.id)
+                livePreferences.setConnectionsManual(latest.ref, true)
+                if (latest.accountId.startsWith("src-")) catalogue.removeAccount(profileId, latest.accountId)
+            }
+        } }
+        reload(this)
+    }
+    fun applySuggestion(group: IptvGroupView) = runOperation {
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            catalogue.saveAccount(profileId, group.id, group.label.take(240), group.limit)
+            for (ref in group.sources) {
+                val latest = catalogue.sources(profileId).firstOrNull { it.ref == ref } ?: continue
+                catalogue.assignAccount(ref, group.id)
+                livePreferences.setConnectionsManual(ref, true)
+                if (latest.accountId.startsWith("src-")) catalogue.removeAccount(profileId, latest.accountId)
+            }
+        } }
+        if (session === this) mutable.update { it.copy(message = R.string.iptv_group_created) }
+        reload(this)
+    }
+    fun removeGroup(group: IptvGroupView) = runOperation {
+        withContext(Dispatchers.IO) { access.use(this@runOperation) {
+            catalogue.sources(profileId).filter { it.accountId == group.id }.forEach(::leaveGroup)
+            catalogue.removeAccount(profileId, group.id)
+        } }
+        if (session === this) mutable.update { it.copy(message = R.string.iptv_group_removed) }
+        reload(this)
+    }
+    private fun leaveGroup(source: IptvSource) {
+        val own = SourceConnections.ownAccount(source.ref.sourceId)
+        catalogue.saveAccount(source.ref.profileId, own, source.label, 1)
+        catalogue.assignAccount(source.ref, own)
+        sourceConnections.choose(source.ref, null)
+    }
+    fun reloadNow() = runOperation { reload(this) }
     fun watch(source: IptvSource) { liveLaunch.source.value = source.ref }
     fun refresh(source: IptvSource) { session?.let { refresher.refresh(it, source) } }
     fun refresh(feed: IptvGuideFeed) { session?.let { refresher.refresh(it, feed) } }

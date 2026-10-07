@@ -7,17 +7,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.GuideKey
 import com.nuvio.tv.core.iptv.IptvDeviceProfile
 import com.nuvio.tv.core.iptv.MultiviewLayout
 import com.nuvio.tv.core.iptv.MultiviewQuality
+import com.nuvio.tv.core.iptv.SetupAssignments
 import com.nuvio.tv.core.iptv.SetupChange
 import com.nuvio.tv.core.iptv.SetupChangeBook
+import com.nuvio.tv.core.iptv.SetupChannel
+import com.nuvio.tv.core.iptv.SetupChannelGuide
 import com.nuvio.tv.core.iptv.SetupConnection
 import com.nuvio.tv.core.iptv.SetupDraft
+import com.nuvio.tv.core.iptv.SetupGuideChannel
+import com.nuvio.tv.core.iptv.SetupGuideLinks
 import com.nuvio.tv.core.iptv.SetupKind
 import com.nuvio.tv.core.iptv.SetupLan
 import com.nuvio.tv.core.iptv.SetupListing
 import com.nuvio.tv.core.iptv.SetupListingItem
+import com.nuvio.tv.core.iptv.SetupLookup
+import com.nuvio.tv.core.iptv.SetupProfile
+import com.nuvio.tv.core.iptv.SetupProfileChoice
 import com.nuvio.tv.core.iptv.SetupSetting
 import com.nuvio.tv.core.iptv.SetupSettings
 import com.nuvio.tv.core.iptv.SetupSettingsChange
@@ -27,6 +36,8 @@ import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.qr.QrCodeGenerator
 import com.nuvio.tv.core.server.IptvSetupAddress
 import com.nuvio.tv.core.server.IptvSetupServer
+import com.nuvio.tv.data.iptv.IptvBrowseQuery
+import com.nuvio.tv.data.iptv.IptvCatalogueItem
 import com.nuvio.tv.data.iptv.IptvCatalogueStore
 import com.nuvio.tv.data.iptv.IptvGuideFeed
 import com.nuvio.tv.data.iptv.IptvGuideRef
@@ -36,10 +47,12 @@ import com.nuvio.tv.data.iptv.IptvProfileAccess
 import com.nuvio.tv.data.iptv.IptvSource
 import com.nuvio.tv.data.iptv.IptvSourceConnection
 import com.nuvio.tv.data.iptv.IptvSourceKind
+import com.nuvio.tv.data.iptv.IptvSourceRef
 import com.nuvio.tv.data.iptv.IptvStartView
 import com.nuvio.tv.data.iptv.IptvStreamFormat
 import com.nuvio.tv.data.iptv.MetadataException
 import com.nuvio.tv.data.iptv.MetadataFailure
+import com.nuvio.tv.data.local.ProfileLockStateDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -50,6 +63,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -61,9 +75,11 @@ data class IptvSetupLine(@StringRes val label: Int, val value: String = "", @Str
     override fun toString() = "IptvSetupLine(value withheld)"
 }
 
-class IptvSetupPending(val id: String, val change: SetupChange, val previousLabel: String?, val lines: List<IptvSetupLine>, val applying: Boolean = false) {
-    val settings: Boolean get() = change is SetupSettingsChange
-    fun applying() = IptvSetupPending(id, change, previousLabel, lines, true)
+class IptvSetupPending(val id: String, val change: SetupChange, val previousLabel: String?, val lines: List<IptvSetupLine>, val applying: Boolean = false,
+    val title: String? = null) {
+    val settings: Boolean get() = change is SetupSettingsChange || change is SetupGuideLinks || change is SetupChannelGuide
+    val allow: Boolean get() = change is SetupProfileChoice
+    fun applying() = IptvSetupPending(id, change, previousLabel, lines, true, title)
     override fun toString() = "IptvSetupPending(values withheld)"
 }
 
@@ -75,6 +91,7 @@ data class IptvSetupState(
     val devices: Int = 0,
     val pending: IptvSetupPending? = null,
     @StringRes val message: Int? = null,
+    val editingProfile: String? = null,
 ) {
     override fun toString() = "IptvSetupState(phase=$phase, devices=$devices)"
 }
@@ -85,10 +102,11 @@ class IptvSetupViewModel @Inject constructor(
     private val catalogue: IptvCatalogueStore,
     private val guides: IptvGuideStore,
     private val access: IptvProfileAccess,
-    profiles: ProfileManager,
+    private val profiles: ProfileManager,
     private val refresher: IptvRefreshCoordinator,
     private val livePreferences: IptvLivePreferences,
     private val device: IptvDeviceProfile,
+    private val locks: ProfileLockStateDataStore,
 ) : ViewModel() {
     private val mutable = MutableStateFlow(IptvSetupState())
     val state = mutable.asStateFlow()
@@ -97,6 +115,18 @@ class IptvSetupViewModel @Inject constructor(
     private var server: IptvSetupServer? = null
     private var monitor: Job? = null
     private var visible = false
+    @Volatile private var activeProfile = -1
+    private val lookup = object : SetupLookup {
+        override fun channels(sourceId: String, query: String): List<SetupChannel>? = withSession { current ->
+            catalogue.page(IptvSourceRef(current.profileId, sourceId), IptvBrowseQuery(search = query), limit = SetupAssignments.MAX_RESULTS).items.map { setupChannel(it) }
+        }
+        override fun channel(sourceId: String, channelId: String): SetupChannel? = withSession { current ->
+            catalogue.playbackItem(IptvSourceRef(current.profileId, sourceId), channelId)?.let { setupChannel(it) }
+        }
+        override fun guideChannels(feedId: String, query: String): List<SetupGuideChannel>? = withSession { current ->
+            guides.searchChannels(IptvGuideRef(current.profileId, feedId), query, 200).map { SetupGuideChannel(it.externalId, it.names.firstOrNull()?.text ?: it.externalId) }
+        }
+    }
 
     init {
         viewModelScope.launch {
@@ -105,6 +135,8 @@ class IptvSetupViewModel @Inject constructor(
                     stopServer()
                     session = null
                     listing = SetupListing()
+                    activeProfile = id
+                    mutable.update { it.copy(editingProfile = null) }
                     if (ready) {
                         val current = withContext(Dispatchers.IO) { access.open(id) }
                         session = current
@@ -153,7 +185,8 @@ class IptvSetupViewModel @Inject constructor(
             host = ip,
             listing = { listing },
             settings = ::settings,
-            onChangeProposed = { origin, id, change, from -> viewModelScope.launch { propose(origin, current, id, change, from) } }
+            lookup = lookup,
+            onChangeProposed = { origin, id, change, from, profile -> viewModelScope.launch { propose(origin, id, change, from, profile) } }
         )
         if (started == null) {
             mutable.update { it.copy(phase = IptvSetupPhase.PORTS_BUSY, address = null, qr = null, code = null, devices = 0) }
@@ -192,9 +225,10 @@ class IptvSetupViewModel @Inject constructor(
         mutable.update { it.copy(address = null, qr = null, code = null, devices = 0, pending = null) }
     }
 
-    private fun propose(origin: IptvSetupServer, current: IptvProfileAccess.Session, id: String, change: SetupChange, from: String) {
+    private suspend fun propose(origin: IptvSetupServer, id: String, change: SetupChange, from: String, profile: Int) {
         val active = server
-        if (active !== origin || session !== current || mutable.value.pending != null) {
+        val current = session
+        if (active !== origin || current == null || current.profileId != profile || mutable.value.pending != null) {
             origin.resolve(id, SetupChangeBook.Status.REJECTED)
             return
         }
@@ -204,6 +238,13 @@ class IptvSetupViewModel @Inject constructor(
                 val lines = settingLines(change, settings(), from)
                 if (lines.size < 2) origin.resolve(id, SetupChangeBook.Status.FAILED)
                 else mutable.update { it.copy(pending = IptvSetupPending(id, change, null, lines), message = null) }
+                return
+            }
+            is SetupGuideLinks, is SetupChannelGuide, is SetupProfileChoice -> {
+                val pending = runCatching { withContext(Dispatchers.IO) { assignment(current, id, change, from) } }
+                    .getOrElse { if (it is CancellationException) throw it; null }
+                if (pending == null || server !== origin || session !== current || mutable.value.pending != null) origin.resolve(id, SetupChangeBook.Status.FAILED)
+                else mutable.update { it.copy(pending = pending, message = null) }
                 return
             }
         }
@@ -229,6 +270,36 @@ class IptvSetupViewModel @Inject constructor(
                         active?.resolve(pending.id, SetupChangeBook.Status.SAVED)
                         R.string.iptv_remote_settings_saved
                     }
+                    is SetupGuideLinks -> {
+                        withContext(Dispatchers.IO) { access.use(current) {
+                            val ref = IptvSourceRef(current.profileId, change.sourceId)
+                            val feeds = change.feeds.map { IptvGuideRef(current.profileId, it).also { feed -> guides.feed(feed) } }
+                            catalogue.setGuideFeeds(ref, feeds, feeds)
+                        } }
+                        active?.resolve(pending.id, SetupChangeBook.Status.SAVED)
+                        R.string.iptv_remote_links_saved
+                    }
+                    is SetupChannelGuide -> {
+                        withContext(Dispatchers.IO) { access.use(current) {
+                            val ref = IptvSourceRef(current.profileId, change.sourceId)
+                            val item = requireNotNull(catalogue.playbackItem(ref, change.channelId))
+                            val key = change.feedId?.let { GuideKey(it, requireNotNull(change.guideId)) }
+                            require(key == null || key.feedId in catalogue.guideAssociations(ref).feedIds)
+                            catalogue.setOverlay(ref, item.channel.id, item.overlay.copy(manualGuide = key))
+                        } }
+                        active?.resolve(pending.id, SetupChangeBook.Status.SAVED)
+                        R.string.iptv_remote_channel_saved
+                    }
+                    is SetupProfileChoice -> {
+                        val choice = withContext(Dispatchers.IO) { profileChoices() }.firstOrNull { it.id == change.profileId }
+                        require(choice != null && !choice.locked)
+                        val next = withContext(Dispatchers.IO) { access.open(choice.id) }
+                        session = next
+                        mutable.update { it.copy(editingProfile = choice.name.takeIf { choice.id != activeProfile }) }
+                        reload(next)
+                        active?.resolve(pending.id, SetupChangeBook.Status.SAVED)
+                        R.string.iptv_remote_profile_switched
+                    }
                     is SetupDraft -> {
                         val saved = withContext(Dispatchers.IO) { access.use(current) { save(current.profileId, change) } }
                         active?.resolve(pending.id, SetupChangeBook.Status.SAVED)
@@ -243,8 +314,8 @@ class IptvSetupViewModel @Inject constructor(
                 active?.resolve(pending.id, SetupChangeBook.Status.FAILED)
                 IptvRefreshCoordinator.failureMessage(error)
             }
-            if (session === current) mutable.update { it.copy(pending = null, message = message) }
-            runCatching { reload(current) }.onFailure { if (it is CancellationException) throw it }
+            mutable.update { it.copy(pending = null, message = message) }
+            session?.let { latest -> runCatching { reload(latest) }.onFailure { if (it is CancellationException) throw it } }
         }
     }
 
@@ -310,6 +381,8 @@ class IptvSetupViewModel @Inject constructor(
     private fun layoutName(wire: String): String = context.getString(when (SetupSettings.choice(MultiviewLayout.entries, wire)) {
         MultiviewLayout.GRID -> R.string.iptv_multiview_layout_grid
         MultiviewLayout.FOCUS -> R.string.iptv_multiview_layout_focus
+        MultiviewLayout.SIDE_BY_SIDE -> R.string.iptv_multiview_layout_side
+        MultiviewLayout.ONE_OVER_TWO -> R.string.iptv_multiview_layout_one_over_two
     })
 
     private fun qualityName(wire: String): String = context.getString(when (SetupSettings.choice(MultiviewQuality.entries, wire)) {
@@ -349,7 +422,65 @@ class IptvSetupViewModel @Inject constructor(
             else catalogue.editSource(existing.ref, draft.label, existing.kind, existing.accountId, connection))
     }
 
+    private fun <T> withSession(block: (IptvProfileAccess.Session) -> T): T? {
+        val current = session ?: return null
+        return runCatching { access.use(current) { block(current) } }.getOrNull()
+    }
+
+    private fun setupChannel(item: IptvCatalogueItem) = SetupChannel(item.channel.id, item.overlay.customName ?: item.channel.data.name,
+        item.overlay.manualGuide?.feedId, item.overlay.manualGuide?.externalId)
+
+    private suspend fun profileChoices(): List<SetupProfile> {
+        val pins = runCatching { locks.pinEnabled.first() }.getOrDefault(emptyMap())
+        return profiles.profiles.value.map { SetupProfile(it.id, it.name.take(80), it.id != activeProfile && pins[it.id] == true) }
+    }
+
+    private suspend fun assignment(current: IptvProfileAccess.Session, id: String, change: SetupChange, from: String): IptvSetupPending? = access.use(current) {
+        val lines = mutableListOf(IptvSetupLine(R.string.iptv_remote_field_device, from))
+        when (change) {
+            is SetupGuideLinks -> {
+                val ref = IptvSourceRef(current.profileId, change.sourceId)
+                val source = catalogue.sources(current.profileId).firstOrNull { it.ref == ref } ?: return@use null
+                val links = catalogue.guideAssociations(ref)
+                fun names(ids: List<String>) = ids.joinToString(", ") { feedId -> runCatching { guides.feed(IptvGuideRef(current.profileId, feedId)).label }.getOrDefault("?") }
+                    .ifEmpty { context.getString(R.string.iptv_settings_none) }
+                lines += IptvSetupLine(R.string.iptv_remote_field_source, source.label)
+                lines += line(R.string.iptv_remote_field_guides, names((links.priority + links.feedIds).distinct()), names(change.feeds))
+                IptvSetupPending(id, change, null, profileLine(lines), title = context.getString(R.string.iptv_remote_confirm_guides_title, source.label))
+            }
+            is SetupChannelGuide -> {
+                val ref = IptvSourceRef(current.profileId, change.sourceId)
+                val source = catalogue.sources(current.profileId).firstOrNull { it.ref == ref } ?: return@use null
+                val item = catalogue.playbackItem(ref, change.channelId) ?: return@use null
+                fun describe(key: GuideKey?, name: String?) = if (key == null) context.getString(R.string.iptv_remote_guide_automatic)
+                    else (runCatching { guides.feed(IptvGuideRef(current.profileId, key.feedId)).label }.getOrDefault("?") + " · " + (name ?: key.externalId))
+                val next = change.feedId?.let { GuideKey(it, requireNotNull(change.guideId)) }
+                lines += IptvSetupLine(R.string.iptv_remote_field_source, source.label)
+                lines += IptvSetupLine(R.string.iptv_remote_field_channel, item.overlay.customName ?: item.channel.data.name)
+                lines += line(R.string.iptv_remote_field_guide, describe(item.overlay.manualGuide, null), describe(next, change.guideName))
+                IptvSetupPending(id, change, null, profileLine(lines),
+                    title = context.getString(R.string.iptv_remote_confirm_channel_title, item.overlay.customName ?: item.channel.data.name))
+            }
+            is SetupProfileChoice -> null
+            else -> null
+        }
+    } ?: if (change is SetupProfileChoice) profilePending(current, id, change, from) else null
+
+    private suspend fun profilePending(current: IptvProfileAccess.Session, id: String, change: SetupProfileChoice, from: String): IptvSetupPending? {
+        val choices = profileChoices()
+        val target = choices.firstOrNull { it.id == change.profileId }?.takeIf { !it.locked && it.id != current.profileId } ?: return null
+        val now = choices.firstOrNull { it.id == current.profileId }?.name ?: return null
+        return IptvSetupPending(id, change, null, listOf(IptvSetupLine(R.string.iptv_remote_field_device, from), line(R.string.iptv_remote_field_profile, now, target.name)),
+            title = context.getString(R.string.iptv_remote_confirm_profile_title))
+    }
+
+    private fun profileLine(lines: MutableList<IptvSetupLine>): List<IptvSetupLine> {
+        mutable.value.editingProfile?.let { lines.add(1, IptvSetupLine(R.string.iptv_remote_field_profile, it)) }
+        return lines
+    }
+
     private suspend fun reload(current: IptvProfileAccess.Session) {
+        val choices = profileChoices()
         val loaded = withContext(Dispatchers.IO) { access.use(current) {
             val sources = catalogue.sources(current.profileId).map { source ->
                 val endpoint = catalogue.connection(source.ref).endpoint
@@ -362,7 +493,8 @@ class IptvSetupViewModel @Inject constructor(
                 SetupListingItem(feed.ref.feedId, feed.label, SetupKind.GUIDE, if (automatic) null else SetupText.host(endpoint), editable = !automatic,
                     origin = SetupText.origin(endpoint))
             }
-            SetupListing(sources, feeds)
+            SetupListing(sources, feeds, current.profileId, choices,
+                sources.associate { item -> item.id to catalogue.guideAssociations(IptvSourceRef(current.profileId, item.id)).let { (it.priority + it.feedIds).distinct() } })
         } }
         if (session === current) listing = loaded
     }

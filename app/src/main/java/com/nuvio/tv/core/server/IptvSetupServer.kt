@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.server
 
+import com.nuvio.tv.core.iptv.SetupAssignments
 import com.nuvio.tv.core.iptv.SetupChange
 import com.nuvio.tv.core.iptv.SetupChangeBook
 import com.nuvio.tv.core.iptv.SetupConnectionLimiter
@@ -9,8 +10,10 @@ import com.nuvio.tv.core.iptv.SetupGuard
 import com.nuvio.tv.core.iptv.SetupHeaders
 import com.nuvio.tv.core.iptv.SetupIdleTimer
 import com.nuvio.tv.core.iptv.SetupInputException
+import com.nuvio.tv.core.iptv.SetupKind
 import com.nuvio.tv.core.iptv.SetupLan
 import com.nuvio.tv.core.iptv.SetupListing
+import com.nuvio.tv.core.iptv.SetupLookup
 import com.nuvio.tv.core.iptv.SetupPairing
 import com.nuvio.tv.core.iptv.SetupRateLimiter
 import com.nuvio.tv.core.iptv.SetupSettings
@@ -31,7 +34,8 @@ class IptvSetupServer private constructor(
     port: Int,
     private val listing: () -> SetupListing,
     private val settings: () -> SetupSettings,
-    private val onChangeProposed: (IptvSetupServer, String, SetupChange, String) -> Unit,
+    private val lookup: SetupLookup,
+    private val onChangeProposed: (IptvSetupServer, String, SetupChange, String, Int) -> Unit,
     now: () -> Long,
 ) : NanoHTTPD(host, port) {
 
@@ -41,7 +45,7 @@ class IptvSetupServer private constructor(
     private val idle = SetupIdleTimer(IDLE_TIMEOUT_MILLIS, now)
     private val requests = SetupRateLimiter(REQUESTS_PER_MINUTE, MINUTE, now)
     private val pairAttempts = SetupRateLimiter(PAIR_ATTEMPTS_PER_MINUTE, MINUTE, now)
-    private val runner = BoundedRunner(SetupConnectionLimiter(MAX_CLIENTS, MAX_CLIENTS_PER_ADDRESS), CONNECTION_DEADLINE_MILLIS)
+    private val runner = SetupBoundedRunner(SetupConnectionLimiter(MAX_CLIENTS, MAX_CLIENTS_PER_ADDRESS), CONNECTION_DEADLINE_MILLIS, "IptvSetup")
 
     init {
         setAsyncRunner(runner)
@@ -113,6 +117,11 @@ class IptvSetupServer private constructor(
             path == "settings" && !post -> json(Response.Status.OK, settings().toJson())
             path == "settings" && post -> proposeSettings(session, owner, remote)
             path == "changes" && post -> propose(session, owner, remote)
+            path == "links" && post -> proposeLinks(session, owner, remote)
+            path == "channel-guide" && post -> proposeChannelGuide(session, owner, remote)
+            path == "profile" && post -> proposeProfile(session, owner, remote)
+            path == "channels" && !post -> channels(session)
+            path == "guide-channels" && !post -> guideChannels(session)
             path.startsWith("changes/") && !post -> status(owner, path.removePrefix("changes/"))
             else -> json(Response.Status.NOT_FOUND, error("missing"))
         }
@@ -174,11 +183,60 @@ class IptvSetupServer private constructor(
         return submit(owner, change, remote)
     }
 
-    private fun submit(owner: String, change: SetupChange, remote: String): Response {
+    private fun proposeLinks(session: IHTTPSession, owner: String, remote: String): Response {
+        val change = try { SetupAssignments.parseLinks(readBody(session)) } catch (invalid: SetupInputException) { return invalid(invalid) }
+        val listing = listing()
+        SetupAssignments.checkLinks(change, listing)?.let { return refused(it) }
+        return submit(owner, change, remote, listing.profile)
+    }
+
+    private fun proposeChannelGuide(session: IHTTPSession, owner: String, remote: String): Response {
+        val change = try { SetupAssignments.parseChannelGuide(readBody(session)) } catch (invalid: SetupInputException) { return invalid(invalid) }
+        val listing = listing()
+        val current = if (listing.find(SetupKind.M3U, change.sourceId) == null) null else lookup.channel(change.sourceId, change.channelId)
+        SetupAssignments.checkChannelGuide(change, listing, current)?.let { return refused(it) }
+        if (change.feedId != null && lookup.guideChannels(change.feedId, change.guideName.orEmpty().take(SetupAssignments.MAX_QUERY))
+                ?.any { it.id == change.guideId } != true) return refused("missing")
+        return submit(owner, change, remote, listing.profile)
+    }
+
+    private fun proposeProfile(session: IHTTPSession, owner: String, remote: String): Response {
+        val change = try { SetupAssignments.parseProfile(readBody(session)) } catch (invalid: SetupInputException) { return invalid(invalid) }
+        val listing = listing()
+        SetupAssignments.checkProfile(change, listing)?.let { return refused(it) }
+        return submit(owner, change, remote, listing.profile)
+    }
+
+    private fun channels(session: IHTTPSession): Response {
+        val source = session.parameters["source"]?.singleOrNull()?.takeIf(ID::matches) ?: return json(Response.Status.BAD_REQUEST, error("source"))
+        val query = SetupAssignments.query(session.parameters["q"]?.singleOrNull()) ?: return json(Response.Status.BAD_REQUEST, error("query"))
+        if (listing().find(SetupKind.M3U, source) == null) return json(Response.Status.NOT_FOUND, error("missing"))
+        val found = lookup.channels(source, query) ?: return json(Response.Status.NOT_FOUND, error("missing"))
+        return json(Response.Status.OK, SetupAssignments.channelsJson(found.take(SetupAssignments.MAX_RESULTS)))
+    }
+
+    private fun guideChannels(session: IHTTPSession): Response {
+        val feed = session.parameters["feed"]?.singleOrNull()?.takeIf(ID::matches) ?: return json(Response.Status.BAD_REQUEST, error("feed"))
+        val query = SetupAssignments.query(session.parameters["q"]?.singleOrNull()) ?: return json(Response.Status.BAD_REQUEST, error("query"))
+        if (listing().find(SetupKind.GUIDE, feed) == null) return json(Response.Status.NOT_FOUND, error("missing"))
+        val found = lookup.guideChannels(feed, query) ?: return json(Response.Status.NOT_FOUND, error("missing"))
+        return json(Response.Status.OK, SetupAssignments.guideChannelsJson(found.take(SetupAssignments.MAX_RESULTS)))
+    }
+
+    private fun invalid(invalid: SetupInputException): Response =
+        json(Response.Status.BAD_REQUEST, JSONObject().put("error", "invalid").put("field", invalid.field).toString())
+
+    private fun refused(problem: String): Response = json(when (problem) {
+        "missing" -> Response.Status.NOT_FOUND
+        "locked" -> Response.Status.FORBIDDEN
+        else -> Response.Status.BAD_REQUEST
+    }, error(problem))
+
+    private fun submit(owner: String, change: SetupChange, remote: String, profile: Int = listing().profile): Response {
         if (changes.coolingDown(owner)) return json(Response.Status.CONFLICT, error("cooldown"))
         val id = changes.propose(owner, change) ?: return json(Response.Status.CONFLICT, error("busy"))
         try {
-            onChangeProposed(this, id, change, remote)
+            onChangeProposed(this, id, change, remote, profile)
         } catch (_: Exception) {
             changes.resolve(id, SetupChangeBook.Status.FAILED)
             return json(Response.Status.INTERNAL_ERROR, error("server"))
@@ -235,59 +293,6 @@ class IptvSetupServer private constructor(
 
     private class BodyRejected(val status: Response.Status) : Exception()
 
-    private class BoundedRunner(private val connections: SetupConnectionLimiter, private val deadlineMillis: Long) : AsyncRunner {
-        private val addresses = HashMap<ClientHandler, String>()
-        private val running = HashMap<ClientHandler, String>()
-        private val deadlines = HashMap<ClientHandler, ScheduledFuture<*>>()
-        private val timer = ScheduledThreadPoolExecutor(1, ThreadFactory { task ->
-            Thread(task, "IptvSetupDeadline").apply { isDaemon = true }
-        }).apply { removeOnCancelPolicy = true }
-
-        fun address(clientHandler: ClientHandler, address: String) {
-            synchronized(this) { addresses[clientHandler] = address }
-        }
-
-        override fun closeAll() {
-            val handlers = synchronized(this) { ArrayList(running.keys) }
-            handlers.forEach { it.close() }
-            timer.shutdownNow()
-        }
-
-        override fun closed(clientHandler: ClientHandler) {
-            synchronized(this) {
-                addresses.remove(clientHandler)
-                deadlines.remove(clientHandler)?.cancel(false)
-                running.remove(clientHandler)?.let(connections::release)
-            }
-        }
-
-        override fun exec(clientHandler: ClientHandler) {
-            val accepted = synchronized(this) {
-                val address = addresses.remove(clientHandler).orEmpty()
-                if (!connections.admit(address)) return@synchronized false
-                try {
-                    deadlines[clientHandler] = timer.schedule(Runnable { clientHandler.close() }, deadlineMillis, TimeUnit.MILLISECONDS)
-                } catch (_: RejectedExecutionException) {
-                    connections.release(address)
-                    return@synchronized false
-                }
-                running[clientHandler] = address
-                true
-            }
-            if (!accepted) {
-                clientHandler.close()
-                return
-            }
-            Thread(clientHandler, "IptvSetupClient").apply {
-                isDaemon = true
-                setUncaughtExceptionHandler { _, _ ->
-                    clientHandler.close()
-                    closed(clientHandler)
-                }
-            }.start()
-        }
-    }
-
     companion object {
         const val IDLE_TIMEOUT_MILLIS = 10 * 60_000L
         private const val MINUTE = 60_000L
@@ -298,12 +303,14 @@ class IptvSetupServer private constructor(
         private const val PAIR_ATTEMPTS_PER_MINUTE = 10
         private val PATH = Regex("/s/([^/]+)(.*)")
         private val CHANGE_ID = Regex("[0-9a-f]{32}")
+        private val ID = Regex("[A-Za-z0-9_-]{1,80}")
 
         fun start(
             host: String,
             listing: () -> SetupListing,
             settings: () -> SetupSettings,
-            onChangeProposed: (IptvSetupServer, String, SetupChange, String) -> Unit,
+            lookup: SetupLookup,
+            onChangeProposed: (IptvSetupServer, String, SetupChange, String, Int) -> Unit,
             now: () -> Long = System::currentTimeMillis,
             startPort: Int = 8100,
             maxAttempts: Int = 10
@@ -311,7 +318,7 @@ class IptvSetupServer private constructor(
             if (!SetupLan.isLanAddress(host)) return null
             for (port in startPort until startPort + maxAttempts) {
                 try {
-                    val server = IptvSetupServer(host, port, listing, settings, onChangeProposed, now)
+                    val server = IptvSetupServer(host, port, listing, settings, lookup, onChangeProposed, now)
                     server.start(SOCKET_READ_TIMEOUT, false)
                     return server
                 } catch (_: Exception) {
@@ -319,5 +326,58 @@ class IptvSetupServer private constructor(
             }
             return null
         }
+    }
+}
+
+internal class SetupBoundedRunner(private val connections: SetupConnectionLimiter, private val deadlineMillis: Long, private val name: String) : NanoHTTPD.AsyncRunner {
+    private val addresses = HashMap<NanoHTTPD.ClientHandler, String>()
+    private val running = HashMap<NanoHTTPD.ClientHandler, String>()
+    private val deadlines = HashMap<NanoHTTPD.ClientHandler, ScheduledFuture<*>>()
+    private val timer = ScheduledThreadPoolExecutor(1, ThreadFactory { task ->
+        Thread(task, "${name}Deadline").apply { isDaemon = true }
+    }).apply { removeOnCancelPolicy = true }
+
+    fun address(clientHandler: NanoHTTPD.ClientHandler, address: String) {
+        synchronized(this) { addresses[clientHandler] = address }
+    }
+
+    override fun closeAll() {
+        val handlers = synchronized(this) { ArrayList(running.keys) }
+        handlers.forEach { it.close() }
+        timer.shutdownNow()
+    }
+
+    override fun closed(clientHandler: NanoHTTPD.ClientHandler) {
+        synchronized(this) {
+            addresses.remove(clientHandler)
+            deadlines.remove(clientHandler)?.cancel(false)
+            running.remove(clientHandler)?.let(connections::release)
+        }
+    }
+
+    override fun exec(clientHandler: NanoHTTPD.ClientHandler) {
+        val accepted = synchronized(this) {
+            val address = addresses.remove(clientHandler).orEmpty()
+            if (!connections.admit(address)) return@synchronized false
+            try {
+                deadlines[clientHandler] = timer.schedule(Runnable { clientHandler.close() }, deadlineMillis, TimeUnit.MILLISECONDS)
+            } catch (_: RejectedExecutionException) {
+                connections.release(address)
+                return@synchronized false
+            }
+            running[clientHandler] = address
+            true
+        }
+        if (!accepted) {
+            clientHandler.close()
+            return
+        }
+        Thread(clientHandler, "${name}Client").apply {
+            isDaemon = true
+            setUncaughtExceptionHandler { _, _ ->
+                clientHandler.close()
+                closed(clientHandler)
+            }
+        }.start()
     }
 }

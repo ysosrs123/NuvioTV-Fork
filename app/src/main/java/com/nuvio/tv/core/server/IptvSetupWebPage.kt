@@ -91,6 +91,8 @@ input.switch:focus{box-shadow:0 0 0 3px rgba(213,221,227,.25)}
 .pair2{display:grid;grid-template-columns:1fr;gap:0 12px}
 .list{list-style:none;margin:14px 0 0;padding:0}
 .list li{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.05);margin-top:8px}
+.list li .tools{display:flex;gap:6px;flex:none}
+.list li.picked{border-color:var(--accent)}
 .badge{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--soft);background:var(--raised);border:1px solid var(--line)}
 .grow{flex:1;min-width:0}
 .name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -146,6 +148,13 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 <section id="home" hidden>
 <p id="busy" class="banner" role="status" hidden>Your TV is waiting for you to save or reject another change.</p>
 <div class="col">
+<div class="card" id="profileCard" aria-labelledby="profileTitle" hidden>
+<div class="head"><div class="grow"><h2 id="profileTitle">Profile</h2><p class="lead" id="profileLead"></p></div></div>
+<label for="profileChoice">Edit the Live TV setup of</label>
+<div class="row"><div class="pick grow"><select id="profileChoice"></select></div><button type="button" id="switchProfile">Switch</button></div>
+<p class="hint">Profiles locked with a PIN can only be changed on the TV.</p>
+<p id="profileError" class="error" role="alert" hidden></p>
+</div>
 <div class="card" aria-labelledby="sourcesTitle">
 <div class="head"><div class="grow"><h2 id="sourcesTitle">Sources</h2><p class="lead">Playlists and accounts that provide your channels.</p></div></div>
 <ul id="sources" class="list" aria-labelledby="sourcesTitle"></ul>
@@ -157,7 +166,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 <ul id="guides" class="list" aria-labelledby="guidesTitle"></ul>
 <p id="guidesEmpty" class="empty" hidden>No guides yet. Xtream and Stalker sources usually bring their own.</p>
 <div class="actions"><button type="button" id="addGuide">Add a guide</button></div>
-<p class="hint">To remove a source or guide, use the TV.</p>
+<p class="hint">To remove a source or guide, use the TV. Use Guides next to a source to choose its guides and their order.</p>
 </div>
 </div>
 
@@ -196,6 +205,8 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 <div class="seg c2">
 <label><input type="radio" name="layout" value="grid"><span>Grid</span></label>
 <label><input type="radio" name="layout" value="focus"><span>One large</span></label>
+<label><input type="radio" name="layout" value="sidebyside"><span>Side by side</span></label>
+<label><input type="radio" name="layout" value="oneovertwo"><span>One over two</span></label>
 </div>
 </fieldset>
 <fieldset>
@@ -255,6 +266,39 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 </form>
 </section>
 
+<section id="assign" class="narrow" hidden aria-labelledby="assignTitle">
+<div class="card">
+<div class="head"><div class="grow"><h2 id="assignTitle">Guides</h2><p class="lead">The TV uses the first guide that has a channel, then the next.</p></div></div>
+<h3>In use, first to last</h3>
+<ul id="linked" class="list"></ul>
+<p id="linkedEmpty" class="empty" hidden>No guides in use for this source.</p>
+<h3>Other guides</h3>
+<ul id="unlinked" class="list"></ul>
+<p id="unlinkedEmpty" class="empty" hidden>No other guides. Add one from the main page.</p>
+<p id="linksError" class="error" role="alert" hidden></p>
+<div class="savebar" id="linksBar" hidden><span class="grow" role="status">Guide order changed</span><button type="button" class="ghost small" id="linksUndo">Undo</button><button type="button" class="primary small" id="sendLinks">Send to TV</button></div>
+</div>
+<div class="card" aria-labelledby="channelTitle">
+<div class="head"><div class="grow"><h2 id="channelTitle">Guide for one channel</h2><p class="lead">Find a channel, then pick the guide channel it should show.</p></div></div>
+<label for="channelQuery">Channel</label>
+<input id="channelQuery" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="64" placeholder="Search channels">
+<ul id="channelResults" class="list"></ul>
+<p id="channelEmpty" class="empty" hidden>No channels found.</p>
+<div id="channelPanel" hidden>
+<p class="banner" id="channelNow" role="status"></p>
+<label for="guideFeed">Guide</label>
+<div class="pick"><select id="guideFeed"></select></div>
+<label for="guideQuery">Guide channel</label>
+<input id="guideQuery" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="64" placeholder="Search the guide">
+<ul id="guideResults" class="list"></ul>
+<p id="guideEmpty" class="empty" hidden>No guide channels found.</p>
+<div class="actions"><button type="button" id="automatic">Match automatically</button></div>
+</div>
+<p id="channelError" class="error" role="alert" hidden></p>
+</div>
+<button class="wide ghost" type="button" id="assignBack">Back</button>
+</section>
+
 <section id="progress" class="card status narrow wait" hidden>
 """ + ORB + """
 <p class="big" id="progressTitle" role="status">Check your TV</p>
@@ -274,13 +318,16 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 (function () {
   'use strict';
   var base = location.pathname.replace(/[^\/]*$/, '');
-  var views = ['pair', 'home', 'editor', 'progress', 'ended'];
+  var views = ['pair', 'home', 'editor', 'assign', 'progress', 'ended'];
   var kindNames = { m3u: 'M3U playlist', xtream: 'Xtream account', stalker: 'Stalker portal', guide: 'XMLTV guide' };
   var badges = { m3u: 'M3U', xtream: 'XT', stalker: 'STB', guide: 'EPG' };
   var settingKeys = ['format', 'timeshift', 'sport', 'startView', 'layout', 'quality', 'recordEarly', 'recordLate'];
   var current = null;
   var saved = null;
   var polling = null;
+  var listing = null;
+  var assign = null;
+  var timers = {};
 
   function el(id) { return document.getElementById(id); }
   function show(name) {
@@ -356,6 +403,15 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
     text.appendChild(meta);
     li.appendChild(badge);
     li.appendChild(text);
+    if (!isGuide) {
+      var guides = document.createElement('button');
+      guides.type = 'button';
+      guides.className = 'small';
+      guides.textContent = 'Guides';
+      guides.setAttribute('aria-label', 'Guides for ' + entry.label);
+      guides.addEventListener('click', function () { openAssign(entry); });
+      li.appendChild(guides);
+    }
     if (entry.editable) {
       var edit = document.createElement('button');
       edit.type = 'button';
@@ -369,6 +425,8 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
   }
 
   function render(state) {
+    listing = state;
+    renderProfiles(state);
     [['sources', state.sources, false], ['guides', state.guides, true]].forEach(function (group) {
       var list = el(group[0]);
       var entries = Array.isArray(group[1]) ? group[1] : [];
@@ -378,6 +436,218 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
       el(group[0] + 'Empty').hidden = entries.length > 0;
     });
     el('busy').hidden = !state.pending;
+  }
+
+  function renderProfiles(state) {
+    var profiles = Array.isArray(state.profiles) ? state.profiles : [];
+    el('profileCard').hidden = profiles.length < 2;
+    var select = el('profileChoice');
+    select.textContent = '';
+    var editing = null;
+    profiles.forEach(function (p) {
+      var option = document.createElement('option');
+      option.value = String(p.id);
+      option.textContent = p.locked && p.id !== state.profile ? p.name + ' (locked)' : p.name;
+      option.disabled = p.locked && p.id !== state.profile;
+      option.selected = p.id === state.profile;
+      if (p.id === state.profile) editing = p.name;
+      select.appendChild(option);
+    });
+    el('profileLead').textContent = editing ? 'Changes from this page go to ' + editing + '.' : '';
+    setText('profileError', '');
+  }
+
+  function sendProfile() {
+    var id = parseInt(el('profileChoice').value, 10);
+    if (isNaN(id) || !listing || id === listing.profile) { setText('profileError', 'Choose another profile first.'); return; }
+    el('switchProfile').disabled = true;
+    api('POST', 'api/profile', { profile: id }).then(function (result) {
+      el('switchProfile').disabled = false;
+      if (common(result, 'profileError')) return;
+      if (result.status === 202 && result.data.id) { waitFor(result.data.id, 'profile'); return; }
+      if (result.data.error === 'locked') setText('profileError', 'That profile is locked with a PIN. Switch to it on the TV instead.');
+      else refused(result.data.error, 'profileError');
+    }, function () { el('switchProfile').disabled = false; lost(); });
+  }
+
+  function guideLabel(id) {
+    var found = (listing && listing.guides || []).filter(function (g) { return g.id === id; })[0];
+    return found ? found.label : 'Removed guide';
+  }
+
+  function openAssign(entry) {
+    assign = { source: entry, saved: (entry.guides || []).slice(), order: (entry.guides || []).slice(), channel: null };
+    el('assignTitle').textContent = 'Guides for ' + entry.label;
+    el('channelQuery').value = '';
+    el('channelResults').textContent = '';
+    el('channelEmpty').hidden = true;
+    el('channelPanel').hidden = true;
+    setText('linksError', '');
+    setText('channelError', '');
+    renderAssign();
+    show('assign');
+    searchChannels();
+  }
+
+  function toolButton(text, label, disabled, action) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'small';
+    button.textContent = text;
+    button.setAttribute('aria-label', label);
+    button.disabled = disabled;
+    button.addEventListener('click', action);
+    return button;
+  }
+
+  function guideRow(id, badge) {
+    var li = document.createElement('li');
+    var mark = document.createElement('span');
+    mark.className = 'badge';
+    mark.setAttribute('aria-hidden', 'true');
+    mark.textContent = badge;
+    var text = document.createElement('div');
+    text.className = 'grow';
+    var name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = guideLabel(id);
+    text.appendChild(name);
+    li.appendChild(mark);
+    li.appendChild(text);
+    var tools = document.createElement('div');
+    tools.className = 'tools';
+    li.appendChild(tools);
+    return { li: li, tools: tools, label: name.textContent };
+  }
+
+  function renderAssign() {
+    var order = assign.order;
+    var linked = el('linked');
+    linked.textContent = '';
+    order.forEach(function (id, index) {
+      var row = guideRow(id, String(index + 1));
+      row.tools.appendChild(toolButton('Up', 'Move ' + row.label + ' up', index === 0, function () { move(index, -1); }));
+      row.tools.appendChild(toolButton('Down', 'Move ' + row.label + ' down', index === order.length - 1, function () { move(index, 1); }));
+      row.tools.appendChild(toolButton('Remove', 'Stop using ' + row.label, false, function () { order.splice(index, 1); renderAssign(); }));
+      linked.appendChild(row.li);
+    });
+    el('linkedEmpty').hidden = order.length > 0;
+    var unlinked = el('unlinked');
+    unlinked.textContent = '';
+    var others = (listing.guides || []).filter(function (g) { return order.indexOf(g.id) < 0; });
+    others.forEach(function (g) {
+      var row = guideRow(g.id, 'EPG');
+      row.tools.appendChild(toolButton('Use', 'Use ' + row.label, order.length >= 16, function () { order.push(g.id); renderAssign(); }));
+      unlinked.appendChild(row.li);
+    });
+    el('unlinkedEmpty').hidden = others.length > 0;
+    el('linksBar').hidden = order.join('|') === assign.saved.join('|');
+    var feed = el('guideFeed');
+    var chosen = feed.value;
+    feed.textContent = '';
+    assign.saved.forEach(function (id) {
+      var option = document.createElement('option');
+      option.value = id;
+      option.textContent = guideLabel(id);
+      option.selected = id === chosen;
+      feed.appendChild(option);
+    });
+  }
+
+  function move(index, step) {
+    var order = assign.order;
+    var item = order.splice(index, 1)[0];
+    order.splice(index + step, 0, item);
+    renderAssign();
+  }
+
+  function sendLinks() {
+    setText('linksError', '');
+    el('sendLinks').disabled = true;
+    api('POST', 'api/links', { source: assign.source.id, guides: assign.order }).then(function (result) {
+      el('sendLinks').disabled = false;
+      if (common(result, 'linksError')) return;
+      if (result.status === 202 && result.data.id) { waitFor(result.data.id, 'links'); return; }
+      refused(result.data.error, 'linksError');
+    }, function () { el('sendLinks').disabled = false; lost(); });
+  }
+
+  function later(name, action) {
+    if (timers[name]) clearTimeout(timers[name]);
+    timers[name] = setTimeout(action, 350);
+  }
+
+  function resultRow(title, detail, buttonText, label, action) {
+    var li = document.createElement('li');
+    var text = document.createElement('div');
+    text.className = 'grow';
+    var name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = title;
+    text.appendChild(name);
+    if (detail) { var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = detail; text.appendChild(meta); }
+    li.appendChild(text);
+    li.appendChild(toolButton(buttonText, label, false, action));
+    return li;
+  }
+
+  function searchChannels() {
+    if (!assign) return;
+    var query = el('channelQuery').value.trim();
+    var source = assign.source.id;
+    api('GET', 'api/channels?source=' + encodeURIComponent(source) + '&q=' + encodeURIComponent(query)).then(function (result) {
+      if (!assign || assign.source.id !== source || el('channelQuery').value.trim() !== query) return;
+      if (common(result, 'channelError')) return;
+      if (result.status !== 200) { refused(result.data.error, 'channelError'); return; }
+      var list = el('channelResults');
+      list.textContent = '';
+      var channels = Array.isArray(result.data.channels) ? result.data.channels : [];
+      channels.forEach(function (ch) {
+        var detail = ch.feed ? 'Guide: ' + guideLabel(ch.feed) + ' · ' + ch.guide : 'Guide: matched automatically';
+        list.appendChild(resultRow(ch.name, detail, 'Choose', 'Choose ' + ch.name, function () { pickChannel(ch); }));
+      });
+      el('channelEmpty').hidden = channels.length > 0;
+    }, lost);
+  }
+
+  function pickChannel(ch) {
+    assign.channel = ch;
+    el('channelNow').textContent = ch.name + ' · ' + (ch.feed ? 'now ' + guideLabel(ch.feed) + ' · ' + ch.guide : 'now matched automatically');
+    el('channelPanel').hidden = false;
+    el('guideQuery').value = ch.name;
+    el('guideResults').textContent = '';
+    el('guideEmpty').hidden = true;
+    if (assign.saved.length === 0) setText('channelError', 'Send a guide order with at least one guide first.');
+    else { setText('channelError', ''); searchGuide(); }
+  }
+
+  function searchGuide() {
+    if (!assign || !assign.channel || !el('guideFeed').value) return;
+    var feed = el('guideFeed').value;
+    var query = el('guideQuery').value.trim();
+    api('GET', 'api/guide-channels?feed=' + encodeURIComponent(feed) + '&q=' + encodeURIComponent(query)).then(function (result) {
+      if (!assign || el('guideFeed').value !== feed || el('guideQuery').value.trim() !== query) return;
+      if (common(result, 'channelError')) return;
+      if (result.status !== 200) { refused(result.data.error, 'channelError'); return; }
+      var list = el('guideResults');
+      list.textContent = '';
+      var channels = Array.isArray(result.data.channels) ? result.data.channels : [];
+      channels.forEach(function (g) {
+        list.appendChild(resultRow(g.name, g.id, 'Use', 'Use ' + g.name, function () { sendChannelGuide({ feed: feed, guide: g.id, guideName: g.name }); }));
+      });
+      el('guideEmpty').hidden = channels.length > 0;
+    }, lost);
+  }
+
+  function sendChannelGuide(choice) {
+    var body = { source: assign.source.id, channel: assign.channel.id };
+    if (choice) { body.feed = choice.feed; body.guide = choice.guide; body.guideName = choice.guideName; }
+    setText('channelError', '');
+    api('POST', 'api/channel-guide', body).then(function (result) {
+      if (common(result, 'channelError')) return;
+      if (result.status === 202 && result.data.id) { waitFor(result.data.id, 'channel'); return; }
+      refused(result.data.error, 'channelError');
+    }, lost);
   }
 
   function radios(name) { return Array.prototype.slice.call(el('settings').querySelectorAll('input[name="' + name + '"]')); }
@@ -573,9 +843,11 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 
   function waitFor(id, what) {
     var misses = 0;
-    var savedText = { source: 'The TV is loading the channels now.', guide: 'The TV is loading the guide now.', settings: 'Your new settings are saved. Some apply the next time you open Live TV.' };
+    var savedText = { source: 'The TV is loading the channels now.', guide: 'The TV is loading the guide now.', settings: 'Your new settings are saved. Some apply the next time you open Live TV.',
+      links: 'The guides and their order are saved.', channel: 'The channel uses the new guide from now on.', profile: 'This page now changes the profile you chose.' };
     progress('wait', 'Check your TV', what === 'settings'
       ? 'Your TV is showing the settings you changed. Choose Save on this TV or Reject.'
+      : what === 'profile' ? 'Your TV is asking whether this page may change another profile. Choose Allow or Reject on the TV.'
       : 'Your TV is asking whether to save this. Choose Save on this TV or Reject.');
     function poll() {
       api('GET', 'api/changes/' + encodeURIComponent(id)).then(function (result) {
@@ -627,6 +899,14 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
   el('settings').addEventListener('submit', sendSettings);
   el('undo').addEventListener('click', function () { if (saved) renderSettings(saved); });
   el('done').addEventListener('click', load);
+  el('switchProfile').addEventListener('click', sendProfile);
+  el('sendLinks').addEventListener('click', sendLinks);
+  el('linksUndo').addEventListener('click', function () { assign.order = assign.saved.slice(); renderAssign(); });
+  el('assignBack').addEventListener('click', function () { assign = null; load(); });
+  el('channelQuery').addEventListener('input', function () { later('channels', searchChannels); });
+  el('guideQuery').addEventListener('input', function () { later('guide', searchGuide); });
+  el('guideFeed').addEventListener('change', searchGuide);
+  el('automatic').addEventListener('click', function () { if (assign && assign.channel) sendChannelGuide(null); });
   load();
 })();
 </script>

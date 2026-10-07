@@ -102,6 +102,7 @@ fun IptvSetupScreen(onBack: () -> Unit, viewModel: IptvSetupViewModel = hiltView
                 Note(Icons.Filled.Lock, stringResource(R.string.iptv_remote_home_network))
                 Note(null, stringResource(R.string.iptv_remote_confirm_note))
                 Note(null, stringResource(R.string.iptv_remote_idle_note))
+                state.editingProfile?.let { Note(null, stringResource(R.string.iptv_remote_editing_profile, it)) }
                 state.message?.let {
                     Spacer(Modifier.height(6.dp))
                     Text(stringResource(it), color = NuvioTheme.colors.TextPrimary, style = MaterialTheme.typography.bodyMedium)
@@ -177,9 +178,9 @@ private fun Note(icon: ImageVector?, text: String) {
 private fun PendingDialog(pending: IptvSetupPending, onSave: () -> Unit, onReject: () -> Unit) {
     val reject = remember { FocusRequester() }
     LaunchedEffect(pending.id) { withFrameNanos { }; runCatching { reject.requestFocus() } }
-    val title = if (pending.settings) stringResource(R.string.iptv_remote_confirm_settings_title)
+    val title = pending.title ?: if (pending.settings) stringResource(R.string.iptv_remote_confirm_settings_title)
         else pending.previousLabel?.let { stringResource(R.string.iptv_remote_confirm_edit_title, it) } ?: stringResource(R.string.iptv_remote_confirm_add_title)
-    NuvioDialog(onDismiss = onReject, title = title, subtitle = stringResource(R.string.iptv_remote_confirm_subtitle), width = 640.dp) {
+    NuvioDialog(onDismiss = onReject, title = title, subtitle = stringResource(if (pending.allow) R.string.iptv_remote_confirm_profile_subtitle else R.string.iptv_remote_confirm_subtitle), width = 640.dp) {
         Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             pending.lines.forEach { line ->
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -192,7 +193,7 @@ private fun PendingDialog(pending: IptvSetupPending, onSave: () -> Unit, onRejec
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             NuvioActionPill(onReject, Modifier.focusRequester(reject), enabled = !pending.applying) { Text(stringResource(R.string.iptv_remote_reject)) }
-            NuvioActionPill(onSave, enabled = !pending.applying) { Text(stringResource(R.string.iptv_remote_save)) }
+            NuvioActionPill(onSave, enabled = !pending.applying) { Text(stringResource(if (pending.allow) R.string.iptv_remote_allow else R.string.iptv_remote_save)) }
             if (pending.applying) LoadingIndicator(Modifier.size(24.dp))
         }
     }

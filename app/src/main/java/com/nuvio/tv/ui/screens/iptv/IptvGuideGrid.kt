@@ -17,6 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.SwapVert
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
@@ -38,7 +41,10 @@ import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.GuideGridRow
 import com.nuvio.tv.core.iptv.GuideGridWindow
+import com.nuvio.tv.core.iptv.GuideDensity
 import com.nuvio.tv.core.iptv.GuideProgrammeCell
+import com.nuvio.tv.core.iptv.ListMove
+import com.nuvio.tv.core.iptv.guideStickyOffsetMillis
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.ui.components.placeholderCardShimmer
 import com.nuvio.tv.ui.components.rememberPlaceholderShimmerOffsetState
@@ -50,19 +56,26 @@ import com.nuvio.tv.ui.v2.components.nuvioV2Focus
 import java.util.Calendar
 import kotlinx.coroutines.launch
 
-internal val ChannelColumn = 300.dp
-private val RowHeight = 60.dp
 private val MinuteWidth = 6.dp
 private val CellShape = RoundedCornerShape(10.dp)
 internal const val SLOT = GuideGridWindow.SLOT_MILLIS
-private const val PAGE_ROWS = 8
+private const val MIN_TITLE_MILLIS = 15 * MINUTE_MILLIS
+
+private class GuideSpec(val row: Dp, val logo: DpSize, val column: Dp, val number: Dp, val detail: Boolean, val pageRows: Int)
+
+private fun guideSpec(density: GuideDensity) = when (density) {
+    GuideDensity.COMFORTABLE -> GuideSpec(60.dp, DpSize(56.dp, 34.dp), 300.dp, 40.dp, true, 8)
+    GuideDensity.COMPACT -> GuideSpec(42.dp, DpSize(42.dp, 24.dp), 260.dp, 34.dp, false, 12)
+}
 
 @Composable
 internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long, cursor: Long, viewStart: Long, rowFocus: MutableMap<String, FocusRequester>,
     heading: String, modifier: Modifier, onCursor: (Long, Long) -> Unit, onRail: () -> Unit, onFocus: (IptvListedChannel) -> Unit,
-    onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onNearEnd: () -> Unit) {
+    onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onNearEnd: () -> Unit,
+    moving: String? = null, onMove: (IptvListedChannel, ListMove) -> Unit = { _, _ -> }, onMoveDone: () -> Unit = {}) {
+    val spec = guideSpec(state.density)
     BoxWithConstraints(modifier.iptvPanel().padding(horizontal = 12.dp, vertical = 10.dp)) {
-        val stripWidth = maxWidth - ChannelColumn
+        val stripWidth = maxWidth - spec.column
         val visibleMillis = (stripWidth.value / MinuteWidth.value * MINUTE_MILLIS).toLong().coerceAtLeast(SLOT)
         val scope = rememberCoroutineScope()
         fun page(index: Int, delta: Int) {
@@ -75,30 +88,41 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
                 rowFocus[id]?.let { runCatching { it.requestFocus() } }
             }
         }
+        val movingIndex = moving?.let { id -> state.channels.indexOfFirst { it.item.channel.id == id } } ?: -1
+        LaunchedEffect(moving, movingIndex) {
+            if (movingIndex < 0) return@LaunchedEffect
+            val visible = listState.layoutInfo.visibleItemsInfo
+            if (visible.isEmpty() || movingIndex <= visible.first().index || movingIndex >= visible.last().index) {
+                listState.scrollToItem((movingIndex - 2).coerceAtLeast(0))
+                withFrameNanos { }
+                moving?.let { rowFocus[it] }?.let { runCatching { it.requestFocus() } }
+            }
+        }
         Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth().height(30.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(heading, style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
-                    overflow = TextOverflow.Ellipsis, modifier = Modifier.width(ChannelColumn).padding(start = 12.dp, end = 12.dp))
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.width(spec.column).padding(start = 12.dp, end = 12.dp))
                 TimeBar(viewStart, visibleMillis, now, Modifier.weight(1f).fillMaxHeight())
             }
             Spacer(Modifier.height(6.dp))
             Box(Modifier.fillMaxSize().clipToBounds()) {
-                if (state.channels.isEmpty()) SkeletonRows()
+                if (state.channels.isEmpty()) SkeletonRows(spec)
                 CompositionLocalProvider(LocalBringIntoViewSpec provides rememberPivotSpec()) {
                     LazyColumn(state = listState, modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         itemsIndexed(state.channels, key = { _, row -> row.item.channel.id }) { index, row ->
                             if (index >= state.channels.size - 8) LaunchedEffect(state.channels.size) { onNearEnd() }
-                            val recordings = state.recordings.filter { it.channelId == row.item.channel.id && it.sourceId == state.source?.sourceId }
-                            GuideRow(row, state.guide[row.item.channel.id], index, now, cursor, viewStart, visibleMillis,
+                            val recordings = state.recordings.filter { it.channelId == row.item.channel.id && it.sourceId == row.item.channel.sourceId }
+                            GuideRow(spec, row, state.guide[row.item.channel.id], index, now, cursor, viewStart, visibleMillis,
                                 row.item.channel.id == state.playingId,
                                 recordings.any { it.status == com.nuvio.tv.core.iptv.RecordingStatus.RECORDING },
                                 recordings.filter { it.status == com.nuvio.tv.core.iptv.RecordingStatus.SCHEDULED }.mapNotNull { it.programmeStartMillis }.toSet(), rowFocus.getOrPut(row.item.channel.id) { FocusRequester() },
-                                onCursor, onRail, onFocus, onSelect, onMenu, onPage = { delta -> page(index, delta) })
+                                onCursor, onRail, onFocus, onSelect, onMenu, onPage = { delta -> page(index, delta * spec.pageRows) },
+                                moving = row.item.channel.id == moving, onMove = { move -> onMove(row, move) }, onMoveDone = onMoveDone)
                         }
                     }
                 }
                 if (now in viewStart until viewStart + visibleMillis) {
-                    Box(Modifier.padding(start = ChannelColumn + minuteOffset(now - viewStart) - 1.dp).width(2.dp).fillMaxHeight()
+                    Box(Modifier.padding(start = spec.column + minuteOffset(now - viewStart) - 1.dp).width(2.dp).fillMaxHeight()
                         .background(NuvioTheme.palette.accentBrush(), RoundedCornerShape(1.dp)))
                 }
             }
@@ -122,14 +146,14 @@ private fun rememberPivotSpec(): BringIntoViewSpec {
 }
 
 @Composable
-private fun SkeletonRows() {
+private fun SkeletonRows(spec: GuideSpec) {
     val shimmer = rememberPlaceholderShimmerOffsetState("iptvGuide")
     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        repeat(7) {
-            Row(Modifier.fillMaxWidth().height(RowHeight), verticalAlignment = Alignment.CenterVertically) {
-                Row(Modifier.width(ChannelColumn).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically,
+        repeat(if (spec.detail) 7 else 10) {
+            Row(Modifier.fillMaxWidth().height(spec.row), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.width(spec.column).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(Modifier.size(56.dp, 34.dp).clip(RoundedCornerShape(8.dp))
+                    Box(Modifier.size(spec.logo).clip(RoundedCornerShape(8.dp))
                         .placeholderCardShimmer(shimmer, NuvioTheme.colors.TextPrimary.copy(alpha = .06f)))
                     Box(Modifier.width(140.dp).height(14.dp).clip(RoundedCornerShape(7.dp))
                         .placeholderCardShimmer(shimmer, NuvioTheme.colors.TextPrimary.copy(alpha = .06f)))
@@ -167,9 +191,10 @@ private fun TimeBar(start: Long, span: Long, now: Long, modifier: Modifier) {
 }
 
 @Composable
-private fun GuideRow(row: IptvListedChannel, grid: GuideGridRow?, index: Int, now: Long, cursor: Long, viewStart: Long, visibleMillis: Long,
+private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow?, index: Int, now: Long, cursor: Long, viewStart: Long, visibleMillis: Long,
     playing: Boolean, recording: Boolean, scheduled: Set<Long>, focusRequester: FocusRequester, onCursor: (Long, Long) -> Unit, onRail: () -> Unit,
-    onFocus: (IptvListedChannel) -> Unit, onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onPage: (Int) -> Unit) {
+    onFocus: (IptvListedChannel) -> Unit, onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onPage: (Int) -> Unit,
+    moving: Boolean, onMove: (ListMove) -> Unit, onMoveDone: () -> Unit) {
     var focused by remember { mutableStateOf(false) }
     val longPress = rememberLongPressKeyTracker()
     var longPressed by remember { mutableStateOf(false) }
@@ -190,12 +215,30 @@ private fun GuideRow(row: IptvListedChannel, grid: GuideGridRow?, index: Int, no
         return true
     }
     val rowShape = RoundedCornerShape(12.dp)
-    Row(Modifier.fillMaxWidth().height(RowHeight).clip(rowShape)
-        .background(if (focused) NuvioTheme.colors.TextPrimary.copy(alpha = .06f) else Color.Transparent)
+    Row(Modifier.fillMaxWidth().height(spec.row).clip(rowShape)
+        .background(when {
+            moving -> NuvioTheme.colors.Secondary.copy(alpha = .22f)
+            focused -> NuvioTheme.colors.TextPrimary.copy(alpha = .06f)
+            else -> Color.Transparent
+        })
+        .then(if (moving) Modifier.border(2.dp, NuvioTheme.colors.Secondary, rowShape) else Modifier)
         .focusRequester(focusRequester)
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocus(row) }
         .onPreviewKeyEvent { event ->
             val native = event.nativeKeyEvent
+            if (moving) {
+                if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) { onMoveDone(); return@onPreviewKeyEvent true }
+                if (isSelect(native.keyCode)) return@onPreviewKeyEvent true
+                val move = when (native.keyCode) {
+                    AndroidKeyEvent.KEYCODE_DPAD_UP, AndroidKeyEvent.KEYCODE_CHANNEL_UP -> ListMove.UP
+                    AndroidKeyEvent.KEYCODE_DPAD_DOWN, AndroidKeyEvent.KEYCODE_CHANNEL_DOWN -> ListMove.DOWN
+                    AndroidKeyEvent.KEYCODE_DPAD_LEFT, AndroidKeyEvent.KEYCODE_PAGE_UP, AndroidKeyEvent.KEYCODE_MOVE_HOME -> ListMove.TOP
+                    AndroidKeyEvent.KEYCODE_DPAD_RIGHT, AndroidKeyEvent.KEYCODE_PAGE_DOWN, AndroidKeyEvent.KEYCODE_MOVE_END -> ListMove.BOTTOM
+                    else -> null
+                } ?: return@onPreviewKeyEvent native.keyCode == AndroidKeyEvent.KEYCODE_MENU
+                if (native.action == AndroidKeyEvent.ACTION_DOWN && (native.repeatCount == 0 || move == ListMove.UP || move == ListMove.DOWN)) onMove(move)
+                return@onPreviewKeyEvent true
+            }
             if (native.action == AndroidKeyEvent.ACTION_DOWN && native.repeatCount == 0 && isSelect(native.keyCode)) longPressed = false
             if (longPress.handle(native, ::isSelect) { longPressed = true; onMenu(row) }) {
                 if (native.action == AndroidKeyEvent.ACTION_UP) longPressed = false
@@ -210,13 +253,13 @@ private fun GuideRow(row: IptvListedChannel, grid: GuideGridRow?, index: Int, no
                 AndroidKeyEvent.KEYCODE_MENU, AndroidKeyEvent.KEYCODE_INFO -> { onMenu(row); true }
                 AndroidKeyEvent.KEYCODE_DPAD_RIGHT -> { move(1); true }
                 AndroidKeyEvent.KEYCODE_DPAD_LEFT -> { if (!move(-1)) onRail(); true }
-                AndroidKeyEvent.KEYCODE_CHANNEL_UP, AndroidKeyEvent.KEYCODE_PAGE_UP -> { onPage(-PAGE_ROWS); true }
-                AndroidKeyEvent.KEYCODE_CHANNEL_DOWN, AndroidKeyEvent.KEYCODE_PAGE_DOWN -> { onPage(PAGE_ROWS); true }
+                AndroidKeyEvent.KEYCODE_CHANNEL_UP, AndroidKeyEvent.KEYCODE_PAGE_UP -> { onPage(-1); true }
+                AndroidKeyEvent.KEYCODE_CHANNEL_DOWN, AndroidKeyEvent.KEYCODE_PAGE_DOWN -> { onPage(1); true }
                 else -> false
             }
         }
         .focusable(), verticalAlignment = Alignment.CenterVertically) {
-        ChannelCell(row, index, playing, recording, focused, Modifier.width(ChannelColumn).fillMaxHeight())
+        ChannelCell(spec, row, index, playing, recording, focused, moving, Modifier.width(spec.column).fillMaxHeight())
         Box(Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
             if (cells.none { it is GuideProgrammeCell }) {
                 Box(Modifier.fillMaxSize().padding(vertical = 4.dp).clip(CellShape).background(NuvioTheme.colors.TextPrimary.copy(alpha = .03f))
@@ -229,13 +272,16 @@ private fun GuideRow(row: IptvListedChannel, grid: GuideGridRow?, index: Int, no
             val viewEnd = viewStart + visibleMillis
             for (cell in cells) {
                 if (cell !is GuideProgrammeCell || cell.endMillis <= viewStart || cell.startMillis >= viewEnd) continue
-                val start = maxOf(cell.startMillis, viewStart)
-                val end = minOf(cell.endMillis, viewEnd)
-                val width = minuteOffset(end - start) - 3.dp
-                if (width <= 0.dp) continue
-                ProgrammeCell(cell, now, selected = focused && cursor >= cell.startMillis && cursor < cell.endMillis, rowFocused = focused,
-                    scheduled = cell.programme.start.epochMillis in scheduled,
-                    modifier = Modifier.padding(start = minuteOffset(start - viewStart), top = 4.dp, bottom = 4.dp).width(width).fillMaxHeight())
+                val begin = maxOf(cell.startMillis, viewStart - 2 * SLOT)
+                val end = minOf(cell.endMillis, viewEnd + SLOT)
+                val width = minuteOffset(end - begin) - 3.dp
+                val visible = minuteOffset(minOf(cell.endMillis, viewEnd) - maxOf(cell.startMillis, viewStart)) - 3.dp
+                if (width <= 0.dp || visible <= 0.dp) continue
+                ProgrammeCell(spec, cell, now, selected = focused && cursor >= cell.startMillis && cursor < cell.endMillis, rowFocused = focused,
+                    scheduled = cell.programme.start.epochMillis in scheduled, titleOffset = minuteOffset(guideStickyOffsetMillis(begin, end, viewStart, MIN_TITLE_MILLIS)),
+                    continued = cell.startMillis < viewStart, wide = visible >= 96.dp,
+                    modifier = Modifier.offset(x = minuteOffset(begin - viewStart)).wrapContentWidth(Alignment.Start, unbounded = true)
+                        .padding(top = 4.dp, bottom = 4.dp).width(width).fillMaxHeight())
             }
         }
     }
@@ -247,32 +293,42 @@ private fun Modifier.cellFocus(shape: RoundedCornerShape): Modifier =
     else border(2.dp, NuvioTheme.colors.FocusRing, shape)
 
 @Composable
-private fun ChannelCell(row: IptvListedChannel, index: Int, playing: Boolean, recording: Boolean, focused: Boolean, modifier: Modifier) {
-    Row(modifier.padding(start = 8.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.width(3.dp).height(28.dp).clip(RoundedCornerShape(2.dp))
+private fun ChannelCell(spec: GuideSpec, row: IptvListedChannel, index: Int, playing: Boolean, recording: Boolean, focused: Boolean, moving: Boolean, modifier: Modifier) {
+    Row(modifier.padding(start = 8.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(if (spec.detail) 10.dp else 8.dp)) {
+        Box(Modifier.width(3.dp).height(if (spec.detail) 28.dp else 20.dp).clip(RoundedCornerShape(2.dp))
             .then(if (playing) Modifier.background(NuvioTheme.palette.accentBrush()) else Modifier))
-        Text("${index + 1}", color = if (focused) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.TextTertiary,
-            style = MaterialTheme.typography.labelLarge, maxLines = 1, modifier = Modifier.width(40.dp))
-        ChannelLogo(logoUrl(row), channelName(row), Modifier.size(56.dp, 34.dp))
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        if (moving) Box(Modifier.width(spec.number)) { Icon(Icons.Filled.SwapVert, null, Modifier.size(20.dp), tint = NuvioTheme.colors.Secondary) }
+        else Text("${index + 1}", color = if (focused) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.TextTertiary,
+            style = if (spec.detail) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelMedium, maxLines = 1, modifier = Modifier.width(spec.number))
+        ChannelLogo(logoUrl(row), channelName(row), Modifier.size(spec.logo))
+        val favourite = row.item.overlay.favouriteRank != null
+        val archive = hasArchive(row)
+        if (spec.detail) Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(channelName(row), color = if (focused || playing) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary, maxLines = 1,
                 overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (focused || playing) FontWeight.SemiBold else FontWeight.Normal)
-            val favourite = row.item.overlay.favouriteRank != null
-            val archive = hasArchive(row)
-            if (favourite || archive || playing || recording) Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                if (playing) Text(stringResource(R.string.iptv_live_now_playing), style = MaterialTheme.typography.labelSmall,
-                    color = NuvioTheme.colors.Secondary, fontWeight = FontWeight.SemiBold, maxLines = 1)
-                if (recording) Icon(Icons.Filled.FiberManualRecord, null, Modifier.size(10.dp), tint = NuvioTheme.colors.Error)
-                if (favourite) Icon(Icons.Filled.Star, null, Modifier.size(12.dp), tint = NuvioTheme.colors.Rating)
-                if (archive) Icon(Icons.Filled.History, null, Modifier.size(12.dp), tint = NuvioTheme.colors.TextTertiary)
-            }
+            if (favourite || archive || playing || recording) Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) { ChannelMarks(spec, playing, recording, favourite, archive) }
+        } else Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(channelName(row), color = if (focused || playing) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary, maxLines = 1,
+                overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
+                fontWeight = if (focused || playing) FontWeight.SemiBold else FontWeight.Normal, modifier = Modifier.weight(1f, fill = false))
+            ChannelMarks(spec, playing, recording, favourite, archive)
         }
     }
 }
 
 @Composable
-private fun ProgrammeCell(cell: GuideProgrammeCell, now: Long, selected: Boolean, rowFocused: Boolean, scheduled: Boolean, modifier: Modifier) {
+private fun ChannelMarks(spec: GuideSpec, playing: Boolean, recording: Boolean, favourite: Boolean, archive: Boolean) {
+    if (playing && spec.detail) Text(stringResource(R.string.iptv_live_now_playing), style = MaterialTheme.typography.labelSmall,
+        color = NuvioTheme.colors.Secondary, fontWeight = FontWeight.SemiBold, maxLines = 1)
+    if (recording) Icon(Icons.Filled.FiberManualRecord, null, Modifier.size(10.dp), tint = NuvioTheme.colors.Error)
+    if (favourite) Icon(Icons.Filled.Star, null, Modifier.size(12.dp), tint = NuvioTheme.colors.Rating)
+    if (archive) Icon(Icons.Filled.History, null, Modifier.size(12.dp), tint = NuvioTheme.colors.TextTertiary)
+}
+
+@Composable
+private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, selected: Boolean, rowFocused: Boolean, scheduled: Boolean,
+    titleOffset: Dp, continued: Boolean, wide: Boolean, modifier: Modifier) {
     val airing = now >= cell.startMillis && now < cell.endMillis
     val past = cell.endMillis <= now
     val v2 = LocalV2Appearance.current != null
@@ -282,19 +338,21 @@ private fun ProgrammeCell(cell: GuideProgrammeCell, now: Long, selected: Boolean
         past -> NuvioTheme.colors.TextPrimary.copy(alpha = .03f)
         else -> NuvioTheme.colors.TextPrimary.copy(alpha = if (rowFocused) .08f else .05f)
     }
-    BoxWithConstraints(modifier.then(if (selected) Modifier.cellFocus(CellShape) else Modifier).clip(CellShape).background(fill)) {
-        val wide = maxWidth >= 96.dp
-        Column(Modifier.fillMaxSize().padding(horizontal = 10.dp), verticalArrangement = Arrangement.Center) {
-            Text(title(cell.programme), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
-                fontWeight = if (selected || airing) FontWeight.SemiBold else FontWeight.Normal,
-                color = when {
-                    selected -> itemContent(true)
-                    past -> NuvioTheme.colors.TextTertiary
-                    airing -> NuvioTheme.colors.TextPrimary
-                    else -> NuvioTheme.colors.TextSecondary
-                })
-            if (wide) Text(timeRange(cell.programme), maxLines = 1, style = MaterialTheme.typography.labelSmall,
-                color = if (selected) itemContent(true).copy(alpha = .8f) else NuvioTheme.colors.TextTertiary)
+    Box(modifier.then(if (selected) Modifier.cellFocus(CellShape) else Modifier).clip(CellShape).background(fill)) {
+        val content = when {
+            selected -> itemContent(true)
+            past -> NuvioTheme.colors.TextTertiary
+            airing -> NuvioTheme.colors.TextPrimary
+            else -> NuvioTheme.colors.TextSecondary
+        }
+        Row(Modifier.fillMaxSize().padding(start = (if (continued) 4.dp else 10.dp) + titleOffset, end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (continued) Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null, Modifier.size(14.dp), tint = content.copy(alpha = .7f))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+                Text(title(cell.programme), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
+                    fontWeight = if (selected || airing) FontWeight.SemiBold else FontWeight.Normal, color = content)
+                if (wide && spec.detail) Text(timeRange(cell.programme), maxLines = 1, style = MaterialTheme.typography.labelSmall,
+                    color = if (selected) itemContent(true).copy(alpha = .8f) else NuvioTheme.colors.TextTertiary)
+            }
         }
         if (scheduled) Icon(Icons.Filled.FiberManualRecord, null, Modifier.align(Alignment.TopEnd).padding(5.dp).size(8.dp), tint = NuvioTheme.colors.Error)
         if (airing && !cell.openEnded) {

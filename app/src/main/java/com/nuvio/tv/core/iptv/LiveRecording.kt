@@ -1,8 +1,10 @@
 package com.nuvio.tv.core.iptv
 
+import java.text.Normalizer
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 enum class RecordingStatus {
     SCHEDULED, RECORDING, DONE, PARTIAL, FAILED, CANCELLED;
@@ -12,7 +14,7 @@ enum class RecordingStatus {
 
 enum class RecordingFailure {
     NO_CONNECTION, DEVICE_BUSY, SOURCE_UNAVAILABLE, CHANNEL_UNAVAILABLE, UNSUPPORTED_STREAM, ENCRYPTED_STREAM,
-    NETWORK, LOW_STORAGE, STORAGE_ERROR, TIME_LIMIT, INTERRUPTED, START_BLOCKED, MISSED,
+    NETWORK, LOW_STORAGE, STORAGE_ERROR, TIME_LIMIT, INTERRUPTED, START_BLOCKED, MISSED, STORAGE_MISSING, STORAGE_REMOVED,
 }
 
 enum class RecordingStop { USER, ENDED, TIME_LIMIT, INTERRUPTED, REMOVED }
@@ -161,21 +163,42 @@ object RecordingStorage {
 object RecordingFiles {
     const val EXTENSION = ".ts"
     const val PARTIAL_SUFFIX = ".part"
+    const val MAX_NAME_CHARS = 120
+    const val MAX_NAME_BYTES = 220
     private val STAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")
+    private val RESERVED = setOf("CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$") + (1..9).flatMap { listOf("COM$it", "LPT$it") }
+    private const val KEPT = "-_'&.,()!+"
 
     fun name(channel: String, title: String?, startMillis: Long, id: String, zone: ZoneId): String {
         require(id.matches(Regex("[A-Za-z0-9-]{8,64}")))
-        val parts = listOfNotNull(clean(channel, 60), title?.let { clean(it, 80) }, STAMP.format(Instant.ofEpochMilli(startMillis).atZone(zone)))
-            .filter { it.isNotEmpty() }
-        return (parts + id.replace("-", "").take(8)).joinToString(" - ") + EXTENSION
+        val tail = STAMP.format(Instant.ofEpochMilli(startMillis).atZone(zone)) + " - " + id.replace("-", "").take(8) + EXTENSION
+        var first = clean(channel, 60)
+        var second = title?.let { clean(it, 100) }.orEmpty()
+        fun join() = listOf(first, second).filter { it.isNotEmpty() }.joinToString("") { "$it - " } + tail
+        fun over() = join().let { it.length > MAX_NAME_CHARS || it.toByteArray(Charsets.UTF_8).size > MAX_NAME_BYTES }
+        while (over() && second.length > 24) second = shorten(second)
+        while (over() && first.length > 24) first = shorten(first)
+        while (over() && second.isNotEmpty()) second = shorten(second)
+        while (over() && first.isNotEmpty()) first = shorten(first)
+        return safe(join())
     }
 
     fun partial(name: String): String = name + PARTIAL_SUFFIX
 
+    fun safe(name: String): String {
+        val stem = name.substringBefore('.').trimEnd(' ').uppercase(Locale.ROOT)
+        return if (stem in RESERVED) "_$name" else name
+    }
+
+    private fun shorten(value: String): String = value.dropLast(1).trimEnd(' ', '.', '-', '_', ',')
+
     private fun clean(value: String, limit: Int): String {
+        val normal = Normalizer.normalize(value, Normalizer.Form.NFC)
         val mapped = buildString {
-            for (char in value) append(if (char.isLetterOrDigit() || char == '-' || char == '_' || char == '\'' || char == '&') char else ' ')
+            for (char in normal) append(if (char.isLetterOrDigit() || char in KEPT || char.category == CharCategory.NON_SPACING_MARK ||
+                    char.category == CharCategory.COMBINING_SPACING_MARK) char else ' ')
         }
-        return mapped.split(' ').filter { it.isNotEmpty() }.joinToString(" ").take(limit).trim().trim('-', '_')
+        return mapped.split(' ').filter { it.isNotEmpty() }.joinToString(" ").take(limit)
+            .trim(' ', '.', '-', '_', ',')
     }
 }

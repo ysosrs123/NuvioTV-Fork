@@ -163,3 +163,14 @@
 
 -dontwarn java.beans.ConstructorProperties
 -dontwarn java.beans.Transient
+
+# ── SMB (smbj) for Live TV recordings on network shares ───────────────────────
+-keep class com.hierynomus.** { *; }
+-keep class net.engio.mbassy.** { *; }
+-keepclassmembers class * {
+    @net.engio.mbassy.listener.Handler <methods>;
+}
+-dontwarn org.ietf.jgss.**
+-dontwarn javax.el.**
+-dontwarn javax.naming.**
+-dontwarn org.slf4j.impl.**

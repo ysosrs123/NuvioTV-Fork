@@ -5,6 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import android.database.sqlite.SQLiteFullException
 import com.nuvio.tv.core.iptv.ChannelCandidate
 import com.nuvio.tv.core.iptv.GuideKey
+import com.nuvio.tv.core.iptv.ListMove
 import com.nuvio.tv.core.iptv.RefreshDecision
 import java.io.IOException
 import java.io.InterruptedIOException
@@ -205,6 +206,57 @@ class IptvCatalogueStoreTest {
         publish(ref, listOf(record), etag = "v2")
         assertEquals(listOf(item.channel.id), store.guideMatchCandidates(ref, setOf("abc.uk"), emptySet(), emptySet()).map { it.channel.id })
         assertEquals(listOf(item.channel.id), store.guideMatchCandidates(ref, emptySet(), setOf("abc"), emptySet()).map { it.channel.id })
+    }
+
+    @Test fun movedChannelsKeepTheirPlaceInAllChannelsAndCategoriesAcrossReopenAndRefresh() {
+        val ref = source()
+        fun grouped(id: Int, name: String, group: String) = IptvCatalogueRecord(ChannelCandidate(name, "https://fixture.invalid/live/$id", providerId = id.toString()), mapOf("group-title" to group))
+        val rows = listOf(grouped(1, "One", "News"), grouped(2, "Two", "Sport"), grouped(3, "Three", "News"), grouped(4, "Four", "News"))
+        publish(ref, rows)
+        fun names(query: IptvBrowseQuery = IptvBrowseQuery()) = store.page(ref, query).items.map { it.channel.data.name }
+        fun id(name: String) = store.page(ref).items.single { it.channel.data.name == name }.channel.id
+        assertTrue(store.moveChannel(ref, id("Four"), IptvBrowseQuery(), ListMove.TOP))
+        assertEquals(listOf("Four", "One", "Two", "Three"), names())
+        val news = IptvBrowseQuery(category = "News")
+        assertTrue(store.moveChannel(ref, id("One"), news, ListMove.DOWN))
+        assertEquals(listOf("Four", "Three", "One"), names(news))
+        assertFalse(store.moveChannel(ref, id("Four"), news, ListMove.UP))
+        assertTrue(store.moveChannel(ref, id("Four"), news, ListMove.BOTTOM))
+        assertEquals(listOf("Three", "One", "Four"), names(news))
+        val first = store.page(ref).items.first()
+        store.setOverlay(ref, first.channel.id, first.overlay.copy(favouriteRank = 0))
+        val before = names()
+        store.close()
+        store = IptvCatalogueStore(context, name, secrets)
+        assertEquals(before, names())
+        assertEquals(RefreshDecision.PUBLISH, publish(ref, rows, etag = "v2"))
+        assertEquals(before, names())
+        assertEquals(listOf("Three", "One", "Four"), names(news))
+        assertEquals(listOf("Two", "Three", "One", "Four"), names())
+        repeat(80) { assertTrue(store.moveChannel(ref, id(if (it % 2 == 0) "One" else "Three"), IptvBrowseQuery(), ListMove.UP)) }
+        assertEquals(listOf("Two", "Three", "One", "Four"), names())
+    }
+
+    @Test fun v8MigrationAddsChannelOrderWithoutTouchingOverlays() {
+        val ref = source(); publish(ref, listOf(row(1), row(2), row(3)))
+        val items = store.page(ref).items
+        val overlay = IptvChannelOverlay("Custom", 3, false, GuideKey("feed", "channel"), IptvStreamFormat.HLS)
+        store.setOverlay(ref, items[1].channel.id, overlay)
+        store.close()
+        context.openOrCreateDatabase(name, 0, null).use { db ->
+            db.execSQL("CREATE TABLE v8_overlays (id TEXT NOT NULL REFERENCES identities(id), profile INTEGER NOT NULL, custom_name TEXT, favourite_rank INTEGER, hidden INTEGER NOT NULL, guide_feed TEXT, guide_id TEXT, search_name TEXT, stream_format TEXT NOT NULL DEFAULT 'AUTO' CHECK(stream_format IN ('AUTO','HLS','MPEG_TS')), PRIMARY KEY(id,profile))")
+            db.execSQL("INSERT INTO v8_overlays SELECT id,profile,custom_name,favourite_rank,hidden,guide_feed,guide_id,search_name,stream_format FROM overlays")
+            db.execSQL("DROP TABLE overlays")
+            db.execSQL("ALTER TABLE v8_overlays RENAME TO overlays")
+            db.version = 8
+        }
+        store = IptvCatalogueStore(context, name, secrets)
+        val migrated = store.page(ref).items
+        assertEquals(items.map { it.channel.id }, migrated.map { it.channel.id })
+        assertEquals(overlay, migrated[1].overlay)
+        assertTrue(store.moveChannel(ref, items[2].channel.id, IptvBrowseQuery(), ListMove.TOP))
+        assertEquals(listOf(items[2], items[0], items[1]).map { it.channel.id }, store.page(ref).items.map { it.channel.id })
+        assertEquals(overlay.copy(userOrder = store.page(ref).items[2].overlay.userOrder), store.page(ref).items[2].overlay)
     }
 
     @Test fun credentialsCatalogueAndOverlaysSurviveCloseAndReopenWithoutPlaintextSecrets() {

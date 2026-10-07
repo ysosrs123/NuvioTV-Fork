@@ -1,6 +1,8 @@
 package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.RecordingFailure
+import com.nuvio.tv.core.iptv.RecordingLocations
+import com.nuvio.tv.core.iptv.RecordingParts
 import com.nuvio.tv.core.iptv.RecordingSlot
 import com.nuvio.tv.core.iptv.RecordingSpan
 import com.nuvio.tv.core.iptv.RecordingStatus
@@ -19,16 +21,19 @@ data class IptvRecording(
     val file: String? = null, val bytes: Long = 0, val gaps: Int = 0,
     val programmeStartMillis: Long? = null, val programmeStopMillis: Long? = null,
     val createdAtMillis: Long, val startedAtMillis: Long? = null, val finishedAtMillis: Long? = null,
+    val storage: String? = null, val storageLabel: String? = null, val parts: Int = 1, val upload: Boolean = false,
 ) {
     init {
         require(id.matches(Regex("[A-Za-z0-9-]{8,64}")) && profileId >= 0 && stopMillis > startMillis && bytes >= 0 && gaps >= 0)
+        require(parts in 1..RecordingParts.MAX_PARTS && RecordingLocations.valid(storage) && (storageLabel?.length ?: 0) <= 240)
         require(channelId.isNotEmpty() && channelId.length <= 1024 && accountId.isNotEmpty() && accountId.length <= 80)
     }
     val source: IptvSourceRef get() = IptvSourceRef(profileId, sourceId)
     val window: RecordingWindow get() = RecordingWindow(startMillis, stopMillis)
     val span: RecordingSpan get() = RecordingSpan.of(startMillis, stopMillis, programmeStartMillis, programmeStopMillis)
     val slot: RecordingSlot get() = span.let { RecordingSlot(accountId, it.coreStartMillis, it.coreStopMillis) }
-    override fun toString(): String = "IptvRecording(id=$id, status=$status, failure=$failure, bytes=$bytes)"
+    val onShare: Boolean get() = RecordingLocations.shareId(storage) != null
+    override fun toString(): String = "IptvRecording(id=$id, status=$status, failure=$failure, bytes=$bytes, parts=$parts, upload=$upload)"
 }
 
 class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2_000) {
@@ -130,6 +135,9 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
         putOpt("file", entry.file); put("bytes", entry.bytes); put("gaps", entry.gaps)
         putOpt("programmeStart", entry.programmeStartMillis); putOpt("programmeStop", entry.programmeStopMillis)
         put("created", entry.createdAtMillis); putOpt("started", entry.startedAtMillis); putOpt("finished", entry.finishedAtMillis)
+        putOpt("storage", entry.storage); putOpt("storageLabel", entry.storageLabel)
+        if (entry.parts != 1) put("parts", entry.parts)
+        if (entry.upload) put("upload", true)
     }
 
     private fun decode(json: JSONObject) = IptvRecording(
@@ -140,6 +148,7 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
         file = json.text("file"), bytes = json.optLong("bytes", 0), gaps = json.optInt("gaps", 0),
         programmeStartMillis = json.number("programmeStart"), programmeStopMillis = json.number("programmeStop"),
         createdAtMillis = json.getLong("created"), startedAtMillis = json.number("started"), finishedAtMillis = json.number("finished"),
+        storage = json.text("storage"), storageLabel = json.text("storageLabel"), parts = json.optInt("parts", 1), upload = json.optBoolean("upload", false),
     ).also { IptvSourceRef(it.profileId, it.sourceId) }
 
     private fun JSONObject.text(key: String): String? = if (has(key) && !isNull(key)) getString(key) else null

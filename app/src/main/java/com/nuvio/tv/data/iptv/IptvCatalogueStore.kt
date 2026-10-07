@@ -6,9 +6,12 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.nuvio.tv.core.iptv.ChannelCandidate
+import com.nuvio.tv.core.iptv.ChannelOrder
 import com.nuvio.tv.core.iptv.ChannelIdentityReconciler
 import com.nuvio.tv.core.iptv.GenerationWriter
 import com.nuvio.tv.core.iptv.GuideKey
+import com.nuvio.tv.core.iptv.ListMove
+import com.nuvio.tv.core.iptv.OrderedChannel
 import com.nuvio.tv.core.iptv.RefreshDecision
 import com.nuvio.tv.core.iptv.RefreshTicket
 import com.nuvio.tv.core.iptv.StoredChannel
@@ -35,6 +38,7 @@ class IptvCatalogueStore(
 ) : Closeable {
     init { require(maxDatabaseBytes >= 64 * 1024 && saveChunkRows > 0) }
     private val helper = Database(context.applicationContext, databaseName)
+    val pending: IptvPendingFiles by lazy { IptvPendingFiles(context.applicationContext, databaseName, secrets) }
 
     fun createSource(profileId: Int, label: String, kind: IptvSourceKind, accountId: String, connection: IptvSourceConnection): IptvSource = transaction { db ->
         validateConfiguration(label, accountId, connection)
@@ -160,6 +164,12 @@ class IptvCatalogueStore(
         Unit
     }
 
+    fun removeAccount(profileId: Int, id: String): Boolean = transaction { db ->
+        require(profileId >= 0)
+        if (count(db, "SELECT COUNT(*) FROM sources WHERE profile=? AND account_id=?", profileId.toString(), id) > 0) return@transaction false
+        db.delete("accounts", "profile=? AND id=?", arrayOf(profileId.toString(), id)) > 0
+    }
+
     fun connection(ref: IptvSourceRef): IptvSourceConnection = transaction { db ->
         source(db, ref)
         readConnection(db, ref)
@@ -219,19 +229,10 @@ class IptvCatalogueStore(
         val offset = cursor?.offset ?: 0
         require(offset in 0..60_000)
         val args = mutableListOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration?.toString() ?: "-1")
-        val filters = buildString {
-            if (!query.includeUnavailable) append(" AND c.available=1")
-            if (!query.includeHidden) append(" AND COALESCE(o.hidden,0)=0")
-            if (query.favouritesOnly) append(" AND o.favourite_rank IS NOT NULL")
-            if (query.category != null) { append(" AND COALESCE(c.category,'')=?"); args += query.category }
-            if (query.category == null && query.excludedCategories.isNotEmpty()) {
-                append(" AND COALESCE(c.category,'') NOT IN (${query.excludedCategories.joinToString(",") { "?" }})"); args += query.excludedCategories
-            }
-            if (query.search.isNotBlank()) { append(" AND instr(COALESCE(o.search_name,c.search_name),?)>0"); args += searchName(query.search.trim()) }
-        }
+        val filters = browseFilters(query, args)
         val order = when {
             query.favouritesOnly -> "o.favourite_rank,"
-            query.search.isBlank() -> "c.position,"
+            query.search.isBlank() -> "$USER_ORDER,"
             else -> ""
         }
         args += (limit + 1).toString(); args += offset.toString()
@@ -239,12 +240,39 @@ class IptvCatalogueStore(
             buildList { while (c.moveToNext()) add(c.getString(0)) }
         }
 
-        val items = if (selected.isEmpty()) emptyList() else db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id IN (${selected.joinToString(",") { "?" }}) ORDER BY ${order}COALESCE(o.search_name,c.search_name),c.id",
+        val items = if (selected.isEmpty()) emptyList() else db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format,o.user_order FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id IN (${selected.joinToString(",") { "?" }}) ORDER BY ${order}COALESCE(o.search_name,c.search_name),c.id",
             arrayOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration.toString(), *selected.toTypedArray())).use { c ->
             buildList { while (c.moveToNext()) add(readItem(c, ref)) }
         }
         IptvCataloguePage(source, revision, items.take(limit), guideAssociations(db, ref),
             if (items.size > limit) IptvBrowseCursor(revision, query, offset + limit) else null)
+    }
+
+    fun moveChannel(ref: IptvSourceRef, channelId: String, query: IptvBrowseQuery, move: ListMove): Boolean = transaction { db ->
+        require(!query.favouritesOnly && query.search.isBlank())
+        val generation = source(db, ref).activeGeneration ?: return@transaction false
+        val args = mutableListOf(ref.profileId.toString(), ref.sourceId, generation.toString())
+        val filters = browseFilters(query, args)
+        val ordered = db.rawQuery("SELECT c.id,$USER_ORDER FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=?$filters ORDER BY $USER_ORDER,COALESCE(o.search_name,c.search_name),c.id LIMIT 60000",
+            args.toTypedArray()).use { c -> buildList { while (c.moveToNext()) add(OrderedChannel(c.getString(0), c.getLong(1))) } }
+        val writes = ChannelOrder.plan(ordered, channelId, move)
+        for ((id, key) in writes) {
+            val updated = db.update("overlays", ContentValues().apply { put("user_order", key) }, "id=? AND profile=?", arrayOf(id, ref.profileId.toString()))
+            if (updated == 0) db.insertOrThrow("overlays", null, ContentValues().apply { put("id", id); put("profile", ref.profileId); put("hidden", 0); put("user_order", key) })
+        }
+        if (writes.isNotEmpty()) bumpBrowseRevision(db, ref)
+        writes.isNotEmpty()
+    }
+
+    private fun browseFilters(query: IptvBrowseQuery, args: MutableList<String>): String = buildString {
+        if (!query.includeUnavailable) append(" AND c.available=1")
+        if (!query.includeHidden) append(" AND COALESCE(o.hidden,0)=0")
+        if (query.favouritesOnly) append(" AND o.favourite_rank IS NOT NULL")
+        if (query.category != null) { append(" AND COALESCE(c.category,'')=?"); args += query.category }
+        if (query.category == null && query.excludedCategories.isNotEmpty()) {
+            append(" AND COALESCE(c.category,'') NOT IN (${query.excludedCategories.joinToString(",") { "?" }})"); args += query.excludedCategories
+        }
+        if (query.search.isNotBlank()) { append(" AND instr(COALESCE(o.search_name,c.search_name),?)>0"); args += searchName(query.search.trim()) }
     }
 
     fun guideMatchCandidates(ref: IptvSourceRef, guideIds: Set<String>, nameKeys: Set<String>, manualGuides: Set<GuideKey>,
@@ -273,7 +301,7 @@ class IptvCatalogueStore(
                 arrayOf(ref.profileId.toString(), *scope, *excludedCategories.toTypedArray(), *chunk.toTypedArray())).use { c -> buildList { while (c.moveToNext()) add(c.getString(0) to c.getLong(1)) } }
         }.sortedWith(compareBy({ it.second }, { it.first })).take(limit).map { it.first }
         val items = visible.chunked(500).flatMap { chunk ->
-            db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id IN (${marks(chunk)})",
+            db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format,o.user_order FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id IN (${marks(chunk)})",
                 arrayOf(ref.profileId.toString(), *scope, *chunk.toTypedArray())).use { c -> buildList { while (c.moveToNext()) add(readItem(c, ref)) } }
         }.associateBy { it.channel.id }
         visible.mapNotNull(items::get)
@@ -297,7 +325,7 @@ class IptvCatalogueStore(
     fun playbackItem(ref: IptvSourceRef, channelId: String): IptvCatalogueItem? = transaction { db ->
         val source = source(db, ref)
         if (!source.playbackEligible) return@transaction null
-        db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id=? AND c.available=1 AND COALESCE(o.hidden,0)=0",
+        db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format,o.user_order FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id=? AND c.available=1 AND COALESCE(o.hidden,0)=0",
             arrayOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration.toString(), channelId)).use { if (it.moveToFirst()) readItem(it, ref) else null }
     }
 
@@ -461,6 +489,7 @@ class IptvCatalogueStore(
             put("favourite_rank", overlay.favouriteRank); put("hidden", if (overlay.hidden) 1 else 0)
             put("stream_format", overlay.streamFormat.name)
             put("guide_feed", overlay.manualGuide?.feedId); put("guide_id", overlay.manualGuide?.externalId)
+            put("user_order", overlay.userOrder)
         }, SQLiteDatabase.CONFLICT_REPLACE).also { check(it != -1L) }
         bumpBrowseRevision(db, ref)
         Unit
@@ -469,7 +498,7 @@ class IptvCatalogueStore(
     private fun snapshot(db: SQLiteDatabase, ref: IptvSourceRef, checkCancellation: () -> Unit = {}): IptvCatalogueSnapshot {
         val source = source(db, ref)
         val rows = if (source.activeGeneration == null) emptyList() else db.rawQuery(
-            "SELECT c.*, o.custom_name, o.favourite_rank, o.hidden, o.guide_feed, o.guide_id, o.stream_format FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? ORDER BY c.name COLLATE NOCASE, c.id",
+            "SELECT c.*, o.custom_name, o.favourite_rank, o.hidden, o.guide_feed, o.guide_id, o.stream_format, o.user_order FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? ORDER BY c.name COLLATE NOCASE, c.id",
             arrayOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration.toString()),
         ).use { cursor -> buildList {
             while (cursor.moveToNext()) {
@@ -488,7 +517,8 @@ class IptvCatalogueStore(
         val manual = cursor.nullableString("guide_feed")?.let { feed -> cursor.nullableString("guide_id")?.let { GuideKey(feed, it) } }
         return IptvCatalogueItem(StoredChannel(id, ref.sourceId, data, cursor.number("available") == 1L), attributes,
             IptvChannelOverlay(cursor.nullableString("custom_name"), cursor.nullableNumber("favourite_rank")?.toInt(), cursor.nullableNumber("hidden") == 1L, manual,
-                cursor.nullableString("stream_format")?.let(IptvStreamFormat::valueOf) ?: IptvStreamFormat.AUTO))
+                cursor.nullableString("stream_format")?.let(IptvStreamFormat::valueOf) ?: IptvStreamFormat.AUTO,
+                cursor.getColumnIndex("user_order").let { if (it < 0 || cursor.isNull(it)) null else cursor.getLong(it) }))
     }
 
     private fun cacheValidators(db: SQLiteDatabase, source: IptvSource): IptvCacheValidators? =
@@ -537,7 +567,7 @@ class IptvCatalogueStore(
         class Write(val rows: List<PlannedRow>) : CataloguePlan
     }
 
-    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 8) {
+    private class Database(context: Context, name: String) : SQLiteOpenHelper(context, name, null, 9) {
         init { require(name.matches(Regex("[A-Za-z0-9_.-]+"))); setWriteAheadLoggingEnabled(true) }
         override fun onConfigure(db: SQLiteDatabase) { db.setForeignKeyConstraintsEnabled(true) }
         override fun onCreate(db: SQLiteDatabase) {
@@ -553,9 +583,10 @@ class IptvCatalogueStore(
             addRefreshSchema(db)
             addIdentityIndex(db)
             addGuideKeySchema(db)
+            addUserOrderSchema(db)
         }
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            check(oldVersion in 1..7 && newVersion == 8) { "Missing IPTV database migration" }
+            check(oldVersion in 1..8 && newVersion == 9) { "Missing IPTV database migration" }
             if (oldVersion == 1) addBrowseSchema(db)
             if (oldVersion <= 2) addStreamFormatSchema(db)
             if (oldVersion <= 4) addGroupingSchema(db)
@@ -563,6 +594,10 @@ class IptvCatalogueStore(
             if (oldVersion <= 5) addRefreshSchema(db)
             if (oldVersion <= 6) addIdentityIndex(db)
             if (oldVersion <= 7) addGuideKeySchema(db)
+            if (oldVersion <= 8) addUserOrderSchema(db)
+        }
+        private fun addUserOrderSchema(db: SQLiteDatabase) {
+            db.execSQL("ALTER TABLE overlays ADD COLUMN user_order INTEGER")
         }
         private fun addGuideKeySchema(db: SQLiteDatabase) {
             db.execSQL("ALTER TABLE catalogue ADD COLUMN epg_id TEXT")
@@ -607,6 +642,7 @@ class IptvCatalogueStore(
 
     private companion object {
         const val CATEGORY_ATTRIBUTE = "group-title"
+        const val USER_ORDER = "COALESCE(o.user_order,c.position*${ChannelOrder.SCALE})"
         fun aad(ref: IptvSourceRef, field: String) = "iptv.v1:${ref.profileId}:${ref.sourceId}:$field"
         fun searchName(value: String) = foldSearchText(value)
         fun count(db: SQLiteDatabase, sql: String, vararg args: String): Long = db.rawQuery(sql, arrayOf(*args)).use { check(it.moveToFirst()); it.getLong(0) }

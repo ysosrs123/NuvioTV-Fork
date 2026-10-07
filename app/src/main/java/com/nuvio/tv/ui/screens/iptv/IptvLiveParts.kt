@@ -135,12 +135,46 @@ internal fun programmeAt(row: GuideGridRow?, time: Long): GuideProgramme? =
 internal fun programmeAfter(row: GuideGridRow?, programme: GuideProgramme?, now: Long): GuideProgramme? =
     row?.cells?.filterIsInstance<GuideProgrammeCell>()?.firstOrNull { it.startMillis >= (programme?.stop?.epochMillis ?: now) }?.programme
 
+internal fun guideRow(state: IptvLiveState, id: String): GuideGridRow? = state.guide[id] ?: state.extraGuide[id]
+
 internal fun liveProgramme(state: IptvLiveState, id: String, time: Long): GuideProgramme? =
-    programmeAt(state.guide[id], time) ?: state.shortGuide[id]?.firstOrNull { it.start.epochMillis <= time && (it.stop?.epochMillis ?: Long.MAX_VALUE) > time }
+    programmeAt(guideRow(state, id), time) ?: state.shortGuide[id]?.firstOrNull { it.start.epochMillis <= time && (it.stop?.epochMillis ?: Long.MAX_VALUE) > time }
 
 internal fun nextProgramme(state: IptvLiveState, id: String, programme: GuideProgramme?, now: Long): GuideProgramme? =
-    programmeAfter(state.guide[id], programme, now)
+    programmeAfter(guideRow(state, id), programme, now)
         ?: state.shortGuide[id]?.firstOrNull { it.start.epochMillis >= (programme?.stop?.epochMillis ?: now) }
+
+internal fun catchupProgrammes(state: IptvLiveState, id: String): List<GuideProgramme> {
+    val fromGuide = guideRow(state, id)?.cells?.filterIsInstance<GuideProgrammeCell>()?.map { it.programme }.orEmpty()
+    val loaded = if (state.playingId == id) state.scrubProgrammes else emptyList()
+    return (loaded + fromGuide + listOfNotNull(state.catchup.takeIf { state.playingId == id }))
+        .distinctBy { it.start.epochMillis }.sortedBy { it.start.epochMillis }
+}
+
+internal fun catchupShown(state: IptvLiveState, position: Long): GuideProgramme? {
+    val catchup = state.catchup ?: return null
+    val id = state.playingId ?: return catchup
+    return com.nuvio.tv.core.iptv.CatchupScrub.programmeAt(catchupProgrammes(state, id), position) ?: catchup
+}
+
+internal fun playbackTag(state: IptvLiveState, shown: GuideProgramme?, now: Long): Int = when {
+    state.catchup == null -> com.nuvio.tv.R.string.iptv_live_playing
+    state.catchupFrom != null && shown != null && airing(shown, now) -> com.nuvio.tv.R.string.iptv_live_behind
+    else -> com.nuvio.tv.R.string.iptv_live_catchup
+}
+
+internal fun programmeArt(programme: GuideProgramme?): String? = com.nuvio.tv.core.iptv.guideIconUrl(programme?.icon)
+
+@Composable
+internal fun ProgrammeArt(url: String?, modifier: Modifier) {
+    var failed by remember(url) { mutableStateOf(false) }
+    val context = LocalContext.current
+    val request = remember(url) { url?.let { ImageRequest.Builder(context).data(it).size(320, 180).build() } }
+    if (request == null || failed) return
+    Box(modifier.clip(RoundedCornerShape(10.dp)).background(NuvioTheme.colors.TextPrimary.copy(alpha = .07f))) {
+        AsyncImage(request, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop, onError = { failed = true })
+    }
+}
 
 internal fun airing(programme: GuideProgramme, now: Long) = programme.start.epochMillis <= now && (programme.stop?.epochMillis ?: Long.MAX_VALUE) > now
 

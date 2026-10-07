@@ -4,6 +4,7 @@ import com.nuvio.tv.core.iptv.GuideChannel
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.GuideTimestamp
 import com.nuvio.tv.core.iptv.LocalizedGuideText
+import com.nuvio.tv.core.iptv.guideIconUrl
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -13,11 +14,13 @@ internal object IptvGuideJson {
     fun programme(value: GuideProgramme): String = JSONObject().put("channel", value.channelExternalId)
         .put("start", timestamp(value.start)).put("stop", value.stop?.let(::timestamp))
         .put("titles", texts(value.titles)).put("descriptions", texts(value.descriptions))
-        .apply { if (value.categories.isNotEmpty()) put("categories", JSONArray(value.categories)) }.toString()
+        .apply { if (value.categories.isNotEmpty()) put("categories", JSONArray(value.categories)) }
+        .apply { guideIconUrl(value.icon)?.let { put("icon", it) } }.toString()
     fun programme(value: String): GuideProgramme = JSONObject(value).let {
         GuideProgramme(it.getString("channel"), timestamp(it.getJSONObject("start")), it.optJSONObject("stop")?.let(::timestamp),
             texts(it.getJSONArray("titles")), texts(it.getJSONArray("descriptions")),
-            it.optJSONArray("categories")?.let { values -> (0 until values.length()).map(values::getString) }.orEmpty())
+            it.optJSONArray("categories")?.let { values -> (0 until values.length()).map(values::getString) }.orEmpty(),
+            if (it.isNull("icon")) null else guideIconUrl(it.optString("icon")))
     }
     private fun timestamp(value: GuideTimestamp) = JSONObject().put("ms", value.epochMillis).put("precision", value.precisionDigits).put("raw", value.raw)
     private fun timestamp(value: JSONObject) = GuideTimestamp(value.getLong("ms"), value.getInt("precision"), value.getString("raw"))

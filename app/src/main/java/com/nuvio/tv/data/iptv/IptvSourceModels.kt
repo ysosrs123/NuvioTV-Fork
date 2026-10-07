@@ -31,6 +31,7 @@ data class IptvCatalogueRecord(val data: ChannelCandidate, val attributes: Map<S
 data class IptvChannelOverlay(
     val customName: String? = null, val favouriteRank: Int? = null, val hidden: Boolean = false,
     val manualGuide: GuideKey? = null, val streamFormat: IptvStreamFormat = IptvStreamFormat.AUTO,
+    val userOrder: Long? = null,
 )
 data class IptvCatalogueItem(val channel: StoredChannel, val attributes: Map<String, String>, val overlay: IptvChannelOverlay) {
     override fun toString(): String = "IptvCatalogueItem(id=${channel.id}, available=${channel.available})"

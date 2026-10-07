@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
-import com.nuvio.tv.core.iptv.LiveTimeshift
 import com.nuvio.tv.data.local.PlayerControlAction
 import com.nuvio.tv.data.local.PlayerControlLayout
 import com.nuvio.tv.ui.screens.player.PlayerControlChrome
@@ -43,7 +42,7 @@ internal fun liveControlActions(state: IptvLiveState, canStartOver: Boolean): Se
 
 @Composable
 internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControlLayout, available: Set<PlayerControlAction>,
-    onAction: (PlayerControlAction) -> Unit, onHide: () -> Unit) {
+    onAction: (PlayerControlAction) -> Unit, onHide: () -> Unit, onScrub: (Long) -> Unit = {}) {
     val v2 = LocalV2Appearance.current != null
     val targets = remember { PlayerControlAction.entries.associateWith { FocusRequester() } }
     var moreExpanded by remember { mutableStateOf(false) }
@@ -57,10 +56,8 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
     }
     LaunchedEffect(interaction, moreExpanded) { if (!moreExpanded) { delay(8_000); onHide() } }
     val row = (state.channels.firstOrNull { it.item.channel.id == state.playingId } ?: state.playingRow?.takeIf { it.item.channel.id == state.playingId })
-    val programme = state.catchup ?: row?.let { liveProgramme(state, it.item.channel.id, now) }
-    val position by produceState(0L, state.player, state.catchup) {
-        while (state.catchup != null) { value = state.player?.currentPosition ?: 0L; delay(1_000) }
-    }
+    val position by rememberCatchupPosition(state)
+    val programme = if (state.catchup != null) position?.let { catchupShown(state, it) } ?: state.catchup else row?.let { liveProgramme(state, it.item.channel.id, now) }
     Box(Modifier.fillMaxSize()) {
         Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(260.dp)
             .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .6f)))))
@@ -71,11 +68,7 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(row?.let(::channelName) ?: state.playingTitle.orEmpty(), style = MaterialTheme.typography.titleMedium,
                             color = Color.White.copy(alpha = .8f), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                        Tag(stringResource(when {
-                            state.catchup == null -> R.string.iptv_live_playing
-                            state.catchupFrom != null -> R.string.iptv_live_behind
-                            else -> R.string.iptv_live_catchup
-                        }), live = state.catchup == null)
+                        Tag(stringResource(playbackTag(state, programme, now)), live = state.catchup == null)
                         qualityBadges(state.player).forEach { Tag(it) }
                     }
                     Text(programme?.let(::title) ?: stringResource(R.string.iptv_live_no_programme), style = MaterialTheme.typography.titleLarge,
@@ -83,15 +76,12 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
                 }
             }
         }, timeline = {
-            val elapsed = if (state.catchup != null) programme?.let { LiveTimeshift.position(it, state.catchupFrom, position) } ?: now else now
-            ProgressLine(programme?.let { progress(it, elapsed) } ?: 0f, Modifier.fillMaxWidth())
+            if (state.catchup != null) ScrubTimeline(programme, position, now, state.scrubTarget != null, Modifier.fillMaxWidth(),
+                onScrub = { interaction++; onScrub(it) }, onFocused = { interaction++ })
+            else ScrubTimeline(programme, null, now, false, Modifier.fillMaxWidth())
         }, time = {
-            Row(Modifier.fillMaxWidth()) {
-                Text(programme?.let(::timeRange).orEmpty(), style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary,
-                    modifier = Modifier.weight(1f))
-                Text(clock(if (state.catchup != null) programme?.let { LiveTimeshift.position(it, state.catchupFrom, position) } ?: now else now),
-                    style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary)
-            }
+            if (state.catchup != null) Text(stringResource(R.string.iptv_scrub_deck_hint), style = MaterialTheme.typography.labelSmall,
+                color = NuvioTheme.colors.TextTertiary, maxLines = 1)
         }, deck = {
             Row(Modifier.fillMaxWidth().focusGroup()) {
                 PlayerControlDeck(layout, available, targets::getValue, playing, moreExpanded = moreExpanded,

@@ -32,6 +32,7 @@ cloudstream = "v4.7.0"
 nicehttp = "0.4.16"
 conscrypt = { strictly = "2.5.2" }
 zxing = "3.5.3"
+smbj = "0.15.0"
 supabase = "3.2.1"
 ktor = "3.1.1"
 kotlinxSerialization = "1.8.0"
@@ -115,6 +116,7 @@ cloudstream-library = { group = "com.github.recloudstream.cloudstream", name = "
 nicehttp = { group = "com.github.Blatzar", name = "NiceHttp", version.ref = "nicehttp" }
 conscrypt-android = { group = "org.conscrypt", name = "conscrypt-android", version.ref = "conscrypt" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
+smbj = { group = "com.hierynomus", name = "smbj", version.ref = "smbj" }
 
 # Markdown rendering
 markdown-renderer-m3 = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }

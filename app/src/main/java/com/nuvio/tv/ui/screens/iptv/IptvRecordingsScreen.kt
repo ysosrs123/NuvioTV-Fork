@@ -49,13 +49,17 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.PlayerView
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.RecordingStatus
+import com.nuvio.tv.core.recording.IptvRecordingAvailability
 import com.nuvio.tv.data.iptv.IptvLog
 import com.nuvio.tv.data.iptv.IptvRecording
+import com.nuvio.tv.data.iptv.IptvRecordingDataSource
+import com.nuvio.tv.data.iptv.IptvShareException
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
 import com.nuvio.tv.ui.screens.settings.SettingsGroupCard
@@ -66,6 +70,7 @@ import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
 import com.nuvio.tv.ui.v2.components.NuvioActionPill
 import java.text.DateFormat
 import java.util.Date
+import kotlin.concurrent.thread
 import kotlinx.coroutines.delay
 
 @Composable
@@ -93,9 +98,13 @@ fun IptvRecordingsScreen(onBack: () -> Unit, viewModel: IptvRecordingsViewModel 
                 Spacer(Modifier.height(18.dp))
                 Text(stringResource(R.string.iptv_recordings_hint), style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextTertiary)
                 Spacer(Modifier.weight(1f))
-                state.freeBytes?.let {
-                    Text(stringResource(R.string.iptv_recordings_free, Formatter.formatShortFileSize(context, it)),
-                        style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextSecondary)
+                state.free?.let { free ->
+                    val size = Formatter.formatShortFileSize(context, free.bytes)
+                    Text(when {
+                        free.share -> stringResource(R.string.iptv_recordings_free_share, size)
+                        free.drive != null -> stringResource(R.string.iptv_recordings_free_drive, size, free.drive)
+                        else -> stringResource(R.string.iptv_recordings_free, size)
+                    }, style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextSecondary)
                 }
                 state.message?.let { Text(stringResource(it), style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.Error) }
             }
@@ -112,7 +121,8 @@ fun IptvRecordingsScreen(onBack: () -> Unit, viewModel: IptvRecordingsViewModel 
                     item(key = "group:$title") {
                         SettingsGroupCard(title = stringResource(title)) {
                             entries.forEachIndexed { index, recording ->
-                                RecordingRow(recording, Modifier.then(if (groupIndex == 0 && index == 0) Modifier.focusRequester(first) else Modifier),
+                                RecordingRow(recording, state.availability[recording.id], recording.id in state.uploading,
+                                    Modifier.then(if (groupIndex == 0 && index == 0) Modifier.focusRequester(first) else Modifier),
                                     onClick = { if (recording.id in state.playable) viewModel.play(recording) else options = recording },
                                     onMenu = { options = recording })
                             }
@@ -145,7 +155,8 @@ fun IptvRecordingsScreen(onBack: () -> Unit, viewModel: IptvRecordingsViewModel 
         val cancel = remember { FocusRequester() }
         LaunchedEffect(Unit) { withFrameNanos { }; runCatching { cancel.requestFocus() } }
         NuvioDialog(onDismiss = { confirmDelete = null }, title = stringResource(R.string.iptv_recording_delete_title, recording.title ?: recording.channelName),
-            subtitle = stringResource(R.string.iptv_recording_delete_description), width = 520.dp) {
+            subtitle = stringResource(if (recording.storage == null) R.string.iptv_recording_delete_description
+                else R.string.iptv_recording_delete_description_elsewhere), width = 520.dp) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 NuvioActionPill({ confirmDelete = null }, Modifier.focusRequester(cancel)) { Text(stringResource(R.string.iptv_recording_keep)) }
                 NuvioActionPill({ confirmDelete = null; viewModel.delete(recording) }) {
@@ -157,13 +168,14 @@ fun IptvRecordingsScreen(onBack: () -> Unit, viewModel: IptvRecordingsViewModel 
 }
 
 @Composable
-private fun RecordingRow(recording: IptvRecording, modifier: Modifier, onClick: () -> Unit, onMenu: () -> Unit) {
+private fun RecordingRow(recording: IptvRecording, availability: IptvRecordingAvailability?, uploading: Boolean, modifier: Modifier,
+    onClick: () -> Unit, onMenu: () -> Unit) {
     val context = LocalContext.current
     val longPress = rememberLongPressKeyTracker()
     val status = stringResource(iptvRecordingStatusLabel(recording.status))
     val size = recording.bytes.takeIf { it > 0 }?.let { Formatter.formatShortFileSize(context, it) }
     SettingsActionRow(title = recording.title ?: recording.channelName, subtitle = null,
-        subtitleContent = { _, _ -> RecordingLine(recording) },
+        subtitleContent = { _, _ -> RecordingLine(recording, availability, uploading) },
         value = listOfNotNull(size, status).joinToString(" · "),
         valueColor = when (recording.status) {
             RecordingStatus.RECORDING -> NuvioTheme.colors.Error
@@ -182,7 +194,7 @@ private fun RecordingRow(recording: IptvRecording, modifier: Modifier, onClick: 
 }
 
 @Composable
-private fun RecordingLine(recording: IptvRecording) {
+private fun RecordingLine(recording: IptvRecording, availability: IptvRecordingAvailability?, uploading: Boolean) {
     val now = System.currentTimeMillis()
     val start = recording.startedAtMillis ?: recording.startMillis
     val stop = if (recording.status.finished) recording.finishedAtMillis ?: recording.stopMillis else recording.stopMillis
@@ -192,6 +204,17 @@ private fun RecordingLine(recording: IptvRecording) {
         "$date ${clock(start)} – ${clock(stop)}",
         recording.failure?.let { stringResource(iptvRecordingFailureMessage(it)) },
         if (recording.gaps > 0 && recording.failure == null) stringResource(R.string.iptv_recording_gaps) else null,
+        when {
+            recording.storage == null -> null
+            recording.onShare -> stringResource(R.string.iptv_recording_on_share)
+            else -> recording.storageLabel ?: stringResource(R.string.iptv_recording_on_drive)
+        },
+        when (availability) {
+            IptvRecordingAvailability.DRIVE_MISSING -> stringResource(R.string.iptv_recording_drive_missing)
+            IptvRecordingAvailability.SHARE_MISSING -> stringResource(R.string.iptv_recording_share_missing)
+            IptvRecordingAvailability.UPLOADING -> stringResource(if (uploading) R.string.iptv_recording_uploading else R.string.iptv_recording_upload_waiting)
+            else -> null
+        },
     )
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(parts.joinToString(" · "), color = if (recording.status == RecordingStatus.FAILED) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary,
@@ -221,7 +244,8 @@ private fun RecordingPlayer(playback: IptvRecordingPlayback, onClose: () -> Unit
     val player = remember {
         ExoPlayer.Builder(context, DefaultRenderersFactory(context).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)).build().apply {
             setAudioAttributes(AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_MOVIE).build(), true)
-            setMediaItem(MediaItem.Builder().setUri(Uri.fromFile(playback.file)).setMimeType(MimeTypes.VIDEO_MP2T).build())
+            setMediaSource(ProgressiveMediaSource.Factory(IptvRecordingDataSource.Factory(playback.reader)).createMediaSource(
+                MediaItem.Builder().setUri(Uri.parse("nuvio-recording://${playback.recording.id}")).setMimeType(MimeTypes.VIDEO_MP2T).build()))
             prepare()
             playWhenReady = true
         }
@@ -230,15 +254,20 @@ private fun RecordingPlayer(playback: IptvRecordingPlayback, onClose: () -> Unit
     DisposableEffect(player, lifecycle) {
         val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) player.playWhenReady = false }
         lifecycle.addObserver(observer)
-        onDispose { lifecycle.removeObserver(observer); player.release() }
+        onDispose {
+            lifecycle.removeObserver(observer)
+            player.release()
+            thread(name = "recording-close", isDaemon = true) { runCatching { playback.reader.close() } }
+        }
     }
     val focus = remember { FocusRequester() }
-    var failed by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf<Int?>(null) }
     DisposableEffect(player) {
         val listener = object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 IptvLog.failure("recording playback", error)
-                failed = true
+                failed = if (generateSequence<Throwable>(error) { it.cause }.any { it is IptvShareException }) R.string.iptv_recording_share_playback_failed
+                    else R.string.iptv_recording_playback_failed
             }
         }
         player.addListener(listener)
@@ -286,8 +315,8 @@ private fun RecordingPlayer(playback: IptvRecordingPlayback, onClose: () -> Unit
             setShutterBackgroundColor(android.graphics.Color.BLACK)
         } }, modifier = Modifier.fillMaxSize(),
             update = { it.player = player; it.keepScreenOn = true }, onRelease = { it.player = null; it.keepScreenOn = false })
-        if (failed) {
-            Text(stringResource(R.string.iptv_recording_playback_failed), color = NuvioTheme.colors.TextPrimary, style = MaterialTheme.typography.titleMedium,
+        failed?.let { reason ->
+            Text(stringResource(reason), color = NuvioTheme.colors.TextPrimary, style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.align(Alignment.Center).iptvPanel().padding(horizontal = 28.dp, vertical = 18.dp))
         }
         if (bar) {

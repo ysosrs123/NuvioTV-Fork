@@ -20,6 +20,7 @@ data class GuideProgramme(
     val titles: List<LocalizedGuideText>,
     val descriptions: List<LocalizedGuideText>,
     val categories: List<String> = emptyList(),
+    val icon: String? = null,
 ) {
     val canSchedulePrecisely: Boolean get() = start.precise && stop?.precise == true
 }
@@ -43,6 +44,13 @@ data class GuideParseLimits(
 ) {
     init { require(expandedBytes > 0 && depth > 0 && textCharacters > 0 && channels > 0 && programmes > 0) }
 }
+
+fun guideIconUrl(raw: String?): String? = raw?.trim()?.takeIf { value ->
+    value.length in 1..MAX_GUIDE_ICON_CHARACTERS && (value.startsWith("https://", ignoreCase = true) || value.startsWith("http://", ignoreCase = true)) &&
+        value.none { it.isWhitespace() || it.isISOControl() }
+}
+
+const val MAX_GUIDE_ICON_CHARACTERS = 2048
 
 class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()) {
     fun parse(input: InputStream, channel: (GuideChannel) -> Unit, programme: (GuideProgramme) -> Unit): GuideParseSummary {
@@ -71,6 +79,7 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
         var rootSeen = false
         var rootEnded = false
         var recordTextCharacters = 0
+        var icon: String? = null
 
         while (true) {
             if (Thread.currentThread().isInterrupted) throw java.io.InterruptedIOException("Guide import cancelled")
@@ -102,7 +111,9 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                         val stop = parser.getAttributeValue(null, "stop")
                         recordStop = stop?.let(::parseTimestamp)
                         badStop = stop != null && recordStop == null
-                        names.clear(); descriptions.clear(); categories.clear(); recordTextCharacters = 0
+                        names.clear(); descriptions.clear(); categories.clear(); recordTextCharacters = 0; icon = null
+                    } else if (parser.depth == 3 && recordType == "programme" && parser.name == "icon") {
+                        if (icon == null) icon = guideIconUrl(parser.getAttributeValue(null, "src"))
                     } else if (parser.depth == 3 && recordType != null && parser.name in setOf("display-name", "title", "desc", "category")) {
                         textType = parser.name
                         textLanguage = parser.getAttributeValue(null, "lang")
@@ -136,7 +147,7 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                             val start = recordStart
                             val stop = recordStop
                             if (recordId == null || start == null || badStop || (stop != null && stop.epochMillis <= start.epochMillis)) rejected++
-                            else programme(GuideProgramme(recordId, start, stop, names.toList(), descriptions.toList(), categories.toList()))
+                            else programme(GuideProgramme(recordId, start, stop, names.toList(), descriptions.toList(), categories.toList(), icon))
                         }
                         recordType = null
                     } else if (parser.depth == 1) rootEnded = true

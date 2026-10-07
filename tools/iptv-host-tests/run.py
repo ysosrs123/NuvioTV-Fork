@@ -37,6 +37,8 @@ JARS = [
     ('com.squareup.okhttp3', 'mockwebserver3', '5.3.2'), ('com.squareup.okio', 'okio-jvm', '3.16.4'),
     ('org.ow2.asm', 'asm', '9.7.1'), ('org.ow2.asm', 'asm-tree', '9.7.1'),
     ('org.robolectric', 'android-all', '16-robolectric-13921718'),
+    ('com.hierynomus', 'smbj', '0.15.0'), ('com.hierynomus', 'asn-one', '0.6.0'), ('net.engio', 'mbassador', '1.3.2'),
+    ('org.slf4j', 'slf4j-api', '2.0.18'), ('org.bouncycastle', 'bcprov-jdk18on', '1.85.2'),
 ]
 AARS = ['lib-common', 'lib-exoplayer', 'lib-extractor', 'lib-datasource', 'lib-exoplayer-hls', 'lib-datasource-okhttp']
 
@@ -132,7 +134,9 @@ def classpath():
             jar('com.google.guava', 'failureaccess', '1.0.2')] + [WORK / 'aar' / a / 'classes.jar' for a in AARS] + [
             WORK / 'lib-decoder.jar', WORK / 'lib-container.jar', WORK / 'stubs.jar', WORK / 'shims.jar', WORK / 'mockable-android.jar',
             jar('com.squareup.okhttp3', 'okhttp-jvm', '5.3.2'), jar('com.squareup.okhttp3', 'mockwebserver', '5.3.2'),
-            jar('com.squareup.okhttp3', 'mockwebserver3', '5.3.2'), jar('com.squareup.okio', 'okio-jvm', '3.16.4')]
+            jar('com.squareup.okhttp3', 'mockwebserver3', '5.3.2'), jar('com.squareup.okio', 'okio-jvm', '3.16.4'),
+            jar('com.hierynomus', 'smbj', '0.15.0'), jar('com.hierynomus', 'asn-one', '0.6.0'), jar('net.engio', 'mbassador', '1.3.2'),
+            jar('org.slf4j', 'slf4j-api', '2.0.18'), jar('org.bouncycastle', 'bcprov-jdk18on', '1.85.2')]
 
 
 def kotlinc(out, sources, extra=(), before=()):

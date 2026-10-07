@@ -12,7 +12,9 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -47,12 +49,14 @@ import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.core.iptv.MultiviewLayout
 import com.nuvio.tv.core.iptv.MultiviewQuality
+import com.nuvio.tv.core.iptv.multiviewEffectiveLayout
+import com.nuvio.tv.core.iptv.multiviewGeometry
+import com.nuvio.tv.core.iptv.multiviewMaxTiles
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
 import com.nuvio.tv.ui.screens.settings.SettingsPickerOption
 import com.nuvio.tv.ui.screens.settings.SettingsSingleChoiceDialog
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.OpenInFull
@@ -69,16 +73,19 @@ private sealed interface TilePick {
 @Composable
 internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, onFocusTile: (Int) -> Unit, onFull: (Int) -> Unit,
     onAdd: (IptvListedChannel) -> Unit, onReplace: (Int, IptvListedChannel) -> Unit, onRemove: (Int) -> Unit, onExit: () -> Unit,
-    onSizes: (List<Int>) -> Unit, onShowLarge: (Int) -> Unit, onLayout: (MultiviewLayout) -> Unit, onQuality: (MultiviewQuality) -> Unit) {
+    onSizes: (List<Int>) -> Unit, onShowLarge: (Int) -> Unit, onLayout: (MultiviewLayout) -> Unit, onQuality: (MultiviewQuality) -> Unit,
+    onPickerSource: (com.nuvio.tv.data.iptv.IptvSourceRef?) -> Unit = {}, onPickerMore: () -> Unit = {}) {
     var choosingQuality by remember { mutableStateOf(false) }
+    var choosingLayout by remember { mutableStateOf(false) }
     var pick by remember { mutableStateOf<TilePick?>(null) }
     var menuFor by remember { mutableStateOf<Int?>(null) }
     val requesters = remember { List(MAX_SLOTS) { FocusRequester() } }
-    val slots = (tiles.size + if (tiles.size < state.maxTiles) 1 else 0).coerceIn(1, MAX_SLOTS)
+    val addSlot = tiles.size < multiviewMaxTiles(state.multiviewLayout, state.maxTiles)
+    val slots = (tiles.size + if (addSlot) 1 else 0).coerceIn(1, MAX_SLOTS)
     LaunchedEffect(pick, tiles.size) {
         if (pick == null) { repeat(2) { withFrameNanos { } }; runCatching { requesters[state.tileFocus.coerceIn(0, slots - 1)].requestFocus() } }
     }
-    BackHandler(pick != null) { pick = null }
+    BackHandler(pick != null) { pick = null; onPickerSource(null) }
     BackHandler(pick == null && menuFor == null) { onExit() }
     var header by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) { delay(5_000); header = false }
@@ -90,47 +97,14 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
                 val boxHeight = maxHeight
                 val uiHeight = LocalWindowInfo.current.containerSize.height.takeIf { it > 0 } ?: with(density) { boxHeight.roundToPx() }
                 val scale = state.panelHeight.toFloat() / uiHeight
-                val focusLayout = state.multiviewLayout == MultiviewLayout.FOCUS && tiles.size >= 2
-                val main = state.mainTile.coerceIn(0, tiles.lastIndex)
-                val order = if (focusLayout) listOf(main) + tiles.indices.filter { it != main } else tiles.indices.toList()
-                val addSlot = tiles.size < state.maxTiles
-                val sizes: Map<Int, DpSize>
-                if (focusLayout) {
-                    val bigWidth = minOf((maxWidth - gap) * 2f / 3f, maxHeight * 16f / 9f)
-                    val smallWidth = minOf(maxWidth - bigWidth - gap, ((maxHeight - gap * 2) / 3f) * 16f / 9f)
-                    sizes = order.mapIndexed { position, index ->
-                        index to if (position == 0) DpSize(bigWidth, bigWidth * 9f / 16f) else DpSize(smallWidth, smallWidth * 9f / 16f)
-                    }.toMap()
-                    Row(Modifier.align(Alignment.Center), horizontalArrangement = Arrangement.spacedBy(gap), verticalAlignment = Alignment.CenterVertically) {
-                        TileSlot(state, tiles, order[0], now, requesters, Modifier.size(sizes.getValue(order[0])), { menuFor = it }, onFocusTile, onFull)
-                        Column(verticalArrangement = Arrangement.spacedBy(gap)) {
-                            order.drop(1).forEach { index -> TileSlot(state, tiles, index, now, requesters, Modifier.size(sizes.getValue(index)), { menuFor = it }, onFocusTile, onFull) }
-                            if (addSlot) AddSlot(requesters[tiles.size], Modifier.size(smallWidth, smallWidth * 9f / 16f)) { pick = TilePick.Add }
-                        }
-                    }
-                } else {
-                    val columns = 2
-                    val rows = if (slots <= 2) 1 else 2
-                    val cellWidth = minOf((maxWidth - gap * (columns - 1)) / columns, ((maxHeight - gap * (rows - 1)) / rows) * 16f / 9f)
-                    val cellHeight = cellWidth * 9f / 16f
-                    sizes = tiles.indices.associateWith { DpSize(cellWidth, cellHeight) }
-                    Column(Modifier.align(Alignment.Center), verticalArrangement = Arrangement.spacedBy(gap)) {
-                        for (r in 0 until rows) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
-                                for (c in 0 until columns) {
-                                    val index = r * columns + c
-                                    val modifier = Modifier.size(cellWidth, cellHeight)
-                                    when {
-                                        index < tiles.size -> TileSlot(state, tiles, index, now, requesters, modifier, { menuFor = it }, onFocusTile, onFull)
-                                        index == tiles.size && addSlot -> AddSlot(requesters[index], modifier) { pick = TilePick.Add }
-                                        else -> Spacer(modifier)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                val layout = multiviewEffectiveLayout(state.multiviewLayout, tiles.size)
+                val rects = multiviewGeometry(layout, slots, state.mainTile.coerceIn(0, (tiles.size - 1).coerceAtLeast(0)), maxWidth.value, maxHeight.value, gap.value)
+                rects.forEachIndexed { index, rect ->
+                    val modifier = Modifier.offset(rect.x.dp, rect.y.dp).size(rect.width.dp, rect.height.dp)
+                    if (index < tiles.size) TileSlot(state, tiles, index, now, requesters, modifier, { menuFor = it }, onFocusTile, onFull)
+                    else AddSlot(requesters[index], modifier) { pick = TilePick.Add }
                 }
-                val physical = tiles.indices.map { index -> sizes[index]?.let { with(density) { (it.height.toPx() * scale).toInt() } } ?: 0 }
+                val physical = tiles.indices.map { index -> rects.getOrNull(index)?.let { with(density) { (it.height.dp.toPx() * scale).toInt() } } ?: 0 }
                 LaunchedEffect(physical) { onSizes(physical) }
             }
         }
@@ -145,14 +119,16 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
         }
         AnimatedVisibility(pick != null, Modifier.align(Alignment.CenterStart),
             enter = fadeIn() + slideInHorizontally { -it / 4 }, exit = fadeOut() + slideOutHorizontally { -it / 4 }) {
+            val picker = state.picker
             ChannelPanel(state, now, onWatch = { row ->
                 when (val target = pick) {
                     TilePick.Add -> onAdd(row)
                     is TilePick.Replace -> onReplace(target.index, row)
                     null -> Unit
                 }
-                pick = null
-            })
+                pick = null; onPickerSource(null)
+            }, channels = picker?.channels ?: state.channels, onNearEnd = { if (picker != null) onPickerMore() },
+                header = { if (state.sources.count { it.playbackEligible } > 1) PickerSources(state, onPickerSource) })
         }
     }
     if (choosingQuality) {
@@ -164,6 +140,11 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
             })) },
             selectedValue = state.multiviewQuality, onOptionSelected = { onQuality(it); choosingQuality = false }, onDismiss = { choosingQuality = false })
     }
+    if (choosingLayout) {
+        SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_multiview_layout), subtitle = stringResource(R.string.iptv_multiview_layout_description),
+            options = MultiviewLayout.entries.map { SettingsPickerOption(it, stringResource(multiviewLayoutLabel(it))) },
+            selectedValue = state.multiviewLayout, onOptionSelected = { onLayout(it); choosingLayout = false }, onDismiss = { choosingLayout = false })
+    }
     menuFor?.let { index ->
         val tile = tiles.getOrNull(index) ?: return@let
         val first = remember { FocusRequester() }
@@ -173,15 +154,11 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 SettingsActionRow(title = stringResource(R.string.iptv_live_fullscreen), subtitle = null, leadingIcon = Icons.Filled.Fullscreen,
                     trailingIcon = null, onClick = { menuFor = null; onFull(index) }, modifier = Modifier.focusRequester(first))
-                if (state.multiviewLayout == MultiviewLayout.FOCUS && index != state.mainTile) SettingsActionRow(
+                if (multiviewEffectiveLayout(state.multiviewLayout, tiles.size).let { it == MultiviewLayout.FOCUS || it == MultiviewLayout.ONE_OVER_TWO } && index != state.mainTile) SettingsActionRow(
                     title = stringResource(R.string.iptv_multiview_show_large), subtitle = null, leadingIcon = Icons.Filled.OpenInFull,
                     trailingIcon = null, onClick = { menuFor = null; onShowLarge(index) })
                 SettingsActionRow(title = stringResource(R.string.iptv_multiview_layout), subtitle = null, leadingIcon = Icons.Filled.Dashboard,
-                    value = stringResource(if (state.multiviewLayout == MultiviewLayout.FOCUS) R.string.iptv_multiview_layout_focus else R.string.iptv_multiview_layout_grid),
-                    trailingIcon = null, onClick = {
-                        menuFor = null
-                        onLayout(if (state.multiviewLayout == MultiviewLayout.FOCUS) MultiviewLayout.GRID else MultiviewLayout.FOCUS)
-                    })
+                    value = stringResource(multiviewLayoutLabel(state.multiviewLayout)), onClick = { menuFor = null; choosingLayout = true })
                 SettingsActionRow(title = stringResource(R.string.iptv_multiview_quality), subtitle = null, leadingIcon = Icons.Filled.HighQuality,
                     value = stringResource(qualityLabel(state.multiviewQuality)), onClick = { menuFor = null; choosingQuality = true })
                 SettingsActionRow(title = stringResource(R.string.iptv_multiview_replace), subtitle = null, leadingIcon = Icons.Filled.SwapHoriz,
@@ -196,6 +173,34 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
 }
 
 private const val MAX_SLOTS = 4
+
+internal fun multiviewLayoutLabel(layout: MultiviewLayout): Int = when (layout) {
+    MultiviewLayout.GRID -> R.string.iptv_multiview_layout_grid
+    MultiviewLayout.FOCUS -> R.string.iptv_multiview_layout_focus
+    MultiviewLayout.SIDE_BY_SIDE -> R.string.iptv_multiview_layout_side
+    MultiviewLayout.ONE_OVER_TWO -> R.string.iptv_multiview_layout_one_over_two
+}
+
+@Composable
+private fun PickerSources(state: IptvLiveState, onPickerSource: (com.nuvio.tv.data.iptv.IptvSourceRef?) -> Unit) {
+    val chosen = state.picker?.ref ?: state.source
+    SectionLabel(stringResource(R.string.iptv_live_sources))
+    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        state.sources.filter { it.playbackEligible }.forEach { source ->
+            var focused by remember { mutableStateOf(false) }
+            val selected = source.ref == chosen
+            Text(source.label, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                color = if (focused || selected) itemContent(focused) else NuvioTheme.colors.TextSecondary,
+                modifier = Modifier.widthIn(max = 200.dp).onFocusChanged { focused = it.isFocused }.iptvItem(focused, selected)
+                    .onPreviewKeyEvent { event ->
+                        val native = event.nativeKeyEvent
+                        if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) { onPickerSource(source.ref.takeIf { it != state.source || state.mergedFavourites }); true } else false
+                    }.focusable().padding(horizontal = 12.dp, vertical = 8.dp))
+        }
+    }
+    if (state.picker?.loading == true) LoadingIndicator(Modifier.size(24.dp))
+}
 
 private fun qualityLabel(quality: MultiviewQuality): Int = when (quality) {
     MultiviewQuality.AUTO -> R.string.iptv_multiview_quality_auto

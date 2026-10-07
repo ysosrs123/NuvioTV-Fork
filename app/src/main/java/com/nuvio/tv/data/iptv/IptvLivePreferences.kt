@@ -1,9 +1,12 @@
 package com.nuvio.tv.data.iptv
 
 import android.content.Context
+import com.nuvio.tv.core.iptv.CategoryOrder
+import com.nuvio.tv.core.iptv.GuideDensity
 import com.nuvio.tv.core.iptv.LivePreferenceKeys
 import com.nuvio.tv.core.iptv.MultiviewLayout
 import com.nuvio.tv.core.iptv.MultiviewQuality
+import com.nuvio.tv.core.iptv.RecordingLocations
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -43,6 +46,24 @@ class IptvLivePreferences(context: Context) {
     var recordLateMinutes: Int
         get() = preferences.getInt(LATE_KEY, 2).coerceIn(0, MAX_LATE_MINUTES)
         set(value) = preferences.edit().putInt(LATE_KEY, value.coerceIn(0, MAX_LATE_MINUTES)).apply()
+
+    var recordLocation: String
+        get() = preferences.getString(LOCATION_KEY, null)?.takeIf { it == RecordingLocations.INTERNAL || it == RecordingLocations.SHARE ||
+            RecordingLocations.volumeId(it) != null } ?: RecordingLocations.INTERNAL
+        set(value) = putString(LOCATION_KEY, value)
+    var shareFreeBytes: Long?
+        get() = preferences.getLong(SHARE_FREE_KEY, -1).takeIf { it >= 0 }
+        set(value) = preferences.edit().putLong(SHARE_FREE_KEY, value ?: -1).apply()
+
+    var guideDensity: GuideDensity
+        get() = enumValue(DENSITY_KEY, GuideDensity.COMFORTABLE)
+        set(value) = putString(DENSITY_KEY, value.name)
+
+    fun categoryOrder(ref: IptvSourceRef): List<String> = preferences.getString(key(ref, CATEGORY_ORDER), null)?.let { saved ->
+        runCatching { org.json.JSONArray(saved).let { array -> (0 until minOf(array.length(), CategoryOrder.MAX_SAVED)).map(array::getString) } }.getOrNull()
+    }.orEmpty()
+
+    fun setCategoryOrder(ref: IptvSourceRef, names: List<String>) = putString(key(ref, CATEGORY_ORDER), org.json.JSONArray(names.take(CategoryOrder.MAX_SAVED)).toString())
 
     var autoPreview: Boolean
         get() = preferences.getBoolean(PREVIEW_KEY, true)
@@ -117,10 +138,14 @@ class IptvLivePreferences(context: Context) {
         private const val MANUAL_CONNECTIONS = "connections-manual"
         private const val PROVIDER_CONNECTIONS = "provider-connections"
         private const val PREVIEW_KEY = "settings-preview"
+        private const val LOCATION_KEY = "settings-record-location"
+        private const val SHARE_FREE_KEY = "settings-record-share-free"
         private const val THEME_KEY = "settings-theme"
         private const val BLACK_KEY = "settings-black"
         private const val SOLID_KEY = "settings-solid"
         private const val PLAIN_KEY = "settings-plain"
         private const val BOOST_PREFIX = "boost-"
+        private const val DENSITY_KEY = "settings-density"
+        private const val CATEGORY_ORDER = "category-order"
     }
 }

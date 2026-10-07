@@ -26,7 +26,7 @@ data class SetupSettings(
     companion object {
         val FORMATS = listOf("auto", "hls", "mpegts")
         val START_VIEWS = listOf("last", "all", "favourites", "sport")
-        val LAYOUTS = listOf("grid", "focus")
+        val LAYOUTS = listOf("grid", "focus", "sidebyside", "oneovertwo")
         val QUALITIES = listOf("auto", "sharpest", "lightest")
         val EARLY_MINUTES = listOf(0, 1, 2, 5, 10)
         val LATE_MINUTES = listOf(0, 2, 5, 10, 15, 30)
