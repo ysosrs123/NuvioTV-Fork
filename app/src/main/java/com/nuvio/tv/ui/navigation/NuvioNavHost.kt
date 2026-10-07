@@ -1236,37 +1236,37 @@ private fun PlaybackNavHost(
         }
 
         composable(Screen.IptvLive.route) {
-            com.nuvio.tv.ui.screens.iptv.IptvLiveScreen(onBack = { navController.popBackStack() },
+            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvLiveScreen(onBack = { navController.popBackStack() },
                 onRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } },
                 onSettings = { navController.navigate(Screen.IptvSettings.route) { launchSingleTop = true } },
                 onSources = {
                     if (!navController.popBackStack(Screen.IptvSources.route, inclusive = false)) {
                         navController.navigate(Screen.IptvSources.route) { launchSingleTop = true }
                     }
-                })
+                }) }
         }
         composable(Screen.IptvSources.route) {
-            com.nuvio.tv.ui.screens.iptv.IptvSourcesScreen(onBack = { navController.popBackStack() },
+            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvSourcesScreen(onBack = { navController.popBackStack() },
                 onLive = {
                     if (!navController.popBackStack(Screen.IptvLive.route, inclusive = false)) {
                         navController.navigate(Screen.IptvLive.route) { launchSingleTop = true }
                     }
                 },
-                onSetup = { navController.navigate(Screen.IptvSetup.route) { launchSingleTop = true } })
+                onSetup = { navController.navigate(Screen.IptvSetup.route) { launchSingleTop = true } }) }
         }
         if (com.nuvio.tv.BuildConfig.FEATURE_IPTV_ENABLED) {
             composable(Screen.IptvSetup.route) {
-                com.nuvio.tv.ui.screens.iptv.IptvSetupScreen(onBack = { navController.popBackStack() })
+                com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvSetupScreen(onBack = { navController.popBackStack() }) }
             }
         }
         composable(Screen.IptvSettings.route) {
-            com.nuvio.tv.ui.screens.iptv.IptvSettingsScreen(
+            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvSettingsScreen(
                 onSources = { navController.navigate(Screen.IptvSources.route) { launchSingleTop = true } },
                 onSetup = { navController.navigate(Screen.IptvSetup.route) { launchSingleTop = true } },
-                onRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } })
+                onRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } }) }
         }
         composable(Screen.IptvRecordings.route) {
-            com.nuvio.tv.ui.screens.iptv.IptvRecordingsScreen(onBack = { navController.popBackStack() })
+            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvRecordingsScreen(onBack = { navController.popBackStack() }) }
         }
 
         composable(Screen.Settings.route) {

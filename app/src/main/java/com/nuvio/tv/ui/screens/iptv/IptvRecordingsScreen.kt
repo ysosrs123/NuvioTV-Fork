@@ -84,7 +84,7 @@ fun IptvRecordingsScreen(onBack: () -> Unit, viewModel: IptvRecordingsViewModel 
         if (!playing && focused) { withFrameNanos { }; runCatching { first.requestFocus() } }
     }
     Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
-        LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
+        if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
             Column(Modifier.width(340.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(R.string.iptv_recordings_title), style = MaterialTheme.typography.headlineMedium,

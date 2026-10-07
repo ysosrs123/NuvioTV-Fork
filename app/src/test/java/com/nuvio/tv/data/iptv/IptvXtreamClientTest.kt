@@ -45,6 +45,16 @@ class IptvXtreamClientTest {
         }
     }
 
+    @Test fun connectionLimitIsReadWhenValidAndIgnoredOtherwise() = runBlocking {
+        val cases = listOf("2" to 2, "\"3\"" to 3, "1" to 1, "\"0\"" to null, "0" to null, "-1" to null, "\"unlimited\"" to null,
+            "\"99999999999\"" to null, "2.5" to null, "null" to null, "\"\"" to null, null to null)
+        for ((value, expected) in cases) MockWebServer().use { server ->
+            val limit = value?.let { ",\"max_connections\":$it" }.orEmpty()
+            enqueue(server, account = """{"user_info":{"auth":1,"status":"Active","active_cons":"1"$limit}}""")
+            assertEquals(value, expected, IptvXtreamClient().catalogue(connection(server)).account.advertisedConnections)
+        }
+    }
+
     @Test fun guideUrlUsesTheEnteredOriginAndEncodesCredentials() {
         val url = IptvXtreamClient.guideUrl(IptvSourceConnection("https://example.invalid:8080/base", "user name", "p&ss/word"))
         assertEquals("https://example.invalid:8080/base/xmltv.php?username=user%20name&password=p%26ss%2Fword", url)

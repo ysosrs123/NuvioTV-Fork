@@ -19,7 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.Fullscreen
@@ -39,6 +41,8 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -98,6 +102,8 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
     var showTracks by remember(state.player) { mutableStateOf(false) }
     var showHud by remember { mutableStateOf(viewModel.showStatsByDefault) }
     var menuFor by remember { mutableStateOf<IptvListedChannel?>(null) }
+    var categoryMenu by remember { mutableStateOf<String?>(null) }
+    var boostFor by remember { mutableStateOf<IptvListedChannel?>(null) }
     var formatFor by remember { mutableStateOf<IptvListedChannel?>(null) }
     val now by produceState(System.currentTimeMillis()) { while (true) { delay(15_000); value = System.currentTimeMillis() } }
     var cursor by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -116,7 +122,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
         viewModel.foreground(lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
         onDispose { lifecycle.removeObserver(observer); viewModel.foreground(false) }
     }
-    LaunchedEffect(state.player, state.tuning) { if (state.player == null && !state.tuning) fullscreen = false }
+    LaunchedEffect(state.playingId, state.tuning) { if (state.playingId == null && !state.tuning) fullscreen = false }
     LaunchedEffect(state.message) { if (state.message != null) { delay(6_000); viewModel.clearMessage() } }
     suspend fun focusGridNow() {
         val id = state.focused?.item?.channel?.id ?: state.channels.firstOrNull()?.item?.channel?.id ?: return
@@ -130,7 +136,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
         when {
             fullscreen -> fullscreen = false
             searching -> { searching = false; viewModel.search("") }
-            railOpen -> { railOpen = false; focusGrid() }
+            railOpen -> onBack()
             !railOpen && (state.channels.isNotEmpty() || state.search.isNotEmpty()) -> railOpen = true
             else -> onBack()
         }
@@ -177,11 +183,14 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
             })
     } else {
         Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
-            LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
+            if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
             Column(Modifier.fillMaxSize().padding(horizontal = 40.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Row(Modifier.fillMaxWidth().height(188.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
                     InfoPanel(state, now, cursor, Modifier.weight(1f).fillMaxHeight())
-                    Preview(state, Modifier.fillMaxHeight().aspectRatio(16f / 9f))
+                    Preview(state, Modifier.fillMaxHeight().aspectRatio(16f / 9f), onClick = {
+                        val row = state.playingRow ?: state.focused
+                        if (state.player != null) fullscreen = true else if (row != null) viewModel.watch(row)
+                    })
                 }
                 if (searching) SearchField(state.search, state.airingSearch, searchFocus, onChange = viewModel::search, onDone = { focusGrid() })
                 if (empty != null) {
@@ -216,12 +225,28 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
                     onSources = { railOpen = false; onSettings() },
                     onRecordings = { railOpen = false; onRecordings() },
                     onSearch = { airing -> viewModel.searchMode(airing); railOpen = false; searching = true },
-                    onHide = viewModel::toggleHidden,
-                    onClose = { railOpen = false; focusGrid() })
+                    onHide = { categoryMenu = it },
+                    onClose = { railOpen = false; focusGrid() },
+                    onExit = onBack)
             }
         }
     }
     if (showTracks) state.player?.let { IptvTrackDialog(it) { showTracks = false } }
+    categoryMenu?.let { name ->
+        val hidden = name in state.hiddenCategories
+        val first = remember { FocusRequester() }
+        LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
+        NuvioDialog(onDismiss = { categoryMenu = null }, title = name.ifEmpty { stringResource(R.string.iptv_live_uncategorised) },
+            subtitle = state.categories.firstOrNull { it.name == name }?.let { pluralStringResource(R.plurals.iptv_source_channels, it.channels, it.channels) }, width = 520.dp) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                SettingsActionRow(title = stringResource(R.string.iptv_live_category_open), subtitle = null, leadingIcon = Icons.AutoMirrored.Filled.List, trailingIcon = null,
+                    onClick = { categoryMenu = null; railOpen = false; viewModel.showCategory(name); focusGrid() }, modifier = Modifier.focusRequester(first))
+                SettingsActionRow(title = stringResource(if (hidden) R.string.iptv_live_category_show else R.string.iptv_live_category_hide), subtitle = null,
+                    leadingIcon = if (hidden) Icons.Filled.Visibility else Icons.Filled.VisibilityOff, trailingIcon = null,
+                    onClick = { categoryMenu = null; viewModel.toggleHidden(name) })
+            }
+        }
+    }
     menuFor?.let { row ->
         ChannelMenu(row, state, onDismiss = { menuFor = null },
             onWatch = { menuFor = null; if (row.item.channel.id == state.playingId && state.player != null) fullscreen = true else viewModel.watch(row) },
@@ -230,6 +255,7 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
             onFavourite = { viewModel.focus(row); viewModel.toggleFavourite(); menuFor = null },
             onGuide = { viewModel.openGuidePicker(row); menuFor = null },
             onFormat = { formatFor = row; menuFor = null },
+            boost = viewModel.boost(row), onBoost = { boostFor = row; menuFor = null },
             onTracks = { showTracks = true; menuFor = null },
             onHud = { showHud = !showHud; menuFor = null },
             onStop = { viewModel.stop(); menuFor = null },
@@ -261,6 +287,14 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
     state.guidePicker?.let { picker ->
         GuidePickerDialog(picker, onAutomatic = { viewModel.chooseGuideChannel(null) }, onFeed = viewModel::pickGuideFeed,
             onSearch = viewModel::searchGuide, onChannel = { viewModel.chooseGuideChannel(it) }, onDismiss = viewModel::closeGuidePicker)
+    }
+    boostFor?.let { channel ->
+        SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_live_boost),
+            subtitle = stringResource(R.string.iptv_live_boost_description),
+            options = listOf(0, 3, 6, 9, 12).map { SettingsPickerOption(it, boostLabel(it)) },
+            selectedValue = viewModel.boost(channel),
+            onOptionSelected = { viewModel.setBoost(channel, it); boostFor = null },
+            onDismiss = { boostFor = null })
     }
     formatFor?.let { channel ->
         SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_live_format_title),
@@ -358,10 +392,17 @@ private fun EmptyPanel(kind: EmptyKind, state: IptvLiveState, focus: FocusReques
 }
 
 @Composable
-private fun Preview(state: IptvLiveState, modifier: Modifier) {
+private fun Preview(state: IptvLiveState, modifier: Modifier, onClick: () -> Unit) {
     val shape = RoundedCornerShape(16.dp)
-    Box(modifier.clip(shape).background(Color.Black, shape).border(1.dp, NuvioTheme.colors.TextPrimary.copy(alpha = .12f), shape)) {
-        if (state.player != null || state.tuning) LiveVideo(state.player, null, Modifier.fillMaxSize())
+    var focused by remember { mutableStateOf(false) }
+    Box(modifier.clip(shape).background(Color.Black, shape)
+        .border(if (focused) 3.dp else 1.dp, if (focused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.TextPrimary.copy(alpha = .12f), shape)
+        .onFocusChanged { focused = it.isFocused }
+        .onPreviewKeyEvent { event ->
+            val native = event.nativeKeyEvent
+            if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) { onClick(); true } else isSelect(native.keyCode)
+        }.focusable()) {
+        if (state.player != null || state.tuning) LiveVideo(state.player, null, Modifier.fillMaxSize(), texture = true)
         else {
             val row = state.focused
             Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -434,7 +475,8 @@ private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, modifier: M
 
 @Composable
 private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: Modifier, onFavourites: () -> Unit, onSports: () -> Unit, onCategory: (String?) -> Unit,
-    onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit, onSources: () -> Unit, onRecordings: () -> Unit, onSearch: (Boolean) -> Unit, onHide: (String) -> Unit, onClose: () -> Unit) {
+    onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit, onSources: () -> Unit, onRecordings: () -> Unit, onSearch: (Boolean) -> Unit, onHide: (String) -> Unit, onClose: () -> Unit,
+    onExit: () -> Unit) {
     Column(modifier.iptvPanel(role = GlassRole.NAVIGATION).padding(vertical = 14.dp, horizontal = 10.dp)
         .onPreviewKeyEvent { event ->
             val native = event.nativeKeyEvent
@@ -443,8 +485,12 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
         Text(stringResource(R.string.iptv_live_title), style = MaterialTheme.typography.titleLarge, color = NuvioTheme.colors.TextPrimary,
             fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 10.dp, bottom = 8.dp))
         LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            item { RailItem(stringResource(R.string.iptv_live_exit), null, false, Modifier, onExit, Icons.AutoMirrored.Filled.ArrowBack) }
             item { RailItem(stringResource(R.string.iptv_live_search), null, state.search.isNotBlank() && !state.airingSearch, Modifier, { onSearch(false) }, Icons.Filled.Search) }
             item { RailItem(stringResource(R.string.iptv_live_search_airing), null, state.search.isNotBlank() && state.airingSearch, Modifier, { onSearch(true) }, Icons.Filled.Schedule) }
+            item { RailItem(stringResource(R.string.iptv_recordings_open), state.recordings.count { it.status.holdsConnection }.takeIf { it > 0 }, false, Modifier, onRecordings, Icons.Filled.VideoLibrary) }
+            item { RailItem(stringResource(R.string.iptv_settings_title), null, false, Modifier, onSources, Icons.Filled.Settings) }
+            item { Spacer(Modifier.height(6.dp)) }
             item { RailItem(stringResource(R.string.iptv_live_favourites), null, state.favourites, Modifier.focusRequester(first), onFavourites, Icons.Filled.Star) }
             if (state.sportEnabled) item { RailItem(stringResource(R.string.iptv_live_sports), null, state.sports, Modifier, onSports, Icons.Filled.EmojiEvents) }
             item { RailItem(stringResource(R.string.iptv_live_all), state.categories.filter { it.name !in state.hiddenCategories }.sumOf { it.channels }.takeIf { it > 0 }, !state.favourites && !state.sports && state.category == null,
@@ -470,9 +516,6 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
                     RailItem(source.label, null, source.ref == state.source, Modifier, { onSource(source.ref) }, Icons.Filled.LiveTv)
                 }
             }
-            item { Spacer(Modifier.height(6.dp)) }
-            item { RailItem(stringResource(R.string.iptv_recordings_open), state.recordings.count { it.status.holdsConnection }.takeIf { it > 0 }, false, Modifier, onRecordings, Icons.Filled.VideoLibrary) }
-            item { RailItem(stringResource(R.string.iptv_settings_title), null, false, Modifier, onSources, Icons.Filled.Settings) }
         }
     }
 }
@@ -510,7 +553,7 @@ private fun RailItem(text: String, count: Int?, selected: Boolean, modifier: Mod
 @Composable
 private fun ChannelMenu(row: IptvListedChannel, state: IptvLiveState, onDismiss: () -> Unit, onWatch: () -> Unit,
     onFromStart: (com.nuvio.tv.core.iptv.GuideProgramme) -> Unit, onLive: () -> Unit, onFavourite: () -> Unit,
-    onGuide: () -> Unit, onFormat: () -> Unit, onTracks: () -> Unit, onHud: () -> Unit, onStop: () -> Unit, onSources: () -> Unit,
+    onGuide: () -> Unit, onFormat: () -> Unit, boost: Int, onBoost: () -> Unit, onTracks: () -> Unit, onHud: () -> Unit, onStop: () -> Unit, onSources: () -> Unit,
     onMove: (Int) -> Unit, onMultiview: () -> Unit, selected: com.nuvio.tv.core.iptv.GuideProgramme?,
     onRecord: (com.nuvio.tv.core.iptv.GuideProgramme?) -> Unit, onCancelRecording: (String) -> Unit) {
     val playing = state.player != null && row.item.channel.id == state.playingId
@@ -556,6 +599,8 @@ private fun ChannelMenu(row: IptvListedChannel, state: IptvLiveState, onDismiss:
                 onClick = onGuide, leadingIcon = Icons.Filled.Schedule)
             SettingsActionRow(title = stringResource(R.string.iptv_live_format_title), subtitle = null,
                 value = stringResource(formatLabel(row.item.overlay.streamFormat)), onClick = onFormat, leadingIcon = Icons.Filled.Tune)
+            SettingsActionRow(title = stringResource(R.string.iptv_live_boost), subtitle = null,
+                value = boostLabel(boost), onClick = onBoost, leadingIcon = Icons.AutoMirrored.Filled.VolumeUp)
             if (playing) {
                 SettingsActionRow(title = stringResource(R.string.iptv_live_tracks), subtitle = null, onClick = onTracks, leadingIcon = Icons.Filled.Subtitles)
                 SettingsActionRow(title = stringResource(R.string.iptv_live_hud), subtitle = null, onClick = onHud, leadingIcon = Icons.Filled.Equalizer, trailingIcon = null)
@@ -643,3 +688,6 @@ private fun SearchField(value: String, airing: Boolean, focus: FocusRequester, o
                 })
     }
 }
+
+@Composable
+private fun boostLabel(db: Int): String = if (db == 0) stringResource(R.string.iptv_settings_none) else stringResource(R.string.iptv_live_boost_value, db)

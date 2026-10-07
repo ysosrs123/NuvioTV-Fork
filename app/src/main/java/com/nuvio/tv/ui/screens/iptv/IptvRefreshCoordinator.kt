@@ -36,6 +36,7 @@ class IptvRefreshCoordinator @Inject constructor(
     private val catalogue: IptvCatalogueStore,
     private val guides: IptvGuideStore,
     private val access: IptvProfileAccess,
+    livePreferences: IptvLivePreferences,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val heavy = Mutex()
@@ -46,7 +47,8 @@ class IptvRefreshCoordinator @Inject constructor(
 
     fun localGuideFolders(): List<java.io.File> = context.getExternalFilesDirs("iptv-guides").filterNotNull()
     val localGuides = LocalGuideFiles(::localGuideFolders)
-    private val playlists = IptvPlaylistRepository(catalogue, xtreamGuides = IptvXtreamGuides(catalogue, guides))
+    private val playlists = IptvPlaylistRepository(catalogue, xtreamGuides = IptvXtreamGuides(catalogue, guides),
+        connections = IptvSourceConnections(catalogue, livePreferences))
     private val guideRepository = IptvGuideRepository(guides, openDocument = { address ->
         requireNotNull(context.contentResolver.openInputStream(android.net.Uri.parse(address)))
     }, xtreamConnection = catalogue::connection, openLocal = { localGuides.open(it) }, providerChannels = catalogue::guideChannelIds)

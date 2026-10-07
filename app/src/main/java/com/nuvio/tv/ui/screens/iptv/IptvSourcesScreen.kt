@@ -87,7 +87,7 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
         if (state.ready && !state.busy && !initiallyFocused) { withFrameNanos { }; runCatching { first.requestFocus() }; initiallyFocused = true }
     }
     Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
-        LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
+        if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
             Column(Modifier.width(340.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(R.string.iptv_sources_title), style = MaterialTheme.typography.headlineMedium,
@@ -183,11 +183,20 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
         }
     }
     connectionsFor?.let { source ->
+        val id = source.ref.sourceId
+        val provider = state.providerConnections[id]
+        val automatic = if (source.kind == IptvSourceKind.XTREAM && provider != null && provider > 0)
+            com.nuvio.tv.ui.screens.settings.SettingsPickerOption(0, pluralStringResource(R.plurals.iptv_connections_automatic_provider, provider, provider))
+        else com.nuvio.tv.ui.screens.settings.SettingsPickerOption(0, stringResource(R.string.iptv_connections_automatic), stringResource(when {
+            source.kind != IptvSourceKind.XTREAM -> R.string.iptv_connections_automatic_unreported
+            provider == null -> R.string.iptv_connections_automatic_pending
+            else -> R.string.iptv_connections_automatic_kept
+        }))
         com.nuvio.tv.ui.screens.settings.SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_source_connections),
             subtitle = stringResource(R.string.iptv_source_connections_description),
-            options = (1..4).map { com.nuvio.tv.ui.screens.settings.SettingsPickerOption(it, pluralStringResource(R.plurals.iptv_connections, it, it)) },
-            selectedValue = state.connections[source.ref.sourceId] ?: 1,
-            onOptionSelected = { viewModel.setConnections(source, it); connectionsFor = null },
+            options = listOf(automatic) + (1..4).map { com.nuvio.tv.ui.screens.settings.SettingsPickerOption(it, pluralStringResource(R.plurals.iptv_connections, it, it)) },
+            selectedValue = if (id in state.manualConnections) state.connections[id] ?: 1 else 0,
+            onOptionSelected = { viewModel.setConnections(source, it.takeIf { count -> count > 0 }); connectionsFor = null },
             onDismiss = { connectionsFor = null })
     }
     confirmSource?.let { source ->

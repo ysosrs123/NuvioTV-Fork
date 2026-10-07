@@ -4,15 +4,20 @@ import com.nuvio.tv.core.iptv.RecordingFailure
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.logging.Handler
+import java.util.logging.LogRecord
+import java.util.logging.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import okhttp3.Protocol
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
+import okhttp3.mockwebserver.SocketPolicy
 import okio.Buffer
 import org.junit.Assert.*
 import org.junit.Rule
@@ -28,6 +33,16 @@ class IptvRecordingCopierTest {
     private fun server(routes: (RecordedRequest) -> MockResponse) = MockWebServer().apply {
         dispatcher = object : Dispatcher() { override fun dispatch(request: RecordedRequest) = routes(request) }
         start()
+    }
+    private suspend fun <T> logged(block: suspend () -> T): Pair<T, List<String>> {
+        val messages = mutableListOf<String>()
+        val handler = object : Handler() {
+            override fun publish(record: LogRecord) { synchronized(messages) { messages += record.message } }
+            override fun flush() { }
+            override fun close() { }
+        }
+        val logger = Logger.getLogger("NuvioIptv").apply { addHandler(handler) }
+        return try { block() to synchronized(messages) { messages.toList() } } finally { logger.removeHandler(handler) }
     }
     private fun ts(bytes: ByteArray) = MockResponse().setHeader("Content-Type", "video/mp2t").setBody(Buffer().write(bytes))
     private fun playlist(text: String) = MockResponse().setHeader("Content-Type", "application/vnd.apple.mpegurl").setBody(text)
@@ -63,6 +78,29 @@ class IptvRecordingCopierTest {
             assertEquals(packets(1).toList(), bytes.copyOf(188 * 4).toList())
             assertTrue(bytes.size > 188 * 4)
             assertEquals(2.toByte(), bytes[188 * 4 + 1])
+        }
+    }
+
+    @Test fun streamResetMidBodyReconnectsAndCountsGap() = runBlocking {
+        val calls = AtomicInteger()
+        val server = server {
+            if (calls.getAndIncrement() == 0) ts(packets(1, 400)).setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY)
+            else ts(packets(2, 400)).throttleBody(188L * 20, 100, TimeUnit.MILLISECONDS)
+        }
+        server.protocols = listOf(Protocol.H2_PRIOR_KNOWLEDGE)
+        server.use {
+            val client = IptvRecordingCopier.newClient().newBuilder().protocols(listOf(Protocol.H2_PRIOR_KNOWLEDGE)).build()
+            val (result, logged) = logged {
+                IptvRecordingCopier(client, freeBytes = { Long.MAX_VALUE }, pause = { }, minimumStallMillis = 2_000)
+                    .copy(server.url("/live/1.ts").toString(), IptvStreamFormat.MPEG_TS, output(), System.currentTimeMillis() + 1_500)
+            }
+            assertNull(result.failure)
+            assertEquals(1, result.gaps)
+            assertTrue(server.requestCount >= 2)
+            val bytes = output().readBytes()
+            assertEquals(1.toByte(), bytes[1])
+            assertEquals(2.toByte(), bytes.last())
+            assertEquals(1, logged.count { it.startsWith("recording connection StreamResetException") })
         }
     }
 
@@ -167,8 +205,11 @@ class IptvRecordingCopierTest {
             }
             while (progress.bytes == 0L) delay(10)
             val started = System.currentTimeMillis()
-            job.cancel()
-            try { job.await(); fail() } catch (_: CancellationException) { }
+            val (_, logged) = logged {
+                job.cancel()
+                try { job.await(); fail() } catch (_: CancellationException) { }
+            }
+            assertTrue(logged.none { it.startsWith("recording connection") })
             assertTrue(System.currentTimeMillis() - started < 5_000)
             assertTrue(output().length() > 0)
             assertEquals(progress.bytes, output().length())

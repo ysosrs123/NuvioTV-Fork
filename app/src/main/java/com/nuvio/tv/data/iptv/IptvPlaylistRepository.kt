@@ -18,7 +18,7 @@ sealed interface IptvPlaylistRefresh {
 
 class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val metadata: IptvMetadataClient = IptvMetadataClient(),
     private val xtream: IptvXtreamClient = IptvXtreamClient(), private val xtreamGuides: IptvXtreamGuides? = null,
-    private val stalker: IptvStalkerClient = IptvStalkerClient()) {
+    private val stalker: IptvStalkerClient = IptvStalkerClient(), private val connections: IptvSourceConnections? = null) {
     suspend fun refresh(ref: IptvSourceRef, onSaving: () -> Unit = {}): IptvPlaylistRefresh = withContext(Dispatchers.IO) {
         val context = currentCoroutineContext()
         context.ensureActive()
@@ -33,6 +33,7 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
             val saving = System.currentTimeMillis()
             val decision = store.commitCatalogue(ref, request.ticket, download.records, download.canPublish) { context.ensureActive() }
             IptvLog.info("catalogue commit decision=$decision ms=${System.currentTimeMillis() - saving}")
+            connections?.let { runCatching { it.reported(ref, download.account.advertisedConnections) }.onFailure { error -> IptvLog.failure("source connections", error) } }
             val guide = if (decision != RefreshDecision.PUBLISH) null else if (firstLoad) xtreamGuides?.ensure(ref) else xtreamGuides?.linked(ref)
             return@withContext IptvPlaylistRefresh.Catalogue(decision, guide)
         }

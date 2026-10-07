@@ -160,8 +160,8 @@ class IptvRecorder @Inject constructor(
         }
     }
 
-    fun stop(id: String): Boolean {
-        val job = synchronized(this) { jobs[id]?.also { if (id !in stops) stops[id] = RecordingStop.USER } } ?: return false
+    fun stop(id: String, reason: RecordingStop = RecordingStop.USER): Boolean {
+        val job = synchronized(this) { jobs[id]?.also { if (id !in stops) stops[id] = reason } } ?: return false
         job.cancel()
         return true
     }
@@ -394,7 +394,7 @@ class IptvRecorder @Inject constructor(
             while (isActive) {
                 delay(PROGRESS_MILLIS)
                 if (++ticks % PERSIST_TICKS == 0) mutex.withLock { update(id) { it.copy(bytes = holder.bytes, gaps = holder.gaps) } }
-                if ((store.get(id)?.stopMillis ?: Long.MAX_VALUE) <= System.currentTimeMillis()) stop(id)
+                if ((store.get(id)?.stopMillis ?: Long.MAX_VALUE) <= System.currentTimeMillis()) stop(id, RecordingStop.ENDED)
                 publish()
             }
         }
@@ -451,7 +451,7 @@ class IptvRecorder @Inject constructor(
         update(entry.id) {
             it.copy(status = outcome.status, failure = outcome.failure, bytes = bytes, gaps = gaps, file = file?.path, finishedAtMillis = System.currentTimeMillis())
         }
-        IptvLog.info("recording finished ${outcome.status}${outcome.failure?.let { " $it" }.orEmpty()}")
+        IptvLog.info("recording finished ${outcome.status}${outcome.failure?.let { " $it" }.orEmpty()}${stop?.let { " stop=$it" }.orEmpty()}")
         publish()
     }
 

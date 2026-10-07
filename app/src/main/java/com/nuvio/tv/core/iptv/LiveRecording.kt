@@ -15,7 +15,7 @@ enum class RecordingFailure {
     NETWORK, LOW_STORAGE, STORAGE_ERROR, TIME_LIMIT, INTERRUPTED, START_BLOCKED, MISSED,
 }
 
-enum class RecordingStop { USER, TIME_LIMIT, INTERRUPTED, REMOVED }
+enum class RecordingStop { USER, ENDED, TIME_LIMIT, INTERRUPTED, REMOVED }
 
 data class RecordingOutcome(val status: RecordingStatus, val failure: RecordingFailure?)
 

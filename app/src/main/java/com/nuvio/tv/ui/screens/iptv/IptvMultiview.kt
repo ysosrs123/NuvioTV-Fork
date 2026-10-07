@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.runtime.*
+import com.nuvio.tv.ui.v2.components.GlassRole
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,18 +80,12 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
     }
     BackHandler(pick != null) { pick = null }
     BackHandler(pick == null && menuFor == null) { onExit() }
+    var header by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) { delay(5_000); header = false }
     Box(Modifier.fillMaxSize().background(Color.Black)) {
-        Column(Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Icon(Icons.Filled.ViewModule, null, Modifier.size(20.dp), tint = NuvioTheme.colors.TextSecondary)
-                Text(stringResource(R.string.iptv_multiview_title), style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextPrimary,
-                    fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.weight(1f))
-                Text(stringResource(R.string.iptv_multiview_hint), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary)
-                Text(clock(now), style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextPrimary)
-            }
-            BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
-                val gap = 12.dp
+        Box(Modifier.fillMaxSize()) {
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                val gap = 2.dp
                 val density = LocalDensity.current
                 val boxHeight = maxHeight
                 val uiHeight = LocalWindowInfo.current.containerSize.height.takeIf { it > 0 } ?: with(density) { boxHeight.roundToPx() }
@@ -136,6 +132,15 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
                 }
                 val physical = tiles.indices.map { index -> sizes[index]?.let { with(density) { (it.height.toPx() * scale).toInt() } } ?: 0 }
                 LaunchedEffect(physical) { onSizes(physical) }
+            }
+        }
+        AnimatedVisibility(header && pick == null, Modifier.align(Alignment.TopCenter).padding(top = 24.dp), enter = fadeIn(), exit = fadeOut()) {
+            Row(Modifier.iptvPanel(RoundedCornerShape(14.dp), GlassRole.HUD).padding(horizontal = 18.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Icon(Icons.Filled.ViewModule, null, Modifier.size(20.dp), tint = NuvioTheme.colors.TextSecondary)
+                Text(stringResource(R.string.iptv_multiview_title), style = MaterialTheme.typography.titleSmall, color = NuvioTheme.colors.TextPrimary,
+                    fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.iptv_multiview_hint), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary)
             }
         }
         AnimatedVisibility(pick != null, Modifier.align(Alignment.CenterStart),
@@ -216,7 +221,7 @@ private fun Tile(state: IptvLiveState, tile: IptvTile, index: Int, audio: Boolea
     var focused by remember { mutableStateOf(false) }
     val longPress = rememberLongPressKeyTracker()
     var held by remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(4.dp)
     Box(modifier.focusRequester(requester)
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocus() }
         .tileFocus(focused, shape)

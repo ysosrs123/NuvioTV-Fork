@@ -34,7 +34,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private val onPlaying: (Boolean) -> Unit, private val onError: () -> Unit,
     private val onReconnecting: (Boolean) -> Unit = {}, private val isLive: Boolean = true,
     private val onEnded: () -> Unit = {}, private val handleAudioFocus: Boolean = true,
-    private val onPlayWhenReady: (Boolean) -> Unit = {},
+    private val onPlayWhenReady: (Boolean) -> Unit = {}, boostDb: Int = 0,
     private val maxVideoHeight: Int? = null, private val targetBufferBytes: Int = 12 * 1024 * 1024) : OwnedLivePlayback {
     private val fence = LiveRequestFence()
     val telemetry = LiveTelemetry()
@@ -51,6 +51,10 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     }
     private val stall = Runnable { if (!released && player.playbackState == Player.STATE_BUFFERING) retry() }
     private var releaseFailed = false
+    private val audioSession = androidx.media3.common.util.Util.generateAudioSessionIdV21(context)
+    private var enhancer: android.media.audiofx.LoudnessEnhancer? = null
+    var boostDb: Int = boostDb
+        private set
     val player: ExoPlayer
     init {
         require(purpose == PlaybackPurpose.LIVE_CHANNEL)
@@ -77,6 +81,8 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             }))
             .build()
         player.setAudioAttributes(AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_MOVIE).build(), handleAudioFocus)
+        player.setAudioSessionId(audioSession)
+        setBoost(boostDb)
         player.setHandleAudioBecomingNoisy(true)
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) { if (!released) onPlaying(isPlaying) }
@@ -113,6 +119,14 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private fun reportFailure() {
         mainHandler.post { if (!released) onError() }
     }
+    fun setBoost(db: Int) {
+        if (released) return
+        boostDb = db.coerceIn(0, MAX_BOOST_DB)
+        runCatching {
+            if (boostDb == 0) { enhancer?.release(); enhancer = null }
+            else (enhancer ?: android.media.audiofx.LoudnessEnhancer(audioSession).also { enhancer = it }).apply { setTargetGain(boostDb * 100); enabled = true }
+        }.onFailure { enhancer = null }
+    }
     fun limitHeight(height: Int?) {
         mainHandler.post {
             if (released) return@post
@@ -147,6 +161,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         client.dispatcher.cancelAll()
         if (!released) {
             released = true
+            runCatching { enhancer?.release() }; enhancer = null
             try { player.release() } catch (_: Exception) { releaseFailed = true }
         }
 
@@ -184,5 +199,6 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private companion object {
         val RETRY_DELAYS_MS = longArrayOf(1_000, 2_000, 3_000, 5_000, 5_000, 5_000)
         const val STALL_MS = 20_000L
+        const val MAX_BOOST_DB = 12
     }
 }

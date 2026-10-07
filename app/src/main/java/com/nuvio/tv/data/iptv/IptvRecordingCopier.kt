@@ -19,6 +19,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -109,7 +110,7 @@ class IptvRecordingCopier(
                     catch (error: RecordingStreamException) {
                         if (error.failure != RecordingFailure.NETWORK) { failure = error.failure; break }
                     } catch (error: IOException) {
-                        if (!deadline.reached && now() < stopAtMillis) IptvLog.failure("recording connection", error)
+                        if (!deadline.reached && now() < stopAtMillis && currentCoroutineContext().isActive) IptvLog.failure("recording connection", error)
                     }
                     currentCoroutineContext().ensureActive()
                     if (ended || deadline.reached || now() >= stopAtMillis) break

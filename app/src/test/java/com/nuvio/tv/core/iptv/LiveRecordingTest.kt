@@ -24,6 +24,8 @@ class LiveRecordingTest {
     @Test fun outcomeReflectsBytesGapsAndStops() {
         assertEquals(RecordingOutcome(RecordingStatus.DONE, null), RecordingTransitions.outcome(10, null, 0, null))
         assertEquals(RecordingOutcome(RecordingStatus.DONE, null), RecordingTransitions.outcome(10, null, 0, RecordingStop.USER))
+        assertEquals(RecordingOutcome(RecordingStatus.DONE, null), RecordingTransitions.outcome(10, null, 0, RecordingStop.ENDED))
+        assertEquals(RecordingOutcome(RecordingStatus.PARTIAL, RecordingFailure.NETWORK), RecordingTransitions.outcome(10, null, 1, RecordingStop.ENDED))
         assertEquals(RecordingOutcome(RecordingStatus.PARTIAL, RecordingFailure.NETWORK), RecordingTransitions.outcome(10, null, 2, RecordingStop.USER))
         assertEquals(RecordingOutcome(RecordingStatus.PARTIAL, RecordingFailure.LOW_STORAGE), RecordingTransitions.outcome(10, RecordingFailure.LOW_STORAGE, 0, null))
         assertEquals(RecordingOutcome(RecordingStatus.PARTIAL, RecordingFailure.TIME_LIMIT), RecordingTransitions.outcome(10, null, 0, RecordingStop.TIME_LIMIT))

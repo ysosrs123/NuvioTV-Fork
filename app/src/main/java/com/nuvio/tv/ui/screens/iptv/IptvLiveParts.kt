@@ -55,9 +55,12 @@ internal val PanelShape = RoundedCornerShape(20.dp)
 internal val ItemShape = RoundedCornerShape(12.dp)
 
 @Composable
-internal fun Modifier.iptvPanel(shape: Shape = PanelShape, role: GlassRole = GlassRole.PANEL): Modifier =
-    if (LocalV2Appearance.current != null) nuvioGlass(role, shape = shape)
-    else clip(shape).background(NuvioTheme.colors.BackgroundCard.copy(alpha = .92f), shape).border(1.dp, NuvioTheme.colors.Border, shape)
+internal fun Modifier.iptvPanel(shape: Shape = PanelShape, role: GlassRole = GlassRole.PANEL): Modifier {
+    val solid = LocalIptvAppearance.current.solidPanels
+    return if (LocalV2Appearance.current != null && !solid) nuvioGlass(role, shape = shape)
+    else clip(shape).background(if (solid) NuvioTheme.colors.BackgroundCard else NuvioTheme.colors.BackgroundCard.copy(alpha = .92f), shape)
+        .border(1.dp, NuvioTheme.colors.Border, shape)
+}
 
 @Composable
 internal fun Modifier.iptvItem(focused: Boolean, selected: Boolean = false, shape: Shape = ItemShape): Modifier =

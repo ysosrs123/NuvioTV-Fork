@@ -6,6 +6,7 @@ import com.nuvio.tv.R
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.iptv.*
 import com.nuvio.tv.core.iptv.RefreshDecision
+import com.nuvio.tv.core.iptv.SourceConnections
 import com.nuvio.tv.core.iptv.StalkerPortal
 import com.nuvio.tv.core.iptv.XtreamGuideReference
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +32,8 @@ data class IptvSourcesState(val profileId: Int = 0, val revision: Long = 0, val 
     val selected: IptvSourceRef? = null, val linked: Set<String> = emptySet(), val linkedOrder: List<String> = emptyList(),
     val busy: Boolean = false, val message: Int? = null, val form: IptvSourceForm? = null,
     val refresh: Map<String, IptvRefreshStatus> = emptyMap(), val counts: Map<String, Int> = emptyMap(),
-    val automatic: Set<String> = emptySet(), val connections: Map<String, Int> = emptyMap())
+    val automatic: Set<String> = emptySet(), val connections: Map<String, Int> = emptyMap(),
+    val manualConnections: Set<String> = emptySet(), val providerConnections: Map<String, Int> = emptyMap())
 
 @HiltViewModel
 class IptvSourcesViewModel @Inject constructor(
@@ -47,6 +49,7 @@ class IptvSourcesViewModel @Inject constructor(
     private var operation: Job? = null
     private var statusReload: Job? = null
     private val xtreamGuides = IptvXtreamGuides(catalogue, guides)
+    private val sourceConnections = IptvSourceConnections(catalogue, livePreferences)
     suspend fun guideFiles(): Pair<List<com.nuvio.tv.core.iptv.LocalGuideFile>, List<String>> = withContext(Dispatchers.IO) {
         runCatching { refresher.localGuides.list() }.getOrDefault(emptyList()) to runCatching { refresher.localGuideFolders().map { it.path } }.getOrDefault(emptyList())
     }
@@ -93,6 +96,8 @@ class IptvSourcesViewModel @Inject constructor(
         val oldSelected = mutable.value.selected
         var automatic = emptySet<String>()
         var connections = emptyMap<String, Int>()
+        var manual = emptySet<String>()
+        var provider = emptyMap<String, Int>()
         val (loaded, counts) = withContext(Dispatchers.IO) { access.use(current) {
             val sources = catalogue.sources(current.profileId)
             val selected = oldSelected?.takeIf { ref -> sources.any { it.ref == ref } } ?: sources.firstOrNull()?.ref
@@ -100,9 +105,12 @@ class IptvSourcesViewModel @Inject constructor(
             automatic = feeds.filter { XtreamGuideReference.sourceId(guides.endpoint(it.ref)) != null }.map { it.ref.feedId }.toSet()
             val accounts = catalogue.accounts(current.profileId)
             connections = sources.associate { source -> source.ref.sourceId to (accounts.firstOrNull { it.id == source.accountId }?.maxStreams ?: 1) }
+            manual = sources.filter { livePreferences.connectionsManual(it.ref) }.map { it.ref.sourceId }.toSet()
+            provider = sources.mapNotNull { source -> livePreferences.providerConnections(source.ref)?.let { source.ref.sourceId to it } }.toMap()
             Triple(sources, feeds, selected?.let(catalogue::guideAssociations)) to catalogue.channelCounts(current.profileId)
         } }
         if (session === current) mutable.update { it.copy(sources = loaded.first, feeds = loaded.second, counts = counts, automatic = automatic, connections = connections,
+            manualConnections = manual, providerConnections = provider,
             selected = oldSelected?.takeIf { ref -> loaded.first.any { it.ref == ref } } ?: loaded.first.firstOrNull()?.ref,
             linked = loaded.third?.feedIds?.toSet().orEmpty(),
             linkedOrder = loaded.third?.let { (it.priority + it.feedIds).distinct() }.orEmpty(), ready = true) }
@@ -151,7 +159,7 @@ class IptvSourcesViewModel @Inject constructor(
                     IptvSourceKind.M3U -> IptvSourceConnection(address)
                 }
                 SavedEntry(source = if (form.source == null) catalogue.createSource(profileId, label.trim(), form.kind, "shared-default", connection).let { created ->
-                    val account = ownAccount(created.ref)
+                    val account = SourceConnections.ownAccount(created.ref.sourceId)
                     catalogue.saveAccount(profileId, account, created.label, 1)
                     catalogue.assignAccount(created.ref, account)
                     catalogue.sources(profileId).single { it.ref == created.ref }
@@ -195,18 +203,13 @@ class IptvSourcesViewModel @Inject constructor(
         } }
         reload(this)
     }
-    fun setConnections(source: IptvSource, count: Int) = runOperation {
+    fun setConnections(source: IptvSource, count: Int?) = runOperation {
         withContext(Dispatchers.IO) { access.use(this@runOperation) {
-            require(source.ref.profileId == profileId && count in 1..MAX_CONNECTIONS)
-            val latest = catalogue.sources(profileId).single { it.ref == source.ref }
-            val shared = catalogue.accounts(profileId).firstOrNull { it.id == latest.accountId }?.sources.orEmpty().size > 1
-            val account = if (shared || latest.accountId == "shared-default") ownAccount(latest.ref) else latest.accountId
-            catalogue.saveAccount(profileId, account, latest.label, count)
-            if (account != latest.accountId) catalogue.assignAccount(latest.ref, account)
+            require(source.ref.profileId == profileId)
+            sourceConnections.choose(source.ref, count)
         } }
         reload(this)
     }
-    private fun ownAccount(ref: IptvSourceRef) = "src-" + ref.sourceId.take(76)
     fun moveUp(source: IptvSource) = runOperation {
         val index = mutable.value.sources.indexOfFirst { it.ref == source.ref }
         if (index > 0) withContext(Dispatchers.IO) { access.use(this@runOperation) {
@@ -238,7 +241,6 @@ class IptvSourcesViewModel @Inject constructor(
     fun refresh(source: IptvSource) { session?.let { refresher.refresh(it, source) } }
     fun refresh(feed: IptvGuideFeed) { session?.let { refresher.refresh(it, feed) } }
     private companion object {
-        const val MAX_CONNECTIONS = 4
         val RELOAD_PHASES = setOf(IptvRefreshPhase.GUIDE, IptvRefreshPhase.DONE, IptvRefreshPhase.FAILED)
     }
 }

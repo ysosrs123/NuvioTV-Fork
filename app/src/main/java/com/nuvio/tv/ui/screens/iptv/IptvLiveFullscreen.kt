@@ -116,6 +116,11 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
             state.sources.firstOrNull { it.ref == state.source }?.label)
         PlaybackState(state, Modifier.align(Alignment.Center), large = true)
         ReconnectingPill(state, Modifier.align(Alignment.TopStart).padding(36.dp))
+        state.message?.let { message ->
+            Text(stringResource(message), style = MaterialTheme.typography.titleSmall, color = NuvioTheme.colors.TextPrimary,
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 36.dp).iptvPanel(RoundedCornerShape(14.dp), GlassRole.HUD)
+                    .padding(horizontal = 18.dp, vertical = 10.dp).widthIn(max = 720.dp))
+        }
         if (digits.isNotEmpty()) NumberEntry(digits, state, Modifier.align(Alignment.TopEnd).padding(36.dp))
         AnimatedVisibility(controls && !panel, Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) {
             LiveControls(state, now, layout, liveControlActions(state, canStartOver), onAction = { action ->
@@ -330,9 +335,12 @@ private fun PanelChannel(row: IptvListedChannel, state: IptvLiveState, now: Long
 
 @Composable
 internal fun LiveVideo(player: ExoPlayer?, playback: IptvLivePlayback?, modifier: Modifier, resize: Int = AspectRatioFrameLayout.RESIZE_MODE_FIT,
-    provider: String? = null) {
+    provider: String? = null, texture: Boolean = false) {
     Box(modifier.background(Color.Black)) {
-        AndroidView(factory = { context -> PlayerView(context).apply {
+        if (texture) AndroidView(factory = { context -> android.view.TextureView(context).apply { isFocusable = false } }, modifier = Modifier.fillMaxSize(),
+            update = { view -> player?.setVideoTextureView(view); view.keepScreenOn = player != null },
+            onRelease = { view -> player?.clearVideoTextureView(view); view.keepScreenOn = false })
+        else AndroidView(factory = { context -> PlayerView(context).apply {
             useController = false; isFocusable = false; descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
             setShutterBackgroundColor(android.graphics.Color.BLACK)
         } }, modifier = Modifier.fillMaxSize(),

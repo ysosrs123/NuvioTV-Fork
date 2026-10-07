@@ -4,8 +4,12 @@ import android.content.Context
 import com.nuvio.tv.core.iptv.LivePreferenceKeys
 import com.nuvio.tv.core.iptv.MultiviewLayout
 import com.nuvio.tv.core.iptv.MultiviewQuality
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 enum class IptvStartView { LAST, ALL, FAVOURITES, SPORT }
+
+data class IptvAppearance(val theme: String? = null, val black: Boolean = false, val solidPanels: Boolean = true, val plainBackground: Boolean = true)
 
 class IptvLivePreferences(context: Context) {
     val preferences = context.applicationContext.getSharedPreferences("iptv-live", Context.MODE_PRIVATE)
@@ -40,6 +44,35 @@ class IptvLivePreferences(context: Context) {
         get() = preferences.getInt(LATE_KEY, 2).coerceIn(0, MAX_LATE_MINUTES)
         set(value) = preferences.edit().putInt(LATE_KEY, value.coerceIn(0, MAX_LATE_MINUTES)).apply()
 
+    var autoPreview: Boolean
+        get() = preferences.getBoolean(PREVIEW_KEY, true)
+        set(value) = preferences.edit().putBoolean(PREVIEW_KEY, value).apply()
+
+    val currentAppearance: IptvAppearance
+        get() = IptvAppearance(preferences.getString(THEME_KEY, null)?.takeIf { it.length <= 40 },
+            preferences.getBoolean(BLACK_KEY, false), preferences.getBoolean(SOLID_KEY, true), preferences.getBoolean(PLAIN_KEY, true))
+
+    fun updateAppearance(change: (IptvAppearance) -> IptvAppearance) {
+        val next = change(currentAppearance)
+        preferences.edit().putString(THEME_KEY, next.theme).putBoolean(BLACK_KEY, next.black).putBoolean(SOLID_KEY, next.solidPanels)
+            .putBoolean(PLAIN_KEY, next.plainBackground).apply()
+        state(this).value = next
+    }
+
+    fun boost(ref: IptvSourceRef, channelId: String): Int = preferences.getInt(key(ref, BOOST_PREFIX + channelId), 0).coerceIn(0, MAX_BOOST_DB)
+
+    fun setBoost(ref: IptvSourceRef, channelId: String, db: Int) = preferences.edit().apply {
+        if (db <= 0) remove(key(ref, BOOST_PREFIX + channelId)) else putInt(key(ref, BOOST_PREFIX + channelId), db.coerceAtMost(MAX_BOOST_DB))
+    }.apply()
+
+    fun connectionsManual(ref: IptvSourceRef): Boolean = preferences.getBoolean(key(ref, MANUAL_CONNECTIONS), false)
+
+    fun setConnectionsManual(ref: IptvSourceRef, manual: Boolean) = preferences.edit().putBoolean(key(ref, MANUAL_CONNECTIONS), manual).apply()
+
+    fun providerConnections(ref: IptvSourceRef): Int? = key(ref, PROVIDER_CONNECTIONS).let { if (preferences.contains(it)) preferences.getInt(it, 0).coerceAtLeast(0) else null }
+
+    fun setProviderConnections(ref: IptvSourceRef, reported: Int) = preferences.edit().putInt(key(ref, PROVIDER_CONNECTIONS), reported.coerceAtLeast(0)).apply()
+
     fun hiddenCategoryCount(profileId: Int): Int =
         LivePreferenceKeys.hiddenOfProfile(preferences.all.keys, profileId).sumOf { preferences.getStringSet(it, null)?.size ?: 0 }
 
@@ -62,6 +95,14 @@ class IptvLivePreferences(context: Context) {
     }
 
     companion object {
+        private var appearanceState: MutableStateFlow<IptvAppearance>? = null
+
+        @Synchronized private fun state(preferences: IptvLivePreferences): MutableStateFlow<IptvAppearance> =
+            appearanceState ?: MutableStateFlow(preferences.currentAppearance).also { appearanceState = it }
+
+        fun appearance(context: Context): StateFlow<IptvAppearance> = state(IptvLivePreferences(context))
+
+        const val MAX_BOOST_DB = 12
         const val MAX_EARLY_MINUTES = 10
         const val MAX_LATE_MINUTES = 30
         private const val FORMAT_KEY = "settings-format"
@@ -73,5 +114,13 @@ class IptvLivePreferences(context: Context) {
         private const val LATE_KEY = "settings-record-late"
         private const val LAYOUT_KEY = "multiview-layout"
         private const val QUALITY_KEY = "multiview-quality"
+        private const val MANUAL_CONNECTIONS = "connections-manual"
+        private const val PROVIDER_CONNECTIONS = "provider-connections"
+        private const val PREVIEW_KEY = "settings-preview"
+        private const val THEME_KEY = "settings-theme"
+        private const val BLACK_KEY = "settings-black"
+        private const val SOLID_KEY = "settings-solid"
+        private const val PLAIN_KEY = "settings-plain"
+        private const val BOOST_PREFIX = "boost-"
     }
 }

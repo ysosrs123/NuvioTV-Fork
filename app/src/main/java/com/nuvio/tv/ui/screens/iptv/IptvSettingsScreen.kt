@@ -34,7 +34,7 @@ import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
 
-private enum class IptvSettingsChoice { FORMAT, START, LAYOUT, QUALITY, EARLY, LATE }
+private enum class IptvSettingsChoice { FORMAT, START, LAYOUT, QUALITY, EARLY, LATE, THEME }
 
 @Composable
 fun IptvSettingsScreen(onSources: () -> Unit, onSetup: () -> Unit, onRecordings: () -> Unit, viewModel: IptvSettingsViewModel = hiltViewModel()) {
@@ -43,7 +43,7 @@ fun IptvSettingsScreen(onSources: () -> Unit, onSetup: () -> Unit, onRecordings:
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
     Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
-        LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
+        if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
             Column(Modifier.width(340.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(R.string.iptv_settings_title), style = MaterialTheme.typography.headlineMedium,
@@ -62,10 +62,24 @@ fun IptvSettingsScreen(onSources: () -> Unit, onSetup: () -> Unit, onRecordings:
                     SettingsGroupCard(title = stringResource(R.string.iptv_settings_playback)) {
                         SettingsActionRow(title = stringResource(R.string.iptv_live_format_title), subtitle = stringResource(R.string.iptv_settings_format_subtitle),
                             value = stringResource(formatLabel(state.format)), onClick = { choosing = IptvSettingsChoice.FORMAT })
+                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_preview), subtitle = stringResource(R.string.iptv_settings_preview_subtitle),
+                            checked = state.preview, onToggle = viewModel::togglePreview)
                         SettingsToggleRow(title = stringResource(R.string.iptv_settings_timeshift), subtitle = stringResource(R.string.iptv_settings_timeshift_subtitle),
                             checked = state.timeshift, onToggle = viewModel::toggleTimeshift)
                         SettingsToggleRow(title = stringResource(R.string.iptv_settings_stats), subtitle = stringResource(R.string.iptv_settings_stats_subtitle),
                             checked = state.stats, onToggle = viewModel::toggleStats)
+                    }
+                }
+                item(key = "appearance") {
+                    SettingsGroupCard(title = stringResource(R.string.iptv_settings_appearance), subtitle = stringResource(R.string.iptv_settings_appearance_subtitle)) {
+                        SettingsActionRow(title = stringResource(R.string.iptv_settings_theme), subtitle = null,
+                            value = stringResource(iptvThemeLabel(iptvTheme(state.appearance.theme))), onClick = { choosing = IptvSettingsChoice.THEME })
+                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_black), subtitle = stringResource(R.string.iptv_settings_black_subtitle),
+                            checked = state.appearance.black, onToggle = viewModel::toggleBlack)
+                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_solid), subtitle = stringResource(R.string.iptv_settings_solid_subtitle),
+                            checked = state.appearance.solidPanels, onToggle = viewModel::toggleSolid)
+                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_artwork), subtitle = stringResource(R.string.iptv_settings_artwork_subtitle),
+                            checked = !state.appearance.plainBackground, onToggle = viewModel::toggleArtwork)
                     }
                 }
                 item(key = "guide") {
@@ -121,6 +135,9 @@ fun IptvSettingsScreen(onSources: () -> Unit, onSetup: () -> Unit, onRecordings:
             subtitle = stringResource(R.string.iptv_settings_record_late_subtitle),
             options = LATE_MINUTES.map { SettingsPickerOption(it, minutes(it)) },
             selectedValue = state.recordLate, onOptionSelected = { viewModel.setRecordLate(it); dismiss() }, onDismiss = dismiss)
+        IptvSettingsChoice.THEME -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_settings_theme),
+            options = (listOf(null) + IPTV_THEMES).map { SettingsPickerOption(it, stringResource(iptvThemeLabel(it))) },
+            selectedValue = iptvTheme(state.appearance.theme), onOptionSelected = { viewModel.setTheme(it); dismiss() }, onDismiss = dismiss)
         null -> Unit
     }
 }
