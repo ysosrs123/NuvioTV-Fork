@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">Любими от ТВ на живо</string>
+    <string name="iptv_home_sport">Сега: Спорт</string>
+    <string name="iptv_home_movies">Наскоро добавени филми</string>
+    <string name="iptv_home_series">Наскоро добавени сериали</string>
+    <string name="iptv_home_recordings">Записи</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">Начален екран</string>
+    <string name="iptv_home_settings_favourites">Любими канали с текущото предаване</string>
+    <string name="iptv_home_settings_sport">Спорт на живо от справочника</string>
+    <string name="iptv_home_settings_movies">Най-новите филми от вашите доставчици</string>
+    <string name="iptv_home_settings_series">Най-новите сериали от вашите доставчици</string>
+    <string name="iptv_home_settings_recordings">Последните ви завършени записи</string>
+</resources>

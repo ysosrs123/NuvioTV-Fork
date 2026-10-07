@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">लाइव टीवी पसंदीदा</string>
+    <string name="iptv_home_sport">अभी चल रहा है: स्पोर्ट्स</string>
+    <string name="iptv_home_movies">हाल ही में जोड़ी गई फ़िल्में</string>
+    <string name="iptv_home_series">हाल ही में जोड़ी गई सीरीज़</string>
+    <string name="iptv_home_recordings">रिकॉर्डिंग</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">होम स्क्रीन</string>
+    <string name="iptv_home_settings_favourites">पसंदीदा चैनल और उन पर अभी क्या चल रहा है</string>
+    <string name="iptv_home_settings_sport">गाइड से लाइव स्पोर्ट्स</string>
+    <string name="iptv_home_settings_movies">आपके प्रोवाइडर की नई फ़िल्में</string>
+    <string name="iptv_home_settings_series">आपके प्रोवाइडर की नई सीरीज़</string>
+    <string name="iptv_home_settings_recordings">आपकी हाल की पूरी हुई रिकॉर्डिंग</string>
+</resources>

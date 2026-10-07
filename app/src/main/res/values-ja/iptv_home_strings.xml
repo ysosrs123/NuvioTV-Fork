@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">ライブTVのお気に入り</string>
+    <string name="iptv_home_sport">放送中：スポーツ</string>
+    <string name="iptv_home_movies">最近追加された映画</string>
+    <string name="iptv_home_series">最近追加されたシリーズ</string>
+    <string name="iptv_home_recordings">録画</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">ホーム画面</string>
+    <string name="iptv_home_settings_favourites">お気に入りチャンネルと現在の番組</string>
+    <string name="iptv_home_settings_sport">番組表のライブスポーツ</string>
+    <string name="iptv_home_settings_movies">プロバイダーの最新映画</string>
+    <string name="iptv_home_settings_series">プロバイダーの最新シリーズ</string>
+    <string name="iptv_home_settings_recordings">最近完了した録画</string>
+</resources>

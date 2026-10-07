@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">مفضلة البث المباشر</string>
+    <string name="iptv_home_sport">يُعرض الآن: رياضة</string>
+    <string name="iptv_home_movies">أفلام أُضيفت مؤخراً</string>
+    <string name="iptv_home_series">مسلسلات أُضيفت مؤخراً</string>
+    <string name="iptv_home_recordings">التسجيلات</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">الشاشة الرئيسية</string>
+    <string name="iptv_home_settings_favourites">القنوات المفضلة مع ما يُعرض الآن</string>
+    <string name="iptv_home_settings_sport">الرياضة المباشرة من الدليل</string>
+    <string name="iptv_home_settings_movies">أحدث الأفلام من مزوّديك</string>
+    <string name="iptv_home_settings_series">أحدث المسلسلات من مزوّديك</string>
+    <string name="iptv_home_settings_recordings">أحدث تسجيلاتك المكتملة</string>
+</resources>

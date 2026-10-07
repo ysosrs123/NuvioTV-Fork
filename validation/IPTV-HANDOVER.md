@@ -140,7 +140,7 @@ Done after `e20d157` (host-tested, CI pending):
   load 800 ms after Home, cache 3 minutes, and open Live TV through `IptvLiveLaunch.channel`
   (no route argument, so sidebar navigation is unchanged). Classic and Grid insert the
   rows after Continue Watching; Modern appends them after the catalogue rows. Strings
-  `iptv_home_strings.xml` not translated yet.
+  `iptv_home_strings.xml` translated into all 40 locales.
 - Minified release build check (R8) with all new code. Run 37594253652 failed in
   `produceIptvPrototypeReleaseComposeMapping` ("Unsupported class file major version
   69"): smbj 0.15.0 depends on bcprov-jdk18on 1.85.2, a multi-release jar with Java 25

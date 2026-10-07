@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">Live-TV-Favoriten</string>
+    <string name="iptv_home_sport">Jetzt läuft: Sport</string>
+    <string name="iptv_home_movies">Kürzlich hinzugefügte Filme</string>
+    <string name="iptv_home_series">Kürzlich hinzugefügte Serien</string>
+    <string name="iptv_home_recordings">Aufnahmen</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">Startbildschirm</string>
+    <string name="iptv_home_settings_favourites">Lieblingssender mit dem aktuellen Programm</string>
+    <string name="iptv_home_settings_sport">Live-Sport aus dem Programmführer</string>
+    <string name="iptv_home_settings_movies">Neueste Filme Ihrer Anbieter</string>
+    <string name="iptv_home_settings_series">Neueste Serien Ihrer Anbieter</string>
+    <string name="iptv_home_settings_recordings">Ihre zuletzt fertiggestellten Aufnahmen</string>
+</resources>

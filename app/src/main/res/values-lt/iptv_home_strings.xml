@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">Tiesioginės TV mėgstami</string>
+    <string name="iptv_home_sport">Dabar: Sportas</string>
+    <string name="iptv_home_movies">Neseniai pridėti filmai</string>
+    <string name="iptv_home_series">Neseniai pridėti serialai</string>
+    <string name="iptv_home_recordings">Įrašai</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">Pagrindinis ekranas</string>
+    <string name="iptv_home_settings_favourites">Mėgstami kanalai su dabar rodoma laida</string>
+    <string name="iptv_home_settings_sport">Tiesioginis sportas iš TV programos</string>
+    <string name="iptv_home_settings_movies">Naujausi jūsų tiekėjų filmai</string>
+    <string name="iptv_home_settings_series">Naujausi jūsų tiekėjų serialai</string>
+    <string name="iptv_home_settings_recordings">Naujausi jūsų baigti įrašai</string>
+</resources>

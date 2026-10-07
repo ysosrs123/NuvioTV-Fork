@@ -1,0 +1,14 @@
+<resources>
+    <string name="iptv_home_favourites">Omiljeni TV uživo</string>
+    <string name="iptv_home_sport">Sada: Sport</string>
+    <string name="iptv_home_movies">Nedavno dodati filmovi</string>
+    <string name="iptv_home_series">Nedavno dodate serije</string>
+    <string name="iptv_home_recordings">Snimci</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">Početni ekran</string>
+    <string name="iptv_home_settings_favourites">Omiljeni kanali sa onim što je sada na programu</string>
+    <string name="iptv_home_settings_sport">Sport uživo iz vodiča</string>
+    <string name="iptv_home_settings_movies">Najnoviji filmovi od vaših provajdera</string>
+    <string name="iptv_home_settings_series">Najnovije serije od vaših provajdera</string>
+    <string name="iptv_home_settings_recordings">Vaši najnoviji završeni snimci</string>
+</resources>
