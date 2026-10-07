@@ -7,8 +7,12 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 
 ## Live TV
 
-- Live TV has its own entry in the main navigation (IPTV build only); IPTV has no
-  entry in the main Settings.
+- Live TV is a destination in Nuvio's sidebar (IPTV build only). Left from the guide
+  opens the Live TV menu and Left again the Nuvio sidebar; Back closes Live TV's own
+  layers, then opens the sidebar, then exits as on Home. The sidebar and top bar stay
+  hidden in full screen and multiview. Live TV settings are a "Live TV" category in
+  the main Settings; the Live TV menu's Settings item opens it. (Replaces the earlier
+  Exit item and separate Live TV settings screen.)
 - After the first device pass: the corner picture plays the channel in focus after a
   short pause and opens full screen from Up then OK; HDR channels stay SDR in the
   corner picture; the menu has Exit Live TV, Recordings and Live TV settings at the
@@ -18,7 +22,7 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   limit for Xtream; a failed channel change stays in full screen and says why;
   forms keep Save and Cancel reachable; the phone setup page is redesigned and can
   change Live TV settings.
-- Live TV settings, at the top of the Live TV menu, brings together sources and
+- Live TV settings (now in the main Settings) bring together sources and
   guides, phone or computer setup and recordings, plus: default stream format for
   channels on Auto; pause and rewind with catch-up (on by default); the stats overlay
   on open; which view Live TV opens on (last category, all channels, favourites or
@@ -209,6 +213,35 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   account groups screen, Stalker grouping by portal, and a review screen when a refresh
   would remove many channels.
 
+## Added after wave 1 (7 October 2026, not device-tested)
+
+- Recording targets: WebDAV (Nextcloud/ownCloud append as it records; other servers
+  get one upload when the recording ends) and FTP/FTPS (explicit TLS), alongside SMB.
+  Self-signed NAS certificates can be trusted from the test screen by fingerprint.
+- "Movies folder" recording location on Android 10 and later: recordings are copied to
+  Movies/Nuvio Recordings when they finish, so other apps can see them.
+- Phone and tablet: the setup page lists finished recordings with Download and "Open
+  in VLC"; links last 6 hours; the Live TV setup screen must stay open on the TV.
+- Sport: optional fixtures from ESPN (unofficial) or TheSportsDB (your own key), off by
+  default, with a league choice; fixtures are linked to channels by guide titles and
+  broadcaster names and shown above the Sport grid.
+- Streaming: seamless reconnect on TS channels (playback continues from the buffer while
+  the connection is re-made); "Start playback after" (Fast / Normal / Safe) and "Safety
+  buffer" (Off to 60 s, built by playing at 97% speed with pitch kept; HLS starts
+  further back instead); HLS keeps the playlist's hold-back; Wi-Fi performance lock while
+  watching; larger network buffer; a user agent per source; stats overlay shows buffer,
+  delay behind live, speed, protocol, whether HTTP/3 is offered and reconnects; the
+  fast-forward key returns to live.
+- Experimental local timeshift (off by default): pause and rewind up to 15, 30 or 60
+  minutes on TS channels, buffered to internal storage or a USB drive and deleted when
+  you change channel or stop.
+- IPTV movies and series: Xtream and M3U movies and series are imported into their own
+  catalogue (M3U movie/series entries no longer appear as live channels). With
+  "IPTV movies and series" on (Settings → Playback → Stream selection), matching titles
+  appear as a stream source on Nuvio's movie and episode pages; continue watching and
+  Trakt/Simkl/MDBList work as for other streams, and provider addresses with account
+  details are never stored.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
@@ -222,8 +255,8 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 - Live streams follow provider redirects (common for Xtream) and reconnect after
   network drops, provider-ended streams, falling behind the live window or a stall
   of more than 20 seconds (after 1, 2, 3 then 5 seconds, six attempts) before an
-  error is shown. Decoder errors still fail at once. HLS keeps about six seconds
-  behind live with small speed adjustments. HLS does not fall back to other
+  error is shown. Decoder errors still fail at once. HLS keeps the playlist's hold-back
+  (at least three segments) with small speed adjustments. HLS does not fall back to other
   renditions after a failure. HTTP/1.0 metadata servers no longer hit stale
   connections.
 - Guide redirects are limited to six, never downgrade to HTTP, never carry userinfo,
@@ -364,15 +397,18 @@ Phone setup (security review)
 - No DRM, encrypted HLS, fMP4 or separate-audio support has been validated.
 - Pause and rewind beyond what the player holds work only on channels with a
   provider archive and a guide programme, at one-minute steps (Xtream archive
-  addresses take minutes). Without an archive a long pause may resume from live;
-  there is no local time-shift buffer (the capture chain stays disabled).
+  addresses take minutes). Without an archive a long pause may resume from live
+  unless experimental local timeshift is on (TS channels, full screen only).
 - Sport is matched from guide text only: titles and categories in other languages,
   or guides without categories, can miss matches or include the odd non-sport
-  programme. No reminders, team favourites or fixtures from a sports data service.
+  programme. Optional fixtures (ESPN or TheSportsDB) have not been checked against the
+  live services. No reminders or team favourites.
 - Exact alarms in deep sleep on Fire OS and recording across stream gaps are
   unverified. With one connection on an account, watching and recording block each
   other. Stalker streams that need extra headers may not record. Encrypted HLS and
-  fMP4 HLS cannot be recorded. USB and network-share recording is untested on devices; WebDAV and FTP targets are in progress.
+  fMP4 HLS cannot be recorded. USB, SMB, WebDAV, FTP and Movies folder
+  recording is untested on devices. WebDAV servers without append support keep the
+  whole recording on the box until it ends.
 - Stalker portals have no catch-up. Xtream catch-up assumes the provider uses the
   device's time zone. "Search what's on now" does not find programmes longer than
   24 hours.
@@ -383,10 +419,21 @@ Phone setup (security review)
   document picker (such as the AM9) add guide files through the iptv-guides folder.
 - Phone setup uses plain HTTP on the home network (pairing code, single-use token and
   confirmation on the TV); it is not meant for untrusted networks.
+- IPTV movies and series as a Nuvio stream source: a playing movie is not counted by
+  Live TV's connection limit; "open in external player" does not work for them;
+  automatic failover to the next stream skips them. Movies and Series browsing in the
+  Live TV menu is in progress.
+- The safety buffer relies on playing at 97% speed; with AC-3/E-AC-3 passthrough to a
+  receiver the speed change may be ignored, so the buffer would not grow.
 - The minified release build with IPTV is built in CI (see Validation) but has not
   been installed or smoke-tested on a device.
 
 ## Validation
+
+- 7 October work after wave 1: 565 core and 233 data-layer JVM tests pass on the host
+  harness; device tests compile. CI run 37589504762 at `d0d0dbb` compiled the whole app
+  and built the APK with one failing unit test, since fixed (`2bef868`). Not device-tested.
+- Wave 1: CI debug build green at `d263b18` (run 37580266979) including translations.
 
 - Last full device validation: commit `b68985a` (full app compile, 317 IPTV JVM tests,
   27 AM9 capture/codec fixtures).

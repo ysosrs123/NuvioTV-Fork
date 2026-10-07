@@ -1,27 +1,30 @@
 # Nuvio IPTV — handover
 
 Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
-Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built
-(latest green debug build: `8461799`, run 37578739181, includes wave 1 below; translations
-for wave 1 added afterwards in `d263b18`; minified release build with IPTV last green at
-`d8d4a03`, run 37550880901, before wave 1), not device-tested. Start with "Current work
-plan" and "Next session — work list" below; older sections further down are history.
+Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built,
+not device-tested. Last fully green debug build: `d263b18` (run 37580266979, wave 1 and
+its translations). Run 37589504762 at `d0d0dbb` (everything up to streaming stability)
+compiled the whole app and assembled the APK; one unit test failed
+(`IptvWebDavShareTest` self-signed certificate case), fixed in `2bef868` and not yet
+confirmed by CI. Minified release build with IPTV last green at `d8d4a03` (run
+37550880901), before wave 1. Start with "Current work plan"; older sections are history.
 Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
 [code review](IPTV-CODE-REVIEW-20261006.md), [reference app notes](IPTV-UX-REFERENCE.md),
 [player validation report](IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json).
 
 ## Status
 
-- Live TV is feature-complete for a first release apart from the items in the work
-  list: M3U/Xtream/Stalker sources, guides, guide-first screen, full screen with the
-  player's control deck and stats HUD, catch-up, search and now-on search, multiview,
-  recording, phone/PC setup. Only the build at `b68985a` and an early real-account run
-  were used on the AM9; everything since is untested on devices. The capture/timeshift
-  chain exists below the UI and stays disabled.
-- IPTV settings are visible only in the `iptvPrototype` flavour
-  (`FEATURE_IPTV_ENABLED`); the `full` flavour hides them.
-- The capture player is wired to a real ExoPlayer in test fixtures. The cause of the
-  two AM9 player-fixture timeouts is fixed in source; the device rerun is pending.
+- Live TV covers M3U/Xtream/Stalker sources, guides, the guide-first screen, full screen
+  with the player's control deck and stats HUD, catch-up, search, multiview, Sport (guide
+  and optional fixtures), recording (internal, USB, SMB, WebDAV, FTP, Movies folder),
+  phone/PC setup and transfer, IPTV movies and series, experimental local timeshift and
+  the streaming-stability settings. Only `b68985a` and an early real-account run were
+  used on the AM9; everything since is untested on devices.
+- Live TV is reached from Nuvio's sidebar and its settings are a main Settings category,
+  only in the `iptvPrototype` flavour (`FEATURE_IPTV_ENABLED`); the `full` flavour hides
+  them. How IPTV ships (full / prototype / behind an off-by-default setting) is the
+  user's decision.
+- The original capture chain stays disabled; local timeshift uses a separate ring file.
 
 ## CI build — 6 October 2026
 
@@ -40,93 +43,97 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
   a filtered error summary on failure. Without GitHub tools, run status is readable
   from the public REST API, but logs and re-runs need the user.
 
-## Current work plan (7 October 2026, user asked for everything below)
+## Current work plan (updated 7 October 2026)
 
-Wave 1 — done, CI-built (run 37578739181), not device-tested; strings translated into
-all 40 locales:
+Everything below is host-tested and (unless marked) committed; none of it is
+device-tested. New strings are translated into all 40 locales unless marked.
+
+Done — wave 1 (`277489d` – `d263b18`, CI green):
 - Storage: recording location internal / USB (FAT32 split into parts, exFAT, NTFS,
   read-only detection) / SMB 2-3 via smbj (user approved the dependency) with local
   spool and resumable upload; safe file names.
 - Live TV screen: catch-up scrubbing across programmes, auto return to live, guide
   densities, sticky titles, programme artwork, channel and category reorder, all
   sources together, multiview across sources and more layouts, picture-in-picture.
-- Playback: per-channel headers, endless retry, frozen-video detection, format
-  probe, faster TS zap, Xtream catch-up address styles, display frame-rate handoff.
+- Playback: per-channel headers, endless retry, frozen-video detection, format probe,
+  faster TS zap, Xtream catch-up address styles, display frame-rate handoff.
 - Setup: phone guide assignment and profiles, device-to-device copy, encrypted
   backup/restore, account groups screen, Stalker grouping, refresh review.
-- CI fixes after wave 1: unescaped apostrophes in setup strings; missing `clip` import.
 
-Wave 2 — in progress (parallel helpers, briefs kept outside the repo):
-- WebDAV (OkHttp; SabreDAV partial-update append when offered, else one PUT after the
-  recording ends) and FTP/FTPS (own minimal client, APPE append) recording targets,
-  certificate pinning for self-signed NAS certificates. Strings: `iptv_network_strings.xml`.
-- Recordings list, download and "Open in VLC" from the phone setup page (signed,
-  time-limited file links, HTTP range support). Strings: `iptv_phone_strings.xml`.
-- Sports data setting: Off (default) / ESPN (unofficial) / TheSportsDB (user's own key),
-  fixtures matched to channels by guide titles and broadcaster names. Strings:
-  `iptv_sport_strings.xml`. Opta/Stats Perform, Sportradar, Flashscore, Sofascore and
-  similar were checked: contract-only or no public API.
-- Experimental local timeshift from the capture chain, off by default, buffer 15/30/60
-  min or automatic, internal or USB. Strings: `iptv_timeshift_strings.xml`.
-- After the network targets: shared Movies folder as a recording location (Android 10+,
-  record to the spool, copy into MediaStore at the end).
-Settings sections for sport and timeshift are separate files to be wired into
-`IptvSettingsScreen` by the integrator.
-Wave 3: Live TV rows on the Nuvio Home screen.
-IPTV VOD (user chose both, 7 October 2026): Xtream movies and series (and M3U entries
-with /movie/, /series/ or tvg-type) stored as a VOD catalogue; (a) a built-in stream
-source on Nuvio's own detail pages, switchable in the main Settings (Playback → Stream
-selection), following the `ServerStreams` pattern in `StreamRepositoryImpl`, matched by
-TMDB/IMDb id with a title+year fallback; (b) Movies and Series in the Live TV menu,
-with artwork either from the provider or from Nuvio metadata (TMDB / meta add-ons),
-opening Nuvio's detail page when a title is matched. VOD is not ingested at all today.
-Stream URLs carry Xtream credentials: resolve at play time, never store them in history.
-Tracking (user agreed 7 October 2026): matched IPTV titles use Nuvio's normal Continue
-Watching, Watchlist, Library, Trakt, Simkl and MDBList (keyed by title id); unmatched
-titles resume locally only. `StreamLinkCacheDataStore` must hold an IPTV reference
-(source + stream id), never an Xtream URL.
-Navigation and settings (user agreed 7 October 2026): Live TV becomes a sidebar
-destination; Left from the guide opens the Live TV menu, Left again the Nuvio sidebar;
-Back as on other Nuvio pages; the Exit item goes; IPTV settings move into the main
-Settings as a "Live TV" category, with a shortcut from the Live TV menu. The guide
-stays full width. This reverses the earlier "IPTV settings only on the Live TV side".
-Done in `IptvSettingsContent` (SettingsCatalog `LIVE_TV`, Watch group); the
-`iptv/settings` route is gone; Back closes Live TV layers, then opens the sidebar,
-then exits like Home; sidebar and top bar are hidden in full screen and multiview.
-Streaming stability (proposed 7 October 2026, after wave 2): seamless TS reconnect that
-keeps the buffer; Live buffer setting (Fast zapping / Balanced / Stable / Maximum;
-current fixed values 1.5 s start, 8 s max); optional slow-start cushion building at
-0.98x; HLS live offset of at least three segments (now fixed at 6 s); Wi-Fi
-high-performance lock while watching; larger socket receive buffer; per-source user
-agent; network details in the stats HUD (HTTP version, reconnects, buffer, Alt-Svc h3).
-Not for live: parallel range connections (continuous TS has no ranges; connection
-limits), HTTP/2 (plain-http panels; OkHttp already negotiates h2 on https). HTTP/3 needs
-https and Cronet (new dependency); measure Alt-Svc first.
-Local timeshift: the capture chain was found unsuitable (HLS-only, baseline-AVC test
-streams, no audio, connection hold on failure); built instead as a capped TS ring file
-read by the normal live player.
-Device validation items can only be prepared here.
+Done — wave 2 and later (`7b26803` – `0c7ebe8`):
+- Phone setup page: recordings list, download and "Open in VLC" (HMAC-signed links
+  valid 6 h, single-range HTTP, multi-part USB recordings joined, network-share
+  recordings streamed; at most 3 downloads; the setup screen must stay open).
+- WebDAV (OkHttp; SabreDAV partial-update append, else one PUT after the recording
+  ends) and FTP/FTPS (own client, APPE append, explicit TLS) recording targets;
+  "Trust this certificate" pinning for self-signed NAS certificates. Non-append WebDAV
+  keeps the whole recording on the box until it ends (spool free space is checked only
+  at start).
+- Sports fixtures: Off (default) / ESPN (unofficial) / TheSportsDB (user's own key,
+  sealed); league choice; fixtures matched to channels by guide titles and broadcaster
+  names; "Fixtures" row in the Sport view. ESPN and TheSportsDB could not be reached from
+  the build environment; league paths and names need a device check. Opta/Stats
+  Perform, Sportradar, Flashscore, Sofascore and similar: contract-only or no public API.
+- Experimental local timeshift (off by default): the capture chain was found unsuitable
+  (HLS-only, baseline-AVC test streams, no audio, connection hold on failure), so it is
+  a capped TS ring file (15/30/60 min or automatic; internal or USB) written by one
+  provider connection and read by the normal live player; full-screen single view, TS
+  only; falls back to direct playback on any error. Entering full screen costs one
+  short reconnect.
+- IPTV movies and series: separate VOD database (`iptv-vod.db`); Xtream VOD/series
+  lists streamed in the background refresh, series info on demand; M3U movie/series
+  entries moved out of the live channel list; title matching (decorations, years,
+  episode markers); `iptv-vod:` references, provider URLs built only at play time.
+- IPTV movies and series as a stream source on Nuvio's pages (Settings → Playback →
+  Stream selection, off by default, per profile); one chip per source; references are
+  what the link cache, history and Trakt/Simkl/MDBList see. Known gaps: a playing VOD
+  stream is not counted by Live TV's connection count; a busy provider is retried twice
+  before the message; "open in external player" shows but fails; automatic failover
+  skips IPTV; mpv resolves on the main thread; possible duplicate User-Agent header on
+  VOD requests.
+- Live TV in Nuvio's navigation: sidebar destination; Left from the guide opens the Live
+  TV menu, Left again the Nuvio sidebar; Back closes Live TV layers, then opens the
+  sidebar, then exits like Home; Exit item removed; sidebar/top bar hidden in full
+  screen and multiview; Live TV settings are a main Settings category (`LIVE_TV`, Watch
+  group, `IptvSettingsContent`); the `iptv/settings` route is gone.
+- Streaming stability: seamless TS reconnect keeping the buffer (`IptvResilientDataSource`);
+  "Start playback after" Fast 1 s / Normal 2.5 s / Safe 5 s; "Safety buffer" Off / 10 /
+  20 (default) / 30 / 60 s built at 0.97x on TS (HLS seeks back instead), memory-capped
+  (16 MB low-RAM, 48 MB otherwise); HLS offset from the playlist; Wi-Fi high-perf lock
+  while playing; 1/4 MiB socket receive buffer; per-source user agent; HUD rows for
+  buffer, behind-live, speed, protocol, Alt-Svc h3 and reconnects; fast-forward key goes
+  live. Open: no Go live button in the control deck (remotes without fast-forward).
+  The user's provider panel answered HTTP/1.1 with no Alt-Svc, so HTTP/3 is not offered.
+- Fixes found by CI: Android org.json has no `JSONObject.keySet()`; the prototype
+  activity used the removed `onBack`; certificate failures on a later route were
+  reported as "unreachable" (real bug, `2bef868`).
 
-## Planned but not done (compared on 7 October 2026)
+Built, not yet committed (waiting on the screens below, which share a settings file):
+- "Movies folder" recording location (Android 10+): records to the spool, then copies
+  into MediaStore `Movies/Nuvio Recordings/` (pending entry, published after the size
+  check); list, play, delete and phone download work through the content id.
+  Strings: `iptv_media_strings.xml` (not translated yet).
 
-From the earlier plan and the reference study; none of these is built yet.
-- Recording: USB and SMB/NAS (in progress), crash/power-loss recovery validation,
-  shared media storage. Possible extras discussed with the user: WebDAV and FTP
-  targets; downloading recordings to a phone from the setup page.
-- Playback: local timeshift from the capture chain (disabled until validated) and
-  its memory/storage measurements; per-channel headers (#EXTVLCOPT user-agent and
-  referrer, #EXTHTTP, pipe suffixes are parsed but ignored); endless retry and
-  frozen-video detection (gives up after six attempts); per-server format probe; fast
-  TS zap; display frame-rate/HDR mode handoff with the main player.
-- Catch-up: scrubbing across programme boundaries, automatic return to live near the
-  edge, probing and remembering the Xtream catch-up address style.
-- Guide: densities, sticky titles, programme artwork, channel and category
-  reordering, categories from several sources together, multiview across sources and
-  more layouts, picture-in-picture, Live TV rows on the Nuvio Home screen.
-- Sport from a fixtures service (needs the user's approval for a data source).
-- Setup: guide assignment and profiles from the phone, device-to-device copy,
-  encrypted backup/restore, account group screen, Stalker grouping by portal and
-  MAC, review screen when a refresh would drop many channels.
+In progress:
+- Movies and Series in the Live TV menu with a "Posters and details from: Provider /
+  Nuvio" setting; matched titles open Nuvio's detail page; unmatched ones a simple Live
+  TV page with local resume. Strings: `iptv_vod_browse_strings.xml`.
+
+Next:
+- Fix the VOD gaps above; Go live button in the control deck; Live TV rows on the
+  Nuvio Home screen; translate the media and browse strings; a minified release build
+  check; a full review pass; device test checklist.
+- Decisions recorded: tracking for matched titles uses Nuvio's normal history and
+  services; unmatched titles resume locally; navigation and settings integration as
+  above (reverses the earlier "IPTV settings only on the Live TV side").
+
+## Planned but not done (updated 7 October 2026)
+
+Everything from the 7 October comparison is now built except:
+- Recording: crash/power-loss recovery validation on a device.
+- Playback: device measurements for local timeshift and the safety buffer (memory,
+  storage write rate, AC-3 passthrough with 0.97x).
+- Guide: Live TV rows on the Nuvio Home screen.
 - Validation: device fixtures, schema upgrades on an existing install, subtitles/CC/
   teletext, accessibility, minified build on a device.
 

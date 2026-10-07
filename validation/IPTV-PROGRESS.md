@@ -23,6 +23,7 @@ Updated 7 October 2026 (wave 1).
 | 7 Oct | 8e5f67e – head | Live TV settings on the Live TV side (playback, guide, multiview, recordings); IPTV removed from the main Settings; translations of the new strings | 350 core + 152 data-layer host tests; CI green at 5276c31 (run 37555640125); device pending |
 | 7 Oct | 6ef6eb2 – 205f453 | First device pass feedback (17 items) fixed; redesigned phone setup page with Live TV settings; guides without channel IDs accepted; box kept awake while recording | Host tests; CI green; device pending |
 | 7 Oct | 277489d – d263b18 | Wave 1: sturdier live playback; recording to USB and SMB; guide, catch-up and multiview upgrades; setup transfer, backup and guide assignment; translations | 461 core + 185 data-layer host tests; CI green at 8461799 (run 37578739181); device pending |
+| 7 Oct | 7b26803 – 2bef868 | Phone recording downloads; WebDAV and FTP recording; sports fixtures (ESPN / TheSportsDB); experimental local timeshift (ring file); IPTV movies and series catalogue and Nuvio stream source; Live TV in the sidebar with settings in the main Settings; streaming stability (seamless reconnect, buffer settings, Wi-Fi lock, user agent, network stats); translations | 565 core + 233 data-layer host tests; CI compiled the app at d0d0dbb (run 37589504762, one test fixed after); device pending |
 
 Design notes and per-checkpoint reports are in this folder
 (`IPTV-*-DESIGN.md`, `IPTV-*-VALIDATION-*.json`). Review findings and their status:
