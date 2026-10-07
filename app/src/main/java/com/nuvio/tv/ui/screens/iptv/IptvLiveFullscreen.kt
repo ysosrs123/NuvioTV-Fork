@@ -39,10 +39,14 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.nuvio.tv.data.local.PlayerControlAction
 import com.nuvio.tv.data.local.PlayerControlLayout
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Pause
+import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.GuideProgrammeCell
+import com.nuvio.tv.core.iptv.LiveTimeshift
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.theme.NuvioTheme
@@ -53,6 +57,7 @@ import kotlinx.coroutines.delay
 @Composable
 internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, onZap: (Int) -> Unit, onMenu: () -> Unit,
     onLastChannel: () -> Unit, onNumber: (Int) -> Unit, onWatch: (IptvListedChannel) -> Unit,
+    onPause: (Boolean?) -> Unit, onRewind: () -> Boolean,
     layout: PlayerControlLayout, canStartOver: Boolean, onControl: (PlayerControlAction) -> Unit) {
     var banner by remember { mutableIntStateOf(0) }
     var panel by remember { mutableStateOf(false) }
@@ -87,13 +92,12 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
                 else -> 0L
             }
             if (step != 0L) { player.seekTo((player.currentPosition + step).coerceAtLeast(0)); banner++; return@onPreviewKeyEvent true }
-            if (native.keyCode == AndroidKeyEvent.KEYCODE_MEDIA_PLAY_PAUSE || native.keyCode == AndroidKeyEvent.KEYCODE_MEDIA_PLAY ||
-                native.keyCode == AndroidKeyEvent.KEYCODE_MEDIA_PAUSE) {
-                player.playWhenReady = native.keyCode == AndroidKeyEvent.KEYCODE_MEDIA_PLAY ||
-                    (native.keyCode == AndroidKeyEvent.KEYCODE_MEDIA_PLAY_PAUSE && !player.playWhenReady)
-                banner++
-                return@onPreviewKeyEvent true
-            }
+        }
+        if (player != null) when (native.keyCode) {
+            AndroidKeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> { onPause(null); banner++; return@onPreviewKeyEvent true }
+            AndroidKeyEvent.KEYCODE_MEDIA_PLAY -> { onPause(false); banner++; return@onPreviewKeyEvent true }
+            AndroidKeyEvent.KEYCODE_MEDIA_PAUSE -> { onPause(true); banner++; return@onPreviewKeyEvent true }
+            AndroidKeyEvent.KEYCODE_MEDIA_REWIND -> if (state.catchup == null) { if (onRewind()) banner++; return@onPreviewKeyEvent true }
         }
         when (native.keyCode) {
             AndroidKeyEvent.KEYCODE_DPAD_UP, AndroidKeyEvent.KEYCODE_CHANNEL_UP -> { onZap(-1); banner++; true }
@@ -143,11 +147,18 @@ private val ZAP_KEYS = setOf(AndroidKeyEvent.KEYCODE_DPAD_UP, AndroidKeyEvent.KE
 
 @Composable
 internal fun PlaybackState(state: IptvLiveState, modifier: Modifier, large: Boolean) {
-    val waiting = state.playingId != null && !state.playing && (state.tuning || state.player != null) && !state.reconnecting
+    val waiting = state.playingId != null && !state.playing && !state.paused && (state.tuning || state.player != null) && !state.reconnecting
     if (waiting) Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
         LoadingIndicator(Modifier.size(if (large) 56.dp else 40.dp))
         Text(stringResource(R.string.iptv_live_connecting), style = if (large) MaterialTheme.typography.titleSmall else MaterialTheme.typography.labelMedium,
             color = Color.White.copy(alpha = .85f))
+    }
+    if (state.paused && state.player != null) Row(modifier.iptvPanel(RoundedCornerShape(if (large) 20.dp else 14.dp), GlassRole.HUD)
+        .padding(horizontal = if (large) 22.dp else 14.dp, vertical = if (large) 14.dp else 8.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Icon(Icons.Filled.Pause, null, Modifier.size(if (large) 32.dp else 22.dp), tint = NuvioTheme.colors.TextPrimary)
+        Text(stringResource(R.string.iptv_live_paused), style = if (large) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelLarge,
+            color = NuvioTheme.colors.TextPrimary)
     }
 }
 
@@ -195,7 +206,12 @@ private fun Banner(state: IptvLiveState, now: Long) {
                     if (index >= 0) Text("${index + 1}", style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextTertiary)
                     Text(row?.let(::channelName) ?: state.playingTitle.orEmpty(), style = MaterialTheme.typography.titleMedium,
                         color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                    Tag(stringResource(if (catchup != null) R.string.iptv_live_catchup else R.string.iptv_live_playing), live = catchup == null)
+                    Tag(stringResource(when {
+                        catchup == null -> R.string.iptv_live_playing
+                        state.catchupFrom != null -> R.string.iptv_live_behind
+                        else -> R.string.iptv_live_catchup
+                    }), live = catchup == null)
+                    if (state.paused) Tag(stringResource(R.string.iptv_live_paused))
                     qualityBadges(state.player).forEach { Tag(it) }
                 }
                 Text(programme?.let(::title) ?: stringResource(R.string.iptv_live_no_programme), style = MaterialTheme.typography.headlineSmall,
@@ -203,7 +219,7 @@ private fun Banner(state: IptvLiveState, now: Long) {
                 programme?.let { item ->
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(timeRange(item), color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
-                        val elapsed = if (catchup != null) item.start.epochMillis + position else now
+                        val elapsed = if (catchup != null) LiveTimeshift.position(item, state.catchupFrom, position) else now
                         progress(item, elapsed)?.let { ProgressLine(it, Modifier.width(260.dp)) }
                         if (catchup != null) Text(clock(elapsed), color = NuvioTheme.colors.TextTertiary, style = MaterialTheme.typography.bodyMedium)
                         else item.stop?.epochMillis?.let { stop -> if (stop > now) Text(stringResource(R.string.iptv_live_minutes_left, ((stop - now) / MINUTE_MILLIS).toInt() + 1),
@@ -215,7 +231,12 @@ private fun Banner(state: IptvLiveState, now: Long) {
             }
             Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(clock(now), style = MaterialTheme.typography.headlineSmall, color = NuvioTheme.colors.TextPrimary)
-                Text(stringResource(if (catchup != null) R.string.iptv_live_catchup_hint else R.string.iptv_live_fullscreen_hint), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary,
+                Text(stringResource(when {
+                    state.paused && catchup == null -> if (row != null && hasArchive(row) && programme != null) R.string.iptv_live_paused_archive_hint else R.string.iptv_live_paused_live_hint
+                    catchup != null -> R.string.iptv_live_catchup_hint
+                    row != null && hasArchive(row) -> R.string.iptv_live_archive_hint
+                    else -> R.string.iptv_live_fullscreen_hint
+                }), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary,
                     maxLines = 2, modifier = Modifier.widthIn(max = 220.dp))
             }
         }

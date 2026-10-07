@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.LiveTimeshift
 import com.nuvio.tv.data.local.PlayerControlAction
 import com.nuvio.tv.data.local.PlayerControlLayout
 import com.nuvio.tv.ui.screens.player.PlayerControlChrome
@@ -70,7 +71,11 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(row?.let(::channelName) ?: state.playingTitle.orEmpty(), style = MaterialTheme.typography.titleMedium,
                             color = Color.White.copy(alpha = .8f), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                        Tag(stringResource(if (state.catchup != null) R.string.iptv_live_catchup else R.string.iptv_live_playing), live = state.catchup == null)
+                        Tag(stringResource(when {
+                            state.catchup == null -> R.string.iptv_live_playing
+                            state.catchupFrom != null -> R.string.iptv_live_behind
+                            else -> R.string.iptv_live_catchup
+                        }), live = state.catchup == null)
                         qualityBadges(state.player).forEach { Tag(it) }
                     }
                     Text(programme?.let(::title) ?: stringResource(R.string.iptv_live_no_programme), style = MaterialTheme.typography.titleLarge,
@@ -78,13 +83,13 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
                 }
             }
         }, timeline = {
-            val elapsed = if (state.catchup != null) (programme?.start?.epochMillis ?: now) + position else now
+            val elapsed = if (state.catchup != null) programme?.let { LiveTimeshift.position(it, state.catchupFrom, position) } ?: now else now
             ProgressLine(programme?.let { progress(it, elapsed) } ?: 0f, Modifier.fillMaxWidth())
         }, time = {
             Row(Modifier.fillMaxWidth()) {
                 Text(programme?.let(::timeRange).orEmpty(), style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary,
                     modifier = Modifier.weight(1f))
-                Text(clock(if (state.catchup != null) (programme?.start?.epochMillis ?: now) + position else now),
+                Text(clock(if (state.catchup != null) programme?.let { LiveTimeshift.position(it, state.catchupFrom, position) } ?: now else now),
                     style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary)
             }
         }, deck = {

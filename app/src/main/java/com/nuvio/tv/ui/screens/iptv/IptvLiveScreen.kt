@@ -156,13 +156,19 @@ fun IptvLiveScreen(onBack: () -> Unit, onSources: () -> Unit, onRecordings: () -
         val v2 = LocalV2Appearance.current != null
         FullscreenLive(state, now, showHud, onZap = viewModel::zap, onMenu = { playingRow?.let { menuFor = it } },
             onLastChannel = viewModel::lastChannel, onNumber = viewModel::watchNumber, onWatch = { viewModel.watch(it) },
+            onPause = { pause -> when (pause) { null -> viewModel.togglePause(); true -> viewModel.pause(); false -> viewModel.resume() } },
+            onRewind = viewModel::rewindLive,
             layout = remember(state.controlLayout, v2) { PlayerControlLayout.effective(state.controlLayout, v2) },
             canStartOver = playingRow != null && current != null && hasArchive(playingRow),
             onControl = { action ->
                 val player = state.player
                 when (action) {
-                    PlayerControlAction.PLAY_PAUSE -> { player?.let { it.playWhenReady = !it.playWhenReady } }
-                    PlayerControlAction.RESTART -> { if (state.catchup != null) player?.seekTo(0) else if (playingRow != null && current != null) viewModel.watch(playingRow, current) }
+                    PlayerControlAction.PLAY_PAUSE -> viewModel.togglePause()
+                    PlayerControlAction.RESTART -> {
+                        val catchup = state.catchup
+                        if (catchup != null && state.catchupFrom == null) player?.seekTo(0)
+                        else if (playingRow != null && (catchup ?: current) != null) viewModel.watch(playingRow, catchup ?: current)
+                    }
                     PlayerControlAction.STATS -> { showHud = !showHud }
                     PlayerControlAction.AUDIO, PlayerControlAction.SUBTITLES -> { showTracks = true }
                     else -> Unit

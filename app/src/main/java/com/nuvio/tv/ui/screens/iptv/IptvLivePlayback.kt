@@ -46,7 +46,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private var released = false
     private var attempts = 0
     private val reconnect = Runnable {
-        if (!released) { if (isLive) player.seekToDefaultPosition() else player.seekTo(player.currentPosition); player.prepare(); player.playWhenReady = true }
+        if (!released) { if (isLive) player.seekToDefaultPosition() else player.seekTo(player.currentPosition); player.prepare() }
     }
     private val stall = Runnable { if (!released && player.playbackState == Player.STATE_BUFFERING) retry() }
     private var releaseFailed = false
