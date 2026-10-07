@@ -182,79 +182,21 @@ fun IptvSettingsScreen(onSources: () -> Unit, onSetup: () -> Unit, onRecordings:
             NuvioActionPill(viewModel::dismissNotice, Modifier.focusRequester(ok)) { Text(stringResource(R.string.iptv_location_ok)) }
         }
     }
-    shareForm?.let { form -> key(form) { ShareDialog(form, shareStatus, viewModel) } }
-}
-
-@Composable
-private fun ShareDialog(form: IptvShareForm, status: IptvShareStatus, viewModel: IptvSettingsViewModel) {
-    val context = LocalContext.current
-    var server by remember { mutableStateOf(form.server) }
-    var share by remember { mutableStateOf(form.share) }
-    var folder by remember { mutableStateOf(form.folder) }
-    var username by remember { mutableStateOf(form.username) }
-    var password by remember { mutableStateOf(form.password) }
-    var domain by remember { mutableStateOf(form.domain) }
-    var guest by remember { mutableStateOf(form.guest) }
-    var showPassword by remember { mutableStateOf(false) }
-    val first = remember { FocusRequester() }
-    LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
-    fun current() = IptvShareForm(server, share, folder, username, password, domain, guest)
-    NuvioDialog(onDismiss = viewModel::closeShare, title = stringResource(R.string.iptv_share_title), subtitle = stringResource(R.string.iptv_share_subtitle),
-        width = 640.dp) {
-        Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            SourceField(stringResource(R.string.iptv_share_server), server, { server = it.take(300) }, hint = stringResource(R.string.iptv_share_server_hint),
-                keyboardType = KeyboardType.Uri, modifier = Modifier.focusRequester(first))
-            SourceField(stringResource(R.string.iptv_share_name), share, { share = it.take(80) }, hint = stringResource(R.string.iptv_share_name_hint),
-                keyboardType = KeyboardType.Uri)
-            SourceField(stringResource(R.string.iptv_share_folder), folder, { folder = it.take(200) }, hint = stringResource(R.string.iptv_share_folder_hint),
-                keyboardType = KeyboardType.Uri, last = guest)
-            SettingsToggleRow(title = stringResource(R.string.iptv_share_guest), subtitle = stringResource(R.string.iptv_share_guest_subtitle),
-                checked = guest, onToggle = { guest = !guest })
-            if (!guest) {
-                SourceField(stringResource(R.string.iptv_share_username), username, { username = it.take(256) }, keyboardType = KeyboardType.Ascii)
-                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    SourceField(stringResource(R.string.iptv_share_password), password, { password = it.take(256) },
-                        keyboardType = KeyboardType.Password, masked = !showPassword, modifier = Modifier.weight(1f))
-                    NuvioActionPill({ showPassword = !showPassword }) {
-                        Icon(if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, null, Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(if (showPassword) R.string.iptv_password_hide else R.string.iptv_password_show))
-                    }
-                }
-                SourceField(stringResource(R.string.iptv_share_domain), domain, { domain = it.take(256) }, hint = stringResource(R.string.iptv_share_domain_hint),
-                    keyboardType = KeyboardType.Ascii, last = true)
-            }
-            when {
-                status.busy -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    LoadingIndicator(Modifier.size(24.dp))
-                    Text(stringResource(R.string.iptv_share_testing), color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
-                }
-                status.message != null -> Text(
-                    if (status.ok && status.freeBytes != null) stringResource(R.string.iptv_share_ok_free, Formatter.formatShortFileSize(context, status.freeBytes))
-                    else stringResource(status.message),
-                    color = if (status.ok) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.Error, style = MaterialTheme.typography.bodyMedium)
-            }
-            Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                NuvioActionPill({ viewModel.testShare(current()) }, enabled = !status.busy && server.isNotBlank()) { Text(stringResource(R.string.iptv_share_test)) }
-                NuvioActionPill({ viewModel.saveShare(current()) }, enabled = server.isNotBlank()) { Text(stringResource(R.string.iptv_setup_save)) }
-                NuvioActionPill(viewModel::closeShare) { Text(stringResource(R.string.iptv_setup_cancel)) }
-            }
-        }
-    }
+    shareForm?.let { form -> key(form) { IptvShareDialog(form, shareStatus, viewModel) } }
 }
 
 @Composable
 private fun locationLabel(summary: IptvLocationSummary): String = when (summary.kind) {
     IptvLocationKind.DEVICE -> stringResource(R.string.iptv_location_device)
     IptvLocationKind.DRIVE -> if (summary.available) summary.label ?: stringResource(R.string.iptv_location_drive) else stringResource(R.string.iptv_location_drive_missing)
-    IptvLocationKind.SHARE -> if (summary.available) stringResource(R.string.iptv_location_share) else stringResource(R.string.iptv_location_share_not_set)
+    IptvLocationKind.SHARE -> if (summary.available) stringResource(R.string.iptv_network_location) else stringResource(R.string.iptv_location_share_not_set)
 }
 
 @Composable
 private fun locationTitle(option: IptvLocationOption): String = when (option.kind) {
     IptvLocationKind.DEVICE -> stringResource(R.string.iptv_location_device)
     IptvLocationKind.DRIVE -> option.label ?: stringResource(R.string.iptv_location_drive)
-    IptvLocationKind.SHARE -> stringResource(R.string.iptv_location_share)
+    IptvLocationKind.SHARE -> stringResource(R.string.iptv_network_location)
 }
 
 @Composable

@@ -9,6 +9,8 @@ import com.nuvio.tv.core.iptv.MultiviewQuality
 import com.nuvio.tv.core.iptv.RecordingFileSystem
 import com.nuvio.tv.core.iptv.RecordingLocations
 import com.nuvio.tv.core.iptv.RecordingShareAddress
+import com.nuvio.tv.core.iptv.RecordingShareProtocol
+import com.nuvio.tv.core.iptv.RecordingShareTarget
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.recording.IptvRecorder
 import com.nuvio.tv.core.recording.IptvRecordingTargets
@@ -44,11 +46,21 @@ enum class IptvLocationKind { DEVICE, DRIVE, SHARE }
 data class IptvLocationOption(val value: String, val kind: IptvLocationKind, val label: String?, val freeBytes: Long?, val fileSystem: RecordingFileSystem?)
 
 class IptvShareForm(val server: String, val share: String, val folder: String, val username: String, val password: String, val domain: String,
-    val guest: Boolean) {
+    val guest: Boolean, val protocol: RecordingShareProtocol = RecordingShareProtocol.SMB, val secure: Boolean = false) {
+    val target: RecordingShareTarget? get() = when (protocol) {
+        RecordingShareProtocol.SMB -> RecordingShareAddress.parse(server, share, folder)
+        RecordingShareProtocol.WEBDAV -> RecordingShareAddress.webDav(server, folder)
+        RecordingShareProtocol.FTP -> RecordingShareAddress.ftp(server, folder, secure)
+    }
+    val anonymous: Boolean get() = if (protocol == RecordingShareProtocol.SMB) guest else username.isBlank()
+    val plain: Boolean get() = protocol != RecordingShareProtocol.SMB && password.isNotEmpty() && target?.secure == false
     override fun toString(): String = "IptvShareForm(withheld)"
 }
 
-data class IptvShareStatus(val busy: Boolean = false, val message: Int? = null, val freeBytes: Long? = null, val ok: Boolean = false)
+data class IptvShareStatus(val busy: Boolean = false, val message: Int? = null, val freeBytes: Long? = null, val ok: Boolean = false,
+    val fingerprint: String? = null) {
+    override fun toString(): String = "IptvShareStatus(withheld)"
+}
 
 @HiltViewModel
 class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLivePreferences, private val profiles: ProfileManager,
@@ -64,6 +76,8 @@ class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLiv
     private val shareStatuses = MutableStateFlow(IptvShareStatus())
     val shareStatus = shareStatuses.asStateFlow()
     private var shareJob: Job? = null
+    private var offered: Pair<RecordingShareTarget, String>? = null
+    private var trusted: Pair<RecordingShareTarget, String>? = null
 
     init { reload() }
 
@@ -134,11 +148,13 @@ class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLiv
     fun openShare() {
         viewModelScope.launch {
             shareStatuses.value = IptvShareStatus()
+            offered = null
+            trusted = null
             forms.value = withContext(Dispatchers.IO) {
                 val settings = targets.shares.settings()
                 val password = settings?.let { runCatching { targets.shares.password() }.getOrNull() }.orEmpty()
-                settings?.let { IptvShareForm(it.target.host.let { host -> if (':' in host) "[$host]" else host } + (it.target.port?.let { port -> ":$port" } ?: ""),
-                    it.target.share, it.target.folder, it.username, password, it.domain, it.guest) }
+                settings?.let { IptvShareForm(RecordingShareAddress.address(it.target), if (it.target.protocol == RecordingShareProtocol.SMB) it.target.share else "",
+                    it.target.folder, it.username, password, it.domain, it.guest, it.target.protocol, it.target.secure) }
                     ?: IptvShareForm("", "", "", "", "", "", false)
             }
         }
@@ -150,27 +166,39 @@ class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLiv
     }
 
     fun testShare(form: IptvShareForm) {
-        val target = RecordingShareAddress.parse(form.server, form.share, form.folder)
-            ?: run { shareStatuses.value = IptvShareStatus(message = R.string.iptv_share_invalid); return }
+        val target = form.target ?: run { shareStatuses.value = IptvShareStatus(message = invalidMessage(form)); return }
         shareJob?.cancel()
         shareStatuses.value = IptvShareStatus(busy = true)
         shareJob = viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                IptvShareProbe.run(targets.connector(target, form.username, form.domain, form.guest, form.password), target.folder)
+            val (result, certificate) = withContext(Dispatchers.IO) {
+                val connector = targets.connector(target, form.username, domain(form), form.anonymous, form.password, pin(target))
+                IptvShareProbe.run(connector, target.folder) to connector.certificate
             }
             result.freeBytes?.let { preferences.shareFreeBytes = it }
-            shareStatuses.value = IptvShareStatus(message = shareMessage(result.error), freeBytes = result.freeBytes, ok = result.error == null)
+            offered = if (result.error == IptvShareError.CERTIFICATE && certificate != null) target to certificate else null
+            shareStatuses.value = IptvShareStatus(message = shareMessage(result.error, target.protocol), freeBytes = result.freeBytes, ok = result.error == null,
+                fingerprint = offered?.second)
         }
     }
 
+    fun trustCertificate(form: IptvShareForm) {
+        val certificate = offered ?: return
+        if (form.target != certificate.first) return
+        trusted = certificate
+        offered = null
+        testShare(form)
+    }
+
     fun saveShare(form: IptvShareForm) {
-        val target = RecordingShareAddress.parse(form.server, form.share, form.folder)
-            ?: run { shareStatuses.value = IptvShareStatus(message = R.string.iptv_share_invalid); return }
-        if (!form.guest && form.username.isBlank()) { shareStatuses.value = IptvShareStatus(message = R.string.iptv_share_username_needed); return }
+        val target = form.target ?: run { shareStatuses.value = IptvShareStatus(message = invalidMessage(form)); return }
+        if (form.protocol == RecordingShareProtocol.SMB && !form.guest && form.username.isBlank()) {
+            shareStatuses.value = IptvShareStatus(message = R.string.iptv_share_username_needed)
+            return
+        }
         shareJob?.cancel()
         viewModelScope.launch {
             val saved = withContext(Dispatchers.IO) {
-                try { targets.shares.save(target, form.username, form.domain, form.guest, form.password); true } catch (error: Exception) {
+                try { targets.shares.save(target, form.username, domain(form), form.anonymous, form.password, pin(target)); true } catch (error: Exception) {
                     IptvLog.failure("share settings save", error)
                     false
                 }
@@ -182,6 +210,14 @@ class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLiv
             reload()
         }
     }
+
+    private fun pin(target: RecordingShareTarget): String? =
+        trusted?.takeIf { it.first == target }?.second ?: targets.shares.settings()?.takeIf { it.target == target }?.pin
+
+    private fun domain(form: IptvShareForm): String = if (form.protocol == RecordingShareProtocol.SMB) form.domain else ""
+
+    private fun invalidMessage(form: IptvShareForm): Int =
+        if (form.protocol == RecordingShareProtocol.SMB) R.string.iptv_share_invalid else R.string.iptv_network_invalid
 
     private fun summary(): IptvLocationSummary {
         val choice = preferences.recordLocation
@@ -199,13 +235,16 @@ class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLiv
     }
 }
 
-fun shareMessage(error: IptvShareError?): Int = when (error) {
+fun shareMessage(error: IptvShareError?, protocol: RecordingShareProtocol = RecordingShareProtocol.SMB): Int = when (error) {
     null -> R.string.iptv_share_ok
+    IptvShareError.SHARE_NOT_FOUND -> if (protocol == RecordingShareProtocol.SMB) R.string.iptv_share_not_found else R.string.iptv_network_address_not_found
+    IptvShareError.CERTIFICATE -> R.string.iptv_network_certificate_untrusted
+    IptvShareError.NO_TLS -> R.string.iptv_network_no_tls
+    IptvShareError.TLS_REUSE -> R.string.iptv_network_tls_reuse
     IptvShareError.UNREACHABLE -> R.string.iptv_share_unreachable
     IptvShareError.TIMEOUT -> R.string.iptv_share_timeout
     IptvShareError.LOGIN_REFUSED -> R.string.iptv_share_login_refused
     IptvShareError.GUEST_REFUSED -> R.string.iptv_share_guest_refused
-    IptvShareError.SHARE_NOT_FOUND -> R.string.iptv_share_not_found
     IptvShareError.FOLDER_NOT_FOUND -> R.string.iptv_share_folder_not_found
     IptvShareError.ACCESS_DENIED -> R.string.iptv_share_access_denied
     IptvShareError.READ_ONLY -> R.string.iptv_share_read_only

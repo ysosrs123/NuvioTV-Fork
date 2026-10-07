@@ -112,6 +112,13 @@ object RecordingUpload {
         return pieces.indices.filter { pieces[it].end <= confirmed && (finished || pieces[it] !== last) }
     }
 
+    fun whole(pieces: List<RecordingPiece>, available: Long): Long? {
+        val sorted = pieces.sortedBy { it.start }
+        if (sorted.isEmpty() || sorted.first().start != 0L) return null
+        if (sorted.zipWithNext().any { (a, b) -> a.end != b.start }) return null
+        return minOf(sorted.last().end, available).takeIf { it > 0 }
+    }
+
     fun spoolName(start: Long): String = "%013d%s".format(Locale.ROOT, start, RecordingFiles.EXTENSION)
 
     fun spoolStart(name: String): Long? =
@@ -121,8 +128,16 @@ object RecordingUpload {
     fun retryMillis(attempt: Int): Long = DELAYS[attempt.coerceIn(0, DELAYS.size - 1)]
 }
 
-data class RecordingShareTarget(val host: String, val port: Int?, val share: String, val folder: String) {
+enum class RecordingShareProtocol { SMB, WEBDAV, FTP }
+
+data class RecordingShareTarget(val host: String, val port: Int?, val share: String, val folder: String,
+    val protocol: RecordingShareProtocol = RecordingShareProtocol.SMB, val secure: Boolean = false) {
     fun path(name: String): String = if (folder.isEmpty()) name else "$folder/$name"
+    fun same(other: RecordingShareTarget): Boolean {
+        if (protocol != other.protocol || !host.equals(other.host, true) || port != other.port || secure != other.secure) return false
+        val caseless = protocol == RecordingShareProtocol.SMB
+        return share.equals(other.share, caseless) && folder.equals(other.folder, caseless)
+    }
     override fun toString(): String = "RecordingShareTarget(withheld)"
 }
 
@@ -139,12 +154,95 @@ object RecordingShareAddress {
         val folderText = if (share.isBlank() && rest.isNotEmpty()) (rest.drop(1) + folder).joinToString("/") else folder
         val (host, port) = hostPort(authority) ?: return null
         if (shareName.isEmpty() || shareName.length > 80 || !segment(shareName)) return null
-        val parts = folderText.replace('\\', '/').split('/').map { it.trim() }.filter { it.isNotEmpty() && it != "." }
-        if (parts.any { it == ".." || !segment(it) || it.endsWith('.') }) return null
-        val path = parts.joinToString("/")
-        if (path.length > 200) return null
+        val path = folder(folderText) ?: return null
         return RecordingShareTarget(host, port, shareName, path)
     }
+
+    fun webDav(address: String, folder: String): RecordingShareTarget? {
+        var text = address.trim()
+        val scheme = text.substringBefore("://", "").lowercase()
+        if (scheme.isNotEmpty()) text = text.substringAfter("://")
+        val secure = when (scheme) {
+            "", "http", "dav", "webdav" -> false
+            "https", "davs", "webdavs" -> true
+            else -> return null
+        }
+        text = text.substringBefore('#').substringBefore('?')
+        val (host, port) = hostPort(text.substringBefore('/').substringAfterLast('@')) ?: return null
+        val base = text.substringAfter('/', "").split('/').filter { it.isNotEmpty() }.map { decode(it) ?: return null }
+        if (base.any { it == "." || it == ".." || !segment(it) } || base.joinToString("/").length > 300) return null
+        val path = folder(folder) ?: return null
+        return RecordingShareTarget(host, port, base.joinToString("/"), path, RecordingShareProtocol.WEBDAV, secure)
+    }
+
+    fun ftp(server: String, folder: String, secure: Boolean): RecordingShareTarget? {
+        var text = server.trim()
+        val scheme = text.substringBefore("://", "").lowercase()
+        if (scheme.isNotEmpty()) text = text.substringAfter("://")
+        if (scheme !in setOf("", "ftp", "ftps", "ftpes")) return null
+        text = text.trimStart('/')
+        val (host, port) = hostPort(text.substringBefore('/').substringAfterLast('@')) ?: return null
+        val rest = text.substringAfter('/', "").split('/').filter { it.isNotBlank() }
+        val path = folder((rest + folder).joinToString("/")) ?: return null
+        return RecordingShareTarget(host, port, "", path, RecordingShareProtocol.FTP, secure || scheme != "" && scheme != "ftp")
+    }
+
+    fun address(target: RecordingShareTarget): String {
+        val authority = (if (':' in target.host) "[${target.host}]" else target.host) + (target.port?.let { ":$it" } ?: "")
+        return when (target.protocol) {
+            RecordingShareProtocol.WEBDAV -> (if (target.secure) "https://" else "http://") + authority +
+                target.share.split('/').filter { it.isNotEmpty() }.joinToString("") { "/" + encode(it) }
+            else -> authority
+        }
+    }
+
+    fun url(target: RecordingShareTarget, path: String, collection: Boolean = false): String {
+        val parts = (target.share.split('/') + path.split('/')).filter { it.isNotEmpty() }
+        val root = (if (target.secure) "https://" else "http://") + (if (':' in target.host) "[${target.host}]" else target.host) +
+            (target.port?.let { ":$it" } ?: "")
+        return root + "/" + parts.joinToString("/") { encode(it) } + if (collection && parts.isNotEmpty()) "/" else ""
+    }
+
+    fun label(target: RecordingShareTarget): String = (listOf(target.host) + (if (target.protocol == RecordingShareProtocol.SMB) listOf(target.share) else emptyList()) +
+        target.folder.split('/').filter { it.isNotEmpty() }).joinToString("/")
+
+    fun encode(segment: String): String {
+        val result = StringBuilder()
+        for (byte in segment.toByteArray(Charsets.UTF_8)) {
+            val c = byte.toInt() and 0xff
+            if (c < 0x80 && (c.toChar().isLetterOrDigit() || c.toChar() in "-._~!$&'()*,;=@")) result.append(c.toChar())
+            else result.append('%').append(HEX[c shr 4]).append(HEX[c and 15])
+        }
+        return result.toString()
+    }
+
+    fun decode(segment: String): String? {
+        if ('%' !in segment) return segment
+        val bytes = java.io.ByteArrayOutputStream()
+        var index = 0
+        while (index < segment.length) {
+            val c = segment[index]
+            if (c == '%') {
+                if (index + 2 >= segment.length) return null
+                val value = segment.substring(index + 1, index + 3).toIntOrNull(16) ?: return null
+                bytes.write(value)
+                index += 3
+            } else {
+                bytes.write(c.toString().toByteArray(Charsets.UTF_8))
+                index += 1
+            }
+        }
+        val decoder = Charsets.UTF_8.newDecoder()
+        return try { decoder.decode(java.nio.ByteBuffer.wrap(bytes.toByteArray())).toString() } catch (_: java.nio.charset.CharacterCodingException) { null }
+    }
+
+    private fun folder(text: String): String? {
+        val parts = text.replace('\\', '/').split('/').map { it.trim() }.filter { it.isNotEmpty() && it != "." }
+        if (parts.any { it == ".." || !segment(it) || it.endsWith('.') }) return null
+        return parts.joinToString("/").takeIf { it.length <= 200 }
+    }
+
+    private const val HEX = "0123456789ABCDEF"
 
     private fun hostPort(text: String): Pair<String, Int?>? {
         if (text.isEmpty() || text.length > 260) return null

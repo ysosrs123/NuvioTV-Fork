@@ -22,6 +22,8 @@ class FakeShare : IptvShareConnector {
     @Volatile var free = Long.MAX_VALUE
     @Volatile var readOnly = false
     @Volatile var refusal: IptvShareError? = null
+    @Volatile var append = true
+    val totals = ArrayList<Long>()
     var connects = 0
     var flushes = 0
 
@@ -37,6 +39,14 @@ class FakeShare : IptvShareConnector {
     private fun check() { if (down) throw IptvShareException(IptvShareError.DISCONNECTED) }
 
     private inner class Session : IptvShareSession {
+        override val append: Boolean get() = this@FakeShare.append
+        override fun openWrite(path: String, total: Long): IptvShareFile = synchronized(this@FakeShare) {
+            check()
+            if (readOnly) throw IptvShareException(IptvShareError.ACCESS_DENIED)
+            totals += total
+            files[path] = ByteArray(0)
+            Handle(path)
+        }
         override fun length(path: String): Long? = synchronized(this@FakeShare) { check(); files[path]?.size?.toLong() }
         override fun openWrite(path: String): IptvShareFile = synchronized(this@FakeShare) {
             check()
@@ -215,6 +225,44 @@ class IptvRecordingUploaderTest {
         assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 0), result)
         assertEquals(0, share.connects)
         assertTrue(share.files.isEmpty())
+    }
+
+    @Test fun wholeFileTargetsWaitForTheEndAndRestartFromZeroAfterAFailure() = runBlocking {
+        val share = FakeShare().apply { append = false }
+        val a = bytes(300, 9)
+        val b = bytes(150, 10)
+        val dir = spool(a, b)
+        var polls = 0
+        var early = false
+        val uploader = IptvRecordingUploader(share, pause = {
+            polls += 1
+            if (polls < 3 && share.files.isNotEmpty()) early = true
+            if (polls == 3) share.writesBeforeDrop = 4
+            if (polls > 3) { share.down = false; share.writesBeforeDrop = -1 }
+        }, now = { 0L }, chunkBytes = 64, minimumFreeBytes = 0)
+        val result = uploader.upload(dir, "w.ts", { Long.MAX_VALUE }, { polls >= 3 }, 60_000)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 450), result)
+        assertFalse(early)
+        assertArrayEquals(a + b, share.text("w.ts"))
+        assertNull(share.text("w.ts.part"))
+        assertEquals(listOf(450L, 450L), share.totals)
+        assertFalse(dir.exists())
+    }
+
+    @Test fun wholeFileWithAGapIsLostAndPatienceStillApplies() = runBlocking {
+        val share = FakeShare().apply { append = false }
+        val dir = temp.newFolder()
+        File(dir, RecordingUpload.spoolName(0)).writeBytes(bytes(100, 11))
+        File(dir, RecordingUpload.spoolName(200)).writeBytes(bytes(100, 12))
+        assertEquals(IptvUploadResult.LOST, uploader(share).upload(dir, "g.ts", { Long.MAX_VALUE }, { true }, 60_000).result)
+        val kept = spool(bytes(100, 13))
+        share.writesBeforeDrop = 0
+        val clock = AtomicLong()
+        val pending = IptvRecordingUploader(share, pause = { clock.addAndGet(it); share.down = false }, now = { clock.get() }, chunkBytes = 64, minimumFreeBytes = 0)
+            .upload(kept, "k.ts", { Long.MAX_VALUE }, { true }, 20_000)
+        assertEquals(IptvUploadResult.PENDING, pending.result)
+        assertTrue(clock.get() >= 20_000)
+        assertTrue(File(kept, RecordingUpload.spoolName(0)).exists())
     }
 
     @Test fun fullShareWaitsWithoutWriting() = runBlocking {

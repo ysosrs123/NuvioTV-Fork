@@ -69,6 +69,41 @@ class IptvRecordingUploader(
                     }
                     if (end == null) return@withContext IptvUploadOutcome(IptvUploadResult.LOST, 0, IptvShareError.LOST)
                 }
+                if (!session.append) {
+                    if (!finished()) {
+                        quietly(session)
+                        session = null
+                        while (!finished()) pause(pollMillis)
+                        continue
+                    }
+                    val local = pieces(spool)
+                    val total = RecordingUpload.whole(local.map { it.piece }, committed())
+                        ?: return@withContext IptvUploadOutcome(IptvUploadResult.LOST, 0, IptvShareError.LOST)
+                    checkFree(session, local, 0)
+                    val output = session.openWrite(partial, total).also { file = it }
+                    var size = 0L
+                    uploaded = 0
+                    for (source in local) {
+                        var offset = 0L
+                        while (offset < source.piece.length && size < total) {
+                            currentCoroutineContext().ensureActive()
+                            val count = read(source.file, offset, buffer, minOf(chunkBytes.toLong(), source.piece.length - offset, total - size).toInt())
+                            if (count <= 0) throw IptvShareException(IptvShareError.LOST)
+                            output.write(size, buffer, 0, count)
+                            size += count
+                            offset += count
+                            uploaded = size
+                        }
+                    }
+                    output.flush()
+                    if (output.length != total) throw IOException("Remote size mismatch")
+                    output.close()
+                    file = null
+                    session.rename(partial, remote, true)
+                    spool.deleteRecursively()
+                    uploaded = total
+                    return@withContext IptvUploadOutcome(IptvUploadResult.DONE, total)
+                }
                 val output = session.openWrite(partial).also { file = it }
                 var size = output.length
                 uploaded = size

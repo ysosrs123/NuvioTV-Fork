@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_network_location">Network location</string>
+    <string name="iptv_network_subtitle">Record to a NAS or computer over SMB, WebDAV or FTP. Recordings are saved on this device first and copied across.</string>
+    <string name="iptv_network_protocol">Connection type</string>
+    <string name="iptv_network_smb" translatable="false">SMB</string>
+    <string name="iptv_network_webdav" translatable="false">WebDAV</string>
+    <string name="iptv_network_ftp" translatable="false">FTP</string>
+    <string name="iptv_network_webdav_address">Address</string>
+    <string name="iptv_network_webdav_address_hint">The WebDAV address, for example https://nas.local:5006/recordings</string>
+    <string name="iptv_network_webdav_folder_hint">A folder under the address, for example TV/Live. It is created if missing.</string>
+    <string name="iptv_network_ftp_server_hint">Name or IP address, for example nas.local. Add :port only if the server uses a port other than 21.</string>
+    <string name="iptv_network_ftp_folder_hint">A folder in the login folder, for example TV/Live. It is created if missing.</string>
+    <string name="iptv_network_ftp_secure">Secure (explicit TLS)</string>
+    <string name="iptv_network_ftp_secure_subtitle">Encrypts the login and recordings. The server must support FTPS.</string>
+    <string name="iptv_network_username_hint">Leave empty to connect without signing in</string>
+    <string name="iptv_network_plain_warning">This connection is not encrypted. Others on the network could see the password.</string>
+    <string name="iptv_network_invalid">Check the address and folder names. They cannot contain &lt; &gt; : \" | ? *</string>
+    <string name="iptv_network_address_not_found">Nothing was found at this address. Check the path after the server name.</string>
+    <string name="iptv_network_certificate_untrusted">The server\'s certificate could not be verified. If it is your NAS\'s own certificate, compare the fingerprint with the one shown on the NAS before trusting it.</string>
+    <string name="iptv_network_certificate_fingerprint">SHA-256 fingerprint: %1$s</string>
+    <string name="iptv_network_trust">Trust this certificate</string>
+    <string name="iptv_network_no_tls">The server does not offer encryption. Turn off Secure, or enable FTPS on the server.</string>
+    <string name="iptv_network_tls_reuse">The server requires TLS session reuse on data connections, which is not supported. Turn that requirement off on the server.</string>
+</resources>

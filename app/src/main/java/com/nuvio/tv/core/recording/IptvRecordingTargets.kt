@@ -8,15 +8,18 @@ import com.nuvio.tv.core.iptv.RecordingFiles
 import com.nuvio.tv.core.iptv.RecordingLocations
 import com.nuvio.tv.core.iptv.RecordingMounts
 import com.nuvio.tv.core.iptv.RecordingParts
+import com.nuvio.tv.core.iptv.RecordingShareProtocol
 import com.nuvio.tv.core.iptv.RecordingShareTarget
 import com.nuvio.tv.data.iptv.AndroidIptvSecretBox
 import com.nuvio.tv.data.iptv.EnvelopeIptvSecretBox
+import com.nuvio.tv.data.iptv.IptvFtpConnector
 import com.nuvio.tv.data.iptv.IptvLivePreferences
 import com.nuvio.tv.data.iptv.IptvLog
 import com.nuvio.tv.data.iptv.IptvRecordingShareStore
 import com.nuvio.tv.data.iptv.IptvShareConnector
 import com.nuvio.tv.data.iptv.IptvShareSettings
 import com.nuvio.tv.data.iptv.IptvSmbConnector
+import com.nuvio.tv.data.iptv.IptvWebDavConnector
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.FileOutputStream
@@ -119,11 +122,17 @@ class IptvRecordingTargets @Inject constructor(@ApplicationContext private val c
 
     fun connector(settings: IptvShareSettings): IptvShareConnector? {
         val password = try { shares.password() } catch (error: Exception) { IptvLog.failure("share password", error); return null } ?: return null
-        return IptvSmbConnector(settings, password)
+        return create(settings, password)
     }
 
-    fun connector(target: RecordingShareTarget, username: String, domain: String, guest: Boolean, password: String): IptvShareConnector =
-        IptvSmbConnector(IptvShareSettings(target, username.trim(), domain.trim(), guest, PROBE_ID), password)
+    fun connector(target: RecordingShareTarget, username: String, domain: String, guest: Boolean, password: String, pin: String? = null): IptvShareConnector =
+        create(IptvShareSettings(target, username.trim(), domain.trim(), guest, PROBE_ID, pin), password)
+
+    private fun create(settings: IptvShareSettings, password: String): IptvShareConnector = when (settings.target.protocol) {
+        RecordingShareProtocol.SMB -> IptvSmbConnector(settings, password)
+        RecordingShareProtocol.WEBDAV -> IptvWebDavConnector(settings, password)
+        RecordingShareProtocol.FTP -> IptvFtpConnector(settings, password)
+    }
 
     fun preferred(): IptvPlaceResult {
         val choice = preferences.recordLocation
