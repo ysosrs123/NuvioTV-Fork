@@ -50,9 +50,11 @@ class IptvRecordingService : Service() {
             return START_NOT_STICKY
         }
         if (id != null) recorder.begin(id)
+        holdAwake()
         if (observing == null) observing = scope.launch {
             recorder.changes.collect {
                 if (recorder.running.value.isEmpty()) {
+                    releaseAwake()
                     ServiceCompat.stopForeground(this@IptvRecordingService, ServiceCompat.STOP_FOREGROUND_REMOVE)
                     stopSelf(lastStartId)
                 } else {
@@ -86,7 +88,29 @@ class IptvRecordingService : Service() {
         stopSelf()
     }
 
+    private var wakeLock: android.os.PowerManager.WakeLock? = null
+    private var wifiLock: android.net.wifi.WifiManager.WifiLock? = null
+
+    private fun holdAwake() {
+        if (wakeLock?.isHeld != true) wakeLock = runCatching {
+            getSystemService(android.os.PowerManager::class.java)?.newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "nuvio:iptv-recording")
+                ?.apply { setReferenceCounted(false); acquire(WAKE_LIMIT_MS) }
+        }.onFailure { IptvLog.failure("recording wake lock", it) }.getOrNull()
+        if (wifiLock?.isHeld != true) wifiLock = runCatching {
+            @Suppress("DEPRECATION")
+            applicationContext.getSystemService(android.net.wifi.WifiManager::class.java)
+                ?.createWifiLock(android.net.wifi.WifiManager.WIFI_MODE_FULL_HIGH_PERF, "nuvio:iptv-recording")
+                ?.apply { setReferenceCounted(false); acquire() }
+        }.onFailure { IptvLog.failure("recording wifi lock", it) }.getOrNull()
+    }
+
+    private fun releaseAwake() {
+        runCatching { wakeLock?.takeIf { it.isHeld }?.release() }; wakeLock = null
+        runCatching { wifiLock?.takeIf { it.isHeld }?.release() }; wifiLock = null
+    }
+
     override fun onDestroy() {
+        releaseAwake()
         observing?.cancel()
         scope.cancel()
         if (::recorder.isInitialized && recorder.running.value.isNotEmpty()) recorder.stopAll(RecordingStop.INTERRUPTED)
@@ -118,6 +142,7 @@ class IptvRecordingService : Service() {
     companion object {
         private const val CHANNEL_ID = "iptv_recording"
         private const val NOTIFICATION_ID = 9530
+        private const val WAKE_LIMIT_MS = 7 * 60 * 60 * 1000L
 
         fun intent(context: Context, id: String): Intent =
             Intent(context, IptvRecordingService::class.java).putExtra(IptvRecordingAlarms.EXTRA_ID, id)

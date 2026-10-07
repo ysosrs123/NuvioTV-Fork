@@ -130,7 +130,8 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   Files stay on the device (app storage) and are removed with the profile. A recording
   needs room for about 2.5 GB per hour plus a 500 MB reserve. Scheduled recordings use
   exact alarms (granted at install on Android 13 and later), survive restarts and are
-  re-armed after a reboot.
+  re-armed after a reboot. While recording, the box is kept awake (CPU and Wi-Fi), so a
+  recording carries on when the TV is switched off and the box goes to standby.
 - Phone or computer setup: Live TV sources has "Set up from phone or computer", which
   shows a QR code, an address and a six-digit code. A phone or computer on the home
   network can add or edit playlists, Xtream accounts, Stalker portals and guides with a
