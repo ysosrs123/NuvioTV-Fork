@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Všetky zdroje</string>
+    <string name="iptv_all_sources_favourites">Obľúbené zo všetkých zdrojov</string>
+    <string name="iptv_density">Hustota programu</string>
+    <string name="iptv_density_subtitle">Koľko kanálov sa zmestí na obrazovku</string>
+    <string name="iptv_density_comfortable">Pohodlná</string>
+    <string name="iptv_density_comfortable_description">Väčšie riadky a logá s časmi relácií</string>
+    <string name="iptv_density_compact">Kompaktná</string>
+    <string name="iptv_density_compact_description">Menšie riadky a logá, aby sa zmestilo viac kanálov</string>
+    <string name="iptv_inset_show">Zobraziť v rohu</string>
+    <string name="iptv_inset_show_subtitle">Ponechá %1$s na celej obrazovke a tento kanál v malom obraze</string>
+    <string name="iptv_inset_swap">Vymeniť s obrazom v rohu</string>
+    <string name="iptv_inset_close">Zavrieť obraz v rohu</string>
+    <string name="iptv_inset_hint">Žlté tlačidlo vymení obrazy, Späť zavrie obraz v rohu</string>
+    <string name="iptv_inset_unsupported">Tento TV box dokáže prehrávať naraz len jeden kanál.</string>
+    <string name="iptv_inset_decoder">Tento TV box nedokáže dekódovať druhý obraz popri tomto kanáli.</string>
+    <string name="iptv_inset_capacity">Účet nemá voľné pripojenie. Ak to tarifa dovoľuje, zvýšte počet pripojení účtu v Zdrojoch živej TV.</string>
+    <string name="iptv_move_channel">Presunúť kanál</string>
+    <string name="iptv_move_channel_subtitle">Zmeniť miesto kanála v zozname</string>
+    <string name="iptv_move_channel_title">Presúva sa %1$s</string>
+    <string name="iptv_move_key_step">▲▼ O jedno miesto</string>
+    <string name="iptv_move_key_top">◀ Na začiatok</string>
+    <string name="iptv_move_key_bottom">▶ Na koniec</string>
+    <string name="iptv_move_key_done">OK alebo Späť: hotovo</string>
+    <string name="iptv_move_moved_bottom">Presunuté na koniec zoznamu</string>
+    <string name="iptv_move_category">Presunúť kategóriu</string>
+    <string name="iptv_move_category_subtitle">Zmeniť miesto kategórie v menu</string>
+    <string name="iptv_move_category_keys">▲▼ o jedno miesto · ◀ na začiatok · ▶ na koniec · OK alebo Späť: hotovo</string>
+    <string name="iptv_multiview_layout_side">Vedľa seba</string>
+    <string name="iptv_multiview_layout_one_over_two">Jeden nad dvoma</string>
+    <string name="iptv_multiview_layout_description">Vedľa seba zobrazí dva obrazy. Jeden veľký a Jeden nad dvoma použijú obraz zvolený cez Zobraziť veľký.</string>
+    <string name="iptv_scrub_behind">%1$s pozadu</string>
+    <string name="iptv_scrub_live_edge">Naživo %1$s</string>
+    <string name="iptv_scrub_hint">Vľavo a vpravo posun o 30 sekúnd, podržaním rýchlejšie</string>
+    <string name="iptv_scrub_deck_hint">Hore na časovú os a prechádzajte staršie relácie</string>
+    <string name="iptv_scrub_banner_hint">Vľavo a vpravo prechádzate relácie, hore a dole meníte kanál</string>
+</resources>

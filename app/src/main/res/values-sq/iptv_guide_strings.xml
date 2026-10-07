@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Të gjitha burimet</string>
+    <string name="iptv_all_sources_favourites">Të preferuarat nga të gjitha burimet</string>
+    <string name="iptv_density">Dendësia e udhëzuesit</string>
+    <string name="iptv_density_subtitle">Sa kanale nxë ekrani</string>
+    <string name="iptv_density_comfortable">E rehatshme</string>
+    <string name="iptv_density_comfortable_description">Rreshta dhe logo më të mëdha me oraret e programeve</string>
+    <string name="iptv_density_compact">Kompakte</string>
+    <string name="iptv_density_compact_description">Rreshta dhe logo më të vogla që të nxërë më shumë kanale</string>
+    <string name="iptv_inset_show">Shfaq në cep</string>
+    <string name="iptv_inset_show_subtitle">Mban %1$s në ekran të plotë me këtë kanal në një pamje të vogël</string>
+    <string name="iptv_inset_swap">Ndërro me pamjen në cep</string>
+    <string name="iptv_inset_close">Mbyll pamjen në cep</string>
+    <string name="iptv_inset_hint">Butoni i verdhë ndërron pamjet, Prapa mbyll pamjen në cep</string>
+    <string name="iptv_inset_unsupported">Ky TV box mund të luajë vetëm një kanal njëherësh.</string>
+    <string name="iptv_inset_decoder">Ky TV box nuk mund të dekodojë një pamje të dytë pranë këtij kanali.</string>
+    <string name="iptv_inset_capacity">Nuk ka lidhje të lirë për këtë llogari. Rrit lidhjet e llogarisë te Burimet e TV-së live nëse paketa jote e lejon.</string>
+    <string name="iptv_move_channel">Zhvendos kanalin</string>
+    <string name="iptv_move_channel_subtitle">Ndrysho vendin e këtij kanali në listë</string>
+    <string name="iptv_move_channel_title">Duke zhvendosur %1$s</string>
+    <string name="iptv_move_key_step">▲▼ Një vend</string>
+    <string name="iptv_move_key_top">◀ Në krye</string>
+    <string name="iptv_move_key_bottom">▶ Në fund</string>
+    <string name="iptv_move_key_done">OK ose Prapa: u krye</string>
+    <string name="iptv_move_moved_bottom">U zhvendos në fund të listës</string>
+    <string name="iptv_move_category">Zhvendos kategorinë</string>
+    <string name="iptv_move_category_subtitle">Ndrysho vendin e kësaj kategorie në menu</string>
+    <string name="iptv_move_category_keys">▲▼ një vend · ◀ në krye · ▶ në fund · OK ose Prapa: u krye</string>
+    <string name="iptv_multiview_layout_side">Krah për krah</string>
+    <string name="iptv_multiview_layout_one_over_two">Një mbi dy</string>
+    <string name="iptv_multiview_layout_description">Krah për krah shfaq dy pamje. Një e madhe dhe Një mbi dy përdorin pamjen e zgjedhur me Shfaq të madhe.</string>
+    <string name="iptv_scrub_behind">%1$s pas</string>
+    <string name="iptv_scrub_live_edge">Live %1$s</string>
+    <string name="iptv_scrub_hint">Majtas dhe djathtas lëvizin 30 sekonda, mbaj shtypur për të lëvizur më shpejt</string>
+    <string name="iptv_scrub_deck_hint">Lart te vija kohore për të kaluar nëpër programet e mëparshme</string>
+    <string name="iptv_scrub_banner_hint">Majtas dhe djathtas kalojnë nëpër programe, lart dhe poshtë ndërrojnë kanalin</string>
+</resources>

@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Все источники</string>
+    <string name="iptv_all_sources_favourites">Избранное из всех источников</string>
+    <string name="iptv_density">Плотность телепрограммы</string>
+    <string name="iptv_density_subtitle">Сколько каналов помещается на экране</string>
+    <string name="iptv_density_comfortable">Просторно</string>
+    <string name="iptv_density_comfortable_description">Крупные строки и логотипы со временем передач</string>
+    <string name="iptv_density_compact">Компактно</string>
+    <string name="iptv_density_compact_description">Мелкие строки и логотипы, чтобы помещалось больше каналов</string>
+    <string name="iptv_inset_show">Показать в углу</string>
+    <string name="iptv_inset_show_subtitle">%1$s остаётся на весь экран, а этот канал — в маленьком окне</string>
+    <string name="iptv_inset_swap">Поменять с окном в углу</string>
+    <string name="iptv_inset_close">Закрыть окно в углу</string>
+    <string name="iptv_inset_hint">Жёлтая кнопка меняет окна местами, «Назад» закрывает окно в углу</string>
+    <string name="iptv_inset_unsupported">Эта приставка может воспроизводить только один канал за раз.</string>
+    <string name="iptv_inset_decoder">Эта приставка не может декодировать второе окно рядом с этим каналом.</string>
+    <string name="iptv_inset_capacity">Нет свободного подключения для этого аккаунта. Увеличьте число подключений в источниках ТВ-эфира, если позволяет тариф.</string>
+    <string name="iptv_move_channel">Переместить канал</string>
+    <string name="iptv_move_channel_subtitle">Изменить положение канала в списке</string>
+    <string name="iptv_move_channel_title">Перемещение: %1$s</string>
+    <string name="iptv_move_key_step">▲▼ На одну позицию</string>
+    <string name="iptv_move_key_top">◀ В начало</string>
+    <string name="iptv_move_key_bottom">▶ В конец</string>
+    <string name="iptv_move_key_done">OK или «Назад»: готово</string>
+    <string name="iptv_move_moved_bottom">Перемещено в конец списка</string>
+    <string name="iptv_move_category">Переместить категорию</string>
+    <string name="iptv_move_category_subtitle">Изменить положение категории в меню</string>
+    <string name="iptv_move_category_keys">▲▼ на одну позицию · ◀ в начало · ▶ в конец · OK или «Назад»: готово</string>
+    <string name="iptv_multiview_layout_side">Рядом</string>
+    <string name="iptv_multiview_layout_one_over_two">Одно над двумя</string>
+    <string name="iptv_multiview_layout_description">«Рядом» показывает два окна. «Одно крупное» и «Одно над двумя» используют окно, выбранное через «Показать крупно».</string>
+    <string name="iptv_scrub_behind">Отставание %1$s</string>
+    <string name="iptv_scrub_live_edge">Эфир %1$s</string>
+    <string name="iptv_scrub_hint">Влево и вправо — на 30 секунд, удерживайте для ускорения</string>
+    <string name="iptv_scrub_deck_hint">Вверх к шкале времени, чтобы перейти к прошедшим передачам</string>
+    <string name="iptv_scrub_banner_hint">Влево и вправо — по передачам, вверх и вниз — смена канала</string>
+</resources>

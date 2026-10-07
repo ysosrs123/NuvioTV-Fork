@@ -1,0 +1,37 @@
+<resources>
+    <string name="iptv_all_sources">Toate sursele</string>
+    <string name="iptv_all_sources_favourites">Favorite din toate sursele</string>
+    <string name="iptv_density">Densitatea ghidului</string>
+    <string name="iptv_density_subtitle">Câte canale încap pe ecran</string>
+    <string name="iptv_density_comfortable">Confortabil</string>
+    <string name="iptv_density_comfortable_description">Rânduri și logouri mai mari, cu orele programelor</string>
+    <string name="iptv_density_compact">Compact</string>
+    <string name="iptv_density_compact_description">Rânduri și logouri mai mici, ca să încapă mai multe canale</string>
+    <string name="iptv_inset_show">Afișează în colț</string>
+    <string name="iptv_inset_show_subtitle">Păstrează %1$s pe tot ecranul, cu acest canal într-o imagine mică</string>
+    <string name="iptv_inset_swap">Schimbă cu imaginea din colț</string>
+    <string name="iptv_inset_close">Închide imaginea din colț</string>
+    <string name="iptv_inset_hint">Butonul galben schimbă imaginile, Înapoi închide imaginea din colț</string>
+    <string name="iptv_inset_unsupported">Acest TV box poate reda un singur canal o dată.</string>
+    <string name="iptv_inset_decoder">Acest TV box nu poate decoda o a doua imagine lângă acest canal.</string>
+    <string name="iptv_inset_capacity">Nicio conexiune liberă pentru acest cont. Mărește numărul de conexiuni ale contului în Surse TV live, dacă abonamentul permite.</string>
+    <string name="iptv_move_channel">Mută canalul</string>
+    <string name="iptv_move_channel_subtitle">Schimbă locul canalului în listă</string>
+    <string name="iptv_move_channel_title">Se mută %1$s</string>
+    <string name="iptv_move_key_step">▲▼ O poziție</string>
+    <string name="iptv_move_key_top">◀ Sus de tot</string>
+    <string name="iptv_move_key_bottom">▶ Jos de tot</string>
+    <string name="iptv_move_key_done">OK sau Înapoi: gata</string>
+    <string name="iptv_move_moved_bottom">Mutat la sfârșitul listei</string>
+    <string name="iptv_move_category">Mută categoria</string>
+    <string name="iptv_move_category_subtitle">Schimbă locul categoriei în meniu</string>
+    <string name="iptv_move_category_keys">▲▼ o poziție · ◀ sus de tot · ▶ jos de tot · OK sau Înapoi: gata</string>
+    <string name="iptv_multiview_layout_side">Una lângă alta</string>
+    <string name="iptv_multiview_layout_one_over_two">Una peste două</string>
+    <string name="iptv_multiview_layout_description">Una lângă alta afișează două imagini. Una mare și Una peste două folosesc imaginea aleasă cu Afișează mare.</string>
+    <string name="iptv_scrub_behind">%1$s în urmă</string>
+    <string name="iptv_scrub_live_edge">Live %1$s</string>
+    <string name="iptv_scrub_hint">Stânga și dreapta mută cu 30 de secunde, ține apăsat pentru a merge mai repede</string>
+    <string name="iptv_scrub_deck_hint">Sus la cronologie pentru a parcurge programele anterioare</string>
+    <string name="iptv_scrub_banner_hint">Stânga și dreapta parcurg programele, sus și jos schimbă canalul</string>
+</resources>

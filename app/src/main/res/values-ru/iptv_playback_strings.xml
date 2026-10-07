@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">Провайдер отклонил этот канал. Проверьте подписку и повторите попытку.</string>
+    <string name="iptv_playback_missing">Этот канал больше не доступен у провайдера.</string>
+    <string name="iptv_playback_unsupported">Формат этого канала не поддерживается на этом устройстве.</string>
+    <string name="iptv_playback_decoder">Не удалось запустить видеодекодер. Закройте другие окна и повторите попытку.</string>
+</resources>

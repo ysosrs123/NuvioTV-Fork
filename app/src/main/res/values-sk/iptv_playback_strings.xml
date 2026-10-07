@@ -1,0 +1,6 @@
+<resources>
+    <string name="iptv_playback_denied">Poskytovateľ tento kanál odmietol. Skontrolujte predplatné a skúste to znova.</string>
+    <string name="iptv_playback_missing">Tento kanál už u poskytovateľa nie je dostupný.</string>
+    <string name="iptv_playback_unsupported">Formát tohto kanála sa v tomto zariadení nedá prehrať.</string>
+    <string name="iptv_playback_decoder">Videodekodér sa nepodarilo spustiť. Zatvorte ostatné obrazy a skúste to znova.</string>
+</resources>
