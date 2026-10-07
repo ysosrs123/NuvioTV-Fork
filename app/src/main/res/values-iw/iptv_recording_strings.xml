@@ -1,0 +1,74 @@
+<resources>
+    <string name="iptv_recording_channel">הקלטות</string>
+    <string name="iptv_recording_channel_description">מוצג בזמן הקלטת תוכניות מטלוויזיה חיה</string>
+    <string name="iptv_recording_notification_title">הקלטת טלוויזיה חיה</string>
+    <string name="iptv_recording_notification_starting">ההקלטה מתחילה…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">תוכנית אחת</item>
+        <item quantity="two">שתי תוכניות</item>
+        <item quantity="many">%1$d תוכניות</item>
+        <item quantity="other">%1$d תוכניות</item>
+    </plurals>
+
+    <string name="iptv_recording_record">הקלטה</string>
+    <string name="iptv_recording_record_now">הקלטה עכשיו</string>
+    <string name="iptv_recording_record_programme">הקלטת התוכנית הזו</string>
+    <string name="iptv_recording_started">ההקלטה התחילה</string>
+    <string name="iptv_recording_scheduled">ההקלטה תוזמנה</string>
+    <string name="iptv_recordings_open">הקלטות</string>
+
+    <string name="iptv_recordings_title">הקלטות</string>
+    <string name="iptv_recordings_description">תוכניות שהוקלטו או תוזמנו מטלוויזיה חיה. ההקלטות נשמרות במכשיר הזה ושייכות לפרופיל הזה.</string>
+    <string name="iptv_recordings_hint">יש ללחוץ על OK להפעלת הקלטה. לחיצה ארוכה על OK או על תפריט לאפשרויות נוספות.</string>
+    <string name="iptv_recordings_free">%1$s פנויים במכשיר הזה</string>
+    <string name="iptv_recordings_empty">עדיין אין הקלטות. אפשר להקליט תוכנית ממדריך הטלוויזיה החיה או בזמן צפייה.</string>
+    <string name="iptv_recordings_group_now">מוקלט עכשיו</string>
+    <string name="iptv_recordings_group_scheduled">מתוזמנות</string>
+    <string name="iptv_recordings_group_recorded">הוקלטו</string>
+
+    <string name="iptv_recording_status_scheduled">מתוזמנת</string>
+    <string name="iptv_recording_status_recording">בהקלטה</string>
+    <string name="iptv_recording_status_done">הוקלטה</string>
+    <string name="iptv_recording_status_partial">הוקלטה חלקית</string>
+    <string name="iptv_recording_status_failed">נכשלה</string>
+    <string name="iptv_recording_status_cancelled">בוטלה</string>
+    <string name="iptv_recording_gaps">יש קטעים חסרים</string>
+
+    <string name="iptv_recording_failure_no_connection">אין חיבור פנוי בחשבון הזה</string>
+    <string name="iptv_recording_failure_device_busy">המכשיר עסוק בשידורים אחרים</string>
+    <string name="iptv_recording_failure_source">לא ניתן היה להגיע למקור</string>
+    <string name="iptv_recording_failure_channel">הערוץ כבר לא זמין</string>
+    <string name="iptv_recording_failure_unsupported">לא ניתן להקליט את פורמט השידור הזה</string>
+    <string name="iptv_recording_failure_encrypted">לא ניתן להקליט שידורים מוצפנים</string>
+    <string name="iptv_recording_failure_network">השידור נקטע</string>
+    <string name="iptv_recording_failure_low_storage">האחסון כמעט מלא</string>
+    <string name="iptv_recording_failure_storage">לא ניתן היה לשמור את ההקלטה</string>
+    <string name="iptv_recording_failure_time_limit">ההקלטה הגיעה למגבלת הזמן</string>
+    <string name="iptv_recording_failure_interrupted">האפליקציה או המכשיר נעצרו במהלך ההקלטה</string>
+    <string name="iptv_recording_failure_start_blocked">Android לא אפשר להתחיל את ההקלטה. יש לאשר התראות ותזכורות ל-Nuvio, או להשאיר את Nuvio פתוחה.</string>
+    <string name="iptv_recording_failure_missed">התוכנית הסתיימה לפני שההקלטה התחילה</string>
+
+    <string name="iptv_recording_refused_conflict">הקלטות אחרות כבר משתמשות בכל החיבורים של החשבון בזמן הזה</string>
+    <string name="iptv_recording_refused_no_connection">אין חיבור פנוי בחשבון הזה. יש להפסיק קודם לצפות או להקליט ערוץ אחר.</string>
+    <string name="iptv_recording_refused_storage">אין מספיק אחסון פנוי להקלטה הזו. יש להקצות כ-2.5 GB לכל שעת HD, ו-500 MB תמיד נשמרים פנויים למכשיר. אפשר למחוק הקלטות ישנות או לפנות מקום.</string>
+    <string name="iptv_recording_refused_ended">התוכנית הזו כבר הסתיימה</string>
+    <string name="iptv_recording_refused_channel">לא ניתן להקליט את הערוץ הזה כרגע</string>
+    <string name="iptv_recording_refused_duplicate">הערוץ הזה כבר מוקלט בזמן הזה</string>
+    <string name="iptv_recording_refused_full">רשימת ההקלטות מלאה. יש למחוק קודם כמה הקלטות.</string>
+    <string name="iptv_recording_refused_profile">הפרופיל השתנה. כדאי לנסות שוב.</string>
+    <string name="iptv_recording_refused_exact_alarms">הקלטות מתוזמנות דורשות הרשאת התראות ותזכורות. יש לאשר אותה ל-Nuvio, או להקליט בזמן צפייה.</string>
+    <string name="iptv_recording_alarm_settings">אישור התראות ותזכורות</string>
+
+    <string name="iptv_recording_play">הפעלה</string>
+    <string name="iptv_recording_stop">עצירת ההקלטה</string>
+    <string name="iptv_recording_cancel">ביטול ההקלטה</string>
+    <string name="iptv_recording_delete">מחיקת ההקלטה</string>
+    <string name="iptv_recording_delete_title">למחוק את \"%1$s\"?</string>
+    <string name="iptv_recording_delete_description">ההקלטה והקובץ שלה יוסרו מהמכשיר הזה.</string>
+    <string name="iptv_recording_delete_confirm">מחיקה</string>
+    <string name="iptv_recording_keep">השארה</string>
+    <string name="iptv_recording_file_missing">קובץ ההקלטה כבר לא נמצא במכשיר הזה</string>
+    <string name="iptv_recording_paused">מושהה</string>
+    <string name="iptv_recording_playback_failed">לא ניתן להפעיל את ההקלטה. ייתכן שהקובץ לא שלם או בפורמט שהמכשיר לא יכול לפענח.</string>
+    <string name="iptv_recording_skip_hint">שמאלה וימינה לדילוג של 30 שניות</string>
+</resources>

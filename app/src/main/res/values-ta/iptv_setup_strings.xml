@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">போன் அல்லது கணினியிலிருந்து அமை</string>
+    <string name="iptv_remote_entry_subtitle">முகவரிகளையும் உள்நுழைவுகளையும் சரியான விசைப்பலகையில் தட்டச்சு செய்யுங்கள்</string>
+    <string name="iptv_remote_title">உங்கள் போனிலிருந்து அமை</string>
+    <string name="iptv_remote_description">உங்கள் போனில் QR குறியீட்டை ஸ்கேன் செய்யவும், அல்லது அதே நெட்வொர்க்கில் உள்ள கணினியில் முகவரியைத் திறக்கவும். பிறகு இங்கே காட்டப்படும் இணைப்புக் குறியீட்டை உள்ளிடவும்.</string>
+    <string name="iptv_remote_code">இணைப்புக் குறியீடு</string>
+    <string name="iptv_remote_address">அல்லது இந்த முகவரியைத் திறக்கவும்</string>
+    <string name="iptv_remote_qr_description">போன் அமைப்புக்கான QR குறியீடு</string>
+    <string name="iptv_remote_home_network">இதை உங்கள் வீட்டு நெட்வொர்க்கில் மட்டும் பயன்படுத்தவும். அமைப்புப் பக்கம் குறியாக்கம் செய்யப்படவில்லை.</string>
+    <string name="iptv_remote_idle_note">இந்தத் திரையை விட்டு வெளியேறும்போது, அல்லது 10 நிமிடங்கள் செயல்பாடு இல்லாவிட்டால் நின்றுவிடும்.</string>
+    <string name="iptv_remote_confirm_note">இங்கே டிவியில் நீங்கள் உறுதிப்படுத்தும்வரை எதுவும் சேமிக்கப்படாது. மூலங்களையும் வழிகாட்டிகளையும் டிவியில் மட்டுமே நீக்க முடியும்.</string>
+    <string name="iptv_remote_starting">போன் அமைப்பு தொடங்குகிறது…</string>
+    <string name="iptv_remote_waiting">போன் அல்லது கணினிக்காகக் காத்திருக்கிறது</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d சாதனம் இணைக்கப்பட்டுள்ளது</item>
+        <item quantity="other">%d சாதனங்கள் இணைக்கப்பட்டுள்ளன</item>
+    </plurals>
+    <string name="iptv_remote_no_network">உங்கள் போனிலிருந்து அமைக்க, டிவியை வீட்டு நெட்வொர்க்குடன் இணைக்கவும்.</string>
+    <string name="iptv_remote_not_home_network">டிவி தனிப்பட்ட வீட்டு நெட்வொர்க் முகவரியில் இல்லை, எனவே போன் அமைப்பு முடக்கப்பட்டுள்ளது.</string>
+    <string name="iptv_remote_ports_busy">நெட்வொர்க் போர்ட்கள் பயன்பாட்டில் இருப்பதால் போன் அமைப்பைத் தொடங்க முடியவில்லை. சிறிது நேரத்தில் மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="iptv_remote_idle_stopped">10 நிமிடங்கள் செயல்பாடு இல்லாததால் போன் அமைப்பு நின்றது.</string>
+    <string name="iptv_remote_paused">ஆப்ஸ் பின்னணியில் இருந்தபோது போன் அமைப்பு நின்றது.</string>
+    <string name="iptv_remote_start_again">மீண்டும் தொடங்கு</string>
+    <string name="iptv_remote_start_again_subtitle">புதிய QR குறியீட்டையும் இணைப்புக் குறியீட்டையும் காட்டும்</string>
+    <string name="iptv_remote_done">முடிந்தது</string>
+    <string name="iptv_remote_done_subtitle">போன் அமைப்பை நிறுத்தி பின்செல்லும்</string>
+    <string name="iptv_remote_confirm_add_title">இதை உங்கள் போனிலிருந்து சேர்க்கவா?</string>
+    <string name="iptv_remote_confirm_edit_title">%1$s-ஐ உங்கள் போனிலிருந்து மாற்றவா?</string>
+    <string name="iptv_remote_confirm_subtitle">விவரங்களைச் சரிபார்க்கவும். இந்த டிவியில் சேமி என்பதைத் தேர்ந்தெடுக்காதவரை எதுவும் சேமிக்கப்படாது.</string>
+    <string name="iptv_remote_field_device">அனுப்பியது</string>
+    <string name="iptv_remote_field_type">வகை</string>
+    <string name="iptv_remote_field_name">பெயர்</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">முகவரி</string>
+    <string name="iptv_remote_field_server">சர்வர்</string>
+    <string name="iptv_remote_server_changes">%1$s-இலிருந்து %2$s-க்கு மாறும்</string>
+    <string name="iptv_remote_server_new">%1$s-க்கு மாறும்</string>
+    <string name="iptv_remote_field_username">பயனர்பெயர்</string>
+    <string name="iptv_remote_field_password">கடவுச்சொல்</string>
+    <string name="iptv_remote_field_mac">MAC முகவரி</string>
+    <string name="iptv_remote_password_set">போனில் உள்ளிடப்பட்டது (மறைக்கப்பட்டது)</string>
+    <string name="iptv_remote_password_new">புதிய கடவுச்சொல் (மறைக்கப்பட்டது)</string>
+    <string name="iptv_remote_save">இந்த டிவியில் சேமி</string>
+    <string name="iptv_remote_reject">நிராகரி</string>
+    <string name="iptv_remote_saved">சேமிக்கப்பட்டது. இப்போது சேனல்கள் ஏற்றப்படுகின்றன.</string>
+    <string name="iptv_remote_guide_saved">சேமிக்கப்பட்டது. இப்போது வழிகாட்டி ஏற்றப்படுகிறது.</string>
+    <string name="iptv_remote_rejected">நிராகரிக்கப்பட்டது. எதுவும் சேமிக்கப்படவில்லை.</string>
+</resources>

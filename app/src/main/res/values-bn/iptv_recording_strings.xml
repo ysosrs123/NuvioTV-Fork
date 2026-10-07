@@ -1,0 +1,72 @@
+<resources>
+    <string name="iptv_recording_channel">রেকর্ডিং</string>
+    <string name="iptv_recording_channel_description">লাইভ টিভি প্রোগ্রাম রেকর্ড হওয়ার সময় দেখানো হয়</string>
+    <string name="iptv_recording_notification_title">লাইভ টিভি রেকর্ড হচ্ছে</string>
+    <string name="iptv_recording_notification_starting">রেকর্ডিং শুরু হচ্ছে…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$dটি প্রোগ্রাম</item>
+        <item quantity="other">%1$dটি প্রোগ্রাম</item>
+    </plurals>
+
+    <string name="iptv_recording_record">রেকর্ড</string>
+    <string name="iptv_recording_record_now">এখন রেকর্ড করুন</string>
+    <string name="iptv_recording_record_programme">এই প্রোগ্রাম রেকর্ড করুন</string>
+    <string name="iptv_recording_started">রেকর্ডিং শুরু হয়েছে</string>
+    <string name="iptv_recording_scheduled">রেকর্ডিং নির্ধারিত হয়েছে</string>
+    <string name="iptv_recordings_open">রেকর্ডিং</string>
+
+    <string name="iptv_recordings_title">রেকর্ডিং</string>
+    <string name="iptv_recordings_description">লাইভ টিভি থেকে রেকর্ড করা বা নির্ধারিত প্রোগ্রাম। রেকর্ডিং এই ডিভাইসে রাখা হয় এবং এই প্রোফাইলের।</string>
+    <string name="iptv_recordings_hint">রেকর্ডিং চালাতে OK চাপুন। আরও অপশনের জন্য OK চেপে ধরুন বা Menu চাপুন।</string>
+    <string name="iptv_recordings_free">এই ডিভাইসে %1$s খালি</string>
+    <string name="iptv_recordings_empty">এখনো কিছু রেকর্ড হয়নি। লাইভ টিভি গাইড থেকে বা দেখার সময় একটি প্রোগ্রাম রেকর্ড করুন।</string>
+    <string name="iptv_recordings_group_now">এখন রেকর্ড হচ্ছে</string>
+    <string name="iptv_recordings_group_scheduled">নির্ধারিত</string>
+    <string name="iptv_recordings_group_recorded">রেকর্ড করা</string>
+
+    <string name="iptv_recording_status_scheduled">নির্ধারিত</string>
+    <string name="iptv_recording_status_recording">রেকর্ড হচ্ছে</string>
+    <string name="iptv_recording_status_done">রেকর্ড হয়েছে</string>
+    <string name="iptv_recording_status_partial">আংশিক রেকর্ড</string>
+    <string name="iptv_recording_status_failed">ব্যর্থ</string>
+    <string name="iptv_recording_status_cancelled">বাতিল</string>
+    <string name="iptv_recording_gaps">ফাঁক আছে</string>
+
+    <string name="iptv_recording_failure_no_connection">এই অ্যাকাউন্টে কোনো সংযোগ খালি নেই</string>
+    <string name="iptv_recording_failure_device_busy">ডিভাইস অন্য স্ট্রিমে ব্যস্ত</string>
+    <string name="iptv_recording_failure_source">সোর্সে পৌঁছানো যায়নি</string>
+    <string name="iptv_recording_failure_channel">চ্যানেলটি আর উপলব্ধ নয়</string>
+    <string name="iptv_recording_failure_unsupported">এই স্ট্রিম ফরম্যাট রেকর্ড করা যায় না</string>
+    <string name="iptv_recording_failure_encrypted">এনক্রিপ্ট করা স্ট্রিম রেকর্ড করা যায় না</string>
+    <string name="iptv_recording_failure_network">স্ট্রিম বাধাপ্রাপ্ত হয়েছে</string>
+    <string name="iptv_recording_failure_low_storage">স্টোরেজ প্রায় পূর্ণ</string>
+    <string name="iptv_recording_failure_storage">রেকর্ডিং সেভ করা যায়নি</string>
+    <string name="iptv_recording_failure_time_limit">রেকর্ডিংয়ের সময়সীমা শেষ হয়েছে</string>
+    <string name="iptv_recording_failure_interrupted">রেকর্ডিংয়ের সময় অ্যাপ বা ডিভাইস বন্ধ হয়ে গেছে</string>
+    <string name="iptv_recording_failure_start_blocked">Android রেকর্ডিং শুরু করতে দেয়নি। Nuvio-র জন্য অ্যালার্ম ও রিমাইন্ডারের অনুমতি দিন, অথবা Nuvio খোলা রাখুন।</string>
+    <string name="iptv_recording_failure_missed">রেকর্ডিং শুরুর আগেই প্রোগ্রাম শেষ হয়ে গেছে</string>
+
+    <string name="iptv_recording_refused_conflict">সেই সময়ে অন্য রেকর্ডিং এই অ্যাকাউন্টের সব সংযোগ ব্যবহার করছে</string>
+    <string name="iptv_recording_refused_no_connection">এই অ্যাকাউন্টে কোনো সংযোগ খালি নেই। আগে অন্য চ্যানেল দেখা বা রেকর্ড করা বন্ধ করুন।</string>
+    <string name="iptv_recording_refused_storage">এই রেকর্ডিংয়ের জন্য যথেষ্ট খালি স্টোরেজ নেই। HD-র প্রতি ঘণ্টার জন্য প্রায় 2.5 GB রাখুন, আর ডিভাইসের জন্য সবসময় 500 MB খালি রাখা হয়। পুরনো রেকর্ডিং মুছুন বা কিছু জায়গা খালি করুন।</string>
+    <string name="iptv_recording_refused_ended">এই প্রোগ্রাম ইতিমধ্যে শেষ হয়েছে</string>
+    <string name="iptv_recording_refused_channel">এই চ্যানেল এখন রেকর্ড করা যাবে না</string>
+    <string name="iptv_recording_refused_duplicate">এই চ্যানেল সেই সময়ে আগে থেকেই রেকর্ড হচ্ছে</string>
+    <string name="iptv_recording_refused_full">রেকর্ডিং তালিকা পূর্ণ। আগে কিছু রেকর্ডিং মুছুন।</string>
+    <string name="iptv_recording_refused_profile">প্রোফাইল বদলে গেছে। আবার চেষ্টা করুন।</string>
+    <string name="iptv_recording_refused_exact_alarms">নির্ধারিত রেকর্ডিংয়ের জন্য অ্যালার্ম ও রিমাইন্ডারের অনুমতি দরকার। Nuvio-র জন্য এটি দিন, অথবা দেখার সময় রেকর্ড করুন।</string>
+    <string name="iptv_recording_alarm_settings">অ্যালার্ম ও রিমাইন্ডারের অনুমতি দিন</string>
+
+    <string name="iptv_recording_play">চালান</string>
+    <string name="iptv_recording_stop">রেকর্ডিং থামান</string>
+    <string name="iptv_recording_cancel">রেকর্ডিং বাতিল করুন</string>
+    <string name="iptv_recording_delete">রেকর্ডিং মুছুন</string>
+    <string name="iptv_recording_delete_title">\"%1$s\" মুছবেন?</string>
+    <string name="iptv_recording_delete_description">রেকর্ডিং ও এর ফাইল এই ডিভাইস থেকে সরানো হবে।</string>
+    <string name="iptv_recording_delete_confirm">মুছুন</string>
+    <string name="iptv_recording_keep">রাখুন</string>
+    <string name="iptv_recording_file_missing">রেকর্ডিং ফাইলটি আর এই ডিভাইসে নেই</string>
+    <string name="iptv_recording_paused">পজ করা</string>
+    <string name="iptv_recording_playback_failed">এই রেকর্ডিং চালানো যাচ্ছে না। ফাইলটি অসম্পূর্ণ হতে পারে বা এমন ফরম্যাটে হতে পারে যা এই ডিভাইস ডিকোড করতে পারে না।</string>
+    <string name="iptv_recording_skip_hint">বামে ও ডানে ৩০ সেকেন্ড স্কিপ</string>
+</resources>

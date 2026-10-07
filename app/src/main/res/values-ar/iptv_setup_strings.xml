@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">الإعداد من الهاتف أو الكمبيوتر</string>
+    <string name="iptv_remote_entry_subtitle">اكتب العناوين وبيانات الدخول على لوحة مفاتيح حقيقية</string>
+    <string name="iptv_remote_title">الإعداد من هاتفك</string>
+    <string name="iptv_remote_description">امسح رمز QR بهاتفك، أو افتح العنوان على كمبيوتر متصل بالشبكة نفسها. ثم أدخل رمز الاقتران الظاهر هنا.</string>
+    <string name="iptv_remote_code">رمز الاقتران</string>
+    <string name="iptv_remote_address">أو افتح هذا العنوان</string>
+    <string name="iptv_remote_qr_description">رمز QR للإعداد من الهاتف</string>
+    <string name="iptv_remote_home_network">استخدم هذه الميزة على شبكتك المنزلية فقط. صفحة الإعداد غير مشفّرة.</string>
+    <string name="iptv_remote_idle_note">يتوقف عند مغادرة هذه الشاشة، أو بعد 10 دقائق دون نشاط.</string>
+    <string name="iptv_remote_confirm_note">لا يُحفظ شيء حتى تؤكده هنا على التلفاز. لا يمكن إزالة المصادر والأدلة إلا من التلفاز.</string>
+    <string name="iptv_remote_starting">جارٍ بدء الإعداد من الهاتف…</string>
+    <string name="iptv_remote_waiting">في انتظار هاتف أو كمبيوتر</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="zero">لا أجهزة متصلة</item>
+        <item quantity="one">جهاز واحد متصل</item>
+        <item quantity="two">جهازان متصلان</item>
+        <item quantity="few">%d أجهزة متصلة</item>
+        <item quantity="many">%d جهازاً متصلاً</item>
+        <item quantity="other">%d جهاز متصل</item>
+    </plurals>
+    <string name="iptv_remote_no_network">وصّل التلفاز بشبكتك المنزلية للإعداد من هاتفك.</string>
+    <string name="iptv_remote_not_home_network">التلفاز ليس على عنوان شبكة منزلية خاصة، لذا يبقى الإعداد من الهاتف معطّلاً.</string>
+    <string name="iptv_remote_ports_busy">تعذّر بدء الإعداد من الهاتف لأن منافذ الشبكة الخاصة به قيد الاستخدام. حاول مرة أخرى بعد قليل.</string>
+    <string name="iptv_remote_idle_stopped">توقف الإعداد من الهاتف بعد 10 دقائق دون نشاط.</string>
+    <string name="iptv_remote_paused">توقف الإعداد من الهاتف بينما كان التطبيق في الخلفية.</string>
+    <string name="iptv_remote_start_again">البدء من جديد</string>
+    <string name="iptv_remote_start_again_subtitle">يعرض رمز QR ورمز اقتران جديدين</string>
+    <string name="iptv_remote_done">تم</string>
+    <string name="iptv_remote_done_subtitle">يوقف الإعداد من الهاتف ويعود</string>
+    <string name="iptv_remote_confirm_add_title">إضافة هذا من هاتفك؟</string>
+    <string name="iptv_remote_confirm_edit_title">تغيير %1$s من هاتفك؟</string>
+    <string name="iptv_remote_confirm_subtitle">تحقق من التفاصيل. لن يُحفظ شيء ما لم تختر حفظ على هذا التلفاز.</string>
+    <string name="iptv_remote_field_device">مُرسل من</string>
+    <string name="iptv_remote_field_type">النوع</string>
+    <string name="iptv_remote_field_name">الاسم</string>
+    <string name="iptv_remote_field_renamed">%1$s ← %2$s</string>
+    <string name="iptv_remote_field_address">العنوان</string>
+    <string name="iptv_remote_field_server">الخادم</string>
+    <string name="iptv_remote_server_changes">يتغير من %1$s إلى %2$s</string>
+    <string name="iptv_remote_server_new">يتغير إلى %1$s</string>
+    <string name="iptv_remote_field_username">اسم المستخدم</string>
+    <string name="iptv_remote_field_password">كلمة المرور</string>
+    <string name="iptv_remote_field_mac">عنوان MAC</string>
+    <string name="iptv_remote_password_set">أُدخلت على الهاتف (مخفية)</string>
+    <string name="iptv_remote_password_new">كلمة مرور جديدة (مخفية)</string>
+    <string name="iptv_remote_save">حفظ على هذا التلفاز</string>
+    <string name="iptv_remote_reject">رفض</string>
+    <string name="iptv_remote_saved">تم الحفظ. جارٍ تحميل القنوات الآن.</string>
+    <string name="iptv_remote_guide_saved">تم الحفظ. جارٍ تحميل الدليل الآن.</string>
+    <string name="iptv_remote_rejected">تم الرفض. لم يُحفظ شيء.</string>
+</resources>

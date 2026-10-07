@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">הגדרה מהטלפון או מהמחשב</string>
+    <string name="iptv_remote_entry_subtitle">הקלדת כתובות ופרטי התחברות במקלדת אמיתית</string>
+    <string name="iptv_remote_title">הגדרה מהטלפון</string>
+    <string name="iptv_remote_description">יש לסרוק את קוד ה-QR בטלפון, או לפתוח את הכתובת במחשב באותה רשת. אחר כך יש להזין את קוד הצימוד שמוצג כאן.</string>
+    <string name="iptv_remote_code">קוד צימוד</string>
+    <string name="iptv_remote_address">או לפתוח את הכתובת הזו</string>
+    <string name="iptv_remote_qr_description">קוד QR להגדרה מהטלפון</string>
+    <string name="iptv_remote_home_network">יש להשתמש בזה רק ברשת הביתית. דף ההגדרה לא מוצפן.</string>
+    <string name="iptv_remote_idle_note">נעצר ביציאה מהמסך הזה, או אחרי 10 דקות ללא פעילות.</string>
+    <string name="iptv_remote_confirm_note">שום דבר לא נשמר עד לאישור כאן בטלוויזיה. אפשר להסיר מקורות ומדריכים רק בטלוויזיה.</string>
+    <string name="iptv_remote_starting">ההגדרה מהטלפון מופעלת…</string>
+    <string name="iptv_remote_waiting">ממתין לטלפון או למחשב</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">מכשיר אחד מחובר</item>
+        <item quantity="two">שני מכשירים מחוברים</item>
+        <item quantity="many">%d מכשירים מחוברים</item>
+        <item quantity="other">%d מכשירים מחוברים</item>
+    </plurals>
+    <string name="iptv_remote_no_network">יש לחבר את הטלוויזיה לרשת הביתית כדי להגדיר מהטלפון.</string>
+    <string name="iptv_remote_not_home_network">הטלוויזיה לא נמצאת בכתובת של רשת ביתית פרטית, ולכן ההגדרה מהטלפון כבויה.</string>
+    <string name="iptv_remote_ports_busy">לא ניתן היה להפעיל הגדרה מהטלפון כי פורטי הרשת שלה בשימוש. כדאי לנסות שוב בעוד רגע.</string>
+    <string name="iptv_remote_idle_stopped">ההגדרה מהטלפון נעצרה אחרי 10 דקות ללא פעילות.</string>
+    <string name="iptv_remote_paused">ההגדרה מהטלפון נעצרה כשהאפליקציה עברה לרקע.</string>
+    <string name="iptv_remote_start_again">התחלה מחדש</string>
+    <string name="iptv_remote_start_again_subtitle">מציג קוד QR וקוד צימוד חדשים</string>
+    <string name="iptv_remote_done">סיום</string>
+    <string name="iptv_remote_done_subtitle">עוצר את ההגדרה מהטלפון וחוזר</string>
+    <string name="iptv_remote_confirm_add_title">להוסיף את זה מהטלפון?</string>
+    <string name="iptv_remote_confirm_edit_title">לשנות את %1$s מהטלפון?</string>
+    <string name="iptv_remote_confirm_subtitle">כדאי לבדוק את הפרטים. שום דבר לא יישמר אלא אם בוחרים בשמירה בטלוויזיה הזו.</string>
+    <string name="iptv_remote_field_device">נשלח מ</string>
+    <string name="iptv_remote_field_type">סוג</string>
+    <string name="iptv_remote_field_name">שם</string>
+    <string name="iptv_remote_field_renamed">%1$s ← %2$s</string>
+    <string name="iptv_remote_field_address">כתובת</string>
+    <string name="iptv_remote_field_server">שרת</string>
+    <string name="iptv_remote_server_changes">משתנה מ-%1$s ל-%2$s</string>
+    <string name="iptv_remote_server_new">משתנה ל-%1$s</string>
+    <string name="iptv_remote_field_username">שם משתמש</string>
+    <string name="iptv_remote_field_password">סיסמה</string>
+    <string name="iptv_remote_field_mac">כתובת MAC</string>
+    <string name="iptv_remote_password_set">הוזנה בטלפון (מוסתרת)</string>
+    <string name="iptv_remote_password_new">סיסמה חדשה (מוסתרת)</string>
+    <string name="iptv_remote_save">שמירה בטלוויזיה הזו</string>
+    <string name="iptv_remote_reject">דחייה</string>
+    <string name="iptv_remote_saved">נשמר. הערוצים נטענים עכשיו.</string>
+    <string name="iptv_remote_guide_saved">נשמר. המדריך נטען עכשיו.</string>
+    <string name="iptv_remote_rejected">נדחה. שום דבר לא נשמר.</string>
+</resources>

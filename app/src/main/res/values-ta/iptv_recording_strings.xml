@@ -1,0 +1,72 @@
+<resources>
+    <string name="iptv_recording_channel">பதிவுகள்</string>
+    <string name="iptv_recording_channel_description">நேரலை டிவி நிகழ்ச்சிகள் பதிவுசெய்யப்படும்போது காட்டப்படும்</string>
+    <string name="iptv_recording_notification_title">நேரலை டிவி பதிவாகிறது</string>
+    <string name="iptv_recording_notification_starting">பதிவு தொடங்குகிறது…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d நிகழ்ச்சி</item>
+        <item quantity="other">%1$d நிகழ்ச்சிகள்</item>
+    </plurals>
+
+    <string name="iptv_recording_record">பதிவுசெய்</string>
+    <string name="iptv_recording_record_now">இப்போது பதிவுசெய்</string>
+    <string name="iptv_recording_record_programme">இந்த நிகழ்ச்சியைப் பதிவுசெய்</string>
+    <string name="iptv_recording_started">பதிவு தொடங்கியது</string>
+    <string name="iptv_recording_scheduled">பதிவு திட்டமிடப்பட்டது</string>
+    <string name="iptv_recordings_open">பதிவுகள்</string>
+
+    <string name="iptv_recordings_title">பதிவுகள்</string>
+    <string name="iptv_recordings_description">நேரலை டிவியிலிருந்து பதிவுசெய்த அல்லது திட்டமிட்ட நிகழ்ச்சிகள். பதிவுகள் இந்தச் சாதனத்தில் வைக்கப்பட்டு, இந்தச் சுயவிவரத்துக்குச் சொந்தமானவை.</string>
+    <string name="iptv_recordings_hint">பதிவை இயக்க OK அழுத்தவும். மேலும் விருப்பங்களுக்கு OK-ஐ அழுத்திப் பிடிக்கவும் அல்லது Menu அழுத்தவும்.</string>
+    <string name="iptv_recordings_free">இந்தச் சாதனத்தில் %1$s காலியாக உள்ளது</string>
+    <string name="iptv_recordings_empty">இன்னும் எதுவும் பதிவுசெய்யப்படவில்லை. நேரலை டிவி வழிகாட்டியிலிருந்து அல்லது பார்க்கும்போது ஒரு நிகழ்ச்சியைப் பதிவுசெய்யவும்.</string>
+    <string name="iptv_recordings_group_now">இப்போது பதிவாகிறது</string>
+    <string name="iptv_recordings_group_scheduled">திட்டமிடப்பட்டவை</string>
+    <string name="iptv_recordings_group_recorded">பதிவுசெய்யப்பட்டவை</string>
+
+    <string name="iptv_recording_status_scheduled">திட்டமிடப்பட்டது</string>
+    <string name="iptv_recording_status_recording">பதிவாகிறது</string>
+    <string name="iptv_recording_status_done">பதிவுசெய்யப்பட்டது</string>
+    <string name="iptv_recording_status_partial">பகுதியாகப் பதிவுசெய்யப்பட்டது</string>
+    <string name="iptv_recording_status_failed">தோல்வி</string>
+    <string name="iptv_recording_status_cancelled">ரத்துசெய்யப்பட்டது</string>
+    <string name="iptv_recording_gaps">இடைவெளிகள் உள்ளன</string>
+
+    <string name="iptv_recording_failure_no_connection">இந்தக் கணக்கில் காலியான இணைப்பு இல்லை</string>
+    <string name="iptv_recording_failure_device_busy">சாதனம் பிற ஸ்ட்ரீம்களில் பிஸியாக உள்ளது</string>
+    <string name="iptv_recording_failure_source">மூலத்தை அணுக முடியவில்லை</string>
+    <string name="iptv_recording_failure_channel">சேனல் இனி கிடைக்காது</string>
+    <string name="iptv_recording_failure_unsupported">இந்த ஸ்ட்ரீம் வடிவத்தைப் பதிவுசெய்ய முடியாது</string>
+    <string name="iptv_recording_failure_encrypted">குறியாக்கம் செய்யப்பட்ட ஸ்ட்ரீம்களைப் பதிவுசெய்ய முடியாது</string>
+    <string name="iptv_recording_failure_network">ஸ்ட்ரீம் தடைபட்டது</string>
+    <string name="iptv_recording_failure_low_storage">சேமிப்பகம் கிட்டத்தட்ட நிரம்பிவிட்டது</string>
+    <string name="iptv_recording_failure_storage">பதிவைச் சேமிக்க முடியவில்லை</string>
+    <string name="iptv_recording_failure_time_limit">பதிவு நேர வரம்பை எட்டியது</string>
+    <string name="iptv_recording_failure_interrupted">பதிவின்போது ஆப்ஸ் அல்லது சாதனம் நின்றுவிட்டது</string>
+    <string name="iptv_recording_failure_start_blocked">பதிவைத் தொடங்க Android அனுமதிக்கவில்லை. Nuvio-க்கு அலாரங்கள் மற்றும் நினைவூட்டல்களை அனுமதிக்கவும், அல்லது Nuvio-வைத் திறந்தே வைக்கவும்.</string>
+    <string name="iptv_recording_failure_missed">பதிவு தொடங்கும் முன்பே நிகழ்ச்சி முடிந்துவிட்டது</string>
+
+    <string name="iptv_recording_refused_conflict">அந்த நேரத்தில் பிற பதிவுகள் இந்தக் கணக்கின் அனைத்து இணைப்புகளையும் பயன்படுத்துகின்றன</string>
+    <string name="iptv_recording_refused_no_connection">இந்தக் கணக்கில் காலியான இணைப்பு இல்லை. முதலில் வேறொரு சேனலைப் பார்ப்பதை அல்லது பதிவுசெய்வதை நிறுத்தவும்.</string>
+    <string name="iptv_recording_refused_storage">இந்தப் பதிவுக்குப் போதுமான காலி சேமிப்பகம் இல்லை. ஒவ்வொரு மணிநேர HD-க்கும் சுமார் 2.5 GB தேவை, மேலும் சாதனத்துக்காக 500 MB எப்போதும் காலியாக வைக்கப்படும். பழைய பதிவுகளை நீக்கவும் அல்லது இடத்தைக் காலிசெய்யவும்.</string>
+    <string name="iptv_recording_refused_ended">இந்த நிகழ்ச்சி ஏற்கனவே முடிந்துவிட்டது</string>
+    <string name="iptv_recording_refused_channel">இந்தச் சேனலை இப்போது பதிவுசெய்ய முடியாது</string>
+    <string name="iptv_recording_refused_duplicate">இந்தச் சேனல் அந்த நேரத்தில் ஏற்கனவே பதிவாகிறது</string>
+    <string name="iptv_recording_refused_full">பதிவுப் பட்டியல் நிரம்பிவிட்டது. முதலில் சில பதிவுகளை நீக்கவும்.</string>
+    <string name="iptv_recording_refused_profile">சுயவிவரம் மாறியது. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="iptv_recording_refused_exact_alarms">திட்டமிட்ட பதிவுகளுக்கு அலாரங்கள் மற்றும் நினைவூட்டல்கள் அனுமதி தேவை. Nuvio-க்கு அதை அனுமதிக்கவும், அல்லது பார்க்கும்போது பதிவுசெய்யவும்.</string>
+    <string name="iptv_recording_alarm_settings">அலாரங்கள் மற்றும் நினைவூட்டல்களை அனுமதி</string>
+
+    <string name="iptv_recording_play">இயக்கு</string>
+    <string name="iptv_recording_stop">பதிவை நிறுத்து</string>
+    <string name="iptv_recording_cancel">பதிவை ரத்து செய்</string>
+    <string name="iptv_recording_delete">பதிவை நீக்கு</string>
+    <string name="iptv_recording_delete_title">\"%1$s\"-ஐ நீக்கவா?</string>
+    <string name="iptv_recording_delete_description">பதிவும் அதன் கோப்பும் இந்தச் சாதனத்திலிருந்து நீக்கப்படும்.</string>
+    <string name="iptv_recording_delete_confirm">நீக்கு</string>
+    <string name="iptv_recording_keep">வைத்திரு</string>
+    <string name="iptv_recording_file_missing">பதிவுக் கோப்பு இனி இந்தச் சாதனத்தில் இல்லை</string>
+    <string name="iptv_recording_paused">இடைநிறுத்தப்பட்டது</string>
+    <string name="iptv_recording_playback_failed">இந்தப் பதிவை இயக்க முடியாது. கோப்பு முழுமையடையாமல் இருக்கலாம் அல்லது இந்தச் சாதனம் டிகோட் செய்ய முடியாத வடிவத்தில் இருக்கலாம்.</string>
+    <string name="iptv_recording_skip_hint">இடது, வலது 30 வினாடிகள் தாவும்</string>
+</resources>

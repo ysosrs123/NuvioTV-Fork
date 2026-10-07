@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">फोन या कंप्यूटर से सेट अप करें</string>
+    <string name="iptv_remote_entry_subtitle">पते और लॉगिन असली कीबोर्ड पर टाइप करें</string>
+    <string name="iptv_remote_title">अपने फोन से सेट अप करें</string>
+    <string name="iptv_remote_description">अपने फोन से QR कोड स्कैन करें, या उसी नेटवर्क पर किसी कंप्यूटर में पता खोलें। फिर यहाँ दिखाया गया पेयरिंग कोड डालें।</string>
+    <string name="iptv_remote_code">पेयरिंग कोड</string>
+    <string name="iptv_remote_address">या यह पता खोलें</string>
+    <string name="iptv_remote_qr_description">फोन सेटअप के लिए QR कोड</string>
+    <string name="iptv_remote_home_network">इसे सिर्फ़ अपने होम नेटवर्क पर इस्तेमाल करें। सेटअप पेज एन्क्रिप्टेड नहीं है।</string>
+    <string name="iptv_remote_idle_note">यह स्क्रीन छोड़ने पर या 10 मिनट तक कोई गतिविधि न होने पर बंद हो जाता है।</string>
+    <string name="iptv_remote_confirm_note">जब तक आप यहाँ टीवी पर पुष्टि नहीं करते, कुछ भी सेव नहीं होता। सोर्स और गाइड सिर्फ़ टीवी पर हटाए जा सकते हैं।</string>
+    <string name="iptv_remote_starting">फोन सेटअप शुरू हो रहा है…</string>
+    <string name="iptv_remote_waiting">फोन या कंप्यूटर की प्रतीक्षा</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d डिवाइस कनेक्ट है</item>
+        <item quantity="other">%d डिवाइस कनेक्ट हैं</item>
+    </plurals>
+    <string name="iptv_remote_no_network">फोन से सेट अप करने के लिए टीवी को अपने होम नेटवर्क से कनेक्ट करें।</string>
+    <string name="iptv_remote_not_home_network">टीवी किसी प्राइवेट होम नेटवर्क पते पर नहीं है, इसलिए फोन सेटअप बंद रहेगा।</string>
+    <string name="iptv_remote_ports_busy">फोन सेटअप शुरू नहीं हो सका क्योंकि इसके नेटवर्क पोर्ट उपयोग में हैं। थोड़ी देर में फिर से कोशिश करें।</string>
+    <string name="iptv_remote_idle_stopped">10 मिनट तक कोई गतिविधि न होने पर फोन सेटअप बंद हो गया।</string>
+    <string name="iptv_remote_paused">ऐप बैकग्राउंड में होने पर फोन सेटअप बंद हो गया।</string>
+    <string name="iptv_remote_start_again">फिर से शुरू करें</string>
+    <string name="iptv_remote_start_again_subtitle">नया QR कोड और पेयरिंग कोड दिखाता है</string>
+    <string name="iptv_remote_done">हो गया</string>
+    <string name="iptv_remote_done_subtitle">फोन सेटअप बंद करके वापस जाता है</string>
+    <string name="iptv_remote_confirm_add_title">इसे अपने फोन से जोड़ें?</string>
+    <string name="iptv_remote_confirm_edit_title">%1$s को अपने फोन से बदलें?</string>
+    <string name="iptv_remote_confirm_subtitle">जानकारी जाँचें। जब तक आप इस टीवी पर सेव नहीं चुनते, कुछ भी सेव नहीं होगा।</string>
+    <string name="iptv_remote_field_device">भेजा गया</string>
+    <string name="iptv_remote_field_type">प्रकार</string>
+    <string name="iptv_remote_field_name">नाम</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">पता</string>
+    <string name="iptv_remote_field_server">सर्वर</string>
+    <string name="iptv_remote_server_changes">%1$s से %2$s में बदलेगा</string>
+    <string name="iptv_remote_server_new">%1$s में बदलेगा</string>
+    <string name="iptv_remote_field_username">यूज़रनेम</string>
+    <string name="iptv_remote_field_password">पासवर्ड</string>
+    <string name="iptv_remote_field_mac">MAC पता</string>
+    <string name="iptv_remote_password_set">फोन पर डाला गया (छिपा हुआ)</string>
+    <string name="iptv_remote_password_new">नया पासवर्ड (छिपा हुआ)</string>
+    <string name="iptv_remote_save">इस टीवी पर सेव करें</string>
+    <string name="iptv_remote_reject">अस्वीकार करें</string>
+    <string name="iptv_remote_saved">सेव हो गया। चैनल अब लोड हो रहे हैं।</string>
+    <string name="iptv_remote_guide_saved">सेव हो गया। गाइड अब लोड हो रही है।</string>
+    <string name="iptv_remote_rejected">अस्वीकार किया गया। कुछ भी सेव नहीं हुआ।</string>
+</resources>

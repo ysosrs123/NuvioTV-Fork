@@ -1,0 +1,76 @@
+<resources>
+    <string name="iptv_recording_channel">التسجيلات</string>
+    <string name="iptv_recording_channel_description">يظهر أثناء تسجيل برامج البث المباشر</string>
+    <string name="iptv_recording_notification_title">تسجيل البث المباشر</string>
+    <string name="iptv_recording_notification_starting">جارٍ بدء التسجيل…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="zero">لا برامج</item>
+        <item quantity="one">برنامج واحد</item>
+        <item quantity="two">برنامجان</item>
+        <item quantity="few">%1$d برامج</item>
+        <item quantity="many">%1$d برنامجاً</item>
+        <item quantity="other">%1$d برنامج</item>
+    </plurals>
+
+    <string name="iptv_recording_record">تسجيل</string>
+    <string name="iptv_recording_record_now">تسجيل الآن</string>
+    <string name="iptv_recording_record_programme">تسجيل هذا البرنامج</string>
+    <string name="iptv_recording_started">بدأ التسجيل</string>
+    <string name="iptv_recording_scheduled">تمت جدولة التسجيل</string>
+    <string name="iptv_recordings_open">التسجيلات</string>
+
+    <string name="iptv_recordings_title">التسجيلات</string>
+    <string name="iptv_recordings_description">البرامج المسجّلة أو المجدولة من البث المباشر. تُحفظ التسجيلات على هذا الجهاز وهي خاصة بهذا الملف الشخصي.</string>
+    <string name="iptv_recordings_hint">اضغط OK لتشغيل تسجيل. اضغط مطولاً على OK أو اضغط القائمة لمزيد من الخيارات.</string>
+    <string name="iptv_recordings_free">%1$s متاحة على هذا الجهاز</string>
+    <string name="iptv_recordings_empty">لا توجد تسجيلات بعد. سجّل برنامجاً من دليل البث المباشر أو أثناء المشاهدة.</string>
+    <string name="iptv_recordings_group_now">قيد التسجيل الآن</string>
+    <string name="iptv_recordings_group_scheduled">مجدولة</string>
+    <string name="iptv_recordings_group_recorded">مسجّلة</string>
+
+    <string name="iptv_recording_status_scheduled">مجدول</string>
+    <string name="iptv_recording_status_recording">قيد التسجيل</string>
+    <string name="iptv_recording_status_done">مسجّل</string>
+    <string name="iptv_recording_status_partial">مسجّل جزئياً</string>
+    <string name="iptv_recording_status_failed">فشل</string>
+    <string name="iptv_recording_status_cancelled">ملغى</string>
+    <string name="iptv_recording_gaps">به فجوات</string>
+
+    <string name="iptv_recording_failure_no_connection">لا يوجد اتصال متاح على هذا الحساب</string>
+    <string name="iptv_recording_failure_device_busy">الجهاز مشغول ببثوث أخرى</string>
+    <string name="iptv_recording_failure_source">تعذّر الوصول إلى المصدر</string>
+    <string name="iptv_recording_failure_channel">القناة لم تعد متاحة</string>
+    <string name="iptv_recording_failure_unsupported">لا يمكن تسجيل تنسيق البث هذا</string>
+    <string name="iptv_recording_failure_encrypted">لا يمكن تسجيل البثوث المشفّرة</string>
+    <string name="iptv_recording_failure_network">انقطع البث</string>
+    <string name="iptv_recording_failure_low_storage">مساحة التخزين ممتلئة تقريباً</string>
+    <string name="iptv_recording_failure_storage">تعذّر حفظ التسجيل</string>
+    <string name="iptv_recording_failure_time_limit">تم بلوغ الحد الأقصى لمدة التسجيل</string>
+    <string name="iptv_recording_failure_interrupted">توقف التطبيق أو الجهاز أثناء التسجيل</string>
+    <string name="iptv_recording_failure_start_blocked">لم يسمح Android ببدء التسجيل. اسمح بالمنبّهات والتذكيرات لـ Nuvio، أو أبقِ Nuvio مفتوحاً.</string>
+    <string name="iptv_recording_failure_missed">انتهى البرنامج قبل أن يبدأ التسجيل</string>
+
+    <string name="iptv_recording_refused_conflict">تستخدم تسجيلات أخرى كل اتصالات هذا الحساب في ذلك الوقت</string>
+    <string name="iptv_recording_refused_no_connection">لا يوجد اتصال متاح على هذا الحساب. أوقف مشاهدة أو تسجيل قناة أخرى أولاً.</string>
+    <string name="iptv_recording_refused_storage">لا توجد مساحة تخزين كافية لهذا التسجيل. خصّص نحو 2.5 GB لكل ساعة بدقة HD، ويُترك 500 MB متاحة دائماً للجهاز. احذف التسجيلات القديمة أو حرّر بعض المساحة.</string>
+    <string name="iptv_recording_refused_ended">انتهى هذا البرنامج بالفعل</string>
+    <string name="iptv_recording_refused_channel">لا يمكن تسجيل هذه القناة حالياً</string>
+    <string name="iptv_recording_refused_duplicate">هذه القناة قيد التسجيل بالفعل في ذلك الوقت</string>
+    <string name="iptv_recording_refused_full">قائمة التسجيلات ممتلئة. احذف بعض التسجيلات أولاً.</string>
+    <string name="iptv_recording_refused_profile">تغيّر الملف الشخصي. حاول مرة أخرى.</string>
+    <string name="iptv_recording_refused_exact_alarms">تحتاج التسجيلات المجدولة إلى إذن المنبّهات والتذكيرات. اسمح به لـ Nuvio، أو سجّل أثناء المشاهدة.</string>
+    <string name="iptv_recording_alarm_settings">السماح بالمنبّهات والتذكيرات</string>
+
+    <string name="iptv_recording_play">تشغيل</string>
+    <string name="iptv_recording_stop">إيقاف التسجيل</string>
+    <string name="iptv_recording_cancel">إلغاء التسجيل</string>
+    <string name="iptv_recording_delete">حذف التسجيل</string>
+    <string name="iptv_recording_delete_title">حذف \"%1$s\"؟</string>
+    <string name="iptv_recording_delete_description">ستتم إزالة التسجيل وملفه من هذا الجهاز.</string>
+    <string name="iptv_recording_delete_confirm">حذف</string>
+    <string name="iptv_recording_keep">الاحتفاظ</string>
+    <string name="iptv_recording_file_missing">ملف التسجيل لم يعد موجوداً على هذا الجهاز</string>
+    <string name="iptv_recording_paused">متوقف مؤقتاً</string>
+    <string name="iptv_recording_playback_failed">لا يمكن تشغيل هذا التسجيل. قد يكون الملف غير مكتمل أو بتنسيق لا يستطيع هذا الجهاز فك ترميزه.</string>
+    <string name="iptv_recording_skip_hint">يسار ويمين للتخطي 30 ثانية</string>
+</resources>
