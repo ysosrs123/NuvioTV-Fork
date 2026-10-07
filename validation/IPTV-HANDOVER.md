@@ -73,8 +73,17 @@ Wave 2 — in progress (parallel helpers, briefs kept outside the repo):
 Settings sections for sport and timeshift are separate files to be wired into
 `IptvSettingsScreen` by the integrator.
 Wave 3: Live TV rows on the Nuvio Home screen.
-Waiting on the user: IPTV VOD with Nuvio add-on metadata (stream source inside Nuvio's
-pages, recommended, or a separate section).
+IPTV VOD (user chose both, 7 October 2026): Xtream movies and series (and M3U entries
+with /movie/, /series/ or tvg-type) stored as a VOD catalogue; (a) a built-in stream
+source on Nuvio's own detail pages, switchable in the main Settings (Playback → Stream
+selection), following the `ServerStreams` pattern in `StreamRepositoryImpl`, matched by
+TMDB/IMDb id with a title+year fallback; (b) Movies and Series in the Live TV menu,
+with artwork either from the provider or from Nuvio metadata (TMDB / meta add-ons),
+opening Nuvio's detail page when a title is matched. VOD is not ingested at all today.
+Stream URLs carry Xtream credentials: resolve at play time, never store them in history.
+Local timeshift: the capture chain was found unsuitable (HLS-only, baseline-AVC test
+streams, no audio, connection hold on failure); built instead as a capped TS ring file
+read by the normal live player.
 Device validation items can only be prepared here.
 
 ## Planned but not done (compared on 7 October 2026)
