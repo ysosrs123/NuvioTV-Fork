@@ -65,6 +65,7 @@ import com.nuvio.tv.core.tracking.LOCAL_LIBRARY_LIST_KEY
 import com.nuvio.tv.core.tracking.supportsMembershipFor
 import com.nuvio.tv.data.local.StartupAuthNotice
 import com.nuvio.tv.ui.components.posteroptions.TrackingRemovalConfirmationDialog
+import com.nuvio.tv.ui.screens.iptv.IptvHomeRowsProvider
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -96,7 +97,10 @@ fun HomeScreen(
     onContinueWatchingStartFromBeginning: (ContinueWatchingItem) -> Unit = onContinueWatchingClick,
     onContinueWatchingPlayManually: (ContinueWatchingItem) -> Unit = onContinueWatchingClick,
     onNavigateToCatalogSeeAll: (String, String, String) -> Unit = { _, _, _ -> },
-    onNavigateToFolderDetail: (String, String) -> Unit = { _, _ -> }
+    onNavigateToFolderDetail: (String, String) -> Unit = { _, _ -> },
+    onOpenLiveTv: () -> Unit = {},
+    onOpenIptvRecordings: () -> Unit = {},
+    onOpenIptvVodTitle: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -390,6 +394,12 @@ fun HomeScreen(
                             LocalLandscapePosterMode provides
                                 (LocalLandscapePosterMode.current || uiState.modernLandscapePostersEnabled)
                         ) {
+                        IptvHomeRowsProvider(
+                            onOpenLive = onOpenLiveTv,
+                            onOpenRecordings = onOpenIptvRecordings,
+                            onOpenTitle = onOpenIptvVodTitle,
+                            onOpenDetail = { itemId, itemType -> onNavigateToDetail(itemId, itemType, "") }
+                        ) {
                         when (uiState.homeLayout) {
                             HomeLayout.CLASSIC -> ClassicHomeRoute(
                                 viewModel = viewModel,
@@ -433,6 +443,7 @@ fun HomeScreen(
                                 isCatalogItemWatched = isCatalogItemWatched,
                                 onCatalogItemLongPress = onCatalogItemLongPress
                             )
+                        }
                         }
                         }
                     }

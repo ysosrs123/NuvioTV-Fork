@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_home_favourites">Live TV favourites</string>
+    <string name="iptv_home_sport">On now: Sport</string>
+    <string name="iptv_home_movies">Recently added movies</string>
+    <string name="iptv_home_series">Recently added series</string>
+    <string name="iptv_home_recordings">Recordings</string>
+    <string name="iptv_home_recording_detail">%1$s · %2$s</string>
+    <string name="iptv_home_settings_title">Home screen</string>
+    <string name="iptv_home_settings_favourites">Favourite channels with what\'s on now</string>
+    <string name="iptv_home_settings_sport">Live sport from the guide</string>
+    <string name="iptv_home_settings_movies">Newest movies from your providers</string>
+    <string name="iptv_home_settings_series">Newest series from your providers</string>
+    <string name="iptv_home_settings_recordings">Your latest finished recordings</string>
+</resources>

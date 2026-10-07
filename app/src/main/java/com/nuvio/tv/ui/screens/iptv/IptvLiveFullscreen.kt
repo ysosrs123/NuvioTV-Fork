@@ -60,7 +60,8 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
     onLastChannel: () -> Unit, onNumber: (Int) -> Unit, onWatch: (IptvListedChannel) -> Unit,
     onPause: (Boolean?) -> Unit, onRewind: () -> Boolean,
     layout: PlayerControlLayout, canStartOver: Boolean, onControl: (PlayerControlAction) -> Unit,
-    onScrub: (Long) -> Boolean = { false }, onCloseInset: () -> Unit = {}, onSwapInset: () -> Unit = {}, onChannelMenu: (IptvListedChannel) -> Unit = {}) {
+    onScrub: (Long) -> Boolean = { false }, onCloseInset: () -> Unit = {}, onSwapInset: () -> Unit = {}, onChannelMenu: (IptvListedChannel) -> Unit = {},
+    onGoLive: () -> Boolean = { false }) {
     var banner by remember { mutableIntStateOf(0) }
     var panel by remember { mutableStateOf(false) }
     var controls by remember { mutableStateOf(false) }
@@ -145,7 +146,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
                     PlayerControlAction.AUDIO, PlayerControlAction.SUBTITLES -> { controls = false; onControl(action) }
                     else -> onControl(action)
                 }
-            }, onHide = { controls = false }, onScrub = { onScrub(it) })
+            }, onHide = { controls = false }, onScrub = { onScrub(it) }, onGoLive = onGoLive)
         }
         AnimatedVisibility(banner >= 0 && !panel && !controls, Modifier.align(Alignment.BottomCenter),
             enter = fadeIn() + slideInVertically { it / 3 }, exit = fadeOut() + slideOutVertically { it / 3 }) {

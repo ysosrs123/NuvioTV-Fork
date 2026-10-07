@@ -3,6 +3,7 @@ package com.nuvio.tv.data.iptv
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.nuvio.tv.core.iptv.AcquisitionKey
+import com.nuvio.tv.core.iptv.AdmissionDenial
 import com.nuvio.tv.core.iptv.ConsumerReservation
 import com.nuvio.tv.core.iptv.DeviceAdmissionLimits
 import com.nuvio.tv.core.iptv.LiveAdmissionResult
@@ -97,6 +98,17 @@ class IptvVodStreamsTest {
         assertEquals(IptvVodResolution.Busy("Panel"), runBlocking { resolver.resolve(movie) })
         catalogue.saveAccount(1, source.accountId, "Panel", 2)
         assertTrue(runBlocking { resolver.resolve(movie) } is IptvVodResolution.Ready)
+        val leased = runBlocking { resolver.acquire(movie, ready.playback) } as IptvVodResolution.Ready
+        val lease = requireNotNull(leased.lease)
+        assertEquals(2, admission.snapshot().upstreamsByAccount[admissionAccount(1, source.accountId)])
+        assertEquals(IptvVodResolution.Busy("Panel"), runBlocking { resolver.resolve(movie) })
+        assertEquals(IptvVodResolution.Busy("Panel"), runBlocking { resolver.acquire(movie) })
+        assertEquals(LiveAdmissionResult.Denied(AdmissionDenial.ACCOUNT_LIMIT), admission.acquire(AcquisitionKey(admissionAccount(1, source.accountId), "other", "main", 0), 0,
+            ConsumerReservation(LiveConsumerRole.VIEWER, 1, 0)))
+        lease.close()
+        lease.close()
+        assertFalse(lease.active)
+        assertEquals(1, admission.snapshot().upstreamsByAccount[admissionAccount(1, source.accountId)])
         assertEquals(IptvVodResolution.Unavailable, runBlocking { resolver.resolve(VodRef(1, ref.sourceId, VodKind.MOVIE, "999")) })
         assertEquals(IptvVodResolution.Unavailable, runBlocking { resolver.resolve(VodRef(1, "gone", VodKind.MOVIE, "603")) })
     }

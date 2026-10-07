@@ -66,6 +66,7 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
     private var customExtractorsFactory: ExtractorsFactory? = null
     private var customSubtitleParserFactory: SubtitleParser.Factory? = null
     private val loadErrorHandlingPolicy = PlayerLoadErrorHandlingPolicy()
+    val iptvVodSession = IptvVodSession(context)
 
     @Volatile private var currentVodCacheUrl: String? = null
     @Volatile private var currentVodCacheResolvedUrl: String? = null
@@ -287,8 +288,9 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         purpose: PlaybackPurpose = PlaybackPurpose.VOD
     ): MediaSource {
         val sanitizedHeaders = sanitizeHeaders(headers)
-        val httpDataSourceFactory = PlayerPlaybackNetworking.createDataSourceFactory(context, sanitizedHeaders)
-            .let { if (VodRef.isVod(url)) IptvVodDataSourceFactory(context, it) else it }
+        val iptvVod = VodRef.isVod(url)
+        val httpDataSourceFactory = PlayerPlaybackNetworking.createDataSourceFactory(context, sanitizedHeaders, defaultUserAgent = !iptvVod)
+            .let { if (iptvVod) IptvVodDataSourceFactory(iptvVodSession, it, DEFAULT_USER_AGENT.takeIf { sanitizedHeaders.keys.none { key -> key.equals("User-Agent", ignoreCase = true) } }) else it }
 
         val chunkSessionShape = resolveChunkSessionShape(
             url = url,
@@ -474,6 +476,7 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         // Free any chunk buffers retained across seek reopens so native
         // allocations never outlive the player.
         ParallelRangeDataSource.releaseRetainedSession()
+        iptvVodSession.release()
     }
 
     // The counters are all zero at playback start, so the start line never shows what the cache
@@ -1342,6 +1345,7 @@ private class PlayerLoadErrorHandlingPolicy : DefaultLoadErrorHandlingPolicy(6) 
     }
 
     override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long {
+        if (loadErrorInfo.exception.iptvVodPlaybackFailure() != null) return androidx.media3.common.C.TIME_UNSET
         val httpException = loadErrorInfo.exception.findCause<androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException>()
         if (httpException != null) {
             val code = httpException.responseCode

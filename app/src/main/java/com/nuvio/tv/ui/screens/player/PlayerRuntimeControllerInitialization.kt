@@ -2011,6 +2011,10 @@ internal fun PlayerRuntimeController.initializePlayer(
                         cancelTunnelAvSyncWatchdog()
                         val detailedError = error.toDisplayMessage(context)
                         cancelStableProgressReset()
+                        error.iptvVodPlaybackFailure()?.let { failure ->
+                            surfaceIptvVodFailure(failure.message.orEmpty())
+                            return
+                        }
 
                         if (Vc1VideoFormatHeuristics.isVc1PlaybackFailure(
                                 error = error,

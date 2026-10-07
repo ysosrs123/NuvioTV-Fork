@@ -12,7 +12,7 @@ internal fun playerControlAvailability(
     addAll(listOf(PlayerControlAction.PLAY_PAUSE, PlayerControlAction.STATS,
         PlayerControlAction.SOURCES, PlayerControlAction.MORE,
         PlayerControlAction.ENGINE, PlayerControlAction.WATCH_PARTY, PlayerControlAction.INFO))
-    if (!state.isServerStream) add(PlayerControlAction.EXTERNAL)
+    if (state.externalPlayerAvailable) add(PlayerControlAction.EXTERNAL)
     if (!timeline.isLive && timeline.duration > 0L) add(PlayerControlAction.RESTART)
     if (state.currentSeason != null && state.currentEpisode != null) add(PlayerControlAction.EPISODES)
     if (state.nextEpisode?.hasAired == true && (state.postPlayMode as? PostPlayMode.AutoPlay)?.let {

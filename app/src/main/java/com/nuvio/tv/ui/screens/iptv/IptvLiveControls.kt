@@ -6,10 +6,13 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -19,10 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.GoLiveRoute
+import com.nuvio.tv.core.iptv.LiveGoLive
 import com.nuvio.tv.data.local.PlayerControlAction
 import com.nuvio.tv.data.local.PlayerControlLayout
 import com.nuvio.tv.ui.screens.player.PlayerControlChrome
 import com.nuvio.tv.ui.screens.player.PlayerControlDeck
+import com.nuvio.tv.ui.screens.player.PillControlButton
 import com.nuvio.tv.ui.screens.player.playerControlDeckAvailable
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
@@ -40,11 +46,22 @@ internal fun liveControlActions(state: IptvLiveState, canStartOver: Boolean): Se
     add(PlayerControlAction.MORE)
 }
 
+internal fun goLiveRoute(state: IptvLiveState, now: Long): GoLiveRoute {
+    if (state.player == null || state.playingRow == null) return GoLiveRoute.NONE
+    val playback = state.playback
+    return LiveGoLive.route(state.catchup != null, state.catchupFrom != null, state.catchup?.stop?.epochMillis, now,
+        state.localTimeshift, state.localBehind, state.paused, playback?.behindLiveMs(), playback?.bufferTargetMs ?: 0L)
+}
+
 @Composable
 internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControlLayout, available: Set<PlayerControlAction>,
-    onAction: (PlayerControlAction) -> Unit, onHide: () -> Unit, onScrub: (Long) -> Unit = {}) {
+    onAction: (PlayerControlAction) -> Unit, onHide: () -> Unit, onScrub: (Long) -> Unit = {}, onGoLive: () -> Boolean = { false }) {
     val v2 = LocalV2Appearance.current != null
     val targets = remember { PlayerControlAction.entries.associateWith { FocusRequester() } }
+    val goLiveFocus = remember { FocusRequester() }
+    var behind by remember { mutableStateOf(false) }
+    var goLiveFocused by remember { mutableStateOf(false) }
+    LaunchedEffect(state) { while (true) { behind = goLiveRoute(state, System.currentTimeMillis()) != GoLiveRoute.NONE; delay(1_000) } }
     var moreExpanded by remember { mutableStateOf(false) }
     var interaction by remember { mutableIntStateOf(0) }
     var playing by remember(state.player) { mutableStateOf(state.player?.playWhenReady == true) }
@@ -55,6 +72,8 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
         layout.focusFallback(null, deckAvailable)?.let { runCatching { targets.getValue(it).requestFocus() } }
     }
     LaunchedEffect(interaction, moreExpanded) { if (!moreExpanded) { delay(8_000); onHide() } }
+    fun focusDeck() { layout.focusFallback(null, deckAvailable)?.let { runCatching { targets.getValue(it).requestFocus() } } }
+    LaunchedEffect(behind) { if (!behind && goLiveFocused) { goLiveFocused = false; focusDeck() } }
     val row = (state.channels.firstOrNull { it.item.channel.id == state.playingId } ?: state.playingRow?.takeIf { it.item.channel.id == state.playingId })
     val position by rememberCatchupPosition(state)
     val programme = if (state.catchup != null) position?.let { catchupShown(state, it) } ?: state.catchup else row?.let { liveProgramme(state, it.item.channel.id, now) }
@@ -77,16 +96,25 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
             }
         }, timeline = {
             if (state.catchup != null || state.localTimeshift) ScrubTimeline(programme, position, now, state.scrubTarget != null, Modifier.fillMaxWidth(),
-                onScrub = { interaction++; onScrub(it) }, onFocused = { interaction++ },
+                onScrub = { interaction++; onScrub(it) }, onFocused = { interaction++; goLiveFocused = false },
                 buffered = state.playback?.takeIf { state.localTimeshift }?.let { playback -> playback::localOldest })
             else ScrubTimeline(programme, null, now, false, Modifier.fillMaxWidth())
         }, time = {
-            if (state.catchup != null || state.localTimeshift) Text(stringResource(R.string.iptv_scrub_deck_hint), style = MaterialTheme.typography.labelSmall,
-                color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(Modifier.weight(1f)) {
+                    if (state.catchup != null || state.localTimeshift) Text(stringResource(R.string.iptv_scrub_deck_hint), style = MaterialTheme.typography.labelSmall,
+                        color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+                }
+                if (behind) PillControlButton(Icons.Filled.LiveTv, label = stringResource(R.string.iptv_live_return),
+                    onClick = { interaction++; if (onGoLive()) { focusDeck(); behind = false } },
+                    focusRequester = goLiveFocus, onFocused = { interaction++; goLiveFocused = true }, onDownKey = { focusDeck() },
+                    modifier = Modifier.focusProperties { left = FocusRequester.Cancel; right = FocusRequester.Cancel }, labelMaxLines = 1)
+            }
         }, deck = {
             Row(Modifier.fillMaxWidth().focusGroup()) {
                 PlayerControlDeck(layout, available, targets::getValue, playing, moreExpanded = moreExpanded,
                     onMoreDismiss = { moreExpanded = false; interaction++ },
+                    upFocus = goLiveFocus.takeIf { behind },
                     onBottom = onHide,
                     onClick = { action ->
                         interaction++
@@ -96,7 +124,7 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
                             else -> { moreExpanded = false; onAction(action) }
                         }
                     },
-                    onFocused = { interaction++ }, modifier = Modifier.weight(1f))
+                    onFocused = { interaction++; goLiveFocused = false }, modifier = Modifier.weight(1f))
             }
         })
     }

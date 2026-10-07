@@ -275,7 +275,10 @@ private fun PlaybackNavHost(
                 },
                 onNavigateToFolderDetail = { collectionId, folderId ->
                     navController.navigate(Screen.FolderDetail.createRoute(collectionId, folderId))
-                }
+                },
+                onOpenLiveTv = { navController.openRootDestination(Screen.IptvLive.route) },
+                onOpenIptvRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } },
+                onOpenIptvVodTitle = { ref -> navController.navigate(Screen.IptvVodTitle.createRoute(ref)) }
             )
         }
 

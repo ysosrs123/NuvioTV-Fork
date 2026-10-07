@@ -2,6 +2,7 @@ package com.nuvio.tv.ui.screens.player
 
 import android.util.Log
 import androidx.media3.exoplayer.SeekParameters
+import com.nuvio.tv.core.iptv.VodRef
 import com.nuvio.tv.core.util.TtffTrace
 import com.nuvio.tv.data.local.InternalPlayerEngine
 import kotlinx.coroutines.CancellationException
@@ -21,13 +22,14 @@ internal fun PlayerRuntimeController.attachMpvView(view: NuvioMpvSurfaceView?) {
     if (currentStreamUrl.isBlank()) return
     if (!mpvMediaLoadPrepared) return
     if (mpvInitializationInProgress) return
+    if (VodRef.parse(currentStreamUrl)?.let { mediaSourceFactory.iptvVodSession.ready(it) == null } == true) return
 
     runCatching {
         performPendingMpvHardRestartIfNeeded(view)
         view.applyHi10pGnextSoftwareFallback(shouldUseMpvHi10pGnextSoftwareFallback())
         view.applyHardwareDecodeMode(mpvHardwareDecodeModeSetting)
         registerMpvEventRelay(view)
-        val (mpvUrl, mpvHeaders) = IptvVodDataSourceFactory.resolveForMpv(context, currentStreamUrl, currentHeaders)
+        val (mpvUrl, mpvHeaders) = iptvVodMpvMedia(currentStreamUrl, currentHeaders)
         view.setMedia(mpvUrl, mpvHeaders)
         view.setPlaybackSpeed(_uiState.value.playbackSpeed)
         view.applyAudioAmplificationDb(_uiState.value.audioAmplificationDb)
@@ -105,6 +107,7 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
     }
     currentMediaSession = null
     notifyAudioSessionUpdate(false)
+    if (awaitIptvVodForMpv(url) { initializeMpvPlayer(url, headers, allowEngineFailover) }) return
 
     val view = mpvView
     if (view == null) {
@@ -138,7 +141,7 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
             .takeIf { it > 0L }
             ?: (_uiState.value.pendingSeekPosition?.coerceAtLeast(0L) ?: 0L)
         playbackAnalyticsDiagnostics.setStartupStartPosition(initialResumePosition)
-        val (mpvUrl, mpvHeaders) = IptvVodDataSourceFactory.resolveForMpv(context, url, headers)
+        val (mpvUrl, mpvHeaders) = iptvVodMpvMedia(url, headers)
         view.setMedia(mpvUrl, mpvHeaders, initialResumePosition)
         val playerInitLine =
             "PLAYER_INIT: engine=MPV host=${url.safeMpvTraceHost()} " +

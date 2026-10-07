@@ -95,7 +95,7 @@ fun V2PlayerControls(
     val more = buildList {
         add(Utility(V2PlayerControl.SPEED, Icons.Default.Speed, stringResource(R.string.cd_playback_speed), actions.speed, true))
         add(Utility(V2PlayerControl.ASPECT, Icons.Default.AspectRatio, stringResource(R.string.cd_aspect_ratio), actions.aspect))
-        if (!uiState.isServerStream) add(Utility(V2PlayerControl.EXTERNAL, Icons.AutoMirrored.Filled.OpenInNew, stringResource(R.string.cd_open_external_player), actions.external))
+        if (uiState.externalPlayerAvailable) add(Utility(V2PlayerControl.EXTERNAL, Icons.AutoMirrored.Filled.OpenInNew, stringResource(R.string.cd_open_external_player), actions.external))
         add(Utility(V2PlayerControl.ENGINE, Icons.Default.SwapHoriz, stringResource(R.string.cd_switch_player_engine), actions.engine))
         if (uiState.playbackIssueReportsEnabled) add(Utility(V2PlayerControl.REPORT, Icons.Default.BugReport,
             if (reportCodeVisible && uiState.playbackIssueReportId != null) uiState.playbackIssueReportId else stringResource(R.string.player_report_issue),

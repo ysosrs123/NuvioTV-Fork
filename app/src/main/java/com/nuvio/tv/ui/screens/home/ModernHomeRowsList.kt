@@ -64,6 +64,11 @@ import com.nuvio.tv.ui.util.StableRef
 import com.nuvio.tv.ui.util.dpadVerticalFastScroll
 import com.nuvio.tv.ui.util.recompositionHighlighter
 import com.nuvio.tv.ui.components.rememberPlaceholderShimmerOffsetState
+import com.nuvio.tv.ui.components.PosterCardStyle
+import com.nuvio.tv.ui.screens.iptv.IPTV_HOME_ROW_PREFIX
+import com.nuvio.tv.ui.screens.iptv.IptvHomeStyle
+import com.nuvio.tv.ui.screens.iptv.LocalIptvHome
+import com.nuvio.tv.ui.screens.iptv.iptvHomeRows
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -334,6 +339,14 @@ internal fun ModernHomeRowsList(
         }
     }
 
+    val iptvHome = LocalIptvHome.current
+    val iptvRows = iptvHome?.rows?.value.orEmpty()
+    val iptvRowFocus = remember { mutableMapOf<String, FocusRequester>() }
+    val iptvInset = if (isV2) 24.dp else 52.dp
+    val iptvStyle = IptvHomeStyle(poster = PosterCardStyle(width = portraitCatalogCardWidth, height = portraitCatalogCardHeight, cornerRadius = posterCardCornerRadius),
+        wideWidth = landscapeCatalogCardWidth, wideHeight = landscapeCatalogCardHeight, showLabels = showLabels, compactTitle = true,
+        headerPadding = PaddingValues(start = iptvInset, end = 52.dp, bottom = 14.dp), rowStart = iptvInset, rowEnd = 52.dp, spacing = NuvioTheme.spacing.md)
+
     val focusRestorerRequester = remember(activeRowKey) {
         {
             activeRowKey.value?.let { rowFocusRequesters[it] } ?: FocusRequester.Default
@@ -385,6 +398,7 @@ internal fun ModernHomeRowsList(
                     if (isV2 && event.type == KeyEventType.KeyDown &&
                         event.nativeKeyEvent.repeatCount == 0 &&
                         (event.key == Key.DirectionDown || event.key == Key.DirectionUp)) {
+                        if (activeRowKey.value?.startsWith(IPTV_HOME_ROW_PREFIX) == true) return@onPreviewKeyEvent false
                         val currentIndex = carouselRows.list.indexOfFirst { it.key == activeRowKey.value }
                         val targetIndex = adjacentHomeRowIndex(currentIndex, carouselRows.list.size,
                             event.key == Key.DirectionDown)
@@ -402,6 +416,19 @@ internal fun ModernHomeRowsList(
                                 val itemTarget = stableItemFocusRequestersByRow[target.key]?.value?.get(saved)
                                 val moved = runCatching { itemTarget?.requestFocus() == true }.getOrDefault(false)
                                 if (!moved) runCatching { rowFocusRequesters[target.key]?.requestFocus() }
+                            }
+                            return@onPreviewKeyEvent true
+                        }
+                        val firstIptvRow = iptvRows.firstOrNull()
+                        if (event.key == Key.DirectionDown && firstIptvRow != null && currentIndex == carouselRows.list.lastIndex) {
+                            verticalFocusJob?.cancel()
+                            verticalFocusJob = navigationScope.launch {
+                                val iptvIndex = carouselRows.list.size
+                                if (verticalRowListState.layoutInfo.visibleItemsInfo.none { it.index == iptvIndex }) {
+                                    verticalRowListState.scrollToItem(iptvIndex)
+                                    repeat(2) { withFrameNanos { } }
+                                }
+                                runCatching { iptvRowFocus[firstIptvRow.key]?.requestFocus() }
                             }
                             return@onPreviewKeyEvent true
                         }
@@ -604,6 +631,12 @@ internal fun ModernHomeRowsList(
                     }
                 )
                 }
+            }
+            iptvHomeRows(iptvHome, iptvRows, iptvStyle, iptvRowFocus) { key, index ->
+                focusedItemByRowMap[key] = index
+                latestOnActiveRowKeyChange.value(key)
+                latestOnActiveItemIndexChange.value(index)
+                if (focusedCatalogSelection.value != null) onFocusedCatalogSelectionChange(null)
             }
         }
     }

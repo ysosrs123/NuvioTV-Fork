@@ -257,6 +257,15 @@ internal fun PlayerRuntimeController.handleMpvPlaybackError(
         lastPlaybackDiagnosticsForReport =
             lastPlaybackDiagnosticsForReport.copy(result = "Error: $detailedError")
 
+        if (com.nuvio.tv.core.iptv.VodRef.isVod(currentStreamUrl) && httpCode != null &&
+            com.nuvio.tv.core.iptv.VodStreams.providerRefusal(httpCode) &&
+            isMpvHttpErrorFresh(mpvLastHttpErrorAtMs, SystemClock.elapsedRealtime())
+        ) {
+            mediaSourceFactory.iptvVodSession.failed()
+            surfaceIptvVodFailure(mediaSourceFactory.iptvVodSession.refused().message.orEmpty())
+            return
+        }
+
         if (isMpvDeadLinkHttpStatus(httpCode) &&
             isMpvHttpErrorFresh(mpvLastHttpErrorAtMs, SystemClock.elapsedRealtime()) &&
             advanceToNextLiveSource(detailedError)

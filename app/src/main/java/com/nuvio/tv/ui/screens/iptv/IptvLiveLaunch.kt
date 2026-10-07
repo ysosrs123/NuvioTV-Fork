@@ -8,4 +8,5 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Singleton
 class IptvLiveLaunch @Inject constructor() {
     val source = MutableStateFlow<IptvSourceRef?>(null)
+    val channel = MutableStateFlow<IptvHomeTune?>(null)
 }

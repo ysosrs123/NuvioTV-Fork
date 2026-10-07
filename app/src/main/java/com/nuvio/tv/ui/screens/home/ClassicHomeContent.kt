@@ -75,6 +75,9 @@ import com.nuvio.tv.ui.components.PosterCardStyle
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.MaterialTheme
 import com.nuvio.tv.R
+import com.nuvio.tv.ui.screens.iptv.IptvHomeStyle
+import com.nuvio.tv.ui.screens.iptv.LocalIptvHome
+import com.nuvio.tv.ui.screens.iptv.iptvHomeRows
 
 private class FocusSnapshot(
     var rowIndex: Int,
@@ -428,6 +431,13 @@ fun ClassicHomeContent(
         return
     }
 
+    val iptvHome = LocalIptvHome.current
+    val iptvRows = iptvHome?.rows?.value.orEmpty()
+    val iptvRowCount = rememberUpdatedState(iptvRows.size)
+    val iptvStyle = IptvHomeStyle(poster = classicCatalogPosterCardStyle, wideWidth = classicSecondaryPosterCardStyle.width * (16f / 9f),
+        wideHeight = classicSecondaryPosterCardStyle.width, showLabels = uiState.posterLabelsEnabled, compactTitle = false,
+        headerPadding = PaddingValues(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.md),
+        rowStart = NuvioTheme.spacing.xxxl, rowEnd = NuvioTheme.spacing.xxxl, spacing = NuvioTheme.spacing.lg)
     // Lazy catalog loading: trigger load when rows approach visibility
     val latestOnRequestLazyCatalogLoad = rememberUpdatedState(onRequestLazyCatalogLoad)
     val latestVisibleHomeRows = rememberUpdatedState(visibleHomeRows)
@@ -447,7 +457,7 @@ fun ClassicHomeContent(
             // Offset for hero + CW sections that precede homeRows in LazyColumn
             val heroOffset = if (uiState.heroSectionEnabled && uiState.heroItems.isNotEmpty()) 1 else 0
             val cwOffset = if (uiState.continueWatchingEnabled && uiState.continueWatchingItems.isNotEmpty()) 1 else 0
-            val rowsOffset = heroOffset + cwOffset
+            val rowsOffset = heroOffset + cwOffset + iptvRowCount.value
             for (idx in firstVisible.coerceAtLeast(0)..(lastVisible + prefetchAhead)) {
                 val rowIdx = idx - rowsOffset
                 val row = rows.getOrNull(rowIdx) ?: continue
@@ -782,6 +792,8 @@ fun ClassicHomeContent(
                 )
             }
         }
+
+        iptvHomeRows(iptvHome, iptvRows, iptvStyle, onFocused = { _, _ -> activeRowKeyState.value = null })
 
         itemsIndexed(
             items = visibleHomeRows,

@@ -1108,7 +1108,7 @@ class PlayerViewModel @Inject constructor(
         onResult: (Boolean) -> Unit
     ) {
         val url = controller.getCurrentStreamUrl()
-        if (url.isBlank()) {
+        if (url.isBlank() || com.nuvio.tv.core.iptv.VodRef.isVod(url)) {
             onResult(false)
             return
         }

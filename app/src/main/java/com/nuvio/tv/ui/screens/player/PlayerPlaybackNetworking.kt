@@ -287,12 +287,13 @@ internal object PlayerPlaybackNetworking {
     @UnstableApi
     fun createHttpDataSourceFactory(
         defaultHeaders: Map<String, String> = emptyMap(),
-        useLongReadTimeout: Boolean = false
+        useLongReadTimeout: Boolean = false,
+        defaultUserAgent: Boolean = true
     ): DataSource.Factory {
         val client = createHttpClient(defaultHeaders, useLongReadTimeout)
         val httpFactory = OkHttpDataSource.Factory(client).apply {
             setDefaultRequestProperties(defaultHeaders)
-            if (defaultHeaders.none { it.key.equals("User-Agent", ignoreCase = true) }) {
+            if (defaultUserAgent && defaultHeaders.none { it.key.equals("User-Agent", ignoreCase = true) }) {
                 setUserAgent(PlayerMediaSourceFactory.DEFAULT_USER_AGENT)
             }
         }
@@ -302,9 +303,10 @@ internal object PlayerPlaybackNetworking {
     @UnstableApi
     fun createDataSourceFactory(
         context: android.content.Context,
-        defaultHeaders: Map<String, String> = emptyMap()
+        defaultHeaders: Map<String, String> = emptyMap(),
+        defaultUserAgent: Boolean = true
     ): DataSource.Factory {
-        return DefaultDataSource.Factory(context, createHttpDataSourceFactory(defaultHeaders))
+        return DefaultDataSource.Factory(context, createHttpDataSourceFactory(defaultHeaders, defaultUserAgent = defaultUserAgent))
     }
 
     fun openConnection(

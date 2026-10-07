@@ -2793,7 +2793,7 @@ private fun PlayerControlsOverlay(
                             onUpKey = onHideControls,
                             onFocused = onResetHideTimer
                         )
-                        if (!uiState.isServerStream) {
+                        if (uiState.externalPlayerAvailable) {
                             ControlButton(
                                 icon = Icons.AutoMirrored.Filled.OpenInNew,
                                 contentDescription = stringResource(R.string.cd_open_external_player),

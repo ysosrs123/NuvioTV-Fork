@@ -99,6 +99,9 @@ import com.nuvio.tv.ui.components.collectionFolderCardImageUrl
 import com.nuvio.tv.ui.components.wideFolderCoverNeedsCrop
 import com.nuvio.tv.ui.components.nuvioCardDepth
 import com.nuvio.tv.ui.components.rememberArtworkBackedCardGlow
+import com.nuvio.tv.ui.screens.iptv.IptvHomeStyle
+import com.nuvio.tv.ui.screens.iptv.LocalIptvHome
+import com.nuvio.tv.ui.screens.iptv.iptvHomeRows
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -217,8 +220,10 @@ fun GridHomeContent(
     }
 
     // Build index-to-section mapping for sticky header
-    val sectionMapping = remember(gridItems, continueWatchingOffset) {
-        buildSectionMapping(gridItems, continueWatchingOffset)
+    val iptvHome = LocalIptvHome.current
+    val iptvRows = iptvHome?.rows?.value.orEmpty()
+    val sectionMapping = remember(gridItems, continueWatchingOffset, iptvRows.size) {
+        buildSectionMapping(gridItems, continueWatchingOffset + iptvRows.size)
     }
 
     // Pre-compute whether hero exists to avoid repeated list scan in derivedStateOf
@@ -429,6 +434,9 @@ fun GridHomeContent(
             result
         }
 
+        val iptvStyle = IptvHomeStyle(poster = posterCardStyle, wideWidth = 220.dp, wideHeight = 124.dp, showLabels = uiState.posterLabelsEnabled,
+            compactTitle = false, headerPadding = PaddingValues(top = NuvioTheme.spacing.xl, bottom = NuvioTheme.spacing.md), rowStart = 36.dp,
+            rowEnd = 36.dp, spacing = NuvioTheme.spacing.md, rowWidth = gridWidth)
         LazyVerticalGrid(
             state = gridState,
             columns = GridCells.Adaptive(minSize = gridColumnMinSize),
@@ -655,6 +663,8 @@ fun GridHomeContent(
                     )
                 }
             }
+
+            iptvHomeRows(iptvHome, iptvRows, iptvStyle, onFocused = { _, _ -> activeCwRowKey.value = null })
 
             // Emit post-section items (SectionDividers, Content, SeeAll, Collections)
             if (trimmedPostItems.isNotEmpty()) {

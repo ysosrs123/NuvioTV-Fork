@@ -243,7 +243,9 @@ data class PlayerUiState(
     // from loading overlay, rebuffering indicator, and corner overlay.
     val hideTorrentStats: Boolean = true,
     val controlLayout: com.nuvio.tv.data.local.PlayerControlLayout? = null
-)
+) {
+    val externalPlayerAvailable: Boolean get() = !isServerStream && !com.nuvio.tv.core.iptv.VodRef.isVod(currentStreamUrl)
+}
 
 data class PlaybackTimelineState(
     /** Display/seek-preview position used by the timers. */

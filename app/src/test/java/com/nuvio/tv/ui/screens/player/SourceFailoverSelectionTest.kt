@@ -67,6 +67,15 @@ class SourceFailoverSelectionTest {
     }
 
     @Test
+    fun `an IPTV movie or episode reference is playable and known by its reference`() {
+        val episode = stream(url = "iptv-vod:1:src_1:episode:42.7")
+        assertTrue(playable(episode))
+        assertTrue(playable(stream(url = "iptv-vod:1:src_1:movie:603")))
+        assertEquals("iptv-vod:1:src_1:episode:42.7", SourceFailoverSelection.failoverKey(episode))
+        assertFalse(playable(stream(url = "iptv-live:1:src_1:channel:9")))
+    }
+
+    @Test
     fun `a link the debrid already resolved stays playable`() {
         val resolved = stream(url = "https://torbox.example/dl/123", clientResolve = torboxResolve())
         assertTrue(resolved.isDirectDebrid())

@@ -143,6 +143,8 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
     }
     LaunchedEffect(state.playingId, state.tuning) { if (state.playingId == null && !state.tuning) fullscreen = false }
     LaunchedEffect(fullscreen) { viewModel.setFullscreen(fullscreen); if (!fullscreen) viewModel.closeInset() }
+    val openFullscreen by viewModel.fullscreenRequest.collectAsStateWithLifecycle()
+    LaunchedEffect(openFullscreen) { if (openFullscreen) { fullscreen = true; viewModel.fullscreenShown() } }
     LaunchedEffect(state.source, state.category, state.favourites, state.sports, state.search) { if (moving != null) { moving = null; viewModel.finishMove() } }
     LaunchedEffect(state.message) { if (state.message != null) { delay(6_000); viewModel.clearMessage() } }
     suspend fun focusGridNow() {
@@ -218,7 +220,8 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                     PlayerControlAction.AUDIO, PlayerControlAction.SUBTITLES -> { showTracks = true }
                     else -> Unit
                 }
-            }, onScrub = viewModel::scrub, onCloseInset = viewModel::closeInset, onSwapInset = viewModel::swapInset, onChannelMenu = { menuFor = it })
+            }, onScrub = viewModel::scrub, onCloseInset = viewModel::closeInset, onSwapInset = viewModel::swapInset, onChannelMenu = { menuFor = it },
+            onGoLive = viewModel::goLive)
     } else {
         Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
             if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }

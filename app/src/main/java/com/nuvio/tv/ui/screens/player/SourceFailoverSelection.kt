@@ -1,13 +1,14 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.core.iptv.VodRef
 import com.nuvio.tv.domain.model.Stream
 import com.nuvio.tv.domain.model.StreamDebridCacheState
 
 /**
  * Which list entry the player may switch to on its own when a source fails.
  *
- * Entries with a playable http(s) link qualify, media server entries (their link is made when they
- * are opened), and debrid entries the service reports as cached: those are added only if cached, so
+ * Entries with a playable http(s) link or an IPTV movie/episode reference qualify, media server entries
+ * (their link is made when they are opened), and debrid entries the service reports as cached: those are added only if cached, so
  * no download starts. Plain torrents and magnets are skipped (they would play peer to peer), as are
  * uncached entries and external links (they open a browser).
  */
@@ -34,7 +35,7 @@ internal object SourceFailoverSelection {
         if (!stream.isDirectDebrid()) {
             if (stream.isTorrent()) return false
             val url = stream.getStreamUrl()?.trim() ?: return false
-            if (!url.startsWith("http://", ignoreCase = true) && !url.startsWith("https://", ignoreCase = true)) {
+            if (!url.startsWith("http://", ignoreCase = true) && !url.startsWith("https://", ignoreCase = true) && !VodRef.isVod(url)) {
                 return false
             }
         }

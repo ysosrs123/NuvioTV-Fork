@@ -124,12 +124,23 @@ Done — committed together with the screens below:
   TMDB 429), and a switch per source.
 - Strings `iptv_media_strings.xml` and `iptv_vod_browse_strings.xml` are translated into all 40 locales.
 
-In progress (after `e20d157`):
-- VOD gaps (connection lease for playing movies, no retries on busy/refused, hide
-  external player, failover, mpv resolve off the main thread, single User-Agent) and a
-  Go live button in the control deck.
-- Live TV rows on the Nuvio Home screen (favourites, sport on now, recently added
-  movies/series, recordings) with a toggle per row.
+Done after `e20d157` (host-tested, CI pending):
+- VOD gaps closed: a playing IPTV movie/episode takes a `VOD` lease in
+  `LiveSessionAdmission` (kept across data-source reopen, released on player release,
+  source/engine switch, next reference or failed open), so Live TV and recordings see
+  it; busy/refused providers raise a non-retryable `IptvVodPlaybackException` with the
+  IPTV message; external player hidden and refused for `iptv-vod`; failover includes
+  IPTV through the same resolver; mpv resolves off the main thread and holds the lease;
+  one User-Agent per request (provider/source value or the default). "Return to live"
+  pill above the Live TV full-screen deck while behind live (cushion, local timeshift,
+  catch-up near live, paused live); not added to the shared `PlayerControlAction`.
+- Live TV rows on the Nuvio Home screen (IPTV flavour only): favourites (now playing and
+  progress), sport on now, recently added movies and series (off by default),
+  recordings; a "Home screen" group in Settings → Live TV with a switch per row. Rows
+  load 800 ms after Home, cache 3 minutes, and open Live TV through `IptvLiveLaunch.channel`
+  (no route argument, so sidebar navigation is unchanged). Classic and Grid insert the
+  rows after Continue Watching; Modern appends them after the catalogue rows. Strings
+  `iptv_home_strings.xml` not translated yet.
 - Minified release build check (R8) with all new code. Run 37594253652 failed in
   `produceIptvPrototypeReleaseComposeMapping` ("Unsupported class file major version
   69"): smbj 0.15.0 depends on bcprov-jdk18on 1.85.2, a multi-release jar with Java 25

@@ -1,5 +1,10 @@
 package com.nuvio.tv.data.iptv
 
+import com.nuvio.tv.core.iptv.AcquisitionKey
+import com.nuvio.tv.core.iptv.ConsumerReservation
+import com.nuvio.tv.core.iptv.LiveAdmissionResult
+import com.nuvio.tv.core.iptv.LiveConsumerLease
+import com.nuvio.tv.core.iptv.LiveConsumerRole
 import com.nuvio.tv.core.iptv.LiveSessionAdmission
 import com.nuvio.tv.core.iptv.VodKind
 import com.nuvio.tv.core.iptv.VodRef
@@ -9,13 +14,16 @@ import com.nuvio.tv.core.iptv.VodStreams
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.Closeable
+import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 
 data class IptvVodStreamItem(val source: IptvSource, val ref: VodRef, val text: VodStreamText) {
     override fun toString(): String = "IptvVodStreamItem(ref=$ref)"
 }
 
 sealed interface IptvVodResolution {
-    data class Ready(val playback: IptvVodPlayback) : IptvVodResolution
+    data class Ready(val playback: IptvVodPlayback, val lease: IptvVodLease? = null) : IptvVodResolution
     data class Busy(val sourceLabel: String) : IptvVodResolution
     data object Unavailable : IptvVodResolution
 }
@@ -69,23 +77,47 @@ class IptvVodStreams(private val repository: IptvVodRepository, private val cata
     }
 }
 
+class IptvVodLease internal constructor(private val admission: LiveSessionAdmission, private val lease: LiveConsumerLease) : Closeable {
+    private val closed = AtomicBoolean()
+    val active: Boolean get() = !closed.get()
+    override fun close() { if (closed.compareAndSet(false, true)) admission.release(lease)?.let(admission::completeClose) }
+    override fun toString(): String = "IptvVodLease(active=$active)"
+}
+
 class IptvVodResolver(private val repository: IptvVodRepository, private val catalogue: IptvCatalogueStore, private val admission: LiveSessionAdmission) {
-    suspend fun resolve(ref: VodRef): IptvVodResolution = withContext(Dispatchers.IO) {
+    suspend fun resolve(ref: VodRef): IptvVodResolution = open(ref, null, false)
+
+    suspend fun acquire(ref: VodRef, known: IptvVodPlayback? = null): IptvVodResolution = open(ref, known?.takeIf { it.ref == ref }, true)
+
+    private suspend fun open(ref: VodRef, known: IptvVodPlayback?, lease: Boolean): IptvVodResolution = withContext(Dispatchers.IO) {
+        var held: IptvVodLease? = null
         try {
             val source = catalogue.sources(ref.profileId).firstOrNull { it.ref.sourceId == ref.sourceId } ?: return@withContext IptvVodResolution.Unavailable
-            val limit = catalogue.accounts(ref.profileId).firstOrNull { it.id == source.accountId }?.maxStreams ?: 1
-            val inUse = admission.snapshot().upstreamsByAccount[admissionAccount(ref.profileId, source.accountId)] ?: 0
-            if (VodStreams.connectionsBusy(inUse, limit)) {
-                IptvLog.info("vod play refused in_use=$inUse limit=$limit")
-                return@withContext IptvVodResolution.Busy(source.label)
+            val limit = (catalogue.accounts(ref.profileId).firstOrNull { it.id == source.accountId }?.maxStreams ?: 1).coerceAtLeast(1)
+            val account = admissionAccount(ref.profileId, source.accountId)
+            if (lease) {
+                admission.setAccountLimit(account, limit)
+                val key = AcquisitionKey(account, "vod:" + UUID.randomUUID(), ref.kind.wire, source.activeGeneration ?: 0)
+                val result = admission.acquire(key, 0, ConsumerReservation(LiveConsumerRole.VOD, 0, 0))
+                if (result !is LiveAdmissionResult.Admitted) {
+                    IptvLog.info("vod play refused limit=$limit reason=${(result as LiveAdmissionResult.Denied).reason}")
+                    return@withContext IptvVodResolution.Busy(source.label)
+                }
+                held = IptvVodLease(admission, result.lease)
+            } else {
+                val inUse = admission.snapshot().upstreamsByAccount[account] ?: 0
+                if (VodStreams.connectionsBusy(inUse, limit)) {
+                    IptvLog.info("vod play refused in_use=$inUse limit=$limit")
+                    return@withContext IptvVodResolution.Busy(source.label)
+                }
             }
-            val playback = repository.playback(ref)
-            IptvLog.info("vod play kind=${ref.kind.wire} source=${source.kind}")
-            IptvVodResolution.Ready(playback)
+            val playback = known ?: repository.playback(ref)
+            if (known == null) IptvLog.info("vod play kind=${ref.kind.wire} source=${source.kind} lease=$lease")
+            IptvVodResolution.Ready(playback, held).also { held = null }
         } catch (cancel: CancellationException) { throw cancel }
         catch (error: Exception) {
             IptvLog.failure("vod play", error)
             IptvVodResolution.Unavailable
-        }
+        } finally { held?.close() }
     }
 }

@@ -5,7 +5,7 @@ import java.util.UUID
 data class AcquisitionKey(val accountId: String, val channelId: String, val variantId: String, val contextVersion: Long) {
     init { require(accountId.isNotBlank() && channelId.isNotBlank() && variantId.isNotBlank() && contextVersion >= 0) }
 }
-enum class LiveConsumerRole { VIEWER, RECORDING, TIMESHIFT }
+enum class LiveConsumerRole { VIEWER, RECORDING, TIMESHIFT, VOD }
 data class ConsumerReservation(val role: LiveConsumerRole, val decoders: Int, val memoryBytes: Long, val storageBytes: Long = 0) {
     init {
         require(decoders >= 0 && memoryBytes >= 0 && storageBytes >= 0)

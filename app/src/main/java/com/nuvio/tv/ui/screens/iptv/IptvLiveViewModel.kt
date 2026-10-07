@@ -68,6 +68,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private val recordingTargets: com.nuvio.tv.core.recording.IptvRecordingTargets) : ViewModel() {
     private val mutable = MutableStateFlow(IptvLiveState(maxTiles = device.maxTiles))
     val state = mutable.asStateFlow()
+    private val fullscreenRequested = MutableStateFlow(false)
+    val fullscreenRequest = fullscreenRequested.asStateFlow()
     private val owner = UUID.randomUUID().toString()
     private val browse = IptvBrowseRepository(catalogue, guides)
     private val stalker = IptvStalkerClient()
@@ -120,6 +122,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         viewModelScope.launch(Dispatchers.IO) { runCatching { IptvLocalTimeshiftPlaces.sweepOnce(timeshiftPreferences, recordingTargets) } }
         viewModelScope.launch { state.map { it.player != null || it.multiview?.any { tile -> tile.player != null } == true }.distinctUntilChanged().collect(screensaver::setPlaybackActive) }
         viewModelScope.launch { liveLaunch.source.collect { ref -> if (ref != null && session != null) { liveLaunch.source.value = null; showSource(ref) } } }
+        viewModelScope.launch { liveLaunch.channel.collect { if (it != null) tuneLaunched() } }
         viewModelScope.launch {
             recorder.all.collect { all -> val profile = session?.profileId; mutable.update { it.copy(recordings = all.filter { r -> r.profileId == profile }) } }
         }
@@ -138,6 +141,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                         if (requested != null) mutable.update { it.copy(source = requested) }
                         mutable.update { it.copy(recordings = recorder.all.value.filter { r -> r.profileId == current.profileId }) }
                         load(); refresher.refreshStale(current)
+                        tuneLaunched()
                     }
                 }
         }
@@ -171,6 +175,26 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     fun foreground(active: Boolean) {
         foreground = active
         if (active) load(background = mutable.value.channels.isNotEmpty()) else { exitMultiview(); stop() }
+        if (active) tuneLaunched()
+    }
+    fun fullscreenShown() { fullscreenRequested.value = false }
+    private fun tuneLaunched() {
+        val current = session ?: return
+        if (!foreground) return
+        val tune = liveLaunch.channel.value ?: return
+        liveLaunch.channel.value = null
+        if (tune.profileId != current.profileId) return
+        val row = tune.row
+        val ref = refOf(row) ?: return
+        val state = mutable.value
+        restored = ref
+        mutable.update { it.copy(source = ref, focused = row, category = null, favourites = tune.favourites, sports = tune.sport && it.sportEnabled,
+            search = "", hiddenCategories = hiddenOf(ref), channels = if (it.source == ref) it.channels else emptyList(), next = null,
+            guide = if (it.source == ref) it.guide else emptyMap()) }
+        load()
+        if (state.multiview != null) exitMultiview(row)
+        else if (state.playingId != row.item.channel.id || state.player == null || state.catchup != null) watch(row)
+        fullscreenRequested.value = true
     }
     fun loadMore() { if (mutable.value.next != null) load(append = true) }
     fun showFavourites() { mutable.update { it.copy(favourites = true, sports = false, category = null, focused = null) }; remember(mutable.value); load() }
@@ -609,6 +633,24 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val from = LiveTimeshift.rewindFrom(now, programme, hasArchive(row) && livePreferences.timeshift) ?: return false
         watch(row, programme, from)
         return true
+    }
+    fun goLive(): Boolean {
+        val state = mutable.value
+        val row = state.playingRow ?: return false
+        val player = state.player ?: return false
+        val playback = state.playback ?: return false
+        return when (goLiveRoute(state, System.currentTimeMillis())) {
+            GoLiveRoute.CUSHION -> playback.goLive()
+            GoLiveRoute.LOCAL -> playback.localLive().also { live ->
+                if (live) {
+                    scrubJob?.cancel()
+                    player.playWhenReady = true
+                    mutable.update { it.copy(localBehind = false, paused = false, pausedAt = null, pausedProgramme = null, scrubTarget = null) }
+                }
+            }
+            GoLiveRoute.RETUNE -> { watch(row); true }
+            GoLiveRoute.NONE -> false
+        }
     }
     val showStatsByDefault: Boolean get() = livePreferences.showStats
     private fun playWhenReadyChanged(ready: Boolean) {

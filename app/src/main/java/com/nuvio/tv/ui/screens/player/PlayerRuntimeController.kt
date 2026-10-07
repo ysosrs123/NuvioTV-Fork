@@ -520,6 +520,7 @@ class PlayerRuntimeController(
     internal var subtitleTimingRefreshJob: Job? = null
     internal var nextEpisodeAutoPlayJob: Job? = null
     internal var debridResolveJob: Job? = null
+    internal var iptvVodMpvJob: Job? = null
     internal var stillWatchingPromptJob: Job? = null
     internal var startupLoadingReportJob: Job? = null
     internal var sourceStreamsJob: Job? = null

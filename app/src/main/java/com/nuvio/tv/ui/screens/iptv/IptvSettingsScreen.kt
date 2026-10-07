@@ -119,6 +119,7 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
                 }
                 if (state.sport) item(key = "sports") { IptvSportsSettingsSection() }
                 item(key = "vod") { IptvVodSettingsSection() }
+                item(key = "home") { IptvHomeSettingsSection() }
                 if (state.multiview) item(key = "multiview") {
                     SettingsGroupCard(title = stringResource(R.string.iptv_multiview_title)) {
                         SettingsActionRow(title = stringResource(R.string.iptv_multiview_layout), subtitle = null,

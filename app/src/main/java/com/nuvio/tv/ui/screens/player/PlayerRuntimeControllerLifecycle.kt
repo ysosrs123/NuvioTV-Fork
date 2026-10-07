@@ -107,6 +107,9 @@ internal fun PlayerRuntimeController.releasePlayer(flushPlaybackState: Boolean, 
     currentExoPlayerListener = null
     currentExoAnalyticsListener = null
     resetPlaybackTimeline()
+    iptvVodMpvJob?.cancel()
+    iptvVodMpvJob = null
+    mediaSourceFactory.iptvVodSession.release()
     isReleasingPlayer = false
 }
 

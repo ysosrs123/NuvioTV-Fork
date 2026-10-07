@@ -245,6 +245,13 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   (TMDB). Titles that match open Nuvio's own page; others open a Live TV page with play
   and resume.
 
+- Home screen: optional Live TV rows (favourites with what's on, sport on now,
+  recently added movies and series, recordings), each switchable in Settings → Live TV.
+- Movies and series: a playing IPTV movie now counts towards the account's connection
+  limit; busy or refusing providers show a clear message straight away; the external
+  player option is hidden for them; failover can use them.
+- Live TV full screen: a "Return to live" button appears while you are behind live.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
@@ -422,9 +429,8 @@ Phone setup (security review)
   document picker (such as the AM9) add guide files through the iptv-guides folder.
 - Phone setup uses plain HTTP on the home network (pairing code, single-use token and
   confirmation on the TV); it is not meant for untrusted networks.
-- IPTV movies and series as a Nuvio stream source: a playing movie is not counted by
-  Live TV's connection limit; "open in external player" does not work for them;
-  automatic failover to the next stream skips them. Resume for titles without a TMDB/IMDb match
+- IPTV movies and series as a Nuvio stream source: playback, connection counting and
+  the busy/refused messages are untested on devices; m3u8 movies are untested. Resume for titles without a TMDB/IMDb match
   stays on the TV and is not sent to Trakt, Simkl or MDBList.
 - The safety buffer relies on playing at 97% speed; with AC-3/E-AC-3 passthrough to a
   receiver the speed change may be ignored, so the buffer would not grow.

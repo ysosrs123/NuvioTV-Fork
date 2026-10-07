@@ -206,7 +206,7 @@ fun StreamScreen(
         if (openExternalInBrowser(playbackInfo)) {
             return
         }
-        val preference = if (playbackInfo.isServerStream) PlayerPreference.INTERNAL else playerPreference ?: return
+        val preference = if (playbackInfo.isServerStream || com.nuvio.tv.core.iptv.VodRef.isVod(playbackInfo.url)) PlayerPreference.INTERNAL else playerPreference ?: return
         if (playbackInfo.isTorrent && !p2pEnabled) {
             pendingTorrentPlaybackInfo = playbackInfo
             showP2pConsentDialog = true
@@ -239,7 +239,7 @@ fun StreamScreen(
             showP2pConsentDialog = true
             return
         }
-        val preference = if (playbackInfo.isServerStream) PlayerPreference.INTERNAL else playerPreference ?: return
+        val preference = if (playbackInfo.isServerStream || com.nuvio.tv.core.iptv.VodRef.isVod(playbackInfo.url)) PlayerPreference.INTERNAL else playerPreference ?: return
         if (uiState.isDirectAutoPlayFlow) {
             // Respect player preference even in direct autoplay flow
             when (preference) {
@@ -340,7 +340,7 @@ fun StreamScreen(
                 return@LaunchedEffect
             }
             // Respect player preference for cached links too
-            when (playerPreference ?: return@LaunchedEffect) {
+            when (if (playbackInfo.isServerStream || com.nuvio.tv.core.iptv.VodRef.isVod(playbackInfo.url)) PlayerPreference.INTERNAL else playerPreference ?: return@LaunchedEffect) {
                 PlayerPreference.EXTERNAL -> {
                     val url = playbackInfo.url ?: if (playbackInfo.isTorrent) "torrent://${playbackInfo.infoHash}" else null
                     url?.let { urlString ->
