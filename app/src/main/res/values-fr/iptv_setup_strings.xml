@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Configurer depuis un téléphone ou un ordinateur</string>
+    <string name="iptv_remote_entry_subtitle">Saisissez adresses et identifiants sur un vrai clavier</string>
+    <string name="iptv_remote_title">Configurer depuis votre téléphone</string>
+    <string name="iptv_remote_description">Scannez le QR code avec votre téléphone, ou ouvrez l’adresse sur un ordinateur du même réseau. Saisissez ensuite le code d’association affiché ici.</string>
+    <string name="iptv_remote_code">Code d’association</string>
+    <string name="iptv_remote_address">Ou ouvrez cette adresse</string>
+    <string name="iptv_remote_qr_description">QR code pour la configuration par téléphone</string>
+    <string name="iptv_remote_home_network">À utiliser uniquement sur votre réseau domestique. La page de configuration n’est pas chiffrée.</string>
+    <string name="iptv_remote_idle_note">S’arrête quand vous quittez cet écran, ou après 10 minutes d’inactivité.</string>
+    <string name="iptv_remote_confirm_note">Rien n’est enregistré tant que vous ne confirmez pas ici sur le téléviseur. Les sources et guides ne peuvent être supprimés que sur le téléviseur.</string>
+    <string name="iptv_remote_starting">Démarrage de la configuration par téléphone…</string>
+    <string name="iptv_remote_waiting">En attente d’un téléphone ou d’un ordinateur</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d appareil connecté</item>
+        <item quantity="many">%d appareils connectés</item>
+        <item quantity="other">%d appareils connectés</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Connectez le téléviseur à votre réseau domestique pour le configurer depuis votre téléphone.</string>
+    <string name="iptv_remote_not_home_network">Le téléviseur n’a pas d’adresse de réseau domestique privé, la configuration par téléphone reste donc désactivée.</string>
+    <string name="iptv_remote_ports_busy">La configuration par téléphone n’a pas pu démarrer car ses ports réseau sont occupés. Réessayez dans un instant.</string>
+    <string name="iptv_remote_idle_stopped">Configuration par téléphone arrêtée après 10 minutes d’inactivité.</string>
+    <string name="iptv_remote_paused">Configuration par téléphone arrêtée pendant que l’application était en arrière-plan.</string>
+    <string name="iptv_remote_start_again">Recommencer</string>
+    <string name="iptv_remote_start_again_subtitle">Affiche un nouveau QR code et un nouveau code d’association</string>
+    <string name="iptv_remote_done">Terminé</string>
+    <string name="iptv_remote_done_subtitle">Arrête la configuration par téléphone et revient en arrière</string>
+    <string name="iptv_remote_confirm_add_title">Ajouter ceci depuis votre téléphone ?</string>
+    <string name="iptv_remote_confirm_edit_title">Modifier %1$s depuis votre téléphone ?</string>
+    <string name="iptv_remote_confirm_subtitle">Vérifiez les informations. Rien n’est enregistré tant que vous ne choisissez pas Enregistrer sur ce téléviseur.</string>
+    <string name="iptv_remote_field_device">Envoyé depuis</string>
+    <string name="iptv_remote_field_type">Type</string>
+    <string name="iptv_remote_field_name">Nom</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adresse</string>
+    <string name="iptv_remote_field_server">Serveur</string>
+    <string name="iptv_remote_server_changes">Passe de %1$s à %2$s</string>
+    <string name="iptv_remote_server_new">Passe à %1$s</string>
+    <string name="iptv_remote_field_username">Nom d’utilisateur</string>
+    <string name="iptv_remote_field_password">Mot de passe</string>
+    <string name="iptv_remote_field_mac">Adresse MAC</string>
+    <string name="iptv_remote_password_set">Saisi sur le téléphone (masqué)</string>
+    <string name="iptv_remote_password_new">Nouveau mot de passe (masqué)</string>
+    <string name="iptv_remote_save">Enregistrer sur ce téléviseur</string>
+    <string name="iptv_remote_reject">Refuser</string>
+    <string name="iptv_remote_saved">Enregistré. Chargement des chaînes en cours.</string>
+    <string name="iptv_remote_guide_saved">Enregistré. Chargement du guide en cours.</string>
+    <string name="iptv_remote_rejected">Refusé. Rien n’a été enregistré.</string>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Per Handy oder Computer einrichten</string>
+    <string name="iptv_remote_entry_subtitle">Adressen und Logins bequem per Tastatur eingeben</string>
+    <string name="iptv_remote_title">Per Handy einrichten</string>
+    <string name="iptv_remote_description">Scannen Sie den QR-Code mit Ihrem Handy oder öffnen Sie die Adresse auf einem Computer im selben Netzwerk. Geben Sie dann den hier angezeigten Kopplungscode ein.</string>
+    <string name="iptv_remote_code">Kopplungscode</string>
+    <string name="iptv_remote_address">Oder diese Adresse öffnen</string>
+    <string name="iptv_remote_qr_description">QR-Code für die Einrichtung per Handy</string>
+    <string name="iptv_remote_home_network">Nur im Heimnetzwerk verwenden. Die Einrichtungsseite ist nicht verschlüsselt.</string>
+    <string name="iptv_remote_idle_note">Endet, wenn Sie diesen Bildschirm verlassen, oder nach 10 Minuten ohne Aktivität.</string>
+    <string name="iptv_remote_confirm_note">Nichts wird gespeichert, bevor Sie es hier am Fernseher bestätigen. Quellen und Programmführer können nur am Fernseher entfernt werden.</string>
+    <string name="iptv_remote_starting">Einrichtung per Handy wird gestartet…</string>
+    <string name="iptv_remote_waiting">Warte auf Handy oder Computer</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d Gerät verbunden</item>
+        <item quantity="other">%d Geräte verbunden</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Verbinden Sie den Fernseher mit Ihrem Heimnetzwerk, um per Handy einzurichten.</string>
+    <string name="iptv_remote_not_home_network">Der Fernseher hat keine private Heimnetz-Adresse, daher bleibt die Einrichtung per Handy aus.</string>
+    <string name="iptv_remote_ports_busy">Die Einrichtung per Handy konnte nicht starten, da ihre Netzwerkports belegt sind. Versuchen Sie es gleich noch einmal.</string>
+    <string name="iptv_remote_idle_stopped">Die Einrichtung per Handy wurde nach 10 Minuten ohne Aktivität beendet.</string>
+    <string name="iptv_remote_paused">Die Einrichtung per Handy wurde beendet, als die App im Hintergrund war.</string>
+    <string name="iptv_remote_start_again">Neu starten</string>
+    <string name="iptv_remote_start_again_subtitle">Zeigt einen neuen QR-Code und Kopplungscode</string>
+    <string name="iptv_remote_done">Fertig</string>
+    <string name="iptv_remote_done_subtitle">Beendet die Einrichtung per Handy und geht zurück</string>
+    <string name="iptv_remote_confirm_add_title">Vom Handy hinzufügen?</string>
+    <string name="iptv_remote_confirm_edit_title">%1$s vom Handy aus ändern?</string>
+    <string name="iptv_remote_confirm_subtitle">Prüfen Sie die Angaben. Nichts wird gespeichert, solange Sie nicht auf diesem Fernseher Speichern wählen.</string>
+    <string name="iptv_remote_field_device">Gesendet von</string>
+    <string name="iptv_remote_field_type">Typ</string>
+    <string name="iptv_remote_field_name">Name</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adresse</string>
+    <string name="iptv_remote_field_server">Server</string>
+    <string name="iptv_remote_server_changes">Ändert sich von %1$s zu %2$s</string>
+    <string name="iptv_remote_server_new">Ändert sich zu %1$s</string>
+    <string name="iptv_remote_field_username">Benutzername</string>
+    <string name="iptv_remote_field_password">Passwort</string>
+    <string name="iptv_remote_field_mac">MAC-Adresse</string>
+    <string name="iptv_remote_password_set">Auf dem Handy eingegeben (verborgen)</string>
+    <string name="iptv_remote_password_new">Neues Passwort (verborgen)</string>
+    <string name="iptv_remote_save">Auf diesem Fernseher speichern</string>
+    <string name="iptv_remote_reject">Ablehnen</string>
+    <string name="iptv_remote_saved">Gespeichert. Sender werden geladen.</string>
+    <string name="iptv_remote_guide_saved">Gespeichert. Programmführer wird geladen.</string>
+    <string name="iptv_remote_rejected">Abgelehnt. Nichts wurde gespeichert.</string>
+</resources>

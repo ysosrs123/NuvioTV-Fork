@@ -1,0 +1,73 @@
+<resources>
+    <string name="iptv_recording_channel">Registrazioni</string>
+    <string name="iptv_recording_channel_description">Mostrata durante la registrazione di programmi della TV in diretta</string>
+    <string name="iptv_recording_notification_title">Registrazione TV in diretta</string>
+    <string name="iptv_recording_notification_starting">Avvio della registrazione…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d programma</item>
+        <item quantity="many">%1$d programmi</item>
+        <item quantity="other">%1$d programmi</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Registra</string>
+    <string name="iptv_recording_record_now">Registra ora</string>
+    <string name="iptv_recording_record_programme">Registra questo programma</string>
+    <string name="iptv_recording_started">Registrazione avviata</string>
+    <string name="iptv_recording_scheduled">Registrazione programmata</string>
+    <string name="iptv_recordings_open">Registrazioni</string>
+
+    <string name="iptv_recordings_title">Registrazioni</string>
+    <string name="iptv_recordings_description">Programmi registrati o programmati dalla TV in diretta. Le registrazioni restano su questo dispositivo e appartengono a questo profilo.</string>
+    <string name="iptv_recordings_hint">Premi OK per riprodurre una registrazione. Tieni premuto OK o premi Menu per altre opzioni.</string>
+    <string name="iptv_recordings_free">%1$s liberi su questo dispositivo</string>
+    <string name="iptv_recordings_empty">Ancora nessuna registrazione. Registra un programma dalla guida della TV in diretta o mentre guardi.</string>
+    <string name="iptv_recordings_group_now">In registrazione</string>
+    <string name="iptv_recordings_group_scheduled">Programmate</string>
+    <string name="iptv_recordings_group_recorded">Registrate</string>
+
+    <string name="iptv_recording_status_scheduled">Programmata</string>
+    <string name="iptv_recording_status_recording">In registrazione</string>
+    <string name="iptv_recording_status_done">Registrata</string>
+    <string name="iptv_recording_status_partial">Registrata in parte</string>
+    <string name="iptv_recording_status_failed">Non riuscita</string>
+    <string name="iptv_recording_status_cancelled">Annullata</string>
+    <string name="iptv_recording_gaps">Con interruzioni</string>
+
+    <string name="iptv_recording_failure_no_connection">Nessuna connessione libera su questo account</string>
+    <string name="iptv_recording_failure_device_busy">Il dispositivo è occupato con altri stream</string>
+    <string name="iptv_recording_failure_source">Impossibile raggiungere la sorgente</string>
+    <string name="iptv_recording_failure_channel">Il canale non è più disponibile</string>
+    <string name="iptv_recording_failure_unsupported">Questo formato di stream non può essere registrato</string>
+    <string name="iptv_recording_failure_encrypted">Gli stream crittografati non possono essere registrati</string>
+    <string name="iptv_recording_failure_network">Lo stream si è interrotto</string>
+    <string name="iptv_recording_failure_low_storage">La memoria è quasi piena</string>
+    <string name="iptv_recording_failure_storage">Impossibile salvare la registrazione</string>
+    <string name="iptv_recording_failure_time_limit">È stato raggiunto il limite di durata della registrazione</string>
+    <string name="iptv_recording_failure_interrupted">L\'app o il dispositivo si è fermato durante la registrazione</string>
+    <string name="iptv_recording_failure_start_blocked">Android non ha consentito l\'avvio della registrazione. Consenti sveglie e promemoria per Nuvio, o tieni Nuvio aperta.</string>
+    <string name="iptv_recording_failure_missed">Il programma è finito prima che la registrazione potesse iniziare</string>
+
+    <string name="iptv_recording_refused_conflict">Altre registrazioni usano già tutte le connessioni di questo account in quell\'orario</string>
+    <string name="iptv_recording_refused_no_connection">Nessuna connessione libera su questo account. Smetti prima di guardare o registrare un altro canale.</string>
+    <string name="iptv_recording_refused_storage">Spazio libero insufficiente per questa registrazione. Calcola circa 2,5 GB per ogni ora in HD; 500 MB restano sempre liberi per il dispositivo. Elimina vecchie registrazioni o libera spazio.</string>
+    <string name="iptv_recording_refused_ended">Questo programma è già terminato</string>
+    <string name="iptv_recording_refused_channel">Questo canale non può essere registrato ora</string>
+    <string name="iptv_recording_refused_duplicate">Questo canale è già in registrazione in quell\'orario</string>
+    <string name="iptv_recording_refused_full">L\'elenco delle registrazioni è pieno. Elimina prima alcune registrazioni.</string>
+    <string name="iptv_recording_refused_profile">Il profilo è cambiato. Riprova.</string>
+    <string name="iptv_recording_refused_exact_alarms">Le registrazioni programmate richiedono l\'autorizzazione Sveglie e promemoria. Consentila per Nuvio, o registra mentre guardi.</string>
+    <string name="iptv_recording_alarm_settings">Consenti sveglie e promemoria</string>
+
+    <string name="iptv_recording_play">Riproduci</string>
+    <string name="iptv_recording_stop">Interrompi registrazione</string>
+    <string name="iptv_recording_cancel">Annulla registrazione</string>
+    <string name="iptv_recording_delete">Elimina registrazione</string>
+    <string name="iptv_recording_delete_title">Eliminare “%1$s”?</string>
+    <string name="iptv_recording_delete_description">La registrazione e il relativo file verranno rimossi da questo dispositivo.</string>
+    <string name="iptv_recording_delete_confirm">Elimina</string>
+    <string name="iptv_recording_keep">Mantieni</string>
+    <string name="iptv_recording_file_missing">Il file della registrazione non è più su questo dispositivo</string>
+    <string name="iptv_recording_paused">In pausa</string>
+    <string name="iptv_recording_playback_failed">Impossibile riprodurre questa registrazione. Il file potrebbe essere incompleto o in un formato che questo dispositivo non può decodificare.</string>
+    <string name="iptv_recording_skip_hint">Sinistra e destra saltano di 30 secondi</string>
+</resources>

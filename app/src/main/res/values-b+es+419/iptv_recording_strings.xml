@@ -1,0 +1,73 @@
+<resources>
+    <string name="iptv_recording_channel">Grabaciones</string>
+    <string name="iptv_recording_channel_description">Se muestra mientras se graban programas de TV en vivo</string>
+    <string name="iptv_recording_notification_title">Grabando TV en vivo</string>
+    <string name="iptv_recording_notification_starting">Iniciando grabación…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d programa</item>
+        <item quantity="many">%1$d programas</item>
+        <item quantity="other">%1$d programas</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Grabar</string>
+    <string name="iptv_recording_record_now">Grabar ahora</string>
+    <string name="iptv_recording_record_programme">Grabar este programa</string>
+    <string name="iptv_recording_started">Grabación iniciada</string>
+    <string name="iptv_recording_scheduled">Grabación programada</string>
+    <string name="iptv_recordings_open">Grabaciones</string>
+
+    <string name="iptv_recordings_title">Grabaciones</string>
+    <string name="iptv_recordings_description">Programas grabados o programados desde TV en vivo. Las grabaciones se guardan en este dispositivo y pertenecen a este perfil.</string>
+    <string name="iptv_recordings_hint">Presiona OK para reproducir una grabación. Mantén presionado OK o presiona Menú para más opciones.</string>
+    <string name="iptv_recordings_free">%1$s libres en este dispositivo</string>
+    <string name="iptv_recordings_empty">Aún no hay grabaciones. Graba un programa desde la guía de TV en vivo o mientras lo ves.</string>
+    <string name="iptv_recordings_group_now">Grabando ahora</string>
+    <string name="iptv_recordings_group_scheduled">Programadas</string>
+    <string name="iptv_recordings_group_recorded">Grabadas</string>
+
+    <string name="iptv_recording_status_scheduled">Programada</string>
+    <string name="iptv_recording_status_recording">Grabando</string>
+    <string name="iptv_recording_status_done">Grabada</string>
+    <string name="iptv_recording_status_partial">Grabada en parte</string>
+    <string name="iptv_recording_status_failed">Fallida</string>
+    <string name="iptv_recording_status_cancelled">Cancelada</string>
+    <string name="iptv_recording_gaps">Con cortes</string>
+
+    <string name="iptv_recording_failure_no_connection">No hay conexiones libres en esta cuenta</string>
+    <string name="iptv_recording_failure_device_busy">El dispositivo está ocupado con otras emisiones</string>
+    <string name="iptv_recording_failure_source">No se pudo acceder a la fuente</string>
+    <string name="iptv_recording_failure_channel">El canal ya no está disponible</string>
+    <string name="iptv_recording_failure_unsupported">Este formato de emisión no se puede grabar</string>
+    <string name="iptv_recording_failure_encrypted">Las emisiones cifradas no se pueden grabar</string>
+    <string name="iptv_recording_failure_network">La emisión se interrumpió</string>
+    <string name="iptv_recording_failure_low_storage">El almacenamiento está casi lleno</string>
+    <string name="iptv_recording_failure_storage">No se pudo guardar la grabación</string>
+    <string name="iptv_recording_failure_time_limit">Se alcanzó el límite de tiempo de grabación</string>
+    <string name="iptv_recording_failure_interrupted">La aplicación o el dispositivo se detuvo durante la grabación</string>
+    <string name="iptv_recording_failure_start_blocked">Android no permitió iniciar la grabación. Permite alarmas y recordatorios para Nuvio o mantén Nuvio abierta.</string>
+    <string name="iptv_recording_failure_missed">El programa terminó antes de que pudiera empezar la grabación</string>
+
+    <string name="iptv_recording_refused_conflict">Otras grabaciones ya usan todas las conexiones de esta cuenta a esa hora</string>
+    <string name="iptv_recording_refused_no_connection">No hay conexiones libres en esta cuenta. Primero deja de ver o grabar otro canal.</string>
+    <string name="iptv_recording_refused_storage">No hay suficiente almacenamiento libre para esta grabación. Calcula unos 2,5 GB por hora de HD; siempre se reservan 500 MB libres para el dispositivo. Elimina grabaciones antiguas o libera espacio.</string>
+    <string name="iptv_recording_refused_ended">Este programa ya ha terminado</string>
+    <string name="iptv_recording_refused_channel">Este canal no se puede grabar ahora</string>
+    <string name="iptv_recording_refused_duplicate">Este canal ya se está grabando a esa hora</string>
+    <string name="iptv_recording_refused_full">La lista de grabaciones está llena. Elimina antes algunas grabaciones.</string>
+    <string name="iptv_recording_refused_profile">El perfil ha cambiado. Inténtalo de nuevo.</string>
+    <string name="iptv_recording_refused_exact_alarms">Las grabaciones programadas necesitan el permiso de alarmas y recordatorios. Permítelo para Nuvio o graba mientras ves.</string>
+    <string name="iptv_recording_alarm_settings">Permitir alarmas y recordatorios</string>
+
+    <string name="iptv_recording_play">Reproducir</string>
+    <string name="iptv_recording_stop">Detener grabación</string>
+    <string name="iptv_recording_cancel">Cancelar grabación</string>
+    <string name="iptv_recording_delete">Eliminar grabación</string>
+    <string name="iptv_recording_delete_title">¿Eliminar “%1$s”?</string>
+    <string name="iptv_recording_delete_description">La grabación y su archivo se eliminarán de este dispositivo.</string>
+    <string name="iptv_recording_delete_confirm">Eliminar</string>
+    <string name="iptv_recording_keep">Conservar</string>
+    <string name="iptv_recording_file_missing">El archivo de la grabación ya no está en este dispositivo</string>
+    <string name="iptv_recording_paused">En pausa</string>
+    <string name="iptv_recording_playback_failed">No se puede reproducir esta grabación. Puede que el archivo esté incompleto o en un formato que este dispositivo no puede decodificar.</string>
+    <string name="iptv_recording_skip_hint">Izquierda y derecha saltan 30 segundos</string>
+</resources>

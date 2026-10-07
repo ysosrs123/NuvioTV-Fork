@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Configura da telefono o computer</string>
+    <string name="iptv_remote_entry_subtitle">Digita indirizzi e credenziali con una vera tastiera</string>
+    <string name="iptv_remote_title">Configura dal telefono</string>
+    <string name="iptv_remote_description">Scansiona il codice QR con il telefono, oppure apri l\'indirizzo su un computer nella stessa rete. Poi inserisci il codice di abbinamento mostrato qui.</string>
+    <string name="iptv_remote_code">Codice di abbinamento</string>
+    <string name="iptv_remote_address">Oppure apri questo indirizzo</string>
+    <string name="iptv_remote_qr_description">Codice QR per la configurazione dal telefono</string>
+    <string name="iptv_remote_home_network">Usalo solo sulla rete di casa. La pagina di configurazione non è crittografata.</string>
+    <string name="iptv_remote_idle_note">Si interrompe quando lasci questa schermata o dopo 10 minuti di inattività.</string>
+    <string name="iptv_remote_confirm_note">Non viene salvato nulla finché non confermi qui sulla TV. Sorgenti e guide si possono rimuovere solo sulla TV.</string>
+    <string name="iptv_remote_starting">Avvio della configurazione dal telefono…</string>
+    <string name="iptv_remote_waiting">In attesa di un telefono o computer</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d dispositivo connesso</item>
+        <item quantity="many">%d dispositivi connessi</item>
+        <item quantity="other">%d dispositivi connessi</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Collega la TV alla rete di casa per configurarla dal telefono.</string>
+    <string name="iptv_remote_not_home_network">La TV non ha un indirizzo di rete domestica privata, quindi la configurazione dal telefono resta disattivata.</string>
+    <string name="iptv_remote_ports_busy">Impossibile avviare la configurazione dal telefono perché le sue porte di rete sono in uso. Riprova tra un attimo.</string>
+    <string name="iptv_remote_idle_stopped">Configurazione dal telefono interrotta dopo 10 minuti di inattività.</string>
+    <string name="iptv_remote_paused">Configurazione dal telefono interrotta mentre l\'app era in background.</string>
+    <string name="iptv_remote_start_again">Ricomincia</string>
+    <string name="iptv_remote_start_again_subtitle">Mostra un nuovo codice QR e un nuovo codice di abbinamento</string>
+    <string name="iptv_remote_done">Fatto</string>
+    <string name="iptv_remote_done_subtitle">Interrompe la configurazione dal telefono e torna indietro</string>
+    <string name="iptv_remote_confirm_add_title">Aggiungere questo dal telefono?</string>
+    <string name="iptv_remote_confirm_edit_title">Modificare %1$s dal telefono?</string>
+    <string name="iptv_remote_confirm_subtitle">Controlla i dati. Non viene salvato nulla a meno che tu non scelga Salva su questa TV.</string>
+    <string name="iptv_remote_field_device">Inviato da</string>
+    <string name="iptv_remote_field_type">Tipo</string>
+    <string name="iptv_remote_field_name">Nome</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Indirizzo</string>
+    <string name="iptv_remote_field_server">Server</string>
+    <string name="iptv_remote_server_changes">Cambia da %1$s a %2$s</string>
+    <string name="iptv_remote_server_new">Cambia in %1$s</string>
+    <string name="iptv_remote_field_username">Nome utente</string>
+    <string name="iptv_remote_field_password">Password</string>
+    <string name="iptv_remote_field_mac">Indirizzo MAC</string>
+    <string name="iptv_remote_password_set">Inserita sul telefono (nascosta)</string>
+    <string name="iptv_remote_password_new">Nuova password (nascosta)</string>
+    <string name="iptv_remote_save">Salva su questa TV</string>
+    <string name="iptv_remote_reject">Rifiuta</string>
+    <string name="iptv_remote_saved">Salvato. Caricamento dei canali in corso.</string>
+    <string name="iptv_remote_guide_saved">Salvato. Caricamento della guida in corso.</string>
+    <string name="iptv_remote_rejected">Rifiutato. Non è stato salvato nulla.</string>
+</resources>

@@ -1,0 +1,73 @@
+<resources>
+    <string name="iptv_recording_channel">Enregistrements</string>
+    <string name="iptv_recording_channel_description">Affiché pendant l’enregistrement de programmes TV en direct</string>
+    <string name="iptv_recording_notification_title">Enregistrement de la TV en direct</string>
+    <string name="iptv_recording_notification_starting">Démarrage de l’enregistrement…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d programme</item>
+        <item quantity="many">%1$d programmes</item>
+        <item quantity="other">%1$d programmes</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Enregistrer</string>
+    <string name="iptv_recording_record_now">Enregistrer maintenant</string>
+    <string name="iptv_recording_record_programme">Enregistrer ce programme</string>
+    <string name="iptv_recording_started">Enregistrement démarré</string>
+    <string name="iptv_recording_scheduled">Enregistrement programmé</string>
+    <string name="iptv_recordings_open">Enregistrements</string>
+
+    <string name="iptv_recordings_title">Enregistrements</string>
+    <string name="iptv_recordings_description">Programmes enregistrés ou programmés depuis la TV en direct. Les enregistrements sont conservés sur cet appareil et liés à ce profil.</string>
+    <string name="iptv_recordings_hint">Appuyez sur OK pour lire un enregistrement. Maintenez OK ou appuyez sur Menu pour plus d’options.</string>
+    <string name="iptv_recordings_free">%1$s libres sur cet appareil</string>
+    <string name="iptv_recordings_empty">Aucun enregistrement pour l’instant. Enregistrez un programme depuis le guide TV en direct ou pendant le visionnage.</string>
+    <string name="iptv_recordings_group_now">En cours d’enregistrement</string>
+    <string name="iptv_recordings_group_scheduled">Programmés</string>
+    <string name="iptv_recordings_group_recorded">Enregistrés</string>
+
+    <string name="iptv_recording_status_scheduled">Programmé</string>
+    <string name="iptv_recording_status_recording">Enregistrement</string>
+    <string name="iptv_recording_status_done">Enregistré</string>
+    <string name="iptv_recording_status_partial">Partiellement enregistré</string>
+    <string name="iptv_recording_status_failed">Échec</string>
+    <string name="iptv_recording_status_cancelled">Annulé</string>
+    <string name="iptv_recording_gaps">Incomplet</string>
+
+    <string name="iptv_recording_failure_no_connection">Aucune connexion libre sur ce compte</string>
+    <string name="iptv_recording_failure_device_busy">L’appareil est occupé par d’autres flux</string>
+    <string name="iptv_recording_failure_source">Impossible de joindre la source</string>
+    <string name="iptv_recording_failure_channel">La chaîne n’est plus disponible</string>
+    <string name="iptv_recording_failure_unsupported">Ce format de flux ne peut pas être enregistré</string>
+    <string name="iptv_recording_failure_encrypted">Les flux chiffrés ne peuvent pas être enregistrés</string>
+    <string name="iptv_recording_failure_network">Le flux a été interrompu</string>
+    <string name="iptv_recording_failure_low_storage">Le stockage est presque plein</string>
+    <string name="iptv_recording_failure_storage">Impossible d’enregistrer le fichier</string>
+    <string name="iptv_recording_failure_time_limit">La durée maximale d’enregistrement a été atteinte</string>
+    <string name="iptv_recording_failure_interrupted">L’application ou l’appareil s’est arrêté pendant l’enregistrement</string>
+    <string name="iptv_recording_failure_start_blocked">Android n’a pas autorisé le démarrage de l’enregistrement. Autorisez les alarmes et rappels pour Nuvio, ou gardez Nuvio ouvert.</string>
+    <string name="iptv_recording_failure_missed">Le programme s’est terminé avant le début de l’enregistrement</string>
+
+    <string name="iptv_recording_refused_conflict">D’autres enregistrements utilisent déjà toutes les connexions de ce compte à ce moment-là</string>
+    <string name="iptv_recording_refused_no_connection">Aucune connexion libre sur ce compte. Arrêtez d’abord de regarder ou d’enregistrer une autre chaîne.</string>
+    <string name="iptv_recording_refused_storage">Espace libre insuffisant pour cet enregistrement. Comptez environ 2,5 Go par heure en HD ; 500 Mo restent toujours libres pour l’appareil. Supprimez d’anciens enregistrements ou libérez de l’espace.</string>
+    <string name="iptv_recording_refused_ended">Ce programme est déjà terminé</string>
+    <string name="iptv_recording_refused_channel">Cette chaîne ne peut pas être enregistrée pour le moment</string>
+    <string name="iptv_recording_refused_duplicate">Cette chaîne est déjà enregistrée à ce moment-là</string>
+    <string name="iptv_recording_refused_full">La liste des enregistrements est pleine. Supprimez d’abord quelques enregistrements.</string>
+    <string name="iptv_recording_refused_profile">Le profil a changé. Réessayez.</string>
+    <string name="iptv_recording_refused_exact_alarms">Les enregistrements programmés nécessitent l’autorisation Alarmes et rappels. Autorisez-la pour Nuvio, ou enregistrez pendant le visionnage.</string>
+    <string name="iptv_recording_alarm_settings">Autoriser les alarmes et rappels</string>
+
+    <string name="iptv_recording_play">Lire</string>
+    <string name="iptv_recording_stop">Arrêter l’enregistrement</string>
+    <string name="iptv_recording_cancel">Annuler l’enregistrement</string>
+    <string name="iptv_recording_delete">Supprimer l’enregistrement</string>
+    <string name="iptv_recording_delete_title">Supprimer « %1$s » ?</string>
+    <string name="iptv_recording_delete_description">L’enregistrement et son fichier seront supprimés de cet appareil.</string>
+    <string name="iptv_recording_delete_confirm">Supprimer</string>
+    <string name="iptv_recording_keep">Conserver</string>
+    <string name="iptv_recording_file_missing">Le fichier d’enregistrement n’est plus sur cet appareil</string>
+    <string name="iptv_recording_paused">En pause</string>
+    <string name="iptv_recording_playback_failed">Impossible de lire cet enregistrement. Le fichier est peut-être incomplet ou dans un format que cet appareil ne peut pas décoder.</string>
+    <string name="iptv_recording_skip_hint">Gauche et droite : sauts de 30 secondes</string>
+</resources>
