@@ -20,6 +20,7 @@ Updated 7 October 2026.
 | 6 Oct | 02ed6e9 – 2484181 | Now-on search, multiview sized to the device, per-source connections, recording (service, scheduling, Recordings screen), phone/PC setup; independent reviews (security for setup) and their fixes | 335 core + 151 data-layer host tests; CI green at 2484181 (run 37537338609); device pending |
 | 6 Oct | 73b59de | Multiview sized to the TV's output and the decoder (Grid / One large, Automatic / Sharpest / Lightest) | 340 core + 151 data-layer host tests; CI green (run 37545837449); device pending |
 | 7 Oct | fd03110 – head | Work list: guides and Live TV choices removed with their source/profile, guide folder chooser, v2 upgrade test fixed, guide 4→5 upgrade test; Sport from the guide (XMLTV categories, sport flag, guide schema 5); catch-up-based pause and rewind; 40 locales translated; optional minified release build in CI; review fixes | 349 core + 152 data-layer host tests, device tests compile; CI debug green at f465328 (run 37552365804); minified release (R8) green at d8d4a03 (run 37550880901); device pending |
+| 7 Oct | 8e5f67e – head | Live TV settings on the Live TV side (playback, guide, multiview, recordings); IPTV removed from the main Settings; translations of the new strings | 350 core + 152 data-layer host tests; CI: see handover; device pending |
 
 Design notes and per-checkpoint reports are in this folder
 (`IPTV-*-DESIGN.md`, `IPTV-*-VALIDATION-*.json`). Review findings and their status:

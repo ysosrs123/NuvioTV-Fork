@@ -7,7 +7,16 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
 
 ## Live TV
 
-- Live TV has its own entry in the main navigation (IPTV build only).
+- Live TV has its own entry in the main navigation (IPTV build only); IPTV has no
+  entry in the main Settings.
+- Live TV settings, at the bottom of the Live TV menu, brings together sources and
+  guides, phone or computer setup and recordings, plus: default stream format for
+  channels on Auto; pause and rewind with catch-up (on by default); the stats overlay
+  on open; which view Live TV opens on (last category, all channels, favourites or
+  Sport); showing Sport in the menu; showing hidden categories again; multiview layout
+  and picture quality; how early recordings start (default 1 minute) and how long they
+  keep going after the end (default 2 minutes). These settings belong to the TV, not
+  the profile.
 - Redesigned Live TV and Live TV sources screens in the app's own style: theme
   colours and typography, glass/frost panels when the V2 glass presentation is on,
   the V2 focus edge (or the classic focus ring), channel logos with initials as a

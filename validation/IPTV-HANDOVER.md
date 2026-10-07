@@ -129,6 +129,15 @@ Status on 7 October 2026 (branch head after the work list; nothing device-tested
    fixed; see the review file); host tests core 349, data-layer 152, device tests
    compile; CI debug build green at `f465328` (run 37552365804).
 
+Decisions on 7 October (user): the main-menu item is called "Live TV"; IPTV settings
+live on the Live TV side, not in the main Settings. Done: Live TV settings screen
+(`IptvSettingsScreen`/`IptvSettingsViewModel`, route `iptv/settings`, opened from the
+bottom of the Live TV menu; device-wide values in `IptvLivePreferences` with
+`settings-*` keys, multiview keys unchanged); the main Settings IPTV category was
+removed (Settings files are back to `main`). If IPTV ships "enabled in full, off by
+default", that on/off switch is the one IPTV item that must sit in the main Settings.
+How IPTV ships is still the user's decision.
+
 Then the user's device pass (Ugoos AM9 Pro first, then smaller boxes):
 - Install the CI APK (`app-iptvPrototype-arm64-v8a-debug.apk`; uninstall an older
   prototype signed with another key first — this clears its sources).
@@ -179,6 +188,8 @@ Before merge and release (only on the user's confirmation):
 - New on 7 October: `core/iptv/SportsGuide.kt`, `LiveTimeshift.kt`,
   `LivePreferenceKeys.kt`; `data/iptv/IptvLivePreferences.kt`; translations in
   `res/values-*/iptv_*.xml`.
+- `ui/screens/iptv/IptvSettings*`: Live TV settings (playback, guide, multiview,
+  recordings; links to sources, phone setup and recordings).
 - `ui/screens/iptv`: `IptvLiveScreen` (scaffold, info panel, preview, rail, empty
   states, channel menu, guide picker, search), `IptvLiveViewModel` (state, playback,
   multiview, recording actions, `iptv-live` preferences), `IptvGuideGrid`,
