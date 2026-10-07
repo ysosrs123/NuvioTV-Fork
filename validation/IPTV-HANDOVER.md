@@ -2,8 +2,9 @@
 
 Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
 Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built,
-not device-tested. Last fully green debug build: `d263b18` (run 37580266979, wave 1 and
-its translations). Run 37589504762 at `d0d0dbb` (everything up to streaming stability)
+not device-tested. Last fully green debug build: `a2eeb57` (run 37592762574: everything
+up to Movies/Series in the Live TV menu and the Movies folder location; their
+translations followed in `e20d157`). Before that: `d263b18` (run 37580266979, wave 1). Run 37589504762 at `d0d0dbb` (everything up to streaming stability)
 compiled the whole app and assembled the APK; one unit test failed
 (`IptvWebDavShareTest` self-signed certificate case), fixed in `2bef868` and not yet
 confirmed by CI. Minified release build with IPTV last green at `d8d4a03` (run
@@ -123,10 +124,15 @@ Done — committed together with the screens below:
   TMDB 429), and a switch per source.
 - Strings `iptv_media_strings.xml` and `iptv_vod_browse_strings.xml` are translated into all 40 locales.
 
-Next:
-- Fix the VOD gaps above; Go live button in the control deck; Live TV rows on the
-  Nuvio Home screen; translate the media and browse strings; a minified release build
-  check; a full review pass; device test checklist.
+In progress (after `e20d157`):
+- VOD gaps (connection lease for playing movies, no retries on busy/refused, hide
+  external player, failover, mpv resolve off the main thread, single User-Agent) and a
+  Go live button in the control deck.
+- Live TV rows on the Nuvio Home screen (favourites, sport on now, recently added
+  movies/series, recordings) with a toggle per row.
+- Minified release build check (R8) with all new code.
+
+Next: a full review pass; device test checklist.
 - Decisions recorded: tracking for matched titles uses Nuvio's normal history and
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
