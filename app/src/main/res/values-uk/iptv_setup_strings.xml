@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Налаштувати з телефона або комп\'ютера</string>
+    <string name="iptv_remote_entry_subtitle">Вводьте адреси й дані входу на звичайній клавіатурі</string>
+    <string name="iptv_remote_title">Налаштування з телефона</string>
+    <string name="iptv_remote_description">Відскануйте QR-код телефоном або відкрийте адресу на комп\'ютері в тій самій мережі. Потім введіть код сполучення, показаний тут.</string>
+    <string name="iptv_remote_code">Код сполучення</string>
+    <string name="iptv_remote_address">Або відкрийте цю адресу</string>
+    <string name="iptv_remote_qr_description">QR-код для налаштування з телефона</string>
+    <string name="iptv_remote_home_network">Використовуйте це лише в домашній мережі. Сторінка налаштування не зашифрована.</string>
+    <string name="iptv_remote_idle_note">Зупиняється, коли ви залишаєте цей екран, або через 10 хвилин бездіяльності.</string>
+    <string name="iptv_remote_confirm_note">Нічого не зберігається, доки ви не підтвердите це тут, на ТВ. Джерела й телепрограми можна видалити лише на ТВ.</string>
+    <string name="iptv_remote_starting">Запуск налаштування з телефона…</string>
+    <string name="iptv_remote_waiting">Очікування телефона або комп\'ютера</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">Підключено %d пристрій</item>
+        <item quantity="few">Підключено %d пристрої</item>
+        <item quantity="many">Підключено %d пристроїв</item>
+        <item quantity="other">Підключено %d пристрою</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Підключіть ТВ до домашньої мережі, щоб налаштовувати з телефона.</string>
+    <string name="iptv_remote_not_home_network">ТВ не має адреси приватної домашньої мережі, тому налаштування з телефона вимкнено.</string>
+    <string name="iptv_remote_ports_busy">Не вдалося запустити налаштування з телефона, бо його мережеві порти зайняті. Спробуйте ще раз за мить.</string>
+    <string name="iptv_remote_idle_stopped">Налаштування з телефона зупинено через 10 хвилин бездіяльності.</string>
+    <string name="iptv_remote_paused">Налаштування з телефона зупинено, поки застосунок був у фоні.</string>
+    <string name="iptv_remote_start_again">Почати знову</string>
+    <string name="iptv_remote_start_again_subtitle">Показує новий QR-код і код сполучення</string>
+    <string name="iptv_remote_done">Готово</string>
+    <string name="iptv_remote_done_subtitle">Зупиняє налаштування з телефона й повертає назад</string>
+    <string name="iptv_remote_confirm_add_title">Додати це з телефона?</string>
+    <string name="iptv_remote_confirm_edit_title">Змінити %1$s з телефона?</string>
+    <string name="iptv_remote_confirm_subtitle">Перевірте дані. Нічого не буде збережено, якщо ви не виберете «Зберегти» на цьому ТВ.</string>
+    <string name="iptv_remote_field_device">Надіслано з</string>
+    <string name="iptv_remote_field_type">Тип</string>
+    <string name="iptv_remote_field_name">Назва</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Адреса</string>
+    <string name="iptv_remote_field_server">Сервер</string>
+    <string name="iptv_remote_server_changes">Зміниться з %1$s на %2$s</string>
+    <string name="iptv_remote_server_new">Зміниться на %1$s</string>
+    <string name="iptv_remote_field_username">Ім\'я користувача</string>
+    <string name="iptv_remote_field_password">Пароль</string>
+    <string name="iptv_remote_field_mac">MAC-адреса</string>
+    <string name="iptv_remote_password_set">Введено на телефоні (приховано)</string>
+    <string name="iptv_remote_password_new">Новий пароль (приховано)</string>
+    <string name="iptv_remote_save">Зберегти на цьому ТВ</string>
+    <string name="iptv_remote_reject">Відхилити</string>
+    <string name="iptv_remote_saved">Збережено. Канали завантажуються.</string>
+    <string name="iptv_remote_guide_saved">Збережено. Телепрограма завантажується.</string>
+    <string name="iptv_remote_rejected">Відхилено. Нічого не збережено.</string>
+</resources>

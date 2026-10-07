@@ -1,0 +1,73 @@
+<resources>
+    <string name="iptv_recording_channel">Снимци</string>
+    <string name="iptv_recording_channel_description">Приказује се док се снимају емисије са ТВ уживо</string>
+    <string name="iptv_recording_notification_title">Снимање ТВ уживо</string>
+    <string name="iptv_recording_notification_starting">Покретање снимања…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d емисија</item>
+        <item quantity="few">%1$d емисије</item>
+        <item quantity="other">%1$d емисија</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Сними</string>
+    <string name="iptv_recording_record_now">Сними сада</string>
+    <string name="iptv_recording_record_programme">Сними ову емисију</string>
+    <string name="iptv_recording_started">Снимање је почело</string>
+    <string name="iptv_recording_scheduled">Снимање је заказано</string>
+    <string name="iptv_recordings_open">Снимци</string>
+
+    <string name="iptv_recordings_title">Снимци</string>
+    <string name="iptv_recordings_description">Емисије снимљене или заказане из ТВ уживо. Снимци се чувају на овом уређају и припадају овом профилу.</string>
+    <string name="iptv_recordings_hint">Притисните OK да пустите снимак. Држите OK или притисните Мени за више опција.</string>
+    <string name="iptv_recordings_free">%1$s слободно на овом уређају</string>
+    <string name="iptv_recordings_empty">Још ништа није снимљено. Снимите емисију из водича ТВ уживо или током гледања.</string>
+    <string name="iptv_recordings_group_now">Снима се сада</string>
+    <string name="iptv_recordings_group_scheduled">Заказано</string>
+    <string name="iptv_recordings_group_recorded">Снимљено</string>
+
+    <string name="iptv_recording_status_scheduled">Заказано</string>
+    <string name="iptv_recording_status_recording">Снима се</string>
+    <string name="iptv_recording_status_done">Снимљено</string>
+    <string name="iptv_recording_status_partial">Делимично снимљено</string>
+    <string name="iptv_recording_status_failed">Неуспешно</string>
+    <string name="iptv_recording_status_cancelled">Отказано</string>
+    <string name="iptv_recording_gaps">Има прекида</string>
+
+    <string name="iptv_recording_failure_no_connection">Нема слободне везе на овом налогу</string>
+    <string name="iptv_recording_failure_device_busy">Уређај је заузет другим стримовима</string>
+    <string name="iptv_recording_failure_source">Извор није доступан</string>
+    <string name="iptv_recording_failure_channel">Канал више није доступан</string>
+    <string name="iptv_recording_failure_unsupported">Овај формат стрима не може да се снима</string>
+    <string name="iptv_recording_failure_encrypted">Шифровани стримови не могу да се снимају</string>
+    <string name="iptv_recording_failure_network">Стрим је прекинут</string>
+    <string name="iptv_recording_failure_low_storage">Меморија је скоро пуна</string>
+    <string name="iptv_recording_failure_storage">Снимак није могуће сачувати</string>
+    <string name="iptv_recording_failure_time_limit">Достигнуто је временско ограничење снимања</string>
+    <string name="iptv_recording_failure_interrupted">Апликација или уређај су се зауставили током снимања</string>
+    <string name="iptv_recording_failure_start_blocked">Android није дозволио покретање снимања. Дозволите аларме и подсетнике за Nuvio или оставите Nuvio отворен.</string>
+    <string name="iptv_recording_failure_missed">Емисија се завршила пре него што је снимање могло да почне</string>
+
+    <string name="iptv_recording_refused_conflict">Други снимци у то време већ користе све везе овог налога</string>
+    <string name="iptv_recording_refused_no_connection">Нема слободне везе на овом налогу. Прво престаните да гледате или снимате други канал.</string>
+    <string name="iptv_recording_refused_storage">Нема довољно слободне меморије за овај снимак. Рачунајте око 2,5 GB за сваки сат HD снимка, а 500 MB увек остаје слободно за уређај. Обришите старе снимке или ослободите простор.</string>
+    <string name="iptv_recording_refused_ended">Ова емисија се већ завршила</string>
+    <string name="iptv_recording_refused_channel">Овај канал тренутно не може да се снима</string>
+    <string name="iptv_recording_refused_duplicate">Овај канал се већ снима у то време</string>
+    <string name="iptv_recording_refused_full">Листа снимака је пуна. Прво обришите неке снимке.</string>
+    <string name="iptv_recording_refused_profile">Профил је промењен. Покушајте поново.</string>
+    <string name="iptv_recording_refused_exact_alarms">Заказана снимања захтевају дозволу за аларме и подсетнике. Дозволите је за Nuvio или снимајте током гледања.</string>
+    <string name="iptv_recording_alarm_settings">Дозволи аларме и подсетнике</string>
+
+    <string name="iptv_recording_play">Пусти</string>
+    <string name="iptv_recording_stop">Заустави снимање</string>
+    <string name="iptv_recording_cancel">Откажи снимање</string>
+    <string name="iptv_recording_delete">Обриши снимак</string>
+    <string name="iptv_recording_delete_title">Обрисати „%1$s“?</string>
+    <string name="iptv_recording_delete_description">Снимак и његова датотека биће уклоњени са овог уређаја.</string>
+    <string name="iptv_recording_delete_confirm">Обриши</string>
+    <string name="iptv_recording_keep">Задржи</string>
+    <string name="iptv_recording_file_missing">Датотека снимка више није на овом уређају</string>
+    <string name="iptv_recording_paused">Паузирано</string>
+    <string name="iptv_recording_playback_failed">Овај снимак не може да се пусти. Датотека је можда непотпуна или у формату који овај уређај не може да декодира.</string>
+    <string name="iptv_recording_skip_hint">Лево и десно прескачу 30 секунди</string>
+</resources>

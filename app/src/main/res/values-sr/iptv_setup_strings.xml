@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Подеси преко телефона или рачунара</string>
+    <string name="iptv_remote_entry_subtitle">Унесите адресе и пријаве на правој тастатури</string>
+    <string name="iptv_remote_title">Подеси преко телефона</string>
+    <string name="iptv_remote_description">Скенирајте QR код телефоном или отворите адресу на рачунару у истој мрежи. Затим унесите код за упаривање приказан овде.</string>
+    <string name="iptv_remote_code">Код за упаривање</string>
+    <string name="iptv_remote_address">Или отворите ову адресу</string>
+    <string name="iptv_remote_qr_description">QR код за подешавање преко телефона</string>
+    <string name="iptv_remote_home_network">Користите ово само на кућној мрежи. Страница за подешавање није шифрована.</string>
+    <string name="iptv_remote_idle_note">Зауставља се када напустите овај екран или после 10 минута неактивности.</string>
+    <string name="iptv_remote_confirm_note">Ништа се не чува док то не потврдите овде на ТВ-у. Извори и водичи могу се уклонити само на ТВ-у.</string>
+    <string name="iptv_remote_starting">Покретање подешавања преко телефона…</string>
+    <string name="iptv_remote_waiting">Чека се телефон или рачунар</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d уређај повезан</item>
+        <item quantity="few">%d уређаја повезана</item>
+        <item quantity="other">%d уређаја повезано</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Повежите ТВ са кућном мрежом да бисте подешавали преко телефона.</string>
+    <string name="iptv_remote_not_home_network">ТВ нема адресу приватне кућне мреже, па подешавање преко телефона остаје искључено.</string>
+    <string name="iptv_remote_ports_busy">Подешавање преко телефона није покренуто јер су његови мрежни портови заузети. Покушајте поново за тренутак.</string>
+    <string name="iptv_remote_idle_stopped">Подешавање преко телефона је заустављено после 10 минута неактивности.</string>
+    <string name="iptv_remote_paused">Подешавање преко телефона је заустављено док је апликација била у позадини.</string>
+    <string name="iptv_remote_start_again">Покрени поново</string>
+    <string name="iptv_remote_start_again_subtitle">Приказује нови QR код и код за упаривање</string>
+    <string name="iptv_remote_done">Готово</string>
+    <string name="iptv_remote_done_subtitle">Зауставља подешавање преко телефона и враћа назад</string>
+    <string name="iptv_remote_confirm_add_title">Додати ово са телефона?</string>
+    <string name="iptv_remote_confirm_edit_title">Изменити %1$s са телефона?</string>
+    <string name="iptv_remote_confirm_subtitle">Проверите податке. Ништа се не чува док не изаберете Сачувај на овом ТВ-у.</string>
+    <string name="iptv_remote_field_device">Послато са</string>
+    <string name="iptv_remote_field_type">Тип</string>
+    <string name="iptv_remote_field_name">Назив</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Адреса</string>
+    <string name="iptv_remote_field_server">Сервер</string>
+    <string name="iptv_remote_server_changes">Мења се са %1$s на %2$s</string>
+    <string name="iptv_remote_server_new">Мења се на %1$s</string>
+    <string name="iptv_remote_field_username">Корисничко име</string>
+    <string name="iptv_remote_field_password">Лозинка</string>
+    <string name="iptv_remote_field_mac">MAC адреса</string>
+    <string name="iptv_remote_password_set">Унета на телефону (скривена)</string>
+    <string name="iptv_remote_password_new">Нова лозинка (скривена)</string>
+    <string name="iptv_remote_save">Сачувај на овом ТВ-у</string>
+    <string name="iptv_remote_reject">Одбиј</string>
+    <string name="iptv_remote_saved">Сачувано. Канали се сада учитавају.</string>
+    <string name="iptv_remote_guide_saved">Сачувано. Водич се сада учитава.</string>
+    <string name="iptv_remote_rejected">Одбијено. Ништа није сачувано.</string>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Настройка от телефон или компютър</string>
+    <string name="iptv_remote_entry_subtitle">Въвеждайте адреси и данни за вход с истинска клавиатура</string>
+    <string name="iptv_remote_title">Настройка от телефона</string>
+    <string name="iptv_remote_description">Сканирайте QR кода с телефона си или отворете адреса на компютър в същата мрежа. След това въведете показания тук код за сдвояване.</string>
+    <string name="iptv_remote_code">Код за сдвояване</string>
+    <string name="iptv_remote_address">Или отворете този адрес</string>
+    <string name="iptv_remote_qr_description">QR код за настройка от телефона</string>
+    <string name="iptv_remote_home_network">Използвайте това само в домашната си мрежа. Страницата за настройка не е криптирана.</string>
+    <string name="iptv_remote_idle_note">Спира, когато напуснете този екран или след 10 минути без активност.</string>
+    <string name="iptv_remote_confirm_note">Нищо не се запазва, докато не го потвърдите тук на телевизора. Източници и справочници могат да се премахват само от телевизора.</string>
+    <string name="iptv_remote_starting">Стартиране на настройката от телефона…</string>
+    <string name="iptv_remote_waiting">Изчакване на телефон или компютър</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d свързано устройство</item>
+        <item quantity="other">%d свързани устройства</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Свържете телевизора с домашната си мрежа, за да настройвате от телефона.</string>
+    <string name="iptv_remote_not_home_network">Телевизорът няма адрес от частна домашна мрежа, затова настройката от телефона остава изключена.</string>
+    <string name="iptv_remote_ports_busy">Настройката от телефона не можа да стартира, защото мрежовите ѝ портове са заети. Опитайте отново след малко.</string>
+    <string name="iptv_remote_idle_stopped">Настройката от телефона спря след 10 минути без активност.</string>
+    <string name="iptv_remote_paused">Настройката от телефона спря, докато приложението беше във фонов режим.</string>
+    <string name="iptv_remote_start_again">Стартирай отново</string>
+    <string name="iptv_remote_start_again_subtitle">Показва нов QR код и код за сдвояване</string>
+    <string name="iptv_remote_done">Готово</string>
+    <string name="iptv_remote_done_subtitle">Спира настройката от телефона и се връща назад</string>
+    <string name="iptv_remote_confirm_add_title">Да се добави ли това от телефона?</string>
+    <string name="iptv_remote_confirm_edit_title">Да се промени ли %1$s от телефона?</string>
+    <string name="iptv_remote_confirm_subtitle">Проверете данните. Нищо не се запазва, освен ако не изберете Запази на този телевизор.</string>
+    <string name="iptv_remote_field_device">Изпратено от</string>
+    <string name="iptv_remote_field_type">Тип</string>
+    <string name="iptv_remote_field_name">Име</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Адрес</string>
+    <string name="iptv_remote_field_server">Сървър</string>
+    <string name="iptv_remote_server_changes">Променя се от %1$s на %2$s</string>
+    <string name="iptv_remote_server_new">Променя се на %1$s</string>
+    <string name="iptv_remote_field_username">Потребителско име</string>
+    <string name="iptv_remote_field_password">Парола</string>
+    <string name="iptv_remote_field_mac">MAC адрес</string>
+    <string name="iptv_remote_password_set">Въведена на телефона (скрита)</string>
+    <string name="iptv_remote_password_new">Нова парола (скрита)</string>
+    <string name="iptv_remote_save">Запази на този телевизор</string>
+    <string name="iptv_remote_reject">Отхвърли</string>
+    <string name="iptv_remote_saved">Запазено. Каналите се зареждат.</string>
+    <string name="iptv_remote_guide_saved">Запазено. Справочникът се зарежда.</string>
+    <string name="iptv_remote_rejected">Отхвърлено. Нищо не е запазено.</string>
+</resources>

@@ -1,0 +1,74 @@
+<resources>
+    <string name="iptv_recording_channel">Записи</string>
+    <string name="iptv_recording_channel_description">Показується під час запису передач із ТВ наживо</string>
+    <string name="iptv_recording_notification_title">Запис ТВ наживо</string>
+    <string name="iptv_recording_notification_starting">Запуск запису…</string>
+    <plurals name="iptv_recording_notification_count">
+        <item quantity="one">%1$d передача</item>
+        <item quantity="few">%1$d передачі</item>
+        <item quantity="many">%1$d передач</item>
+        <item quantity="other">%1$d передачі</item>
+    </plurals>
+
+    <string name="iptv_recording_record">Записати</string>
+    <string name="iptv_recording_record_now">Записати зараз</string>
+    <string name="iptv_recording_record_programme">Записати цю передачу</string>
+    <string name="iptv_recording_started">Запис розпочато</string>
+    <string name="iptv_recording_scheduled">Запис заплановано</string>
+    <string name="iptv_recordings_open">Записи</string>
+
+    <string name="iptv_recordings_title">Записи</string>
+    <string name="iptv_recordings_description">Передачі, записані або заплановані з ТВ наживо. Записи зберігаються на цьому пристрої та належать цьому профілю.</string>
+    <string name="iptv_recordings_hint">Натисніть OK, щоб відтворити запис. Утримуйте OK або натисніть «Меню» для інших параметрів.</string>
+    <string name="iptv_recordings_free">Вільно %1$s на цьому пристрої</string>
+    <string name="iptv_recordings_empty">Записів ще немає. Запишіть передачу з телепрограми ТВ наживо або під час перегляду.</string>
+    <string name="iptv_recordings_group_now">Записується зараз</string>
+    <string name="iptv_recordings_group_scheduled">Заплановані</string>
+    <string name="iptv_recordings_group_recorded">Записані</string>
+
+    <string name="iptv_recording_status_scheduled">Заплановано</string>
+    <string name="iptv_recording_status_recording">Записується</string>
+    <string name="iptv_recording_status_done">Записано</string>
+    <string name="iptv_recording_status_partial">Записано частково</string>
+    <string name="iptv_recording_status_failed">Помилка</string>
+    <string name="iptv_recording_status_cancelled">Скасовано</string>
+    <string name="iptv_recording_gaps">Є пропуски</string>
+
+    <string name="iptv_recording_failure_no_connection">Немає вільного з\'єднання в цьому акаунті</string>
+    <string name="iptv_recording_failure_device_busy">Пристрій зайнятий іншими потоками</string>
+    <string name="iptv_recording_failure_source">Джерело недоступне</string>
+    <string name="iptv_recording_failure_channel">Канал більше недоступний</string>
+    <string name="iptv_recording_failure_unsupported">Цей формат потоку не можна записати</string>
+    <string name="iptv_recording_failure_encrypted">Зашифровані потоки не можна записувати</string>
+    <string name="iptv_recording_failure_network">Потік перервано</string>
+    <string name="iptv_recording_failure_low_storage">Сховище майже заповнене</string>
+    <string name="iptv_recording_failure_storage">Не вдалося зберегти запис</string>
+    <string name="iptv_recording_failure_time_limit">Досягнуто ліміту тривалості запису</string>
+    <string name="iptv_recording_failure_interrupted">Застосунок або пристрій зупинився під час запису</string>
+    <string name="iptv_recording_failure_start_blocked">Android не дозволив почати запис. Дозвольте будильники й нагадування для Nuvio або залиште Nuvio відкритим.</string>
+    <string name="iptv_recording_failure_missed">Передача закінчилася до початку запису</string>
+
+    <string name="iptv_recording_refused_conflict">Інші записи вже використовують усі з\'єднання цього акаунта в цей час</string>
+    <string name="iptv_recording_refused_no_connection">Немає вільного з\'єднання в цьому акаунті. Спершу припиніть перегляд або запис іншого каналу.</string>
+    <string name="iptv_recording_refused_storage">Недостатньо вільного місця для цього запису. Розраховуйте приблизно на 2,5 GB на кожну годину HD, а 500 MB завжди залишаються вільними для пристрою. Видаліть старі записи або звільніть місце.</string>
+    <string name="iptv_recording_refused_ended">Ця передача вже закінчилася</string>
+    <string name="iptv_recording_refused_channel">Цей канал зараз не можна записати</string>
+    <string name="iptv_recording_refused_duplicate">Цей канал уже записується в цей час</string>
+    <string name="iptv_recording_refused_full">Список записів заповнено. Спершу видаліть кілька записів.</string>
+    <string name="iptv_recording_refused_profile">Профіль змінено. Спробуйте ще раз.</string>
+    <string name="iptv_recording_refused_exact_alarms">Для запланованих записів потрібен дозвіл на будильники й нагадування. Надайте його Nuvio або записуйте під час перегляду.</string>
+    <string name="iptv_recording_alarm_settings">Дозволити будильники й нагадування</string>
+
+    <string name="iptv_recording_play">Відтворити</string>
+    <string name="iptv_recording_stop">Зупинити запис</string>
+    <string name="iptv_recording_cancel">Скасувати запис</string>
+    <string name="iptv_recording_delete">Видалити запис</string>
+    <string name="iptv_recording_delete_title">Видалити «%1$s»?</string>
+    <string name="iptv_recording_delete_description">Запис і його файл буде видалено з цього пристрою.</string>
+    <string name="iptv_recording_delete_confirm">Видалити</string>
+    <string name="iptv_recording_keep">Залишити</string>
+    <string name="iptv_recording_file_missing">Файлу запису більше немає на цьому пристрої</string>
+    <string name="iptv_recording_paused">Пауза</string>
+    <string name="iptv_recording_playback_failed">Не вдалося відтворити цей запис. Файл може бути неповним або у форматі, який цей пристрій не може декодувати.</string>
+    <string name="iptv_recording_skip_hint">Ліворуч і праворуч — перемотка на 30 секунд</string>
+</resources>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_remote_entry_title">Postavi s telefona ili računara</string>
+    <string name="iptv_remote_entry_subtitle">Unesite adrese i prijave na pravoj tastaturi</string>
+    <string name="iptv_remote_title">Postavi s telefona</string>
+    <string name="iptv_remote_description">Skenirajte QR kod telefonom ili otvorite adresu na računaru u istoj mreži. Zatim unesite kod za uparivanje prikazan ovdje.</string>
+    <string name="iptv_remote_code">Kod za uparivanje</string>
+    <string name="iptv_remote_address">Ili otvorite ovu adresu</string>
+    <string name="iptv_remote_qr_description">QR kod za postavljanje s telefona</string>
+    <string name="iptv_remote_home_network">Koristite ovo samo na kućnoj mreži. Stranica za postavljanje nije šifrovana.</string>
+    <string name="iptv_remote_idle_note">Zaustavlja se kada napustite ovaj ekran ili nakon 10 minuta neaktivnosti.</string>
+    <string name="iptv_remote_confirm_note">Ništa se ne sprema dok to ne potvrdite ovdje na TV-u. Izvori i vodiči mogu se ukloniti samo na TV-u.</string>
+    <string name="iptv_remote_starting">Pokretanje postavljanja s telefona…</string>
+    <string name="iptv_remote_waiting">Čeka se telefon ili računar</string>
+    <plurals name="iptv_remote_connected">
+        <item quantity="one">%d uređaj povezan</item>
+        <item quantity="few">%d uređaja povezana</item>
+        <item quantity="other">%d uređaja povezano</item>
+    </plurals>
+    <string name="iptv_remote_no_network">Povežite TV s kućnom mrežom da biste postavljali s telefona.</string>
+    <string name="iptv_remote_not_home_network">TV nema adresu privatne kućne mreže, pa postavljanje s telefona ostaje isključeno.</string>
+    <string name="iptv_remote_ports_busy">Postavljanje s telefona nije pokrenuto jer su njegovi mrežni portovi zauzeti. Pokušajte ponovo za trenutak.</string>
+    <string name="iptv_remote_idle_stopped">Postavljanje s telefona je zaustavljeno nakon 10 minuta neaktivnosti.</string>
+    <string name="iptv_remote_paused">Postavljanje s telefona je zaustavljeno dok je aplikacija bila u pozadini.</string>
+    <string name="iptv_remote_start_again">Pokreni ponovo</string>
+    <string name="iptv_remote_start_again_subtitle">Prikazuje novi QR kod i kod za uparivanje</string>
+    <string name="iptv_remote_done">Gotovo</string>
+    <string name="iptv_remote_done_subtitle">Zaustavlja postavljanje s telefona i vraća nazad</string>
+    <string name="iptv_remote_confirm_add_title">Dodati ovo s telefona?</string>
+    <string name="iptv_remote_confirm_edit_title">Promijeniti %1$s s telefona?</string>
+    <string name="iptv_remote_confirm_subtitle">Provjerite podatke. Ništa se ne sprema dok ne odaberete Spremi na ovom TV-u.</string>
+    <string name="iptv_remote_field_device">Poslano s</string>
+    <string name="iptv_remote_field_type">Vrsta</string>
+    <string name="iptv_remote_field_name">Naziv</string>
+    <string name="iptv_remote_field_renamed">%1$s → %2$s</string>
+    <string name="iptv_remote_field_address">Adresa</string>
+    <string name="iptv_remote_field_server">Server</string>
+    <string name="iptv_remote_server_changes">Mijenja se s %1$s na %2$s</string>
+    <string name="iptv_remote_server_new">Mijenja se na %1$s</string>
+    <string name="iptv_remote_field_username">Korisničko ime</string>
+    <string name="iptv_remote_field_password">Lozinka</string>
+    <string name="iptv_remote_field_mac">MAC adresa</string>
+    <string name="iptv_remote_password_set">Unesena na telefonu (skrivena)</string>
+    <string name="iptv_remote_password_new">Nova lozinka (skrivena)</string>
+    <string name="iptv_remote_save">Spremi na ovom TV-u</string>
+    <string name="iptv_remote_reject">Odbij</string>
+    <string name="iptv_remote_saved">Spremljeno. Kanali se sada učitavaju.</string>
+    <string name="iptv_remote_guide_saved">Spremljeno. Vodič se sada učitava.</string>
+    <string name="iptv_remote_rejected">Odbijeno. Ništa nije spremljeno.</string>
+</resources>
