@@ -58,7 +58,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
@@ -83,6 +82,7 @@ import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
+import com.nuvio.tv.ui.screens.settings.SettingsDetailHeader
 import com.nuvio.tv.ui.screens.settings.SettingsGroupCard
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
@@ -119,10 +119,8 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
         if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
             Column(Modifier.width(340.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(stringResource(R.string.iptv_sources_title), style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary)
-                Text(stringResource(R.string.iptv_sources_description), style = MaterialTheme.typography.bodyMedium, color = NuvioTheme.colors.TextSecondary)
-                Spacer(Modifier.height(18.dp))
+                SettingsDetailHeader(stringResource(R.string.iptv_sources_title), stringResource(R.string.iptv_sources_description))
+                Spacer(Modifier.height(12.dp))
                 SettingsActionRow(title = stringResource(R.string.iptv_live_title), subtitle = stringResource(R.string.iptv_sources_watch_subtitle),
                     onClick = onLive, enabled = state.sources.isNotEmpty(), leadingIcon = Icons.Filled.LiveTv,
                     modifier = if (state.sources.isNotEmpty()) Modifier.focusRequester(first) else Modifier)

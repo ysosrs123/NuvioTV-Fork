@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play_return_hint">Press Right to return to live</string>
+    <string name="iptv_play_corner_full">This picture shows in full screen only. Press OK to watch.</string>
+</resources>

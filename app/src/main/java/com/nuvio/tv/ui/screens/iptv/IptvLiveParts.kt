@@ -4,6 +4,32 @@ package com.nuvio.tv.ui.screens.iptv
 
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.sp
+import androidx.tv.material3.Icon
+import com.nuvio.tv.ui.components.FocusMarqueeText
+import com.nuvio.tv.ui.util.rememberLongPressKeyTracker
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,14 +87,95 @@ internal val PanelShape = RoundedCornerShape(20.dp)
 internal val ItemShape = RoundedCornerShape(12.dp)
 
 @Composable
-internal fun Modifier.iptvPanel(shape: Shape = PanelShape, role: GlassRole = GlassRole.PANEL): Modifier {
+internal fun Modifier.iptvPanel(shape: Shape = PanelShape, role: GlassRole = GlassRole.PANEL, edge: Boolean = false): Modifier {
     val solid = LocalIptvAppearance.current.solidPanels
     val v2 = LocalV2Appearance.current != null
-    return if (v2 && !solid) nuvioGlass(role, shape = shape)
-    else if (v2) clip(shape).background(NuvioTheme.colors.BackgroundCard, shape)
-    else clip(shape).background(if (solid) NuvioTheme.colors.BackgroundCard else NuvioTheme.colors.BackgroundCard.copy(alpha = .92f), shape)
+    return if (v2 && !solid) nuvioGlass(role, shape = shape, trailingEdgeOnly = edge)
+    else if (v2) clip(shape).background(NuvioTheme.colors.BackgroundCard, shape).then(
+        if (edge) Modifier.drawWithContent {
+            drawContent()
+            val x = if (layoutDirection == LayoutDirection.Ltr) size.width - 1.dp.toPx() / 2 else 1.dp.toPx() / 2
+            drawLine(Color.White.copy(alpha = .10f), Offset(x, 0f), Offset(x, size.height), 1.dp.toPx())
+        } else Modifier.border(1.dp, Color.White.copy(alpha = .08f), shape))
+    else clip(shape).background(if (solid) NuvioTheme.colors.BackgroundCard else NuvioTheme.colors.BackgroundCard.copy(alpha = .96f), shape)
         .border(1.dp, NuvioTheme.colors.Border, shape)
 }
+
+@Composable
+@ReadOnlyComposable
+internal fun iptvTitleStyle(): TextStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
+
+@Composable
+@ReadOnlyComposable
+internal fun iptvItemStyle(emphasis: Boolean, compact: Boolean = false): TextStyle =
+    (if (compact) MaterialTheme.typography.bodySmall.copy(lineHeight = 15.sp) else MaterialTheme.typography.bodyMedium.copy(lineHeight = 18.sp))
+        .copy(fontWeight = if (emphasis) FontWeight.SemiBold else FontWeight.Medium)
+
+@Composable
+@ReadOnlyComposable
+internal fun iptvMetaStyle(): TextStyle = MaterialTheme.typography.labelMedium
+
+@Composable
+@ReadOnlyComposable
+internal fun iptvHeadingStyle(): TextStyle = MaterialTheme.typography.labelLarge
+
+@Composable
+internal fun IptvRailItem(text: String, count: Int?, selected: Boolean, modifier: Modifier, onClick: () -> Unit,
+    icon: ImageVector? = null, onHold: (() -> Unit)? = null, dim: Boolean = false) {
+    var focused by remember { mutableStateOf(false) }
+    val longPress = rememberLongPressKeyTracker()
+    var held by remember { mutableStateOf(false) }
+    Row(modifier.fillMaxWidth().heightIn(min = 46.dp)
+        .onFocusChanged { focused = it.isFocused }
+        .iptvItem(focused)
+        .graphicsLayer { alpha = if (dim && !focused) .55f else 1f }
+        .onPreviewKeyEvent { event ->
+            val native = event.nativeKeyEvent
+            if (onHold != null && longPress.handle(native, ::isSelect) { held = true; onHold() }) {
+                if (native.action == AndroidKeyEvent.ACTION_UP) held = false
+                return@onPreviewKeyEvent true
+            }
+            if (onHold != null && native.action == AndroidKeyEvent.ACTION_DOWN && native.keyCode == AndroidKeyEvent.KEYCODE_MENU) { onHold(); return@onPreviewKeyEvent true }
+            if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) { if (!held) onClick(); held = false; true } else false
+        }
+        .focusable().padding(start = 6.dp, end = 12.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        val content = if (focused) itemContent(true) else if (selected) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary
+        Box(Modifier.width(3.dp).height(16.dp).clip(RoundedCornerShape(2.dp)).background(if (selected) NuvioTheme.colors.Secondary else Color.Transparent))
+        if (icon != null) Icon(icon, null, Modifier.size(18.dp), tint = content)
+        FocusMarqueeText(text, focused, iptvItemStyle(selected || focused), Modifier.weight(1f), color = content)
+        if (count != null) Text("$count", style = iptvMetaStyle(), color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+    }
+}
+
+@Composable
+internal fun IptvSearchField(value: String, hint: String, focus: FocusRequester, onChange: (String) -> Unit, onDone: () -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(14.dp)
+    val keyboard = LocalSoftwareKeyboardController.current
+    Row(Modifier.fillMaxWidth().height(52.dp).fieldFocus(focused, shape).iptvPanel(shape, GlassRole.CONTROL)
+        .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Icon(Icons.Filled.Search, null, Modifier.size(20.dp), tint = NuvioTheme.colors.TextSecondary)
+        BasicTextField(value, onChange, singleLine = true,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = NuvioTheme.colors.TextPrimary),
+            keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { keyboard?.hide(); onDone() }),
+            cursorBrush = SolidColor(NuvioTheme.colors.TextPrimary),
+            decorationBox = { inner ->
+                Box { if (value.isEmpty()) Text(hint, style = MaterialTheme.typography.bodyLarge, color = NuvioTheme.colors.TextTertiary); inner() }
+            },
+            modifier = Modifier.weight(1f).focusRequester(focus).onFocusChanged { focused = it.isFocused }
+                .onPreviewKeyEvent { event ->
+                    val native = event.nativeKeyEvent
+                    if (native.action == AndroidKeyEvent.ACTION_DOWN && native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_DOWN) { onDone(); true } else false
+                })
+    }
+}
+
+@Composable
+internal fun Modifier.fieldFocus(focused: Boolean, shape: Shape): Modifier =
+    if (LocalV2Appearance.current != null) nuvioV2Focus(focused, shape, stationary = true)
+    else if (focused) border(2.dp, NuvioTheme.colors.FocusRing, shape) else this
 
 @Composable
 internal fun Modifier.iptvItem(focused: Boolean, selected: Boolean = false, shape: Shape = ItemShape): Modifier =

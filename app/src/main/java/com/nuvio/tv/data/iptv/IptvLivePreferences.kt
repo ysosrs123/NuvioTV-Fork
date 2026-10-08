@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 enum class IptvStartView { LAST, ALL, FAVOURITES, SPORT }
 
-data class IptvAppearance(val theme: String? = null, val black: Boolean = false, val solidPanels: Boolean = true, val plainBackground: Boolean = true)
+data class IptvAppearance(val theme: String? = null, val black: Boolean = false, val solidPanels: Boolean = false, val plainBackground: Boolean = true)
 
 class IptvLivePreferences(context: Context) {
     val preferences = context.applicationContext.getSharedPreferences("iptv-live", Context.MODE_PRIVATE)
@@ -71,7 +71,7 @@ class IptvLivePreferences(context: Context) {
 
     val currentAppearance: IptvAppearance
         get() = IptvAppearance(preferences.getString(THEME_KEY, null)?.takeIf { it.length <= 40 },
-            preferences.getBoolean(BLACK_KEY, false), preferences.getBoolean(SOLID_KEY, true), preferences.getBoolean(PLAIN_KEY, true))
+            preferences.getBoolean(BLACK_KEY, false), preferences.getBoolean(SOLID_KEY, false), preferences.getBoolean(PLAIN_KEY, true))
 
     fun updateAppearance(change: (IptvAppearance) -> IptvAppearance) {
         val next = change(currentAppearance)

@@ -13,7 +13,6 @@ object LiveBufferPolicy {
     const val MARGIN_MS = 10_000
     const val PLAIN_MIN_MS = 1_500
     const val PLAIN_MAX_MS = 8_000
-    const val HLS_HEAD_MS = 4_000L
     const val SLOW_SPEED = 0.97f
     private const val BYTES_FILL = 0.75
 
@@ -42,13 +41,6 @@ object LiveBufferPolicy {
         val fits = (capBytes * 8.0 * 1_000 * BYTES_FILL / rate).toLong()
         return minOf(cushionMs, fits).coerceAtLeast(0)
     }
-
-    fun hlsStartMs(defaultMs: Long, windowMs: Long, cushionMs: Long): Long? {
-        if (cushionMs <= 0 || defaultMs <= 0 || windowMs <= 0) return null
-        val floor = minOf(maxOf(HLS_HEAD_MS, windowMs / 4), defaultMs)
-        val start = maxOf(defaultMs - cushionMs, floor)
-        return start.takeIf { it < defaultMs }
-    }
 }
 
 class LiveCushionSpeed(private val slow: Float = LiveBufferPolicy.SLOW_SPEED) {
@@ -69,6 +61,25 @@ class LiveCushionSpeed(private val slow: Float = LiveBufferPolicy.SLOW_SPEED) {
     private fun hysteresis(targetMs: Long) = maxOf(MIN_HYSTERESIS_MS, targetMs / 5)
 
     private companion object { const val MIN_HYSTERESIS_MS = 2_000L }
+}
+
+class LiveBehindClock {
+    private var startedAt: Long? = null
+    private var startPosition = 0L
+
+    @Synchronized fun reset() { startedAt = null }
+
+    @Synchronized fun ready(now: Long, positionMs: Long) { if (startedAt == null) { startedAt = now; startPosition = positionMs } }
+
+    @Synchronized fun behindMs(now: Long, positionMs: Long): Long? =
+        startedAt?.let { ((now - it) - (positionMs - startPosition)).coerceAtLeast(0) }
+}
+
+object LiveCornerVideo {
+    const val MAX_WIDTH = 1920
+    const val MAX_HEIGHT = 1088
+
+    fun heavy(width: Int, height: Int, hdr: Boolean): Boolean = hdr || width > MAX_WIDTH || height > MAX_HEIGHT
 }
 
 class LiveHolds<T : Any> {

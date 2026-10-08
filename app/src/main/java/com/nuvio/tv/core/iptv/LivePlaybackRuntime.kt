@@ -3,6 +3,7 @@ package com.nuvio.tv.core.iptv
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -15,7 +16,7 @@ interface OwnedLivePlayback {
 
 enum class LiveOpenResult { OPENED, CAPACITY, SHARING_UNAVAILABLE, CLOSE_UNCONFIRMED, FAILED }
 
-class LivePlaybackRuntime(private val admission: LiveSessionAdmission) {
+class LivePlaybackRuntime(private val admission: LiveSessionAdmission, private val closeRetryMs: Long = CLOSE_RETRY_MS) {
     private data class Active(val owner: String, val lease: LiveConsumerLease, val playback: OwnedLivePlayback)
     private val mutex = Mutex()
     private var active: Active? = null
@@ -24,7 +25,7 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission) {
         maxUpstreams: Int? = null, create: suspend (PlaybackPurpose) -> OwnedLivePlayback): LiveOpenResult = mutex.withLock {
         require(maxUpstreams == null || maxUpstreams in 1..16)
         currentCoroutineContext().ensureActive()
-        if (!closeActive()) return@withLock LiveOpenResult.CLOSE_UNCONFIRMED
+        if (!closeWithRetry()) return@withLock LiveOpenResult.CLOSE_UNCONFIRMED
         currentCoroutineContext().ensureActive()
         maxUpstreams?.let { admission.setAccountLimit(key.accountId, it) }
         val result = admission.acquire(key, acquisitionBytes, ConsumerReservation(LiveConsumerRole.VIEWER, 1, viewerBytes))
@@ -50,12 +51,21 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission) {
     }
 
     suspend fun stop(owner: String = "foreground"): Boolean = mutex.withLock {
-        if (active?.owner != owner) true else closeActive()
+        if (active?.owner != owner) true else closeWithRetry()
+    }
+
+    private suspend fun closeWithRetry(): Boolean {
+        if (closeActive()) return true
+        val deadline = System.nanoTime() + closeRetryMs * 1_000_000
+        while (System.nanoTime() < deadline) {
+            delay(CLOSE_RETRY_STEP_MS)
+            if (closeActive()) return true
+        }
+        return false
     }
 
     private suspend fun closeActive(): Boolean = withContext(NonCancellable) {
         val previous = active ?: return@withContext true
-
         val closed = try { previous.playback.close() } catch (_: Exception) { false }
         if (closed) { release(previous.lease); active = null }
         closed
@@ -63,5 +73,10 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission) {
 
     private fun release(lease: LiveConsumerLease) {
         admission.release(lease)?.let(admission::completeClose)
+    }
+
+    private companion object {
+        const val CLOSE_RETRY_MS = 3_000L
+        const val CLOSE_RETRY_STEP_MS = 150L
     }
 }

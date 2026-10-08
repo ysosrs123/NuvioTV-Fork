@@ -6,7 +6,7 @@ import org.junit.Test
 
 class LivePlaybackRuntimeTest {
     private val admission = LiveSessionAdmission(DeviceAdmissionLimits(2, 1000, 0))
-    private val runtime = LivePlaybackRuntime(admission)
+    private val runtime = LivePlaybackRuntime(admission, closeRetryMs = 0)
     private fun key(id: String) = AcquisitionKey("shared", id, "main", 1)
     private class Handle(val closeAction: suspend () -> Boolean = { true }) : OwnedLivePlayback {
         var starts = 0
@@ -44,6 +44,24 @@ class LivePlaybackRuntimeTest {
         canClose = true
         assertTrue(runtime.stop())
         assertNull(admission.snapshot().audioOwner)
+    }
+    @Test fun closeIsRetriedBrieflyBeforeTheSwitchIsRefused() = runBlocking {
+        val patient = LivePlaybackRuntime(admission, closeRetryMs = 2_000)
+        var attempts = 0
+        patient.open(key("one"), 10, 20) { Handle { ++attempts >= 3 } }
+        assertEquals(LiveOpenResult.OPENED, patient.open(key("two"), 10, 20) { Handle() })
+        assertEquals(3, attempts)
+        assertEquals(1, admission.snapshot().consumers)
+    }
+    @Test fun closeThatNeverConfirmsIsRefusedAfterTheRetryWindow() = runBlocking {
+        val patient = LivePlaybackRuntime(admission, closeRetryMs = 300)
+        var attempts = 0
+        patient.open(key("one"), 10, 20) { Handle { attempts++; false } }
+        val started = System.nanoTime()
+        assertEquals(LiveOpenResult.CLOSE_UNCONFIRMED, patient.open(key("two"), 10, 20) { error("Must not construct") })
+        assertTrue((System.nanoTime() - started) / 1_000_000 >= 300)
+        assertTrue(attempts > 2)
+        assertEquals(1, admission.snapshot().consumers)
     }
     @Test fun cancelledSwitchStillClosesOldTransportWithoutOpeningNewOne() = runBlocking {
         val closing = CompletableDeferred<Unit>(); val closed = CompletableDeferred<Boolean>()

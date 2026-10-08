@@ -43,7 +43,9 @@ import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.FixtureTeam
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureText
+import com.nuvio.tv.ui.components.rememberShimmerBrush
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 
 @Composable
 internal fun IptvSportHero(active: Boolean, modifier: Modifier, fallback: @Composable (Modifier) -> Unit) {
@@ -51,9 +53,32 @@ internal fun IptvSportHero(active: Boolean, modifier: Modifier, fallback: @Compo
     val viewModel: IptvSportsFixturesViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val key by viewModel.hero.collectAsStateWithLifecycle()
-    val item = key?.let { wanted -> state.rows.firstNotNullOfOrNull { row -> row.items.firstOrNull { it.fixture.key == wanted } } }
-    if (!state.enabled || item == null) { fallback(modifier); return }
-    SportHero(item, state.showScores, modifier)
+    val item = when (val wanted = key) {
+        null -> null
+        IptvSportsFixturesViewModel.FEATURED -> state.rows.firstOrNull()?.items?.firstOrNull()
+        else -> state.rows.firstNotNullOfOrNull { row -> row.items.firstOrNull { it.fixture.key == wanted } }
+    }
+    when {
+        !state.enabled -> fallback(modifier)
+        item != null -> SportHero(item, state.showScores, modifier)
+        key == IptvSportsFixturesViewModel.FEATURED && state.loading -> SportHeroPlaceholder(modifier)
+        else -> fallback(modifier)
+    }
+}
+
+@Composable
+private fun SportHeroPlaceholder(modifier: Modifier) {
+    val brush = rememberShimmerBrush(backdropAware = LocalV2Appearance.current != null)
+    Column(modifier.iptvPanel().padding(horizontal = 18.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Box(Modifier.width(180.dp).height(12.dp).clip(SportPlaceholderShape).background(brush))
+        Box(Modifier.fillMaxWidth(.55f).height(22.dp).clip(SportPlaceholderShape).background(brush))
+        repeat(2) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Box(Modifier.size(26.dp).clip(CircleShape).background(brush))
+                Box(Modifier.width(140.dp).height(14.dp).clip(SportPlaceholderShape).background(brush))
+            }
+        }
+    }
 }
 
 @Composable
@@ -108,8 +133,8 @@ private fun HeroChannel(item: IptvFixtureItem) {
     if (first != null) Text(stringResource(R.string.iptv_sport2_watch_on, channelName(first.row)) + if (item.links.size > 1) " +${item.links.size - 1}" else "",
         style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.Secondary, maxLines = 1, overflow = TextOverflow.Ellipsis,
         modifier = Modifier.widthIn(max = 200.dp))
-    else if (item.fixture.status != FixtureStatus.FINAL) Text(stringResource(R.string.iptv_sport_no_channel), style = MaterialTheme.typography.labelMedium,
-        color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+    else if (item.fixture.status != FixtureStatus.FINAL) Text(stringResource(if (item.linking) R.string.iptv_sport3_finding_channels else R.string.iptv_sport_no_channel),
+        style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
 }
 
 @Composable

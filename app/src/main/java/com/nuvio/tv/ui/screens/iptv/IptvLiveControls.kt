@@ -55,11 +55,12 @@ internal fun goLiveRoute(state: IptvLiveState, now: Long): GoLiveRoute {
 
 @Composable
 internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControlLayout, available: Set<PlayerControlAction>,
-    onAction: (PlayerControlAction) -> Unit, onHide: () -> Unit, onScrub: (Long) -> Unit = {}, onGoLive: () -> Boolean = { false }) {
+    onAction: (PlayerControlAction) -> Unit, onHide: () -> Unit, onScrub: (Long) -> Unit = {}, onGoLive: () -> Boolean = { false },
+    focusGoLive: Boolean = false) {
     val v2 = LocalV2Appearance.current != null
     val targets = remember { PlayerControlAction.entries.associateWith { FocusRequester() } }
     val goLiveFocus = remember { FocusRequester() }
-    var behind by remember { mutableStateOf(false) }
+    var behind by remember { mutableStateOf(goLiveRoute(state, System.currentTimeMillis()) != GoLiveRoute.NONE) }
     var goLiveFocused by remember { mutableStateOf(false) }
     LaunchedEffect(state) { while (true) { behind = goLiveRoute(state, System.currentTimeMillis()) != GoLiveRoute.NONE; delay(1_000) } }
     var moreExpanded by remember { mutableStateOf(false) }
@@ -69,6 +70,7 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
     BackHandler { if (moreExpanded) moreExpanded = false else onHide() }
     LaunchedEffect(Unit) {
         repeat(2) { withFrameNanos { } }
+        if (focusGoLive && behind && runCatching { goLiveFocus.requestFocus() }.isSuccess) return@LaunchedEffect
         layout.focusFallback(null, deckAvailable)?.let { runCatching { targets.getValue(it).requestFocus() } }
     }
     LaunchedEffect(interaction, moreExpanded) { if (!moreExpanded) { delay(8_000); onHide() } }

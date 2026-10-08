@@ -2053,9 +2053,11 @@ private fun ModernSidebarScaffold(
     val sidebarExpandProgress by sidebarExpandProgressState
     // This is a static CompositionLocal: a fresh instance invalidates the whole
     // destination subtree, even when only the focused sidebar item has changed.
-    val sidebarPageLayout = remember(isV2Sidebar, showSidebar, sidebarCollapsed, openSidebarWidth, sidebarExpandProgressState) {
-        if (isV2Sidebar && showSidebar) com.nuvio.tv.ui.v2.components.SidebarPageLayout(
-            if (sidebarCollapsed) 0.dp else 62.dp, openSidebarWidth, { sidebarExpandProgressState.value }
+    val pageShown = androidx.compose.runtime.rememberUpdatedState(showSidebar)
+    val pageInset = animateDpAsState(if (sidebarCollapsed) 0.dp else 62.dp, tween(180), label = "sidebarPageInset")
+    val sidebarPageLayout = remember(isV2Sidebar, openSidebarWidth, sidebarExpandProgressState) {
+        if (isV2Sidebar) com.nuvio.tv.ui.v2.components.SidebarPageLayout(
+            { if (pageShown.value) pageInset.value else 0.dp }, openSidebarWidth, { if (pageShown.value) sidebarExpandProgressState.value else 0f }
         ) else null
     }
 

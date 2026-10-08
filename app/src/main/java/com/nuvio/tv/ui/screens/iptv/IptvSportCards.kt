@@ -173,7 +173,8 @@ private fun CardFooter(item: IptvFixtureItem) {
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         if (first != null) Text(channelName(first.row) + if (item.links.size > 1) " +${item.links.size - 1}" else "", style = MaterialTheme.typography.labelSmall,
             color = NuvioTheme.colors.Secondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-        else if (fixture.status != FixtureStatus.FINAL) Text(stringResource(R.string.iptv_sport_no_channel), style = MaterialTheme.typography.labelSmall,
+        else if (fixture.status != FixtureStatus.FINAL) Text(stringResource(if (item.linking) R.string.iptv_sport3_finding_channels else R.string.iptv_sport_no_channel),
+            style = MaterialTheme.typography.labelSmall,
             color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
         val venue = fixture.venue
         if (venue != null) Text(venue, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1,

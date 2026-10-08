@@ -116,6 +116,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         }).apply()
     }
     private var tuneJob: Job? = null
+    private var warmJob: Job? = null
     private var tuneVersion = 0L
     private var pageVersion = 0L
 
@@ -570,6 +571,26 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     fun focus(row: IptvListedChannel) {
         if (session != null) mutable.update { it.copy(focused = row) }
         loadShortGuide(row)
+        prewarm(row)
+    }
+    private fun prewarm(row: IptvListedChannel) {
+        warmJob?.cancel()
+        IptvLiveNet.drop()
+        val current = session ?: return
+        val ref = refOf(row) ?: return
+        val state = mutable.value
+        if (!foreground || state.multiview != null || row.item.channel.id == state.playingId) return
+        val kind = state.sources.firstOrNull { it.ref == ref }?.kind ?: return
+        if (kind == IptvSourceKind.STALKER) return
+        warmJob = viewModelScope.launch {
+            delay(WARM_DELAY)
+            val url = runCatching { withContext(Dispatchers.IO) { access.use(current) {
+                val item = requireNotNull(catalogue.playbackItem(ref, row.item.channel.id))
+                if (kind == IptvSourceKind.XTREAM) IptvXtreamClient.streamUrl(catalogue.connection(ref), item.channel.data.locator) else item.channel.data.locator
+            } } }.getOrElse { if (it is CancellationException) throw it; null } ?: return@launch
+            if (session === current && foreground && mutable.value.focused?.item?.channel?.id == row.item.channel.id)
+                IptvLiveNet.warm(url, liveReceiveBytes(liveLowMemory(context)))
+        }
     }
     private fun loadShortGuide(row: IptvListedChannel) {
         val current = session ?: return
@@ -666,7 +687,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val current = session ?: return
         val ref = refOf(row) ?: return
         if (!foreground) return
-        tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel()
+        tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel(); warmJob?.cancel()
         if (mutable.value.inset?.row?.item?.channel?.id == row.item.channel.id) closeInset()
         loadShortGuide(row)
         val request = ++tuneVersion
@@ -682,23 +703,34 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 previousId = it.playingId?.takeIf { id -> id != row.item.channel.id } ?: it.previousId,
                 recent = (listOf(row.item.channel.id) + it.recent.filter { id -> id != row.item.channel.id }).take(RECENT)) }
             try {
-                val source = withContext(Dispatchers.IO) { access.use(current) { catalogue.sources(current.profileId).single { it.ref == ref } } }
-                val stored = withContext(Dispatchers.IO) { access.use(current) { requireNotNull(catalogue.playbackItem(ref, row.item.channel.id)) } }
+                val (source, stored, streams) = withContext(Dispatchers.IO) { access.use(current) {
+                    val source = catalogue.sources(current.profileId).single { it.ref == ref }
+                    Triple(source, requireNotNull(catalogue.playbackItem(ref, row.item.channel.id)),
+                        catalogue.accounts(current.profileId).firstOrNull { it.id == source.accountId }?.maxStreams ?: 1)
+                } }
                 val catchupStart = from ?: catchup?.start?.epochMillis
                 if (catchup != null && !IptvCatchup.reaches(source.kind, stored.attributes, requireNotNull(catchupStart), System.currentTimeMillis()))
                     throw CatchupUnavailableException()
                 val overlayFormat = stored.overlay.streamFormat
                 val streamFormat = if (catchup != null && source.kind == IptvSourceKind.XTREAM) IptvStreamFormat.MPEG_TS
                     else overlayFormat.takeIf { it != IptvStreamFormat.AUTO } ?: livePreferences.defaultFormat
-                val streams = withContext(Dispatchers.IO) { access.use(current) {
-                    catalogue.accounts(current.profileId).firstOrNull { it.id == source.accountId }?.maxStreams ?: 1
-                } }
                 val variant = if (catchup == null) "main:" + streamFormat.name else "catchup:$catchupStart:" + streamFormat.name
                 val key = AcquisitionKey(admissionAccount(current.profileId, source.accountId), row.item.channel.id, variant, source.activeGeneration ?: 0)
                 val local = if (catchup == null) localConfig(row) else null
+                var plan = emptyList<IptvCatchupLocator>()
+                var catchupConnection: IptvSourceConnection? = null
+                val styles = IptvCatchupStyles.shared(context)
+                val prepared = if (catchup != null) {
+                    catchupConnection = if (source.kind == IptvSourceKind.XTREAM) withContext(Dispatchers.IO) { access.use(current) { catalogue.connection(ref) } } else null
+                    plan = IptvCatchup.locators(source.kind, catchupConnection, stored, requireNotNull(catchupStart), requireNotNull(until), System.currentTimeMillis(),
+                        remembered = catchupConnection?.let(styles::remembered)).ifEmpty { throw CatchupUnavailableException() }
+                    plan.first().url
+                } else if (source.kind == IptvSourceKind.STALKER) null else liveLocator(current, ref, source, stored)
                 val resolved = android.os.SystemClock.elapsedRealtime()
+                var closed = resolved
                 var logged = false
                 val result = runtime.open(key, 16L * 1024 * 1024, 96L * 1024 * 1024, owner, streams) { purpose ->
+                    closed = android.os.SystemClock.elapsedRealtime()
                     val item = withContext(Dispatchers.IO) { access.use(current) {
                         val latest = catalogue.sources(current.profileId).single { it.ref == ref }
                         check(latest.configurationVersion == source.configurationVersion && latest.accountId == source.accountId && latest.activeGeneration == source.activeGeneration)
@@ -706,17 +738,10 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     } }
                     currentCoroutineContext().ensureActive()
                     check(session === current && foreground && request == tuneVersion && profiles.activeProfileId.value == current.profileId && profiles.profileSelectionRevision.value == profileRevision)
-                    var plan = emptyList<IptvCatchupLocator>()
-                    var catchupConnection: IptvSourceConnection? = null
-                    val styles = IptvCatchupStyles.shared(context)
-                    val locator = if (catchup != null) {
-                        catchupConnection = if (source.kind == IptvSourceKind.XTREAM) withContext(Dispatchers.IO) { access.use(current) { catalogue.connection(ref) } } else null
-                        plan = IptvCatchup.locators(source.kind, catchupConnection, item, requireNotNull(catchupStart), requireNotNull(until), System.currentTimeMillis(),
-                            remembered = catchupConnection?.let(styles::remembered)).ifEmpty { throw CatchupUnavailableException() }
-                        plan.first().url
-                    } else liveLocator(current, ref, source, item)
+                    val locator = prepared ?: liveLocator(current, ref, source, item)
                     var failure: LiveFailure? = null
-                    IptvLivePlayback(context, locator, purpose, plan.firstOrNull()?.format ?: streamFormat, boostDb = livePreferences.boost(ref, row.item.channel.id),
+                    lateinit var created: IptvLivePlayback
+                    created = IptvLivePlayback(context, locator, purpose, plan.firstOrNull()?.format ?: streamFormat, boostDb = livePreferences.boost(ref, row.item.channel.id),
                         headers = StreamHeaders.requestHeaders(item.attributes), sourceUserAgent = livePreferences.userAgent(ref),
                         alternatives = plan.drop(1).map { it.url to (it.format ?: streamFormat) },
                         onAlternative = { index -> catchupConnection?.let { styles.worked(it, plan.getOrNull(index)?.style) } },
@@ -726,7 +751,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                             if (playing && !logged) {
                                 logged = true
                                 val now = android.os.SystemClock.elapsedRealtime()
-                                IptvLog.info("tune kind=${source.kind} format=$streamFormat catchup=${catchup != null} auto=$auto prepare ms=${resolved - started} play ms=${now - resolved} total ms=${now - started}")
+                                IptvLog.info("tune kind=${source.kind} format=$streamFormat catchup=${catchup != null} auto=$auto prepare ms=${resolved - started} " +
+                                    "close ms=${closed - resolved} play ms=${now - closed} total ms=${now - started} ${created.startSummary()}")
                             }
                         } },
                         onError = { if (request == tuneVersion) {
@@ -737,15 +763,18 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                         onReconnecting = { active -> if (request == tuneVersion) mutable.update { it.copy(reconnecting = active) } },
                         isLive = catchup == null, onEnded = { if (request == tuneVersion) { if (catchup != null) continueCatchup(row) else watch(row) } },
                         localTimeshift = local, onLocalTimeshift = { active -> if (request == tuneVersion) localChanged(active) })
-                        .also { mutable.update { state -> state.copy(playback = it, player = it.player, playingTitle = item.overlay.customName ?: item.channel.data.name) } }
+                    created.also { mutable.update { state -> state.copy(playback = it, player = it.player, playingTitle = item.overlay.customName ?: item.channel.data.name) } }
                 }
                 if (request == tuneVersion && result != LiveOpenResult.OPENED) mutable.update { it.copy(playback = null, player = null, playingTitle = null,
                     message = if (auto) null else if (result == LiveOpenResult.CLOSE_UNCONFIRMED) R.string.iptv_live_closing else if (result == LiveOpenResult.CAPACITY || result == LiveOpenResult.SHARING_UNAVAILABLE) R.string.iptv_live_capacity else R.string.iptv_live_failed) }
             } catch (cancel: CancellationException) { throw cancel }
             catch (error: Exception) {
                 if (request == tuneVersion && from != null) watch(row, notice = R.string.iptv_live_timeshift_unavailable)
-                else if (request == tuneVersion) mutable.update { it.copy(catchup = null, catchupFrom = null,
-                    message = if (auto) null else if (error is CatchupUnavailableException) R.string.iptv_live_catchup_unavailable else R.string.iptv_live_failed) }
+                else if (request == tuneVersion) {
+                    mutable.update { it.copy(catchup = null, catchupFrom = null,
+                        message = if (auto) null else if (error is CatchupUnavailableException) R.string.iptv_live_catchup_unavailable else R.string.iptv_live_failed) }
+                    runtime.stop(owner)
+                }
             }
             finally { if (request == tuneVersion) mutable.update { it.copy(tuning = false) } }
         }
@@ -1173,7 +1202,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         }
     }
     fun stop(keepChannel: Boolean = false) {
-        ++tuneVersion; tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel()
+        ++tuneVersion; tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel(); warmJob?.cancel()
+        IptvLiveNet.drop()
         closeInset()
         mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, reconnecting = false, catchup = null, catchupFrom = null,
             catchupUntil = null, scrubTarget = null, localTimeshift = false, localBehind = false,
@@ -1202,6 +1232,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         const val MAX_FAVOURITES = 2000
         const val EXTRA_GUIDE = 120
         const val SCRUB_COMMIT = 700L
+        const val WARM_DELAY = 400L
         const val SCRUB_WINDOW = 12 * 60 * 60 * 1000L
         const val PICKER_PAGE = 100
         const val MAX_PICKER = 2000

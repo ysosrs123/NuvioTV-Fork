@@ -43,12 +43,28 @@ class LiveBufferPolicyTest {
         assertTrue(capped in 12_000..13_000)
     }
 
-    @Test fun hlsCushionStaysInsideTheWindow() {
-        assertNull(LiveBufferPolicy.hlsStartMs(12_000, 30_000, 0))
-        assertEquals(15_000L, LiveBufferPolicy.hlsStartMs(42_000, 60_000, 32_000))
-        assertEquals(22_000L, LiveBufferPolicy.hlsStartMs(42_000, 60_000, 20_000))
-        assertEquals(7_500L, LiveBufferPolicy.hlsStartMs(12_000, 30_000, 20_000))
-        assertNull(LiveBufferPolicy.hlsStartMs(3_000, 12_000, 20_000))
+    @Test fun behindLiveCountsOnlyDelayAddedAfterTheStart() {
+        val clock = LiveBehindClock()
+        assertNull(clock.behindMs(1_000, 0))
+        clock.ready(10_000, 400)
+        clock.ready(12_000, 2_400)
+        assertEquals(0L, clock.behindMs(10_000, 400))
+        assertEquals(0L, clock.behindMs(20_000, 10_400))
+        assertEquals(3_000L, clock.behindMs(110_000, 97_400))
+        assertEquals(0L, clock.behindMs(30_000, 40_000))
+        clock.reset()
+        assertNull(clock.behindMs(120_000, 0))
+        clock.ready(120_000, 0)
+        assertEquals(5_000L, clock.behindMs(125_000, 0))
+    }
+
+    @Test fun cornerPictureRefusesHdrAndAboveFullHd() {
+        assertFalse(LiveCornerVideo.heavy(1920, 1080, false))
+        assertFalse(LiveCornerVideo.heavy(1920, 1088, false))
+        assertFalse(LiveCornerVideo.heavy(1280, 720, false))
+        assertTrue(LiveCornerVideo.heavy(1280, 720, true))
+        assertTrue(LiveCornerVideo.heavy(3840, 2160, false))
+        assertTrue(LiveCornerVideo.heavy(2560, 1080, false))
     }
 
     @Test fun speedSlowsUntilTargetWithHysteresis() {

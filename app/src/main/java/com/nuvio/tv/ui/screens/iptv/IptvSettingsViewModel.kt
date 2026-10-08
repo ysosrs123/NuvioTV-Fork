@@ -23,12 +23,16 @@ import com.nuvio.tv.data.iptv.IptvShareProbe
 import com.nuvio.tv.domain.model.AppTheme
 import com.nuvio.tv.data.iptv.IptvStartView
 import com.nuvio.tv.data.iptv.IptvStreamFormat
+import com.nuvio.tv.data.repository.MemberAccessRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -64,9 +68,11 @@ data class IptvShareStatus(val busy: Boolean = false, val message: Int? = null, 
 
 @HiltViewModel
 class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLivePreferences, private val profiles: ProfileManager,
-    private val device: IptvDeviceProfile, private val targets: IptvRecordingTargets, private val recorder: IptvRecorder) : ViewModel() {
+    private val device: IptvDeviceProfile, private val targets: IptvRecordingTargets, private val recorder: IptvRecorder,
+    memberAccess: MemberAccessRepository) : ViewModel() {
     private val mutable = MutableStateFlow(IptvSettingsState())
     val state = mutable.asStateFlow()
+    val themes = memberAccess.access.map { iptvThemes(it.entitlements) }.stateIn(viewModelScope, SharingStarted.Eagerly, iptvThemes(memberAccess.access.value.entitlements))
     private val locationOptions = MutableStateFlow<List<IptvLocationOption>?>(null)
     val locations = locationOptions.asStateFlow()
     private val notices = MutableStateFlow<Int?>(null)

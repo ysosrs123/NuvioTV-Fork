@@ -5,27 +5,15 @@ import com.nuvio.tv.core.iptv.FixtureLinkReason
 import com.nuvio.tv.core.iptv.FixtureListing
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.GuideProgramme
-import com.nuvio.tv.core.iptv.SportsCacheEntry
-import com.nuvio.tv.core.iptv.SportsDays
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureMatching
-import com.nuvio.tv.core.iptv.SportsLeague
 import com.nuvio.tv.core.iptv.SportsLeagues
-import com.nuvio.tv.core.iptv.SportsRefresh
 import com.nuvio.tv.core.iptv.SportsService
-import java.time.LocalDate
 import java.time.ZoneId
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 
 data class IptvSportsFixtures(val service: SportsService, val fixtures: List<SportsFixture> = emptyList(), val failed: Boolean = false,
@@ -34,47 +22,18 @@ data class IptvSportsFixtures(val service: SportsService, val fixtures: List<Spo
 data class IptvFixtureLink(val row: IptvListedChannel, val reason: FixtureLinkReason, val programme: GuideProgramme? = null, val broadcaster: String? = null)
 
 class IptvSportsFixturesRepository(private val preferences: IptvSportsPreferences, private val catalogue: IptvCatalogueStore, private val guides: IptvGuideStore,
-    private val client: IptvSportsFixturesClient, private val store: IptvSportsFixturesStore) {
+    client: IptvSportsFixturesClient, store: IptvSportsFixturesStore) {
     private val browse = IptvBrowseRepository(catalogue, guides)
-    private val memory = HashMap<String, SportsCacheEntry>()
-    private val mutex = Mutex()
-    private val requests = Semaphore(MAX_REQUESTS)
+    private val cache = IptvSportsFixturesCache(client, store)
 
-    suspend fun load(nowMillis: Long, zone: ZoneId, refresh: Boolean): IptvSportsFixtures = mutex.withLock {
-        withContext(Dispatchers.IO) {
-            val service = preferences.service
-            if (service == SportsService.OFF) return@withContext IptvSportsFixtures(service)
-            val leagues = SportsLeagues.chosen(preferences.leagues, service)
-            if (leagues.isEmpty()) return@withContext IptvSportsFixtures(service, noLeagues = true)
-            val key = if (service == SportsService.THESPORTSDB) preferences.key()?.takeIf { IptvSportsPreferences.validKey(it) } else null
-            if (service == SportsService.THESPORTSDB && key == null) return@withContext IptvSportsFixtures(service, missingKey = true)
-            val (from, until) = SportsDays.window(nowMillis, zone)
-            val dates = SportsDays.serviceDates(from, until, SportsDays.zone(service))
-            val wanted = leagues.flatMap { league -> dates.map { date -> Wanted(IptvSportsFixturesStore.key(service, league, date), league, date) } }
-            for (item in wanted) if (item.key !in memory) store.read(item.key)?.let { memory[item.key] = it }
-            memory.keys.retainAll(wanted.map { it.key }.toSet())
-            if (refresh) {
-                val due = wanted.filter { SportsRefresh.due(memory[it.key], nowMillis) }
-                if (due.isNotEmpty()) {
-                    val results = coroutineScope { due.map { item -> async { requests.withPermit { item.key to fetch(service, item, key, nowMillis) } } }.awaitAll() }
-                    for ((name, entry) in results) { memory[name] = entry; store.write(name, entry) }
-                    val failures = results.count { it.second.failedAt == nowMillis }
-                    IptvLog.info("sports fetch service=${service.name.lowercase()} requests=${due.size} failed=$failures")
-                    store.prune(wanted.map { it.key }.toSet())
-                }
-            }
-            val fixtures = wanted.flatMap { memory[it.key]?.fixtures.orEmpty() }
-                .filter { it.startMillis >= from - EARLIER_MILLIS && it.startMillis < until }.distinctBy { it.league to it.id }
-            IptvSportsFixtures(service, fixtures, failed = wanted.any { (memory[it.key]?.failures ?: 0) > 0 })
-        }
-    }
-
-    private suspend fun fetch(service: SportsService, item: Wanted, key: String?, nowMillis: Long): SportsCacheEntry = try {
-        SportsRefresh.succeeded(client.fixtures(service, item.league, item.date, key, nowMillis), nowMillis)
-    } catch (cancel: CancellationException) { throw cancel }
-    catch (error: Exception) {
-        IptvLog.failure("sports fetch ${service.name.lowercase()}${(error as? SportsFetchException)?.status?.let { " status=$it" }.orEmpty()}", error)
-        SportsRefresh.failed(memory[item.key], nowMillis)
+    suspend fun load(nowMillis: Long, zone: ZoneId, refresh: Boolean): IptvSportsFixtures = withContext(Dispatchers.IO) {
+        val service = preferences.service
+        if (service == SportsService.OFF) return@withContext IptvSportsFixtures(service)
+        val leagues = SportsLeagues.chosen(preferences.leagues, service)
+        if (leagues.isEmpty()) return@withContext IptvSportsFixtures(service, noLeagues = true)
+        val key = if (service == SportsService.THESPORTSDB) preferences.key()?.takeIf { IptvSportsPreferences.validKey(it) } else null
+        if (service == SportsService.THESPORTSDB && key == null) return@withContext IptvSportsFixtures(service, missingKey = true)
+        cache.load(service, leagues, key, nowMillis, zone, refresh)
     }
 
     suspend fun links(ref: IptvSourceRef, fixtures: List<SportsFixture>, nowMillis: Long, hiddenCategories: Set<String>): Map<String, List<IptvFixtureLink>> =
@@ -112,16 +71,12 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
             }.filterValues { it.isNotEmpty() }
         }
 
-    private class Wanted(val key: String, val league: SportsLeague, val date: LocalDate)
-
     private companion object {
-        const val MAX_REQUESTS = 2
         const val MAX_FIXTURES = 120
         const val MAX_SLICES = 24
         const val PROGRAMMES_PER_SLICE = 400
         const val ROWS_PER_TERM = 200
         const val SLICE_MILLIS = 60L * 60 * 1000
-        const val EARLIER_MILLIS = 12L * 60 * 60 * 1000
         const val CATEGORY_ATTRIBUTE = "group-title"
     }
 }

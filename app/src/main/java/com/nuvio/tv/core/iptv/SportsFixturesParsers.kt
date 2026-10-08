@@ -48,8 +48,8 @@ object EspnScoreboard {
         val round = (event.optJSONObject("week") ?: competition?.optJSONObject("week"))?.optIntOrNull("number")?.takeIf { it in 1..99 }
         val period = statusJson?.optIntOrNull("period")?.takeIf { it in 0..30 && status == FixtureStatus.LIVE }
         val clock = statusJson?.text("displayClock")?.takeIf { status == FixtureStatus.LIVE && it.length <= 12 }
-        val homeLine = if (started) FixtureLine(homeScore, periods(home)) else null
-        val awayLine = if (started) FixtureLine(awayScore, periods(away)) else null
+        val homeLine = if (started) FixtureLine(homeScore, periods(home, homeScore)) else null
+        val awayLine = if (started) FixtureLine(awayScore, periods(away, awayScore)) else null
         val situation = if (paired && status == FixtureStatus.LIVE) competition?.optJSONObject("situation")?.let { situation(it, home!!, away!!) } else null
         return SportsFixture(id, league.id, league.sport, title, homeTeam.takeIf { paired }, awayTeam.takeIf { paired }, start, status, score,
             type?.text("shortDetail") ?: type?.text("detail"), broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo)
@@ -63,7 +63,7 @@ object EspnScoreboard {
             .filter { it != name && it != short }.distinct()
         val records = competitor.optJSONArray("records")?.let(::objects).orEmpty()
         val record = (records.firstOrNull { it.text("type") == "total" || it.text("name")?.lowercase() == "overall" } ?: records.firstOrNull())
-            ?.text("summary")?.takeIf { it.length <= 24 }
+            ?.text("summary")?.takeIf { RECORD.matches(it) }
         val colour = json.text("color")?.removePrefix("#")?.takeIf { COLOUR.matches(it) }?.lowercase()
         return FixtureTeam(name, short, json.text("abbreviation"), alternatives, json.text("logo")?.let(::sportsImage) ?: logo(json), colour, record)
     }
@@ -80,8 +80,13 @@ object EspnScoreboard {
         }?.takeIf { it.length <= 24 }
     }
 
-    private fun periods(competitor: JSONObject?): List<String> = competitor?.optJSONArray("linescores")?.let(::objects).orEmpty().take(MAX_PERIODS).mapNotNull { line ->
-        (line.text("displayValue") ?: line.text("value")?.let(::wholeNumber))?.takeIf { it.length <= 8 }
+    private fun periods(competitor: JSONObject?, total: String?): List<String> {
+        val lines = competitor?.optJSONArray("linescores")?.let(::objects).orEmpty()
+        if (lines.any { it.has("runs") || it.has("wickets") }) return emptyList()
+        val values = lines.filter { (it.optIntOrNull("period") ?: 1) in 1..MAX_PERIODS }.sortedBy { it.optIntOrNull("period") ?: 0 }.take(MAX_PERIODS).mapNotNull { line ->
+            (line.text("displayValue") ?: line.text("value")?.let(::wholeNumber))?.takeIf { it.length <= 8 }
+        }
+        return SportsLines.perPeriod(values, total)
     }
 
     private fun situation(json: JSONObject, home: JSONObject, away: JSONObject): FixtureSituation? {
@@ -119,7 +124,17 @@ object EspnScoreboard {
 
     private val SKIPPED = listOf("POSTPONED", "CANCELED", "CANCELLED", "ABANDONED", "FORFEIT", "SUSPENDED", "DELAYED")
     private val COLOUR = Regex("[0-9A-Fa-f]{6}")
+    private val RECORD = Regex("\\d{1,3}(-\\d{1,3}){1,3}")
     private const val MAX_PERIODS = 12
+}
+
+object SportsLines {
+    fun perPeriod(values: List<String>, total: String?): List<String> {
+        val numbers = values.map { it.toIntOrNull() ?: return values }
+        val sum = total?.toIntOrNull() ?: return values
+        if (numbers.size < 2 || numbers.sum() == sum || numbers.last() != sum || numbers.zipWithNext().any { (a, b) -> b < a }) return values
+        return numbers.mapIndexed { index, value -> (value - (numbers.getOrNull(index - 1) ?: 0)).toString() }
+    }
 }
 
 object SportsDbEvents {

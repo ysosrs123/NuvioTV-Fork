@@ -11,10 +11,24 @@ import com.nuvio.tv.core.iptv.LiveReconnect
 import com.nuvio.tv.core.iptv.LiveTsSync
 import java.io.IOException
 import java.io.InterruptedIOException
+import java.net.ConnectException
 import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.net.Socket
+import java.net.SocketAddress
+import java.net.SocketTimeoutException
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import javax.net.SocketFactory
+import okhttp3.Call
+import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
+import okhttp3.Dns
+import okhttp3.EventListener
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
+import okhttp3.OkHttpClient
 import okhttp3.Response
 
 class IptvStreamSyncException : IOException("Transport stream sync lost")
@@ -171,4 +185,204 @@ class IptvStreamNetwork : Interceptor {
         private const val NO = "no"
         private val altSvc = IptvHostMemory("alt-svc:", null)
     }
+}
+
+class IptvLiveCalls : EventListener.Factory {
+    private val calls = HashSet<Call>()
+    private var closed = false
+
+    val count: Int @Synchronized get() = calls.size
+
+    override fun create(call: Call): EventListener = object : EventListener() {
+        override fun callStart(call: Call) = started(call)
+        override fun callEnd(call: Call) = ended(call)
+        override fun callFailed(call: Call, ioe: IOException) = ended(call)
+    }
+
+    fun cancelAll() {
+        val running = synchronized(this) { closed = true; calls.toList() }
+        running.forEach { it.cancel() }
+    }
+
+    private fun started(call: Call) {
+        val late = synchronized(this) { calls += call; closed }
+        if (late) call.cancel()
+    }
+
+    @Synchronized private fun ended(call: Call) { calls -= call }
+}
+
+class IptvWarmSocket : Socket() {
+    override fun connect(endpoint: SocketAddress?, timeout: Int) {
+        if (isConnected) {
+            if (endpoint == remoteSocketAddress) return
+            close()
+            throw ConnectException("Prepared connection does not match")
+        }
+        super.connect(endpoint, timeout)
+    }
+}
+
+class IptvWarmConnections(private val receiveBytes: Int, private val resolve: (String) -> List<InetAddress> = { Dns.SYSTEM.lookup(it) },
+    private val clock: () -> Long = { System.nanoTime() / 1_000_000 }, private val maxAgeMs: Long = MAX_AGE_MS,
+    private val connectMs: Int = CONNECT_MS) {
+    private class Entry(val host: String, val port: Int, val socket: IptvWarmSocket, val at: Long)
+    private val entries = ArrayList<Entry>()
+    private val resolved = HashMap<String, Pair<List<InetAddress>, Long>>()
+    private val redirectTargets = object : LinkedHashMap<String, Pair<String, Int>>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Pair<String, Int>>?) = size > MAX_REDIRECTS
+    }
+    private var armed: Entry? = null
+    private var armedAt = 0L
+    private var generation = 0L
+    private var worker: ScheduledExecutorService? = null
+    private val tuned = IptvLiveSocketFactory(receiveBytes)
+    @Volatile var used = 0
+        private set
+
+    val dns: Dns = object : Dns {
+        override fun lookup(hostname: String): List<InetAddress> {
+            val now = clock()
+            synchronized(this@IptvWarmConnections) {
+                expire(now)
+                entries.firstOrNull { it.host == hostname }?.let { entry ->
+                    armed = entry; armedAt = now
+                    return listOf(requireNotNull(entry.socket.inetAddress))
+                }
+                resolved[hostname]?.takeIf { now - it.second <= RESOLVED_MS }?.let { return it.first }
+            }
+            return resolve(hostname)
+        }
+    }
+
+    val sockets: SocketFactory = object : SocketFactory() {
+        override fun createSocket(): Socket = claim() ?: tuned.createSocket()
+        override fun createSocket(host: String?, port: Int): Socket = tuned.createSocket(host, port)
+        override fun createSocket(host: String?, port: Int, localHost: InetAddress?, localPort: Int): Socket = tuned.createSocket(host, port, localHost, localPort)
+        override fun createSocket(host: InetAddress?, port: Int): Socket = tuned.createSocket(host, port)
+        override fun createSocket(address: InetAddress?, port: Int, localAddress: InetAddress?, localPort: Int): Socket =
+            tuned.createSocket(address, port, localAddress, localPort)
+    }
+
+    val redirects = Interceptor { chain ->
+        val request = chain.request()
+        chain.proceed(request).also { response ->
+            if (response.isRedirect) response.header("Location")?.let(request.url::resolve)?.let { target ->
+                if (target.host != request.url.host || target.port != request.url.port)
+                    synchronized(this) { redirectTargets["${request.url.host}:${request.url.port}"] = target.host to target.port }
+            }
+        }
+    }
+
+    fun warm(url: String) {
+        val parsed = url.toHttpUrlOrNull() ?: return
+        val targets = synchronized(this) {
+            generation++
+            val wanted = listOfNotNull(parsed.host to parsed.port, redirectTargets["${parsed.host}:${parsed.port}"])
+                .distinctBy { it.first }.take(MAX_WARM)
+            val now = clock()
+            expire(now)
+            entries.filter { entry -> wanted.none { it.first == entry.host && it.second == entry.port } }.forEach(::discard)
+            wanted.filter { target -> entries.none { it.host == target.first && it.port == target.second } }
+        }
+        if (targets.isEmpty()) return
+        val ticket = synchronized(this) { generation }
+        val executor = executor()
+        targets.forEach { (host, port) -> executor.execute { open(host, port, ticket) } }
+        executor.schedule({ synchronized(this) { expire(clock()) } }, maxAgeMs + 50, TimeUnit.MILLISECONDS)
+    }
+
+    fun drop() {
+        val closing = synchronized(this) {
+            generation++
+            armed = null
+            entries.toList().also { entries.clear() }
+        }
+        if (closing.isNotEmpty()) executor().execute { closing.forEach { runCatching { it.socket.close() } } }
+    }
+
+    @Synchronized fun warmCount(): Int = entries.size
+
+    private fun open(host: String, port: Int, ticket: Long) {
+        if (synchronized(this) { ticket != generation }) return
+        val socket = IptvWarmSocket()
+        try {
+            val addresses = resolve(host)
+            synchronized(this) { resolved[host] = addresses to clock() }
+            val address = addresses.firstOrNull()
+            if (address == null || synchronized(this) { ticket != generation }) { socket.close(); return }
+            runCatching { socket.receiveBufferSize = receiveBytes }
+            socket.connect(InetSocketAddress(address, port), connectMs)
+        } catch (_: Exception) { runCatching { socket.close() }; return }
+        val keep = synchronized(this) {
+            (ticket == generation && entries.none { it.host == host }).also { if (it) entries += Entry(host, port, socket, clock()) }
+        }
+        if (!keep) runCatching { socket.close() }
+    }
+
+    private fun claim(): Socket? {
+        val entry = synchronized(this) {
+            val now = clock()
+            val candidate = armed?.takeIf { now - armedAt <= ARM_MS && it in entries && now - it.at <= maxAgeMs }
+            armed = null
+            candidate?.also { entries.remove(it) }
+        } ?: return null
+        val socket = entry.socket
+        val alive = try {
+            socket.soTimeout = 1
+            socket.getInputStream().read()
+            false
+        } catch (_: SocketTimeoutException) { true } catch (_: Exception) { false }
+        if (!alive) { runCatching { socket.close() }; return null }
+        used++
+        return socket
+    }
+
+    private fun expire(now: Long) {
+        entries.filter { now - it.at > maxAgeMs || it.socket.isClosed }.forEach(::discard)
+        resolved.entries.removeAll { now - it.value.second > RESOLVED_MS }
+    }
+
+    private fun discard(entry: Entry) {
+        entries.remove(entry)
+        if (armed === entry) armed = null
+        runCatching { entry.socket.close() }
+    }
+
+    @Synchronized private fun executor(): ScheduledExecutorService = worker ?: Executors.newSingleThreadScheduledExecutor { task ->
+        Thread(task, "IptvWarm").apply { isDaemon = true }
+    }.also { worker = it }
+
+    private companion object {
+        const val MAX_AGE_MS = 10_000L
+        const val CONNECT_MS = 3_000
+        const val ARM_MS = 5_000L
+        const val RESOLVED_MS = 60_000L
+        const val MAX_WARM = 2
+        const val MAX_REDIRECTS = 32
+    }
+}
+
+object IptvLiveNet {
+    private var base: OkHttpClient? = null
+    private var warm: IptvWarmConnections? = null
+
+    @Synchronized fun client(receiveBytes: Int): OkHttpClient = base ?: connections(receiveBytes).let { connections ->
+        OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true).followRedirects(true).followSslRedirects(true)
+            .connectionPool(ConnectionPool(POOL_IDLE, POOL_KEEP_ALIVE_S, TimeUnit.SECONDS))
+            .dispatcher(Dispatcher().apply { maxRequests = 64; maxRequestsPerHost = 16 })
+            .dns(connections.dns).socketFactory(connections.sockets).addNetworkInterceptor(connections.redirects).build()
+    }.also { base = it }
+
+    fun warm(url: String, receiveBytes: Int) = connections(receiveBytes).warm(url)
+
+    @Synchronized fun drop() { warm?.drop() }
+
+    val warmUsed: Int @Synchronized get() = warm?.used ?: 0
+
+    @Synchronized private fun connections(receiveBytes: Int): IptvWarmConnections = warm ?: IptvWarmConnections(receiveBytes).also { warm = it }
+
+    private const val POOL_IDLE = 4
+    private const val POOL_KEEP_ALIVE_S = 30L
 }

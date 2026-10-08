@@ -212,26 +212,40 @@ Overall OK. Items and status:
    dropped (`c718fab`, with a test).
 2. Live TV Sources: Back and Left did nothing — the screen never called its `onBack`.
    Back now leaves; Left from the leftmost item leaves (`c718fab`).
-3. Live TV ↔ Settings transition janky — in progress (UI helper).
-4. Live TV colour themes lack the supporter themes and seem to do nothing — in progress.
-5. Channel start ~4 s even with Fast — in progress (playback helper: measure, shared warm
-   connections, skip the probe when the format is known, pre-warm DNS/TCP/TLS on focus
-   without opening a media request).
-6. First OK after scrolling does not start the preview — in progress.
-7. "Behind live — fast-forward to go live" with no fast-forward key; Right zaps — in
-   progress (Right shows Return to live when behind live; fresh tunes start near live).
-8. "Previous player has not confirmed it stopped" on about every second switch — in
-   progress (root cause being traced; silent retry for ~3 s).
-9. 4K HLG HDR: corner preview stutters after leaving full screen; one box reboot — in
-   progress (no TextureView for HDR/>1080p, single decoder during the transition).
+3. Live TV ↔ Settings transition janky — the sidebar page layout was recreated on every
+   route change (62 dp jump mid-fade) and Live TV start/stop ran twice; both fixed.
+4. Live TV colour themes — now the app's own list incl. unlocked supporter themes;
+   IptvTheme now provides the theme name, extended colours and colour scheme, so the
+   choice applies.
+5. Channel start ~4 s — one shared OkHttp client and pool (30 s keep-alive,
+   retryOnConnectionFailure on), tune data in one DB pass, address resolved before the old
+   player closes, release no longer blocks 500 ms, pre-warmed DNS+TCP after 400 ms focus
+   (no request sent). Tune log gives prepare/close/play/total ms for device timing.
+6. First OK after scrolling — most likely the alternating close failure (8); the row also
+   consumes OK key-down now.
+7. Behind live — TS measured only delay added after start (LiveBehindClock); HLS start
+   seek removed; Right opens controls with Return to live focused when behind live.
+8. "Previous player has not confirmed it stopped" — close() evicted the OkHttp pool on
+   the main thread (TLS shutdown → NetworkOnMainThreadException, alternating), and a
+   500 ms ExoPlayer release timeout left releaseFailed set for good. Fixed; close is
+   confirmed when the playback thread ended and no provider call is open; silent retry
+   up to 3 s; log lines `live close ms=` / `live close unconfirmed reason=`.
+9. 4K HLG HDR corner stutter/reboot — corner and inset never attach a TextureView for
+   HDR or >1080p (logo + "press OK" with audio); switches wait for the old playback
+   thread so decoders never overlap.
 10. Recording names: decorative superscripts (e.g. "ᴸᶦᵛᵉ") were kept; now stripped and
     names NFKC-normalised (`c718fab`). Colons and length were already handled.
-11. Transparent panels and inconsistent fonts/panels (menu vs guide) — in progress.
-12. VOD Movies/Series screens still old style — in progress.
-13. Sport fixtures appear late — in progress (placeholders, cache first, fetch when Live
-    TV opens).
-14. Sports data fields reference — being written to `IPTV-SPORTS-DATA-FIELDS.md`.
-15. Defaults: Pure black off, Solid panels off, Background artwork off — in progress.
+11. Transparent panels — glass panels get a minimum body opacity in Live TV (0.9, 1.0
+    with Solid panels); menu and guide share panel colour and text styles.
+12. VOD screens restyled with the app's poster cards and detail-page layout.
+13. Sport fixtures — fetched when Live TV opens, cache first, placeholders reserve the
+    space, channel matching runs separately. Parsers checked against real responses
+    (NRL running totals, NRL form strings, cricket innings fixed).
+14. Sports data fields reference — `IPTV-SPORTS-DATA-FIELDS.md`, from real responses.
+    Sports experience concepts (hub, HUD, Game Centre, stats multiview, follow/alerts) in
+    a design canvas; TheSportsDB premium key kept out of the repo (relay suggested).
+15. Defaults: Solid panels now off by default; Pure black and background artwork were
+    already off.
 
 ## Planned but not done (updated 7 October 2026)
 

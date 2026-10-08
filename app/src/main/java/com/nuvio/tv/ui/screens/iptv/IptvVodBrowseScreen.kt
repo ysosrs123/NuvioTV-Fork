@@ -1,11 +1,8 @@
 @file:OptIn(androidx.tv.material3.ExperimentalTvMaterial3Api::class)
 package com.nuvio.tv.ui.screens.iptv
 
-import android.view.KeyEvent as AndroidKeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -14,10 +11,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.LiveTv
@@ -29,17 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -48,7 +35,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
@@ -59,11 +45,15 @@ import com.nuvio.tv.core.iptv.VodDetailTarget
 import com.nuvio.tv.core.iptv.VodKind
 import com.nuvio.tv.core.iptv.VodRef
 import com.nuvio.tv.data.iptv.IptvVodTitle
+import com.nuvio.tv.domain.model.ContentType
+import com.nuvio.tv.domain.model.MetaPreview
+import com.nuvio.tv.domain.model.PosterShape
+import com.nuvio.tv.ui.components.GridContentCard
 import com.nuvio.tv.ui.components.LoadingIndicator
+import com.nuvio.tv.ui.components.PosterCardDefaults
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
-import com.nuvio.tv.ui.v2.components.GlassRole
 import java.util.Locale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -130,19 +120,20 @@ fun IptvVodBrowseScreen(onBack: () -> Unit, onTitle: (VodRef) -> Unit, onDetail:
         focusGrid = true
     }
     BackHandler(enabled = !searching, onBack = onBack)
+    val v2 = LocalV2Appearance.current != null
     Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
         if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
-        Row(Modifier.fillMaxSize().padding(horizontal = 40.dp, vertical = 24.dp), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-            VodRail(state, firstRail, Modifier.width(280.dp).fillMaxHeight(),
+        Row(Modifier.fillMaxSize().then(if (v2) Modifier else Modifier.padding(start = 24.dp, top = 20.dp, bottom = 20.dp)), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+            VodRail(state, firstRail, Modifier.width(300.dp).fillMaxHeight(),
                 onSearch = { searching = true },
                 onRecent = { searching = false; focusGrid = true; viewModel.showRecent() },
                 onAll = { searching = false; focusGrid = true; viewModel.showAll() },
                 onCategory = { searching = false; focusGrid = true; viewModel.showCategory(it) },
                 onSource = { searching = false; focusGrid = true; viewModel.showSource(it) })
-            Column(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Text(vodHeading(state), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary,
+            Column(Modifier.weight(1f).fillMaxHeight().padding(top = 28.dp, end = 32.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Text(vodHeading(state), style = MaterialTheme.typography.headlineLarge, color = NuvioTheme.colors.TextPrimary,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (searching) VodSearchField(state.search, searchFocus, onChange = viewModel::search, onDone = {
+                if (searching) IptvSearchField(state.search, stringResource(R.string.iptv_vod_browse_search_hint), searchFocus, onChange = viewModel::search, onDone = {
                     if (state.items.isNotEmpty()) runCatching { firstPoster.requestFocus() }
                 })
                 Box(Modifier.fillMaxWidth().weight(1f)) {
@@ -170,104 +161,54 @@ private fun vodHeading(state: IptvVodBrowseState): String = when (state.shelf) {
 @Composable
 private fun VodRail(state: IptvVodBrowseState, first: FocusRequester, modifier: Modifier, onSearch: () -> Unit, onRecent: () -> Unit, onAll: () -> Unit,
     onCategory: (String) -> Unit, onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit) {
-    Column(modifier.iptvPanel(role = GlassRole.NAVIGATION).padding(vertical = 14.dp, horizontal = 10.dp)) {
+    val surface = if (LocalV2Appearance.current == null) Modifier.iptvPanel() else Modifier.iptvPanel(RectangleShape, edge = true)
+    Column(modifier.then(surface).padding(vertical = 18.dp, horizontal = 12.dp)) {
         Text(stringResource(if (state.kind == VodKind.SERIES) R.string.iptv_vod_browse_series else R.string.iptv_vod_browse_movies),
-            style = MaterialTheme.typography.titleLarge, color = NuvioTheme.colors.TextPrimary, fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(start = 10.dp, bottom = 8.dp))
+            style = iptvTitleStyle(), color = NuvioTheme.colors.TextPrimary, modifier = Modifier.padding(start = 12.dp, top = 4.dp, bottom = 12.dp))
         if (state.sources.isEmpty()) return@Column
         LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            item(key = "search") { VodRailItem(stringResource(R.string.iptv_vod_browse_search), null, state.shelf == IptvVodShelf.SEARCH, Modifier, onSearch, Icons.Filled.Search) }
-            item(key = "space") { Spacer(Modifier.height(6.dp)) }
-            item(key = "recent") { VodRailItem(stringResource(R.string.iptv_vod_browse_recent), null, state.shelf == IptvVodShelf.RECENT, Modifier.focusRequester(first),
+            item(key = "search") { IptvRailItem(stringResource(R.string.iptv_vod_browse_search), null, state.shelf == IptvVodShelf.SEARCH, Modifier, onSearch, Icons.Filled.Search) }
+            item(key = "recent") { IptvRailItem(stringResource(R.string.iptv_vod_browse_recent), null, state.shelf == IptvVodShelf.RECENT, Modifier.focusRequester(first),
                 onRecent, Icons.Filled.NewReleases) }
-            item(key = "all") { VodRailItem(stringResource(R.string.iptv_vod_browse_all), state.categories.sumOf { it.count }.takeIf { it > 0 },
+            item(key = "all") { IptvRailItem(stringResource(R.string.iptv_vod_browse_all), state.categories.sumOf { it.count }.takeIf { it > 0 },
                 state.shelf == IptvVodShelf.ALL, Modifier, onAll, Icons.AutoMirrored.Filled.List) }
             if (state.sources.size > 1) {
                 item(key = "sources") { SectionLabel(stringResource(R.string.iptv_vod_browse_sources)) }
                 items(state.sources, key = { "source-${it.ref.sourceId}" }) { source ->
-                    VodRailItem(source.label, null, source.ref == state.source, Modifier, { onSource(source.ref) }, Icons.Filled.LiveTv)
+                    IptvRailItem(source.label, null, source.ref == state.source, Modifier, { onSource(source.ref) }, Icons.Filled.LiveTv)
                 }
             }
             if (state.categories.isNotEmpty()) item(key = "categories") { SectionLabel(stringResource(R.string.iptv_vod_browse_categories)) }
             items(state.categories, key = { "category-${it.id}" }) { category ->
-                VodRailItem(category.name, category.count, state.shelf == IptvVodShelf.CATEGORY && state.category == category.id, Modifier, { onCategory(category.id) })
+                IptvRailItem(category.name, category.count, state.shelf == IptvVodShelf.CATEGORY && state.category == category.id, Modifier, { onCategory(category.id) })
             }
         }
-    }
-}
-
-@Composable
-private fun VodRailItem(text: String, count: Int?, selected: Boolean, modifier: Modifier, onClick: () -> Unit, icon: ImageVector? = null) {
-    var focused by remember { mutableStateOf(false) }
-    Row(modifier.fillMaxWidth().onFocusChanged { focused = it.isFocused }.iptvItem(focused, selected)
-        .onPreviewKeyEvent { event ->
-            val native = event.nativeKeyEvent
-            if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) { onClick(); true } else false
-        }
-        .focusable().padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        if (icon != null) Icon(icon, null, Modifier.size(18.dp), tint = if (selected || focused) itemContent(focused) else NuvioTheme.colors.TextTertiary)
-        Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyLarge,
-            color = if (focused || selected) itemContent(focused) else NuvioTheme.colors.TextSecondary,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal, modifier = Modifier.weight(1f))
-        if (count != null) Text("$count", style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary)
-        if (selected) Box(Modifier.size(6.dp).clip(RoundedCornerShape(3.dp)).background(NuvioTheme.colors.Secondary))
-    }
-}
-
-@Composable
-private fun VodSearchField(value: String, focus: FocusRequester, onChange: (String) -> Unit, onDone: () -> Unit) {
-    var focused by remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(14.dp)
-    val keyboard = LocalSoftwareKeyboardController.current
-    Row(Modifier.fillMaxWidth().height(52.dp).iptvPanel(shape, GlassRole.CONTROL)
-        .then(if (focused) Modifier.border(2.dp, NuvioTheme.colors.FocusRing, shape) else Modifier)
-        .padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Icon(Icons.Filled.Search, null, Modifier.size(20.dp), tint = NuvioTheme.colors.TextSecondary)
-        BasicTextField(value, onChange, singleLine = true,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(color = NuvioTheme.colors.TextPrimary),
-            keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { keyboard?.hide(); onDone() }),
-            cursorBrush = SolidColor(NuvioTheme.colors.TextPrimary),
-            decorationBox = { inner ->
-                Box { if (value.isEmpty()) Text(stringResource(R.string.iptv_vod_browse_search_hint), color = NuvioTheme.colors.TextTertiary); inner() }
-            },
-            modifier = Modifier.weight(1f).focusRequester(focus).onFocusChanged { focused = it.isFocused }
-                .onPreviewKeyEvent { event ->
-                    val native = event.nativeKeyEvent
-                    if (native.action == AndroidKeyEvent.ACTION_DOWN && native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_DOWN) { onDone(); true } else false
-                })
     }
 }
 
 @Composable
 private fun VodGrid(state: IptvVodBrowseState, grid: androidx.compose.foundation.lazy.grid.LazyGridState, first: FocusRequester, onOpen: (IptvVodTitle) -> Unit) {
-    LazyVerticalGrid(GridCells.Adaptive(POSTER_WIDTH), Modifier.fillMaxSize(), state = grid, contentPadding = PaddingValues(top = 6.dp, bottom = 32.dp, start = 4.dp, end = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+    val style = PosterCardDefaults.Style
+    LazyVerticalGrid(GridCells.Adaptive(style.width), Modifier.fillMaxSize(), state = grid,
+        contentPadding = PaddingValues(top = NuvioTheme.spacing.md, bottom = NuvioTheme.spacing.xxl, start = 4.dp, end = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md), verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)) {
         itemsIndexed(state.items, key = { _, title -> title.ref.format() }) { index, title ->
-            VodPoster(title, state.art[title.ref], state.opening == title.ref, if (index == 0) Modifier.focusRequester(first) else Modifier) { onOpen(title) }
+            VodPoster(title, state.kind, state.art[title.ref], state.opening == title.ref, if (index == 0) first else null) { onOpen(title) }
         }
         if (state.loading && state.items.isNotEmpty()) item(key = "more", span = { GridItemSpan(maxLineSpan) }) { Box(Modifier.fillMaxWidth().height(120.dp)) { LoadingIndicator(Modifier.align(Alignment.Center).size(28.dp)) } }
     }
 }
 
 @Composable
-private fun VodPoster(title: IptvVodTitle, art: VodArt?, opening: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    var focused by remember { mutableStateOf(false) }
-    Column(modifier.onFocusChanged { focused = it.isFocused }
-        .onPreviewKeyEvent { event ->
-            val native = event.nativeKeyEvent
-            if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) { onClick(); true } else false
-        }
-        .focusable(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Box(Modifier.fillMaxWidth().aspectRatio(2f / 3f).iptvItem(focused, shape = ItemShape).padding(if (focused) 3.dp else 0.dp)) {
-            VodPosterImage(art?.poster ?: title.artwork, art?.title ?: title.title, Modifier.fillMaxSize())
-            if (opening) LoadingIndicator(Modifier.align(Alignment.Center).size(28.dp))
-        }
-        Text(art?.title ?: title.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
-            color = if (focused) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary, fontWeight = if (focused) FontWeight.SemiBold else FontWeight.Normal)
-        val details = listOfNotNull((title.year ?: art?.year)?.toString(), (art?.rating ?: title.rating)?.let(::ratingText)).joinToString(" · ")
-        if (details.isNotEmpty()) Text(details, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+private fun VodPoster(title: IptvVodTitle, kind: VodKind, art: VodArt?, opening: Boolean, focus: FocusRequester?, onClick: () -> Unit) {
+    val preview = remember(title, kind, art) {
+        MetaPreview(id = title.ref.format(), type = if (kind == VodKind.SERIES) ContentType.SERIES else ContentType.MOVIE, name = art?.title ?: title.title,
+            poster = art?.poster ?: title.artwork, posterShape = PosterShape.POSTER, background = art?.backdrop, logo = null, description = null,
+            releaseInfo = (title.year ?: art?.year)?.toString(), imdbRating = (art?.rating ?: title.rating)?.toFloat(), genres = emptyList())
+    }
+    Box {
+        GridContentCard(preview, onClick = onClick, focusRequester = focus)
+        if (opening) LoadingIndicator(Modifier.align(Alignment.Center).size(28.dp))
     }
 }
 

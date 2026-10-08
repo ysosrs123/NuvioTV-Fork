@@ -41,6 +41,7 @@ import com.nuvio.tv.ui.screens.settings.SettingsPickerOption
 import com.nuvio.tv.ui.screens.settings.SettingsSingleChoiceDialog
 import com.nuvio.tv.ui.screens.settings.SettingsToggleRow
 import com.nuvio.tv.ui.screens.settings.SettingsVerticalScrollIndicators
+import com.nuvio.tv.ui.screens.settings.localizedName
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.components.NuvioActionPill
 
@@ -54,6 +55,7 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
     val notice by viewModel.notice.collectAsStateWithLifecycle()
     val shareForm by viewModel.shareForm.collectAsStateWithLifecycle()
     val shareStatus by viewModel.shareStatus.collectAsStateWithLifecycle()
+    val themes by viewModel.themes.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var choosing by remember { mutableStateOf<IptvSettingsChoice?>(null) }
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
@@ -93,7 +95,7 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
                 item(key = "appearance") {
                     SettingsGroupCard(title = stringResource(R.string.iptv_settings_appearance), subtitle = stringResource(R.string.iptv_settings_appearance_subtitle)) {
                         SettingsActionRow(title = stringResource(R.string.iptv_settings_theme), subtitle = null,
-                            value = stringResource(iptvThemeLabel(iptvTheme(state.appearance.theme))), onClick = { choosing = IptvSettingsChoice.THEME })
+                            value = themeLabel(iptvTheme(state.appearance.theme)?.takeIf { it in themes }), onClick = { choosing = IptvSettingsChoice.THEME })
                         SettingsToggleRow(title = stringResource(R.string.iptv_settings_black), subtitle = stringResource(R.string.iptv_settings_black_subtitle),
                             checked = state.appearance.black, onToggle = viewModel::toggleBlack)
                         SettingsToggleRow(title = stringResource(R.string.iptv_settings_solid), subtitle = stringResource(R.string.iptv_settings_solid_subtitle),
@@ -165,8 +167,8 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
             options = LATE_MINUTES.map { SettingsPickerOption(it, minutes(it)) },
             selectedValue = state.recordLate, onOptionSelected = { viewModel.setRecordLate(it); dismiss() }, onDismiss = dismiss)
         IptvSettingsChoice.THEME -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_settings_theme),
-            options = (listOf(null) + IPTV_THEMES).map { SettingsPickerOption(it, stringResource(iptvThemeLabel(it))) },
-            selectedValue = iptvTheme(state.appearance.theme), onOptionSelected = { viewModel.setTheme(it); dismiss() }, onDismiss = dismiss)
+            options = (listOf(null) + themes).map { SettingsPickerOption(it, themeLabel(it)) },
+            selectedValue = iptvTheme(state.appearance.theme)?.takeIf { it in themes }, onOptionSelected = { viewModel.setTheme(it); dismiss() }, onDismiss = dismiss)
         null -> Unit
     }
     locations?.let { options ->
@@ -184,6 +186,10 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
     }
     shareForm?.let { form -> key(form) { IptvShareDialog(form, shareStatus, viewModel) } }
 }
+
+@Composable
+private fun themeLabel(theme: com.nuvio.tv.domain.model.AppTheme?): String =
+    theme?.localizedName() ?: stringResource(R.string.iptv_settings_theme_nuvio)
 
 @Composable
 private fun locationLabel(summary: IptvLocationSummary): String = when (summary.kind) {

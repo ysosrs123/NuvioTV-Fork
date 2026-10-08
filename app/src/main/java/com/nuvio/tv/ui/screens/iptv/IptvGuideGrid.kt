@@ -36,7 +36,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -102,7 +101,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
         }
         Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth().height(30.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(heading, style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+                Text(heading, style = iptvHeadingStyle(), color = NuvioTheme.colors.TextSecondary, maxLines = 1,
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.width(spec.column).padding(start = 10.dp, end = 12.dp))
                 TimeBar(viewStart, visibleMillis, now, Modifier.weight(1f).fillMaxHeight())
             }
@@ -250,6 +249,7 @@ private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow
                 if (!longPressed) onSelect(row); longPressed = false
                 return@onPreviewKeyEvent true
             }
+            if (isSelect(native.keyCode)) return@onPreviewKeyEvent true
             if (native.action != AndroidKeyEvent.ACTION_DOWN) return@onPreviewKeyEvent false
             when (native.keyCode) {
                 AndroidKeyEvent.KEYCODE_MENU, AndroidKeyEvent.KEYCODE_INFO -> { onMenu(row); true }
@@ -301,14 +301,13 @@ private fun ChannelCell(spec: GuideSpec, row: IptvListedChannel, index: Int, pla
             .then(if (playing) Modifier.background(NuvioTheme.palette.accentBrush()) else Modifier))
         if (moving) Box(Modifier.width(spec.number), contentAlignment = Alignment.Center) { Icon(Icons.Filled.SwapVert, null, Modifier.size(18.dp), tint = NuvioTheme.colors.Secondary) }
         else Text("${index + 1}", color = if (focused) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.TextTertiary,
-            style = if (index < 999) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false,
+            style = if (index < 999) iptvMetaStyle() else MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false,
             textAlign = TextAlign.End, modifier = Modifier.width(spec.number))
         ChannelLogo(logoUrl(row), channelName(row), Modifier.size(spec.logo))
         val favourite = row.item.overlay.favouriteRank != null
         val archive = hasArchive(row)
         Text(channelName(row), color = if (focused || playing) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary, maxLines = 2,
-            overflow = TextOverflow.Ellipsis, style = if (spec.detail) MaterialTheme.typography.bodyMedium.copy(lineHeight = 18.sp) else MaterialTheme.typography.bodySmall.copy(lineHeight = 15.sp),
-            fontWeight = if (focused || playing) FontWeight.SemiBold else FontWeight.Normal, modifier = Modifier.weight(1f))
+            overflow = TextOverflow.Ellipsis, style = iptvItemStyle(focused || playing, compact = !spec.detail), modifier = Modifier.weight(1f))
         if (favourite || archive || recording) Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             ChannelMarks(recording, favourite, archive)
         }
@@ -344,7 +343,8 @@ private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, 
         Row(Modifier.fillMaxSize().padding(start = (if (continued) 4.dp else 10.dp) + titleOffset, end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             if (continued) Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null, Modifier.size(14.dp), tint = content.copy(alpha = .7f))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-                Text(title(cell.programme), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
+                Text(title(cell.programme), maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    style = if (spec.detail) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
                     fontWeight = if (selected || airing) FontWeight.SemiBold else FontWeight.Normal, color = content)
                 if (wide && spec.detail) Text(timeRange(cell.programme), maxLines = 1, style = MaterialTheme.typography.labelSmall,
                     color = if (selected) itemContent(true).copy(alpha = .8f) else NuvioTheme.colors.TextTertiary)

@@ -44,6 +44,8 @@ val LocalGlassBackdrop = staticCompositionLocalOf<HazeState?> { null }
 /** 0..1 while moving video replaces the glass source behind a surface; null everywhere else. */
 val LocalGlassVideoSmoke = compositionLocalOf<State<Float>?> { null }
 
+val LocalGlassBodyFloor = staticCompositionLocalOf { 0f }
+
 /** Attach to background layers; compatible trailer textures join only at Maximum quality. */
 @Composable
 fun Modifier.v2GlassSource(): Modifier {
@@ -127,7 +129,8 @@ fun Modifier.nuvioGlass(
         else appearance?.glassTintMode ?: GlassTintMode.NEUTRAL
     val accentColors = com.nuvio.tv.ui.v2.appearance.v2AccentColors()
     val transparency = appearance?.glassTransparencyPercent ?: 60
-    val bodyAlpha = remember(dark, role, frosted, playback, transparency, cinematic, clearGlass, neutralBackdrop) {
+    val floor = if (role == GlassRole.CONTROL || role == GlassRole.CARD_FOCUS) 0f else LocalGlassBodyFloor.current
+    val bodyAlpha = remember(dark, role, frosted, playback, transparency, cinematic, clearGlass, neutralBackdrop, floor) {
         val legacyAlpha = when (role) {
             GlassRole.HUD -> if (playbackGlass) .38f else if (playback) .82f else .91f
             GlassRole.CONTROL -> if (playbackGlass) .18f else if (playback) .55f else if (dark) .80f else if (frosted) .48f else .84f
@@ -135,8 +138,8 @@ fun Modifier.nuvioGlass(
             GlassRole.MODAL -> if (frosted) .62f else .97f
             else -> if (playbackGlass) .28f else if (playback) .70f else if (dark) .94f else if (frosted) .50f else .94f
         }
-        if (neutralBackdrop) .96f else if (clearGlass) clearGlassBodyAlpha(role, transparency)
-            else if (cinematic) glassBodyAlpha(role, playback, legacyAlpha, transparency) else legacyAlpha
+        (if (neutralBackdrop) .96f else if (clearGlass) clearGlassBodyAlpha(role, transparency)
+            else if (cinematic) glassBodyAlpha(role, playback, legacyAlpha, transparency) else legacyAlpha).coerceAtLeast(floor)
     }
     val background = remember(tokens, dark, neutralGlass, playbackGlass, clearGlass, neutralBackdrop, bodyAlpha) {
         val alpha = bodyAlpha

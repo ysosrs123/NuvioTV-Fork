@@ -38,6 +38,8 @@ import com.nuvio.tv.data.iptv.IptvLocalTimeshiftInput
 import com.nuvio.tv.data.iptv.IptvLocalTimeshiftRouter
 import com.nuvio.tv.data.iptv.IptvLocalTimeshiftSession
 import com.nuvio.tv.data.iptv.IptvLocalTimeshiftStalledException
+import com.nuvio.tv.data.iptv.IptvLiveCalls
+import com.nuvio.tv.data.iptv.IptvLiveNet
 import com.nuvio.tv.data.iptv.IptvLiveSocketFactory
 import com.nuvio.tv.data.iptv.IptvLog
 import com.nuvio.tv.data.iptv.IptvResilientDataSource
@@ -45,11 +47,9 @@ import com.nuvio.tv.data.iptv.IptvStreamNetwork
 import com.nuvio.tv.data.iptv.IptvStreamingPreferences
 import com.nuvio.tv.core.iptv.*
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
-import okhttp3.OkHttpClient
 
 class IptvLivePlayback(context: Context, private val locator: String, purpose: PlaybackPurpose,
     val streamFormat: IptvStreamFormat = IptvStreamFormat.AUTO,
@@ -69,16 +69,10 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     val activeRequests: Int get() = fence.active.value
     private val mainHandler = Handler(Looper.getMainLooper())
     private val appContext = context.applicationContext
-    private val lowMemory = runCatching {
-        val manager = requireNotNull(context.getSystemService(android.app.ActivityManager::class.java))
-        val memory = android.app.ActivityManager.MemoryInfo().also(manager::getMemoryInfo)
-        LiveBufferPolicy.lowMemory(memory.totalMem, manager.isLowRamDevice)
-    }.getOrDefault(true)
+    private val lowMemory = liveLowMemory(context)
     private val network = IptvStreamNetwork()
-    private val client = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS).readTimeout(10, TimeUnit.SECONDS)
-        .retryOnConnectionFailure(false).followRedirects(true).followSslRedirects(true)
-        .socketFactory(IptvLiveSocketFactory(if (lowMemory) IptvLiveSocketFactory.LOW_MEMORY_BYTES else IptvLiveSocketFactory.NORMAL_BYTES))
-        .addNetworkInterceptor(network).build()
+    private val calls = IptvLiveCalls()
+    private val client = IptvLiveNet.client(liveReceiveBytes(lowMemory)).newBuilder().eventListenerFactory(calls).addNetworkInterceptor(network).build()
     private val requestHeaders = headers.filterKeys { it in HEADER_NAMES }.mapNotNull { (name, value) -> StreamHeaders.clean(value)?.let { name to it } }.toMap()
     private val userAgent = LiveUserAgent.pick(requestHeaders["User-Agent"], sourceUserAgent?.let(StreamHeaders::clean), DEFAULT_USER_AGENT)
     private val plan = if (!primary) null else IptvStreamingPreferences(context).let { streaming ->
@@ -87,7 +81,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     }
     private val cushionSpeed = LiveCushionSpeed()
     private var cushionCleared = false
-    private var hlsCushion = false
+    private val behind = LiveBehindClock()
     @Volatile private var bufferedSnapshot = 0L
     @Volatile private var resilientUrl: String? = null
     @Volatile private var streamOpen = true
@@ -116,6 +110,12 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private var localAnchorTime: Long? = null
     private var behindJumps = 0
     private var currentFormat: IptvStreamFormat? = null
+    private var startedAt = 0L
+    @Volatile private var firstByteAt = 0L
+    private var readyAt = 0L
+    private var frameAt = 0L
+    private var closeStartedAt = 0L
+    private var closeLogged = false
     private val reconnect = Runnable {
         if (!released && !failed) {
             val position = player.currentPosition
@@ -123,7 +123,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             val local = ring
             if (local != null) playRing(local, local.liveAnchor())
             else {
-                hlsCushion = false
+                behind.reset()
                 if (isLive) player.seekToDefaultPosition() else player.seekTo(position)
                 player.prepare()
             }
@@ -153,12 +153,12 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             mainHandler.postDelayed(this, WATCH_MS)
         }
     }
-    private var releaseFailed = false
     private val audioSession = androidx.media3.common.util.Util.generateAudioSessionIdV21(context)
     private var enhancer: android.media.audiofx.LoudnessEnhancer? = null
     var boostDb: Int = boostDb
         private set
     val player: ExoPlayer
+    private val playbackThread: Thread
     init {
         require(purpose == PlaybackPurpose.LIVE_CHANNEL)
         require((listOf(locator) + alternatives.map { it.first }).all { Uri.parse(it).scheme?.lowercase() in setOf("http", "https") })
@@ -168,7 +168,10 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             override fun onTransferStart(source: DataSource, spec: DataSpec, network: Boolean) = Unit
             override fun onTransferEnd(source: DataSource, spec: DataSpec, network: Boolean) = Unit
             override fun onBytesTransferred(source: DataSource, spec: DataSpec, network: Boolean, count: Int) {
-                if (network) { telemetry.transferred(count); if (count > 0) loadedBytes.addAndGet(count.toLong()) }
+                if (network) {
+                    telemetry.transferred(count)
+                    if (count > 0) { loadedBytes.addAndGet(count.toLong()); if (firstByteAt == 0L) firstByteAt = android.os.SystemClock.elapsedRealtime() }
+                }
             }
         })
         val sources = DataSource.Factory {
@@ -177,7 +180,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             FencedSource(IptvLocalTimeshiftRouter(direct) { ring }, fence, { Uri.parse(current) }, !isLive)
         }
         val renderers = DefaultRenderersFactory(context).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
-        player = ExoPlayer.Builder(context, renderers)
+        player = ExoPlayer.Builder(context, renderers).setReleaseTimeoutMs(RELEASE_BLOCK_MS)
             .setLoadControl(DefaultLoadControl.Builder().apply {
                 if (plan == null) setBufferDurationsMs(1500, 8000, 500, 1000).setTargetBufferBytes(targetBufferBytes)
                 else setBufferDurationsMs(plan.minMs, plan.maxMs, plan.startMs, plan.rebufferMs).setTargetBufferBytes(plan.targetBytes)
@@ -189,6 +192,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                     loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): LoadErrorHandlingPolicy.FallbackSelection? = null
             }))
             .build()
+        playbackThread = player.playbackLooper.thread
         player.setAudioAttributes(AudioAttributes.Builder().setUsage(C.USAGE_MEDIA).setContentType(C.AUDIO_CONTENT_TYPE_MOVIE).build(), handleAudioFocus)
         player.setAudioSessionId(audioSession)
         setBoost(boostDb)
@@ -196,9 +200,8 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) { if (!released) onPlaying(isPlaying) }
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) { updateWifi(); if (!released) onPlayWhenReady(playWhenReady) }
-            override fun onTimelineChanged(timeline: Timeline, reason: Int) { if (!released) applyHlsCushion(timeline) }
             override fun onPlayerError(error: PlaybackException) {
-                if (released) { releaseFailed = true; return }
+                if (released) return
                 if (localError(error)) return
                 val response = generateSequence<Throwable>(error) { it.cause }.take(8).filterIsInstance<HttpDataSource.InvalidResponseCodeException>().firstOrNull()
                 retry(error.errorCode, response?.responseCode,
@@ -206,6 +209,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             }
             override fun onRenderedFirstFrame() {
                 firstFrame = true
+                if (frameAt == 0L) frameAt = android.os.SystemClock.elapsedRealtime()
                 mainHandler.removeCallbacks(startCheck)
                 telemetry.firstFrame(android.os.SystemClock.elapsedRealtime())
             }
@@ -216,6 +220,8 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 if (released) return
                 when (playbackState) {
                     Player.STATE_READY -> {
+                        if (readyAt == 0L) readyAt = android.os.SystemClock.elapsedRealtime()
+                        behind.ready(android.os.SystemClock.elapsedRealtime(), player.currentPosition)
                         if (reconnecting) { reconnecting = false; onReconnecting(false) }
                         if (!readyReported) { readyReported = true; onAlternative(alternative) }
                         mainHandler.postDelayed(steady, STEADY_MS)
@@ -274,7 +280,8 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         maxVideoHeight?.let { height ->
             player.trackSelectionParameters = player.trackSelectionParameters.buildUpon().setMaxVideoSize(height * 16 / 9, height).build()
         }
-        telemetry.start(android.os.SystemClock.elapsedRealtime())
+        startedAt = android.os.SystemClock.elapsedRealtime()
+        telemetry.start(startedAt)
         mainHandler.postDelayed(watchdog, WATCH_MS)
         if (streamFormat != IptvStreamFormat.AUTO) { play(locator, streamFormat); return }
         StreamFormatSniff.fromUrl(locator)?.let { play(locator, if (it == SniffedFormat.HLS) IptvStreamFormat.HLS else IptvStreamFormat.MPEG_TS); return }
@@ -286,7 +293,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         }
     }
     private fun play(url: String, format: IptvStreamFormat) {
-        current = url; readyReported = false; firstFrame = false; currentFormat = format; hlsCushion = false
+        current = url; readyReported = false; firstFrame = false; currentFormat = format; behind.reset()
         resilientUrl = if (isLive && format == IptvStreamFormat.MPEG_TS) url else null
         mainHandler.removeCallbacks(startCheck)
         if (isLive && format == IptvStreamFormat.MPEG_TS && url == locator && localConfig != null && ring == null) { player.playWhenReady = true; startLocal(url); return }
@@ -307,12 +314,16 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     val bufferTargetMs: Long get() = if (currentFormat == IptvStreamFormat.HLS && isLive && ring == null && !cushionCleared) plan?.cushionMs ?: 0L else cushionTargetMs()
     fun behindLiveMs(): Long? {
         if (released || !isLive || ring != null || player.playbackState == Player.STATE_IDLE) return null
-        if (currentFormat != IptvStreamFormat.HLS) return player.totalBufferedDuration.coerceAtLeast(0)
-        player.currentLiveOffset.takeIf { it != C.TIME_UNSET && it >= 0 }?.let { return it }
+        if (currentFormat != IptvStreamFormat.HLS) return behind.behindMs(android.os.SystemClock.elapsedRealtime(), player.currentPosition)
         val timeline = player.currentTimeline
         if (timeline.isEmpty) return null
         val window = timeline.getWindow(player.currentMediaItemIndex, Timeline.Window())
-        return if (window.isLive() && window.durationMs != C.TIME_UNSET) (window.durationMs - player.currentPosition).coerceAtLeast(0) else null
+        if (window.isPlaceholder || !window.isLive() || window.defaultPositionMs == C.TIME_UNSET) return null
+        return (window.defaultPositionMs - player.currentPosition).coerceAtLeast(0)
+    }
+    fun startSummary(): String {
+        fun since(at: Long) = if (at == 0L || startedAt == 0L) "-" else (at - startedAt).toString()
+        return "bytes ms=${since(firstByteAt)} ready ms=${since(readyAt)} frame ms=${since(frameAt)} warm=${IptvLiveNet.warmUsed}"
     }
     fun goLive(): Boolean {
         if (released || failed || !isLive || ring != null || currentFormat == null) return false
@@ -341,14 +352,6 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         val speed = if (target <= 0) { cushionSpeed.reset(); 1f }
             else if (player.playbackState == Player.STATE_READY && player.playWhenReady) cushionSpeed.update(bufferedSnapshot, target) else cushionSpeed.speed
         if (player.playbackParameters.speed != speed) player.playbackParameters = PlaybackParameters(speed)
-    }
-    private fun applyHlsCushion(timeline: Timeline) {
-        val cushion = plan?.cushionMs ?: return
-        if (hlsCushion || cushionCleared || cushion <= 0 || !isLive || ring != null || currentFormat != IptvStreamFormat.HLS || timeline.isEmpty) return
-        val window = timeline.getWindow(player.currentMediaItemIndex, Timeline.Window())
-        if (window.isPlaceholder || !window.isLive() || !window.isDynamic || window.durationMs == C.TIME_UNSET) return
-        hlsCushion = true
-        LiveBufferPolicy.hlsStartMs(window.defaultPositionMs, window.durationMs, cushion)?.let { player.seekTo(it) }
     }
     private fun updateWifi() {
         val wanted = !released && player.playWhenReady && (player.playbackState == Player.STATE_BUFFERING || player.playbackState == Player.STATE_READY)
@@ -417,7 +420,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     }
     private fun playRing(session: IptvLocalTimeshiftSession, anchor: Long) {
         mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(startCheck)
-        firstFrame = false
+        firstFrame = false; behind.reset()
         localAnchorTime = session.timeAt(anchor) ?: System.currentTimeMillis()
         if (player.playbackState != Player.STATE_IDLE) player.stop()
         player.setMediaItem(MediaItem.Builder().setUri(session.uri(anchor)).setMimeType(MimeTypes.VIDEO_MP2T).build())
@@ -473,26 +476,30 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         override fun release() { ticket?.let { fence.leave(it); ticket = null } }
     }
     override suspend fun close(): Boolean {
-        mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(stall); mainHandler.removeCallbacks(steady)
-        mainHandler.removeCallbacks(startCheck); mainHandler.removeCallbacks(watchdog)
-        streamOpen = false
-        if (wifiHeld) { wifiHeld = false; IptvLiveWifiLock.hold(appContext, this, false) }
-        fence.stopAccepting()
-        client.dispatcher.cancelAll()
-        localGeneration++
-        ring?.let { session -> ring = null; session.stop(); thread(name = "IptvTimeshiftClose", isDaemon = true) { session.awaitStopped(IDLE_WAIT_MS); session.close() } }
         if (!released) {
+            closeStartedAt = android.os.SystemClock.elapsedRealtime()
+            mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(stall); mainHandler.removeCallbacks(steady)
+            mainHandler.removeCallbacks(startCheck); mainHandler.removeCallbacks(watchdog)
+            streamOpen = false
+            if (wifiHeld) { wifiHeld = false; IptvLiveWifiLock.hold(appContext, this, false) }
+            fence.stopAccepting()
+            calls.cancelAll()
+            localGeneration++
+            ring?.let { session -> ring = null; session.stop(); thread(name = "IptvTimeshiftClose", isDaemon = true) { session.awaitStopped(IDLE_WAIT_MS); session.close() } }
             released = true
             runCatching { enhancer?.release() }; enhancer = null
-            try { player.release() } catch (_: Exception) { releaseFailed = true }
-        }
-
-        if (releaseFailed) return false
-        val closed = withTimeoutOrNull(15_000) {
-            while (fence.active.value != 0 && (client.dispatcher.runningCallsCount() > 0 || client.dispatcher.queuedCallsCount() > 0)) delay(40)
+            try { player.release() } catch (error: Exception) { IptvLog.failure("live release", error) }
+        } else calls.cancelAll()
+        val closed = withTimeoutOrNull(CLOSE_WAIT_MS) {
+            while (playbackThread.isAlive || calls.count > 0) delay(CLOSE_POLL_MS)
             true
         } ?: false
-        if (closed) client.connectionPool.evictAll()
+        if (closed) IptvLog.info("live close ms=${android.os.SystemClock.elapsedRealtime() - closeStartedAt}")
+        else if (!closeLogged) {
+            closeLogged = true
+            val reason = if (playbackThread.isAlive) "release" else "calls"
+            IptvLog.info("live close unconfirmed reason=$reason calls=${calls.count} requests=${fence.active.value}")
+        }
         return closed
     }
     private class FencedSource(private val delegate: DataSource, private val fence: LiveRequestFence, private val entryPoint: () -> Uri,
@@ -553,8 +560,19 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         const val LIVE_MAX_SPEED = 1.03f
         const val RATE_MS = 5_000L
         const val GO_LIVE_MIN_MS = 3_000L
+        const val RELEASE_BLOCK_MS = 250L
+        const val CLOSE_WAIT_MS = 1_000L
+        const val CLOSE_POLL_MS = 25L
     }
 }
+
+internal fun liveLowMemory(context: Context): Boolean = runCatching {
+    val manager = requireNotNull(context.getSystemService(android.app.ActivityManager::class.java))
+    val memory = android.app.ActivityManager.MemoryInfo().also(manager::getMemoryInfo)
+    LiveBufferPolicy.lowMemory(memory.totalMem, manager.isLowRamDevice)
+}.getOrDefault(true)
+
+internal fun liveReceiveBytes(lowMemory: Boolean): Int = if (lowMemory) IptvLiveSocketFactory.LOW_MEMORY_BYTES else IptvLiveSocketFactory.NORMAL_BYTES
 
 internal object IptvLiveWifiLock {
     private val holds = LiveHolds<Any>()
