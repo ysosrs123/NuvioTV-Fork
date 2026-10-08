@@ -11,7 +11,6 @@ import com.nuvio.tv.core.iptv.SportsNuvioAlert
 import com.nuvio.tv.core.iptv.SportsPolling
 import com.nuvio.tv.core.iptv.SportsReminder
 import com.nuvio.tv.core.iptv.SportsReminders
-import com.nuvio.tv.core.iptv.SportsService
 import java.time.ZoneId
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -107,24 +106,24 @@ class IptvSportsLive(private val repository: IptvSportsFixturesRepository, priva
             val now = clock()
             val favourites = preferences.favouriteTeams
             val showScores = preferences.showScores
-            if (mode == IptvSportsMode.BACKGROUND && (favourites.isEmpty() || preferences.nuvioAlert == SportsNuvioAlert.OFF || preferences.service == SportsService.OFF)) {
+            if (mode == IptvSportsMode.BACKGROUND && (favourites.isEmpty() || preferences.nuvioAlert == SportsNuvioAlert.OFF || !preferences.enabled)) {
                 delay(CHECK_MILLIS); continue
             }
             var wait = if (mode == IptvSportsMode.LIVE_TV) SportsPolling.LIVE_TV_MILLIS else SportsPolling.IDLE_MILLIS
             try {
                 val result = repository.load(now, ZoneId.systemDefault(), refresh, favourites, followedOnly = mode == IptvSportsMode.BACKGROUND)
-                if (result.service != SportsService.OFF) {
+                if (result.enabled) {
                     if (refresh) detect(result.fixtures, now)
                     wait = if (mode == IptvSportsMode.LIVE_TV) SportsPolling.liveTvDelay(result.fixtures, favourites, now)
                         else SportsPolling.backgroundDelay(result.fixtures, favourites, now)
                 }
                 mutable.value = IptvSportsSnapshot(result, now, favourites, showScores, mode, refresh)
-                if (result.service == SportsService.OFF) { synchronized(this) { previous = null }; refresh = false; delay(CHECK_MILLIS); continue }
+                if (!result.enabled) { synchronized(this) { previous = null }; refresh = false; delay(CHECK_MILLIS); continue }
             } catch (cancel: CancellationException) { throw cancel }
             catch (error: Exception) {
                 IptvLog.failure("sports fixtures", error)
                 if (refresh) mutable.value = mutable.value?.let { it.copy(result = it.result.copy(failed = true), refreshed = true) }
-                    ?: IptvSportsSnapshot(IptvSportsFixtures(preferences.service, failed = true), now, favourites, showScores, mode, true)
+                    ?: IptvSportsSnapshot(IptvSportsFixtures(preferences.enabled, failed = true), now, favourites, showScores, mode, true)
             }
             if (refresh) delay(wait)
             refresh = true

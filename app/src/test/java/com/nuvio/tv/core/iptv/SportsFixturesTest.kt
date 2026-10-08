@@ -98,10 +98,9 @@ class SportsFixturesTest {
         assertTrue(SportsLeagues.ALL.all { it.espn != null || it.sportsDb != null })
         assertFalse(SportsLeagues.byId("big-bash")!!.supports(SportsService.ESPN))
         assertTrue(SportsLeagues.byId("big-bash")!!.supports(SportsService.THESPORTSDB))
-        assertFalse(afl.supports(SportsService.OFF))
         assertEquals(SportsLeagues.ALL.size, SportsLeagues.ALL.map { it.id }.distinct().size)
         assertTrue(SportsLeagues.DEFAULTS.all { SportsLeagues.byId(it) != null })
-        assertEquals(listOf("afl"), SportsLeagues.chosen(setOf("afl", "big-bash", "missing"), SportsService.ESPN).map { it.id })
+        assertEquals(listOf("afl", "big-bash"), SportsLeagues.chosen(setOf("afl", "big-bash", "missing")).map { it.id })
     }
 
     @Test fun daysCoverTodayAndNextTwoInLocalZoneAndServiceDates() {

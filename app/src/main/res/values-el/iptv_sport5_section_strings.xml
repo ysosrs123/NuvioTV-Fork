@@ -9,10 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">Αριστερά και Δεξιά μετακινούνται στον χρόνο · OK ανοίγει · Κρατήστε το OK για επιλογές</string>
     <string name="iptv_sport5_section_kick_off">Έναρξη %1$s</string>
     <string name="iptv_sport5_section_watch_on">Δείτε στο %1$s</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="one">%1$d ακόμη ροή</item>
-        <item quantity="other">%1$d ακόμη ροές</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">Ακολουθήστε</string>
     <string name="iptv_sport5_section_following">Ακολουθείτε</string>
     <string name="iptv_sport5_section_remind">Υπενθύμιση</string>
@@ -26,24 +22,12 @@
     <string name="iptv_sport5_section_done">Ολοκληρώθηκε</string>
     <string name="iptv_sport5_section_main_card">Κύρια κάρτα</string>
     <string name="iptv_sport5_section_prelims">Προκριματικοί</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="one">%1$s · %2$d αγώνας</item>
-        <item quantity="other">%1$s · %2$d αγώνες</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="one">%1$d γύρος</item>
-        <item quantity="other">%1$d γύροι</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">Τώρα: %1$s</string>
     <string name="iptv_sport5_section_fight_round">Γύρος %1$d</string>
     <string name="iptv_sport5_section_chase">%1$s χρειάζονται %2$d σε %3$d μπάλες · απαιτ. %4$s</string>
     <string name="iptv_sport5_section_overs_of">%1$s από %2$d overs</string>
     <string name="iptv_sport5_section_overs">%1$s overs</string>
     <string name="iptv_sport5_section_target">στόχος %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="one">%1$d άουτ</item>
-        <item quantity="other">%1$d άουτ</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">Μέση %1$d</string>
     <string name="iptv_sport5_section_inning_end">Τέλος %1$d</string>
     <string name="iptv_sport5_section_sport_football">Ποδόσφαιρο</string>

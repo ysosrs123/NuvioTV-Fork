@@ -11,7 +11,6 @@
     <string name="iptv_sport2_round">রাউন্ড %1$d</string>
     <string name="iptv_sport2_last_play">শেষ খেলা</string>
     <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
-    <string name="iptv_sport2_watch_on">%1$s-এ</string>
     <string name="iptv_sport2_show_scores">স্কোর দেখান</string>
     <string name="iptv_sport2_show_scores_subtitle">স্কোর, খেলার সময় ও ফলাফল লুকাতে বন্ধ করুন।</string>
     <string name="iptv_sport2_favourite_team">প্রিয় দল</string>

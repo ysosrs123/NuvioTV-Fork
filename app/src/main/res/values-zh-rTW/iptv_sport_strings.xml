@@ -14,25 +14,11 @@
     <string name="iptv_sport_choose_channel">選擇頻道</string>
     <string name="iptv_sport_broadcaster">列出的轉播單位：%1$s</string>
     <string name="iptv_sport_close">關閉</string>
-    <string name="iptv_sport_data">體育資料</string>
-    <string name="iptv_sport_data_subtitle">賽程從所選服務取得。ESPN 的資料來源為非官方，可能停止運作。</string>
-    <string name="iptv_sport_data_off">關閉</string>
-    <string name="iptv_sport_data_off_description">體育僅使用您的節目表，不會傳送任何要求。</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">非官方資料來源，無需金鑰。可能隨時停止運作。</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">需要您自己的 API 金鑰。免費測試金鑰 123 可有限使用。</string>
     <string name="iptv_sport_leagues">聯賽</string>
-    <string name="iptv_sport_leagues_subtitle">顯示這些聯賽的賽程</string>
     <string name="iptv_sport_leagues_none">無</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="other">%d 個聯賽</item>
-    </plurals>
     <string name="iptv_sport_key">TheSportsDB 金鑰</string>
-    <string name="iptv_sport_key_subtitle">加密儲存在此裝置上。免費測試金鑰 123 可有限使用。</string>
     <string name="iptv_sport_key_set">已儲存</string>
     <string name="iptv_sport_key_not_set">未設定</string>
-    <string name="iptv_sport_key_hint">輸入 123 以使用免費測試金鑰</string>
     <string name="iptv_sport_key_invalid">只能使用字母和數字。</string>
     <string name="iptv_sport_key_remove">移除金鑰</string>
 </resources>

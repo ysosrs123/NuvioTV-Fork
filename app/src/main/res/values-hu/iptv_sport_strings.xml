@@ -14,26 +14,11 @@
     <string name="iptv_sport_choose_channel">Válassz csatornát</string>
     <string name="iptv_sport_broadcaster">Megadott közvetítő: %1$s</string>
     <string name="iptv_sport_close">Bezárás</string>
-    <string name="iptv_sport_data">Sportadatok</string>
-    <string name="iptv_sport_data_subtitle">A mérkőzéseket a kiválasztott szolgáltatás adja. Az ESPN hírfolyama nem hivatalos, és leállhat.</string>
-    <string name="iptv_sport_data_off">Ki</string>
-    <string name="iptv_sport_data_off_description">A Sport csak a műsorújságot használja. Nincs lekérés.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">Nem hivatalos hírfolyam, nem kell kulcs. Bármikor leállhat.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">Saját API-kulcs szükséges. Az ingyenes 123-as tesztkulcs korlátozásokkal működik.</string>
     <string name="iptv_sport_leagues">Bajnokságok</string>
-    <string name="iptv_sport_leagues_subtitle">Ezeknek a bajnokságoknak a mérkőzései jelennek meg</string>
     <string name="iptv_sport_leagues_none">Nincs</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="one">%d bajnokság</item>
-        <item quantity="other">%d bajnokság</item>
-    </plurals>
     <string name="iptv_sport_key">TheSportsDB-kulcs</string>
-    <string name="iptv_sport_key_subtitle">Titkosítva tárolva ezen az eszközön. Az ingyenes 123-as tesztkulcs korlátozásokkal működik.</string>
     <string name="iptv_sport_key_set">Mentve</string>
     <string name="iptv_sport_key_not_set">Nincs beállítva</string>
-    <string name="iptv_sport_key_hint">Írd be: 123 az ingyenes tesztkulcs használatához</string>
     <string name="iptv_sport_key_invalid">Csak betűket és számokat használj.</string>
     <string name="iptv_sport_key_remove">Kulcs eltávolítása</string>
 </resources>

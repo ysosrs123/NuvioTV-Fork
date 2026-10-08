@@ -11,7 +11,6 @@
     <string name="iptv_sport2_round">Jornada %1$d</string>
     <string name="iptv_sport2_last_play">Última jugada</string>
     <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
-    <string name="iptv_sport2_watch_on">En %1$s</string>
     <string name="iptv_sport2_show_scores">Mostrar marcadores</string>
     <string name="iptv_sport2_show_scores_subtitle">Desactívalo para ocultar marcadores, relojes de partido y resultados.</string>
     <string name="iptv_sport2_favourite_team">Equipo favorito</string>

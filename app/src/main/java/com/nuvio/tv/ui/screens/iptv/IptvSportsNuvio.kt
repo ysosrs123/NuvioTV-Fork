@@ -70,7 +70,6 @@ import com.nuvio.tv.core.iptv.SportsRecordedWindow
 import com.nuvio.tv.core.iptv.SportsRefresh
 import com.nuvio.tv.core.iptv.SportsReminder
 import com.nuvio.tv.core.iptv.SportsReminders
-import com.nuvio.tv.core.iptv.SportsService
 import com.nuvio.tv.core.iptv.SportsSpoilers
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.recording.IptvRecordResult
@@ -184,11 +183,11 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
                 if (followed && !isMuted(change.key) && !(change.kind != SportsChangeKind.STARTED && change.key in spoilerKeys.value)) alertEvents.emit(change)
             }
         }
-        scope.launch { live.snapshot.collect { snapshot -> if (snapshot != null && snapshot.result.service != SportsService.OFF) merge(snapshot.result.fixtures) } }
+        scope.launch { live.snapshot.collect { snapshot -> if (snapshot != null && snapshot.result.enabled) merge(snapshot.result.fixtures) } }
         scope.launch { recorder.all.collect { refreshSpoilers() } }
     }
 
-    val enabled: Boolean get() = preferences.service != SportsService.OFF
+    val enabled: Boolean get() = preferences.enabled
     val alertStyle: SportsNuvioAlert get() = preferences.nuvioAlert
     val quietMillis: Long get() = preferences.nuvioQuietEndMinutes * 60_000L
     val showScores: Boolean get() = preferences.showScores
@@ -337,7 +336,8 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
         val now = System.currentTimeMillis()
         fixtureList.update { current ->
             val next = LinkedHashMap<String, SportsFixture>()
-            current.forEach { next[it.key] = it }
+            val sources = fixtures.associate { it.league to it.source }
+            current.filter { old -> sources[old.league]?.let { it == old.source } != false }.forEach { next[it.key] = it }
             fixtures.forEach { next[it.key] = it }
             next.values.filter { it.startMillis + SportsRefresh.durationMillis(it) + KEEP_MILLIS > now }.sortedBy { it.startMillis }
         }
@@ -346,14 +346,14 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
 
     private suspend fun maintain(force: Boolean) = checking.withLock {
         try {
-            if (preferences.service == SportsService.OFF) { fixtureList.value = emptyList(); linkMap.value = emptyMap(); return@withLock }
+            if (!preferences.enabled) { fixtureList.value = emptyList(); linkMap.value = emptyMap(); return@withLock }
             val favourites = preferences.favouriteTeams
             if (favourites.isEmpty()) return@withLock
             val now = System.currentTimeMillis()
             if (force || now - loadedAt >= LOAD_MILLIS || now < loadedAt) {
                 val result = repository.load(now, ZoneId.systemDefault(), true, favourites, followedOnly = true)
                 loadedAt = now
-                if (result.service != SportsService.OFF) merge(result.fixtures)
+                if (result.enabled) merge(result.fixtures)
             }
             val followed = fixtureList.value.filter { SportsFavourites.has(favourites, it) && it.status != FixtureStatus.FINAL &&
                 it.startMillis + SportsRefresh.durationMillis(it) > now }

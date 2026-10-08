@@ -57,9 +57,9 @@ class IptvSportsFixturesCacheTest {
     }
 
     @Test fun cachedFixturesDoNotWaitForARunningFetch() = withCache(now - 2 * 60 * 60 * 1000) { cache, server, release ->
-        val refresh = async(Dispatchers.Default) { cache.load(SportsService.ESPN, listOf(afl), null, now, zone, refresh = true) }
+        val refresh = async(Dispatchers.Default) { cache.load(listOf(afl), null, now, zone, refresh = true) }
         assertNotNull(server.takeRequest(5, TimeUnit.SECONDS))
-        val shown = withTimeout(2_000) { cache.load(SportsService.ESPN, listOf(afl), null, now, zone, refresh = false) }
+        val shown = withTimeout(2_000) { cache.load(listOf(afl), null, now, zone, refresh = false) }
         assertEquals(listOf("Richmond v Carlton"), shown.fixtures.map { it.title })
         release.countDown()
         assertTrue(refresh.await().fixtures.isEmpty())
@@ -68,7 +68,7 @@ class IptvSportsFixturesCacheTest {
 
     @Test fun freshEntriesAreNotRequestedAgain() = withCache(now - 60_000) { cache, server, release ->
         release.countDown()
-        val result = cache.load(SportsService.ESPN, listOf(afl), null, now, zone, refresh = true)
+        val result = cache.load(listOf(afl), null, now, zone, refresh = true)
         assertEquals(listOf("Richmond v Carlton"), result.fixtures.map { it.title })
         assertFalse(result.failed)
         assertEquals(0, server.requestCount)

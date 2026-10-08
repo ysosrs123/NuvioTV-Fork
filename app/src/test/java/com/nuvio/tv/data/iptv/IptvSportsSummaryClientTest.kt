@@ -73,7 +73,7 @@ class IptvSportsSummaryClientTest {
                 watch.stop()
                 assertEquals(FixtureStatus.LIVE, watch.summary.value?.status)
                 assertTrue(server.requestCount >= 4)
-                watch.start(fixture(FixtureStatus.LIVE), SportsService.THESPORTSDB)
+                watch.start(fixture(FixtureStatus.LIVE).copy(source = SportsService.THESPORTSDB))
                 assertNull(watch.summary.value)
             } finally { scope.cancel() }
         }

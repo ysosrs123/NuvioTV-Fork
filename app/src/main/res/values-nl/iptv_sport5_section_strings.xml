@@ -9,10 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">Links en Rechts bewegen door de tijd · OK opent · Houd OK ingedrukt voor opties</string>
     <string name="iptv_sport5_section_kick_off">Aftrap %1$s</string>
     <string name="iptv_sport5_section_watch_on">Kijken op %1$s</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="one">%1$d andere stream</item>
-        <item quantity="other">%1$d andere streams</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">Volgen</string>
     <string name="iptv_sport5_section_following">Volgend</string>
     <string name="iptv_sport5_section_remind">Herinner me</string>
@@ -26,24 +22,12 @@
     <string name="iptv_sport5_section_done">Klaar</string>
     <string name="iptv_sport5_section_main_card">Hoofdkaart</string>
     <string name="iptv_sport5_section_prelims">Voorprogramma</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="one">%1$s · %2$d partij</item>
-        <item quantity="other">%1$s · %2$d partijen</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="one">%1$d ronde</item>
-        <item quantity="other">%1$d rondes</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">Nu: %1$s</string>
     <string name="iptv_sport5_section_fight_round">Ronde %1$d</string>
     <string name="iptv_sport5_section_chase">%1$s heeft %2$d nodig uit %3$d ballen · vereist %4$s</string>
     <string name="iptv_sport5_section_overs_of">%1$s van %2$d overs</string>
     <string name="iptv_sport5_section_overs">%1$s overs</string>
     <string name="iptv_sport5_section_target">doel %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="one">%1$d out</item>
-        <item quantity="other">%1$d outs</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">Midden %1$d</string>
     <string name="iptv_sport5_section_inning_end">Einde %1$d</string>
     <string name="iptv_sport5_section_sport_football">Voetbal</string>

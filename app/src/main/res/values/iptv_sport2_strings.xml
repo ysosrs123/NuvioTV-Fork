@@ -12,7 +12,6 @@
     <string name="iptv_sport2_round">Round %1$d</string>
     <string name="iptv_sport2_last_play">Last play</string>
     <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
-    <string name="iptv_sport2_watch_on">On %1$s</string>
     <string name="iptv_sport2_show_scores">Show scores</string>
     <string name="iptv_sport2_show_scores_subtitle">Turn off to hide scores, game clocks and results.</string>
     <string name="iptv_sport2_favourite_team">Favourite team</string>

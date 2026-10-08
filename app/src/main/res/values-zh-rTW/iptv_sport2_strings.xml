@@ -11,7 +11,6 @@
     <string name="iptv_sport2_round">第 %1$d 輪</string>
     <string name="iptv_sport2_last_play">最新戰況</string>
     <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
-    <string name="iptv_sport2_watch_on">頻道：%1$s</string>
     <string name="iptv_sport2_show_scores">顯示比分</string>
     <string name="iptv_sport2_show_scores_subtitle">關閉後將隱藏比分、比賽時鐘和賽果。</string>
     <string name="iptv_sport2_favourite_team">喜愛的球隊</string>

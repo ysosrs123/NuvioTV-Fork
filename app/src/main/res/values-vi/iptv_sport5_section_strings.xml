@@ -9,9 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">Trái và Phải di chuyển theo thời gian · OK để mở · Giữ OK để xem tùy chọn</string>
     <string name="iptv_sport5_section_kick_off">Bắt đầu %1$s</string>
     <string name="iptv_sport5_section_watch_on">Xem trên %1$s</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="other">%1$d luồng khác</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">Theo dõi</string>
     <string name="iptv_sport5_section_following">Đang theo dõi</string>
     <string name="iptv_sport5_section_remind">Nhắc tôi</string>
@@ -25,21 +22,12 @@
     <string name="iptv_sport5_section_done">Xong</string>
     <string name="iptv_sport5_section_main_card">Thẻ chính</string>
     <string name="iptv_sport5_section_prelims">Trận mở màn</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="other">%1$s · %2$d trận</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="other">%1$d hiệp</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">Hiện tại: %1$s</string>
     <string name="iptv_sport5_section_fight_round">Hiệp %1$d</string>
     <string name="iptv_sport5_section_chase">%1$s cần %2$d từ %3$d bóng · cần %4$s</string>
     <string name="iptv_sport5_section_overs_of">%1$s / %2$d over</string>
     <string name="iptv_sport5_section_overs">%1$s over</string>
     <string name="iptv_sport5_section_target">mục tiêu %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="other">%1$d out</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">Giữa hiệp %1$d</string>
     <string name="iptv_sport5_section_inning_end">Hết hiệp %1$d</string>
     <string name="iptv_sport5_section_sport_football">Bóng đá</string>

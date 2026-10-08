@@ -14,25 +14,11 @@
     <string name="iptv_sport_choose_channel">チャンネルを選択</string>
     <string name="iptv_sport_broadcaster">記載の放送局: %1$s</string>
     <string name="iptv_sport_close">閉じる</string>
-    <string name="iptv_sport_data">スポーツデータ</string>
-    <string name="iptv_sport_data_subtitle">試合日程は選択したサービスから取得されます。ESPN のフィードは非公式で、使えなくなる場合があります。</string>
-    <string name="iptv_sport_data_off">オフ</string>
-    <string name="iptv_sport_data_off_description">スポーツは番組表のみを使用します。リクエストは送信されません。</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">非公式のフィードで、キーは不要です。いつでも使えなくなる可能性があります。</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">自分の API キーが必要です。無料のテストキー 123 は制限付きで使えます。</string>
     <string name="iptv_sport_leagues">リーグ</string>
-    <string name="iptv_sport_leagues_subtitle">これらのリーグの試合日程を表示します</string>
     <string name="iptv_sport_leagues_none">なし</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="other">%d リーグ</item>
-    </plurals>
     <string name="iptv_sport_key">TheSportsDB キー</string>
-    <string name="iptv_sport_key_subtitle">このデバイスに暗号化して保存されます。無料のテストキー 123 は制限付きで使えます。</string>
     <string name="iptv_sport_key_set">保存済み</string>
     <string name="iptv_sport_key_not_set">未設定</string>
-    <string name="iptv_sport_key_hint">無料のテストキーを使うには 123 を入力します</string>
     <string name="iptv_sport_key_invalid">英数字のみ使用できます。</string>
     <string name="iptv_sport_key_remove">キーを削除</string>
 </resources>

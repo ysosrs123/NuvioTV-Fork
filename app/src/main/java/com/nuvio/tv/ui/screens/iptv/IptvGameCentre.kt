@@ -58,7 +58,6 @@ import com.nuvio.tv.core.iptv.SportsSummary
 import com.nuvio.tv.core.iptv.SummaryCount
 import com.nuvio.tv.core.iptv.SummaryMoment
 import com.nuvio.tv.data.iptv.IptvListedChannel
-import com.nuvio.tv.data.iptv.IptvSportsPreferences
 import com.nuvio.tv.data.iptv.IptvSportsSummaryClient
 import com.nuvio.tv.data.iptv.IptvSportsSummaryWatch
 import com.nuvio.tv.ui.components.LoadingIndicator
@@ -73,7 +72,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class IptvSportsSummaryViewModel @Inject constructor(private val client: IptvSportsSummaryClient, private val preferences: IptvSportsPreferences) : ViewModel() {
+class IptvSportsSummaryViewModel @Inject constructor(private val client: IptvSportsSummaryClient) : ViewModel() {
     private class Entry(val watch: IptvSportsSummaryWatch, var fixture: SportsFixture, var users: Int = 0, var closing: Job? = null)
     private val entries = mutableMapOf<String, Entry>()
 
@@ -82,7 +81,7 @@ class IptvSportsSummaryViewModel @Inject constructor(private val client: IptvSpo
         entry.fixture = fixture
         entry.closing?.cancel(); entry.closing = null
         entry.users++
-        entry.watch.start(fixture, preferences.service)
+        entry.watch.start(fixture)
         return entry.watch.summary
     }
 
@@ -97,7 +96,7 @@ class IptvSportsSummaryViewModel @Inject constructor(private val client: IptvSpo
 
     fun pause() { entries.values.forEach { it.watch.stop() } }
 
-    fun resume() { entries.values.filter { it.users > 0 }.forEach { it.watch.start(it.fixture, preferences.service) } }
+    fun resume() { entries.values.filter { it.users > 0 }.forEach { it.watch.start(it.fixture) } }
 
     override fun onCleared() { entries.values.forEach { it.watch.stop() }; entries.clear() }
 

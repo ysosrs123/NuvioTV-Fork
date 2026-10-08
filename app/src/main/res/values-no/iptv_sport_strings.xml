@@ -14,26 +14,11 @@
     <string name="iptv_sport_choose_channel">Velg en kanal</string>
     <string name="iptv_sport_broadcaster">Oppført kringkaster: %1$s</string>
     <string name="iptv_sport_close">Lukk</string>
-    <string name="iptv_sport_data">Sportsdata</string>
-    <string name="iptv_sport_data_subtitle">Kamper hentes fra den valgte tjenesten. ESPN sin feed er uoffisiell og kan slutte å virke.</string>
-    <string name="iptv_sport_data_off">Av</string>
-    <string name="iptv_sport_data_off_description">Sport bruker bare guiden din. Ingen forespørsler sendes.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">Uoffisiell feed, ingen nøkkel nødvendig. Den kan slutte å virke når som helst.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">Krever din egen API-nøkkel. Den gratis testnøkkelen 123 fungerer med begrensninger.</string>
     <string name="iptv_sport_leagues">Ligaer</string>
-    <string name="iptv_sport_leagues_subtitle">Kamper vises for disse ligaene</string>
     <string name="iptv_sport_leagues_none">Ingen</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="one">%d liga</item>
-        <item quantity="other">%d ligaer</item>
-    </plurals>
     <string name="iptv_sport_key">TheSportsDB-nøkkel</string>
-    <string name="iptv_sport_key_subtitle">Lagres kryptert på denne enheten. Den gratis testnøkkelen 123 fungerer med begrensninger.</string>
     <string name="iptv_sport_key_set">Lagret</string>
     <string name="iptv_sport_key_not_set">Ikke angitt</string>
-    <string name="iptv_sport_key_hint">Skriv inn 123 for å bruke den gratis testnøkkelen</string>
     <string name="iptv_sport_key_invalid">Bruk bare bokstaver og tall.</string>
     <string name="iptv_sport_key_remove">Fjern nøkkel</string>
 </resources>

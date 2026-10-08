@@ -63,6 +63,7 @@ import com.nuvio.tv.core.iptv.GuideProgrammeCell
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.LiveCornerVideo
 import com.nuvio.tv.core.iptv.SportsFixtureText
+import com.nuvio.tv.core.iptv.SportsService
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.theme.NuvioTheme
@@ -158,7 +159,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
             AndroidKeyEvent.KEYCODE_LAST_CHANNEL -> { onLastChannel(); banner++; true }
             AndroidKeyEvent.KEYCODE_DPAD_LEFT, AndroidKeyEvent.KEYCODE_GUIDE -> { panel = true; true }
             AndroidKeyEvent.KEYCODE_MENU -> { onMenu(); true }
-            AndroidKeyEvent.KEYCODE_INFO -> { if (game != null) { banner = -1; centre = true } else banner = if (banner < 0) 0 else -1; true }
+            AndroidKeyEvent.KEYCODE_INFO -> { if (game?.fixture?.source == SportsService.ESPN) { banner = -1; centre = true } else banner = if (banner < 0) 0 else -1; true }
             else -> false
         }
     }.focusable()) {
@@ -201,7 +202,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
                 }
             }, onHide = { controls = false; liveFirst = false }, onScrub = { onScrub(it) }, onGoLive = onGoLive, focusGoLive = liveFirst,
                 markers = if (hideScores) emptyList() else sportsMarkers(summary, game?.fixture), feeds = (game?.links?.size ?: 0) + others.size,
-                onCentre = game?.let { { controls = false; centre = true } },
+                onCentre = game?.takeIf { it.fixture.source == SportsService.ESPN }?.let { { controls = false; centre = true } },
                 onFeeds = game?.takeIf { it.links.size > 1 || others.isNotEmpty() }?.let { { controls = false; feeds = true } })
         }
         AnimatedVisibility(banner >= 0 && !panel && !controls && !centre && !feeds, Modifier.align(Alignment.BottomCenter),

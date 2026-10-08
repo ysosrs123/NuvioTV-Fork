@@ -11,7 +11,6 @@
     <string name="iptv_sport2_round">الجولة %1$d</string>
     <string name="iptv_sport2_last_play">آخر لعبة</string>
     <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
-    <string name="iptv_sport2_watch_on">على %1$s</string>
     <string name="iptv_sport2_show_scores">إظهار النتائج</string>
     <string name="iptv_sport2_show_scores_subtitle">أوقفه لإخفاء النتائج وتوقيت المباريات والنتائج النهائية.</string>
     <string name="iptv_sport2_favourite_team">الفريق المفضل</string>

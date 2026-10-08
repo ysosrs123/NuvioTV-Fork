@@ -9,10 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">Balra és Jobbra lépked az időben · OK: megnyitás · OK nyomva tartása: lehetőségek</string>
     <string name="iptv_sport5_section_kick_off">Kezdés %1$s</string>
     <string name="iptv_sport5_section_watch_on">Nézés itt: %1$s</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="one">%1$d másik adás</item>
-        <item quantity="other">%1$d másik adás</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">Követés</string>
     <string name="iptv_sport5_section_following">Követed</string>
     <string name="iptv_sport5_section_remind">Emlékeztess</string>
@@ -26,24 +22,12 @@
     <string name="iptv_sport5_section_done">Vége</string>
     <string name="iptv_sport5_section_main_card">Főkártya</string>
     <string name="iptv_sport5_section_prelims">Előmeccsek</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="one">%1$s · %2$d meccs</item>
-        <item quantity="other">%1$s · %2$d meccs</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="one">%1$d menet</item>
-        <item quantity="other">%1$d menet</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">Most: %1$s</string>
     <string name="iptv_sport5_section_fight_round">%1$d. menet</string>
     <string name="iptv_sport5_section_chase">%1$s: %2$d kell %3$d labdából · szüks. %4$s</string>
     <string name="iptv_sport5_section_overs_of">%1$s / %2$d over</string>
     <string name="iptv_sport5_section_overs">%1$s over</string>
     <string name="iptv_sport5_section_target">cél: %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="one">%1$d out</item>
-        <item quantity="other">%1$d out</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">%1$d. játékrész közepe</string>
     <string name="iptv_sport5_section_inning_end">%1$d. játékrész vége</string>
     <string name="iptv_sport5_section_sport_football">Labdarúgás</string>

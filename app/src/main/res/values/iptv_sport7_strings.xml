@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Sport fixtures</string>
+    <string name="iptv_sport7_fixtures_subtitle">Fixtures and scores from ESPN, and from TheSportsDB with your own key. When off, Sport uses your guide only and makes no requests.</string>
+    <string name="iptv_sport7_leagues_subtitle">Each league uses ESPN when it can, otherwise TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Add a league</string>
+    <string name="iptv_sport7_add_league_subtitle">Search every TheSportsDB league. Added leagues need your TheSportsDB key.</string>
+    <string name="iptv_sport7_search">Search leagues</string>
+    <string name="iptv_sport7_search_hint">Type at least two letters of a league or sport</string>
+    <string name="iptv_sport7_search_loading">Loading leagues…</string>
+    <string name="iptv_sport7_search_failed">Couldn\'t load the league list. Check your TheSportsDB key.</string>
+    <string name="iptv_sport7_search_none">No leagues match.</string>
+    <string name="iptv_sport7_added">Added</string>
+    <string name="iptv_sport7_key_subtitle">Optional. Your own key adds leagues ESPN doesn\'t cover, live scores for them, TV channels for followed teams and a backup when ESPN fails. Stored encrypted on this device.</string>
+    <string name="iptv_sport7_key_hint">Your personal TheSportsDB API key</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, with TheSportsDB as backup</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · needs your key</string>
+    <string name="iptv_sport7_logos">Team logos</string>
+    <string name="iptv_sport7_logos_subtitle">Monograms are shown when logos are off</string>
+    <string name="iptv_sport7_logos_espn">ESPN logos only</string>
+    <string name="iptv_sport7_logos_espn_description">Logos for ESPN fixtures, monograms for TheSportsDB fixtures</string>
+    <string name="iptv_sport7_logos_all">All logos</string>
+    <string name="iptv_sport7_logos_all_description">Also shows TheSportsDB badges. Check TheSportsDB\'s artwork terms first.</string>
+    <string name="iptv_sport7_logos_off">Monograms only</string>
+    <string name="iptv_sport7_logos_off_description">No team or league logos</string>
+    <string name="iptv_sport7_credit">Sports data from ESPN and TheSportsDB</string>
+</resources>

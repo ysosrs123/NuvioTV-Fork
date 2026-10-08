@@ -29,7 +29,6 @@ class IptvSportsFixturesClientTest {
         assertNull(client.url(SportsService.ESPN, bigBash, date, null))
         assertNull(client.url(SportsService.THESPORTSDB, epl, date, null))
         assertNull(client.url(SportsService.THESPORTSDB, epl, date, "../x"))
-        assertNull(client.url(SportsService.OFF, epl, date, "123"))
     }
 
     @Test fun fetchesAndParsesWithUserAgent() = runBlocking {

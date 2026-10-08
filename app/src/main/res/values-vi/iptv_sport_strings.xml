@@ -14,25 +14,11 @@
     <string name="iptv_sport_choose_channel">Chọn kênh</string>
     <string name="iptv_sport_broadcaster">Đài phát sóng được liệt kê: %1$s</string>
     <string name="iptv_sport_close">Đóng</string>
-    <string name="iptv_sport_data">Dữ liệu thể thao</string>
-    <string name="iptv_sport_data_subtitle">Lịch thi đấu được lấy từ dịch vụ đã chọn. Nguồn dữ liệu của ESPN không chính thức và có thể ngừng hoạt động.</string>
-    <string name="iptv_sport_data_off">Tắt</string>
-    <string name="iptv_sport_data_off_description">Thể thao chỉ dùng lịch phát sóng của bạn. Không gửi yêu cầu nào.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">Nguồn không chính thức, không cần khóa. Có thể ngừng hoạt động bất cứ lúc nào.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">Cần khóa API riêng của bạn. Khóa thử nghiệm miễn phí 123 hoạt động có giới hạn.</string>
     <string name="iptv_sport_leagues">Giải đấu</string>
-    <string name="iptv_sport_leagues_subtitle">Hiển thị lịch thi đấu cho các giải này</string>
     <string name="iptv_sport_leagues_none">Không có</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="other">%d giải đấu</item>
-    </plurals>
     <string name="iptv_sport_key">Khóa TheSportsDB</string>
-    <string name="iptv_sport_key_subtitle">Được lưu mã hóa trên thiết bị này. Khóa thử nghiệm miễn phí 123 hoạt động có giới hạn.</string>
     <string name="iptv_sport_key_set">Đã lưu</string>
     <string name="iptv_sport_key_not_set">Chưa đặt</string>
-    <string name="iptv_sport_key_hint">Nhập 123 để dùng khóa thử nghiệm miễn phí</string>
     <string name="iptv_sport_key_invalid">Chỉ dùng chữ cái và chữ số.</string>
     <string name="iptv_sport_key_remove">Xóa khóa</string>
 </resources>

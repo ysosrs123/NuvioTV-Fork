@@ -14,28 +14,11 @@
     <string name="iptv_sport_choose_channel">Выберите канал</string>
     <string name="iptv_sport_broadcaster">Указанный вещатель: %1$s</string>
     <string name="iptv_sport_close">Закрыть</string>
-    <string name="iptv_sport_data">Спортивные данные</string>
-    <string name="iptv_sport_data_subtitle">Матчи загружаются из выбранного сервиса. Канал данных ESPN неофициальный и может перестать работать.</string>
-    <string name="iptv_sport_data_off">Выкл.</string>
-    <string name="iptv_sport_data_off_description">Спорт использует только вашу телепрограмму. Запросы не отправляются.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">Неофициальный канал данных, ключ не нужен. Может перестать работать в любой момент.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">Нужен собственный API-ключ. Бесплатный тестовый ключ 123 работает с ограничениями.</string>
     <string name="iptv_sport_leagues">Лиги</string>
-    <string name="iptv_sport_leagues_subtitle">Матчи показываются для этих лиг</string>
     <string name="iptv_sport_leagues_none">Нет</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="one">%d лига</item>
-        <item quantity="few">%d лиги</item>
-        <item quantity="many">%d лиг</item>
-        <item quantity="other">%d лиги</item>
-    </plurals>
     <string name="iptv_sport_key">Ключ TheSportsDB</string>
-    <string name="iptv_sport_key_subtitle">Хранится в зашифрованном виде на этом устройстве. Бесплатный тестовый ключ 123 работает с ограничениями.</string>
     <string name="iptv_sport_key_set">Сохранён</string>
     <string name="iptv_sport_key_not_set">Не задан</string>
-    <string name="iptv_sport_key_hint">Введите 123, чтобы использовать бесплатный тестовый ключ</string>
     <string name="iptv_sport_key_invalid">Используйте только буквы и цифры.</string>
     <string name="iptv_sport_key_remove">Удалить ключ</string>
 </resources>

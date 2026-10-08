@@ -6,19 +6,21 @@ import com.nuvio.tv.core.iptv.FixtureListing
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.SportsCatchup
+import com.nuvio.tv.core.iptv.SportsDbLeague
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureMatching
 import com.nuvio.tv.core.iptv.SportsLeagues
 import com.nuvio.tv.core.iptv.SportsPolling
-import com.nuvio.tv.core.iptv.SportsService
+import com.nuvio.tv.core.iptv.SportsSources
 import java.time.ZoneId
+import java.util.Locale
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
-data class IptvSportsFixtures(val service: SportsService, val fixtures: List<SportsFixture> = emptyList(), val failed: Boolean = false,
+data class IptvSportsFixtures(val enabled: Boolean, val fixtures: List<SportsFixture> = emptyList(), val failed: Boolean = false,
     val missingKey: Boolean = false, val noLeagues: Boolean = false)
 
 data class IptvFixtureLink(val row: IptvListedChannel, val reason: FixtureLinkReason, val programme: GuideProgramme? = null, val broadcaster: String? = null)
@@ -30,15 +32,21 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
 
     suspend fun load(nowMillis: Long, zone: ZoneId, refresh: Boolean, favourites: Set<String> = emptySet(), followedOnly: Boolean = false): IptvSportsFixtures =
         withContext(Dispatchers.IO) {
-            val service = preferences.service
-            if (service == SportsService.OFF) return@withContext IptvSportsFixtures(service)
-            val chosen = SportsLeagues.chosen(preferences.leagues, service)
+            if (!preferences.enabled) return@withContext IptvSportsFixtures(false)
+            val chosen = SportsLeagues.chosen(preferences.leagues)
             val leagues = if (followedOnly) SportsPolling.followedLeagues(favourites).let { ids -> chosen.filter { it.id in ids } } else chosen
-            if (leagues.isEmpty()) return@withContext IptvSportsFixtures(service, noLeagues = true)
-            val key = if (service == SportsService.THESPORTSDB) preferences.key()?.takeIf { IptvSportsPreferences.validKey(it) } else null
-            if (service == SportsService.THESPORTSDB && key == null) return@withContext IptvSportsFixtures(service, missingKey = true)
-            cache.load(service, leagues, key, nowMillis, zone, refresh, favourites, prune = !followedOnly)
+            if (leagues.isEmpty()) return@withContext IptvSportsFixtures(true, noLeagues = true)
+            val key = if (preferences.hasKey) preferences.key()?.takeIf { IptvSportsPreferences.validKey(it) } else null
+            val usable = leagues.filter { SportsSources.available(it, key != null) }
+            if (usable.isEmpty()) return@withContext IptvSportsFixtures(true, missingKey = true)
+            val result = cache.load(usable, key, nowMillis, zone, refresh, favourites, prune = !followedOnly, country = Locale.getDefault().country)
+            result.copy(fixtures = SportsSources.logos(result.fixtures, preferences.logos))
         }
+
+    suspend fun leagueList(nowMillis: Long): List<SportsDbLeague>? {
+        val key = withContext(Dispatchers.IO) { if (preferences.hasKey) preferences.key()?.takeIf { IptvSportsPreferences.validKey(it) } else null } ?: return null
+        return cache.leagues(key, nowMillis)
+    }
 
     suspend fun links(ref: IptvSourceRef, fixtures: List<SportsFixture>, nowMillis: Long, hiddenCategories: Set<String>): Map<String, List<IptvFixtureLink>> =
         withContext(Dispatchers.IO) {

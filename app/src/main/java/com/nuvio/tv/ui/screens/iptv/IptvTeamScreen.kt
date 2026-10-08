@@ -36,7 +36,6 @@ import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsLeagues
 import com.nuvio.tv.core.iptv.SportsNuvioAlert
 import com.nuvio.tv.core.iptv.SportsRecordRules
-import com.nuvio.tv.core.iptv.SportsService
 import com.nuvio.tv.core.iptv.SportsTeams
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.recording.IptvRecorder
@@ -100,7 +99,7 @@ class IptvTeamViewModel @Inject constructor(savedState: SavedStateHandle, privat
     }
 
     private suspend fun load() {
-        if (parsed == null || preferences.service == SportsService.OFF) { loaded = true; publish(); return }
+        if (parsed == null || !preferences.enabled) { loaded = true; publish(); return }
         try {
             val now = System.currentTimeMillis()
             fixtures = withContext(Dispatchers.IO) { repository.load(now, ZoneId.systemDefault(), true, preferences.favouriteTeams + key, followedOnly = true).fixtures }
@@ -118,7 +117,7 @@ class IptvTeamViewModel @Inject constructor(savedState: SavedStateHandle, privat
         val now = System.currentTimeMillis()
         val games = SportsTeams.games(key, fixtures, now)
         val current = games?.current
-        mutable.value = mutable.value.copy(team = games?.team ?: mutable.value.team, loading = !loaded, enabled = preferences.service != SportsService.OFF && parsed != null,
+        mutable.value = mutable.value.copy(team = games?.team ?: mutable.value.team, loading = !loaded, enabled = preferences.enabled && parsed != null,
             following = key in preferences.favouriteTeams, current = current, home = games?.let { g -> current?.let { SportsTeams.home(g, it) } },
             currentHidden = current?.let { !preferences.showScores || it.key in spoilers } == true, upcoming = games?.upcoming.orEmpty(),
             last = games?.last, lastHidden = games?.last?.let { !preferences.showScores || it.key in spoilers } == true,

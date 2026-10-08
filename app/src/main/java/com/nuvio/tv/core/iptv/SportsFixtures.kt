@@ -7,7 +7,7 @@ import java.time.ZoneOffset
 import org.json.JSONArray
 import org.json.JSONObject
 
-enum class SportsService { OFF, ESPN, THESPORTSDB }
+enum class SportsService { ESPN, THESPORTSDB }
 enum class FixtureStatus { SCHEDULED, LIVE, FINAL }
 enum class FixtureSection { LIVE, CLOSE, TODAY, TOMORROW, DAY, FINISHED }
 enum class FixtureSide { HOME, AWAY }
@@ -26,15 +26,16 @@ data class SportsFixture(val id: String, val league: String, val sport: String, 
     val startMillis: Long, val status: FixtureStatus, val score: String? = null, val detail: String? = null, val broadcasters: List<String> = emptyList(),
     val venue: String? = null, val round: Int? = null, val period: Int? = null, val clock: String? = null, val homeLine: FixtureLine? = null,
     val awayLine: FixtureLine? = null, val situation: FixtureSituation? = null, val leagueLogo: String? = null, val sportDetail: SportsDetail? = null,
-    val events: List<FixtureEvent> = emptyList()) {
+    val events: List<FixtureEvent> = emptyList(), val source: SportsService = SportsService.ESPN) {
     val teams: Boolean get() = home != null && away != null
-    val key: String get() = "$league:$id"
+    val key: String get() = if (source == SportsService.THESPORTSDB) "$league:sdb-$id" else "$league:$id"
 }
 
 data class SportsLeague(val id: String, val name: String, val sport: String, val espn: String?, val sportsDb: String?, val sportsDbId: String? = null,
     val aliases: List<String> = emptyList(), val women: Boolean = false, val durationMinutes: Int = 180) {
+    val custom: Boolean get() = id.startsWith(SportsDbLeagues.CUSTOM_PREFIX)
+
     fun supports(service: SportsService): Boolean = when (service) {
-        SportsService.OFF -> false
         SportsService.ESPN -> espn != null
         SportsService.THESPORTSDB -> sportsDb != null
     }
@@ -79,10 +80,13 @@ object SportsLeagues {
     )
     val DEFAULTS = setOf("afl", "nrl", "a-league-men", "epl", "champions-league")
     private val byId = ALL.associateBy { it.id }
+    @Volatile var custom: List<SportsLeague> = emptyList()
 
-    fun byId(id: String): SportsLeague? = byId[id]
+    fun byId(id: String): SportsLeague? = byId[id] ?: custom.firstOrNull { it.id == id }
 
-    fun chosen(ids: Set<String>, service: SportsService): List<SportsLeague> = ALL.filter { it.id in ids && it.supports(service) }
+    fun all(): List<SportsLeague> = ALL + custom
+
+    fun chosen(ids: Set<String>): List<SportsLeague> = all().filter { it.id in ids }
 }
 
 object SportsDays {
@@ -214,12 +218,29 @@ object SportsFavourites {
     fun key(league: String, team: FixtureTeam): String = "$league:${team.name.trim()}"
 
     fun has(favourites: Set<String>, fixture: SportsFixture): Boolean =
-        favourites.isNotEmpty() && listOfNotNull(fixture.home, fixture.away).any { key(fixture.league, it) in favourites }
+        favourites.isNotEmpty() && listOfNotNull(fixture.home, fixture.away).any { matching(favourites, fixture.league, it).isNotEmpty() }
 
     fun toggle(favourites: Set<String>, league: String, team: FixtureTeam): Set<String> {
-        val key = key(league, team)
-        return if (key in favourites) favourites - key else (favourites + key).toList().takeLast(MAX).toSet()
+        val found = matching(favourites, league, team)
+        return if (found.isNotEmpty()) favourites - found else (favourites + key(league, team)).toList().takeLast(MAX).toSet()
     }
+
+    fun matching(favourites: Set<String>, league: String, team: FixtureTeam): Set<String> {
+        if (favourites.isEmpty()) return emptySet()
+        val exact = key(league, team)
+        if (exact in favourites) return setOf(exact)
+        val names = (listOf(team.name) + listOfNotNull(team.shortName) + team.alternatives).map(::words).filter { it.isNotEmpty() }
+        return favourites.filterTo(HashSet()) { favourite ->
+            val (favouriteLeague, name) = parse(favourite) ?: return@filterTo false
+            if (favouriteLeague != league) return@filterTo false
+            val wanted = words(name)
+            wanted.isNotEmpty() && names.any { it == wanted || (it.size > wanted.size && it.subList(0, wanted.size) == wanted) || (wanted.size > it.size && wanted.subList(0, it.size) == it) }
+        }
+    }
+
+    private fun words(value: String): List<String> =
+        java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFKD).lowercase().replace(Regex("\\p{M}+"), "")
+            .split(Regex("[^a-z0-9]+")).filter { it.isNotEmpty() }
 
     fun parse(key: String): Pair<String, String>? {
         val split = key.indexOf(':')
@@ -380,12 +401,12 @@ object SportsFixtureCodec {
         put("fixtures", JSONArray().apply { entry.fixtures.forEach { put(encode(it)) } })
     }.toString()
 
-    fun decode(text: String): SportsCacheEntry? = runCatching {
+    fun decode(text: String, source: SportsService = SportsService.ESPN): SportsCacheEntry? = runCatching {
         val json = JSONObject(text)
         val version = json.optInt("version")
         if (version != 1 && version != VERSION) return null
         val array = json.optJSONArray("fixtures") ?: JSONArray()
-        SportsCacheEntry((0 until minOf(array.length(), MAX_FIXTURES)).mapNotNull { index -> array.optJSONObject(index)?.let(::fixture) },
+        SportsCacheEntry((0 until minOf(array.length(), MAX_FIXTURES)).mapNotNull { index -> array.optJSONObject(index)?.let { fixture(it, source) } },
             json.optLongOrNull("fetched").takeIf { version == VERSION }, json.optLongOrNull("failed"), json.optInt("failures").coerceIn(0, 20))
     }.getOrNull()
 
@@ -400,6 +421,7 @@ object SportsFixtureCodec {
         fixture.homeLine?.let { put("homeLine", line(it)) }; fixture.awayLine?.let { put("awayLine", line(it)) }
         fixture.sportDetail?.let { put("sportDetail", SportsDetails.encode(it)) }
         if (fixture.events.isNotEmpty()) put("events", JSONArray().apply { fixture.events.forEach { put(event(it)) } })
+        put("source", fixture.source.name)
         fixture.situation?.let { situation ->
             put("situation", JSONObject().apply {
                 situation.downDistance?.let { put("downDistance", it) }; situation.possession?.let { put("possession", it.name) }
@@ -429,7 +451,7 @@ object SportsFixtureCodec {
 
     private fun line(line: FixtureLine) = JSONObject().apply { line.score?.let { put("score", it) }; put("periods", JSONArray(line.periods)) }
 
-    private fun fixture(json: JSONObject): SportsFixture? {
+    private fun fixture(json: JSONObject, source: SportsService): SportsFixture? {
         val id = json.text("id") ?: return null
         val league = json.text("league") ?: return null
         val status = FixtureStatus.entries.firstOrNull { it.name == json.text("status") } ?: return null
@@ -441,7 +463,8 @@ object SportsFixtureCodec {
         return SportsFixture(id, league, json.text("sport").orEmpty(), json.text("title").orEmpty(), json.optJSONObject("home")?.let(::team),
             json.optJSONObject("away")?.let(::team), json.getLong("start"), status, json.text("score"), json.text("detail"), json.strings("broadcasters"),
             json.text("venue"), json.optIntOrNull("round"), json.optIntOrNull("period"), json.text("clock"), json.optJSONObject("homeLine")?.let(::line),
-            json.optJSONObject("awayLine")?.let(::line), situation, json.text("leagueLogo"), json.optJSONObject("sportDetail")?.let(SportsDetails::decode), events(json))
+            json.optJSONObject("awayLine")?.let(::line), situation, json.text("leagueLogo"), json.optJSONObject("sportDetail")?.let(SportsDetails::decode), events(json),
+            SportsService.entries.firstOrNull { it.name == json.text("source") } ?: source)
     }
 
     private fun team(json: JSONObject): FixtureTeam? =

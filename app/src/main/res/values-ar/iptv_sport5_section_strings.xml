@@ -9,14 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">يسار ويمين للتنقل عبر الوقت · OK للفتح · اضغط مطولًا على OK للخيارات</string>
     <string name="iptv_sport5_section_kick_off">البداية %1$s</string>
     <string name="iptv_sport5_section_watch_on">شاهد على %1$s</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="zero">%1$d بث آخر</item>
-        <item quantity="one">%1$d بث آخر</item>
-        <item quantity="two">%1$d بثان آخران</item>
-        <item quantity="few">%1$d بثوث أخرى</item>
-        <item quantity="many">%1$d بثًا آخر</item>
-        <item quantity="other">%1$d بث آخر</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">متابعة</string>
     <string name="iptv_sport5_section_following">تتابعه</string>
     <string name="iptv_sport5_section_remind">ذكّرني</string>
@@ -30,36 +22,12 @@
     <string name="iptv_sport5_section_done">انتهت</string>
     <string name="iptv_sport5_section_main_card">البطاقة الرئيسية</string>
     <string name="iptv_sport5_section_prelims">النزالات التمهيدية</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="zero">%1$s · %2$d نزال</item>
-        <item quantity="one">%1$s · %2$d نزال</item>
-        <item quantity="two">%1$s · %2$d نزالان</item>
-        <item quantity="few">%1$s · %2$d نزالات</item>
-        <item quantity="many">%1$s · %2$d نزالًا</item>
-        <item quantity="other">%1$s · %2$d نزال</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="zero">%1$d جولة</item>
-        <item quantity="one">%1$d جولة</item>
-        <item quantity="two">%1$d جولتان</item>
-        <item quantity="few">%1$d جولات</item>
-        <item quantity="many">%1$d جولة</item>
-        <item quantity="other">%1$d جولة</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">الآن: %1$s</string>
     <string name="iptv_sport5_section_fight_round">الجولة %1$d</string>
     <string name="iptv_sport5_section_chase">%1$s يحتاج %2$d من %3$d كرة · المطلوب %4$s</string>
     <string name="iptv_sport5_section_overs_of">%1$s من %2$d أوفر</string>
     <string name="iptv_sport5_section_overs">%1$s أوفر</string>
     <string name="iptv_sport5_section_target">الهدف %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="zero">%1$d إقصاء</item>
-        <item quantity="one">%1$d إقصاء</item>
-        <item quantity="two">%1$d إقصاءان</item>
-        <item quantity="few">%1$d إقصاءات</item>
-        <item quantity="many">%1$d إقصاءً</item>
-        <item quantity="other">%1$d إقصاء</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">منتصف %1$d</string>
     <string name="iptv_sport5_section_inning_end">نهاية %1$d</string>
     <string name="iptv_sport5_section_sport_football">كرة القدم</string>

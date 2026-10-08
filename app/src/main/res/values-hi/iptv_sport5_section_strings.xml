@@ -9,10 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">बाएं और दाएं से समय में आगे-पीछे जाएं · OK से खोलें · विकल्पों के लिए OK दबाकर रखें</string>
     <string name="iptv_sport5_section_kick_off">शुरुआत %1$s</string>
     <string name="iptv_sport5_section_watch_on">%1$s पर देखें</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="one">%1$d दूसरी फ़ीड</item>
-        <item quantity="other">%1$d दूसरी फ़ीड</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">फ़ॉलो करें</string>
     <string name="iptv_sport5_section_following">फ़ॉलो कर रहे हैं</string>
     <string name="iptv_sport5_section_remind">मुझे याद दिलाएं</string>
@@ -26,24 +22,12 @@
     <string name="iptv_sport5_section_done">समाप्त</string>
     <string name="iptv_sport5_section_main_card">मुख्य कार्ड</string>
     <string name="iptv_sport5_section_prelims">प्रारंभिक मुकाबले</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="one">%1$s · %2$d मुकाबला</item>
-        <item quantity="other">%1$s · %2$d मुकाबले</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="one">%1$d राउंड</item>
-        <item quantity="other">%1$d राउंड</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">अभी: %1$s</string>
     <string name="iptv_sport5_section_fight_round">राउंड %1$d</string>
     <string name="iptv_sport5_section_chase">%1$s को %3$d गेंदों में %2$d रन चाहिए · आवश्यक %4$s</string>
     <string name="iptv_sport5_section_overs_of">%2$d में से %1$s ओवर</string>
     <string name="iptv_sport5_section_overs">%1$s ओवर</string>
     <string name="iptv_sport5_section_target">लक्ष्य %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="one">%1$d आउट</item>
-        <item quantity="other">%1$d आउट</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">मध्य %1$d</string>
     <string name="iptv_sport5_section_inning_end">समाप्त %1$d</string>
     <string name="iptv_sport5_section_sport_football">फ़ुटबॉल</string>

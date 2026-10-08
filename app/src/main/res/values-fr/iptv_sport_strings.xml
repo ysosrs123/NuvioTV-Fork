@@ -14,27 +14,11 @@
     <string name="iptv_sport_choose_channel">Choisir une chaîne</string>
     <string name="iptv_sport_broadcaster">Diffuseur indiqué : %1$s</string>
     <string name="iptv_sport_close">Fermer</string>
-    <string name="iptv_sport_data">Données sportives</string>
-    <string name="iptv_sport_data_subtitle">Les matchs sont récupérés depuis le service choisi. Le flux d’ESPN n’est pas officiel et peut cesser de fonctionner.</string>
-    <string name="iptv_sport_data_off">Désactivé</string>
-    <string name="iptv_sport_data_off_description">Le sport utilise uniquement votre guide. Aucune requête n’est envoyée.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">Flux non officiel, sans clé. Il peut cesser de fonctionner à tout moment.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">Nécessite votre propre clé API. La clé de test gratuite 123 fonctionne avec des limites.</string>
     <string name="iptv_sport_leagues">Ligues</string>
-    <string name="iptv_sport_leagues_subtitle">Les matchs de ces ligues sont affichés</string>
     <string name="iptv_sport_leagues_none">Aucune</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="one">%d ligue</item>
-        <item quantity="many">%d ligues</item>
-        <item quantity="other">%d ligues</item>
-    </plurals>
     <string name="iptv_sport_key">Clé TheSportsDB</string>
-    <string name="iptv_sport_key_subtitle">Stockée chiffrée sur cet appareil. La clé de test gratuite 123 fonctionne avec des limites.</string>
     <string name="iptv_sport_key_set">Enregistrée</string>
     <string name="iptv_sport_key_not_set">Non définie</string>
-    <string name="iptv_sport_key_hint">Saisissez 123 pour utiliser la clé de test gratuite</string>
     <string name="iptv_sport_key_invalid">Utilisez uniquement des lettres et des chiffres.</string>
     <string name="iptv_sport_key_remove">Supprimer la clé</string>
 </resources>

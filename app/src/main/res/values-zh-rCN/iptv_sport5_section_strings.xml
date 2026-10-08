@@ -9,9 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">左右键在时间轴上移动 · OK 打开 · 长按 OK 查看选项</string>
     <string name="iptv_sport5_section_kick_off">开球 %1$s</string>
     <string name="iptv_sport5_section_watch_on">在 %1$s 观看</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="other">另有 %1$d 个信号源</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">关注</string>
     <string name="iptv_sport5_section_following">已关注</string>
     <string name="iptv_sport5_section_remind">提醒我</string>
@@ -25,21 +22,12 @@
     <string name="iptv_sport5_section_done">已结束</string>
     <string name="iptv_sport5_section_main_card">主赛卡</string>
     <string name="iptv_sport5_section_prelims">预赛</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="other">%1$s · %2$d 场对决</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="other">%1$d 回合</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">当前：%1$s</string>
     <string name="iptv_sport5_section_fight_round">第 %1$d 回合</string>
     <string name="iptv_sport5_section_chase">%1$s 需在 %3$d 球内得 %2$d 分 · 所需 %4$s</string>
     <string name="iptv_sport5_section_overs_of">%1$s / %2$d 轮</string>
     <string name="iptv_sport5_section_overs">%1$s 轮</string>
     <string name="iptv_sport5_section_target">目标 %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="other">%1$d 出局</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">第 %1$d 局中</string>
     <string name="iptv_sport5_section_inning_end">第 %1$d 局末</string>
     <string name="iptv_sport5_section_sport_football">足球</string>

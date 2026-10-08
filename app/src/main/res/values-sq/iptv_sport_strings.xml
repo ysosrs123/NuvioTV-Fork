@@ -14,26 +14,11 @@
     <string name="iptv_sport_choose_channel">Zgjidh një kanal</string>
     <string name="iptv_sport_broadcaster">Transmetuesi i listuar: %1$s</string>
     <string name="iptv_sport_close">Mbyll</string>
-    <string name="iptv_sport_data">Të dhënat sportive</string>
-    <string name="iptv_sport_data_subtitle">Ndeshjet merren nga shërbimi i zgjedhur. Burimi i ESPN-së është jozyrtar dhe mund të ndalojë së punuari.</string>
-    <string name="iptv_sport_data_off">Joaktiv</string>
-    <string name="iptv_sport_data_off_description">Sporti përdor vetëm udhëzuesin tënd. Nuk bëhen kërkesa.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">Burim jozyrtar, pa çelës. Mund të ndalojë së punuari në çdo kohë.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">Kërkon çelësin tënd API. Çelësi falas i testimit 123 funksionon me kufizime.</string>
     <string name="iptv_sport_leagues">Ligat</string>
-    <string name="iptv_sport_leagues_subtitle">Ndeshjet shfaqen për këto liga</string>
     <string name="iptv_sport_leagues_none">Asnjë</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="one">%d ligë</item>
-        <item quantity="other">%d liga</item>
-    </plurals>
     <string name="iptv_sport_key">Çelësi TheSportsDB</string>
-    <string name="iptv_sport_key_subtitle">Ruhet i enkriptuar në këtë pajisje. Çelësi falas i testimit 123 funksionon me kufizime.</string>
     <string name="iptv_sport_key_set">I ruajtur</string>
     <string name="iptv_sport_key_not_set">I pavendosur</string>
-    <string name="iptv_sport_key_hint">Fut 123 për të përdorur çelësin falas të testimit</string>
     <string name="iptv_sport_key_invalid">Përdor vetëm shkronja dhe numra.</string>
     <string name="iptv_sport_key_remove">Hiq çelësin</string>
 </resources>

@@ -9,10 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">Sol ve Sağ zamanda ilerler · OK açar · Seçenekler için OK\'u basılı tutun</string>
     <string name="iptv_sport5_section_kick_off">Başlama %1$s</string>
     <string name="iptv_sport5_section_watch_on">%1$s kanalında izle</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="one">%1$d başka yayın</item>
-        <item quantity="other">%1$d başka yayın</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">Takip et</string>
     <string name="iptv_sport5_section_following">Takip ediliyor</string>
     <string name="iptv_sport5_section_remind">Bana hatırlat</string>
@@ -26,24 +22,12 @@
     <string name="iptv_sport5_section_done">Bitti</string>
     <string name="iptv_sport5_section_main_card">Ana kart</string>
     <string name="iptv_sport5_section_prelims">Ön kart</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="one">%1$s · %2$d maç</item>
-        <item quantity="other">%1$s · %2$d maç</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="one">%1$d raunt</item>
-        <item quantity="other">%1$d raunt</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">Şimdi: %1$s</string>
     <string name="iptv_sport5_section_fight_round">Raunt %1$d</string>
     <string name="iptv_sport5_section_chase">%1$s, %3$d topta %2$d sayıya ihtiyaç duyuyor · gereken %4$s</string>
     <string name="iptv_sport5_section_overs_of">%1$s / %2$d over</string>
     <string name="iptv_sport5_section_overs">%1$s over</string>
     <string name="iptv_sport5_section_target">hedef %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="one">%1$d out</item>
-        <item quantity="other">%1$d out</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">%1$d. devre ortası</string>
     <string name="iptv_sport5_section_inning_end">%1$d. devre sonu</string>
     <string name="iptv_sport5_section_sport_football">Futbol</string>

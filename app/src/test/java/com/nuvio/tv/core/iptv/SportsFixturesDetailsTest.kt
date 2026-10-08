@@ -192,4 +192,13 @@ class SportsFixturesDetailsTest {
         assertNull(sportsImage("https://x.test/a b.png"))
         assertNull(sportsImage("https://x.test/" + "a".repeat(1100)))
     }
+
+    @Test fun favouritesSavedUnderAnotherServiceNameStillMatch() {
+        val favourites = setOf("afl:Richmond", "epl:Arsenal FC")
+        assertEquals(setOf("afl:Richmond"), SportsFavourites.matching(favourites, "afl", FixtureTeam("Richmond Tigers")))
+        assertEquals(setOf("epl:Arsenal FC"), SportsFavourites.matching(favourites, "epl", FixtureTeam("Arsenal")))
+        assertTrue(SportsFavourites.matching(favourites, "nrl", FixtureTeam("Richmond Tigers")).isEmpty())
+        assertTrue(SportsFavourites.matching(favourites, "afl", FixtureTeam("Brisbane Lions")).isEmpty())
+        assertEquals(setOf("epl:Arsenal FC"), favourites - SportsFavourites.toggle(favourites, "epl", FixtureTeam("Arsenal")))
+    }
 }

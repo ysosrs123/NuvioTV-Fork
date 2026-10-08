@@ -533,7 +533,7 @@ object SportsDbEvents {
         return SportsFixture(id, league.id, league.sport, title, home.takeIf { paired }, away.takeIf { paired }, start, status, score,
             raw.takeIf { live && it.isNotEmpty() && it.length <= 24 }, stations.distinct().take(12), event.text("strVenue")?.take(MAX_TEXT),
             event.text("intRound")?.toIntOrNull()?.takeIf { it in 1..99 }, period, progress, if (started) FixtureLine(homeScore) else null,
-            if (started) FixtureLine(awayScore) else null, null, event.text("strLeagueBadge")?.let(::sportsImage))
+            if (started) FixtureLine(awayScore) else null, null, event.text("strLeagueBadge")?.let(::sportsImage), source = SportsService.THESPORTSDB)
     }
 
     private fun start(event: JSONObject): Long? {
@@ -548,10 +548,10 @@ object SportsDbEvents {
 
     private fun parseLocal(value: String): Long? = runCatching { LocalDateTime.parse(value).toInstant(ZoneOffset.UTC).toEpochMilli() }.getOrNull()
 
-    private val FINISHED = setOf("match finished", "ft", "aet", "pen", "ft pen", "aot", "final", "finished", "after over time", "after extra time", "after penalties", "ended", "full time")
-    private val NOT_STARTED = setOf("not started", "ns", "tbd", "time to be defined", "scheduled")
-    private val PERIODS = mapOf("1h" to 1, "2h" to 2, "et" to 3, "q1" to 1, "q2" to 2, "q3" to 3, "q4" to 4, "p1" to 1, "p2" to 2, "p3" to 3)
-    private val SKIPPED = setOf("postponed", "pst", "canc", "cancelled", "canceled", "abandoned", "abd", "awd", "wo", "susp", "suspended", "int", "interrupted")
+    internal val FINISHED = setOf("match finished", "ft", "aet", "pen", "ft pen", "aot", "final", "finished", "after over time", "after extra time", "after penalties", "ended", "full time")
+    internal val NOT_STARTED = setOf("not started", "ns", "tbd", "time to be defined", "scheduled")
+    internal val PERIODS = mapOf("1h" to 1, "2h" to 2, "et" to 3, "q1" to 1, "q2" to 2, "q3" to 3, "q4" to 4, "p1" to 1, "p2" to 2, "p3" to 3)
+    internal val SKIPPED = setOf("postponed", "pst", "canc", "cancelled", "canceled", "abandoned", "abd", "awd", "wo", "susp", "suspended", "int", "interrupted")
 }
 
 internal fun sportsImage(value: String): String? = value.trim().takeIf { url ->

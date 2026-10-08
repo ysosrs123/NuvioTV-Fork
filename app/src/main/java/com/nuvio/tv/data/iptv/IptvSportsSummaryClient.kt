@@ -86,8 +86,8 @@ class IptvSportsSummaryWatch(private val client: IptvSportsSummaryClient, privat
     private var job: Job? = null
     private var key: String? = null
 
-    @Synchronized fun start(fixture: SportsFixture, service: SportsService = SportsService.ESPN) {
-        val league = SportsLeagues.byId(fixture.league)?.takeIf { service == SportsService.ESPN && it.espn != null }
+    @Synchronized fun start(fixture: SportsFixture) {
+        val league = SportsLeagues.byId(fixture.league)?.takeIf { fixture.source == SportsService.ESPN && it.espn != null }
         if (key == fixture.key && job?.isActive == true) return
         job?.cancel()
         if (key != fixture.key) state.value = null

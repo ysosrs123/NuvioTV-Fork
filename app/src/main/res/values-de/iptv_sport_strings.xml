@@ -14,26 +14,11 @@
     <string name="iptv_sport_choose_channel">Sender wählen</string>
     <string name="iptv_sport_broadcaster">Angegebener Übertragungssender: %1$s</string>
     <string name="iptv_sport_close">Schließen</string>
-    <string name="iptv_sport_data">Sportdaten</string>
-    <string name="iptv_sport_data_subtitle">Spiele werden vom gewählten Dienst abgerufen. Der Feed von ESPN ist inoffiziell und funktioniert eventuell irgendwann nicht mehr.</string>
-    <string name="iptv_sport_data_off">Aus</string>
-    <string name="iptv_sport_data_off_description">Sport nutzt nur Ihr Programm. Es werden keine Anfragen gesendet.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">Inoffizieller Feed, kein Schlüssel nötig. Er kann jederzeit ausfallen.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">Benötigt Ihren eigenen API-Schlüssel. Der kostenlose Testschlüssel 123 funktioniert mit Einschränkungen.</string>
     <string name="iptv_sport_leagues">Ligen</string>
-    <string name="iptv_sport_leagues_subtitle">Für diese Ligen werden Spiele angezeigt</string>
     <string name="iptv_sport_leagues_none">Keine</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="one">%d Liga</item>
-        <item quantity="other">%d Ligen</item>
-    </plurals>
     <string name="iptv_sport_key">TheSportsDB-Schlüssel</string>
-    <string name="iptv_sport_key_subtitle">Verschlüsselt auf diesem Gerät gespeichert. Der kostenlose Testschlüssel 123 funktioniert mit Einschränkungen.</string>
     <string name="iptv_sport_key_set">Gespeichert</string>
     <string name="iptv_sport_key_not_set">Nicht festgelegt</string>
-    <string name="iptv_sport_key_hint">Geben Sie 123 ein, um den kostenlosen Testschlüssel zu nutzen</string>
     <string name="iptv_sport_key_invalid">Nur Buchstaben und Ziffern verwenden.</string>
     <string name="iptv_sport_key_remove">Schlüssel entfernen</string>
 </resources>

@@ -14,26 +14,11 @@
     <string name="iptv_sport_choose_channel">ஒரு சேனலைத் தேர்வுசெய்யவும்</string>
     <string name="iptv_sport_broadcaster">பட்டியலிடப்பட்ட ஒளிபரப்பாளர்: %1$s</string>
     <string name="iptv_sport_close">மூடு</string>
-    <string name="iptv_sport_data">விளையாட்டுத் தரவு</string>
-    <string name="iptv_sport_data_subtitle">தேர்ந்தெடுத்த சேவையிலிருந்து போட்டிகள் பெறப்படும். ESPN ஊட்டம் அதிகாரப்பூர்வமற்றது, வேலை செய்வதை நிறுத்தக்கூடும்.</string>
-    <string name="iptv_sport_data_off">ஆஃப்</string>
-    <string name="iptv_sport_data_off_description">விளையாட்டு உங்கள் வழிகாட்டியை மட்டுமே பயன்படுத்தும். கோரிக்கைகள் எதுவும் அனுப்பப்படாது.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">அதிகாரப்பூர்வமற்ற ஊட்டம், விசை தேவையில்லை. எப்போது வேண்டுமானாலும் வேலை செய்வதை நிறுத்தக்கூடும்.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">உங்கள் சொந்த API விசை தேவை. இலவசச் சோதனை விசை 123 வரம்புகளுடன் வேலை செய்யும்.</string>
     <string name="iptv_sport_leagues">லீக்குகள்</string>
-    <string name="iptv_sport_leagues_subtitle">இந்த லீக்குகளுக்கான போட்டிகள் காட்டப்படும்</string>
     <string name="iptv_sport_leagues_none">எதுவுமில்லை</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="one">%d லீக்</item>
-        <item quantity="other">%d லீக்குகள்</item>
-    </plurals>
     <string name="iptv_sport_key">TheSportsDB விசை</string>
-    <string name="iptv_sport_key_subtitle">இந்தச் சாதனத்தில் குறியாக்கப்பட்டுச் சேமிக்கப்படும். இலவசச் சோதனை விசை 123 வரம்புகளுடன் வேலை செய்யும்.</string>
     <string name="iptv_sport_key_set">சேமிக்கப்பட்டது</string>
     <string name="iptv_sport_key_not_set">அமைக்கப்படவில்லை</string>
-    <string name="iptv_sport_key_hint">இலவசச் சோதனை விசையைப் பயன்படுத்த 123 என உள்ளிடவும்</string>
     <string name="iptv_sport_key_invalid">எழுத்துகளையும் எண்களையும் மட்டும் பயன்படுத்தவும்.</string>
     <string name="iptv_sport_key_remove">விசையை அகற்று</string>
 </resources>

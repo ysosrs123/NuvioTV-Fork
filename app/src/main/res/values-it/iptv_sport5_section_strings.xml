@@ -9,11 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">Sinistra e Destra scorrono nel tempo · OK apre · Tieni premuto OK per le opzioni</string>
     <string name="iptv_sport5_section_kick_off">Inizio %1$s</string>
     <string name="iptv_sport5_section_watch_on">Guarda su %1$s</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="one">%1$d altro flusso</item>
-        <item quantity="many">%1$d altri flussi</item>
-        <item quantity="other">%1$d altri flussi</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">Segui</string>
     <string name="iptv_sport5_section_following">Segui già</string>
     <string name="iptv_sport5_section_remind">Ricordamelo</string>
@@ -27,27 +22,12 @@
     <string name="iptv_sport5_section_done">Concluso</string>
     <string name="iptv_sport5_section_main_card">Card principale</string>
     <string name="iptv_sport5_section_prelims">Preliminari</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="one">%1$s · %2$d incontro</item>
-        <item quantity="many">%1$s · %2$d incontri</item>
-        <item quantity="other">%1$s · %2$d incontri</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="one">%1$d round</item>
-        <item quantity="many">%1$d round</item>
-        <item quantity="other">%1$d round</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">Ora: %1$s</string>
     <string name="iptv_sport5_section_fight_round">Round %1$d</string>
     <string name="iptv_sport5_section_chase">A %1$s servono %2$d punti in %3$d palle · rich. %4$s</string>
     <string name="iptv_sport5_section_overs_of">%1$s di %2$d over</string>
     <string name="iptv_sport5_section_overs">%1$s over</string>
     <string name="iptv_sport5_section_target">obiettivo %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="one">%1$d out</item>
-        <item quantity="many">%1$d out</item>
-        <item quantity="other">%1$d out</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">Metà %1$d</string>
     <string name="iptv_sport5_section_inning_end">Fine %1$d</string>
     <string name="iptv_sport5_section_sport_football">Calcio</string>

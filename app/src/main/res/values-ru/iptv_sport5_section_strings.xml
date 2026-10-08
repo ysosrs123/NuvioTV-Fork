@@ -9,12 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">Влево и вправо — перемещение по времени · OK — открыть · Удерживайте OK для параметров</string>
     <string name="iptv_sport5_section_kick_off">Начало %1$s</string>
     <string name="iptv_sport5_section_watch_on">Смотреть на %1$s</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="one">Ещё %1$d трансляция</item>
-        <item quantity="few">Ещё %1$d трансляции</item>
-        <item quantity="many">Ещё %1$d трансляций</item>
-        <item quantity="other">Ещё %1$d трансляции</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">Следить</string>
     <string name="iptv_sport5_section_following">Вы следите</string>
     <string name="iptv_sport5_section_remind">Напомнить</string>
@@ -28,30 +22,12 @@
     <string name="iptv_sport5_section_done">Завершён</string>
     <string name="iptv_sport5_section_main_card">Основной кард</string>
     <string name="iptv_sport5_section_prelims">Предварительный кард</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="one">%1$s · %2$d бой</item>
-        <item quantity="few">%1$s · %2$d боя</item>
-        <item quantity="many">%1$s · %2$d боёв</item>
-        <item quantity="other">%1$s · %2$d боя</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="one">%1$d раунд</item>
-        <item quantity="few">%1$d раунда</item>
-        <item quantity="many">%1$d раундов</item>
-        <item quantity="other">%1$d раунда</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">Сейчас: %1$s</string>
     <string name="iptv_sport5_section_fight_round">Раунд %1$d</string>
     <string name="iptv_sport5_section_chase">%1$s нужно %2$d с %3$d мячей · треб. %4$s</string>
     <string name="iptv_sport5_section_overs_of">%1$s из %2$d оверов</string>
     <string name="iptv_sport5_section_overs">Оверов: %1$s</string>
     <string name="iptv_sport5_section_target">цель %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="one">%1$d аут</item>
-        <item quantity="few">%1$d аута</item>
-        <item quantity="many">%1$d аутов</item>
-        <item quantity="other">%1$d аута</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">Середина %1$d</string>
     <string name="iptv_sport5_section_inning_end">Конец %1$d</string>
     <string name="iptv_sport5_section_sport_football">Футбол</string>

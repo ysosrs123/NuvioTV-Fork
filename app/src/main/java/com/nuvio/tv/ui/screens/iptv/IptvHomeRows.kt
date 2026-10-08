@@ -29,7 +29,6 @@ import com.nuvio.tv.core.iptv.HomeRows
 import com.nuvio.tv.core.iptv.SportsFavourites
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsLeagues
-import com.nuvio.tv.core.iptv.SportsService
 import com.nuvio.tv.core.iptv.SportsTeams
 import com.nuvio.tv.core.iptv.VodArt
 import com.nuvio.tv.core.iptv.VodDetailTarget
@@ -164,7 +163,7 @@ class IptvHomeViewModel @Inject constructor(@ApplicationContext context: Context
     fun refresh() {
         if (!active) return
         val request = Request(profiles.activeProfileId.value, profiles.profileSelectionRevision.value, preferences.settings, livePreferences.sport,
-            artworkPreferences.mode == IptvVodArtworkMode.NUVIO, BuildConfig.FEATURE_IPTV_ENABLED && sportsPreferences.service != SportsService.OFF,
+            artworkPreferences.mode == IptvVodArtworkMode.NUVIO, BuildConfig.FEATURE_IPTV_ENABLED && sportsPreferences.enabled,
             sportsPreferences.favouriteTeams, sports.rules.value)
         if (request == loaded && HomeRows.fresh(loadedAt, System.currentTimeMillis())) return
         if (loadJob?.isActive == true && request == requested) return
@@ -226,7 +225,7 @@ class IptvHomeViewModel @Inject constructor(@ApplicationContext context: Context
     private suspend fun sportRows(request: Request, sources: List<IptvSource>, now: Long, guide: suspend () -> IptvHomeRow?): List<IptvHomeRow> {
         if (!request.fixtures) return listOfNotNull(guide())
         val favourites = request.favourites
-        val fixtures = io(emptyList()) { sportsRepository.load(now, ZoneId.systemDefault(), true, favourites).takeIf { it.service != SportsService.OFF }?.fixtures.orEmpty() }
+        val fixtures = io(emptyList()) { sportsRepository.load(now, ZoneId.systemDefault(), true, favourites).takeIf { it.enabled }?.fixtures.orEmpty() }
         val teams = favourites.sortedBy { it.lowercase() }.mapNotNull { SportsTeams.games(it, fixtures, now) }
         val soon = fixtures.filter { it.status == FixtureStatus.LIVE || (it.status == FixtureStatus.SCHEDULED && it.startMillis <= now + SOON_MILLIS &&
             it.startMillis + SOON_MILLIS > now) }

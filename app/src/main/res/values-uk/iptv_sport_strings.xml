@@ -14,28 +14,11 @@
     <string name="iptv_sport_choose_channel">Виберіть канал</string>
     <string name="iptv_sport_broadcaster">Вказаний мовник: %1$s</string>
     <string name="iptv_sport_close">Закрити</string>
-    <string name="iptv_sport_data">Спортивні дані</string>
-    <string name="iptv_sport_data_subtitle">Матчі отримуються з вибраного сервісу. Джерело ESPN неофіційне й може перестати працювати.</string>
-    <string name="iptv_sport_data_off">Вимкнено</string>
-    <string name="iptv_sport_data_off_description">Спорт використовує лише вашу телепрограму. Запити не надсилаються.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">Неофіційне джерело, ключ не потрібен. Може будь-коли перестати працювати.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">Потрібен власний ключ API. Безкоштовний тестовий ключ 123 працює з обмеженнями.</string>
     <string name="iptv_sport_leagues">Ліги</string>
-    <string name="iptv_sport_leagues_subtitle">Матчі показуються для цих ліг</string>
     <string name="iptv_sport_leagues_none">Жодної</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="one">%d ліга</item>
-        <item quantity="few">%d ліги</item>
-        <item quantity="many">%d ліг</item>
-        <item quantity="other">%d ліги</item>
-    </plurals>
     <string name="iptv_sport_key">Ключ TheSportsDB</string>
-    <string name="iptv_sport_key_subtitle">Зберігається зашифрованим на цьому пристрої. Безкоштовний тестовий ключ 123 працює з обмеженнями.</string>
     <string name="iptv_sport_key_set">Збережено</string>
     <string name="iptv_sport_key_not_set">Не задано</string>
-    <string name="iptv_sport_key_hint">Введіть 123, щоб використати безкоштовний тестовий ключ</string>
     <string name="iptv_sport_key_invalid">Використовуйте лише літери й цифри.</string>
     <string name="iptv_sport_key_remove">Видалити ключ</string>
 </resources>

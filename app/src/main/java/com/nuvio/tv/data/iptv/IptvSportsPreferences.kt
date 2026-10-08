@@ -3,22 +3,41 @@ package com.nuvio.tv.data.iptv
 import android.content.Context
 import com.nuvio.tv.core.iptv.SportsAlertGames
 import com.nuvio.tv.core.iptv.SportsChangeKind
+import com.nuvio.tv.core.iptv.SportsDbLeagues
 import com.nuvio.tv.core.iptv.SportsFavourites
+import com.nuvio.tv.core.iptv.SportsLeague
 import com.nuvio.tv.core.iptv.SportsLeagues
+import com.nuvio.tv.core.iptv.SportsLogos
 import com.nuvio.tv.core.iptv.SportsNuvioAlert
 import com.nuvio.tv.core.iptv.SportsOverlayStyle
 import com.nuvio.tv.core.iptv.SportsReminder
 import com.nuvio.tv.core.iptv.SportsReminders
-import com.nuvio.tv.core.iptv.SportsService
+import com.nuvio.tv.core.iptv.SportsSources
 import java.util.Base64
 
 class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretBox = { EnvelopeIptvSecretBox(AndroidIptvSecretBox()) }) {
     private val preferences = context.applicationContext.getSharedPreferences("iptv-live", Context.MODE_PRIVATE)
     @Volatile private var cachedKey: Pair<String, String>? = null
 
-    var service: SportsService
-        get() = preferences.getString(SERVICE_KEY, null)?.let { name -> SportsService.entries.firstOrNull { it.name == name } } ?: SportsService.OFF
-        set(value) = preferences.edit().putString(SERVICE_KEY, value.name).apply()
+    init { SportsLeagues.custom = customLeagues }
+
+    var enabled: Boolean
+        get() = SportsSources.enabled(if (preferences.contains(ENABLED_KEY)) preferences.getBoolean(ENABLED_KEY, false) else null,
+            preferences.getString(SERVICE_KEY, null))
+        set(value) = preferences.edit().putBoolean(ENABLED_KEY, value).apply()
+
+    var customLeagues: List<SportsLeague>
+        @Synchronized get() = preferences.getStringSet(CUSTOM_KEY, null).orEmpty().take(SportsDbLeagues.MAX_CUSTOM * 2).mapNotNull(SportsDbLeagues::decodeCustom)
+            .distinctBy { it.id }.sortedBy { it.name.lowercase() }.take(SportsDbLeagues.MAX_CUSTOM)
+        @Synchronized set(value) {
+            val kept = value.filter { it.custom }.distinctBy { it.id }.take(SportsDbLeagues.MAX_CUSTOM)
+            preferences.edit().putStringSet(CUSTOM_KEY, kept.map(SportsDbLeagues::encodeCustom).toSet()).apply()
+            SportsLeagues.custom = kept
+        }
+
+    var logos: SportsLogos
+        get() = enumOf(LOGOS_KEY, SportsLogos.ESPN)
+        set(value) = preferences.edit().putString(LOGOS_KEY, value.name).apply()
 
     var leagues: Set<String>
         get() = preferences.getStringSet(LEAGUES_KEY, null)?.filter { SportsLeagues.byId(it) != null }?.toSet() ?: SportsLeagues.DEFAULTS
@@ -104,6 +123,9 @@ class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretB
         const val MAX_KEY = 64
         fun validKey(value: String): Boolean = value.trim().let { it.isNotEmpty() && it.length <= MAX_KEY && it.all { char -> char.isLetterOrDigit() || char == '-' || char == '_' } }
         private const val SERVICE_KEY = "settings-sports-service"
+        private const val ENABLED_KEY = "settings-sports-enabled"
+        private const val CUSTOM_KEY = "settings-sports-custom-leagues"
+        private const val LOGOS_KEY = "settings-sports-logos"
         private const val LEAGUES_KEY = "settings-sports-leagues"
         private const val KEY_KEY = "settings-sports-key"
         private const val SCORES_KEY = "settings-sports-scores"

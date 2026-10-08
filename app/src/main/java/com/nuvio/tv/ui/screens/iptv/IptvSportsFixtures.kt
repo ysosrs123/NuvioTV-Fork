@@ -51,6 +51,7 @@ import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.FixtureTeam
 import com.nuvio.tv.core.iptv.RecordingStatus
 import com.nuvio.tv.core.iptv.SportsCatchup
+import com.nuvio.tv.core.iptv.SportsDbLive
 import com.nuvio.tv.core.iptv.SportsChange
 import com.nuvio.tv.core.iptv.SportsDetail
 import com.nuvio.tv.core.iptv.SportsFavourites
@@ -124,7 +125,7 @@ sealed class IptvSportPrompt {
 @HiltViewModel
 class IptvSportsFixturesViewModel @Inject constructor(private val repository: IptvSportsFixturesRepository, private val preferences: IptvSportsPreferences,
     private val live: IptvSportsLive, private val recorder: IptvRecorder, summaryClient: IptvSportsSummaryClient) : ViewModel() {
-    private val mutable = MutableStateFlow((preferences.service != SportsService.OFF).let { IptvFixturesState(enabled = it, loading = it) })
+    private val mutable = MutableStateFlow(preferences.enabled.let { IptvFixturesState(enabled = it, loading = it) })
     val state = mutable.asStateFlow()
     private val heroKey = MutableStateFlow<String?>(FEATURED)
     val hero = heroKey.asStateFlow()
@@ -168,7 +169,7 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
 
     private fun accept(snapshot: IptvSportsSnapshot) {
         val result = snapshot.result
-        if (result.service == SportsService.OFF) {
+        if (!result.enabled) {
             loaded = null; grouped = emptyList(); linkJob?.cancel(); linked = emptyMap(); linkedSignature = null; spoilerKeys = emptySet()
             mutable.value = IptvFixturesState(reminders = live.reminders.value)
             return
@@ -207,9 +208,8 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
 
     fun watchSummary(fixture: SportsFixture?) {
         summaryFixture = fixture
-        val service = preferences.service
-        if (fixture == null || fixture.status != FixtureStatus.LIVE || service != SportsService.ESPN || handle == null) summaryWatch.stop()
-        else summaryWatch.start(fixture, service)
+        if (fixture == null || fixture.status != FixtureStatus.LIVE || fixture.source != SportsService.ESPN || handle == null) summaryWatch.stop()
+        else summaryWatch.start(fixture)
     }
 
     override fun onCleared() { summaryWatch.stop(); handle?.release(); handle = null }
@@ -257,24 +257,24 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
     private fun publish(showScores: Boolean = mutable.value.showScores, favourites: Set<String> = mutable.value.favourites) {
         val result = loaded ?: return
         val linking = pendingSignature != null || linkedSignature == null
-        val scheduleOnly = preferences.service == SportsService.THESPORTSDB
         mutable.value = IptvFixturesState(true, loading = !refreshed && grouped.isEmpty() && !result.missingKey && !result.noLeagues,
             rows = grouped.map { row -> IptvFixtureRow(row.section, row.day, row.fixtures.map { fixture ->
                 val links = if (fixture.status == FixtureStatus.FINAL) emptyList() else linked[fixture.id].orEmpty()
                 IptvFixtureItem(fixture, links, SportsFavourites.has(favourites, fixture), linking && links.isEmpty() && fixture.status != FixtureStatus.FINAL,
-                    scheduleOnly && fixture.sport !in LIVE_SCORE_SPORTS)
+                    scheduleOnly(fixture))
             }) },
             failed = result.failed, missingKey = result.missingKey, noLeagues = result.noLeagues, showScores = showScores, favourites = favourites,
             reminders = live.reminders.value, spoilerKeys = spoilerKeys - revealed,
             recent = SportsCatchup.recent(result.fixtures, System.currentTimeMillis()).mapNotNull { fixture ->
-                linked[fixture.id]?.takeIf { it.isNotEmpty() }?.let { IptvFixtureItem(fixture, it, SportsFavourites.has(favourites, fixture), scheduleOnly = scheduleOnly && fixture.sport !in LIVE_SCORE_SPORTS) }
+                linked[fixture.id]?.takeIf { it.isNotEmpty() }?.let { IptvFixtureItem(fixture, it, SportsFavourites.has(favourites, fixture), scheduleOnly = scheduleOnly(fixture)) }
             }, hideSpoilers = preferences.hideSpoilers)
     }
+
+    private fun scheduleOnly(fixture: SportsFixture): Boolean = fixture.source == SportsService.THESPORTSDB && fixture.sport !in SportsDbLive.SPORTS
 
     companion object {
         const val FEATURED = "\u0000featured"
         private const val RELINK_MILLIS = 5L * 60 * 1000
-        private val LIVE_SCORE_SPORTS = setOf("soccer", "basketball", "ice-hockey", "baseball", "american-football")
     }
 }
 

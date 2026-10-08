@@ -14,28 +14,11 @@
     <string name="iptv_sport_choose_channel">Vyberte kanál</string>
     <string name="iptv_sport_broadcaster">Uvedený vysielateľ: %1$s</string>
     <string name="iptv_sport_close">Zavrieť</string>
-    <string name="iptv_sport_data">Športové údaje</string>
-    <string name="iptv_sport_data_subtitle">Zápasy sa načítavajú zo zvolenej služby. Zdroj ESPN je neoficiálny a môže prestať fungovať.</string>
-    <string name="iptv_sport_data_off">Vypnuté</string>
-    <string name="iptv_sport_data_off_description">Šport používa len váš program. Neodosielajú sa žiadne požiadavky.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">Neoficiálny zdroj, bez kľúča. Môže kedykoľvek prestať fungovať.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">Vyžaduje vlastný kľúč API. Bezplatný testovací kľúč 123 funguje s obmedzeniami.</string>
     <string name="iptv_sport_leagues">Ligy</string>
-    <string name="iptv_sport_leagues_subtitle">Zápasy sa zobrazujú pre tieto ligy</string>
     <string name="iptv_sport_leagues_none">Žiadne</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="one">%d liga</item>
-        <item quantity="few">%d ligy</item>
-        <item quantity="many">%d ligy</item>
-        <item quantity="other">%d líg</item>
-    </plurals>
     <string name="iptv_sport_key">Kľúč TheSportsDB</string>
-    <string name="iptv_sport_key_subtitle">Uložený šifrovane v tomto zariadení. Bezplatný testovací kľúč 123 funguje s obmedzeniami.</string>
     <string name="iptv_sport_key_set">Uložený</string>
     <string name="iptv_sport_key_not_set">Nenastavený</string>
-    <string name="iptv_sport_key_hint">Zadajte 123 na použitie bezplatného testovacieho kľúča</string>
     <string name="iptv_sport_key_invalid">Používajte len písmená a číslice.</string>
     <string name="iptv_sport_key_remove">Odstrániť kľúč</string>
 </resources>

@@ -14,27 +14,11 @@
     <string name="iptv_sport_choose_channel">Escolhe um canal</string>
     <string name="iptv_sport_broadcaster">Emissora indicada: %1$s</string>
     <string name="iptv_sport_close">Fechar</string>
-    <string name="iptv_sport_data">Dados desportivos</string>
-    <string name="iptv_sport_data_subtitle">Os jogos são obtidos do serviço escolhido. O feed da ESPN não é oficial e pode deixar de funcionar.</string>
-    <string name="iptv_sport_data_off">Desligado</string>
-    <string name="iptv_sport_data_off_description">O desporto usa apenas o teu guia. Não são feitos pedidos.</string>
-    <string name="iptv_sport_data_espn">ESPN</string>
-    <string name="iptv_sport_data_espn_description">Feed não oficial, sem chave. Pode deixar de funcionar a qualquer momento.</string>
-    <string name="iptv_sport_data_sportsdb">TheSportsDB</string>
-    <string name="iptv_sport_data_sportsdb_description">Requer a tua própria chave API. A chave de teste gratuita 123 funciona com limites.</string>
     <string name="iptv_sport_leagues">Ligas</string>
-    <string name="iptv_sport_leagues_subtitle">São mostrados jogos destas ligas</string>
     <string name="iptv_sport_leagues_none">Nenhuma</string>
-    <plurals name="iptv_sport_leagues_chosen">
-        <item quantity="one">%d liga</item>
-        <item quantity="many">%d ligas</item>
-        <item quantity="other">%d ligas</item>
-    </plurals>
     <string name="iptv_sport_key">Chave TheSportsDB</string>
-    <string name="iptv_sport_key_subtitle">Guardada encriptada neste dispositivo. A chave de teste gratuita 123 funciona com limites.</string>
     <string name="iptv_sport_key_set">Guardada</string>
     <string name="iptv_sport_key_not_set">Não definida</string>
-    <string name="iptv_sport_key_hint">Introduz 123 para usar a chave de teste gratuita</string>
     <string name="iptv_sport_key_invalid">Usa apenas letras e números.</string>
     <string name="iptv_sport_key_remove">Remover chave</string>
 </resources>

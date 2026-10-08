@@ -9,9 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">Kiri dan Kanan menelusuri waktu · OK membuka · Tahan OK untuk opsi</string>
     <string name="iptv_sport5_section_kick_off">Mulai %1$s</string>
     <string name="iptv_sport5_section_watch_on">Tonton di %1$s</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="other">%1$d feed lain</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">Ikuti</string>
     <string name="iptv_sport5_section_following">Mengikuti</string>
     <string name="iptv_sport5_section_remind">Ingatkan saya</string>
@@ -25,21 +22,12 @@
     <string name="iptv_sport5_section_done">Selesai</string>
     <string name="iptv_sport5_section_main_card">Kartu utama</string>
     <string name="iptv_sport5_section_prelims">Prelim</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="other">%1$s · %2$d pertarungan</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="other">%1$d ronde</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">Sekarang: %1$s</string>
     <string name="iptv_sport5_section_fight_round">Ronde %1$d</string>
     <string name="iptv_sport5_section_chase">%1$s butuh %2$d dari %3$d bola · perlu %4$s</string>
     <string name="iptv_sport5_section_overs_of">%1$s dari %2$d over</string>
     <string name="iptv_sport5_section_overs">%1$s over</string>
     <string name="iptv_sport5_section_target">target %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="other">%1$d out</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">Tengah %1$d</string>
     <string name="iptv_sport5_section_inning_end">Akhir %1$d</string>
     <string name="iptv_sport5_section_sport_football">Sepak bola</string>

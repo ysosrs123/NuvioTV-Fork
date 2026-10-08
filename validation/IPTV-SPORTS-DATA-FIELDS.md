@@ -381,3 +381,16 @@ and overs while batting, MLB situation and count, scoreboard `situation`/`lastPl
 running clocks, soccer `keyEvents` and live rosters (`subbedIn`/`subbedOut`), NRL/URC
 details `period` on the scoreboard (absent after the game), live team stats for rugby
 union, and whether the NHL/MLB pre-game season stats should be shown under team stats.
+
+## Combined sources (9 October 2026)
+
+The app no longer has a source choice. Per league: ESPN path → ESPN; otherwise TheSportsDB
+when the user's own key is saved (never the free key `123`, which TheSportsDB's terms do
+not allow in published apps). ESPN failures (half or more of a league's days failed twice)
+switch that league to TheSportsDB until ESPN answers again. Extras with a key: v2
+`livescore/{sport}` (`X-API-KEY` header) merged by event id into TheSportsDB fixtures, at
+most 3 requests per refresh and no more often than every 2 min; v1 `lookuptv.php` for
+followed teams' games (ESPN games matched to TheSportsDB events by teams and start within
+6 h), cached 24 h per event; league list (`all_leagues.php` / v2 `all/leagues`) cached
+7 days for "Add a league". Response shapes for livescore, lookuptv and the league list
+are from documentation and the 8 October coverage files; confirm with a real capture.

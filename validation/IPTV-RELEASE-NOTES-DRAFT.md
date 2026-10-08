@@ -361,6 +361,22 @@ Sport:
 - Other feeds also lists the same channel on your other sources; the backup switch
   prefers it.
 
+Sports data from ESPN and TheSportsDB combined (9 October):
+- No more choice of data source: each league uses ESPN when ESPN has it (live detail,
+  Game Centre, markers) and TheSportsDB otherwise, with your own TheSportsDB key. If ESPN
+  fails for a league that TheSportsDB also covers, that league switches to TheSportsDB
+  until ESPN works again. Sport settings: an on/off switch, one league list (leagues
+  needing the key are marked), "Add a league" to search any TheSportsDB league, an
+  optional key, "Team logos" (ESPN only, all, or monograms only) and the credit "Sports
+  data from ESPN and TheSportsDB".
+- With a key: live scores for TheSportsDB's football, basketball, ice hockey and
+  baseball leagues, and TV channel names for followed teams' games (preferring your
+  country's channels) to improve channel matching.
+- Existing settings carry over (Sport off stays off; chosen leagues, key and followed
+  teams kept). Teams followed under a slightly different name (for example "Richmond"
+  and "Richmond Tigers") still match.
+- Not checked against real TheSportsDB live score, TV channel or league list responses.
+
 Checked against real ESPN responses (8 October evening, no game in play):
 - Tennis: each tour shows only its own draws; matches with no time yet or no players
   are left out; short names and walkovers display correctly.

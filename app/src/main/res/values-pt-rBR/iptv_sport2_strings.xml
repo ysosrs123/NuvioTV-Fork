@@ -11,7 +11,6 @@
     <string name="iptv_sport2_round">Rodada %1$d</string>
     <string name="iptv_sport2_last_play">Última jogada</string>
     <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
-    <string name="iptv_sport2_watch_on">Em %1$s</string>
     <string name="iptv_sport2_show_scores">Mostrar placares</string>
     <string name="iptv_sport2_show_scores_subtitle">Desative para ocultar placares, cronômetros e resultados.</string>
     <string name="iptv_sport2_favourite_team">Time favorito</string>

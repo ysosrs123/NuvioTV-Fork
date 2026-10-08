@@ -9,10 +9,6 @@
     <string name="iptv_sport5_section_timeline_hint">বাম ও ডান দিয়ে সময়ে সরুন · OK খোলে · অপশনের জন্য OK চেপে ধরুন</string>
     <string name="iptv_sport5_section_kick_off">শুরু %1$s</string>
     <string name="iptv_sport5_section_watch_on">%1$s-এ দেখুন</string>
-    <plurals name="iptv_sport5_section_other_feeds">
-        <item quantity="one">আরও %1$dটি ফিড</item>
-        <item quantity="other">আরও %1$dটি ফিড</item>
-    </plurals>
     <string name="iptv_sport5_section_follow">অনুসরণ করুন</string>
     <string name="iptv_sport5_section_following">অনুসরণ করছেন</string>
     <string name="iptv_sport5_section_remind">আমাকে মনে করিয়ে দিন</string>
@@ -26,24 +22,12 @@
     <string name="iptv_sport5_section_done">শেষ</string>
     <string name="iptv_sport5_section_main_card">প্রধান কার্ড</string>
     <string name="iptv_sport5_section_prelims">প্রাথমিক লড়াই</string>
-    <plurals name="iptv_sport5_section_bouts">
-        <item quantity="one">%1$s · %2$dটি লড়াই</item>
-        <item quantity="other">%1$s · %2$dটি লড়াই</item>
-    </plurals>
-    <plurals name="iptv_sport5_section_rounds">
-        <item quantity="one">%1$d রাউন্ড</item>
-        <item quantity="other">%1$d রাউন্ড</item>
-    </plurals>
     <string name="iptv_sport5_section_now_bout">এখন: %1$s</string>
     <string name="iptv_sport5_section_fight_round">রাউন্ড %1$d</string>
     <string name="iptv_sport5_section_chase">%1$s-এর %3$d বলে %2$d রান দরকার · প্রয়োজনীয় %4$s</string>
     <string name="iptv_sport5_section_overs_of">%2$d ওভারের মধ্যে %1$s</string>
     <string name="iptv_sport5_section_overs">%1$s ওভার</string>
     <string name="iptv_sport5_section_target">লক্ষ্য %1$d</string>
-    <plurals name="iptv_sport5_section_outs">
-        <item quantity="one">%1$d আউট</item>
-        <item quantity="other">%1$d আউট</item>
-    </plurals>
     <string name="iptv_sport5_section_inning_mid">মাঝ %1$d</string>
     <string name="iptv_sport5_section_inning_end">শেষ %1$d</string>
     <string name="iptv_sport5_section_sport_football">ফুটবল</string>
