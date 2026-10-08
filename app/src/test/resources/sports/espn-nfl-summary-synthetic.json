@@ -1,0 +1,294 @@
+{
+ "header": {
+  "id": "401772938",
+  "competitions": [
+   {
+    "id": "401772938",
+    "date": "2026-10-11T20:05Z",
+    "status": {
+     "displayClock": "11:20",
+     "period": 3,
+     "type": {
+      "name": "STATUS_IN_PROGRESS",
+      "state": "in",
+      "completed": false,
+      "detail": "11:20 - 3rd",
+      "shortDetail": "11:20 - 3rd"
+     }
+    },
+    "competitors": [
+     {
+      "id": "26",
+      "homeAway": "home",
+      "score": "7",
+      "team": {
+       "id": "26",
+       "displayName": "Seattle Seahawks",
+       "abbreviation": "SEA",
+       "shortDisplayName": "Seahawks"
+      },
+      "linescores": [
+       {
+        "displayValue": "7"
+       },
+       {
+        "displayValue": "0"
+       }
+      ]
+     },
+     {
+      "id": "24",
+      "homeAway": "away",
+      "score": "3",
+      "team": {
+       "id": "24",
+       "displayName": "Los Angeles Chargers",
+       "abbreviation": "LAC",
+       "shortDisplayName": "Chargers"
+      },
+      "linescores": [
+       {
+        "displayValue": "0"
+       },
+       {
+        "displayValue": "3"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "plays": [
+  {
+   "id": "1",
+   "type": {
+    "text": "Kickoff"
+   },
+   "text": "Kickoff to SEA 25.",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "displayValue": "15:00"
+   },
+   "homeScore": 0,
+   "awayScore": 0,
+   "scoringPlay": false,
+   "wallclock": "2026-10-11T20:05:30Z"
+  },
+  {
+   "id": "2",
+   "type": {
+    "text": "Passing Touchdown"
+   },
+   "text": "G.Smith pass to D.Metcalf for 34 yds, TOUCHDOWN.",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "displayValue": "9:12"
+   },
+   "homeScore": 7,
+   "awayScore": 0,
+   "scoringPlay": true,
+   "scoreValue": 6,
+   "team": {
+    "id": "26"
+   },
+   "wallclock": "2026-10-11T20:16:02Z"
+  },
+  {
+   "id": "3",
+   "type": {
+    "text": "Field Goal Good"
+   },
+   "text": "C.Dicker 41 yard field goal is GOOD.",
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "displayValue": "2:00"
+   },
+   "homeScore": 7,
+   "awayScore": 3,
+   "scoringPlay": true,
+   "scoreValue": 3,
+   "team": {
+    "id": "24"
+   }
+  },
+  {
+   "id": "4",
+   "type": {
+    "text": "Rush"
+   },
+   "text": "K.Walker left end to SEA 40 for 6 yards.",
+   "period": {
+    "number": 3
+   },
+   "clock": {
+    "displayValue": "11:20"
+   },
+   "homeScore": 7,
+   "awayScore": 3
+  }
+ ],
+ "winprobability": [
+  {
+   "homeWinPercentage": 0.5,
+   "tiePercentage": 0.0,
+   "playId": "1"
+  },
+  {
+   "homeWinPercentage": 0.71,
+   "playId": "2"
+  },
+  {
+   "homeWinPercentage": 0.64,
+   "playId": "3"
+  }
+ ],
+ "boxscore": {
+  "teams": [
+   {
+    "team": {
+     "id": "24"
+    },
+    "statistics": [
+     {
+      "name": "firstDowns",
+      "label": "1st Downs",
+      "displayValue": "9"
+     },
+     {
+      "name": "totalYards",
+      "label": "Total Yards",
+      "displayValue": "180"
+     },
+     {
+      "name": "netPassingYards",
+      "label": "Passing",
+      "displayValue": "120"
+     },
+     {
+      "name": "rushingYards",
+      "label": "Rushing",
+      "displayValue": "60"
+     },
+     {
+      "name": "turnovers",
+      "label": "Turnovers",
+      "displayValue": "1"
+     },
+     {
+      "name": "possessionTime",
+      "label": "Possession",
+      "displayValue": "14:02"
+     }
+    ]
+   },
+   {
+    "team": {
+     "id": "26"
+    },
+    "statistics": [
+     {
+      "name": "firstDowns",
+      "label": "1st Downs",
+      "displayValue": "12"
+     },
+     {
+      "name": "totalYards",
+      "label": "Total Yards",
+      "displayValue": "240"
+     },
+     {
+      "name": "netPassingYards",
+      "label": "Passing",
+      "displayValue": "170"
+     },
+     {
+      "name": "rushingYards",
+      "label": "Rushing",
+      "displayValue": "70"
+     },
+     {
+      "name": "turnovers",
+      "label": "Turnovers",
+      "displayValue": "0"
+     },
+     {
+      "name": "possessionTime",
+      "label": "Possession",
+      "displayValue": "18:40"
+     }
+    ]
+   }
+  ]
+ },
+ "leaders": [
+  {
+   "team": {
+    "id": "26"
+   },
+   "leaders": [
+    {
+     "name": "passingYards",
+     "displayName": "Passing Yards",
+     "leaders": [
+      {
+       "displayValue": "14/20, 170 YDS, 1 TD",
+       "athlete": {
+        "displayName": "Geno Smith"
+       }
+      }
+     ]
+    },
+    {
+     "name": "rushingYards",
+     "displayName": "Rushing Yards",
+     "leaders": [
+      {
+       "displayValue": "12 CAR, 60 YDS",
+       "athlete": {
+        "displayName": "Kenneth Walker III"
+       }
+      }
+     ]
+    },
+    {
+     "name": "receivingYards",
+     "displayName": "Receiving Yards",
+     "leaders": [
+      {
+       "displayValue": "4 REC, 80 YDS",
+       "athlete": {
+        "displayName": "DK Metcalf"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "team": {
+    "id": "24"
+   },
+   "leaders": [
+    {
+     "name": "passingYards",
+     "displayName": "Passing Yards",
+     "leaders": [
+      {
+       "displayValue": "12/22, 120 YDS",
+       "athlete": {
+        "displayName": "Justin Herbert"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

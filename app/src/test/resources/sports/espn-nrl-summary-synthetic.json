@@ -1,0 +1,335 @@
+{
+ "header": {
+  "id": "401860001",
+  "competitions": [
+   {
+    "id": "401860001",
+    "date": "2026-10-04T08:15Z",
+    "status": {
+     "displayClock": "52'",
+     "period": 2,
+     "type": {
+      "name": "STATUS_IN_PROGRESS",
+      "state": "in",
+      "completed": false,
+      "detail": "52'",
+      "shortDetail": "52'"
+     }
+    },
+    "competitors": [
+     {
+      "id": "55",
+      "homeAway": "home",
+      "score": "12",
+      "team": {
+       "id": "55",
+       "displayName": "Roosters",
+       "abbreviation": "SYD",
+       "shortDisplayName": "Roosters"
+      },
+      "linescores": [
+       {
+        "displayValue": "6"
+       },
+       {
+        "displayValue": "12"
+       }
+      ]
+     },
+     {
+      "id": "62",
+      "homeAway": "away",
+      "score": "10",
+      "team": {
+       "id": "62",
+       "displayName": "Knights",
+       "abbreviation": "NEW",
+       "shortDisplayName": "Knights"
+      },
+      "linescores": [
+       {
+        "displayValue": "10"
+       },
+       {
+        "displayValue": "10"
+       }
+      ]
+     }
+    ],
+    "details": [
+     {
+      "type": {
+       "text": "Try"
+      },
+      "clock": {
+       "value": 480,
+       "displayValue": "8'"
+      },
+      "team": {
+       "id": "62"
+      },
+      "scoreValue": 4,
+      "scoringPlay": true,
+      "athletesInvolved": [
+       {
+        "displayName": "Dominic Young"
+       }
+      ]
+     },
+     {
+      "type": {
+       "text": "Conversion"
+      },
+      "clock": {
+       "value": 540,
+       "displayValue": "9'"
+      },
+      "team": {
+       "id": "62"
+      },
+      "scoreValue": 2,
+      "scoringPlay": true,
+      "athletesInvolved": [
+       {
+        "displayName": "Kalyn Ponga"
+       }
+      ]
+     },
+     {
+      "type": {
+       "text": "Try"
+      },
+      "clock": {
+       "value": 1500,
+       "displayValue": "25'"
+      },
+      "team": {
+       "id": "55"
+      },
+      "scoreValue": 4,
+      "scoringPlay": true,
+      "athletesInvolved": [
+       {
+        "displayName": "James Tedesco"
+       }
+      ]
+     },
+     {
+      "type": {
+       "text": "Conversion"
+      },
+      "clock": {
+       "value": 1560,
+       "displayValue": "26'"
+      },
+      "team": {
+       "id": "55"
+      },
+      "scoreValue": 2,
+      "scoringPlay": true,
+      "athletesInvolved": [
+       {
+        "displayName": "Sam Walker"
+       }
+      ]
+     },
+     {
+      "type": {
+       "text": "Penalty Goal"
+      },
+      "clock": {
+       "value": 2100,
+       "displayValue": "35'"
+      },
+      "team": {
+       "id": "62"
+      },
+      "scoreValue": 2,
+      "scoringPlay": true,
+      "athletesInvolved": [
+       {
+        "displayName": "Kalyn Ponga"
+       }
+      ]
+     },
+     {
+      "type": {
+       "text": "Penalty Goal"
+      },
+      "clock": {
+       "value": 2280,
+       "displayValue": "38'"
+      },
+      "team": {
+       "id": "62"
+      },
+      "scoreValue": 2,
+      "scoringPlay": true,
+      "athletesInvolved": [
+       {
+        "displayName": "Kalyn Ponga"
+       }
+      ]
+     },
+     {
+      "type": {
+       "text": "Try"
+      },
+      "clock": {
+       "value": 2700,
+       "displayValue": "45'"
+      },
+      "team": {
+       "id": "55"
+      },
+      "scoreValue": 4,
+      "scoringPlay": true,
+      "athletesInvolved": [
+       {
+        "displayName": "Daniel Tupou"
+       }
+      ]
+     },
+     {
+      "type": {
+       "text": "Conversion"
+      },
+      "clock": {
+       "value": 2760,
+       "displayValue": "46'"
+      },
+      "team": {
+       "id": "55"
+      },
+      "scoreValue": 2,
+      "scoringPlay": true,
+      "athletesInvolved": [
+       {
+        "displayName": "Sam Walker"
+       }
+      ]
+     },
+     {
+      "type": {
+       "text": "Sin Bin"
+      },
+      "clock": {
+       "value": 2900,
+       "displayValue": "48'"
+      },
+      "team": {
+       "id": "62"
+      },
+      "yellowCard": true,
+      "athletesInvolved": [
+       {
+        "displayName": "Tyson Frizell"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "rosters": [
+  {
+   "homeAway": "home",
+   "team": {
+    "id": "55"
+   },
+   "roster": [
+    {
+     "starter": true,
+     "jersey": "1",
+     "athlete": {
+      "displayName": "James Tedesco"
+     },
+     "position": {
+      "abbreviation": "FB"
+     },
+     "captain": true
+    },
+    {
+     "starter": false,
+     "jersey": "14",
+     "subbedIn": true,
+     "athlete": {
+      "displayName": "Connor Watson"
+     },
+     "position": {
+      "abbreviation": "INT"
+     }
+    }
+   ]
+  }
+ ],
+ "headToHeadGames": [
+  {
+   "team": {
+    "id": "55"
+   },
+   "events": [
+    {
+     "gameDate": "2026-04-03T09:00Z",
+     "score": "19-18",
+     "homeTeamScore": "19",
+     "awayTeamScore": "18",
+     "gameResult": "W",
+     "opponent": {
+      "displayName": "Knights"
+     }
+    },
+    {
+     "gameDate": "2025-08-10T06:00Z",
+     "score": "12-30",
+     "homeTeamScore": "30",
+     "awayTeamScore": "12",
+     "gameResult": "L",
+     "opponent": {
+      "displayName": "Knights"
+     }
+    },
+    {
+     "gameDate": "2025-03-14T09:00Z",
+     "score": "24-6",
+     "homeTeamScore": "24",
+     "awayTeamScore": "6",
+     "gameResult": "W",
+     "opponent": {
+      "displayName": "Knights"
+     }
+    },
+    {
+     "gameDate": "2024-07-20T07:30Z",
+     "score": "20-20",
+     "homeTeamScore": "20",
+     "awayTeamScore": "20",
+     "gameResult": "D",
+     "opponent": {
+      "displayName": "Knights"
+     }
+    },
+    {
+     "gameDate": "2024-03-30T09:00Z",
+     "score": "10-14",
+     "homeTeamScore": "14",
+     "awayTeamScore": "10",
+     "gameResult": "L",
+     "opponent": {
+      "displayName": "Knights"
+     }
+    },
+    {
+     "gameDate": "2023-06-01T09:00Z",
+     "score": "40-0",
+     "homeTeamScore": "40",
+     "awayTeamScore": "0",
+     "gameResult": "W",
+     "opponent": {
+      "displayName": "Knights"
+     }
+    }
+   ]
+  }
+ ]
+}

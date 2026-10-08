@@ -1,0 +1,281 @@
+{
+ "header": {
+  "id": "401850001",
+  "competitions": [
+   {
+    "id": "401850001",
+    "date": "2026-09-27T04:30Z",
+    "status": {
+     "displayClock": "0:00",
+     "period": 4,
+     "type": {
+      "name": "STATUS_FINAL",
+      "state": "post",
+      "completed": true,
+      "detail": "Final",
+      "shortDetail": "Final"
+     }
+    },
+    "competitors": [
+     {
+      "id": "1",
+      "homeAway": "home",
+      "score": "89",
+      "team": {
+       "id": "1",
+       "displayName": "Fremantle",
+       "abbreviation": "FRE",
+       "shortDisplayName": "Fremantle"
+      },
+      "linescores": [
+       {
+        "period": 1,
+        "value": 22.0,
+        "displayValue": "22"
+       },
+       {
+        "period": 2,
+        "value": 21.0,
+        "displayValue": "21"
+       },
+       {
+        "period": 3,
+        "value": 29.0,
+        "displayValue": "29"
+       },
+       {
+        "period": 4,
+        "value": 17.0,
+        "displayValue": "17"
+       }
+      ]
+     },
+     {
+      "id": "11",
+      "homeAway": "away",
+      "score": "96",
+      "team": {
+       "id": "11",
+       "displayName": "Brisbane Lions",
+       "abbreviation": "BL",
+       "shortDisplayName": "Lions"
+      },
+      "linescores": [
+       {
+        "period": 1,
+        "value": 23.0,
+        "displayValue": "23"
+       },
+       {
+        "period": 2,
+        "value": 20.0,
+        "displayValue": "20"
+       },
+       {
+        "period": 3,
+        "value": 19.0,
+        "displayValue": "19"
+       },
+       {
+        "period": 4,
+        "value": 34.0,
+        "displayValue": "34"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "plays": [
+  {
+   "id": "1",
+   "type": {
+    "text": "Goal"
+   },
+   "text": "Goal - Jye Amiss",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "displayValue": "3:12"
+   },
+   "homeScore": 6,
+   "awayScore": 0,
+   "scoringPlay": true,
+   "scoreValue": 6,
+   "team": {
+    "id": "1"
+   }
+  },
+  {
+   "id": "2",
+   "type": {
+    "text": "Behind"
+   },
+   "text": "Behind - Joe Daniher",
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "displayValue": "7:40"
+   },
+   "homeScore": 6,
+   "awayScore": 1,
+   "scoringPlay": true,
+   "scoreValue": 1,
+   "team": {
+    "id": "11"
+   }
+  },
+  {
+   "id": "3",
+   "type": {
+    "text": "Goal"
+   },
+   "text": "Goal - Charlie Cameron",
+   "period": {
+    "number": 4
+   },
+   "clock": {
+    "displayValue": "28:50"
+   },
+   "homeScore": 89,
+   "awayScore": 96,
+   "scoringPlay": true,
+   "scoreValue": 6,
+   "team": {
+    "id": "11"
+   }
+  }
+ ],
+ "boxscore": {
+  "teams": [
+   {
+    "team": {
+     "id": "1"
+    },
+    "statistics": [
+     {
+      "name": "goals",
+      "label": "Goals",
+      "displayValue": "13"
+     },
+     {
+      "name": "behinds",
+      "label": "Behinds",
+      "displayValue": "11"
+     },
+     {
+      "name": "disposals",
+      "label": "Disposals",
+      "displayValue": "350"
+     },
+     {
+      "name": "kicks",
+      "label": "Kicks",
+      "displayValue": "203"
+     },
+     {
+      "name": "handballs",
+      "label": "Handballs",
+      "displayValue": "147"
+     },
+     {
+      "name": "marks",
+      "label": "Marks",
+      "displayValue": "88"
+     },
+     {
+      "name": "tackles",
+      "label": "Tackles",
+      "displayValue": "61"
+     },
+     {
+      "name": "inside50s",
+      "label": "Inside 50s",
+      "displayValue": "52"
+     },
+     {
+      "name": "clearances",
+      "label": "Clearances",
+      "displayValue": "38"
+     }
+    ]
+   },
+   {
+    "team": {
+     "id": "11"
+    },
+    "statistics": [
+     {
+      "name": "goals",
+      "label": "Goals",
+      "displayValue": "14"
+     },
+     {
+      "name": "behinds",
+      "label": "Behinds",
+      "displayValue": "12"
+     },
+     {
+      "name": "disposals",
+      "label": "Disposals",
+      "displayValue": "372"
+     },
+     {
+      "name": "kicks",
+      "label": "Kicks",
+      "displayValue": "220"
+     },
+     {
+      "name": "handballs",
+      "label": "Handballs",
+      "displayValue": "152"
+     },
+     {
+      "name": "marks",
+      "label": "Marks",
+      "displayValue": "95"
+     },
+     {
+      "name": "tackles",
+      "label": "Tackles",
+      "displayValue": "55"
+     },
+     {
+      "name": "inside50s",
+      "label": "Inside 50s",
+      "displayValue": "57"
+     },
+     {
+      "name": "clearances",
+      "label": "Clearances",
+      "displayValue": "35"
+     }
+    ]
+   }
+  ]
+ },
+ "leaders": [
+  {
+   "team": {
+    "id": "11"
+   },
+   "leaders": [
+    {
+     "name": "disposals",
+     "displayName": "Disposals",
+     "leaders": [
+      {
+       "displayValue": "34",
+       "athlete": {
+        "displayName": "Lachie Neale"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

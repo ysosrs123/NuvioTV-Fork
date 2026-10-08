@@ -1,0 +1,571 @@
+{
+ "header": {
+  "id": "740001",
+  "competitions": [
+   {
+    "id": "740001",
+    "date": "2026-10-10T14:00Z",
+    "status": {
+     "displayClock": "67'",
+     "period": 2,
+     "type": {
+      "name": "STATUS_IN_PROGRESS",
+      "state": "in",
+      "completed": false,
+      "detail": "67'",
+      "shortDetail": "67'"
+     }
+    },
+    "competitors": [
+     {
+      "id": "359",
+      "homeAway": "home",
+      "score": "1",
+      "team": {
+       "id": "359",
+       "displayName": "Arsenal",
+       "abbreviation": "ARS",
+       "shortDisplayName": "Arsenal"
+      }
+     },
+     {
+      "id": "357",
+      "homeAway": "away",
+      "score": "1",
+      "team": {
+       "id": "357",
+       "displayName": "Leeds United",
+       "abbreviation": "LEE",
+       "shortDisplayName": "United"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "keyEvents": [
+  {
+   "id": "1",
+   "type": {
+    "id": "80",
+    "text": "Kickoff"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 0,
+    "displayValue": "0'"
+   },
+   "text": "First Half begins."
+  },
+  {
+   "id": "2",
+   "type": {
+    "id": "70",
+    "text": "Goal"
+   },
+   "scoringPlay": true,
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 1380,
+    "displayValue": "23'"
+   },
+   "team": {
+    "id": "359",
+    "displayName": "Arsenal"
+   },
+   "shortText": "Bukayo Saka Goal",
+   "text": "Goal! Arsenal 1, Leeds United 0. Bukayo Saka (Arsenal) left footed shot.",
+   "participants": [
+    {
+     "athlete": {
+      "id": "1",
+      "displayName": "Bukayo Saka"
+     }
+    }
+   ],
+   "wallclock": "2026-10-10T14:23:40Z"
+  },
+  {
+   "id": "3",
+   "type": {
+    "id": "94",
+    "text": "Yellow Card"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "value": 2700,
+    "displayValue": "45'+2'"
+   },
+   "team": {
+    "id": "357"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "displayName": "Ethan Ampadu"
+     }
+    }
+   ]
+  },
+  {
+   "id": "4",
+   "type": {
+    "id": "81",
+    "text": "Halftime"
+   },
+   "period": {
+    "number": 1
+   },
+   "clock": {
+    "displayValue": "45'+3'"
+   }
+  },
+  {
+   "id": "5",
+   "type": {
+    "id": "76",
+    "text": "Substitution"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "displayValue": "55'"
+   },
+   "team": {
+    "id": "359"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "displayName": "Gabriel Martinelli"
+     }
+    },
+    {
+     "athlete": {
+      "displayName": "Leandro Trossard"
+     }
+    }
+   ]
+  },
+  {
+   "id": "6",
+   "type": {
+    "id": "70",
+    "text": "Penalty - Scored"
+   },
+   "scoringPlay": true,
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "displayValue": "61'"
+   },
+   "team": {
+    "id": "357"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "displayName": "Joel Piroe"
+     }
+    }
+   ]
+  },
+  {
+   "id": "7",
+   "type": {
+    "id": "93",
+    "text": "Red Card"
+   },
+   "period": {
+    "number": 2
+   },
+   "clock": {
+    "displayValue": "64'"
+   },
+   "team": {
+    "id": "357"
+   },
+   "participants": [
+    {
+     "athlete": {
+      "displayName": "Pascal Struijk"
+     }
+    }
+   ]
+  }
+ ],
+ "boxscore": {
+  "teams": [
+   {
+    "homeAway": "home",
+    "team": {
+     "id": "359"
+    },
+    "statistics": [
+     {
+      "name": "foulsCommitted",
+      "label": "Fouls",
+      "displayValue": "8"
+     },
+     {
+      "name": "possessionPct",
+      "label": "Possession",
+      "displayValue": "61.2"
+     },
+     {
+      "name": "totalShots",
+      "label": "SHOTS",
+      "displayValue": "14"
+     },
+     {
+      "name": "shotsOnTarget",
+      "label": "ON GOAL",
+      "displayValue": "6"
+     },
+     {
+      "name": "wonCorners",
+      "label": "Corner Kicks",
+      "displayValue": "7"
+     },
+     {
+      "name": "yellowCards",
+      "label": "Yellow Cards",
+      "displayValue": "0"
+     },
+     {
+      "name": "redCards",
+      "label": "Red Cards",
+      "displayValue": "0"
+     },
+     {
+      "name": "offsides",
+      "label": "Offsides",
+      "displayValue": "1"
+     },
+     {
+      "name": "saves",
+      "label": "Saves",
+      "displayValue": "1"
+     },
+     {
+      "name": "totalPasses",
+      "label": "Passes",
+      "displayValue": "512"
+     }
+    ]
+   },
+   {
+    "homeAway": "away",
+    "team": {
+     "id": "357"
+    },
+    "statistics": [
+     {
+      "name": "foulsCommitted",
+      "label": "Fouls",
+      "displayValue": "12"
+     },
+     {
+      "name": "possessionPct",
+      "label": "Possession",
+      "displayValue": "38.8"
+     },
+     {
+      "name": "totalShots",
+      "label": "SHOTS",
+      "displayValue": "5"
+     },
+     {
+      "name": "shotsOnTarget",
+      "label": "ON GOAL",
+      "displayValue": "2"
+     },
+     {
+      "name": "wonCorners",
+      "label": "Corner Kicks",
+      "displayValue": "2"
+     },
+     {
+      "name": "yellowCards",
+      "label": "Yellow Cards",
+      "displayValue": "1"
+     },
+     {
+      "name": "redCards",
+      "label": "Red Cards",
+      "displayValue": "1"
+     },
+     {
+      "name": "offsides",
+      "label": "Offsides",
+      "displayValue": "3"
+     },
+     {
+      "name": "saves",
+      "label": "Saves",
+      "displayValue": "5"
+     },
+     {
+      "name": "totalPasses",
+      "label": "Passes",
+      "displayValue": "301"
+     }
+    ]
+   }
+  ]
+ },
+ "leaders": [
+  {
+   "team": {
+    "id": "359"
+   },
+   "leaders": [
+    {
+     "name": "goals",
+     "displayName": "Goals",
+     "leaders": [
+      {
+       "displayValue": "1",
+       "athlete": {
+        "displayName": "Bukayo Saka"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rosters": [
+  {
+   "homeAway": "home",
+   "team": {
+    "id": "359"
+   },
+   "roster": [
+    {
+     "active": true,
+     "starter": true,
+     "jersey": "1",
+     "athlete": {
+      "id": "10",
+      "displayName": "David Raya"
+     },
+     "position": {
+      "abbreviation": "G"
+     }
+    },
+    {
+     "active": true,
+     "starter": true,
+     "jersey": "8",
+     "captain": true,
+     "athlete": {
+      "id": "11",
+      "displayName": "Martin Odegaard"
+     },
+     "position": {
+      "abbreviation": "AM"
+     }
+    },
+    {
+     "active": true,
+     "starter": true,
+     "jersey": "11",
+     "subbedOut": true,
+     "athlete": {
+      "id": "12",
+      "displayName": "Gabriel Martinelli"
+     },
+     "position": {
+      "abbreviation": "LW"
+     }
+    },
+    {
+     "active": true,
+     "starter": false,
+     "jersey": "19",
+     "subbedIn": true,
+     "athlete": {
+      "id": "13",
+      "displayName": "Leandro Trossard"
+     },
+     "position": {
+      "abbreviation": "SUB"
+     }
+    },
+    {
+     "active": true,
+     "starter": false,
+     "jersey": "32",
+     "subbedIn": false,
+     "athlete": {
+      "id": "14",
+      "displayName": "Kepa Arrizabalaga"
+     }
+    }
+   ]
+  },
+  {
+   "homeAway": "away",
+   "team": {
+    "id": "357"
+   },
+   "roster": [
+    {
+     "starter": true,
+     "jersey": "1",
+     "athlete": {
+      "displayName": "Illan Meslier"
+     },
+     "position": {
+      "abbreviation": "G"
+     }
+    }
+   ]
+  }
+ ],
+ "standings": {
+  "groups": [
+   {
+    "header": "Premier League",
+    "standings": {
+     "entries": [
+      {
+       "team": "Arsenal",
+       "id": "359",
+       "stats": [
+        {
+         "name": "rank",
+         "abbreviation": "R",
+         "displayValue": "1"
+        },
+        {
+         "name": "gamesPlayed",
+         "abbreviation": "GP",
+         "displayValue": "7"
+        },
+        {
+         "name": "wins",
+         "abbreviation": "W",
+         "displayValue": "5"
+        },
+        {
+         "name": "ties",
+         "abbreviation": "D",
+         "displayValue": "1"
+        },
+        {
+         "name": "losses",
+         "abbreviation": "L",
+         "displayValue": "1"
+        },
+        {
+         "name": "pointDifferential",
+         "abbreviation": "GD",
+         "displayValue": "+9"
+        },
+        {
+         "name": "points",
+         "abbreviation": "P",
+         "displayValue": "16"
+        }
+       ]
+      },
+      {
+       "team": "Liverpool",
+       "id": "364",
+       "stats": [
+        {
+         "abbreviation": "GP",
+         "displayValue": "7"
+        },
+        {
+         "abbreviation": "W",
+         "displayValue": "5"
+        },
+        {
+         "abbreviation": "D",
+         "displayValue": "0"
+        },
+        {
+         "abbreviation": "L",
+         "displayValue": "2"
+        },
+        {
+         "abbreviation": "GD",
+         "displayValue": "+6"
+        },
+        {
+         "abbreviation": "P",
+         "displayValue": "15"
+        }
+       ]
+      },
+      {
+       "team": "Leeds United",
+       "id": "357",
+       "stats": [
+        {
+         "abbreviation": "GP",
+         "displayValue": "7"
+        },
+        {
+         "abbreviation": "W",
+         "displayValue": "2"
+        },
+        {
+         "abbreviation": "D",
+         "displayValue": "2"
+        },
+        {
+         "abbreviation": "L",
+         "displayValue": "3"
+        },
+        {
+         "abbreviation": "GD",
+         "displayValue": "-3"
+        },
+        {
+         "abbreviation": "P",
+         "displayValue": "8"
+        }
+       ]
+      }
+     ]
+    }
+   }
+  ]
+ },
+ "headToHeadGames": [
+  {
+   "team": {
+    "id": "359"
+   },
+   "events": [
+    {
+     "id": "1",
+     "gameDate": "2025-08-23T14:00Z",
+     "score": "5-0",
+     "homeTeamId": "359",
+     "awayTeamId": "357",
+     "homeTeamScore": "5",
+     "awayTeamScore": "0",
+     "gameResult": "W",
+     "opponent": {
+      "displayName": "Leeds United",
+      "abbreviation": "LEE"
+     },
+     "atVs": "vs"
+    }
+   ]
+  }
+ ]
+}

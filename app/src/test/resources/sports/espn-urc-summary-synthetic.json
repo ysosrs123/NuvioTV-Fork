@@ -1,0 +1,248 @@
+{
+ "header": {
+  "id": "600001",
+  "competitions": [
+   {
+    "id": "600001",
+    "date": "2026-10-10T18:35Z",
+    "status": {
+     "displayClock": "0:00",
+     "period": 0,
+     "type": {
+      "name": "STATUS_SCHEDULED",
+      "state": "pre",
+      "completed": false,
+      "detail": "Sat, October 10th",
+      "shortDetail": "Sat, October 10th"
+     }
+    },
+    "competitors": [
+     {
+      "id": "2000",
+      "homeAway": "home",
+      "score": null,
+      "team": {
+       "id": "2000",
+       "displayName": "Glasgow Warriors",
+       "abbreviation": "GLA",
+       "shortDisplayName": "Warriors"
+      }
+     },
+     {
+      "id": "2001",
+      "homeAway": "away",
+      "score": null,
+      "team": {
+       "id": "2001",
+       "displayName": "Connacht",
+       "abbreviation": "CON",
+       "shortDisplayName": "Connacht"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "boxscore": {
+  "teams": [
+   {
+    "team": {
+     "id": "2000"
+    },
+    "statistics": []
+   },
+   {
+    "team": {
+     "id": "2001"
+    },
+    "statistics": []
+   }
+  ]
+ },
+ "rosters": [],
+ "odds": [],
+ "pickcenter": [],
+ "headToHeadGames": [
+  {
+   "team": {
+    "id": "2000"
+   },
+   "events": [
+    {
+     "gameDate": "2026-03-21T19:35Z",
+     "score": "31-17",
+     "homeTeamScore": "31",
+     "awayTeamScore": "17",
+     "gameResult": "W",
+     "opponent": {
+      "displayName": "Connacht"
+     }
+    }
+   ]
+  }
+ ],
+ "standings": {
+  "children": [
+   {
+    "name": "United Rugby Championship",
+    "standings": {
+     "entries": [
+      {
+       "team": "Glasgow Warriors",
+       "id": "2000",
+       "stats": [
+        {
+         "name": "gamesPlayed",
+         "abbreviation": "GP",
+         "displayValue": "2"
+        },
+        {
+         "name": "gamesWon",
+         "abbreviation": "W",
+         "displayValue": "2"
+        },
+        {
+         "name": "gamesDrawn",
+         "abbreviation": "D",
+         "displayValue": "0"
+        },
+        {
+         "name": "gamesLost",
+         "abbreviation": "L",
+         "displayValue": "0"
+        },
+        {
+         "name": "pointsDifference",
+         "abbreviation": "PD",
+         "displayValue": "+30"
+        },
+        {
+         "name": "bonusPoints",
+         "abbreviation": "BP",
+         "displayValue": "2"
+        },
+        {
+         "name": "triesBonusPoints",
+         "abbreviation": "TBP",
+         "displayValue": "1"
+        },
+        {
+         "name": "losingBonusPoints",
+         "abbreviation": "LBP",
+         "displayValue": "0"
+        },
+        {
+         "name": "points",
+         "abbreviation": "P",
+         "displayValue": "10"
+        }
+       ]
+      },
+      {
+       "team": "Leinster",
+       "id": "2002",
+       "stats": [
+        {
+         "name": "gamesPlayed",
+         "abbreviation": "GP",
+         "displayValue": "2"
+        },
+        {
+         "name": "gamesWon",
+         "abbreviation": "W",
+         "displayValue": "2"
+        },
+        {
+         "name": "gamesDrawn",
+         "abbreviation": "D",
+         "displayValue": "0"
+        },
+        {
+         "name": "gamesLost",
+         "abbreviation": "L",
+         "displayValue": "0"
+        },
+        {
+         "name": "pointsDifference",
+         "abbreviation": "PD",
+         "displayValue": "+25"
+        },
+        {
+         "name": "bonusPoints",
+         "abbreviation": "BP",
+         "displayValue": "1"
+        },
+        {
+         "name": "triesBonusPoints",
+         "abbreviation": "TBP",
+         "displayValue": "1"
+        },
+        {
+         "name": "losingBonusPoints",
+         "abbreviation": "LBP",
+         "displayValue": "0"
+        },
+        {
+         "name": "points",
+         "abbreviation": "P",
+         "displayValue": "9"
+        }
+       ]
+      },
+      {
+       "team": "Connacht",
+       "id": "2001",
+       "stats": [
+        {
+         "name": "gamesPlayed",
+         "abbreviation": "GP",
+         "displayValue": "2"
+        },
+        {
+         "name": "gamesWon",
+         "abbreviation": "W",
+         "displayValue": "1"
+        },
+        {
+         "name": "gamesDrawn",
+         "abbreviation": "D",
+         "displayValue": "0"
+        },
+        {
+         "name": "gamesLost",
+         "abbreviation": "L",
+         "displayValue": "1"
+        },
+        {
+         "name": "pointsDifference",
+         "abbreviation": "PD",
+         "displayValue": "-4"
+        },
+        {
+         "name": "bonusPoints",
+         "abbreviation": "BP",
+         "displayValue": "1"
+        },
+        {
+         "name": "triesBonusPoints",
+         "abbreviation": "TBP",
+         "displayValue": "1"
+        },
+        {
+         "name": "losingBonusPoints",
+         "abbreviation": "LBP",
+         "displayValue": "0"
+        },
+        {
+         "name": "points",
+         "abbreviation": "P",
+         "displayValue": "5"
+        }
+       ]
+      }
+     ]
+    }
+   }
+  ]
+ }
+}

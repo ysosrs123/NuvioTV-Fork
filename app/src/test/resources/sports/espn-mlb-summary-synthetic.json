@@ -1,0 +1,301 @@
+{
+ "header": {
+  "id": "401820001",
+  "competitions": [
+   {
+    "id": "401820001",
+    "date": "2026-10-08T22:08Z",
+    "status": {
+     "displayClock": "0:00",
+     "period": 5,
+     "type": {
+      "name": "STATUS_IN_PROGRESS",
+      "state": "in",
+      "completed": false,
+      "detail": "Bot 5th",
+      "shortDetail": "Bot 5th"
+     }
+    },
+    "competitors": [
+     {
+      "id": "4",
+      "homeAway": "home",
+      "score": "3",
+      "team": {
+       "id": "4",
+       "displayName": "Chicago White Sox",
+       "abbreviation": "CHW",
+       "shortDisplayName": "Sox"
+      }
+     },
+     {
+      "id": "5",
+      "homeAway": "away",
+      "score": "2",
+      "team": {
+       "id": "5",
+       "displayName": "Cleveland Guardians",
+       "abbreviation": "CLE",
+       "shortDisplayName": "Guardians"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ "plays": [
+  {
+   "id": "1",
+   "type": {
+    "text": "Play Result"
+   },
+   "alternativeType": {
+    "text": "Double"
+   },
+   "text": "Ramirez doubled to left, Kwan scored.",
+   "period": {
+    "type": "Top",
+    "number": 3,
+    "displayValue": "3rd Inning"
+   },
+   "homeScore": 0,
+   "awayScore": 2,
+   "scoringPlay": true,
+   "scoreValue": 2,
+   "team": {
+    "id": "5"
+   },
+   "outs": 1,
+   "wallclock": "2026-10-08T22:51:10Z"
+  },
+  {
+   "id": "2",
+   "type": {
+    "text": "Play Result"
+   },
+   "text": "Robert homered to center (412 feet), Vaughn scored.",
+   "period": {
+    "type": "Bottom",
+    "number": 4,
+    "displayValue": "4th Inning"
+   },
+   "homeScore": 2,
+   "awayScore": 2,
+   "scoringPlay": true,
+   "scoreValue": 2,
+   "team": {
+    "id": "4"
+   },
+   "outs": 2,
+   "wallclock": "2026-10-08T23:20:00Z"
+  },
+  {
+   "id": "3",
+   "type": {
+    "text": "Play Result"
+   },
+   "text": "Benintendi singled to right, Vaughn scored.",
+   "period": {
+    "type": "Bottom",
+    "number": 5,
+    "displayValue": "5th Inning"
+   },
+   "homeScore": 3,
+   "awayScore": 2,
+   "scoringPlay": true,
+   "scoreValue": 1,
+   "team": {
+    "id": "4"
+   },
+   "outs": 1
+  },
+  {
+   "id": "4",
+   "type": {
+    "text": "Ball"
+   },
+   "text": "Pitch 2 : Ball 1",
+   "period": {
+    "type": "Bottom",
+    "number": 5,
+    "displayValue": "5th Inning"
+   },
+   "homeScore": 3,
+   "awayScore": 2,
+   "scoringPlay": false,
+   "outs": 1,
+   "pitchCount": {
+    "balls": 0,
+    "strikes": 1
+   },
+   "resultCount": {
+    "balls": 1,
+    "strikes": 1
+   },
+   "onFirst": {
+    "athlete": {
+     "id": "30"
+    }
+   },
+   "onThird": {
+    "athlete": {
+     "id": "31"
+    }
+   },
+   "participants": [
+    {
+     "athlete": {
+      "id": "20"
+     },
+     "type": "pitcher"
+    },
+    {
+     "athlete": {
+      "id": "21"
+     },
+     "type": "batter"
+    }
+   ],
+   "pitchType": {
+    "text": "Slider"
+   },
+   "pitchVelocity": 86
+  }
+ ],
+ "winprobability": [
+  {
+   "homeWinPercentage": 0.739,
+   "playId": "1"
+  },
+  {
+   "homeWinPercentage": 0.41,
+   "playId": "2"
+  },
+  {
+   "homeWinPercentage": 0.58,
+   "playId": "3"
+  }
+ ],
+ "boxscore": {
+  "teams": [
+   {
+    "team": {
+     "id": "5"
+    },
+    "statistics": [
+     {
+      "name": "batting",
+      "stats": [
+       {
+        "name": "hits",
+        "displayValue": "6"
+       },
+       {
+        "name": "homeRuns",
+        "displayValue": "0"
+       },
+       {
+        "name": "RBIs",
+        "displayValue": "2"
+       }
+      ]
+     },
+     {
+      "name": "fielding",
+      "stats": [
+       {
+        "name": "errors",
+        "displayValue": "1"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "team": {
+     "id": "4"
+    },
+    "statistics": [
+     {
+      "name": "batting",
+      "stats": [
+       {
+        "name": "hits",
+        "displayValue": "7"
+       },
+       {
+        "name": "homeRuns",
+        "displayValue": "1"
+       },
+       {
+        "name": "RBIs",
+        "displayValue": "3"
+       }
+      ]
+     },
+     {
+      "name": "fielding",
+      "stats": [
+       {
+        "name": "errors",
+        "displayValue": "0"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "players": [
+   {
+    "team": {
+     "id": "5"
+    },
+    "statistics": [
+     {
+      "names": [
+       "IP",
+       "H"
+      ],
+      "athletes": [
+       {
+        "athlete": {
+         "id": "20",
+         "displayName": "Tanner Bibee"
+        },
+        "stats": [
+         "4.1",
+         "5"
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "team": {
+     "id": "4"
+    },
+    "statistics": [
+     {
+      "names": [
+       "AB",
+       "H"
+      ],
+      "athletes": [
+       {
+        "athlete": {
+         "id": "21",
+         "displayName": "Andrew Benintendi"
+        },
+        "stats": [
+         "3",
+         "1"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
