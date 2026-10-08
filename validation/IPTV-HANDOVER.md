@@ -48,7 +48,8 @@ Next, in order:
    status text). Parsers checked against a real ESPN capture (8 October evening, no game in
    play; 12 mismatches fixed in `374e1f6`, CI green run 37845595141); live-only fields
    still unverified until the weekend capture. Pending user decisions: combine ESPN and
-   TheSportsDB per league instead of a source choice (proposal given), attribution line
+   TheSportsDB per league instead of a source choice (APPROVED 9 October: per-league source,
+   fallback, combined settings, league search, TV channels from lookuptv; in progress), attribution line
    and a monogram/logo setting (TheSportsDB terms of 17 September 2026 require crediting
    the data source and forbid public use of artwork without a confirmed licence). Known gaps: football red cards, NRL last try, basketball run and ice
    hockey power play show only via the summary (Game Centre), not in the scoreboard bug;
