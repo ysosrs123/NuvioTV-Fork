@@ -48,14 +48,24 @@ import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.FixtureTeam
 import com.nuvio.tv.core.iptv.SportsFavourites
 import com.nuvio.tv.core.iptv.SportsFixture
+import com.nuvio.tv.core.iptv.RecordingStatus
+import com.nuvio.tv.core.iptv.SportsChange
 import com.nuvio.tv.core.iptv.SportsFixtureSections
+import com.nuvio.tv.core.iptv.SportsRecordedWindow
+import com.nuvio.tv.core.iptv.SportsReminder
 import com.nuvio.tv.core.iptv.SportsService
+import com.nuvio.tv.core.iptv.SportsSpoilers
+import com.nuvio.tv.core.recording.IptvRecorder
 import com.nuvio.tv.data.iptv.IptvFixtureLink
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.data.iptv.IptvLog
+import com.nuvio.tv.data.iptv.IptvRecording
 import com.nuvio.tv.data.iptv.IptvSourceRef
 import com.nuvio.tv.data.iptv.IptvSportsFixtures
 import com.nuvio.tv.data.iptv.IptvSportsFixturesRepository
+import com.nuvio.tv.data.iptv.IptvSportsLive
+import com.nuvio.tv.data.iptv.IptvSportsMode
+import com.nuvio.tv.data.iptv.IptvSportsSnapshot
 import com.nuvio.tv.data.iptv.IptvSportsPreferences
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.components.rememberShimmerBrush
@@ -70,11 +80,10 @@ import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 data class IptvFixtureItem(val fixture: SportsFixture, val links: List<IptvFixtureLink>, val favourite: Boolean = false, val linking: Boolean = false)
@@ -85,15 +94,18 @@ data class IptvFixtureRow(val section: FixtureSection, val day: LocalDate?, val 
 
 data class IptvFixturesState(val enabled: Boolean = false, val loading: Boolean = false, val rows: List<IptvFixtureRow> = emptyList(),
     val failed: Boolean = false, val missingKey: Boolean = false, val noLeagues: Boolean = false, val showScores: Boolean = true,
-    val favourites: Set<String> = emptySet())
+    val favourites: Set<String> = emptySet(), val reminders: Set<String> = emptySet(), val spoilerKeys: Set<String> = emptySet())
 
 @HiltViewModel
-class IptvSportsFixturesViewModel @Inject constructor(private val repository: IptvSportsFixturesRepository, private val preferences: IptvSportsPreferences) : ViewModel() {
+class IptvSportsFixturesViewModel @Inject constructor(private val repository: IptvSportsFixturesRepository, private val preferences: IptvSportsPreferences,
+    private val live: IptvSportsLive, private val recorder: IptvRecorder) : ViewModel() {
     private val mutable = MutableStateFlow((preferences.service != SportsService.OFF).let { IptvFixturesState(enabled = it, loading = it) })
     val state = mutable.asStateFlow()
     private val heroKey = MutableStateFlow<String?>(FEATURED)
     val hero = heroKey.asStateFlow()
-    private var job: Job? = null
+    val alerts: SharedFlow<SportsChange> = live.alerts
+    val reminderDue: SharedFlow<SportsReminder> = live.reminderDue
+    private var handle: IptvSportsLive.Handle? = null
     private var linkJob: Job? = null
     private var opened: Pair<IptvSourceRef, Set<String>>? = null
     private var loaded: IptvSportsFixtures? = null
@@ -104,44 +116,63 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
     private var pendingSignature: Set<Pair<String, Long>>? = null
     private var linkedAt = 0L
     private var viewing = false
+    private var recordings = emptyList<IptvRecording>()
+    private var spoilerKeys = emptySet<String>()
+
+    init {
+        viewModelScope.launch { live.snapshot.collect { snapshot -> if (snapshot != null && snapshot.mode == IptvSportsMode.LIVE_TV && handle != null) accept(snapshot) } }
+        viewModelScope.launch { live.reminders.collect { keys -> mutable.update { it.copy(reminders = keys) } } }
+        viewModelScope.launch { recorder.all.collect { all -> recordings = all; if (spoilers()) publish() } }
+    }
 
     fun open(ref: IptvSourceRef, hiddenCategories: Set<String>) {
-        if (job?.isActive == true && opened == ref to hiddenCategories) return
-        job?.cancel()
+        if (handle != null && opened == ref to hiddenCategories) return
         linkJob?.cancel()
         if (opened?.first != ref) linked = emptyMap()
         linkedSignature = null
         opened = ref to hiddenCategories
-        job = viewModelScope.launch {
-            var refresh = false
-            while (isActive) {
-                val now = System.currentTimeMillis()
-                val zone = ZoneId.systemDefault()
-                try {
-                    val result = repository.load(now, zone, refresh)
-                    if (result.service == SportsService.OFF) {
-                        loaded = null; grouped = emptyList(); linkJob?.cancel(); linked = emptyMap(); linkedSignature = null
-                        mutable.value = IptvFixturesState()
-                        return@launch
-                    }
-                    val showScores = preferences.showScores
-                    val favourites = preferences.favouriteTeams
-                    loaded = result; refreshed = refresh
-                    grouped = SportsFixtureSections.group(result.fixtures, now, zone, showScores, favourites)
-                    publish(showScores, favourites)
-                    relink(ref, hiddenCategories, now)
-                } catch (cancel: CancellationException) { throw cancel }
-                catch (error: Exception) {
-                    IptvLog.failure("sports fixtures", error)
-                    if (refresh) mutable.update { it.copy(enabled = true, loading = false, failed = true) }
-                }
-                if (refresh) delay(TICK_MILLIS)
-                refresh = true
-            }
-        }
+        if (handle == null) handle = live.acquire(IptvSportsMode.LIVE_TV)
+        live.snapshot.value?.takeIf { it.mode == IptvSportsMode.LIVE_TV }?.let(::accept)
     }
 
-    fun close() { job?.cancel(); job = null; linkJob?.cancel(); linkJob = null; pendingSignature = null; publish() }
+    private fun accept(snapshot: IptvSportsSnapshot) {
+        val result = snapshot.result
+        if (result.service == SportsService.OFF) {
+            loaded = null; grouped = emptyList(); linkJob?.cancel(); linked = emptyMap(); linkedSignature = null; spoilerKeys = emptySet()
+            mutable.value = IptvFixturesState(reminders = live.reminders.value)
+            return
+        }
+        try {
+            val now = System.currentTimeMillis()
+            val showScores = preferences.showScores
+            val favourites = preferences.favouriteTeams
+            loaded = result; refreshed = snapshot.refreshed
+            grouped = SportsFixtureSections.group(result.fixtures, now, ZoneId.systemDefault(), showScores, favourites)
+            spoilers()
+            publish(showScores, favourites)
+            opened?.let { (ref, hiddenCategories) -> relink(ref, hiddenCategories, now) }
+        } catch (cancel: CancellationException) { throw cancel }
+        catch (error: Exception) { IptvLog.failure("sports fixtures", error) }
+    }
+
+    private fun spoilers(): Boolean {
+        val result = loaded
+        val profile = opened?.first?.profileId
+        val next = if (result == null || profile == null || !preferences.hideSpoilers) emptySet() else SportsSpoilers.keys(result.fixtures,
+            recordings.filter { it.profileId == profile && it.status != RecordingStatus.FAILED && it.status != RecordingStatus.CANCELLED }
+                .mapNotNull { recording -> recording.title?.let { SportsRecordedWindow(it, recording.startMillis, recording.stopMillis) } })
+        if (next == spoilerKeys) return false
+        spoilerKeys = next
+        return true
+    }
+
+    fun toggleReminder(fixture: SportsFixture) = live.toggleReminder(fixture)
+
+    fun setOnScreen(keys: Set<String>) = live.setOnScreen(keys)
+
+    override fun onCleared() { handle?.release(); handle = null }
+
+    fun close() { handle?.release(); handle = null; linkJob?.cancel(); linkJob = null; pendingSignature = null; publish() }
 
     fun show(ref: IptvSourceRef, hiddenCategories: Set<String>, started: Boolean) {
         viewing = true
@@ -188,12 +219,12 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
                 val links = linked[fixture.id].orEmpty()
                 IptvFixtureItem(fixture, links, SportsFavourites.has(favourites, fixture), linking && links.isEmpty() && fixture.status != FixtureStatus.FINAL)
             }) },
-            failed = result.failed, missingKey = result.missingKey, noLeagues = result.noLeagues, showScores = showScores, favourites = favourites)
+            failed = result.failed, missingKey = result.missingKey, noLeagues = result.noLeagues, showScores = showScores, favourites = favourites,
+            reminders = live.reminders.value, spoilerKeys = spoilerKeys)
     }
 
     companion object {
         const val FEATURED = "\u0000featured"
-        private const val TICK_MILLIS = 60_000L
         private const val RELINK_MILLIS = 5L * 60 * 1000
     }
 }

@@ -22,8 +22,12 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.SportsAlertGames
+import com.nuvio.tv.core.iptv.SportsChangeKind
 import com.nuvio.tv.core.iptv.SportsFavourites
 import com.nuvio.tv.core.iptv.SportsLeagues
+import com.nuvio.tv.core.iptv.SportsNuvioAlert
+import com.nuvio.tv.core.iptv.SportsOverlayStyle
 import com.nuvio.tv.core.iptv.SportsService
 import com.nuvio.tv.data.iptv.IptvLog
 import com.nuvio.tv.data.iptv.IptvSportsPreferences
@@ -46,7 +50,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 data class IptvSportsSettingsState(val service: SportsService = SportsService.OFF, val leagues: Set<String> = emptySet(), val hasKey: Boolean = false,
-    val showScores: Boolean = true, val favourites: List<String> = emptyList())
+    val showScores: Boolean = true, val favourites: List<String> = emptyList(), val overlayStyle: SportsOverlayStyle = SportsOverlayStyle.GLANCE,
+    val alertGames: SportsAlertGames = SportsAlertGames.FOLLOWED_AND_CLOSE, val alertHoldSeconds: Int = IptvSportsPreferences.DEFAULT_HOLD,
+    val skipOnScreen: Boolean = true, val alertKinds: Set<SportsChangeKind> = SportsChangeKind.entries.toSet(),
+    val nuvioAlert: SportsNuvioAlert = SportsNuvioAlert.POPUP, val nuvioQuietEndMinutes: Int = IptvSportsPreferences.DEFAULT_QUIET,
+    val reminderLeadMinutes: Int = IptvSportsPreferences.DEFAULT_LEAD, val hideSpoilers: Boolean = true)
 
 @HiltViewModel
 class IptvSportsSettingsViewModel @Inject constructor(private val preferences: IptvSportsPreferences) : ViewModel() {
@@ -57,8 +65,28 @@ class IptvSportsSettingsViewModel @Inject constructor(private val preferences: I
 
     fun reload() {
         mutable.value = IptvSportsSettingsState(preferences.service, preferences.leagues, preferences.hasKey, preferences.showScores,
-            preferences.favouriteTeams.sortedBy { SportsFavourites.parse(it)?.second?.lowercase() })
+            preferences.favouriteTeams.sortedBy { SportsFavourites.parse(it)?.second?.lowercase() }, preferences.overlayStyle, preferences.alertGames,
+            preferences.alertHoldSeconds, preferences.skipOnScreen, preferences.alertKinds, preferences.nuvioAlert, preferences.nuvioQuietEndMinutes,
+            preferences.reminderLeadMinutes, preferences.hideSpoilers)
     }
+
+    fun setOverlayStyle(value: SportsOverlayStyle) { preferences.overlayStyle = value; reload() }
+
+    fun setAlertGames(value: SportsAlertGames) { preferences.alertGames = value; reload() }
+
+    fun setAlertHold(seconds: Int) { preferences.alertHoldSeconds = seconds; reload() }
+
+    fun setSkipOnScreen(value: Boolean) { preferences.skipOnScreen = value; reload() }
+
+    fun setAlertKinds(value: List<SportsChangeKind>) { preferences.alertKinds = value.toSet(); reload() }
+
+    fun setNuvioAlert(value: SportsNuvioAlert) { preferences.nuvioAlert = value; reload() }
+
+    fun setQuietEnd(minutes: Int) { preferences.nuvioQuietEndMinutes = minutes; reload() }
+
+    fun setReminderLead(minutes: Int) { preferences.reminderLeadMinutes = minutes; reload() }
+
+    fun setHideSpoilers(value: Boolean) { preferences.hideSpoilers = value; reload() }
 
     fun setShowScores(value: Boolean) { preferences.showScores = value; reload() }
 
@@ -86,31 +114,62 @@ class IptvSportsSettingsViewModel @Inject constructor(private val preferences: I
     fun removeKey() { preferences.setKey(null); reload() }
 }
 
-private enum class IptvSportsChoice { SERVICE, LEAGUES, KEY, FAVOURITES }
+private enum class IptvSportsChoice { SERVICE, LEAGUES, KEY, FAVOURITES, OVERLAY, GAMES, HOLD, KINDS, NUVIO, QUIET, LEAD }
 
 @Composable
 fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var choosing by remember { mutableStateOf<IptvSportsChoice?>(null) }
-    SettingsGroupCard(title = stringResource(R.string.iptv_live_sports)) {
-        SettingsActionRow(title = stringResource(R.string.iptv_sport_data), subtitle = stringResource(R.string.iptv_sport_data_subtitle),
-            value = stringResource(serviceLabel(state.service)), onClick = { choosing = IptvSportsChoice.SERVICE })
-        if (state.service != SportsService.OFF) {
-            val count = SportsLeagues.chosen(state.leagues, state.service).size
-            SettingsActionRow(title = stringResource(R.string.iptv_sport_leagues), subtitle = stringResource(R.string.iptv_sport_leagues_subtitle),
-                value = if (count == 0) stringResource(R.string.iptv_sport_leagues_none) else pluralStringResource(R.plurals.iptv_sport_leagues_chosen, count, count),
-                onClick = { choosing = IptvSportsChoice.LEAGUES })
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SettingsGroupCard(title = stringResource(R.string.iptv_live_sports)) {
+            SettingsActionRow(title = stringResource(R.string.iptv_sport_data), subtitle = stringResource(R.string.iptv_sport_data_subtitle),
+                value = stringResource(serviceLabel(state.service)), onClick = { choosing = IptvSportsChoice.SERVICE })
+            if (state.service != SportsService.OFF) {
+                val count = SportsLeagues.chosen(state.leagues, state.service).size
+                SettingsActionRow(title = stringResource(R.string.iptv_sport_leagues), subtitle = stringResource(R.string.iptv_sport_leagues_subtitle),
+                    value = if (count == 0) stringResource(R.string.iptv_sport_leagues_none) else pluralStringResource(R.plurals.iptv_sport_leagues_chosen, count, count),
+                    onClick = { choosing = IptvSportsChoice.LEAGUES })
+            }
+            if (state.service == SportsService.THESPORTSDB) SettingsActionRow(title = stringResource(R.string.iptv_sport_key),
+                subtitle = stringResource(R.string.iptv_sport_key_subtitle),
+                value = stringResource(if (state.hasKey) R.string.iptv_sport_key_set else R.string.iptv_sport_key_not_set),
+                valueColor = if (state.hasKey) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.Error, onClick = { choosing = IptvSportsChoice.KEY })
+            if (state.service != SportsService.OFF) {
+                SettingsToggleRow(title = stringResource(R.string.iptv_sport2_show_scores), subtitle = stringResource(R.string.iptv_sport2_show_scores_subtitle),
+                    checked = state.showScores, onToggle = { viewModel.setShowScores(!state.showScores) })
+                if (state.favourites.isNotEmpty()) SettingsActionRow(title = stringResource(R.string.iptv_sport2_favourite_teams),
+                    subtitle = stringResource(R.string.iptv_sport2_favourite_hint), value = state.favourites.size.toString(),
+                    onClick = { choosing = IptvSportsChoice.FAVOURITES })
+            }
         }
-        if (state.service == SportsService.THESPORTSDB) SettingsActionRow(title = stringResource(R.string.iptv_sport_key),
-            subtitle = stringResource(R.string.iptv_sport_key_subtitle),
-            value = stringResource(if (state.hasKey) R.string.iptv_sport_key_set else R.string.iptv_sport_key_not_set),
-            valueColor = if (state.hasKey) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.Error, onClick = { choosing = IptvSportsChoice.KEY })
         if (state.service != SportsService.OFF) {
-            SettingsToggleRow(title = stringResource(R.string.iptv_sport2_show_scores), subtitle = stringResource(R.string.iptv_sport2_show_scores_subtitle),
-                checked = state.showScores, onToggle = { viewModel.setShowScores(!state.showScores) })
-            if (state.favourites.isNotEmpty()) SettingsActionRow(title = stringResource(R.string.iptv_sport2_favourite_teams),
-                subtitle = stringResource(R.string.iptv_sport2_favourite_hint), value = state.favourites.size.toString(),
-                onClick = { choosing = IptvSportsChoice.FAVOURITES })
+            SettingsGroupCard(title = stringResource(R.string.iptv_sport4_while_watching), subtitle = stringResource(R.string.iptv_sport4_while_watching_subtitle)) {
+                SettingsActionRow(title = stringResource(R.string.iptv_sport4_overlay), subtitle = stringResource(R.string.iptv_sport4_overlay_subtitle),
+                    value = stringResource(overlayLabel(state.overlayStyle)), onClick = { choosing = IptvSportsChoice.OVERLAY })
+                SettingsActionRow(title = stringResource(R.string.iptv_sport4_games), subtitle = stringResource(R.string.iptv_sport4_games_subtitle),
+                    value = stringResource(gamesLabel(state.alertGames)), onClick = { choosing = IptvSportsChoice.GAMES })
+                SettingsActionRow(title = stringResource(R.string.iptv_sport4_hold), subtitle = stringResource(R.string.iptv_sport4_hold_subtitle),
+                    value = holdLabel(state.alertHoldSeconds), onClick = { choosing = IptvSportsChoice.HOLD })
+                SettingsToggleRow(title = stringResource(R.string.iptv_sport4_skip), subtitle = stringResource(R.string.iptv_sport4_skip_subtitle),
+                    checked = state.skipOnScreen, onToggle = { viewModel.setSkipOnScreen(!state.skipOnScreen) })
+                SettingsActionRow(title = stringResource(R.string.iptv_sport4_kinds), subtitle = stringResource(R.string.iptv_sport4_kinds_subtitle),
+                    value = when (state.alertKinds.size) {
+                        0 -> stringResource(R.string.iptv_sport4_none)
+                        SportsChangeKind.entries.size -> stringResource(R.string.iptv_sport4_all)
+                        else -> SportsChangeKind.entries.filter { it in state.alertKinds }.map { stringResource(kindLabel(it)) }.joinToString(", ")
+                    }, onClick = { choosing = IptvSportsChoice.KINDS })
+            }
+            SettingsGroupCard(title = stringResource(R.string.iptv_sport4_across_nuvio), subtitle = stringResource(R.string.iptv_sport4_across_nuvio_subtitle)) {
+                SettingsActionRow(title = stringResource(R.string.iptv_sport4_nuvio_alert), subtitle = stringResource(R.string.iptv_sport4_nuvio_alert_subtitle),
+                    value = stringResource(nuvioLabel(state.nuvioAlert)), onClick = { choosing = IptvSportsChoice.NUVIO })
+                if (state.nuvioAlert != SportsNuvioAlert.OFF) SettingsActionRow(title = stringResource(R.string.iptv_sport4_quiet),
+                    subtitle = stringResource(R.string.iptv_sport4_quiet_subtitle), value = quietLabel(state.nuvioQuietEndMinutes),
+                    onClick = { choosing = IptvSportsChoice.QUIET })
+                SettingsActionRow(title = stringResource(R.string.iptv_sport4_reminder_lead), subtitle = stringResource(R.string.iptv_sport4_reminder_lead_subtitle),
+                    value = leadLabel(state.reminderLeadMinutes), onClick = { choosing = IptvSportsChoice.LEAD })
+                SettingsToggleRow(title = stringResource(R.string.iptv_sport4_hide_spoilers), subtitle = stringResource(R.string.iptv_sport4_hide_spoilers_subtitle),
+                    checked = state.hideSpoilers, onToggle = { viewModel.setHideSpoilers(!state.hideSpoilers) })
+            }
         }
     }
     val dismiss = { choosing = null }
@@ -132,6 +191,39 @@ fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewM
                 SportsFavourites.parse(key)?.let { (league, team) -> SettingsPickerOption(key, team, SportsLeagues.byId(league)?.name ?: league) }
             },
             selectedValues = state.favourites, onValuesSelected = { viewModel.keepFavourites(it); dismiss() }, onDismiss = dismiss, maxHeight = 460.dp)
+        IptvSportsChoice.OVERLAY -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_sport4_overlay),
+            subtitle = stringResource(R.string.iptv_sport4_overlay_subtitle),
+            options = SportsOverlayStyle.entries.map { SettingsPickerOption(it, stringResource(overlayLabel(it)), stringResource(overlayDescription(it))) },
+            selectedValue = state.overlayStyle, onDismiss = dismiss, width = 560.dp, maxHeight = 420.dp,
+            onOptionSelected = { viewModel.setOverlayStyle(it); dismiss() })
+        IptvSportsChoice.GAMES -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_sport4_games),
+            subtitle = stringResource(R.string.iptv_sport4_games_subtitle),
+            options = SportsAlertGames.entries.map { SettingsPickerOption(it, stringResource(gamesLabel(it))) },
+            selectedValue = state.alertGames, onDismiss = dismiss, width = 560.dp, onOptionSelected = { viewModel.setAlertGames(it); dismiss() })
+        IptvSportsChoice.HOLD -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_sport4_hold),
+            subtitle = stringResource(R.string.iptv_sport4_hold_subtitle),
+            options = IptvSportsPreferences.HOLD_CHOICES.map { SettingsPickerOption(it, holdLabel(it)) },
+            selectedValue = state.alertHoldSeconds, onDismiss = dismiss, width = 560.dp, maxHeight = 420.dp,
+            onOptionSelected = { viewModel.setAlertHold(it); dismiss() })
+        IptvSportsChoice.KINDS -> SettingsMultiChoiceDialog(title = stringResource(R.string.iptv_sport4_kinds),
+            subtitle = stringResource(R.string.iptv_sport4_kinds_subtitle),
+            options = SportsChangeKind.entries.map { SettingsPickerOption(it, stringResource(kindLabel(it))) },
+            selectedValues = SportsChangeKind.entries.filter { it in state.alertKinds },
+            onValuesSelected = { viewModel.setAlertKinds(it); dismiss() }, onDismiss = dismiss, width = 560.dp)
+        IptvSportsChoice.NUVIO -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_sport4_nuvio_alert),
+            subtitle = stringResource(R.string.iptv_sport4_nuvio_alert_subtitle),
+            options = SportsNuvioAlert.entries.map { SettingsPickerOption(it, stringResource(nuvioLabel(it)), stringResource(nuvioDescription(it))) },
+            selectedValue = state.nuvioAlert, onDismiss = dismiss, width = 560.dp, onOptionSelected = { viewModel.setNuvioAlert(it); dismiss() })
+        IptvSportsChoice.QUIET -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_sport4_quiet),
+            subtitle = stringResource(R.string.iptv_sport4_quiet_subtitle),
+            options = IptvSportsPreferences.QUIET_CHOICES.map { SettingsPickerOption(it, quietLabel(it)) },
+            selectedValue = state.nuvioQuietEndMinutes, onDismiss = dismiss, width = 560.dp, maxHeight = 420.dp,
+            onOptionSelected = { viewModel.setQuietEnd(it); dismiss() })
+        IptvSportsChoice.LEAD -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_sport4_reminder_lead),
+            subtitle = stringResource(R.string.iptv_sport4_reminder_lead_subtitle),
+            options = IptvSportsPreferences.LEAD_CHOICES.map { SettingsPickerOption(it, leadLabel(it)) },
+            selectedValue = state.reminderLeadMinutes, onDismiss = dismiss, width = 560.dp, maxHeight = 420.dp,
+            onOptionSelected = { viewModel.setReminderLead(it); dismiss() })
         IptvSportsChoice.KEY -> SportsKeyDialog(state.hasKey, onSave = { viewModel.saveKey(it, dismiss) }, onRemove = { viewModel.removeKey(); dismiss() }, onDismiss = dismiss)
         null -> Unit
     }
@@ -174,3 +266,55 @@ private fun serviceDescription(service: SportsService): Int = when (service) {
     SportsService.ESPN -> R.string.iptv_sport_data_espn_description
     SportsService.THESPORTSDB -> R.string.iptv_sport_data_sportsdb_description
 }
+
+private fun overlayLabel(style: SportsOverlayStyle): Int = when (style) {
+    SportsOverlayStyle.OFF -> R.string.iptv_sport4_overlay_off
+    SportsOverlayStyle.GLANCE -> R.string.iptv_sport4_overlay_glance
+    SportsOverlayStyle.BUG -> R.string.iptv_sport4_overlay_bug
+    SportsOverlayStyle.CARDS -> R.string.iptv_sport4_overlay_cards
+    SportsOverlayStyle.TICKER -> R.string.iptv_sport4_overlay_ticker
+}
+
+private fun overlayDescription(style: SportsOverlayStyle): Int = when (style) {
+    SportsOverlayStyle.OFF -> R.string.iptv_sport4_overlay_off_description
+    SportsOverlayStyle.GLANCE -> R.string.iptv_sport4_overlay_glance_description
+    SportsOverlayStyle.BUG -> R.string.iptv_sport4_overlay_bug_description
+    SportsOverlayStyle.CARDS -> R.string.iptv_sport4_overlay_cards_description
+    SportsOverlayStyle.TICKER -> R.string.iptv_sport4_overlay_ticker_description
+}
+
+private fun gamesLabel(games: SportsAlertGames): Int = when (games) {
+    SportsAlertGames.FOLLOWED -> R.string.iptv_sport4_games_followed
+    SportsAlertGames.FOLLOWED_AND_CLOSE -> R.string.iptv_sport4_games_followed_close
+    SportsAlertGames.ALL_LIVE -> R.string.iptv_sport4_games_all
+}
+
+private fun kindLabel(kind: SportsChangeKind): Int = when (kind) {
+    SportsChangeKind.STARTED -> R.string.iptv_sport4_kind_started
+    SportsChangeKind.SCORED -> R.string.iptv_sport4_kind_scored
+    SportsChangeKind.FINISHED -> R.string.iptv_sport4_kind_finished
+}
+
+private fun nuvioLabel(alert: SportsNuvioAlert): Int = when (alert) {
+    SportsNuvioAlert.POPUP -> R.string.iptv_sport4_nuvio_popup
+    SportsNuvioAlert.CHIP -> R.string.iptv_sport4_nuvio_chip
+    SportsNuvioAlert.OFF -> R.string.iptv_sport4_nuvio_off
+}
+
+private fun nuvioDescription(alert: SportsNuvioAlert): Int = when (alert) {
+    SportsNuvioAlert.POPUP -> R.string.iptv_sport4_nuvio_popup_description
+    SportsNuvioAlert.CHIP -> R.string.iptv_sport4_nuvio_chip_description
+    SportsNuvioAlert.OFF -> R.string.iptv_sport4_nuvio_off_description
+}
+
+@Composable
+private fun holdLabel(seconds: Int): String =
+    if (seconds == 0) stringResource(R.string.iptv_sport4_hold_none) else stringResource(R.string.iptv_sport4_hold_seconds, seconds)
+
+@Composable
+private fun quietLabel(minutes: Int): String =
+    if (minutes == 0) stringResource(R.string.iptv_sport4_quiet_off) else stringResource(R.string.iptv_sport4_quiet_minutes, minutes)
+
+@Composable
+private fun leadLabel(minutes: Int): String =
+    if (minutes == 0) stringResource(R.string.iptv_sport4_reminder_at_start) else stringResource(R.string.iptv_sport4_reminder_minutes, minutes)

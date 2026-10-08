@@ -3,6 +3,7 @@ package com.nuvio.tv.data.iptv
 import com.nuvio.tv.core.iptv.SportsCacheEntry
 import com.nuvio.tv.core.iptv.SportsDays
 import com.nuvio.tv.core.iptv.SportsLeague
+import com.nuvio.tv.core.iptv.SportsPolling
 import com.nuvio.tv.core.iptv.SportsRefresh
 import com.nuvio.tv.core.iptv.SportsService
 import java.time.LocalDate
@@ -23,7 +24,8 @@ class IptvSportsFixturesCache(private val client: IptvSportsFixturesClient, priv
     private val fetching = Mutex()
     private val requests = Semaphore(MAX_REQUESTS)
 
-    suspend fun load(service: SportsService, leagues: List<SportsLeague>, key: String?, nowMillis: Long, zone: ZoneId, refresh: Boolean): IptvSportsFixtures =
+    suspend fun load(service: SportsService, leagues: List<SportsLeague>, key: String?, nowMillis: Long, zone: ZoneId, refresh: Boolean,
+        favourites: Set<String> = emptySet(), prune: Boolean = true): IptvSportsFixtures =
         withContext(Dispatchers.IO) {
             val (from, until) = SportsDays.window(nowMillis, zone)
             val dates = SportsDays.serviceDates(from, until, SportsDays.zone(service))
@@ -31,17 +33,17 @@ class IptvSportsFixturesCache(private val client: IptvSportsFixturesClient, priv
             val names = wanted.map { it.key }.toSet()
             synchronized(memory) { for (item in wanted) if (item.key !in memory) store.read(item.key)?.let { memory[item.key] = it } }
             if (refresh) fetching.withLock {
-                val due = synchronized(memory) { wanted.filter { SportsRefresh.due(memory[it.key], nowMillis) } }
+                val due = synchronized(memory) { wanted.filter { SportsPolling.due(memory[it.key], favourites, nowMillis) } }
                 if (due.isNotEmpty()) {
                     val results = coroutineScope { due.map { item -> async { requests.withPermit { item.key to fetch(service, item, key, nowMillis) } } }.awaitAll() }
                     synchronized(memory) { for ((name, entry) in results) memory[name] = entry }
                     for ((name, entry) in results) store.write(name, entry)
                     IptvLog.info("sports fetch service=${service.name.lowercase()} requests=${due.size} failed=${results.count { it.second.failedAt == nowMillis }}")
-                    store.prune(names)
+                    if (prune) store.prune(names)
                 }
             }
             synchronized(memory) {
-                memory.keys.retainAll(names)
+                if (prune) memory.keys.retainAll(names)
                 val fixtures = wanted.flatMap { memory[it.key]?.fixtures.orEmpty() }
                     .filter { it.startMillis >= from - EARLIER_MILLIS && it.startMillis < until }.distinctBy { it.league to it.id }
                 IptvSportsFixtures(service, fixtures, failed = wanted.any { (memory[it.key]?.failures ?: 0) > 0 })

@@ -313,6 +313,14 @@ Sport:
   events list their bouts with the main card and prelims; cricket shows the chase;
   baseball shows inning, outs, count and runners. These formats are built from
   documented ESPN shapes and are not yet checked against live responses.
+- New Sport settings: "While watching" (score overlay style, Glance by default; which
+  games: followed teams and close games by default; alerts held 45 s so they do not
+  beat the picture; skip the game on screen; which changes alert: start, scores, full
+  time) and "Across Nuvio" (pop-up, chip or off while watching films and series; quiet
+  in the last minutes; reminder lead time; hide results of recorded games). The screens
+  that use these settings follow in the next changes.
+- Fixtures are now fetched by one shared service for the whole app. Leagues with a
+  followed team's live game refresh every 30 s instead of every 2 min.
 - Guide matching for events without two teams (tennis, golf, motor racing, UFC) uses the
   event or tournament name.
 

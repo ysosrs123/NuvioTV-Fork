@@ -8,6 +8,7 @@ import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureMatching
 import com.nuvio.tv.core.iptv.SportsLeagues
+import com.nuvio.tv.core.iptv.SportsPolling
 import com.nuvio.tv.core.iptv.SportsService
 import java.time.ZoneId
 import kotlinx.coroutines.CancellationException
@@ -26,15 +27,17 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
     private val browse = IptvBrowseRepository(catalogue, guides)
     private val cache = IptvSportsFixturesCache(client, store)
 
-    suspend fun load(nowMillis: Long, zone: ZoneId, refresh: Boolean): IptvSportsFixtures = withContext(Dispatchers.IO) {
-        val service = preferences.service
-        if (service == SportsService.OFF) return@withContext IptvSportsFixtures(service)
-        val leagues = SportsLeagues.chosen(preferences.leagues, service)
-        if (leagues.isEmpty()) return@withContext IptvSportsFixtures(service, noLeagues = true)
-        val key = if (service == SportsService.THESPORTSDB) preferences.key()?.takeIf { IptvSportsPreferences.validKey(it) } else null
-        if (service == SportsService.THESPORTSDB && key == null) return@withContext IptvSportsFixtures(service, missingKey = true)
-        cache.load(service, leagues, key, nowMillis, zone, refresh)
-    }
+    suspend fun load(nowMillis: Long, zone: ZoneId, refresh: Boolean, favourites: Set<String> = emptySet(), followedOnly: Boolean = false): IptvSportsFixtures =
+        withContext(Dispatchers.IO) {
+            val service = preferences.service
+            if (service == SportsService.OFF) return@withContext IptvSportsFixtures(service)
+            val chosen = SportsLeagues.chosen(preferences.leagues, service)
+            val leagues = if (followedOnly) SportsPolling.followedLeagues(favourites).let { ids -> chosen.filter { it.id in ids } } else chosen
+            if (leagues.isEmpty()) return@withContext IptvSportsFixtures(service, noLeagues = true)
+            val key = if (service == SportsService.THESPORTSDB) preferences.key()?.takeIf { IptvSportsPreferences.validKey(it) } else null
+            if (service == SportsService.THESPORTSDB && key == null) return@withContext IptvSportsFixtures(service, missingKey = true)
+            cache.load(service, leagues, key, nowMillis, zone, refresh, favourites, prune = !followedOnly)
+        }
 
     suspend fun links(ref: IptvSourceRef, fixtures: List<SportsFixture>, nowMillis: Long, hiddenCategories: Set<String>): Map<String, List<IptvFixtureLink>> =
         withContext(Dispatchers.IO) {

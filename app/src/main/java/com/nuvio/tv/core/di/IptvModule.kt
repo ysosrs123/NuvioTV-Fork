@@ -30,6 +30,8 @@ object IptvModule {
     @Provides @Singleton fun sportsFixtures(@ApplicationContext context: Context, preferences: IptvSportsPreferences, catalogue: IptvCatalogueStore,
         guides: IptvGuideStore) = IptvSportsFixturesRepository(preferences, catalogue, guides, IptvSportsFixturesClient(),
         IptvSportsFixturesStore(java.io.File(context.cacheDir, "iptv-sports")))
+    @Provides @Singleton fun sportsLive(repository: IptvSportsFixturesRepository, preferences: IptvSportsPreferences) = IptvSportsLive(repository, preferences)
+    @Provides @Singleton fun sportsSummary() = IptvSportsSummaryClient()
     @Provides @IntoSet fun credentials(access: IptvProfileAccess, live: IptvLivePreferences): ProfileScopedCredentialStore = object : ProfileScopedCredentialStore {
         override fun removeProfile(profileId: Int) { access.removeProfile(profileId); live.removeProfile(profileId) }
         override fun clearAllProfiles() { access.clearAllProfiles(); live.clearAllProfiles() }
