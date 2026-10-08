@@ -528,7 +528,15 @@ Before merge and release (only on the user's confirmation):
   trailers, in the project's own voice; no tool attributions anywhere.
 - No explanatory comments; minimal or no KDoc; match the surrounding style.
 - No dependency or version upgrades. WorkManager is not a dependency; NanoHTTPD 2.3.1
-  and ZXing are.
+  and ZXing are; smbj 0.15.0 was approved by the user.
+- Nothing may look machine-written: no mention of automated tools or assistants in code,
+  comments, docs, commit messages or branch names.
+- Keep this handover, the progress log and the release notes current with every change;
+  when the session's context nears its limit, update the handover and start a new
+  session the same way, and tell the user.
+- Never store API keys (e.g. the user's TheSportsDB key) in the repo, docs or app.
+- The user decides product questions (shipping, data sources, keys); give a
+  recommendation and wait.
 - Docs carry no local paths, device IPs or hostnames. Australian English.
 - Say what is host-tested, CI-built and device-tested separately.
 
