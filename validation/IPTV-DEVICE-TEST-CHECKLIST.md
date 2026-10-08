@@ -1,4 +1,4 @@
-# Nuvio IPTV — device test checklist (build `f29cbe2`, run 37599069380)
+# Nuvio IPTV — device test checklist (build `24d6868`, run 37752927770)
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.

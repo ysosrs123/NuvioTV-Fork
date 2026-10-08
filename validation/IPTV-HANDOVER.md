@@ -2,8 +2,7 @@
 
 Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
 Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built,
-not device-tested. Last fully green debug build: `f29cbe2` (run 37599069380: everything,
-including Home rows, VOD fixes, Return to live and all translations); minified release
+not device-tested. Last fully green debug build: `24d6868` (run 37752927770: everything including the 8 October device fixes, guide overhaul, Sport redesign and all translations); before that `f29cbe2` (run 37599069380); minified release
 build green at `ec6f16f` (run 37596443549). Before that: `d263b18` (run 37580266979, wave 1). Run 37589504762 at `d0d0dbb` (everything up to streaming stability)
 compiled the whole app and assembled the APK; one unit test failed
 (`IptvWebDavShareTest` self-signed certificate case), fixed in `2bef868` and not yet
