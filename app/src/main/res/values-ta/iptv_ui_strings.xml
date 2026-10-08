@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">எங்கே சேமிப்பது என்பதைத் தேர்ந்தெடுக்கவும். இயல்புநிலையை நேரலை டிவி அமைப்புகளில் மாற்றலாம்.</string>
+    <string name="iptv_record_where_default">இயல்புநிலை</string>
+    <string name="iptv_record_where_read_only">படிக்க மட்டும்</string>
+</resources>

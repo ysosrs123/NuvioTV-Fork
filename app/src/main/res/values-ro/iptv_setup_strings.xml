@@ -81,7 +81,7 @@
     <string name="iptv_review_kept">Lista actuală de canale a fost păstrată.</string>
     <string name="iptv_review_outdated">Lista nu mai este actuală. Reîmprospătează sursa pentru a verifica din nou.</string>
     <string name="iptv_groups_title">Conexiuni partajate</string>
-    <string name="iptv_groups_description">Sursele dintr-un grup partajează o singură limită de conexiuni, de exemplu mai multe playlisturi din același cont.</string>
+    <string name="iptv_groups_description">Furnizorii limitează câte canale poate reda simultan un cont, adesea 1 sau 2. Dacă ai adăugat același cont de mai multe ori, de exemplu autentificarea Xtream și un link M3U, pune acele surse într-un grup ca să partajeze o singură limită. Așa eviți erorile de \"număr maxim de conexiuni\" când urmărești și înregistrezi în același timp.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d sursă</item>
         <item quantity="few">%1$d surse</item>
@@ -100,7 +100,7 @@
     <string name="iptv_group_sources_description">Sursele bifate partajează conexiunile acestui grup. O sursă poate fi într-un singur grup.</string>
     <string name="iptv_group_limit_description">Câte canale pot reda sau înregistra simultan sursele din acest grup, în total.</string>
     <string name="iptv_transfer_title">Copiere și backup</string>
-    <string name="iptv_transfer_description">Mută configurarea TV live a acestui profil pe alt televizor sau păstrează o copie într-un fișier blocat.</string>
+    <string name="iptv_transfer_description">Copiază configurarea TV live a acestui profil (surse, ghiduri, favorite, ordinea canalelor și setări) pe alt televizor din rețea sau salveaz-o într-un fișier de backup blocat cu o frază de acces. Restaureaz-o după reinstalarea aplicației sau pe un box nou.</string>
     <string name="iptv_transfer_logins">Include datele de autentificare</string>
     <string name="iptv_transfer_logins_subtitle">Nume de utilizator, parole, adrese MAC și adrese care conțin date de autentificare. Fără ele, acele surse sunt omise.</string>
     <string name="iptv_transfer_back">Înapoi</string>

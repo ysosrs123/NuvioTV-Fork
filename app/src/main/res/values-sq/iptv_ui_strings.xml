@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Zgjidh ku ta ruash. Ndrysho parazgjedhjen te cilësimet e TV-së live.</string>
+    <string name="iptv_record_where_default">Parazgjedhja</string>
+    <string name="iptv_record_where_read_only">Vetëm për lexim</string>
+</resources>

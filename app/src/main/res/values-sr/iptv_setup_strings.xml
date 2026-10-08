@@ -81,7 +81,7 @@
     <string name="iptv_review_kept">Тренутна листа канала је задржана.</string>
     <string name="iptv_review_outdated">Та листа је застарела. Освежите извор да бисте поново проверили.</string>
     <string name="iptv_groups_title">Заједничке везе</string>
-    <string name="iptv_groups_description">Извори у једној групи деле једно ограничење веза, на пример више плејлиста са истог налога.</string>
+    <string name="iptv_groups_description">Провајдери ограничавају колико канала један налог може да пушта истовремено, често 1 или 2. Ако сте исти налог додали више пута, на пример као Xtream пријаву и M3U линк, ставите те изворе у једну групу да деле једно ограничење. Тако избегавате грешке \"максималан број веза\" када гледате и снимате у исто време.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d извор</item>
         <item quantity="few">%1$d извора</item>
@@ -100,7 +100,7 @@
     <string name="iptv_group_sources_description">Означени извори деле везе ове групе. Извор може бити само у једној групи.</string>
     <string name="iptv_group_limit_description">Колико канала извори у овој групи могу истовремено да пуштају или снимају, укупно.</string>
     <string name="iptv_transfer_title">Копирање и резервна копија</string>
-    <string name="iptv_transfer_description">Пренесите подешавање ТВ уживо овог профила на други ТВ или сачувајте копију у закључаној датотеци.</string>
+    <string name="iptv_transfer_description">Копирајте подешавање ТВ уживо овог профила (извори, водичи, омиљени, редослед канала и подешавања) на други ТВ у вашој мрежи или га сачувајте у датотеку резервне копије закључану приступном фразом. Вратите га након поновне инсталације апликације или на новом уређају.</string>
     <string name="iptv_transfer_logins">Укључи податке за пријаву</string>
     <string name="iptv_transfer_logins_subtitle">Корисничка имена, лозинке, MAC адресе и адресе са подацима за пријаву. Без њих се ти извори изостављају.</string>
     <string name="iptv_transfer_back">Назад</string>

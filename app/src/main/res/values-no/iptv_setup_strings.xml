@@ -80,7 +80,7 @@
     <string name="iptv_review_kept">Nåværende kanalliste er beholdt.</string>
     <string name="iptv_review_outdated">Den listen er utdatert. Oppdater kilden for å sjekke igjen.</string>
     <string name="iptv_groups_title">Delte tilkoblinger</string>
-    <string name="iptv_groups_description">Kilder i én gruppe deler én tilkoblingsgrense, for eksempel flere spillelister fra samme konto.</string>
+    <string name="iptv_groups_description">Leverandører begrenser hvor mange kanaler én konto kan spille samtidig, ofte 1 eller 2. Hvis du har lagt til samme konto flere ganger, for eksempel Xtream-innloggingen og en M3U-lenke, legger du disse kildene i én gruppe så de deler én grense. Da unngår du feil om \"maks antall tilkoblinger\" når du ser og tar opp samtidig.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d kilde</item>
         <item quantity="other">%1$d kilder</item>
@@ -98,7 +98,7 @@
     <string name="iptv_group_sources_description">Avkryssede kilder deler tilkoblingene i denne gruppen. En kilde kan være i én gruppe.</string>
     <string name="iptv_group_limit_description">Hvor mange kanaler kildene i denne gruppen kan spille av eller ta opp samtidig, til sammen.</string>
     <string name="iptv_transfer_title">Kopier og sikkerhetskopier</string>
-    <string name="iptv_transfer_description">Flytt direkte-TV-oppsettet for denne profilen til en annen TV, eller behold en kopi i en låst fil.</string>
+    <string name="iptv_transfer_description">Kopier direkte-TV-oppsettet for denne profilen (kilder, guider, favoritter, kanalrekkefølge og innstillinger) til en annen TV på nettverket, eller lagre det i en sikkerhetskopifil låst med en passordfrase. Gjenopprett det etter at appen er installert på nytt, eller på en ny boks.</string>
     <string name="iptv_transfer_logins">Ta med pålogginger</string>
     <string name="iptv_transfer_logins_subtitle">Brukernavn, passord, MAC-adresser og adresser med pålogginger i seg. Uten dem utelates disse kildene.</string>
     <string name="iptv_transfer_back">Tilbake</string>

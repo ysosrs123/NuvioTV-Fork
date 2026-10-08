@@ -80,7 +80,7 @@
     <string name="iptv_review_kept">Lista aktuale e kanaleve u mbajt.</string>
     <string name="iptv_review_outdated">Kjo listë nuk është më e përditësuar. Rifresko burimin për ta kontrolluar përsëri.</string>
     <string name="iptv_groups_title">Lidhje të përbashkëta</string>
-    <string name="iptv_groups_description">Burimet në një grup ndajnë një kufi të vetëm lidhjesh, për shembull disa lista nga e njëjta llogari.</string>
+    <string name="iptv_groups_description">Ofruesit kufizojnë sa kanale mund të luajë një llogari njëkohësisht, shpesh 1 ose 2. Nëse e ke shtuar të njëjtën llogari më shumë se një herë, si hyrjen Xtream dhe një lidhje M3U, vendosi ato burime në një grup që të ndajnë një kufi. Kështu shmangen gabimet \"numri maksimal i lidhjeve\" kur shikon dhe regjistron njëkohësisht.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d burim</item>
         <item quantity="other">%1$d burime</item>
@@ -98,7 +98,7 @@
     <string name="iptv_group_sources_description">Burimet e shënuara ndajnë lidhjet e këtij grupi. Një burim mund të jetë vetëm në një grup.</string>
     <string name="iptv_group_limit_description">Sa kanale mund të luajnë ose regjistrojnë njëkohësisht burimet e këtij grupi, të gjitha së bashku.</string>
     <string name="iptv_transfer_title">Kopjo dhe rezervo</string>
-    <string name="iptv_transfer_description">Kaloje konfigurimin e TV-së live të këtij profili në një televizor tjetër, ose mbaj një kopje në një skedar të kyçur.</string>
+    <string name="iptv_transfer_description">Kopjo konfigurimin e TV-së live të këtij profili (burimet, udhëzuesit, të preferuarat, renditjen e kanaleve dhe cilësimet) në një televizor tjetër në rrjetin tënd, ose ruaje në një skedar rezervë të kyçur me frazëkalim. Riktheje pas riinstalimit të aplikacionit ose në një kuti të re.</string>
     <string name="iptv_transfer_logins">Përfshi kredencialet</string>
     <string name="iptv_transfer_logins_subtitle">Emrat e përdoruesve, fjalëkalimet, adresat MAC dhe adresat që përmbajnë kredenciale. Pa to, ato burime lihen jashtë.</string>
     <string name="iptv_transfer_back">Prapa</string>

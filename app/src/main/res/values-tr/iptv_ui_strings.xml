@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Nereye kaydedileceğini seçin. Varsayılanı Canlı TV ayarlarından değiştirin.</string>
+    <string name="iptv_record_where_default">Varsayılan</string>
+    <string name="iptv_record_where_read_only">Salt okunur</string>
+</resources>

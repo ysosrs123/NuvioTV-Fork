@@ -81,7 +81,7 @@
     <string name="iptv_review_kept">Lista de canais atual mantida.</string>
     <string name="iptv_review_outdated">Essa lista está desatualizada. Atualize a fonte para verificar de novo.</string>
     <string name="iptv_groups_title">Conexões compartilhadas</string>
-    <string name="iptv_groups_description">As fontes de um grupo compartilham um único limite de conexões, por exemplo várias listas da mesma conta.</string>
+    <string name="iptv_groups_description">Os provedores limitam quantos canais uma conta pode reproduzir ao mesmo tempo, geralmente 1 ou 2. Se você adicionou a mesma conta mais de uma vez, como o login Xtream e um link M3U, coloque essas fontes em um grupo para que compartilhem um limite. Isso evita erros de \"máximo de conexões\" ao assistir e gravar ao mesmo tempo.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d fonte</item>
         <item quantity="many">%1$d fontes</item>
@@ -100,7 +100,7 @@
     <string name="iptv_group_sources_description">As fontes marcadas compartilham as conexões deste grupo. Uma fonte só pode estar em um grupo.</string>
     <string name="iptv_group_limit_description">Quantos canais as fontes deste grupo podem assistir ou gravar ao mesmo tempo, somando todas.</string>
     <string name="iptv_transfer_title">Copiar e fazer backup</string>
-    <string name="iptv_transfer_description">Leve a configuração da TV ao vivo deste perfil para outra TV ou guarde uma cópia em um arquivo protegido.</string>
+    <string name="iptv_transfer_description">Copie a configuração da TV ao vivo deste perfil (fontes, guias, favoritos, ordem dos canais e configurações) para outra TV na sua rede ou salve em um arquivo de backup protegido por uma frase secreta. Restaure depois de reinstalar o app ou em um aparelho novo.</string>
     <string name="iptv_transfer_logins">Incluir logins</string>
     <string name="iptv_transfer_logins_subtitle">Nomes de usuário, senhas, endereços MAC e endereços que contêm login. Sem eles, essas fontes ficam de fora.</string>
     <string name="iptv_transfer_back">Voltar</string>

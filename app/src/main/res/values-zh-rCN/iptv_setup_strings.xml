@@ -79,7 +79,7 @@
     <string name="iptv_review_kept">已保留当前频道列表。</string>
     <string name="iptv_review_outdated">该列表已过期。请刷新来源以再次检查。</string>
     <string name="iptv_groups_title">共享连接</string>
-    <string name="iptv_groups_description">同一组中的来源共享一个连接数上限，例如来自同一账户的多个播放列表。</string>
+    <string name="iptv_groups_description">服务商会限制一个账户可同时播放的频道数，通常为 1 或 2 个。如果你多次添加了同一账户，例如其 Xtream 登录和 M3U 链接，请将这些来源放入同一组，使它们共享一个上限。这样可避免边看边录时出现“已达最大连接数”错误。</string>
     <plurals name="iptv_group_sources">
         <item quantity="other">%1$d 个来源</item>
     </plurals>
@@ -96,7 +96,7 @@
     <string name="iptv_group_sources_description">勾选的来源共享此分组的连接。一个来源只能属于一个分组。</string>
     <string name="iptv_group_limit_description">此分组中的来源总共可同时播放或录制的频道数。</string>
     <string name="iptv_transfer_title">复制和备份</string>
-    <string name="iptv_transfer_description">将此个人资料的直播电视设置转移到另一台电视，或保存在加密文件中。</string>
+    <string name="iptv_transfer_description">将此个人资料的直播电视设置（来源、节目单、最爱、频道顺序和设置）复制到同一网络中的另一台电视，或保存到用密码短语加密的备份文件中。重新安装应用后或在新盒子上即可恢复。</string>
     <string name="iptv_transfer_logins">包含登录信息</string>
     <string name="iptv_transfer_logins_subtitle">用户名、密码、MAC 地址以及包含登录信息的地址。不包含时，这些来源将被略过。</string>
     <string name="iptv_transfer_back">返回</string>

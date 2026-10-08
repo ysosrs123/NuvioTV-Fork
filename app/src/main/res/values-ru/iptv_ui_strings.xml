@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Выберите, куда сохранить. Место по умолчанию меняется в настройках ТВ-эфира.</string>
+    <string name="iptv_record_where_default">По умолчанию</string>
+    <string name="iptv_record_where_read_only">Только чтение</string>
+</resources>

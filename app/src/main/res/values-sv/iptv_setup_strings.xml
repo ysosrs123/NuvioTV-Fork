@@ -80,7 +80,7 @@
     <string name="iptv_review_kept">Den aktuella kanallistan behölls.</string>
     <string name="iptv_review_outdated">Listan är inaktuell. Uppdatera källan för att kontrollera igen.</string>
     <string name="iptv_groups_title">Delade anslutningar</string>
-    <string name="iptv_groups_description">Källor i en grupp delar en gemensam anslutningsgräns, till exempel flera spellistor från samma konto.</string>
+    <string name="iptv_groups_description">Leverantörer begränsar hur många kanaler ett konto kan spela samtidigt, ofta 1 eller 2. Om du har lagt till samma konto flera gånger, till exempel Xtream-inloggningen och en M3U-länk, lägg dessa källor i en grupp så att de delar en gräns. Då undviker du felet \"max antal anslutningar\" när du tittar och spelar in samtidigt.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d källa</item>
         <item quantity="other">%1$d källor</item>
@@ -98,7 +98,7 @@
     <string name="iptv_group_sources_description">Markerade källor delar gruppens anslutningar. En källa kan bara vara i en grupp.</string>
     <string name="iptv_group_limit_description">Hur många kanaler källorna i gruppen kan spela upp eller spela in samtidigt, sammanlagt.</string>
     <string name="iptv_transfer_title">Kopiera och säkerhetskopiera</string>
-    <string name="iptv_transfer_description">Flytta profilens Live-TV-konfiguration till en annan TV, eller spara en kopia i en låst fil.</string>
+    <string name="iptv_transfer_description">Kopiera profilens Live-TV-konfiguration (källor, guider, favoriter, kanalordning och inställningar) till en annan TV i nätverket, eller spara den i en säkerhetskopia låst med en lösenfras. Återställ den efter att appen installerats om eller på en ny box.</string>
     <string name="iptv_transfer_logins">Inkludera inloggningar</string>
     <string name="iptv_transfer_logins_subtitle">Användarnamn, lösenord, MAC-adresser och adresser som innehåller inloggningar. Utan dem utelämnas de källorna.</string>
     <string name="iptv_transfer_back">Tillbaka</string>

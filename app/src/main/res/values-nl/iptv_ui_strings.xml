@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Kies waar je het wilt opslaan. Wijzig de standaard in de live-tv-instellingen.</string>
+    <string name="iptv_record_where_default">Standaard</string>
+    <string name="iptv_record_where_read_only">Alleen-lezen</string>
+</resources>

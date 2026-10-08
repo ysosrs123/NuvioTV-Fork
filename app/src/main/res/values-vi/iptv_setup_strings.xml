@@ -79,7 +79,7 @@
     <string name="iptv_review_kept">Đã giữ danh sách kênh hiện tại.</string>
     <string name="iptv_review_outdated">Danh sách này đã cũ. Hãy làm mới nguồn để kiểm tra lại.</string>
     <string name="iptv_groups_title">Kết nối dùng chung</string>
-    <string name="iptv_groups_description">Các nguồn trong một nhóm dùng chung một giới hạn kết nối, ví dụ nhiều danh sách phát từ cùng một tài khoản.</string>
+    <string name="iptv_groups_description">Nhà cung cấp giới hạn số kênh một tài khoản có thể phát cùng lúc, thường là 1 hoặc 2. Nếu bạn đã thêm cùng một tài khoản nhiều lần, như đăng nhập Xtream và một liên kết M3U, hãy đặt các nguồn đó vào một nhóm để dùng chung một giới hạn. Điều này tránh lỗi \"vượt quá số kết nối\" khi vừa xem vừa ghi.</string>
     <plurals name="iptv_group_sources">
         <item quantity="other">%1$d nguồn</item>
     </plurals>
@@ -96,7 +96,7 @@
     <string name="iptv_group_sources_description">Các nguồn được đánh dấu dùng chung kết nối của nhóm này. Mỗi nguồn chỉ thuộc một nhóm.</string>
     <string name="iptv_group_limit_description">Tổng số kênh mà các nguồn trong nhóm này có thể phát hoặc ghi cùng lúc.</string>
     <string name="iptv_transfer_title">Sao chép và sao lưu</string>
-    <string name="iptv_transfer_description">Chuyển thiết lập TV trực tiếp của hồ sơ này sang TV khác, hoặc giữ bản sao trong một tệp có khóa.</string>
+    <string name="iptv_transfer_description">Sao chép thiết lập TV trực tiếp của hồ sơ này (nguồn, lịch phát sóng, yêu thích, thứ tự kênh và cài đặt) sang TV khác trong mạng của bạn, hoặc lưu vào tệp sao lưu được khóa bằng cụm mật khẩu. Khôi phục sau khi cài lại ứng dụng hoặc trên box mới.</string>
     <string name="iptv_transfer_logins">Bao gồm thông tin đăng nhập</string>
     <string name="iptv_transfer_logins_subtitle">Tên người dùng, mật khẩu, địa chỉ MAC và địa chỉ có chứa thông tin đăng nhập. Nếu không có, các nguồn đó sẽ bị bỏ qua.</string>
     <string name="iptv_transfer_back">Quay lại</string>

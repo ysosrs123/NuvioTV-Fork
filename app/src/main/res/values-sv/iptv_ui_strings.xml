@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Välj var den ska sparas. Ändra standard i Live-TV-inställningarna.</string>
+    <string name="iptv_record_where_default">Standard</string>
+    <string name="iptv_record_where_read_only">Skrivskyddad</string>
+</resources>

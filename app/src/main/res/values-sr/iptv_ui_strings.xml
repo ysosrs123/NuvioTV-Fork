@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Изаберите где да се сачува. Подразумевано место мењате у подешавањима ТВ уживо.</string>
+    <string name="iptv_record_where_default">Подразумевано</string>
+    <string name="iptv_record_where_read_only">Само за читање</string>
+</resources>

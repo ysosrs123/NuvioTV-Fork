@@ -80,7 +80,7 @@
     <string name="iptv_review_kept">Mevcut kanal listesi korundu.</string>
     <string name="iptv_review_outdated">Bu liste güncel değil. Tekrar kontrol etmek için kaynağı yenileyin.</string>
     <string name="iptv_groups_title">Paylaşılan bağlantılar</string>
-    <string name="iptv_groups_description">Bir gruptaki kaynaklar tek bir bağlantı sınırını paylaşır, örneğin aynı hesaptan birkaç oynatma listesi.</string>
+    <string name="iptv_groups_description">Sağlayıcılar bir hesabın aynı anda kaç kanal oynatabileceğini sınırlar, genellikle 1 veya 2. Aynı hesabı birden fazla kez eklediyseniz, örneğin Xtream girişi ve bir M3U bağlantısı olarak, bu kaynakları tek bir gruba koyun ki tek bir sınırı paylaşsınlar. Böylece aynı anda izleyip kaydederken \"maksimum bağlantı\" hatalarının önüne geçilir.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d kaynak</item>
         <item quantity="other">%1$d kaynak</item>
@@ -98,7 +98,7 @@
     <string name="iptv_group_sources_description">İşaretli kaynaklar bu grubun bağlantılarını paylaşır. Bir kaynak tek bir grupta olabilir.</string>
     <string name="iptv_group_limit_description">Bu gruptaki kaynakların toplamda aynı anda kaç kanal oynatabileceği veya kaydedebileceği.</string>
     <string name="iptv_transfer_title">Kopyala ve yedekle</string>
-    <string name="iptv_transfer_description">Bu profilin Canlı TV kurulumunu başka bir TV\'ye taşıyın veya kilitli bir dosyada kopyasını saklayın.</string>
+    <string name="iptv_transfer_description">Bu profilin Canlı TV kurulumunu (kaynaklar, yayın akışları, favoriler, kanal sırası ve ayarlar) ağınızdaki başka bir TV\'ye kopyalayın veya parola ifadesiyle kilitlenmiş bir yedek dosyasına kaydedin. Uygulamayı yeniden yükledikten sonra ya da yeni bir kutuda geri yükleyin.</string>
     <string name="iptv_transfer_logins">Giriş bilgilerini dahil et</string>
     <string name="iptv_transfer_logins_subtitle">Kullanıcı adları, parolalar, MAC adresleri ve giriş bilgisi içeren adresler. Bunlar olmadan o kaynaklar dahil edilmez.</string>
     <string name="iptv_transfer_back">Geri</string>

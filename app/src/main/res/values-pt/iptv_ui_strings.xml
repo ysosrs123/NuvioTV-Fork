@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Escolhe onde guardar. Altera a predefinição nas definições da TV em direto.</string>
+    <string name="iptv_record_where_default">Predefinição</string>
+    <string name="iptv_record_where_read_only">Só de leitura</string>
+</resources>

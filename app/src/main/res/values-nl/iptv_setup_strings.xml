@@ -80,7 +80,7 @@
     <string name="iptv_review_kept">Huidige zenderlijst behouden.</string>
     <string name="iptv_review_outdated">Die lijst is verouderd. Vernieuw de bron om opnieuw te controleren.</string>
     <string name="iptv_groups_title">Gedeelde verbindingen</string>
-    <string name="iptv_groups_description">Bronnen in één groep delen één verbindingslimiet, bijvoorbeeld meerdere playlists van hetzelfde account.</string>
+    <string name="iptv_groups_description">Providers beperken hoeveel zenders één account tegelijk kan afspelen, vaak 1 of 2. Heb je hetzelfde account meer dan eens toegevoegd, zoals de Xtream-login en een M3U-link, zet die bronnen dan in één groep zodat ze één limiet delen. Zo voorkom je \"maximaal aantal verbindingen\"-fouten als je tegelijk kijkt en opneemt.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d bron</item>
         <item quantity="other">%1$d bronnen</item>
@@ -98,7 +98,7 @@
     <string name="iptv_group_sources_description">Aangevinkte bronnen delen de verbindingen van deze groep. Een bron kan in één groep zitten.</string>
     <string name="iptv_group_limit_description">Hoeveel zenders de bronnen in deze groep samen tegelijk kunnen afspelen of opnemen.</string>
     <string name="iptv_transfer_title">Kopiëren en back-up</string>
-    <string name="iptv_transfer_description">Zet de live-tv-instellingen van dit profiel over naar een andere tv, of bewaar een kopie in een vergrendeld bestand.</string>
+    <string name="iptv_transfer_description">Kopieer de live-tv-instellingen van dit profiel (bronnen, gidsen, favorieten, zendervolgorde en instellingen) naar een andere tv in je netwerk, of bewaar ze in een back-upbestand dat met een wachtzin is vergrendeld. Zet ze terug na het opnieuw installeren van de app of op een nieuw kastje.</string>
     <string name="iptv_transfer_logins">Inloggegevens meenemen</string>
     <string name="iptv_transfer_logins_subtitle">Gebruikersnamen, wachtwoorden, MAC-adressen en adressen met inloggegevens erin. Zonder deze worden die bronnen weggelaten.</string>
     <string name="iptv_transfer_back">Terug</string>

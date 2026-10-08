@@ -82,7 +82,7 @@
     <string name="iptv_review_kept">Aktuálny zoznam kanálov ponechaný.</string>
     <string name="iptv_review_outdated">Tento zoznam je zastaraný. Obnovte zdroj a skontrolujte ho znova.</string>
     <string name="iptv_groups_title">Zdieľané pripojenia</string>
-    <string name="iptv_groups_description">Zdroje v jednej skupine zdieľajú jeden limit pripojení, napríklad viac playlistov z toho istého účtu.</string>
+    <string name="iptv_groups_description">Poskytovatelia obmedzujú, koľko kanálov môže jeden účet prehrávať naraz, často 1 alebo 2. Ak ste ten istý účet pridali viackrát, napríklad ako prihlásenie Xtream a odkaz M3U, dajte tieto zdroje do jednej skupiny, aby zdieľali jeden limit. Predídete tak chybám \"maximálny počet pripojení\" pri súčasnom sledovaní a nahrávaní.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d zdroj</item>
         <item quantity="few">%1$d zdroje</item>
@@ -102,7 +102,7 @@
     <string name="iptv_group_sources_description">Označené zdroje zdieľajú pripojenia tejto skupiny. Zdroj môže byť len v jednej skupine.</string>
     <string name="iptv_group_limit_description">Koľko kanálov môžu zdroje v tejto skupine naraz prehrávať alebo nahrávať, spolu.</string>
     <string name="iptv_transfer_title">Kopírovanie a záloha</string>
-    <string name="iptv_transfer_description">Presuňte nastavenie živej TV tohto profilu do iného TV alebo si uložte kópiu do zamknutého súboru.</string>
+    <string name="iptv_transfer_description">Skopírujte nastavenie živej TV tohto profilu (zdroje, TV programy, obľúbené, poradie kanálov a nastavenia) do iného TV vo vašej sieti alebo ho uložte do záložného súboru zamknutého prístupovou frázou. Obnovte ho po preinštalovaní aplikácie alebo na novom boxe.</string>
     <string name="iptv_transfer_logins">Zahrnúť prihlasovacie údaje</string>
     <string name="iptv_transfer_logins_subtitle">Používateľské mená, heslá, MAC adresy a adresy s prihlasovacími údajmi. Bez nich sa tieto zdroje vynechajú.</string>
     <string name="iptv_transfer_back">Späť</string>

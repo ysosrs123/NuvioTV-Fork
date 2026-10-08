@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">选择保存位置。可在直播电视设置中更改默认位置。</string>
+    <string name="iptv_record_where_default">默认</string>
+    <string name="iptv_record_where_read_only">只读</string>
+</resources>

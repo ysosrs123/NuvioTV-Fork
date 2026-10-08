@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Wybierz, gdzie zapisać. Domyślne miejsce zmienisz w ustawieniach telewizji na żywo.</string>
+    <string name="iptv_record_where_default">Domyślne</string>
+    <string name="iptv_record_where_read_only">Tylko do odczytu</string>
+</resources>

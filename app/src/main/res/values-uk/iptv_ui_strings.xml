@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Виберіть, куди зберегти. Місце за замовчуванням змінюється в налаштуваннях ТВ наживо.</string>
+    <string name="iptv_record_where_default">За замовчуванням</string>
+    <string name="iptv_record_where_read_only">Лише читання</string>
+</resources>

@@ -82,7 +82,7 @@
     <string name="iptv_review_kept">Trenutni seznam kanalov obdržan.</string>
     <string name="iptv_review_outdated">Ta seznam ni več aktualen. Osvežite vir, da znova preverite.</string>
     <string name="iptv_groups_title">Skupne povezave</string>
-    <string name="iptv_groups_description">Viri v isti skupini si delijo eno omejitev povezav, na primer več seznamov predvajanja z istega računa.</string>
+    <string name="iptv_groups_description">Ponudniki omejijo, koliko kanalov lahko en račun predvaja hkrati, pogosto 1 ali 2. Če ste isti račun dodali večkrat, na primer kot prijavo Xtream in povezavo M3U, dajte te vire v eno skupino, da si delijo eno omejitev. Tako se izognete napakam \"največje število povezav\" pri hkratnem gledanju in snemanju.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d vir</item>
         <item quantity="two">%1$d vira</item>
@@ -102,7 +102,7 @@
     <string name="iptv_group_sources_description">Označeni viri si delijo povezave te skupine. Vir je lahko samo v eni skupini.</string>
     <string name="iptv_group_limit_description">Koliko kanalov lahko viri v tej skupini hkrati predvajajo ali snemajo, skupaj.</string>
     <string name="iptv_transfer_title">Kopiranje in varnostna kopija</string>
-    <string name="iptv_transfer_description">Prenesite nastavitev TV v živo tega profila na drug TV ali shranite kopijo v zaklenjeno datoteko.</string>
+    <string name="iptv_transfer_description">Kopirajte nastavitev TV v živo tega profila (vire, vodnike, priljubljene, vrstni red kanalov in nastavitve) na drug TV v vašem omrežju ali jo shranite v datoteko varnostne kopije, zaklenjeno z geslom. Obnovite jo po ponovni namestitvi aplikacije ali na novem sprejemniku.</string>
     <string name="iptv_transfer_logins">Vključi prijavne podatke</string>
     <string name="iptv_transfer_logins_subtitle">Uporabniška imena, gesla, naslovi MAC in naslovi s prijavnimi podatki. Brez njih so ti viri izpuščeni.</string>
     <string name="iptv_transfer_back">Nazaj</string>
