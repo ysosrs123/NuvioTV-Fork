@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Αμφίρροπα παιχνίδια</string>
+    <string name="iptv_sport2_finished">Ολοκληρώθηκαν</string>
+    <string name="iptv_sport2_today">Σήμερα</string>
+    <string name="iptv_sport2_home">Εντός</string>
+    <string name="iptv_sport2_away">Εκτός</string>
+    <string name="iptv_sport2_final">Τελικό</string>
+    <string name="iptv_sport2_at">%1$s @ %2$s</string>
+    <string name="iptv_sport2_versus">%1$s – %2$s</string>
+    <string name="iptv_sport2_week">Εβδομάδα %1$d</string>
+    <string name="iptv_sport2_round">Αγωνιστική %1$d</string>
+    <string name="iptv_sport2_last_play">Τελευταία φάση</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">Στο %1$s</string>
+    <string name="iptv_sport2_show_scores">Εμφάνιση σκορ</string>
+    <string name="iptv_sport2_show_scores_subtitle">Απενεργοποιήστε για απόκρυψη σκορ, χρόνου αγώνα και αποτελεσμάτων.</string>
+    <string name="iptv_sport2_favourite_team">Αγαπημένη ομάδα</string>
+    <string name="iptv_sport2_favourite_subtitle">Οι αγαπημένες ομάδες έχουν αστέρι και εμφανίζονται πρώτες.</string>
+    <string name="iptv_sport2_favourite_hint">Με αστέρι και πρώτες στη λίστα. Κρατήστε το OK σε έναν αγώνα για προσθήκη ή αφαίρεση ομάδων.</string>
+    <string name="iptv_sport2_favourite_teams">Αγαπημένες ομάδες</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Διαγράψτε μια ομάδα για να την αφαιρέσετε από τα αγαπημένα.</string>
+</resources>

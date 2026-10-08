@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">משחקים צמודים</string>
+    <string name="iptv_sport2_finished">הסתיימו</string>
+    <string name="iptv_sport2_today">היום</string>
+    <string name="iptv_sport2_home">בית</string>
+    <string name="iptv_sport2_away">חוץ</string>
+    <string name="iptv_sport2_final">סיום</string>
+    <string name="iptv_sport2_at">%1$s @ %2$s</string>
+    <string name="iptv_sport2_versus">%1$s נגד %2$s</string>
+    <string name="iptv_sport2_week">שבוע %1$d</string>
+    <string name="iptv_sport2_round">מחזור %1$d</string>
+    <string name="iptv_sport2_last_play">מהלך אחרון</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">ב-%1$s</string>
+    <string name="iptv_sport2_show_scores">הצגת תוצאות</string>
+    <string name="iptv_sport2_show_scores_subtitle">יש לכבות כדי להסתיר תוצאות, שעוני משחק ותוצאות סופיות.</string>
+    <string name="iptv_sport2_favourite_team">קבוצה אהובה</string>
+    <string name="iptv_sport2_favourite_subtitle">קבוצות אהובות מסומנות בכוכב ומוצגות ראשונות.</string>
+    <string name="iptv_sport2_favourite_hint">מסומנות בכוכב ומוצגות ראשונות. לחיצה ארוכה על OK במשחק מוסיפה או מסירה קבוצות.</string>
+    <string name="iptv_sport2_favourite_teams">קבוצות אהובות</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">יש לנקות קבוצה כדי להסיר אותה מהמועדפים.</string>
+</resources>

@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">হাড্ডাহাড্ডি ম্যাচ</string>
+    <string name="iptv_sport2_finished">শেষ হয়েছে</string>
+    <string name="iptv_sport2_today">আজ</string>
+    <string name="iptv_sport2_home">হোম</string>
+    <string name="iptv_sport2_away">অ্যাওয়ে</string>
+    <string name="iptv_sport2_final">ফাইনাল</string>
+    <string name="iptv_sport2_at">%1$s @ %2$s</string>
+    <string name="iptv_sport2_versus">%1$s বনাম %2$s</string>
+    <string name="iptv_sport2_week">সপ্তাহ %1$d</string>
+    <string name="iptv_sport2_round">রাউন্ড %1$d</string>
+    <string name="iptv_sport2_last_play">শেষ খেলা</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">%1$s-এ</string>
+    <string name="iptv_sport2_show_scores">স্কোর দেখান</string>
+    <string name="iptv_sport2_show_scores_subtitle">স্কোর, খেলার সময় ও ফলাফল লুকাতে বন্ধ করুন।</string>
+    <string name="iptv_sport2_favourite_team">প্রিয় দল</string>
+    <string name="iptv_sport2_favourite_subtitle">প্রিয় দলগুলো তারকা চিহ্নিত ও প্রথমে দেখানো হয়।</string>
+    <string name="iptv_sport2_favourite_hint">তারকা চিহ্নিত ও প্রথমে দেখানো হয়। দল যোগ বা সরাতে কোনো ম্যাচে OK চেপে ধরুন।</string>
+    <string name="iptv_sport2_favourite_teams">প্রিয় দলগুলো</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">প্রিয় থেকে সরাতে কোনো দল মুছুন।</string>
+</resources>

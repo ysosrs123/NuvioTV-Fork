@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">مباريات متقاربة</string>
+    <string name="iptv_sport2_finished">انتهت</string>
+    <string name="iptv_sport2_today">اليوم</string>
+    <string name="iptv_sport2_home">على أرضه</string>
+    <string name="iptv_sport2_away">خارج أرضه</string>
+    <string name="iptv_sport2_final">النهائية</string>
+    <string name="iptv_sport2_at">%1$s @ %2$s</string>
+    <string name="iptv_sport2_versus">%1$s ضد %2$s</string>
+    <string name="iptv_sport2_week">الأسبوع %1$d</string>
+    <string name="iptv_sport2_round">الجولة %1$d</string>
+    <string name="iptv_sport2_last_play">آخر لعبة</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">على %1$s</string>
+    <string name="iptv_sport2_show_scores">إظهار النتائج</string>
+    <string name="iptv_sport2_show_scores_subtitle">أوقفه لإخفاء النتائج وتوقيت المباريات والنتائج النهائية.</string>
+    <string name="iptv_sport2_favourite_team">الفريق المفضل</string>
+    <string name="iptv_sport2_favourite_subtitle">تظهر الفرق المفضلة بنجمة وفي أعلى القائمة.</string>
+    <string name="iptv_sport2_favourite_hint">بنجمة وفي أعلى القائمة. اضغط مطولاً على OK فوق مباراة لإضافة الفرق أو إزالتها.</string>
+    <string name="iptv_sport2_favourite_teams">الفرق المفضلة</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">امسح فريقاً لإزالته من المفضلة.</string>
+</resources>

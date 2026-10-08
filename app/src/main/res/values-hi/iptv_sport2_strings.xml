@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">कांटे के मुकाबले</string>
+    <string name="iptv_sport2_finished">समाप्त</string>
+    <string name="iptv_sport2_today">आज</string>
+    <string name="iptv_sport2_home">होम</string>
+    <string name="iptv_sport2_away">अवे</string>
+    <string name="iptv_sport2_final">फ़ाइनल</string>
+    <string name="iptv_sport2_at">%1$s @ %2$s</string>
+    <string name="iptv_sport2_versus">%1$s बनाम %2$s</string>
+    <string name="iptv_sport2_week">सप्ताह %1$d</string>
+    <string name="iptv_sport2_round">राउंड %1$d</string>
+    <string name="iptv_sport2_last_play">आख़िरी प्ले</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">%1$s पर</string>
+    <string name="iptv_sport2_show_scores">स्कोर दिखाएँ</string>
+    <string name="iptv_sport2_show_scores_subtitle">स्कोर, गेम क्लॉक और नतीजे छिपाने के लिए बंद करें।</string>
+    <string name="iptv_sport2_favourite_team">पसंदीदा टीम</string>
+    <string name="iptv_sport2_favourite_subtitle">पसंदीदा टीमों पर स्टार लगता है और वे सबसे पहले दिखती हैं।</string>
+    <string name="iptv_sport2_favourite_hint">स्टार लगी और सबसे पहले दिखती हैं। टीमें जोड़ने या हटाने के लिए किसी मैच पर OK दबाकर रखें।</string>
+    <string name="iptv_sport2_favourite_teams">पसंदीदा टीमें</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">किसी टीम को पसंदीदा से हटाने के लिए उसे साफ़ करें।</string>
+</resources>

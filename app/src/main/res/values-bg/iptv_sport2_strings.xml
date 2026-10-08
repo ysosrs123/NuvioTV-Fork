@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Оспорвани мачове</string>
+    <string name="iptv_sport2_finished">Завършили</string>
+    <string name="iptv_sport2_today">Днес</string>
+    <string name="iptv_sport2_home">Домакин</string>
+    <string name="iptv_sport2_away">Гост</string>
+    <string name="iptv_sport2_final">Край</string>
+    <string name="iptv_sport2_at">%1$s при %2$s</string>
+    <string name="iptv_sport2_versus">%1$s – %2$s</string>
+    <string name="iptv_sport2_week">Седмица %1$d</string>
+    <string name="iptv_sport2_round">Кръг %1$d</string>
+    <string name="iptv_sport2_last_play">Последно действие</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">По %1$s</string>
+    <string name="iptv_sport2_show_scores">Показване на резултати</string>
+    <string name="iptv_sport2_show_scores_subtitle">Изключете, за да скриете резултати, игрово време и крайни резултати.</string>
+    <string name="iptv_sport2_favourite_team">Любим отбор</string>
+    <string name="iptv_sport2_favourite_subtitle">Любимите отбори са със звезда и се показват първи.</string>
+    <string name="iptv_sport2_favourite_hint">Със звезда и показани първи. Задръжте OK върху мач, за да добавите или премахнете отбори.</string>
+    <string name="iptv_sport2_favourite_teams">Любими отбори</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Изчистете отбор, за да го премахнете от любимите.</string>
+</resources>

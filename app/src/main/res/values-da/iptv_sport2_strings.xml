@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Tætte kampe</string>
+    <string name="iptv_sport2_finished">Afsluttet</string>
+    <string name="iptv_sport2_today">I dag</string>
+    <string name="iptv_sport2_home">Hjemme</string>
+    <string name="iptv_sport2_away">Ude</string>
+    <string name="iptv_sport2_final">Slut</string>
+    <string name="iptv_sport2_at">%1$s @ %2$s</string>
+    <string name="iptv_sport2_versus">%1$s – %2$s</string>
+    <string name="iptv_sport2_week">Uge %1$d</string>
+    <string name="iptv_sport2_round">Runde %1$d</string>
+    <string name="iptv_sport2_last_play">Seneste spil</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">På %1$s</string>
+    <string name="iptv_sport2_show_scores">Vis resultater</string>
+    <string name="iptv_sport2_show_scores_subtitle">Slå fra for at skjule resultater, kampure og slutresultater.</string>
+    <string name="iptv_sport2_favourite_team">Favorithold</string>
+    <string name="iptv_sport2_favourite_subtitle">Favorithold får en stjerne og vises først.</string>
+    <string name="iptv_sport2_favourite_hint">Stjernemarkeret og vist først. Hold OK på en kamp for at tilføje eller fjerne hold.</string>
+    <string name="iptv_sport2_favourite_teams">Favorithold</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Ryd et hold for at fjerne det fra dine favoritter.</string>
+</resources>
