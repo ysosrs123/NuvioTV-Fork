@@ -304,6 +304,16 @@ Sport:
   matching runs separately. Score parsing checked against real ESPN and TheSportsDB
   responses (NRL and cricket scores corrected).
 
+## Changes after 8 October 2026 (not device-tested)
+
+Fixes from an independent review:
+- Recordings saved to the Movies folder no longer stop playing after a quick seek (a
+  cancelled read closed the file for every later read; it now reopens).
+- Seeking or Return to live during local timeshift no longer ends the timeshift session
+  (reads use their own file handle, so a cancelled read cannot close the recording ring).
+- Guide downloads stop early with "not enough space" when under 128 MB is free, instead
+  of failing as "could not be accepted".
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
@@ -496,6 +506,7 @@ Phone setup (security review)
 
 ## Validation
 
+- After 8 October: review fixes host-tested (261 data-layer JVM tests); CI pending.
 - Latest: debug build green at `ada280b` (run 37767996467) with the fixes from both
   8 October device passes; translations completed in `ecf29d4`. Minified release build
   last green at `ec6f16f` (run 37596443549). Before that: `f29cbe2` (run 37599069380).

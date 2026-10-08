@@ -68,6 +68,7 @@ class IptvGuideRepository(private val store: IptvGuideStore, private val client:
             }
             folder.mkdirs()
             if (swept.compareAndSet(false, true)) folder.listFiles()?.filter { it.name.startsWith("guide-") && it.lastModified() < System.currentTimeMillis() - STALE_DOWNLOAD_MILLIS }?.forEach { it.delete() }
+            if (folder.usableSpace in 0 until MIN_DOWNLOAD_SPACE) return@withContext IptvGuideRefresh.StorageFull
             val file = File.createTempFile("guide-", ".part", folder)
             try {
                 when (val result = client.fetch(address, previous) { input, validators, _ ->
@@ -116,5 +117,6 @@ class IptvGuideRepository(private val store: IptvGuideStore, private val client:
     private companion object {
         const val COPY_BUFFER = 64 * 1024
         const val STALE_DOWNLOAD_MILLIS = 24 * 60 * 60 * 1000L
+        const val MIN_DOWNLOAD_SPACE = 128L * 1024 * 1024
     }
 }

@@ -23,6 +23,7 @@ class IptvLocalTimeshiftRing(private val file: File, provisionalCapacity: Long,
     init { require(provisionalCapacity > 0 && provisionalCapacity % LocalTimeshiftSizing.PACKET == 0L) }
     private val access = RandomAccessFile(file, "rw")
     private val channel = access.channel
+    private val reader = RandomAccessFile(file, "r")
     private val lock = Object()
     val index = LocalTimeshiftIndex()
     @Volatile var capacity = provisionalCapacity
@@ -85,12 +86,14 @@ class IptvLocalTimeshiftRing(private val file: File, provisionalCapacity: Long,
             available = head - at
         }
         val part = LocalTimeshiftRing.contiguous(at, minOf(length.toLong(), available).toInt(), size)
-        val buffer = ByteBuffer.wrap(target, offset, part)
-        var position = LocalTimeshiftRing.filePosition(at, size)
-        while (buffer.hasRemaining()) {
-            val count = channel.read(buffer, position)
-            if (count < 0) throw IptvLocalTimeshiftClosedException(LocalTimeshiftFailure.STORAGE)
-            position += count
+        synchronized(reader) {
+            reader.seek(LocalTimeshiftRing.filePosition(at, size))
+            var done = 0
+            while (done < part) {
+                val count = reader.read(target, offset + done, part - done)
+                if (count < 0) throw IptvLocalTimeshiftClosedException(LocalTimeshiftFailure.STORAGE)
+                done += count
+            }
         }
         if (!LocalTimeshiftRing.intact(at, head, size)) throw IptvLocalTimeshiftBehindException()
         return part
@@ -102,6 +105,7 @@ class IptvLocalTimeshiftRing(private val file: File, provisionalCapacity: Long,
         synchronized(lock) { if (closed) return; closed = true; lock.notifyAll() }
         try { channel.close() } catch (_: IOException) { }
         try { access.close() } catch (_: IOException) { }
+        try { reader.close() } catch (_: IOException) { }
         file.delete()
     }
 }

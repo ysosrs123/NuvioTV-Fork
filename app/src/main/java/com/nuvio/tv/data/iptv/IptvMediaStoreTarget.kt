@@ -13,7 +13,9 @@ import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import com.nuvio.tv.core.iptv.RecordingMedia
 import java.io.IOException
+import java.io.InterruptedIOException
 import java.nio.ByteBuffer
+import java.nio.channels.ClosedChannelException
 import java.nio.channels.FileChannel
 
 data class IptvMediaEntry(val id: Long, val name: String, val pending: Boolean)
@@ -172,7 +174,8 @@ class IptvMediaStoreReader(private val files: IptvMediaFiles, private val id: Lo
 
     @Synchronized override fun read(position: Long, buffer: ByteArray, offset: Int, length: Int): Int {
         if (length == 0) return 0
-        return opened().read(ByteBuffer.wrap(buffer, offset, length), position)
+        return try { opened().read(ByteBuffer.wrap(buffer, offset, length), position) }
+        catch (error: ClosedChannelException) { channel = null; throw InterruptedIOException().apply { initCause(error) } }
     }
 
     @Synchronized override fun close() {
@@ -180,7 +183,7 @@ class IptvMediaStoreReader(private val files: IptvMediaFiles, private val id: Lo
         channel = null
     }
 
-    private fun opened(): FileChannel = channel ?: try { files.openRead(id) } catch (error: SecurityException) {
+    private fun opened(): FileChannel = channel?.takeIf { it.isOpen } ?: try { files.openRead(id) } catch (error: SecurityException) {
         throw IOException("Media recording not accessible", error)
     }.also { channel = it }
 

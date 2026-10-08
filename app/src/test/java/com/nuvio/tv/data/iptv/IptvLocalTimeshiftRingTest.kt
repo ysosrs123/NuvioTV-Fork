@@ -48,6 +48,22 @@ class IptvLocalTimeshiftRingTest {
         ring.close()
     }
 
+    @Test fun interruptedReaderLeavesTheRingWritable() {
+        val ring = IptvLocalTimeshiftRing(File(directory, "ring.ts"), capacity)
+        fill(ring, 1024)
+        var read = -1
+        thread {
+            Thread.currentThread().interrupt()
+            read = ring.read(ring.oldest(), ByteArray(188 * 8), 0, 188 * 8, 0)
+        }.join()
+        assertEquals(188 * 8, read)
+        ring.write(packets(1024, 8), 0, 188 * 8)
+        val buffer = ByteArray(188)
+        assertEquals(188, ring.read(1024L * 188, buffer, 0, 188, 0))
+        assertEquals(expected(1024L * 188 + 1), buffer[1])
+        ring.close()
+    }
+
     @Test fun overwrittenDataIsReportedAsBehind() {
         val ring = IptvLocalTimeshiftRing(File(directory, "ring.ts"), capacity)
         fill(ring, 6144)
