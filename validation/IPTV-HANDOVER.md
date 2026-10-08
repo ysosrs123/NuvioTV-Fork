@@ -15,6 +15,7 @@ Related: [progress](IPTV-PROGRESS.md), [sports design pass 2](IPTV-SPORTS-DESIGN
 ## Start here — next session (from 9 October 2026)
 
 State: everything is committed and pushed on `iptv/player-binding`. Last green debug build
+`6afbea0` (run 37791659338), minified release `dd888c0` (run 37795570642); before the sports build
 `ada280b` (run 37767996467); later commits are translations (`ecf29d4`) and docs only.
 Minified release last green at `ec6f16f` (run 37596443549). Host tests: core 626,
 data 256, androidTest compiles. Nothing after `b68985a` is device-tested except the
@@ -32,7 +33,8 @@ Next, in order:
    overlays, 2 Game Centre and markers, 3 new sport formats, 4 across Nuvio); default
    overlay Glance; background checks while watching films allowed for followed teams'
    live games only.
-   BUILT (8 October, CI green at `9d563f0`, run 37779066258; not device-tested): all four
+   BUILT (8 October; debug green at `6afbea0` run 37791659338, minified release green at
+   `dd888c0` run 37795570642; not device-tested): all four
    parts. New files: core/iptv SportsLive, SportsDetail, SportsSummary, SportsGuideCells,
    SportsOverlayText, SportsRecordRules; data/iptv IptvSportsLive (app-wide polling,
    alerts, reminders), IptvSportsSummaryClient; ui/screens/iptv IptvSportsOverlay,
