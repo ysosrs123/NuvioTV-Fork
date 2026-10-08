@@ -38,7 +38,7 @@ class IptvGuideClient(
         consume: (InputStream, CatalogueValidators, () -> Unit) -> T): GuideDownload<T> = withContext(Dispatchers.IO) {
         require(listOf(validators?.etag, validators?.lastModified).all { it == null || (it.length <= 4096 && '\r' !in it && '\n' !in it) })
         permits.withPermit {
-            var url = address.toHttpUrlOrNull()?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+            var url = address.toHttpUrlOrNull()?.newBuilder()?.fragment(null)?.build()?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
             var redirected = false
             val visited = mutableSetOf<HttpUrl>()
             repeat(IptvMetadataClient.MAX_REDIRECTS + 1) {
@@ -59,7 +59,7 @@ class IptvGuideClient(
                 }) {
                     is Step.Done -> return@withPermit step.value
                     is Step.Redirect -> {
-                        val next = url.resolve(step.location)?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+                        val next = url.resolve(step.location)?.newBuilder()?.fragment(null)?.build()?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
                         val sameOrigin = next.scheme == url.scheme && next.host == url.host && next.port == url.port
 
                         if (!sameOrigin && next.scheme != "https") throw MetadataException(MetadataFailure.REDIRECT_REQUIRES_REVIEW)

@@ -71,6 +71,15 @@ class IptvGuideClientTest {
             assertEquals("identity", server.takeRequest().getHeader("Accept-Encoding"))
         }
     }
+    @Test fun redirectWithAnEmptyFragmentIsFollowed() = runBlocking {
+        MockWebServer().use { server ->
+            server.enqueue(MockResponse().setResponseCode(302).addHeader("Location", "/cd/0/get/guide.xml.gz?dl=1#"))
+            server.enqueue(MockResponse().setBody(xml))
+            assertEquals(GuideDownload.Imported(1), read(IptvGuideClient(), server.url("/s/guide.xml.gz?rlkey=a&dl=1").toString()))
+            assertEquals(2, server.requestCount)
+        }
+    }
+
     @Test fun crossOriginRedirectCannotForwardCredentialsOrContactTarget() = runBlocking {
         MockWebServer().use { first -> MockWebServer().use { other ->
             first.enqueue(MockResponse().setResponseCode(302).addHeader("Location", other.url("/secret")))

@@ -190,10 +190,13 @@ object RecordingFiles {
         return if (stem in RESERVED) "_$name" else name
     }
 
+    private fun decoration(char: Char): Boolean = char.code in 0x02B0..0x02FF || char.code in 0x1D2C..0x1D6A ||
+        char.code in 0x1D9B..0x1DBF || char.code in 0x2070..0x209F || char.code in 0xFE00..0xFE0F || char == '\u200D'
+
     private fun shorten(value: String): String = value.dropLast(1).trimEnd(' ', '.', '-', '_', ',')
 
     private fun clean(value: String, limit: Int): String {
-        val normal = Normalizer.normalize(value, Normalizer.Form.NFC)
+        val normal = Normalizer.normalize(value.filterNot(::decoration), Normalizer.Form.NFKC)
         val mapped = buildString {
             for (char in normal) append(if (char.isLetterOrDigit() || char in KEPT || char.category == CharCategory.NON_SPACING_MARK ||
                     char.category == CharCategory.COMBINING_SPACING_MARK) char else ' ')

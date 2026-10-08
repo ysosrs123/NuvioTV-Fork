@@ -116,6 +116,10 @@ class LiveRecordingTest {
         assertTrue(long.length < 200)
         assertEquals("2026-10-07 1100 - abcdef01.ts", RecordingFiles.name("///", null, now, "abcdef0123456789", zone))
         try { RecordingFiles.name("a", null, now, "../escape", zone); fail() } catch (_: IllegalArgumentException) { }
+        assertEquals("Sky Sports Tennis - Live Tennis ATP Shanghai Masters 2026 Day 2 - 2026-10-07 1100 - abcdef01.ts",
+            RecordingFiles.name("Sky Sports Tennis ᴴᴰ", "Live Tennis: ATP Shanghai Masters 2026 : Day 2 ᴸᶦᵛᵉ", now, "abcdef0123456789", zone))
+        assertEquals("Ｆｕｌｌ 1 - 2026-10-07 1100 - abcdef01.ts".replace("Ｆｕｌｌ", "Full"), RecordingFiles.name("Ｆｕｌｌ ¹", null, now, "abcdef0123456789", zone))
+        assertEquals("天気予報々 - 2026-10-07 1100 - abcdef01.ts", RecordingFiles.name("天気予報々", null, now, "abcdef0123456789", zone))
     }
 
     @Test fun spanUsesProgrammeTimesInsidePadding() {

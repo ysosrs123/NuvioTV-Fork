@@ -1,6 +1,12 @@
 @file:OptIn(androidx.tv.material3.ExperimentalTvMaterial3Api::class)
 package com.nuvio.tv.ui.screens.iptv
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.rememberScrollState
@@ -104,7 +110,12 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
     LaunchedEffect(state.ready, state.busy, state.revision) {
         if (state.ready && !state.busy && !initiallyFocused) { withFrameNanos { }; runCatching { first.requestFocus() }; initiallyFocused = true }
     }
-    Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
+    BackHandler(onBack = onBack)
+    val focusManager = LocalFocusManager.current
+    Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background).onKeyEvent { event ->
+        if (event.type != KeyEventType.KeyDown || event.key != Key.DirectionLeft) false
+        else { if (!focusManager.moveFocus(FocusDirection.Left)) onBack(); true }
+    }) {
         if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
             Column(Modifier.width(340.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {

@@ -44,7 +44,7 @@ class IptvMetadataClient(
     }
 
     suspend fun playlist(address: String, validators: CatalogueValidators? = null): PlaylistDownload {
-        var url = address.toHttpUrlOrNull()?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+        var url = address.toHttpUrlOrNull()?.newBuilder()?.fragment(null)?.build()?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
         val visited = mutableSetOf<HttpUrl>()
         var redirected = false
         repeat(MAX_REDIRECTS + 1) {
@@ -58,7 +58,7 @@ class IptvMetadataClient(
             when (val result = download(request, !redirected && validators != null && (validators.etag != null || validators.lastModified != null))) {
                 is Step.Done -> return result.result
                 is Step.Redirect -> {
-                    val next = url.resolve(result.location)?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
+                    val next = url.resolve(result.location)?.newBuilder()?.fragment(null)?.build()?.takeIf(::usable) ?: throw MetadataException(MetadataFailure.INVALID_ADDRESS)
 
                     if (url.scheme != next.scheme || url.host != next.host || url.port != next.port) {
                         throw MetadataException(MetadataFailure.REDIRECT_REQUIRES_REVIEW)
