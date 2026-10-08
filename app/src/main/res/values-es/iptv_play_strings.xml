@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">Pulsa Derecha para volver al directo</string>
+    <string name="iptv_play_corner_full">Esta imagen solo se muestra a pantalla completa. Pulsa OK para ver.</string>
+</resources>

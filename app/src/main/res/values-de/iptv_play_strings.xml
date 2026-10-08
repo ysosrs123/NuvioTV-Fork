@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">Rechts drücken, um zu Live zurückzukehren</string>
+    <string name="iptv_play_corner_full">Dieses Bild wird nur im Vollbild angezeigt. OK zum Ansehen.</string>
+</resources>

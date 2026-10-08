@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">Натисніть праворуч, щоб повернутися до ефіру</string>
+    <string name="iptv_play_corner_full">Це зображення показується лише на весь екран. Натисніть OK для перегляду.</string>
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">நேரலைக்குத் திரும்ப வலது அழுத்தவும்</string>
+    <string name="iptv_play_corner_full">இந்தப் படம் முழுத்திரையில் மட்டுமே காட்டப்படும். பார்க்க OK அழுத்தவும்.</string>
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">Nyomd meg a jobbra gombot az élő adáshoz való visszatéréshez</string>
+    <string name="iptv_play_corner_full">Ez a kép csak teljes képernyőn látszik. Nyomd meg az OK gombot a nézéshez.</string>
+</resources>

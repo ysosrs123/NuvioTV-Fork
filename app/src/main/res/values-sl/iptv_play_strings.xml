@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">Pritisnite desno za vrnitev v živo</string>
+    <string name="iptv_play_corner_full">Ta slika je prikazana samo celozaslonsko. Pritisnite OK za ogled.</string>
+</resources>

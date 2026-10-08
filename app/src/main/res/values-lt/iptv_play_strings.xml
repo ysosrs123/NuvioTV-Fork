@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">Paspauskite dešinėn, kad grįžtumėte į tiesioginį</string>
+    <string name="iptv_play_corner_full">Šis vaizdas rodomas tik per visą ekraną. Paspauskite OK, kad žiūrėtumėte.</string>
+</resources>

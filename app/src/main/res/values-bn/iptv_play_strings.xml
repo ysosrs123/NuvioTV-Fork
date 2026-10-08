@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">লাইভে ফিরতে ডানে চাপুন</string>
+    <string name="iptv_play_corner_full">এই ছবিটি শুধু ফুল স্ক্রিনে দেখায়। দেখতে OK চাপুন।</string>
+</resources>

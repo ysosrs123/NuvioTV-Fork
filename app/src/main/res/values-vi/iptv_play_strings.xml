@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">Nhấn Phải để về trực tiếp</string>
+    <string name="iptv_play_corner_full">Hình này chỉ hiện ở chế độ toàn màn hình. Nhấn OK để xem.</string>
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">Tryck höger för att gå tillbaka till live</string>
+    <string name="iptv_play_corner_full">Den här bilden visas bara i helskärm. Tryck OK för att titta.</string>
+</resources>

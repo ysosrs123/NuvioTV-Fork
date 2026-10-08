@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">Shtyp djathtas për t\'u kthyer te live</string>
+    <string name="iptv_play_corner_full">Kjo pamje shfaqet vetëm në ekran të plotë. Shtyp OK për të parë.</string>
+</resources>

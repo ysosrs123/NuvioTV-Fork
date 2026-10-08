@@ -1,0 +1,4 @@
+<resources>
+    <string name="iptv_play_return_hint">Pritisnite desno za povratak na uživo</string>
+    <string name="iptv_play_corner_full">Ova slika se prikazuje samo preko celog ekrana. Pritisnite OK za gledanje.</string>
+</resources>
