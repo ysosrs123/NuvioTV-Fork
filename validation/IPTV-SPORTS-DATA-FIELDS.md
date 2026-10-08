@@ -251,3 +251,107 @@ teams and artwork, not live scores.
 Suggested split: ESPN for live detail in the leagues it covers; TheSportsDB for breadth
 (schedules, results, teams, artwork across 37 sports) and for live scores in smaller
 soccer, basketball and ice hockey leagues ESPN lacks.
+
+## ESPN second pass (8 October 2026)
+
+Second set of real responses: scoreboards for EPL, UCL, A-League, NFL, NCAAF, NBA, NBL,
+NHL, MLB, AFL, NRL, United Rugby Championship (`rugby/270557`), ATP, WTA, PGA, F1,
+NASCAR, UFC and cricket; summaries for all team leagues except F1/NASCAR/UFC/golf/tennis;
+plus the multi-sport header feed. No team game was in progress. Live data was seen only
+in golf (event state `in` between rounds) and tennis (3 matches `in` in each tour file).
+
+### Multi-sport header feed
+
+`site.web.api.espn.com/apis/v2/scoreboard/header?region=au` (418 KB). Shape:
+`sports[]` → `leagues[]` (`slug`, `abbreviation`, `isTournament`, `smartdates[]`, 3 dates)
+→ `events[]`. One request returned 8 sports, 11 leagues, 24 events:
+
+| Sport | League (`slug`) | Events |
+|---|---|---|
+| Baseball | `mlb` | 4 |
+| Basketball | `wnba`, `nba` | 2, 5 |
+| Ice hockey | `nhl` | 3 |
+| Football | `college-football` | 2 |
+| Tennis | `wta`, `atp` | 2, 2 |
+| Golf | `pga` | 1 (25 players) |
+| Volleyball | `womens-college-volleyball` | 1 |
+| Soccer | `usa.ncaa.w.1`, `usa.ncaa.m.1` | 1, 1 |
+
+All 24 events were `post` (dated 7 October 20:00Z to 8 October 05:45Z). Absent despite
+`region=au`: AFL, NRL, NBL, A-League, EPL, UCL, rugby union, cricket, F1, NASCAR, UFC,
+and also NFL (15 games scheduled that night). Broadcasts are US networks; links point to
+`espn.com.au`.
+
+Per-event fields (flat, not under `competitions`):
+
+| Field | Example | Notes |
+|---|---|---|
+| `status`, `summary` | `post`, `Final`, `Final/OT`, `FT`, `Round 1 - Play Complete` | ready-made ticker text |
+| `fullStatus.type.{name,state,detail,shortDetail,altDetail}`, `fullStatus.displayPeriod`, `periodPrefix` | `STATUS_FINAL`, `OT`, `9th`, `End` | |
+| `clock`, `fullStatus.displayClock`, `fullStatus.clock` (s), soccer `addedClock` | `5:00`, `90'` | missing for MLB, tennis, golf |
+| `period` | `9`, `5` (OT) | |
+| `competitors[]` `{homeAway, winner, displayName, abbreviation, color, alternateColor, score, logo, logoDark, record}` | `NY` `98`, `26-18` | no `linescores` for team sports |
+| NHL `competitors[].goalieSummary[].displayValue` | `5 GA, 22 SV, .815 SV%` | |
+| MLB `onFirst`, `onSecond`, `onThird` (0/1), `outsText`, `baseRunnersText`, `competitors[].summaryAthletes[]` (`STARTING_PITCHER`) | `0 Outs`, `Bases empty` | 4 MLB events; values seen only after the game |
+| `seriesSummary`, `note`, `competitionType.text` | `CHW lead series 2-1`, `ALDS - Game 3` | playoffs |
+| `odds` | `provider.name` `TAB Betting`, `homeTeamOdds.favorite` | 4 events (MLB, NCAAF); no spread or total in any |
+| `broadcasts[]` `{type, name, shortName, isNational, region}` | `TBS`, `ESPN Radio` | 15 events |
+| Tennis `competitors[].linescores[]` `{value, setScore, winner}`, `score`, `notes[0].text` | `6-3 7-5`, `... bt ... 6-3 7-5` | |
+| Golf `competitors[]` `{place, movement, amateur, score, status.{teeTime, hole, thru, state, todayDetail}}`, event `displayPurse`, `defendingChampion` | `1`, `-8`, `-8(F)`, `$8,000,000` | top 25 of 72 |
+
+Could it replace per-league scoreboard polling for the HUD? Only partly. It is one
+request for many leagues and carries ticker-ready text, but: (1) the league list is
+curated by ESPN and US-centred, with none of the Australian leagues or the EPL/UCL;
+(2) it lagged or filtered — tennis showed 2 finished matches per tour while the tour
+scoreboards had 3 live matches each, and golf showed `post` while the golf scoreboard
+event was `in`; (3) no period lines for team sports and no situation fields were seen.
+Use it for a cross-sport ticker or "elsewhere" row; keep per-league scoreboards for
+fixtures, period scores and Australian leagues. Live fields (clock while running,
+football situation, MLB base runners during play) remain unverified here.
+
+### Individual sports not handled yet
+
+The app's parser assumes `events[].competitions[0]` with two teams. These do not fit:
+
+| Sport | Shape (`e` = `events[]`) | Seen | Card / HUD could show |
+|---|---|---|---|
+| Golf (PGA) | One `e`; `e.status.type.state` `in` while `e.competitions[0].status` was `STATUS_PLAY_COMPLETE` (`Round 1 - Play Complete`, period 1). `competitors[]` = 72 players: `order` (1–72, ties not marked), `score` (to par, `-8` … `+10`), `athlete.displayName`, `shortName`, `flag.href`, `statistics` (empty for all 72), `linescores[]` per round (`value` 63 strokes, `displayValue` `-8`, `period` 1, nested 18 holes with `value`, `period` = hole, `scoreType.displayValue` `E`/`-1`/`+1`; round 2 only `{period: 2}`). Round `statistics.categories[0].stats` are 7 unlabelled values. No place, thru or tee time on the scoreboard (the header has them). | 164 KB; Baycurrent Classic, 8–11 Oct; `Golf Chnl`; `leagues[0].calendar` | Event, round status, top 5 with flag and to-par, viewer's player highlighted; HUD: leader and score |
+| Tennis (ATP, WTA) | `e` = tournament (`name`, `venue.displayName`, `major`, `previousWinners[]`); `e.groupings[]` (`grouping.slug` `mens-singles`, `womens-doubles`, …) → `competitions[]` = matches with `round.displayName`, `venue.court`, `status` (`detail` `3rd Set`), `notes[0].text` (`... leads ... 1-6 6-3 5-4`). `competitors[]` `{order, homeAway, winner, curatedRank.current (seed), athlete.displayName, flag}`; doubles `type: team`, `roster.displayName` `F. Reynolds / J. Watt` style. `linescores[]` per set `{value, winner, tiebreak}`; current set has no `winner`. Live WTA matches had `possession` (server) true/false; the 2 live Shanghai ATP matches had none. No point score within a game. `format.regulation.periods` was 5 for every match in the ATP file and 3 in the WTA file, so it is not reliable. | ATP 836 KB: 2 tournaments, 385 matches (275 post, 3 in, 107 pre). WTA 804 KB: 3 tournaments, 343 matches (304 post, 3 in, 36 pre). One China Open match is in both files. No match had broadcasts. | Live matches first: names, seeds, set games with tiebreak, serve dot, round, court; filter by `state` and stream-parse (size) |
+| F1 | One `e` (Singapore Grand Prix, `circuit.fullName` `Marina Bay Street Circuit`, `circuit.address`); `competitions[]` = 5 sessions, `type.abbreviation` `FP1`, `SS`, `SR`, `Qual`, `Race`, each with own `date`, `status`, `broadcasts` (`Apple TV`). `competitors` empty before each session. | 11 KB; all `pre`; `calendar` 25 | Weekend card with the session list and local times; next session as the fixture for guide matching. Results/driver fields unverified. |
+| NASCAR | League `nascar-premier`; one `e` (`NASCAR Cup Series at Charlotte`, 11 Oct 19:00Z), one competition, 0 competitors, `broadcasts` `USA Net`, `HBO Max`; no venue or circuit field. | 12 KB; `calendar` 40 | Race name, start time, channel. Running order unverified. |
+| UFC | One `e` (`UFC Fight Night: Allen vs. Duncan`, `venues[0]` Meta APEX, Las Vegas); `competitions[]` = 12 bouts: `type.abbreviation` weight class (`Middleweight`, `W Flyweight`), `format.regulation.periods` 3 (main event 5), 2 `competitors` (`order`, `winner`, `athlete.displayName`, `athlete.flag`, `records[0].summary` `27-7-0`), `status.displayClock` `-`, `broadcasts` `Paramount+`. Main event is the last bout. No card-segment field; 7 bouts at 21:00Z and 5 at 00:00Z mark prelims and main card. | 34 KB; all `pre` | Card headline from the last bout, main card and prelims split by start time, records, weight class |
+
+### Summaries compared with the first pass
+
+| League | State | New or different |
+|---|---|---|
+| MLB (CLE 9 at CHW 3, ALDS) | post, 1,085 KB | `plays[]` 645 (`type.text` `Ball`, `Play Result`, …; `alternativeType` `Double`/`2B`; `period.type` `Top`/`Bottom`; `outs`; `pitchCount`/`resultCount` balls-strikes; `onFirst`/`onSecond`/`onThird` `{athlete.id}`; `pitchType`, `pitchVelocity`; `wallclock`); `atBats` 84 and `playsMap` 645 (`$ref` into `plays`); `winprobability[]` 84, one per at-bat (`homeWinPercentage` 0.739 first, 0.0 last). Scoreboard `situation` was null after the game. |
+| NBL (Cairns 97–91 Brisbane) | post, 242 KB | `plays[]` 409 with `clock`, `period`, `text`, `shortDescription`, `scoringPlay`, `shootingPlay`, `pointsAttempted`, `coordinate` (placeholder values for non-shots); no `wallclock`. `winprobability` present but empty; `standings.groups` empty; `leaders` and `boxscore.players` for both teams. |
+| NHL (PIT at WSH) | post, 469 KB | `plays[]` 307 with `strength`, `shotInfo` (8), `wallclock`; `onIce[]`; no `winprobability`. |
+| UCL | pre, 199 KB | `standings.groups[0]` 36 entries (league phase), stats `GP W D L GD P`. |
+| A-League Men | pre, 106 KB | standings 12 entries (same stats); `odds`, `pickcenter`, `rosters` present. EPL: 20 entries. |
+| URC (Glasgow Warriors v Connacht) | pre, 114 KB | `headToHeadGames[]` 1 entry (`team` + 5 `events` with `score`, `homeTeamScore`, `awayTeamScore`, `gameResult`, `opponent`, `gameDate`); NRL has the same shape (5 events). Standings use `standings.children[].standings.entries` (16 entries, 28 stats incl. `BP`, `TBP`, `LBP`), not `groups`. `rosters` empty, `odds`/`pickcenter` empty lists, team box score stats empty before kick-off. Scoreboard `records[0].summary` is form (`TWLWW`), already rejected by the record filter. No broadcasts. |
+| NCAAF | pre, 112 KB | `predictor`; `winprobability` empty; standings 18 (Big Ten, stats `overall`, `CONF`). |
+| NFL, AFL, NRL, NBA, EPL, cricket | as first pass | AFL `plays` 55, NBA `plays`/`winprobability` 469 (same game as before). |
+
+Still unverified (no team game in progress in either pass): scoreboard `situation`
+(0 of all team competitions had one), `lastPlay` and its probability, running
+`displayClock`, NFL `drives`, MLB balls/strikes/outs and base runners while live, NBL
+live win probability, and live header fields.
+
+### What the app could add next
+
+1. Tennis: parse `groupings` → matches; show live matches with set games, tiebreaks,
+   seed and serve dot. Filter to `state` `in`/`pre` while parsing (800 KB responses).
+2. Golf: leaderboard card (top 5 by `order`, to-par, flag, round status) from the
+   scoreboard; take place and thru from the header when present.
+3. Event-with-sessions sports: F1 weekend (5 sessions) and UFC card (12 bouts) as one
+   fixture with a session/bout list; NASCAR as a single race fixture.
+4. Rugby union (URC `270557`): fits the existing team parser; add the league and read
+   standings from `children` as well as `groups`.
+5. MLB HUD line from the header (`outsText`, `baseRunnersText`, starting pitchers) and
+   summary `winprobability` per at-bat for the win bar.
+6. Optional cross-sport ticker from the header feed, alongside (not instead of)
+   per-league scoreboards.
+7. Capture again during live NFL, AFL, NRL, EPL, NBA and MLB games to verify the
+   situation, clock and probability fields.
