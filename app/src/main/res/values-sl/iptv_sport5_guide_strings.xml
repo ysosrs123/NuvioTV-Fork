@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5g_games_now">Tekme zdaj</string>
+    <string name="iptv_sport5g_sport_only">Samo šport</string>
+    <string name="iptv_sport5g_all_channels">Vsi kanali</string>
+    <string name="iptv_sport5g_reminder_set">Opomnik nastavljen</string>
+    <string name="iptv_sport5g_sport">Šport</string>
+    <string name="iptv_sport5g_close">Izenačeno</string>
+    <string name="iptv_sport5g_live">V živo</string>
+    <string name="iptv_sport5g_channels">%1$s +%2$d</string>
+    <string name="iptv_sport5g_no_sport">Na teh kanalih ta čas ni povezanih tekem. Izberite Vsi kanali, da vidite vse.</string>
+</resources>

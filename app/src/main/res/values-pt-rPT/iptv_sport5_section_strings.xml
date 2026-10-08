@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">Todos os resultados</string>
+    <string name="iptv_sport5_section_live">Em direto</string>
+    <string name="iptv_sport5_section_my_teams">As minhas equipas</string>
+    <string name="iptv_sport5_section_nothing">Nada para mostrar aqui.</string>
+    <string name="iptv_sport5_section_scores_hint">OK para ver. Mantém OK premido para definir um lembrete ou mostrar um resultado oculto.</string>
+    <string name="iptv_sport5_section_tonight">Esta noite</string>
+    <string name="iptv_sport5_section_timeline_hint">Esquerda e Direita percorrem o tempo · OK abre · Mantém OK premido para opções</string>
+    <string name="iptv_sport5_section_kick_off">Início %1$s</string>
+    <string name="iptv_sport5_section_watch_on">Ver na %1$s</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d outra emissão</item>
+        <item quantity="many">%1$d outras emissões</item>
+        <item quantity="other">%1$d outras emissões</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">Seguir</string>
+    <string name="iptv_sport5_section_following">A seguir</string>
+    <string name="iptv_sport5_section_remind">Lembrar-me</string>
+    <string name="iptv_sport5_section_reminder_set">Lembrete definido</string>
+    <string name="iptv_sport5_section_cancel_reminder">Cancelar lembrete</string>
+    <string name="iptv_sport5_section_hold_to_show">Mantém OK premido para mostrar</string>
+    <string name="iptv_sport5_section_no_live_score">Sem resultado em direto</string>
+    <string name="iptv_sport5_section_set">Set %1$d</string>
+    <string name="iptv_sport5_section_serving">%1$s a servir</string>
+    <string name="iptv_sport5_section_golf_round">R%1$d</string>
+    <string name="iptv_sport5_section_done">Terminado</string>
+    <string name="iptv_sport5_section_main_card">Cartaz principal</string>
+    <string name="iptv_sport5_section_prelims">Preliminares</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d combate</item>
+        <item quantity="many">%1$s · %2$d combates</item>
+        <item quantity="other">%1$s · %2$d combates</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d assalto</item>
+        <item quantity="many">%1$d assaltos</item>
+        <item quantity="other">%1$d assaltos</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">Agora: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">Assalto %1$d</string>
+    <string name="iptv_sport5_section_chase">%1$s precisa de %2$d em %3$d bolas · nec. %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s de %2$d overs</string>
+    <string name="iptv_sport5_section_overs">%1$s overs</string>
+    <string name="iptv_sport5_section_target">objetivo %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d out</item>
+        <item quantity="many">%1$d outs</item>
+        <item quantity="other">%1$d outs</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">Meio da %1$d.ª</string>
+    <string name="iptv_sport5_section_inning_end">Fim da %1$d.ª</string>
+    <string name="iptv_sport5_section_sport_football">Futebol</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">Râguebi de 13</string>
+    <string name="iptv_sport5_section_sport_rugby">Râguebi</string>
+    <string name="iptv_sport5_section_sport_american_football">Futebol americano</string>
+    <string name="iptv_sport5_section_sport_basketball">Basquetebol</string>
+    <string name="iptv_sport5_section_sport_baseball">Basebol</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">Hóquei no gelo</string>
+    <string name="iptv_sport5_section_sport_motor">Desportos motorizados</string>
+    <string name="iptv_sport5_section_sport_fighting">Desportos de combate</string>
+    <string name="iptv_sport5_section_sport_tennis">Ténis</string>
+    <string name="iptv_sport5_section_sport_golf">Golfe</string>
+    <string name="iptv_sport5_section_sport_cricket">Críquete</string>
+</resources>

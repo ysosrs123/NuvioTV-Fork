@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Bàn thắng · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s ghi điểm · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Ghi điểm · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Giao bóng · %1$s</string>
+    <string name="iptv_sport5_overlay_started">Đang diễn ra · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Hết giờ · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Chung cuộc · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">trên %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK để xem</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Quay lại để đóng</string>
+    <string name="iptv_sport5_overlay_reminder">Lời nhắc</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s bắt đầu sau %2$d phút</string>
+    <string name="iptv_sport5_overlay_starting">%1$s đang bắt đầu</string>
+    <string name="iptv_sport5_overlay_watch">Xem</string>
+    <string name="iptv_sport5_overlay_dismiss">Đóng</string>
+    <string name="iptv_sport5_overlay_close_game">Sát nút</string>
+    <string name="iptv_sport5_overlay_main_event">Trận chính</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d phút</string>
+</resources>

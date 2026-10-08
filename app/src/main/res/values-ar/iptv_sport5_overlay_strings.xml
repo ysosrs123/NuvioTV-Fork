@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">هدف · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s يسجّل · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">تسجيل · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">ضربة البداية · %1$s</string>
+    <string name="iptv_sport5_overlay_started">انطلقت · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">نهاية المباراة · %1$s</string>
+    <string name="iptv_sport5_overlay_final">النتيجة النهائية · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">على %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK للمشاهدة</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">رجوع للإغلاق</string>
+    <string name="iptv_sport5_overlay_reminder">تذكير</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s تبدأ بعد %2$d د</string>
+    <string name="iptv_sport5_overlay_starting">%1$s تبدأ الآن</string>
+    <string name="iptv_sport5_overlay_watch">مشاهدة</string>
+    <string name="iptv_sport5_overlay_dismiss">إغلاق</string>
+    <string name="iptv_sport5_overlay_close_game">متقاربة</string>
+    <string name="iptv_sport5_overlay_main_event">النزال الرئيسي</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d د</string>
+</resources>

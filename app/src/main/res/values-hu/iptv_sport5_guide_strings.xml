@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5g_games_now">Meccsek most</string>
+    <string name="iptv_sport5g_sport_only">Csak sport</string>
+    <string name="iptv_sport5g_all_channels">Minden csatorna</string>
+    <string name="iptv_sport5g_reminder_set">Emlékeztető beállítva</string>
+    <string name="iptv_sport5g_sport">Sport</string>
+    <string name="iptv_sport5g_close">Szoros</string>
+    <string name="iptv_sport5g_live">Élő</string>
+    <string name="iptv_sport5g_channels">%1$s +%2$d</string>
+    <string name="iptv_sport5g_no_sport">Ezeken a csatornákon most nincs kapcsolt meccs. Válaszd a Minden csatorna lehetőséget, hogy mindent láss.</string>
+</resources>

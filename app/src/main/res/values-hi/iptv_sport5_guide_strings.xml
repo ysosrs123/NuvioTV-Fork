@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5g_games_now">अभी के मैच</string>
+    <string name="iptv_sport5g_sport_only">सिर्फ़ खेल</string>
+    <string name="iptv_sport5g_all_channels">सभी चैनल</string>
+    <string name="iptv_sport5g_reminder_set">रिमाइंडर सेट है</string>
+    <string name="iptv_sport5g_sport">खेल</string>
+    <string name="iptv_sport5g_close">कांटे का</string>
+    <string name="iptv_sport5g_live">लाइव</string>
+    <string name="iptv_sport5g_channels">%1$s +%2$d</string>
+    <string name="iptv_sport5g_no_sport">इस समय इन चैनलों पर कोई जुड़ा हुआ मैच नहीं है। सब कुछ देखने के लिए सभी चैनल चुनें।</string>
+</resources>

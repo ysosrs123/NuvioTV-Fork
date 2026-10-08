@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">அனைத்து ஸ்கோர்கள்</string>
+    <string name="iptv_sport5_section_live">நேரலை</string>
+    <string name="iptv_sport5_section_my_teams">என் அணிகள்</string>
+    <string name="iptv_sport5_section_nothing">இங்கே காட்ட எதுவும் இல்லை.</string>
+    <string name="iptv_sport5_section_scores_hint">OK பார்க்க. நினைவூட்டலை அமைக்க அல்லது மறைந்த முடிவைக் காட்ட OK ஐ அழுத்திப் பிடி.</string>
+    <string name="iptv_sport5_section_tonight">இன்றிரவு</string>
+    <string name="iptv_sport5_section_timeline_hint">இடது, வலது நேரத்தில் நகர்த்தும் · OK திறக்கும் · விருப்பங்களுக்கு OK ஐ அழுத்திப் பிடி</string>
+    <string name="iptv_sport5_section_kick_off">தொடக்கம் %1$s</string>
+    <string name="iptv_sport5_section_watch_on">%1$s இல் பார்</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">மேலும் %1$d ஃபீட்</item>
+        <item quantity="other">மேலும் %1$d ஃபீட்கள்</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">பின்தொடர்</string>
+    <string name="iptv_sport5_section_following">பின்தொடர்கிறீர்கள்</string>
+    <string name="iptv_sport5_section_remind">எனக்கு நினைவூட்டு</string>
+    <string name="iptv_sport5_section_reminder_set">நினைவூட்டல் அமைக்கப்பட்டது</string>
+    <string name="iptv_sport5_section_cancel_reminder">நினைவூட்டலை ரத்துசெய்</string>
+    <string name="iptv_sport5_section_hold_to_show">காட்ட OK ஐ அழுத்திப் பிடி</string>
+    <string name="iptv_sport5_section_no_live_score">நேரலை ஸ்கோர் இல்லை</string>
+    <string name="iptv_sport5_section_set">செட் %1$d</string>
+    <string name="iptv_sport5_section_serving">%1$s சர்வ் செய்கிறார்</string>
+    <string name="iptv_sport5_section_golf_round">R%1$d</string>
+    <string name="iptv_sport5_section_done">முடிந்தது</string>
+    <string name="iptv_sport5_section_main_card">முதன்மை அட்டை</string>
+    <string name="iptv_sport5_section_prelims">முதற்கட்டப் போட்டிகள்</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d சண்டை</item>
+        <item quantity="other">%1$s · %2$d சண்டைகள்</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d சுற்று</item>
+        <item quantity="other">%1$d சுற்றுகள்</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">இப்போது: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">சுற்று %1$d</string>
+    <string name="iptv_sport5_section_chase">%1$s க்கு %3$d பந்துகளில் %2$d தேவை · தேவை %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%2$d ஓவர்களில் %1$s</string>
+    <string name="iptv_sport5_section_overs">%1$s ஓவர்கள்</string>
+    <string name="iptv_sport5_section_target">இலக்கு %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d அவுட்</item>
+        <item quantity="other">%1$d அவுட்கள்</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">நடு %1$d</string>
+    <string name="iptv_sport5_section_inning_end">முடிவு %1$d</string>
+    <string name="iptv_sport5_section_sport_football">கால்பந்து</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">ரக்பி லீக்</string>
+    <string name="iptv_sport5_section_sport_rugby">ரக்பி யூனியன்</string>
+    <string name="iptv_sport5_section_sport_american_football">அமெரிக்கக் கால்பந்து</string>
+    <string name="iptv_sport5_section_sport_basketball">கூடைப்பந்து</string>
+    <string name="iptv_sport5_section_sport_baseball">பேஸ்பால்</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">ஐஸ் ஹாக்கி</string>
+    <string name="iptv_sport5_section_sport_motor">மோட்டார்</string>
+    <string name="iptv_sport5_section_sport_fighting">சண்டை</string>
+    <string name="iptv_sport5_section_sport_tennis">டென்னிஸ்</string>
+    <string name="iptv_sport5_section_sport_golf">கோல்ஃப்</string>
+    <string name="iptv_sport5_section_sport_cricket">கிரிக்கெட்</string>
+</resources>

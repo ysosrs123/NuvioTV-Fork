@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Gól · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s pontot szerez · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Pont · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Kezdőrúgás · %1$s</string>
+    <string name="iptv_sport5_overlay_started">Elkezdődött · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Vége · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Végeredmény · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">itt: %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK a nézéshez</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Vissza a bezáráshoz</string>
+    <string name="iptv_sport5_overlay_reminder">Emlékeztető</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s %2$d perc múlva kezdődik</string>
+    <string name="iptv_sport5_overlay_starting">%1$s most kezdődik</string>
+    <string name="iptv_sport5_overlay_watch">Nézés</string>
+    <string name="iptv_sport5_overlay_dismiss">Elvetés</string>
+    <string name="iptv_sport5_overlay_close_game">Szoros</string>
+    <string name="iptv_sport5_overlay_main_event">Főmeccs</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d perc</string>
+</resources>

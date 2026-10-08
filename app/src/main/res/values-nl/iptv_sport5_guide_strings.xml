@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5g_games_now">Wedstrijden nu</string>
+    <string name="iptv_sport5g_sport_only">Alleen sport</string>
+    <string name="iptv_sport5g_all_channels">Alle kanalen</string>
+    <string name="iptv_sport5g_reminder_set">Herinnering ingesteld</string>
+    <string name="iptv_sport5g_sport">Sport</string>
+    <string name="iptv_sport5g_close">Spannend</string>
+    <string name="iptv_sport5g_live">Live</string>
+    <string name="iptv_sport5g_channels">%1$s +%2$d</string>
+    <string name="iptv_sport5g_no_sport">Op dit moment geen gekoppelde wedstrijden op deze kanalen. Kies Alle kanalen om alles te zien.</string>
+</resources>

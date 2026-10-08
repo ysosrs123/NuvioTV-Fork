@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">Visi rezultatai</string>
+    <string name="iptv_sport5_section_live">Tiesiogiai</string>
+    <string name="iptv_sport5_section_my_teams">Mano komandos</string>
+    <string name="iptv_sport5_section_nothing">Čia nėra ką rodyti.</string>
+    <string name="iptv_sport5_section_scores_hint">OK – žiūrėti. Palaikykite OK, kad nustatytumėte priminimą arba parodytumėte paslėptą rezultatą.</string>
+    <string name="iptv_sport5_section_tonight">Šįvakar</string>
+    <string name="iptv_sport5_section_timeline_hint">Kairė ir Dešinė juda laiku · OK atidaro · Palaikykite OK parinktims</string>
+    <string name="iptv_sport5_section_kick_off">Pradžia %1$s</string>
+    <string name="iptv_sport5_section_watch_on">Žiūrėti per %1$s</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d kitas srautas</item>
+        <item quantity="few">%1$d kiti srautai</item>
+        <item quantity="many">%1$d kito srauto</item>
+        <item quantity="other">%1$d kitų srautų</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">Sekti</string>
+    <string name="iptv_sport5_section_following">Sekama</string>
+    <string name="iptv_sport5_section_remind">Priminti</string>
+    <string name="iptv_sport5_section_reminder_set">Priminimas nustatytas</string>
+    <string name="iptv_sport5_section_cancel_reminder">Atšaukti priminimą</string>
+    <string name="iptv_sport5_section_hold_to_show">Palaikykite OK, kad parodytumėte</string>
+    <string name="iptv_sport5_section_no_live_score">Nėra tiesioginio rezultato</string>
+    <string name="iptv_sport5_section_set">%1$d setas</string>
+    <string name="iptv_sport5_section_serving">Paduoda %1$s</string>
+    <string name="iptv_sport5_section_golf_round">R%1$d</string>
+    <string name="iptv_sport5_section_done">Baigta</string>
+    <string name="iptv_sport5_section_main_card">Pagrindinė programa</string>
+    <string name="iptv_sport5_section_prelims">Įžanginės kovos</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d kova</item>
+        <item quantity="few">%1$s · %2$d kovos</item>
+        <item quantity="many">%1$s · %2$d kovos</item>
+        <item quantity="other">%1$s · %2$d kovų</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d raundas</item>
+        <item quantity="few">%1$d raundai</item>
+        <item quantity="many">%1$d raundo</item>
+        <item quantity="other">%1$d raundų</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">Dabar: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">%1$d raundas</string>
+    <string name="iptv_sport5_section_chase">%1$s reikia %2$d iš %3$d kamuolių · reik. %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s iš %2$d overių</string>
+    <string name="iptv_sport5_section_overs">%1$s overiai</string>
+    <string name="iptv_sport5_section_target">tikslas %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d autas</item>
+        <item quantity="few">%1$d autai</item>
+        <item quantity="many">%1$d auto</item>
+        <item quantity="other">%1$d autų</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">Vidurys %1$d</string>
+    <string name="iptv_sport5_section_inning_end">Pabaiga %1$d</string>
+    <string name="iptv_sport5_section_sport_football">Futbolas</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">Regbio lyga</string>
+    <string name="iptv_sport5_section_sport_rugby">Regbio sąjunga</string>
+    <string name="iptv_sport5_section_sport_american_football">Amerikietiškasis futbolas</string>
+    <string name="iptv_sport5_section_sport_basketball">Krepšinis</string>
+    <string name="iptv_sport5_section_sport_baseball">Beisbolas</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">Ledo ritulys</string>
+    <string name="iptv_sport5_section_sport_motor">Motorų sportas</string>
+    <string name="iptv_sport5_section_sport_fighting">Kovos menai</string>
+    <string name="iptv_sport5_section_sport_tennis">Tenisas</string>
+    <string name="iptv_sport5_section_sport_golf">Golfas</string>
+    <string name="iptv_sport5_section_sport_cricket">Kriketas</string>
+</resources>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">Сви резултати</string>
+    <string name="iptv_sport5_section_live">Уживо</string>
+    <string name="iptv_sport5_section_my_teams">Моји тимови</string>
+    <string name="iptv_sport5_section_nothing">Овде нема ништа за приказ.</string>
+    <string name="iptv_sport5_section_scores_hint">OK за гледање. Држите OK да поставите подсетник или прикажете скривени резултат.</string>
+    <string name="iptv_sport5_section_tonight">Вечерас</string>
+    <string name="iptv_sport5_section_timeline_hint">Лево и Десно помичу кроз време · OK отвара · Држите OK за опције</string>
+    <string name="iptv_sport5_section_kick_off">Почетак %1$s</string>
+    <string name="iptv_sport5_section_watch_on">Гледај на %1$s</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d други пренос</item>
+        <item quantity="few">%1$d друга преноса</item>
+        <item quantity="other">%1$d других преноса</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">Прати</string>
+    <string name="iptv_sport5_section_following">Пратите</string>
+    <string name="iptv_sport5_section_remind">Подсети ме</string>
+    <string name="iptv_sport5_section_reminder_set">Подсетник постављен</string>
+    <string name="iptv_sport5_section_cancel_reminder">Откажи подсетник</string>
+    <string name="iptv_sport5_section_hold_to_show">Држите OK за приказ</string>
+    <string name="iptv_sport5_section_no_live_score">Нема резултата уживо</string>
+    <string name="iptv_sport5_section_set">Сет %1$d</string>
+    <string name="iptv_sport5_section_serving">Сервира %1$s</string>
+    <string name="iptv_sport5_section_golf_round">Р%1$d</string>
+    <string name="iptv_sport5_section_done">Завршено</string>
+    <string name="iptv_sport5_section_main_card">Главна карта</string>
+    <string name="iptv_sport5_section_prelims">Предборбе</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d борба</item>
+        <item quantity="few">%1$s · %2$d борбе</item>
+        <item quantity="other">%1$s · %2$d борби</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d рунда</item>
+        <item quantity="few">%1$d рунде</item>
+        <item quantity="other">%1$d рунди</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">Сада: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">Рунда %1$d</string>
+    <string name="iptv_sport5_section_chase">%1$s треба %2$d из %3$d лопти · потр. %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s од %2$d овера</string>
+    <string name="iptv_sport5_section_overs">%1$s овера</string>
+    <string name="iptv_sport5_section_target">циљ %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d аут</item>
+        <item quantity="few">%1$d аута</item>
+        <item quantity="other">%1$d аутова</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">Средина %1$d</string>
+    <string name="iptv_sport5_section_inning_end">Крај %1$d</string>
+    <string name="iptv_sport5_section_sport_football">Фудбал</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">Рагби лига</string>
+    <string name="iptv_sport5_section_sport_rugby">Рагби унија</string>
+    <string name="iptv_sport5_section_sport_american_football">Амерички фудбал</string>
+    <string name="iptv_sport5_section_sport_basketball">Кошарка</string>
+    <string name="iptv_sport5_section_sport_baseball">Бејзбол</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">Хокеј на леду</string>
+    <string name="iptv_sport5_section_sport_motor">Мото спорт</string>
+    <string name="iptv_sport5_section_sport_fighting">Борилачки спортови</string>
+    <string name="iptv_sport5_section_sport_tennis">Тенис</string>
+    <string name="iptv_sport5_section_sport_golf">Голф</string>
+    <string name="iptv_sport5_section_sport_cricket">Крикет</string>
+</resources>

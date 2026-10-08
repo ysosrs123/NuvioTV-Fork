@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5g_games_now">משחקים עכשיו</string>
+    <string name="iptv_sport5g_sport_only">ספורט בלבד</string>
+    <string name="iptv_sport5g_all_channels">כל הערוצים</string>
+    <string name="iptv_sport5g_reminder_set">התזכורת נקבעה</string>
+    <string name="iptv_sport5g_sport">ספורט</string>
+    <string name="iptv_sport5g_close">צמוד</string>
+    <string name="iptv_sport5g_live">בשידור חי</string>
+    <string name="iptv_sport5g_channels">%1$s +%2$d</string>
+    <string name="iptv_sport5g_no_sport">אין משחקים מקושרים בערוצים האלה בשעה זו. יש לבחור כל הערוצים כדי לראות הכול.</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Gól · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s skórujú · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Body · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Výkop · %1$s</string>
+    <string name="iptv_sport5_overlay_started">Prebieha · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Koniec zápasu · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Konečný stav · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">na %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK na sledovanie</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Späť na zatvorenie</string>
+    <string name="iptv_sport5_overlay_reminder">Pripomenutie</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s začína o %2$d min</string>
+    <string name="iptv_sport5_overlay_starting">%1$s práve začína</string>
+    <string name="iptv_sport5_overlay_watch">Sledovať</string>
+    <string name="iptv_sport5_overlay_dismiss">Zavrieť</string>
+    <string name="iptv_sport5_overlay_close_game">Vyrovnané</string>
+    <string name="iptv_sport5_overlay_main_event">Hlavný zápas</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d min</string>
+</resources>

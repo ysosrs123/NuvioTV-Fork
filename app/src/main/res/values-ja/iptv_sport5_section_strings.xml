@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">全スコア</string>
+    <string name="iptv_sport5_section_live">ライブ</string>
+    <string name="iptv_sport5_section_my_teams">マイチーム</string>
+    <string name="iptv_sport5_section_nothing">ここに表示するものはありません。</string>
+    <string name="iptv_sport5_section_scores_hint">OK で視聴。OK 長押しでリマインダー設定または非表示の結果を表示。</string>
+    <string name="iptv_sport5_section_tonight">今夜</string>
+    <string name="iptv_sport5_section_timeline_hint">左右で時間を移動 · OK で開く · OK 長押しでオプション</string>
+    <string name="iptv_sport5_section_kick_off">開始 %1$s</string>
+    <string name="iptv_sport5_section_watch_on">%1$s で見る</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="other">他 %1$d 件の配信</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">フォロー</string>
+    <string name="iptv_sport5_section_following">フォロー中</string>
+    <string name="iptv_sport5_section_remind">リマインド</string>
+    <string name="iptv_sport5_section_reminder_set">リマインダー設定済み</string>
+    <string name="iptv_sport5_section_cancel_reminder">リマインダーを取り消す</string>
+    <string name="iptv_sport5_section_hold_to_show">OK 長押しで表示</string>
+    <string name="iptv_sport5_section_no_live_score">ライブスコアなし</string>
+    <string name="iptv_sport5_section_set">第 %1$d セット</string>
+    <string name="iptv_sport5_section_serving">%1$s のサーブ</string>
+    <string name="iptv_sport5_section_golf_round">R%1$d</string>
+    <string name="iptv_sport5_section_done">終了</string>
+    <string name="iptv_sport5_section_main_card">メインカード</string>
+    <string name="iptv_sport5_section_prelims">プレリム</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="other">%1$s · %2$d 試合</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="other">%1$d ラウンド</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">現在: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">第 %1$d ラウンド</string>
+    <string name="iptv_sport5_section_chase">%1$s は %3$d 球で %2$d 点が必要 · 必要RR %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s / %2$d オーバー</string>
+    <string name="iptv_sport5_section_overs">%1$s オーバー</string>
+    <string name="iptv_sport5_section_target">目標 %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="other">%1$d アウト</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">%1$d 回中盤</string>
+    <string name="iptv_sport5_section_inning_end">%1$d 回終了</string>
+    <string name="iptv_sport5_section_sport_football">サッカー</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">ラグビーリーグ</string>
+    <string name="iptv_sport5_section_sport_rugby">ラグビーユニオン</string>
+    <string name="iptv_sport5_section_sport_american_football">アメリカンフットボール</string>
+    <string name="iptv_sport5_section_sport_basketball">バスケットボール</string>
+    <string name="iptv_sport5_section_sport_baseball">野球</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">アイスホッケー</string>
+    <string name="iptv_sport5_section_sport_motor">モータースポーツ</string>
+    <string name="iptv_sport5_section_sport_fighting">格闘技</string>
+    <string name="iptv_sport5_section_sport_tennis">テニス</string>
+    <string name="iptv_sport5_section_sport_golf">ゴルフ</string>
+    <string name="iptv_sport5_section_sport_cricket">クリケット</string>
+</resources>

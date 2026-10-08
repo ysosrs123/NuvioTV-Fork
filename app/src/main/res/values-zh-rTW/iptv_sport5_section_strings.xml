@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">所有比分</string>
+    <string name="iptv_sport5_section_live">直播</string>
+    <string name="iptv_sport5_section_my_teams">我的球隊</string>
+    <string name="iptv_sport5_section_nothing">這裡沒有可顯示的內容。</string>
+    <string name="iptv_sport5_section_scores_hint">按 OK 觀看。長按 OK 設定提醒或顯示隱藏的結果。</string>
+    <string name="iptv_sport5_section_tonight">今晚</string>
+    <string name="iptv_sport5_section_timeline_hint">左右鍵在時間軸上移動 · OK 開啟 · 長按 OK 查看選項</string>
+    <string name="iptv_sport5_section_kick_off">開球 %1$s</string>
+    <string name="iptv_sport5_section_watch_on">在 %1$s 觀看</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="other">另有 %1$d 個訊號源</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">追蹤</string>
+    <string name="iptv_sport5_section_following">追蹤中</string>
+    <string name="iptv_sport5_section_remind">提醒我</string>
+    <string name="iptv_sport5_section_reminder_set">已設定提醒</string>
+    <string name="iptv_sport5_section_cancel_reminder">取消提醒</string>
+    <string name="iptv_sport5_section_hold_to_show">長按 OK 顯示</string>
+    <string name="iptv_sport5_section_no_live_score">無即時比分</string>
+    <string name="iptv_sport5_section_set">第 %1$d 盤</string>
+    <string name="iptv_sport5_section_serving">%1$s 發球</string>
+    <string name="iptv_sport5_section_golf_round">第 %1$d 輪</string>
+    <string name="iptv_sport5_section_done">已結束</string>
+    <string name="iptv_sport5_section_main_card">主賽卡</string>
+    <string name="iptv_sport5_section_prelims">預賽</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="other">%1$s · %2$d 場對戰</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="other">%1$d 回合</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">目前：%1$s</string>
+    <string name="iptv_sport5_section_fight_round">第 %1$d 回合</string>
+    <string name="iptv_sport5_section_chase">%1$s 需在 %3$d 球內得 %2$d 分 · 所需 %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s / %2$d 輪</string>
+    <string name="iptv_sport5_section_overs">%1$s 輪</string>
+    <string name="iptv_sport5_section_target">目標 %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="other">%1$d 出局</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">第 %1$d 局中</string>
+    <string name="iptv_sport5_section_inning_end">第 %1$d 局末</string>
+    <string name="iptv_sport5_section_sport_football">足球</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">聯盟式橄欖球</string>
+    <string name="iptv_sport5_section_sport_rugby">英式橄欖球</string>
+    <string name="iptv_sport5_section_sport_american_football">美式足球</string>
+    <string name="iptv_sport5_section_sport_basketball">籃球</string>
+    <string name="iptv_sport5_section_sport_baseball">棒球</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">冰球</string>
+    <string name="iptv_sport5_section_sport_motor">賽車</string>
+    <string name="iptv_sport5_section_sport_fighting">格鬥</string>
+    <string name="iptv_sport5_section_sport_tennis">網球</string>
+    <string name="iptv_sport5_section_sport_golf">高爾夫</string>
+    <string name="iptv_sport5_section_sport_cricket">板球</string>
+</resources>

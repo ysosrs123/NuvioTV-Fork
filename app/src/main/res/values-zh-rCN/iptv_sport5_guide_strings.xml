@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5g_games_now">正在进行的比赛</string>
+    <string name="iptv_sport5g_sport_only">仅体育</string>
+    <string name="iptv_sport5g_all_channels">所有频道</string>
+    <string name="iptv_sport5g_reminder_set">已设置提醒</string>
+    <string name="iptv_sport5g_sport">体育</string>
+    <string name="iptv_sport5g_close">胶着</string>
+    <string name="iptv_sport5g_live">直播</string>
+    <string name="iptv_sport5g_channels">%1$s +%2$d</string>
+    <string name="iptv_sport5g_no_sport">此时这些频道上没有关联的比赛。选择“所有频道”可查看全部内容。</string>
+</resources>

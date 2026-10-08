@@ -351,6 +351,8 @@ Sport:
 - Guide matching for events without two teams (tennis, golf, motor racing, UFC) uses the
   event or tournament name.
 
+- The new sport screens and settings are translated into all 40 languages.
+
 Fixes from an independent review:
 - Recordings saved to the Movies folder no longer stop playing after a quick seek (a
   cancelled read closed the file for every later read; it now reopens).

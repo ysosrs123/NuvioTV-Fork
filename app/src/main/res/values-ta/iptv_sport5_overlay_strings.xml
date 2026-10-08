@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">கோல் · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s ஸ்கோர் செய்தது · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">ஸ்கோர் · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">கிக்-ஆஃப் · %1$s</string>
+    <string name="iptv_sport5_overlay_started">தொடங்கியது · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">முழு நேரம் · %1$s</string>
+    <string name="iptv_sport5_overlay_final">இறுதி · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">%1$s இல்</string>
+    <string name="iptv_sport5_overlay_hint_watch">பார்க்க OK</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">மூட பின்செல்</string>
+    <string name="iptv_sport5_overlay_reminder">நினைவூட்டல்</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s %2$d நிமி. இல் தொடங்கும்</string>
+    <string name="iptv_sport5_overlay_starting">%1$s இப்போது தொடங்குகிறது</string>
+    <string name="iptv_sport5_overlay_watch">பார்</string>
+    <string name="iptv_sport5_overlay_dismiss">மூடு</string>
+    <string name="iptv_sport5_overlay_close_game">நெருக்கம்</string>
+    <string name="iptv_sport5_overlay_main_event">முதன்மைப் போட்டி</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d நிமி.</string>
+</resources>

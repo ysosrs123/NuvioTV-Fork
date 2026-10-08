@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Mål · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s scorer · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Scoring · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Avspark · %1$s</string>
+    <string name="iptv_sport5_overlay_started">I gang · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Slutt · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Sluttresultat · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">på %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK for å se</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Tilbake for å lukke</string>
+    <string name="iptv_sport5_overlay_reminder">Påminnelse</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s starter om %2$d min</string>
+    <string name="iptv_sport5_overlay_starting">%1$s starter nå</string>
+    <string name="iptv_sport5_overlay_watch">Se</string>
+    <string name="iptv_sport5_overlay_dismiss">Lukk</string>
+    <string name="iptv_sport5_overlay_close_game">Jevn</string>
+    <string name="iptv_sport5_overlay_main_event">Hovedkamp</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d min</string>
+</resources>

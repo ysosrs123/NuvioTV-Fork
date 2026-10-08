@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">Të gjitha rezultatet</string>
+    <string name="iptv_sport5_section_live">Live</string>
+    <string name="iptv_sport5_section_my_teams">Ekipet e mia</string>
+    <string name="iptv_sport5_section_nothing">Asgjë për të shfaqur këtu.</string>
+    <string name="iptv_sport5_section_scores_hint">OK për ta parë. Mbaj shtypur OK për të vendosur një kujtesë ose për të shfaqur një rezultat të fshehur.</string>
+    <string name="iptv_sport5_section_tonight">Sonte</string>
+    <string name="iptv_sport5_section_timeline_hint">Majtas dhe Djathtas lëvizin në kohë · OK hap · Mbaj shtypur OK për opsione</string>
+    <string name="iptv_sport5_section_kick_off">Fillimi %1$s</string>
+    <string name="iptv_sport5_section_watch_on">Shiko në %1$s</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d transmetim tjetër</item>
+        <item quantity="other">%1$d transmetime të tjera</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">Ndiq</string>
+    <string name="iptv_sport5_section_following">Po ndjek</string>
+    <string name="iptv_sport5_section_remind">Më kujto</string>
+    <string name="iptv_sport5_section_reminder_set">Kujtesa u vendos</string>
+    <string name="iptv_sport5_section_cancel_reminder">Anulo kujtesën</string>
+    <string name="iptv_sport5_section_hold_to_show">Mbaj shtypur OK për ta shfaqur</string>
+    <string name="iptv_sport5_section_no_live_score">Pa rezultat live</string>
+    <string name="iptv_sport5_section_set">Seti %1$d</string>
+    <string name="iptv_sport5_section_serving">Shërben %1$s</string>
+    <string name="iptv_sport5_section_golf_round">R%1$d</string>
+    <string name="iptv_sport5_section_done">Përfundoi</string>
+    <string name="iptv_sport5_section_main_card">Karta kryesore</string>
+    <string name="iptv_sport5_section_prelims">Ndeshjet paraprake</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d ndeshje</item>
+        <item quantity="other">%1$s · %2$d ndeshje</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d raund</item>
+        <item quantity="other">%1$d raunde</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">Tani: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">Raundi %1$d</string>
+    <string name="iptv_sport5_section_chase">%1$s kanë nevojë për %2$d nga %3$d topa · kërkohet %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s nga %2$d overa</string>
+    <string name="iptv_sport5_section_overs">%1$s overa</string>
+    <string name="iptv_sport5_section_target">objektivi %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d aut</item>
+        <item quantity="other">%1$d aute</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">Mesi i %1$d</string>
+    <string name="iptv_sport5_section_inning_end">Fundi i %1$d</string>
+    <string name="iptv_sport5_section_sport_football">Futboll</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">Rugbi ligë</string>
+    <string name="iptv_sport5_section_sport_rugby">Rugbi union</string>
+    <string name="iptv_sport5_section_sport_american_football">Futboll amerikan</string>
+    <string name="iptv_sport5_section_sport_basketball">Basketboll</string>
+    <string name="iptv_sport5_section_sport_baseball">Bejsboll</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">Hokej mbi akull</string>
+    <string name="iptv_sport5_section_sport_motor">Sporte me motor</string>
+    <string name="iptv_sport5_section_sport_fighting">Sporte luftarake</string>
+    <string name="iptv_sport5_section_sport_tennis">Tenis</string>
+    <string name="iptv_sport5_section_sport_golf">Golf</string>
+    <string name="iptv_sport5_section_sport_cricket">Kriket</string>
+</resources>

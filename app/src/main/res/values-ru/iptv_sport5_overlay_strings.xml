@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Гол · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s набирают очки · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Очки · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Начало матча · %1$s</string>
+    <string name="iptv_sport5_overlay_started">Матч идёт · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Матч окончен · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Итог · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">на %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK — смотреть</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Назад — закрыть</string>
+    <string name="iptv_sport5_overlay_reminder">Напоминание</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s начнётся через %2$d мин</string>
+    <string name="iptv_sport5_overlay_starting">%1$s начинается</string>
+    <string name="iptv_sport5_overlay_watch">Смотреть</string>
+    <string name="iptv_sport5_overlay_dismiss">Закрыть</string>
+    <string name="iptv_sport5_overlay_close_game">Напряжённый</string>
+    <string name="iptv_sport5_overlay_main_event">Главный бой</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d мин</string>
+</resources>

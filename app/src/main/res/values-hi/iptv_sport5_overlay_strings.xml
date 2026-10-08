@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">गोल · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s ने स्कोर किया · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">स्कोर · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">किक-ऑफ़ · %1$s</string>
+    <string name="iptv_sport5_overlay_started">शुरू हो गया · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">पूर्ण समय · %1$s</string>
+    <string name="iptv_sport5_overlay_final">अंतिम · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">%1$s पर</string>
+    <string name="iptv_sport5_overlay_hint_watch">देखने के लिए OK</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">हटाने के लिए वापस</string>
+    <string name="iptv_sport5_overlay_reminder">रिमाइंडर</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s %2$d मिनट में शुरू होगा</string>
+    <string name="iptv_sport5_overlay_starting">%1$s अभी शुरू हो रहा है</string>
+    <string name="iptv_sport5_overlay_watch">देखें</string>
+    <string name="iptv_sport5_overlay_dismiss">हटाएं</string>
+    <string name="iptv_sport5_overlay_close_game">कांटे का</string>
+    <string name="iptv_sport5_overlay_main_event">मुख्य मुकाबला</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d मिनट</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5g_games_now">Trận đang diễn ra</string>
+    <string name="iptv_sport5g_sport_only">Chỉ thể thao</string>
+    <string name="iptv_sport5g_all_channels">Tất cả kênh</string>
+    <string name="iptv_sport5g_reminder_set">Đã đặt lời nhắc</string>
+    <string name="iptv_sport5g_sport">Thể thao</string>
+    <string name="iptv_sport5g_close">Sát nút</string>
+    <string name="iptv_sport5g_live">Trực tiếp</string>
+    <string name="iptv_sport5g_channels">%1$s +%2$d</string>
+    <string name="iptv_sport5g_no_sport">Không có trận nào được liên kết trên các kênh này vào lúc này. Chọn Tất cả kênh để xem mọi thứ.</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5g_games_now">Pertandingan sekarang</string>
+    <string name="iptv_sport5g_sport_only">Hanya olahraga</string>
+    <string name="iptv_sport5g_all_channels">Semua saluran</string>
+    <string name="iptv_sport5g_reminder_set">Pengingat disetel</string>
+    <string name="iptv_sport5g_sport">Olahraga</string>
+    <string name="iptv_sport5g_close">Ketat</string>
+    <string name="iptv_sport5g_live">Live</string>
+    <string name="iptv_sport5g_channels">%1$s +%2$d</string>
+    <string name="iptv_sport5g_no_sport">Tidak ada pertandingan tertaut di saluran ini pada waktu ini. Pilih Semua saluran untuk melihat semuanya.</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Gol · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s postižu poene · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Poeni · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Početni udarac · %1$s</string>
+    <string name="iptv_sport5_overlay_started">U toku · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Kraj utakmice · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Konačno · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">na %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK za gledanje</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Nazad za zatvaranje</string>
+    <string name="iptv_sport5_overlay_reminder">Podsetnik</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s počinje za %2$d min</string>
+    <string name="iptv_sport5_overlay_starting">%1$s počinje sada</string>
+    <string name="iptv_sport5_overlay_watch">Gledaj</string>
+    <string name="iptv_sport5_overlay_dismiss">Zatvori</string>
+    <string name="iptv_sport5_overlay_close_game">Neizvesno</string>
+    <string name="iptv_sport5_overlay_main_event">Glavna borba</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d min</string>
+</resources>

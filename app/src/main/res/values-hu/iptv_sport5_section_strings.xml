@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">Minden eredmény</string>
+    <string name="iptv_sport5_section_live">Élő</string>
+    <string name="iptv_sport5_section_my_teams">Csapataim</string>
+    <string name="iptv_sport5_section_nothing">Itt nincs mit mutatni.</string>
+    <string name="iptv_sport5_section_scores_hint">OK: nézés. Tartsd lenyomva az OK-t emlékeztető beállításához vagy rejtett eredmény megjelenítéséhez.</string>
+    <string name="iptv_sport5_section_tonight">Ma este</string>
+    <string name="iptv_sport5_section_timeline_hint">Balra és Jobbra lépked az időben · OK: megnyitás · OK nyomva tartása: lehetőségek</string>
+    <string name="iptv_sport5_section_kick_off">Kezdés %1$s</string>
+    <string name="iptv_sport5_section_watch_on">Nézés itt: %1$s</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d másik adás</item>
+        <item quantity="other">%1$d másik adás</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">Követés</string>
+    <string name="iptv_sport5_section_following">Követed</string>
+    <string name="iptv_sport5_section_remind">Emlékeztess</string>
+    <string name="iptv_sport5_section_reminder_set">Emlékeztető beállítva</string>
+    <string name="iptv_sport5_section_cancel_reminder">Emlékeztető törlése</string>
+    <string name="iptv_sport5_section_hold_to_show">Tartsd lenyomva az OK-t a megjelenítéshez</string>
+    <string name="iptv_sport5_section_no_live_score">Nincs élő eredmény</string>
+    <string name="iptv_sport5_section_set">%1$d. szett</string>
+    <string name="iptv_sport5_section_serving">%1$s adogat</string>
+    <string name="iptv_sport5_section_golf_round">%1$d. kör</string>
+    <string name="iptv_sport5_section_done">Vége</string>
+    <string name="iptv_sport5_section_main_card">Főkártya</string>
+    <string name="iptv_sport5_section_prelims">Előmeccsek</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d meccs</item>
+        <item quantity="other">%1$s · %2$d meccs</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d menet</item>
+        <item quantity="other">%1$d menet</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">Most: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">%1$d. menet</string>
+    <string name="iptv_sport5_section_chase">%1$s: %2$d kell %3$d labdából · szüks. %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s / %2$d over</string>
+    <string name="iptv_sport5_section_overs">%1$s over</string>
+    <string name="iptv_sport5_section_target">cél: %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d out</item>
+        <item quantity="other">%1$d out</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">%1$d. játékrész közepe</string>
+    <string name="iptv_sport5_section_inning_end">%1$d. játékrész vége</string>
+    <string name="iptv_sport5_section_sport_football">Labdarúgás</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">Rögbi liga</string>
+    <string name="iptv_sport5_section_sport_rugby">Rögbi unió</string>
+    <string name="iptv_sport5_section_sport_american_football">Amerikai futball</string>
+    <string name="iptv_sport5_section_sport_basketball">Kosárlabda</string>
+    <string name="iptv_sport5_section_sport_baseball">Baseball</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">Jégkorong</string>
+    <string name="iptv_sport5_section_sport_motor">Motorsport</string>
+    <string name="iptv_sport5_section_sport_fighting">Küzdősport</string>
+    <string name="iptv_sport5_section_sport_tennis">Tenisz</string>
+    <string name="iptv_sport5_section_sport_golf">Golf</string>
+    <string name="iptv_sport5_section_sport_cricket">Krikett</string>
+</resources>

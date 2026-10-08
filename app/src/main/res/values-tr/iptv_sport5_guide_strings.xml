@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5g_games_now">Şu anki maçlar</string>
+    <string name="iptv_sport5g_sport_only">Yalnızca spor</string>
+    <string name="iptv_sport5g_all_channels">Tüm kanallar</string>
+    <string name="iptv_sport5g_reminder_set">Hatırlatıcı kuruldu</string>
+    <string name="iptv_sport5g_sport">Spor</string>
+    <string name="iptv_sport5g_close">Çekişmeli</string>
+    <string name="iptv_sport5g_live">Canlı</string>
+    <string name="iptv_sport5g_channels">%1$s +%2$d</string>
+    <string name="iptv_sport5g_no_sport">Bu saatte bu kanallarda eşleşmiş maç yok. Her şeyi görmek için Tüm kanallar\'ı seçin.</string>
+</resources>

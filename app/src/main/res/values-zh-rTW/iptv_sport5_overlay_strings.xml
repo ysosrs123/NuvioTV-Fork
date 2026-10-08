@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">進球 · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s 得分 · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">得分 · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">開球 · %1$s</string>
+    <string name="iptv_sport5_overlay_started">已開始 · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">全場結束 · %1$s</string>
+    <string name="iptv_sport5_overlay_final">終場 · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">在 %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">按 OK 觀看</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">按返回關閉</string>
+    <string name="iptv_sport5_overlay_reminder">提醒</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s 將在 %2$d 分鐘後開始</string>
+    <string name="iptv_sport5_overlay_starting">%1$s 即將開始</string>
+    <string name="iptv_sport5_overlay_watch">觀看</string>
+    <string name="iptv_sport5_overlay_dismiss">關閉</string>
+    <string name="iptv_sport5_overlay_close_game">膠著</string>
+    <string name="iptv_sport5_overlay_main_event">主賽</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d 分鐘</string>
+</resources>

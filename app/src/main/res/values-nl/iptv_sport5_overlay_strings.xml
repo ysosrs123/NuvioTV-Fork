@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Doelpunt · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s scoort · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Score · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Aftrap · %1$s</string>
+    <string name="iptv_sport5_overlay_started">Begonnen · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Einde wedstrijd · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Eindstand · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">op %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK om te kijken</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Terug om te sluiten</string>
+    <string name="iptv_sport5_overlay_reminder">Herinnering</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s begint over %2$d min</string>
+    <string name="iptv_sport5_overlay_starting">%1$s begint nu</string>
+    <string name="iptv_sport5_overlay_watch">Kijken</string>
+    <string name="iptv_sport5_overlay_dismiss">Sluiten</string>
+    <string name="iptv_sport5_overlay_close_game">Spannend</string>
+    <string name="iptv_sport5_overlay_main_event">Hoofdgevecht</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d min</string>
+</resources>

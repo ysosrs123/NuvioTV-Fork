@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">Všetky výsledky</string>
+    <string name="iptv_sport5_section_live">Naživo</string>
+    <string name="iptv_sport5_section_my_teams">Moje tímy</string>
+    <string name="iptv_sport5_section_nothing">Tu nie je čo zobraziť.</string>
+    <string name="iptv_sport5_section_scores_hint">OK spustí sledovanie. Podržaním OK nastavíte pripomenutie alebo zobrazíte skrytý výsledok.</string>
+    <string name="iptv_sport5_section_tonight">Dnes večer</string>
+    <string name="iptv_sport5_section_timeline_hint">Vľavo a Vpravo posúva v čase · OK otvorí · Podržaním OK zobrazíte možnosti</string>
+    <string name="iptv_sport5_section_kick_off">Začiatok %1$s</string>
+    <string name="iptv_sport5_section_watch_on">Sledovať na %1$s</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d ďalší stream</item>
+        <item quantity="few">%1$d ďalšie streamy</item>
+        <item quantity="many">%1$d ďalšieho streamu</item>
+        <item quantity="other">%1$d ďalších streamov</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">Sledovať</string>
+    <string name="iptv_sport5_section_following">Sledujete</string>
+    <string name="iptv_sport5_section_remind">Pripomenúť</string>
+    <string name="iptv_sport5_section_reminder_set">Pripomenutie nastavené</string>
+    <string name="iptv_sport5_section_cancel_reminder">Zrušiť pripomenutie</string>
+    <string name="iptv_sport5_section_hold_to_show">Podržaním OK zobrazíte</string>
+    <string name="iptv_sport5_section_no_live_score">Bez živého výsledku</string>
+    <string name="iptv_sport5_section_set">%1$d. set</string>
+    <string name="iptv_sport5_section_serving">Podáva %1$s</string>
+    <string name="iptv_sport5_section_golf_round">%1$d. kolo</string>
+    <string name="iptv_sport5_section_done">Hotovo</string>
+    <string name="iptv_sport5_section_main_card">Hlavná karta</string>
+    <string name="iptv_sport5_section_prelims">Predzápasy</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d zápas</item>
+        <item quantity="few">%1$s · %2$d zápasy</item>
+        <item quantity="many">%1$s · %2$d zápasu</item>
+        <item quantity="other">%1$s · %2$d zápasov</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d kolo</item>
+        <item quantity="few">%1$d kolá</item>
+        <item quantity="many">%1$d kola</item>
+        <item quantity="other">%1$d kôl</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">Teraz: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">%1$d. kolo</string>
+    <string name="iptv_sport5_section_chase">%1$s potrebujú %2$d z %3$d loptičiek · potr. %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s z %2$d overov</string>
+    <string name="iptv_sport5_section_overs">%1$s overov</string>
+    <string name="iptv_sport5_section_target">cieľ %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d aut</item>
+        <item quantity="few">%1$d auty</item>
+        <item quantity="many">%1$d autu</item>
+        <item quantity="other">%1$d autov</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">Polovica %1$d</string>
+    <string name="iptv_sport5_section_inning_end">Koniec %1$d</string>
+    <string name="iptv_sport5_section_sport_football">Futbal</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">Rugby league</string>
+    <string name="iptv_sport5_section_sport_rugby">Rugby union</string>
+    <string name="iptv_sport5_section_sport_american_football">Americký futbal</string>
+    <string name="iptv_sport5_section_sport_basketball">Basketbal</string>
+    <string name="iptv_sport5_section_sport_baseball">Bejzbal</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">Ľadový hokej</string>
+    <string name="iptv_sport5_section_sport_motor">Motoršport</string>
+    <string name="iptv_sport5_section_sport_fighting">Bojové športy</string>
+    <string name="iptv_sport5_section_sport_tennis">Tenis</string>
+    <string name="iptv_sport5_section_sport_golf">Golf</string>
+    <string name="iptv_sport5_section_sport_cricket">Kriket</string>
+</resources>

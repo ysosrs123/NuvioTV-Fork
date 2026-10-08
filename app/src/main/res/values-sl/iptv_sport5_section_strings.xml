@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">Vsi rezultati</string>
+    <string name="iptv_sport5_section_live">V živo</string>
+    <string name="iptv_sport5_section_my_teams">Moje ekipe</string>
+    <string name="iptv_sport5_section_nothing">Tu ni ničesar za prikaz.</string>
+    <string name="iptv_sport5_section_scores_hint">OK za ogled. Pridržite OK, da nastavite opomnik ali prikažete skrit rezultat.</string>
+    <string name="iptv_sport5_section_tonight">Nocoj</string>
+    <string name="iptv_sport5_section_timeline_hint">Levo in Desno se premikata po času · OK odpre · Pridržite OK za možnosti</string>
+    <string name="iptv_sport5_section_kick_off">Začetek %1$s</string>
+    <string name="iptv_sport5_section_watch_on">Glej na %1$s</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d drug prenos</item>
+        <item quantity="two">%1$d druga prenosa</item>
+        <item quantity="few">%1$d drugi prenosi</item>
+        <item quantity="other">%1$d drugih prenosov</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">Sledi</string>
+    <string name="iptv_sport5_section_following">Sledite</string>
+    <string name="iptv_sport5_section_remind">Opomni me</string>
+    <string name="iptv_sport5_section_reminder_set">Opomnik nastavljen</string>
+    <string name="iptv_sport5_section_cancel_reminder">Prekliči opomnik</string>
+    <string name="iptv_sport5_section_hold_to_show">Pridržite OK za prikaz</string>
+    <string name="iptv_sport5_section_no_live_score">Ni rezultata v živo</string>
+    <string name="iptv_sport5_section_set">%1$d. niz</string>
+    <string name="iptv_sport5_section_serving">Servira %1$s</string>
+    <string name="iptv_sport5_section_golf_round">K%1$d</string>
+    <string name="iptv_sport5_section_done">Končano</string>
+    <string name="iptv_sport5_section_main_card">Glavni program</string>
+    <string name="iptv_sport5_section_prelims">Predizbori</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d dvoboj</item>
+        <item quantity="two">%1$s · %2$d dvoboja</item>
+        <item quantity="few">%1$s · %2$d dvoboji</item>
+        <item quantity="other">%1$s · %2$d dvobojev</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d runda</item>
+        <item quantity="two">%1$d rundi</item>
+        <item quantity="few">%1$d runde</item>
+        <item quantity="other">%1$d rund</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">Zdaj: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">Runda %1$d</string>
+    <string name="iptv_sport5_section_chase">%1$s potrebujejo %2$d iz %3$d žog · potr. %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s od %2$d overjev</string>
+    <string name="iptv_sport5_section_overs">%1$s overjev</string>
+    <string name="iptv_sport5_section_target">cilj %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d aut</item>
+        <item quantity="two">%1$d auta</item>
+        <item quantity="few">%1$d auti</item>
+        <item quantity="other">%1$d autov</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">Sredina %1$d</string>
+    <string name="iptv_sport5_section_inning_end">Konec %1$d</string>
+    <string name="iptv_sport5_section_sport_football">Nogomet</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">Ragbi liga</string>
+    <string name="iptv_sport5_section_sport_rugby">Ragbi unija</string>
+    <string name="iptv_sport5_section_sport_american_football">Ameriški nogomet</string>
+    <string name="iptv_sport5_section_sport_basketball">Košarka</string>
+    <string name="iptv_sport5_section_sport_baseball">Baseball</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">Hokej na ledu</string>
+    <string name="iptv_sport5_section_sport_motor">Motošport</string>
+    <string name="iptv_sport5_section_sport_fighting">Borilni športi</string>
+    <string name="iptv_sport5_section_sport_tennis">Tenis</string>
+    <string name="iptv_sport5_section_sport_golf">Golf</string>
+    <string name="iptv_sport5_section_sport_cricket">Kriket</string>
+</resources>

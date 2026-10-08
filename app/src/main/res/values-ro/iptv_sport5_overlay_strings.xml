@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Gol · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s marchează · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Puncte · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Lovitura de start · %1$s</string>
+    <string name="iptv_sport5_overlay_started">În desfășurare · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Final de meci · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Final · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">pe %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK pentru a viziona</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Înapoi pentru a închide</string>
+    <string name="iptv_sport5_overlay_reminder">Memento</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s începe în %2$d min</string>
+    <string name="iptv_sport5_overlay_starting">%1$s începe acum</string>
+    <string name="iptv_sport5_overlay_watch">Vezi</string>
+    <string name="iptv_sport5_overlay_dismiss">Închide</string>
+    <string name="iptv_sport5_overlay_close_game">Strâns</string>
+    <string name="iptv_sport5_overlay_main_event">Meciul principal</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d min</string>
+</resources>

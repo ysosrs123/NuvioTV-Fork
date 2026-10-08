@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Гол · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s отбелязват · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Точки · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Начален удар · %1$s</string>
+    <string name="iptv_sport5_overlay_started">Започна · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Край на мача · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Краен резултат · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">по %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK за гледане</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Назад за затваряне</string>
+    <string name="iptv_sport5_overlay_reminder">Напомняне</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s започва след %2$d мин.</string>
+    <string name="iptv_sport5_overlay_starting">%1$s започва сега</string>
+    <string name="iptv_sport5_overlay_watch">Гледай</string>
+    <string name="iptv_sport5_overlay_dismiss">Затвори</string>
+    <string name="iptv_sport5_overlay_close_game">Оспорван</string>
+    <string name="iptv_sport5_overlay_main_event">Главна среща</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d мин.</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">ゴール · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s が得点 · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">得点 · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">キックオフ · %1$s</string>
+    <string name="iptv_sport5_overlay_started">試合開始 · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">試合終了 · %1$s</string>
+    <string name="iptv_sport5_overlay_final">最終結果 · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">%1$s で放送</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK で視聴</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">戻るで閉じる</string>
+    <string name="iptv_sport5_overlay_reminder">リマインダー</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s はあと %2$d 分で開始</string>
+    <string name="iptv_sport5_overlay_starting">%1$s がまもなく開始</string>
+    <string name="iptv_sport5_overlay_watch">視聴</string>
+    <string name="iptv_sport5_overlay_dismiss">閉じる</string>
+    <string name="iptv_sport5_overlay_close_game">接戦</string>
+    <string name="iptv_sport5_overlay_main_event">メインイベント</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d 分</string>
+</resources>

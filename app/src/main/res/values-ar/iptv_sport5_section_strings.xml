@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">كل النتائج</string>
+    <string name="iptv_sport5_section_live">مباشر</string>
+    <string name="iptv_sport5_section_my_teams">فرقي</string>
+    <string name="iptv_sport5_section_nothing">لا شيء لعرضه هنا.</string>
+    <string name="iptv_sport5_section_scores_hint">OK للمشاهدة. اضغط مطولًا على OK لضبط تذكير أو إظهار نتيجة مخفية.</string>
+    <string name="iptv_sport5_section_tonight">الليلة</string>
+    <string name="iptv_sport5_section_timeline_hint">يسار ويمين للتنقل عبر الوقت · OK للفتح · اضغط مطولًا على OK للخيارات</string>
+    <string name="iptv_sport5_section_kick_off">البداية %1$s</string>
+    <string name="iptv_sport5_section_watch_on">شاهد على %1$s</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="zero">%1$d بث آخر</item>
+        <item quantity="one">%1$d بث آخر</item>
+        <item quantity="two">%1$d بثان آخران</item>
+        <item quantity="few">%1$d بثوث أخرى</item>
+        <item quantity="many">%1$d بثًا آخر</item>
+        <item quantity="other">%1$d بث آخر</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">متابعة</string>
+    <string name="iptv_sport5_section_following">تتابعه</string>
+    <string name="iptv_sport5_section_remind">ذكّرني</string>
+    <string name="iptv_sport5_section_reminder_set">تم ضبط التذكير</string>
+    <string name="iptv_sport5_section_cancel_reminder">إلغاء التذكير</string>
+    <string name="iptv_sport5_section_hold_to_show">اضغط مطولًا على OK للإظهار</string>
+    <string name="iptv_sport5_section_no_live_score">لا نتيجة مباشرة</string>
+    <string name="iptv_sport5_section_set">المجموعة %1$d</string>
+    <string name="iptv_sport5_section_serving">%1$s يرسل</string>
+    <string name="iptv_sport5_section_golf_round">ج%1$d</string>
+    <string name="iptv_sport5_section_done">انتهت</string>
+    <string name="iptv_sport5_section_main_card">البطاقة الرئيسية</string>
+    <string name="iptv_sport5_section_prelims">النزالات التمهيدية</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="zero">%1$s · %2$d نزال</item>
+        <item quantity="one">%1$s · %2$d نزال</item>
+        <item quantity="two">%1$s · %2$d نزالان</item>
+        <item quantity="few">%1$s · %2$d نزالات</item>
+        <item quantity="many">%1$s · %2$d نزالًا</item>
+        <item quantity="other">%1$s · %2$d نزال</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="zero">%1$d جولة</item>
+        <item quantity="one">%1$d جولة</item>
+        <item quantity="two">%1$d جولتان</item>
+        <item quantity="few">%1$d جولات</item>
+        <item quantity="many">%1$d جولة</item>
+        <item quantity="other">%1$d جولة</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">الآن: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">الجولة %1$d</string>
+    <string name="iptv_sport5_section_chase">%1$s يحتاج %2$d من %3$d كرة · المطلوب %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s من %2$d أوفر</string>
+    <string name="iptv_sport5_section_overs">%1$s أوفر</string>
+    <string name="iptv_sport5_section_target">الهدف %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="zero">%1$d إقصاء</item>
+        <item quantity="one">%1$d إقصاء</item>
+        <item quantity="two">%1$d إقصاءان</item>
+        <item quantity="few">%1$d إقصاءات</item>
+        <item quantity="many">%1$d إقصاءً</item>
+        <item quantity="other">%1$d إقصاء</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">منتصف %1$d</string>
+    <string name="iptv_sport5_section_inning_end">نهاية %1$d</string>
+    <string name="iptv_sport5_section_sport_football">كرة القدم</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">رغبي ليغ</string>
+    <string name="iptv_sport5_section_sport_rugby">رغبي يونيون</string>
+    <string name="iptv_sport5_section_sport_american_football">كرة القدم الأمريكية</string>
+    <string name="iptv_sport5_section_sport_basketball">كرة السلة</string>
+    <string name="iptv_sport5_section_sport_baseball">البيسبول</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">هوكي الجليد</string>
+    <string name="iptv_sport5_section_sport_motor">رياضة المحركات</string>
+    <string name="iptv_sport5_section_sport_fighting">الرياضات القتالية</string>
+    <string name="iptv_sport5_section_sport_tennis">التنس</string>
+    <string name="iptv_sport5_section_sport_golf">الغولف</string>
+    <string name="iptv_sport5_section_sport_cricket">الكريكيت</string>
+</resources>

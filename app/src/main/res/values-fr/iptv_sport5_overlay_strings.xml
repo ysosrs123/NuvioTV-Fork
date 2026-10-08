@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">But · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s marque · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Points · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Coup d’envoi · %1$s</string>
+    <string name="iptv_sport5_overlay_started">En cours · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Fin du match · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Terminé · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">sur %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK pour regarder</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Retour pour fermer</string>
+    <string name="iptv_sport5_overlay_reminder">Rappel</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s commence dans %2$d min</string>
+    <string name="iptv_sport5_overlay_starting">%1$s commence maintenant</string>
+    <string name="iptv_sport5_overlay_watch">Regarder</string>
+    <string name="iptv_sport5_overlay_dismiss">Fermer</string>
+    <string name="iptv_sport5_overlay_close_game">Serré</string>
+    <string name="iptv_sport5_overlay_main_event">Combat principal</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d min</string>
+</resources>

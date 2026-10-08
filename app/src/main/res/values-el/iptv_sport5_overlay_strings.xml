@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Γκολ · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s σκοράρει · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Σκορ · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Σέντρα · %1$s</string>
+    <string name="iptv_sport5_overlay_started">Σε εξέλιξη · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Τέλος αγώνα · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Τελικό · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">στο %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK για παρακολούθηση</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Πίσω για απόρριψη</string>
+    <string name="iptv_sport5_overlay_reminder">Υπενθύμιση</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s ξεκινά σε %2$d λεπ.</string>
+    <string name="iptv_sport5_overlay_starting">%1$s ξεκινά τώρα</string>
+    <string name="iptv_sport5_overlay_watch">Παρακολούθηση</string>
+    <string name="iptv_sport5_overlay_dismiss">Απόρριψη</string>
+    <string name="iptv_sport5_overlay_close_game">Αμφίρροπο</string>
+    <string name="iptv_sport5_overlay_main_event">Κεντρικός αγώνας</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d λεπ.</string>
+</resources>

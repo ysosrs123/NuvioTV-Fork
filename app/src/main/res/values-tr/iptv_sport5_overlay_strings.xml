@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Gol · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s skor yaptı · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Skor · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Başlama vuruşu · %1$s</string>
+    <string name="iptv_sport5_overlay_started">Başladı · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Maç sonu · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Final · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">%1$s kanalında</string>
+    <string name="iptv_sport5_overlay_hint_watch">İzlemek için OK</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Kapatmak için Geri</string>
+    <string name="iptv_sport5_overlay_reminder">Hatırlatıcı</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s %2$d dk sonra başlıyor</string>
+    <string name="iptv_sport5_overlay_starting">%1$s şimdi başlıyor</string>
+    <string name="iptv_sport5_overlay_watch">İzle</string>
+    <string name="iptv_sport5_overlay_dismiss">Kapat</string>
+    <string name="iptv_sport5_overlay_close_game">Çekişmeli</string>
+    <string name="iptv_sport5_overlay_main_event">Ana karşılaşma</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d dk</string>
+</resources>

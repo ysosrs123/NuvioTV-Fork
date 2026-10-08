@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">Усі результати</string>
+    <string name="iptv_sport5_section_live">Наживо</string>
+    <string name="iptv_sport5_section_my_teams">Мої команди</string>
+    <string name="iptv_sport5_section_nothing">Тут нічого показати.</string>
+    <string name="iptv_sport5_section_scores_hint">OK — дивитися. Утримуйте OK, щоб установити нагадування або показати прихований результат.</string>
+    <string name="iptv_sport5_section_tonight">Сьогодні ввечері</string>
+    <string name="iptv_sport5_section_timeline_hint">Вліво і вправо — переміщення в часі · OK — відкрити · Утримуйте OK для параметрів</string>
+    <string name="iptv_sport5_section_kick_off">Початок %1$s</string>
+    <string name="iptv_sport5_section_watch_on">Дивитися на %1$s</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">Ще %1$d трансляція</item>
+        <item quantity="few">Ще %1$d трансляції</item>
+        <item quantity="many">Ще %1$d трансляцій</item>
+        <item quantity="other">Ще %1$d трансляції</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">Стежити</string>
+    <string name="iptv_sport5_section_following">Ви стежите</string>
+    <string name="iptv_sport5_section_remind">Нагадати</string>
+    <string name="iptv_sport5_section_reminder_set">Нагадування встановлено</string>
+    <string name="iptv_sport5_section_cancel_reminder">Скасувати нагадування</string>
+    <string name="iptv_sport5_section_hold_to_show">Утримуйте OK, щоб показати</string>
+    <string name="iptv_sport5_section_no_live_score">Немає рахунку наживо</string>
+    <string name="iptv_sport5_section_set">Сет %1$d</string>
+    <string name="iptv_sport5_section_serving">Подає %1$s</string>
+    <string name="iptv_sport5_section_golf_round">Р%1$d</string>
+    <string name="iptv_sport5_section_done">Завершено</string>
+    <string name="iptv_sport5_section_main_card">Основний кард</string>
+    <string name="iptv_sport5_section_prelims">Попередній кард</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d бій</item>
+        <item quantity="few">%1$s · %2$d бої</item>
+        <item quantity="many">%1$s · %2$d боїв</item>
+        <item quantity="other">%1$s · %2$d бою</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d раунд</item>
+        <item quantity="few">%1$d раунди</item>
+        <item quantity="many">%1$d раундів</item>
+        <item quantity="other">%1$d раунду</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">Зараз: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">Раунд %1$d</string>
+    <string name="iptv_sport5_section_chase">%1$s потрібно %2$d з %3$d м’ячів · потр. %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s з %2$d оверів</string>
+    <string name="iptv_sport5_section_overs">Оверів: %1$s</string>
+    <string name="iptv_sport5_section_target">мета %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d аут</item>
+        <item quantity="few">%1$d аути</item>
+        <item quantity="many">%1$d аутів</item>
+        <item quantity="other">%1$d ауту</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">Середина %1$d</string>
+    <string name="iptv_sport5_section_inning_end">Кінець %1$d</string>
+    <string name="iptv_sport5_section_sport_football">Футбол</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">Регбіліг</string>
+    <string name="iptv_sport5_section_sport_rugby">Регбі</string>
+    <string name="iptv_sport5_section_sport_american_football">Американський футбол</string>
+    <string name="iptv_sport5_section_sport_basketball">Баскетбол</string>
+    <string name="iptv_sport5_section_sport_baseball">Бейсбол</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">Хокей</string>
+    <string name="iptv_sport5_section_sport_motor">Автоспорт</string>
+    <string name="iptv_sport5_section_sport_fighting">Єдиноборства</string>
+    <string name="iptv_sport5_section_sport_tennis">Теніс</string>
+    <string name="iptv_sport5_section_sport_golf">Гольф</string>
+    <string name="iptv_sport5_section_sport_cricket">Крикет</string>
+</resources>
