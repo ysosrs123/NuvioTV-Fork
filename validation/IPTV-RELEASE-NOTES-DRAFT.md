@@ -597,6 +597,8 @@ Phone setup (security review)
 
 ## Validation
 
+- Combined ESPN and TheSportsDB sources with translations: CI debug build green at `d3a0288`
+  (run 37853846775); 710 core and 271 data-layer JVM tests on the host.
 - Parsers checked against real ESPN responses (8 October evening): CI debug build green at
   `374e1f6` (run 37845595141); 697 core and 263 data-layer JVM tests on the host.
 - After 8 October: the sports build (shared live service, guide, overlays, Game Centre,
