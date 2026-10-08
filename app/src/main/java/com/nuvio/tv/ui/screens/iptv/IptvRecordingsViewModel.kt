@@ -76,6 +76,7 @@ class IptvRecordingsViewModel @Inject constructor(
             message.value = null
             playing.value = IptvRecordingPlayback(recording, reader)
             screensaver.setPlaybackActive(true)
+            if (recording.playedAtMillis == null) recorder.markPlayed(recording.id)
         }
     }
 

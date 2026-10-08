@@ -174,6 +174,20 @@ class IptvRecorder @Inject constructor(
         return create(session, source, channelId, programme, window, location)
     }
 
+    suspend fun scheduleSport(session: IptvProfileAccess.Session, source: IptvSourceRef, channelId: String, programme: GuideProgramme?,
+        title: String, window: RecordingWindow, fixtureKey: String, location: String? = null): IptvRecordResult {
+        if (window.stopMillis <= System.currentTimeMillis()) return IptvRecordResult.Refused(IptvRecordRefusal.PROGRAMME_ENDED)
+        return create(session, source, channelId, programme, window, location, title, fixtureKey)
+    }
+
+    suspend fun markPlayed(id: String) = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            load()
+            update(id) { if (it.playedAtMillis == null) it.copy(playedAtMillis = System.currentTimeMillis()) else it }
+            publish()
+        }
+    }
+
     suspend fun cancel(id: String): Boolean = withContext(Dispatchers.IO) {
         val status = mutex.withLock {
             load()
@@ -346,16 +360,17 @@ class IptvRecorder @Inject constructor(
     }
 
     private suspend fun create(session: IptvProfileAccess.Session, source: IptvSourceRef, channelId: String,
-        programme: GuideProgramme?, window: RecordingWindow, location: String?): IptvRecordResult = withContext(Dispatchers.IO) {
-        require(source.profileId == session.profileId)
-        mutex.withLock {
-            load()
-            createLocked(session, source, channelId, programme, window, location)
+        programme: GuideProgramme?, window: RecordingWindow, location: String?, named: String? = null, fixtureKey: String? = null): IptvRecordResult =
+        withContext(Dispatchers.IO) {
+            require(source.profileId == session.profileId)
+            mutex.withLock {
+                load()
+                createLocked(session, source, channelId, programme, window, location, named, fixtureKey)
+            }
         }
-    }
 
     private fun createLocked(session: IptvProfileAccess.Session, source: IptvSourceRef, channelId: String,
-        programme: GuideProgramme?, window: RecordingWindow, location: String?): IptvRecordResult {
+        programme: GuideProgramme?, window: RecordingWindow, location: String?, named: String?, fixtureKey: String?): IptvRecordResult {
         val now = System.currentTimeMillis()
         val found = try {
             access.use(session) {
@@ -402,14 +417,14 @@ class IptvRecorder @Inject constructor(
             if ((admission.snapshot().upstreamsByAccount[admissionAccount(source.profileId, stored.accountId)] ?: 0) >= streams) return IptvRecordResult.Refused(IptvRecordRefusal.NO_FREE_CONNECTION)
         }
         val language = Locale.getDefault().language
-        val title = programme?.let { p -> (p.titles.firstOrNull { it.language?.substringBefore('-') == language } ?: p.titles.firstOrNull())?.text }
+        val title = named ?: programme?.let { p -> (p.titles.firstOrNull { it.language?.substringBefore('-') == language } ?: p.titles.firstOrNull())?.text }
         val description = programme?.let { p -> (p.descriptions.firstOrNull { it.language?.substringBefore('-') == language } ?: p.descriptions.firstOrNull())?.text }
         val entry = IptvRecording(id = UUID.randomUUID().toString(), profileId = source.profileId, sourceId = source.sourceId,
             accountId = stored.accountId, channelId = channelId, channelName = (item.overlay.customName ?: item.channel.data.name).take(240),
             title = title?.trim()?.takeIf { it.isNotEmpty() }?.take(500), description = description?.trim()?.takeIf { it.isNotEmpty() }?.take(4000),
             startMillis = trim.candidate.startMillis, stopMillis = trim.candidate.stopMillis, status = RecordingStatus.SCHEDULED,
             programmeStartMillis = programme?.start?.epochMillis, programmeStopMillis = programme?.stop?.epochMillis, createdAtMillis = now,
-            storage = place.storage, storageLabel = place.label?.take(240))
+            storage = place.storage, storageLabel = place.label?.take(240), fixtureKey = fixtureKey?.take(400))
         try { store.insert(entry) } catch (error: Exception) {
             IptvLog.failure("recording save", error)
             return IptvRecordResult.Refused(if (error is IllegalStateException) IptvRecordRefusal.LIST_FULL else IptvRecordRefusal.LOW_STORAGE)

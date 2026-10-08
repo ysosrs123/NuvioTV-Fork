@@ -340,6 +340,14 @@ Sport:
 - Sport section: cards fitted to each sport, hero with Follow and Remind me, a "Tonight"
   timeline with a lane per sport, an All scores screen, Remind me in the options, and
   results of recorded games hidden until you choose to show them.
+- Across Nuvio (IPTV build): Home shows "Live sport" and "Your teams" rows; a team page
+  (from Your teams) with the next games, Follow, Remind me and "Record every game";
+  while a film or series plays, a followed team's start, scores and full time appear as
+  a pop-up (Watch the game saves your place and opens Live TV) or a one-line chip, never
+  in the last minutes of a film; "While you were watching" when it ends. Scores are
+  checked in the background only for followed teams' live games while Nuvio is open.
+- Recordings remember when they were first played; sport recordings show "Not watched
+  yet" and keep their result hidden until played.
 - Guide matching for events without two teams (tennis, golf, motor racing, UFC) uses the
   event or tournament name.
 

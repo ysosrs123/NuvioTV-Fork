@@ -1558,6 +1558,7 @@ fun PlayerScreen(
                 },
                 modifier = Modifier.align(Alignment.TopStart)
             )
+            if (com.nuvio.tv.BuildConfig.FEATURE_IPTV_ENABLED) com.nuvio.tv.ui.screens.iptv.IptvSportsPlayerAlerts(uiState.showControls, viewModel.playbackTimeline, viewModel::stopAndRelease)
 
             DisplayModeOverlay(
                 info = uiState.displayModeInfo,

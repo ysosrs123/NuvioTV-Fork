@@ -22,11 +22,13 @@ data class IptvRecording(
     val programmeStartMillis: Long? = null, val programmeStopMillis: Long? = null,
     val createdAtMillis: Long, val startedAtMillis: Long? = null, val finishedAtMillis: Long? = null,
     val storage: String? = null, val storageLabel: String? = null, val parts: Int = 1, val upload: Boolean = false,
+    val playedAtMillis: Long? = null, val fixtureKey: String? = null,
 ) {
     init {
         require(id.matches(Regex("[A-Za-z0-9-]{8,64}")) && profileId >= 0 && stopMillis > startMillis && bytes >= 0 && gaps >= 0)
         require(parts in 1..RecordingParts.MAX_PARTS && RecordingLocations.valid(storage) && (storageLabel?.length ?: 0) <= 240)
         require(channelId.isNotEmpty() && channelId.length <= 1024 && accountId.isNotEmpty() && accountId.length <= 80)
+        require((fixtureKey?.length ?: 0) <= 400)
     }
     val source: IptvSourceRef get() = IptvSourceRef(profileId, sourceId)
     val window: RecordingWindow get() = RecordingWindow(startMillis, stopMillis)
@@ -140,6 +142,7 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
         putOpt("storage", entry.storage); putOpt("storageLabel", entry.storageLabel)
         if (entry.parts != 1) put("parts", entry.parts)
         if (entry.upload) put("upload", true)
+        putOpt("played", entry.playedAtMillis); putOpt("fixture", entry.fixtureKey)
     }
 
     private fun decode(json: JSONObject) = IptvRecording(
@@ -151,6 +154,7 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
         programmeStartMillis = json.number("programmeStart"), programmeStopMillis = json.number("programmeStop"),
         createdAtMillis = json.getLong("created"), startedAtMillis = json.number("started"), finishedAtMillis = json.number("finished"),
         storage = json.text("storage"), storageLabel = json.text("storageLabel"), parts = json.optInt("parts", 1), upload = json.optBoolean("upload", false),
+        playedAtMillis = json.number("played"), fixtureKey = json.text("fixture")?.takeIf { it.length <= 400 },
     ).also { IptvSourceRef(it.profileId, it.sourceId) }
 
     private fun JSONObject.text(key: String): String? = if (has(key) && !isNull(key)) getString(key) else null

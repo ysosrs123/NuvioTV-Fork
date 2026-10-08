@@ -206,6 +206,7 @@ private fun RecordingLine(recording: IptvRecording, availability: IptvRecordingA
         "$date ${clock(start)} – ${clock(stop)}",
         recording.failure?.let { stringResource(iptvRecordingFailureMessage(it)) },
         if (recording.gaps > 0 && recording.failure == null) stringResource(R.string.iptv_recording_gaps) else null,
+        if (recording.fixtureKey != null && recording.status.finished && recording.playedAtMillis == null) stringResource(R.string.iptv_sport5_nuvio_unwatched) else null,
         when {
             recording.storage == null -> null
             recording.onMedia -> stringResource(R.string.iptv_media_label)

@@ -10,6 +10,8 @@ import androidx.compose.foundation.gestures.BringIntoViewSpec
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -67,8 +69,10 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.HomeRowKind
 import com.nuvio.tv.core.iptv.HomeRows
+import com.nuvio.tv.core.iptv.SportsFixtureText
 import com.nuvio.tv.core.iptv.VodArt
 import com.nuvio.tv.core.iptv.VodKind
 import com.nuvio.tv.data.iptv.IptvHomeChannel
@@ -123,11 +127,17 @@ private fun IptvHomeRowSection(host: IptvHomeHost, row: IptvHomeRow, style: Iptv
         is IptvHomeRow.Channels -> row.items.size
         is IptvHomeRow.Titles -> row.items.size
         is IptvHomeRow.Recordings -> row.items.size
+        is IptvHomeRow.LiveSport -> row.items.size
+        is IptvHomeRow.Teams -> row.items.size + 1
     }
     fun focused(index: Int) { lastFocused = index; onFocused(row.key, index) }
     fun requester(index: Int) = requesters.getOrPut(index) { FocusRequester() }
     Column(Modifier.fillMaxWidth()) {
-        Text(stringResource(iptvHomeRowTitle(row.kind)), color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        Text(stringResource(when (row) {
+                is IptvHomeRow.LiveSport -> R.string.iptv_sport5_nuvio_live_sport
+                is IptvHomeRow.Teams -> R.string.iptv_sport5_nuvio_your_teams
+                else -> iptvHomeRowTitle(row.kind)
+            }), color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis,
             style = if (style.compactTitle) MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold) else MaterialTheme.typography.headlineMedium,
             modifier = Modifier.fillMaxWidth().padding(style.headerPadding))
         val density = LocalDensity.current
@@ -189,6 +199,24 @@ private fun IptvHomeRowSection(host: IptvHomeHost, row: IptvHomeRow, style: Iptv
                         RecordingCard(item, row.logos[item.sourceId to item.channelId], style, Modifier.focusRequester(requester(index)),
                             onFocus = { focused(index) }, onClick = host::openRecordings)
                     }
+                    is IptvHomeRow.LiveSport -> itemsIndexed(row.items, key = { _, item -> item.fixture.key }) { index, item ->
+                        SportCard(item, host.now.value, style, Modifier.focusRequester(requester(index)), onFocus = { focused(index) },
+                            onClick = { host.openSport(item) })
+                    }
+                    is IptvHomeRow.Teams -> {
+                        itemsIndexed(row.items, key = { _, item -> item.key }) { index, item ->
+                            TeamCard(item, row.days, style, Modifier.focusRequester(requester(index)), onFocus = { focused(index) },
+                                onClick = { host.openTeam(item) })
+                        }
+                        item(key = "follow") {
+                            val index = row.items.size
+                            HomeCardFrame(style, Modifier.focusRequester(requester(index)), onFocus = { focused(index) }, onClick = host::openLive) {
+                                Text(stringResource(R.string.iptv_sport5_nuvio_follow_team), style = MaterialTheme.typography.titleSmall,
+                                    color = NuvioTheme.colors.TextSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.align(Alignment.Center)
+                                        .padding(horizontal = NuvioTheme.spacing.md))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -213,8 +241,95 @@ private fun RecordingCard(item: IptvRecording, logo: String?, style: IptvHomeSty
 }
 
 @Composable
+private fun SportCard(item: IptvHomeSport, now: Long, style: IptvHomeStyle, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
+    val fixture = item.fixture
+    val tag = when {
+        fixture.status != FixtureStatus.LIVE -> ((fixture.startMillis - now) / 60_000L).toInt().let {
+            if (it > 0) stringResource(R.string.iptv_sport5_nuvio_in_minutes, it) else stringResource(R.string.iptv_sport5_nuvio_starting) }
+        item.close -> stringResource(R.string.iptv_sport5_nuvio_close_tag, SportsFixtureText.bug(fixture).state ?: stringResource(R.string.iptv_sport_live))
+        else -> SportsFixtureText.bug(fixture).state?.takeIf { !item.hidden }?.let { stringResource(R.string.iptv_sport5_nuvio_live_state, it) }
+            ?: stringResource(R.string.iptv_sport_live)
+    }
+    WideCard(iptvScoreLine(fixture, item.hidden), "${sportLeagueName(fixture)} · ${channelName(item.link.row)}", programmeArt(item.link.programme),
+        logoUrl(item.link.row), channelName(item.link.row), null, fixture.status == FixtureStatus.LIVE, style, modifier, onFocus, onClick, tag)
+}
+
+@Composable
+private fun TeamCard(item: IptvHomeTeam, days: Int, style: IptvHomeStyle, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
+    val fixture = item.fixture
+    val opponent = fixture?.let { if (item.home == false) it.home else it.away }
+    val versus = opponent?.let { stringResource(if (item.home == false) R.string.iptv_sport5_nuvio_at_team else R.string.iptv_sport5_nuvio_versus_team, it.shortName ?: it.name) }
+    val scores = fixture?.let { SportsFixtureText.scores(it) }?.takeIf { !item.hidden && fixture.status != FixtureStatus.SCHEDULED }
+        ?.let { if (item.home == false) "${it.second}–${it.first}" else "${it.first}–${it.second}" }
+    val state = fixture?.let { iptvFixtureState(it, item.hidden) }
+    val start = fixture?.startMillis ?: 0L
+    val heading = when {
+        fixture == null -> stringResource(R.string.iptv_sport5_nuvio_no_game, days)
+        fixture.status == FixtureStatus.LIVE && scores != null -> listOfNotNull(versus, scores).joinToString(" · ")
+        versus != null -> versus
+        else -> sportTitle(fixture)
+    }
+    val note = when (item.recording) {
+        IptvTeamRecording.RECORDING -> stringResource(R.string.iptv_sport5_nuvio_recording_now)
+        IptvTeamRecording.SET -> stringResource(R.string.iptv_sport5_nuvio_recording_set)
+        IptvTeamRecording.RULE -> stringResource(R.string.iptv_sport5_nuvio_records_all)
+        IptvTeamRecording.NONE -> if (item.reminder) stringResource(R.string.iptv_sport5_nuvio_reminder_set) else null
+    }
+    val detail = when (fixture?.status) {
+        null -> note
+        FixtureStatus.FINAL -> if (item.hidden) stringResource(R.string.iptv_sport5_nuvio_result_hidden) else listOfNotNull(state, scores).joinToString(" · ")
+        FixtureStatus.LIVE -> listOfNotNull(state, note).joinToString(" · ")
+        FixtureStatus.SCHEDULED -> listOfNotNull(clock(start), fixture?.venue, note).joinToString(" · ")
+    }
+    val corner = when (fixture?.status) {
+        FixtureStatus.LIVE -> stringResource(R.string.iptv_sport_live)
+        FixtureStatus.SCHEDULED -> sportDayLabel(start)
+        else -> null
+    }
+    HomeCardFrame(style, modifier, onFocus, onClick) {
+        Column(Modifier.fillMaxSize().padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.sm), verticalArrangement = Arrangement.SpaceEvenly) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (item.team != null) TeamLogo(item.team, 24.dp)
+                Text("${item.name} · ${item.league}", style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                if (corner != null) Text(corner, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, maxLines = 1,
+                    color = if (fixture?.status == FixtureStatus.LIVE) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary)
+            }
+            Text(heading, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+            if (!detail.isNullOrEmpty()) Text(detail, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+@Composable
+private fun HomeCardFrame(style: IptvHomeStyle, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit, content: @Composable BoxScope.() -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    val isV2 = LocalV2Appearance.current != null
+    val shape = remember(style.poster.cornerRadius) { RoundedCornerShape(style.poster.cornerRadius) }
+    val depth = LocalCardDepthStyle.current
+    Card(
+        onClick = onClick,
+        modifier = modifier
+            .width(style.wideWidth)
+            .nuvioV2Focus(focused, shape, stationary = true)
+            .onFocusChanged { state -> if (state.isFocused != focused) { focused = state.isFocused; if (state.isFocused) onFocus() } },
+        shape = CardDefaults.shape(shape = shape),
+        colors = CardDefaults.colors(containerColor = Color.Transparent, focusedContainerColor = Color.Transparent),
+        border = if (isV2) CardDefaults.border(focusedBorder = Border.None)
+            else CardDefaults.border(focusedBorder = Border(border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs), shape = shape)),
+        scale = CardDefaults.scale(focusedScale = 1f)
+    ) {
+        Box(Modifier.fillMaxWidth().height(style.wideHeight)
+            .nuvioCardDepth(shape = shape, surface = CardDepthSurface.CONTINUE_WATCHING, style = depth)
+            .clip(shape).background(NuvioTheme.colors.BackgroundCard), content = content)
+    }
+}
+
+@Composable
 private fun WideCard(heading: String, detail: String?, artwork: String?, logo: String?, name: String, progress: Float?, live: Boolean,
-    style: IptvHomeStyle, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
+    style: IptvHomeStyle, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit, tag: String? = null) {
     var focused by remember { mutableStateOf(false) }
     var artFailed by remember(artwork) { mutableStateOf(false) }
     val isV2 = LocalV2Appearance.current != null
@@ -249,7 +364,8 @@ private fun WideCard(heading: String, detail: String?, artwork: String?, logo: S
             else ChannelLogo(logo, name, Modifier.align(Alignment.Center).padding(bottom = style.wideHeight * .22f).fillMaxWidth(.42f).aspectRatio(16f / 9f))
             Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, .4f to Color.Transparent, 1f to fade.copy(alpha = .95f))))
             if (showArt && logo != null) ChannelLogo(logo, name, Modifier.align(Alignment.TopStart).padding(NuvioTheme.spacing.sm).size(56.dp, 32.dp))
-            if (live) Tag(stringResource(R.string.iptv_live_playing), Modifier.align(Alignment.TopEnd).padding(NuvioTheme.spacing.sm), live = true)
+            if (tag != null) Tag(tag, Modifier.align(Alignment.TopEnd).padding(NuvioTheme.spacing.sm), live = live, scrim = true)
+            else if (live) Tag(stringResource(R.string.iptv_live_playing), Modifier.align(Alignment.TopEnd).padding(NuvioTheme.spacing.sm), live = true)
             Column(Modifier.align(Alignment.BottomStart).fillMaxWidth()
                 .padding(start = NuvioTheme.spacing.md, end = NuvioTheme.spacing.md, bottom = if (progress != null) NuvioTheme.spacing.lg else NuvioTheme.spacing.md)) {
                 Text(heading, style = MaterialTheme.typography.titleSmall, color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)

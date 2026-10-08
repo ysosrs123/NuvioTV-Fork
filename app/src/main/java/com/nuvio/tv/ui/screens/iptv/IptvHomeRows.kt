@@ -21,9 +21,16 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.BuildConfig
+import com.nuvio.tv.core.iptv.FixtureStatus
+import com.nuvio.tv.core.iptv.FixtureTeam
 import com.nuvio.tv.core.iptv.HomeRowKind
 import com.nuvio.tv.core.iptv.HomeRowSettings
 import com.nuvio.tv.core.iptv.HomeRows
+import com.nuvio.tv.core.iptv.SportsFavourites
+import com.nuvio.tv.core.iptv.SportsFixture
+import com.nuvio.tv.core.iptv.SportsLeagues
+import com.nuvio.tv.core.iptv.SportsService
+import com.nuvio.tv.core.iptv.SportsTeams
 import com.nuvio.tv.core.iptv.VodArt
 import com.nuvio.tv.core.iptv.VodDetailTarget
 import com.nuvio.tv.core.iptv.VodKind
@@ -31,6 +38,7 @@ import com.nuvio.tv.core.iptv.VodRef
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.recording.IptvRecorder
 import com.nuvio.tv.data.iptv.IptvCatalogueStore
+import com.nuvio.tv.data.iptv.IptvFixtureLink
 import com.nuvio.tv.data.iptv.IptvGuideStore
 import com.nuvio.tv.data.iptv.IptvHomeChannel
 import com.nuvio.tv.data.iptv.IptvHomePreferences
@@ -41,6 +49,8 @@ import com.nuvio.tv.data.iptv.IptvLog
 import com.nuvio.tv.data.iptv.IptvProfileAccess
 import com.nuvio.tv.data.iptv.IptvRecording
 import com.nuvio.tv.data.iptv.IptvSource
+import com.nuvio.tv.data.iptv.IptvSportsFixturesRepository
+import com.nuvio.tv.data.iptv.IptvSportsPreferences
 import com.nuvio.tv.data.iptv.IptvVodArtwork
 import com.nuvio.tv.data.iptv.IptvVodArtworkMode
 import com.nuvio.tv.data.iptv.IptvVodArtworkPreferences
@@ -49,6 +59,7 @@ import com.nuvio.tv.data.iptv.IptvVodStreams
 import com.nuvio.tv.data.iptv.IptvVodTitle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -83,7 +94,26 @@ sealed interface IptvHomeRow {
     data class Recordings(val items: List<IptvRecording>, val logos: Map<Pair<String, String>, String> = emptyMap()) : IptvHomeRow {
         override val kind: HomeRowKind get() = HomeRowKind.RECORDINGS
     }
+
+    @Immutable
+    data class LiveSport(val items: List<IptvHomeSport>) : IptvHomeRow {
+        override val kind: HomeRowKind get() = HomeRowKind.SPORT
+        override val key: String get() = IPTV_HOME_ROW_PREFIX + "live_sport"
+    }
+
+    @Immutable
+    data class Teams(val items: List<IptvHomeTeam>, val days: Int) : IptvHomeRow {
+        override val kind: HomeRowKind get() = HomeRowKind.SPORT
+        override val key: String get() = IPTV_HOME_ROW_PREFIX + "teams"
+    }
 }
+
+@Immutable
+data class IptvHomeSport(val fixture: SportsFixture, val link: IptvFixtureLink, val hidden: Boolean, val close: Boolean)
+
+@Immutable
+data class IptvHomeTeam(val key: String, val name: String, val league: String, val team: FixtureTeam?, val fixture: SportsFixture?, val home: Boolean?,
+    val hidden: Boolean, val recording: IptvTeamRecording, val reminder: Boolean)
 
 sealed interface IptvHomeEvent {
     data class Detail(val target: VodDetailTarget) : IptvHomeEvent
@@ -94,8 +124,10 @@ sealed interface IptvHomeEvent {
 class IptvHomeViewModel @Inject constructor(@ApplicationContext context: Context, private val catalogue: IptvCatalogueStore, guides: IptvGuideStore,
     vod: IptvVodRepository, vodStreams: IptvVodStreams, private val access: IptvProfileAccess, private val profiles: ProfileManager,
     private val livePreferences: IptvLivePreferences, private val artwork: IptvVodArtwork, private val artworkPreferences: IptvVodArtworkPreferences,
-    private val opener: IptvVodOpener, private val recorder: IptvRecorder, private val liveLaunch: IptvLiveLaunch) : ViewModel() {
-    private data class Request(val profileId: Int, val revision: Long, val settings: HomeRowSettings, val sport: Boolean, val nuvio: Boolean)
+    private val opener: IptvVodOpener, private val recorder: IptvRecorder, private val liveLaunch: IptvLiveLaunch,
+    private val sportsPreferences: IptvSportsPreferences, private val sportsRepository: IptvSportsFixturesRepository, private val sports: IptvSportsNuvio) : ViewModel() {
+    private data class Request(val profileId: Int, val revision: Long, val settings: HomeRowSettings, val sport: Boolean, val nuvio: Boolean,
+        val fixtures: Boolean, val favourites: Set<String>, val rules: Set<String>)
 
     private val preferences = IptvHomePreferences(context)
     private val loader = IptvHomeRowsLoader(catalogue, guides, vod, vodStreams) { ref ->
@@ -132,7 +164,8 @@ class IptvHomeViewModel @Inject constructor(@ApplicationContext context: Context
     fun refresh() {
         if (!active) return
         val request = Request(profiles.activeProfileId.value, profiles.profileSelectionRevision.value, preferences.settings, livePreferences.sport,
-            artworkPreferences.mode == IptvVodArtworkMode.NUVIO)
+            artworkPreferences.mode == IptvVodArtworkMode.NUVIO, BuildConfig.FEATURE_IPTV_ENABLED && sportsPreferences.service != SportsService.OFF,
+            sportsPreferences.favouriteTeams, sports.rules.value)
         if (request == loaded && HomeRows.fresh(loadedAt, System.currentTimeMillis())) return
         if (loadJob?.isActive == true && request == requested) return
         requested = request
@@ -143,6 +176,12 @@ class IptvHomeViewModel @Inject constructor(@ApplicationContext context: Context
     fun tune(row: IptvHomeRow.Channels, item: IptvHomeChannel) {
         liveLaunch.channel.value = IptvHomeTune(item.channel, profiles.activeProfileId.value, row.kind == HomeRowKind.FAVOURITES, row.kind == HomeRowKind.SPORT)
     }
+
+    fun tune(item: IptvHomeSport) {
+        liveLaunch.channel.value = IptvHomeTune(item.link.row, profiles.activeProfileId.value, favourites = false, sport = true)
+    }
+
+    fun openTeam(item: IptvHomeTeam) = sports.openTeam(item.key)
 
     fun open(row: IptvHomeRow.Titles, title: IptvVodTitle) {
         if (opening) return
@@ -165,13 +204,16 @@ class IptvHomeViewModel @Inject constructor(@ApplicationContext context: Context
         val kinds = HomeRows.order(request.settings, request.sport)
         val sources = if (kinds.none { it == HomeRowKind.FAVOURITES || it == HomeRowKind.SPORT }) emptyList()
             else io(emptyList<IptvSource>()) { access.use(access.open(profileId)) { catalogue.sources(profileId) }.filter { it.playbackEligible } }
-        val result = kinds.mapNotNull { kind ->
+        val result = kinds.flatMap { kind ->
             when (kind) {
-                HomeRowKind.FAVOURITES -> io(emptyList()) { loader.favourites(profileId, sources, now) }.takeIf { it.isNotEmpty() }?.let { IptvHomeRow.Channels(kind, it) }
-                HomeRowKind.SPORT -> io(emptyList()) { loader.sport(sources, now) }.takeIf { it.isNotEmpty() }?.let { IptvHomeRow.Channels(kind, it) }
-                HomeRowKind.MOVIES -> titles(profileId, VodKind.MOVIE, kind, request.nuvio)
-                HomeRowKind.SERIES -> titles(profileId, VodKind.SERIES, kind, request.nuvio)
-                HomeRowKind.RECORDINGS -> recordings(profileId)
+                HomeRowKind.FAVOURITES -> listOfNotNull(io(emptyList()) { loader.favourites(profileId, sources, now) }.takeIf { it.isNotEmpty() }
+                    ?.let { IptvHomeRow.Channels(kind, it) })
+                HomeRowKind.SPORT -> sportRows(request, sources, now) {
+                    io(emptyList()) { loader.sport(sources, now) }.takeIf { it.isNotEmpty() }?.let { IptvHomeRow.Channels(kind, it) }
+                }
+                HomeRowKind.MOVIES -> listOfNotNull(titles(profileId, VodKind.MOVIE, kind, request.nuvio))
+                HomeRowKind.SERIES -> listOfNotNull(titles(profileId, VodKind.SERIES, kind, request.nuvio))
+                HomeRowKind.RECORDINGS -> listOfNotNull(recordings(profileId))
             }
         }
         if (profiles.activeProfileId.value != profileId || requested != request) return
@@ -179,6 +221,31 @@ class IptvHomeViewModel @Inject constructor(@ApplicationContext context: Context
         loaded = request
         loadedAt = System.currentTimeMillis()
         if (request.nuvio) resolveArt(result)
+    }
+
+    private suspend fun sportRows(request: Request, sources: List<IptvSource>, now: Long, guide: suspend () -> IptvHomeRow?): List<IptvHomeRow> {
+        if (!request.fixtures) return listOfNotNull(guide())
+        val favourites = request.favourites
+        val fixtures = io(emptyList()) { sportsRepository.load(now, ZoneId.systemDefault(), true, favourites).takeIf { it.service != SportsService.OFF }?.fixtures.orEmpty() }
+        val teams = favourites.sortedBy { it.lowercase() }.mapNotNull { SportsTeams.games(it, fixtures, now) }
+        val soon = fixtures.filter { it.status == FixtureStatus.LIVE || (it.status == FixtureStatus.SCHEDULED && it.startMillis <= now + SOON_MILLIS &&
+            it.startMillis + SOON_MILLIS > now) }
+        val links = io(emptyMap()) { sports.link(sources, (soon + teams.mapNotNull { it.current }).distinctBy { it.key }.take(MAX_LINKED), now) }
+        val spoilers = io(emptySet()) { sports.spoilersFor(fixtures, request.profileId) }
+        val showScores = sportsPreferences.showScores
+        val live = soon.mapNotNull { fixture -> links[fixture.key]?.firstOrNull()?.let {
+            IptvHomeSport(fixture, it, !showScores || fixture.key in spoilers, showScores && fixture.key !in spoilers && com.nuvio.tv.core.iptv.SportsFixtureSections.close(fixture))
+        } }.sortedWith(compareBy<IptvHomeSport>({ !SportsFavourites.has(favourites, it.fixture) }, { if (it.fixture.status == FixtureStatus.LIVE) 0 else 1 },
+            { it.fixture.startMillis })).take(HomeRows.SPORT)
+        val reminders = sports.reminders.value
+        val items = teams.map { games ->
+            val fixture = games.current ?: games.last
+            IptvHomeTeam(games.key, games.team?.name ?: games.name, SportsLeagues.byId(games.league)?.name ?: games.league, games.team, fixture,
+                fixture?.let { SportsTeams.home(games, it) }, fixture != null && (!showScores || fixture.key in spoilers), sports.recording(games.current, games.key),
+                games.current?.key?.let { it in reminders } == true)
+        }
+        return listOfNotNull(if (live.isNotEmpty()) IptvHomeRow.LiveSport(live) else guide(),
+            items.takeIf { it.isNotEmpty() }?.let { IptvHomeRow.Teams(it, sports.guideDays) })
     }
 
     private suspend fun titles(profileId: Int, vodKind: VodKind, kind: HomeRowKind, nuvio: Boolean): IptvHomeRow? {
@@ -218,6 +285,9 @@ class IptvHomeViewModel @Inject constructor(@ApplicationContext context: Context
 class IptvHomeHost internal constructor(val rows: State<List<IptvHomeRow>>, val now: State<Long>, private val viewModel: IptvHomeViewModel,
     private val onLive: State<() -> Unit>, private val onRecordings: State<() -> Unit>) {
     fun openChannel(row: IptvHomeRow.Channels, item: IptvHomeChannel) { viewModel.tune(row, item); onLive.value() }
+    fun openSport(item: IptvHomeSport) { viewModel.tune(item); onLive.value() }
+    fun openTeam(item: IptvHomeTeam) = viewModel.openTeam(item)
+    fun openLive() = onLive.value()
     fun openTitle(row: IptvHomeRow.Titles, title: IptvVodTitle) = viewModel.open(row, title)
     fun openRecordings() = onRecordings.value()
 }
@@ -256,3 +326,5 @@ fun IptvHomeRowsProvider(onOpenLive: () -> Unit, onOpenRecordings: () -> Unit, o
 
 private const val START_DELAY = 800L
 private const val NOW_TICK = 30_000L
+private const val SOON_MILLIS = 30L * 60 * 1000
+private const val MAX_LINKED = 60

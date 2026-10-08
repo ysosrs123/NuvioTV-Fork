@@ -1265,6 +1265,9 @@ private fun PlaybackNavHost(
             composable(Screen.IptvSetup.route) {
                 com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvSetupScreen(onBack = { navController.popBackStack() }) }
             }
+            composable(com.nuvio.tv.ui.screens.iptv.IPTV_TEAM_ROUTE, arguments = listOf(navArgument("team") { type = NavType.StringType })) {
+                com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvTeamScreen() }
+            }
         }
         composable(Screen.IptvRecordings.route) {
             com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvRecordingsScreen(onBack = { navController.popBackStack() }) }

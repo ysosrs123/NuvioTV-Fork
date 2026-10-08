@@ -188,7 +188,7 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
         val result = loaded
         val profile = opened?.first?.profileId
         val next = if (result == null || profile == null || !preferences.hideSpoilers) emptySet() else SportsSpoilers.keys(result.fixtures,
-            recordings.filter { it.profileId == profile && it.status != RecordingStatus.FAILED && it.status != RecordingStatus.CANCELLED }
+            recordings.filter { it.profileId == profile && it.status != RecordingStatus.FAILED && it.status != RecordingStatus.CANCELLED && it.playedAtMillis == null }
                 .mapNotNull { recording -> recording.title?.let { SportsRecordedWindow(it, recording.startMillis, recording.stopMillis) } })
         if (next == spoilerKeys) return false
         spoilerKeys = next
