@@ -112,7 +112,7 @@ object EspnSummary {
         val lines = c.optJSONArray("linescores")?.let(::objs).orEmpty().filter { (it.int("period") ?: 1) in 1..12 }.sortedBy { it.int("period") ?: 0 }.take(12)
         val afl = sport == "australian-football"
         val split = afl && lines.isNotEmpty() && lines.all { it.has("goals") && it.has("behinds") }
-        val periods = if (split) lines.map { "${it.int("goals") ?: 0}.${it.int("behinds") ?: 0}" }
+        val periods = if (score == null) emptyList() else if (split) lines.map { "${it.int("goals") ?: 0}.${it.int("behinds") ?: 0}" }
         else SportsLines.perPeriod(lines.mapNotNull { (it.str("displayValue") ?: it.str("value")?.let(::whole))?.takeIf { v -> v.length <= 8 } }, score)
         val breakdown = if (afl) stats?.let { s -> val g = s["goals"]; val b = s["behinds"]; if (g != null && b != null) "$g.$b" else null }
             ?: lines.takeIf { split }?.let { "${it.sumOf { l -> l.int("goals") ?: 0 }}.${it.sumOf { l -> l.int("behinds") ?: 0 }}" } else null
@@ -125,7 +125,8 @@ object EspnSummary {
         val list = when {
             sport == "soccer" && keyEvents.isNotEmpty() -> events(keyEvents, sport, sides)
             (sport == "soccer" || sport == "rugby-league" || sport == "rugby") && details.isNotEmpty() -> events(details, sport, sides)
-            else -> plays.filter { it.optBoolean("scoringPlay") }.mapNotNull { play(it, sport, sides) }.ifEmpty { events(details, sport, sides) }
+            else -> plays.filter { it.optBoolean("scoringPlay") || sport == "australian-football" && it.optJSONObject("type")?.let { t -> t.str("type") ?: t.str("text") }?.lowercase() in AFL_SCORES }
+                .mapNotNull { play(it, sport, sides) }.ifEmpty { events(details, sport, sides) }
         }
         return list.takeLast(MAX_MOMENTS)
     }
@@ -140,6 +141,7 @@ object EspnSummary {
     }
 
     private fun events(items: List<JSONObject>, sport: String, sides: Sides): List<SummaryMoment> {
+        val rugby = sport == "rugby-league" || sport == "rugby"
         var home = 0
         var away = 0
         return items.mapNotNull { item ->
@@ -151,6 +153,8 @@ object EspnSummary {
                 item.optBoolean("yellowCard") || "yellow card" in lower -> MomentKind.CARD_YELLOW
                 "substitution" in lower -> MomentKind.SUBSTITUTION
                 scoring -> scoringKind(sport, typeText, typeText, item.int("scoreValue"))
+                rugby && "try" in lower -> MomentKind.TRY
+                rugby && ("conversion" in lower || "goal" in lower) -> MomentKind.POINTS
                 "penalty" in lower || item.optBoolean("penaltyKick") -> MomentKind.OTHER
                 sport == "soccer" && "goal" in lower && "kick" !in lower -> MomentKind.GOAL
                 sport != "soccer" && "try" in lower -> MomentKind.TRY
@@ -164,7 +168,7 @@ object EspnSummary {
             val people = (item.optJSONArray("athletesInvolved") ?: item.optJSONArray("participants"))?.let(::objs).orEmpty()
                 .mapNotNull { (it.optJSONObject("athlete") ?: it).let { a -> a.str("displayName") ?: a.str("shortName") } }.take(2)
             val own = item.optBoolean("ownGoal")
-            val built = listOfNotNull(typeText.takeIf(String::isNotEmpty)?.let { if (own && "own" !in lower) "$it (own goal)" else it },
+            val built = listOfNotNull(typeText.takeIf(String::isNotEmpty)?.replaceFirstChar(Char::uppercaseChar)?.let { if (own && "own" !in lower) "$it (own goal)" else it },
                 people.joinToString(", ").takeIf(String::isNotEmpty)).joinToString(" – ")
             val text = (item.str("shortText") ?: built.takeIf(String::isNotEmpty) ?: item.str("text"))?.take(MAX_TEXT) ?: return@mapNotNull null
             val withScore = scoring && side != null
@@ -218,8 +222,11 @@ object EspnSummary {
     private fun stats(teams: Map<FixtureSide, Map<String, String>>, sport: String): List<SummaryStat> {
         val home = teams[FixtureSide.HOME] ?: return emptyList()
         val away = teams[FixtureSide.AWAY] ?: return emptyList()
-        val names = home.keys.filter { !it.startsWith("label:") && it in away }
         val preferred = PREFERRED[sport].orEmpty()
+        val names = home.keys.filter { !it.startsWith("label:") && it in away }.filter { name ->
+            val values = listOf(home.getValue(name), away.getValue(name))
+            values.any { it != "-" } && (preferred.any { it.first == name } || values.any { it.toDoubleOrNull() != 0.0 })
+        }
         val picked = preferred.map { it.first }.filter { it in names }
         val chosen = (if (picked.size >= 4) picked else picked + names.filterNot { it in picked }).take(MAX_STATS)
         return chosen.map { name ->
@@ -246,13 +253,17 @@ object EspnSummary {
         if (sport != "soccer" && sport != "rugby-league" && sport != "rugby") return emptyList()
         return root.optJSONArray("rosters")?.let(::objs).orEmpty().mapNotNull { team ->
             val side = sides.of(team) ?: return@mapNotNull null
-            val players = team.optJSONArray("roster")?.let(::objs).orEmpty().take(MAX_ROSTER).mapNotNull { entry ->
+            val entries = team.optJSONArray("roster")?.let(::objs).orEmpty().take(MAX_ROSTER)
+            val flagged = entries.any { it.optBoolean("starter") }
+            val players = entries.mapNotNull { entry ->
                 val athlete = entry.optJSONObject("athlete") ?: return@mapNotNull null
                 val name = athlete.str("displayName") ?: athlete.str("shortName") ?: return@mapNotNull null
-                val position = entry.optJSONObject("position")?.let { it.str("abbreviation") ?: it.str("displayName") }
-                SummaryPlayer(entry.str("jersey") ?: athlete.str("jersey"), name.take(60), position?.take(24), entry.optBoolean("starter"),
+                val json = entry.optJSONObject("position")
+                val position = json?.let { it.str("abbreviation") ?: it.str("displayName") }
+                val starter = if (flagged || sport == "soccer") entry.optBoolean("starter") else json?.str("name")?.lowercase()?.let { it !in BENCH } ?: false
+                SummaryPlayer(entry.str("jersey") ?: athlete.str("jersey"), name.take(60), position?.take(24), starter,
                     entry.optBoolean("captain"), subbed(entry.opt("subbedIn")), subbed(entry.opt("subbedOut")))
-            }
+            }.let { list -> if (sport == "soccer") list else list.sortedBy { it.jersey?.toIntOrNull() ?: Int.MAX_VALUE } }
             if (players.isEmpty()) null else SummaryRoster(side, players.filter { it.starter }, players.filter { !it.starter })
         }.distinctBy { it.side }
     }
@@ -287,7 +298,7 @@ object EspnSummary {
         val name = (if (teamValue is String) teamValue.trim() else teamJson?.let { it.str("displayName") ?: it.str("name") })?.takeIf(String::isNotEmpty) ?: return null
         val side = sides.byId(setOfNotNull(entry.str("id"), teamJson?.str("id"))) ?: sides.byName(name)
         val stats = entry.optJSONArray("stats")?.let(::objs).orEmpty().mapNotNull { stat ->
-            val key = (stat.str("abbreviation") ?: stat.str("shortDisplayName") ?: return@mapNotNull null).take(8)
+            val key = (if (stat.str("name") in POINTS) "PTS" else stat.str("abbreviation") ?: stat.str("shortDisplayName") ?: return@mapNotNull null).take(8)
             val value = stat.str("displayValue") ?: stat.str("value")?.let(::whole) ?: return@mapNotNull null
             key to value.take(12)
         }
@@ -389,7 +400,8 @@ object EspnSummary {
 
     private fun innings(competitors: List<JSONObject>, sides: Sides): List<SummaryInnings> = competitors.flatMap { c ->
         val side = sides.of(c)
-        c.optJSONArray("linescores")?.let(::objs).orEmpty().filter { it.has("runs") || it.has("wickets") }.take(4).mapIndexed { index, line ->
+        c.optJSONArray("linescores")?.let(::objs).orEmpty().filter { it.has("runs") || it.has("wickets") }
+            .filter { it.optBoolean("isBatting") || !it.has("isBatting") || (it.int("runs") ?: 0) > 0 || (it.int("wickets") ?: 0) > 0 }.take(4).mapIndexed { index, line ->
             SummaryInnings(side, line.int("period") ?: line.str("displayValue")?.toIntOrNull() ?: (index + 1), line.int("runs"), line.int("wickets"),
                 line.str("overs")?.take(8), line.int("target")?.takeIf { it > 0 })
         }
@@ -408,9 +420,16 @@ object EspnSummary {
         "baseball" to listOf("hits" to "Hits", "errors" to "Errors", "homeRuns" to "Home runs", "RBIs" to "RBI", "walks" to "Walks",
             "strikeouts" to "Strikeouts", "avg" to "AVG", "leftOnBase" to "Left on base"),
         "australian-football" to listOf("disposals" to "Disposals", "kicks" to "Kicks", "handballs" to "Handballs", "marks" to "Marks", "tackles" to "Tackles",
-            "inside50s" to "Inside 50s", "clearances" to "Clearances", "contestedPossessions" to "Contested", "hitouts" to "Hit-outs", "freesFor" to "Frees"),
+            "inside50s" to "Inside 50s", "clearances" to "Clearances", "totalClearances" to "Clearances", "contestedPossessions" to "Contested", "hitouts" to "Hit-outs", "freesFor" to "Frees"),
+        "rugby-league" to listOf("tries" to "Tries", "metres" to "Run metres", "runs" to "Runs", "cleanBreaks" to "Line breaks", "offload" to "Offloads",
+            "tackles" to "Tackles", "missedTackles" to "Missed tackles", "penaltiesConceded" to "Penalties", "kicks" to "Kicks"),
+        "rugby" to listOf("possession" to "Possession", "territory" to "Territory", "tries" to "Tries", "metres" to "Metres", "cleanBreaks" to "Line breaks",
+            "tackles" to "Tackles", "missedTackles" to "Missed tackles", "lineoutsWon" to "Lineouts won", "scrumsWon" to "Scrums won", "penaltiesConceded" to "Penalties"),
     )
-    private val TABLE_STATS = listOf("GP", "W", "D", "T", "L", "GD", "PD", "PCT", "GB", "P", "PTS")
+    private val BENCH = setOf("replacement", "reserve", "interchange", "substitute")
+    private val AFL_SCORES = setOf("goal", "behind", "rushed")
+    private val TABLE_STATS = listOf("GP", "M", "W", "D", "T", "L", "GD", "PD", "PTS", "P", "PCT", "GB", "PER")
+    private val POINTS = setOf("points", "matchPoints")
 }
 
 data class SportsMarker(val millis: Long, val exact: Boolean)

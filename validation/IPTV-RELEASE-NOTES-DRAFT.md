@@ -361,6 +361,15 @@ Sport:
 - Other feeds also lists the same channel on your other sources; the backup switch
   prefers it.
 
+Checked against real ESPN responses (8 October evening, no game in play):
+- Tennis: each tour shows only its own draws; matches with no time yet or no players
+  are left out; short names and walkovers display correctly.
+- Golf: holes played ("thru") and today's score from the round's hole scores.
+- Cricket: the fielding side no longer shows a 0/0 copy of the innings.
+- Game Centre: AFL goals and behinds, rugby conversions, penalty and drop goals appear
+  as key moments; NRL half scores correct; rugby line-ups split starters and bench;
+  rugby and AFL team stats; table points now found, so "If it ends now" works.
+
 Fixes from a review of the sports build:
 - Score markers and Previous/Next score are hidden when scores are hidden (Show scores
   off or an unwatched recording of the game), as everywhere else.

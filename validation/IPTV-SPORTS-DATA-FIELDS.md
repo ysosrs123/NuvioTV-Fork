@@ -355,3 +355,29 @@ live win probability, and live header fields.
    per-league scoreboards.
 7. Capture again during live NFL, AFL, NRL, EPL, NBA and MLB games to verify the
    situation, clock and probability fields.
+
+## Third pass (8 October evening)
+
+Real responses captured about 07:55 Sydney time on 9 October (20:55Z on 8 October) for
+the same leagues, checked against the parsers that had only been built from synthetic
+JSON. No team game was in progress; golf was `in` between rounds; tennis had only `post`
+and `pre` matches. Trimmed copies are in `app/src/test/resources/sports/*-real-20261008.json`.
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Tennis | Tour files mix draws: the ATP file carries the China Open women's singles and doubles, the WTA file its men's draws (`grouping.slug`, `competitions[].type.slug`). 80 ATP and 24 WTA matches had `timeValid: false`, date `04:00Z` and detail `M/d - 'TBD'`; 50 had `TBD` players (negative ids). Short names follow the player's own surname order (`Zheng Qinwen` → `Q. Zheng`; `A. Lazaro Garcia`); doubles have `roster.shortDisplayName`. `STATUS_RETIRED`, `STATUS_WALKOVER` (no `linescores`) and `STATUS_CANCELED` occur. `curatedRank.current` matched the seed in all 871 notes checked; `tiebreak` is per side (`6-7 (4-7)` → 6/tb 4, 7/tb 7). | Keep only the tour's own draws; drop untimed scheduled matches and `TBD` players; surname from the short name; no `0–0` score for walkovers; scheduled detail from `shortDetail` |
+| Golf | 72 players; no `displayPurse`, venue, place or `status.thru` on the scoreboard. Each player's round card is `linescores[]` (`period` = round, `displayValue` = round to-par, nested `linescores[]` = holes played, hole number in `period`, back-nine starters begin at 10). | `thru` (`F` at 18) and today's score from the current round's hole count |
+| Cricket | Every innings is listed for both teams; the fielding side gets `runs` 0, `wickets` 0, `isBatting: false` and the batting side's `overs`. `isBatting` marks the side that batted that innings, `isCurrent` the current innings. Score text `166 (39.1/50 ov, target 279)`. | Skip the fielding copies; batting = `isBatting` and current; score before ` (` |
+| AFL summary | 55 `plays`, all goals/behinds/rushed, none with `scoringPlay`. Ladder entries: `team` is the abbreviation string, stats `points` (TP), `form`, `percentage`. Team stat is `totalClearances`. | Goal/behind/rushed plays become moments; `points` shown as `PTS` with `PER` |
+| NRL / URC summary | Header `linescores` are cumulative with two trailing `0` entries and no `period`; URC before kick-off has four `0` entries. Every roster entry has `starter: false`; starters are the players whose `position.name` is not `replacement`/`reserve` (an NRL hooker wore 19). Details types are lower case (`try`, `conversion`, `penalty goal`, `drop goal`, `substitute on`); no `scoringPlay`. Team stats are union-style names, many 0 for league. | Trailing zeros trimmed before the cumulative check, no periods without a score; position-based starters sorted by jersey; kicks as points; league/union stat lists |
+| Standings | Points are `name: points` with abbreviation `P` (soccer, URC), `TP` (AFL), `PTS` (NHL) or `matchPoints` `PT` (cricket). | Shown as `PTS` everywhere so the "ends now" points work |
+| Pre-game summaries | `boxscore.teams` hold season values (NFL `Points Per Game`, MLB season `hits` 1282, NBA `streak` `-`, `avgPointsAgainst` 0.0). | Rows that are `-` or 0 for both teams are left out (unless preferred) |
+| F1, NASCAR, UFC | Matched the synthetic shapes: F1 `FP1`/`SS`/`SR`/`Qual`/`Race`, NASCAR one competition with no venue, UFC bouts sorted by `order`, 7 prelims at 21:00Z and 5 main-card bouts at 00:00Z. | none |
+
+Still unverified (needs a capture during play): tennis `possession` and in-play set
+scores, golf `status.thru`/`todayDetail` and a part-played round card, F1 session results
+and live session state, UFC live round and results, cricket live `isBatting`/`isCurrent`
+and overs while batting, MLB situation and count, scoreboard `situation`/`lastPlay`,
+running clocks, soccer `keyEvents` and live rosters (`subbedIn`/`subbedOut`), NRL/URC
+details `period` on the scoreboard (absent after the game), live team stats for rugby
+union, and whether the NHL/MLB pre-game season stats should be shown under team stats.
