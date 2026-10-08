@@ -25,7 +25,7 @@ data class FixtureSituation(val downDistance: String? = null, val possession: Fi
 data class SportsFixture(val id: String, val league: String, val sport: String, val title: String, val home: FixtureTeam?, val away: FixtureTeam?,
     val startMillis: Long, val status: FixtureStatus, val score: String? = null, val detail: String? = null, val broadcasters: List<String> = emptyList(),
     val venue: String? = null, val round: Int? = null, val period: Int? = null, val clock: String? = null, val homeLine: FixtureLine? = null,
-    val awayLine: FixtureLine? = null, val situation: FixtureSituation? = null, val leagueLogo: String? = null) {
+    val awayLine: FixtureLine? = null, val situation: FixtureSituation? = null, val leagueLogo: String? = null, val sportDetail: SportsDetail? = null) {
     val teams: Boolean get() = home != null && away != null
     val key: String get() = "$league:$id"
 }
@@ -66,6 +66,15 @@ object SportsLeagues {
         SportsLeague("nhl", "NHL", "ice-hockey", "hockey/nhl", "NHL", "4380", listOf("nhl", "ice hockey", "hockey"), durationMinutes = 180),
         SportsLeague("f1", "Formula 1", "motorsport", "racing/f1", "Formula 1", "4370", listOf("formula 1", "formula one", "f1"), durationMinutes = 150),
         SportsLeague("ufc", "UFC", "mma", "mma/ufc", "UFC", "4443", listOf("ufc", "mma"), durationMinutes = 300),
+        SportsLeague("atp", "ATP", "tennis", "tennis/atp", null, null, listOf("atp", "atp tour", "atp tennis", "atp masters 1000", "atp 500", "atp 250"),
+            durationMinutes = 150),
+        SportsLeague("wta", "WTA", "tennis", "tennis/wta", null, null, listOf("wta", "wta tour", "wta tennis", "wta 1000", "wta 500", "wta 250"),
+            women = true, durationMinutes = 120),
+        SportsLeague("pga", "PGA Tour", "golf", "golf/pga", "PGA Tour", null, listOf("pga tour", "pga", "pga tour golf"), durationMinutes = 600),
+        SportsLeague("nascar-cup", "NASCAR Cup", "motorsport", "racing/nascar-premier", "NASCAR Cup Series", null,
+            listOf("nascar cup series", "nascar cup", "nascar"), durationMinutes = 240),
+        SportsLeague("urc", "United Rugby Championship", "rugby", "rugby/270557", "United Rugby Championship", null,
+            listOf("united rugby championship", "urc", "vodacom urc", "bkt united rugby championship"), durationMinutes = 135),
     )
     val DEFAULTS = setOf("afl", "nrl", "a-league-men", "epl", "champions-league")
     private val byId = ALL.associateBy { it.id }
@@ -233,7 +242,120 @@ object SportsFixtureText {
         "soccer", "rugby", "rugby-league" -> if (period <= 2) "${period}H" else "ET"
         else -> null
     }
+
+    fun bug(fixture: SportsFixture): SportsBugText = when (val detail = fixture.sportDetail) {
+        is SportsDetail.Tennis -> tennis(fixture, detail)
+        is SportsDetail.Golf -> golf(fixture, detail)
+        is SportsDetail.Sessions -> sessions(fixture, detail)
+        is SportsDetail.Card -> card(fixture, detail)
+        is SportsDetail.Cricket -> cricket(fixture, detail) ?: teams(fixture)
+        is SportsDetail.Baseball -> baseball(fixture, detail)
+        null -> teams(fixture)
+    }
+
+    fun code(team: FixtureTeam): String = team.abbreviation?.takeIf { it.length <= 12 } ?: team.shortName ?: team.name
+
+    private fun teams(fixture: SportsFixture): SportsBugText {
+        val home = fixture.home
+        val away = fixture.away
+        val state = when (fixture.status) {
+            FixtureStatus.LIVE -> if (fixture.sport == "soccer") fixture.clock?.trim()?.takeIf { it.isNotEmpty() && it != "0'" } ?: fixture.detail else periodClock(fixture)
+            FixtureStatus.FINAL -> fixture.detail
+            FixtureStatus.SCHEDULED -> null
+        }
+        if (home == null || away == null) return SportsBugText(fixture.title, state)
+        val scores = scores(fixture)?.takeIf { fixture.status != FixtureStatus.SCHEDULED }
+        val first = awayFirst(fixture)
+        val primary = when {
+            scores == null -> if (first) "${code(away)} @ ${code(home)}" else "${code(home)} v ${code(away)}"
+            first -> "${code(away)} ${scores.second}–${scores.first} ${code(home)}"
+            else -> "${code(home)} ${scores.first}–${scores.second} ${code(away)}"
+        }
+        val extra = fixture.situation?.downDistance?.takeIf { fixture.sport == "american-football" && fixture.status == FixtureStatus.LIVE }
+        return SportsBugText(primary, state, extra)
+    }
+
+    private fun baseball(fixture: SportsFixture, detail: SportsDetail.Baseball): SportsBugText {
+        val base = teams(fixture)
+        if (fixture.status != FixtureStatus.LIVE) return base
+        val inning = detail.inning
+        val state = when {
+            inning == null -> base.state
+            detail.half == InningHalf.TOP -> "▲$inning"
+            detail.half == InningHalf.BOTTOM -> "▼$inning"
+            detail.half == InningHalf.MIDDLE -> "Mid $inning"
+            detail.half == InningHalf.END -> "End $inning"
+            else -> base.state
+        }
+        val outs = detail.outs?.let { if (it == 1) "1 out" else "$it outs" }
+        val count = if (detail.balls != null && detail.strikes != null) "${detail.balls}–${detail.strikes}" else null
+        return SportsBugText(base.primary, state, listOfNotNull(outs, count).joinToString(" · ").takeIf(String::isNotEmpty))
+    }
+
+    private fun tennis(fixture: SportsFixture, detail: SportsDetail.Tennis): SportsBugText {
+        val home = fixture.home
+        val away = fixture.away
+        if (home == null || away == null) return SportsBugText(fixture.title, detail.round)
+        if (fixture.status == FixtureStatus.SCHEDULED || detail.sets.isEmpty())
+            return SportsBugText("${player(home)} v ${player(away)}", detail.round, detail.tournament)
+        fun line(side: FixtureSide) = detail.sets.joinToString(" ") { set ->
+            val games = (if (side == FixtureSide.HOME) set.home else set.away)?.toString() ?: "0"
+            val tiebreak = (if (side == FixtureSide.HOME) set.homeTiebreak else set.awayTiebreak)?.takeIf { set.winner != null && set.winner != side }
+            if (tiebreak != null) "$games($tiebreak)" else games
+        }
+        val primary = "${player(home)} ${line(FixtureSide.HOME)} / ${player(away)} ${line(FixtureSide.AWAY)}"
+        if (fixture.status == FixtureStatus.FINAL) return SportsBugText(primary, fixture.detail ?: "Final", detail.round)
+        val server = detail.server?.let { if (it == FixtureSide.HOME) home else away }?.let(::player)
+        val extra = server?.let { if (detail.servingForSet) "$it serving for the set" else "$it serving" }
+        return SportsBugText(primary, fixture.detail, extra)
+    }
+
+    private fun player(team: FixtureTeam): String = team.abbreviation ?: team.name.substringAfterLast(' ').uppercase()
+
+    private fun golf(fixture: SportsFixture, detail: SportsDetail.Golf): SportsBugText {
+        val state = detail.statusText ?: detail.round?.let { "Round $it" }
+        val leader = detail.leaders.firstOrNull()?.takeIf { fixture.status != FixtureStatus.SCHEDULED } ?: return SportsBugText(detail.tournament, state)
+        val primary = listOfNotNull(leader.shortName ?: leader.name, leader.toPar).joinToString(" ")
+        val extra = leader.thru?.let { if (it == "F") "F" else "Thru $it" }
+        return SportsBugText(primary, state, extra)
+    }
+
+    private fun sessions(fixture: SportsFixture, detail: SportsDetail.Sessions): SportsBugText {
+        val session = detail.current ?: return SportsBugText(fixture.title, fixture.detail, detail.venue)
+        val word = when (session.state) {
+            FixtureStatus.LIVE -> "live"
+            FixtureStatus.SCHEDULED -> "next"
+            FixtureStatus.FINAL -> "finished"
+        }
+        return SportsBugText(fixture.title, "${session.name} · $word", detail.venue)
+    }
+
+    private fun card(fixture: SportsFixture, detail: SportsDetail.Card): SportsBugText {
+        val bout = detail.live ?: detail.mainEvent ?: return SportsBugText(fixture.title, fixture.detail)
+        val primary = "${fighter(bout.first)} v ${fighter(bout.second)}"
+        return when {
+            bout.state == FixtureStatus.LIVE -> SportsBugText(primary, "Round ${bout.round ?: 1}" + (bout.rounds?.let { " of $it" } ?: ""), bout.weightClass)
+            fixture.status == FixtureStatus.FINAL -> SportsBugText(primary, fixture.detail ?: "Final", bout.weightClass)
+            else -> SportsBugText(primary, bout.weightClass, bout.rounds?.let { "$it rounds" })
+        }
+    }
+
+    private fun fighter(fighter: Fighter): String = fighter.shortName ?: fighter.name.substringAfterLast(' ')
+
+    private fun cricket(fixture: SportsFixture, detail: SportsDetail.Cricket): SportsBugText? {
+        if (detail.innings.isEmpty()) return null
+        val latest = detail.innings.groupBy { it.team }.map { (team, list) -> list.last().let { "$team ${it.runs}" + if (it.wickets < 10) "/${it.wickets}" else "" } }
+        val batting = detail.innings.lastOrNull { it.batting } ?: detail.innings.last()
+        val state = when (fixture.status) {
+            FixtureStatus.LIVE -> batting.overs?.let { "$it ov" } ?: fixture.detail
+            else -> fixture.detail
+        }
+        val chase = detail.chase?.takeIf { fixture.status == FixtureStatus.LIVE }
+        return SportsBugText(latest.joinToString(" · "), state, chase?.let { "Need ${it.runs} from ${it.balls}" })
+    }
 }
+
+data class SportsBugText(val primary: String, val state: String? = null, val extra: String? = null)
 
 object SportsFixtureCodec {
     private const val VERSION = 2
@@ -264,6 +386,7 @@ object SportsFixtureCodec {
         fixture.venue?.let { put("venue", it) }; fixture.round?.let { put("round", it) }; fixture.period?.let { put("period", it) }
         fixture.clock?.let { put("clock", it) }; fixture.leagueLogo?.let { put("leagueLogo", it) }
         fixture.homeLine?.let { put("homeLine", line(it)) }; fixture.awayLine?.let { put("awayLine", line(it)) }
+        fixture.sportDetail?.let { put("sportDetail", SportsDetails.encode(it)) }
         fixture.situation?.let { situation ->
             put("situation", JSONObject().apply {
                 situation.downDistance?.let { put("downDistance", it) }; situation.possession?.let { put("possession", it.name) }
@@ -292,7 +415,7 @@ object SportsFixtureCodec {
         return SportsFixture(id, league, json.text("sport").orEmpty(), json.text("title").orEmpty(), json.optJSONObject("home")?.let(::team),
             json.optJSONObject("away")?.let(::team), json.getLong("start"), status, json.text("score"), json.text("detail"), json.strings("broadcasters"),
             json.text("venue"), json.optIntOrNull("round"), json.optIntOrNull("period"), json.text("clock"), json.optJSONObject("homeLine")?.let(::line),
-            json.optJSONObject("awayLine")?.let(::line), situation, json.text("leagueLogo"))
+            json.optJSONObject("awayLine")?.let(::line), situation, json.text("leagueLogo"), json.optJSONObject("sportDetail")?.let(SportsDetails::decode))
     }
 
     private fun team(json: JSONObject): FixtureTeam? =

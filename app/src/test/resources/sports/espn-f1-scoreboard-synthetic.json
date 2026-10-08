@@ -1,0 +1,10 @@
+{"leagues":[{"abbreviation":"F1","calendar":[]}],
+ "events":[{"id":"600050","name":"Singapore Grand Prix","date":"2026-10-09T09:30Z",
+  "circuit":{"fullName":"Marina Bay Street Circuit","address":{"city":"Singapore","country":"Singapore"}},
+  "status":{"type":{"name":"STATUS_SCHEDULED","state":"pre"}},
+  "competitions":[
+   {"id":"1","date":"2026-10-09T09:30Z","type":{"id":"1","abbreviation":"FP1"},"status":{"type":{"name":"STATUS_FINAL","state":"post","completed":true,"detail":"Final"}},"competitors":[],"broadcasts":[{"names":["Apple TV"]}]},
+   {"id":"5","date":"2026-10-11T12:00Z","type":{"id":"5","abbreviation":"Race"},"status":{"type":{"name":"STATUS_SCHEDULED","state":"pre","shortDetail":"Sun, October 11th at 8:00 AM EDT"}},"competitors":[],"broadcasts":[{"names":["Apple TV"]}]},
+   {"id":"2","date":"2026-10-09T13:00Z","type":{"id":"2","abbreviation":"SS"},"status":{"type":{"name":"STATUS_FINAL","state":"post","completed":true}},"competitors":[]},
+   {"id":"3","date":"2026-10-10T09:30Z","type":{"id":"3","abbreviation":"SR"},"status":{"type":{"name":"STATUS_FINAL","state":"post","completed":true}},"competitors":[]},
+   {"id":"4","date":"2026-10-10T13:00Z","type":{"id":"4","abbreviation":"Qual"},"status":{"type":{"name":"STATUS_IN_PROGRESS","state":"in","shortDetail":"In Progress"}},"competitors":[]}]}]}

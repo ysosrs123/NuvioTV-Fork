@@ -1,0 +1,7 @@
+{"events":[{"id":"1500","date":"2026-10-08T03:20Z","name":"Australia v England","competitions":[{"date":"2026-10-08T03:20Z",
+  "status":{"period":2,"type":{"name":"STATUS_IN_PROGRESS","state":"in","detail":"England need 113 runs from 65 balls","shortDetail":"2nd innings"}},
+  "competitors":[
+   {"id":"2","homeAway":"home","score":"278/8","team":{"id":"2","displayName":"Australia","abbreviation":"AUS"},
+    "linescores":[{"period":1,"value":1,"displayValue":1,"runs":278,"wickets":8,"isBatting":false},{"period":2,"value":2,"displayValue":2,"runs":0,"wickets":0}]},
+   {"id":"1","homeAway":"away","score":"166/7 (39.1/50 ov, target 279)","team":{"id":"1","displayName":"England","abbreviation":"ENG"},
+    "linescores":[{"period":1,"value":1,"displayValue":1,"runs":0,"wickets":0},{"period":2,"value":2,"displayValue":2,"runs":166,"wickets":7,"isBatting":true}]}]}]}]}

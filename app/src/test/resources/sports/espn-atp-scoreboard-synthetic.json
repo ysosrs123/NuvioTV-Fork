@@ -1,0 +1,7 @@
+{"events":[{"id":"7101","name":"Rolex Shanghai Masters","date":"2026-10-01T02:00Z","venue":{"displayName":"Shanghai, China"},
+  "groupings":[{"grouping":{"slug":"mens-singles"},"competitions":[
+   {"id":"9301","date":"2026-10-08T05:00Z","round":{"displayName":"Round of 16"},"venue":{"court":"Stadium Court"},
+    "status":{"type":{"name":"STATUS_IN_PROGRESS","state":"in","detail":"2nd Set"}},
+    "competitors":[
+     {"order":1,"homeAway":"home","curatedRank":{"current":2},"athlete":{"displayName":"Tomas Berg"},"linescores":[{"value":6,"winner":true},{"value":2}]},
+     {"order":2,"homeAway":"away","athlete":{"displayName":"Luca Ferri"},"linescores":[{"value":4,"winner":false},{"value":3}]}]}]}]}]}

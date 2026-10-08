@@ -1,0 +1,6 @@
+{"events":[{"id":"401900","date":"2026-10-08T22:08Z","name":"Cleveland Guardians at Chicago White Sox","competitions":[{"date":"2026-10-08T22:08Z",
+  "status":{"period":7,"displayClock":"0:00","type":{"name":"STATUS_IN_PROGRESS","state":"in","detail":"Top 7th","shortDetail":"Top 7th"}},
+  "situation":{"balls":2,"strikes":1,"outs":1,"onFirst":true,"onSecond":false,"onThird":true,"lastPlay":{"text":"Ramirez singled to left."}},
+  "competitors":[
+   {"id":"4","homeAway":"home","score":"3","team":{"id":"4","displayName":"Chicago White Sox","abbreviation":"CHW"}},
+   {"id":"5","homeAway":"away","score":"9","team":{"id":"5","displayName":"Cleveland Guardians","abbreviation":"CLE"}}]}]}]}

@@ -306,6 +306,16 @@ Sport:
 
 ## Changes after 8 October 2026 (not device-tested)
 
+Sport:
+- More leagues to choose from: ATP and WTA tennis, PGA Tour golf, NASCAR Cup and the
+  United Rugby Championship. Tennis matches show games per set, seeds and who is
+  serving; golf shows the leaderboard; F1 and NASCAR weekends list their sessions; UFC
+  events list their bouts with the main card and prelims; cricket shows the chase;
+  baseball shows inning, outs, count and runners. These formats are built from
+  documented ESPN shapes and are not yet checked against live responses.
+- Guide matching for events without two teams (tennis, golf, motor racing, UFC) uses the
+  event or tournament name.
+
 Fixes from an independent review:
 - Recordings saved to the Movies folder no longer stop playing after a quick seek (a
   cancelled read closed the file for every later read; it now reopens).

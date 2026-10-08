@@ -34,18 +34,34 @@ object SportsFixtureMatching {
     }
 
     fun overlaps(fixture: SportsFixture, programme: GuideProgramme, nowMillis: Long): Boolean {
-        val start = fixture.startMillis - LEAD_MILLIS
-        var end = fixture.startMillis + SportsRefresh.durationMillis(fixture)
-        if (fixture.status == FixtureStatus.LIVE) end = maxOf(end, nowMillis + LEAD_MILLIS)
         val programmeStart = programme.start.epochMillis
         val programmeEnd = programme.stop?.epochMillis ?: (programmeStart + OPEN_PROGRAMME_MILLIS)
-        return programmeStart < end && programmeEnd > start
+        return windows(fixture, nowMillis).any { (start, end) -> programmeStart < end && programmeEnd > start }
+    }
+
+    private fun windows(fixture: SportsFixture, nowMillis: Long): List<Pair<Long, Long>> {
+        val duration = SportsRefresh.durationMillis(fixture)
+        fun around(start: Long, live: Boolean) = (start - LEAD_MILLIS) to (if (live) maxOf(start + duration, nowMillis + LEAD_MILLIS) else start + duration)
+        val plain = listOf(around(fixture.startMillis, fixture.status == FixtureStatus.LIVE))
+        return when (val detail = fixture.sportDetail) {
+            is SportsDetail.Sessions -> detail.sessions.map { around(it.startMillis, it.state == FixtureStatus.LIVE) }.ifEmpty { plain }
+            is SportsDetail.Golf -> listOf((fixture.startMillis - LEAD_MILLIS) to maxOf((detail.endMillis ?: (fixture.startMillis + 3 * DAY_MILLIS)) + DAY_MILLIS,
+                if (fixture.status == FixtureStatus.LIVE) nowMillis + LEAD_MILLIS else 0L))
+            is SportsDetail.Card -> {
+                val last = detail.bouts.maxOfOrNull { it.startMillis } ?: fixture.startMillis
+                listOf((fixture.startMillis - LEAD_MILLIS) to maxOf(fixture.startMillis + duration, last + CARD_MILLIS,
+                    if (fixture.status == FixtureStatus.LIVE) nowMillis + LEAD_MILLIS else 0L))
+            }
+            else -> plain
+        }
     }
 
     fun guideMatch(fixture: SportsFixture, programme: GuideProgramme, nowMillis: Long): FixtureLinkReason? {
         if (!programme.start.precise || !overlaps(fixture, programme, nowMillis)) return null
         val titles = programme.titles.map { SportsGuide.normalise(it.text) }.filter(String::isNotEmpty)
-        if (titles.isEmpty() || titles.any { title -> EXCLUDED.any { has(title, it) } }) return null
+        val named = SportsGuide.normalise(listOfNotNull(fixture.title, (fixture.sportDetail as? SportsDetail.Tennis)?.tournament,
+            (fixture.sportDetail as? SportsDetail.Golf)?.tournament).joinToString(" "))
+        if (titles.isEmpty() || titles.any { title -> EXCLUDED.any { has(title, it) && !has(named, it) } }) return null
         val text = (titles + programme.descriptions.take(4).map { SportsGuide.normalise(it.text.take(600)) }).joinToString(" | ")
         val league = SportsLeagues.byId(fixture.league)
         val leagueWords = (league?.aliases.orEmpty() + SPORT_WORDS[fixture.sport].orEmpty()).map(SportsGuide::normalise).distinct()
@@ -54,17 +70,14 @@ object SportsFixtureMatching {
         val otherLeague = SportsLeagues.ALL.filter { it.id != fixture.league }.flatMap { it.aliases }.map(SportsGuide::normalise)
             .filter { it !in ownAliases && ownAliases.none { own -> has(own, it) || has(it, own) } }.any { has(text, it) }
         if (otherLeague && !ownLeague) return null
-        if (women(text) != (league?.women == true || listOfNotNull(fixture.home?.name, fixture.away?.name).any { women(SportsGuide.normalise(it)) })) return null
-        if (youth(text) != youth(SportsGuide.normalise(listOfNotNull(fixture.home?.name, fixture.away?.name, fixture.title).joinToString(" ")))) return null
         val home = fixture.home
         val away = fixture.away
-        if (home == null || away == null) {
-            if (!ownLeague) return null
-            val words = SportsGuide.normalise(fixture.title).split(' ').filter { word ->
-                word !in TITLE_STOP && word !in leagueWords.flatMap { it.split(' ') } && (word.length >= 4 || (word.length >= 2 && word.all(Char::isDigit)))
-            }
-            return if (words.any { has(text, it) }) FixtureLinkReason.GUIDE_TEAMS else null
-        }
+        val event = home == null || away == null || fixture.sportDetail is SportsDetail.Tennis
+        val fixtureWomen = league?.women == true || listOfNotNull(fixture.home?.name, fixture.away?.name).any { women(SportsGuide.normalise(it)) }
+        if (if (event) women(text) && !fixtureWomen else women(text) != fixtureWomen) return null
+        if (youth(text) != youth(SportsGuide.normalise(listOfNotNull(fixture.home?.name, fixture.away?.name, fixture.title).joinToString(" ")))) return null
+        if (event) return eventMatch(fixture, text, titles.joinToString(" | "), leagueWords, league?.aliases.orEmpty(), ownLeague)
+        home!!; away!!
         val homeHit = teamHit(home, text)
         val awayHit = teamHit(away, text)
         if (homeHit != null && awayHit != null) {
@@ -72,6 +85,42 @@ object SportsFixtureMatching {
         }
         if (ownLeague && (homeHit == true || awayHit == true)) return FixtureLinkReason.GUIDE_LEAGUE
         return null
+    }
+
+    private fun eventMatch(fixture: SportsFixture, text: String, titles: String, leagueWords: List<String>, aliases: List<String>,
+        ownLeague: Boolean): FixtureLinkReason? {
+        val detail = fixture.sportDetail
+        val name = SportsGuide.normalise(when (detail) {
+            is SportsDetail.Tennis -> detail.tournament.orEmpty()
+            is SportsDetail.Golf -> detail.tournament
+            else -> fixture.title
+        })
+        val stop = leagueWords.flatMap { it.split(' ') }.toSet()
+        val words = name.split(' ').filter { word -> word !in TITLE_STOP && word !in stop && (word.length >= 4 || (word.length >= 2 && word.all(Char::isDigit))) }.distinct()
+        val hits = words.count { has(text, it) }
+        val eventHit = (name.contains(' ') && has(text, name)) || (ownLeague && hits > 0) || hits >= 2
+        val home = fixture.home
+        val away = fixture.away
+        val tennis = detail is SportsDetail.Tennis && home != null && away != null
+        if (tennis) {
+            val players = listOf(home!!, away!!).count { team -> (team.strongNames + team.weakNames).any { value -> variants(value).any { it.length >= 3 && has(text, it) } } }
+            if (players == 2 || (players == 1 && (ownLeague || eventHit))) return FixtureLinkReason.GUIDE_TEAMS
+        }
+        if (eventHit) return if (tennis) FixtureLinkReason.GUIDE_LEAGUE else FixtureLinkReason.GUIDE_TEAMS
+        if (!ownLeague) return null
+        if (NUMBERED_EVENT.findAll(titles).any { !has(name, it.value) }) return null
+        var rest = " $titles "
+        val own = aliases.map(SportsGuide::normalise).filter(String::isNotEmpty)
+        (own + name).filter(String::isNotEmpty).sortedByDescending { it.length }.forEach { rest = rest.replace(" $it ", " ") }
+        val known = (name.split(' ') + own.flatMap { it.split(' ') } + "|").toSet()
+        val tokens = rest.split(' ').filter(String::isNotEmpty)
+        for (marker in EVENT_MARKERS) {
+            if (!has(rest, marker)) continue
+            if (!has(name, marker)) return null
+            val parts = marker.split(' ')
+            for (index in 1..tokens.size - parts.size) if (tokens.subList(index, index + parts.size) == parts && tokens[index - 1] !in known) return null
+        }
+        return FixtureLinkReason.GUIDE_LEAGUE
     }
 
     fun broadcasterMatches(broadcaster: String, channelName: String): Boolean {
@@ -171,10 +220,15 @@ object SportsFixtureMatching {
         "united", "kingdom", "ireland", "canada", "zealand", "new")
     private val EXCLUDED = listOf("highlights", "highlight", "replay", "classic", "classics", "rewind", "condensed", "mini match", "review", "preview",
         "magazine", "news", "podcast", "talk", "tipping", "draft").map(SportsGuide::normalise)
-    private val WOMEN = listOf("women", "womens", "woman", "ladies", "aflw", "nrlw", "wbbl", "wnba", "femenino", "feminino", "feminine", "feminin",
+    private val WOMEN = listOf("women", "womens", "woman", "ladies", "aflw", "nrlw", "wbbl", "wnba", "wta", "lpga", "femenino", "feminino", "feminine", "feminin",
         "frauen", "femminile", "liga f", "wsl", "w league")
     private val TITLE_STOP = setOf("grand", "prix", "the", "and", "of", "de", "del", "la", "le", "di", "race", "round", "fight", "night", "main", "card",
-        "event", "vs", "v", "presented", "by", "gp", "formula", "one", "championship", "season", "week")
+        "event", "vs", "v", "presented", "by", "gp", "formula", "one", "championship", "season", "week", "open", "masters", "classic", "tour", "series", "cup",
+        "invitational", "international", "championships", "tournament", "singles", "doubles", "mens", "womens", "final", "finals")
+    private val EVENT_MARKERS = listOf("grand prix", "gp", "open", "masters", "classic", "championship", "championships", "invitational", "fight night", "cup", "trophy")
+    private val NUMBERED_EVENT = Regex("""\bufc \d{2,4}\b""")
+    private const val DAY_MILLIS = 24L * 60 * 60 * 1000
+    private const val CARD_MILLIS = 3L * 60 * 60 * 1000
     private val CLUB_SUFFIXES = setOf("fc", "afc", "cf", "sc", "sfc", "rlfc", "rfc", "fk", "ac", "bc", "sk")
     private val CLUB_PREFIXES = setOf("fc", "afc", "cf", "ac", "as", "ss", "sv", "vfb", "vfl", "rc", "rcd", "cd", "ud", "sd", "us", "ssc", "tsg", "1")
     private val SHORTENED = mapOf("manchester" to "man", "united" to "utd", "saint" to "st", "wanderers" to "wanderers", "hotspur" to "hotspur")
@@ -188,7 +242,9 @@ object SportsFixtureMatching {
         "american-football" to listOf("nfl", "american football"),
         "baseball" to listOf("baseball"),
         "ice-hockey" to listOf("hockey", "ice hockey"),
-        "motorsport" to listOf("formula 1", "f1", "motor racing"),
+        "motorsport" to listOf("formula 1", "f1", "motor racing", "motorsport"),
+        "tennis" to listOf("tennis"),
+        "golf" to listOf("golf"),
         "mma" to listOf("ufc", "mma"))
     private val BRANDS = listOf(
         Brand("fox-footy", listOf("fox footy")), Brand("fox-league", listOf("fox league")), Brand("fox-cricket", listOf("fox cricket")),

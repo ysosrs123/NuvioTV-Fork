@@ -1,0 +1,3 @@
+{"events":[{"id":"202610","name":"NASCAR Cup Series at Charlotte","date":"2026-10-11T19:00Z","status":{"type":{"name":"STATUS_SCHEDULED","state":"pre"}},
+  "competitions":[{"id":"202610","date":"2026-10-11T19:00Z","competitors":[],"status":{"type":{"name":"STATUS_SCHEDULED","state":"pre","shortDetail":"10/11 - 3:00 PM EDT"}},
+   "broadcasts":[{"names":["USA Net","HBO Max"]}]}]}]}

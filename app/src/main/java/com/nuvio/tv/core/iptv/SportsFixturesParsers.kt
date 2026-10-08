@@ -10,11 +10,22 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 object EspnScoreboard {
-    fun parse(json: String, league: SportsLeague): List<SportsFixture> {
+    fun parse(json: String, league: SportsLeague, nowMillis: Long = System.currentTimeMillis()): List<SportsFixture> {
         val root = JSONObject(json)
         val events = root.optJSONArray("events") ?: return emptyList()
         val leagueLogo = root.optJSONArray("leagues")?.let(::objects)?.firstOrNull()?.let(::logo)
-        return objects(events).take(SportsFixtureCodec.MAX_FIXTURES).mapNotNull { event -> runCatching { fixture(event, league, leagueLogo) }.getOrNull() }
+        val list = objects(events)
+        if (league.sport == "tennis") return tennis(list, league, leagueLogo, nowMillis)
+        return list.take(SportsFixtureCodec.MAX_FIXTURES).mapNotNull { event ->
+            runCatching {
+                when (league.sport) {
+                    "golf" -> golf(event, league, leagueLogo)
+                    "motorsport" -> sessions(event, league, leagueLogo)
+                    "mma" -> card(event, league, leagueLogo)
+                    else -> fixture(event, league, leagueLogo)
+                }
+            }.getOrNull()
+        }
     }
 
     private fun fixture(event: JSONObject, league: SportsLeague, leagueLogo: String?): SportsFixture? {
@@ -51,8 +62,277 @@ object EspnScoreboard {
         val homeLine = if (started) FixtureLine(homeScore, periods(home, homeScore)) else null
         val awayLine = if (started) FixtureLine(awayScore, periods(away, awayScore)) else null
         val situation = if (paired && status == FixtureStatus.LIVE) competition?.optJSONObject("situation")?.let { situation(it, home!!, away!!) } else null
+        val extra = when {
+            !started -> null
+            league.sport == "cricket" -> cricket(listOf(home!! to homeTeam!!, away!! to awayTeam!!))
+            league.sport == "baseball" && status == FixtureStatus.LIVE -> baseball(statusJson, type, competition?.optJSONObject("situation"))
+            else -> null
+        }
         return SportsFixture(id, league.id, league.sport, title, homeTeam.takeIf { paired }, awayTeam.takeIf { paired }, start, status, score,
-            type?.text("shortDetail") ?: type?.text("detail"), broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo)
+            type?.text("shortDetail") ?: type?.text("detail"), broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra)
+    }
+
+    private fun status(type: JSONObject?): FixtureStatus = when {
+        type?.optBoolean("completed") == true || type?.text("state") == "post" -> FixtureStatus.FINAL
+        type?.text("state") == "in" -> FixtureStatus.LIVE
+        else -> FixtureStatus.SCHEDULED
+    }
+
+    private fun skipped(type: JSONObject?): Boolean = type?.text("name").orEmpty().uppercase().let { name -> SKIPPED.any { name.contains(it) } }
+
+    private fun competitions(event: JSONObject): List<JSONObject> = event.optJSONArray("competitions")?.let(::objects).orEmpty()
+
+    private fun competitors(json: JSONObject): List<JSONObject> = json.optJSONArray("competitors")?.let(::objects).orEmpty()
+
+    private fun tennis(events: List<JSONObject>, league: SportsLeague, leagueLogo: String?, nowMillis: Long): List<SportsFixture> {
+        val matches = events.flatMap { event ->
+            val groupings = event.optJSONArray("groupings")?.let(::objects).orEmpty()
+            val list = if (groupings.isEmpty()) competitions(event) else groupings.flatMap(::competitions)
+            list.mapNotNull { runCatching { match(event, it, league, leagueLogo, nowMillis) }.getOrNull() }
+        }
+        return matches.distinctBy { it.id }.sortedWith(compareBy<SportsFixture>({ TENNIS_ORDER.indexOf(it.status) },
+            { if (it.status == FixtureStatus.FINAL) -it.startMillis else it.startMillis })).take(MAX_MATCHES)
+    }
+
+    private fun match(event: JSONObject, competition: JSONObject, league: SportsLeague, leagueLogo: String?, nowMillis: Long): SportsFixture? {
+        val id = competition.text("id") ?: return null
+        val start = (competition.text("date") ?: competition.text("startDate") ?: event.text("date"))?.let(::sportsInstant) ?: return null
+        val statusJson = competition.optJSONObject("status")
+        val type = statusJson?.optJSONObject("type")
+        if (skipped(type)) return null
+        val status = status(type)
+        if (status == FixtureStatus.FINAL && start < nowMillis - RECENT_MILLIS) return null
+        val players = competitors(competition).take(2).takeIf { it.size == 2 } ?: return null
+        val home = players.firstOrNull { it.text("homeAway") == "home" } ?: players.minBy { it.optIntOrNull("order") ?: 9 }
+        val away = players.first { it !== home }
+        val homeTeam = player(home) ?: return null
+        val awayTeam = player(away) ?: return null
+        val started = status != FixtureStatus.SCHEDULED
+        val homeLines = home.optJSONArray("linescores")?.let(::objects).orEmpty().take(MAX_SETS)
+        val awayLines = away.optJSONArray("linescores")?.let(::objects).orEmpty().take(MAX_SETS)
+        val sets = if (!started) emptyList() else (0 until maxOf(homeLines.size, awayLines.size)).map { index ->
+            val a = homeLines.getOrNull(index)
+            val b = awayLines.getOrNull(index)
+            TennisSet(a?.optIntOrNull("value"), b?.optIntOrNull("value"), a?.optIntOrNull("tiebreak"), b?.optIntOrNull("tiebreak"), when {
+                a?.optBoolean("winner") == true -> FixtureSide.HOME
+                b?.optBoolean("winner") == true -> FixtureSide.AWAY
+                else -> null
+            })
+        }
+        val server = when {
+            status != FixtureStatus.LIVE -> null
+            home.optBoolean("possession") -> FixtureSide.HOME
+            away.optBoolean("possession") -> FixtureSide.AWAY
+            else -> null
+        }
+        val detail = SportsDetail.Tennis(event.text("name")?.take(MAX_TEXT), competition.optJSONObject("round")?.text("displayName")?.take(MAX_TEXT),
+            competition.optJSONObject("venue")?.text("court")?.take(MAX_TEXT), seed(home), seed(away), sets, server)
+        val won = detail.setsWon
+        val score = if (started) "${won.first}–${won.second}" else null
+        fun line(side: FixtureSide, total: Int) = FixtureLine(total.toString(), sets.map { ((if (side == FixtureSide.HOME) it.home else it.away) ?: 0).toString() })
+        val venue = (event.optJSONObject("venue") ?: competition.optJSONObject("venue"))?.let { it.text("displayName") ?: it.text("fullName") }?.take(MAX_TEXT)
+        val broadcasters = listOf(competition, event).flatMap(::broadcasters).distinctBy { SportsGuide.normalise(it) }.take(12)
+        return SportsFixture(id, league.id, league.sport, "${homeTeam.name} v ${awayTeam.name}", homeTeam, awayTeam, start, status, score,
+            type?.text("detail") ?: type?.text("shortDetail"), broadcasters, venue, null, statusJson?.optIntOrNull("period")?.takeIf { status == FixtureStatus.LIVE && it in 1..5 },
+            null, if (started) line(FixtureSide.HOME, won.first) else null, if (started) line(FixtureSide.AWAY, won.second) else null, null, leagueLogo, detail)
+    }
+
+    private fun player(competitor: JSONObject): FixtureTeam? {
+        val athlete = competitor.optJSONObject("athlete")
+        val roster = competitor.optJSONObject("roster")
+        val name = (athlete?.text("displayName") ?: roster?.text("displayName") ?: competitor.optJSONObject("team")?.text("displayName"))?.take(MAX_TEXT) ?: return null
+        val surnames = name.split('/').map(String::trim).filter(String::isNotEmpty).map { part ->
+            (if (athlete != null && roster == null) athlete.text("lastName") else null) ?: part.substringAfterLast(' ')
+        }
+        val abbreviation = surnames.joinToString("/") { it.uppercase() }
+        val flag = flag(competitor)
+        return FixtureTeam(name, athlete?.text("shortName")?.takeIf { it != name }, abbreviation, surnames.filter { it != name && it.length >= 3 }.distinct(),
+            flag?.text("href")?.let(::sportsImage))
+    }
+
+    private fun flag(competitor: JSONObject): JSONObject? = competitor.optJSONObject("flag") ?: competitor.optJSONObject("athlete")?.optJSONObject("flag")
+
+    private fun seed(competitor: JSONObject): TennisPlayer {
+        val flag = flag(competitor)
+        return TennisPlayer(competitor.optJSONObject("curatedRank")?.optIntOrNull("current")?.takeIf { it in 1..64 }, flag?.text("href")?.let(::sportsImage),
+            flag?.text("alt")?.take(60))
+    }
+
+    private fun golf(event: JSONObject, league: SportsLeague, leagueLogo: String?): SportsFixture? {
+        val id = event.text("id") ?: return null
+        val competition = competitions(event).firstOrNull()
+        val start = (event.text("date") ?: competition?.text("date"))?.let(::sportsInstant) ?: return null
+        val title = (event.text("name") ?: event.text("shortName"))?.take(MAX_TEXT) ?: return null
+        val eventType = (event.optJSONObject("status") ?: competition?.optJSONObject("status"))?.optJSONObject("type")
+        val roundStatus = competition?.optJSONObject("status") ?: event.optJSONObject("status")
+        val roundType = roundStatus?.optJSONObject("type")
+        if (skipped(eventType)) return null
+        val status = status(eventType)
+        val players = competitors(competition ?: JSONObject()).withIndex().sortedBy { it.value.optIntOrNull("order") ?: (1000 + it.index) }.mapNotNull { (index, competitor) ->
+            val athlete = competitor.optJSONObject("athlete")
+            val name = (athlete?.text("displayName") ?: athlete?.text("fullName"))?.take(MAX_TEXT) ?: return@mapNotNull null
+            val flag = flag(competitor)
+            val state = competitor.optJSONObject("status")
+            val thru = state?.optIntOrNull("thru")?.let { if (it >= 18) "F" else if (it > 0) it.toString() else null } ?: state?.text("thru")?.takeIf { it.length <= 3 && it != "0" }
+            Triple(competitor.optIntOrNull("order") ?: (index + 1), score(competitor)?.takeIf { it.length <= 6 },
+                GolfPlayer("", name, athlete?.text("shortName")?.takeIf { it != name }, flag?.text("alt")?.take(60), flag?.text("href")?.let(::sportsImage), null, thru,
+                    state?.text("todayDetail")?.take(12)))
+        }
+        val values = players.map { toPar(it.second) }
+        val leaders = players.mapIndexed { index, (order, par, player) ->
+            val value = values[index]
+            val position = if (value == null) order.toString() else {
+                val place = values.count { it != null && it < value } + 1
+                if (values.count { it == value } > 1) "T$place" else place.toString()
+            }
+            player.copy(position = position, toPar = par)
+        }.take(SportsDetails.MAX_LEADERS)
+        val detail = SportsDetail.Golf(title, roundStatus?.optIntOrNull("period")?.takeIf { it in 1..6 }, (roundType?.text("detail") ?: roundType?.text("shortDetail"))?.take(MAX_TEXT),
+            (event.text("displayPurse") ?: competition?.text("displayPurse"))?.take(40), leaders,
+            (event.text("endDate") ?: competition?.text("endDate"))?.let(::sportsInstant))
+        val venue = (competition?.optJSONObject("venue") ?: event.optJSONObject("venue"))?.let { it.text("fullName") ?: it.text("displayName") }?.take(MAX_TEXT)
+        val broadcasters = (competitions(event) + event).flatMap(::broadcasters).distinctBy { SportsGuide.normalise(it) }.take(12)
+        return SportsFixture(id, league.id, league.sport, title, null, null, start, status, null, detail.statusText, broadcasters, venue, null,
+            detail.round.takeIf { status == FixtureStatus.LIVE }, null, null, null, null, leagueLogo, detail)
+    }
+
+    internal fun toPar(value: String?): Int? {
+        val text = value?.trim()?.uppercase() ?: return null
+        if (text == "E" || text == "EVEN") return 0
+        return text.removePrefix("+").toIntOrNull()
+    }
+
+    private fun sessions(event: JSONObject, league: SportsLeague, leagueLogo: String?): SportsFixture? {
+        val id = event.text("id") ?: return null
+        val title = (event.text("name") ?: event.text("shortName"))?.take(MAX_TEXT) ?: return null
+        val eventStatus = event.optJSONObject("status")
+        if (skipped(eventStatus?.optJSONObject("type"))) return null
+        val list = competitions(event).mapNotNull { competition ->
+            val start = (competition.text("date") ?: competition.text("startDate"))?.let(::sportsInstant) ?: return@mapNotNull null
+            val type = (competition.optJSONObject("status") ?: eventStatus)?.optJSONObject("type")
+            if (skipped(type)) return@mapNotNull null
+            val abbreviation = competition.optJSONObject("type")?.text("abbreviation")?.take(12)
+            Triple(competition, type, RaceSession(abbreviation, sessionName(abbreviation, competition.optJSONObject("type")?.text("text")), start, status(type)))
+        }.sortedBy { it.third.startMillis }.take(MAX_SESSIONS)
+        val circuit = event.optJSONObject("circuit")
+        val venue = (circuit?.text("fullName") ?: list.firstNotNullOfOrNull { it.first.optJSONObject("venue")?.text("fullName") }
+            ?: event.optJSONObject("venue")?.text("fullName"))?.take(MAX_TEXT)
+        val detail = SportsDetail.Sessions(venue, list.map { it.third })
+        val current = detail.current
+        val currentType = list.firstOrNull { it.third === current }?.second ?: eventStatus?.optJSONObject("type")
+        val start = current?.startMillis ?: event.text("date")?.let(::sportsInstant) ?: return null
+        val status = current?.state ?: status(eventStatus?.optJSONObject("type"))
+        val broadcasters = (list.filter { it.third === current }.map { it.first } + list.map { it.first } + event).flatMap(::broadcasters)
+            .distinctBy { SportsGuide.normalise(it) }.take(12)
+        return SportsFixture(id, league.id, league.sport, title, null, null, start, status, null, currentType?.text("shortDetail") ?: currentType?.text("detail"),
+            broadcasters, venue, null, null, null, null, null, null, leagueLogo, detail.takeIf { list.isNotEmpty() })
+    }
+
+    private fun sessionName(abbreviation: String?, text: String?): String = when (abbreviation?.lowercase()) {
+        "fp1" -> "Practice 1"
+        "fp2" -> "Practice 2"
+        "fp3" -> "Practice 3"
+        "ss", "sq" -> "Sprint Qualifying"
+        "sr", "sprint" -> "Sprint"
+        "qual", "q" -> "Qualifying"
+        "race" -> "Race"
+        else -> text?.take(40) ?: abbreviation ?: "Race"
+    }
+
+    private fun card(event: JSONObject, league: SportsLeague, leagueLogo: String?): SportsFixture? {
+        val id = event.text("id") ?: return null
+        val title = (event.text("name") ?: event.text("shortName"))?.take(MAX_TEXT) ?: return null
+        val eventStatus = event.optJSONObject("status")
+        if (skipped(eventStatus?.optJSONObject("type"))) return null
+        val eventStart = event.text("date")?.let(::sportsInstant)
+        val raw = competitions(event).take(MAX_BOUTS).mapNotNull { competition ->
+            val start = (competition.text("date") ?: competition.text("startDate"))?.let(::sportsInstant) ?: eventStart ?: return@mapNotNull null
+            val statusJson = competition.optJSONObject("status")
+            val type = statusJson?.optJSONObject("type")
+            if (skipped(type)) return@mapNotNull null
+            val pair = competitors(competition).withIndex().sortedBy { it.value.optIntOrNull("order") ?: it.index }.map { it.value }.take(2)
+            if (pair.size != 2) return@mapNotNull null
+            val first = fighter(pair[0]) ?: return@mapNotNull null
+            val second = fighter(pair[1]) ?: return@mapNotNull null
+            val state = status(type)
+            val winner = when {
+                pair[0].optBoolean("winner") -> 1
+                pair[1].optBoolean("winner") -> 2
+                else -> null
+            }
+            val bout = FightBout(competition.optJSONObject("type")?.let { it.text("abbreviation") ?: it.text("text") }?.take(40),
+                competition.optJSONObject("format")?.optJSONObject("regulation")?.optIntOrNull("periods")?.takeIf { it in 1..12 }, first, second, winner, start, state,
+                statusJson?.optIntOrNull("period")?.takeIf { state == FixtureStatus.LIVE && it in 1..12 })
+            Triple(competition, type, bout)
+        }
+        val bouts = raw.map { it.third }
+        val mainStart = bouts.lastOrNull()?.startMillis
+        val detail = SportsDetail.Card(bouts.map { it.copy(mainCard = mainStart != null && it.startMillis >= mainStart) })
+        val states = bouts.map { it.state }.toSet()
+        val status = when {
+            bouts.isEmpty() -> status(eventStatus?.optJSONObject("type"))
+            FixtureStatus.LIVE in states -> FixtureStatus.LIVE
+            states == setOf(FixtureStatus.FINAL) -> FixtureStatus.FINAL
+            FixtureStatus.FINAL in states -> FixtureStatus.LIVE
+            else -> FixtureStatus.SCHEDULED
+        }
+        val start = bouts.minOfOrNull { it.startMillis } ?: eventStart ?: return null
+        val shown = raw.firstOrNull { it.third.state == FixtureStatus.LIVE }?.second ?: eventStatus?.optJSONObject("type") ?: raw.lastOrNull()?.second
+        val venue = (event.optJSONArray("venues")?.let(::objects)?.firstOrNull() ?: raw.firstNotNullOfOrNull { it.first.optJSONObject("venue") }
+            ?: event.optJSONObject("venue"))?.let { it.text("fullName") ?: it.text("displayName") }?.take(MAX_TEXT)
+        val broadcasters = (raw.map { it.first } + event).flatMap(::broadcasters).distinctBy { SportsGuide.normalise(it) }.take(12)
+        return SportsFixture(id, league.id, league.sport, title, null, null, start, status, null, shown?.text("shortDetail") ?: shown?.text("detail"),
+            broadcasters, venue, null, null, null, null, null, null, leagueLogo, detail.takeIf { bouts.isNotEmpty() })
+    }
+
+    private fun fighter(competitor: JSONObject): Fighter? {
+        val athlete = competitor.optJSONObject("athlete") ?: return null
+        val name = athlete.text("displayName")?.take(MAX_TEXT) ?: return null
+        val record = competitor.optJSONArray("records")?.let(::objects)?.firstOrNull()?.text("summary")?.takeIf { RECORD.matches(it) }
+        return Fighter(name, athlete.text("shortName")?.takeIf { it != name }, record, flag(competitor)?.text("href")?.let(::sportsImage))
+    }
+
+    private fun cricket(sides: List<Pair<JSONObject, FixtureTeam>>): SportsDetail.Cricket? {
+        val innings = sides.flatMap { (competitor, team) ->
+            val name = team.abbreviation ?: team.shortName ?: team.name
+            val summary = CRICKET.find(competitor.text("score").orEmpty())
+            val lines = competitor.optJSONArray("linescores")?.let(::objects).orEmpty().filter { it.has("runs") || it.has("wickets") }.filter { line ->
+                (line.optIntOrNull("runs") ?: 0) > 0 || (line.optIntOrNull("wickets") ?: 0) > 0 || line.text("overs") != null || line.optBoolean("isBatting")
+            }
+            val last = lines.maxOfOrNull { it.optIntOrNull("period") ?: 0 }
+            val max = summary?.groupValues?.get(2)?.toIntOrNull()?.takeIf { it in 1..200 }
+            lines.map { line ->
+                val latest = (line.optIntOrNull("period") ?: 0) == last
+                (line.optIntOrNull("period") ?: 0) to CricketInnings(name, line.optIntOrNull("runs") ?: 0, (line.optIntOrNull("wickets") ?: 0).coerceIn(0, 10),
+                    (line.text("overs") ?: summary?.groupValues?.get(1)?.takeIf { latest })?.takeIf { SportsDetails.balls(it) != null }, max,
+                    summary?.groupValues?.get(3)?.toIntOrNull()?.takeIf { latest }, line.optBoolean("isBatting"))
+            }
+        }.sortedBy { it.first }.map { it.second }
+        return if (innings.isEmpty()) null else SportsDetail.Cricket(innings.take(4))
+    }
+
+    private fun baseball(status: JSONObject?, type: JSONObject?, situation: JSONObject?): SportsDetail.Baseball? {
+        val half = listOfNotNull(status?.text("periodPrefix"), type?.text("shortDetail"), type?.text("detail")).firstNotNullOfOrNull(::half)
+        if (situation == null && half == null) return null
+        fun count(key: String) = situation?.optIntOrNull(key)?.takeIf { it in 0..4 }
+        fun base(key: String) = when (val value = situation?.opt(key)) {
+            is Boolean -> value
+            is Number -> value.toInt() != 0
+            is JSONObject -> true
+            else -> false
+        }
+        return SportsDetail.Baseball(status?.optIntOrNull("period")?.takeIf { it in 1..30 }, half, count("outs"), count("balls"), count("strikes"),
+            base("onFirst"), base("onSecond"), base("onThird"))
+    }
+
+    private fun half(text: String): InningHalf? = text.trim().lowercase().let {
+        when {
+            it.startsWith("top") -> InningHalf.TOP
+            it.startsWith("bot") -> InningHalf.BOTTOM
+            it.startsWith("mid") -> InningHalf.MIDDLE
+            it.startsWith("end") -> InningHalf.END
+            else -> null
+        }
     }
 
     private fun team(competitor: JSONObject): FixtureTeam? {
@@ -125,7 +405,14 @@ object EspnScoreboard {
     private val SKIPPED = listOf("POSTPONED", "CANCELED", "CANCELLED", "ABANDONED", "FORFEIT", "SUSPENDED", "DELAYED")
     private val COLOUR = Regex("[0-9A-Fa-f]{6}")
     private val RECORD = Regex("\\d{1,3}(-\\d{1,3}){1,3}")
+    private val CRICKET = Regex("""\(([\d.]+)(?:/(\d+))? ov(?:, target (\d+))?""")
+    private val TENNIS_ORDER = listOf(FixtureStatus.LIVE, FixtureStatus.SCHEDULED, FixtureStatus.FINAL)
     private const val MAX_PERIODS = 12
+    private const val MAX_SETS = 5
+    private const val MAX_SESSIONS = 12
+    private const val MAX_BOUTS = 24
+    const val MAX_MATCHES = 60
+    private const val RECENT_MILLIS = 12L * 60 * 60 * 1000
 }
 
 object SportsLines {

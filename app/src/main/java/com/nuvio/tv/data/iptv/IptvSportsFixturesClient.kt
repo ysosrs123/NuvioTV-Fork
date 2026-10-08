@@ -35,7 +35,7 @@ class IptvSportsFixturesClient(private val http: OkHttpClient = newClient(), pri
         val body = get(url)
         return try {
             when (service) {
-                SportsService.ESPN -> EspnScoreboard.parse(body, league)
+                SportsService.ESPN -> EspnScoreboard.parse(body, league, nowMillis)
                 SportsService.THESPORTSDB -> SportsDbEvents.parse(body, league, nowMillis)
                 SportsService.OFF -> emptyList()
             }

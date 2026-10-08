@@ -1,0 +1,41 @@
+{"leagues":[{"abbreviation":"WTA","logos":[{"href":"https://a.espncdn.com/i/leaguelogos/tennis/500/wta.png"}]}],
+ "events":[{"id":"7001","name":"China Open","date":"2026-10-01T02:00Z","major":false,
+  "venue":{"displayName":"Beijing, China"},
+  "status":{"type":{"name":"STATUS_IN_PROGRESS","state":"in"}},
+  "groupings":[
+   {"grouping":{"slug":"womens-singles","displayName":"Women's Singles"},
+    "competitions":[
+     {"id":"9101","date":"2026-10-08T06:00Z","round":{"displayName":"Quarterfinal"},"venue":{"court":"Diamond Court"},
+      "status":{"period":3,"type":{"name":"STATUS_IN_PROGRESS","state":"in","completed":false,"detail":"3rd Set","shortDetail":"3rd Set"}},
+      "notes":[{"text":"J. Varga leads M. Okafor 7-6 3-6 5-4"}],
+      "competitors":[
+       {"id":"1","order":1,"homeAway":"home","winner":false,"possession":true,"curatedRank":{"current":4},
+        "athlete":{"displayName":"Jana Varga","shortName":"J. Varga","flag":{"href":"https://a.espncdn.com/i/teamlogos/countries/500/hun.png","alt":"Hungary"}},
+        "linescores":[{"value":7,"winner":true,"tiebreak":7},{"value":3,"winner":false},{"value":5}]},
+       {"id":"2","order":2,"homeAway":"away","winner":false,"possession":false,"curatedRank":{"current":99},
+        "athlete":{"displayName":"Mia Okafor","shortName":"M. Okafor","flag":{"href":"https://a.espncdn.com/i/teamlogos/countries/500/nga.png","alt":"Nigeria"}},
+        "linescores":[{"value":6,"winner":false,"tiebreak":4},{"value":6,"winner":true},{"value":4}]}]},
+     {"id":"9102","date":"2026-10-08T09:00Z","round":{"displayName":"Quarterfinal"},"venue":{"court":"Lotus Court"},
+      "status":{"type":{"name":"STATUS_SCHEDULED","state":"pre","completed":false,"detail":"Thu, October 8th at 5:00 AM EDT"}},
+      "competitors":[
+       {"order":1,"homeAway":"home","curatedRank":{"current":1},"athlete":{"displayName":"Ana Lind","flag":{"href":"https://a.espncdn.com/i/teamlogos/countries/500/swe.png","alt":"Sweden"}}},
+       {"order":2,"homeAway":"away","athlete":{"displayName":"Clara Ruiz"}}]},
+     {"id":"9103","date":"2026-10-08T01:00Z","round":{"displayName":"Quarterfinal"},
+      "status":{"type":{"name":"STATUS_FINAL","state":"post","completed":true,"detail":"Final"}},
+      "competitors":[
+       {"order":1,"homeAway":"home","winner":true,"athlete":{"displayName":"Lena Brandt"},"linescores":[{"value":6,"winner":true},{"value":6,"winner":true}]},
+       {"order":2,"homeAway":"away","winner":false,"athlete":{"displayName":"Ella Novak"},"linescores":[{"value":2,"winner":false},{"value":3,"winner":false}]}]},
+     {"id":"9104","date":"2026-10-06T01:00Z","round":{"displayName":"Round of 16"},
+      "status":{"type":{"name":"STATUS_FINAL","state":"post","completed":true,"detail":"Final"}},
+      "competitors":[
+       {"order":1,"homeAway":"home","winner":true,"athlete":{"displayName":"Jana Varga"},"linescores":[{"value":6,"winner":true},{"value":6,"winner":true}]},
+       {"order":2,"homeAway":"away","athlete":{"displayName":"Ella Novak"},"linescores":[{"value":1},{"value":0}]}]},
+     {"id":"9105","date":"2026-10-08T10:00Z","status":{"type":{"name":"STATUS_CANCELED","state":"post"}},
+      "competitors":[{"order":1,"homeAway":"home","athlete":{"displayName":"A One"}},{"order":2,"homeAway":"away","athlete":{"displayName":"B Two"}}]}]},
+   {"grouping":{"slug":"womens-doubles","displayName":"Women's Doubles"},
+    "competitions":[
+     {"id":"9201","date":"2026-10-08T07:00Z","round":{"displayName":"Semifinal"},"venue":{"court":"Court 1"},
+      "status":{"type":{"name":"STATUS_IN_PROGRESS","state":"in","detail":"1st Set"}},
+      "competitors":[
+       {"order":1,"homeAway":"home","type":"team","possession":false,"roster":{"displayName":"F. Reynolds / J. Watt"},"linescores":[{"value":5}]},
+       {"order":2,"homeAway":"away","type":"team","possession":true,"roster":{"displayName":"K. Sato / L. Moreau"},"linescores":[{"value":4}]}]}]}]}]}
