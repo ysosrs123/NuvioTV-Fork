@@ -553,7 +553,13 @@ Phone setup (security review)
 
 ## Validation
 
-- After 8 October: review fixes host-tested (261 data-layer JVM tests); CI pending.
+- After 8 October: the sports build (shared live service, guide, overlays, Game Centre,
+  markers, feeds, multiview data tiles, Sport section, Home rows, pop-ups in Nuvio's player,
+  team page, record rules) and the review fixes: 678 core and 263 data-layer JVM tests
+  pass on the host; CI debug build green at `9d563f0` (run 37779066258); earlier steps
+  green at `f1daa27` (run 37777062519) and `7759873` (run 37774873509). Not device-tested;
+  the new sport formats are checked only against synthetic responses built from the
+  documented ESPN shapes.
 - Latest: debug build green at `ada280b` (run 37767996467) with the fixes from both
   8 October device passes; translations completed in `ecf29d4`. Minified release build
   last green at `ec6f16f` (run 37596443549). Before that: `f29cbe2` (run 37599069380).

@@ -31,7 +31,23 @@ Next, in order:
    Decision (user, 8 October): build all four parts in the recommended order (1 guide and
    overlays, 2 Game Centre and markers, 3 new sport formats, 4 across Nuvio); default
    overlay Glance; background checks while watching films allowed for followed teams'
-   live games only. Original brief, for reference:
+   live games only.
+   BUILT (8 October, CI green at `9d563f0`, run 37779066258; not device-tested): all four
+   parts. New files: core/iptv SportsLive, SportsDetail, SportsSummary, SportsGuideCells,
+   SportsOverlayText, SportsRecordRules; data/iptv IptvSportsLive (app-wide polling,
+   alerts, reminders), IptvSportsSummaryClient; ui/screens/iptv IptvSportsOverlay,
+   IptvGameCentre, IptvSportFeeds, IptvSportTimeline, IptvAllScores, IptvSportsGuide,
+   IptvSportsNuvio (app-wide host, pop-up in Nuvio's player), IptvTeamScreen. Hooks:
+   MainActivity (IptvSportsNuvioHost), NuvioNavHost (team route), PlayerScreen
+   (IptvSportsPlayerAlerts). New sport shapes (tennis, golf, F1/NASCAR, UFC, cricket,
+   baseball) and the summary parser are tested only with synthetic JSON built from the
+   documented shapes: run the ESPN capture script during live games and replace the
+   synthetic fixtures. The SportsFixture per-sport field is `sportDetail` (`detail` is the
+   status text). Known gaps: football red cards, NRL last try, basketball run and ice
+   hockey power play show only via the summary (Game Centre), not in the scoreboard bug;
+   "same channel on another source" is not detected for Other feeds; catch-up of a
+   finished game has no fixture link; record-every-game rules run only while the app is
+   in the foreground. Original brief, for reference:
    second, more thorough and creative design pass (user request).
    Mock up how sports fit across IPTV and Nuvio itself: the Sport section, the EPG (live
    scores and sport badges in guide cells, a "games now" lane), the player UI (Game
