@@ -109,7 +109,7 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
             }
         }
         AnimatedVisibility(header && pick == null, Modifier.align(Alignment.TopCenter).padding(top = 24.dp), enter = fadeIn(), exit = fadeOut()) {
-            Row(Modifier.iptvPanel(RoundedCornerShape(14.dp), GlassRole.HUD).padding(horizontal = 18.dp, vertical = 10.dp),
+            Row(Modifier.iptvPanel(RoundedCornerShape(12.dp), GlassRole.HUD).padding(horizontal = 18.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Icon(Icons.Filled.ViewModule, null, Modifier.size(20.dp), tint = NuvioTheme.colors.TextSecondary)
                 Text(stringResource(R.string.iptv_multiview_title), style = MaterialTheme.typography.titleSmall, color = NuvioTheme.colors.TextPrimary,
@@ -263,16 +263,16 @@ private fun Tile(state: IptvLiveState, tile: IptvTile, index: Int, audio: Boolea
             }
             if (audio) Icon(Icons.AutoMirrored.Filled.VolumeUp, stringResource(R.string.iptv_multiview_audio), Modifier.size(18.dp), tint = Color.White)
         }
-        Text("${index + 1}", style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = .8f),
-            modifier = Modifier.align(Alignment.TopStart).padding(10.dp).clip(RoundedCornerShape(6.dp))
-                .background(Color.Black.copy(alpha = .5f)).padding(horizontal = 7.dp, vertical = 2.dp))
+        Text("${index + 1}", style = MaterialTheme.typography.labelLarge, color = Color.White.copy(alpha = .85f),
+            modifier = Modifier.align(Alignment.TopStart).padding(8.dp).clip(RoundedCornerShape(4.dp))
+                .background(Color.Black.copy(alpha = .45f)).padding(horizontal = 8.dp, vertical = 2.dp))
     }
 }
 
 @Composable
 private fun AddSlot(requester: FocusRequester, modifier: Modifier, onClick: () -> Unit) {
     var focused by remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(4.dp)
     Column(modifier.focusRequester(requester)
         .onFocusChanged { focused = it.isFocused }
         .tileFocus(focused, shape)

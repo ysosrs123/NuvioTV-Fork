@@ -358,14 +358,14 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         channelSearch?.cancel()
         channelSearch = viewModelScope.launch { delay(300); load() }
     }
-    fun record(row: IptvListedChannel, programme: GuideProgramme?) {
+    fun record(row: IptvListedChannel, programme: GuideProgramme?, location: String? = null) {
         val current = session ?: return
         val ref = refOf(row) ?: return
         viewModelScope.launch {
             val now = System.currentTimeMillis()
             val result = try {
-                if (programme != null && programme.start.epochMillis > now) recorder.schedule(current, ref, row.item.channel.id, programme)
-                else recorder.recordNow(current, ref, row.item.channel.id, programme?.takeIf { airing(it, now) })
+                if (programme != null && programme.start.epochMillis > now) recorder.schedule(current, ref, row.item.channel.id, programme, location)
+                else recorder.recordNow(current, ref, row.item.channel.id, programme?.takeIf { airing(it, now) }, location)
             } catch (cancel: CancellationException) { throw cancel }
             catch (error: Exception) { IptvLog.failure("record", error); null }
             val message = when (result) {

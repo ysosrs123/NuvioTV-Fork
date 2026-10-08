@@ -5,12 +5,16 @@ package com.nuvio.tv.ui.screens.iptv
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +44,8 @@ import com.nuvio.tv.core.iptv.GuideProgrammeCell
 import com.nuvio.tv.core.iptv.catchupType
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.data.iptv.IptvStreamFormat
+import com.nuvio.tv.ui.screens.settings.settingsFocusFillColor
+import com.nuvio.tv.ui.screens.settings.settingsItemColor
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.theme.accentBrush
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
@@ -57,7 +63,9 @@ internal val ItemShape = RoundedCornerShape(12.dp)
 @Composable
 internal fun Modifier.iptvPanel(shape: Shape = PanelShape, role: GlassRole = GlassRole.PANEL): Modifier {
     val solid = LocalIptvAppearance.current.solidPanels
-    return if (LocalV2Appearance.current != null && !solid) nuvioGlass(role, shape = shape)
+    val v2 = LocalV2Appearance.current != null
+    return if (v2 && !solid) nuvioGlass(role, shape = shape)
+    else if (v2) clip(shape).background(NuvioTheme.colors.BackgroundCard, shape)
     else clip(shape).background(if (solid) NuvioTheme.colors.BackgroundCard else NuvioTheme.colors.BackgroundCard.copy(alpha = .92f), shape)
         .border(1.dp, NuvioTheme.colors.Border, shape)
 }
@@ -66,8 +74,8 @@ internal fun Modifier.iptvPanel(shape: Shape = PanelShape, role: GlassRole = Gla
 internal fun Modifier.iptvItem(focused: Boolean, selected: Boolean = false, shape: Shape = ItemShape): Modifier =
     if (LocalV2Appearance.current != null) {
         nuvioV2Focus(focused, shape, stationary = true).clip(shape).background(when {
-            focused -> NuvioTheme.colors.Secondary.copy(alpha = .18f)
-            selected -> NuvioTheme.colors.TextPrimary.copy(alpha = .07f)
+            focused -> settingsFocusFillColor()
+            selected -> settingsItemColor(Color.Transparent)
             else -> Color.Transparent
         }, shape)
     } else {
@@ -106,12 +114,16 @@ internal fun ProgressLine(fraction: Float, modifier: Modifier) {
 }
 
 @Composable
-internal fun Tag(text: String, modifier: Modifier = Modifier, live: Boolean = false) {
-    Text(text, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, maxLines = 1,
-        color = if (live) Color.White else NuvioTheme.colors.TextSecondary,
-        modifier = modifier.clip(RoundedCornerShape(6.dp))
-            .background(if (live) NuvioTheme.colors.Error.copy(alpha = .9f) else NuvioTheme.colors.TextPrimary.copy(alpha = .1f))
-            .padding(horizontal = 7.dp, vertical = 2.dp))
+internal fun Tag(text: String, modifier: Modifier = Modifier, live: Boolean = false, scrim: Boolean = live) {
+    if (!scrim) {
+        Text(text, style = MaterialTheme.typography.labelMedium, maxLines = 1, color = NuvioTheme.colors.TextSecondary, modifier = modifier)
+        return
+    }
+    Row(modifier.clip(RoundedCornerShape(6.dp)).background(Color.Black.copy(alpha = .45f)).padding(horizontal = 7.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+        if (live) Box(Modifier.size(6.dp).clip(CircleShape).background(NuvioTheme.colors.Error))
+        Text(text, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, color = Color.White)
+    }
 }
 
 internal fun monogram(name: String): String {

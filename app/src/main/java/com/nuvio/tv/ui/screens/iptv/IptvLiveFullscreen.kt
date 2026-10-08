@@ -226,7 +226,8 @@ private fun Banner(state: IptvLiveState, now: Long) {
                         color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
                     Tag(stringResource(playbackTag(state, programme, now)), live = catchup == null)
                     if (state.paused) Tag(stringResource(R.string.iptv_live_paused))
-                    qualityBadges(state.player).forEach { Tag(it) }
+                    qualityBadges(state.player).takeIf { it.isNotEmpty() }?.let { Text(it.joinToString(" · "), style = MaterialTheme.typography.labelMedium,
+                        color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
                 Text(programme?.let(::title) ?: stringResource(R.string.iptv_live_no_programme), style = MaterialTheme.typography.headlineSmall,
                     color = NuvioTheme.colors.TextPrimary, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -340,9 +341,9 @@ internal fun ChannelPanel(state: IptvLiveState, now: Long, onWatch: (IptvListedC
 
 @Composable
 internal fun SectionLabel(text: String, modifier: Modifier = Modifier) {
-    Text(text.uppercase(), style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary,
-        letterSpacing = 1.2.sp, maxLines = 1,
-        modifier = modifier.padding(start = 10.dp, top = 4.dp, bottom = 2.dp))
+    Text(text, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary,
+        letterSpacing = 1.4.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        modifier = modifier.padding(start = 12.dp, top = 6.dp, bottom = 2.dp))
 }
 
 @Composable
@@ -398,7 +399,7 @@ internal fun LiveVideo(player: ExoPlayer?, playback: IptvLivePlayback?, modifier
 @Composable
 private fun InsetPicture(state: IptvLiveState, inset: IptvTile, now: Long, modifier: Modifier) {
     val shape = RoundedCornerShape(12.dp)
-    Box(modifier.clip(shape).background(Color.Black, shape).border(2.dp, NuvioTheme.colors.TextPrimary.copy(alpha = .35f), shape)) {
+    Box(modifier.clip(shape).background(Color.Black, shape).border(1.dp, Color.White.copy(alpha = .22f), shape)) {
         LiveVideo(inset.player, null, Modifier.fillMaxSize(), texture = true)
         if (inset.failure != null) Text(stringResource(inset.failure), style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = .85f),
             modifier = Modifier.align(Alignment.Center).padding(16.dp))

@@ -140,8 +140,9 @@ class IptvRecordingTargets @Inject constructor(@ApplicationContext private val c
         RecordingShareProtocol.FTP -> IptvFtpConnector(settings, password)
     }
 
-    fun preferred(): IptvPlaceResult {
-        val choice = preferences.recordLocation
+    fun preferred(): IptvPlaceResult = place(preferences.recordLocation)
+
+    fun place(choice: String?): IptvPlaceResult {
         return when {
             choice == RecordingLocations.SHARE -> shares.settings()?.let { resolve(RecordingLocations.share(it.id)) } ?: IptvPlaceResult.ShareMissing
             choice == RecordingLocations.MEDIA -> resolve(choice)

@@ -159,19 +159,19 @@ class IptvRecorder @Inject constructor(
     }
 
     suspend fun recordNow(session: IptvProfileAccess.Session, source: IptvSourceRef, channelId: String,
-        programme: GuideProgramme? = null): IptvRecordResult {
+        programme: GuideProgramme? = null, location: String? = null): IptvRecordResult {
         val window = RecordingPlan.now(System.currentTimeMillis(), programme?.stop?.epochMillis,
             postRollMillis = livePreferences.recordLateMinutes * 60_000L)
             ?: return IptvRecordResult.Refused(IptvRecordRefusal.PROGRAMME_ENDED)
-        return create(session, source, channelId, programme, window)
+        return create(session, source, channelId, programme, window, location)
     }
 
     suspend fun schedule(session: IptvProfileAccess.Session, source: IptvSourceRef, channelId: String,
-        programme: GuideProgramme): IptvRecordResult {
+        programme: GuideProgramme, location: String? = null): IptvRecordResult {
         val window = RecordingPlan.programme(System.currentTimeMillis(), programme.start.epochMillis, programme.stop?.epochMillis,
             livePreferences.recordEarlyMinutes * 60_000L, livePreferences.recordLateMinutes * 60_000L)
             ?: return IptvRecordResult.Refused(IptvRecordRefusal.PROGRAMME_ENDED)
-        return create(session, source, channelId, programme, window)
+        return create(session, source, channelId, programme, window, location)
     }
 
     suspend fun cancel(id: String): Boolean = withContext(Dispatchers.IO) {
@@ -346,16 +346,16 @@ class IptvRecorder @Inject constructor(
     }
 
     private suspend fun create(session: IptvProfileAccess.Session, source: IptvSourceRef, channelId: String,
-        programme: GuideProgramme?, window: RecordingWindow): IptvRecordResult = withContext(Dispatchers.IO) {
+        programme: GuideProgramme?, window: RecordingWindow, location: String?): IptvRecordResult = withContext(Dispatchers.IO) {
         require(source.profileId == session.profileId)
         mutex.withLock {
             load()
-            createLocked(session, source, channelId, programme, window)
+            createLocked(session, source, channelId, programme, window, location)
         }
     }
 
     private fun createLocked(session: IptvProfileAccess.Session, source: IptvSourceRef, channelId: String,
-        programme: GuideProgramme?, window: RecordingWindow): IptvRecordResult {
+        programme: GuideProgramme?, window: RecordingWindow, location: String?): IptvRecordResult {
         val now = System.currentTimeMillis()
         val found = try {
             access.use(session) {
@@ -380,7 +380,7 @@ class IptvRecorder @Inject constructor(
         val trim = trimRecordingPadding(requested, neighbours.map { it.span })
         val immediate = trim.candidate.startMillis <= now
         if (!immediate && !IptvRecordingAlarms.exactAllowed(context)) return IptvRecordResult.Refused(IptvRecordRefusal.EXACT_ALARMS_DENIED)
-        val place = when (val result = targets.preferred()) {
+        val place = when (val result = if (location == null) targets.preferred() else targets.place(location)) {
             is IptvPlaceResult.Ready -> result.place
             IptvPlaceResult.Missing -> return IptvRecordResult.Refused(IptvRecordRefusal.STORAGE_MISSING)
             IptvPlaceResult.ReadOnly -> return IptvRecordResult.Refused(IptvRecordRefusal.STORAGE_READ_ONLY)

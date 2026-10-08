@@ -62,6 +62,7 @@ import com.nuvio.tv.data.iptv.IptvRecordingDataSource
 import com.nuvio.tv.data.iptv.IptvShareException
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
+import com.nuvio.tv.ui.screens.settings.SettingsDetailHeader
 import com.nuvio.tv.ui.screens.settings.SettingsGroupCard
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.util.rememberLongPressKeyTracker
@@ -92,10 +93,8 @@ fun IptvRecordingsScreen(onBack: () -> Unit, viewModel: IptvRecordingsViewModel 
         if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
             Column(Modifier.width(340.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(stringResource(R.string.iptv_recordings_title), style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary)
-                Text(stringResource(R.string.iptv_recordings_description), style = MaterialTheme.typography.bodyMedium, color = NuvioTheme.colors.TextSecondary)
-                Spacer(Modifier.height(18.dp))
+                SettingsDetailHeader(stringResource(R.string.iptv_recordings_title), stringResource(R.string.iptv_recordings_description))
+                Spacer(Modifier.height(12.dp))
                 Text(stringResource(R.string.iptv_recordings_hint), style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextTertiary)
                 Spacer(Modifier.weight(1f))
                 state.free?.let { free ->

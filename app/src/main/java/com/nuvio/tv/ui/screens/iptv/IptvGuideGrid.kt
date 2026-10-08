@@ -31,10 +31,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -64,8 +66,8 @@ private const val MIN_TITLE_MILLIS = 15 * MINUTE_MILLIS
 private class GuideSpec(val row: Dp, val logo: DpSize, val column: Dp, val number: Dp, val detail: Boolean, val pageRows: Int)
 
 private fun guideSpec(density: GuideDensity) = when (density) {
-    GuideDensity.COMFORTABLE -> GuideSpec(60.dp, DpSize(56.dp, 34.dp), 300.dp, 40.dp, true, 8)
-    GuideDensity.COMPACT -> GuideSpec(42.dp, DpSize(42.dp, 24.dp), 260.dp, 34.dp, false, 12)
+    GuideDensity.COMFORTABLE -> GuideSpec(60.dp, DpSize(46.dp, 28.dp), 330.dp, 30.dp, true, 8)
+    GuideDensity.COMPACT -> GuideSpec(42.dp, DpSize(36.dp, 22.dp), 290.dp, 28.dp, false, 12)
 }
 
 @Composable
@@ -74,7 +76,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
     onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onNearEnd: () -> Unit,
     moving: String? = null, onMove: (IptvListedChannel, ListMove) -> Unit = { _, _ -> }, onMoveDone: () -> Unit = {}) {
     val spec = guideSpec(state.density)
-    BoxWithConstraints(modifier.iptvPanel().padding(horizontal = 12.dp, vertical = 10.dp)) {
+    BoxWithConstraints(modifier.iptvPanel().padding(horizontal = 6.dp, vertical = 8.dp)) {
         val stripWidth = maxWidth - spec.column
         val visibleMillis = (stripWidth.value / MinuteWidth.value * MINUTE_MILLIS).toLong().coerceAtLeast(SLOT)
         val scope = rememberCoroutineScope()
@@ -101,7 +103,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
         Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth().height(30.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(heading, style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
-                    overflow = TextOverflow.Ellipsis, modifier = Modifier.width(spec.column).padding(start = 12.dp, end = 12.dp))
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.width(spec.column).padding(start = 10.dp, end = 12.dp))
                 TimeBar(viewStart, visibleMillis, now, Modifier.weight(1f).fillMaxHeight())
             }
             Spacer(Modifier.height(6.dp))
@@ -294,33 +296,27 @@ private fun Modifier.cellFocus(shape: RoundedCornerShape): Modifier =
 
 @Composable
 private fun ChannelCell(spec: GuideSpec, row: IptvListedChannel, index: Int, playing: Boolean, recording: Boolean, focused: Boolean, moving: Boolean, modifier: Modifier) {
-    Row(modifier.padding(start = 8.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(if (spec.detail) 10.dp else 8.dp)) {
+    Row(modifier.padding(start = 4.dp, end = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Box(Modifier.width(3.dp).height(if (spec.detail) 28.dp else 20.dp).clip(RoundedCornerShape(2.dp))
             .then(if (playing) Modifier.background(NuvioTheme.palette.accentBrush()) else Modifier))
-        if (moving) Box(Modifier.width(spec.number)) { Icon(Icons.Filled.SwapVert, null, Modifier.size(20.dp), tint = NuvioTheme.colors.Secondary) }
+        if (moving) Box(Modifier.width(spec.number), contentAlignment = Alignment.Center) { Icon(Icons.Filled.SwapVert, null, Modifier.size(18.dp), tint = NuvioTheme.colors.Secondary) }
         else Text("${index + 1}", color = if (focused) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.TextTertiary,
-            style = if (spec.detail) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelMedium, maxLines = 1, modifier = Modifier.width(spec.number))
+            style = if (index < 999) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false,
+            textAlign = TextAlign.End, modifier = Modifier.width(spec.number))
         ChannelLogo(logoUrl(row), channelName(row), Modifier.size(spec.logo))
         val favourite = row.item.overlay.favouriteRank != null
         val archive = hasArchive(row)
-        if (spec.detail) Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(channelName(row), color = if (focused || playing) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary, maxLines = 1,
-                overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (focused || playing) FontWeight.SemiBold else FontWeight.Normal)
-            if (favourite || archive || playing || recording) Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) { ChannelMarks(spec, playing, recording, favourite, archive) }
-        } else Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(channelName(row), color = if (focused || playing) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary, maxLines = 1,
-                overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall,
-                fontWeight = if (focused || playing) FontWeight.SemiBold else FontWeight.Normal, modifier = Modifier.weight(1f, fill = false))
-            ChannelMarks(spec, playing, recording, favourite, archive)
+        Text(channelName(row), color = if (focused || playing) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary, maxLines = 2,
+            overflow = TextOverflow.Ellipsis, style = if (spec.detail) MaterialTheme.typography.bodyMedium.copy(lineHeight = 18.sp) else MaterialTheme.typography.bodySmall.copy(lineHeight = 15.sp),
+            fontWeight = if (focused || playing) FontWeight.SemiBold else FontWeight.Normal, modifier = Modifier.weight(1f))
+        if (favourite || archive || recording) Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            ChannelMarks(recording, favourite, archive)
         }
     }
 }
 
 @Composable
-private fun ChannelMarks(spec: GuideSpec, playing: Boolean, recording: Boolean, favourite: Boolean, archive: Boolean) {
-    if (playing && spec.detail) Text(stringResource(R.string.iptv_live_now_playing), style = MaterialTheme.typography.labelSmall,
-        color = NuvioTheme.colors.Secondary, fontWeight = FontWeight.SemiBold, maxLines = 1)
+private fun ChannelMarks(recording: Boolean, favourite: Boolean, archive: Boolean) {
     if (recording) Icon(Icons.Filled.FiberManualRecord, null, Modifier.size(10.dp), tint = NuvioTheme.colors.Error)
     if (favourite) Icon(Icons.Filled.Star, null, Modifier.size(12.dp), tint = NuvioTheme.colors.Rating)
     if (archive) Icon(Icons.Filled.History, null, Modifier.size(12.dp), tint = NuvioTheme.colors.TextTertiary)
