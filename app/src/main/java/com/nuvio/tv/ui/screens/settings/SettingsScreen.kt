@@ -252,6 +252,7 @@ fun SettingsScreen(
     val integrationAnimeSkipFocusRequester = remember { FocusRequester() }
     var integrationSection by remember { mutableStateOf(IntegrationSettingsSection.Hub) }
     var pendingContentFocusCategory by remember { mutableStateOf<SettingsCategory?>(null) }
+    var requestedEntryCategory by remember { mutableStateOf<SettingsCategory?>(null) }
     var pendingContentFocusRequestId by remember { mutableLongStateOf(0L) }
     // Saveable so it survives a trip out to one of the screens a category opens. The pane bounces
     // focus back to the rail whenever it gains focus while this is false, so a plain remember made
@@ -372,11 +373,18 @@ fun SettingsScreen(
         val category = requestedCategory ?: return@LaunchedEffect
         SettingsCategoryRequest.consume(category)
         if (visibleSections.none { it.category == category }) return@LaunchedEffect
+        requestedEntryCategory = category
         selectedCategory = category
         railFocusCategoryName = category.name
         allowDetailAutofocus = true
         pendingContentFocusCategory = category
         pendingContentFocusRequestId += 1L
+    }
+
+    LaunchedEffect(requestedEntryCategory) {
+        val category = requestedEntryCategory ?: return@LaunchedEffect
+        delay(SETTINGS_DETAIL_FOCUS_DELAY_MS + SETTINGS_DETAIL_FOCUS_RETRY_WINDOW_MS + 500L)
+        if (requestedEntryCategory == category) requestedEntryCategory = null
     }
 
     LaunchedEffect(visibleSections) {
@@ -413,9 +421,10 @@ fun SettingsScreen(
                 ?.let { runCatching { it.requestFocus() }.getOrDefault(false) } ?: false
             if (!requested) withFrameNanos { }
         }
-        if (!requested) {
+        if (!requested && requestedEntryCategory != category) {
             focusManager.moveFocus(if (isHorizonStyle) FocusDirection.Down else FocusDirection.Right)
         }
+        if (requestedEntryCategory == category) requestedEntryCategory = null
         pendingContentFocusCategory = null
     }
 
@@ -446,7 +455,12 @@ fun SettingsScreen(
             )
         ) {
 
-            val onSectionFocused: (SettingsSectionSpec) -> Unit = { section ->
+            val onSectionFocused: (SettingsSectionSpec) -> Unit = onSectionFocused@{ section ->
+                val requested = requestedEntryCategory
+                if (requested != null) {
+                    if (requested == section.category) railFocusCategoryName = section.category.name
+                    return@onSectionFocused
+                }
                 val restoringTo = railRestoringCategory
                 // Ignore temporary lazy-list focus while restoring an off-screen category.
                 if (restoringTo == null || restoringTo == section.category) {

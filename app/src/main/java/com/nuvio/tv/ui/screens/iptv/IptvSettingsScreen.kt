@@ -82,8 +82,6 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
                     SettingsGroupCard(title = stringResource(R.string.iptv_settings_playback)) {
                         SettingsActionRow(title = stringResource(R.string.iptv_live_format_title), subtitle = stringResource(R.string.iptv_settings_format_subtitle),
                             value = stringResource(formatLabel(state.format)), onClick = { choosing = IptvSettingsChoice.FORMAT })
-                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_preview), subtitle = stringResource(R.string.iptv_settings_preview_subtitle),
-                            checked = state.preview, onToggle = viewModel::togglePreview)
                         SettingsToggleRow(title = stringResource(R.string.iptv_settings_timeshift), subtitle = stringResource(R.string.iptv_settings_timeshift_subtitle),
                             checked = state.timeshift, onToggle = viewModel::toggleTimeshift)
                         SettingsToggleRow(title = stringResource(R.string.iptv_settings_stats), subtitle = stringResource(R.string.iptv_settings_stats_subtitle),

@@ -160,13 +160,14 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
             if (state.channels.isNotEmpty()) focusGridNow() else { withFrameNanos { }; runCatching { emptyFocus.requestFocus() } }
         }
     }
-    BackHandler(enabled = !sidebarExpanded && (moving != null || movingCategory != null || fullscreen || searching || railOpen)) {
+    BackHandler(enabled = !sidebarExpanded && (moving != null || movingCategory != null || fullscreen || searching || railOpen || state.sports)) {
         when {
             moving != null -> { moving = null; viewModel.finishMove() }
             movingCategory != null -> movingCategory = null
             fullscreen -> fullscreen = false
             searching -> { searching = false; viewModel.search("") }
-            else -> { railOpen = false; focusContent() }
+            railOpen -> { railOpen = false; focusContent() }
+            else -> { viewModel.leaveSports(); focusContent() }
         }
     }
     var sidebarWasOpen by remember { mutableStateOf(false) }
@@ -237,7 +238,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                 moving?.let { id -> MoveHint(state.channels.firstOrNull { it.item.channel.id == id }?.let(::channelName).orEmpty()) }
                 if (state.sports && state.search.isBlank()) IptvSportsFixturesRow(state.source, state.hiddenCategories, state.playingId, onWatch = { row ->
                     if (row.item.channel.id == state.playingId && state.player != null && state.catchup == null) fullscreen = true else viewModel.watch(row)
-                })
+                }, onRail = { railOpen = true })
                 if (empty != null) {
                     EmptyPanel(empty, state, emptyFocus, Modifier.fillMaxWidth().weight(1f), onSources = onSources,
                         onRefresh = viewModel::refreshSource, onAll = { viewModel.showCategory(null) }, onRail = { railOpen = true })
@@ -512,7 +513,7 @@ private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, modifier: M
             if (index >= 0) Text("${index + 1}", style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextTertiary)
             Text(channelName(row), style = MaterialTheme.typography.titleMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
                 overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-            if (programme != null && airing(programme, now)) Tag(stringResource(R.string.iptv_live_playing), live = true)
+            if (programme != null && airing(programme, now) && state.player != null && state.playingId == row.item.channel.id) Tag(stringResource(R.string.iptv_live_playing), live = true)
             if (hasArchive(row)) Tag(stringResource(R.string.iptv_live_catchup))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -588,7 +589,7 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, modifier: 
             item { RailItem(stringResource(R.string.iptv_recordings_open), state.recordings.count { it.status.holdsConnection }.takeIf { it > 0 }, false, Modifier, onRecordings, Icons.Filled.VideoLibrary) }
             if (vod.movies) item { RailItem(stringResource(R.string.iptv_vod_browse_movies), null, false, Modifier, { onVod(com.nuvio.tv.core.iptv.VodKind.MOVIE) }, Icons.Filled.Movie) }
             if (vod.series) item { RailItem(stringResource(R.string.iptv_vod_browse_series), null, false, Modifier, { onVod(com.nuvio.tv.core.iptv.VodKind.SERIES) }, Icons.Filled.Tv) }
-            item { RailItem(stringResource(R.string.iptv_settings_title), null, false, Modifier, onSources, Icons.Filled.Settings) }
+            item { RailItem(stringResource(R.string.nav_settings), null, false, Modifier, onSources, Icons.Filled.Settings) }
             item { Spacer(Modifier.height(6.dp)) }
             item { RailItem(stringResource(if (state.allSources) R.string.iptv_all_sources_favourites else R.string.iptv_live_favourites), null, state.favourites,
                 Modifier.focusRequester(first), onFavourites, Icons.Filled.Star) }

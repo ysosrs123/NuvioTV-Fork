@@ -29,6 +29,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -154,7 +155,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
         }
         AnimatedVisibility(panel, Modifier.align(Alignment.CenterStart),
             enter = fadeIn() + slideInHorizontally { -it / 4 }, exit = fadeOut() + slideOutHorizontally { -it / 4 }) {
-            ChannelPanel(state, now, onWatch = { panel = false; onWatch(it) }, onMenu = { panel = false; onChannelMenu(it) })
+            ChannelPanel(state, now, onWatch = { panel = false; onWatch(it) }, onMenu = { panel = false; onChannelMenu(it) }, onLeft = { panel = false })
         }
     }
 }
@@ -280,14 +281,21 @@ private const val BEHIND_HINT_MS = 5_000L
 
 @Composable
 internal fun ChannelPanel(state: IptvLiveState, now: Long, onWatch: (IptvListedChannel) -> Unit, channels: List<IptvListedChannel> = state.channels,
-    header: @Composable () -> Unit = {}, onNearEnd: () -> Unit = {}, onMenu: ((IptvListedChannel) -> Unit)? = null) {
+    header: @Composable () -> Unit = {}, onNearEnd: () -> Unit = {}, onMenu: ((IptvListedChannel) -> Unit)? = null, onLeft: (() -> Unit)? = null) {
     var selected by remember(channels.firstOrNull()?.item?.channel?.id) { mutableStateOf(channels.firstOrNull { it.item.channel.id == state.playingId } ?: channels.firstOrNull()) }
     val recent = if (channels !== state.channels) emptyList() else state.recent.drop(1).mapNotNull { id -> state.channels.firstOrNull { it.item.channel.id == id } }.take(4)
     val start = remember { FocusRequester() }
+    var leftPressed by remember { mutableStateOf(false) }
     val playingIndex = channels.indexOfFirst { it.item.channel.id == state.playingId }
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = (playingIndex - 3).coerceAtLeast(0))
     LaunchedEffect(channels.firstOrNull()?.item?.channel?.id) { withFrameNanos { }; runCatching { start.requestFocus() } }
     Row(Modifier.fillMaxHeight().padding(start = 28.dp, top = 28.dp, bottom = 28.dp)
+        .onKeyEvent { event ->
+            val left = onLeft != null && event.nativeKeyEvent.keyCode == AndroidKeyEvent.KEYCODE_DPAD_LEFT
+            if (left && event.nativeKeyEvent.action == AndroidKeyEvent.ACTION_DOWN) leftPressed = true
+            if (left && event.nativeKeyEvent.action == AndroidKeyEvent.ACTION_UP && leftPressed) { leftPressed = false; onLeft?.invoke() }
+            left
+        }
         .iptvPanel().padding(18.dp), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
         Column(Modifier.width(440.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             header()

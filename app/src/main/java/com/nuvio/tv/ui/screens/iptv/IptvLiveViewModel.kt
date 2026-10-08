@@ -198,7 +198,12 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     }
     fun loadMore() { if (mutable.value.next != null) load(append = true) }
     fun showFavourites() { mutable.update { it.copy(favourites = true, sports = false, category = null, focused = null) }; remember(mutable.value); load() }
-    fun showSports() { mutable.update { it.copy(favourites = false, sports = true, category = null, focused = null) }; remember(mutable.value); load() }
+    private var beforeSports: Pair<Boolean, String?> = false to null
+    fun showSports() {
+        mutable.value.takeIf { !it.sports }?.let { beforeSports = it.favourites to it.category }
+        mutable.update { it.copy(favourites = false, sports = true, category = null, focused = null) }; remember(mutable.value); load()
+    }
+    fun leaveSports() { val (favourites, category) = beforeSports; if (favourites) showFavourites() else showCategory(category) }
     fun showCategory(name: String?) { mutable.update { it.copy(favourites = false, sports = false, category = name, focused = null) }; remember(mutable.value); load() }
     fun toggleHidden(name: String) {
         val ref = mutable.value.source ?: return
@@ -557,19 +562,6 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     fun focus(row: IptvListedChannel) {
         if (session != null) mutable.update { it.copy(focused = row) }
         loadShortGuide(row)
-        schedulePreview(row)
-    }
-    private var previewJob: Job? = null
-    private fun schedulePreview(row: IptvListedChannel) {
-        previewJob?.cancel()
-        val state = mutable.value
-        if (!livePreferences.autoPreview || !foreground || state.multiview != null || state.playingId == row.item.channel.id) return
-        previewJob = viewModelScope.launch {
-            delay(PREVIEW_DELAY)
-            val latest = mutable.value
-            if (foreground && latest.multiview == null && latest.focused?.item?.channel?.id == row.item.channel.id && latest.playingId != row.item.channel.id && !latest.paused)
-                watch(row, auto = true)
-        }
     }
     private fun loadShortGuide(row: IptvListedChannel) {
         val current = session ?: return
@@ -670,7 +662,6 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         if (mutable.value.inset?.row?.item?.channel?.id == row.item.channel.id) closeInset()
         loadShortGuide(row)
         val request = ++tuneVersion
-        if (!auto) previewJob?.cancel()
         val started = android.os.SystemClock.elapsedRealtime()
         val until = catchup?.let { CatchupScrub.streamEnd(it, from, System.currentTimeMillis()) }
         if (catchup != null) { loadScrubProgrammes(row, from ?: catchup.start.epochMillis); watchCatchup(row, request) }
@@ -1174,7 +1165,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         }
     }
     fun stop(keepChannel: Boolean = false) {
-        ++tuneVersion; tuneJob?.cancel(); previewJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel()
+        ++tuneVersion; tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel()
         closeInset()
         mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, reconnecting = false, catchup = null, catchupFrom = null,
             catchupUntil = null, scrubTarget = null, localTimeshift = false, localBehind = false,
@@ -1198,7 +1189,6 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         const val RECENT = 8
         const val WINDOW_SPAN = 12 * 60 * 60 * 1000L
         const val WINDOW_SHIFT = 4 * 60 * 60 * 1000L
-        const val PREVIEW_DELAY = 800L
         const val SHORT_GUIDE_CACHE = 200
         const val MERGED_FAVOURITES = 400
         const val MAX_FAVOURITES = 2000

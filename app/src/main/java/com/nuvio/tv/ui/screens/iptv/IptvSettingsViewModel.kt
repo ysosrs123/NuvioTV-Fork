@@ -101,7 +101,6 @@ class IptvSettingsViewModel @Inject constructor(private val preferences: IptvLiv
     fun setQuality(value: MultiviewQuality) { preferences.multiviewQuality = value; reload() }
     fun setRecordEarly(minutes: Int) { preferences.recordEarlyMinutes = minutes; reload() }
     fun setRecordLate(minutes: Int) { preferences.recordLateMinutes = minutes; reload() }
-    fun togglePreview() { preferences.autoPreview = !preferences.autoPreview; reload() }
     val density = MutableStateFlow(preferences.guideDensity)
     fun setDensity(value: com.nuvio.tv.core.iptv.GuideDensity) { preferences.guideDensity = value; density.value = value }
     fun setTheme(theme: AppTheme?) { preferences.updateAppearance { it.copy(theme = theme?.name) }; reload() }

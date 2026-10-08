@@ -47,7 +47,7 @@ import com.nuvio.tv.core.iptv.*
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 
@@ -488,7 +488,10 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         }
 
         if (releaseFailed) return false
-        val closed = withTimeoutOrNull(15_000) { fence.active.first { it == 0 }; true } ?: false
+        val closed = withTimeoutOrNull(15_000) {
+            while (fence.active.value != 0 && (client.dispatcher.runningCallsCount() > 0 || client.dispatcher.queuedCallsCount() > 0)) delay(40)
+            true
+        } ?: false
         if (closed) client.connectionPool.evictAll()
         return closed
     }

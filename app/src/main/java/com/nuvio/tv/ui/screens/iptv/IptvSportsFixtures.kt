@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -124,7 +125,7 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
 
 @Composable
 internal fun IptvSportsFixturesRow(source: IptvSourceRef?, hiddenCategories: Set<String>, playingId: String?, onWatch: (IptvListedChannel) -> Unit,
-    modifier: Modifier = Modifier, viewModel: IptvSportsFixturesViewModel = hiltViewModel()) {
+    onRail: () -> Unit = {}, modifier: Modifier = Modifier, viewModel: IptvSportsFixturesViewModel = hiltViewModel()) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle, source, hiddenCategories) {
         val observer = LifecycleEventObserver { _, event ->
@@ -152,11 +153,18 @@ internal fun IptvSportsFixturesRow(source: IptvSourceRef?, hiddenCategories: Set
             if (message != null) Text(stringResource(message), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 color = if (state.failed || state.missingKey) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary)
         }
-        if (state.sections.isNotEmpty()) LazyRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        val firstKey = state.sections.firstOrNull()?.second?.firstOrNull()?.let { "${it.fixture.league}:${it.fixture.id}" }
+        var focusedKey by remember { mutableStateOf<String?>(null) }
+        if (state.sections.isNotEmpty()) LazyRow(Modifier.fillMaxWidth().onKeyEvent { event ->
+            val left = event.nativeKeyEvent.keyCode == AndroidKeyEvent.KEYCODE_DPAD_LEFT && focusedKey == firstKey
+            if (left && event.nativeKeyEvent.action == AndroidKeyEvent.ACTION_DOWN) onRail()
+            left
+        }, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             state.sections.forEach { (section, fixtures) ->
                 item(key = "section-${section.name}") { SectionLabel(section, fixtures.first().fixture) }
                 items(fixtures, key = { "${it.fixture.league}:${it.fixture.id}" }) { item ->
-                    FixtureCard(item, playing = item.links.any { it.row.item.channel.id == playingId }, onClick = {
+                    val key = "${item.fixture.league}:${item.fixture.id}"
+                    FixtureCard(item, playing = item.links.any { it.row.item.channel.id == playingId }, onFocused = { focusedKey = key }, onClick = {
                         if (item.links.size == 1) onWatch(item.links.first().row) else choosing = item
                     })
                 }
@@ -181,14 +189,14 @@ private fun SectionLabel(section: FixtureSection, first: SportsFixture) {
 }
 
 @Composable
-private fun FixtureCard(item: IptvFixtureItem, playing: Boolean, onClick: () -> Unit) {
+private fun FixtureCard(item: IptvFixtureItem, playing: Boolean, onFocused: () -> Unit, onClick: () -> Unit) {
     var focused by remember { mutableStateOf(false) }
     val fixture = item.fixture
     val live = fixture.status == FixtureStatus.LIVE
     val scores = fixture.score?.split('–')?.takeIf { it.size == 2 && live }
     Column(Modifier.width(260.dp).height(FIXTURE_HEIGHT)
         .clip(ItemShape).background(NuvioTheme.colors.TextPrimary.copy(alpha = .05f), ItemShape)
-        .onFocusChanged { focused = it.isFocused }
+        .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
         .iptvItem(focused, playing)
         .onPreviewKeyEvent { event ->
             val native = event.nativeKeyEvent
