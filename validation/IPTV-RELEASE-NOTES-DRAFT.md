@@ -252,6 +252,58 @@ alongside the normal app); the `full` flavour hides it. Nothing published.
   player option is hidden for them; failover can use them.
 - Live TV full screen: a "Return to live" button appears while you are behind live.
 
+## Changes after the device passes of 8 October 2026 (not yet device-tested)
+
+Guide (EPG):
+- Guides store programmes only for channels in your sources, so large provider guides now
+  fit; the storage limit follows free space (256 MB up to 2 GB) with a share per guide.
+- New "Guide days" setting: 1 day back and 3 ahead by default; up to 7 back for catch-up
+  and 7 ahead.
+- Guides load two at a time, import in large batches and download to a temporary file
+  first, so they are much faster.
+- More XMLTV files are accepted (timestamp variants, channel ids differing in case or
+  spaces, programmes without a channel entry); a refused file says why. Dropbox and other
+  links that redirect with an empty "#" now work.
+- A guide you add is linked to the source automatically; each channel uses the first
+  linked guide that has programmes for it. Upgrading clears guide data once; guides
+  re-import when Live TV opens.
+
+Playback:
+- Channel changes no longer fail with "The previous player has not confirmed it stopped"
+  (closing a player could fail on secure streams and after a slow 4K decoder release).
+- Faster channel starts: shared, kept-alive connections, fewer database round trips, the
+  old player no longer blocks, and the stream host is pre-connected after you rest on a
+  channel (no stream request is made, so it does not use a provider connection).
+- Nothing plays while you scroll the guide; OK plays the channel in the corner, OK again
+  goes full screen.
+- 4K and HDR channels show the channel logo in the corner window (sound continues) instead
+  of a stuttering picture; full screen is unchanged.
+- "Behind live" now counts only delay added while watching; when behind live, Right opens
+  the controls on Return to live.
+- In full screen, Left closes the channel list again.
+
+Live TV screens:
+- Live TV's menu item is "Settings" and opens Settings at the Live TV category.
+- Wider channel column with two-line names and less empty space; menus, guide, dialogs
+  and Movies/Series in the Nuvio V2 style; panels and dialogs are no longer see-through;
+  menu and guide share fonts and colours.
+- Colour themes come from the app's own list, including unlocked supporter themes, and
+  now apply; Solid panels is off by default.
+- Recording asks where to save (this device, a USB drive, the Movies folder or the
+  network location); recording names drop decorative characters (such as "ᴸᶦᵛᵉ").
+- Back and Left leave Live TV Sources; Back leaves Sport; smoother switching between Live
+  TV and Settings.
+- Shared connections and Copy and back up explain what they are for.
+
+Sport:
+- Fixtures view with a featured game (league, round, venue, score by period, clock, NFL
+  situation and last play, win chance), rows for Live now, Close games, Later today,
+  Tomorrow, later days and Finished, team logos, favourite teams and a "Show scores"
+  switch for spoiler-free viewing.
+- Fixtures load when Live TV opens and show from the cache straight away; channel
+  matching runs separately. Score parsing checked against real ESPN and TheSportsDB
+  responses (NRL and cricket scores corrected).
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
@@ -432,6 +484,11 @@ Phone setup (security review)
 - IPTV movies and series as a Nuvio stream source: playback, connection counting and
   the busy/refused messages are untested on devices; m3u8 movies are untested. Resume for titles without a TMDB/IMDb match
   stays on the TV and is not sent to Trakt, Simkl or MDBList.
+- Sports fixtures cover team sports only (golf, tennis, F1, UFC and cricket formats are not
+  shown yet). ESPN's feed is unofficial and may change; TheSportsDB's free key returns
+  short lists and no TV channels. Live clock, situation and win probability have not
+  been checked against a game in progress.
+- Pre-connecting to the stream host does not open TLS in advance.
 - The safety buffer relies on playing at 97% speed; with AC-3/E-AC-3 passthrough to a
   receiver the speed change may be ignored, so the buffer would not grow.
 - The minified release build with IPTV is built in CI (see Validation) but has not
@@ -439,8 +496,9 @@ Phone setup (security review)
 
 ## Validation
 
-- Latest: debug build green at `f29cbe2` (run 37599069380) and minified release build
-  green at `ec6f16f` (run 37596443549), with every feature above and all 40 locales.
+- Latest: debug build green at `ada280b` (run 37767996467) with the fixes from both
+  8 October device passes; translations completed in `ecf29d4`. Minified release build
+  last green at `ec6f16f` (run 37596443549). Before that: `f29cbe2` (run 37599069380).
 - 7 October work after wave 1: 565 core and 233 data-layer JVM tests pass on the host
   harness; device tests compile. CI run 37589504762 at `d0d0dbb` compiled the whole app
   and built the APK with one failing unit test, since fixed (`2bef868`). Not device-tested.

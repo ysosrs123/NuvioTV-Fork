@@ -2,7 +2,7 @@
 
 Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
 Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built,
-not device-tested. Last fully green debug build: `24d6868` (run 37752927770: everything including the 8 October device fixes, guide overhaul, Sport redesign and all translations); before that `f29cbe2` (run 37599069380); minified release
+not device-tested. Last fully green debug build: `ada280b` (run 37767996467: both 8 October device passes fixed); translations finished in `ecf29d4`; before that `24d6868` (run 37752927770); before that `f29cbe2` (run 37599069380); minified release
 build green at `ec6f16f` (run 37596443549). Before that: `d263b18` (run 37580266979, wave 1). Run 37589504762 at `d0d0dbb` (everything up to streaming stability)
 compiled the whole app and assembled the APK; one unit test failed
 (`IptvWebDavShareTest` self-signed certificate case), fixed in `2bef868` and not yet
@@ -11,6 +11,72 @@ confirmed by CI. Minified release build with IPTV last green at `d8d4a03` (run
 Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
 [code review](IPTV-CODE-REVIEW-20261006.md), [reference app notes](IPTV-UX-REFERENCE.md),
 [player validation report](IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json).
+
+## Start here — next session (from 9 October 2026)
+
+State: everything is committed and pushed on `iptv/player-binding`. Last green debug build
+`ada280b` (run 37767996467); later commits are translations (`ecf29d4`) and docs only.
+Minified release last green at `ec6f16f` (run 37596443549). Host tests: core 626,
+data 256, androidTest compiles. Nothing after `b68985a` is device-tested except the
+user's two passes on 8 October (builds `f29cbe2` and `24d6868`); every item they raised
+is fixed in code (see the two "Device findings — 8 October" sections) but not rechecked
+on a device. The user cannot test on a device right now.
+
+Next, in order:
+1. Sports experience — second, more thorough and creative design pass (user request).
+   Mock up how sports fit across IPTV and Nuvio itself: the Sport section, the EPG (live
+   scores and sport badges in guide cells, a "games now" lane), the player UI (Game
+   Centre panel, scoring-play markers on the timeline, alternative feeds), score HUD
+   overlays (bug, stacked cards, ticker; per-sport formats for golf, tennis, F1, UFC,
+   cricket, baseball bases/outs), multiview (stream + stats screen, "all scores" screen),
+   and Nuvio-wide features (goal/score pop-up while watching anything in Nuvio, Home rows,
+   follow teams, reminders, spoiler-free mode, auto-record). Use real field availability
+   from `IPTV-SPORTS-DATA-FIELDS.md` (ESPN: rich live detail for ~350 leagues in 17
+   sports; TheSportsDB premium: 37 sports / 1,547 leagues, live scores only for soccer,
+   basketball, ice hockey and baseball (NFL per pricing), basic fields). The first concept
+   canvas (5 boards: hub, HUD, Game Centre, stats multiview, follow/alerts) is the user's
+   artifact "Nuvio Live TV — Sports experience"; build the new pass as a new or revised
+   canvas and present it with the reasoning. Mockups use real fixtures; mark live values
+   as illustrative; no club logos in mockups.
+2. TheSportsDB premium: the user bought a key (do not store it anywhere; they will
+   rotate it). Its licence for use in a public app is unverified (site blocked from the
+   build environment). Recommendation given: do not embed a key in the app (extractable,
+   100 requests/min shared by all users); run a small caching relay (e.g. a free
+   Cloudflare Worker) that polls livescores every 2 min and serves all users, after
+   confirming the licence with TheSportsDB (Small Business tier). Awaiting the user.
+3. When the user tests again: build from the latest green run; checklist in
+   `IPTV-DEVICE-TEST-CHECKLIST.md` plus the two 8 October finding lists. Useful log
+   lines: `live close ms=`, `live close unconfirmed reason=`, tune timings
+   (`prepare/close/play/total ms`, `bytes/ready/frame ms`), `guide import ... budget=`.
+4. After a clean device pass: ship as part of the full app (enable
+   `FEATURE_IPTV_ENABLED` in `full`; move `src/iptvPrototype/AndroidManifest.xml`
+   additions such as `WAKE_LOCK`, the recording service and receivers into main); minified
+   release build and an upgrade-from-existing-install check (guide schema 6, VOD schema 2,
+   catalogue schema 9).
+5. Independent review of `d263b18..HEAD` (three areas: storage and setup server; playback,
+   streaming and navigation; VOD, sport and Home) — started once, stopped by a usage
+   limit, never completed.
+6. Sports follow-ups: a capture while team games are live (scripts in
+   `IPTV-SPORTS-DATA-SCRIPTS.md`); golf/tennis/F1/UFC/cricket formats; TheSportsDB TV
+   channels via `lookuptv`; URC rugby standings under `children`.
+7. The user will have a separate agent merge the branch into `main`; keep both branches.
+
+How work was done (keep doing it this way):
+- Parallel helpers with strict file ownership, briefs naming the files they own, their
+  own `IPTV_HOST_WORK` folder, and new strings only in a named new `values/iptv_*.xml`.
+  Shared files touched by two helpers are committed together once both finish (a
+  temporary `git worktree` was used to commit one helper's files when others' work in
+  progress did not compile).
+- Translations: after each feature, translate new strings into all 40 locales in two
+  batches of 20; check with `python3 tools/iptv-host-tests/check_translations.py` (prints
+  `problems 0`); also check no duplicate names per `values-*` folder.
+- CI lessons: Android's org.json has no `JSONObject.keySet()`; unescaped apostrophes break
+  aapt; check other source sets (`app/src/iptvPrototype`, `app/src/full`, androidTest)
+  when changing a signature; one CI run at a time (starting one cancels the running one);
+  the release build needs `includeComposeMappingFile = false` (smbj's bcprov has Java 25
+  classes).
+- After each device pass: record findings and status in this file and the release notes,
+  then build.
 
 ## Status
 
