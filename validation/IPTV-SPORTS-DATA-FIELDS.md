@@ -221,3 +221,33 @@ Cost: one summary request per refresh for the playing fixture only. At one reque
 30 s. Fetch only while the panel is visible, stop when the game is final, and keep the
 same back-off rules. TheSportsDB equivalent (timeline + stats + line-up) is three
 requests per refresh and returns only 5 rows each with the free key.
+
+## Coverage comparison (from responses downloaded 8 October 2026)
+
+TheSportsDB (premium key, v2):
+- `all/sports`: 37 sports; `all/leagues`: 1,547 leagues (soccer 692, fighting 140,
+  basketball 123, ice hockey 60, rugby 57, motorsport 52, skiing 41, cricket 34, golf 31,
+  volleyball 30, ... netball 11, darts 3, snooker 3, Gaelic 22, esports 23, Australian
+  football 4). v1 `all_leagues.php` returns the same 1,547.
+- `livescore/all`: 85 games, only ice hockey (43), basketball (35), soccer (6) and baseball
+  (1) at the time; every other sport answers `{"Message":"No data found"}`. The pricing
+  page lists livescores for soccer, NFL, NBA, MLB and NHL only. Fields: teams and ids,
+  badges, scores, status, progress, league, timestamp — no clock detail, stats or plays.
+- `list/teams/{league}` and `search/team/{name}` work; `schedule/next/league/4456` (AFL)
+  returned no data (off-season).
+
+ESPN (core API `sports` and `{sport}/leagues`):
+- 17 sports, ~350 leagues: soccer 219, MMA 48, rugby union 25, basketball 15, baseball 12,
+  golf 9, ice hockey 6, American football 5, racing 5 (F1, IndyCar, three NASCAR series),
+  lacrosse 4, tennis 2 (ATP, WTA), volleyball 2, water polo 2, field hockey 1, Australian
+  football 1 (AFL), rugby league 1 (NRL, id 3). Cricket returns no leagues from this list
+  (the app's cricket league id comes from the site API).
+- Live detail (clock, situation, plays, box score, win probability) per game via `summary`.
+
+Only in TheSportsDB: netball, darts, snooker, cycling, handball, esports, Gaelic games,
+skiing and other winter sports, athletics and smaller codes — mostly schedules, results,
+teams and artwork, not live scores.
+
+Suggested split: ESPN for live detail in the leagues it covers; TheSportsDB for breadth
+(schedules, results, teams, artwork across 37 sports) and for live scores in smaller
+soccer, basketball and ice hockey leagues ESPN lacks.
