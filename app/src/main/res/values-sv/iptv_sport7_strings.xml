@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Sportmatcher</string>
+    <string name="iptv_sport7_fixtures_subtitle">Matcher och resultat från ESPN, och från TheSportsDB med din egen nyckel. När det är av använder Sport bara din guide och skickar inga förfrågningar.</string>
+    <string name="iptv_sport7_leagues_subtitle">Varje liga använder ESPN när det går, annars TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Lägg till en liga</string>
+    <string name="iptv_sport7_add_league_subtitle">Sök bland alla ligor på TheSportsDB. Tillagda ligor kräver din TheSportsDB-nyckel.</string>
+    <string name="iptv_sport7_search">Sök ligor</string>
+    <string name="iptv_sport7_search_hint">Skriv minst två bokstäver i en liga eller sport</string>
+    <string name="iptv_sport7_search_loading">Läser in ligor…</string>
+    <string name="iptv_sport7_search_failed">Det gick inte att läsa in listan över ligor. Kontrollera din TheSportsDB-nyckel.</string>
+    <string name="iptv_sport7_search_none">Inga ligor matchar.</string>
+    <string name="iptv_sport7_added">Tillagd</string>
+    <string name="iptv_sport7_key_subtitle">Valfritt. Med en egen nyckel får du ligor som ESPN inte täcker, liveresultat för dem, tv-kanaler för lag du följer och en reserv när ESPN inte fungerar. Lagras krypterad på den här enheten.</string>
+    <string name="iptv_sport7_key_hint">Din personliga API-nyckel för TheSportsDB</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, med TheSportsDB som reserv</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · kräver din nyckel</string>
+    <string name="iptv_sport7_logos">Laglogotyper</string>
+    <string name="iptv_sport7_logos_subtitle">Monogram visas när logotyper är av</string>
+    <string name="iptv_sport7_logos_espn">Endast ESPN-logotyper</string>
+    <string name="iptv_sport7_logos_espn_description">Logotyper för ESPN-matcher, monogram för TheSportsDB-matcher</string>
+    <string name="iptv_sport7_logos_all">Alla logotyper</string>
+    <string name="iptv_sport7_logos_all_description">Visar även TheSportsDB-emblem. Läs först villkoren för bilder hos TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Endast monogram</string>
+    <string name="iptv_sport7_logos_off_description">Inga lag- eller ligalogotyper</string>
+    <string name="iptv_sport7_credit">Sportdata från ESPN och TheSportsDB</string>
+</resources>

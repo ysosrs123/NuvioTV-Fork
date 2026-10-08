@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">مباريات رياضية</string>
+    <string name="iptv_sport7_fixtures_subtitle">المباريات والنتائج من ESPN، ومن TheSportsDB باستخدام مفتاحك الخاص. عند الإيقاف، يستخدم قسم الرياضة دليلك فقط ولا يرسل أي طلبات.</string>
+    <string name="iptv_sport7_leagues_subtitle">يستخدم كل دوري ESPN عند الإمكان، وإلا TheSportsDB</string>
+    <string name="iptv_sport7_add_league">إضافة دوري</string>
+    <string name="iptv_sport7_add_league_subtitle">ابحث في كل دوريات TheSportsDB. تحتاج الدوريات المضافة إلى مفتاح TheSportsDB الخاص بك.</string>
+    <string name="iptv_sport7_search">البحث عن دوريات</string>
+    <string name="iptv_sport7_search_hint">اكتب حرفين على الأقل من اسم دوري أو رياضة</string>
+    <string name="iptv_sport7_search_loading">جارٍ تحميل الدوريات…</string>
+    <string name="iptv_sport7_search_failed">تعذّر تحميل قائمة الدوريات. تحقق من مفتاح TheSportsDB.</string>
+    <string name="iptv_sport7_search_none">لا توجد دوريات مطابقة.</string>
+    <string name="iptv_sport7_added">تمت الإضافة</string>
+    <string name="iptv_sport7_key_subtitle">اختياري. يضيف مفتاحك الخاص دوريات لا يغطيها ESPN، ونتائجها المباشرة، والقنوات التلفزيونية للفرق التي تتابعها، ومصدرًا احتياطيًا عند تعطّل ESPN. يُخزَّن مشفّرًا على هذا الجهاز.</string>
+    <string name="iptv_sport7_key_hint">مفتاح TheSportsDB API الشخصي الخاص بك</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN، مع TheSportsDB كمصدر احتياطي</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · يحتاج إلى مفتاحك</string>
+    <string name="iptv_sport7_logos">شعارات الفرق</string>
+    <string name="iptv_sport7_logos_subtitle">تُعرض الأحرف الأولى عند إيقاف الشعارات</string>
+    <string name="iptv_sport7_logos_espn">شعارات ESPN فقط</string>
+    <string name="iptv_sport7_logos_espn_description">شعارات لمباريات ESPN، وأحرف أولى لمباريات TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">كل الشعارات</string>
+    <string name="iptv_sport7_logos_all_description">يعرض أيضًا شارات TheSportsDB. راجع أولًا شروط استخدام الصور لدى TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">الأحرف الأولى فقط</string>
+    <string name="iptv_sport7_logos_off_description">بلا شعارات للفرق أو الدوريات</string>
+    <string name="iptv_sport7_credit">البيانات الرياضية من ESPN و TheSportsDB</string>
+</resources>

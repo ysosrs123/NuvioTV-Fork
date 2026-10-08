@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">體育賽程</string>
+    <string name="iptv_sport7_fixtures_subtitle">賽程和比分來自 ESPN，使用您自己的金鑰時也來自 TheSportsDB。關閉後，體育僅使用您的節目表，不會傳送任何請求。</string>
+    <string name="iptv_sport7_leagues_subtitle">每個聯賽盡可能使用 ESPN，否則使用 TheSportsDB</string>
+    <string name="iptv_sport7_add_league">新增聯賽</string>
+    <string name="iptv_sport7_add_league_subtitle">搜尋 TheSportsDB 的所有聯賽。新增的聯賽需要您的 TheSportsDB 金鑰。</string>
+    <string name="iptv_sport7_search">搜尋聯賽</string>
+    <string name="iptv_sport7_search_hint">輸入聯賽或運動項目的至少兩個字</string>
+    <string name="iptv_sport7_search_loading">正在載入聯賽…</string>
+    <string name="iptv_sport7_search_failed">無法載入聯賽清單。請檢查您的 TheSportsDB 金鑰。</string>
+    <string name="iptv_sport7_search_none">沒有符合的聯賽。</string>
+    <string name="iptv_sport7_added">已新增</string>
+    <string name="iptv_sport7_key_subtitle">選用。使用您自己的金鑰可新增 ESPN 未涵蓋的聯賽及其即時比分、所追蹤球隊的電視頻道，並在 ESPN 發生錯誤時作為備用來源。加密儲存在此裝置上。</string>
+    <string name="iptv_sport7_key_hint">您個人的 TheSportsDB API 金鑰</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN，以 TheSportsDB 作為備用</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · 需要您的金鑰</string>
+    <string name="iptv_sport7_logos">球隊標誌</string>
+    <string name="iptv_sport7_logos_subtitle">關閉標誌時顯示字母縮寫</string>
+    <string name="iptv_sport7_logos_espn">僅 ESPN 標誌</string>
+    <string name="iptv_sport7_logos_espn_description">ESPN 賽事顯示標誌，TheSportsDB 賽事顯示字母縮寫</string>
+    <string name="iptv_sport7_logos_all">所有標誌</string>
+    <string name="iptv_sport7_logos_all_description">同時顯示 TheSportsDB 的隊徽。請先查看 TheSportsDB 的圖片使用條款。</string>
+    <string name="iptv_sport7_logos_off">僅字母縮寫</string>
+    <string name="iptv_sport7_logos_off_description">不顯示球隊或聯賽標誌</string>
+    <string name="iptv_sport7_credit">體育資料來自 ESPN 和 TheSportsDB</string>
+</resources>

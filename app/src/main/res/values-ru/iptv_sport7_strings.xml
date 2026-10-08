@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Спортивные матчи</string>
+    <string name="iptv_sport7_fixtures_subtitle">Матчи и счёт от ESPN, а с вашим ключом — и от TheSportsDB. Если выключено, раздел «Спорт» использует только телепрограмму и не отправляет запросов.</string>
+    <string name="iptv_sport7_leagues_subtitle">Каждая лига использует ESPN, когда это возможно, иначе TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Добавить лигу</string>
+    <string name="iptv_sport7_add_league_subtitle">Поиск по всем лигам TheSportsDB. Для добавленных лиг нужен ваш ключ TheSportsDB.</string>
+    <string name="iptv_sport7_search">Поиск лиг</string>
+    <string name="iptv_sport7_search_hint">Введите хотя бы две буквы названия лиги или вида спорта</string>
+    <string name="iptv_sport7_search_loading">Загрузка лиг…</string>
+    <string name="iptv_sport7_search_failed">Не удалось загрузить список лиг. Проверьте ключ TheSportsDB.</string>
+    <string name="iptv_sport7_search_none">Подходящих лиг нет.</string>
+    <string name="iptv_sport7_added">Добавлена</string>
+    <string name="iptv_sport7_key_subtitle">Необязательно. Ваш ключ добавляет лиги, которых нет в ESPN, их счёт в реальном времени, ТВ-каналы для отслеживаемых команд и резервный источник на случай сбоя ESPN. Хранится в зашифрованном виде на этом устройстве.</string>
+    <string name="iptv_sport7_key_hint">Ваш личный API-ключ TheSportsDB</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, резерв — TheSportsDB</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · нужен ваш ключ</string>
+    <string name="iptv_sport7_logos">Логотипы команд</string>
+    <string name="iptv_sport7_logos_subtitle">Когда логотипы выключены, показываются монограммы</string>
+    <string name="iptv_sport7_logos_espn">Только логотипы ESPN</string>
+    <string name="iptv_sport7_logos_espn_description">Логотипы для матчей ESPN, монограммы для матчей TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">Все логотипы</string>
+    <string name="iptv_sport7_logos_all_description">Также показывает эмблемы TheSportsDB. Сначала ознакомьтесь с условиями использования изображений TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Только монограммы</string>
+    <string name="iptv_sport7_logos_off_description">Без логотипов команд и лиг</string>
+    <string name="iptv_sport7_credit">Спортивные данные: ESPN и TheSportsDB</string>
+</resources>

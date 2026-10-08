@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Спортни мачове</string>
+    <string name="iptv_sport7_fixtures_subtitle">Мачове и резултати от ESPN, а с вашия ключ – и от TheSportsDB. Когато е изключено, „Спорт“ използва само справочника ви и не изпраща заявки.</string>
+    <string name="iptv_sport7_leagues_subtitle">Всяка лига използва ESPN, когато е възможно, иначе TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Добавяне на лига</string>
+    <string name="iptv_sport7_add_league_subtitle">Търсете във всички лиги на TheSportsDB. Добавените лиги изискват ключа ви за TheSportsDB.</string>
+    <string name="iptv_sport7_search">Търсене на лиги</string>
+    <string name="iptv_sport7_search_hint">Въведете поне две букви от лига или спорт</string>
+    <string name="iptv_sport7_search_loading">Зареждане на лиги…</string>
+    <string name="iptv_sport7_search_failed">Списъкът с лиги не можа да се зареди. Проверете ключа си за TheSportsDB.</string>
+    <string name="iptv_sport7_search_none">Няма съвпадащи лиги.</string>
+    <string name="iptv_sport7_added">Добавена</string>
+    <string name="iptv_sport7_key_subtitle">По избор. Собственият ви ключ добавя лиги, които ESPN не покрива, резултати на живо за тях, ТВ канали за следваните отбори и резервен източник, когато ESPN не работи. Съхранява се шифрован на това устройство.</string>
+    <string name="iptv_sport7_key_hint">Личният ви API ключ за TheSportsDB</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, с TheSportsDB като резерва</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · изисква ключа ви</string>
+    <string name="iptv_sport7_logos">Лога на отборите</string>
+    <string name="iptv_sport7_logos_subtitle">Когато логата са изключени, се показват монограми</string>
+    <string name="iptv_sport7_logos_espn">Само лога на ESPN</string>
+    <string name="iptv_sport7_logos_espn_description">Лога за мачове от ESPN, монограми за мачове от TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">Всички лога</string>
+    <string name="iptv_sport7_logos_all_description">Показва и емблемите от TheSportsDB. Първо проверете условията за използване на изображения на TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Само монограми</string>
+    <string name="iptv_sport7_logos_off_description">Без лога на отбори и лиги</string>
+    <string name="iptv_sport7_credit">Спортни данни от ESPN и TheSportsDB</string>
+</resources>

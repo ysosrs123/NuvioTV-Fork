@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">விளையாட்டுப் போட்டிகள்</string>
+    <string name="iptv_sport7_fixtures_subtitle">ESPN இலிருந்தும், உங்கள் சொந்த விசையுடன் TheSportsDB இலிருந்தும் போட்டிகள் மற்றும் ஸ்கோர்கள். முடக்கப்பட்டிருக்கும்போது, விளையாட்டு உங்கள் வழிகாட்டியை மட்டுமே பயன்படுத்தும், எந்தக் கோரிக்கையும் அனுப்பாது.</string>
+    <string name="iptv_sport7_leagues_subtitle">ஒவ்வொரு லீக்கும் முடிந்தால் ESPN ஐப் பயன்படுத்தும், இல்லையெனில் TheSportsDB ஐ</string>
+    <string name="iptv_sport7_add_league">லீக்கைச் சேர்</string>
+    <string name="iptv_sport7_add_league_subtitle">TheSportsDB இன் அனைத்து லீக்குகளிலும் தேடுங்கள். சேர்த்த லீக்குகளுக்கு உங்கள் TheSportsDB விசை தேவை.</string>
+    <string name="iptv_sport7_search">லீக்குகளைத் தேடு</string>
+    <string name="iptv_sport7_search_hint">லீக் அல்லது விளையாட்டின் குறைந்தது இரண்டு எழுத்துகளைத் தட்டச்சு செய்யவும்</string>
+    <string name="iptv_sport7_search_loading">லீக்குகள் ஏற்றப்படுகின்றன…</string>
+    <string name="iptv_sport7_search_failed">லீக் பட்டியலை ஏற்ற முடியவில்லை. உங்கள் TheSportsDB விசையைச் சரிபார்க்கவும்.</string>
+    <string name="iptv_sport7_search_none">பொருந்தும் லீக்குகள் இல்லை.</string>
+    <string name="iptv_sport7_added">சேர்க்கப்பட்டது</string>
+    <string name="iptv_sport7_key_subtitle">விருப்பத்தேர்வு. உங்கள் சொந்த விசை ESPN உள்ளடக்காத லீக்குகள், அவற்றின் நேரலை ஸ்கோர்கள், பின்தொடரும் அணிகளுக்கான டிவி சேனல்கள், ESPN தோல்வியடையும்போது காப்பு மூலம் ஆகியவற்றைச் சேர்க்கும். இந்தச் சாதனத்தில் மறையாக்கப்பட்டுச் சேமிக்கப்படும்.</string>
+    <string name="iptv_sport7_key_hint">உங்கள் தனிப்பட்ட TheSportsDB API விசை</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, காப்பாக TheSportsDB</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · உங்கள் விசை தேவை</string>
+    <string name="iptv_sport7_logos">அணி லோகோக்கள்</string>
+    <string name="iptv_sport7_logos_subtitle">லோகோக்கள் முடக்கப்பட்டிருக்கும்போது மோனோகிராம்கள் காட்டப்படும்</string>
+    <string name="iptv_sport7_logos_espn">ESPN லோகோக்கள் மட்டும்</string>
+    <string name="iptv_sport7_logos_espn_description">ESPN போட்டிகளுக்கு லோகோக்கள், TheSportsDB போட்டிகளுக்கு மோனோகிராம்கள்</string>
+    <string name="iptv_sport7_logos_all">அனைத்து லோகோக்களும்</string>
+    <string name="iptv_sport7_logos_all_description">TheSportsDB பேட்ஜ்களையும் காட்டும். முதலில் TheSportsDB இன் படப் பயன்பாட்டு விதிமுறைகளைச் சரிபார்க்கவும்.</string>
+    <string name="iptv_sport7_logos_off">மோனோகிராம்கள் மட்டும்</string>
+    <string name="iptv_sport7_logos_off_description">அணி அல்லது லீக் லோகோக்கள் இல்லை</string>
+    <string name="iptv_sport7_credit">ESPN மற்றும் TheSportsDB வழங்கும் விளையாட்டுத் தரவு</string>
+</resources>

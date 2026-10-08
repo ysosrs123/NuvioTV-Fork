@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Sportmérkőzések</string>
+    <string name="iptv_sport7_fixtures_subtitle">Mérkőzések és eredmények az ESPN-től, saját kulccsal pedig a TheSportsDB-től. Kikapcsolva a Sport csak a műsorújságot használja, és nem küld kéréseket.</string>
+    <string name="iptv_sport7_leagues_subtitle">Minden bajnokság az ESPN-t használja, ha lehet, egyébként a TheSportsDB-t</string>
+    <string name="iptv_sport7_add_league">Bajnokság hozzáadása</string>
+    <string name="iptv_sport7_add_league_subtitle">Keress a TheSportsDB összes bajnokságában. A hozzáadott bajnokságokhoz szükséges a TheSportsDB-kulcsod.</string>
+    <string name="iptv_sport7_search">Bajnokságok keresése</string>
+    <string name="iptv_sport7_search_hint">Írd be egy bajnokság vagy sportág nevének legalább két betűjét</string>
+    <string name="iptv_sport7_search_loading">Bajnokságok betöltése…</string>
+    <string name="iptv_sport7_search_failed">Nem sikerült betölteni a bajnokságok listáját. Ellenőrizd a TheSportsDB-kulcsodat.</string>
+    <string name="iptv_sport7_search_none">Nincs egyező bajnokság.</string>
+    <string name="iptv_sport7_added">Hozzáadva</string>
+    <string name="iptv_sport7_key_subtitle">Nem kötelező. A saját kulcsoddal olyan bajnokságok is elérhetők, amelyeket az ESPN nem fed le, azok élő eredményei, a követett csapatok TV-csatornái, és tartalékforrás, ha az ESPN nem működik. Titkosítva tárolódik ezen az eszközön.</string>
+    <string name="iptv_sport7_key_hint">Saját TheSportsDB API-kulcsod</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, a TheSportsDB-vel tartalékként</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · a kulcsod szükséges</string>
+    <string name="iptv_sport7_logos">Csapatlogók</string>
+    <string name="iptv_sport7_logos_subtitle">Ha a logók ki vannak kapcsolva, monogramok jelennek meg</string>
+    <string name="iptv_sport7_logos_espn">Csak ESPN-logók</string>
+    <string name="iptv_sport7_logos_espn_description">Logók az ESPN-mérkőzésekhez, monogramok a TheSportsDB-mérkőzésekhez</string>
+    <string name="iptv_sport7_logos_all">Minden logó</string>
+    <string name="iptv_sport7_logos_all_description">A TheSportsDB címereit is megjeleníti. Előbb nézd meg a TheSportsDB képhasználati feltételeit.</string>
+    <string name="iptv_sport7_logos_off">Csak monogramok</string>
+    <string name="iptv_sport7_logos_off_description">Nincsenek csapat- vagy bajnokságlogók</string>
+    <string name="iptv_sport7_credit">Sportadatok: ESPN és TheSportsDB</string>
+</resources>

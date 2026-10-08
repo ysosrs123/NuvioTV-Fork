@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Spor maçları</string>
+    <string name="iptv_sport7_fixtures_subtitle">ESPN\'den ve kendi anahtarınızla TheSportsDB\'den maçlar ve skorlar. Kapalıyken Spor yalnızca yayın akışınızı kullanır ve istek göndermez.</string>
+    <string name="iptv_sport7_leagues_subtitle">Her lig mümkünse ESPN\'i, değilse TheSportsDB\'yi kullanır</string>
+    <string name="iptv_sport7_add_league">Lig ekle</string>
+    <string name="iptv_sport7_add_league_subtitle">Tüm TheSportsDB liglerinde arayın. Eklenen ligler için TheSportsDB anahtarınız gerekir.</string>
+    <string name="iptv_sport7_search">Lig ara</string>
+    <string name="iptv_sport7_search_hint">Bir lig veya spor dalının en az iki harfini yazın</string>
+    <string name="iptv_sport7_search_loading">Ligler yükleniyor…</string>
+    <string name="iptv_sport7_search_failed">Lig listesi yüklenemedi. TheSportsDB anahtarınızı kontrol edin.</string>
+    <string name="iptv_sport7_search_none">Eşleşen lig yok.</string>
+    <string name="iptv_sport7_added">Eklendi</string>
+    <string name="iptv_sport7_key_subtitle">İsteğe bağlı. Kendi anahtarınız ESPN\'in kapsamadığı ligleri, bu liglerin canlı skorlarını, takip ettiğiniz takımların TV kanallarını ve ESPN çalışmadığında bir yedek kaynak ekler. Bu cihazda şifrelenmiş olarak saklanır.</string>
+    <string name="iptv_sport7_key_hint">Kişisel TheSportsDB API anahtarınız</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, yedek olarak TheSportsDB</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · anahtarınız gerekir</string>
+    <string name="iptv_sport7_logos">Takım logoları</string>
+    <string name="iptv_sport7_logos_subtitle">Logolar kapalıyken monogramlar gösterilir</string>
+    <string name="iptv_sport7_logos_espn">Yalnızca ESPN logoları</string>
+    <string name="iptv_sport7_logos_espn_description">ESPN maçları için logolar, TheSportsDB maçları için monogramlar</string>
+    <string name="iptv_sport7_logos_all">Tüm logolar</string>
+    <string name="iptv_sport7_logos_all_description">TheSportsDB armalarını da gösterir. Önce TheSportsDB\'nin görsel kullanım koşullarını inceleyin.</string>
+    <string name="iptv_sport7_logos_off">Yalnızca monogramlar</string>
+    <string name="iptv_sport7_logos_off_description">Takım veya lig logosu yok</string>
+    <string name="iptv_sport7_credit">Spor verileri: ESPN ve TheSportsDB</string>
+</resources>

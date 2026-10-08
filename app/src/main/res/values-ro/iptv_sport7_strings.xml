@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Meciuri sportive</string>
+    <string name="iptv_sport7_fixtures_subtitle">Meciuri și scoruri de la ESPN și, cu propria cheie, de la TheSportsDB. Când este dezactivat, Sport folosește doar ghidul tău și nu face cereri.</string>
+    <string name="iptv_sport7_leagues_subtitle">Fiecare ligă folosește ESPN când se poate, altfel TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Adaugă o ligă</string>
+    <string name="iptv_sport7_add_league_subtitle">Caută în toate ligile TheSportsDB. Ligile adăugate necesită cheia ta TheSportsDB.</string>
+    <string name="iptv_sport7_search">Caută ligi</string>
+    <string name="iptv_sport7_search_hint">Tastează cel puțin două litere dintr-o ligă sau un sport</string>
+    <string name="iptv_sport7_search_loading">Se încarcă ligile…</string>
+    <string name="iptv_sport7_search_failed">Lista de ligi nu a putut fi încărcată. Verifică cheia TheSportsDB.</string>
+    <string name="iptv_sport7_search_none">Nicio ligă nu se potrivește.</string>
+    <string name="iptv_sport7_added">Adăugată</string>
+    <string name="iptv_sport7_key_subtitle">Opțional. Propria cheie adaugă ligi pe care ESPN nu le acoperă, scoruri live pentru ele, canale TV pentru echipele urmărite și o rezervă când ESPN nu funcționează. Stocată criptat pe acest dispozitiv.</string>
+    <string name="iptv_sport7_key_hint">Cheia ta personală de API TheSportsDB</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, cu TheSportsDB ca rezervă</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · necesită cheia ta</string>
+    <string name="iptv_sport7_logos">Logouri echipe</string>
+    <string name="iptv_sport7_logos_subtitle">Monogramele sunt afișate când logourile sunt dezactivate</string>
+    <string name="iptv_sport7_logos_espn">Doar logouri ESPN</string>
+    <string name="iptv_sport7_logos_espn_description">Logouri pentru meciurile ESPN, monograme pentru meciurile TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">Toate logourile</string>
+    <string name="iptv_sport7_logos_all_description">Afișează și emblemele TheSportsDB. Verifică mai întâi condițiile de utilizare a imaginilor TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Doar monograme</string>
+    <string name="iptv_sport7_logos_off_description">Fără logouri de echipe sau ligi</string>
+    <string name="iptv_sport7_credit">Date sportive de la ESPN și TheSportsDB</string>
+</resources>

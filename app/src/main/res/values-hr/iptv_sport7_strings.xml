@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Sportske utakmice</string>
+    <string name="iptv_sport7_fixtures_subtitle">Utakmice i rezultati iz izvora ESPN te, uz tvoj ključ, iz izvora TheSportsDB. Kad je isključeno, Sport koristi samo tvoj vodič i ne šalje zahtjeve.</string>
+    <string name="iptv_sport7_leagues_subtitle">Svaka liga koristi ESPN kad je moguće, inače TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Dodaj ligu</string>
+    <string name="iptv_sport7_add_league_subtitle">Pretraži sve lige na TheSportsDB. Dodane lige trebaju tvoj TheSportsDB ključ.</string>
+    <string name="iptv_sport7_search">Pretraži lige</string>
+    <string name="iptv_sport7_search_hint">Upiši barem dva slova lige ili sporta</string>
+    <string name="iptv_sport7_search_loading">Učitavanje liga…</string>
+    <string name="iptv_sport7_search_failed">Popis liga nije moguće učitati. Provjeri svoj TheSportsDB ključ.</string>
+    <string name="iptv_sport7_search_none">Nema odgovarajućih liga.</string>
+    <string name="iptv_sport7_added">Dodano</string>
+    <string name="iptv_sport7_key_subtitle">Neobavezno. Tvoj ključ dodaje lige koje ESPN ne pokriva, njihove rezultate uživo, TV kanale za praćene timove i rezervu kad ESPN zakaže. Pohranjen šifrirano na ovom uređaju.</string>
+    <string name="iptv_sport7_key_hint">Tvoj osobni TheSportsDB API ključ</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, uz TheSportsDB kao rezervu</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · treba tvoj ključ</string>
+    <string name="iptv_sport7_logos">Logotipi timova</string>
+    <string name="iptv_sport7_logos_subtitle">Kad su logotipi isključeni, prikazuju se monogrami</string>
+    <string name="iptv_sport7_logos_espn">Samo ESPN logotipi</string>
+    <string name="iptv_sport7_logos_espn_description">Logotipi za utakmice iz ESPN, monogrami za utakmice iz TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">Svi logotipi</string>
+    <string name="iptv_sport7_logos_all_description">Prikazuje i grbove iz TheSportsDB. Najprije provjeri uvjete korištenja slika na TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Samo monogrami</string>
+    <string name="iptv_sport7_logos_off_description">Bez logotipa timova i liga</string>
+    <string name="iptv_sport7_credit">Sportski podaci: ESPN i TheSportsDB</string>
+</resources>

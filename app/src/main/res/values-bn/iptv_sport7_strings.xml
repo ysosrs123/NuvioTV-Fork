@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">খেলার ম্যাচসূচি</string>
+    <string name="iptv_sport7_fixtures_subtitle">ESPN থেকে ম্যাচসূচি ও স্কোর, আর নিজের কী থাকলে TheSportsDB থেকেও। বন্ধ থাকলে স্পোর্টস শুধু আপনার গাইড ব্যবহার করে এবং কোনো অনুরোধ পাঠায় না।</string>
+    <string name="iptv_sport7_leagues_subtitle">প্রতিটি লিগ সম্ভব হলে ESPN ব্যবহার করে, নইলে TheSportsDB</string>
+    <string name="iptv_sport7_add_league">লিগ যোগ করুন</string>
+    <string name="iptv_sport7_add_league_subtitle">TheSportsDB-এর সব লিগে খুঁজুন। যোগ করা লিগের জন্য আপনার TheSportsDB কী লাগবে।</string>
+    <string name="iptv_sport7_search">লিগ খুঁজুন</string>
+    <string name="iptv_sport7_search_hint">কোনো লিগ বা খেলার অন্তত দুটি অক্ষর লিখুন</string>
+    <string name="iptv_sport7_search_loading">লিগ লোড হচ্ছে…</string>
+    <string name="iptv_sport7_search_failed">লিগের তালিকা লোড করা যায়নি। আপনার TheSportsDB কী যাচাই করুন।</string>
+    <string name="iptv_sport7_search_none">কোনো লিগ মেলেনি।</string>
+    <string name="iptv_sport7_added">যোগ করা হয়েছে</string>
+    <string name="iptv_sport7_key_subtitle">ঐচ্ছিক। নিজের কী দিলে ESPN যেসব লিগ কভার করে না সেগুলো, সেগুলোর লাইভ স্কোর, ফলো করা দলের টিভি চ্যানেল এবং ESPN ব্যর্থ হলে ব্যাকআপ যোগ হয়। এই ডিভাইসে এনক্রিপ্ট করে সংরক্ষিত থাকে।</string>
+    <string name="iptv_sport7_key_hint">আপনার ব্যক্তিগত TheSportsDB API কী</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, ব্যাকআপ হিসেবে TheSportsDB</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · আপনার কী লাগবে</string>
+    <string name="iptv_sport7_logos">দলের লোগো</string>
+    <string name="iptv_sport7_logos_subtitle">লোগো বন্ধ থাকলে মনোগ্রাম দেখানো হয়</string>
+    <string name="iptv_sport7_logos_espn">শুধু ESPN লোগো</string>
+    <string name="iptv_sport7_logos_espn_description">ESPN ম্যাচের জন্য লোগো, TheSportsDB ম্যাচের জন্য মনোগ্রাম</string>
+    <string name="iptv_sport7_logos_all">সব লোগো</string>
+    <string name="iptv_sport7_logos_all_description">TheSportsDB-এর ব্যাজও দেখায়। আগে TheSportsDB-এর ছবি ব্যবহারের শর্তাবলি দেখে নিন।</string>
+    <string name="iptv_sport7_logos_off">শুধু মনোগ্রাম</string>
+    <string name="iptv_sport7_logos_off_description">দল বা লিগের কোনো লোগো নেই</string>
+    <string name="iptv_sport7_credit">ESPN ও TheSportsDB থেকে খেলার ডেটা</string>
+</resources>

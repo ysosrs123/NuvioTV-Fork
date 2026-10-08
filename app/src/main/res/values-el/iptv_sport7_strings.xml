@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Αθλητικοί αγώνες</string>
+    <string name="iptv_sport7_fixtures_subtitle">Αγώνες και σκορ από το ESPN και, με το δικό σας κλειδί, από το TheSportsDB. Όταν είναι απενεργοποιημένο, τα Αθλητικά χρησιμοποιούν μόνο τον οδηγό σας και δεν κάνουν αιτήματα.</string>
+    <string name="iptv_sport7_leagues_subtitle">Κάθε πρωτάθλημα χρησιμοποιεί το ESPN όταν είναι δυνατό, αλλιώς το TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Προσθήκη πρωταθλήματος</string>
+    <string name="iptv_sport7_add_league_subtitle">Αναζητήστε σε όλα τα πρωταθλήματα του TheSportsDB. Τα πρωταθλήματα που προσθέτετε χρειάζονται το κλειδί TheSportsDB σας.</string>
+    <string name="iptv_sport7_search">Αναζήτηση πρωταθλημάτων</string>
+    <string name="iptv_sport7_search_hint">Πληκτρολογήστε τουλάχιστον δύο γράμματα ενός πρωταθλήματος ή αθλήματος</string>
+    <string name="iptv_sport7_search_loading">Φόρτωση πρωταθλημάτων…</string>
+    <string name="iptv_sport7_search_failed">Δεν ήταν δυνατή η φόρτωση της λίστας πρωταθλημάτων. Ελέγξτε το κλειδί TheSportsDB σας.</string>
+    <string name="iptv_sport7_search_none">Κανένα πρωτάθλημα δεν ταιριάζει.</string>
+    <string name="iptv_sport7_added">Προστέθηκε</string>
+    <string name="iptv_sport7_key_subtitle">Προαιρετικό. Με το δικό σας κλειδί προστίθενται πρωταθλήματα που δεν καλύπτει το ESPN, ζωντανά σκορ για αυτά, τηλεοπτικά κανάλια για τις ομάδες που ακολουθείτε και εφεδρική πηγή όταν το ESPN αποτυγχάνει. Αποθηκεύεται κρυπτογραφημένο σε αυτήν τη συσκευή.</string>
+    <string name="iptv_sport7_key_hint">Το προσωπικό σας κλειδί API του TheSportsDB</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, με το TheSportsDB ως εφεδρικό</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · χρειάζεται το κλειδί σας</string>
+    <string name="iptv_sport7_logos">Λογότυπα ομάδων</string>
+    <string name="iptv_sport7_logos_subtitle">Όταν τα λογότυπα είναι απενεργοποιημένα, εμφανίζονται μονογράμματα</string>
+    <string name="iptv_sport7_logos_espn">Μόνο λογότυπα ESPN</string>
+    <string name="iptv_sport7_logos_espn_description">Λογότυπα για αγώνες ESPN, μονογράμματα για αγώνες TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">Όλα τα λογότυπα</string>
+    <string name="iptv_sport7_logos_all_description">Εμφανίζει επίσης τα εμβλήματα του TheSportsDB. Ελέγξτε πρώτα τους όρους χρήσης εικόνων του TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Μόνο μονογράμματα</string>
+    <string name="iptv_sport7_logos_off_description">Χωρίς λογότυπα ομάδων ή πρωταθλημάτων</string>
+    <string name="iptv_sport7_credit">Αθλητικά δεδομένα από ESPN και TheSportsDB</string>
+</resources>

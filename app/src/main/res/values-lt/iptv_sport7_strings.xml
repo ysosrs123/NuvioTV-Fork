@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Sporto varžybos</string>
+    <string name="iptv_sport7_fixtures_subtitle">Varžybos ir rezultatai iš ESPN, o su jūsų raktu – ir iš TheSportsDB. Išjungus Sportas naudoja tik jūsų TV programą ir nesiunčia jokių užklausų.</string>
+    <string name="iptv_sport7_leagues_subtitle">Kiekviena lyga naudoja ESPN, kai įmanoma, kitaip – TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Pridėti lygą</string>
+    <string name="iptv_sport7_add_league_subtitle">Ieškokite visose TheSportsDB lygose. Pridėtoms lygoms reikia jūsų TheSportsDB rakto.</string>
+    <string name="iptv_sport7_search">Ieškoti lygų</string>
+    <string name="iptv_sport7_search_hint">Įveskite bent dvi lygos ar sporto šakos raides</string>
+    <string name="iptv_sport7_search_loading">Įkeliamos lygos…</string>
+    <string name="iptv_sport7_search_failed">Nepavyko įkelti lygų sąrašo. Patikrinkite savo TheSportsDB raktą.</string>
+    <string name="iptv_sport7_search_none">Atitinkančių lygų nėra.</string>
+    <string name="iptv_sport7_added">Pridėta</string>
+    <string name="iptv_sport7_key_subtitle">Neprivaloma. Su savo raktu gausite lygas, kurių ESPN neapima, jų tiesioginius rezultatus, stebimų komandų TV kanalus ir atsarginį šaltinį, kai ESPN neveikia. Saugomas užšifruotas šiame įrenginyje.</string>
+    <string name="iptv_sport7_key_hint">Jūsų asmeninis TheSportsDB API raktas</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, su TheSportsDB kaip atsarginiu šaltiniu</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · reikia jūsų rakto</string>
+    <string name="iptv_sport7_logos">Komandų logotipai</string>
+    <string name="iptv_sport7_logos_subtitle">Kai logotipai išjungti, rodomos monogramos</string>
+    <string name="iptv_sport7_logos_espn">Tik ESPN logotipai</string>
+    <string name="iptv_sport7_logos_espn_description">Logotipai ESPN varžyboms, monogramos TheSportsDB varžyboms</string>
+    <string name="iptv_sport7_logos_all">Visi logotipai</string>
+    <string name="iptv_sport7_logos_all_description">Taip pat rodo TheSportsDB emblemas. Pirmiausia patikrinkite TheSportsDB vaizdų naudojimo sąlygas.</string>
+    <string name="iptv_sport7_logos_off">Tik monogramos</string>
+    <string name="iptv_sport7_logos_off_description">Jokių komandų ar lygų logotipų</string>
+    <string name="iptv_sport7_credit">Sporto duomenys iš ESPN ir TheSportsDB</string>
+</resources>

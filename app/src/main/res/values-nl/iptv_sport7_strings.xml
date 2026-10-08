@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Sportwedstrijden</string>
+    <string name="iptv_sport7_fixtures_subtitle">Wedstrijden en uitslagen van ESPN, en van TheSportsDB met je eigen sleutel. Als dit uit staat, gebruikt Sport alleen je gids en worden er geen verzoeken gedaan.</string>
+    <string name="iptv_sport7_leagues_subtitle">Elke competitie gebruikt ESPN waar mogelijk, anders TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Competitie toevoegen</string>
+    <string name="iptv_sport7_add_league_subtitle">Doorzoek alle competities van TheSportsDB. Toegevoegde competities hebben je TheSportsDB-sleutel nodig.</string>
+    <string name="iptv_sport7_search">Competities zoeken</string>
+    <string name="iptv_sport7_search_hint">Typ minstens twee letters van een competitie of sport</string>
+    <string name="iptv_sport7_search_loading">Competities laden…</string>
+    <string name="iptv_sport7_search_failed">Kan de lijst met competities niet laden. Controleer je TheSportsDB-sleutel.</string>
+    <string name="iptv_sport7_search_none">Geen competities gevonden.</string>
+    <string name="iptv_sport7_added">Toegevoegd</string>
+    <string name="iptv_sport7_key_subtitle">Optioneel. Met je eigen sleutel krijg je competities die ESPN niet dekt, live-uitslagen daarvan, tv-zenders voor gevolgde teams en een reserve als ESPN faalt. Versleuteld opgeslagen op dit apparaat.</string>
+    <string name="iptv_sport7_key_hint">Je persoonlijke TheSportsDB-API-sleutel</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, met TheSportsDB als reserve</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · vereist je sleutel</string>
+    <string name="iptv_sport7_logos">Teamlogo\'s</string>
+    <string name="iptv_sport7_logos_subtitle">Monogrammen worden getoond als logo\'s uit staan</string>
+    <string name="iptv_sport7_logos_espn">Alleen ESPN-logo\'s</string>
+    <string name="iptv_sport7_logos_espn_description">Logo\'s voor ESPN-wedstrijden, monogrammen voor TheSportsDB-wedstrijden</string>
+    <string name="iptv_sport7_logos_all">Alle logo\'s</string>
+    <string name="iptv_sport7_logos_all_description">Toont ook TheSportsDB-emblemen. Controleer eerst de beeldvoorwaarden van TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Alleen monogrammen</string>
+    <string name="iptv_sport7_logos_off_description">Geen team- of competitielogo\'s</string>
+    <string name="iptv_sport7_credit">Sportgegevens van ESPN en TheSportsDB</string>
+</resources>

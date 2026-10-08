@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Ndeshjet sportive</string>
+    <string name="iptv_sport7_fixtures_subtitle">Ndeshje dhe rezultate nga ESPN dhe, me çelësin tënd, nga TheSportsDB. Kur është çaktivizuar, Sport përdor vetëm udhëzuesin tënd dhe nuk bën kërkesa.</string>
+    <string name="iptv_sport7_leagues_subtitle">Çdo ligë përdor ESPN kur është e mundur, përndryshe TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Shto një ligë</string>
+    <string name="iptv_sport7_add_league_subtitle">Kërko në të gjitha ligat e TheSportsDB. Ligat e shtuara kërkojnë çelësin tënd TheSportsDB.</string>
+    <string name="iptv_sport7_search">Kërko liga</string>
+    <string name="iptv_sport7_search_hint">Shkruaj të paktën dy shkronja të një lige ose sporti</string>
+    <string name="iptv_sport7_search_loading">Po ngarkohen ligat…</string>
+    <string name="iptv_sport7_search_failed">Lista e ligave nuk u ngarkua. Kontrollo çelësin TheSportsDB.</string>
+    <string name="iptv_sport7_search_none">Asnjë ligë nuk përputhet.</string>
+    <string name="iptv_sport7_added">U shtua</string>
+    <string name="iptv_sport7_key_subtitle">Opsional. Çelësi yt shton liga që ESPN nuk i mbulon, rezultate live për to, kanale TV për ekipet që ndjek dhe një rezervë kur ESPN dështon. Ruhet i enkriptuar në këtë pajisje.</string>
+    <string name="iptv_sport7_key_hint">Çelësi yt personal i API-së TheSportsDB</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, me TheSportsDB si rezervë</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · kërkon çelësin tënd</string>
+    <string name="iptv_sport7_logos">Logot e ekipeve</string>
+    <string name="iptv_sport7_logos_subtitle">Kur logot janë çaktivizuar, shfaqen monograme</string>
+    <string name="iptv_sport7_logos_espn">Vetëm logot e ESPN</string>
+    <string name="iptv_sport7_logos_espn_description">Logo për ndeshjet e ESPN, monograme për ndeshjet e TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">Të gjitha logot</string>
+    <string name="iptv_sport7_logos_all_description">Shfaq edhe stemat e TheSportsDB. Kontrollo fillimisht kushtet e përdorimit të imazheve të TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Vetëm monograme</string>
+    <string name="iptv_sport7_logos_off_description">Pa logo ekipesh ose ligash</string>
+    <string name="iptv_sport7_credit">Të dhëna sportive nga ESPN dhe TheSportsDB</string>
+</resources>

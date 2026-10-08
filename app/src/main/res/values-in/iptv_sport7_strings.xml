@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Jadwal pertandingan olahraga</string>
+    <string name="iptv_sport7_fixtures_subtitle">Jadwal pertandingan dan skor dari ESPN, serta dari TheSportsDB dengan kunci Anda sendiri. Jika nonaktif, Olahraga hanya menggunakan panduan Anda dan tidak mengirim permintaan.</string>
+    <string name="iptv_sport7_leagues_subtitle">Setiap liga menggunakan ESPN jika memungkinkan, jika tidak TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Tambahkan liga</string>
+    <string name="iptv_sport7_add_league_subtitle">Cari semua liga TheSportsDB. Liga yang ditambahkan memerlukan kunci TheSportsDB Anda.</string>
+    <string name="iptv_sport7_search">Cari liga</string>
+    <string name="iptv_sport7_search_hint">Ketik minimal dua huruf nama liga atau olahraga</string>
+    <string name="iptv_sport7_search_loading">Memuat liga…</string>
+    <string name="iptv_sport7_search_failed">Tidak dapat memuat daftar liga. Periksa kunci TheSportsDB Anda.</string>
+    <string name="iptv_sport7_search_none">Tidak ada liga yang cocok.</string>
+    <string name="iptv_sport7_added">Ditambahkan</string>
+    <string name="iptv_sport7_key_subtitle">Opsional. Kunci Anda sendiri menambahkan liga yang tidak dicakup ESPN, skor langsungnya, saluran TV untuk tim yang diikuti, dan cadangan saat ESPN gagal. Disimpan terenkripsi di perangkat ini.</string>
+    <string name="iptv_sport7_key_hint">Kunci API TheSportsDB pribadi Anda</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, dengan TheSportsDB sebagai cadangan</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · memerlukan kunci Anda</string>
+    <string name="iptv_sport7_logos">Logo tim</string>
+    <string name="iptv_sport7_logos_subtitle">Monogram ditampilkan saat logo nonaktif</string>
+    <string name="iptv_sport7_logos_espn">Hanya logo ESPN</string>
+    <string name="iptv_sport7_logos_espn_description">Logo untuk pertandingan ESPN, monogram untuk pertandingan TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">Semua logo</string>
+    <string name="iptv_sport7_logos_all_description">Juga menampilkan lambang TheSportsDB. Periksa dulu ketentuan penggunaan gambar TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Hanya monogram</string>
+    <string name="iptv_sport7_logos_off_description">Tanpa logo tim atau liga</string>
+    <string name="iptv_sport7_credit">Data olahraga dari ESPN dan TheSportsDB</string>
+</resources>

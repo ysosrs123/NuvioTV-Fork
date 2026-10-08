@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Športové zápasy</string>
+    <string name="iptv_sport7_fixtures_subtitle">Zápasy a výsledky z ESPN a s vlastným kľúčom aj z TheSportsDB. Keď je vypnuté, Šport používa len váš program a neodosiela žiadne požiadavky.</string>
+    <string name="iptv_sport7_leagues_subtitle">Každá liga používa ESPN, ak je to možné, inak TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Pridať ligu</string>
+    <string name="iptv_sport7_add_league_subtitle">Prehľadajte všetky ligy TheSportsDB. Pridané ligy vyžadujú váš kľúč TheSportsDB.</string>
+    <string name="iptv_sport7_search">Hľadať ligy</string>
+    <string name="iptv_sport7_search_hint">Zadajte aspoň dve písmená ligy alebo športu</string>
+    <string name="iptv_sport7_search_loading">Načítavajú sa ligy…</string>
+    <string name="iptv_sport7_search_failed">Zoznam líg sa nepodarilo načítať. Skontrolujte kľúč TheSportsDB.</string>
+    <string name="iptv_sport7_search_none">Žiadne ligy nezodpovedajú.</string>
+    <string name="iptv_sport7_added">Pridané</string>
+    <string name="iptv_sport7_key_subtitle">Voliteľné. Vlastný kľúč pridá ligy, ktoré ESPN nepokrýva, ich živé výsledky, TV kanály sledovaných tímov a záložný zdroj, keď ESPN zlyhá. Uložený šifrovane v tomto zariadení.</string>
+    <string name="iptv_sport7_key_hint">Váš osobný API kľúč TheSportsDB</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN so záložným TheSportsDB</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · vyžaduje váš kľúč</string>
+    <string name="iptv_sport7_logos">Logá tímov</string>
+    <string name="iptv_sport7_logos_subtitle">Keď sú logá vypnuté, zobrazujú sa monogramy</string>
+    <string name="iptv_sport7_logos_espn">Len logá ESPN</string>
+    <string name="iptv_sport7_logos_espn_description">Logá pre zápasy z ESPN, monogramy pre zápasy z TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">Všetky logá</string>
+    <string name="iptv_sport7_logos_all_description">Zobrazí aj erby z TheSportsDB. Najprv si prečítajte podmienky používania grafiky TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Len monogramy</string>
+    <string name="iptv_sport7_logos_off_description">Žiadne logá tímov ani líg</string>
+    <string name="iptv_sport7_credit">Športové údaje z ESPN a TheSportsDB</string>
+</resources>

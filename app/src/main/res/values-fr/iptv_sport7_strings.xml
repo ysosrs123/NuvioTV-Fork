@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Matchs sportifs</string>
+    <string name="iptv_sport7_fixtures_subtitle">Matchs et scores d\'ESPN, et de TheSportsDB avec votre propre clé. Si désactivé, Sport utilise uniquement votre guide et n\'envoie aucune requête.</string>
+    <string name="iptv_sport7_leagues_subtitle">Chaque ligue utilise ESPN si possible, sinon TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Ajouter une ligue</string>
+    <string name="iptv_sport7_add_league_subtitle">Recherchez parmi toutes les ligues TheSportsDB. Les ligues ajoutées nécessitent votre clé TheSportsDB.</string>
+    <string name="iptv_sport7_search">Rechercher des ligues</string>
+    <string name="iptv_sport7_search_hint">Saisissez au moins deux lettres d\'une ligue ou d\'un sport</string>
+    <string name="iptv_sport7_search_loading">Chargement des ligues…</string>
+    <string name="iptv_sport7_search_failed">Impossible de charger la liste des ligues. Vérifiez votre clé TheSportsDB.</string>
+    <string name="iptv_sport7_search_none">Aucune ligue ne correspond.</string>
+    <string name="iptv_sport7_added">Ajoutée</string>
+    <string name="iptv_sport7_key_subtitle">Facultatif. Votre propre clé ajoute les ligues non couvertes par ESPN, leurs scores en direct, les chaînes TV des équipes suivies et une source de secours en cas de panne d\'ESPN. Stockée chiffrée sur cet appareil.</string>
+    <string name="iptv_sport7_key_hint">Votre clé API TheSportsDB personnelle</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, avec TheSportsDB en secours</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · nécessite votre clé</string>
+    <string name="iptv_sport7_logos">Logos des équipes</string>
+    <string name="iptv_sport7_logos_subtitle">Des monogrammes s\'affichent quand les logos sont désactivés</string>
+    <string name="iptv_sport7_logos_espn">Logos ESPN uniquement</string>
+    <string name="iptv_sport7_logos_espn_description">Logos pour les matchs ESPN, monogrammes pour les matchs TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">Tous les logos</string>
+    <string name="iptv_sport7_logos_all_description">Affiche aussi les écussons TheSportsDB. Consultez d\'abord les conditions d\'utilisation des visuels de TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Monogrammes uniquement</string>
+    <string name="iptv_sport7_logos_off_description">Aucun logo d\'équipe ou de ligue</string>
+    <string name="iptv_sport7_credit">Données sportives d\'ESPN et de TheSportsDB</string>
+</resources>

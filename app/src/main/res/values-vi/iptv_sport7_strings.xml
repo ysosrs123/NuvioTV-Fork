@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">Lịch thi đấu thể thao</string>
+    <string name="iptv_sport7_fixtures_subtitle">Lịch thi đấu và tỉ số từ ESPN, và từ TheSportsDB khi có khóa riêng của bạn. Khi tắt, Thể thao chỉ dùng lịch phát sóng của bạn và không gửi yêu cầu nào.</string>
+    <string name="iptv_sport7_leagues_subtitle">Mỗi giải đấu dùng ESPN khi có thể, nếu không thì dùng TheSportsDB</string>
+    <string name="iptv_sport7_add_league">Thêm giải đấu</string>
+    <string name="iptv_sport7_add_league_subtitle">Tìm trong mọi giải đấu của TheSportsDB. Giải đấu được thêm cần khóa TheSportsDB của bạn.</string>
+    <string name="iptv_sport7_search">Tìm giải đấu</string>
+    <string name="iptv_sport7_search_hint">Nhập ít nhất hai chữ cái của tên giải đấu hoặc môn thể thao</string>
+    <string name="iptv_sport7_search_loading">Đang tải giải đấu…</string>
+    <string name="iptv_sport7_search_failed">Không thể tải danh sách giải đấu. Hãy kiểm tra khóa TheSportsDB của bạn.</string>
+    <string name="iptv_sport7_search_none">Không có giải đấu nào phù hợp.</string>
+    <string name="iptv_sport7_added">Đã thêm</string>
+    <string name="iptv_sport7_key_subtitle">Không bắt buộc. Khóa riêng của bạn bổ sung các giải đấu ESPN không có, tỉ số trực tiếp của chúng, kênh TV cho đội bạn theo dõi và nguồn dự phòng khi ESPN gặp lỗi. Được lưu mã hóa trên thiết bị này.</string>
+    <string name="iptv_sport7_key_hint">Khóa API TheSportsDB cá nhân của bạn</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, dự phòng bằng TheSportsDB</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · cần khóa của bạn</string>
+    <string name="iptv_sport7_logos">Logo đội</string>
+    <string name="iptv_sport7_logos_subtitle">Hiển thị chữ viết tắt khi tắt logo</string>
+    <string name="iptv_sport7_logos_espn">Chỉ logo ESPN</string>
+    <string name="iptv_sport7_logos_espn_description">Logo cho trận đấu ESPN, chữ viết tắt cho trận đấu TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">Tất cả logo</string>
+    <string name="iptv_sport7_logos_all_description">Hiển thị cả huy hiệu của TheSportsDB. Hãy xem trước điều khoản sử dụng hình ảnh của TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">Chỉ chữ viết tắt</string>
+    <string name="iptv_sport7_logos_off_description">Không có logo đội hay giải đấu</string>
+    <string name="iptv_sport7_credit">Dữ liệu thể thao từ ESPN và TheSportsDB</string>
+</resources>

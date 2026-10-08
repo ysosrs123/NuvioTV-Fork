@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport7_fixtures">משחקי ספורט</string>
+    <string name="iptv_sport7_fixtures_subtitle">משחקים ותוצאות מ-ESPN, ומ-TheSportsDB עם מפתח משלך. כשהאפשרות כבויה, ספורט משתמש רק במדריך שלך ולא שולח בקשות.</string>
+    <string name="iptv_sport7_leagues_subtitle">כל ליגה משתמשת ב-ESPN כשאפשר, אחרת ב-TheSportsDB</string>
+    <string name="iptv_sport7_add_league">הוספת ליגה</string>
+    <string name="iptv_sport7_add_league_subtitle">חיפוש בכל הליגות של TheSportsDB. ליגות שנוספו דורשות את מפתח TheSportsDB שלך.</string>
+    <string name="iptv_sport7_search">חיפוש ליגות</string>
+    <string name="iptv_sport7_search_hint">יש להקליד לפחות שתי אותיות משם של ליגה או ענף ספורט</string>
+    <string name="iptv_sport7_search_loading">הליגות בטעינה…</string>
+    <string name="iptv_sport7_search_failed">לא ניתן היה לטעון את רשימת הליגות. יש לבדוק את מפתח TheSportsDB שלך.</string>
+    <string name="iptv_sport7_search_none">אין ליגות תואמות.</string>
+    <string name="iptv_sport7_added">נוספה</string>
+    <string name="iptv_sport7_key_subtitle">אופציונלי. מפתח משלך מוסיף ליגות ש-ESPN לא מכסה, תוצאות חיות שלהן, ערוצי טלוויזיה לקבוצות שבמעקב וגיבוי כש-ESPN נכשל. נשמר מוצפן במכשיר הזה.</string>
+    <string name="iptv_sport7_key_hint">מפתח ה-API האישי שלך ל-TheSportsDB</string>
+    <string name="iptv_sport7_source_espn">ESPN</string>
+    <string name="iptv_sport7_source_both">ESPN, עם TheSportsDB כגיבוי</string>
+    <string name="iptv_sport7_source_sportsdb">TheSportsDB</string>
+    <string name="iptv_sport7_source_needs_key">TheSportsDB · נדרש המפתח שלך</string>
+    <string name="iptv_sport7_logos">סמלי קבוצות</string>
+    <string name="iptv_sport7_logos_subtitle">כשהסמלים כבויים מוצגים ראשי תיבות</string>
+    <string name="iptv_sport7_logos_espn">סמלי ESPN בלבד</string>
+    <string name="iptv_sport7_logos_espn_description">סמלים למשחקי ESPN, ראשי תיבות למשחקי TheSportsDB</string>
+    <string name="iptv_sport7_logos_all">כל הסמלים</string>
+    <string name="iptv_sport7_logos_all_description">מציג גם את התגים של TheSportsDB. יש לבדוק קודם את תנאי השימוש בתמונות של TheSportsDB.</string>
+    <string name="iptv_sport7_logos_off">ראשי תיבות בלבד</string>
+    <string name="iptv_sport7_logos_off_description">ללא סמלי קבוצות או ליגות</string>
+    <string name="iptv_sport7_credit">נתוני ספורט מ-ESPN ומ-TheSportsDB</string>
+</resources>
