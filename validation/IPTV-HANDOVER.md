@@ -23,8 +23,9 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
   used on the AM9; everything since is untested on devices.
 - Live TV is reached from Nuvio's sidebar and its settings are a main Settings category,
   only in the `iptvPrototype` flavour (`FEATURE_IPTV_ENABLED`); the `full` flavour hides
-  them. How IPTV ships (full / prototype / behind an off-by-default setting) is the
-  user's decision.
+  them. Decision (user, 8 October 2026): IPTV ships as part of the full app. To do after
+  the device pass: enable `FEATURE_IPTV_ENABLED` in `full` and move the prototype
+  manifest additions (e.g. `WAKE_LOCK`) into the main manifest.
 - The original capture chain stays disabled; local timeshift uses a separate ring file.
 
 ## CI build — 6 October 2026
