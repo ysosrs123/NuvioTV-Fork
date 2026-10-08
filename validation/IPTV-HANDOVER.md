@@ -35,7 +35,8 @@ Next, in order:
    sports; TheSportsDB premium: 37 sports / 1,547 leagues, live scores only for soccer,
    basketball, ice hockey and baseball (NFL per pricing), basic fields). The first concept
    canvas (5 boards: hub, HUD, Game Centre, stats multiview, follow/alerts) is the user's
-   artifact "Nuvio Live TV — Sports experience"; build the new pass as a new or revised
+   artifact "Nuvio Live TV — Sports experience"
+   (https://claude.ai/artifact/UY781c11Pg7vBmTZoEtGfW, private to the user); build the new pass as a new or revised
    canvas and present it with the reasoning. Mockups use real fixtures; mark live values
    as illustrative; no club logos in mockups.
 2. TheSportsDB premium: the user bought a key (do not store it anywhere; they will
@@ -60,6 +61,33 @@ Next, in order:
    `IPTV-SPORTS-DATA-SCRIPTS.md`); golf/tennis/F1/UFC/cricket formats; TheSportsDB TV
    channels via `lookuptv`; URC rugby standings under `children`.
 7. The user will have a separate agent merge the branch into `main`; keep both branches.
+
+Caveats and behaviour changes to verify (from the helpers' reports, 8 October):
+- Guide: over-budget guides drop the last-parsed (whole) channels (`budget=` in the log);
+  programmes with the same channel and start collapse to one; name matching is now a
+  fallback for every channel; a missing manual target falls back to automatic matching;
+  old catalogue rows without guide keys import unfiltered until the source refreshes.
+- Playback: shared OkHttp client with `retryOnConnectionFailure` on (check strict
+  connection-limit providers); pre-warm opens DNS+TCP only (no TLS, no request); the
+  alternating close failure was attributed to a main-thread TLS close (likely, not
+  proven) — the close log lines will show the real reason; corner/inset pictures show the
+  logo for HDR or >1080p for the rest of that player's life.
+- Behind-live: TS counts only delay added after the start; the HLS start-late seek was
+  removed; Right opens the controls on Return to live only when behind live.
+- Recording location picker: a default pointing at a removed network share falls back to
+  This device; choosing an unavailable location is refused at record time.
+- Styling: glass panels in Live TV get a 0.9 minimum opacity (`GLASS_FLOOR` in
+  `IptvTheme.kt`); importing an old setup bundle without the "solid" key still sets Solid
+  panels on (`core/iptv/SetupBundle.kt`).
+- Sport: fixtures are fetched whenever Live TV is open and Sport is enabled (also during
+  full screen and multiview); the featured hero shows the first fixture until a card is
+  focused; favourites are stored as league + team name.
+- VOD: m3u8 movies untested; mpv busy/refused messages depend on mpv logging the status;
+  resume for unmatched titles stays local.
+- Navigation: Back no longer opens the Live TV menu (Left does); the Modern Home layout
+  appends Live TV rows after the catalogue rows.
+- The user's earlier "pre-fetch the stream on focus" request was implemented as a
+  connection pre-warm only; fetching media in advance would use a provider connection.
 
 How work was done (keep doing it this way):
 - Parallel helpers with strict file ownership, briefs naming the files they own, their
