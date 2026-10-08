@@ -1,0 +1,25 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">El archivo de la guía no tiene programas para los próximos días y puede estar desactualizado. Se conservó tu guía anterior.</string>
+    <string name="iptv_guide_import_no_channels">El archivo de la guía no tiene canales. Se conservó tu guía anterior.</string>
+    <string name="iptv_guide_import_invalid">Demasiadas entradas del archivo de la guía no son válidas. Se conservó tu guía anterior.</string>
+    <string name="iptv_guide_import_too_large">El archivo de la guía es demasiado grande. Se conservó tu guía anterior.</string>
+    <string name="iptv_guide_import_not_xmltv">Este no es un archivo de guía XMLTV. Se conservó tu guía anterior.</string>
+    <string name="iptv_guide_import_fewer">La nueva guía tiene muchos menos programas que antes. Se conservó tu guía anterior.</string>
+    <string name="iptv_guide_import_not_linked">Canales de la guía guardados. Los programas se cargarán cuando una fuente use esta guía.</string>
+    <string name="iptv_guide_days">Días de la guía</string>
+    <string name="iptv_guide_days_subtitle">Cuánta información de programas conservar. Más días usan más almacenamiento. Se aplica en la próxima actualización de la guía.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d día atrás</item>
+        <item quantity="many">%d días atrás</item>
+        <item quantity="other">%d días atrás</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d día adelante</item>
+        <item quantity="many">%d días adelante</item>
+        <item quantity="other">%d días adelante</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Recomendado</string>
+    <string name="iptv_guide_days_catchup">Catch-up más largo, usa más almacenamiento</string>
+    <string name="iptv_guide_days_larger">Usa más almacenamiento</string>
+    <string name="iptv_guides_choice_help">Cada canal usa la primera guía vinculada que tenga programas para él: primero una asignación manual, luego un ID coincidente y luego un nombre coincidente, en el orden mostrado. Subir cambia la prioridad.</string>
+</resources>

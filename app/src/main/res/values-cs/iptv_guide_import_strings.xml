@@ -1,0 +1,27 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Soubor programu neobsahuje pořady na příští dny a může být zastaralý. Předchozí program byl zachován.</string>
+    <string name="iptv_guide_import_no_channels">Soubor programu neobsahuje žádné kanály. Předchozí program byl zachován.</string>
+    <string name="iptv_guide_import_invalid">Příliš mnoho položek v souboru programu je neplatných. Předchozí program byl zachován.</string>
+    <string name="iptv_guide_import_too_large">Soubor programu je příliš velký. Předchozí program byl zachován.</string>
+    <string name="iptv_guide_import_not_xmltv">Toto není soubor programu XMLTV. Předchozí program byl zachován.</string>
+    <string name="iptv_guide_import_fewer">Nový program obsahuje mnohem méně pořadů než dříve. Předchozí program byl zachován.</string>
+    <string name="iptv_guide_import_not_linked">Kanály programu uloženy. Pořady se načtou, jakmile tento program použije některý zdroj.</string>
+    <string name="iptv_guide_days">Dny programu</string>
+    <string name="iptv_guide_days_subtitle">Kolik informací o pořadech uchovávat. Více dní zabere více úložiště. Projeví se při další aktualizaci programu.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d den zpět</item>
+        <item quantity="few">%d dny zpět</item>
+        <item quantity="many">%d dne zpět</item>
+        <item quantity="other">%d dní zpět</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d den dopředu</item>
+        <item quantity="few">%d dny dopředu</item>
+        <item quantity="many">%d dne dopředu</item>
+        <item quantity="other">%d dní dopředu</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Doporučeno</string>
+    <string name="iptv_guide_days_catchup">Delší catch-up, zabere více úložiště</string>
+    <string name="iptv_guide_days_larger">Zabere více úložiště</string>
+    <string name="iptv_guides_choice_help">Každý kanál použije první propojený program, který pro něj má pořady: nejdřív ruční přiřazení, pak shodné ID, pak shodný název, v zobrazeném pořadí. Posunout nahoru mění prioritu.</string>
+</resources>

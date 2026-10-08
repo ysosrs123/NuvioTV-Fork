@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">गाइड फ़ाइल में आने वाले दिनों के कोई प्रोग्राम नहीं हैं और यह पुरानी हो सकती है। आपकी पिछली गाइड रखी गई है।</string>
+    <string name="iptv_guide_import_no_channels">गाइड फ़ाइल में कोई चैनल नहीं है। आपकी पिछली गाइड रखी गई है।</string>
+    <string name="iptv_guide_import_invalid">गाइड फ़ाइल की बहुत सी एंट्री अमान्य हैं। आपकी पिछली गाइड रखी गई है।</string>
+    <string name="iptv_guide_import_too_large">गाइड फ़ाइल बहुत बड़ी है। आपकी पिछली गाइड रखी गई है।</string>
+    <string name="iptv_guide_import_not_xmltv">यह XMLTV गाइड फ़ाइल नहीं है। आपकी पिछली गाइड रखी गई है।</string>
+    <string name="iptv_guide_import_fewer">नई गाइड में पहले से बहुत कम प्रोग्राम हैं। आपकी पिछली गाइड रखी गई है।</string>
+    <string name="iptv_guide_import_not_linked">गाइड चैनल सेव हो गए। कोई सोर्स इस गाइड का उपयोग करेगा, तब प्रोग्राम लोड होंगे।</string>
+    <string name="iptv_guide_days">गाइड के दिन</string>
+    <string name="iptv_guide_days_subtitle">कितनी प्रोग्राम जानकारी रखनी है। ज़्यादा दिन ज़्यादा स्टोरेज लेते हैं। अगले गाइड अपडेट पर लागू होगा।</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d दिन पीछे</item>
+        <item quantity="other">%d दिन पीछे</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d दिन आगे</item>
+        <item quantity="other">%d दिन आगे</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">सुझाया गया</string>
+    <string name="iptv_guide_days_catchup">लंबा कैच-अप, ज़्यादा स्टोरेज लेता है</string>
+    <string name="iptv_guide_days_larger">ज़्यादा स्टोरेज लेता है</string>
+    <string name="iptv_guides_choice_help">हर चैनल पहली लिंक की गई गाइड का उपयोग करता है जिसमें उसके प्रोग्राम हों: पहले मैन्युअल असाइनमेंट, फिर मेल खाती ID, फिर मेल खाता नाम, दिखाए गए क्रम में। ऊपर ले जाएँ से प्राथमिकता बदलती है।</string>
+</resources>

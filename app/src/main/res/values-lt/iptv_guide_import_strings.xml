@@ -1,0 +1,27 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">TV programos faile nėra artimiausių dienų laidų, todėl jis gali būti pasenęs. Ankstesnė TV programa išsaugota.</string>
+    <string name="iptv_guide_import_no_channels">TV programos faile nėra kanalų. Ankstesnė TV programa išsaugota.</string>
+    <string name="iptv_guide_import_invalid">Per daug TV programos failo įrašų yra netinkami. Ankstesnė TV programa išsaugota.</string>
+    <string name="iptv_guide_import_too_large">TV programos failas per didelis. Ankstesnė TV programa išsaugota.</string>
+    <string name="iptv_guide_import_not_xmltv">Tai ne XMLTV TV programos failas. Ankstesnė TV programa išsaugota.</string>
+    <string name="iptv_guide_import_fewer">Naujoje TV programoje daug mažiau laidų nei anksčiau. Ankstesnė TV programa išsaugota.</string>
+    <string name="iptv_guide_import_not_linked">TV programos kanalai išsaugoti. Laidos bus įkeltos, kai šaltinis naudos šią TV programą.</string>
+    <string name="iptv_guide_days">TV programos dienos</string>
+    <string name="iptv_guide_days_subtitle">Kiek laidų informacijos saugoti. Daugiau dienų užima daugiau saugyklos vietos. Taikoma kito TV programos atnaujinimo metu.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d diena atgal</item>
+        <item quantity="few">%d dienos atgal</item>
+        <item quantity="many">%d dienos atgal</item>
+        <item quantity="other">%d dienų atgal</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d diena į priekį</item>
+        <item quantity="few">%d dienos į priekį</item>
+        <item quantity="many">%d dienos į priekį</item>
+        <item quantity="other">%d dienų į priekį</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Rekomenduojama</string>
+    <string name="iptv_guide_days_catchup">Ilgesnis archyvas, užima daugiau vietos</string>
+    <string name="iptv_guide_days_larger">Užima daugiau vietos</string>
+    <string name="iptv_guides_choice_help">Kiekvienas kanalas naudoja pirmą susietą TV programą, kurioje yra jo laidų: pirmiausia rankinį priskyrimą, tada sutampantį ID, tada sutampantį pavadinimą, rodoma tvarka. Perkelti aukštyn keičia prioritetą.</string>
+</resources>

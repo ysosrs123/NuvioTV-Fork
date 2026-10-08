@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">File panduan tidak berisi acara untuk beberapa hari ke depan dan mungkin sudah usang. Panduan Anda sebelumnya tetap disimpan.</string>
+    <string name="iptv_guide_import_no_channels">File panduan tidak berisi saluran. Panduan Anda sebelumnya tetap disimpan.</string>
+    <string name="iptv_guide_import_invalid">Terlalu banyak entri di file panduan yang tidak valid. Panduan Anda sebelumnya tetap disimpan.</string>
+    <string name="iptv_guide_import_too_large">File panduan terlalu besar. Panduan Anda sebelumnya tetap disimpan.</string>
+    <string name="iptv_guide_import_not_xmltv">Ini bukan file panduan XMLTV. Panduan Anda sebelumnya tetap disimpan.</string>
+    <string name="iptv_guide_import_fewer">Panduan baru berisi jauh lebih sedikit acara daripada sebelumnya. Panduan Anda sebelumnya tetap disimpan.</string>
+    <string name="iptv_guide_import_not_linked">Saluran panduan disimpan. Acara dimuat setelah sebuah sumber menggunakan panduan ini.</string>
+    <string name="iptv_guide_days">Hari panduan</string>
+    <string name="iptv_guide_days_subtitle">Seberapa banyak informasi acara yang disimpan. Lebih banyak hari memakai lebih banyak penyimpanan. Berlaku pada pembaruan panduan berikutnya.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="other">%d hari ke belakang</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="other">%d hari ke depan</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Direkomendasikan</string>
+    <string name="iptv_guide_days_catchup">Catch-up lebih lama, memakai lebih banyak penyimpanan</string>
+    <string name="iptv_guide_days_larger">Memakai lebih banyak penyimpanan</string>
+    <string name="iptv_guides_choice_help">Setiap saluran memakai panduan tertaut pertama yang memiliki acara untuknya: penetapan manual dulu, lalu ID yang cocok, lalu nama yang cocok, sesuai urutan yang ditampilkan. Pindah ke atas mengubah prioritas.</string>
+</resources>

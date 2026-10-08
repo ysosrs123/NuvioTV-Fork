@@ -1,0 +1,25 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Le fichier du guide ne contient aucun programme pour les prochains jours et n’est peut-être plus à jour. Votre guide précédent a été conservé.</string>
+    <string name="iptv_guide_import_no_channels">Le fichier du guide ne contient aucune chaîne. Votre guide précédent a été conservé.</string>
+    <string name="iptv_guide_import_invalid">Trop d’entrées du fichier du guide sont invalides. Votre guide précédent a été conservé.</string>
+    <string name="iptv_guide_import_too_large">Le fichier du guide est trop volumineux. Votre guide précédent a été conservé.</string>
+    <string name="iptv_guide_import_not_xmltv">Ce n’est pas un fichier de guide XMLTV. Votre guide précédent a été conservé.</string>
+    <string name="iptv_guide_import_fewer">Le nouveau guide contient beaucoup moins de programmes qu’avant. Votre guide précédent a été conservé.</string>
+    <string name="iptv_guide_import_not_linked">Chaînes du guide enregistrées. Les programmes se chargent dès qu’une source utilise ce guide.</string>
+    <string name="iptv_guide_days">Jours du guide</string>
+    <string name="iptv_guide_days_subtitle">Quantité d’informations de programmes à conserver. Plus de jours utilisent plus de stockage. S’applique à la prochaine mise à jour du guide.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d jour en arrière</item>
+        <item quantity="many">%d jours en arrière</item>
+        <item quantity="other">%d jours en arrière</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d jour à venir</item>
+        <item quantity="many">%d jours à venir</item>
+        <item quantity="other">%d jours à venir</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Recommandé</string>
+    <string name="iptv_guide_days_catchup">Replay plus long, utilise plus de stockage</string>
+    <string name="iptv_guide_days_larger">Utilise plus de stockage</string>
+    <string name="iptv_guides_choice_help">Chaque chaîne utilise le premier guide associé qui a des programmes pour elle : d’abord une attribution manuelle, puis un ID correspondant, puis un nom correspondant, dans l’ordre affiché. Monter change la priorité.</string>
+</resources>

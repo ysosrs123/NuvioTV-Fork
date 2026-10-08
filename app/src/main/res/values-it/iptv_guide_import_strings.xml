@@ -1,0 +1,25 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Il file della guida non ha programmi per i prossimi giorni e potrebbe non essere aggiornato. La guida precedente è stata mantenuta.</string>
+    <string name="iptv_guide_import_no_channels">Il file della guida non contiene canali. La guida precedente è stata mantenuta.</string>
+    <string name="iptv_guide_import_invalid">Troppe voci del file della guida non sono valide. La guida precedente è stata mantenuta.</string>
+    <string name="iptv_guide_import_too_large">Il file della guida è troppo grande. La guida precedente è stata mantenuta.</string>
+    <string name="iptv_guide_import_not_xmltv">Questo non è un file guida XMLTV. La guida precedente è stata mantenuta.</string>
+    <string name="iptv_guide_import_fewer">La nuova guida ha molti meno programmi di prima. La guida precedente è stata mantenuta.</string>
+    <string name="iptv_guide_import_not_linked">Canali della guida salvati. I programmi verranno caricati quando una sorgente userà questa guida.</string>
+    <string name="iptv_guide_days">Giorni della guida</string>
+    <string name="iptv_guide_days_subtitle">Quante informazioni sui programmi conservare. Più giorni occupano più memoria. Si applica al prossimo aggiornamento della guida.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d giorno indietro</item>
+        <item quantity="many">%d giorni indietro</item>
+        <item quantity="other">%d giorni indietro</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d giorno avanti</item>
+        <item quantity="many">%d giorni avanti</item>
+        <item quantity="other">%d giorni avanti</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Consigliato</string>
+    <string name="iptv_guide_days_catchup">Catch-up più lungo, occupa più memoria</string>
+    <string name="iptv_guide_days_larger">Occupa più memoria</string>
+    <string name="iptv_guides_choice_help">Ogni canale usa la prima guida collegata con programmi per quel canale: prima l\'assegnazione manuale, poi un ID corrispondente, poi un nome corrispondente, nell\'ordine mostrato. Sposta su cambia la priorità.</string>
+</resources>

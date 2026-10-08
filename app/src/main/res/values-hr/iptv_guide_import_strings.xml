@@ -1,0 +1,25 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Datoteka vodiča nema emisija za sljedeće dane i možda je zastarjela. Prethodni vodič je zadržan.</string>
+    <string name="iptv_guide_import_no_channels">Datoteka vodiča nema kanala. Prethodni vodič je zadržan.</string>
+    <string name="iptv_guide_import_invalid">Previše unosa u datoteci vodiča nije ispravno. Prethodni vodič je zadržan.</string>
+    <string name="iptv_guide_import_too_large">Datoteka vodiča je prevelika. Prethodni vodič je zadržan.</string>
+    <string name="iptv_guide_import_not_xmltv">Ovo nije XMLTV datoteka vodiča. Prethodni vodič je zadržan.</string>
+    <string name="iptv_guide_import_fewer">Novi vodič ima mnogo manje emisija nego prije. Prethodni vodič je zadržan.</string>
+    <string name="iptv_guide_import_not_linked">Kanali vodiča su spremljeni. Emisije se učitavaju kada neki izvor počne koristiti ovaj vodič.</string>
+    <string name="iptv_guide_days">Dani vodiča</string>
+    <string name="iptv_guide_days_subtitle">Koliko informacija o emisijama čuvati. Više dana zauzima više pohrane. Primjenjuje se pri sljedećem ažuriranju vodiča.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d dan unatrag</item>
+        <item quantity="few">%d dana unatrag</item>
+        <item quantity="other">%d dana unatrag</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d dan unaprijed</item>
+        <item quantity="few">%d dana unaprijed</item>
+        <item quantity="other">%d dana unaprijed</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Preporučeno</string>
+    <string name="iptv_guide_days_catchup">Duži catch-up, zauzima više pohrane</string>
+    <string name="iptv_guide_days_larger">Zauzima više pohrane</string>
+    <string name="iptv_guides_choice_help">Svaki kanal koristi prvi povezani vodič koji ima emisije za njega: prvo ručnu dodjelu, zatim podudaran ID, pa podudarno ime, prikazanim redoslijedom. Pomakni gore mijenja prioritet.</string>
+</resources>

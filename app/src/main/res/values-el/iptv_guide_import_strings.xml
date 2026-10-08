@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Το αρχείο οδηγού δεν έχει προγράμματα για τις επόμενες ημέρες και ίσως δεν είναι ενημερωμένο. Ο προηγούμενος οδηγός σας διατηρήθηκε.</string>
+    <string name="iptv_guide_import_no_channels">Το αρχείο οδηγού δεν έχει κανάλια. Ο προηγούμενος οδηγός σας διατηρήθηκε.</string>
+    <string name="iptv_guide_import_invalid">Πάρα πολλές εγγραφές στο αρχείο οδηγού δεν είναι έγκυρες. Ο προηγούμενος οδηγός σας διατηρήθηκε.</string>
+    <string name="iptv_guide_import_too_large">Το αρχείο οδηγού είναι πολύ μεγάλο. Ο προηγούμενος οδηγός σας διατηρήθηκε.</string>
+    <string name="iptv_guide_import_not_xmltv">Αυτό δεν είναι αρχείο οδηγού XMLTV. Ο προηγούμενος οδηγός σας διατηρήθηκε.</string>
+    <string name="iptv_guide_import_fewer">Ο νέος οδηγός έχει πολύ λιγότερα προγράμματα από πριν. Ο προηγούμενος οδηγός σας διατηρήθηκε.</string>
+    <string name="iptv_guide_import_not_linked">Τα κανάλια του οδηγού αποθηκεύτηκαν. Τα προγράμματα φορτώνονται μόλις μια πηγή χρησιμοποιήσει αυτόν τον οδηγό.</string>
+    <string name="iptv_guide_days">Ημέρες οδηγού</string>
+    <string name="iptv_guide_days_subtitle">Πόσες πληροφορίες προγράμματος διατηρούνται. Περισσότερες ημέρες χρειάζονται περισσότερο αποθηκευτικό χώρο. Ισχύει στην επόμενη ενημέρωση του οδηγού.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d ημέρα πίσω</item>
+        <item quantity="other">%d ημέρες πίσω</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d ημέρα μπροστά</item>
+        <item quantity="other">%d ημέρες μπροστά</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Προτείνεται</string>
+    <string name="iptv_guide_days_catchup">Μεγαλύτερο catch-up, χρειάζεται περισσότερο χώρο</string>
+    <string name="iptv_guide_days_larger">Χρειάζεται περισσότερο χώρο</string>
+    <string name="iptv_guides_choice_help">Κάθε κανάλι χρησιμοποιεί τον πρώτο συνδεδεμένο οδηγό με προγράμματα για αυτό: πρώτα τη χειροκίνητη αντιστοίχιση, μετά το ίδιο ID, μετά το ίδιο όνομα, με τη σειρά που εμφανίζεται. Η Μετακίνηση πάνω αλλάζει την προτεραιότητα.</string>
+</resources>

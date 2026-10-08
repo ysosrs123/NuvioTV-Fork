@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">A műsorújság-fájlban nincsenek műsorok a következő napokra, és lehet, hogy elavult. Az előző műsorújság megmaradt.</string>
+    <string name="iptv_guide_import_no_channels">A műsorújság-fájlban nincsenek csatornák. Az előző műsorújság megmaradt.</string>
+    <string name="iptv_guide_import_invalid">A műsorújság-fájlban túl sok bejegyzés érvénytelen. Az előző műsorújság megmaradt.</string>
+    <string name="iptv_guide_import_too_large">A műsorújság-fájl túl nagy. Az előző műsorújság megmaradt.</string>
+    <string name="iptv_guide_import_not_xmltv">Ez nem XMLTV műsorújság-fájl. Az előző műsorújság megmaradt.</string>
+    <string name="iptv_guide_import_fewer">Az új műsorújságban jóval kevesebb műsor van, mint korábban. Az előző műsorújság megmaradt.</string>
+    <string name="iptv_guide_import_not_linked">A műsorújság csatornái mentve. A műsorok akkor töltődnek be, amikor egy forrás ezt a műsorújságot használja.</string>
+    <string name="iptv_guide_days">Műsorújság napjai</string>
+    <string name="iptv_guide_days_subtitle">Mennyi műsorinformáció maradjon meg. Több nap több tárhelyet foglal. A következő műsorújság-frissítéskor lép életbe.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d nap vissza</item>
+        <item quantity="other">%d nap vissza</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d nap előre</item>
+        <item quantity="other">%d nap előre</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Ajánlott</string>
+    <string name="iptv_guide_days_catchup">Hosszabb visszanézés, több tárhelyet foglal</string>
+    <string name="iptv_guide_days_larger">Több tárhelyet foglal</string>
+    <string name="iptv_guides_choice_help">Minden csatorna az első csatolt műsorújságot használja, amelyben vannak műsorai: először a kézi hozzárendelést, aztán az egyező azonosítót, majd az egyező nevet, a megjelenített sorrendben. A Feljebb a prioritást módosítja.</string>
+</resources>

@@ -1,0 +1,27 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">בקובץ המדריך אין תוכניות לימים הקרובים וייתכן שהוא לא עדכני. המדריך הקודם נשמר.</string>
+    <string name="iptv_guide_import_no_channels">בקובץ המדריך אין ערוצים. המדריך הקודם נשמר.</string>
+    <string name="iptv_guide_import_invalid">יותר מדי רשומות בקובץ המדריך אינן תקינות. המדריך הקודם נשמר.</string>
+    <string name="iptv_guide_import_too_large">קובץ המדריך גדול מדי. המדריך הקודם נשמר.</string>
+    <string name="iptv_guide_import_not_xmltv">זה לא קובץ מדריך XMLTV. המדריך הקודם נשמר.</string>
+    <string name="iptv_guide_import_fewer">במדריך החדש יש הרבה פחות תוכניות מבעבר. המדריך הקודם נשמר.</string>
+    <string name="iptv_guide_import_not_linked">ערוצי המדריך נשמרו. התוכניות ייטענו כשמקור כלשהו ישתמש במדריך הזה.</string>
+    <string name="iptv_guide_days">ימי מדריך</string>
+    <string name="iptv_guide_days_subtitle">כמה מידע על תוכניות לשמור. יותר ימים תופסים יותר אחסון. ההגדרה תחול בעדכון המדריך הבא.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">יום אחד אחורה</item>
+        <item quantity="two">יומיים אחורה</item>
+        <item quantity="many">%d ימים אחורה</item>
+        <item quantity="other">%d ימים אחורה</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">יום אחד קדימה</item>
+        <item quantity="two">יומיים קדימה</item>
+        <item quantity="many">%d ימים קדימה</item>
+        <item quantity="other">%d ימים קדימה</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">מומלץ</string>
+    <string name="iptv_guide_days_catchup">צפייה לאחור ארוכה יותר, תופסת יותר אחסון</string>
+    <string name="iptv_guide_days_larger">תופס יותר אחסון</string>
+    <string name="iptv_guides_choice_help">כל ערוץ משתמש במדריך המקושר הראשון שיש בו תוכניות עבורו: קודם שיוך ידני, אחר כך מזהה תואם, ואז שם תואם, לפי הסדר המוצג. העברה למעלה משנה את העדיפות.</string>
+</resources>

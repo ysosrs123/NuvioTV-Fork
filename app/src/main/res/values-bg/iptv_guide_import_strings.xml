@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Файлът на справочника няма предавания за следващите дни и може да е остарял. Предишният справочник е запазен.</string>
+    <string name="iptv_guide_import_no_channels">Файлът на справочника няма канали. Предишният справочник е запазен.</string>
+    <string name="iptv_guide_import_invalid">Твърде много записи във файла на справочника са невалидни. Предишният справочник е запазен.</string>
+    <string name="iptv_guide_import_too_large">Файлът на справочника е твърде голям. Предишният справочник е запазен.</string>
+    <string name="iptv_guide_import_not_xmltv">Това не е XMLTV файл на справочник. Предишният справочник е запазен.</string>
+    <string name="iptv_guide_import_fewer">Новият справочник има много по-малко предавания от преди. Предишният справочник е запазен.</string>
+    <string name="iptv_guide_import_not_linked">Каналите на справочника са запазени. Предаванията ще се заредят, когато източник използва този справочник.</string>
+    <string name="iptv_guide_days">Дни в справочника</string>
+    <string name="iptv_guide_days_subtitle">Колко информация за предаванията да се пази. Повече дни заемат повече място в хранилището. Прилага се при следващото обновяване на справочника.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d ден назад</item>
+        <item quantity="other">%d дни назад</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d ден напред</item>
+        <item quantity="other">%d дни напред</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Препоръчително</string>
+    <string name="iptv_guide_days_catchup">По-дълъг catch-up, заема повече място</string>
+    <string name="iptv_guide_days_larger">Заема повече място</string>
+    <string name="iptv_guides_choice_help">Всеки канал използва първия свързан справочник с предавания за него: първо ръчно зададен, после съвпадащо ID, после съвпадащо име, в показания ред. „Премести нагоре“ променя приоритета.</string>
+</resources>

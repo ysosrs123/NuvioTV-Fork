@@ -1,0 +1,31 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">لا يحتوي ملف الدليل على برامج للأيام القادمة وقد يكون قديماً. تم الاحتفاظ بدليلك السابق.</string>
+    <string name="iptv_guide_import_no_channels">لا يحتوي ملف الدليل على أي قنوات. تم الاحتفاظ بدليلك السابق.</string>
+    <string name="iptv_guide_import_invalid">عدد كبير جداً من الإدخالات في ملف الدليل غير صالح. تم الاحتفاظ بدليلك السابق.</string>
+    <string name="iptv_guide_import_too_large">ملف الدليل كبير جداً. تم الاحتفاظ بدليلك السابق.</string>
+    <string name="iptv_guide_import_not_xmltv">هذا ليس ملف دليل XMLTV. تم الاحتفاظ بدليلك السابق.</string>
+    <string name="iptv_guide_import_fewer">يحتوي الدليل الجديد على برامج أقل بكثير من السابق. تم الاحتفاظ بدليلك السابق.</string>
+    <string name="iptv_guide_import_not_linked">تم حفظ قنوات الدليل. ستُحمَّل البرامج عندما يستخدم أحد المصادر هذا الدليل.</string>
+    <string name="iptv_guide_days">أيام الدليل</string>
+    <string name="iptv_guide_days_subtitle">مقدار معلومات البرامج التي يتم الاحتفاظ بها. المزيد من الأيام يستهلك مساحة تخزين أكبر. يُطبَّق عند التحديث التالي للدليل.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="zero">%d يوم للخلف</item>
+        <item quantity="one">يوم واحد للخلف</item>
+        <item quantity="two">يومان للخلف</item>
+        <item quantity="few">%d أيام للخلف</item>
+        <item quantity="many">%d يوماً للخلف</item>
+        <item quantity="other">%d يوم للخلف</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="zero">%d يوم للأمام</item>
+        <item quantity="one">يوم واحد للأمام</item>
+        <item quantity="two">يومان للأمام</item>
+        <item quantity="few">%d أيام للأمام</item>
+        <item quantity="many">%d يوماً للأمام</item>
+        <item quantity="other">%d يوم للأمام</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">موصى به</string>
+    <string name="iptv_guide_days_catchup">مشاهدة مؤجلة أطول، تستهلك مساحة تخزين أكبر</string>
+    <string name="iptv_guide_days_larger">تستهلك مساحة تخزين أكبر</string>
+    <string name="iptv_guides_choice_help">تستخدم كل قناة أول دليل مرتبط يحتوي على برامج لها: التعيين اليدوي أولاً، ثم المعرّف المطابق، ثم الاسم المطابق، حسب الترتيب المعروض. يؤدي «نقل للأعلى» إلى تغيير الأولوية.</string>
+</resources>

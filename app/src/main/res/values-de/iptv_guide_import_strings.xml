@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Die Programmführer-Datei enthält keine Sendungen für die kommenden Tage und ist möglicherweise veraltet. Ihr bisheriger Programmführer wurde beibehalten.</string>
+    <string name="iptv_guide_import_no_channels">Die Programmführer-Datei enthält keine Sender. Ihr bisheriger Programmführer wurde beibehalten.</string>
+    <string name="iptv_guide_import_invalid">Zu viele Einträge in der Programmführer-Datei sind ungültig. Ihr bisheriger Programmführer wurde beibehalten.</string>
+    <string name="iptv_guide_import_too_large">Die Programmführer-Datei ist zu groß. Ihr bisheriger Programmführer wurde beibehalten.</string>
+    <string name="iptv_guide_import_not_xmltv">Dies ist keine XMLTV-Programmführer-Datei. Ihr bisheriger Programmführer wurde beibehalten.</string>
+    <string name="iptv_guide_import_fewer">Der neue Programmführer enthält weit weniger Sendungen als zuvor. Ihr bisheriger Programmführer wurde beibehalten.</string>
+    <string name="iptv_guide_import_not_linked">Sender des Programmführers gespeichert. Sendungen werden geladen, sobald eine Quelle diesen Programmführer nutzt.</string>
+    <string name="iptv_guide_days">Programmführer-Tage</string>
+    <string name="iptv_guide_days_subtitle">Wie viele Programminformationen gespeichert werden. Mehr Tage belegen mehr Speicher. Gilt ab der nächsten Aktualisierung des Programmführers.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d Tag zurück</item>
+        <item quantity="other">%d Tage zurück</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d Tag voraus</item>
+        <item quantity="other">%d Tage voraus</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Empfohlen</string>
+    <string name="iptv_guide_days_catchup">Längeres Catch-up, belegt mehr Speicher</string>
+    <string name="iptv_guide_days_larger">Belegt mehr Speicher</string>
+    <string name="iptv_guides_choice_help">Jeder Sender nutzt den ersten verknüpften Programmführer mit Sendungen für ihn: zuerst eine manuelle Zuordnung, dann eine passende ID, dann ein passender Name, in der angezeigten Reihenfolge. „Nach oben“ ändert die Priorität.</string>
+</resources>

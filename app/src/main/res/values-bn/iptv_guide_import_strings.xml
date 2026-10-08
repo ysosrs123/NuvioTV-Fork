@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">গাইড ফাইলে আগামী দিনগুলোর কোনো প্রোগ্রাম নেই এবং এটি পুরোনো হতে পারে। আপনার আগের গাইড রাখা হয়েছে।</string>
+    <string name="iptv_guide_import_no_channels">গাইড ফাইলে কোনো চ্যানেল নেই। আপনার আগের গাইড রাখা হয়েছে।</string>
+    <string name="iptv_guide_import_invalid">গাইড ফাইলের অনেক বেশি এন্ট্রি অবৈধ। আপনার আগের গাইড রাখা হয়েছে।</string>
+    <string name="iptv_guide_import_too_large">গাইড ফাইলটি অনেক বড়। আপনার আগের গাইড রাখা হয়েছে।</string>
+    <string name="iptv_guide_import_not_xmltv">এটি কোনো XMLTV গাইড ফাইল নয়। আপনার আগের গাইড রাখা হয়েছে।</string>
+    <string name="iptv_guide_import_fewer">নতুন গাইডে আগের চেয়ে অনেক কম প্রোগ্রাম আছে। আপনার আগের গাইড রাখা হয়েছে।</string>
+    <string name="iptv_guide_import_not_linked">গাইড চ্যানেল সেভ হয়েছে। কোনো সোর্স এই গাইড ব্যবহার করলে প্রোগ্রাম লোড হবে।</string>
+    <string name="iptv_guide_days">গাইডের দিন</string>
+    <string name="iptv_guide_days_subtitle">কতটা প্রোগ্রামের তথ্য রাখা হবে। বেশি দিন মানে বেশি স্টোরেজ। পরের গাইড আপডেটে প্রযোজ্য হবে।</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d দিন পিছনে</item>
+        <item quantity="other">%d দিন পিছনে</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d দিন সামনে</item>
+        <item quantity="other">%d দিন সামনে</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">প্রস্তাবিত</string>
+    <string name="iptv_guide_days_catchup">দীর্ঘ ক্যাচ-আপ, বেশি স্টোরেজ লাগে</string>
+    <string name="iptv_guide_days_larger">বেশি স্টোরেজ লাগে</string>
+    <string name="iptv_guides_choice_help">প্রতিটি চ্যানেল এমন প্রথম লিংক করা গাইড ব্যবহার করে যাতে তার প্রোগ্রাম আছে: প্রথমে ম্যানুয়াল নির্ধারণ, তারপর মিলে যাওয়া ID, তারপর মিলে যাওয়া নাম, দেখানো ক্রমে। উপরে সরান অগ্রাধিকার বদলায়।</string>
+</resources>

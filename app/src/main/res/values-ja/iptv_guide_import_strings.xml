@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">番組表ファイルに今後数日間の番組がなく、古い可能性があります。 以前の番組表を保持しました。</string>
+    <string name="iptv_guide_import_no_channels">番組表ファイルにチャンネルがありません。 以前の番組表を保持しました。</string>
+    <string name="iptv_guide_import_invalid">番組表ファイルに無効なエントリが多すぎます。 以前の番組表を保持しました。</string>
+    <string name="iptv_guide_import_too_large">番組表ファイルが大きすぎます。 以前の番組表を保持しました。</string>
+    <string name="iptv_guide_import_not_xmltv">これはXMLTV番組表ファイルではありません。 以前の番組表を保持しました。</string>
+    <string name="iptv_guide_import_fewer">新しい番組表の番組数が以前より大幅に少なくなっています。 以前の番組表を保持しました。</string>
+    <string name="iptv_guide_import_not_linked">番組表のチャンネルを保存しました。ソースがこの番組表を使用すると番組が読み込まれます。</string>
+    <string name="iptv_guide_days">番組表の日数</string>
+    <string name="iptv_guide_days_subtitle">保持する番組情報の量です。日数を増やすとストレージを多く使用します。次回の番組表の更新時に適用されます。</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="other">%d 日前まで</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="other">%d 日先まで</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">おすすめ</string>
+    <string name="iptv_guide_days_catchup">見逃し視聴が長くなり、ストレージを多く使用</string>
+    <string name="iptv_guide_days_larger">ストレージを多く使用</string>
+    <string name="iptv_guides_choice_help">各チャンネルは、そのチャンネルの番組がある最初のリンク済み番組表を使用します。手動割り当て、一致するID、一致する名前の順に、表示順で適用されます。「上へ移動」で優先度を変更できます。</string>
+</resources>
