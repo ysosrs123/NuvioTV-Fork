@@ -161,6 +161,39 @@ reporting, resets 10 October 2026 00:00 UTC):
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
 
+## Device findings — 8 October 2026 (build `f29cbe2`)
+
+User-reported, with status:
+1. Guide (EPG) empty — causes found: provider guide fails on the 256 MB cap, added XMLTV
+   guides are never linked to the source, guide choice ignores whether a guide has
+   programmes, a dropped reload. Being fixed (guide overhaul, in progress).
+2. Guides load slowly and one after another — one global refresh lock, 100-row
+   transactions, downloads coupled to DB writes. Being fixed (parallel, batched).
+3. Live TV menu → Settings opened Integrations — the Settings rail's own focus cancelled
+   the requested category. Fixed in `2d72733` (requested category wins until its pane
+   takes focus).
+4. Settings location: user asked whether to move Live TV settings into Content &
+   discovery. Recommendation given: keep a separate Live TV category; awaiting decision.
+5. Full screen: Left opens the channel list, second Left did nothing — now closes it
+   (`2d72733`).
+6. "The previous player has not confirmed it stopped" on channel change — close waited
+   up to 15 s for all reader threads; now completes once no provider request is running
+   (`2d72733`). Needs a device recheck.
+7. Corner preview: automatic preview removed; OK plays in the corner, OK again full
+   screen; the "Live" tag only shows for the channel actually playing (`2d72733`).
+8. Channel names cut off in the guide; menus, guide and Sport look generic — being
+   redone to Nuvio V2 styling with a wider channel column and less outer padding.
+9. Real XMLTV file refused ("could not be accepted") — likely strict timestamps or
+   orphaned programmes; parser being made lenient with specific messages. The file
+   could not be downloaded here (network policy).
+10. Provider guide "not enough space" — see 1.
+11. Recording from the guide gives no choice of location — a location choice is being
+    added to the record dialog.
+12. Sport view: no way back — Back returns to the previous view, Left on the first
+    fixture opens the menu (`2d72733`). Sport redesign with logos, live scores (with a
+    hide-scores setting), venue and game clock in progress.
+13. Menu item renamed to "Settings" (`2d72733`).
+
 ## Planned but not done (updated 7 October 2026)
 
 Everything from the 7 October comparison is now built except:
