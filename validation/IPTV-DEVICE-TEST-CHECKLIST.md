@@ -1,4 +1,4 @@
-# Nuvio IPTV — device test checklist (build `24d6868`, run 37752927770)
+# Nuvio IPTV — device test checklist (build `6afbea0`, run 37791659338; earlier items from `24d6868`)
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -56,6 +56,31 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 1. Settings → Live TV → Sport → Sports data → ESPN; choose AFL/NRL/EPL.
 2. Sport view shows a Fixtures row; selecting a fixture plays a matching channel.
 3. TheSportsDB with key 123: same check.
+
+Sports build (8 October; best done while followed teams are playing):
+4. Sport settings: follow two teams (hold OK on a fixture); Show scores on; While watching
+   → Glance; Across Nuvio → Pop-up.
+5. Sport view: cards per sport (tennis, golf, F1, UFC if chosen), hero Follow / Remind me,
+   "Tonight" timeline (Left/Right through events, OK opens channels), All scores pill;
+   recorded unwatched games show masked scores, hold OK reveals.
+6. Guide: league badges, live score chips and progress, "Games now" lane above the rows
+   (Up from the first row; OK tunes), Sport only filter.
+7. Full screen on a live game: game banner; Info opens Game Centre (picture shrinks,
+   tabs, Watch on a key moment, Back closes); score markers on the catch-up/timeshift bar
+   with Previous/Next score; Feeds lists other channels and the same channel on other
+   sources; another followed game scoring shows a Glance card about 45 s later (OK
+   switches, Back dismisses); nothing pops up for the game on screen; the channel list
+   (Left) and number entry are not interrupted by a card.
+8. Multiview: add a Game screen and an All scores tile; they need no decoder slot.
+9. Nuvio Home: Live sport and Your teams rows; team page (Follow, Remind me, Record every
+   game). Play a film: a followed team's score shows a pop-up (Watch the game resumes the
+   film from Continue watching later); none in the last 10 minutes; Show scores off hides
+   the score in the pop-up.
+10. Reminder: set one 6 minutes ahead; it appears 5 minutes before kick-off in Live TV, in
+   Nuvio's player and on Home.
+11. Press Home on the remote with Game Centre open: logcat should show sports requests
+   stop (`sports fetch` lines cease).
+12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
 
 ## 8. Experimental local timeshift
 1. Settings → Live TV → Local timeshift on, 30 minutes, internal.
