@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Izenačene tekme</string>
+    <string name="iptv_sport2_finished">Končane</string>
+    <string name="iptv_sport2_today">Danes</string>
+    <string name="iptv_sport2_home">Doma</string>
+    <string name="iptv_sport2_away">V gosteh</string>
+    <string name="iptv_sport2_final">Konec</string>
+    <string name="iptv_sport2_at">%2$s – %1$s</string>
+    <string name="iptv_sport2_versus">%1$s – %2$s</string>
+    <string name="iptv_sport2_week">Teden %1$d</string>
+    <string name="iptv_sport2_round">Krog %1$d</string>
+    <string name="iptv_sport2_last_play">Zadnja akcija</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d %%</string>
+    <string name="iptv_sport2_watch_on">Na %1$s</string>
+    <string name="iptv_sport2_show_scores">Prikaži rezultate</string>
+    <string name="iptv_sport2_show_scores_subtitle">Izklopite, da skrijete rezultate, ure tekem in izide.</string>
+    <string name="iptv_sport2_favourite_team">Priljubljena ekipa</string>
+    <string name="iptv_sport2_favourite_subtitle">Priljubljene ekipe so označene z zvezdico in prikazane prve.</string>
+    <string name="iptv_sport2_favourite_hint">Označene z zvezdico in prikazane prve. Na tekmi pridržite OK, da dodate ali odstranite ekipe.</string>
+    <string name="iptv_sport2_favourite_teams">Priljubljene ekipe</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Počistite ekipo, da jo odstranite iz priljubljenih.</string>
+</resources>

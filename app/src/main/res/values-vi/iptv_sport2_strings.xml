@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Trận đấu sát nút</string>
+    <string name="iptv_sport2_finished">Đã kết thúc</string>
+    <string name="iptv_sport2_today">Hôm nay</string>
+    <string name="iptv_sport2_home">Sân nhà</string>
+    <string name="iptv_sport2_away">Sân khách</string>
+    <string name="iptv_sport2_final">Kết thúc</string>
+    <string name="iptv_sport2_at">%2$s vs %1$s</string>
+    <string name="iptv_sport2_versus">%1$s vs %2$s</string>
+    <string name="iptv_sport2_week">Tuần %1$d</string>
+    <string name="iptv_sport2_round">Vòng %1$d</string>
+    <string name="iptv_sport2_last_play">Tình huống gần nhất</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">Trên %1$s</string>
+    <string name="iptv_sport2_show_scores">Hiện tỷ số</string>
+    <string name="iptv_sport2_show_scores_subtitle">Tắt để ẩn tỷ số, đồng hồ trận đấu và kết quả.</string>
+    <string name="iptv_sport2_favourite_team">Đội yêu thích</string>
+    <string name="iptv_sport2_favourite_subtitle">Đội yêu thích được gắn sao và xếp lên đầu.</string>
+    <string name="iptv_sport2_favourite_hint">Được gắn sao và xếp lên đầu. Giữ OK trên một trận đấu để thêm hoặc xóa đội.</string>
+    <string name="iptv_sport2_favourite_teams">Đội yêu thích</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Xóa một đội để bỏ khỏi mục yêu thích.</string>
+</resources>

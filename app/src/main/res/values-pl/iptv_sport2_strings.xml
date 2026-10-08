@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Wyrównane mecze</string>
+    <string name="iptv_sport2_finished">Zakończone</string>
+    <string name="iptv_sport2_today">Dzisiaj</string>
+    <string name="iptv_sport2_home">Gospodarze</string>
+    <string name="iptv_sport2_away">Goście</string>
+    <string name="iptv_sport2_final">Koniec</string>
+    <string name="iptv_sport2_at">%2$s – %1$s</string>
+    <string name="iptv_sport2_versus">%1$s – %2$s</string>
+    <string name="iptv_sport2_week">Tydzień %1$d</string>
+    <string name="iptv_sport2_round">Kolejka %1$d</string>
+    <string name="iptv_sport2_last_play">Ostatnia akcja</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">Na kanale %1$s</string>
+    <string name="iptv_sport2_show_scores">Pokazuj wyniki</string>
+    <string name="iptv_sport2_show_scores_subtitle">Wyłącz, aby ukryć wyniki, zegary meczowe i rezultaty.</string>
+    <string name="iptv_sport2_favourite_team">Ulubiona drużyna</string>
+    <string name="iptv_sport2_favourite_subtitle">Ulubione drużyny są oznaczone gwiazdką i wyświetlane jako pierwsze.</string>
+    <string name="iptv_sport2_favourite_hint">Oznaczone gwiazdką i wyświetlane jako pierwsze. Przytrzymaj OK na meczu, aby dodać lub usunąć drużyny.</string>
+    <string name="iptv_sport2_favourite_teams">Ulubione drużyny</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Wyczyść drużynę, aby usunąć ją z ulubionych.</string>
+</resources>

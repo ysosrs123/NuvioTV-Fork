@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">நெருக்கமான போட்டிகள்</string>
+    <string name="iptv_sport2_finished">முடிந்தவை</string>
+    <string name="iptv_sport2_today">இன்று</string>
+    <string name="iptv_sport2_home">சொந்த மைதானம்</string>
+    <string name="iptv_sport2_away">வெளி மைதானம்</string>
+    <string name="iptv_sport2_final">முடிவு</string>
+    <string name="iptv_sport2_at">%2$s எதிர் %1$s</string>
+    <string name="iptv_sport2_versus">%1$s எதிர் %2$s</string>
+    <string name="iptv_sport2_week">வாரம் %1$d</string>
+    <string name="iptv_sport2_round">சுற்று %1$d</string>
+    <string name="iptv_sport2_last_play">கடைசி ஆட்டம்</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">%1$s இல்</string>
+    <string name="iptv_sport2_show_scores">ஸ்கோர்களைக் காட்டு</string>
+    <string name="iptv_sport2_show_scores_subtitle">ஸ்கோர்கள், ஆட்ட நேரம் மற்றும் முடிவுகளை மறைக்க அணைக்கவும்.</string>
+    <string name="iptv_sport2_favourite_team">பிடித்த அணி</string>
+    <string name="iptv_sport2_favourite_subtitle">பிடித்த அணிகள் நட்சத்திரமிடப்பட்டு முதலில் காட்டப்படும்.</string>
+    <string name="iptv_sport2_favourite_hint">நட்சத்திரமிடப்பட்டு முதலில் காட்டப்படும். அணிகளைச் சேர்க்க அல்லது அகற்ற ஒரு போட்டியில் OK ஐ அழுத்திப் பிடிக்கவும்.</string>
+    <string name="iptv_sport2_favourite_teams">பிடித்த அணிகள்</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">உங்கள் பிடித்தவற்றிலிருந்து அகற்ற ஒரு அணியை அழிக்கவும்.</string>
+</resources>

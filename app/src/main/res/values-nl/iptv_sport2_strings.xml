@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Spannende wedstrijden</string>
+    <string name="iptv_sport2_finished">Afgelopen</string>
+    <string name="iptv_sport2_today">Vandaag</string>
+    <string name="iptv_sport2_home">Thuis</string>
+    <string name="iptv_sport2_away">Uit</string>
+    <string name="iptv_sport2_final">Eindstand</string>
+    <string name="iptv_sport2_at">%2$s - %1$s</string>
+    <string name="iptv_sport2_versus">%1$s - %2$s</string>
+    <string name="iptv_sport2_week">Week %1$d</string>
+    <string name="iptv_sport2_round">Speelronde %1$d</string>
+    <string name="iptv_sport2_last_play">Laatste actie</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">Op %1$s</string>
+    <string name="iptv_sport2_show_scores">Scores tonen</string>
+    <string name="iptv_sport2_show_scores_subtitle">Zet uit om scores, wedstrijdklokken en uitslagen te verbergen.</string>
+    <string name="iptv_sport2_favourite_team">Favoriete team</string>
+    <string name="iptv_sport2_favourite_subtitle">Favoriete teams krijgen een ster en staan bovenaan.</string>
+    <string name="iptv_sport2_favourite_hint">Krijgen een ster en staan bovenaan. Houd OK ingedrukt op een wedstrijd om teams toe te voegen of te verwijderen.</string>
+    <string name="iptv_sport2_favourite_teams">Favoriete teams</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Wis een team om het uit je favorieten te verwijderen.</string>
+</resources>

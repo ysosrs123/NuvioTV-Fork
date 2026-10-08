@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Jämna matcher</string>
+    <string name="iptv_sport2_finished">Avslutade</string>
+    <string name="iptv_sport2_today">Idag</string>
+    <string name="iptv_sport2_home">Hemma</string>
+    <string name="iptv_sport2_away">Borta</string>
+    <string name="iptv_sport2_final">Slut</string>
+    <string name="iptv_sport2_at">%2$s – %1$s</string>
+    <string name="iptv_sport2_versus">%1$s – %2$s</string>
+    <string name="iptv_sport2_week">Vecka %1$d</string>
+    <string name="iptv_sport2_round">Omgång %1$d</string>
+    <string name="iptv_sport2_last_play">Senaste spel</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d %%</string>
+    <string name="iptv_sport2_watch_on">På %1$s</string>
+    <string name="iptv_sport2_show_scores">Visa resultat</string>
+    <string name="iptv_sport2_show_scores_subtitle">Stäng av för att dölja resultat, matchklockor och utfall.</string>
+    <string name="iptv_sport2_favourite_team">Favoritlag</string>
+    <string name="iptv_sport2_favourite_subtitle">Favoritlag stjärnmärks och visas först.</string>
+    <string name="iptv_sport2_favourite_hint">Stjärnmärks och visas först. Håll in OK på en match för att lägga till eller ta bort lag.</string>
+    <string name="iptv_sport2_favourite_teams">Favoritlag</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Rensa ett lag för att ta bort det från dina favoriter.</string>
+</resources>

@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">膠著比賽</string>
+    <string name="iptv_sport2_finished">已結束</string>
+    <string name="iptv_sport2_today">今天</string>
+    <string name="iptv_sport2_home">主場</string>
+    <string name="iptv_sport2_away">客場</string>
+    <string name="iptv_sport2_final">終場</string>
+    <string name="iptv_sport2_at">%2$s 對 %1$s</string>
+    <string name="iptv_sport2_versus">%1$s 對 %2$s</string>
+    <string name="iptv_sport2_week">第 %1$d 週</string>
+    <string name="iptv_sport2_round">第 %1$d 輪</string>
+    <string name="iptv_sport2_last_play">最新戰況</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">頻道：%1$s</string>
+    <string name="iptv_sport2_show_scores">顯示比分</string>
+    <string name="iptv_sport2_show_scores_subtitle">關閉後將隱藏比分、比賽時鐘和賽果。</string>
+    <string name="iptv_sport2_favourite_team">喜愛的球隊</string>
+    <string name="iptv_sport2_favourite_subtitle">喜愛的球隊會加上星號並優先顯示。</string>
+    <string name="iptv_sport2_favourite_hint">加上星號並優先顯示。在比賽上長按 OK 可新增或移除球隊。</string>
+    <string name="iptv_sport2_favourite_teams">喜愛的球隊</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">清除某支球隊即可將其從喜愛清單中移除。</string>
+</resources>

@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Vyrovnané zápasy</string>
+    <string name="iptv_sport2_finished">Skončené</string>
+    <string name="iptv_sport2_today">Dnes</string>
+    <string name="iptv_sport2_home">Doma</string>
+    <string name="iptv_sport2_away">Vonku</string>
+    <string name="iptv_sport2_final">Koniec</string>
+    <string name="iptv_sport2_at">%2$s – %1$s</string>
+    <string name="iptv_sport2_versus">%1$s – %2$s</string>
+    <string name="iptv_sport2_week">Týždeň %1$d</string>
+    <string name="iptv_sport2_round">Kolo %1$d</string>
+    <string name="iptv_sport2_last_play">Posledná akcia</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d %%</string>
+    <string name="iptv_sport2_watch_on">Na %1$s</string>
+    <string name="iptv_sport2_show_scores">Zobraziť skóre</string>
+    <string name="iptv_sport2_show_scores_subtitle">Vypnite na skrytie skóre, hracieho času a výsledkov.</string>
+    <string name="iptv_sport2_favourite_team">Obľúbený tím</string>
+    <string name="iptv_sport2_favourite_subtitle">Obľúbené tímy majú hviezdičku a zobrazujú sa ako prvé.</string>
+    <string name="iptv_sport2_favourite_hint">Majú hviezdičku a zobrazujú sa ako prvé. Podržte OK na zápase a pridajte alebo odstráňte tímy.</string>
+    <string name="iptv_sport2_favourite_teams">Obľúbené tímy</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Vymažte tím a odstránite ho z obľúbených.</string>
+</resources>

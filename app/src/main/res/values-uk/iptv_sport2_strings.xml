@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Напружені матчі</string>
+    <string name="iptv_sport2_finished">Завершені</string>
+    <string name="iptv_sport2_today">Сьогодні</string>
+    <string name="iptv_sport2_home">Удома</string>
+    <string name="iptv_sport2_away">На виїзді</string>
+    <string name="iptv_sport2_final">Кінець матчу</string>
+    <string name="iptv_sport2_at">%2$s — %1$s</string>
+    <string name="iptv_sport2_versus">%1$s — %2$s</string>
+    <string name="iptv_sport2_week">Тиждень %1$d</string>
+    <string name="iptv_sport2_round">Тур %1$d</string>
+    <string name="iptv_sport2_last_play">Останній епізод</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d %%</string>
+    <string name="iptv_sport2_watch_on">Канал: %1$s</string>
+    <string name="iptv_sport2_show_scores">Показувати рахунок</string>
+    <string name="iptv_sport2_show_scores_subtitle">Вимкніть, щоб приховати рахунок, ігровий час і результати.</string>
+    <string name="iptv_sport2_favourite_team">Улюблена команда</string>
+    <string name="iptv_sport2_favourite_subtitle">Улюблені команди позначені зірочкою й показані першими.</string>
+    <string name="iptv_sport2_favourite_hint">Позначені зірочкою й показані першими. Утримуйте OK на матчі, щоб додати або видалити команди.</string>
+    <string name="iptv_sport2_favourite_teams">Улюблені команди</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Очистьте команду, щоб прибрати її з улюблених.</string>
+</resources>

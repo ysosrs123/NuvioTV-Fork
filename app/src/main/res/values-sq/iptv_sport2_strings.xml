@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Ndeshje të ngushta</string>
+    <string name="iptv_sport2_finished">Të përfunduara</string>
+    <string name="iptv_sport2_today">Sot</string>
+    <string name="iptv_sport2_home">Në shtëpi</string>
+    <string name="iptv_sport2_away">Në transfertë</string>
+    <string name="iptv_sport2_final">Përfunduar</string>
+    <string name="iptv_sport2_at">%2$s – %1$s</string>
+    <string name="iptv_sport2_versus">%1$s – %2$s</string>
+    <string name="iptv_sport2_week">Java %1$d</string>
+    <string name="iptv_sport2_round">Raundi %1$d</string>
+    <string name="iptv_sport2_last_play">Aksioni i fundit</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">Në %1$s</string>
+    <string name="iptv_sport2_show_scores">Shfaq rezultatet</string>
+    <string name="iptv_sport2_show_scores_subtitle">Çaktivizoje për të fshehur rezultatet, kohën e lojës dhe përfundimet.</string>
+    <string name="iptv_sport2_favourite_team">Ekipi i preferuar</string>
+    <string name="iptv_sport2_favourite_subtitle">Ekipet e preferuara shënohen me yll dhe shfaqen të parat.</string>
+    <string name="iptv_sport2_favourite_hint">Shënohen me yll dhe shfaqen të parat. Mbaj shtypur OK mbi një ndeshje për të shtuar ose hequr ekipe.</string>
+    <string name="iptv_sport2_favourite_teams">Ekipet e preferuara</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Pastro një ekip për ta hequr nga të preferuarat.</string>
+</resources>

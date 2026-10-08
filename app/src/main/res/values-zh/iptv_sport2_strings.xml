@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">胶着比赛</string>
+    <string name="iptv_sport2_finished">已结束</string>
+    <string name="iptv_sport2_today">今天</string>
+    <string name="iptv_sport2_home">主场</string>
+    <string name="iptv_sport2_away">客场</string>
+    <string name="iptv_sport2_final">完场</string>
+    <string name="iptv_sport2_at">%2$s 对 %1$s</string>
+    <string name="iptv_sport2_versus">%1$s 对 %2$s</string>
+    <string name="iptv_sport2_week">第 %1$d 周</string>
+    <string name="iptv_sport2_round">第 %1$d 轮</string>
+    <string name="iptv_sport2_last_play">最新战况</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">频道：%1$s</string>
+    <string name="iptv_sport2_show_scores">显示比分</string>
+    <string name="iptv_sport2_show_scores_subtitle">关闭后将隐藏比分、比赛时钟和赛果。</string>
+    <string name="iptv_sport2_favourite_team">喜爱的球队</string>
+    <string name="iptv_sport2_favourite_subtitle">喜爱的球队会加星标并优先显示。</string>
+    <string name="iptv_sport2_favourite_hint">加星标并优先显示。在比赛上长按 OK 可添加或移除球队。</string>
+    <string name="iptv_sport2_favourite_teams">喜爱的球队</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">清除某支球队即可将其从喜爱列表中移除。</string>
+</resources>

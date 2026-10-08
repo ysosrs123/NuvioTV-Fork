@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Çekişmeli maçlar</string>
+    <string name="iptv_sport2_finished">Bitenler</string>
+    <string name="iptv_sport2_today">Bugün</string>
+    <string name="iptv_sport2_home">İç saha</string>
+    <string name="iptv_sport2_away">Deplasman</string>
+    <string name="iptv_sport2_final">Maç sonu</string>
+    <string name="iptv_sport2_at">%2$s - %1$s</string>
+    <string name="iptv_sport2_versus">%1$s - %2$s</string>
+    <string name="iptv_sport2_week">%1$d. hafta</string>
+    <string name="iptv_sport2_round">%1$d. tur</string>
+    <string name="iptv_sport2_last_play">Son pozisyon</string>
+    <string name="iptv_sport2_win_percent">%1$s %%%2$d</string>
+    <string name="iptv_sport2_watch_on">Kanal: %1$s</string>
+    <string name="iptv_sport2_show_scores">Skorları göster</string>
+    <string name="iptv_sport2_show_scores_subtitle">Skorları, maç saatlerini ve sonuçları gizlemek için kapatın.</string>
+    <string name="iptv_sport2_favourite_team">Favori takım</string>
+    <string name="iptv_sport2_favourite_subtitle">Favori takımlar yıldızlanır ve en üstte listelenir.</string>
+    <string name="iptv_sport2_favourite_hint">Yıldızlanır ve en üstte listelenir. Takım eklemek veya kaldırmak için bir maçta OK tuşunu basılı tutun.</string>
+    <string name="iptv_sport2_favourite_teams">Favori takımlar</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Bir takımı favorilerinizden kaldırmak için temizleyin.</string>
+</resources>

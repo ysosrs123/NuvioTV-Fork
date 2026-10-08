@@ -1,0 +1,22 @@
+<resources>
+    <string name="iptv_sport2_close_games">Meciuri strânse</string>
+    <string name="iptv_sport2_finished">Încheiate</string>
+    <string name="iptv_sport2_today">Astăzi</string>
+    <string name="iptv_sport2_home">Acasă</string>
+    <string name="iptv_sport2_away">Deplasare</string>
+    <string name="iptv_sport2_final">Final</string>
+    <string name="iptv_sport2_at">%2$s – %1$s</string>
+    <string name="iptv_sport2_versus">%1$s – %2$s</string>
+    <string name="iptv_sport2_week">Săptămâna %1$d</string>
+    <string name="iptv_sport2_round">Etapa %1$d</string>
+    <string name="iptv_sport2_last_play">Ultima fază</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">Pe %1$s</string>
+    <string name="iptv_sport2_show_scores">Afișează scorurile</string>
+    <string name="iptv_sport2_show_scores_subtitle">Dezactivează pentru a ascunde scorurile, cronometrele și rezultatele.</string>
+    <string name="iptv_sport2_favourite_team">Echipă favorită</string>
+    <string name="iptv_sport2_favourite_subtitle">Echipele favorite au stea și apar primele.</string>
+    <string name="iptv_sport2_favourite_hint">Au stea și apar primele. Ține apăsat OK pe un meci pentru a adăuga sau elimina echipe.</string>
+    <string name="iptv_sport2_favourite_teams">Echipe favorite</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Golește o echipă pentru a o elimina din favorite.</string>
+</resources>
