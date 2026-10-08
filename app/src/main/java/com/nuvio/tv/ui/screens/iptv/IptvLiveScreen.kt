@@ -235,7 +235,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
             Column(Modifier.fillMaxSize().sidebarPageContent().padding(start = if (LocalV2Appearance.current != null) 16.dp else 40.dp, end = 24.dp, top = 16.dp, bottom = 14.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(Modifier.fillMaxWidth().height(176.dp), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                    InfoPanel(state, now, cursor, Modifier.weight(1f).fillMaxHeight())
+                    IptvSportHero(state.sports && state.search.isBlank(), Modifier.weight(1f).fillMaxHeight()) { InfoPanel(state, now, cursor, it) }
                     Preview(state, Modifier.fillMaxHeight().aspectRatio(16f / 9f), onClick = {
                         val row = state.playingRow ?: state.focused
                         if (state.player != null) fullscreen = true else if (row != null) viewModel.watch(row)

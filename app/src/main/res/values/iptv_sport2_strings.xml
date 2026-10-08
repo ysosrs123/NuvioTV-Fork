@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport2_close_games">Close games</string>
+    <string name="iptv_sport2_finished">Finished</string>
+    <string name="iptv_sport2_today">Today</string>
+    <string name="iptv_sport2_home">Home</string>
+    <string name="iptv_sport2_away">Away</string>
+    <string name="iptv_sport2_final">Final</string>
+    <string name="iptv_sport2_at">%1$s at %2$s</string>
+    <string name="iptv_sport2_versus">%1$s v %2$s</string>
+    <string name="iptv_sport2_week">Week %1$d</string>
+    <string name="iptv_sport2_round">Round %1$d</string>
+    <string name="iptv_sport2_last_play">Last play</string>
+    <string name="iptv_sport2_win_percent">%1$s %2$d%%</string>
+    <string name="iptv_sport2_watch_on">On %1$s</string>
+    <string name="iptv_sport2_show_scores">Show scores</string>
+    <string name="iptv_sport2_show_scores_subtitle">Turn off to hide scores, game clocks and results.</string>
+    <string name="iptv_sport2_favourite_team">Favourite team</string>
+    <string name="iptv_sport2_favourite_subtitle">Favourite teams are starred and listed first.</string>
+    <string name="iptv_sport2_favourite_hint">Starred and listed first. Hold OK on a fixture to add or remove teams.</string>
+    <string name="iptv_sport2_favourite_teams">Favourite teams</string>
+    <string name="iptv_sport2_favourite_teams_subtitle">Clear a team to remove it from your favourites.</string>
+</resources>

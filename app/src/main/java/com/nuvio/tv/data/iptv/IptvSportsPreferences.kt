@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.iptv
 
 import android.content.Context
+import com.nuvio.tv.core.iptv.SportsFavourites
 import com.nuvio.tv.core.iptv.SportsLeagues
 import com.nuvio.tv.core.iptv.SportsService
 import java.util.Base64
@@ -16,6 +17,15 @@ class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretB
     var leagues: Set<String>
         get() = preferences.getStringSet(LEAGUES_KEY, null)?.filter { SportsLeagues.byId(it) != null }?.toSet() ?: SportsLeagues.DEFAULTS
         set(value) = preferences.edit().putStringSet(LEAGUES_KEY, value.filter { SportsLeagues.byId(it) != null }.toSet()).apply()
+
+    var showScores: Boolean
+        get() = preferences.getBoolean(SCORES_KEY, true)
+        set(value) = preferences.edit().putBoolean(SCORES_KEY, value).apply()
+
+    var favouriteTeams: Set<String>
+        get() = preferences.getStringSet(FAVOURITES_KEY, null)?.filter { SportsFavourites.parse(it) != null }?.toSet().orEmpty()
+        set(value) = preferences.edit().putStringSet(FAVOURITES_KEY, value.filter { SportsFavourites.parse(it) != null && it.length <= 200 }
+            .take(SportsFavourites.MAX).toSet()).apply()
 
     val hasKey: Boolean get() = preferences.contains(KEY_KEY)
 
@@ -44,6 +54,8 @@ class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretB
         private const val SERVICE_KEY = "settings-sports-service"
         private const val LEAGUES_KEY = "settings-sports-leagues"
         private const val KEY_KEY = "settings-sports-key"
+        private const val SCORES_KEY = "settings-sports-scores"
+        private const val FAVOURITES_KEY = "settings-sports-favourite-teams"
         private const val KEY_CONTEXT = "iptv.sports.v1:thesportsdb-key"
     }
 }

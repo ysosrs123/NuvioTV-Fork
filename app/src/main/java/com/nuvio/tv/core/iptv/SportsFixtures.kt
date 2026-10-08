@@ -9,16 +9,25 @@ import org.json.JSONObject
 
 enum class SportsService { OFF, ESPN, THESPORTSDB }
 enum class FixtureStatus { SCHEDULED, LIVE, FINAL }
-enum class FixtureSection { LIVE, TODAY, TOMORROW, LATER }
+enum class FixtureSection { LIVE, CLOSE, TODAY, TOMORROW, DAY, FINISHED }
+enum class FixtureSide { HOME, AWAY }
 
-data class FixtureTeam(val name: String, val shortName: String? = null, val abbreviation: String? = null, val alternatives: List<String> = emptyList()) {
+data class FixtureTeam(val name: String, val shortName: String? = null, val abbreviation: String? = null, val alternatives: List<String> = emptyList(),
+    val logo: String? = null, val colour: String? = null, val record: String? = null) {
     val strongNames: List<String> get() = listOfNotNull(name, shortName).filter(String::isNotBlank).distinct()
     val weakNames: List<String> get() = (alternatives + listOfNotNull(abbreviation)).filter(String::isNotBlank).distinct() - strongNames.toSet()
 }
 
+data class FixtureLine(val score: String? = null, val periods: List<String> = emptyList())
+
+data class FixtureSituation(val downDistance: String? = null, val possession: FixtureSide? = null, val lastPlay: String? = null, val homeWinPercent: Int? = null)
+
 data class SportsFixture(val id: String, val league: String, val sport: String, val title: String, val home: FixtureTeam?, val away: FixtureTeam?,
-    val startMillis: Long, val status: FixtureStatus, val score: String? = null, val detail: String? = null, val broadcasters: List<String> = emptyList()) {
+    val startMillis: Long, val status: FixtureStatus, val score: String? = null, val detail: String? = null, val broadcasters: List<String> = emptyList(),
+    val venue: String? = null, val round: Int? = null, val period: Int? = null, val clock: String? = null, val homeLine: FixtureLine? = null,
+    val awayLine: FixtureLine? = null, val situation: FixtureSituation? = null, val leagueLogo: String? = null) {
     val teams: Boolean get() = home != null && away != null
+    val key: String get() = "$league:$id"
 }
 
 data class SportsLeague(val id: String, val name: String, val sport: String, val espn: String?, val sportsDb: String?, val sportsDbId: String? = null,
@@ -118,36 +127,119 @@ object SportsRefresh {
     fun durationMillis(fixture: SportsFixture): Long = (SportsLeagues.byId(fixture.league)?.durationMinutes ?: 180) * 60_000L
 }
 
+data class FixtureRow(val section: FixtureSection, val fixtures: List<SportsFixture>, val day: LocalDate? = null)
+
 object SportsFixtureSections {
     private const val STALE_MILLIS = 30L * 60 * 1000
 
-    fun group(fixtures: List<SportsFixture>, nowMillis: Long, zone: ZoneId): List<Pair<FixtureSection, List<SportsFixture>>> {
+    fun group(fixtures: List<SportsFixture>, nowMillis: Long, zone: ZoneId, showScores: Boolean = true, favourites: Set<String> = emptySet()): List<FixtureRow> {
         val today = Instant.ofEpochMilli(nowMillis).atZone(zone).toLocalDate()
         val order = SportsLeagues.ALL.withIndex().associate { it.value.id to it.index }
-        val sections = fixtures.distinctBy { it.league to it.id }.mapNotNull { fixture ->
+        val placed = fixtures.distinctBy { it.league to it.id }.mapNotNull { fixture ->
             val day = Instant.ofEpochMilli(fixture.startMillis).atZone(zone).toLocalDate()
             val section = when {
-                fixture.status == FixtureStatus.FINAL -> null
+                fixture.status == FixtureStatus.FINAL -> FixtureSection.FINISHED.takeIf { showScores && day == today }
                 fixture.status == FixtureStatus.LIVE -> FixtureSection.LIVE
                 fixture.startMillis + SportsRefresh.durationMillis(fixture) + STALE_MILLIS < nowMillis -> null
                 day == today || (day.isBefore(today) && fixture.startMillis <= nowMillis) -> FixtureSection.TODAY
                 day == today.plusDays(1) -> FixtureSection.TOMORROW
-                day.isAfter(today.plusDays(1)) && day.isBefore(today.plusDays(SportsDays.DAYS.toLong())) -> FixtureSection.LATER
+                day.isAfter(today.plusDays(1)) && day.isBefore(today.plusDays(SportsDays.DAYS.toLong())) -> FixtureSection.DAY
                 else -> null
             }
-            section?.let { it to fixture }
+            section?.let { Triple(it, day, fixture) }
         }
-        return FixtureSection.entries.mapNotNull { section ->
-            sections.filter { it.first == section }.map { it.second }
-                .sortedWith(compareBy({ it.startMillis }, { order[it.league] ?: Int.MAX_VALUE }, { it.title }))
-                .takeIf { it.isNotEmpty() }?.let { section to it }
+        val ascending = compareBy<SportsFixture>({ !SportsFavourites.has(favourites, it) }, { it.startMillis }, { order[it.league] ?: Int.MAX_VALUE }, { it.title })
+        fun of(section: FixtureSection) = placed.filter { it.first == section }.map { it.third }
+        val live = of(FixtureSection.LIVE).sortedWith(ascending)
+        val close = if (showScores) live.filter(::close) else emptyList()
+        val rows = mutableListOf<FixtureRow>()
+        if (live.isNotEmpty()) rows += FixtureRow(FixtureSection.LIVE, live)
+        if (close.isNotEmpty() && close.size < live.size) rows += FixtureRow(FixtureSection.CLOSE, close)
+        of(FixtureSection.TODAY).takeIf { it.isNotEmpty() }?.let { rows += FixtureRow(FixtureSection.TODAY, it.sortedWith(ascending), today) }
+        of(FixtureSection.TOMORROW).takeIf { it.isNotEmpty() }?.let { rows += FixtureRow(FixtureSection.TOMORROW, it.sortedWith(ascending), today.plusDays(1)) }
+        placed.filter { it.first == FixtureSection.DAY }.groupBy { it.second }.entries.sortedBy { it.key.toEpochDay() }.forEach { (day, items) ->
+            rows += FixtureRow(FixtureSection.DAY, items.map { it.third }.sortedWith(ascending), day)
         }
+        of(FixtureSection.FINISHED).takeIf { it.isNotEmpty() }?.let { finished ->
+            rows += FixtureRow(FixtureSection.FINISHED, finished.sortedWith(compareBy<SportsFixture>({ !SportsFavourites.has(favourites, it) },
+                { -it.startMillis }, { order[it.league] ?: Int.MAX_VALUE }, { it.title })), today)
+        }
+        return rows
+    }
+
+    fun close(fixture: SportsFixture): Boolean {
+        if (fixture.status != FixtureStatus.LIVE) return false
+        val margin = closeMargin(fixture.sport) ?: return false
+        val (home, away) = SportsFixtureText.scores(fixture) ?: return false
+        val a = home.toIntOrNull() ?: return false
+        val b = away.toIntOrNull() ?: return false
+        return kotlin.math.abs(a - b) <= margin
+    }
+
+    private fun closeMargin(sport: String): Int? = when (sport) {
+        "soccer", "ice-hockey" -> 1
+        "baseball" -> 2
+        "basketball", "rugby-league" -> 6
+        "rugby" -> 7
+        "american-football" -> 8
+        "australian-football" -> 12
+        else -> null
+    }
+}
+
+object SportsFavourites {
+    const val MAX = 200
+
+    fun key(league: String, team: FixtureTeam): String = "$league:${team.name.trim()}"
+
+    fun has(favourites: Set<String>, fixture: SportsFixture): Boolean =
+        favourites.isNotEmpty() && listOfNotNull(fixture.home, fixture.away).any { key(fixture.league, it) in favourites }
+
+    fun toggle(favourites: Set<String>, league: String, team: FixtureTeam): Set<String> {
+        val key = key(league, team)
+        return if (key in favourites) favourites - key else (favourites + key).toList().takeLast(MAX).toSet()
+    }
+
+    fun parse(key: String): Pair<String, String>? {
+        val split = key.indexOf(':')
+        if (split <= 0 || split == key.length - 1) return null
+        return key.substring(0, split) to key.substring(split + 1)
+    }
+}
+
+object SportsFixtureText {
+    private val US_SPORTS = setOf("american-football", "basketball", "baseball", "ice-hockey")
+
+    fun awayFirst(fixture: SportsFixture): Boolean = fixture.sport in US_SPORTS
+
+    fun scores(fixture: SportsFixture): Pair<String, String>? {
+        val home = fixture.homeLine?.score
+        val away = fixture.awayLine?.score
+        if (home != null && away != null) return home to away
+        val parts = fixture.score?.split('–')?.map(String::trim)?.takeIf { it.size == 2 && it.all(String::isNotEmpty) } ?: return null
+        return parts[0] to parts[1]
+    }
+
+    fun periodClock(fixture: SportsFixture): String? {
+        if (fixture.status != FixtureStatus.LIVE) return null
+        val label = fixture.period?.takeIf { it > 0 }?.let { periodLabel(fixture.sport, it) }
+        val clock = fixture.clock?.trim()?.takeIf { it.isNotEmpty() && it != "0:00" && it != "0'" && it != "0" }
+        return if (label != null && clock != null) "$label · $clock" else fixture.detail ?: label ?: clock
+    }
+
+    fun periodLabel(sport: String, period: Int): String? = when (sport) {
+        "american-football", "basketball", "australian-football" -> if (period <= 4) "Q$period" else "OT"
+        "ice-hockey" -> if (period <= 3) "P$period" else "OT"
+        "soccer", "rugby", "rugby-league" -> if (period <= 2) "${period}H" else "ET"
+        else -> null
     }
 }
 
 object SportsFixtureCodec {
+    private const val VERSION = 2
+
     fun encode(entry: SportsCacheEntry): String = JSONObject().apply {
-        put("version", 1)
+        put("version", VERSION)
         entry.fetchedAt?.let { put("fetched", it) }
         entry.failedAt?.let { put("failed", it) }
         put("failures", entry.failures)
@@ -156,10 +248,11 @@ object SportsFixtureCodec {
 
     fun decode(text: String): SportsCacheEntry? = runCatching {
         val json = JSONObject(text)
-        if (json.optInt("version") != 1) return null
+        val version = json.optInt("version")
+        if (version != 1 && version != VERSION) return null
         val array = json.optJSONArray("fixtures") ?: JSONArray()
         SportsCacheEntry((0 until minOf(array.length(), MAX_FIXTURES)).mapNotNull { index -> array.optJSONObject(index)?.let(::fixture) },
-            json.optLongOrNull("fetched"), json.optLongOrNull("failed"), json.optInt("failures").coerceIn(0, 20))
+            json.optLongOrNull("fetched").takeIf { version == VERSION }, json.optLongOrNull("failed"), json.optInt("failures").coerceIn(0, 20))
     }.getOrNull()
 
     private fun encode(fixture: SportsFixture) = JSONObject().apply {
@@ -168,25 +261,46 @@ object SportsFixtureCodec {
         put("start", fixture.startMillis); put("status", fixture.status.name)
         fixture.score?.let { put("score", it) }; fixture.detail?.let { put("detail", it) }
         put("broadcasters", JSONArray(fixture.broadcasters))
+        fixture.venue?.let { put("venue", it) }; fixture.round?.let { put("round", it) }; fixture.period?.let { put("period", it) }
+        fixture.clock?.let { put("clock", it) }; fixture.leagueLogo?.let { put("leagueLogo", it) }
+        fixture.homeLine?.let { put("homeLine", line(it)) }; fixture.awayLine?.let { put("awayLine", line(it)) }
+        fixture.situation?.let { situation ->
+            put("situation", JSONObject().apply {
+                situation.downDistance?.let { put("downDistance", it) }; situation.possession?.let { put("possession", it.name) }
+                situation.lastPlay?.let { put("lastPlay", it) }; situation.homeWinPercent?.let { put("homeWin", it) }
+            })
+        }
     }
 
     private fun team(team: FixtureTeam) = JSONObject().apply {
         put("name", team.name); team.shortName?.let { put("short", it) }; team.abbreviation?.let { put("abbreviation", it) }
         put("alternatives", JSONArray(team.alternatives))
+        team.logo?.let { put("logo", it) }; team.colour?.let { put("colour", it) }; team.record?.let { put("record", it) }
     }
+
+    private fun line(line: FixtureLine) = JSONObject().apply { line.score?.let { put("score", it) }; put("periods", JSONArray(line.periods)) }
 
     private fun fixture(json: JSONObject): SportsFixture? {
         val id = json.text("id") ?: return null
         val league = json.text("league") ?: return null
         val status = FixtureStatus.entries.firstOrNull { it.name == json.text("status") } ?: return null
         if (!json.has("start")) return null
+        val situation = json.optJSONObject("situation")?.let { item ->
+            FixtureSituation(item.text("downDistance"), FixtureSide.entries.firstOrNull { it.name == item.text("possession") }, item.text("lastPlay"),
+                item.optIntOrNull("homeWin")?.coerceIn(0, 100))
+        }
         return SportsFixture(id, league, json.text("sport").orEmpty(), json.text("title").orEmpty(), json.optJSONObject("home")?.let(::team),
-            json.optJSONObject("away")?.let(::team), json.getLong("start"), status, json.text("score"), json.text("detail"), json.strings("broadcasters"))
+            json.optJSONObject("away")?.let(::team), json.getLong("start"), status, json.text("score"), json.text("detail"), json.strings("broadcasters"),
+            json.text("venue"), json.optIntOrNull("round"), json.optIntOrNull("period"), json.text("clock"), json.optJSONObject("homeLine")?.let(::line),
+            json.optJSONObject("awayLine")?.let(::line), situation, json.text("leagueLogo"))
     }
 
     private fun team(json: JSONObject): FixtureTeam? =
-        json.text("name")?.let { FixtureTeam(it, json.text("short"), json.text("abbreviation"), json.strings("alternatives")) }
+        json.text("name")?.let { FixtureTeam(it, json.text("short"), json.text("abbreviation"), json.strings("alternatives"), json.text("logo"), json.text("colour"), json.text("record")) }
 
+    private fun line(json: JSONObject) = FixtureLine(json.text("score"), json.strings("periods"))
+
+    private fun JSONObject.optIntOrNull(key: String): Int? = if (!has(key) || isNull(key)) null else optInt(key)
     private fun JSONObject.text(key: String): String? = if (isNull(key)) null else optString(key).takeIf(String::isNotEmpty)
     private fun JSONObject.optLongOrNull(key: String): Long? = if (isNull(key)) null else optLong(key)
     private fun JSONObject.strings(key: String): List<String> = optJSONArray(key)?.let { array ->

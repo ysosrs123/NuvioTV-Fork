@@ -22,6 +22,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.SportsFavourites
 import com.nuvio.tv.core.iptv.SportsLeagues
 import com.nuvio.tv.core.iptv.SportsService
 import com.nuvio.tv.data.iptv.IptvLog
@@ -32,6 +33,7 @@ import com.nuvio.tv.ui.screens.settings.SettingsGroupCard
 import com.nuvio.tv.ui.screens.settings.SettingsMultiChoiceDialog
 import com.nuvio.tv.ui.screens.settings.SettingsPickerOption
 import com.nuvio.tv.ui.screens.settings.SettingsSingleChoiceDialog
+import com.nuvio.tv.ui.screens.settings.SettingsToggleRow
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.components.NuvioActionPill
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,7 +45,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-data class IptvSportsSettingsState(val service: SportsService = SportsService.OFF, val leagues: Set<String> = emptySet(), val hasKey: Boolean = false)
+data class IptvSportsSettingsState(val service: SportsService = SportsService.OFF, val leagues: Set<String> = emptySet(), val hasKey: Boolean = false,
+    val showScores: Boolean = true, val favourites: List<String> = emptyList())
 
 @HiltViewModel
 class IptvSportsSettingsViewModel @Inject constructor(private val preferences: IptvSportsPreferences) : ViewModel() {
@@ -52,7 +55,14 @@ class IptvSportsSettingsViewModel @Inject constructor(private val preferences: I
 
     init { reload() }
 
-    fun reload() { mutable.value = IptvSportsSettingsState(preferences.service, preferences.leagues, preferences.hasKey) }
+    fun reload() {
+        mutable.value = IptvSportsSettingsState(preferences.service, preferences.leagues, preferences.hasKey, preferences.showScores,
+            preferences.favouriteTeams.sortedBy { SportsFavourites.parse(it)?.second?.lowercase() })
+    }
+
+    fun setShowScores(value: Boolean) { preferences.showScores = value; reload() }
+
+    fun keepFavourites(kept: List<String>) { preferences.favouriteTeams = preferences.favouriteTeams.filter { it in kept }.toSet(); reload() }
 
     fun setService(service: SportsService) { preferences.service = service; reload() }
 
@@ -76,7 +86,7 @@ class IptvSportsSettingsViewModel @Inject constructor(private val preferences: I
     fun removeKey() { preferences.setKey(null); reload() }
 }
 
-private enum class IptvSportsChoice { SERVICE, LEAGUES, KEY }
+private enum class IptvSportsChoice { SERVICE, LEAGUES, KEY, FAVOURITES }
 
 @Composable
 fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewModel()) {
@@ -95,6 +105,13 @@ fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewM
             subtitle = stringResource(R.string.iptv_sport_key_subtitle),
             value = stringResource(if (state.hasKey) R.string.iptv_sport_key_set else R.string.iptv_sport_key_not_set),
             valueColor = if (state.hasKey) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.Error, onClick = { choosing = IptvSportsChoice.KEY })
+        if (state.service != SportsService.OFF) {
+            SettingsToggleRow(title = stringResource(R.string.iptv_sport2_show_scores), subtitle = stringResource(R.string.iptv_sport2_show_scores_subtitle),
+                checked = state.showScores, onToggle = { viewModel.setShowScores(!state.showScores) })
+            if (state.favourites.isNotEmpty()) SettingsActionRow(title = stringResource(R.string.iptv_sport2_favourite_teams),
+                subtitle = stringResource(R.string.iptv_sport2_favourite_hint), value = state.favourites.size.toString(),
+                onClick = { choosing = IptvSportsChoice.FAVOURITES })
+        }
     }
     val dismiss = { choosing = null }
     when (choosing) {
@@ -109,6 +126,12 @@ fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewM
             options = SportsLeagues.ALL.filter { it.supports(state.service) }.map { SettingsPickerOption(it.id, it.name) },
             selectedValues = SportsLeagues.ALL.filter { it.id in state.leagues }.map { it.id },
             onValuesSelected = { viewModel.setLeagues(it); dismiss() }, onDismiss = dismiss, maxHeight = 460.dp)
+        IptvSportsChoice.FAVOURITES -> SettingsMultiChoiceDialog(title = stringResource(R.string.iptv_sport2_favourite_teams),
+            subtitle = stringResource(R.string.iptv_sport2_favourite_teams_subtitle),
+            options = state.favourites.mapNotNull { key ->
+                SportsFavourites.parse(key)?.let { (league, team) -> SettingsPickerOption(key, team, SportsLeagues.byId(league)?.name ?: league) }
+            },
+            selectedValues = state.favourites, onValuesSelected = { viewModel.keepFavourites(it); dismiss() }, onDismiss = dismiss, maxHeight = 460.dp)
         IptvSportsChoice.KEY -> SportsKeyDialog(state.hasKey, onSave = { viewModel.saveKey(it, dismiss) }, onRemove = { viewModel.removeKey(); dismiss() }, onDismiss = dismiss)
         null -> Unit
     }

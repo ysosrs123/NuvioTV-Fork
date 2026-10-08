@@ -1,0 +1,199 @@
+@file:OptIn(androidx.tv.material3.ExperimentalTvMaterial3Api::class)
+package com.nuvio.tv.ui.screens.iptv
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.tv.material3.Icon
+import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Text
+import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.FixtureLine
+import com.nuvio.tv.core.iptv.FixtureSide
+import com.nuvio.tv.core.iptv.FixtureSituation
+import com.nuvio.tv.core.iptv.FixtureStatus
+import com.nuvio.tv.core.iptv.FixtureTeam
+import com.nuvio.tv.core.iptv.SportsFixture
+import com.nuvio.tv.core.iptv.SportsFixtureText
+import com.nuvio.tv.ui.theme.NuvioTheme
+
+@Composable
+internal fun IptvSportHero(active: Boolean, modifier: Modifier, fallback: @Composable (Modifier) -> Unit) {
+    if (!active) { fallback(modifier); return }
+    val viewModel: IptvSportsFixturesViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val key by viewModel.hero.collectAsStateWithLifecycle()
+    val item = key?.let { wanted -> state.rows.firstNotNullOfOrNull { row -> row.items.firstOrNull { it.fixture.key == wanted } } }
+    if (!state.enabled || item == null) { fallback(modifier); return }
+    SportHero(item, state.showScores, modifier)
+}
+
+@Composable
+private fun SportHero(item: IptvFixtureItem, showScores: Boolean, modifier: Modifier) {
+    val fixture = item.fixture
+    val live = fixture.status == FixtureStatus.LIVE
+    Column(modifier.iptvPanel().padding(horizontal = 18.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        Row(Modifier.height(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            fixture.leagueLogo?.let { LeagueLogo(it, 16.dp) }
+            val round = fixture.round?.let { stringResource(if (fixture.sport == "american-football") R.string.iptv_sport2_week else R.string.iptv_sport2_round, it) }
+            Text(listOfNotNull(sportLeagueName(fixture), round, fixture.venue).joinToString(" · "), style = MaterialTheme.typography.labelMedium,
+                color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            if (item.favourite) Icon(Icons.Filled.Star, null, Modifier.size(14.dp), tint = NuvioTheme.colors.Secondary)
+            HeroState(fixture, showScores)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text(sportTitle(fixture), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary,
+                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            HeroChannel(item)
+        }
+        val home = fixture.home
+        val away = fixture.away
+        if (home != null && away != null) {
+            Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                HeroScoreboard(fixture, home, away, showScores && fixture.status != FixtureStatus.SCHEDULED, Modifier.weight(1.15f).fillMaxHeight())
+                val situation = fixture.situation?.takeIf { showScores && live && (it.downDistance != null || it.lastPlay != null) }
+                if (situation != null) HeroSituation(situation, Modifier.weight(1f).fillMaxHeight())
+            }
+            fixture.situation?.homeWinPercent?.takeIf { showScores && live }?.let { WinBar(fixture, home, away, it) }
+        } else Spacer(Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun HeroState(fixture: SportsFixture, showScores: Boolean) {
+    when (fixture.status) {
+        FixtureStatus.LIVE -> {
+            Box(Modifier.size(8.dp).clip(CircleShape).background(NuvioTheme.colors.Error))
+            Text(SportsFixtureText.periodClock(fixture)?.takeIf { showScores } ?: stringResource(R.string.iptv_sport_live),
+                style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1)
+        }
+        FixtureStatus.FINAL -> Text(stringResource(R.string.iptv_sport2_final), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
+            color = NuvioTheme.colors.TextSecondary, maxLines = 1)
+        FixtureStatus.SCHEDULED -> Text("${sportDayLabel(fixture.startMillis)} · ${clock(fixture.startMillis)}", style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1)
+    }
+}
+
+@Composable
+private fun HeroChannel(item: IptvFixtureItem) {
+    val first = item.links.firstOrNull()
+    if (first != null) Text(stringResource(R.string.iptv_sport2_watch_on, channelName(first.row)) + if (item.links.size > 1) " +${item.links.size - 1}" else "",
+        style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.Secondary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.widthIn(max = 200.dp))
+    else if (item.fixture.status != FixtureStatus.FINAL) Text(stringResource(R.string.iptv_sport_no_channel), style = MaterialTheme.typography.labelMedium,
+        color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+}
+
+@Composable
+private fun HeroScoreboard(fixture: SportsFixture, home: FixtureTeam, away: FixtureTeam, scores: Boolean, modifier: Modifier) {
+    val awayFirst = SportsFixtureText.awayFirst(fixture)
+    val sides = if (awayFirst) listOf(FixtureSide.AWAY, FixtureSide.HOME) else listOf(FixtureSide.HOME, FixtureSide.AWAY)
+    val count = if (scores) maxOf(fixture.homeLine?.periods?.size ?: 0, fixture.awayLine?.periods?.size ?: 0) else 0
+    val periods = (maxOf(0, count - MAX_PERIODS) until count).toList()
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)) {
+        if (periods.isNotEmpty()) Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(Modifier.weight(1f))
+            periods.forEach { index ->
+                Text(SportsFixtureText.periodLabel(fixture.sport, index + 1) ?: "${index + 1}", style = MaterialTheme.typography.labelSmall,
+                    color = NuvioTheme.colors.TextTertiary, maxLines = 1, textAlign = TextAlign.Center, modifier = Modifier.width(PERIOD_WIDTH))
+            }
+            Spacer(Modifier.width(TOTAL_WIDTH))
+        }
+        sides.forEach { side ->
+            val team = if (side == FixtureSide.HOME) home else away
+            val line = if (side == FixtureSide.HOME) fixture.homeLine else fixture.awayLine
+            HeroTeamLine(team, line, fixture.situation?.possession == side && scores && fixture.status == FixtureStatus.LIVE, scores, periods)
+        }
+    }
+}
+
+@Composable
+private fun HeroTeamLine(team: FixtureTeam, line: FixtureLine?, possession: Boolean, scores: Boolean, periods: List<Int>) {
+    Row(Modifier.fillMaxWidth().height(28.dp), verticalAlignment = Alignment.CenterVertically) {
+        TeamLogo(team, 26.dp)
+        Spacer(Modifier.width(10.dp))
+        Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(team.shortName ?: team.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary,
+                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+            team.record?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1) }
+            if (possession) Box(Modifier.size(6.dp).clip(CircleShape).background(NuvioTheme.colors.Secondary))
+        }
+        periods.forEach { index ->
+            Text(line?.periods?.getOrNull(index).orEmpty(), style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+                textAlign = TextAlign.Center, modifier = Modifier.width(PERIOD_WIDTH))
+        }
+        if (scores) Text(line?.score.orEmpty(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
+            maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.width(TOTAL_WIDTH))
+    }
+}
+
+@Composable
+private fun HeroSituation(situation: FixtureSituation, modifier: Modifier) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)) {
+        situation.downDistance?.let {
+            Text(it, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1,
+                overflow = TextOverflow.Ellipsis)
+        }
+        situation.lastPlay?.let {
+            Text(stringResource(R.string.iptv_sport2_last_play).uppercase(), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+            Text(it, style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+@Composable
+private fun WinBar(fixture: SportsFixture, home: FixtureTeam, away: FixtureTeam, homeWin: Int) {
+    val awayFirst = SportsFixtureText.awayFirst(fixture)
+    val left = if (awayFirst) away else home
+    val right = if (awayFirst) home else away
+    val leftShare = (if (awayFirst) 100 - homeWin else homeWin).coerceIn(0, 100)
+    val rightShare = 100 - leftShare
+    Row(Modifier.fillMaxWidth().height(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(stringResource(R.string.iptv_sport2_win_percent, shortTeam(left), leftShare), style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1)
+        Row(Modifier.weight(1f).height(4.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            Box(Modifier.weight(leftShare.coerceAtLeast(1).toFloat()).height(4.dp).background(barColour(left, NuvioTheme.colors.Secondary), BarShape))
+            Box(Modifier.weight(rightShare.coerceAtLeast(1).toFloat()).height(4.dp).background(barColour(right, NuvioTheme.colors.TextSecondary), BarShape))
+        }
+        Text(stringResource(R.string.iptv_sport2_win_percent, shortTeam(right), rightShare), style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1)
+    }
+}
+
+private fun shortTeam(team: FixtureTeam): String = team.abbreviation ?: team.shortName ?: team.name
+
+private fun barColour(team: FixtureTeam, fallback: Color): Color =
+    teamColour(team)?.takeIf { it.luminance() in .04f..0.9f } ?: fallback
+
+private val BarShape = RoundedCornerShape(2.dp)
+private val PERIOD_WIDTH = 26.dp
+private val TOTAL_WIDTH = 40.dp
+private const val MAX_PERIODS = 6

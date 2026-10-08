@@ -146,13 +146,18 @@ class SportsFixturesTest {
         val now = ZonedDateTime.of(2026, 10, 7, 15, 0, 0, 0, sydney).toInstant().toEpochMilli()
         fun at(day: Int, hour: Int) = ZonedDateTime.of(2026, 10, day, hour, 0, 0, 0, sydney).toInstant().toEpochMilli()
         val fixtures = listOf(fixture("live", at(7, 14), FixtureStatus.LIVE), fixture("tonight", at(7, 19)), fixture("done", at(7, 12), FixtureStatus.FINAL),
-            fixture("stale", at(7, 9)), fixture("lagging", at(7, 14)), fixture("tomorrow", at(8, 19)), fixture("saturday", at(9, 13)), fixture("far", at(10, 13)))
-        val sections = SportsFixtureSections.group(fixtures, now, sydney)
-        assertEquals(listOf(FixtureSection.LIVE, FixtureSection.TODAY, FixtureSection.TOMORROW, FixtureSection.LATER), sections.map { it.first })
-        assertEquals(listOf("live"), sections[0].second.map { it.id })
-        assertEquals(listOf("lagging", "tonight"), sections[1].second.map { it.id })
-        assertEquals(listOf("tomorrow"), sections[2].second.map { it.id })
-        assertEquals(listOf("saturday"), sections[3].second.map { it.id })
+            fixture("stale", at(7, 9)), fixture("lagging", at(7, 14)), fixture("tomorrow", at(8, 19)), fixture("saturday", at(9, 13)), fixture("far", at(10, 13)),
+            fixture("yesterday", at(6, 13), FixtureStatus.FINAL))
+        val rows = SportsFixtureSections.group(fixtures, now, sydney)
+        assertEquals(listOf(FixtureSection.LIVE, FixtureSection.TODAY, FixtureSection.TOMORROW, FixtureSection.DAY, FixtureSection.FINISHED), rows.map { it.section })
+        assertEquals(listOf("live"), rows[0].fixtures.map { it.id })
+        assertEquals(listOf("lagging", "tonight"), rows[1].fixtures.map { it.id })
+        assertEquals(listOf("tomorrow"), rows[2].fixtures.map { it.id })
+        assertEquals(listOf("saturday"), rows[3].fixtures.map { it.id })
+        assertEquals(LocalDate.of(2026, 10, 9), rows[3].day)
+        assertEquals(listOf("done"), rows[4].fixtures.map { it.id })
+        assertEquals(listOf(FixtureSection.LIVE, FixtureSection.TODAY, FixtureSection.TOMORROW, FixtureSection.DAY),
+            SportsFixtureSections.group(fixtures, now, sydney, showScores = false).map { it.section })
     }
 
     @Test fun cacheEntriesRoundTrip() {
@@ -161,7 +166,7 @@ class SportsFixturesTest {
         val entry = SportsCacheEntry(listOf(fixture, fixture("x", 5L)), 99L, 100L, 2)
         assertEquals(entry, SportsFixtureCodec.decode(SportsFixtureCodec.encode(entry)))
         assertNull(SportsFixtureCodec.decode("not json"))
-        assertNull(SportsFixtureCodec.decode("""{"version":2}"""))
+        assertNull(SportsFixtureCodec.decode("""{"version":3}"""))
         assertEquals(SportsCacheEntry(emptyList(), null), SportsFixtureCodec.decode("""{"version":1,"fixtures":[{"id":"1"}]}"""))
     }
 }
