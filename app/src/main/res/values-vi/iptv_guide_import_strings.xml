@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Tệp lịch phát sóng không có chương trình cho những ngày tới và có thể đã lỗi thời. Lịch phát sóng trước đó vẫn được giữ.</string>
+    <string name="iptv_guide_import_no_channels">Tệp lịch phát sóng không có kênh nào. Lịch phát sóng trước đó vẫn được giữ.</string>
+    <string name="iptv_guide_import_invalid">Quá nhiều mục trong tệp lịch phát sóng không hợp lệ. Lịch phát sóng trước đó vẫn được giữ.</string>
+    <string name="iptv_guide_import_too_large">Tệp lịch phát sóng quá lớn. Lịch phát sóng trước đó vẫn được giữ.</string>
+    <string name="iptv_guide_import_not_xmltv">Đây không phải tệp lịch phát sóng XMLTV. Lịch phát sóng trước đó vẫn được giữ.</string>
+    <string name="iptv_guide_import_fewer">Lịch phát sóng mới có ít chương trình hơn trước rất nhiều. Lịch phát sóng trước đó vẫn được giữ.</string>
+    <string name="iptv_guide_import_not_linked">Đã lưu các kênh trong lịch phát sóng. Chương trình sẽ được tải khi một nguồn dùng lịch phát sóng này.</string>
+    <string name="iptv_guide_days">Số ngày lịch phát sóng</string>
+    <string name="iptv_guide_days_subtitle">Lượng thông tin chương trình cần giữ. Càng nhiều ngày càng tốn bộ nhớ. Áp dụng ở lần cập nhật lịch phát sóng tiếp theo.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="other">%d ngày đã qua</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="other">%d ngày sắp tới</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Khuyên dùng</string>
+    <string name="iptv_guide_days_catchup">Xem lại lâu hơn, tốn nhiều bộ nhớ hơn</string>
+    <string name="iptv_guide_days_larger">Tốn nhiều bộ nhớ hơn</string>
+    <string name="iptv_guides_choice_help">Mỗi kênh dùng lịch phát sóng được liên kết đầu tiên có chương trình cho kênh đó: trước tiên là gán thủ công, sau đó là ID trùng khớp, rồi đến tên trùng khớp, theo thứ tự hiển thị. Di chuyển lên sẽ thay đổi mức ưu tiên.</string>
+</resources>

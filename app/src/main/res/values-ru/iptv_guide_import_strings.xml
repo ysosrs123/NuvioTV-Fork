@@ -1,0 +1,27 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">В файле телепрограммы нет передач на ближайшие дни, возможно, он устарел. Прежняя телепрограмма сохранена.</string>
+    <string name="iptv_guide_import_no_channels">В файле телепрограммы нет каналов. Прежняя телепрограмма сохранена.</string>
+    <string name="iptv_guide_import_invalid">Слишком много записей в файле телепрограммы недействительны. Прежняя телепрограмма сохранена.</string>
+    <string name="iptv_guide_import_too_large">Файл телепрограммы слишком большой. Прежняя телепрограмма сохранена.</string>
+    <string name="iptv_guide_import_not_xmltv">Это не файл телепрограммы XMLTV. Прежняя телепрограмма сохранена.</string>
+    <string name="iptv_guide_import_fewer">В новой телепрограмме намного меньше передач, чем раньше. Прежняя телепрограмма сохранена.</string>
+    <string name="iptv_guide_import_not_linked">Каналы телепрограммы сохранены. Передачи загрузятся, когда источник начнёт использовать эту телепрограмму.</string>
+    <string name="iptv_guide_days">Дни телепрограммы</string>
+    <string name="iptv_guide_days_subtitle">Сколько данных о передачах хранить. Чем больше дней, тем больше места занято. Применяется при следующем обновлении телепрограммы.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d день назад</item>
+        <item quantity="few">%d дня назад</item>
+        <item quantity="many">%d дней назад</item>
+        <item quantity="other">%d дня назад</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d день вперёд</item>
+        <item quantity="few">%d дня вперёд</item>
+        <item quantity="many">%d дней вперёд</item>
+        <item quantity="other">%d дня вперёд</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Рекомендуется</string>
+    <string name="iptv_guide_days_catchup">Более длинный архив, занимает больше места</string>
+    <string name="iptv_guide_days_larger">Занимает больше места</string>
+    <string name="iptv_guides_choice_help">Каждый канал использует первую привязанную телепрограмму с передачами для него: сначала ручное назначение, затем совпадение по ID, затем совпадение по названию, в показанном порядке. «Переместить выше» меняет приоритет.</string>
+</resources>

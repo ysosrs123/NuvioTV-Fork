@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">节目单文件中没有未来几天的节目，可能已过期。已保留之前的节目单。</string>
+    <string name="iptv_guide_import_no_channels">节目单文件中没有频道。已保留之前的节目单。</string>
+    <string name="iptv_guide_import_invalid">节目单文件中无效条目过多。已保留之前的节目单。</string>
+    <string name="iptv_guide_import_too_large">节目单文件过大。已保留之前的节目单。</string>
+    <string name="iptv_guide_import_not_xmltv">这不是 XMLTV 节目单文件。已保留之前的节目单。</string>
+    <string name="iptv_guide_import_fewer">新节目单的节目比之前少得多。已保留之前的节目单。</string>
+    <string name="iptv_guide_import_not_linked">节目单频道已保存。来源使用此节目单后即会加载节目。</string>
+    <string name="iptv_guide_days">节目单天数</string>
+    <string name="iptv_guide_days_subtitle">要保留多少天的节目信息。天数越多，占用的存储空间越多。将在下次更新节目单时生效。</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="other">过去 %d 天</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="other">未来 %d 天</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">推荐</string>
+    <string name="iptv_guide_days_catchup">回看时间更长，占用更多存储空间</string>
+    <string name="iptv_guide_days_larger">占用更多存储空间</string>
+    <string name="iptv_guides_choice_help">每个频道使用第一个包含其节目的已关联节目单：先按手动指定，再按匹配的 ID，然后按匹配的名称，依显示顺序。“上移”可更改优先级。</string>
+</resources>

@@ -1,0 +1,27 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">У файлі телепрограми немає передач на найближчі дні, можливо, він застарів. Попередню телепрограму збережено.</string>
+    <string name="iptv_guide_import_no_channels">У файлі телепрограми немає каналів. Попередню телепрограму збережено.</string>
+    <string name="iptv_guide_import_invalid">Забагато записів у файлі телепрограми недійсні. Попередню телепрограму збережено.</string>
+    <string name="iptv_guide_import_too_large">Файл телепрограми завеликий. Попередню телепрограму збережено.</string>
+    <string name="iptv_guide_import_not_xmltv">Це не файл телепрограми XMLTV. Попередню телепрограму збережено.</string>
+    <string name="iptv_guide_import_fewer">У новій телепрограмі значно менше передач, ніж раніше. Попередню телепрограму збережено.</string>
+    <string name="iptv_guide_import_not_linked">Канали телепрограми збережено. Передачі завантажаться, щойно джерело почне використовувати цю телепрограму.</string>
+    <string name="iptv_guide_days">Дні телепрограми</string>
+    <string name="iptv_guide_days_subtitle">Скільки даних про передачі зберігати. Більше днів займає більше місця. Застосовується під час наступного оновлення телепрограми.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d день назад</item>
+        <item quantity="few">%d дні назад</item>
+        <item quantity="many">%d днів назад</item>
+        <item quantity="other">%d дня назад</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d день уперед</item>
+        <item quantity="few">%d дні уперед</item>
+        <item quantity="many">%d днів уперед</item>
+        <item quantity="other">%d дня уперед</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Рекомендовано</string>
+    <string name="iptv_guide_days_catchup">Довший catch-up, займає більше місця</string>
+    <string name="iptv_guide_days_larger">Займає більше місця</string>
+    <string name="iptv_guides_choice_help">Кожен канал використовує першу прив\'язану телепрограму з передачами для нього: спершу ручне призначення, потім збіг за ID, потім збіг за назвою, у показаному порядку. «Перемістити вгору» змінює пріоритет.</string>
+</resources>

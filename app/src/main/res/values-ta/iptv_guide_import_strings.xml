@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">வழிகாட்டிக் கோப்பில் வரும் நாட்களுக்கான நிகழ்ச்சிகள் இல்லை, அது காலாவதியாகியிருக்கலாம். உங்கள் முந்தைய வழிகாட்டி வைக்கப்பட்டுள்ளது.</string>
+    <string name="iptv_guide_import_no_channels">வழிகாட்டிக் கோப்பில் சேனல்கள் இல்லை. உங்கள் முந்தைய வழிகாட்டி வைக்கப்பட்டுள்ளது.</string>
+    <string name="iptv_guide_import_invalid">வழிகாட்டிக் கோப்பில் மிக அதிகமான உள்ளீடுகள் தவறானவை. உங்கள் முந்தைய வழிகாட்டி வைக்கப்பட்டுள்ளது.</string>
+    <string name="iptv_guide_import_too_large">வழிகாட்டிக் கோப்பு மிகப் பெரியது. உங்கள் முந்தைய வழிகாட்டி வைக்கப்பட்டுள்ளது.</string>
+    <string name="iptv_guide_import_not_xmltv">இது XMLTV வழிகாட்டிக் கோப்பு அல்ல. உங்கள் முந்தைய வழிகாட்டி வைக்கப்பட்டுள்ளது.</string>
+    <string name="iptv_guide_import_fewer">புதிய வழிகாட்டியில் முன்பை விட மிகக் குறைவான நிகழ்ச்சிகள் உள்ளன. உங்கள் முந்தைய வழிகாட்டி வைக்கப்பட்டுள்ளது.</string>
+    <string name="iptv_guide_import_not_linked">வழிகாட்டிச் சேனல்கள் சேமிக்கப்பட்டன. ஒரு மூலம் இந்த வழிகாட்டியைப் பயன்படுத்தியதும் நிகழ்ச்சிகள் ஏற்றப்படும்.</string>
+    <string name="iptv_guide_days">வழிகாட்டி நாட்கள்</string>
+    <string name="iptv_guide_days_subtitle">எவ்வளவு நிகழ்ச்சித் தகவலை வைத்திருக்க வேண்டும். அதிக நாட்கள் அதிக சேமிப்பகத்தைப் பயன்படுத்தும். அடுத்த வழிகாட்டிப் புதுப்பிப்பில் பொருந்தும்.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">பின்னோக்கி %d நாள்</item>
+        <item quantity="other">பின்னோக்கி %d நாட்கள்</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">முன்னோக்கி %d நாள்</item>
+        <item quantity="other">முன்னோக்கி %d நாட்கள்</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">பரிந்துரைக்கப்பட்டது</string>
+    <string name="iptv_guide_days_catchup">நீண்ட கேட்ச்-அப், அதிக சேமிப்பகத்தைப் பயன்படுத்தும்</string>
+    <string name="iptv_guide_days_larger">அதிக சேமிப்பகத்தைப் பயன்படுத்தும்</string>
+    <string name="iptv_guides_choice_help">ஒவ்வொரு சேனலும் அதற்கான நிகழ்ச்சிகள் உள்ள முதல் இணைக்கப்பட்ட வழிகாட்டியைப் பயன்படுத்தும்: முதலில் கைமுறை ஒதுக்கீடு, பின்னர் பொருந்தும் ID, பின்னர் பொருந்தும் பெயர், காட்டப்பட்ட வரிசையில். மேலே நகர்த்து முன்னுரிமையை மாற்றும்.</string>
+</resources>

@@ -1,0 +1,27 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Súbor programu neobsahuje relácie na najbližšie dni a môže byť zastaraný. Predchádzajúci program sa ponechal.</string>
+    <string name="iptv_guide_import_no_channels">Súbor programu neobsahuje žiadne kanály. Predchádzajúci program sa ponechal.</string>
+    <string name="iptv_guide_import_invalid">Príliš veľa záznamov v súbore programu je neplatných. Predchádzajúci program sa ponechal.</string>
+    <string name="iptv_guide_import_too_large">Súbor programu je príliš veľký. Predchádzajúci program sa ponechal.</string>
+    <string name="iptv_guide_import_not_xmltv">Toto nie je súbor programu XMLTV. Predchádzajúci program sa ponechal.</string>
+    <string name="iptv_guide_import_fewer">Nový program má oveľa menej relácií než predtým. Predchádzajúci program sa ponechal.</string>
+    <string name="iptv_guide_import_not_linked">Kanály programu sa uložili. Relácie sa načítajú, keď niektorý zdroj začne tento program používať.</string>
+    <string name="iptv_guide_days">Dni v programe</string>
+    <string name="iptv_guide_days_subtitle">Koľko informácií o reláciách uchovávať. Viac dní zaberá viac úložiska. Platí od ďalšej aktualizácie programu.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d deň dozadu</item>
+        <item quantity="few">%d dni dozadu</item>
+        <item quantity="many">%d dňa dozadu</item>
+        <item quantity="other">%d dní dozadu</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d deň dopredu</item>
+        <item quantity="few">%d dni dopredu</item>
+        <item quantity="many">%d dňa dopredu</item>
+        <item quantity="other">%d dní dopredu</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Odporúčané</string>
+    <string name="iptv_guide_days_catchup">Dlhší catch-up, zaberá viac úložiska</string>
+    <string name="iptv_guide_days_larger">Zaberá viac úložiska</string>
+    <string name="iptv_guides_choice_help">Každý kanál použije prvý prepojený program, ktorý má preň relácie: najprv ručné priradenie, potom zhodné ID, potom zhodný názov, v zobrazenom poradí. Posunúť nahor mení prioritu.</string>
+</resources>

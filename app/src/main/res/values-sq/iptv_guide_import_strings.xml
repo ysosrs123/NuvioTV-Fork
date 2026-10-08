@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Skedari i udhëzuesit nuk ka programe për ditët në vijim dhe mund të jetë i vjetëruar. Udhëzuesi i mëparshëm u mbajt.</string>
+    <string name="iptv_guide_import_no_channels">Skedari i udhëzuesit nuk ka kanale. Udhëzuesi i mëparshëm u mbajt.</string>
+    <string name="iptv_guide_import_invalid">Shumë hyrje në skedarin e udhëzuesit janë të pavlefshme. Udhëzuesi i mëparshëm u mbajt.</string>
+    <string name="iptv_guide_import_too_large">Skedari i udhëzuesit është shumë i madh. Udhëzuesi i mëparshëm u mbajt.</string>
+    <string name="iptv_guide_import_not_xmltv">Ky nuk është skedar udhëzuesi XMLTV. Udhëzuesi i mëparshëm u mbajt.</string>
+    <string name="iptv_guide_import_fewer">Udhëzuesi i ri ka shumë më pak programe se më parë. Udhëzuesi i mëparshëm u mbajt.</string>
+    <string name="iptv_guide_import_not_linked">Kanalet e udhëzuesit u ruajtën. Programet ngarkohen sapo një burim të përdorë këtë udhëzues.</string>
+    <string name="iptv_guide_days">Ditët e udhëzuesit</string>
+    <string name="iptv_guide_days_subtitle">Sa informacion programesh të mbahet. Më shumë ditë përdorin më shumë hapësirë ruajtëse. Zbatohet në përditësimin e radhës të udhëzuesit.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d ditë prapa</item>
+        <item quantity="other">%d ditë prapa</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d ditë përpara</item>
+        <item quantity="other">%d ditë përpara</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">E rekomanduar</string>
+    <string name="iptv_guide_days_catchup">Catch-up më i gjatë, përdor më shumë hapësirë</string>
+    <string name="iptv_guide_days_larger">Përdor më shumë hapësirë</string>
+    <string name="iptv_guides_choice_help">Çdo kanal përdor udhëzuesin e parë të lidhur që ka programe për të: fillimisht një caktim manual, pastaj një ID që përputhet, pastaj një emër që përputhet, sipas renditjes së shfaqur. Lëviz lart ndryshon përparësinë.</string>
+</resources>

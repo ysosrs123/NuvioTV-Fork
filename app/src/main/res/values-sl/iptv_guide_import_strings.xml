@@ -1,0 +1,27 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Datoteka vodnika nima oddaj za prihodnje dni in je morda zastarela. Prejšnji vodnik je ohranjen.</string>
+    <string name="iptv_guide_import_no_channels">Datoteka vodnika nima kanalov. Prejšnji vodnik je ohranjen.</string>
+    <string name="iptv_guide_import_invalid">Preveč vnosov v datoteki vodnika je neveljavnih. Prejšnji vodnik je ohranjen.</string>
+    <string name="iptv_guide_import_too_large">Datoteka vodnika je prevelika. Prejšnji vodnik je ohranjen.</string>
+    <string name="iptv_guide_import_not_xmltv">To ni datoteka vodnika XMLTV. Prejšnji vodnik je ohranjen.</string>
+    <string name="iptv_guide_import_fewer">Novi vodnik ima veliko manj oddaj kot prej. Prejšnji vodnik je ohranjen.</string>
+    <string name="iptv_guide_import_not_linked">Kanali vodnika so shranjeni. Oddaje se naložijo, ko vir začne uporabljati ta vodnik.</string>
+    <string name="iptv_guide_days">Dnevi vodnika</string>
+    <string name="iptv_guide_days_subtitle">Koliko podatkov o oddajah hraniti. Več dni porabi več prostora v shrambi. Velja ob naslednji posodobitvi vodnika.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d dan nazaj</item>
+        <item quantity="two">%d dneva nazaj</item>
+        <item quantity="few">%d dni nazaj</item>
+        <item quantity="other">%d dni nazaj</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d dan naprej</item>
+        <item quantity="two">%d dneva naprej</item>
+        <item quantity="few">%d dni naprej</item>
+        <item quantity="other">%d dni naprej</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Priporočeno</string>
+    <string name="iptv_guide_days_catchup">Daljši catch-up, porabi več prostora</string>
+    <string name="iptv_guide_days_larger">Porabi več prostora</string>
+    <string name="iptv_guides_choice_help">Vsak kanal uporabi prvi povezani vodnik, ki ima zanj oddaje: najprej ročna dodelitev, nato ujemajoč ID, nato ujemajoče ime, v prikazanem vrstnem redu. Premakni gor spremeni prednost.</string>
+</resources>

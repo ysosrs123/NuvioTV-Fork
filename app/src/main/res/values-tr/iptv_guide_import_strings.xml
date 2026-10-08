@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Yayın akışı dosyasında önümüzdeki günler için program yok ve dosya güncel olmayabilir. Önceki yayın akışınız korundu.</string>
+    <string name="iptv_guide_import_no_channels">Yayın akışı dosyasında kanal yok. Önceki yayın akışınız korundu.</string>
+    <string name="iptv_guide_import_invalid">Yayın akışı dosyasındaki girişlerin çok fazlası geçersiz. Önceki yayın akışınız korundu.</string>
+    <string name="iptv_guide_import_too_large">Yayın akışı dosyası çok büyük. Önceki yayın akışınız korundu.</string>
+    <string name="iptv_guide_import_not_xmltv">Bu bir XMLTV yayın akışı dosyası değil. Önceki yayın akışınız korundu.</string>
+    <string name="iptv_guide_import_fewer">Yeni yayın akışında öncekinden çok daha az program var. Önceki yayın akışınız korundu.</string>
+    <string name="iptv_guide_import_not_linked">Yayın akışı kanalları kaydedildi. Bir kaynak bu yayın akışını kullandığında programlar yüklenir.</string>
+    <string name="iptv_guide_days">Yayın akışı günleri</string>
+    <string name="iptv_guide_days_subtitle">Ne kadar program bilgisi saklanacağı. Daha fazla gün daha fazla depolama alanı kullanır. Bir sonraki yayın akışı güncellemesinde uygulanır.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d gün geriye</item>
+        <item quantity="other">%d gün geriye</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d gün ileriye</item>
+        <item quantity="other">%d gün ileriye</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Önerilen</string>
+    <string name="iptv_guide_days_catchup">Daha uzun geriye dönük izleme, daha fazla depolama alanı kullanır</string>
+    <string name="iptv_guide_days_larger">Daha fazla depolama alanı kullanır</string>
+    <string name="iptv_guides_choice_help">Her kanal, kendisi için program içeren ilk bağlı yayın akışını kullanır: önce elle atama, sonra eşleşen ID, sonra eşleşen ad, gösterilen sırayla. Yukarı taşı önceliği değiştirir.</string>
+</resources>

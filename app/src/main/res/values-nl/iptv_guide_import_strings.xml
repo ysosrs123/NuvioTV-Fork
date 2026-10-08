@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Het gidsbestand bevat geen programma\'s voor de komende dagen en is mogelijk verouderd. Je vorige gids is behouden.</string>
+    <string name="iptv_guide_import_no_channels">Het gidsbestand bevat geen zenders. Je vorige gids is behouden.</string>
+    <string name="iptv_guide_import_invalid">Te veel items in het gidsbestand zijn ongeldig. Je vorige gids is behouden.</string>
+    <string name="iptv_guide_import_too_large">Het gidsbestand is te groot. Je vorige gids is behouden.</string>
+    <string name="iptv_guide_import_not_xmltv">Dit is geen XMLTV-gidsbestand. Je vorige gids is behouden.</string>
+    <string name="iptv_guide_import_fewer">De nieuwe gids bevat veel minder programma\'s dan voorheen. Je vorige gids is behouden.</string>
+    <string name="iptv_guide_import_not_linked">Gidszenders opgeslagen. Programma\'s worden geladen zodra een bron deze gids gebruikt.</string>
+    <string name="iptv_guide_days">Gidsdagen</string>
+    <string name="iptv_guide_days_subtitle">Hoeveel programma-informatie bewaard blijft. Meer dagen gebruiken meer opslag. Geldt bij de volgende gidsupdate.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d dag terug</item>
+        <item quantity="other">%d dagen terug</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d dag vooruit</item>
+        <item quantity="other">%d dagen vooruit</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Aanbevolen</string>
+    <string name="iptv_guide_days_catchup">Langer terugkijken, gebruikt meer opslag</string>
+    <string name="iptv_guide_days_larger">Gebruikt meer opslag</string>
+    <string name="iptv_guides_choice_help">Elke zender gebruikt de eerste gekoppelde gids met programma\'s voor die zender: eerst een handmatige toewijzing, dan een overeenkomende ID, dan een overeenkomende naam, in de getoonde volgorde. Omhoog wijzigt de prioriteit.</string>
+</resources>

@@ -1,0 +1,25 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">O ficheiro do guia não tem programas para os próximos dias e pode estar desatualizado. O guia anterior foi mantido.</string>
+    <string name="iptv_guide_import_no_channels">O ficheiro do guia não tem canais. O guia anterior foi mantido.</string>
+    <string name="iptv_guide_import_invalid">Demasiadas entradas no ficheiro do guia são inválidas. O guia anterior foi mantido.</string>
+    <string name="iptv_guide_import_too_large">O ficheiro do guia é demasiado grande. O guia anterior foi mantido.</string>
+    <string name="iptv_guide_import_not_xmltv">Este não é um ficheiro de guia XMLTV. O guia anterior foi mantido.</string>
+    <string name="iptv_guide_import_fewer">O novo guia tem muito menos programas do que antes. O guia anterior foi mantido.</string>
+    <string name="iptv_guide_import_not_linked">Canais do guia guardados. Os programas são carregados quando uma fonte usar este guia.</string>
+    <string name="iptv_guide_days">Dias do guia</string>
+    <string name="iptv_guide_days_subtitle">Quanta informação de programação guardar. Mais dias ocupam mais armazenamento. Aplica-se na próxima atualização do guia.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d dia para trás</item>
+        <item quantity="many">%d dias para trás</item>
+        <item quantity="other">%d dias para trás</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d dia para a frente</item>
+        <item quantity="many">%d dias para a frente</item>
+        <item quantity="other">%d dias para a frente</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Recomendado</string>
+    <string name="iptv_guide_days_catchup">Catch-up mais longo, ocupa mais armazenamento</string>
+    <string name="iptv_guide_days_larger">Ocupa mais armazenamento</string>
+    <string name="iptv_guides_choice_help">Cada canal usa o primeiro guia associado com programas para ele: primeiro uma atribuição manual, depois um ID correspondente, depois um nome correspondente, pela ordem apresentada. Mover para cima altera a prioridade.</string>
+</resources>

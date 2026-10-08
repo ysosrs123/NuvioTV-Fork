@@ -1,0 +1,25 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Fișierul ghidului nu are programe pentru zilele următoare și poate fi învechit. Ghidul anterior a fost păstrat.</string>
+    <string name="iptv_guide_import_no_channels">Fișierul ghidului nu are canale. Ghidul anterior a fost păstrat.</string>
+    <string name="iptv_guide_import_invalid">Prea multe intrări din fișierul ghidului sunt nevalide. Ghidul anterior a fost păstrat.</string>
+    <string name="iptv_guide_import_too_large">Fișierul ghidului este prea mare. Ghidul anterior a fost păstrat.</string>
+    <string name="iptv_guide_import_not_xmltv">Acesta nu este un fișier de ghid XMLTV. Ghidul anterior a fost păstrat.</string>
+    <string name="iptv_guide_import_fewer">Noul ghid are mult mai puține programe decât înainte. Ghidul anterior a fost păstrat.</string>
+    <string name="iptv_guide_import_not_linked">Canalele ghidului au fost salvate. Programele se încarcă după ce o sursă folosește acest ghid.</string>
+    <string name="iptv_guide_days">Zile în ghid</string>
+    <string name="iptv_guide_days_subtitle">Câte informații despre programe se păstrează. Mai multe zile ocupă mai mult spațiu de stocare. Se aplică la următoarea actualizare a ghidului.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d zi în urmă</item>
+        <item quantity="few">%d zile în urmă</item>
+        <item quantity="other">%d de zile în urmă</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d zi înainte</item>
+        <item quantity="few">%d zile înainte</item>
+        <item quantity="other">%d de zile înainte</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Recomandat</string>
+    <string name="iptv_guide_days_catchup">Catch-up mai lung, ocupă mai mult spațiu</string>
+    <string name="iptv_guide_days_larger">Ocupă mai mult spațiu</string>
+    <string name="iptv_guides_choice_help">Fiecare canal folosește primul ghid asociat care are programe pentru el: întâi o atribuire manuală, apoi un ID potrivit, apoi un nume potrivit, în ordinea afișată. Mută în sus schimbă prioritatea.</string>
+</resources>

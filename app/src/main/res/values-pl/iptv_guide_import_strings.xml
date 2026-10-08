@@ -1,0 +1,27 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Plik przewodnika nie zawiera programów na najbliższe dni i może być nieaktualny. Poprzedni przewodnik został zachowany.</string>
+    <string name="iptv_guide_import_no_channels">Plik przewodnika nie zawiera kanałów. Poprzedni przewodnik został zachowany.</string>
+    <string name="iptv_guide_import_invalid">Zbyt wiele wpisów w pliku przewodnika jest nieprawidłowych. Poprzedni przewodnik został zachowany.</string>
+    <string name="iptv_guide_import_too_large">Plik przewodnika jest za duży. Poprzedni przewodnik został zachowany.</string>
+    <string name="iptv_guide_import_not_xmltv">To nie jest plik przewodnika XMLTV. Poprzedni przewodnik został zachowany.</string>
+    <string name="iptv_guide_import_fewer">Nowy przewodnik ma znacznie mniej programów niż wcześniej. Poprzedni przewodnik został zachowany.</string>
+    <string name="iptv_guide_import_not_linked">Kanały przewodnika zapisane. Programy zostaną wczytane, gdy źródło zacznie używać tego przewodnika.</string>
+    <string name="iptv_guide_days">Dni w przewodniku</string>
+    <string name="iptv_guide_days_subtitle">Ile informacji o programach przechowywać. Więcej dni zajmuje więcej miejsca. Obowiązuje od następnej aktualizacji przewodnika.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d dzień wstecz</item>
+        <item quantity="few">%d dni wstecz</item>
+        <item quantity="many">%d dni wstecz</item>
+        <item quantity="other">%d dnia wstecz</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d dzień do przodu</item>
+        <item quantity="few">%d dni do przodu</item>
+        <item quantity="many">%d dni do przodu</item>
+        <item quantity="other">%d dnia do przodu</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Zalecane</string>
+    <string name="iptv_guide_days_catchup">Dłuższy catch-up, zajmuje więcej miejsca</string>
+    <string name="iptv_guide_days_larger">Zajmuje więcej miejsca</string>
+    <string name="iptv_guides_choice_help">Każdy kanał korzysta z pierwszego połączonego przewodnika, który ma dla niego programy: najpierw przypisanie ręczne, potem zgodne ID, potem zgodna nazwa, w pokazanej kolejności. Przesuń w górę zmienia priorytet.</string>
+</resources>

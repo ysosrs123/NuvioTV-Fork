@@ -1,0 +1,21 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">節目表檔案中沒有未來幾天的節目，可能已過期。已保留先前的節目表。</string>
+    <string name="iptv_guide_import_no_channels">節目表檔案中沒有頻道。已保留先前的節目表。</string>
+    <string name="iptv_guide_import_invalid">節目表檔案中無效的項目過多。已保留先前的節目表。</string>
+    <string name="iptv_guide_import_too_large">節目表檔案過大。已保留先前的節目表。</string>
+    <string name="iptv_guide_import_not_xmltv">這不是 XMLTV 節目表檔案。已保留先前的節目表。</string>
+    <string name="iptv_guide_import_fewer">新節目表的節目比先前少很多。已保留先前的節目表。</string>
+    <string name="iptv_guide_import_not_linked">節目表頻道已儲存。來源使用此節目表後就會載入節目。</string>
+    <string name="iptv_guide_days">節目表天數</string>
+    <string name="iptv_guide_days_subtitle">要保留多少天的節目資訊。天數越多，佔用的儲存空間越多。將在下次更新節目表時生效。</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="other">過去 %d 天</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="other">未來 %d 天</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">建議</string>
+    <string name="iptv_guide_days_catchup">回看時間更長，佔用更多儲存空間</string>
+    <string name="iptv_guide_days_larger">佔用更多儲存空間</string>
+    <string name="iptv_guides_choice_help">每個頻道會使用第一個含有其節目的已連結節目表：先依手動指定，再依相符的 ID，然後依相符的名稱，按顯示順序。「上移」可變更優先順序。</string>
+</resources>

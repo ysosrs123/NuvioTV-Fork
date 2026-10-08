@@ -1,0 +1,25 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Датотека водича нема емисије за наредне дане и можда је застарела. Претходни водич је задржан.</string>
+    <string name="iptv_guide_import_no_channels">Датотека водича нема канале. Претходни водич је задржан.</string>
+    <string name="iptv_guide_import_invalid">Превише уноса у датотеци водича је неважеће. Претходни водич је задржан.</string>
+    <string name="iptv_guide_import_too_large">Датотека водича је превелика. Претходни водич је задржан.</string>
+    <string name="iptv_guide_import_not_xmltv">Ово није XMLTV датотека водича. Претходни водич је задржан.</string>
+    <string name="iptv_guide_import_fewer">Нови водич има знатно мање емисија него раније. Претходни водич је задржан.</string>
+    <string name="iptv_guide_import_not_linked">Канали водича су сачувани. Емисије се учитавају када неки извор почне да користи овај водич.</string>
+    <string name="iptv_guide_days">Дани у водичу</string>
+    <string name="iptv_guide_days_subtitle">Колико података о емисијама чувати. Више дана заузима више меморије. Примењује се при следећем ажурирању водича.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d дан уназад</item>
+        <item quantity="few">%d дана уназад</item>
+        <item quantity="other">%d дана уназад</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d дан унапред</item>
+        <item quantity="few">%d дана унапред</item>
+        <item quantity="other">%d дана унапред</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Препоручено</string>
+    <string name="iptv_guide_days_catchup">Дужи catch-up, заузима више меморије</string>
+    <string name="iptv_guide_days_larger">Заузима више меморије</string>
+    <string name="iptv_guides_choice_help">Сваки канал користи први повезани водич који има емисије за њега: прво ручна додела, затим подударни ID, затим подударно име, редоследом који је приказан. Помери горе мења приоритет.</string>
+</resources>

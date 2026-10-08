@@ -1,0 +1,23 @@
+<resources>
+    <string name="iptv_guide_import_out_of_date">Guidefilen har inga program för de kommande dagarna och kan vara inaktuell. Din tidigare guide har behållits.</string>
+    <string name="iptv_guide_import_no_channels">Guidefilen har inga kanaler. Din tidigare guide har behållits.</string>
+    <string name="iptv_guide_import_invalid">För många poster i guidefilen är ogiltiga. Din tidigare guide har behållits.</string>
+    <string name="iptv_guide_import_too_large">Guidefilen är för stor. Din tidigare guide har behållits.</string>
+    <string name="iptv_guide_import_not_xmltv">Det här är inte en XMLTV-guidefil. Din tidigare guide har behållits.</string>
+    <string name="iptv_guide_import_fewer">Den nya guiden har betydligt färre program än tidigare. Din tidigare guide har behållits.</string>
+    <string name="iptv_guide_import_not_linked">Guidekanaler sparade. Program läses in när en källa använder den här guiden.</string>
+    <string name="iptv_guide_days">Guidedagar</string>
+    <string name="iptv_guide_days_subtitle">Hur mycket programinformation som sparas. Fler dagar tar mer lagringsutrymme. Gäller vid nästa guideuppdatering.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d dag bakåt</item>
+        <item quantity="other">%d dagar bakåt</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d dag framåt</item>
+        <item quantity="other">%d dagar framåt</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Rekommenderas</string>
+    <string name="iptv_guide_days_catchup">Längre catch-up, tar mer lagringsutrymme</string>
+    <string name="iptv_guide_days_larger">Tar mer lagringsutrymme</string>
+    <string name="iptv_guides_choice_help">Varje kanal använder den första kopplade guiden som har program för den: först en manuell tilldelning, sedan ett matchande ID, sedan ett matchande namn, i den ordning som visas. Flytta upp ändrar prioriteten.</string>
+</resources>
