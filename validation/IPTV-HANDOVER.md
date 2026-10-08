@@ -204,6 +204,35 @@ User-reported, with status:
     "Show scores" setting), venue, game clock and favourite teams in `bbfa0a5`.
 13. Menu item renamed to "Settings" (`2d72733`).
 
+## Device findings — 8 October 2026, second pass (build `24d6868`)
+
+Overall OK. Items and status:
+1. Dropbox XMLTV guide: "server address is not valid" — Dropbox redirects to a URL with an
+   empty `#` fragment, which the guide and metadata clients rejected. Fragments are now
+   dropped (`c718fab`, with a test).
+2. Live TV Sources: Back and Left did nothing — the screen never called its `onBack`.
+   Back now leaves; Left from the leftmost item leaves (`c718fab`).
+3. Live TV ↔ Settings transition janky — in progress (UI helper).
+4. Live TV colour themes lack the supporter themes and seem to do nothing — in progress.
+5. Channel start ~4 s even with Fast — in progress (playback helper: measure, shared warm
+   connections, skip the probe when the format is known, pre-warm DNS/TCP/TLS on focus
+   without opening a media request).
+6. First OK after scrolling does not start the preview — in progress.
+7. "Behind live — fast-forward to go live" with no fast-forward key; Right zaps — in
+   progress (Right shows Return to live when behind live; fresh tunes start near live).
+8. "Previous player has not confirmed it stopped" on about every second switch — in
+   progress (root cause being traced; silent retry for ~3 s).
+9. 4K HLG HDR: corner preview stutters after leaving full screen; one box reboot — in
+   progress (no TextureView for HDR/>1080p, single decoder during the transition).
+10. Recording names: decorative superscripts (e.g. "ᴸᶦᵛᵉ") were kept; now stripped and
+    names NFKC-normalised (`c718fab`). Colons and length were already handled.
+11. Transparent panels and inconsistent fonts/panels (menu vs guide) — in progress.
+12. VOD Movies/Series screens still old style — in progress.
+13. Sport fixtures appear late — in progress (placeholders, cache first, fetch when Live
+    TV opens).
+14. Sports data fields reference — being written to `IPTV-SPORTS-DATA-FIELDS.md`.
+15. Defaults: Pure black off, Solid panels off, Background artwork off — in progress.
+
 ## Planned but not done (updated 7 October 2026)
 
 Everything from the 7 October comparison is now built except:
