@@ -390,6 +390,7 @@ internal fun HomeViewModel.observeTrailerSourceChangesPipeline() {
                 trailerPreviewNegativeCache.clear()
                 trailerPreviewUrlsState.clear()
                 trailerPreviewAudioUrlsState.clear()
+                trailerPreviewValidUntil.clear()
                 val refocusId = activeTrailerPreviewItemId
                 activeTrailerPreviewItemId = null
                 refocusId?.let { id -> findCatalogItemById(id)?.let { requestTrailerPreviewPipeline(it) } }
@@ -464,7 +465,8 @@ internal fun HomeViewModel.requestTrailerPreviewPipeline(
         trailerPreviewNegativeCache.remove(itemId)
     }
     trailerPreviewUrlsState[itemId]?.let { url ->
-        if (!isTrailerPreviewLinkExpired(url, trailerPreviewAudioUrlsState[itemId], Instant.now())) return
+        if (System.currentTimeMillis() < (trailerPreviewValidUntil[itemId] ?: Long.MAX_VALUE) &&
+            !isTrailerPreviewLinkExpired(url, trailerPreviewAudioUrlsState[itemId], Instant.now())) return
         trailerPreviewUrlsState.remove(itemId)
         trailerPreviewAudioUrlsState.remove(itemId)
     }
@@ -503,6 +505,10 @@ internal fun HomeViewModel.requestTrailerPreviewPipeline(
                     trailerPreviewUrlsState.remove(itemId)
                     trailerPreviewAudioUrlsState.remove(itemId)
                 } else {
+                    trailerPreviewValidUntil[itemId] = minOf(
+                        System.currentTimeMillis() + 30 * 60_000L,
+                        com.nuvio.tv.data.trailer.TrailerSourceExpiry.expiresAtMs(trailerSource)
+                    )
                     val videoUrl = trailerSource.videoUrl
                     if (trailerPreviewUrlsState[itemId] != videoUrl) {
                         trailerPreviewUrlsState[itemId] = videoUrl
@@ -515,6 +521,7 @@ internal fun HomeViewModel.requestTrailerPreviewPipeline(
                     }
                 }
             }
+            trailerSource?.let { trailerService.preload(it) }
         } finally {
             if (trailerPreviewRequestVersion == requestVersion) trailerPreviewLoadingIds.remove(itemId)
         }

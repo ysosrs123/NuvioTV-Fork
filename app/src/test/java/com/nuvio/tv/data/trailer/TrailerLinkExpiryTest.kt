@@ -114,7 +114,7 @@ class TrailerLinkExpiryTest {
         val clock = MutableClock(start)
         val harness = newService(clock, TrailerSource.IMDB)
         coEvery { harness.tmdbService.tmdbToImdb(123, "movie") } returns "tt0137523"
-        val first = "https://imdb-video.media-imdb.com/vi1/a.mp4?Expires=${start.epochSecond + 3600}&Signature=s"
+        val first = "https://imdb-video.media-imdb.com/vi1/a.mp4?Expires=${start.epochSecond + 20 * 60}&Signature=s"
         val second = "https://imdb-video.media-imdb.com/vi1/a.mp4?Expires=${start.epochSecond + 7200}&Signature=t"
         coEvery { harness.imdb.resolve("tt0137523", any()) } returnsMany listOf(
             TrailerPlaybackSource(videoUrl = first),
@@ -122,9 +122,9 @@ class TrailerLinkExpiryTest {
         )
 
         assertEquals(first, harness.lookup()?.videoUrl)
-        clock.now = start.plus(Duration.ofMinutes(30))
+        clock.now = start.plus(Duration.ofMinutes(10))
         assertEquals(first, harness.lookup()?.videoUrl)
-        clock.now = start.plus(Duration.ofMinutes(50))
+        clock.now = start.plus(Duration.ofMinutes(19))
         assertEquals(second, harness.lookup()?.videoUrl)
     }
 
@@ -225,7 +225,7 @@ class TrailerLinkExpiryTest {
     }
 
     @Test
-    fun `a link without expiry is kept for three hours`() = runTest {
+    fun `an unsigned IMDb link is refreshed after thirty minutes`() = runTest {
         val clock = MutableClock(start)
         val harness = newService(clock, TrailerSource.IMDB)
         coEvery { harness.tmdbService.tmdbToImdb(123, "movie") } returns "tt0137523"
@@ -235,9 +235,9 @@ class TrailerLinkExpiryTest {
         )
 
         assertEquals("https://cdn.example/one.mp4", harness.lookup()?.videoUrl)
-        clock.now = start.plus(Duration.ofMinutes(179))
+        clock.now = start.plus(Duration.ofMinutes(29))
         assertEquals("https://cdn.example/one.mp4", harness.lookup()?.videoUrl)
-        clock.now = start.plus(Duration.ofHours(3))
+        clock.now = start.plus(Duration.ofMinutes(30))
         assertEquals("https://cdn.example/two.mp4", harness.lookup()?.videoUrl)
     }
 

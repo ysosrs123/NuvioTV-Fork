@@ -49,8 +49,8 @@ class HomeTrailerLookupTest {
         vm.requestTrailerPreviewPipeline(preview("kitsu:1", imdbId = "tt0137523"))
         advanceTimeBy(400); runCurrent()
 
-        coVerify { vm.tmdbService.ensureTmdbId("kitsu:1", "movie", "tt0137523") }
-        coVerify { vm.trailerService.lookupTrailer(any(), any(), "550", any(), any()) }
+        coVerify(exactly = 0) { vm.tmdbService.ensureTmdbId(any(), any(), any()) }
+        coVerify { vm.trailerService.lookupTrailer(any(), any(), "tt0137523", any(), any()) }
         assertEquals("https://example.test/trailer.mp4", vm.trailerPreviewUrlsState["kitsu:1"])
     }
 

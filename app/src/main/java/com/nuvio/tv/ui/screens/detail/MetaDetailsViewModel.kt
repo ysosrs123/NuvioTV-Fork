@@ -3270,8 +3270,13 @@ class MetaDetailsViewModel @Inject constructor(
                 else Regex("""\b(19|20)\d{2}\b""").find(info)?.value
             }
 
-            val tmdbId = try {
+            val nativeImdbId = (meta.imdbId ?: meta.id).takeIf { it.matches(Regex("tt\\d+")) }
+            val tmdbId = if (AppFeaturePolicy.inAppTrailerPlaybackEnabled && nativeImdbId != null) {
+                nativeImdbId
+            } else try {
                 tmdbService.ensureTmdbId(meta.id, meta.apiType, fallbackImdbId = meta.imdbId)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
             } catch (_: Exception) {
                 null
             }

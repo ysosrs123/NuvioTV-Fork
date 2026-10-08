@@ -29,15 +29,16 @@ class TrailerPreviewLookupTest {
     )
 
     @Test
-    fun `the IMDb id is passed into the TMDB lookup`() = runTest {
+    fun `the IMDb id bypasses the TMDB lookup`() = runTest {
         coEvery { tmdbService.ensureTmdbId("kitsu:1", "movie", "tt0137523") } returns "550"
-        coEvery { trailerService.lookupTrailer("Title", "2026", "550", "movie", any()) } returns
+        coEvery { trailerService.lookupTrailer("Title", "2026", "tt0137523", "movie", any()) } returns
             TrailerLookupResult(TrailerPlaybackSource("https://example.test/trailer.mp4"))
 
         val result = lookup(imdbId = "tt0137523")
 
         assertEquals("https://example.test/trailer.mp4", result.source?.videoUrl)
         assertFalse(result.rememberMiss)
+        coVerify(exactly = 0) { tmdbService.ensureTmdbId(any(), any(), any()) }
     }
 
     @Test

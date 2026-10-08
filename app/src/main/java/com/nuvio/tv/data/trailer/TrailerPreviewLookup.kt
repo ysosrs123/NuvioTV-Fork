@@ -42,7 +42,9 @@ internal suspend fun lookupTrailerPreview(
     imdbId: String?,
     ytIds: List<String>
 ): TrailerPreviewLookup {
-    val tmdbId = try {
+    val nativeImdbId = imdbId?.takeIf { it.matches(Regex("tt\\d+")) }
+        ?: itemId.takeIf { it.matches(Regex("tt\\d+")) }
+    val tmdbId = nativeImdbId ?: try {
         tmdbService.ensureTmdbId(itemId, apiType, fallbackImdbId = imdbId)
     } catch (cancelled: CancellationException) {
         throw cancelled

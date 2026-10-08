@@ -14,7 +14,7 @@ class TrailerPlayerPoolOwnershipTest {
         val settings = mockk<PlayerSettingsDataStore> {
             every { nuvioPerformanceModeEnabled } returns flowOf(false)
         }
-        return TrailerPlayerPool(mockk(relaxed = true), settings).also {
+        return TrailerPlayerPool(mockk(relaxed = true), settings, mockk(relaxed = true)).also {
             TrailerPlayerPool::class.java.getDeclaredField("_player").apply { isAccessible = true }.set(it, player)
         }
     }

@@ -26,6 +26,38 @@ class HomeTrailerCancellationTest {
             TrailerLookupResult(TrailerPlaybackSource("https://example.test/trailer.mp4"))
     }
 
+    @Test fun `transient focus does not resolve or preload a trailer`() = runTest {
+        val vm = newViewModel(); vm.stubSource()
+        vm.request("A"); advanceTimeBy(300)
+        vm.request("B"); advanceTimeBy(300)
+        vm.setTrailerPreviewActive(false)
+        advanceTimeBy(500); runCurrent()
+        coVerify(exactly = 0) { vm.trailerService.lookupTrailer(any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { vm.trailerService.preload(any()) }
+    }
+
+    @Test fun `source publishes before preloading and focus loss cancels the preloader`() = runTest {
+        val vm = newViewModel(); vm.stubSource()
+        var cancelled = false
+        coEvery { vm.trailerService.preload(any()) } coAnswers {
+            try { awaitCancellation() } finally { cancelled = true }
+        }
+        vm.request("A"); advanceTimeBy(400); runCurrent()
+        assertNotNull(vm.trailerPreviewUrlsState["A"])
+        vm.setTrailerPreviewActive(false); runCurrent()
+        assertTrue(cancelled)
+        assertFalse(vm.trailerPreviewNegativeCache.contains("A"))
+    }
+
+    @Test fun `expired Home source is resolved again on focus instead of replaying stale URL`() = runTest {
+        val vm = newViewModel(); vm.stubSource()
+        vm.trailerPreviewUrlsState["A"] = "https://example.test/expired.mp4"
+        vm.trailerPreviewValidUntil["A"] = 1L
+        vm.request("A"); advanceTimeBy(400); runCurrent()
+        assertEquals("https://example.test/trailer.mp4", vm.trailerPreviewUrlsState["A"])
+        coVerify(exactly = 1) { vm.trailerService.lookupTrailer(any(), any(), any(), any(), any()) }
+    }
+
     @Test fun `duplicate focus during debounce still resolves the focused trailer`() = runTest {
         val vm = newViewModel(); vm.stubSource()
         vm.request("A")

@@ -33,7 +33,8 @@ import kotlinx.coroutines.flow.first
 @Singleton
 class TrailerPlayerPool @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val playerSettingsDataStore: PlayerSettingsDataStore
+    private val playerSettingsDataStore: PlayerSettingsDataStore,
+    private val trailerMediaCache: com.nuvio.tv.data.trailer.TrailerMediaCache
 ) {
     companion object {
         private const val TAG = "TrailerPlayerPool"
@@ -76,6 +77,10 @@ class TrailerPlayerPool @Inject constructor(
     }
 
     fun isOwner(owner: Any): Boolean = this.owner === owner
+
+    suspend fun preload(source: com.nuvio.tv.data.trailer.TrailerPlaybackSource) {
+        if (!released.get() && !yielded.get() && !screensaverSuppressed.get()) trailerMediaCache.preload(source)
+    }
 
     /** An outgoing screen must not stop a newer screen's preview during a transition. */
     fun stop(owner: Any) {
@@ -155,10 +160,10 @@ class TrailerPlayerPool @Inject constructor(
         Log.d(TAG, "Creating shared trailer ExoPlayer instance with forceNativeAllocation = $forceNative")
         val loadControlBuilder = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
-                /* minBufferMs = */ 30_000,
-                /* maxBufferMs = */ 120_000,
-                /* bufferForPlaybackMs = */ 5_000,
-                /* bufferForPlaybackAfterRebufferMs = */ 10_000
+                /* minBufferMs = */ 15_000,
+                /* maxBufferMs = */ 30_000,
+                /* bufferForPlaybackMs = */ 1_500,
+                /* bufferForPlaybackAfterRebufferMs = */ 3_000
             )
         if (forceNative) {
             val allocator = DefaultAllocator(
@@ -180,6 +185,7 @@ class TrailerPlayerPool @Inject constructor(
             )
         }
         return ExoPlayer.Builder(context)
+            .setMediaSourceFactory(androidx.media3.exoplayer.source.DefaultMediaSourceFactory(trailerMediaCache.playbackFactory()))
             .setLoadControl(loadControl)
             .setTrackSelector(trackSelector)
             .setBandwidthMeter(
