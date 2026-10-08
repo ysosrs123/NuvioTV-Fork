@@ -14,6 +14,10 @@ Related: [progress](IPTV-PROGRESS.md), [sports design pass 2](IPTV-SPORTS-DESIGN
 
 ## Start here — next session (from 9 October 2026)
 
+Device pass in progress (user, 9 October): build `374e1f6`, CI run 37845595141 (sports build
+with real-data parser fixes, before the combined ESPN/TheSportsDB sources). Record findings
+against that build.
+
 State: everything is committed and pushed on `iptv/player-binding`. Last green debug build
 `6afbea0` (run 37791659338), minified release `dd888c0` (run 37795570642); before the sports build
 `ada280b` (run 37767996467); later commits are translations (`ecf29d4`) and docs only.
