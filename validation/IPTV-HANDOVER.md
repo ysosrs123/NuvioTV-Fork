@@ -8,7 +8,7 @@ compiled the whole app and assembled the APK; one unit test failed
 (`IptvWebDavShareTest` self-signed certificate case), fixed in `2bef868` and not yet
 confirmed by CI. Minified release build with IPTV last green at `d8d4a03` (run
 37550880901), before wave 1. Start with "Current work plan"; older sections are history.
-Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
+Related: [progress](IPTV-PROGRESS.md), [sports design pass 2](IPTV-SPORTS-DESIGN-PASS-2.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
 [code review](IPTV-CODE-REVIEW-20261006.md), [reference app notes](IPTV-UX-REFERENCE.md),
 [player validation report](IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json).
 
@@ -23,7 +23,12 @@ is fixed in code (see the two "Device findings — 8 October" sections) but not 
 on a device. The user cannot test on a device right now.
 
 Next, in order:
-1. Sports experience — second, more thorough and creative design pass (user request).
+1. Sports experience — second design pass DONE (8 October): 12-board canvas "Nuvio —
+   Sports experience, second pass" (https://claude.ai/artifact/NCce5k5kkBJa5aC5MbSiYt,
+   private to the user); reasoning, constraints and recommended order in
+   [IPTV-SPORTS-DESIGN-PASS-2.md](IPTV-SPORTS-DESIGN-PASS-2.md). Waiting for the user to
+   choose which ideas to build; nothing built yet. Original brief, for reference:
+   second, more thorough and creative design pass (user request).
    Mock up how sports fit across IPTV and Nuvio itself: the Sport section, the EPG (live
    scores and sport badges in guide cells, a "games now" lane), the player UI (Game
    Centre panel, scoring-play markers on the timeline, alternative feeds), score HUD
