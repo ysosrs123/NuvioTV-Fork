@@ -332,9 +332,11 @@ Before merge and release (only on the user's confirmation):
   where `FEATURE_IPTV_ENABLED` is false. Options: enable in `full` (move the recording
   permissions, service and receivers from `src/iptvPrototype/AndroidManifest.xml` to
   main), keep the separate prototype app, or enable in `full` behind an off-by-default
-  setting (suggested). Not decided yet.
-- Squash-merge `iptv/player-binding` into `main` as one commit, then delete `iptv/wip`
-  and `iptv/player-binding`. The workflow change and `tools/iptv-host-tests` ship with it.
+  setting (suggested). Decided 8 October 2026: part of the full app.
+- Merge (user, 8 October 2026): keep `iptv/player-binding` (and `iptv/wip`); no squash
+  merge or branch deletion from this work. When the work is complete, the user will have
+  a separate agent merge the branch into `main` for a release build. The workflow change
+  and `tools/iptv-host-tests` ship with that merge.
 
 ## Rules for this branch
 
@@ -468,7 +470,7 @@ recovery, live retry backoff, HLS live speed), catch-up, search, sports, multivi
   group by portal host and MAC (as Xtream with the MAC as the user).
 - `IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json` source hashes predate later commits;
   refresh them with the next recorded validation.
-- The workflow changes and `tools/iptv-host-tests` ship with the squash merge.
+- The workflow changes and `tools/iptv-host-tests` ship with the merge into `main`.
 
 ## Next steps (device fixtures; earlier plan)
 
@@ -483,8 +485,8 @@ recovery, live retry backoff, HLS live speed), catch-up, search, sports, multivi
    per-row Keystore sealing.
 4. Then measure aggregate memory and storage margins, validate renderer preroll
    discard and seek acknowledgement, and only then enable capture controls.
-5. Once steps 1–2 pass, squash-merge `iptv/player-binding` into `main` as one commit
-   and delete the `iptv/wip` and `iptv/player-binding` branches.
+5. Once steps 1–2 pass, the user has a separate agent merge `iptv/player-binding` into
+   `main`; the branches are kept.
 
 ## Logic layer added for the next UI work — 6 October 2026
 
