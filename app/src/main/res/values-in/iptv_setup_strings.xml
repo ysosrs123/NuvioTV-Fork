@@ -79,7 +79,7 @@
     <string name="iptv_review_kept">Daftar saluran saat ini dipertahankan.</string>
     <string name="iptv_review_outdated">Daftar itu sudah usang. Segarkan sumber untuk memeriksa lagi.</string>
     <string name="iptv_groups_title">Koneksi bersama</string>
-    <string name="iptv_groups_description">Sumber dalam satu grup berbagi satu batas koneksi, misalnya beberapa playlist dari akun yang sama.</string>
+    <string name="iptv_groups_description">Penyedia membatasi berapa banyak saluran yang dapat diputar satu akun sekaligus, sering 1 atau 2. Jika Anda menambahkan akun yang sama lebih dari sekali, misalnya login Xtream dan tautan M3U-nya, masukkan sumber tersebut ke satu grup agar berbagi satu batas. Ini mencegah error \"koneksi maksimum\" saat menonton dan merekam bersamaan.</string>
     <plurals name="iptv_group_sources">
         <item quantity="other">%1$d sumber</item>
     </plurals>
@@ -96,7 +96,7 @@
     <string name="iptv_group_sources_description">Sumber yang dicentang berbagi koneksi grup ini. Satu sumber hanya bisa berada di satu grup.</string>
     <string name="iptv_group_limit_description">Jumlah saluran yang dapat diputar atau direkam sekaligus oleh semua sumber di grup ini secara bersamaan.</string>
     <string name="iptv_transfer_title">Salin dan cadangkan</string>
-    <string name="iptv_transfer_description">Pindahkan penyiapan TV Live profil ini ke TV lain, atau simpan salinannya dalam file terkunci.</string>
+    <string name="iptv_transfer_description">Salin penyiapan TV Live profil ini (sumber, panduan acara, favorit, urutan saluran, dan pengaturan) ke TV lain di jaringan Anda, atau simpan ke file cadangan yang dikunci dengan frasa sandi. Pulihkan setelah menginstal ulang aplikasi atau di box baru.</string>
     <string name="iptv_transfer_logins">Sertakan info login</string>
     <string name="iptv_transfer_logins_subtitle">Nama pengguna, sandi, alamat MAC, dan alamat yang berisi info login. Tanpanya, sumber tersebut tidak disertakan.</string>
     <string name="iptv_transfer_back">Kembali</string>

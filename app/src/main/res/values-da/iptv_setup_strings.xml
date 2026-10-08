@@ -80,7 +80,7 @@
     <string name="iptv_review_kept">Nuværende kanalliste beholdt.</string>
     <string name="iptv_review_outdated">Den liste er forældet. Opdater kilden for at tjekke igen.</string>
     <string name="iptv_groups_title">Delte forbindelser</string>
-    <string name="iptv_groups_description">Kilder i samme gruppe deler én forbindelsesgrænse, for eksempel flere playlister fra samme konto.</string>
+    <string name="iptv_groups_description">Udbydere begrænser, hvor mange kanaler én konto kan afspille ad gangen, ofte 1 eller 2. Hvis du har tilføjet den samme konto mere end én gang, f.eks. dens Xtream-login og et M3U-link, så sæt de kilder i én gruppe, så de deler én grænse. Det forhindrer fejl om \"maksimalt antal forbindelser\", når du ser og optager på samme tid.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d kilde</item>
         <item quantity="other">%1$d kilder</item>
@@ -98,7 +98,7 @@
     <string name="iptv_group_sources_description">Markerede kilder deler denne gruppes forbindelser. En kilde kan være i én gruppe.</string>
     <string name="iptv_group_limit_description">Hvor mange kanaler kilderne i denne gruppe kan afspille eller optage samtidig, tilsammen.</string>
     <string name="iptv_transfer_title">Kopiér og sikkerhedskopiér</string>
-    <string name="iptv_transfer_description">Flyt denne profils live-TV-opsætning til et andet TV, eller gem en kopi i en låst fil.</string>
+    <string name="iptv_transfer_description">Kopiér denne profils live-TV-opsætning (kilder, guider, favoritter, kanalrækkefølge og indstillinger) til et andet TV på dit netværk, eller gem den i en sikkerhedskopi låst med en adgangssætning. Gendan den efter geninstallation af appen eller på en ny boks.</string>
     <string name="iptv_transfer_logins">Medtag logins</string>
     <string name="iptv_transfer_logins_subtitle">Brugernavne, adgangskoder, MAC-adresser og adresser med logins i. Uden dem udelades de kilder.</string>
     <string name="iptv_transfer_back">Tilbage</string>

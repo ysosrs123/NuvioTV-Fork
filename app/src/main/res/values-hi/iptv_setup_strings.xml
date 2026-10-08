@@ -80,7 +80,7 @@
     <string name="iptv_review_kept">मौजूदा चैनल लिस्ट रखी गई।</string>
     <string name="iptv_review_outdated">वह लिस्ट पुरानी हो चुकी है। फिर से जाँचने के लिए सोर्स रिफ्रेश करें।</string>
     <string name="iptv_groups_title">शेयर किए गए कनेक्शन</string>
-    <string name="iptv_groups_description">एक ग्रुप के सोर्स एक ही कनेक्शन सीमा शेयर करते हैं, जैसे एक ही अकाउंट की कई प्लेलिस्ट।</string>
+    <string name="iptv_groups_description">प्रोवाइडर सीमित करते हैं कि एक अकाउंट एक साथ कितने चैनल चला सकता है, अक्सर 1 या 2। अगर आपने एक ही अकाउंट एक से ज़्यादा बार जोड़ा है, जैसे उसका Xtream लॉगिन और एक M3U लिंक, तो उन सोर्स को एक ग्रुप में रखें ताकि वे एक ही सीमा शेयर करें। इससे एक साथ देखते और रिकॉर्ड करते समय \"अधिकतम कनेक्शन\" त्रुटियाँ नहीं आतीं।</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d सोर्स</item>
         <item quantity="other">%1$d सोर्स</item>
@@ -98,7 +98,7 @@
     <string name="iptv_group_sources_description">टिक किए गए सोर्स इस ग्रुप के कनेक्शन शेयर करते हैं। एक सोर्स एक ही ग्रुप में हो सकता है।</string>
     <string name="iptv_group_limit_description">इस ग्रुप के सोर्स मिलाकर एक साथ कितने चैनल चला या रिकॉर्ड कर सकते हैं।</string>
     <string name="iptv_transfer_title">कॉपी और बैकअप</string>
-    <string name="iptv_transfer_description">इस प्रोफाइल का लाइव टीवी सेटअप दूसरे टीवी पर ले जाएँ, या उसकी कॉपी लॉक की गई फ़ाइल में रखें।</string>
+    <string name="iptv_transfer_description">इस प्रोफाइल का लाइव टीवी सेटअप (सोर्स, गाइड, पसंदीदा, चैनल क्रम और सेटिंग) अपने नेटवर्क के दूसरे टीवी पर कॉपी करें, या पासफ़्रेज़ से लॉक की गई बैकअप फ़ाइल में सेव करें। ऐप दोबारा इंस्टॉल करने के बाद या नए बॉक्स पर इसे रीस्टोर करें।</string>
     <string name="iptv_transfer_logins">लॉगिन शामिल करें</string>
     <string name="iptv_transfer_logins_subtitle">यूज़रनेम, पासवर्ड, MAC पते और लॉगिन वाले पते। इनके बिना वे सोर्स छोड़ दिए जाते हैं।</string>
     <string name="iptv_transfer_back">वापस</string>

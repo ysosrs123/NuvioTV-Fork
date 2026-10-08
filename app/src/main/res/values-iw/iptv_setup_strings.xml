@@ -82,7 +82,7 @@
     <string name="iptv_review_kept">רשימת הערוצים הנוכחית נשמרה.</string>
     <string name="iptv_review_outdated">הרשימה הזו כבר לא עדכנית. יש לרענן את המקור כדי לבדוק שוב.</string>
     <string name="iptv_groups_title">חיבורים משותפים</string>
-    <string name="iptv_groups_description">מקורות בקבוצה אחת חולקים מגבלת חיבורים אחת, למשל כמה רשימות השמעה מאותו חשבון.</string>
+    <string name="iptv_groups_description">ספקים מגבילים כמה ערוצים חשבון אחד יכול להפעיל בו-זמנית, לרוב 1 או 2. אם הוספת את אותו חשבון יותר מפעם אחת, למשל כניסת Xtream וקישור M3U, יש לשים את המקורות האלה בקבוצה אחת כדי שיחלקו מגבלה אחת. כך נמנעות שגיאות \"מקסימום חיבורים\" בזמן צפייה והקלטה במקביל.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">מקור אחד</item>
         <item quantity="two">שני מקורות</item>
@@ -102,7 +102,7 @@
     <string name="iptv_group_sources_description">המקורות המסומנים חולקים את החיבורים של הקבוצה הזו. מקור יכול להיות בקבוצה אחת בלבד.</string>
     <string name="iptv_group_limit_description">כמה ערוצים המקורות בקבוצה הזו יכולים לנגן או להקליט בבת אחת, ביחד.</string>
     <string name="iptv_transfer_title">העתקה וגיבוי</string>
-    <string name="iptv_transfer_description">העברת הגדרות טלוויזיה חיה של הפרופיל הזה לטלוויזיה אחרת, או שמירת עותק בקובץ נעול.</string>
+    <string name="iptv_transfer_description">העתקת הגדרות טלוויזיה חיה של הפרופיל הזה (מקורות, מדריכי שידורים, מועדפים, סדר ערוצים והגדרות) לטלוויזיה אחרת ברשת שלך, או שמירתן בקובץ גיבוי נעול בביטוי סיסמה. אפשר לשחזר אותן אחרי התקנה מחדש של האפליקציה או בממיר חדש.</string>
     <string name="iptv_transfer_logins">כולל פרטי התחברות</string>
     <string name="iptv_transfer_logins_subtitle">שמות משתמש, סיסמאות, כתובות MAC וכתובות שכוללות פרטי התחברות. בלעדיהם, המקורות האלה לא ייכללו.</string>
     <string name="iptv_transfer_back">חזרה</string>

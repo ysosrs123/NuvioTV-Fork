@@ -81,7 +81,7 @@
     <string name="iptv_review_kept">Se ha conservado la lista de canales actual.</string>
     <string name="iptv_review_outdated">Esa lista está desactualizada. Actualiza la fuente para volver a comprobarlo.</string>
     <string name="iptv_groups_title">Conexiones compartidas</string>
-    <string name="iptv_groups_description">Las fuentes de un grupo comparten un único límite de conexiones, por ejemplo varias listas de la misma cuenta.</string>
+    <string name="iptv_groups_description">Los proveedores limitan cuántos canales puede reproducir una cuenta a la vez, a menudo 1 o 2. Si añadiste la misma cuenta más de una vez, como su acceso Xtream y un enlace M3U, pon esas fuentes en un grupo para que compartan un solo límite. Así evitas errores de \"máximo de conexiones\" al ver y grabar a la vez.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d fuente</item>
         <item quantity="many">%1$d fuentes</item>
@@ -100,7 +100,7 @@
     <string name="iptv_group_sources_description">Las fuentes marcadas comparten las conexiones de este grupo. Una fuente puede estar en un solo grupo.</string>
     <string name="iptv_group_limit_description">Cuántos canales pueden reproducir o grabar a la vez, en total, las fuentes de este grupo.</string>
     <string name="iptv_transfer_title">Copiar y hacer copia de seguridad</string>
-    <string name="iptv_transfer_description">Pasa la configuración de TV en directo de este perfil a otra TV o guarda una copia en un archivo protegido.</string>
+    <string name="iptv_transfer_description">Copia la configuración de TV en directo de este perfil (fuentes, guías, favoritos, orden de canales y ajustes) a otra TV de tu red, o guárdala en una copia de seguridad protegida con una frase de contraseña. Restáurala tras reinstalar la app o en un dispositivo nuevo.</string>
     <string name="iptv_transfer_logins">Incluir inicios de sesión</string>
     <string name="iptv_transfer_logins_subtitle">Usuarios, contraseñas, direcciones MAC y direcciones que contienen datos de acceso. Sin ellos, esas fuentes se omiten.</string>
     <string name="iptv_transfer_back">Atrás</string>

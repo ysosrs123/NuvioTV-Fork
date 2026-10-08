@@ -80,7 +80,7 @@
     <string name="iptv_review_kept">A jelenlegi csatornalista megmaradt.</string>
     <string name="iptv_review_outdated">Ez a lista elavult. Frissítsd a forrást az újbóli ellenőrzéshez.</string>
     <string name="iptv_groups_title">Közös kapcsolatok</string>
-    <string name="iptv_groups_description">Egy csoport forrásai közös kapcsolatkorláton osztoznak, például ugyanannak a fióknak több lejátszási listája.</string>
+    <string name="iptv_groups_description">A szolgáltatók korlátozzák, hány csatornát játszhat le egy fiók egyszerre, gyakran 1-et vagy 2-t. Ha ugyanazt a fiókot többször is hozzáadtad, például Xtream-bejelentkezéssel és M3U-linkkel, tedd ezeket a forrásokat egy csoportba, hogy egy közös korláton osztozzanak. Így elkerülheted a \"maximális kapcsolatszám\" hibákat, amikor egyszerre nézel és rögzítesz.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d forrás</item>
         <item quantity="other">%1$d forrás</item>
@@ -98,7 +98,7 @@
     <string name="iptv_group_sources_description">A bejelölt források a csoport kapcsolatain osztoznak. Egy forrás egy csoportban lehet.</string>
     <string name="iptv_group_limit_description">Hány csatornát játszhatnak le vagy rögzíthetnek egyszerre összesen a csoport forrásai.</string>
     <string name="iptv_transfer_title">Másolás és biztonsági mentés</string>
-    <string name="iptv_transfer_description">Vidd át ennek a profilnak az Élő TV-beállítását egy másik tévére, vagy őrizz meg egy másolatot egy zárolt fájlban.</string>
+    <string name="iptv_transfer_description">Másold át ennek a profilnak az Élő TV-beállítását (források, műsorújságok, kedvencek, csatornasorrend és beállítások) egy másik tévére a hálózatodon, vagy mentsd el egy jelmondattal zárolt biztonsági mentés fájlba. Állítsd vissza az alkalmazás újratelepítése után vagy egy új eszközön.</string>
     <string name="iptv_transfer_logins">Bejelentkezési adatokkal együtt</string>
     <string name="iptv_transfer_logins_subtitle">Felhasználónevek, jelszavak, MAC-címek és bejelentkezési adatokat tartalmazó címek. Nélkülük ezek a források kimaradnak.</string>
     <string name="iptv_transfer_back">Vissza</string>

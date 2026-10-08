@@ -82,7 +82,7 @@
     <string name="iptv_review_kept">Paliktas dabartinis kanalų sąrašas.</string>
     <string name="iptv_review_outdated">Šis sąrašas pasenęs. Atnaujinkite šaltinį, kad patikrintumėte dar kartą.</string>
     <string name="iptv_groups_title">Bendros jungtys</string>
-    <string name="iptv_groups_description">Vienos grupės šaltiniai dalijasi viena jungčių riba, pavyzdžiui, keli tos pačios paskyros grojaraščiai.</string>
+    <string name="iptv_groups_description">Teikėjai riboja, kiek kanalų viena paskyra gali leisti vienu metu, dažnai 1 ar 2. Jei tą pačią paskyrą pridėjote kelis kartus, pavyzdžiui, jos Xtream prisijungimą ir M3U nuorodą, sudėkite tuos šaltinius į vieną grupę, kad jie dalytųsi viena riba. Taip išvengsite \"maksimalaus jungčių skaičiaus\" klaidų, kai vienu metu žiūrite ir įrašote.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d šaltinis</item>
         <item quantity="few">%1$d šaltiniai</item>
@@ -102,7 +102,7 @@
     <string name="iptv_group_sources_description">Pažymėti šaltiniai dalijasi šios grupės jungtimis. Šaltinis gali būti tik vienoje grupėje.</string>
     <string name="iptv_group_limit_description">Kiek kanalų šios grupės šaltiniai iš viso gali leisti ar įrašyti vienu metu.</string>
     <string name="iptv_transfer_title">Kopijavimas ir atsarginė kopija</string>
-    <string name="iptv_transfer_description">Perkelkite šio profilio tiesioginės TV nustatymus į kitą televizorių arba laikykite kopiją užrakintame faile.</string>
+    <string name="iptv_transfer_description">Nukopijuokite šio profilio tiesioginės TV nustatymus (šaltinius, TV programas, mėgstamus, kanalų tvarką ir nuostatas) į kitą televizorių jūsų tinkle arba išsaugokite juos atsarginės kopijos faile, užrakintame slaptafraze. Atkurkite juos iš naujo įdiegę programėlę arba naujame priedėlyje.</string>
     <string name="iptv_transfer_logins">Įtraukti prisijungimo duomenis</string>
     <string name="iptv_transfer_logins_subtitle">Naudotojų vardai, slaptažodžiai, MAC adresai ir adresai su prisijungimo duomenimis. Be jų tie šaltiniai praleidžiami.</string>
     <string name="iptv_transfer_back">Atgal</string>

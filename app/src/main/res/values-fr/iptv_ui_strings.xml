@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Choisissez où l’enregistrer. Modifiez l’emplacement par défaut dans les réglages de la TV en direct.</string>
+    <string name="iptv_record_where_default">Par défaut</string>
+    <string name="iptv_record_where_read_only">Lecture seule</string>
+</resources>

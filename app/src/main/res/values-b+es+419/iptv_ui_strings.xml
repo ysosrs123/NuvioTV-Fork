@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Elige dónde guardarla. Cambia la ubicación predeterminada en Configuración de TV en vivo.</string>
+    <string name="iptv_record_where_default">Predeterminada</string>
+    <string name="iptv_record_where_read_only">Solo lectura</string>
+</resources>

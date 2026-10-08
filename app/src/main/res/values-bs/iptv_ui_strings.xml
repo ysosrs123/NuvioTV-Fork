@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Odaberite gdje spremiti. Zadanu lokaciju promijenite u postavkama TV uživo.</string>
+    <string name="iptv_record_where_default">Zadano</string>
+    <string name="iptv_record_where_read_only">Samo za čitanje</string>
+</resources>

@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">יש לבחור היכן לשמור. ניתן לשנות את ברירת המחדל בהגדרות טלוויזיה חיה.</string>
+    <string name="iptv_record_where_default">ברירת מחדל</string>
+    <string name="iptv_record_where_read_only">קריאה בלבד</string>
+</resources>

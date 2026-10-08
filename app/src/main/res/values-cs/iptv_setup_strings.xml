@@ -82,7 +82,7 @@
     <string name="iptv_review_kept">Aktuální seznam kanálů ponechán.</string>
     <string name="iptv_review_outdated">Tento seznam je zastaralý. Obnovte zdroj a zkontrolujte to znovu.</string>
     <string name="iptv_groups_title">Sdílená připojení</string>
-    <string name="iptv_groups_description">Zdroje v jedné skupině sdílejí společný limit připojení, například několik playlistů ze stejného účtu.</string>
+    <string name="iptv_groups_description">Poskytovatelé omezují, kolik kanálů může jeden účet přehrávat najednou, často 1 nebo 2. Pokud jste stejný účet přidali vícekrát, například jeho přihlášení Xtream a odkaz M3U, dejte tyto zdroje do jedné skupiny, aby sdílely jeden limit. Zabráníte tak chybám \"maximum připojení\" při současném sledování a nahrávání.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d zdroj</item>
         <item quantity="few">%1$d zdroje</item>
@@ -102,7 +102,7 @@
     <string name="iptv_group_sources_description">Zaškrtnuté zdroje sdílejí připojení této skupiny. Zdroj může být jen v jedné skupině.</string>
     <string name="iptv_group_limit_description">Kolik kanálů mohou zdroje v této skupině dohromady přehrávat nebo nahrávat současně.</string>
     <string name="iptv_transfer_title">Kopírování a záloha</string>
-    <string name="iptv_transfer_description">Přeneste nastavení živé TV tohoto profilu na jinou TV, nebo si uložte kopii v zamčeném souboru.</string>
+    <string name="iptv_transfer_description">Zkopírujte nastavení živé TV tohoto profilu (zdroje, televizní programy, oblíbené, pořadí kanálů a předvolby) do jiné TV ve vaší síti, nebo ho uložte do záložního souboru zamčeného heslem. Obnovte ho po přeinstalaci aplikace nebo na novém zařízení.</string>
     <string name="iptv_transfer_logins">Zahrnout přihlašovací údaje</string>
     <string name="iptv_transfer_logins_subtitle">Uživatelská jména, hesla, MAC adresy a adresy s přihlašovacími údaji. Bez nich se tyto zdroje vynechají.</string>
     <string name="iptv_transfer_back">Zpět</string>

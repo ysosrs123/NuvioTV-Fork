@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">اختر مكان الحفظ. غيّر الموقع الافتراضي في إعدادات البث المباشر.</string>
+    <string name="iptv_record_where_default">افتراضي</string>
+    <string name="iptv_record_where_read_only">للقراءة فقط</string>
+</resources>

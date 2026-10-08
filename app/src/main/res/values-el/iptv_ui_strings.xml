@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Επιλέξτε πού θα αποθηκευτεί. Αλλάξτε την προεπιλογή στις ρυθμίσεις ζωντανής TV.</string>
+    <string name="iptv_record_where_default">Προεπιλογή</string>
+    <string name="iptv_record_where_read_only">Μόνο για ανάγνωση</string>
+</resources>

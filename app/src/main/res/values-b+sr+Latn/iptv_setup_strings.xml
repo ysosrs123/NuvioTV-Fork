@@ -81,7 +81,7 @@
     <string name="iptv_review_kept">Trenutna lista kanala je zadržana.</string>
     <string name="iptv_review_outdated">Ta lista je zastarela. Osvežite izvor da biste ponovo proverili.</string>
     <string name="iptv_groups_title">Deljene veze</string>
-    <string name="iptv_groups_description">Izvori u jednoj grupi dele jedno ograničenje veza, na primer više plejlisti sa istog naloga.</string>
+    <string name="iptv_groups_description">Provajderi ograničavaju koliko kanala jedan nalog može da pušta istovremeno, često 1 ili 2. Ako ste isti nalog dodali više puta, na primer Xtream prijavu i M3U link, stavite te izvore u jednu grupu da bi delili jedno ograničenje. Tako izbegavate greške \"maksimalan broj veza\" kada istovremeno gledate i snimate.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d izvor</item>
         <item quantity="few">%1$d izvora</item>
@@ -100,7 +100,7 @@
     <string name="iptv_group_sources_description">Označeni izvori dele veze ove grupe. Izvor može biti samo u jednoj grupi.</string>
     <string name="iptv_group_limit_description">Koliko kanala izvori u ovoj grupi mogu ukupno da puštaju ili snimaju istovremeno.</string>
     <string name="iptv_transfer_title">Kopiranje i rezervna kopija</string>
-    <string name="iptv_transfer_description">Prenesite podešavanje TV uživo ovog profila na drugi TV ili sačuvajte kopiju u zaključanoj datoteci.</string>
+    <string name="iptv_transfer_description">Kopirajte podešavanje TV uživo ovog profila (izvore, TV vodiče, omiljene, redosled kanala i podešavanja) na drugi TV u vašoj mreži ili ga sačuvajte u rezervnu kopiju zaključanu lozinkom. Vratite ga posle ponovne instalacije aplikacije ili na novom uređaju.</string>
     <string name="iptv_transfer_logins">Uključi prijave</string>
     <string name="iptv_transfer_logins_subtitle">Korisnička imena, lozinke, MAC adrese i adrese koje sadrže podatke za prijavu. Bez njih, ti izvori se izostavljaju.</string>
     <string name="iptv_transfer_back">Nazad</string>

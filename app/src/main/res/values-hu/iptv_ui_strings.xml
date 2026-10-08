@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Válaszd ki, hová mentse. Az alapértelmezett helyet az Élő TV beállításaiban módosíthatod.</string>
+    <string name="iptv_record_where_default">Alapértelmezett</string>
+    <string name="iptv_record_where_read_only">Csak olvasható</string>
+</resources>

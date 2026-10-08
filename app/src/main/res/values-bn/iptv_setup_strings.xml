@@ -80,7 +80,7 @@
     <string name="iptv_review_kept">বর্তমান চ্যানেল তালিকা রাখা হয়েছে।</string>
     <string name="iptv_review_outdated">এই তালিকাটি পুরনো। আবার পরীক্ষা করতে সোর্স রিফ্রেশ করুন।</string>
     <string name="iptv_groups_title">শেয়ার করা সংযোগ</string>
-    <string name="iptv_groups_description">একটি গ্রুপের সোর্সগুলো একটিই সংযোগ সীমা ভাগ করে, যেমন একই অ্যাকাউন্টের কয়েকটি প্লেলিস্ট।</string>
+    <string name="iptv_groups_description">প্রোভাইডাররা একটি অ্যাকাউন্টে একসাথে কতগুলো চ্যানেল চালানো যাবে তা সীমিত করে, প্রায়ই 1 বা 2টি। একই অ্যাকাউন্ট একাধিকবার যোগ করে থাকলে, যেমন এর Xtream লগইন ও একটি M3U লিংক, সেই সোর্সগুলো একটি গ্রুপে রাখুন যাতে সেগুলো একটিই সীমা ভাগ করে। এতে একসাথে দেখা ও রেকর্ড করার সময় \"সর্বোচ্চ সংযোগ\" ত্রুটি এড়ানো যায়।</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$dটি সোর্স</item>
         <item quantity="other">%1$dটি সোর্স</item>
@@ -98,7 +98,7 @@
     <string name="iptv_group_sources_description">টিক দেওয়া সোর্সগুলো এই গ্রুপের সংযোগ ভাগ করে। একটি সোর্স একটিই গ্রুপে থাকতে পারে।</string>
     <string name="iptv_group_limit_description">এই গ্রুপের সোর্সগুলো একসাথে মোট কতগুলো চ্যানেল চালাতে বা রেকর্ড করতে পারবে।</string>
     <string name="iptv_transfer_title">কপি ও ব্যাকআপ</string>
-    <string name="iptv_transfer_description">এই প্রোফাইলের লাইভ টিভি সেটআপ অন্য টিভিতে নিন, অথবা একটি লক করা ফাইলে কপি রাখুন।</string>
+    <string name="iptv_transfer_description">এই প্রোফাইলের লাইভ টিভি সেটআপ (সোর্স, গাইড, ফেভারিট, চ্যানেলের ক্রম ও সেটিংস) আপনার নেটওয়ার্কের অন্য টিভিতে কপি করুন, অথবা পাসফ্রেজ দিয়ে লক করা একটি ব্যাকআপ ফাইলে সেভ করুন। অ্যাপ আবার ইনস্টল করার পর বা নতুন বক্সে এটি রিস্টোর করুন।</string>
     <string name="iptv_transfer_logins">লগইন অন্তর্ভুক্ত করুন</string>
     <string name="iptv_transfer_logins_subtitle">ইউজারনেম, পাসওয়ার্ড, MAC ঠিকানা এবং লগইনসহ ঠিকানা। এগুলো ছাড়া ওই সোর্সগুলো বাদ পড়বে।</string>
     <string name="iptv_transfer_back">ফিরে যান</string>

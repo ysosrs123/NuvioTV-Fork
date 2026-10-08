@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Pasirinkite, kur išsaugoti. Numatytąją vietą pakeiskite tiesioginės TV nustatymuose.</string>
+    <string name="iptv_record_where_default">Numatytoji</string>
+    <string name="iptv_record_where_read_only">Tik skaitomas</string>
+</resources>

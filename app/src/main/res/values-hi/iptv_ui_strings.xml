@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">चुनें कि इसे कहाँ सेव करना है। डिफ़ॉल्ट जगह लाइव टीवी सेटिंग में बदलें।</string>
+    <string name="iptv_record_where_default">डिफ़ॉल्ट</string>
+    <string name="iptv_record_where_read_only">सिर्फ़ पढ़ने के लिए</string>
+</resources>

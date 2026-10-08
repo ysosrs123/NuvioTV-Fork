@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Pilih tempat menyimpannya. Ubah lokasi default di pengaturan TV Live.</string>
+    <string name="iptv_record_where_default">Default</string>
+    <string name="iptv_record_where_read_only">Hanya baca</string>
+</resources>

@@ -81,7 +81,7 @@
     <string name="iptv_review_kept">Trenutni popis kanala je zadržan.</string>
     <string name="iptv_review_outdated">Taj popis je zastario. Osvježi izvor za ponovnu provjeru.</string>
     <string name="iptv_groups_title">Zajedničke veze</string>
-    <string name="iptv_groups_description">Izvori u jednoj grupi dijele isto ograničenje veza, na primjer nekoliko popisa s istog računa.</string>
+    <string name="iptv_groups_description">Pružatelji ograničavaju koliko kanala jedan račun može reproducirati istodobno, često 1 ili 2. Ako si isti račun dodao više puta, npr. Xtream prijavu i M3U poveznicu, stavi te izvore u jednu grupu da dijele jedno ograničenje. Tako izbjegavaš pogreške \"najveći broj veza\" kad istodobno gledaš i snimaš.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d izvor</item>
         <item quantity="few">%1$d izvora</item>
@@ -100,7 +100,7 @@
     <string name="iptv_group_sources_description">Označeni izvori dijele veze ove grupe. Izvor može biti u jednoj grupi.</string>
     <string name="iptv_group_limit_description">Koliko kanala izvori u ovoj grupi mogu ukupno istovremeno reproducirati ili snimati.</string>
     <string name="iptv_transfer_title">Kopiranje i sigurnosna kopija</string>
-    <string name="iptv_transfer_description">Prenesi postavke TV-a uživo ovog profila na drugi TV ili spremi kopiju u zaključanu datoteku.</string>
+    <string name="iptv_transfer_description">Kopiraj postavke TV-a uživo ovog profila (izvore, TV vodiče, omiljene, redoslijed kanala i postavke) na drugi TV u svojoj mreži ili ih spremi u sigurnosnu kopiju zaključanu pristupnom frazom. Vrati ih nakon ponovne instalacije aplikacije ili na novom uređaju.</string>
     <string name="iptv_transfer_logins">Uključi prijave</string>
     <string name="iptv_transfer_logins_subtitle">Korisnička imena, lozinke, MAC adrese i adrese s podacima za prijavu. Bez njih se ti izvori izostavljaju.</string>
     <string name="iptv_transfer_back">Natrag</string>

@@ -81,7 +81,7 @@
     <string name="iptv_review_kept">Elenco canali attuale mantenuto.</string>
     <string name="iptv_review_outdated">Quell\'elenco non è più aggiornato. Aggiorna la sorgente per ricontrollare.</string>
     <string name="iptv_groups_title">Connessioni condivise</string>
-    <string name="iptv_groups_description">Le sorgenti di un gruppo condividono un unico limite di connessioni, ad esempio più playlist dello stesso account.</string>
+    <string name="iptv_groups_description">I provider limitano quanti canali un account può riprodurre contemporaneamente, spesso 1 o 2. Se hai aggiunto lo stesso account più volte, ad esempio con il login Xtream e un link M3U, metti quelle sorgenti in un gruppo così condividono un unico limite. Così eviti errori di \"connessioni massime\" quando guardi e registri insieme.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d sorgente</item>
         <item quantity="many">%1$d sorgenti</item>
@@ -100,7 +100,7 @@
     <string name="iptv_group_sources_description">Le sorgenti selezionate condividono le connessioni di questo gruppo. Una sorgente può stare in un solo gruppo.</string>
     <string name="iptv_group_limit_description">Quanti canali le sorgenti di questo gruppo possono riprodurre o registrare contemporaneamente, in totale.</string>
     <string name="iptv_transfer_title">Copia e backup</string>
-    <string name="iptv_transfer_description">Sposta la configurazione della TV in diretta di questo profilo su un\'altra TV, o conservane una copia in un file protetto.</string>
+    <string name="iptv_transfer_description">Copia la configurazione della TV in diretta di questo profilo (sorgenti, guide, preferiti, ordine dei canali e impostazioni) su un\'altra TV della tua rete, o salvala in un file di backup protetto da passphrase. Ripristinala dopo aver reinstallato l\'app o su un nuovo box.</string>
     <string name="iptv_transfer_logins">Includi credenziali</string>
     <string name="iptv_transfer_logins_subtitle">Nomi utente, password, indirizzi MAC e indirizzi che contengono credenziali. Senza di esse, quelle sorgenti vengono escluse.</string>
     <string name="iptv_transfer_back">Indietro</string>

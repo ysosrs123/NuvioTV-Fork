@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Zvolte, kam uložit. Výchozí umístění změníte v nastavení živé TV.</string>
+    <string name="iptv_record_where_default">Výchozí</string>
+    <string name="iptv_record_where_read_only">Jen pro čtení</string>
+</resources>

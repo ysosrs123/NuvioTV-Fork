@@ -84,7 +84,7 @@
     <string name="iptv_review_kept">تم إبقاء قائمة القنوات الحالية.</string>
     <string name="iptv_review_outdated">هذه القائمة قديمة. حدّث المصدر للتحقق مرة أخرى.</string>
     <string name="iptv_groups_title">الاتصالات المشتركة</string>
-    <string name="iptv_groups_description">تتشارك المصادر في المجموعة الواحدة حداً واحداً للاتصالات، مثل عدة قوائم تشغيل من الحساب نفسه.</string>
+    <string name="iptv_groups_description">يحدّ المزوّدون عدد القنوات التي يمكن لحساب واحد تشغيلها في وقت واحد، غالباً 1 أو 2. إذا أضفت الحساب نفسه أكثر من مرة، مثل تسجيل دخول Xtream ورابط M3U، فضع هذه المصادر في مجموعة واحدة لتتشارك حداً واحداً. يمنع ذلك أخطاء \"الحد الأقصى للاتصالات\" عند المشاهدة والتسجيل في الوقت نفسه.</string>
     <plurals name="iptv_group_sources">
         <item quantity="zero">لا مصادر</item>
         <item quantity="one">مصدر واحد</item>
@@ -106,7 +106,7 @@
     <string name="iptv_group_sources_description">تتشارك المصادر المحددة اتصالات هذه المجموعة. يمكن أن يكون المصدر في مجموعة واحدة فقط.</string>
     <string name="iptv_group_limit_description">عدد القنوات التي يمكن لمصادر هذه المجموعة تشغيلها أو تسجيلها في الوقت نفسه، مجتمعةً.</string>
     <string name="iptv_transfer_title">النسخ والنسخ الاحتياطي</string>
-    <string name="iptv_transfer_description">انقل إعداد البث المباشر لهذا الملف الشخصي إلى تلفاز آخر، أو احتفظ بنسخة في ملف مقفل.</string>
+    <string name="iptv_transfer_description">انسخ إعداد البث المباشر لهذا الملف الشخصي (المصادر وأدلة البرامج والمفضلة وترتيب القنوات والإعدادات) إلى تلفاز آخر على شبكتك، أو احفظه في ملف نسخ احتياطي مقفل بعبارة مرور. استعده بعد إعادة تثبيت التطبيق أو على جهاز جديد.</string>
     <string name="iptv_transfer_logins">تضمين بيانات الدخول</string>
     <string name="iptv_transfer_logins_subtitle">أسماء المستخدمين وكلمات المرور وعناوين MAC والعناوين التي تحتوي على بيانات دخول. بدونها تُستبعد تلك المصادر.</string>
     <string name="iptv_transfer_back">رجوع</string>

@@ -79,7 +79,7 @@
     <string name="iptv_review_kept">現在のチャンネルリストを維持しました。</string>
     <string name="iptv_review_outdated">そのリストは古くなっています。ソースを更新して再確認してください。</string>
     <string name="iptv_groups_title">共有接続</string>
-    <string name="iptv_groups_description">同じグループのソースは1つの接続上限を共有します。たとえば同じアカウントの複数のプレイリストなどです。</string>
+    <string name="iptv_groups_description">プロバイダーは1つのアカウントで同時に再生できるチャンネル数を制限しており、多くは1〜2です。XtreamログインとM3Uリンクのように同じアカウントを複数回追加した場合は、それらのソースを1つのグループにまとめて上限を共有させてください。視聴と録画を同時に行うときの「最大接続数」エラーを防げます。</string>
     <plurals name="iptv_group_sources">
         <item quantity="other">%1$d 件のソース</item>
     </plurals>
@@ -96,7 +96,7 @@
     <string name="iptv_group_sources_description">チェックしたソースはこのグループの接続を共有します。ソースは1つのグループにのみ所属できます。</string>
     <string name="iptv_group_limit_description">このグループのソースで同時に再生または録画できるチャンネルの合計数です。</string>
     <string name="iptv_transfer_title">コピーとバックアップ</string>
-    <string name="iptv_transfer_description">このプロフィールのライブTV設定を別のTVに移すか、ロックされたファイルにコピーを保存します。</string>
+    <string name="iptv_transfer_description">このプロフィールのライブTV設定（ソース、ガイド、お気に入り、チャンネル順、各種設定）をネットワーク上の別のTVにコピーするか、パスフレーズでロックしたバックアップファイルに保存します。アプリの再インストール後や新しいボックスで復元できます。</string>
     <string name="iptv_transfer_logins">ログイン情報を含める</string>
     <string name="iptv_transfer_logins_subtitle">ユーザー名、パスワード、MACアドレス、ログイン情報を含むアドレス。含めない場合、それらのソースは除外されます。</string>
     <string name="iptv_transfer_back">戻る</string>

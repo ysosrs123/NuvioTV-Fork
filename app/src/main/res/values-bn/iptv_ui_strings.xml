@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">কোথায় সেভ হবে বেছে নিন। ডিফল্ট লাইভ টিভি সেটিংসে পরিবর্তন করুন।</string>
+    <string name="iptv_record_where_default">ডিফল্ট</string>
+    <string name="iptv_record_where_read_only">শুধু পড়ার জন্য</string>
+</resources>

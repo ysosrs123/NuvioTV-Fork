@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">Wählen Sie den Speicherort. Den Standard ändern Sie in den Live-TV-Einstellungen.</string>
+    <string name="iptv_record_where_default">Standard</string>
+    <string name="iptv_record_where_read_only">Schreibgeschützt</string>
+</resources>

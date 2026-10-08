@@ -81,7 +81,7 @@
     <string name="iptv_review_kept">Liste de chaînes actuelle conservée.</string>
     <string name="iptv_review_outdated">Cette liste n’est plus à jour. Actualisez la source pour vérifier à nouveau.</string>
     <string name="iptv_groups_title">Connexions partagées</string>
-    <string name="iptv_groups_description">Les sources d’un groupe partagent une même limite de connexions, par exemple plusieurs listes du même compte.</string>
+    <string name="iptv_groups_description">Les fournisseurs limitent le nombre de chaînes qu’un compte peut lire en même temps, souvent 1 ou 2. Si vous avez ajouté le même compte plusieurs fois, par exemple son identifiant Xtream et un lien M3U, placez ces sources dans un même groupe pour qu’elles partagent une seule limite. Cela évite les erreurs « nombre maximal de connexions » quand vous regardez et enregistrez en même temps.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d source</item>
         <item quantity="many">%1$d sources</item>
@@ -100,7 +100,7 @@
     <string name="iptv_group_sources_description">Les sources cochées partagent les connexions de ce groupe. Une source ne peut être que dans un groupe.</string>
     <string name="iptv_group_limit_description">Nombre total de chaînes que les sources de ce groupe peuvent lire ou enregistrer en même temps.</string>
     <string name="iptv_transfer_title">Copier et sauvegarder</string>
-    <string name="iptv_transfer_description">Transférez la configuration TV en direct de ce profil vers un autre téléviseur, ou gardez-en une copie dans un fichier verrouillé.</string>
+    <string name="iptv_transfer_description">Copiez la configuration TV en direct de ce profil (sources, guides, favoris, ordre des chaînes et réglages) vers un autre téléviseur de votre réseau, ou enregistrez-la dans un fichier de sauvegarde verrouillé par une phrase secrète. Restaurez-la après une réinstallation de l’app ou sur un nouveau boîtier.</string>
     <string name="iptv_transfer_logins">Inclure les identifiants</string>
     <string name="iptv_transfer_logins_subtitle">Noms d’utilisateur, mots de passe, adresses MAC et adresses contenant des identifiants. Sans eux, ces sources sont omises.</string>
     <string name="iptv_transfer_back">Retour</string>

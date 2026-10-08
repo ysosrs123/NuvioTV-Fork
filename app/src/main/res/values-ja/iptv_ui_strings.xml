@@ -1,0 +1,5 @@
+<resources>
+    <string name="iptv_record_where_hint">保存先を選んでください。デフォルトはライブTV設定で変更できます。</string>
+    <string name="iptv_record_where_default">デフォルト</string>
+    <string name="iptv_record_where_read_only">読み取り専用</string>
+</resources>
