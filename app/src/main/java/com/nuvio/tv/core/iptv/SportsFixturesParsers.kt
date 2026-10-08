@@ -68,8 +68,47 @@ object EspnScoreboard {
             league.sport == "baseball" && status == FixtureStatus.LIVE -> baseball(statusJson, type, competition?.optJSONObject("situation"))
             else -> null
         }
+        val events = if (started && league.sport in EVENT_SPORTS) events(competition, league.sport, home!!, away!!) else emptyList()
         return SportsFixture(id, league.id, league.sport, title, homeTeam.takeIf { paired }, awayTeam.takeIf { paired }, start, status, score,
-            type?.text("shortDetail") ?: type?.text("detail"), broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra)
+            type?.text("shortDetail") ?: type?.text("detail"), broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra, events)
+    }
+
+    private fun events(competition: JSONObject?, sport: String, home: JSONObject, away: JSONObject): List<FixtureEvent> {
+        val items = competition?.optJSONArray("details")?.let(::objects).orEmpty()
+        fun ids(competitor: JSONObject) = setOfNotNull(competitor.text("id"), competitor.optJSONObject("team")?.text("id"))
+        val homeIds = ids(home)
+        val awayIds = ids(away)
+        return items.mapNotNull { item ->
+            val type = item.optJSONObject("type")
+            val text = (type?.text("text") ?: type?.text("name") ?: type?.text("abbreviation") ?: item.text("type") ?: item.text("text")).orEmpty().lowercase()
+            val typeId = type?.text("id")
+            val scoring = item.optBoolean("scoringPlay")
+            val kind = when {
+                item.optBoolean("redCard") || "red card" in text || "second yellow" in text || typeId in RED_IDS -> FixtureEventKind.RED
+                item.optBoolean("yellowCard") || "yellow card" in text || typeId in YELLOW_IDS -> FixtureEventKind.YELLOW
+                item.optBoolean("shootout") || "shootout" in text -> return@mapNotNull null
+                sport == "soccer" && (scoring || typeId in GOAL_IDS || ("goal" in text && "kick" !in text && "disallowed" !in text)) -> FixtureEventKind.GOAL
+                sport != "soccer" && "try" in text -> FixtureEventKind.TRY
+                scoring -> FixtureEventKind.OTHER
+                else -> return@mapNotNull null
+            }
+            val people = (item.optJSONArray("athletesInvolved") ?: item.optJSONArray("participants"))?.let(::objects).orEmpty()
+            val person = people.firstOrNull()?.let { it.optJSONObject("athlete") ?: it }
+            val team = item.optJSONObject("team")?.text("id") ?: item.text("teamId") ?: person?.optJSONObject("team")?.text("id")
+            val side = when (team) {
+                null -> null
+                in homeIds -> FixtureSide.HOME
+                in awayIds -> FixtureSide.AWAY
+                else -> null
+            }
+            val clock = when (val value = item.opt("clock")) {
+                is JSONObject -> value.text("displayValue")
+                is String -> value.trim().takeIf(String::isNotEmpty)
+                else -> null
+            }?.take(16)
+            val period = item.optJSONObject("period")?.optIntOrNull("number")?.takeIf { it in 1..9 }
+            FixtureEvent(kind, side, clock, period, (person?.text("shortName") ?: person?.text("displayName"))?.take(MAX_NAME))
+        }.takeLast(SportsEvents.MAX_EVENTS)
     }
 
     private fun status(type: JSONObject?): FixtureStatus = when {
@@ -402,6 +441,11 @@ object EspnScoreboard {
         return names.map(String::trim).filter { it.isNotEmpty() && it.length <= 80 }
     }
 
+    private val EVENT_SPORTS = setOf("soccer", "rugby-league", "rugby")
+    private val GOAL_IDS = setOf("70", "137", "138", "173")
+    private val YELLOW_IDS = setOf("94")
+    private val RED_IDS = setOf("93")
+    private const val MAX_NAME = 40
     private val SKIPPED = listOf("POSTPONED", "CANCELED", "CANCELLED", "ABANDONED", "FORFEIT", "SUSPENDED", "DELAYED")
     private val COLOUR = Regex("[0-9A-Fa-f]{6}")
     private val RECORD = Regex("\\d{1,3}(-\\d{1,3}){1,3}")

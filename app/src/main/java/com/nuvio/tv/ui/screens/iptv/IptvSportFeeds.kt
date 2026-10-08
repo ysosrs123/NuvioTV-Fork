@@ -23,19 +23,32 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.FixtureLinkReason
+import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.data.iptv.IptvFixtureLink
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.ui.screens.settings.SettingsToggleRow
 import com.nuvio.tv.ui.theme.NuvioTheme
 
-internal fun backupFeed(item: IptvFixtureItem, playingId: String?): IptvListedChannel? =
-    item.links.firstOrNull { it.row.item.channel.id != playingId }?.row?.takeIf { item.links.any { link -> link.row.item.channel.id == playingId } }
+internal fun backupFeed(item: IptvFixtureItem, playingId: String?, others: List<IptvListedChannel> = emptyList()): IptvListedChannel? =
+    (others.firstOrNull { it.item.channel.id != playingId } ?: item.links.firstOrNull { it.row.item.channel.id != playingId }?.row)
+        ?.takeIf { item.links.any { link -> link.row.item.channel.id == playingId } }
+
+internal fun feedTwins(twins: Pair<String, List<IptvListedChannel>>?, playingId: String?): List<IptvListedChannel> =
+    twins?.takeIf { it.first == playingId }?.second.orEmpty()
+
+internal fun feedAliases(twins: Pair<String, List<IptvListedChannel>>?, playingId: String?): List<String> = when {
+    twins == null || playingId == null -> emptyList()
+    twins.first == playingId -> twins.second.map { it.item.channel.id }
+    twins.second.any { it.item.channel.id == playingId } -> listOf(twins.first)
+    else -> emptyList()
+}
 
 @Composable
 internal fun IptvSportFeedsPanel(item: IptvFixtureItem, state: IptvLiveState, backupArmed: Boolean, onWatch: (IptvListedChannel) -> Unit,
-    onBackup: ((Boolean) -> Unit)?, onClose: () -> Unit, modifier: Modifier = Modifier) {
+    onBackup: ((Boolean) -> Unit)?, onClose: () -> Unit, modifier: Modifier = Modifier, others: List<IptvListedChannel> = emptyList()) {
     val first = remember { FocusRequester() }
-    val backup = backupFeed(item, state.playingId)
+    val backup = backupFeed(item, state.playingId, others)
+    val sameChannel = stringResource(R.string.iptv_sport6_same_channel)
     BackHandler { onClose() }
     LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
     Column(modifier.fillMaxHeight().iptvPanel().padding(horizontal = 22.dp, vertical = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -44,9 +57,17 @@ internal fun IptvSportFeedsPanel(item: IptvFixtureItem, state: IptvLiveState, ba
         Text(stringResource(R.string.iptv_sport5p_feeds_subtitle, sportTitle(item.fixture)), style = MaterialTheme.typography.labelMedium,
             color = NuvioTheme.colors.TextSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
         LazyColumn(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            itemsIndexed(item.links, key = { _, link -> link.row.item.channel.id }) { index, link ->
-                FeedRow(link, state, backup?.item?.channel?.id == link.row.item.channel.id && backupArmed,
+            itemsIndexed(item.links, key = { _, link -> "${link.row.item.channel.sourceId}/${link.row.item.channel.id}" }) { index, link ->
+                FeedRow(link.row, feedReason(link), link.programme, state, backup?.item?.channel?.id == link.row.item.channel.id && backupArmed,
                     if (index == 0) Modifier.focusRequester(first) else Modifier) { onWatch(link.row) }
+            }
+            if (others.isNotEmpty()) this.item(key = OTHERS_KEY) {
+                Text(stringResource(R.string.iptv_sport6_other_sources), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold,
+                    color = NuvioTheme.colors.TextSecondary, maxLines = 1, modifier = Modifier.padding(top = 8.dp, start = 4.dp))
+            }
+            itemsIndexed(others, key = { _, row -> "${row.item.channel.sourceId}/${row.item.channel.id}" }) { index, row ->
+                FeedRow(row, sameChannel, null, state, backup?.item?.channel?.id == row.item.channel.id && backupArmed,
+                    if (index == 0 && item.links.isEmpty()) Modifier.focusRequester(first) else Modifier) { onWatch(row) }
             }
         }
         if (backup != null && onBackup != null) SettingsToggleRow(title = stringResource(R.string.iptv_sport5p_backup_toggle),
@@ -56,16 +77,17 @@ internal fun IptvSportFeedsPanel(item: IptvFixtureItem, state: IptvLiveState, ba
 }
 
 @Composable
-private fun FeedRow(link: IptvFixtureLink, state: IptvLiveState, backup: Boolean, modifier: Modifier, onClick: () -> Unit) {
+private fun feedReason(link: IptvFixtureLink): String = stringResource(when (link.reason) {
+    FixtureLinkReason.GUIDE_TEAMS -> R.string.iptv_sport5p_reason_teams
+    FixtureLinkReason.GUIDE_LEAGUE -> R.string.iptv_sport5p_reason_league
+    FixtureLinkReason.BROADCASTER -> R.string.iptv_sport5p_reason_broadcaster
+})
+
+@Composable
+private fun FeedRow(row: IptvListedChannel, reason: String, programme: GuideProgramme?, state: IptvLiveState, backup: Boolean, modifier: Modifier, onClick: () -> Unit) {
     var focused by remember { mutableStateOf(false) }
-    val row = link.row
     val playing = row.item.channel.id == state.playingId
     val source = state.sources.firstOrNull { it.ref.sourceId == row.item.channel.sourceId }?.label
-    val reason = stringResource(when (link.reason) {
-        FixtureLinkReason.GUIDE_TEAMS -> R.string.iptv_sport5p_reason_teams
-        FixtureLinkReason.GUIDE_LEAGUE -> R.string.iptv_sport5p_reason_league
-        FixtureLinkReason.BROADCASTER -> R.string.iptv_sport5p_reason_broadcaster
-    })
     Row(modifier.fillMaxWidth()
         .focusProperties { left = FocusRequester.Cancel; right = FocusRequester.Cancel }
         .onFocusChanged { focused = it.isFocused }
@@ -83,8 +105,10 @@ private fun FeedRow(link: IptvFixtureLink, state: IptvLiveState, backup: Boolean
                 if (playing) Tag(stringResource(R.string.iptv_sport5p_feed_playing), live = true)
                 else if (backup) Tag(stringResource(R.string.iptv_sport5p_feed_backup))
             }
-            Text(listOfNotNull(source, reason, link.programme?.let { "${timeRange(it)} · ${title(it)}" }).joinToString(" · "),
+            Text(listOfNotNull(source, reason, programme?.let { "${timeRange(it)} · ${title(it)}" }).joinToString(" · "),
                 style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
     }
 }
+
+private const val OTHERS_KEY = "\u0000others"

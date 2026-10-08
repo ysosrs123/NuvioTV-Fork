@@ -1,0 +1,13 @@
+{"leagues":[{"id":"3","name":"National Rugby League","abbreviation":"NRL"}],
+ "events":[{"id":"1400200","date":"2026-10-08T09:00Z","name":"Roosters v Knights",
+  "competitions":[{"id":"1400200","date":"2026-10-08T09:00Z",
+   "competitors":[
+    {"id":"55","homeAway":"home","score":"10","team":{"id":"55","displayName":"Sydney Roosters","shortDisplayName":"Roosters","abbreviation":"SYD"}},
+    {"id":"62","homeAway":"away","score":"6","team":{"id":"62","displayName":"Newcastle Knights","shortDisplayName":"Knights","abbreviation":"NEW"}}],
+   "details":[
+    {"type":{"text":"Try"},"clock":{"value":480,"displayValue":"8'"},"team":{"id":"62"},"scoreValue":4,"scoringPlay":true,"athletesInvolved":[{"displayName":"Dominic Young"}]},
+    {"type":{"text":"Conversion"},"clock":{"value":540,"displayValue":"9'"},"team":{"id":"62"},"scoreValue":2,"scoringPlay":true,"athletesInvolved":[{"displayName":"Kalyn Ponga"}]},
+    {"type":{"text":"Try"},"clock":{"value":1500,"displayValue":"25'"},"team":{"id":"55"},"scoreValue":4,"scoringPlay":true,"athletesInvolved":[{"displayName":"James Tedesco"}]},
+    {"type":{"text":"Conversion"},"clock":{"value":1560,"displayValue":"26'"},"team":{"id":"55"},"scoreValue":2,"scoringPlay":true},
+    {"type":{"text":"Try"},"clock":{"value":3060,"displayValue":"51'"},"scoreValue":4,"scoringPlay":true,"athletesInvolved":[{"displayName":"Daniel Tupou","team":{"id":"55"}}]}],
+   "status":{"clock":3120,"displayClock":"52'","period":2,"type":{"id":"2","name":"STATUS_IN_PROGRESS","state":"in","completed":false,"shortDetail":"52'"}}}]}]}

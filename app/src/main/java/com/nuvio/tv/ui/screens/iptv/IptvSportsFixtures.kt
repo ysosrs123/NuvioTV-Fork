@@ -50,6 +50,7 @@ import com.nuvio.tv.core.iptv.FixtureSection
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.FixtureTeam
 import com.nuvio.tv.core.iptv.RecordingStatus
+import com.nuvio.tv.core.iptv.SportsCatchup
 import com.nuvio.tv.core.iptv.SportsChange
 import com.nuvio.tv.core.iptv.SportsDetail
 import com.nuvio.tv.core.iptv.SportsFavourites
@@ -105,7 +106,8 @@ data class IptvFixtureRow(val section: FixtureSection, val day: LocalDate?, val 
 
 data class IptvFixturesState(val enabled: Boolean = false, val loading: Boolean = false, val rows: List<IptvFixtureRow> = emptyList(),
     val failed: Boolean = false, val missingKey: Boolean = false, val noLeagues: Boolean = false, val showScores: Boolean = true,
-    val favourites: Set<String> = emptySet(), val reminders: Set<String> = emptySet(), val spoilerKeys: Set<String> = emptySet()) {
+    val favourites: Set<String> = emptySet(), val reminders: Set<String> = emptySet(), val spoilerKeys: Set<String> = emptySet(),
+    val recent: List<IptvFixtureItem> = emptyList(), val hideSpoilers: Boolean = false) {
     fun hidden(fixture: SportsFixture): Boolean = !showScores || fixture.key in spoilerKeys
     fun spoiler(fixture: SportsFixture): Boolean = showScores && fixture.key in spoilerKeys
     val items: List<IptvFixtureItem> get() = rows.flatMap { it.items }.distinctBy { it.fixture.key }
@@ -236,7 +238,8 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
     }
 
     private fun relink(ref: IptvSourceRef, hiddenCategories: Set<String>, now: Long) {
-        val shown = grouped.flatMap { it.fixtures }.filter { it.status != FixtureStatus.FINAL }.distinctBy { it.key }
+        val shown = (grouped.flatMap { it.fixtures }.filter { it.status != FixtureStatus.FINAL } + SportsCatchup.recent(loaded?.fixtures.orEmpty(), now))
+            .distinctBy { it.key }
         val signature = shown.map { it.key to it.startMillis }.toSet()
         if (linkJob?.isActive == true) { if (signature == pendingSignature) return; linkJob?.cancel() }
         if (signature == linkedSignature && !(viewing && now - linkedAt >= RELINK_MILLIS)) return
@@ -257,12 +260,15 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
         val scheduleOnly = preferences.service == SportsService.THESPORTSDB
         mutable.value = IptvFixturesState(true, loading = !refreshed && grouped.isEmpty() && !result.missingKey && !result.noLeagues,
             rows = grouped.map { row -> IptvFixtureRow(row.section, row.day, row.fixtures.map { fixture ->
-                val links = linked[fixture.id].orEmpty()
+                val links = if (fixture.status == FixtureStatus.FINAL) emptyList() else linked[fixture.id].orEmpty()
                 IptvFixtureItem(fixture, links, SportsFavourites.has(favourites, fixture), linking && links.isEmpty() && fixture.status != FixtureStatus.FINAL,
                     scheduleOnly && fixture.sport !in LIVE_SCORE_SPORTS)
             }) },
             failed = result.failed, missingKey = result.missingKey, noLeagues = result.noLeagues, showScores = showScores, favourites = favourites,
-            reminders = live.reminders.value, spoilerKeys = spoilerKeys - revealed)
+            reminders = live.reminders.value, spoilerKeys = spoilerKeys - revealed,
+            recent = SportsCatchup.recent(result.fixtures, System.currentTimeMillis()).mapNotNull { fixture ->
+                linked[fixture.id]?.takeIf { it.isNotEmpty() }?.let { IptvFixtureItem(fixture, it, SportsFavourites.has(favourites, fixture), scheduleOnly = scheduleOnly && fixture.sport !in LIVE_SCORE_SPORTS) }
+            }, hideSpoilers = preferences.hideSpoilers)
     }
 
     companion object {

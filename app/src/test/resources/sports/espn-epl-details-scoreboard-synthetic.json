@@ -1,0 +1,22 @@
+{"leagues":[{"id":"700","name":"English Premier League","abbreviation":"EPL"}],
+ "events":[{"id":"740900","date":"2026-10-08T14:00Z","name":"Chelsea at Arsenal","shortName":"CHE @ ARS",
+  "competitions":[{"id":"740900","date":"2026-10-08T14:00Z",
+   "competitors":[
+    {"id":"359","homeAway":"home","score":"2","team":{"id":"359","name":"Arsenal","displayName":"Arsenal","shortDisplayName":"Arsenal","abbreviation":"ARS"}},
+    {"id":"363","homeAway":"away","score":"1","team":{"id":"363","name":"Chelsea","displayName":"Chelsea","shortDisplayName":"Chelsea","abbreviation":"CHE"}}],
+   "details":[
+    {"type":{"id":"70","text":"Goal"},"clock":{"value":720.0,"displayValue":"12'"},"team":{"id":"359"},"scoreValue":1,"scoringPlay":true,
+     "redCard":false,"yellowCard":false,"penaltyKick":false,"ownGoal":false,"shootout":false,
+     "athletesInvolved":[{"id":"1","displayName":"Bukayo Saka","shortName":"B. Saka","team":{"id":"359"}}]},
+    {"type":{"id":"94","text":"Yellow Card"},"clock":{"value":1500.0,"displayValue":"25'"},"team":{"id":"363"},"scoreValue":0,"scoringPlay":false,
+     "redCard":false,"yellowCard":true,"athletesInvolved":[{"id":"2","displayName":"Moises Caicedo","shortName":"M. Caicedo"}]},
+    {"type":{"id":"137","text":"Goal - Header"},"clock":{"value":2460.0,"displayValue":"41'"},"team":{"id":"363"},"scoreValue":1,"scoringPlay":true,
+     "athletesInvolved":[{"id":"3","displayName":"Cole Palmer","shortName":"C. Palmer"}]},
+    {"type":{"id":"93"},"clock":{"value":3300.0,"displayValue":"55'"},"team":{"id":"363"},"redCard":true,
+     "athletesInvolved":[{"id":"4","displayName":"Wesley Fofana","team":{"id":"363"}}]},
+    {"type":{"text":"Substitution"},"clock":{"displayValue":"60'"},"team":{"id":"359"}},
+    {"type":{"text":"Goal"},"clock":"67'","scoringPlay":true,"athletesInvolved":[{"athlete":{"displayName":"Declan Rice","team":{"id":"359"}}}]},
+    {"type":"Red Card","clock":{"displayValue":"70'"}}],
+   "status":{"clock":4080.0,"displayClock":"68'","period":2,"type":{"id":"2","name":"STATUS_IN_PROGRESS","state":"in","completed":false,
+    "detail":"68'","shortDetail":"68'"}}}],
+  "status":{"type":{"state":"in"}}}]}

@@ -47,6 +47,7 @@ import com.nuvio.tv.core.iptv.FixtureSide
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.FixtureTeam
 import com.nuvio.tv.core.iptv.MomentKind
+import com.nuvio.tv.core.iptv.SportsEvents
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureText
 import com.nuvio.tv.core.iptv.SportsMarker
@@ -126,9 +127,9 @@ internal fun rememberSportsSummary(fixture: SportsFixture?, viewModel: IptvSport
     return flow.collectAsStateWithLifecycle().value
 }
 
-internal fun playingFixture(rows: List<IptvFixtureRow>, playingId: String?, at: Long): IptvFixtureItem? {
+internal fun playingFixture(rows: List<IptvFixtureRow>, playingId: String?, at: Long, recent: List<IptvFixtureItem> = emptyList()): IptvFixtureItem? {
     playingId ?: return null
-    val found = rows.asSequence().flatMap { it.items.asSequence() }.filter { item -> item.links.any { it.row.item.channel.id == playingId } }
+    val found = (rows.asSequence().flatMap { it.items.asSequence() } + recent.asSequence()).filter { item -> item.links.any { it.row.item.channel.id == playingId } }
         .distinctBy { it.fixture.key }.filter { item ->
             val duration = SportsRefresh.durationMillis(item.fixture)
             val programme = item.links.first { it.row.item.channel.id == playingId }.programme
@@ -145,8 +146,12 @@ internal fun scoreHidden(state: IptvFixturesState, fixture: SportsFixture): Bool
 internal fun scoringMoment(kind: MomentKind): Boolean = kind == MomentKind.GOAL || kind == MomentKind.POINTS || kind == MomentKind.TRY ||
     kind == MomentKind.TOUCHDOWN || kind == MomentKind.RUN
 
-internal fun sportsMarkers(summary: SportsSummary?, fixture: SportsFixture?): List<Pair<SummaryMoment, SportsMarker>> =
-    if (summary == null || fixture == null) emptyList() else SportsMarkers.all(summary, fixture.startMillis).sortedBy { it.second.millis }
+internal fun sportsMarkers(summary: SportsSummary?, fixture: SportsFixture?): List<Pair<SummaryMoment, SportsMarker>> = when {
+    fixture == null -> emptyList()
+    summary == null -> SportsEvents.moments(fixture).mapNotNull { moment -> SportsMarkers.estimate(moment, fixture.sport, fixture.startMillis)?.let { moment to it } }
+        .sortedBy { it.second.millis }
+    else -> SportsMarkers.all(summary, fixture.startMillis).sortedBy { it.second.millis }
+}
 
 internal fun endsNow(summary: SportsSummary, sport: String): Pair<Int, Int>? {
     val (win, draw) = when (sport) {

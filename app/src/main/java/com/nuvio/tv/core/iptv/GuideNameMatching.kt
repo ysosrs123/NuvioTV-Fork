@@ -21,6 +21,14 @@ fun guideMatchName(value: String): String {
     return tokens.joinToString("").take(240)
 }
 
+fun guideSearchPhrase(value: String): String? {
+    var text = foldSearchText(value).trim()
+    repeat(2) { text = regionPrefix.replaceFirst(text, "") }
+    val tokens = bracketed.replace(text, " ").split(separators).filter(String::isNotEmpty).toMutableList()
+    while (tokens.size > 1 && tokens.last() in qualityTags) tokens.removeAt(tokens.lastIndex)
+    return tokens.joinToString(" ").take(120).takeIf { it.length >= 2 }
+}
+
 fun guideIdMatchName(externalId: String): String =
     guideMatchName(countrySuffix.replace(guideIdWithoutFeedSuffix(externalId) ?: externalId.trim(), ""))
 

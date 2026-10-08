@@ -5,6 +5,7 @@ import com.nuvio.tv.core.iptv.FixtureLinkReason
 import com.nuvio.tv.core.iptv.FixtureListing
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.GuideProgramme
+import com.nuvio.tv.core.iptv.SportsCatchup
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureMatching
 import com.nuvio.tv.core.iptv.SportsLeagues
@@ -41,13 +42,16 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
 
     suspend fun links(ref: IptvSourceRef, fixtures: List<SportsFixture>, nowMillis: Long, hiddenCategories: Set<String>): Map<String, List<IptvFixtureLink>> =
         withContext(Dispatchers.IO) {
-            val current = fixtures.filter { it.status != FixtureStatus.FINAL }.take(MAX_FIXTURES)
+            val upcoming = fixtures.filter { it.status != FixtureStatus.FINAL }.take(MAX_FIXTURES)
+            val recent = SportsCatchup.recent(fixtures, nowMillis)
+            val current = upcoming + recent
             if (current.isEmpty()) return@withContext emptyMap()
             val excluded = hiddenCategories.take(500).toSet()
             val associations = catalogue.guideAssociations(ref)
             val order = (associations.priority + associations.feedIds).distinct().take(16)
             val matched = mutableListOf<IptvAiringMatch>()
-            val slices = current.map { Math.floorDiv(maxOf(it.startMillis, nowMillis - SLICE_MILLIS), SLICE_MILLIS) }.distinct().sorted().take(MAX_SLICES)
+            val slices = (upcoming.map { Math.floorDiv(maxOf(it.startMillis, nowMillis - SLICE_MILLIS), SLICE_MILLIS) }.distinct().sorted().take(MAX_SLICES) +
+                recent.map { Math.floorDiv(it.startMillis, SLICE_MILLIS) }.distinct().sortedDescending().take(MAX_RECENT_SLICES)).distinct().sorted()
             if (order.isNotEmpty()) for (slice in slices) {
                 currentCoroutineContext().ensureActive()
                 val start = slice * SLICE_MILLIS
@@ -77,6 +81,7 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
     private companion object {
         const val MAX_FIXTURES = 120
         const val MAX_SLICES = 24
+        const val MAX_RECENT_SLICES = 8
         const val PROGRAMMES_PER_SLICE = 400
         const val ROWS_PER_TERM = 200
         const val SLICE_MILLIS = 60L * 60 * 1000

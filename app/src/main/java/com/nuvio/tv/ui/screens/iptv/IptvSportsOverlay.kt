@@ -69,6 +69,7 @@ import com.nuvio.tv.core.iptv.SportsAlertGames
 import com.nuvio.tv.core.iptv.SportsChange
 import com.nuvio.tv.core.iptv.SportsChangeKind
 import com.nuvio.tv.core.iptv.SportsDetail
+import com.nuvio.tv.core.iptv.SportsEvents
 import com.nuvio.tv.core.iptv.SportsFavourites
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureSections
@@ -409,7 +410,8 @@ internal fun IptvSportsBug(fixture: SportsFixture, hidden: Boolean, modifier: Mo
             null -> {
                 if (home != null && away != null) TeamsSegment(fixture, home, away) else BugText(bug.primary)
                 BugState(bug.state, fixture)
-                BugExtra(bug.extra)
+                val scored = remember(fixture) { SportsEvents.recentTry(fixture) }
+                BugExtra(scored?.clock?.let { stringResource(R.string.iptv_sport6_try, it) } ?: bug.extra, accent = scored != null)
             }
         }
     }
@@ -458,8 +460,11 @@ private fun TeamsSegment(fixture: SportsFixture, home: FixtureTeam, away: Fixtur
     val rightScore = scores?.let { if (first) it.first else it.second }
     val possession = fixture.situation?.possession?.takeIf { fixture.sport == "american-football" && fixture.status == FixtureStatus.LIVE }
     val leftHas = possession != null && (possession == FixtureSide.AWAY) == first
+    val leftReds = SportsEvents.reds(fixture, if (first) FixtureSide.AWAY else FixtureSide.HOME)
+    val rightReds = SportsEvents.reds(fixture, if (first) FixtureSide.HOME else FixtureSide.AWAY)
     BugSegment {
         TeamLogo(left, 20.dp)
+        RedCards(leftReds)
         if (leftHas) Dot()
         if (leftScore == null || rightScore == null) Text(stringResource(if (first) R.string.iptv_sport2_at else R.string.iptv_sport2_versus, SportsFixtureText.code(left), SportsFixtureText.code(right)),
             style = bugStyle(), fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary, maxLines = 1)
@@ -469,7 +474,16 @@ private fun TeamsSegment(fixture: SportsFixture, home: FixtureTeam, away: Fixtur
             BugScore(rightScore, fixture.sport, leading = false)
         }
         if (possession != null && !leftHas) Dot()
+        RedCards(rightReds)
         TeamLogo(right, 20.dp)
+    }
+}
+
+@Composable
+private fun RedCards(count: Int) {
+    if (count <= 0) return
+    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        repeat(minOf(count, MAX_RED_PIPS)) { Box(Modifier.size(6.dp, 9.dp).clip(RoundedCornerShape(1.dp)).background(NuvioTheme.colors.Error)) }
     }
 }
 
@@ -557,3 +571,4 @@ private const val REFRESH_MILLIS = 15_000L
 private const val MAX_QUEUE = 6
 private const val MAX_CARDS = 3
 private const val MAX_TICKER = 24
+private const val MAX_RED_PIPS = 3

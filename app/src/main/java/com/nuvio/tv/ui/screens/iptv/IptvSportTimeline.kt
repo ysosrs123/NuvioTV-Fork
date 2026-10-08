@@ -51,6 +51,7 @@ import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.FixtureSide
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.MomentKind
+import com.nuvio.tv.core.iptv.SportsEvents
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureText
 import com.nuvio.tv.core.iptv.SportsMarkers
@@ -89,7 +90,8 @@ internal object SportsStrip {
         "ice-hockey" to Shape(3, { "20:00" to "0:00" }, null),
         "australian-football" to Shape(4, { "0:00" to "30:00" }, null),
     )
-    private val MOMENTS = setOf(MomentKind.GOAL, MomentKind.CARD_YELLOW, MomentKind.CARD_RED)
+    private val MOMENTS = setOf(MomentKind.GOAL, MomentKind.TRY, MomentKind.CARD_YELLOW, MomentKind.CARD_RED)
+    private val TICKS = setOf("soccer", "rugby-league", "rugby")
 
     class Strip(val segments: List<Pair<Double, Double>>, val total: Double, val progress: Double?, val ticks: List<Pair<Double, MomentKind>>,
         val sides: List<FixtureSide?>, val end: String?)
@@ -111,7 +113,7 @@ internal object SportsStrip {
             period > shape.periods -> total
             else -> SportsMarkers.minutes(sport, period, clock)?.coerceIn(0.0, total)
         }
-        val moments = if (sport == "soccer") summary?.moments.orEmpty().filter { it.kind in MOMENTS }.mapNotNull { moment ->
+        val moments = if (sport in TICKS) (summary?.moments ?: SportsEvents.moments(fixture)).filter { it.kind in MOMENTS }.mapNotNull { moment ->
             SportsMarkers.minutes(sport, moment.period, moment.clock)?.coerceIn(0.0, total)?.let { Triple(it, moment.kind, moment.side) }
         } else emptyList()
         return Strip(segments, total, progress, moments.map { it.first to it.second }, moments.map { it.third }, shape.end ?: SportsFixtureText.periodLabel(sport, shape.periods))
@@ -141,7 +143,7 @@ internal fun SportHeroStrip(fixture: SportsFixture, summary: SportsSummary?, mod
             strip.ticks.forEachIndexed { index, (minutes, kind) ->
                 val cx = x(minutes)
                 when (kind) {
-                    MomentKind.GOAL -> drawCircle(if (strip.sides[index] == FixtureSide.AWAY) awayColour else homeColour, 5.dp.toPx(), Offset(cx, mid))
+                    MomentKind.GOAL, MomentKind.TRY -> drawCircle(if (strip.sides[index] == FixtureSide.AWAY) awayColour else homeColour, 5.dp.toPx(), Offset(cx, mid))
                     else -> drawRect(if (kind == MomentKind.CARD_RED) now else yellow, Offset(cx - 3.dp.toPx(), mid - 5.dp.toPx()), Size(6.dp.toPx(), 10.dp.toPx()))
                 }
             }

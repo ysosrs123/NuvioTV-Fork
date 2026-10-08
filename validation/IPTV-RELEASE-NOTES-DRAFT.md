@@ -353,6 +353,14 @@ Sport:
 
 - The new sport screens and settings are translated into all 40 languages.
 
+- Football score bugs show red cards and NRL shows the latest try, from the scoreboard's
+  event list; the Sport hero and score markers use these events when game details are
+  not loaded.
+- Catch-up of a game that finished in the last 12 hours keeps its game banner and score
+  markers.
+- Other feeds also lists the same channel on your other sources; the backup switch
+  prefers it.
+
 Fixes from a review of the sports build:
 - Score markers and Previous/Next score are hidden when scores are hidden (Show scores
   off or an unwatched recording of the game), as everywhere else.

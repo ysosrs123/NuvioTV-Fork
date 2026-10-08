@@ -95,9 +95,16 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
     val behind = state.catchup != null || state.localBehind
     val watchedMinute by remember(behind) { derivedStateOf { behindPosition.value?.let { it / MINUTE_MILLIS } } }
     val watchedAt = watchedMinute?.takeIf { behind }?.times(MINUTE_MILLIS) ?: now
-    val game = fixtures.takeIf { it.enabled }?.let { playingFixture(it.rows, state.playingId, watchedAt) }
+    val twins by live.twins.collectAsStateWithLifecycle()
+    val game = fixtures.takeIf { it.enabled }?.let { shown ->
+        val recent = if (behind) shown.recent else emptyList()
+        playingFixture(shown.rows, state.playingId, watchedAt, recent)
+            ?: feedAliases(twins, state.playingId).firstNotNullOfOrNull { playingFixture(shown.rows, it, watchedAt, recent) }
+    }
+    val others = feedTwins(twins, state.playingId)
+    LaunchedEffect(game?.fixture?.key, state.playingId) { if (game != null) live.findTwins(state.playingRow?.takeIf { it.item.channel.id == state.playingId }) }
     val seekable = state.catchup != null || state.localTimeshift
-    val hideScores = game?.let { scoreHidden(fixtures, it.fixture) } ?: true
+    val hideScores = game?.let { scoreHidden(fixtures, it.fixture) || (fixtures.hideSpoilers && it.fixture.status == FixtureStatus.FINAL && it in fixtures.recent) } ?: true
     val summary = rememberSportsSummary(game?.fixture?.takeIf { controls && seekable && state.multiview == null && !hideScores })
     LaunchedEffect(game == null) { if (game == null) { centre = false; feeds = false } }
     LaunchedEffect(panel, controls, centre, feeds) { if (!panel && !controls && !centre && !feeds) runCatching { focus.requestFocus() } }
@@ -193,9 +200,9 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
                     else -> onControl(action)
                 }
             }, onHide = { controls = false; liveFirst = false }, onScrub = { onScrub(it) }, onGoLive = onGoLive, focusGoLive = liveFirst,
-                markers = if (hideScores) emptyList() else sportsMarkers(summary, game?.fixture), feeds = game?.links?.size ?: 0,
+                markers = if (hideScores) emptyList() else sportsMarkers(summary, game?.fixture), feeds = (game?.links?.size ?: 0) + others.size,
                 onCentre = game?.let { { controls = false; centre = true } },
-                onFeeds = game?.takeIf { it.links.size > 1 }?.let { { controls = false; feeds = true } })
+                onFeeds = game?.takeIf { it.links.size > 1 || others.isNotEmpty() }?.let { { controls = false; feeds = true } })
         }
         AnimatedVisibility(banner >= 0 && !panel && !controls && !centre && !feeds, Modifier.align(Alignment.BottomCenter),
             enter = fadeIn() + slideInVertically { it / 3 }, exit = fadeOut() + slideOutVertically { it / 3 }) {
@@ -212,10 +219,10 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
         AnimatedVisibility(feeds && game != null, Modifier.align(Alignment.CenterEnd),
             enter = fadeIn() + slideInHorizontally { it / 4 }, exit = fadeOut() + slideOutHorizontally { it / 4 }) {
             game?.let { item ->
-                IptvSportFeedsPanel(item, state, backupArmed = backup?.first == state.playingId && backup?.second?.item?.channel?.id == backupFeed(item, state.playingId)?.item?.channel?.id,
+                IptvSportFeedsPanel(item, state, backupArmed = backup?.first == state.playingId && backup?.second?.item?.channel?.id == backupFeed(item, state.playingId, others)?.item?.channel?.id,
                     onWatch = { feeds = false; onWatch(it) },
-                    onBackup = { on -> state.playingId?.let { id -> live.armBackup(id, if (on) backupFeed(item, id) else null) } },
-                    onClose = { feeds = false }, modifier = Modifier.width(420.dp).padding(top = 24.dp, bottom = 24.dp, end = 24.dp))
+                    onBackup = { on -> state.playingId?.let { id -> live.armBackup(id, if (on) backupFeed(item, id, others) else null) } },
+                    onClose = { feeds = false }, modifier = Modifier.width(420.dp).padding(top = 24.dp, bottom = 24.dp, end = 24.dp), others = others)
             }
         }
         AnimatedVisibility(panel, Modifier.align(Alignment.CenterStart),

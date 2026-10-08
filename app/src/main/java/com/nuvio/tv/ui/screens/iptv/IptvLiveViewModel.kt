@@ -120,6 +120,10 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var backupJob: Job? = null
     private val backupArm = MutableStateFlow<Pair<String, IptvListedChannel>?>(null)
     val backup: StateFlow<Pair<String, IptvListedChannel>?> = backupArm.asStateFlow()
+    private var twinJob: Job? = null
+    private var twinFor: String? = null
+    private val twinState = MutableStateFlow<Pair<String, List<IptvListedChannel>>?>(null)
+    val twins: StateFlow<Pair<String, List<IptvListedChannel>>?> = twinState.asStateFlow()
     private var tuneVersion = 0L
     private var pageVersion = 0L
 
@@ -662,6 +666,27 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         backupArm.value = backup?.takeIf { it.item.channel.id != playingId }?.let { playingId to it }
         if (backup == null) backupJob?.cancel()
     }
+    fun findTwins(row: IptvListedChannel?) {
+        val current = session ?: return
+        if (row == null) return
+        val id = row.item.channel.id
+        if (twinFor == id && (twinJob?.isActive == true || twinState.value?.first == id)) return
+        twinJob?.cancel()
+        twinFor = id
+        val sources = mutable.value.sources.filter { it.playbackEligible && it.ref.sourceId != row.item.channel.sourceId }.take(MAX_TWIN_SOURCES)
+        val term = guideSearchPhrase(row.item.channel.data.name)
+        if (sources.isEmpty() || term == null) { twinState.value = id to emptyList(); return }
+        twinJob = viewModelScope.launch {
+            val found = sources.flatMap { source ->
+                runCatching { browse.page(source.ref, IptvBrowseQuery(search = term, excludedCategories = hiddenOf(source.ref).take(500).toSet()), null, TWIN_PAGE).channels }
+                    .getOrElse { if (it is CancellationException) throw it; emptyList() }
+            }
+            val byKey = found.associateBy { it.item.channel.sourceId to it.item.channel.id }
+            val picked = ChannelTwins.pick(twin(row), found.map(::twin)).mapNotNull { byKey[it.sourceId to it.id] }
+            if (session === current && twinFor == id) twinState.value = id to picked
+        }
+    }
+    private fun twin(row: IptvListedChannel) = TwinChannel(row.item.channel.sourceId, row.item.channel.id, row.item.channel.data.name, row.item.channel.data.guideId, row.guide.key)
     private fun switchToBackup(row: IptvListedChannel): Boolean {
         val (id, backup) = backupArm.value ?: return false
         val state = mutable.value
@@ -1279,6 +1304,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         const val WARM_DELAY = 400L
         const val SCRUB_WINDOW = 12 * 60 * 60 * 1000L
         const val PICKER_PAGE = 100
+        const val TWIN_PAGE = 40
+        const val MAX_TWIN_SOURCES = 8
         const val MAX_PICKER = 2000
         const val MAX_NUMBER = 60_000
         const val FAVOURITES_KEY = "\u0000favourites"
