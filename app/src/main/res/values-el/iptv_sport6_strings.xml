@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport6_try">Προσπάθεια %1$s</string>
+    <string name="iptv_sport6_other_sources">Στις άλλες πηγές σας</string>
+    <string name="iptv_sport6_same_channel">Ίδιο κανάλι</string>
+</resources>
