@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_section_all_scores">All scores</string>
+    <string name="iptv_sport5_section_live">Live</string>
+    <string name="iptv_sport5_section_my_teams">My teams</string>
+    <string name="iptv_sport5_section_nothing">Nothing to show here.</string>
+    <string name="iptv_sport5_section_scores_hint">OK watches. Hold OK to set a reminder or show a hidden result.</string>
+    <string name="iptv_sport5_section_tonight">Tonight</string>
+    <string name="iptv_sport5_section_timeline_hint">Left and Right move through time · OK opens · Hold OK for options</string>
+    <string name="iptv_sport5_section_kick_off">KO %1$s</string>
+    <string name="iptv_sport5_section_watch_on">Watch on %1$s</string>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d other feed</item>
+        <item quantity="other">%1$d other feeds</item>
+    </plurals>
+    <string name="iptv_sport5_section_follow">Follow</string>
+    <string name="iptv_sport5_section_following">Following</string>
+    <string name="iptv_sport5_section_remind">Remind me</string>
+    <string name="iptv_sport5_section_reminder_set">Reminder set</string>
+    <string name="iptv_sport5_section_cancel_reminder">Cancel reminder</string>
+    <string name="iptv_sport5_section_hold_to_show">Hold OK to show</string>
+    <string name="iptv_sport5_section_no_live_score">No live score</string>
+    <string name="iptv_sport5_section_set">Set %1$d</string>
+    <string name="iptv_sport5_section_serving">%1$s serving</string>
+    <string name="iptv_sport5_section_golf_round">R%1$d</string>
+    <string name="iptv_sport5_section_done">Done</string>
+    <string name="iptv_sport5_section_main_card">Main card</string>
+    <string name="iptv_sport5_section_prelims">Prelims</string>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d bout</item>
+        <item quantity="other">%1$s · %2$d bouts</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d round</item>
+        <item quantity="other">%1$d rounds</item>
+    </plurals>
+    <string name="iptv_sport5_section_now_bout">Now: %1$s</string>
+    <string name="iptv_sport5_section_fight_round">Round %1$d</string>
+    <string name="iptv_sport5_section_chase">%1$s need %2$d from %3$d balls · req. %4$s</string>
+    <string name="iptv_sport5_section_overs_of">%1$s of %2$d overs</string>
+    <string name="iptv_sport5_section_overs">%1$s overs</string>
+    <string name="iptv_sport5_section_target">target %1$d</string>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d out</item>
+        <item quantity="other">%1$d outs</item>
+    </plurals>
+    <string name="iptv_sport5_section_inning_mid">Mid %1$d</string>
+    <string name="iptv_sport5_section_inning_end">End %1$d</string>
+    <string name="iptv_sport5_section_sport_football">Football</string>
+    <string name="iptv_sport5_section_sport_afl">AFL</string>
+    <string name="iptv_sport5_section_sport_rugby_league">Rugby league</string>
+    <string name="iptv_sport5_section_sport_rugby">Rugby union</string>
+    <string name="iptv_sport5_section_sport_american_football">American football</string>
+    <string name="iptv_sport5_section_sport_basketball">Basketball</string>
+    <string name="iptv_sport5_section_sport_baseball">Baseball</string>
+    <string name="iptv_sport5_section_sport_ice_hockey">Ice hockey</string>
+    <string name="iptv_sport5_section_sport_motor">Motor</string>
+    <string name="iptv_sport5_section_sport_fighting">Fighting</string>
+    <string name="iptv_sport5_section_sport_tennis">Tennis</string>
+    <string name="iptv_sport5_section_sport_golf">Golf</string>
+    <string name="iptv_sport5_section_sport_cricket">Cricket</string>
+</resources>

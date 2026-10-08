@@ -117,6 +117,9 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     }
     private var tuneJob: Job? = null
     private var warmJob: Job? = null
+    private var backupJob: Job? = null
+    private val backupArm = MutableStateFlow<Pair<String, IptvListedChannel>?>(null)
+    val backup: StateFlow<Pair<String, IptvListedChannel>?> = backupArm.asStateFlow()
     private var tuneVersion = 0L
     private var pageVersion = 0L
 
@@ -655,6 +658,43 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         watch(row, programme, from)
         return true
     }
+    fun armBackup(playingId: String, backup: IptvListedChannel?) {
+        backupArm.value = backup?.takeIf { it.item.channel.id != playingId }?.let { playingId to it }
+        if (backup == null) backupJob?.cancel()
+    }
+    private fun switchToBackup(row: IptvListedChannel): Boolean {
+        val (id, backup) = backupArm.value ?: return false
+        val state = mutable.value
+        if (id != row.item.channel.id || state.playingId != id || state.catchup != null || state.multiview != null) return false
+        backupArm.value = null
+        backupJob?.cancel()
+        IptvLog.info("live backup switch")
+        watch(backup, notice = R.string.iptv_sport5p_backup_switched)
+        return true
+    }
+    private fun backupOnStall(row: IptvListedChannel, request: Long, active: Boolean) {
+        backupJob?.cancel()
+        if (!active || backupArm.value?.first != row.item.channel.id) return
+        backupJob = viewModelScope.launch {
+            delay(BACKUP_STALL)
+            if (request == tuneVersion && mutable.value.reconnecting) switchToBackup(row)
+        }
+    }
+    fun seekTo(millis: Long): Boolean {
+        val state = mutable.value
+        val row = state.playingRow ?: return false
+        val player = state.player ?: return false
+        val now = System.currentTimeMillis()
+        val target = millis.coerceAtMost(now)
+        val catchup = state.catchup
+        if (catchup != null) return scrub(target - (state.scrubTarget ?: LiveTimeshift.position(catchup, state.catchupFrom, player.currentPosition)))
+        if (state.localTimeshift) return scrub(target - (state.scrubTarget ?: state.playback?.localPosition() ?: now))
+        val programme = if (hasArchive(row) && livePreferences.timeshift) CatchupScrub.programmeAt(catchupProgrammes(state, row.item.channel.id), target)
+            ?: liveProgramme(state, row.item.channel.id, target) else null
+        if (programme == null || !programme.start.precise) { mutable.update { it.copy(message = R.string.iptv_live_catchup_unavailable) }; return false }
+        watch(row, programme, target.takeIf { it > programme.start.epochMillis })
+        return true
+    }
     fun goLive(): Boolean {
         val state = mutable.value
         val row = state.playingRow ?: return false
@@ -757,10 +797,13 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                         } },
                         onError = { if (request == tuneVersion) {
                             if (from != null) watch(row, notice = R.string.iptv_live_timeshift_unavailable)
-                            else { stop(keepChannel = true); if (!auto) mutable.update { it.copy(message = failureMessage(failure)) } }
+                            else if (catchup != null || !switchToBackup(row)) { stop(keepChannel = true); if (!auto) mutable.update { it.copy(message = failureMessage(failure)) } }
                         } },
                         onPlayWhenReady = { ready -> if (request == tuneVersion) playWhenReadyChanged(ready) },
-                        onReconnecting = { active -> if (request == tuneVersion) mutable.update { it.copy(reconnecting = active) } },
+                        onReconnecting = { active -> if (request == tuneVersion) {
+                            mutable.update { it.copy(reconnecting = active) }
+                            if (catchup == null) backupOnStall(row, request, active)
+                        } },
                         isLive = catchup == null, onEnded = { if (request == tuneVersion) { if (catchup != null) continueCatchup(row) else watch(row) } },
                         localTimeshift = local, onLocalTimeshift = { active -> if (request == tuneVersion) localChanged(active) })
                     created.also { mutable.update { state -> state.copy(playback = it, player = it.player, playingTitle = item.overlay.customName ?: item.channel.data.name) } }
@@ -1232,6 +1275,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         const val MAX_FAVOURITES = 2000
         const val EXTRA_GUIDE = 120
         const val SCRUB_COMMIT = 700L
+        const val BACKUP_STALL = 12_000L
         const val WARM_DELAY = 400L
         const val SCRUB_WINDOW = 12 * 60 * 60 * 1000L
         const val PICKER_PAGE = 100

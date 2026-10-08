@@ -16,7 +16,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.LiveTv
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,15 +49,18 @@ import com.nuvio.tv.core.iptv.FixtureRow
 import com.nuvio.tv.core.iptv.FixtureSection
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.FixtureTeam
-import com.nuvio.tv.core.iptv.SportsFavourites
-import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.RecordingStatus
 import com.nuvio.tv.core.iptv.SportsChange
+import com.nuvio.tv.core.iptv.SportsDetail
+import com.nuvio.tv.core.iptv.SportsFavourites
+import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureSections
 import com.nuvio.tv.core.iptv.SportsRecordedWindow
 import com.nuvio.tv.core.iptv.SportsReminder
 import com.nuvio.tv.core.iptv.SportsService
 import com.nuvio.tv.core.iptv.SportsSpoilers
+import com.nuvio.tv.core.iptv.SportsSummary
+import com.nuvio.tv.core.iptv.SportsTimeline
 import com.nuvio.tv.core.recording.IptvRecorder
 import com.nuvio.tv.data.iptv.IptvFixtureLink
 import com.nuvio.tv.data.iptv.IptvListedChannel
@@ -65,8 +71,10 @@ import com.nuvio.tv.data.iptv.IptvSportsFixtures
 import com.nuvio.tv.data.iptv.IptvSportsFixturesRepository
 import com.nuvio.tv.data.iptv.IptvSportsLive
 import com.nuvio.tv.data.iptv.IptvSportsMode
-import com.nuvio.tv.data.iptv.IptvSportsSnapshot
 import com.nuvio.tv.data.iptv.IptvSportsPreferences
+import com.nuvio.tv.data.iptv.IptvSportsSnapshot
+import com.nuvio.tv.data.iptv.IptvSportsSummaryClient
+import com.nuvio.tv.data.iptv.IptvSportsSummaryWatch
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.components.rememberShimmerBrush
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
@@ -80,13 +88,16 @@ import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class IptvFixtureItem(val fixture: SportsFixture, val links: List<IptvFixtureLink>, val favourite: Boolean = false, val linking: Boolean = false)
+data class IptvFixtureItem(val fixture: SportsFixture, val links: List<IptvFixtureLink>, val favourite: Boolean = false, val linking: Boolean = false,
+    val scheduleOnly: Boolean = false)
 
 data class IptvFixtureRow(val section: FixtureSection, val day: LocalDate?, val items: List<IptvFixtureItem>) {
     val key: String get() = "${section.name}:${day ?: ""}"
@@ -94,17 +105,35 @@ data class IptvFixtureRow(val section: FixtureSection, val day: LocalDate?, val 
 
 data class IptvFixturesState(val enabled: Boolean = false, val loading: Boolean = false, val rows: List<IptvFixtureRow> = emptyList(),
     val failed: Boolean = false, val missingKey: Boolean = false, val noLeagues: Boolean = false, val showScores: Boolean = true,
-    val favourites: Set<String> = emptySet(), val reminders: Set<String> = emptySet(), val spoilerKeys: Set<String> = emptySet())
+    val favourites: Set<String> = emptySet(), val reminders: Set<String> = emptySet(), val spoilerKeys: Set<String> = emptySet()) {
+    fun hidden(fixture: SportsFixture): Boolean = !showScores || fixture.key in spoilerKeys
+    fun spoiler(fixture: SportsFixture): Boolean = showScores && fixture.key in spoilerKeys
+    val items: List<IptvFixtureItem> get() = rows.flatMap { it.items }.distinctBy { it.fixture.key }
+    fun item(key: String?): IptvFixtureItem? = key?.let { wanted -> rows.firstNotNullOfOrNull { row -> row.items.firstOrNull { it.fixture.key == wanted } } }
+}
+
+sealed class IptvSportPrompt {
+    data class Channels(val key: String) : IptvSportPrompt()
+    data class Options(val key: String) : IptvSportPrompt()
+    data class Watch(val row: IptvListedChannel) : IptvSportPrompt()
+    data object Scores : IptvSportPrompt()
+}
 
 @HiltViewModel
 class IptvSportsFixturesViewModel @Inject constructor(private val repository: IptvSportsFixturesRepository, private val preferences: IptvSportsPreferences,
-    private val live: IptvSportsLive, private val recorder: IptvRecorder) : ViewModel() {
+    private val live: IptvSportsLive, private val recorder: IptvRecorder, summaryClient: IptvSportsSummaryClient) : ViewModel() {
     private val mutable = MutableStateFlow((preferences.service != SportsService.OFF).let { IptvFixturesState(enabled = it, loading = it) })
     val state = mutable.asStateFlow()
     private val heroKey = MutableStateFlow<String?>(FEATURED)
     val hero = heroKey.asStateFlow()
     val alerts: SharedFlow<SportsChange> = live.alerts
     val reminderDue: SharedFlow<SportsReminder> = live.reminderDue
+    private val summaryWatch = IptvSportsSummaryWatch(summaryClient, viewModelScope)
+    val summary: StateFlow<SportsSummary?> = summaryWatch.summary
+    private val promptState = MutableStateFlow<IptvSportPrompt?>(null)
+    val prompt = promptState.asStateFlow()
+    private val revealed = mutableSetOf<String>()
+    private var summaryFixture: SportsFixture? = null
     private var handle: IptvSportsLive.Handle? = null
     private var linkJob: Job? = null
     private var opened: Pair<IptvSourceRef, Set<String>>? = null
@@ -131,7 +160,7 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
         if (opened?.first != ref) linked = emptyMap()
         linkedSignature = null
         opened = ref to hiddenCategories
-        if (handle == null) handle = live.acquire(IptvSportsMode.LIVE_TV)
+        if (handle == null) { handle = live.acquire(IptvSportsMode.LIVE_TV); summaryFixture?.let(::watchSummary) }
         live.snapshot.value?.takeIf { it.mode == IptvSportsMode.LIVE_TV }?.let(::accept)
     }
 
@@ -170,9 +199,20 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
 
     fun setOnScreen(keys: Set<String>) = live.setOnScreen(keys)
 
-    override fun onCleared() { handle?.release(); handle = null }
+    fun reveal(key: String) { if (revealed.add(key)) publish() }
 
-    fun close() { handle?.release(); handle = null; linkJob?.cancel(); linkJob = null; pendingSignature = null; publish() }
+    fun prompt(next: IptvSportPrompt?) { promptState.value = next }
+
+    fun watchSummary(fixture: SportsFixture?) {
+        summaryFixture = fixture
+        val service = preferences.service
+        if (fixture == null || fixture.status != FixtureStatus.LIVE || service != SportsService.ESPN || handle == null) summaryWatch.stop()
+        else summaryWatch.start(fixture, service)
+    }
+
+    override fun onCleared() { summaryWatch.stop(); handle?.release(); handle = null }
+
+    fun close() { summaryWatch.stop(); handle?.release(); handle = null; linkJob?.cancel(); linkJob = null; pendingSignature = null; publish() }
 
     fun show(ref: IptvSourceRef, hiddenCategories: Set<String>, started: Boolean) {
         viewing = true
@@ -182,7 +222,7 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
         if (loaded != null) relink(ref, hiddenCategories, System.currentTimeMillis())
     }
 
-    fun hide() { viewing = false }
+    fun hide() { viewing = false; summaryWatch.stop(); promptState.value = null }
 
     fun focusFixture(key: String?) { heroKey.value = key }
 
@@ -214,18 +254,21 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
     private fun publish(showScores: Boolean = mutable.value.showScores, favourites: Set<String> = mutable.value.favourites) {
         val result = loaded ?: return
         val linking = pendingSignature != null || linkedSignature == null
+        val scheduleOnly = preferences.service == SportsService.THESPORTSDB
         mutable.value = IptvFixturesState(true, loading = !refreshed && grouped.isEmpty() && !result.missingKey && !result.noLeagues,
             rows = grouped.map { row -> IptvFixtureRow(row.section, row.day, row.fixtures.map { fixture ->
                 val links = linked[fixture.id].orEmpty()
-                IptvFixtureItem(fixture, links, SportsFavourites.has(favourites, fixture), linking && links.isEmpty() && fixture.status != FixtureStatus.FINAL)
+                IptvFixtureItem(fixture, links, SportsFavourites.has(favourites, fixture), linking && links.isEmpty() && fixture.status != FixtureStatus.FINAL,
+                    scheduleOnly && fixture.sport !in LIVE_SCORE_SPORTS)
             }) },
             failed = result.failed, missingKey = result.missingKey, noLeagues = result.noLeagues, showScores = showScores, favourites = favourites,
-            reminders = live.reminders.value, spoilerKeys = spoilerKeys)
+            reminders = live.reminders.value, spoilerKeys = spoilerKeys - revealed)
     }
 
     companion object {
         const val FEATURED = "\u0000featured"
         private const val RELINK_MILLIS = 5L * 60 * 1000
+        private val LIVE_SCORE_SPORTS = setOf("soccer", "basketball", "ice-hockey", "baseball", "american-football")
     }
 }
 
@@ -252,9 +295,12 @@ internal fun IptvSportsFixturesRow(source: IptvSourceRef?, hiddenCategories: Set
         onDispose { viewModel.hide() }
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val prompt by viewModel.prompt.collectAsStateWithLifecycle()
+    val now by produceState(System.currentTimeMillis()) { while (true) { delay(TICK_MILLIS); value = System.currentTimeMillis() } }
     if (!state.enabled || source == null) return
-    var choosing by remember { mutableStateOf<IptvFixtureItem?>(null) }
-    var holding by remember { mutableStateOf<IptvFixtureItem?>(null) }
+    fun open(item: IptvFixtureItem) { if (item.links.size == 1) onWatch(item.links.first().row) else viewModel.prompt(IptvSportPrompt.Channels(item.fixture.key)) }
+    fun hold(item: IptvFixtureItem) { if (state.spoiler(item.fixture)) viewModel.reveal(item.fixture.key) else viewModel.prompt(IptvSportPrompt.Options(item.fixture.key)) }
+    fun options(item: IptvFixtureItem) = viewModel.prompt(IptvSportPrompt.Options(item.fixture.key))
     val message = when {
         state.missingKey -> R.string.iptv_sport_key_missing
         state.noLeagues -> R.string.iptv_sport_no_leagues
@@ -280,27 +326,38 @@ internal fun IptvSportsFixturesRow(source: IptvSourceRef?, hiddenCategories: Set
             }
         }
     } else {
+        val window = remember(now / TIMELINE_HOUR_MILLIS) { sportTimelineWindow(now) }
+        val lanes = remember(state.rows, window) { SportsTimeline.lanes(state.items.map { it.fixture }, window.first, window.second) }
         var lastKey by remember { mutableIntStateOf(0) }
         LazyColumn(modifier.fillMaxWidth().height(SPORT_ROW_HEIGHT)
             .onPreviewKeyEvent { event -> if (event.nativeKeyEvent.action == AndroidKeyEvent.ACTION_DOWN) lastKey = event.nativeKeyEvent.keyCode; false }
             .onFocusChanged { if (!it.hasFocus && lastKey == AndroidKeyEvent.KEYCODE_DPAD_DOWN) viewModel.focusFixture(null) }
             .focusGroup(), verticalArrangement = Arrangement.spacedBy(SPORT_ROW_GAP)) {
-            itemsIndexed(state.rows, key = { _, row -> row.key }) { index, row ->
-                SportFixtureRow(row, state.showScores, playingId, message.takeIf { index == 0 && state.failed }, onRail,
-                    onFocused = { viewModel.focusFixture(it.fixture.key) },
-                    onClick = { item -> if (item.links.size == 1) onWatch(item.links.first().row) else choosing = item },
-                    onHold = { holding = it })
+            state.rows.forEachIndexed { index, row ->
+                item(key = row.key) {
+                    SportFixtureRow(row, state, playingId, message.takeIf { index == 0 && state.failed }, onRail,
+                        onScores = if (index == 0) ({ viewModel.prompt(IptvSportPrompt.Scores) }) else null,
+                        onFocused = { viewModel.focusFixture(it.fixture.key) }, onClick = { open(it) }, onHold = { hold(it) }, onMenu = { options(it) })
+                }
+                if (index == 0 && lanes.isNotEmpty()) item(key = TIMELINE_KEY) {
+                    IptvSportTimeline(lanes, window, now, state, playingId, Modifier.fillMaxWidth().height(SPORT_ROW_HEIGHT), onRail,
+                        onFocused = { viewModel.focusFixture(it.fixture.key) }, onOpen = { open(it) }, onHold = { hold(it) }, onMenu = { options(it) })
+                }
             }
         }
     }
-    choosing?.let { chosen ->
-        val item = state.rows.firstNotNullOfOrNull { row -> row.items.firstOrNull { it.fixture.key == chosen.fixture.key } } ?: chosen
-        FixtureChannelsDialog(item, onWatch = { choosing = null; onWatch(it) }, onDismiss = { choosing = null })
-    }
-    holding?.let { held ->
-        val item = state.rows.firstNotNullOfOrNull { row -> row.items.firstOrNull { it.fixture.key == held.fixture.key } } ?: held
-        FixtureOptionsDialog(item, state.favourites, onToggle = { team -> viewModel.toggleFavourite(item.fixture, team) },
-            onWatch = { holding = null; if (item.links.size == 1) onWatch(item.links.first().row) else choosing = item }, onDismiss = { holding = null })
+    when (val current = prompt) {
+        is IptvSportPrompt.Channels -> state.item(current.key)?.let { item ->
+            FixtureChannelsDialog(item, onWatch = { viewModel.prompt(null); onWatch(it) }, onDismiss = { viewModel.prompt(null) })
+        } ?: LaunchedEffect(current) { viewModel.prompt(null) }
+        is IptvSportPrompt.Options -> state.item(current.key)?.let { item ->
+            FixtureOptionsDialog(item, state, onToggle = { team -> viewModel.toggleFavourite(item.fixture, team) },
+                onReminder = { viewModel.toggleReminder(item.fixture) }, onWatch = { viewModel.prompt(null); open(item) }, onDismiss = { viewModel.prompt(null) })
+        } ?: LaunchedEffect(current) { viewModel.prompt(null) }
+        is IptvSportPrompt.Watch -> LaunchedEffect(current) { viewModel.prompt(null); onWatch(current.row) }
+        IptvSportPrompt.Scores -> IptvAllScores(state, playingId, onWatch = { viewModel.prompt(null); onWatch(it) }, onReveal = viewModel::reveal,
+            onReminder = viewModel::toggleReminder, onDismiss = { viewModel.prompt(null) })
+        null -> Unit
     }
 }
 
@@ -311,8 +368,8 @@ private fun RowMessage(message: Int, warning: Boolean) {
 }
 
 @Composable
-private fun SportFixtureRow(row: IptvFixtureRow, showScores: Boolean, playingId: String?, message: Int?, onRail: () -> Unit,
-    onFocused: (IptvFixtureItem) -> Unit, onClick: (IptvFixtureItem) -> Unit, onHold: (IptvFixtureItem) -> Unit) {
+private fun SportFixtureRow(row: IptvFixtureRow, state: IptvFixturesState, playingId: String?, message: Int?, onRail: () -> Unit, onScores: (() -> Unit)?,
+    onFocused: (IptvFixtureItem) -> Unit, onClick: (IptvFixtureItem) -> Unit, onHold: (IptvFixtureItem) -> Unit, onMenu: (IptvFixtureItem) -> Unit) {
     val listState = rememberLazyListState()
     var lastFocused by remember(row.key) { mutableIntStateOf(0) }
     val requesters = remember(row.key) { mutableMapOf<Int, FocusRequester>() }
@@ -322,6 +379,8 @@ private fun SportFixtureRow(row: IptvFixtureRow, showScores: Boolean, playingId:
             if (row.section == FixtureSection.LIVE) Box(Modifier.size(8.dp).clip(CircleShape).background(NuvioTheme.colors.Error))
             Text(rowTitle(row), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1)
             Text("${row.items.size}", style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+            if (onScores != null) SportChip(stringResource(R.string.iptv_sport5_section_all_scores), onScores, height = 22.dp,
+                icon = Icons.AutoMirrored.Filled.List)
             if (message != null) RowMessage(message, true)
         }
         LazyRow(state = listState, modifier = Modifier.fillMaxWidth()
@@ -338,8 +397,9 @@ private fun SportFixtureRow(row: IptvFixtureRow, showScores: Boolean, playingId:
                 left
             }, contentPadding = PaddingValues(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             itemsIndexed(row.items, key = { _, item -> item.fixture.key }) { index, item ->
-                SportFixtureCard(item, showScores, playing = item.links.any { it.row.item.channel.id == playingId }, modifier = Modifier.focusRequester(requester(index)),
-                    onFocused = { lastFocused = index; onFocused(item) }, onClick = { onClick(item) }, onHold = { onHold(item) })
+                SportFixtureCard(item, state.hidden(item.fixture), state.spoiler(item.fixture), state.favourites, item.fixture.key in state.reminders,
+                    playing = item.links.any { it.row.item.channel.id == playingId }, modifier = Modifier.focusRequester(requester(index)),
+                    onFocused = { lastFocused = index; onFocused(item) }, onClick = { onClick(item) }, onHold = { onHold(item) }, onMenu = { onMenu(item) })
             }
         }
     }
@@ -355,29 +415,46 @@ private fun rowTitle(row: IptvFixtureRow): String = when (row.section) {
     FixtureSection.FINISHED -> stringResource(R.string.iptv_sport2_finished)
 }
 
+internal fun sportFollowable(fixture: SportsFixture): List<FixtureTeam> {
+    val teams = listOfNotNull(fixture.home, fixture.away)
+    if (teams.isNotEmpty()) return teams
+    return (fixture.sportDetail as? SportsDetail.Golf)?.leaders.orEmpty().take(FOLLOW_GOLFERS).map { FixtureTeam(it.name, it.shortName) }
+}
+
+internal fun sportCanRemind(fixture: SportsFixture, now: Long = System.currentTimeMillis()): Boolean =
+    fixture.status == FixtureStatus.SCHEDULED && fixture.startMillis > now
+
 @Composable
-private fun FixtureOptionsDialog(item: IptvFixtureItem, favourites: Set<String>, onToggle: (FixtureTeam) -> Unit, onWatch: () -> Unit, onDismiss: () -> Unit) {
+private fun FixtureOptionsDialog(item: IptvFixtureItem, state: IptvFixturesState, onToggle: (FixtureTeam) -> Unit, onReminder: () -> Unit, onWatch: () -> Unit,
+    onDismiss: () -> Unit) {
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
     val fixture = item.fixture
-    val teams = listOfNotNull(fixture.home, fixture.away)
+    val teams = sportFollowable(fixture)
+    val remind = sportCanRemind(fixture)
+    val reminded = fixture.key in state.reminders
+    val watch = fixture.status != FixtureStatus.FINAL
     NuvioDialog(onDismiss = onDismiss, title = sportTitle(fixture),
         subtitle = if (teams.isEmpty()) null else stringResource(R.string.iptv_sport2_favourite_subtitle), width = 560.dp) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            if (watch) SettingsActionRow(title = stringResource(R.string.iptv_sport_choose_channel), subtitle = null,
+                onClick = onWatch, leadingIcon = Icons.Filled.LiveTv, trailingIcon = null, modifier = Modifier.focusRequester(first))
+            if (remind) SettingsActionRow(title = stringResource(if (reminded) R.string.iptv_sport5_section_cancel_reminder else R.string.iptv_sport5_section_remind),
+                subtitle = if (reminded) stringResource(R.string.iptv_sport5_section_reminder_set) else "${sportDayLabel(fixture.startMillis)} · ${clock(fixture.startMillis)}",
+                onClick = onReminder, leadingIcon = if (reminded) Icons.Filled.NotificationsOff else Icons.Filled.NotificationsActive, trailingIcon = null,
+                modifier = if (!watch) Modifier.focusRequester(first) else Modifier)
             teams.forEachIndexed { index, team ->
                 SettingsToggleRow(title = team.name, subtitle = stringResource(R.string.iptv_sport2_favourite_team),
-                    checked = SportsFavourites.key(fixture.league, team) in favourites, onToggle = { onToggle(team) },
-                    modifier = if (index == 0) Modifier.focusRequester(first) else Modifier)
+                    checked = SportsFavourites.key(fixture.league, team) in state.favourites, onToggle = { onToggle(team) },
+                    modifier = if (index == 0 && !watch && !remind) Modifier.focusRequester(first) else Modifier)
             }
-            if (fixture.status != FixtureStatus.FINAL) SettingsActionRow(title = stringResource(R.string.iptv_sport_choose_channel), subtitle = null,
-                onClick = onWatch, leadingIcon = Icons.Filled.LiveTv, trailingIcon = null, modifier = if (teams.isEmpty()) Modifier.focusRequester(first) else Modifier)
-            if (teams.isEmpty() && fixture.status == FixtureStatus.FINAL) NuvioActionPill(onDismiss, Modifier.focusRequester(first)) { Text(stringResource(R.string.iptv_sport_close)) }
+            if (!watch && !remind && teams.isEmpty()) NuvioActionPill(onDismiss, Modifier.focusRequester(first)) { Text(stringResource(R.string.iptv_sport_close)) }
         }
     }
 }
 
 @Composable
-private fun FixtureChannelsDialog(item: IptvFixtureItem, onWatch: (IptvListedChannel) -> Unit, onDismiss: () -> Unit) {
+internal fun FixtureChannelsDialog(item: IptvFixtureItem, onWatch: (IptvListedChannel) -> Unit, onDismiss: () -> Unit) {
     val first = remember { FocusRequester() }
     LaunchedEffect(item.links.isEmpty()) { withFrameNanos { }; runCatching { first.requestFocus() } }
     val fixture = item.fixture
@@ -428,3 +505,6 @@ internal val SportPlaceholderShape = RoundedCornerShape(4.dp)
 private val SPORT_ROW_HEIGHT = 168.dp
 private val SPORT_ROW_GAP = 12.dp
 private const val PLACEHOLDER_CARDS = 6
+private const val TICK_MILLIS = 60_000L
+private const val TIMELINE_KEY = "\u0000timeline"
+private const val FOLLOW_GOLFERS = 5

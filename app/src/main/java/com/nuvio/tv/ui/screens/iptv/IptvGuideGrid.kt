@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -45,6 +46,11 @@ import com.nuvio.tv.core.iptv.GuideGridWindow
 import com.nuvio.tv.core.iptv.GuideDensity
 import com.nuvio.tv.core.iptv.GuideProgrammeCell
 import com.nuvio.tv.core.iptv.ListMove
+import com.nuvio.tv.core.iptv.FixtureStatus
+import com.nuvio.tv.core.iptv.LocalizedGuideText
+import com.nuvio.tv.core.iptv.SportsFixture
+import com.nuvio.tv.core.iptv.SportsGuide
+import com.nuvio.tv.core.iptv.SportsGuideCells
 import com.nuvio.tv.core.iptv.guideStickyOffsetMillis
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.ui.components.placeholderCardShimmer
@@ -73,11 +79,14 @@ private fun guideSpec(density: GuideDensity) = when (density) {
 internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long, cursor: Long, viewStart: Long, rowFocus: MutableMap<String, FocusRequester>,
     heading: String, modifier: Modifier, onCursor: (Long, Long) -> Unit, onRail: () -> Unit, onFocus: (IptvListedChannel) -> Unit,
     onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onNearEnd: () -> Unit,
-    moving: String? = null, onMove: (IptvListedChannel, ListMove) -> Unit = { _, _ -> }, onMoveDone: () -> Unit = {}) {
+    moving: String? = null, onMove: (IptvListedChannel, ListMove) -> Unit = { _, _ -> }, onMoveDone: () -> Unit = {},
+    sport: IptvSportsGuide = NoSportsGuide, sportOnly: Boolean? = null, onSportOnly: () -> Unit = {}, onSpan: (Long) -> Unit = {},
+    sportOnlyFocus: FocusRequester? = null) {
     val spec = guideSpec(state.density)
     BoxWithConstraints(modifier.iptvPanel().padding(horizontal = 6.dp, vertical = 8.dp)) {
         val stripWidth = maxWidth - spec.column
         val visibleMillis = (stripWidth.value / MinuteWidth.value * MINUTE_MILLIS).toLong().coerceAtLeast(SLOT)
+        LaunchedEffect(visibleMillis) { onSpan(visibleMillis) }
         val scope = rememberCoroutineScope()
         fun page(index: Int, delta: Int) {
             val target = (index + delta).coerceIn(0, state.channels.lastIndex)
@@ -101,13 +110,21 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
         }
         Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth().height(30.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(heading, style = iptvHeadingStyle(), color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+                if (sportOnly != null) Row(Modifier.width(spec.column).padding(start = 4.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SportOnlyToggle(sportOnly, onSportOnly, onRail, sportOnlyFocus?.let { Modifier.focusRequester(it) } ?: Modifier)
+                    Text(heading, style = iptvHeadingStyle(), color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f))
+                }
+                else Text(heading, style = iptvHeadingStyle(), color = NuvioTheme.colors.TextSecondary, maxLines = 1,
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.width(spec.column).padding(start = 10.dp, end = 12.dp))
                 TimeBar(viewStart, visibleMillis, now, Modifier.weight(1f).fillMaxHeight())
             }
             Spacer(Modifier.height(6.dp))
             Box(Modifier.fillMaxSize().clipToBounds()) {
-                if (state.channels.isEmpty()) SkeletonRows(spec)
+                if (state.channels.isEmpty() && sportOnly == true) Text(stringResource(R.string.iptv_sport5g_no_sport), style = MaterialTheme.typography.bodyMedium,
+                    color = NuvioTheme.colors.TextSecondary, modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp))
+                else if (state.channels.isEmpty()) SkeletonRows(spec)
                 CompositionLocalProvider(LocalBringIntoViewSpec provides rememberPivotSpec()) {
                     LazyColumn(state = listState, modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         itemsIndexed(state.channels, key = { _, row -> row.item.channel.id }) { index, row ->
@@ -118,7 +135,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
                                 recordings.any { it.status == com.nuvio.tv.core.iptv.RecordingStatus.RECORDING },
                                 recordings.filter { it.status == com.nuvio.tv.core.iptv.RecordingStatus.SCHEDULED }.mapNotNull { it.programmeStartMillis }.toSet(), rowFocus.getOrPut(row.item.channel.id) { FocusRequester() },
                                 onCursor, onRail, onFocus, onSelect, onMenu, onPage = { delta -> page(index, delta * spec.pageRows) },
-                                moving = row.item.channel.id == moving, onMove = { move -> onMove(row, move) }, onMoveDone = onMoveDone)
+                                moving = row.item.channel.id == moving, onMove = { move -> onMove(row, move) }, onMoveDone = onMoveDone, sport = sport)
                         }
                     }
                 }
@@ -195,8 +212,10 @@ private fun TimeBar(start: Long, span: Long, now: Long, modifier: Modifier) {
 private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow?, index: Int, now: Long, cursor: Long, viewStart: Long, visibleMillis: Long,
     playing: Boolean, recording: Boolean, scheduled: Set<Long>, focusRequester: FocusRequester, onCursor: (Long, Long) -> Unit, onRail: () -> Unit,
     onFocus: (IptvListedChannel) -> Unit, onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onPage: (Int) -> Unit,
-    moving: Boolean, onMove: (ListMove) -> Unit, onMoveDone: () -> Unit) {
+    moving: Boolean, onMove: (ListMove) -> Unit, onMoveDone: () -> Unit, sport: IptvSportsGuide) {
     var focused by remember { mutableStateOf(false) }
+    val name = channelName(row)
+    val sportsChannel = remember(name, sport.active) { sport.active && SportsGuide.isSportsChannel(listOf(LocalizedGuideText(name, null))) }
     val longPress = rememberLongPressKeyTracker()
     var longPressed by remember { mutableStateOf(false) }
     val cells = grid?.cells.orEmpty()
@@ -280,6 +299,7 @@ private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow
                 val visible = minuteOffset(minOf(cell.endMillis, viewEnd) - maxOf(cell.startMillis, viewStart)) - 3.dp
                 if (width <= 0.dp || visible <= 0.dp) continue
                 ProgrammeCell(spec, cell, now, selected = focused && cursor >= cell.startMillis && cursor < cell.endMillis, rowFocused = focused,
+                    sport = sport, fixture = if (sport.active) sport.index.at(row.item.channel.id, cell.programme.start.epochMillis) else null, sportsChannel = sportsChannel,
                     scheduled = cell.programme.start.epochMillis in scheduled, titleOffset = minuteOffset(guideStickyOffsetMillis(begin, end, viewStart, MIN_TITLE_MILLIS)),
                     continued = cell.startMillis < viewStart, wide = visible >= 96.dp,
                     modifier = Modifier.offset(x = minuteOffset(begin - viewStart)).wrapContentWidth(Alignment.Start, unbounded = true)
@@ -322,18 +342,29 @@ private fun ChannelMarks(recording: Boolean, favourite: Boolean, archive: Boolea
 }
 
 @Composable
-private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, selected: Boolean, rowFocused: Boolean, scheduled: Boolean,
-    titleOffset: Dp, continued: Boolean, wide: Boolean, modifier: Modifier) {
+private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, selected: Boolean, rowFocused: Boolean, sport: IptvSportsGuide,
+    fixture: SportsFixture?, sportsChannel: Boolean, scheduled: Boolean, titleOffset: Dp, continued: Boolean, wide: Boolean, modifier: Modifier) {
     val airing = now >= cell.startMillis && now < cell.endMillis
     val past = cell.endMillis <= now
     val v2 = LocalV2Appearance.current != null
+    val unlinked = remember(cell.programme, sportsChannel, sport.active && fixture == null) {
+        if (!sport.active || fixture != null || !SportsGuide.isSportsProgramme(cell.programme.titles, cell.programme.categories, sportsChannel)) null
+        else SportsGuideCells.league(cell.programme.titles).orEmpty()
+    }
+    val hidden = fixture != null && sport.hidden(fixture)
+    val live = fixture?.status == FixtureStatus.LIVE && airing
+    val close = fixture != null && SportsGuideCells.close(fixture, hidden)
+    val chip = fixture?.let { SportsGuideCells.chip(it, hidden) }
+    val reminded = fixture != null && sport.reminded(fixture)
     val fill = when {
         selected -> if (v2) NuvioTheme.colors.Secondary.copy(alpha = .30f) else NuvioTheme.colors.FocusBackground
+        live -> NuvioTheme.colors.Error.copy(alpha = if (rowFocused) .22f else .16f)
         airing -> NuvioTheme.colors.TextPrimary.copy(alpha = if (rowFocused) .14f else .10f)
         past -> NuvioTheme.colors.TextPrimary.copy(alpha = .03f)
         else -> NuvioTheme.colors.TextPrimary.copy(alpha = if (rowFocused) .08f else .05f)
     }
-    Box(modifier.then(if (selected) Modifier.cellFocus(CellShape) else Modifier).clip(CellShape).background(fill)) {
+    Box(modifier.then(if (selected) Modifier.cellFocus(CellShape) else Modifier).clip(CellShape).background(fill)
+        .then(if (close && !selected) Modifier.border(2.dp, NuvioTheme.colors.Warning, CellShape) else Modifier)) {
         val content = when {
             selected -> itemContent(true)
             past -> NuvioTheme.colors.TextTertiary
@@ -342,16 +373,25 @@ private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, 
         }
         Row(Modifier.fillMaxSize().padding(start = (if (continued) 4.dp else 10.dp) + titleOffset, end = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             if (continued) Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, null, Modifier.size(14.dp), tint = content.copy(alpha = .7f))
+            if (wide && fixture != null) SportGuideBadge(SportsGuideCells.badge(fixture.league), fixture.sport, Modifier.padding(end = 6.dp))
+            else if (wide && unlinked != null) SportGuideBadge(unlinked.takeIf(String::isNotEmpty)?.let(SportsGuideCells::badge)
+                ?: stringResource(R.string.iptv_sport5g_sport), null, Modifier.padding(end = 6.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                 Text(title(cell.programme), maxLines = 1, overflow = TextOverflow.Ellipsis,
                     style = if (spec.detail) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
-                    fontWeight = if (selected || airing) FontWeight.SemiBold else FontWeight.Normal, color = content)
-                if (wide && spec.detail) Text(timeRange(cell.programme), maxLines = 1, style = MaterialTheme.typography.labelSmall,
-                    color = if (selected) itemContent(true).copy(alpha = .8f) else NuvioTheme.colors.TextTertiary)
+                    fontWeight = if (selected || airing) FontWeight.SemiBold else FontWeight.Normal, color = if (unlinked != null && !selected) content.copy(alpha = .8f) else content)
+                if (wide && spec.detail) Text(if (reminded) "${timeRange(cell.programme)} · ${stringResource(R.string.iptv_sport5g_reminder_set)}" else timeRange(cell.programme),
+                    maxLines = 1, style = MaterialTheme.typography.labelSmall, overflow = TextOverflow.Ellipsis,
+                    color = if (selected) itemContent(true).copy(alpha = .8f) else if (reminded) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextTertiary)
             }
+            if (chip != null && wide) SportGuideScore(chip, Modifier.padding(start = 6.dp))
         }
         if (scheduled) Icon(Icons.Filled.FiberManualRecord, null, Modifier.align(Alignment.TopEnd).padding(5.dp).size(8.dp), tint = NuvioTheme.colors.Error)
-        if (airing && !cell.openEnded) {
+        else if (reminded && !(wide && spec.detail)) Icon(Icons.Filled.NotificationsActive, null, Modifier.align(Alignment.TopEnd).padding(4.dp).size(10.dp),
+            tint = NuvioTheme.colors.Secondary)
+        val game = fixture?.takeIf { live }?.let { SportsGuideCells.progress(it, now) }
+        if (game != null) Box(Modifier.align(Alignment.BottomStart).fillMaxWidth(game).height(3.dp).background(NuvioTheme.colors.Error))
+        else if (airing && !cell.openEnded) {
             val fraction = ((now - cell.programme.start.epochMillis).toFloat() /
                 ((cell.programme.stop?.epochMillis ?: cell.endMillis) - cell.programme.start.epochMillis).coerceAtLeast(1)).coerceIn(0f, 1f)
             Box(Modifier.align(Alignment.BottomStart).fillMaxWidth(fraction).height(2.dp).background(NuvioTheme.palette.accentBrush()))

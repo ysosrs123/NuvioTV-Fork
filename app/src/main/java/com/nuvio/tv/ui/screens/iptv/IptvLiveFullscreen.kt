@@ -38,6 +38,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.Player
@@ -58,7 +60,9 @@ import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.GoLiveRoute
 import com.nuvio.tv.core.iptv.GuideProgrammeCell
+import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.LiveCornerVideo
+import com.nuvio.tv.core.iptv.SportsFixtureText
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.theme.NuvioTheme
@@ -80,7 +84,22 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
     var resize by remember { mutableIntStateOf(AspectRatioFrameLayout.RESIZE_MODE_FIT) }
     var digits by remember { mutableStateOf("") }
     val focus = remember { FocusRequester() }
-    LaunchedEffect(panel, controls) { if (!panel && !controls) runCatching { focus.requestFocus() } }
+    val live: IptvLiveViewModel = hiltViewModel()
+    val sports: IptvSportsFixturesViewModel = hiltViewModel()
+    val fixtures by sports.state.collectAsStateWithLifecycle()
+    val backup by live.backup.collectAsStateWithLifecycle()
+    var centre by remember { mutableStateOf(false) }
+    var feeds by remember { mutableStateOf(false) }
+    var overlayFocused by remember { mutableStateOf(false) }
+    val behindPosition = rememberCatchupPosition(state)
+    val behind = state.catchup != null || state.localBehind
+    val watchedMinute by remember(behind) { derivedStateOf { behindPosition.value?.let { it / MINUTE_MILLIS } } }
+    val watchedAt = watchedMinute?.takeIf { behind }?.times(MINUTE_MILLIS) ?: now
+    val game = fixtures.takeIf { it.enabled }?.let { playingFixture(it.rows, state.playingId, watchedAt) }
+    val seekable = state.catchup != null || state.localTimeshift
+    val summary = rememberSportsSummary(game?.fixture?.takeIf { controls && seekable && state.multiview == null })
+    LaunchedEffect(game == null) { if (game == null) { centre = false; feeds = false } }
+    LaunchedEffect(panel, controls, centre, feeds) { if (!panel && !controls && !centre && !feeds) runCatching { focus.requestFocus() } }
     LaunchedEffect(banner, state.playingId) { if (banner >= 0) { delay(5_000); banner = -1 } }
     LaunchedEffect(digits) {
         if (digits.isNotEmpty()) { delay(1_500); digits.toIntOrNull()?.let(onNumber); digits = ""; banner = 0 }
@@ -90,7 +109,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
     val longPress = rememberLongPressKeyTracker()
     Box(Modifier.fillMaxSize().background(Color.Black).focusRequester(focus).onPreviewKeyEvent { event ->
         val native = event.nativeKeyEvent
-        if (panel || controls) return@onPreviewKeyEvent false
+        if (panel || controls || centre || feeds || overlayFocused) return@onPreviewKeyEvent false
         if (longPress.handle(native, ::isSelect) { onMenu() }) return@onPreviewKeyEvent true
         if (native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode)) {
             banner = -1; liveFirst = false; controls = true
@@ -131,13 +150,22 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
             AndroidKeyEvent.KEYCODE_LAST_CHANNEL -> { onLastChannel(); banner++; true }
             AndroidKeyEvent.KEYCODE_DPAD_LEFT, AndroidKeyEvent.KEYCODE_GUIDE -> { panel = true; true }
             AndroidKeyEvent.KEYCODE_MENU -> { onMenu(); true }
-            AndroidKeyEvent.KEYCODE_INFO -> { banner = if (banner < 0) 0 else -1; true }
+            AndroidKeyEvent.KEYCODE_INFO -> { if (game != null) { banner = -1; centre = true } else banner = if (banner < 0) 0 else -1; true }
             else -> false
         }
     }.focusable()) {
-        LiveVideo(state.player, state.playback.takeIf { showHud }, Modifier.fillMaxSize(), resize,
+        val squeezed = centre && game != null
+        LiveVideo(state.player, state.playback.takeIf { showHud && !squeezed },
+            if (squeezed) Modifier.padding(start = 28.dp, top = 40.dp).fillMaxWidth(.55f).aspectRatio(16f / 9f) else Modifier.fillMaxSize(), resize,
             state.sources.firstOrNull { it.ref.sourceId == (state.playingRow?.item?.channel?.sourceId ?: state.source?.sourceId) }?.label)
         PlaybackState(state, Modifier.align(Alignment.Center), large = true)
+        Box((if (squeezed || feeds) Modifier.fillMaxHeight().fillMaxWidth(.58f) else Modifier.fillMaxSize()).onFocusChanged {
+            val was = overlayFocused
+            overlayFocused = it.hasFocus
+            if (was && !it.hasFocus && !panel && !controls && !centre && !feeds) runCatching { focus.requestFocus() }
+        }) {
+            IptvSportsOverlayLayer(state.playingId, controls || centre || feeds, onWatch = { panel = false; centre = false; feeds = false; onWatch(it) }, Modifier.fillMaxSize())
+        }
         ReconnectingPill(state, Modifier.align(Alignment.TopStart).padding(36.dp))
         state.message?.let { message ->
             Text(stringResource(message), style = MaterialTheme.typography.titleSmall, color = NuvioTheme.colors.TextPrimary,
@@ -149,7 +177,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
             InsetPicture(state, inset, now, Modifier.align(Alignment.BottomEnd)
                 .padding(end = 36.dp, bottom = if (controls || (banner >= 0 && !panel)) 236.dp else 36.dp).width(400.dp).aspectRatio(16f / 9f))
         }
-        AnimatedVisibility(controls && !panel, Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) {
+        AnimatedVisibility(controls && !panel && !centre && !feeds, Modifier.fillMaxSize(), enter = fadeIn(), exit = fadeOut()) {
             LiveControls(state, now, layout, liveControlActions(state, canStartOver), onAction = { action ->
                 when (action) {
                     PlayerControlAction.INFO -> { controls = false; banner = 0 }
@@ -163,11 +191,31 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
                     PlayerControlAction.AUDIO, PlayerControlAction.SUBTITLES -> { controls = false; onControl(action) }
                     else -> onControl(action)
                 }
-            }, onHide = { controls = false; liveFirst = false }, onScrub = { onScrub(it) }, onGoLive = onGoLive, focusGoLive = liveFirst)
+            }, onHide = { controls = false; liveFirst = false }, onScrub = { onScrub(it) }, onGoLive = onGoLive, focusGoLive = liveFirst,
+                markers = sportsMarkers(summary, game?.fixture), feeds = game?.links?.size ?: 0,
+                onCentre = game?.let { { controls = false; centre = true } },
+                onFeeds = game?.takeIf { it.links.size > 1 }?.let { { controls = false; feeds = true } })
         }
-        AnimatedVisibility(banner >= 0 && !panel && !controls, Modifier.align(Alignment.BottomCenter),
+        AnimatedVisibility(banner >= 0 && !panel && !controls && !centre && !feeds, Modifier.align(Alignment.BottomCenter),
             enter = fadeIn() + slideInVertically { it / 3 }, exit = fadeOut() + slideOutVertically { it / 3 }) {
-            Banner(state, now)
+            Banner(state, now, game, game?.let { scoreHidden(fixtures, it.fixture) } ?: true)
+        }
+        AnimatedVisibility(squeezed, Modifier.align(Alignment.CenterEnd),
+            enter = fadeIn() + slideInHorizontally { it / 4 }, exit = fadeOut() + slideOutHorizontally { it / 4 }) {
+            game?.let { item ->
+                IptvGameCentrePanel(item.fixture, onWatchMoment = { millis -> centre = false; live.seekTo(millis - SCORE_LEAD_MILLIS) }, onClose = { centre = false },
+                    Modifier.fillMaxWidth(.4f).padding(top = 24.dp, bottom = 24.dp, end = 24.dp),
+                    onWatch = { centre = false; onWatch(it) })
+            }
+        }
+        AnimatedVisibility(feeds && game != null, Modifier.align(Alignment.CenterEnd),
+            enter = fadeIn() + slideInHorizontally { it / 4 }, exit = fadeOut() + slideOutHorizontally { it / 4 }) {
+            game?.let { item ->
+                IptvSportFeedsPanel(item, state, backupArmed = backup?.first == state.playingId && backup?.second?.item?.channel?.id == backupFeed(item, state.playingId)?.item?.channel?.id,
+                    onWatch = { feeds = false; onWatch(it) },
+                    onBackup = { on -> state.playingId?.let { id -> live.armBackup(id, if (on) backupFeed(item, id) else null) } },
+                    onClose = { feeds = false }, modifier = Modifier.width(420.dp).padding(top = 24.dp, bottom = 24.dp, end = 24.dp))
+            }
         }
         AnimatedVisibility(panel, Modifier.align(Alignment.CenterStart),
             enter = fadeIn() + slideInHorizontally { -it / 4 }, exit = fadeOut() + slideOutHorizontally { -it / 4 }) {
@@ -177,6 +225,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
 }
 
 private const val SEEK_STEP = com.nuvio.tv.core.iptv.CatchupScrub.STEP_MILLIS
+private const val SCORE_LEAD_MILLIS = 30_000L
 private val SWAP_KEYS = setOf(AndroidKeyEvent.KEYCODE_WINDOW, AndroidKeyEvent.KEYCODE_PROG_YELLOW)
 private val ZAP_KEYS = setOf(AndroidKeyEvent.KEYCODE_DPAD_UP, AndroidKeyEvent.KEYCODE_DPAD_DOWN, AndroidKeyEvent.KEYCODE_CHANNEL_UP,
     AndroidKeyEvent.KEYCODE_CHANNEL_DOWN, AndroidKeyEvent.KEYCODE_DPAD_RIGHT, AndroidKeyEvent.KEYCODE_LAST_CHANNEL)
@@ -223,13 +272,14 @@ private fun NumberEntry(digits: String, state: IptvLiveState, modifier: Modifier
 }
 
 @Composable
-private fun Banner(state: IptvLiveState, now: Long) {
+private fun Banner(state: IptvLiveState, now: Long, game: IptvFixtureItem? = null, hidden: Boolean = true) {
     val index = state.channels.indexOfFirst { it.item.channel.id == state.playingId }
     val row = state.channels.getOrNull(index) ?: state.playingRow?.takeIf { it.item.channel.id == state.playingId }
     val catchup = state.catchup
     val position by rememberCatchupPosition(state)
     val programme = if (catchup != null) position?.let { catchupShown(state, it) } ?: catchup else row?.let { liveProgramme(state, it.item.channel.id, now) }
     val following = if (catchup == null) row?.let { nextProgramme(state, it.item.channel.id, programme, now) } else null
+    val behindSeconds = rememberBehindLive(state)
     Box(Modifier.fillMaxWidth().background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .55f))))
         .padding(start = 40.dp, end = 40.dp, top = 48.dp, bottom = 28.dp)) {
         Row(Modifier.fillMaxWidth().iptvPanel(RoundedCornerShape(18.dp), GlassRole.HUD).padding(horizontal = 22.dp, vertical = 18.dp),
@@ -245,7 +295,14 @@ private fun Banner(state: IptvLiveState, now: Long) {
                     qualityBadges(state.player).takeIf { it.isNotEmpty() }?.let { Text(it.joinToString(" · "), style = MaterialTheme.typography.labelMedium,
                         color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 }
-                Text(programme?.let(::title) ?: stringResource(R.string.iptv_live_no_programme), style = MaterialTheme.typography.headlineSmall,
+                if (game != null) {
+                    GameScoreLine(game.fixture, hidden, 30.dp, MaterialTheme.typography.headlineSmall)
+                    val behindMinutes = ((if (catchup != null || state.localBehind) position?.let { now - it } else behindSeconds?.let { it * 1_000L }) ?: 0L) / MINUTE_MILLIS
+                    val gameState = if (game.fixture.status == FixtureStatus.LIVE) stringResource(R.string.iptv_sport5p_live_state,
+                        (if (hidden) null else SportsFixtureText.periodClock(game.fixture)) ?: stringResource(R.string.iptv_sport_live)) else null
+                    listOfNotNull(sportLeagueName(game.fixture), gameState, if (behindMinutes >= 1) stringResource(R.string.iptv_sport5p_behind, behindMinutes.toInt()) else null)
+                        .joinToString(" · ").let { Text(it, style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                } else Text(programme?.let(::title) ?: stringResource(R.string.iptv_live_no_programme), style = MaterialTheme.typography.headlineSmall,
                     color = NuvioTheme.colors.TextPrimary, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (catchup != null || state.localBehind) ScrubTimeline(programme, position, now, state.scrubTarget != null, Modifier.fillMaxWidth(),
                     buffered = state.playback?.takeIf { state.localTimeshift }?.let { playback -> playback::localOldest })
@@ -270,7 +327,7 @@ private fun Banner(state: IptvLiveState, now: Long) {
                     else -> R.string.iptv_live_fullscreen_hint
                 }), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary,
                     maxLines = 2, modifier = Modifier.widthIn(max = 220.dp))
-                rememberBehindLive(state)?.let { behind ->
+                behindSeconds?.let { behind ->
                     Text(stringResource(R.string.iptv_stream_behind_live, behind), style = MaterialTheme.typography.labelMedium,
                         color = NuvioTheme.colors.TextSecondary, maxLines = 1)
                     Text(stringResource(R.string.iptv_play_return_hint), style = MaterialTheme.typography.labelSmall,

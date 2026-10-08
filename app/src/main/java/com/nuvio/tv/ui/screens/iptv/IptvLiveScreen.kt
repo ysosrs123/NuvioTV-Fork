@@ -144,6 +144,14 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
         onDispose { lifecycle.removeObserver(observer); if (lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) viewModel.foreground(false) }
     }
     IptvSportsFixturesSync(state.source, state.hiddenCategories, state.sportEnabled)
+    val sport = rememberIptvSportsGuide(state.sportEnabled)
+    var sportOnly by remember { mutableStateOf(IptvSportOnly.on) }
+    var guideSpan by remember { mutableLongStateOf(2 * 60 * MINUTE_MILLIS) }
+    val sportOnlyFocus = remember { FocusRequester() }
+    val filtering = sportOnly && sport.active && moving == null
+    val view = remember(state, sport, filtering, viewStart, guideSpan) {
+        if (filtering) state.copy(channels = sportOnlyChannels(state.channels, sport, viewStart, viewStart + guideSpan, state.focused?.item?.channel?.id)) else state
+    }
     LaunchedEffect(state.playingId, state.tuning) { if (state.playingId == null && !state.tuning) fullscreen = false }
     LaunchedEffect(fullscreen) { viewModel.setFullscreen(fullscreen); if (!fullscreen) viewModel.closeInset() }
     val openFullscreen by viewModel.fullscreenRequest.collectAsStateWithLifecycle()
@@ -151,8 +159,9 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
     LaunchedEffect(state.source, state.category, state.favourites, state.sports, state.search) { if (moving != null) { moving = null; viewModel.finishMove() } }
     LaunchedEffect(state.message) { if (state.message != null) { delay(6_000); viewModel.clearMessage() } }
     suspend fun focusGridNow() {
-        val id = state.focused?.item?.channel?.id ?: state.channels.firstOrNull()?.item?.channel?.id ?: return
-        val index = state.channels.indexOfFirst { it.item.channel.id == id }
+        val id = state.focused?.item?.channel?.id?.takeIf { focused -> view.channels.any { it.item.channel.id == focused } }
+            ?: view.channels.firstOrNull()?.item?.channel?.id ?: run { if (filtering) runCatching { sportOnlyFocus.requestFocus() }; return }
+        val index = view.channels.indexOfFirst { it.item.channel.id == id }
         if (index >= 0 && guideList.layoutInfo.visibleItemsInfo.none { it.index == index }) guideList.scrollToItem((index - 2).coerceAtLeast(0))
         repeat(2) { withFrameNanos { } }
         rowFocus[id]?.let { runCatching { it.requestFocus() } }
@@ -160,7 +169,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
     fun focusGrid() { scope.launch { focusGridNow() } }
     fun focusContent() {
         scope.launch {
-            if (state.channels.isNotEmpty()) focusGridNow() else { withFrameNanos { }; runCatching { emptyFocus.requestFocus() } }
+            if (view.channels.isNotEmpty() || (filtering && state.channels.isNotEmpty())) focusGridNow() else { withFrameNanos { }; runCatching { emptyFocus.requestFocus() } }
         }
     }
     BackHandler(enabled = !sidebarExpanded && (moving != null || movingCategory != null || fullscreen || searching || railOpen || state.sports)) {
@@ -187,6 +196,11 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
         if (!fullscreen && !railOpen && !searching && state.channels.isNotEmpty()) { withFrameNanos { }; focusGridNow() }
     }
     val empty = emptyState(state)
+    val games = remember(sport, now) { sport.games(now) }
+    val laneVisible = games.isNotEmpty() && empty == null && !searching && state.search.isBlank() && !state.sports && moving == null
+    val laneShown = rememberUpdatedState(laneVisible)
+    var laneFocused by remember { mutableStateOf(false) }
+    LaunchedEffect(laneVisible) { if (!laneVisible && laneFocused) { laneFocused = false; if (!railOpen && !fullscreen) focusContent() } }
     LaunchedEffect(empty) { if (empty != null && !railOpen && !searching) { withFrameNanos { }; runCatching { emptyFocus.requestFocus() } } }
 
     val tiles = state.multiview
@@ -244,11 +258,15 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                 if (state.sports && state.search.isBlank()) IptvSportsFixturesRow(state.source, state.hiddenCategories, state.playingId, onWatch = { row ->
                     if (row.item.channel.id == state.playingId && state.player != null && state.catchup == null) fullscreen = true else viewModel.watch(row)
                 }, onRail = { railOpen = true })
+                if (laneVisible) IptvGamesNowLane(games, sport, state.playingId, onWatch = { row ->
+                    if (row.item.channel.id == state.playingId && state.player != null && state.catchup == null) fullscreen = true else viewModel.watch(row)
+                }, onRail = { railOpen = true }, onDown = { focusContent() },
+                    modifier = Modifier.onFocusChanged { if (it.hasFocus) laneFocused = true else if (laneShown.value) laneFocused = false })
                 if (empty != null) {
                     EmptyPanel(empty, state, emptyFocus, Modifier.fillMaxWidth().weight(1f), onSources = onSources,
                         onRefresh = viewModel::refreshSource, onAll = { viewModel.showCategory(null) }, onRail = { railOpen = true })
                 } else {
-                    GuideGrid(state, guideList, now, cursor, viewStart, rowFocus, heading(state), Modifier.fillMaxWidth().weight(1f),
+                    GuideGrid(view, guideList, now, cursor, viewStart, rowFocus, heading(state), Modifier.fillMaxWidth().weight(1f),
                         onCursor = { time, start -> cursor = time; viewStart = start },
                         onRail = { railOpen = true },
                         onFocus = viewModel::focus,
@@ -261,7 +279,9 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                         },
                         onMenu = { menuFor = it },
                         onNearEnd = viewModel::loadMore,
-                        moving = moving, onMove = viewModel::moveChannel, onMoveDone = { moving = null; viewModel.finishMove() })
+                        moving = moving, onMove = viewModel::moveChannel, onMoveDone = { moving = null; viewModel.finishMove() },
+                        sport = sport, sportOnly = if (sport.active && moving == null) sportOnly else null,
+                        onSportOnly = { sportOnly = !sportOnly; IptvSportOnly.on = sportOnly }, onSpan = { guideSpan = it }, sportOnlyFocus = sportOnlyFocus)
                 }
             }
             AnimatedVisibility(railOpen, enter = fadeIn(), exit = fadeOut()) {

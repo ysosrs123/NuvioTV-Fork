@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5_overlay_goal">Goal · %1$s</string>
+    <string name="iptv_sport5_overlay_team_scored">%1$s score · %2$s</string>
+    <string name="iptv_sport5_overlay_scored">Score · %1$s</string>
+    <string name="iptv_sport5_overlay_kick_off">Kick-off · %1$s</string>
+    <string name="iptv_sport5_overlay_started">Under way · %1$s</string>
+    <string name="iptv_sport5_overlay_full_time">Full time · %1$s</string>
+    <string name="iptv_sport5_overlay_final">Final · %1$s</string>
+    <string name="iptv_sport5_overlay_on_channel">on %1$s</string>
+    <string name="iptv_sport5_overlay_hint_watch">OK to watch</string>
+    <string name="iptv_sport5_overlay_hint_dismiss">Back to dismiss</string>
+    <string name="iptv_sport5_overlay_reminder">Reminder</string>
+    <string name="iptv_sport5_overlay_starts_in">%1$s starts in %2$d min</string>
+    <string name="iptv_sport5_overlay_starting">%1$s is starting now</string>
+    <string name="iptv_sport5_overlay_watch">Watch</string>
+    <string name="iptv_sport5_overlay_dismiss">Dismiss</string>
+    <string name="iptv_sport5_overlay_close_game">Close</string>
+    <string name="iptv_sport5_overlay_main_event">Main event</string>
+    <string name="iptv_sport5_overlay_next">%1$s · %2$s</string>
+    <string name="iptv_sport5_overlay_in_minutes">%1$d min</string>
+</resources>

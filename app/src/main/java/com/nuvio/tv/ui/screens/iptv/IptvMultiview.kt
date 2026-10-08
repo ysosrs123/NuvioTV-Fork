@@ -15,6 +15,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.ViewModule
+import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.runtime.*
 import com.nuvio.tv.ui.v2.components.GlassRole
@@ -64,10 +66,20 @@ import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.util.rememberLongPressKeyTracker
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.components.nuvioV2Focus
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nuvio.tv.core.iptv.FixtureStatus
+import com.nuvio.tv.core.iptv.SportsFixture
+import com.nuvio.tv.core.iptv.SportsFixtureText
 
 private sealed interface TilePick {
     data object Add : TilePick
     data class Replace(val index: Int) : TilePick
+}
+
+private sealed interface DataTile {
+    data class Game(val key: String) : DataTile
+    data object Scores : DataTile
 }
 
 @Composable
@@ -80,13 +92,32 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
     var pick by remember { mutableStateOf<TilePick?>(null) }
     var menuFor by remember { mutableStateOf<Int?>(null) }
     val requesters = remember { List(MAX_SLOTS) { FocusRequester() } }
-    val addSlot = tiles.size < multiviewMaxTiles(state.multiviewLayout, state.maxTiles)
-    val slots = (tiles.size + if (addSlot) 1 else 0).coerceIn(1, MAX_SLOTS)
+    val sports: IptvSportsFixturesViewModel = hiltViewModel()
+    val fixtures by sports.state.collectAsStateWithLifecycle()
+    var data by remember { mutableStateOf(emptyList<DataTile>()) }
+    var dataMenu by remember { mutableStateOf<Int?>(null) }
+    var choosingGame by remember { mutableStateOf<Int?>(null) }
+    var dataFocus by remember { mutableStateOf<Int?>(null) }
+    val total = tiles.size + data.size
+    val streamRoom = tiles.size < multiviewMaxTiles(state.multiviewLayout, state.maxTiles)
+    val addSlot = total < MAX_SLOTS && (streamRoom || fixtures.enabled)
+    val slots = (total + if (addSlot) 1 else 0).coerceIn(1, MAX_SLOTS)
+    LaunchedEffect(dataFocus, pick) {
+        val slot = dataFocus ?: return@LaunchedEffect
+        if (pick != null) return@LaunchedEffect
+        repeat(2) { withFrameNanos { } }
+        runCatching { requesters[slot.coerceIn(0, slots - 1)].requestFocus() }
+        dataFocus = null
+    }
+    fun addData(tile: DataTile, at: Int?) {
+        data = if (at != null && at in data.indices) data.toMutableList().also { it[at] = tile } else data + tile
+        dataFocus = tiles.size + (at ?: data.lastIndex)
+    }
     LaunchedEffect(pick, tiles.size) {
         if (pick == null) { repeat(2) { withFrameNanos { } }; runCatching { requesters[state.tileFocus.coerceIn(0, slots - 1)].requestFocus() } }
     }
     BackHandler(pick != null) { pick = null; onPickerSource(null) }
-    BackHandler(pick == null && menuFor == null) { onExit() }
+    BackHandler(pick == null && menuFor == null && dataMenu == null && choosingGame == null) { onExit() }
     var header by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) { delay(5_000); header = false }
     Box(Modifier.fillMaxSize().background(Color.Black)) {
@@ -97,12 +128,13 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
                 val boxHeight = maxHeight
                 val uiHeight = LocalWindowInfo.current.containerSize.height.takeIf { it > 0 } ?: with(density) { boxHeight.roundToPx() }
                 val scale = state.panelHeight.toFloat() / uiHeight
-                val layout = multiviewEffectiveLayout(state.multiviewLayout, tiles.size)
+                val layout = multiviewEffectiveLayout(state.multiviewLayout, total)
                 val rects = multiviewGeometry(layout, slots, state.mainTile.coerceIn(0, (tiles.size - 1).coerceAtLeast(0)), maxWidth.value, maxHeight.value, gap.value)
                 rects.forEachIndexed { index, rect ->
                     val modifier = Modifier.offset(rect.x.dp, rect.y.dp).size(rect.width.dp, rect.height.dp)
                     if (index < tiles.size) TileSlot(state, tiles, index, now, requesters, modifier, { menuFor = it }, onFocusTile, onFull)
-                    else AddSlot(requesters[index], modifier) { pick = TilePick.Add }
+                    else if (index < total) DataSlot(data[index - tiles.size], fixtures, index, requesters[index], modifier) { dataMenu = index - tiles.size }
+                    else AddSlot(requesters[index], modifier) { if (streamRoom) pick = TilePick.Add else dataMenu = ADD_DATA }
                 }
                 val physical = tiles.indices.map { index -> rects.getOrNull(index)?.let { with(density) { (it.height.dp.toPx() * scale).toInt() } } ?: 0 }
                 LaunchedEffect(physical) { onSizes(physical) }
@@ -128,7 +160,12 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
                 }
                 pick = null; onPickerSource(null)
             }, channels = picker?.channels ?: state.channels, onNearEnd = { if (picker != null) onPickerMore() },
-                header = { if (state.sources.count { it.playbackEligible } > 1) PickerSources(state, onPickerSource) })
+                header = {
+                    if (pick == TilePick.Add && fixtures.enabled && total < MAX_SLOTS) DataChoices(
+                        onGame = { pick = null; onPickerSource(null); choosingGame = ADD_DATA },
+                        onScores = { pick = null; onPickerSource(null); addData(DataTile.Scores, null) })
+                    if (state.sources.count { it.playbackEligible } > 1) PickerSources(state, onPickerSource)
+                })
         }
     }
     if (choosingQuality) {
@@ -170,9 +207,59 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
             }
         }
     }
+    dataMenu?.let { index ->
+        val first = remember { FocusRequester() }
+        LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
+        val tile = data.getOrNull(index)
+        NuvioDialog(onDismiss = { dataMenu = null },
+            title = stringResource(when (tile) { is DataTile.Game -> R.string.iptv_sport5p_game_screen; DataTile.Scores -> R.string.iptv_sport5p_all_scores; null -> R.string.iptv_sport5p_add_data }),
+            subtitle = stringResource(R.string.iptv_sport5p_data_hint), width = 520.dp) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                if (tile == null) DataChoices(onGame = { dataMenu = null; choosingGame = ADD_DATA }, onScores = { dataMenu = null; addData(DataTile.Scores, null) },
+                    modifier = Modifier.focusRequester(first))
+                else {
+                    if (tile is DataTile.Game) SettingsActionRow(title = stringResource(R.string.iptv_sport5p_change_game), subtitle = null, leadingIcon = Icons.Filled.SwapHoriz,
+                        onClick = { dataMenu = null; choosingGame = index }, modifier = Modifier.focusRequester(first))
+                    SettingsActionRow(title = stringResource(R.string.iptv_sport5p_remove), subtitle = null, leadingIcon = Icons.Filled.Close, trailingIcon = null,
+                        onClick = { dataMenu = null; data = data.filterIndexed { i, _ -> i != index }; dataFocus = 0 },
+                        modifier = if (tile is DataTile.Game) Modifier else Modifier.focusRequester(first))
+                    SettingsActionRow(title = stringResource(R.string.iptv_multiview_exit), subtitle = null, leadingIcon = Icons.Filled.ViewModule,
+                        trailingIcon = null, onClick = { dataMenu = null; onExit() })
+                }
+            }
+        }
+    }
+    choosingGame?.let { target ->
+        val first = remember { FocusRequester() }
+        val games = remember(fixtures.rows, tiles) {
+            val all = fixtures.rows.flatMap { it.items }.filter { it.fixture.status != FixtureStatus.FINAL }.distinctBy { it.fixture.key }
+            val linked = tiles.mapNotNull { tile -> playingFixture(fixtures.rows, tile.row.item.channel.id, System.currentTimeMillis()) }.map { it.fixture.key }.toSet()
+            all.sortedBy { item -> when { item.fixture.key in linked -> 0; item.fixture.status == FixtureStatus.LIVE -> 1; else -> 2 } }.take(40)
+        }
+        LaunchedEffect(games.isEmpty()) { withFrameNanos { }; runCatching { first.requestFocus() } }
+        NuvioDialog(onDismiss = { choosingGame = null }, title = stringResource(R.string.iptv_sport5p_choose_game),
+            subtitle = if (games.isEmpty()) stringResource(R.string.iptv_sport5p_no_live) else null, width = 560.dp) {
+            Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                games.forEachIndexed { i, item ->
+                    val fixture = item.fixture
+                    val text = SportsFixtureText.bug(fixture)
+                    SettingsActionRow(title = sportTitle(fixture), subtitle = listOfNotNull(sportLeagueName(fixture),
+                        if (fixture.status == FixtureStatus.LIVE) text.state?.takeIf { !scoreHidden(fixtures, fixture) } ?: stringResource(R.string.iptv_sport_live)
+                        else "${sportDayLabel(fixture.startMillis)} · ${clock(fixture.startMillis)}").joinToString(" · "),
+                        leadingIcon = Icons.Filled.SportsSoccer, trailingIcon = null,
+                        onClick = { choosingGame = null; addData(DataTile.Game(fixture.key), target.takeIf { it >= 0 }) },
+                        modifier = if (i == 0) Modifier.focusRequester(first) else Modifier)
+                }
+                if (games.isEmpty()) com.nuvio.tv.ui.v2.components.NuvioActionPill({ choosingGame = null }, Modifier.focusRequester(first)) {
+                    Text(stringResource(R.string.iptv_sport_close))
+                }
+            }
+        }
+    }
 }
 
 private const val MAX_SLOTS = 4
+private const val ADD_DATA = -1
 
 internal fun multiviewLayoutLabel(layout: MultiviewLayout): Int = when (layout) {
     MultiviewLayout.GRID -> R.string.iptv_multiview_layout_grid
@@ -289,3 +376,147 @@ private fun AddSlot(requester: FocusRequester, modifier: Modifier, onClick: () -
             textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 24.dp))
     }
 }
+
+@Composable
+private fun DataChoices(onGame: () -> Unit, onScores: () -> Unit, modifier: Modifier = Modifier) {
+    SettingsActionRow(title = stringResource(R.string.iptv_sport5p_game_screen), subtitle = stringResource(R.string.iptv_sport5p_game_screen_subtitle),
+        leadingIcon = Icons.Filled.SportsSoccer, onClick = onGame, modifier = modifier)
+    SettingsActionRow(title = stringResource(R.string.iptv_sport5p_all_scores), subtitle = stringResource(R.string.iptv_sport5p_all_scores_subtitle),
+        leadingIcon = Icons.Filled.Dashboard, onClick = onScores)
+}
+
+@Composable
+private fun DataSlot(tile: DataTile, fixtures: IptvFixturesState, index: Int, requester: FocusRequester, modifier: Modifier, onMenu: () -> Unit) {
+    var focused by remember { mutableStateOf(false) }
+    val longPress = rememberLongPressKeyTracker()
+    val shape = RoundedCornerShape(4.dp)
+    Box(modifier.focusRequester(requester)
+        .onFocusChanged { focused = it.isFocused }
+        .tileFocus(focused, shape)
+        .clip(shape).background(NuvioTheme.colors.BackgroundCard, shape)
+        .onPreviewKeyEvent { event ->
+            val native = event.nativeKeyEvent
+            if (longPress.handle(native, ::isSelect) { onMenu() }) return@onPreviewKeyEvent true
+            when {
+                native.action == AndroidKeyEvent.ACTION_UP && isSelect(native.keyCode) -> { onMenu(); true }
+                native.action == AndroidKeyEvent.ACTION_DOWN && (native.keyCode == AndroidKeyEvent.KEYCODE_MENU || native.keyCode == AndroidKeyEvent.KEYCODE_INFO) -> { onMenu(); true }
+                else -> false
+            }
+        }
+        .focusable()) {
+        when (tile) {
+            is DataTile.Game -> {
+                val fixture = fixtures.rows.firstNotNullOfOrNull { row -> row.items.firstOrNull { it.fixture.key == tile.key } }?.fixture
+                if (fixture == null) Text(stringResource(R.string.iptv_sport5p_no_summary), style = MaterialTheme.typography.bodyMedium,
+                    color = NuvioTheme.colors.TextSecondary, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center).padding(24.dp))
+                else GameScreen(fixture, scoreHidden(fixtures, fixture), Modifier.fillMaxSize())
+            }
+            DataTile.Scores -> AllScores(fixtures, Modifier.fillMaxSize())
+        }
+        Text("${index + 1}", style = MaterialTheme.typography.labelLarge, color = Color.White.copy(alpha = .85f),
+            modifier = Modifier.align(Alignment.TopStart).padding(8.dp).clip(RoundedCornerShape(4.dp))
+                .background(Color.Black.copy(alpha = .45f)).padding(horizontal = 8.dp, vertical = 2.dp))
+    }
+}
+
+@Composable
+private fun GameScreen(fixture: SportsFixture, hidden: Boolean, modifier: Modifier) {
+    val summary = rememberSportsSummary(fixture.takeIf { it.status != FixtureStatus.SCHEDULED })
+    val bug = SportsFixtureText.bug(fixture)
+    Column(modifier.padding(start = 48.dp, end = 18.dp, top = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(listOfNotNull(stringResource(R.string.iptv_sport5p_game_screen), sportLeagueName(fixture), bug.state?.takeIf { !hidden }).joinToString(" · "),
+            style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        GameScoreLine(fixture, hidden, 28.dp, MaterialTheme.typography.titleMedium)
+        if (hidden) {
+            Text(stringResource(R.string.iptv_sport5p_hidden), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+            return@Column
+        }
+        val count = summary?.count?.takeIf { fixture.sport == "baseball" && fixture.status == FixtureStatus.LIVE }
+        if (count != null) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            CountBases(count, 12.dp)
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(listOfNotNull(count.outs?.let { stringResource(R.string.iptv_sport5p_outs, it) },
+                    if (count.balls != null && count.strikes != null) stringResource(R.string.iptv_sport5p_count, count.balls, count.strikes) else null).joinToString(" · "),
+                    style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextPrimary, maxLines = 1)
+                listOfNotNull(count.pitcher?.let { stringResource(R.string.iptv_sport5p_pitching, it) }, count.batter?.let { stringResource(R.string.iptv_sport5p_batting, it) })
+                    .forEach { Text(it, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            }
+        } else {
+            val run = summary?.run?.let { run -> (if (run.side == com.nuvio.tv.core.iptv.FixtureSide.HOME) fixture.home else fixture.away)?.let {
+                stringResource(R.string.iptv_sport5p_run, SportsFixtureText.code(it), run.text) } }
+            listOfNotNull(bug.extra, summary?.strength?.text, run, fixture.situation?.downDistance?.takeIf { bug.extra == null }).distinct().take(2).forEach {
+                Text(it, style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
+        val probability = summary?.winProbability.orEmpty()
+        if (probability.size >= 2) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.iptv_sport5p_win_probability), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary,
+                    maxLines = 1, modifier = Modifier.weight(1f))
+                val last = probability.last()
+                val leader = if (last >= .5f) fixture.home else fixture.away
+                leader?.let { Text("${SportsFixtureText.code(it)} ${Math.round(maxOf(last, 1f - last) * 100)}%", style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1) }
+            }
+            WinProbabilityLine(probability, fixture.home, fixture.away, Modifier.fillMaxWidth().height(40.dp))
+        }
+        val plays = summary?.lastPlays.orEmpty()
+        if (plays.isNotEmpty()) {
+            Text(stringResource(R.string.iptv_sport5p_last_plays), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+            plays.take(3).forEach { play ->
+                Text(listOfNotNull(play.clock, play.text).joinToString("  "), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AllScores(fixtures: IptvFixturesState, modifier: Modifier) {
+    val now = System.currentTimeMillis()
+    val games = fixtures.rows.flatMap { it.items }.map { it.fixture }.distinctBy { it.key }.filter { fixture ->
+        fixture.status == FixtureStatus.LIVE || (fixture.status == FixtureStatus.SCHEDULED && fixture.startMillis in now..now + UPCOMING_MILLIS)
+    }.sortedBy { if (it.status == FixtureStatus.LIVE) 0L else it.startMillis }
+    BoxWithConstraints(modifier.padding(start = 48.dp, end = 14.dp, top = 12.dp, bottom = 12.dp)) {
+        val columns = if (maxWidth > 520.dp) 2 else 1
+        val rows = ((maxHeight - 32.dp) / 62.dp).toInt().coerceAtLeast(1)
+        val size = columns * rows
+        val pages = ((games.size + size - 1) / size).coerceAtLeast(1)
+        var page by remember { mutableIntStateOf(0) }
+        LaunchedEffect(pages) { page = 0; while (pages > 1) { delay(PAGE_MILLIS); page = (page + 1) % pages } }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.iptv_sport5p_all_scores), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold,
+                    color = NuvioTheme.colors.TextSecondary, maxLines = 1, modifier = Modifier.weight(1f))
+                if (pages > 1) Text(stringResource(R.string.iptv_sport5p_page, page + 1, pages), style = MaterialTheme.typography.labelSmall,
+                    color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+            }
+            if (games.isEmpty()) Text(stringResource(R.string.iptv_sport5p_no_live), style = MaterialTheme.typography.bodyMedium, color = NuvioTheme.colors.TextSecondary)
+            games.drop(page.coerceAtMost(pages - 1) * size).take(size).chunked(columns).forEach { line ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    line.forEach { fixture -> ScoreCell(fixture, scoreHidden(fixtures, fixture), Modifier.weight(1f)) }
+                    repeat(columns - line.size) { Spacer(Modifier.weight(1f)) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScoreCell(fixture: SportsFixture, hidden: Boolean, modifier: Modifier) {
+    val bug = SportsFixtureText.bug(fixture)
+    val live = fixture.status == FixtureStatus.LIVE
+    val close = live && !hidden && com.nuvio.tv.core.iptv.SportsFixtureSections.close(fixture)
+    Column(modifier.height(54.dp).clip(RoundedCornerShape(8.dp)).background(NuvioTheme.colors.TextPrimary.copy(alpha = .06f))
+        .then(if (close) Modifier.border(1.dp, NuvioTheme.colors.Secondary, RoundedCornerShape(8.dp)) else Modifier)
+        .padding(horizontal = 10.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(listOfNotNull(sportLeagueName(fixture), if (live) bug.state?.takeIf { !hidden } ?: stringResource(R.string.iptv_sport_live) else clock(fixture.startMillis))
+            .joinToString(" · "), style = MaterialTheme.typography.labelSmall, color = if (live) NuvioTheme.colors.Error else NuvioTheme.colors.TextTertiary,
+            maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(if (hidden || !live) sportTitle(fixture) else bug.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
+            color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+private const val PAGE_MILLIS = 8_000L
+private const val UPCOMING_MILLIS = 6L * 60 * 60 * 1000

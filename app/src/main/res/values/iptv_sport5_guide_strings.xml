@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport5g_games_now">Games now</string>
+    <string name="iptv_sport5g_sport_only">Sport only</string>
+    <string name="iptv_sport5g_all_channels">All channels</string>
+    <string name="iptv_sport5g_reminder_set">Reminder set</string>
+    <string name="iptv_sport5g_sport">Sport</string>
+    <string name="iptv_sport5g_close">Close</string>
+    <string name="iptv_sport5g_live">Live</string>
+    <string name="iptv_sport5g_channels">%1$s +%2$d</string>
+    <string name="iptv_sport5g_no_sport">No linked games on these channels at this time. Choose All channels to see everything.</string>
+</resources>

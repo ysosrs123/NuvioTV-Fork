@@ -17,14 +17,21 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,8 +48,11 @@ import com.nuvio.tv.core.iptv.FixtureSide
 import com.nuvio.tv.core.iptv.FixtureSituation
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.FixtureTeam
+import com.nuvio.tv.core.iptv.SportsDetail
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureText
+import com.nuvio.tv.core.iptv.SportsSummary
+import com.nuvio.tv.data.iptv.IptvFixtureLink
 import com.nuvio.tv.ui.components.rememberShimmerBrush
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
@@ -53,14 +63,21 @@ internal fun IptvSportHero(active: Boolean, modifier: Modifier, fallback: @Compo
     val viewModel: IptvSportsFixturesViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val key by viewModel.hero.collectAsStateWithLifecycle()
+    val summary by viewModel.summary.collectAsStateWithLifecycle()
     val item = when (val wanted = key) {
         null -> null
         IptvSportsFixturesViewModel.FEATURED -> state.rows.firstOrNull()?.items?.firstOrNull()
-        else -> state.rows.firstNotNullOfOrNull { row -> row.items.firstOrNull { it.fixture.key == wanted } }
+        else -> state.item(wanted)
     }
+    val watched = item?.fixture?.takeIf { it.status == FixtureStatus.LIVE && !state.hidden(it) && it.teams && it.sport == "soccer" }
+    LaunchedEffect(watched?.key) { viewModel.watchSummary(watched) }
+    DisposableEffect(viewModel) { onDispose { viewModel.watchSummary(null) } }
     when {
         !state.enabled -> fallback(modifier)
-        item != null -> SportHero(item, state.showScores, modifier)
+        item != null -> SportHero(item, state, summary?.takeIf { watched != null && it.eventId == watched.id }, modifier,
+            onWatch = { links -> if (links.size == 1) viewModel.prompt(IptvSportPrompt.Watch(links.first().row)) else viewModel.prompt(IptvSportPrompt.Channels(item.fixture.key)) },
+            onFeeds = { viewModel.prompt(IptvSportPrompt.Channels(item.fixture.key)) }, onFollow = { viewModel.prompt(IptvSportPrompt.Options(item.fixture.key)) },
+            onRemind = { viewModel.toggleReminder(item.fixture) })
         key == IptvSportsFixturesViewModel.FEATURED && state.loading -> SportHeroPlaceholder(modifier)
         else -> fallback(modifier)
     }
@@ -82,9 +99,11 @@ private fun SportHeroPlaceholder(modifier: Modifier) {
 }
 
 @Composable
-private fun SportHero(item: IptvFixtureItem, showScores: Boolean, modifier: Modifier) {
+private fun SportHero(item: IptvFixtureItem, state: IptvFixturesState, summary: SportsSummary?, modifier: Modifier, onWatch: (List<IptvFixtureLink>) -> Unit,
+    onFeeds: () -> Unit, onFollow: () -> Unit, onRemind: () -> Unit) {
     val fixture = item.fixture
     val live = fixture.status == FixtureStatus.LIVE
+    val hidden = state.hidden(fixture)
     Column(modifier.iptvPanel().padding(horizontal = 18.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Row(Modifier.height(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             fixture.leagueLogo?.let { LeagueLogo(it, 16.dp) }
@@ -92,22 +111,28 @@ private fun SportHero(item: IptvFixtureItem, showScores: Boolean, modifier: Modi
             Text(listOfNotNull(sportLeagueName(fixture), round, fixture.venue).joinToString(" · "), style = MaterialTheme.typography.labelMedium,
                 color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             if (item.favourite) Icon(Icons.Filled.Star, null, Modifier.size(14.dp), tint = NuvioTheme.colors.Secondary)
-            HeroState(fixture, showScores)
+            HeroState(fixture, !hidden)
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(Modifier.fillMaxWidth().height(30.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(sportTitle(fixture), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary,
                 maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-            HeroChannel(item)
+            HeroActions(item, fixture.key in state.reminders, onWatch, onFeeds, onFollow, onRemind)
         }
         val home = fixture.home
         val away = fixture.away
+        val detail = fixture.sportDetail.takeIf { !item.scheduleOnly }
         if (home != null && away != null) {
             Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                HeroScoreboard(fixture, home, away, showScores && fixture.status != FixtureStatus.SCHEDULED, Modifier.weight(1.15f).fillMaxHeight())
-                val situation = fixture.situation?.takeIf { showScores && live && (it.downDistance != null || it.lastPlay != null) }
+                HeroScoreboard(fixture, home, away, !hidden && fixture.status != FixtureStatus.SCHEDULED && !item.scheduleOnly,
+                    hidden && fixture.status != FixtureStatus.SCHEDULED, Modifier.weight(1.15f).fillMaxHeight())
+                val situation = fixture.situation?.takeIf { !hidden && live && (it.downDistance != null || it.lastPlay != null) }
                 if (situation != null) HeroSituation(situation, Modifier.weight(1f).fillMaxHeight())
             }
-            fixture.situation?.homeWinPercent?.takeIf { showScores && live }?.let { WinBar(fixture, home, away, it) }
+            val win = fixture.situation?.homeWinPercent?.takeIf { !hidden && live }
+            if (!hidden && live && SportsStrip.supports(fixture.sport) && (win == null || summary != null)) SportHeroStrip(fixture, summary, Modifier.fillMaxWidth())
+            else win?.let { WinBar(fixture, home, away, it) }
+        } else if (detail is SportsDetail.Golf || detail is SportsDetail.Sessions || detail is SportsDetail.Card) {
+            SportDetailBody(fixture, hidden, state.favourites, Modifier.fillMaxWidth(.6f).weight(1f))
         } else Spacer(Modifier.weight(1f))
     }
 }
@@ -128,17 +153,26 @@ private fun HeroState(fixture: SportsFixture, showScores: Boolean) {
 }
 
 @Composable
-private fun HeroChannel(item: IptvFixtureItem) {
-    val first = item.links.firstOrNull()
-    if (first != null) Text(stringResource(R.string.iptv_sport2_watch_on, channelName(first.row)) + if (item.links.size > 1) " +${item.links.size - 1}" else "",
-        style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.Secondary, maxLines = 1, overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.widthIn(max = 200.dp))
-    else if (item.fixture.status != FixtureStatus.FINAL) Text(stringResource(if (item.linking) R.string.iptv_sport3_finding_channels else R.string.iptv_sport_no_channel),
-        style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+private fun HeroActions(item: IptvFixtureItem, reminded: Boolean, onWatch: (List<IptvFixtureLink>) -> Unit, onFeeds: () -> Unit, onFollow: () -> Unit,
+    onRemind: () -> Unit) {
+    val fixture = item.fixture
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        val first = item.links.firstOrNull()
+        if (first != null) {
+            SportChip(stringResource(R.string.iptv_sport5_section_watch_on, channelName(first.row)), { onWatch(item.links) }, Modifier.widthIn(max = 240.dp),
+                primary = true, icon = Icons.Filled.PlayArrow)
+            if (item.links.size > 1) SportChip(pluralStringResource(R.plurals.iptv_sport5_section_other_feeds, item.links.size - 1, item.links.size - 1), onFeeds)
+        } else if (fixture.status != FixtureStatus.FINAL) Text(stringResource(if (item.linking) R.string.iptv_sport3_finding_channels else R.string.iptv_sport_no_channel),
+            style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+        if (sportFollowable(fixture).isNotEmpty()) SportChip(stringResource(if (item.favourite) R.string.iptv_sport5_section_following else R.string.iptv_sport5_section_follow),
+            onFollow, icon = if (item.favourite) Icons.Filled.Star else Icons.Filled.StarBorder)
+        if (sportCanRemind(fixture)) SportChip(stringResource(if (reminded) R.string.iptv_sport5_section_reminder_set else R.string.iptv_sport5_section_remind), onRemind,
+            icon = if (reminded) Icons.Filled.NotificationsActive else Icons.Filled.NotificationsNone)
+    }
 }
 
 @Composable
-private fun HeroScoreboard(fixture: SportsFixture, home: FixtureTeam, away: FixtureTeam, scores: Boolean, modifier: Modifier) {
+private fun HeroScoreboard(fixture: SportsFixture, home: FixtureTeam, away: FixtureTeam, scores: Boolean, masked: Boolean, modifier: Modifier) {
     val awayFirst = SportsFixtureText.awayFirst(fixture)
     val sides = if (awayFirst) listOf(FixtureSide.AWAY, FixtureSide.HOME) else listOf(FixtureSide.HOME, FixtureSide.AWAY)
     val count = if (scores) maxOf(fixture.homeLine?.periods?.size ?: 0, fixture.awayLine?.periods?.size ?: 0) else 0
@@ -155,13 +189,13 @@ private fun HeroScoreboard(fixture: SportsFixture, home: FixtureTeam, away: Fixt
         sides.forEach { side ->
             val team = if (side == FixtureSide.HOME) home else away
             val line = if (side == FixtureSide.HOME) fixture.homeLine else fixture.awayLine
-            HeroTeamLine(team, line, fixture.situation?.possession == side && scores && fixture.status == FixtureStatus.LIVE, scores, periods)
+            HeroTeamLine(team, line, fixture.situation?.possession == side && scores && fixture.status == FixtureStatus.LIVE, scores, masked, periods)
         }
     }
 }
 
 @Composable
-private fun HeroTeamLine(team: FixtureTeam, line: FixtureLine?, possession: Boolean, scores: Boolean, periods: List<Int>) {
+private fun HeroTeamLine(team: FixtureTeam, line: FixtureLine?, possession: Boolean, scores: Boolean, masked: Boolean, periods: List<Int>) {
     Row(Modifier.fillMaxWidth().height(28.dp), verticalAlignment = Alignment.CenterVertically) {
         TeamLogo(team, 26.dp)
         Spacer(Modifier.width(10.dp))
@@ -177,6 +211,7 @@ private fun HeroTeamLine(team: FixtureTeam, line: FixtureLine?, possession: Bool
         }
         if (scores) Text(line?.score.orEmpty(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
             maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.width(TOTAL_WIDTH))
+        else if (masked) MaskBar(TOTAL_WIDTH - 8.dp)
     }
 }
 

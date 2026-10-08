@@ -321,6 +321,25 @@ Sport:
   that use these settings follow in the next changes.
 - Fixtures are now fetched by one shared service for the whole app. Leagues with a
   followed team's live game refresh every 30 s instead of every 2 min.
+- Guide: matched games show a league badge, a live score and clock, game progress, an
+  amber edge for close games and "Reminder set"; studio shows get a muted badge. A
+  "Games now" lane above the guide lists live and soon-starting games (OK watches). A
+  "Sport only" filter shows only channels with a matched game.
+- Score overlays in full screen: Glance (appears only when a followed or close game
+  changes, OK switches), score bug, stacked cards or ticker; the game on screen is
+  skipped; per-sport formats (football, AFL, NRL, NFL, basketball, baseball bases and
+  count, ice hockey, cricket chase, tennis sets and server, golf leader, F1 session, UFC
+  round). Reminders pop up in Live TV.
+- Player: game banner with score and how far behind live; Game Centre (Info key or the
+  control deck) shrinks the picture and shows key moments (watch each one through
+  catch-up), team stats, line-ups, table and head to head, other games; score markers
+  on the catch-up and timeshift bar with Previous and Next score; Other feeds lists every
+  channel showing the game and can switch to a backup when the stream stalls.
+- Multiview can show a game screen (score, situation, win probability, last plays) or an
+  all-scores screen in a tile; these use no decoder.
+- Sport section: cards fitted to each sport, hero with Follow and Remind me, a "Tonight"
+  timeline with a lane per sport, an All scores screen, Remind me in the options, and
+  results of recorded games hidden until you choose to show them.
 - Guide matching for events without two teams (tennis, golf, motor racing, UFC) uses the
   event or tournament name.
 
