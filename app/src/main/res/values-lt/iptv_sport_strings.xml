@@ -21,4 +21,10 @@
     <string name="iptv_sport_key_not_set">Nenustatytas</string>
     <string name="iptv_sport_key_invalid">Naudokite tik raides ir skaičius.</string>
     <string name="iptv_sport_key_remove">Pašalinti raktą</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d lyga</item>
+        <item quantity="few">%d lygos</item>
+        <item quantity="many">%d lygos</item>
+        <item quantity="other">%d lygų</item>
+    </plurals>
 </resources>

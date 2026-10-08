@@ -21,4 +21,8 @@
     <string name="iptv_sport_key_not_set">I pavendosur</string>
     <string name="iptv_sport_key_invalid">Përdor vetëm shkronja dhe numra.</string>
     <string name="iptv_sport_key_remove">Hiq çelësin</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d ligë</item>
+        <item quantity="other">%d liga</item>
+    </plurals>
 </resources>

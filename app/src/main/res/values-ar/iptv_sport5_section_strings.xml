@@ -43,4 +43,36 @@
     <string name="iptv_sport5_section_sport_tennis">التنس</string>
     <string name="iptv_sport5_section_sport_golf">الغولف</string>
     <string name="iptv_sport5_section_sport_cricket">الكريكيت</string>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="zero">%1$d جولة</item>
+        <item quantity="one">%1$d جولة</item>
+        <item quantity="two">%1$d جولتان</item>
+        <item quantity="few">%1$d جولات</item>
+        <item quantity="many">%1$d جولة</item>
+        <item quantity="other">%1$d جولة</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="zero">%1$s · %2$d نزال</item>
+        <item quantity="one">%1$s · %2$d نزال</item>
+        <item quantity="two">%1$s · %2$d نزالان</item>
+        <item quantity="few">%1$s · %2$d نزالات</item>
+        <item quantity="many">%1$s · %2$d نزالًا</item>
+        <item quantity="other">%1$s · %2$d نزال</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="zero">%1$d إقصاء</item>
+        <item quantity="one">%1$d إقصاء</item>
+        <item quantity="two">%1$d إقصاءان</item>
+        <item quantity="few">%1$d إقصاءات</item>
+        <item quantity="many">%1$d إقصاءً</item>
+        <item quantity="other">%1$d إقصاء</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="zero">%1$d بث آخر</item>
+        <item quantity="one">%1$d بث آخر</item>
+        <item quantity="two">%1$d بثان آخران</item>
+        <item quantity="few">%1$d بثوث أخرى</item>
+        <item quantity="many">%1$d بثًا آخر</item>
+        <item quantity="other">%1$d بث آخر</item>
+    </plurals>
 </resources>

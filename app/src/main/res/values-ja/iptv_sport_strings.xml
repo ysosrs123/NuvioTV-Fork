@@ -21,4 +21,7 @@
     <string name="iptv_sport_key_not_set">未設定</string>
     <string name="iptv_sport_key_invalid">英数字のみ使用できます。</string>
     <string name="iptv_sport_key_remove">キーを削除</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="other">%d リーグ</item>
+    </plurals>
 </resources>

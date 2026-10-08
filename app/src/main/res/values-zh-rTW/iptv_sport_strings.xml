@@ -21,4 +21,7 @@
     <string name="iptv_sport_key_not_set">未設定</string>
     <string name="iptv_sport_key_invalid">只能使用字母和數字。</string>
     <string name="iptv_sport_key_remove">移除金鑰</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="other">%d 個聯賽</item>
+    </plurals>
 </resources>

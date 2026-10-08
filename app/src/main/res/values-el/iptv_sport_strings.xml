@@ -21,4 +21,8 @@
     <string name="iptv_sport_key_not_set">Δεν έχει οριστεί</string>
     <string name="iptv_sport_key_invalid">Χρησιμοποιήστε μόνο γράμματα και αριθμούς.</string>
     <string name="iptv_sport_key_remove">Αφαίρεση κλειδιού</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d πρωτάθλημα</item>
+        <item quantity="other">%d πρωταθλήματα</item>
+    </plurals>
 </resources>

@@ -21,4 +21,7 @@
     <string name="iptv_sport_key_not_set">Belum diatur</string>
     <string name="iptv_sport_key_invalid">Gunakan huruf dan angka saja.</string>
     <string name="iptv_sport_key_remove">Hapus kunci</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="other">%d liga</item>
+    </plurals>
 </resources>

@@ -21,4 +21,10 @@
     <string name="iptv_sport_key_not_set">Ni nastavljeno</string>
     <string name="iptv_sport_key_invalid">Uporabite samo črke in številke.</string>
     <string name="iptv_sport_key_remove">Odstrani ključ</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d liga</item>
+        <item quantity="two">%d ligi</item>
+        <item quantity="few">%d lige</item>
+        <item quantity="other">%d lig</item>
+    </plurals>
 </resources>

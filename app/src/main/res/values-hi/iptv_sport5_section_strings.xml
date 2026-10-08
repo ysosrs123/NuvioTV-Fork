@@ -43,4 +43,20 @@
     <string name="iptv_sport5_section_sport_tennis">टेनिस</string>
     <string name="iptv_sport5_section_sport_golf">गोल्फ़</string>
     <string name="iptv_sport5_section_sport_cricket">क्रिकेट</string>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d राउंड</item>
+        <item quantity="other">%1$d राउंड</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d मुकाबला</item>
+        <item quantity="other">%1$s · %2$d मुकाबले</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d आउट</item>
+        <item quantity="other">%1$d आउट</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d दूसरी फ़ीड</item>
+        <item quantity="other">%1$d दूसरी फ़ीड</item>
+    </plurals>
 </resources>

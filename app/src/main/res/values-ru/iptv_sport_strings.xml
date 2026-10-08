@@ -21,4 +21,10 @@
     <string name="iptv_sport_key_not_set">Не задан</string>
     <string name="iptv_sport_key_invalid">Используйте только буквы и цифры.</string>
     <string name="iptv_sport_key_remove">Удалить ключ</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d лига</item>
+        <item quantity="few">%d лиги</item>
+        <item quantity="many">%d лиг</item>
+        <item quantity="other">%d лиги</item>
+    </plurals>
 </resources>

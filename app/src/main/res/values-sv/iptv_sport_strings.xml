@@ -21,4 +21,8 @@
     <string name="iptv_sport_key_not_set">Inte angiven</string>
     <string name="iptv_sport_key_invalid">Använd bara bokstäver och siffror.</string>
     <string name="iptv_sport_key_remove">Ta bort nyckel</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d liga</item>
+        <item quantity="other">%d ligor</item>
+    </plurals>
 </resources>

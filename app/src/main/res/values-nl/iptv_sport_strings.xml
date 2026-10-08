@@ -21,4 +21,8 @@
     <string name="iptv_sport_key_not_set">Niet ingesteld</string>
     <string name="iptv_sport_key_invalid">Gebruik alleen letters en cijfers.</string>
     <string name="iptv_sport_key_remove">Sleutel verwijderen</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d competitie</item>
+        <item quantity="other">%d competities</item>
+    </plurals>
 </resources>

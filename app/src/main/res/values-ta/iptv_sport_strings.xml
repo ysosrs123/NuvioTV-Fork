@@ -21,4 +21,8 @@
     <string name="iptv_sport_key_not_set">அமைக்கப்படவில்லை</string>
     <string name="iptv_sport_key_invalid">எழுத்துகளையும் எண்களையும் மட்டும் பயன்படுத்தவும்.</string>
     <string name="iptv_sport_key_remove">விசையை அகற்று</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d லீக்</item>
+        <item quantity="other">%d லீக்குகள்</item>
+    </plurals>
 </resources>

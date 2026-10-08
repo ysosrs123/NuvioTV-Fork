@@ -21,4 +21,10 @@
     <string name="iptv_sport_key_not_set">לא הוגדר</string>
     <string name="iptv_sport_key_invalid">יש להשתמש באותיות ובספרות בלבד.</string>
     <string name="iptv_sport_key_remove">הסרת המפתח</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">ליגה אחת</item>
+        <item quantity="two">שתי ליגות</item>
+        <item quantity="many">%d ליגות</item>
+        <item quantity="other">%d ליגות</item>
+    </plurals>
 </resources>

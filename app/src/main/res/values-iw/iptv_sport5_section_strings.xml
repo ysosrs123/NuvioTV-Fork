@@ -43,4 +43,28 @@
     <string name="iptv_sport5_section_sport_tennis">טניס</string>
     <string name="iptv_sport5_section_sport_golf">גולף</string>
     <string name="iptv_sport5_section_sport_cricket">קריקט</string>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d סיבוב</item>
+        <item quantity="two">%1$d סיבובים</item>
+        <item quantity="many">%1$d סיבובים</item>
+        <item quantity="other">%1$d סיבובים</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d קרב</item>
+        <item quantity="two">%1$s · %2$d קרבות</item>
+        <item quantity="many">%1$s · %2$d קרבות</item>
+        <item quantity="other">%1$s · %2$d קרבות</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d אאוט</item>
+        <item quantity="two">%1$d אאוטים</item>
+        <item quantity="many">%1$d אאוטים</item>
+        <item quantity="other">%1$d אאוטים</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d שידור נוסף</item>
+        <item quantity="two">%1$d שידורים נוספים</item>
+        <item quantity="many">%1$d שידורים נוספים</item>
+        <item quantity="other">%1$d שידורים נוספים</item>
+    </plurals>
 </resources>

@@ -43,4 +43,20 @@
     <string name="iptv_sport5_section_sport_tennis">Тенис</string>
     <string name="iptv_sport5_section_sport_golf">Голф</string>
     <string name="iptv_sport5_section_sport_cricket">Крикет</string>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d рунд</item>
+        <item quantity="other">%1$d рунда</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d среща</item>
+        <item quantity="other">%1$s · %2$d срещи</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d аут</item>
+        <item quantity="other">%1$d аута</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d друг поток</item>
+        <item quantity="other">%1$d други потока</item>
+    </plurals>
 </resources>

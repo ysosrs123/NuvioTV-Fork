@@ -21,4 +21,8 @@
     <string name="iptv_sport_key_not_set">Nincs beállítva</string>
     <string name="iptv_sport_key_invalid">Csak betűket és számokat használj.</string>
     <string name="iptv_sport_key_remove">Kulcs eltávolítása</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d bajnokság</item>
+        <item quantity="other">%d bajnokság</item>
+    </plurals>
 </resources>

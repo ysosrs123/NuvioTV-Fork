@@ -21,4 +21,7 @@
     <string name="iptv_sport_key_not_set">Chưa đặt</string>
     <string name="iptv_sport_key_invalid">Chỉ dùng chữ cái và chữ số.</string>
     <string name="iptv_sport_key_remove">Xóa khóa</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="other">%d giải đấu</item>
+    </plurals>
 </resources>

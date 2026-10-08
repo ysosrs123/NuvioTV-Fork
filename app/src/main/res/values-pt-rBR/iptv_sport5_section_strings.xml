@@ -43,4 +43,24 @@
     <string name="iptv_sport5_section_sport_tennis">Tênis</string>
     <string name="iptv_sport5_section_sport_golf">Golfe</string>
     <string name="iptv_sport5_section_sport_cricket">Críquete</string>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d round</item>
+        <item quantity="many">%1$d rounds</item>
+        <item quantity="other">%1$d rounds</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d luta</item>
+        <item quantity="many">%1$s · %2$d lutas</item>
+        <item quantity="other">%1$s · %2$d lutas</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d out</item>
+        <item quantity="many">%1$d outs</item>
+        <item quantity="other">%1$d outs</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d outra transmissão</item>
+        <item quantity="many">%1$d outras transmissões</item>
+        <item quantity="other">%1$d outras transmissões</item>
+    </plurals>
 </resources>

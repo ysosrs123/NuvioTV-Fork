@@ -21,4 +21,8 @@
     <string name="iptv_sport_key_not_set">Ikke angitt</string>
     <string name="iptv_sport_key_invalid">Bruk bare bokstaver og tall.</string>
     <string name="iptv_sport_key_remove">Fjern nøkkel</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d liga</item>
+        <item quantity="other">%d ligaer</item>
+    </plurals>
 </resources>

@@ -43,4 +43,28 @@
     <string name="iptv_sport5_section_sport_tennis">Теніс</string>
     <string name="iptv_sport5_section_sport_golf">Гольф</string>
     <string name="iptv_sport5_section_sport_cricket">Крикет</string>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d раунд</item>
+        <item quantity="few">%1$d раунди</item>
+        <item quantity="many">%1$d раундів</item>
+        <item quantity="other">%1$d раунду</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d бій</item>
+        <item quantity="few">%1$s · %2$d бої</item>
+        <item quantity="many">%1$s · %2$d боїв</item>
+        <item quantity="other">%1$s · %2$d бою</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d аут</item>
+        <item quantity="few">%1$d аути</item>
+        <item quantity="many">%1$d аутів</item>
+        <item quantity="other">%1$d ауту</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">Ще %1$d трансляція</item>
+        <item quantity="few">Ще %1$d трансляції</item>
+        <item quantity="many">Ще %1$d трансляцій</item>
+        <item quantity="other">Ще %1$d трансляції</item>
+    </plurals>
 </resources>

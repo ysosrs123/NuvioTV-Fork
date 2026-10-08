@@ -43,4 +43,28 @@
     <string name="iptv_sport5_section_sport_tennis">Tenis</string>
     <string name="iptv_sport5_section_sport_golf">Golf</string>
     <string name="iptv_sport5_section_sport_cricket">Kriket</string>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d runda</item>
+        <item quantity="two">%1$d rundi</item>
+        <item quantity="few">%1$d runde</item>
+        <item quantity="other">%1$d rund</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d dvoboj</item>
+        <item quantity="two">%1$s · %2$d dvoboja</item>
+        <item quantity="few">%1$s · %2$d dvoboji</item>
+        <item quantity="other">%1$s · %2$d dvobojev</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d aut</item>
+        <item quantity="two">%1$d auta</item>
+        <item quantity="few">%1$d auti</item>
+        <item quantity="other">%1$d autov</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d drug prenos</item>
+        <item quantity="two">%1$d druga prenosa</item>
+        <item quantity="few">%1$d drugi prenosi</item>
+        <item quantity="other">%1$d drugih prenosov</item>
+    </plurals>
 </resources>

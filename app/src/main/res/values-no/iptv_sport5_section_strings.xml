@@ -43,4 +43,20 @@
     <string name="iptv_sport5_section_sport_tennis">Tennis</string>
     <string name="iptv_sport5_section_sport_golf">Golf</string>
     <string name="iptv_sport5_section_sport_cricket">Cricket</string>
+    <plurals name="iptv_sport5_section_rounds">
+        <item quantity="one">%1$d runde</item>
+        <item quantity="other">%1$d runder</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_bouts">
+        <item quantity="one">%1$s · %2$d kamp</item>
+        <item quantity="other">%1$s · %2$d kamper</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_outs">
+        <item quantity="one">%1$d out</item>
+        <item quantity="other">%1$d outs</item>
+    </plurals>
+    <plurals name="iptv_sport5_section_other_feeds">
+        <item quantity="one">%1$d annen strøm</item>
+        <item quantity="other">%1$d andre strømmer</item>
+    </plurals>
 </resources>

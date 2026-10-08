@@ -21,4 +21,8 @@
     <string name="iptv_sport_key_not_set">सेट नहीं है</string>
     <string name="iptv_sport_key_invalid">सिर्फ़ अक्षर और अंक इस्तेमाल करें।</string>
     <string name="iptv_sport_key_remove">की हटाएँ</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d लीग</item>
+        <item quantity="other">%d लीग</item>
+    </plurals>
 </resources>

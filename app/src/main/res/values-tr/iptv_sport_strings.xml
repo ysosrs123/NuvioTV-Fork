@@ -21,4 +21,8 @@
     <string name="iptv_sport_key_not_set">Ayarlanmadı</string>
     <string name="iptv_sport_key_invalid">Yalnızca harf ve rakam kullanın.</string>
     <string name="iptv_sport_key_remove">Anahtarı kaldır</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d lig</item>
+        <item quantity="other">%d lig</item>
+    </plurals>
 </resources>

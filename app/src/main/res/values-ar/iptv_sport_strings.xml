@@ -21,4 +21,12 @@
     <string name="iptv_sport_key_not_set">غير مضبوط</string>
     <string name="iptv_sport_key_invalid">استخدم الحروف والأرقام فقط.</string>
     <string name="iptv_sport_key_remove">إزالة المفتاح</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="zero">%d دوري</item>
+        <item quantity="one">دوري واحد</item>
+        <item quantity="two">دوريان</item>
+        <item quantity="few">%d دوريات</item>
+        <item quantity="many">%d دورياً</item>
+        <item quantity="other">%d دوري</item>
+    </plurals>
 </resources>

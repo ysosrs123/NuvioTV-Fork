@@ -21,4 +21,9 @@
     <string name="iptv_sport_key_not_set">Sin configurar</string>
     <string name="iptv_sport_key_invalid">Usa solo letras y números.</string>
     <string name="iptv_sport_key_remove">Quitar clave</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d liga</item>
+        <item quantity="many">%d ligas</item>
+        <item quantity="other">%d ligas</item>
+    </plurals>
 </resources>

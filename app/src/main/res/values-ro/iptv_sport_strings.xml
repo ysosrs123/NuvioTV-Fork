@@ -21,4 +21,9 @@
     <string name="iptv_sport_key_not_set">Nesetată</string>
     <string name="iptv_sport_key_invalid">Folosește doar litere și cifre.</string>
     <string name="iptv_sport_key_remove">Elimină cheia</string>
+    <plurals name="iptv_sport_leagues_chosen">
+        <item quantity="one">%d ligă</item>
+        <item quantity="few">%d ligi</item>
+        <item quantity="other">%d de ligi</item>
+    </plurals>
 </resources>
