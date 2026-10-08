@@ -295,6 +295,32 @@ reporting, resets 10 October 2026 00:00 UTC):
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
 
+## Device findings — 9 October 2026 (build `374e1f6`, run 37845595141)
+
+User-reported (status in the following commits):
+1. Some menus/panels/pop-ups transparent again (defaults: Solid panels off, glass floor 0.9).
+2. Left on Live TV Sources (first page on opening) does nothing.
+3. Back from the guide leaves Live TV for Nuvio Home; wanted: Back opens the Live TV menu,
+   a further Back asks to confirm leaving to Nuvio Home.
+4. Guide: programme text slightly larger; Compact density by default; shorter guide so the
+   corner picture can be bigger; ideas for the empty middle of the top area (world clocks
+   suggested by the user).
+5. "Previous player has not confirmed it stopped" still appears when scrolling and pressing OK.
+6. Stats HUD shows "HTTP/3 advertised": what it means and whether to pursue HTTP/3.
+7. Full screen: Left opens the channel list (good); a second Left should open categories.
+8. Back from full screen goes to the guide, then Nuvio Home; wanted: guide → Live TV menu →
+   confirm leaving.
+9. Left on the IPTV Movies and Series pages does nothing; should open the Live TV menu.
+10. Nuvio QR sign-in missing in the CI build: CI's local.properties secret
+    (LOCAL_PROPERTIES_BASE64 with NUVIO_SUPABASE_URL/ANON_KEY, TMDB etc.) is not set in the
+    fork, so these features are built without keys. User action needed (repository secret).
+11. Recording names still contain decorative characters.
+12. Opening an IPTV movie/series: "Tried meta addons: Cinemeta. None of them provided metadata
+    for id=tmdb:1401539" — need a fallback when no addon supplies metadata.
+13. Could not find the phone setup page.
+14. Sport card "No channel found" for Arsenal v Leeds tomorrow; how far ahead matching works;
+    match the guide's days and allow recording ahead from match cards.
+
 ## Device findings — 8 October 2026 (build `f29cbe2`)
 
 User-reported, with status:
