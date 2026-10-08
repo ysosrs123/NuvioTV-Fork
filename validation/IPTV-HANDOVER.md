@@ -180,7 +180,7 @@ User-reported, with status:
    the requested category. Fixed in `2d72733` (requested category wins until its pane
    takes focus).
 4. Settings location: user asked whether to move Live TV settings into Content &
-   discovery. Recommendation given: keep a separate Live TV category; awaiting decision.
+   discovery. Decided (user): keep Live TV as its own category.
 5. Full screen: Left opens the channel list, second Left did nothing — now closes it
    (`2d72733`).
 6. "The previous player has not confirmed it stopped" on channel change — close waited
