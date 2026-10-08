@@ -31,6 +31,42 @@ fun resolveGuideMapping(
     }, candidates)
 }
 
+fun guideCandidates(
+    guideId: String?,
+    manual: GuideKey?,
+    feeds: List<GuideFeedIndex>,
+    orderedFeedPriority: List<String> = emptyList(),
+    name: String? = null,
+    names: List<GuideNameIndex> = emptyList(),
+): List<GuideMatch> {
+    val order = (orderedFeedPriority + feeds.map { it.feedId } + names.map { it.feedId }).distinct()
+    val ids = feeds.associate { it.feedId to it.channelIds }
+    val found = LinkedHashMap<GuideKey, GuideMatchReason>()
+    if (manual != null && ids[manual.feedId]?.contains(manual.externalId) == true) found[manual] = GuideMatchReason.MANUAL
+    val id = guideId?.takeIf(String::isNotBlank)
+    if (id != null) {
+        for (feed in order) if (ids[feed]?.contains(id) == true) found.putIfAbsent(GuideKey(feed, id), GuideMatchReason.EXACT_ID)
+        guideIdWithoutFeedSuffix(id)?.let { base ->
+            for (feed in order) if (ids[feed]?.contains(base) == true) found.putIfAbsent(GuideKey(feed, base), GuideMatchReason.EXACT_ID)
+        }
+    }
+    val key = name?.let(::guideMatchName)?.takeIf { it.length >= 2 }
+    if (key != null) {
+        val byFeed = names.associate { it.feedId to it.names }
+        for (feed in order) byFeed[feed]?.get(key)?.singleOrNull()?.let { found.putIfAbsent(GuideKey(feed, it), GuideMatchReason.NAME) }
+    }
+    return found.map { (candidate, reason) -> GuideMatch(candidate, reason) }
+}
+
+fun chooseGuide(candidates: List<GuideMatch>, manual: GuideKey?, hasProgrammes: (GuideKey) -> Boolean): GuideMatch =
+    candidates.firstOrNull { match -> match.key?.let(hasProgrammes) == true } ?: candidates.firstOrNull()
+        ?: GuideMatch(null, if (manual != null) GuideMatchReason.MISSING_MANUAL_TARGET else GuideMatchReason.NONE)
+
+fun appendGuideLink(feedIds: List<String>, priority: List<String>, feedId: String, maxFeeds: Int = 16): Pair<List<String>, List<String>>? {
+    if (feedId in feedIds || feedIds.size >= maxFeeds) return null
+    return (feedIds + feedId) to ((priority + feedIds).distinct() + feedId)
+}
+
 fun programmesAt(programmes: List<GuideProgramme>, channelExternalId: String, instantMillis: Long): List<GuideProgramme> =
     programmes.filter { it.channelExternalId == channelExternalId && it.start.precise && it.stop?.precise == true && it.start.epochMillis <= instantMillis && it.stop.epochMillis > instantMillis }
         .sortedWith(compareBy({ it.start.epochMillis }, { it.stop!!.epochMillis }))

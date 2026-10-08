@@ -3,17 +3,18 @@ package com.nuvio.tv.data.iptv
 import android.database.sqlite.SQLiteFullException
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.nuvio.tv.core.iptv.GuideChannel
+import com.nuvio.tv.core.iptv.GuideImportFilter
+import com.nuvio.tv.core.iptv.GuideImportIssue
+import com.nuvio.tv.core.iptv.GuideImportResult
 import com.nuvio.tv.core.iptv.GuideKey
-import com.nuvio.tv.core.iptv.GuideProgramme
-import com.nuvio.tv.core.iptv.GuideTimestamp
-import com.nuvio.tv.core.iptv.LocalizedGuideText
 import com.nuvio.tv.core.iptv.RefreshDecision
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InterruptedIOException
 import java.security.KeyStore
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.zip.GZIPOutputStream
 import org.junit.After
@@ -35,6 +36,8 @@ class IptvGuideStoreTest {
     private fun programme(title: String = "Morning", from: String = "20261005000000 +0000", to: String? = "20261005010000 +0000", id: String = "one") =
         "<programme channel=\"$id\" start=\"$from\"${to?.let { " stop=\"$it\"" }.orEmpty()}><title lang=\"en\">$title</title><title lang=\"fr\">Matin</title><desc>Fixture</desc></programme>"
     private fun xml(rows: String = programme()) = "<tv>$channel$rows</tv>"
+    private fun stamp(minutes: Int) = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC).format(Instant.ofEpochMilli(start + minutes * 60_000L)) + " +0000"
+    private fun slot(title: String, minutes: Int) = programme(title, stamp(minutes), stamp(minutes + 1))
     private fun feed(profile: Int = 1) = store.createFeed(profile, "Fixture", "https://fixture.invalid/epg?token=UNIQUE_GUIDE_SECRET")
     private fun publish(ref: IptvGuideRef, value: String = xml()) = store.importGuide(store.beginRefresh(ref), value.byteInputStream(), window, IptvCacheValidators("v1"))
 
@@ -48,23 +51,58 @@ class IptvGuideStoreTest {
         store.close(); store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias))
         val row = store.programmes(ref, "one", window).programmes.single()
         assertEquals(listOf("en", "fr"), row.titles.map { it.language })
-        assertEquals("20261005000000 +0000", row.start.raw)
+        assertEquals(14, row.start.precisionDigits)
         assertTrue(row.canSchedulePrecisely)
         assertEquals("one", store.channelPage(ref).single().externalId)
         assertEquals("v1", store.validators(ref)!!.etag)
         store.close()
         assertFalse(context.getDatabasePath(name).readBytes().toString(Charsets.ISO_8859_1).contains("UNIQUE_GUIDE_SECRET"))
     }
-    @Test fun channelFilterKeepsOnlyListedChannelsAndPublishRecordsRefreshTime() {
+    @Test fun filterKeepsEveryChannelButOnlyWantedProgrammesAndPublishRecordsRefreshTime() {
         store.close(); store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias), now = { 1234L })
         val ref = feed()
         assertNull(store.feeds(1).single().refreshedAtMillis)
         val other = "<channel id=\"two\"><display-name>Two</display-name></channel>"
         val value = "<tv>$channel$other${programme()}${programme("Elsewhere", id = "two")}</tv>"
-        assertEquals(RefreshDecision.PUBLISH, store.importGuide(store.beginRefresh(ref), value.byteInputStream(), window, channelFilter = setOf("one")))
-        assertEquals(listOf("one"), store.channelPage(ref).map { it.externalId })
+        val filter = GuideImportFilter(setOf("ONE"), emptySet())
+        assertEquals(RefreshDecision.PUBLISH, store.importGuide(store.beginRefresh(ref), value.byteInputStream(), window, filter = filter))
+        assertEquals(listOf("one", "two"), store.channelPage(ref).map { it.externalId })
+        assertEquals(1, store.programmes(ref, "one", window).programmes.size)
         assertTrue(store.programmes(ref, "two", window).programmes.isEmpty())
         assertEquals(1234L, store.feeds(1).single().refreshedAtMillis)
+        assertTrue(store.upToDate(ref, window, filter.fingerprint, 60_000))
+        assertFalse(store.upToDate(ref, window, GuideImportFilter(setOf("two"), emptySet()).fingerprint, 60_000))
+    }
+    @Test fun aGuideWithoutLinkedChannelsStoresChannelsOnly() {
+        val ref = feed()
+        val result = store.importGuideResult(store.beginRefresh(ref), xml().byteInputStream(), window, filter = GuideImportFilter(emptySet(), emptySet()))
+        assertEquals(GuideImportResult(RefreshDecision.PUBLISH, GuideImportIssue.NOT_LINKED), result)
+        assertEquals(listOf("one"), store.channelPage(ref).map { it.externalId })
+        assertTrue(store.programmes(ref, "one", window).programmes.isEmpty())
+    }
+    @Test fun changedFilterDropsCacheValidatorsAndChoiceSeesProgrammes() {
+        val ref = feed()
+        val first = GuideImportFilter(setOf("one"), emptySet())
+        assertEquals(RefreshDecision.PUBLISH, store.importGuide(store.beginRefresh(ref), xml().byteInputStream(), window, IptvCacheValidators("v1"), filter = first))
+        assertEquals("v1", store.prepareRefresh(ref, window, first.fingerprint).validators?.etag)
+        assertNull(store.prepareRefresh(ref, window, GuideImportFilter(setOf("one", "two"), emptySet()).fingerprint).validators)
+        val keys = setOf(GuideKey(ref.feedId, "one"), GuideKey(ref.feedId, "two"))
+        assertEquals(setOf(GuideKey(ref.feedId, "one")), store.programmeKeys(1, keys, window))
+        assertTrue(store.programmeKeys(1, keys, IptvGuideWindow(start + 2 * 3_600_000, start + 3 * 3_600_000)).isEmpty())
+        assertTrue(store.programmeKeys(2, emptyList(), window).isEmpty())
+    }
+    @Test fun droppingTheActiveCopyLeavesNoRows() {
+        val ref = feed(); publish(ref)
+        store.dropActive(ref)
+        assertTrue(store.channelPage(ref).isEmpty()); assertNull(store.validators(ref))
+        store.close()
+        context.openOrCreateDatabase(name, 0, null).use { db ->
+            db.rawQuery("SELECT (SELECT COUNT(*) FROM stages),(SELECT COUNT(*) FROM channels),(SELECT COUNT(*) FROM programmes),(SELECT COUNT(*) FROM channel_names)", null).use {
+                assertTrue(it.moveToFirst()); for (column in 0..3) assertEquals(0, it.getInt(column))
+            }
+        }
+        store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias))
+        assertEquals(RefreshDecision.PUBLISH, publish(ref))
     }
     @Test fun removingAFeedDropsItsGuideAndAnImportInFlightIsStale() {
         val ref = feed(); val other = feed(); val otherProfile = feed(2)
@@ -128,7 +166,7 @@ class IptvGuideStoreTest {
     }
     @Test fun paginationPreservesOverlapsAndDoesNotInventMissingEnds() {
         val ref = feed()
-        publish(ref, xml(programme("A") + programme("B") + programme("Unknown", to = null)))
+        publish(ref, xml(programme("A") + programme("B", stamp(10)) + programme("Unknown", stamp(20), to = null)))
         val page = store.programmes(ref, "one", window, limit = 2)
         assertTrue(page.hasMore); assertEquals(2, page.programmes.size)
         assertEquals(1, store.programmes(ref, "one", window, offset = 2, limit = 2).programmes.size)
@@ -137,15 +175,17 @@ class IptvGuideStoreTest {
         assertFalse(store.programmes(ref, "one", window).programmes.single { it.stop == null }.canSchedulePrecisely)
     }
     @Test fun emptyOrLargeShrinkNeedsReviewAndDoesNotPromoteValidators() {
-        val ref = feed(); publish(ref, xml((1..4).joinToString("") { programme("Show $it") }))
+        val ref = feed(); publish(ref, xml((1..4).joinToString("") { slot("Show $it", it) }))
         assertEquals(RefreshDecision.SHRINK_REQUIRES_REVIEW, publish(ref))
         assertEquals(RefreshDecision.EMPTY_REQUIRES_REVIEW, publish(ref, "<tv>$channel</tv>"))
         assertEquals(4, store.programmes(ref, "one", window).programmes.size)
     }
-    @Test fun unknownChannelProgrammesAreDroppedAndDuplicateChannelNamesMerge() {
+    @Test fun unknownChannelProgrammesAreKeptUnderAnImpliedChannelAndDuplicateChannelNamesMerge() {
         val ref = feed(); publish(ref)
-        assertEquals(RefreshDecision.EMPTY_REQUIRES_REVIEW, publish(ref, xml(programme(id = "missing"))))
-        assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(programme() + programme("Elsewhere", id = "missing"))))
+        assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(programme(id = "missing"))))
+        assertEquals(listOf("missing", "one"), store.channelPage(ref).map { it.externalId })
+        assertEquals("Morning", store.programmes(ref, "missing", window).programmes.single().titles.first().text)
+        assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(programme() + programme("Elsewhere", id = " ONE "))))
         assertEquals(1, store.programmes(ref, "one", window).programmes.size)
         assertEquals(RefreshDecision.PUBLISH, publish(ref, "<tv>$channel<channel id=\"one\"><display-name>Different</display-name></channel>${programme()}</tv>"))
         assertEquals(1, store.channelPage(ref).size)
@@ -197,7 +237,7 @@ class IptvGuideStoreTest {
     @Test fun realCapacityFailurePreservesActiveGuideAndRetrySucceeds() {
         val ref = feed(); publish(ref)
         store.close(); store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias), maxDatabaseBytes = 128L * 1024)
-        val large = xml((1..150).joinToString("") { programme("Large $it " + "x".repeat(2000)) })
+        val large = xml((1..150).joinToString("") { slot("Large $it " + "x".repeat(2000), it) })
         assertThrows(SQLiteFullException::class.java) { publish(ref, large) }
         assertEquals("Morning", store.programmes(ref, "one", window).programmes.single().titles.first().text)
         store.close(); store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias))
@@ -239,32 +279,43 @@ class IptvGuideStoreTest {
         assertThrows(IllegalArgumentException::class.java) { store.airingMatches(1, listOf(one.feedId), "x".repeat(257), start) }
         assertThrows(IllegalArgumentException::class.java) { store.airingMatches(1, listOf(one.feedId, one.feedId), "news", start) }
     }
-    @Test fun v3MigrationKeepsTheGuideAndSearchesTitlesAfterTheNextImport() {
+    @Test fun v5MigrationKeepsFeedsDropsProgrammeDataAndEnablesIncrementalVacuum() {
         store.close(); context.deleteDatabase(name)
         val secrets = AndroidIptvSecretBox(alias)
-        val stamp = { millis: Long -> GuideTimestamp(millis, 14, millis.toString()) }
-        val old = GuideProgramme("one", stamp(start), stamp(start + 3_600_000), listOf(LocalizedGuideText("Legacy news", "en")), emptyList())
         context.openOrCreateDatabase(name, 0, null).use { db ->
             db.execSQL("CREATE TABLE feeds(id TEXT PRIMARY KEY, profile INTEGER NOT NULL, label TEXT NOT NULL, endpoint BLOB NOT NULL, version INTEGER NOT NULL, requested INTEGER NOT NULL, active_stage TEXT, active_generation INTEGER, active_version INTEGER, validators BLOB, window_from INTEGER, window_until INTEGER, refreshed_at INTEGER)")
             db.execSQL("CREATE TABLE stages(id TEXT PRIMARY KEY, feed TEXT NOT NULL REFERENCES feeds(id), generation INTEGER NOT NULL, UNIQUE(feed,generation))")
             db.execSQL("CREATE TABLE channels(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, external_id TEXT NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(stage,external_id))")
-            db.execSQL("CREATE TABLE programmes(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, id TEXT NOT NULL, external_id TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER, precise INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(stage,id))")
+            db.execSQL("CREATE TABLE programmes(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, id TEXT NOT NULL, external_id TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER, precise INTEGER NOT NULL, payload TEXT NOT NULL, search_title TEXT, sport INTEGER, PRIMARY KEY(stage,id))")
             db.execSQL("CREATE INDEX guide_window ON programmes(stage,external_id,start,stop)")
+            db.execSQL("CREATE INDEX guide_sport ON programmes(stage,start,stop) WHERE sport=1")
             db.execSQL("CREATE TABLE channel_names(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, external_id TEXT NOT NULL, name TEXT NOT NULL, PRIMARY KEY(stage,name,external_id))")
             db.execSQL("INSERT INTO feeds VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", arrayOf<Any?>("legacy", 1, "Legacy", secrets.seal("iptv.guide.v1:1:legacy:endpoint", "https://fixture.invalid/legacy"),
-                1, 1, "stage", 1, 1, null, window.fromMillis, window.untilMillis, 1L))
-            db.execSQL("INSERT INTO stages VALUES('stage','legacy',1)")
-            db.execSQL("INSERT INTO channels VALUES('stage','one',?)", arrayOf(IptvGuideJson.channel(GuideChannel("one", listOf(LocalizedGuideText("One", "en"))))))
-            db.execSQL("INSERT INTO programmes VALUES('stage','old','one',?,?,1,?)", arrayOf<Any?>(start, start + 3_600_000, IptvGuideJson.programme(old)))
+                3, 7, "stage", 7, 3, secrets.seal("iptv.guide.v1:1:legacy:validators", "{\"etag\":\"old\"}"), window.fromMillis, window.untilMillis, 1L))
+            db.execSQL("INSERT INTO stages VALUES('stage','legacy',7)")
+            db.execSQL("INSERT INTO channels VALUES('stage','one','{\"id\":\"one\",\"names\":[]}')")
+            for (index in 0 until 500) db.execSQL("INSERT INTO programmes VALUES('stage',?,'one',?,?,1,?,NULL,NULL)", arrayOf<Any?>("p$index", start + index, start + index + 1, "x".repeat(400)))
             db.execSQL("INSERT INTO channel_names VALUES('stage','one','one')")
-            db.version = 3
+            db.version = 5
         }
         store = IptvGuideStore(context, name, secrets)
         val ref = IptvGuideRef(1, "legacy")
-        assertEquals(old, store.programmes(ref, "one", window).programmes.single())
-        assertTrue(store.airingMatches(1, listOf(ref.feedId), "legacy", start).isEmpty())
+        val migrated = store.feed(ref)
+        assertEquals("Legacy", migrated.label); assertEquals(3L, migrated.configurationVersion); assertEquals(7L, migrated.requestedGeneration)
+        assertNull(migrated.activeGeneration); assertNull(migrated.refreshedAtMillis)
+        assertEquals("https://fixture.invalid/legacy", store.endpoint(ref))
+        assertTrue(store.channelPage(ref).isEmpty()); assertNull(store.validators(ref))
+        assertNull(store.prepareRefresh(ref, window).validators)
         assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(programme("Fresh news"))))
         assertEquals("Fresh news", store.airingMatches(1, listOf(ref.feedId), "NEWS", start).single().programme.titles.first().text)
+        store.close()
+        context.openOrCreateDatabase(name, 0, null).use { db ->
+            assertEquals(6, db.version)
+            db.rawQuery("PRAGMA auto_vacuum", null).use { assertTrue(it.moveToFirst()); assertEquals(2, it.getInt(0)) }
+            db.rawQuery("SELECT typeof(active_stage) FROM feeds", null).use { assertTrue(it.moveToFirst()); assertEquals("integer", it.getString(0)) }
+            db.rawQuery("SELECT COUNT(*) FROM programmes", null).use { assertTrue(it.moveToFirst()); assertEquals(1, it.getInt(0)) }
+        }
+        store = IptvGuideStore(context, name, secrets)
     }
     @Test fun sportsMatchesListLiveAndUpcomingSportOnly() {
         val ref = feed()
@@ -282,24 +333,17 @@ class IptvGuideStoreTest {
         assertTrue(store.sportsMatches(1, listOf(ref.feedId), start + 7 * 3_600_000, start + 8 * 3_600_000).isEmpty())
         assertTrue(store.sportsMatches(2, emptyList(), now, now).isEmpty())
     }
-    @Test fun v4MigrationAddsTheSportsFlagOnTheNextImport() {
-        val ref = feed(); assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(programme("Premier League: Leeds v Hull"))))
+    @Test fun publishingReplacesTheOldStageWithoutLeftovers() {
+        val ref = feed()
+        repeat(3) { round -> assertEquals(RefreshDecision.PUBLISH, publish(ref, xml((1..3).joinToString("") { slot -> programme("Round $round $slot", "2026100500${slot}000 +0000", "2026100500${slot}500 +0000") }))) }
+        assertEquals(3, store.programmes(ref, "one", window).programmes.size)
         store.close()
         context.openOrCreateDatabase(name, 0, null).use { db ->
-            db.execSQL("DROP INDEX guide_sport")
-            db.execSQL("ALTER TABLE programmes RENAME TO newer_programmes")
-            db.execSQL("CREATE TABLE programmes(stage TEXT NOT NULL REFERENCES stages(id) ON DELETE CASCADE, id TEXT NOT NULL, external_id TEXT NOT NULL, start INTEGER NOT NULL, stop INTEGER, precise INTEGER NOT NULL, payload TEXT NOT NULL, search_title TEXT, PRIMARY KEY(stage,id))")
-            db.execSQL("INSERT INTO programmes SELECT stage,id,external_id,start,stop,precise,payload,search_title FROM newer_programmes")
-            db.execSQL("DROP TABLE newer_programmes")
-            db.execSQL("CREATE INDEX guide_window ON programmes(stage,external_id,start,stop)")
-            db.version = 4
+            db.rawQuery("SELECT (SELECT COUNT(*) FROM stages),(SELECT COUNT(*) FROM programmes),(SELECT COUNT(DISTINCT stage) FROM channels)", null).use {
+                assertTrue(it.moveToFirst()); assertEquals(1, it.getInt(0)); assertEquals(3, it.getInt(1)); assertEquals(1, it.getInt(2))
+            }
         }
         store = IptvGuideStore(context, name, AndroidIptvSecretBox(alias))
-        assertEquals("Premier League: Leeds v Hull", store.programmes(ref, "one", window).programmes.single().titles.first().text)
-        assertTrue(store.sportsMatches(1, listOf(ref.feedId), start, start + 3_600_000).isEmpty())
-        assertNull(store.feed(ref).refreshedAtMillis)
-        assertEquals(RefreshDecision.PUBLISH, store.importGuide(store.beginRefresh(ref), xml(programme("Premier League: Leeds v Hull")).byteInputStream(), window, IptvCacheValidators("v2")))
-        assertEquals(1, store.sportsMatches(1, listOf(ref.feedId), start, start + 3_600_000).size)
     }
     @Test fun gzipInputAndExactDuplicatesAreHandledWithoutDuplicateRows() {
         val ref = feed()

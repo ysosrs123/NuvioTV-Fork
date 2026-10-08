@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.XtreamGuideReference
+import com.nuvio.tv.core.iptv.appendGuideLink
 import com.nuvio.tv.core.iptv.playlistGuideAddresses
 
 class IptvXtreamGuides(private val catalogue: IptvCatalogueStore, private val guides: IptvGuideStore) {
@@ -33,6 +34,15 @@ class IptvXtreamGuides(private val catalogue: IptvCatalogueStore, private val gu
         val added = found.filter { it !in feeds }.take(MAX_LINKED_FEEDS - feeds.size)
         if (added.isNotEmpty()) catalogue.setGuideFeeds(source, feeds + added, linked.priority.map { IptvGuideRef(source.profileId, it) })
         return found
+    }
+
+    fun linkNew(feed: IptvGuideRef, selected: IptvSourceRef?): IptvSourceRef? {
+        val sources = catalogue.sources(feed.profileId)
+        val target = selected?.takeIf { ref -> ref.profileId == feed.profileId && sources.any { it.ref == ref } } ?: sources.singleOrNull()?.ref ?: return null
+        val linked = catalogue.guideAssociations(target)
+        val (feeds, priority) = appendGuideLink(linked.feedIds, linked.priority, feed.feedId, MAX_LINKED_FEEDS) ?: return null
+        catalogue.setGuideFeeds(target, feeds.map { IptvGuideRef(feed.profileId, it) }, priority.map { IptvGuideRef(feed.profileId, it) })
+        return target
     }
 
     fun linked(source: IptvSourceRef): IptvGuideRef? {

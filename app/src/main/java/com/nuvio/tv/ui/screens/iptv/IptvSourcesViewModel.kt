@@ -171,7 +171,7 @@ class IptvSourcesViewModel @Inject constructor(
                     context.contentResolver.takePersistableUriPermission(android.net.Uri.parse(endpoint.trim()), android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 val feed = form.feed?.also { require(it.profileId == profileId); guides.editFeed(it, label.trim(), endpoint.trim()) }
-                    ?: guides.createFeed(profileId, label.trim(), endpoint.trim())
+                    ?: guides.createFeed(profileId, label.trim(), endpoint.trim()).also { xtreamGuides.linkNew(it, mutable.value.selected) }
                 SavedEntry(feed = guides.feed(feed))
             } else {
                 val address = endpoint.trim().let { if ("://" in it) it else "http://$it" }
@@ -214,6 +214,7 @@ class IptvSourcesViewModel @Inject constructor(
             catalogue.setGuideFeeds(selected, ids.map { IptvGuideRef(profileId, it) }, previous.priority.filter { it in ids }.map { IptvGuideRef(profileId, it) })
         } }
         reload(this)
+        refresher.refreshIfChanged(this, feed.ref)
     }
     fun moveGuideUp(feed: IptvGuideFeed) = runOperation {
         val selected = mutable.value.selected ?: return@runOperation

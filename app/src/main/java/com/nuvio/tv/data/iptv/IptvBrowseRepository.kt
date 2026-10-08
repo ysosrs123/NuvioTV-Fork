@@ -1,21 +1,19 @@
 package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.GuideGridRow
-import com.nuvio.tv.core.iptv.GuideMatch
-import com.nuvio.tv.core.iptv.GuideMatchReason
 import com.nuvio.tv.core.iptv.GuideGridWindow
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.airingChannels
+import com.nuvio.tv.core.iptv.chooseGuide
 import com.nuvio.tv.core.iptv.earliestAiring
 import com.nuvio.tv.core.iptv.guideAiringCandidates
+import com.nuvio.tv.core.iptv.guideCandidates
 import com.nuvio.tv.core.iptv.guideSearchQuery
 import com.nuvio.tv.core.iptv.layoutGuideRow
 import com.nuvio.tv.core.iptv.guideIdWithoutFeedSuffix
 import com.nuvio.tv.core.iptv.guideMatchName
-import com.nuvio.tv.core.iptv.resolveGuideMapping
 import com.nuvio.tv.core.iptv.SPORTS_AHEAD_MILLIS
 import com.nuvio.tv.core.iptv.sportsOrder
-import com.nuvio.tv.core.iptv.uniqueNameMatch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -85,19 +83,19 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
         val ids = items.flatMap { row ->
             val guideId = row.channel.data.guideId?.takeIf(String::isNotBlank)
             listOfNotNull(guideId, guideId?.let(::guideIdWithoutFeedSuffix), row.overlay.manualGuide?.externalId)
-        }.toSet()
+        }.filter { it.isNotBlank() && it.length <= 4096 }.toSet()
         val feeds = guides.matchingIndexes(profileId, associations.feedIds, ids)
         val order = (associations.priority + associations.feedIds).distinct()
         currentCoroutineContext().ensureActive()
-        val matches = items.map { row -> resolveGuideMapping(row.channel.data.guideId, row.overlay.manualGuide, feeds, order) }
-        val unmatched = items.indices.filter { matches[it].reason == GuideMatchReason.NONE }
-        val names = unmatched.map { guideMatchName(items[it].channel.data.name) }.filter { it.length >= 2 }.toSet()
-        val indexes = if (names.isEmpty()) emptyList() else guides.nameIndexes(profileId, order, names)
+        val names = items.map { guideMatchName(it.channel.data.name) }.filter { it.length >= 2 }.toSet()
+        val indexes = if (names.isEmpty() || order.isEmpty()) emptyList() else guides.nameIndexes(profileId, order, names)
+        val candidates = items.map { row -> guideCandidates(row.channel.data.guideId, row.overlay.manualGuide, feeds, order, row.channel.data.name, indexes) }
+        val keys = candidates.flatMap { list -> list.mapNotNull { it.key } }.toSet()
         currentCoroutineContext().ensureActive()
-        return items.mapIndexed { index, row ->
-            val byName = if (index in unmatched) uniqueNameMatch(row.channel.data.name, indexes) else null
-            IptvListedChannel(row, byName?.let { GuideMatch(it, GuideMatchReason.NAME) } ?: matches[index])
-        }
+        val now = System.currentTimeMillis()
+        val withProgrammes = if (keys.isEmpty() || candidates.none { it.size > 1 }) emptySet()
+            else guides.programmeKeys(profileId, keys, IptvGuideWindow(now, now + GUIDE_CHOICE_AHEAD_MILLIS))
+        return items.mapIndexed { index, row -> IptvListedChannel(row, chooseGuide(candidates[index], row.overlay.manualGuide) { it in withProgrammes }) }
     }
 
     suspend fun guideRows(profileId: Int, channels: List<IptvListedChannel>, window: GuideGridWindow,
@@ -123,5 +121,6 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
 
     private companion object {
         const val MAX_SPORTS_CHANNELS = 500
+        const val GUIDE_CHOICE_AHEAD_MILLIS = 6 * 60 * 60 * 1000L
     }
 }

@@ -9,22 +9,39 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 internal object IptvGuideJson {
-    fun channel(value: GuideChannel): String = JSONObject().put("id", value.externalId).put("names", texts(value.names)).toString()
-    fun channel(value: String): GuideChannel = JSONObject(value).let { GuideChannel(it.getString("id"), texts(it.getJSONArray("names"))) }
-    fun programme(value: GuideProgramme): String = JSONObject().put("channel", value.channelExternalId)
-        .put("start", timestamp(value.start)).put("stop", value.stop?.let(::timestamp))
-        .put("titles", texts(value.titles)).put("descriptions", texts(value.descriptions))
-        .apply { if (value.categories.isNotEmpty()) put("categories", JSONArray(value.categories)) }
-        .apply { guideIconUrl(value.icon)?.let { put("icon", it) } }.toString()
-    fun programme(value: String): GuideProgramme = JSONObject(value).let {
-        GuideProgramme(it.getString("channel"), timestamp(it.getJSONObject("start")), it.optJSONObject("stop")?.let(::timestamp),
-            texts(it.getJSONArray("titles")), texts(it.getJSONArray("descriptions")),
-            it.optJSONArray("categories")?.let { values -> (0 until values.length()).map(values::getString) }.orEmpty(),
-            if (it.isNull("icon")) null else guideIconUrl(it.optString("icon")))
+    private const val FULL_PRECISION = 14
+
+    fun channel(value: GuideChannel): String = JSONObject().put("n", compact(value.names)).toString()
+    fun channel(value: String, externalId: String): GuideChannel = JSONObject(value).let {
+        if (it.has("names")) GuideChannel(it.optString("id", externalId), texts(it.getJSONArray("names"))) else GuideChannel(externalId, compact(it.getJSONArray("n")))
     }
-    private fun timestamp(value: GuideTimestamp) = JSONObject().put("ms", value.epochMillis).put("precision", value.precisionDigits).put("raw", value.raw)
-    private fun timestamp(value: JSONObject) = GuideTimestamp(value.getLong("ms"), value.getInt("precision"), value.getString("raw"))
-    private fun texts(values: List<LocalizedGuideText>) = JSONArray().apply { values.forEach { put(JSONObject().put("text", it.text).put("language", it.language)) } }
+    fun programme(value: GuideProgramme): String = JSONObject().put("s", value.start.epochMillis)
+        .apply {
+            if (value.start.precisionDigits != FULL_PRECISION) put("p", value.start.precisionDigits)
+            value.stop?.let { stop -> put("e", stop.epochMillis); if (stop.precisionDigits != FULL_PRECISION) put("q", stop.precisionDigits) }
+            put("t", compact(value.titles))
+            if (value.descriptions.isNotEmpty()) put("d", compact(value.descriptions))
+            if (value.categories.isNotEmpty()) put("c", JSONArray(value.categories))
+            guideIconUrl(value.icon)?.let { put("i", it) }
+        }.toString()
+    fun programme(value: String, externalId: String): GuideProgramme = JSONObject(value).let {
+        if (it.has("start")) return legacy(it, externalId)
+        GuideProgramme(externalId, GuideTimestamp(it.getLong("s"), it.optInt("p", FULL_PRECISION)),
+            if (it.has("e")) GuideTimestamp(it.getLong("e"), it.optInt("q", FULL_PRECISION)) else null,
+            compact(it.getJSONArray("t")), it.optJSONArray("d")?.let { values -> compact(values) }.orEmpty(), strings(it.optJSONArray("c")),
+            if (it.isNull("i")) null else guideIconUrl(it.optString("i")))
+    }
+    private fun legacy(value: JSONObject, externalId: String) = GuideProgramme(value.optString("channel", externalId), timestamp(value.getJSONObject("start")),
+        value.optJSONObject("stop")?.let(::timestamp), texts(value.getJSONArray("titles")), texts(value.getJSONArray("descriptions")),
+        strings(value.optJSONArray("categories")), if (value.isNull("icon")) null else guideIconUrl(value.optString("icon")))
+    private fun strings(values: JSONArray?): List<String> = values?.let { (0 until it.length()).map(it::getString) }.orEmpty()
+    private fun timestamp(value: JSONObject) = GuideTimestamp(value.getLong("ms"), value.getInt("precision"))
+    private fun compact(values: List<LocalizedGuideText>) = JSONArray().apply {
+        values.forEach { text -> put(JSONArray().put(text.text).apply { text.language?.let { language -> put(language) } }) }
+    }
+    private fun compact(values: JSONArray): List<LocalizedGuideText> = (0 until values.length()).map { index ->
+        values.getJSONArray(index).let { LocalizedGuideText(it.getString(0), if (it.length() > 1 && !it.isNull(1)) it.getString(1) else null) }
+    }
     private fun texts(values: JSONArray): List<LocalizedGuideText> = (0 until values.length()).map { index ->
         values.getJSONObject(index).let { LocalizedGuideText(it.getString("text"), if (it.isNull("language")) null else it.getString("language")) }
     }

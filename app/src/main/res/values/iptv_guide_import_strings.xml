@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_guide_import_out_of_date">The guide file has no programmes for the coming days and may be out of date. Your previous guide has been kept.</string>
+    <string name="iptv_guide_import_no_channels">The guide file has no channels. Your previous guide has been kept.</string>
+    <string name="iptv_guide_import_invalid">Too many entries in the guide file are invalid. Your previous guide has been kept.</string>
+    <string name="iptv_guide_import_too_large">The guide file is too large. Your previous guide has been kept.</string>
+    <string name="iptv_guide_import_not_xmltv">This is not an XMLTV guide file. Your previous guide has been kept.</string>
+    <string name="iptv_guide_import_fewer">The new guide has far fewer programmes than before. Your previous guide has been kept.</string>
+    <string name="iptv_guide_import_not_linked">Guide channels saved. Programmes load once a source uses this guide.</string>
+    <string name="iptv_guide_days">Guide days</string>
+    <string name="iptv_guide_days_subtitle">How much programme information to keep. More days use more storage. Applies at the next guide update.</string>
+    <plurals name="iptv_guide_days_past">
+        <item quantity="one">%d day back</item>
+        <item quantity="other">%d days back</item>
+    </plurals>
+    <plurals name="iptv_guide_days_future">
+        <item quantity="one">%d day ahead</item>
+        <item quantity="other">%d days ahead</item>
+    </plurals>
+    <string name="iptv_guide_days_recommended">Recommended</string>
+    <string name="iptv_guide_days_catchup">Longer catch-up, uses more storage</string>
+    <string name="iptv_guide_days_larger">Uses more storage</string>
+    <string name="iptv_guides_choice_help">Each channel uses the first linked guide with programmes for it: a manual assignment first, then a matching ID, then a matching name, in the order shown. Move up changes the priority.</string>
+</resources>

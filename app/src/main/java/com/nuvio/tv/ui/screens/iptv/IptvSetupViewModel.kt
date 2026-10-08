@@ -52,6 +52,7 @@ import com.nuvio.tv.data.iptv.IptvSourceKind
 import com.nuvio.tv.data.iptv.IptvSourceRef
 import com.nuvio.tv.data.iptv.IptvStartView
 import com.nuvio.tv.data.iptv.IptvStreamFormat
+import com.nuvio.tv.data.iptv.IptvXtreamGuides
 import com.nuvio.tv.data.iptv.MetadataException
 import com.nuvio.tv.data.iptv.MetadataFailure
 import com.nuvio.tv.data.local.ProfileLockStateDataStore
@@ -275,11 +276,12 @@ class IptvSetupViewModel @Inject constructor(
                         R.string.iptv_remote_settings_saved
                     }
                     is SetupGuideLinks -> {
-                        withContext(Dispatchers.IO) { access.use(current) {
+                        val previous = withContext(Dispatchers.IO) { access.use(current) {
                             val ref = IptvSourceRef(current.profileId, change.sourceId)
                             val feeds = change.feeds.map { IptvGuideRef(current.profileId, it).also { feed -> guides.feed(feed) } }
-                            catalogue.setGuideFeeds(ref, feeds, feeds)
+                            catalogue.guideAssociations(ref).feedIds.map { IptvGuideRef(current.profileId, it) }.also { catalogue.setGuideFeeds(ref, feeds, feeds) }
                         } }
+                        (previous + change.feeds.map { IptvGuideRef(current.profileId, it) }).distinct().forEach { refresher.refreshIfChanged(current, it) }
                         active?.resolve(pending.id, SetupChangeBook.Status.SAVED)
                         R.string.iptv_remote_links_saved
                     }
@@ -291,6 +293,7 @@ class IptvSetupViewModel @Inject constructor(
                             require(key == null || key.feedId in catalogue.guideAssociations(ref).feedIds)
                             catalogue.setOverlay(ref, item.channel.id, item.overlay.copy(manualGuide = key))
                         } }
+                        change.feedId?.let { refresher.refreshIfChanged(current, IptvGuideRef(current.profileId, it)) }
                         active?.resolve(pending.id, SetupChangeBook.Status.SAVED)
                         R.string.iptv_remote_channel_saved
                     }
@@ -401,7 +404,8 @@ class IptvSetupViewModel @Inject constructor(
             val stored = ref?.let { guides.endpoint(it) }
             if (stored != null && XtreamGuideReference.sourceId(stored) != null) throw IllegalArgumentException("Automatic guide")
             val endpoint = draft.connection(stored?.let { SetupConnection(it) }).endpoint
-            val feed = ref?.also { guides.editFeed(it, draft.label, endpoint) } ?: guides.createFeed(profileId, draft.label, endpoint)
+            val feed = ref?.also { guides.editFeed(it, draft.label, endpoint) }
+                ?: guides.createFeed(profileId, draft.label, endpoint).also { IptvXtreamGuides(catalogue, guides).linkNew(it, null) }
             return SavedEntry(feed = guides.feed(feed))
         }
         val kind = IptvSourceKind.valueOf(draft.kind.name)

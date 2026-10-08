@@ -172,6 +172,8 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
                                 onClick = { feedMenu = feed },
                                 leadingIcon = if (linked) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked)
                         }
+                        if (state.feeds.isNotEmpty()) Text(stringResource(R.string.iptv_guides_choice_help), color = NuvioTheme.colors.TextSecondary,
+                            style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp))
                     }
                 }
                 if (state.ready && state.sources.isNotEmpty()) item(key = "groups") {

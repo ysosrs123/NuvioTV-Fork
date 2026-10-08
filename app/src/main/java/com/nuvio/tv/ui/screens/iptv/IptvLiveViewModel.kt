@@ -77,6 +77,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var profileRevision = -1L
     private var foreground = false
     private var pageJob: Job? = null
+    private var guideReloadPending = false
     private var searchJob: Job? = null
     private var channelSearch: Job? = null
     private var shortGuideJob: Job? = null
@@ -158,7 +159,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 }) }
                 val landed = mine.any { (key, value) -> previous[key]?.phase != value.phase && value.phase in setOf(IptvRefreshPhase.GUIDE, IptvRefreshPhase.DONE) }
                 previous = mine
-                if (landed && foreground && pageJob?.isActive != true) load(background = true)
+                if (landed && foreground) { if (pageJob?.isActive == true) guideReloadPending = true else load(background = true) }
             }
         }
         viewModelScope.launch {
@@ -323,6 +324,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     val latest = requireNotNull(catalogue.playbackItem(ref, picker.row.item.channel.id))
                     catalogue.setOverlay(ref, latest.channel.id, latest.overlay.copy(manualGuide = key))
                 } }
+                key?.let { refresher.refreshIfChanged(current, IptvGuideRef(current.profileId, it.feedId)) }
                 if (session === current) load(background = true)
             } catch (cancel: CancellationException) { throw cancel }
             catch (_: Exception) { if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
@@ -407,6 +409,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         if (append && pageJob?.isActive == true) return
         pageJob?.cancel()
         val request = ++pageVersion
+        if (!append) guideReloadPending = false
         pageJob = viewModelScope.launch {
             if (!background && !append) mutable.update { it.copy(loading = true) }
             try {
@@ -474,7 +477,12 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 }
             } catch (cancel: CancellationException) { throw cancel }
             catch (error: Exception) { IptvLog.failure("live load", error); if (session === current) mutable.update { it.copy(message = R.string.iptv_setup_failed) } }
-            finally { if (session === current && request == pageVersion) mutable.update { it.copy(loading = false, loaded = true) } }
+            finally {
+                if (session === current && request == pageVersion) {
+                    mutable.update { it.copy(loading = false, loaded = true) }
+                    if (guideReloadPending && foreground) { guideReloadPending = false; viewModelScope.launch { load(background = true) } }
+                }
+            }
         }
     }
     private suspend fun mergedFavourites(sources: List<IptvSource>): List<IptvListedChannel> {

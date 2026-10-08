@@ -2,6 +2,7 @@ package com.nuvio.tv.ui.screens.iptv
 
 import android.content.Context
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.GuideImportIssue
 import com.nuvio.tv.core.iptv.LocalGuideFiles
 import com.nuvio.tv.core.iptv.RefreshDecision
 import com.nuvio.tv.core.iptv.XtreamGuideReference
@@ -22,7 +23,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 
 enum class IptvRefreshPhase { QUEUED, DOWNLOADING, SAVING, GUIDE, DONE, FAILED }
@@ -40,7 +43,10 @@ class IptvRefreshCoordinator @Inject constructor(
     private val vod: IptvVodRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val heavy = Mutex()
+    private val catalogueLock = Mutex()
+    private val vodLock = Mutex()
+    private val guideImports = Semaphore(GUIDE_IMPORTS)
+    private val guideDays = IptvGuideDaysPreference(livePreferences)
     private val jobs = HashMap<String, Job>()
     private val attempts = HashMap<String, Long>()
     private val mutable = MutableStateFlow<Map<String, IptvRefreshStatus>>(emptyMap())
@@ -52,13 +58,16 @@ class IptvRefreshCoordinator @Inject constructor(
         connections = IptvSourceConnections(catalogue, livePreferences), vod = vod)
     private val guideRepository = IptvGuideRepository(guides, openDocument = { address ->
         requireNotNull(context.contentResolver.openInputStream(android.net.Uri.parse(address)))
-    }, xtreamConnection = catalogue::connection, openLocal = { localGuides.open(it) }, providerChannels = catalogue::guideChannelIds)
+    }, xtreamConnection = catalogue::connection, openLocal = { localGuides.open(it) }, guideFilter = catalogue::guideImportFilter,
+        downloads = java.io.File(context.cacheDir, "iptv-guides"))
 
     fun refresh(session: IptvProfileAccess.Session, source: IptvSource): Boolean = start(key(source.ref)) {
         require(source.ref.profileId == session.profileId)
-        withContext(Dispatchers.IO) { access.use(session) { catalogue.connection(source.ref) } }
-        set(key(source.ref), IptvRefreshStatus(IptvRefreshPhase.DOWNLOADING))
-        val result = playlists.refresh(source.ref) { set(key(source.ref), IptvRefreshStatus(IptvRefreshPhase.SAVING)) }
+        val result = catalogueLock.withLock {
+            withContext(Dispatchers.IO) { access.use(session) { catalogue.connection(source.ref) } }
+            set(key(source.ref), IptvRefreshStatus(IptvRefreshPhase.DOWNLOADING))
+            playlists.refresh(source.ref) { set(key(source.ref), IptvRefreshStatus(IptvRefreshPhase.SAVING)) }
+        }
         val message = when (result) {
             IptvPlaylistRefresh.Unchanged -> R.string.iptv_setup_refreshed
             is IptvPlaylistRefresh.Catalogue -> if (result.decision == RefreshDecision.PUBLISH) R.string.iptv_setup_refreshed else R.string.iptv_setup_kept_previous
@@ -66,8 +75,13 @@ class IptvRefreshCoordinator @Inject constructor(
         }
         IptvLog.info("source refresh result=${result.javaClass.simpleName}${(result as? IptvPlaylistRefresh.Catalogue)?.let { " decision=${it.decision}" }.orEmpty()}")
         finish(key(source.ref), IptvRefreshPhase.DONE, message)
-        (result as? IptvPlaylistRefresh.Catalogue)?.let { published -> (listOfNotNull(published.guide) + published.guides).distinct().forEach { refreshGuide(session, it) } }
-        if (source.kind == IptvSourceKind.XTREAM) refreshVod(session, source.ref)
+        val provided = (result as? IptvPlaylistRefresh.Catalogue)?.let { published -> (listOfNotNull(published.guide) + published.guides).distinct() }.orEmpty()
+        provided.forEach { startGuide(session, it, onlyIfChanged = false) }
+        val linked = try {
+            withContext(Dispatchers.IO) { access.use(session) { catalogue.guideAssociations(source.ref).feedIds.map { IptvGuideRef(source.ref.profileId, it) } } }
+        } catch (cancel: CancellationException) { throw cancel } catch (error: Exception) { IptvLog.failure("guide links", error); emptyList() }
+        (linked - provided.toSet()).forEach { startGuide(session, it, onlyIfChanged = true) }
+        if (source.kind == IptvSourceKind.XTREAM) vodLock.withLock { refreshVod(session, source.ref) }
     }
 
     private suspend fun refreshVod(session: IptvProfileAccess.Session, ref: IptvSourceRef) {
@@ -79,8 +93,12 @@ class IptvRefreshCoordinator @Inject constructor(
         catch (error: Exception) { IptvLog.failure("vod refresh", error) }
     }
 
-    fun refresh(session: IptvProfileAccess.Session, feed: IptvGuideFeed): Boolean = start(key(feed.ref)) {
-        refreshGuide(session, feed.ref)
+    fun refresh(session: IptvProfileAccess.Session, feed: IptvGuideFeed): Boolean = startGuide(session, feed.ref, onlyIfChanged = false)
+
+    fun refreshIfChanged(session: IptvProfileAccess.Session, feed: IptvGuideRef): Boolean = startGuide(session, feed, onlyIfChanged = true)
+
+    private fun startGuide(session: IptvProfileAccess.Session, feed: IptvGuideRef, onlyIfChanged: Boolean): Boolean = start(key(feed)) {
+        refreshGuide(session, feed, onlyIfChanged)
     }
 
     fun refreshStale(session: IptvProfileAccess.Session, now: Long = System.currentTimeMillis()) {
@@ -92,22 +110,18 @@ class IptvRefreshCoordinator @Inject constructor(
                 feeds.filter { XtreamGuideReference.sourceId(guides.endpoint(it.ref)) != null }.map { it.ref }.toSet()
             } } }.getOrDefault(emptySet())
             for (source in sources) if (due(key(source.ref), source.refreshedAtMillis, SOURCE_INTERVAL, now)) refresh(session, source)
-            for (feed in feeds) if (feed.ref !in provided && due(key(feed.ref), feed.refreshedAtMillis, GUIDE_INTERVAL, now)) refresh(session, feed)
+            for (feed in feeds) if ((feed.ref !in provided || feed.refreshedAtMillis == null) && due(key(feed.ref), feed.refreshedAtMillis, GUIDE_INTERVAL, now)) refresh(session, feed)
         }
     }
 
-    private suspend fun refreshGuide(session: IptvProfileAccess.Session, feed: IptvGuideRef) {
+    private suspend fun refreshGuide(session: IptvProfileAccess.Session, feed: IptvGuideRef, onlyIfChanged: Boolean) = guideImports.withPermit {
         set(key(feed), IptvRefreshStatus(IptvRefreshPhase.GUIDE))
         try {
             withContext(Dispatchers.IO) { access.use(session) { guides.feed(feed) } }
-            val day = Math.floorDiv(System.currentTimeMillis(), DAY) * DAY
-            val message = when (val result = guideRepository.refresh(feed, IptvGuideWindow(day - DAY, day + 7 * DAY))) {
-                IptvGuideRefresh.Unchanged -> R.string.iptv_setup_refreshed
-                IptvGuideRefresh.StorageFull -> R.string.iptv_setup_storage_full
-                is IptvGuideRefresh.Guide -> if (result.decision == RefreshDecision.PUBLISH) R.string.iptv_setup_refreshed else R.string.iptv_setup_kept_previous
-            }
-            IptvLog.info("guide refresh done")
-            finish(key(feed), IptvRefreshPhase.DONE, message)
+            val (from, until) = guideDays.days.window(System.currentTimeMillis())
+            val result = guideRepository.refresh(feed, IptvGuideWindow(from, until), if (onlyIfChanged) GUIDE_INTERVAL else null)
+            IptvLog.info("guide refresh result=${result.javaClass.simpleName}${(result as? IptvGuideRefresh.Guide)?.let { " decision=${it.decision}" }.orEmpty()}")
+            finish(key(feed), IptvRefreshPhase.DONE, guideMessage(result))
         } catch (cancel: CancellationException) { throw cancel }
         catch (error: Exception) { IptvLog.failure("guide refresh", error); finish(key(feed), IptvRefreshPhase.FAILED, failureMessage(error)) }
     }
@@ -125,7 +139,7 @@ class IptvRefreshCoordinator @Inject constructor(
         attempts[key] = System.currentTimeMillis()
         set(key, IptvRefreshStatus(IptvRefreshPhase.QUEUED))
         jobs[key] = scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            try { heavy.withLock { block() } }
+            try { block() }
             catch (cancel: CancellationException) { finish(key, IptvRefreshPhase.FAILED, null); throw cancel }
             catch (error: Exception) { IptvLog.failure("refresh", error); finish(key, IptvRefreshPhase.FAILED, failureMessage(error)) }
         }
@@ -153,7 +167,21 @@ class IptvRefreshCoordinator @Inject constructor(
             MetadataFailure.INVALID_RESPONSE -> R.string.iptv_error_response
             null -> R.string.iptv_setup_failed
         }
-        private const val DAY = 86_400_000L
+        fun guideMessage(result: IptvGuideRefresh): Int = when (result) {
+            IptvGuideRefresh.Unchanged -> R.string.iptv_setup_refreshed
+            IptvGuideRefresh.StorageFull -> R.string.iptv_setup_storage_full
+            is IptvGuideRefresh.Guide -> when (result.issue) {
+                GuideImportIssue.OUT_OF_DATE -> R.string.iptv_guide_import_out_of_date
+                GuideImportIssue.NO_CHANNELS -> R.string.iptv_guide_import_no_channels
+                GuideImportIssue.TOO_MANY_INVALID -> R.string.iptv_guide_import_invalid
+                GuideImportIssue.TOO_LARGE -> R.string.iptv_guide_import_too_large
+                GuideImportIssue.NOT_XMLTV -> R.string.iptv_guide_import_not_xmltv
+                GuideImportIssue.FEWER_PROGRAMMES -> R.string.iptv_guide_import_fewer
+                GuideImportIssue.NOT_LINKED -> R.string.iptv_guide_import_not_linked
+                null -> if (result.decision == RefreshDecision.PUBLISH) R.string.iptv_setup_refreshed else R.string.iptv_setup_kept_previous
+            }
+        }
+        private const val GUIDE_IMPORTS = 2
         private const val SOURCE_INTERVAL = 12 * 60 * 60 * 1000L
         private const val GUIDE_INTERVAL = 6 * 60 * 60 * 1000L
         private const val RETRY_INTERVAL = 30 * 60 * 1000L

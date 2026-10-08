@@ -166,9 +166,17 @@ reporting, resets 10 October 2026 00:00 UTC):
 User-reported, with status:
 1. Guide (EPG) empty — causes found: provider guide fails on the 256 MB cap, added XMLTV
    guides are never linked to the source, guide choice ignores whether a guide has
-   programmes, a dropped reload. Being fixed (guide overhaul, in progress).
-2. Guides load slowly and one after another — one global refresh lock, 100-row
-   transactions, downloads coupled to DB writes. Being fixed (parallel, batched).
+   programmes, a dropped reload. Fixed by the guide overhaul: every guide stores
+   programmes only for channels in linked sources; "Guide days" setting (default 1 back,
+   3 ahead); guide schema 6 (integer stage, rowid key, ~400 B per programme instead of
+   730-1,250 B); cap 256 MB to min(2 GB, 25% free) with per-guide budgets; old copy
+   deleted in chunks, incremental vacuum; new XMLTV guides linked automatically; per
+   channel the first linked guide with programmes in the next 6 h wins. Upgrading from
+   schema 5 drops programme data once; guides re-import on first open.
+2. Guides load slowly and one after another — fixed: guides run as their own jobs, two
+   imports at a time, 5,000-row transactions with reused statements, downloads to a temp
+   file first. Host measurement: 20,000-channel x 3-day file with 1,000 linked channels,
+   10.7 s and 24 MB on a desktop JVM; expect several times slower on a box.
 3. Live TV menu → Settings opened Integrations — the Settings rail's own focus cancelled
    the requested category. Fixed in `2d72733` (requested category wins until its pane
    takes focus).
@@ -181,17 +189,20 @@ User-reported, with status:
    (`2d72733`). Needs a device recheck.
 7. Corner preview: automatic preview removed; OK plays in the corner, OK again full
    screen; the "Live" tag only shows for the channel actually playing (`2d72733`).
-8. Channel names cut off in the guide; menus, guide and Sport look generic — being
-   redone to Nuvio V2 styling with a wider channel column and less outer padding.
+8. Channel names cut off in the guide; menus, guide and Sport look generic — done in
+   `8d47359` (wider channel column, 2-line names, less padding, V2 rail and focus
+   styling) and `bbfa0a5` (Sport hero card and fixture cards).
 9. Real XMLTV file refused ("could not be accepted") — likely strict timestamps or
-   orphaned programmes; parser being made lenient with specific messages. The file
-   could not be downloaded here (network policy).
+   orphaned programmes. The parser now accepts timestamp variants and case/space
+   differences in channel ids, keeps programmes without a channel element, and each
+   refusal has its own message. The file could not be downloaded here (network policy),
+   so this needs a device recheck.
 10. Provider guide "not enough space" — see 1.
-11. Recording from the guide gives no choice of location — a location choice is being
-    added to the record dialog.
+11. Recording from the guide gives no choice of location — record dialog now asks where
+    (`8d47359`).
 12. Sport view: no way back — Back returns to the previous view, Left on the first
     fixture opens the menu (`2d72733`). Sport redesign with logos, live scores (with a
-    hide-scores setting), venue and game clock in progress.
+    "Show scores" setting), venue, game clock and favourite teams in `bbfa0a5`.
 13. Menu item renamed to "Settings" (`2d72733`).
 
 ## Planned but not done (updated 7 October 2026)

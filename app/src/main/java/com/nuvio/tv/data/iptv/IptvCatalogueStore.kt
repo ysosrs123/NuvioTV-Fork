@@ -9,6 +9,7 @@ import com.nuvio.tv.core.iptv.ChannelCandidate
 import com.nuvio.tv.core.iptv.ChannelOrder
 import com.nuvio.tv.core.iptv.ChannelIdentityReconciler
 import com.nuvio.tv.core.iptv.GenerationWriter
+import com.nuvio.tv.core.iptv.GuideImportFilter
 import com.nuvio.tv.core.iptv.GuideKey
 import com.nuvio.tv.core.iptv.ListMove
 import com.nuvio.tv.core.iptv.OrderedChannel
@@ -231,6 +232,29 @@ class IptvCatalogueStore(
             db.rawQuery("SELECT o.guide_id FROM overlays o JOIN identities i ON o.id=i.id WHERE i.source=? AND o.profile=? AND o.guide_feed=? AND o.guide_id IS NOT NULL",
                 arrayOf(ref.sourceId, ref.profileId.toString(), feed.feedId)).use { c -> while (c.moveToNext()) add(c.getString(0)) }
         }
+    }
+
+    fun guideImportFilter(feed: IptvGuideRef): GuideImportFilter? = transaction { db ->
+        val ids = HashSet<String>(); val names = HashSet<String>()
+        db.rawQuery("SELECT s.id,s.active_generation FROM source_guides g JOIN sources s ON s.id=g.source WHERE s.profile=? AND g.feed=? AND s.active_generation IS NOT NULL",
+            arrayOf(feed.profileId.toString(), feed.feedId)).use { sources ->
+            while (sources.moveToNext()) {
+                var rows = 0; var keyed = 0
+                db.rawQuery("SELECT epg_id,epg_base,name_key FROM catalogue WHERE source=? AND generation=?", arrayOf(sources.getString(0), sources.getLong(1).toString())).use { c ->
+                    while (c.moveToNext()) {
+                        rows++
+                        if (!c.isNull(0)) ids += c.getString(0)
+                        if (!c.isNull(1)) ids += c.getString(1)
+                        if (!c.isNull(2)) { names += c.getString(2); keyed++ }
+                    }
+                }
+                if (rows > 0 && keyed == 0) return@transaction null
+            }
+        }
+        db.rawQuery("SELECT guide_id FROM overlays WHERE profile=? AND guide_feed=? AND guide_id IS NOT NULL", arrayOf(feed.profileId.toString(), feed.feedId)).use { c ->
+            while (c.moveToNext()) ids += c.getString(0)
+        }
+        GuideImportFilter(ids, names)
     }
 
     private fun beginRefresh(db: SQLiteDatabase, ref: IptvSourceRef): RefreshTicket {

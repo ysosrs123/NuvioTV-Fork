@@ -2,10 +2,13 @@ package com.nuvio.tv.data.iptv
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.nuvio.tv.core.iptv.GuideImportIssue
 import com.nuvio.tv.core.iptv.RefreshDecision
 import java.io.ByteArrayOutputStream
 import java.security.KeyStore
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.zip.GZIPOutputStream
 import kotlinx.coroutines.CompletableDeferred
@@ -32,6 +35,7 @@ import org.junit.runner.RunWith
 class IptvGuideRepositoryTest {
     private val start = Instant.parse("2026-10-05T00:00:00Z").toEpochMilli()
     private val window = IptvGuideWindow(start, start + 86_400_000)
+    private fun stamp(minutes: Int) = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC).format(Instant.ofEpochMilli(start + minutes * 60_000L)) + " +0000"
     private fun xml(title: String = "Fixture") = "<tv><channel id=\"one\"><display-name>One</display-name></channel><programme channel=\"one\" start=\"20261005000000 +0000\" stop=\"20261005010000 +0000\"><title>$title</title></programme></tv>"
     private fun response(request: Request, body: String = xml(), status: Int = 200) = Response.Builder().request(request).protocol(Protocol.HTTP_1_1)
         .message("Fixture").code(status).header("ETag", "v1").body(body.toResponseBody("application/xml".toMediaType()))
@@ -125,7 +129,7 @@ class IptvGuideRepositoryTest {
         repo.refresh(ref, window); mode = 1
         failure { repo.refresh(ref, window) }
         mode = 2
-        assertEquals(IptvGuideRefresh.Guide(RefreshDecision.INVALID), repo.refresh(ref, window))
+        assertEquals(IptvGuideRefresh.Guide(RefreshDecision.INVALID, GuideImportIssue.TOO_MANY_INVALID), repo.refresh(ref, window))
         assertEquals("v1", store.validators(ref)!!.etag)
         assertEquals(1, store.programmes(ref, "one", window).programmes.size)
     }
@@ -190,22 +194,38 @@ class IptvGuideRepositoryTest {
             }
             IptvGuideStore(context, name, AndroidIptvSecretBox(alias)).use { store ->
                 val ref = IptvGuideRef(1, "legacy")
-                assertEquals("one", store.channelPage(ref).single().externalId)
-                assertEquals("v1", store.validators(ref)!!.etag)
+                assertEquals("Legacy", store.feed(ref).label)
+                assertTrue(store.channelPage(ref).isEmpty())
+                assertNull(store.validators(ref))
                 assertNull(store.prepareRefresh(ref, window).validators)
                 assertEquals(RefreshDecision.PUBLISH, store.importGuide(store.beginRefresh(ref), xml().byteInputStream(), window))
             }
         } finally { context.deleteDatabase(name); KeyStore.getInstance("AndroidKeyStore").apply { load(null); deleteEntry(alias) } }
     }
-    @Test fun capacityFailureReportsStorageFullAndPreservesActiveGuide() = fixture(128L * 1024) { store, ref ->
+    @Test fun capacityFailureDropsThePreviousCopyRetriesOnceThenReportsStorageFull() = fixture(128L * 1024) { store, ref ->
         var body = xml()
         val http = IptvMetadataClient.newClient().newBuilder().addInterceptor { chain -> response(chain.request(), body).build() }.build()
-        val repo = IptvGuideRepository(store, IptvGuideClient(http))
+        val repo = IptvGuideRepository(store, IptvGuideClient(http), downloads = InstrumentationRegistry.getInstrumentation().targetContext.cacheDir)
         assertEquals(IptvGuideRefresh.Guide(RefreshDecision.PUBLISH), repo.refresh(ref, window))
-        body = "<tv><channel id=\"one\"><display-name>One</display-name></channel>" +
-            (1..150).joinToString("") { xml("$it " + "x".repeat(2000)).substringAfter("</channel>").substringBefore("</tv>") } + "</tv>"
+        body = "<tv><channel id=\"one\"><display-name>One</display-name></channel>" + (1..150).joinToString("") { minute ->
+            "<programme channel=\"one\" start=\"${stamp(minute)}\" stop=\"${stamp(minute + 1)}\"><title>$minute ${"x".repeat(2000)}</title></programme>"
+        } + "</tv>"
         assertEquals(IptvGuideRefresh.StorageFull, repo.refresh(ref, window))
-        assertEquals("Fixture", store.programmes(ref, "one", window).programmes.single().titles.single().text)
+        assertTrue(store.channelPage(ref).isEmpty())
+        body = xml("Small")
+        assertEquals(IptvGuideRefresh.Guide(RefreshDecision.PUBLISH), repo.refresh(ref, window))
+        assertEquals("Small", store.programmes(ref, "one", window).programmes.single().titles.single().text)
+        assertTrue(InstrumentationRegistry.getInstrumentation().targetContext.cacheDir.listFiles().orEmpty().none { it.name.startsWith("guide-") && it.name.endsWith(".part") })
+    }
+    @Test fun outOfDateAndNonXmltvFilesNameTheReason() = fixture { store, ref ->
+        var body = xml().replace("20261005", "20200105")
+        val http = IptvMetadataClient.newClient().newBuilder().addInterceptor { chain -> response(chain.request(), body).build() }.build()
+        val repo = IptvGuideRepository(store, IptvGuideClient(http), downloads = InstrumentationRegistry.getInstrumentation().targetContext.cacheDir)
+        assertEquals(IptvGuideRefresh.Guide(RefreshDecision.EMPTY_REQUIRES_REVIEW, GuideImportIssue.OUT_OF_DATE), repo.refresh(ref, window))
+        body = "<html><body>Sign in</body></html>"
+        assertEquals(IptvGuideRefresh.Guide(RefreshDecision.INVALID, GuideImportIssue.NOT_XMLTV), repo.refresh(ref, window))
+        body = xml().replace(" +0000", "Z")
+        assertEquals(IptvGuideRefresh.Guide(RefreshDecision.PUBLISH), repo.refresh(ref, window))
     }
     @Test fun localDocumentImportsClosesAndRefreshesWithoutHttpOrCacheValidators() = fixture { store, ref ->
         store.editFeed(ref, "Local", "content://fixture.documents/guide.xml")

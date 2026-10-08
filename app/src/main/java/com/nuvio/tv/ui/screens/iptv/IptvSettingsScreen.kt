@@ -107,6 +107,7 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
                         SettingsActionRow(title = stringResource(R.string.iptv_settings_start), subtitle = null,
                             value = stringResource(startLabel(state.startView)), onClick = { choosing = IptvSettingsChoice.START })
                         IptvDensityRow(viewModel)
+                        IptvGuideDaysRow()
                         SettingsToggleRow(title = stringResource(R.string.iptv_settings_sport), subtitle = stringResource(R.string.iptv_settings_sport_subtitle),
                             checked = state.sport, onToggle = viewModel::toggleSport)
                         SettingsActionRow(title = stringResource(R.string.iptv_live_hidden_categories),
