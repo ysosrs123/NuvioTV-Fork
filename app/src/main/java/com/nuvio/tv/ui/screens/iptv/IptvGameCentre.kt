@@ -34,7 +34,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.tv.material3.MaterialTheme
@@ -70,11 +73,12 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class IptvSportsSummaryViewModel @Inject constructor(private val client: IptvSportsSummaryClient, private val preferences: IptvSportsPreferences) : ViewModel() {
-    private class Entry(val watch: IptvSportsSummaryWatch, var users: Int = 0, var closing: Job? = null)
+    private class Entry(val watch: IptvSportsSummaryWatch, var fixture: SportsFixture, var users: Int = 0, var closing: Job? = null)
     private val entries = mutableMapOf<String, Entry>()
 
     fun acquire(fixture: SportsFixture): StateFlow<SportsSummary?> {
-        val entry = entries.getOrPut(fixture.key) { Entry(IptvSportsSummaryWatch(client, viewModelScope)) }
+        val entry = entries.getOrPut(fixture.key) { Entry(IptvSportsSummaryWatch(client, viewModelScope), fixture) }
+        entry.fixture = fixture
         entry.closing?.cancel(); entry.closing = null
         entry.users++
         entry.watch.start(fixture, preferences.service)
@@ -90,6 +94,10 @@ class IptvSportsSummaryViewModel @Inject constructor(private val client: IptvSpo
         }
     }
 
+    fun pause() { entries.values.forEach { it.watch.stop() } }
+
+    fun resume() { entries.values.filter { it.users > 0 }.forEach { it.watch.start(it.fixture, preferences.service) } }
+
     override fun onCleared() { entries.values.forEach { it.watch.stop() }; entries.clear() }
 
     private companion object { const val LINGER_MILLIS = 60_000L }
@@ -101,6 +109,15 @@ private val NO_SUMMARY = MutableStateFlow<SportsSummary?>(null)
 internal fun rememberSportsSummary(fixture: SportsFixture?, viewModel: IptvSportsSummaryViewModel = hiltViewModel()): SportsSummary? {
     val key = fixture?.key
     var flow by remember(key) { mutableStateOf<StateFlow<SportsSummary?>>(NO_SUMMARY) }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) viewModel.pause()
+            if (event == Lifecycle.Event.ON_START) viewModel.resume()
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
     DisposableEffect(key) {
         if (fixture == null) return@DisposableEffect onDispose { }
         flow = viewModel.acquire(fixture)

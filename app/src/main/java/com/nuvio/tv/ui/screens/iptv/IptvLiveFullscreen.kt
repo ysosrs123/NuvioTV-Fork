@@ -97,7 +97,8 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
     val watchedAt = watchedMinute?.takeIf { behind }?.times(MINUTE_MILLIS) ?: now
     val game = fixtures.takeIf { it.enabled }?.let { playingFixture(it.rows, state.playingId, watchedAt) }
     val seekable = state.catchup != null || state.localTimeshift
-    val summary = rememberSportsSummary(game?.fixture?.takeIf { controls && seekable && state.multiview == null })
+    val hideScores = game?.let { scoreHidden(fixtures, it.fixture) } ?: true
+    val summary = rememberSportsSummary(game?.fixture?.takeIf { controls && seekable && state.multiview == null && !hideScores })
     LaunchedEffect(game == null) { if (game == null) { centre = false; feeds = false } }
     LaunchedEffect(panel, controls, centre, feeds) { if (!panel && !controls && !centre && !feeds) runCatching { focus.requestFocus() } }
     LaunchedEffect(banner, state.playingId) { if (banner >= 0) { delay(5_000); banner = -1 } }
@@ -164,7 +165,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
             overlayFocused = it.hasFocus
             if (was && !it.hasFocus && !panel && !controls && !centre && !feeds) runCatching { focus.requestFocus() }
         }) {
-            IptvSportsOverlayLayer(state.playingId, controls || centre || feeds, onWatch = { panel = false; centre = false; feeds = false; onWatch(it) }, Modifier.fillMaxSize())
+            IptvSportsOverlayLayer(state.playingId, controls || centre || feeds || panel || digits.isNotEmpty(), onWatch = { panel = false; centre = false; feeds = false; onWatch(it) }, Modifier.fillMaxSize())
         }
         ReconnectingPill(state, Modifier.align(Alignment.TopStart).padding(36.dp))
         state.message?.let { message ->
@@ -192,13 +193,13 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
                     else -> onControl(action)
                 }
             }, onHide = { controls = false; liveFirst = false }, onScrub = { onScrub(it) }, onGoLive = onGoLive, focusGoLive = liveFirst,
-                markers = sportsMarkers(summary, game?.fixture), feeds = game?.links?.size ?: 0,
+                markers = if (hideScores) emptyList() else sportsMarkers(summary, game?.fixture), feeds = game?.links?.size ?: 0,
                 onCentre = game?.let { { controls = false; centre = true } },
                 onFeeds = game?.takeIf { it.links.size > 1 }?.let { { controls = false; feeds = true } })
         }
         AnimatedVisibility(banner >= 0 && !panel && !controls && !centre && !feeds, Modifier.align(Alignment.BottomCenter),
             enter = fadeIn() + slideInVertically { it / 3 }, exit = fadeOut() + slideOutVertically { it / 3 }) {
-            Banner(state, now, game, game?.let { scoreHidden(fixtures, it.fixture) } ?: true)
+            Banner(state, now, game, hideScores)
         }
         AnimatedVisibility(squeezed, Modifier.align(Alignment.CenterEnd),
             enter = fadeIn() + slideInHorizontally { it / 4 }, exit = fadeOut() + slideOutHorizontally { it / 4 }) {

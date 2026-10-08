@@ -18,8 +18,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.tv.material3.MaterialTheme
@@ -51,6 +54,7 @@ import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,13 +85,18 @@ class IptvTeamViewModel @Inject constructor(savedState: SavedStateHandle, privat
     private var links = emptyMap<String, List<IptvFixtureLink>>()
     private var spoilers = emptySet<String>()
     private var loaded = false
+    private var refresher: Job? = null
 
     init {
-        viewModelScope.launch { while (isActive) { load(); delay(REFRESH_MILLIS) } }
         viewModelScope.launch { sports.rules.collect { publish() } }
         viewModelScope.launch { sports.reminders.collect { publish() } }
         viewModelScope.launch { recorder.all.collect { publish() } }
         viewModelScope.launch { mutable.value = mutable.value.copy(saveTo = withContext(Dispatchers.IO) { runCatching { recorder.freeSpace()?.drive }.getOrNull() }) }
+    }
+
+    fun active(on: Boolean) {
+        if (!on) { refresher?.cancel(); refresher = null; return }
+        if (refresher?.isActive != true) refresher = viewModelScope.launch { while (isActive) { load(); delay(REFRESH_MILLIS) } }
     }
 
     private suspend fun load() {
@@ -125,7 +134,7 @@ class IptvTeamViewModel @Inject constructor(savedState: SavedStateHandle, privat
 
     fun toggleReminder(fixture: SportsFixture) { sports.toggleReminder(fixture) }
 
-    fun record(fixture: SportsFixture) { viewModelScope.launch { messages.emit(sports.record(fixture)) } }
+    fun record(fixture: SportsFixture, link: IptvFixtureLink) { viewModelScope.launch { messages.emit(sports.record(fixture, link)) } }
 
     fun watch(link: IptvFixtureLink) = sports.watch(link.row)
 
@@ -149,6 +158,15 @@ fun IptvTeamScreen(viewModel: IptvTeamViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle, viewModel) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) viewModel.active(true)
+            if (event == Lifecycle.Event.ON_STOP) viewModel.active(false)
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer); viewModel.active(false) }
+    }
     LaunchedEffect(viewModel) { viewModel.message.collect { Toast.makeText(context, it, Toast.LENGTH_LONG).show() } }
     Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
         if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
@@ -258,7 +276,7 @@ private fun NextPanel(state: IptvTeamState, viewModel: IptvTeamViewModel) {
                 IptvTeamRecording.SET, IptvTeamRecording.RECORDING -> Text(stringResource(if (state.recording == IptvTeamRecording.SET) R.string.iptv_sport5_nuvio_recording_set
                     else R.string.iptv_sport5_nuvio_recording_now), style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.Error,
                     modifier = Modifier.align(Alignment.CenterVertically))
-                else -> if (link != null) NuvioActionPill({ viewModel.record(fixture) }) { Text(stringResource(R.string.iptv_sport5_nuvio_record_game)) }
+                else -> if (link != null) NuvioActionPill({ viewModel.record(fixture, link) }) { Text(stringResource(R.string.iptv_sport5_nuvio_record_game)) }
                     else if (state.recording == IptvTeamRecording.RULE) Text(stringResource(R.string.iptv_sport5_nuvio_records_all), style = MaterialTheme.typography.labelLarge,
                         color = NuvioTheme.colors.TextSecondary, modifier = Modifier.align(Alignment.CenterVertically))
             }

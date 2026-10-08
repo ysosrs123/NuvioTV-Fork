@@ -34,8 +34,10 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,11 +63,13 @@ import com.nuvio.tv.core.iptv.SportsFavourites
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureText
 import com.nuvio.tv.core.iptv.SportsNuvioAlert
+import com.nuvio.tv.core.iptv.SportsOverlayText
 import com.nuvio.tv.core.iptv.SportsRecordRules
 import com.nuvio.tv.core.iptv.SportsRecordTarget
 import com.nuvio.tv.core.iptv.SportsRecordedWindow
 import com.nuvio.tv.core.iptv.SportsRefresh
 import com.nuvio.tv.core.iptv.SportsReminder
+import com.nuvio.tv.core.iptv.SportsReminders
 import com.nuvio.tv.core.iptv.SportsService
 import com.nuvio.tv.core.iptv.SportsSpoilers
 import com.nuvio.tv.core.profile.ProfileManager
@@ -116,6 +120,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -165,6 +170,7 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
     private val muted = HashSet<String>()
     private val handled = HashSet<String>()
     private var handle: IptvSportsLive.Handle? = null
+    private val reminderSurfaces = java.util.concurrent.atomic.AtomicInteger()
     private var worker: Job? = null
     private var loadedAt = 0L
     private var linkedAt = 0L
@@ -215,6 +221,14 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
 
     fun fixture(key: String): SportsFixture? = fixtureList.value.firstOrNull { it.key == key }
 
+    val remindersShown: Boolean get() = reminderSurfaces.get() > 0
+
+    fun showReminders(): () -> Unit {
+        reminderSurfaces.incrementAndGet()
+        val released = java.util.concurrent.atomic.AtomicBoolean()
+        return { if (released.compareAndSet(false, true)) reminderSurfaces.decrementAndGet() }
+    }
+
     fun openTeam(key: String) { requestEvents.tryEmit(IptvSportsRequest.Team(key)) }
 
     fun watch(row: IptvListedChannel) {
@@ -222,10 +236,15 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
         requestEvents.tryEmit(IptvSportsRequest.Live)
     }
 
-    fun watch(fixture: SportsFixture): Boolean {
-        val link = linkFor(fixture.key) ?: run { noticeEvents.tryEmit(context.getString(R.string.iptv_sport5_nuvio_no_channel_now, plainTitle(fixture))); return false }
-        watch(link.row)
-        return true
+    fun watch(fixture: SportsFixture, fallback: IptvFixtureLink? = null) {
+        val known = linkFor(fixture.key) ?: fallback
+        if (known != null) { watch(known.row); return }
+        scope.launch {
+            val link = try { link(sources(profiles.activeProfileId.value), listOf(fixture), System.currentTimeMillis())[fixture.key]?.firstOrNull() }
+                catch (cancel: CancellationException) { throw cancel }
+                catch (error: Exception) { IptvLog.failure("sports nuvio watch", error); null }
+            if (link != null) watch(link.row) else noticeEvents.emit(context.getString(R.string.iptv_sport5_nuvio_no_channel_now, plainTitle(fixture)))
+        }
     }
 
     fun follow(key: String, on: Boolean) {
@@ -253,8 +272,8 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
         }
     }
 
-    suspend fun record(fixture: SportsFixture): String {
-        val link = linkFor(fixture.key) ?: return context.getString(R.string.iptv_sport5_nuvio_no_channel_now, plainTitle(fixture))
+    suspend fun record(fixture: SportsFixture, fallback: IptvFixtureLink? = null): String {
+        val link = linkFor(fixture.key) ?: fallback ?: return context.getString(R.string.iptv_sport5_nuvio_no_channel_now, plainTitle(fixture))
         return when (val result = schedule(fixture, link)) {
             is IptvRecordResult.Accepted -> context.getString(R.string.iptv_sport5_nuvio_recording_set_for, plainTitle(fixture))
             is IptvRecordResult.Refused -> context.getString(R.string.iptv_sport5_nuvio_record_refused, plainTitle(fixture), context.getString(iptvRecordRefusalMessage(result.reason)))
@@ -316,10 +335,12 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
 
     private fun merge(fixtures: List<SportsFixture>) {
         val now = System.currentTimeMillis()
-        val next = LinkedHashMap<String, SportsFixture>()
-        fixtureList.value.forEach { next[it.key] = it }
-        fixtures.forEach { next[it.key] = it }
-        fixtureList.value = next.values.filter { it.startMillis + SportsRefresh.durationMillis(it) + KEEP_MILLIS > now }.sortedBy { it.startMillis }
+        fixtureList.update { current ->
+            val next = LinkedHashMap<String, SportsFixture>()
+            current.forEach { next[it.key] = it }
+            fixtures.forEach { next[it.key] = it }
+            next.values.filter { it.startMillis + SportsRefresh.durationMillis(it) + KEEP_MILLIS > now }.sortedBy { it.startMillis }
+        }
         refreshSpoilers()
     }
 
@@ -439,11 +460,11 @@ fun IptvSportsNuvioHost(navController: NavHostController) {
     LaunchedEffect(nuvio) { nuvio.notices.collect { Toast.makeText(context, it, Toast.LENGTH_LONG).show() } }
     var due by remember { mutableStateOf<SportsReminder?>(null) }
     LaunchedEffect(nuvio) {
-        nuvio.reminderDue.collect { reminder -> if (currentRoute != Screen.Player.route && currentRoute != Screen.IptvLive.route) due = reminder }
+        nuvio.reminderDue.collect { reminder -> if (currentRoute != Screen.Player.route && !nuvio.remindersShown) due = reminder }
     }
     val summary by nuvio.summary.collectAsState()
     val inPlayer = route == Screen.Player.route
-    due?.takeIf { !inPlayer && route != Screen.IptvLive.route }?.let { reminder ->
+    due?.takeIf { !inPlayer }?.let { reminder ->
         ReminderDialog(reminder, nuvio.fixture(reminder.key), onWatch = { fixture -> due = null; nuvio.watch(fixture) }, onDismiss = { due = null })
     }
     summary?.takeIf { !inPlayer && due == null }?.let { lines -> SummaryDialog(lines, nuvio, onDismiss = nuvio::closeSummary) }
@@ -510,8 +531,8 @@ fun IptvSportsPlayerAlerts(controlsVisible: Boolean, timeline: StateFlow<Playbac
         return quiet > 0 && !state.isLive && state.duration > 0 && state.duration - state.currentPosition <= quiet
     }
     fun offer(alert: IptvPlayerAlert) {
-        if (quiet()) return
-        when (nuvio.alertStyle) {
+        if (alert.reminder == null && quiet()) return
+        when (nuvio.alertStyle.takeIf { alert.reminder == null || it != SportsNuvioAlert.OFF } ?: SportsNuvioAlert.POPUP) {
             SportsNuvioAlert.POPUP -> { queue.removeAll { it.key == alert.key }; queue += alert; while (queue.size > MAX_QUEUED) queue.removeAt(0) }
             SportsNuvioAlert.CHIP -> chip = alert
             SportsNuvioAlert.OFF -> Unit
@@ -519,13 +540,15 @@ fun IptvSportsPlayerAlerts(controlsVisible: Boolean, timeline: StateFlow<Playbac
     }
     LaunchedEffect(nuvio) { nuvio.alerts.collect { change -> offer(IptvPlayerAlert(change.fixture, change, null, System.currentTimeMillis())) } }
     LaunchedEffect(nuvio) {
-        nuvio.reminderDue.collect { reminder -> nuvio.fixture(reminder.key)?.let { offer(IptvPlayerAlert(it, null, reminder, System.currentTimeMillis())) } }
+        nuvio.reminderDue.collect { reminder ->
+            offer(IptvPlayerAlert(nuvio.fixture(reminder.key) ?: SportsReminders.fixture(reminder), null, reminder, System.currentTimeMillis()))
+        }
     }
     LaunchedEffect(controlsVisible, queue.size, current) {
         if (current != null || controlsVisible) return@LaunchedEffect
         val now = System.currentTimeMillis()
         queue.removeAll { now - it.at > STALE_MILLIS }
-        if (queue.isNotEmpty() && !quiet()) current = queue.removeAt(0)
+        if (queue.isNotEmpty() && (queue[0].reminder != null || !quiet())) current = queue.removeAt(0)
     }
     LaunchedEffect(chip) { val shown = chip ?: return@LaunchedEffect; delay(CHIP_MILLIS); if (chip === shown) chip = null }
     Box(Modifier.fillMaxSize()) {
@@ -557,14 +580,15 @@ private fun AlertCard(alert: IptvPlayerAlert, nuvio: IptvSportsNuvio, focus: Boo
     LaunchedEffect(alert) { drain.animateTo(0f, tween(POPUP_MILLIS.toInt(), easing = LinearEasing)); onTimeout() }
     val fixture = alert.fixture
     val link = nuvio.linkFor(alert.key)
+    val hidden = alertHidden(alert, nuvio)
     val side = alert.change?.side?.let { if (it == FixtureSide.HOME) fixture.home else fixture.away } ?: fixture.home ?: fixture.away
     Column(modifier.width(430.dp).clip(RoundedCornerShape(16.dp)).background(NuvioTheme.colors.Background.copy(alpha = .95f))) {
         Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             if (side != null) TeamLogo(side, 44.dp)
             Column(Modifier.weight(1f)) {
-                Text(alertHeadline(alert), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.Error, maxLines = 1)
-                Text(iptvScoreLine(fixture, false), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
+                Text(alertHeadline(alert, hidden), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.Error, maxLines = 1)
+                Text(iptvScoreLine(fixture, hidden), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
                     maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(link?.let { stringResource(R.string.iptv_sport5_nuvio_on_channel, sportLeagueName(fixture), channelName(it.row)) } ?: sportLeagueName(fixture),
                     style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -575,27 +599,37 @@ private fun AlertCard(alert: IptvPlayerAlert, nuvio: IptvSportsNuvio, focus: Boo
             NuvioActionPill(onLater, if (link == null) Modifier.focusRequester(first) else Modifier) { Text(stringResource(R.string.iptv_sport5_nuvio_later)) }
             if (alert.change != null) NuvioActionPill(onMute) { Text(stringResource(R.string.iptv_sport5_nuvio_mute_game)) }
         }
-        Box(Modifier.fillMaxWidth().height(3.dp).background(NuvioTheme.colors.TextPrimary.copy(alpha = .14f))) {
-            Box(Modifier.fillMaxWidth(drain.value).height(3.dp).background(NuvioTheme.colors.TextPrimary))
-        }
+        val track = NuvioTheme.colors.TextPrimary.copy(alpha = .14f)
+        val bar = NuvioTheme.colors.TextPrimary
+        Box(Modifier.fillMaxWidth().height(3.dp).drawBehind {
+            drawRect(track)
+            drawRect(bar, size = Size(size.width * drain.value, size.height))
+        })
     }
 }
 
 @Composable
 private fun AlertChip(alert: IptvPlayerAlert, nuvio: IptvSportsNuvio, modifier: Modifier) {
     val fixture = alert.fixture
+    val hidden = alertHidden(alert, nuvio)
     Row(modifier.widthIn(max = 520.dp).clip(RoundedCornerShape(50)).background(NuvioTheme.colors.Background.copy(alpha = .9f))
         .padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Box(Modifier.size(8.dp).clip(CircleShape).background(NuvioTheme.colors.Error))
-        Text(SportsFixtureText.bug(fixture).primary, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
+        Text(if (hidden) SportsOverlayText.match(fixture) else SportsFixtureText.bug(fixture).primary, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
             maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-        Text(listOfNotNull(alertHeadline(alert), nuvio.linkFor(alert.key)?.let { channelName(it.row) }).joinToString(" · "),
+        Text(listOfNotNull(alertHeadline(alert, hidden), nuvio.linkFor(alert.key)?.let { channelName(it.row) }).joinToString(" · "),
             style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1)
     }
 }
 
 @Composable
-private fun alertHeadline(alert: IptvPlayerAlert): String {
+private fun alertHidden(alert: IptvPlayerAlert, nuvio: IptvSportsNuvio): Boolean {
+    val spoilers by nuvio.spoilers.collectAsState()
+    return !nuvio.showScores || alert.key in spoilers
+}
+
+@Composable
+private fun alertHeadline(alert: IptvPlayerAlert, hidden: Boolean): String {
     val fixture = alert.fixture
     val reminder = alert.reminder
     if (reminder != null) {
@@ -609,7 +643,7 @@ private fun alertHeadline(alert: IptvPlayerAlert): String {
             else R.string.iptv_sport2_final)
         null -> ""
     }
-    val state = SportsFixtureText.bug(fixture).state?.takeIf { fixture.status == FixtureStatus.LIVE }
+    val state = SportsFixtureText.bug(fixture).state?.takeIf { fixture.status == FixtureStatus.LIVE && !hidden }
     return listOfNotNull(label.takeIf { it.isNotEmpty() }, state).joinToString(" · ")
 }
 

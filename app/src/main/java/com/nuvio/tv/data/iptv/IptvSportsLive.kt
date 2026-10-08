@@ -119,7 +119,7 @@ class IptvSportsLive(private val repository: IptvSportsFixturesRepository, priva
                         else SportsPolling.backgroundDelay(result.fixtures, favourites, now)
                 }
                 mutable.value = IptvSportsSnapshot(result, now, favourites, showScores, mode, refresh)
-                if (result.service == SportsService.OFF) { synchronized(this) { previous = null }; return }
+                if (result.service == SportsService.OFF) { synchronized(this) { previous = null }; refresh = false; delay(CHECK_MILLIS); continue }
             } catch (cancel: CancellationException) { throw cancel }
             catch (error: Exception) {
                 IptvLog.failure("sports fixtures", error)

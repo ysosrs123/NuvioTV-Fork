@@ -114,6 +114,8 @@ internal fun IptvSportsOverlayLayer(playingId: String?, controlsVisible: Boolean
     }
     LaunchedEffect(onScreen) { viewModel.setOnScreen(onScreen) }
     DisposableEffect(viewModel) { onDispose { viewModel.setOnScreen(emptySet()) } }
+    val nuvio = rememberIptvSportsNuvio()
+    DisposableEffect(nuvio) { val release = nuvio.showReminders(); onDispose { release() } }
     val alerts = remember { mutableStateListOf<SportsChange>() }
     val reminders = remember { mutableStateListOf<SportsReminder>() }
     val latestSettings by rememberUpdatedState(settings)

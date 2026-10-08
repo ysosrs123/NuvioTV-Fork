@@ -150,6 +150,15 @@ class SportsLiveTest {
         assertNull(SportsReminders.decode("nope"))
     }
 
+    @Test fun reminderFallsBackToAPlainFixture() {
+        val fixture = SportsReminders.fixture(SportsReminder("afl:401", "Sydney v Geelong", now + 5 * minute, 0))
+        assertEquals("afl:401", fixture.key)
+        assertEquals("Sydney v Geelong", fixture.title)
+        assertEquals(FixtureStatus.SCHEDULED, fixture.status)
+        assertEquals("australian-football", fixture.sport)
+        assertNull(fixture.home)
+    }
+
     @Test fun pollingQuickensOnlyForFollowedGames() {
         val favourites = setOf(SportsFavourites.key("afl", swans))
         val live = afl("1", FixtureStatus.LIVE, "10–5")

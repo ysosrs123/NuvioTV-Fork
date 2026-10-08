@@ -353,6 +353,17 @@ Sport:
 
 - The new sport screens and settings are translated into all 40 languages.
 
+Fixes from a review of the sports build:
+- Score markers and Previous/Next score are hidden when scores are hidden (Show scores
+  off or an unwatched recording of the game), as everywhere else.
+- Pop-ups in Nuvio's player respect hidden scores.
+- Reminders always show (also outside full screen and with alerts off) instead of being
+  dropped; Record and Watch on a team page work for teams you do not follow.
+- Game details and team pages stop checking scores when Nuvio goes to the background.
+- A score card no longer takes focus from the open channel list or number entry.
+- Smoother playback while a pop-up is shown; sport checks resume after Sport is turned
+  off and on again.
+
 Fixes from an independent review:
 - Recordings saved to the Movies folder no longer stop playing after a quick seek (a
   cancelled read closed the file for every later read; it now reopens).

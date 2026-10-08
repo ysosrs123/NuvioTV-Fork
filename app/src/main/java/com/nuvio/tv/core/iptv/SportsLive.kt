@@ -183,6 +183,12 @@ object SportsReminders {
     fun prune(reminders: Collection<SportsReminder>, nowMillis: Long): List<SportsReminder> =
         reminders.filter { nowMillis <= it.startMillis + KEEP_MILLIS }.distinctBy { it.key }.sortedBy { it.startMillis }.take(MAX)
 
+    fun fixture(reminder: SportsReminder): SportsFixture {
+        val league = reminder.key.substringBefore(':')
+        return SportsFixture(reminder.key.substringAfter(':'), league, SportsLeagues.byId(league)?.sport.orEmpty(), reminder.title, null, null,
+            reminder.startMillis, FixtureStatus.SCHEDULED)
+    }
+
     fun encode(reminder: SportsReminder): String = JSONObject().put("key", reminder.key).put("title", reminder.title)
         .put("start", reminder.startMillis).put("lead", reminder.leadMillis).toString()
 
