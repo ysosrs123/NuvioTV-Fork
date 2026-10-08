@@ -45,7 +45,12 @@ Next, in order:
    baseball) and the summary parser are tested only with synthetic JSON built from the
    documented shapes: run the ESPN capture script during live games and replace the
    synthetic fixtures. The SportsFixture per-sport field is `sportDetail` (`detail` is the
-   status text). Known gaps: football red cards, NRL last try, basketball run and ice
+   status text). Parsers checked against a real ESPN capture (8 October evening, no game in
+   play; 12 mismatches fixed in `374e1f6`, CI green run 37845595141); live-only fields
+   still unverified until the weekend capture. Pending user decisions: combine ESPN and
+   TheSportsDB per league instead of a source choice (proposal given), attribution line
+   and a monogram/logo setting (TheSportsDB terms of 17 September 2026 require crediting
+   the data source and forbid public use of artwork without a confirmed licence). Known gaps: football red cards, NRL last try, basketball run and ice
    hockey power play show only via the summary (Game Centre), not in the scoreboard bug;
    "same channel on another source" is not detected for Other feeds; catch-up of a
    finished game has no fixture link; record-every-game rules run only while the app is
