@@ -80,7 +80,7 @@
     <string name="iptv_review_kept">Current channel list kept.</string>
     <string name="iptv_review_outdated">That list is out of date. Refresh the source to check again.</string>
     <string name="iptv_groups_title">Shared connections</string>
-    <string name="iptv_groups_description">Sources in one group share a single connection limit, for example several playlists from the same account.</string>
+    <string name="iptv_groups_description">Providers limit how many channels one account can play at once, often 1 or 2. If you added the same account more than once, such as its Xtream login and an M3U link, put those sources in one group so they share one limit. This avoids \"maximum connections\" errors when you watch and record at the same time.</string>
     <plurals name="iptv_group_sources">
         <item quantity="one">%1$d source</item>
         <item quantity="other">%1$d sources</item>
@@ -98,7 +98,7 @@
     <string name="iptv_group_sources_description">Ticked sources share this group\'s connections. A source can be in one group.</string>
     <string name="iptv_group_limit_description">How many channels the sources in this group can play or record at once, all together.</string>
     <string name="iptv_transfer_title">Copy and back up</string>
-    <string name="iptv_transfer_description">Move this profile\'s Live TV setup to another TV, or keep a copy in a locked file.</string>
+    <string name="iptv_transfer_description">Copy this profile\'s Live TV setup (sources, guides, favourites, channel order and settings) to another TV on your network, or save it to a backup file locked with a passphrase. Restore it after reinstalling the app or on a new box.</string>
     <string name="iptv_transfer_logins">Include logins</string>
     <string name="iptv_transfer_logins_subtitle">Usernames, passwords, MAC addresses and addresses with logins in them. Without them, those sources are left out.</string>
     <string name="iptv_transfer_back">Back</string>
