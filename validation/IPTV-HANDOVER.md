@@ -537,6 +537,10 @@ Before merge and release (only on the user's confirmation):
 - Nothing may look machine-written: no mention of automated tools or assistants in code,
   comments, docs, commit messages or branch names.
 - Keep this handover, the progress log and the release notes current with every change;
+  the user has asked for this explicitly. Any commit that changes what the app does
+  updates IPTV-RELEASE-NOTES-DRAFT.md in the same commit (the right section, the known
+  limitations and the validation line with the latest CI run). Design-only work is noted
+  in the release notes only once it is built;
   when the session's context nears its limit, update the handover and start a new
   session the same way, and tell the user.
 - Never store API keys (e.g. the user's TheSportsDB key) in the repo, docs or app.
