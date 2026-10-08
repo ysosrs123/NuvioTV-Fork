@@ -144,7 +144,7 @@ class IptvCaptureHttpTest {
                     override fun source() = bytes
                 }).build()
         }.build()
-        val client = IptvCaptureHttp(http)
+        val client = IptvCaptureHttp(http, closeTimeoutMs = 30_000)
         val queue = LinkedBlockingQueue<Runnable>()
         val dispatcher = object : CoroutineDispatcher() {
             override fun dispatch(context: CoroutineContext, block: Runnable) { queue.add(block) }
