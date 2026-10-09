@@ -99,7 +99,12 @@ Next, in order:
 6. Sports follow-ups: a capture while team games are live (scripts in
    `IPTV-SPORTS-DATA-SCRIPTS.md`); golf/tennis/F1/UFC/cricket formats; TheSportsDB TV
    channels via `lookuptv`; URC rugby standings under `children`.
-7. The user will have a separate agent merge the branch into `main`; keep both branches.
+7. Merge into `main` (decided by the user, 9 October 2026; replaces the earlier "no squash
+   merge" note): SQUASH-merge `iptv/player-binding` into `main`, so `main` gets one commit
+   with the final, clean files and none of the branch history. Afterwards the user retires
+   `iptv/player-binding`, `iptv/wip` and `nuvio-test` (branch deletion is the user's action),
+   so the old commits that held removed notes stop being reachable. Do not rewrite history
+   on any branch. A separate agent does the merge.
 
 Caveats and behaviour changes to verify (from the helpers' reports, 8 October):
 - Guide: over-budget guides drop the last-parsed (whole) channels (`budget=` in the log);
@@ -580,10 +585,9 @@ Before merge and release (only on the user's confirmation):
   permissions, service and receivers from `src/iptvPrototype/AndroidManifest.xml` to
   main), keep the separate prototype app, or enable in `full` behind an off-by-default
   setting (suggested). Decided 8 October 2026: part of the full app.
-- Merge (user, 8 October 2026): keep `iptv/player-binding` (and `iptv/wip`); no squash
-  merge or branch deletion from this work. When the work is complete, the user will have
-  a separate agent merge the branch into `main` for a release build. The workflow change
-  and `tools/iptv-host-tests` ship with that merge.
+- Merge (user, 9 October 2026, replaces 8 October): squash-merge `iptv/player-binding`
+  into `main`; the user then retires `iptv/player-binding`, `iptv/wip` and `nuvio-test`. No
+  history rewriting. The workflow change and `tools/iptv-host-tests` ship with that merge.
 
 ## Rules for this branch
 
