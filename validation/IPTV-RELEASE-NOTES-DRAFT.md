@@ -403,6 +403,13 @@ After the device pass of 9 October:
 - Match cards: Record (with the usual start/end padding) or Cancel recording; when no
   channel is known yet, "Record when a channel is found" (also offered in the "No channel
   found" dialog).
+- Widgets in the space between the programme details and the corner picture: 1, 2 or 3
+  tiles (default 2) sized to the free width (tiles too narrow to read are hidden). Hold
+  OK (or OK) on a tile to choose: World clocks (1–4 of 101 built-in cities, local time,
+  "+1 day", day or night; no internet needed), Sport strip (followed and close games,
+  hidden scores respected), Up next on this channel, Recordings (now and next), Stream
+  info (resolution, HDR, codec, bitrate) or Empty. Defaults: clocks for your city, London
+  and New York, and Up next. Up from the guide reaches the tiles; Down returns.
 - "Set up from your phone or computer" is now in the Live TV menu, on Live TV Sources, in
   the no-sources screen and in Live TV settings.
 

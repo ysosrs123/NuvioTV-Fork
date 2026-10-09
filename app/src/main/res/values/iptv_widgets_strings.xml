@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Choose widget</string>
+    <string name="iptv_widgets_choose_subtitle">Widget %1$d · Hold OK on any widget to change it</string>
+    <string name="iptv_widgets_change">OK to change</string>
+    <string name="iptv_widgets_kind_clocks">World clocks</string>
+    <string name="iptv_widgets_kind_clocks_description">The time in up to four cities</string>
+    <string name="iptv_widgets_kind_sport">Sport strip</string>
+    <string name="iptv_widgets_kind_sport_description">Your teams\' games and close games</string>
+    <string name="iptv_widgets_kind_up_next">Up next</string>
+    <string name="iptv_widgets_kind_up_next_description">The next two programmes on the selected channel</string>
+    <string name="iptv_widgets_kind_recordings">Recordings</string>
+    <string name="iptv_widgets_kind_recordings_description">What\'s recording now and what\'s next</string>
+    <string name="iptv_widgets_kind_stream">Stream info</string>
+    <string name="iptv_widgets_kind_stream_description">Picture size, HDR, codec and bitrate of the playing channel</string>
+    <string name="iptv_widgets_kind_empty">Empty</string>
+    <string name="iptv_widgets_kind_empty_description">Leave this space blank</string>
+    <string name="iptv_widgets_add">Press OK to add a widget</string>
+    <string name="iptv_widgets_layout">Layout</string>
+    <string name="iptv_widgets_layout_subtitle">Widgets that don\'t fit on this screen are hidden</string>
+    <string name="iptv_widgets_layout_one">One wide widget</string>
+    <string name="iptv_widgets_layout_two">Two widgets</string>
+    <string name="iptv_widgets_layout_three">Three widgets</string>
+    <string name="iptv_widgets_cities">Change cities</string>
+    <string name="iptv_widgets_cities_subtitle">Up to four cities. Select a city to remove it.</string>
+    <string name="iptv_widgets_city_add">Add a city</string>
+    <string name="iptv_widgets_city_search">Search cities</string>
+    <string name="iptv_widgets_city_none">No matching cities</string>
+    <string name="iptv_widgets_city_device">This device</string>
+    <string name="iptv_widgets_done">Done</string>
+    <string name="iptv_widgets_no_cities">No cities chosen</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d day</item>
+        <item quantity="other">+%d days</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d day</item>
+        <item quantity="other">−%d days</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">No games now</string>
+    <string name="iptv_widgets_sport_off">Sport is turned off</string>
+    <string name="iptv_widgets_no_channel">Choose a channel</string>
+    <string name="iptv_widgets_no_guide">No guide for this channel</string>
+    <string name="iptv_widgets_recording_now">Recording · until %1$s</string>
+    <string name="iptv_widgets_recording_next">Next · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d more</string>
+    <string name="iptv_widgets_no_recordings">Nothing recording or scheduled</string>
+    <string name="iptv_widgets_nothing_playing">Nothing playing</string>
+    <string name="iptv_widgets_stream_waiting">Waiting for the picture</string>
+    <string name="iptv_widgets_stream_resolution">Picture</string>
+    <string name="iptv_widgets_stream_codec">Codec</string>
+    <string name="iptv_widgets_stream_range">Range</string>
+    <string name="iptv_widgets_stream_bitrate">Bitrate</string>
+</resources>

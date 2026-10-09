@@ -82,6 +82,7 @@ import com.nuvio.tv.data.local.PlayerControlAction
 import com.nuvio.tv.data.local.PlayerControlLayout
 import com.nuvio.tv.core.iptv.GuideMatchReason
 import com.nuvio.tv.core.iptv.ListMove
+import com.nuvio.tv.core.iptv.LiveWidgets
 import com.nuvio.tv.data.iptv.IptvGuideRef
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.data.iptv.IptvStreamFormat
@@ -109,6 +110,8 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     var fullscreen by remember { mutableStateOf(false) }
     var railOpen by remember { mutableStateOf(false) }
+    val vodMenu by IptvVodLiveMenu.requested.collectAsStateWithLifecycle()
+    LaunchedEffect(vodMenu) { if (vodMenu) { IptvVodLiveMenu.requested.value = false; railOpen = true } }
     var searching by remember { mutableStateOf(false) }
     val searchFocus = remember { FocusRequester() }
     var showTracks by remember(state.player) { mutableStateOf(false) }
@@ -149,6 +152,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
     }
     IptvSportsFixturesSync(state.source, state.hiddenCategories, state.sportEnabled)
     val sport = rememberIptvSportsGuide(state.sportEnabled)
+    val widgets = rememberIptvWidgetSettings()
     var sportOnly by remember { mutableStateOf(IptvSportOnly.on) }
     var guideSpan by remember { mutableLongStateOf(2 * 60 * MINUTE_MILLIS) }
     val sportOnlyFocus = remember { FocusRequester() }
@@ -251,9 +255,14 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
             if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
             BoxWithConstraints(Modifier.fillMaxSize().sidebarPageContent().padding(start = if (LocalV2Appearance.current != null) 16.dp else 40.dp, end = 24.dp, top = 16.dp, bottom = 14.dp)) {
                 val topHeight = (maxHeight - if (state.density == com.nuvio.tv.core.iptv.GuideDensity.COMPACT) GUIDE_RESERVE_COMPACT else GUIDE_RESERVE).coerceIn(150.dp, 240.dp)
+                val hero = state.sports && state.search.isBlank()
+                val slots = remember(maxWidth, topHeight, widgets.layout, hero) {
+                    if (hero) emptyList() else LiveWidgets.slots((maxWidth - topHeight * (16f / 9f) - LiveWidgets.SPACING.dp).value.toInt(), widgets.layout)
+                }
                 Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(Modifier.fillMaxWidth().height(topHeight), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                        IptvSportHero(state.sports && state.search.isBlank(), Modifier.weight(1f).fillMaxHeight()) { InfoPanel(state, now, cursor, it) }
+                    Row(Modifier.fillMaxWidth().height(topHeight), horizontalArrangement = Arrangement.spacedBy(LiveWidgets.SPACING.dp)) {
+                        IptvSportHero(hero, Modifier.weight(1f).fillMaxHeight()) { InfoPanel(state, now, cursor, it) }
+                        if (slots.isNotEmpty()) IptvWidgetRow(slots, widgets, state, Modifier.fillMaxHeight(), onDown = { focusContent() }, onRail = { railOpen = true })
                         Preview(state, Modifier.fillMaxHeight().aspectRatio(16f / 9f), onClick = {
                             val row = state.playingRow ?: state.focused
                             if (state.player != null) fullscreen = true else if (row != null) viewModel.watch(row)
@@ -581,19 +590,20 @@ private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, modifier: M
                     color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold)
                 programme?.let { item ->
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(timeRange(item), color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
-                        if (airing(item, now)) progress(item, now)?.let { ProgressLine(it, Modifier.width(200.dp)) }
+                        Text(timeRange(item), color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
+                        if (airing(item, now)) progress(item, now)?.let { ProgressLine(it, Modifier.weight(1f).widthIn(max = 200.dp)) }
                         if (airing(item, now)) item.stop?.epochMillis?.let { stop -> Text(stringResource(R.string.iptv_live_minutes_left, ((stop - now) / MINUTE_MILLIS).toInt() + 1),
-                            color = NuvioTheme.colors.TextTertiary, style = MaterialTheme.typography.bodyMedium) }
+                            color = NuvioTheme.colors.TextTertiary, style = MaterialTheme.typography.bodyMedium, maxLines = 1) }
                         if (item.start.epochMillis > now) Text(stringResource(R.string.iptv_live_starts_in, ((item.start.epochMillis - now) / MINUTE_MILLIS).toInt() + 1),
-                            color = NuvioTheme.colors.TextTertiary, style = MaterialTheme.typography.bodyMedium)
+                            color = NuvioTheme.colors.TextTertiary, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     description(item)?.let { Text(it, color = NuvioTheme.colors.TextSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodySmall) }
                 }
             }
         }
         Spacer(Modifier.weight(1f))
-        Text(stringResource(R.string.iptv_live_guide_hint), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+        Text(stringResource(R.string.iptv_live_guide_hint), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1,
+            overflow = TextOverflow.Ellipsis)
     }
 }
 

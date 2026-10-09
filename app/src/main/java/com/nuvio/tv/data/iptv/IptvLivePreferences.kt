@@ -5,6 +5,9 @@ import com.nuvio.tv.core.iptv.CategoryOrder
 import com.nuvio.tv.core.iptv.GuideDensity
 import com.nuvio.tv.core.iptv.LivePreferenceKeys
 import com.nuvio.tv.core.iptv.LiveUserAgent
+import com.nuvio.tv.core.iptv.LiveWidgetKind
+import com.nuvio.tv.core.iptv.LiveWidgetLayout
+import com.nuvio.tv.core.iptv.LiveWidgets
 import com.nuvio.tv.core.iptv.MultiviewLayout
 import com.nuvio.tv.core.iptv.MultiviewQuality
 import com.nuvio.tv.core.iptv.RecordingLocations
@@ -68,6 +71,19 @@ class IptvLivePreferences(context: Context) {
     var autoPreview: Boolean
         get() = preferences.getBoolean(PREVIEW_KEY, true)
         set(value) = preferences.edit().putBoolean(PREVIEW_KEY, value).apply()
+
+    var widgetLayout: LiveWidgetLayout
+        get() = enumValue(WIDGET_LAYOUT_KEY, LiveWidgets.DEFAULT_LAYOUT)
+        set(value) = putString(WIDGET_LAYOUT_KEY, value.name)
+    var widgetKinds: List<LiveWidgetKind>
+        get() = LiveWidgets.kinds(List(LiveWidgetLayout.THREE.slots) { preferences.getString(WIDGET_KIND_PREFIX + it, null) })
+        set(value) = preferences.edit().apply { value.take(LiveWidgetLayout.THREE.slots).forEachIndexed { index, kind -> putString(WIDGET_KIND_PREFIX + index, kind.name) } }.apply()
+
+    fun widgetCities(deviceZone: String): List<String> = LiveWidgets.savedCities(preferences.getString(WIDGET_CITIES_KEY, null)?.let { saved ->
+        runCatching { org.json.JSONArray(saved).let { array -> (0 until minOf(array.length(), MAX_SAVED_CITIES)).map(array::getString) } }.getOrNull()
+    }, deviceZone)
+
+    fun setWidgetCities(ids: List<String>) = putString(WIDGET_CITIES_KEY, org.json.JSONArray(ids.take(LiveWidgets.MAX_CITIES)).toString())
 
     val currentAppearance: IptvAppearance
         get() = IptvAppearance(preferences.getString(THEME_KEY, null)?.takeIf { it.length <= 40 },
@@ -156,5 +172,9 @@ class IptvLivePreferences(context: Context) {
         private const val DENSITY_KEY = "settings-density"
         private const val CATEGORY_ORDER = "category-order"
         private const val USER_AGENT = "user-agent"
+        private const val WIDGET_LAYOUT_KEY = "widgets-layout"
+        private const val WIDGET_KIND_PREFIX = "widgets-kind-"
+        private const val WIDGET_CITIES_KEY = "widgets-cities"
+        private const val MAX_SAVED_CITIES = 16
     }
 }
