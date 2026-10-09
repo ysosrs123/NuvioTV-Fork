@@ -2,7 +2,7 @@
 package com.nuvio.tv.ui.screens.iptv
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -111,14 +111,14 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
         if (state.ready && !state.busy && !initiallyFocused) { withFrameNanos { }; runCatching { first.requestFocus() }; initiallyFocused = true }
     }
     BackHandler(onBack = onBack)
-    val focusManager = LocalFocusManager.current
-    Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background).onKeyEvent { event ->
-        if (event.type != KeyEventType.KeyDown || event.key != Key.DirectionLeft) false
-        else { if (!focusManager.moveFocus(FocusDirection.Left)) onBack(); true }
+    var leftColumn by remember { mutableStateOf(false) }
+    Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background).onPreviewKeyEvent { event ->
+        if (event.key != Key.DirectionLeft || !leftColumn) false
+        else { if (event.type == KeyEventType.KeyDown && event.nativeKeyEvent.repeatCount == 0) onLive(); true }
     }) {
         if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-            Column(Modifier.width(340.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(Modifier.width(340.dp).fillMaxHeight().onFocusChanged { leftColumn = it.hasFocus }, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 SettingsDetailHeader(stringResource(R.string.iptv_sources_title), stringResource(R.string.iptv_sources_description))
                 Spacer(Modifier.height(12.dp))
                 SettingsActionRow(title = stringResource(R.string.iptv_live_title), subtitle = stringResource(R.string.iptv_sources_watch_subtitle),
@@ -127,10 +127,10 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
                 SettingsActionRow(title = stringResource(R.string.iptv_live_add_source), subtitle = stringResource(R.string.iptv_sources_add_subtitle),
                     onClick = { choosingKind = true }, enabled = state.ready && !state.busy, leadingIcon = Icons.Filled.Add,
                     modifier = if (state.sources.isEmpty()) Modifier.focusRequester(first) else Modifier)
+                SettingsActionRow(title = stringResource(R.string.iptv_ui9_phone_setup), subtitle = stringResource(R.string.iptv_remote_entry_subtitle),
+                    onClick = onSetup, leadingIcon = Icons.Filled.PhoneAndroid)
                 SettingsActionRow(title = stringResource(R.string.iptv_add_guide), subtitle = stringResource(R.string.iptv_sources_guide_subtitle),
                     onClick = { viewModel.add(true) }, enabled = state.ready && !state.busy, leadingIcon = Icons.Filled.Schedule)
-                SettingsActionRow(title = stringResource(R.string.iptv_remote_entry_title), subtitle = stringResource(R.string.iptv_remote_entry_subtitle),
-                    onClick = onSetup, enabled = state.ready, leadingIcon = Icons.Filled.PhoneAndroid)
                 Spacer(Modifier.weight(1f))
                 if (state.busy) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     LoadingIndicator(Modifier.size(20.dp))

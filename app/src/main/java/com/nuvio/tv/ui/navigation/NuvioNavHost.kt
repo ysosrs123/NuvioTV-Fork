@@ -1241,6 +1241,7 @@ private fun PlaybackNavHost(
         composable(Screen.IptvLive.route) {
             com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvLiveScreen(
                 onRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } },
+                onSetup = { navController.navigate(Screen.IptvSetup.route) { launchSingleTop = true } },
                 onVod = { kind -> navController.navigate(Screen.IptvVod.createRoute(kind.wire)) { launchSingleTop = true } },
                 onSettings = {
                     com.nuvio.tv.ui.screens.settings.SettingsCategoryRequest.open(com.nuvio.tv.ui.screens.settings.SettingsCategory.LIVE_TV)

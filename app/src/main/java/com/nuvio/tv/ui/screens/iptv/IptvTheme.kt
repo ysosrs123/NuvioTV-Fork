@@ -80,4 +80,11 @@ fun IptvTheme(content: @Composable () -> Unit) {
     }
 }
 
+@Composable
+internal fun IptvPanelFloor(content: @Composable () -> Unit) {
+    val context = LocalContext.current
+    val appearance by remember { IptvLivePreferences.appearance(context) }.collectAsState()
+    CompositionLocalProvider(LocalIptvAppearance provides appearance, LocalGlassBodyFloor provides if (appearance.solidPanels) 1f else GLASS_FLOOR, content = content)
+}
+
 internal fun iptvTheme(name: String?): AppTheme? = AppTheme.entries.firstOrNull { it.name == name && it != AppTheme.CUSTOM }

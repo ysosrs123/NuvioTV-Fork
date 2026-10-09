@@ -361,6 +361,22 @@ Sport:
 - Other feeds also lists the same channel on your other sources; the backup switch
   prefers it.
 
+After the device pass of 9 October:
+- Back: full screen → guide → Live TV menu → "Leave Live TV?" (Stay / Leave to Home), so
+  Live TV no longer closes by accident. Search, multiview, panels and dialogs close first.
+- Full screen: Left opens the channel list, a second Left shows the categories (choosing
+  one reloads the list), Left again or Back closes.
+- Left on Live TV Sources returns to the guide.
+- Guide: slightly larger programme titles; Compact is the default density (a saved choice
+  is kept); the corner picture is larger (about 640×360 at 1080p) with at least six
+  compact rows still visible.
+- Panels and dialogs that were see-through are now opaque like the rest of Live TV: Live
+  TV settings dialogs (incl. sport key and add league), the search field, the move hint
+  and classic-style dialogs inside Live TV. Defaults unchanged (Solid panels, Pure black
+  and artwork off).
+- "Set up from your phone or computer" is now in the Live TV menu, on Live TV Sources, in
+  the no-sources screen and in Live TV settings.
+
 Sports data from ESPN and TheSportsDB combined (9 October):
 - No more choice of data source: each league uses ESPN when ESPN has it (live detail,
   Game Centre, markers) and TheSportsDB otherwise, with your own TheSportsDB key. If ESPN

@@ -76,6 +76,7 @@ import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.theme.accentBrush
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.components.GlassRole
+import com.nuvio.tv.ui.v2.components.LocalGlassBodyFloor
 import com.nuvio.tv.ui.v2.components.nuvioGlass
 import com.nuvio.tv.ui.v2.components.nuvioV2Focus
 import java.text.DateFormat
@@ -90,14 +91,14 @@ internal val ItemShape = RoundedCornerShape(12.dp)
 internal fun Modifier.iptvPanel(shape: Shape = PanelShape, role: GlassRole = GlassRole.PANEL, edge: Boolean = false): Modifier {
     val solid = LocalIptvAppearance.current.solidPanels
     val v2 = LocalV2Appearance.current != null
-    return if (v2 && !solid) nuvioGlass(role, shape = shape, trailingEdgeOnly = edge)
+    return if (v2 && !solid) nuvioGlass(if (role == GlassRole.CONTROL || role == GlassRole.CARD_FOCUS) GlassRole.PANEL else role, shape = shape, trailingEdgeOnly = edge)
     else if (v2) clip(shape).background(NuvioTheme.colors.BackgroundCard, shape).then(
         if (edge) Modifier.drawWithContent {
             drawContent()
             val x = if (layoutDirection == LayoutDirection.Ltr) size.width - 1.dp.toPx() / 2 else 1.dp.toPx() / 2
             drawLine(Color.White.copy(alpha = .10f), Offset(x, 0f), Offset(x, size.height), 1.dp.toPx())
         } else Modifier.border(1.dp, Color.White.copy(alpha = .08f), shape))
-    else clip(shape).background(if (solid) NuvioTheme.colors.BackgroundCard else NuvioTheme.colors.BackgroundCard.copy(alpha = .96f), shape)
+    else clip(shape).background(if (solid) NuvioTheme.colors.BackgroundCard else NuvioTheme.colors.BackgroundCard.copy(alpha = maxOf(.96f, LocalGlassBodyFloor.current)), shape)
         .border(1.dp, NuvioTheme.colors.Border, shape)
 }
 

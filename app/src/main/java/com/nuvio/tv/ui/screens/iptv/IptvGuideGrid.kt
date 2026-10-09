@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -378,7 +379,7 @@ private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, 
                 ?: stringResource(R.string.iptv_sport5g_sport), null, Modifier.padding(end = 6.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                 Text(title(cell.programme), maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    style = if (spec.detail) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodySmall,
+                    style = if (spec.detail) MaterialTheme.typography.bodyLarge.copy(lineHeight = 20.sp) else MaterialTheme.typography.bodyMedium.copy(lineHeight = 18.sp),
                     fontWeight = if (selected || airing) FontWeight.SemiBold else FontWeight.Normal, color = if (unlinked != null && !selected) content.copy(alpha = .8f) else content)
                 if (wide && spec.detail) Text(if (reminded) "${timeRange(cell.programme)} · ${stringResource(R.string.iptv_sport5g_reminder_set)}" else timeRange(cell.programme),
                     maxLines = 1, style = MaterialTheme.typography.labelSmall, overflow = TextOverflow.Ellipsis,

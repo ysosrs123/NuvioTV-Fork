@@ -53,7 +53,9 @@ import androidx.media3.ui.PlayerView
 import com.nuvio.tv.data.local.PlayerControlAction
 import com.nuvio.tv.data.local.PlayerControlLayout
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Star
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -77,9 +79,10 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
     onPause: (Boolean?) -> Unit, onRewind: () -> Boolean,
     layout: PlayerControlLayout, canStartOver: Boolean, onControl: (PlayerControlAction) -> Unit,
     onScrub: (Long) -> Boolean = { false }, onCloseInset: () -> Unit = {}, onSwapInset: () -> Unit = {}, onChannelMenu: (IptvListedChannel) -> Unit = {},
-    onGoLive: () -> Boolean = { false }) {
+    onGoLive: () -> Boolean = { false }, onFavourites: () -> Unit = {}, onCategory: (String?) -> Unit = {}, onNearEnd: () -> Unit = {}) {
     var banner by remember { mutableIntStateOf(0) }
     var panel by remember { mutableStateOf(false) }
+    var categories by remember { mutableStateOf(false) }
     var controls by remember { mutableStateOf(false) }
     var liveFirst by remember { mutableStateOf(false) }
     var resize by remember { mutableIntStateOf(AspectRatioFrameLayout.RESIZE_MODE_FIT) }
@@ -113,6 +116,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
     LaunchedEffect(digits) {
         if (digits.isNotEmpty()) { delay(1_500); digits.toIntOrNull()?.let(onNumber); digits = ""; banner = 0 }
     }
+    LaunchedEffect(panel) { if (!panel) categories = false }
     BackHandler(panel) { panel = false }
     BackHandler(state.inset != null && !panel && !controls) { onCloseInset() }
     val longPress = rememberLongPressKeyTracker()
@@ -228,7 +232,8 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
         }
         AnimatedVisibility(panel, Modifier.align(Alignment.CenterStart),
             enter = fadeIn() + slideInHorizontally { -it / 4 }, exit = fadeOut() + slideOutHorizontally { -it / 4 }) {
-            ChannelPanel(state, now, onWatch = { panel = false; onWatch(it) }, onMenu = { panel = false; onChannelMenu(it) }, onLeft = { panel = false })
+            ChannelPanel(state, now, onWatch = { panel = false; onWatch(it) }, onNearEnd = onNearEnd, onMenu = { panel = false; onChannelMenu(it) },
+                onLeft = { if (categories) panel = false else categories = true }, showCategories = categories, onFavourites = onFavourites, onCategory = onCategory)
         }
     }
 }
@@ -364,22 +369,30 @@ private const val BEHIND_HINT_MS = 5_000L
 
 @Composable
 internal fun ChannelPanel(state: IptvLiveState, now: Long, onWatch: (IptvListedChannel) -> Unit, channels: List<IptvListedChannel> = state.channels,
-    header: @Composable () -> Unit = {}, onNearEnd: () -> Unit = {}, onMenu: ((IptvListedChannel) -> Unit)? = null, onLeft: (() -> Unit)? = null) {
+    header: @Composable () -> Unit = {}, onNearEnd: () -> Unit = {}, onMenu: ((IptvListedChannel) -> Unit)? = null, onLeft: (() -> Unit)? = null,
+    showCategories: Boolean = false, onFavourites: () -> Unit = {}, onCategory: (String?) -> Unit = {}) {
     var selected by remember(channels.firstOrNull()?.item?.channel?.id) { mutableStateOf(channels.firstOrNull { it.item.channel.id == state.playingId } ?: channels.firstOrNull()) }
     val recent = if (channels !== state.channels) emptyList() else state.recent.drop(1).mapNotNull { id -> state.channels.firstOrNull { it.item.channel.id == id } }.take(4)
     val start = remember { FocusRequester() }
     var leftPressed by remember { mutableStateOf(false) }
+    var inCategories by remember { mutableStateOf(false) }
     val playingIndex = channels.indexOfFirst { it.item.channel.id == state.playingId }
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = (playingIndex - 3).coerceAtLeast(0))
-    LaunchedEffect(channels.firstOrNull()?.item?.channel?.id) { withFrameNanos { }; runCatching { start.requestFocus() } }
+    LaunchedEffect(channels.firstOrNull()?.item?.channel?.id) {
+        val target = playingIndex.coerceAtLeast(0)
+        if (channels.isNotEmpty() && listState.layoutInfo.visibleItemsInfo.none { it.index == target }) listState.scrollToItem((target - 3).coerceAtLeast(0))
+        withFrameNanos { }; runCatching { start.requestFocus() }
+    }
     Row(Modifier.fillMaxHeight().padding(start = 28.dp, top = 28.dp, bottom = 28.dp)
         .onKeyEvent { event ->
             val left = onLeft != null && event.nativeKeyEvent.keyCode == AndroidKeyEvent.KEYCODE_DPAD_LEFT
+            if (left && showCategories && !inCategories) return@onKeyEvent false
             if (left && event.nativeKeyEvent.action == AndroidKeyEvent.ACTION_DOWN) leftPressed = true
             if (left && event.nativeKeyEvent.action == AndroidKeyEvent.ACTION_UP && leftPressed) { leftPressed = false; onLeft?.invoke() }
             left
         }
         .iptvPanel().padding(18.dp), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+        if (showCategories) PanelCategories(state, Modifier.width(250.dp).fillMaxHeight().onFocusChanged { inCategories = it.hasFocus }, onFavourites, onCategory)
         Column(Modifier.width(440.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             header()
             if (recent.isNotEmpty()) {
@@ -396,7 +409,7 @@ internal fun ChannelPanel(state: IptvLiveState, now: Long, onWatch: (IptvListedC
                 }
             }
         }
-        Column(Modifier.width(360.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (!showCategories) Column(Modifier.width(360.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             val row = selected
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (row != null) ChannelLogo(logoUrl(row), channelName(row), Modifier.size(64.dp, 38.dp))
@@ -416,6 +429,37 @@ internal fun ChannelPanel(state: IptvLiveState, now: Long, onWatch: (IptvListedC
                         style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                     if (live) Tag(stringResource(R.string.iptv_live_playing), live = true)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PanelCategories(state: IptvLiveState, modifier: Modifier, onFavourites: () -> Unit, onCategory: (String?) -> Unit) {
+    val visible = state.categories.filter { it.name !in state.hiddenCategories }
+    val current = when {
+        state.favourites -> 0
+        state.category == null -> 1
+        else -> visible.indexOfFirst { it.name == state.category }.let { if (it < 0) 1 else it + 2 }
+    }
+    val focus = remember { FocusRequester() }
+    val list = rememberLazyListState(initialFirstVisibleItemIndex = (current - 3).coerceAtLeast(0))
+    LaunchedEffect(Unit) { withFrameNanos { }; runCatching { focus.requestFocus() } }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        SectionLabel(stringResource(R.string.iptv_live_categories))
+        LazyColumn(state = list, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            item(key = "favourites") {
+                IptvRailItem(stringResource(R.string.iptv_live_favourites), null, state.favourites, if (current == 0) Modifier.focusRequester(focus) else Modifier,
+                    onFavourites, Icons.Filled.Star)
+            }
+            item(key = "all") {
+                IptvRailItem(stringResource(R.string.iptv_live_all), visible.sumOf { it.channels }.takeIf { it > 0 }, !state.favourites && !state.sports && state.category == null,
+                    if (current == 1) Modifier.focusRequester(focus) else Modifier, { onCategory(null) }, Icons.AutoMirrored.Filled.List)
+            }
+            itemsIndexed(visible, key = { _, category -> "category-${category.name}" }) { index, category ->
+                IptvRailItem(category.name.ifEmpty { stringResource(R.string.iptv_live_uncategorised) }, category.channels,
+                    !state.favourites && !state.sports && state.category == category.name, if (current == index + 2) Modifier.focusRequester(focus) else Modifier,
+                    { onCategory(category.name) })
             }
         }
     }

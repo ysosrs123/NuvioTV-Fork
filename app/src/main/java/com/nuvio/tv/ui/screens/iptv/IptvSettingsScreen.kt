@@ -50,6 +50,12 @@ private enum class IptvSettingsChoice { FORMAT, START, LAYOUT, QUALITY, EARLY, L
 @Composable
 internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onRecordings: () -> Unit, initialFocusRequester: FocusRequester? = null,
     viewModel: IptvSettingsViewModel = hiltViewModel()) {
+    IptvPanelFloor { IptvSettingsBody(onSources, onSetup, onRecordings, initialFocusRequester, viewModel) }
+}
+
+@Composable
+private fun IptvSettingsBody(onSources: () -> Unit, onSetup: () -> Unit, onRecordings: () -> Unit, initialFocusRequester: FocusRequester?,
+    viewModel: IptvSettingsViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val locations by viewModel.locations.collectAsStateWithLifecycle()
     val notice by viewModel.notice.collectAsStateWithLifecycle()
@@ -74,7 +80,7 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
                         SettingsActionRow(title = stringResource(R.string.iptv_settings_sources), subtitle = stringResource(R.string.iptv_settings_sources_subtitle),
                             onClick = onSources, leadingIcon = Icons.AutoMirrored.Filled.PlaylistPlay,
                             modifier = if (initialFocusRequester != null) Modifier.focusRequester(initialFocusRequester) else Modifier)
-                        SettingsActionRow(title = stringResource(R.string.iptv_remote_entry_title), subtitle = stringResource(R.string.iptv_remote_entry_subtitle),
+                        SettingsActionRow(title = stringResource(R.string.iptv_ui9_phone_setup), subtitle = stringResource(R.string.iptv_remote_entry_subtitle),
                             onClick = onSetup, leadingIcon = Icons.Filled.PhoneAndroid)
                         SettingsActionRow(title = stringResource(R.string.iptv_recordings_open), subtitle = stringResource(R.string.iptv_settings_recordings_subtitle),
                             onClick = onRecordings, leadingIcon = Icons.Filled.VideoLibrary)

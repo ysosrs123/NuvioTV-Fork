@@ -56,7 +56,7 @@ class IptvLivePreferences(context: Context) {
         set(value) = preferences.edit().putLong(SHARE_FREE_KEY, value ?: -1).apply()
 
     var guideDensity: GuideDensity
-        get() = enumValue(DENSITY_KEY, GuideDensity.COMFORTABLE)
+        get() = enumValue(DENSITY_KEY, GuideDensity.COMPACT)
         set(value) = putString(DENSITY_KEY, value.name)
 
     fun categoryOrder(ref: IptvSourceRef): List<String> = preferences.getString(key(ref, CATEGORY_ORDER), null)?.let { saved ->
