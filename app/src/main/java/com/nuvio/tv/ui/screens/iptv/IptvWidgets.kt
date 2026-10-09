@@ -85,14 +85,14 @@ internal class IptvWidgetSettings(private val preferences: IptvLivePreferences, 
     var cities by mutableStateOf(preferences.widgetCities(deviceZone))
         private set
 
-    fun setLayout(value: LiveWidgetLayout) { layout = value; preferences.widgetLayout = value }
+    fun chooseLayout(value: LiveWidgetLayout) { layout = value; preferences.widgetLayout = value }
 
     fun setKind(slot: Int, kind: LiveWidgetKind) {
         kinds = kinds.mapIndexed { index, old -> if (index == slot) kind else old }
         preferences.widgetKinds = kinds
     }
 
-    fun setCities(ids: List<String>) {
+    fun chooseCities(ids: List<String>) {
         cities = ids.distinct().take(LiveWidgets.MAX_CITIES)
         preferences.setWidgetCities(cities)
     }
@@ -147,12 +147,12 @@ internal fun IptvWidgetRow(slots: List<Int>, settings: IptvWidgetSettings, state
             if (kind == LiveWidgetKind.CLOCKS) dialog = open.copy(step = WidgetStep.CITIES) else close()
         }, onCities = { dialog = open.copy(step = WidgetStep.CITIES) }, onLayout = { dialog = open.copy(step = WidgetStep.LAYOUT) }, onDismiss = ::close)
         WidgetStep.CITIES -> CitiesDialog(settings, minute, onAdd = { dialog = open.copy(step = WidgetStep.ADD_CITY) }, onDismiss = ::close)
-        WidgetStep.ADD_CITY -> CityPicker(settings, onPick = { id -> settings.setCities(settings.cities + id); dialog = open.copy(step = WidgetStep.CITIES) },
+        WidgetStep.ADD_CITY -> CityPicker(settings, onPick = { id -> settings.chooseCities(settings.cities + id); dialog = open.copy(step = WidgetStep.CITIES) },
             onDismiss = { dialog = open.copy(step = WidgetStep.CITIES) })
         WidgetStep.LAYOUT -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_widgets_layout),
             subtitle = stringResource(R.string.iptv_widgets_layout_subtitle),
             options = LiveWidgetLayout.entries.map { SettingsPickerOption(it, stringResource(layoutLabel(it))) },
-            selectedValue = settings.layout, onOptionSelected = { settings.setLayout(it); close() }, onDismiss = ::close)
+            selectedValue = settings.layout, onOptionSelected = { settings.chooseLayout(it); close() }, onDismiss = ::close)
     }
 }
 
@@ -398,7 +398,7 @@ private fun CitiesDialog(settings: IptvWidgetSettings, minute: Long, onAdd: () -
         Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             clocks.forEachIndexed { index, clock ->
                 SettingsActionRow(title = clock.city.name, subtitle = if (clock.city.zone == settings.deviceZone) stringResource(R.string.iptv_widgets_city_device) else null,
-                    value = clock.time, onClick = { settings.setCities(settings.cities.filter { LiveWidgets.city(it)?.id != clock.city.id }) },
+                    value = clock.time, onClick = { settings.chooseCities(settings.cities.filter { LiveWidgets.city(it)?.id != clock.city.id }) },
                     leadingIcon = if (clock.day) Icons.Filled.WbSunny else Icons.Filled.NightsStay, trailingIcon = Icons.Filled.Close,
                     modifier = if (index == 0) Modifier.focusRequester(first) else Modifier)
             }
