@@ -14,7 +14,7 @@ Related: [progress](IPTV-PROGRESS.md), [sports design pass 2](IPTV-SPORTS-DESIGN
 
 ## Start here — next session (from 9 October 2026)
 
-Device pass in progress (user, 9 October): build `374e1f6`, CI run 37845595141 (sports build
+Next device pass: build `8354d89` (run 37867719176), checklist section 7b. Previous pass (9 October): build `374e1f6`, CI run 37845595141 (sports build
 with real-data parser fixes, before the combined ESPN/TheSportsDB sources). Record findings
 against that build. Newer: `d3a0288` (run 37853846775, green) adds the combined ESPN and
 TheSportsDB sources and their translations.
@@ -297,7 +297,9 @@ reporting, resets 10 October 2026 00:00 UTC):
 
 ## Device findings — 9 October 2026 (build `374e1f6`, run 37845595141)
 
-User-reported (status in the following commits):
+All 14 fixed or answered in `495a527`..`8354d89` (CI green run 37867719176, not device-tested);
+item 10 needs the user to add the LOCAL_PROPERTIES_BASE64 repository secret. Also added: widgets
+in the top area, "Find channels using" (guide/broadcasters/both). Items:
 1. Some menus/panels/pop-ups transparent again (defaults: Solid panels off, glass floor 0.9).
 2. Left on Live TV Sources (first page on opening) does nothing.
 3. Back from the guide leaves Live TV for Nuvio Home; wanted: Back opens the Live TV menu,

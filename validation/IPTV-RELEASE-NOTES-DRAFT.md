@@ -655,6 +655,9 @@ Phone setup (security review)
 
 ## Validation
 
+- Fixes from the 9 October device pass, widgets, sport follow-ups and translations: CI debug
+  build green at `8354d89` (run 37867719176; earlier step `ea3fc4e`, run 37864431259);
+  748 core and 276 data-layer JVM tests on the host. Not device-tested.
 - Combined ESPN and TheSportsDB sources with translations: CI debug build green at `d3a0288`
   (run 37853846775); 710 core and 271 data-layer JVM tests on the host.
 - Parsers checked against real ESPN responses (8 October evening): CI debug build green at
