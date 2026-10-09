@@ -1,6 +1,6 @@
 # Retained inspection, sample epochs and seek ownership
 
-Internal development continuation from 43b1dff on codex/iptv, 5 October 2026.
+Internal development continuation from 43b1dff, 5 October 2026.
 These components supply structural media evidence and seek policy. Production
 Media3 playback, pause/timeshift and recording controls remain unconnected.
 
