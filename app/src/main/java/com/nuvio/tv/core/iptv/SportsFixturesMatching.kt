@@ -3,7 +3,26 @@ package com.nuvio.tv.core.iptv
 data class FixtureChannel(val id: String, val name: String, val category: String? = null, val hidden: Boolean = false)
 data class FixtureListing(val channelId: String, val programme: GuideProgramme)
 enum class FixtureLinkReason { GUIDE_TEAMS, GUIDE_LEAGUE, BROADCASTER }
+enum class SportsChannelSource {
+    GUIDE, BROADCASTERS, BOTH;
+    val guide: Boolean get() = this != BROADCASTERS
+    val broadcasters: Boolean get() = this != GUIDE
+}
 data class FixtureLink(val channelId: String, val reason: FixtureLinkReason, val programme: GuideProgramme? = null, val broadcaster: String? = null)
+
+object SportsGuideSlices {
+    const val SLICE_MILLIS = 60L * 60 * 1000
+    const val MAX_SLICES = 24 * SportsDays.MAX_DAYS
+    const val MAX_RECENT_SLICES = 8
+
+    fun plan(upcoming: List<SportsFixture>, recent: List<SportsFixture>, nowMillis: Long, maxSlices: Int = MAX_SLICES,
+        maxRecent: Int = MAX_RECENT_SLICES): Map<Long, List<SportsFixture>> {
+        val ahead = upcoming.groupBy { Math.floorDiv(maxOf(it.startMillis, nowMillis - SLICE_MILLIS), SLICE_MILLIS) }
+        val behind = recent.groupBy { Math.floorDiv(it.startMillis, SLICE_MILLIS) }
+        val kept = ahead.keys.sorted().take(maxSlices) + behind.keys.sortedDescending().take(maxRecent)
+        return kept.distinct().sorted().associateWith { slice -> (ahead[slice].orEmpty() + behind[slice].orEmpty()).distinctBy { it.key } }
+    }
+}
 
 object SportsFixtureMatching {
     const val MAX_LINKS = 6
@@ -11,11 +30,11 @@ object SportsFixtureMatching {
     private const val OPEN_PROGRAMME_MILLIS = 3L * 60 * 60 * 1000
 
     fun link(fixtures: List<SportsFixture>, channels: List<FixtureChannel>, listings: List<FixtureListing>, hiddenCategories: Set<String>,
-        nowMillis: Long, max: Int = MAX_LINKS): Map<String, List<FixtureLink>> {
+        nowMillis: Long, max: Int = MAX_LINKS, source: SportsChannelSource = SportsChannelSource.BOTH): Map<String, List<FixtureLink>> {
         require(max > 0)
         val visible = channels.filter { !it.hidden && (it.category?.trim().orEmpty()) !in hiddenCategories }.distinctBy { it.id }
         val order = visible.withIndex().associate { it.value.id to it.index }
-        val byChannel = listings.filter { it.channelId in order }
+        val byChannel = if (source.guide) listings.filter { it.channelId in order } else emptyList()
         val brands = visible.associate { it.id to channelBrand(it.name) }
         return fixtures.associate { fixture ->
             val found = mutableListOf<Pair<FixtureLink, Long>>()
@@ -23,7 +42,7 @@ object SportsFixtureMatching {
                 val reason = guideMatch(fixture, listing.programme, nowMillis) ?: continue
                 found += FixtureLink(listing.channelId, reason, listing.programme) to kotlin.math.abs(listing.programme.start.epochMillis - fixture.startMillis)
             }
-            for (broadcaster in fixture.broadcasters) {
+            if (source.broadcasters) for (broadcaster in fixture.broadcasters) {
                 val wanted = channelBrand(broadcaster) ?: continue
                 for (channel in visible) if (brands[channel.id]?.let { sameBrand(wanted, it) } == true)
                     found += FixtureLink(channel.id, FixtureLinkReason.BROADCASTER, broadcaster = broadcaster) to Long.MAX_VALUE

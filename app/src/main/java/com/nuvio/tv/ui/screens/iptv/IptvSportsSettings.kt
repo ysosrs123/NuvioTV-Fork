@@ -27,6 +27,7 @@ import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.SportsAlertGames
 import com.nuvio.tv.core.iptv.SportsChangeKind
+import com.nuvio.tv.core.iptv.SportsChannelSource
 import com.nuvio.tv.core.iptv.SportsDbLeague
 import com.nuvio.tv.core.iptv.SportsDbLeagues
 import com.nuvio.tv.core.iptv.SportsFavourites
@@ -67,7 +68,7 @@ data class IptvSportsSettingsState(val enabled: Boolean = false, val leagues: Se
     val skipOnScreen: Boolean = true, val alertKinds: Set<SportsChangeKind> = SportsChangeKind.entries.toSet(),
     val nuvioAlert: SportsNuvioAlert = SportsNuvioAlert.POPUP, val nuvioQuietEndMinutes: Int = IptvSportsPreferences.DEFAULT_QUIET,
     val reminderLeadMinutes: Int = IptvSportsPreferences.DEFAULT_LEAD, val hideSpoilers: Boolean = true, val logos: SportsLogos = SportsLogos.ESPN,
-    val custom: List<SportsLeague> = emptyList()) {
+    val custom: List<SportsLeague> = emptyList(), val channelSource: SportsChannelSource = SportsChannelSource.BOTH) {
     val offered: List<SportsLeague> get() = SportsLeagues.ALL + custom
 }
 
@@ -88,12 +89,14 @@ class IptvSportsSettingsViewModel @Inject constructor(private val preferences: I
         mutable.value = IptvSportsSettingsState(preferences.enabled, preferences.leagues, preferences.hasKey, preferences.showScores,
             preferences.favouriteTeams.sortedBy { SportsFavourites.parse(it)?.second?.lowercase() }, preferences.overlayStyle, preferences.alertGames,
             preferences.alertHoldSeconds, preferences.skipOnScreen, preferences.alertKinds, preferences.nuvioAlert, preferences.nuvioQuietEndMinutes,
-            preferences.reminderLeadMinutes, preferences.hideSpoilers, preferences.logos, preferences.customLeagues)
+            preferences.reminderLeadMinutes, preferences.hideSpoilers, preferences.logos, preferences.customLeagues, preferences.channelSource)
     }
 
     fun setEnabled(value: Boolean) { preferences.enabled = value; reload() }
 
     fun setLogos(value: SportsLogos) { preferences.logos = value; reload() }
+
+    fun setChannelSource(value: SportsChannelSource) { preferences.channelSource = value; reload() }
 
     fun searchLeagues(query: String) {
         searching.update { it.copy(query = query) }
@@ -164,7 +167,7 @@ class IptvSportsSettingsViewModel @Inject constructor(private val preferences: I
     fun removeKey() { leagueList = null; preferences.setKey(null); reload() }
 }
 
-private enum class IptvSportsChoice { LEAGUES, SEARCH, LOGOS, KEY, FAVOURITES, OVERLAY, GAMES, HOLD, KINDS, NUVIO, QUIET, LEAD }
+private enum class IptvSportsChoice { LEAGUES, SEARCH, LOGOS, CHANNELS, KEY, FAVOURITES, OVERLAY, GAMES, HOLD, KINDS, NUVIO, QUIET, LEAD }
 
 @Composable
 fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewModel()) {
@@ -187,6 +190,8 @@ fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewM
                     valueColor = if (keyNeeded) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary, onClick = { choosing = IptvSportsChoice.KEY })
                 SettingsActionRow(title = stringResource(R.string.iptv_sport7_logos), subtitle = stringResource(R.string.iptv_sport7_logos_subtitle),
                     value = stringResource(logosLabel(state.logos)), onClick = { choosing = IptvSportsChoice.LOGOS })
+                SettingsActionRow(title = stringResource(R.string.iptv_sport9_channels), subtitle = stringResource(R.string.iptv_sport9_channels_subtitle),
+                    value = stringResource(channelSourceLabel(state.channelSource)), onClick = { choosing = IptvSportsChoice.CHANNELS })
                 SettingsToggleRow(title = stringResource(R.string.iptv_sport2_show_scores), subtitle = stringResource(R.string.iptv_sport2_show_scores_subtitle),
                     checked = state.showScores, onToggle = { viewModel.setShowScores(!state.showScores) })
                 if (state.favourites.isNotEmpty()) SettingsActionRow(title = stringResource(R.string.iptv_sport2_favourite_teams),
@@ -242,6 +247,10 @@ fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewM
             subtitle = stringResource(R.string.iptv_sport7_logos_subtitle),
             options = SportsLogos.entries.map { SettingsPickerOption(it, stringResource(logosLabel(it)), stringResource(logosDescription(it))) },
             selectedValue = state.logos, onDismiss = dismiss, width = 560.dp, onOptionSelected = { viewModel.setLogos(it); dismiss() })
+        IptvSportsChoice.CHANNELS -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_sport9_channels),
+            subtitle = stringResource(R.string.iptv_sport9_channels_subtitle),
+            options = SportsChannelSource.entries.map { SettingsPickerOption(it, stringResource(channelSourceLabel(it)), stringResource(channelSourceDescription(it))) },
+            selectedValue = state.channelSource, onDismiss = dismiss, width = 560.dp, onOptionSelected = { viewModel.setChannelSource(it); dismiss() })
         IptvSportsChoice.FAVOURITES -> SettingsMultiChoiceDialog(title = stringResource(R.string.iptv_sport2_favourite_teams),
             subtitle = stringResource(R.string.iptv_sport2_favourite_teams_subtitle),
             options = state.favourites.mapNotNull { key ->
@@ -344,6 +353,18 @@ private fun sourceLabel(league: SportsLeague, hasKey: Boolean): Int = when {
     league.espn != null -> if (hasKey && league.sportsDb != null) R.string.iptv_sport7_source_both else R.string.iptv_sport7_source_espn
     hasKey -> R.string.iptv_sport7_source_sportsdb
     else -> R.string.iptv_sport7_source_needs_key
+}
+
+private fun channelSourceLabel(source: SportsChannelSource): Int = when (source) {
+    SportsChannelSource.GUIDE -> R.string.iptv_sport9_channels_guide
+    SportsChannelSource.BROADCASTERS -> R.string.iptv_sport9_channels_broadcasters
+    SportsChannelSource.BOTH -> R.string.iptv_sport9_channels_both
+}
+
+private fun channelSourceDescription(source: SportsChannelSource): Int = when (source) {
+    SportsChannelSource.GUIDE -> R.string.iptv_sport9_channels_guide_description
+    SportsChannelSource.BROADCASTERS -> R.string.iptv_sport9_channels_broadcasters_description
+    SportsChannelSource.BOTH -> R.string.iptv_sport9_channels_both_description
 }
 
 private fun logosLabel(logos: SportsLogos): Int = when (logos) {

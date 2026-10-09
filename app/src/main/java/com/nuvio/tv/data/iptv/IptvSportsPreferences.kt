@@ -3,6 +3,7 @@ package com.nuvio.tv.data.iptv
 import android.content.Context
 import com.nuvio.tv.core.iptv.SportsAlertGames
 import com.nuvio.tv.core.iptv.SportsChangeKind
+import com.nuvio.tv.core.iptv.SportsChannelSource
 import com.nuvio.tv.core.iptv.SportsDbLeagues
 import com.nuvio.tv.core.iptv.SportsFavourites
 import com.nuvio.tv.core.iptv.SportsLeague
@@ -51,6 +52,10 @@ class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretB
         get() = preferences.getStringSet(FAVOURITES_KEY, null)?.filter { SportsFavourites.parse(it) != null }?.toSet().orEmpty()
         set(value) = preferences.edit().putStringSet(FAVOURITES_KEY, value.filter { SportsFavourites.parse(it) != null && it.length <= 200 }
             .take(SportsFavourites.MAX).toSet()).apply()
+
+    var channelSource: SportsChannelSource
+        get() = enumOf(CHANNELS_KEY, SportsChannelSource.BOTH)
+        set(value) = preferences.edit().putString(CHANNELS_KEY, value.name).apply()
 
     var overlayStyle: SportsOverlayStyle
         get() = enumOf(OVERLAY_KEY, SportsOverlayStyle.GLANCE)
@@ -137,6 +142,7 @@ class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretB
         val QUIET_CHOICES = listOf(0, 5, 10, 15, 20, 30)
         val LEAD_CHOICES = listOf(0, 2, 5, 10, 15, 30)
         private const val OVERLAY_KEY = "settings-sports-overlay"
+        private const val CHANNELS_KEY = "settings-sports-channel-source"
         private const val HOLD_KEY = "settings-sports-alert-hold"
         private const val GAMES_KEY = "settings-sports-alert-games"
         private const val KINDS_KEY = "settings-sports-alert-kinds"

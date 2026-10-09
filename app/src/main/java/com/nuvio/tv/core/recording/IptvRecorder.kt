@@ -28,6 +28,7 @@ import com.nuvio.tv.core.iptv.RecordingSpan
 import com.nuvio.tv.core.iptv.RecordingStatus
 import com.nuvio.tv.core.iptv.RecordingStop
 import com.nuvio.tv.core.iptv.RecordingStorage
+import com.nuvio.tv.core.iptv.RecordingText
 import com.nuvio.tv.core.iptv.RecordingTransitions
 import com.nuvio.tv.core.iptv.RecordingWindow
 import com.nuvio.tv.core.iptv.recordingAlarmAction
@@ -420,8 +421,8 @@ class IptvRecorder @Inject constructor(
         val title = named ?: programme?.let { p -> (p.titles.firstOrNull { it.language?.substringBefore('-') == language } ?: p.titles.firstOrNull())?.text }
         val description = programme?.let { p -> (p.descriptions.firstOrNull { it.language?.substringBefore('-') == language } ?: p.descriptions.firstOrNull())?.text }
         val entry = IptvRecording(id = UUID.randomUUID().toString(), profileId = source.profileId, sourceId = source.sourceId,
-            accountId = stored.accountId, channelId = channelId, channelName = (item.overlay.customName ?: item.channel.data.name).take(240),
-            title = title?.trim()?.takeIf { it.isNotEmpty() }?.take(500), description = description?.trim()?.takeIf { it.isNotEmpty() }?.take(4000),
+            accountId = stored.accountId, channelId = channelId, channelName = (item.overlay.customName ?: item.channel.data.name).let { RecordingText.display(it).ifEmpty { it.trim() } }.take(240),
+            title = title?.let(RecordingText::display)?.takeIf { it.isNotEmpty() }?.take(500), description = description?.trim()?.takeIf { it.isNotEmpty() }?.take(4000),
             startMillis = trim.candidate.startMillis, stopMillis = trim.candidate.stopMillis, status = RecordingStatus.SCHEDULED,
             programmeStartMillis = programme?.start?.epochMillis, programmeStopMillis = programme?.stop?.epochMillis, createdAtMillis = now,
             storage = place.storage, storageLabel = place.label?.take(240), fixtureKey = fixtureKey?.take(400))

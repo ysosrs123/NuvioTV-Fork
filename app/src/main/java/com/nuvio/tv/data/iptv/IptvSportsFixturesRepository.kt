@@ -9,6 +9,7 @@ import com.nuvio.tv.core.iptv.SportsCatchup
 import com.nuvio.tv.core.iptv.SportsDbLeague
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureMatching
+import com.nuvio.tv.core.iptv.SportsGuideSlices
 import com.nuvio.tv.core.iptv.SportsLeagues
 import com.nuvio.tv.core.iptv.SportsPolling
 import com.nuvio.tv.core.iptv.SportsSources
@@ -57,20 +58,22 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
             val excluded = hiddenCategories.take(500).toSet()
             val associations = catalogue.guideAssociations(ref)
             val order = (associations.priority + associations.feedIds).distinct().take(16)
+            val source = preferences.channelSource
             val matched = mutableListOf<IptvAiringMatch>()
-            val slices = (upcoming.map { Math.floorDiv(maxOf(it.startMillis, nowMillis - SLICE_MILLIS), SLICE_MILLIS) }.distinct().sorted().take(MAX_SLICES) +
-                recent.map { Math.floorDiv(it.startMillis, SLICE_MILLIS) }.distinct().sortedDescending().take(MAX_RECENT_SLICES)).distinct().sorted()
-            if (order.isNotEmpty()) for (slice in slices) {
+            val slices = SportsGuideSlices.plan(upcoming, recent, nowMillis)
+            if (source.guide && order.isNotEmpty()) for (slice in slices.keys) {
                 currentCoroutineContext().ensureActive()
-                val start = slice * SLICE_MILLIS
-                val found = guides.sportsMatches(ref.profileId, order, start, start + SLICE_MILLIS, PROGRAMMES_PER_SLICE)
-                matched += found.filter { match -> current.any { SportsFixtureMatching.guideMatch(it, match.programme, nowMillis) != null } }
+                val start = slice * SportsGuideSlices.SLICE_MILLIS
+                val near = (slice - NEIGHBOUR_SLICES..slice + 1).flatMap { slices[it].orEmpty() }.distinctBy { it.key }
+                fun query(limit: Int) = guides.sportsMatches(ref.profileId, order, start, start + SportsGuideSlices.SLICE_MILLIS, limit)
+                val found = query(PROGRAMMES_PER_SLICE).let { if (it.size >= PROGRAMMES_PER_SLICE / order.size) query(BUSY_PROGRAMMES_PER_SLICE) else it }
+                matched += found.filter { match -> near.any { SportsFixtureMatching.guideMatch(it, match.programme, nowMillis) != null } }
             }
             val unique = matched.distinctBy { Triple(it.key, it.programme.start.epochMillis, it.programme.titles.firstOrNull()?.text) }
             val guideRows = browse.guideChannels(ref, unique, excluded)
             val byKey = unique.groupBy { it.key }
             val listings = guideRows.flatMap { row -> byKey[row.guide.key].orEmpty().map { FixtureListing(row.item.channel.id, it.programme) } }
-            val terms = SportsFixtureMatching.searchTerms(current.flatMap { it.broadcasters }.distinct())
+            val terms = if (source.broadcasters) SportsFixtureMatching.searchTerms(current.flatMap { it.broadcasters }.distinct()) else emptyList()
             val broadcastRows = terms.flatMap { term ->
                 currentCoroutineContext().ensureActive()
                 try { browse.page(ref, IptvBrowseQuery(search = term, excludedCategories = excluded), null, ROWS_PER_TERM).channels }
@@ -81,18 +84,17 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
             val channels = rows.map { FixtureChannel(it.item.channel.id, it.item.overlay.customName ?: it.item.channel.data.name,
                 it.item.attributes[CATEGORY_ATTRIBUTE]?.trim()?.take(240), it.item.overlay.hidden) }
             val byId = rows.associateBy { it.item.channel.id }
-            SportsFixtureMatching.link(current, channels, listings, excluded, nowMillis).mapValues { (_, links) ->
+            SportsFixtureMatching.link(current, channels, listings, excluded, nowMillis, source = source).mapValues { (_, links) ->
                 links.mapNotNull { link -> byId[link.channelId]?.let { IptvFixtureLink(it, link.reason, link.programme, link.broadcaster) } }
             }.filterValues { it.isNotEmpty() }
         }
 
     private companion object {
-        const val MAX_FIXTURES = 120
-        const val MAX_SLICES = 24
-        const val MAX_RECENT_SLICES = 8
+        const val MAX_FIXTURES = 320
+        const val NEIGHBOUR_SLICES = 3
         const val PROGRAMMES_PER_SLICE = 400
+        const val BUSY_PROGRAMMES_PER_SLICE = 2000
         const val ROWS_PER_TERM = 200
-        const val SLICE_MILLIS = 60L * 60 * 1000
         const val CATEGORY_ATTRIBUTE = "group-title"
     }
 }

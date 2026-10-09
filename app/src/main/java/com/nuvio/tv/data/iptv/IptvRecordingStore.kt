@@ -6,6 +6,7 @@ import com.nuvio.tv.core.iptv.RecordingParts
 import com.nuvio.tv.core.iptv.RecordingSlot
 import com.nuvio.tv.core.iptv.RecordingSpan
 import com.nuvio.tv.core.iptv.RecordingStatus
+import com.nuvio.tv.core.iptv.RecordingText
 import com.nuvio.tv.core.iptv.RecordingTransitions
 import com.nuvio.tv.core.iptv.RecordingWindow
 import java.io.File
@@ -147,7 +148,8 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
 
     private fun decode(json: JSONObject) = IptvRecording(
         id = json.getString("id"), profileId = json.getInt("profile"), sourceId = json.getString("source"), accountId = json.getString("account"),
-        channelId = json.getString("channel"), channelName = json.getString("channelName"), title = json.text("title"), description = json.text("description"),
+        channelId = json.getString("channel"), channelName = json.getString("channelName").let { RecordingText.display(it).ifEmpty { it } },
+        title = json.text("title")?.let { RecordingText.display(it).ifEmpty { it } }, description = json.text("description"),
         startMillis = json.getLong("start"), stopMillis = json.getLong("stop"), status = RecordingStatus.valueOf(json.getString("status")),
         failure = json.text("failure")?.let { name -> RecordingFailure.entries.firstOrNull { it.name == name } ?: RecordingFailure.INTERRUPTED },
         file = json.text("file"), bytes = json.optLong("bytes", 0), gaps = json.optInt("gaps", 0),

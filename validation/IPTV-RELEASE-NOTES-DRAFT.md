@@ -389,6 +389,20 @@ After the device pass of 9 October:
   earlier switch no longer appear. "Previous player has not confirmed it stopped" should
   now be rare; new log lines (`live close started`, `live close ms=… dns= connect=
   connected= cut=`, `live close unconfirmed reason=`) show the cause if it remains.
+- Recording names and titles drop decorative lettering in every recording path: small
+  capitals, superscript and modifier letters (for example "ᴸᶦᵛᵉ" becomes "Live"),
+  fullwidth, mathematical, circled and squared letters become plain letters; flags, emoji
+  and symbols such as ★ ⚽ ● ▶ | are removed. Existing recordings display cleanly too.
+- Sport channel matching now covers the same days as the guide ("Guide days ahead" + 1,
+  up to 8), looks at every hour in that range, retries busy hours with a larger limit and
+  re-runs when a guide finishes refreshing. Before, a game the next evening could miss
+  out ("No channel found") when many leagues were chosen.
+- New Sport setting "Find channels using": Guide titles, Broadcaster lists (ESPN and
+  TheSportsDB channel names) or Both (default). Guide matches come first; each channel
+  says "In your guide" or "Broadcaster". Better for viewers outside the US.
+- Match cards: Record (with the usual start/end padding) or Cancel recording; when no
+  channel is known yet, "Record when a channel is found" (also offered in the "No channel
+  found" dialog).
 - "Set up from your phone or computer" is now in the Live TV menu, on Live TV Sources, in
   the no-sources screen and in Live TV settings.
 

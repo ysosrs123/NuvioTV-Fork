@@ -190,18 +190,73 @@ object RecordingFiles {
         return if (stem in RESERVED) "_$name" else name
     }
 
-    private fun decoration(char: Char): Boolean = char.code in 0x02B0..0x02FF || char.code in 0x1D2C..0x1D6A ||
-        char.code in 0x1D9B..0x1DBF || char.code in 0x2070..0x209F || char.code in 0xFE00..0xFE0F || char == '\u200D'
+    private fun shorten(value: String): String = whole(value.dropLast(1)).trimEnd(' ', '.', '-', '_', ',')
 
-    private fun shorten(value: String): String = value.dropLast(1).trimEnd(' ', '.', '-', '_', ',')
+    private fun whole(value: String): String = if (value.lastOrNull()?.isHighSurrogate() == true) value.dropLast(1) else value
 
-    private fun clean(value: String, limit: Int): String {
-        val normal = Normalizer.normalize(value.filterNot(::decoration), Normalizer.Form.NFKC)
-        val mapped = buildString {
-            for (char in normal) append(if (char.isLetterOrDigit() || char in KEPT || char.category == CharCategory.NON_SPACING_MARK ||
-                    char.category == CharCategory.COMBINING_SPACING_MARK) char else ' ')
+    private fun clean(value: String, limit: Int): String = whole(RecordingText.plain(value, KEPT).take(limit)).trim(' ', '.', '-', '_', ',')
+}
+
+object RecordingText {
+    private const val DISPLAY_KEPT = "-_'&.,()!+:;?/\"#%@\$[]"
+    private val SMALL = mapOf(0x1D00 to 'a', 0x0299 to 'b', 0x1D03 to 'b', 0x1D04 to 'c', 0x1D05 to 'd', 0x1D07 to 'e', 0xA730 to 'f', 0x0262 to 'g',
+        0x029C to 'h', 0x026A to 'i', 0x1D0A to 'j', 0x1D0B to 'k', 0x029F to 'l', 0x1D0C to 'l', 0x1D0D to 'm', 0x0274 to 'n', 0x1D0F to 'o',
+        0x1D18 to 'p', 0xA7AF to 'q', 0x0280 to 'r', 0xA731 to 's', 0x1D1B to 't', 0x1D1C to 'u', 0x1D20 to 'v', 0x1D21 to 'w', 0x028F to 'y',
+        0x1D22 to 'z', 0x1D01 to 'æ', 0x0276 to 'œ', 0x2018 to '\'', 0x2019 to '\'', 0x201B to '\'', 0x02BC to '\'', 0x201C to '"', 0x201D to '"',
+        0x201E to '"', 0x2010 to '-', 0x2011 to '-', 0x2012 to '-', 0x2013 to '-', 0x2014 to '-', 0x2015 to '-', 0x2212 to '-')
+
+    fun display(value: String): String = plain(value, DISPLAY_KEPT)
+
+    fun plain(value: String, kept: String): String {
+        val out = StringBuilder(value.length)
+        var raised: Boolean? = null
+        var letter = false
+        fun gap() { if (out.isNotEmpty() && out[out.length - 1] != ' ') out.append(' '); letter = false }
+        val composed = Normalizer.normalize(value, Normalizer.Form.NFC)
+        var index = 0
+        while (index < composed.length) {
+            val point = composed.codePointAt(index)
+            index += Character.charCount(point)
+            if (dropped(point)) continue
+            val high = superscript(point)
+            val mapped = squared(point)?.toString() ?: Normalizer.normalize(String(Character.toChars(point)), Normalizer.Form.NFKC)
+            var at = 0
+            while (at < mapped.length) {
+                val raw = mapped.codePointAt(at)
+                at += Character.charCount(raw)
+                val code = SMALL[raw]?.code ?: raw
+                val type = Character.getType(code)
+                when {
+                    Character.isLetterOrDigit(code) -> {
+                        if (letter && raised != null && raised != high) out.append(' ')
+                        out.appendCodePoint(code); letter = true; raised = high
+                    }
+                    type == Character.NON_SPACING_MARK.toInt() || type == Character.COMBINING_SPACING_MARK.toInt() ->
+                        if (letter && !decorativeMark(code)) out.appendCodePoint(code)
+                    type == Character.ENCLOSING_MARK.toInt() || type == Character.FORMAT.toInt() -> Unit
+                    code < 0x80 && code.toChar() in kept -> { out.appendCodePoint(code); letter = false }
+                    else -> gap()
+                }
+            }
         }
-        return mapped.split(' ').filter { it.isNotEmpty() }.joinToString(" ").take(limit)
-            .trim(' ', '.', '-', '_', ',')
+        return out.split(' ').filter { it.isNotEmpty() }.joinToString(" ")
     }
+
+    private fun dropped(point: Int): Boolean = point in 0xFE00..0xFE0F || point in 0xE0100..0xE01EF || point in 0xE0000..0xE007F ||
+        point == 0x200D || point in 0x1F1E6..0x1F1FF || point in 0x1F3FB..0x1F3FF
+
+    private fun superscript(point: Int): Boolean = point in 0x02B0..0x02FF || point in 0x1D2C..0x1D6A || point == 0x1D78 || point in 0x1D9B..0x1DBF ||
+        point in 0x2070..0x209F || point == 0x00B9 || point == 0x00B2 || point == 0x00B3 || point in 0xA770..0xA771 || point in 0xA7F8..0xA7F9
+
+    private fun squared(point: Int): Char? = when (point) {
+        in 0x1F150..0x1F169 -> 'A' + (point - 0x1F150)
+        in 0x1F170..0x1F189 -> 'A' + (point - 0x1F170)
+        in 0x1F130..0x1F149 -> 'A' + (point - 0x1F130)
+        in 0x24B6..0x24CF -> 'A' + (point - 0x24B6)
+        in 0x24D0..0x24E9 -> 'a' + (point - 0x24D0)
+        else -> null
+    }
+
+    private fun decorativeMark(point: Int): Boolean = point in 0x0300..0x036F || point in 0x1AB0..0x1AFF || point in 0x1DC0..0x1DFF ||
+        point in 0x20D0..0x20FF || point in 0xFE20..0xFE2F
 }

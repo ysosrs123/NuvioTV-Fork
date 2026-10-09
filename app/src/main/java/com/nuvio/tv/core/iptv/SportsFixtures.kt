@@ -90,20 +90,35 @@ object SportsLeagues {
 }
 
 object SportsDays {
-    const val DAYS = 3
+    const val DEFAULT_DAYS = 3
+    const val MAX_DAYS = 8
+    const val NEAR_DAYS = 3
+    const val FAR_REFRESH_MILLIS = 3L * 60 * 60 * 1000
     val ESPN_ZONE: ZoneId = ZoneId.of("America/New_York")
     val SPORTSDB_ZONE: ZoneId = ZoneOffset.UTC
+    @Volatile private var days = DEFAULT_DAYS
+    val DAYS: Int get() = days
 
-    fun window(nowMillis: Long, zone: ZoneId): Pair<Long, Long> {
+    fun guideDays(future: Int) { days = (future + 1).coerceIn(DEFAULT_DAYS, MAX_DAYS) }
+
+    fun window(nowMillis: Long, zone: ZoneId, count: Int = DAYS): Pair<Long, Long> {
         val today = Instant.ofEpochMilli(nowMillis).atZone(zone).toLocalDate()
-        return today.atStartOfDay(zone).toInstant().toEpochMilli() to today.plusDays(DAYS.toLong()).atStartOfDay(zone).toInstant().toEpochMilli()
+        return today.atStartOfDay(zone).toInstant().toEpochMilli() to today.plusDays(count.coerceIn(1, MAX_DAYS).toLong()).atStartOfDay(zone).toInstant().toEpochMilli()
     }
 
     fun serviceDates(fromMillis: Long, untilMillis: Long, zone: ZoneId): List<LocalDate> {
         require(untilMillis > fromMillis)
         val first = Instant.ofEpochMilli(fromMillis).atZone(zone).toLocalDate()
         val last = Instant.ofEpochMilli(untilMillis - 1).atZone(zone).toLocalDate()
-        return generateSequence(first) { it.plusDays(1) }.takeWhile { !it.isAfter(last) }.take(8).toList()
+        return generateSequence(first) { it.plusDays(1) }.takeWhile { !it.isAfter(last) }.take(MAX_DAYS + 2).toList()
+    }
+
+    fun far(date: LocalDate, nowMillis: Long, zone: ZoneId): Boolean = date.isAfter(Instant.ofEpochMilli(nowMillis).atZone(zone).toLocalDate().plusDays(NEAR_DAYS.toLong()))
+
+    fun due(date: LocalDate, zone: ZoneId, entry: SportsCacheEntry?, nowMillis: Long): Boolean {
+        if (!far(date, nowMillis, zone)) return true
+        val fetched = entry?.fetchedAt ?: return true
+        return nowMillis < fetched || nowMillis - fetched >= FAR_REFRESH_MILLIS
     }
 
     fun zone(service: SportsService): ZoneId = if (service == SportsService.THESPORTSDB) SPORTSDB_ZONE else ESPN_ZONE
