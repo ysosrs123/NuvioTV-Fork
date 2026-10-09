@@ -90,7 +90,7 @@ feeds, markers, multiview data tiles (`IptvGameCentre.kt`, `IptvSportFeeds.kt`),
 `IptvWidgets.kt`). Two independent reviews of the sports code were done and every finding
 fixed (`f36382e`); the earlier review of `d263b18..HEAD` is done too (`29b217a`).
 
-Caveats and behaviour changes to verify (from the helpers' reports, 8 October):
+Caveats and behaviour changes to verify (from the helpers' reports, 8 October; still relevant unless marked):
 - Guide: over-budget guides drop the last-parsed (whole) channels (`budget=` in the log);
   programmes with the same channel and start collapse to one; name matching is now a
   fallback for every channel; a missing manual target falls back to automatic matching;
@@ -107,13 +107,14 @@ Caveats and behaviour changes to verify (from the helpers' reports, 8 October):
 - Styling: glass panels in Live TV get a 0.9 minimum opacity (`GLASS_FLOOR` in
   `IptvTheme.kt`); importing an old setup bundle without the "solid" key still sets Solid
   panels on (`core/iptv/SetupBundle.kt`).
-- Sport: fixtures are fetched whenever Live TV is open and Sport is enabled (also during
-  full screen and multiview); the featured hero shows the first fixture until a card is
-  focused; favourites are stored as league + team name.
+- Sport (updated 9 October): fixtures come from the app-wide `IptvSportsLive` service (all
+  chosen leagues while Live TV is open; followed teams only in the background while Nuvio is
+  open); the featured hero shows the first fixture until a card is focused; favourites are
+  stored as league + team name and match loosely across name variants.
 - VOD: m3u8 movies untested; mpv busy/refused messages depend on mpv logging the status;
   resume for unmatched titles stays local.
-- Navigation: Back no longer opens the Live TV menu (Left does); the Modern Home layout
-  appends Live TV rows after the catalogue rows.
+- Navigation (superseded 9 October): Back from the guide now opens the Live TV menu and then
+  asks "Leave Live TV?"; the Modern Home layout appends Live TV rows after the catalogue rows.
 - The user's earlier "pre-fetch the stream on focus" request was implemented as a
   connection pre-warm only; fetching media in advance would use a provider connection.
 
@@ -633,6 +634,11 @@ Before merge and release (only on the user's confirmation):
 
 ## Code map (app/src/main/java/com/nuvio/tv)
 
+- Sports (8–9 October): see "Sports build summary" in "Start here" for every file; widgets in
+  `core/iptv/LiveWidgets.kt` and `ui/screens/iptv/IptvWidgets.kt`; IPTV movie/series detail routing
+  in `core/iptv/VodDetailRoute.kt`; recording-name cleaning in `core/iptv/LiveRecording.kt`
+  (`RecordingText`); pending sport recordings in `core/iptv/SportsPendingRecords.kt`.
+
 - New on 7 October: `core/iptv/SportsGuide.kt`, `LiveTimeshift.kt`,
   `LivePreferenceKeys.kt`; `data/iptv/IptvLivePreferences.kt`; translations in
   `res/values-*/iptv_*.xml`.
@@ -650,7 +656,7 @@ Before merge and release (only on the user's confirmation):
 - `core/iptv`: models and pure logic (guide grid, matching, admission, device profile
   `DeviceProfile.kt`, `MultiviewSizing.kt`, `LiveRecording.kt`, setup drafts and
   pairing, capture chain).
-- `data/iptv`: stores (catalogue schema 8, guide schema 5, recordings JSON), clients
+- `data/iptv`: stores (catalogue schema 9, guide schema 6, VOD schema 2, recordings JSON), clients
   (M3U, Xtream, Stalker, XMLTV), `IptvXtreamGuides`, `IptvCatchup`,
   `AndroidDeviceProfile`, `IptvProfileAccess`.
 - `core/recording`: `IptvRecorder`, `IptvRecordingService`, `IptvRecordingAlarms`.
