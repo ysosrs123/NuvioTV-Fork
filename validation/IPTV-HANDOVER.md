@@ -29,6 +29,8 @@ Next, in order:
    - QR sign-in in CI builds: the fork needs the repository secret `LOCAL_PROPERTIES_BASE64`
      (base64 of a local.properties with NUVIO_SUPABASE_URL, NUVIO_SUPABASE_ANON_KEY and the
      other keys: TMDB, Trakt, …). Without it CI APKs have no Nuvio sign-in, TMDB or Trakt.
+     The debug build step also accepts the plain file contents, drops `sdk.dir` and logs the
+     key names it found (never the values).
    - Weekend ESPN capture during live play (`IPTV-SPORTS-DATA-SCRIPTS.md`); then check the
      live-only fields (clocks, NFL situation, MLB count/bases, tennis serve, golf mid-round,
      F1 results, UFC rounds) and replace synthetic fixtures with trimmed real ones (as done

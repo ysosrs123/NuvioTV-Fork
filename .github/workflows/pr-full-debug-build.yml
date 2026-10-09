@@ -46,7 +46,11 @@ jobs:
           LOCAL_DEV_PROPERTIES_BASE64: ${{ secrets.LOCAL_DEV_PROPERTIES_BASE64 }}
         run: |
           if [ -n "$LOCAL_PROPERTIES_BASE64" ]; then
-            printf '%s' "$LOCAL_PROPERTIES_BASE64" | base64 --decode > local.properties
+            if ! printf '%s' "$LOCAL_PROPERTIES_BASE64" | tr -d ' \t\r\n' | base64 --decode > local.properties 2>/dev/null; then
+              printf '%s\n' "$LOCAL_PROPERTIES_BASE64" | tr -d '\r' > local.properties
+            fi
+            sed -i '/^sdk\.dir=/d' local.properties
+            echo "local.properties keys: $(grep -o '^[A-Za-z0-9_.]*=' local.properties | tr -d '=' | tr '\n' ' ')"
           else
             touch local.properties
           fi
