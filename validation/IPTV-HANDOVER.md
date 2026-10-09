@@ -746,7 +746,7 @@ recovery, live retry backoff, HLS live speed), catch-up, search, sports, multivi
 4. Then measure aggregate memory and storage margins, validate renderer preroll
    discard and seek acknowledgement, and only then enable capture controls.
 5. Once steps 1–2 pass, the user has a separate agent merge `iptv/player-binding` into
-   `main`; the branches are kept.
+   `main`; the branches are kept. (as a squash merge; see "Start here" item 7)
 
 ## Logic layer added for the next UI work — 6 October 2026
 
