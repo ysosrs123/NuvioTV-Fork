@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Aktorët: %1$s</string>
+    <string name="iptv_vod9_director">Regjisori: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Shtesat e tua nuk japin detaje të plota për këtë titull.</string>
+</resources>

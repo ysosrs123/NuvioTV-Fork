@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Widget kiezen</string>
+    <string name="iptv_widgets_choose_subtitle">Widget %1$d · Houd OK ingedrukt op een widget om die te wijzigen</string>
+    <string name="iptv_widgets_change">OK om te wijzigen</string>
+    <string name="iptv_widgets_kind_clocks">Wereldklokken</string>
+    <string name="iptv_widgets_kind_clocks_description">De tijd in maximaal vier steden</string>
+    <string name="iptv_widgets_kind_sport">Sportbalk</string>
+    <string name="iptv_widgets_kind_sport_description">Wedstrijden van je teams en spannende wedstrijden</string>
+    <string name="iptv_widgets_kind_up_next">Hierna</string>
+    <string name="iptv_widgets_kind_up_next_description">De volgende twee programma\'s op de geselecteerde zender</string>
+    <string name="iptv_widgets_kind_recordings">Opnamen</string>
+    <string name="iptv_widgets_kind_recordings_description">Wat nu wordt opgenomen en wat hierna komt</string>
+    <string name="iptv_widgets_kind_stream">Streaminfo</string>
+    <string name="iptv_widgets_kind_stream_description">Beeldformaat, HDR, codec en bitrate van de spelende zender</string>
+    <string name="iptv_widgets_kind_empty">Leeg</string>
+    <string name="iptv_widgets_kind_empty_description">Deze ruimte leeg laten</string>
+    <string name="iptv_widgets_add">Druk op OK om een widget toe te voegen</string>
+    <string name="iptv_widgets_layout">Indeling</string>
+    <string name="iptv_widgets_layout_subtitle">Widgets die niet op dit scherm passen, worden verborgen</string>
+    <string name="iptv_widgets_layout_one">Eén brede widget</string>
+    <string name="iptv_widgets_layout_two">Twee widgets</string>
+    <string name="iptv_widgets_layout_three">Drie widgets</string>
+    <string name="iptv_widgets_cities">Steden wijzigen</string>
+    <string name="iptv_widgets_cities_subtitle">Maximaal vier steden. Selecteer een stad om die te verwijderen.</string>
+    <string name="iptv_widgets_city_add">Stad toevoegen</string>
+    <string name="iptv_widgets_city_search">Steden zoeken</string>
+    <string name="iptv_widgets_city_none">Geen overeenkomende steden</string>
+    <string name="iptv_widgets_city_device">Dit apparaat</string>
+    <string name="iptv_widgets_done">Klaar</string>
+    <string name="iptv_widgets_no_cities">Geen steden gekozen</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d dag</item>
+        <item quantity="other">+%d dagen</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d dag</item>
+        <item quantity="other">−%d dagen</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Nu geen wedstrijden</string>
+    <string name="iptv_widgets_sport_off">Sport staat uit</string>
+    <string name="iptv_widgets_no_channel">Kies een zender</string>
+    <string name="iptv_widgets_no_guide">Geen gids voor deze zender</string>
+    <string name="iptv_widgets_recording_now">Opname · tot %1$s</string>
+    <string name="iptv_widgets_recording_next">Hierna · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d meer</string>
+    <string name="iptv_widgets_no_recordings">Niets wordt opgenomen of is gepland</string>
+    <string name="iptv_widgets_nothing_playing">Er speelt niets</string>
+    <string name="iptv_widgets_stream_waiting">Wachten op het beeld</string>
+    <string name="iptv_widgets_stream_resolution">Beeld</string>
+    <string name="iptv_widgets_stream_codec">Codec</string>
+    <string name="iptv_widgets_stream_range">Bereik</string>
+    <string name="iptv_widgets_stream_bitrate">Bitrate</string>
+</resources>

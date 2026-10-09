@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Instellen via je telefoon of computer</string>
+    <string name="iptv_ui9_leave_title">Live-tv verlaten?</string>
+    <string name="iptv_ui9_leave_subtitle">Terug vanuit het live-tv-menu brengt je naar Nuvio Home.</string>
+    <string name="iptv_ui9_stay">Blijven</string>
+    <string name="iptv_ui9_leave_home">Naar Home</string>
+</resources>

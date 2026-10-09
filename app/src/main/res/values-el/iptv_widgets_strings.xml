@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Επιλογή widget</string>
+    <string name="iptv_widgets_choose_subtitle">Widget %1$d · Κρατήστε πατημένο το OK σε ένα widget για να το αλλάξετε</string>
+    <string name="iptv_widgets_change">OK για αλλαγή</string>
+    <string name="iptv_widgets_kind_clocks">Παγκόσμια ρολόγια</string>
+    <string name="iptv_widgets_kind_clocks_description">Η ώρα σε έως τέσσερις πόλεις</string>
+    <string name="iptv_widgets_kind_sport">Αθλητική λωρίδα</string>
+    <string name="iptv_widgets_kind_sport_description">Οι αγώνες των ομάδων σας και οι αμφίρροποι αγώνες</string>
+    <string name="iptv_widgets_kind_up_next">Επόμενο</string>
+    <string name="iptv_widgets_kind_up_next_description">Τα δύο επόμενα προγράμματα στο επιλεγμένο κανάλι</string>
+    <string name="iptv_widgets_kind_recordings">Εγγραφές</string>
+    <string name="iptv_widgets_kind_recordings_description">Τι εγγράφεται τώρα και τι ακολουθεί</string>
+    <string name="iptv_widgets_kind_stream">Πληροφορίες ροής</string>
+    <string name="iptv_widgets_kind_stream_description">Μέγεθος εικόνας, HDR, codec και ρυθμός bit του καναλιού που αναπαράγεται</string>
+    <string name="iptv_widgets_kind_empty">Κενό</string>
+    <string name="iptv_widgets_kind_empty_description">Αφήστε αυτόν τον χώρο κενό</string>
+    <string name="iptv_widgets_add">Πατήστε OK για να προσθέσετε ένα widget</string>
+    <string name="iptv_widgets_layout">Διάταξη</string>
+    <string name="iptv_widgets_layout_subtitle">Τα widget που δεν χωρούν σε αυτήν την οθόνη αποκρύπτονται</string>
+    <string name="iptv_widgets_layout_one">Ένα φαρδύ widget</string>
+    <string name="iptv_widgets_layout_two">Δύο widget</string>
+    <string name="iptv_widgets_layout_three">Τρία widget</string>
+    <string name="iptv_widgets_cities">Αλλαγή πόλεων</string>
+    <string name="iptv_widgets_cities_subtitle">Έως τέσσερις πόλεις. Επιλέξτε μια πόλη για να την αφαιρέσετε.</string>
+    <string name="iptv_widgets_city_add">Προσθήκη πόλης</string>
+    <string name="iptv_widgets_city_search">Αναζήτηση πόλεων</string>
+    <string name="iptv_widgets_city_none">Δεν βρέθηκαν πόλεις</string>
+    <string name="iptv_widgets_city_device">Αυτή η συσκευή</string>
+    <string name="iptv_widgets_done">Τέλος</string>
+    <string name="iptv_widgets_no_cities">Δεν έχουν επιλεγεί πόλεις</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d ημέρα</item>
+        <item quantity="other">+%d ημέρες</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d ημέρα</item>
+        <item quantity="other">−%d ημέρες</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Δεν υπάρχουν αγώνες τώρα</string>
+    <string name="iptv_widgets_sport_off">Τα Αθλητικά είναι απενεργοποιημένα</string>
+    <string name="iptv_widgets_no_channel">Επιλέξτε κανάλι</string>
+    <string name="iptv_widgets_no_guide">Δεν υπάρχει οδηγός για αυτό το κανάλι</string>
+    <string name="iptv_widgets_recording_now">Εγγραφή · έως %1$s</string>
+    <string name="iptv_widgets_recording_next">Επόμενο · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d ακόμη</string>
+    <string name="iptv_widgets_no_recordings">Καμία εγγραφή σε εξέλιξη ή προγραμματισμένη</string>
+    <string name="iptv_widgets_nothing_playing">Δεν αναπαράγεται τίποτα</string>
+    <string name="iptv_widgets_stream_waiting">Αναμονή για την εικόνα</string>
+    <string name="iptv_widgets_stream_resolution">Εικόνα</string>
+    <string name="iptv_widgets_stream_codec">Codec</string>
+    <string name="iptv_widgets_stream_range">Εύρος</string>
+    <string name="iptv_widgets_stream_bitrate">Ρυθμός bit</string>
+</resources>

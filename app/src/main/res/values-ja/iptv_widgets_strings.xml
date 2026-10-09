@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">ウィジェットを選択</string>
+    <string name="iptv_widgets_choose_subtitle">ウィジェット %1$d · ウィジェットで OK を長押しすると変更できます</string>
+    <string name="iptv_widgets_change">OK で変更</string>
+    <string name="iptv_widgets_kind_clocks">世界時計</string>
+    <string name="iptv_widgets_kind_clocks_description">最大 4 都市の時刻</string>
+    <string name="iptv_widgets_kind_sport">スポーツバー</string>
+    <string name="iptv_widgets_kind_sport_description">フォロー中のチームの試合と接戦</string>
+    <string name="iptv_widgets_kind_up_next">次の番組</string>
+    <string name="iptv_widgets_kind_up_next_description">選択したチャンネルの次の 2 番組</string>
+    <string name="iptv_widgets_kind_recordings">録画</string>
+    <string name="iptv_widgets_kind_recordings_description">録画中の番組と次の録画</string>
+    <string name="iptv_widgets_kind_stream">ストリーム情報</string>
+    <string name="iptv_widgets_kind_stream_description">再生中チャンネルの解像度、HDR、コーデック、ビットレート</string>
+    <string name="iptv_widgets_kind_empty">空き</string>
+    <string name="iptv_widgets_kind_empty_description">このスペースを空けておく</string>
+    <string name="iptv_widgets_add">OK を押してウィジェットを追加</string>
+    <string name="iptv_widgets_layout">レイアウト</string>
+    <string name="iptv_widgets_layout_subtitle">この画面に収まらないウィジェットは非表示になります</string>
+    <string name="iptv_widgets_layout_one">ワイドウィジェット 1 つ</string>
+    <string name="iptv_widgets_layout_two">ウィジェット 2 つ</string>
+    <string name="iptv_widgets_layout_three">ウィジェット 3 つ</string>
+    <string name="iptv_widgets_cities">都市を変更</string>
+    <string name="iptv_widgets_cities_subtitle">最大 4 都市。都市を選択すると削除されます。</string>
+    <string name="iptv_widgets_city_add">都市を追加</string>
+    <string name="iptv_widgets_city_search">都市を検索</string>
+    <string name="iptv_widgets_city_none">一致する都市はありません</string>
+    <string name="iptv_widgets_city_device">このデバイス</string>
+    <string name="iptv_widgets_done">完了</string>
+    <string name="iptv_widgets_no_cities">都市が選択されていません</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="other">+%d 日</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="other">−%d 日</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">現在試合はありません</string>
+    <string name="iptv_widgets_sport_off">スポーツはオフです</string>
+    <string name="iptv_widgets_no_channel">チャンネルを選択</string>
+    <string name="iptv_widgets_no_guide">このチャンネルの番組表はありません</string>
+    <string name="iptv_widgets_recording_now">録画中 · %1$s まで</string>
+    <string name="iptv_widgets_recording_next">次 · %1$s</string>
+    <string name="iptv_widgets_recording_more">他 %1$d 件</string>
+    <string name="iptv_widgets_no_recordings">録画中または予約中の番組はありません</string>
+    <string name="iptv_widgets_nothing_playing">再生中の番組はありません</string>
+    <string name="iptv_widgets_stream_waiting">映像を待機中</string>
+    <string name="iptv_widgets_stream_resolution">映像</string>
+    <string name="iptv_widgets_stream_codec">コーデック</string>
+    <string name="iptv_widgets_stream_range">レンジ</string>
+    <string name="iptv_widgets_stream_bitrate">ビットレート</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Beállítás telefonról vagy számítógépről</string>
+    <string name="iptv_ui9_leave_title">Kilépsz az Élő TV-ből?</string>
+    <string name="iptv_ui9_leave_subtitle">Az Élő TV menüjéből a Vissza a Nuvio kezdőlapjára visz.</string>
+    <string name="iptv_ui9_stay">Maradok</string>
+    <string name="iptv_ui9_leave_home">Kezdőlapra</string>
+</resources>

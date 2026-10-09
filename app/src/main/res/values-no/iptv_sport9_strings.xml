@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Ta opp</string>
+    <string name="iptv_sport9_record_on">På %1$s, med tidligere start og senere slutt som angitt i Opptak</string>
+    <string name="iptv_sport9_record_when_found">Ta opp når en kanal blir funnet</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Tar opp kampen så snart guiden viser en kanal for den</string>
+    <string name="iptv_sport9_record_waiting">Venter på en kanal</string>
+    <string name="iptv_sport9_record_waiting_cancel">Slutt å vente på opptak</string>
+    <string name="iptv_sport9_cancel_recording">Avbryt opptak</string>
+    <string name="iptv_sport9_recording_set">Opptak satt opp</string>
+    <string name="iptv_sport9_recording_cancelled">Opptak av %1$s avbrutt</string>
+    <string name="iptv_sport9_pending_added">%1$s blir tatt opp så snart en kanal blir funnet</string>
+    <string name="iptv_sport9_pending_removed">%1$s blir ikke tatt opp automatisk</string>
+    <string name="iptv_sport9_channels">Finn kanaler med</string>
+    <string name="iptv_sport9_channels_subtitle">Hvordan Sport kobler kamper til kanalene dine</string>
+    <string name="iptv_sport9_channels_guide">Guidetitler</string>
+    <string name="iptv_sport9_channels_guide_description">Kamper som guiden din nevner ved navn. Fungerer i alle land når guiden er fylt ut.</string>
+    <string name="iptv_sport9_channels_broadcasters">Kringkasterlister</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Kanaler nevnt av ESPN og, for lag du følger med en TheSportsDB-nøkkel, av TheSportsDB for landet ditt. ESPN nevner mest amerikanske kanaler.</string>
+    <string name="iptv_sport9_channels_both">Begge</string>
+    <string name="iptv_sport9_channels_both_description">Treff i guiden først, deretter kringkasterkanaler du har</string>
+    <string name="iptv_sport9_link_guide">I guiden din · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Kringkaster · %1$s</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Ghi hình</string>
+    <string name="iptv_sport9_record_on">Trên %1$s, bắt đầu sớm và kết thúc muộn theo cài đặt trong Bản ghi</string>
+    <string name="iptv_sport9_record_when_found">Ghi hình khi tìm thấy kênh</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Ghi hình trận đấu ngay khi lịch phát sóng hiển thị kênh cho trận đó</string>
+    <string name="iptv_sport9_record_waiting">Đang chờ kênh</string>
+    <string name="iptv_sport9_record_waiting_cancel">Ngừng chờ để ghi hình</string>
+    <string name="iptv_sport9_cancel_recording">Hủy ghi hình</string>
+    <string name="iptv_sport9_recording_set">Đã đặt ghi hình</string>
+    <string name="iptv_sport9_recording_cancelled">Đã hủy ghi hình %1$s</string>
+    <string name="iptv_sport9_pending_added">%1$s sẽ được ghi hình ngay khi tìm thấy kênh</string>
+    <string name="iptv_sport9_pending_removed">%1$s sẽ không được ghi hình tự động</string>
+    <string name="iptv_sport9_channels">Tìm kênh bằng</string>
+    <string name="iptv_sport9_channels_subtitle">Cách Thể thao liên kết trận đấu với kênh của bạn</string>
+    <string name="iptv_sport9_channels_guide">Tiêu đề trong lịch phát sóng</string>
+    <string name="iptv_sport9_channels_guide_description">Các trận đấu mà lịch phát sóng của bạn ghi theo tên. Hoạt động ở mọi quốc gia khi lịch phát sóng có dữ liệu.</string>
+    <string name="iptv_sport9_channels_broadcasters">Danh sách đài phát sóng</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Các kênh do ESPN nêu và, với đội bạn theo dõi bằng khóa TheSportsDB, do TheSportsDB nêu cho quốc gia của bạn. ESPN chủ yếu nêu các kênh của Mỹ.</string>
+    <string name="iptv_sport9_channels_both">Cả hai</string>
+    <string name="iptv_sport9_channels_both_description">Khớp lịch phát sóng trước, sau đó là các kênh đài phát sóng bạn có</string>
+    <string name="iptv_sport9_link_guide">Trong lịch phát sóng · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Đài phát sóng · %1$s</string>
+</resources>

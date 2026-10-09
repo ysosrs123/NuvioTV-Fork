@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Widget kiválasztása</string>
+    <string name="iptv_widgets_choose_subtitle">%1$d. widget · Tartsd lenyomva az OK gombot egy widgeten a módosításához</string>
+    <string name="iptv_widgets_change">OK: módosítás</string>
+    <string name="iptv_widgets_kind_clocks">Világórák</string>
+    <string name="iptv_widgets_kind_clocks_description">A pontos idő legfeljebb négy városban</string>
+    <string name="iptv_widgets_kind_sport">Sportsáv</string>
+    <string name="iptv_widgets_kind_sport_description">A csapataid meccsei és a szoros meccsek</string>
+    <string name="iptv_widgets_kind_up_next">Következik</string>
+    <string name="iptv_widgets_kind_up_next_description">A kiválasztott csatorna következő két műsora</string>
+    <string name="iptv_widgets_kind_recordings">Felvételek</string>
+    <string name="iptv_widgets_kind_recordings_description">Mi készül most és mi következik</string>
+    <string name="iptv_widgets_kind_stream">Streaminfó</string>
+    <string name="iptv_widgets_kind_stream_description">A lejátszott csatorna képmérete, HDR-je, kodekje és bitrátája</string>
+    <string name="iptv_widgets_kind_empty">Üres</string>
+    <string name="iptv_widgets_kind_empty_description">Hely üresen hagyása</string>
+    <string name="iptv_widgets_add">Nyomd meg az OK gombot widget hozzáadásához</string>
+    <string name="iptv_widgets_layout">Elrendezés</string>
+    <string name="iptv_widgets_layout_subtitle">Az erre a képernyőre nem férő widgetek rejtve maradnak</string>
+    <string name="iptv_widgets_layout_one">Egy széles widget</string>
+    <string name="iptv_widgets_layout_two">Két widget</string>
+    <string name="iptv_widgets_layout_three">Három widget</string>
+    <string name="iptv_widgets_cities">Városok módosítása</string>
+    <string name="iptv_widgets_cities_subtitle">Legfeljebb négy város. Válassz ki egy várost az eltávolításához.</string>
+    <string name="iptv_widgets_city_add">Város hozzáadása</string>
+    <string name="iptv_widgets_city_search">Városok keresése</string>
+    <string name="iptv_widgets_city_none">Nincs egyező város</string>
+    <string name="iptv_widgets_city_device">Ez az eszköz</string>
+    <string name="iptv_widgets_done">Kész</string>
+    <string name="iptv_widgets_no_cities">Nincs kiválasztott város</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d nap</item>
+        <item quantity="other">+%d nap</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d nap</item>
+        <item quantity="other">−%d nap</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Most nincs meccs</string>
+    <string name="iptv_widgets_sport_off">A Sport ki van kapcsolva</string>
+    <string name="iptv_widgets_no_channel">Válassz csatornát</string>
+    <string name="iptv_widgets_no_guide">Nincs műsorújság ehhez a csatornához</string>
+    <string name="iptv_widgets_recording_now">Felvétel · %1$s-ig</string>
+    <string name="iptv_widgets_recording_next">Következik · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d további</string>
+    <string name="iptv_widgets_no_recordings">Nincs folyamatban lévő vagy ütemezett felvétel</string>
+    <string name="iptv_widgets_nothing_playing">Nincs lejátszás</string>
+    <string name="iptv_widgets_stream_waiting">Várakozás a képre</string>
+    <string name="iptv_widgets_stream_resolution">Kép</string>
+    <string name="iptv_widgets_stream_codec">Kodek</string>
+    <string name="iptv_widgets_stream_range">Tartomány</string>
+    <string name="iptv_widgets_stream_bitrate">Bitráta</string>
+</resources>

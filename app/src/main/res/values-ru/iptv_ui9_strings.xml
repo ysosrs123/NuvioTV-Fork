@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Настройте с телефона или компьютера</string>
+    <string name="iptv_ui9_leave_title">Выйти из ТВ-эфира?</string>
+    <string name="iptv_ui9_leave_subtitle">Кнопка «Назад» в меню ТВ-эфира ведёт на главную Nuvio.</string>
+    <string name="iptv_ui9_stay">Остаться</string>
+    <string name="iptv_ui9_leave_home">На главную</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Ηθοποιοί: %1$s</string>
+    <string name="iptv_vod9_director">Σκηνοθέτης: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Δεν υπάρχουν πλήρεις λεπτομέρειες για αυτόν τον τίτλο από τα πρόσθετά σας.</string>
+</resources>

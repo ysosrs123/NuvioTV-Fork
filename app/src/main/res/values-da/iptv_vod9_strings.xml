@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Medvirkende: %1$s</string>
+    <string name="iptv_vod9_director">Instruktør: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Der er ikke fulde detaljer om denne titel fra dine addons.</string>
+</resources>

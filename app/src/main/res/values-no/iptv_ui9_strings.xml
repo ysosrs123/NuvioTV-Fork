@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Konfigurer fra telefonen eller datamaskinen</string>
+    <string name="iptv_ui9_leave_title">Forlate Direkte-TV?</string>
+    <string name="iptv_ui9_leave_subtitle">Tilbake fra Direkte-TV-menyen tar deg til Nuvio Hjem.</string>
+    <string name="iptv_ui9_stay">Bli</string>
+    <string name="iptv_ui9_leave_home">Gå til Hjem</string>
+</resources>

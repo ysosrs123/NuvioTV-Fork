@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">আপনার ফোন বা কম্পিউটার থেকে সেট আপ করুন</string>
+    <string name="iptv_ui9_leave_title">লাইভ টিভি ছেড়ে যাবেন?</string>
+    <string name="iptv_ui9_leave_subtitle">লাইভ টিভি মেনু থেকে পিছনে গেলে Nuvio হোমে পৌঁছাবেন।</string>
+    <string name="iptv_ui9_stay">থাকুন</string>
+    <string name="iptv_ui9_leave_home">হোমে যান</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">تسجيل</string>
+    <string name="iptv_sport9_record_on">على %1$s، مع البدء مبكراً والانتهاء متأخراً حسب إعدادات التسجيلات</string>
+    <string name="iptv_sport9_record_when_found">التسجيل عند العثور على قناة</string>
+    <string name="iptv_sport9_record_when_found_subtitle">يسجّل المباراة بمجرد أن يعرض الدليل قناة لها</string>
+    <string name="iptv_sport9_record_waiting">في انتظار قناة</string>
+    <string name="iptv_sport9_record_waiting_cancel">إيقاف انتظار التسجيل</string>
+    <string name="iptv_sport9_cancel_recording">إلغاء التسجيل</string>
+    <string name="iptv_sport9_recording_set">تم ضبط التسجيل</string>
+    <string name="iptv_sport9_recording_cancelled">تم إلغاء تسجيل %1$s</string>
+    <string name="iptv_sport9_pending_added">سيتم تسجيل %1$s بمجرد العثور على قناة</string>
+    <string name="iptv_sport9_pending_removed">لن يتم تسجيل %1$s تلقائياً</string>
+    <string name="iptv_sport9_channels">البحث عن القنوات باستخدام</string>
+    <string name="iptv_sport9_channels_subtitle">كيف يربط قسم الرياضة المباريات بقنواتك</string>
+    <string name="iptv_sport9_channels_guide">عناوين الدليل</string>
+    <string name="iptv_sport9_channels_guide_description">المباريات التي يذكرها دليلك بالاسم. يعمل في كل البلدان عندما يكون دليلك مكتملاً.</string>
+    <string name="iptv_sport9_channels_broadcasters">قوائم القنوات الناقلة</string>
+    <string name="iptv_sport9_channels_broadcasters_description">القنوات التي يحددها ESPN، وللفرق التي تتابعها باستخدام مفتاح TheSportsDB، القنوات التي يحددها TheSportsDB لبلدك. يحدد ESPN في الغالب قنوات أمريكية.</string>
+    <string name="iptv_sport9_channels_both">كلاهما</string>
+    <string name="iptv_sport9_channels_both_description">تطابقات الدليل أولاً، ثم القنوات الناقلة المتوفرة لديك</string>
+    <string name="iptv_sport9_link_guide">في دليلك · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">قناة ناقلة · %1$s</string>
+</resources>

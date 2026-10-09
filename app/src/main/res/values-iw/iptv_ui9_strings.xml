@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">הגדרה מהטלפון או מהמחשב</string>
+    <string name="iptv_ui9_leave_title">לצאת מהטלוויזיה החיה?</string>
+    <string name="iptv_ui9_leave_subtitle">חזרה מתפריט הטלוויזיה החיה מובילה למסך הבית של Nuvio.</string>
+    <string name="iptv_ui9_stay">הישארות</string>
+    <string name="iptv_ui9_leave_home">יציאה לבית</string>
+</resources>

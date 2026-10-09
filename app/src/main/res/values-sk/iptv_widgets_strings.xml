@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Vybrať miniaplikáciu</string>
+    <string name="iptv_widgets_choose_subtitle">Miniaplikácia %1$d · Podržaním OK na ľubovoľnej miniaplikácii ju zmeníte</string>
+    <string name="iptv_widgets_change">OK na zmenu</string>
+    <string name="iptv_widgets_kind_clocks">Svetové hodiny</string>
+    <string name="iptv_widgets_kind_clocks_description">Čas až v štyroch mestách</string>
+    <string name="iptv_widgets_kind_sport">Športový pás</string>
+    <string name="iptv_widgets_kind_sport_description">Zápasy vašich tímov a vyrovnané zápasy</string>
+    <string name="iptv_widgets_kind_up_next">Nasleduje</string>
+    <string name="iptv_widgets_kind_up_next_description">Ďalšie dva programy na vybranom kanáli</string>
+    <string name="iptv_widgets_kind_recordings">Nahrávky</string>
+    <string name="iptv_widgets_kind_recordings_description">Čo sa práve nahráva a čo bude ďalej</string>
+    <string name="iptv_widgets_kind_stream">Informácie o streame</string>
+    <string name="iptv_widgets_kind_stream_description">Veľkosť obrazu, HDR, kodek a dátový tok prehrávaného kanála</string>
+    <string name="iptv_widgets_kind_empty">Prázdne</string>
+    <string name="iptv_widgets_kind_empty_description">Ponechať toto miesto prázdne</string>
+    <string name="iptv_widgets_add">Stlačením OK pridáte miniaplikáciu</string>
+    <string name="iptv_widgets_layout">Rozloženie</string>
+    <string name="iptv_widgets_layout_subtitle">Miniaplikácie, ktoré sa na túto obrazovku nezmestia, sú skryté</string>
+    <string name="iptv_widgets_layout_one">Jedna široká miniaplikácia</string>
+    <string name="iptv_widgets_layout_two">Dve miniaplikácie</string>
+    <string name="iptv_widgets_layout_three">Tri miniaplikácie</string>
+    <string name="iptv_widgets_cities">Zmeniť mestá</string>
+    <string name="iptv_widgets_cities_subtitle">Až štyri mestá. Výberom mesta ho odstránite.</string>
+    <string name="iptv_widgets_city_add">Pridať mesto</string>
+    <string name="iptv_widgets_city_search">Hľadať mestá</string>
+    <string name="iptv_widgets_city_none">Žiadne zodpovedajúce mestá</string>
+    <string name="iptv_widgets_city_device">Toto zariadenie</string>
+    <string name="iptv_widgets_done">Hotovo</string>
+    <string name="iptv_widgets_no_cities">Nie sú vybrané žiadne mestá</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d deň</item>
+        <item quantity="few">+%d dni</item>
+        <item quantity="many">+%d dňa</item>
+        <item quantity="other">+%d dní</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d deň</item>
+        <item quantity="few">−%d dni</item>
+        <item quantity="many">−%d dňa</item>
+        <item quantity="other">−%d dní</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Teraz žiadne zápasy</string>
+    <string name="iptv_widgets_sport_off">Šport je vypnutý</string>
+    <string name="iptv_widgets_no_channel">Vyberte kanál</string>
+    <string name="iptv_widgets_no_guide">Pre tento kanál nie je program</string>
+    <string name="iptv_widgets_recording_now">Nahráva sa · do %1$s</string>
+    <string name="iptv_widgets_recording_next">Ďalej · %1$s</string>
+    <string name="iptv_widgets_recording_more">Ďalšie: %1$d</string>
+    <string name="iptv_widgets_no_recordings">Nič sa nenahráva ani nie je naplánované</string>
+    <string name="iptv_widgets_nothing_playing">Nič sa neprehráva</string>
+    <string name="iptv_widgets_stream_waiting">Čaká sa na obraz</string>
+    <string name="iptv_widgets_stream_resolution">Obraz</string>
+    <string name="iptv_widgets_stream_codec">Kodek</string>
+    <string name="iptv_widgets_stream_range">Rozsah</string>
+    <string name="iptv_widgets_stream_bitrate">Dátový tok</string>
+</resources>

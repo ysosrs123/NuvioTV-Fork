@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Nahrať</string>
+    <string name="iptv_sport9_record_on">Na %1$s, so začiatkom skôr a koncom neskôr podľa nastavenia v Nahrávkach</string>
+    <string name="iptv_sport9_record_when_found">Nahrať, keď sa nájde kanál</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Nahrá zápas, hneď ako program ukáže kanál, ktorý ho vysiela</string>
+    <string name="iptv_sport9_record_waiting">Čaká sa na kanál</string>
+    <string name="iptv_sport9_record_waiting_cancel">Prestať čakať na nahrávanie</string>
+    <string name="iptv_sport9_cancel_recording">Zrušiť nahrávanie</string>
+    <string name="iptv_sport9_recording_set">Nahrávanie nastavené</string>
+    <string name="iptv_sport9_recording_cancelled">Nahrávanie %1$s zrušené</string>
+    <string name="iptv_sport9_pending_added">%1$s sa nahrá, hneď ako sa nájde kanál</string>
+    <string name="iptv_sport9_pending_removed">%1$s sa nebude nahrávať automaticky</string>
+    <string name="iptv_sport9_channels">Hľadať kanály pomocou</string>
+    <string name="iptv_sport9_channels_subtitle">Ako Šport priraďuje zápasy k vašim kanálom</string>
+    <string name="iptv_sport9_channels_guide">Názvy v programe</string>
+    <string name="iptv_sport9_channels_guide_description">Zápasy, ktoré váš program uvádza podľa názvu. Funguje v každej krajine, ak je program vyplnený.</string>
+    <string name="iptv_sport9_channels_broadcasters">Zoznamy vysielateľov</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Kanály uvedené ESPN a pre tímy, ktoré sledujete s kľúčom TheSportsDB, kanály uvedené TheSportsDB pre vašu krajinu. ESPN uvádza najmä americké kanály.</string>
+    <string name="iptv_sport9_channels_both">Oboje</string>
+    <string name="iptv_sport9_channels_both_description">Najprv zhody v programe, potom kanály vysielateľov, ktoré máte</string>
+    <string name="iptv_sport9_link_guide">Vo vašom programe · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Vysielateľ · %1$s</string>
+</resources>

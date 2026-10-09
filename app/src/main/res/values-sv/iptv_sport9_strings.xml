@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Spela in</string>
+    <string name="iptv_sport9_record_on">På %1$s, med tidigare start och senare slut enligt inställningen i Inspelningar</string>
+    <string name="iptv_sport9_record_when_found">Spela in när en kanal hittas</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Spelar in matchen så snart guiden visar en kanal för den</string>
+    <string name="iptv_sport9_record_waiting">Väntar på en kanal</string>
+    <string name="iptv_sport9_record_waiting_cancel">Sluta vänta på inspelning</string>
+    <string name="iptv_sport9_cancel_recording">Avbryt inspelning</string>
+    <string name="iptv_sport9_recording_set">Inspelning inställd</string>
+    <string name="iptv_sport9_recording_cancelled">Inspelningen av %1$s avbröts</string>
+    <string name="iptv_sport9_pending_added">%1$s spelas in så snart en kanal hittas</string>
+    <string name="iptv_sport9_pending_removed">%1$s spelas inte in automatiskt</string>
+    <string name="iptv_sport9_channels">Hitta kanaler med</string>
+    <string name="iptv_sport9_channels_subtitle">Hur Sport kopplar matcher till dina kanaler</string>
+    <string name="iptv_sport9_channels_guide">Guidetitlar</string>
+    <string name="iptv_sport9_channels_guide_description">Matcher som din guide nämner vid namn. Fungerar i alla länder när guiden är ifylld.</string>
+    <string name="iptv_sport9_channels_broadcasters">Sändarlistor</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Kanaler som ESPN anger och, för lag du följer med en TheSportsDB-nyckel, som TheSportsDB anger för ditt land. ESPN anger mest amerikanska kanaler.</string>
+    <string name="iptv_sport9_channels_both">Båda</string>
+    <string name="iptv_sport9_channels_both_description">Först träffar i guiden, sedan sändarkanaler du har</string>
+    <string name="iptv_sport9_link_guide">I din guide · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Sändare · %1$s</string>
+</resources>

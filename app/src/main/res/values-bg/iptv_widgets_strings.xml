@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Изберете уиджет</string>
+    <string name="iptv_widgets_choose_subtitle">Уиджет %1$d · Задръжте OK върху уиджет, за да го смените</string>
+    <string name="iptv_widgets_change">OK за смяна</string>
+    <string name="iptv_widgets_kind_clocks">Световни часовници</string>
+    <string name="iptv_widgets_kind_clocks_description">Часът в до четири града</string>
+    <string name="iptv_widgets_kind_sport">Спортна лента</string>
+    <string name="iptv_widgets_kind_sport_description">Мачовете на отборите ви и оспорваните мачове</string>
+    <string name="iptv_widgets_kind_up_next">Следва</string>
+    <string name="iptv_widgets_kind_up_next_description">Следващите две предавания по избрания канал</string>
+    <string name="iptv_widgets_kind_recordings">Записи</string>
+    <string name="iptv_widgets_kind_recordings_description">Какво се записва сега и какво следва</string>
+    <string name="iptv_widgets_kind_stream">Информация за потока</string>
+    <string name="iptv_widgets_kind_stream_description">Размер на картината, HDR, кодек и битрейт на текущия канал</string>
+    <string name="iptv_widgets_kind_empty">Празно</string>
+    <string name="iptv_widgets_kind_empty_description">Оставете това място празно</string>
+    <string name="iptv_widgets_add">Натиснете OK, за да добавите уиджет</string>
+    <string name="iptv_widgets_layout">Оформление</string>
+    <string name="iptv_widgets_layout_subtitle">Уиджетите, които не се побират на този екран, се скриват</string>
+    <string name="iptv_widgets_layout_one">Един широк уиджет</string>
+    <string name="iptv_widgets_layout_two">Два уиджета</string>
+    <string name="iptv_widgets_layout_three">Три уиджета</string>
+    <string name="iptv_widgets_cities">Смяна на градовете</string>
+    <string name="iptv_widgets_cities_subtitle">До четири града. Изберете град, за да го премахнете.</string>
+    <string name="iptv_widgets_city_add">Добавяне на град</string>
+    <string name="iptv_widgets_city_search">Търсене на градове</string>
+    <string name="iptv_widgets_city_none">Няма съвпадащи градове</string>
+    <string name="iptv_widgets_city_device">Това устройство</string>
+    <string name="iptv_widgets_done">Готово</string>
+    <string name="iptv_widgets_no_cities">Няма избрани градове</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d ден</item>
+        <item quantity="other">+%d дни</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d ден</item>
+        <item quantity="other">−%d дни</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Няма мачове в момента</string>
+    <string name="iptv_widgets_sport_off">„Спорт“ е изключен</string>
+    <string name="iptv_widgets_no_channel">Изберете канал</string>
+    <string name="iptv_widgets_no_guide">Няма справочник за този канал</string>
+    <string name="iptv_widgets_recording_now">Записва се · до %1$s</string>
+    <string name="iptv_widgets_recording_next">Следва · %1$s</string>
+    <string name="iptv_widgets_recording_more">Още %1$d</string>
+    <string name="iptv_widgets_no_recordings">Нищо не се записва и няма насрочени записи</string>
+    <string name="iptv_widgets_nothing_playing">Нищо не се възпроизвежда</string>
+    <string name="iptv_widgets_stream_waiting">Изчакване на картината</string>
+    <string name="iptv_widgets_stream_resolution">Картина</string>
+    <string name="iptv_widgets_stream_codec">Кодек</string>
+    <string name="iptv_widgets_stream_range">Обхват</string>
+    <string name="iptv_widgets_stream_bitrate">Битрейт</string>
+</resources>

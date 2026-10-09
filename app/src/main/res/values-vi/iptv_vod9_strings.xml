@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Diễn viên: %1$s</string>
+    <string name="iptv_vod9_director">Đạo diễn: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Tiện ích của bạn không có đầy đủ thông tin cho nội dung này.</string>
+</resources>

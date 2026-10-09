@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Distribuție: %1$s</string>
+    <string name="iptv_vod9_director">Regizor: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Complementurile tale nu oferă detalii complete pentru acest titlu.</string>
+</resources>

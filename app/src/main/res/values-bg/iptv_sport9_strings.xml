@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Запиши</string>
+    <string name="iptv_sport9_record_on">По %1$s, с по-ранно начало и по-късен край, както е зададено в Записи</string>
+    <string name="iptv_sport9_record_when_found">Запиши, когато бъде намерен канал</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Записва мача, щом справочникът покаже канал за него</string>
+    <string name="iptv_sport9_record_waiting">Изчакване на канал</string>
+    <string name="iptv_sport9_record_waiting_cancel">Спри изчакването за запис</string>
+    <string name="iptv_sport9_cancel_recording">Отмени записа</string>
+    <string name="iptv_sport9_recording_set">Записът е насрочен</string>
+    <string name="iptv_sport9_recording_cancelled">Записът на %1$s е отменен</string>
+    <string name="iptv_sport9_pending_added">%1$s ще бъде записан, щом бъде намерен канал</string>
+    <string name="iptv_sport9_pending_removed">%1$s няма да бъде записан автоматично</string>
+    <string name="iptv_sport9_channels">Намиране на канали чрез</string>
+    <string name="iptv_sport9_channels_subtitle">Как „Спорт“ свързва мачовете с каналите ви</string>
+    <string name="iptv_sport9_channels_guide">Заглавия в справочника</string>
+    <string name="iptv_sport9_channels_guide_description">Мачове, които справочникът ви изброява по име. Работи във всяка държава, когато справочникът е попълнен.</string>
+    <string name="iptv_sport9_channels_broadcasters">Списъци на излъчващите</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Канали, посочени от ESPN, а за отборите, които следвате с ключ за TheSportsDB – посочени от TheSportsDB за вашата държава. ESPN посочва предимно канали от САЩ.</string>
+    <string name="iptv_sport9_channels_both">И двете</string>
+    <string name="iptv_sport9_channels_both_description">Първо съвпадения в справочника, после излъчващи канали, които имате</string>
+    <string name="iptv_sport9_link_guide">Във вашия справочник · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Излъчващ · %1$s</string>
+</resources>

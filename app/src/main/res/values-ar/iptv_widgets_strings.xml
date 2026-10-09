@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">اختيار أداة</string>
+    <string name="iptv_widgets_choose_subtitle">الأداة %1$d · اضغط مطولاً على OK فوق أي أداة لتغييرها</string>
+    <string name="iptv_widgets_change">OK للتغيير</string>
+    <string name="iptv_widgets_kind_clocks">ساعات عالمية</string>
+    <string name="iptv_widgets_kind_clocks_description">الوقت في ما يصل إلى أربع مدن</string>
+    <string name="iptv_widgets_kind_sport">شريط الرياضة</string>
+    <string name="iptv_widgets_kind_sport_description">مباريات فرقك والمباريات المتقاربة</string>
+    <string name="iptv_widgets_kind_up_next">التالي</string>
+    <string name="iptv_widgets_kind_up_next_description">البرنامجان التاليان على القناة المحددة</string>
+    <string name="iptv_widgets_kind_recordings">التسجيلات</string>
+    <string name="iptv_widgets_kind_recordings_description">ما يُسجَّل الآن وما التالي</string>
+    <string name="iptv_widgets_kind_stream">معلومات البث</string>
+    <string name="iptv_widgets_kind_stream_description">حجم الصورة وHDR والترميز ومعدل البت للقناة المعروضة</string>
+    <string name="iptv_widgets_kind_empty">فارغ</string>
+    <string name="iptv_widgets_kind_empty_description">ترك هذه المساحة فارغة</string>
+    <string name="iptv_widgets_add">اضغط OK لإضافة أداة</string>
+    <string name="iptv_widgets_layout">التخطيط</string>
+    <string name="iptv_widgets_layout_subtitle">تُخفى الأدوات التي لا تتسع لها هذه الشاشة</string>
+    <string name="iptv_widgets_layout_one">أداة واحدة عريضة</string>
+    <string name="iptv_widgets_layout_two">أداتان</string>
+    <string name="iptv_widgets_layout_three">ثلاث أدوات</string>
+    <string name="iptv_widgets_cities">تغيير المدن</string>
+    <string name="iptv_widgets_cities_subtitle">ما يصل إلى أربع مدن. اختر مدينة لإزالتها.</string>
+    <string name="iptv_widgets_city_add">إضافة مدينة</string>
+    <string name="iptv_widgets_city_search">البحث عن مدن</string>
+    <string name="iptv_widgets_city_none">لا توجد مدن مطابقة</string>
+    <string name="iptv_widgets_city_device">هذا الجهاز</string>
+    <string name="iptv_widgets_done">تم</string>
+    <string name="iptv_widgets_no_cities">لم يتم اختيار مدن</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="zero">+%d يوم</item>
+        <item quantity="one">+%d يوم</item>
+        <item quantity="two">+%d يوم</item>
+        <item quantity="few">+%d أيام</item>
+        <item quantity="many">+%d يوماً</item>
+        <item quantity="other">+%d يوم</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="zero">−%d يوم</item>
+        <item quantity="one">−%d يوم</item>
+        <item quantity="two">−%d يوم</item>
+        <item quantity="few">−%d أيام</item>
+        <item quantity="many">−%d يوماً</item>
+        <item quantity="other">−%d يوم</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">لا توجد مباريات الآن</string>
+    <string name="iptv_widgets_sport_off">الرياضة متوقفة</string>
+    <string name="iptv_widgets_no_channel">اختر قناة</string>
+    <string name="iptv_widgets_no_guide">لا يوجد دليل لهذه القناة</string>
+    <string name="iptv_widgets_recording_now">جارٍ التسجيل · حتى %1$s</string>
+    <string name="iptv_widgets_recording_next">التالي · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d أخرى</string>
+    <string name="iptv_widgets_no_recordings">لا توجد تسجيلات جارية أو مجدولة</string>
+    <string name="iptv_widgets_nothing_playing">لا يُعرض شيء</string>
+    <string name="iptv_widgets_stream_waiting">في انتظار الصورة</string>
+    <string name="iptv_widgets_stream_resolution">الصورة</string>
+    <string name="iptv_widgets_stream_codec">الترميز</string>
+    <string name="iptv_widgets_stream_range">النطاق</string>
+    <string name="iptv_widgets_stream_bitrate">معدل البت</string>
+</resources>

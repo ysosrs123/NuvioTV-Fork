@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Aufnehmen</string>
+    <string name="iptv_sport9_record_on">Auf %1$s, mit früherem Start und späterem Ende wie in Aufnahmen festgelegt</string>
+    <string name="iptv_sport9_record_when_found">Aufnehmen, sobald ein Sender gefunden wird</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Nimmt das Spiel auf, sobald das Programm einen Sender dafür anzeigt</string>
+    <string name="iptv_sport9_record_waiting">Warten auf einen Sender</string>
+    <string name="iptv_sport9_record_waiting_cancel">Warten auf Aufnahme beenden</string>
+    <string name="iptv_sport9_cancel_recording">Aufnahme abbrechen</string>
+    <string name="iptv_sport9_recording_set">Aufnahme geplant</string>
+    <string name="iptv_sport9_recording_cancelled">Aufnahme von %1$s abgebrochen</string>
+    <string name="iptv_sport9_pending_added">%1$s wird aufgenommen, sobald ein Sender gefunden wird</string>
+    <string name="iptv_sport9_pending_removed">%1$s wird nicht automatisch aufgenommen</string>
+    <string name="iptv_sport9_channels">Sender finden über</string>
+    <string name="iptv_sport9_channels_subtitle">Wie Sport Spiele mit Ihren Sendern verknüpft</string>
+    <string name="iptv_sport9_channels_guide">Programmtitel</string>
+    <string name="iptv_sport9_channels_guide_description">Spiele, die Ihr Programm namentlich aufführt. Funktioniert in jedem Land, wenn Ihr Programm gefüllt ist.</string>
+    <string name="iptv_sport9_channels_broadcasters">Listen übertragender Sender</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Sender, die ESPN nennt, und für Teams, denen Sie mit einem TheSportsDB-Schlüssel folgen, die von TheSportsDB für Ihr Land genannten. ESPN nennt meist US-Sender.</string>
+    <string name="iptv_sport9_channels_both">Beides</string>
+    <string name="iptv_sport9_channels_both_description">Zuerst Treffer im Programm, dann übertragende Sender, die Sie haben</string>
+    <string name="iptv_sport9_link_guide">In Ihrem Programm · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Übertragender Sender · %1$s</string>
+</resources>

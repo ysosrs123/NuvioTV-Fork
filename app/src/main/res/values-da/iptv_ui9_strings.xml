@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Konfigurer fra din telefon eller computer</string>
+    <string name="iptv_ui9_leave_title">Forlad Live-TV?</string>
+    <string name="iptv_ui9_leave_subtitle">Tilbage fra Live-TV-menuen fører dig til Nuvio Hjem.</string>
+    <string name="iptv_ui9_stay">Bliv</string>
+    <string name="iptv_ui9_leave_home">Gå til Hjem</string>
+</resources>

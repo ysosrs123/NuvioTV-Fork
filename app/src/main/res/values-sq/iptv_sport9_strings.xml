@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Regjistro</string>
+    <string name="iptv_sport9_record_on">Në %1$s, duke nisur më herët dhe duke mbaruar më vonë siç është caktuar te Regjistrimet</string>
+    <string name="iptv_sport9_record_when_found">Regjistro kur të gjendet një kanal</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Regjistron ndeshjen sapo udhëzuesi të shfaqë një kanal për të</string>
+    <string name="iptv_sport9_record_waiting">Në pritje të një kanali</string>
+    <string name="iptv_sport9_record_waiting_cancel">Ndalo pritjen për regjistrim</string>
+    <string name="iptv_sport9_cancel_recording">Anulo regjistrimin</string>
+    <string name="iptv_sport9_recording_set">Regjistrimi u caktua</string>
+    <string name="iptv_sport9_recording_cancelled">Regjistrimi i %1$s u anulua</string>
+    <string name="iptv_sport9_pending_added">%1$s do të regjistrohet sapo të gjendet një kanal</string>
+    <string name="iptv_sport9_pending_removed">%1$s nuk do të regjistrohet automatikisht</string>
+    <string name="iptv_sport9_channels">Gjej kanale duke përdorur</string>
+    <string name="iptv_sport9_channels_subtitle">Si i lidh Sport ndeshjet me kanalet e tua</string>
+    <string name="iptv_sport9_channels_guide">Titujt e udhëzuesit</string>
+    <string name="iptv_sport9_channels_guide_description">Ndeshjet që udhëzuesi yt i liston me emër. Funksionon në çdo vend kur udhëzuesi është i plotësuar.</string>
+    <string name="iptv_sport9_channels_broadcasters">Listat e transmetuesve</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Kanale të përmendura nga ESPN dhe, për ekipet që ndjek me një çelës TheSportsDB, nga TheSportsDB për vendin tënd. ESPN përmend kryesisht kanale të SHBA-së.</string>
+    <string name="iptv_sport9_channels_both">Të dyja</string>
+    <string name="iptv_sport9_channels_both_description">Fillimisht përputhjet në udhëzues, pastaj kanalet e transmetuesve që ke</string>
+    <string name="iptv_sport9_link_guide">Në udhëzuesin tënd · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Transmetuesi · %1$s</string>
+</resources>

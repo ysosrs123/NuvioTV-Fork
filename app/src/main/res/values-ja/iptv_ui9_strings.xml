@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">スマートフォンまたはパソコンから設定</string>
+    <string name="iptv_ui9_leave_title">ライブTVを終了しますか？</string>
+    <string name="iptv_ui9_leave_subtitle">ライブTVメニューで戻ると Nuvio のホームに移動します。</string>
+    <string name="iptv_ui9_stay">とどまる</string>
+    <string name="iptv_ui9_leave_home">ホームへ移動</string>
+</resources>

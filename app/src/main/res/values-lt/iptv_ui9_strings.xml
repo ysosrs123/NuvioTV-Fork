@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Nustatykite telefonu arba kompiuteriu</string>
+    <string name="iptv_ui9_leave_title">Išeiti iš tiesioginės TV?</string>
+    <string name="iptv_ui9_leave_subtitle">Grįžus iš tiesioginės TV meniu atidaromas Nuvio pagrindinis ekranas.</string>
+    <string name="iptv_ui9_stay">Likti</string>
+    <string name="iptv_ui9_leave_home">Į pagrindinį</string>
+</resources>

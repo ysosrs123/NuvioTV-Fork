@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Configure pelo celular ou computador</string>
+    <string name="iptv_ui9_leave_title">Sair da TV ao vivo?</string>
+    <string name="iptv_ui9_leave_subtitle">Voltar no menu da TV ao vivo leva você ao Início do Nuvio.</string>
+    <string name="iptv_ui9_stay">Ficar</string>
+    <string name="iptv_ui9_leave_home">Ir para o Início</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">الإعداد من هاتفك أو الكمبيوتر</string>
+    <string name="iptv_ui9_leave_title">مغادرة البث المباشر؟</string>
+    <string name="iptv_ui9_leave_subtitle">الرجوع من قائمة البث المباشر ينقلك إلى الصفحة الرئيسية في Nuvio.</string>
+    <string name="iptv_ui9_stay">البقاء</string>
+    <string name="iptv_ui9_leave_home">المغادرة إلى الرئيسية</string>
+</resources>

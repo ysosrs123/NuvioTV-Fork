@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Opnemen</string>
+    <string name="iptv_sport9_record_on">Op %1$s, eerder beginnen en later stoppen zoals ingesteld bij Opnamen</string>
+    <string name="iptv_sport9_record_when_found">Opnemen zodra een zender is gevonden</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Neemt de wedstrijd op zodra de gids er een zender voor toont</string>
+    <string name="iptv_sport9_record_waiting">Wachten op een zender</string>
+    <string name="iptv_sport9_record_waiting_cancel">Stoppen met wachten op opname</string>
+    <string name="iptv_sport9_cancel_recording">Opname annuleren</string>
+    <string name="iptv_sport9_recording_set">Opname ingesteld</string>
+    <string name="iptv_sport9_recording_cancelled">Opname van %1$s geannuleerd</string>
+    <string name="iptv_sport9_pending_added">%1$s wordt opgenomen zodra een zender is gevonden</string>
+    <string name="iptv_sport9_pending_removed">%1$s wordt niet automatisch opgenomen</string>
+    <string name="iptv_sport9_channels">Zenders vinden via</string>
+    <string name="iptv_sport9_channels_subtitle">Hoe Sport wedstrijden aan je zenders koppelt</string>
+    <string name="iptv_sport9_channels_guide">Gidstitels</string>
+    <string name="iptv_sport9_channels_guide_description">Wedstrijden die je gids bij naam noemt. Werkt in elk land als je gids gevuld is.</string>
+    <string name="iptv_sport9_channels_broadcasters">Lijsten van omroepen</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Zenders genoemd door ESPN en, voor teams die je volgt met een TheSportsDB-sleutel, door TheSportsDB voor jouw land. ESPN noemt vooral Amerikaanse zenders.</string>
+    <string name="iptv_sport9_channels_both">Beide</string>
+    <string name="iptv_sport9_channels_both_description">Eerst overeenkomsten in de gids, daarna omroepzenders die je hebt</string>
+    <string name="iptv_sport9_link_guide">In je gids · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Omroep · %1$s</string>
+</resources>

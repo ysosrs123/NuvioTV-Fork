@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Įrašyti</string>
+    <string name="iptv_sport9_record_on">Kanale %1$s, pradedant anksčiau ir baigiant vėliau, kaip nustatyta Įrašuose</string>
+    <string name="iptv_sport9_record_when_found">Įrašyti, kai bus rastas kanalas</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Įrašo varžybas, kai tik TV programoje atsiranda jas rodantis kanalas</string>
+    <string name="iptv_sport9_record_waiting">Laukiama kanalo</string>
+    <string name="iptv_sport9_record_waiting_cancel">Nebelaukti įrašymo</string>
+    <string name="iptv_sport9_cancel_recording">Atšaukti įrašymą</string>
+    <string name="iptv_sport9_recording_set">Įrašymas nustatytas</string>
+    <string name="iptv_sport9_recording_cancelled">%1$s įrašymas atšauktas</string>
+    <string name="iptv_sport9_pending_added">%1$s bus įrašyta, kai tik bus rastas kanalas</string>
+    <string name="iptv_sport9_pending_removed">%1$s nebus įrašyta automatiškai</string>
+    <string name="iptv_sport9_channels">Kanalų paieška pagal</string>
+    <string name="iptv_sport9_channels_subtitle">Kaip Sportas susieja varžybas su jūsų kanalais</string>
+    <string name="iptv_sport9_channels_guide">TV programos pavadinimai</string>
+    <string name="iptv_sport9_channels_guide_description">Varžybos, kurias TV programa nurodo pavadinimu. Veikia bet kurioje šalyje, kai TV programa užpildyta.</string>
+    <string name="iptv_sport9_channels_broadcasters">Transliuotojų sąrašai</string>
+    <string name="iptv_sport9_channels_broadcasters_description">ESPN nurodyti kanalai, o komandoms, kurias sekate su TheSportsDB raktu, – TheSportsDB nurodyti kanalai jūsų šaliai. ESPN dažniausiai nurodo JAV kanalus.</string>
+    <string name="iptv_sport9_channels_both">Abu</string>
+    <string name="iptv_sport9_channels_both_description">Pirmiausia atitikmenys TV programoje, tada jūsų turimi transliuotojų kanalai</string>
+    <string name="iptv_sport9_link_guide">Jūsų TV programoje · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Transliuotojas · %1$s</string>
+</resources>

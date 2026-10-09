@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Nastavit z telefonu nebo počítače</string>
+    <string name="iptv_ui9_leave_title">Opustit živou TV?</string>
+    <string name="iptv_ui9_leave_subtitle">Zpět z nabídky živé TV vás přenese na domovskou obrazovku Nuvio.</string>
+    <string name="iptv_ui9_stay">Zůstat</string>
+    <string name="iptv_ui9_leave_home">Přejít domů</string>
+</resources>

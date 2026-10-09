@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Налаштуйте з телефона або комп’ютера</string>
+    <string name="iptv_ui9_leave_title">Вийти з ТВ наживо?</string>
+    <string name="iptv_ui9_leave_subtitle">Кнопка «Назад» у меню ТВ наживо веде на головну Nuvio.</string>
+    <string name="iptv_ui9_stay">Залишитися</string>
+    <string name="iptv_ui9_leave_home">На головну</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Distribution : %1$s</string>
+    <string name="iptv_vod9_director">Réalisateur : %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Vos addons ne fournissent pas tous les détails de ce titre.</string>
+</resources>

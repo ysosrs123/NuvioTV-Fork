@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Ρύθμιση από το τηλέφωνο ή τον υπολογιστή σας</string>
+    <string name="iptv_ui9_leave_title">Έξοδος από τη Ζωντανή TV;</string>
+    <string name="iptv_ui9_leave_subtitle">Το Πίσω από το μενού της Ζωντανής TV σάς μεταφέρει στην Αρχική του Nuvio.</string>
+    <string name="iptv_ui9_stay">Παραμονή</string>
+    <string name="iptv_ui9_leave_home">Μετάβαση στην Αρχική</string>
+</resources>

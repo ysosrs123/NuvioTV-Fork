@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Записать</string>
+    <string name="iptv_sport9_record_on">На %1$s, с более ранним началом и поздним окончанием, как задано в Записях</string>
+    <string name="iptv_sport9_record_when_found">Записать, когда найдётся канал</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Записывает матч, как только в телепрограмме появится канал для него</string>
+    <string name="iptv_sport9_record_waiting">Ожидание канала</string>
+    <string name="iptv_sport9_record_waiting_cancel">Перестать ждать записи</string>
+    <string name="iptv_sport9_cancel_recording">Отменить запись</string>
+    <string name="iptv_sport9_recording_set">Запись запланирована</string>
+    <string name="iptv_sport9_recording_cancelled">Запись «%1$s» отменена</string>
+    <string name="iptv_sport9_pending_added">«%1$s» будет записан, как только найдётся канал</string>
+    <string name="iptv_sport9_pending_removed">«%1$s» не будет записан автоматически</string>
+    <string name="iptv_sport9_channels">Искать каналы по</string>
+    <string name="iptv_sport9_channels_subtitle">Как раздел «Спорт» связывает матчи с вашими каналами</string>
+    <string name="iptv_sport9_channels_guide">Названиям в телепрограмме</string>
+    <string name="iptv_sport9_channels_guide_description">Матчи, которые телепрограмма указывает по названию. Работает в любой стране, если телепрограмма заполнена.</string>
+    <string name="iptv_sport9_channels_broadcasters">Спискам вещателей</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Каналы, указанные ESPN, а для команд, за которыми вы следите с ключом TheSportsDB, — указанные TheSportsDB для вашей страны. ESPN указывает в основном каналы США.</string>
+    <string name="iptv_sport9_channels_both">Обоим способам</string>
+    <string name="iptv_sport9_channels_both_description">Сначала совпадения в телепрограмме, затем доступные вам каналы вещателей</string>
+    <string name="iptv_sport9_link_guide">В телепрограмме · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Вещатель · %1$s</string>
+</resources>

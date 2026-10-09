@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Obsadenie: %1$s</string>
+    <string name="iptv_vod9_director">Režisér: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Úplné podrobnosti o tomto titule nie sú z vašich doplnkov k dispozícii.</string>
+</resources>

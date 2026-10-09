@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Odaberi widget</string>
+    <string name="iptv_widgets_choose_subtitle">Widget %1$d · Drži OK na bilo kojem widgetu da ga promijeniš</string>
+    <string name="iptv_widgets_change">OK za promjenu</string>
+    <string name="iptv_widgets_kind_clocks">Svjetski satovi</string>
+    <string name="iptv_widgets_kind_clocks_description">Vrijeme u najviše četiri grada</string>
+    <string name="iptv_widgets_kind_sport">Sportska traka</string>
+    <string name="iptv_widgets_kind_sport_description">Utakmice tvojih timova i neizvjesne utakmice</string>
+    <string name="iptv_widgets_kind_up_next">Sljedeće</string>
+    <string name="iptv_widgets_kind_up_next_description">Sljedeće dvije emisije na odabranom kanalu</string>
+    <string name="iptv_widgets_kind_recordings">Snimke</string>
+    <string name="iptv_widgets_kind_recordings_description">Što se sada snima i što je sljedeće</string>
+    <string name="iptv_widgets_kind_stream">Informacije o streamu</string>
+    <string name="iptv_widgets_kind_stream_description">Veličina slike, HDR, kodek i brzina prijenosa kanala koji se reproducira</string>
+    <string name="iptv_widgets_kind_empty">Prazno</string>
+    <string name="iptv_widgets_kind_empty_description">Ostavi ovaj prostor prazan</string>
+    <string name="iptv_widgets_add">Pritisni OK za dodavanje widgeta</string>
+    <string name="iptv_widgets_layout">Raspored</string>
+    <string name="iptv_widgets_layout_subtitle">Widgeti koji ne stanu na ovaj zaslon su skriveni</string>
+    <string name="iptv_widgets_layout_one">Jedan širok widget</string>
+    <string name="iptv_widgets_layout_two">Dva widgeta</string>
+    <string name="iptv_widgets_layout_three">Tri widgeta</string>
+    <string name="iptv_widgets_cities">Promijeni gradove</string>
+    <string name="iptv_widgets_cities_subtitle">Najviše četiri grada. Odaberi grad da ga ukloniš.</string>
+    <string name="iptv_widgets_city_add">Dodaj grad</string>
+    <string name="iptv_widgets_city_search">Pretraži gradove</string>
+    <string name="iptv_widgets_city_none">Nema odgovarajućih gradova</string>
+    <string name="iptv_widgets_city_device">Ovaj uređaj</string>
+    <string name="iptv_widgets_done">Gotovo</string>
+    <string name="iptv_widgets_no_cities">Nije odabran nijedan grad</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d dan</item>
+        <item quantity="few">+%d dana</item>
+        <item quantity="other">+%d dana</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d dan</item>
+        <item quantity="few">−%d dana</item>
+        <item quantity="other">−%d dana</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Trenutačno nema utakmica</string>
+    <string name="iptv_widgets_sport_off">Sport je isključen</string>
+    <string name="iptv_widgets_no_channel">Odaberi kanal</string>
+    <string name="iptv_widgets_no_guide">Nema vodiča za ovaj kanal</string>
+    <string name="iptv_widgets_recording_now">Snima se · do %1$s</string>
+    <string name="iptv_widgets_recording_next">Sljedeće · %1$s</string>
+    <string name="iptv_widgets_recording_more">Još %1$d</string>
+    <string name="iptv_widgets_no_recordings">Ništa se ne snima niti je zakazano</string>
+    <string name="iptv_widgets_nothing_playing">Ništa se ne reproducira</string>
+    <string name="iptv_widgets_stream_waiting">Čeka se slika</string>
+    <string name="iptv_widgets_stream_resolution">Slika</string>
+    <string name="iptv_widgets_stream_codec">Kodek</string>
+    <string name="iptv_widgets_stream_range">Raspon</string>
+    <string name="iptv_widgets_stream_bitrate">Brzina prijenosa</string>
+</resources>

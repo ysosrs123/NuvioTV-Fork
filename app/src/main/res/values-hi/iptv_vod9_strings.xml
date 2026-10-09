@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">कास्ट: %1$s</string>
+    <string name="iptv_vod9_director">निर्देशक: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">आपके ऐडऑन से इस टाइटल का पूरा विवरण उपलब्ध नहीं है।</string>
+</resources>

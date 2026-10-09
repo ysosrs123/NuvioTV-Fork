@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Enregistrer</string>
+    <string name="iptv_sport9_record_on">Sur %1$s, en commençant plus tôt et en finissant plus tard comme défini dans Enregistrements</string>
+    <string name="iptv_sport9_record_when_found">Enregistrer dès qu\'une chaîne est trouvée</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Enregistre le match dès que le guide indique une chaîne pour celui-ci</string>
+    <string name="iptv_sport9_record_waiting">En attente d\'une chaîne</string>
+    <string name="iptv_sport9_record_waiting_cancel">Ne plus attendre pour enregistrer</string>
+    <string name="iptv_sport9_cancel_recording">Annuler l\'enregistrement</string>
+    <string name="iptv_sport9_recording_set">Enregistrement programmé</string>
+    <string name="iptv_sport9_recording_cancelled">Enregistrement de %1$s annulé</string>
+    <string name="iptv_sport9_pending_added">%1$s sera enregistré dès qu\'une chaîne sera trouvée</string>
+    <string name="iptv_sport9_pending_removed">%1$s ne sera pas enregistré automatiquement</string>
+    <string name="iptv_sport9_channels">Trouver les chaînes avec</string>
+    <string name="iptv_sport9_channels_subtitle">Comment Sport associe les matchs à vos chaînes</string>
+    <string name="iptv_sport9_channels_guide">Titres du guide</string>
+    <string name="iptv_sport9_channels_guide_description">Les matchs que votre guide cite par leur nom. Fonctionne dans tous les pays si votre guide est rempli.</string>
+    <string name="iptv_sport9_channels_broadcasters">Listes des diffuseurs</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Chaînes citées par ESPN et, pour les équipes que vous suivez avec une clé TheSportsDB, par TheSportsDB pour votre pays. ESPN cite surtout des chaînes américaines.</string>
+    <string name="iptv_sport9_channels_both">Les deux</string>
+    <string name="iptv_sport9_channels_both_description">D\'abord les correspondances du guide, puis les chaînes des diffuseurs dont vous disposez</string>
+    <string name="iptv_sport9_link_guide">Dans votre guide · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Diffuseur · %1$s</string>
+</resources>

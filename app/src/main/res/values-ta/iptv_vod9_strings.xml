@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">நடிகர்கள்: %1$s</string>
+    <string name="iptv_vod9_director">இயக்குனர்: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">உங்கள் ஆட்ஆன்களில் இந்தத் தலைப்பின் முழு விவரங்கள் கிடைக்கவில்லை.</string>
+</resources>

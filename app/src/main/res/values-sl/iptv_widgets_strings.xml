@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Izberite pripomoček</string>
+    <string name="iptv_widgets_choose_subtitle">Pripomoček %1$d · Pridržite OK na pripomočku, da ga spremenite</string>
+    <string name="iptv_widgets_change">OK za spremembo</string>
+    <string name="iptv_widgets_kind_clocks">Svetovne ure</string>
+    <string name="iptv_widgets_kind_clocks_description">Čas v največ štirih mestih</string>
+    <string name="iptv_widgets_kind_sport">Športni trak</string>
+    <string name="iptv_widgets_kind_sport_description">Tekme vaših ekip in izenačene tekme</string>
+    <string name="iptv_widgets_kind_up_next">Sledi</string>
+    <string name="iptv_widgets_kind_up_next_description">Naslednji dve oddaji na izbranem kanalu</string>
+    <string name="iptv_widgets_kind_recordings">Posnetki</string>
+    <string name="iptv_widgets_kind_recordings_description">Kaj se snema zdaj in kaj sledi</string>
+    <string name="iptv_widgets_kind_stream">Podatki o pretoku</string>
+    <string name="iptv_widgets_kind_stream_description">Velikost slike, HDR, kodek in bitna hitrost predvajanega kanala</string>
+    <string name="iptv_widgets_kind_empty">Prazno</string>
+    <string name="iptv_widgets_kind_empty_description">Pusti ta prostor prazen</string>
+    <string name="iptv_widgets_add">Pritisnite OK, da dodate pripomoček</string>
+    <string name="iptv_widgets_layout">Postavitev</string>
+    <string name="iptv_widgets_layout_subtitle">Pripomočki, ki ne gredo na ta zaslon, so skriti</string>
+    <string name="iptv_widgets_layout_one">En širok pripomoček</string>
+    <string name="iptv_widgets_layout_two">Dva pripomočka</string>
+    <string name="iptv_widgets_layout_three">Trije pripomočki</string>
+    <string name="iptv_widgets_cities">Spremeni mesta</string>
+    <string name="iptv_widgets_cities_subtitle">Največ štiri mesta. Izberite mesto, da ga odstranite.</string>
+    <string name="iptv_widgets_city_add">Dodaj mesto</string>
+    <string name="iptv_widgets_city_search">Iskanje mest</string>
+    <string name="iptv_widgets_city_none">Ni ujemajočih se mest</string>
+    <string name="iptv_widgets_city_device">Ta naprava</string>
+    <string name="iptv_widgets_done">Končano</string>
+    <string name="iptv_widgets_no_cities">Ni izbranih mest</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d dan</item>
+        <item quantity="two">+%d dneva</item>
+        <item quantity="few">+%d dni</item>
+        <item quantity="other">+%d dni</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d dan</item>
+        <item quantity="two">−%d dneva</item>
+        <item quantity="few">−%d dni</item>
+        <item quantity="other">−%d dni</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Trenutno ni tekem</string>
+    <string name="iptv_widgets_sport_off">Šport je izklopljen</string>
+    <string name="iptv_widgets_no_channel">Izberite kanal</string>
+    <string name="iptv_widgets_no_guide">Za ta kanal ni vodnika</string>
+    <string name="iptv_widgets_recording_now">Snemanje · do %1$s</string>
+    <string name="iptv_widgets_recording_next">Sledi · %1$s</string>
+    <string name="iptv_widgets_recording_more">Še %1$d</string>
+    <string name="iptv_widgets_no_recordings">Nič se ne snema in nič ni načrtovano</string>
+    <string name="iptv_widgets_nothing_playing">Nič se ne predvaja</string>
+    <string name="iptv_widgets_stream_waiting">Čakanje na sliko</string>
+    <string name="iptv_widgets_stream_resolution">Slika</string>
+    <string name="iptv_widgets_stream_codec">Kodek</string>
+    <string name="iptv_widgets_stream_range">Obseg</string>
+    <string name="iptv_widgets_stream_bitrate">Bitna hitrost</string>
+</resources>

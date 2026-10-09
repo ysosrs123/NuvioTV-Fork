@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Konfigurera från telefonen eller datorn</string>
+    <string name="iptv_ui9_leave_title">Lämna Live-TV?</string>
+    <string name="iptv_ui9_leave_subtitle">Tillbaka från Live-TV-menyn tar dig till Nuvio Hem.</string>
+    <string name="iptv_ui9_stay">Stanna</string>
+    <string name="iptv_ui9_leave_home">Gå till Hem</string>
+</resources>

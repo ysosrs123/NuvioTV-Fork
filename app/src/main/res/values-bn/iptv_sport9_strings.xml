@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">রেকর্ড</string>
+    <string name="iptv_sport9_record_on">%1$s-এ, রেকর্ডিং সেটিংস অনুযায়ী আগে শুরু ও পরে শেষ করে</string>
+    <string name="iptv_sport9_record_when_found">চ্যানেল পাওয়া গেলে রেকর্ড করুন</string>
+    <string name="iptv_sport9_record_when_found_subtitle">গাইডে এর জন্য কোনো চ্যানেল দেখালেই খেলাটি রেকর্ড করে</string>
+    <string name="iptv_sport9_record_waiting">চ্যানেলের অপেক্ষায়</string>
+    <string name="iptv_sport9_record_waiting_cancel">রেকর্ডের অপেক্ষা বন্ধ করুন</string>
+    <string name="iptv_sport9_cancel_recording">রেকর্ডিং বাতিল করুন</string>
+    <string name="iptv_sport9_recording_set">রেকর্ডিং সেট হয়েছে</string>
+    <string name="iptv_sport9_recording_cancelled">%1$s-এর রেকর্ডিং বাতিল হয়েছে</string>
+    <string name="iptv_sport9_pending_added">চ্যানেল পাওয়া গেলেই %1$s রেকর্ড হবে</string>
+    <string name="iptv_sport9_pending_removed">%1$s স্বয়ংক্রিয়ভাবে রেকর্ড হবে না</string>
+    <string name="iptv_sport9_channels">চ্যানেল খোঁজার উপায়</string>
+    <string name="iptv_sport9_channels_subtitle">স্পোর্টস কীভাবে খেলাগুলোকে আপনার চ্যানেলের সঙ্গে যুক্ত করে</string>
+    <string name="iptv_sport9_channels_guide">গাইডের শিরোনাম</string>
+    <string name="iptv_sport9_channels_guide_description">আপনার গাইডে নাম দিয়ে তালিকাভুক্ত খেলা। গাইড পূর্ণ থাকলে যেকোনো দেশে কাজ করে।</string>
+    <string name="iptv_sport9_channels_broadcasters">সম্প্রচারকারীর তালিকা</string>
+    <string name="iptv_sport9_channels_broadcasters_description">ESPN যে চ্যানেলগুলোর নাম দেয়, এবং TheSportsDB কী দিয়ে অনুসরণ করা দলের জন্য TheSportsDB আপনার দেশের যে চ্যানেলগুলোর নাম দেয়। ESPN বেশিরভাগ মার্কিন চ্যানেলের নাম দেয়।</string>
+    <string name="iptv_sport9_channels_both">উভয়</string>
+    <string name="iptv_sport9_channels_both_description">প্রথমে গাইডের মিল, তারপর আপনার কাছে থাকা সম্প্রচারকারী চ্যানেল</string>
+    <string name="iptv_sport9_link_guide">আপনার গাইডে · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">সম্প্রচারকারী · %1$s</string>
+</resources>

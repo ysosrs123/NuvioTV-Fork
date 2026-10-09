@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Kaydet</string>
+    <string name="iptv_sport9_record_on">%1$s kanalında, Kayıtlar\'da ayarlandığı gibi erken başlayıp geç bitirerek</string>
+    <string name="iptv_sport9_record_when_found">Kanal bulunduğunda kaydet</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Yayın akışı maç için bir kanal gösterdiği anda maçı kaydeder</string>
+    <string name="iptv_sport9_record_waiting">Kanal bekleniyor</string>
+    <string name="iptv_sport9_record_waiting_cancel">Kayıt için beklemeyi durdur</string>
+    <string name="iptv_sport9_cancel_recording">Kaydı iptal et</string>
+    <string name="iptv_sport9_recording_set">Kayıt ayarlandı</string>
+    <string name="iptv_sport9_recording_cancelled">%1$s kaydı iptal edildi</string>
+    <string name="iptv_sport9_pending_added">%1$s, bir kanal bulunduğunda kaydedilecek</string>
+    <string name="iptv_sport9_pending_removed">%1$s otomatik olarak kaydedilmeyecek</string>
+    <string name="iptv_sport9_channels">Kanalları bulma yöntemi</string>
+    <string name="iptv_sport9_channels_subtitle">Spor maçları kanallarınızla nasıl eşleştirir</string>
+    <string name="iptv_sport9_channels_guide">Yayın akışı başlıkları</string>
+    <string name="iptv_sport9_channels_guide_description">Yayın akışınızın adıyla listelediği maçlar. Yayın akışınız doluysa her ülkede çalışır.</string>
+    <string name="iptv_sport9_channels_broadcasters">Yayıncı listeleri</string>
+    <string name="iptv_sport9_channels_broadcasters_description">ESPN\'in belirttiği kanallar ve TheSportsDB anahtarıyla takip ettiğiniz takımlar için TheSportsDB\'nin ülkeniz için belirttiği kanallar. ESPN çoğunlukla ABD kanallarını belirtir.</string>
+    <string name="iptv_sport9_channels_both">Her ikisi</string>
+    <string name="iptv_sport9_channels_both_description">Önce yayın akışı eşleşmeleri, sonra sahip olduğunuz yayıncı kanalları</string>
+    <string name="iptv_sport9_link_guide">Yayın akışınızda · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Yayıncı · %1$s</string>
+</resources>

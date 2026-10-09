@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Telefonunuzdan veya bilgisayarınızdan kurun</string>
+    <string name="iptv_ui9_leave_title">Canlı TV\'den çıkılsın mı?</string>
+    <string name="iptv_ui9_leave_subtitle">Canlı TV menüsünde geri tuşu sizi Nuvio Ana Menü\'ye götürür.</string>
+    <string name="iptv_ui9_stay">Kal</string>
+    <string name="iptv_ui9_leave_home">Ana Menü\'ye git</string>
+</resources>

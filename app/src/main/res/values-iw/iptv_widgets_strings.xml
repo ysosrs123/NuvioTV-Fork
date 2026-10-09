@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">בחירת ווידג׳ט</string>
+    <string name="iptv_widgets_choose_subtitle">ווידג׳ט %1$d · יש ללחוץ לחיצה ארוכה על OK בווידג׳ט כדי לשנות אותו</string>
+    <string name="iptv_widgets_change">OK לשינוי</string>
+    <string name="iptv_widgets_kind_clocks">שעונים עולמיים</string>
+    <string name="iptv_widgets_kind_clocks_description">השעה בעד ארבע ערים</string>
+    <string name="iptv_widgets_kind_sport">רצועת ספורט</string>
+    <string name="iptv_widgets_kind_sport_description">משחקי הקבוצות שלך ומשחקים צמודים</string>
+    <string name="iptv_widgets_kind_up_next">הבא בתור</string>
+    <string name="iptv_widgets_kind_up_next_description">שתי התוכניות הבאות בערוץ הנבחר</string>
+    <string name="iptv_widgets_kind_recordings">הקלטות</string>
+    <string name="iptv_widgets_kind_recordings_description">מה מוקלט עכשיו ומה הבא</string>
+    <string name="iptv_widgets_kind_stream">מידע על השידור</string>
+    <string name="iptv_widgets_kind_stream_description">גודל תמונה, HDR, קודק וקצב סיביות של הערוץ המופעל</string>
+    <string name="iptv_widgets_kind_empty">ריק</string>
+    <string name="iptv_widgets_kind_empty_description">להשאיר את המקום הזה ריק</string>
+    <string name="iptv_widgets_add">יש ללחוץ על OK כדי להוסיף ווידג׳ט</string>
+    <string name="iptv_widgets_layout">פריסה</string>
+    <string name="iptv_widgets_layout_subtitle">ווידג׳טים שלא נכנסים במסך הזה מוסתרים</string>
+    <string name="iptv_widgets_layout_one">ווידג׳ט רחב אחד</string>
+    <string name="iptv_widgets_layout_two">שני ווידג׳טים</string>
+    <string name="iptv_widgets_layout_three">שלושה ווידג׳טים</string>
+    <string name="iptv_widgets_cities">שינוי ערים</string>
+    <string name="iptv_widgets_cities_subtitle">עד ארבע ערים. יש לבחור עיר כדי להסיר אותה.</string>
+    <string name="iptv_widgets_city_add">הוספת עיר</string>
+    <string name="iptv_widgets_city_search">חיפוש ערים</string>
+    <string name="iptv_widgets_city_none">אין ערים תואמות</string>
+    <string name="iptv_widgets_city_device">המכשיר הזה</string>
+    <string name="iptv_widgets_done">סיום</string>
+    <string name="iptv_widgets_no_cities">לא נבחרו ערים</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d יום</item>
+        <item quantity="two">+%d ימים</item>
+        <item quantity="many">+%d ימים</item>
+        <item quantity="other">+%d ימים</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d יום</item>
+        <item quantity="two">−%d ימים</item>
+        <item quantity="many">−%d ימים</item>
+        <item quantity="other">−%d ימים</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">אין משחקים כרגע</string>
+    <string name="iptv_widgets_sport_off">ספורט כבוי</string>
+    <string name="iptv_widgets_no_channel">בחירת ערוץ</string>
+    <string name="iptv_widgets_no_guide">אין מדריך לערוץ הזה</string>
+    <string name="iptv_widgets_recording_now">בהקלטה · עד %1$s</string>
+    <string name="iptv_widgets_recording_next">הבא · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d נוספות</string>
+    <string name="iptv_widgets_no_recordings">אין הקלטות פעילות או מתוזמנות</string>
+    <string name="iptv_widgets_nothing_playing">לא מופעל דבר</string>
+    <string name="iptv_widgets_stream_waiting">ממתין לתמונה</string>
+    <string name="iptv_widgets_stream_resolution">תמונה</string>
+    <string name="iptv_widgets_stream_codec">קודק</string>
+    <string name="iptv_widgets_stream_range">טווח</string>
+    <string name="iptv_widgets_stream_bitrate">קצב סיביות</string>
+</resources>

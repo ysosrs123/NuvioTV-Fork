@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">透過手機或電腦設定</string>
+    <string name="iptv_ui9_leave_title">要離開直播電視嗎？</string>
+    <string name="iptv_ui9_leave_subtitle">在直播電視選單中返回會回到 Nuvio 首頁。</string>
+    <string name="iptv_ui9_stay">留下</string>
+    <string name="iptv_ui9_leave_home">返回首頁</string>
+</resources>

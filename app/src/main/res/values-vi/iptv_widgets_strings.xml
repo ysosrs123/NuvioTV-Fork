@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Chọn tiện ích con</string>
+    <string name="iptv_widgets_choose_subtitle">Tiện ích con %1$d · Giữ OK trên bất kỳ tiện ích con nào để thay đổi</string>
+    <string name="iptv_widgets_change">OK để thay đổi</string>
+    <string name="iptv_widgets_kind_clocks">Đồng hồ thế giới</string>
+    <string name="iptv_widgets_kind_clocks_description">Giờ tại tối đa bốn thành phố</string>
+    <string name="iptv_widgets_kind_sport">Dải thể thao</string>
+    <string name="iptv_widgets_kind_sport_description">Trận đấu của đội bạn và các trận sát nút</string>
+    <string name="iptv_widgets_kind_up_next">Tiếp theo</string>
+    <string name="iptv_widgets_kind_up_next_description">Hai chương trình tiếp theo trên kênh đã chọn</string>
+    <string name="iptv_widgets_kind_recordings">Bản ghi</string>
+    <string name="iptv_widgets_kind_recordings_description">Đang ghi gì và tiếp theo là gì</string>
+    <string name="iptv_widgets_kind_stream">Thông tin luồng</string>
+    <string name="iptv_widgets_kind_stream_description">Kích thước hình ảnh, HDR, codec và bitrate của kênh đang phát</string>
+    <string name="iptv_widgets_kind_empty">Trống</string>
+    <string name="iptv_widgets_kind_empty_description">Để trống vị trí này</string>
+    <string name="iptv_widgets_add">Nhấn OK để thêm tiện ích con</string>
+    <string name="iptv_widgets_layout">Bố cục</string>
+    <string name="iptv_widgets_layout_subtitle">Tiện ích con không vừa màn hình này sẽ bị ẩn</string>
+    <string name="iptv_widgets_layout_one">Một tiện ích con rộng</string>
+    <string name="iptv_widgets_layout_two">Hai tiện ích con</string>
+    <string name="iptv_widgets_layout_three">Ba tiện ích con</string>
+    <string name="iptv_widgets_cities">Đổi thành phố</string>
+    <string name="iptv_widgets_cities_subtitle">Tối đa bốn thành phố. Chọn một thành phố để xóa.</string>
+    <string name="iptv_widgets_city_add">Thêm thành phố</string>
+    <string name="iptv_widgets_city_search">Tìm thành phố</string>
+    <string name="iptv_widgets_city_none">Không có thành phố phù hợp</string>
+    <string name="iptv_widgets_city_device">Thiết bị này</string>
+    <string name="iptv_widgets_done">Xong</string>
+    <string name="iptv_widgets_no_cities">Chưa chọn thành phố nào</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="other">+%d ngày</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="other">−%d ngày</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Hiện không có trận đấu</string>
+    <string name="iptv_widgets_sport_off">Thể thao đang tắt</string>
+    <string name="iptv_widgets_no_channel">Chọn một kênh</string>
+    <string name="iptv_widgets_no_guide">Không có lịch phát sóng cho kênh này</string>
+    <string name="iptv_widgets_recording_now">Đang ghi · đến %1$s</string>
+    <string name="iptv_widgets_recording_next">Tiếp theo · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d nữa</string>
+    <string name="iptv_widgets_no_recordings">Không có gì đang ghi hoặc đã lên lịch</string>
+    <string name="iptv_widgets_nothing_playing">Không có gì đang phát</string>
+    <string name="iptv_widgets_stream_waiting">Đang chờ hình ảnh</string>
+    <string name="iptv_widgets_stream_resolution">Hình ảnh</string>
+    <string name="iptv_widgets_stream_codec">Codec</string>
+    <string name="iptv_widgets_stream_range">Dải màu</string>
+    <string name="iptv_widgets_stream_bitrate">Bitrate</string>
+</resources>

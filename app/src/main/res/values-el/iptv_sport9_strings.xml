@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Εγγραφή</string>
+    <string name="iptv_sport9_record_on">Στο %1$s, με νωρίτερη έναρξη και αργότερη λήξη όπως ορίζεται στις Εγγραφές</string>
+    <string name="iptv_sport9_record_when_found">Εγγραφή όταν βρεθεί κανάλι</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Καταγράφει τον αγώνα μόλις ο οδηγός δείξει κανάλι για αυτόν</string>
+    <string name="iptv_sport9_record_waiting">Αναμονή για κανάλι</string>
+    <string name="iptv_sport9_record_waiting_cancel">Διακοπή αναμονής για εγγραφή</string>
+    <string name="iptv_sport9_cancel_recording">Ακύρωση εγγραφής</string>
+    <string name="iptv_sport9_recording_set">Η εγγραφή ορίστηκε</string>
+    <string name="iptv_sport9_recording_cancelled">Η εγγραφή του %1$s ακυρώθηκε</string>
+    <string name="iptv_sport9_pending_added">Το %1$s θα εγγραφεί μόλις βρεθεί κανάλι</string>
+    <string name="iptv_sport9_pending_removed">Το %1$s δεν θα εγγραφεί αυτόματα</string>
+    <string name="iptv_sport9_channels">Εύρεση καναλιών μέσω</string>
+    <string name="iptv_sport9_channels_subtitle">Πώς τα Αθλητικά συνδέουν τους αγώνες με τα κανάλια σας</string>
+    <string name="iptv_sport9_channels_guide">Τίτλοι οδηγού</string>
+    <string name="iptv_sport9_channels_guide_description">Αγώνες που ο οδηγός σας αναφέρει ονομαστικά. Λειτουργεί σε κάθε χώρα όταν ο οδηγός σας είναι συμπληρωμένος.</string>
+    <string name="iptv_sport9_channels_broadcasters">Λίστες μεταδοτών</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Κανάλια που αναφέρει το ESPN και, για ομάδες που ακολουθείτε με κλειδί TheSportsDB, που αναφέρει το TheSportsDB για τη χώρα σας. Το ESPN αναφέρει κυρίως κανάλια των ΗΠΑ.</string>
+    <string name="iptv_sport9_channels_both">Και τα δύο</string>
+    <string name="iptv_sport9_channels_both_description">Πρώτα αντιστοιχίσεις του οδηγού, μετά κανάλια μεταδοτών που έχετε</string>
+    <string name="iptv_sport9_link_guide">Στον οδηγό σας · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Μεταδότης · %1$s</string>
+</resources>

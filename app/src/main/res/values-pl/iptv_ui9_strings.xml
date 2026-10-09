@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Skonfiguruj na telefonie lub komputerze</string>
+    <string name="iptv_ui9_leave_title">Opuścić telewizję na żywo?</string>
+    <string name="iptv_ui9_leave_subtitle">Wstecz w menu telewizji na żywo przenosi do ekranu głównego Nuvio.</string>
+    <string name="iptv_ui9_stay">Zostań</string>
+    <string name="iptv_ui9_leave_home">Przejdź do ekranu głównego</string>
+</resources>

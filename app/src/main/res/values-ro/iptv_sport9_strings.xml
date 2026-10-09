@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Înregistrează</string>
+    <string name="iptv_sport9_record_on">Pe %1$s, începând mai devreme și terminând mai târziu, așa cum e setat în Înregistrări</string>
+    <string name="iptv_sport9_record_when_found">Înregistrează când se găsește un canal</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Înregistrează meciul imediat ce ghidul arată un canal pentru el</string>
+    <string name="iptv_sport9_record_waiting">Se așteaptă un canal</string>
+    <string name="iptv_sport9_record_waiting_cancel">Nu mai aștepta înregistrarea</string>
+    <string name="iptv_sport9_cancel_recording">Anulează înregistrarea</string>
+    <string name="iptv_sport9_recording_set">Înregistrare setată</string>
+    <string name="iptv_sport9_recording_cancelled">Înregistrarea pentru %1$s a fost anulată</string>
+    <string name="iptv_sport9_pending_added">%1$s va fi înregistrat imediat ce se găsește un canal</string>
+    <string name="iptv_sport9_pending_removed">%1$s nu va fi înregistrat automat</string>
+    <string name="iptv_sport9_channels">Găsește canale folosind</string>
+    <string name="iptv_sport9_channels_subtitle">Cum leagă Sport meciurile de canalele tale</string>
+    <string name="iptv_sport9_channels_guide">Titluri din ghid</string>
+    <string name="iptv_sport9_channels_guide_description">Meciuri pe care ghidul tău le listează după nume. Funcționează în orice țară când ghidul e completat.</string>
+    <string name="iptv_sport9_channels_broadcasters">Liste de difuzori</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Canale indicate de ESPN și, pentru echipele pe care le urmărești cu o cheie TheSportsDB, de TheSportsDB pentru țara ta. ESPN indică mai ales canale din SUA.</string>
+    <string name="iptv_sport9_channels_both">Ambele</string>
+    <string name="iptv_sport9_channels_both_description">Întâi potrivirile din ghid, apoi canalele difuzorilor pe care le ai</string>
+    <string name="iptv_sport9_link_guide">În ghidul tău · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Difuzor · %1$s</string>
+</resources>

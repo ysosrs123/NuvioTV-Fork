@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Актьорски състав: %1$s</string>
+    <string name="iptv_vod9_director">Режисьор: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Пълните подробности за това заглавие не са налични от добавките ви.</string>
+</resources>

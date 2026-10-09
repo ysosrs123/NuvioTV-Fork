@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Skådespelare: %1$s</string>
+    <string name="iptv_vod9_director">Regissör: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Dina tillägg har inte fullständiga uppgifter om den här titeln.</string>
+</resources>

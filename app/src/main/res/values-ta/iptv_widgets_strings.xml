@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">விட்ஜெட்டைத் தேர்வுசெய்</string>
+    <string name="iptv_widgets_choose_subtitle">விட்ஜெட் %1$d · மாற்ற எந்த விட்ஜெட்டிலும் OK ஐ அழுத்திப் பிடிக்கவும்</string>
+    <string name="iptv_widgets_change">மாற்ற OK</string>
+    <string name="iptv_widgets_kind_clocks">உலகக் கடிகாரங்கள்</string>
+    <string name="iptv_widgets_kind_clocks_description">அதிகபட்சம் நான்கு நகரங்களின் நேரம்</string>
+    <string name="iptv_widgets_kind_sport">விளையாட்டுப் பட்டை</string>
+    <string name="iptv_widgets_kind_sport_description">உங்கள் அணிகளின் போட்டிகளும் நெருக்கமான போட்டிகளும்</string>
+    <string name="iptv_widgets_kind_up_next">அடுத்து</string>
+    <string name="iptv_widgets_kind_up_next_description">தேர்ந்தெடுத்த சேனலில் அடுத்த இரண்டு நிகழ்ச்சிகள்</string>
+    <string name="iptv_widgets_kind_recordings">பதிவுகள்</string>
+    <string name="iptv_widgets_kind_recordings_description">இப்போது பதிவாவதும் அடுத்து வருவதும்</string>
+    <string name="iptv_widgets_kind_stream">ஸ்ட்ரீம் தகவல்</string>
+    <string name="iptv_widgets_kind_stream_description">இயங்கும் சேனலின் படத்தின் அளவு, HDR, கோடெக் மற்றும் பிட்ரேட்</string>
+    <string name="iptv_widgets_kind_empty">காலி</string>
+    <string name="iptv_widgets_kind_empty_description">இந்த இடத்தைக் காலியாக விடு</string>
+    <string name="iptv_widgets_add">விட்ஜெட்டைச் சேர்க்க OK ஐ அழுத்தவும்</string>
+    <string name="iptv_widgets_layout">தளவமைப்பு</string>
+    <string name="iptv_widgets_layout_subtitle">இந்தத் திரையில் பொருந்தாத விட்ஜெட்டுகள் மறைக்கப்படும்</string>
+    <string name="iptv_widgets_layout_one">ஒரு அகலமான விட்ஜெட்</string>
+    <string name="iptv_widgets_layout_two">இரண்டு விட்ஜெட்டுகள்</string>
+    <string name="iptv_widgets_layout_three">மூன்று விட்ஜெட்டுகள்</string>
+    <string name="iptv_widgets_cities">நகரங்களை மாற்று</string>
+    <string name="iptv_widgets_cities_subtitle">அதிகபட்சம் நான்கு நகரங்கள். நகரத்தை அகற்ற அதைத் தேர்ந்தெடுக்கவும்.</string>
+    <string name="iptv_widgets_city_add">நகரத்தைச் சேர்</string>
+    <string name="iptv_widgets_city_search">நகரங்களைத் தேடு</string>
+    <string name="iptv_widgets_city_none">பொருந்தும் நகரங்கள் இல்லை</string>
+    <string name="iptv_widgets_city_device">இந்தச் சாதனம்</string>
+    <string name="iptv_widgets_done">முடிந்தது</string>
+    <string name="iptv_widgets_no_cities">நகரங்கள் எதுவும் தேர்வுசெய்யப்படவில்லை</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d நாள்</item>
+        <item quantity="other">+%d நாட்கள்</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d நாள்</item>
+        <item quantity="other">−%d நாட்கள்</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">இப்போது போட்டிகள் இல்லை</string>
+    <string name="iptv_widgets_sport_off">விளையாட்டு முடக்கப்பட்டுள்ளது</string>
+    <string name="iptv_widgets_no_channel">சேனலைத் தேர்வுசெய்யவும்</string>
+    <string name="iptv_widgets_no_guide">இந்தச் சேனலுக்கு வழிகாட்டி இல்லை</string>
+    <string name="iptv_widgets_recording_now">பதிவாகிறது · %1$s வரை</string>
+    <string name="iptv_widgets_recording_next">அடுத்து · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d மேலும்</string>
+    <string name="iptv_widgets_no_recordings">பதிவோ திட்டமிடப்பட்டதோ எதுவும் இல்லை</string>
+    <string name="iptv_widgets_nothing_playing">எதுவும் இயங்கவில்லை</string>
+    <string name="iptv_widgets_stream_waiting">படத்திற்காகக் காத்திருக்கிறது</string>
+    <string name="iptv_widgets_stream_resolution">படம்</string>
+    <string name="iptv_widgets_stream_codec">கோடெக்</string>
+    <string name="iptv_widgets_stream_range">வரம்பு</string>
+    <string name="iptv_widgets_stream_bitrate">பிட்ரேட்</string>
+</resources>

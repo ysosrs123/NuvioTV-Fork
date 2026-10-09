@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Siapkan dari ponsel atau komputer Anda</string>
+    <string name="iptv_ui9_leave_title">Keluar dari TV Live?</string>
+    <string name="iptv_ui9_leave_subtitle">Kembali dari menu TV Live akan membawa Anda ke Beranda Nuvio.</string>
+    <string name="iptv_ui9_stay">Tetap di sini</string>
+    <string name="iptv_ui9_leave_home">Ke Beranda</string>
+</resources>

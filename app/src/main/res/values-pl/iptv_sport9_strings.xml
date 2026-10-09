@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Nagraj</string>
+    <string name="iptv_sport9_record_on">Na kanale %1$s, z wcześniejszym początkiem i późniejszym końcem ustawionymi w Nagraniach</string>
+    <string name="iptv_sport9_record_when_found">Nagraj, gdy kanał zostanie znaleziony</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Nagrywa mecz, gdy tylko przewodnik pokaże dla niego kanał</string>
+    <string name="iptv_sport9_record_waiting">Oczekiwanie na kanał</string>
+    <string name="iptv_sport9_record_waiting_cancel">Przestań czekać na nagranie</string>
+    <string name="iptv_sport9_cancel_recording">Anuluj nagranie</string>
+    <string name="iptv_sport9_recording_set">Nagranie ustawione</string>
+    <string name="iptv_sport9_recording_cancelled">Anulowano nagranie: %1$s</string>
+    <string name="iptv_sport9_pending_added">%1$s zostanie nagrany, gdy tylko kanał zostanie znaleziony</string>
+    <string name="iptv_sport9_pending_removed">%1$s nie zostanie nagrany automatycznie</string>
+    <string name="iptv_sport9_channels">Znajdź kanały za pomocą</string>
+    <string name="iptv_sport9_channels_subtitle">Jak Sport łączy mecze z Twoimi kanałami</string>
+    <string name="iptv_sport9_channels_guide">Tytuły w przewodniku</string>
+    <string name="iptv_sport9_channels_guide_description">Mecze wymienione z nazwy w Twoim przewodniku. Działa w każdym kraju, gdy przewodnik jest wypełniony.</string>
+    <string name="iptv_sport9_channels_broadcasters">Listy nadawców</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Kanały wskazane przez ESPN oraz, dla drużyn obserwowanych z kluczem TheSportsDB, przez TheSportsDB dla Twojego kraju. ESPN wskazuje głównie kanały z USA.</string>
+    <string name="iptv_sport9_channels_both">Oba</string>
+    <string name="iptv_sport9_channels_both_description">Najpierw dopasowania w przewodniku, potem posiadane kanały nadawców</string>
+    <string name="iptv_sport9_link_guide">W Twoim przewodniku · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Nadawca · %1$s</string>
+</resources>

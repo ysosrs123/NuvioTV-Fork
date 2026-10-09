@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">演员：%1$s</string>
+    <string name="iptv_vod9_director">导演：%1$s</string>
+    <string name="iptv_vod9_details_unavailable">您的扩展未提供此影片的完整详情。</string>
+</resources>

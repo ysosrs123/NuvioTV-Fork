@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Thiết lập từ điện thoại hoặc máy tính</string>
+    <string name="iptv_ui9_leave_title">Rời TV trực tiếp?</string>
+    <string name="iptv_ui9_leave_subtitle">Quay lại từ menu TV trực tiếp sẽ đưa bạn về Trang chủ Nuvio.</string>
+    <string name="iptv_ui9_stay">Ở lại</string>
+    <string name="iptv_ui9_leave_home">Về Trang chủ</string>
+</resources>

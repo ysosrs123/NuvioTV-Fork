@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">录制</string>
+    <string name="iptv_sport9_record_on">在 %1$s，按录像设置提前开始并延后结束</string>
+    <string name="iptv_sport9_record_when_found">找到频道后录制</string>
+    <string name="iptv_sport9_record_when_found_subtitle">节目单一显示该比赛的频道就开始录制</string>
+    <string name="iptv_sport9_record_waiting">正在等待频道</string>
+    <string name="iptv_sport9_record_waiting_cancel">停止等待录制</string>
+    <string name="iptv_sport9_cancel_recording">取消录制</string>
+    <string name="iptv_sport9_recording_set">已设置录制</string>
+    <string name="iptv_sport9_recording_cancelled">已取消录制 %1$s</string>
+    <string name="iptv_sport9_pending_added">找到频道后将录制 %1$s</string>
+    <string name="iptv_sport9_pending_removed">%1$s 不会被自动录制</string>
+    <string name="iptv_sport9_channels">查找频道的方式</string>
+    <string name="iptv_sport9_channels_subtitle">体育如何将比赛关联到您的频道</string>
+    <string name="iptv_sport9_channels_guide">节目单标题</string>
+    <string name="iptv_sport9_channels_guide_description">您的节目单中按名称列出的比赛。只要节目单有内容，在任何国家都适用。</string>
+    <string name="iptv_sport9_channels_broadcasters">转播方列表</string>
+    <string name="iptv_sport9_channels_broadcasters_description">ESPN 列出的频道；对于您使用 TheSportsDB 密钥关注的球队，还包括 TheSportsDB 为您所在国家列出的频道。ESPN 主要列出美国频道。</string>
+    <string name="iptv_sport9_channels_both">两者</string>
+    <string name="iptv_sport9_channels_both_description">先匹配节目单，再匹配您拥有的转播频道</string>
+    <string name="iptv_sport9_link_guide">在您的节目单中 · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">转播方 · %1$s</string>
+</resources>

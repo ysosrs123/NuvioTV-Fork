@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">У ролях: %1$s</string>
+    <string name="iptv_vod9_director">Режисер: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Ваші адони не надають повних відомостей про цю назву.</string>
+</resources>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Widget seçin</string>
+    <string name="iptv_widgets_choose_subtitle">Widget %1$d · Değiştirmek için herhangi bir widget üzerinde OK tuşunu basılı tutun</string>
+    <string name="iptv_widgets_change">Değiştirmek için OK</string>
+    <string name="iptv_widgets_kind_clocks">Dünya saatleri</string>
+    <string name="iptv_widgets_kind_clocks_description">En fazla dört şehirde saat</string>
+    <string name="iptv_widgets_kind_sport">Spor şeridi</string>
+    <string name="iptv_widgets_kind_sport_description">Takımlarınızın maçları ve çekişmeli maçlar</string>
+    <string name="iptv_widgets_kind_up_next">Sıradaki</string>
+    <string name="iptv_widgets_kind_up_next_description">Seçili kanaldaki sonraki iki program</string>
+    <string name="iptv_widgets_kind_recordings">Kayıtlar</string>
+    <string name="iptv_widgets_kind_recordings_description">Şu anda kaydedilen ve sıradaki</string>
+    <string name="iptv_widgets_kind_stream">Yayın bilgisi</string>
+    <string name="iptv_widgets_kind_stream_description">Oynatılan kanalın görüntü boyutu, HDR, codec ve bit hızı</string>
+    <string name="iptv_widgets_kind_empty">Boş</string>
+    <string name="iptv_widgets_kind_empty_description">Bu alanı boş bırak</string>
+    <string name="iptv_widgets_add">Widget eklemek için OK tuşuna basın</string>
+    <string name="iptv_widgets_layout">Düzen</string>
+    <string name="iptv_widgets_layout_subtitle">Bu ekrana sığmayan widget\'lar gizlenir</string>
+    <string name="iptv_widgets_layout_one">Bir geniş widget</string>
+    <string name="iptv_widgets_layout_two">İki widget</string>
+    <string name="iptv_widgets_layout_three">Üç widget</string>
+    <string name="iptv_widgets_cities">Şehirleri değiştir</string>
+    <string name="iptv_widgets_cities_subtitle">En fazla dört şehir. Kaldırmak için bir şehir seçin.</string>
+    <string name="iptv_widgets_city_add">Şehir ekle</string>
+    <string name="iptv_widgets_city_search">Şehir ara</string>
+    <string name="iptv_widgets_city_none">Eşleşen şehir yok</string>
+    <string name="iptv_widgets_city_device">Bu cihaz</string>
+    <string name="iptv_widgets_done">Bitti</string>
+    <string name="iptv_widgets_no_cities">Şehir seçilmedi</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d gün</item>
+        <item quantity="other">+%d gün</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d gün</item>
+        <item quantity="other">−%d gün</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Şu anda maç yok</string>
+    <string name="iptv_widgets_sport_off">Spor kapalı</string>
+    <string name="iptv_widgets_no_channel">Bir kanal seçin</string>
+    <string name="iptv_widgets_no_guide">Bu kanal için yayın akışı yok</string>
+    <string name="iptv_widgets_recording_now">Kaydediliyor · %1$s saatine kadar</string>
+    <string name="iptv_widgets_recording_next">Sıradaki · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d tane daha</string>
+    <string name="iptv_widgets_no_recordings">Kaydedilen veya planlanan bir şey yok</string>
+    <string name="iptv_widgets_nothing_playing">Hiçbir şey oynatılmıyor</string>
+    <string name="iptv_widgets_stream_waiting">Görüntü bekleniyor</string>
+    <string name="iptv_widgets_stream_resolution">Görüntü</string>
+    <string name="iptv_widgets_stream_codec">Codec</string>
+    <string name="iptv_widgets_stream_range">Aralık</string>
+    <string name="iptv_widgets_stream_bitrate">Bit hızı</string>
+</resources>

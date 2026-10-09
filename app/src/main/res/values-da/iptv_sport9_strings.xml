@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Optag</string>
+    <string name="iptv_sport9_record_on">På %1$s, med tidligere start og senere slut som angivet i Optagelser</string>
+    <string name="iptv_sport9_record_when_found">Optag, når en kanal findes</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Optager kampen, så snart guiden viser en kanal til den</string>
+    <string name="iptv_sport9_record_waiting">Venter på en kanal</string>
+    <string name="iptv_sport9_record_waiting_cancel">Stop med at vente på optagelse</string>
+    <string name="iptv_sport9_cancel_recording">Annuller optagelse</string>
+    <string name="iptv_sport9_recording_set">Optagelse planlagt</string>
+    <string name="iptv_sport9_recording_cancelled">Optagelse af %1$s annulleret</string>
+    <string name="iptv_sport9_pending_added">%1$s bliver optaget, så snart en kanal findes</string>
+    <string name="iptv_sport9_pending_removed">%1$s bliver ikke optaget automatisk</string>
+    <string name="iptv_sport9_channels">Find kanaler med</string>
+    <string name="iptv_sport9_channels_subtitle">Hvordan Sport forbinder kampe med dine kanaler</string>
+    <string name="iptv_sport9_channels_guide">Guidetitler</string>
+    <string name="iptv_sport9_channels_guide_description">Kampe, som din guide nævner ved navn. Virker i alle lande, når din guide er udfyldt.</string>
+    <string name="iptv_sport9_channels_broadcasters">Lister over tv-stationer</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Kanaler nævnt af ESPN og, for hold du følger med en TheSportsDB-nøgle, af TheSportsDB for dit land. ESPN nævner mest amerikanske kanaler.</string>
+    <string name="iptv_sport9_channels_both">Begge</string>
+    <string name="iptv_sport9_channels_both_description">Først match i guiden, derefter tv-stationers kanaler, du har</string>
+    <string name="iptv_sport9_link_guide">I din guide · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Tv-station · %1$s</string>
+</resources>

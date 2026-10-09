@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Snimi</string>
+    <string name="iptv_sport9_record_on">Na kanalu %1$s, sa ranijim početkom i kasnijim završetkom kako je podešeno u Snimcima</string>
+    <string name="iptv_sport9_record_when_found">Snimi kada se pronađe kanal</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Snima utakmicu čim vodič prikaže kanal za nju</string>
+    <string name="iptv_sport9_record_waiting">Čeka se kanal</string>
+    <string name="iptv_sport9_record_waiting_cancel">Prestani da čekaš snimanje</string>
+    <string name="iptv_sport9_cancel_recording">Otkaži snimanje</string>
+    <string name="iptv_sport9_recording_set">Snimanje je zakazano</string>
+    <string name="iptv_sport9_recording_cancelled">Snimanje za %1$s je otkazano</string>
+    <string name="iptv_sport9_pending_added">%1$s će biti snimljeno čim se pronađe kanal</string>
+    <string name="iptv_sport9_pending_removed">%1$s neće biti automatski snimljeno</string>
+    <string name="iptv_sport9_channels">Pronađi kanale pomoću</string>
+    <string name="iptv_sport9_channels_subtitle">Kako Sport povezuje utakmice sa vašim kanalima</string>
+    <string name="iptv_sport9_channels_guide">Naslovi u vodiču</string>
+    <string name="iptv_sport9_channels_guide_description">Utakmice koje vaš vodič navodi po imenu. Radi u svakoj zemlji kada je vodič popunjen.</string>
+    <string name="iptv_sport9_channels_broadcasters">Liste emitera</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Kanali koje navodi ESPN i, za timove koje pratite uz TheSportsDB ključ, kanali koje TheSportsDB navodi za vašu zemlju. ESPN uglavnom navodi američke kanale.</string>
+    <string name="iptv_sport9_channels_both">Oba</string>
+    <string name="iptv_sport9_channels_both_description">Prvo poklapanja u vodiču, zatim kanali emitera koje imate</string>
+    <string name="iptv_sport9_link_guide">U vašem vodiču · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Emiter · %1$s</string>
+</resources>

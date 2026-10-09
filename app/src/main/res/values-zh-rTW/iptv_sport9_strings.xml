@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">錄影</string>
+    <string name="iptv_sport9_record_on">在 %1$s，依錄影設定提早開始並延後結束</string>
+    <string name="iptv_sport9_record_when_found">找到頻道後錄影</string>
+    <string name="iptv_sport9_record_when_found_subtitle">節目表一顯示該比賽的頻道就開始錄影</string>
+    <string name="iptv_sport9_record_waiting">正在等待頻道</string>
+    <string name="iptv_sport9_record_waiting_cancel">停止等待錄影</string>
+    <string name="iptv_sport9_cancel_recording">取消錄影</string>
+    <string name="iptv_sport9_recording_set">已設定錄影</string>
+    <string name="iptv_sport9_recording_cancelled">已取消錄影 %1$s</string>
+    <string name="iptv_sport9_pending_added">找到頻道後將錄影 %1$s</string>
+    <string name="iptv_sport9_pending_removed">%1$s 不會自動錄影</string>
+    <string name="iptv_sport9_channels">尋找頻道的方式</string>
+    <string name="iptv_sport9_channels_subtitle">體育如何將比賽連結到您的頻道</string>
+    <string name="iptv_sport9_channels_guide">節目表標題</string>
+    <string name="iptv_sport9_channels_guide_description">您的節目表中依名稱列出的比賽。只要節目表有內容，在任何國家都適用。</string>
+    <string name="iptv_sport9_channels_broadcasters">轉播單位清單</string>
+    <string name="iptv_sport9_channels_broadcasters_description">ESPN 列出的頻道；對於您使用 TheSportsDB 金鑰追蹤的球隊，還包括 TheSportsDB 為您所在國家列出的頻道。ESPN 主要列出美國頻道。</string>
+    <string name="iptv_sport9_channels_both">兩者</string>
+    <string name="iptv_sport9_channels_both_description">先比對節目表，再比對您擁有的轉播頻道</string>
+    <string name="iptv_sport9_link_guide">在您的節目表中 · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">轉播單位 · %1$s</string>
+</resources>

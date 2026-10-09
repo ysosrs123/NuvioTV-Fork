@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Pilih widget</string>
+    <string name="iptv_widgets_choose_subtitle">Widget %1$d · Tahan OK pada widget mana pun untuk mengubahnya</string>
+    <string name="iptv_widgets_change">OK untuk mengubah</string>
+    <string name="iptv_widgets_kind_clocks">Jam dunia</string>
+    <string name="iptv_widgets_kind_clocks_description">Waktu di hingga empat kota</string>
+    <string name="iptv_widgets_kind_sport">Strip olahraga</string>
+    <string name="iptv_widgets_kind_sport_description">Pertandingan tim Anda dan pertandingan ketat</string>
+    <string name="iptv_widgets_kind_up_next">Berikutnya</string>
+    <string name="iptv_widgets_kind_up_next_description">Dua acara berikutnya di saluran yang dipilih</string>
+    <string name="iptv_widgets_kind_recordings">Rekaman</string>
+    <string name="iptv_widgets_kind_recordings_description">Apa yang sedang direkam dan apa berikutnya</string>
+    <string name="iptv_widgets_kind_stream">Info streaming</string>
+    <string name="iptv_widgets_kind_stream_description">Ukuran gambar, HDR, codec, dan bitrate saluran yang diputar</string>
+    <string name="iptv_widgets_kind_empty">Kosong</string>
+    <string name="iptv_widgets_kind_empty_description">Biarkan ruang ini kosong</string>
+    <string name="iptv_widgets_add">Tekan OK untuk menambahkan widget</string>
+    <string name="iptv_widgets_layout">Tata letak</string>
+    <string name="iptv_widgets_layout_subtitle">Widget yang tidak muat di layar ini disembunyikan</string>
+    <string name="iptv_widgets_layout_one">Satu widget lebar</string>
+    <string name="iptv_widgets_layout_two">Dua widget</string>
+    <string name="iptv_widgets_layout_three">Tiga widget</string>
+    <string name="iptv_widgets_cities">Ubah kota</string>
+    <string name="iptv_widgets_cities_subtitle">Hingga empat kota. Pilih kota untuk menghapusnya.</string>
+    <string name="iptv_widgets_city_add">Tambahkan kota</string>
+    <string name="iptv_widgets_city_search">Cari kota</string>
+    <string name="iptv_widgets_city_none">Tidak ada kota yang cocok</string>
+    <string name="iptv_widgets_city_device">Perangkat ini</string>
+    <string name="iptv_widgets_done">Selesai</string>
+    <string name="iptv_widgets_no_cities">Belum ada kota yang dipilih</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="other">+%d hari</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="other">−%d hari</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Tidak ada pertandingan sekarang</string>
+    <string name="iptv_widgets_sport_off">Olahraga dinonaktifkan</string>
+    <string name="iptv_widgets_no_channel">Pilih saluran</string>
+    <string name="iptv_widgets_no_guide">Tidak ada panduan untuk saluran ini</string>
+    <string name="iptv_widgets_recording_now">Merekam · hingga %1$s</string>
+    <string name="iptv_widgets_recording_next">Berikutnya · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d lainnya</string>
+    <string name="iptv_widgets_no_recordings">Tidak ada yang direkam atau dijadwalkan</string>
+    <string name="iptv_widgets_nothing_playing">Tidak ada yang diputar</string>
+    <string name="iptv_widgets_stream_waiting">Menunggu gambar</string>
+    <string name="iptv_widgets_stream_resolution">Gambar</string>
+    <string name="iptv_widgets_stream_codec">Codec</string>
+    <string name="iptv_widgets_stream_range">Rentang</string>
+    <string name="iptv_widgets_stream_bitrate">Bitrate</string>
+</resources>

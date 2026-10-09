@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Nahrát</string>
+    <string name="iptv_sport9_record_on">Na %1$s, se začátkem dříve a koncem později podle nastavení v Nahrávkách</string>
+    <string name="iptv_sport9_record_when_found">Nahrát, až bude nalezen kanál</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Nahraje zápas, jakmile program ukáže kanál, který ho vysílá</string>
+    <string name="iptv_sport9_record_waiting">Čekání na kanál</string>
+    <string name="iptv_sport9_record_waiting_cancel">Přestat čekat na nahrávání</string>
+    <string name="iptv_sport9_cancel_recording">Zrušit nahrávání</string>
+    <string name="iptv_sport9_recording_set">Nahrávání nastaveno</string>
+    <string name="iptv_sport9_recording_cancelled">Nahrávání %1$s zrušeno</string>
+    <string name="iptv_sport9_pending_added">%1$s se nahraje, jakmile bude nalezen kanál</string>
+    <string name="iptv_sport9_pending_removed">%1$s se nebude nahrávat automaticky</string>
+    <string name="iptv_sport9_channels">Hledat kanály pomocí</string>
+    <string name="iptv_sport9_channels_subtitle">Jak Sport přiřazuje zápasy k vašim kanálům</string>
+    <string name="iptv_sport9_channels_guide">Názvy v programu</string>
+    <string name="iptv_sport9_channels_guide_description">Zápasy, které váš program uvádí podle názvu. Funguje v každé zemi, pokud je program vyplněný.</string>
+    <string name="iptv_sport9_channels_broadcasters">Seznamy vysílatelů</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Kanály uvedené ESPN a pro týmy, které sledujete s klíčem TheSportsDB, kanály uvedené TheSportsDB pro vaši zemi. ESPN uvádí hlavně americké kanály.</string>
+    <string name="iptv_sport9_channels_both">Obojí</string>
+    <string name="iptv_sport9_channels_both_description">Nejprve shody v programu, potom kanály vysílatelů, které máte</string>
+    <string name="iptv_sport9_link_guide">Ve vašem programu · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Vysílatel · %1$s</string>
+</resources>

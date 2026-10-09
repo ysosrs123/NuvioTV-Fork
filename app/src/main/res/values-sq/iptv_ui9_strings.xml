@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">Konfiguro nga telefoni ose kompjuteri</string>
+    <string name="iptv_ui9_leave_title">Të dalësh nga TV live?</string>
+    <string name="iptv_ui9_leave_subtitle">Kthimi nga menyja e TV-së live të çon te faqja kryesore e Nuvio.</string>
+    <string name="iptv_ui9_stay">Qëndro</string>
+    <string name="iptv_ui9_leave_home">Shko te faqja kryesore</string>
+</resources>

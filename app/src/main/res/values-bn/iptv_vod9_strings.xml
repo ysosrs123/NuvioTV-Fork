@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">কাস্ট: %1$s</string>
+    <string name="iptv_vod9_director">ডিরেক্টর: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">আপনার অ্যাডনগুলো থেকে এই টাইটেলের পূর্ণ বিবরণ পাওয়া যাচ্ছে না।</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Felvétel</string>
+    <string name="iptv_sport9_record_on">A(z) %1$s csatornán, a Felvételekben beállított korábbi kezdéssel és későbbi befejezéssel</string>
+    <string name="iptv_sport9_record_when_found">Felvétel, amikor csatorna található</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Felveszi a meccset, amint a műsorújság csatornát mutat hozzá</string>
+    <string name="iptv_sport9_record_waiting">Várakozás csatornára</string>
+    <string name="iptv_sport9_record_waiting_cancel">Felvételre várakozás leállítása</string>
+    <string name="iptv_sport9_cancel_recording">Felvétel megszakítása</string>
+    <string name="iptv_sport9_recording_set">Felvétel beállítva</string>
+    <string name="iptv_sport9_recording_cancelled">%1$s felvétele megszakítva</string>
+    <string name="iptv_sport9_pending_added">%1$s felvétele elindul, amint csatorna található</string>
+    <string name="iptv_sport9_pending_removed">%1$s nem lesz automatikusan felvéve</string>
+    <string name="iptv_sport9_channels">Csatornák keresése ezzel</string>
+    <string name="iptv_sport9_channels_subtitle">Hogyan kapcsolja a Sport a meccseket a csatornáidhoz</string>
+    <string name="iptv_sport9_channels_guide">Műsorújság-címek</string>
+    <string name="iptv_sport9_channels_guide_description">Meccsek, amelyeket a műsorújságod név szerint felsorol. Minden országban működik, ha a műsorújság ki van töltve.</string>
+    <string name="iptv_sport9_channels_broadcasters">Közvetítői listák</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Az ESPN által megnevezett csatornák, és a TheSportsDB-kulccsal követett csapatoknál a TheSportsDB által az országodra megnevezettek. Az ESPN főleg amerikai csatornákat nevez meg.</string>
+    <string name="iptv_sport9_channels_both">Mindkettő</string>
+    <string name="iptv_sport9_channels_both_description">Először a műsorújság egyezései, aztán a meglévő közvetítő csatornáid</string>
+    <string name="iptv_sport9_link_guide">A műsorújságodban · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Közvetítő · %1$s</string>
+</resources>

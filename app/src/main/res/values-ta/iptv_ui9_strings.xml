@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui9_phone_setup">உங்கள் ஃபோன் அல்லது கணினியிலிருந்து அமைக்கவும்</string>
+    <string name="iptv_ui9_leave_title">நேரலை டிவியிலிருந்து வெளியேறவா?</string>
+    <string name="iptv_ui9_leave_subtitle">நேரலை டிவி மெனுவிலிருந்து பின்செல்வது உங்களை Nuvio முகப்புக்கு அழைத்துச் செல்லும்.</string>
+    <string name="iptv_ui9_stay">இங்கேயே இரு</string>
+    <string name="iptv_ui9_leave_home">முகப்புக்குச் செல்</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">הקלטה</string>
+    <string name="iptv_sport9_record_on">ב-%1$s, עם התחלה מוקדמת וסיום מאוחר לפי ההגדרות בהקלטות</string>
+    <string name="iptv_sport9_record_when_found">הקלטה כשנמצא ערוץ</string>
+    <string name="iptv_sport9_record_when_found_subtitle">מקליט את המשחק ברגע שהמדריך מציג עבורו ערוץ</string>
+    <string name="iptv_sport9_record_waiting">ממתין לערוץ</string>
+    <string name="iptv_sport9_record_waiting_cancel">הפסקת ההמתנה להקלטה</string>
+    <string name="iptv_sport9_cancel_recording">ביטול ההקלטה</string>
+    <string name="iptv_sport9_recording_set">ההקלטה הוגדרה</string>
+    <string name="iptv_sport9_recording_cancelled">ההקלטה של %1$s בוטלה</string>
+    <string name="iptv_sport9_pending_added">%1$s יוקלט ברגע שיימצא ערוץ</string>
+    <string name="iptv_sport9_pending_removed">%1$s לא יוקלט אוטומטית</string>
+    <string name="iptv_sport9_channels">חיפוש ערוצים באמצעות</string>
+    <string name="iptv_sport9_channels_subtitle">איך ספורט מקשר משחקים לערוצים שלך</string>
+    <string name="iptv_sport9_channels_guide">כותרות במדריך</string>
+    <string name="iptv_sport9_channels_guide_description">משחקים שהמדריך שלך מציין בשמם. עובד בכל מדינה כשהמדריך מלא.</string>
+    <string name="iptv_sport9_channels_broadcasters">רשימות גופי שידור</string>
+    <string name="iptv_sport9_channels_broadcasters_description">ערוצים ש-ESPN מציין, ועבור קבוצות שבמעקב עם מפתח TheSportsDB, ערוצים ש-TheSportsDB מציין עבור המדינה שלך. ESPN מציין בעיקר ערוצים בארה״ב.</string>
+    <string name="iptv_sport9_channels_both">שניהם</string>
+    <string name="iptv_sport9_channels_both_description">קודם התאמות במדריך, ואז ערוצי שידור שיש לך</string>
+    <string name="iptv_sport9_link_guide">במדריך שלך · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">גוף שידור · %1$s</string>
+</resources>

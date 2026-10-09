@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Velg widget</string>
+    <string name="iptv_widgets_choose_subtitle">Widget %1$d · Hold inne OK på en widget for å endre den</string>
+    <string name="iptv_widgets_change">OK for å endre</string>
+    <string name="iptv_widgets_kind_clocks">Verdensklokker</string>
+    <string name="iptv_widgets_kind_clocks_description">Klokkeslettet i opptil fire byer</string>
+    <string name="iptv_widgets_kind_sport">Sportsstripe</string>
+    <string name="iptv_widgets_kind_sport_description">Kampene til lagene dine og jevne kamper</string>
+    <string name="iptv_widgets_kind_up_next">Neste</string>
+    <string name="iptv_widgets_kind_up_next_description">De neste to programmene på den valgte kanalen</string>
+    <string name="iptv_widgets_kind_recordings">Opptak</string>
+    <string name="iptv_widgets_kind_recordings_description">Hva som tas opp nå, og hva som kommer</string>
+    <string name="iptv_widgets_kind_stream">Strøminfo</string>
+    <string name="iptv_widgets_kind_stream_description">Bildestørrelse, HDR, kodek og bithastighet for kanalen som spilles</string>
+    <string name="iptv_widgets_kind_empty">Tom</string>
+    <string name="iptv_widgets_kind_empty_description">La denne plassen være tom</string>
+    <string name="iptv_widgets_add">Trykk OK for å legge til en widget</string>
+    <string name="iptv_widgets_layout">Oppsett</string>
+    <string name="iptv_widgets_layout_subtitle">Widgeter som ikke får plass på denne skjermen, skjules</string>
+    <string name="iptv_widgets_layout_one">Én bred widget</string>
+    <string name="iptv_widgets_layout_two">To widgeter</string>
+    <string name="iptv_widgets_layout_three">Tre widgeter</string>
+    <string name="iptv_widgets_cities">Endre byer</string>
+    <string name="iptv_widgets_cities_subtitle">Opptil fire byer. Velg en by for å fjerne den.</string>
+    <string name="iptv_widgets_city_add">Legg til en by</string>
+    <string name="iptv_widgets_city_search">Søk etter byer</string>
+    <string name="iptv_widgets_city_none">Ingen samsvarende byer</string>
+    <string name="iptv_widgets_city_device">Denne enheten</string>
+    <string name="iptv_widgets_done">Ferdig</string>
+    <string name="iptv_widgets_no_cities">Ingen byer valgt</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d dag</item>
+        <item quantity="other">+%d dager</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d dag</item>
+        <item quantity="other">−%d dager</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Ingen kamper nå</string>
+    <string name="iptv_widgets_sport_off">Sport er slått av</string>
+    <string name="iptv_widgets_no_channel">Velg en kanal</string>
+    <string name="iptv_widgets_no_guide">Ingen guide for denne kanalen</string>
+    <string name="iptv_widgets_recording_now">Tar opp · til %1$s</string>
+    <string name="iptv_widgets_recording_next">Neste · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d til</string>
+    <string name="iptv_widgets_no_recordings">Ingenting tas opp eller er planlagt</string>
+    <string name="iptv_widgets_nothing_playing">Ingenting spilles</string>
+    <string name="iptv_widgets_stream_waiting">Venter på bildet</string>
+    <string name="iptv_widgets_stream_resolution">Bilde</string>
+    <string name="iptv_widgets_stream_codec">Kodek</string>
+    <string name="iptv_widgets_stream_range">Område</string>
+    <string name="iptv_widgets_stream_bitrate">Bithastighet</string>
+</resources>

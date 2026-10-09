@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Alege widgetul</string>
+    <string name="iptv_widgets_choose_subtitle">Widget %1$d · Ține apăsat OK pe orice widget pentru a-l schimba</string>
+    <string name="iptv_widgets_change">OK pentru a schimba</string>
+    <string name="iptv_widgets_kind_clocks">Ceasuri mondiale</string>
+    <string name="iptv_widgets_kind_clocks_description">Ora în până la patru orașe</string>
+    <string name="iptv_widgets_kind_sport">Bandă sport</string>
+    <string name="iptv_widgets_kind_sport_description">Meciurile echipelor tale și meciurile strânse</string>
+    <string name="iptv_widgets_kind_up_next">Urmează</string>
+    <string name="iptv_widgets_kind_up_next_description">Următoarele două emisiuni de pe canalul selectat</string>
+    <string name="iptv_widgets_kind_recordings">Înregistrări</string>
+    <string name="iptv_widgets_kind_recordings_description">Ce se înregistrează acum și ce urmează</string>
+    <string name="iptv_widgets_kind_stream">Info flux</string>
+    <string name="iptv_widgets_kind_stream_description">Dimensiunea imaginii, HDR, codecul și rata de biți a canalului redat</string>
+    <string name="iptv_widgets_kind_empty">Gol</string>
+    <string name="iptv_widgets_kind_empty_description">Lasă acest spațiu liber</string>
+    <string name="iptv_widgets_add">Apasă OK pentru a adăuga un widget</string>
+    <string name="iptv_widgets_layout">Aranjament</string>
+    <string name="iptv_widgets_layout_subtitle">Widgeturile care nu încap pe acest ecran sunt ascunse</string>
+    <string name="iptv_widgets_layout_one">Un widget lat</string>
+    <string name="iptv_widgets_layout_two">Două widgeturi</string>
+    <string name="iptv_widgets_layout_three">Trei widgeturi</string>
+    <string name="iptv_widgets_cities">Schimbă orașele</string>
+    <string name="iptv_widgets_cities_subtitle">Până la patru orașe. Selectează un oraș pentru a-l elimina.</string>
+    <string name="iptv_widgets_city_add">Adaugă un oraș</string>
+    <string name="iptv_widgets_city_search">Caută orașe</string>
+    <string name="iptv_widgets_city_none">Niciun oraș potrivit</string>
+    <string name="iptv_widgets_city_device">Acest dispozitiv</string>
+    <string name="iptv_widgets_done">Gata</string>
+    <string name="iptv_widgets_no_cities">Niciun oraș ales</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d zi</item>
+        <item quantity="few">+%d zile</item>
+        <item quantity="other">+%d de zile</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d zi</item>
+        <item quantity="few">−%d zile</item>
+        <item quantity="other">−%d de zile</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Niciun meci acum</string>
+    <string name="iptv_widgets_sport_off">Sport este dezactivat</string>
+    <string name="iptv_widgets_no_channel">Alege un canal</string>
+    <string name="iptv_widgets_no_guide">Niciun ghid pentru acest canal</string>
+    <string name="iptv_widgets_recording_now">Se înregistrează · până la %1$s</string>
+    <string name="iptv_widgets_recording_next">Urmează · %1$s</string>
+    <string name="iptv_widgets_recording_more">Încă %1$d</string>
+    <string name="iptv_widgets_no_recordings">Nimic în înregistrare sau programat</string>
+    <string name="iptv_widgets_nothing_playing">Nu se redă nimic</string>
+    <string name="iptv_widgets_stream_waiting">Se așteaptă imaginea</string>
+    <string name="iptv_widgets_stream_resolution">Imagine</string>
+    <string name="iptv_widgets_stream_codec">Codec</string>
+    <string name="iptv_widgets_stream_range">Interval</string>
+    <string name="iptv_widgets_stream_bitrate">Rată de biți</string>
+</resources>

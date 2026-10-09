@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Сними</string>
+    <string name="iptv_sport9_record_on">На каналу %1$s, са ранијим почетком и каснијим завршетком како је подешено у Снимцима</string>
+    <string name="iptv_sport9_record_when_found">Сними када се пронађе канал</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Снима утакмицу чим водич прикаже канал за њу</string>
+    <string name="iptv_sport9_record_waiting">Чека се канал</string>
+    <string name="iptv_sport9_record_waiting_cancel">Престани да чекаш снимање</string>
+    <string name="iptv_sport9_cancel_recording">Откажи снимање</string>
+    <string name="iptv_sport9_recording_set">Снимање је заказано</string>
+    <string name="iptv_sport9_recording_cancelled">Снимање за %1$s је отказано</string>
+    <string name="iptv_sport9_pending_added">%1$s ће бити снимљено чим се пронађе канал</string>
+    <string name="iptv_sport9_pending_removed">%1$s неће бити аутоматски снимљено</string>
+    <string name="iptv_sport9_channels">Пронађи канале помоћу</string>
+    <string name="iptv_sport9_channels_subtitle">Како Спорт повезује утакмице са вашим каналима</string>
+    <string name="iptv_sport9_channels_guide">Наслови у водичу</string>
+    <string name="iptv_sport9_channels_guide_description">Утакмице које ваш водич наводи по имену. Ради у свакој земљи када је водич попуњен.</string>
+    <string name="iptv_sport9_channels_broadcasters">Листе емитера</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Канали које наводи ESPN и, за тимове које пратите уз TheSportsDB кључ, канали које TheSportsDB наводи за вашу земљу. ESPN углавном наводи америчке канале.</string>
+    <string name="iptv_sport9_channels_both">Оба</string>
+    <string name="iptv_sport9_channels_both_description">Прво поклапања у водичу, затим канали емитера које имате</string>
+    <string name="iptv_sport9_link_guide">У вашем водичу · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Емитер · %1$s</string>
+</resources>

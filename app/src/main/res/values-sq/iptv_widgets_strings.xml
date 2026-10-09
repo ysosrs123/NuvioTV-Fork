@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Zgjidh miniaplikacionin</string>
+    <string name="iptv_widgets_choose_subtitle">Miniaplikacioni %1$d · Mbaj OK mbi çdo miniaplikacion për ta ndryshuar</string>
+    <string name="iptv_widgets_change">OK për ta ndryshuar</string>
+    <string name="iptv_widgets_kind_clocks">Orët botërore</string>
+    <string name="iptv_widgets_kind_clocks_description">Ora në deri në katër qytete</string>
+    <string name="iptv_widgets_kind_sport">Shiriti i sportit</string>
+    <string name="iptv_widgets_kind_sport_description">Ndeshjet e ekipeve të tua dhe ndeshjet e ngushta</string>
+    <string name="iptv_widgets_kind_up_next">Në vijim</string>
+    <string name="iptv_widgets_kind_up_next_description">Dy programet e radhës në kanalin e zgjedhur</string>
+    <string name="iptv_widgets_kind_recordings">Regjistrimet</string>
+    <string name="iptv_widgets_kind_recordings_description">Çfarë po regjistrohet tani dhe çfarë vjen më pas</string>
+    <string name="iptv_widgets_kind_stream">Info e transmetimit</string>
+    <string name="iptv_widgets_kind_stream_description">Madhësia e figurës, HDR, kodeku dhe shpejtësia e bitëve të kanalit që po luhet</string>
+    <string name="iptv_widgets_kind_empty">Bosh</string>
+    <string name="iptv_widgets_kind_empty_description">Lëre këtë hapësirë bosh</string>
+    <string name="iptv_widgets_add">Shtyp OK për të shtuar një miniaplikacion</string>
+    <string name="iptv_widgets_layout">Paraqitja</string>
+    <string name="iptv_widgets_layout_subtitle">Miniaplikacionet që nuk zënë vend në këtë ekran fshihen</string>
+    <string name="iptv_widgets_layout_one">Një miniaplikacion i gjerë</string>
+    <string name="iptv_widgets_layout_two">Dy miniaplikacione</string>
+    <string name="iptv_widgets_layout_three">Tre miniaplikacione</string>
+    <string name="iptv_widgets_cities">Ndrysho qytetet</string>
+    <string name="iptv_widgets_cities_subtitle">Deri në katër qytete. Zgjidh një qytet për ta hequr.</string>
+    <string name="iptv_widgets_city_add">Shto një qytet</string>
+    <string name="iptv_widgets_city_search">Kërko qytete</string>
+    <string name="iptv_widgets_city_none">Asnjë qytet që përputhet</string>
+    <string name="iptv_widgets_city_device">Kjo pajisje</string>
+    <string name="iptv_widgets_done">U krye</string>
+    <string name="iptv_widgets_no_cities">Nuk është zgjedhur asnjë qytet</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d ditë</item>
+        <item quantity="other">+%d ditë</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d ditë</item>
+        <item quantity="other">−%d ditë</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Asnjë ndeshje tani</string>
+    <string name="iptv_widgets_sport_off">Sporti është çaktivizuar</string>
+    <string name="iptv_widgets_no_channel">Zgjidh një kanal</string>
+    <string name="iptv_widgets_no_guide">Asnjë udhëzues për këtë kanal</string>
+    <string name="iptv_widgets_recording_now">Po regjistrohet · deri në %1$s</string>
+    <string name="iptv_widgets_recording_next">Më pas · %1$s</string>
+    <string name="iptv_widgets_recording_more">+%1$d të tjera</string>
+    <string name="iptv_widgets_no_recordings">Asgjë nuk po regjistrohet dhe nuk është planifikuar</string>
+    <string name="iptv_widgets_nothing_playing">Asgjë nuk po luhet</string>
+    <string name="iptv_widgets_stream_waiting">Në pritje të figurës</string>
+    <string name="iptv_widgets_stream_resolution">Figura</string>
+    <string name="iptv_widgets_stream_codec">Kodeku</string>
+    <string name="iptv_widgets_stream_range">Diapazoni</string>
+    <string name="iptv_widgets_stream_bitrate">Shpejtësia e bitëve</string>
+</resources>

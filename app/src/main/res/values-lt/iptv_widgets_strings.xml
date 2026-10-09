@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">Pasirinkite valdiklį</string>
+    <string name="iptv_widgets_choose_subtitle">Valdiklis %1$d · Laikykite nuspaudę OK ant valdiklio, kad jį pakeistumėte</string>
+    <string name="iptv_widgets_change">OK – pakeisti</string>
+    <string name="iptv_widgets_kind_clocks">Pasaulio laikrodžiai</string>
+    <string name="iptv_widgets_kind_clocks_description">Laikas iki keturių miestų</string>
+    <string name="iptv_widgets_kind_sport">Sporto juosta</string>
+    <string name="iptv_widgets_kind_sport_description">Jūsų komandų ir įtemptos varžybos</string>
+    <string name="iptv_widgets_kind_up_next">Toliau</string>
+    <string name="iptv_widgets_kind_up_next_description">Kitos dvi laidos pasirinktame kanale</string>
+    <string name="iptv_widgets_kind_recordings">Įrašai</string>
+    <string name="iptv_widgets_kind_recordings_description">Kas įrašoma dabar ir kas toliau</string>
+    <string name="iptv_widgets_kind_stream">Srauto informacija</string>
+    <string name="iptv_widgets_kind_stream_description">Rodomo kanalo vaizdo dydis, HDR, kodekas ir sparta</string>
+    <string name="iptv_widgets_kind_empty">Tuščia</string>
+    <string name="iptv_widgets_kind_empty_description">Palikti šią vietą tuščią</string>
+    <string name="iptv_widgets_add">Paspauskite OK, kad pridėtumėte valdiklį</string>
+    <string name="iptv_widgets_layout">Išdėstymas</string>
+    <string name="iptv_widgets_layout_subtitle">Valdikliai, kurie netelpa šiame ekrane, slepiami</string>
+    <string name="iptv_widgets_layout_one">Vienas platus valdiklis</string>
+    <string name="iptv_widgets_layout_two">Du valdikliai</string>
+    <string name="iptv_widgets_layout_three">Trys valdikliai</string>
+    <string name="iptv_widgets_cities">Keisti miestus</string>
+    <string name="iptv_widgets_cities_subtitle">Iki keturių miestų. Pasirinkite miestą, kad jį pašalintumėte.</string>
+    <string name="iptv_widgets_city_add">Pridėti miestą</string>
+    <string name="iptv_widgets_city_search">Ieškoti miestų</string>
+    <string name="iptv_widgets_city_none">Atitinkančių miestų nėra</string>
+    <string name="iptv_widgets_city_device">Šis įrenginys</string>
+    <string name="iptv_widgets_done">Atlikta</string>
+    <string name="iptv_widgets_no_cities">Miestai nepasirinkti</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d diena</item>
+        <item quantity="few">+%d dienos</item>
+        <item quantity="many">+%d dienos</item>
+        <item quantity="other">+%d dienų</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d diena</item>
+        <item quantity="few">−%d dienos</item>
+        <item quantity="many">−%d dienos</item>
+        <item quantity="other">−%d dienų</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">Šiuo metu varžybų nėra</string>
+    <string name="iptv_widgets_sport_off">Sportas išjungtas</string>
+    <string name="iptv_widgets_no_channel">Pasirinkite kanalą</string>
+    <string name="iptv_widgets_no_guide">Šiam kanalui nėra TV programos</string>
+    <string name="iptv_widgets_recording_now">Įrašoma · iki %1$s</string>
+    <string name="iptv_widgets_recording_next">Toliau · %1$s</string>
+    <string name="iptv_widgets_recording_more">Dar %1$d</string>
+    <string name="iptv_widgets_no_recordings">Niekas neįrašoma ir nesuplanuota</string>
+    <string name="iptv_widgets_nothing_playing">Niekas neleidžiama</string>
+    <string name="iptv_widgets_stream_waiting">Laukiama vaizdo</string>
+    <string name="iptv_widgets_stream_resolution">Vaizdas</string>
+    <string name="iptv_widgets_stream_codec">Kodekas</string>
+    <string name="iptv_widgets_stream_range">Diapazonas</string>
+    <string name="iptv_widgets_stream_bitrate">Sparta</string>
+</resources>

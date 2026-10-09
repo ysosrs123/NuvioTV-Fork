@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">பதிவுசெய்</string>
+    <string name="iptv_sport9_record_on">%1$s இல், பதிவுகள் அமைப்பின்படி முன்னதாகத் தொடங்கி தாமதமாக முடிக்கும்</string>
+    <string name="iptv_sport9_record_when_found">சேனல் கிடைத்ததும் பதிவுசெய்</string>
+    <string name="iptv_sport9_record_when_found_subtitle">வழிகாட்டி இதற்கான சேனலைக் காட்டியதும் போட்டியைப் பதிவுசெய்யும்</string>
+    <string name="iptv_sport9_record_waiting">சேனலுக்காகக் காத்திருக்கிறது</string>
+    <string name="iptv_sport9_record_waiting_cancel">பதிவுக்காகக் காத்திருப்பதை நிறுத்து</string>
+    <string name="iptv_sport9_cancel_recording">பதிவை ரத்து செய்</string>
+    <string name="iptv_sport9_recording_set">பதிவு அமைக்கப்பட்டது</string>
+    <string name="iptv_sport9_recording_cancelled">%1$s இன் பதிவு ரத்து செய்யப்பட்டது</string>
+    <string name="iptv_sport9_pending_added">சேனல் கிடைத்ததும் %1$s பதிவுசெய்யப்படும்</string>
+    <string name="iptv_sport9_pending_removed">%1$s தானாகப் பதிவுசெய்யப்படாது</string>
+    <string name="iptv_sport9_channels">சேனல்களைக் கண்டறியும் முறை</string>
+    <string name="iptv_sport9_channels_subtitle">விளையாட்டு போட்டிகளை உங்கள் சேனல்களுடன் எப்படி இணைக்கிறது</string>
+    <string name="iptv_sport9_channels_guide">வழிகாட்டித் தலைப்புகள்</string>
+    <string name="iptv_sport9_channels_guide_description">உங்கள் வழிகாட்டி பெயருடன் பட்டியலிடும் போட்டிகள். வழிகாட்டி நிரம்பியிருந்தால் எல்லா நாடுகளிலும் செயல்படும்.</string>
+    <string name="iptv_sport9_channels_broadcasters">ஒளிபரப்பாளர் பட்டியல்கள்</string>
+    <string name="iptv_sport9_channels_broadcasters_description">ESPN குறிப்பிடும் சேனல்கள், மேலும் TheSportsDB விசையுடன் நீங்கள் பின்தொடரும் அணிகளுக்கு, உங்கள் நாட்டுக்காக TheSportsDB குறிப்பிடும் சேனல்கள். ESPN பெரும்பாலும் அமெரிக்கச் சேனல்களைக் குறிப்பிடும்.</string>
+    <string name="iptv_sport9_channels_both">இரண்டும்</string>
+    <string name="iptv_sport9_channels_both_description">முதலில் வழிகாட்டிப் பொருத்தங்கள், பிறகு உங்களிடம் உள்ள ஒளிபரப்பாளர் சேனல்கள்</string>
+    <string name="iptv_sport9_link_guide">உங்கள் வழிகாட்டியில் · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">ஒளிபரப்பாளர் · %1$s</string>
+</resources>

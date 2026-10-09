@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Besetzung: %1$s</string>
+    <string name="iptv_vod9_director">Regisseur: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Für diesen Titel sind über Ihre Addons keine vollständigen Details verfügbar.</string>
+</resources>

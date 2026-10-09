@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">रिकॉर्ड करें</string>
+    <string name="iptv_sport9_record_on">%1$s पर, रिकॉर्डिंग में सेट किए अनुसार जल्दी शुरू और देर से खत्म करते हुए</string>
+    <string name="iptv_sport9_record_when_found">चैनल मिलने पर रिकॉर्ड करें</string>
+    <string name="iptv_sport9_record_when_found_subtitle">गाइड में इसके लिए चैनल दिखते ही मैच रिकॉर्ड करता है</string>
+    <string name="iptv_sport9_record_waiting">चैनल का इंतज़ार</string>
+    <string name="iptv_sport9_record_waiting_cancel">रिकॉर्ड करने का इंतज़ार बंद करें</string>
+    <string name="iptv_sport9_cancel_recording">रिकॉर्डिंग रद्द करें</string>
+    <string name="iptv_sport9_recording_set">रिकॉर्डिंग सेट हो गई</string>
+    <string name="iptv_sport9_recording_cancelled">%1$s की रिकॉर्डिंग रद्द की गई</string>
+    <string name="iptv_sport9_pending_added">चैनल मिलते ही %1$s रिकॉर्ड होगा</string>
+    <string name="iptv_sport9_pending_removed">%1$s अपने-आप रिकॉर्ड नहीं होगा</string>
+    <string name="iptv_sport9_channels">चैनल ढूँढने का तरीका</string>
+    <string name="iptv_sport9_channels_subtitle">स्पोर्ट्स मैचों को आपके चैनलों से कैसे जोड़ता है</string>
+    <string name="iptv_sport9_channels_guide">गाइड के टाइटल</string>
+    <string name="iptv_sport9_channels_guide_description">वे मैच जिन्हें आपकी गाइड नाम से दिखाती है। गाइड भरी होने पर हर देश में काम करता है।</string>
+    <string name="iptv_sport9_channels_broadcasters">ब्रॉडकास्टर सूचियाँ</string>
+    <string name="iptv_sport9_channels_broadcasters_description">ESPN द्वारा बताए गए चैनल, और TheSportsDB की से फ़ॉलो की गई टीमों के लिए, आपके देश के लिए TheSportsDB द्वारा बताए गए चैनल। ESPN ज़्यादातर अमेरिकी चैनल बताता है।</string>
+    <string name="iptv_sport9_channels_both">दोनों</string>
+    <string name="iptv_sport9_channels_both_description">पहले गाइड के मिलान, फिर आपके पास मौजूद ब्रॉडकास्टर चैनल</string>
+    <string name="iptv_sport9_link_guide">आपकी गाइड में · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">ब्रॉडकास्टर · %1$s</string>
+</resources>

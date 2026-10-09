@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_sport9_record">Gravar</string>
+    <string name="iptv_sport9_record_on">Em %1$s, a começar mais cedo e a terminar mais tarde como definido em Gravações</string>
+    <string name="iptv_sport9_record_when_found">Gravar quando for encontrado um canal</string>
+    <string name="iptv_sport9_record_when_found_subtitle">Grava o jogo assim que o guia mostrar um canal para ele</string>
+    <string name="iptv_sport9_record_waiting">A aguardar um canal</string>
+    <string name="iptv_sport9_record_waiting_cancel">Deixar de aguardar para gravar</string>
+    <string name="iptv_sport9_cancel_recording">Cancelar gravação</string>
+    <string name="iptv_sport9_recording_set">Gravação agendada</string>
+    <string name="iptv_sport9_recording_cancelled">Gravação de %1$s cancelada</string>
+    <string name="iptv_sport9_pending_added">%1$s será gravado assim que for encontrado um canal</string>
+    <string name="iptv_sport9_pending_removed">%1$s não será gravado automaticamente</string>
+    <string name="iptv_sport9_channels">Encontrar canais através de</string>
+    <string name="iptv_sport9_channels_subtitle">Como o Desporto liga os jogos aos teus canais</string>
+    <string name="iptv_sport9_channels_guide">Títulos do guia</string>
+    <string name="iptv_sport9_channels_guide_description">Jogos que o teu guia indica pelo nome. Funciona em qualquer país quando o guia está preenchido.</string>
+    <string name="iptv_sport9_channels_broadcasters">Listas de emissoras</string>
+    <string name="iptv_sport9_channels_broadcasters_description">Canais indicados pela ESPN e, para equipas que segues com uma chave do TheSportsDB, pelo TheSportsDB para o teu país. A ESPN indica sobretudo canais dos EUA.</string>
+    <string name="iptv_sport9_channels_both">Ambos</string>
+    <string name="iptv_sport9_channels_both_description">Primeiro correspondências do guia, depois canais de emissoras que tens</string>
+    <string name="iptv_sport9_link_guide">No teu guia · %1$s · %2$s</string>
+    <string name="iptv_sport9_link_broadcaster">Emissora · %1$s</string>
+</resources>

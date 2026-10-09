@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">উইজেট বেছে নিন</string>
+    <string name="iptv_widgets_choose_subtitle">উইজেট %1$d · পরিবর্তন করতে যেকোনো উইজেটে OK চেপে ধরে রাখুন</string>
+    <string name="iptv_widgets_change">পরিবর্তন করতে OK</string>
+    <string name="iptv_widgets_kind_clocks">বিশ্ব ঘড়ি</string>
+    <string name="iptv_widgets_kind_clocks_description">সর্বোচ্চ চারটি শহরের সময়</string>
+    <string name="iptv_widgets_kind_sport">স্পোর্টস স্ট্রিপ</string>
+    <string name="iptv_widgets_kind_sport_description">আপনার দলের খেলা ও হাড্ডাহাড্ডি খেলা</string>
+    <string name="iptv_widgets_kind_up_next">এর পরে</string>
+    <string name="iptv_widgets_kind_up_next_description">নির্বাচিত চ্যানেলের পরের দুটি অনুষ্ঠান</string>
+    <string name="iptv_widgets_kind_recordings">রেকর্ডিং</string>
+    <string name="iptv_widgets_kind_recordings_description">এখন কী রেকর্ড হচ্ছে এবং এর পরে কী</string>
+    <string name="iptv_widgets_kind_stream">স্ট্রিম তথ্য</string>
+    <string name="iptv_widgets_kind_stream_description">চলমান চ্যানেলের ছবির আকার, HDR, কোডেক ও বিটরেট</string>
+    <string name="iptv_widgets_kind_empty">খালি</string>
+    <string name="iptv_widgets_kind_empty_description">এই জায়গা ফাঁকা রাখুন</string>
+    <string name="iptv_widgets_add">উইজেট যোগ করতে OK চাপুন</string>
+    <string name="iptv_widgets_layout">লেআউট</string>
+    <string name="iptv_widgets_layout_subtitle">এই স্ক্রিনে যে উইজেটগুলো আঁটে না সেগুলো লুকানো থাকে</string>
+    <string name="iptv_widgets_layout_one">একটি চওড়া উইজেট</string>
+    <string name="iptv_widgets_layout_two">দুটি উইজেট</string>
+    <string name="iptv_widgets_layout_three">তিনটি উইজেট</string>
+    <string name="iptv_widgets_cities">শহর পরিবর্তন করুন</string>
+    <string name="iptv_widgets_cities_subtitle">সর্বোচ্চ চারটি শহর। কোনো শহর সরাতে সেটি নির্বাচন করুন।</string>
+    <string name="iptv_widgets_city_add">শহর যোগ করুন</string>
+    <string name="iptv_widgets_city_search">শহর খুঁজুন</string>
+    <string name="iptv_widgets_city_none">মিলে যাওয়া কোনো শহর নেই</string>
+    <string name="iptv_widgets_city_device">এই ডিভাইস</string>
+    <string name="iptv_widgets_done">সম্পন্ন</string>
+    <string name="iptv_widgets_no_cities">কোনো শহর বেছে নেওয়া হয়নি</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="one">+%d দিন</item>
+        <item quantity="other">+%d দিন</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="one">−%d দিন</item>
+        <item quantity="other">−%d দিন</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">এখন কোনো খেলা নেই</string>
+    <string name="iptv_widgets_sport_off">স্পোর্টস বন্ধ আছে</string>
+    <string name="iptv_widgets_no_channel">একটি চ্যানেল বেছে নিন</string>
+    <string name="iptv_widgets_no_guide">এই চ্যানেলের কোনো গাইড নেই</string>
+    <string name="iptv_widgets_recording_now">রেকর্ড হচ্ছে · %1$s পর্যন্ত</string>
+    <string name="iptv_widgets_recording_next">এর পরে · %1$s</string>
+    <string name="iptv_widgets_recording_more">আরও %1$d</string>
+    <string name="iptv_widgets_no_recordings">কিছুই রেকর্ড বা নির্ধারিত হচ্ছে না</string>
+    <string name="iptv_widgets_nothing_playing">কিছুই চলছে না</string>
+    <string name="iptv_widgets_stream_waiting">ছবির অপেক্ষায়</string>
+    <string name="iptv_widgets_stream_resolution">ছবি</string>
+    <string name="iptv_widgets_stream_codec">কোডেক</string>
+    <string name="iptv_widgets_stream_range">রেঞ্জ</string>
+    <string name="iptv_widgets_stream_bitrate">বিটরেট</string>
+</resources>

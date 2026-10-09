@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Szereplők: %1$s</string>
+    <string name="iptv_vod9_director">Rendező: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">A bővítményeid nem adnak teljes adatokat ehhez a címhez.</string>
+</resources>

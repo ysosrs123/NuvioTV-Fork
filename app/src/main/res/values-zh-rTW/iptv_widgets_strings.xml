@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_widgets_choose_title">選擇小工具</string>
+    <string name="iptv_widgets_choose_subtitle">小工具 %1$d · 在任一小工具上按住 OK 即可變更</string>
+    <string name="iptv_widgets_change">按 OK 變更</string>
+    <string name="iptv_widgets_kind_clocks">世界時鐘</string>
+    <string name="iptv_widgets_kind_clocks_description">最多四個城市的時間</string>
+    <string name="iptv_widgets_kind_sport">體育列</string>
+    <string name="iptv_widgets_kind_sport_description">您追蹤球隊的比賽和膠著比賽</string>
+    <string name="iptv_widgets_kind_up_next">接下來</string>
+    <string name="iptv_widgets_kind_up_next_description">所選頻道接下來的兩個節目</string>
+    <string name="iptv_widgets_kind_recordings">錄影內容</string>
+    <string name="iptv_widgets_kind_recordings_description">正在錄影的內容和接下來的錄影</string>
+    <string name="iptv_widgets_kind_stream">串流資訊</string>
+    <string name="iptv_widgets_kind_stream_description">正在播放頻道的畫面尺寸、HDR、轉碼器和位元率</string>
+    <string name="iptv_widgets_kind_empty">空白</string>
+    <string name="iptv_widgets_kind_empty_description">將此位置留空</string>
+    <string name="iptv_widgets_add">按 OK 新增小工具</string>
+    <string name="iptv_widgets_layout">版面配置</string>
+    <string name="iptv_widgets_layout_subtitle">此畫面放不下的小工具將會隱藏</string>
+    <string name="iptv_widgets_layout_one">一個寬版小工具</string>
+    <string name="iptv_widgets_layout_two">兩個小工具</string>
+    <string name="iptv_widgets_layout_three">三個小工具</string>
+    <string name="iptv_widgets_cities">變更城市</string>
+    <string name="iptv_widgets_cities_subtitle">最多四個城市。選取城市即可將其移除。</string>
+    <string name="iptv_widgets_city_add">新增城市</string>
+    <string name="iptv_widgets_city_search">搜尋城市</string>
+    <string name="iptv_widgets_city_none">沒有符合的城市</string>
+    <string name="iptv_widgets_city_device">此裝置</string>
+    <string name="iptv_widgets_done">完成</string>
+    <string name="iptv_widgets_no_cities">未選擇城市</string>
+    <plurals name="iptv_widgets_days_ahead">
+        <item quantity="other">+%d 天</item>
+    </plurals>
+    <plurals name="iptv_widgets_days_behind">
+        <item quantity="other">−%d 天</item>
+    </plurals>
+    <string name="iptv_widgets_no_games">目前沒有比賽</string>
+    <string name="iptv_widgets_sport_off">體育已關閉</string>
+    <string name="iptv_widgets_no_channel">選擇頻道</string>
+    <string name="iptv_widgets_no_guide">此頻道沒有節目表</string>
+    <string name="iptv_widgets_recording_now">錄影中 · 至 %1$s</string>
+    <string name="iptv_widgets_recording_next">接下來 · %1$s</string>
+    <string name="iptv_widgets_recording_more">另外 %1$d 個</string>
+    <string name="iptv_widgets_no_recordings">沒有正在錄影或已排程的節目</string>
+    <string name="iptv_widgets_nothing_playing">沒有正在播放的內容</string>
+    <string name="iptv_widgets_stream_waiting">正在等待畫面</string>
+    <string name="iptv_widgets_stream_resolution">畫面</string>
+    <string name="iptv_widgets_stream_codec">轉碼器</string>
+    <string name="iptv_widgets_stream_range">動態範圍</string>
+    <string name="iptv_widgets_stream_bitrate">位元率</string>
+</resources>

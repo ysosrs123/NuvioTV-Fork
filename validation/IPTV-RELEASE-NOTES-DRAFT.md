@@ -417,6 +417,7 @@ After the device pass of 9 October:
   and New York, and Up next. Up from the guide reaches the tiles; Down returns.
 - "Set up from your phone or computer" is now in the Live TV menu, on Live TV Sources, in
   the no-sources screen and in Live TV settings.
+- This round's new screens and settings are translated into all 40 languages.
 
 Sports data from ESPN and TheSportsDB combined (9 October):
 - No more choice of data source: each league uses ESPN when ESPN has it (live detail,
