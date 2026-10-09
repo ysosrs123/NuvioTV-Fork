@@ -17,9 +17,8 @@ State (end of the 8–9 October session):
 - Host tests: core 748, data 276, androidTest compiles
   (`python3 tools/iptv-host-tests/run.py`).
 - Device testing: user passes on 8 October (`f29cbe2`, `24d6868`), 9 October (`374e1f6`,
-  findings below, all fixed in code) and a NEW pass on `8354d89` whose findings the user
-  will give at the start of the next session. Record them as "Device findings — <date>
-  (build `8354d89`)" above the 9 October section, then fix.
+  findings below, all fixed in code) and 9 October second pass on `8354d89` (25 findings,
+  recorded below; fixes in progress).
 
 Next, in order:
 1. Take the user's findings from the `8354d89` pass; record them here and in the release
@@ -305,6 +304,53 @@ reporting, resets 10 October 2026 00:00 UTC):
 - Decisions recorded: tracking for matched titles uses Nuvio's normal history and
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
+
+## Device findings — 9 October 2026, second pass (build `8354d89`, run 37867719176)
+
+The 7b list passed apart from the items below (in progress). Five screenshots were shared
+(guide top area; Sport with clipped text). Items:
+1. Checklist 7b otherwise passes.
+2. Phone setup: after adding a source the page says "Saved to TV" and the option to add a
+   separate XMLTV guide is gone.
+3. Guide top area too busy: remove "Live TV · <profile>", "Updating programme guide…" and the
+   clock from it; keep programme info, description, widgets and the corner picture.
+4. 4K channel in the corner picture: sound but no picture ("This picture shows in full screen
+   only"); the user wants the picture (the logo was the fix for the 8 October AM9 stutter).
+5. Stream info widget: sparse, three basic stats; wants more information and a better look.
+6. Widget layout "3" does nothing (likely no room); wants widget sizes (short, square, tall)
+   and a single non-wide option.
+7. Sport: text clipped in the middle area (section headings above "Sport only", e.g. "Close
+   games", "Today", day headings) and card borders clipped at the top.
+8. Sport fixtures on by default.
+9. Refresh all sources at once and all guides at once.
+10. Loading a new source or guide still feels slow.
+11. Question: what "Tune" means in the stats overlay (time from starting a channel to its
+    first picture).
+12. Full screen: Left or Right also changes channel (Up/Down should be the only zap keys).
+13. Back from full screen to the guide: the corner picture and the whole UI stutter while
+    sound plays smoothly.
+14. Holding Up from low in the guide: focus jumps to the widgets before reaching the top row.
+15. Left/Back from the guide opens the menu on Favourites; focus should land on the first
+    item (Search channels).
+16. Full screen → Add to multiview: playback stops and restarts in the first pane; wanted
+    seamless.
+17. Sport multiview: the add list should offer all channels (Left from the channel list
+    opens categories).
+18. Multiview: the second pane sometimes has no sound although the same stream has sound in
+    full screen.
+19. Multiview: adding a third stream from a second source (first allows 2 connections, second
+    1) did nothing.
+20. Recordings play in a different player UI from the normal player.
+21. 4K HLG HDR channels with AAC audio are very quiet.
+22. "Leave Live TV?": Leave to Home should be first and focused.
+23. Sport hero (e.g. Arsenal v Leeds United): large empty space beside the teams; bigger logo
+    and names; question: what "4-0-1" / "2-3-0" mean (season record; wins-draws-losses for
+    football per ESPN).
+24. Golf leaderboard tile and hero: scores not right-aligned; hero has much empty space.
+25. IPTV movie/series pages look empty; wanted: Nuvio's detail page even when signed out.
+Also seen in the screenshots: the guide grid showed "Programme information unavailable" for
+every 4K channel while the info panel had the current programme (guide update in progress);
+the Premier League logo is nearly invisible on black; Arsenal v Leeds still "No channel found".
 
 ## Device findings — 9 October 2026 (build `374e1f6`, run 37845595141)
 
