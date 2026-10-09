@@ -6,12 +6,16 @@ import org.junit.Test
 
 class LivePlaybackRuntimeTest {
     private val admission = LiveSessionAdmission(DeviceAdmissionLimits(2, 1000, 0))
-    private val runtime = LivePlaybackRuntime(admission, closeRetryMs = 0)
+    private val runtime = LivePlaybackRuntime(admission, closeWaitMs = 0)
     private fun key(id: String) = AcquisitionKey("shared", id, "main", 1)
-    private class Handle(val closeAction: suspend () -> Boolean = { true }) : OwnedLivePlayback {
+    private class Handle(override val decoderReleased: Boolean = false, val closeAction: suspend () -> Boolean = { true }) : OwnedLivePlayback {
         var starts = 0
+        var interrupts = 0
+        var abandoned = 0
         override fun start() { starts++ }
         override suspend fun close() = closeAction()
+        override fun interrupt() { interrupts++ }
+        override fun abandon() { abandoned++ }
     }
     @Test fun replacementCannotOpenUntilOldDecoderAndTransportHaveClosed() = runBlocking {
         val closing = CompletableDeferred<Unit>(); val closed = CompletableDeferred<Boolean>()
@@ -46,7 +50,7 @@ class LivePlaybackRuntimeTest {
         assertNull(admission.snapshot().audioOwner)
     }
     @Test fun closeIsRetriedBrieflyBeforeTheSwitchIsRefused() = runBlocking {
-        val patient = LivePlaybackRuntime(admission, closeRetryMs = 2_000)
+        val patient = LivePlaybackRuntime(admission, closeWaitMs = 2_000)
         var attempts = 0
         patient.open(key("one"), 10, 20) { Handle { ++attempts >= 3 } }
         assertEquals(LiveOpenResult.OPENED, patient.open(key("two"), 10, 20) { Handle() })
@@ -54,7 +58,7 @@ class LivePlaybackRuntimeTest {
         assertEquals(1, admission.snapshot().consumers)
     }
     @Test fun closeThatNeverConfirmsIsRefusedAfterTheRetryWindow() = runBlocking {
-        val patient = LivePlaybackRuntime(admission, closeRetryMs = 300)
+        val patient = LivePlaybackRuntime(admission, closeWaitMs = 300)
         var attempts = 0
         patient.open(key("one"), 10, 20) { Handle { attempts++; false } }
         val started = System.nanoTime()
@@ -110,6 +114,57 @@ class LivePlaybackRuntimeTest {
         preparing.await(); job.cancelAndJoin()
         assertEquals(0, admission.snapshot().consumers)
         assertTrue(admission.snapshot().upstreamsByAccount.isEmpty())
+    }
+    @Test fun switchWaitsForASlowCloseInsteadOfRefusing() = runBlocking {
+        val patient = LivePlaybackRuntime(admission, closeWaitMs = 1_500)
+        val started = System.nanoTime()
+        patient.open(key("one"), 10, 20, maxUpstreams = 1) { Handle { (System.nanoTime() - started) / 1_000_000 >= 900 } }
+        assertEquals(LiveOpenResult.OPENED, patient.open(key("two"), 10, 20, maxUpstreams = 1) { Handle() })
+        assertEquals(1, admission.snapshot().consumers)
+    }
+    @Test fun singleConnectionProviderNeverOverlapsAfterTheWait() = runBlocking {
+        val patient = LivePlaybackRuntime(admission, closeWaitMs = 200)
+        val first = Handle(true) { false }
+        patient.open(key("one"), 10, 20, maxUpstreams = 1) { first }
+        assertEquals(LiveOpenResult.CLOSE_UNCONFIRMED, patient.open(key("two"), 10, 20, maxUpstreams = 1) { error("Must not construct") })
+        assertEquals(0, first.abandoned)
+        assertEquals(1, admission.snapshot().consumers)
+    }
+    @Test fun multiConnectionProviderProceedsOnceTheDecoderIsFree() = runBlocking {
+        val patient = LivePlaybackRuntime(admission, closeWaitMs = 200)
+        val first = Handle(true) { false }
+        patient.open(key("one"), 10, 20, maxUpstreams = 2) { first }
+        assertEquals(LiveOpenResult.OPENED, patient.open(key("two"), 10, 20, maxUpstreams = 2) { Handle() })
+        assertEquals(1, first.abandoned)
+        assertEquals(1, admission.snapshot().consumers)
+        assertEquals(1, admission.snapshot().decoders)
+    }
+    @Test fun busyDecoderBlocksTheSwitchWhateverTheLimit() = runBlocking {
+        val patient = LivePlaybackRuntime(admission, closeWaitMs = 200)
+        patient.open(key("one"), 10, 20, maxUpstreams = 4) { Handle(false) { false } }
+        assertEquals(LiveOpenResult.CLOSE_UNCONFIRMED, patient.open(key("two"), 10, 20, maxUpstreams = 4) { error("Must not construct") })
+    }
+    @Test fun otherProviderMayOpenWhileTheOldConnectionsDrain() = runBlocking {
+        val patient = LivePlaybackRuntime(admission, closeWaitMs = 200)
+        patient.open(key("one"), 10, 20, maxUpstreams = 1) { Handle(true) { false } }
+        assertEquals(LiveOpenResult.OPENED, patient.open(AcquisitionKey("other", "two", "main", 1), 10, 20, maxUpstreams = 1) { Handle() })
+        assertNull(admission.snapshot().upstreamsByAccount["shared"])
+    }
+    @Test fun interruptReachesOnlyTheOwnersPlayback() = runBlocking {
+        val first = Handle()
+        runtime.open(key("one"), 10, 20, "screen") { first }
+        runtime.interrupt("other")
+        assertEquals(0, first.interrupts)
+        runtime.interrupt("screen")
+        assertEquals(1, first.interrupts)
+        assertTrue(runtime.stop("screen"))
+    }
+    @Test fun overlapRules() {
+        assertFalse(LiveSwitchOverlap.allowed("a", "a", 1, true))
+        assertTrue(LiveSwitchOverlap.allowed("a", "a", 2, true))
+        assertTrue(LiveSwitchOverlap.allowed("a", "a", null, true))
+        assertTrue(LiveSwitchOverlap.allowed("a", "b", 1, true))
+        assertFalse(LiveSwitchOverlap.allowed("a", "b", 4, false))
     }
     @Test fun requestFenceCountsConnectingWorkAndRejectsLateLoads() {
         val fence = LiveRequestFence()

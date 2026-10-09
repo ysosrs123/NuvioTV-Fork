@@ -38,6 +38,7 @@ import com.nuvio.tv.data.iptv.IptvLocalTimeshiftInput
 import com.nuvio.tv.data.iptv.IptvLocalTimeshiftRouter
 import com.nuvio.tv.data.iptv.IptvLocalTimeshiftSession
 import com.nuvio.tv.data.iptv.IptvLocalTimeshiftStalledException
+import com.nuvio.tv.data.iptv.IptvClaimedCalls
 import com.nuvio.tv.data.iptv.IptvLiveCalls
 import com.nuvio.tv.data.iptv.IptvLiveNet
 import com.nuvio.tv.data.iptv.IptvLiveSocketFactory
@@ -115,7 +116,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private var readyAt = 0L
     private var frameAt = 0L
     private var closeStartedAt = 0L
-    private var closeLogged = false
+    private var closeLogged: String? = null
     private val reconnect = Runnable {
         if (!released && !failed) {
             val position = player.currentPosition
@@ -162,7 +163,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     init {
         require(purpose == PlaybackPurpose.LIVE_CHANNEL)
         require((listOf(locator) + alternatives.map { it.first }).all { Uri.parse(it).scheme?.lowercase() in setOf("http", "https") })
-        val upstream = OkHttpDataSource.Factory(client).setUserAgent(userAgent).setDefaultRequestProperties(requestHeaders - "User-Agent")
+        val upstream = OkHttpDataSource.Factory(IptvClaimedCalls(client)).setUserAgent(userAgent).setDefaultRequestProperties(requestHeaders - "User-Agent")
         upstream.setTransferListener(object : TransferListener {
             override fun onTransferInitializing(source: DataSource, spec: DataSpec, network: Boolean) = Unit
             override fun onTransferStart(source: DataSource, spec: DataSpec, network: Boolean) = Unit
@@ -475,32 +476,45 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         override fun cancel() { cancelled = true; call?.cancel() }
         override fun release() { ticket?.let { fence.leave(it); ticket = null } }
     }
+    override fun interrupt() { if (!released) shutdown() }
+    override val decoderReleased: Boolean get() = released && !playbackThread.isAlive
+    override fun abandon() {
+        IptvLog.info("live close detached ms=${android.os.SystemClock.elapsedRealtime() - closeStartedAt} ${calls.describe()} requests=${fence.active.value}")
+    }
+    private fun shutdown() {
+        closeStartedAt = android.os.SystemClock.elapsedRealtime()
+        mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(stall); mainHandler.removeCallbacks(steady)
+        mainHandler.removeCallbacks(startCheck); mainHandler.removeCallbacks(watchdog)
+        streamOpen = false
+        if (wifiHeld) { wifiHeld = false; IptvLiveWifiLock.hold(appContext, this, false) }
+        fence.stopAccepting()
+        calls.cancelAll()
+        localGeneration++
+        ring?.let { session -> ring = null; session.stop(); thread(name = "IptvTimeshiftClose", isDaemon = true) { session.awaitStopped(IDLE_WAIT_MS); session.close() } }
+        released = true
+        runCatching { enhancer?.release() }; enhancer = null
+        try { player.release() } catch (error: Exception) { IptvLog.failure("live release", error) }
+        IptvLog.info("live close started ${calls.describe()} requests=${fence.active.value} thread=${playbackThread.isAlive}")
+    }
+    private fun settled(): Boolean = !playbackThread.isAlive && calls.open == 0
     override suspend fun close(): Boolean {
-        if (!released) {
-            closeStartedAt = android.os.SystemClock.elapsedRealtime()
-            mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(stall); mainHandler.removeCallbacks(steady)
-            mainHandler.removeCallbacks(startCheck); mainHandler.removeCallbacks(watchdog)
-            streamOpen = false
-            if (wifiHeld) { wifiHeld = false; IptvLiveWifiLock.hold(appContext, this, false) }
-            fence.stopAccepting()
-            calls.cancelAll()
-            localGeneration++
-            ring?.let { session -> ring = null; session.stop(); thread(name = "IptvTimeshiftClose", isDaemon = true) { session.awaitStopped(IDLE_WAIT_MS); session.close() } }
-            released = true
-            runCatching { enhancer?.release() }; enhancer = null
-            try { player.release() } catch (error: Exception) { IptvLog.failure("live release", error) }
-        } else calls.cancelAll()
-        val closed = withTimeoutOrNull(CLOSE_WAIT_MS) {
-            while (playbackThread.isAlive || calls.count > 0) delay(CLOSE_POLL_MS)
+        if (!released) shutdown() else calls.cancelAll()
+        val settled = withTimeoutOrNull(CLOSE_WAIT_MS) {
+            while (!settled()) delay(CLOSE_POLL_MS)
             true
         } ?: false
-        if (closed) IptvLog.info("live close ms=${android.os.SystemClock.elapsedRealtime() - closeStartedAt}")
-        else if (!closeLogged) {
-            closeLogged = true
-            val reason = if (playbackThread.isAlive) "release" else "calls"
-            IptvLog.info("live close unconfirmed reason=$reason calls=${calls.count} requests=${fence.active.value}")
+        val elapsed = android.os.SystemClock.elapsedRealtime() - closeStartedAt
+        val forced = !settled && !playbackThread.isAlive && elapsed >= ORPHAN_MS
+        if (settled || forced) {
+            IptvLog.info("live close ms=$elapsed${if (forced) " forced" else ""} ${calls.describe()} left=${calls.count}")
+            return true
         }
-        return closed
+        val reason = if (playbackThread.isAlive) "release" else "calls"
+        if (closeLogged != reason) {
+            closeLogged = reason
+            IptvLog.info("live close unconfirmed reason=$reason ms=$elapsed ${calls.describe()} requests=${fence.active.value}")
+        }
+        return false
     }
     private class FencedSource(private val delegate: DataSource, private val fence: LiveRequestFence, private val entryPoint: () -> Uri,
         private val seekable: Boolean) : DataSource {
@@ -561,8 +575,9 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         const val RATE_MS = 5_000L
         const val GO_LIVE_MIN_MS = 3_000L
         const val RELEASE_BLOCK_MS = 250L
-        const val CLOSE_WAIT_MS = 1_000L
+        const val CLOSE_WAIT_MS = 500L
         const val CLOSE_POLL_MS = 25L
+        const val ORPHAN_MS = 20_000L
     }
 }
 

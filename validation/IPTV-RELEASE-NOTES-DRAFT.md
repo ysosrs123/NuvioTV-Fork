@@ -380,6 +380,15 @@ After the device pass of 9 October:
   opens with the provider's own plot, cast, director, genre, rating, artwork, runtime and
   year. Fixes "None of them provided metadata for id=tmdb:…". Home rows use the same rule.
 - Left on the Movies and Series pages goes back to Live TV with the menu open.
+- Channel switching: the old stream starts closing the moment OK is pressed; a request
+  answered just as it was cancelled is now closed instead of keeping the old player
+  "busy" for good; connections already cut no longer count; the switch waits up to 8 s
+  with the normal loading state (instead of 1 + 3 s) and goes ahead earlier when the old
+  decoder is free and the provider allows more than one connection; a second OK on the
+  channel being tuned opens full screen instead of restarting it; stale messages from an
+  earlier switch no longer appear. "Previous player has not confirmed it stopped" should
+  now be rare; new log lines (`live close started`, `live close ms=… dns= connect=
+  connected= cut=`, `live close unconfirmed reason=`) show the cause if it remains.
 - "Set up from your phone or computer" is now in the Live TV menu, on Live TV Sources, in
   the no-sources screen and in Live TV settings.
 

@@ -12,20 +12,28 @@ import kotlinx.coroutines.withContext
 interface OwnedLivePlayback {
     fun start()
     suspend fun close(): Boolean
+    fun interrupt() {}
+    val decoderReleased: Boolean get() = false
+    fun abandon() {}
 }
 
 enum class LiveOpenResult { OPENED, CAPACITY, SHARING_UNAVAILABLE, CLOSE_UNCONFIRMED, FAILED }
 
-class LivePlaybackRuntime(private val admission: LiveSessionAdmission, private val closeRetryMs: Long = CLOSE_RETRY_MS) {
+object LiveSwitchOverlap {
+    fun allowed(previousAccount: String, nextAccount: String, limit: Int?, decoderReleased: Boolean): Boolean =
+        decoderReleased && (previousAccount != nextAccount || limit == null || limit > 1)
+}
+
+class LivePlaybackRuntime(private val admission: LiveSessionAdmission, private val closeWaitMs: Long = CLOSE_WAIT_MS) {
     private data class Active(val owner: String, val lease: LiveConsumerLease, val playback: OwnedLivePlayback)
     private val mutex = Mutex()
-    private var active: Active? = null
+    @Volatile private var active: Active? = null
 
     suspend fun open(key: AcquisitionKey, acquisitionBytes: Long, viewerBytes: Long, owner: String = "foreground",
         maxUpstreams: Int? = null, create: suspend (PlaybackPurpose) -> OwnedLivePlayback): LiveOpenResult = mutex.withLock {
         require(maxUpstreams == null || maxUpstreams in 1..16)
         currentCoroutineContext().ensureActive()
-        if (!closeWithRetry()) return@withLock LiveOpenResult.CLOSE_UNCONFIRMED
+        if (!closeWithRetry() && !abandonFor(key, maxUpstreams)) return@withLock LiveOpenResult.CLOSE_UNCONFIRMED
         currentCoroutineContext().ensureActive()
         maxUpstreams?.let { admission.setAccountLimit(key.accountId, it) }
         val result = admission.acquire(key, acquisitionBytes, ConsumerReservation(LiveConsumerRole.VIEWER, 1, viewerBytes))
@@ -50,15 +58,29 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission, private v
         }
     }
 
+    fun interrupt(owner: String = "foreground") {
+        active?.takeIf { it.owner == owner }?.playback?.let { runCatching { it.interrupt() } }
+    }
+
     suspend fun stop(owner: String = "foreground"): Boolean = mutex.withLock {
         if (active?.owner != owner) true else closeWithRetry()
     }
 
+    private fun abandonFor(key: AcquisitionKey, maxUpstreams: Int?): Boolean {
+        val previous = active ?: return true
+        val account = previous.lease.key.accountId
+        val limit = if (account == key.accountId) maxUpstreams ?: admission.accountLimit(account) else admission.accountLimit(account)
+        if (!LiveSwitchOverlap.allowed(account, key.accountId, limit, previous.playback.decoderReleased)) return false
+        runCatching { previous.playback.abandon() }
+        release(previous.lease); active = null
+        return true
+    }
+
     private suspend fun closeWithRetry(): Boolean {
         if (closeActive()) return true
-        val deadline = System.nanoTime() + closeRetryMs * 1_000_000
+        val deadline = System.nanoTime() + closeWaitMs * 1_000_000
         while (System.nanoTime() < deadline) {
-            delay(CLOSE_RETRY_STEP_MS)
+            delay(CLOSE_STEP_MS)
             if (closeActive()) return true
         }
         return false
@@ -76,7 +98,7 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission, private v
     }
 
     private companion object {
-        const val CLOSE_RETRY_MS = 3_000L
-        const val CLOSE_RETRY_STEP_MS = 150L
+        const val CLOSE_WAIT_MS = 8_000L
+        const val CLOSE_STEP_MS = 100L
     }
 }

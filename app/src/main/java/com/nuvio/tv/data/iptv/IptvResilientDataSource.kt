@@ -14,6 +14,7 @@ import java.io.InterruptedIOException
 import java.net.ConnectException
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.net.Proxy
 import java.net.Socket
 import java.net.SocketAddress
 import java.net.SocketTimeoutException
@@ -22,6 +23,8 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import javax.net.SocketFactory
 import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Connection
 import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.Dns
@@ -29,6 +32,8 @@ import okhttp3.EventListener
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
+import okhttp3.Request
 import okhttp3.Response
 
 class IptvStreamSyncException : IOException("Transport stream sync lost")
@@ -188,28 +193,76 @@ class IptvStreamNetwork : Interceptor {
 }
 
 class IptvLiveCalls : EventListener.Factory {
-    private val calls = HashSet<Call>()
+    enum class Phase { QUEUED, DNS, CONNECT, CONNECTED, IDLE }
+    private class Track { var phase = Phase.QUEUED; var cut = false }
+    private val calls = HashMap<Call, Track>()
     private var closed = false
 
     val count: Int @Synchronized get() = calls.size
+    val open: Int @Synchronized get() = calls.values.count { !it.cut }
+
+    @Synchronized fun describe(): String {
+        val live = calls.values.filter { !it.cut }.groupingBy { it.phase }.eachCount()
+        return Phase.values().joinToString(" ") { "${it.name.lowercase()}=${live[it] ?: 0}" } + " cut=${calls.values.count { it.cut }}"
+    }
 
     override fun create(call: Call): EventListener = object : EventListener() {
         override fun callStart(call: Call) = started(call)
+        override fun dnsStart(call: Call, domainName: String) = phase(call, Phase.DNS)
+        override fun connectStart(call: Call, inetSocketAddress: InetSocketAddress, proxy: Proxy) = phase(call, Phase.CONNECT)
+        override fun connectFailed(call: Call, inetSocketAddress: InetSocketAddress, proxy: Proxy, protocol: Protocol?, ioe: IOException) = phase(call, Phase.IDLE)
+        override fun connectionAcquired(call: Call, connection: Connection) = phase(call, Phase.CONNECTED)
+        override fun connectionReleased(call: Call, connection: Connection) = phase(call, Phase.IDLE)
         override fun callEnd(call: Call) = ended(call)
         override fun callFailed(call: Call, ioe: IOException) = ended(call)
     }
 
     fun cancelAll() {
-        val running = synchronized(this) { closed = true; calls.toList() }
+        val running = synchronized(this) {
+            closed = true
+            calls.values.forEach { if (it.phase == Phase.CONNECT || it.phase == Phase.CONNECTED) it.cut = true }
+            calls.keys.toList()
+        }
         running.forEach { it.cancel() }
     }
 
     private fun started(call: Call) {
-        val late = synchronized(this) { calls += call; closed }
+        val late = synchronized(this) { calls[call] = Track(); closed }
         if (late) call.cancel()
     }
 
+    @Synchronized private fun phase(call: Call, phase: Phase) {
+        val track = calls[call] ?: return
+        track.phase = phase
+    }
+
     @Synchronized private fun ended(call: Call) { calls -= call }
+}
+
+class IptvClaimedCalls(private val factory: Call.Factory) : Call.Factory {
+    override fun newCall(request: Request): Call = Claimed(factory.newCall(request))
+
+    private class Claimed(private val delegate: Call) : Call by delegate {
+        private var delivered: Response? = null
+        private var cancelled = false
+
+        override fun enqueue(responseCallback: Callback) = delegate.enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) = responseCallback.onFailure(this@Claimed, e)
+            override fun onResponse(call: Call, response: Response) {
+                val late = synchronized(this@Claimed) { cancelled.also { if (!it) delivered = response } }
+                if (late) { runCatching { response.close() }; responseCallback.onFailure(this@Claimed, IOException("Canceled")) }
+                else responseCallback.onResponse(this@Claimed, response)
+            }
+        })
+
+        override fun cancel() {
+            val orphan = synchronized(this) { cancelled = true; delivered.also { delivered = null } }
+            delegate.cancel()
+            orphan?.let { runCatching { it.close() } }
+        }
+
+        override fun clone(): Call = Claimed(delegate.clone())
+    }
 }
 
 class IptvWarmSocket : Socket() {

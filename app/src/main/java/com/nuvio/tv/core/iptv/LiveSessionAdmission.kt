@@ -41,8 +41,9 @@ class LiveSessionAdmission(private val limits: DeviceAdmissionLimits) {
     @Synchronized fun setAccountLimit(accountId: String, maxUpstreams: Int) {
         require(accountId.isNotBlank() && maxUpstreams > 0)
         accountLimits[accountId] = maxUpstreams
-
     }
+
+    @Synchronized fun accountLimit(accountId: String): Int? = accountLimits[accountId]
 
     @Synchronized fun acquire(key: AcquisitionKey, acquisitionMemoryBytes: Long, reservation: ConsumerReservation): LiveAdmissionResult {
         require(acquisitionMemoryBytes >= 0)

@@ -31,7 +31,7 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
     val recordings: List<IptvRecording> = emptyList(), val maxTiles: Int = 1,
     val alarmPrompt: Boolean = false, val multiviewLayout: MultiviewLayout = MultiviewLayout.GRID,
     val multiviewQuality: MultiviewQuality = MultiviewQuality.AUTO, val mainTile: Int = 0, val panelHeight: Int = 1080,
-    val tileHeights: List<Int> = emptyList(), val density: GuideDensity = GuideDensity.COMFORTABLE,
+    val tileHeights: List<Int> = emptyList(), val density: GuideDensity = GuideDensity.COMPACT,
     val allSources: Boolean = false, val sourceCategories: List<IptvSourceCategories> = emptyList(),
     val extraGuide: Map<String, GuideGridRow> = emptyMap(), val scrubProgrammes: List<GuideProgramme> = emptyList(),
     val catchupUntil: Long? = null, val scrubTarget: Long? = null, val inset: IptvTile? = null, val picker: IptvPicker? = null,
@@ -752,8 +752,16 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val current = session ?: return
         val ref = refOf(row) ?: return
         if (!foreground) return
+        val live = mutable.value
+        if (catchup == null && from == null && notice == null && !auto && live.catchup == null && live.multiview == null &&
+            live.playingId == row.item.channel.id && tuneJob?.isActive == true) {
+            IptvLog.info("tune repeat ignored")
+            fullscreenRequested.value = true
+            return
+        }
         tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel(); warmJob?.cancel()
-        if (mutable.value.inset?.row?.item?.channel?.id == row.item.channel.id) closeInset()
+        runtime.interrupt(owner)
+        val insetClosing = if (live.inset?.row?.item?.channel?.id == row.item.channel.id) { closeInset(); insetJob } else null
         loadShortGuide(row)
         val request = ++tuneVersion
         val started = android.os.SystemClock.elapsedRealtime()
@@ -791,6 +799,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                         remembered = catchupConnection?.let(styles::remembered)).ifEmpty { throw CatchupUnavailableException() }
                     plan.first().url
                 } else if (source.kind == IptvSourceKind.STALKER) null else liveLocator(current, ref, source, stored)
+                insetClosing?.join()
                 val resolved = android.os.SystemClock.elapsedRealtime()
                 var closed = resolved
                 var logged = false
@@ -1118,6 +1127,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         closeInset()
         ensureGuide(tiles)
         ++tuneVersion; tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel()
+        runtime.interrupt(owner)
         mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, reconnecting = false, catchup = null, catchupFrom = null,
             catchupUntil = null, scrubTarget = null, paused = false, pausedAt = null, pausedProgramme = null, tuning = false,
             playingId = null, previousId = it.playingId ?: it.previousId, multiview = tiles.map { row -> IptvTile(row) }, tileFocus = 0, mainTile = 0,
@@ -1128,7 +1138,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val generation = ++multiviewGeneration
         multiviewJob = viewModelScope.launch {
             previous?.join()
-            if (!runtime.stop(owner)) mutable.update { it.copy(message = R.string.iptv_live_closing) }
+            if (!runtime.stop(owner) && generation == multiviewGeneration) mutable.update { it.copy(message = R.string.iptv_live_closing) }
             if (generation == multiviewGeneration) tiles.indices.forEach(::openTile)
         }
     }
@@ -1270,14 +1280,15 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         }
     }
     fun stop(keepChannel: Boolean = false) {
-        ++tuneVersion; tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel(); warmJob?.cancel()
+        val version = ++tuneVersion; tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel(); warmJob?.cancel()
+        runtime.interrupt(owner)
         IptvLiveNet.drop()
         closeInset()
         mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, reconnecting = false, catchup = null, catchupFrom = null,
             catchupUntil = null, scrubTarget = null, localTimeshift = false, localBehind = false,
             paused = false, pausedAt = null, pausedProgramme = null, tuning = false, playingId = if (keepChannel) it.playingId else null,
             previousId = if (keepChannel) it.previousId else it.playingId ?: it.previousId) }
-        viewModelScope.launch { if (!runtime.stop(owner)) mutable.update { it.copy(message = R.string.iptv_live_closing) } }
+        viewModelScope.launch { if (!runtime.stop(owner) && version == tuneVersion) mutable.update { it.copy(message = R.string.iptv_live_closing) } }
     }
     private fun guideWindow(now: Long): GuideGridWindow {
         val start = Math.floorDiv(now, GuideGridWindow.SLOT_MILLIS) * GuideGridWindow.SLOT_MILLIS - GuideGridWindow.SLOT_MILLIS

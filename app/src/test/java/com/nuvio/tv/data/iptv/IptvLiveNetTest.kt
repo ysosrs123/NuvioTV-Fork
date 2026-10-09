@@ -8,8 +8,11 @@ import java.net.Socket
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.*
@@ -127,5 +130,80 @@ class IptvLiveNetTest {
             assertThrows(IOException::class.java) { client.newCall(Request.Builder().url(url).build()).execute().close() }
             waitFor { calls.count == 0 }
         } finally { server.shutdown() }
+    }
+
+    @Test fun cancelledConnectionsStopCountingAtOnce() {
+        val server = MockWebServer()
+        server.enqueue(MockResponse().setBody("x".repeat(200_000)).throttleBody(1_024, 100, TimeUnit.MILLISECONDS))
+        server.start()
+        try {
+            val calls = IptvLiveCalls()
+            val client = OkHttpClient.Builder().proxy(Proxy.NO_PROXY).eventListenerFactory(calls).build()
+            val reading = thread {
+                runCatching { client.newCall(Request.Builder().url(server.url("/live/1.ts")).build()).execute().use { it.body.source().readByteArray() } }
+            }
+            waitFor { calls.open == 1 && calls.describe().contains("connected=1") }
+            calls.cancelAll()
+            assertEquals(0, calls.open)
+            reading.join(5_000)
+            waitFor { calls.count == 0 }
+        } finally { server.shutdown() }
+    }
+
+    @Test fun responseNobodyClaimedDoesNotHoldTheSwitch() {
+        val server = MockWebServer()
+        server.enqueue(MockResponse().setBody("x".repeat(200_000)).throttleBody(1_024, 100, TimeUnit.MILLISECONDS))
+        server.start()
+        try {
+            val calls = IptvLiveCalls()
+            val client = OkHttpClient.Builder().proxy(Proxy.NO_PROXY).eventListenerFactory(calls).build()
+            val delivered = java.util.concurrent.CompletableFuture<Response>()
+            client.newCall(Request.Builder().url(server.url("/live/1.ts")).build()).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) { delivered.completeExceptionally(e) }
+                override fun onResponse(call: Call, response: Response) { delivered.complete(response) }
+            })
+            val orphan = delivered.get(5, TimeUnit.SECONDS)
+            calls.cancelAll()
+            assertEquals(0, calls.open)
+            orphan.close()
+            waitFor { calls.count == 0 }
+        } finally { server.shutdown() }
+    }
+
+    @Test fun cancellingAClaimedCallClosesAResponseThatArrivedTooLate() {
+        val server = MockWebServer()
+        server.enqueue(MockResponse().setBody("x".repeat(200_000)).throttleBody(1_024, 100, TimeUnit.MILLISECONDS))
+        server.start()
+        try {
+            val calls = IptvLiveCalls()
+            val factory = IptvClaimedCalls(OkHttpClient.Builder().proxy(Proxy.NO_PROXY).eventListenerFactory(calls).build())
+            val delivered = java.util.concurrent.CompletableFuture<Response>()
+            val call = factory.newCall(Request.Builder().url(server.url("/live/1.ts")).build())
+            call.enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) { delivered.completeExceptionally(e) }
+                override fun onResponse(call: Call, response: Response) { delivered.complete(response) }
+            })
+            delivered.get(5, TimeUnit.SECONDS)
+            assertEquals(1, calls.count)
+            call.cancel()
+            waitFor { calls.count == 0 }
+        } finally { server.shutdown() }
+    }
+
+    @Test fun lookupStillRunningKeepsCountingUntilItEnds() {
+        val lookup = java.util.concurrent.CountDownLatch(1)
+        val resolving = java.util.concurrent.CountDownLatch(1)
+        val calls = IptvLiveCalls()
+        val client = OkHttpClient.Builder().proxy(Proxy.NO_PROXY).eventListenerFactory(calls).dns(object : okhttp3.Dns {
+            override fun lookup(hostname: String): List<InetAddress> { resolving.countDown(); lookup.await(5, TimeUnit.SECONDS); return listOf(InetAddress.getLoopbackAddress()) }
+        }).build()
+        val running = thread { runCatching { client.newCall(Request.Builder().url("http://slow.test:9/live/1.ts").build()).execute().close() } }
+        assertTrue(resolving.await(5, TimeUnit.SECONDS))
+        calls.cancelAll()
+        assertEquals(1, calls.open)
+        assertTrue(calls.describe().contains("dns=1"))
+        lookup.countDown()
+        running.join(5_000)
+        waitFor { calls.count == 0 }
     }
 }
