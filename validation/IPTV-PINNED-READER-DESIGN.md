@@ -62,4 +62,4 @@ failure, close-before-start and preservation of another
 recording consumer/reservations. Two Android fixtures use the actual TS stager;
 they compile only until the authorized AM9 is awake. No provider/device installation,
 wake, power/CEC, accounts/settings or recordings are needed for host validation.
-Check IPTV-PINNED-READER-VALIDATION-20261006.json for final measured results/hashes.
+Check the recorded validation for final measured results/hashes.

@@ -69,7 +69,7 @@ every video/audio sample. Video used `c2.amlogic.avc.decoder`; audio used
 `c2.android.aac.decoder`. Input and output PTS lists matched. This validates local
 decode of these exact fixtures; no visible render, audibility, HDR/UHD, provider or
 general codec certification is implied. Exact final outcomes are recorded in
-`IPTV-TS-ENTRY-VALIDATION-20261005.json`.
+the recorded validation.
 
 ## Store concurrency and live reader
 

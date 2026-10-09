@@ -33,4 +33,4 @@ This is a byte reader suitable as a building block for capture export and later 
 3. Wire production capture/viewer ownership through one admission instance. Validate backpressure UX, capture-aware navigation/profile/background cleanup, physical disk margins and durable leases before exposing pause/record controls.
 4. Add foreground service/process-death reconciliation, recording delivery/schedules, USB/SMB and hardware/UI checks. Existing HUD/track/document UI checks still await an active TV/AVR.
 
-Validation results and exact source hashes are recorded in `IPTV-SHARED-CAPTURE-VALIDATION-20261005.json`.
+Validation results were recorded during development.

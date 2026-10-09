@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.nuvio.tv.data.iptv.CaptureStorageHostTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:50.578Z" hostname="PWR_PC" time="2.857">
-  <properties/>
-  <testcase name="realHostFilesystemProbeChecksTheTaskSpoolWithoutFillingOrChangingItsVolume" classname="com.nuvio.tv.data.iptv.CaptureStorageHostTest" time="2.857"/>
-  <system-out><![CDATA[CAPTURE_STORAGE_HOST usableBytes=10620936192 unitBytes=4096 overheadBytes=19931136 observations=8
-]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

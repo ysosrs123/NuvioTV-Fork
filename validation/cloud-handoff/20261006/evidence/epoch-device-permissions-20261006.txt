@@ -1,3 +1,0 @@
-package: com.nuvio.iptv.validation
-package: com.nuvio.iptv.validation.test
-uses-permission: name='android.permission.REORDER_TASKS'

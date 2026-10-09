@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.nuvio.tv.core.iptv.CaptureStoreConcurrencyTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:16:48.031Z" hostname="PWR_PC" time="0.045">
-  <properties/>
-  <testcase name="concurrentWritersRemainSerializedAndValidateOrderAfterAcquiringWriterOwnership" classname="com.nuvio.tv.core.iptv.CaptureStoreConcurrencyTest" time="0.019"/>
-  <testcase name="slowSourceDoesNotBlockLocalReadersAndPinsAreRecheckedAtPublication" classname="com.nuvio.tv.core.iptv.CaptureStoreConcurrencyTest" time="0.026"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

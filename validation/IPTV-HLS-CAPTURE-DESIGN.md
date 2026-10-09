@@ -75,7 +75,7 @@ schedules, USB/SMB, remaining adapters and product UI remain outstanding.
 Protocol reference: [RFC 8216](https://www.rfc-editor.org/rfc/rfc8216.html), especially
 media/discontinuity sequences and media-playlist reload/overlap rules.
 Exact outcomes, build limitations and source hashes are in
-`IPTV-HLS-CAPTURE-VALIDATION-20261005.json`.
+the recorded validation.
 
 Full application Kotlin compilation and all 176 IPTV JVM tests also passed.
 The first 3 GiB run failed from native allocation and a 2 GiB run exhausted its

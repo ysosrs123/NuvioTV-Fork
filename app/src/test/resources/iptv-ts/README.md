@@ -9,7 +9,7 @@ audio frames are 95, 94 and 94. PTS is transport timing, not wall-clock latency.
 Reproduce into a NEW empty directory with
 `tools/iptv-device-tests/validate_capture_media.py --generate <directory> --report <json>`.
 Run the same script without --generate to independently probe/decode these exact
-committed bytes using FFprobe/FFmpeg. See validation/IPTV-TS-ENTRY-VALIDATION-20261005.json
+committed bytes using FFprobe/FFmpeg. See the recorded validation
 for hashes, tool version and Android evidence. Encoder versions can change output bytes.
 
 These narrow fixtures are not general codec, HDR/UHD, audibility or provider certification.
