@@ -374,6 +374,12 @@ After the device pass of 9 October:
   TV settings dialogs (incl. sport key and add league), the search field, the move hint
   and classic-style dialogs inside Live TV. Defaults unchanged (Solid panels, Pure black
   and artwork off).
+- IPTV movies and series always open: Nuvio's detail page is used only when an installed
+  addon actually returns details for the title (IMDb id first, then TMDB); otherwise —
+  no addons, not signed in, no TMDB key, no ids, or a failed load — the IPTV title page
+  opens with the provider's own plot, cast, director, genre, rating, artwork, runtime and
+  year. Fixes "None of them provided metadata for id=tmdb:…". Home rows use the same rule.
+- Left on the Movies and Series pages goes back to Live TV with the menu open.
 - "Set up from your phone or computer" is now in the Live TV menu, on Live TV Sources, in
   the no-sources screen and in Live TV settings.
 

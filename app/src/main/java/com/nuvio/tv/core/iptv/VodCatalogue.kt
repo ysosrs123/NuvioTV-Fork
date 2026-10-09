@@ -28,14 +28,19 @@ data class VodEpisode(
     override fun toString(): String = "VodEpisode(id=$providerId, season=$season, episode=$episode)"
 }
 
+data class VodDetails(
+    val plot: String? = null, val cast: String? = null, val director: String? = null, val genre: String? = null, val rating: Double? = null,
+    val poster: String? = null, val backdrop: String? = null, val year: Int? = null, val durationSeconds: Int? = null,
+)
+
 data class VodMovieInfo(
     val tmdbId: String?, val imdbId: String?, val year: Int?, val durationSeconds: Int?, val plot: String?, val poster: String?,
-    val extension: String?,
+    val extension: String?, val details: VodDetails = VodDetails(),
 ) {
     override fun toString(): String = "VodMovieInfo(tmdb=${tmdbId != null}, imdb=${imdbId != null})"
 }
 
-data class VodSeriesInfo(val series: VodSeries?, val episodes: List<VodEpisode>, val invalidRows: Int = 0) {
+data class VodSeriesInfo(val series: VodSeries?, val episodes: List<VodEpisode>, val invalidRows: Int = 0, val details: VodDetails = VodDetails()) {
     override fun toString(): String = "VodSeriesInfo(episodes=${episodes.size}, invalid=$invalidRows)"
 }
 
@@ -104,12 +109,29 @@ object XtreamVodParser {
         val name = text(info["name"]) ?: text(data["name"])
         return VodMovieInfo(tmdb(info) ?: tmdb(data), imdb(info) ?: imdb(data), year(info, name) ?: year(data, null),
             duration(info), (text(info["plot"]) ?: text(info["description"]))?.take(4000),
-            channelLogoUrl(text(info["movie_image"]) ?: text(info["cover_big"])), extension(data["container_extension"]))
+            channelLogoUrl(text(info["movie_image"]) ?: text(info["cover_big"])), extension(data["container_extension"]), details(info, name))
+    }
+
+    fun details(row: Map<*, *>, name: String?): VodDetails = VodDetails(
+        (text(row["plot"]) ?: text(row["description"]) ?: text(row["overview"]))?.take(4000), people(row["cast"]) ?: people(row["actors"]),
+        people(row["director"]), people(row["genre"]), rating(row),
+        channelLogoUrl(text(row["movie_image"]) ?: text(row["cover_big"]) ?: text(row["cover"])),
+        backdrop(row["backdrop_path"]) ?: backdrop(row["backdrop"]), year(row, name), duration(row))
+
+    private fun people(value: Any?): String? = when (value) {
+        is List<*> -> value.mapNotNull(::text).joinToString(", ")
+        else -> text(value)
+    }.let { it?.replace(SPACES, " ")?.trim()?.trim(',')?.trim()?.takeIf(String::isNotEmpty)?.take(600) }
+
+    private fun backdrop(value: Any?): String? = when (value) {
+        is List<*> -> value.firstNotNullOfOrNull { channelLogoUrl(text(it)) }
+        else -> channelLogoUrl(text(value))
     }
 
     fun seriesInfo(input: Reader, seriesId: String, max: Int = MAX_EPISODES): VodSeriesInfo {
         val root = VodJsonReader(input).readDocument() as? Map<*, *> ?: return VodSeriesInfo(null, emptyList())
-        val series = (root["info"] as? Map<*, *>)?.takeIf { it.isNotEmpty() }?.let { seriesRow(it, seriesId) }
+        val infoRow = (root["info"] as? Map<*, *>)?.takeIf { it.isNotEmpty() }
+        val series = infoRow?.let { seriesRow(it, seriesId) }
         val episodes = LinkedHashMap<String, VodEpisode>()
         var invalid = 0
         fun add(value: Any?, season: Int?) {
@@ -129,7 +151,7 @@ object XtreamVodParser {
         }
         group(root["episodes"], null)
         val sorted = episodes.values.sortedWith(compareBy({ it.season }, { it.episode }, { it.providerId }))
-        return VodSeriesInfo(series, sorted, invalid)
+        return VodSeriesInfo(series, sorted, invalid, infoRow?.let { details(it, series?.name) } ?: VodDetails())
     }
 
     private fun episode(row: Map<*, *>, season: Int?): VodEpisode? {
@@ -193,6 +215,7 @@ object XtreamVodParser {
     fun imdbId(value: String?): String? = value?.let { IMDB.find(it)?.value?.lowercase(Locale.ROOT) }
 
     private val SAFE_ID = Regex("[A-Za-z0-9_-]+")
+    private val SPACES = Regex("\\s+")
     private val EXTENSION = Regex("[a-z0-9]{1,8}")
     private val CLOCK = Regex("([0-9]{1,3}):([0-5][0-9]):([0-5][0-9])")
     private val TMDB_URL = Regex("(?:movie|tv)/([0-9]{1,12})")

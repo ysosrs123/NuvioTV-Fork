@@ -80,8 +80,22 @@ class VodCatalogueTest {
     @Test fun movieInfoReadsIdsAndDuration() {
         val info = XtreamVodParser.movieInfo(StringReader("""{"info":{"tmdb_id":"603","imdb_id":"tt0133093","releasedate":"1999-03-31","duration_secs":"8160","plot":"Neo."},
             "movie_data":{"stream_id":603,"container_extension":"mkv"}}"""))!!
-        assertEquals(VodMovieInfo("603", "tt0133093", 1999, 8160, "Neo.", null, "mkv"), info)
+        assertEquals(VodMovieInfo("603", "tt0133093", 1999, 8160, "Neo.", null, "mkv", VodDetails(plot = "Neo.", year = 1999, durationSeconds = 8160)), info)
         assertNull(XtreamVodParser.movieInfo(StringReader("""{"info":[],"movie_data":[]}""")))
+    }
+
+    @Test fun infoReadsProviderDetails() {
+        val movie = XtreamVodParser.movieInfo(StringReader("""{"info":{"name":"Heist","cover_big":"http://p.example/c.jpg","plot":"A job.","cast":"A  One,\n B Two",
+            "director":"C Three","genre":"Crime, Thriller","rating":"7.4","backdrop_path":["","https://p.example/b.jpg"],"duration":"01:40:00","releasedate":"2024-05-01"},
+            "movie_data":{"container_extension":"mp4"}}"""))!!
+        assertEquals(VodDetails("A job.", "A One, B Two", "C Three", "Crime, Thriller", 7.4, "http://p.example/c.jpg", "https://p.example/b.jpg", 2024, 6000), movie.details)
+        assertEquals("A job.", movie.plot)
+
+        val series = XtreamVodParser.seriesInfo(StringReader("""{"info":{"name":"Show (2019)","cover":"http://p.example/s.jpg","plot":"Things.","actors":["X","Y"],
+            "rating_5based":"4","backdrop_path":"javascript:alert(1)","episode_run_time":"45"},"episodes":{"1":[{"id":"7","episode_num":1}]}}"""), "9")
+        assertEquals(VodDetails("Things.", "X, Y", null, null, 8.0, "http://p.example/s.jpg", null, 2019, 2700), series.details)
+        assertEquals(VodDetails(), XtreamVodParser.seriesInfo(StringReader("""{"info":[],"episodes":[]}"""), "9").details)
+        assertEquals(VodDetails(), XtreamVodParser.movieInfo(StringReader("""{"movie_data":{"stream_id":1}}"""))!!.details)
     }
 
     @Test fun jsonReaderRejectsMalformedInput() {

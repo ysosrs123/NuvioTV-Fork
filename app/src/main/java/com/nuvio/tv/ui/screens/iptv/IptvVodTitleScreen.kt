@@ -75,8 +75,9 @@ fun IptvVodTitleScreen(onPlay: (IptvVodPlay) -> Unit, onDetail: (VodDetailTarget
     LaunchedEffect(ready) { if (ready && !focused) { withFrameNanos { }; focused = true; runCatching { first.requestFocus() } } }
     val title = state.title
     val art = state.art
+    val info = state.info
     Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
-        val backdrop = art?.backdrop
+        val backdrop = art?.backdrop ?: info?.backdrop
         val background = NuvioTheme.colors.Background
         if (backdrop != null) {
             val context = LocalContext.current
@@ -94,15 +95,21 @@ fun IptvVodTitleScreen(onPlay: (IptvVodPlay) -> Unit, onDetail: (VodDetailTarget
                 Column(Modifier.fillMaxSize().padding(start = 56.dp, end = 56.dp, top = 40.dp, bottom = if (series) 20.dp else 56.dp),
                     verticalArrangement = if (series) Arrangement.spacedBy(18.dp) else Arrangement.spacedBy(18.dp, Alignment.Bottom)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(32.dp), verticalAlignment = Alignment.Bottom) {
-                        if (backdrop == null) VodPosterImage(art?.poster ?: title.artwork, title.title, Modifier.width(200.dp).aspectRatio(2f / 3f))
+                        if (backdrop == null) VodPosterImage(art?.poster ?: info?.poster ?: title.artwork, title.title, Modifier.width(200.dp).aspectRatio(2f / 3f))
                         Column(Modifier.widthIn(max = 760.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(art?.title ?: title.title, style = MaterialTheme.typography.displayMedium, color = NuvioTheme.colors.TextPrimary,
                                 maxLines = 2, overflow = TextOverflow.Ellipsis)
-                            val facts = listOfNotNull((title.year ?: art?.year)?.toString(), (art?.rating ?: title.rating)?.let(::ratingText),
-                                state.durationSeconds?.let { stringResource(R.string.iptv_vod_browse_runtime, (it + 59) / 60) }, state.source).joinToString(" · ")
-                            if (facts.isNotEmpty()) Text(facts, style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextSecondary, maxLines = 1)
-                            (art?.overview ?: state.plot)?.let { Text(it, style = MaterialTheme.typography.bodyLarge, color = NuvioTheme.colors.TextSecondary, maxLines = 3,
+                            val facts = listOfNotNull((title.year ?: art?.year ?: info?.year)?.toString(), (art?.rating ?: info?.rating ?: title.rating)?.let(::ratingText),
+                                (state.durationSeconds ?: info?.durationSeconds)?.let { stringResource(R.string.iptv_vod_browse_runtime, (it + 59) / 60) },
+                                info?.genre, state.source).joinToString(" · ")
+                            if (facts.isNotEmpty()) Text(facts, style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+                                overflow = TextOverflow.Ellipsis)
+                            (art?.overview ?: state.plot ?: info?.plot)?.let { Text(it, style = MaterialTheme.typography.bodyLarge, color = NuvioTheme.colors.TextSecondary, maxLines = 3,
                                 overflow = TextOverflow.Ellipsis) }
+                            info?.cast?.let { Text(stringResource(R.string.iptv_vod9_cast, it), style = MaterialTheme.typography.bodyMedium, color = NuvioTheme.colors.TextSecondary,
+                                maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                            info?.director?.let { Text(stringResource(R.string.iptv_vod9_director, it), style = MaterialTheme.typography.bodyMedium,
+                                color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                             state.message?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = NuvioTheme.colors.Error) }
                             Spacer(Modifier.height(4.dp))
                             Actions(state, first, onPlay = viewModel::play, onDetails = viewModel::openDetails)
@@ -134,7 +141,7 @@ private fun Actions(state: IptvVodTitleState, first: FocusRequester, onPlay: (co
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.iptv_vod_browse_from_start))
         }
-        if (state.tmdbId != null || state.imdbId != null) NuvioActionPill(onDetails, if (target == null) Modifier.focusRequester(first) else Modifier) {
+        if (state.offered) NuvioActionPill(onDetails, if (target == null) Modifier.focusRequester(first) else Modifier) {
             Icon(Icons.Filled.Info, null, Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.iptv_vod_browse_full_details))

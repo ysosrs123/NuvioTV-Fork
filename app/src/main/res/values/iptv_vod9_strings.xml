@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_vod9_cast">Cast: %1$s</string>
+    <string name="iptv_vod9_director">Director: %1$s</string>
+    <string name="iptv_vod9_details_unavailable">Full details aren\'t available for this title from your addons.</string>
+</resources>

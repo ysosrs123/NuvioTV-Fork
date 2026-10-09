@@ -1,6 +1,7 @@
 @file:OptIn(androidx.tv.material3.ExperimentalTvMaterial3Api::class)
 package com.nuvio.tv.ui.screens.iptv
 
+import android.view.KeyEvent as AndroidKeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -23,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -56,8 +58,13 @@ import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
 import java.util.Locale
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+
+object IptvVodLiveMenu {
+    val requested = MutableStateFlow(false)
+}
 
 @Composable
 internal fun rememberIptvVodAvailability(viewModel: IptvVodMenuViewModel = hiltViewModel()): IptvVodAvailability {
@@ -72,7 +79,7 @@ internal fun rememberIptvVodAvailability(viewModel: IptvVodMenuViewModel = hiltV
 }
 
 @Composable
-fun IptvVodBrowseScreen(onBack: () -> Unit, onTitle: (VodRef) -> Unit, onDetail: (VodDetailTarget) -> Unit,
+fun IptvVodBrowseScreen(onBack: () -> Unit, onTitle: (VodRef) -> Unit, onDetail: (VodDetailTarget) -> Unit, onMenu: () -> Unit = onBack,
     viewModel: IptvVodBrowseViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val grid = rememberLazyGridState()
@@ -125,6 +132,7 @@ fun IptvVodBrowseScreen(onBack: () -> Unit, onTitle: (VodRef) -> Unit, onDetail:
         if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         Row(Modifier.fillMaxSize().then(if (v2) Modifier else Modifier.padding(start = 24.dp, top = 20.dp, bottom = 20.dp)), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
             VodRail(state, firstRail, Modifier.width(300.dp).fillMaxHeight(),
+                onMenu = { IptvVodLiveMenu.requested.value = true; onMenu() },
                 onSearch = { searching = true },
                 onRecent = { searching = false; focusGrid = true; viewModel.showRecent() },
                 onAll = { searching = false; focusGrid = true; viewModel.showAll() },
@@ -159,10 +167,16 @@ private fun vodHeading(state: IptvVodBrowseState): String = when (state.shelf) {
 }
 
 @Composable
-private fun VodRail(state: IptvVodBrowseState, first: FocusRequester, modifier: Modifier, onSearch: () -> Unit, onRecent: () -> Unit, onAll: () -> Unit,
-    onCategory: (String) -> Unit, onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit) {
+private fun VodRail(state: IptvVodBrowseState, first: FocusRequester, modifier: Modifier, onMenu: () -> Unit, onSearch: () -> Unit, onRecent: () -> Unit,
+    onAll: () -> Unit, onCategory: (String) -> Unit, onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit) {
     val surface = if (LocalV2Appearance.current == null) Modifier.iptvPanel() else Modifier.iptvPanel(RectangleShape, edge = true)
-    Column(modifier.then(surface).padding(vertical = 18.dp, horizontal = 12.dp)) {
+    Column(modifier.then(surface).padding(vertical = 18.dp, horizontal = 12.dp)
+        .onPreviewKeyEvent { event ->
+            val native = event.nativeKeyEvent
+            if (native.keyCode != AndroidKeyEvent.KEYCODE_DPAD_LEFT) return@onPreviewKeyEvent false
+            if (native.action == AndroidKeyEvent.ACTION_DOWN && native.repeatCount == 0) onMenu()
+            true
+        }) {
         Text(stringResource(if (state.kind == VodKind.SERIES) R.string.iptv_vod_browse_series else R.string.iptv_vod_browse_movies),
             style = iptvTitleStyle(), color = NuvioTheme.colors.TextPrimary, modifier = Modifier.padding(start = 12.dp, top = 4.dp, bottom = 12.dp))
         if (state.sources.isEmpty()) return@Column

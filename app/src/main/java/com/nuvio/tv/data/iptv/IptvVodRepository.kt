@@ -2,6 +2,7 @@ package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.PlaylistVod
 import com.nuvio.tv.core.iptv.PlaylistVodEntry
+import com.nuvio.tv.core.iptv.VodDetails
 import com.nuvio.tv.core.iptv.VodKind
 import com.nuvio.tv.core.iptv.VodMovieInfo
 import com.nuvio.tv.core.iptv.VodResume
@@ -39,6 +40,9 @@ class IptvVodRepository(
     private val fetches = Mutex()
     private val movieInfos = object : LinkedHashMap<VodRef, VodMovieInfo>(16, .75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<VodRef, VodMovieInfo>?): Boolean = size > 32
+    }
+    private val seriesInfos = object : LinkedHashMap<VodRef, VodDetails>(16, .75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<VodRef, VodDetails>?): Boolean = size > 32
     }
 
     fun enabled(source: IptvSource): Boolean = enabled(source.kind, store.state(source.ref))
@@ -171,6 +175,7 @@ class IptvVodRepository(
                 val info = xtream.seriesInfo(catalogue.connection(source.ref), series.id)
                 IptvLog.info("vod episodes count=${info.episodes.size} skipped=${info.invalidRows}")
                 store.saveEpisodes(series, info.episodes, info.series)
+                synchronized(seriesInfos) { seriesInfos[series] = info.details }
                 store.episodes(series).episodes
             } catch (cancel: CancellationException) { throw cancel }
             catch (error: Exception) {
@@ -178,6 +183,21 @@ class IptvVodRepository(
                 IptvLog.failure("vod episodes", error)
                 again.episodes
             }
+        }
+    }
+
+    suspend fun seriesDetails(series: VodRef): VodDetails? = withContext(Dispatchers.IO) {
+        require(series.kind == VodKind.SERIES)
+        synchronized(seriesInfos) { seriesInfos[series] }?.let { return@withContext it }
+        val source = source(series) ?: return@withContext null
+        if (source.kind != IptvSourceKind.XTREAM) return@withContext null
+        fetches.withLock {
+            synchronized(seriesInfos) { seriesInfos[series] }?.let { return@withLock it }
+            store.title(series) ?: return@withLock null
+            val info = xtream.seriesInfo(catalogue.connection(source.ref), series.id)
+            if (info.episodes.isNotEmpty() || store.episodes(series).episodes.isEmpty()) store.saveEpisodes(series, info.episodes, info.series)
+            synchronized(seriesInfos) { seriesInfos[series] = info.details }
+            info.details
         }
     }
 
