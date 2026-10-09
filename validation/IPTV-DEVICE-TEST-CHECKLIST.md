@@ -82,6 +82,27 @@ Sports build (8 October; best done while followed teams are playing):
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
 
+## 7b. Fixes from the 9 October pass (build after `8354d89`)
+1. Back: full screen → guide → Live TV menu → "Leave Live TV?" (Stay / Leave to Home).
+2. Full screen: Left = channel list, Left again = categories (choose one), Left/Back closes.
+3. Left on Live TV Sources returns to the guide; Left on Movies/Series returns to Live TV
+   with the menu open.
+4. Guide: Compact by default (fresh install or never changed), slightly larger titles,
+   bigger corner picture, at least six rows.
+5. Widgets between the programme details and the corner picture: Up from the guide (past
+   the Sport only toggle and Games now lane), hold OK to choose; try World clocks (add and
+   remove cities), Up next, Recordings, Stream info, Sport strip; Layout 1/2/3.
+6. No see-through dialogs or panels anywhere in Live TV or its settings.
+7. Scroll the guide and press OK on many channels quickly: the "previous player has not
+   confirmed it stopped" message should not appear; if it does, keep the logcat lines
+   `live close started`, `live close ms=`, `live close unconfirmed reason=`.
+8. Record a channel whose name has decorative letters: the recording name is plain text.
+9. Open an IPTV movie and a series (signed out of Nuvio): the IPTV details page opens
+   with the provider's plot and artwork; playback and resume work.
+10. Phone setup: Live TV menu → "Set up from your phone or computer".
+11. Sport: a match tomorrow shows a channel when your guide lists it; options offer Record
+    or "Record when a channel is found"; Sport settings → "Find channels using".
+
 ## 8. Experimental local timeshift
 1. Settings → Live TV → Local timeshift on, 30 minutes, internal.
 2. Full screen on a TS channel: pause 2 minutes, resume, rewind 60 s, Return to live.
