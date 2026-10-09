@@ -1,4 +1,6 @@
-# Nuvio IPTV — device test checklist (build `6afbea0`, run 37791659338; earlier items from `24d6868`)
+# Nuvio IPTV — device test checklist (build `8354d89`, run 37867719176)
+
+For this build start with section 7b (fixes from the 9 October pass), then 7 (Sport) and the rest.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -53,11 +55,11 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 2. Download a recording on the phone; "Open in VLC" plays and seeks.
 
 ## 7. Sport fixtures
-1. Settings → Live TV → Sport → Sports data → ESPN; choose AFL/NRL/EPL.
-2. Sport view shows a Fixtures row; selecting a fixture plays a matching channel.
-3. TheSportsDB with key 123: same check.
-
-Sports build (8 October; best done while followed teams are playing):
+1. Settings → Live TV → Sport: Sport fixtures on; choose AFL/NRL/EPL in Leagues; check the
+   credit line "Sports data from ESPN and TheSportsDB" and Team logos.
+2. Sport view shows the fixture cards; selecting a fixture plays a matching channel.
+3. Optional, with your own TheSportsDB key: add it, then "Add a league" and pick a league
+   only TheSportsDB has (e.g. netball); its fixtures appear (time, channel, final only).
 4. Sport settings: follow two teams (hold OK on a fixture); Show scores on; While watching
    → Glance; Across Nuvio → Pop-up.
 5. Sport view: cards per sport (tennis, golf, F1, UFC if chosen), hero Follow / Remind me,
