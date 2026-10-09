@@ -695,8 +695,7 @@ Phone setup (security review)
   now-on search, multiview, recording, phone setup and multiview sizing). Store,
   removal and catalogue-save tests that need real SQLite and Keystore run only on
   device. Three independent code reviews (Live TV redesign; phone setup security;
-  recording and multiview) were done and every finding fixed or answered (see
-  IPTV-CODE-REVIEW-20261006.md). Device fixtures and AM9 use are pending. See
+  recording and multiview) were done and every finding fixed or answered. Device fixtures and AM9 use are pending. See
   IPTV-HANDOVER.md.
 
 ## Change history
@@ -711,6 +710,3 @@ fences; 6842df1 finite period; a960696 async reader; 0b82357 incremental loading
 34a4937 incremental reader; ed528c6 growing period; 6ad3799 media source; b68985a
 ID3 track exclusion and AM9 capture validation; then the player binding, review
 fixes, `main` merge and IPTV flavour gate on `iptv/player-binding`.
-
-Upstream draft PR NuvioMedia/NuvioTV#3788 was reviewed (IPTV-UPSTREAM-PR3788-REVIEW.md);
-nothing was imported.

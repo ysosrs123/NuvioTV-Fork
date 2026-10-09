@@ -67,7 +67,7 @@ fixtures use the actual stager across growing rows plus metadata, explicit epoch
 boundary and cancellation. They remain unexecuted while device validation is
 deferred after the prior Asleep observation. No device/provider operation, component
 upgrade or control enablement is needed for host checks. Exact source/build/evidence
-hashes and measured outcomes are in IPTV-SAMPLE-LOAD-VALIDATION-20261006.json.
+hashes and measured outcomes are in the recorded validation (summarised in IPTV-PROGRESS.md).
 
 Final validation: full app compile (448s); 204 core tests (2.186s); 285 full IPTV JVM tests in
 34 suites with zero failures/errors/skips (7.730s test / 384s build); current-fixture

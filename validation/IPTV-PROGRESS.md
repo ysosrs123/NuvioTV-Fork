@@ -28,6 +28,4 @@ Updated 8 October 2026.
 | 8 Oct | docs | Sports experience second design pass: 12 boards (Sport section, cards per sport, guide, player markers and feeds, Game Centre, score bug formats, overlays, multiview, all scores, Home rows, pop-up in Nuvio's player, follow a team) and a recommended order ([IPTV-SPORTS-DESIGN-PASS-2.md](IPTV-SPORTS-DESIGN-PASS-2.md)) | Design only; awaiting the user's choice |
 | 8 Oct | 29b217a – 5612ae4 | Sports build, all four parts: shared live service (alerts, reminders, spoiler rules, background checks for followed teams), game summaries, tennis/golf/F1/NASCAR/UFC/cricket/baseball formats, guide badges and Games now lane, score overlays (Glance, bug, cards, ticker), Game Centre, score markers, other feeds and backup switching, multiview data tiles, Sport section timeline and All scores, Home rows, pop-ups in Nuvio's player, team page and record rules; two independent reviews and their fixes; translations | 687 core + 263 data-layer host tests; CI debug green at 6afbea0 (run 37791659338), minified release green at dd888c0 (run 37795570642); device pending; new sport shapes checked only against synthetic data |
 
-Design notes and per-checkpoint reports are in this folder
-(`IPTV-*-DESIGN.md`, `IPTV-*-VALIDATION-*.json`). Review findings and their status:
-[IPTV-CODE-REVIEW-20261006.md](IPTV-CODE-REVIEW-20261006.md).
+Design notes are in this folder (`IPTV-*-DESIGN.md`).

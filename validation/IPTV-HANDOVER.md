@@ -9,8 +9,7 @@ compiled the whole app and assembled the APK; one unit test failed
 confirmed by CI. Minified release build with IPTV last green at `d8d4a03` (run
 37550880901), before wave 1. Start with "Current work plan"; older sections are history.
 Related: [progress](IPTV-PROGRESS.md), [sports design pass 2](IPTV-SPORTS-DESIGN-PASS-2.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
-[code review](IPTV-CODE-REVIEW-20261006.md), [reference app notes](IPTV-UX-REFERENCE.md),
-[player validation report](IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json).
+[device test checklist](IPTV-DEVICE-TEST-CHECKLIST.md).
 
 ## Start here — next session (from 9 October 2026)
 
@@ -30,8 +29,7 @@ on a device. The user cannot test on a device right now.
 
 Next, in order:
 1. Sports experience — second design pass DONE (8 October): 12-board canvas "Nuvio —
-   Sports experience, second pass" (https://claude.ai/artifact/NCce5k5kkBJa5aC5MbSiYt,
-   private to the user); reasoning, constraints and recommended order in
+   Sports experience, second pass" (shared privately with the user); reasoning, constraints and recommended order in
    [IPTV-SPORTS-DESIGN-PASS-2.md](IPTV-SPORTS-DESIGN-PASS-2.md). Waiting for the user to
    choose which ideas to build; nothing built yet.
    Decision (user, 8 October): build all four parts in the recommended order (1 guide and
@@ -77,7 +75,7 @@ Next, in order:
    basketball, ice hockey and baseball (NFL per pricing), basic fields). The first concept
    canvas (5 boards: hub, HUD, Game Centre, stats multiview, follow/alerts) is the user's
    artifact "Nuvio Live TV — Sports experience"
-   (https://claude.ai/artifact/UY781c11Pg7vBmTZoEtGfW, private to the user); build the new pass as a new or revised
+   (shared privately with the user); build the new pass as a new or revised
    canvas and present it with the reasoning. Mockups use real fixtures; mark live values
    as illustrative; no club logos in mockups.
 2. TheSportsDB premium: the user bought a key (do not store it anywhere; they will
@@ -705,8 +703,7 @@ Done since 1b7952c (nothing device-tested):
 
 ## Redesign work — 6 October 2026
 
-Following the reference app study ([IPTV-UX-REFERENCE.md](IPTV-UX-REFERENCE.md)),
-items 1–4 of its recommended order are implemented; none is device-tested.
+Items 1–4 of the redesign plan are implemented; none is device-tested.
 
 1. `IptvRefreshCoordinator` (app-wide singleton, one heavy refresh at a time, stage
    statuses, stale refresh on screen open: sources 12 h, guides 6 h, failed attempts
@@ -729,8 +726,6 @@ recovery, live retry backoff, HLS live speed), catch-up, search, sports, multivi
 
 - `suggestAccountGroups` distinguishes only Xtream and M3U; Stalker sources should
   group by portal host and MAC (as Xtream with the MAC as the user).
-- `IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json` source hashes predate later commits;
-  refresh them with the next recorded validation.
 - The workflow changes and `tools/iptv-host-tests` ship with the merge into `main`.
 
 ## Next steps (device fixtures; earlier plan)
@@ -776,8 +771,7 @@ showing the automatic Xtream guide in the feed list.
 
 ## Review fixes — 6 October 2026
 
-Branch iptv/player-binding. Full findings and per-item status:
-[IPTV-CODE-REVIEW-20261006.md](IPTV-CODE-REVIEW-20261006.md). Fixed in source:
+Branch iptv/player-binding. Fixed in source:
 
 - Capture/period: final frame kept for declared-length video PES (packet-fed
   extractor clears video PES lengths after hashing); atomic current-snapshot borrow
@@ -810,9 +804,7 @@ player, stager/codec, guide store and catalogue store fixtures.
 ## Player binding — 6 October 2026
 
 Branch iptv/player-binding, derived from iptv/wip 8b84c11. The last device-validated
-checkpoint remains b68985a. Details, hashes and limits:
-[IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json](IPTV-CAPTURE-PLAYER-VALIDATION-20261006.json);
-code review findings: [IPTV-CODE-REVIEW-20261006.md](IPTV-CODE-REVIEW-20261006.md).
+checkpoint remains b68985a.
 
 Probable cause of both AM9 player timeouts, from code inspection and a JVM reproduction
 (not yet confirmed on device): CaptureSampleBatchQueue (maxBatches 2) and

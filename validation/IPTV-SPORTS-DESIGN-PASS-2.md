@@ -1,9 +1,7 @@
 # Sports experience — second design pass (8 October 2026)
 
-Design canvas: "Nuvio — Sports experience, second pass"
-(https://claude.ai/artifact/NCce5k5kkBJa5aC5MbSiYt, private to the user). First pass:
-https://claude.ai/artifact/UY781c11Pg7vBmTZoEtGfW. Nothing here is built yet; the user
-chooses what to build.
+Design canvas: "Nuvio — Sports experience, second pass" (shared privately with the user).
+All four parts were approved and built on 8 October.
 
 Mockups use real fixtures, venues, rounds, records and team colours from the 8 October
 responses (`IPTV-SPORTS-DATA-FIELDS.md`); live scores, clocks, stats, plays, individual-sport
