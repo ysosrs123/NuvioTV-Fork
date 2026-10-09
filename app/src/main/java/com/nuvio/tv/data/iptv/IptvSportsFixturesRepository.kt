@@ -6,6 +6,7 @@ import com.nuvio.tv.core.iptv.FixtureListing
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.SportsCatchup
+import com.nuvio.tv.core.iptv.SportsDays
 import com.nuvio.tv.core.iptv.SportsDbLeague
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureMatching
@@ -27,15 +28,17 @@ data class IptvSportsFixtures(val enabled: Boolean, val fixtures: List<SportsFix
 data class IptvFixtureLink(val row: IptvListedChannel, val reason: FixtureLinkReason, val programme: GuideProgramme? = null, val broadcaster: String? = null)
 
 class IptvSportsFixturesRepository(private val preferences: IptvSportsPreferences, private val catalogue: IptvCatalogueStore, private val guides: IptvGuideStore,
-    client: IptvSportsFixturesClient, store: IptvSportsFixturesStore) {
+    client: IptvSportsFixturesClient, store: IptvSportsFixturesStore, private val guideDays: () -> Int? = { null }) {
     private val browse = IptvBrowseRepository(catalogue, guides)
     private val cache = IptvSportsFixturesCache(client, store)
 
-    suspend fun load(nowMillis: Long, zone: ZoneId, refresh: Boolean, favourites: Set<String> = emptySet(), followedOnly: Boolean = false): IptvSportsFixtures =
+    suspend fun load(nowMillis: Long, zone: ZoneId, refresh: Boolean, favourites: Set<String> = emptySet(), followedOnly: Boolean = false,
+        alsoLeagues: Set<String> = emptySet()): IptvSportsFixtures =
         withContext(Dispatchers.IO) {
             if (!preferences.enabled) return@withContext IptvSportsFixtures(false)
+            syncDays()
             val chosen = SportsLeagues.chosen(preferences.leagues)
-            val leagues = if (followedOnly) SportsPolling.followedLeagues(favourites).let { ids -> chosen.filter { it.id in ids } } else chosen
+            val leagues = if (followedOnly) (SportsPolling.followedLeagues(favourites) + alsoLeagues).let { ids -> chosen.filter { it.id in ids } } else chosen
             if (leagues.isEmpty()) return@withContext IptvSportsFixtures(true, noLeagues = true)
             val key = if (preferences.hasKey) preferences.key()?.takeIf { IptvSportsPreferences.validKey(it) } else null
             val usable = leagues.filter { SportsSources.available(it, key != null) }
@@ -51,6 +54,7 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
 
     suspend fun links(ref: IptvSourceRef, fixtures: List<SportsFixture>, nowMillis: Long, hiddenCategories: Set<String>): Map<String, List<IptvFixtureLink>> =
         withContext(Dispatchers.IO) {
+            syncDays()
             val upcoming = fixtures.filter { it.status != FixtureStatus.FINAL }.take(MAX_FIXTURES)
             val recent = SportsCatchup.recent(fixtures, nowMillis)
             val current = upcoming + recent
@@ -65,7 +69,7 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
                 currentCoroutineContext().ensureActive()
                 val start = slice * SportsGuideSlices.SLICE_MILLIS
                 val near = (slice - NEIGHBOUR_SLICES..slice + 1).flatMap { slices[it].orEmpty() }.distinctBy { it.key }
-                fun query(limit: Int) = guides.sportsMatches(ref.profileId, order, start, start + SportsGuideSlices.SLICE_MILLIS, limit)
+                fun query(limit: Int) = guides.sportsMatches(ref.profileId, order, start, start + SportsGuideSlices.SLICE_MILLIS, limit, SportsGuideSlices.LOOKBACK_MILLIS)
                 val found = query(PROGRAMMES_PER_SLICE).let { if (it.size >= PROGRAMMES_PER_SLICE / order.size) query(BUSY_PROGRAMMES_PER_SLICE) else it }
                 matched += found.filter { match -> near.any { SportsFixtureMatching.guideMatch(it, match.programme, nowMillis) != null } }
             }
@@ -88,6 +92,11 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
                 links.mapNotNull { link -> byId[link.channelId]?.let { IptvFixtureLink(it, link.reason, link.programme, link.broadcaster) } }
             }.filterValues { it.isNotEmpty() }
         }
+
+    private fun syncDays() {
+        try { guideDays()?.let(SportsDays::guideDays) }
+        catch (error: Exception) { IptvLog.failure("sports guide days", error) }
+    }
 
     private companion object {
         const val MAX_FIXTURES = 320

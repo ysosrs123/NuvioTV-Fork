@@ -4,6 +4,7 @@ data class SportsPendingRecord(val profileId: Int, val key: String, val startMil
 
 object SportsPendingRecords {
     const val MAX = 50
+    const val MAX_WATCHED = 12
 
     fun of(profileId: Int, fixture: SportsFixture): SportsPendingRecord =
         SportsPendingRecord(profileId, fixture.key, fixture.startMillis, fixture.startMillis + SportsRefresh.durationMillis(fixture))
@@ -28,6 +29,26 @@ object SportsPendingRecords {
     fun toggle(all: Collection<SportsPendingRecord>, profileId: Int, fixture: SportsFixture, nowMillis: Long): List<SportsPendingRecord> {
         val kept = all.filterNot { it.profileId == profileId && it.key == fixture.key }
         return prune(if (kept.size < all.size || !wanted(fixture, nowMillis)) kept else kept + of(profileId, fixture), nowMillis)
+    }
+
+    fun leagues(all: Collection<SportsPendingRecord>): Set<String> = all.map { it.key.substringBefore(':') }.filter { it.isNotEmpty() }.toSet()
+
+    fun update(all: Collection<SportsPendingRecord>, fixtures: Collection<SportsFixture>, nowMillis: Long): List<SportsPendingRecord> {
+        val known = fixtures.associateBy { it.key }
+        return prune(all.mapNotNull { record ->
+            val fixture = known[record.key] ?: return@mapNotNull record
+            if (fixture.status == FixtureStatus.FINAL) null else of(record.profileId, fixture)
+        }, nowMillis)
+    }
+
+    fun watched(all: Collection<SportsPendingRecord>, profileId: Int, fixtures: Collection<SportsFixture>, nowMillis: Long, max: Int = MAX_WATCHED): List<SportsFixture> =
+        ready(all, profileId, fixtures, { true }, nowMillis).take(max)
+
+    fun claim(all: Collection<SportsPendingRecord>, profileId: Int, fixtures: Collection<SportsFixture>): Pair<List<SportsPendingRecord>, List<SportsFixture>> {
+        val keys = all.filter { it.profileId == profileId }.map { it.key }.toSet()
+        val claimed = fixtures.filter { it.key in keys }.distinctBy { it.key }
+        val taken = claimed.map { it.key }.toSet()
+        return all.filterNot { it.profileId == profileId && it.key in taken } to claimed
     }
 
     fun ready(all: Collection<SportsPendingRecord>, profileId: Int, fixtures: Collection<SportsFixture>, linked: (SportsFixture) -> Boolean,

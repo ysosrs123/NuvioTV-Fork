@@ -64,7 +64,6 @@ import com.nuvio.tv.core.iptv.SportsDetail
 import com.nuvio.tv.core.iptv.SportsFavourites
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureSections
-import com.nuvio.tv.core.iptv.SportsPendingRecord
 import com.nuvio.tv.core.iptv.SportsPendingRecords
 import com.nuvio.tv.core.iptv.SportsRecordedWindow
 import com.nuvio.tv.core.iptv.SportsReminder
@@ -168,7 +167,6 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
     private var recordings = emptyList<IptvRecording>()
     private var spoilerKeys = emptySet<String>()
     private var recordedKeys = emptySet<String>()
-    private var pendingRecords = readPending()
     private var refreshedAt = 0L
     private val messageEvents = MutableSharedFlow<String>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val messages: SharedFlow<String> = messageEvents.asSharedFlow()
@@ -177,6 +175,7 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
         viewModelScope.launch { live.snapshot.collect { snapshot -> if (snapshot != null && snapshot.mode == IptvSportsMode.LIVE_TV && handle != null) accept(snapshot) } }
         viewModelScope.launch { live.reminders.collect { keys -> mutable.update { it.copy(reminders = keys) } } }
         viewModelScope.launch { recorder.all.collect { all -> recordings = all; val spoiled = spoilers(); if (booked() || spoiled) publish() } }
+        viewModelScope.launch { nuvio.pending.collect { publish() } }
         viewModelScope.launch {
             refreshes.status.collect { all ->
                 val done = all.values.filter { it.phase == IptvRefreshPhase.DONE }.maxOfOrNull { it.finishedAtMillis ?: 0L } ?: 0L
@@ -306,10 +305,9 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
     fun togglePending(fixture: SportsFixture) {
         val profile = opened?.first?.profileId ?: return
         val now = System.currentTimeMillis()
-        val was = pendingRecords.any { it.profileId == profile && it.key == fixture.key }
-        savePending(SportsPendingRecords.toggle(pendingRecords, profile, fixture, now))
-        publish()
-        val added = !was && pendingRecords.any { it.profileId == profile && it.key == fixture.key }
+        val was = nuvio.pending.value.any { it.profileId == profile && it.key == fixture.key }
+        val next = nuvio.changePending { SportsPendingRecords.toggle(it, profile, fixture, now) }
+        val added = !was && next.any { it.profileId == profile && it.key == fixture.key }
         if (was || added) messageEvents.tryEmit(context.getString(if (added) R.string.iptv_sport9_pending_added else R.string.iptv_sport9_pending_removed,
             nuvio.plainTitle(fixture)))
         if (added) recordPending()
@@ -318,9 +316,9 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
     private fun recordPending() {
         val profile = opened?.first?.profileId ?: return
         val now = System.currentTimeMillis()
-        val ready = SportsPendingRecords.ready(pendingRecords, profile, loaded?.fixtures.orEmpty(), { linked[it.id].orEmpty().isNotEmpty() }, now)
-        val kept = SportsPendingRecords.prune(pendingRecords.filterNot { record -> record.profileId == profile && ready.any { it.key == record.key } }, now)
-        if (kept != pendingRecords) { savePending(kept); publish() }
+        val known = loaded?.fixtures.orEmpty()
+        val all = nuvio.changePending { SportsPendingRecords.update(it, known, now) }
+        val ready = nuvio.claimPending(profile, SportsPendingRecords.ready(all, profile, known, { linked[it.id].orEmpty().isNotEmpty() }, now))
         if (ready.isEmpty()) return
         viewModelScope.launch { ready.forEach { fixture -> linked[fixture.id]?.firstOrNull()?.let { messageEvents.emit(nuvio.record(fixture, it)) } } }
     }
@@ -333,17 +331,7 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
         return true
     }
 
-    private fun readPending(): List<SportsPendingRecord> = try {
-        SportsPendingRecords.prune(livePreferences.preferences.getStringSet(PENDING_KEY, null).orEmpty().take(SportsPendingRecords.MAX * 2)
-            .mapNotNull(SportsPendingRecords::decode), System.currentTimeMillis())
-    } catch (error: Exception) { IptvLog.failure("sports pending read", error); emptyList() }
-
-    private fun savePending(next: List<SportsPendingRecord>) {
-        pendingRecords = next
-        livePreferences.preferences.edit().putStringSet(PENDING_KEY, next.map(SportsPendingRecords::encode).toSet()).apply()
-    }
-
-    private fun pendingKeys(): Set<String> = opened?.first?.profileId?.let { profile -> pendingRecords.filter { it.profileId == profile }.map { it.key }.toSet() }.orEmpty()
+    private fun pendingKeys(): Set<String> = opened?.first?.profileId?.let { profile -> nuvio.pending.value.filter { it.profileId == profile }.map { it.key }.toSet() }.orEmpty()
 
     private fun publish(showScores: Boolean = mutable.value.showScores, favourites: Set<String> = mutable.value.favourites) {
         val result = loaded ?: return
@@ -366,7 +354,6 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
     companion object {
         const val FEATURED = "\u0000featured"
         private const val RELINK_MILLIS = 5L * 60 * 1000
-        private const val PENDING_KEY = "sports-pending-records"
     }
 }
 

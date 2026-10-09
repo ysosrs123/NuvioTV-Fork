@@ -333,6 +333,16 @@ class IptvGuideStoreTest {
         assertTrue(store.sportsMatches(1, listOf(ref.feedId), start + 7 * 3_600_000, start + 8 * 3_600_000).isEmpty())
         assertTrue(store.sportsMatches(2, emptyList(), now, now).isEmpty())
     }
+    @Test fun sportsMatchesCanSkipProgrammesThatStartedLongBefore() {
+        val ref = feed()
+        val rows = programme("Premier League: Leeds v Hull", "20261005000000 +0000", "20261005080000 +0000") +
+            programme("AFL: Carlton v Geelong", "20261005030000 +0000", "20261005060000 +0000")
+        assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(rows)))
+        val slice = start + 4 * 3_600_000
+        assertEquals(2, store.sportsMatches(1, listOf(ref.feedId), slice, slice + 3_600_000).size)
+        assertEquals(listOf("AFL: Carlton v Geelong"), store.sportsMatches(1, listOf(ref.feedId), slice, slice + 3_600_000, lookbackMillis = 3 * 3_600_000L)
+            .map { it.programme.titles.first().text })
+    }
     @Test fun publishingReplacesTheOldStageWithoutLeftovers() {
         val ref = feed()
         repeat(3) { round -> assertEquals(RefreshDecision.PUBLISH, publish(ref, xml((1..3).joinToString("") { slot -> programme("Round $round $slot", "2026100500${slot}000 +0000", "2026100500${slot}500 +0000") }))) }

@@ -73,4 +73,19 @@ class IptvSportsFixturesCacheTest {
         assertFalse(result.failed)
         assertEquals(0, server.requestCount)
     }
+
+    @Test fun farDaysWaitLongerBeforeTheyAreRequestedAgain() = try {
+        SportsDays.guideDays(7)
+        withCache(now - 60 * 60 * 1000) { cache, server, release ->
+            release.countDown()
+            cache.load(listOf(afl), null, now, zone, refresh = true)
+            assertEquals(9, keys().size)
+            assertEquals(5, server.requestCount)
+        }
+        withCache(now - 3 * 60 * 60 * 1000) { cache, server, release ->
+            release.countDown()
+            cache.load(listOf(afl), null, now, zone, refresh = true)
+            assertEquals(9, server.requestCount)
+        }
+    } finally { SportsDays.guideDays(SportsDays.DEFAULT_DAYS - 1) }
 }

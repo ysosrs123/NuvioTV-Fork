@@ -400,6 +400,11 @@ After the device pass of 9 October:
 - New Sport setting "Find channels using": Guide titles, Broadcaster lists (ESPN and
   TheSportsDB channel names) or Both (default). Guide matches come first; each channel
   says "In your guide" or "Broadcaster". Better for viewers outside the US.
+- Sport fixtures beyond three days ahead refresh every 3 hours instead of every 30 minutes;
+  the Guide days setting applies in the background too; "Record when a channel is found"
+  is checked every minute while Nuvio is open (not only in Live TV) and follows kick-off
+  changes; guide matching ignores programmes that started over 3 hours earlier, so busy
+  hours are not crowded out.
 - Match cards: Record (with the usual start/end padding) or Cancel recording; when no
   channel is known yet, "Record when a channel is found" (also offered in the "No channel
   found" dialog).

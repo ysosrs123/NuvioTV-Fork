@@ -200,15 +200,17 @@ class IptvGuideStore(
         found
     }
 
-    fun sportsMatches(profileId: Int, feedIds: List<String>, nowMillis: Long, untilMillis: Long, limit: Int = 400): List<IptvAiringMatch> = transaction { db ->
-        require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && limit in 1..5000 && untilMillis >= nowMillis)
+    fun sportsMatches(profileId: Int, feedIds: List<String>, nowMillis: Long, untilMillis: Long, limit: Int = 400,
+        lookbackMillis: Long = GUIDE_AIRING_LOOKBACK_MILLIS): List<IptvAiringMatch> = transaction { db ->
+        require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && limit in 1..5000 && untilMillis >= nowMillis &&
+            lookbackMillis in 0..GUIDE_AIRING_LOOKBACK_MILLIS)
         feedIds.forEach { IptvGuideRef(profileId, it) }
         val found = mutableListOf<IptvAiringMatch>()
         for ((index, feed) in feedIds.withIndex()) {
             val share = (limit - found.size) / (feedIds.size - index)
             if (share <= 0) break
             db.rawQuery("SELECT c.external_id,c.payload,p.payload FROM feeds f CROSS JOIN programmes p CROSS JOIN channels c WHERE f.id=? AND f.profile=? AND f.version=f.active_version AND p.stage=f.active_stage AND p.sport=1 AND p.start<=? AND p.start>? AND (p.stop>? OR (p.stop IS NULL AND p.start>?)) AND c.stage=p.stage AND c.external_id=p.external_id ORDER BY p.start,p.id LIMIT ?",
-                arrayOf(feed, profileId.toString(), untilMillis.toString(), (nowMillis - GUIDE_AIRING_LOOKBACK_MILLIS).toString(), nowMillis.toString(),
+                arrayOf(feed, profileId.toString(), untilMillis.toString(), (nowMillis - lookbackMillis).toString(), nowMillis.toString(),
                     (nowMillis - SPORTS_OPEN_ENDED_MILLIS).toString(), share.toString())).use { c ->
                 while (c.moveToNext()) {
                     val id = c.getString(0)

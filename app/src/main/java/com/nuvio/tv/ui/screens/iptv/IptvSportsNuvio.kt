@@ -64,6 +64,8 @@ import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureText
 import com.nuvio.tv.core.iptv.SportsNuvioAlert
 import com.nuvio.tv.core.iptv.SportsOverlayText
+import com.nuvio.tv.core.iptv.SportsPendingRecord
+import com.nuvio.tv.core.iptv.SportsPendingRecords
 import com.nuvio.tv.core.iptv.SportsRecordRules
 import com.nuvio.tv.core.iptv.SportsRecordTarget
 import com.nuvio.tv.core.iptv.SportsRecordedWindow
@@ -149,6 +151,8 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
     private val checking = Mutex()
     private val ruleKeys = MutableStateFlow(readRules())
     val rules: StateFlow<Set<String>> = ruleKeys.asStateFlow()
+    private val pendingList = MutableStateFlow(readPending())
+    val pending: StateFlow<List<SportsPendingRecord>> = pendingList.asStateFlow()
     private val fixtureList = MutableStateFlow<List<SportsFixture>>(emptyList())
     val fixtures: StateFlow<List<SportsFixture>> = fixtureList.asStateFlow()
     private val linkMap = MutableStateFlow<Map<String, List<IptvFixtureLink>>>(emptyMap())
@@ -260,6 +264,22 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
         if (on && key !in preferences.favouriteTeams) follow(key, true) else refresh()
     }
 
+    fun changePending(change: (List<SportsPendingRecord>) -> List<SportsPendingRecord>): List<SportsPendingRecord> = synchronized(pendingList) {
+        val next = change(pendingList.value)
+        if (next != pendingList.value) {
+            pendingList.value = next
+            store.edit().putStringSet(PENDING_KEY, next.map(SportsPendingRecords::encode).toSet()).apply()
+        }
+        next
+    }
+
+    fun claimPending(profileId: Int, fixtures: List<SportsFixture>): List<SportsFixture> {
+        if (fixtures.isEmpty()) return emptyList()
+        var claimed = emptyList<SportsFixture>()
+        changePending { all -> SportsPendingRecords.claim(all, profileId, fixtures).let { (kept, taken) -> claimed = taken; kept } }
+        return claimed
+    }
+
     fun recording(fixture: SportsFixture?, team: String): IptvTeamRecording {
         val profile = profiles.activeProfileId.value
         val entry = fixture?.let { item -> recorder.all.value.firstOrNull { it.profileId == profile && it.fixtureKey == item.key && !it.status.finished } }
@@ -348,22 +368,27 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
         try {
             if (!preferences.enabled) { fixtureList.value = emptyList(); linkMap.value = emptyMap(); return@withLock }
             val favourites = preferences.favouriteTeams
-            if (favourites.isEmpty()) return@withLock
             val now = System.currentTimeMillis()
+            val profile = profiles.activeProfileId.value
+            val waiting = SportsPendingRecords.prune(pendingList.value, now).filter { it.profileId == profile }
+            if (favourites.isEmpty() && waiting.isEmpty()) return@withLock
             if (force || now - loadedAt >= LOAD_MILLIS || now < loadedAt) {
-                val result = repository.load(now, ZoneId.systemDefault(), true, favourites, followedOnly = true)
+                val result = repository.load(now, ZoneId.systemDefault(), true, favourites, followedOnly = true, alsoLeagues = SportsPendingRecords.leagues(waiting))
                 loadedAt = now
                 if (result.enabled) merge(result.fixtures)
             }
             val followed = fixtureList.value.filter { SportsFavourites.has(favourites, it) && it.status != FixtureStatus.FINAL &&
                 it.startMillis + SportsRefresh.durationMillis(it) > now }
-            val profile = profiles.activeProfileId.value
-            val keys = followed.map { it.key }.toSet()
+            val known = fixtureList.value
+            val awaited = SportsPendingRecords.watched(changePending { SportsPendingRecords.update(it, known, now) }, profile, known, now)
+            val wanted = (followed + awaited).distinctBy { it.key }
+            val keys = wanted.map { it.key }.toSet()
             if (force || keys != linkedFor || now - linkedAt >= LINK_MILLIS || now < linkedAt) {
-                linkMap.value = link(sources(profile), followed, now)
+                linkMap.value = link(sources(profile), wanted, now)
                 linkedFor = keys; linkedAt = now
             }
             applyRules(followed, favourites, profile, now)
+            applyPending(awaited, profile)
         } catch (cancel: CancellationException) { throw cancel }
         catch (error: Exception) { IptvLog.failure("sports nuvio", error) }
     }
@@ -388,6 +413,16 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
         }
     }
 
+    private suspend fun applyPending(awaited: List<SportsFixture>, profile: Int) {
+        val links = linkMap.value
+        val booked = recorder.all.value.filter { it.profileId == profile && !it.status.finished }.mapNotNull { it.fixtureKey }.toSet()
+        for (fixture in claimPending(profile, awaited.filter { it.key in booked || !links[it.key].isNullOrEmpty() })) {
+            if (fixture.key in booked) continue
+            val link = links[fixture.key]?.firstOrNull() ?: continue
+            noticeEvents.emit(record(fixture, link))
+        }
+    }
+
     private suspend fun schedule(fixture: SportsFixture, link: IptvFixtureLink): IptvRecordResult? {
         val now = System.currentTimeMillis()
         val target = target(link)
@@ -406,8 +441,14 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
     private fun readRules(): Set<String> = store.getStringSet(RULES_KEY, null).orEmpty().filter { SportsFavourites.parse(it) != null && it.length <= 200 }
         .take(SportsRecordRules.MAX_RULES).toSet()
 
+    private fun readPending(): List<SportsPendingRecord> = try {
+        SportsPendingRecords.prune(store.getStringSet(PENDING_KEY, null).orEmpty().take(SportsPendingRecords.MAX * 2)
+            .mapNotNull(SportsPendingRecords::decode), System.currentTimeMillis())
+    } catch (error: Exception) { IptvLog.failure("sports pending read", error); emptyList() }
+
     private companion object {
         const val RULES_KEY = "settings-sports-record-teams"
+        const val PENDING_KEY = "sports-pending-records"
         const val CHECK_MILLIS = 60_000L
         const val LOAD_MILLIS = 5L * 60 * 1000
         const val LINK_MILLIS = 10L * 60 * 1000

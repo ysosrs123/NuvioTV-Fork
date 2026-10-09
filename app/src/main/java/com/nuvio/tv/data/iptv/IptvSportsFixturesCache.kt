@@ -90,7 +90,10 @@ class IptvSportsFixturesCache(private val client: IptvSportsFixturesClient, priv
         return if (entry.failedAt == nowMillis) null else entry.fixtures
     }
 
-    private fun due(item: Wanted, favourites: Set<String>, nowMillis: Long): Boolean = SportsPolling.due(synchronized(memory) { memory[item.key] }, favourites, nowMillis)
+    private fun due(item: Wanted, favourites: Set<String>, nowMillis: Long): Boolean {
+        val entry = synchronized(memory) { memory[item.key] }
+        return SportsPolling.due(entry, favourites, nowMillis) && SportsDays.due(item.date, SportsDays.zone(item.service), entry, nowMillis)
+    }
 
     private suspend fun fetch(items: List<Wanted>, key: String?, nowMillis: Long): List<Pair<Wanted, SportsCacheEntry>> {
         if (items.isEmpty()) return emptyList()

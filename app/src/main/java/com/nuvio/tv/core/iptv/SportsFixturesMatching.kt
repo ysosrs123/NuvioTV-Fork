@@ -14,6 +14,7 @@ object SportsGuideSlices {
     const val SLICE_MILLIS = 60L * 60 * 1000
     const val MAX_SLICES = 24 * SportsDays.MAX_DAYS
     const val MAX_RECENT_SLICES = 8
+    const val LOOKBACK_MILLIS = 3L * 60 * 60 * 1000
 
     fun plan(upcoming: List<SportsFixture>, recent: List<SportsFixture>, nowMillis: Long, maxSlices: Int = MAX_SLICES,
         maxRecent: Int = MAX_RECENT_SLICES): Map<Long, List<SportsFixture>> {
