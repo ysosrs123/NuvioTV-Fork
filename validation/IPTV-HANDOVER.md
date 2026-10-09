@@ -1,110 +1,94 @@
 # Nuvio IPTV — handover
 
-Branch: `iptv/player-binding` (includes `main` as of 6 October 2026).
-Last device-validated commit: `b68985a`. Everything after it is host-tested and CI-built,
-not device-tested. Last fully green debug build: `ada280b` (run 37767996467: both 8 October device passes fixed); translations finished in `ecf29d4`; before that `24d6868` (run 37752927770); before that `f29cbe2` (run 37599069380); minified release
-build green at `ec6f16f` (run 37596443549). Before that: `d263b18` (run 37580266979, wave 1). Run 37589504762 at `d0d0dbb` (everything up to streaming stability)
-compiled the whole app and assembled the APK; one unit test failed
-(`IptvWebDavShareTest` self-signed certificate case), fixed in `2bef868` and not yet
-confirmed by CI. Minified release build with IPTV last green at `d8d4a03` (run
-37550880901), before wave 1. Start with "Current work plan"; older sections are history.
-Related: [progress](IPTV-PROGRESS.md), [sports design pass 2](IPTV-SPORTS-DESIGN-PASS-2.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
-[device test checklist](IPTV-DEVICE-TEST-CHECKLIST.md).
+Branch: `iptv/player-binding` (includes `main` as of 6 October 2026). Only this branch is
+worked on; `iptv/wip` and `nuvio-test` were tidied on 9 October with the user's permission.
+Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-DRAFT.md),
+[device test checklist](IPTV-DEVICE-TEST-CHECKLIST.md), [sports design pass 2](IPTV-SPORTS-DESIGN-PASS-2.md),
+[sports data fields](IPTV-SPORTS-DATA-FIELDS.md), [sports data scripts](IPTV-SPORTS-DATA-SCRIPTS.md).
+Older sections further down are history; read "Start here" first.
 
-## Start here — next session (from 9 October 2026)
+## Start here — next session (from 9 October 2026, evening)
 
-Next device pass: build `8354d89` (run 37867719176), checklist section 7b. Previous pass (9 October): build `374e1f6`, CI run 37845595141 (sports build
-with real-data parser fixes, before the combined ESPN/TheSportsDB sources). Record findings
-against that build. Newer: `d3a0288` (run 37853846775, green) adds the combined ESPN and
-TheSportsDB sources and their translations.
-
-State: everything is committed and pushed on `iptv/player-binding`. Last green debug build
-`6afbea0` (run 37791659338), minified release `dd888c0` (run 37795570642); before the sports build
-`ada280b` (run 37767996467); later commits are translations (`ecf29d4`) and docs only.
-Minified release last green at `ec6f16f` (run 37596443549). Host tests: core 626,
-data 256, androidTest compiles. Nothing after `b68985a` is device-tested except the
-user's two passes on 8 October (builds `f29cbe2` and `24d6868`); every item they raised
-is fixed in code (see the two "Device findings — 8 October" sections) but not rechecked
-on a device. The user cannot test on a device right now.
+State (end of the 8–9 October session):
+- Everything is committed and pushed. Latest green CI: debug `8354d89` (run 37867719176),
+  which contains every fix up to the 9 October device findings plus widgets, sport
+  follow-ups and translations; later commits are docs only. Minified release (R8) last green
+  at `dd888c0` (run 37795570642) — run a release build again before shipping.
+- Host tests: core 748, data 276, androidTest compiles
+  (`python3 tools/iptv-host-tests/run.py`).
+- Device testing: user passes on 8 October (`f29cbe2`, `24d6868`), 9 October (`374e1f6`,
+  findings below, all fixed in code) and a NEW pass on `8354d89` whose findings the user
+  will give at the start of the next session. Record them as "Device findings — <date>
+  (build `8354d89`)" above the 9 October section, then fix.
 
 Next, in order:
-1. Sports experience — second design pass DONE (8 October): 12-board canvas "Nuvio —
-   Sports experience, second pass" (shared privately with the user); reasoning, constraints and recommended order in
-   [IPTV-SPORTS-DESIGN-PASS-2.md](IPTV-SPORTS-DESIGN-PASS-2.md). Waiting for the user to
-   choose which ideas to build; nothing built yet.
-   Decision (user, 8 October): build all four parts in the recommended order (1 guide and
-   overlays, 2 Game Centre and markers, 3 new sport formats, 4 across Nuvio); default
-   overlay Glance; background checks while watching films allowed for followed teams'
-   live games only.
-   BUILT (8 October; debug green at `6afbea0` run 37791659338, minified release green at
-   `dd888c0` run 37795570642; not device-tested): all four
-   parts. New files: core/iptv SportsLive, SportsDetail, SportsSummary, SportsGuideCells,
-   SportsOverlayText, SportsRecordRules; data/iptv IptvSportsLive (app-wide polling,
-   alerts, reminders), IptvSportsSummaryClient; ui/screens/iptv IptvSportsOverlay,
-   IptvGameCentre, IptvSportFeeds, IptvSportTimeline, IptvAllScores, IptvSportsGuide,
-   IptvSportsNuvio (app-wide host, pop-up in Nuvio's player), IptvTeamScreen. Hooks:
-   MainActivity (IptvSportsNuvioHost), NuvioNavHost (team route), PlayerScreen
-   (IptvSportsPlayerAlerts). New sport shapes (tennis, golf, F1/NASCAR, UFC, cricket,
-   baseball) and the summary parser are tested only with synthetic JSON built from the
-   documented shapes: run the ESPN capture script during live games and replace the
-   synthetic fixtures. The SportsFixture per-sport field is `sportDetail` (`detail` is the
-   status text). Parsers checked against a real ESPN capture (8 October evening, no game in
-   play; 12 mismatches fixed in `374e1f6`, CI green run 37845595141); live-only fields
-   still unverified until the weekend capture. Pending user decisions: combine ESPN and
-   TheSportsDB per league instead of a source choice (APPROVED 9 October: per-league source,
-   fallback, combined settings, league search, TV channels from lookuptv; built 9 October:
-   core/iptv SportsSources, SportsDbExtras; data/iptv IptvSportsDbExtras; fixtures carry
-   `source`; TheSportsDB fixture keys `league:sdb-id`; TheSportsDB v2 livescore, lookuptv
-   and league list parsed from documented shapes only), attribution line
-   and a monogram/logo setting (TheSportsDB terms of 17 September 2026 require crediting
-   the data source and forbid public use of artwork without a confirmed licence). Known gaps: football red cards, NRL last try, basketball run and ice
-   hockey power play show only via the summary (Game Centre), not in the scoreboard bug;
-   "same channel on another source" is not detected for Other feeds; catch-up of a
-   finished game has no fixture link; record-every-game rules run only while the app is
-   in the foreground. Original brief, for reference:
-   second, more thorough and creative design pass (user request).
-   Mock up how sports fit across IPTV and Nuvio itself: the Sport section, the EPG (live
-   scores and sport badges in guide cells, a "games now" lane), the player UI (Game
-   Centre panel, scoring-play markers on the timeline, alternative feeds), score HUD
-   overlays (bug, stacked cards, ticker; per-sport formats for golf, tennis, F1, UFC,
-   cricket, baseball bases/outs), multiview (stream + stats screen, "all scores" screen),
-   and Nuvio-wide features (goal/score pop-up while watching anything in Nuvio, Home rows,
-   follow teams, reminders, spoiler-free mode, auto-record). Use real field availability
-   from `IPTV-SPORTS-DATA-FIELDS.md` (ESPN: rich live detail for ~350 leagues in 17
-   sports; TheSportsDB premium: 37 sports / 1,547 leagues, live scores only for soccer,
-   basketball, ice hockey and baseball (NFL per pricing), basic fields). The first concept
-   canvas (5 boards: hub, HUD, Game Centre, stats multiview, follow/alerts) is the user's
-   artifact "Nuvio Live TV — Sports experience"
-   (shared privately with the user); build the new pass as a new or revised
-   canvas and present it with the reasoning. Mockups use real fixtures; mark live values
-   as illustrative; no club logos in mockups.
-2. TheSportsDB premium: the user bought a key (do not store it anywhere; they will
-   rotate it). Its licence for use in a public app is unverified (site blocked from the
-   build environment). Recommendation given: do not embed a key in the app (extractable,
-   100 requests/min shared by all users); run a small caching relay (e.g. a free
-   Cloudflare Worker) that polls livescores every 2 min and serves all users, after
-   confirming the licence with TheSportsDB (Small Business tier). Awaiting the user.
-3. When the user tests again: build from the latest green run; checklist in
-   `IPTV-DEVICE-TEST-CHECKLIST.md` plus the two 8 October finding lists. Useful log
-   lines: `live close ms=`, `live close unconfirmed reason=`, tune timings
-   (`prepare/close/play/total ms`, `bytes/ready/frame ms`), `guide import ... budget=`.
-4. After a clean device pass: ship as part of the full app (enable
-   `FEATURE_IPTV_ENABLED` in `full`; move `src/iptvPrototype/AndroidManifest.xml`
-   additions such as `WAKE_LOCK`, the recording service and receivers into main); minified
-   release build and an upgrade-from-existing-install check (guide schema 6, VOD schema 2,
-   catalogue schema 9).
-5. Independent review of `d263b18..HEAD` (three areas: storage and setup server; playback,
-   streaming and navigation; VOD, sport and Home) — started once, stopped by a usage
-   limit, never completed.
-6. Sports follow-ups: a capture while team games are live (scripts in
-   `IPTV-SPORTS-DATA-SCRIPTS.md`); golf/tennis/F1/UFC/cricket formats; TheSportsDB TV
-   channels via `lookuptv`; URC rugby standings under `children`.
-7. Merge into `main` (decided by the user, 9 October 2026; replaces the earlier "no squash
-   merge" note): SQUASH-merge `iptv/player-binding` into `main`, so `main` gets one commit
-   with the final, clean files and none of the branch history. Afterwards the user retires
-   `iptv/player-binding`, `iptv/wip` and `nuvio-test` (branch deletion is the user's action),
-   so the old commits that held removed notes stop being reachable. Do not rewrite history
-   on any branch. A separate agent does the merge.
+1. Take the user's findings from the `8354d89` pass; record them here and in the release
+   notes as fixed; fix them with parallel helpers (see "How work was done"); CI; give the
+   user the run link and update the checklist.
+2. Waiting on the user (do not do these without them):
+   - QR sign-in in CI builds: the fork needs the repository secret `LOCAL_PROPERTIES_BASE64`
+     (base64 of a local.properties with NUVIO_SUPABASE_URL, NUVIO_SUPABASE_ANON_KEY and the
+     other keys: TMDB, Trakt, …). Without it CI APKs have no Nuvio sign-in, TMDB or Trakt.
+   - Weekend ESPN capture during live play (`IPTV-SPORTS-DATA-SCRIPTS.md`); then check the
+     live-only fields (clocks, NFL situation, MLB count/bases, tennis serve, golf mid-round,
+     F1 results, UFC rounds) and replace synthetic fixtures with trimmed real ones (as done
+     for the 8 October evening capture in `374e1f6`).
+   - TheSportsDB relay: not decided. Terms (17 Sept 2026, pasted by the user) allow paid
+     use in apps and services within the rate limit, require crediting the data source,
+     forbid public use of artwork without a confirmed licence and reselling. Recommendation:
+     no key in the app; a small caching relay is permitted; optional email to TheSportsDB
+     to confirm. Today each viewer can enter their own key (sealed on the device).
+   - HTTP/3: the user is doing it separately in a local session on a `feature/http3` branch
+     (Cronet), not on this branch. The stats HUD only shows whether a server advertises h3.
+3. After a clean device pass: ship in the full app — enable `FEATURE_IPTV_ENABLED` in
+   `full`; move `src/iptvPrototype/AndroidManifest.xml` additions (WAKE_LOCK, recording
+   service, receivers) into main; minified release build; upgrade-from-existing-install
+   check (guide schema 6, VOD schema 2, catalogue schema 9, recordings JSON with
+   `playedAtMillis`/`fixtureKey`, sports cache with `sportDetail`/`source`/`events`).
+4. Merge (user decision, 9 October): SQUASH-merge `iptv/player-binding` into `main` so
+   `main` gets one commit with the final, clean files; afterwards the user retires
+   `iptv/player-binding`, `iptv/wip` and `nuvio-test` (the user deletes branches). Never
+   rewrite history. A separate agent does the merge.
+
+Known gaps and things to verify on a device (latest):
+- Channel switching (`43a1d62`): close starts on OK, late responses are closed, 8 s wait
+  with loading shown, repeat OK opens full screen. The decoder is still released and
+  recreated per switch (player reuse not done). OkHttp cancel behaviour was checked on the
+  host against 5.x; the app ships 4.12. Log lines: `live close started`, `live close ms=…
+  dns= connect= connected= cut=`, `live close unconfirmed reason=`, `tune repeat ignored`.
+- Back/Left (`495a527`): full screen → guide → Live TV menu → "Leave Live TV?"; full-screen
+  Left twice = categories; Left on Sources = guide; Left on Movies/Series = Live TV menu.
+- Widgets (`930df01`, `8354d89`): Up from the guide reaches them via default focus search
+  (unverified); text fit on 140–240 dp tiles estimated; city names in code (English).
+- Opaque panels: Live TV settings dialogs now get the 0.9 floor; `NuvioDialog` classic
+  branch uses `maxOf(0.85, LocalGlassBodyFloor)` (only changes dialogs inside Live TV).
+- IPTV movies/series (`044f6ad`): Nuvio's detail page only when an installed addon returns
+  metadata within 8 s; otherwise the IPTV title page (`core/iptv/VodDetailRoute.kt`).
+- Sport: combined sources (`64ae717`) — per-league ESPN else TheSportsDB with the user's key,
+  fallback after repeated ESPN failures, v2 livescore, lookuptv for followed teams, league
+  search, Team logos (ESPN only by default), credit line. "Find channels using" (guide /
+  broadcasters / both), matching across Guide days + 1 (max 8), Record and "Record when a
+  channel is found" on match cards, pending rules checked app-wide every minute while
+  Nuvio is open (`ea3fc4e`, `befcd5f`). Favourites match loosely across name variants.
+  TheSportsDB v2 livescore, lookuptv and league-list shapes are from documentation only.
+- Stat labels added in `SportsSummary` (e.g. "Run metres") are English in core; NHL/MLB
+  pre-game team stats are season totals shown like match stats.
+- Recording names (`ea3fc4e`): `RecordingText.plain/display` maps decorative letters to
+  ASCII and drops symbols; stored names are cleaned on load too.
+
+Sports build summary (8 October; details in the release notes and design pass 2):
+all four parts are built — shared live service and settings (`core/iptv/SportsLive.kt`,
+`data/iptv/IptvSportsLive.kt`), game summaries (`SportsSummary.kt`,
+`IptvSportsSummaryClient.kt`), per-sport detail (`SportsDetail.kt`, field
+`SportsFixture.sportDetail`; `detail` is the status text), guide cells and Games now lane
+(`SportsGuideCells.kt`, `IptvSportsGuide.kt`), overlays (`IptvSportsOverlay.kt`), Game Centre,
+feeds, markers, multiview data tiles (`IptvGameCentre.kt`, `IptvSportFeeds.kt`), Sport section
+(`IptvSportCards.kt`, `IptvSportHero.kt`, `IptvSportTimeline.kt`, `IptvAllScores.kt`), Nuvio-wide
+(`IptvSportsNuvio.kt` hooked in MainActivity and PlayerScreen, `IptvHomeRows.kt`,
+`IptvTeamScreen.kt` route in NuvioNavHost, `SportsRecordRules.kt`), combined sources
+(`SportsSources.kt`, `SportsDbExtras.kt`, `IptvSportsDbExtras.kt`), widgets (`LiveWidgets.kt`,
+`IptvWidgets.kt`). Two independent reviews of the sports code were done and every finding
+fixed (`f36382e`); the earlier review of `d263b18..HEAD` is done too (`29b217a`).
 
 Caveats and behaviour changes to verify (from the helpers' reports, 8 October):
 - Guide: over-budget guides drop the last-parsed (whole) channels (`budget=` in the log);
@@ -149,6 +133,27 @@ How work was done (keep doing it this way):
   classes).
 - After each device pass: record findings and status in this file and the release notes,
   then build.
+- Helper brief essentials (give every helper): read the handover's rules and code map and
+  the relevant sports docs; edit only owned files and report needed changes elsewhere; no
+  commits or state-changing git (the coordinator commits); match the surrounding style (dense
+  Kotlin, no explanatory comments or KDoc); no mention of automated tools anywhere;
+  Australian English; strings only in the named new values file with apostrophes escaped;
+  check all callers in every source set; pure logic in core/iptv with JVM tests; host tests
+  with a private copy of build/iptv-host-tests (`IPTV_HOST_WORK=/tmp/hw-<name>`); Compose and
+  Hilt compile only in CI, so read component sources instead of guessing parameters; network
+  to ESPN/TheSportsDB is blocked from the cloud environment, so use documented shapes and
+  synthetic fixtures named `*-synthetic.json` (real ones `*-real-<date>.json`); never write
+  the user's TheSportsDB key anywhere; final report under 300 words with files, tests,
+  unverified points and changes needed in files the helper does not own.
+- Coordinator checks before each commit: run host tests on the full tree, or on the last
+  commit plus only the finished helper's files in a temporary worktree when others are
+  still working; update the release notes in the same commit as any behaviour change;
+  translate new strings; run the `PR Full Debug Build` workflow (variant iptvPrototype) and
+  record green runs in the release notes "Validation" and here.
+- Plural strings are referenced as `R.plurals.*`: when looking for unused strings, search
+  `R.string.` and `R.plurals.` (a clean-up that missed plurals broke the build once).
+- Kotlin: a `var x by …; private set` property clashes with a function named `setX` (JVM
+  signature clash); name such functions differently.
 
 ## Status
 

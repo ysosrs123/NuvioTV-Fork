@@ -4,6 +4,8 @@ Unreleased. Branch `iptv/player-binding` (includes `main` as of 6 October 2026,
 1.1.0-beta-nt4.2 / build 1461). IPTV is enabled only in the `iptvPrototype`
 flavour (package `com.nuvio.iptv.prototype`, shown as "Nuvio IPTV Prototype", installs
 alongside the normal app); the `full` flavour hides it. Nothing published.
+Decided: IPTV will ship as part of the full app after a clean device pass, merged into
+`main` as a single squash commit.
 
 ## Live TV
 
@@ -612,7 +614,9 @@ Phone setup (security review)
 
 ## Known limitations
 
-- Nothing after `b68985a` has been tested on a device. Device limits for multiview
+- Device testing so far: the user's passes on 8 October (builds `f29cbe2`, `24d6868`), 9 October
+  (`374e1f6`) and a further pass on `8354d89` (findings being worked on). Everything else,
+  including the latest fixes, is host-tested and CI-built only. Device limits for multiview
   (pictures, decode capacity, what each box reports as its output height) come from
   what Android reports, not from measurements.
 - No DRM, encrypted HLS, fMP4 or separate-audio support has been validated.
@@ -622,8 +626,8 @@ Phone setup (security review)
   unless experimental local timeshift is on (TS channels, full screen only).
 - Sport is matched from guide text only: titles and categories in other languages,
   or guides without categories, can miss matches or include the odd non-sport
-  programme. Optional fixtures (ESPN or TheSportsDB) have not been checked against the
-  live services. No reminders or team favourites.
+  programme (with fixtures on, guide titles are matched to fixtures and "Find channels
+  using" can add broadcaster lists).
 - Exact alarms in deep sleep on Fire OS and recording across stream gaps are
   unverified. With one connection on an account, watching and recording block each
   other. Stalker streams that need extra headers may not record. Encrypted HLS and
@@ -643,10 +647,28 @@ Phone setup (security review)
 - IPTV movies and series as a Nuvio stream source: playback, connection counting and
   the busy/refused messages are untested on devices; m3u8 movies are untested. Resume for titles without a TMDB/IMDb match
   stays on the TV and is not sent to Trakt, Simkl or MDBList.
-- Sports fixtures cover team sports only (golf, tennis, F1, UFC and cricket formats are not
-  shown yet). ESPN's feed is unofficial and may change; TheSportsDB's free key returns
-  short lists and no TV channels. Live clock, situation and win probability have not
-  been checked against a game in progress.
+- Sports data: ESPN's feed is unofficial and may change without notice. TheSportsDB leagues
+  need the viewer's own key (the free test key is not allowed in published apps); its
+  live scores, TV channels and league list are built from documentation and not yet
+  checked against real responses. ESPN shapes were checked against real responses with no
+  game in play: running clocks, NFL down and distance, baseball count and bases, tennis
+  serve and in-play sets, golf mid-round, F1 results and UFC live rounds are unverified.
+  Team logos and league badges are third-party trademarks; TheSportsDB artwork without a
+  confirmed licence must not be shown in public builds (Team logos setting: ESPN only by
+  default). Credit: "Sports data from ESPN and TheSportsDB".
+- Sports alerts arrive a little after the picture by design (held 45 s by default); scores
+  refresh every 30 s for followed teams' live games and every 2 min otherwise. Background
+  checks and "Record when a channel is found" run only while Nuvio is open.
+- Game Centre, score markers and win probability are ESPN-only; before kick-off NHL and MLB
+  team stats show season totals. Score markers are exact only where the feed has a wall
+  clock (NHL, MLB); elsewhere they are estimates.
+- Widgets: text fit on small tiles and the Up path into the widgets need device checks;
+  world clock city names are English.
+- Channel switching still releases and recreates the decoder each time; a decoder that
+  never finishes releasing still shows a message after 8 s.
+- CI builds are made without the Nuvio sign-in server details and TMDB/Trakt keys (the
+  fork has no LOCAL_PROPERTIES_BASE64 secret), so QR sign-in and those features are off in
+  CI APKs. Streams use HTTP/1.1 or HTTP/2 only (no HTTP/3).
 - Pre-connecting to the stream host does not open TLS in advance.
 - The safety buffer relies on playing at 97% speed; with AC-3/E-AC-3 passthrough to a
   receiver the speed change may be ignored, so the buffer would not grow.

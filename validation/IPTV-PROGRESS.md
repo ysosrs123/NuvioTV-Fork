@@ -1,7 +1,7 @@
 # Nuvio IPTV — progress
 
 Current status and next steps: [IPTV-HANDOVER.md](IPTV-HANDOVER.md).
-Updated 8 October 2026.
+Updated 9 October 2026.
 
 | Date | Commits | Work | Validation |
 | --- | --- | --- | --- |
@@ -27,5 +27,7 @@ Updated 8 October 2026.
 | 8 Oct | 2d72733 – 5cfc199 | Device passes 1 and 2 fixed: guide overhaul (only your channels, Guide days, schema 6, parallel imports, lenient XMLTV, auto-link), Settings shortcut, Left/Back fixes, OK-only preview, reliable channel switching and faster starts, 4K HDR corner picture, V2 styling and opaque panels, themes, record location choice, Sport redesign with real-data parser checks, sports data reference; translations | 626 core + 256 data-layer host tests; CI green at ada280b (run 37767996467); device recheck pending |
 | 8 Oct | docs | Sports experience second design pass: 12 boards (Sport section, cards per sport, guide, player markers and feeds, Game Centre, score bug formats, overlays, multiview, all scores, Home rows, pop-up in Nuvio's player, follow a team) and a recommended order ([IPTV-SPORTS-DESIGN-PASS-2.md](IPTV-SPORTS-DESIGN-PASS-2.md)) | Design only; awaiting the user's choice |
 | 8 Oct | 29b217a – 5612ae4 | Sports build, all four parts: shared live service (alerts, reminders, spoiler rules, background checks for followed teams), game summaries, tennis/golf/F1/NASCAR/UFC/cricket/baseball formats, guide badges and Games now lane, score overlays (Glance, bug, cards, ticker), Game Centre, score markers, other feeds and backup switching, multiview data tiles, Sport section timeline and All scores, Home rows, pop-ups in Nuvio's player, team page and record rules; two independent reviews and their fixes; translations | 687 core + 263 data-layer host tests; CI debug green at 6afbea0 (run 37791659338), minified release green at dd888c0 (run 37795570642); device pending; new sport shapes checked only against synthetic data |
+| 8–9 Oct | 374e1f6 – d3a0288 | Parsers checked against a real ESPN capture (12 fixes); ESPN and TheSportsDB combined per league (fallback, live scores, TV channels, league search, logo choice, credit); translations | 710 core + 271 data-layer host tests; CI green at d3a0288 (run 37853846775) |
+| 9 Oct | 495a527 – 8354d89 | Fixes from the 9 October device pass (Back/Left flow and leave confirmation, full-screen categories, guide text and corner picture, Compact default, opaque dialogs, phone setup entry, channel switching, IPTV movie/series details fallback, recording names, sport matching across guide days, find-channels choice, recording from match cards); widgets beside the programme details; sport follow-ups; translations; old notes removed from all branches | 748 core + 276 data-layer host tests; CI green at 8354d89 (run 37867719176); user device pass on 8354d89 done, findings pending |
 
 Design notes are in this folder (`IPTV-*-DESIGN.md`).
