@@ -95,6 +95,7 @@ object EspnScoreboard {
             }
             val people = (item.optJSONArray("athletesInvolved") ?: item.optJSONArray("participants"))?.let(::objects).orEmpty()
             val person = people.firstOrNull()?.let { it.optJSONObject("athlete") ?: it }
+            if (sport == "soccer" && person == null && (kind == FixtureEventKind.YELLOW || kind == FixtureEventKind.RED)) return@mapNotNull null
             val team = item.optJSONObject("team")?.text("id") ?: item.text("teamId") ?: person?.optJSONObject("team")?.text("id")
             val side = when (team) {
                 null -> null
@@ -464,7 +465,7 @@ object EspnScoreboard {
             else -> null
         }
         val last = json.optJSONObject("lastPlay")
-        val lastPlay = last?.text("text")?.take(MAX_PLAY)
+        val lastPlay = last?.text("text")?.replace(SPACES, " ")?.take(MAX_PLAY)
         val probability = last?.optJSONObject("probability") ?: json.optJSONObject("probability")
         val homeWin = probability?.let { if (it.isNull("homeWinPercentage")) null else it.optDouble("homeWinPercentage", Double.NaN) }
             ?.takeIf { !it.isNaN() && it >= 0 }?.let { if (it <= 1.0) it * 100 else it }?.takeIf { it <= 100.0 }?.let { Math.round(it).toInt() }
@@ -491,6 +492,7 @@ object EspnScoreboard {
     private const val MAX_NAME = 40
     private val SKIPPED = listOf("POSTPONED", "CANCELED", "CANCELLED", "ABANDONED", "FORFEIT", "SUSPENDED", "DELAYED")
     private val COLOUR = Regex("[0-9A-Fa-f]{6}")
+    private val SPACES = Regex("\\s+")
     private val RECORD = Regex("\\d{1,3}(-\\d{1,3}){1,3}")
     private val INITIAL = Regex("""[\p{L}.\-]{1,6}\.\s+(.+)""")
     private val TEE = Regex("""^\w{3} (\w{3}) (\d{1,2}) (\d{1,2}):(\d{2}):\d{2} \w+ (\d{4})$""")
@@ -576,7 +578,7 @@ object SportsDbEvents {
     internal val FINISHED = setOf("match finished", "ft", "aet", "pen", "ft pen", "aot", "final", "finished", "after over time", "after extra time", "after penalties", "ended", "full time")
     internal val NOT_STARTED = setOf("not started", "ns", "tbd", "time to be defined", "scheduled")
     internal val PERIODS = mapOf("1h" to 1, "2h" to 2, "et" to 3, "q1" to 1, "q2" to 2, "q3" to 3, "q4" to 4, "p1" to 1, "p2" to 2, "p3" to 3)
-    internal val SKIPPED = setOf("postponed", "pst", "canc", "cancelled", "canceled", "abandoned", "abd", "awd", "wo", "susp", "suspended", "int", "interrupted")
+    internal val SKIPPED = setOf("postponed", "pst", "post", "canc", "cancelled", "canceled", "abandoned", "abd", "awd", "wo", "susp", "suspended", "int", "interrupted")
 }
 
 internal fun sportsImage(value: String): String? = value.trim().takeIf { url ->

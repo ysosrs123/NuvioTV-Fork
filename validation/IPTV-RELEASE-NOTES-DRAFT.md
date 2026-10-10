@@ -680,6 +680,12 @@ TheSportsDB (checked against the user's real captures, 10 October):
   Netherlands, Czechia and Turkey; built-in leagues carry their TheSportsDB ids (Big Bash,
   Super Rugby, A-League Women, PGA Tour, NASCAR Cup, URC).
 
+Sport data (live Premier League and NBL capture, evening of 10 October):
+- Football line-ups no longer label bench players "SUB"; leaders show plain numbers; cards
+  shown to staff no longer appear as player cards on the match strip.
+- Basketball play text no longer breaks across lines; NBL key-moment markers sit closer to
+  the real broadcast time. TheSportsDB fixtures skip postponed games.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

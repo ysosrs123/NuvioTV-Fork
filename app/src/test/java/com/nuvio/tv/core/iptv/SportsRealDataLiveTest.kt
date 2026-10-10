@@ -48,10 +48,10 @@ class SportsRealDataLiveTest {
         val start = millis("2026-10-10T08:30:00Z")
         val markers = SportsMarkers.all(game, start, league = "nbl")
         assertEquals(34, markers.size)
-        assertEquals(39.665, (markers.last().second.millis - start) / 60_000.0, 0.001)
+        assertEquals(34.085, (markers.last().second.millis - start) / 60_000.0, 0.001)
         assertTrue(markers.zipWithNext().all { (a, b) -> a.second.millis <= b.second.millis })
         val progress = SportsMarkers.minutes("basketball", game.period, game.clock, league = "nbl")!!
-        assertEquals(39.98, progress, 0.01)
+        assertEquals(34.35, progress, 0.01)
         assertEquals(37.0, progress, 4.0)
         assertTrue(SportsMarkers.minutes("basketball", game.period, game.clock, league = "nba")!! > 50.0)
     }

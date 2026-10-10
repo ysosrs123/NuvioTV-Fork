@@ -15,12 +15,11 @@ class SportsEventsTest {
             FixtureEvent(FixtureEventKind.YELLOW, FixtureSide.AWAY, "25'", null, "M. Caicedo"),
             FixtureEvent(FixtureEventKind.GOAL, FixtureSide.AWAY, "41'", null, "C. Palmer"),
             FixtureEvent(FixtureEventKind.RED, FixtureSide.AWAY, "55'", null, "Wesley Fofana"),
-            FixtureEvent(FixtureEventKind.GOAL, FixtureSide.HOME, "67'", null, "Declan Rice"),
-            FixtureEvent(FixtureEventKind.RED, null, "70'", null, null)), fixture.events)
+            FixtureEvent(FixtureEventKind.GOAL, FixtureSide.HOME, "67'", null, "Declan Rice")), fixture.events)
         assertEquals(0, SportsEvents.reds(fixture, FixtureSide.HOME))
         assertEquals(1, SportsEvents.reds(fixture, FixtureSide.AWAY))
         assertNull(SportsEvents.recentTry(fixture))
-        assertEquals(listOf(MomentKind.GOAL, MomentKind.CARD_YELLOW, MomentKind.GOAL, MomentKind.CARD_RED, MomentKind.GOAL, MomentKind.CARD_RED),
+        assertEquals(listOf(MomentKind.GOAL, MomentKind.CARD_YELLOW, MomentKind.GOAL, MomentKind.CARD_RED, MomentKind.GOAL),
             SportsEvents.moments(fixture).map { it.kind })
     }
 

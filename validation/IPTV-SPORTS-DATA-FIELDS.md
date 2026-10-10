@@ -463,3 +463,46 @@ live session state, classification and gaps; NASCAR running order; UFC live roun
 and winner; cricket live `isBatting`/`isCurrent` and overs; soccer `keyEvents`, live clock
 and substitutions; AFL/NRL/URC live clock and details `period`; golf with the field on the
 course and after a cut.
+
+## Sixth pass (10 October night)
+
+Real responses captured about 23:12 Sydney time on 10 October (12:12Z). In play: the first
+live football match seen (Arsenal v Leeds United, 41', 0–0, two Leeds yellow cards), a
+second NBL game (Perth v New Zealand, 2:51 left in the 4th) and five ATP and two WTA
+matches. PGA was still between rounds (byte-for-byte the fifth-pass file); NHL adds nothing.
+Trimmed copies are in `app/src/test/resources/sports/*-real-20261010c.json`
+(`SportsRealDataNightTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Soccer scoreboard (live) | `STATUS_FIRST_HALF`, `period` 1, `displayClock`/`detail`/`shortDetail` `41'`, `clock` 2460.0 (elapsed seconds). No `situation`, no `linescores`. `details[]` cards carry `yellowCard`/`redCard` flags, `team.id`, `clock.displayValue` and no `period`; one 39' Leeds yellow has no `athletesInvolved` and is not in the summary, its key events, commentary or the team's card count (a card to staff). Competitors carry live `statistics` (`possessionPct`, `totalShots`, `shotsOnTarget`, `wonCorners`, `foulsCommitted`) and `form`. | Football cards without a player are left out (strip markers and red-card counts follow the players' cards only) |
+| Soccer summary (live) | `keyEvents[]` include `Kickoff`, `Start Delay`/`End Delay` (injury) and cards; each has `type.type` slug (`yellow-card`), `period.number`, `clock.displayValue`, `team.id`, `participants[].athlete`, `shortText` and an exact `wallclock`. No root `plays`; `commentary[]` (56) is in time order with `time.displayValue` and a nested `play`. Header `linescores` hold one entry (`0`) in the first half, no `period`. Box score has `possessionPct` `58.4` and fractions for `shotPct`/`passPct` (`0.3`). Rosters: `formation` (`4-2-3-1`), `starter`, `subbedIn`/`subbedOut` false for all, bench `position.abbreviation` `SUB`, per-player `plays[]` with `yellowCard`/`redCard`/`substitution`. Leaders' `mainStat.label` is an ESPN code (`SHOT`, `ACPASS`, `DINT`, `SV`). `odds`/`pickcenter` (moneyline incl. draw) present, `winprobability` absent. `meta.firstPlayWallClock` is the actual kick-off (11:30:46Z). | Bench `SUB` position dropped; formation (`SummaryRoster.formation`) and booked/sent off (`SummaryPlayer.booked`/`sentOff`) kept; football leaders show the number only; cards without a player left out |
+| NBL (live, 4th quarter) | Same shapes as the fifth pass; `plays[].text` can hold a line break (`bad pass\nturnover`, also NBA) or double spaces. At 4th 2:51 the game was 102 min past the scheduled tip-off (fifth pass: 2nd 5:56 at 37 min). | Play, moment and last-play texts collapse whitespace; NBL markers use 23 real minutes per quarter (was 27; WNBA unchanged), 4th 2:51 now 104 min |
+| Tennis, golf, others | Live tennis as in the fifth pass (server only with `situation`); golf still between rounds; other leagues `pre`/`post` with the shapes above. | none |
+
+Confirmed now: football live status, clock, period, score, cards (scoreboard and summary,
+with side, minute and wallclock), live team stats, line-ups with formation, commentary as
+last plays; NBL late-game clock and the marker pace.
+
+Still unconfirmed: football goals, own goals, penalties, substitutions (`subbedIn`/`subbedOut`
+and the key event), red cards, stoppage-time clocks (`45'+2'`), half-time and second-half
+status names (`STATUS_HALFTIME`, `STATUS_SECOND_HALF`) and the second header line score;
+plus everything still listed under the fifth pass (NFL/college `situation`, MLB count and
+runners, NBA live win probability, NHL running clock and power play, F1/NASCAR live order,
+UFC live round, cricket live innings, AFL/NRL/URC live clock, golf with the field on the
+course and after a cut).
+
+## TheSportsDB real data (10 October)
+
+Livescore returned games only for Soccer (188), Basketball (122), Ice_Hockey (96), Baseball (3)
+and American_Football (1); all other sports, including Rugby, Cricket and Australian_Football,
+answer `{"Message":"No data found"}`. Each item has `idEvent`, team ids and names, badges, string
+scores, `strStatus` (1H, 2H, HT, FT, P, NS, Q1–Q4, P1–P3, OT, BT, POST, CANC, or null),
+`strProgress` (minute such as `45+1`, `Final`/`FT`), `strTimestamp` (UTC) and `updated`; no
+clock or stats. Paths are case-sensitive in practice (`Soccer`, `Ice_Hockey`,
+`American_Football`). `lookuptv` (`tvevent`) returned channels for 2 of 10 events (46 for the
+NFL game, in 22 countries) with `strChannel`, `strCountry`, `strEventCountry`, `strLogo`,
+`strTimeStamp`. v1 `all_leagues` (`leagues`) and v2 `all/leagues` (`all`) match: 1,547
+leagues, 38 of them placeholders. `eventsday` for `English_Premier_League` returned 6 events
+with live `strStatus` but no `strProgress` and no `strTVStation`; `Australian_AFL` returned
+null (off-season).

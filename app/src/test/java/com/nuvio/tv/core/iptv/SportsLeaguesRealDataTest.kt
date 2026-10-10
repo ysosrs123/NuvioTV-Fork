@@ -41,8 +41,8 @@ class SportsLeaguesRealDataTest {
         assertEquals(10, summary.moments.size)
         val first = summary.moments.first { it.clock == "9:56" }
         assertEquals(1, first.period)
-        assertEquals(0.18, SportsMarkers.minutes("basketball", 1, "9:56", league = "nbl")!!, 0.01)
-        assertEquals(126.91, SportsMarkers.minutes("basketball", 4, "0:02", league = "nbl")!!, 0.01)
+        assertEquals(0.15, SportsMarkers.minutes("basketball", 1, "9:56", league = "nbl")!!, 0.01)
+        assertEquals(110.92, SportsMarkers.minutes("basketball", 4, "0:02", league = "nbl")!!, 0.01)
         assertEquals(0.0, SportsMarkers.minutes("basketball", 1, "12:00", league = "nbl")!!, 0.001)
         assertEquals(5.60, SportsMarkers.minutes("basketball", 1, "9:56")!!, 0.01)
         assertEquals(147.97, SportsMarkers.minutes("basketball", 4, "45.2", league = "nba")!!, 0.01)
