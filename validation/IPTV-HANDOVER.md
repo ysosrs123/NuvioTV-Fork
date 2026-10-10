@@ -45,7 +45,8 @@ session winners shown. CI green at `3de7568` (run 38012700521) and at `3065341` 
 focused game's summary (one extra request).
 
 Next, in order:
-1. Device pass on `422d9d8f0` (run 38027429837; checklist 7d then 7c). Playback options,
+1. The user skipped `422d9d8f0` and will test the next build (7e, 7d, 7c) once findings
+   13–14 of 10 October are fixed. Playback options,
    menu order, external player and source expiry are committed after it (`2c83574c9`,
    `826090865`, playback options pending) and go into the next build.
 2. Waiting on the user (do not do these without them):
@@ -372,6 +373,10 @@ Checklist 7c done; findings (fixes in progress unless noted):
     MPEG-TS is a straight copy of the broadcast, survives interruptions and plays in VLC;
     MP4 would need a remux at the end).
 Passed otherwise (SMB recording worked).
+13. (added later) Left/Back on the Recordings screen does nothing; should return to Live TV
+    with the menu open.
+14. (added later) Multiview channel/category overlay: focus can drop behind the overlay onto
+    the multiview pictures when moving Left/Right between the category and channel lists.
 12. Recording file names: date as dd-MMM-yy and no id suffix (done: `RecordingFiles.name`
     takes a `taken` check; the recorder checks names of other recordings and local files).
 
