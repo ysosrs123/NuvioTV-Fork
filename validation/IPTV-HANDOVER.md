@@ -344,6 +344,26 @@ reporting, resets 10 October 2026 00:00 UTC):
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
 
+## Device findings — 11 October 2026 (build `f79646c53`; ~3 h recording to an SMB NAS)
+
+The overnight recording to the NAS worked. Findings (fixes in progress):
+1. Recording opened in the player showed a runtime of just over 24 hours on the timebar.
+   Cause: recordings play in Nuvio's PlayerScreen as a raw .ts file over the local
+   `IptvRecordingStreamServer`; ExoPlayer works the length out from the first and last
+   PCR, which a reconnect gap or a timestamp wrap in a live recording throws off.
+2. Watching part of a recording, backing out and opening it again starts from the
+   beginning. Cause: the player route uses `startFromBeginning = true` with no id, so
+   nothing saves or restores a position.
+3. Long seeks struggle. Cause: TS seeking in ExoPlayer binary-searches the file by PCR
+   through many range requests, each one a read from the NAS; with timestamp jumps the
+   search can also land in the wrong place.
+4. Remove the watch party button for recordings; keep it for IPTV movies and series.
+   (Live channels play in the Live TV player, which has no watch party.)
+5. Provider catch-up: no way to move back in the guide to earlier programmes. Cause: the
+   guide window starts half an hour before now (`IptvLiveViewModel.guideWindow`); OK on a
+   past programme of an archive channel already plays catch-up, but the past cannot be
+   reached.
+
 ## Review — night of 10 October 2026 (`01f19bbed..96f8939ea`)
 
 Two read-only reviews of everything since the last full device pass. All findings below are
