@@ -66,8 +66,6 @@ import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.OpenInFull
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.util.rememberLongPressKeyTracker
-import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
-import com.nuvio.tv.ui.v2.components.nuvioV2Focus
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nuvio.tv.core.iptv.FixtureStatus
@@ -327,8 +325,7 @@ private fun TileSlot(state: IptvLiveState, tiles: List<IptvTile>, index: Int, no
 
 @Composable
 private fun Modifier.tileFocus(focused: Boolean, shape: RoundedCornerShape): Modifier =
-    if (LocalV2Appearance.current != null) nuvioV2Focus(focused, shape, hardwareShadow = false)
-    else if (focused) border(3.dp, NuvioTheme.colors.FocusRing, shape) else this
+    if (focused) border(2.5.dp, NuvioTheme.colors.FocusRing, shape) else this
 
 @Composable
 private fun Tile(state: IptvLiveState, tile: IptvTile, index: Int, audio: Boolean, now: Long, requester: FocusRequester, modifier: Modifier,

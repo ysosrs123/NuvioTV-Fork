@@ -53,29 +53,27 @@ fun IptvTheme(content: @Composable () -> Unit) {
     val v2 = LocalV2Appearance.current
     val theme = iptvTheme(appearance.theme)?.takeIf { it in iptvThemes(access.entitlements) }
     val floor = if (appearance.solidPanels) 1f else GLASS_FLOOR
-    if (theme == null && !appearance.black) {
-        CompositionLocalProvider(LocalIptvAppearance provides appearance, LocalGlassBodyFloor provides floor, content = content)
-        return
-    }
+    val custom = theme != null || appearance.black
     val inherited = LocalThemePalette.current
     val appTheme = theme ?: LocalAppTheme.current
     val palette = remember(theme, inherited, v2) {
         val base = theme?.let { ThemeColors.getColorPalette(it) } ?: inherited
         if (theme != null && v2 != null) v2Palette(base, v2, theme) else base
     }
-    val colors = remember(palette, appearance.black, v2 != null) {
+    val colors = if (custom) remember(palette, appearance.black, v2 != null) {
         NuvioColorScheme(palette, amoledMode = appearance.black, amoledSurfacesMode = appearance.black, glassPresentation = v2 != null)
-    }
-    val extended = remember(colors) {
+    } else LocalNuvioColors.current
+    val extended = if (custom) remember(colors) {
         NuvioExtendedColors(colors.BackgroundElevated, colors.BackgroundCard, colors.TextSecondary, colors.TextTertiary, colors.FocusRing,
             colors.FocusBackground, colors.Rating)
-    }
-    val scheme = darkColorScheme(primary = colors.Primary, onPrimary = colors.OnPrimary, secondary = colors.Secondary, onSecondary = colors.OnSecondary,
+    } else LocalNuvioExtendedColors.current
+    val focusRing = if (custom) remember(palette) { createFocusRingStyle(palette) } else LocalNuvioFocusRingStyle.current
+    val scheme = if (custom) darkColorScheme(primary = colors.Primary, onPrimary = colors.OnPrimary, secondary = colors.Secondary, onSecondary = colors.OnSecondary,
         background = colors.Background, surface = colors.Surface, surfaceVariant = colors.SurfaceVariant, onBackground = colors.TextPrimary,
-        onSurface = colors.TextPrimary, onSurfaceVariant = colors.TextSecondary, error = colors.Error)
+        onSurface = colors.TextPrimary, onSurfaceVariant = colors.TextSecondary, error = colors.Error) else MaterialTheme.colorScheme
     CompositionLocalProvider(LocalIptvAppearance provides appearance, LocalGlassBodyFloor provides floor, LocalAppTheme provides appTheme,
         LocalThemePalette provides palette, LocalNuvioColors provides colors, LocalNuvioExtendedColors provides extended,
-        LocalNuvioFocusRingStyle provides remember(palette) { createFocusRingStyle(palette) }) {
+        LocalNuvioFocusRingStyle provides focusRing) {
         MaterialTheme(colorScheme = scheme, typography = MaterialTheme.typography, content = content)
     }
 }

@@ -655,6 +655,13 @@ Sport data (second 10 October capture: live NBL and live tennis):
 - Live NBL games and tennis matches with live sets, serve and tiebreaks are checked against
   real data.
 
+## Changes after the evening 10 October 2026 device pass (not device-tested)
+
+- Live TV settings: changing Pure black or the colour theme keeps focus on the setting you
+  changed (the theme no longer rebuilds the screen).
+- Multiview: the selected picture keeps its size and shows a thin border instead of
+  enlarging over the others.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
