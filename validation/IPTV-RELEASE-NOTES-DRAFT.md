@@ -713,6 +713,10 @@ Fixes from the night review of 10 October:
 - Sport only now lists up to 200 channels (was 120). Moving focus from the guide to the
   sport toggle or Go live only counts as moved when focus actually lands there.
 - Game Centre booked and sent-off marks are translated.
+- Recordings to a network share start on time even when the share is slow to answer (the
+  folder is checked just before the start); a WebDAV upload that is retried no longer
+  leaves a full-size partial file behind; deleting a recording at the moment its upload
+  finishes no longer leaves the file on the share.
 
 ## Ready below the UI (screens pending)
 

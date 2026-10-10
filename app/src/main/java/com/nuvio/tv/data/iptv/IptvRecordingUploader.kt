@@ -43,6 +43,7 @@ class IptvRecordingUploader(
         val buffer = ByteArray(chunkBytes)
         var failures = 0
         var failingSince: Long? = null
+        var chosen: String? = null
         var lastError: IptvShareError? = null
         while (true) {
             val done = finished()
@@ -82,7 +83,7 @@ class IptvRecordingUploader(
                     val total = RecordingUpload.whole(local.map { it.piece }, committed())
                         ?: return@withContext IptvUploadOutcome(IptvUploadResult.LOST, 0, IptvShareError.LOST)
                     checkFree(session, local, 0)
-                    val target = free(session, remote, partial)
+                    val target = free(session, chosen ?: remote, chosen?.let(RecordingFiles::partial) ?: partial).also { chosen = it }
                     val whole = RecordingFiles.partial(target)
                     val output = session.openWrite(whole, total).also { file = it }
                     var size = 0L

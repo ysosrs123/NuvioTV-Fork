@@ -472,17 +472,19 @@ class IptvRecorder @Inject constructor(
     }
 
     private suspend fun record(id: String, holder: IptvRecordingProgress) {
+        var listing: Deferred<Set<String>>? = null
         val started = try {
             while (true) {
-                val wait = mutex.withLock {
+                val (wait, storage) = mutex.withLock {
                     load()
                     val current = store.get(id)?.takeIf { it.status == RecordingStatus.SCHEDULED } ?: return
-                    current.startMillis - System.currentTimeMillis()
+                    (current.startMillis - System.currentTimeMillis()) to current.storage
                 }
+                if (listing == null && wait <= LISTING_MILLIS) listing = scope.async { folderNames(storage) }
                 if (wait <= 0) break
-                delay(minOf(wait, START_CHECK_MILLIS))
+                delay(minOf(if (listing == null) wait - LISTING_MILLIS else wait, START_CHECK_MILLIS).coerceAtLeast(1))
             }
-            val remote = folderNames(mutex.withLock { store.get(id)?.storage })
+            val remote = listing?.let { names -> withTimeoutOrNull(LISTING_GRACE_MILLIS) { names.await() } ?: run { names.cancel(); null } }.orEmpty()
             mutex.withLock {
                 load()
                 val current = store.get(id)?.takeIf { it.status == RecordingStatus.SCHEDULED } ?: return
@@ -651,7 +653,7 @@ class IptvRecorder @Inject constructor(
             return
         }
         val result = try { upload.await() } catch (_: CancellationException) { null }
-        applyUpload(entry.id, result, spool, link)
+        withContext(NonCancellable) { applyUpload(entry.id, result, spool, link) }
     }
 
     private suspend fun applyUpload(id: String, result: IptvUploadOutcome?, spool: File, link: IptvShareConnector?) = mutex.withLock {
@@ -696,7 +698,7 @@ class IptvRecorder @Inject constructor(
                 is IptvRecordingPlace.Local -> emptyList()
             }
         }
-        val names = try { withTimeoutOrNull(LISTING_MILLIS) { listing.await() } } catch (cancel: CancellationException) { listing.cancel(); throw cancel }
+        val names = try { withTimeoutOrNull(LISTING_MILLIS) { listing.await() } ?: run { listing.cancel(); null } } catch (cancel: CancellationException) { listing.cancel(); throw cancel }
             catch (error: Exception) { IptvLog.failure("recording names", error); null }
         return names.orEmpty().mapTo(HashSet()) { it.lowercase(Locale.ROOT) }
     }
@@ -738,7 +740,7 @@ class IptvRecorder @Inject constructor(
         val link = connector(place) ?: return
         val spool = targets.spool(id)
         val result = uploader(place, link).upload(spool, path, { Long.MAX_VALUE }, { true }, RETRY_PATIENCE_MILLIS)
-        applyUpload(id, result, spool, link)
+        withContext(NonCancellable) { applyUpload(id, result, spool, link) }
     }
 
     private suspend fun resolve(entry: IptvRecording): Target? {
@@ -890,5 +892,6 @@ class IptvRecorder @Inject constructor(
         const val PERSIST_TICKS = 30
         const val START_CHECK_MILLIS = 30_000L
         const val LISTING_MILLIS = 8_000L
+        const val LISTING_GRACE_MILLIS = 1_500L
     }
 }

@@ -350,6 +350,9 @@ the two "not changed" items:
   performance points and size/rate support; check the `multiview device` log on the AM9.
 - To check on a device: tunnelled playback kept alive while in settings may need a re-tune
   (now re-tunes itself after 10 s if no frame arrives; log `live tunnel picture missing`).
+- Second review of the fixes (`44b68ebce..7c7e0e4ae`): no compile or SQL errors; three
+  recording issues fixed (share folder listing delayed the start by up to 8 s; retried
+  WebDAV uploads left orphan partials; delete during the final rename could leave the file).
 - Follow-ups not done: Movies-folder recordings still store the MediaStore id rather than
   the final name (`IptvRecordingStore`); the folder check covers new names. Sport only is
   capped at 200 channels (`browse.sports` allows 1..200).
