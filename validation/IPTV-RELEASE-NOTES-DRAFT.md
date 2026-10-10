@@ -777,6 +777,9 @@ Phone setup (security review)
 
 ## Validation
 
+- Remaining sport screens on the new score bands, NHL goalies, race winners and
+  translations: CI debug build green at `3065341` (run 38013663627); 788 core and 276
+  data-layer JVM tests on the host. Not device-tested. Latest build for the device pass.
 - Sport redesign (ledger top panel, team-colour cards on the Sport section, Home rows and
   Games now) and NBL/WNBA/College Football: CI debug build green at `3de7568`
   (run 38012700521); 785 core and 276 data-layer JVM tests on the host. Not device-tested.

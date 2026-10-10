@@ -40,13 +40,13 @@ after it; the video score bug (IptvSportsOverlay `BugSegment`) keeps its own loo
 Done 10 October (user away): those remaining screens moved to the new look (Game Centre,
 team page, player pop-up, All scores, multiview score tiles, widgets; the full-screen banner
 follows via `GameScoreLine`), NHL goalies (`SportsGoalies` in SportsLedger.kt) and racing
-session winners shown. CI green at `3de7568` (run 38012700521) before this step; a new run
-follows. Unverified: row heights computed from text sizes, live hockey now loads the
+session winners shown. CI green at `3de7568` (run 38012700521) and at `3065341` (run
+38013663627, the build given to the user for the next device pass). Unverified: row heights computed from text sizes, live hockey now loads the
 focused game's summary (one extra request).
 
 Next, in order:
-1. Give the user the CI run link for the fixes of the second 9 October pass; take their
-   findings from that pass; record and fix them the same way.
+1. The user's next device pass is on `3065341` (run 38013663627, checklist section 7c
+   items 1–17); take their findings, record and fix them the same way.
 2. Waiting on the user (do not do these without them):
    - QR sign-in in CI builds: the fork needs the repository secret `LOCAL_PROPERTIES_BASE64`
      (base64 of a local.properties with NUVIO_SUPABASE_URL, NUVIO_SUPABASE_ANON_KEY and the
