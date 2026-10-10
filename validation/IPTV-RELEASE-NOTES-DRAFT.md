@@ -842,6 +842,9 @@ Phone setup (security review)
 
 ## Validation
 
+- Fixes from the 10 October pass with translations: CI debug green at `422d9d8f0` (run
+  38027429837; code compile check at `769e7bc63`, run 38026419701). 814 core and 276
+  data-layer JVM tests on the host. Not device-tested. Build for the next device pass.
 - Latest build for the device pass: CI debug green at `01f19bbed` (run 38017089840), same
   app as `3065341` (an app-name clean-up was made and reverted in between). Not device-tested.
 - Minified release build (R8) green at `03808ae` (run 38014569747), same code as the

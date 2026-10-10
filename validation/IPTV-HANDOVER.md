@@ -45,7 +45,9 @@ session winners shown. CI green at `3de7568` (run 38012700521) and at `3065341` 
 focused game's summary (one extra request).
 
 Next, in order:
-1. Fix the 10 October findings on `01f19bbed` (section below), then CI and a new pass.
+1. Device pass on `422d9d8f0` (run 38027429837; checklist 7d then 7c). Playback options,
+   menu order, external player and source expiry are committed after it (`2c83574c9`,
+   `826090865`, playback options pending) and go into the next build.
 2. Waiting on the user (do not do these without them):
    - QR sign-in in CI builds: the fork needs the repository secret `LOCAL_PROPERTIES_BASE64`
      (base64 of a local.properties with NUVIO_SUPABASE_URL, NUVIO_SUPABASE_ANON_KEY and the

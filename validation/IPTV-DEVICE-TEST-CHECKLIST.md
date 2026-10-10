@@ -1,4 +1,4 @@
-# Nuvio IPTV — device test checklist (build `01f19bbed`, run 38017089840)
+# Nuvio IPTV — device test checklist (build `422d9d8f0`, run 38027429837)
 
 For this build start with section 7d, then 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
 
@@ -84,7 +84,7 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
 
-## 7d. Fixes from the 10 October pass (build after `9172949f7`)
+## 7d. Fixes from the 10 October pass (build `422d9d8f0`)
 1. Stream info widget in the short stacked size: two labelled columns (video, audio,
    bitrate, buffer); other sizes use their space.
 2. Guide info panel: long description fills down to the hint line; long titles wrap to two
