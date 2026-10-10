@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">%1$d. çeyrek</string>
+    <string name="iptv_ui11_sport_period">%1$d. periyot</string>
+    <string name="iptv_ui11_sport_first_half">İlk yarı</string>
+    <string name="iptv_ui11_sport_second_half">İkinci yarı</string>
+    <string name="iptv_ui11_sport_extra_time">Uzatmalar</string>
+    <string name="iptv_ui11_sport_overtime">Uzatma</string>
+    <string name="iptv_ui11_sport_clock_left">%1$s kaldı</string>
+    <string name="iptv_ui11_sport_total">Toplam</string>
+    <string name="iptv_ui11_sport_win_chance">Kazanma şansı: %1$s %2$d%%, %3$s %4$d%%.</string>
+</resources>

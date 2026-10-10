@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">רבע %1$d</string>
+    <string name="iptv_ui11_sport_period">מחצית %1$d</string>
+    <string name="iptv_ui11_sport_first_half">מחצית ראשונה</string>
+    <string name="iptv_ui11_sport_second_half">מחצית שנייה</string>
+    <string name="iptv_ui11_sport_extra_time">הארכה</string>
+    <string name="iptv_ui11_sport_overtime">הארכה</string>
+    <string name="iptv_ui11_sport_clock_left">נותרו %1$s</string>
+    <string name="iptv_ui11_sport_total">סה״כ</string>
+    <string name="iptv_ui11_sport_win_chance">סיכויי ניצחון: %1$s %2$d%%, %3$s %4$d%%.</string>
+</resources>

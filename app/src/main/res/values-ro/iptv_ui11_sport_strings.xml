@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">Sfertul %1$d</string>
+    <string name="iptv_ui11_sport_period">Repriza %1$d</string>
+    <string name="iptv_ui11_sport_first_half">Prima repriză</string>
+    <string name="iptv_ui11_sport_second_half">A doua repriză</string>
+    <string name="iptv_ui11_sport_extra_time">Prelungiri</string>
+    <string name="iptv_ui11_sport_overtime">Prelungiri</string>
+    <string name="iptv_ui11_sport_clock_left">Mai sunt %1$s</string>
+    <string name="iptv_ui11_sport_total">Total</string>
+    <string name="iptv_ui11_sport_win_chance">Șanse de victorie: %1$s %2$d%%, %3$s %4$d%%.</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">%1$d. quarter</string>
+    <string name="iptv_ui11_sport_period">%1$d. periode</string>
+    <string name="iptv_ui11_sport_first_half">1. halvleg</string>
+    <string name="iptv_ui11_sport_second_half">2. halvleg</string>
+    <string name="iptv_ui11_sport_extra_time">Forlænget spilletid</string>
+    <string name="iptv_ui11_sport_overtime">Overtid</string>
+    <string name="iptv_ui11_sport_clock_left">%1$s tilbage</string>
+    <string name="iptv_ui11_sport_total">I alt</string>
+    <string name="iptv_ui11_sport_win_chance">Vinderchance: %1$s %2$d%%, %3$s %4$d%%.</string>
+</resources>

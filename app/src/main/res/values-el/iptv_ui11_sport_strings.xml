@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">%1$dο δεκάλεπτο</string>
+    <string name="iptv_ui11_sport_period">%1$dη περίοδος</string>
+    <string name="iptv_ui11_sport_first_half">Α΄ ημίχρονο</string>
+    <string name="iptv_ui11_sport_second_half">Β΄ ημίχρονο</string>
+    <string name="iptv_ui11_sport_extra_time">Παράταση</string>
+    <string name="iptv_ui11_sport_overtime">Παράταση</string>
+    <string name="iptv_ui11_sport_clock_left">Απομένουν %1$s</string>
+    <string name="iptv_ui11_sport_total">Σύνολο</string>
+    <string name="iptv_ui11_sport_win_chance">Πιθανότητα νίκης: %1$s %2$d%%, %3$s %4$d%%.</string>
+</resources>

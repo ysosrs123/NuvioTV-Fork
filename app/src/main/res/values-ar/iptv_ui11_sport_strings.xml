@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">الربع %1$d</string>
+    <string name="iptv_ui11_sport_period">الشوط %1$d</string>
+    <string name="iptv_ui11_sport_first_half">الشوط الأول</string>
+    <string name="iptv_ui11_sport_second_half">الشوط الثاني</string>
+    <string name="iptv_ui11_sport_extra_time">الوقت الإضافي</string>
+    <string name="iptv_ui11_sport_overtime">الوقت الإضافي</string>
+    <string name="iptv_ui11_sport_clock_left">متبقٍ %1$s</string>
+    <string name="iptv_ui11_sport_total">المجموع</string>
+    <string name="iptv_ui11_sport_win_chance">فرص الفوز: %1$s %2$d%%، %3$s %4$d%%.</string>
+</resources>

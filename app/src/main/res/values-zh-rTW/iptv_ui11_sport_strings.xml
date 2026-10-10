@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">第%1$d節</string>
+    <string name="iptv_ui11_sport_period">第%1$d局</string>
+    <string name="iptv_ui11_sport_first_half">上半場</string>
+    <string name="iptv_ui11_sport_second_half">下半場</string>
+    <string name="iptv_ui11_sport_extra_time">延長賽</string>
+    <string name="iptv_ui11_sport_overtime">延長</string>
+    <string name="iptv_ui11_sport_clock_left">剩餘%1$s</string>
+    <string name="iptv_ui11_sport_total">總計</string>
+    <string name="iptv_ui11_sport_win_chance">勝率：%1$s %2$d%%，%3$s %4$d%%。</string>
+</resources>

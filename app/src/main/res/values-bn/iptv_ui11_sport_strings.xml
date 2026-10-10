@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">কোয়ার্টার %1$d</string>
+    <string name="iptv_ui11_sport_period">পিরিয়ড %1$d</string>
+    <string name="iptv_ui11_sport_first_half">প্রথমার্ধ</string>
+    <string name="iptv_ui11_sport_second_half">দ্বিতীয়ার্ধ</string>
+    <string name="iptv_ui11_sport_extra_time">অতিরিক্ত সময়</string>
+    <string name="iptv_ui11_sport_overtime">ওভারটাইম</string>
+    <string name="iptv_ui11_sport_clock_left">%1$s বাকি</string>
+    <string name="iptv_ui11_sport_total">মোট</string>
+    <string name="iptv_ui11_sport_win_chance">জয়ের সম্ভাবনা: %1$s %2$d%%, %3$s %4$d%%।</string>
+</resources>

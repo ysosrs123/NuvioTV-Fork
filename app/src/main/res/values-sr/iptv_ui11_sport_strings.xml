@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">Четвртина %1$d</string>
+    <string name="iptv_ui11_sport_period">Период %1$d</string>
+    <string name="iptv_ui11_sport_first_half">Прво полувреме</string>
+    <string name="iptv_ui11_sport_second_half">Друго полувреме</string>
+    <string name="iptv_ui11_sport_extra_time">Продужеци</string>
+    <string name="iptv_ui11_sport_overtime">Продужетак</string>
+    <string name="iptv_ui11_sport_clock_left">Преостало %1$s</string>
+    <string name="iptv_ui11_sport_total">Укупно</string>
+    <string name="iptv_ui11_sport_win_chance">Шансе за победу: %1$s %2$d%%, %3$s %4$d%%.</string>
+</resources>

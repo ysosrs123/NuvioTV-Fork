@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">Hiệp %1$d</string>
+    <string name="iptv_ui11_sport_period">Hiệp %1$d</string>
+    <string name="iptv_ui11_sport_first_half">Hiệp 1</string>
+    <string name="iptv_ui11_sport_second_half">Hiệp 2</string>
+    <string name="iptv_ui11_sport_extra_time">Hiệp phụ</string>
+    <string name="iptv_ui11_sport_overtime">Hiệp phụ</string>
+    <string name="iptv_ui11_sport_clock_left">Còn %1$s</string>
+    <string name="iptv_ui11_sport_total">Tổng</string>
+    <string name="iptv_ui11_sport_win_chance">Cơ hội thắng: %1$s %2$d%%, %3$s %4$d%%.</string>
+</resources>

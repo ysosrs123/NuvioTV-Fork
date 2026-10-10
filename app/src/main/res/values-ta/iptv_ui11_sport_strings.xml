@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">காலிறுதி %1$d</string>
+    <string name="iptv_ui11_sport_period">பகுதி %1$d</string>
+    <string name="iptv_ui11_sport_first_half">முதல் பாதி</string>
+    <string name="iptv_ui11_sport_second_half">இரண்டாம் பாதி</string>
+    <string name="iptv_ui11_sport_extra_time">கூடுதல் நேரம்</string>
+    <string name="iptv_ui11_sport_overtime">ஓவர்டைம்</string>
+    <string name="iptv_ui11_sport_clock_left">%1$s மீதம்</string>
+    <string name="iptv_ui11_sport_total">மொத்தம்</string>
+    <string name="iptv_ui11_sport_win_chance">வெற்றி வாய்ப்பு: %1$s %2$d%%, %3$s %4$d%%.</string>
+</resources>

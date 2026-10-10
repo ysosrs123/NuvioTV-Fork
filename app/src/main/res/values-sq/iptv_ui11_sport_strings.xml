@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">Çereku %1$d</string>
+    <string name="iptv_ui11_sport_period">Periudha %1$d</string>
+    <string name="iptv_ui11_sport_first_half">Pjesa e parë</string>
+    <string name="iptv_ui11_sport_second_half">Pjesa e dytë</string>
+    <string name="iptv_ui11_sport_extra_time">Shtesat</string>
+    <string name="iptv_ui11_sport_overtime">Kohë shtesë</string>
+    <string name="iptv_ui11_sport_clock_left">Mbeten %1$s</string>
+    <string name="iptv_ui11_sport_total">Gjithsej</string>
+    <string name="iptv_ui11_sport_win_chance">Shansi për fitore: %1$s %2$d%%, %3$s %4$d%%.</string>
+</resources>
