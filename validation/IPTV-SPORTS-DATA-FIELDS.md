@@ -506,3 +506,71 @@ NFL game, in 22 countries) with `strChannel`, `strCountry`, `strEventCountry`, `
 leagues, 38 of them placeholders. `eventsday` for `English_Premier_League` returned 6 events
 with live `strStatus` but no `strProgress` and no `strTVStation`; `Australian_AFL` returned
 null (off-season).
+
+## Seventh pass (11 October)
+
+Real responses captured about 05:07 Brisbane time on 11 October (19:07Z on 10 October),
+TheSportsDB calls three minutes later. In play: five college football games (four in the
+4th quarter, one early in the 3rd), one NHL game (Boston v Philadelphia, 3rd period, a
+minor penalty as the last play) and a URC match in the first half (Leinster v Cardiff,
+15–0). Six Premier League games had finished (goals, substitutions, two straight reds, stoppage
+time up to `90'+8'`). PGA was again between rounds (round 3 complete), no tennis was live,
+F1 qualifying was over, NASCAR and UFC were upcoming. `epl-summary-LIVE.json`,
+`nbl-summary-LIVE.json`, `ncaaf-summary.json`, `nhl-summary.json` and
+`rugby-urc-summary.json` are byte-for-byte the sixth-pass files. Trimmed copies are in
+`app/src/test/resources/sports/*-real-20261011.json` (`SportsRealDataWeekendTest`,
+`SportsDbExtrasTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| College football scoreboard (live) | `situation` has `down`, `distance`, `yardLine`, `downDistanceText` (`3rd & 4 at NEB 47`), `shortDownDistanceText`, `possessionText`, `isRedZone`, `homeTimeouts`/`awayTimeouts` and `possession` (team id); `lastPlay` has `probability.homeWinPercentage` (0.6003), `drive` and `start`/`end` yard lines. College play texts start with the snap clock, `(08:05) No Huddle-Shotgun …` (131 of 140 plays; NFL texts never do). | Snap clock removed from the last play (scoreboard and summary) |
+| College football summary (live) | No root `plays` or `situation`: `drives.previous` plus `drives.current` (plays with `wallclock`), `scoringPlays` (6), `winprobability` (135, last entry matches the scoreboard), team box score. Wallclocks: kick-off 8 min after the listed start, quarters 39–44 real minutes, half-time 21 min, 4th 7:43 left at 187 min. | College football markers use 45 real minutes per quarter and a 20-minute half-time (NFL shape put the same moment at 156 min) |
+| NHL (live) | Scoreboard `situation` holds only `lastPlay` (the penalty). Summary plays: penalties carry `type.penaltyMinutes` (`"2"`) and `type.penaltyType` (`Minor`) and their own `strength` is the state before the call (`Even Strength`); the following plays switch to `Power Play`/`Shorthanded`. Stoppages have no team. `onIce` lists skaters by id only. Boston led 3–0 at 3rd 13:44 (6:16 elapsed in the plays), 127 min after the listed start; puck drop was 8 min late. | Strength read from the last play with a team; a minor or major penalty as the latest such play gives the other side the power play (not for coincidental penalties or misconducts) |
+| URC scoreboard (live) | `STATUS_FIRST_HALF`, `period` 1, `clock` 0.0 and `displayClock`/`detail` `1'` while `details` already reached 19' (three tries, a yellow card); every finished URC game also shows `1'`. Live `linescores` are all 0 (half lines, 20' and 60'). Finished games give per-half values in periods 1 and 2 (`29`, `28` for 57) with 20'/60' as running totals. | A minute clock behind the latest event minute is dropped and the status description (`First Half`) shown instead; all-zero period lines with a non-zero score are left out for both sides |
+| URC summary (live) | Header `displayClock` `1'`, `linescores` without `period`: `15, 0, 15, 15` (halves, then the 20' and 60' totals); details use `participants[].athlete`. | Union summary lines keep the two halves only and, while live, only the halves played (`15`) |
+| Football (finals) | `keyEvents` substitutions: `participants` = [on, off], `shortText` names only the player coming on, `text` `Substitution, Arsenal. Jurriën Timber replaces Ben White.`. Goals: `participants` = [scorer, assister]. `Halftime` key event at `45'+3'`. Scoreboard `details` clocks include `45'+3'` and `90'+5'`; straight reds are `type.id` 93 with `redCard` true. | Substitution moments use the full text (both players) |
+| Tennis | `STATUS_WALKOVER` with `timeValid: false` dated two days ahead (`04:00Z` placeholder) listed as finished; `STATUS_RETIRED` and `STATUS_CANCELED` as before. | A finished match with a placeholder date in the future is left out |
+| Pre-game summaries | NBA preseason `boxscore` holds `Streak`, `Points Against` (`129.0`), `Last Ten Games`; Champions League holds season totals. | none (season values stay, as decided in the fourth pass) |
+| Others | AFL, NRL, A-League, NBL, NFL, MLB, NBA, UFC, F1, NASCAR, cricket and golf with the shapes above. | none |
+
+TheSportsDB at 19:10Z: livescore returned Soccer (105), Basketball (60), Ice_Hockey (71) and
+one American_Football row (an NFL final from 9 October); every other sport, tennis, rugby,
+cricket, AFL and motorsport included, answered `{"Message":"No data found"}`. New statuses:
+`AOT` (hockey and basketball), `ABD`, `BT`, `OT`; basketball `HT` with progress `0`. Hockey
+and basketball `strProgress` is the minute played in the period (`P2` `17`, `Q4` `9`, `FT`
+`10`), not a countdown. `updated` is UK local time (latest `20:08:33` at 19:10Z); three
+hockey rows (QMJHL, WHL, AHL) were stuck at `P3 20` or `OT 4` with `updated` 13–15 hours
+old. `lookuptv` returned channels for 4 of 21 events (NFL 46, Monaco v Toulouse 9, a
+Bolivian match 1, a Turkish basketball game 2); new countries include `Bosnia and
+Herzegovina`, `Qatar`, `Saudi Arabia`. Parser changes: rows whose `updated` is more than 3
+hours old no longer keep a game live; minute clocks (`17'`) count up on the timeline; channel
+countries match names written with "and" or "Saint" (`Bosnia & Herzegovina`, `St. Kitts &
+Nevis` in Java's list) plus Hong Kong, Macau, Macedonia, DR Congo and Ivory Coast.
+
+ESPN league lists (`{sport}/leagues`) are unchanged since 8 October. Added to the app's list
+(off by default), all with the parser of a league already checked against real data:
+Ligue 1, Europa League, Conference League, EFL Championship, FA Cup, EFL Cup, Scottish
+Premiership, Eredivisie, Primeira Liga, Süper Lig, Saudi Pro League, MLS, Liga MX, Women's
+Super League, NWSL, Women's Champions League, NBA G League, women's college basketball (4×10
+minutes), CFL, UFL, men's and women's college hockey, PFL, LPGA Tour, DP World Tour, LIV Golf,
+NASCAR Xfinity and Truck Series, IndyCar, Premiership Rugby (267979), Top 14 (270559),
+Champions Cup (271937), Six Nations (180659) and The Rugby Championship (244293). The rugby
+names are not in the capture (the list gives ids only); check them on the device.
+
+Not added: men's college basketball (two 20-minute halves; the timeline only knows
+quarters), the other 200 or so football competitions (lower divisions, cups, youth,
+qualifiers, friendlies), baseball's college and winter leagues and international events,
+golf's Champions and Korn Ferry tours, TGL and Olympic events, the other 46 MMA promotions
+(mostly historical), the other 20 rugby union ids (names unknown), FIBA, summer leagues,
+lacrosse, volleyball, water polo and field hockey (no parser checked against their data).
+
+Confirmed now: college football live `situation`, possession, down and distance, win
+probability and drives; NHL live penalty and power play shape; URC live status and details;
+football goals, substitutions, stoppage-time clocks and straight red cards;
+TheSportsDB live hockey and basketball progress.
+
+Still unconfirmed: NFL live `situation`; MLB balls/strikes/outs and runners; NBA live win
+probability; tennis serve in a live match tiebreak; F1/NASCAR live order and gaps; UFC live
+round, method and winner; cricket live innings; AFL/NRL live clock; golf with the field on
+the course and after a cut; football own goals, penalties, second yellows and the
+half-time and second-half status names on the scoreboard.

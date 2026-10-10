@@ -1,19 +1,26 @@
 package com.nuvio.tv.core.iptv
 
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import org.json.JSONArray
 import org.json.JSONObject
 
-data class SportsDbLiveScore(val eventId: String, val status: String, val progress: String? = null, val homeScore: String? = null, val awayScore: String? = null)
+data class SportsDbLiveScore(val eventId: String, val status: String, val progress: String? = null, val homeScore: String? = null, val awayScore: String? = null,
+    val updatedMillis: Long? = null)
 
 object SportsDbLive {
     const val MAX_SPORTS = 3
     const val FRESH_MILLIS = 10L * 60 * 1000
+    const val STALE_MILLIS = 3L * 60 * 60 * 1000
     private const val MAX_SCORES = 500
     private val PATHS = mapOf("soccer" to "Soccer", "basketball" to "Basketball", "ice-hockey" to "Ice_Hockey", "baseball" to "Baseball",
         "american-football" to "American_Football")
     private val SKIPPED = SportsDbEvents.SKIPPED + "post"
     private val MINUTE = Regex("[0-9]{1,3}(\\+[0-9]{1,2})?")
+    private val UPDATED = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    private val UPDATED_ZONE = ZoneId.of("Europe/London")
     val SPORTS: Set<String> = PATHS.keys
 
     fun path(sport: String): String? = PATHS[sport]
@@ -27,9 +34,12 @@ object SportsDbLive {
         val array = listOf("livescore", "livescores", "events").firstNotNullOfOrNull { root.optJSONArray(it) } ?: return emptyList()
         return (0 until minOf(array.length(), MAX_SCORES)).mapNotNull { array.optJSONObject(it) }.mapNotNull { item ->
             val id = item.value("idEvent")?.takeIf { it.length <= 20 } ?: return@mapNotNull null
-            SportsDbLiveScore(id, item.value("strStatus").orEmpty(), item.value("strProgress"), item.value("intHomeScore"), item.value("intAwayScore"))
+            SportsDbLiveScore(id, item.value("strStatus").orEmpty(), item.value("strProgress"), item.value("intHomeScore"), item.value("intAwayScore"),
+                item.value("updated")?.let(::updated))
         }
     }
+
+    internal fun updated(value: String): Long? = runCatching { LocalDateTime.parse(value.trim(), UPDATED).atZone(UPDATED_ZONE).toInstant().toEpochMilli() }.getOrNull()
 
     fun merge(fixtures: List<SportsFixture>, scores: Map<String, SportsDbLiveScore>, nowMillis: Long): List<SportsFixture> =
         if (scores.isEmpty()) fixtures else fixtures.map { fixture ->
@@ -41,6 +51,7 @@ object SportsDbLive {
         val code = SportsGuide.normalise(raw).ifEmpty { SportsGuide.normalise(score.progress.orEmpty()).takeIf { it in SportsDbEvents.FINISHED }.orEmpty() }
         if (code in SKIPPED || code in SportsDbEvents.NOT_STARTED || (code.isEmpty() && fixture.startMillis > nowMillis)) return fixture
         val status = if (code in SportsDbEvents.FINISHED) FixtureStatus.FINAL else FixtureStatus.LIVE
+        if (status == FixtureStatus.LIVE && score.updatedMillis?.let { nowMillis - it > STALE_MILLIS } == true) return fixture
         val live = status == FixtureStatus.LIVE
         val home = score.homeScore?.trim()?.takeIf { it.isNotEmpty() && it.length <= 8 }
         val away = score.awayScore?.trim()?.takeIf { it.isNotEmpty() && it.length <= 8 }
@@ -62,7 +73,8 @@ object SportsTv {
     private const val MATCH_WINDOW_MILLIS = 6L * 60 * 60 * 1000
     private val ALIASES = mapOf("US" to listOf("USA", "United States of America"), "GB" to listOf("UK", "England", "Scotland", "Wales", "Northern Ireland",
         "Great Britain"), "IE" to listOf("Republic of Ireland"), "KR" to listOf("Korea"), "NL" to listOf("Holland", "The Netherlands"), "CZ" to listOf("Czechia", "Czech Republic"),
-        "TR" to listOf("Turkey", "Türkiye"))
+        "TR" to listOf("Turkey", "Türkiye"), "HK" to listOf("Hong Kong"), "MO" to listOf("Macau"), "MK" to listOf("Macedonia"), "CD" to listOf("DR Congo"),
+        "CI" to listOf("Ivory Coast"))
 
     fun parse(json: String): List<SportsTvChannel> {
         val root = JSONObject(json)
@@ -81,7 +93,8 @@ object SportsTv {
     fun countryNames(code: String?): Set<String> {
         val iso = code?.trim()?.uppercase(Locale.ROOT)?.takeIf { it.length == 2 && it.all { char -> char in 'A'..'Z' } } ?: return emptySet()
         val english = runCatching { Locale.Builder().setRegion(iso).build().getDisplayCountry(Locale.ENGLISH) }.getOrNull()
-        return (listOfNotNull(english) + ALIASES[iso].orEmpty()).map(SportsGuide::normalise).filter { it.length >= 2 }.toSet()
+        val written = english?.replace("&", "and")?.replace("St. ", "Saint ")
+        return (listOfNotNull(english, written) + ALIASES[iso].orEmpty()).map(SportsGuide::normalise).filter { it.length >= 2 }.toSet()
     }
 
     fun wanted(fixtures: List<SportsFixture>, favourites: Set<String>, nowMillis: Long): List<SportsFixture> = fixtures.filter {

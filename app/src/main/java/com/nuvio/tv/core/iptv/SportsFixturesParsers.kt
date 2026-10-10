@@ -59,9 +59,15 @@ object EspnScoreboard {
         val venue = (competition?.optJSONObject("venue") ?: event.optJSONObject("venue"))?.let { it.text("fullName") ?: it.text("displayName") }?.take(MAX_TEXT)
         val round = (event.optJSONObject("week") ?: competition?.optJSONObject("week"))?.optIntOrNull("number")?.takeIf { it in 1..99 }
         val period = statusJson?.optIntOrNull("period")?.takeIf { it in 0..30 && status == FixtureStatus.LIVE }
-        val clock = statusJson?.text("displayClock")?.takeIf { status == FixtureStatus.LIVE && it.length <= 12 }
-        val homeLine = if (started) FixtureLine(homeScore, periods(home, homeScore)) else null
-        val awayLine = if (started) FixtureLine(awayScore, periods(away, awayScore)) else null
+        val events = if (started && league.sport in EVENT_SPORTS) events(competition, league.sport, home!!, away!!) else emptyList()
+        val shownClock = statusJson?.text("displayClock")?.takeIf { status == FixtureStatus.LIVE && it.length <= 12 }
+        val stale = shownClock != null && SportsLines.behind(shownClock, events.mapNotNull { it.clock })
+        val clock = shownClock.takeIf { !stale }
+        val homePeriods = periods(home, homeScore)
+        val awayPeriods = periods(away, awayScore)
+        val unfilled = listOf(home to homePeriods, away to awayPeriods).any { (competitor, lines) -> lines.isEmpty() && (competitor?.optJSONArray("linescores")?.length() ?: 0) > 0 }
+        val homeLine = if (started) FixtureLine(homeScore, if (unfilled) emptyList() else homePeriods) else null
+        val awayLine = if (started) FixtureLine(awayScore, if (unfilled) emptyList() else awayPeriods) else null
         val situation = if (paired && status == FixtureStatus.LIVE) competition?.optJSONObject("situation")?.let { situation(it, home!!, away!!) } else null
         val extra = when {
             !started -> null
@@ -69,9 +75,8 @@ object EspnScoreboard {
             league.sport == "baseball" && status == FixtureStatus.LIVE -> baseball(statusJson, type, competition?.optJSONObject("situation"))
             else -> null
         }
-        val events = if (started && league.sport in EVENT_SPORTS) events(competition, league.sport, home!!, away!!) else emptyList()
         return SportsFixture(id, league.id, league.sport, title, homeTeam.takeIf { paired }, awayTeam.takeIf { paired }, start, status, score,
-            type?.text("shortDetail") ?: type?.text("detail"), broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra, events)
+            (if (stale) type?.text("description") else null) ?: type?.text("shortDetail") ?: type?.text("detail"), broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra, events)
     }
 
     private fun events(competition: JSONObject?, sport: String, home: JSONObject, away: JSONObject): List<FixtureEvent> {
@@ -152,7 +157,7 @@ object EspnScoreboard {
         if (skipped(type)) return null
         val status = status(type)
         if (status == FixtureStatus.FINAL && start < nowMillis - RECENT_MILLIS) return null
-        if (status == FixtureStatus.SCHEDULED && competition.has("timeValid") && !competition.optBoolean("timeValid")) return null
+        if ((status == FixtureStatus.SCHEDULED || status == FixtureStatus.FINAL && start > nowMillis) && competition.has("timeValid") && !competition.optBoolean("timeValid")) return null
         val players = competitors(competition).take(2).takeIf { it.size == 2 } ?: return null
         val home = players.firstOrNull { it.text("homeAway") == "home" } ?: players.minBy { it.optIntOrNull("order") ?: 9 }
         val away = players.first { it !== home }
@@ -465,7 +470,7 @@ object EspnScoreboard {
             else -> null
         }
         val last = json.optJSONObject("lastPlay")
-        val lastPlay = last?.text("text")?.replace(SPACES, " ")?.take(MAX_PLAY)
+        val lastPlay = last?.text("text")?.replace(SPACES, " ")?.replaceFirst(SNAP, "")?.take(MAX_PLAY)
         val probability = last?.optJSONObject("probability") ?: json.optJSONObject("probability")
         val homeWin = probability?.let { if (it.isNull("homeWinPercentage")) null else it.optDouble("homeWinPercentage", Double.NaN) }
             ?.takeIf { !it.isNaN() && it >= 0 }?.let { if (it <= 1.0) it * 100 else it }?.takeIf { it <= 100.0 }?.let { Math.round(it).toInt() }
@@ -493,6 +498,7 @@ object EspnScoreboard {
     private val SKIPPED = listOf("POSTPONED", "CANCELED", "CANCELLED", "ABANDONED", "FORFEIT", "SUSPENDED", "DELAYED")
     private val COLOUR = Regex("[0-9A-Fa-f]{6}")
     private val SPACES = Regex("\\s+")
+    private val SNAP = Regex("^\\(\\d{1,2}:\\d{2}\\)\\s+")
     private val RECORD = Regex("\\d{1,3}(-\\d{1,3}){1,3}")
     private val INITIAL = Regex("""[\p{L}.\-]{1,6}\.\s+(.+)""")
     private val TEE = Regex("""^\w{3} (\w{3}) (\d{1,2}) (\d{1,2}):(\d{2}):\d{2} \w+ (\d{4})$""")
@@ -512,11 +518,21 @@ object SportsLines {
     fun perPeriod(values: List<String>, total: String?): List<String> {
         val numbers = values.map { it.toIntOrNull() ?: return values }
         val sum = total?.toIntOrNull() ?: return values
+        if (sum > 0 && numbers.all { it == 0 }) return emptyList()
         val played = numbers.dropLastWhile { it == 0 }.takeIf { it.size < numbers.size && it.size >= 2 && it.last() == sum && it.sum() != sum }
         val list = played ?: numbers
         if (list.size < 2 || list.sum() == sum || list.last() != sum || list.zipWithNext().any { (a, b) -> b < a }) return values
         return list.mapIndexed { index, value -> (value - (list.getOrNull(index - 1) ?: 0)).toString() }
     }
+
+    fun behind(clock: String, later: List<String>): Boolean {
+        val shown = minute(clock) ?: return false
+        return later.mapNotNull(::minute).any { it > shown + 1 }
+    }
+
+    private fun minute(clock: String): Int? = MINUTE.find(clock.trim())?.groupValues?.get(1)?.toIntOrNull()
+
+    private val MINUTE = Regex("^(\\d{1,3})'")
 }
 
 object SportsDbEvents {

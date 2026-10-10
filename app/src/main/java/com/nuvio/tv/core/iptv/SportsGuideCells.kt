@@ -28,7 +28,12 @@ object SportsGuideCells {
     const val SOON_MILLIS = 30L * 60 * 1000
     private val BADGES = mapOf("a-league-men" to "ALM", "a-league-women" to "ALW", "super-rugby" to "SRP", "big-bash" to "BBL",
         "epl" to "EPL", "champions-league" to "UCL", "la-liga" to "LIGA", "serie-a" to "SA", "bundesliga" to "BUN", "pga" to "PGA",
-        "nascar-cup" to "NAS", "urc" to "URC", "college-football" to "CFB")
+        "nascar-cup" to "NAS", "urc" to "URC", "college-football" to "CFB",
+        "ligue-1" to "L1", "europa-league" to "UEL", "conference-league" to "UECL", "championship" to "EFL", "fa-cup" to "FAC", "efl-cup" to "EFLC",
+        "scottish-premiership" to "SPFL", "eredivisie" to "ERE", "primeira-liga" to "POR", "super-lig" to "TSL", "saudi-pro-league" to "SPL", "liga-mx" to "LMX",
+        "womens-champions-league" to "UWCL", "g-league" to "GL", "womens-college-basketball" to "WCBB", "college-hockey" to "CHK", "womens-college-hockey" to "WCHK",
+        "dp-world-tour" to "DPWT", "nascar-xfinity" to "NXS", "nascar-truck" to "NTS", "indycar" to "INDY", "premiership-rugby" to "PREM", "top-14" to "T14",
+        "champions-cup" to "ECC", "six-nations" to "6N", "rugby-championship" to "TRC")
     private val ALIASES by lazy {
         SportsLeagues.ALL.flatMap { league -> (league.aliases + league.name).map { SportsGuide.normalise(it) to league.id } }
             .filter { it.first.length >= 2 }.sortedByDescending { it.first.length }

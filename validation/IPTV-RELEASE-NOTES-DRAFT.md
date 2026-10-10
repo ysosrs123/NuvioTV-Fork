@@ -718,6 +718,20 @@ Fixes from the night review of 10 October:
   leaves a full-size partial file behind; deleting a recording at the moment its upload
   finishes no longer leaves the file on the share.
 
+Sport data (live capture of 11 October):
+- College football shows the last play without the clock prefix, and its timeline follows
+  the real length of a college game.
+- NHL Game Centre shows a power play as soon as a minor or major penalty is called.
+- Live rugby no longer shows a stuck "1'" clock or empty "0 0" half scores.
+- Football substitutions name both players ("Timber replaces White").
+- TheSportsDB: games left "live" for hours by the provider are no longer shown as live;
+  hockey and basketball clocks count the right way; TV channel countries such as Bosnia and
+  Herzegovina, Hong Kong and Ivory Coast are recognised.
+- 34 more leagues can be followed (off until you pick them), including Ligue 1, Europa
+  League, Conference League, EFL Championship, FA Cup, MLS, Liga MX, WSL, CFL, college
+  hockey, LPGA, DP World Tour, LIV, IndyCar, NASCAR Xfinity and Truck, Premiership Rugby,
+  Top 14, Champions Cup, Six Nations and The Rugby Championship.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

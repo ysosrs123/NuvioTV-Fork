@@ -125,6 +125,59 @@ class SportsDbExtrasTest {
         assertEquals(listOf("Optus Sport", "Stan Sport"), added.single().broadcasters)
     }
 
+    @Test fun realLivescoresSkipRowsLeftLiveForHoursAndClocksCountUp() {
+        val at = Instant.parse("2026-10-10T19:10:00Z").toEpochMilli()
+        val scores = SportsDbLive.parse(sample("tsdb-livescore-all-real-20261011.json")).associateBy { it.eventId }
+        assertEquals(11, scores.size)
+        assertEquals(Instant.parse("2026-10-10T19:08:30Z").toEpochMilli(), scores.getValue("2519046").updatedMillis)
+        assertEquals(Instant.parse("2026-10-10T05:35:30Z").toEpochMilli(), SportsDbLive.updated("2026-10-10 06:35:30"))
+        assertNull(SportsDbLive.updated("yesterday"))
+        fun merged(id: String, start: String, sport: String = "ice-hockey") =
+            SportsDbLive.merge(listOf(fixture(id, "Home", "Away", Instant.parse(start).toEpochMilli()).copy(sport = sport)), scores, at).single()
+        listOf("2559218" to "2026-10-09T22:00:00Z", "2600752" to "2026-10-10T01:00:00Z", "2526140" to "2026-10-10T01:05:00Z").forEach { (id, start) ->
+            val stuck = merged(id, start)
+            assertEquals(id, FixtureStatus.SCHEDULED, stuck.status)
+            assertNull(id, stuck.score)
+        }
+        val hockey = merged("2519046", "2026-10-10T17:45:00Z")
+        assertEquals(FixtureStatus.LIVE, hockey.status)
+        assertEquals("4–3", hockey.score)
+        assertEquals(2, hockey.period)
+        assertEquals("17'", hockey.clock)
+        assertEquals(82.75, SportsMarkers.minutes("ice-hockey", hockey.period, hockey.clock)!!, 0.001)
+        assertEquals(85.0, (at - hockey.startMillis) / 60_000.0, 0.001)
+        assertEquals(58.25, SportsMarkers.minutes("ice-hockey", 2, "17:00")!!, 0.001)
+        val interval = merged("2522049", "2026-10-10T17:30:00Z")
+        assertEquals("BT", interval.detail)
+        assertNull(interval.period)
+        assertEquals(FixtureStatus.SCHEDULED, merged("2521845", "2026-10-10T17:00:00Z").status)
+        val overtime = merged("2584724", "2026-10-10T16:00:00Z", "basketball")
+        assertEquals(FixtureStatus.FINAL, overtime.status)
+        assertEquals("99–93", overtime.score)
+        val second = merged("2564520", "2026-10-10T17:00:00Z", "soccer")
+        assertEquals(2, second.period)
+        assertEquals("46'", second.clock)
+        val half = merged("2406578", "2026-10-10T18:00:00Z", "soccer")
+        assertEquals("HT", half.detail)
+        assertEquals("45+6'", half.clock)
+        assertEquals(FixtureStatus.FINAL, merged("2611920", "2026-10-10T16:00:00Z", "soccer").status)
+    }
+
+    @Test fun realTvChannelsMatchCountriesWrittenOut() {
+        val channels = SportsTv.parse(sample("tsdb-lookuptv-real-20261011.json"))
+        assertEquals(9, channels.size)
+        assertEquals(listOf("Arena Sport 1 BiH"), SportsTv.names(channels, "BA"))
+        assertEquals(listOf("TOD KSA"), SportsTv.names(channels, "SA"))
+        assertEquals(listOf("BeIN Sports 4 Qatar"), SportsTv.names(channels, "QA"))
+        assertEquals(listOf("Nova Sport 5 CZ"), SportsTv.names(channels, "CZ"))
+        assertEquals(listOf("Ligue 1+ 4 FR"), SportsTv.names(channels, "FR"))
+        assertEquals(channels.take(SportsTv.MAX_CHANNELS).map { it.name }, SportsTv.names(channels, "AU"))
+        assertTrue("saint kitts and nevis" in SportsTv.countryNames("KN"))
+        assertTrue("trinidad and tobago" in SportsTv.countryNames("TT"))
+        assertTrue("hong kong" in SportsTv.countryNames("HK"))
+        assertTrue("ivory coast" in SportsTv.countryNames("CI"))
+    }
+
     @Test fun tvLookupIsOnlyForFollowedUnfinishedGames() {
         val favourites = setOf("epl:Fulham")
         val games = listOf(fixture("1", "Fulham", "Brentford"), fixture("2", "Everton", "Chelsea"), fixture("3", "Brentford", "Fulham", status = FixtureStatus.FINAL),
