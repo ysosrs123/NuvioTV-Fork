@@ -333,6 +333,20 @@ class IptvGuideStoreTest {
         assertTrue(store.sportsMatches(1, listOf(ref.feedId), start + 7 * 3_600_000, start + 8 * 3_600_000).isEmpty())
         assertTrue(store.sportsMatches(2, emptyList(), now, now).isEmpty())
     }
+    @Test fun sportsChannelsKeepTheEarliestSportProgrammePerChannel() {
+        val ref = feed()
+        val rows = programme("Cooking at Home", "20261005000000 +0000", "20261005010000 +0000") +
+            programme("Premier League: Leeds v Hull", "20261005010000 +0000", "20261005030000 +0000") +
+            programme("AFL: Carlton v Geelong", "20261005100000 +0000", "20261005120000 +0000")
+        assertEquals(RefreshDecision.PUBLISH, publish(ref, xml(rows)))
+        val now = start + 30 * 60_000
+        val found = store.sportsChannels(1, listOf(ref.feedId), now, now + 24 * 3_600_000)
+        assertEquals(listOf("Premier League: Leeds v Hull"), found.map { it.programme.titles.first().text })
+        assertEquals(GuideKey(ref.feedId, "one"), found.single().key)
+        assertEquals(listOf("AFL: Carlton v Geelong"), store.sportsChannels(1, listOf(ref.feedId), start + 4 * 3_600_000, start + 24 * 3_600_000)
+            .map { it.programme.titles.first().text })
+        assertTrue(store.sportsChannels(2, emptyList(), now, now).isEmpty())
+    }
     @Test fun sportsMatchesCanSkipProgrammesThatStartedLongBefore() {
         val ref = feed()
         val rows = programme("Premier League: Leeds v Hull", "20261005000000 +0000", "20261005080000 +0000") +

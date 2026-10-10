@@ -7,6 +7,7 @@ import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.SportsCatchup
 import com.nuvio.tv.core.iptv.SportsChannelPick
+import com.nuvio.tv.core.iptv.SportsChannelPicks
 import com.nuvio.tv.core.iptv.SportsChannelRules
 import com.nuvio.tv.core.iptv.SportsDays
 import com.nuvio.tv.core.iptv.SportsDbLeague
@@ -66,7 +67,7 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
             val current = upcoming + recent
             if (current.isEmpty()) return@withContext emptyMap()
             val rules = preferences.channelRules
-            val excluded = (hiddenCategories.take(500) + rules.categories(SportsPickList.EXCLUDED)).take(500).toSet()
+            val excluded = (hiddenCategories.take(500) + exactCategories(ref, rules.categories(SportsPickList.EXCLUDED)).flatten()).take(500).toSet()
             val associations = catalogue.guideAssociations(ref)
             val order = (associations.priority + associations.feedIds).distinct().take(16)
             val source = preferences.channelSource
@@ -85,15 +86,16 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
             val byKey = unique.groupBy { it.key }
             val listings = guideRows.flatMap { row -> byKey[row.guide.key].orEmpty().map { FixtureListing(row.item.channel.id, it.programme) } }
             val terms = if (source.broadcasters) SportsFixtureMatching.searchTerms(current.flatMap { it.broadcasters }.distinct()) else emptyList()
-            val preferredCategories = rules.categories(SportsPickList.PREFERRED).filter { it !in excluded }.take(MAX_PREFERRED_CATEGORIES)
-            val broadcastRows = terms.flatMap { term ->
-                (listOf(IptvBrowseQuery(search = term, excludedCategories = excluded) to ROWS_PER_TERM) +
-                    preferredCategories.map { IptvBrowseQuery(search = term, category = it) to ROWS_PER_PREFERRED }).flatMap { (query, limit) ->
-                    currentCoroutineContext().ensureActive()
-                    try { browse.page(ref, query, null, limit).channels }
-                    catch (cancel: CancellationException) { throw cancel }
-                    catch (error: Exception) { IptvLog.failure("sports channels", error); emptyList() }
+            val broadcastRows = if (terms.isEmpty()) emptyList() else buildList<IptvListedChannel> {
+                val all = quiet("sports channels") { browse.searchAny(ref, terms, excludedCategories = excluded, limit = ROWS_PER_SEARCH) }
+                addAll(all)
+                if (all.size >= ROWS_PER_SEARCH && terms.size > 1) for (term in terms) {
+                    if (size >= MAX_BROADCAST_ROWS) break
+                    addAll(quiet("sports channels") { browse.searchAny(ref, listOf(term), excludedCategories = excluded, limit = minOf(ROWS_PER_TERM, MAX_BROADCAST_ROWS - size)) })
                 }
+                val preferred = exactCategories(ref, rules.categories(SportsPickList.PREFERRED)).map { names -> names.filter { it !in excluded }.toSet() }
+                    .filter { it.isNotEmpty() }.take(MAX_PREFERRED_CATEGORIES)
+                for (names in preferred) addAll(quiet("sports channels") { browse.searchAny(ref, terms, categories = names, limit = ROWS_PER_PREFERRED) })
             }
             val rows = (guideRows + broadcastRows).distinctBy { it.item.channel.id }
             val channels = rows.map { FixtureChannel(it.item.channel.id, it.item.overlay.customName ?: it.item.channel.data.name,
@@ -105,23 +107,20 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
         }
 
     fun ranked(links: List<IptvFixtureLink>, rules: SportsChannelRules = preferences.channelRules): List<IptvFixtureLink> =
-        rules.ranked(links.distinctBy { it.row.item.channel.id }) { it.row.item.channel.id to it.row.item.attributes[CATEGORY_ATTRIBUTE] }
+        rules.ranked(links.sortedBy { it.reason.ordinal }.distinctBy { it.row.item.channel.id }) { it.row.item.channel.id to it.row.item.attributes[CATEGORY_ATTRIBUTE] }
+            .sortedBy { it.reason.ordinal }
 
     suspend fun alwaysChannels(ref: IptvSourceRef, hiddenCategories: Set<String>, limit: Int = MAX_ALWAYS): List<IptvListedChannel> =
         withContext(Dispatchers.IO) {
             val rules = preferences.channelRules
             if (rules.always.isEmpty()) return@withContext emptyList()
             val hidden = hiddenCategories.map { it.trim() }.toSet()
-            val rows = mutableListOf<IptvListedChannel>()
-            for (category in rules.categories(SportsPickList.ALWAYS)) {
+            val picked = rules.channels(SportsPickList.ALWAYS).map { it.value }.take(limit)
+            val rows = quiet("sports always channels") { browse.channels(ref, picked) }.toMutableList()
+            val names = exactCategories(ref, rules.categories(SportsPickList.ALWAYS)).flatten().filter { it.trim() !in hidden }.take(MAX_ALWAYS_QUERIES)
+            for (name in names) {
                 if (rows.size >= limit) break
-                if (category.trim() in hidden) continue
-                rows += quietPage(ref, IptvBrowseQuery(category = category), (limit - rows.size).coerceIn(1, ROWS_PER_ALWAYS))
-            }
-            for (pick in rules.channels(SportsPickList.ALWAYS)) {
-                if (rows.size >= limit) break
-                if (rows.any { it.item.channel.id == pick.value }) continue
-                rows += quietPage(ref, IptvBrowseQuery(search = pick.label.take(256)), ROWS_PER_TERM).filter { it.item.channel.id == pick.value }
+                rows += quiet("sports always channels") { browse.page(ref, IptvBrowseQuery(category = name), null, (limit - rows.size).coerceIn(1, ROWS_PER_ALWAYS)).channels }
             }
             rows.filter { (it.item.attributes[CATEGORY_ATTRIBUTE]?.trim() ?: "") !in hidden && !it.item.overlay.hidden }
                 .distinctBy { it.item.channel.id }.take(limit)
@@ -155,10 +154,21 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
         }.distinctBy { it.pick.value }.take(limit)
     }
 
-    private suspend fun quietPage(ref: IptvSourceRef, query: IptvBrowseQuery, limit: Int): List<IptvListedChannel> =
-        try { browse.page(ref, query, null, limit).channels }
+    private suspend fun quiet(label: String, block: suspend () -> List<IptvListedChannel>): List<IptvListedChannel> {
+        currentCoroutineContext().ensureActive()
+        return try { block() }
         catch (cancel: CancellationException) { throw cancel }
-        catch (error: Exception) { IptvLog.failure("sports always channels", error); emptyList() }
+        catch (error: Exception) { IptvLog.failure(label, error); emptyList() }
+    }
+
+    private fun exactCategories(ref: IptvSourceRef, picks: List<String>): List<List<String>> {
+        val wanted = picks.map(SportsChannelPicks::category).filter(String::isNotEmpty).distinct()
+        if (wanted.isEmpty()) return emptyList()
+        val names = try { catalogue.categories(ref).map { it.name } }
+            catch (error: Exception) { IptvLog.failure("sports categories", error); emptyList() }
+        val byKey = names.filter { it.length <= 240 }.groupBy(SportsChannelPicks::category)
+        return wanted.mapNotNull { byKey[it] }
+    }
 
     private fun syncDays() {
         try { guideDays()?.let(SportsDays::guideDays) }
@@ -170,10 +180,13 @@ class IptvSportsFixturesRepository(private val preferences: IptvSportsPreference
         const val NEIGHBOUR_SLICES = 3
         const val PROGRAMMES_PER_SLICE = 400
         const val BUSY_PROGRAMMES_PER_SLICE = 2000
-        const val ROWS_PER_TERM = 200
+        const val ROWS_PER_SEARCH = 200
+        const val ROWS_PER_TERM = 150
+        const val MAX_BROADCAST_ROWS = 1200
+        const val MAX_ALWAYS_QUERIES = 12
         const val CATEGORY_ATTRIBUTE = "group-title"
         const val MAX_PREFERRED_CATEGORIES = 4
-        const val ROWS_PER_PREFERRED = 60
+        const val ROWS_PER_PREFERRED = 100
         const val MAX_ALWAYS = 120
         const val ROWS_PER_ALWAYS = 120
         const val MAX_PICK_CHANNELS = 60

@@ -50,7 +50,7 @@ object SportsFixtureMatching {
                 for (channel in visible) if (brands[channel.id]?.let { sameBrand(wanted, it) } == true)
                     found += FixtureLink(channel.id, FixtureLinkReason.BROADCASTER, broadcaster = broadcaster) to Long.MAX_VALUE
             }
-            fixture.id to found.sortedWith(compareBy({ rank[it.first.channelId] ?: 2 }, { it.first.reason.ordinal }, { it.second }, { order[it.first.channelId] ?: Int.MAX_VALUE }))
+            fixture.id to found.sortedWith(compareBy({ it.first.reason.ordinal }, { rank[it.first.channelId] ?: 2 }, { it.second }, { order[it.first.channelId] ?: Int.MAX_VALUE }))
                 .map { it.first }.distinctBy { it.channelId }.take(max)
         }.filterValues { it.isNotEmpty() }
     }

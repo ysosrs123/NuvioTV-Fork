@@ -22,10 +22,18 @@ class SportsChannelRulesTest {
     private fun linked(rules: SportsChannelRules) =
         SportsFixtureMatching.link(listOf(afl), channels, listings, emptySet(), start, rules = rules).getValue("401").map { it.channelId }
 
-    @Test fun preferredChannelsAndCategoriesRankFirst() {
+    @Test fun preferredChannelsAndCategoriesRankFirstWithinTheSameMatch() {
         assertEquals(listOf("footy", "guide", "league", "seven"), linked(SportsChannelRules()))
-        assertEquals(listOf("seven", "footy", "guide", "league"), linked(SportsChannelRules(preferred = listOf(category("au | sport")))))
-        assertEquals(listOf("league", "seven", "footy", "guide"), linked(SportsChannelRules(preferred = listOf(category("AU | Sport"), channel("league")))))
+        assertEquals(listOf("guide", "footy", "league", "seven"), linked(SportsChannelRules(preferred = listOf(category("uk | sport")))))
+        assertEquals(listOf("guide", "footy", "league", "seven"), linked(SportsChannelRules(preferred = listOf(channel("guide")))))
+    }
+
+    @Test fun preferredChannelsMatchedByBrandOrLeagueDoNotBeatBothTeams() {
+        assertEquals(listOf("footy", "guide", "league", "seven"), linked(SportsChannelRules(preferred = listOf(category("au | sport")))))
+        assertEquals(listOf("footy", "guide", "league", "seven"), linked(SportsChannelRules(preferred = listOf(category("AU | Sport"), channel("league")))))
+        val broadcastOnly = listings.filter { it.channelId != "footy" }
+        assertEquals(listOf("guide", "league", "seven", "footy"), SportsFixtureMatching.link(listOf(afl), channels, broadcastOnly, emptySet(), start,
+            rules = SportsChannelRules(preferred = listOf(channel("seven")))).getValue("401").map { it.channelId })
     }
 
     @Test fun excludedChannelsAndCategoriesAreNeverOffered() {

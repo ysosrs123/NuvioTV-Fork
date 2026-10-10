@@ -90,6 +90,19 @@ class IptvCatalogueStoreTest {
         assertEquals(listOf("Alpha", "Bravo"), store.page(ref, IptvBrowseQuery(search = "a")).items.map { it.channel.data.name }.filter { it in setOf("Alpha", "Bravo") })
     }
 
+    @Test fun itemsByIdAndSearchAnyFindPicksAndBroadcasters() {
+        val ref = source()
+        fun grouped(id: Int, name: String, group: String?) = IptvCatalogueRecord(ChannelCandidate(name, "https://fixture.invalid/live/$id", providerId = id.toString()),
+            group?.let { mapOf("group-title" to it) } ?: emptyMap())
+        publish(ref, listOf(grouped(1, "Fox Footy HD", "AU Sport"), grouped(2, "Sky Sports Main", "UK Sports "), grouped(3, "Fox News", "News"), grouped(4, "Kayo 1", null)))
+        val ids = store.page(ref).items.associate { it.channel.data.name to it.channel.id }
+        assertEquals(listOf("Kayo 1", "Fox Footy HD"), store.items(ref, listOf(ids.getValue("Kayo 1"), "missing", ids.getValue("Fox Footy HD"))).map { it.channel.data.name })
+        assertEquals(listOf("Fox Footy HD", "Fox News", "Kayo 1"), store.searchAny(ref, listOf("fox", "KAYO")).map { it.channel.data.name })
+        assertEquals(listOf("Fox Footy HD", "Kayo 1"), store.searchAny(ref, listOf("fox", "kayo"), excludedCategories = setOf("News")).map { it.channel.data.name })
+        assertEquals(listOf("Sky Sports Main"), store.searchAny(ref, listOf("sky", "fox"), categories = setOf("UK Sports")).map { it.channel.data.name })
+        assertEquals(listOf("Fox Footy HD"), store.searchAny(ref, listOf("fox"), limit = 1).map { it.channel.data.name })
+        assertTrue(store.searchAny(ref, listOf(" ")).isEmpty())
+    }
     @Test fun accountGroupsAndSourceOrderPersistWithoutInvalidatingCatalogues() {
         val a = source(); val b = source(); val c = source(); val other = source(2)
         publish(a)

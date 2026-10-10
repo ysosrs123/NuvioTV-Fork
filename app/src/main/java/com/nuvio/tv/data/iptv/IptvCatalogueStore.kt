@@ -377,6 +377,38 @@ class IptvCatalogueStore(
             arrayOf(ref.profileId.toString(), ref.sourceId, source.activeGeneration.toString(), channelId)).use { if (it.moveToFirst()) readItem(it, ref) else null }
     }
 
+    fun items(ref: IptvSourceRef, ids: List<String>): List<IptvCatalogueItem> = transaction { db ->
+        require(ids.size <= 500 && ids.all { it.isNotBlank() && it.length <= 4096 })
+        val generation = source(db, ref).activeGeneration ?: return@transaction emptyList()
+        val wanted = ids.distinct()
+        if (wanted.isEmpty()) return@transaction emptyList()
+        val found = db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format,o.user_order FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.available=1 AND COALESCE(o.hidden,0)=0 AND c.id IN (${wanted.joinToString(",") { "?" }})",
+            arrayOf(ref.profileId.toString(), ref.sourceId, generation.toString(), *wanted.toTypedArray())).use { c -> buildList { while (c.moveToNext()) add(readItem(c, ref)) } }
+            .associateBy { it.channel.id }
+        wanted.mapNotNull(found::get)
+    }
+
+    fun searchAny(ref: IptvSourceRef, terms: List<String>, categories: Set<String> = emptySet(), excludedCategories: Set<String> = emptySet(),
+        limit: Int = 200): List<IptvCatalogueItem> = transaction { db ->
+        require(limit in 1..500 && terms.size <= 32 && terms.all { it.length <= 256 } && categories.size <= 500 && categories.all { it.length <= 240 })
+        require(excludedCategories.size <= 500 && excludedCategories.all { it.length <= 240 })
+        val names = terms.map { searchName(it.trim()) }.filter(String::isNotEmpty).distinct()
+        val generation = source(db, ref).activeGeneration ?: return@transaction emptyList()
+        if (names.isEmpty()) return@transaction emptyList()
+        val args = mutableListOf(ref.profileId.toString(), ref.sourceId, generation.toString())
+        val filters = browseFilters(IptvBrowseQuery(excludedCategories = if (categories.isEmpty()) excludedCategories else emptySet()), args)
+        val within = if (categories.isEmpty()) "" else " AND COALESCE(c.category,'') IN (${categories.joinToString(",") { "?" }})".also { args += categories }
+        val any = names.joinToString(" OR ", " AND (", ")") { "instr(COALESCE(o.search_name,c.search_name),?)>0" }.also { args += names }
+        args += limit.toString()
+        val selected = db.rawQuery("SELECT c.id FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=?$filters$within$any ORDER BY COALESCE(o.search_name,c.search_name),c.id LIMIT ?",
+            args.toTypedArray()).use { c -> buildList { while (c.moveToNext()) add(c.getString(0)) } }
+        if (selected.isEmpty()) return@transaction emptyList()
+        val found = db.rawQuery("SELECT c.*,o.custom_name,o.favourite_rank,o.hidden,o.guide_feed,o.guide_id,o.stream_format,o.user_order FROM catalogue c LEFT JOIN overlays o ON c.id=o.id AND o.profile=? WHERE c.source=? AND c.generation=? AND c.id IN (${selected.joinToString(",") { "?" }})",
+            arrayOf(ref.profileId.toString(), ref.sourceId, generation.toString(), *selected.toTypedArray())).use { c -> buildList { while (c.moveToNext()) add(readItem(c, ref)) } }
+            .associateBy { it.channel.id }
+        selected.mapNotNull(found::get)
+    }
+
     fun setGuideFeeds(ref: IptvSourceRef, feeds: List<IptvGuideRef>, priority: List<IptvGuideRef> = emptyList()) = transaction { db ->
         source(db, ref)
         require(feeds.size <= 16 && feeds.distinct().size == feeds.size && feeds.all { it.profileId == ref.profileId })

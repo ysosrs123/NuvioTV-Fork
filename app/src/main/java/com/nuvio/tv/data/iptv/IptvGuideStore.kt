@@ -222,6 +222,26 @@ class IptvGuideStore(
         found
     }
 
+    fun sportsChannels(profileId: Int, feedIds: List<String>, nowMillis: Long, untilMillis: Long, limit: Int = 500): List<IptvAiringMatch> = read { db ->
+        require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && limit in 1..5000 && untilMillis >= nowMillis)
+        feedIds.forEach { IptvGuideRef(profileId, it) }
+        val found = mutableListOf<IptvAiringMatch>()
+        for ((index, feed) in feedIds.withIndex()) {
+            val share = (limit - found.size) / (feedIds.size - index)
+            if (share <= 0) break
+            db.rawQuery("SELECT c.external_id,c.payload,p.payload FROM (SELECT q.id AS pid,MIN(q.start) AS earliest FROM feeds f CROSS JOIN programmes q WHERE f.id=? AND f.profile=? AND f.version=f.active_version AND q.stage=f.active_stage AND q.sport=1 AND q.precise=1 AND q.start<=? AND q.start>? AND (q.stop>? OR (q.stop IS NULL AND q.start>?)) GROUP BY q.external_id ORDER BY earliest,q.external_id LIMIT ?) m CROSS JOIN programmes p CROSS JOIN channels c WHERE p.id=m.pid AND c.stage=p.stage AND c.external_id=p.external_id ORDER BY m.earliest,p.external_id",
+                arrayOf(feed, profileId.toString(), untilMillis.toString(), (nowMillis - GUIDE_AIRING_LOOKBACK_MILLIS).toString(), nowMillis.toString(),
+                    (nowMillis - SPORTS_OPEN_ENDED_MILLIS).toString(), share.toString())).use { c ->
+                while (c.moveToNext()) {
+                    val id = c.getString(0)
+                    val channel = IptvGuideJson.channel(c.getString(1), id); val programme = IptvGuideJson.programme(c.getString(2), id)
+                    if (programme.start.precise) found += IptvAiringMatch(GuideKey(feed, id), channel, programme)
+                }
+            }
+        }
+        found
+    }
+
     fun beginRefresh(ref: IptvGuideRef): IptvGuideTicket = transaction { db -> beginRefresh(db, ref) }
 
     fun prepareRefresh(ref: IptvGuideRef, window: IptvGuideWindow, filterKey: String? = null): IptvGuideRefreshRequest = transaction { db ->

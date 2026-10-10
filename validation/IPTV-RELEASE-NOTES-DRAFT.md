@@ -701,6 +701,12 @@ Fixes from the night review of 10 October:
   device can decode; the Live TV menu and display matching no longer read settings while
   the screen is drawing; pressing up or down at the edge of the sport cards no longer gets
   stuck.
+- Sport: Watch on and other feeds prefer a channel whose guide lists both teams, even over a
+  preferred channel matched only by broadcaster or league; channels picked for "Always in
+  Sport only" always appear, even after a rename or alongside large categories; Sport only
+  lists sport channels for the full next 24 hours on large guides; category picks work
+  across sources whatever the letter case; channel matching runs far fewer searches, so
+  Sport loads faster; Stalker expiry dates use the portal's time zone.
 
 ## Ready below the UI (screens pending)
 

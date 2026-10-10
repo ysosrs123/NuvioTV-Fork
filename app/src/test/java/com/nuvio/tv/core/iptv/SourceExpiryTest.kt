@@ -41,12 +41,22 @@ class SourceExpiryTest {
     }
 
     @Test fun stalkerBillingDateIsReadFromTheProfile() {
-        assertEquals(at(12, 3, 2027, hour = 0), SourceExpiries.stalkerProfile("""{"js":{"expire_billing_date":"2027-03-12 00:00:00"}}"""))
-        assertEquals(at(12, 3, 2027, hour = 0), SourceExpiries.stalkerProfile("""{"js":{"expire_billing_date":"2027-03-12"}}"""))
+        assertEquals(at(12, 3, 2027, hour = 0), SourceExpiries.stalkerProfile("""{"js":{"expire_billing_date":"2027-03-12 00:00:00"}}""", utc))
+        assertEquals(at(12, 3, 2027, hour = 0), SourceExpiries.stalkerProfile("""{"js":{"expire_billing_date":"2027-03-12"}}""", utc))
         assertNull(SourceExpiries.stalkerProfile("""{"js":{"expire_billing_date":"0000-00-00 00:00:00"}}"""))
         assertNull(SourceExpiries.stalkerProfile("""{"js":{"expire_billing_date":"2027-02-30 00:00:00"}}"""))
         assertNull(SourceExpiries.stalkerProfile("""{"js":{"expire_billing_date":null}}"""))
         assertNull(SourceExpiries.stalkerProfile("""{"js":{}}"""))
         assertNull(SourceExpiries.stalkerProfile("not json"))
+    }
+
+    @Test fun stalkerBillingDateUsesThePortalTimeZoneThenTheDevice() {
+        val sydney = ZoneId.of("Australia/Sydney")
+        val midnight = ZonedDateTime.of(2027, 3, 12, 0, 0, 0, 0, ZoneId.of("Europe/Kiev")).toEpochSecond()
+        assertEquals(midnight, SourceExpiries.stalkerProfile("""{"js":{"expire_billing_date":"2027-03-12 00:00:00","default_timezone":"Europe/Kiev"}}""", sydney))
+        assertEquals(ZonedDateTime.of(2027, 3, 12, 0, 0, 0, 0, sydney).toEpochSecond(),
+            SourceExpiries.stalkerProfile("""{"js":{"expire_billing_date":"2027-03-12 00:00:00","default_timezone":"Nowhere/Else"}}""", sydney))
+        assertEquals(ZonedDateTime.of(2027, 3, 12, 0, 0, 0, 0, sydney).toEpochSecond(),
+            SourceExpiries.stalkerProfile("""{"js":{"expire_billing_date":"2027-03-12"}}""", sydney))
     }
 }

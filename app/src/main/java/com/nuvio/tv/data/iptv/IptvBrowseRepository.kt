@@ -34,6 +34,22 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
         IptvBrowsePage(page, listed(ref.profileId, page.guides, page.items))
     }
 
+    suspend fun channels(ref: IptvSourceRef, ids: List<String>): List<IptvListedChannel> = withContext(Dispatchers.IO) {
+        val items = ids.filter { it.isNotBlank() && it.length <= 4096 }.distinct().take(500).let { if (it.isEmpty()) emptyList() else catalogue.items(ref, it) }
+        if (items.isEmpty()) return@withContext emptyList()
+        val associations = catalogue.guideAssociations(ref)
+        items.chunked(200).flatMap { listed(ref.profileId, associations, it) }
+    }
+
+    suspend fun searchAny(ref: IptvSourceRef, terms: List<String>, categories: Set<String> = emptySet(), excludedCategories: Set<String> = emptySet(),
+        limit: Int = 200): List<IptvListedChannel> = withContext(Dispatchers.IO) {
+        currentCoroutineContext().ensureActive()
+        val items = catalogue.searchAny(ref, terms, categories, excludedCategories, limit)
+        if (items.isEmpty()) return@withContext emptyList()
+        val associations = catalogue.guideAssociations(ref)
+        items.chunked(200).flatMap { listed(ref.profileId, associations, it) }
+    }
+
     suspend fun searchAiring(ref: IptvSourceRef, query: String, nowMillis: Long, limit: Int = 60,
         excludedCategories: Set<String> = emptySet()): List<IptvAiringResult> = withContext(Dispatchers.IO) {
         require(limit in 1..200)
@@ -59,13 +75,13 @@ class IptvBrowseRepository(private val catalogue: IptvCatalogueStore, private va
         val order = (associations.priority + associations.feedIds).distinct()
         if (order.isEmpty()) return@withContext emptyList()
         currentCoroutineContext().ensureActive()
-        val matches = guides.sportsMatches(ref.profileId, order, nowMillis, nowMillis + aheadMillis, 3000)
+        val matches = guides.sportsChannels(ref.profileId, order, nowMillis, nowMillis + aheadMillis, MAX_SPORTS_CHANNELS)
         if (matches.isEmpty()) return@withContext emptyList()
         val wanted = guideAiringCandidates(matches.distinctBy { it.key }.take(MAX_SPORTS_CHANNELS).map { it.key to it.channel })
         currentCoroutineContext().ensureActive()
         val items = catalogue.guideMatchCandidates(ref, wanted.guideIds, wanted.nameKeys, wanted.keys, 600, excludedCategories)
         val channels = items.chunked(200).flatMap { listed(ref.profileId, associations, it) }
-        val listings = airingChannels(channels, { it.item.channel.id }, { it.guide.key }, earliestAiring(matches.map { it.key to it.programme }), 3000)
+        val listings = airingChannels(channels, { it.item.channel.id }, { it.guide.key }, earliestAiring(matches.map { it.key to it.programme }), 1000)
         sportsOrder(listings, nowMillis).take(limit).map { (channel, programme) -> IptvAiringResult(channel, programme) }
     }
 

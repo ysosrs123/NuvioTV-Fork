@@ -5,7 +5,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
@@ -47,14 +46,16 @@ object SourceExpiries {
             status(source.expiresAtSeconds, nowMillis, zone).takeIf(::warns)?.let { ExpiryWarning(source.sourceId, source.label, it) }
         }
 
-    fun stalkerProfile(json: String): Long? {
+    fun stalkerProfile(json: String, zone: ZoneId = ZoneId.systemDefault()): Long? {
         val profile = runCatching { JSONObject(json).opt("js") as? JSONObject }.getOrNull() ?: return null
         val text = (profile.opt("expire_billing_date") as? String)?.trim()?.takeIf { it.length <= 32 } ?: return null
         val match = STALKER.matchEntire(text) ?: return null
         val parts = match.groupValues.drop(1).map { it.toIntOrNull() ?: 0 }
         if (parts[0] < 2000) return null
+        val portal = (profile.opt("default_timezone") as? String)?.trim()?.takeIf { it.length in 1..64 }
+            ?.let { runCatching { ZoneId.of(it) }.getOrNull() } ?: zone
         return runCatching {
-            LocalDateTime.of(LocalDate.of(parts[0], parts[1], parts[2]), LocalTime.of(parts[3], parts[4], parts[5])).toEpochSecond(ZoneOffset.UTC)
+            LocalDateTime.of(LocalDate.of(parts[0], parts[1], parts[2]), LocalTime.of(parts[3], parts[4], parts[5])).atZone(portal).toEpochSecond()
         }.getOrNull()
     }
 }
