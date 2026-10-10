@@ -1,4 +1,4 @@
-# Nuvio IPTV — device test checklist (build `05cd1484a`, run 38047277797)
+# Nuvio IPTV — device test checklist (build `c1685393a`, run 38057188837)
 
 For this build start with section 7g, then 7f, 7e, 7d, 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
 
@@ -84,7 +84,7 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
 
-## 7g. Fixes from the night review of 10 October (build `7c7e0e4ae`)
+## 7g. Fixes from the night review of 10 October (build `c1685393a`)
 1. Phone access: right after starting the app, a paired phone cannot open a PIN-protected
    profile's settings or recordings; the phone change prompt never shows over the profile
    screen or profile management.

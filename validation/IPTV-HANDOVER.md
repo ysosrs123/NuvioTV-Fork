@@ -9,6 +9,12 @@ Older sections further down are history; read "Start here" first.
 
 ## Start here — next session (from 10 October 2026)
 
+Update night of 10 October (user asleep): all night-review findings fixed and a second
+review of those fixes done (three more recording fixes); Game Centre formation and card
+marks; TheSportsDB checked against the user's real captures. Build for the next device
+pass: CI debug green at `c1685393a` (run 38057188837); release (R8) run 38058607115.
+Host tests: core 848, data 285. Checklist: start at 7g, then 7f and 7e.
+
 State (end of the 8–9 October session):
 - Everything is committed and pushed. Latest green CI: debug `8354d89` (run 37867719176),
   which contains every fix up to the 9 October device findings plus widgets, sport
@@ -45,10 +51,9 @@ session winners shown. CI green at `3de7568` (run 38012700521) and at `3065341` 
 focused game's summary (one extra request).
 
 Next, in order:
-1. Device pass on `05cd1484a` (run 38047277797; checklist 7f, then 7e); take the findings,
-   record and fix them the same way. Playback options,
-   menu order, external player and source expiry are committed after it (`2c83574c9`,
-   `826090865`, playback options pending) and go into the next build.
+1. Device pass on `c1685393a` (run 38057188837; checklist 7g, 7f, then 7e); take the findings,
+   record and fix them the same way. Playback options, menu order, external player and
+   source expiry (7e) have not been tried on a device yet.
 2. Waiting on the user (do not do these without them):
    - QR sign-in in CI builds: the fork needs the repository secret `LOCAL_PROPERTIES_BASE64`
      (base64 of a local.properties with NUVIO_SUPABASE_URL, NUVIO_SUPABASE_ANON_KEY and the
