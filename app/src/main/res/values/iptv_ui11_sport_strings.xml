@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui11_sport_quarter">Quarter %1$d</string>
+    <string name="iptv_ui11_sport_period">Period %1$d</string>
+    <string name="iptv_ui11_sport_first_half">First half</string>
+    <string name="iptv_ui11_sport_second_half">Second half</string>
+    <string name="iptv_ui11_sport_extra_time">Extra time</string>
+    <string name="iptv_ui11_sport_overtime">Overtime</string>
+    <string name="iptv_ui11_sport_clock_left">%1$s left</string>
+    <string name="iptv_ui11_sport_total">Total</string>
+    <string name="iptv_ui11_sport_win_chance">%1$s are given a %2$d%% chance, %3$s %4$d%%.</string>
+</resources>

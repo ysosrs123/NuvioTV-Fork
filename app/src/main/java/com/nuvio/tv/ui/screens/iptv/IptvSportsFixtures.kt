@@ -630,16 +630,21 @@ private fun SportCardsPlaceholder() {
             Column(Modifier.width(SPORT_CARD_WIDTH).height(SPORT_CARD_HEIGHT).clip(SportCardShape)
                 .background(NuvioTheme.colors.TextPrimary.copy(alpha = .05f), SportCardShape)
                 .border(1.dp, NuvioTheme.colors.TextPrimary.copy(alpha = .08f), SportCardShape)) {
-                Box(Modifier.padding(start = 10.dp, top = 10.dp).width(44.dp).height(12.dp).clip(SportPlaceholderShape).background(brush))
-                Row(Modifier.fillMaxWidth().weight(1f).padding(horizontal = 18.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(40.dp).clip(CircleShape).background(brush))
-                    Spacer(Modifier.weight(1f))
-                    Box(Modifier.width(52.dp).height(18.dp).clip(SportPlaceholderShape).background(brush))
-                    Spacer(Modifier.weight(1f))
-                    Box(Modifier.size(40.dp).clip(CircleShape).background(brush))
+                Box(Modifier.padding(start = 12.dp, top = 10.dp).width(72.dp).height(10.dp).clip(SportPlaceholderShape).background(brush))
+                Column(Modifier.fillMaxWidth().weight(1f).padding(vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    repeat(2) {
+                        Row(Modifier.fillMaxWidth().weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.width(5.dp).fillMaxHeight().background(brush))
+                            Spacer(Modifier.width(8.dp))
+                            Box(Modifier.size(32.dp).clip(CircleShape).background(brush))
+                            Spacer(Modifier.width(8.dp))
+                            Box(Modifier.width(72.dp).height(14.dp).clip(SportPlaceholderShape).background(brush))
+                            Spacer(Modifier.weight(1f))
+                            Box(Modifier.padding(end = 12.dp).width(28.dp).height(18.dp).clip(SportPlaceholderShape).background(brush))
+                        }
+                    }
                 }
-                Box(Modifier.fillMaxWidth().height(24.dp).background(NuvioTheme.colors.TextPrimary.copy(alpha = .05f)).padding(horizontal = 10.dp),
-                    contentAlignment = Alignment.CenterStart) {
+                Box(Modifier.fillMaxWidth().height(22.dp).padding(horizontal = 12.dp), contentAlignment = Alignment.CenterStart) {
                     Box(Modifier.width(96.dp).height(10.dp).clip(SportPlaceholderShape).background(brush))
                 }
             }
