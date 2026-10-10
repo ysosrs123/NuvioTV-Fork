@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">நேரலை விளையாட்டு</string>
     <string name="iptv_sport5_nuvio_your_teams">உங்கள் அணிகள்</string>
     <string name="iptv_sport5_nuvio_follow_team">ஓர் அணியைப் பின்தொடர்</string>
-    <string name="iptv_sport5_nuvio_in_minutes">%1$d நிமி. இல்</string>
-    <string name="iptv_sport5_nuvio_starting">தொடங்குகிறது</string>
-    <string name="iptv_sport5_nuvio_close_tag">நெருக்கம் · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">நேரலை · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">எதிர் %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">%1$s மைதானத்தில்</string>
     <string name="iptv_sport5_nuvio_no_game">அடுத்த %1$d நாட்களில் போட்டி இல்லை</string>
     <string name="iptv_sport5_nuvio_result_hidden">நீங்கள் பார்க்கும் வரை முடிவு மறைக்கப்பட்டுள்ளது</string>
     <string name="iptv_sport5_nuvio_recording_set">பதிவு அமைக்கப்பட்டது</string>

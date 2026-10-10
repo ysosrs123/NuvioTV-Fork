@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Thể thao trực tiếp</string>
     <string name="iptv_sport5_nuvio_your_teams">Đội của bạn</string>
     <string name="iptv_sport5_nuvio_follow_team">Theo dõi một đội</string>
-    <string name="iptv_sport5_nuvio_in_minutes">SAU %1$d PHÚT</string>
-    <string name="iptv_sport5_nuvio_starting">SẮP BẮT ĐẦU</string>
-    <string name="iptv_sport5_nuvio_close_tag">SÁT NÚT · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">TRỰC TIẾP · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">gặp %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">trên sân %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Không có trận trong %1$d ngày tới</string>
     <string name="iptv_sport5_nuvio_result_hidden">Kết quả được ẩn cho đến khi bạn xem</string>
     <string name="iptv_sport5_nuvio_recording_set">Đã đặt ghi hình</string>

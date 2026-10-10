@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Ζωντανά αθλητικά</string>
     <string name="iptv_sport5_nuvio_your_teams">Οι ομάδες σας</string>
     <string name="iptv_sport5_nuvio_follow_team">Ακολουθήστε μια ομάδα</string>
-    <string name="iptv_sport5_nuvio_in_minutes">ΣΕ %1$d ΛΕΠ.</string>
-    <string name="iptv_sport5_nuvio_starting">ΞΕΚΙΝΑ</string>
-    <string name="iptv_sport5_nuvio_close_tag">ΑΜΦΙΡΡΟΠΟ · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">ΖΩΝΤΑΝΑ · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">εναντίον %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">έδρα %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Κανένα παιχνίδι τις επόμενες %1$d ημέρες</string>
     <string name="iptv_sport5_nuvio_result_hidden">Το αποτέλεσμα είναι κρυφό μέχρι να το δείτε</string>
     <string name="iptv_sport5_nuvio_recording_set">Η εγγραφή ορίστηκε</string>

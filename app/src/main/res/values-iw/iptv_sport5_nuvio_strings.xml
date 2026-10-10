@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">ספורט בשידור חי</string>
     <string name="iptv_sport5_nuvio_your_teams">הקבוצות שלך</string>
     <string name="iptv_sport5_nuvio_follow_team">מעקב אחר קבוצה</string>
-    <string name="iptv_sport5_nuvio_in_minutes">בעוד %1$d דק׳</string>
-    <string name="iptv_sport5_nuvio_starting">מתחיל</string>
-    <string name="iptv_sport5_nuvio_close_tag">צמוד · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">בשידור חי · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">נגד %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">אצל %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">אין משחק ב-%1$d הימים הקרובים</string>
     <string name="iptv_sport5_nuvio_result_hidden">התוצאה מוסתרת עד שצופים בה</string>
     <string name="iptv_sport5_nuvio_recording_set">ההקלטה נקבעה</string>

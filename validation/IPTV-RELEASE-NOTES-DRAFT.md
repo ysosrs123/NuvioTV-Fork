@@ -555,6 +555,7 @@ Sport data (checked against a real capture with NHL and golf live, 10 October):
   and win chance, Watch / Other feed / Follow on the right); score cards show two
   team-colour bands with logos, codes and right-aligned scores. Golf, tennis, racing and
   cricket use the same language.
+- The Home sport rows and the guide's Games now strip use the same team-colour cards.
 - Sport can follow NBL, WNBA and College Football (off by default); NBL and WNBA timelines
   use 10-minute quarters.
 

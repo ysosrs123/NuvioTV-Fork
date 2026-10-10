@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Canlı spor</string>
     <string name="iptv_sport5_nuvio_your_teams">Takımlarınız</string>
     <string name="iptv_sport5_nuvio_follow_team">Bir takımı takip et</string>
-    <string name="iptv_sport5_nuvio_in_minutes">%1$d DK SONRA</string>
-    <string name="iptv_sport5_nuvio_starting">BAŞLIYOR</string>
-    <string name="iptv_sport5_nuvio_close_tag">ÇEKİŞMELİ · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">CANLI · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">vs %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">deplasmanda %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Önümüzdeki %1$d günde maç yok</string>
     <string name="iptv_sport5_nuvio_result_hidden">Siz izleyene kadar sonuç gizli</string>
     <string name="iptv_sport5_nuvio_recording_set">Kayıt kuruldu</string>

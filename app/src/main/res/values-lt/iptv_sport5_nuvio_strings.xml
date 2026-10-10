@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Tiesioginis sportas</string>
     <string name="iptv_sport5_nuvio_your_teams">Jūsų komandos</string>
     <string name="iptv_sport5_nuvio_follow_team">Sekti komandą</string>
-    <string name="iptv_sport5_nuvio_in_minutes">PO %1$d MIN.</string>
-    <string name="iptv_sport5_nuvio_starting">PRASIDEDA</string>
-    <string name="iptv_sport5_nuvio_close_tag">ĮTEMPTOS · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">TIESIOGIAI · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">prieš %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">pas %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Per artimiausias %1$d d. varžybų nėra</string>
     <string name="iptv_sport5_nuvio_result_hidden">Rezultatas paslėptas, kol jų nepažiūrėsite</string>
     <string name="iptv_sport5_nuvio_recording_set">Įrašymas nustatytas</string>

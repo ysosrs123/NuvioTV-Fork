@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Sport live</string>
     <string name="iptv_sport5_nuvio_your_teams">Ekipet e tua</string>
     <string name="iptv_sport5_nuvio_follow_team">Ndiq një ekip</string>
-    <string name="iptv_sport5_nuvio_in_minutes">PAS %1$d MIN</string>
-    <string name="iptv_sport5_nuvio_starting">PO FILLON</string>
-    <string name="iptv_sport5_nuvio_close_tag">E NGUSHTË · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">LIVE · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">kundër %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">te %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Asnjë ndeshje në %1$d ditët e ardhshme</string>
     <string name="iptv_sport5_nuvio_result_hidden">Rezultati është i fshehur derisa ta shikosh</string>
     <string name="iptv_sport5_nuvio_recording_set">Regjistrimi u vendos</string>

@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">رياضة مباشرة</string>
     <string name="iptv_sport5_nuvio_your_teams">فرقك</string>
     <string name="iptv_sport5_nuvio_follow_team">تابع فريقًا</string>
-    <string name="iptv_sport5_nuvio_in_minutes">بعد %1$d د</string>
-    <string name="iptv_sport5_nuvio_starting">تبدأ</string>
-    <string name="iptv_sport5_nuvio_close_tag">متقاربة · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">مباشر · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">ضد %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">على أرض %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">لا مباراة خلال الأيام الـ %1$d القادمة</string>
     <string name="iptv_sport5_nuvio_result_hidden">النتيجة مخفية حتى تشاهدها</string>
     <string name="iptv_sport5_nuvio_recording_set">تم ضبط التسجيل</string>

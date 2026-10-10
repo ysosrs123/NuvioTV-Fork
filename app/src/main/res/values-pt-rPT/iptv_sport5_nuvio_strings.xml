@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Desporto em direto</string>
     <string name="iptv_sport5_nuvio_your_teams">As tuas equipas</string>
     <string name="iptv_sport5_nuvio_follow_team">Seguir uma equipa</string>
-    <string name="iptv_sport5_nuvio_in_minutes">DAQUI A %1$d MIN</string>
-    <string name="iptv_sport5_nuvio_starting">A COMEÇAR</string>
-    <string name="iptv_sport5_nuvio_close_tag">RENHIDO · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">EM DIRETO · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">vs. %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">em casa do %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Nenhum jogo nos próximos %1$d dias</string>
     <string name="iptv_sport5_nuvio_result_hidden">Resultado oculto até o veres</string>
     <string name="iptv_sport5_nuvio_recording_set">Gravação agendada</string>

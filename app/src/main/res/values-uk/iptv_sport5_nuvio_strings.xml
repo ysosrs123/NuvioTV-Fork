@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Спорт наживо</string>
     <string name="iptv_sport5_nuvio_your_teams">Ваші команди</string>
     <string name="iptv_sport5_nuvio_follow_team">Стежити за командою</string>
-    <string name="iptv_sport5_nuvio_in_minutes">ЧЕРЕЗ %1$d ХВ</string>
-    <string name="iptv_sport5_nuvio_starting">ПОЧИНАЄТЬСЯ</string>
-    <string name="iptv_sport5_nuvio_close_tag">НАПРУЖЕНИЙ · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">НАЖИВО · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">проти %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">у гостях у %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Немає матчів у найближчі %1$d дн.</string>
     <string name="iptv_sport5_nuvio_result_hidden">Результат приховано, доки ви не переглянете</string>
     <string name="iptv_sport5_nuvio_recording_set">Запис заплановано</string>

@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Olahraga live</string>
     <string name="iptv_sport5_nuvio_your_teams">Tim Anda</string>
     <string name="iptv_sport5_nuvio_follow_team">Ikuti tim</string>
-    <string name="iptv_sport5_nuvio_in_minutes">%1$d MNT LAGI</string>
-    <string name="iptv_sport5_nuvio_starting">DIMULAI</string>
-    <string name="iptv_sport5_nuvio_close_tag">KETAT · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">LIVE · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">vs %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">di kandang %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Tidak ada pertandingan dalam %1$d hari ke depan</string>
     <string name="iptv_sport5_nuvio_result_hidden">Hasil disembunyikan sampai Anda menontonnya</string>
     <string name="iptv_sport5_nuvio_recording_set">Rekaman disetel</string>

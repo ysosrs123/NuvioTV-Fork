@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">ライブスポーツ</string>
     <string name="iptv_sport5_nuvio_your_teams">あなたのチーム</string>
     <string name="iptv_sport5_nuvio_follow_team">チームをフォロー</string>
-    <string name="iptv_sport5_nuvio_in_minutes">%1$d 分後</string>
-    <string name="iptv_sport5_nuvio_starting">まもなく開始</string>
-    <string name="iptv_sport5_nuvio_close_tag">接戦 · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">LIVE · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">vs %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">\@ %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">今後 %1$d 日間に試合はありません</string>
     <string name="iptv_sport5_nuvio_result_hidden">視聴するまで結果は非表示です</string>
     <string name="iptv_sport5_nuvio_recording_set">録画予約済み</string>

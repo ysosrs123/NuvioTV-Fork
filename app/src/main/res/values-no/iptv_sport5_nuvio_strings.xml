@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Direktesport</string>
     <string name="iptv_sport5_nuvio_your_teams">Dine lag</string>
     <string name="iptv_sport5_nuvio_follow_team">Følg et lag</string>
-    <string name="iptv_sport5_nuvio_in_minutes">OM %1$d MIN</string>
-    <string name="iptv_sport5_nuvio_starting">STARTER</string>
-    <string name="iptv_sport5_nuvio_close_tag">JEVN · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">DIREKTE · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">mot %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">borte mot %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Ingen kamp de neste %1$d dagene</string>
     <string name="iptv_sport5_nuvio_result_hidden">Resultatet er skjult til du har sett kampen</string>
     <string name="iptv_sport5_nuvio_recording_set">Opptak satt</string>

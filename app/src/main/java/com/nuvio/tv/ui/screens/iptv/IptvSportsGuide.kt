@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,8 +30,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.FixtureSide
 import com.nuvio.tv.core.iptv.FixtureStatus
+import com.nuvio.tv.core.iptv.SportsDetail
 import com.nuvio.tv.core.iptv.SportsFixture
+import com.nuvio.tv.core.iptv.SportsFixtureText
 import com.nuvio.tv.core.iptv.SportsGuideCells
 import com.nuvio.tv.core.iptv.SportsGuideChip
 import com.nuvio.tv.core.iptv.SportsGuideIndex
@@ -117,10 +119,13 @@ private fun GameChip(item: IptvFixtureItem, sport: IptvSportsGuide, playing: Boo
     val fixture = item.fixture
     val hidden = sport.hidden(fixture)
     val live = fixture.status == FixtureStatus.LIVE
+    val detail = fixture.sportDetail
+    val home = fixture.home
+    val away = fixture.away
+    val banded = detail == null || detail is SportsDetail.Cricket || detail is SportsDetail.Baseball
     val channel = item.links.first().row.let(::channelName).let { name ->
         if (item.links.size > 1) stringResource(R.string.iptv_sport5g_channels, name, item.links.size - 1) else name
     }
-    val state = if (live) SportsGuideCells.chip(fixture, hidden)?.clock ?: stringResource(R.string.iptv_sport5g_live) else clock(fixture.startMillis)
     Row(modifier.height(CHIP_HEIGHT)
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
         .iptvItem(focused, playing, ChipShape)
@@ -130,12 +135,22 @@ private fun GameChip(item: IptvFixtureItem, sport: IptvSportsGuide, playing: Boo
             if (isSelect(native.keyCode)) { if (native.action == AndroidKeyEvent.ACTION_UP) onClick(); true } else false
         }
         .focusable()
-        .padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (live) Box(Modifier.size(7.dp).clip(CircleShape).background(NuvioTheme.colors.Error))
-        Text(SportsGuideCells.label(fixture, hidden), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = itemContent(focused),
-            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 240.dp))
-        Text("$state · $channel", style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
-            color = if (focused) itemContent(true).copy(alpha = .8f) else NuvioTheme.colors.TextSecondary, modifier = Modifier.widthIn(max = 200.dp))
+        .padding(end = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (banded && home != null && away != null) {
+            val sides = if (SportsFixtureText.awayFirst(fixture)) listOf(FixtureSide.AWAY, FixtureSide.HOME) else listOf(FixtureSide.HOME, FixtureSide.AWAY)
+            Row(Modifier.fillMaxHeight(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                sides.forEach { side ->
+                    val team = if (side == FixtureSide.HOME) home else away
+                    TeamBand(team, LANE_LOGO, false, focused, Modifier.width(LANE_BAND_WIDTH).fillMaxHeight()) {
+                        BandScore(fixture, team, side, hidden, focused, record = false)
+                    }
+                }
+            }
+        } else Text(SportsGuideCells.label(fixture, hidden), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = itemContent(focused),
+            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 12.dp).widthIn(max = 240.dp))
+        CardState(fixture, detail, hidden)
+        Text(channel, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            color = if (focused) itemContent(true).copy(alpha = .8f) else NuvioTheme.colors.TextSecondary, modifier = Modifier.widthIn(max = 180.dp))
         if (live && SportsGuideCells.close(fixture, hidden)) Text(stringResource(R.string.iptv_sport5g_close).uppercase(), style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold, color = NuvioTheme.colors.Warning, maxLines = 1)
     }
@@ -210,6 +225,8 @@ private fun sportColour(sport: String): Color = Color(when (sport) {
 
 private val LANE_HEIGHT = 40.dp
 private val CHIP_HEIGHT = 34.dp
+private val LANE_LOGO = 22.dp
+private val LANE_BAND_WIDTH = 148.dp
 private val ChipShape = RoundedCornerShape(10.dp)
 private val ToggleShape = RoundedCornerShape(999.dp)
 private val BadgeShape = RoundedCornerShape(3.dp)

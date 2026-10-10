@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">体育直播</string>
     <string name="iptv_sport5_nuvio_your_teams">你的球队</string>
     <string name="iptv_sport5_nuvio_follow_team">关注球队</string>
-    <string name="iptv_sport5_nuvio_in_minutes">%1$d 分钟后</string>
-    <string name="iptv_sport5_nuvio_starting">即将开始</string>
-    <string name="iptv_sport5_nuvio_close_tag">胶着 · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">直播 · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">对阵 %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">客场对阵 %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">未来 %1$d 天内没有比赛</string>
     <string name="iptv_sport5_nuvio_result_hidden">观看前结果已隐藏</string>
     <string name="iptv_sport5_nuvio_recording_set">已设置录制</string>

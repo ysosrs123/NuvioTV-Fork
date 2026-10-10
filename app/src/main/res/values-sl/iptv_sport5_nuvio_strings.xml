@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Šport v živo</string>
     <string name="iptv_sport5_nuvio_your_teams">Vaše ekipe</string>
     <string name="iptv_sport5_nuvio_follow_team">Sledi ekipi</string>
-    <string name="iptv_sport5_nuvio_in_minutes">ČEZ %1$d MIN</string>
-    <string name="iptv_sport5_nuvio_starting">ZAČENJA SE</string>
-    <string name="iptv_sport5_nuvio_close_tag">IZENAČENO · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">V ŽIVO · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">proti %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">pri %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">V naslednjih %1$d dneh ni tekme</string>
     <string name="iptv_sport5_nuvio_result_hidden">Rezultat je skrit, dokler ga ne pogledate</string>
     <string name="iptv_sport5_nuvio_recording_set">Snemanje nastavljeno</string>

@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">लाइव खेल</string>
     <string name="iptv_sport5_nuvio_your_teams">आपकी टीमें</string>
     <string name="iptv_sport5_nuvio_follow_team">किसी टीम को फ़ॉलो करें</string>
-    <string name="iptv_sport5_nuvio_in_minutes">%1$d मिनट में</string>
-    <string name="iptv_sport5_nuvio_starting">शुरू हो रहा है</string>
-    <string name="iptv_sport5_nuvio_close_tag">कांटे का · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">लाइव · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">बनाम %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">%1$s के मैदान पर</string>
     <string name="iptv_sport5_nuvio_no_game">अगले %1$d दिनों में कोई मैच नहीं</string>
     <string name="iptv_sport5_nuvio_result_hidden">देखने तक नतीजा छिपा है</string>
     <string name="iptv_sport5_nuvio_recording_set">रिकॉर्डिंग सेट है</string>

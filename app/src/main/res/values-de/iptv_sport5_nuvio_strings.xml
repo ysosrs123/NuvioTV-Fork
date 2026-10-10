@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Live-Sport</string>
     <string name="iptv_sport5_nuvio_your_teams">Ihre Teams</string>
     <string name="iptv_sport5_nuvio_follow_team">Einem Team folgen</string>
-    <string name="iptv_sport5_nuvio_in_minutes">IN %1$d MIN</string>
-    <string name="iptv_sport5_nuvio_starting">BEGINNT</string>
-    <string name="iptv_sport5_nuvio_close_tag">KNAPP · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">LIVE · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">gg. %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">bei %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Kein Spiel in den nächsten %1$d Tagen</string>
     <string name="iptv_sport5_nuvio_result_hidden">Ergebnis verborgen, bis Sie es ansehen</string>
     <string name="iptv_sport5_nuvio_recording_set">Aufnahme geplant</string>

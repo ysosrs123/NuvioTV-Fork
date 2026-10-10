@@ -9,6 +9,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -107,17 +108,6 @@ internal fun SportFixtureCard(item: IptvFixtureItem, hidden: Boolean, spoiler: B
     var focused by remember { mutableStateOf(false) }
     val longPress = rememberLongPressKeyTracker()
     var held by remember { mutableStateOf(false) }
-    val fixture = item.fixture
-    val detail = fixture.sportDetail.takeIf { !item.scheduleOnly }
-    val home = fixture.home
-    val away = fixture.away
-    val shaped = when (detail) {
-        is SportsDetail.Tennis -> home != null && away != null
-        is SportsDetail.Golf, is SportsDetail.Sessions, is SportsDetail.Card -> true
-        is SportsDetail.Cricket -> home != null && away != null && !hidden && fixture.status != FixtureStatus.SCHEDULED && detail.innings.isNotEmpty()
-        is SportsDetail.Baseball -> home != null && away != null && !hidden && fixture.status == FixtureStatus.LIVE
-        null -> false
-    }
     Column(modifier.width(SPORT_CARD_WIDTH).height(SPORT_CARD_HEIGHT)
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
         .iptvItem(focused, playing, SportCardShape)
@@ -133,49 +123,57 @@ internal fun SportFixtureCard(item: IptvFixtureItem, hidden: Boolean, spoiler: B
             if (isSelect(native.keyCode)) { if (native.action == AndroidKeyEvent.ACTION_UP) { if (!held) onClick(); held = false }; true } else false
         }
         .focusable()) {
-        Row(Modifier.fillMaxWidth().height(CARD_HEADER).padding(start = 12.dp, end = 12.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            fixture.leagueLogo?.let { LeagueLogo(it, 14.dp) }
-            Text(listOfNotNull(sportLeagueName(fixture), (detail as? SportsDetail.Golf)?.tournament).joinToString(" · ").uppercase(), style = SportCaps,
-                color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-            if (item.favourite) Icon(Icons.Filled.Star, null, Modifier.size(13.dp), tint = NuvioTheme.colors.Secondary)
-            if (reminded) Icon(Icons.Filled.NotificationsActive, null, Modifier.size(13.dp), tint = NuvioTheme.colors.Secondary)
-            CardState(fixture, detail, hidden || item.scheduleOnly)
-        }
-        val middle = Modifier.fillMaxWidth().weight(1f)
-        when {
-            shaped && detail is SportsDetail.Tennis && home != null && away != null -> TennisMiddle(fixture, detail, home, away, hidden, focused, middle)
-            shaped && detail is SportsDetail.Golf -> GolfMiddle(fixture, detail, hidden, favourites, focused, middle)
-            shaped && detail is SportsDetail.Sessions -> SessionsMiddle(fixture, detail, focused, middle)
-            shaped && detail is SportsDetail.Card -> FightMiddle(fixture, detail, hidden, focused, middle)
-            shaped && detail is SportsDetail.Cricket && home != null && away != null -> CricketMiddle(fixture, detail, home, away, focused, middle)
-            shaped && detail is SportsDetail.Baseball && home != null && away != null -> BaseballMiddle(fixture, detail, home, away, focused, middle)
-            home != null && away != null -> {
-                val scores = SportsFixtureText.scores(fixture)?.takeIf { fixture.status != FixtureStatus.SCHEDULED && !item.scheduleOnly }
-                val masked = hidden && scores != null
-                val shown = scores?.takeIf { !hidden }
-                CardBands(fixture, home, away, focused, middle, BAND_LOGO, extra = null) { team, side ->
-                    BandValue(when {
-                        fixture.status == FixtureStatus.SCHEDULED -> sportRecord(fixture.sport, team.record)?.let { BandText(it, small = true) }
-                        masked -> BandText(null, mask = true)
-                        shown != null -> {
-                            val first = side == FixtureSide.HOME
-                            val lead = SportsLedger.leader(shown.first, shown.second)
-                            BandText(if (first) shown.first else shown.second, dim = lead != null && lead != (if (first) 0 else 1))
-                        }
-                        else -> null
-                    }, focused)
-                }
-            }
-            else -> Column(middle.padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)) {
-                Text(fixture.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis,
-                    color = itemContent(focused))
-                if (fixture.status == FixtureStatus.SCHEDULED) Text("${sportDayLabel(fixture.startMillis)} · ${clock(fixture.startMillis)}",
-                    style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1)
-            }
-        }
-        CardFooter(item, hidden, spoiler)
+        SportCardContent(item, hidden, spoiler, favourites, reminded, focused)
     }
+}
+
+internal class SportCardSize(val header: Dp, val footer: Dp, val logo: Dp, val compact: Boolean)
+
+internal val FullSportCard = SportCardSize(CARD_HEADER, CARD_FOOTER, BAND_LOGO, false)
+
+@Composable
+internal fun ColumnScope.SportCardContent(item: IptvFixtureItem, hidden: Boolean, spoiler: Boolean, favourites: Set<String>, reminded: Boolean, focused: Boolean,
+    size: SportCardSize = FullSportCard, badge: String? = null, footer: String? = null) {
+    val fixture = item.fixture
+    val detail = fixture.sportDetail.takeIf { !item.scheduleOnly }
+    val home = fixture.home
+    val away = fixture.away
+    val shaped = !size.compact && when (detail) {
+        is SportsDetail.Tennis -> home != null && away != null
+        is SportsDetail.Golf, is SportsDetail.Sessions, is SportsDetail.Card -> true
+        is SportsDetail.Cricket -> home != null && away != null && !hidden && fixture.status != FixtureStatus.SCHEDULED && detail.innings.isNotEmpty()
+        is SportsDetail.Baseball -> home != null && away != null && !hidden && fixture.status == FixtureStatus.LIVE
+        null -> false
+    }
+    Row(Modifier.fillMaxWidth().height(size.header).padding(start = 12.dp, end = 12.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        fixture.leagueLogo?.let { LeagueLogo(it, 14.dp) }
+        Text(listOfNotNull(sportLeagueName(fixture), (detail as? SportsDetail.Golf)?.tournament).joinToString(" · ").uppercase(), style = SportCaps,
+            color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        if (item.favourite) Icon(Icons.Filled.Star, null, Modifier.size(13.dp), tint = NuvioTheme.colors.Secondary)
+        if (reminded) Icon(Icons.Filled.NotificationsActive, null, Modifier.size(13.dp), tint = NuvioTheme.colors.Secondary)
+        if (badge != null) Text(badge.uppercase(), style = SportCaps, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.Warning, maxLines = 1)
+        CardState(fixture, detail, hidden || item.scheduleOnly)
+    }
+    val middle = Modifier.fillMaxWidth().weight(1f)
+    when {
+        shaped && detail is SportsDetail.Tennis && home != null && away != null -> TennisMiddle(fixture, detail, home, away, hidden, focused, middle)
+        shaped && detail is SportsDetail.Golf -> GolfMiddle(fixture, detail, hidden, favourites, focused, middle)
+        shaped && detail is SportsDetail.Sessions -> SessionsMiddle(fixture, detail, focused, middle)
+        shaped && detail is SportsDetail.Card -> FightMiddle(fixture, detail, hidden, focused, middle)
+        shaped && detail is SportsDetail.Cricket && home != null && away != null -> CricketMiddle(fixture, detail, home, away, focused, middle)
+        shaped && detail is SportsDetail.Baseball && home != null && away != null -> BaseballMiddle(fixture, detail, home, away, focused, middle)
+        home != null && away != null -> CardBands(fixture, home, away, focused, middle, size.logo, extra = null) { team, side ->
+            BandScore(fixture, team, side, hidden, focused, item.scheduleOnly)
+        }
+        else -> Column(middle.padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)) {
+            Text(fixture.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                color = itemContent(focused))
+            if (fixture.status == FixtureStatus.SCHEDULED) Text("${sportDayLabel(fixture.startMillis)} · ${clock(fixture.startMillis)}",
+                style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1)
+        }
+    }
+    CardFooter(item, hidden, spoiler, size.footer, footer)
 }
 
 internal val SportCaps: TextStyle
@@ -185,6 +183,21 @@ internal val SportNumerals: TextStyle
     @Composable get() = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, fontFeatureSettings = "tnum")
 
 private class BandText(val text: String?, val small: Boolean = false, val dim: Boolean = false, val mask: Boolean = false)
+
+@Composable
+internal fun BandScore(fixture: SportsFixture, team: FixtureTeam, side: FixtureSide, hidden: Boolean, focused: Boolean, scheduleOnly: Boolean = false, record: Boolean = true) {
+    val scores = SportsFixtureText.scores(fixture)?.takeIf { fixture.status != FixtureStatus.SCHEDULED && !scheduleOnly }
+    BandValue(when {
+        fixture.status == FixtureStatus.SCHEDULED -> if (record) sportRecord(fixture.sport, team.record)?.let { BandText(it, small = true) } else null
+        scores == null -> null
+        hidden -> BandText(null, mask = true)
+        else -> {
+            val first = side == FixtureSide.HOME
+            val lead = SportsLedger.leader(scores.first, scores.second)
+            BandText(if (first) scores.first else scores.second, dim = lead != null && lead != (if (first) 0 else 1))
+        }
+    }, focused)
+}
 
 @Composable
 private fun BandValue(value: BandText?, focused: Boolean) {
@@ -212,7 +225,7 @@ private fun CardBands(fixture: SportsFixture, home: FixtureTeam, away: FixtureTe
 }
 
 @Composable
-private fun TeamBand(team: FixtureTeam, logo: Dp, active: Boolean, focused: Boolean, modifier: Modifier, value: @Composable () -> Unit) {
+internal fun TeamBand(team: FixtureTeam, logo: Dp, active: Boolean, focused: Boolean, modifier: Modifier, value: @Composable () -> Unit) {
     val base = NuvioTheme.colors.TextPrimary.copy(alpha = .05f).compositeOver(NuvioTheme.colors.Background).toArgb()
     val text = NuvioTheme.colors.TextSecondary.toArgb()
     val (stripe, alpha) = remember(team.colour, base, text) {
@@ -250,7 +263,7 @@ internal fun SportDetailBody(fixture: SportsFixture, hidden: Boolean, favourites
 }
 
 @Composable
-private fun CardState(fixture: SportsFixture, detail: SportsDetail?, hidden: Boolean) {
+internal fun CardState(fixture: SportsFixture, detail: SportsDetail?, hidden: Boolean) {
     val live = stringResource(R.string.iptv_sport_live)
     val text = when (fixture.status) {
         FixtureStatus.LIVE -> if (hidden) live else when (detail) {
@@ -523,12 +536,18 @@ internal fun SportChip(text: String, onClick: () -> Unit, modifier: Modifier = M
 }
 
 @Composable
-private fun CardFooter(item: IptvFixtureItem, hidden: Boolean, spoiler: Boolean) {
+private fun CardFooter(item: IptvFixtureItem, hidden: Boolean, spoiler: Boolean, height: Dp, text: String?) {
+    if (text != null) {
+        Box(Modifier.fillMaxWidth().height(height).padding(horizontal = 12.dp), contentAlignment = Alignment.CenterStart) {
+            Text(text, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        return
+    }
     val fixture = item.fixture
     val first = item.links.firstOrNull()
     val scheduled = fixture.status == FixtureStatus.SCHEDULED
     val now by produceState(System.currentTimeMillis(), scheduled) { while (scheduled) { delay(CARD_TICK_MILLIS); value = System.currentTimeMillis() } }
-    Row(Modifier.fillMaxWidth().height(CARD_FOOTER).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically,
+    Row(Modifier.fillMaxWidth().height(height).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         val lead = when {
             first != null -> channelName(first.row) + if (item.links.size > 1) " +${item.links.size - 1}" else ""

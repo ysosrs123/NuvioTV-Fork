@@ -72,7 +72,6 @@ import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.HomeRowKind
 import com.nuvio.tv.core.iptv.HomeRows
-import com.nuvio.tv.core.iptv.SportsFixtureText
 import com.nuvio.tv.core.iptv.VodArt
 import com.nuvio.tv.core.iptv.VodKind
 import com.nuvio.tv.data.iptv.IptvHomeChannel
@@ -200,7 +199,7 @@ private fun IptvHomeRowSection(host: IptvHomeHost, row: IptvHomeRow, style: Iptv
                             onFocus = { focused(index) }, onClick = host::openRecordings)
                     }
                     is IptvHomeRow.LiveSport -> itemsIndexed(row.items, key = { _, item -> item.fixture.key }) { index, item ->
-                        SportCard(item, host.now.value, style, Modifier.focusRequester(requester(index)), onFocus = { focused(index) },
+                        SportCard(item, style, Modifier.focusRequester(requester(index)), onFocus = { focused(index) },
                             onClick = { host.openSport(item) })
                     }
                     is IptvHomeRow.Teams -> {
@@ -241,50 +240,36 @@ private fun RecordingCard(item: IptvRecording, logo: String?, style: IptvHomeSty
 }
 
 @Composable
-private fun SportCard(item: IptvHomeSport, now: Long, style: IptvHomeStyle, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
-    val fixture = item.fixture
-    val tag = when {
-        fixture.status != FixtureStatus.LIVE -> ((fixture.startMillis - now) / 60_000L).toInt().let {
-            if (it > 0) stringResource(R.string.iptv_sport5_nuvio_in_minutes, it) else stringResource(R.string.iptv_sport5_nuvio_starting) }
-        item.close -> stringResource(R.string.iptv_sport5_nuvio_close_tag, SportsFixtureText.bug(fixture).state ?: stringResource(R.string.iptv_sport_live))
-        else -> SportsFixtureText.bug(fixture).state?.takeIf { !item.hidden }?.let { stringResource(R.string.iptv_sport5_nuvio_live_state, it) }
-            ?: stringResource(R.string.iptv_sport_live)
+private fun SportCard(item: IptvHomeSport, style: IptvHomeStyle, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
+    val card = remember(item) { IptvFixtureItem(item.fixture, listOf(item.link)) }
+    HomeCardFrame(style, modifier, onFocus, onClick) {
+        Column(Modifier.fillMaxSize()) {
+            SportCardContent(card, item.hidden, false, emptySet(), false, false, homeSportCardSize(style.wideHeight),
+                badge = if (item.close) stringResource(R.string.iptv_sport5g_close) else null)
+        }
     }
-    WideCard(iptvScoreLine(fixture, item.hidden), "${sportLeagueName(fixture)} · ${channelName(item.link.row)}", programmeArt(item.link.programme),
-        logoUrl(item.link.row), channelName(item.link.row), null, fixture.status == FixtureStatus.LIVE, style, modifier, onFocus, onClick, tag)
 }
 
 @Composable
 private fun TeamCard(item: IptvHomeTeam, days: Int, style: IptvHomeStyle, modifier: Modifier, onFocus: () -> Unit, onClick: () -> Unit) {
     val fixture = item.fixture
-    val opponent = fixture?.let { if (item.home == false) it.home else it.away }
-    val versus = opponent?.let { stringResource(if (item.home == false) R.string.iptv_sport5_nuvio_at_team else R.string.iptv_sport5_nuvio_versus_team, it.shortName ?: it.name) }
-    val scores = fixture?.let { SportsFixtureText.scores(it) }?.takeIf { !item.hidden && fixture.status != FixtureStatus.SCHEDULED }
-        ?.let { if (item.home == false) "${it.second}–${it.first}" else "${it.first}–${it.second}" }
-    val state = fixture?.let { iptvFixtureState(it, item.hidden) }
-    val start = fixture?.startMillis ?: 0L
-    val heading = when {
-        fixture == null -> stringResource(R.string.iptv_sport5_nuvio_no_game, days)
-        fixture.status == FixtureStatus.LIVE && scores != null -> listOfNotNull(versus, scores).joinToString(" · ")
-        versus != null -> versus
-        else -> sportTitle(fixture)
-    }
     val note = when (item.recording) {
         IptvTeamRecording.RECORDING -> stringResource(R.string.iptv_sport5_nuvio_recording_now)
         IptvTeamRecording.SET -> stringResource(R.string.iptv_sport5_nuvio_recording_set)
         IptvTeamRecording.RULE -> stringResource(R.string.iptv_sport5_nuvio_records_all)
         IptvTeamRecording.NONE -> if (item.reminder) stringResource(R.string.iptv_sport5_nuvio_reminder_set) else null
     }
-    val detail = when (fixture?.status) {
-        null -> note
-        FixtureStatus.FINAL -> if (item.hidden) stringResource(R.string.iptv_sport5_nuvio_result_hidden) else listOfNotNull(state, scores).joinToString(" · ")
-        FixtureStatus.LIVE -> listOfNotNull(state, note).joinToString(" · ")
-        FixtureStatus.SCHEDULED -> listOfNotNull(clock(start), fixture?.venue, note).joinToString(" · ")
-    }
-    val corner = when (fixture?.status) {
-        FixtureStatus.LIVE -> stringResource(R.string.iptv_sport_live)
-        FixtureStatus.SCHEDULED -> sportDayLabel(start)
-        else -> null
+    if (fixture != null) {
+        val card = remember(fixture) { IptvFixtureItem(fixture, emptyList(), favourite = true) }
+        val hiddenResult = if (item.hidden && fixture.status == FixtureStatus.FINAL) stringResource(R.string.iptv_sport5_nuvio_result_hidden) else null
+        val footer = listOfNotNull(hiddenResult, note, fixture.venue.takeIf { fixture.status == FixtureStatus.SCHEDULED }).joinToString(" · ")
+        HomeCardFrame(style, modifier, onFocus, onClick) {
+            Column(Modifier.fillMaxSize()) {
+                SportCardContent(card, item.hidden, false, emptySet(), item.reminder && fixture.status == FixtureStatus.SCHEDULED, false,
+                    homeSportCardSize(style.wideHeight), footer = footer)
+            }
+        }
+        return
     }
     HomeCardFrame(style, modifier, onFocus, onClick) {
         Column(Modifier.fillMaxSize().padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.sm), verticalArrangement = Arrangement.SpaceEvenly) {
@@ -292,15 +277,22 @@ private fun TeamCard(item: IptvHomeTeam, days: Int, style: IptvHomeStyle, modifi
                 if (item.team != null) TeamLogo(item.team, 24.dp)
                 Text("${item.name} · ${item.league}", style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                if (corner != null) Text(corner, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, maxLines = 1,
-                    color = if (fixture?.status == FixtureStatus.LIVE) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary)
             }
-            Text(heading, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1,
-                overflow = TextOverflow.Ellipsis)
-            if (!detail.isNullOrEmpty()) Text(detail, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+            Text(stringResource(R.string.iptv_sport5_nuvio_no_game, days), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold,
+                color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (note != null) Text(note, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
                 overflow = TextOverflow.Ellipsis)
         }
     }
+}
+
+private val COMPACT_SPORT_CARD = SportCardSize(20.dp, 18.dp, 24.dp, true)
+private val MEDIUM_SPORT_CARD = SportCardSize(22.dp, 20.dp, 28.dp, true)
+
+private fun homeSportCardSize(height: Dp): SportCardSize = when {
+    height >= SPORT_CARD_HEIGHT -> FullSportCard
+    height >= 116.dp -> MEDIUM_SPORT_CARD
+    else -> COMPACT_SPORT_CARD
 }
 
 @Composable

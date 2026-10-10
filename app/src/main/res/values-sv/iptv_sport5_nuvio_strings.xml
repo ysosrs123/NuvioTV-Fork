@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Livesport</string>
     <string name="iptv_sport5_nuvio_your_teams">Dina lag</string>
     <string name="iptv_sport5_nuvio_follow_team">Följ ett lag</string>
-    <string name="iptv_sport5_nuvio_in_minutes">OM %1$d MIN</string>
-    <string name="iptv_sport5_nuvio_starting">STARTAR</string>
-    <string name="iptv_sport5_nuvio_close_tag">JÄMN · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">LIVE · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">mot %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">borta mot %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Ingen match de kommande %1$d dagarna</string>
     <string name="iptv_sport5_nuvio_result_hidden">Resultatet är dolt tills du har sett matchen</string>
     <string name="iptv_sport5_nuvio_recording_set">Inspelning inställd</string>

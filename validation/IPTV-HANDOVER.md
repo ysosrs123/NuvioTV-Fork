@@ -35,7 +35,10 @@ series open after episodes and TMDB load, up to ~45 s worst case; Play not Resum
 provider-only titles; library/watched for `iptv-vod:` ids excluded from sync), guide reads
 outside write transactions during imports, per-account refresh locks (max 2 sources).
 Follow-ups not done: show NHL goalies (`SportsSummary.goalies`) and F1 `RaceSession.top`
-in the UI; Sport panel redesign (item 27) in progress.
+in the UI; Sport redesign (item 27) built in `d81ba81` and the Home rows / Games now strip after it;
+still on the old look (suggested: reuse `TeamBand`/`CardState` from IptvSportCards.kt): Game
+Centre score line and LIVE tag, team screen, Nuvio player pop-up, All scores, multiview score
+cells, widget red dots; the video score bug stays.
 
 Next, in order:
 1. Give the user the CI run link for the fixes of the second 9 October pass; take their

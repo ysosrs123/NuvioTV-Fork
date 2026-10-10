@@ -3,12 +3,7 @@
     <string name="iptv_sport5_nuvio_live_sport">Élő sport</string>
     <string name="iptv_sport5_nuvio_your_teams">Csapataid</string>
     <string name="iptv_sport5_nuvio_follow_team">Csapat követése</string>
-    <string name="iptv_sport5_nuvio_in_minutes">%1$d PERC MÚLVA</string>
-    <string name="iptv_sport5_nuvio_starting">KEZDŐDIK</string>
-    <string name="iptv_sport5_nuvio_close_tag">SZOROS · %1$s</string>
     <string name="iptv_sport5_nuvio_live_state">ÉLŐ · %1$s</string>
-    <string name="iptv_sport5_nuvio_versus_team">– %1$s</string>
-    <string name="iptv_sport5_nuvio_at_team">\@ %1$s</string>
     <string name="iptv_sport5_nuvio_no_game">Nincs meccs a következő %1$d napban</string>
     <string name="iptv_sport5_nuvio_result_hidden">Az eredmény rejtve marad, amíg meg nem nézed</string>
     <string name="iptv_sport5_nuvio_recording_set">Felvétel beállítva</string>
