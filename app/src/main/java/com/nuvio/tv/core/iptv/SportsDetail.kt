@@ -8,8 +8,8 @@ enum class InningHalf { TOP, MIDDLE, BOTTOM, END }
 data class TennisPlayer(val seed: Int? = null, val flag: String? = null, val country: String? = null)
 data class TennisSet(val home: Int? = null, val away: Int? = null, val homeTiebreak: Int? = null, val awayTiebreak: Int? = null, val winner: FixtureSide? = null)
 data class GolfPlayer(val position: String, val name: String, val shortName: String? = null, val country: String? = null, val flag: String? = null,
-    val toPar: String? = null, val thru: String? = null, val today: String? = null)
-data class RaceSession(val abbreviation: String?, val name: String, val startMillis: Long, val state: FixtureStatus)
+    val toPar: String? = null, val thru: String? = null, val today: String? = null, val teeMillis: Long? = null)
+data class RaceSession(val abbreviation: String?, val name: String, val startMillis: Long, val state: FixtureStatus, val top: List<String> = emptyList())
 data class Fighter(val name: String, val shortName: String? = null, val record: String? = null, val flag: String? = null)
 data class FightBout(val weightClass: String?, val rounds: Int?, val first: Fighter, val second: Fighter, val winner: Int? = null, val startMillis: Long,
     val state: FixtureStatus = FixtureStatus.SCHEDULED, val round: Int? = null, val mainCard: Boolean = false)
@@ -91,13 +91,14 @@ object SportsDetails {
                 put("leaders", JSONArray().apply { detail.leaders.forEach { player -> put(JSONObject().apply {
                     put("position", player.position); put("name", player.name); player.shortName?.let { put("short", it) }
                     player.country?.let { put("country", it) }; player.flag?.let { put("flag", it) }; player.toPar?.let { put("toPar", it) }
-                    player.thru?.let { put("thru", it) }; player.today?.let { put("today", it) }
+                    player.thru?.let { put("thru", it) }; player.today?.let { put("today", it) }; player.teeMillis?.let { put("tee", it) }
                 }) } })
             }
             is SportsDetail.Sessions -> {
                 put("type", "sessions"); detail.venue?.let { put("venue", it) }
                 put("sessions", JSONArray().apply { detail.sessions.forEach { session -> put(JSONObject().apply {
                     session.abbreviation?.let { put("abbreviation", it) }; put("name", session.name); put("start", session.startMillis); put("state", session.state.name)
+                    if (session.top.isNotEmpty()) put("top", JSONArray(session.top))
                 }) } })
             }
             is SportsDetail.Card -> {
@@ -133,11 +134,11 @@ object SportsDetails {
             "golf" -> SportsDetail.Golf(json.text("tournament") ?: return null, json.int("round"), json.text("status"), json.text("purse"),
                 json.objects("leaders").mapNotNull { player ->
                     GolfPlayer(player.text("position") ?: return@mapNotNull null, player.text("name") ?: return@mapNotNull null, player.text("short"),
-                        player.text("country"), player.text("flag"), player.text("toPar"), player.text("thru"), player.text("today"))
+                        player.text("country"), player.text("flag"), player.text("toPar"), player.text("thru"), player.text("today"), player.long("tee"))
                 }.take(MAX_LEADERS), json.long("end"))
             "sessions" -> SportsDetail.Sessions(json.text("venue"), json.objects("sessions").mapNotNull { session ->
                 RaceSession(session.text("abbreviation"), session.text("name") ?: return@mapNotNull null, session.long("start") ?: return@mapNotNull null,
-                    status(session.text("state")))
+                    status(session.text("state")), session.optJSONArray("top")?.let { top -> (0 until minOf(top.length(), 3)).mapNotNull { top.optString(it).takeIf(String::isNotEmpty) } }.orEmpty())
             })
             "card" -> SportsDetail.Card(json.objects("bouts").mapNotNull { bout ->
                 FightBout(bout.text("weightClass"), bout.int("rounds"), bout.optJSONObject("first")?.let(::fighter) ?: return@mapNotNull null,

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import org.json.JSONArray
 import org.json.JSONObject
@@ -162,11 +163,15 @@ object EspnScoreboard {
         val sets = if (!started) emptyList() else (0 until maxOf(homeLines.size, awayLines.size)).map { index ->
             val a = homeLines.getOrNull(index)
             val b = awayLines.getOrNull(index)
-            TennisSet(a?.optIntOrNull("value"), b?.optIntOrNull("value"), a?.optIntOrNull("tiebreak"), b?.optIntOrNull("tiebreak"), when {
-                a?.optBoolean("winner") == true -> FixtureSide.HOME
-                b?.optBoolean("winner") == true -> FixtureSide.AWAY
-                else -> null
-            })
+            val homeTiebreak = a?.optIntOrNull("tiebreak")
+            val awayTiebreak = b?.optIntOrNull("tiebreak")
+            val matchTiebreak = homeTiebreak != null && awayTiebreak != null && (a?.optIntOrNull("value") ?: 0) + (b?.optIntOrNull("value") ?: 0) <= 1
+            TennisSet(if (matchTiebreak) homeTiebreak else a?.optIntOrNull("value"), if (matchTiebreak) awayTiebreak else b?.optIntOrNull("value"),
+                homeTiebreak.takeIf { !matchTiebreak }, awayTiebreak.takeIf { !matchTiebreak }, when {
+                    a?.optBoolean("winner") == true -> FixtureSide.HOME
+                    b?.optBoolean("winner") == true -> FixtureSide.AWAY
+                    else -> null
+                })
         }
         val server = when {
             status != FixtureStatus.LIVE -> null
@@ -231,11 +236,14 @@ object EspnScoreboard {
                 (round == null || line.optIntOrNull("period") == round) && line.optJSONArray("linescores") != null
             }
             val holes = card?.optJSONArray("linescores")?.length()?.takeIf { it > 0 }
+            val tee = if (holes != null || round == null) null else competitor.optJSONArray("linescores")?.let(::objects).orEmpty().firstOrNull { it.optIntOrNull("period") == round }
+                ?.optJSONObject("statistics")?.optJSONArray("categories")?.let(::objects)?.firstOrNull()?.optJSONArray("stats")?.let(::objects)?.lastOrNull()?.text("displayValue")?.let(::teeTime)
             val thru = state?.optIntOrNull("thru")?.let { if (it >= 18) "F" else if (it > 0) it.toString() else null } ?: state?.text("thru")?.takeIf { it.length <= 3 && it != "0" }
                 ?: holes?.let { if (it >= 18) "F" else it.toString() }
+            val country = flag?.text("href")?.let { COUNTRY.find(it)?.groupValues?.get(1)?.uppercase() } ?: flag?.text("alt")?.take(60)
             Triple(competitor.optIntOrNull("order") ?: (index + 1), score(competitor)?.takeIf { it.length <= 6 },
-                GolfPlayer("", name, athlete?.text("shortName")?.takeIf { it != name }, flag?.text("alt")?.take(60), flag?.text("href")?.let(::sportsImage), null, thru,
-                    (state?.text("todayDetail") ?: card?.text("displayValue")?.takeIf { holes != null })?.take(12)))
+                GolfPlayer("", name, athlete?.text("shortName")?.takeIf { it != name }, country, flag?.text("href")?.let(::sportsImage), null, thru,
+                    (state?.text("todayDetail") ?: card?.text("displayValue")?.takeIf { holes != null })?.take(12), tee))
         }
         val values = players.map { toPar(it.second) }
         val leaders = players.mapIndexed { index, (order, par, player) ->
@@ -255,6 +263,15 @@ object EspnScoreboard {
             detail.round.takeIf { status == FixtureStatus.LIVE }, null, null, null, null, leagueLogo, detail)
     }
 
+    internal fun teeTime(value: String): Long? {
+        val match = TEE.find(value) ?: return null
+        val month = MONTHS.indexOf(match.groupValues[1].lowercase()).takeIf { it >= 0 } ?: return null
+        return runCatching {
+            LocalDateTime.of(match.groupValues[5].toInt(), month + 1, match.groupValues[2].toInt(), match.groupValues[3].toInt(), match.groupValues[4].toInt())
+                .atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli()
+        }.getOrNull()
+    }
+
     internal fun toPar(value: String?): Int? {
         val text = value?.trim()?.uppercase() ?: return null
         if (text == "E" || text == "EVEN") return 0
@@ -271,7 +288,10 @@ object EspnScoreboard {
             val type = (competition.optJSONObject("status") ?: eventStatus)?.optJSONObject("type")
             if (skipped(type)) return@mapNotNull null
             val abbreviation = competition.optJSONObject("type")?.text("abbreviation")?.take(12)
-            Triple(competition, type, RaceSession(abbreviation, sessionName(abbreviation, competition.optJSONObject("type")?.text("text")), start, status(type)))
+            val state = status(type)
+            val top = if (state != FixtureStatus.FINAL) emptyList() else competitors(competition).filter { it.optIntOrNull("order") != null }.sortedBy { it.optIntOrNull("order") }
+                .take(3).mapNotNull { it.optJSONObject("athlete")?.let { athlete -> athlete.text("shortName") ?: athlete.text("displayName") }?.take(MAX_NAME) }
+            Triple(competition, type, RaceSession(abbreviation, sessionName(abbreviation, competition.optJSONObject("type")?.text("text")), start, state, top))
         }.sortedBy { it.third.startMillis }.take(MAX_SESSIONS)
         val circuit = event.optJSONObject("circuit")
         val venue = (circuit?.text("fullName") ?: list.firstNotNullOfOrNull { it.first.optJSONObject("venue")?.text("fullName") }
@@ -408,7 +428,9 @@ object EspnScoreboard {
         return FixtureTeam(name, short, json.text("abbreviation"), alternatives, json.text("logo")?.let(::sportsImage) ?: logo(json), colour, record)
     }
 
-    private fun logo(json: JSONObject): String? = json.optJSONArray("logos")?.let(::objects)?.firstNotNullOfOrNull { it.text("href")?.let(::sportsImage) }
+    private fun logo(json: JSONObject): String? = json.optJSONArray("logos")?.let(::objects)?.let { logos ->
+        logos.sortedByDescending { logo -> logo.optJSONArray("rel")?.let { rel -> (0 until rel.length()).any { rel.optString(it) == "dark" } } == true }
+            .firstNotNullOfOrNull { it.text("href")?.let(::sportsImage) } }
 
     private fun score(competitor: JSONObject?): String? {
         competitor ?: return null
@@ -471,6 +493,9 @@ object EspnScoreboard {
     private val COLOUR = Regex("[0-9A-Fa-f]{6}")
     private val RECORD = Regex("\\d{1,3}(-\\d{1,3}){1,3}")
     private val INITIAL = Regex("""[\p{L}.\-]{1,6}\.\s+(.+)""")
+    private val TEE = Regex("""^\w{3} (\w{3}) (\d{1,2}) (\d{1,2}):(\d{2}):\d{2} \w+ (\d{4})$""")
+    private val COUNTRY = Regex("""/countries/\d+/([a-z]{3})\.png""", RegexOption.IGNORE_CASE)
+    private val MONTHS = listOf("jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
     private val CRICKET = Regex("""\(([\d.]+)(?:/(\d+))? ov(?:, target (\d+))?""")
     private val TENNIS_ORDER = listOf(FixtureStatus.LIVE, FixtureStatus.SCHEDULED, FixtureStatus.FINAL)
     private const val MAX_PERIODS = 12

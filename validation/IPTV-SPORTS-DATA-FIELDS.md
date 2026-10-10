@@ -394,3 +394,42 @@ followed teams' games (ESPN games matched to TheSportsDB events by teams and sta
 6 h), cached 24 h per event; league list (`all_leagues.php` / v2 `all/leagues`) cached
 7 days for "Add a league". Response shapes for livescore, lookuptv and the league list
 are from documentation and the 8 October coverage files; confirm with a real capture.
+
+## Fourth pass (10 October morning)
+
+Real responses captured about 10:50 Sydney time on 10 October (23:50Z on 9 October):
+scoreboards for all leagues above plus NBL and college football, summaries for the team
+leagues, the multi-sport header, and a summary of a live NHL game. In play: three NHL
+games (all at the end of the 1st period) and PGA round 3 (6 of 72 players had started).
+Everything else was `pre` or `post`; no tennis match was live. Trimmed copies are in
+`app/src/test/resources/sports/*-real-20261010.json` (`SportsRealDataMorningTest`); the
+synthetic NHL summary was replaced by the real one.
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NHL scoreboard (live) | `status.type.name` `STATUS_END_PERIOD`, `state` `in`, `period` 1, `displayClock` `0:00` (counts down), `shortDetail` `End of 1st`. `situation` holds only `lastPlay` (`End of 1st Period`, no probability). Header `linescores` per period without a `period` field. `competitors[].statistics` are goalie figures (`saves`, `savePct`) plus skater totals, not shots. | none |
+| NHL summary (live) | `plays[].clock` counts **up** within the period (`9:19`, period end `20:00`), unlike the scoreboard clock. Every play has `wallclock`. `strength` (`Even Strength`, `Power Play`, `Shorthanded`) is from the acting team's point of view and is on almost every play, including the period-end play (no team). `boxscore.teams` shots `shotsTotal`, `powerPlayGoals`/`powerPlayOpportunities`; goalies in `boxscore.players[].statistics[name=goalies]` with `keys` (`saves`, `shotsAgainst`, `savePct`). No `winprobability`, no `situation`. | Moment markers treat hockey play clocks as elapsed; even strength gives no strength line; `Shorthanded` becomes a power play for the other side; goalies parsed (`SummaryGoalie`) |
+| Header (NHL) | `goalieSummary[].displayValue` `1 GA, 17 SV, .944 SV%` per side while live; `fullStatus.clock` 0.0. | none (header not used) |
+| Golf (mid-round) | Scoreboard still has no `status`, place or `thru`. A started player's current-round line has nested hole lines (first hole `period` 10 for back-nine starters) and `displayValue` = today. A player yet to start has the round line with no holes; the last value of its unlabelled `statistics.categories[0].stats` is the tee time as text, e.g. `Fri Oct 09 21:36:00 PDT 2026`, which is US Eastern wall-clock time despite the label (the header gave `teeTime` `2026-10-10T01:36Z` for the same 25 players). Header `place` ties match ties computed from to-par. | Tee time (`teeMillis`) for players yet to start; country as the three-letter flag code (`USA`, `JPN`) for a fixed-width column |
+| Tennis | Doubles match tiebreaks are a third "set" of `value` 1–0 with the points in `tiebreak` (`1-0 (10-7)`); a retirement during one is `0-0 (4-7)`. Still no live match, so `possession` and in-play sets remain unseen. | Match tiebreak shown as its points (`7`–`10`) instead of `0(7)`–`1` |
+| F1 | Completed sessions (FP1, sprint qualifying) list all 22 drivers with `order` = classification; no times or gaps (`statistics` empty). The next session lists drivers without `order`. Event-level `status` was `post` (period 28) while the weekend was still running; the parser ignores it and follows the sessions. | Top three per finished session (`RaceSession.top`) |
+| NFL summary (final) | No root `plays`; play-by-play is in `drives.previous[].plays` (no `team` on the play), scoring summary in `scoringPlays[]` (`team`, `text`, `homeScore`, `awayScore`, `clock`, no `wallclock`; ids match drive plays). `winprobability` 184 entries. | Moments from `scoringPlays` (wallclock taken from the matching drive play); last plays from drives |
+| URC scoreboard | Same cumulative `linescores` with scores at 20' and 60' in periods 20 and 60. One final (Glasgow 36–19) had 0 at half-time and 0 at 20'/60' although tries were scored before the break. | none — shown as given (`0 36`); the half-time line is missing at source |
+| NBL, college football | Both parse cleanly with the team parser (NBL quarters 10 min; NBL plays have no `wallclock`). Neither is in the app's league list. | none |
+| Cricket, AFL, NRL, A-League, EPL, UCL, MLB, NBA, UFC, NASCAR | Same shapes as the third pass; MLB and NHL pre-game summaries again carry season totals as team stats. | none |
+
+Confirmed from real data on 10 October: NHL live status/period/clock/detail and score
+lines, NHL `lastPlay` on the scoreboard, NHL plays with strength, goals and wallclock,
+NHL team stats and goalie lines, golf mid-round thru/today, tee times, tied positions,
+doubles match tiebreaks, F1 practice and sprint qualifying classification order, NFL
+scoring plays, drives and full-game win probability.
+
+Still unconfirmed (need a capture during play): NHL running clock within a period and a
+power play in progress at capture time; NFL `situation` (down and distance, possession,
+`lastPlay` probability) and `drives.current`; MLB balls/strikes/outs and base runners;
+NBA/NBL running clock and live win probability; tennis `possession` (serve) and in-play
+set scores; F1 race classification, live session state and gaps; NASCAR running order;
+UFC live round, result method and winner; cricket live `isBatting`/`isCurrent` and
+overs; soccer `keyEvents`, live clock and `subbedIn`/`subbedOut`; AFL/NRL/URC live
+clock and details `period`; golf leaderboard during a round with most of the field on
+the course (only 6 had started) and after a cut (this event has none).

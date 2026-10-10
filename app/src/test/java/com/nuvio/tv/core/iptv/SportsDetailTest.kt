@@ -88,7 +88,7 @@ class SportsDetailTest {
         assertEquals(millis("2026-10-11T04:00:00Z"), golf.endMillis)
         assertEquals(10, golf.leaders.size)
         assertEquals(listOf("1", "T2", "T2", "4", "T5", "T5", "7"), golf.leaders.take(7).map { it.position })
-        assertEquals(GolfPlayer("1", "Sam Ito", "S. Ito", "Japan", "https://a.espncdn.com/i/teamlogos/countries/500/jpn.png", "-8"), golf.leaders[0])
+        assertEquals(GolfPlayer("1", "Sam Ito", "S. Ito", "JPN", "https://a.espncdn.com/i/teamlogos/countries/500/jpn.png", "-8"), golf.leaders[0])
         assertEquals("E", golf.leaders[3].toPar)
         assertEquals(SportsBugText("S. Ito -8", "Round 1 - Play Complete", null), SportsFixtureText.bug(event))
     }

@@ -114,7 +114,7 @@ internal object SportsStrip {
             else -> SportsMarkers.minutes(sport, period, clock)?.coerceIn(0.0, total)
         }
         val moments = if (sport in TICKS) (summary?.moments ?: SportsEvents.moments(fixture)).filter { it.kind in MOMENTS }.mapNotNull { moment ->
-            SportsMarkers.minutes(sport, moment.period, moment.clock)?.coerceIn(0.0, total)?.let { Triple(it, moment.kind, moment.side) }
+            SportsMarkers.minutes(sport, moment.period, moment.clock, elapsed = sport == "ice-hockey" && summary?.moments != null)?.coerceIn(0.0, total)?.let { Triple(it, moment.kind, moment.side) }
         } else emptyList()
         return Strip(segments, total, progress, moments.map { it.first to it.second }, moments.map { it.third }, shape.end ?: SportsFixtureText.periodLabel(sport, shape.periods))
     }

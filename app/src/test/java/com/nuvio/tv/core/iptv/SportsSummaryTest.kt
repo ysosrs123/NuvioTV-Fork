@@ -93,14 +93,6 @@ class SportsSummaryTest {
         assertEquals("Pitch 2 : Ball 1", game.lastPlays[0].text)
     }
 
-    @Test fun nhlPowerPlayAndGoals() {
-        val game = summary("nhl", "nhl")
-        assertEquals(SummaryStrength("Power Play", FixtureSide.AWAY), game.strength)
-        assertEquals(2, game.moments.size)
-        assertTrue(game.moments.all { it.kind == MomentKind.GOAL && it.wallclockMillis != null })
-        assertTrue(game.winProbability.isEmpty())
-    }
-
     @Test fun aflGoalsBehindsAndQuarters() {
         val game = summary("afl", "afl")
         assertEquals(FixtureStatus.FINAL, game.status)

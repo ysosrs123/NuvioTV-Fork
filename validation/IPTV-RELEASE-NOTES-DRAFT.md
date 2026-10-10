@@ -544,6 +544,13 @@ Guide:
 - A background guide reload keeps each channel's programmes until the new ones arrive, so
   the grid no longer shows "Programme information unavailable" during a guide update.
 
+Sport data (checked against a real capture with NHL and golf live, 10 October):
+- Tennis doubles match tiebreaks show the tiebreak score; NHL goal markers sit at the right
+  time, the power play line names the right team and is hidden at even strength; NFL
+  scoring plays and recent plays appear in Game Centre; finished F1 sessions carry the top
+  three; golf rows give clean columns including tee times; league logos prefer the
+  variant made for dark backgrounds.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
