@@ -332,7 +332,9 @@ reporting, resets 10 October 2026 00:00 UTC):
 
 ## Review — night of 10 October 2026 (`01f19bbed..96f8939ea`)
 
-Two read-only reviews of everything since the last full device pass; fixes in progress:
+Two read-only reviews of everything since the last full device pass. All findings below are
+fixed (`42fb1a5f9`, `69100afe3`, `86d5bd8b3`, `278e688f6`, `7c7e0e4ae`; checklist 7g) except
+the two "not changed" items:
 - High: recording names without the id suffix could overwrite files on network shares and
   delete same-named MediaStore entries (uniqueness was only checked on local storage).
 - Medium: PIN-locked profile reachable by a paired phone right after app start (PIN map not
@@ -346,7 +348,11 @@ Two read-only reviews of everything since the last full device pass; fixes in pr
   expiry read as UTC; HEVC tiles measured against the AVC budget.
 - Not changed (waiting for a device test): multiview decode budget uses the larger of
   performance points and size/rate support; check the `multiview device` log on the AM9.
-- To check on a device: tunnelled playback kept alive while in settings may need a re-tune.
+- To check on a device: tunnelled playback kept alive while in settings may need a re-tune
+  (now re-tunes itself after 10 s if no frame arrives; log `live tunnel picture missing`).
+- Follow-ups not done: Movies-folder recordings still store the MediaStore id rather than
+  the final name (`IptvRecordingStore`); the folder check covers new names. Sport only is
+  capped at 200 channels (`browse.sports` allows 1..200).
 
 ## Device findings — 10 October 2026, evening (build `e7e1d17b5`, run 38029912007)
 
