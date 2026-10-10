@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Diese TV-Box dekodiert bereits so viel Video wie möglich, selbst mit den anderen Bildern in niedrigster Qualität. Entfernen Sie zuerst ein Bild oder ersetzen Sie eines durch eine Version seines Senders mit geringerer Auflösung (etwa SD oder 720p) und fügen Sie diesen dann erneut hinzu.</string>
+    <string name="iptv_multiview_decoder_busy">Diese TV-Box hat gerade keinen freien Videodecoder für ein weiteres Bild. Entfernen Sie ein Bild oder versuchen Sie es in ein paar Sekunden erneut.</string>
+</resources>

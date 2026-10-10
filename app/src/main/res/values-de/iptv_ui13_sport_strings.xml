@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Sportsender</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Wählen Sie, welche Sender „Nur Sport“ zeigt und auf welchen Sendern Spiele angeboten werden</string>
+    <string name="iptv_ui13_sport_always">Immer in „Nur Sport“</string>
+    <string name="iptv_ui13_sport_always_subtitle">Auch ohne passendes Spiel in „Nur Sport“, etwa Ihre Sportkategorien</string>
+    <string name="iptv_ui13_sport_never">Nie in „Nur Sport“</string>
+    <string name="iptv_ui13_sport_never_subtitle">Bleiben aus „Nur Sport“ draußen, auch wenn sie ein Spiel zeigen</string>
+    <string name="iptv_ui13_sport_preferred">Bevorzugt für Spiele</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Zuerst angeboten zum Ansehen, für andere Streams und Aufnahmen, etwa die Sportkategorien Ihres Landes</string>
+    <string name="iptv_ui13_sport_excluded">Nie für Spiele anbieten</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Nie zum Ansehen oder Aufnehmen eines Spiels angeboten</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d ausgewählt</item>
+        <item quantity="other">%d ausgewählt</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Kategorien filtern oder Sender suchen</string>
+    <string name="iptv_ui13_sport_pick_hint">Mindestens zwei Buchstaben eingeben, um Sender in allen Quellen zu finden</string>
+    <string name="iptv_ui13_sport_pick_chosen">Ausgewählt</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategorien</string>
+    <string name="iptv_ui13_sport_pick_channels">Sender</string>
+    <string name="iptv_ui13_sport_pick_category">Kategorie</string>
+    <string name="iptv_ui13_sport_pick_channel">Sender</string>
+    <string name="iptv_ui13_sport_pick_searching">Sender werden gesucht…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Keine passenden Sender.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Keine passenden Kategorien.</string>
+</resources>

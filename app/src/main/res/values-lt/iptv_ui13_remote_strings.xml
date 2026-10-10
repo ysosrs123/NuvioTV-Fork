@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Palikti telefono prieigą įjungtą</string>
+    <string name="iptv_phone_keep_subtitle">Susieti telefonai pasiekia nustatymą ir įrašus, kol Nuvio atidaryta arba veikia fone</string>
+    <string name="iptv_phone_keep_note">Telefono prieiga lieka įjungta, kol Nuvio atidaryta arba veikia fone šiame televizoriuje. Naujus telefonus galima susieti tik kol atidarytas šis ekranas.</string>
+    <string name="iptv_phone_done_kept">Grįžta atgal. Susieti telefonai išlaiko prieigą.</string>
+    <string name="iptv_phone_paired">Susieti telefonai</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefonas ar kompiuteris</item>
+        <item quantity="few">%d telefonai ar kompiuteriai</item>
+        <item quantity="many">%d telefono ar kompiuterio</item>
+        <item quantity="other">%d telefonų ar kompiuterių</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Dar nėra. Nuskaitykite QR kodą, kad susietumėte.</string>
+    <string name="iptv_phone_paired_subtitle">Jie gali atidaryti nustatymą ir įrašus, kol Nuvio atidaryta arba veikia fone šiame televizoriuje. Pakeitimus vis tiek reikia patvirtinti čia.</string>
+    <string name="iptv_phone_paired_on">Susieta: %1$s</string>
+    <string name="iptv_phone_remove_all">Pašalinti visus</string>
+    <string name="iptv_phone_name">%1$s, %2$s</string>
+    <string name="iptv_phone_unknown">Nežinoma naršyklė</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Susieti telefonai atidaro</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">TV box ini sudah mendekode video sebanyak mungkin, bahkan dengan gambar lain di kualitas teringan. Hapus satu gambar dulu, atau ganti dengan versi resolusi lebih rendah dari salurannya (seperti SD atau 720p), lalu tambahkan yang ini lagi.</string>
+    <string name="iptv_multiview_decoder_busy">TV box ini sedang tidak punya dekoder video kosong untuk gambar lain. Hapus satu gambar, atau tunggu beberapa detik lalu coba lagi.</string>
+</resources>

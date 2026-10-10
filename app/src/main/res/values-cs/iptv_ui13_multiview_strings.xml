@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Tento TV box už dekóduje tolik videa, kolik zvládne, i když jsou ostatní obrazy v nejnižší kvalitě. Nejprve odeberte jeden obraz nebo ho vyměňte za verzi jeho kanálu v nižším rozlišení (např. SD nebo 720p) a pak tento přidejte znovu.</string>
+    <string name="iptv_multiview_decoder_busy">Tento TV box teď nemá volný videodekodér pro další obraz. Odeberte jeden obraz, nebo počkejte pár sekund a zkuste to znovu.</string>
+</resources>

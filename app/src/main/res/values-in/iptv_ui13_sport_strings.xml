@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Saluran olahraga</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Pilih saluran yang ditampilkan Hanya olahraga dan saluran tempat pertandingan ditawarkan</string>
+    <string name="iptv_ui13_sport_always">Selalu di Hanya olahraga</string>
+    <string name="iptv_ui13_sport_always_subtitle">Tampil di Hanya olahraga meski tanpa pertandingan yang cocok, seperti kategori olahraga Anda</string>
+    <string name="iptv_ui13_sport_never">Tidak pernah di Hanya olahraga</string>
+    <string name="iptv_ui13_sport_never_subtitle">Dikecualikan dari Hanya olahraga meski menayangkan pertandingan</string>
+    <string name="iptv_ui13_sport_preferred">Diutamakan untuk pertandingan</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Ditawarkan lebih dulu untuk Tonton di, feed lain, dan rekaman, seperti kategori olahraga negara Anda</string>
+    <string name="iptv_ui13_sport_excluded">Jangan tawarkan untuk pertandingan</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Tidak pernah ditawarkan untuk menonton atau merekam pertandingan</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="other">%d dipilih</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filter kategori atau cari saluran</string>
+    <string name="iptv_ui13_sport_pick_hint">Ketik minimal dua huruf untuk mencari saluran di semua sumber Anda</string>
+    <string name="iptv_ui13_sport_pick_chosen">Dipilih</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategori</string>
+    <string name="iptv_ui13_sport_pick_channels">Saluran</string>
+    <string name="iptv_ui13_sport_pick_category">Kategori</string>
+    <string name="iptv_ui13_sport_pick_channel">Saluran</string>
+    <string name="iptv_ui13_sport_pick_searching">Mencari saluran…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Tidak ada saluran yang cocok.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Tidak ada kategori yang cocok.</string>
+</resources>

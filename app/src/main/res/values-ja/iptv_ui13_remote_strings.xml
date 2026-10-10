@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">スマートフォンからのアクセスを維持</string>
+    <string name="iptv_phone_keep_subtitle">Nuvioが開いているかバックグラウンドにある間、ペアリング済みのスマートフォンから設定と録画を利用できます</string>
+    <string name="iptv_phone_keep_note">このTVでNuvioが開いているかバックグラウンドにある間、スマートフォンからのアクセスは有効のままです。新しいスマートフォンは、この画面を開いている間のみペアリングできます。</string>
+    <string name="iptv_phone_done_kept">戻ります。ペアリング済みのスマートフォンはアクセスを維持します。</string>
+    <string name="iptv_phone_paired">ペアリング済みのスマートフォン</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="other">%d 台のスマートフォンまたはパソコン</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">まだありません。QRコードをスキャンしてペアリングしてください。</string>
+    <string name="iptv_phone_paired_subtitle">このTVでNuvioが開いているかバックグラウンドにある間、設定と録画を開けます。変更にはこれまでどおりここでの承認が必要です。</string>
+    <string name="iptv_phone_paired_on">ペアリング: %1$s</string>
+    <string name="iptv_phone_remove_all">すべて削除</string>
+    <string name="iptv_phone_name">%2$s の %1$s</string>
+    <string name="iptv_phone_unknown">不明なブラウザ</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">ペアリング済みのスマートフォンで開く</string>
+</resources>

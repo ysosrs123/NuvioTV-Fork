@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Αθλητικά κανάλια</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Επιλέξτε τα κανάλια που δείχνει το Μόνο αθλητικά και τα κανάλια όπου προτείνονται παιχνίδια</string>
+    <string name="iptv_ui13_sport_always">Πάντα στο Μόνο αθλητικά</string>
+    <string name="iptv_ui13_sport_always_subtitle">Εμφανίζονται στο Μόνο αθλητικά ακόμη και χωρίς αντίστοιχο παιχνίδι, π.χ. οι αθλητικές σας κατηγορίες</string>
+    <string name="iptv_ui13_sport_never">Ποτέ στο Μόνο αθλητικά</string>
+    <string name="iptv_ui13_sport_never_subtitle">Εξαιρούνται από το Μόνο αθλητικά ακόμη κι όταν δείχνουν παιχνίδι</string>
+    <string name="iptv_ui13_sport_preferred">Προτιμώμενα για παιχνίδια</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Προτείνονται πρώτα για το Δείτε στο, άλλες ροές και εγγραφές, π.χ. οι αθλητικές κατηγορίες της χώρας σας</string>
+    <string name="iptv_ui13_sport_excluded">Ποτέ για παιχνίδια</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Δεν προτείνονται ποτέ για παρακολούθηση ή εγγραφή παιχνιδιού</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d επιλεγμένο</item>
+        <item quantity="other">%d επιλεγμένα</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Φιλτράρισμα κατηγοριών ή εύρεση καναλιών</string>
+    <string name="iptv_ui13_sport_pick_hint">Πληκτρολογήστε τουλάχιστον δύο γράμματα για εύρεση καναλιών σε όλες τις πηγές σας</string>
+    <string name="iptv_ui13_sport_pick_chosen">Επιλεγμένα</string>
+    <string name="iptv_ui13_sport_pick_categories">Κατηγορίες</string>
+    <string name="iptv_ui13_sport_pick_channels">Κανάλια</string>
+    <string name="iptv_ui13_sport_pick_category">Κατηγορία</string>
+    <string name="iptv_ui13_sport_pick_channel">Κανάλι</string>
+    <string name="iptv_ui13_sport_pick_searching">Εύρεση καναλιών…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Κανένα κανάλι δεν ταιριάζει.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Καμία κατηγορία δεν ταιριάζει.</string>
+</resources>

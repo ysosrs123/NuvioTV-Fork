@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Запази достъпа от телефон</string>
+    <string name="iptv_phone_keep_subtitle">Сдвоените телефони имат достъп до настройката и записите, докато Nuvio е отворено или във фонов режим</string>
+    <string name="iptv_phone_keep_note">Достъпът от телефон остава включен, докато Nuvio е отворено или във фонов режим на този телевизор. Нови телефони могат да се сдвояват само докато този екран е отворен.</string>
+    <string name="iptv_phone_done_kept">Връща назад. Сдвоените телефони запазват достъпа.</string>
+    <string name="iptv_phone_paired">Сдвоени телефони</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d телефон или компютър</item>
+        <item quantity="other">%d телефона или компютъра</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Още няма. Сканирайте QR кода, за да сдвоите.</string>
+    <string name="iptv_phone_paired_subtitle">Те могат да отварят настройката и записите, докато Nuvio е отворено или във фонов режим на този телевизор. Промените пак изискват потвърждение тук.</string>
+    <string name="iptv_phone_paired_on">Сдвоен: %1$s</string>
+    <string name="iptv_phone_remove_all">Премахни всички</string>
+    <string name="iptv_phone_name">%1$s на %2$s</string>
+    <string name="iptv_phone_unknown">Неизвестен браузър</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Сдвоените телефони отварят</string>
+</resources>

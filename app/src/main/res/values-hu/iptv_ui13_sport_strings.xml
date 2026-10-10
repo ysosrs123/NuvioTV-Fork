@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Sportcsatornák</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Válaszd ki, mely csatornákat mutassa a Csak sport, és mely csatornákon kínáljon meccseket</string>
+    <string name="iptv_ui13_sport_always">Mindig a Csak sportban</string>
+    <string name="iptv_ui13_sport_always_subtitle">Megjelennek a Csak sportban egyező meccs nélkül is, például a sportkategóriáid</string>
+    <string name="iptv_ui13_sport_never">Soha a Csak sportban</string>
+    <string name="iptv_ui13_sport_never_subtitle">Kimaradnak a Csak sportból akkor is, ha meccset adnak</string>
+    <string name="iptv_ui13_sport_preferred">Előnyben meccsekhez</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Elsőként ajánlva nézéshez, más adásokhoz és felvételekhez, például az országod sportkategóriái</string>
+    <string name="iptv_ui13_sport_excluded">Soha ne ajánlja meccsekhez</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Soha nem ajánlott meccs nézéséhez vagy felvételéhez</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d kiválasztva</item>
+        <item quantity="other">%d kiválasztva</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Kategóriák szűrése vagy csatornák keresése</string>
+    <string name="iptv_ui13_sport_pick_hint">Írj be legalább két betűt a csatornák kereséséhez az összes forrásodban</string>
+    <string name="iptv_ui13_sport_pick_chosen">Kiválasztva</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategóriák</string>
+    <string name="iptv_ui13_sport_pick_channels">Csatornák</string>
+    <string name="iptv_ui13_sport_pick_category">Kategória</string>
+    <string name="iptv_ui13_sport_pick_channel">Csatorna</string>
+    <string name="iptv_ui13_sport_pick_searching">Csatornák keresése…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Nincs egyező csatorna.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Nincs egyező kategória.</string>
+</resources>

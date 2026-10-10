@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">このTVボックスは、他の画面を最も軽い画質にしても、すでにデコードできる上限に達しています。先に画面を1つ削除するか、1つをそのチャンネルの低解像度版（SDや720pなど）に切り替えてから、もう一度追加してください。</string>
+    <string name="iptv_multiview_decoder_busy">このTVボックスには現在、もう1画面分の空きビデオデコーダーがありません。画面を1つ削除するか、数秒待ってからもう一度お試しください。</string>
+</resources>

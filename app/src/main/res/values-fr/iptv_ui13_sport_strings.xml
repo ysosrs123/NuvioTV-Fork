@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Chaînes de sport</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Choisissez les chaînes affichées par Sport uniquement et celles où les matchs sont proposés</string>
+    <string name="iptv_ui13_sport_always">Toujours dans Sport uniquement</string>
+    <string name="iptv_ui13_sport_always_subtitle">Affichées dans Sport uniquement même sans match associé, comme vos catégories sport</string>
+    <string name="iptv_ui13_sport_never">Jamais dans Sport uniquement</string>
+    <string name="iptv_ui13_sport_never_subtitle">Exclues de Sport uniquement même si elles diffusent un match</string>
+    <string name="iptv_ui13_sport_preferred">Préférées pour les matchs</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Proposées en premier pour Regarder sur, les autres flux et les enregistrements, comme les catégories sport de votre pays</string>
+    <string name="iptv_ui13_sport_excluded">Ne jamais proposer pour les matchs</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Jamais proposées pour regarder ou enregistrer un match</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d choisie</item>
+        <item quantity="many">%d choisies</item>
+        <item quantity="other">%d choisies</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtrer les catégories ou chercher des chaînes</string>
+    <string name="iptv_ui13_sport_pick_hint">Saisissez au moins deux lettres pour trouver des chaînes dans toutes vos sources</string>
+    <string name="iptv_ui13_sport_pick_chosen">Choisies</string>
+    <string name="iptv_ui13_sport_pick_categories">Catégories</string>
+    <string name="iptv_ui13_sport_pick_channels">Chaînes</string>
+    <string name="iptv_ui13_sport_pick_category">Catégorie</string>
+    <string name="iptv_ui13_sport_pick_channel">Chaîne</string>
+    <string name="iptv_ui13_sport_pick_searching">Recherche de chaînes…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Aucune chaîne ne correspond.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Aucune catégorie ne correspond.</string>
+</resources>

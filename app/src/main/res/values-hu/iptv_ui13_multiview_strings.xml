@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Ez a TV-box már annyi videót dekódol, amennyit csak tud, még a többi kép legkisebb minőségével is. Előbb távolíts el egy képet, vagy cseréld le egyet a csatornája kisebb felbontású változatára (például SD vagy 720p), majd add hozzá újra ezt.</string>
+    <string name="iptv_multiview_decoder_busy">Ennek a TV-boxnak most nincs szabad videodekódere újabb képhez. Távolíts el egy képet, vagy várj néhány másodpercet, és próbáld újra.</string>
+</resources>

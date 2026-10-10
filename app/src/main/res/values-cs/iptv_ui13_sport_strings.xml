@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Sportovní kanály</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Vyberte kanály, které zobrazí Jen sport, a kanály, na kterých se nabízejí zápasy</string>
+    <string name="iptv_ui13_sport_always">Vždy v režimu Jen sport</string>
+    <string name="iptv_ui13_sport_always_subtitle">Zobrazeny v režimu Jen sport i bez přiřazeného zápasu, např. vaše sportovní kategorie</string>
+    <string name="iptv_ui13_sport_never">Nikdy v režimu Jen sport</string>
+    <string name="iptv_ui13_sport_never_subtitle">Vynechány z režimu Jen sport, i když vysílají zápas</string>
+    <string name="iptv_ui13_sport_preferred">Preferované pro zápasy</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Nabízeny jako první pro Sledovat na, další streamy a nahrávky, např. sportovní kategorie vaší země</string>
+    <string name="iptv_ui13_sport_excluded">Nikdy nenabízet pro zápasy</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Nikdy nenabízeny ke sledování ani nahrávání zápasu</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">Vybráno: %d</item>
+        <item quantity="few">Vybráno: %d</item>
+        <item quantity="many">Vybráno: %d</item>
+        <item quantity="other">Vybráno: %d</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtrovat kategorie nebo najít kanály</string>
+    <string name="iptv_ui13_sport_pick_hint">Zadejte aspoň dvě písmena a najděte kanály ve všech svých zdrojích</string>
+    <string name="iptv_ui13_sport_pick_chosen">Vybrané</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategorie</string>
+    <string name="iptv_ui13_sport_pick_channels">Kanály</string>
+    <string name="iptv_ui13_sport_pick_category">Kategorie</string>
+    <string name="iptv_ui13_sport_pick_channel">Kanál</string>
+    <string name="iptv_ui13_sport_pick_searching">Hledání kanálů…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Žádné kanály neodpovídají.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Žádné kategorie neodpovídají.</string>
+</resources>

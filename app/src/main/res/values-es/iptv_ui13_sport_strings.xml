@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Canales de deporte</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Elige los canales que muestra Solo deporte y los canales donde se ofrecen partidos</string>
+    <string name="iptv_ui13_sport_always">Siempre en Solo deporte</string>
+    <string name="iptv_ui13_sport_always_subtitle">Se muestran en Solo deporte aunque no haya un partido asociado, como tus categorías de deporte</string>
+    <string name="iptv_ui13_sport_never">Nunca en Solo deporte</string>
+    <string name="iptv_ui13_sport_never_subtitle">Fuera de Solo deporte aunque emitan un partido</string>
+    <string name="iptv_ui13_sport_preferred">Preferidos para partidos</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Se ofrecen primero para Ver en, otras señales y grabaciones, como las categorías de deporte de tu país</string>
+    <string name="iptv_ui13_sport_excluded">No ofrecer nunca para partidos</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Nunca se ofrecen para ver o grabar un partido</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d elegido</item>
+        <item quantity="many">%d elegidos</item>
+        <item quantity="other">%d elegidos</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtrar categorías o buscar canales</string>
+    <string name="iptv_ui13_sport_pick_hint">Escribe al menos dos letras para buscar canales en todas tus fuentes</string>
+    <string name="iptv_ui13_sport_pick_chosen">Elegidos</string>
+    <string name="iptv_ui13_sport_pick_categories">Categorías</string>
+    <string name="iptv_ui13_sport_pick_channels">Canales</string>
+    <string name="iptv_ui13_sport_pick_category">Categoría</string>
+    <string name="iptv_ui13_sport_pick_channel">Canal</string>
+    <string name="iptv_ui13_sport_pick_searching">Buscando canales…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Ningún canal coincide.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Ninguna categoría coincide.</string>
+</resources>

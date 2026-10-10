@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Denne TV-boks afkoder allerede så meget video, som den kan, selv med de andre billeder i laveste kvalitet. Fjern først et billede, eller skift et ud med en version af kanalen i lavere opløsning (f.eks. SD eller 720p), og tilføj så denne igen.</string>
+    <string name="iptv_multiview_decoder_busy">Denne TV-boks har ingen ledig videodekoder til endnu et billede lige nu. Fjern et billede, eller vent et par sekunder, og prøv igen.</string>
+</resources>

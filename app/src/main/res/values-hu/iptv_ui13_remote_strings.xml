@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Telefonos hozzáférés megtartása</string>
+    <string name="iptv_phone_keep_subtitle">A párosított telefonok elérik a beállítást és a felvételeket, amíg a Nuvio nyitva van vagy a háttérben fut</string>
+    <string name="iptv_phone_keep_note">A telefonos hozzáférés bekapcsolva marad, amíg a Nuvio nyitva van vagy a háttérben fut ezen a tévén. Új telefont csak akkor lehet párosítani, amikor ez a képernyő nyitva van.</string>
+    <string name="iptv_phone_done_kept">Visszalép. A párosított telefonok megtartják a hozzáférést.</string>
+    <string name="iptv_phone_paired">Párosított telefonok</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefon vagy számítógép</item>
+        <item quantity="other">%d telefon vagy számítógép</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Még nincs. Olvasd be a QR-kódot a párosításhoz.</string>
+    <string name="iptv_phone_paired_subtitle">Ezek megnyithatják a beállítást és a felvételeket, amíg a Nuvio nyitva van vagy a háttérben fut ezen a tévén. A módosításokat továbbra is itt kell jóváhagynod.</string>
+    <string name="iptv_phone_paired_on">Párosítva: %1$s</string>
+    <string name="iptv_phone_remove_all">Összes eltávolítása</string>
+    <string name="iptv_phone_name">%1$s, %2$s</string>
+    <string name="iptv_phone_unknown">Ismeretlen böngésző</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">A párosított telefonok ezt nyitják meg</string>
+</resources>

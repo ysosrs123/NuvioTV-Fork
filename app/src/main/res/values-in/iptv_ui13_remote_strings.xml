@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Biarkan akses ponsel aktif</string>
+    <string name="iptv_phone_keep_subtitle">Ponsel yang disandingkan bisa membuka penyiapan dan rekaman selama Nuvio terbuka atau di latar belakang</string>
+    <string name="iptv_phone_keep_note">Akses ponsel tetap aktif selama Nuvio terbuka atau di latar belakang di TV ini. Ponsel baru hanya bisa disandingkan saat layar ini terbuka.</string>
+    <string name="iptv_phone_done_kept">Kembali. Ponsel yang disandingkan tetap punya akses.</string>
+    <string name="iptv_phone_paired">Ponsel yang disandingkan</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="other">%d ponsel atau komputer</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Belum ada. Pindai kode QR untuk menyandingkan.</string>
+    <string name="iptv_phone_paired_subtitle">Perangkat ini bisa membuka penyiapan dan rekaman selama Nuvio terbuka atau di latar belakang di TV ini. Perubahan tetap perlu persetujuan Anda di sini.</string>
+    <string name="iptv_phone_paired_on">Disandingkan: %1$s</string>
+    <string name="iptv_phone_remove_all">Hapus semua</string>
+    <string name="iptv_phone_name">%1$s di %2$s</string>
+    <string name="iptv_phone_unknown">Browser tidak dikenal</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Ponsel yang disandingkan membuka</string>
+</resources>

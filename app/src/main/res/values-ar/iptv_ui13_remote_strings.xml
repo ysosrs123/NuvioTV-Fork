@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">إبقاء وصول الهاتف مفعّلاً</string>
+    <string name="iptv_phone_keep_subtitle">تصل الهواتف المقترنة إلى الإعداد والتسجيلات ما دام Nuvio مفتوحاً أو في الخلفية</string>
+    <string name="iptv_phone_keep_note">يبقى وصول الهاتف مفعّلاً ما دام Nuvio مفتوحاً أو في الخلفية على هذا التلفاز. لا يمكن اقتران هواتف جديدة إلا أثناء فتح هذه الشاشة.</string>
+    <string name="iptv_phone_done_kept">يعود للخلف. تحتفظ الهواتف المقترنة بالوصول.</string>
+    <string name="iptv_phone_paired">الهواتف المقترنة</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="zero">لا هواتف أو أجهزة كمبيوتر</item>
+        <item quantity="one">هاتف أو كمبيوتر واحد</item>
+        <item quantity="two">هاتفان أو جهازا كمبيوتر</item>
+        <item quantity="few">%d هواتف أو أجهزة كمبيوتر</item>
+        <item quantity="many">%d هاتفاً أو جهاز كمبيوتر</item>
+        <item quantity="other">%d هاتف أو كمبيوتر</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">لا يوجد بعد. امسح رمز QR لإقران هاتف.</string>
+    <string name="iptv_phone_paired_subtitle">يمكنها فتح الإعداد والتسجيلات ما دام Nuvio مفتوحاً أو في الخلفية على هذا التلفاز. لا تزال التغييرات تحتاج إلى موافقتك هنا.</string>
+    <string name="iptv_phone_paired_on">تم الاقتران: %1$s</string>
+    <string name="iptv_phone_remove_all">إزالة الكل</string>
+    <string name="iptv_phone_name">%1$s على %2$s</string>
+    <string name="iptv_phone_unknown">متصفح غير معروف</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">تفتح الهواتف المقترنة</string>
+</resources>

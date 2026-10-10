@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Behold telefonadgang</string>
+    <string name="iptv_phone_keep_subtitle">Parrede telefoner kan nå opsætning og optagelser, mens Nuvio er åben eller kører i baggrunden</string>
+    <string name="iptv_phone_keep_note">Telefonadgang forbliver slået til, mens Nuvio er åben eller kører i baggrunden på dette TV. Nye telefoner kan kun parres, mens denne skærm er åben.</string>
+    <string name="iptv_phone_done_kept">Går tilbage. Parrede telefoner beholder adgangen.</string>
+    <string name="iptv_phone_paired">Parrede telefoner</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefon eller computer</item>
+        <item quantity="other">%d telefoner eller computere</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Ingen endnu. Scan QR-koden for at parre en.</string>
+    <string name="iptv_phone_paired_subtitle">De kan åbne opsætning og optagelser, mens Nuvio er åben eller kører i baggrunden på dette TV. Ændringer skal stadig godkendes her.</string>
+    <string name="iptv_phone_paired_on">Parret: %1$s</string>
+    <string name="iptv_phone_remove_all">Fjern alle</string>
+    <string name="iptv_phone_name">%1$s på %2$s</string>
+    <string name="iptv_phone_unknown">Ukendt browser</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Parrede telefoner åbner</string>
+</resources>

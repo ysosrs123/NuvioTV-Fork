@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Šis TV priedėlis jau dekoduoja tiek vaizdo, kiek gali, net kai kiti vaizdai yra lengviausios kokybės. Pirmiausia pašalinkite vieną vaizdą arba pakeiskite jį žemesnės raiškos jo kanalo versija (pvz., SD ar 720p), tada vėl pridėkite šį.</string>
+    <string name="iptv_multiview_decoder_busy">Šis TV priedėlis dabar neturi laisvo vaizdo dekoderio dar vienam vaizdui. Pašalinkite vaizdą arba palaukite kelias sekundes ir bandykite dar kartą.</string>
+</resources>

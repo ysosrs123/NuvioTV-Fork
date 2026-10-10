@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Sportskanaler</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Vælg de kanaler, Kun sport viser, og de kanaler, kampe tilbydes på</string>
+    <string name="iptv_ui13_sport_always">Altid i Kun sport</string>
+    <string name="iptv_ui13_sport_always_subtitle">Vises i Kun sport selv uden en matchet kamp, f.eks. dine sportskategorier</string>
+    <string name="iptv_ui13_sport_never">Aldrig i Kun sport</string>
+    <string name="iptv_ui13_sport_never_subtitle">Udelades af Kun sport, selv når de viser en kamp</string>
+    <string name="iptv_ui13_sport_preferred">Foretrukne til kampe</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Tilbydes først til Se på, andre streams og optagelser, f.eks. dit lands sportskategorier</string>
+    <string name="iptv_ui13_sport_excluded">Tilbyd aldrig til kampe</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Tilbydes aldrig til at se eller optage en kamp</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d valgt</item>
+        <item quantity="other">%d valgt</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtrér kategorier eller find kanaler</string>
+    <string name="iptv_ui13_sport_pick_hint">Skriv mindst to bogstaver for at finde kanaler i alle dine kilder</string>
+    <string name="iptv_ui13_sport_pick_chosen">Valgt</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategorier</string>
+    <string name="iptv_ui13_sport_pick_channels">Kanaler</string>
+    <string name="iptv_ui13_sport_pick_category">Kategori</string>
+    <string name="iptv_ui13_sport_pick_channel">Kanal</string>
+    <string name="iptv_ui13_sport_pick_searching">Finder kanaler…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Ingen kanaler matcher.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Ingen kategorier matcher.</string>
+</resources>

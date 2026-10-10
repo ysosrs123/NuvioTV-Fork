@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Questo TV box sta già decodificando tutto il video possibile, anche con gli altri riquadri alla qualità più leggera. Rimuovi prima un riquadro o sostituiscine uno con una versione a risoluzione più bassa del suo canale (come SD o 720p), poi aggiungi di nuovo questo.</string>
+    <string name="iptv_multiview_decoder_busy">Questo TV box non ha al momento un decoder video libero per un altro riquadro. Rimuovi un riquadro o attendi qualche secondo e riprova.</string>
+</resources>

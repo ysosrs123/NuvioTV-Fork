@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Ovaj TV uređaj već dekodira koliko god videa može, čak i s ostalim slikama u najnižem kvalitetu. Prvo uklonite jednu sliku ili je zamijenite verzijom njenog kanala niže rezolucije (npr. SD ili 720p), a zatim ponovo dodajte ovu.</string>
+    <string name="iptv_multiview_decoder_busy">Ovaj TV uređaj trenutno nema slobodan video dekoder za još jednu sliku. Uklonite sliku ili sačekajte nekoliko sekundi i pokušajte ponovo.</string>
+</resources>

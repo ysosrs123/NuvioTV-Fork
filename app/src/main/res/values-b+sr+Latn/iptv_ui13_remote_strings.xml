@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Zadrži pristup sa telefona</string>
+    <string name="iptv_phone_keep_subtitle">Upareni telefoni pristupaju podešavanju i snimcima dok je Nuvio otvoren ili u pozadini</string>
+    <string name="iptv_phone_keep_note">Pristup sa telefona ostaje uključen dok je Nuvio otvoren ili u pozadini na ovom TV-u. Novi telefoni mogu da se upare samo dok je ovaj ekran otvoren.</string>
+    <string name="iptv_phone_done_kept">Vraća nazad. Upareni telefoni zadržavaju pristup.</string>
+    <string name="iptv_phone_paired">Upareni telefoni</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefon ili računar</item>
+        <item quantity="few">%d telefona ili računara</item>
+        <item quantity="other">%d telefona ili računara</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Još nijedan. Skenirajte QR kod da biste uparili jedan.</string>
+    <string name="iptv_phone_paired_subtitle">Mogu da otvore podešavanje i snimke dok je Nuvio otvoren ili u pozadini na ovom TV-u. Promene i dalje morate da potvrdite ovde.</string>
+    <string name="iptv_phone_paired_on">Upareno: %1$s</string>
+    <string name="iptv_phone_remove_all">Ukloni sve</string>
+    <string name="iptv_phone_name">%1$s na %2$s</string>
+    <string name="iptv_phone_unknown">Nepoznat pregledač</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Upareni telefoni otvaraju</string>
+</resources>

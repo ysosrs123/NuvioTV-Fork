@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">फोन एक्सेस चालू रखें</string>
+    <string name="iptv_phone_keep_subtitle">Nuvio खुला या बैकग्राउंड में रहने तक पेयर किए गए फोन सेटअप और रिकॉर्डिंग तक पहुँच सकते हैं</string>
+    <string name="iptv_phone_keep_note">इस टीवी पर Nuvio खुला या बैकग्राउंड में रहने तक फोन एक्सेस चालू रहता है। नए फोन सिर्फ़ तभी पेयर हो सकते हैं जब यह स्क्रीन खुली हो।</string>
+    <string name="iptv_phone_done_kept">वापस जाता है। पेयर किए गए फोन का एक्सेस बना रहता है।</string>
+    <string name="iptv_phone_paired">पेयर किए गए फोन</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d फोन या कंप्यूटर</item>
+        <item quantity="other">%d फोन या कंप्यूटर</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">अभी कोई नहीं। पेयर करने के लिए QR कोड स्कैन करें।</string>
+    <string name="iptv_phone_paired_subtitle">इस टीवी पर Nuvio खुला या बैकग्राउंड में रहने तक ये सेटअप और रिकॉर्डिंग खोल सकते हैं। बदलावों के लिए अब भी यहाँ आपकी मंज़ूरी चाहिए।</string>
+    <string name="iptv_phone_paired_on">पेयर किया गया: %1$s</string>
+    <string name="iptv_phone_remove_all">सभी हटाएँ</string>
+    <string name="iptv_phone_name">%2$s पर %1$s</string>
+    <string name="iptv_phone_unknown">अज्ञात ब्राउज़र</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">पेयर किए गए फोन यह खोलें</string>
+</resources>

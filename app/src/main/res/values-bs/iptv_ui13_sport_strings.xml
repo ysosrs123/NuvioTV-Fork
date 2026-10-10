@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Sportski kanali</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Odaberite kanale koje prikazuje Samo sport i kanale na kojima se nude utakmice</string>
+    <string name="iptv_ui13_sport_always">Uvijek u prikazu Samo sport</string>
+    <string name="iptv_ui13_sport_always_subtitle">Prikazuju se u prikazu Samo sport i bez pronađene utakmice, npr. vaše sportske kategorije</string>
+    <string name="iptv_ui13_sport_never">Nikad u prikazu Samo sport</string>
+    <string name="iptv_ui13_sport_never_subtitle">Izostavljeni iz prikaza Samo sport čak i kad prikazuju utakmicu</string>
+    <string name="iptv_ui13_sport_preferred">Prednost za utakmice</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Prvi se nude za Gledaj na, druge prijenose i snimke, npr. sportske kategorije vaše zemlje</string>
+    <string name="iptv_ui13_sport_excluded">Nikad ne nudi za utakmice</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Nikad se ne nude za gledanje ili snimanje utakmice</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">Odabrano: %d</item>
+        <item quantity="few">Odabrano: %d</item>
+        <item quantity="other">Odabrano: %d</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtriraj kategorije ili pronađi kanale</string>
+    <string name="iptv_ui13_sport_pick_hint">Unesite barem dva slova za traženje kanala u svim izvorima</string>
+    <string name="iptv_ui13_sport_pick_chosen">Odabrano</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategorije</string>
+    <string name="iptv_ui13_sport_pick_channels">Kanali</string>
+    <string name="iptv_ui13_sport_pick_category">Kategorija</string>
+    <string name="iptv_ui13_sport_pick_channel">Kanal</string>
+    <string name="iptv_ui13_sport_pick_searching">Traženje kanala…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Nema odgovarajućih kanala.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Nema odgovarajućih kategorija.</string>
+</resources>

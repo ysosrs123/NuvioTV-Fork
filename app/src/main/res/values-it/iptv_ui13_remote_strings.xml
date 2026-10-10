@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Mantieni attivo l\'accesso dal telefono</string>
+    <string name="iptv_phone_keep_subtitle">I telefoni abbinati raggiungono configurazione e registrazioni mentre Nuvio è aperto o in background</string>
+    <string name="iptv_phone_keep_note">L\'accesso dal telefono resta attivo mentre Nuvio è aperto o in background su questa TV. I nuovi telefoni possono abbinarsi solo con questa schermata aperta.</string>
+    <string name="iptv_phone_done_kept">Torna indietro. I telefoni abbinati mantengono l\'accesso.</string>
+    <string name="iptv_phone_paired">Telefoni abbinati</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefono o computer</item>
+        <item quantity="many">%d telefoni o computer</item>
+        <item quantity="other">%d telefoni o computer</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Ancora nessuno. Scansiona il codice QR per abbinarne uno.</string>
+    <string name="iptv_phone_paired_subtitle">Possono aprire configurazione e registrazioni mentre Nuvio è aperto o in background su questa TV. Le modifiche vanno comunque confermate qui.</string>
+    <string name="iptv_phone_paired_on">Abbinato: %1$s</string>
+    <string name="iptv_phone_remove_all">Rimuovi tutti</string>
+    <string name="iptv_phone_name">%1$s su %2$s</string>
+    <string name="iptv_phone_unknown">Browser sconosciuto</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">I telefoni abbinati aprono</string>
+</resources>

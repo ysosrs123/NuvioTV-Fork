@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">قنوات الرياضة</string>
+    <string name="iptv_ui13_sport_channels_subtitle">اختر القنوات التي يعرضها وضع الرياضة فقط والقنوات التي تُقترح عليها المباريات</string>
+    <string name="iptv_ui13_sport_always">دائماً في الرياضة فقط</string>
+    <string name="iptv_ui13_sport_always_subtitle">تظهر في الرياضة فقط حتى دون مباراة مطابقة، مثل فئات الرياضة لديك</string>
+    <string name="iptv_ui13_sport_never">لا تظهر في الرياضة فقط أبداً</string>
+    <string name="iptv_ui13_sport_never_subtitle">تُستبعد من الرياضة فقط حتى عندما تعرض مباراة</string>
+    <string name="iptv_ui13_sport_preferred">مفضّلة للمباريات</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">تُقترح أولاً للمشاهدة والبثوث الأخرى والتسجيلات، مثل فئات الرياضة في بلدك</string>
+    <string name="iptv_ui13_sport_excluded">عدم اقتراحها للمباريات أبداً</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">لا تُقترح أبداً لمشاهدة مباراة أو تسجيلها</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="zero">لا شيء مختار</item>
+        <item quantity="one">عنصر واحد مختار</item>
+        <item quantity="two">عنصران مختاران</item>
+        <item quantity="few">%d عناصر مختارة</item>
+        <item quantity="many">%d عنصراً مختاراً</item>
+        <item quantity="other">%d عنصر مختار</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">تصفية الفئات أو البحث عن قنوات</string>
+    <string name="iptv_ui13_sport_pick_hint">اكتب حرفين على الأقل للبحث عن القنوات في كل مصادرك</string>
+    <string name="iptv_ui13_sport_pick_chosen">المختارة</string>
+    <string name="iptv_ui13_sport_pick_categories">الفئات</string>
+    <string name="iptv_ui13_sport_pick_channels">القنوات</string>
+    <string name="iptv_ui13_sport_pick_category">الفئة</string>
+    <string name="iptv_ui13_sport_pick_channel">القناة</string>
+    <string name="iptv_ui13_sport_pick_searching">جارٍ البحث عن القنوات…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">لا توجد قنوات مطابقة.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">لا توجد فئات مطابقة.</string>
+</resources>

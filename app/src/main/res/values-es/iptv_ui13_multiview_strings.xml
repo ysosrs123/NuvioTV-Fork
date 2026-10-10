@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Este TV box ya decodifica todo el vídeo que puede, incluso con las otras imágenes en su calidad más ligera. Quita primero una imagen o cámbiala por una versión de menor resolución de su canal (como SD o 720p) y vuelve a añadir esta.</string>
+    <string name="iptv_multiview_decoder_busy">Este TV box no tiene ahora un decodificador de vídeo libre para otra imagen. Quita una imagen o espera unos segundos y vuelve a intentarlo.</string>
+</resources>

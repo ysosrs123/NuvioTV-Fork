@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Διατήρηση πρόσβασης από κινητό</string>
+    <string name="iptv_phone_keep_subtitle">Τα συζευγμένα κινητά έχουν πρόσβαση σε ρύθμιση και εγγραφές όσο το Nuvio είναι ανοιχτό ή στο παρασκήνιο</string>
+    <string name="iptv_phone_keep_note">Η πρόσβαση από κινητό μένει ενεργή όσο το Nuvio είναι ανοιχτό ή στο παρασκήνιο σε αυτή την τηλεόραση. Νέα κινητά συζευγνύονται μόνο όσο είναι ανοιχτή αυτή η οθόνη.</string>
+    <string name="iptv_phone_done_kept">Επιστρέφει. Τα συζευγμένα κινητά διατηρούν την πρόσβαση.</string>
+    <string name="iptv_phone_paired">Συζευγμένα κινητά</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d κινητό ή υπολογιστής</item>
+        <item quantity="other">%d κινητά ή υπολογιστές</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Κανένα ακόμη. Σαρώστε τον κωδικό QR για σύζευξη.</string>
+    <string name="iptv_phone_paired_subtitle">Μπορούν να ανοίγουν τη ρύθμιση και τις εγγραφές όσο το Nuvio είναι ανοιχτό ή στο παρασκήνιο σε αυτή την τηλεόραση. Οι αλλαγές χρειάζονται πάντα την έγκρισή σας εδώ.</string>
+    <string name="iptv_phone_paired_on">Σύζευξη: %1$s</string>
+    <string name="iptv_phone_remove_all">Αφαίρεση όλων</string>
+    <string name="iptv_phone_name">%1$s σε %2$s</string>
+    <string name="iptv_phone_unknown">Άγνωστο πρόγραμμα περιήγησης</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Τα συζευγμένα κινητά ανοίγουν</string>
+</resources>

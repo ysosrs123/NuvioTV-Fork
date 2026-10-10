@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">खेल चैनल</string>
+    <string name="iptv_ui13_sport_channels_subtitle">वे चैनल चुनें जो सिर्फ़ खेल में दिखते हैं और वे चैनल जिन पर मैच दिए जाते हैं</string>
+    <string name="iptv_ui13_sport_always">हमेशा सिर्फ़ खेल में</string>
+    <string name="iptv_ui13_sport_always_subtitle">मैच न मिलने पर भी सिर्फ़ खेल में दिखते हैं, जैसे आपकी खेल कैटेगरी</string>
+    <string name="iptv_ui13_sport_never">सिर्फ़ खेल में कभी नहीं</string>
+    <string name="iptv_ui13_sport_never_subtitle">मैच दिखाने पर भी सिर्फ़ खेल से बाहर रहते हैं</string>
+    <string name="iptv_ui13_sport_preferred">मैचों के लिए पसंदीदा</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">देखने, दूसरी फ़ीड और रिकॉर्डिंग के लिए पहले दिए जाते हैं, जैसे आपके देश की खेल कैटेगरी</string>
+    <string name="iptv_ui13_sport_excluded">मैचों के लिए कभी न दें</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">मैच देखने या रिकॉर्ड करने के लिए कभी नहीं दिए जाते</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d चुना गया</item>
+        <item quantity="other">%d चुने गए</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">कैटेगरी फ़िल्टर करें या चैनल ढूँढें</string>
+    <string name="iptv_ui13_sport_pick_hint">अपने सभी सोर्स में चैनल ढूँढने के लिए कम से कम दो अक्षर लिखें</string>
+    <string name="iptv_ui13_sport_pick_chosen">चुने गए</string>
+    <string name="iptv_ui13_sport_pick_categories">कैटेगरी</string>
+    <string name="iptv_ui13_sport_pick_channels">चैनल</string>
+    <string name="iptv_ui13_sport_pick_category">कैटेगरी</string>
+    <string name="iptv_ui13_sport_pick_channel">चैनल</string>
+    <string name="iptv_ui13_sport_pick_searching">चैनल ढूँढे जा रहे हैं…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">कोई चैनल मेल नहीं खाता।</string>
+    <string name="iptv_ui13_sport_pick_no_categories">कोई कैटेगरी मेल नहीं खाती।</string>
+</resources>

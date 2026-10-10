@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Handyzugriff aktiv lassen</string>
+    <string name="iptv_phone_keep_subtitle">Gekoppelte Handys erreichen Einrichtung und Aufnahmen, solange Nuvio geöffnet ist oder im Hintergrund läuft</string>
+    <string name="iptv_phone_keep_note">Der Handyzugriff bleibt aktiv, solange Nuvio auf diesem Fernseher geöffnet ist oder im Hintergrund läuft. Neue Handys lassen sich nur koppeln, solange dieser Bildschirm geöffnet ist.</string>
+    <string name="iptv_phone_done_kept">Geht zurück. Gekoppelte Handys behalten den Zugriff.</string>
+    <string name="iptv_phone_paired">Gekoppelte Handys</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d Handy oder Computer</item>
+        <item quantity="other">%d Handys oder Computer</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Noch keine. Scannen Sie den QR-Code, um eines zu koppeln.</string>
+    <string name="iptv_phone_paired_subtitle">Diese können Einrichtung und Aufnahmen öffnen, solange Nuvio auf diesem Fernseher geöffnet ist oder im Hintergrund läuft. Änderungen müssen weiterhin hier bestätigt werden.</string>
+    <string name="iptv_phone_paired_on">Gekoppelt: %1$s</string>
+    <string name="iptv_phone_remove_all">Alle entfernen</string>
+    <string name="iptv_phone_name">%1$s auf %2$s</string>
+    <string name="iptv_phone_unknown">Unbekannter Browser</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Gekoppelte Handys öffnen</string>
+</resources>

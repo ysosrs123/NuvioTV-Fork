@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">খেলার চ্যানেল</string>
+    <string name="iptv_ui13_sport_channels_subtitle">শুধু খেলা যে চ্যানেলগুলো দেখায় এবং যে চ্যানেলে ম্যাচ দেওয়া হয় সেগুলো বেছে নিন</string>
+    <string name="iptv_ui13_sport_always">সবসময় শুধু খেলায়</string>
+    <string name="iptv_ui13_sport_always_subtitle">মিলে যাওয়া ম্যাচ না থাকলেও শুধু খেলায় দেখায়, যেমন আপনার খেলার ক্যাটাগরি</string>
+    <string name="iptv_ui13_sport_never">কখনো শুধু খেলায় নয়</string>
+    <string name="iptv_ui13_sport_never_subtitle">ম্যাচ দেখালেও শুধু খেলা থেকে বাদ থাকে</string>
+    <string name="iptv_ui13_sport_preferred">ম্যাচের জন্য পছন্দের</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">দেখা, অন্য ফিড ও রেকর্ডিংয়ের জন্য আগে দেওয়া হয়, যেমন আপনার দেশের খেলার ক্যাটাগরি</string>
+    <string name="iptv_ui13_sport_excluded">ম্যাচের জন্য কখনো দেবেন না</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">ম্যাচ দেখা বা রেকর্ড করার জন্য কখনো দেওয়া হয় না</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%dটি বাছাই করা</item>
+        <item quantity="other">%dটি বাছাই করা</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">ক্যাটাগরি ফিল্টার করুন বা চ্যানেল খুঁজুন</string>
+    <string name="iptv_ui13_sport_pick_hint">আপনার সব সোর্সে চ্যানেল খুঁজতে অন্তত দুটি অক্ষর লিখুন</string>
+    <string name="iptv_ui13_sport_pick_chosen">বাছাই করা</string>
+    <string name="iptv_ui13_sport_pick_categories">ক্যাটাগরি</string>
+    <string name="iptv_ui13_sport_pick_channels">চ্যানেল</string>
+    <string name="iptv_ui13_sport_pick_category">ক্যাটাগরি</string>
+    <string name="iptv_ui13_sport_pick_channel">চ্যানেল</string>
+    <string name="iptv_ui13_sport_pick_searching">চ্যানেল খোঁজা হচ্ছে…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">কোনো চ্যানেল মেলেনি।</string>
+    <string name="iptv_ui13_sport_pick_no_categories">কোনো ক্যাটাগরি মেলেনি।</string>
+</resources>

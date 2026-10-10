@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Sporto kanalai</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Pasirinkite kanalus, kuriuos rodo „Tik sportas“, ir kanalus, kuriuose siūlomos varžybos</string>
+    <string name="iptv_ui13_sport_always">Visada „Tik sportas“</string>
+    <string name="iptv_ui13_sport_always_subtitle">Rodomi „Tik sportas“ net be atitinkančių varžybų, pvz., jūsų sporto kategorijos</string>
+    <string name="iptv_ui13_sport_never">Niekada „Tik sportas“</string>
+    <string name="iptv_ui13_sport_never_subtitle">Neįtraukiami į „Tik sportas“, net kai rodo varžybas</string>
+    <string name="iptv_ui13_sport_preferred">Pirmenybė varžyboms</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Pirmiausia siūlomi žiūrėti, kitiems srautams ir įrašams, pvz., jūsų šalies sporto kategorijos</string>
+    <string name="iptv_ui13_sport_excluded">Niekada nesiūlyti varžyboms</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Niekada nesiūlomi varžyboms žiūrėti ar įrašyti</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">Pasirinkta: %d</item>
+        <item quantity="few">Pasirinkta: %d</item>
+        <item quantity="many">Pasirinkta: %d</item>
+        <item quantity="other">Pasirinkta: %d</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtruoti kategorijas arba rasti kanalus</string>
+    <string name="iptv_ui13_sport_pick_hint">Įveskite bent dvi raides, kad rastumėte kanalus visuose šaltiniuose</string>
+    <string name="iptv_ui13_sport_pick_chosen">Pasirinkta</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategorijos</string>
+    <string name="iptv_ui13_sport_pick_channels">Kanalai</string>
+    <string name="iptv_ui13_sport_pick_category">Kategorija</string>
+    <string name="iptv_ui13_sport_pick_channel">Kanalas</string>
+    <string name="iptv_ui13_sport_pick_searching">Ieškoma kanalų…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Atitinkančių kanalų nėra.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Atitinkančių kategorijų nėra.</string>
+</resources>

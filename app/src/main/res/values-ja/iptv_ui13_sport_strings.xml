@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">スポーツチャンネル</string>
+    <string name="iptv_ui13_sport_channels_subtitle">「スポーツのみ」に表示するチャンネルと、試合を提供するチャンネルを選択します</string>
+    <string name="iptv_ui13_sport_always">常に「スポーツのみ」に表示</string>
+    <string name="iptv_ui13_sport_always_subtitle">一致する試合がなくても「スポーツのみ」に表示します（スポーツカテゴリなど）</string>
+    <string name="iptv_ui13_sport_never">「スポーツのみ」に表示しない</string>
+    <string name="iptv_ui13_sport_never_subtitle">試合を放送中でも「スポーツのみ」から除外します</string>
+    <string name="iptv_ui13_sport_preferred">試合で優先</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">視聴先、他の配信、録画で最初に提案します（自国のスポーツカテゴリなど）</string>
+    <string name="iptv_ui13_sport_excluded">試合に提案しない</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">試合の視聴や録画には提案しません</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="other">%d 件選択</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">カテゴリを絞り込むかチャンネルを検索</string>
+    <string name="iptv_ui13_sport_pick_hint">2文字以上入力すると、すべてのソースからチャンネルを検索します</string>
+    <string name="iptv_ui13_sport_pick_chosen">選択済み</string>
+    <string name="iptv_ui13_sport_pick_categories">カテゴリ</string>
+    <string name="iptv_ui13_sport_pick_channels">チャンネル</string>
+    <string name="iptv_ui13_sport_pick_category">カテゴリ</string>
+    <string name="iptv_ui13_sport_pick_channel">チャンネル</string>
+    <string name="iptv_ui13_sport_pick_searching">チャンネルを検索中…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">一致するチャンネルはありません。</string>
+    <string name="iptv_ui13_sport_pick_no_categories">一致するカテゴリはありません。</string>
+</resources>

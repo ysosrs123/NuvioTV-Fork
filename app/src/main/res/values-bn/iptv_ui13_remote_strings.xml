@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">ফোন অ্যাক্সেস চালু রাখুন</string>
+    <string name="iptv_phone_keep_subtitle">Nuvio খোলা বা ব্যাকগ্রাউন্ডে থাকা অবস্থায় পেয়ার করা ফোন সেটআপ ও রেকর্ডিংয়ে পৌঁছাতে পারে</string>
+    <string name="iptv_phone_keep_note">এই টিভিতে Nuvio খোলা বা ব্যাকগ্রাউন্ডে থাকা পর্যন্ত ফোন অ্যাক্সেস চালু থাকে। নতুন ফোন শুধু এই স্ক্রিন খোলা থাকলেই পেয়ার করা যায়।</string>
+    <string name="iptv_phone_done_kept">ফিরে যায়। পেয়ার করা ফোনের অ্যাক্সেস থাকে।</string>
+    <string name="iptv_phone_paired">পেয়ার করা ফোন</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%dটি ফোন বা কম্পিউটার</item>
+        <item quantity="other">%dটি ফোন বা কম্পিউটার</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">এখনও কোনোটি নেই। পেয়ার করতে QR কোড স্ক্যান করুন।</string>
+    <string name="iptv_phone_paired_subtitle">এই টিভিতে Nuvio খোলা বা ব্যাকগ্রাউন্ডে থাকা পর্যন্ত এগুলো সেটআপ ও রেকর্ডিং খুলতে পারে। পরিবর্তনের জন্য এখনও এখানে আপনার অনুমোদন লাগবে।</string>
+    <string name="iptv_phone_paired_on">পেয়ার করা হয়েছে: %1$s</string>
+    <string name="iptv_phone_remove_all">সব সরান</string>
+    <string name="iptv_phone_name">%2$s-এ %1$s</string>
+    <string name="iptv_phone_unknown">অজানা ব্রাউজার</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">পেয়ার করা ফোনে খুলুন</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">השארת הגישה מהטלפון פעילה</string>
+    <string name="iptv_phone_keep_subtitle">טלפונים מצומדים מגיעים להגדרה ולהקלטות כל עוד Nuvio פתוחה או ברקע</string>
+    <string name="iptv_phone_keep_note">הגישה מהטלפון נשארת פעילה כל עוד Nuvio פתוחה או ברקע בטלוויזיה הזו. אפשר לצמד טלפונים חדשים רק כשהמסך הזה פתוח.</string>
+    <string name="iptv_phone_done_kept">חזרה. טלפונים מצומדים שומרים על הגישה.</string>
+    <string name="iptv_phone_paired">טלפונים מצומדים</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">טלפון או מחשב אחד</item>
+        <item quantity="two">שני טלפונים או מחשבים</item>
+        <item quantity="many">%d טלפונים או מחשבים</item>
+        <item quantity="other">%d טלפונים או מחשבים</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">עדיין אין. אפשר לסרוק את קוד ה-QR כדי לצמד טלפון.</string>
+    <string name="iptv_phone_paired_subtitle">הם יכולים לפתוח את ההגדרה וההקלטות כל עוד Nuvio פתוחה או ברקע בטלוויזיה הזו. שינויים עדיין צריכים את האישור שלך כאן.</string>
+    <string name="iptv_phone_paired_on">צומד: %1$s</string>
+    <string name="iptv_phone_remove_all">הסרת הכול</string>
+    <string name="iptv_phone_name">%1$s ב-%2$s</string>
+    <string name="iptv_phone_unknown">דפדפן לא ידוע</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">טלפונים מצומדים פותחים</string>
+</resources>

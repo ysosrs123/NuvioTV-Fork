@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">ערוצי ספורט</string>
+    <string name="iptv_ui13_sport_channels_subtitle">בחירת הערוצים שמוצגים בספורט בלבד והערוצים שבהם מוצעים משחקים</string>
+    <string name="iptv_ui13_sport_always">תמיד בספורט בלבד</string>
+    <string name="iptv_ui13_sport_always_subtitle">מוצגים בספורט בלבד גם בלי משחק תואם, כמו קטגוריות הספורט שלך</string>
+    <string name="iptv_ui13_sport_never">אף פעם לא בספורט בלבד</string>
+    <string name="iptv_ui13_sport_never_subtitle">לא נכללים בספורט בלבד גם כשהם משדרים משחק</string>
+    <string name="iptv_ui13_sport_preferred">מועדפים למשחקים</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">מוצעים ראשונים לצפייה, לשידורים נוספים ולהקלטות, כמו קטגוריות הספורט של המדינה שלך</string>
+    <string name="iptv_ui13_sport_excluded">לא להציע אף פעם למשחקים</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">אף פעם לא מוצעים לצפייה או להקלטה של משחק</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">נבחר אחד</item>
+        <item quantity="two">נבחרו שניים</item>
+        <item quantity="many">%d נבחרו</item>
+        <item quantity="other">%d נבחרו</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">סינון קטגוריות או חיפוש ערוצים</string>
+    <string name="iptv_ui13_sport_pick_hint">יש להקליד לפחות שתי אותיות כדי למצוא ערוצים בכל המקורות</string>
+    <string name="iptv_ui13_sport_pick_chosen">נבחרו</string>
+    <string name="iptv_ui13_sport_pick_categories">קטגוריות</string>
+    <string name="iptv_ui13_sport_pick_channels">ערוצים</string>
+    <string name="iptv_ui13_sport_pick_category">קטגוריה</string>
+    <string name="iptv_ui13_sport_pick_channel">ערוץ</string>
+    <string name="iptv_ui13_sport_pick_searching">מחפש ערוצים…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">אין ערוצים תואמים.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">אין קטגוריות תואמות.</string>
+</resources>

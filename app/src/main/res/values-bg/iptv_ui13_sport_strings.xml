@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Спортни канали</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Изберете каналите, които Само спорт показва, и каналите, на които се предлагат мачове</string>
+    <string name="iptv_ui13_sport_always">Винаги в Само спорт</string>
+    <string name="iptv_ui13_sport_always_subtitle">Показват се в Само спорт дори без открит мач, напр. вашите спортни категории</string>
+    <string name="iptv_ui13_sport_never">Никога в Само спорт</string>
+    <string name="iptv_ui13_sport_never_subtitle">Изключени от Само спорт дори когато показват мач</string>
+    <string name="iptv_ui13_sport_preferred">Предпочитани за мачове</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Предлагат се първи за Гледай по, другите потоци и записите, напр. спортните категории на вашата страна</string>
+    <string name="iptv_ui13_sport_excluded">Никога за мачове</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Никога не се предлагат за гледане или запис на мач</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">Избрани: %d</item>
+        <item quantity="other">Избрани: %d</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Филтрирай категории или намери канали</string>
+    <string name="iptv_ui13_sport_pick_hint">Въведете поне две букви, за да търсите канали във всичките си източници</string>
+    <string name="iptv_ui13_sport_pick_chosen">Избрани</string>
+    <string name="iptv_ui13_sport_pick_categories">Категории</string>
+    <string name="iptv_ui13_sport_pick_channels">Канали</string>
+    <string name="iptv_ui13_sport_pick_category">Категория</string>
+    <string name="iptv_ui13_sport_pick_channel">Канал</string>
+    <string name="iptv_ui13_sport_pick_searching">Търсене на канали…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Няма съвпадащи канали.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Няма съвпадащи категории.</string>
+</resources>
