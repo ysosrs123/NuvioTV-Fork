@@ -76,7 +76,7 @@ import java.util.Locale
 import kotlinx.coroutines.delay
 
 @Composable
-internal fun IptvSportHero(active: Boolean, modifier: Modifier, fallback: @Composable (Modifier) -> Unit) {
+internal fun IptvSportHero(active: Boolean, modifier: Modifier, blocked: Boolean = false, fallback: @Composable (Modifier) -> Unit) {
     if (!active) { fallback(modifier); return }
     val viewModel: IptvSportsFixturesViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -95,7 +95,7 @@ internal fun IptvSportHero(active: Boolean, modifier: Modifier, fallback: @Compo
         item != null -> SportHero(item, state, summary?.takeIf { watched != null && it.eventId == watched.id }, modifier,
             onWatch = { links -> if (links.size == 1) viewModel.prompt(IptvSportPrompt.Watch(links.first().row)) else viewModel.prompt(IptvSportPrompt.Channels(item.fixture.key)) },
             onFeeds = { viewModel.prompt(IptvSportPrompt.Channels(item.fixture.key)) }, onFollow = { viewModel.prompt(IptvSportPrompt.Options(item.fixture.key)) },
-            onRemind = { viewModel.toggleReminder(item.fixture) })
+            onRemind = { viewModel.toggleReminder(item.fixture) }, blocked = blocked)
         key == IptvSportsFixturesViewModel.FEATURED && state.loading -> SportHeroPlaceholder(modifier)
         else -> fallback(modifier)
     }
@@ -128,7 +128,7 @@ private class Clock(val label: String?, val big: String?, val sentence: String?)
 
 @Composable
 private fun SportHero(item: IptvFixtureItem, state: IptvFixturesState, summary: SportsSummary?, modifier: Modifier, onWatch: (List<IptvFixtureLink>) -> Unit,
-    onFeeds: () -> Unit, onFollow: () -> Unit, onRemind: () -> Unit) {
+    onFeeds: () -> Unit, onFollow: () -> Unit, onRemind: () -> Unit, blocked: Boolean = false) {
     val fixture = item.fixture
     val hidden = state.hidden(fixture)
     val now by produceState(System.currentTimeMillis(), fixture.status) {
@@ -169,7 +169,7 @@ private fun SportHero(item: IptvFixtureItem, state: IptvFixturesState, summary: 
                         Text(it, style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextSecondary, maxLines = if (compact) 1 else 3,
                             overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                     } ?: Spacer(Modifier.weight(1f))
-                    LedgerActions(item, fixture.key in state.reminders, compact, onWatch, onFeeds, onFollow, onRemind)
+                    LedgerActions(item, fixture.key in state.reminders, compact, onWatch, onFeeds, onFollow, onRemind, blocked)
                 }
             }
         }
@@ -495,7 +495,7 @@ private fun situationSentence(fixture: SportsFixture): String? {
 
 @Composable
 private fun LedgerActions(item: IptvFixtureItem, reminded: Boolean, compact: Boolean, onWatch: (List<IptvFixtureLink>) -> Unit, onFeeds: () -> Unit,
-    onFollow: () -> Unit, onRemind: () -> Unit) {
+    onFollow: () -> Unit, onRemind: () -> Unit, blocked: Boolean) {
     val fixture = item.fixture
     val first = item.links.firstOrNull()
     val feeds = item.links.size > 1
@@ -505,22 +505,23 @@ private fun LedgerActions(item: IptvFixtureItem, reminded: Boolean, compact: Boo
     val small = if (compact) 24.dp else 26.dp
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(if (compact) 4.dp else 6.dp)) {
         if (first != null) LedgerButton(stringResource(R.string.iptv_sport5_section_watch_on, channelName(first.row)), { onWatch(item.links) },
-            Modifier.fillMaxWidth(), primary = true, icon = Icons.Filled.PlayArrow, height = if (compact) 26.dp else 30.dp)
+            Modifier.fillMaxWidth(), primary = true, icon = Icons.Filled.PlayArrow, height = if (compact) 26.dp else 30.dp, blocked = blocked)
         else if (fixture.status != FixtureStatus.FINAL) Text(stringResource(if (item.linking) R.string.iptv_sport3_finding_channels else R.string.iptv_sport_no_channel),
             style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         if (feeds || follow || remind) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             if (feeds) LedgerButton(pluralStringResource(R.plurals.iptv_sport5_section_other_feeds, item.links.size - 1, item.links.size - 1), onFeeds,
-                Modifier.weight(1f, fill = false), height = small)
+                Modifier.weight(1f, fill = false), height = small, blocked = blocked)
             if (follow) LedgerButton(if (crowded) null else stringResource(if (item.favourite) R.string.iptv_sport5_section_following else R.string.iptv_sport5_section_follow),
-                onFollow, Modifier.weight(1f, fill = false), icon = if (item.favourite) Icons.Filled.Star else Icons.Filled.StarBorder, height = small)
+                onFollow, Modifier.weight(1f, fill = false), icon = if (item.favourite) Icons.Filled.Star else Icons.Filled.StarBorder, height = small, blocked = blocked)
             if (remind) LedgerButton(if (crowded) null else stringResource(if (reminded) R.string.iptv_sport5_section_reminder_set else R.string.iptv_sport5_section_remind),
-                onRemind, Modifier.weight(1f, fill = false), icon = if (reminded) Icons.Filled.NotificationsActive else Icons.Filled.NotificationsNone, height = small)
+                onRemind, Modifier.weight(1f, fill = false), icon = if (reminded) Icons.Filled.NotificationsActive else Icons.Filled.NotificationsNone, height = small, blocked = blocked)
         }
     }
 }
 
 @Composable
-private fun LedgerButton(text: String?, onClick: () -> Unit, modifier: Modifier = Modifier, primary: Boolean = false, icon: ImageVector? = null, height: Dp = 26.dp) {
+private fun LedgerButton(text: String?, onClick: () -> Unit, modifier: Modifier = Modifier, primary: Boolean = false, icon: ImageVector? = null, height: Dp = 26.dp,
+    blocked: Boolean = false) {
     var focused by remember { mutableStateOf(false) }
     val content = if (primary && !focused) NuvioTheme.colors.Background else itemContent(focused)
     Row(modifier.height(height).onFocusChanged { focused = it.isFocused }.iptvItem(focused, shape = LedgerButtonShape)
@@ -533,7 +534,7 @@ private fun LedgerButton(text: String?, onClick: () -> Unit, modifier: Modifier 
             val native = event.nativeKeyEvent
             if (isSelect(native.keyCode)) { if (native.action == AndroidKeyEvent.ACTION_UP) onClick(); true } else false
         }
-        .focusable().padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        .focusable(enabled = !blocked).padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         if (icon != null) Icon(icon, null, Modifier.size(14.dp), tint = content)
         if (text != null) Text(text, style = MaterialTheme.typography.labelMedium, fontWeight = if (primary) FontWeight.SemiBold else FontWeight.Normal, color = content,
             maxLines = 1, overflow = TextOverflow.Ellipsis)

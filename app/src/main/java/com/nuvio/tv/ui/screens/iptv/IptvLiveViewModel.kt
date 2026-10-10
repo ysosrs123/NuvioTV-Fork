@@ -69,7 +69,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private val recorder: com.nuvio.tv.core.recording.IptvRecorder,
     private val device: IptvDeviceProfile,
     private val livePreferences: IptvLivePreferences,
-    private val recordingTargets: com.nuvio.tv.core.recording.IptvRecordingTargets) : ViewModel() {
+    private val recordingTargets: com.nuvio.tv.core.recording.IptvRecordingTargets,
+    private val sportsFixtures: IptvSportsFixturesRepository) : ViewModel() {
     private val mutable = MutableStateFlow(IptvLiveState(maxTiles = device.maxTiles))
     val state = mutable.asStateFlow()
     private val fullscreenRequested = MutableStateFlow(false)
@@ -179,7 +180,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             while (isActive) {
                 delay(60_000)
                 val window = mutable.value.window
-                if (foreground && pageJob?.isActive != true && window != null && System.currentTimeMillis() > window.startMillis + WINDOW_SHIFT) load(background = true)
+                if (foreground && pageJob?.isActive != true && window != null && windowFor(mutable.value, System.currentTimeMillis()) != window) load(background = true)
                 if (foreground && ++ticks % 60 == 0) session?.let { refresher.refreshStale(it) }
                 else if (foreground && ticks % 5 == 0 && mutable.value.sports && mutable.value.search.isBlank() && pageJob?.isActive != true) load(background = true)
             }
@@ -475,8 +476,12 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     return@launch
                 }
                 val now = System.currentTimeMillis()
-                val window = state.window?.takeIf { append || now <= it.startMillis + WINDOW_SHIFT } ?: guideWindow(now)
-                val loaded = airing?.map { it.channel } ?: merged ?: (page?.channels.orEmpty() + extra)
+                val window = windowFor(state, now, append)
+                val always = if (ref != null && !append && state.sports && query.search.isBlank())
+                    runCatching { sportsFixtures.alwaysChannels(ref, state.hiddenCategories) }.getOrElse { if (it is CancellationException) throw it; emptyList() }
+                else emptyList()
+                val loaded = airing?.map { it.channel }?.let { if (always.isEmpty()) it else (it + always).distinctBy { row -> row.item.channel.id } }
+                    ?: merged ?: (page?.channels.orEmpty() + extra)
                 val rows = if (ref == null || loaded.isEmpty()) emptyMap() else loaded.chunked(200).fold(emptyMap<String, GuideGridRow>()) { acc, part -> acc + browse.guideRows(current.profileId, part, window) }
                 if (session === current && request == pageVersion) {
                     val channels = if (append) state.channels + loaded else loaded
@@ -1383,6 +1388,9 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             previousId = if (keepChannel) it.previousId else it.playingId ?: it.previousId) }
         viewModelScope.launch { if (!runtime.stop(owner) && version == tuneVersion) mutable.update { it.copy(message = R.string.iptv_live_closing) } }
     }
+    private fun windowFor(state: IptvLiveState, now: Long, append: Boolean = false): GuideGridWindow =
+        if (state.sports && state.search.isBlank()) state.window?.takeIf { append || SportsOnlyWindow.fresh(it, now) } ?: SportsOnlyWindow.guide(now)
+        else state.window?.takeIf { append || (it.spanMillis == WINDOW_SPAN && now <= it.startMillis + WINDOW_SHIFT) } ?: guideWindow(now)
     private fun guideWindow(now: Long): GuideGridWindow {
         val start = Math.floorDiv(now, GuideGridWindow.SLOT_MILLIS) * GuideGridWindow.SLOT_MILLIS - GuideGridWindow.SLOT_MILLIS
         return GuideGridWindow(start, start + WINDOW_SPAN)

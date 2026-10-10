@@ -93,7 +93,7 @@ private const val CATEGORY_ATTRIBUTE = "group-title"
 
 @Composable
 internal fun IptvGamesNowLane(games: List<IptvFixtureItem>, sport: IptvSportsGuide, playingId: String?, onWatch: (IptvListedChannel) -> Unit,
-    onRail: () -> Unit, onDown: () -> Unit, modifier: Modifier = Modifier) {
+    onRail: () -> Unit, onDown: () -> Unit, modifier: Modifier = Modifier, blocked: Boolean = false) {
     var choosing by remember { mutableStateOf<IptvFixtureItem?>(null) }
     val listState = rememberLazyListState()
     var lastFocused by remember { mutableIntStateOf(0) }
@@ -123,7 +123,7 @@ internal fun IptvGamesNowLane(games: List<IptvFixtureItem>, sport: IptvSportsGui
             }, contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             itemsIndexed(games, key = { _, item -> item.fixture.key }) { index, item ->
                 GameChip(item, sport, playing = item.links.any { it.row.item.channel.id == playingId }, modifier = Modifier.focusRequester(requester(index)),
-                    onFocused = { lastFocused = index },
+                    onFocused = { lastFocused = index }, blocked = blocked,
                     onClick = { if (item.links.size == 1) onWatch(item.links.first().row) else choosing = item })
             }
         }
@@ -135,7 +135,7 @@ internal fun IptvGamesNowLane(games: List<IptvFixtureItem>, sport: IptvSportsGui
 }
 
 @Composable
-private fun GameChip(item: IptvFixtureItem, sport: IptvSportsGuide, playing: Boolean, modifier: Modifier, onFocused: () -> Unit, onClick: () -> Unit) {
+private fun GameChip(item: IptvFixtureItem, sport: IptvSportsGuide, playing: Boolean, modifier: Modifier, onFocused: () -> Unit, blocked: Boolean, onClick: () -> Unit) {
     var focused by remember { mutableStateOf(false) }
     val fixture = item.fixture
     val hidden = sport.hidden(fixture)
@@ -155,7 +155,7 @@ private fun GameChip(item: IptvFixtureItem, sport: IptvSportsGuide, playing: Boo
             val native = event.nativeKeyEvent
             if (isSelect(native.keyCode)) { if (native.action == AndroidKeyEvent.ACTION_UP) onClick(); true } else false
         }
-        .focusable()
+        .focusable(enabled = !blocked)
         .padding(end = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         if (banded && home != null && away != null) {
             val sides = if (SportsFixtureText.awayFirst(fixture)) listOf(FixtureSide.AWAY, FixtureSide.HOME) else listOf(FixtureSide.HOME, FixtureSide.AWAY)

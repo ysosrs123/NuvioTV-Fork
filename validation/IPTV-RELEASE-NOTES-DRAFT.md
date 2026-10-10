@@ -594,8 +594,10 @@ Guide:
 - Sport sits next to Movies and Series in the Live TV menu.
 
 Sport:
-- Sport only keeps every channel with a game in the next 24 hours, including channels found
-  only by broadcaster name.
+- The Sport page guide covers the next 24 hours (about 28 h window); Sport only keeps every
+  channel with a game in that time, including channels found only by broadcaster name, plus
+  channels you chose to always include. The Sport panels cannot take focus while the Live
+  TV menu is open.
 - Sport settings → Sport channels: "Always in Sport only" and "Never in Sport only"
   (categories or channels); "Preferred for games" ranks chosen categories or channels first
   for Watch on, other feeds and recordings; "Never offer for games" removes them. A picker

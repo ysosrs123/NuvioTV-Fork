@@ -8,7 +8,7 @@ data class GuideGridWindow(val startMillis: Long, val endMillis: Long) {
 
     companion object {
         const val SLOT_MILLIS = 30L * 60 * 1000
-        const val MAX_SPAN_MILLIS = 24L * 60 * 60 * 1000
+        const val MAX_SPAN_MILLIS = 30L * 60 * 60 * 1000
 
         fun around(nowMillis: Long, spanMillis: Long = 3 * 60 * 60 * 1000L, slotMillis: Long = SLOT_MILLIS): GuideGridWindow {
             require(slotMillis > 0 && spanMillis >= slotMillis && spanMillis % slotMillis == 0L)

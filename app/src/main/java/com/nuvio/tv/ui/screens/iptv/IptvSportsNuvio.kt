@@ -336,7 +336,7 @@ class IptvSportsNuvio @Inject constructor(@ApplicationContext private val contex
                 catch (error: Exception) { IptvLog.failure("sports nuvio links", error); emptyMap() }
             wanted.forEach { fixture -> links[fixture.id]?.let { found.getOrPut(fixture.key) { mutableListOf() } += it } }
         }
-        return found
+        return found.mapValues { repository.ranked(it.value) }.filterValues { it.isNotEmpty() }
     }
 
     fun spoilersFor(fixtures: List<SportsFixture>, profileId: Int): Set<String> {

@@ -283,7 +283,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                 }
                 Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(Modifier.fillMaxWidth().height(topHeight), horizontalArrangement = Arrangement.spacedBy(LiveWidgets.SPACING.dp)) {
-                        IptvSportHero(hero, Modifier.weight(1f).fillMaxHeight()) { InfoPanel(state, now, cursor, it) }
+                        IptvSportHero(hero, Modifier.weight(1f).fillMaxHeight(), blocked = railOpen) { InfoPanel(state, now, cursor, it) }
                         if (columns.isNotEmpty()) IptvWidgetRow(columns, widgets, state, Modifier.fillMaxHeight(), fits = { LiveWidgets.fits(widgetRoom, widgetHeight, it) },
                             onDown = { focusContent() }, onRail = ::openRail, blocked = railOpen)
                         Preview(state, Modifier.fillMaxHeight().aspectRatio(16f / 9f), blocked = railOpen, onClick = {
@@ -296,10 +296,10 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                     moving?.let { id -> MoveHint(state.channels.firstOrNull { it.item.channel.id == id }?.let(::channelName).orEmpty()) }
                     if (state.sports && state.search.isBlank()) IptvSportsFixturesRow(state.source, state.hiddenCategories, state.playingId, onWatch = { row ->
                         if (row.item.channel.id == state.playingId && state.player != null && state.catchup == null) fullscreen = true else viewModel.watch(row)
-                    }, onRail = ::openRail)
+                    }, onRail = ::openRail, blocked = railOpen)
                     if (laneVisible) IptvGamesNowLane(games, sport, state.playingId, onWatch = { row ->
                         if (row.item.channel.id == state.playingId && state.player != null && state.catchup == null) fullscreen = true else viewModel.watch(row)
-                    }, onRail = ::openRail, onDown = { focusContent() },
+                    }, onRail = ::openRail, onDown = { focusContent() }, blocked = railOpen,
                         modifier = Modifier.onFocusChanged { if (it.hasFocus) laneFocused = true else if (laneShown.value) laneFocused = false })
                     if (empty != null) {
                         EmptyPanel(empty, state, emptyFocus, Modifier.fillMaxWidth().weight(1f), onSources = onSources,

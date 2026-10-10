@@ -104,7 +104,7 @@ private const val CARD_TICK_MILLIS = 60_000L
 
 @Composable
 internal fun SportFixtureCard(item: IptvFixtureItem, hidden: Boolean, spoiler: Boolean, favourites: Set<String>, reminded: Boolean, playing: Boolean,
-    modifier: Modifier, onFocused: () -> Unit, onClick: () -> Unit, onHold: () -> Unit, onMenu: () -> Unit) {
+    modifier: Modifier, onFocused: () -> Unit, onClick: () -> Unit, onHold: () -> Unit, onMenu: () -> Unit, blocked: Boolean = false) {
     var focused by remember { mutableStateOf(false) }
     val longPress = rememberLongPressKeyTracker()
     var held by remember { mutableStateOf(false) }
@@ -122,7 +122,7 @@ internal fun SportFixtureCard(item: IptvFixtureItem, hidden: Boolean, spoiler: B
             if (native.action == AndroidKeyEvent.ACTION_DOWN && native.keyCode == AndroidKeyEvent.KEYCODE_MENU) { onMenu(); return@onPreviewKeyEvent true }
             if (isSelect(native.keyCode)) { if (native.action == AndroidKeyEvent.ACTION_UP) { if (!held) onClick(); held = false }; true } else false
         }
-        .focusable()) {
+        .focusable(enabled = !blocked)) {
         SportCardContent(item, hidden, spoiler, favourites, reminded, focused)
     }
 }
@@ -515,7 +515,8 @@ internal fun sportWhen(millis: Long): String {
 }
 
 @Composable
-internal fun SportChip(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, primary: Boolean = false, icon: ImageVector? = null, height: Dp = 28.dp) {
+internal fun SportChip(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, primary: Boolean = false, icon: ImageVector? = null, height: Dp = 28.dp,
+    blocked: Boolean = false) {
     var focused by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(height / 2)
     Row(modifier.height(height).onFocusChanged { focused = it.isFocused }.iptvItem(focused, shape = shape)
@@ -528,7 +529,7 @@ internal fun SportChip(text: String, onClick: () -> Unit, modifier: Modifier = M
             val native = event.nativeKeyEvent
             if (isSelect(native.keyCode)) { if (native.action == AndroidKeyEvent.ACTION_UP) onClick(); true } else false
         }
-        .focusable().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        .focusable(enabled = !blocked).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         if (icon != null) Icon(icon, null, Modifier.size(14.dp), tint = itemContent(focused))
         Text(text, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = itemContent(focused), maxLines = 1,
             overflow = TextOverflow.Ellipsis)

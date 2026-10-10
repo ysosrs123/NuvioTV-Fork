@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
@@ -386,7 +387,7 @@ internal fun IptvSportsFixturesSync(source: IptvSourceRef?, hiddenCategories: Se
 
 @Composable
 internal fun IptvSportsFixturesRow(source: IptvSourceRef?, hiddenCategories: Set<String>, playingId: String?, onWatch: (IptvListedChannel) -> Unit,
-    onRail: () -> Unit = {}, modifier: Modifier = Modifier, viewModel: IptvSportsFixturesViewModel = hiltViewModel()) {
+    onRail: () -> Unit = {}, modifier: Modifier = Modifier, blocked: Boolean = false, viewModel: IptvSportsFixturesViewModel = hiltViewModel()) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle, source, hiddenCategories) {
         if (source != null) viewModel.show(source, hiddenCategories, lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
@@ -435,13 +436,14 @@ internal fun IptvSportsFixturesRow(source: IptvSourceRef?, hiddenCategories: Set
             LazyColumn(modifier.fillMaxWidth().height(SPORT_ROW_HEIGHT + SPORT_ROW_BLEED)
                 .onPreviewKeyEvent { event -> if (event.nativeKeyEvent.action == AndroidKeyEvent.ACTION_DOWN) lastKey = event.nativeKeyEvent.keyCode; false }
                 .onFocusChanged { if (!it.hasFocus && lastKey == AndroidKeyEvent.KEYCODE_DPAD_DOWN) viewModel.focusFixture(null) }
+                .focusProperties { onEnter = { if (blocked) cancelFocusChange() } }
                 .focusGroup(), state = rowsState, contentPadding = PaddingValues(bottom = SPORT_ROW_BLEED), verticalArrangement = Arrangement.spacedBy(SPORT_ROW_GAP)) {
                 var slot = 0
                 state.rows.forEachIndexed { index, row ->
                     val at = slot++
                     item(key = row.key) {
                         SportSlot(at, rowsState, inner) {
-                            SportFixtureRow(row, state, playingId, message.takeIf { index == 0 && state.failed }, onRail,
+                            SportFixtureRow(row, state, playingId, message.takeIf { index == 0 && state.failed }, onRail, blocked,
                                 onScores = if (index == 0) ({ viewModel.prompt(IptvSportPrompt.Scores) }) else null,
                                 onFocused = { viewModel.focusFixture(it.fixture.key) }, onClick = { open(it) }, onHold = { hold(it) }, onMenu = { options(it) })
                         }
@@ -496,7 +498,7 @@ private fun RowMessage(message: Int, warning: Boolean) {
 }
 
 @Composable
-private fun SportFixtureRow(row: IptvFixtureRow, state: IptvFixturesState, playingId: String?, message: Int?, onRail: () -> Unit, onScores: (() -> Unit)?,
+private fun SportFixtureRow(row: IptvFixtureRow, state: IptvFixturesState, playingId: String?, message: Int?, onRail: () -> Unit, blocked: Boolean, onScores: (() -> Unit)?,
     onFocused: (IptvFixtureItem) -> Unit, onClick: (IptvFixtureItem) -> Unit, onHold: (IptvFixtureItem) -> Unit, onMenu: (IptvFixtureItem) -> Unit) {
     val listState = rememberLazyListState()
     var lastFocused by remember(row.key) { mutableIntStateOf(0) }
@@ -508,7 +510,7 @@ private fun SportFixtureRow(row: IptvFixtureRow, state: IptvFixturesState, playi
             Text(rowTitle(row), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1)
             Text("${row.items.size}", style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
             if (onScores != null) SportChip(stringResource(R.string.iptv_sport5_section_all_scores), onScores, height = 22.dp,
-                icon = Icons.AutoMirrored.Filled.List)
+                icon = Icons.AutoMirrored.Filled.List, blocked = blocked)
             if (message != null) RowMessage(message, true)
         }
         LazyRow(state = listState, modifier = Modifier.fillMaxWidth()
@@ -527,7 +529,7 @@ private fun SportFixtureRow(row: IptvFixtureRow, state: IptvFixturesState, playi
             itemsIndexed(row.items, key = { _, item -> item.fixture.key }) { index, item ->
                 SportFixtureCard(item, state.hidden(item.fixture), state.spoiler(item.fixture), state.favourites, item.fixture.key in state.reminders,
                     playing = item.links.any { it.row.item.channel.id == playingId }, modifier = Modifier.focusRequester(requester(index)),
-                    onFocused = { lastFocused = index; onFocused(item) }, onClick = { onClick(item) }, onHold = { onHold(item) }, onMenu = { onMenu(item) })
+                    onFocused = { lastFocused = index; onFocused(item) }, onClick = { onClick(item) }, onHold = { onHold(item) }, onMenu = { onMenu(item) }, blocked = blocked)
             }
         }
     }
