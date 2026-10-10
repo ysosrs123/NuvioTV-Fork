@@ -50,7 +50,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
@@ -60,6 +59,8 @@ import com.nuvio.tv.core.iptv.FixtureSection
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.GuideProgramme
 import com.nuvio.tv.core.iptv.LiveWidgetKind
+import com.nuvio.tv.core.iptv.LiveStreamFacts
+import com.nuvio.tv.core.iptv.LiveWidgetColumn
 import com.nuvio.tv.core.iptv.LiveWidgetLayout
 import com.nuvio.tv.core.iptv.LiveWidgets
 import com.nuvio.tv.core.iptv.RecordingStatus
@@ -111,30 +112,38 @@ private data class WidgetDialog(val slot: Int, val step: WidgetStep)
 private val TileShape = RoundedCornerShape(16.dp)
 
 @Composable
-internal fun IptvWidgetRow(slots: List<Int>, settings: IptvWidgetSettings, state: IptvLiveState, modifier: Modifier, onDown: () -> Unit, onRail: () -> Unit) {
+internal fun IptvWidgetRow(columns: List<LiveWidgetColumn>, settings: IptvWidgetSettings, state: IptvLiveState, modifier: Modifier, fits: (LiveWidgetLayout) -> Boolean,
+    onDown: () -> Unit, onRail: () -> Unit) {
     val minute by produceState(System.currentTimeMillis()) { while (true) { delay(LiveWidgets.nextMinute(System.currentTimeMillis())); value = System.currentTimeMillis() } }
     var dialog by remember { mutableStateOf<WidgetDialog?>(null) }
     var refocus by remember { mutableStateOf<Int?>(null) }
-    val requesters = remember { List(LiveWidgetLayout.THREE.slots) { FocusRequester() } }
+    val requesters = remember { List(LiveWidgets.MAX_SLOTS) { FocusRequester() } }
+    val shown = columns.flatMap { it.slots }
     LaunchedEffect(dialog) {
         if (dialog != null) return@LaunchedEffect
         val slot = refocus ?: return@LaunchedEffect
         repeat(2) { withFrameNanos { } }
         refocus = null
-        requesters.getOrNull(slot.coerceAtMost(slots.lastIndex))?.let { runCatching { it.requestFocus() } }
+        val target = slot.takeIf { it in shown } ?: shown.firstOrNull() ?: return@LaunchedEffect
+        requesters.getOrNull(target)?.let { runCatching { it.requestFocus() } }
     }
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(LiveWidgets.GAP.dp)) {
-        slots.forEachIndexed { index, width ->
-            val kind = settings.kinds[index]
-            WidgetTile(kind, width.dp, requesters[index], first = index == 0,
-                onChoose = { dialog = WidgetDialog(index, WidgetStep.CHOOSE) }, onDown = onDown, onRail = onRail) { wide, roomy ->
-                when (kind) {
-                    LiveWidgetKind.CLOCKS -> ClocksWidget(settings, minute, wide)
-                    LiveWidgetKind.SPORT -> if (state.sportEnabled) SportWidget(roomy) else WidgetMessage(stringResource(R.string.iptv_widgets_sport_off))
-                    LiveWidgetKind.UP_NEXT -> UpNextWidget(state, minute, roomy)
-                    LiveWidgetKind.RECORDINGS -> RecordingsWidget(state.recordings, minute, roomy)
-                    LiveWidgetKind.STREAM -> StreamWidget(state.player, state.playing, wide)
-                    LiveWidgetKind.EMPTY -> EmptyWidget()
+        columns.forEachIndexed { column, part ->
+            Column(Modifier.width(part.width.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(LiveWidgets.GAP.dp)) {
+                part.slots.forEachIndexed { position, index ->
+                    val kind = settings.kinds[index]
+                    WidgetTile(kind, part.width.dp, requesters[index], Modifier.fillMaxWidth().weight(1f), first = column == 0,
+                        above = part.slots.getOrNull(position - 1)?.let { requesters[it] }, below = part.slots.getOrNull(position + 1)?.let { requesters[it] },
+                        onChoose = { dialog = WidgetDialog(index, WidgetStep.CHOOSE) }, onDown = onDown, onRail = onRail) { wide, roomy, short ->
+                        when (kind) {
+                            LiveWidgetKind.CLOCKS -> ClocksWidget(settings, minute, wide)
+                            LiveWidgetKind.SPORT -> if (state.sportEnabled) SportWidget(roomy, short) else WidgetMessage(stringResource(R.string.iptv_widgets_sport_off))
+                            LiveWidgetKind.UP_NEXT -> UpNextWidget(state, minute, roomy, short)
+                            LiveWidgetKind.RECORDINGS -> RecordingsWidget(state.recordings, minute, roomy, short)
+                            LiveWidgetKind.STREAM -> StreamWidget(state.player, state.playing, wide)
+                            LiveWidgetKind.EMPTY -> EmptyWidget()
+                        }
+                    }
                 }
             }
         }
@@ -151,18 +160,20 @@ internal fun IptvWidgetRow(slots: List<Int>, settings: IptvWidgetSettings, state
             onDismiss = { dialog = open.copy(step = WidgetStep.CITIES) })
         WidgetStep.LAYOUT -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_widgets_layout),
             subtitle = stringResource(R.string.iptv_widgets_layout_subtitle),
-            options = LiveWidgetLayout.entries.map { SettingsPickerOption(it, stringResource(layoutLabel(it))) },
+            options = LiveWidgetLayout.entries.map { layout ->
+                SettingsPickerOption(layout, stringResource(layoutLabel(layout)), description = if (fits(layout)) null else stringResource(R.string.iptv_ui10_layout_partial))
+            },
             selectedValue = settings.layout, onOptionSelected = { settings.chooseLayout(it); close() }, onDismiss = ::close)
     }
 }
 
 @Composable
-private fun WidgetTile(kind: LiveWidgetKind, width: Dp, requester: FocusRequester, first: Boolean, onChoose: () -> Unit, onDown: () -> Unit, onRail: () -> Unit,
-    content: @Composable (wide: Boolean, roomy: Boolean) -> Unit) {
+private fun WidgetTile(kind: LiveWidgetKind, width: Dp, requester: FocusRequester, modifier: Modifier, first: Boolean, above: FocusRequester?, below: FocusRequester?,
+    onChoose: () -> Unit, onDown: () -> Unit, onRail: () -> Unit, content: @Composable (wide: Boolean, roomy: Boolean, short: Boolean) -> Unit) {
     var focused by remember { mutableStateOf(false) }
     val longPress = rememberLongPressKeyTracker()
     var held by remember { mutableStateOf(false) }
-    BoxWithConstraints(Modifier.width(width).fillMaxHeight().focusRequester(requester).fieldFocus(focused, TileShape).iptvPanel(TileShape)
+    BoxWithConstraints(modifier.focusRequester(requester).fieldFocus(focused, TileShape).iptvPanel(TileShape)
         .onFocusChanged { focused = it.isFocused }
         .onPreviewKeyEvent { event ->
             val native = event.nativeKeyEvent
@@ -171,8 +182,11 @@ private fun WidgetTile(kind: LiveWidgetKind, width: Dp, requester: FocusRequeste
                 return@onPreviewKeyEvent true
             }
             when (native.keyCode) {
-                AndroidKeyEvent.KEYCODE_DPAD_DOWN -> { if (native.action == AndroidKeyEvent.ACTION_DOWN) onDown(); true }
-                AndroidKeyEvent.KEYCODE_DPAD_UP -> true
+                AndroidKeyEvent.KEYCODE_DPAD_DOWN -> {
+                    if (native.action == AndroidKeyEvent.ACTION_DOWN) { if (below != null) runCatching { below.requestFocus() } else onDown() }
+                    true
+                }
+                AndroidKeyEvent.KEYCODE_DPAD_UP -> { if (native.action == AndroidKeyEvent.ACTION_DOWN && above != null) runCatching { above.requestFocus() }; true }
                 AndroidKeyEvent.KEYCODE_DPAD_LEFT -> {
                     if (first && native.action == AndroidKeyEvent.ACTION_DOWN && native.repeatCount == 0) onRail()
                     first
@@ -186,11 +200,12 @@ private fun WidgetTile(kind: LiveWidgetKind, width: Dp, requester: FocusRequeste
         }
         .focusable().padding(horizontal = 12.dp, vertical = 10.dp)) {
         val roomy = maxHeight >= 150.dp
-        Column(Modifier.fillMaxSize().clipToBounds(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        val short = maxHeight < 110.dp
+        Column(Modifier.fillMaxSize().clipToBounds(), verticalArrangement = Arrangement.spacedBy(if (short) 4.dp else 6.dp)) {
             if (kind != LiveWidgetKind.EMPTY || focused) Text(if (focused) stringResource(R.string.iptv_widgets_change) else stringResource(kindLabel(kind)).uppercase(),
                 style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 color = if (focused) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextTertiary)
-            Box(Modifier.fillMaxWidth().weight(1f)) { content(width >= LiveWidgets.WIDE.dp, roomy) }
+            Box(Modifier.fillMaxWidth().weight(1f)) { content(width >= LiveWidgets.WIDE.dp, roomy, short) }
         }
     }
 }
@@ -216,15 +231,19 @@ private fun EmptyWidget() {
 private fun ClocksWidget(settings: IptvWidgetSettings, minute: Long, wide: Boolean) {
     val clocks = remember(settings.cities, minute / 60_000L) { LiveWidgets.clocks(settings.cities, minute, settings.deviceZone) }
     if (clocks.isEmpty()) { WidgetMessage(stringResource(R.string.iptv_widgets_no_cities)); return }
-    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceEvenly) {
-        clocks.forEach { clock -> ClockLine(clock, wide) }
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val fit = (maxHeight / 24.dp).toInt().coerceAtLeast(1)
+        val narrow = maxWidth < 120.dp
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceEvenly) {
+            clocks.take(fit).forEach { clock -> ClockLine(clock, wide, narrow) }
+        }
     }
 }
 
 @Composable
-private fun ClockLine(clock: WidgetClock, wide: Boolean) {
+private fun ClockLine(clock: WidgetClock, wide: Boolean, narrow: Boolean) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Icon(if (clock.day) Icons.Filled.WbSunny else Icons.Filled.NightsStay, null, Modifier.size(14.dp),
+        if (!narrow) Icon(if (clock.day) Icons.Filled.WbSunny else Icons.Filled.NightsStay, null, Modifier.size(14.dp),
             tint = if (clock.day) SunColour else NuvioTheme.colors.TextTertiary)
         Text(clock.city.name, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
             overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
@@ -241,14 +260,14 @@ private fun dayOffset(days: Int, wide: Boolean): String = when {
 }
 
 @Composable
-private fun SportWidget(roomy: Boolean) {
+private fun SportWidget(roomy: Boolean, short: Boolean) {
     val viewModel: IptvSportsFixturesViewModel = hiltViewModel()
     val fixtures by viewModel.state.collectAsStateWithLifecycle()
     val games = remember(fixtures) { sportStrip(fixtures) }
     if (!fixtures.enabled) { WidgetMessage(stringResource(R.string.iptv_widgets_sport_off)); return }
     if (games.isEmpty()) { WidgetMessage(stringResource(R.string.iptv_widgets_no_games)); return }
     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        games.take(if (roomy) 3 else 2).forEach { item ->
+        games.take(if (roomy) 3 else if (short) 1 else 2).forEach { item ->
             val fixture = item.fixture
             val hidden = fixtures.hidden(fixture)
             Column {
@@ -273,7 +292,7 @@ private fun sportStrip(state: IptvFixturesState): List<IptvFixtureItem> {
 }
 
 @Composable
-private fun UpNextWidget(state: IptvLiveState, minute: Long, roomy: Boolean) {
+private fun UpNextWidget(state: IptvLiveState, minute: Long, roomy: Boolean, short: Boolean) {
     val row = state.focused
     val id = row?.item?.channel?.id
     val programmes = remember(id, state.guide, state.extraGuide, state.shortGuide, minute / 60_000L) {
@@ -287,7 +306,7 @@ private fun UpNextWidget(state: IptvLiveState, minute: Long, roomy: Boolean) {
         Text(channelName(row), style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         if (programmes.isEmpty()) Text(stringResource(R.string.iptv_widgets_no_guide), style = MaterialTheme.typography.bodySmall,
             color = NuvioTheme.colors.TextTertiary, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        programmes.forEach { programme -> UpNextLine(programme, roomy) }
+        programmes.take(if (short) 1 else 2).forEach { programme -> UpNextLine(programme, roomy) }
     }
 }
 
@@ -301,7 +320,7 @@ private fun UpNextLine(programme: GuideProgramme, roomy: Boolean) {
 }
 
 @Composable
-private fun RecordingsWidget(recordings: List<IptvRecording>, minute: Long, roomy: Boolean) {
+private fun RecordingsWidget(recordings: List<IptvRecording>, minute: Long, roomy: Boolean, short: Boolean) {
     val now = remember(recordings) { recordings.filter { it.status == RecordingStatus.RECORDING }.sortedBy { it.stopMillis } }
     val next = remember(recordings, minute / 60_000L) {
         recordings.filter { it.status == RecordingStatus.SCHEDULED && it.stopMillis > minute }.minByOrNull { it.startMillis }
@@ -312,7 +331,7 @@ private fun RecordingsWidget(recordings: List<IptvRecording>, minute: Long, room
             val more = if (now.size > 1) " · " + stringResource(R.string.iptv_widgets_recording_more, now.size - 1) else ""
             RecordingLine(recording, true, stringResource(R.string.iptv_widgets_recording_now, clock(recording.stopMillis)) + more, roomy)
         }
-        next?.let { recording ->
+        next?.takeIf { !short || now.isEmpty() }?.let { recording ->
             RecordingLine(recording, false, stringResource(R.string.iptv_widgets_recording_next, "${sportDayLabel(recording.startMillis)} ${clock(recording.startMillis)}"), roomy)
         }
     }
@@ -333,38 +352,71 @@ private fun RecordingLine(recording: IptvRecording, live: Boolean, label: String
     }
 }
 
-private data class StreamInfo(val resolution: String?, val codec: String?, val range: String?, val bitrate: String?)
-
-private fun streamInfo(player: ExoPlayer?): StreamInfo? {
+private fun streamFacts(player: ExoPlayer?): LiveStreamFacts? {
     val video = player?.videoFormat ?: return null
-    val fps = video.frameRate.takeIf { it > 0 }?.let { " · ${kotlin.math.round(it).toInt()} fps" }.orEmpty()
-    val range = when {
-        video.sampleMimeType == "video/dolby-vision" -> "Dolby Vision"
-        video.colorInfo?.colorTransfer == C.COLOR_TRANSFER_ST2084 -> "HDR10"
-        video.colorInfo?.colorTransfer == C.COLOR_TRANSFER_HLG -> "HLG"
-        else -> "SDR"
-    }
-    return StreamInfo(LiveWidgets.resolution(video.width, video.height)?.plus(fps), LiveWidgets.codec(video.sampleMimeType),
-        range, LiveWidgets.bitrate(video.bitrate))
+    val audio = player.audioFormat
+    val counters = player.videoDecoderCounters?.also { it.ensureUpdated() }
+    return LiveStreamFacts(video.width, video.height, video.frameRate, video.sampleMimeType, video.codecs, video.colorInfo?.colorTransfer ?: 0,
+        video.bitrate.takeIf { it > 0 } ?: video.peakBitrate, audio?.sampleMimeType, audio?.channelCount ?: 0, audio?.language,
+        video.containerMimeType ?: player.currentMediaItem?.localConfiguration?.mimeType, player.totalBufferedDuration, counters?.droppedBufferCount ?: -1)
 }
+
+private class StreamLine(val label: Int, val value: String, val health: Int? = null)
 
 @Composable
 private fun StreamWidget(player: ExoPlayer?, playing: Boolean, wide: Boolean) {
-    val info by produceState(streamInfo(player), player) { while (true) { value = streamInfo(player); delay(STREAM_POLL_MILLIS) } }
+    val facts by produceState(streamFacts(player), player) { while (true) { value = streamFacts(player); delay(STREAM_POLL_MILLIS) } }
     if (player == null) { WidgetMessage(stringResource(R.string.iptv_widgets_nothing_playing)); return }
-    val shown = info
-    if (shown == null || !playing && shown.resolution == null) { WidgetMessage(stringResource(R.string.iptv_widgets_stream_waiting)); return }
-    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceEvenly) {
-        listOf(R.string.iptv_widgets_stream_resolution to shown.resolution, R.string.iptv_widgets_stream_codec to shown.codec,
-            R.string.iptv_widgets_stream_range to shown.range, R.string.iptv_widgets_stream_bitrate to shown.bitrate).forEach { (label, value) ->
-            if (value != null) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (wide) Text(stringResource(label), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1,
-                    modifier = Modifier.width(56.dp), overflow = TextOverflow.Ellipsis)
-                Text(value, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1,
-                    overflow = TextOverflow.Ellipsis)
+    val shown = facts
+    if (shown == null || !playing && shown.width <= 0) { WidgetMessage(stringResource(R.string.iptv_widgets_stream_waiting)); return }
+    val language = shown.language?.takeIf { it.isNotBlank() && it != "und" }?.let { code ->
+        runCatching { java.util.Locale.forLanguageTag(code).getDisplayLanguage(java.util.Locale.getDefault()) }.getOrNull()?.takeIf { it.isNotBlank() } ?: code
+    }
+    val lines = listOfNotNull(
+        listOfNotNull(LiveWidgets.codec(shown.videoMime), LiveWidgets.range(shown.videoMime, shown.videoCodecs, shown.transfer), LiveWidgets.bitrate(shown.videoBitrate))
+            .joinToString(" · ").takeIf { it.isNotEmpty() }?.let { StreamLine(R.string.iptv_ui10_stream_video, it) },
+        listOfNotNull(LiveWidgets.audioCodec(shown.audioMime), LiveWidgets.channels(shown.channels), language)
+            .joinToString(" · ").takeIf { it.isNotEmpty() }?.let { StreamLine(R.string.iptv_ui10_stream_audio, it) },
+        LiveWidgets.buffer(shown.bufferMs)?.let { StreamLine(R.string.iptv_ui10_stream_buffer, it, LiveWidgets.bufferHealth(shown.bufferMs)) },
+        shown.dropped.takeIf { it >= 0 }?.let { StreamLine(R.string.iptv_ui10_stream_dropped, "$it", if (it == 0) 2 else 1) },
+        LiveWidgets.container(shown.container)?.let { StreamLine(R.string.iptv_ui10_stream_format, it) },
+    )
+    val badges = LiveWidgets.badges(shown)
+    val headline = listOfNotNull(LiveWidgets.resolution(shown.width, shown.height), LiveWidgets.frameRate(shown.frameRate)).joinToString(" · ")
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val room = ((maxHeight - (if (badges.isEmpty()) 0.dp else 26.dp) - 24.dp) / 20.dp).toInt().coerceAtLeast(0)
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (badges.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.clipToBounds()) {
+                badges.forEach { StreamBadge(it) }
+            }
+            if (headline.isNotEmpty()) Text(headline, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary,
+                maxLines = 1, overflow = TextOverflow.Ellipsis)
+            lines.take(room).forEach { line ->
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (wide) Text(stringResource(line.label), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1,
+                        modifier = Modifier.width(52.dp), overflow = TextOverflow.Ellipsis)
+                    line.health?.let { health ->
+                        Box(Modifier.size(6.dp).clip(CircleShape).background(when (health) {
+                            2 -> NuvioTheme.colors.Success
+                            1 -> NuvioTheme.colors.Warning
+                            else -> NuvioTheme.colors.Error
+                        }))
+                    }
+                    Text(if (wide || line.health == null) line.value else stringResource(line.label) + " " + line.value, style = MaterialTheme.typography.labelMedium,
+                        color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
             }
         }
     }
+}
+
+@Composable
+private fun StreamBadge(text: String) {
+    val hdr = text == "HDR10" || text == "HLG" || text == "DV"
+    Text(text, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, maxLines = 1,
+        color = if (hdr) Color.Black else NuvioTheme.colors.TextPrimary,
+        modifier = Modifier.clip(RoundedCornerShape(5.dp)).background(if (hdr) SunColour else NuvioTheme.colors.TextPrimary.copy(alpha = .14f))
+            .padding(horizontal = 6.dp, vertical = 2.dp))
 }
 
 @Composable
@@ -466,10 +518,15 @@ private fun kindIcon(kind: LiveWidgetKind): ImageVector = when (kind) {
 }
 
 private fun layoutLabel(layout: LiveWidgetLayout): Int = when (layout) {
+    LiveWidgetLayout.TALL -> R.string.iptv_ui10_layout_tall
+    LiveWidgetLayout.SQUARE -> R.string.iptv_ui10_layout_square
     LiveWidgetLayout.ONE -> R.string.iptv_widgets_layout_one
-    LiveWidgetLayout.TWO -> R.string.iptv_widgets_layout_two
-    LiveWidgetLayout.THREE -> R.string.iptv_widgets_layout_three
+    LiveWidgetLayout.STACKED -> R.string.iptv_ui10_layout_stacked
+    LiveWidgetLayout.TWO -> R.string.iptv_ui10_layout_two
+    LiveWidgetLayout.THREE -> R.string.iptv_ui10_layout_three
+    LiveWidgetLayout.SQUARES -> R.string.iptv_ui10_layout_squares
+    LiveWidgetLayout.FOUR -> R.string.iptv_ui10_layout_four
 }
 
 private val SunColour = Color(0xFFFFC14D)
-private const val STREAM_POLL_MILLIS = 5_000L
+private const val STREAM_POLL_MILLIS = 2_000L

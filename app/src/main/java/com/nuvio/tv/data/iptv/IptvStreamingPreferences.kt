@@ -13,9 +13,17 @@ class IptvStreamingPreferences(context: Context) {
     var cushion: LiveCushion
         get() = preferences.getString(CUSHION_KEY, null)?.let { name -> LiveCushion.entries.firstOrNull { it.name == name } } ?: LiveCushion.SECONDS_20
         set(value) = preferences.edit().putString(CUSHION_KEY, value.name).apply()
+    var cornerPicture: Boolean
+        get() = preferences.getBoolean(CORNER_KEY, true)
+        set(value) = preferences.edit().putBoolean(CORNER_KEY, value).apply()
+    var surroundLift: Boolean
+        get() = preferences.getBoolean(SURROUND_KEY, true)
+        set(value) = preferences.edit().putBoolean(SURROUND_KEY, value).apply()
 
     companion object {
         private const val START_KEY = "settings-stream-start"
         private const val CUSHION_KEY = "settings-stream-cushion"
+        private const val CORNER_KEY = "settings-stream-corner-picture"
+        private const val SURROUND_KEY = "settings-stream-surround-lift"
     }
 }

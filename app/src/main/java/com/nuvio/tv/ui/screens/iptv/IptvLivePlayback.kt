@@ -20,7 +20,17 @@ import androidx.media3.datasource.HttpDataSource
 import androidx.media3.datasource.TransferListener
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
+import android.media.MediaFormat
+import androidx.media3.common.Format
+import androidx.media3.exoplayer.DecoderReuseEvaluation
 import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.Renderer
+import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.audio.AudioRendererEventListener
+import androidx.media3.exoplayer.audio.AudioSink
+import androidx.media3.exoplayer.audio.MediaCodecAudioRenderer
+import androidx.media3.exoplayer.mediacodec.MediaCodecAdapter
+import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
@@ -158,6 +168,10 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private var enhancer: android.media.audiofx.LoudnessEnhancer? = null
     var boostDb: Int = boostDb
         private set
+    private val surroundLift = IptvStreamingPreferences(context).surroundLift
+    @Volatile var autoBoostDb: Int = 0
+        private set
+    val appliedBoostDb: Int get() = (boostDb + autoBoostDb).coerceAtMost(MAX_BOOST_DB)
     val player: ExoPlayer
     private val playbackThread: Thread
     init {
@@ -180,7 +194,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 { bufferedSnapshot }, { streamOpen }, { reconnects++; IptvLog.info("live reconnect seamless count=$reconnects") })
             FencedSource(IptvLocalTimeshiftRouter(direct) { ring }, fence, { Uri.parse(current) }, !isLive)
         }
-        val renderers = DefaultRenderersFactory(context).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+        val renderers = LiveRenderersFactory(context).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
         player = ExoPlayer.Builder(context, renderers).setReleaseTimeoutMs(RELEASE_BLOCK_MS)
             .setLoadControl(DefaultLoadControl.Builder().apply {
                 if (plan == null) setBufferDurationsMs(1500, 8000, 500, 1000).setTargetBufferBytes(targetBufferBytes)
@@ -198,6 +212,12 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         player.setAudioSessionId(audioSession)
         setBoost(boostDb)
         player.setHandleAudioBecomingNoisy(true)
+        player.addAnalyticsListener(object : AnalyticsListener {
+            override fun onAudioInputFormatChanged(eventTime: AnalyticsListener.EventTime, format: Format, decoderReuseEvaluation: DecoderReuseEvaluation?) {
+                val lift = if (surroundLift && format.sampleMimeType == MimeTypes.AUDIO_AAC && format.channelCount > 2) SURROUND_LIFT_DB else 0
+                if (lift != autoBoostDb) { autoBoostDb = lift; applyBoost() }
+            }
+        })
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) { if (!released) onPlaying(isPlaying) }
             override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) { updateWifi(); if (!released) onPlayWhenReady(playWhenReady) }
@@ -261,9 +281,14 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     fun setBoost(db: Int) {
         if (released) return
         boostDb = db.coerceIn(0, MAX_BOOST_DB)
+        applyBoost()
+    }
+    private fun applyBoost() {
+        if (released) return
+        val gain = appliedBoostDb
         runCatching {
-            if (boostDb == 0) { enhancer?.release(); enhancer = null }
-            else (enhancer ?: android.media.audiofx.LoudnessEnhancer(audioSession).also { enhancer = it }).apply { setTargetGain(boostDb * 100); enabled = true }
+            if (gain == 0) { enhancer?.release(); enhancer = null }
+            else (enhancer ?: android.media.audiofx.LoudnessEnhancer(audioSession).also { enhancer = it }).apply { setTargetGain(gain * 100); enabled = true }
         }.onFailure { enhancer = null }
     }
     fun limitHeight(height: Int?) {
@@ -542,6 +567,24 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             ticket?.let { fence.leave(it); ticket = null }
         }
     }
+    private class LiveRenderersFactory(context: Context) : DefaultRenderersFactory(context) {
+        override fun buildAudioRenderers(context: Context, extensionRendererMode: Int, mediaCodecSelector: MediaCodecSelector, enableDecoderFallback: Boolean,
+            audioSink: AudioSink, eventHandler: Handler, eventListener: AudioRendererEventListener, out: ArrayList<Renderer>) {
+            val start = out.size
+            super.buildAudioRenderers(context, extensionRendererMode, mediaCodecSelector, enableDecoderFallback, audioSink, eventHandler, eventListener, out)
+            val index = (start until out.size).firstOrNull { out[it] is MediaCodecAudioRenderer } ?: return
+            out[index] = LiveAudioRenderer(context, getCodecAdapterFactory(), mediaCodecSelector, enableDecoderFallback, eventHandler, eventListener, audioSink)
+        }
+    }
+    private class LiveAudioRenderer(context: Context, codecAdapterFactory: MediaCodecAdapter.Factory, mediaCodecSelector: MediaCodecSelector,
+        enableDecoderFallback: Boolean, eventHandler: Handler?, eventListener: AudioRendererEventListener?, audioSink: AudioSink) :
+        MediaCodecAudioRenderer(context, codecAdapterFactory, mediaCodecSelector, enableDecoderFallback, eventHandler, eventListener, audioSink) {
+        override fun getMediaFormat(format: Format, codecMimeType: String, codecMaxInputSize: Int, codecOperatingRate: Float): MediaFormat =
+            super.getMediaFormat(format, codecMimeType, codecMaxInputSize, codecOperatingRate).apply {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P && codecMimeType == MimeTypes.AUDIO_AAC)
+                    setInteger(MediaFormat.KEY_AAC_DRC_TARGET_REFERENCE_LEVEL, AAC_TARGET_LEVEL)
+            }
+    }
     private class LiveExtractors : ExtractorsFactory {
         @Volatile var lenient = true
         private val fast = DefaultExtractorsFactory().setTsExtractorFlags(DefaultTsPayloadReaderFactory.FLAG_ALLOW_NON_IDR_KEYFRAMES)
@@ -569,6 +612,8 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         const val FROZEN_MS = 8_000L
         const val WATCH_MS = 1_000L
         const val MAX_BOOST_DB = 12
+        const val SURROUND_LIFT_DB = 4
+        const val AAC_TARGET_LEVEL = 64
         const val IDLE_WAIT_MS = 5_000L
         const val LIVE_MIN_SPEED = 0.97f
         const val LIVE_MAX_SPEED = 1.03f

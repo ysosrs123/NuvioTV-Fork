@@ -53,7 +53,9 @@ import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsGuide
 import com.nuvio.tv.core.iptv.SportsGuideCells
 import com.nuvio.tv.core.iptv.guideStickyOffsetMillis
+import com.nuvio.tv.core.iptv.layoutGuideRow
 import com.nuvio.tv.data.iptv.IptvListedChannel
+import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.components.placeholderCardShimmer
 import com.nuvio.tv.ui.components.rememberPlaceholderShimmerOffsetState
 import com.nuvio.tv.ui.theme.NuvioTheme
@@ -82,7 +84,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
     onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onNearEnd: () -> Unit,
     moving: String? = null, onMove: (IptvListedChannel, ListMove) -> Unit = { _, _ -> }, onMoveDone: () -> Unit = {},
     sport: IptvSportsGuide = NoSportsGuide, sportOnly: Boolean? = null, onSportOnly: () -> Unit = {}, onSpan: (Long) -> Unit = {},
-    sportOnlyFocus: FocusRequester? = null) {
+    sportOnlyFocus: FocusRequester? = null, updating: Boolean = false) {
     val spec = guideSpec(state.density)
     BoxWithConstraints(modifier.iptvPanel().padding(horizontal = 6.dp, vertical = 8.dp)) {
         val stripWidth = maxWidth - spec.column
@@ -98,6 +100,20 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
                 withFrameNanos { }
                 rowFocus[id]?.let { runCatching { it.requestFocus() } }
             }
+        }
+        fun step(index: Int, delta: Int, repeat: Boolean): Boolean {
+            val target = index + delta
+            if (target < 0) return repeat
+            if (target > state.channels.lastIndex) return true
+            val requester = rowFocus.getOrPut(state.channels[target].item.channel.id) { FocusRequester() }
+            val visible = listState.layoutInfo.visibleItemsInfo.any { it.index == target }
+            if (visible) { runCatching { requester.requestFocus() }; return true }
+            scope.launch {
+                listState.scrollToItem(if (delta < 0) (target - 2).coerceAtLeast(0) else (target - 4).coerceAtLeast(0))
+                withFrameNanos { }
+                runCatching { requester.requestFocus() }
+            }
+            return true
         }
         val movingIndex = moving?.let { id -> state.channels.indexOfFirst { it.item.channel.id == id } } ?: -1
         LaunchedEffect(moving, movingIndex) {
@@ -115,10 +131,15 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SportOnlyToggle(sportOnly, onSportOnly, onRail, sportOnlyFocus?.let { Modifier.focusRequester(it) } ?: Modifier)
                     Text(heading, style = iptvHeadingStyle(), color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f))
+                        modifier = Modifier.weight(1f, fill = !updating))
+                    if (updating) LoadingIndicator(Modifier.size(14.dp))
                 }
-                else Text(heading, style = iptvHeadingStyle(), color = NuvioTheme.colors.TextSecondary, maxLines = 1,
-                    overflow = TextOverflow.Ellipsis, modifier = Modifier.width(spec.column).padding(start = 10.dp, end = 12.dp))
+                else Row(Modifier.width(spec.column).padding(start = 10.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(heading, style = iptvHeadingStyle(), color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+                        overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                    if (updating) LoadingIndicator(Modifier.size(14.dp))
+                }
                 TimeBar(viewStart, visibleMillis, now, Modifier.weight(1f).fillMaxHeight())
             }
             Spacer(Modifier.height(6.dp))
@@ -131,11 +152,14 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
                         itemsIndexed(state.channels, key = { _, row -> row.item.channel.id }) { index, row ->
                             if (index >= state.channels.size - 8) LaunchedEffect(state.channels.size) { onNearEnd() }
                             val recordings = state.recordings.filter { it.channelId == row.item.channel.id && it.sourceId == row.item.channel.sourceId }
-                            GuideRow(spec, row, state.guide[row.item.channel.id], index, now, cursor, viewStart, visibleMillis,
+                            val id = row.item.channel.id
+                            val grid = remember(state.guide[id], state.extraGuide[id], state.shortGuide[id], state.window) { gridRow(state, id) }
+                            GuideRow(spec, row, grid, index, now, cursor, viewStart, visibleMillis,
                                 row.item.channel.id == state.playingId,
                                 recordings.any { it.status == com.nuvio.tv.core.iptv.RecordingStatus.RECORDING },
                                 recordings.filter { it.status == com.nuvio.tv.core.iptv.RecordingStatus.SCHEDULED }.mapNotNull { it.programmeStartMillis }.toSet(), rowFocus.getOrPut(row.item.channel.id) { FocusRequester() },
                                 onCursor, onRail, onFocus, onSelect, onMenu, onPage = { delta -> page(index, delta * spec.pageRows) },
+                                onStep = { delta, repeat -> step(index, delta, repeat) },
                                 moving = row.item.channel.id == moving, onMove = { move -> onMove(row, move) }, onMoveDone = onMoveDone, sport = sport)
                         }
                     }
@@ -213,7 +237,7 @@ private fun TimeBar(start: Long, span: Long, now: Long, modifier: Modifier) {
 private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow?, index: Int, now: Long, cursor: Long, viewStart: Long, visibleMillis: Long,
     playing: Boolean, recording: Boolean, scheduled: Set<Long>, focusRequester: FocusRequester, onCursor: (Long, Long) -> Unit, onRail: () -> Unit,
     onFocus: (IptvListedChannel) -> Unit, onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onPage: (Int) -> Unit,
-    moving: Boolean, onMove: (ListMove) -> Unit, onMoveDone: () -> Unit, sport: IptvSportsGuide) {
+    onStep: (Int, Boolean) -> Boolean, moving: Boolean, onMove: (ListMove) -> Unit, onMoveDone: () -> Unit, sport: IptvSportsGuide) {
     var focused by remember { mutableStateOf(false) }
     val name = channelName(row)
     val sportsChannel = remember(name, sport.active) { sport.active && SportsGuide.isSportsChannel(listOf(LocalizedGuideText(name, null))) }
@@ -275,6 +299,8 @@ private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow
                 AndroidKeyEvent.KEYCODE_MENU, AndroidKeyEvent.KEYCODE_INFO -> { onMenu(row); true }
                 AndroidKeyEvent.KEYCODE_DPAD_RIGHT -> { move(1); true }
                 AndroidKeyEvent.KEYCODE_DPAD_LEFT -> { if (!move(-1)) onRail(); true }
+                AndroidKeyEvent.KEYCODE_DPAD_UP -> onStep(-1, native.repeatCount > 0)
+                AndroidKeyEvent.KEYCODE_DPAD_DOWN -> onStep(1, native.repeatCount > 0)
                 AndroidKeyEvent.KEYCODE_CHANNEL_UP, AndroidKeyEvent.KEYCODE_PAGE_UP -> { onPage(-1); true }
                 AndroidKeyEvent.KEYCODE_CHANNEL_DOWN, AndroidKeyEvent.KEYCODE_PAGE_DOWN -> { onPage(1); true }
                 else -> false
@@ -398,6 +424,14 @@ private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, 
             Box(Modifier.align(Alignment.BottomStart).fillMaxWidth(fraction).height(2.dp).background(NuvioTheme.palette.accentBrush()))
         }
     }
+}
+
+private fun gridRow(state: IptvLiveState, id: String): GuideGridRow? {
+    val row = guideRow(state, id)
+    if (row?.cells?.any { it is GuideProgrammeCell } == true) return row
+    val short = state.shortGuide[id]?.takeIf { it.isNotEmpty() } ?: return row
+    val window = state.window ?: return row
+    return runCatching { layoutGuideRow(short, window) }.getOrNull()?.takeIf { built -> built.cells.any { it is GuideProgrammeCell } } ?: row
 }
 
 private fun minuteOffset(millis: Long): Dp = MinuteWidth * (millis.toFloat() / MINUTE_MILLIS)

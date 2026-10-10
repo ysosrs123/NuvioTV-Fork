@@ -6,29 +6,61 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class LiveWidgetsTest {
-    @Test fun slotsFillTheGapUpToTheChosenLayout() {
-        assertEquals(listOf(240, 240), LiveWidgets.slots(1000, LiveWidgetLayout.TWO))
-        assertEquals(listOf(360), LiveWidgets.slots(1000, LiveWidgetLayout.ONE))
-        assertEquals(listOf(192, 192, 192), LiveWidgets.slots(1000, LiveWidgetLayout.THREE))
-        assertEquals(listOf(200, 200, 200), LiveWidgets.slots(1200, LiveWidgetLayout.THREE))
+    private fun widths(width: Int, height: Int, layout: LiveWidgetLayout) = LiveWidgets.columns(width, height, layout).map { it.width }
+    private fun slots(width: Int, height: Int, layout: LiveWidgetLayout) = LiveWidgets.columns(width, height, layout).map { it.slots }
+
+    @Test fun everyLayoutFitsTheGapOnA1080pScreen() {
+        val width = 792
+        for (layout in LiveWidgetLayout.entries) assertTrue(layout.name, LiveWidgets.fits(width, 240, layout))
+        assertEquals(listOf(220), widths(width, 240, LiveWidgetLayout.TALL))
+        assertEquals(listOf(240), widths(width, 240, LiveWidgetLayout.SQUARE))
+        assertEquals(listOf(360), widths(width, 240, LiveWidgetLayout.ONE))
+        assertEquals(listOf(360), widths(width, 240, LiveWidgetLayout.STACKED))
+        assertEquals(listOf(190, 190), widths(width, 240, LiveWidgetLayout.TWO))
+        assertEquals(listOf(190, 190), widths(width, 240, LiveWidgetLayout.THREE))
+        assertEquals(listOf(listOf(0), listOf(1, 2)), slots(width, 240, LiveWidgetLayout.THREE))
+        assertEquals(listOf(240, 114), widths(width, 240, LiveWidgetLayout.SQUARES))
+        assertEquals(listOf(114, 114), widths(width, 240, LiveWidgetLayout.FOUR))
+        assertEquals(listOf(listOf(0, 1), listOf(2, 3)), slots(width, 240, LiveWidgetLayout.FOUR))
+        assertEquals(114, LiveWidgets.columns(width, 240, LiveWidgetLayout.STACKED).single().tileHeight)
     }
 
-    @Test fun narrowSlotsAreDroppedAndATinyGapShowsNone() {
-        assertEquals(listOf(143, 143), LiveWidgets.slots(698, LiveWidgetLayout.THREE))
-        assertEquals(listOf(280), LiveWidgets.slots(680, LiveWidgetLayout.TWO))
-        assertEquals(listOf(140), LiveWidgets.slots(540, LiveWidgetLayout.TWO))
-        assertTrue(LiveWidgets.slots(539, LiveWidgetLayout.THREE).isEmpty())
-        assertTrue(LiveWidgets.slots(0, LiveWidgetLayout.ONE).isEmpty())
-        for (width in 0..2000 step 7) for (layout in LiveWidgetLayout.entries) {
-            val slots = LiveWidgets.slots(width, layout)
-            assertTrue(slots.size <= layout.slots && slots.all { it >= LiveWidgets.SLOT_MIN })
-            if (slots.isNotEmpty()) assertTrue(width - slots.sum() - LiveWidgets.GAP * (slots.size - 1) - LiveWidgets.SPACING >= LiveWidgets.INFO_MIN)
+    @Test fun roomyScreensUsePreferredSizes() {
+        assertEquals(listOf(220, 220), widths(1400, 240, LiveWidgetLayout.TWO))
+        assertEquals(listOf(220, 220), widths(1400, 240, LiveWidgetLayout.THREE))
+        assertEquals(listOf(360), widths(1400, 240, LiveWidgetLayout.ONE))
+    }
+
+    @Test fun narrowScreensDropTrailingColumnsAndShortTilesCollapse() {
+        assertEquals(listOf(198), widths(598, 170, LiveWidgetLayout.TWO))
+        assertEquals(listOf(listOf(0)), slots(598, 170, LiveWidgetLayout.THREE))
+        assertEquals(listOf(listOf(0)), slots(598, 170, LiveWidgetLayout.FOUR))
+        assertEquals(listOf(170), widths(598, 170, LiveWidgetLayout.FOUR))
+        assertFalse(LiveWidgets.fits(598, 170, LiveWidgetLayout.THREE))
+        assertTrue(LiveWidgets.fits(598, 170, LiveWidgetLayout.TALL))
+        assertTrue(LiveWidgets.columns(539, 240, LiveWidgetLayout.THREE).isEmpty())
+        assertTrue(LiveWidgets.columns(0, 240, LiveWidgetLayout.ONE).isEmpty())
+        assertTrue(LiveWidgets.columns(1000, 0, LiveWidgetLayout.ONE).isEmpty())
+    }
+
+    @Test fun columnsNeverCrowdTheInfoPanel() {
+        for (width in 0..2000 step 7) for (height in listOf(120, 150, 170, 200, 240)) for (layout in LiveWidgetLayout.entries) {
+            val columns = LiveWidgets.columns(width, height, layout)
+            assertTrue(columns.flatMap { it.slots }.all { it in 0 until layout.slots })
+            assertTrue(columns.all { it.width >= LiveWidgets.SQUARE_MIN && it.tileHeight >= LiveWidgets.SHORT_MIN })
+            if (columns.isNotEmpty()) assertTrue(width - columns.sumOf { it.width } - LiveWidgets.GAP * (columns.size - 1) - LiveWidgets.SPACING >= LiveWidgets.INFO_MIN)
         }
     }
 
+    @Test fun oldStoredLayoutsStayValid() {
+        for (name in listOf("ONE", "TWO", "THREE")) assertNotNull(LiveWidgetLayout.entries.firstOrNull { it.name == name })
+        assertEquals(3, LiveWidgetLayout.THREE.slots)
+        assertTrue(LiveWidgetLayout.entries.all { it.slots <= LiveWidgets.MAX_SLOTS })
+    }
+
     @Test fun savedKindsFallBackToDefaults() {
-        assertEquals(listOf(LiveWidgetKind.CLOCKS, LiveWidgetKind.UP_NEXT, LiveWidgetKind.RECORDINGS), LiveWidgets.kinds(emptyList()))
-        assertEquals(listOf(LiveWidgetKind.RECORDINGS, LiveWidgetKind.UP_NEXT, LiveWidgetKind.EMPTY),
+        assertEquals(listOf(LiveWidgetKind.CLOCKS, LiveWidgetKind.UP_NEXT, LiveWidgetKind.RECORDINGS, LiveWidgetKind.STREAM), LiveWidgets.kinds(emptyList()))
+        assertEquals(listOf(LiveWidgetKind.RECORDINGS, LiveWidgetKind.UP_NEXT, LiveWidgetKind.EMPTY, LiveWidgetKind.STREAM),
             LiveWidgets.kinds(listOf("RECORDINGS", "WEATHER", "EMPTY")))
     }
 
@@ -111,5 +143,30 @@ class LiveWidgetsTest {
         assertNull(LiveWidgets.resolution(0, 1080))
         assertEquals("HEVC", LiveWidgets.codec("video/hevc"))
         assertNull(LiveWidgets.codec("video/unknown"))
+    }
+
+    @Test fun richStreamLabels() {
+        assertEquals("50 fps", LiveWidgets.frameRate(50.01f))
+        assertEquals("59.94 fps", LiveWidgets.frameRate(59.94f))
+        assertNull(LiveWidgets.frameRate(-1f))
+        assertEquals("HLG", LiveWidgets.range("video/hevc", "hvc1.2.4.L153", LiveWidgets.TRANSFER_HLG))
+        assertEquals("HDR10", LiveWidgets.range("video/hevc", null, LiveWidgets.TRANSFER_PQ))
+        assertEquals("Dolby Vision", LiveWidgets.range("video/hevc", "dvh1.05.06", LiveWidgets.TRANSFER_PQ))
+        assertEquals("SDR", LiveWidgets.range("video/avc", null, 3))
+        assertEquals("4K", LiveWidgets.quality(3840, 2160))
+        assertEquals("1080p", LiveWidgets.quality(1920, 1080))
+        assertEquals("720p", LiveWidgets.quality(1280, 720))
+        assertEquals("SD", LiveWidgets.quality(720, 576))
+        assertEquals("Dolby Digital Plus", LiveWidgets.audioCodec("audio/eac3"))
+        assertEquals("AAC", LiveWidgets.audioCodec("audio/mp4a-latm"))
+        assertEquals("5.1", LiveWidgets.channels(6))
+        assertEquals("2.0", LiveWidgets.channels(2))
+        assertEquals("HLS", LiveWidgets.container("application/x-mpegURL"))
+        assertEquals("MPEG-TS", LiveWidgets.container("video/mp2t"))
+        assertEquals("6.2 s", LiveWidgets.buffer(6_200))
+        assertEquals(2, LiveWidgets.bufferHealth(6_000))
+        assertEquals(-1, LiveWidgets.bufferHealth(900))
+        assertEquals(listOf("4K", "HLG", "50p", "5.1"), LiveWidgets.badges(LiveStreamFacts(3840, 2160, 50f, "video/hevc", transfer = LiveWidgets.TRANSFER_HLG, channels = 6)))
+        assertEquals(listOf("1080p"), LiveWidgets.badges(LiveStreamFacts(1920, 1080, 25f, "video/avc", channels = 2)))
     }
 }

@@ -8,7 +8,30 @@ import java.util.Locale
 
 enum class LiveWidgetKind { CLOCKS, SPORT, UP_NEXT, RECORDINGS, STREAM, EMPTY }
 
-enum class LiveWidgetLayout(val slots: Int) { ONE(1), TWO(2), THREE(3) }
+enum class LiveWidgetShape { NARROW, WIDE, SQUARE }
+
+data class LiveWidgetPart(val shape: LiveWidgetShape, val tiles: Int = 1)
+
+enum class LiveWidgetLayout(vararg val parts: LiveWidgetPart) {
+    TALL(LiveWidgetPart(LiveWidgetShape.NARROW)),
+    SQUARE(LiveWidgetPart(LiveWidgetShape.SQUARE)),
+    ONE(LiveWidgetPart(LiveWidgetShape.WIDE)),
+    STACKED(LiveWidgetPart(LiveWidgetShape.WIDE, 2)),
+    TWO(LiveWidgetPart(LiveWidgetShape.NARROW), LiveWidgetPart(LiveWidgetShape.NARROW)),
+    THREE(LiveWidgetPart(LiveWidgetShape.NARROW), LiveWidgetPart(LiveWidgetShape.NARROW, 2)),
+    SQUARES(LiveWidgetPart(LiveWidgetShape.SQUARE), LiveWidgetPart(LiveWidgetShape.SQUARE, 2)),
+    FOUR(LiveWidgetPart(LiveWidgetShape.SQUARE, 2), LiveWidgetPart(LiveWidgetShape.SQUARE, 2));
+
+    val slots: Int get() = parts.sumOf { it.tiles }
+}
+
+data class LiveWidgetColumn(val width: Int, val slots: List<Int>, val tileHeight: Int)
+
+data class LiveStreamFacts(
+    val width: Int = 0, val height: Int = 0, val frameRate: Float = 0f, val videoMime: String? = null, val videoCodecs: String? = null,
+    val transfer: Int = 0, val videoBitrate: Int = 0, val audioMime: String? = null, val channels: Int = 0, val language: String? = null,
+    val container: String? = null, val bufferMs: Long = -1, val dropped: Int = -1,
+)
 
 data class WidgetCity(val name: String, val zone: String, val listed: Boolean = true) {
     val id: String get() = if (listed) name else zone
@@ -21,25 +44,53 @@ object LiveWidgets {
     const val GAP = 12
     const val SPACING = 20
     const val SLOT_MIN = 140
+    const val SQUARE_MIN = 100
+    const val SHORT_MIN = 90
     const val INFO_MIN = 380
     const val MAX_CITIES = 4
+    const val MAX_SLOTS = 4
     const val WIDE = 200
+    const val NARROW_WIDTH = 220
+    const val WIDE_WIDTH = 360
     val DEFAULT_LAYOUT = LiveWidgetLayout.TWO
-    val DEFAULT_KINDS = listOf(LiveWidgetKind.CLOCKS, LiveWidgetKind.UP_NEXT, LiveWidgetKind.RECORDINGS)
+    val DEFAULT_KINDS = listOf(LiveWidgetKind.CLOCKS, LiveWidgetKind.UP_NEXT, LiveWidgetKind.RECORDINGS, LiveWidgetKind.STREAM)
     private val FALLBACKS = listOf("London", "New York", "Tokyo", "Sydney")
 
-    fun preferred(slots: Int): Int = when (slots) { 1 -> 360; 2 -> 240; else -> 200 }
+    fun tileHeight(height: Int, tiles: Int): Int = (height - GAP * (tiles - 1)) / tiles
 
-    fun slots(width: Int, layout: LiveWidgetLayout): List<Int> {
+    fun columns(width: Int, height: Int, layout: LiveWidgetLayout): List<LiveWidgetColumn> {
         val room = width - INFO_MIN - SPACING
-        for (count in layout.slots downTo 1) {
-            val fit = (room - GAP * (count - 1)) / count
-            if (fit >= SLOT_MIN) return List(count) { minOf(fit, preferred(count)) }
+        if (height <= 0) return emptyList()
+        var first = 0
+        val planned = layout.parts.map { part ->
+            val tiles = if (part.tiles > 1 && tileHeight(height, part.tiles) >= SHORT_MIN) part.tiles else 1
+            val tile = tileHeight(height, tiles)
+            val (preferred, least) = when (part.shape) {
+                LiveWidgetShape.NARROW -> NARROW_WIDTH to SLOT_MIN
+                LiveWidgetShape.WIDE -> WIDE_WIDTH to SLOT_MIN
+                LiveWidgetShape.SQUARE -> tile to minOf(tile, SLOT_MIN).coerceAtLeast(SQUARE_MIN)
+            }
+            Triple(List(tiles) { first + it }, tile, preferred.coerceAtLeast(least) to least).also { first += part.tiles }
+        }
+        for (count in planned.size downTo 1) {
+            val parts = planned.take(count)
+            val space = room - GAP * (count - 1)
+            val preferred = parts.sumOf { it.third.first }
+            val least = parts.sumOf { it.third.second }
+            if (least > space) continue
+            val give = preferred - least
+            val extra = minOf(space - least, give)
+            return parts.map { (slots, tile, size) ->
+                val width = if (give == 0) size.first else size.second + ((size.first - size.second).toLong() * extra / give).toInt()
+                LiveWidgetColumn(width, slots, tile)
+            }
         }
         return emptyList()
     }
 
-    fun kinds(saved: List<String?>): List<LiveWidgetKind> = List(LiveWidgetLayout.THREE.slots) { index ->
+    fun fits(width: Int, height: Int, layout: LiveWidgetLayout): Boolean = columns(width, height, layout).sumOf { it.slots.size } == layout.slots
+
+    fun kinds(saved: List<String?>): List<LiveWidgetKind> = List(MAX_SLOTS) { index ->
         saved.getOrNull(index)?.let { name -> LiveWidgetKind.entries.firstOrNull { it.name == name } } ?: DEFAULT_KINDS[index]
     }
 
@@ -138,10 +189,91 @@ object LiveWidgets {
         "video/hevc" -> "HEVC"
         "video/av01" -> "AV1"
         "video/mpeg2" -> "MPEG-2"
+        "video/mp4v-es" -> "MPEG-4"
         "video/x-vnd.on2.vp9" -> "VP9"
         "video/dolby-vision" -> "Dolby Vision"
         else -> null
     }
+
+    fun dolbyVision(mime: String?, codecs: String?): Boolean =
+        mime == "video/dolby-vision" || codecs?.lowercase(Locale.ROOT)?.let { it.startsWith("dvh") || it.startsWith("dva") || it.startsWith("dav1") } == true
+
+    fun range(mime: String?, codecs: String?, transfer: Int): String = when {
+        dolbyVision(mime, codecs) -> "Dolby Vision"
+        transfer == TRANSFER_PQ -> "HDR10"
+        transfer == TRANSFER_HLG -> "HLG"
+        else -> "SDR"
+    }
+
+    fun frameRate(fps: Float): String? {
+        if (fps <= 0f || fps.isNaN() || fps > 1000f) return null
+        val whole = kotlin.math.round(fps)
+        return if (kotlin.math.abs(fps - whole) < 0.05f) "${whole.toInt()} fps" else String.format(Locale.ROOT, "%.2f fps", fps)
+    }
+
+    fun quality(width: Int, height: Int): String? = when {
+        width <= 0 || height <= 0 -> null
+        height >= 2000 || width >= 3800 -> "4K"
+        height >= 1400 || width >= 2500 -> "1440p"
+        height >= 1000 || width >= 1900 -> "1080p"
+        height >= 700 || width >= 1260 -> "720p"
+        else -> "SD"
+    }
+
+    fun audioCodec(mime: String?): String? = when (mime) {
+        null -> null
+        "audio/mp4a-latm" -> "AAC"
+        "audio/ac3" -> "Dolby Digital"
+        "audio/eac3" -> "Dolby Digital Plus"
+        "audio/eac3-joc" -> "Dolby Atmos"
+        "audio/ac4" -> "AC-4"
+        "audio/mpeg" -> "MP3"
+        "audio/mpeg-L2" -> "MPEG audio"
+        "audio/opus" -> "Opus"
+        "audio/vnd.dts", "audio/vnd.dts.hd", "audio/vnd.dts.uhd;profile=p2" -> "DTS"
+        "audio/true-hd" -> "Dolby TrueHD"
+        "audio/flac" -> "FLAC"
+        else -> mime.substringAfter('/').uppercase(Locale.ROOT).takeIf { it.isNotBlank() && it.length <= 12 }
+    }
+
+    fun channels(count: Int): String? = when {
+        count <= 0 -> null
+        count == 1 -> "1.0"
+        count == 2 -> "2.0"
+        count == 6 -> "5.1"
+        count == 8 -> "7.1"
+        else -> "$count ch"
+    }
+
+    fun container(mime: String?): String? = when (mime?.lowercase(Locale.ROOT)) {
+        null -> null
+        "application/x-mpegurl", "application/vnd.apple.mpegurl" -> "HLS"
+        "video/mp2t" -> "MPEG-TS"
+        "application/dash+xml" -> "DASH"
+        "video/mp4", "audio/mp4" -> "MP4"
+        "video/x-matroska", "video/webm" -> "MKV"
+        else -> null
+    }
+
+    fun buffer(ms: Long): String? = if (ms < 0) null else String.format(Locale.ROOT, "%.1f s", ms / 1000.0)
+
+    fun bufferHealth(ms: Long): Int = when {
+        ms < 0 -> 0
+        ms >= 6_000 -> 2
+        ms >= 1_500 -> 1
+        else -> -1
+    }
+
+    fun badges(facts: LiveStreamFacts): List<String> = listOfNotNull(
+        quality(facts.width, facts.height),
+        range(facts.videoMime, facts.videoCodecs, facts.transfer).takeIf { it != "SDR" }?.let { if (it == "Dolby Vision") "DV" else it },
+        facts.frameRate.takeIf { it >= 48f }?.let { "${kotlin.math.round(it).toInt()}p" },
+        "Atmos".takeIf { facts.audioMime == "audio/eac3-joc" },
+        channels(facts.channels)?.takeIf { facts.channels > 2 },
+    )
+
+    const val TRANSFER_PQ = 6
+    const val TRANSFER_HLG = 7
 
     fun fold(value: String): String =
         Normalizer.normalize(value, Normalizer.Form.NFD).replace(MARKS, "").lowercase(Locale.ROOT)

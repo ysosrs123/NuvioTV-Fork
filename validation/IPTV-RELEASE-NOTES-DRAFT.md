@@ -472,6 +472,34 @@ Phone and computer setup:
   what was saved and lets you add an XMLTV guide for that source, add more sources or keep
   changing settings. A new guide can be assigned to a source as you add it ("Use it for").
 
+Guide and widgets:
+- The guide's top area is cleaner: no title, clock or update text; a small spinner beside
+  the guide heading shows a guide update. The description gets three lines.
+- The guide keeps showing the current programme for channels with now/next information
+  during a guide update.
+- Stream info widget: quality badges (4K, HDR10/HLG/Dolby Vision, frame rate, Atmos, 5.1),
+  resolution, video and audio details, format, buffer health and dropped frames.
+- Widgets have eight layouts (one tall, one square, one wide, two short stacked, two tall,
+  tall plus two short, one large and two small squares, four small squares); every option
+  works, and an older "3" setting becomes tall plus two short.
+- Holding Up in the guide scrolls row by row to the top before going to the widgets.
+- The Live TV menu opens with focus on Search channels; "Leave Live TV?" offers Leave to
+  Home first.
+
+Playback:
+- 4K and HDR channels show their picture in the guide's corner (the corner now uses the
+  same video surface as full screen; the TV may switch to HDR while browsing and the
+  video's corners are square). Streaming setting "4K and HDR in the corner picture" brings
+  back the logo if a box struggles.
+- Going back from full screen to the guide no longer makes the corner picture and guide
+  stutter (the corner no longer redraws the whole screen for every video frame).
+- In full screen only Up/Down and the channel keys change channel; Right opens the
+  controls (it used to recall the last channel; the Last channel key still does).
+- Quiet AAC channels play louder: the decoder's target loudness is set to Android's normal
+  level, and "Lift quiet surround audio" (on by default) adds 4 dB to 5.1 AAC mixed down
+  to stereo. The stats show the AAC profile, channels, audio bitrate and gain; "Tune" is
+  now "Start time" (time to the first picture).
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

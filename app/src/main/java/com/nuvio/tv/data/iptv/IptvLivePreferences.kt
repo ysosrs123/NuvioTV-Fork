@@ -76,8 +76,8 @@ class IptvLivePreferences(context: Context) {
         get() = enumValue(WIDGET_LAYOUT_KEY, LiveWidgets.DEFAULT_LAYOUT)
         set(value) = putString(WIDGET_LAYOUT_KEY, value.name)
     var widgetKinds: List<LiveWidgetKind>
-        get() = LiveWidgets.kinds(List(LiveWidgetLayout.THREE.slots) { preferences.getString(WIDGET_KIND_PREFIX + it, null) })
-        set(value) = preferences.edit().apply { value.take(LiveWidgetLayout.THREE.slots).forEachIndexed { index, kind -> putString(WIDGET_KIND_PREFIX + index, kind.name) } }.apply()
+        get() = LiveWidgets.kinds(List(LiveWidgets.MAX_SLOTS) { preferences.getString(WIDGET_KIND_PREFIX + it, null) })
+        set(value) = preferences.edit().apply { value.take(LiveWidgets.MAX_SLOTS).forEachIndexed { index, kind -> putString(WIDGET_KIND_PREFIX + index, kind.name) } }.apply()
 
     fun widgetCities(deviceZone: String): List<String> = LiveWidgets.savedCities(preferences.getString(WIDGET_CITIES_KEY, null)?.let { saved ->
         runCatching { org.json.JSONArray(saved).let { array -> (0 until minOf(array.length(), MAX_SAVED_CITIES)).map(array::getString) } }.getOrNull()

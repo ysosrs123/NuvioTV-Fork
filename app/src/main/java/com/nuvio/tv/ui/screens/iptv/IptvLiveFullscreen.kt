@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -67,6 +68,7 @@ import com.nuvio.tv.core.iptv.LiveCornerVideo
 import com.nuvio.tv.core.iptv.SportsFixtureText
 import com.nuvio.tv.core.iptv.SportsService
 import com.nuvio.tv.data.iptv.IptvListedChannel
+import com.nuvio.tv.data.iptv.IptvStreamingPreferences
 import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.util.rememberLongPressKeyTracker
@@ -131,7 +133,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
         if (native.action != AndroidKeyEvent.ACTION_DOWN) return@onPreviewKeyEvent false
         val digit = native.keyCode - AndroidKeyEvent.KEYCODE_0
         if (digit in 0..9) { if (digits.length < 5) digits += digit; return@onPreviewKeyEvent true }
-        if (native.repeatCount > 0 && native.keyCode in ZAP_KEYS && !((state.catchup != null || state.localBehind) && native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_RIGHT)) return@onPreviewKeyEvent true
+        if (native.repeatCount > 0 && native.keyCode in ZAP_KEYS) return@onPreviewKeyEvent true
         val player = state.player
         if (state.inset != null && native.keyCode in SWAP_KEYS) { onSwapInset(); return@onPreviewKeyEvent true }
         if ((state.catchup != null || state.localBehind) && (player != null || state.tuning)) {
@@ -156,8 +158,7 @@ internal fun FullscreenLive(state: IptvLiveState, now: Long, showHud: Boolean, o
             AndroidKeyEvent.KEYCODE_DPAD_UP, AndroidKeyEvent.KEYCODE_CHANNEL_UP -> { onZap(-1); banner++; true }
             AndroidKeyEvent.KEYCODE_DPAD_DOWN, AndroidKeyEvent.KEYCODE_CHANNEL_DOWN -> { onZap(1); banner++; true }
             AndroidKeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (player != null && goLiveRoute(state, System.currentTimeMillis()) != GoLiveRoute.NONE) { banner = -1; liveFirst = true; controls = true }
-                else { onLastChannel(); banner++ }
+                banner = -1; liveFirst = player != null && goLiveRoute(state, System.currentTimeMillis()) != GoLiveRoute.NONE; controls = true
                 true
             }
             AndroidKeyEvent.KEYCODE_LAST_CHANNEL -> { onLastChannel(); banner++; true }
@@ -242,7 +243,7 @@ private const val SEEK_STEP = com.nuvio.tv.core.iptv.CatchupScrub.STEP_MILLIS
 private const val SCORE_LEAD_MILLIS = 30_000L
 private val SWAP_KEYS = setOf(AndroidKeyEvent.KEYCODE_WINDOW, AndroidKeyEvent.KEYCODE_PROG_YELLOW)
 private val ZAP_KEYS = setOf(AndroidKeyEvent.KEYCODE_DPAD_UP, AndroidKeyEvent.KEYCODE_DPAD_DOWN, AndroidKeyEvent.KEYCODE_CHANNEL_UP,
-    AndroidKeyEvent.KEYCODE_CHANNEL_DOWN, AndroidKeyEvent.KEYCODE_DPAD_RIGHT, AndroidKeyEvent.KEYCODE_LAST_CHANNEL)
+    AndroidKeyEvent.KEYCODE_CHANNEL_DOWN, AndroidKeyEvent.KEYCODE_LAST_CHANNEL)
 
 @Composable
 internal fun PlaybackState(state: IptvLiveState, modifier: Modifier, large: Boolean) {
@@ -338,7 +339,7 @@ private fun Banner(state: IptvLiveState, now: Long, game: IptvFixtureItem? = nul
                     state.inset != null -> R.string.iptv_inset_hint
                     catchup != null -> R.string.iptv_scrub_banner_hint
                     row != null && hasArchive(row) && state.timeshiftEnabled -> R.string.iptv_live_archive_hint
-                    else -> R.string.iptv_live_fullscreen_hint
+                    else -> R.string.iptv_play10_fullscreen_hint
                 }), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary,
                     maxLines = 2, modifier = Modifier.widthIn(max = 220.dp))
                 behindSeconds?.let { behind ->
@@ -507,17 +508,26 @@ private fun PanelChannel(row: IptvListedChannel, state: IptvLiveState, now: Long
 
 @Composable
 internal fun LiveVideo(player: ExoPlayer?, playback: IptvLivePlayback?, modifier: Modifier, resize: Int = AspectRatioFrameLayout.RESIZE_MODE_FIT,
-    provider: String? = null, texture: Boolean = false, cover: IptvListedChannel? = null, coverHint: Int? = null) {
+    provider: String? = null, texture: Boolean = false, cover: IptvListedChannel? = null, coverHint: Int? = null, surface: Boolean = coverHint != null) {
     Box(modifier.background(Color.Black)) {
         if (texture) {
+            val context = LocalContext.current
+            val everything = remember(player) { IptvStreamingPreferences(context).cornerPicture }
             val load = rememberCornerLoad(player)
-            AndroidView(factory = { context -> android.view.TextureView(context).apply { isFocusable = false } }, modifier = Modifier.fillMaxSize(),
+            val shown = player != null && (if (surface && everything) true else load == CornerLoad.LIGHT)
+            if (surface) AndroidView(factory = { viewContext -> PlayerView(viewContext).apply {
+                useController = false; isFocusable = false; descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+                setShutterBackgroundColor(android.graphics.Color.BLACK)
+            } }, modifier = Modifier.fillMaxSize(),
+                update = { view -> view.player = if (shown) player else null; view.keepScreenOn = player != null; view.resizeMode = resize },
+                onRelease = { view -> view.player = null; view.keepScreenOn = false })
+            else AndroidView(factory = { viewContext -> android.view.TextureView(viewContext).apply { isFocusable = false } }, modifier = Modifier.fillMaxSize(),
                 update = { view ->
-                    if (player != null && load == CornerLoad.LIGHT) player.setVideoTextureView(view) else player?.clearVideoTextureView(view)
+                    if (shown) player?.setVideoTextureView(view) else player?.clearVideoTextureView(view)
                     view.keepScreenOn = player != null
                 },
                 onRelease = { view -> player?.clearVideoTextureView(view); view.keepScreenOn = false })
-            if (load == CornerLoad.HEAVY) Column(Modifier.align(Alignment.Center).padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally,
+            if (load == CornerLoad.HEAVY && !shown) Column(Modifier.align(Alignment.Center).padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 cover?.let { ChannelLogo(logoUrl(it), channelName(it), Modifier.size(96.dp, 56.dp)) }
                 coverHint?.let { Text(stringResource(it), style = MaterialTheme.typography.labelMedium, color = Color.White.copy(alpha = .8f),

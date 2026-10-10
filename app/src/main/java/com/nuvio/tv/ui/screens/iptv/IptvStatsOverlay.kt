@@ -56,7 +56,10 @@ internal fun IptvStatsOverlay(playback: IptvLivePlayback, provider: String?, mod
                 video?.bitrate?.takeIf { it > 0 }?.let { StatsRow("V bitrate", mbps(it.toDouble())) },
                 counters?.let { StatsRow("Dropped", "${it.droppedBufferCount}",
                     if (it.droppedBufferCount == 0) StatsDot.GOOD else if (now - droppedAt < RECENT_MS) StatsDot.BAD else StatsDot.WARN) })
-            val audioRows = listOf(StatsRow("Audio", audio?.let { audioLabel(it) } ?: "Unavailable"))
+            val audioRows = listOfNotNull(StatsRow("Audio", audio?.let { audioLabel(it) } ?: "Unavailable"),
+                audio?.bitrate?.takeIf { it > 0 }?.let { StatsRow("A bitrate", String.format(Locale.US, "%d kbps", it / 1000)) },
+                playback.appliedBoostDb.takeIf { it > 0 }?.let { gain -> StatsRow("Gain", listOfNotNull("+$gain dB",
+                    playback.autoBoostDb.takeIf { it > 0 }?.let { "surround +$it" }).joinToString(" · ")) })
             val target = playback.bufferTargetMs
             val playbackSpeed = playback.playbackSpeed
             val network = listOfNotNull(
@@ -76,7 +79,7 @@ internal fun IptvStatsOverlay(playback: IptvLivePlayback, provider: String?, mod
                         if (needed <= 0) StatsDot.NONE else if (rate >= needed * 1.5) StatsDot.GOOD else if (rate >= needed) StatsDot.WARN else StatsDot.BAD } ?: StatsDot.NONE),
                 StatsRow("Loaded", String.format(Locale.US, "%.1f MiB", telemetry.bytes / 1_048_576.0)),
                 StatsRow("Request", "${playback.activeRequests} open"),
-                StatsRow("Tune", telemetry.firstFrameMs?.let { seconds(it) } ?: "Waiting",
+                StatsRow("Start time", telemetry.firstFrameMs?.let { seconds(it) } ?: "Waiting",
                     telemetry.firstFrameMs?.let { if (it <= 2_000) StatsDot.GOOD else if (it <= 5_000) StatsDot.WARN else StatsDot.BAD } ?: StatsDot.NONE),
                 StatsRow("Rebuffers", "${telemetry.rebuffers} · ${seconds(telemetry.rebufferMs)}",
                     if (telemetry.rebuffers == 0) StatsDot.GOOD else if (now - stalledAt < RECENT_MS) StatsDot.BAD else StatsDot.WARN),
@@ -123,13 +126,18 @@ private fun videoLabel(format: Format): String = listOfNotNull(
 
 private fun audioLabel(format: Format): String = listOfNotNull(
     when (format.sampleMimeType) {
-        MimeTypes.AUDIO_AAC -> "AAC"
+        MimeTypes.AUDIO_AAC -> when (format.codecs?.lowercase(Locale.US)) {
+            "mp4a.40.2" -> "AAC-LC"
+            "mp4a.40.5" -> "HE-AAC"
+            "mp4a.40.29" -> "HE-AAC v2"
+            else -> "AAC"
+        }
         MimeTypes.AUDIO_AC3 -> "Dolby Digital"
         MimeTypes.AUDIO_E_AC3, MimeTypes.AUDIO_E_AC3_JOC -> "Dolby Digital Plus"
         MimeTypes.AUDIO_MPEG, MimeTypes.AUDIO_MPEG_L2 -> "MPEG audio"
         else -> format.sampleMimeType?.substringAfter('/')
     },
-    format.channelCount.takeIf { it > 0 }?.let { if (it >= 6) "5.1" else if (it == 2) "2.0" else "$it ch" },
+    format.channelCount.takeIf { it > 0 }?.let { when (it) { 1 -> "Mono"; 2 -> "2.0"; 6 -> "5.1 (6 ch)"; 8 -> "7.1 (8 ch)"; else -> "$it ch" } },
     format.sampleRate.takeIf { it > 0 }?.let { "${it / 1000.0} kHz".replace(".0 kHz", " kHz") },
     format.language?.takeIf { it != "und" }
 ).joinToString(" · ")

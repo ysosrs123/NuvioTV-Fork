@@ -30,6 +30,7 @@ import com.nuvio.tv.ui.screens.settings.SettingsActionRow
 import com.nuvio.tv.ui.screens.settings.SettingsGroupCard
 import com.nuvio.tv.ui.screens.settings.SettingsPickerOption
 import com.nuvio.tv.ui.screens.settings.SettingsSingleChoiceDialog
+import com.nuvio.tv.ui.screens.settings.SettingsToggleRow
 import com.nuvio.tv.ui.v2.components.NuvioActionPill
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -39,7 +40,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 data class IptvStreamingSettingsState(val start: LiveStartBuffer = LiveStartBuffer.NORMAL, val cushion: LiveCushion = LiveCushion.SECONDS_20,
-    val capMegabytes: Int = LiveBufferPolicy.NORMAL_BYTES / (1024 * 1024))
+    val capMegabytes: Int = LiveBufferPolicy.NORMAL_BYTES / (1024 * 1024), val cornerPicture: Boolean = true, val surroundLift: Boolean = true)
 
 @HiltViewModel
 class IptvStreamingSettingsViewModel @Inject constructor(@ApplicationContext context: Context) : ViewModel() {
@@ -49,11 +50,14 @@ class IptvStreamingSettingsViewModel @Inject constructor(@ApplicationContext con
         val memory = android.app.ActivityManager.MemoryInfo().also(manager::getMemoryInfo)
         LiveBufferPolicy.capBytes(LiveBufferPolicy.lowMemory(memory.totalMem, manager.isLowRamDevice), Runtime.getRuntime().maxMemory()) / MEGABYTE
     }.getOrDefault(LiveBufferPolicy.LOW_MEMORY_BYTES / MEGABYTE)
-    private val mutable = MutableStateFlow(IptvStreamingSettingsState(preferences.start, preferences.cushion, capMegabytes))
+    private val mutable = MutableStateFlow(IptvStreamingSettingsState(preferences.start, preferences.cushion, capMegabytes,
+        preferences.cornerPicture, preferences.surroundLift))
     val state = mutable.asStateFlow()
 
     fun setStart(value: LiveStartBuffer) { preferences.start = value; mutable.update { it.copy(start = value) } }
     fun setCushion(value: LiveCushion) { preferences.cushion = value; mutable.update { it.copy(cushion = value) } }
+    fun toggleCornerPicture() { val value = !mutable.value.cornerPicture; preferences.cornerPicture = value; mutable.update { it.copy(cornerPicture = value) } }
+    fun toggleSurroundLift() { val value = !mutable.value.surroundLift; preferences.surroundLift = value; mutable.update { it.copy(surroundLift = value) } }
 }
 
 @Composable
@@ -65,6 +69,10 @@ internal fun IptvStreamingSettingsSection(viewModel: IptvStreamingSettingsViewMo
             value = stringResource(startLabel(state.start)), onClick = { choosing = START })
         SettingsActionRow(title = stringResource(R.string.iptv_stream_cushion), subtitle = stringResource(R.string.iptv_stream_cushion_subtitle),
             value = cushionLabel(state.cushion), onClick = { choosing = CUSHION })
+        SettingsToggleRow(title = stringResource(R.string.iptv_play10_corner_picture), subtitle = stringResource(R.string.iptv_play10_corner_picture_subtitle),
+            checked = state.cornerPicture, onToggle = viewModel::toggleCornerPicture)
+        SettingsToggleRow(title = stringResource(R.string.iptv_play10_surround_lift), subtitle = stringResource(R.string.iptv_play10_surround_lift_subtitle),
+            checked = state.surroundLift, onToggle = viewModel::toggleSurroundLift)
     }
     when (choosing) {
         START -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_stream_start), subtitle = stringResource(R.string.iptv_stream_start_subtitle),

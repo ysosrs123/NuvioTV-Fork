@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">One tall widget</string>
+    <string name="iptv_ui10_layout_square">One square widget</string>
+    <string name="iptv_ui10_layout_stacked">Two short widgets, stacked</string>
+    <string name="iptv_ui10_layout_two">Two tall widgets</string>
+    <string name="iptv_ui10_layout_three">One tall and two short widgets</string>
+    <string name="iptv_ui10_layout_squares">One large and two small squares</string>
+    <string name="iptv_ui10_layout_four">Four small squares</string>
+    <string name="iptv_ui10_layout_partial">Doesn\'t fully fit on this screen, so some widgets are hidden</string>
+    <string name="iptv_ui10_stream_video">Video</string>
+    <string name="iptv_ui10_stream_audio">Audio</string>
+    <string name="iptv_ui10_stream_format">Format</string>
+    <string name="iptv_ui10_stream_buffer">Buffer</string>
+    <string name="iptv_ui10_stream_dropped">Dropped</string>
+</resources>

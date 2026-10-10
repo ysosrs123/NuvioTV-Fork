@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K and HDR in the corner picture</string>
+    <string name="iptv_play10_corner_picture_subtitle">Shows the picture of 4K and HDR channels in the guide\'s corner. Turn off if the guide stutters or the TV switches to HDR while browsing; the corner then shows the channel logo with sound.</string>
+    <string name="iptv_play10_surround_lift">Lift quiet surround audio</string>
+    <string name="iptv_play10_surround_lift_subtitle">Raises the level of AAC surround channels (5.1) mixed down for stereo, which often play much quieter than other channels.</string>
+    <string name="iptv_play10_fullscreen_hint">Left for channels, Right for controls, hold OK for options</string>
+</resources>
