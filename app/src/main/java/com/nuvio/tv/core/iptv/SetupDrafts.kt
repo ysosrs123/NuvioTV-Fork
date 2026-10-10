@@ -18,7 +18,8 @@ class SetupInputException(val field: String) : IllegalArgumentException("Invalid
 
 sealed interface SetupChange
 
-class SetupDraft(val kind: SetupKind, val targetId: String?, val label: String, val address: String, val username: String, val password: String) : SetupChange {
+class SetupDraft(val kind: SetupKind, val targetId: String?, val label: String, val address: String, val username: String, val password: String,
+    val sourceId: String? = null) : SetupChange {
     val edit: Boolean get() = targetId != null
     override fun toString() = "SetupDraft(kind=$kind, edit=$edit, values withheld)"
 
@@ -112,7 +113,8 @@ object SetupDrafts {
             }
             else -> Unit
         }
-        return SetupDraft(kind, target, label, address, username, password)
+        val source = text(json, "source", 80).ifEmpty { null }?.also { if (!kind.guide || target != null || !ID.matches(it)) throw SetupInputException("source") }
+        return SetupDraft(kind, target, label, address, username, password, source)
     }
 
     fun shallowJson(body: String, maxDepth: Int = 4): Boolean {
@@ -141,6 +143,7 @@ object SetupDrafts {
     }
 
     fun checkTarget(draft: SetupDraft, listing: SetupListing): String? {
+        if (draft.sourceId != null && listing.find(SetupKind.M3U, draft.sourceId) == null) return "missing"
         val id = draft.targetId ?: return null
         val current = listing.find(draft.kind, id) ?: return "missing"
         if (!current.editable || current.kind != draft.kind) return "locked"

@@ -75,8 +75,19 @@ import kotlin.concurrent.thread
 import kotlinx.coroutines.delay
 
 @Composable
-fun IptvRecordingsScreen(onBack: () -> Unit, viewModel: IptvRecordingsViewModel = hiltViewModel()) {
+fun IptvRecordingsScreen(onBack: () -> Unit, onPlay: ((IptvRecordingStream) -> Unit)? = null, viewModel: IptvRecordingsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val open by rememberUpdatedState(onPlay)
+    val fullPlayer = onPlay != null
+    LaunchedEffect(state.stream) {
+        state.stream?.let { stream -> viewModel.streamOpened(); open?.invoke(stream) }
+    }
+    val owner = LocalLifecycleOwner.current
+    DisposableEffect(owner) {
+        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_RESUME) viewModel.playerReturned() }
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
     val context = LocalContext.current
     val first = remember { FocusRequester() }
     var focused by remember { mutableStateOf(false) }
@@ -122,7 +133,7 @@ fun IptvRecordingsScreen(onBack: () -> Unit, viewModel: IptvRecordingsViewModel 
                             entries.forEachIndexed { index, recording ->
                                 RecordingRow(recording, state.availability[recording.id], recording.id in state.uploading,
                                     Modifier.then(if (groupIndex == 0 && index == 0) Modifier.focusRequester(first) else Modifier),
-                                    onClick = { if (recording.id in state.playable) viewModel.play(recording) else options = recording },
+                                    onClick = { if (recording.id in state.playable) viewModel.play(recording, fullPlayer) else options = recording },
                                     onMenu = { options = recording })
                             }
                         }
@@ -139,7 +150,7 @@ fun IptvRecordingsScreen(onBack: () -> Unit, viewModel: IptvRecordingsViewModel 
             val focus = remember { FocusRequester() }
             LaunchedEffect(Unit) { withFrameNanos { }; runCatching { focus.requestFocus() } }
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).focusRequester(focus), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                if (playable) RecordingOption(stringResource(R.string.iptv_recording_play), Icons.Filled.PlayArrow) { options = null; viewModel.play(recording) }
+                if (playable) RecordingOption(stringResource(R.string.iptv_recording_play), Icons.Filled.PlayArrow) { options = null; viewModel.play(recording, fullPlayer) }
                 if (recording.status == RecordingStatus.RECORDING) RecordingOption(stringResource(R.string.iptv_recording_stop), Icons.Filled.Stop) {
                     options = null; viewModel.stop(recording)
                 }

@@ -405,7 +405,7 @@ class IptvSetupViewModel @Inject constructor(
             if (stored != null && XtreamGuideReference.sourceId(stored) != null) throw IllegalArgumentException("Automatic guide")
             val endpoint = draft.connection(stored?.let { SetupConnection(it) }).endpoint
             val feed = ref?.also { guides.editFeed(it, draft.label, endpoint) }
-                ?: guides.createFeed(profileId, draft.label, endpoint).also { IptvXtreamGuides(catalogue, guides).linkNew(it, null) }
+                ?: guides.createFeed(profileId, draft.label, endpoint).also { IptvXtreamGuides(catalogue, guides).linkNew(it, draft.sourceId?.let { id -> IptvSourceRef(profileId, id) }) }
             return SavedEntry(feed = guides.feed(feed))
         }
         val kind = IptvSourceKind.valueOf(draft.kind.name)
@@ -520,6 +520,7 @@ class IptvSetupViewModel @Inject constructor(
                 else context.getString(R.string.iptv_remote_server_changes, previous, next)))
         }
         if (draft.address.isNotEmpty()) add(IptvSetupLine(R.string.iptv_remote_field_address, SetupText.displayAddress(draft.address)))
+        draft.sourceId?.let { id -> listing.find(SetupKind.M3U, id) }?.let { add(IptvSetupLine(R.string.iptv_remote_field_source, it.label)) }
         when (draft.kind) {
             SetupKind.XTREAM -> {
                 if (draft.username.isNotEmpty()) add(IptvSetupLine(R.string.iptv_remote_field_username, draft.username))

@@ -125,10 +125,11 @@ a.btn.primary:hover{background:var(--accent-hi)}
 .list li.rec .tools{flex:1 1 100%;justify-content:flex-end}
 .rec .off{font-size:13px;color:var(--warn)}
 .gap{margin-top:14px}
+#savedTitle:focus{outline:none}
 [hidden]{display:none!important}
 footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 @media (min-width:560px){.list li.rec{flex-wrap:nowrap}.list li.rec .tools{flex:none}.c4{grid-template-columns:repeat(4,1fr)}.pair2{grid-template-columns:1fr 1fr}main{padding-top:32px}.card{padding:24px}}
-@media (min-width:900px){#home:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}#home .card{margin-bottom:0}#home .col{display:grid;gap:16px}#home .banner{grid-column:1/-1;margin:0}}
+@media (min-width:900px){#home:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}#home .card{margin-bottom:0}#home .col{display:grid;gap:16px}#home .banner,#home #savedCard{grid-column:1/-1;margin:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -156,6 +157,10 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 
 <section id="home" hidden>
 <p id="busy" class="banner" role="status" hidden>Your TV is waiting for you to save or reject another change.</p>
+<div id="savedCard" class="card" aria-labelledby="savedTitle" hidden>
+<div class="head"><div class="grow"><h2 id="savedTitle" tabindex="-1"></h2><p class="lead" id="savedText" role="status"></p></div><button type="button" class="ghost small" id="savedClose">Close</button></div>
+<div class="actions"><button class="primary" type="button" id="savedGuide" hidden></button><button type="button" id="savedGuides" hidden></button><button type="button" id="savedMore"></button></div>
+</div>
 <div class="col">
 <div class="card" id="profileCard" aria-labelledby="profileTitle" hidden>
 <div class="head"><div class="grow"><h2 id="profileTitle">Profile</h2><p class="lead" id="profileLead"></p></div></div>
@@ -273,6 +278,11 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 <input id="mac" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="17" placeholder="00:1A:79:00:00:00" aria-describedby="macHint">
 <p id="macHint" class="hint">Six pairs separated by colons, as registered with your provider.</p>
 </div>
+<div id="guideForField" hidden>
+<label for="guideFor">Use it for</label>
+<div class="pick"><select id="guideFor" aria-describedby="guideForHint"></select></div>
+<p id="guideForHint" class="hint">The source whose channels this guide fills in. You can change this later with Guides next to a source.</p>
+</div>
 <p id="formError" class="error" role="alert" hidden></p>
 <button class="primary wide" type="submit" id="send">Send to TV</button>
 <button class="wide ghost" type="button" id="cancel">Cancel</button>
@@ -328,7 +338,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 """ + ORB + """
 <p class="big" id="progressTitle" role="status">Check your TV</p>
 <p class="hint" id="progressText">Confirm the change on your TV to save it.</p>
-<div class="actions center"><button class="primary" type="button" id="done" hidden>Done</button></div>
+<div class="actions center"><button class="primary" type="button" id="done" hidden>Back to setup</button></div>
 </section>
 
 <section id="ended" class="card status narrow no" hidden>
@@ -353,6 +363,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
   var listing = null;
   var assign = null;
   var timers = {};
+  var just = null;
 
   function el(id) { return document.getElementById(id); }
   function show(name) {
@@ -397,16 +408,62 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
   }
 
   function load() {
+    var profile = listing ? listing.profile : null;
+    var edits = saved && !el('settings').hidden ? settingsDiff().values : null;
     return api('GET', 'api/state').then(function (result) {
-      if (common(result, 'pairError')) return;
-      if (result.status !== 200) { lost(); return; }
+      if (common(result, 'pairError')) return false;
+      if (result.status !== 200) { lost(); return false; }
       render(result.data);
+      if (profile !== null && listing.profile !== profile) just = null;
       return api('GET', 'api/settings').then(function (answer) {
-        if (common(answer, 'pairError')) return;
-        if (answer.status === 200) renderSettings(answer.data); else el('settings').hidden = true;
+        if (common(answer, 'pairError')) return false;
+        if (answer.status === 200) {
+          renderSettings(answer.data);
+          if (edits && listing.profile === profile) keepSettings(edits);
+        } else el('settings').hidden = true;
+        renderSaved();
         show('home');
+        return true;
       });
-    }).catch(lost);
+    }).catch(function () { lost(); return false; });
+  }
+
+  function findEntry(group, id) {
+    return ((listing && listing[group]) || []).filter(function (e) { return e.id === id; })[0] || null;
+  }
+
+  function renderSaved() {
+    var card = el('savedCard');
+    if (!just) { card.hidden = true; return; }
+    var guide = just.kind === 'guide';
+    var entry = just.id ? findEntry(guide ? 'guides' : 'sources', just.id) : null;
+    var source = guide ? (just.source ? findEntry('sources', just.source) : null) : entry;
+    var label = entry ? entry.label : just.label;
+    el('savedTitle').textContent = just.edit ? 'Saved changes to ' + label : 'Saved ' + label + ' on the TV';
+    el('savedText').textContent = guide
+      ? 'The TV is loading the guide now.' + (source ? ' It fills in the channels of ' + source.label + '.' : '')
+      : 'The TV is loading the channels now.' + (just.edit ? '' : ' If your provider gave you a separate XMLTV guide link, add it here.');
+    var add = el('savedGuide');
+    add.hidden = !!guide || !source;
+    add.textContent = 'Add a guide for this source';
+    var pick = el('savedGuides');
+    pick.hidden = !source;
+    pick.textContent = 'Guides for ' + (source ? source.label : '');
+    el('savedMore').textContent = guide ? 'Add another guide' : 'Add another source';
+    card.hidden = false;
+  }
+
+  function ids(group) { return ((listing && listing[group]) || []).map(function (e) { return e.id; }); }
+
+  function keepSettings(edits) {
+    Object.keys(edits).forEach(function (key) {
+      var value = edits[key];
+      if (value === saved[key]) return;
+      if (key === 'timeshift' || key === 'sport') el(key).checked = !!value;
+      else if (key === 'recordEarly' || key === 'recordLate') el(key).value = String(value);
+      else setRadio(key, value);
+    });
+    refreshSettings();
   }
 
   function item(entry, isGuide) {
@@ -853,16 +910,36 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
     el('macHint').textContent = 'Six pairs separated by colons, as registered with your provider.' + (editing ? ' Leave blank to keep the saved one. If you change the portal address, enter it again.' : '');
   }
 
-  function openEditor(kind, entry) {
+  function guideTargets(preset) {
+    var select = el('guideFor');
+    var sources = (listing && listing.sources) || [];
+    select.textContent = '';
+    var none = document.createElement('option');
+    none.value = '';
+    none.textContent = sources.length ? 'Choose later' : 'No sources yet';
+    select.appendChild(none);
+    sources.forEach(function (s) {
+      var option = document.createElement('option');
+      option.value = s.id;
+      option.textContent = s.label;
+      select.appendChild(option);
+    });
+    select.value = preset ? preset.id : (sources.length === 1 ? sources[0].id : '');
+    if (select.selectedIndex < 0) select.value = '';
+    el('guideForField').hidden = sources.length === 0;
+  }
+
+  function openEditor(kind, entry, forSource) {
     current = { kind: kind, entry: entry || null };
     el('entryForm').reset();
     revealPassword(false);
     setText('formError', '');
     var guide = kind === 'guide';
-    el('formTitle').textContent = entry ? 'Change ' + entry.label : (guide ? 'Add a guide' : 'Add a source');
+    el('formTitle').textContent = entry ? 'Change ' + entry.label : (guide ? (forSource ? 'Add a guide for ' + forSource.label : 'Add a guide') : 'Add a source');
     el('formHint').textContent = entry ? 'Only what you fill in changes. Your TV will ask you to confirm.' : 'Your TV will ask you to confirm before anything is saved.';
     el('kinds').hidden = guide || !!entry;
     el('label').value = entry ? entry.label : '';
+    if (guide && !entry) guideTargets(forSource); else el('guideForField').hidden = true;
     setKind(kind);
     show('editor');
     el('label').focus();
@@ -881,6 +958,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
     mac: 'Enter the MAC address as six pairs separated by colons, such as 00:1A:79:12:34:56.',
     id: 'That entry can no longer be changed from here.',
     kind: 'Choose a source type.',
+    source: 'Choose the source again.',
     body: 'Something went wrong with that request. Reload the page and try again.'
   };
   var settingErrors = {
@@ -910,17 +988,21 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
     if (current.entry) body.id = current.entry.id;
     if (current.kind === 'xtream') { body.username = el('username').value.trim(); body.password = el('password').value; }
     if (current.kind === 'stalker') body.mac = el('mac').value.trim();
+    if (current.kind === 'guide' && !current.entry && !el('guideForField').hidden && el('guideFor').value) body.source = el('guideFor').value;
     el('label').removeAttribute('aria-invalid');
     el('address').removeAttribute('aria-invalid');
     if (!body.label) { setText('formError', fieldErrors.label); el('label').setAttribute('aria-invalid', 'true'); el('label').focus(); return; }
     if (!current.entry && !body.address) { setText('formError', addressErrors[current.kind]); el('address').setAttribute('aria-invalid', 'true'); el('address').focus(); return; }
     el('send').disabled = true;
+    var guide = current.kind === 'guide';
+    var sent = { kind: current.kind, label: body.label, edit: !!current.entry, id: current.entry ? current.entry.id : null,
+      source: body.source || null, known: ids(guide ? 'guides' : 'sources') };
     api('POST', 'api/changes', body).then(function (result) {
       el('send').disabled = false;
       el('password').value = '';
       body = null;
       if (common(result, 'formError')) return;
-      if (result.status === 202 && result.data.id) { waitFor(result.data.id, current.kind === 'guide' ? 'guide' : 'source'); return; }
+      if (result.status === 202 && result.data.id) { waitFor(result.data.id, guide ? 'guide' : 'source', sent); return; }
       var error = result.data.error;
       if (error === 'invalid' && result.data.reason === 'server') setText('formError', current.kind === 'stalker'
         ? 'The portal address has changed, so enter the MAC address again.'
@@ -930,6 +1012,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
         setText('formError', field === 'address' ? addressErrors[current.kind] : (fieldErrors[field] || fieldErrors.body));
         if (field === 'address' || field === 'label') el(field).setAttribute('aria-invalid', 'true');
       }
+      else if (error === 'missing' && sent.source) setText('formError', 'That source no longer exists on the TV. Choose another one.');
       else refused(error, 'formError');
     }, function () { el('send').disabled = false; el('password').value = ''; lost(); });
   }
@@ -960,9 +1043,23 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
     if (state !== 'wait') el('done').focus();
   }
 
+  function savedEntry(sent) {
+    just = sent;
+    load().then(function (shown) {
+      if (!shown || just !== sent) return;
+      if (!sent.id) {
+        var group = sent.kind === 'guide' ? 'guides' : 'sources';
+        var added = ((listing && listing[group]) || []).filter(function (e) { return sent.known.indexOf(e.id) < 0; });
+        var match = added.filter(function (e) { return e.label === sent.label; })[0] || (added.length === 1 ? added[0] : null);
+        if (match) { sent.id = match.id; renderSaved(); }
+      }
+      el('savedTitle').focus();
+    });
+  }
+
   function stopPolling() { if (polling) { clearTimeout(polling); polling = null; } }
 
-  function waitFor(id, what) {
+  function waitFor(id, what, sent) {
     var misses = 0;
     var savedText = { source: 'The TV is loading the channels now.', guide: 'The TV is loading the guide now.', settings: 'Your new settings are saved. Some apply the next time you open Live TV.',
       links: 'The guides and their order are saved.', channel: 'The channel uses the new guide from now on.', profile: 'This page now changes the profile you chose.' };
@@ -976,6 +1073,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
         if ((result.status === 200 && status === 'pending') || result.status === 429 || result.status >= 500) { polling = setTimeout(poll, 1500); return; }
         polling = null;
         if (common(result, 'formError')) return;
+        if (status === 'saved' && sent) { savedEntry(sent); return; }
         if (status === 'saved') progress('ok', 'Saved on the TV', savedText[what]);
         else if (status === 'rejected') progress('no', 'Rejected on the TV', 'Nothing was saved.');
         else if (status === 'failed') progress('no', 'The TV couldn\'t save this', 'Nothing was saved. Check the details and try again.');
@@ -1020,6 +1118,13 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
   el('settings').addEventListener('submit', sendSettings);
   el('undo').addEventListener('click', function () { if (saved) renderSettings(saved); });
   el('done').addEventListener('click', load);
+  el('savedClose').addEventListener('click', function () { just = null; renderSaved(); });
+  el('savedGuide').addEventListener('click', function () { var s = just && findEntry('sources', just.id); if (s) openEditor('guide', null, s); });
+  el('savedGuides').addEventListener('click', function () {
+    var s = just && findEntry('sources', just.kind === 'guide' ? just.source : just.id);
+    if (s) openAssign(s);
+  });
+  el('savedMore').addEventListener('click', function () { openEditor(just && just.kind === 'guide' ? 'guide' : 'm3u', null); });
   el('switchProfile').addEventListener('click', sendProfile);
   el('sendLinks').addEventListener('click', sendLinks);
   el('linksUndo').addEventListener('click', function () { assign.order = assign.saved.slice(); renderAssign(); });

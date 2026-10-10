@@ -120,6 +120,19 @@ class SetupDraftsTest {
         assertEquals(setOf(SetupField.USERNAME), changes)
     }
 
+    @Test fun aNewGuideCanNameTheSourceItIsFor() {
+        val listing = SetupListing(sources = listOf(SetupListingItem("a", "Lounge", SetupKind.XTREAM, "x.example", true), SetupListingItem("b", "Den", SetupKind.M3U, "m.example", true)))
+        val draft = SetupDrafts.parse(body("kind" to "guide", "label" to "EPG", "address" to "https://epg.example/g.xml", "source" to "b"))
+        assertEquals("b", draft.sourceId)
+        assertNull(SetupDrafts.checkTarget(draft, listing))
+        assertNull(SetupDrafts.parse(body("kind" to "guide", "label" to "EPG", "address" to "https://epg.example/g.xml")).sourceId)
+        assertEquals("missing", SetupDrafts.checkTarget(SetupDrafts.parse(body("kind" to "guide", "label" to "EPG", "address" to "https://epg.example/g.xml", "source" to "gone")), listing))
+        rejects("source", body("kind" to "m3u", "label" to "L", "address" to "http://a.example", "source" to "a"))
+        rejects("source", body("kind" to "guide", "id" to "h", "label" to "EPG", "source" to "a"))
+        rejects("source", body("kind" to "guide", "label" to "EPG", "address" to "https://epg.example/g.xml", "source" to "a/b"))
+        rejects("source", body("kind" to "guide", "label" to "EPG", "address" to "https://epg.example/g.xml", "source" to 3))
+    }
+
     @Test fun movingALoginToAnotherServerNeedsTheLoginAgain() {
         val listing = SetupListing(listOf(
             SetupListingItem("x", "X", SetupKind.XTREAM, "x.example:8080", true, SetupText.origin("http://X.example:8080/")),

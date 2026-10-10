@@ -11,6 +11,7 @@ import com.nuvio.tv.core.recording.IptvRecordRefusal
 import com.nuvio.tv.core.recording.IptvRecorder
 import com.nuvio.tv.core.recording.IptvRecordingAvailability
 import com.nuvio.tv.core.recording.IptvRecordingDeletion
+import com.nuvio.tv.core.server.IptvRecordingStreamServer
 import com.nuvio.tv.data.iptv.IptvRecording
 import com.nuvio.tv.data.iptv.IptvRecordingReader
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,12 +38,17 @@ data class IptvRecordingsState(
     val uploading: Set<String> = emptySet(),
     val free: IptvFreeSpace? = null,
     val playing: IptvRecordingPlayback? = null,
+    val stream: IptvRecordingStream? = null,
     val message: Int? = null,
 ) {
     val empty: Boolean get() = recording.isEmpty() && scheduled.isEmpty() && recorded.isEmpty()
 }
 
 class IptvRecordingPlayback(val recording: IptvRecording, val reader: IptvRecordingReader)
+
+class IptvRecordingStream(val id: String, val url: String, val title: String, val channel: String) {
+    override fun toString() = "IptvRecordingStream(withheld)"
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -54,9 +60,13 @@ class IptvRecordingsViewModel @Inject constructor(
     private val playing = MutableStateFlow<IptvRecordingPlayback?>(null)
     private val message = MutableStateFlow<Int?>(null)
     private val free = MutableStateFlow<IptvFreeSpace?>(null)
+    private val stream = MutableStateFlow<IptvRecordingStream?>(null)
+    private var server: IptvRecordingStreamServer? = null
 
-    val state: StateFlow<IptvRecordingsState> = combine(profiles.activeProfileId.flatMapLatest { recorder.recordings(it) }, playing, message, free,
-        recorder.uploading) { list, playing, message, free, uploading ->
+    private val shown = combine(playing, stream) { playing, stream -> playing to stream }
+
+    val state: StateFlow<IptvRecordingsState> = combine(profiles.activeProfileId.flatMapLatest { recorder.recordings(it) }, shown, message, free,
+        recorder.uploading) { list, (playing, stream), message, free, uploading ->
         val availability = recorder.availability(list)
         IptvRecordingsState(ready = true,
             recording = list.filter { it.status == RecordingStatus.RECORDING }.sortedBy { it.startMillis },
@@ -64,20 +74,43 @@ class IptvRecordingsViewModel @Inject constructor(
             recorded = list.filter { it.status.finished }.sortedByDescending { it.startedAtMillis ?: it.startMillis },
             playable = availability.filterValues { it == IptvRecordingAvailability.PLAYABLE }.keys,
             availability = availability, uploading = uploading,
-            free = free, playing = playing?.takeIf { current -> list.any { it.id == current.recording.id } }, message = message)
+            free = free, playing = playing?.takeIf { current -> list.any { it.id == current.recording.id } },
+            stream = stream?.takeIf { current -> list.any { it.id == current.id } }, message = message)
     }.flowOn(Dispatchers.IO).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), IptvRecordingsState())
 
     init { refreshFree() }
 
-    fun play(recording: IptvRecording) {
+    fun play(recording: IptvRecording, fullPlayer: Boolean = false) {
         viewModelScope.launch {
             val reader = withContext(Dispatchers.IO) { recorder.reader(recording) }
             if (reader == null) { message.value = R.string.iptv_recording_file_missing; return@launch }
             message.value = null
-            playing.value = IptvRecordingPlayback(recording, reader)
-            screensaver.setPlaybackActive(true)
+            val previous = server.also { server = null }
+            val started = if (fullPlayer || previous != null) withContext(Dispatchers.IO) {
+                previous?.let { runCatching { it.stop() } }
+                if (fullPlayer) IptvRecordingStreamServer.start(reader) else null
+            } else null
+            if (started != null) {
+                server = started
+                stream.value = IptvRecordingStream(recording.id, started.url, recording.title ?: recording.channelName, recording.channelName)
+            } else {
+                playing.value = IptvRecordingPlayback(recording, reader)
+                screensaver.setPlaybackActive(true)
+            }
             if (recording.playedAtMillis == null) recorder.markPlayed(recording.id)
         }
+    }
+
+    fun streamOpened() { stream.value = null }
+
+    fun playerReturned() {
+        if (stream.value == null) stopStream()
+    }
+
+    private fun stopStream() {
+        val current = server ?: return
+        server = null
+        kotlin.concurrent.thread(name = "recording-stream-stop", isDaemon = true) { runCatching { current.stop() } }
     }
 
     fun closePlayer() {
@@ -102,6 +135,7 @@ class IptvRecordingsViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        stopStream()
         if (playing.value != null) screensaver.setPlaybackActive(false)
         super.onCleared()
     }

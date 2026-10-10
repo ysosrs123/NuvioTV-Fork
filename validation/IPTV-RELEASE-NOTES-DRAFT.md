@@ -465,6 +465,13 @@ Fixes from an independent review:
 - Guide downloads stop early with "not enough space" when under 128 MB is free, instead
   of failing as "could not be accepted".
 
+## Changes after the second 9 October 2026 device pass (not device-tested)
+
+Phone and computer setup:
+- After you add a source from your phone or computer, the setup page stays open, shows
+  what was saved and lets you add an XMLTV guide for that source, add more sources or keep
+  changing settings. A new guide can be assigned to a source as you add it ("Use it for").
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
