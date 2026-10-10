@@ -88,7 +88,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 
 class IptvLivePlayback(context: Context, private val locator: String, purpose: PlaybackPurpose,
@@ -121,8 +120,9 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private val audioPlan = LiveAudioOptions.audio(streaming.passthrough, streaming.tunnelling, streaming.audioDecoder, streaming.surroundLift, primary, streaming.cornerPicture)
     private val output = if (audioPlan.passthrough) IptvLiveNuvioAudio.output(context) else null
     private var tunnel = audioPlan.tunnelling
-    val tunnelling: Boolean get() = tunnel
-    private val tunnelActive: Boolean get() = tunnel && runCatching { player.isTunnelingEnabled }.getOrDefault(false)
+    @Volatile private var audioTunnel: Boolean? = null
+    private val tunnelActive: Boolean get() = tunnel && (audioTunnel ?: runCatching { player.isTunnelingEnabled }.getOrDefault(false))
+    val tunnelling: Boolean get() = tunnelActive
     private val trackSelector = LiveTrackSelector(context, streaming.preferSurround).apply {
         setParameters(buildUponParameters().setTunnelingEnabled(tunnel)
             .setPreferredAudioLanguages(*LiveAudioOptions.languages(streaming.audioLanguage, androidx.media3.common.util.Util.getSystemLanguageCodes().toList()).toTypedArray()))
@@ -209,7 +209,9 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     @Volatile private var pcmOutput = false
     @Volatile var autoBoostDb: Int = 0
         private set
-    val appliedBoostDb: Int get() = if (tunnel || !pcmOutput) 0 else (boostDb + autoBoostDb).coerceAtMost(MAX_BOOST_DB)
+    val appliedBoostDb: Int get() = if (!pcmOutput) 0 else (boostDb + autoBoostDb).coerceAtMost(MAX_BOOST_DB)
+    private var frames = 0
+    private var pictureCheck: Runnable? = null
     val player: ExoPlayer
     private val playbackThread: Thread
     init {
@@ -259,7 +261,11 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             }
             override fun onAudioTrackInitialized(eventTime: AnalyticsListener.EventTime, audioTrackConfig: AudioSink.AudioTrackConfig) {
                 val pcm = androidx.media3.common.util.Util.isEncodingLinearPcm(audioTrackConfig.encoding) && !audioTrackConfig.tunneling
-                if (pcm != pcmOutput) { pcmOutput = pcm; applyBoost() }
+                val tunnelled = audioTrackConfig.tunneling
+                if (tunnelled != audioTunnel) { audioTunnel = tunnelled; IptvLog.info("live tunnel engaged=$tunnelled") }
+                if (pcm != pcmOutput) pcmOutput = pcm
+                updateLift(player.audioFormat)
+                applyBoost()
             }
         })
         player.addListener(object : Player.Listener {
@@ -274,6 +280,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             }
             override fun onRenderedFirstFrame() {
                 firstFrame = true
+                frames++
                 if (frameAt == 0L) frameAt = android.os.SystemClock.elapsedRealtime()
                 mainHandler.removeCallbacks(startCheck)
                 telemetry.firstFrame(android.os.SystemClock.elapsedRealtime())
@@ -334,12 +341,12 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         applyBoost()
     }
     private fun updateLift(format: Format?) {
-        val lift = if (surroundLift && !tunnel && format != null && format.sampleMimeType == MimeTypes.AUDIO_AAC && format.channelCount > 2) SURROUND_LIFT_DB else 0
+        val lift = if (surroundLift && !tunnelActive && format != null && format.sampleMimeType == MimeTypes.AUDIO_AAC && format.channelCount > 2) SURROUND_LIFT_DB else 0
         if (lift != autoBoostDb) { autoBoostDb = lift; applyBoost() }
     }
     private fun leaveTunnel() {
         if (!tunnel || released) return
-        tunnel = false
+        tunnel = false; audioTunnel = null
         trackSelector.setParameters(trackSelector.buildUponParameters().setTunnelingEnabled(false))
         IptvLog.info("live tunnel off reason=tile")
         updateLift(player.audioFormat)
@@ -361,6 +368,21 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             player.trackSelectionParameters = (if (height == null) builder.clearVideoSizeConstraints() else builder.setMaxVideoSize(height * 16 / 9, height)).build()
         }
     }
+    fun expectPicture(onMissing: () -> Unit) {
+        if (released) return
+        pictureCheck?.let(mainHandler::removeCallbacks)
+        val mark = frames
+        val queued = decodedInput()
+        pictureCheck = Runnable {
+            pictureCheck = null
+            val fed = queued != null && (decodedInput() ?: 0) > queued
+            if (!released && !failed && tunnelActive && frames == mark && !fed && player.playbackState == Player.STATE_READY && player.playWhenReady) {
+                IptvLog.info("live tunnel picture missing after return")
+                onMissing()
+            }
+        }.also { mainHandler.postDelayed(it, PICTURE_RETURN_MS) }
+    }
+    private fun decodedInput(): Int? = player.videoDecoderCounters?.let { it.ensureUpdated(); it.queuedInputBufferCount }
     val pixelRate: Long? get() = player.videoFormat?.takeIf { it.width > 0 && it.height > 0 }?.let {
         it.width.toLong() * it.height * (it.frameRate.takeIf { rate -> rate > 0 }?.toInt() ?: MULTIVIEW_FRAME_RATE)
     }
@@ -573,6 +595,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         closeStartedAt = android.os.SystemClock.elapsedRealtime()
         mainHandler.removeCallbacks(reconnect); mainHandler.removeCallbacks(stall); mainHandler.removeCallbacks(steady)
         mainHandler.removeCallbacks(startCheck); mainHandler.removeCallbacks(watchdog)
+        pictureCheck?.let(mainHandler::removeCallbacks); pictureCheck = null
         streamOpen = false
         if (wifiHeld) { wifiHeld = false; IptvLiveWifiLock.hold(appContext, this, false) }
         fence.stopAccepting()
@@ -753,6 +776,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         const val CLOSE_WAIT_MS = 500L
         const val CLOSE_POLL_MS = 25L
         const val ORPHAN_MS = 20_000L
+        const val PICTURE_RETURN_MS = 10_000L
     }
 }
 
@@ -774,12 +798,22 @@ internal object IptvLiveNuvioAudio {
     private var watching = false
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    fun watch(store: PlayerSettingsDataStore) {
+        synchronized(this) { if (watching) return; watching = true }
+        scope.launch { store.playerSettings.collect { latest = it } }
+    }
+
+    suspend fun ready(store: PlayerSettingsDataStore) {
+        watch(store)
+        if (latest != null) return
+        withTimeoutOrNull(FIRST_READ_MS) { store.playerSettings.first() }?.let { if (latest == null) latest = it }
+    }
+
     fun settings(context: Context): PlayerSettings {
         latest?.let { return it }
-        val store = runCatching { EntryPointAccessors.fromApplication(context.applicationContext, IptvLiveAudioEntryPoint::class.java).playerSettings() }.getOrNull()
-            ?: return PlayerSettings()
-        synchronized(this) { if (!watching) { watching = true; scope.launch { store.playerSettings.collect { latest = it } } } }
-        return latest ?: runBlocking { withTimeoutOrNull(FIRST_READ_MS) { store.playerSettings.first() } } ?: PlayerSettings()
+        runCatching { EntryPointAccessors.fromApplication(context.applicationContext, IptvLiveAudioEntryPoint::class.java).playerSettings() }.getOrNull()?.let(::watch)
+        IptvLog.info("live audio settings not loaded yet")
+        return latest ?: PlayerSettings()
     }
 
     fun output(context: Context): LiveAudioOutput = runCatching {
@@ -796,7 +830,7 @@ internal object IptvLiveNuvioAudio {
         LiveAudioOutput(false, false, false, AudioPassthroughPolicy.ALLOW_ALL, false, AudioOutputChannels.default, false, emptySet())
     }
 
-    private const val FIRST_READ_MS = 300L
+    private const val FIRST_READ_MS = 1_500L
 }
 
 internal fun liveLowMemory(context: Context): Boolean = runCatching {

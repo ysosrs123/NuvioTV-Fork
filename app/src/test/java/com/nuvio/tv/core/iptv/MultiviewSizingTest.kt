@@ -54,13 +54,19 @@ class MultiviewSizingTest {
         assertTrue(multiviewFits(listOf(tsFullHd, tsFullHd, MultiviewTileLoad(540)), MultiviewDecode(null)))
     }
 
-    @Test fun hevcPicturesUseTheLargerOfTheTwoDecoders() {
+    @Test fun hevcPicturesUseTheHevcDecoder() {
         val hevc = MultiviewTileLoad(1060, 3840L * 2160 * 50, 50, hevc = true, adjustable = false)
         val decode = MultiviewDecode(1920L * 1080 * 60, 7680L * 4320 * 60)
         assertTrue(multiviewFits(listOf(hevc, hevc, MultiviewTileLoad(540)), decode))
         assertFalse(multiviewFits(listOf(hevc, MultiviewTileLoad(540)), MultiviewDecode(1920L * 1080 * 60, 1920L * 1080 * 30)))
         assertEquals(7680L * 4320 * 60, decode.budget(true))
         assertEquals(1920L * 1080 * 60, decode.budget(false))
+        val weaker = MultiviewDecode(3840L * 2160 * 60, 1920L * 1080 * 60)
+        assertEquals(1920L * 1080 * 60, weaker.budget(true))
+        assertFalse(multiviewFits(listOf(hevc, MultiviewTileLoad(540)), weaker))
+        assertTrue(multiviewFits(listOf(hevc.copy(hevc = false), MultiviewTileLoad(540)), weaker))
+        assertEquals(3840L * 2160 * 60, MultiviewDecode(3840L * 2160 * 60).budget(true))
+        assertNull(MultiviewDecode(null).budget(true))
     }
 
     @Test fun roomForAnotherPicture() {

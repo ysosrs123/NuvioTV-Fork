@@ -103,6 +103,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var multiviewGeneration = 0L
     private var restored: IptvSourceRef? = null
     private val preferences = livePreferences.preferences
+    internal val menuLayout = IptvMenuLayout(livePreferences)
+    private var keptAway = false
     @OptIn(ExperimentalCoroutinesApi::class)
     val expiryWarning: StateFlow<ExpiryWarning?> = profiles.activeProfileId.flatMapLatest { IptvSourceConnections(catalogue, livePreferences).expiryWarning(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -146,6 +148,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
 
     init {
         viewModelScope.launch { IptvLiveHold.ended.collect { released() } }
+        IptvLiveNuvioAudio.watch(playerSettings)
+        viewModelScope.launch { val (order, hidden) = withContext(Dispatchers.IO) { livePreferences.menuOrder to livePreferences.menuHidden }; menuLayout.restore(order, hidden) }
         viewModelScope.launch(Dispatchers.IO) { runCatching { IptvLocalTimeshiftPlaces.sweepOnce(timeshiftPreferences, recordingTargets) } }
         viewModelScope.launch { state.map { it.player != null || it.multiview?.any { tile -> tile.player != null } == true }.distinctUntilChanged().collect(screensaver::setPlaybackActive) }
         viewModelScope.launch { liveLaunch.source.collect { ref -> if (ref != null && session != null) { liveLaunch.source.value = null; showSource(ref) } } }
@@ -201,12 +205,27 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     }
     fun foreground(active: Boolean, keep: Boolean = false) {
         foreground = active
-        if (active) { IptvLiveHold.requested = false; load(background = mutable.value.channels.isNotEmpty()); tuneLaunched(); return }
+        if (active) {
+            IptvLiveHold.requested = false
+            if (keptAway) { keptAway = false; checkReturnPicture() }
+            load(background = mutable.value.channels.isNotEmpty()); tuneLaunched(); return
+        }
         val state = mutable.value
+        keptAway = false
         if (keep && state.multiview == null && state.player != null && !state.tuning) {
+            keptAway = true
             warmJob?.cancel(); IptvLiveNet.drop(); closeInset()
             IptvLog.info("live kept playing away")
         } else { exitMultiview(); stop() }
+    }
+    private fun checkReturnPicture() {
+        val state = mutable.value
+        val playback = state.playback?.takeIf { it.tunnelling && state.catchup == null && state.multiview == null } ?: return
+        val row = state.playingRow ?: return
+        playback.expectPicture {
+            val now = mutable.value
+            if (foreground && now.playback === playback && now.playingId == row.item.channel.id && now.multiview == null) watch(row, auto = true)
+        }
     }
     private fun released() {
         val state = mutable.value
@@ -838,6 +857,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     plan.first().url
                 } else if (source.kind == IptvSourceKind.STALKER) null else liveLocator(current, ref, source, stored)
                 insetClosing?.join()
+                IptvLiveNuvioAudio.ready(playerSettings)
                 val resolved = android.os.SystemClock.elapsedRealtime()
                 var closed = resolved
                 var logged = false

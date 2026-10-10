@@ -58,6 +58,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -158,7 +159,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
     var categoryMenu by remember { mutableStateOf<String?>(null) }
     var moving by remember { mutableStateOf<String?>(null) }
     var movingCategory by remember { mutableStateOf<String?>(null) }
-    val menuLayout = rememberIptvMenuLayout()
+    val menuLayout = viewModel.menuLayout
     var menuItemFor by remember { mutableStateOf<LiveMenuItem?>(null) }
     var movingItem by remember { mutableStateOf<LiveMenuItem?>(null) }
     var railReveal by remember { mutableIntStateOf(0) }
@@ -383,7 +384,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                             moving = moving, onMove = viewModel::moveChannel, onMoveDone = { moving = null; viewModel.finishMove() },
                             sport = sport, sportOnly = if (sportPage) sportOnly else null,
                             onSportOnly = { sportOnly = !sportOnly; IptvSportOnly.on = sportOnly }, onSpan = { guideSpan = it }, sportOnlyFocus = sportOnlyFocus,
-                            onSportOnlyUp = { runCatching { cardsFocus.requestFocus() }.isSuccess }, blocked = railOpen)
+                            onSportOnlyUp = { runCatching { cardsFocus.requestFocus(FocusDirection.Enter) }.getOrDefault(false) }, blocked = railOpen)
                     }
                 }
             }
@@ -734,22 +735,18 @@ private class RailRow(val key: String, val focusable: Boolean = true, val anchor
 
 @Stable
 internal class IptvMenuLayout(private val preferences: IptvLivePreferences) {
-    var order by mutableStateOf(preferences.menuOrder)
+    var order by mutableStateOf(LiveMenuLayout.DEFAULT)
         private set
-    var hidden by mutableStateOf(preferences.menuHidden)
+    var hidden by mutableStateOf(emptySet<LiveMenuItem>())
         private set
+    private var changed = false
     val customised: Boolean get() = LiveMenuLayout.customised(order, hidden)
+    fun restore(order: List<LiveMenuItem>, hidden: Set<LiveMenuItem>) { if (!changed) { this.order = order; this.hidden = hidden } }
     fun move(item: LiveMenuItem, shown: List<LiveMenuItem>, move: ListMove) {
-        LiveMenuLayout.move(order, shown, item, move)?.let { order = it; preferences.menuOrder = it }
+        LiveMenuLayout.move(order, shown, item, move)?.let { changed = true; order = it; preferences.menuOrder = it }
     }
-    fun toggle(item: LiveMenuItem) { hidden = LiveMenuLayout.toggle(hidden, item); preferences.menuHidden = hidden }
-    fun reset() { preferences.resetMenu(); order = LiveMenuLayout.DEFAULT; hidden = emptySet() }
-}
-
-@Composable
-private fun rememberIptvMenuLayout(): IptvMenuLayout {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    return remember { IptvMenuLayout(IptvLivePreferences(context)) }
+    fun toggle(item: LiveMenuItem) { changed = true; hidden = LiveMenuLayout.toggle(hidden, item); preferences.menuHidden = hidden }
+    fun reset() { changed = true; preferences.resetMenu(); order = LiveMenuLayout.DEFAULT; hidden = emptySet() }
 }
 
 private fun menuAvailable(state: IptvLiveState, vod: IptvVodAvailability): (LiveMenuItem) -> Boolean = { item ->

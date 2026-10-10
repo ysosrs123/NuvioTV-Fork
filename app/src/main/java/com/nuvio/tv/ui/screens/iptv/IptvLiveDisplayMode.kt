@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.media3.exoplayer.ExoPlayer
@@ -15,10 +15,14 @@ import com.nuvio.tv.core.iptv.LiveAudioOptions
 import com.nuvio.tv.core.iptv.LiveDisplayMatch
 import com.nuvio.tv.core.iptv.LiveDisplayPlan
 import com.nuvio.tv.core.iptv.LiveFrameRate
+import com.nuvio.tv.core.iptv.LiveFrameRateChoice
+import com.nuvio.tv.core.iptv.LiveResolutionChoice
 import com.nuvio.tv.core.player.FrameRateUtils
 import com.nuvio.tv.data.iptv.IptvStreamingPreferences
 import com.nuvio.tv.data.local.FrameRateMatchingMode
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 object IptvLiveDisplayMode {
@@ -57,8 +61,8 @@ object IptvLiveDisplayMode {
         }
     }
 
-    fun plan(preferences: IptvStreamingPreferences, nuvioMode: FrameRateMatchingMode, nuvioResolution: Boolean): LiveDisplayPlan =
-        LiveAudioOptions.display(preferences.frameRate, preferences.resolution, LiveDisplayMatch.valueOf(nuvioMode.name), nuvioResolution)
+    fun plan(frameRate: LiveFrameRateChoice, resolution: LiveResolutionChoice, nuvioMode: FrameRateMatchingMode, nuvioResolution: Boolean): LiveDisplayPlan =
+        LiveAudioOptions.display(frameRate, resolution, LiveDisplayMatch.valueOf(nuvioMode.name), nuvioResolution)
 
     fun mode(match: LiveDisplayMatch): FrameRateMatchingMode = FrameRateMatchingMode.valueOf(match.name)
 
@@ -70,15 +74,17 @@ object IptvLiveDisplayMode {
 internal fun IptvLiveDisplayModeEffect(player: ExoPlayer?, nuvioMode: FrameRateMatchingMode, nuvioResolution: Boolean) {
     val context = LocalContext.current
     val activity = context as? Activity
-    val preferences = remember(player) { IptvStreamingPreferences(context) }
-    val plan = remember(preferences, nuvioMode, nuvioResolution) { IptvLiveDisplayMode.plan(preferences, nuvioMode, nuvioResolution) }
-    val mode = IptvLiveDisplayMode.mode(plan.frameRate)
-    val resolutionMatching = plan.resolution
+    val choices by produceState<Pair<LiveFrameRateChoice, LiveResolutionChoice>?>(null, player) {
+        value = withContext(Dispatchers.IO) { IptvStreamingPreferences(context).let { it.frameRate to it.resolution } }
+    }
+    val plan = choices?.let { (frameRate, resolution) -> IptvLiveDisplayMode.plan(frameRate, resolution, nuvioMode, nuvioResolution) }
+    val mode = plan?.let { IptvLiveDisplayMode.mode(it.frameRate) }
+    val resolutionMatching = plan?.resolution == true
     val currentMode by rememberUpdatedState(mode)
     LaunchedEffect(activity, player, mode, resolutionMatching) {
-        if (activity != null && player != null) IptvLiveDisplayMode.match(activity, player, mode, resolutionMatching)
+        if (activity != null && player != null && mode != null) IptvLiveDisplayMode.match(activity, player, mode, resolutionMatching)
     }
     DisposableEffect(activity) {
-        onDispose { activity?.let { IptvLiveDisplayMode.leave(it, currentMode) } }
+        onDispose { activity?.let { a -> currentMode?.let { IptvLiveDisplayMode.leave(a, it) } } }
     }
 }

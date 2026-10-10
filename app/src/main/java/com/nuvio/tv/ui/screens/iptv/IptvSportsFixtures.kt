@@ -33,6 +33,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
@@ -441,7 +442,7 @@ internal fun IptvSportsFixturesRow(source: IptvSourceRef?, hiddenCategories: Set
                     val native = event.nativeKeyEvent
                     if (native.action == AndroidKeyEvent.ACTION_DOWN) lastKey = native.keyCode
                     toggle != null && native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_DOWN && native.action == AndroidKeyEvent.ACTION_DOWN && lastSlot >= slots - 1 &&
-                        runCatching { toggle.requestFocus() }.isSuccess
+                        runCatching { toggle.requestFocus(FocusDirection.Enter) }.getOrDefault(false)
                 }
                 .onFocusChanged { if (!it.hasFocus && lastKey == AndroidKeyEvent.KEYCODE_DPAD_DOWN) viewModel.focusFixture(null) }
                 .focusProperties { onEnter = { if (blocked) cancelFocusChange() } }

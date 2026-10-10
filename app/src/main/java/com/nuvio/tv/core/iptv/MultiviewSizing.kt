@@ -22,7 +22,7 @@ fun multiviewRung(physicalHeight: Int, quality: MultiviewQuality): Int {
 fun multiviewPixelRate(height: Int, frameRate: Int = MULTIVIEW_FRAME_RATE): Long = height.toLong() * 16 / 9 * height * frameRate
 
 data class MultiviewDecode(val avc: Long?, val hevc: Long? = null) {
-    fun budget(hevcStream: Boolean): Long? = if (hevcStream) listOfNotNull(avc, hevc).maxOrNull() else avc
+    fun budget(hevcStream: Boolean): Long? = if (hevcStream) hevc ?: avc else avc
 }
 
 data class MultiviewTileLoad(val physicalHeight: Int, val pixelRate: Long? = null, val frameRate: Int = MULTIVIEW_FRAME_RATE,

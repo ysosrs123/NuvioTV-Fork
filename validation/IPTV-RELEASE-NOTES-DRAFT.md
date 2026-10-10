@@ -693,6 +693,14 @@ Fixes from the night review of 10 October:
   app starts; two phones pairing at once are both remembered; phone requests wait until you
   leave profile management or the profile intro; the network check and settings reads no
   longer run on the main thread.
+- Playback: volume boost, surround lift and moving the channel into multiview now work when
+  tunnelling is switched on but the device doesn't actually use it; your Nuvio passthrough
+  settings apply from the first channel you open, without a pause when tuning; with
+  tunnelling on, if the picture doesn't come back after Live TV settings or recordings, the
+  channel re-tunes itself; multiview no longer overestimates how many HEVC channels the
+  device can decode; the Live TV menu and display matching no longer read settings while
+  the screen is drawing; pressing up or down at the edge of the sport cards no longer gets
+  stuck.
 
 ## Ready below the UI (screens pending)
 
