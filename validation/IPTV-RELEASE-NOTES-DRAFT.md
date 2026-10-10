@@ -565,6 +565,13 @@ Sport data (checked against a real capture with NHL and golf live, 10 October):
 - Sport can follow NBL, WNBA and College Football (off by default); NBL and WNBA timelines
   use 10-minute quarters.
 
+## Changes after the 10 October 2026 device pass (not device-tested)
+
+Recordings:
+- Recording file names use a short date and no code at the end, e.g.
+  "Al Jazeera - 101 East - 10-Oct-26 1355.ts"; when a name is already taken, " (2)", " (3)"
+  and so on is added. Existing recordings keep their names.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

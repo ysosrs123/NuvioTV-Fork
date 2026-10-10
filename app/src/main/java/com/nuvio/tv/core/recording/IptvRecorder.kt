@@ -492,7 +492,11 @@ class IptvRecorder @Inject constructor(
                     IptvLog.info("recording location unavailable")
                     return
                 }
-                val name = RecordingFiles.name(current.channelName, current.title, now, current.id, ZoneId.systemDefault())
+                val used = store.all().filter { it.id != current.id }.mapNotNull { it.file?.substringAfterLast('/')?.substringAfterLast('\\') }.toSet()
+                val name = RecordingFiles.name(current.channelName, current.title, now, ZoneId.systemDefault()) { candidate ->
+                    candidate in used || (place is IptvRecordingPlace.Local &&
+                        (File(place.directory, candidate).exists() || File(place.directory, RecordingFiles.partial(candidate)).exists()))
+                }
                 val path = when (place) {
                     is IptvRecordingPlace.Local -> File(place.directory, name).path
                     is IptvRecordingPlace.Share -> place.settings.target.path(name)

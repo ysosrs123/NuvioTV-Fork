@@ -52,10 +52,10 @@ class RecordingTargetsTest {
     }
 
     @Test fun partsAreNamedFromTheMainFile() {
-        val main = "News - Late - 2026-10-07 2200 - 0f3c9a2e.ts"
+        val main = "News - Late - 07-Oct-26 2200.ts"
         assertEquals(main, RecordingParts.name(main, 1))
-        assertEquals("News - Late - 2026-10-07 2200 - 0f3c9a2e (part 2).ts", RecordingParts.name(main, 2))
-        assertEquals("News - Late - 2026-10-07 2200 - 0f3c9a2e (part 12).ts", RecordingParts.name(main, 12))
+        assertEquals("News - Late - 07-Oct-26 2200 (part 2).ts", RecordingParts.name(main, 2))
+        assertEquals("News - Late - 07-Oct-26 2200 (part 12).ts", RecordingParts.name(main, 12))
         assertEquals("raw (part 3)", RecordingParts.name("raw", 3))
         try { RecordingParts.name(main, 0); fail() } catch (_: IllegalArgumentException) { }
         assertEquals(RecordingParts.FAT_PART_BYTES, RecordingParts.partBytes(RecordingFileSystem.FAT32))
@@ -151,14 +151,14 @@ class RecordingTargetsTest {
         try { RecordingLocations.volume("a/b"); fail() } catch (_: IllegalArgumentException) { }
     }
 
-    private fun name(channel: String, title: String?) = RecordingFiles.name(channel, title, now, id, zone)
+    private fun name(channel: String, title: String?) = RecordingFiles.name(channel, title, now, zone)
 
     private fun assertPortable(name: String) {
         assertTrue(name, name.length <= RecordingFiles.MAX_NAME_CHARS)
         assertTrue(name, name.toByteArray(Charsets.UTF_8).size <= RecordingFiles.MAX_NAME_BYTES)
         assertTrue(name, name.none { it < ' ' || it in "<>:\"/\\|?*" })
         assertFalse(name, name.endsWith(".") || name.endsWith(" ") || name.startsWith(".") || name.startsWith(" "))
-        assertTrue(name, name.endsWith("2026-10-07 1100 - 0f3c9a2e.ts"))
+        assertTrue(name, name.endsWith("07-Oct-26 1100.ts"))
         val stem = name.substringBefore('.').trimEnd().uppercase()
         assertFalse(name, stem in setOf("CON", "PRN", "AUX", "NUL") || stem.matches(Regex("(COM|LPT)[1-9]")))
         for (index in listOf(2, 99)) {
@@ -168,19 +168,19 @@ class RecordingTargetsTest {
     }
 
     @Test fun fileNamesArePortableAcrossFat32ExfatNtfsAndSmb() {
-        assertEquals("UK BBC One HD - News at Six Special live - 2026-10-07 1100 - 0f3c9a2e.ts",
+        assertEquals("UK BBC One HD - News at Six Special live - 07-Oct-26 1100.ts",
             name("UK: BBC One/HD", "News at Six: \"Special\" <live>").also(::assertPortable))
-        assertEquals("Sport 1 - Final Win - 2026-10-07 1100 - 0f3c9a2e.ts", name("Sport 1 🏆", "Final 🔥 Win").also(::assertPortable))
-        assertEquals("_AUX.1 - 2026-10-07 1100 - 0f3c9a2e.ts", name("AUX.1", null).also(::assertPortable))
-        assertEquals("AUX - 2026-10-07 1100 - 0f3c9a2e.ts", name("AUX", null).also(::assertPortable))
-        assertEquals("_com1.x - 2026-10-07 1100 - 0f3c9a2e.ts", name("com1.x", "").also(::assertPortable))
-        assertEquals("Movies - The End - 2026-10-07 1100 - 0f3c9a2e.ts", name("Movies...", "The End... ").also(::assertPortable))
-        assertEquals("a b c - 2026-10-07 1100 - 0f3c9a2e.ts", name("a/b\\c", null).also(::assertPortable))
-        assertEquals("Tab Line - 2026-10-07 1100 - 0f3c9a2e.ts", name("Tab\tLine\u0000", null).also(::assertPortable))
-        assertEquals("الجزيرة - نشرة الأخبار - 2026-10-07 1100 - 0f3c9a2e.ts", name("الجزيرة", "نشرة الأخبار").also(::assertPortable))
-        assertEquals("中央电视台 - 新闻联播 - 2026-10-07 1100 - 0f3c9a2e.ts", name("中央电视台", "新闻联播").also(::assertPortable))
-        assertEquals("हिन्दी समाचार - 2026-10-07 1100 - 0f3c9a2e.ts", name("हिन्दी समाचार", null).also(::assertPortable))
-        assertEquals("Café".let { java.text.Normalizer.normalize(it, java.text.Normalizer.Form.NFC) } + " - 2026-10-07 1100 - 0f3c9a2e.ts",
+        assertEquals("Sport 1 - Final Win - 07-Oct-26 1100.ts", name("Sport 1 🏆", "Final 🔥 Win").also(::assertPortable))
+        assertEquals("_AUX.1 - 07-Oct-26 1100.ts", name("AUX.1", null).also(::assertPortable))
+        assertEquals("AUX - 07-Oct-26 1100.ts", name("AUX", null).also(::assertPortable))
+        assertEquals("_com1.x - 07-Oct-26 1100.ts", name("com1.x", "").also(::assertPortable))
+        assertEquals("Movies - The End - 07-Oct-26 1100.ts", name("Movies...", "The End... ").also(::assertPortable))
+        assertEquals("a b c - 07-Oct-26 1100.ts", name("a/b\\c", null).also(::assertPortable))
+        assertEquals("Tab Line - 07-Oct-26 1100.ts", name("Tab\tLine\u0000", null).also(::assertPortable))
+        assertEquals("الجزيرة - نشرة الأخبار - 07-Oct-26 1100.ts", name("الجزيرة", "نشرة الأخبار").also(::assertPortable))
+        assertEquals("中央电视台 - 新闻联播 - 07-Oct-26 1100.ts", name("中央电视台", "新闻联播").also(::assertPortable))
+        assertEquals("हिन्दी समाचार - 07-Oct-26 1100.ts", name("हिन्दी समाचार", null).also(::assertPortable))
+        assertEquals("Café".let { java.text.Normalizer.normalize(it, java.text.Normalizer.Form.NFC) } + " - 07-Oct-26 1100.ts",
             name("Café", null).also(::assertPortable))
         assertPortable(name("x".repeat(500), "y".repeat(500)))
         assertPortable(name("频道".repeat(100), "节目名称".repeat(100)))
@@ -189,6 +189,6 @@ class RecordingTargetsTest {
         assertTrue(name("Channel", "t".repeat(500)).startsWith("Channel - ttt"))
         val wide = name("頻道".repeat(30), "節目".repeat(60))
         assertTrue(wide.startsWith("頻道頻道") && wide.contains(" - 節目"))
-        assertEquals("2026-10-07 1100 - 0f3c9a2e.ts", name("///", null))
+        assertEquals("07-Oct-26 1100.ts", name("///", null))
     }
 }

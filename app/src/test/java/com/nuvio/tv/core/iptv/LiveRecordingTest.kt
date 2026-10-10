@@ -108,18 +108,19 @@ class LiveRecordingTest {
 
     @Test fun fileNamesAreSafeBoundedAndUnique() {
         val zone = ZoneId.of("Australia/Sydney")
-        val name = RecordingFiles.name("UK: BBC One/HD", "News at Six: \"Special\" <live>", now, "0f3c9a2e-1111-2222-3333-444455556666", zone)
-        assertEquals("UK BBC One HD - News at Six Special live - 2026-10-07 1100 - 0f3c9a2e.ts", name)
+        val name = RecordingFiles.name("UK: BBC One/HD", "News at Six: \"Special\" <live>", now, zone)
+        assertEquals("UK BBC One HD - News at Six Special live - 07-Oct-26 1100.ts", name)
         assertEquals("$name.part", RecordingFiles.partial(name))
         assertFalse(name.contains('/') || name.contains(':') || name.contains('"'))
-        val long = RecordingFiles.name("x".repeat(500), "y".repeat(500), now, "abcdef0123456789", zone)
+        val long = RecordingFiles.name("x".repeat(500), "y".repeat(500), now, zone)
         assertTrue(long.length < 200)
-        assertEquals("2026-10-07 1100 - abcdef01.ts", RecordingFiles.name("///", null, now, "abcdef0123456789", zone))
-        try { RecordingFiles.name("a", null, now, "../escape", zone); fail() } catch (_: IllegalArgumentException) { }
-        assertEquals("Sky Sports Tennis HD - Live Tennis ATP Shanghai Masters 2026 Day 2 Live - 2026-10-07 1100 - abcdef01.ts",
-            RecordingFiles.name("Sky Sports Tennis ᴴᴰ", "Live Tennis: ATP Shanghai Masters 2026 : Day 2 ᴸᶦᵛᵉ", now, "abcdef0123456789", zone))
-        assertEquals("Ｆｕｌｌ 1 - 2026-10-07 1100 - abcdef01.ts".replace("Ｆｕｌｌ", "Full"), RecordingFiles.name("Ｆｕｌｌ ¹", null, now, "abcdef0123456789", zone))
-        assertEquals("天気予報々 - 2026-10-07 1100 - abcdef01.ts", RecordingFiles.name("天気予報々", null, now, "abcdef0123456789", zone))
+        assertEquals("07-Oct-26 1100.ts", RecordingFiles.name("///", null, now, zone))
+        assertEquals("Sky Sports Tennis HD - Live Tennis ATP Shanghai Masters 2026 Day 2 Live - 07-Oct-26 1100.ts",
+            RecordingFiles.name("Sky Sports Tennis ᴴᴰ", "Live Tennis: ATP Shanghai Masters 2026 : Day 2 ᴸᶦᵛᵉ", now, zone))
+        assertEquals("Ｆｕｌｌ 1 - 07-Oct-26 1100.ts".replace("Ｆｕｌｌ", "Full"), RecordingFiles.name("Ｆｕｌｌ ¹", null, now, zone))
+        val busy = setOf("BBC One - News - 07-Oct-26 1100.ts", "BBC One - News - 07-Oct-26 1100 (2).ts")
+        assertEquals("BBC One - News - 07-Oct-26 1100 (3).ts", RecordingFiles.name("BBC One", "News", now, zone) { it in busy })
+        assertEquals("天気予報々 - 07-Oct-26 1100.ts", RecordingFiles.name("天気予報々", null, now, zone))
     }
 
     @Test fun spanUsesProgrammeTimesInsidePadding() {

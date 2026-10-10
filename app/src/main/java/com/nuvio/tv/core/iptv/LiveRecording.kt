@@ -165,13 +165,18 @@ object RecordingFiles {
     const val PARTIAL_SUFFIX = ".part"
     const val MAX_NAME_CHARS = 120
     const val MAX_NAME_BYTES = 220
-    private val STAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm")
+    private val STAMP = DateTimeFormatter.ofPattern("dd-MMM-yy HHmm", Locale.ENGLISH)
     private val RESERVED = setOf("CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$") + (1..9).flatMap { listOf("COM$it", "LPT$it") }
     private const val KEPT = "-_'&.,()!+"
 
-    fun name(channel: String, title: String?, startMillis: Long, id: String, zone: ZoneId): String {
-        require(id.matches(Regex("[A-Za-z0-9-]{8,64}")))
-        val tail = STAMP.format(Instant.ofEpochMilli(startMillis).atZone(zone)) + " - " + id.replace("-", "").take(8) + EXTENSION
+    fun name(channel: String, title: String?, startMillis: Long, zone: ZoneId, taken: (String) -> Boolean = { false }): String {
+        val stamp = STAMP.format(Instant.ofEpochMilli(startMillis).atZone(zone))
+        return (1..99).asSequence().map { copy -> named(channel, title, if (copy == 1) stamp else "$stamp ($copy)") }.firstOrNull { !taken(it) }
+            ?: named(channel, title, "$stamp (${startMillis % 100_000})")
+    }
+
+    private fun named(channel: String, title: String?, stamp: String): String {
+        val tail = stamp + EXTENSION
         var first = clean(channel, 60)
         var second = title?.let { clean(it, 100) }.orEmpty()
         fun join() = listOf(first, second).filter { it.isNotEmpty() }.joinToString("") { "$it - " } + tail

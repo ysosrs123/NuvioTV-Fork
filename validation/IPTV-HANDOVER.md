@@ -353,6 +353,8 @@ Checklist 7c done; findings (fixes in progress unless noted):
     MPEG-TS is a straight copy of the broadcast, survives interruptions and plays in VLC;
     MP4 would need a remux at the end).
 Passed otherwise (SMB recording worked).
+12. Recording file names: date as dd-MMM-yy and no id suffix (done: `RecordingFiles.name`
+    takes a `taken` check; the recorder checks names of other recordings and local files).
 
 ## Device findings — 9 October 2026, second pass (build `8354d89`, run 37867719176)
 

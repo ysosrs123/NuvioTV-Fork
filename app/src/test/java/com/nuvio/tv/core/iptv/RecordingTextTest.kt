@@ -38,14 +38,14 @@ class RecordingTextTest {
     }
 
     @Test fun fileNamesUseTheSameCleaning() {
-        assertEquals("live nrl finals - Fox League - 2026-10-07 1100 - abcdef01.ts",
-            RecordingFiles.name("ʟɪᴠᴇ: ɴʀʟ ꜰɪɴᴀʟꜱ", "𝓕𝓸𝔁 𝓛𝓮𝓪𝓰𝓾𝓮", now, "abcdef0123456789", zone))
-        assertEquals("UK Sky Sports Main Event HD - LIVE Arsenal v Leeds United - 2026-10-07 1100 - abcdef01.ts",
-            RecordingFiles.name("UK | Sky Sports Main Event ᴴᴰ ★", "● LIVE ▶ 🇬🇧 Arsenal v Leeds United ⚽", now, "abcdef0123456789", zone))
-        assertEquals("BBC ONE - 2026-10-07 1100 - abcdef01.ts", RecordingFiles.name("🄱🄱🄲 🄾🄽🄴 ✦✦✦", "🔴🔴", now, "abcdef0123456789", zone))
-        val long = RecordingFiles.name("𝐒".repeat(80), "😀".repeat(40) + "𝔸".repeat(200), now, "abcdef0123456789", zone)
+        assertEquals("live nrl finals - Fox League - 07-Oct-26 1100.ts",
+            RecordingFiles.name("ʟɪᴠᴇ: ɴʀʟ ꜰɪɴᴀʟꜱ", "𝓕𝓸𝔁 𝓛𝓮𝓪𝓰𝓾𝓮", now, zone))
+        assertEquals("UK Sky Sports Main Event HD - LIVE Arsenal v Leeds United - 07-Oct-26 1100.ts",
+            RecordingFiles.name("UK | Sky Sports Main Event ᴴᴰ ★", "● LIVE ▶ 🇬🇧 Arsenal v Leeds United ⚽", now, zone))
+        assertEquals("BBC ONE - 07-Oct-26 1100.ts", RecordingFiles.name("🄱🄱🄲 🄾🄽🄴 ✦✦✦", "🔴🔴", now, zone))
+        val long = RecordingFiles.name("𝐒".repeat(80), "😀".repeat(40) + "𝔸".repeat(200), now, zone)
         assertTrue(long, long.length <= RecordingFiles.MAX_NAME_CHARS && long.all { !it.isSurrogate() })
-        val cjk = RecordingFiles.name("𠀋".repeat(70), null, now, "abcdef0123456789", zone)
+        val cjk = RecordingFiles.name("𠀋".repeat(70), null, now, zone)
         assertTrue(cjk.toByteArray(Charsets.UTF_8).size <= RecordingFiles.MAX_NAME_BYTES)
         assertFalse(cjk.toCharArray().let { chars -> chars.indices.any { chars[it].isHighSurrogate() && (it + 1 >= chars.size || !chars[it + 1].isLowSurrogate()) } })
     }

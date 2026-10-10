@@ -35,12 +35,12 @@ class RecordingMediaTest {
         assertNull(RecordingMedia.id("12a"))
         assertNull(RecordingMedia.id("content://media/external_primary/video/media/12"))
         assertNull(RecordingMedia.id("9999999999999999999"))
-        val name = RecordingFiles.name("BBC One", "News", 1_791_331_200_000L, "0f3c9a2e-1111-2222-3333-444455556666", ZoneId.of("UTC"))
+        val name = RecordingFiles.name("BBC One", "News", 1_791_331_200_000L, ZoneId.of("UTC"))
         assertNull(RecordingMedia.id(name))
     }
 
     @Test fun displayNamesComeFromTheSafeRecordingName() {
-        val name = RecordingFiles.name("CON", null, 1_791_331_200_000L, "0f3c9a2e-1111-2222-3333-444455556666", ZoneId.of("UTC"))
+        val name = RecordingFiles.name("CON", null, 1_791_331_200_000L, ZoneId.of("UTC"))
         assertEquals(name, RecordingMedia.displayName(name))
         assertEquals(name, RecordingMedia.displayName(RecordingFiles.partial(name)))
         assertEquals("show.ts", RecordingMedia.displayName("folder/show.ts.part"))
