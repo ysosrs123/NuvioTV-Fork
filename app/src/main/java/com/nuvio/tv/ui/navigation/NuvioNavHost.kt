@@ -71,6 +71,9 @@ fun NuvioNavHost(
     }
 }
 
+private val iptvHoldRoutes = setOf(Screen.IptvLive.route, Screen.IptvSettings.route, Screen.IptvRecordings.route, Screen.IptvSources.route,
+    Screen.IptvSetup.route)
+
 @Composable
 private fun PlaybackNavHost(
     navController: NavHostController,
@@ -87,6 +90,20 @@ private fun PlaybackNavHost(
         return from.startsWith("player/") && to.startsWith("stream/")
     }
 
+    val hostLifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    androidx.compose.runtime.DisposableEffect(hostLifecycle) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_STOP) com.nuvio.tv.ui.screens.iptv.IptvLiveHold.end()
+        }
+        hostLifecycle.addObserver(observer)
+        com.nuvio.tv.ui.screens.iptv.IptvLiveHold.hosted = true
+        onDispose { hostLifecycle.removeObserver(observer); com.nuvio.tv.ui.screens.iptv.IptvLiveHold.hosted = false; com.nuvio.tv.ui.screens.iptv.IptvLiveHold.end() }
+    }
+    androidx.compose.runtime.LaunchedEffect(navController) {
+        navController.currentBackStackEntryFlow.collect { entry ->
+            if (entry.destination.route !in iptvHoldRoutes) com.nuvio.tv.ui.screens.iptv.IptvLiveHold.end()
+        }
+    }
     val v2 = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current != null
     // Keep destination overlap short: both populated screens otherwise draw through the whole transition.
     val transitionMs = if (v2) 180 else NuvioMotion.tokens.durations.medium

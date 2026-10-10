@@ -661,6 +661,15 @@ Sport data (second 10 October capture: live NBL and live tennis):
   changed (the theme no longer rebuilds the screen).
 - Multiview: the selected picture keeps its size and shows a thin border instead of
   enlarging over the others.
+- The main guide always shows all channels; the Sport only / All channels switch is on the
+  Sport page only. On the Sport page, Down from the cards reaches the switch and Up returns
+  to the last card.
+- Returning to Live TV from any of its screens or panels puts you back where you were: the
+  same menu item, or the same channel, programme and scroll position. Closing channel,
+  category or menu options, search or the guide picker returns focus to what opened it.
+- A channel keeps playing (sound only) while you are in Live TV settings, Recordings,
+  Sources or phone setup, and the picture comes back on return without re-tuning; it stops
+  when you leave Live TV, the app goes to the background or a recording starts playing.
 
 ## Ready below the UI (screens pending)
 

@@ -85,7 +85,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
     onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onNearEnd: () -> Unit,
     moving: String? = null, onMove: (IptvListedChannel, ListMove) -> Unit = { _, _ -> }, onMoveDone: () -> Unit = {},
     sport: IptvSportsGuide = NoSportsGuide, sportOnly: Boolean? = null, onSportOnly: () -> Unit = {}, onSpan: (Long) -> Unit = {},
-    sportOnlyFocus: FocusRequester? = null, updating: Boolean = false, blocked: Boolean = false) {
+    sportOnlyFocus: FocusRequester? = null, onSportOnlyUp: () -> Boolean = { false }, updating: Boolean = false, blocked: Boolean = false) {
     val spec = guideSpec(state.density)
     BoxWithConstraints(modifier.iptvPanel().padding(horizontal = 6.dp, vertical = 8.dp)) {
         val stripWidth = maxWidth - spec.column
@@ -104,7 +104,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
         }
         fun step(index: Int, delta: Int, repeat: Boolean): Boolean {
             val target = index + delta
-            if (target < 0) return repeat
+            if (target < 0) return repeat || (sportOnly != null && sportOnlyFocus != null && runCatching { sportOnlyFocus.requestFocus() }.isSuccess)
             if (target > state.channels.lastIndex) return true
             val requester = rowFocus.getOrPut(state.channels[target].item.channel.id) { FocusRequester() }
             val visible = listState.layoutInfo.visibleItemsInfo.any { it.index == target }
@@ -130,7 +130,11 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
             Row(Modifier.fillMaxWidth().height(30.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (sportOnly != null) Row(Modifier.width(spec.column).padding(start = 4.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SportOnlyToggle(sportOnly, onSportOnly, onRail, (sportOnlyFocus?.let { Modifier.focusRequester(it) } ?: Modifier).focusProperties { canFocus = !blocked })
+                    SportOnlyToggle(sportOnly, onSportOnly, onRail, (sportOnlyFocus?.let { Modifier.focusRequester(it) } ?: Modifier).focusProperties { canFocus = !blocked },
+                        onUp = onSportOnlyUp, onDown = {
+                            val first = state.channels.getOrNull(listState.firstVisibleItemIndex) ?: state.channels.firstOrNull()
+                            first?.let { rowFocus[it.item.channel.id] }?.let { runCatching { it.requestFocus() }.isSuccess } ?: false
+                        })
                     Text(heading, style = iptvHeadingStyle(), color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = !updating))
                     if (updating) LoadingIndicator(Modifier.size(14.dp))

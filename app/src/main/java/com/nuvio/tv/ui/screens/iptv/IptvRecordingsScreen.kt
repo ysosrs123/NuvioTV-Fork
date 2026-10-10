@@ -97,6 +97,7 @@ fun IptvRecordingsScreen(onBack: () -> Unit, onPlay: ((IptvRecordingStream) -> U
         if (state.ready && state.playing == null) { withFrameNanos { }; runCatching { first.requestFocus() }; focused = true }
     }
     val playing = state.playing != null
+    LaunchedEffect(playing) { if (playing) IptvLiveHold.end() }
     BackHandler(onBack = onBack)
     LaunchedEffect(playing) {
         if (!playing && focused) { withFrameNanos { }; runCatching { first.requestFocus() } }

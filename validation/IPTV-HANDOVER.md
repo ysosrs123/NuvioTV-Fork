@@ -332,7 +332,7 @@ reporting, resets 10 October 2026 00:00 UTC):
 
 ## Device findings — 10 October 2026, evening (build `e7e1d17b5`, run 38029912007)
 
-Checklist 7e/7d passed except (fixes in progress):
+Checklist 7e/7d passed except (all fixed in code, `9a88d0d41`..head; checklist 7f):
 1. Live TV settings: toggling Pure black moves focus back to "Sources and guides"; focus
    should stay on the toggle.
 2. The main guide should show all channels without the Sport only / All channels toggle

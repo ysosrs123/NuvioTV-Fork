@@ -55,6 +55,14 @@ data class IptvTile(val row: IptvListedChannel, val playback: IptvLivePlayback? 
 data class IptvGuidePicker(val row: IptvListedChannel, val feeds: List<IptvGuideFeed>, val feed: IptvGuideRef? = null,
     val query: String = "", val results: List<GuideChannel> = emptyList())
 
+object IptvLiveHold {
+    @Volatile var requested = false
+    @Volatile var hosted = false
+    private val ends = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val ended: SharedFlow<Unit> = ends.asSharedFlow()
+    fun end() { requested = false; ends.tryEmit(Unit) }
+}
+
 @HiltViewModel
 class IptvLiveViewModel @Inject constructor(@ApplicationContext private val context: Context,
     private val catalogue: IptvCatalogueStore, private val guides: IptvGuideStore,
@@ -81,6 +89,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var session: IptvProfileAccess.Session? = null
     private var profileRevision = -1L
     private var foreground = false
+    internal var screenKey = 0
     private var pageJob: Job? = null
     private var guideReloadPending = false
     private var searchJob: Job? = null
@@ -136,6 +145,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var pageVersion = 0L
 
     init {
+        viewModelScope.launch { IptvLiveHold.ended.collect { released() } }
         viewModelScope.launch(Dispatchers.IO) { runCatching { IptvLocalTimeshiftPlaces.sweepOnce(timeshiftPreferences, recordingTargets) } }
         viewModelScope.launch { state.map { it.player != null || it.multiview?.any { tile -> tile.player != null } == true }.distinctUntilChanged().collect(screensaver::setPlaybackActive) }
         viewModelScope.launch { liveLaunch.source.collect { ref -> if (ref != null && session != null) { liveLaunch.source.value = null; showSource(ref) } } }
@@ -189,10 +199,20 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             }
         }
     }
-    fun foreground(active: Boolean) {
+    fun foreground(active: Boolean, keep: Boolean = false) {
         foreground = active
-        if (active) load(background = mutable.value.channels.isNotEmpty()) else { exitMultiview(); stop() }
-        if (active) tuneLaunched()
+        if (active) { IptvLiveHold.requested = false; load(background = mutable.value.channels.isNotEmpty()); tuneLaunched(); return }
+        val state = mutable.value
+        if (keep && state.multiview == null && state.player != null && !state.tuning) {
+            warmJob?.cancel(); IptvLiveNet.drop(); closeInset()
+            IptvLog.info("live kept playing away")
+        } else { exitMultiview(); stop() }
+    }
+    private fun released() {
+        val state = mutable.value
+        if (foreground || (state.player == null && !state.tuning && state.multiview == null)) return
+        IptvLog.info("live stopped away")
+        exitMultiview(); stop()
     }
     fun fullscreenShown() { fullscreenRequested.value = false }
     private fun tuneLaunched() {

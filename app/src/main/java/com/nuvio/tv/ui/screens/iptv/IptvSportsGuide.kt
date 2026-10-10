@@ -178,7 +178,8 @@ private fun GameChip(item: IptvFixtureItem, sport: IptvSportsGuide, playing: Boo
 }
 
 @Composable
-internal fun SportOnlyToggle(on: Boolean, onToggle: () -> Unit, onRail: () -> Unit, modifier: Modifier = Modifier) {
+internal fun SportOnlyToggle(on: Boolean, onToggle: () -> Unit, onRail: () -> Unit, modifier: Modifier = Modifier, onUp: () -> Boolean = { false },
+    onDown: () -> Boolean = { false }) {
     var focused by remember { mutableStateOf(false) }
     Row(modifier.height(26.dp)
         .onFocusChanged { focused = it.isFocused }
@@ -189,6 +190,8 @@ internal fun SportOnlyToggle(on: Boolean, onToggle: () -> Unit, onRail: () -> Un
                 isSelect(native.keyCode) -> { if (native.action == AndroidKeyEvent.ACTION_UP) onToggle(); true }
                 native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_LEFT -> { if (native.action == AndroidKeyEvent.ACTION_DOWN && native.repeatCount == 0) onRail(); true }
                 native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_RIGHT -> true
+                native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_UP -> native.action == AndroidKeyEvent.ACTION_DOWN && onUp()
+                native.keyCode == AndroidKeyEvent.KEYCODE_DPAD_DOWN -> native.action == AndroidKeyEvent.ACTION_DOWN && onDown()
                 else -> false
             }
         }
