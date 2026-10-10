@@ -86,9 +86,16 @@ class SetupPhonesTest {
 
     @Test fun aPhoneCannotOpenAnotherProfileThatHasAPin() {
         val phone = SetupPhone("0123456789abcdef", null, null, 0, 1)
-        assertTrue(SetupPhones.canUse(phone, 1, setOf(1, 2)))
-        assertTrue(SetupPhones.canUse(phone, 3, setOf(1, 2)))
-        assertFalse(SetupPhones.canUse(phone, 2, setOf(1, 2)))
+        assertEquals(true, SetupPhones.canUse(phone, 1, setOf(1, 2)))
+        assertEquals(true, SetupPhones.canUse(phone, 3, setOf(1, 2)))
+        assertEquals(false, SetupPhones.canUse(phone, 2, setOf(1, 2)))
+    }
+
+    @Test fun noProfileOpensUntilPinLocksAreKnown() {
+        val phone = SetupPhone("0123456789abcdef", null, null, 0, 1)
+        assertNull(SetupPhones.canUse(phone, 1, null))
+        assertNull(SetupPhones.canUse(phone, 2, null))
+        assertEquals(true, SetupPhones.canUse(phone, 2, emptySet()))
     }
 
     @Test fun pairingIsLimitedPerAddressAndOverall() {

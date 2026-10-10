@@ -688,6 +688,12 @@ Sport data (live Premier League and NBL capture, evening of 10 October):
 - Game Centre line-ups show each side's formation and mark booked (yellow) and sent-off (red)
   players; the cards are hidden while scores are hidden.
 
+Fixes from the night review of 10 October:
+- Phone access: a paired phone can't open a PIN-protected profile in the moments after the
+  app starts; two phones pairing at once are both remembered; phone requests wait until you
+  leave profile management or the profile intro; the network check and settings reads no
+  longer run on the main thread.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

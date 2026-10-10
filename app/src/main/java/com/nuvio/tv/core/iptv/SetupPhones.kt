@@ -108,7 +108,7 @@ class SetupPhones(
             return browser to platform
         }
 
-        fun canUse(phone: SetupPhone, profile: Int, pinLocked: Set<Int>): Boolean = phone.profile == profile || profile !in pinLocked
+        fun canUse(phone: SetupPhone, profile: Int, pinLocked: Set<Int>?): Boolean? = pinLocked?.let { phone.profile == profile || profile !in it }
     }
 }
 

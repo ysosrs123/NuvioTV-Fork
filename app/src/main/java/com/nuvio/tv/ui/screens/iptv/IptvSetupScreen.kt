@@ -30,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
@@ -54,6 +55,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -61,12 +64,14 @@ import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.SetupPhone
 import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.components.NuvioDialog
+import com.nuvio.tv.ui.navigation.Screen
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
 import com.nuvio.tv.ui.screens.settings.SettingsToggleRow
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
 import com.nuvio.tv.ui.v2.components.NuvioActionPill
+import com.nuvio.tv.ui.v2.profile.LocalProfileEntryState
 import java.text.DateFormat
 import java.util.Date
 
@@ -142,14 +147,17 @@ fun IptvSetupScreen(onBack: () -> Unit, viewModel: IptvSetupViewModel = hiltView
 }
 
 @Composable
-fun IptvPhoneRequestPrompt() {
+fun IptvPhoneRequestPrompt(navController: NavHostController) {
     val context = LocalContext.current
     val live by IptvSetupHost.live.collectAsState()
-    val keep = remember { IptvSetupHost.keepOn(context) }
+    val keep by produceState(false, context) { value = IptvSetupHost.keepOn(context) }
     if (!live && !keep) return
     val viewModel: IptvPhoneRequestViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    if (!state.visible) state.pending?.let { pending -> PendingDialog(pending, onSave = viewModel::confirm, onReject = viewModel::reject) }
+    val route = navController.currentBackStackEntryAsState().value?.destination?.route
+    val entering = LocalProfileEntryState.current?.pending == true
+    if (state.visible || entering || route == Screen.ManageProfiles.route) return
+    state.pending?.let { pending -> PendingDialog(pending, onSave = viewModel::confirm, onReject = viewModel::reject) }
 }
 
 @Composable

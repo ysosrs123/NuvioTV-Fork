@@ -130,7 +130,7 @@ class IptvSetupHost @Inject constructor(
     val state = mutable.asStateFlow()
     @Volatile private var session: IptvProfileAccess.Session? = null
     @Volatile private var listing = SetupListing()
-    @Volatile private var pinLocked: Set<Int> = emptySet()
+    @Volatile private var pinLocked: Set<Int>? = null
     private var server: IptvSetupServer? = null
     private var monitor: Job? = null
     private var keeper: Job? = null
@@ -250,7 +250,7 @@ class IptvSetupHost @Inject constructor(
         savePhones()
     }
 
-    private fun savePhones() {
+    @Synchronized private fun savePhones() {
         store.phones = paired.encode()
         mutable.update { it.copy(phones = paired.phones) }
     }
@@ -335,7 +335,9 @@ class IptvSetupHost @Inject constructor(
             }
             if (keep && now - checked >= ADDRESS_CHECK_MILLIS) {
                 checked = now
-                if (IptvSetupAddress.get(context) != active.boundHost) {
+                val ip = withContext(Dispatchers.IO) { IptvSetupAddress.get(context) }
+                if (server !== active) return
+                if (ip != active.boundHost) {
                     startServer()
                     return
                 }
@@ -676,7 +678,7 @@ class IptvSetupHost @Inject constructor(
         private const val PENDING_MILLIS = 10 * 60_000L
         val live = MutableStateFlow(false)
 
-        fun keepOn(context: Context): Boolean = IptvPhoneAccessStore(context).enabled
+        suspend fun keepOn(context: Context): Boolean = withContext(Dispatchers.IO) { IptvPhoneAccessStore(context).enabled }
 
         fun phoneName(context: Context, phone: SetupPhone): String {
             val browser = phone.browser
