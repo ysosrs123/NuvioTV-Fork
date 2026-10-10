@@ -348,6 +348,12 @@ The 7b list passed apart from the items below (in progress). Five screenshots we
     football per ESPN).
 24. Golf leaderboard tile and hero: scores not right-aligned; hero has much empty space.
 25. IPTV movie/series pages look empty; wanted: Nuvio's detail page even when signed out.
+26. Main Settings → Live TV → Sport → TheSportsDB key: the Show button is not aligned with
+    the key field, and the dialog and its field are see-through (dialogs outside Live TV
+    miss the opaque floor).
+Further screenshots (10 October): golf hero with uneven score positions and empty space; the
+IPTV series page (MobLand). New ESPN capture (10 October morning, NHL and PGA live) being
+turned into trimmed real fixtures.
 Also seen in the screenshots: the guide grid showed "Programme information unavailable" for
 every 4K channel while the info panel had the current programme (guide update in progress);
 the Premier League logo is nearly invisible on black; Arsenal v Leeds still "No channel found".
