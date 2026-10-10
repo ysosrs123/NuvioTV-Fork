@@ -31,10 +31,12 @@ object SportsFixtureMatching {
     private const val OPEN_PROGRAMME_MILLIS = 3L * 60 * 60 * 1000
 
     fun link(fixtures: List<SportsFixture>, channels: List<FixtureChannel>, listings: List<FixtureListing>, hiddenCategories: Set<String>,
-        nowMillis: Long, max: Int = MAX_LINKS, source: SportsChannelSource = SportsChannelSource.BOTH): Map<String, List<FixtureLink>> {
+        nowMillis: Long, max: Int = MAX_LINKS, source: SportsChannelSource = SportsChannelSource.BOTH,
+        rules: SportsChannelRules = SportsChannelRules()): Map<String, List<FixtureLink>> {
         require(max > 0)
-        val visible = channels.filter { !it.hidden && (it.category?.trim().orEmpty()) !in hiddenCategories }.distinctBy { it.id }
+        val visible = channels.filter { !it.hidden && (it.category?.trim().orEmpty()) !in hiddenCategories && rules.offered(it.id, it.category) }.distinctBy { it.id }
         val order = visible.withIndex().associate { it.value.id to it.index }
+        val rank = visible.associate { it.id to rules.rank(it.id, it.category) }
         val byChannel = if (source.guide) listings.filter { it.channelId in order } else emptyList()
         val brands = visible.associate { it.id to channelBrand(it.name) }
         return fixtures.associate { fixture ->
@@ -48,7 +50,7 @@ object SportsFixtureMatching {
                 for (channel in visible) if (brands[channel.id]?.let { sameBrand(wanted, it) } == true)
                     found += FixtureLink(channel.id, FixtureLinkReason.BROADCASTER, broadcaster = broadcaster) to Long.MAX_VALUE
             }
-            fixture.id to found.sortedWith(compareBy({ it.first.reason.ordinal }, { it.second }, { order[it.first.channelId] ?: Int.MAX_VALUE }))
+            fixture.id to found.sortedWith(compareBy({ rank[it.first.channelId] ?: 2 }, { it.first.reason.ordinal }, { it.second }, { order[it.first.channelId] ?: Int.MAX_VALUE }))
                 .map { it.first }.distinctBy { it.channelId }.take(max)
         }.filterValues { it.isNotEmpty() }
     }

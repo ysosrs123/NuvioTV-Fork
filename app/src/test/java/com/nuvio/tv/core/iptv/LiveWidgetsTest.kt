@@ -169,4 +169,45 @@ class LiveWidgetsTest {
         assertEquals(listOf("4K", "HLG", "50p", "5.1"), LiveWidgets.badges(LiveStreamFacts(3840, 2160, 50f, "video/hevc", transfer = LiveWidgets.TRANSFER_HLG, channels = 6)))
         assertEquals(listOf("1080p"), LiveWidgets.badges(LiveStreamFacts(1920, 1080, 25f, "video/avc", channels = 2)))
     }
+
+    @Test fun streamCellsKeepPriorityOrder() {
+        val facts = LiveStreamFacts(1920, 1080, 25f, "video/avc", videoBitrate = 5_200_000, audioMime = "audio/mp4a-latm", channels = 2,
+            container = "application/x-mpegURL", bufferMs = 12_300, dropped = 0)
+        val cells = LiveWidgets.streamCells(facts, "English")
+        assertEquals(listOf(StreamCellKind.VIDEO, StreamCellKind.AUDIO, StreamCellKind.BITRATE, StreamCellKind.BUFFER, StreamCellKind.LANGUAGE,
+            StreamCellKind.DROPPED, StreamCellKind.FORMAT), cells.map { it.kind })
+        assertEquals("H.264 · SDR", cells[0].value)
+        assertEquals("AAC · 2.0", cells[1].value)
+        assertEquals(2, cells[3].health)
+        assertEquals(listOf(StreamCellKind.VIDEO), LiveWidgets.streamCells(LiveStreamFacts(1280, 720, videoMime = "video/avc"), " ").map { it.kind })
+    }
+
+    @Test fun shortWideStreamTileUsesTwoColumns() {
+        val layout = LiveWidgets.streamLayout(336, 76, 7, badges = true)
+        assertEquals(StreamLayout(badgeRow = false, columns = 2, rows = 2, labels = true), layout)
+        assertEquals(4, layout.cells)
+    }
+
+    @Test fun tallStreamTilesUseOneLabelledColumn() {
+        assertEquals(StreamLayout(true, 1, 7, true), LiveWidgets.streamLayout(196, 202, 7, badges = true))
+        assertEquals(StreamLayout(false, 1, 7, true), LiveWidgets.streamLayout(336, 202, 7, badges = true))
+        assertEquals(StreamLayout(false, 1, 3, true), LiveWidgets.streamLayout(336, 202, 3, badges = true))
+    }
+
+    @Test fun smallStreamTilesDropLabelsAndBadgeRow() {
+        assertEquals(StreamLayout(false, 1, 2, false), LiveWidgets.streamLayout(90, 76, 7, badges = true))
+        assertEquals(0, LiveWidgets.streamLayout(200, 10, 7, badges = true).cells)
+        assertEquals(0, LiveWidgets.streamLayout(0, 100, 7, badges = false).cells)
+    }
+
+    @Test fun streamLayoutNeverOverflowsItsTile() {
+        for (width in 60..400 step 9) for (height in 20..260 step 7) for (cells in 0..7) {
+            val layout = LiveWidgets.streamLayout(width, height, cells, badges = true)
+            assertTrue(layout.cells >= 0 && layout.rows <= cells)
+            val used = LiveWidgets.STREAM_HEADLINE + (if (layout.badgeRow) LiveWidgets.STREAM_BADGES + LiveWidgets.STREAM_SPACING else 0) +
+                layout.rows * (LiveWidgets.STREAM_LINE + LiveWidgets.STREAM_SPACING)
+            assertTrue("$width×$height", used <= height)
+            if (layout.columns == 2) assertTrue(width >= 2 * LiveWidgets.STREAM_CELL + LiveWidgets.GAP)
+        }
+    }
 }

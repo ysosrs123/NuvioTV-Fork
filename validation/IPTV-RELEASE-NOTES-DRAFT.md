@@ -583,6 +583,24 @@ Multiview:
   their declared performance and the number of decoders. When a picture still can't be
   added, the message says what to do. Log lines `multiview device` and `multiview budget=`.
 
+Guide:
+- Stream info widget fills its space: two labelled columns in the short size (video,
+  audio, bitrate, buffer), more detail in taller sizes, values only in tiny tiles.
+- Guide info panel: the description uses all the height down to the hint line; long titles
+  wrap to two lines in slightly smaller type.
+- Left from the guide always moves focus into the Live TV menu (the guide cannot take focus
+  while the menu is open; Back or Left closes the menu if focus ever misses); Back from Live
+  TV settings lands on the menu's Settings item.
+- Sport sits next to Movies and Series in the Live TV menu.
+
+Sport:
+- Sport only keeps every channel with a game in the next 24 hours, including channels found
+  only by broadcaster name.
+- Sport settings → Sport channels: "Always in Sport only" and "Never in Sport only"
+  (categories or channels); "Preferred for games" ranks chosen categories or channels first
+  for Watch on, other feeds and recordings; "Never offer for games" removes them. A picker
+  lists categories from all sources and searches channels.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

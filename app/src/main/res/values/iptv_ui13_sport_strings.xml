@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Sport channels</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Choose the channels Sport only shows and the channels games are offered on</string>
+    <string name="iptv_ui13_sport_always">Always in Sport only</string>
+    <string name="iptv_ui13_sport_always_subtitle">Shown in Sport only even without a matched game, such as your sport categories</string>
+    <string name="iptv_ui13_sport_never">Never in Sport only</string>
+    <string name="iptv_ui13_sport_never_subtitle">Left out of Sport only even when they show a game</string>
+    <string name="iptv_ui13_sport_preferred">Preferred for games</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Offered first for Watch on, other feeds and recordings, such as your country\'s sport categories</string>
+    <string name="iptv_ui13_sport_excluded">Never offer for games</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Never offered to watch or record a game</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d chosen</item>
+        <item quantity="other">%d chosen</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filter categories or find channels</string>
+    <string name="iptv_ui13_sport_pick_hint">Type at least two letters to find channels across your sources</string>
+    <string name="iptv_ui13_sport_pick_chosen">Chosen</string>
+    <string name="iptv_ui13_sport_pick_categories">Categories</string>
+    <string name="iptv_ui13_sport_pick_channels">Channels</string>
+    <string name="iptv_ui13_sport_pick_category">Category</string>
+    <string name="iptv_ui13_sport_pick_channel">Channel</string>
+    <string name="iptv_ui13_sport_pick_searching">Finding channels…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">No channels match.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">No categories match.</string>
+</resources>

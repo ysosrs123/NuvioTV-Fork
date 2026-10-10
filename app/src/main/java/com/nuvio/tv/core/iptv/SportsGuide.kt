@@ -2,7 +2,7 @@ package com.nuvio.tv.core.iptv
 
 import java.text.Normalizer
 
-const val SPORTS_AHEAD_MILLIS = 6L * 60 * 60 * 1000
+const val SPORTS_AHEAD_MILLIS = SportsOnlyWindow.AHEAD_MILLIS
 const val SPORTS_OPEN_ENDED_MILLIS = 3L * 60 * 60 * 1000
 
 object SportsGuide {

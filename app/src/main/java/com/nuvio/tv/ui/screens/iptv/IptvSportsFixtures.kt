@@ -62,6 +62,7 @@ import com.nuvio.tv.core.iptv.RecordingStatus
 import com.nuvio.tv.core.iptv.SportsCatchup
 import com.nuvio.tv.core.iptv.SportsDbLive
 import com.nuvio.tv.core.iptv.SportsChange
+import com.nuvio.tv.core.iptv.SportsChannelRules
 import com.nuvio.tv.core.iptv.SportsDays
 import com.nuvio.tv.core.iptv.SportsDetail
 import com.nuvio.tv.core.iptv.SportsFavourites
@@ -112,6 +113,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -173,12 +177,18 @@ class IptvSportsFixturesViewModel @Inject constructor(private val repository: Ip
     private var refreshedAt = 0L
     private val messageEvents = MutableSharedFlow<String>(extraBufferCapacity = 4, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     val messages: SharedFlow<String> = messageEvents.asSharedFlow()
+    val channelRules: StateFlow<SportsChannelRules> = preferences.channelRulesFlow
 
     init {
         viewModelScope.launch { live.snapshot.collect { snapshot -> if (snapshot != null && snapshot.mode == IptvSportsMode.LIVE_TV && handle != null) accept(snapshot) } }
         viewModelScope.launch { live.reminders.collect { keys -> mutable.update { it.copy(reminders = keys) } } }
         viewModelScope.launch { recorder.all.collect { all -> recordings = all; val spoiled = spoilers(); if (booked() || spoiled) publish() } }
         viewModelScope.launch { nuvio.pending.collect { publish() } }
+        viewModelScope.launch {
+            preferences.channelRulesFlow.map { it.linking }.distinctUntilChanged().drop(1).collect {
+                if (handle != null && loaded != null) opened?.let { (ref, hidden) -> relink(ref, hidden, System.currentTimeMillis(), force = true) }
+            }
+        }
         viewModelScope.launch {
             refreshes.status.collect { all ->
                 val done = all.values.filter { it.phase == IptvRefreshPhase.DONE }.maxOfOrNull { it.finishedAtMillis ?: 0L } ?: 0L

@@ -3,6 +3,8 @@ package com.nuvio.tv.data.iptv
 import android.content.Context
 import com.nuvio.tv.core.iptv.SportsAlertGames
 import com.nuvio.tv.core.iptv.SportsChangeKind
+import com.nuvio.tv.core.iptv.SportsChannelPicks
+import com.nuvio.tv.core.iptv.SportsChannelRules
 import com.nuvio.tv.core.iptv.SportsChannelSource
 import com.nuvio.tv.core.iptv.SportsDbLeagues
 import com.nuvio.tv.core.iptv.SportsFavourites
@@ -11,16 +13,40 @@ import com.nuvio.tv.core.iptv.SportsLeagues
 import com.nuvio.tv.core.iptv.SportsLogos
 import com.nuvio.tv.core.iptv.SportsNuvioAlert
 import com.nuvio.tv.core.iptv.SportsOverlayStyle
+import com.nuvio.tv.core.iptv.SportsPickList
 import com.nuvio.tv.core.iptv.SportsReminder
 import com.nuvio.tv.core.iptv.SportsReminders
 import com.nuvio.tv.core.iptv.SportsSources
 import java.util.Base64
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretBox = { EnvelopeIptvSecretBox(AndroidIptvSecretBox()) }) {
     private val preferences = context.applicationContext.getSharedPreferences("iptv-live", Context.MODE_PRIVATE)
     @Volatile private var cachedKey: Pair<String, String>? = null
 
+    private val rulesState = MutableStateFlow(readRules())
+    val channelRulesFlow: StateFlow<SportsChannelRules> = rulesState.asStateFlow()
+
     init { SportsLeagues.custom = customLeagues }
+
+    var channelRules: SportsChannelRules
+        get() = rulesState.value
+        @Synchronized set(value) {
+            val edit = preferences.edit()
+            SportsPickList.entries.forEach { which ->
+                edit.putStringSet(RULES_KEY + which.name.lowercase(), SportsChannelPicks.clean(value.list(which)).map(SportsChannelPicks::encode).toSet())
+            }
+            edit.apply()
+            rulesState.value = readRules()
+        }
+
+    private fun readRules(): SportsChannelRules {
+        fun read(which: SportsPickList) = SportsChannelPicks.clean(preferences.getStringSet(RULES_KEY + which.name.lowercase(), null).orEmpty()
+            .take(SportsChannelPicks.MAX * 2).mapNotNull(SportsChannelPicks::decode)).sortedBy { it.label.lowercase() }
+        return SportsChannelRules(read(SportsPickList.ALWAYS), read(SportsPickList.NEVER), read(SportsPickList.PREFERRED), read(SportsPickList.EXCLUDED))
+    }
 
     var enabled: Boolean
         get() = SportsSources.enabled(if (preferences.contains(ENABLED_KEY)) preferences.getBoolean(ENABLED_KEY, false) else null,
@@ -152,6 +178,7 @@ class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretB
         private const val LEAD_KEY = "settings-sports-reminder-lead"
         private const val SPOILERS_KEY = "settings-sports-hide-spoilers"
         private const val REMINDERS_KEY = "settings-sports-reminders"
+        private const val RULES_KEY = "settings-sports-channels-"
         private const val KEY_CONTEXT = "iptv.sports.v1:thesportsdb-key"
     }
 }

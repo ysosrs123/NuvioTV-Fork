@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -84,7 +85,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
     onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onNearEnd: () -> Unit,
     moving: String? = null, onMove: (IptvListedChannel, ListMove) -> Unit = { _, _ -> }, onMoveDone: () -> Unit = {},
     sport: IptvSportsGuide = NoSportsGuide, sportOnly: Boolean? = null, onSportOnly: () -> Unit = {}, onSpan: (Long) -> Unit = {},
-    sportOnlyFocus: FocusRequester? = null, updating: Boolean = false) {
+    sportOnlyFocus: FocusRequester? = null, updating: Boolean = false, blocked: Boolean = false) {
     val spec = guideSpec(state.density)
     BoxWithConstraints(modifier.iptvPanel().padding(horizontal = 6.dp, vertical = 8.dp)) {
         val stripWidth = maxWidth - spec.column
@@ -129,7 +130,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
             Row(Modifier.fillMaxWidth().height(30.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (sportOnly != null) Row(Modifier.width(spec.column).padding(start = 4.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SportOnlyToggle(sportOnly, onSportOnly, onRail, sportOnlyFocus?.let { Modifier.focusRequester(it) } ?: Modifier)
+                    SportOnlyToggle(sportOnly, onSportOnly, onRail, (sportOnlyFocus?.let { Modifier.focusRequester(it) } ?: Modifier).focusProperties { canFocus = !blocked })
                     Text(heading, style = iptvHeadingStyle(), color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = !updating))
                     if (updating) LoadingIndicator(Modifier.size(14.dp))
@@ -160,7 +161,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
                                 recordings.filter { it.status == com.nuvio.tv.core.iptv.RecordingStatus.SCHEDULED }.mapNotNull { it.programmeStartMillis }.toSet(), rowFocus.getOrPut(row.item.channel.id) { FocusRequester() },
                                 onCursor, onRail, onFocus, onSelect, onMenu, onPage = { delta -> page(index, delta * spec.pageRows) },
                                 onStep = { delta, repeat -> step(index, delta, repeat) },
-                                moving = row.item.channel.id == moving, onMove = { move -> onMove(row, move) }, onMoveDone = onMoveDone, sport = sport)
+                                moving = row.item.channel.id == moving, onMove = { move -> onMove(row, move) }, onMoveDone = onMoveDone, sport = sport, blocked = blocked)
                         }
                     }
                 }
@@ -237,7 +238,7 @@ private fun TimeBar(start: Long, span: Long, now: Long, modifier: Modifier) {
 private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow?, index: Int, now: Long, cursor: Long, viewStart: Long, visibleMillis: Long,
     playing: Boolean, recording: Boolean, scheduled: Set<Long>, focusRequester: FocusRequester, onCursor: (Long, Long) -> Unit, onRail: () -> Unit,
     onFocus: (IptvListedChannel) -> Unit, onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onPage: (Int) -> Unit,
-    onStep: (Int, Boolean) -> Boolean, moving: Boolean, onMove: (ListMove) -> Unit, onMoveDone: () -> Unit, sport: IptvSportsGuide) {
+    onStep: (Int, Boolean) -> Boolean, moving: Boolean, onMove: (ListMove) -> Unit, onMoveDone: () -> Unit, sport: IptvSportsGuide, blocked: Boolean) {
     var focused by remember { mutableStateOf(false) }
     val name = channelName(row)
     val sportsChannel = remember(name, sport.active) { sport.active && SportsGuide.isSportsChannel(listOf(LocalizedGuideText(name, null))) }
@@ -306,7 +307,7 @@ private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow
                 else -> false
             }
         }
-        .focusable(), verticalAlignment = Alignment.CenterVertically) {
+        .focusable(enabled = !blocked), verticalAlignment = Alignment.CenterVertically) {
         ChannelCell(spec, row, index, playing, recording, focused, moving, Modifier.width(spec.column).fillMaxHeight())
         Box(Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
             if (cells.none { it is GuideProgrammeCell }) {

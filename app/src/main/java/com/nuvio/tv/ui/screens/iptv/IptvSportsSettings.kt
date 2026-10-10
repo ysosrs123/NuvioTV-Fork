@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
@@ -27,6 +28,9 @@ import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.SportsAlertGames
 import com.nuvio.tv.core.iptv.SportsChangeKind
+import com.nuvio.tv.core.iptv.SportsChannelPick
+import com.nuvio.tv.core.iptv.SportsChannelPicks
+import com.nuvio.tv.core.iptv.SportsChannelRules
 import com.nuvio.tv.core.iptv.SportsChannelSource
 import com.nuvio.tv.core.iptv.SportsDbLeague
 import com.nuvio.tv.core.iptv.SportsDbLeagues
@@ -36,9 +40,13 @@ import com.nuvio.tv.core.iptv.SportsLeagues
 import com.nuvio.tv.core.iptv.SportsLogos
 import com.nuvio.tv.core.iptv.SportsNuvioAlert
 import com.nuvio.tv.core.iptv.SportsOverlayStyle
+import com.nuvio.tv.core.iptv.SportsPickKind
+import com.nuvio.tv.core.iptv.SportsPickList
 import com.nuvio.tv.core.iptv.SportsSources
+import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.iptv.IptvLog
 import com.nuvio.tv.data.iptv.IptvSportsFixturesRepository
+import com.nuvio.tv.data.iptv.IptvSportsPickOption
 import com.nuvio.tv.data.iptv.IptvSportsPreferences
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
@@ -56,6 +64,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -68,20 +77,29 @@ data class IptvSportsSettingsState(val enabled: Boolean = false, val leagues: Se
     val skipOnScreen: Boolean = true, val alertKinds: Set<SportsChangeKind> = SportsChangeKind.entries.toSet(),
     val nuvioAlert: SportsNuvioAlert = SportsNuvioAlert.POPUP, val nuvioQuietEndMinutes: Int = IptvSportsPreferences.DEFAULT_QUIET,
     val reminderLeadMinutes: Int = IptvSportsPreferences.DEFAULT_LEAD, val hideSpoilers: Boolean = true, val logos: SportsLogos = SportsLogos.ESPN,
-    val custom: List<SportsLeague> = emptyList(), val channelSource: SportsChannelSource = SportsChannelSource.BOTH) {
+    val custom: List<SportsLeague> = emptyList(), val channelSource: SportsChannelSource = SportsChannelSource.BOTH,
+    val rules: SportsChannelRules = SportsChannelRules()) {
     val offered: List<SportsLeague> get() = SportsLeagues.ALL + custom
 }
+
+data class IptvSportsPickState(val query: String = "", val categories: List<SportsChannelPick> = emptyList(),
+    val channels: List<IptvSportsPickOption> = emptyList(), val searching: Boolean = false)
 
 data class IptvSportsLeagueSearch(val query: String = "", val loading: Boolean = false, val failed: Boolean = false, val results: List<SportsDbLeague> = emptyList())
 
 @HiltViewModel
-class IptvSportsSettingsViewModel @Inject constructor(private val preferences: IptvSportsPreferences, private val repository: IptvSportsFixturesRepository) : ViewModel() {
+class IptvSportsSettingsViewModel @Inject constructor(private val preferences: IptvSportsPreferences, private val repository: IptvSportsFixturesRepository,
+    private val profiles: ProfileManager) : ViewModel() {
     private val mutable = MutableStateFlow(IptvSportsSettingsState())
     val state = mutable.asStateFlow()
     private val searching = MutableStateFlow(IptvSportsLeagueSearch())
     val search = searching.asStateFlow()
     private var leagueList: Deferred<List<SportsDbLeague>?>? = null
     private var searchJob: Job? = null
+    private val pickState = MutableStateFlow(IptvSportsPickState())
+    val picks = pickState.asStateFlow()
+    private var pickJob: Job? = null
+    private var categoryJob: Job? = null
 
     init { reload() }
 
@@ -89,7 +107,41 @@ class IptvSportsSettingsViewModel @Inject constructor(private val preferences: I
         mutable.value = IptvSportsSettingsState(preferences.enabled, preferences.leagues, preferences.hasKey, preferences.showScores,
             preferences.favouriteTeams.sortedBy { SportsFavourites.parse(it)?.second?.lowercase() }, preferences.overlayStyle, preferences.alertGames,
             preferences.alertHoldSeconds, preferences.skipOnScreen, preferences.alertKinds, preferences.nuvioAlert, preferences.nuvioQuietEndMinutes,
-            preferences.reminderLeadMinutes, preferences.hideSpoilers, preferences.logos, preferences.customLeagues, preferences.channelSource)
+            preferences.reminderLeadMinutes, preferences.hideSpoilers, preferences.logos, preferences.customLeagues, preferences.channelSource,
+            preferences.channelRules)
+    }
+
+    fun openPicks() {
+        pickState.value = IptvSportsPickState()
+        categoryJob?.cancel()
+        categoryJob = viewModelScope.launch {
+            val categories = try { repository.pickCategories(profiles.activeProfileId.value) }
+                catch (cancel: CancellationException) { throw cancel }
+                catch (error: Exception) { IptvLog.failure("sports pick categories", error); emptyList() }
+            pickState.update { it.copy(categories = categories) }
+        }
+    }
+
+    fun searchPicks(query: String) {
+        pickState.update { it.copy(query = query) }
+        pickJob?.cancel()
+        if (query.trim().length < 2) { pickState.update { it.copy(channels = emptyList(), searching = false) }; return }
+        pickJob = viewModelScope.launch {
+            delay(PICK_DELAY)
+            pickState.update { it.copy(searching = true) }
+            val found = try { repository.pickChannels(profiles.activeProfileId.value, query) }
+                catch (cancel: CancellationException) { throw cancel }
+                catch (error: Exception) { IptvLog.failure("sports pick channels", error); emptyList() }
+            pickState.update { it.copy(channels = found, searching = false) }
+        }
+    }
+
+    fun closePicks() { pickJob?.cancel(); categoryJob?.cancel(); pickState.value = IptvSportsPickState() }
+
+    fun togglePick(which: SportsPickList, pick: SportsChannelPick) {
+        val rules = preferences.channelRules
+        preferences.channelRules = SportsChannelPicks.set(rules, which, SportsChannelPicks.toggle(rules.list(which), pick))
+        reload()
     }
 
     fun setEnabled(value: Boolean) { preferences.enabled = value; reload() }
@@ -167,12 +219,13 @@ class IptvSportsSettingsViewModel @Inject constructor(private val preferences: I
     fun removeKey() { leagueList = null; preferences.setKey(null); reload() }
 }
 
-private enum class IptvSportsChoice { LEAGUES, SEARCH, LOGOS, CHANNELS, KEY, FAVOURITES, OVERLAY, GAMES, HOLD, KINDS, NUVIO, QUIET, LEAD }
+private enum class IptvSportsChoice { LEAGUES, SEARCH, LOGOS, CHANNELS, KEY, FAVOURITES, OVERLAY, GAMES, HOLD, KINDS, NUVIO, QUIET, LEAD, PICKS }
 
 @Composable
 fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var choosing by remember { mutableStateOf<IptvSportsChoice?>(null) }
+    var pickList by remember { mutableStateOf(SportsPickList.ALWAYS) }
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SettingsGroupCard(title = stringResource(R.string.iptv_live_sports)) {
             SettingsToggleRow(title = stringResource(R.string.iptv_sport7_fixtures), subtitle = stringResource(R.string.iptv_sport7_fixtures_subtitle),
@@ -202,6 +255,14 @@ fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewM
                 modifier = Modifier.padding(start = 14.dp, top = 4.dp))
         }
         if (state.enabled) {
+            SettingsGroupCard(title = stringResource(R.string.iptv_ui13_sport_channels), subtitle = stringResource(R.string.iptv_ui13_sport_channels_subtitle)) {
+                SportsPickList.entries.forEach { which ->
+                    val count = state.rules.list(which).size
+                    SettingsActionRow(title = stringResource(pickTitle(which)), subtitle = stringResource(pickSubtitle(which)),
+                        value = if (count == 0) stringResource(R.string.iptv_sport4_none) else pluralStringResource(R.plurals.iptv_ui13_sport_chosen, count, count),
+                        onClick = { pickList = which; viewModel.openPicks(); choosing = IptvSportsChoice.PICKS })
+                }
+            }
             SettingsGroupCard(title = stringResource(R.string.iptv_sport4_while_watching), subtitle = stringResource(R.string.iptv_sport4_while_watching_subtitle)) {
                 SettingsActionRow(title = stringResource(R.string.iptv_sport4_overlay), subtitle = stringResource(R.string.iptv_sport4_overlay_subtitle),
                     value = stringResource(overlayLabel(state.overlayStyle)), onClick = { choosing = IptvSportsChoice.OVERLAY })
@@ -290,6 +351,11 @@ fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewM
             options = IptvSportsPreferences.LEAD_CHOICES.map { SettingsPickerOption(it, leadLabel(it)) },
             selectedValue = state.reminderLeadMinutes, onDismiss = dismiss, width = 560.dp, maxHeight = 420.dp,
             onOptionSelected = { viewModel.setReminderLead(it); dismiss() })
+        IptvSportsChoice.PICKS -> {
+            val picks by viewModel.picks.collectAsStateWithLifecycle()
+            SportsPicksDialog(pickList, state.rules.list(pickList), picks, onQuery = viewModel::searchPicks,
+                onToggle = { viewModel.togglePick(pickList, it) }, onDismiss = { viewModel.closePicks(); dismiss() })
+        }
         IptvSportsChoice.KEY -> SportsKeyDialog(state.hasKey, onSave = { viewModel.saveKey(it, dismiss) }, onRemove = { viewModel.removeKey(); dismiss() }, onDismiss = dismiss)
         null -> Unit
     } }
@@ -353,6 +419,66 @@ private fun SportsLeagueSearchDialog(search: IptvSportsLeagueSearch, chosen: Set
             }
         }
     }
+}
+
+@Composable
+private fun SportsPicksDialog(which: SportsPickList, chosen: List<SportsChannelPick>, picks: IptvSportsPickState, onQuery: (String) -> Unit,
+    onToggle: (SportsChannelPick) -> Unit, onDismiss: () -> Unit) {
+    val first = remember { FocusRequester() }
+    LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
+    val keys = remember(chosen) { chosen.map { it.key }.toSet() }
+    var listed by remember { mutableStateOf(chosen) }
+    LaunchedEffect(chosen) { listed = listed + chosen.filter { pick -> listed.none { it.key == pick.key } } }
+    val filter = picks.query.trim()
+    val categories = remember(picks.categories, filter) { picks.categories.filter { filter.isEmpty() || it.label.contains(filter, ignoreCase = true) } }
+    val categoryLabel = stringResource(R.string.iptv_ui13_sport_pick_category)
+    val channelLabel = stringResource(R.string.iptv_ui13_sport_pick_channel)
+    NuvioDialog(onDismiss = onDismiss, title = stringResource(pickTitle(which)), subtitle = stringResource(pickSubtitle(which)), width = 680.dp) {
+        SourceField(stringResource(R.string.iptv_ui13_sport_pick_search), picks.query, { onQuery(it.take(60)) },
+            hint = stringResource(R.string.iptv_ui13_sport_pick_hint), last = true, modifier = Modifier.fillMaxWidth().focusRequester(first))
+        LazyColumn(Modifier.fillMaxWidth().heightIn(max = 400.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (listed.isNotEmpty()) {
+                item(key = "chosen") { PickHeading(stringResource(R.string.iptv_ui13_sport_pick_chosen)) }
+                items(listed, key = { "c:" + it.key }) { pick -> PickRow(pick, if (pick.kind == SportsPickKind.CATEGORY) categoryLabel else channelLabel, pick.key in keys, onToggle) }
+            }
+            if (filter.length >= 2 || picks.searching) {
+                item(key = "channels") { PickHeading(stringResource(R.string.iptv_ui13_sport_pick_channels)) }
+                if (picks.channels.isEmpty()) item(key = "channels-none") {
+                    PickHeading(stringResource(if (picks.searching) R.string.iptv_ui13_sport_pick_searching else R.string.iptv_ui13_sport_pick_no_channels), quiet = true)
+                }
+                items(picks.channels, key = { "h:" + it.pick.key }) { option -> PickRow(option.pick, option.detail ?: channelLabel, option.pick.key in keys, onToggle) }
+            }
+            item(key = "categories") { PickHeading(stringResource(R.string.iptv_ui13_sport_pick_categories)) }
+            if (categories.isEmpty()) item(key = "categories-none") { PickHeading(stringResource(R.string.iptv_ui13_sport_pick_no_categories), quiet = true) }
+            items(categories, key = { "g:" + it.key }) { pick -> PickRow(pick, categoryLabel, pick.key in keys, onToggle) }
+        }
+    }
+}
+
+@Composable
+private fun PickRow(pick: SportsChannelPick, detail: String, on: Boolean, onToggle: (SportsChannelPick) -> Unit) {
+    SettingsActionRow(title = pick.label, subtitle = detail, value = if (on) stringResource(R.string.iptv_sport7_added) else null, onClick = { onToggle(pick) },
+        trailingIcon = if (on) Icons.Filled.Close else Icons.Filled.Add)
+}
+
+@Composable
+private fun PickHeading(text: String, quiet: Boolean = false) {
+    Text(text, style = if (quiet) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.labelLarge,
+        color = if (quiet) NuvioTheme.colors.TextTertiary else NuvioTheme.colors.TextSecondary, modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 2.dp))
+}
+
+private fun pickTitle(which: SportsPickList): Int = when (which) {
+    SportsPickList.ALWAYS -> R.string.iptv_ui13_sport_always
+    SportsPickList.NEVER -> R.string.iptv_ui13_sport_never
+    SportsPickList.PREFERRED -> R.string.iptv_ui13_sport_preferred
+    SportsPickList.EXCLUDED -> R.string.iptv_ui13_sport_excluded
+}
+
+private fun pickSubtitle(which: SportsPickList): Int = when (which) {
+    SportsPickList.ALWAYS -> R.string.iptv_ui13_sport_always_subtitle
+    SportsPickList.NEVER -> R.string.iptv_ui13_sport_never_subtitle
+    SportsPickList.PREFERRED -> R.string.iptv_ui13_sport_preferred_subtitle
+    SportsPickList.EXCLUDED -> R.string.iptv_ui13_sport_excluded_subtitle
 }
 
 private fun sourceLabel(league: SportsLeague, hasKey: Boolean): Int = when {
@@ -438,3 +564,4 @@ private fun leadLabel(minutes: Int): String =
     if (minutes == 0) stringResource(R.string.iptv_sport4_reminder_at_start) else stringResource(R.string.iptv_sport4_reminder_minutes, minutes)
 
 private val KEY_FIELD_HEIGHT = 48.dp
+private const val PICK_DELAY = 300L

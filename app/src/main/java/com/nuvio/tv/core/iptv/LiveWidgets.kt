@@ -33,6 +33,14 @@ data class LiveStreamFacts(
     val container: String? = null, val bufferMs: Long = -1, val dropped: Int = -1,
 )
 
+enum class StreamCellKind { VIDEO, AUDIO, BITRATE, BUFFER, LANGUAGE, DROPPED, FORMAT }
+
+data class StreamCell(val kind: StreamCellKind, val value: String, val health: Int? = null)
+
+data class StreamLayout(val badgeRow: Boolean, val columns: Int, val rows: Int, val labels: Boolean) {
+    val cells: Int get() = columns * rows
+}
+
 data class WidgetCity(val name: String, val zone: String, val listed: Boolean = true) {
     val id: String get() = if (listed) name else zone
 }
@@ -271,6 +279,35 @@ object LiveWidgets {
         "Atmos".takeIf { facts.audioMime == "audio/eac3-joc" },
         channels(facts.channels)?.takeIf { facts.channels > 2 },
     )
+
+    const val STREAM_HEADLINE = 20
+    const val STREAM_BADGES = 20
+    const val STREAM_LINE = 16
+    const val STREAM_SPACING = 4
+    const val STREAM_CELL = 150
+    const val STREAM_INLINE_BADGES = 260
+
+    fun streamCells(facts: LiveStreamFacts, language: String?): List<StreamCell> = listOfNotNull(
+        listOfNotNull(codec(facts.videoMime), range(facts.videoMime, facts.videoCodecs, facts.transfer)).joinToString(" · ").takeIf { it.isNotEmpty() }
+            ?.let { StreamCell(StreamCellKind.VIDEO, it) },
+        listOfNotNull(audioCodec(facts.audioMime), channels(facts.channels)).joinToString(" · ").takeIf { it.isNotEmpty() }?.let { StreamCell(StreamCellKind.AUDIO, it) },
+        bitrate(facts.videoBitrate)?.let { StreamCell(StreamCellKind.BITRATE, it) },
+        buffer(facts.bufferMs)?.let { StreamCell(StreamCellKind.BUFFER, it, bufferHealth(facts.bufferMs)) },
+        language?.takeIf { it.isNotBlank() }?.let { StreamCell(StreamCellKind.LANGUAGE, it) },
+        facts.dropped.takeIf { it >= 0 }?.let { StreamCell(StreamCellKind.DROPPED, "$it", if (it == 0) 2 else 1) },
+        container(facts.container)?.let { StreamCell(StreamCellKind.FORMAT, it) },
+    )
+
+    fun streamLayout(width: Int, height: Int, cells: Int, badges: Boolean): StreamLayout {
+        if (width <= 0 || height < STREAM_HEADLINE) return StreamLayout(false, 1, 0, false)
+        fun rows(room: Int) = ((room + STREAM_SPACING) / (STREAM_LINE + STREAM_SPACING)).coerceAtLeast(0)
+        val below = height - STREAM_HEADLINE - STREAM_SPACING
+        val badgeRow = badges && width < STREAM_INLINE_BADGES && rows(below - STREAM_BADGES - STREAM_SPACING) >= 2
+        val room = rows(if (badgeRow) below - STREAM_BADGES - STREAM_SPACING else below)
+        val columns = if (cells > room && width >= 2 * STREAM_CELL + GAP) 2 else 1
+        val rows = minOf(room, (cells + columns - 1) / columns)
+        return StreamLayout(badgeRow, columns, rows, (width - GAP * (columns - 1)) / columns >= STREAM_CELL)
+    }
 
     const val TRANSFER_PQ = 6
     const val TRANSFER_HLG = 7

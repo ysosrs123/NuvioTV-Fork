@@ -32,6 +32,7 @@ import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.FixtureSide
 import com.nuvio.tv.core.iptv.FixtureStatus
+import com.nuvio.tv.core.iptv.SportsChannelRules
 import com.nuvio.tv.core.iptv.SportsDetail
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureText
@@ -39,11 +40,14 @@ import com.nuvio.tv.core.iptv.SportsGuideCells
 import com.nuvio.tv.core.iptv.SportsGuideChip
 import com.nuvio.tv.core.iptv.SportsGuideIndex
 import com.nuvio.tv.core.iptv.SportsGuideLink
+import com.nuvio.tv.core.iptv.SportsOnlyWindow
+import com.nuvio.tv.core.iptv.SportsRefresh
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 internal class IptvSportsGuide(val active: Boolean, val index: SportsGuideIndex, val showScores: Boolean, val spoilerKeys: Set<String>,
-    val reminders: Set<String>, val items: List<IptvFixtureItem>) {
+    val reminders: Set<String>, val items: List<IptvFixtureItem>, val rules: SportsChannelRules = SportsChannelRules(),
+    val games: Map<String, LongArray> = emptyMap()) {
     fun hidden(fixture: SportsFixture): Boolean = SportsGuideCells.hidden(fixture, showScores, spoilerKeys)
     fun reminded(fixture: SportsFixture): Boolean = fixture.status == FixtureStatus.SCHEDULED && fixture.key in reminders
     fun games(now: Long): List<IptvFixtureItem> = if (!active) emptyList() else SportsGuideCells.lane(items, { it.fixture }, now)
@@ -56,19 +60,36 @@ internal object IptvSportOnly { var on = false }
 @Composable
 internal fun rememberIptvSportsGuide(enabled: Boolean, viewModel: IptvSportsFixturesViewModel = hiltViewModel()): IptvSportsGuide {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    return remember(state, enabled) {
+    val rules by viewModel.channelRules.collectAsStateWithLifecycle()
+    return remember(state, enabled, rules) {
         if (!enabled || !state.enabled) NoSportsGuide else {
             val items = state.rows.flatMap { it.items }.filter { it.links.isNotEmpty() }.distinctBy { it.fixture.key }
             val links = items.flatMap { item ->
                 item.links.mapNotNull { link -> link.programme?.let { SportsGuideLink(item.fixture, link.row.item.channel.id, it, link.reason) } }
             }
-            IptvSportsGuide(true, SportsGuideCells.index(links), state.showScores, state.spoilerKeys, state.reminders, items)
+            val games = items.flatMap { item ->
+                item.links.map { link ->
+                    val start = link.programme?.start?.epochMillis ?: item.fixture.startMillis
+                    val end = link.programme?.stop?.epochMillis ?: (start + SportsRefresh.durationMillis(item.fixture))
+                    link.row.item.channel.id to (start to maxOf(end, start + 1))
+                }
+            }.groupBy({ it.first }, { it.second }).mapValues { (_, spans) -> spans.flatMap { listOf(it.first, it.second) }.toLongArray() }
+            IptvSportsGuide(true, SportsGuideCells.index(links), state.showScores, state.spoilerKeys, state.reminders, items, rules, games)
         }
     }
 }
 
-internal fun sportOnlyChannels(channels: List<IptvListedChannel>, sport: IptvSportsGuide, from: Long, until: Long, keep: String?): List<IptvListedChannel> =
-    channels.filter { it.item.channel.id == keep || sport.index.within(it.item.channel.id, from, until) }
+internal fun sportOnlyChannels(channels: List<IptvListedChannel>, sport: IptvSportsGuide, from: Long, until: Long, keep: String?,
+    now: Long = System.currentTimeMillis()): List<IptvListedChannel> {
+    val (start, end) = SportsOnlyWindow.range(now, from, until)
+    return channels.filter { row ->
+        val id = row.item.channel.id
+        id == keep || sport.rules.sportOnly(id, row.item.attributes[CATEGORY_ATTRIBUTE],
+            sport.index.within(id, start, end) || SportsOnlyWindow.overlaps(sport.games[id], start, end))
+    }
+}
+
+private const val CATEGORY_ATTRIBUTE = "group-title"
 
 @Composable
 internal fun IptvGamesNowLane(games: List<IptvFixtureItem>, sport: IptvSportsGuide, playingId: String?, onWatch: (IptvListedChannel) -> Unit,
