@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">All connections for this channel\'s account are in use. Remove a picture from the same account, stop a recording, or raise the account\'s connections in Live TV sources if your plan allows it.</string>
+    <string name="iptv_multiview_memory_full">This TV box does not have enough memory for another picture. Remove one first.</string>
+    <string name="iptv_multiview_already">This channel is already in multiview.</string>
+    <string name="iptv_multiview_tiles_full">No room for another picture in this layout. Remove one or choose another layout.</string>
+</resources>

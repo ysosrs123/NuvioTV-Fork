@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">この番号のチャンネルはありません</string>
     <string name="iptv_live_minutes_left">残り%1$d分</string>
     <string name="iptv_live_starts_in">%1$d分後に開始</string>
-    <string name="iptv_live_fullscreen_hint">左でチャンネル一覧、右で直前のチャンネル、OK長押しでオプション</string>
     <string name="iptv_live_no_programme_short">情報なし</string>
     <string name="iptv_live_setup_title">ライブTVを設定</string>
     <string name="iptv_live_setup_description">M3Uプレイリスト、Xtreamアカウント、Stalkerポータルを追加して視聴を始めましょう。チャンネルと番組表はバックグラウンドで読み込まれます。</string>

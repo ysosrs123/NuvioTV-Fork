@@ -30,7 +30,7 @@ data class LiveAdmissionSnapshot(
 )
 
 class LiveSessionAdmission(private val limits: DeviceAdmissionLimits) {
-    private data class Acquisition(val id: String, val key: AcquisitionKey, val memoryBytes: Long, var closing: Boolean = false)
+    private data class Acquisition(val id: String, val key: AcquisitionKey, var memoryBytes: Long, var closing: Boolean = false)
     private data class Consumer(val lease: LiveConsumerLease, val reservation: ConsumerReservation)
     private val acquisitions = linkedMapOf<AcquisitionKey, Acquisition>()
     private val consumers = linkedMapOf<String, Consumer>()
@@ -76,6 +76,20 @@ class LiveSessionAdmission(private val limits: DeviceAdmissionLimits) {
         val acquisition = acquisitions[lease.key]?.takeIf { it.id == lease.acquisitionId } ?: return null
         acquisition.closing = true
         return AcquisitionCloseTicket(acquisition.id)
+    }
+
+    @Synchronized fun resize(lease: LiveConsumerLease, acquisitionMemoryBytes: Long, reservation: ConsumerReservation): Boolean {
+        require(acquisitionMemoryBytes >= 0)
+        val consumer = consumers[lease.id]?.takeIf { it.lease == lease } ?: return false
+        val acquisition = acquisitions[lease.key]?.takeIf { it.id == lease.acquisitionId && !it.closing } ?: return false
+        if (consumer.reservation.role != reservation.role || consumers.values.count { it.lease.acquisitionId == lease.acquisitionId } != 1) return false
+        val current = snapshot()
+        if (reservation.decoders - consumer.reservation.decoders > limits.decoders - current.decoders) return false
+        if (acquisitionMemoryBytes - acquisition.memoryBytes + reservation.memoryBytes - consumer.reservation.memoryBytes > limits.memoryBytes - current.memoryBytes) return false
+        if (reservation.storageBytes - consumer.reservation.storageBytes > limits.storageBytes - current.storageBytes) return false
+        acquisition.memoryBytes = acquisitionMemoryBytes
+        consumers[lease.id] = Consumer(lease, reservation)
+        return true
     }
 
     @Synchronized fun completeClose(ticket: AcquisitionCloseTicket): Boolean {

@@ -86,10 +86,12 @@ private sealed interface DataTile {
 internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, onFocusTile: (Int) -> Unit, onFull: (Int) -> Unit,
     onAdd: (IptvListedChannel) -> Unit, onReplace: (Int, IptvListedChannel) -> Unit, onRemove: (Int) -> Unit, onExit: () -> Unit,
     onSizes: (List<Int>) -> Unit, onShowLarge: (Int) -> Unit, onLayout: (MultiviewLayout) -> Unit, onQuality: (MultiviewQuality) -> Unit,
-    onPickerSource: (com.nuvio.tv.data.iptv.IptvSourceRef?) -> Unit = {}, onPickerMore: () -> Unit = {}) {
+    onPickerSource: (com.nuvio.tv.data.iptv.IptvSourceRef?) -> Unit = {}, onPickerMore: () -> Unit = {},
+    onPickerCategory: (Boolean, String?) -> Unit = hiltViewModel<IptvLiveViewModel>()::pickerCategory) {
     var choosingQuality by remember { mutableStateOf(false) }
     var choosingLayout by remember { mutableStateOf(false) }
     var pick by remember { mutableStateOf<TilePick?>(null) }
+    var pickCategories by remember(pick) { mutableStateOf(false) }
     var menuFor by remember { mutableStateOf<Int?>(null) }
     val requesters = remember { List(MAX_SLOTS) { FocusRequester() } }
     val sports: IptvSportsFixturesViewModel = hiltViewModel()
@@ -149,10 +151,17 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
                 Text(stringResource(R.string.iptv_multiview_hint), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary)
             }
         }
+        state.message?.let { message ->
+            Text(stringResource(message), style = MaterialTheme.typography.titleSmall, color = NuvioTheme.colors.TextPrimary,
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 36.dp).iptvPanel(RoundedCornerShape(14.dp), GlassRole.HUD)
+                    .padding(horizontal = 18.dp, vertical = 10.dp).widthIn(max = 720.dp))
+        }
         AnimatedVisibility(pick != null, Modifier.align(Alignment.CenterStart),
             enter = fadeIn() + slideInHorizontally { -it / 4 }, exit = fadeOut() + slideOutHorizontally { -it / 4 }) {
             val picker = state.picker
-            ChannelPanel(state, now, onWatch = { row ->
+            val panelState = if (picker == null) state else state.copy(categories = picker.categories.orEmpty(), favourites = picker.favourites,
+                sports = false, category = picker.category, hiddenCategories = picker.hidden)
+            ChannelPanel(panelState, now, onWatch = { row ->
                 when (val target = pick) {
                     TilePick.Add -> onAdd(row)
                     is TilePick.Replace -> onReplace(target.index, row)
@@ -165,7 +174,8 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
                         onGame = { pick = null; onPickerSource(null); choosingGame = ADD_DATA },
                         onScores = { pick = null; onPickerSource(null); addData(DataTile.Scores, null) })
                     if (state.sources.count { it.playbackEligible } > 1) PickerSources(state, onPickerSource)
-                })
+                }, onLeft = { if (pickCategories) { pick = null; onPickerSource(null) } else pickCategories = true }, showCategories = pickCategories,
+                onFavourites = { onPickerCategory(true, null) }, onCategory = { onPickerCategory(false, it) })
         }
     }
     if (choosingQuality) {

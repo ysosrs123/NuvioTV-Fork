@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Kanál s týmto číslom neexistuje</string>
     <string name="iptv_live_minutes_left">Zostáva %1$d min</string>
     <string name="iptv_live_starts_in">Začína o %1$d min</string>
-    <string name="iptv_live_fullscreen_hint">Vľavo kanály, vpravo posledný kanál, podržaním OK možnosti</string>
     <string name="iptv_live_no_programme_short">Bez informácií</string>
     <string name="iptv_live_setup_title">Nastaviť živú TV</string>
     <string name="iptv_live_setup_description">Na sledovanie pridajte playlist M3U, účet Xtream alebo portál Stalker. Kanály a televízny program sa načítajú na pozadí.</string>

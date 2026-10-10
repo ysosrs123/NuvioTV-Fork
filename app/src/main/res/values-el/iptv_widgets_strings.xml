@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Διάταξη</string>
     <string name="iptv_widgets_layout_subtitle">Τα widget που δεν χωρούν σε αυτήν την οθόνη αποκρύπτονται</string>
     <string name="iptv_widgets_layout_one">Ένα φαρδύ widget</string>
-    <string name="iptv_widgets_layout_two">Δύο widget</string>
-    <string name="iptv_widgets_layout_three">Τρία widget</string>
     <string name="iptv_widgets_cities">Αλλαγή πόλεων</string>
     <string name="iptv_widgets_cities_subtitle">Έως τέσσερις πόλεις. Επιλέξτε μια πόλη για να την αφαιρέσετε.</string>
     <string name="iptv_widgets_city_add">Προσθήκη πόλης</string>
@@ -47,8 +45,4 @@
     <string name="iptv_widgets_no_recordings">Καμία εγγραφή σε εξέλιξη ή προγραμματισμένη</string>
     <string name="iptv_widgets_nothing_playing">Δεν αναπαράγεται τίποτα</string>
     <string name="iptv_widgets_stream_waiting">Αναμονή για την εικόνα</string>
-    <string name="iptv_widgets_stream_resolution">Εικόνα</string>
-    <string name="iptv_widgets_stream_codec">Codec</string>
-    <string name="iptv_widgets_stream_range">Εύρος</string>
-    <string name="iptv_widgets_stream_bitrate">Ρυθμός bit</string>
 </resources>

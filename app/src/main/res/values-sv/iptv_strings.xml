@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Ingen kanal med det numret</string>
     <string name="iptv_live_minutes_left">%1$d min kvar</string>
     <string name="iptv_live_starts_in">Börjar om %1$d min</string>
-    <string name="iptv_live_fullscreen_hint">Vänster för kanaler, höger för senaste kanalen, håll OK för alternativ</string>
     <string name="iptv_live_no_programme_short">Ingen information</string>
     <string name="iptv_live_setup_title">Konfigurera Live-TV</string>
     <string name="iptv_live_setup_description">Lägg till en M3U-spellista, ett Xtream-konto eller en Stalker-portal för att börja titta. Kanaler och programguide läses in i bakgrunden.</string>

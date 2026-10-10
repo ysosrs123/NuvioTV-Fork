@@ -176,4 +176,22 @@ class LivePlaybackRuntimeTest {
         fence.leave(second); assertEquals(0, fence.active.value)
         assertNull(fence.enter())
     }
+
+    @Test fun handOverKeepsTheSameConnectionCountedOnce() = runBlocking {
+        val tile = LivePlaybackRuntime(admission, closeWaitMs = 0)
+        val handle = Handle()
+        assertEquals(LiveOpenResult.OPENED, runtime.open(key("one"), 100, 400, owner = "me", maxUpstreams = 1) { handle })
+        assertTrue(runtime.handOver("me", tile, 10, 20))
+        assertEquals(1, admission.snapshot().upstreamsByAccount["shared"])
+        assertEquals(1, admission.snapshot().decoders)
+        assertEquals(30, admission.snapshot().memoryBytes)
+        assertTrue(runtime.stop("me"))
+        assertEquals(1, admission.snapshot().consumers)
+        assertFalse(runtime.handOver("me", tile, 10, 20))
+        assertEquals(LiveOpenResult.CAPACITY, runtime.open(key("two"), 10, 20, owner = "me", maxUpstreams = 1) { error("No capacity") })
+        assertEquals(AdmissionDenial.ACCOUNT_LIMIT, runtime.lastDenial)
+        assertTrue(tile.stop("me"))
+        assertEquals(0, admission.snapshot().consumers)
+        assertEquals(0, handle.interrupts)
+    }
 }

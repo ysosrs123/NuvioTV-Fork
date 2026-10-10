@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">版面配置</string>
     <string name="iptv_widgets_layout_subtitle">此畫面放不下的小工具將會隱藏</string>
     <string name="iptv_widgets_layout_one">一個寬版小工具</string>
-    <string name="iptv_widgets_layout_two">兩個小工具</string>
-    <string name="iptv_widgets_layout_three">三個小工具</string>
     <string name="iptv_widgets_cities">變更城市</string>
     <string name="iptv_widgets_cities_subtitle">最多四個城市。選取城市即可將其移除。</string>
     <string name="iptv_widgets_city_add">新增城市</string>
@@ -45,8 +43,4 @@
     <string name="iptv_widgets_no_recordings">沒有正在錄影或已排程的節目</string>
     <string name="iptv_widgets_nothing_playing">沒有正在播放的內容</string>
     <string name="iptv_widgets_stream_waiting">正在等待畫面</string>
-    <string name="iptv_widgets_stream_resolution">畫面</string>
-    <string name="iptv_widgets_stream_codec">轉碼器</string>
-    <string name="iptv_widgets_stream_range">動態範圍</string>
-    <string name="iptv_widgets_stream_bitrate">位元率</string>
 </resources>

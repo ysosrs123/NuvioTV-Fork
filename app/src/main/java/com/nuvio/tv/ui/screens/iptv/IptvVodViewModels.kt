@@ -14,6 +14,7 @@ import com.nuvio.tv.core.iptv.VodRef
 import com.nuvio.tv.core.iptv.VodStreams
 import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.profile.ProfileManager
+import com.nuvio.tv.core.tmdb.TmdbMetadataService
 import com.nuvio.tv.core.tmdb.TmdbService
 import com.nuvio.tv.data.iptv.IptvCatalogueStore
 import com.nuvio.tv.data.iptv.IptvLog
@@ -32,6 +33,7 @@ import com.nuvio.tv.data.iptv.IptvVodStreams
 import com.nuvio.tv.data.iptv.IptvVodTitle
 import com.nuvio.tv.data.iptvvod.IptvVodStreamSources
 import com.nuvio.tv.data.local.TmdbSettingsDataStore
+import com.nuvio.tv.domain.model.ContentType
 import com.nuvio.tv.domain.model.enabledAddons
 import com.nuvio.tv.domain.repository.AddonRepository
 import com.nuvio.tv.domain.repository.MetaRepository
@@ -73,21 +75,38 @@ class IptvVodMenuViewModel @Inject constructor(private val streams: IptvVodStrea
 
 @Singleton
 class IptvVodOpener @Inject constructor(private val tmdb: TmdbService, private val streams: IptvVodStreamSources,
-    private val tmdbSettings: TmdbSettingsDataStore, private val addons: AddonRepository, private val meta: MetaRepository) {
+    private val tmdbSettings: TmdbSettingsDataStore, private val addons: AddonRepository, private val meta: MetaRepository,
+    private val tmdbMetadata: TmdbMetadataService, private val metaSource: IptvVodMetaSource) {
     fun language(): String = tmdbSettings.settings.value.language.ifBlank { "en" }
+
+    suspend fun open(ref: VodRef, tmdbId: String?, imdbId: String?): VodDetailTarget? = target(ref.kind, tmdbId, imdbId) ?: own(ref)
+
+    suspend fun own(ref: VodRef): VodDetailTarget? {
+        val target = VodDetailRoute.own(ref) ?: return null
+        return target.takeIf { quiet(OWN_TIMEOUT) { metaSource.meta(target.itemId) } != null }
+            .also { IptvLog.info("vod details own kind=${ref.kind.wire} ok=${it != null}") }
+    }
 
     suspend fun target(kind: VodKind, tmdbId: String?, imdbId: String?): VodDetailTarget? {
         val type = VodDetailRoute.type(kind) ?: return null
         if (tmdbId == null && imdbId == null) return null
         val installed = metaAddons()
-        if (installed.isEmpty()) return null
         val key = tmdb.apiKey().isNotBlank()
-        val tmdbValue = tmdbId ?: imdbId?.takeIf { key && VodDetailRoute.wantsTmdb(kind, installed) }?.let { id -> quiet(LOOKUP_TIMEOUT) { tmdb.imdbToTmdb(id, type)?.toString() } }
-        val imdbValue = imdbId ?: tmdbValue?.takeIf { key }?.toIntOrNull()?.let { id -> quiet(LOOKUP_TIMEOUT) { tmdb.tmdbToImdb(id, type) } }
-        val target = VodDetailRoute.open(kind, tmdbValue, imdbValue, installed) { loads(it) }
+        val tmdbValue = tmdbId ?: imdbId?.takeIf { key && (kind == VodKind.MOVIE || VodDetailRoute.wantsTmdb(kind, installed)) }
+            ?.let { id -> quiet(LOOKUP_TIMEOUT) { tmdb.imdbToTmdb(id, type)?.toString() } }
+        val imdbValue = imdbId ?: tmdbValue?.takeIf { key && installed.isNotEmpty() }?.toIntOrNull()?.let { id -> quiet(LOOKUP_TIMEOUT) { tmdb.tmdbToImdb(id, type) } }
+        val target = (if (installed.isEmpty()) null else VodDetailRoute.open(kind, tmdbValue, imdbValue, installed) { loads(it) })
+            ?: if (key) tmdbMovie(kind, tmdbValue) else null
         if (target == null) { IptvLog.info("vod details none kind=${kind.wire} tmdb=${tmdbValue != null} imdb=${imdbValue != null}"); return null }
         streams.allow(kind, tmdbValue, imdbValue)
         return target
+    }
+
+    private suspend fun tmdbMovie(kind: VodKind, tmdbId: String?): VodDetailTarget? {
+        val target = VodDetailRoute.tmdbMovie(kind, tmdbId) ?: return null
+        val found = quiet(META_TIMEOUT) { tmdbMetadata.fetchEnrichment(target.itemId.removePrefix("tmdb:"), ContentType.MOVIE, language()) }
+        IptvLog.info("vod details tmdb ok=${found != null}")
+        return target.takeIf { found != null }
     }
 
     suspend fun offered(kind: VodKind, tmdbId: String?, imdbId: String?): Boolean =
@@ -109,6 +128,7 @@ class IptvVodOpener @Inject constructor(private val tmdb: TmdbService, private v
         const val LOOKUP_TIMEOUT = 6_000L
         const val META_TIMEOUT = 8_000L
         const val ADDON_WAIT = 750L
+        const val OWN_TIMEOUT = 45_000L
     }
 }
 
@@ -202,7 +222,7 @@ class IptvVodBrowseViewModel @Inject constructor(savedState: SavedStateHandle, p
             mutable.update { it.copy(opening = title.ref) }
             try {
                 val art = if (mutable.value.nuvio) mutable.value.art[title.ref] ?: artwork.resolve(listOf(title), opener.language())[title.ref] else null
-                val target = opener.target(title.ref.kind, title.tmdbId ?: art?.tmdbId, title.imdbId ?: art?.imdbId)
+                val target = opener.open(title.ref, title.tmdbId ?: art?.tmdbId, title.imdbId ?: art?.imdbId)
                 navigation.send(if (target != null) IptvVodNavigation.Detail(target) else IptvVodNavigation.Title(title.ref))
             } catch (cancel: CancellationException) { throw cancel }
             catch (error: Exception) { IptvLog.failure("vod open", error); navigation.send(IptvVodNavigation.Title(title.ref)) }
@@ -281,6 +301,7 @@ data class IptvVodTitleState(
 sealed interface IptvVodTitleEvent {
     data class Play(val play: IptvVodPlay) : IptvVodTitleEvent
     data class Detail(val target: VodDetailTarget) : IptvVodTitleEvent
+    data class Replace(val target: VodDetailTarget) : IptvVodTitleEvent
 }
 
 @HiltViewModel
@@ -288,6 +309,7 @@ class IptvVodTitleViewModel @Inject constructor(savedState: SavedStateHandle, @d
     private val repository: IptvVodRepository, private val resolver: IptvVodResolver, private val catalogue: IptvCatalogueStore,
     private val artwork: IptvVodArtwork, private val preferences: IptvVodArtworkPreferences, private val opener: IptvVodOpener) : ViewModel() {
     private val ref = VodRef.parse(savedState.get<String>("ref"))?.takeIf { it.kind != VodKind.EPISODE }
+    private val resolve = savedState.get<String>("resolve")?.toBooleanStrictOrNull() != false
     private val mutable = MutableStateFlow(IptvVodTitleState(ref = ref))
     val state = mutable.asStateFlow()
     private val channel = Channel<IptvVodTitleEvent>(Channel.BUFFERED)
@@ -300,6 +322,11 @@ class IptvVodTitleViewModel @Inject constructor(savedState: SavedStateHandle, @d
         val ref = ref ?: run { mutable.update { it.copy(loaded = true) }; return }
         viewModelScope.launch {
             val title = io(null) { repository.title(ref) }
+            if (title != null && resolve) {
+                val target = try { opener.own(ref) } catch (cancel: CancellationException) { throw cancel }
+                    catch (error: Exception) { IptvLog.failure("vod title own", error); null }
+                if (target != null) { channel.send(IptvVodTitleEvent.Replace(target)); return@launch }
+            }
             val source = io(null) { catalogue.sources(ref.profileId).firstOrNull { it.ref.sourceId == ref.sourceId }?.label }
             mutable.update { it.copy(loaded = true, title = title, source = source, tmdbId = title?.tmdbId, imdbId = title?.imdbId,
                 episodesLoading = title != null && ref.kind == VodKind.SERIES) }
@@ -414,5 +441,35 @@ class IptvVodTitleViewModel @Inject constructor(savedState: SavedStateHandle, @d
     private suspend fun <T> io(fallback: T, block: () -> T): T = withContext(Dispatchers.IO) {
         try { block() } catch (cancel: CancellationException) { throw cancel }
         catch (error: Exception) { IptvLog.failure("vod title", error); fallback }
+    }
+}
+
+@HiltViewModel
+class IptvVodDetailPlayViewModel @Inject constructor(@dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
+    private val resolver: IptvVodResolver, private val catalogue: IptvCatalogueStore) : ViewModel() {
+    private val channel = Channel<IptvVodPlay>(Channel.BUFFERED)
+    val plays = channel.receiveAsFlow()
+    private var job: Job? = null
+
+    fun play(videoId: String, title: String, season: Int?, episode: Int?, episodeTitle: String?, year: String?, poster: String?, backdrop: String?,
+        fromStart: Boolean) {
+        val ref = VodDetailRoute.playable(videoId) ?: return
+        if (job?.isActive == true) return
+        job = viewModelScope.launch {
+            val message = when (val result = resolver.resolve(ref)) {
+                is IptvVodResolution.Ready -> {
+                    val source = withContext(Dispatchers.IO) {
+                        try { catalogue.sources(ref.profileId).firstOrNull { it.ref.sourceId == ref.sourceId }?.label }
+                        catch (cancel: CancellationException) { throw cancel } catch (error: Exception) { IptvLog.failure("vod detail play", error); null }
+                    }
+                    val name = if (ref.kind == VodKind.EPISODE && season != null && episode != null) VodStreams.episode(title, season, episode, episodeTitle, null).title else title
+                    channel.send(IptvVodPlay(ref, name, year?.take(4)?.toIntOrNull(), poster, backdrop, source, fromStart))
+                    null
+                }
+                is IptvVodResolution.Busy -> context.getString(R.string.iptv_vod_connections_busy, result.sourceLabel)
+                IptvVodResolution.Unavailable -> context.getString(R.string.iptv_vod_unavailable)
+            }
+            message?.let { android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_LONG).show() }
+        }
     }
 }

@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Tata letak</string>
     <string name="iptv_widgets_layout_subtitle">Widget yang tidak muat di layar ini disembunyikan</string>
     <string name="iptv_widgets_layout_one">Satu widget lebar</string>
-    <string name="iptv_widgets_layout_two">Dua widget</string>
-    <string name="iptv_widgets_layout_three">Tiga widget</string>
     <string name="iptv_widgets_cities">Ubah kota</string>
     <string name="iptv_widgets_cities_subtitle">Hingga empat kota. Pilih kota untuk menghapusnya.</string>
     <string name="iptv_widgets_city_add">Tambahkan kota</string>
@@ -45,8 +43,4 @@
     <string name="iptv_widgets_no_recordings">Tidak ada yang direkam atau dijadwalkan</string>
     <string name="iptv_widgets_nothing_playing">Tidak ada yang diputar</string>
     <string name="iptv_widgets_stream_waiting">Menunggu gambar</string>
-    <string name="iptv_widgets_stream_resolution">Gambar</string>
-    <string name="iptv_widgets_stream_codec">Codec</string>
-    <string name="iptv_widgets_stream_range">Rentang</string>
-    <string name="iptv_widgets_stream_bitrate">Bitrate</string>
 </resources>

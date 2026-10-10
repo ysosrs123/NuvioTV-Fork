@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Раскладка</string>
     <string name="iptv_widgets_layout_subtitle">Виджеты, которые не помещаются на этом экране, скрыты</string>
     <string name="iptv_widgets_layout_one">Один широкий виджет</string>
-    <string name="iptv_widgets_layout_two">Два виджета</string>
-    <string name="iptv_widgets_layout_three">Три виджета</string>
     <string name="iptv_widgets_cities">Изменить города</string>
     <string name="iptv_widgets_cities_subtitle">До четырёх городов. Выберите город, чтобы удалить его.</string>
     <string name="iptv_widgets_city_add">Добавить город</string>
@@ -51,8 +49,4 @@
     <string name="iptv_widgets_no_recordings">Ничего не записывается и не запланировано</string>
     <string name="iptv_widgets_nothing_playing">Ничего не воспроизводится</string>
     <string name="iptv_widgets_stream_waiting">Ожидание изображения</string>
-    <string name="iptv_widgets_stream_resolution">Изображение</string>
-    <string name="iptv_widgets_stream_codec">Кодек</string>
-    <string name="iptv_widgets_stream_range">Диапазон</string>
-    <string name="iptv_widgets_stream_bitrate">Битрейт</string>
 </resources>

@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Układ</string>
     <string name="iptv_widgets_layout_subtitle">Widżety, które nie mieszczą się na tym ekranie, są ukryte</string>
     <string name="iptv_widgets_layout_one">Jeden szeroki widżet</string>
-    <string name="iptv_widgets_layout_two">Dwa widżety</string>
-    <string name="iptv_widgets_layout_three">Trzy widżety</string>
     <string name="iptv_widgets_cities">Zmień miasta</string>
     <string name="iptv_widgets_cities_subtitle">Maksymalnie cztery miasta. Wybierz miasto, aby je usunąć.</string>
     <string name="iptv_widgets_city_add">Dodaj miasto</string>
@@ -51,8 +49,4 @@
     <string name="iptv_widgets_no_recordings">Nic nie jest nagrywane ani zaplanowane</string>
     <string name="iptv_widgets_nothing_playing">Nic nie jest odtwarzane</string>
     <string name="iptv_widgets_stream_waiting">Oczekiwanie na obraz</string>
-    <string name="iptv_widgets_stream_resolution">Obraz</string>
-    <string name="iptv_widgets_stream_codec">Kodek</string>
-    <string name="iptv_widgets_stream_range">Zakres</string>
-    <string name="iptv_widgets_stream_bitrate">Przepływność</string>
 </resources>

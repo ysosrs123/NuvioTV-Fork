@@ -37,4 +37,11 @@ class MultiviewSizingTest {
         assertFalse(multiviewHasRoom(List(4) { multiviewPixelRate(1080) }, multiviewPixelRate(1080) * 4))
         assertTrue(multiviewHasRoom(List(2) { multiviewPixelRate(1080) }, multiviewPixelRate(2160, 60)))
     }
+
+    @Test fun decodeBudgetUsesTheLargestPointTheDecoderCovers() {
+        assertEquals(3840L * 2160 * 60, multiviewDecodeBudget { w, h, f -> w <= 3840 && h <= 2160 && f <= 60 })
+        assertEquals(1920L * 1080 * 60, multiviewDecodeBudget { w, h, f -> w <= 1920 && h <= 1080 && f <= 60 })
+        assertNull(multiviewDecodeBudget { _, _, _ -> false })
+        assertTrue(multiviewHasRoom(List(2) { multiviewPixelRate(1080) }, multiviewDecodeBudget { w, h, f -> w <= 3840 && h <= 2160 && f <= 60 }))
+    }
 }

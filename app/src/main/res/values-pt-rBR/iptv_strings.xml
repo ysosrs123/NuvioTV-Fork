@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Nenhum canal com este número</string>
     <string name="iptv_live_minutes_left">Faltam %1$d min</string>
     <string name="iptv_live_starts_in">Começa em %1$d min</string>
-    <string name="iptv_live_fullscreen_hint">Esquerda para canais, direita para o último canal, segure OK para opções</string>
     <string name="iptv_live_no_programme_short">Sem informações</string>
     <string name="iptv_live_setup_title">Configurar TV ao vivo</string>
     <string name="iptv_live_setup_description">Adicione uma lista M3U, uma conta Xtream ou um portal Stalker para começar a assistir. Os canais e o guia de programação carregam em segundo plano.</string>

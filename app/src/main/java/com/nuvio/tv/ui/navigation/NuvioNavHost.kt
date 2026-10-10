@@ -350,7 +350,16 @@ private fun PlaybackNavHost(
             val heroBackdropUrl = detailArgs?.getString("heroBackdropUrl")?.takeIf { it.isNotBlank() }
             val playOnLoad = detailArgs?.getString("playOnLoad")?.toBooleanStrictOrNull() == true
             val manualSelection = detailArgs?.getString("manualSelection")?.toBooleanStrictOrNull() == true
+            val iptvVod = if (com.nuvio.tv.core.iptv.VodDetailRoute.ownTitle(detailArgs?.getString("itemId")) != null) {
+                androidx.hilt.navigation.compose.hiltViewModel<com.nuvio.tv.ui.screens.iptv.IptvVodDetailPlayViewModel>()
+            } else null
+            if (iptvVod != null) androidx.compose.runtime.LaunchedEffect(iptvVod) { iptvVod.plays.collect { play -> navController.navigate(iptvVodPlayerRoute(play)) } }
+            val iptvAvailability = androidx.compose.runtime.remember {
+                com.nuvio.tv.core.streams.PlaybackAvailability(isLoaded = true, serverStreams = { _, id -> com.nuvio.tv.core.iptv.VodDetailRoute.playable(id) != null })
+            }
+            val availability = if (iptvVod == null) LocalPlaybackAvailability.current else iptvAvailability
             DetailChildHost(parentNavController = navController) { childNav ->
+            androidx.compose.runtime.CompositionLocalProvider(LocalPlaybackAvailability provides availability) {
             MetaDetailsScreen(
                 returnFocusSeason = returnFocusSeason,
                 returnFocusEpisode = returnFocusEpisode,
@@ -392,7 +401,9 @@ private fun PlaybackNavHost(
                     childNav.navigateNestedDetail(itemId, itemType, addonBaseUrl)
                 },
                 onPlayClick = { videoId, contentType, contentId, title, poster, backdrop, logo, season, episode, episodeName, genres, year, runtime, contentLanguage ->
-                    navController.navigate(
+                    if (iptvVod != null && com.nuvio.tv.core.iptv.VodDetailRoute.playable(videoId) != null) {
+                        iptvVod.play(videoId, title, season, episode, episodeName, year, poster, backdrop, fromStart = false)
+                    } else navController.navigate(
                         Screen.Stream.createRoute(
                             videoId = videoId,
                             contentType = contentType,
@@ -414,7 +425,9 @@ private fun PlaybackNavHost(
                     )
                 },
                 onPlayManuallyClick = { videoId, contentType, contentId, title, poster, backdrop, logo, season, episode, episodeName, genres, year, runtime, contentLanguage ->
-                    navController.navigate(
+                    if (iptvVod != null && com.nuvio.tv.core.iptv.VodDetailRoute.playable(videoId) != null) {
+                        iptvVod.play(videoId, title, season, episode, episodeName, year, poster, backdrop, fromStart = false)
+                    } else navController.navigate(
                         Screen.Stream.createRoute(
                             videoId = videoId,
                             contentType = contentType,
@@ -437,7 +450,9 @@ private fun PlaybackNavHost(
                     )
                 },
                 onPlayStartFromBeginningClick = { videoId, contentType, contentId, title, poster, backdrop, logo, season, episode, episodeName, genres, year, runtime, contentLanguage ->
-                    navController.navigate(
+                    if (iptvVod != null && com.nuvio.tv.core.iptv.VodDetailRoute.playable(videoId) != null) {
+                        iptvVod.play(videoId, title, season, episode, episodeName, year, poster, backdrop, fromStart = true)
+                    } else navController.navigate(
                         Screen.Stream.createRoute(
                             videoId = videoId,
                             contentType = contentType,
@@ -460,6 +475,7 @@ private fun PlaybackNavHost(
                     )
                 }
             )
+            }
             }
         }
 
@@ -1271,21 +1287,25 @@ private fun PlaybackNavHost(
             }
         }
         composable(Screen.IptvRecordings.route) {
-            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvRecordingsScreen(onBack = { navController.popBackStack() }) }
+            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvRecordingsScreen(onBack = { navController.popBackStack() },
+                onPlay = { stream -> navController.navigate(Screen.Player.createRoute(streamUrl = stream.url, title = stream.title,
+                    streamName = stream.channel, filename = stream.title + ".ts", startFromBeginning = true)) }) }
         }
         composable(Screen.IptvVod.route, arguments = listOf(navArgument("kind") { type = NavType.StringType })) {
             com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvVodBrowseScreen(onBack = { navController.popBackStack() },
-                onTitle = { ref -> navController.navigate(Screen.IptvVodTitle.createRoute(ref.format())) },
+                onTitle = { ref -> navController.navigate(Screen.IptvVodTitle.createRoute(ref.format(), resolve = false)) },
                 onDetail = { target -> navController.navigate(Screen.Detail.createRoute(itemId = target.itemId, itemType = target.itemType)) }) }
         }
-        composable(Screen.IptvVodTitle.route, arguments = listOf(navArgument("ref") { type = NavType.StringType })) {
+        composable(Screen.IptvVodTitle.route, arguments = listOf(navArgument("ref") { type = NavType.StringType },
+            navArgument("resolve") { type = NavType.StringType; nullable = true; defaultValue = "true" })) {
             com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvVodTitleScreen(
-                onPlay = { play ->
-                    navController.navigate(Screen.Player.createRoute(streamUrl = play.ref.format(), title = play.title, streamName = play.source,
-                        year = play.year?.toString(), poster = play.poster, backdrop = play.backdrop, startFromBeginning = play.fromStart,
-                        addonName = play.source))
-                },
-                onDetail = { target -> navController.navigate(Screen.Detail.createRoute(itemId = target.itemId, itemType = target.itemType)) }) }
+                onPlay = { play -> navController.navigate(iptvVodPlayerRoute(play)) },
+                onDetail = { target -> navController.navigate(Screen.Detail.createRoute(itemId = target.itemId, itemType = target.itemType)) },
+                onReplace = { target ->
+                    navController.navigate(Screen.Detail.createRoute(itemId = target.itemId, itemType = target.itemType)) {
+                        popUpTo(Screen.IptvVodTitle.route) { inclusive = true }
+                    }
+                }) }
         }
 
         composable(Screen.Settings.route) {
@@ -1562,3 +1582,7 @@ private fun NavHostController.openRootDestination(route: String) {
         restoreState = true
     }
 }
+
+private fun iptvVodPlayerRoute(play: com.nuvio.tv.ui.screens.iptv.IptvVodPlay): String =
+    Screen.Player.createRoute(streamUrl = play.ref.format(), title = play.title, streamName = play.source, year = play.year?.toString(), poster = play.poster,
+        backdrop = play.backdrop, startFromBeginning = play.fromStart, addonName = play.source)

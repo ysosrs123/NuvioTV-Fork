@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Nema kanala s ovim brojem</string>
     <string name="iptv_live_minutes_left">Još %1$d min</string>
     <string name="iptv_live_starts_in">Počinje za %1$d min</string>
-    <string name="iptv_live_fullscreen_hint">Lijevo za kanale, desno za posljednji kanal, držite OK za opcije</string>
     <string name="iptv_live_no_programme_short">Nema informacija</string>
     <string name="iptv_live_setup_title">Postavi TV uživo</string>
     <string name="iptv_live_setup_description">Dodajte M3U playlistu, Xtream račun ili Stalker portal da počnete gledati. Kanali i TV vodič se učitavaju u pozadini.</string>

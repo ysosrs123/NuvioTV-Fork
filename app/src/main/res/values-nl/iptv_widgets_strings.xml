@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Indeling</string>
     <string name="iptv_widgets_layout_subtitle">Widgets die niet op dit scherm passen, worden verborgen</string>
     <string name="iptv_widgets_layout_one">Eén brede widget</string>
-    <string name="iptv_widgets_layout_two">Twee widgets</string>
-    <string name="iptv_widgets_layout_three">Drie widgets</string>
     <string name="iptv_widgets_cities">Steden wijzigen</string>
     <string name="iptv_widgets_cities_subtitle">Maximaal vier steden. Selecteer een stad om die te verwijderen.</string>
     <string name="iptv_widgets_city_add">Stad toevoegen</string>
@@ -47,8 +45,4 @@
     <string name="iptv_widgets_no_recordings">Niets wordt opgenomen of is gepland</string>
     <string name="iptv_widgets_nothing_playing">Er speelt niets</string>
     <string name="iptv_widgets_stream_waiting">Wachten op het beeld</string>
-    <string name="iptv_widgets_stream_resolution">Beeld</string>
-    <string name="iptv_widgets_stream_codec">Codec</string>
-    <string name="iptv_widgets_stream_range">Bereik</string>
-    <string name="iptv_widgets_stream_bitrate">Bitrate</string>
 </resources>

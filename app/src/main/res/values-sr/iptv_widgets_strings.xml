@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Распоред</string>
     <string name="iptv_widgets_layout_subtitle">Виџети који не стају на овај екран су скривени</string>
     <string name="iptv_widgets_layout_one">Један широк виџет</string>
-    <string name="iptv_widgets_layout_two">Два виџета</string>
-    <string name="iptv_widgets_layout_three">Три виџета</string>
     <string name="iptv_widgets_cities">Промени градове</string>
     <string name="iptv_widgets_cities_subtitle">Највише четири града. Изаберите град да бисте га уклонили.</string>
     <string name="iptv_widgets_city_add">Додај град</string>
@@ -49,8 +47,4 @@
     <string name="iptv_widgets_no_recordings">Ништа се не снима нити је заказано</string>
     <string name="iptv_widgets_nothing_playing">Ништа се не репродукује</string>
     <string name="iptv_widgets_stream_waiting">Чека се слика</string>
-    <string name="iptv_widgets_stream_resolution">Слика</string>
-    <string name="iptv_widgets_stream_codec">Кодек</string>
-    <string name="iptv_widgets_stream_range">Опсег</string>
-    <string name="iptv_widgets_stream_bitrate">Проток</string>
 </resources>

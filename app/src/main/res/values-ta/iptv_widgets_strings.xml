@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">தளவமைப்பு</string>
     <string name="iptv_widgets_layout_subtitle">இந்தத் திரையில் பொருந்தாத விட்ஜெட்டுகள் மறைக்கப்படும்</string>
     <string name="iptv_widgets_layout_one">ஒரு அகலமான விட்ஜெட்</string>
-    <string name="iptv_widgets_layout_two">இரண்டு விட்ஜெட்டுகள்</string>
-    <string name="iptv_widgets_layout_three">மூன்று விட்ஜெட்டுகள்</string>
     <string name="iptv_widgets_cities">நகரங்களை மாற்று</string>
     <string name="iptv_widgets_cities_subtitle">அதிகபட்சம் நான்கு நகரங்கள். நகரத்தை அகற்ற அதைத் தேர்ந்தெடுக்கவும்.</string>
     <string name="iptv_widgets_city_add">நகரத்தைச் சேர்</string>
@@ -47,8 +45,4 @@
     <string name="iptv_widgets_no_recordings">பதிவோ திட்டமிடப்பட்டதோ எதுவும் இல்லை</string>
     <string name="iptv_widgets_nothing_playing">எதுவும் இயங்கவில்லை</string>
     <string name="iptv_widgets_stream_waiting">படத்திற்காகக் காத்திருக்கிறது</string>
-    <string name="iptv_widgets_stream_resolution">படம்</string>
-    <string name="iptv_widgets_stream_codec">கோடெக்</string>
-    <string name="iptv_widgets_stream_range">வரம்பு</string>
-    <string name="iptv_widgets_stream_bitrate">பிட்ரேட்</string>
 </resources>

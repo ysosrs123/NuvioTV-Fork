@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Bố cục</string>
     <string name="iptv_widgets_layout_subtitle">Tiện ích con không vừa màn hình này sẽ bị ẩn</string>
     <string name="iptv_widgets_layout_one">Một tiện ích con rộng</string>
-    <string name="iptv_widgets_layout_two">Hai tiện ích con</string>
-    <string name="iptv_widgets_layout_three">Ba tiện ích con</string>
     <string name="iptv_widgets_cities">Đổi thành phố</string>
     <string name="iptv_widgets_cities_subtitle">Tối đa bốn thành phố. Chọn một thành phố để xóa.</string>
     <string name="iptv_widgets_city_add">Thêm thành phố</string>
@@ -45,8 +43,4 @@
     <string name="iptv_widgets_no_recordings">Không có gì đang ghi hoặc đã lên lịch</string>
     <string name="iptv_widgets_nothing_playing">Không có gì đang phát</string>
     <string name="iptv_widgets_stream_waiting">Đang chờ hình ảnh</string>
-    <string name="iptv_widgets_stream_resolution">Hình ảnh</string>
-    <string name="iptv_widgets_stream_codec">Codec</string>
-    <string name="iptv_widgets_stream_range">Dải màu</string>
-    <string name="iptv_widgets_stream_bitrate">Bitrate</string>
 </resources>

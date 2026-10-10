@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Nuk ka kanal me këtë numër</string>
     <string name="iptv_live_minutes_left">Edhe %1$d min</string>
     <string name="iptv_live_starts_in">Fillon pas %1$d min</string>
-    <string name="iptv_live_fullscreen_hint">Majtas për kanalet, djathtas për kanalin e fundit, mbaj OK për opsionet</string>
     <string name="iptv_live_no_programme_short">Pa informacion</string>
     <string name="iptv_live_setup_title">Konfiguro TV-në live</string>
     <string name="iptv_live_setup_description">Shto një listë luajtjeje M3U, një llogari Xtream ose një portal Stalker për të filluar shikimin. Kanalet dhe udhëzuesi i programeve ngarkohen në sfond.</string>

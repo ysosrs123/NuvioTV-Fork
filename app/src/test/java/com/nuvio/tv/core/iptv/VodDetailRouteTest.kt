@@ -44,10 +44,48 @@ class VodDetailRouteTest {
         assertTrue(VodDetailRoute.offered(VodKind.MOVIE, null, "tt0133093", listOf(cinemeta), tmdbKey = false))
         assertTrue(VodDetailRoute.offered(VodKind.MOVIE, null, "tt0133093", listOf(tmdbAddon), tmdbKey = true))
         assertFalse(VodDetailRoute.offered(VodKind.MOVIE, null, "tt0133093", listOf(tmdbAddon), tmdbKey = false))
-        assertFalse(VodDetailRoute.offered(VodKind.MOVIE, "603", "tt0133093", emptyList(), tmdbKey = true))
+        assertTrue(VodDetailRoute.offered(VodKind.MOVIE, "603", "tt0133093", emptyList(), tmdbKey = true))
+        assertFalse(VodDetailRoute.offered(VodKind.MOVIE, "603", null, emptyList(), tmdbKey = false))
+        assertFalse(VodDetailRoute.offered(VodKind.SERIES, "1396", null, emptyList(), tmdbKey = true))
         assertFalse(VodDetailRoute.offered(VodKind.MOVIE, null, null, listOf(cinemeta, anyId), tmdbKey = true))
         assertTrue(VodDetailRoute.wantsImdb(VodKind.SERIES, listOf(cinemeta)))
         assertFalse(VodDetailRoute.wantsTmdb(VodKind.SERIES, listOf(cinemeta, VodMetaAddon(listOf("series"), emptyList()))))
+    }
+
+    @Test fun tmdbPathIsForMoviesOnly() {
+        assertEquals(VodDetailTarget("tmdb:1401539", "movie"), VodDetailRoute.tmdbMovie(VodKind.MOVIE, "01401539"))
+        assertNull(VodDetailRoute.tmdbMovie(VodKind.SERIES, "1396"))
+        assertNull(VodDetailRoute.tmdbMovie(VodKind.MOVIE, "0"))
+        assertNull(VodDetailRoute.tmdbMovie(VodKind.MOVIE, null))
+    }
+
+    @Test fun ownTargetsUseTheProviderReference() {
+        val movie = VodRef(0, "src1", VodKind.MOVIE, "77")
+        val series = VodRef(2, "src1", VodKind.SERIES, "9")
+        val episode = VodRef.episode(series, "123")
+        assertEquals(VodDetailTarget("iptv-vod:0:src1:movie:77", "movie"), VodDetailRoute.own(movie))
+        assertEquals(VodDetailTarget("iptv-vod:2:src1:series:9", "series"), VodDetailRoute.own(series))
+        assertNull(VodDetailRoute.own(episode))
+        assertEquals(series, VodDetailRoute.ownTitle(series.format()))
+        assertNull(VodDetailRoute.ownTitle(episode.format()))
+        assertNull(VodDetailRoute.ownTitle("tt0133093"))
+        assertEquals(episode, VodDetailRoute.playable(episode.format()))
+        assertEquals(movie, VodDetailRoute.playable(movie.format()))
+        assertNull(VodDetailRoute.playable(series.format()))
+        assertNull(VodDetailRoute.playable("tmdb:5"))
+    }
+
+    @Test fun providerTextBecomesDetailFields() {
+        assertEquals(listOf("Tom Hardy", "Pierce Brosnan", "Helen Mirren"), VodDetailRoute.names(" Tom Hardy, Pierce Brosnan ,, tom hardy / Helen Mirren"))
+        assertEquals(listOf("Crime", "Drama"), VodDetailRoute.names("Crime / Drama"))
+        assertTrue(VodDetailRoute.names(null).isEmpty())
+        assertEquals(2, VodDetailRoute.names("a, b, c", limit = 2).size)
+        assertEquals(52, VodDetailRoute.minutes(3100))
+        assertNull(VodDetailRoute.minutes(0))
+        assertEquals(8.0f, VodDetailRoute.rating(8.0))
+        assertNull(VodDetailRoute.rating(0.0))
+        assertNull(VodDetailRoute.rating(Double.NaN))
+        assertNull(VodDetailRoute.rating(11.0))
     }
 
     @Test fun openUsesTheFirstIdAnAddonActuallyLoads() = runBlocking {

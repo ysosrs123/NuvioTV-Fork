@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Ingen kanal med dette nummeret</string>
     <string name="iptv_live_minutes_left">%1$d min igjen</string>
     <string name="iptv_live_starts_in">Starter om %1$d min</string>
-    <string name="iptv_live_fullscreen_hint">Venstre for kanaler, høyre for forrige kanal, hold OK for valg</string>
     <string name="iptv_live_no_programme_short">Ingen informasjon</string>
     <string name="iptv_live_setup_title">Sett opp direkte-TV</string>
     <string name="iptv_live_setup_description">Legg til en M3U-spilleliste, en Xtream-konto eller en Stalker-portal for å begynne å se. Kanaler og programguide lastes inn i bakgrunnen.</string>

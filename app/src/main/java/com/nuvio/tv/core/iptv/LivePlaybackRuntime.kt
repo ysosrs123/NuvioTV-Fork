@@ -28,6 +28,8 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission, private v
     private data class Active(val owner: String, val lease: LiveConsumerLease, val playback: OwnedLivePlayback)
     private val mutex = Mutex()
     @Volatile private var active: Active? = null
+    @Volatile var lastDenial: AdmissionDenial? = null
+        private set
 
     suspend fun open(key: AcquisitionKey, acquisitionBytes: Long, viewerBytes: Long, owner: String = "foreground",
         maxUpstreams: Int? = null, create: suspend (PlaybackPurpose) -> OwnedLivePlayback): LiveOpenResult = mutex.withLock {
@@ -37,6 +39,7 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission, private v
         currentCoroutineContext().ensureActive()
         maxUpstreams?.let { admission.setAccountLimit(key.accountId, it) }
         val result = admission.acquire(key, acquisitionBytes, ConsumerReservation(LiveConsumerRole.VIEWER, 1, viewerBytes))
+        lastDenial = (result as? LiveAdmissionResult.Denied)?.reason
         if (result !is LiveAdmissionResult.Admitted) return@withLock LiveOpenResult.CAPACITY
         if (!result.openUpstream) {
             release(result.lease)
@@ -56,6 +59,19 @@ class LivePlaybackRuntime(private val admission: LiveSessionAdmission, private v
         } catch (_: Exception) {
             if (closeActive()) LiveOpenResult.FAILED else LiveOpenResult.CLOSE_UNCONFIRMED
         }
+    }
+
+    suspend fun handOver(owner: String, target: LivePlaybackRuntime, acquisitionBytes: Long, viewerBytes: Long): Boolean {
+        if (target === this || active?.owner != owner || !target.stop(owner)) return false
+        val moving = mutex.withLock { active?.takeIf { it.owner == owner && it.lease.let { lease -> admission.resize(lease, acquisitionBytes,
+            ConsumerReservation(LiveConsumerRole.VIEWER, 1, viewerBytes)) } }?.also { active = null } } ?: return false
+        val adopted = target.mutex.withLock { if (target.active == null) { target.active = moving; true } else false }
+        if (!adopted) withContext(NonCancellable) {
+            val closed = try { moving.playback.close() } catch (_: Exception) { false }
+            if (!closed) runCatching { moving.playback.abandon() }
+            release(moving.lease)
+        }
+        return adopted
     }
 
     fun interrupt(owner: String = "foreground") {

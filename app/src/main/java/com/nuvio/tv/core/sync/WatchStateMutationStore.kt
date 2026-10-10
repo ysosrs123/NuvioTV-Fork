@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.google.gson.Gson
 import com.nuvio.tv.data.local.ProfileDataStoreFactory
 import com.nuvio.tv.data.mediaserver.ServerItemRef
+import com.nuvio.tv.core.iptv.VodRef
 import com.nuvio.tv.domain.model.WatchProgress
 import com.nuvio.tv.domain.model.WatchedItem
 import com.nuvio.tv.domain.model.WatchedMutationKey
@@ -43,7 +44,7 @@ class WatchStateMutationStore @Inject constructor(
         entries: Map<String, WatchProgress>,
         profileId: Int
     ) {
-        val entries = entries.filterValues { !ServerItemRef.isServerId(it.contentId) }
+        val entries = entries.filterValues { !(ServerItemRef.isServerId(it.contentId) || VodRef.isVod(it.contentId)) }
         if (entries.isEmpty()) return
         store(profileId).edit { preferences ->
             val pending = parseProgressUpserts(preferences[progressUpsertsKey]).toMutableMap()
@@ -58,7 +59,7 @@ class WatchStateMutationStore @Inject constructor(
     }
 
     suspend fun queueProgressDeletes(keys: Collection<String>, profileId: Int) {
-        val normalized = keys.map(String::trim).filter { it.isNotEmpty() && !ServerItemRef.isServerId(it) }.toSet()
+        val normalized = keys.map(String::trim).filter { it.isNotEmpty() && !(ServerItemRef.isServerId(it) || VodRef.isVod(it)) }.toSet()
         if (normalized.isEmpty()) return
         store(profileId).edit { preferences ->
             val pending = parseProgressUpserts(preferences[progressUpsertsKey]) - normalized
@@ -102,7 +103,7 @@ class WatchStateMutationStore @Inject constructor(
     }
 
     suspend fun queueWatchedUpserts(items: Collection<WatchedItem>, profileId: Int) {
-        val items = items.filterNot { ServerItemRef.isServerId(it.contentId) }
+        val items = items.filterNot { ServerItemRef.isServerId(it.contentId) || VodRef.isVod(it.contentId) }
         if (items.isEmpty()) return
         store(profileId).edit { preferences ->
             val pending = parseWatchedUpserts(preferences[watchedUpsertsKey]).toMutableMap()
@@ -121,7 +122,7 @@ class WatchStateMutationStore @Inject constructor(
     }
 
     suspend fun queueWatchedDeletes(keys: Collection<WatchedMutationKey>, profileId: Int) {
-        val normalized = keys.filterNot { ServerItemRef.isServerId(it.contentId) }.toSet()
+        val normalized = keys.filterNot { ServerItemRef.isServerId(it.contentId) || VodRef.isVod(it.contentId) }.toSet()
         if (normalized.isEmpty()) return
         store(profileId).edit { preferences ->
             val pending = parseWatchedUpserts(preferences[watchedUpsertsKey]) - normalized

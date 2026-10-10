@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Paraqitja</string>
     <string name="iptv_widgets_layout_subtitle">Miniaplikacionet që nuk zënë vend në këtë ekran fshihen</string>
     <string name="iptv_widgets_layout_one">Një miniaplikacion i gjerë</string>
-    <string name="iptv_widgets_layout_two">Dy miniaplikacione</string>
-    <string name="iptv_widgets_layout_three">Tre miniaplikacione</string>
     <string name="iptv_widgets_cities">Ndrysho qytetet</string>
     <string name="iptv_widgets_cities_subtitle">Deri në katër qytete. Zgjidh një qytet për ta hequr.</string>
     <string name="iptv_widgets_city_add">Shto një qytet</string>
@@ -47,8 +45,4 @@
     <string name="iptv_widgets_no_recordings">Asgjë nuk po regjistrohet dhe nuk është planifikuar</string>
     <string name="iptv_widgets_nothing_playing">Asgjë nuk po luhet</string>
     <string name="iptv_widgets_stream_waiting">Në pritje të figurës</string>
-    <string name="iptv_widgets_stream_resolution">Figura</string>
-    <string name="iptv_widgets_stream_codec">Kodeku</string>
-    <string name="iptv_widgets_stream_range">Diapazoni</string>
-    <string name="iptv_widgets_stream_bitrate">Shpejtësia e bitëve</string>
 </resources>

@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">אין ערוץ עם המספר הזה</string>
     <string name="iptv_live_minutes_left">נותרו %1$d דק׳</string>
     <string name="iptv_live_starts_in">מתחיל בעוד %1$d דק׳</string>
-    <string name="iptv_live_fullscreen_hint">שמאלה לערוצים, ימינה לערוץ האחרון, לחיצה ארוכה על OK לאפשרויות</string>
     <string name="iptv_live_no_programme_short">אין מידע</string>
     <string name="iptv_live_setup_title">הגדרת טלוויזיה חיה</string>
     <string name="iptv_live_setup_description">כדי להתחיל לצפות יש להוסיף רשימת M3U, חשבון Xtream או פורטל Stalker. הערוצים ומדריך השידורים נטענים ברקע.</string>

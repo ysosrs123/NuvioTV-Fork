@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Δεν υπάρχει κανάλι με αυτόν τον αριθμό</string>
     <string name="iptv_live_minutes_left">Απομένουν %1$d λεπ.</string>
     <string name="iptv_live_starts_in">Ξεκινά σε %1$d λεπ.</string>
-    <string name="iptv_live_fullscreen_hint">Αριστερά για κανάλια, δεξιά για το τελευταίο κανάλι, κρατήστε το OK για επιλογές</string>
     <string name="iptv_live_no_programme_short">Χωρίς πληροφορίες</string>
     <string name="iptv_live_setup_title">Ρύθμιση ζωντανής TV</string>
     <string name="iptv_live_setup_description">Προσθέστε μια λίστα M3U, έναν λογαριασμό Xtream ή μια πύλη Stalker για να ξεκινήσετε. Τα κανάλια και ο οδηγός προγράμματος φορτώνονται στο παρασκήνιο.</string>

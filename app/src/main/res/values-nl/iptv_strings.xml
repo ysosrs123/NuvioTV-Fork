@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Geen zender met dit nummer</string>
     <string name="iptv_live_minutes_left">Nog %1$d min</string>
     <string name="iptv_live_starts_in">Begint over %1$d min</string>
-    <string name="iptv_live_fullscreen_hint">Links voor zenders, rechts voor de vorige zender, houd OK ingedrukt voor opties</string>
     <string name="iptv_live_no_programme_short">Geen informatie</string>
     <string name="iptv_live_setup_title">Live-tv instellen</string>
     <string name="iptv_live_setup_description">Voeg een M3U-afspeellijst, een Xtream-account of een Stalker-portal toe om te beginnen met kijken. Zenders en de programmagids worden op de achtergrond geladen.</string>

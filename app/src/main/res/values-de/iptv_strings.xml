@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Kein Sender mit dieser Nummer</string>
     <string name="iptv_live_minutes_left">Noch %1$d Min.</string>
     <string name="iptv_live_starts_in">Beginnt in %1$d Min.</string>
-    <string name="iptv_live_fullscreen_hint">Links für Sender, rechts für den letzten Sender, OK halten für Optionen</string>
     <string name="iptv_live_no_programme_short">Keine Informationen</string>
     <string name="iptv_live_setup_title">Live-TV einrichten</string>
     <string name="iptv_live_setup_description">Fügen Sie eine M3U-Playlist, ein Xtream-Konto oder ein Stalker-Portal hinzu. Sender und Programmführer werden im Hintergrund geladen.</string>

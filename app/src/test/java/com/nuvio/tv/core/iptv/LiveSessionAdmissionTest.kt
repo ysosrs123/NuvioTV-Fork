@@ -110,4 +110,18 @@ class LiveSessionAdmissionTest {
             assertEquals(purpose == PlaybackPurpose.VOD, purpose.allowsUpstreamThumbnails)
         }
     }
+
+    @Test fun resizeMovesASoleViewerToSmallerBudgetsAndRefusesGrowthPastTheLimit() {
+        val g = governor()
+        val lease = admitted(g.acquire(key, 400, ConsumerReservation(LiveConsumerRole.VIEWER, 1, 500)))
+        assertTrue(g.resize(lease, 50, viewer))
+        assertEquals(150, g.snapshot().memoryBytes)
+        assertEquals(1, g.snapshot().decoders)
+        assertFalse(g.resize(lease, 600, ConsumerReservation(LiveConsumerRole.VIEWER, 1, 500)))
+        assertEquals(150, g.snapshot().memoryBytes)
+        admitted(g.acquire(key, 50, recorder))
+        assertFalse(g.resize(lease, 50, ConsumerReservation(LiveConsumerRole.VIEWER, 1, 60)))
+        g.release(lease)?.let(g::completeClose)
+        assertFalse(g.resize(lease, 50, viewer))
+    }
 }

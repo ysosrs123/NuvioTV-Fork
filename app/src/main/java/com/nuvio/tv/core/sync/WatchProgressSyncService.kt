@@ -8,6 +8,7 @@ import com.nuvio.tv.core.tracking.providerId
 import com.nuvio.tv.data.local.TraktSettingsDataStore
 import com.nuvio.tv.data.local.WatchProgressPreferences
 import com.nuvio.tv.data.mediaserver.ServerItemRef
+import com.nuvio.tv.core.iptv.VodRef
 import com.nuvio.tv.data.remote.supabase.SupabaseWatchProgress
 import com.nuvio.tv.data.remote.supabase.SupabaseWatchProgressEvent
 import com.nuvio.tv.domain.model.WatchProgress
@@ -122,7 +123,7 @@ class WatchProgressSyncService @Inject constructor(
         return try {
             val distinctKeys = keys
                 .map { it.trim() }
-                .filter { it.isNotEmpty() && !ServerItemRef.isServerId(it) }
+                .filter { it.isNotEmpty() && !(ServerItemRef.isServerId(it) || VodRef.isVod(it)) }
                 .distinct()
             if (distinctKeys.isEmpty()) {
                 return Result.success(Unit)
@@ -164,7 +165,7 @@ class WatchProgressSyncService @Inject constructor(
             val rawEntries = mutationStore.pendingProgressUpserts(profileId)
             val entries = canonicalizeForRemote(rawEntries).filterValues { progress ->
                 !(progress.position <= 1L && progress.duration <= 1L && progress.duration > 0L) &&
-                    !ServerItemRef.isServerId(progress.contentId)
+                    !(ServerItemRef.isServerId(progress.contentId) || VodRef.isVod(progress.contentId))
             }
             Log.d(TAG, "pushToRemote: ${rawEntries.size} pending entries, ${entries.size} canonical entries to push for profile $profileId")
             entries.forEach { (key, progress) ->
@@ -230,7 +231,7 @@ class WatchProgressSyncService @Inject constructor(
         progress: WatchProgress,
         profileId: Int
     ): Result<Unit> {
-        if (ServerItemRef.isServerId(progress.contentId)) return Result.success(Unit)
+        if (ServerItemRef.isServerId(progress.contentId) || VodRef.isVod(progress.contentId)) return Result.success(Unit)
         return try {
             val params = buildJsonObject {
                 put("p_entries", buildJsonArray {

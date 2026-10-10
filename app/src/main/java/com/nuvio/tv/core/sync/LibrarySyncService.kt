@@ -7,6 +7,7 @@ import com.nuvio.tv.core.sync.library.LibrarySyncLocalStore
 import com.nuvio.tv.core.sync.library.LibrarySyncRemoteDataSource
 import com.nuvio.tv.core.sync.library.consumeCursorPages
 import com.nuvio.tv.data.mediaserver.ServerItemRef
+import com.nuvio.tv.core.iptv.VodRef
 import com.nuvio.tv.domain.model.LibrarySyncReducer
 import com.nuvio.tv.domain.model.LibrarySyncState
 import kotlinx.coroutines.CancellationException
@@ -131,8 +132,8 @@ class LibrarySyncService @Inject constructor(
     ): Pair<Int, Int> {
         if (!state.hasPendingMutations) return 0 to 0
 
-        val upsertItems = LibrarySyncReducer.pendingUpsertItems(state).filterNot { ServerItemRef.isServerId(it.id) }
-        val deleteKeys = state.pendingDeleteKeys.filterNot { ServerItemRef.isServerId(it.contentId) }
+        val upsertItems = LibrarySyncReducer.pendingUpsertItems(state).filterNot { ServerItemRef.isServerId(it.id) || VodRef.isVod(it.id) }
+        val deleteKeys = state.pendingDeleteKeys.filterNot { ServerItemRef.isServerId(it.contentId) || VodRef.isVod(it.contentId) }
         remoteDataSource.pushItems(profileId, upsertItems)
         remoteDataSource.deleteItems(profileId, deleteKeys)
         val acknowledged = localStore.acknowledgePush(

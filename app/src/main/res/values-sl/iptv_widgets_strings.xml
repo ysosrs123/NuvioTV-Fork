@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Postavitev</string>
     <string name="iptv_widgets_layout_subtitle">Pripomočki, ki ne gredo na ta zaslon, so skriti</string>
     <string name="iptv_widgets_layout_one">En širok pripomoček</string>
-    <string name="iptv_widgets_layout_two">Dva pripomočka</string>
-    <string name="iptv_widgets_layout_three">Trije pripomočki</string>
     <string name="iptv_widgets_cities">Spremeni mesta</string>
     <string name="iptv_widgets_cities_subtitle">Največ štiri mesta. Izberite mesto, da ga odstranite.</string>
     <string name="iptv_widgets_city_add">Dodaj mesto</string>
@@ -51,8 +49,4 @@
     <string name="iptv_widgets_no_recordings">Nič se ne snema in nič ni načrtovano</string>
     <string name="iptv_widgets_nothing_playing">Nič se ne predvaja</string>
     <string name="iptv_widgets_stream_waiting">Čakanje na sliko</string>
-    <string name="iptv_widgets_stream_resolution">Slika</string>
-    <string name="iptv_widgets_stream_codec">Kodek</string>
-    <string name="iptv_widgets_stream_range">Obseg</string>
-    <string name="iptv_widgets_stream_bitrate">Bitna hitrost</string>
 </resources>

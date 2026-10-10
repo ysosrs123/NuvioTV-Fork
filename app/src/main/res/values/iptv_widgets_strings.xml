@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Layout</string>
     <string name="iptv_widgets_layout_subtitle">Widgets that don\'t fit on this screen are hidden</string>
     <string name="iptv_widgets_layout_one">One wide widget</string>
-    <string name="iptv_widgets_layout_two">Two widgets</string>
-    <string name="iptv_widgets_layout_three">Three widgets</string>
     <string name="iptv_widgets_cities">Change cities</string>
     <string name="iptv_widgets_cities_subtitle">Up to four cities. Select a city to remove it.</string>
     <string name="iptv_widgets_city_add">Add a city</string>
@@ -47,8 +45,4 @@
     <string name="iptv_widgets_no_recordings">Nothing recording or scheduled</string>
     <string name="iptv_widgets_nothing_playing">Nothing playing</string>
     <string name="iptv_widgets_stream_waiting">Waiting for the picture</string>
-    <string name="iptv_widgets_stream_resolution">Picture</string>
-    <string name="iptv_widgets_stream_codec">Codec</string>
-    <string name="iptv_widgets_stream_range">Range</string>
-    <string name="iptv_widgets_stream_bitrate">Bitrate</string>
 </resources>

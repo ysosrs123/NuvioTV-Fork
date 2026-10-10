@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">इस नंबर का कोई चैनल नहीं</string>
     <string name="iptv_live_minutes_left">%1$d मिनट बाकी</string>
     <string name="iptv_live_starts_in">%1$d मिनट में शुरू</string>
-    <string name="iptv_live_fullscreen_hint">चैनलों के लिए बाएँ, पिछले चैनल के लिए दाएँ, विकल्पों के लिए OK दबाकर रखें</string>
     <string name="iptv_live_no_programme_short">कोई जानकारी नहीं</string>
     <string name="iptv_live_setup_title">लाइव टीवी सेट अप करें</string>
     <string name="iptv_live_setup_description">देखना शुरू करने के लिए M3U प्लेलिस्ट, Xtream अकाउंट या Stalker पोर्टल जोड़ें। चैनल और प्रोग्राम गाइड बैकग्राउंड में लोड होते हैं।</string>

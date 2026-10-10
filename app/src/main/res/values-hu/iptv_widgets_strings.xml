@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Elrendezés</string>
     <string name="iptv_widgets_layout_subtitle">Az erre a képernyőre nem férő widgetek rejtve maradnak</string>
     <string name="iptv_widgets_layout_one">Egy széles widget</string>
-    <string name="iptv_widgets_layout_two">Két widget</string>
-    <string name="iptv_widgets_layout_three">Három widget</string>
     <string name="iptv_widgets_cities">Városok módosítása</string>
     <string name="iptv_widgets_cities_subtitle">Legfeljebb négy város. Válassz ki egy várost az eltávolításához.</string>
     <string name="iptv_widgets_city_add">Város hozzáadása</string>
@@ -47,8 +45,4 @@
     <string name="iptv_widgets_no_recordings">Nincs folyamatban lévő vagy ütemezett felvétel</string>
     <string name="iptv_widgets_nothing_playing">Nincs lejátszás</string>
     <string name="iptv_widgets_stream_waiting">Várakozás a képre</string>
-    <string name="iptv_widgets_stream_resolution">Kép</string>
-    <string name="iptv_widgets_stream_codec">Kodek</string>
-    <string name="iptv_widgets_stream_range">Tartomány</string>
-    <string name="iptv_widgets_stream_bitrate">Bitráta</string>
 </resources>

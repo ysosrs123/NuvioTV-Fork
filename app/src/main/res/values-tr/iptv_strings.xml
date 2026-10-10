@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Bu numarada kanal yok</string>
     <string name="iptv_live_minutes_left">%1$d dk kaldı</string>
     <string name="iptv_live_starts_in">%1$d dk sonra başlıyor</string>
-    <string name="iptv_live_fullscreen_hint">Sol: kanallar, sağ: son kanal, seçenekler için OK tuşunu basılı tutun</string>
     <string name="iptv_live_no_programme_short">Bilgi yok</string>
     <string name="iptv_live_setup_title">Canlı TV kurulumu</string>
     <string name="iptv_live_setup_description">İzlemeye başlamak için bir M3U oynatma listesi, Xtream hesabı veya Stalker portalı ekleyin. Kanallar ve yayın akışı arka planda yüklenir.</string>

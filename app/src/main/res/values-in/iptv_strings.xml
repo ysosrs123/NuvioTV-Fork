@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Tidak ada saluran dengan nomor ini</string>
     <string name="iptv_live_minutes_left">Sisa %1$d mnt</string>
     <string name="iptv_live_starts_in">Mulai dalam %1$d mnt</string>
-    <string name="iptv_live_fullscreen_hint">Kiri untuk saluran, kanan untuk saluran terakhir, tahan OK untuk opsi</string>
     <string name="iptv_live_no_programme_short">Tidak ada informasi</string>
     <string name="iptv_live_setup_title">Siapkan TV Live</string>
     <string name="iptv_live_setup_description">Tambahkan playlist M3U, akun Xtream, atau portal Stalker untuk mulai menonton. Saluran dan panduan acara dimuat di latar belakang.</string>

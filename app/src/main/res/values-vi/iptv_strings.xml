@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Không có kênh nào mang số này</string>
     <string name="iptv_live_minutes_left">Còn %1$d phút</string>
     <string name="iptv_live_starts_in">Bắt đầu sau %1$d phút</string>
-    <string name="iptv_live_fullscreen_hint">Trái để xem kênh, phải để về kênh trước, giữ OK để xem tùy chọn</string>
     <string name="iptv_live_no_programme_short">Không có thông tin</string>
     <string name="iptv_live_setup_title">Thiết lập TV trực tiếp</string>
     <string name="iptv_live_setup_description">Thêm danh sách phát M3U, tài khoản Xtream hoặc cổng Stalker để bắt đầu xem. Kênh và lịch phát sóng sẽ tải trong nền.</string>

@@ -1,6 +1,7 @@
 package com.nuvio.tv.domain.model
 
 import com.nuvio.tv.data.mediaserver.ServerItemRef
+import com.nuvio.tv.core.iptv.VodRef
 
 object LibrarySyncReducer {
     fun sanitize(state: LibrarySyncState): LibrarySyncState {
@@ -128,7 +129,7 @@ object LibrarySyncReducer {
                     remoteItemsByKey[identity] = localItem
                 }
             }
-            localItems.filterValues { ServerItemRef.isServerId(it.id) }.forEach(remoteItemsByKey::putIfAbsent)
+            localItems.filterValues { ServerItemRef.isServerId(it.id) || VodRef.isVod(it.id) }.forEach(remoteItemsByKey::putIfAbsent)
             remoteItemsByKey
         }
 

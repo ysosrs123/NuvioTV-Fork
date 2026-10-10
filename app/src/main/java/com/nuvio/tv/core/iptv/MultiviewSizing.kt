@@ -33,3 +33,10 @@ fun multiviewHeights(physicalHeights: List<Int>, focused: Int, quality: Multivie
 
 fun multiviewHasRoom(currentPixelRates: List<Long>, budgetPixelsPerSecond: Long?): Boolean =
     budgetPixelsPerSecond == null || currentPixelRates.sum() + multiviewPixelRate(MULTIVIEW_RUNGS.first()) <= budgetPixelsPerSecond
+
+private val DECODE_POINTS = listOf(Triple(7680, 4320, 60), Triple(7680, 4320, 30), Triple(3840, 2160, 120), Triple(1920, 1080, 240),
+    Triple(3840, 2160, 60), Triple(3840, 2160, 50), Triple(3840, 2160, 30), Triple(1920, 1080, 120), Triple(2560, 1440, 60),
+    Triple(1920, 1080, 60), Triple(1920, 1080, 50), Triple(1920, 1080, 30)).sortedByDescending { (w, h, f) -> w.toLong() * h * f }
+
+fun multiviewDecodeBudget(covers: (width: Int, height: Int, frameRate: Int) -> Boolean): Long? =
+    DECODE_POINTS.firstOrNull { (w, h, f) -> covers(w, h, f) }?.let { (w, h, f) -> w.toLong() * h * f }

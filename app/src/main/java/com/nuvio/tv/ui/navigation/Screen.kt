@@ -11,8 +11,8 @@ sealed class Screen(val route: String) {
     data object IptvVod : Screen("iptv/vod/{kind}") {
         fun createRoute(kind: String): String = "iptv/vod/${URLEncoder.encode(kind, "UTF-8")}"
     }
-    data object IptvVodTitle : Screen("iptv/vod-title/{ref}") {
-        fun createRoute(ref: String): String = "iptv/vod-title/${URLEncoder.encode(ref, "UTF-8").replace("+", "%20")}"
+    data object IptvVodTitle : Screen("iptv/vod-title/{ref}?resolve={resolve}") {
+        fun createRoute(ref: String, resolve: Boolean = true): String = "iptv/vod-title/${URLEncoder.encode(ref, "UTF-8").replace("+", "%20")}?resolve=$resolve"
     }
     data object Home : Screen("home")
     data object Detail : Screen("detail/{itemId}/{itemType}?addonBaseUrl={addonBaseUrl}&returnFocusSeason={returnFocusSeason}&returnFocusEpisode={returnFocusEpisode}&returnToHomeOnBack={returnToHomeOnBack}&heroBackdropUrl={heroBackdropUrl}&playOnLoad={playOnLoad}&manualSelection={manualSelection}&heroLogoUrl={heroLogoUrl}") {

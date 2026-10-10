@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">التخطيط</string>
     <string name="iptv_widgets_layout_subtitle">تُخفى الأدوات التي لا تتسع لها هذه الشاشة</string>
     <string name="iptv_widgets_layout_one">أداة واحدة عريضة</string>
-    <string name="iptv_widgets_layout_two">أداتان</string>
-    <string name="iptv_widgets_layout_three">ثلاث أدوات</string>
     <string name="iptv_widgets_cities">تغيير المدن</string>
     <string name="iptv_widgets_cities_subtitle">ما يصل إلى أربع مدن. اختر مدينة لإزالتها.</string>
     <string name="iptv_widgets_city_add">إضافة مدينة</string>
@@ -55,8 +53,4 @@
     <string name="iptv_widgets_no_recordings">لا توجد تسجيلات جارية أو مجدولة</string>
     <string name="iptv_widgets_nothing_playing">لا يُعرض شيء</string>
     <string name="iptv_widgets_stream_waiting">في انتظار الصورة</string>
-    <string name="iptv_widgets_stream_resolution">الصورة</string>
-    <string name="iptv_widgets_stream_codec">الترميز</string>
-    <string name="iptv_widgets_stream_range">النطاق</string>
-    <string name="iptv_widgets_stream_bitrate">معدل البت</string>
 </resources>

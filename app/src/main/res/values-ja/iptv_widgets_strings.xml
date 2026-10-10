@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">レイアウト</string>
     <string name="iptv_widgets_layout_subtitle">この画面に収まらないウィジェットは非表示になります</string>
     <string name="iptv_widgets_layout_one">ワイドウィジェット 1 つ</string>
-    <string name="iptv_widgets_layout_two">ウィジェット 2 つ</string>
-    <string name="iptv_widgets_layout_three">ウィジェット 3 つ</string>
     <string name="iptv_widgets_cities">都市を変更</string>
     <string name="iptv_widgets_cities_subtitle">最大 4 都市。都市を選択すると削除されます。</string>
     <string name="iptv_widgets_city_add">都市を追加</string>
@@ -45,8 +43,4 @@
     <string name="iptv_widgets_no_recordings">録画中または予約中の番組はありません</string>
     <string name="iptv_widgets_nothing_playing">再生中の番組はありません</string>
     <string name="iptv_widgets_stream_waiting">映像を待機中</string>
-    <string name="iptv_widgets_stream_resolution">映像</string>
-    <string name="iptv_widgets_stream_codec">コーデック</string>
-    <string name="iptv_widgets_stream_range">レンジ</string>
-    <string name="iptv_widgets_stream_bitrate">ビットレート</string>
 </resources>

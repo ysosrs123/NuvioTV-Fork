@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">פריסה</string>
     <string name="iptv_widgets_layout_subtitle">ווידג׳טים שלא נכנסים במסך הזה מוסתרים</string>
     <string name="iptv_widgets_layout_one">ווידג׳ט רחב אחד</string>
-    <string name="iptv_widgets_layout_two">שני ווידג׳טים</string>
-    <string name="iptv_widgets_layout_three">שלושה ווידג׳טים</string>
     <string name="iptv_widgets_cities">שינוי ערים</string>
     <string name="iptv_widgets_cities_subtitle">עד ארבע ערים. יש לבחור עיר כדי להסיר אותה.</string>
     <string name="iptv_widgets_city_add">הוספת עיר</string>
@@ -51,8 +49,4 @@
     <string name="iptv_widgets_no_recordings">אין הקלטות פעילות או מתוזמנות</string>
     <string name="iptv_widgets_nothing_playing">לא מופעל דבר</string>
     <string name="iptv_widgets_stream_waiting">ממתין לתמונה</string>
-    <string name="iptv_widgets_stream_resolution">תמונה</string>
-    <string name="iptv_widgets_stream_codec">קודק</string>
-    <string name="iptv_widgets_stream_range">טווח</string>
-    <string name="iptv_widgets_stream_bitrate">קצב סיביות</string>
 </resources>

@@ -137,7 +137,8 @@ class MetaDetailsViewModel @Inject constructor(
 ) : ViewModel() {
     private val traceSetup = com.nuvio.tv.core.performance.DetailEntryTrace.mark("viewmodel_setup")
     private val itemId: String = savedStateHandle["itemId"] ?: ""
-    private val isServerItem = ServerItemRef.isServerId(itemId)
+    private val isIptvVodItem = com.nuvio.tv.core.iptv.VodDetailRoute.ownTitle(itemId) != null
+    private val isServerItem = ServerItemRef.isServerId(itemId) || isIptvVodItem
     private val itemType: String = savedStateHandle["itemType"] ?: ""
     private val preferredAddonBaseUrl: String? = savedStateHandle["addonBaseUrl"]
 
@@ -247,7 +248,7 @@ class MetaDetailsViewModel @Inject constructor(
         contentId: String?,
         source: String
     ) {
-        if (!detailsResumed.value || !com.nuvio.tv.core.stream.StreamPrefetchCache.speculationAllowed.value || type.isBlank() || videoId.isBlank()) return
+        if (isIptvVodItem || !detailsResumed.value || !com.nuvio.tv.core.stream.StreamPrefetchCache.speculationAllowed.value || type.isBlank() || videoId.isBlank()) return
         val key = com.nuvio.tv.core.stream.StreamPrefetchCache.keyOf(type, videoId, season, episode)
         if (key == lastStreamPrefetchKey) return
         lastStreamPrefetchKey = key

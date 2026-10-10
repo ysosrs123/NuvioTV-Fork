@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Rozloženie</string>
     <string name="iptv_widgets_layout_subtitle">Miniaplikácie, ktoré sa na túto obrazovku nezmestia, sú skryté</string>
     <string name="iptv_widgets_layout_one">Jedna široká miniaplikácia</string>
-    <string name="iptv_widgets_layout_two">Dve miniaplikácie</string>
-    <string name="iptv_widgets_layout_three">Tri miniaplikácie</string>
     <string name="iptv_widgets_cities">Zmeniť mestá</string>
     <string name="iptv_widgets_cities_subtitle">Až štyri mestá. Výberom mesta ho odstránite.</string>
     <string name="iptv_widgets_city_add">Pridať mesto</string>
@@ -51,8 +49,4 @@
     <string name="iptv_widgets_no_recordings">Nič sa nenahráva ani nie je naplánované</string>
     <string name="iptv_widgets_nothing_playing">Nič sa neprehráva</string>
     <string name="iptv_widgets_stream_waiting">Čaká sa na obraz</string>
-    <string name="iptv_widgets_stream_resolution">Obraz</string>
-    <string name="iptv_widgets_stream_codec">Kodek</string>
-    <string name="iptv_widgets_stream_range">Rozsah</string>
-    <string name="iptv_widgets_stream_bitrate">Dátový tok</string>
 </resources>

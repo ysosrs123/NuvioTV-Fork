@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">लेआउट</string>
     <string name="iptv_widgets_layout_subtitle">जो विजेट इस स्क्रीन पर नहीं आते, वे छिपा दिए जाते हैं</string>
     <string name="iptv_widgets_layout_one">एक चौड़ा विजेट</string>
-    <string name="iptv_widgets_layout_two">दो विजेट</string>
-    <string name="iptv_widgets_layout_three">तीन विजेट</string>
     <string name="iptv_widgets_cities">शहर बदलें</string>
     <string name="iptv_widgets_cities_subtitle">अधिकतम चार शहर। किसी शहर को हटाने के लिए उसे चुनें।</string>
     <string name="iptv_widgets_city_add">शहर जोड़ें</string>
@@ -47,8 +45,4 @@
     <string name="iptv_widgets_no_recordings">कुछ भी रिकॉर्ड या शेड्यूल नहीं है</string>
     <string name="iptv_widgets_nothing_playing">कुछ नहीं चल रहा</string>
     <string name="iptv_widgets_stream_waiting">तस्वीर का इंतज़ार</string>
-    <string name="iptv_widgets_stream_resolution">तस्वीर</string>
-    <string name="iptv_widgets_stream_codec">कोडेक</string>
-    <string name="iptv_widgets_stream_range">रेंज</string>
-    <string name="iptv_widgets_stream_bitrate">बिटरेट</string>
 </resources>

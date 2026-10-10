@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Layout</string>
     <string name="iptv_widgets_layout_subtitle">Widgets, der ikke passer på denne skærm, skjules</string>
     <string name="iptv_widgets_layout_one">Én bred widget</string>
-    <string name="iptv_widgets_layout_two">To widgets</string>
-    <string name="iptv_widgets_layout_three">Tre widgets</string>
     <string name="iptv_widgets_cities">Skift byer</string>
     <string name="iptv_widgets_cities_subtitle">Op til fire byer. Vælg en by for at fjerne den.</string>
     <string name="iptv_widgets_city_add">Tilføj en by</string>
@@ -47,8 +45,4 @@
     <string name="iptv_widgets_no_recordings">Intet optages eller er planlagt</string>
     <string name="iptv_widgets_nothing_playing">Intet afspilles</string>
     <string name="iptv_widgets_stream_waiting">Venter på billedet</string>
-    <string name="iptv_widgets_stream_resolution">Billede</string>
-    <string name="iptv_widgets_stream_codec">Codec</string>
-    <string name="iptv_widgets_stream_range">Område</string>
-    <string name="iptv_widgets_stream_bitrate">Bitrate</string>
 </resources>

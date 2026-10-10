@@ -9,6 +9,7 @@ import com.nuvio.tv.data.local.TraktSettingsDataStore
 import com.nuvio.tv.data.local.WatchedItemsGeneration
 import com.nuvio.tv.data.local.WatchedItemsPreferences
 import com.nuvio.tv.data.mediaserver.ServerItemRef
+import com.nuvio.tv.core.iptv.VodRef
 import com.nuvio.tv.data.remote.supabase.SupabaseWatchedItem
 import com.nuvio.tv.data.remote.supabase.SupabaseWatchedItemEvent
 import com.nuvio.tv.domain.model.WatchedItem
@@ -146,7 +147,7 @@ class WatchedItemsSyncService @Inject constructor(
         profileId: Int
     ): Result<Unit> {
         return try {
-            val items = items.filterNot { ServerItemRef.isServerId(it.contentId) }
+            val items = items.filterNot { ServerItemRef.isServerId(it.contentId) || VodRef.isVod(it.contentId) }
             if (items.isEmpty()) return Result.success(Unit)
             val generation = watchedItemsPreferences.captureGeneration(profileId)
             Log.d(TAG, "pushItemsToRemote: ${items.size} watched items to push")
@@ -444,7 +445,7 @@ class WatchedItemsSyncService @Inject constructor(
         profileId: Int
     ): Result<Unit> {
         return try {
-            val distinctKeys = keys.filterNot { ServerItemRef.isServerId(it.contentId) }.toSet()
+            val distinctKeys = keys.filterNot { ServerItemRef.isServerId(it.contentId) || VodRef.isVod(it.contentId) }.toSet()
             if (distinctKeys.isEmpty()) return Result.success(Unit)
 
             val params = buildJsonObject {

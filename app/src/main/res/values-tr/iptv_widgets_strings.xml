@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Düzen</string>
     <string name="iptv_widgets_layout_subtitle">Bu ekrana sığmayan widget\'lar gizlenir</string>
     <string name="iptv_widgets_layout_one">Bir geniş widget</string>
-    <string name="iptv_widgets_layout_two">İki widget</string>
-    <string name="iptv_widgets_layout_three">Üç widget</string>
     <string name="iptv_widgets_cities">Şehirleri değiştir</string>
     <string name="iptv_widgets_cities_subtitle">En fazla dört şehir. Kaldırmak için bir şehir seçin.</string>
     <string name="iptv_widgets_city_add">Şehir ekle</string>
@@ -47,8 +45,4 @@
     <string name="iptv_widgets_no_recordings">Kaydedilen veya planlanan bir şey yok</string>
     <string name="iptv_widgets_nothing_playing">Hiçbir şey oynatılmıyor</string>
     <string name="iptv_widgets_stream_waiting">Görüntü bekleniyor</string>
-    <string name="iptv_widgets_stream_resolution">Görüntü</string>
-    <string name="iptv_widgets_stream_codec">Codec</string>
-    <string name="iptv_widgets_stream_range">Aralık</string>
-    <string name="iptv_widgets_stream_bitrate">Bit hızı</string>
 </resources>

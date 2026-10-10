@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Канала с таким номером нет</string>
     <string name="iptv_live_minutes_left">Осталось %1$d мин</string>
     <string name="iptv_live_starts_in">Начало через %1$d мин</string>
-    <string name="iptv_live_fullscreen_hint">Влево — каналы, вправо — предыдущий канал, удерживайте OK для параметров</string>
     <string name="iptv_live_no_programme_short">Нет информации</string>
     <string name="iptv_live_setup_title">Настройка ТВ-эфира</string>
     <string name="iptv_live_setup_description">Добавьте плейлист M3U, аккаунт Xtream или портал Stalker, чтобы начать просмотр. Каналы и телепрограмма загружаются в фоне.</string>

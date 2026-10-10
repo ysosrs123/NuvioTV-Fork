@@ -16,6 +16,7 @@ import com.nuvio.tv.domain.model.AddonResource
 import com.nuvio.tv.domain.model.enabledAddons
 import com.nuvio.tv.domain.repository.AddonRepository
 import com.nuvio.tv.domain.repository.MetaRepository
+import com.nuvio.tv.ui.screens.iptv.IptvVodMeta
 import com.nuvio.tv.core.health.AddonHealthStore
 import com.nuvio.tv.core.health.HealthOutcome
 import com.nuvio.tv.core.util.canonicalizeAddonUrl
@@ -196,6 +197,10 @@ class MetaRepositoryImpl @Inject constructor(
             emitAll(serverMeta(ref))
             return@flow
         }
+        if (IptvVodMeta.handles(id)) {
+            emitAll(IptvVodMeta.flow(context, id))
+            return@flow
+        }
         if (ServerCatalog.isServerAddon(addonBaseUrl)) {
             emitAll(getMetaFromAllAddons(type, id))
             return@flow
@@ -301,6 +306,10 @@ class MetaRepositoryImpl @Inject constructor(
     ): Flow<NetworkResult<Meta>> = flow {
         ServerItemRef.parse(id)?.let { ref ->
             emitAll(serverMeta(ref))
+            return@flow
+        }
+        if (IptvVodMeta.handles(id)) {
+            emitAll(IptvVodMeta.flow(context, id))
             return@flow
         }
         val cacheKey = metaLookupCacheKey(type, id)
@@ -576,6 +585,10 @@ class MetaRepositoryImpl @Inject constructor(
     ): Flow<NetworkResult<Meta>> = flow {
         ServerItemRef.parse(id)?.let { ref ->
             emitAll(serverMeta(ref))
+            return@flow
+        }
+        if (IptvVodMeta.handles(id)) {
+            emitAll(IptvVodMeta.flow(context, id))
             return@flow
         }
         val cacheKey = metaLookupCacheKey(type, id)
@@ -891,6 +904,7 @@ class MetaRepositoryImpl @Inject constructor(
 
     override fun getCachedMeta(type: String, id: String): Meta? {
         if (ServerItemRef.isServerId(id)) return serverMetaCache[id]?.takeIf { !it.isExpired() }?.meta
+        if (IptvVodMeta.handles(id)) return IptvVodMeta.cached(context, id)
         val cacheKey = metaLookupCacheKey(type, id)
         return addonMetaCache[cacheKey]?.takeIf { !it.isExpired() }?.meta
     }

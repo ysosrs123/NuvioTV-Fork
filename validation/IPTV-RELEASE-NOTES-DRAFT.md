@@ -521,6 +521,29 @@ Sport:
 - TheSportsDB key: the Show button lines up with the field; Live TV settings dialogs opened
   from the main Settings are opaque.
 
+Multiview:
+- Add to multiview from full screen keeps the channel playing in the first picture without
+  a restart (when it is playing live; otherwise it reopens as before).
+- The multiview channel list offers all channels and categories (press Left), including
+  when multiview was opened from Sport.
+- Sound follows the focused picture reliably, including AC-3/E-AC-3 passthrough to a
+  receiver (other pictures have their audio turned off, not just muted).
+- Multiview explains why a channel can't be added (connections in use, decoder, memory,
+  layout full, already shown) instead of doing nothing; the decoder budget now also counts
+  4K and high frame rate capability, so boxes that can decode more get more pictures.
+
+Movies, series and recordings:
+- IPTV movies and series open on Nuvio's full detail page, using addon, TMDB (movies) or the
+  provider's own information (plot, artwork, cast, seasons and episodes); Play starts the
+  IPTV stream and resume stays local. The IPTV title page remains only as a last fallback.
+  Library and watched marks for provider-only titles stay on this TV (not synced).
+- Recordings play in Nuvio's normal player (seek bar, skip, audio and subtitle tracks,
+  stats), including recordings on USB or a network share, through a local stream on the TV.
+
+Guide:
+- A background guide reload keeps each channel's programmes until the new ones arrive, so
+  the grid no longer shows "Programme information unavailable" during a guide update.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

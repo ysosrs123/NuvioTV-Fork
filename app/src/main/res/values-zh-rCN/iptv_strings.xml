@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">没有此编号的频道</string>
     <string name="iptv_live_minutes_left">剩余 %1$d 分钟</string>
     <string name="iptv_live_starts_in">%1$d 分钟后开始</string>
-    <string name="iptv_live_fullscreen_hint">左键查看频道，右键返回上一频道，长按 OK 显示选项</string>
     <string name="iptv_live_no_programme_short">暂无信息</string>
     <string name="iptv_live_setup_title">设置直播电视</string>
     <string name="iptv_live_setup_description">添加 M3U 播放列表、Xtream 账户或 Stalker 门户即可开始观看。频道和节目单会在后台加载。</string>

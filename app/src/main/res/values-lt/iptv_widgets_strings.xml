@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Išdėstymas</string>
     <string name="iptv_widgets_layout_subtitle">Valdikliai, kurie netelpa šiame ekrane, slepiami</string>
     <string name="iptv_widgets_layout_one">Vienas platus valdiklis</string>
-    <string name="iptv_widgets_layout_two">Du valdikliai</string>
-    <string name="iptv_widgets_layout_three">Trys valdikliai</string>
     <string name="iptv_widgets_cities">Keisti miestus</string>
     <string name="iptv_widgets_cities_subtitle">Iki keturių miestų. Pasirinkite miestą, kad jį pašalintumėte.</string>
     <string name="iptv_widgets_city_add">Pridėti miestą</string>
@@ -51,8 +49,4 @@
     <string name="iptv_widgets_no_recordings">Niekas neįrašoma ir nesuplanuota</string>
     <string name="iptv_widgets_nothing_playing">Niekas neleidžiama</string>
     <string name="iptv_widgets_stream_waiting">Laukiama vaizdo</string>
-    <string name="iptv_widgets_stream_resolution">Vaizdas</string>
-    <string name="iptv_widgets_stream_codec">Kodekas</string>
-    <string name="iptv_widgets_stream_range">Diapazonas</string>
-    <string name="iptv_widgets_stream_bitrate">Sparta</string>
 </resources>

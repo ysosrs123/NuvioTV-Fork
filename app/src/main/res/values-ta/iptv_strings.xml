@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">இந்த எண்ணில் சேனல் இல்லை</string>
     <string name="iptv_live_minutes_left">%1$d நிமி. மீதம்</string>
     <string name="iptv_live_starts_in">%1$d நிமிடத்தில் தொடங்கும்</string>
-    <string name="iptv_live_fullscreen_hint">சேனல்களுக்கு இடது, கடைசி சேனலுக்கு வலது, விருப்பங்களுக்கு OK-ஐ அழுத்திப் பிடிக்கவும்</string>
     <string name="iptv_live_no_programme_short">தகவல் இல்லை</string>
     <string name="iptv_live_setup_title">நேரலை டிவியை அமை</string>
     <string name="iptv_live_setup_description">பார்க்கத் தொடங்க M3U பிளேலிஸ்ட், Xtream கணக்கு அல்லது Stalker போர்ட்டலைச் சேர்க்கவும். சேனல்களும் நிகழ்ச்சி வழிகாட்டியும் பின்னணியில் ஏற்றப்படும்.</string>

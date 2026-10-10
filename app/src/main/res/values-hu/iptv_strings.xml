@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Nincs csatorna ezzel a számmal</string>
     <string name="iptv_live_minutes_left">Még %1$d perc</string>
     <string name="iptv_live_starts_in">%1$d perc múlva kezdődik</string>
-    <string name="iptv_live_fullscreen_hint">Balra a csatornák, jobbra az előző csatorna, OK nyomva tartása a lehetőségekhez</string>
     <string name="iptv_live_no_programme_short">Nincs információ</string>
     <string name="iptv_live_setup_title">Élő TV beállítása</string>
     <string name="iptv_live_setup_description">A nézéshez adj hozzá egy M3U lejátszási listát, egy Xtream-fiókot vagy egy Stalker-portált. A csatornák és a műsorújság a háttérben töltődnek be.</string>

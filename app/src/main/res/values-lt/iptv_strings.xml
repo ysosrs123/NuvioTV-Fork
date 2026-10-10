@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Kanalo tokiu numeriu nėra</string>
     <string name="iptv_live_minutes_left">Liko %1$d min.</string>
     <string name="iptv_live_starts_in">Prasidės po %1$d min.</string>
-    <string name="iptv_live_fullscreen_hint">Kairėn – kanalai, dešinėn – paskutinis kanalas, laikykite OK – parinktys</string>
     <string name="iptv_live_no_programme_short">Nėra informacijos</string>
     <string name="iptv_live_setup_title">Nustatyti tiesioginę TV</string>
     <string name="iptv_live_setup_description">Pridėkite M3U grojaraštį, Xtream paskyrą arba Stalker portalą ir pradėkite žiūrėti. Kanalai ir TV programa įkeliami fone.</string>

@@ -3,6 +3,7 @@ package com.nuvio.tv.ui.screens.iptv
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.*
@@ -43,7 +44,8 @@ data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source
 data class IptvSourceCategories(val source: IptvSource, val categories: List<IptvCategory>)
 
 data class IptvPicker(val ref: IptvSourceRef, val channels: List<IptvListedChannel> = emptyList(), val next: IptvBrowseCursor? = null,
-    val loading: Boolean = true)
+    val loading: Boolean = true, val category: String? = null, val favourites: Boolean = false, val categories: List<IptvCategory>? = null,
+    val hidden: Set<String> = emptySet())
 
 data class IptvTile(val row: IptvListedChannel, val playback: IptvLivePlayback? = null, val player: ExoPlayer? = null,
     val playing: Boolean = false, val failure: Int? = null)
@@ -476,11 +478,17 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                 val rows = if (ref == null || loaded.isEmpty()) emptyMap() else loaded.chunked(200).fold(emptyMap<String, GuideGridRow>()) { acc, part -> acc + browse.guideRows(current.profileId, part, window) }
                 if (session === current && request == pageVersion) {
                     val channels = if (append) state.channels + loaded else loaded
+                    val loadedIds = loaded.mapTo(HashSet()) { it.item.channel.id }
                     val focusedId = mutable.value.focused?.item?.channel?.id
                     val focused = channels.firstOrNull { it.item.channel.id == focusedId }
                         ?: channels.firstOrNull { it.item.channel.id == state.playingId } ?: channels.firstOrNull()
                     mutable.update { it.copy(sources = sources, source = ref, channels = channels, next = page?.catalogue?.next,
-                        categories = categories, guide = if (append) it.guide + rows else rows, window = window, focused = focused) }
+                        categories = categories, window = window, focused = focused, guide = when {
+                        append -> it.guide + rows
+                        background && window == it.window -> rows + it.guide.filterKeys { id ->
+                            rows[id]?.cells?.none { c -> c is GuideProgrammeCell } != false && id in loadedIds }
+                        else -> rows
+                    }) }
                     if (!append && mutable.value.allSources) loadSourceCategories(sources)
                 }
             } catch (cancel: CancellationException) { throw cancel }
@@ -820,7 +828,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                         alternatives = plan.drop(1).map { it.url to (it.format ?: streamFormat) },
                         onAlternative = { index -> catchupConnection?.let { styles.worked(it, plan.getOrNull(index)?.style) } },
                         onFailure = { failure = it },
-                        onPlaying = { playing -> if (request == tuneVersion) {
+                        onPlaying = { playing -> if (request != tuneVersion) handedTile(created, playing = playing) else {
                             mutable.update { it.copy(playing = playing) }
                             if (playing && !logged) {
                                 logged = true
@@ -829,7 +837,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                                     "close ms=${closed - resolved} play ms=${now - closed} total ms=${now - started} ${created.startSummary()}")
                             }
                         } },
-                        onError = { if (request == tuneVersion) {
+                        onError = { if (request != tuneVersion) handedTile(created, failed = true) else {
                             if (from != null) watch(row, notice = R.string.iptv_live_timeshift_unavailable)
                             else if (catchup != null || !switchToBackup(row)) { stop(keepChannel = true); if (!auto) mutable.update { it.copy(message = failureMessage(failure)) } }
                         } },
@@ -1086,7 +1094,15 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     fun pickerSource(ref: IptvSourceRef?) {
         pickerJob?.cancel()
         if (ref == null || (ref == mutable.value.source && !mutable.value.mergedFavourites)) { mutable.update { it.copy(picker = null) }; return }
-        mutable.update { it.copy(picker = IptvPicker(ref)) }
+        mutable.update { it.copy(picker = IptvPicker(ref, hidden = hiddenOf(ref))) }
+        loadPicker(ref, null)
+    }
+    fun pickerCategory(favourites: Boolean, category: String?) {
+        val state = mutable.value
+        val ref = state.picker?.ref ?: state.source ?: return
+        pickerJob?.cancel()
+        mutable.update { it.copy(picker = IptvPicker(ref, category = category.takeUnless { favourites }, favourites = favourites,
+            categories = it.picker?.takeIf { picker -> picker.ref == ref }?.categories ?: it.categories.takeIf { _ -> ref == it.source }, hidden = hiddenOf(ref))) }
         loadPicker(ref, null)
     }
     fun pickerMore() {
@@ -1097,14 +1113,20 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val current = session ?: return
         pickerJob?.cancel()
         mutable.update { it.copy(picker = it.picker?.copy(loading = true)) }
+        val chosen = mutable.value.picker?.takeIf { it.ref == ref }
         pickerJob = viewModelScope.launch {
-            val query = IptvBrowseQuery(excludedCategories = hiddenOf(ref).take(500).toSet())
+            val favourites = chosen?.favourites == true
+            val category = chosen?.category.takeUnless { favourites }
+            val query = IptvBrowseQuery(favouritesOnly = favourites, category = category,
+                excludedCategories = if (favourites || category != null) emptySet() else hiddenOf(ref).take(500).toSet())
+            val categories = chosen?.categories ?: runCatching { withContext(Dispatchers.IO) { access.use(current) { ordered(ref, catalogue.categories(ref)) } } }
+                .getOrElse { if (it is CancellationException) throw it; null }
             val page = runCatching { browse.page(ref, query, cursor?.takeIf { it.query == query }, PICKER_PAGE) }
                 .getOrElse { if (it is CancellationException) throw it; null }
             if (session === current) mutable.update { state ->
-                val picker = state.picker?.takeIf { it.ref == ref } ?: return@update state
+                val picker = state.picker?.takeIf { it.ref == ref && it.favourites == favourites && it.category == category } ?: return@update state
                 state.copy(picker = picker.copy(channels = if (cursor == null) page?.channels.orEmpty() else picker.channels + page?.channels.orEmpty(),
-                    next = page?.catalogue?.next, loading = false))
+                    next = page?.catalogue?.next, loading = false, categories = picker.categories ?: categories))
             }
         }
     }
@@ -1123,14 +1145,21 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         }
     fun startMultiview(rows: List<IptvListedChannel>) {
         val tiles = rows.distinctBy { it.item.channel.id }.take(device.maxTiles)
-        if (device.maxTiles < 2 || tiles.isEmpty() || session == null || !foreground) return
+        if (device.maxTiles < 2) { mutable.update { it.copy(message = R.string.iptv_inset_unsupported) }; return }
+        if (tiles.isEmpty() || session == null || !foreground) return
         closeInset()
         ensureGuide(tiles)
+        val live = mutable.value
+        val kept = live.playback?.takeIf { playback -> live.player === playback.player && live.playingId == tiles.first().row.item.channel.id && live.playing &&
+            !live.tuning && tuneJob?.isActive != true && live.catchup == null && !live.paused && !live.reconnecting && !live.localTimeshift && !playback.localTimeshift && playback.live }
         ++tuneVersion; tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel()
-        runtime.interrupt(owner)
+        if (kept == null) runtime.interrupt(owner)
+        tileJobs.forEach { it?.cancel() }
+        val keptVersion = ++tileVersions[0]
         mutable.update { it.copy(playback = null, player = null, playingTitle = null, playing = false, reconnecting = false, catchup = null, catchupFrom = null,
             catchupUntil = null, scrubTarget = null, paused = false, pausedAt = null, pausedProgramme = null, tuning = false,
-            playingId = null, previousId = it.playingId ?: it.previousId, multiview = tiles.map { row -> IptvTile(row) }, tileFocus = 0, mainTile = 0,
+            playingId = null, previousId = it.playingId ?: it.previousId, multiview = tiles.mapIndexed { i, row ->
+                if (i == 0 && kept != null) IptvTile(row, kept, kept.player, playing = true) else IptvTile(row) }, tileFocus = 0, mainTile = 0,
             panelHeight = AndroidDeviceProfile.panelHeight(context), tileHeights = emptyList(),
             multiviewLayout = livePreferences.multiviewLayout, multiviewQuality = livePreferences.multiviewQuality) }
         tileSizes = emptyList()
@@ -1138,9 +1167,48 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         val generation = ++multiviewGeneration
         multiviewJob = viewModelScope.launch {
             previous?.join()
+            val handed = kept != null && generation == multiviewGeneration && tileVersions[0] == keptVersion &&
+                runtime.handOver(owner, tileRuntimes[0], device.tileBufferBytes.toLong(), 4L * device.tileBufferBytes)
+            if (kept != null) IptvLog.info("multiview handover kept=$handed")
+            if (kept != null && !handed) mutable.update { state -> state.copy(multiview = state.multiview?.mapIndexed { i, tile ->
+                if (i == 0 && tile.playback === kept) IptvTile(tile.row) else tile }) }
             if (!runtime.stop(owner) && generation == multiviewGeneration) mutable.update { it.copy(message = R.string.iptv_live_closing) }
-            if (generation == multiviewGeneration) tiles.indices.forEach(::openTile)
+            if (generation != multiviewGeneration) return@launch
+            if (handed) { kept?.limitHeight(tileHeight(0)); applyTileAudio() }
+            tiles.indices.filter { !handed || it > 0 }.forEach(::openTile)
         }
+    }
+    private fun handedTile(playback: IptvLivePlayback, playing: Boolean? = null, failed: Boolean = false) {
+        val index = mutable.value.multiview?.indexOfFirst { it.playback === playback }?.takeIf { it >= 0 } ?: return
+        mutable.update { state -> state.copy(multiview = state.multiview?.mapIndexed { i, tile -> if (i != index || tile.playback !== playback) tile
+            else if (failed) tile.copy(failure = R.string.iptv_live_failed, playing = false, player = null, playback = null) else tile.copy(playing = playing ?: tile.playing) }) }
+        if (failed) { val version = tileVersions[index]; viewModelScope.launch { if (tileVersions[index] == version) tileRuntimes[index].stop(owner) } }
+        else if (playing == true) applyTileAudio()
+    }
+    private fun applyTileAudio() {
+        val state = mutable.value
+        val tiles = state.multiview ?: return
+        val order = tiles.indices.sortedBy { it == state.tileFocus }
+        order.forEach { i ->
+            val player = tiles[i].player ?: return@forEach
+            val audible = i == state.tileFocus
+            runCatching {
+                player.volume = if (audible) 1f else 0f
+                player.trackSelectionParameters = player.trackSelectionParameters.buildUpon().setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, !audible).build()
+            }
+        }
+    }
+    private fun refusal(tile: LivePlaybackRuntime, result: LiveOpenResult): Int = when (result) {
+        LiveOpenResult.CAPACITY -> when (tile.lastDenial) {
+            AdmissionDenial.ACCOUNT_LIMIT -> R.string.iptv_multiview_account_full
+            AdmissionDenial.DEVICE_DECODERS -> R.string.iptv_multiview_decoder_full
+            AdmissionDenial.DEVICE_MEMORY -> R.string.iptv_multiview_memory_full
+            AdmissionDenial.ACQUISITION_CLOSING -> R.string.iptv_live_closing
+            else -> R.string.iptv_multiview_capacity
+        }
+        LiveOpenResult.SHARING_UNAVAILABLE -> R.string.iptv_multiview_capacity
+        LiveOpenResult.CLOSE_UNCONFIRMED -> R.string.iptv_live_closing
+        else -> R.string.iptv_live_failed
     }
     fun addToMultiview(row: IptvListedChannel) {
         val tiles = mutable.value.multiview
@@ -1149,7 +1217,10 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             startMultiview(listOfNotNull(playing, row))
             return
         }
-        if (tiles.size >= device.maxTiles || tiles.any { it.row.item.channel.id == row.item.channel.id }) return
+        if (tiles.any { it.row.item.channel.id == row.item.channel.id }) { mutable.update { it.copy(message = R.string.iptv_multiview_already) }; return }
+        if (tiles.size >= minOf(device.maxTiles, multiviewMaxTiles(mutable.value.multiviewLayout, device.maxTiles))) {
+            mutable.update { it.copy(message = R.string.iptv_multiview_tiles_full) }; return
+        }
         val load = tiles.mapIndexed { i, tile -> tile.playback?.pixelRate ?: multiviewPixelRate(tileHeight(i)) }
         if (!multiviewHasRoom(load, device.decodeBudget)) { mutable.update { it.copy(message = R.string.iptv_multiview_decoder_full) }; return }
         ensureGuide(listOf(row))
@@ -1158,7 +1229,8 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     }
     fun replaceTile(index: Int, row: IptvListedChannel) {
         val tiles = mutable.value.multiview ?: return
-        if (index !in tiles.indices || tiles.any { it.row.item.channel.id == row.item.channel.id }) return
+        if (index !in tiles.indices) return
+        if (tiles.any { it.row.item.channel.id == row.item.channel.id }) { mutable.update { it.copy(message = R.string.iptv_multiview_already) }; return }
         ensureGuide(listOf(row))
         mutable.update { it.copy(multiview = tiles.toMutableList().also { list -> list[index] = IptvTile(row) }) }
         afterMultiviewJob { openTile(index) }
@@ -1217,7 +1289,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         if (index !in tiles.indices) return
         mutable.update { it.copy(tileFocus = index) }
         applyTileHeights()
-        tiles.forEachIndexed { i, tile -> tile.player?.volume = if (i == index) 1f else 0f }
+        applyTileAudio()
     }
     fun exitMultiview(continueWith: IptvListedChannel? = null) {
         val tiles = mutable.value.multiview ?: return
@@ -1259,24 +1331,28 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     check(session === current && foreground && tileVersions[index] == version)
                     IptvLivePlayback(context, liveLocator(current, ref, source, item), purpose, format, headers = StreamHeaders.requestHeaders(item.attributes),
                         sourceUserAgent = livePreferences.userAgent(ref),
-                        onPlaying = { playing -> patch { it.copy(playing = playing) } },
+                        onPlaying = { playing -> patch { it.copy(playing = playing) }; if (playing) applyTileAudio() },
                         onError = {
                             patch { it.copy(failure = R.string.iptv_live_failed, playing = false, player = null, playback = null) }
                             if (tileVersions[index] == version) viewModelScope.launch { tileRuntimes[index].stop(owner) }
                         }, handleAudioFocus = false,
                         maxVideoHeight = tileHeight(index), targetBufferBytes = device.tileBufferBytes)
                         .also { playback ->
-                            playback.player.volume = if (mutable.value.tileFocus == index) 1f else 0f
+                            val audible = mutable.value.tileFocus == index
+                            playback.player.volume = if (audible) 1f else 0f
+                            playback.player.trackSelectionParameters = playback.player.trackSelectionParameters.buildUpon()
+                                .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, !audible).build()
                             patch { it.copy(playback = playback, player = playback.player) }
                         }
                 }
-                if (result != LiveOpenResult.OPENED) patch { it.copy(playback = null, player = null, failure = when (result) {
-                    LiveOpenResult.CAPACITY, LiveOpenResult.SHARING_UNAVAILABLE -> R.string.iptv_multiview_capacity
-                    LiveOpenResult.CLOSE_UNCONFIRMED -> R.string.iptv_live_closing
-                    else -> R.string.iptv_live_failed
-                }) }
+                if (result != LiveOpenResult.OPENED) {
+                    val failure = refusal(tileRuntimes[index], result)
+                    IptvLog.info("multiview tile refused result=$result denial=${tileRuntimes[index].lastDenial}")
+                    patch { it.copy(playback = null, player = null, failure = failure) }
+                    if (tileVersions[index] == version) mutable.update { it.copy(message = failure) }
+                }
             } catch (cancel: CancellationException) { throw cancel }
-            catch (_: Exception) { patch { it.copy(failure = R.string.iptv_live_failed) } }
+            catch (error: Exception) { IptvLog.failure("multiview tile", error); patch { it.copy(failure = R.string.iptv_live_failed) } }
         }
     }
     fun stop(keepChannel: Boolean = false) {

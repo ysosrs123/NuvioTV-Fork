@@ -92,7 +92,6 @@
     <string name="iptv_live_number_missing">Niciun canal cu acest număr</string>
     <string name="iptv_live_minutes_left">%1$d min rămase</string>
     <string name="iptv_live_starts_in">Începe în %1$d min</string>
-    <string name="iptv_live_fullscreen_hint">Stânga pentru canale, dreapta pentru ultimul canal, ține apăsat OK pentru opțiuni</string>
     <string name="iptv_live_no_programme_short">Fără informații</string>
     <string name="iptv_live_setup_title">Configurează TV live</string>
     <string name="iptv_live_setup_description">Adaugă un playlist M3U, un cont Xtream sau un portal Stalker pentru a începe să urmărești. Canalele și ghidul de programe se încarcă în fundal.</string>

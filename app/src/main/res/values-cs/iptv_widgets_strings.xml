@@ -19,8 +19,6 @@
     <string name="iptv_widgets_layout">Rozvržení</string>
     <string name="iptv_widgets_layout_subtitle">Widgety, které se na tuto obrazovku nevejdou, jsou skryté</string>
     <string name="iptv_widgets_layout_one">Jeden široký widget</string>
-    <string name="iptv_widgets_layout_two">Dva widgety</string>
-    <string name="iptv_widgets_layout_three">Tři widgety</string>
     <string name="iptv_widgets_cities">Změnit města</string>
     <string name="iptv_widgets_cities_subtitle">Až čtyři města. Výběrem města ho odeberete.</string>
     <string name="iptv_widgets_city_add">Přidat město</string>
@@ -51,8 +49,4 @@
     <string name="iptv_widgets_no_recordings">Nic se nenahrává ani není naplánováno</string>
     <string name="iptv_widgets_nothing_playing">Nic se nepřehrává</string>
     <string name="iptv_widgets_stream_waiting">Čekání na obraz</string>
-    <string name="iptv_widgets_stream_resolution">Obraz</string>
-    <string name="iptv_widgets_stream_codec">Kodek</string>
-    <string name="iptv_widgets_stream_range">Rozsah</string>
-    <string name="iptv_widgets_stream_bitrate">Datový tok</string>
 </resources>

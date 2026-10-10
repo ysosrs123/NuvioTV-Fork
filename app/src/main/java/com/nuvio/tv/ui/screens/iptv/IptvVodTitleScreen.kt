@@ -52,7 +52,8 @@ import com.nuvio.tv.ui.v2.components.NuvioActionPill
 import java.util.Locale
 
 @Composable
-fun IptvVodTitleScreen(onPlay: (IptvVodPlay) -> Unit, onDetail: (VodDetailTarget) -> Unit, viewModel: IptvVodTitleViewModel = hiltViewModel()) {
+fun IptvVodTitleScreen(onPlay: (IptvVodPlay) -> Unit, onDetail: (VodDetailTarget) -> Unit, onReplace: (VodDetailTarget) -> Unit = onDetail,
+    viewModel: IptvVodTitleViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val first = remember { FocusRequester() }
     var focused by remember { mutableStateOf(false) }
@@ -68,6 +69,7 @@ fun IptvVodTitleScreen(onPlay: (IptvVodPlay) -> Unit, onDetail: (VodDetailTarget
             when (event) {
                 is IptvVodTitleEvent.Play -> onPlay(event.play)
                 is IptvVodTitleEvent.Detail -> onDetail(event.target)
+                is IptvVodTitleEvent.Replace -> onReplace(event.target)
             }
         }
     }
@@ -77,13 +79,16 @@ fun IptvVodTitleScreen(onPlay: (IptvVodPlay) -> Unit, onDetail: (VodDetailTarget
     val art = state.art
     val info = state.info
     Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
+        val poster = art?.poster ?: info?.poster ?: title?.artwork
         val backdrop = art?.backdrop ?: info?.backdrop
         val background = NuvioTheme.colors.Background
-        if (backdrop != null) {
+        val wall = backdrop ?: poster
+        if (wall != null) {
             val context = LocalContext.current
-            val request = remember(backdrop) { ImageRequest.Builder(context).data(backdrop).size(1280, 720).build() }
+            val request = remember(wall) { ImageRequest.Builder(context).data(wall).size(1280, 720).build() }
             AsyncImage(request, null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-            Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to background, .42f to background.copy(alpha = .86f), 1f to background.copy(alpha = .18f))))
+            Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to background, .42f to background.copy(alpha = .86f),
+                1f to background.copy(alpha = if (backdrop != null) .18f else .6f))))
             Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0f to Color.Transparent, .5f to Color.Transparent, 1f to background)))
         } else if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         when {
@@ -95,8 +100,8 @@ fun IptvVodTitleScreen(onPlay: (IptvVodPlay) -> Unit, onDetail: (VodDetailTarget
                 Column(Modifier.fillMaxSize().padding(start = 56.dp, end = 56.dp, top = 40.dp, bottom = if (series) 20.dp else 56.dp),
                     verticalArrangement = if (series) Arrangement.spacedBy(18.dp) else Arrangement.spacedBy(18.dp, Alignment.Bottom)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(32.dp), verticalAlignment = Alignment.Bottom) {
-                        if (backdrop == null) VodPosterImage(art?.poster ?: info?.poster ?: title.artwork, title.title, Modifier.width(200.dp).aspectRatio(2f / 3f))
-                        Column(Modifier.widthIn(max = 760.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        VodPosterImage(poster, title.title, Modifier.width(if (series) 168.dp else 220.dp).aspectRatio(2f / 3f))
+                        Column(Modifier.weight(1f, fill = false).widthIn(max = 1040.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(art?.title ?: title.title, style = MaterialTheme.typography.displayMedium, color = NuvioTheme.colors.TextPrimary,
                                 maxLines = 2, overflow = TextOverflow.Ellipsis)
                             val facts = listOfNotNull((title.year ?: art?.year ?: info?.year)?.toString(), (art?.rating ?: info?.rating ?: title.rating)?.let(::ratingText),
@@ -104,7 +109,7 @@ fun IptvVodTitleScreen(onPlay: (IptvVodPlay) -> Unit, onDetail: (VodDetailTarget
                                 info?.genre, state.source).joinToString(" · ")
                             if (facts.isNotEmpty()) Text(facts, style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
                                 overflow = TextOverflow.Ellipsis)
-                            (art?.overview ?: state.plot ?: info?.plot)?.let { Text(it, style = MaterialTheme.typography.bodyLarge, color = NuvioTheme.colors.TextSecondary, maxLines = 3,
+                            (art?.overview ?: state.plot ?: info?.plot)?.let { Text(it, style = MaterialTheme.typography.bodyLarge, color = NuvioTheme.colors.TextSecondary, maxLines = if (series) 3 else 5,
                                 overflow = TextOverflow.Ellipsis) }
                             info?.cast?.let { Text(stringResource(R.string.iptv_vod9_cast, it), style = MaterialTheme.typography.bodyMedium, color = NuvioTheme.colors.TextSecondary,
                                 maxLines = 1, overflow = TextOverflow.Ellipsis) }
