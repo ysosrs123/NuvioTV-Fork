@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">Baştan izlemek için OK</string>
+    <string name="iptv_ui18_guide_no_catchup">Bu program için geriye dönük izleme yok</string>
+    <string name="iptv_ui18_guide_back_now">Geri, şimdiki zamana döner</string>
+    <string name="iptv_ui18_guide_jump">Geri ve ileri sarma 3 saat atlar</string>
+</resources>

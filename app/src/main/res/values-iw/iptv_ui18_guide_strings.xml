@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK לצפייה מההתחלה</string>
+    <string name="iptv_ui18_guide_no_catchup">אין צפייה חוזרת לתוכנית הזו</string>
+    <string name="iptv_ui18_guide_back_now">חזרה מחזירה לעכשיו</string>
+    <string name="iptv_ui18_guide_jump">הרצה אחורה וקדימה קופצות 3 שעות</string>
+</resources>

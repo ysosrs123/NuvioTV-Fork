@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK за гледане от началото</string>
+    <string name="iptv_ui18_guide_no_catchup">Няма запис назад за това предаване</string>
+    <string name="iptv_ui18_guide_back_now">Назад връща към сега</string>
+    <string name="iptv_ui18_guide_jump">Превъртането назад и напред прескача 3 часа</string>
+</resources>

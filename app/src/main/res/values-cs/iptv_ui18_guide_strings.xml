@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK – sledovat od začátku</string>
+    <string name="iptv_ui18_guide_no_catchup">Tento pořad nelze zpětně přehrát</string>
+    <string name="iptv_ui18_guide_back_now">Zpět se vrátí na teď</string>
+    <string name="iptv_ui18_guide_jump">Přetáčení vzad a vpřed skáče o 3 hodiny</string>
+</resources>

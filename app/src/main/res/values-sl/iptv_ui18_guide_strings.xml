@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK za ogled od začetka</string>
+    <string name="iptv_ui18_guide_no_catchup">Za to oddajo ni ogleda za nazaj</string>
+    <string name="iptv_ui18_guide_back_now">Nazaj se vrne na zdaj</string>
+    <string name="iptv_ui18_guide_jump">Previjanje nazaj in naprej skoči 3 ure</string>
+</resources>

@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusDirection
@@ -47,6 +48,7 @@ import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.GuideGridRow
 import com.nuvio.tv.core.iptv.GuideGridWindow
 import com.nuvio.tv.core.iptv.GuideDensity
+import com.nuvio.tv.core.iptv.GuidePast
 import com.nuvio.tv.core.iptv.GuideProgrammeCell
 import com.nuvio.tv.core.iptv.ListMove
 import com.nuvio.tv.core.iptv.FixtureStatus
@@ -86,7 +88,8 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
     onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onNearEnd: () -> Unit,
     moving: String? = null, onMove: (IptvListedChannel, ListMove) -> Unit = { _, _ -> }, onMoveDone: () -> Unit = {},
     sport: IptvSportsGuide = NoSportsGuide, sportOnly: Boolean? = null, onSportOnly: () -> Unit = {}, onSpan: (Long) -> Unit = {},
-    sportOnlyFocus: FocusRequester? = null, onSportOnlyUp: () -> Boolean = { false }, updating: Boolean = false, blocked: Boolean = false) {
+    sportOnlyFocus: FocusRequester? = null, onSportOnlyUp: () -> Boolean = { false }, updating: Boolean = false, blocked: Boolean = false,
+    earliest: Long? = null, onEarlier: (Long) -> Unit = {}, onJump: (Int) -> Unit = {}) {
     val spec = guideSpec(state.density)
     BoxWithConstraints(modifier.iptvPanel().padding(horizontal = 6.dp, vertical = 8.dp)) {
         val stripWidth = maxWidth - spec.column
@@ -159,14 +162,15 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
                             if (index >= state.channels.size - 8) LaunchedEffect(state.channels.size) { onNearEnd() }
                             val recordings = state.recordings.filter { it.channelId == row.item.channel.id && it.sourceId == row.item.channel.sourceId }
                             val id = row.item.channel.id
-                            val grid = remember(state.guide[id], state.extraGuide[id], state.shortGuide[id], state.window) { gridRow(state, id) }
+                            val grid = remember(state.pastGuide[id], state.guide[id], state.extraGuide[id], state.shortGuide[id], state.window) { gridRow(state, id) }
                             GuideRow(spec, row, grid, index, now, cursor, viewStart, visibleMillis,
                                 row.item.channel.id == state.playingId,
                                 recordings.any { it.status == com.nuvio.tv.core.iptv.RecordingStatus.RECORDING },
                                 recordings.filter { it.status == com.nuvio.tv.core.iptv.RecordingStatus.SCHEDULED }.mapNotNull { it.programmeStartMillis }.toSet(), rowFocus.getOrPut(row.item.channel.id) { FocusRequester() },
                                 onCursor, onRail, onFocus, onSelect, onMenu, onPage = { delta -> page(index, delta * spec.pageRows) },
                                 onStep = { delta, repeat -> step(index, delta, repeat) },
-                                moving = row.item.channel.id == moving, onMove = { move -> onMove(row, move) }, onMoveDone = onMoveDone, sport = sport, blocked = blocked)
+                                moving = row.item.channel.id == moving, onMove = { move -> onMove(row, move) }, onMoveDone = onMoveDone, sport = sport, blocked = blocked,
+                                earliest = earliest, onEarlier = onEarlier, onJump = onJump)
                         }
                     }
                 }
@@ -216,14 +220,17 @@ private fun SkeletonRows(spec: GuideSpec) {
 
 @Composable
 private fun TimeBar(start: Long, span: Long, now: Long, modifier: Modifier) {
-    val today = remember(now / MINUTE_MILLIS / 60) { Calendar.getInstance().apply { timeInMillis = now }.get(Calendar.DAY_OF_YEAR) }
+    val today = remember(now / MINUTE_MILLIS / 60) { dayKey(now) }
+    val otherDay = dayKey(start) != today
     Box(modifier.clipToBounds()) {
         var slot = start
         while (slot < start + span) {
             val day = Calendar.getInstance().apply { timeInMillis = slot }
-            val label = if (day.get(Calendar.DAY_OF_YEAR) != today && day.get(Calendar.HOUR_OF_DAY) == 0 && day.get(Calendar.MINUTE) == 0)
-                android.text.format.DateFormat.format(android.text.format.DateFormat.getBestDateTimePattern(java.util.Locale.getDefault(), "EEE"), slot).toString() + " " + clock(slot)
-                else clock(slot)
+            val label = when {
+                slot == start && otherDay -> dayLabel(slot, "EEEdMMM") + " " + clock(slot)
+                (otherDay || dayKey(slot) != today) && day.get(Calendar.HOUR_OF_DAY) == 0 && day.get(Calendar.MINUTE) == 0 -> dayLabel(slot, "EEE") + " " + clock(slot)
+                else -> clock(slot)
+            }
             Row(Modifier.padding(start = minuteOffset(slot - start)).fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.width(1.dp).height(12.dp).background(NuvioTheme.colors.TextPrimary.copy(alpha = .18f)))
                 Text(label, color = NuvioTheme.colors.TextTertiary, style = MaterialTheme.typography.labelMedium, maxLines = 1,
@@ -239,12 +246,21 @@ private fun TimeBar(start: Long, span: Long, now: Long, modifier: Modifier) {
     }
 }
 
+private fun dayKey(time: Long): Int = Calendar.getInstance().apply { timeInMillis = time }.let { it.get(Calendar.YEAR) * 1000 + it.get(Calendar.DAY_OF_YEAR) }
+
+private fun dayLabel(time: Long, skeleton: String): String =
+    android.text.format.DateFormat.format(android.text.format.DateFormat.getBestDateTimePattern(java.util.Locale.getDefault(), skeleton), time).toString()
+
 @Composable
 private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow?, index: Int, now: Long, cursor: Long, viewStart: Long, visibleMillis: Long,
     playing: Boolean, recording: Boolean, scheduled: Set<Long>, focusRequester: FocusRequester, onCursor: (Long, Long) -> Unit, onRail: () -> Unit,
     onFocus: (IptvListedChannel) -> Unit, onSelect: (IptvListedChannel) -> Unit, onMenu: (IptvListedChannel) -> Unit, onPage: (Int) -> Unit,
-    onStep: (Int, Boolean) -> Boolean, moving: Boolean, onMove: (ListMove) -> Unit, onMoveDone: () -> Unit, sport: IptvSportsGuide, blocked: Boolean) {
+    onStep: (Int, Boolean) -> Boolean, moving: Boolean, onMove: (ListMove) -> Unit, onMoveDone: () -> Unit, sport: IptvSportsGuide, blocked: Boolean,
+    earliest: Long?, onEarlier: (Long) -> Unit, onJump: (Int) -> Unit) {
     var focused by remember { mutableStateOf(false) }
+    var waitingBack by remember { mutableStateOf(false) }
+    val archive = remember(row) { hasArchive(row) }
+    val archiveDays = remember(row) { GuidePast.archiveDays(row.item.attributes) }
     val name = channelName(row)
     val sportsChannel = remember(name, sport.active) { sport.active && SportsGuide.isSportsChannel(listOf(LocalizedGuideText(name, null))) }
     val longPress = rememberLongPressKeyTracker()
@@ -264,6 +280,17 @@ private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow
         }
         onCursor(time, start)
         return true
+    }
+    fun earlier(): Long? = cells.firstOrNull()?.takeIf { GuidePast.earlierLoadable(it.startMillis, it is GuideProgrammeCell, earliest) }?.startMillis
+    fun back() {
+        if (move(-1)) return
+        val first = earlier()
+        if (first != null) { waitingBack = true; onEarlier(first) } else onRail()
+    }
+    LaunchedEffect(grid) {
+        if (!waitingBack) return@LaunchedEffect
+        if (!focused || move(-1)) { waitingBack = false; return@LaunchedEffect }
+        if (earlier() == null) { waitingBack = false; onRail() }
     }
     val rowShape = RoundedCornerShape(12.dp)
     Row(Modifier.fillMaxWidth().height(spec.row).clip(rowShape)
@@ -301,10 +328,14 @@ private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow
             }
             if (isSelect(native.keyCode)) return@onPreviewKeyEvent true
             if (native.action != AndroidKeyEvent.ACTION_DOWN) return@onPreviewKeyEvent false
+            if (native.keyCode != AndroidKeyEvent.KEYCODE_DPAD_LEFT) waitingBack = false
             when (native.keyCode) {
                 AndroidKeyEvent.KEYCODE_MENU, AndroidKeyEvent.KEYCODE_INFO -> { onMenu(row); true }
                 AndroidKeyEvent.KEYCODE_DPAD_RIGHT -> { move(1); true }
-                AndroidKeyEvent.KEYCODE_DPAD_LEFT -> { if (!move(-1)) onRail(); true }
+                AndroidKeyEvent.KEYCODE_DPAD_LEFT -> { waitingBack = false; back(); true }
+                AndroidKeyEvent.KEYCODE_MEDIA_REWIND, AndroidKeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> if (earliest == null) false else {
+                    if (native.repeatCount == 0) onJump(if (native.keyCode == AndroidKeyEvent.KEYCODE_MEDIA_REWIND) -1 else 1); true
+                }
                 AndroidKeyEvent.KEYCODE_DPAD_UP -> onStep(-1, native.repeatCount > 0)
                 AndroidKeyEvent.KEYCODE_DPAD_DOWN -> onStep(1, native.repeatCount > 0)
                 AndroidKeyEvent.KEYCODE_CHANNEL_UP, AndroidKeyEvent.KEYCODE_PAGE_UP -> { onPage(-1); true }
@@ -333,7 +364,7 @@ private fun GuideRow(spec: GuideSpec, row: IptvListedChannel, grid: GuideGridRow
                 if (width <= 0.dp || visible <= 0.dp) continue
                 ProgrammeCell(spec, cell, now, selected = focused && cursor >= cell.startMillis && cursor < cell.endMillis, rowFocused = focused,
                     sport = sport, fixture = if (sport.active) sport.index.at(row.item.channel.id, cell.programme.start.epochMillis) else null, sportsChannel = sportsChannel,
-                    scheduled = cell.programme.start.epochMillis in scheduled, titleOffset = minuteOffset(guideStickyOffsetMillis(begin, end, viewStart, MIN_TITLE_MILLIS)),
+                    scheduled = cell.programme.start.epochMillis in scheduled, archive = archive, archiveDays = archiveDays, titleOffset = minuteOffset(guideStickyOffsetMillis(begin, end, viewStart, MIN_TITLE_MILLIS)),
                     continued = cell.startMillis < viewStart, wide = visible >= 96.dp,
                     modifier = Modifier.offset(x = minuteOffset(begin - viewStart)).wrapContentWidth(Alignment.Start, unbounded = true)
                         .padding(top = 4.dp, bottom = 4.dp).width(width).fillMaxHeight())
@@ -376,9 +407,12 @@ private fun ChannelMarks(recording: Boolean, favourite: Boolean, archive: Boolea
 
 @Composable
 private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, selected: Boolean, rowFocused: Boolean, sport: IptvSportsGuide,
-    fixture: SportsFixture?, sportsChannel: Boolean, scheduled: Boolean, titleOffset: Dp, continued: Boolean, wide: Boolean, modifier: Modifier) {
+    fixture: SportsFixture?, sportsChannel: Boolean, scheduled: Boolean, archive: Boolean, archiveDays: Int?, titleOffset: Dp, continued: Boolean, wide: Boolean,
+    modifier: Modifier) {
     val airing = now >= cell.startMillis && now < cell.endMillis
-    val past = cell.endMillis <= now
+    val ended = cell.endMillis <= now
+    val catchup = ended && GuidePast.reaches(archive, archiveDays, cell.programme.start.epochMillis, now)
+    val past = ended && !catchup
     val v2 = LocalV2Appearance.current != null
     val unlinked = remember(cell.programme, sportsChannel, sport.active && fixture == null) {
         if (!sport.active || fixture != null || !SportsGuide.isSportsProgramme(cell.programme.titles, cell.programme.categories, sportsChannel)) null
@@ -396,7 +430,7 @@ private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, 
         past -> NuvioTheme.colors.TextPrimary.copy(alpha = .03f)
         else -> NuvioTheme.colors.TextPrimary.copy(alpha = if (rowFocused) .08f else .05f)
     }
-    Box(modifier.then(if (selected) Modifier.cellFocus(CellShape) else Modifier).clip(CellShape).background(fill)
+    Box(modifier.then(if (selected) Modifier.cellFocus(CellShape) else Modifier).then(if (past) Modifier.alpha(if (selected) .8f else .6f) else Modifier).clip(CellShape).background(fill)
         .then(if (close && !selected) Modifier.border(2.dp, NuvioTheme.colors.Warning, CellShape) else Modifier)) {
         val content = when {
             selected -> itemContent(true)
@@ -420,6 +454,8 @@ private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, 
             if (chip != null && wide) SportGuideScore(chip, Modifier.padding(start = 6.dp))
         }
         if (scheduled) Icon(Icons.Filled.FiberManualRecord, null, Modifier.align(Alignment.TopEnd).padding(5.dp).size(8.dp), tint = NuvioTheme.colors.Error)
+        else if (catchup) Icon(Icons.Filled.History, null, Modifier.align(Alignment.TopEnd).padding(4.dp).size(10.dp),
+            tint = if (selected) itemContent(true).copy(alpha = .8f) else NuvioTheme.colors.TextTertiary)
         else if (reminded && !(wide && spec.detail)) Icon(Icons.Filled.NotificationsActive, null, Modifier.align(Alignment.TopEnd).padding(4.dp).size(10.dp),
             tint = NuvioTheme.colors.Secondary)
         val game = fixture?.takeIf { live }?.let { SportsGuideCells.progress(it, now) }
@@ -433,7 +469,7 @@ private fun ProgrammeCell(spec: GuideSpec, cell: GuideProgrammeCell, now: Long, 
 }
 
 private fun gridRow(state: IptvLiveState, id: String): GuideGridRow? {
-    val row = guideRow(state, id)
+    val row = browseRow(state, id)
     if (row?.cells?.any { it is GuideProgrammeCell } == true) return row
     val short = state.shortGuide[id]?.takeIf { it.isNotEmpty() } ?: return row
     val window = state.window ?: return row

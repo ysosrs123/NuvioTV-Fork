@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK – pozerať od začiatku</string>
+    <string name="iptv_ui18_guide_no_catchup">Tento program nemožno pozrieť spätne</string>
+    <string name="iptv_ui18_guide_back_now">Späť sa vráti na teraz</string>
+    <string name="iptv_ui18_guide_jump">Pretáčanie dozadu a dopredu skáče o 3 hodiny</string>
+</resources>

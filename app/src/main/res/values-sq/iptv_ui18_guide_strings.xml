@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK për ta parë nga fillimi</string>
+    <string name="iptv_ui18_guide_no_catchup">Nuk ka catch-up për këtë program</string>
+    <string name="iptv_ui18_guide_back_now">Prapa kthen te tani</string>
+    <string name="iptv_ui18_guide_jump">Kthimi dhe përparimi i shpejtë kërcejnë 3 orë</string>
+</resources>

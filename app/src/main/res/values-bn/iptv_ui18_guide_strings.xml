@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">শুরু থেকে দেখতে OK চাপুন</string>
+    <string name="iptv_ui18_guide_no_catchup">এই অনুষ্ঠানের জন্য ক্যাচ-আপ নেই</string>
+    <string name="iptv_ui18_guide_back_now">ব্যাক এখনকার সময়ে ফিরিয়ে আনে</string>
+    <string name="iptv_ui18_guide_jump">রিওয়াইন্ড ও ফাস্ট-ফরোয়ার্ড ৩ ঘণ্টা লাফ দেয়</string>
+</resources>

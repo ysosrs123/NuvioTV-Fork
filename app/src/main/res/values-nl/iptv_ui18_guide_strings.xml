@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK om vanaf het begin te kijken</string>
+    <string name="iptv_ui18_guide_no_catchup">Geen terugkijken voor dit programma</string>
+    <string name="iptv_ui18_guide_back_now">Terug gaat naar nu</string>
+    <string name="iptv_ui18_guide_jump">Terug- en vooruitspoelen springen 3 uur</string>
+</resources>

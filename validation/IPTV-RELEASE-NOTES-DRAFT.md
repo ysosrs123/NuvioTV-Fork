@@ -745,6 +745,14 @@ Recording storage:
 - When the TV box itself runs low while recording to a share, the message now says the TV
   box's storage is almost full.
 
+Changes after the 11 October device test:
+- Guide catch-up: press Left to go back through earlier programmes, as far as your
+  provider's catch-up archive allows (up to the guide's past days); OK plays a catch-up
+  programme from the start. Earlier programmes without catch-up are dimmed; those with
+  catch-up show the history mark.
+- Guide: Rewind and Fast-forward jump 3 hours; Back returns to now; the time bar shows the
+  day when you are looking at another day.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

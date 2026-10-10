@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK, aby oglądać od początku</string>
+    <string name="iptv_ui18_guide_no_catchup">Brak odtwarzania wstecz dla tego programu</string>
+    <string name="iptv_ui18_guide_back_now">Wstecz wraca do teraz</string>
+    <string name="iptv_ui18_guide_jump">Przewijanie do tyłu i do przodu przeskakuje o 3 godziny</string>
+</resources>

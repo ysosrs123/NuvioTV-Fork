@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK για παρακολούθηση από την αρχή</string>
+    <string name="iptv_ui18_guide_no_catchup">Δεν υπάρχει catch-up για αυτή την εκπομπή</string>
+    <string name="iptv_ui18_guide_back_now">Το Πίσω επιστρέφει στο τώρα</string>
+    <string name="iptv_ui18_guide_jump">Η επαναφορά και η γρήγορη προώθηση μετακινούν 3 ώρες</string>
+</resources>

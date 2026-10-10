@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK per guardare dall\'inizio</string>
+    <string name="iptv_ui18_guide_no_catchup">Nessun catch-up per questo programma</string>
+    <string name="iptv_ui18_guide_back_now">Indietro torna ad adesso</string>
+    <string name="iptv_ui18_guide_jump">Riavvolgi e avanti veloce saltano di 3 ore</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK za gledanje od početka</string>
+    <string name="iptv_ui18_guide_no_catchup">Za ovu emisiju nema naknadnog gledanja</string>
+    <string name="iptv_ui18_guide_back_now">Natrag vraća na sada</string>
+    <string name="iptv_ui18_guide_jump">Premotavanje unatrag i naprijed skače 3 sata</string>
+</resources>

@@ -90,6 +90,7 @@ import com.nuvio.tv.data.local.PlayerControlLayout
 import com.nuvio.tv.core.iptv.ExpiryStatus
 import com.nuvio.tv.core.iptv.ExpiryWarning
 import com.nuvio.tv.core.iptv.GuideMatchReason
+import com.nuvio.tv.core.iptv.GuidePast
 import com.nuvio.tv.core.iptv.ListMove
 import com.nuvio.tv.core.iptv.LiveMenuItem
 import com.nuvio.tv.core.iptv.LiveMenuLayout
@@ -211,6 +212,20 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
     val view = remember(state, sport, filtering, viewStart, guideSpan) {
         if (filtering) state.copy(channels = sportOnlyChannels(state.channels, sport, viewStart, viewStart + guideSpan, state.focused?.item?.channel?.id)) else state
     }
+    val earliest = if (state.sports && state.search.isBlank()) null else GuidePast.earliest(now, state.pastDays)
+    val away = earliest != null && GuidePast.away(viewStart, now)
+    LaunchedEffect(Unit) { if (!returning) viewModel.guideNow() }
+    LaunchedEffect(viewStart, guideSpan, state.window, state.pastDays, earliest == null) { viewModel.browseGuide(viewStart, viewStart + guideSpan) }
+    fun guideJump(direction: Int) {
+        val from = earliest ?: return
+        val home = state.window ?: return
+        val target = GuidePast.jump(cursor, direction, from, home.endMillis - SLOT)
+        cursor = target; viewStart = GuidePast.viewStart(target, from)
+    }
+    fun guideNow() {
+        cursor = System.currentTimeMillis(); viewStart = Math.floorDiv(cursor, SLOT) * SLOT
+        viewModel.guideNow()
+    }
     LaunchedEffect(state.playingId, state.tuning) { if (state.playingId == null && !state.tuning) fullscreen = false }
     LaunchedEffect(fullscreen) { viewModel.setFullscreen(fullscreen); if (!fullscreen) viewModel.closeInset() }
     val openFullscreen by viewModel.fullscreenRequest.collectAsStateWithLifecycle()
@@ -249,6 +264,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
             }
             railOpen -> if (railFocused) leaveAsk = true else { railOpen = false; focusContent() }
             state.sports -> { viewModel.leaveSports(); focusContent() }
+            away && emptyState(state) == null -> guideNow()
             else -> railOpen = true
         }
     }
@@ -344,7 +360,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                 }
                 Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(Modifier.fillMaxWidth().height(topHeight), horizontalArrangement = Arrangement.spacedBy(LiveWidgets.SPACING.dp)) {
-                        IptvSportHero(hero, Modifier.weight(1f).fillMaxHeight(), blocked = railOpen) { InfoPanel(state, now, cursor, it) }
+                        IptvSportHero(hero, Modifier.weight(1f).fillMaxHeight(), blocked = railOpen) { InfoPanel(state, now, cursor, away, it) }
                         if (columns.isNotEmpty()) IptvWidgetRow(columns, widgets, state, Modifier.fillMaxHeight(), fits = { LiveWidgets.fits(widgetRoom, widgetHeight, it) },
                             onDown = { focusContent() }, onRail = ::openRail, blocked = railOpen)
                         Preview(state, Modifier.fillMaxHeight().aspectRatio(16f / 9f), blocked = railOpen, onClick = {
@@ -373,10 +389,11 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                             onRail = ::openRail,
                             onFocus = viewModel::focus,
                             onSelect = { row ->
-                                val programme = programmeAt(state.guide[row.item.channel.id], cursor)
+                                val programme = browseProgramme(state, row.item.channel.id, cursor)
                                 val past = programme != null && (programme.stop?.epochMillis ?: Long.MAX_VALUE) <= now && hasArchive(row)
                                 val target = if (past) programme else null
-                                if (row.item.channel.id == state.playingId && state.player != null && state.catchup == target) fullscreen = true
+                                if (programme != null && past && !catchupReaches(row, programme, now)) viewModel.catchupOutOfReach()
+                                else if (row.item.channel.id == state.playingId && state.player != null && state.catchup == target) fullscreen = true
                                 else viewModel.watch(row, target)
                             },
                             onMenu = { menuFor = it },
@@ -384,7 +401,8 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                             moving = moving, onMove = viewModel::moveChannel, onMoveDone = { moving = null; viewModel.finishMove() },
                             sport = sport, sportOnly = if (sportPage) sportOnly else null,
                             onSportOnly = { sportOnly = !sportOnly; IptvSportOnly.on = sportOnly }, onSpan = { guideSpan = it }, sportOnlyFocus = sportOnlyFocus,
-                            onSportOnlyUp = { runCatching { cardsFocus.requestFocus(FocusDirection.Enter) }.getOrDefault(false) }, blocked = railOpen)
+                            onSportOnlyUp = { runCatching { cardsFocus.requestFocus(FocusDirection.Enter) }.getOrDefault(false) }, blocked = railOpen,
+                            earliest = earliest, onEarlier = { time -> viewModel.browseGuide(time - SLOT, time - SLOT + guideSpan) }, onJump = ::guideJump)
                     }
                 }
             }
@@ -488,7 +506,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
             onInset = { menuFor = null; viewModel.showInset(row); fullscreen = true },
             onSwapInset = { menuFor = null; viewModel.swapInset() },
             onCloseInset = { menuFor = null; viewModel.closeInset() },
-            selected = programmeAt(state.guide[row.item.channel.id], cursor).takeIf { !fullscreen },
+            selected = browseProgramme(state, row.item.channel.id, cursor).takeIf { !fullscreen },
             onRecord = { programme -> menuFor = null; recordFor = row to programme },
             onCancelRecording = { id -> menuFor = null; viewModel.cancelRecording(id) }, fullscreen = fullscreen,
             onExternal = { menuFor = null; fullscreen = false; viewModel.openExternal(row) })
@@ -663,9 +681,9 @@ private fun Preview(state: IptvLiveState, modifier: Modifier, blocked: Boolean, 
 }
 
 @Composable
-private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, modifier: Modifier) {
+private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, away: Boolean, modifier: Modifier) {
     val row = state.focused
-    val programme = row?.let { liveProgramme(state, it.item.channel.id, cursor) ?: liveProgramme(state, it.item.channel.id, now) }
+    val programme = row?.let { browseProgramme(state, it.item.channel.id, cursor) ?: liveProgramme(state, it.item.channel.id, cursor) ?: liveProgramme(state, it.item.channel.id, now) }
     val index = row?.let { state.channels.indexOf(it) } ?: -1
     Column(modifier.padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (row == null) {
@@ -702,7 +720,15 @@ private fun InfoPanel(state: IptvLiveState, now: Long, cursor: Long, modifier: M
             }
         }
         val message = state.message
-        Text(stringResource(message ?: R.string.iptv_live_guide_hint), style = if (message != null) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall,
+        val ended = programme != null && (programme.stop?.epochMillis ?: Long.MAX_VALUE) <= now
+        val hint = when {
+            message != null -> stringResource(message)
+            ended && programme != null -> stringResource(if (catchupReaches(row, programme, now)) R.string.iptv_ui18_guide_ok_catchup else R.string.iptv_ui18_guide_no_catchup) +
+                " · " + stringResource(if (away) R.string.iptv_ui18_guide_back_now else R.string.iptv_ui18_guide_jump)
+            away -> stringResource(R.string.iptv_ui18_guide_back_now) + " · " + stringResource(R.string.iptv_ui18_guide_jump)
+            else -> stringResource(R.string.iptv_live_guide_hint)
+        }
+        Text(hint, style = if (message != null) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelSmall,
             color = if (message != null) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

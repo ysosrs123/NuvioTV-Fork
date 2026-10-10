@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK pentru a viziona de la început</string>
+    <string name="iptv_ui18_guide_no_catchup">Nu există catch-up pentru această emisiune</string>
+    <string name="iptv_ui18_guide_back_now">Înapoi revine la acum</string>
+    <string name="iptv_ui18_guide_jump">Derularea înapoi și înainte sare 3 ore</string>
+</resources>

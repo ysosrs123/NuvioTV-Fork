@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OKで最初から視聴</string>
+    <string name="iptv_ui18_guide_no_catchup">この番組は見逃し配信がありません</string>
+    <string name="iptv_ui18_guide_back_now">戻るで現在に戻ります</string>
+    <string name="iptv_ui18_guide_jump">早戻し・早送りで3時間移動</string>
+</resources>

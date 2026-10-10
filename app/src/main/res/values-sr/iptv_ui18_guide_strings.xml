@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK за гледање од почетка</string>
+    <string name="iptv_ui18_guide_no_catchup">За ову емисију нема накнадног гледања</string>
+    <string name="iptv_ui18_guide_back_now">Назад враћа на сада</string>
+    <string name="iptv_ui18_guide_jump">Премотавање уназад и унапред скаче 3 сата</string>
+</resources>

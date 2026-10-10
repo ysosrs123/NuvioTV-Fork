@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">शुरू से देखने के लिए OK दबाएँ</string>
+    <string name="iptv_ui18_guide_no_catchup">इस कार्यक्रम के लिए कैच-अप नहीं है</string>
+    <string name="iptv_ui18_guide_back_now">बैक अभी के समय पर लौटाता है</string>
+    <string name="iptv_ui18_guide_jump">रिवाइंड और फ़ास्ट-फ़ॉरवर्ड 3 घंटे कूदते हैं</string>
+</resources>

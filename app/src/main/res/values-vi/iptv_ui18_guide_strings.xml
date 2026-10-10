@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK để xem từ đầu</string>
+    <string name="iptv_ui18_guide_no_catchup">Chương trình này không có xem lại</string>
+    <string name="iptv_ui18_guide_back_now">Quay lại trở về hiện tại</string>
+    <string name="iptv_ui18_guide_jump">Tua lại và tua nhanh nhảy 3 giờ</string>
+</resources>

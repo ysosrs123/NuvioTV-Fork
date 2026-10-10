@@ -257,6 +257,14 @@ internal fun programmeAfter(row: GuideGridRow?, programme: GuideProgramme?, now:
 
 internal fun guideRow(state: IptvLiveState, id: String): GuideGridRow? = state.guide[id] ?: state.extraGuide[id]
 
+internal fun browseRow(state: IptvLiveState, id: String): GuideGridRow? = state.pastGuide[id] ?: guideRow(state, id)
+
+internal fun browseProgramme(state: IptvLiveState, id: String, time: Long): GuideProgramme? =
+    programmeAt(state.pastGuide[id], time) ?: programmeAt(guideRow(state, id), time)
+
+internal fun catchupReaches(row: IptvListedChannel, programme: GuideProgramme, now: Long): Boolean =
+    com.nuvio.tv.core.iptv.GuidePast.reaches(hasArchive(row), com.nuvio.tv.core.iptv.GuidePast.archiveDays(row.item.attributes), programme.start.epochMillis, now)
+
 internal fun liveProgramme(state: IptvLiveState, id: String, time: Long): GuideProgramme? =
     programmeAt(guideRow(state, id), time) ?: state.shortGuide[id]?.firstOrNull { it.start.epochMillis <= time && (it.stop?.epochMillis ?: Long.MAX_VALUE) > time }
 

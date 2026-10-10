@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">按 OK 从头观看</string>
+    <string name="iptv_ui18_guide_no_catchup">此节目不支持回看</string>
+    <string name="iptv_ui18_guide_back_now">返回键回到现在</string>
+    <string name="iptv_ui18_guide_jump">快退和快进跳转 3 小时</string>
+</resources>

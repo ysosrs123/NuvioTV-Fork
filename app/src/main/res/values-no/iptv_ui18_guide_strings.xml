@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK for å se fra starten</string>
+    <string name="iptv_ui18_guide_no_catchup">Ingen catch-up for dette programmet</string>
+    <string name="iptv_ui18_guide_back_now">Tilbake går til nå</string>
+    <string name="iptv_ui18_guide_jump">Spol tilbake og fremover hopper 3 timer</string>
+</resources>

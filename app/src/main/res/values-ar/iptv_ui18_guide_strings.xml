@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">اضغط OK للمشاهدة من البداية</string>
+    <string name="iptv_ui18_guide_no_catchup">لا تتوفر مشاهدة لاحقة لهذا البرنامج</string>
+    <string name="iptv_ui18_guide_back_now">زر الرجوع يعيدك إلى الآن</string>
+    <string name="iptv_ui18_guide_jump">الترجيع والتقديم السريع يقفزان 3 ساعات</string>
+</resources>

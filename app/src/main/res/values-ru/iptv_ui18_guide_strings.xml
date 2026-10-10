@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK — смотреть с начала</string>
+    <string name="iptv_ui18_guide_no_catchup">Для этой передачи нет архива</string>
+    <string name="iptv_ui18_guide_back_now">Назад возвращает к текущему времени</string>
+    <string name="iptv_ui18_guide_jump">Перемотка назад и вперёд — на 3 часа</string>
+</resources>

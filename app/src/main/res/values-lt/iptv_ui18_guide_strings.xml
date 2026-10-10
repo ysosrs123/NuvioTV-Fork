@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK – žiūrėti nuo pradžios</string>
+    <string name="iptv_ui18_guide_no_catchup">Šios laidos negalima žiūrėti atgal</string>
+    <string name="iptv_ui18_guide_back_now">Atgal grąžina į dabartį</string>
+    <string name="iptv_ui18_guide_jump">Atsukimas ir persukimas peršoka 3 valandas</string>
+</resources>

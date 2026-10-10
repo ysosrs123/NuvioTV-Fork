@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">தொடக்கத்திலிருந்து பார்க்க OK அழுத்தவும்</string>
+    <string name="iptv_ui18_guide_no_catchup">இந்த நிகழ்ச்சிக்கு கேட்ச்-அப் இல்லை</string>
+    <string name="iptv_ui18_guide_back_now">பின் சென்றால் தற்போதைய நேரத்துக்குத் திரும்பும்</string>
+    <string name="iptv_ui18_guide_jump">பின்னோக்கி மற்றும் முன்னோக்கி 3 மணிநேரம் தாவும்</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui18_guide_ok_catchup">OK untuk menonton dari awal</string>
+    <string name="iptv_ui18_guide_no_catchup">Tidak ada catch-up untuk acara ini</string>
+    <string name="iptv_ui18_guide_back_now">Kembali ke waktu sekarang</string>
+    <string name="iptv_ui18_guide_jump">Mundur dan maju cepat melompat 3 jam</string>
+</resources>
