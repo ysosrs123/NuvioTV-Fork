@@ -1,6 +1,9 @@
 package com.nuvio.tv.core.iptv
 
 object LivePreferenceKeys {
+    const val MENU_ORDER = "menu-order"
+    const val MENU_HIDDEN = "menu-hidden"
+
     fun source(profileId: Int, sourceId: String, name: String) = "$profileId:$sourceId:$name"
 
     fun ofProfile(keys: Collection<String>, profileId: Int): List<String> = keys.filter { it.startsWith("$profileId:") }

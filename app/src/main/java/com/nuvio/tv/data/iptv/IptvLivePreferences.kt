@@ -3,6 +3,8 @@ package com.nuvio.tv.data.iptv
 import android.content.Context
 import com.nuvio.tv.core.iptv.CategoryOrder
 import com.nuvio.tv.core.iptv.GuideDensity
+import com.nuvio.tv.core.iptv.LiveMenuItem
+import com.nuvio.tv.core.iptv.LiveMenuLayout
 import com.nuvio.tv.core.iptv.LivePreferenceKeys
 import com.nuvio.tv.core.iptv.LiveUserAgent
 import com.nuvio.tv.core.iptv.LiveWidgetKind
@@ -117,6 +119,15 @@ class IptvLivePreferences(context: Context) {
     fun setUserAgent(ref: IptvSourceRef, choice: String?) = preferences.edit().apply {
         if (choice == null || LiveUserAgent.kind(choice) == LiveUserAgent.DEFAULT) remove(key(ref, USER_AGENT)) else putString(key(ref, USER_AGENT), choice)
     }.apply()
+
+    var menuOrder: List<LiveMenuItem>
+        get() = LiveMenuLayout.parse(preferences.getString(LivePreferenceKeys.MENU_ORDER, null))
+        set(value) = putString(LivePreferenceKeys.MENU_ORDER, LiveMenuLayout.encode(value))
+    var menuHidden: Set<LiveMenuItem>
+        get() = LiveMenuLayout.hidden(preferences.getStringSet(LivePreferenceKeys.MENU_HIDDEN, null).orEmpty())
+        set(value) = preferences.edit().putStringSet(LivePreferenceKeys.MENU_HIDDEN, value.filterNot { it.required }.map { it.id }.toSet()).apply()
+
+    fun resetMenu() = preferences.edit().remove(LivePreferenceKeys.MENU_ORDER).remove(LivePreferenceKeys.MENU_HIDDEN).apply()
 
     fun hiddenCategoryCount(profileId: Int): Int =
         LivePreferenceKeys.hiddenOfProfile(preferences.all.keys, profileId).sumOf { preferences.getStringSet(it, null)?.size ?: 0 }

@@ -620,6 +620,15 @@ Sources:
   ("Expires in 3 days", "Expired 2 days ago"). Stalker portals show their expiry when the
   portal reports a billing date; M3U playlists have neither. Stored in Live TV preferences
   (`provider-expiry`), no schema change.
+- The Live TV menu shows a one-line warning under its title when a source is about to
+  expire or has expired.
+
+Live TV menu and channels:
+- Hold OK on a menu item to move or hide it; Search channels, Settings, the categories
+  block and Sources always stay (they can move); hidden items are listed dimmed at the
+  bottom; "Reset menu" restores the default order.
+- Channel options: "Open in external player" stops Live TV and plays the channel in another
+  app through Nuvio's external player handling, with the channel's headers and user agent.
 
 ## Ready below the UI (screens pending)
 

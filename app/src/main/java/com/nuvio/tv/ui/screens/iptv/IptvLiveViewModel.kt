@@ -94,6 +94,9 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private var multiviewGeneration = 0L
     private var restored: IptvSourceRef? = null
     private val preferences = livePreferences.preferences
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val expiryWarning: StateFlow<ExpiryWarning?> = profiles.activeProfileId.flatMapLatest { IptvSourceConnections(catalogue, livePreferences).expiryWarning(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
     private val insetRuntime = LivePlaybackRuntime(admission)
     private var insetJob: Job? = null
     private var insetVersion = 0L
@@ -1150,6 +1153,26 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
             }
             IptvSourceKind.M3U -> item.channel.data.locator
         }
+    fun openExternal(row: IptvListedChannel) {
+        val current = session ?: return
+        val ref = refOf(row) ?: return
+        if (!foreground) return
+        val live = mutable.value
+        if (live.player != null || live.tuning || live.playingId != null) stop()
+        viewModelScope.launch {
+            try {
+                val (source, item) = withContext(Dispatchers.IO) { access.use(current) {
+                    catalogue.sources(current.profileId).single { it.ref == ref } to requireNotNull(catalogue.playbackItem(ref, row.item.channel.id))
+                } }
+                val url = liveLocator(current, ref, source, item)
+                runtime.stop(owner)
+                if (session !== current || !foreground) return@launch
+                com.nuvio.tv.core.player.ExternalPlayerLauncher.launch(context, url, item.overlay.customName ?: item.channel.data.name,
+                    LiveExternalPlayer.headers(StreamHeaders.requestHeaders(item.attributes), livePreferences.userAgent(ref)))
+            } catch (cancel: CancellationException) { throw cancel }
+            catch (error: Exception) { IptvLog.failure("external player", error); mutable.update { it.copy(message = R.string.iptv_live_failed) } }
+        }
+    }
     fun startMultiview(rows: List<IptvListedChannel>) {
         val tiles = rows.distinctBy { it.item.channel.id }.take(device.maxTiles)
         if (device.maxTiles < 2) { mutable.update { it.copy(message = R.string.iptv_inset_unsupported) }; return }
