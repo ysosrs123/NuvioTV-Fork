@@ -327,6 +327,23 @@ reporting, resets 10 October 2026 00:00 UTC):
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
 
+## Decisions — 10 October 2026 (playback options, menu, sources)
+
+User agreed to these recommendations (in progress):
+- Live TV settings, new "Playback and audio" group: AFR follows Nuvio's frame-rate and
+  resolution matching by default with an optional Live TV override; Nuvio's passthrough
+  settings applied to Live TV (optional override); tunnelled playback option (off by
+  default; not with volume boost/surround lift; main player only, not multiview tiles);
+  "Prefer surround audio (5.1)" with stereo fallback and "Prefer audio language"; audio
+  decoder Automatic / Prefer app decoder (video stays hardware-only).
+- Channel hold-OK menu: "Open in external player" (not a default; uses Nuvio's external
+  player handling).
+- Live TV menu: reorder and hide items like categories; Settings, Search channels and
+  Sources cannot be hidden; "Reset menu".
+- Sources: Xtream expiry date and connections shown per source ("Expires 12-Mar-27 ·
+  2 connections"); warning on Sources and the Live TV menu from 7 days before expiry;
+  Stalker if the portal provides it; M3U has neither.
+
 ## Device findings — 10 October 2026 (build `01f19bbed`, run 38017089840)
 
 Checklist 7c done; findings (fixes in progress unless noted):
