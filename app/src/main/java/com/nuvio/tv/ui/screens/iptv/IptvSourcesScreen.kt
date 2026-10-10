@@ -73,6 +73,9 @@ import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.LocalGuideFile
 import com.nuvio.tv.core.iptv.AccountGroups
 import com.nuvio.tv.core.iptv.DEFAULT_ACCOUNT_ID
+import com.nuvio.tv.core.iptv.ExpiryStatus
+import com.nuvio.tv.core.iptv.ExpiryWarning
+import com.nuvio.tv.core.iptv.SourceExpiries
 import com.nuvio.tv.core.iptv.HeldCatalogue
 import com.nuvio.tv.core.iptv.StalkerPortal
 import com.nuvio.tv.data.iptv.IptvGuideFeed
@@ -158,8 +161,11 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
                             val status = state.refresh[IptvRefreshCoordinator.key(source.ref)]
                             SettingsActionRow(title = source.label,
                                 subtitle = null,
-                                subtitleContent = { _, _ -> SourceLine(kindLabel(source.kind), state.counts[source.ref.sourceId], status,
-                                    source.refreshedAtMillis, source.playbackEligible) },
+                                subtitleContent = { _, _ -> Column {
+                                    SourceLine(kindLabel(source.kind), state.counts[source.ref.sourceId], status, source.refreshedAtMillis, source.playbackEligible)
+                                    AccountLine(state.expiries[source.ref.sourceId],
+                                        state.providerConnections[source.ref.sourceId]?.takeIf { source.kind == IptvSourceKind.XTREAM && it > 0 })
+                                } },
                                 value = if (state.selected == source.ref && state.sources.size > 1) stringResource(R.string.iptv_sources_guides_shown) else null,
                                 onClick = { sourceMenu = source }, leadingIcon = kindIcon(source.kind))
                         }
@@ -390,6 +396,31 @@ private fun kindIcon(kind: IptvSourceKind): ImageVector = when (kind) {
     IptvSourceKind.XTREAM -> Icons.Filled.Dns
     IptvSourceKind.STALKER -> Icons.Filled.Router
 }
+
+@Composable
+private fun AccountLine(expiresAtSeconds: Long?, connections: Int?) {
+    val status = expiresAtSeconds?.let { SourceExpiries.status(it, System.currentTimeMillis()) }
+    val parts = listOfNotNull(status?.let { expiryText(it) }, connections?.let { pluralStringResource(R.plurals.iptv_connections, it, it) })
+    if (parts.isEmpty()) return
+    Text(parts.joinToString(" · "), color = when (status) {
+            is ExpiryStatus.Expired -> NuvioTheme.colors.Error
+            is ExpiryStatus.Soon -> NuvioTheme.colors.Warning
+            else -> NuvioTheme.colors.TextSecondary
+        }, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+}
+
+@Composable
+internal fun expiryText(status: ExpiryStatus): String = when (status) {
+    ExpiryStatus.None -> stringResource(R.string.iptv_ui14_no_expiry)
+    is ExpiryStatus.Until -> stringResource(R.string.iptv_ui14_expires_on, status.date)
+    is ExpiryStatus.Soon -> if (status.days == 0) stringResource(R.string.iptv_ui14_expires_today)
+        else pluralStringResource(R.plurals.iptv_ui14_expires_in, status.days, status.days)
+    is ExpiryStatus.Expired -> if (status.daysAgo == 0) stringResource(R.string.iptv_ui14_expired_today)
+        else pluralStringResource(R.plurals.iptv_ui14_expired_ago, status.daysAgo, status.daysAgo)
+}
+
+@Composable
+internal fun expiryWarningText(warning: ExpiryWarning): String = stringResource(R.string.iptv_ui14_source_expiry, warning.label, expiryText(warning.status))
 
 @Composable
 private fun SourceLine(kind: String, channels: Int?, status: IptvRefreshStatus?, refreshedAt: Long?, loaded: Boolean) {

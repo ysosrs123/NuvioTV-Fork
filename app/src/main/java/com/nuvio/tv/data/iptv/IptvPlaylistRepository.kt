@@ -5,6 +5,7 @@ import com.nuvio.tv.core.iptv.ChannelCandidate
 import com.nuvio.tv.core.iptv.HeldCatalogue
 import com.nuvio.tv.core.iptv.PlaylistKind
 import com.nuvio.tv.core.iptv.RefreshDecision
+import com.nuvio.tv.core.iptv.SourceExpiries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -38,6 +39,7 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
             IptvLog.info("catalogue commit decision=$decision ms=${System.currentTimeMillis() - saving}")
             settle(ref, decision, download.records, IptvCacheValidators(), emptyList())
             connections?.let { runCatching { it.reported(ref, download.account.advertisedConnections) }.onFailure { error -> IptvLog.failure("source connections", error) } }
+            connections?.let { runCatching { it.reportedExpiry(ref, download.account.expiresAtSeconds ?: SourceExpiries.NONE) }.onFailure { error -> IptvLog.failure("source expiry", error) } }
             val guide = if (decision != RefreshDecision.PUBLISH) null else if (firstLoad) xtreamGuides?.ensure(ref) else xtreamGuides?.linked(ref)
             if (decision == RefreshDecision.PUBLISH) applyImport(ref)
             return@withContext IptvPlaylistRefresh.Catalogue(decision, guide)
@@ -45,6 +47,7 @@ class IptvPlaylistRepository(private val store: IptvCatalogueStore, private val 
         if (request.kind == IptvSourceKind.STALKER) {
             val download = stalker.catalogue(request.connection)
             context.ensureActive()
+            connections?.let { runCatching { it.reportedExpiry(ref, download.expiresAtSeconds) }.onFailure { error -> IptvLog.failure("source expiry", error) } }
             onSaving()
             val decision = store.commitCatalogue(ref, request.ticket, download.records, download.canPublish) { context.ensureActive() }
             settle(ref, decision, download.records, IptvCacheValidators(), emptyList())

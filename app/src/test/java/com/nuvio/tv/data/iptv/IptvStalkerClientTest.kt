@@ -43,6 +43,15 @@ class IptvStalkerClientTest {
             assertFalse(download.toString().contains("TOKEN1")); assertFalse(download.toString().contains("00:1A"))
         }
     }
+    @Test fun profileBillingDateBecomesTheExpiry() = runBlocking {
+        server(profile = """{"js":{"id":"7","status":0,"expire_billing_date":"2027-03-12 00:00:00"}}""").use { server ->
+            assertEquals(1_804_809_600L, IptvStalkerClient().catalogue(connection(server)).expiresAtSeconds)
+        }
+        server(profile = """{"js":{"id":"7","status":0,"expire_billing_date":"0000-00-00 00:00:00"}}""").use { server ->
+            assertNull(IptvStalkerClient().catalogue(connection(server)).expiresAtSeconds)
+        }
+        server().use { server -> assertNull(IptvStalkerClient().catalogue(connection(server)).expiresAtSeconds) }
+    }
     @Test fun streamLinkIsCreatedOnlyOnRequest() = runBlocking {
         server().use { server ->
             assertEquals("http://media.invalid/live/1.ts?play_token=abc", IptvStalkerClient().streamUrl(connection(server), "ffmpeg http://localhost/ch/1_"))

@@ -612,6 +612,15 @@ Phone and computer setup:
   minutes). Phones hold a random token in an HttpOnly cookie; the TV stores only its hash.
 - Downloaded recording names use the same short date, e.g. "News at Six 07-Oct-26 1910.ts".
 
+## Playback options, menu and source expiry (10 October 2026, not device-tested)
+
+Sources:
+- Xtream sources show the account expiry and the provider's connection count ("Expires
+  12-Mar-27 · 2 connections", or "No expiry"); from 7 days before it becomes a warning
+  ("Expires in 3 days", "Expired 2 days ago"). Stalker portals show their expiry when the
+  portal reports a billing date; M3U playlists have neither. Stored in Live TV preferences
+  (`provider-expiry`), no schema change.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

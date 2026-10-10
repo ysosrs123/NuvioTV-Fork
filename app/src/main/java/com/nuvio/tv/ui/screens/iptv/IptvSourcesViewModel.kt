@@ -39,6 +39,7 @@ data class IptvSourcesState(val profileId: Int = 0, val revision: Long = 0, val 
     val refresh: Map<String, IptvRefreshStatus> = emptyMap(), val counts: Map<String, Int> = emptyMap(),
     val automatic: Set<String> = emptySet(), val connections: Map<String, Int> = emptyMap(),
     val manualConnections: Set<String> = emptySet(), val providerConnections: Map<String, Int> = emptyMap(),
+    val expiries: Map<String, Long> = emptyMap(),
     val groups: List<IptvGroupView> = emptyList(), val suggestions: List<IptvGroupView> = emptyList(),
     val reviews: Map<String, HeldCatalogue> = emptyMap(), val batches: Map<IptvRefreshBatchKind, IptvRefreshBatch> = emptyMap())
 
@@ -110,6 +111,7 @@ class IptvSourcesViewModel @Inject constructor(
         var connections = emptyMap<String, Int>()
         var manual = emptySet<String>()
         var provider = emptyMap<String, Int>()
+        var expiries = emptyMap<String, Long>()
         var groups = emptyList<IptvGroupView>()
         var suggestions = emptyList<IptvGroupView>()
         var reviews = emptyMap<String, HeldCatalogue>()
@@ -122,6 +124,7 @@ class IptvSourcesViewModel @Inject constructor(
             connections = sources.associate { source -> source.ref.sourceId to (accounts.firstOrNull { it.id == source.accountId }?.maxStreams ?: 1) }
             manual = sources.filter { livePreferences.connectionsManual(it.ref) }.map { it.ref.sourceId }.toSet()
             provider = sources.mapNotNull { source -> livePreferences.providerConnections(source.ref)?.let { source.ref.sourceId to it } }.toMap()
+            expiries = sources.mapNotNull { source -> sourceConnections.expiry(source.ref)?.let { source.ref.sourceId to it } }.toMap()
             groups = accounts.filter { AccountGroups.isGroup(it.id, it.sources.size) }.map { IptvGroupView(it.id, it.label, it.maxStreams, it.sources) }
             val endpoints = sources.associate { it.ref.sourceId to runCatching { catalogue.connection(it.ref) }.getOrNull() }
             val suggested = suggestAccountGroups(sources.mapNotNull { source -> endpoints[source.ref.sourceId]?.let { c ->
@@ -137,7 +140,7 @@ class IptvSourcesViewModel @Inject constructor(
             Triple(sources, feeds, selected?.let(catalogue::guideAssociations)) to catalogue.channelCounts(current.profileId)
         } }
         if (session === current) mutable.update { it.copy(sources = loaded.first, feeds = loaded.second, counts = counts, automatic = automatic, connections = connections,
-            manualConnections = manual, providerConnections = provider, groups = groups, suggestions = suggestions, reviews = reviews,
+            manualConnections = manual, providerConnections = provider, expiries = expiries, groups = groups, suggestions = suggestions, reviews = reviews,
             selected = oldSelected?.takeIf { ref -> loaded.first.any { it.ref == ref } } ?: loaded.first.firstOrNull()?.ref,
             linked = loaded.third?.feedIds?.toSet().orEmpty(),
             linkedOrder = loaded.third?.let { (it.priority + it.feedIds).distinct() }.orEmpty(), ready = true) }

@@ -2,6 +2,7 @@ package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.CHANNEL_LOGO_ATTRIBUTE
 import com.nuvio.tv.core.iptv.ChannelCandidate
+import com.nuvio.tv.core.iptv.SourceExpiries
 import com.nuvio.tv.core.iptv.StalkerPortal
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -20,7 +21,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
-data class StalkerDownload(val records: List<IptvCatalogueRecord>, val canPublish: Boolean) {
+data class StalkerDownload(val records: List<IptvCatalogueRecord>, val canPublish: Boolean, val expiresAtSeconds: Long? = null) {
     override fun toString() = "StalkerDownload(channels=${records.size}, canPublish=$canPublish)"
 }
 
@@ -46,7 +47,7 @@ class IptvStalkerClient(private val http: OkHttpClient = IptvMetadataClient.newC
             IptvCatalogueRecord(ChannelCandidate(channel.name, requireNotNull(StalkerPortal.streamUrl(channel.command)),
                 providerId = channel.id, guideId = channel.guideId), attributes)
         }
-        return StalkerDownload(records, catalogue.canPublish)
+        return StalkerDownload(records, catalogue.canPublish, session.expiresAtSeconds)
     }
 
     suspend fun streamUrl(connection: IptvSourceConnection, command: String): String {
@@ -62,10 +63,11 @@ class IptvStalkerClient(private val http: OkHttpClient = IptvMetadataClient.newC
         val token = parse { StalkerPortal.parseToken(anonymous.call("stb", "handshake", "token" to "", budget = 64 * 1024)) }
         currentCoroutineContext().ensureActive()
         val session = Session(api, mac, token)
-        try { StalkerPortal.requireProfile(session.call("stb", "get_profile", budget = 256 * 1024)) }
+        val profile = try { session.call("stb", "get_profile", budget = 256 * 1024).also(StalkerPortal::requireProfile) }
         catch (_: SecurityException) { throw MetadataException(MetadataFailure.AUTHENTICATION) }
         catch (error: MetadataException) { throw error }
         catch (_: Exception) { throw MetadataException(MetadataFailure.INVALID_RESPONSE) }
+        session.expiresAtSeconds = runCatching { SourceExpiries.stalkerProfile(profile) }.getOrNull()
         currentCoroutineContext().ensureActive()
         return session
     }
@@ -75,6 +77,7 @@ class IptvStalkerClient(private val http: OkHttpClient = IptvMetadataClient.newC
         catch (_: Exception) { throw MetadataException(MetadataFailure.INVALID_RESPONSE) }
 
     private inner class Session(val api: HttpUrl, val mac: String, val token: String?) {
+        var expiresAtSeconds: Long? = null
         suspend fun call(type: String, action: String, vararg extra: Pair<String, String>, budget: Int): String {
             val url = api.newBuilder().addQueryParameter("type", type).addQueryParameter("action", action)
                 .apply { extra.forEach { (key, value) -> addQueryParameter(key, value) } }

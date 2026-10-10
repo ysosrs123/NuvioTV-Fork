@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Expires %1$s</string>
+    <string name="iptv_ui14_no_expiry">No expiry</string>
+    <string name="iptv_ui14_expires_today">Expires today</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Expires in %1$d day</item>
+        <item quantity="other">Expires in %1$d days</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Expired today</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">Expired %1$d day ago</item>
+        <item quantity="other">Expired %1$d days ago</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>
