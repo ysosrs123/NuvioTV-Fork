@@ -45,7 +45,7 @@ session winners shown. CI green at `3de7568` (run 38012700521) and at `3065341` 
 focused game's summary (one extra request).
 
 Next, in order:
-1. The user's next device pass is on `3065341` (run 38013663627, checklist section 7c
+1. The user's next device pass is on `01f19bbed` (run 38017089840, checklist section 7c
    items 1–17); take their findings, record and fix them the same way.
 2. Waiting on the user (do not do these without them):
    - QR sign-in in CI builds: the fork needs the repository secret `LOCAL_PROPERTIES_BASE64`

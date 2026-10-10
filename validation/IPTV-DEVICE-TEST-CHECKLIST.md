@@ -1,4 +1,4 @@
-# Nuvio IPTV — device test checklist (build `3065341`, run 38013663627)
+# Nuvio IPTV — device test checklist (build `01f19bbed`, run 38017089840)
 
 For this build start with section 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
 
@@ -84,7 +84,7 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
 
-## 7c. Fixes from the second 9 October pass, Sport redesign and new leagues (build `3065341`)
+## 7c. Fixes from the second 9 October pass, Sport redesign and new leagues (build `01f19bbed`)
 1. Guide top area: no "Live TV · profile", update text or clock; a small spinner beside the
    guide heading during a guide update; the grid keeps programmes during the update.
 2. Widgets: hold OK → Layout: try all eight layouts (tall, square, wide, two stacked, two

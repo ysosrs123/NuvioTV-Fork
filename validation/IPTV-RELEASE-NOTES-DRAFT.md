@@ -777,6 +777,8 @@ Phone setup (security review)
 
 ## Validation
 
+- Latest build for the device pass: CI debug green at `01f19bbed` (run 38017089840), same
+  app as `3065341` (an app-name clean-up was made and reverted in between). Not device-tested.
 - Minified release build (R8) green at `03808ae` (run 38014569747), same code as the
   `3065341` debug build; not installed on a device.
 - Remaining sport screens on the new score bands, NHL goalies, race winners and
