@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Penyimpanan TV box ini hampir penuh</string>
+    <string name="iptv_ui17_recording_share_full">Folder bersama jaringan penuh</string>
+    <string name="iptv_ui17_recording_media_full">Folder Movies penuh</string>
+    <string name="iptv_ui17_recording_share_paused">Folder bersama penuh – unggahan dijeda sampai ada ruang</string>
+    <string name="iptv_ui17_recording_media_paused">Folder Movies penuh – penyalinan dijeda sampai ada ruang</string>
+</resources>

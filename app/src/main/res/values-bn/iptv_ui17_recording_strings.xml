@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">এই টিভি বক্সের স্টোরেজ প্রায় পূর্ণ</string>
+    <string name="iptv_ui17_recording_share_full">নেটওয়ার্ক শেয়ার পূর্ণ</string>
+    <string name="iptv_ui17_recording_media_full">Movies ফোল্ডার পূর্ণ</string>
+    <string name="iptv_ui17_recording_share_paused">শেয়ার পূর্ণ – জায়গা না হওয়া পর্যন্ত আপলোড থামানো আছে</string>
+    <string name="iptv_ui17_recording_media_paused">Movies ফোল্ডার পূর্ণ – জায়গা না হওয়া পর্যন্ত কপি থামানো আছে</string>
+</resources>

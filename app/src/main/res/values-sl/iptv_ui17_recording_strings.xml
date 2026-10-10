@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Shramba te TV-naprave je skoraj polna</string>
+    <string name="iptv_ui17_recording_share_full">Omrežna skupna raba je polna</string>
+    <string name="iptv_ui17_recording_media_full">Mapa Movies je polna</string>
+    <string name="iptv_ui17_recording_share_paused">Skupna raba je polna – nalaganje je začasno ustavljeno, dokler ne bo prostora</string>
+    <string name="iptv_ui17_recording_media_paused">Mapa Movies je polna – kopiranje je začasno ustavljeno, dokler ne bo prostora</string>
+</resources>

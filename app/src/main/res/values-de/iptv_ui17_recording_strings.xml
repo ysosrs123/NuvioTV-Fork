@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Der Speicher dieser TV-Box ist fast voll</string>
+    <string name="iptv_ui17_recording_share_full">Die Netzwerkfreigabe ist voll</string>
+    <string name="iptv_ui17_recording_media_full">Der Ordner „Movies“ ist voll</string>
+    <string name="iptv_ui17_recording_share_paused">Freigabe voll – Hochladen pausiert, bis wieder Platz ist</string>
+    <string name="iptv_ui17_recording_media_paused">Ordner „Movies“ voll – Kopieren pausiert, bis wieder Platz ist</string>
+</resources>

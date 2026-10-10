@@ -36,6 +36,33 @@ class LiveRecordingTest {
         assertEquals(RecordingOutcome(RecordingStatus.FAILED, RecordingFailure.INTERRUPTED), RecordingTransitions.interrupted(0))
     }
 
+    @Test fun shareBacklogCapAppliesOnlyWhenTheTargetIsFull() {
+        val cap = RecordingStorage.SHARE_BACKLOG_BYTES
+        assertEquals(2L * 1024 * 1024 * 1024, cap)
+        assertTrue(cap / RecordingStorage.ESTIMATED_BYTES_PER_HOUR.toDouble() * 60 in 45.0..50.0)
+        assertTrue(RecordingStorage.backlogTooLarge(true, cap + 1))
+        assertFalse(RecordingStorage.backlogTooLarge(true, cap))
+        assertFalse(RecordingStorage.backlogTooLarge(false, 10 * cap))
+        assertTrue(RecordingStorage.backlogTooLarge(true, 11, capBytes = 10))
+        assertEquals(RecordingOutcome(RecordingStatus.PARTIAL, RecordingFailure.SHARE_FULL), RecordingTransitions.outcome(10, RecordingFailure.SHARE_FULL, 0, RecordingStop.ENDED))
+    }
+
+    @Test fun notesNameTheBoxOrTheTarget() {
+        assertEquals(RecordingNote.BOX_STORAGE_LOW, RecordingNotes.failure(RecordingFailure.LOW_STORAGE, spooled = true, media = false))
+        assertEquals(RecordingNote.BOX_STORAGE_LOW, RecordingNotes.failure(RecordingFailure.LOW_STORAGE, spooled = true, media = true))
+        assertNull(RecordingNotes.failure(RecordingFailure.LOW_STORAGE, spooled = false, media = false))
+        assertEquals(RecordingNote.SHARE_FULL, RecordingNotes.failure(RecordingFailure.SHARE_FULL, spooled = true, media = false))
+        assertEquals(RecordingNote.MEDIA_FULL, RecordingNotes.failure(RecordingFailure.SHARE_FULL, spooled = true, media = true))
+        assertNull(RecordingNotes.failure(RecordingFailure.NETWORK, spooled = true, media = false))
+        assertNull(RecordingNotes.failure(null, spooled = true, media = false))
+        assertEquals(RecordingNote.SHARE_PAUSED, RecordingNotes.upload(true, RecordingStatus.RECORDING, pending = false, media = false))
+        assertEquals(RecordingNote.MEDIA_PAUSED, RecordingNotes.upload(true, RecordingStatus.RECORDING, pending = false, media = true))
+        assertEquals(RecordingNote.SHARE_PAUSED, RecordingNotes.upload(true, RecordingStatus.PARTIAL, pending = true, media = false))
+        assertNull(RecordingNotes.upload(true, RecordingStatus.DONE, pending = false, media = false))
+        assertNull(RecordingNotes.upload(false, RecordingStatus.RECORDING, pending = false, media = false))
+        assertNull(RecordingNotes.upload(true, RecordingStatus.SCHEDULED, pending = false, media = false))
+    }
+
     @Test fun recordNowFollowsProgrammeEndWithPostRollAndCap() {
         assertEquals(RecordingWindow(now, now + 30 * minute + RecordingPlan.POST_ROLL_MILLIS), RecordingPlan.now(now, now + 30 * minute))
         assertEquals(RecordingWindow(now, now + RecordingPlan.DEFAULT_DURATION_MILLIS), RecordingPlan.now(now))

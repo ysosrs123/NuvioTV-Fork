@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">De opslag van deze tv-box is bijna vol</string>
+    <string name="iptv_ui17_recording_share_full">De netwerkshare is vol</string>
+    <string name="iptv_ui17_recording_media_full">De map Movies is vol</string>
+    <string name="iptv_ui17_recording_share_paused">Share vol – uploaden gepauzeerd tot er ruimte is</string>
+    <string name="iptv_ui17_recording_media_paused">Map Movies vol – kopiëren gepauzeerd tot er ruimte is</string>
+</resources>

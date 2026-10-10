@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Bộ nhớ của TV box này gần đầy</string>
+    <string name="iptv_ui17_recording_share_full">Thư mục chia sẻ mạng đã đầy</string>
+    <string name="iptv_ui17_recording_media_full">Thư mục Movies đã đầy</string>
+    <string name="iptv_ui17_recording_share_paused">Thư mục chia sẻ đã đầy – tạm dừng tải lên cho đến khi có chỗ trống</string>
+    <string name="iptv_ui17_recording_media_paused">Thư mục Movies đã đầy – tạm dừng sao chép cho đến khi có chỗ trống</string>
+</resources>

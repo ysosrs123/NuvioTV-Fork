@@ -51,6 +51,7 @@ import com.nuvio.tv.data.iptv.IptvRecordingReader
 import com.nuvio.tv.data.iptv.IptvRecordingStore
 import com.nuvio.tv.data.iptv.IptvRecordingUploader
 import com.nuvio.tv.data.iptv.IptvShareConnector
+import com.nuvio.tv.data.iptv.IptvShareError
 import com.nuvio.tv.data.iptv.IptvShareReader
 import com.nuvio.tv.data.iptv.IptvSource
 import com.nuvio.tv.data.iptv.IptvSourceConnection
@@ -87,6 +88,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -138,11 +140,13 @@ class IptvRecorder @Inject constructor(
     private val runningIds = MutableStateFlow<Set<String>>(emptySet())
     private val uploadJobs = HashMap<String, Job>()
     private val uploadingIds = MutableStateFlow<Set<String>>(emptySet())
+    private val issues = MutableStateFlow<Map<String, IptvShareError>>(emptyMap())
     private var loaded = false
 
     private val runningChanges = MutableStateFlow(0L)
     val running: StateFlow<Set<String>> = runningIds.asStateFlow()
     val uploading: StateFlow<Set<String>> = uploadingIds.asStateFlow()
+    val uploadIssues: StateFlow<Map<String, IptvShareError>> = issues.asStateFlow()
     internal val changes: StateFlow<Long> = runningChanges.asStateFlow()
     val all: StateFlow<List<IptvRecording>> = entries.asStateFlow()
 
@@ -534,9 +538,10 @@ class IptvRecorder @Inject constructor(
             is IptvRecordingPlace.Share, is IptvRecordingPlace.Media -> { spool.mkdirs(); IptvRecordingUploader.spoolOutput(spool) }
         }
         val link = connector(place)
-        val upload = link?.let { remote ->
+        val sender = link?.let { uploader(place, it, id) }
+        val upload = sender?.let { client ->
             scope.async(start = CoroutineStart.LAZY) {
-                uploader(place, remote).upload(spool, path, { holder.committed }, { copied.get() }, UPLOAD_PATIENCE_MILLIS)
+                client.upload(spool, path, { holder.committed }, { copied.get() }, UPLOAD_PATIENCE_MILLIS)
             }.also { track(id, it); it.start() }
         }
         var failure: RecordingFailure? = null
@@ -573,7 +578,9 @@ class IptvRecorder @Inject constructor(
                 }
                 IptvLog.info("recording connected")
                 val stopAt = minOf(entry.stopMillis, requireNotNull(entry.startedAtMillis) + RecordingPlan.MAX_DURATION_MILLIS)
-                IptvRecordingCopier().copy(target.address, target.format, output, stopAt, holder).failure
+                IptvRecordingCopier(halt = {
+                    sender?.takeIf { RecordingStorage.backlogTooLarge(it.issue == IptvShareError.FULL, holder.bytes - it.uploaded) }?.let { RecordingFailure.SHARE_FULL }
+                }).copy(target.address, target.format, output, stopAt, holder).failure
             }
         } catch (_: CancellationException) {
         } catch (error: Exception) {
@@ -658,6 +665,7 @@ class IptvRecorder @Inject constructor(
 
     private suspend fun applyUpload(id: String, result: IptvUploadOutcome?, spool: File, link: IptvShareConnector?) = mutex.withLock {
         val media = (link as? IptvMediaStoreConnector)?.published
+        if (result?.result != IptvUploadResult.PENDING) issue(id, null)
         if (store.get(id) == null) {
             spool.deleteRecursively()
             val remote = result?.remote
@@ -703,8 +711,10 @@ class IptvRecorder @Inject constructor(
         return names.orEmpty().mapTo(HashSet()) { it.lowercase(Locale.ROOT) }
     }
 
-    private fun uploader(place: IptvRecordingPlace, connector: IptvShareConnector) =
-        IptvRecordingUploader(connector, onFree = { if (place is IptvRecordingPlace.Share) livePreferences.shareFreeBytes = it })
+    private fun uploader(place: IptvRecordingPlace, connector: IptvShareConnector, id: String) =
+        IptvRecordingUploader(connector, onFree = { if (place is IptvRecordingPlace.Share) livePreferences.shareFreeBytes = it }, onIssue = { issue(id, it) })
+
+    private fun issue(id: String, error: IptvShareError?) = issues.update { if (error == null) it - id else it + (id to error) }
 
     private fun connector(place: IptvRecordingPlace): IptvShareConnector? = when (place) {
         is IptvRecordingPlace.Local -> null
@@ -739,7 +749,7 @@ class IptvRecorder @Inject constructor(
         val place = (targets.resolve(entry.storage) as? IptvPlaceResult.Ready)?.place ?: return
         val link = connector(place) ?: return
         val spool = targets.spool(id)
-        val result = uploader(place, link).upload(spool, path, { Long.MAX_VALUE }, { true }, RETRY_PATIENCE_MILLIS)
+        val result = uploader(place, link, id).upload(spool, path, { Long.MAX_VALUE }, { true }, RETRY_PATIENCE_MILLIS)
         withContext(NonCancellable) { applyUpload(id, result, spool, link) }
     }
 
@@ -876,7 +886,9 @@ class IptvRecorder @Inject constructor(
 
     private fun publish() = synchronized(this) {
         val live = progress.mapValues { it.value.bytes }
-        entries.value = store.all().map { entry ->
+        val list = store.all()
+        if (issues.value.isNotEmpty()) list.mapTo(HashSet()) { it.id }.let { ids -> issues.update { it.filterKeys(ids::contains) } }
+        entries.value = list.map { entry ->
             live[entry.id]?.takeIf { entry.status == RecordingStatus.RECORDING }?.let { entry.copy(bytes = it) } ?: entry
         }
     }

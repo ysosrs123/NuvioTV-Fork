@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Úložiště tohoto TV boxu je téměř plné</string>
+    <string name="iptv_ui17_recording_share_full">Síťové úložiště je plné</string>
+    <string name="iptv_ui17_recording_media_full">Složka Movies je plná</string>
+    <string name="iptv_ui17_recording_share_paused">Síťové úložiště je plné – nahrávání je pozastaveno, dokud nebude místo</string>
+    <string name="iptv_ui17_recording_media_paused">Složka Movies je plná – kopírování je pozastaveno, dokud nebude místo</string>
+</resources>

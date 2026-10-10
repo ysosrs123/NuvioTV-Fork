@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Lagerpladsen på denne tv-boks er næsten fyldt</string>
+    <string name="iptv_ui17_recording_share_full">Netværksdrevet er fyldt</string>
+    <string name="iptv_ui17_recording_media_full">Movies-mappen er fyldt</string>
+    <string name="iptv_ui17_recording_share_paused">Netværksdrevet er fyldt – upload er sat på pause, indtil der er plads</string>
+    <string name="iptv_ui17_recording_media_paused">Movies-mappen er fyldt – kopiering er sat på pause, indtil der er plads</string>
+</resources>

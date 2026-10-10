@@ -137,7 +137,7 @@ fun IptvRecordingsScreen(onBack: () -> Unit, onPlay: ((IptvRecordingStream) -> U
                     item(key = "group:$title") {
                         SettingsGroupCard(title = stringResource(title)) {
                             entries.forEachIndexed { index, recording ->
-                                RecordingRow(recording, state.availability[recording.id], recording.id in state.uploading,
+                                RecordingRow(recording, state.availability[recording.id], recording.id in state.uploading, state.notes[recording.id],
                                     Modifier.then(if (groupIndex == 0 && index == 0) Modifier.focusRequester(first) else Modifier),
                                     onClick = { if (recording.id in state.playable) viewModel.play(recording, fullPlayer) else options = recording },
                                     onMenu = { options = recording })
@@ -152,7 +152,7 @@ fun IptvRecordingsScreen(onBack: () -> Unit, onPlay: ((IptvRecordingStream) -> U
     options?.let { recording ->
         val playable = recording.id in state.playable
         NuvioDialog(onDismiss = { options = null }, title = recording.title ?: recording.channelName,
-            subtitle = recording.failure?.let { stringResource(iptvRecordingFailureMessage(it)) } ?: recording.description, width = 560.dp) {
+            subtitle = recording.failure?.let { stringResource(iptvRecordingFailureMessage(recording, it)) } ?: recording.description, width = 560.dp) {
             val focus = remember { FocusRequester() }
             LaunchedEffect(Unit) { withFrameNanos { }; runCatching { focus.requestFocus() } }
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).focusRequester(focus), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -187,14 +187,14 @@ fun IptvRecordingsScreen(onBack: () -> Unit, onPlay: ((IptvRecordingStream) -> U
 }
 
 @Composable
-private fun RecordingRow(recording: IptvRecording, availability: IptvRecordingAvailability?, uploading: Boolean, modifier: Modifier,
+private fun RecordingRow(recording: IptvRecording, availability: IptvRecordingAvailability?, uploading: Boolean, note: Int?, modifier: Modifier,
     onClick: () -> Unit, onMenu: () -> Unit) {
     val context = LocalContext.current
     val longPress = rememberLongPressKeyTracker()
     val status = stringResource(iptvRecordingStatusLabel(recording.status))
     val size = recording.bytes.takeIf { it > 0 }?.let { Formatter.formatShortFileSize(context, it) }
     SettingsActionRow(title = recording.title ?: recording.channelName, subtitle = null,
-        subtitleContent = { _, _ -> RecordingLine(recording, availability, uploading) },
+        subtitleContent = { _, _ -> RecordingLine(recording, availability, uploading, note) },
         value = listOfNotNull(size, status).joinToString(" · "),
         valueColor = when (recording.status) {
             RecordingStatus.RECORDING -> NuvioTheme.colors.Error
@@ -213,7 +213,7 @@ private fun RecordingRow(recording: IptvRecording, availability: IptvRecordingAv
 }
 
 @Composable
-private fun RecordingLine(recording: IptvRecording, availability: IptvRecordingAvailability?, uploading: Boolean) {
+private fun RecordingLine(recording: IptvRecording, availability: IptvRecordingAvailability?, uploading: Boolean, note: Int?) {
     val now = System.currentTimeMillis()
     val start = recording.startedAtMillis ?: recording.startMillis
     val stop = if (recording.status.finished) recording.finishedAtMillis ?: recording.stopMillis else recording.stopMillis
@@ -221,7 +221,8 @@ private fun RecordingLine(recording: IptvRecording, availability: IptvRecordingA
     val parts = listOfNotNull(
         recording.title?.let { recording.channelName },
         "$date ${clock(start)} – ${clock(stop)}",
-        recording.failure?.let { stringResource(iptvRecordingFailureMessage(it)) },
+        recording.failure?.let { stringResource(iptvRecordingFailureMessage(recording, it)) },
+        note?.let { stringResource(it) },
         if (recording.gaps > 0 && recording.failure == null) stringResource(R.string.iptv_recording_gaps) else null,
         if (recording.fixtureKey != null && recording.status.finished && recording.playedAtMillis == null) stringResource(R.string.iptv_sport5_nuvio_unwatched) else null,
         when {
@@ -233,7 +234,7 @@ private fun RecordingLine(recording: IptvRecording, availability: IptvRecordingA
         when (availability) {
             IptvRecordingAvailability.DRIVE_MISSING -> stringResource(R.string.iptv_recording_drive_missing)
             IptvRecordingAvailability.SHARE_MISSING -> stringResource(R.string.iptv_recording_share_missing)
-            IptvRecordingAvailability.UPLOADING -> stringResource(when {
+            IptvRecordingAvailability.UPLOADING -> if (note != null) null else stringResource(when {
                 recording.onMedia -> if (uploading) R.string.iptv_media_copying else R.string.iptv_media_copy_waiting
                 else -> if (uploading) R.string.iptv_recording_uploading else R.string.iptv_recording_upload_waiting
             })
@@ -241,7 +242,7 @@ private fun RecordingLine(recording: IptvRecording, availability: IptvRecordingA
         },
     )
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(parts.joinToString(" · "), color = if (recording.status == RecordingStatus.FAILED) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary,
+        Text(parts.joinToString(" · "), color = if (recording.status == RecordingStatus.FAILED || note != null) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary,
             style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
         if (recording.status == RecordingStatus.RECORDING) {
             ProgressLine(((now - start).toFloat() / (recording.stopMillis - start).coerceAtLeast(1)), Modifier.fillMaxWidth(.5f))

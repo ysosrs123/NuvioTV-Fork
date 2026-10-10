@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">このTVボックスのストレージの空き容量がほとんどありません</string>
+    <string name="iptv_ui17_recording_share_full">ネットワーク共有がいっぱいです</string>
+    <string name="iptv_ui17_recording_media_full">Movies フォルダがいっぱいです</string>
+    <string name="iptv_ui17_recording_share_paused">共有がいっぱいです – 空きができるまでアップロードを一時停止中</string>
+    <string name="iptv_ui17_recording_media_paused">Movies フォルダがいっぱいです – 空きができるまでコピーを一時停止中</string>
+</resources>

@@ -14,7 +14,7 @@ enum class RecordingStatus {
 
 enum class RecordingFailure {
     NO_CONNECTION, DEVICE_BUSY, SOURCE_UNAVAILABLE, CHANNEL_UNAVAILABLE, UNSUPPORTED_STREAM, ENCRYPTED_STREAM,
-    NETWORK, LOW_STORAGE, STORAGE_ERROR, TIME_LIMIT, INTERRUPTED, START_BLOCKED, MISSED, STORAGE_MISSING, STORAGE_REMOVED,
+    NETWORK, LOW_STORAGE, STORAGE_ERROR, TIME_LIMIT, INTERRUPTED, START_BLOCKED, MISSED, STORAGE_MISSING, STORAGE_REMOVED, SHARE_FULL,
 }
 
 enum class RecordingStop { USER, ENDED, TIME_LIMIT, INTERRUPTED, REMOVED }
@@ -152,12 +152,30 @@ object RecordingStorage {
     const val START_MARGIN_BYTES = 100L * 1024 * 1024
     const val CHECK_INTERVAL_BYTES = 8L * 1024 * 1024
     const val ESTIMATED_BYTES_PER_HOUR = 2_500L * 1024 * 1024
+    const val SHARE_BACKLOG_BYTES = 2L * 1024 * 1024 * 1024
     fun canStart(freeBytes: Long, reserveBytes: Long = RESERVE_BYTES): Boolean = freeBytes >= reserveBytes + START_MARGIN_BYTES
     fun estimatedBytes(durationMillis: Long): Long =
         durationMillis.coerceIn(0, RecordingPlan.MAX_DURATION_MILLIS) / 1000 * ESTIMATED_BYTES_PER_HOUR / 3600
     fun hasRoomFor(freeBytes: Long, durationMillis: Long, committedBytes: Long = 0, reserveBytes: Long = RESERVE_BYTES): Boolean =
         freeBytes >= reserveBytes + START_MARGIN_BYTES + estimatedBytes(durationMillis) + committedBytes
     fun canContinue(freeBytes: Long, reserveBytes: Long = RESERVE_BYTES): Boolean = freeBytes >= reserveBytes
+    fun backlogTooLarge(targetFull: Boolean, backlogBytes: Long, capBytes: Long = SHARE_BACKLOG_BYTES): Boolean = targetFull && backlogBytes > capBytes
+}
+
+enum class RecordingNote { BOX_STORAGE_LOW, SHARE_FULL, MEDIA_FULL, SHARE_PAUSED, MEDIA_PAUSED }
+
+object RecordingNotes {
+    fun failure(failure: RecordingFailure?, spooled: Boolean, media: Boolean): RecordingNote? = when (failure) {
+        RecordingFailure.LOW_STORAGE -> if (spooled || media) RecordingNote.BOX_STORAGE_LOW else null
+        RecordingFailure.SHARE_FULL -> if (media) RecordingNote.MEDIA_FULL else RecordingNote.SHARE_FULL
+        else -> null
+    }
+
+    fun upload(targetFull: Boolean, status: RecordingStatus, pending: Boolean, media: Boolean): RecordingNote? = when {
+        !targetFull || !(status == RecordingStatus.RECORDING || (status.finished && pending)) -> null
+        media -> RecordingNote.MEDIA_PAUSED
+        else -> RecordingNote.SHARE_PAUSED
+    }
 }
 
 object RecordingFiles {

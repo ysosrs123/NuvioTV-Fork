@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">This TV box\'s storage is almost full</string>
+    <string name="iptv_ui17_recording_share_full">The network share is full</string>
+    <string name="iptv_ui17_recording_media_full">The Movies folder is full</string>
+    <string name="iptv_ui17_recording_share_paused">Share full – upload paused until there\'s space</string>
+    <string name="iptv_ui17_recording_media_paused">Movies folder full – copying paused until there\'s space</string>
+</resources>

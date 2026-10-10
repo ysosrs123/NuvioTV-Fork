@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Bu TV kutusunun depolama alanı neredeyse dolu</string>
+    <string name="iptv_ui17_recording_share_full">Ağ paylaşımı dolu</string>
+    <string name="iptv_ui17_recording_media_full">Movies klasörü dolu</string>
+    <string name="iptv_ui17_recording_share_paused">Paylaşım dolu – yer açılana kadar yükleme duraklatıldı</string>
+    <string name="iptv_ui17_recording_media_paused">Movies klasörü dolu – yer açılana kadar kopyalama duraklatıldı</string>
+</resources>

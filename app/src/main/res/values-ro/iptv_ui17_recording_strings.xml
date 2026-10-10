@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Spațiul de stocare al acestui TV box este aproape plin</string>
+    <string name="iptv_ui17_recording_share_full">Partajarea de rețea este plină</string>
+    <string name="iptv_ui17_recording_media_full">Dosarul Movies este plin</string>
+    <string name="iptv_ui17_recording_share_paused">Partajare plină – încărcarea este întreruptă până există spațiu</string>
+    <string name="iptv_ui17_recording_media_paused">Dosarul Movies este plin – copierea este întreruptă până există spațiu</string>
+</resources>

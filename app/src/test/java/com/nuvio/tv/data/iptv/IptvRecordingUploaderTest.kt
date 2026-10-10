@@ -318,6 +318,26 @@ class IptvRecordingUploaderTest {
         assertArrayEquals(other, share.text("r.ts"))
     }
 
+    @Test fun fullShareIsReportedUntilUploadingMovesAgain() = runBlocking {
+        val share = FakeShare().apply { free = 10 }
+        val dir = spool(bytes(100, 9))
+        val issues = ArrayList<IptvShareError?>()
+        var pauses = 0
+        val uploader = IptvRecordingUploader(share, pause = { if (++pauses == 3) share.free = Long.MAX_VALUE }, now = { 0L }, chunkBytes = 64,
+            minimumFreeBytes = 50, onIssue = { issues += it })
+        val result = uploader.upload(dir, "f.ts", { Long.MAX_VALUE }, { true }, 60_000)
+        assertEquals(IptvUploadResult.DONE, result.result)
+        assertEquals(listOf(IptvShareError.FULL, null), issues)
+        assertNull(uploader.issue)
+        val clean = ArrayList<IptvShareError?>()
+        IptvRecordingUploader(FakeShare(), pause = { }, minimumFreeBytes = 0, onIssue = { clean += it }).upload(spool(bytes(10, 2)), "h.ts", { Long.MAX_VALUE }, { true }, 0)
+        assertEquals(listOf<IptvShareError?>(null), clean)
+        share.down = true
+        val down = IptvRecordingUploader(share, pause = { }, now = { 0L }, onIssue = { issues += it }).upload(spool(bytes(10, 1)), "g.ts", { Long.MAX_VALUE }, { true }, 0)
+        assertEquals(IptvShareError.UNREACHABLE, down.error)
+        assertEquals(IptvShareError.UNREACHABLE, issues.last())
+    }
+
     @Test fun fullShareWaitsWithoutWriting() = runBlocking {
         val share = FakeShare().apply { free = 10 }
         val dir = spool(bytes(100, 8))

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Pohrana ovog TV uređaja gotovo je puna</string>
+    <string name="iptv_ui17_recording_share_full">Mrežno dijeljenje je puno</string>
+    <string name="iptv_ui17_recording_media_full">Mapa Movies je puna</string>
+    <string name="iptv_ui17_recording_share_paused">Dijeljenje je puno – prijenos je pauziran dok ne bude prostora</string>
+    <string name="iptv_ui17_recording_media_paused">Mapa Movies je puna – kopiranje je pauzirano dok ne bude prostora</string>
+</resources>

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.RecordingFailure
+import com.nuvio.tv.core.iptv.RecordingNote
+import com.nuvio.tv.core.iptv.RecordingNotes
 import com.nuvio.tv.core.iptv.RecordingStatus
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.recording.IptvFreeSpace
@@ -14,6 +16,7 @@ import com.nuvio.tv.core.recording.IptvRecordingDeletion
 import com.nuvio.tv.core.server.IptvRecordingStreamServer
 import com.nuvio.tv.data.iptv.IptvRecording
 import com.nuvio.tv.data.iptv.IptvRecordingReader
+import com.nuvio.tv.data.iptv.IptvShareError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -36,6 +39,7 @@ data class IptvRecordingsState(
     val playable: Set<String> = emptySet(),
     val availability: Map<String, IptvRecordingAvailability> = emptyMap(),
     val uploading: Set<String> = emptySet(),
+    val notes: Map<String, Int> = emptyMap(),
     val free: IptvFreeSpace? = null,
     val playing: IptvRecordingPlayback? = null,
     val stream: IptvRecordingStream? = null,
@@ -64,16 +68,20 @@ class IptvRecordingsViewModel @Inject constructor(
     private var server: IptvRecordingStreamServer? = null
 
     private val shown = combine(playing, stream) { playing, stream -> playing to stream }
+    private val upload = combine(recorder.uploading, recorder.uploadIssues) { uploading, issues -> uploading to issues }
 
     val state: StateFlow<IptvRecordingsState> = combine(profiles.activeProfileId.flatMapLatest { recorder.recordings(it) }, shown, message, free,
-        recorder.uploading) { list, (playing, stream), message, free, uploading ->
+        upload) { list, (playing, stream), message, free, (uploading, issues) ->
         val availability = recorder.availability(list)
+        val notes = list.mapNotNull { entry ->
+            RecordingNotes.upload(issues[entry.id] == IptvShareError.FULL, entry.status, entry.upload, entry.onMedia)?.let { entry.id to iptvRecordingNoteMessage(it) }
+        }.toMap()
         IptvRecordingsState(ready = true,
             recording = list.filter { it.status == RecordingStatus.RECORDING }.sortedBy { it.startMillis },
             scheduled = list.filter { it.status == RecordingStatus.SCHEDULED }.sortedBy { it.startMillis },
             recorded = list.filter { it.status.finished }.sortedByDescending { it.startedAtMillis ?: it.startMillis },
             playable = availability.filterValues { it == IptvRecordingAvailability.PLAYABLE }.keys,
-            availability = availability, uploading = uploading,
+            availability = availability, uploading = uploading, notes = notes,
             free = free, playing = playing?.takeIf { current -> list.any { it.id == current.recording.id } },
             stream = stream?.takeIf { current -> list.any { it.id == current.id } }, message = message)
     }.flowOn(Dispatchers.IO).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), IptvRecordingsState())
@@ -157,6 +165,17 @@ fun iptvRecordRefusalMessage(reason: IptvRecordRefusal): Int = when (reason) {
     IptvRecordRefusal.SHARE_MISSING -> R.string.iptv_recording_refused_share_missing
 }
 
+fun iptvRecordingFailureMessage(recording: IptvRecording, failure: RecordingFailure): Int =
+    RecordingNotes.failure(failure, recording.spooled, recording.onMedia)?.let(::iptvRecordingNoteMessage) ?: iptvRecordingFailureMessage(failure)
+
+fun iptvRecordingNoteMessage(note: RecordingNote): Int = when (note) {
+    RecordingNote.BOX_STORAGE_LOW -> R.string.iptv_ui17_recording_box_storage_low
+    RecordingNote.SHARE_FULL -> R.string.iptv_ui17_recording_share_full
+    RecordingNote.MEDIA_FULL -> R.string.iptv_ui17_recording_media_full
+    RecordingNote.SHARE_PAUSED -> R.string.iptv_ui17_recording_share_paused
+    RecordingNote.MEDIA_PAUSED -> R.string.iptv_ui17_recording_media_paused
+}
+
 fun iptvRecordingFailureMessage(failure: RecordingFailure): Int = when (failure) {
     RecordingFailure.NO_CONNECTION -> R.string.iptv_recording_failure_no_connection
     RecordingFailure.DEVICE_BUSY -> R.string.iptv_recording_failure_device_busy
@@ -173,6 +192,7 @@ fun iptvRecordingFailureMessage(failure: RecordingFailure): Int = when (failure)
     RecordingFailure.MISSED -> R.string.iptv_recording_failure_missed
     RecordingFailure.STORAGE_MISSING -> R.string.iptv_recording_failure_storage_missing
     RecordingFailure.STORAGE_REMOVED -> R.string.iptv_recording_failure_storage_removed
+    RecordingFailure.SHARE_FULL -> R.string.iptv_ui17_recording_share_full
 }
 
 fun iptvRecordingStatusLabel(status: RecordingStatus): Int = when (status) {

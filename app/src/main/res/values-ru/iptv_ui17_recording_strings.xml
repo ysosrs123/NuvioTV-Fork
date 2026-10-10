@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Память этой ТВ-приставки почти заполнена</string>
+    <string name="iptv_ui17_recording_share_full">Общая сетевая папка заполнена</string>
+    <string name="iptv_ui17_recording_media_full">Папка Movies заполнена</string>
+    <string name="iptv_ui17_recording_share_paused">Общая папка заполнена – загрузка приостановлена, пока не освободится место</string>
+    <string name="iptv_ui17_recording_media_paused">Папка Movies заполнена – копирование приостановлено, пока не освободится место</string>
+</resources>

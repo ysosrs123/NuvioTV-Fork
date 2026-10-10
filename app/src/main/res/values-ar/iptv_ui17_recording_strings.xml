@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">مساحة التخزين في جهاز التلفزيون ممتلئة تقريباً</string>
+    <string name="iptv_ui17_recording_share_full">المجلد المشترك على الشبكة ممتلئ</string>
+    <string name="iptv_ui17_recording_media_full">مجلد Movies ممتلئ</string>
+    <string name="iptv_ui17_recording_share_paused">المجلد المشترك ممتلئ – الرفع متوقف حتى تتوفر مساحة</string>
+    <string name="iptv_ui17_recording_media_paused">مجلد Movies ممتلئ – النسخ متوقف حتى تتوفر مساحة</string>
+</resources>

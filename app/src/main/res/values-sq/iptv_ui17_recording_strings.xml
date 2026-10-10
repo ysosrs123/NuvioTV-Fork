@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Hapësira e ruajtjes e këtij TV box-i është pothuajse plot</string>
+    <string name="iptv_ui17_recording_share_full">Dosja e ndarë në rrjet është plot</string>
+    <string name="iptv_ui17_recording_media_full">Dosja Movies është plot</string>
+    <string name="iptv_ui17_recording_share_paused">Dosja e ndarë është plot – ngarkimi është në pauzë derisa të ketë hapësirë</string>
+    <string name="iptv_ui17_recording_media_paused">Dosja Movies është plot – kopjimi është në pauzë derisa të ketë hapësirë</string>
+</resources>

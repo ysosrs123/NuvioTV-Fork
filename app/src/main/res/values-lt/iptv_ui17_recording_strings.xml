@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Šio TV priedėlio saugykla beveik pilna</string>
+    <string name="iptv_ui17_recording_share_full">Tinklo bendrinamas aplankas pilnas</string>
+    <string name="iptv_ui17_recording_media_full">Aplankas Movies pilnas</string>
+    <string name="iptv_ui17_recording_share_paused">Bendrinamas aplankas pilnas – įkėlimas pristabdytas, kol atsiras vietos</string>
+    <string name="iptv_ui17_recording_media_paused">Aplankas Movies pilnas – kopijavimas pristabdytas, kol atsiras vietos</string>
+</resources>

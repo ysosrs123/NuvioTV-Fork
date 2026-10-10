@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">O armazenamento deste TV box está quase cheio</string>
+    <string name="iptv_ui17_recording_share_full">O compartilhamento de rede está cheio</string>
+    <string name="iptv_ui17_recording_media_full">A pasta Movies está cheia</string>
+    <string name="iptv_ui17_recording_share_paused">Compartilhamento cheio – envio pausado até haver espaço</string>
+    <string name="iptv_ui17_recording_media_paused">Pasta Movies cheia – cópia pausada até haver espaço</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">இந்த டிவி பெட்டியின் சேமிப்பகம் கிட்டத்தட்ட நிரம்பியுள்ளது</string>
+    <string name="iptv_ui17_recording_share_full">நெட்வொர்க் பகிர்வு நிரம்பியுள்ளது</string>
+    <string name="iptv_ui17_recording_media_full">Movies கோப்புறை நிரம்பியுள்ளது</string>
+    <string name="iptv_ui17_recording_share_paused">பகிர்வு நிரம்பியுள்ளது – இடம் கிடைக்கும் வரை பதிவேற்றம் நிறுத்தப்பட்டுள்ளது</string>
+    <string name="iptv_ui17_recording_media_paused">Movies கோப்புறை நிரம்பியுள்ளது – இடம் கிடைக்கும் வரை நகலெடுப்பு நிறுத்தப்பட்டுள்ளது</string>
+</resources>

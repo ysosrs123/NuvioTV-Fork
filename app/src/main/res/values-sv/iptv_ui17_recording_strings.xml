@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Lagringen på den här tv-boxen är nästan full</string>
+    <string name="iptv_ui17_recording_share_full">Nätverksresursen är full</string>
+    <string name="iptv_ui17_recording_media_full">Mappen Movies är full</string>
+    <string name="iptv_ui17_recording_share_paused">Resursen är full – uppladdning pausad tills det finns plats</string>
+    <string name="iptv_ui17_recording_media_paused">Mappen Movies är full – kopiering pausad tills det finns plats</string>
+</resources>

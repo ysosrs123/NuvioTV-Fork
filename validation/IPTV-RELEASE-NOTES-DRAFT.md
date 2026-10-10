@@ -732,6 +732,16 @@ Sport data (live capture of 11 October):
   hockey, LPGA, DP World Tour, LIV, IndyCar, NASCAR Xfinity and Truck, Premiership Rugby,
   Top 14, Champions Cup, Six Nations and The Rugby Championship.
 
+Recording storage:
+- While a network share or the Movies folder is full, the recording says "Share full –
+  upload paused until there's space" (or the Movies folder version); it clears once
+  uploading resumes.
+- If the share stays full, the recording stops once about 2 GB (roughly 45 minutes) is
+  waiting on the TV box; it is marked "The network share is full" and what was recorded
+  uploads later. A share that is only unreachable keeps buffering as before.
+- When the TV box itself runs low while recording to a share, the message now says the TV
+  box's storage is almost full.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

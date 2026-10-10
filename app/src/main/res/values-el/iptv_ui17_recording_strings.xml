@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Ο αποθηκευτικός χώρος αυτού του TV box είναι σχεδόν γεμάτος</string>
+    <string name="iptv_ui17_recording_share_full">Ο κοινόχρηστος φάκελος δικτύου είναι γεμάτος</string>
+    <string name="iptv_ui17_recording_media_full">Ο φάκελος Movies είναι γεμάτος</string>
+    <string name="iptv_ui17_recording_share_paused">Ο κοινόχρηστος φάκελος είναι γεμάτος – η μεταφόρτωση σε παύση μέχρι να υπάρξει χώρος</string>
+    <string name="iptv_ui17_recording_media_paused">Ο φάκελος Movies είναι γεμάτος – η αντιγραφή σε παύση μέχρι να υπάρξει χώρος</string>
+</resources>

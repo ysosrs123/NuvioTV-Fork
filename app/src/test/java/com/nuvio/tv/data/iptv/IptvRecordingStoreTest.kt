@@ -28,6 +28,14 @@ class IptvRecordingStoreTest {
         assertFalse(file.readText().contains("password"))
     }
 
+    @Test fun newFailuresSurviveAndUnknownOnesReadAsInterrupted() {
+        val file = File(temp.root, "r.json")
+        IptvRecordingStore(file).insert(entry("aaaaaaaa-1").copy(failure = RecordingFailure.SHARE_FULL))
+        assertEquals(RecordingFailure.SHARE_FULL, IptvRecordingStore(file).get("aaaaaaaa-1")?.failure)
+        file.writeText(file.readText().replace("SHARE_FULL", "SOMETHING_LATER"))
+        assertEquals(RecordingFailure.INTERRUPTED, IptvRecordingStore(file).get("aaaaaaaa-1")?.failure)
+    }
+
     @Test fun updatesEnforceTransitions() {
         val store = IptvRecordingStore(File(temp.root, "r.json"))
         store.insert(entry("aaaaaaaa-1"))

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">इस टीवी बॉक्स का स्टोरेज लगभग भर गया है</string>
+    <string name="iptv_ui17_recording_share_full">नेटवर्क शेयर भर गया है</string>
+    <string name="iptv_ui17_recording_media_full">Movies फ़ोल्डर भर गया है</string>
+    <string name="iptv_ui17_recording_share_paused">शेयर भर गया – जगह होने तक अपलोड रुका है</string>
+    <string name="iptv_ui17_recording_media_paused">Movies फ़ोल्डर भर गया – जगह होने तक कॉपी रुकी है</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">האחסון של ממיר הטלוויזיה הזה כמעט מלא</string>
+    <string name="iptv_ui17_recording_share_full">שיתוף הרשת מלא</string>
+    <string name="iptv_ui17_recording_media_full">תיקיית Movies מלאה</string>
+    <string name="iptv_ui17_recording_share_paused">השיתוף מלא – ההעלאה מושהית עד שיתפנה מקום</string>
+    <string name="iptv_ui17_recording_media_paused">תיקיית Movies מלאה – ההעתקה מושהית עד שיתפנה מקום</string>
+</resources>

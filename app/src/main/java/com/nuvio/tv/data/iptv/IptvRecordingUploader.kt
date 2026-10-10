@@ -29,11 +29,15 @@ class IptvRecordingUploader(
     private val pollMillis: Long = 1_000,
     private val minimumFreeBytes: Long = RecordingStorage.START_MARGIN_BYTES,
     private val onFree: (Long) -> Unit = { },
+    private val onIssue: (IptvShareError?) -> Unit = { },
 ) {
     init { require(chunkBytes > 0 && pollMillis > 0 && minimumFreeBytes >= 0) }
 
     @Volatile var uploaded: Long = 0
         private set
+    @Volatile var issue: IptvShareError? = null
+        private set
+    private var reported = false
 
     private class Local(val piece: RecordingPiece, val file: File)
 
@@ -98,6 +102,7 @@ class IptvRecordingUploader(
                             size += count
                             offset += count
                             uploaded = size
+                            report(null)
                         }
                     }
                     output.flush()
@@ -139,6 +144,7 @@ class IptvRecordingUploader(
                             size += count
                             uploaded = size
                             failures = 0
+                            report(null)
                             if (size == source.piece.end && (done || source !== local.last())) {
                                 output.flush()
                                 val confirmed = output.length
@@ -154,6 +160,7 @@ class IptvRecordingUploader(
             catch (error: Exception) {
                 lastError = (error as? IptvShareException)?.error ?: IptvShareError.OTHER
                 if (lastError == IptvShareError.LOST) return@withContext IptvUploadOutcome(IptvUploadResult.LOST, uploaded, lastError)
+                report(lastError)
                 if (failures == 0) IptvLog.failure("recording upload", error)
                 if (finished()) {
                     val since = failingSince ?: now().also { failingSince = it }
@@ -214,6 +221,14 @@ class IptvRecordingUploader(
         val free = session.freeBytes()
         onFree(free)
         if (free < minimumFreeBytes + pending.coerceAtLeast(0)) throw IptvShareException(IptvShareError.FULL)
+        report(null)
+    }
+
+    private fun report(error: IptvShareError?) {
+        if (issue == error && reported) return
+        issue = error
+        reported = true
+        onIssue(error)
     }
 
     private fun pieces(spool: File): List<Local> = (spool.listFiles() ?: emptyArray()).mapNotNull { file ->

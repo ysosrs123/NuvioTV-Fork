@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.iptv
 
 import com.nuvio.tv.core.iptv.RecordingFailure
+import com.nuvio.tv.core.iptv.RecordingStorage
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
@@ -182,6 +183,20 @@ class IptvRecordingCopierTest {
         server.use {
             val result = copier(free = 1024).copy(server.url("/a.ts").toString(), IptvStreamFormat.AUTO, output(), System.currentTimeMillis() + 5_000)
             assertEquals(IptvRecordingCopy(0, 0, RecordingFailure.LOW_STORAGE), result)
+        }
+    }
+
+    @Test fun haltStopsTheCopyAtTheNextSpaceCheck() = runBlocking {
+        val server = server { ts(packets(1, 50_000)) }
+        server.use {
+            var checks = 0
+            val result = IptvRecordingCopier(freeBytes = { Long.MAX_VALUE }, pause = { }, minimumStallMillis = 2_000,
+                halt = { if (++checks > 1) RecordingFailure.SHARE_FULL else null })
+                .copy(server.url("/a.ts").toString(), IptvStreamFormat.AUTO, output(), System.currentTimeMillis() + 30_000)
+            assertEquals(RecordingFailure.SHARE_FULL, result.failure)
+            assertTrue(result.bytes >= RecordingStorage.CHECK_INTERVAL_BYTES)
+            assertEquals(result.bytes, output().length())
+            assertEquals(2, checks)
         }
     }
 

@@ -49,6 +49,7 @@ class IptvRecordingCopier(
     private val pause: suspend (Long) -> Unit = { delay(it) },
     private val maxSegmentBytes: Long = 256L * 1024 * 1024,
     private val minimumStallMillis: Long = 30_000,
+    private val halt: () -> RecordingFailure? = { null },
 ) {
     init { require(reserveBytes >= 0 && maxSegmentBytes > 0 && minimumStallMillis > 0) }
 
@@ -92,6 +93,7 @@ class IptvRecordingCopier(
         private fun checkSpace() {
             val free = try { freeBytes(output.directory) } catch (_: Exception) { Long.MAX_VALUE }
             if (!RecordingStorage.canContinue(free, reserveBytes)) throw RecordingStreamException(RecordingFailure.LOW_STORAGE)
+            halt()?.let { throw RecordingStreamException(it) }
         }
     }
 

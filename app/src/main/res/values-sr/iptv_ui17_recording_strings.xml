@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Меморија овог ТВ уређаја је скоро пуна</string>
+    <string name="iptv_ui17_recording_share_full">Мрежно дељење је пуно</string>
+    <string name="iptv_ui17_recording_media_full">Фасцикла Movies је пуна</string>
+    <string name="iptv_ui17_recording_share_paused">Дељење је пуно – отпремање је паузирано док не буде простора</string>
+    <string name="iptv_ui17_recording_media_paused">Фасцикла Movies је пуна – копирање је паузирано док не буде простора</string>
+</resources>

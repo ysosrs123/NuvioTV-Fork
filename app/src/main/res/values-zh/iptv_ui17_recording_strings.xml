@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">此电视盒的存储空间即将用尽</string>
+    <string name="iptv_ui17_recording_share_full">网络共享空间已满</string>
+    <string name="iptv_ui17_recording_media_full">Movies 文件夹已满</string>
+    <string name="iptv_ui17_recording_share_paused">共享空间已满 – 上传已暂停，直到有可用空间</string>
+    <string name="iptv_ui17_recording_media_paused">Movies 文件夹已满 – 复制已暂停，直到有可用空间</string>
+</resources>

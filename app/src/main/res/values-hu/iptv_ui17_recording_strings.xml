@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">A TV-box tárhelye majdnem megtelt</string>
+    <string name="iptv_ui17_recording_share_full">A hálózati megosztás megtelt</string>
+    <string name="iptv_ui17_recording_media_full">A Movies mappa megtelt</string>
+    <string name="iptv_ui17_recording_share_paused">A megosztás megtelt – a feltöltés szünetel, amíg nem lesz hely</string>
+    <string name="iptv_ui17_recording_media_paused">A Movies mappa megtelt – a másolás szünetel, amíg nem lesz hely</string>
+</resources>

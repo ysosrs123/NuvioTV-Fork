@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui17_recording_box_storage_low">Pamięć tego TV boxa jest prawie pełna</string>
+    <string name="iptv_ui17_recording_share_full">Udział sieciowy jest pełny</string>
+    <string name="iptv_ui17_recording_media_full">Folder Movies jest pełny</string>
+    <string name="iptv_ui17_recording_share_paused">Udział pełny – wysyłanie wstrzymane do czasu zwolnienia miejsca</string>
+    <string name="iptv_ui17_recording_media_paused">Folder Movies pełny – kopiowanie wstrzymane do czasu zwolnienia miejsca</string>
+</resources>
