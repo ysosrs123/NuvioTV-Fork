@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Bu TV kutusu, diğer görüntüler en hafif sürümlerindeyken bile çözebildiği kadar videoyu zaten çözüyor. Önce bir görüntüyü kaldırın veya birini kanalının daha düşük çözünürlüklü bir sürümüyle (SD veya 720p gibi) değiştirin, ardından bunu yeniden ekleyin.</string>
+    <string name="iptv_multiview_decoder_busy">Bu TV kutusunda şu anda başka bir görüntü için boş video kod çözücü yok. Bir görüntüyü kaldırın veya birkaç saniye bekleyip yeniden deneyin.</string>
+</resources>

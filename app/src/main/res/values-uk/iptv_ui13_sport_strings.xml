@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Спортивні канали</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Виберіть канали для «Лише спорт» і канали, на яких пропонуються матчі</string>
+    <string name="iptv_ui13_sport_always">Завжди в «Лише спорт»</string>
+    <string name="iptv_ui13_sport_always_subtitle">Показуються в «Лише спорт» навіть без знайденого матчу, як-от ваші спортивні категорії</string>
+    <string name="iptv_ui13_sport_never">Ніколи в «Лише спорт»</string>
+    <string name="iptv_ui13_sport_never_subtitle">Виключені з «Лише спорт», навіть коли показують матч</string>
+    <string name="iptv_ui13_sport_preferred">Бажані для матчів</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Пропонуються першими для «Дивитися на», інших трансляцій і записів, як-от спортивні категорії вашої країни</string>
+    <string name="iptv_ui13_sport_excluded">Не пропонувати для матчів</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Ніколи не пропонуються для перегляду чи запису матчу</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">Вибрано: %d</item>
+        <item quantity="few">Вибрано: %d</item>
+        <item quantity="many">Вибрано: %d</item>
+        <item quantity="other">Вибрано: %d</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Фільтр категорій або пошук каналів</string>
+    <string name="iptv_ui13_sport_pick_hint">Введіть щонайменше дві літери, щоб знайти канали в усіх джерелах</string>
+    <string name="iptv_ui13_sport_pick_chosen">Вибрані</string>
+    <string name="iptv_ui13_sport_pick_categories">Категорії</string>
+    <string name="iptv_ui13_sport_pick_channels">Канали</string>
+    <string name="iptv_ui13_sport_pick_category">Категорія</string>
+    <string name="iptv_ui13_sport_pick_channel">Канал</string>
+    <string name="iptv_ui13_sport_pick_searching">Пошук каналів…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Немає відповідних каналів.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Немає відповідних категорій.</string>
+</resources>

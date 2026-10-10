@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">TV box này đang giải mã tối đa lượng video có thể, kể cả khi các khung hình khác ở mức nhẹ nhất. Hãy xóa một khung hình trước, hoặc đổi một khung sang phiên bản độ phân giải thấp hơn của kênh đó (như SD hoặc 720p), rồi thêm lại kênh này.</string>
+    <string name="iptv_multiview_decoder_busy">TV box này hiện không còn bộ giải mã video trống cho thêm khung hình. Hãy xóa một khung hình, hoặc đợi vài giây rồi thử lại.</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Зберігати доступ із телефона</string>
+    <string name="iptv_phone_keep_subtitle">Сполучені телефони відкривають налаштування й записи, поки Nuvio відкрито або працює у фоні</string>
+    <string name="iptv_phone_keep_note">Доступ із телефона залишається ввімкненим, поки Nuvio відкрито або працює у фоні на цьому телевізорі. Нові телефони можна сполучити, лише поки відкрито цей екран.</string>
+    <string name="iptv_phone_done_kept">Повернення назад. Сполучені телефони зберігають доступ.</string>
+    <string name="iptv_phone_paired">Сполучені телефони</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d телефон або комп\'ютер</item>
+        <item quantity="few">%d телефони або комп\'ютери</item>
+        <item quantity="many">%d телефонів або комп\'ютерів</item>
+        <item quantity="other">%d телефона або комп\'ютера</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Ще немає. Відскануйте QR-код, щоб сполучити телефон.</string>
+    <string name="iptv_phone_paired_subtitle">Вони можуть відкривати налаштування й записи, поки Nuvio відкрито або працює у фоні на цьому телевізорі. Зміни все одно потрібно підтвердити тут.</string>
+    <string name="iptv_phone_paired_on">Сполучено %1$s</string>
+    <string name="iptv_phone_remove_all">Видалити всі</string>
+    <string name="iptv_phone_name">%1$s на %2$s</string>
+    <string name="iptv_phone_unknown">Невідомий браузер</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Сполучені телефони відкривають</string>
+</resources>

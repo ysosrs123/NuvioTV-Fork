@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Canais de esportes</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Escolha os canais que Só esportes mostra e os canais em que os jogos são oferecidos</string>
+    <string name="iptv_ui13_sport_always">Sempre em Só esportes</string>
+    <string name="iptv_ui13_sport_always_subtitle">Exibidos em Só esportes mesmo sem jogo associado, como suas categorias de esportes</string>
+    <string name="iptv_ui13_sport_never">Nunca em Só esportes</string>
+    <string name="iptv_ui13_sport_never_subtitle">Fora de Só esportes mesmo quando mostram um jogo</string>
+    <string name="iptv_ui13_sport_preferred">Preferidos para jogos</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Oferecidos primeiro em Assistir em, outras transmissões e gravações, como as categorias de esportes do seu país</string>
+    <string name="iptv_ui13_sport_excluded">Nunca oferecer para jogos</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Nunca oferecidos para assistir ou gravar um jogo</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d escolhido</item>
+        <item quantity="many">%d escolhidos</item>
+        <item quantity="other">%d escolhidos</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtrar categorias ou buscar canais</string>
+    <string name="iptv_ui13_sport_pick_hint">Digite pelo menos duas letras para buscar canais em todas as suas fontes</string>
+    <string name="iptv_ui13_sport_pick_chosen">Escolhidos</string>
+    <string name="iptv_ui13_sport_pick_categories">Categorias</string>
+    <string name="iptv_ui13_sport_pick_channels">Canais</string>
+    <string name="iptv_ui13_sport_pick_category">Categoria</string>
+    <string name="iptv_ui13_sport_pick_channel">Canal</string>
+    <string name="iptv_ui13_sport_pick_searching">Buscando canais…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Nenhum canal encontrado.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Nenhuma categoria encontrada.</string>
+</resources>

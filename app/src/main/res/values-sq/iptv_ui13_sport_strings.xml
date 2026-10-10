@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Kanalet sportive</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Zgjidh kanalet që shfaq Vetëm sport dhe kanalet ku ofrohen ndeshjet</string>
+    <string name="iptv_ui13_sport_always">Gjithmonë te Vetëm sport</string>
+    <string name="iptv_ui13_sport_always_subtitle">Shfaqen te Vetëm sport edhe pa një ndeshje të përputhur, si kategoritë e tua sportive</string>
+    <string name="iptv_ui13_sport_never">Kurrë te Vetëm sport</string>
+    <string name="iptv_ui13_sport_never_subtitle">Lihen jashtë Vetëm sport edhe kur shfaqin një ndeshje</string>
+    <string name="iptv_ui13_sport_preferred">Të preferuara për ndeshjet</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Ofrohen të parat për Shiko në, transmetime të tjera dhe regjistrime, si kategoritë sportive të vendit tënd</string>
+    <string name="iptv_ui13_sport_excluded">Mos i ofro kurrë për ndeshje</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Nuk ofrohen kurrë për të parë ose regjistruar një ndeshje</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d i zgjedhur</item>
+        <item quantity="other">%d të zgjedhur</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtro kategoritë ose gjej kanale</string>
+    <string name="iptv_ui13_sport_pick_hint">Shkruaj të paktën dy shkronja për të gjetur kanale në të gjitha burimet</string>
+    <string name="iptv_ui13_sport_pick_chosen">Të zgjedhurat</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategoritë</string>
+    <string name="iptv_ui13_sport_pick_channels">Kanalet</string>
+    <string name="iptv_ui13_sport_pick_category">Kategoria</string>
+    <string name="iptv_ui13_sport_pick_channel">Kanali</string>
+    <string name="iptv_ui13_sport_pick_searching">Po gjenden kanalet…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Asnjë kanal nuk përputhet.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Asnjë kategori nuk përputhet.</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Ohrani dostop s telefonom</string>
+    <string name="iptv_phone_keep_subtitle">Seznanjeni telefoni dostopajo do nastavitve in posnetkov, ko je Nuvio odprt ali v ozadju</string>
+    <string name="iptv_phone_keep_note">Dostop s telefonom ostane vklopljen, ko je Nuvio odprt ali v ozadju na tem televizorju. Nove telefone lahko seznanite le, ko je ta zaslon odprt.</string>
+    <string name="iptv_phone_done_kept">Vrne nazaj. Seznanjeni telefoni obdržijo dostop.</string>
+    <string name="iptv_phone_paired">Seznanjeni telefoni</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefon ali računalnik</item>
+        <item quantity="two">%d telefona ali računalnika</item>
+        <item quantity="few">%d telefoni ali računalniki</item>
+        <item quantity="other">%d telefonov ali računalnikov</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Še nobenega. Skenirajte kodo QR, da ga seznanite.</string>
+    <string name="iptv_phone_paired_subtitle">Ti lahko odprejo nastavitev in posnetke, ko je Nuvio odprt ali v ozadju na tem televizorju. Spremembe morate še vedno potrditi tukaj.</string>
+    <string name="iptv_phone_paired_on">Seznanjeno %1$s</string>
+    <string name="iptv_phone_remove_all">Odstrani vse</string>
+    <string name="iptv_phone_name">%1$s na %2$s</string>
+    <string name="iptv_phone_unknown">Neznan brskalnik</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Seznanjeni telefoni odprejo</string>
+</resources>

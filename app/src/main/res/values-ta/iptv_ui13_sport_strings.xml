@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">விளையாட்டுச் சேனல்கள்</string>
+    <string name="iptv_ui13_sport_channels_subtitle">விளையாட்டு மட்டும் காட்டும் சேனல்களையும் போட்டிகள் வழங்கப்படும் சேனல்களையும் தேர்வுசெய்யவும்</string>
+    <string name="iptv_ui13_sport_always">எப்போதும் விளையாட்டு மட்டும் இல்</string>
+    <string name="iptv_ui13_sport_always_subtitle">பொருந்திய போட்டி இல்லாவிட்டாலும் விளையாட்டு மட்டும் இல் காட்டப்படும், உதா. உங்கள் விளையாட்டு வகைகள்</string>
+    <string name="iptv_ui13_sport_never">ஒருபோதும் விளையாட்டு மட்டும் இல் இல்லை</string>
+    <string name="iptv_ui13_sport_never_subtitle">போட்டியைக் காட்டினாலும் விளையாட்டு மட்டும் இலிருந்து விலக்கப்படும்</string>
+    <string name="iptv_ui13_sport_preferred">போட்டிகளுக்கு விருப்பமானவை</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">இல் பார், பிற ஃபீட்கள், பதிவுகளுக்கு முதலில் வழங்கப்படும், உதா. உங்கள் நாட்டின் விளையாட்டு வகைகள்</string>
+    <string name="iptv_ui13_sport_excluded">போட்டிகளுக்கு ஒருபோதும் வழங்காதே</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">போட்டியைப் பார்க்கவோ பதிவுசெய்யவோ ஒருபோதும் வழங்கப்படாது</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d தேர்வுசெய்யப்பட்டது</item>
+        <item quantity="other">%d தேர்வுசெய்யப்பட்டன</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">வகைகளை வடிகட்டவும் அல்லது சேனல்களைக் கண்டறியவும்</string>
+    <string name="iptv_ui13_sport_pick_hint">உங்கள் மூலங்களில் சேனல்களைக் கண்டறிய குறைந்தது இரண்டு எழுத்துகளை உள்ளிடவும்</string>
+    <string name="iptv_ui13_sport_pick_chosen">தேர்வுசெய்தவை</string>
+    <string name="iptv_ui13_sport_pick_categories">வகைகள்</string>
+    <string name="iptv_ui13_sport_pick_channels">சேனல்கள்</string>
+    <string name="iptv_ui13_sport_pick_category">வகை</string>
+    <string name="iptv_ui13_sport_pick_channel">சேனல்</string>
+    <string name="iptv_ui13_sport_pick_searching">சேனல்களைக் கண்டறிகிறது…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">பொருந்தும் சேனல்கள் இல்லை.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">பொருந்தும் வகைகள் இல்லை.</string>
+</resources>

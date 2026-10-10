@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">TV-boxen avkodar redan så mycket video den klarar, även med de andra bilderna på lättaste nivå. Ta bort en bild först, eller byt ut en mot en version av kanalen med lägre upplösning (till exempel SD eller 720p), och lägg sedan till den här igen.</string>
+    <string name="iptv_multiview_decoder_busy">TV-boxen har ingen ledig videoavkodare för fler bilder just nu. Ta bort en bild, eller vänta några sekunder och försök igen.</string>
+</resources>

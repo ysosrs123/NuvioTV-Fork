@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Zachowaj dostęp z telefonu</string>
+    <string name="iptv_phone_keep_subtitle">Sparowane telefony mają dostęp do konfiguracji i nagrań, gdy Nuvio jest otwarte lub działa w tle</string>
+    <string name="iptv_phone_keep_note">Dostęp z telefonu pozostaje włączony, gdy Nuvio jest otwarte lub działa w tle na tym telewizorze. Nowe telefony można sparować tylko przy otwartym tym ekranie.</string>
+    <string name="iptv_phone_done_kept">Wraca. Sparowane telefony zachowują dostęp.</string>
+    <string name="iptv_phone_paired">Sparowane telefony</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefon lub komputer</item>
+        <item quantity="few">%d telefony lub komputery</item>
+        <item quantity="many">%d telefonów lub komputerów</item>
+        <item quantity="other">%d telefonu lub komputera</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Jeszcze żadnych. Zeskanuj kod QR, aby sparować telefon.</string>
+    <string name="iptv_phone_paired_subtitle">Mogą otwierać konfigurację i nagrania, gdy Nuvio jest otwarte lub działa w tle na tym telewizorze. Zmiany nadal zatwierdzasz tutaj.</string>
+    <string name="iptv_phone_paired_on">Sparowano %1$s</string>
+    <string name="iptv_phone_remove_all">Usuń wszystkie</string>
+    <string name="iptv_phone_name">%1$s na %2$s</string>
+    <string name="iptv_phone_unknown">Nieznana przeglądarka</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Sparowane telefony otwierają</string>
+</resources>

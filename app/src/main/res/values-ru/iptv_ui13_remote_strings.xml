@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Сохранять доступ с телефона</string>
+    <string name="iptv_phone_keep_subtitle">Сопряжённые телефоны открывают настройку и записи, пока Nuvio открыт или работает в фоне</string>
+    <string name="iptv_phone_keep_note">Доступ с телефона остаётся включённым, пока Nuvio открыт или работает в фоне на этом телевизоре. Новые телефоны можно сопрячь, только пока открыт этот экран.</string>
+    <string name="iptv_phone_done_kept">Возврат назад. Сопряжённые телефоны сохраняют доступ.</string>
+    <string name="iptv_phone_paired">Сопряжённые телефоны</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d телефон или компьютер</item>
+        <item quantity="few">%d телефона или компьютера</item>
+        <item quantity="many">%d телефонов или компьютеров</item>
+        <item quantity="other">%d телефона или компьютера</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Пока нет. Отсканируйте QR-код, чтобы выполнить сопряжение.</string>
+    <string name="iptv_phone_paired_subtitle">Они могут открывать настройку и записи, пока Nuvio открыт или работает в фоне на этом телевизоре. Изменения всё равно нужно подтвердить здесь.</string>
+    <string name="iptv_phone_paired_on">Сопряжено %1$s</string>
+    <string name="iptv_phone_remove_all">Удалить все</string>
+    <string name="iptv_phone_name">%1$s на %2$s</string>
+    <string name="iptv_phone_unknown">Неизвестный браузер</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Сопряжённые телефоны открывают</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Telefoontoegang aan laten</string>
+    <string name="iptv_phone_keep_subtitle">Gekoppelde telefoons hebben toegang tot instellen en opnamen zolang Nuvio open is of op de achtergrond draait</string>
+    <string name="iptv_phone_keep_note">Telefoontoegang blijft aan zolang Nuvio open is of op de achtergrond draait op deze tv. Nieuwe telefoons kunnen alleen koppelen terwijl dit scherm open is.</string>
+    <string name="iptv_phone_done_kept">Gaat terug. Gekoppelde telefoons houden toegang.</string>
+    <string name="iptv_phone_paired">Gekoppelde telefoons</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefoon of computer</item>
+        <item quantity="other">%d telefoons of computers</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Nog geen. Scan de QR-code om er een te koppelen.</string>
+    <string name="iptv_phone_paired_subtitle">Deze kunnen instellen en opnamen openen zolang Nuvio open is of op de achtergrond draait op deze tv. Wijzigingen keur je nog steeds hier goed.</string>
+    <string name="iptv_phone_paired_on">Gekoppeld %1$s</string>
+    <string name="iptv_phone_remove_all">Alles verwijderen</string>
+    <string name="iptv_phone_name">%1$s op %2$s</string>
+    <string name="iptv_phone_unknown">Onbekende browser</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Gekoppelde telefoons openen</string>
+</resources>

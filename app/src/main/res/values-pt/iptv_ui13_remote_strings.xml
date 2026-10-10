@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Manter o acesso do telemóvel</string>
+    <string name="iptv_phone_keep_subtitle">Os telemóveis emparelhados acedem à configuração e às gravações enquanto o Nuvio está aberto ou em segundo plano</string>
+    <string name="iptv_phone_keep_note">O acesso do telemóvel mantém-se ativo enquanto o Nuvio está aberto ou em segundo plano nesta TV. Só é possível emparelhar novos telemóveis com este ecrã aberto.</string>
+    <string name="iptv_phone_done_kept">Volta atrás. Os telemóveis emparelhados mantêm o acesso.</string>
+    <string name="iptv_phone_paired">Telemóveis emparelhados</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telemóvel ou computador</item>
+        <item quantity="many">%d telemóveis ou computadores</item>
+        <item quantity="other">%d telemóveis ou computadores</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Ainda nenhum. Lê o código QR para emparelhar um.</string>
+    <string name="iptv_phone_paired_subtitle">Estes podem abrir a configuração e as gravações enquanto o Nuvio está aberto ou em segundo plano nesta TV. As alterações continuam a precisar da tua aprovação aqui.</string>
+    <string name="iptv_phone_paired_on">Emparelhado %1$s</string>
+    <string name="iptv_phone_remove_all">Remover todos</string>
+    <string name="iptv_phone_name">%1$s em %2$s</string>
+    <string name="iptv_phone_unknown">Navegador desconhecido</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Os telemóveis emparelhados abrem</string>
+</resources>

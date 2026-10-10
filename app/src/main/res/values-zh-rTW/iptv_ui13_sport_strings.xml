@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">體育頻道</string>
+    <string name="iptv_ui13_sport_channels_subtitle">選擇「僅限體育」顯示的頻道和提供比賽的頻道</string>
+    <string name="iptv_ui13_sport_always">一律在「僅限體育」中</string>
+    <string name="iptv_ui13_sport_always_subtitle">即使沒有相符的比賽也在「僅限體育」中顯示，例如您的體育分類</string>
+    <string name="iptv_ui13_sport_never">絕不在「僅限體育」中</string>
+    <string name="iptv_ui13_sport_never_subtitle">即使正在播比賽也不在「僅限體育」中顯示</string>
+    <string name="iptv_ui13_sport_preferred">比賽優先使用</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">優先用於「觀看」、其他訊號源和錄影，例如您所在國家的體育分類</string>
+    <string name="iptv_ui13_sport_excluded">絕不用於比賽</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">絕不用於觀看或錄製比賽</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="other">已選 %d 個</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">篩選分類或尋找頻道</string>
+    <string name="iptv_ui13_sport_pick_hint">輸入至少兩個字母，在所有來源中尋找頻道</string>
+    <string name="iptv_ui13_sport_pick_chosen">已選取</string>
+    <string name="iptv_ui13_sport_pick_categories">分類</string>
+    <string name="iptv_ui13_sport_pick_channels">頻道</string>
+    <string name="iptv_ui13_sport_pick_category">分類</string>
+    <string name="iptv_ui13_sport_pick_channel">頻道</string>
+    <string name="iptv_ui13_sport_pick_searching">正在尋找頻道…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">沒有相符的頻道。</string>
+    <string name="iptv_ui13_sport_pick_no_categories">沒有相符的分類。</string>
+</resources>

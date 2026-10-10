@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">保持手機存取</string>
+    <string name="iptv_phone_keep_subtitle">Nuvio 開啟或在背景執行時，已配對的手機可存取設定和錄影</string>
+    <string name="iptv_phone_keep_note">此電視上的 Nuvio 開啟或在背景執行時，手機存取會保持開啟。只有在此畫面開啟時才能配對新手機。</string>
+    <string name="iptv_phone_done_kept">返回。已配對的手機保留存取權。</string>
+    <string name="iptv_phone_paired">已配對的手機</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="other">%d 支手機或電腦</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">尚無。掃描 QR 碼即可配對。</string>
+    <string name="iptv_phone_paired_subtitle">此電視上的 Nuvio 開啟或在背景執行時，這些裝置可開啟設定和錄影。變更仍需您在此確認。</string>
+    <string name="iptv_phone_paired_on">配對於 %1$s</string>
+    <string name="iptv_phone_remove_all">全部移除</string>
+    <string name="iptv_phone_name">%2$s 上的 %1$s</string>
+    <string name="iptv_phone_unknown">不明的瀏覽器</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">已配對的手機開啟</string>
+</resources>

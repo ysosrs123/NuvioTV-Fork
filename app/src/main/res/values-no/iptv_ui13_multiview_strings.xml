@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">TV-boksen dekoder allerede så mye video den kan, selv med de andre bildene på lettest mulig nivå. Fjern et bilde først, eller bytt ett ut med en versjon av kanalen med lavere oppløsning (for eksempel SD eller 720p), og legg så til dette igjen.</string>
+    <string name="iptv_multiview_decoder_busy">TV-boksen har ingen ledig videodekoder til flere bilder akkurat nå. Fjern et bilde, eller vent noen sekunder og prøv igjen.</string>
+</resources>

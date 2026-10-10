@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Păstrează accesul de pe telefon</string>
+    <string name="iptv_phone_keep_subtitle">Telefoanele asociate accesează configurarea și înregistrările cât timp Nuvio este deschis sau în fundal</string>
+    <string name="iptv_phone_keep_note">Accesul de pe telefon rămâne activ cât timp Nuvio este deschis sau în fundal pe acest TV. Telefoanele noi se pot asocia doar cât timp acest ecran este deschis.</string>
+    <string name="iptv_phone_done_kept">Revine. Telefoanele asociate își păstrează accesul.</string>
+    <string name="iptv_phone_paired">Telefoane asociate</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefon sau computer</item>
+        <item quantity="few">%d telefoane sau computere</item>
+        <item quantity="other">%d de telefoane sau computere</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Niciunul încă. Scanează codul QR pentru a asocia unul.</string>
+    <string name="iptv_phone_paired_subtitle">Acestea pot deschide configurarea și înregistrările cât timp Nuvio este deschis sau în fundal pe acest TV. Modificările necesită în continuare acordul tău aici.</string>
+    <string name="iptv_phone_paired_on">Asociat %1$s</string>
+    <string name="iptv_phone_remove_all">Elimină tot</string>
+    <string name="iptv_phone_name">%1$s pe %2$s</string>
+    <string name="iptv_phone_unknown">Browser necunoscut</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Telefoanele asociate deschid</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Behold telefontilgang på</string>
+    <string name="iptv_phone_keep_subtitle">Sammenkoblede telefoner når oppsett og opptak mens Nuvio er åpen eller i bakgrunnen</string>
+    <string name="iptv_phone_keep_note">Telefontilgang forblir på mens Nuvio er åpen eller i bakgrunnen på denne TV-en. Nye telefoner kan bare kobles sammen mens denne skjermen er åpen.</string>
+    <string name="iptv_phone_done_kept">Går tilbake. Sammenkoblede telefoner beholder tilgangen.</string>
+    <string name="iptv_phone_paired">Sammenkoblede telefoner</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefon eller datamaskin</item>
+        <item quantity="other">%d telefoner eller datamaskiner</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Ingen ennå. Skann QR-koden for å koble sammen en.</string>
+    <string name="iptv_phone_paired_subtitle">Disse kan åpne oppsett og opptak mens Nuvio er åpen eller i bakgrunnen på denne TV-en. Endringer må fortsatt godkjennes her.</string>
+    <string name="iptv_phone_paired_on">Sammenkoblet %1$s</string>
+    <string name="iptv_phone_remove_all">Fjern alle</string>
+    <string name="iptv_phone_name">%1$s på %2$s</string>
+    <string name="iptv_phone_unknown">Ukjent nettleser</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Sammenkoblede telefoner åpner</string>
+</resources>

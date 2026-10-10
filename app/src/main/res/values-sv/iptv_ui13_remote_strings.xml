@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Behåll telefonåtkomst</string>
+    <string name="iptv_phone_keep_subtitle">Parkopplade telefoner når konfiguration och inspelningar medan Nuvio är öppen eller i bakgrunden</string>
+    <string name="iptv_phone_keep_note">Telefonåtkomsten är på medan Nuvio är öppen eller i bakgrunden på den här TV:n. Nya telefoner kan bara parkopplas medan den här skärmen är öppen.</string>
+    <string name="iptv_phone_done_kept">Går tillbaka. Parkopplade telefoner behåller åtkomsten.</string>
+    <string name="iptv_phone_paired">Parkopplade telefoner</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefon eller dator</item>
+        <item quantity="other">%d telefoner eller datorer</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Inga än. Skanna QR-koden för att parkoppla en.</string>
+    <string name="iptv_phone_paired_subtitle">De kan öppna konfiguration och inspelningar medan Nuvio är öppen eller i bakgrunden på den här TV:n. Ändringar måste fortfarande godkännas här.</string>
+    <string name="iptv_phone_paired_on">Parkopplad %1$s</string>
+    <string name="iptv_phone_remove_all">Ta bort alla</string>
+    <string name="iptv_phone_name">%1$s på %2$s</string>
+    <string name="iptv_phone_unknown">Okänd webbläsare</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Parkopplade telefoner öppnar</string>
+</resources>

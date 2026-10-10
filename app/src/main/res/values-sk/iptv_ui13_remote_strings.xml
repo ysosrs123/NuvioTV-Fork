@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Ponechať prístup z telefónu</string>
+    <string name="iptv_phone_keep_subtitle">Spárované telefóny majú prístup k nastaveniu a nahrávkam, kým je Nuvio otvorené alebo na pozadí</string>
+    <string name="iptv_phone_keep_note">Prístup z telefónu zostáva zapnutý, kým je Nuvio otvorené alebo na pozadí na tomto televízore. Nové telefóny sa dajú spárovať, len kým je táto obrazovka otvorená.</string>
+    <string name="iptv_phone_done_kept">Vráti sa späť. Spárované telefóny si ponechajú prístup.</string>
+    <string name="iptv_phone_paired">Spárované telefóny</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefón alebo počítač</item>
+        <item quantity="few">%d telefóny alebo počítače</item>
+        <item quantity="many">%d telefónu alebo počítača</item>
+        <item quantity="other">%d telefónov alebo počítačov</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Zatiaľ žiadne. Naskenujte QR kód a spárujte telefón.</string>
+    <string name="iptv_phone_paired_subtitle">Môžu otvárať nastavenie a nahrávky, kým je Nuvio otvorené alebo na pozadí na tomto televízore. Zmeny stále musíte potvrdiť tu.</string>
+    <string name="iptv_phone_paired_on">Spárované %1$s</string>
+    <string name="iptv_phone_remove_all">Odstrániť všetky</string>
+    <string name="iptv_phone_name">%1$s na %2$s</string>
+    <string name="iptv_phone_unknown">Neznámy prehliadač</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Spárované telefóny otvárajú</string>
+</resources>

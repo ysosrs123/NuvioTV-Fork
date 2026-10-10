@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Kênh thể thao</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Chọn kênh hiển thị trong Chỉ thể thao và kênh dùng để xem trận đấu</string>
+    <string name="iptv_ui13_sport_always">Luôn trong Chỉ thể thao</string>
+    <string name="iptv_ui13_sport_always_subtitle">Hiện trong Chỉ thể thao kể cả khi không khớp trận nào, như danh mục thể thao của bạn</string>
+    <string name="iptv_ui13_sport_never">Không bao giờ trong Chỉ thể thao</string>
+    <string name="iptv_ui13_sport_never_subtitle">Bị loại khỏi Chỉ thể thao kể cả khi đang chiếu trận đấu</string>
+    <string name="iptv_ui13_sport_preferred">Ưu tiên cho trận đấu</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Được đề xuất trước cho Xem trên, luồng khác và bản ghi, như danh mục thể thao của nước bạn</string>
+    <string name="iptv_ui13_sport_excluded">Không bao giờ đề xuất cho trận đấu</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Không bao giờ được đề xuất để xem hoặc ghi trận đấu</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="other">Đã chọn %d</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Lọc danh mục hoặc tìm kênh</string>
+    <string name="iptv_ui13_sport_pick_hint">Nhập ít nhất hai chữ cái để tìm kênh trong mọi nguồn</string>
+    <string name="iptv_ui13_sport_pick_chosen">Đã chọn</string>
+    <string name="iptv_ui13_sport_pick_categories">Danh mục</string>
+    <string name="iptv_ui13_sport_pick_channels">Kênh</string>
+    <string name="iptv_ui13_sport_pick_category">Danh mục</string>
+    <string name="iptv_ui13_sport_pick_channel">Kênh</string>
+    <string name="iptv_ui13_sport_pick_searching">Đang tìm kênh…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Không có kênh phù hợp.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Không có danh mục phù hợp.</string>
+</resources>

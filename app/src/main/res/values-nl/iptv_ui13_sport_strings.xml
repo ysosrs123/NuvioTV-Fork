@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Sportzenders</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Kies welke zenders Alleen sport toont en op welke zenders wedstrijden worden aangeboden</string>
+    <string name="iptv_ui13_sport_always">Altijd in Alleen sport</string>
+    <string name="iptv_ui13_sport_always_subtitle">Getoond in Alleen sport, ook zonder bijbehorende wedstrijd, zoals je sportcategorieën</string>
+    <string name="iptv_ui13_sport_never">Nooit in Alleen sport</string>
+    <string name="iptv_ui13_sport_never_subtitle">Weggelaten uit Alleen sport, ook als ze een wedstrijd tonen</string>
+    <string name="iptv_ui13_sport_preferred">Voorkeur voor wedstrijden</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Eerst aangeboden voor Kijken op, andere streams en opnamen, zoals de sportcategorieën van je land</string>
+    <string name="iptv_ui13_sport_excluded">Nooit aanbieden voor wedstrijden</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Nooit aangeboden om een wedstrijd te kijken of op te nemen</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d gekozen</item>
+        <item quantity="other">%d gekozen</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Categorieën filteren of zenders zoeken</string>
+    <string name="iptv_ui13_sport_pick_hint">Typ minstens twee letters om zenders in al je bronnen te zoeken</string>
+    <string name="iptv_ui13_sport_pick_chosen">Gekozen</string>
+    <string name="iptv_ui13_sport_pick_categories">Categorieën</string>
+    <string name="iptv_ui13_sport_pick_channels">Zenders</string>
+    <string name="iptv_ui13_sport_pick_category">Categorie</string>
+    <string name="iptv_ui13_sport_pick_channel">Zender</string>
+    <string name="iptv_ui13_sport_pick_searching">Zenders zoeken…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Geen zenders gevonden.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Geen categorieën gevonden.</string>
+</resources>

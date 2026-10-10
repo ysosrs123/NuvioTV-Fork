@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Ta TV-sprejemnik že dekodira toliko videa, kot zmore, tudi ko so druge slike v najlažji različici. Najprej odstranite sliko ali eno zamenjajte z različico njenega kanala z nižjo ločljivostjo (na primer SD ali 720p), nato to dodajte znova.</string>
+    <string name="iptv_multiview_decoder_busy">Ta TV-sprejemnik trenutno nima prostega video dekoderja za še eno sliko. Odstranite sliko ali počakajte nekaj sekund in poskusite znova.</string>
+</resources>

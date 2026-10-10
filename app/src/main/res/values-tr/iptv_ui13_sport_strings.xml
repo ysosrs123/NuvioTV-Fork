@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Spor kanalları</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Yalnızca spor modunda gösterilecek kanalları ve maçların sunulacağı kanalları seçin</string>
+    <string name="iptv_ui13_sport_always">Yalnızca spor modunda her zaman</string>
+    <string name="iptv_ui13_sport_always_subtitle">Eşleşen maç olmasa bile Yalnızca spor modunda gösterilir, örneğin spor kategorileriniz</string>
+    <string name="iptv_ui13_sport_never">Yalnızca spor modunda asla</string>
+    <string name="iptv_ui13_sport_never_subtitle">Maç gösterseler bile Yalnızca spor modunun dışında tutulur</string>
+    <string name="iptv_ui13_sport_preferred">Maçlar için tercih edilen</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">İzle, diğer yayınlar ve kayıtlar için önce sunulur, örneğin ülkenizin spor kategorileri</string>
+    <string name="iptv_ui13_sport_excluded">Maçlar için asla sunma</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Maç izlemek veya kaydetmek için asla sunulmaz</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d seçili</item>
+        <item quantity="other">%d seçili</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Kategorileri filtrele veya kanal bul</string>
+    <string name="iptv_ui13_sport_pick_hint">Tüm kaynaklarınızda kanal bulmak için en az iki harf yazın</string>
+    <string name="iptv_ui13_sport_pick_chosen">Seçilenler</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategoriler</string>
+    <string name="iptv_ui13_sport_pick_channels">Kanallar</string>
+    <string name="iptv_ui13_sport_pick_category">Kategori</string>
+    <string name="iptv_ui13_sport_pick_channel">Kanal</string>
+    <string name="iptv_ui13_sport_pick_searching">Kanallar aranıyor…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Eşleşen kanal yok.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Eşleşen kategori yok.</string>
+</resources>

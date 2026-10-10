@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Acest TV box decodează deja cât video poate, chiar și cu celelalte imagini la nivelul cel mai redus. Elimină mai întâi o imagine sau înlocuiește una cu o versiune a canalului ei la rezoluție mai mică (cum ar fi SD sau 720p), apoi adaugă din nou aceasta.</string>
+    <string name="iptv_multiview_decoder_busy">Acest TV box nu are acum niciun decodor video liber pentru încă o imagine. Elimină o imagine sau așteaptă câteva secunde și încearcă din nou.</string>
+</resources>

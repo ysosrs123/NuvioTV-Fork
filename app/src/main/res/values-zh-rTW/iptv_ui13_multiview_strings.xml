@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">即使其他畫面已降到最輕，此電視盒仍已在滿載解碼影片。請先移除一個畫面，或將其中一個換成該頻道的較低解析度版本（如 SD 或 720p），然後再加入此畫面。</string>
+    <string name="iptv_multiview_decoder_busy">此電視盒目前沒有閒置的影片解碼器可加入畫面。請移除一個畫面，或稍候幾秒再試一次。</string>
+</resources>

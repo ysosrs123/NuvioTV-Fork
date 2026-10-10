@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Manter acesso pelo celular</string>
+    <string name="iptv_phone_keep_subtitle">Celulares pareados acessam a configuração e as gravações enquanto o Nuvio está aberto ou em segundo plano</string>
+    <string name="iptv_phone_keep_note">O acesso pelo celular continua ativo enquanto o Nuvio está aberto ou em segundo plano nesta TV. Novos celulares só podem parear com esta tela aberta.</string>
+    <string name="iptv_phone_done_kept">Volta. Celulares pareados mantêm o acesso.</string>
+    <string name="iptv_phone_paired">Celulares pareados</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d celular ou computador</item>
+        <item quantity="many">%d celulares ou computadores</item>
+        <item quantity="other">%d celulares ou computadores</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Nenhum ainda. Escaneie o código QR para parear um.</string>
+    <string name="iptv_phone_paired_subtitle">Eles podem abrir a configuração e as gravações enquanto o Nuvio está aberto ou em segundo plano nesta TV. Alterações ainda precisam da sua aprovação aqui.</string>
+    <string name="iptv_phone_paired_on">Pareado %1$s</string>
+    <string name="iptv_phone_remove_all">Remover todos</string>
+    <string name="iptv_phone_name">%1$s em %2$s</string>
+    <string name="iptv_phone_unknown">Navegador desconhecido</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Celulares pareados abrem</string>
+</resources>

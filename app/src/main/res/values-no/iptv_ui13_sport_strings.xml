@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Sportskanaler</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Velg kanalene Bare sport viser og kanalene kamper tilbys på</string>
+    <string name="iptv_ui13_sport_always">Alltid i Bare sport</string>
+    <string name="iptv_ui13_sport_always_subtitle">Vises i Bare sport selv uten en funnet kamp, for eksempel sportskategoriene dine</string>
+    <string name="iptv_ui13_sport_never">Aldri i Bare sport</string>
+    <string name="iptv_ui13_sport_never_subtitle">Utelatt fra Bare sport selv når de viser en kamp</string>
+    <string name="iptv_ui13_sport_preferred">Foretrukket for kamper</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Tilbys først for Se på, andre strømmer og opptak, for eksempel landets sportskategorier</string>
+    <string name="iptv_ui13_sport_excluded">Tilby aldri for kamper</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Tilbys aldri for å se eller ta opp en kamp</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d valgt</item>
+        <item quantity="other">%d valgt</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtrer kategorier eller finn kanaler</string>
+    <string name="iptv_ui13_sport_pick_hint">Skriv minst to bokstaver for å finne kanaler i alle kildene dine</string>
+    <string name="iptv_ui13_sport_pick_chosen">Valgt</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategorier</string>
+    <string name="iptv_ui13_sport_pick_channels">Kanaler</string>
+    <string name="iptv_ui13_sport_pick_category">Kategori</string>
+    <string name="iptv_ui13_sport_pick_channel">Kanal</string>
+    <string name="iptv_ui13_sport_pick_searching">Finner kanaler…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Ingen kanaler passer.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Ingen kategorier passer.</string>
+</resources>

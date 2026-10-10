@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">போன் அணுகலை இயக்கத்தில் வை</string>
+    <string name="iptv_phone_keep_subtitle">Nuvio திறந்திருக்கும்போது அல்லது பின்னணியில் இருக்கும்போது இணைத்த போன்கள் அமைப்பையும் பதிவுகளையும் அணுகலாம்</string>
+    <string name="iptv_phone_keep_note">இந்த டிவியில் Nuvio திறந்திருக்கும்போது அல்லது பின்னணியில் இருக்கும்போது போன் அணுகல் இயக்கத்தில் இருக்கும். இந்தத் திரை திறந்திருக்கும்போது மட்டுமே புதிய போன்களை இணைக்க முடியும்.</string>
+    <string name="iptv_phone_done_kept">பின்செல்லும். இணைத்த போன்கள் அணுகலை வைத்திருக்கும்.</string>
+    <string name="iptv_phone_paired">இணைத்த போன்கள்</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d போன் அல்லது கணினி</item>
+        <item quantity="other">%d போன்கள் அல்லது கணினிகள்</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">இன்னும் இல்லை. ஒன்றை இணைக்க QR குறியீட்டை ஸ்கேன் செய்யவும்.</string>
+    <string name="iptv_phone_paired_subtitle">இந்த டிவியில் Nuvio திறந்திருக்கும்போது அல்லது பின்னணியில் இருக்கும்போது இவை அமைப்பையும் பதிவுகளையும் திறக்கலாம். மாற்றங்களுக்கு இங்கே உங்கள் ஒப்புதல் இன்னும் தேவை.</string>
+    <string name="iptv_phone_paired_on">இணைத்தது %1$s</string>
+    <string name="iptv_phone_remove_all">அனைத்தையும் நீக்கு</string>
+    <string name="iptv_phone_name">%2$s இல் %1$s</string>
+    <string name="iptv_phone_unknown">தெரியாத உலாவி</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">இணைத்த போன்களில் திறக்கவும்</string>
+</resources>

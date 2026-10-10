@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Mbaj aktiv aksesin nga telefoni</string>
+    <string name="iptv_phone_keep_subtitle">Telefonat e çiftuar arrijnë konfigurimin dhe regjistrimet kur Nuvio është i hapur ose në sfond</string>
+    <string name="iptv_phone_keep_note">Aksesi nga telefoni mbetet aktiv kur Nuvio është i hapur ose në sfond në këtë TV. Telefonat e rinj mund të çiftohen vetëm kur ky ekran është i hapur.</string>
+    <string name="iptv_phone_done_kept">Kthehet mbrapa. Telefonat e çiftuar e ruajnë aksesin.</string>
+    <string name="iptv_phone_paired">Telefonat e çiftuar</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefon ose kompjuter</item>
+        <item quantity="other">%d telefona ose kompjuterë</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Asnjë ende. Skano kodin QR për të çiftuar një.</string>
+    <string name="iptv_phone_paired_subtitle">Këta mund të hapin konfigurimin dhe regjistrimet kur Nuvio është i hapur ose në sfond në këtë TV. Ndryshimet kanë ende nevojë për miratimin tënd këtu.</string>
+    <string name="iptv_phone_paired_on">Çiftuar %1$s</string>
+    <string name="iptv_phone_remove_all">Hiqi të gjitha</string>
+    <string name="iptv_phone_name">%1$s në %2$s</string>
+    <string name="iptv_phone_unknown">Shfletues i panjohur</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Telefonat e çiftuar hapin</string>
+</resources>

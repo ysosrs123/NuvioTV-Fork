@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Dit tv-kastje decodeert al zoveel video als het kan, ook met de andere beelden op hun lichtst. Verwijder eerst een beeld, of wissel er een voor een versie van die zender met lagere resolutie (zoals SD of 720p), en voeg deze daarna opnieuw toe.</string>
+    <string name="iptv_multiview_decoder_busy">Dit tv-kastje heeft nu geen vrije videodecoder voor nog een beeld. Verwijder een beeld, of wacht een paar seconden en probeer het opnieuw.</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Telefon erişimini açık tut</string>
+    <string name="iptv_phone_keep_subtitle">Eşleşen telefonlar, Nuvio açıkken veya arka plandayken kuruluma ve kayıtlara erişir</string>
+    <string name="iptv_phone_keep_note">Nuvio bu TV\'de açıkken veya arka plandayken telefon erişimi açık kalır. Yeni telefonlar yalnızca bu ekran açıkken eşleşebilir.</string>
+    <string name="iptv_phone_done_kept">Geri döner. Eşleşen telefonların erişimi sürer.</string>
+    <string name="iptv_phone_paired">Eşleşen telefonlar</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="one">%d telefon veya bilgisayar</item>
+        <item quantity="other">%d telefon veya bilgisayar</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Henüz yok. Eşleştirmek için QR kodunu tarayın.</string>
+    <string name="iptv_phone_paired_subtitle">Bunlar, Nuvio bu TV\'de açıkken veya arka plandayken kurulumu ve kayıtları açabilir. Değişiklikler yine de burada onayınızı gerektirir.</string>
+    <string name="iptv_phone_paired_on">Eşleşme: %1$s</string>
+    <string name="iptv_phone_remove_all">Tümünü kaldır</string>
+    <string name="iptv_phone_name">%2$s üzerinde %1$s</string>
+    <string name="iptv_phone_unknown">Bilinmeyen tarayıcı</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Eşleşen telefonlarda açın</string>
+</resources>

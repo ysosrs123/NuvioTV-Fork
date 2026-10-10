@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Ky TV box po dekodon tashmë aq video sa mundet, edhe me pamjet e tjera në versionin më të lehtë. Hiq fillimisht një pamje, ose ndërro një me një version me rezolucion më të ulët të kanalit të saj (si SD ose 720p), pastaj shto sërish këtë.</string>
+    <string name="iptv_multiview_decoder_busy">Ky TV box nuk ka tani asnjë dekodues video të lirë për një pamje tjetër. Hiq një pamje, ose prit pak sekonda dhe provo sërish.</string>
+</resources>

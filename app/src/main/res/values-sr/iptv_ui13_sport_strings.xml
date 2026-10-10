@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Спортски канали</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Изаберите канале које приказује „Само спорт“ и канале на којима се нуде утакмице</string>
+    <string name="iptv_ui13_sport_always">Увек у „Само спорт“</string>
+    <string name="iptv_ui13_sport_always_subtitle">Приказани у „Само спорт“ чак и без пронађене утакмице, на пример ваше спортске категорије</string>
+    <string name="iptv_ui13_sport_never">Никад у „Само спорт“</string>
+    <string name="iptv_ui13_sport_never_subtitle">Изостављени из „Само спорт“ чак и кад приказују утакмицу</string>
+    <string name="iptv_ui13_sport_preferred">Пожељни за утакмице</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Нуде се први за „Гледај на“, друге преносе и снимке, на пример спортске категорије ваше земље</string>
+    <string name="iptv_ui13_sport_excluded">Никад не нуди за утакмице</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Никад се не нуде за гледање или снимање утакмице</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">Изабрано: %d</item>
+        <item quantity="few">Изабрано: %d</item>
+        <item quantity="other">Изабрано: %d</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Филтрирај категорије или пронађи канале</string>
+    <string name="iptv_ui13_sport_pick_hint">Унесите бар два слова да бисте пронашли канале у свим изворима</string>
+    <string name="iptv_ui13_sport_pick_chosen">Изабрано</string>
+    <string name="iptv_ui13_sport_pick_categories">Категорије</string>
+    <string name="iptv_ui13_sport_pick_channels">Канали</string>
+    <string name="iptv_ui13_sport_pick_category">Категорија</string>
+    <string name="iptv_ui13_sport_pick_channel">Канал</string>
+    <string name="iptv_ui13_sport_pick_searching">Тражење канала…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Нема одговарајућих канала.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Нема одговарајућих категорија.</string>
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Canale sport</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Alege canalele afișate în Doar sport și canalele pe care sunt oferite meciurile</string>
+    <string name="iptv_ui13_sport_always">Mereu în Doar sport</string>
+    <string name="iptv_ui13_sport_always_subtitle">Afișate în Doar sport chiar și fără un meci potrivit, cum ar fi categoriile tale de sport</string>
+    <string name="iptv_ui13_sport_never">Niciodată în Doar sport</string>
+    <string name="iptv_ui13_sport_never_subtitle">Excluse din Doar sport chiar dacă arată un meci</string>
+    <string name="iptv_ui13_sport_preferred">Preferate pentru meciuri</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Oferite primele pentru Vezi pe, alte fluxuri și înregistrări, cum ar fi categoriile de sport ale țării tale</string>
+    <string name="iptv_ui13_sport_excluded">Nu oferi niciodată pentru meciuri</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Nu sunt oferite niciodată pentru a viziona sau înregistra un meci</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d ales</item>
+        <item quantity="few">%d alese</item>
+        <item quantity="other">%d de alese</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtrează categoriile sau găsește canale</string>
+    <string name="iptv_ui13_sport_pick_hint">Tastează cel puțin două litere pentru a găsi canale în toate sursele</string>
+    <string name="iptv_ui13_sport_pick_chosen">Alese</string>
+    <string name="iptv_ui13_sport_pick_categories">Categorii</string>
+    <string name="iptv_ui13_sport_pick_channels">Canale</string>
+    <string name="iptv_ui13_sport_pick_category">Categorie</string>
+    <string name="iptv_ui13_sport_pick_channel">Canal</string>
+    <string name="iptv_ui13_sport_pick_searching">Se caută canale…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Niciun canal potrivit.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Nicio categorie potrivită.</string>
+</resources>

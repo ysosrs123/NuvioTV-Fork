@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">To urządzenie dekoduje już tyle wideo, ile może, nawet przy najlżejszych wersjach pozostałych obrazów. Najpierw usuń obraz albo zamień jeden na wersję kanału o niższej rozdzielczości (np. SD lub 720p), a potem dodaj ten ponownie.</string>
+    <string name="iptv_multiview_decoder_busy">To urządzenie nie ma teraz wolnego dekodera wideo na kolejny obraz. Usuń obraz albo odczekaj kilka sekund i spróbuj ponownie.</string>
+</resources>

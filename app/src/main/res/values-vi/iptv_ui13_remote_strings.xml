@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_phone_keep">Giữ quyền truy cập từ điện thoại</string>
+    <string name="iptv_phone_keep_subtitle">Điện thoại đã ghép nối truy cập được thiết lập và bản ghi khi Nuvio đang mở hoặc chạy nền</string>
+    <string name="iptv_phone_keep_note">Quyền truy cập từ điện thoại vẫn bật khi Nuvio đang mở hoặc chạy nền trên TV này. Chỉ có thể ghép nối điện thoại mới khi màn hình này đang mở.</string>
+    <string name="iptv_phone_done_kept">Quay lại. Điện thoại đã ghép nối vẫn giữ quyền truy cập.</string>
+    <string name="iptv_phone_paired">Điện thoại đã ghép nối</string>
+    <plurals name="iptv_phone_paired_count">
+        <item quantity="other">%d điện thoại hoặc máy tính</item>
+    </plurals>
+    <string name="iptv_phone_paired_none">Chưa có. Quét mã QR để ghép nối.</string>
+    <string name="iptv_phone_paired_subtitle">Các thiết bị này có thể mở thiết lập và bản ghi khi Nuvio đang mở hoặc chạy nền trên TV này. Mọi thay đổi vẫn cần bạn đồng ý tại đây.</string>
+    <string name="iptv_phone_paired_on">Đã ghép nối %1$s</string>
+    <string name="iptv_phone_remove_all">Xóa tất cả</string>
+    <string name="iptv_phone_name">%1$s trên %2$s</string>
+    <string name="iptv_phone_unknown">Trình duyệt không xác định</string>
+    <string name="iptv_phone_sent_from">%1$s (%2$s)</string>
+    <string name="iptv_phone_address">Điện thoại đã ghép nối mở</string>
+</resources>

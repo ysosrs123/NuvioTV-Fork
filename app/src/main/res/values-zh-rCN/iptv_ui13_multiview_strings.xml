@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">即使其他画面已降到最轻，此电视盒仍已在满负荷解码视频。请先移除一个画面，或将其中一个换成该频道的较低分辨率版本（如 SD 或 720p），然后再添加此画面。</string>
+    <string name="iptv_multiview_decoder_busy">此电视盒当前没有空闲的视频解码器来添加画面。请移除一个画面，或等待几秒后重试。</string>
+</resources>

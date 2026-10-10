@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">Este aparelho de TV já está decodificando o máximo de vídeo que consegue, mesmo com as outras imagens no mínimo. Remova uma imagem primeiro, ou troque uma por uma versão do canal com resolução menor (como SD ou 720p), e depois adicione esta de novo.</string>
+    <string name="iptv_multiview_decoder_busy">Este aparelho de TV não tem um decodificador de vídeo livre para outra imagem agora. Remova uma imagem, ou aguarde alguns segundos e tente de novo.</string>
+</resources>

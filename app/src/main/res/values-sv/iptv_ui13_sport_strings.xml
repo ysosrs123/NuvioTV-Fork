@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui13_sport_channels">Sportkanaler</string>
+    <string name="iptv_ui13_sport_channels_subtitle">Välj kanalerna som Endast sport visar och kanalerna som matcher erbjuds på</string>
+    <string name="iptv_ui13_sport_always">Alltid i Endast sport</string>
+    <string name="iptv_ui13_sport_always_subtitle">Visas i Endast sport även utan hittad match, till exempel dina sportkategorier</string>
+    <string name="iptv_ui13_sport_never">Aldrig i Endast sport</string>
+    <string name="iptv_ui13_sport_never_subtitle">Utelämnas från Endast sport även när de visar en match</string>
+    <string name="iptv_ui13_sport_preferred">Föredragna för matcher</string>
+    <string name="iptv_ui13_sport_preferred_subtitle">Erbjuds först för Titta på, andra strömmar och inspelningar, till exempel ditt lands sportkategorier</string>
+    <string name="iptv_ui13_sport_excluded">Erbjud aldrig för matcher</string>
+    <string name="iptv_ui13_sport_excluded_subtitle">Erbjuds aldrig för att titta på eller spela in en match</string>
+    <plurals name="iptv_ui13_sport_chosen">
+        <item quantity="one">%d vald</item>
+        <item quantity="other">%d valda</item>
+    </plurals>
+    <string name="iptv_ui13_sport_pick_search">Filtrera kategorier eller hitta kanaler</string>
+    <string name="iptv_ui13_sport_pick_hint">Skriv minst två bokstäver för att hitta kanaler i alla dina källor</string>
+    <string name="iptv_ui13_sport_pick_chosen">Valda</string>
+    <string name="iptv_ui13_sport_pick_categories">Kategorier</string>
+    <string name="iptv_ui13_sport_pick_channels">Kanaler</string>
+    <string name="iptv_ui13_sport_pick_category">Kategori</string>
+    <string name="iptv_ui13_sport_pick_channel">Kanal</string>
+    <string name="iptv_ui13_sport_pick_searching">Söker kanaler…</string>
+    <string name="iptv_ui13_sport_pick_no_channels">Inga kanaler matchar.</string>
+    <string name="iptv_ui13_sport_pick_no_categories">Inga kategorier matchar.</string>
+</resources>
