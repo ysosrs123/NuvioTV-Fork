@@ -19,10 +19,7 @@
     <string name="iptv_user_agent">ユーザーエージェント</string>
     <string name="iptv_user_agent_description">このソースのチャンネル、見逃し視聴、映画の再生時に送信されます。チャンネル個別のプレイリスト設定が引き続き優先されます。</string>
     <string name="iptv_user_agent_default">アプリのデフォルト</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">汎用（okhttp）</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">カスタム</string>
     <string name="iptv_user_agent_custom_hint">印刷可能な文字のみ、200 文字まで。</string>
 </resources>

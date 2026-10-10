@@ -19,10 +19,7 @@
     <string name="iptv_user_agent">使用者代理程式</string>
     <string name="iptv_user_agent_description">從此來源播放頻道、回看和電影時傳送。頻道本身的播放清單設定仍然優先。</string>
     <string name="iptv_user_agent_default">應用程式預設</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">通用 (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">自訂</string>
     <string name="iptv_user_agent_custom_hint">僅限可列印字元，最多 200 個。</string>
 </resources>

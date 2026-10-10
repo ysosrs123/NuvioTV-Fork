@@ -21,10 +21,7 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Sent when playing channels, catch-up and films from this source. A channel\'s own playlist settings still take priority.</string>
     <string name="iptv_user_agent_default">App default</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Generic (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Custom</string>
     <string name="iptv_user_agent_custom_hint">Printable characters only, up to 200.</string>
 </resources>

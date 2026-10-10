@@ -20,10 +20,7 @@
     <string name="iptv_user_agent">ইউজার এজেন্ট</string>
     <string name="iptv_user_agent_description">এই সোর্স থেকে চ্যানেল, ক্যাচ-আপ ও মুভি চালানোর সময় পাঠানো হয়। চ্যানেলের নিজস্ব প্লেলিস্ট সেটিংস তবুও অগ্রাধিকার পায়।</string>
     <string name="iptv_user_agent_default">অ্যাপ ডিফল্ট</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">জেনেরিক (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">কাস্টম</string>
     <string name="iptv_user_agent_custom_hint">শুধু প্রিন্টযোগ্য অক্ষর, সর্বোচ্চ 200টি।</string>
 </resources>

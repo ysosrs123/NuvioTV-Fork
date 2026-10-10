@@ -22,10 +22,7 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">נשלח בזמן הפעלת ערוצים, צפייה לאחור וסרטים מהמקור הזה. הגדרות הפלייליסט של ערוץ עדיין קודמות.</string>
     <string name="iptv_user_agent_default">ברירת המחדל של האפליקציה</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">כללי (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">מותאם אישית</string>
     <string name="iptv_user_agent_custom_hint">תווים הניתנים להדפסה בלבד, עד 200.</string>
 </resources>

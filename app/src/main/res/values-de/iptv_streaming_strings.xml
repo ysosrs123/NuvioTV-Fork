@@ -20,10 +20,7 @@
     <string name="iptv_user_agent">User-Agent</string>
     <string name="iptv_user_agent_description">Wird beim Abspielen von Sendern, Catch-up und Filmen dieser Quelle gesendet. Die Playlist-Einstellungen eines Senders haben weiterhin Vorrang.</string>
     <string name="iptv_user_agent_default">App-Standard</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Generisch (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Benutzerdefiniert</string>
     <string name="iptv_user_agent_custom_hint">Nur druckbare Zeichen, bis zu 200.</string>
 </resources>

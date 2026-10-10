@@ -24,10 +24,7 @@
     <string name="iptv_user_agent">وكيل المستخدم</string>
     <string name="iptv_user_agent_description">يُرسل عند تشغيل القنوات والمشاهدة المؤجلة والأفلام من هذا المصدر. تبقى الأولوية لإعدادات قائمة التشغيل الخاصة بالقناة.</string>
     <string name="iptv_user_agent_default">افتراضي التطبيق</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">عام (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">مخصص</string>
     <string name="iptv_user_agent_custom_hint">أحرف قابلة للطباعة فقط، حتى 200.</string>
 </resources>

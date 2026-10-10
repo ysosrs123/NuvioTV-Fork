@@ -20,10 +20,7 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Dërgohet kur luhen kanale, catch-up dhe filma nga ky burim. Cilësimet e listës së vetë kanalit kanë ende përparësi.</string>
     <string name="iptv_user_agent_default">Parazgjedhja e aplikacionit</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">I përgjithshëm (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">I personalizuar</string>
     <string name="iptv_user_agent_custom_hint">Vetëm karaktere të printueshme, deri në 200.</string>
 </resources>

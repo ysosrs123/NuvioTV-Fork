@@ -22,10 +22,7 @@
     <string name="iptv_user_agent">Naudotojo agentas</string>
     <string name="iptv_user_agent_description">Siunčiamas leidžiant kanalus, archyvą ir filmus iš šio šaltinio. Kanalo grojaraščio nustatymai vis tiek turi pirmenybę.</string>
     <string name="iptv_user_agent_default">Programos numatytasis</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Bendrasis (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Pasirinktinis</string>
     <string name="iptv_user_agent_custom_hint">Tik spausdinami simboliai, iki 200.</string>
 </resources>

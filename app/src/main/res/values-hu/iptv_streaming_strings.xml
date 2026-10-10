@@ -20,10 +20,7 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Ennek a forrásnak a csatornái, visszanézése és filmjei lejátszásakor kerül elküldésre. Egy csatorna saját lejátszásilista-beállításai továbbra is elsőbbséget élveznek.</string>
     <string name="iptv_user_agent_default">Alkalmazás alapértelmezése</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Általános (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Egyéni</string>
     <string name="iptv_user_agent_custom_hint">Csak nyomtatható karakterek, legfeljebb 200.</string>
 </resources>

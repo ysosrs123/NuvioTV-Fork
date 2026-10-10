@@ -22,10 +22,7 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Odosiela sa pri prehrávaní kanálov, catch-up a filmov z tohto zdroja. Vlastné nastavenia kanála v playliste majú stále prednosť.</string>
     <string name="iptv_user_agent_default">Predvolené aplikáciou</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Všeobecný (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Vlastný</string>
     <string name="iptv_user_agent_custom_hint">Len tlačiteľné znaky, najviac 200.</string>
 </resources>

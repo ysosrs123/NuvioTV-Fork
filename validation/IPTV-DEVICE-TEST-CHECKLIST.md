@@ -52,7 +52,7 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 
 ## 6. Phone setup page
 1. Open phone setup, pair, open the Recordings card: list shows recordings.
-2. Download a recording on the phone; "Open in VLC" plays and seeks.
+2. Download a recording on the phone; it plays in a video player app.
 
 ## 7. Sport fixtures
 1. Settings → Live TV → Sport: Sport fixtures on; choose AFL/NRL/EPL in Leagues; check the

@@ -48,11 +48,7 @@ object LiveUserAgent {
     const val CUSTOM = "custom"
     private const val CUSTOM_PREFIX = "custom:"
     const val MAX_LENGTH = 200
-    val PRESETS: Map<String, String> = linkedMapOf(
-        "vlc" to "VLC/3.0.21 LibVLC/3.0.21",
-        "kodi" to "Kodi/21.2 (Linux; Android 11) Android/11 Sys_CPU/aarch64 App_Bitness/64 Version/21.2",
-        "okhttp" to "okhttp/4.12.0",
-        "smarters" to "IPTVSmartersPro")
+    val PRESETS: Map<String, String> = linkedMapOf("okhttp" to "okhttp/4.12.0")
 
     fun custom(text: String): String? = clean(text)?.let { CUSTOM_PREFIX + it }
 

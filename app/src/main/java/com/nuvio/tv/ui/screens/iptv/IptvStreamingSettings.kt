@@ -132,10 +132,7 @@ internal fun IptvUserAgentDialog(ref: IptvSourceRef, onDismiss: () -> Unit) {
 
 @Composable
 private fun userAgentLabel(kind: String): String = stringResource(when (kind) {
-    "vlc" -> R.string.iptv_user_agent_vlc
-    "kodi" -> R.string.iptv_user_agent_kodi
     "okhttp" -> R.string.iptv_user_agent_okhttp
-    "smarters" -> R.string.iptv_user_agent_smarters
     LiveUserAgent.CUSTOM -> R.string.iptv_user_agent_custom
     else -> R.string.iptv_user_agent_default
 })

@@ -20,10 +20,7 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Αποστέλλεται κατά την αναπαραγωγή καναλιών, catch-up και ταινιών από αυτή την πηγή. Οι ρυθμίσεις playlist ενός καναλιού εξακολουθούν να έχουν προτεραιότητα.</string>
     <string name="iptv_user_agent_default">Προεπιλογή εφαρμογής</string>
-    <string name="iptv_user_agent_vlc">VLC</string>
-    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Γενικό (okhttp)</string>
-    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Προσαρμοσμένο</string>
     <string name="iptv_user_agent_custom_hint">Μόνο εκτυπώσιμοι χαρακτήρες, έως 200.</string>
 </resources>
