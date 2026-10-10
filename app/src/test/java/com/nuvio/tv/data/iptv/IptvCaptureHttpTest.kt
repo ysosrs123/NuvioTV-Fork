@@ -4,6 +4,7 @@ import com.nuvio.tv.core.iptv.*
 import java.net.URI
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
@@ -136,7 +137,9 @@ class IptvCaptureHttpTest {
         val bytes = object : ForwardingSource(Buffer().writeUtf8("abcd")) {
             override fun close() { closes.incrementAndGet(); super.close() }
         }.buffer()
+        val suspended = CountDownLatch(1)
         val http = IptvCaptureHttp.newClient().newBuilder().addInterceptor { chain ->
+            assertTrue(suspended.await(30, TimeUnit.SECONDS))
             Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1).code(200).message("fixture")
                 .body(object : ResponseBody() {
                     override fun contentType(): MediaType? = null
@@ -153,6 +156,7 @@ class IptvCaptureHttpTest {
         try {
             val request = scope.async { client.open(URI("https://fixture.invalid/list"), 4) }
             assertNotNull(queue.poll(30, TimeUnit.SECONDS)?.also { it.run() })
+            suspended.countDown()
             val resume = queue.poll(30, TimeUnit.SECONDS)
             assertNotNull(resume)
             request.cancel(); resume!!.run()
