@@ -496,7 +496,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     browse.searchAiring(ref, query.search, System.currentTimeMillis(), AIRING_RESULTS,
                         state.hiddenCategories.take(500).toSet())
                 else if (ref != null && !append && state.sports && query.search.isBlank())
-                    browse.sports(ref, System.currentTimeMillis(), limit = AIRING_RESULTS, excludedCategories = state.hiddenCategories.take(500).toSet())
+                    browse.sports(ref, System.currentTimeMillis(), limit = SPORT_RESULTS, excludedCategories = state.hiddenCategories.take(500).toSet())
                 else null
                 val merged = if (!append && state.mergedFavourites) mergedFavourites(sources) else null
                 var page = if (ref == null || airing != null || merged != null) null else try { browse.page(ref, query, cursor, wanted.coerceAtMost(200)) }
@@ -1467,6 +1467,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         const val PAGE = 60
         const val MAX_TILES = 4
         const val AIRING_RESULTS = 120
+        const val SPORT_RESULTS = 200
         const val RECENT = 8
         const val WINDOW_SPAN = 12 * 60 * 60 * 1000L
         const val WINDOW_SHIFT = 4 * 60 * 60 * 1000L

@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
@@ -104,7 +105,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
         }
         fun step(index: Int, delta: Int, repeat: Boolean): Boolean {
             val target = index + delta
-            if (target < 0) return repeat || (sportOnly != null && sportOnlyFocus != null && runCatching { sportOnlyFocus.requestFocus() }.isSuccess)
+            if (target < 0) return repeat || (sportOnly != null && sportOnlyFocus != null && runCatching { sportOnlyFocus.requestFocus(FocusDirection.Enter) }.getOrDefault(false))
             if (target > state.channels.lastIndex) return true
             val requester = rowFocus.getOrPut(state.channels[target].item.channel.id) { FocusRequester() }
             val visible = listState.layoutInfo.visibleItemsInfo.any { it.index == target }
@@ -133,7 +134,7 @@ internal fun GuideGrid(state: IptvLiveState, listState: LazyListState, now: Long
                     SportOnlyToggle(sportOnly, onSportOnly, onRail, (sportOnlyFocus?.let { Modifier.focusRequester(it) } ?: Modifier).focusProperties { canFocus = !blocked },
                         onUp = onSportOnlyUp, onDown = {
                             val first = state.channels.getOrNull(listState.firstVisibleItemIndex) ?: state.channels.firstOrNull()
-                            first?.let { rowFocus[it.item.channel.id] }?.let { runCatching { it.requestFocus() }.isSuccess } ?: false
+                            first?.let { rowFocus[it.item.channel.id] }?.let { runCatching { it.requestFocus(FocusDirection.Enter) }.getOrDefault(false) } ?: false
                         })
                     Text(heading, style = iptvHeadingStyle(), color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = !updating))

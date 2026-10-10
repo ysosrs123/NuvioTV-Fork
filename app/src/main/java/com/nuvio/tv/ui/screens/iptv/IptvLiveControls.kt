@@ -19,6 +19,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Brush
@@ -84,7 +85,7 @@ internal fun LiveControls(state: IptvLiveState, now: Long, layout: PlayerControl
     BackHandler { if (moreExpanded) moreExpanded = false else onHide() }
     LaunchedEffect(Unit) {
         repeat(2) { withFrameNanos { } }
-        if (focusGoLive && behind && runCatching { goLiveFocus.requestFocus() }.isSuccess) return@LaunchedEffect
+        if (focusGoLive && behind && runCatching { goLiveFocus.requestFocus(FocusDirection.Enter) }.getOrDefault(false)) return@LaunchedEffect
         layout.focusFallback(null, deckAvailable)?.let { runCatching { targets.getValue(it).requestFocus() } }
     }
     LaunchedEffect(interaction, moreExpanded) { if (!moreExpanded) { delay(8_000); onHide() } }

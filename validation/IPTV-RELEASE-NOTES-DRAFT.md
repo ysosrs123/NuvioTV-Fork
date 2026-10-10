@@ -710,6 +710,9 @@ Fixes from the night review of 10 October:
 - Recordings never overwrite or delete an existing file with the same name on a network
   share or in the Movies folder; the new recording is saved as " (2)", " (3)" and so on.
   Deleting a recording only removes that recording's own file.
+- Sport only now lists up to 200 channels (was 120). Moving focus from the guide to the
+  sport toggle or Go live only counts as moved when focus actually lands there.
+- Game Centre booked and sent-off marks are translated.
 
 ## Ready below the UI (screens pending)
 
