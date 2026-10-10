@@ -933,8 +933,8 @@ Phone setup (security review)
 - Night review fixes (phone access, playback, sport matching, recording names), real
   TheSportsDB and live ESPN parser checks, Game Centre formation and cards: CI debug green
   at `c1685393a` (run 38057188837; earlier at `7c7e0e4ae`, run 38055457565); 848 core and
-  285 data-layer JVM tests on the host. Minified release (R8) at `c1685393a`: run
-  38058607115 (result below once finished). Not device-tested.
+  285 data-layer JVM tests on the host. Minified release (R8) green at `c1685393a`
+  (run 38058607115). Not device-tested.
 - Evening 10 October fixes and the second-capture parser fix: CI debug green at `05cd1484a`
   (run 38047277797); 839 core and 277 data-layer JVM tests on the host. Not device-tested.
 - Everything since the 10 October pass (fixes, playback and audio options, menu order,

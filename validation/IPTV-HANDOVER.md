@@ -12,7 +12,8 @@ Older sections further down are history; read "Start here" first.
 Update night of 10 October (user asleep): all night-review findings fixed and a second
 review of those fixes done (three more recording fixes); Game Centre formation and card
 marks; TheSportsDB checked against the user's real captures. Build for the next device
-pass: CI debug green at `c1685393a` (run 38057188837); release (R8) run 38058607115.
+pass: CI debug green at `c1685393a` (run 38057188837); release (R8) green at the same
+commit (run 38058607115).
 Host tests: core 848, data 285. Checklist: start at 7g, then 7f and 7e.
 
 State (end of the 8–9 October session):
