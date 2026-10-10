@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">இயக்கம் மற்றும் ஆடியோ</string>
+    <string name="iptv_play14_description">நேரலை சேனல்களுக்கான படம் மற்றும் ஒலி. நீங்கள் அடுத்து திறக்கும் சேனலுக்கு மாற்றங்கள் பொருந்தும்.</string>
+    <string name="iptv_play14_same_as_nuvio">Nuvio போலவே</string>
+    <string name="iptv_play14_same_as_nuvio_value">Nuvio போலவே (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Nuvio பிளேயர் அமைப்புகளில் உள்ளதைப் பின்பற்றும், இப்போது: %1$s</string>
+    <string name="iptv_play14_on">ஆன்</string>
+    <string name="iptv_play14_frame_rate">Frame Rate பொருத்தம்</string>
+    <string name="iptv_play14_frame_rate_subtitle">சேனல் இயங்கத் தொடங்கியதும் டிவியை அதன் Frame Rate-க்கு மாற்றும்.</string>
+    <string name="iptv_play14_resolution_subtitle">Frame Rate பொருத்தம் இயக்கத்தில் இருக்கும்போது டிவியை சேனலின் தீர்மானத்துக்கும் மாற்றும்.</string>
+    <string name="iptv_play14_passthrough">ஆடியோ பாஸ்த்ரூ</string>
+    <string name="iptv_play14_passthrough_subtitle">Nuvio ஆடியோ அமைப்புகளின்படி Dolby Digital, Dolby Digital Plus ஒலியை உங்கள் ரிசீவர் அல்லது சவுண்ட்பாருக்கு அனுப்பும்.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Nuvio-வின் பாஸ்த்ரூ, AC-3 டிரான்ஸ்கோடிங், டவுன்மிக்ஸ் அமைப்புகளைப் பயன்படுத்தும். மல்டிவியூவும் மூலைப் படமும் எப்போதும் செயலியில் டிகோட் ஆகும்.</string>
+    <string name="iptv_play14_passthrough_off">முடக்கம் (செயலியில் டிகோட்)</string>
+    <string name="iptv_play14_passthrough_off_hint">எப்போதும் டிகோட் செய்த ஒலியை அனுப்பும். ரிசீவர் வழியாக ஒரு சேனலில் ஒலி இல்லையெனில் இதை முயலவும்.</string>
+    <string name="iptv_play14_tunnel">டனல்டு இயக்கம்</string>
+    <string name="iptv_play14_tunnel_subtitle">டிவி பெட்டி படத்தையும் ஒலியையும் வன்பொருளில் ஒத்திசைக்கும். முதன்மைப் படம் மட்டும்; மல்டிவியூவில், செயலி டிகோடருக்கு முன்னுரிமை இருக்கும்போது, அல்லது மூலைப் படத்தில் 4K, HDR முடக்கத்தில் இருக்கும்போது பயன்படாது. அப்போது ஒலி அதிகரிப்பும் சரவுண்ட் உயர்த்தலும் முடங்கும்.</string>
+    <string name="iptv_play14_surround">சரவுண்ட் ஆடியோவுக்கு முன்னுரிமை (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">அதே மொழியில் அதிக சேனல்கள் கொண்ட ஆடியோ டிராக்கைத் தேர்வு செய்யும். சரவுண்ட் டிராக் இல்லையெனில் ஸ்டீரியோ இயங்கும்.</string>
+    <string name="iptv_play14_language">விருப்ப ஆடியோ மொழி</string>
+    <string name="iptv_play14_language_subtitle">ஒரு சேனலில் ஒன்றுக்கு மேற்பட்ட ஆடியோ டிராக் இருந்தால் இந்த மொழியைத் தேர்வு செய்யும்.</string>
+    <string name="iptv_play14_language_stream">ஸ்ட்ரீம் இயல்புநிலை</string>
+    <string name="iptv_play14_decoder">ஆடியோ டிகோடர்</string>
+    <string name="iptv_play14_decoder_subtitle">நேரலை ஒலியை இயக்கும் டிகோடர். வீடியோ தொடர்ந்து டிவி பெட்டியின் டிகோடரைப் பயன்படுத்தும்.</string>
+    <string name="iptv_play14_decoder_auto">தானியங்கி</string>
+    <string name="iptv_play14_decoder_auto_hint">டிவி பெட்டியின் டிகோடர்; அது இயக்க முடியாத வடிவங்களுக்குச் செயலியின் டிகோடர்.</string>
+    <string name="iptv_play14_decoder_app">செயலி டிகோடருக்கு முன்னுரிமை</string>
+    <string name="iptv_play14_decoder_app_hint">ஒலியை முதலில் செயலியில் டிகோட் செய்யும், உங்கள் ரிசீவர் பாஸ்த்ரூவாக ஏற்கக்கூடிய வடிவங்களும் சேர்த்து. ஒரு சேனலில் கரகரப்பு அல்லது ஒலி இல்லையெனில் இதை முயலவும்.</string>
+</resources>

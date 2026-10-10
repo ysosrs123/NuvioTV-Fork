@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">மெனுவிலிருந்து மறை</string>
+    <string name="iptv_ui14_menu_show">மெனுவில் காட்டு</string>
+    <string name="iptv_ui14_menu_move">மெனுவில் நகர்த்து</string>
+    <string name="iptv_ui14_menu_move_subtitle">இந்த உருப்படி மெனுவில் தோன்றும் இடத்தை மாற்று</string>
+    <string name="iptv_ui14_menu_required">மெனுவில் எப்போதும் காட்டப்படும்</string>
+    <string name="iptv_ui14_menu_reset">மெனுவை மீட்டமை</string>
+    <string name="iptv_ui14_menu_reset_subtitle">இயல்புநிலை வரிசை, எல்லா உருப்படிகளும் காட்டப்படும்</string>
+    <string name="iptv_ui14_menu_hidden">மறைக்கப்பட்ட மெனு உருப்படிகள்</string>
+    <string name="iptv_ui14_external_subtitle">மற்ற செயலி இயங்கும்போது நேரலை டிவி இங்கே நிற்கும்</string>
+</resources>

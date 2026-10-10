@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Upphör %1$s</string>
+    <string name="iptv_ui14_no_expiry">Inget slutdatum</string>
+    <string name="iptv_ui14_expires_today">Upphör i dag</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Upphör om %1$d dag</item>
+        <item quantity="other">Upphör om %1$d dagar</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Upphörde i dag</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">Upphörde för %1$d dag sedan</item>
+        <item quantity="other">Upphörde för %1$d dagar sedan</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

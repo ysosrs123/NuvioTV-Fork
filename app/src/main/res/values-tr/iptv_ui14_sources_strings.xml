@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Bitiş: %1$s</string>
+    <string name="iptv_ui14_no_expiry">Süresiz</string>
+    <string name="iptv_ui14_expires_today">Bugün sona eriyor</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">%1$d gün içinde sona eriyor</item>
+        <item quantity="other">%1$d gün içinde sona eriyor</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Bugün sona erdi</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">%1$d gün önce sona erdi</item>
+        <item quantity="other">%1$d gün önce sona erdi</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

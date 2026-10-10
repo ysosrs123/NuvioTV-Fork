@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">從選單中隱藏</string>
+    <string name="iptv_ui14_menu_show">在選單中顯示</string>
+    <string name="iptv_ui14_menu_move">在選單中移動</string>
+    <string name="iptv_ui14_menu_move_subtitle">變更此項目在選單中的位置</string>
+    <string name="iptv_ui14_menu_required">一律顯示在選單中</string>
+    <string name="iptv_ui14_menu_reset">重設選單</string>
+    <string name="iptv_ui14_menu_reset_subtitle">預設順序，顯示所有項目</string>
+    <string name="iptv_ui14_menu_hidden">已隱藏的選單項目</string>
+    <string name="iptv_ui14_external_subtitle">其他應用程式播放時，直播電視會在此停止</string>
+</resources>

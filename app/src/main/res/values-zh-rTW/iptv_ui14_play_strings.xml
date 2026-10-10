@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">播放與音訊</string>
+    <string name="iptv_play14_description">直播頻道的畫面和聲音。變更會在下次開啟頻道時生效。</string>
+    <string name="iptv_play14_same_as_nuvio">與 Nuvio 相同</string>
+    <string name="iptv_play14_same_as_nuvio_value">與 Nuvio 相同 (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">依照 Nuvio 播放器設定，目前：%1$s</string>
+    <string name="iptv_play14_on">開啟</string>
+    <string name="iptv_play14_frame_rate">幀率匹配</string>
+    <string name="iptv_play14_frame_rate_subtitle">頻道開始播放後，將電視切換為頻道的幀率。</string>
+    <string name="iptv_play14_resolution_subtitle">幀率匹配開啟時，也將電視切換為頻道的解析度。</string>
+    <string name="iptv_play14_passthrough">音訊穿透</string>
+    <string name="iptv_play14_passthrough_subtitle">依照 Nuvio 音訊設定，將 Dolby Digital 和 Dolby Digital Plus 聲音傳送到擴大機或聲霸。</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">使用 Nuvio 的穿透、AC-3 轉碼和混音下轉設定。多畫面和角落畫面一律在應用程式內解碼。</string>
+    <string name="iptv_play14_passthrough_off">關閉（在應用程式內解碼）</string>
+    <string name="iptv_play14_passthrough_off_hint">一律傳送解碼後的聲音。如果頻道透過擴大機沒有聲音，請試試此項。</string>
+    <string name="iptv_play14_tunnel">通道化播放</string>
+    <string name="iptv_play14_tunnel_subtitle">讓電視盒以硬體保持畫面和聲音同步。僅限主畫面；在多畫面中、選擇偏好應用程式解碼器時或角落畫面顯示 4K 和 HDR 關閉時不使用。使用期間會關閉音量增強和環繞提升。</string>
+    <string name="iptv_play14_surround">偏好環繞音效 (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">選擇同一語言中聲道最多的音軌。頻道沒有環繞音軌時播放立體聲。</string>
+    <string name="iptv_play14_language">偏好音訊語言</string>
+    <string name="iptv_play14_language_subtitle">頻道有多條音軌時選擇此語言。</string>
+    <string name="iptv_play14_language_stream">串流預設</string>
+    <string name="iptv_play14_decoder">音訊解碼器</string>
+    <string name="iptv_play14_decoder_subtitle">播放直播聲音的解碼器。影片仍使用電視盒的解碼器。</string>
+    <string name="iptv_play14_decoder_auto">自動</string>
+    <string name="iptv_play14_decoder_auto_hint">電視盒的解碼器，無法播放的格式改由應用程式解碼器處理。</string>
+    <string name="iptv_play14_decoder_app">偏好應用程式解碼器</string>
+    <string name="iptv_play14_decoder_app_hint">先在應用程式內解碼聲音，包括擴大機可透過穿透接收的格式。如果頻道有爆音或沒有聲音，請試試此項。</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">காலாவதி: %1$s</string>
+    <string name="iptv_ui14_no_expiry">காலாவதி இல்லை</string>
+    <string name="iptv_ui14_expires_today">இன்று காலாவதியாகும்</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">%1$d நாளில் காலாவதியாகும்</item>
+        <item quantity="other">%1$d நாட்களில் காலாவதியாகும்</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">இன்று காலாவதியானது</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">%1$d நாள் முன்பு காலாவதியானது</item>
+        <item quantity="other">%1$d நாட்களுக்கு முன்பு காலாவதியானது</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

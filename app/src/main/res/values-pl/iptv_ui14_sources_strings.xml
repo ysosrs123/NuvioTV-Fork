@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Wygasa %1$s</string>
+    <string name="iptv_ui14_no_expiry">Bez daty wygaśnięcia</string>
+    <string name="iptv_ui14_expires_today">Wygasa dzisiaj</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Wygasa za %1$d dzień</item>
+        <item quantity="few">Wygasa za %1$d dni</item>
+        <item quantity="many">Wygasa za %1$d dni</item>
+        <item quantity="other">Wygasa za %1$d dnia</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Wygasło dzisiaj</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">Wygasło %1$d dzień temu</item>
+        <item quantity="few">Wygasło %1$d dni temu</item>
+        <item quantity="many">Wygasło %1$d dni temu</item>
+        <item quantity="other">Wygasło %1$d dnia temu</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

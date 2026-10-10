@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Hết hạn %1$s</string>
+    <string name="iptv_ui14_no_expiry">Không hết hạn</string>
+    <string name="iptv_ui14_expires_today">Hết hạn hôm nay</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="other">Hết hạn sau %1$d ngày</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Đã hết hạn hôm nay</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="other">Đã hết hạn %1$d ngày trước</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Ascunde din meniu</string>
+    <string name="iptv_ui14_menu_show">Arată în meniu</string>
+    <string name="iptv_ui14_menu_move">Mută în meniu</string>
+    <string name="iptv_ui14_menu_move_subtitle">Schimbă locul acestui element în meniu</string>
+    <string name="iptv_ui14_menu_required">Afișat mereu în meniu</string>
+    <string name="iptv_ui14_menu_reset">Resetează meniul</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Ordinea implicită, cu toate elementele afișate</string>
+    <string name="iptv_ui14_menu_hidden">Elemente ascunse din meniu</string>
+    <string name="iptv_ui14_external_subtitle">TV live se oprește aici cât timp redă cealaltă aplicație</string>
+</resources>

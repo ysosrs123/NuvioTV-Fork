@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Predvajanje in zvok</string>
+    <string name="iptv_play14_description">Slika in zvok za kanale v živo. Spremembe veljajo za naslednji kanal, ki ga odprete.</string>
+    <string name="iptv_play14_same_as_nuvio">Enako kot Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Enako kot Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Sledi nastavitvi predvajalnika Nuvio, zdaj: %1$s</string>
+    <string name="iptv_play14_on">Vklopljeno</string>
+    <string name="iptv_play14_frame_rate">Ujemanje hitrosti sličic</string>
+    <string name="iptv_play14_frame_rate_subtitle">Ko se kanal predvaja, preklopi TV na njegovo hitrost sličic.</string>
+    <string name="iptv_play14_resolution_subtitle">Ko je ujemanje hitrosti sličic vklopljeno, preklopi TV tudi na ločljivost kanala.</string>
+    <string name="iptv_play14_passthrough">Prehod zvoka</string>
+    <string name="iptv_play14_passthrough_subtitle">Pošlje zvok Dolby Digital in Dolby Digital Plus sprejemniku ali zvočni vrstici, kot je nastavljeno v zvočnih nastavitvah Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Uporablja nastavitve Nuvio za prehod zvoka, prekodiranje AC-3 in downmix. Multiview in slika v kotu se vedno dekodirata v aplikaciji.</string>
+    <string name="iptv_play14_passthrough_off">Izklopljeno (dekodiranje v aplikaciji)</string>
+    <string name="iptv_play14_passthrough_off_hint">Vedno pošlje dekodiran zvok. Poskusite, če kanal prek sprejemnika nima zvoka.</string>
+    <string name="iptv_play14_tunnel">Tunelirano predvajanje</string>
+    <string name="iptv_play14_tunnel_subtitle">TV-sprejemnik strojno usklajuje sliko in zvok. Samo glavna slika; ne pri multiview, z možnostjo Preferiraj dekoder aplikacije ali ko je 4K in HDR v sliki v kotu izklopljeno. Ojačanje glasnosti in dvig prostorskega zvoka sta takrat izklopljena.</string>
+    <string name="iptv_play14_surround">Prednost prostorskemu zvoku (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Izbere zvočni posnetek z največ kanali v istem jeziku. Brez prostorskega posnetka se predvaja stereo.</string>
+    <string name="iptv_play14_language">Prednostni jezik zvoka</string>
+    <string name="iptv_play14_language_subtitle">Izbere ta jezik, ko ima kanal več zvočnih posnetkov.</string>
+    <string name="iptv_play14_language_stream">Privzeto za tok</string>
+    <string name="iptv_play14_decoder">Zvočni dekoder</string>
+    <string name="iptv_play14_decoder_subtitle">Kateri dekoder predvaja zvok v živo. Video še naprej uporablja dekoder TV-sprejemnika.</string>
+    <string name="iptv_play14_decoder_auto">Samodejno</string>
+    <string name="iptv_play14_decoder_auto_hint">Dekoder TV-sprejemnika, z dekoderjem aplikacije za formate, ki jih ne zmore predvajati.</string>
+    <string name="iptv_play14_decoder_app">Preferiraj dekoder aplikacije</string>
+    <string name="iptv_play14_decoder_app_hint">Zvok najprej dekodira v aplikaciji, tudi formate, ki bi jih sprejemnik lahko prevzel prek prehoda zvoka. Poskusite, če kanal prasketa ali nima zvoka.</string>
+</resources>

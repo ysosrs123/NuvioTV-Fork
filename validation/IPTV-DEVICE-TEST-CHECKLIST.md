@@ -1,6 +1,6 @@
 # Nuvio IPTV — device test checklist (build `422d9d8f0`, run 38027429837)
 
-For this build start with section 7d, then 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
+For this build start with section 7e, then 7d, 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -83,6 +83,24 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 11. Press Home on the remote with Game Centre open: logcat should show sports requests
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
+
+## 7e. Playback options, menu order, external player and source expiry (build after `593b5775b`)
+1. Live TV settings → Playback and audio: frame rate / resolution matching "Same as Nuvio"
+   shows Nuvio's value; set Live TV only values and check the TV switches on a 50 fps channel.
+2. Passthrough with your receiver: "Same as Nuvio" passes AC-3/E-AC-3 (receiver shows Dolby);
+   "Off" sends PCM. Multiview and the corner picture always decode in the app.
+3. Tunnelled playback on (needs "4K and HDR in the corner picture" on and Automatic decoder):
+   full screen 4K/HDR smoothness; zapping; back to the guide; add to multiview (reopens).
+4. Prefer surround audio (5.1) on: a channel with stereo + 5.1 starts on 5.1. Prefer audio
+   language works; a track picked by hand still wins.
+5. Audio decoder: Prefer app decoder plays everything (Dolby decoded in the app, no
+   passthrough); back to Automatic.
+6. Live TV menu: hold OK on an item → Move in menu / Hide from menu; Search, Settings,
+   categories and Sources cannot be hidden; hidden items listed dimmed; Reset menu.
+7. Channel hold OK → Open in external player: plays in your external player with headers;
+   Live TV stops; message when no player is installed.
+8. Sources: Xtream sources show "Expires dd-MMM-yy · N connections" or "No expiry"; a source
+   within 7 days shows the warning there and under the Live TV menu title.
 
 ## 7d. Fixes from the 10 October pass (build `422d9d8f0`)
 1. Stream info widget in the short stacked size: two labelled columns (video, audio,

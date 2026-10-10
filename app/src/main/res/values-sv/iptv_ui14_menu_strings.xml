@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Dölj i menyn</string>
+    <string name="iptv_ui14_menu_show">Visa i menyn</string>
+    <string name="iptv_ui14_menu_move">Flytta i menyn</string>
+    <string name="iptv_ui14_menu_move_subtitle">Ändra var objektet visas i menyn</string>
+    <string name="iptv_ui14_menu_required">Visas alltid i menyn</string>
+    <string name="iptv_ui14_menu_reset">Återställ menyn</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Standardordning, med alla objekt synliga</string>
+    <string name="iptv_ui14_menu_hidden">Dolda menyobjekt</string>
+    <string name="iptv_ui14_external_subtitle">Live-TV stoppas här medan den andra appen spelar</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Menüden gizle</string>
+    <string name="iptv_ui14_menu_show">Menüde göster</string>
+    <string name="iptv_ui14_menu_move">Menüde taşı</string>
+    <string name="iptv_ui14_menu_move_subtitle">Bu öğenin menüdeki yerini değiştir</string>
+    <string name="iptv_ui14_menu_required">Menüde her zaman gösterilir</string>
+    <string name="iptv_ui14_menu_reset">Menüyü sıfırla</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Varsayılan sıra, tüm öğeler gösterilir</string>
+    <string name="iptv_ui14_menu_hidden">Gizli menü öğeleri</string>
+    <string name="iptv_ui14_external_subtitle">Diğer uygulama oynatırken Canlı TV burada durur</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Истекает %1$s</string>
+    <string name="iptv_ui14_no_expiry">Бессрочно</string>
+    <string name="iptv_ui14_expires_today">Истекает сегодня</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Истекает через %1$d день</item>
+        <item quantity="few">Истекает через %1$d дня</item>
+        <item quantity="many">Истекает через %1$d дней</item>
+        <item quantity="other">Истекает через %1$d дня</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Срок истёк сегодня</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">Срок истёк %1$d день назад</item>
+        <item quantity="few">Срок истёк %1$d дня назад</item>
+        <item quantity="many">Срок истёк %1$d дней назад</item>
+        <item quantity="other">Срок истёк %1$d дня назад</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

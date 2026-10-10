@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">%1$s 到期</string>
+    <string name="iptv_ui14_no_expiry">無到期日</string>
+    <string name="iptv_ui14_expires_today">今天到期</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="other">%1$d 天後到期</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">今天已到期</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="other">%1$d 天前已到期</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s：%2$s</string>
+</resources>

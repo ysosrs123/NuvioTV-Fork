@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">从菜单中隐藏</string>
+    <string name="iptv_ui14_menu_show">在菜单中显示</string>
+    <string name="iptv_ui14_menu_move">在菜单中移动</string>
+    <string name="iptv_ui14_menu_move_subtitle">更改此项在菜单中的位置</string>
+    <string name="iptv_ui14_menu_required">始终显示在菜单中</string>
+    <string name="iptv_ui14_menu_reset">重置菜单</string>
+    <string name="iptv_ui14_menu_reset_subtitle">默认顺序，显示所有项目</string>
+    <string name="iptv_ui14_menu_hidden">已隐藏的菜单项</string>
+    <string name="iptv_ui14_external_subtitle">其他应用播放时，直播电视在此停止</string>
+</resources>

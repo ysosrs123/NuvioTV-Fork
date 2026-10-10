@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Skadon %1$s</string>
+    <string name="iptv_ui14_no_expiry">Pa skadim</string>
+    <string name="iptv_ui14_expires_today">Skadon sot</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Skadon pas %1$d dite</item>
+        <item quantity="other">Skadon pas %1$d ditësh</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Skadoi sot</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">Skadoi %1$d ditë më parë</item>
+        <item quantity="other">Skadoi %1$d ditë më parë</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

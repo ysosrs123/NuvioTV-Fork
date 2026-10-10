@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Odtwarzanie i dźwięk</string>
+    <string name="iptv_play14_description">Obraz i dźwięk kanałów na żywo. Zmiany obowiązują od następnego otwartego kanału.</string>
+    <string name="iptv_play14_same_as_nuvio">Taki jak w Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Taki jak w Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Zgodnie z ustawieniami odtwarzacza Nuvio, teraz: %1$s</string>
+    <string name="iptv_play14_on">Wł.</string>
+    <string name="iptv_play14_frame_rate">Dopasowanie częstotliwości klatek</string>
+    <string name="iptv_play14_frame_rate_subtitle">Po rozpoczęciu odtwarzania przełącza telewizor na częstotliwość klatek kanału.</string>
+    <string name="iptv_play14_resolution_subtitle">Przełącza też telewizor na rozdzielczość kanału, gdy dopasowanie częstotliwości klatek jest włączone.</string>
+    <string name="iptv_play14_passthrough">Przepuszczanie dźwięku</string>
+    <string name="iptv_play14_passthrough_subtitle">Wysyła dźwięk Dolby Digital i Dolby Digital Plus do amplitunera lub soundbara zgodnie z ustawieniami dźwięku Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Używa ustawień Nuvio dla przepuszczania, transkodowania AC-3 i downmiksu. Multiview i obraz w rogu są zawsze dekodowane w aplikacji.</string>
+    <string name="iptv_play14_passthrough_off">Wył. (dekodowanie w aplikacji)</string>
+    <string name="iptv_play14_passthrough_off_hint">Zawsze wysyła zdekodowany dźwięk. Spróbuj, jeśli kanał nie ma dźwięku przez amplituner.</string>
+    <string name="iptv_play14_tunnel">Tunelowane odtwarzanie</string>
+    <string name="iptv_play14_tunnel_subtitle">Urządzenie sprzętowo synchronizuje obraz i dźwięk. Tylko główny obraz; nie w multiview, z opcją Preferuj dekoder aplikacji ani gdy 4K i HDR w obrazie w rogu jest wyłączone. Wzmocnienie głośności i podbicie surround są wtedy wyłączone.</string>
+    <string name="iptv_play14_surround">Preferuj dźwięk przestrzenny (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Wybiera ścieżkę dźwiękową z największą liczbą kanałów w tym samym języku. Bez ścieżki przestrzennej gra stereo.</string>
+    <string name="iptv_play14_language">Preferowany język dźwięku</string>
+    <string name="iptv_play14_language_subtitle">Wybiera ten język, gdy kanał ma więcej niż jedną ścieżkę dźwiękową.</string>
+    <string name="iptv_play14_language_stream">Domyślny strumienia</string>
+    <string name="iptv_play14_decoder">Dekoder dźwięku</string>
+    <string name="iptv_play14_decoder_subtitle">Który dekoder odtwarza dźwięk na żywo. Wideo nadal używa dekodera urządzenia.</string>
+    <string name="iptv_play14_decoder_auto">Automatycznie</string>
+    <string name="iptv_play14_decoder_auto_hint">Dekoder urządzenia, a dla formatów, których nie obsługuje, dekoder aplikacji.</string>
+    <string name="iptv_play14_decoder_app">Preferuj dekoder aplikacji</string>
+    <string name="iptv_play14_decoder_app_hint">Najpierw dekoduje dźwięk w aplikacji, także formaty, które amplituner mógłby przyjąć przez przepuszczanie. Spróbuj, jeśli kanał trzeszczy lub nie ma dźwięku.</string>
+</resources>

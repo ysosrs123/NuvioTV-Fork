@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Phát và âm thanh</string>
+    <string name="iptv_play14_description">Hình ảnh và âm thanh cho kênh trực tiếp. Thay đổi áp dụng cho kênh tiếp theo bạn mở.</string>
+    <string name="iptv_play14_same_as_nuvio">Giống Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Giống Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Theo cài đặt trình phát của Nuvio, hiện tại: %1$s</string>
+    <string name="iptv_play14_on">Bật</string>
+    <string name="iptv_play14_frame_rate">Khớp tốc độ khung hình</string>
+    <string name="iptv_play14_frame_rate_subtitle">Chuyển TV sang tốc độ khung hình của kênh khi kênh bắt đầu phát.</string>
+    <string name="iptv_play14_resolution_subtitle">Cũng chuyển TV sang độ phân giải của kênh khi bật khớp tốc độ khung hình.</string>
+    <string name="iptv_play14_passthrough">Truyền thẳng âm thanh</string>
+    <string name="iptv_play14_passthrough_subtitle">Gửi âm thanh Dolby Digital và Dolby Digital Plus đến bộ thu hoặc loa thanh theo cài đặt âm thanh của Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Dùng cài đặt truyền thẳng, chuyển mã AC-3 và hạ kênh của Nuvio. Đa màn hình và khung hình góc luôn giải mã trong ứng dụng.</string>
+    <string name="iptv_play14_passthrough_off">Tắt (giải mã trong ứng dụng)</string>
+    <string name="iptv_play14_passthrough_off_hint">Luôn gửi âm thanh đã giải mã. Hãy thử nếu một kênh không có tiếng qua bộ thu.</string>
+    <string name="iptv_play14_tunnel">Phát trực tiếp qua phần cứng</string>
+    <string name="iptv_play14_tunnel_subtitle">TV box đồng bộ hình và tiếng bằng phần cứng. Chỉ hình chính; không dùng ở đa màn hình, với Ưu tiên bộ giải mã ứng dụng hoặc khi tắt 4K và HDR trong khung góc. Khi đó tăng âm lượng và nâng âm vòm bị tắt.</string>
+    <string name="iptv_play14_surround">Ưu tiên âm thanh vòm (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Chọn bản âm thanh có nhiều kênh nhất cùng ngôn ngữ. Không có bản âm thanh vòm thì phát stereo.</string>
+    <string name="iptv_play14_language">Ưu tiên ngôn ngữ âm thanh</string>
+    <string name="iptv_play14_language_subtitle">Chọn ngôn ngữ này khi kênh có nhiều bản âm thanh.</string>
+    <string name="iptv_play14_language_stream">Mặc định của luồng</string>
+    <string name="iptv_play14_decoder">Bộ giải mã âm thanh</string>
+    <string name="iptv_play14_decoder_subtitle">Bộ giải mã phát âm thanh trực tiếp. Video vẫn dùng bộ giải mã của TV box.</string>
+    <string name="iptv_play14_decoder_auto">Tự động</string>
+    <string name="iptv_play14_decoder_auto_hint">Bộ giải mã của TV box, cùng bộ giải mã ứng dụng cho định dạng nó không phát được.</string>
+    <string name="iptv_play14_decoder_app">Ưu tiên bộ giải mã ứng dụng</string>
+    <string name="iptv_play14_decoder_app_hint">Giải mã âm thanh trong ứng dụng trước, kể cả định dạng bộ thu có thể nhận qua truyền thẳng. Hãy thử nếu kênh bị rè hoặc mất tiếng.</string>
+</resources>

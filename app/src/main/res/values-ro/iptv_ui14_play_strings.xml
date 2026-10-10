@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Redare și audio</string>
+    <string name="iptv_play14_description">Imagine și sunet pentru canalele live. Modificările se aplică la următorul canal deschis.</string>
+    <string name="iptv_play14_same_as_nuvio">La fel ca Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">La fel ca Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Urmează setarea din setările playerului Nuvio, acum: %1$s</string>
+    <string name="iptv_play14_on">Activat</string>
+    <string name="iptv_play14_frame_rate">Potrivirea ratei de cadre</string>
+    <string name="iptv_play14_frame_rate_subtitle">Comută televizorul la rata de cadre a canalului după ce începe redarea.</string>
+    <string name="iptv_play14_resolution_subtitle">Comută și televizorul la rezoluția canalului cât timp potrivirea ratei de cadre este activă.</string>
+    <string name="iptv_play14_passthrough">Passthrough audio</string>
+    <string name="iptv_play14_passthrough_subtitle">Trimite sunetul Dolby Digital și Dolby Digital Plus către receiver sau soundbar, conform setărilor audio Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Folosește setările Nuvio pentru passthrough, transcodarea AC-3 și downmix. Multiview și imaginea din colț decodează mereu în aplicație.</string>
+    <string name="iptv_play14_passthrough_off">Dezactivat (decodare în aplicație)</string>
+    <string name="iptv_play14_passthrough_off_hint">Trimite mereu sunet decodat. Încearcă asta dacă un canal nu are sunet prin receiver.</string>
+    <string name="iptv_play14_tunnel">Redare prin tunel</string>
+    <string name="iptv_play14_tunnel_subtitle">TV box-ul sincronizează hardware imaginea și sunetul. Doar imaginea principală; nu în multiview, cu Preferă decodorul aplicației sau când 4K și HDR în imaginea din colț e dezactivat. Amplificarea volumului și accentuarea surround sunt atunci oprite.</string>
+    <string name="iptv_play14_surround">Preferă audio surround (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Alege pista audio cu cele mai multe canale în aceeași limbă. Fără pistă surround, se redă stereo.</string>
+    <string name="iptv_play14_language">Limba audio preferată</string>
+    <string name="iptv_play14_language_subtitle">Alege această limbă când un canal are mai multe piste audio.</string>
+    <string name="iptv_play14_language_stream">Implicit din stream</string>
+    <string name="iptv_play14_decoder">Decodor audio</string>
+    <string name="iptv_play14_decoder_subtitle">Ce decodor redă sunetul live. Video folosește în continuare decodorul TV box-ului.</string>
+    <string name="iptv_play14_decoder_auto">Automat</string>
+    <string name="iptv_play14_decoder_auto_hint">Decodorul TV box-ului, cu decodorul aplicației pentru formatele pe care nu le poate reda.</string>
+    <string name="iptv_play14_decoder_app">Preferă decodorul aplicației</string>
+    <string name="iptv_play14_decoder_app_hint">Decodează sunetul mai întâi în aplicație, inclusiv formatele pe care receiverul le-ar putea primi prin passthrough. Încearcă asta dacă un canal pârâie sau nu are sunet.</string>
+</resources>

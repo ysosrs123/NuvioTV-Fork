@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Skjul fra menyen</string>
+    <string name="iptv_ui14_menu_show">Vis i menyen</string>
+    <string name="iptv_ui14_menu_move">Flytt i menyen</string>
+    <string name="iptv_ui14_menu_move_subtitle">Endre hvor dette elementet vises i menyen</string>
+    <string name="iptv_ui14_menu_required">Vises alltid i menyen</string>
+    <string name="iptv_ui14_menu_reset">Tilbakestill menyen</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Standard rekkefølge, med alle elementer synlige</string>
+    <string name="iptv_ui14_menu_hidden">Skjulte menyelementer</string>
+    <string name="iptv_ui14_external_subtitle">Direkte-TV stopper her mens den andre appen spiller</string>
+</resources>

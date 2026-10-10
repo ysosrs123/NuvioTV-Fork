@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Expiră %1$s</string>
+    <string name="iptv_ui14_no_expiry">Fără expirare</string>
+    <string name="iptv_ui14_expires_today">Expiră azi</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Expiră peste %1$d zi</item>
+        <item quantity="few">Expiră peste %1$d zile</item>
+        <item quantity="other">Expiră peste %1$d de zile</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">A expirat azi</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">A expirat acum %1$d zi</item>
+        <item quantity="few">A expirat acum %1$d zile</item>
+        <item quantity="other">A expirat acum %1$d de zile</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

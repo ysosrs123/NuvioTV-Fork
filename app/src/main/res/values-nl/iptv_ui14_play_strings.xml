@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Afspelen en audio</string>
+    <string name="iptv_play14_description">Beeld en geluid voor live zenders. Wijzigingen gelden vanaf de volgende zender die je opent.</string>
+    <string name="iptv_play14_same_as_nuvio">Zelfde als Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Zelfde als Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Volgt de instelling in de spelerinstellingen van Nuvio, nu: %1$s</string>
+    <string name="iptv_play14_on">Aan</string>
+    <string name="iptv_play14_frame_rate">Framerate-afstemming</string>
+    <string name="iptv_play14_frame_rate_subtitle">Zet de tv op de framerate van de zender zodra die speelt.</string>
+    <string name="iptv_play14_resolution_subtitle">Zet de tv ook op de resolutie van de zender zolang framerate-afstemming aan staat.</string>
+    <string name="iptv_play14_passthrough">Audio passthrough</string>
+    <string name="iptv_play14_passthrough_subtitle">Stuurt Dolby Digital- en Dolby Digital Plus-geluid naar je receiver of soundbar zoals ingesteld in de audio-instellingen van Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Gebruikt de instellingen van Nuvio voor passthrough, AC-3-transcodering en downmix. Multiview en het hoekbeeld decoderen altijd in de app.</string>
+    <string name="iptv_play14_passthrough_off">Uit (decoderen in de app)</string>
+    <string name="iptv_play14_passthrough_off_hint">Stuurt altijd gedecodeerd geluid. Probeer dit als een zender geen geluid geeft via je receiver.</string>
+    <string name="iptv_play14_tunnel">Getunneld afspelen</string>
+    <string name="iptv_play14_tunnel_subtitle">Laat het tv-kastje beeld en geluid hardwarematig synchroon houden. Alleen hoofdbeeld; niet bij multiview, met Voorkeur voor app-decoder of als 4K en HDR in het hoekbeeld uit staat. Volumeversterking en surroundverhoging zijn dan uit.</string>
+    <string name="iptv_play14_surround">Voorkeur voor surroundaudio (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Kiest het audiospoor met de meeste kanalen in dezelfde taal. Zonder surroundspoor speelt stereo.</string>
+    <string name="iptv_play14_language">Voorkeurstaal audio</string>
+    <string name="iptv_play14_language_subtitle">Kiest deze taal als een zender meer dan één audiospoor heeft.</string>
+    <string name="iptv_play14_language_stream">Standaard van stream</string>
+    <string name="iptv_play14_decoder">Audiodecoder</string>
+    <string name="iptv_play14_decoder_subtitle">Welke decoder het live geluid afspeelt. Video blijft de decoder van het tv-kastje gebruiken.</string>
+    <string name="iptv_play14_decoder_auto">Automatisch</string>
+    <string name="iptv_play14_decoder_auto_hint">De decoder van het tv-kastje, met de app-decoder voor formaten die hij niet kan afspelen.</string>
+    <string name="iptv_play14_decoder_app">Voorkeur voor app-decoder</string>
+    <string name="iptv_play14_decoder_app_hint">Decodeert geluid eerst in de app, ook formaten die je receiver als passthrough kan ontvangen. Probeer dit als een zender kraakt of geen geluid heeft.</string>
+</resources>

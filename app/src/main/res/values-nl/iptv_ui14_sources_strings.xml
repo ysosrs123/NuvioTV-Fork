@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Verloopt %1$s</string>
+    <string name="iptv_ui14_no_expiry">Verloopt niet</string>
+    <string name="iptv_ui14_expires_today">Verloopt vandaag</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Verloopt over %1$d dag</item>
+        <item quantity="other">Verloopt over %1$d dagen</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Vandaag verlopen</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">%1$d dag geleden verlopen</item>
+        <item quantity="other">%1$d dagen geleden verlopen</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

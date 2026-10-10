@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Poteče %1$s</string>
+    <string name="iptv_ui14_no_expiry">Brez poteka</string>
+    <string name="iptv_ui14_expires_today">Poteče danes</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Poteče čez %1$d dan</item>
+        <item quantity="two">Poteče čez %1$d dneva</item>
+        <item quantity="few">Poteče čez %1$d dni</item>
+        <item quantity="other">Poteče čez %1$d dni</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Poteklo danes</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">Poteklo pred %1$d dnem</item>
+        <item quantity="two">Poteklo pred %1$d dnevoma</item>
+        <item quantity="few">Poteklo pred %1$d dnevi</item>
+        <item quantity="other">Poteklo pred %1$d dnevi</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

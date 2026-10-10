@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Uppspelning och ljud</string>
+    <string name="iptv_play14_description">Bild och ljud för livekanaler. Ändringar gäller från nästa kanal du öppnar.</string>
+    <string name="iptv_play14_same_as_nuvio">Samma som Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Samma som Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Följer inställningen i Nuvios spelarinställningar, nu: %1$s</string>
+    <string name="iptv_play14_on">På</string>
+    <string name="iptv_play14_frame_rate">Matcha bildfrekvens</string>
+    <string name="iptv_play14_frame_rate_subtitle">Byter tv:n till kanalens bildfrekvens när den spelas.</string>
+    <string name="iptv_play14_resolution_subtitle">Byter även tv:n till kanalens upplösning medan matchning av bildfrekvens är på.</string>
+    <string name="iptv_play14_passthrough">Ljudgenomströmning</string>
+    <string name="iptv_play14_passthrough_subtitle">Skickar Dolby Digital- och Dolby Digital Plus-ljud till din receiver eller soundbar enligt Nuvios ljudinställningar.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Använder Nuvios inställningar för genomströmning, AC-3-omkodning och nedmixning. Multivy och hörnbilden avkodas alltid i appen.</string>
+    <string name="iptv_play14_passthrough_off">Av (avkoda i appen)</string>
+    <string name="iptv_play14_passthrough_off_hint">Skickar alltid avkodat ljud. Prova detta om en kanal saknar ljud via receivern.</string>
+    <string name="iptv_play14_tunnel">Tunneluppspelning</string>
+    <string name="iptv_play14_tunnel_subtitle">TV-boxen håller bild och ljud i synk i hårdvaran. Bara huvudbilden; inte i multivy, med Föredra appens avkodare eller när 4K och HDR i hörnbilden är av. Volymförstärkning och surroundlyft är då av.</string>
+    <string name="iptv_play14_surround">Föredra surroundljud (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Väljer ljudspåret med flest kanaler på samma språk. Utan surroundspår spelas stereo.</string>
+    <string name="iptv_play14_language">Föredraget ljudspråk</string>
+    <string name="iptv_play14_language_subtitle">Väljer det här språket när en kanal har mer än ett ljudspår.</string>
+    <string name="iptv_play14_language_stream">Strömmens standard</string>
+    <string name="iptv_play14_decoder">Ljudavkodare</string>
+    <string name="iptv_play14_decoder_subtitle">Vilken avkodare som spelar liveljudet. Video använder fortfarande TV-boxens avkodare.</string>
+    <string name="iptv_play14_decoder_auto">Automatiskt</string>
+    <string name="iptv_play14_decoder_auto_hint">TV-boxens avkodare, med appens avkodare för format den inte kan spela.</string>
+    <string name="iptv_play14_decoder_app">Föredra appens avkodare</string>
+    <string name="iptv_play14_decoder_app_hint">Avkodar ljud i appen först, även format som receivern kunde ta emot via genomströmning. Prova detta om en kanal knastrar eller saknar ljud.</string>
+</resources>

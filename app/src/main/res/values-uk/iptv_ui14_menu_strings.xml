@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Сховати з меню</string>
+    <string name="iptv_ui14_menu_show">Показати в меню</string>
+    <string name="iptv_ui14_menu_move">Перемістити в меню</string>
+    <string name="iptv_ui14_menu_move_subtitle">Змінити місце цього пункту в меню</string>
+    <string name="iptv_ui14_menu_required">Завжди в меню</string>
+    <string name="iptv_ui14_menu_reset">Скинути меню</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Типовий порядок, усі пункти видимі</string>
+    <string name="iptv_ui14_menu_hidden">Сховані пункти меню</string>
+    <string name="iptv_ui14_external_subtitle">ТВ наживо зупиняється тут, поки грає інша програма</string>
+</resources>

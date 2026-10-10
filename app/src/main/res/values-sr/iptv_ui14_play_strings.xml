@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Репродукција и звук</string>
+    <string name="iptv_play14_description">Слика и звук за канале уживо. Измене важе за следећи канал који отворите.</string>
+    <string name="iptv_play14_same_as_nuvio">Исто као Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Исто као Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Прати подешавање плејера у Nuvio-у, сада: %1$s</string>
+    <string name="iptv_play14_on">Укључено</string>
+    <string name="iptv_play14_frame_rate">Усклађивање брзине кадрова</string>
+    <string name="iptv_play14_frame_rate_subtitle">Пребацује ТВ на брзину кадрова канала када почне репродукција.</string>
+    <string name="iptv_play14_resolution_subtitle">Пребацује ТВ и на резолуцију канала док је усклађивање брзине кадрова укључено.</string>
+    <string name="iptv_play14_passthrough">Аудио passthrough</string>
+    <string name="iptv_play14_passthrough_subtitle">Шаље Dolby Digital и Dolby Digital Plus звук пријемнику или звучној траци према аудио подешавањима у Nuvio-у.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Користи Nuvio подешавања за passthrough, AC-3 транскодирање и downmix. Multiview и слика у углу се увек декодирају у апликацији.</string>
+    <string name="iptv_play14_passthrough_off">Искључено (декодирање у апликацији)</string>
+    <string name="iptv_play14_passthrough_off_hint">Увек шаље декодиран звук. Пробајте ако канал нема звука преко пријемника.</string>
+    <string name="iptv_play14_tunnel">Тунелована репродукција</string>
+    <string name="iptv_play14_tunnel_subtitle">ТВ уређај хардверски усклађује слику и звук. Само главна слика; не у Multiview приказу, уз Преферирај декодер апликације нити кад је 4K и HDR у слици у углу искључено. Појачање звука и surround појачање су тада искључени.</string>
+    <string name="iptv_play14_surround">Преферирај surround звук (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Бира аудио запис са највише канала на истом језику. Без surround записа пушта се стерео.</string>
+    <string name="iptv_play14_language">Жељени језик звука</string>
+    <string name="iptv_play14_language_subtitle">Бира овај језик када канал има више аудио записа.</string>
+    <string name="iptv_play14_language_stream">Подразумевано за стрим</string>
+    <string name="iptv_play14_decoder">Аудио декодер</string>
+    <string name="iptv_play14_decoder_subtitle">Који декодер пушта звук уживо. Видео и даље користи декодер ТВ уређаја.</string>
+    <string name="iptv_play14_decoder_auto">Аутоматски</string>
+    <string name="iptv_play14_decoder_auto_hint">Декодер ТВ уређаја, уз декодер апликације за формате које не може да пусти.</string>
+    <string name="iptv_play14_decoder_app">Преферирај декодер апликације</string>
+    <string name="iptv_play14_decoder_app_hint">Прво декодира звук у апликацији, укључујући формате које би пријемник могао да прими као passthrough. Пробајте ако канал пуцкета или нема звука.</string>
+</resources>

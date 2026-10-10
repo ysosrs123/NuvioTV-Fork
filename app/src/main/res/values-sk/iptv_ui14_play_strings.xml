@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Prehrávanie a zvuk</string>
+    <string name="iptv_play14_description">Obraz a zvuk pre živé kanály. Zmeny platia od ďalšieho otvoreného kanála.</string>
+    <string name="iptv_play14_same_as_nuvio">Ako v Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Ako v Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Riadi sa nastavením prehrávača Nuvio, teraz: %1$s</string>
+    <string name="iptv_play14_on">Zapnuté</string>
+    <string name="iptv_play14_frame_rate">Prispôsobenie snímkovej frekvencie</string>
+    <string name="iptv_play14_frame_rate_subtitle">Po spustení prepne TV na snímkovú frekvenciu kanála.</string>
+    <string name="iptv_play14_resolution_subtitle">Prepne TV aj na rozlíšenie kanála, keď je prispôsobenie snímkovej frekvencie zapnuté.</string>
+    <string name="iptv_play14_passthrough">Priechod zvuku</string>
+    <string name="iptv_play14_passthrough_subtitle">Posiela zvuk Dolby Digital a Dolby Digital Plus do prijímača alebo soundbaru podľa nastavení zvuku Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Používa nastavenia Nuvio pre priechod zvuku, transkódovanie do AC-3 a downmix. Multiview a obraz v rohu sa vždy dekódujú v aplikácii.</string>
+    <string name="iptv_play14_passthrough_off">Vypnuté (dekódovať v aplikácii)</string>
+    <string name="iptv_play14_passthrough_off_hint">Vždy posiela dekódovaný zvuk. Skúste, ak kanál nemá zvuk cez prijímač.</string>
+    <string name="iptv_play14_tunnel">Tunelované prehrávanie</string>
+    <string name="iptv_play14_tunnel_subtitle">TV box hardvérovo synchronizuje obraz a zvuk. Len hlavný obraz; nie v multiview, s Preferovať dekodér aplikácie ani keď je 4K a HDR v rohovom obraze vypnuté. Zosilnenie hlasitosti a zdvih priestorového zvuku sú vtedy vypnuté.</string>
+    <string name="iptv_play14_surround">Preferovať priestorový zvuk (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Vyberie zvukovú stopu s najviac kanálmi v rovnakom jazyku. Bez priestorovej stopy hrá stereo.</string>
+    <string name="iptv_play14_language">Preferovaný jazyk zvuku</string>
+    <string name="iptv_play14_language_subtitle">Vyberie tento jazyk, keď má kanál viac zvukových stôp.</string>
+    <string name="iptv_play14_language_stream">Predvolené streamu</string>
+    <string name="iptv_play14_decoder">Zvukový dekodér</string>
+    <string name="iptv_play14_decoder_subtitle">Ktorý dekodér prehráva živý zvuk. Video naďalej používa dekodér TV boxu.</string>
+    <string name="iptv_play14_decoder_auto">Automaticky</string>
+    <string name="iptv_play14_decoder_auto_hint">Dekodér TV boxu, s dekodérom aplikácie pre formáty, ktoré nevie prehrať.</string>
+    <string name="iptv_play14_decoder_app">Preferovať dekodér aplikácie</string>
+    <string name="iptv_play14_decoder_app_hint">Najprv dekóduje zvuk v aplikácii, aj formáty, ktoré by prijímač prijal cez priechod zvuku. Skúste, ak kanál praská alebo nemá zvuk.</string>
+</resources>

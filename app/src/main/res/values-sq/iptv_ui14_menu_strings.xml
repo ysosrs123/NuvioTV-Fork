@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Fshih nga menyja</string>
+    <string name="iptv_ui14_menu_show">Shfaq në meny</string>
+    <string name="iptv_ui14_menu_move">Zhvendos në meny</string>
+    <string name="iptv_ui14_menu_move_subtitle">Ndrysho vendin ku shfaqet ky element në meny</string>
+    <string name="iptv_ui14_menu_required">Shfaqet gjithmonë në meny</string>
+    <string name="iptv_ui14_menu_reset">Rivendos menynë</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Rendi i parazgjedhur, me të gjitha elementet të shfaqura</string>
+    <string name="iptv_ui14_menu_hidden">Elementet e fshehura të menysë</string>
+    <string name="iptv_ui14_external_subtitle">TV live ndalon këtu ndërsa luan aplikacioni tjetër</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Ẩn khỏi menu</string>
+    <string name="iptv_ui14_menu_show">Hiện trong menu</string>
+    <string name="iptv_ui14_menu_move">Di chuyển trong menu</string>
+    <string name="iptv_ui14_menu_move_subtitle">Đổi vị trí của mục này trong menu</string>
+    <string name="iptv_ui14_menu_required">Luôn hiện trong menu</string>
+    <string name="iptv_ui14_menu_reset">Đặt lại menu</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Thứ tự mặc định, hiện mọi mục</string>
+    <string name="iptv_ui14_menu_hidden">Mục menu bị ẩn</string>
+    <string name="iptv_ui14_external_subtitle">TV trực tiếp dừng ở đây khi ứng dụng kia đang phát</string>
+</resources>

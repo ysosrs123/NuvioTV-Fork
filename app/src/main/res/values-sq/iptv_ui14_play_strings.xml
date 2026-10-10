@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Riprodhimi dhe audio</string>
+    <string name="iptv_play14_description">Pamja dhe zëri për kanalet live. Ndryshimet zbatohen te kanali i radhës që hap.</string>
+    <string name="iptv_play14_same_as_nuvio">Njësoj si Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Njësoj si Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Ndjek cilësimin e luajtësit të Nuvio, tani: %1$s</string>
+    <string name="iptv_play14_on">Aktiv</string>
+    <string name="iptv_play14_frame_rate">Përputhja e shpejtësisë së kuadrove</string>
+    <string name="iptv_play14_frame_rate_subtitle">Kalon televizorin në shpejtësinë e kuadrove të kanalit sapo ai fillon.</string>
+    <string name="iptv_play14_resolution_subtitle">Kalon televizorin edhe në rezolucionin e kanalit kur përputhja e shpejtësisë së kuadrove është aktive.</string>
+    <string name="iptv_play14_passthrough">Passthrough i audios</string>
+    <string name="iptv_play14_passthrough_subtitle">Dërgon zërin Dolby Digital dhe Dolby Digital Plus te marrësi ose soundbar-i sipas cilësimeve të audios në Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Përdor cilësimet e Nuvio për passthrough, transkodimin AC-3 dhe downmix. Multiview dhe pamja në cep dekodohen gjithmonë në aplikacion.</string>
+    <string name="iptv_play14_passthrough_off">Joaktiv (dekodim në aplikacion)</string>
+    <string name="iptv_play14_passthrough_off_hint">Dërgon gjithmonë zë të dekoduar. Provoje nëse një kanal nuk ka zë përmes marrësit.</string>
+    <string name="iptv_play14_tunnel">Riprodhim tunneled</string>
+    <string name="iptv_play14_tunnel_subtitle">TV box-i sinkronizon pamjen dhe zërin në harduer. Vetëm pamja kryesore; jo në multiview, me Prefero dekoderin e aplikacionit ose kur 4K dhe HDR në pamjen e këndit është joaktiv. Përforcimi i volumit dhe ngritja surround janë atëherë joaktive.</string>
+    <string name="iptv_play14_surround">Prefero audion surround (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Zgjedh pistën audio me më shumë kanale në të njëjtën gjuhë. Pa pistë surround luhet stereo.</string>
+    <string name="iptv_play14_language">Gjuha e preferuar e audios</string>
+    <string name="iptv_play14_language_subtitle">Zgjedh këtë gjuhë kur kanali ka më shumë se një pistë audio.</string>
+    <string name="iptv_play14_language_stream">Parazgjedhja e transmetimit</string>
+    <string name="iptv_play14_decoder">Dekoderi i audios</string>
+    <string name="iptv_play14_decoder_subtitle">Cili dekoder luan zërin live. Videoja vazhdon të përdorë dekoderin e TV box-it.</string>
+    <string name="iptv_play14_decoder_auto">Automatik</string>
+    <string name="iptv_play14_decoder_auto_hint">Dekoderi i TV box-it, me dekoderin e aplikacionit për formatet që nuk mund t\'i luajë.</string>
+    <string name="iptv_play14_decoder_app">Prefero dekoderin e aplikacionit</string>
+    <string name="iptv_play14_decoder_app_hint">Dekodon zërin fillimisht në aplikacion, përfshirë formatet që marrësi mund t\'i merrte si passthrough. Provoje nëse një kanal kërcet ose nuk ka zë.</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Oynatma ve ses</string>
+    <string name="iptv_play14_description">Canlı kanallar için görüntü ve ses. Değişiklikler açtığınız sonraki kanalda geçerli olur.</string>
+    <string name="iptv_play14_same_as_nuvio">Nuvio ile aynı</string>
+    <string name="iptv_play14_same_as_nuvio_value">Nuvio ile aynı (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Nuvio oynatıcı ayarlarındaki ayarı izler, şu an: %1$s</string>
+    <string name="iptv_play14_on">Açık</string>
+    <string name="iptv_play14_frame_rate">Kare Hızı Eşleştirme</string>
+    <string name="iptv_play14_frame_rate_subtitle">Kanal oynamaya başlayınca TV\'yi kanalın kare hızına geçirir.</string>
+    <string name="iptv_play14_resolution_subtitle">Kare hızı eşleştirme açıkken TV\'yi kanalın çözünürlüğüne de geçirir.</string>
+    <string name="iptv_play14_passthrough">Ses geçidi</string>
+    <string name="iptv_play14_passthrough_subtitle">Dolby Digital ve Dolby Digital Plus sesi, Nuvio ses ayarlarına göre alıcınıza veya soundbar\'ınıza gönderir.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Nuvio\'nun ses geçidi, AC-3 dönüştürme ve downmix ayarlarını kullanır. Çoklu görünüm ve köşe görüntüsü her zaman uygulamada çözülür.</string>
+    <string name="iptv_play14_passthrough_off">Kapalı (uygulamada çöz)</string>
+    <string name="iptv_play14_passthrough_off_hint">Her zaman çözülmüş ses gönderir. Bir kanal alıcınızda ses vermiyorsa bunu deneyin.</string>
+    <string name="iptv_play14_tunnel">Tünelli Oynatma</string>
+    <string name="iptv_play14_tunnel_subtitle">TV kutusu görüntü ve sesi donanımda senkron tutar. Yalnızca ana görüntü; çoklu görünümde, Uygulama kod çözücüsünü tercih et seçiliyken veya köşe görüntüsünde 4K ve HDR kapalıyken kullanılmaz. Bu sırada ses yükseltme ve surround güçlendirme kapalıdır.</string>
+    <string name="iptv_play14_surround">Surround sesi tercih et (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Aynı dilde en çok kanala sahip ses parçasını seçer. Surround parça yoksa stereo çalar.</string>
+    <string name="iptv_play14_language">Tercih edilen ses dili</string>
+    <string name="iptv_play14_language_subtitle">Kanalda birden fazla ses parçası varsa bu dili seçer.</string>
+    <string name="iptv_play14_language_stream">Yayın varsayılanı</string>
+    <string name="iptv_play14_decoder">Ses kod çözücü</string>
+    <string name="iptv_play14_decoder_subtitle">Canlı sesi çalan kod çözücü. Video, TV kutusunun kod çözücüsünü kullanmaya devam eder.</string>
+    <string name="iptv_play14_decoder_auto">Otomatik</string>
+    <string name="iptv_play14_decoder_auto_hint">TV kutusunun kod çözücüsü; çalamadığı biçimler için uygulamanın kod çözücüsü.</string>
+    <string name="iptv_play14_decoder_app">Uygulama kod çözücüsünü tercih et</string>
+    <string name="iptv_play14_decoder_app_hint">Sesi önce uygulamada çözer, alıcınızın ses geçidiyle alabileceği biçimler dahil. Bir kanal cızırdıyorsa veya ses yoksa bunu deneyin.</string>
+</resources>
