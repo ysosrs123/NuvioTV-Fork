@@ -883,6 +883,8 @@ Phone setup (security review)
 
 ## Validation
 
+- Evening 10 October fixes and the second-capture parser fix: CI debug green at `05cd1484a`
+  (run 38047277797); 839 core and 277 data-layer JVM tests on the host. Not device-tested.
 - Everything since the 10 October pass (fixes, playback and audio options, menu order,
   external player, source expiry, Recordings/multiview focus, translations): CI debug green
   at `e7e1d17b5` (run 38029912007; compile checks `d78449491` run 38028980919, `422d9d8f0`

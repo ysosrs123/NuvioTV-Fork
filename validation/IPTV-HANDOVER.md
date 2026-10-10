@@ -45,8 +45,8 @@ session winners shown. CI green at `3de7568` (run 38012700521) and at `3065341` 
 focused game's summary (one extra request).
 
 Next, in order:
-1. Device pass on `e7e1d17b5` (run 38029912007; checklist 7e, then 7d and 7c); take the
-   findings, record and fix them the same way. Playback options,
+1. Device pass on `05cd1484a` (run 38047277797; checklist 7f, then 7e); take the findings,
+   record and fix them the same way. Playback options,
    menu order, external player and source expiry are committed after it (`2c83574c9`,
    `826090865`, playback options pending) and go into the next build.
 2. Waiting on the user (do not do these without them):

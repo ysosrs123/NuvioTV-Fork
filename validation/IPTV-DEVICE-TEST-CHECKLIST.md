@@ -1,4 +1,4 @@
-# Nuvio IPTV — device test checklist (build `e7e1d17b5`, run 38029912007)
+# Nuvio IPTV — device test checklist (build `05cd1484a`, run 38047277797)
 
 For this build start with section 7f, then 7e, 7d, 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
 
@@ -84,7 +84,7 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
 
-## 7f. Fixes from the evening 10 October pass (build after `9a88d0d41`)
+## 7f. Fixes from the evening 10 October pass (build `05cd1484a`)
 1. Live TV settings: toggle Pure black and the colour theme; focus stays on the toggle.
 2. Main guide: no Sport only / All channels switch; all channels shown. Sport page: Down
    from the cards reaches the switch, Up returns to the last card.
