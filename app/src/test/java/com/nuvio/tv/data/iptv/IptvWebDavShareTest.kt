@@ -164,10 +164,9 @@ class IptvWebDavShareTest {
         var polls = 0
         val uploader = IptvRecordingUploader(IptvWebDavConnector(settings("TV"), "pä55"), pause = { polls += 1 }, chunkBytes = 1024, minimumFreeBytes = 0)
         val result = uploader.upload(dir, "TV/show one.ts", { 4700 }, { polls >= 3 }, 60_000)
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 4700), result)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 4700, remote = "TV/show one.ts"), result)
         assertArrayEquals(a + b, dav.files["TV/show one.ts"])
         assertNull(dav.files["TV/show one.ts.part"])
-        assertFalse(dir.exists())
         val puts = dav.requests.filter { it.method == "PUT" }
         assertEquals(1, puts.size)
         assertEquals("4700", puts.single().getHeader("Content-Length"))
@@ -192,6 +191,20 @@ class IptvWebDavShareTest {
         assertTrue(File(failing, RecordingUpload.spoolName(0)).exists())
     }
 
+    @Test fun existingFileIsKeptAndTheRecordingTakesTheNextName() = runBlocking {
+        val dav = start(FakeDav(partial = true))
+        dav.folders += "TV"
+        val other = bytes(400, 8)
+        dav.files["TV/d.ts"] = other
+        val data = bytes(600, 9)
+        val result = IptvRecordingUploader(IptvWebDavConnector(settings("TV"), ""), pause = { }, chunkBytes = 256, minimumFreeBytes = 0)
+            .upload(spool(data), "TV/d.ts", { Long.MAX_VALUE }, { true }, 60_000)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 600, remote = "TV/d (2).ts"), result)
+        assertArrayEquals(other, dav.files["TV/d.ts"])
+        assertArrayEquals(data, dav.files["TV/d (2).ts"])
+        assertTrue(dav.requests.filter { it.method == "MOVE" }.all { it.getHeader("Overwrite") == "F" })
+    }
+
     @Test fun partialUpdateServersReceiveAppendsWhileRecording() = runBlocking {
         val dav = start(FakeDav(partial = true))
         val a = bytes(700, 5)
@@ -199,7 +212,7 @@ class IptvWebDavShareTest {
         val dir = spool(a, b)
         val result = IptvRecordingUploader(IptvWebDavConnector(settings(""), ""), pause = { }, chunkBytes = 256, minimumFreeBytes = 0)
             .upload(dir, "c.ts", { Long.MAX_VALUE }, { true }, 60_000)
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 1000), result)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 1000, remote = "c.ts"), result)
         assertArrayEquals(a + b, dav.files["c.ts"])
         assertTrue(dav.requests.count { it.method == "PATCH" } >= 4)
         assertEquals(0L, dav.requests.first { it.method == "PUT" }.bodySize)

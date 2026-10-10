@@ -123,6 +123,28 @@ class LiveRecordingTest {
         assertEquals("天気予報々 - 07-Oct-26 1100.ts", RecordingFiles.name("天気予報々", null, now, zone))
     }
 
+    @Test fun nextCopyNameKeepsTheFormatFolderAndLimits() {
+        assertEquals("BBC One - News - 10-Oct-26 1355 (2).ts", RecordingFiles.next("BBC One - News - 10-Oct-26 1355.ts"))
+        assertEquals("BBC One - News - 10-Oct-26 1355 (3).ts", RecordingFiles.next("BBC One - News - 10-Oct-26 1355 (2).ts"))
+        assertEquals("TV/Rec/News - 10-Oct-26 1355 (12).ts", RecordingFiles.next("TV/Rec/News - 10-Oct-26 1355 (11).ts"))
+        assertEquals("10-Oct-26 1355 (2).ts", RecordingFiles.next("10-Oct-26 1355.ts"))
+        assertEquals("old name (2)", RecordingFiles.next("old name"))
+        val zone = ZoneId.of("Australia/Sydney")
+        val long = RecordingFiles.name("x".repeat(500), "y".repeat(500), now, zone)
+        var name = long
+        repeat(RecordingFiles.MAX_COPIES) {
+            name = RecordingFiles.next(name)
+            assertTrue(name.length <= RecordingFiles.MAX_NAME_CHARS && name.toByteArray().size <= RecordingFiles.MAX_NAME_BYTES)
+            assertTrue(name.startsWith("x") && name.contains(" - 07-Oct-26 1100 ("))
+        }
+        assertTrue(name.endsWith(" - 07-Oct-26 1100 (${RecordingFiles.MAX_COPIES + 1}).ts"))
+        val wide = RecordingFiles.name("天".repeat(60), "気".repeat(100), now, zone)
+        assertTrue(RecordingFiles.next(wide).toByteArray().size <= RecordingFiles.MAX_NAME_BYTES)
+        assertTrue(RecordingFiles.next(wide).endsWith("07-Oct-26 1100 (2).ts"))
+        val seen = HashSet<String>()
+        generateSequence("a - 07-Oct-26 1100.ts", RecordingFiles::next).take(150).forEach { assertTrue(seen.add(it)) }
+    }
+
     @Test fun spanUsesProgrammeTimesInsidePadding() {
         val pre = RecordingPlan.PRE_ROLL_MILLIS
         val post = RecordingPlan.POST_ROLL_MILLIS

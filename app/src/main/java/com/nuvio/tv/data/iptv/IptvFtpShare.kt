@@ -82,6 +82,7 @@ private class IptvFtpSession(private val settings: IptvShareSettings, private va
 
     override fun rename(from: String, to: String, replace: Boolean) = ftp {
         if (replace && from != to) command("DELE $to")
+        if (!replace && from != to && size(to) != null) throw IptvShareException(IptvShareError.OTHER)
         val first = command("RNFR $from")
         if (first.code != 350) throw failure(first, IptvShareError.FOLDER_NOT_FOUND)
         val second = command("RNTO $to")

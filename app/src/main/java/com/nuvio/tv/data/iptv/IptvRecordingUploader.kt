@@ -19,7 +19,7 @@ import kotlinx.coroutines.withContext
 
 enum class IptvUploadResult { DONE, PENDING, LOST }
 
-data class IptvUploadOutcome(val result: IptvUploadResult, val bytes: Long, val error: IptvShareError? = null)
+data class IptvUploadOutcome(val result: IptvUploadResult, val bytes: Long, val error: IptvShareError? = null, val remote: String? = null)
 
 class IptvRecordingUploader(
     private val connector: IptvShareConnector,
@@ -60,14 +60,16 @@ class IptvRecordingUploader(
                 if (folder.isNotEmpty()) session.ensureFolder(folder)
                 val initial = pieces(spool)
                 if (session.length(partial) == null && finished()) {
-                    val existing = session.length(remote)
                     val end = initial.maxOfOrNull { it.piece.end }
-                    if (existing != null && (end == null || existing == end)) {
-                        spool.deleteRecursively()
+                    if (end == null) {
+                        val existing = session.length(remote) ?: return@withContext IptvUploadOutcome(IptvUploadResult.LOST, 0, IptvShareError.LOST)
                         uploaded = existing
-                        return@withContext IptvUploadOutcome(IptvUploadResult.DONE, existing)
+                        return@withContext IptvUploadOutcome(IptvUploadResult.DONE, existing, remote = remote)
                     }
-                    if (end == null) return@withContext IptvUploadOutcome(IptvUploadResult.LOST, 0, IptvShareError.LOST)
+                    found(session, remote, end)?.let { name ->
+                        uploaded = end
+                        return@withContext IptvUploadOutcome(IptvUploadResult.DONE, end, remote = name)
+                    }
                 }
                 if (!session.append) {
                     if (!finished()) {
@@ -80,7 +82,9 @@ class IptvRecordingUploader(
                     val total = RecordingUpload.whole(local.map { it.piece }, committed())
                         ?: return@withContext IptvUploadOutcome(IptvUploadResult.LOST, 0, IptvShareError.LOST)
                     checkFree(session, local, 0)
-                    val output = session.openWrite(partial, total).also { file = it }
+                    val target = free(session, remote, partial)
+                    val whole = RecordingFiles.partial(target)
+                    val output = session.openWrite(whole, total).also { file = it }
                     var size = 0L
                     uploaded = 0
                     for (source in local) {
@@ -99,10 +103,9 @@ class IptvRecordingUploader(
                     if (output.length != total) throw IOException("Remote size mismatch")
                     output.close()
                     file = null
-                    session.rename(partial, remote, true)
-                    spool.deleteRecursively()
+                    val name = publish(session, whole, target, total)
                     uploaded = total
-                    return@withContext IptvUploadOutcome(IptvUploadResult.DONE, total)
+                    return@withContext IptvUploadOutcome(IptvUploadResult.DONE, total, remote = name)
                 }
                 val output = session.openWrite(partial).also { file = it }
                 var size = output.length
@@ -120,10 +123,9 @@ class IptvRecordingUploader(
                             if (output.length != size) throw IOException("Remote size mismatch")
                             output.close()
                             file = null
-                            session.rename(partial, remote, true)
-                            spool.deleteRecursively()
+                            val name = publish(session, partial, remote, size)
                             uploaded = size
-                            return@withContext IptvUploadOutcome(IptvUploadResult.DONE, size)
+                            return@withContext IptvUploadOutcome(IptvUploadResult.DONE, size, remote = name)
                         }
                         RecordingUploadStep.Wait -> pause(pollMillis)
                         RecordingUploadStep.Lost -> return@withContext IptvUploadOutcome(IptvUploadResult.LOST, size, IptvShareError.LOST)
@@ -140,7 +142,7 @@ class IptvRecordingUploader(
                                 output.flush()
                                 val confirmed = output.length
                                 if (confirmed < size) throw IOException("Remote size behind")
-                                val removable = RecordingUpload.removable(local.map { it.piece }, confirmed, done)
+                                val removable = RecordingUpload.removable(local.map { it.piece }, confirmed, false)
                                 removable.forEach { local[it].file.delete() }
                                 checkFree(session, pieces(spool), size)
                             }
@@ -164,6 +166,46 @@ class IptvRecordingUploader(
             }
         }
         IptvUploadOutcome(IptvUploadResult.PENDING, uploaded, lastError)
+    }
+
+    private fun free(session: IptvShareSession, remote: String, own: String): String {
+        var name = remote
+        repeat(RecordingFiles.MAX_COPIES) {
+            if (open(session, name, own)) return name
+            name = RecordingFiles.next(name)
+        }
+        throw IptvShareException(IptvShareError.OTHER)
+    }
+
+    private fun publish(session: IptvShareSession, partial: String, remote: String, size: Long): String {
+        var name = remote
+        repeat(RecordingFiles.MAX_COPIES) {
+            if (open(session, name, partial)) {
+                try {
+                    session.rename(partial, name, false)
+                    return name
+                } catch (error: IOException) {
+                    if (session.length(partial) == null && session.length(name) == size) return name
+                    if (session.length(name) == null) throw error
+                }
+            }
+            name = RecordingFiles.next(name)
+        }
+        throw IptvShareException(IptvShareError.OTHER)
+    }
+
+    private fun open(session: IptvShareSession, name: String, own: String): Boolean =
+        session.length(name) == null && RecordingFiles.partial(name).let { it == own || session.length(it) == null }
+
+    private fun found(session: IptvShareSession, remote: String, size: Long): String? {
+        var name = remote
+        repeat(RecordingFiles.MAX_COPIES) {
+            val length = session.length(name)
+            if (length == size) return name
+            if (length == null && session.length(RecordingFiles.partial(name)) == null) return null
+            name = RecordingFiles.next(name)
+        }
+        return null
     }
 
     private fun checkFree(session: IptvShareSession, local: List<Local>, size: Long) {

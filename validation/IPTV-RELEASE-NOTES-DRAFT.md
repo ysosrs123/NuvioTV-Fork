@@ -707,6 +707,9 @@ Fixes from the night review of 10 October:
   lists sport channels for the full next 24 hours on large guides; category picks work
   across sources whatever the letter case; channel matching runs far fewer searches, so
   Sport loads faster; Stalker expiry dates use the portal's time zone.
+- Recordings never overwrite or delete an existing file with the same name on a network
+  share or in the Movies folder; the new recording is saved as " (2)", " (3)" and so on.
+  Deleting a recording only removes that recording's own file.
 
 ## Ready below the UI (screens pending)
 

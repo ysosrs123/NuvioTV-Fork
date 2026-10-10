@@ -93,6 +93,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 enum class IptvRecordRefusal {
     CONNECTION_LIMIT, NO_FREE_CONNECTION, LOW_STORAGE, PROGRAMME_ENDED, CHANNEL_UNAVAILABLE,
@@ -481,6 +482,7 @@ class IptvRecorder @Inject constructor(
                 if (wait <= 0) break
                 delay(minOf(wait, START_CHECK_MILLIS))
             }
+            val remote = folderNames(mutex.withLock { store.get(id)?.storage })
             mutex.withLock {
                 load()
                 val current = store.get(id)?.takeIf { it.status == RecordingStatus.SCHEDULED } ?: return
@@ -494,8 +496,8 @@ class IptvRecorder @Inject constructor(
                 }
                 val used = store.all().filter { it.id != current.id }.mapNotNull { it.file?.substringAfterLast('/')?.substringAfterLast('\\') }.toSet()
                 val name = RecordingFiles.name(current.channelName, current.title, now, ZoneId.systemDefault()) { candidate ->
-                    candidate in used || (place is IptvRecordingPlace.Local &&
-                        (File(place.directory, candidate).exists() || File(place.directory, RecordingFiles.partial(candidate)).exists()))
+                    candidate in used || candidate.lowercase(Locale.ROOT).let { it in remote || RecordingFiles.partial(it) in remote } ||
+                        (place is IptvRecordingPlace.Local && (File(place.directory, candidate).exists() || File(place.directory, RecordingFiles.partial(candidate)).exists()))
                 }
                 val path = when (place) {
                     is IptvRecordingPlace.Local -> File(place.directory, name).path
@@ -649,21 +651,31 @@ class IptvRecorder @Inject constructor(
             return
         }
         val result = try { upload.await() } catch (_: CancellationException) { null }
-        applyUpload(entry.id, result, spool, (link as? IptvMediaStoreConnector)?.published)
+        applyUpload(entry.id, result, spool, link)
     }
 
-    private suspend fun applyUpload(id: String, result: IptvUploadOutcome?, spool: File, media: Long? = null) = mutex.withLock {
+    private suspend fun applyUpload(id: String, result: IptvUploadOutcome?, spool: File, link: IptvShareConnector?) = mutex.withLock {
+        val media = (link as? IptvMediaStoreConnector)?.published
         if (store.get(id) == null) {
             spool.deleteRecursively()
-            if (result?.result == IptvUploadResult.DONE && media != null) targets.media.delete(media)
+            val remote = result?.remote
+            if (result?.result == IptvUploadResult.DONE) {
+                if (media != null) targets.media.delete(media)
+                else if (link != null && remote != null) scope.launch {
+                    try { link.connect().use { it.delete(remote) } } catch (error: Exception) { IptvLog.failure("recording remote delete", error) }
+                }
+            }
             publish()
             return@withLock
         }
         when {
             result == null || result.result == IptvUploadResult.PENDING -> Unit
-            result.result == IptvUploadResult.DONE -> update(id) {
-                it.copy(upload = false, bytes = result.bytes.takeIf { bytes -> bytes > 0 } ?: it.bytes,
-                    file = if (it.onMedia) media?.toString() else it.file)
+            result.result == IptvUploadResult.DONE -> {
+                update(id) {
+                    it.copy(upload = false, bytes = result.bytes.takeIf { bytes -> bytes > 0 } ?: it.bytes,
+                        file = if (it.onMedia) media?.toString() else result.remote ?: it.file)
+                }
+                spool.deleteRecursively()
             }
             else -> {
                 spool.deleteRecursively()
@@ -672,6 +684,21 @@ class IptvRecorder @Inject constructor(
         }
         IptvLog.info("recording upload ${result?.result ?: "STOPPED"}${result?.error?.let { " $it" }.orEmpty()}")
         publish()
+    }
+
+    private suspend fun folderNames(storage: String?): Set<String> {
+        val place = (targets.resolve(storage) as? IptvPlaceResult.Ready)?.place ?: return emptySet()
+        if (place is IptvRecordingPlace.Local) return emptySet()
+        val listing = scope.async {
+            when (place) {
+                is IptvRecordingPlace.Share -> place.connector.connect().use { it.list(place.settings.target.folder) }
+                is IptvRecordingPlace.Media -> place.target.names()
+                is IptvRecordingPlace.Local -> emptyList()
+            }
+        }
+        val names = try { withTimeoutOrNull(LISTING_MILLIS) { listing.await() } } catch (cancel: CancellationException) { listing.cancel(); throw cancel }
+            catch (error: Exception) { IptvLog.failure("recording names", error); null }
+        return names.orEmpty().mapTo(HashSet()) { it.lowercase(Locale.ROOT) }
     }
 
     private fun uploader(place: IptvRecordingPlace, connector: IptvShareConnector) =
@@ -711,7 +738,7 @@ class IptvRecorder @Inject constructor(
         val link = connector(place) ?: return
         val spool = targets.spool(id)
         val result = uploader(place, link).upload(spool, path, { Long.MAX_VALUE }, { true }, RETRY_PATIENCE_MILLIS)
-        applyUpload(id, result, spool, (link as? IptvMediaStoreConnector)?.published)
+        applyUpload(id, result, spool, link)
     }
 
     private suspend fun resolve(entry: IptvRecording): Target? {
@@ -830,8 +857,9 @@ class IptvRecorder @Inject constructor(
             targets.spool(entry.id).deleteRecursively()
             val path = entry.file ?: return true
             val share = (targets.resolve(entry.storage) as? IptvPlaceResult.Ready)?.place as? IptvRecordingPlace.Share ?: return true
+            val whole = entry.status.finished && !entry.upload
             scope.launch {
-                try { share.connector.connect().use { it.delete(RecordingFiles.partial(path)); it.delete(path) } }
+                try { share.connector.connect().use { it.delete(RecordingFiles.partial(path)); if (whole) it.delete(path) } }
                 catch (error: Exception) { IptvLog.failure("recording remote delete", error) }
             }
             return true
@@ -861,5 +889,6 @@ class IptvRecorder @Inject constructor(
         const val PROGRESS_MILLIS = 2_000L
         const val PERSIST_TICKS = 30
         const val START_CHECK_MILLIS = 30_000L
+        const val LISTING_MILLIS = 8_000L
     }
 }

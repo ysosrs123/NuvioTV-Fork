@@ -28,6 +28,7 @@ class FakeFtp(private val tls: SSLContext? = null, private val refuseReuse: Bool
     val files: MutableMap<String, ByteArray> = ConcurrentHashMap<String, ByteArray>()
     val folders: MutableSet<String> = ConcurrentHashMap.newKeySet<String>().apply { add("") }
     val commands = CopyOnWriteArrayList<String>()
+    @Volatile var renameOverwrites = false
     private val server = ServerSocket(0, 50, InetAddress.getLoopbackAddress())
     val port: Int get() = server.localPort
 
@@ -99,7 +100,7 @@ class FakeFtp(private val tls: SSLContext? = null, private val refuseReuse: Bool
                 "MKD" -> { val target = resolve(arg); if (target in folders || target.substringBeforeLast('/', "") !in folders) say("550 Exists") else { folders += target; say("257 \"$target\" created") } }
                 "DELE" -> if (files.remove(resolve(arg)) != null) say("250 Deleted") else say("550 Not found")
                 "RNFR" -> if (resolve(arg) in files) { from = resolve(arg); say("350 Ready") } else say("550 Not found")
-                "RNTO" -> { val to = resolve(arg); if (to in files) say("553 Exists") else { files[to] = files.remove(from!!)!!; say("250 Renamed") } }
+                "RNTO" -> { val to = resolve(arg); if (to in files && !renameOverwrites) say("553 Exists") else { files[to] = files.remove(from!!)!!; say("250 Renamed") } }
                 "REST" -> { rest = arg.toLong(); say("350 Restarting") }
                 "AVBL" -> if (avbl == null) say("502 Not implemented") else say("213 $avbl")
                 "MLSD", "NLST" -> {
@@ -168,6 +169,28 @@ class IptvFtpShareTest {
         assertTrue(fake.commands.contains("USER anonymous"))
     }
 
+    @Test fun renameNeverReplacesAnExistingFile() = runBlocking {
+        val fake = server(FakeFtp()).apply { renameOverwrites = true }
+        fake.folders += "TV"
+        val other = bytes(500, 3)
+        fake.files["TV/show.ts"] = other
+        fake.files["TV/x.part"] = bytes(10, 4)
+        val connector = IptvFtpConnector(settings(fake, "TV"), "pw")
+        connector.connect().use { session ->
+            try { session.rename("TV/x.part", "TV/show.ts", false); fail() } catch (_: IptvShareException) { }
+        }
+        assertArrayEquals(other, fake.files["TV/show.ts"])
+        val dir = temp.newFolder()
+        val data = bytes(800, 5)
+        File(dir, RecordingUpload.spoolName(0)).writeBytes(data)
+        val result = IptvRecordingUploader(connector, pause = { }, chunkBytes = 512, minimumFreeBytes = 0)
+            .upload(dir, "TV/show.ts", { Long.MAX_VALUE }, { true }, 60_000)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 800, remote = "TV/show (2).ts"), result)
+        assertArrayEquals(other, fake.files["TV/show.ts"])
+        assertArrayEquals(data, fake.files["TV/show (2).ts"])
+        assertTrue(fake.commands.none { it.startsWith("DELE") })
+    }
+
     @Test fun uploadAppendsResumesAndRenames() = runBlocking {
         val fake = server(FakeFtp(extended = false, machine = false))
         fake.folders += "TV"
@@ -179,10 +202,9 @@ class IptvFtpShareTest {
         fake.files["TV/show.ts.part"] = a.copyOf(1000)
         val result = IptvRecordingUploader(IptvFtpConnector(settings(fake, "TV"), "pw"), pause = { }, chunkBytes = 512, minimumFreeBytes = 0)
             .upload(dir, "TV/show.ts", { Long.MAX_VALUE }, { true }, 60_000)
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 4200), result)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 4200, remote = "TV/show.ts"), result)
         assertArrayEquals(a + b, fake.files["TV/show.ts"])
         assertNull(fake.files["TV/show.ts.part"])
-        assertFalse(dir.exists())
         assertTrue(fake.commands.any { it == "APPE TV/show.ts.part" })
         assertTrue(fake.commands.none { it.startsWith("STOR") })
         assertTrue(fake.commands.any { it == "PASV" })

@@ -50,6 +50,11 @@ class IptvMediaStoreTarget(private val files: IptvMediaFiles?) {
         return try { store.present(ids) } catch (error: Exception) { IptvLog.failure("media recordings check", error); emptySet() }
     }
 
+    fun names(): List<String> {
+        val store = files ?: return emptyList()
+        return try { store.entries(null).map { it.name } } catch (error: Exception) { IptvLog.failure("media recordings check", error); emptyList() }
+    }
+
     fun reader(id: Long): IptvRecordingReader? {
         val store = files ?: return null
         val size = try { store.size(id) } catch (error: Exception) { IptvLog.failure("media recording open", error); null }
@@ -95,6 +100,7 @@ private class IptvMediaStoreSession(private val files: IptvMediaFiles, private v
     override fun openWrite(path: String, total: Long): IptvShareFile {
         val name = RecordingMedia.displayName(path)
         dropPending()
+        connector.published = null
         guard { files.entries(name) }.filter { it.pending }.forEach { quietly { files.delete(it.id) } }
         val id = guard { files.create(name) }
         pendingId = id
@@ -109,7 +115,6 @@ private class IptvMediaStoreSession(private val files: IptvMediaFiles, private v
 
     override fun rename(from: String, to: String, replace: Boolean) {
         val id = pendingId ?: throw IptvShareException(IptvShareError.LOST)
-        if (replace) guard { files.entries(RecordingMedia.displayName(to)) }.filter { !it.pending && it.id != id }.forEach { quietly { files.delete(it.id) } }
         guard { files.publish(id) }
         pendingId = null
         connector.published = id
@@ -117,9 +122,8 @@ private class IptvMediaStoreSession(private val files: IptvMediaFiles, private v
 
     override fun delete(path: String): Boolean {
         RecordingMedia.id(path)?.let { return guard { files.delete(it) } }
-        val pending = RecordingMedia.pending(path)
-        val found = guard { files.entries(RecordingMedia.displayName(path)) }.filter { it.pending == pending }
-        return found.map { guard { files.delete(it.id) } }.any { it }
+        if (!RecordingMedia.pending(path)) return false
+        return guard { files.entries(RecordingMedia.displayName(path)) }.filter { it.pending }.map { guard { files.delete(it.id) } }.any { it }
     }
 
     override fun list(folder: String): List<String> = guard { files.entries(null) }.filter { !it.pending }.map { it.name }

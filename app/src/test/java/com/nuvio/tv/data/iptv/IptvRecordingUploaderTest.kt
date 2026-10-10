@@ -23,6 +23,8 @@ class FakeShare : IptvShareConnector {
     @Volatile var readOnly = false
     @Volatile var refusal: IptvShareError? = null
     @Volatile var append = true
+    @Volatile var overwrites = false
+    @Volatile var beforeRename: (() -> Unit)? = null
     val totals = ArrayList<Long>()
     var connects = 0
     var flushes = 0
@@ -61,9 +63,10 @@ class FakeShare : IptvShareConnector {
         }
         override fun rename(from: String, to: String, replace: Boolean) = synchronized(this@FakeShare) {
             check()
-            val data = files.remove(from) ?: throw IptvShareException(IptvShareError.FOLDER_NOT_FOUND)
-            if (!replace && to in files) throw IptvShareException(IptvShareError.OTHER)
-            files[to] = data
+            beforeRename?.invoke()
+            if (from !in files) throw IptvShareException(IptvShareError.FOLDER_NOT_FOUND)
+            if (!replace && !overwrites && to in files) throw IptvShareException(IptvShareError.OTHER)
+            files[to] = files.remove(from)!!
         }
         override fun delete(path: String): Boolean = synchronized(this@FakeShare) { check(); files.remove(path) != null }
         override fun list(folder: String): List<String> = synchronized(this@FakeShare) {
@@ -125,11 +128,12 @@ class IptvRecordingUploaderTest {
         val dir = spool(a, b)
         var free = -1L
         val result = uploader(share, free = { free = it }).upload(dir, "TV/show.ts", { Long.MAX_VALUE }, { true }, 60_000)
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 420), result)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 420, remote = "TV/show.ts"), result)
         assertArrayEquals(a + b, share.text("TV/show.ts"))
         assertNull(share.text("TV/show.ts.part"))
         assertTrue("TV" in share.folders)
-        assertFalse(dir.exists())
+        assertFalse(File(dir, RecordingUpload.spoolName(0)).exists())
+        assertTrue(File(dir, RecordingUpload.spoolName(300)).exists())
         assertEquals(Long.MAX_VALUE, free)
         assertTrue(share.flushes >= 2)
     }
@@ -151,9 +155,8 @@ class IptvRecordingUploaderTest {
         share.down = false
         share.writesBeforeDrop = -1
         val second = uploader(share, clock).upload(dir, "show.ts", { Long.MAX_VALUE }, { true }, 0)
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 456), second)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 456, remote = "show.ts"), second)
         assertArrayEquals(a + b, share.text("show.ts"))
-        assertFalse(dir.exists())
     }
 
     @Test fun reconnectsWithBackoffWhileRecordingAndGivesUpOnlyAfterPatience() = runBlocking {
@@ -192,10 +195,9 @@ class IptvRecordingUploaderTest {
             output.close()
             finished.set(true)
             val result = job.await()
-            assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 188L * 40), result)
+            assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 188L * 40, remote = "live.ts"), result)
         }
         assertArrayEquals(expected.toByteArray(), share.text("live.ts"))
-        assertFalse(dir.exists())
     }
 
     @Test fun missingRemoteDataIsReportedLost() = runBlocking {
@@ -211,11 +213,10 @@ class IptvRecordingUploaderTest {
         val data = bytes(64, 7)
         share.files["x.ts"] = data
         val dir = spool(data)
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 64), uploader(share).upload(dir, "x.ts", { Long.MAX_VALUE }, { true }, 60_000))
-        assertFalse(dir.exists())
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 64, remote = "x.ts"), uploader(share).upload(dir, "x.ts", { Long.MAX_VALUE }, { true }, 60_000))
         val empty = temp.newFolder()
         share.files["y.ts.part"] = data
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 64), uploader(share).upload(empty, "y.ts", { Long.MAX_VALUE }, { true }, 60_000))
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 64, remote = "y.ts"), uploader(share).upload(empty, "y.ts", { Long.MAX_VALUE }, { true }, 60_000))
         assertArrayEquals(data, share.text("y.ts"))
     }
 
@@ -241,12 +242,11 @@ class IptvRecordingUploaderTest {
             if (polls > 3) { share.down = false; share.writesBeforeDrop = -1 }
         }, now = { 0L }, chunkBytes = 64, minimumFreeBytes = 0)
         val result = uploader.upload(dir, "w.ts", { Long.MAX_VALUE }, { polls >= 3 }, 60_000)
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 450), result)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 450, remote = "w.ts"), result)
         assertFalse(early)
         assertArrayEquals(a + b, share.text("w.ts"))
         assertNull(share.text("w.ts.part"))
         assertEquals(listOf(450L, 450L), share.totals)
-        assertFalse(dir.exists())
     }
 
     @Test fun wholeFileWithAGapIsLostAndPatienceStillApplies() = runBlocking {
@@ -263,6 +263,59 @@ class IptvRecordingUploaderTest {
         assertEquals(IptvUploadResult.PENDING, pending.result)
         assertTrue(clock.get() >= 20_000)
         assertTrue(File(kept, RecordingUpload.spoolName(0)).exists())
+    }
+
+    @Test fun existingFileOfTheSameNameIsNeverOverwritten() = runBlocking {
+        val share = FakeShare().apply { overwrites = true }
+        val other = bytes(50, 20)
+        share.files["TV/BBC One - News - 10-Oct-26 1355.ts"] = other
+        share.files["TV/BBC One - News - 10-Oct-26 1355 (2).ts.part"] = bytes(10, 21)
+        val data = bytes(200, 22)
+        val dir = spool(data)
+        val result = uploader(share).upload(dir, "TV/BBC One - News - 10-Oct-26 1355.ts", { Long.MAX_VALUE }, { true }, 60_000)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 200, remote = "TV/BBC One - News - 10-Oct-26 1355 (3).ts"), result)
+        assertArrayEquals(other, share.text("TV/BBC One - News - 10-Oct-26 1355.ts"))
+        assertArrayEquals(data, share.text("TV/BBC One - News - 10-Oct-26 1355 (3).ts"))
+        assertEquals(10, share.text("TV/BBC One - News - 10-Oct-26 1355 (2).ts.part")!!.size)
+        assertNull(share.text("TV/BBC One - News - 10-Oct-26 1355.ts.part"))
+    }
+
+    @Test fun wholeFileTargetsPickAFreeNameBeforeWriting() = runBlocking {
+        val share = FakeShare().apply { append = false }
+        val other = bytes(70, 23)
+        share.files["w.ts"] = other
+        val data = bytes(130, 24)
+        val result = uploader(share).upload(spool(data), "w.ts", { Long.MAX_VALUE }, { true }, 60_000)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 130, remote = "w (2).ts"), result)
+        assertArrayEquals(other, share.text("w.ts"))
+        assertArrayEquals(data, share.text("w (2).ts"))
+        assertEquals(setOf("w.ts", "w (2).ts"), share.files.keys)
+    }
+
+    @Test fun nameTakenWhileUploadingMovesToTheNextCopy() = runBlocking {
+        val share = FakeShare()
+        val other = bytes(40, 25)
+        share.beforeRename = { share.files.putIfAbsent("r.ts", other); share.beforeRename = null }
+        val data = bytes(90, 26)
+        val result = uploader(share).upload(spool(data), "r.ts", { Long.MAX_VALUE }, { true }, 60_000)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 90, remote = "r (2).ts"), result)
+        assertArrayEquals(other, share.text("r.ts"))
+        assertArrayEquals(data, share.text("r (2).ts"))
+        assertNull(share.text("r.ts.part"))
+    }
+
+    @Test fun copyRenamedBeforeARestartIsFoundUnderItsNewName() = runBlocking {
+        val share = FakeShare()
+        val other = bytes(40, 27)
+        val data = bytes(90, 28)
+        share.files["r.ts"] = other
+        share.files["r (2).ts"] = bytes(60, 29)
+        share.files["r (3).ts"] = data
+        val dir = spool(data)
+        val result = uploader(share).upload(dir, "r.ts", { Long.MAX_VALUE }, { true }, 60_000)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 90, remote = "r (3).ts"), result)
+        assertEquals(3, share.files.size)
+        assertArrayEquals(other, share.text("r.ts"))
     }
 
     @Test fun fullShareWaitsWithoutWriting() = runBlocking {

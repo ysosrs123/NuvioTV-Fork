@@ -168,6 +168,8 @@ object RecordingFiles {
     private val STAMP = DateTimeFormatter.ofPattern("dd-MMM-yy HHmm", Locale.ENGLISH)
     private val RESERVED = setOf("CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$") + (1..9).flatMap { listOf("COM$it", "LPT$it") }
     private const val KEPT = "-_'&.,()!+"
+    private val COPY = Regex(" \\((\\d{1,6})\\)$")
+    const val MAX_COPIES = 100
 
     fun name(channel: String, title: String?, startMillis: Long, zone: ZoneId, taken: (String) -> Boolean = { false }): String {
         val stamp = STAMP.format(Instant.ofEpochMilli(startMillis).atZone(zone))
@@ -186,6 +188,25 @@ object RecordingFiles {
         while (over() && second.isNotEmpty()) second = shorten(second)
         while (over() && first.isNotEmpty()) first = shorten(first)
         return safe(join())
+    }
+
+    fun next(path: String): String {
+        val folder = path.substringBeforeLast('/', "")
+        val name = path.substringAfterLast('/')
+        val extension = if (name.endsWith(EXTENSION, ignoreCase = true)) name.takeLast(EXTENSION.length) else ""
+        val stem = name.dropLast(extension.length)
+        val match = COPY.find(stem)
+        val copy = match?.groupValues?.get(1)?.toIntOrNull()?.plus(1) ?: 2
+        val base = match?.let { stem.substring(0, it.range.first) } ?: stem
+        val cut = base.lastIndexOf(" - ")
+        var head = if (cut > 0) base.substring(0, cut) else ""
+        var tail = if (cut > 0) base.substring(cut + 3) else base
+        fun join() = listOf(head, tail).filter { it.isNotEmpty() }.joinToString(" - ") + " ($copy)$extension"
+        fun over() = join().let { it.length > MAX_NAME_CHARS || it.toByteArray(Charsets.UTF_8).size > MAX_NAME_BYTES }
+        while (over() && head.isNotEmpty()) head = shorten(head)
+        while (over() && tail.isNotEmpty()) tail = shorten(tail)
+        val result = safe(join().trimStart(' '))
+        return if (folder.isEmpty()) result else "$folder/$result"
     }
 
     fun partial(name: String): String = name + PARTIAL_SUFFIX

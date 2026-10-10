@@ -83,12 +83,11 @@ class IptvMediaStoreTargetTest {
         val dir = spool(a, b)
         val connector = target.connector()
         val result = uploader(connector).upload(dir, "News - 2026-10-07 1100 - 0f3c9a2e.ts", { Long.MAX_VALUE }, { true }, 60_000)
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 377), result)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 377, remote = "News - 2026-10-07 1100 - 0f3c9a2e.ts"), result)
         val id = requireNotNull(connector.published)
         assertEquals(listOf("News - 2026-10-07 1100 - 0f3c9a2e.ts"), files.visible().map { it.name })
         assertEquals(id, files.visible().single().id)
         assertArrayEquals(a + b, files.bytes(id))
-        assertFalse(dir.exists())
         assertEquals(setOf(id), target.present(listOf(id, 999L)))
         target.reader(id)!!.use { reader ->
             assertFalse(reader.network)
@@ -128,7 +127,7 @@ class IptvMediaStoreTargetTest {
         files.full = false
         val connector = IptvMediaStoreTarget(files).connector()
         val third = uploader(connector, clock).upload(dir, "a.ts", { Long.MAX_VALUE }, { true }, 0)
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 400), third)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 400, remote = "a.ts"), third)
         assertEquals(listOf(connector.published), files.visible().map { it.id })
     }
 
@@ -155,10 +154,38 @@ class IptvMediaStoreTargetTest {
         assertEquals(IptvUploadResult.DONE, uploader(first).upload(dir, "a.ts", { Long.MAX_VALUE }, { true }, 0).result)
         val again = spool(data)
         val second = IptvMediaStoreTarget(files).connector()
-        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 120), uploader(second).upload(again, "a.ts", { Long.MAX_VALUE }, { true }, 0))
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 120, remote = "a.ts"), uploader(second).upload(again, "a.ts", { Long.MAX_VALUE }, { true }, 0))
         assertEquals(first.published, second.published)
         assertEquals(1, files.rows.size)
-        assertFalse(again.exists())
+    }
+
+    @Test fun entryWithTheSameNameIsKeptAndTheCopyGetsTheNextName() = runBlocking {
+        val files = FakeMediaFiles(temp.newFolder())
+        val kept = files.create("BBC One - News - 10-Oct-26 1355.ts").also { files.publish(it); files.fill(it, bytes(30, 10)) }
+        val target = IptvMediaStoreTarget(files)
+        assertEquals(listOf("BBC One - News - 10-Oct-26 1355.ts"), target.names())
+        val connector = target.connector()
+        val result = uploader(connector).upload(spool(bytes(80, 11)), "BBC One - News - 10-Oct-26 1355.ts", { Long.MAX_VALUE }, { true }, 0)
+        assertEquals(IptvUploadOutcome(IptvUploadResult.DONE, 80, remote = "BBC One - News - 10-Oct-26 1355 (2).ts"), result)
+        val id = requireNotNull(connector.published)
+        assertNotEquals(kept, id)
+        assertEquals(30L, files.size(kept))
+        assertEquals("BBC One - News - 10-Oct-26 1355 (2).ts", files.rows[id]!!.name)
+        val session = connector.connect()
+        assertFalse(session.delete("BBC One - News - 10-Oct-26 1355.ts"))
+        assertEquals(30L, files.size(kept))
+        assertTrue(session.delete(id.toString()))
+        assertEquals(setOf(kept), files.rows.keys)
+    }
+
+    @Test fun publishingNeverRemovesOtherEntries() {
+        val files = FakeMediaFiles(temp.newFolder())
+        val kept = files.create("a.ts").also { files.publish(it) }
+        val session = IptvMediaStoreTarget(files).connector().connect()
+        session.openWrite("a.ts.part", 0).close()
+        session.rename("a.ts.part", "a.ts", true)
+        assertEquals(2, files.visible().size)
+        assertTrue(kept in files.rows)
     }
 
     @Test fun missingVolumeIsRetriedLikeAnUnreachableShare() = runBlocking {
