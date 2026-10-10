@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.iptv
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.R
@@ -14,11 +15,18 @@ import com.nuvio.tv.core.recording.IptvRecorder
 import com.nuvio.tv.core.recording.IptvRecordingAvailability
 import com.nuvio.tv.core.recording.IptvRecordingDeletion
 import com.nuvio.tv.core.server.IptvRecordingStreamServer
+import com.nuvio.tv.data.iptv.IptvLog
 import com.nuvio.tv.data.iptv.IptvRecording
 import com.nuvio.tv.data.iptv.IptvRecordingReader
 import com.nuvio.tv.data.iptv.IptvShareError
+import com.nuvio.tv.domain.model.WatchProgress
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,13 +52,14 @@ data class IptvRecordingsState(
     val playing: IptvRecordingPlayback? = null,
     val stream: IptvRecordingStream? = null,
     val message: Int? = null,
+    val preparing: Boolean = false,
 ) {
     val empty: Boolean get() = recording.isEmpty() && scheduled.isEmpty() && recorded.isEmpty()
 }
 
 class IptvRecordingPlayback(val recording: IptvRecording, val reader: IptvRecordingReader)
 
-class IptvRecordingStream(val id: String, val url: String, val title: String, val channel: String) {
+class IptvRecordingStream(val id: String, val url: String, val title: String, val channel: String, val resume: Boolean = false) {
     override fun toString() = "IptvRecordingStream(withheld)"
 }
 
@@ -65,13 +74,14 @@ class IptvRecordingsViewModel @Inject constructor(
     private val message = MutableStateFlow<Int?>(null)
     private val free = MutableStateFlow<IptvFreeSpace?>(null)
     private val stream = MutableStateFlow<IptvRecordingStream?>(null)
+    private val preparing = MutableStateFlow(false)
     private var server: IptvRecordingStreamServer? = null
 
-    private val shown = combine(playing, stream) { playing, stream -> playing to stream }
+    private val shown = combine(playing, stream, preparing) { playing, stream, preparing -> Triple(playing, stream, preparing) }
     private val upload = combine(recorder.uploading, recorder.uploadIssues) { uploading, issues -> uploading to issues }
 
     val state: StateFlow<IptvRecordingsState> = combine(profiles.activeProfileId.flatMapLatest { recorder.recordings(it) }, shown, message, free,
-        upload) { list, (playing, stream), message, free, (uploading, issues) ->
+        upload) { list, (playing, stream, preparing), message, free, (uploading, issues) ->
         val availability = recorder.availability(list)
         val notes = list.mapNotNull { entry ->
             RecordingNotes.upload(issues[entry.id] == IptvShareError.FULL, entry.status, entry.upload, entry.onMedia)?.let { entry.id to iptvRecordingNoteMessage(it) }
@@ -83,24 +93,34 @@ class IptvRecordingsViewModel @Inject constructor(
             playable = availability.filterValues { it == IptvRecordingAvailability.PLAYABLE }.keys,
             availability = availability, uploading = uploading, notes = notes,
             free = free, playing = playing?.takeIf { current -> list.any { it.id == current.recording.id } },
-            stream = stream?.takeIf { current -> list.any { it.id == current.id } }, message = message)
+            stream = stream?.takeIf { current -> list.any { it.id == current.id } }, message = message, preparing = preparing)
     }.flowOn(Dispatchers.IO).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), IptvRecordingsState())
 
     init { refreshFree() }
 
-    fun play(recording: IptvRecording, fullPlayer: Boolean = false) {
+    fun play(recording: IptvRecording, fullPlayer: Boolean = false, fromStart: Boolean = false) {
+        if (preparing.value) return
         viewModelScope.launch {
             val reader = withContext(Dispatchers.IO) { recorder.reader(recording) }
             if (reader == null) { message.value = R.string.iptv_recording_file_missing; return@launch }
             message.value = null
             val previous = server.also { server = null }
-            val started = if (fullPlayer || previous != null) withContext(Dispatchers.IO) {
-                previous?.let { runCatching { it.stop() } }
-                if (fullPlayer) IptvRecordingStreamServer.start(reader) else null
-            } else null
+            if (fullPlayer) preparing.value = true
+            val started = try {
+                if (fullPlayer || previous != null) withContext(Dispatchers.IO) {
+                    previous?.let { runCatching { it.stop() } }
+                    if (fullPlayer) {
+                        val playlist = try { recorder.playlist(recording, reader, IptvRecordingStreamServer.MEDIA) } catch (cancel: CancellationException) { throw cancel }
+                            catch (error: Exception) { IptvLog.failure("recording playlist", error); null }
+                        IptvRecordingStreamServer.start(reader, playlist)
+                    } else null
+                } else null
+            } finally { preparing.value = false }
             if (started != null) {
                 server = started
-                stream.value = IptvRecordingStream(recording.id, started.url, recording.title ?: recording.channelName, recording.channelName)
+                val position = if (fromStart) null else (recorder.all.value.firstOrNull { it.id == recording.id } ?: recording).resumeMillis
+                IptvRecordingResume.open(started.url, recording.id, position)
+                stream.value = IptvRecordingStream(recording.id, started.url, recording.title ?: recording.channelName, recording.channelName, position != null)
             } else {
                 playing.value = IptvRecordingPlayback(recording, reader)
                 screensaver.setPlaybackActive(true)
@@ -147,6 +167,42 @@ class IptvRecordingsViewModel @Inject constructor(
         if (playing.value != null) screensaver.setPlaybackActive(false)
         super.onCleared()
     }
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface IptvRecordingResumeEntryPoint {
+    fun iptvRecorder(): IptvRecorder
+}
+
+object IptvRecordingResume {
+    private class Opened(val id: String, @Volatile var positionMillis: Long?)
+    private val opened = LinkedHashMap<String, Opened>()
+
+    internal fun open(url: String, id: String, positionMillis: Long?) = synchronized(opened) {
+        opened.remove(url)
+        opened[url] = Opened(id, positionMillis)
+        while (opened.size > MAX_OPEN) opened.remove(opened.keys.first())
+    }
+
+    fun applies(url: String?): Boolean = url != null && synchronized(opened) { url in opened }
+
+    fun load(url: String): WatchProgress? {
+        val position = synchronized(opened) { opened[url]?.positionMillis } ?: return null
+        return WatchProgress(contentId = "", contentType = "movie", name = "", poster = null, backdrop = null, logo = null, videoId = "", season = null,
+            episode = null, episodeTitle = null, position = position, duration = 0, lastWatched = System.currentTimeMillis())
+    }
+
+    suspend fun save(context: Context, url: String, positionMillis: Long, durationMillis: Long) {
+        val entry = synchronized(opened) { opened[url] } ?: return
+        entry.positionMillis = com.nuvio.tv.core.iptv.RecordingResume.keep(positionMillis, durationMillis)
+        try {
+            EntryPointAccessors.fromApplication(context.applicationContext, IptvRecordingResumeEntryPoint::class.java).iptvRecorder()
+                .saveResume(entry.id, positionMillis, durationMillis)
+        } catch (cancel: CancellationException) { throw cancel } catch (error: Exception) { IptvLog.failure("recording resume save", error) }
+    }
+
+    private const val MAX_OPEN = 4
 }
 
 fun iptvRecordRefusalMessage(reason: IptvRecordRefusal): Int = when (reason) {

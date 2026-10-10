@@ -771,6 +771,11 @@ internal fun PlayerRuntimeController.saveWatchProgressInternal(position: Long, d
         scope.launch(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.NonCancellable) { com.nuvio.tv.ui.screens.iptv.IptvVodPlayerResume.save(context, url, position, duration) }
         return
     }
+    if (contentId.isNullOrEmpty() && com.nuvio.tv.ui.screens.iptv.IptvRecordingResume.applies(currentStreamUrl)) {
+        val url = currentStreamUrl
+        scope.launch(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.NonCancellable) { com.nuvio.tv.ui.screens.iptv.IptvRecordingResume.save(context, url, position, duration) }
+        return
+    }
     val parentContentId = contentId?.takeIf { it.isNotEmpty() } ?: return
     val parentContentType = contentType?.takeIf { it.isNotEmpty() } ?: return
 

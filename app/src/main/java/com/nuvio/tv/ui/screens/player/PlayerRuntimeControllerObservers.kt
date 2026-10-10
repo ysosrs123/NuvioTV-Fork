@@ -632,6 +632,10 @@ internal suspend fun PlayerRuntimeController.loadSavedProgressSuspend(season: In
         pendingResumeProgress = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { com.nuvio.tv.ui.screens.iptv.IptvVodPlayerResume.load(context, url) }
         return
     }
+    if (progressContentId.isNullOrEmpty() && com.nuvio.tv.ui.screens.iptv.IptvRecordingResume.applies(currentStreamUrl)) {
+        pendingResumeProgress = com.nuvio.tv.ui.screens.iptv.IptvRecordingResume.load(currentStreamUrl)
+        return
+    }
     if (!isCloudLibraryPlayback && progressContentId == null) return
 
     pendingResumeProgress = null

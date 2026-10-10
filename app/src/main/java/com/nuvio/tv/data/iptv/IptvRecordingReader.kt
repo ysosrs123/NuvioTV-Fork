@@ -76,10 +76,11 @@ class IptvShareReader(private val connector: IptvShareConnector, private val pat
         if (length == 0) return 0
         if (position >= length()) return -1
         if (position < windowStart || position >= windowStart + windowLength) {
+            val sequential = windowLength > 0 && position == windowStart + windowLength
             windowStart = position
             windowLength = 0
             var filled = 0
-            val wanted = minOf(windowBytes.toLong(), size - position).toInt()
+            val wanted = minOf((if (sequential) windowBytes else minOf(windowBytes, maxOf(length, JUMP_BYTES))).toLong(), size - position).toInt()
             while (filled < wanted) {
                 val count = attempt { opened().read(position + filled, window, filled, wanted - filled) }
                 if (count <= 0) break
@@ -116,6 +117,21 @@ class IptvShareReader(private val connector: IptvShareConnector, private val pat
     }
 
     override fun toString(): String = "IptvShareReader(withheld)"
+
+    private companion object {
+        const val JUMP_BYTES = 128 * 1024
+    }
+}
+
+fun IptvRecordingReader.window(position: Long, size: Int): ByteArray {
+    val buffer = ByteArray(size)
+    var filled = 0
+    while (filled < size) {
+        val count = read(position + filled, buffer, filled, size - filled)
+        if (count <= 0) break
+        filled += count
+    }
+    return if (filled == size) buffer else buffer.copyOf(filled)
 }
 
 class IptvRecordingDataSource(private val reader: IptvRecordingReader) : BaseDataSource(reader.network) {

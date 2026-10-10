@@ -22,6 +22,8 @@ import com.nuvio.tv.core.iptv.RecordingMedia
 import com.nuvio.tv.core.iptv.RecordingMediaState
 import com.nuvio.tv.core.iptv.RecordingParts
 import com.nuvio.tv.core.iptv.RecordingPlan
+import com.nuvio.tv.core.iptv.RecordingProbe
+import com.nuvio.tv.core.iptv.RecordingResume
 import com.nuvio.tv.core.iptv.RecordingRetry
 import com.nuvio.tv.core.iptv.RecordingSlot
 import com.nuvio.tv.core.iptv.RecordingSpan
@@ -30,6 +32,7 @@ import com.nuvio.tv.core.iptv.RecordingStop
 import com.nuvio.tv.core.iptv.RecordingStorage
 import com.nuvio.tv.core.iptv.RecordingText
 import com.nuvio.tv.core.iptv.RecordingTransitions
+import com.nuvio.tv.core.iptv.RecordingVodPlaylist
 import com.nuvio.tv.core.iptv.RecordingWindow
 import com.nuvio.tv.core.iptv.recordingAlarmAction
 import com.nuvio.tv.core.iptv.recordingConflicts
@@ -45,6 +48,7 @@ import com.nuvio.tv.data.iptv.IptvProfileAccess
 import com.nuvio.tv.data.iptv.IptvRecording
 import com.nuvio.tv.data.iptv.IptvPartsReader
 import com.nuvio.tv.data.iptv.IptvRecordingCopier
+import com.nuvio.tv.data.iptv.IptvRecordingIndex
 import com.nuvio.tv.data.iptv.IptvRecordingOutput
 import com.nuvio.tv.data.iptv.IptvRecordingProgress
 import com.nuvio.tv.data.iptv.IptvRecordingReader
@@ -63,6 +67,7 @@ import com.nuvio.tv.data.iptv.IptvUploadOutcome
 import com.nuvio.tv.data.iptv.IptvUploadResult
 import com.nuvio.tv.data.iptv.IptvXtreamClient
 import com.nuvio.tv.data.iptv.admissionAccount
+import com.nuvio.tv.data.iptv.window
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.time.ZoneId
@@ -130,6 +135,7 @@ class IptvRecorder @Inject constructor(
     }
 
     private val store = IptvRecordingStore(File(context.filesDir, "iptv/recordings.json"))
+    private val index = IptvRecordingIndex(File(context.filesDir, "iptv/recording-index"))
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { _, error -> IptvLog.failure("recorder", error) })
     private val mutex = Mutex()
     private val jobs = HashMap<String, Job>()
@@ -192,6 +198,29 @@ class IptvRecorder @Inject constructor(
             update(id) { if (it.playedAtMillis == null) it.copy(playedAtMillis = System.currentTimeMillis()) else it }
             publish()
         }
+    }
+
+    suspend fun saveResume(id: String, positionMillis: Long, durationMillis: Long) = withContext(Dispatchers.IO) {
+        val keep = RecordingResume.keep(positionMillis, durationMillis)
+        mutex.withLock {
+            load()
+            update(id) { it.copy(resumeMillis = keep, lengthMillis = durationMillis.takeIf { length -> length > 0 } ?: it.lengthMillis) }
+            publish()
+        }
+    }
+
+    fun playlist(recording: IptvRecording, reader: IptvRecordingReader, uri: String): String? {
+        val total = reader.length()
+        if (total <= 0) return null
+        val timeline = index.load(recording.id)?.takeIf { !it.probed || it.endOffset == total } ?: run {
+            val wall = (recording.finishedAtMillis ?: recording.stopMillis) - (recording.startedAtMillis ?: recording.startMillis)
+            RecordingProbe.timeline(total, wall.coerceAtLeast(0)) { offset, size -> reader.window(offset, size) }.also {
+                IptvLog.info("recording probed marks=${it.marks.size} cuts=${it.marks.count { mark -> mark.cut }}")
+                if (store.get(recording.id) != null) index.save(recording.id, it)
+            }
+        }
+        val segments = RecordingVodPlaylist.segments(timeline, total).takeIf { it.isNotEmpty() } ?: return null
+        return RecordingVodPlaylist.text(segments, uri)
     }
 
     suspend fun cancel(id: String): Boolean = withContext(Dispatchers.IO) {
@@ -550,8 +579,11 @@ class IptvRecorder @Inject constructor(
             var ticks = 0
             while (isActive) {
                 delay(PROGRESS_MILLIS)
-                if (++ticks % PERSIST_TICKS == 0) mutex.withLock {
-                    update(id) { it.copy(bytes = holder.bytes, gaps = holder.gaps, parts = if (upload == null) holder.parts.coerceIn(1, RecordingParts.MAX_PARTS) else 1) }
+                if (++ticks % PERSIST_TICKS == 0) {
+                    mutex.withLock {
+                        update(id) { it.copy(bytes = holder.bytes, gaps = holder.gaps, parts = if (upload == null) holder.parts.coerceIn(1, RecordingParts.MAX_PARTS) else 1) }
+                    }
+                    holder.clock.timeline(holder.committed)?.let { index.save(id, it) }
                 }
                 if ((store.get(id)?.stopMillis ?: Long.MAX_VALUE) <= System.currentTimeMillis()) stop(id, RecordingStop.ENDED)
                 publish()
@@ -592,6 +624,7 @@ class IptvRecorder @Inject constructor(
                 lease?.let { admission.release(it)?.let(admission::completeClose) }
                 output.close()
                 copied.set(true)
+                holder.clock.timeline(if (upload == null) holder.bytes else holder.committed)?.let { if (store.get(id) != null) index.save(id, it) }
                 val stop = synchronized(this@IptvRecorder) { stops[id] }
                 if (upload == null) finishLocal(entry, output, holder.bytes, failure, holder.gaps, stop)
                 else finishShare(entry, spool, upload, holder, failure, stop, link)
@@ -860,6 +893,7 @@ class IptvRecorder @Inject constructor(
     }
 
     private fun deleteFiles(entry: IptvRecording): Boolean {
+        index.delete(entry.id)
         if (entry.onMedia) {
             targets.spool(entry.id).deleteRecursively()
             val id = RecordingMedia.id(entry.file) ?: return true

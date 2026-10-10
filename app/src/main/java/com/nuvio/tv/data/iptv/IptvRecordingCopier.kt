@@ -1,5 +1,6 @@
 package com.nuvio.tv.data.iptv
 
+import com.nuvio.tv.core.iptv.RecordingClock
 import com.nuvio.tv.core.iptv.RecordingFailure
 import com.nuvio.tv.core.iptv.RecordingPlaylist
 import com.nuvio.tv.core.iptv.RecordingPlaylistParser
@@ -37,6 +38,7 @@ class IptvRecordingProgress {
         internal set
     @Volatile var parts: Int = 1
         internal set
+    val clock = RecordingClock()
 }
 
 data class IptvRecordingCopy(val bytes: Long, val gaps: Int, val failure: RecordingFailure?, val parts: Int = 1)
@@ -65,10 +67,12 @@ class IptvRecordingCopier(
         fun write(buffer: ByteArray, length: Int) {
             if (length <= 0) return
             if (progress.bytes == 0L) checkSpace()
+            val start = output.bytes
             try { output.write(buffer, 0, length, split = !hls) } catch (full: IptvRecordingPartFullException) {
                 progress.bytes = output.bytes
                 throw full
             } catch (_: IOException) { throw RecordingStreamException(RecordingFailure.STORAGE_ERROR) }
+            finally { (output.bytes - start).toInt().takeIf { it > 0 }?.let { progress.clock.feed(start, buffer, 0, it) } }
             progress.bytes = output.bytes
             progress.parts = output.parts
             if (!hls) progress.committed = output.bytes
@@ -83,9 +87,11 @@ class IptvRecordingCopier(
 
         fun commit() { progress.committed = output.bytes }
 
+        fun cut() = progress.clock.cut(output.bytes)
+
         fun rollback(position: Long) {
             if (position >= progress.bytes) return
-            if (output.rollback(position)) progress.bytes = output.bytes
+            if (output.rollback(position)) { progress.bytes = output.bytes; progress.clock.rollback(output.bytes) }
         }
 
         fun sync() = output.sync()
@@ -112,6 +118,7 @@ class IptvRecordingCopier(
         progress.bytes = output.bytes
         progress.committed = output.bytes
         progress.parts = output.parts
+        progress.clock.cut(output.bytes)
         val cursor = RecordingSegmentCursor()
         var failure: RecordingFailure? = null
         output.use {
@@ -167,6 +174,7 @@ class IptvRecordingCopier(
         sink.hls = false
         val offset = syncOffset(source)
         if (offset > 0) source.skip(offset)
+        sink.cut()
         val buffer = ByteArray(COPY_BUFFER)
         while (true) {
             if (deadline.reached || now() >= deadline.stopAtMillis) return@call Finished(false)
@@ -199,9 +207,10 @@ class IptvRecordingCopier(
         while (!deadline.reached && now() < deadline.stopAtMillis) {
             val media = playlist as? RecordingPlaylist.Media ?: throw RecordingStreamException(RecordingFailure.UNSUPPORTED_STREAM)
             val step = cursor.next(media)
-            if (step.gap) progress.gaps += 1
+            if (step.gap) { progress.gaps += 1; sink.cut() }
             for (segment in step.segments) {
                 if (deadline.reached || now() >= deadline.stopAtMillis) return false
+                if (segment.discontinuity) sink.cut()
                 append(segment, sink, deadline)
                 if (deadline.reached) return false
                 cursor.appended(segment)

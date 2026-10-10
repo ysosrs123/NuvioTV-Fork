@@ -10,8 +10,9 @@ internal fun playerControlAvailability(
     appliedTunneling: Boolean = false
 ): Set<PlayerControlAction> = buildSet {
     addAll(listOf(PlayerControlAction.PLAY_PAUSE, PlayerControlAction.STATS,
-        PlayerControlAction.SOURCES, PlayerControlAction.MORE,
-        PlayerControlAction.ENGINE, PlayerControlAction.WATCH_PARTY, PlayerControlAction.INFO))
+        PlayerControlAction.SOURCES, PlayerControlAction.MORE, PlayerControlAction.ENGINE))
+    if (!com.nuvio.tv.ui.screens.iptv.IptvRecordingResume.applies(state.currentStreamUrl)) add(PlayerControlAction.WATCH_PARTY)
+    add(PlayerControlAction.INFO)
     if (state.externalPlayerAvailable) add(PlayerControlAction.EXTERNAL)
     if (!timeline.isLive && timeline.duration > 0L) add(PlayerControlAction.RESTART)
     if (state.currentSeason != null && state.currentEpisode != null) add(PlayerControlAction.EPISODES)

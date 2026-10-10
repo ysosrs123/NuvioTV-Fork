@@ -1320,7 +1320,7 @@ private fun PlaybackNavHost(
                     navController.popBackStack()
                 },
                 onPlay = { stream -> navController.navigate(Screen.Player.createRoute(streamUrl = stream.url, title = stream.title,
-                    streamName = stream.channel, filename = stream.title + ".ts", startFromBeginning = true)) }) }
+                    streamName = stream.channel, filename = stream.title + ".ts", startFromBeginning = !stream.resume)) }) }
         }
         composable(Screen.IptvVod.route, arguments = listOf(navArgument("kind") { type = NavType.StringType })) {
             com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvVodBrowseScreen(onBack = { navController.popBackStack() },

@@ -7,6 +7,7 @@ import com.nuvio.tv.core.iptv.RecordingSlot
 import com.nuvio.tv.core.iptv.RecordingSpan
 import com.nuvio.tv.core.iptv.RecordingStatus
 import com.nuvio.tv.core.iptv.RecordingText
+import com.nuvio.tv.core.iptv.RecordingTimeline
 import com.nuvio.tv.core.iptv.RecordingTransitions
 import com.nuvio.tv.core.iptv.RecordingWindow
 import java.io.File
@@ -24,12 +25,14 @@ data class IptvRecording(
     val createdAtMillis: Long, val startedAtMillis: Long? = null, val finishedAtMillis: Long? = null,
     val storage: String? = null, val storageLabel: String? = null, val parts: Int = 1, val upload: Boolean = false,
     val playedAtMillis: Long? = null, val fixtureKey: String? = null,
+    val resumeMillis: Long? = null, val lengthMillis: Long? = null,
 ) {
     init {
         require(id.matches(Regex("[A-Za-z0-9-]{8,64}")) && profileId >= 0 && stopMillis > startMillis && bytes >= 0 && gaps >= 0)
         require(parts in 1..RecordingParts.MAX_PARTS && RecordingLocations.valid(storage) && (storageLabel?.length ?: 0) <= 240)
         require(channelId.isNotEmpty() && channelId.length <= 1024 && accountId.isNotEmpty() && accountId.length <= 80)
         require((fixtureKey?.length ?: 0) <= 400)
+        require((resumeMillis ?: 0) >= 0 && (lengthMillis ?: 0) >= 0)
     }
     val source: IptvSourceRef get() = IptvSourceRef(profileId, sourceId)
     val window: RecordingWindow get() = RecordingWindow(startMillis, stopMillis)
@@ -144,6 +147,7 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
         if (entry.parts != 1) put("parts", entry.parts)
         if (entry.upload) put("upload", true)
         putOpt("played", entry.playedAtMillis); putOpt("fixture", entry.fixtureKey)
+        putOpt("resume", entry.resumeMillis); putOpt("length", entry.lengthMillis)
     }
 
     private fun decode(json: JSONObject) = IptvRecording(
@@ -157,6 +161,7 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
         createdAtMillis = json.getLong("created"), startedAtMillis = json.number("started"), finishedAtMillis = json.number("finished"),
         storage = json.text("storage"), storageLabel = json.text("storageLabel"), parts = json.optInt("parts", 1), upload = json.optBoolean("upload", false),
         playedAtMillis = json.number("played"), fixtureKey = json.text("fixture")?.takeIf { it.length <= 400 },
+        resumeMillis = json.number("resume")?.takeIf { it >= 0 }, lengthMillis = json.number("length")?.takeIf { it >= 0 },
     ).also { IptvSourceRef(it.profileId, it.sourceId) }
 
     private fun JSONObject.text(key: String): String? = if (has(key) && !isNull(key)) getString(key) else null
@@ -165,5 +170,33 @@ class IptvRecordingStore(private val file: File, private val maxEntries: Int = 2
     private companion object {
         const val VERSION = 1
         const val MAX_FILE_BYTES = 16L * 1024 * 1024
+    }
+}
+
+class IptvRecordingIndex(private val directory: File) {
+    @Synchronized fun load(id: String): RecordingTimeline? = try {
+        file(id)?.takeIf { it.isFile && it.length() <= MAX_FILE_BYTES }?.readText()?.let(RecordingTimeline::decode)
+    } catch (error: Exception) {
+        IptvLog.failure("recording index read", error)
+        null
+    }
+
+    @Synchronized fun save(id: String, timeline: RecordingTimeline) {
+        val target = file(id) ?: return
+        try {
+            if (!directory.isDirectory && !directory.mkdirs()) throw IOException("Recording index folder unavailable")
+            val temporary = File(directory, target.name + ".tmp")
+            temporary.writeText(timeline.encode())
+            if (!temporary.renameTo(target)) { temporary.delete(); throw IOException("Recording index could not be saved") }
+        } catch (error: Exception) { IptvLog.failure("recording index save", error) }
+    }
+
+    @Synchronized fun delete(id: String) { file(id)?.delete() }
+
+    private fun file(id: String): File? = if (id.matches(ID)) File(directory, "$id.idx") else null
+
+    private companion object {
+        val ID = Regex("[A-Za-z0-9-]{8,64}")
+        const val MAX_FILE_BYTES = 2L * 1024 * 1024
     }
 }

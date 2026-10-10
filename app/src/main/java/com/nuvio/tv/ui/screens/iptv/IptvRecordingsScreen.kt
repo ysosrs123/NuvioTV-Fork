@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.*
@@ -54,6 +55,7 @@ import androidx.media3.ui.PlayerView
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.RecordingResume
 import com.nuvio.tv.core.iptv.RecordingStatus
 import com.nuvio.tv.core.recording.IptvRecordingAvailability
 import com.nuvio.tv.data.iptv.IptvLog
@@ -122,6 +124,7 @@ fun IptvRecordingsScreen(onBack: () -> Unit, onPlay: ((IptvRecordingStream) -> U
                         else -> stringResource(R.string.iptv_recordings_free, size)
                     }, style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextSecondary)
                 }
+                if (state.preparing) Text(stringResource(R.string.iptv_ui18_recording_preparing), style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextSecondary)
                 state.message?.let { Text(stringResource(it), style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.Error) }
             }
             LazyColumn(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(bottom = 32.dp)) {
@@ -156,7 +159,11 @@ fun IptvRecordingsScreen(onBack: () -> Unit, onPlay: ((IptvRecordingStream) -> U
             val focus = remember { FocusRequester() }
             LaunchedEffect(Unit) { withFrameNanos { }; runCatching { focus.requestFocus() } }
             Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).focusRequester(focus), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                if (playable) RecordingOption(stringResource(R.string.iptv_recording_play), Icons.Filled.PlayArrow) { options = null; viewModel.play(recording, fullPlayer) }
+                val resume = recording.resumeMillis
+                if (playable && resume != null) {
+                    RecordingOption(stringResource(R.string.iptv_vod_browse_resume, elapsed(resume)), Icons.Filled.PlayArrow) { options = null; viewModel.play(recording, fullPlayer) }
+                    RecordingOption(stringResource(R.string.iptv_vod_browse_from_start), Icons.Filled.Replay) { options = null; viewModel.play(recording, fullPlayer, fromStart = true) }
+                } else if (playable) RecordingOption(stringResource(R.string.iptv_recording_play), Icons.Filled.PlayArrow) { options = null; viewModel.play(recording, fullPlayer) }
                 if (recording.status == RecordingStatus.RECORDING) RecordingOption(stringResource(R.string.iptv_recording_stop), Icons.Filled.Stop) {
                     options = null; viewModel.stop(recording)
                 }
@@ -246,7 +253,7 @@ private fun RecordingLine(recording: IptvRecording, availability: IptvRecordingA
             style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
         if (recording.status == RecordingStatus.RECORDING) {
             ProgressLine(((now - start).toFloat() / (recording.stopMillis - start).coerceAtLeast(1)), Modifier.fillMaxWidth(.5f))
-        }
+        } else if (recording.status.finished) RecordingResume.fraction(recording.resumeMillis, recording.lengthMillis)?.let { ProgressLine(it, Modifier.fillMaxWidth(.5f)) }
     }
 }
 

@@ -752,6 +752,16 @@ Changes after the 11 October device test:
   catch-up show the history mark.
 - Guide: Rewind and Fast-forward jump 3 hours; Back returns to now; the time bar shows the
   day when you are looking at another day.
+- Recordings show their real length on the timebar, even when the recording had network
+  drops or a timestamp jump. They play through a short playlist of the file, so long seeks
+  are quick and land in the right place, also on a network share. Recordings made before
+  this update are measured once when first opened ("Preparing the recording…"); seeks in
+  those can be a few seconds out.
+- Recordings resume where you left off; "Play from start" is in the recording's options,
+  and recordings you have started show how far you've watched. Positions stay with the
+  recording and are not synced anywhere.
+- The watch party button no longer appears when playing recordings (it stays for IPTV
+  movies and series).
 
 ## Ready below the UI (screens pending)
 
