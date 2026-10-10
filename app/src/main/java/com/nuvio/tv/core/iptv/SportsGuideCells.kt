@@ -28,7 +28,7 @@ object SportsGuideCells {
     const val SOON_MILLIS = 30L * 60 * 1000
     private val BADGES = mapOf("a-league-men" to "ALM", "a-league-women" to "ALW", "super-rugby" to "SRP", "big-bash" to "BBL",
         "epl" to "EPL", "champions-league" to "UCL", "la-liga" to "LIGA", "serie-a" to "SA", "bundesliga" to "BUN", "pga" to "PGA",
-        "nascar-cup" to "NAS", "urc" to "URC")
+        "nascar-cup" to "NAS", "urc" to "URC", "college-football" to "CFB")
     private val ALIASES by lazy {
         SportsLeagues.ALL.flatMap { league -> (league.aliases + league.name).map { SportsGuide.normalise(it) to league.id } }
             .filter { it.first.length >= 2 }.sortedByDescending { it.first.length }

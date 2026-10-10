@@ -147,9 +147,9 @@ internal fun scoringMoment(kind: MomentKind): Boolean = kind == MomentKind.GOAL 
 
 internal fun sportsMarkers(summary: SportsSummary?, fixture: SportsFixture?): List<Pair<SummaryMoment, SportsMarker>> = when {
     fixture == null -> emptyList()
-    summary == null -> SportsEvents.moments(fixture).mapNotNull { moment -> SportsMarkers.estimate(moment, fixture.sport, fixture.startMillis)?.let { moment to it } }
+    summary == null -> SportsEvents.moments(fixture).mapNotNull { moment -> SportsMarkers.estimate(moment, fixture.sport, fixture.startMillis, league = fixture.league)?.let { moment to it } }
         .sortedBy { it.second.millis }
-    else -> SportsMarkers.all(summary, fixture.startMillis).sortedBy { it.second.millis }
+    else -> SportsMarkers.all(summary, fixture.startMillis, league = fixture.league).sortedBy { it.second.millis }
 }
 
 internal fun endsNow(summary: SportsSummary, sport: String): Pair<Int, Int>? {
@@ -307,7 +307,7 @@ private fun centreItems(tab: CentreTab, fixture: SportsFixture, summary: SportsS
             val moments = summary.moments.filter { it.kind != MomentKind.SUBSTITUTION || summary.moments.size <= 20 }
             if (moments.isNotEmpty()) add(CentreItem.Heading(R.string.iptv_sport5p_key_moments, "h:moments"))
             moments.asReversed().forEachIndexed { i, moment ->
-                add(CentreItem.Moment(moment, SportsMarkers.estimate(moment, summary.sport, fixture.startMillis), team(moment.side), "m:$i"))
+                add(CentreItem.Moment(moment, SportsMarkers.estimate(moment, summary.sport, fixture.startMillis, league = fixture.league), team(moment.side), "m:$i"))
             }
             if (stats.isNotEmpty()) { add(CentreItem.Heading(R.string.iptv_sport5p_team_stats, "h:stats")); addAll(stats.take(4)) }
             if (pointsText != null) { add(CentreItem.Heading(R.string.iptv_sport5p_ends_now, "h:ends")); add(CentreItem.Line(pointsText, null, true, "ends")) }

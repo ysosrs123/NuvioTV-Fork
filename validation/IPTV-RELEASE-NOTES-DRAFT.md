@@ -550,6 +550,8 @@ Sport data (checked against a real capture with NHL and golf live, 10 October):
   scoring plays and recent plays appear in Game Centre; finished F1 sessions carry the top
   three; golf rows give clean columns including tee times; league logos prefer the
   variant made for dark backgrounds.
+- Sport can follow NBL, WNBA and College Football (off by default); NBL and WNBA timelines
+  use 10-minute quarters.
 
 ## Ready below the UI (screens pending)
 

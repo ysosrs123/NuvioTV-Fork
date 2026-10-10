@@ -15,13 +15,13 @@ object SportsGuide {
     private val COMPETITIONS = listOf(
         "premier league", "champions league", "europa league", "conference league", "a league", "a leagues", "la liga", "serie a", "bundesliga",
         "laliga", "ligue 1", "eredivisie", "primeira liga", "mls", "world cup", "fa cup", "efl", "copa", "libertadores", "brasileirao", "campeonato",
-        "nrl", "afl", "aflw", "nrlw", "nfl", "nba", "wnba", "nhl", "mlb", "ufc", "formula 1", "formula one", "f1", "grand prix",
+        "nrl", "afl", "aflw", "nrlw", "nfl", "nba", "nbl", "wnba", "nhl", "mlb", "ufc", "formula 1", "formula one", "f1", "grand prix",
         "motogp", "supercars", "nascar", "indycar", "super rugby", "six nations", "rugby championship", "state of origin",
         "test match", "the ashes", "big bash", "bbl", "wbbl", "ipl", "odi", "t20", "wimbledon", "us open", "australian open",
         "roland garros", "french open", "atp", "wta", "tour de france", "giro", "vuelta", "olympic", "olympics", "paralympic",
         "super bowl", "world series", "stanley cup", "ryder cup", "pga", "lpga", "liv golf", "melbourne cup",
         "derby", "match of the day", "monday night football", "sunday night football", "thursday night football",
-        "ncaa", "college football", "college basketball", "wrestlemania").map(::normalise)
+        "ncaa", "ncaaf", "college football", "college basketball", "wrestlemania").map(::normalise)
     private val EXCLUDED_TITLE = listOf(
         "highlights", "highlight", "preview", "previews", "review", "magazine", "news", "betting", "odds", "tips", "tipping",
         "podcast", "talk", "debate", "documentary", "resumen", "resumo", "zusammenfassung", "sintesi", "melhores momentos", "resume",

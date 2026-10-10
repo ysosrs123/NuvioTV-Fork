@@ -476,25 +476,27 @@ object SportsMarkers {
         "ice-hockey" to Shape(20.0, 35.0, listOf(18.0, 18.0), true, 5.0, 9.0, 2.0),
         "australian-football" to Shape(30.0, 30.0, listOf(6.0, 20.0, 6.0), false, 10.0, 10.0, 5.0),
     )
+    private val TEN_MINUTE_QUARTERS = Shape(10.0, 27.0, listOf(2.0, 15.0, 2.0), true, 5.0, 12.0, 2.0)
+    private val LEAGUE_SHAPES = mapOf("nbl" to TEN_MINUTE_QUARTERS, "wnba" to TEN_MINUTE_QUARTERS)
 
-    fun all(summary: SportsSummary, startMillis: Long, windowStart: Long? = null, windowEnd: Long? = null): List<Pair<SummaryMoment, SportsMarker>> =
-        summary.moments.mapNotNull { moment -> estimate(moment, summary.sport, startMillis, windowStart, windowEnd)?.let { moment to it } }
+    fun all(summary: SportsSummary, startMillis: Long, windowStart: Long? = null, windowEnd: Long? = null, league: String? = null): List<Pair<SummaryMoment, SportsMarker>> =
+        summary.moments.mapNotNull { moment -> estimate(moment, summary.sport, startMillis, windowStart, windowEnd, league)?.let { moment to it } }
 
-    fun estimate(moment: SummaryMoment, sport: String, startMillis: Long, windowStart: Long? = null, windowEnd: Long? = null): SportsMarker? {
+    fun estimate(moment: SummaryMoment, sport: String, startMillis: Long, windowStart: Long? = null, windowEnd: Long? = null, league: String? = null): SportsMarker? {
         val marker = moment.wallclockMillis?.let { SportsMarker(it, true) }
-            ?: minutes(sport, moment.period, moment.clock, moment.bottom, sport in ELAPSED_PLAYS)?.let { SportsMarker(startMillis + Math.round(it * 60_000), false) } ?: return null
+            ?: minutes(sport, moment.period, moment.clock, moment.bottom, sport in ELAPSED_PLAYS, league)?.let { SportsMarker(startMillis + Math.round(it * 60_000), false) } ?: return null
         if (windowStart == null || windowEnd == null || windowEnd < windowStart) return marker
         return marker.copy(millis = marker.millis.coerceIn(windowStart, windowEnd))
     }
 
-    fun minutes(sport: String, period: Int?, clock: String?, bottom: Boolean? = null, elapsed: Boolean = false): Double? {
+    fun minutes(sport: String, period: Int?, clock: String?, bottom: Boolean? = null, elapsed: Boolean = false, league: String? = null): Double? {
         val seconds = clock?.let(::seconds)
         return when (sport) {
             "soccer" -> halves(period, seconds, clock?.let(::base), 45.0, 15.0, 15.0, 5.0)
             "rugby-league" -> halves(period, seconds, clock?.let(::base), 40.0, 10.0, 5.0, 5.0)
             "rugby" -> halves(period, seconds, clock?.let(::base), 40.0, 15.0, 10.0, 5.0)
             "baseball" -> period?.takeIf { it >= 1 }?.let { (it - 1) * 18.0 + if (bottom == true) 9.0 + 4.5 else 4.5 }
-            else -> SHAPES[sport]?.let { quarters(it, period ?: return null, seconds, elapsed) }
+            else -> (league?.let(LEAGUE_SHAPES::get) ?: SHAPES[sport])?.let { quarters(it, period ?: return null, seconds, elapsed) }
         }
     }
 

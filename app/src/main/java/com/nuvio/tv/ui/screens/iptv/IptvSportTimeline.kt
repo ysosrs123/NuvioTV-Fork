@@ -101,9 +101,10 @@ internal object SportsStrip {
     fun build(fixture: SportsFixture, summary: SportsSummary?): Strip? {
         val shape = SHAPES[fixture.sport] ?: return null
         val sport = fixture.sport
+        val league = fixture.league
         val segments = (1..shape.periods).map { period ->
             val (from, to) = shape.clocks(period)
-            (SportsMarkers.minutes(sport, period, from) ?: return null) to (SportsMarkers.minutes(sport, period, to) ?: return null)
+            (SportsMarkers.minutes(sport, period, from, league = league) ?: return null) to (SportsMarkers.minutes(sport, period, to, league = league) ?: return null)
         }
         val total = segments.last().second.takeIf { it > 0 } ?: return null
         val period = summary?.period ?: fixture.period
@@ -111,10 +112,10 @@ internal object SportsStrip {
         val progress = when {
             period == null -> null
             period > shape.periods -> total
-            else -> SportsMarkers.minutes(sport, period, clock)?.coerceIn(0.0, total)
+            else -> SportsMarkers.minutes(sport, period, clock, league = league)?.coerceIn(0.0, total)
         }
         val moments = if (sport in TICKS) (summary?.moments ?: SportsEvents.moments(fixture)).filter { it.kind in MOMENTS }.mapNotNull { moment ->
-            SportsMarkers.minutes(sport, moment.period, moment.clock, elapsed = sport == "ice-hockey" && summary?.moments != null)?.coerceIn(0.0, total)?.let { Triple(it, moment.kind, moment.side) }
+            SportsMarkers.minutes(sport, moment.period, moment.clock, elapsed = sport == "ice-hockey" && summary?.moments != null, league = league)?.coerceIn(0.0, total)?.let { Triple(it, moment.kind, moment.side) }
         } else emptyList()
         return Strip(segments, total, progress, moments.map { it.first to it.second }, moments.map { it.third }, shape.end ?: SportsFixtureText.periodLabel(sport, shape.periods))
     }

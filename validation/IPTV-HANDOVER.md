@@ -35,7 +35,7 @@ series open after episodes and TMDB load, up to ~45 s worst case; Play not Resum
 provider-only titles; library/watched for `iptv-vod:` ids excluded from sync), guide reads
 outside write transactions during imports, per-account refresh locks (max 2 sources).
 Follow-ups not done: show NHL goalies (`SportsSummary.goalies`) and F1 `RaceSession.top`
-in the UI; NBL and college football are parsed but not in `SportsLeagues.ALL`.
+in the UI; Sport panel redesign (item 27) waits for the user's choice of direction.
 
 Next, in order:
 1. Give the user the CI run link for the fixes of the second 9 October pass; take their
@@ -367,6 +367,11 @@ The 7b list passed apart from the items below (all fixed in code on 10 October, 
 26. Main Settings → Live TV → Sport → TheSportsDB key: the Show button is not aligned with
     the key field, and the dialog and its field are see-through (dialogs outside Live TV
     miss the opaque floor).
+27. (10 October) Sport panels look almost identical to another app's (screenshots compared);
+    redesign wanted. Three directions on a design canvas (A scorebug bands, B ledger, C
+    momentum); waiting for the user's choice before building.
+28. (10 October) Include every league we parse: NBL, WNBA and College Football added (off
+    by default); NBL/WNBA use 4×10-minute quarters.
 Further screenshots (10 October): golf hero with uneven score positions and empty space; the
 IPTV series page (MobLand). New ESPN capture (10 October morning, NHL and PGA live) being
 turned into trimmed real fixtures.
