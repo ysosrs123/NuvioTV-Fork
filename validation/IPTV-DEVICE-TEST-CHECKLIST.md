@@ -1,6 +1,6 @@
 # Nuvio IPTV — device test checklist (build `01f19bbed`, run 38017089840)
 
-For this build start with section 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
+For this build start with section 7d, then 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -83,6 +83,30 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 11. Press Home on the remote with Game Centre open: logcat should show sports requests
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
+
+## 7d. Fixes from the 10 October pass (build after `9172949f7`)
+1. Stream info widget in the short stacked size: two labelled columns (video, audio,
+   bitrate, buffer); other sizes use their space.
+2. Guide info panel: long description fills down to the hint line; long titles wrap to two
+   lines in slightly smaller type.
+3. Live TV menu → Settings opens Live TV settings inside Live TV (no jump to Nuvio's main
+   Settings); Back returns to the menu on Settings. Main Settings has no Live TV category.
+4. Phone access: setup screen → "Keep phone access on" → pair the phone once; close the
+   setup screen; the phone still reaches setup and recordings (Nuvio open or in the
+   background). A change from the phone asks for OK on the TV wherever you are. Paired
+   phones list: Remove works; "Forget this device" on the phone works.
+5. Multiview: add a third and fourth 1080p channel: the others step down or it plays; if
+   refused, the message says what to do. Keep the `multiview device` / `multiview budget=`
+   log lines if it refuses.
+6. Left from the guide many times (also quickly after scrolling): focus always lands in the
+   menu; Sport panels never keep focus behind the open menu.
+7. Live TV menu: Sport next to Movies and Series.
+8. Sport page guide: scroll across the next 24 hours; Sport only lists every channel with a
+   game in that time.
+9. Sport settings → Sport channels: Always / Never in Sport only; Preferred / Never offer for
+   games (check "Watch on" picks a preferred channel).
+10. Record something: file name like "Channel - Title - 10-Oct-26 1355.ts" (no code at the
+    end); phone download names use the same date.
 
 ## 7c. Fixes from the second 9 October pass, Sport redesign and new leagues (build `01f19bbed`)
 1. Guide top area: no "Live TV · profile", update text or clock; a small spinner beside the
