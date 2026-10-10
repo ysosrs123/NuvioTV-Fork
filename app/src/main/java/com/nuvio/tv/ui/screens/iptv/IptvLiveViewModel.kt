@@ -1150,7 +1150,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         closeInset()
         ensureGuide(tiles)
         val live = mutable.value
-        val kept = live.playback?.takeIf { playback -> live.player === playback.player && live.playingId == tiles.first().row.item.channel.id && live.playing &&
+        val kept = live.playback?.takeIf { playback -> live.player === playback.player && live.playingId == tiles.first().item.channel.id && live.playing &&
             !live.tuning && tuneJob?.isActive != true && live.catchup == null && !live.paused && !live.reconnecting && !live.localTimeshift && !playback.localTimeshift && playback.live }
         ++tuneVersion; tuneJob?.cancel(); scrubJob?.cancel(); catchupWatch?.cancel()
         if (kept == null) runtime.interrupt(owner)
