@@ -58,5 +58,32 @@ Get-ChildItem $out -Filter *.json | ForEach-Object { (Get-Content $_.FullName -R
 Compress-Archive -Force -Path "$out\*" -DestinationPath "$env:USERPROFILE\Downloads\sports-coverage.zip"
 ```
 
+## TheSportsDB calls the app makes (run after the block above, while games are live)
+
+These replace the remaining synthetic samples (livescore per sport, `lookuptv`, the league
+list). Run it in the same window (it reuses `$key`, `$out`, `$v2`, `$h` and `Get-Json`);
+the last line removes the key from every file before zipping.
+
+```powershell
+$v1 = "https://www.thesportsdb.com/api/v1/json/$key"
+foreach ($s in "Soccer","Basketball","Ice_Hockey","Baseball","American_Football","Rugby","Cricket","Australian_Football") {
+  Get-Json "v2-livescore-app-$($s.ToLower())" "$v2/livescore/$s" $h
+}
+Get-Json "v1-all-leagues" "$v1/all_leagues.php"
+$day = (Get-Date).ToString("yyyy-MM-dd")
+Get-Json "v1-eventsday-epl" "$v1/eventsday.php?d=$day&l=English_Premier_League"
+Get-Json "v1-eventsday-afl" "$v1/eventsday.php?d=$day&l=Australian_AFL"
+$ids = @()
+foreach ($f in Get-ChildItem $out -Filter "v2-livescore-app-*.json") {
+  $j = Get-Content $f.FullName -Raw | ConvertFrom-Json
+  if ($j.livescore) { $ids += $j.livescore | Select-Object -First 3 | ForEach-Object { $_.idEvent } }
+}
+$e = Get-Content "$out\v1-eventsday-epl.json" -Raw | ConvertFrom-Json
+if ($e.events) { $ids += $e.events | Select-Object -First 3 | ForEach-Object { $_.idEvent } }
+foreach ($id in ($ids | Where-Object { $_ } | Select-Object -Unique -First 10)) { Get-Json "v1-lookuptv-$id" "$v1/lookuptv.php?id=$id" }
+Get-ChildItem $out -Filter *.json | ForEach-Object { (Get-Content $_.FullName -Raw) -replace [regex]::Escape($key), "KEY" | Set-Content $_.FullName }
+Compress-Archive -Force -Path "$out\*" -DestinationPath "$env:USERPROFILE\Downloads\sportsdb-calls.zip"
+```
+
 v2 authenticates with the `X-API-KEY` header; v1 puts the key in the path
 (`/api/v1/json/<key>/...`, free test key `123`).
