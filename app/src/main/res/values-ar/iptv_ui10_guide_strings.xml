@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">أداة واحدة طويلة</string>
+    <string name="iptv_ui10_layout_square">أداة واحدة مربعة</string>
+    <string name="iptv_ui10_layout_stacked">أداتان قصيرتان فوق بعضهما</string>
+    <string name="iptv_ui10_layout_two">أداتان طويلتان</string>
+    <string name="iptv_ui10_layout_three">أداة طويلة وأداتان قصيرتان</string>
+    <string name="iptv_ui10_layout_squares">مربع كبير ومربعان صغيران</string>
+    <string name="iptv_ui10_layout_four">أربعة مربعات صغيرة</string>
+    <string name="iptv_ui10_layout_partial">لا يتسع بالكامل لهذه الشاشة، لذا أُخفيت بعض الأدوات</string>
+    <string name="iptv_ui10_stream_video">الفيديو</string>
+    <string name="iptv_ui10_stream_audio">الصوت</string>
+    <string name="iptv_ui10_stream_format">التنسيق</string>
+    <string name="iptv_ui10_stream_buffer">المخزن المؤقت</string>
+    <string name="iptv_ui10_stream_dropped">المُسقَطة</string>
+</resources>

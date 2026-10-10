@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Semua koneksi untuk akun saluran ini sedang dipakai. Hapus gambar dari akun yang sama, hentikan rekaman, atau tambah koneksi akun di Sumber TV Live jika paket Anda mengizinkan.</string>
+    <string name="iptv_multiview_memory_full">TV box ini tidak punya cukup memori untuk gambar lain. Hapus satu dulu.</string>
+    <string name="iptv_multiview_already">Saluran ini sudah ada di multiview.</string>
+    <string name="iptv_multiview_tiles_full">Tidak ada ruang untuk gambar lain di tata letak ini. Hapus satu atau pilih tata letak lain.</string>
+</resources>

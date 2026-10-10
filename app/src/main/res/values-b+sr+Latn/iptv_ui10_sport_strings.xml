@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$dP %2$dN %3$dI</string>
+    <string name="iptv_ui10_sport_record_wl">%1$dP %2$dI</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$dP %2$dI %3$dN</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$dP %2$dI %3$dIP</string>
+    <string name="iptv_ui10_sport_season_record">Učinak sezone %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">Počinje za %1$d min</string>
+    <string name="iptv_ui10_sport_starts_hours">Počinje za %1$d h %2$d min</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="one">Počinje za %1$d dan %2$d h</item>
+        <item quantity="few">Počinje za %1$d dana %2$d h</item>
+        <item quantity="other">Počinje za %1$d dana %2$d h</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">Počinje sada</string>
+    <string name="iptv_ui10_sport_golf_to_par">Prema paru</string>
+    <string name="iptv_ui10_sport_golf_thru">Rupa</string>
+</resources>

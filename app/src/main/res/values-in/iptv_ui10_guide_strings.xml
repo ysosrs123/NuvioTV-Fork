@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Satu widget tinggi</string>
+    <string name="iptv_ui10_layout_square">Satu widget persegi</string>
+    <string name="iptv_ui10_layout_stacked">Dua widget pendek, bertumpuk</string>
+    <string name="iptv_ui10_layout_two">Dua widget tinggi</string>
+    <string name="iptv_ui10_layout_three">Satu widget tinggi dan dua pendek</string>
+    <string name="iptv_ui10_layout_squares">Satu persegi besar dan dua kecil</string>
+    <string name="iptv_ui10_layout_four">Empat persegi kecil</string>
+    <string name="iptv_ui10_layout_partial">Tidak muat sepenuhnya di layar ini, jadi beberapa widget disembunyikan</string>
+    <string name="iptv_ui10_stream_video">Video</string>
+    <string name="iptv_ui10_stream_audio">Audio</string>
+    <string name="iptv_ui10_stream_format">Format</string>
+    <string name="iptv_ui10_stream_buffer">Buffer</string>
+    <string name="iptv_ui10_stream_dropped">Terbuang</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Vienas aukštas valdiklis</string>
+    <string name="iptv_ui10_layout_square">Vienas kvadratinis valdiklis</string>
+    <string name="iptv_ui10_layout_stacked">Du žemi valdikliai vienas virš kito</string>
+    <string name="iptv_ui10_layout_two">Du aukšti valdikliai</string>
+    <string name="iptv_ui10_layout_three">Vienas aukštas ir du žemi valdikliai</string>
+    <string name="iptv_ui10_layout_squares">Vienas didelis ir du maži kvadratai</string>
+    <string name="iptv_ui10_layout_four">Keturi maži kvadratai</string>
+    <string name="iptv_ui10_layout_partial">Netelpa visas šiame ekrane, todėl kai kurie valdikliai paslėpti</string>
+    <string name="iptv_ui10_stream_video">Vaizdas</string>
+    <string name="iptv_ui10_stream_audio">Garsas</string>
+    <string name="iptv_ui10_stream_format">Formatas</string>
+    <string name="iptv_ui10_stream_buffer">Buferis</string>
+    <string name="iptv_ui10_stream_dropped">Praleista</string>
+</resources>

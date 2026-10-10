@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Jedan visok widget</string>
+    <string name="iptv_ui10_layout_square">Jedan kvadratni widget</string>
+    <string name="iptv_ui10_layout_stacked">Dva niska widgeta, jedan iznad drugog</string>
+    <string name="iptv_ui10_layout_two">Dva visoka widgeta</string>
+    <string name="iptv_ui10_layout_three">Jedan visok i dva niska widgeta</string>
+    <string name="iptv_ui10_layout_squares">Jedan velik i dva mala kvadrata</string>
+    <string name="iptv_ui10_layout_four">Četiri mala kvadrata</string>
+    <string name="iptv_ui10_layout_partial">Ne stane cijelo na ovaj zaslon pa su neki widgeti skriveni</string>
+    <string name="iptv_ui10_stream_video">Video</string>
+    <string name="iptv_ui10_stream_audio">Zvuk</string>
+    <string name="iptv_ui10_stream_format">Format</string>
+    <string name="iptv_ui10_stream_buffer">Međuspremnik</string>
+    <string name="iptv_ui10_stream_dropped">Odbačeno</string>
+</resources>

@@ -7,7 +7,7 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
 [sports data fields](IPTV-SPORTS-DATA-FIELDS.md), [sports data scripts](IPTV-SPORTS-DATA-SCRIPTS.md).
 Older sections further down are history; read "Start here" first.
 
-## Start here — next session (from 9 October 2026, evening)
+## Start here — next session (from 10 October 2026)
 
 State (end of the 8–9 October session):
 - Everything is committed and pushed. Latest green CI: debug `8354d89` (run 37867719176),
@@ -17,13 +17,29 @@ State (end of the 8–9 October session):
 - Host tests: core 748, data 276, androidTest compiles
   (`python3 tools/iptv-host-tests/run.py`).
 - Device testing: user passes on 8 October (`f29cbe2`, `24d6868`), 9 October (`374e1f6`,
-  findings below, all fixed in code) and 9 October second pass on `8354d89` (25 findings,
-  recorded below; fixes in progress).
+  findings below, all fixed in code) and 9 October second pass on `8354d89` (26 findings,
+  recorded below, all fixed in code on 10 October).
+
+Update 10 October: the 26 findings of the second 9 October pass (`8354d89`) are fixed in
+code (`f002c10`..head, see that section and the release notes); the checklist has a new
+section 7c. Host tests: core 774, data 276. CI: see "Validation" in the release notes.
+Unverified on a device (from the helpers' reports): SurfaceView corner picture (HDR mode
+switch, square corners, panel fades no longer dim the video), AAC target loudness and the
++4 dB surround lift, seamless handover into multiview (surface switch; reverse direction
+not done), audio-renderer toggling per tile (possible short rebuffer), decoder budget now
+probing 4K/high frame rates (`multiviewDecodeBudget`), held Up/Down handled by the guide
+itself, eight widget layouts' text fit, phone page flow in a real browser, recordings via a
+local 127.0.0.1 stream (`IptvRecordingStreamServer`) in Nuvio's PlayerScreen, IPTV titles
+on Nuvio's detail page (`iptv-vod:` ids handled by `IptvVodMeta` in MetaRepositoryImpl;
+series open after episodes and TMDB load, up to ~45 s worst case; Play not Resume for
+provider-only titles; library/watched for `iptv-vod:` ids excluded from sync), guide reads
+outside write transactions during imports, per-account refresh locks (max 2 sources).
+Follow-ups not done: show NHL goalies (`SportsSummary.goalies`) and F1 `RaceSession.top`
+in the UI; NBL and college football are parsed but not in `SportsLeagues.ALL`.
 
 Next, in order:
-1. Take the user's findings from the `8354d89` pass; record them here and in the release
-   notes as fixed; fix them with parallel helpers (see "How work was done"); CI; give the
-   user the run link and update the checklist.
+1. Give the user the CI run link for the fixes of the second 9 October pass; take their
+   findings from that pass; record and fix them the same way.
 2. Waiting on the user (do not do these without them):
    - QR sign-in in CI builds: the fork needs the repository secret `LOCAL_PROPERTIES_BASE64`
      (base64 of a local.properties with NUVIO_SUPABASE_URL, NUVIO_SUPABASE_ANON_KEY and the
@@ -307,7 +323,7 @@ reporting, resets 10 October 2026 00:00 UTC):
 
 ## Device findings — 9 October 2026, second pass (build `8354d89`, run 37867719176)
 
-The 7b list passed apart from the items below (in progress). Five screenshots were shared
+The 7b list passed apart from the items below (all fixed in code on 10 October, `f002c10`..head). Five screenshots were shared
 (guide top area; Sport with clipped text). Items:
 1. Checklist 7b otherwise passes.
 2. Phone setup: after adding a source the page says "Saved to TV" and the option to add a
@@ -688,6 +704,12 @@ Before merge and release (only on the user's confirmation):
 
 ## Code map (app/src/main/java/com/nuvio/tv)
 
+- 10 October: widget layouts and stream facts in `core/iptv/LiveWidgets.kt`; refresh batches
+  `core/iptv/RefreshBatch.kt`; sport records and countdown `SportsRecords.kt`,
+  `SportsCountdown.kt`; recordings stream `core/server/IptvRecordingStreamServer.kt`; IPTV
+  detail-page meta `IptvVodMeta`/`IptvVodMetaSource` in `ui/screens/iptv/IptvVodServices.kt`;
+  handover into multiview `LivePlaybackRuntime.handOver`, `LiveSessionAdmission.resize`;
+  opaque settings dialogs `IptvOpaqueDialogs` in `IptvTheme.kt`.
 - Sports (8–9 October): see "Sports build summary" in "Start here" for every file; widgets in
   `core/iptv/LiveWidgets.kt` and `ui/screens/iptv/IptvWidgets.kt`; IPTV movie/series detail routing
   in `core/iptv/VodDetailRoute.kt`; recording-name cleaning in `core/iptv/LiveRecording.kt`

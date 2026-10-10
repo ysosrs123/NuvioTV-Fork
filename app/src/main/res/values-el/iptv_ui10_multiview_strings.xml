@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Όλες οι συνδέσεις του λογαριασμού αυτού του καναλιού χρησιμοποιούνται. Αφαιρέστε μια εικόνα από τον ίδιο λογαριασμό, σταματήστε μια εγγραφή ή αυξήστε τις συνδέσεις του λογαριασμού στις Πηγές ζωντανής TV, αν το επιτρέπει το πακέτο σας.</string>
+    <string name="iptv_multiview_memory_full">Αυτό το TV box δεν έχει αρκετή μνήμη για άλλη εικόνα. Αφαιρέστε πρώτα μία.</string>
+    <string name="iptv_multiview_already">Αυτό το κανάλι είναι ήδη στην πολλαπλή προβολή.</string>
+    <string name="iptv_multiview_tiles_full">Δεν υπάρχει χώρος για άλλη εικόνα σε αυτήν τη διάταξη. Αφαιρέστε μία ή επιλέξτε άλλη διάταξη.</string>
+</resources>

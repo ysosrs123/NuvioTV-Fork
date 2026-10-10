@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$d জয় %2$d ড্র %3$d হার</string>
+    <string name="iptv_ui10_sport_record_wl">%1$d জয় %2$d হার</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$d জয় %2$d হার %3$d টাই</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$d জয় %2$d হার %3$d OT হার</string>
+    <string name="iptv_ui10_sport_season_record">সিজন রেকর্ড %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">%1$d মিনিটে শুরু</string>
+    <string name="iptv_ui10_sport_starts_hours">%1$d ঘণ্টা %2$d মিনিটে শুরু</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="one">%1$d দিন %2$d ঘণ্টায় শুরু</item>
+        <item quantity="other">%1$d দিন %2$d ঘণ্টায় শুরু</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">এখন শুরু হচ্ছে</string>
+    <string name="iptv_ui10_sport_golf_to_par">পারের তুলনায়</string>
+    <string name="iptv_ui10_sport_golf_thru">হোল</string>
+</resources>

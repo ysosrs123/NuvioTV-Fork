@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K und HDR im Eckbild</string>
+    <string name="iptv_play10_corner_picture_subtitle">Zeigt das Bild von 4K- und HDR-Sendern im Eckbild des Programmführers. Schalten Sie es aus, wenn der Programmführer ruckelt oder der Fernseher beim Stöbern auf HDR umschaltet; das Eckbild zeigt dann das Senderlogo mit Ton.</string>
+    <string name="iptv_play10_surround_lift">Leisen Surround-Ton anheben</string>
+    <string name="iptv_play10_surround_lift_subtitle">Hebt die Lautstärke von Sendern mit AAC-Surround-Ton (5.1) an, der für Stereo heruntergemischt wird und oft viel leiser ist als bei anderen Sendern.</string>
+    <string name="iptv_play10_fullscreen_hint">Links für Sender, rechts für Steuerung, OK halten für Optionen</string>
+</resources>

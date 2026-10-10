@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$d ف %2$d ت %3$d خ</string>
+    <string name="iptv_ui10_sport_record_wl">%1$d ف %2$d خ</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$d ف %2$d خ %3$d ت</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$d ف %2$d خ %3$d خ.إ</string>
+    <string name="iptv_ui10_sport_season_record">سجل الموسم %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">يبدأ خلال %1$d د</string>
+    <string name="iptv_ui10_sport_starts_hours">يبدأ خلال %1$d س %2$d د</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="zero">يبدأ خلال %1$d يوم %2$d س</item>
+        <item quantity="one">يبدأ خلال %1$d يوم %2$d س</item>
+        <item quantity="two">يبدأ خلال %1$d يوم %2$d س</item>
+        <item quantity="few">يبدأ خلال %1$d أيام %2$d س</item>
+        <item quantity="many">يبدأ خلال %1$d يوماً %2$d س</item>
+        <item quantity="other">يبدأ خلال %1$d يوم %2$d س</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">يبدأ الآن</string>
+    <string name="iptv_ui10_sport_golf_to_par">مقابل البار</string>
+    <string name="iptv_ui10_sport_golf_thru">الحفرة</string>
+</resources>

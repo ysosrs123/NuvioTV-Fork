@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K и HDR в картината в ъгъла</string>
+    <string name="iptv_play10_corner_picture_subtitle">Показва картината на 4K и HDR канали в ъгъла на справочника. Изключете, ако справочникът насича или телевизорът превключва на HDR при разглеждане; тогава ъгълът показва логото на канала със звук.</string>
+    <string name="iptv_play10_surround_lift">Усилване на тих съраунд звук</string>
+    <string name="iptv_play10_surround_lift_subtitle">Повишава нивото на канали с AAC съраунд звук (5.1), смесен до стерео, който често звучи много по-тихо от други канали.</string>
+    <string name="iptv_play10_fullscreen_hint">Наляво за канали, надясно за управление, задръжте OK за опции</string>
+</resources>

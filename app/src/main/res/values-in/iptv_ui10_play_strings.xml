@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K dan HDR di gambar sudut</string>
+    <string name="iptv_play10_corner_picture_subtitle">Menampilkan gambar saluran 4K dan HDR di sudut panduan. Matikan jika panduan tersendat atau TV beralih ke HDR saat menjelajah; sudut lalu menampilkan logo saluran dengan suara.</string>
+    <string name="iptv_play10_surround_lift">Kuatkan audio surround yang pelan</string>
+    <string name="iptv_play10_surround_lift_subtitle">Menaikkan level saluran surround AAC (5.1) yang di-downmix ke stereo, yang sering terdengar jauh lebih pelan daripada saluran lain.</string>
+    <string name="iptv_play10_fullscreen_hint">Kiri untuk saluran, Kanan untuk kontrol, tahan OK untuk opsi</string>
+</resources>

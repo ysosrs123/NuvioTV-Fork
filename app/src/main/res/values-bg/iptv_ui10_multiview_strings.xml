@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Всички връзки на акаунта на този канал се използват. Премахнете картина от същия акаунт, спрете запис или увеличете връзките на акаунта в източниците за ТВ на живо, ако планът ви позволява.</string>
+    <string name="iptv_multiview_memory_full">Тази ТВ приставка няма достатъчно памет за още една картина. Първо премахнете една.</string>
+    <string name="iptv_multiview_already">Този канал вече е в Multiview.</string>
+    <string name="iptv_multiview_tiles_full">Няма място за още една картина в това оформление. Премахнете една или изберете друго оформление.</string>
+</resources>

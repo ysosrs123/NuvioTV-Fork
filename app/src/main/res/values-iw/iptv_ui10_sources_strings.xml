@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">רענון כל המקורות</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">טעינה מחדש של רשימת הערוצים בכל מקור</string>
+    <string name="iptv_ui10_refresh_all_guides">רענון כל המדריכים</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">טעינה מחדש של התוכניות בכל מדריך</string>
+    <string name="iptv_ui10_refresh_all_progress">מתבצע רענון… %1$d מתוך %2$d הסתיימו</string>
+    <string name="iptv_ui10_refresh_all_done">הסתיים · כל %1$d רועננו</string>
+    <string name="iptv_ui10_refresh_all_failed">הסתיים · %1$d רועננו, %2$d נכשלו</string>
+</resources>

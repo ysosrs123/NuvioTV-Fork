@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">A csatorna fiókjának minden kapcsolata foglalt. Távolíts el egy képet ugyanabból a fiókból, állíts le egy felvételt, vagy növeld a fiók kapcsolatainak számát az Élő TV-források között, ha a csomagod engedi.</string>
+    <string name="iptv_multiview_memory_full">Ennek a TV-boxnak nincs elég memóriája egy újabb képhez. Előbb távolíts el egyet.</string>
+    <string name="iptv_multiview_already">Ez a csatorna már a többképes nézetben van.</string>
+    <string name="iptv_multiview_tiles_full">Ebben az elrendezésben nincs hely újabb képnek. Távolíts el egyet, vagy válassz másik elrendezést.</string>
+</resources>

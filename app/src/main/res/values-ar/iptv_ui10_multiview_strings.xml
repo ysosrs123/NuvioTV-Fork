@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">كل اتصالات حساب هذه القناة قيد الاستخدام. أزِل صورة من الحساب نفسه، أو أوقف تسجيلاً، أو زِد اتصالات الحساب من مصادر البث المباشر إذا كانت باقتك تسمح بذلك.</string>
+    <string name="iptv_multiview_memory_full">لا يحتوي جهاز التلفزيون هذا على ذاكرة كافية لصورة أخرى. أزِل واحدة أولاً.</string>
+    <string name="iptv_multiview_already">هذه القناة موجودة بالفعل في العرض المتعدد.</string>
+    <string name="iptv_multiview_tiles_full">لا مكان لصورة أخرى في هذا التخطيط. أزِل واحدة أو اختر تخطيطاً آخر.</string>
+</resources>

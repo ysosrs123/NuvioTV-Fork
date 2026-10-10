@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">एक लंबा विजेट</string>
+    <string name="iptv_ui10_layout_square">एक चौकोर विजेट</string>
+    <string name="iptv_ui10_layout_stacked">दो छोटे विजेट, ऊपर-नीचे</string>
+    <string name="iptv_ui10_layout_two">दो लंबे विजेट</string>
+    <string name="iptv_ui10_layout_three">एक लंबा और दो छोटे विजेट</string>
+    <string name="iptv_ui10_layout_squares">एक बड़ा और दो छोटे चौकोर</string>
+    <string name="iptv_ui10_layout_four">चार छोटे चौकोर</string>
+    <string name="iptv_ui10_layout_partial">यह इस स्क्रीन पर पूरा नहीं आता, इसलिए कुछ विजेट छिपे हैं</string>
+    <string name="iptv_ui10_stream_video">वीडियो</string>
+    <string name="iptv_ui10_stream_audio">ऑडियो</string>
+    <string name="iptv_ui10_stream_format">फ़ॉर्मैट</string>
+    <string name="iptv_ui10_stream_buffer">बफ़र</string>
+    <string name="iptv_ui10_stream_dropped">ड्रॉप हुए</string>
+</resources>

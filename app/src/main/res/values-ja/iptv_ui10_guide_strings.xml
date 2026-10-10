@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">縦長ウィジェット 1 つ</string>
+    <string name="iptv_ui10_layout_square">正方形ウィジェット 1 つ</string>
+    <string name="iptv_ui10_layout_stacked">低いウィジェット 2 つ（縦に重ねる）</string>
+    <string name="iptv_ui10_layout_two">縦長ウィジェット 2 つ</string>
+    <string name="iptv_ui10_layout_three">縦長 1 つと低いウィジェット 2 つ</string>
+    <string name="iptv_ui10_layout_squares">大きな正方形 1 つと小さな正方形 2 つ</string>
+    <string name="iptv_ui10_layout_four">小さな正方形 4 つ</string>
+    <string name="iptv_ui10_layout_partial">この画面に収まりきらないため、一部のウィジェットは非表示です</string>
+    <string name="iptv_ui10_stream_video">映像</string>
+    <string name="iptv_ui10_stream_audio">音声</string>
+    <string name="iptv_ui10_stream_format">フォーマット</string>
+    <string name="iptv_ui10_stream_buffer">バッファ</string>
+    <string name="iptv_ui10_stream_dropped">ドロップ</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Összes forrás frissítése</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">Minden forrás csatornalistájának újratöltése</string>
+    <string name="iptv_ui10_refresh_all_guides">Összes műsorújság frissítése</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">Minden műsorújság műsorainak újratöltése</string>
+    <string name="iptv_ui10_refresh_all_progress">Frissítés… %1$d/%2$d kész</string>
+    <string name="iptv_ui10_refresh_all_done">Kész · mind a(z) %1$d frissítve</string>
+    <string name="iptv_ui10_refresh_all_failed">Kész · %1$d frissítve, %2$d sikertelen</string>
+</resources>

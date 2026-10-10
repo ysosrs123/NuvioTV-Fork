@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">কোণের ছবিতে 4K ও HDR</string>
+    <string name="iptv_play10_corner_picture_subtitle">গাইডের কোণে 4K ও HDR চ্যানেলের ছবি দেখায়। গাইড আটকে গেলে বা ব্রাউজ করার সময় টিভি HDR-এ চলে গেলে এটি বন্ধ করুন; তখন কোণে শব্দসহ চ্যানেলের লোগো দেখাবে।</string>
+    <string name="iptv_play10_surround_lift">কম সারাউন্ড অডিও বাড়ান</string>
+    <string name="iptv_play10_surround_lift_subtitle">স্টেরিওতে মেশানো AAC সারাউন্ড (5.1) চ্যানেলের লেভেল বাড়ায়, যেগুলো প্রায়ই অন্য চ্যানেলের চেয়ে অনেক আস্তে বাজে।</string>
+    <string name="iptv_play10_fullscreen_hint">চ্যানেলের জন্য বাঁয়ে, কন্ট্রোলের জন্য ডানে, অপশনের জন্য OK চেপে ধরুন</string>
+</resources>

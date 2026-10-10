@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">تحديث كل المصادر</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">إعادة تحميل قائمة قنوات كل مصدر</string>
+    <string name="iptv_ui10_refresh_all_guides">تحديث كل الأدلة</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">إعادة تحميل برامج كل دليل</string>
+    <string name="iptv_ui10_refresh_all_progress">جارٍ التحديث… اكتمل %1$d من %2$d</string>
+    <string name="iptv_ui10_refresh_all_done">اكتمل · تم تحديث الكل (%1$d)</string>
+    <string name="iptv_ui10_refresh_all_failed">اكتمل · تم تحديث %1$d، وفشل %2$d</string>
+</resources>

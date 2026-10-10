@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$dP %2$dL %3$dPr</string>
+    <string name="iptv_ui10_sport_record_wl">%1$dP %2$dPr</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$dP %2$dPr %3$dL</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$dP %2$dPr %3$dPrPr</string>
+    <string name="iptv_ui10_sport_season_record">Sezono rezultatai %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">Prasidės po %1$d min.</string>
+    <string name="iptv_ui10_sport_starts_hours">Prasidės po %1$d val. %2$d min.</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="one">Prasidės po %1$d dienos %2$d val.</item>
+        <item quantity="few">Prasidės po %1$d dienų %2$d val.</item>
+        <item quantity="many">Prasidės po %1$d dienos %2$d val.</item>
+        <item quantity="other">Prasidės po %1$d dienų %2$d val.</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">Prasideda dabar</string>
+    <string name="iptv_ui10_sport_golf_to_par">Pagal par</string>
+    <string name="iptv_ui10_sport_golf_thru">Duobutė</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$dנ %2$dת %3$dה</string>
+    <string name="iptv_ui10_sport_record_wl">%1$dנ %2$dה</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$dנ %2$dה %3$dת</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$dנ %2$dה %3$dהה</string>
+    <string name="iptv_ui10_sport_season_record">מאזן העונה %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">מתחיל בעוד %1$d דק׳</string>
+    <string name="iptv_ui10_sport_starts_hours">מתחיל בעוד %1$d שע׳ %2$d דק׳</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="one">מתחיל בעוד %1$d יום %2$d שע׳</item>
+        <item quantity="two">מתחיל בעוד %1$d ימים %2$d שע׳</item>
+        <item quantity="many">מתחיל בעוד %1$d ימים %2$d שע׳</item>
+        <item quantity="other">מתחיל בעוד %1$d ימים %2$d שע׳</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">מתחיל עכשיו</string>
+    <string name="iptv_ui10_sport_golf_to_par">ביחס לפאר</string>
+    <string name="iptv_ui10_sport_golf_thru">גומה</string>
+</resources>

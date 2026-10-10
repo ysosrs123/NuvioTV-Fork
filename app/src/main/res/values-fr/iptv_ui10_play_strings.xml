@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K et HDR dans l’image du coin</string>
+    <string name="iptv_play10_corner_picture_subtitle">Affiche l’image des chaînes 4K et HDR dans le coin du guide. Désactivez si le guide saccade ou si le téléviseur passe en HDR pendant la navigation ; le coin affiche alors le logo de la chaîne avec le son.</string>
+    <string name="iptv_play10_surround_lift">Remonter le son surround trop faible</string>
+    <string name="iptv_play10_surround_lift_subtitle">Augmente le niveau des chaînes en son surround AAC (5.1) converti en stéréo, souvent bien plus faible que celui des autres chaînes.</string>
+    <string name="iptv_play10_fullscreen_hint">Gauche pour les chaînes, droite pour les commandes, maintenez OK pour les options</string>
+</resources>

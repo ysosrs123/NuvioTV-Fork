@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Jeden vysoký widget</string>
+    <string name="iptv_ui10_layout_square">Jeden čtvercový widget</string>
+    <string name="iptv_ui10_layout_stacked">Dva nízké widgety nad sebou</string>
+    <string name="iptv_ui10_layout_two">Dva vysoké widgety</string>
+    <string name="iptv_ui10_layout_three">Jeden vysoký a dva nízké widgety</string>
+    <string name="iptv_ui10_layout_squares">Jeden velký a dva malé čtverce</string>
+    <string name="iptv_ui10_layout_four">Čtyři malé čtverce</string>
+    <string name="iptv_ui10_layout_partial">Nevejde se celé na tuto obrazovku, proto jsou některé widgety skryté</string>
+    <string name="iptv_ui10_stream_video">Video</string>
+    <string name="iptv_ui10_stream_audio">Zvuk</string>
+    <string name="iptv_ui10_stream_format">Formát</string>
+    <string name="iptv_ui10_stream_buffer">Buffer</string>
+    <string name="iptv_ui10_stream_dropped">Zahozeno</string>
+</resources>

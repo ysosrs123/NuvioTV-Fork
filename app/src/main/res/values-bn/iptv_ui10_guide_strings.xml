@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">একটি লম্বা উইজেট</string>
+    <string name="iptv_ui10_layout_square">একটি বর্গাকার উইজেট</string>
+    <string name="iptv_ui10_layout_stacked">দুটি ছোট উইজেট, উপরে-নিচে</string>
+    <string name="iptv_ui10_layout_two">দুটি লম্বা উইজেট</string>
+    <string name="iptv_ui10_layout_three">একটি লম্বা ও দুটি ছোট উইজেট</string>
+    <string name="iptv_ui10_layout_squares">একটি বড় ও দুটি ছোট বর্গ</string>
+    <string name="iptv_ui10_layout_four">চারটি ছোট বর্গ</string>
+    <string name="iptv_ui10_layout_partial">এই স্ক্রিনে পুরোটা আঁটে না, তাই কিছু উইজেট লুকানো আছে</string>
+    <string name="iptv_ui10_stream_video">ভিডিও</string>
+    <string name="iptv_ui10_stream_audio">অডিও</string>
+    <string name="iptv_ui10_stream_format">ফরম্যাট</string>
+    <string name="iptv_ui10_stream_buffer">বাফার</string>
+    <string name="iptv_ui10_stream_dropped">বাদ পড়েছে</string>
+</resources>

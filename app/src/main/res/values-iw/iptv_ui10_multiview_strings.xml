@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">כל החיבורים של החשבון של הערוץ הזה בשימוש. אפשר להסיר תמונה מאותו חשבון, לעצור הקלטה או להגדיל את מספר החיבורים של החשבון במקורות טלוויזיה חיה אם החבילה שלך מאפשרת.</string>
+    <string name="iptv_multiview_memory_full">אין בממיר הזה מספיק זיכרון לתמונה נוספת. יש להסיר אחת קודם.</string>
+    <string name="iptv_multiview_already">הערוץ הזה כבר נמצא בריבוי תצוגות.</string>
+    <string name="iptv_multiview_tiles_full">אין מקום לתמונה נוספת בפריסה הזו. יש להסיר אחת או לבחור פריסה אחרת.</string>
+</resources>

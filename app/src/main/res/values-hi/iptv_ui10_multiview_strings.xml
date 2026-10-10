@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">इस चैनल के अकाउंट के सभी कनेक्शन इस्तेमाल में हैं। उसी अकाउंट की कोई तस्वीर हटाएँ, कोई रिकॉर्डिंग रोकें, या अगर आपका प्लान अनुमति देता है तो लाइव टीवी सोर्स में अकाउंट के कनेक्शन बढ़ाएँ।</string>
+    <string name="iptv_multiview_memory_full">इस टीवी बॉक्स में एक और तस्वीर के लिए पर्याप्त मेमोरी नहीं है। पहले एक हटाएँ।</string>
+    <string name="iptv_multiview_already">यह चैनल पहले से मल्टीव्यू में है।</string>
+    <string name="iptv_multiview_tiles_full">इस लेआउट में एक और तस्वीर की जगह नहीं है। एक हटाएँ या दूसरा लेआउट चुनें।</string>
+</resources>

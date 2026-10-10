@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Egy magas widget</string>
+    <string name="iptv_ui10_layout_square">Egy négyzetes widget</string>
+    <string name="iptv_ui10_layout_stacked">Két alacsony widget egymás alatt</string>
+    <string name="iptv_ui10_layout_two">Két magas widget</string>
+    <string name="iptv_ui10_layout_three">Egy magas és két alacsony widget</string>
+    <string name="iptv_ui10_layout_squares">Egy nagy és két kis négyzet</string>
+    <string name="iptv_ui10_layout_four">Négy kis négyzet</string>
+    <string name="iptv_ui10_layout_partial">Nem fér el teljesen ezen a képernyőn, ezért néhány widget rejtve van</string>
+    <string name="iptv_ui10_stream_video">Videó</string>
+    <string name="iptv_ui10_stream_audio">Hang</string>
+    <string name="iptv_ui10_stream_format">Formátum</string>
+    <string name="iptv_ui10_stream_buffer">Puffer</string>
+    <string name="iptv_ui10_stream_dropped">Eldobott</string>
+</resources>

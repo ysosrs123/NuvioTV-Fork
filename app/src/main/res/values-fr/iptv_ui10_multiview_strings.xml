@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Toutes les connexions du compte de cette chaîne sont utilisées. Retirez une image du même compte, arrêtez un enregistrement ou augmentez les connexions du compte dans Sources TV en direct si votre offre le permet.</string>
+    <string name="iptv_multiview_memory_full">Ce boîtier TV n’a pas assez de mémoire pour une autre image. Retirez-en une d’abord.</string>
+    <string name="iptv_multiview_already">Cette chaîne est déjà dans la multivue.</string>
+    <string name="iptv_multiview_tiles_full">Plus de place pour une autre image dans cette disposition. Retirez-en une ou choisissez une autre disposition.</string>
+</resources>

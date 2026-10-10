@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$dП %2$dР %3$dЗ</string>
+    <string name="iptv_ui10_sport_record_wl">%1$dП %2$dЗ</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$dП %2$dЗ %3$dР</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$dП %2$dЗ %3$dЗП</string>
+    <string name="iptv_ui10_sport_season_record">Баланс за сезона %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">Започва след %1$d мин</string>
+    <string name="iptv_ui10_sport_starts_hours">Започва след %1$d ч %2$d мин</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="one">Започва след %1$d ден %2$d ч</item>
+        <item quantity="other">Започва след %1$d дни %2$d ч</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">Започва сега</string>
+    <string name="iptv_ui10_sport_golf_to_par">Спрямо пар</string>
+    <string name="iptv_ui10_sport_golf_thru">Дупка</string>
+</resources>

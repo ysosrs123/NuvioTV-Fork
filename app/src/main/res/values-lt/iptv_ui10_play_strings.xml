@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K ir HDR kampiniame vaizde</string>
+    <string name="iptv_play10_corner_picture_subtitle">Rodo 4K ir HDR kanalų vaizdą TV programos kampe. Išjunkite, jei TV programa stringa arba naršant televizorius persijungia į HDR; tada kampe rodomas kanalo logotipas su garsu.</string>
+    <string name="iptv_play10_surround_lift">Pagarsinti tylų erdvinį garsą</string>
+    <string name="iptv_play10_surround_lift_subtitle">Padidina kanalų su AAC erdviniu garsu (5.1), sumaišytu į stereo, garsumą – jie dažnai skamba daug tyliau nei kiti kanalai.</string>
+    <string name="iptv_play10_fullscreen_hint">Kairėn – kanalai, dešinėn – valdymas, laikykite OK – parinktys</string>
+</resources>

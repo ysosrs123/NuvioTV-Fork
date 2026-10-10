@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Ένα ψηλό widget</string>
+    <string name="iptv_ui10_layout_square">Ένα τετράγωνο widget</string>
+    <string name="iptv_ui10_layout_stacked">Δύο χαμηλά widget, το ένα πάνω στο άλλο</string>
+    <string name="iptv_ui10_layout_two">Δύο ψηλά widget</string>
+    <string name="iptv_ui10_layout_three">Ένα ψηλό και δύο χαμηλά widget</string>
+    <string name="iptv_ui10_layout_squares">Ένα μεγάλο και δύο μικρά τετράγωνα</string>
+    <string name="iptv_ui10_layout_four">Τέσσερα μικρά τετράγωνα</string>
+    <string name="iptv_ui10_layout_partial">Δεν χωράει πλήρως σε αυτήν την οθόνη, οπότε κάποια widget αποκρύπτονται</string>
+    <string name="iptv_ui10_stream_video">Βίντεο</string>
+    <string name="iptv_ui10_stream_audio">Ήχος</string>
+    <string name="iptv_ui10_stream_format">Μορφή</string>
+    <string name="iptv_ui10_stream_buffer">Buffer</string>
+    <string name="iptv_ui10_stream_dropped">Απορρίφθηκαν</string>
+</resources>

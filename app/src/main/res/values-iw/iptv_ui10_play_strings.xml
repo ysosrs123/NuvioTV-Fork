@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K ו-HDR בתמונה שבפינה</string>
+    <string name="iptv_play10_corner_picture_subtitle">מציג את התמונה של ערוצי 4K ו-HDR בפינת המדריך. כדאי לכבות אם המדריך מקרטע או שהטלוויזיה עוברת ל-HDR בזמן גלישה; הפינה תציג אז את לוגו הערוץ עם קול.</string>
+    <string name="iptv_play10_surround_lift">הגברת סראונד שקט</string>
+    <string name="iptv_play10_surround_lift_subtitle">מגביר את עוצמת הערוצים עם סראונד AAC ‏(5.1) שמומר לסטריאו, שלרוב נשמעים הרבה יותר בשקט מערוצים אחרים.</string>
+    <string name="iptv_play10_fullscreen_hint">שמאלה לערוצים, ימינה לפקדים, לחיצה ארוכה על OK לאפשרויות</string>
+</resources>

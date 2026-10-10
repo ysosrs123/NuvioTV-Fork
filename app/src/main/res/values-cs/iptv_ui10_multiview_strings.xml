@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Všechna připojení účtu tohoto kanálu se používají. Odeberte obraz ze stejného účtu, zastavte nahrávání, nebo pokud to tarif dovoluje, zvyšte počet připojení účtu ve Zdrojích živé TV.</string>
+    <string name="iptv_multiview_memory_full">Tento TV box nemá dost paměti pro další obraz. Nejdřív jeden odeberte.</string>
+    <string name="iptv_multiview_already">Tento kanál už je v multiview.</string>
+    <string name="iptv_multiview_tiles_full">V tomto rozvržení není místo pro další obraz. Jeden odeberte nebo zvolte jiné rozvržení.</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$dΝ %2$dΙ %3$dΗ</string>
+    <string name="iptv_ui10_sport_record_wl">%1$dΝ %2$dΗ</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$dΝ %2$dΗ %3$dΙ</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$dΝ %2$dΗ %3$dΗΠ</string>
+    <string name="iptv_ui10_sport_season_record">Απολογισμός σεζόν %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">Ξεκινά σε %1$d λεπ.</string>
+    <string name="iptv_ui10_sport_starts_hours">Ξεκινά σε %1$d ώ. %2$d λεπ.</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="one">Ξεκινά σε %1$d ημέρα %2$d ώ.</item>
+        <item quantity="other">Ξεκινά σε %1$d ημέρες %2$d ώ.</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">Ξεκινά τώρα</string>
+    <string name="iptv_ui10_sport_golf_to_par">Ως προς par</string>
+    <string name="iptv_ui10_sport_golf_thru">Τρύπα</string>
+</resources>

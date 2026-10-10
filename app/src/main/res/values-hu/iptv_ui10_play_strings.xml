@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K és HDR a sarokképben</string>
+    <string name="iptv_play10_corner_picture_subtitle">A 4K és HDR csatornák képét is megjeleníti a műsorújság sarkában. Kapcsold ki, ha a műsorújság akadozik, vagy a TV böngészés közben HDR-re vált; ilyenkor a sarokban a csatorna logója látszik, hanggal.</string>
+    <string name="iptv_play10_surround_lift">Halk térhatású hang erősítése</string>
+    <string name="iptv_play10_surround_lift_subtitle">Megemeli a sztereóra lekevert AAC térhatású (5.1) csatornák hangerejét, amelyek gyakran sokkal halkabbak más csatornáknál.</string>
+    <string name="iptv_play10_fullscreen_hint">Balra: csatornák, jobbra: vezérlők, OK nyomva tartása: lehetőségek</string>
+</resources>

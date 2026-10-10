@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">すべてのソースを更新</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">各ソースのチャンネルリストを再読み込み</string>
+    <string name="iptv_ui10_refresh_all_guides">すべての番組表を更新</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">各番組表の番組を再読み込み</string>
+    <string name="iptv_ui10_refresh_all_progress">更新中… %2$d 件中 %1$d 件完了</string>
+    <string name="iptv_ui10_refresh_all_done">完了 · %1$d 件すべて更新</string>
+    <string name="iptv_ui10_refresh_all_failed">完了 · %1$d 件更新、%2$d 件失敗</string>
+</resources>

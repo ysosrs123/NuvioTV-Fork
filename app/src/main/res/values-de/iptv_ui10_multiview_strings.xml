@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Alle Verbindungen des Kontos dieses Senders sind belegt. Entfernen Sie ein Bild desselben Kontos, beenden Sie eine Aufnahme oder erhöhen Sie die Verbindungen des Kontos unter Live-TV-Quellen, falls Ihr Tarif es erlaubt.</string>
+    <string name="iptv_multiview_memory_full">Diese TV-Box hat nicht genug Speicher für ein weiteres Bild. Entfernen Sie zuerst eines.</string>
+    <string name="iptv_multiview_already">Dieser Sender ist bereits in Multiview.</string>
+    <string name="iptv_multiview_tiles_full">Kein Platz für ein weiteres Bild in diesem Layout. Entfernen Sie eines oder wählen Sie ein anderes Layout.</string>
+</resources>

@@ -1,6 +1,6 @@
-# Nuvio IPTV — device test checklist (build `8354d89`, run 37867719176)
+# Nuvio IPTV — device test checklist (build BUILD_PENDING)
 
-For this build start with section 7b (fixes from the 9 October pass), then 7 (Sport) and the rest.
+For this build start with section 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -83,6 +83,39 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 11. Press Home on the remote with Game Centre open: logcat should show sports requests
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
+
+## 7c. Fixes from the second 9 October pass (build after `5c5bdda`)
+1. Guide top area: no "Live TV · profile", update text or clock; a small spinner beside the
+   guide heading during a guide update; the grid keeps programmes during the update.
+2. Widgets: hold OK → Layout: try all eight layouts (tall, square, wide, two stacked, two
+   tall, tall + two short, large + two small squares, four squares); text fits small tiles.
+   Stream info shows badges, video/audio details, buffer and dropped frames.
+3. Hold Up from low in the guide: rows scroll to the top first, then a fresh Up goes to the
+   widgets. Left/Back opens the menu on Search channels. "Leave Live TV?": Leave to Home first.
+4. 4K/HDR channel in the corner picture: picture shows (check smoothness, whether the TV
+   switches to HDR, square corners); Settings → Live TV → Streaming → "4K and HDR in the
+   corner picture" off brings back the logo.
+5. Full screen → Back to the guide: no stutter. Full screen Left/Right never change channel
+   (Right opens the controls).
+6. Quiet 4K HLG AAC channel: louder? Stats overlay audio row (codec, channels, gain) and
+   "Start time" row — please note the audio row if still quiet.
+7. Multiview: from full screen hold OK → Add to multiview: no restart. Left in the multiview
+   channel list opens categories (also from Sport). Sound follows focus in every pane. Add a
+   third stream from the second source: it plays or a message says why.
+8. Live TV Sources: Refresh all sources / Refresh all guides with progress; new guide import
+   speed; the guide stays usable during an import.
+9. Phone setup: add a source → the page stays open with "Add a guide for this source"; add a
+   guide assigned to that source.
+10. Recordings: play one (local and network share if you use one): Nuvio's normal player with
+    seek bar and tracks; Back returns to Recordings.
+11. IPTV movie and series (signed out and signed in): Nuvio's detail page; Play starts the
+    IPTV stream; series seasons and episodes; resume.
+12. Sport: no clipped headings or card borders; timeline lanes whole; pre-match hero with big
+    logos, countdown and "4W 0D 1L"; golf columns aligned; Premier League logo visible;
+    Sport on by default on a fresh install.
+13. Settings → Live TV → Sport → TheSportsDB key: Show button aligned; dialog opaque. Other
+    Live TV settings dialogs opaque.
+14. QR sign-in now present (CI builds include the keys from your secret).
 
 ## 7b. Fixes from the 9 October pass (build after `8354d89`)
 1. Back: full screen → guide → Live TV menu → "Leave Live TV?" (Stay / Leave to Home).

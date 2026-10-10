@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Tutte le connessioni dell\'account di questo canale sono in uso. Rimuovi un riquadro dello stesso account, interrompi una registrazione o aumenta le connessioni dell\'account in Sorgenti TV in diretta se il tuo piano lo consente.</string>
+    <string name="iptv_multiview_memory_full">Questo TV box non ha memoria sufficiente per un altro riquadro. Rimuovine prima uno.</string>
+    <string name="iptv_multiview_already">Questo canale è già in Multiview.</string>
+    <string name="iptv_multiview_tiles_full">Non c\'è spazio per un altro riquadro in questo layout. Rimuovine uno o scegli un altro layout.</string>
+</resources>

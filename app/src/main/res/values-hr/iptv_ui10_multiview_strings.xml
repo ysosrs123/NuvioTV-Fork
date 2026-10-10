@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Sve veze računa ovog kanala su zauzete. Ukloni sliku s istog računa, zaustavi snimanje ili povećaj broj veza računa u Izvorima TV-a uživo ako tvoj paket to dopušta.</string>
+    <string name="iptv_multiview_memory_full">Ovaj TV box nema dovoljno memorije za još jednu sliku. Najprije ukloni jednu.</string>
+    <string name="iptv_multiview_already">Ovaj kanal je već u multiviewu.</string>
+    <string name="iptv_multiview_tiles_full">U ovom rasporedu nema mjesta za još jednu sliku. Ukloni jednu ili odaberi drugi raspored.</string>
+</resources>

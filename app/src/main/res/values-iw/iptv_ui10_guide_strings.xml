@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">ווידג׳ט גבוה אחד</string>
+    <string name="iptv_ui10_layout_square">ווידג׳ט ריבועי אחד</string>
+    <string name="iptv_ui10_layout_stacked">שני ווידג׳טים נמוכים, אחד מעל השני</string>
+    <string name="iptv_ui10_layout_two">שני ווידג׳טים גבוהים</string>
+    <string name="iptv_ui10_layout_three">ווידג׳ט גבוה אחד ושניים נמוכים</string>
+    <string name="iptv_ui10_layout_squares">ריבוע גדול אחד ושניים קטנים</string>
+    <string name="iptv_ui10_layout_four">ארבעה ריבועים קטנים</string>
+    <string name="iptv_ui10_layout_partial">לא נכנס במלואו במסך הזה, ולכן חלק מהווידג׳טים מוסתרים</string>
+    <string name="iptv_ui10_stream_video">וידאו</string>
+    <string name="iptv_ui10_stream_audio">אודיו</string>
+    <string name="iptv_ui10_stream_format">פורמט</string>
+    <string name="iptv_ui10_stream_buffer">באפר</string>
+    <string name="iptv_ui10_stream_dropped">נזרקו</string>
+</resources>

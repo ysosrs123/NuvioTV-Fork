@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Segarkan semua sumber</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">Muat ulang daftar saluran setiap sumber</string>
+    <string name="iptv_ui10_refresh_all_guides">Segarkan semua panduan</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">Muat ulang acara setiap panduan</string>
+    <string name="iptv_ui10_refresh_all_progress">Menyegarkan… %1$d dari %2$d selesai</string>
+    <string name="iptv_ui10_refresh_all_done">Selesai · semua %1$d disegarkan</string>
+    <string name="iptv_ui10_refresh_all_failed">Selesai · %1$d disegarkan, %2$d gagal</string>
+</resources>

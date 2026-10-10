@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">このチャンネルのアカウントの接続がすべて使用中です。同じアカウントの画面を外すか、録画を停止するか、プランで許可されていればライブTVソースでアカウントの接続数を増やしてください。</string>
+    <string name="iptv_multiview_memory_full">このTVボックスには、もう 1 画面分のメモリがありません。先に 1 つ外してください。</string>
+    <string name="iptv_multiview_already">このチャンネルはすでにマルチビューにあります。</string>
+    <string name="iptv_multiview_tiles_full">このレイアウトにはもう画面を追加できません。1 つ外すか、別のレイアウトを選んでください。</string>
+</resources>

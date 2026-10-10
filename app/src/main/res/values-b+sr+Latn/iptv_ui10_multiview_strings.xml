@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Sve veze naloga ovog kanala su zauzete. Uklonite sliku sa istog naloga, zaustavite snimanje ili povećajte broj veza naloga u izvorima TV uživo ako vaš paket to dozvoljava.</string>
+    <string name="iptv_multiview_memory_full">Ovaj TV boks nema dovoljno memorije za još jednu sliku. Prvo uklonite jednu.</string>
+    <string name="iptv_multiview_already">Ovaj kanal je već u Multiview-u.</string>
+    <string name="iptv_multiview_tiles_full">U ovom rasporedu nema mesta za još jednu sliku. Uklonite jednu ili izaberite drugi raspored.</string>
+</resources>

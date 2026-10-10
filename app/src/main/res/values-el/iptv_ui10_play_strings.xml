@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K και HDR στη γωνιακή εικόνα</string>
+    <string name="iptv_play10_corner_picture_subtitle">Δείχνει την εικόνα καναλιών 4K και HDR στη γωνία του οδηγού. Απενεργοποιήστε το αν ο οδηγός κολλάει ή η TV αλλάζει σε HDR κατά την περιήγηση· η γωνία τότε δείχνει το λογότυπο του καναλιού με ήχο.</string>
+    <string name="iptv_play10_surround_lift">Ενίσχυση χαμηλού surround ήχου</string>
+    <string name="iptv_play10_surround_lift_subtitle">Ανεβάζει τη στάθμη καναλιών με surround ήχο AAC (5.1) που μετατρέπεται σε στερεοφωνικό και συχνά ακούγεται πολύ πιο χαμηλά από άλλα κανάλια.</string>
+    <string name="iptv_play10_fullscreen_hint">Αριστερά για κανάλια, δεξιά για χειριστήρια, κρατήστε OK για επιλογές</string>
+</resources>

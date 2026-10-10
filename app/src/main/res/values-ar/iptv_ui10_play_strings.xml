@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K وHDR في صورة الزاوية</string>
+    <string name="iptv_play10_corner_picture_subtitle">يعرض صورة قنوات 4K وHDR في زاوية الدليل. أوقفه إذا تقطّع الدليل أو انتقل التلفزيون إلى HDR أثناء التصفح؛ وعندها تعرض الزاوية شعار القناة مع الصوت.</string>
+    <string name="iptv_play10_surround_lift">رفع صوت المحيطي المنخفض</string>
+    <string name="iptv_play10_surround_lift_subtitle">يرفع مستوى قنوات الصوت المحيطي AAC ‏(5.1) المدموجة إلى ستيريو، والتي غالباً ما يكون صوتها أخفض بكثير من القنوات الأخرى.</string>
+    <string name="iptv_play10_fullscreen_hint">يسار للقنوات، يمين لعناصر التحكم، اضغط مطولاً على OK للخيارات</string>
+</resources>

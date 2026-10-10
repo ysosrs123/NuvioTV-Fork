@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K i HDR u kutnoj slici</string>
+    <string name="iptv_play10_corner_picture_subtitle">Prikazuje sliku 4K i HDR kanala u kutu vodiča. Isključi ako vodič zastajkuje ili se TV prebacuje u HDR tijekom pregledavanja; kut tada prikazuje logotip kanala sa zvukom.</string>
+    <string name="iptv_play10_surround_lift">Pojačaj tihi surround zvuk</string>
+    <string name="iptv_play10_surround_lift_subtitle">Podiže razinu kanala s AAC surround zvukom (5.1) miješanim u stereo, koji često sviraju puno tiše od ostalih kanala.</string>
+    <string name="iptv_play10_fullscreen_hint">Lijevo za kanale, desno za kontrole, drži OK za opcije</string>
+</resources>

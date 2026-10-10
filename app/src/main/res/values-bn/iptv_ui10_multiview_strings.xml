@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">এই চ্যানেলের অ্যাকাউন্টের সব সংযোগ ব্যবহার হচ্ছে। একই অ্যাকাউন্টের একটি ছবি সরান, একটি রেকর্ডিং বন্ধ করুন, অথবা আপনার প্ল্যান অনুমতি দিলে লাইভ টিভি সোর্সে অ্যাকাউন্টের সংযোগ বাড়ান।</string>
+    <string name="iptv_multiview_memory_full">এই টিভি বক্সে আরেকটি ছবির জন্য যথেষ্ট মেমরি নেই। আগে একটি সরান।</string>
+    <string name="iptv_multiview_already">এই চ্যানেলটি ইতিমধ্যে মাল্টিভিউতে আছে।</string>
+    <string name="iptv_multiview_tiles_full">এই লেআউটে আরেকটি ছবির জায়গা নেই। একটি সরান বা অন্য লেআউট বেছে নিন।</string>
+</resources>

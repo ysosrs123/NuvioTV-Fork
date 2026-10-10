@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">সব সোর্স রিফ্রেশ করুন</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">প্রতিটি সোর্সের চ্যানেল তালিকা আবার লোড করুন</string>
+    <string name="iptv_ui10_refresh_all_guides">সব গাইড রিফ্রেশ করুন</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">প্রতিটি গাইডের প্রোগ্রাম আবার লোড করুন</string>
+    <string name="iptv_ui10_refresh_all_progress">রিফ্রেশ হচ্ছে… %2$d-এর মধ্যে %1$d সম্পন্ন</string>
+    <string name="iptv_ui10_refresh_all_done">সম্পন্ন · সব %1$d রিফ্রেশ হয়েছে</string>
+    <string name="iptv_ui10_refresh_all_failed">সম্পন্ন · %1$d রিফ্রেশ হয়েছে, %2$d ব্যর্থ</string>
+</resources>
