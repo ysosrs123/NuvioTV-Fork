@@ -780,6 +780,8 @@ Phone setup (security review)
 
 ## Validation
 
+- Minified release build (R8) green at `03808ae` (run 38014569747), same code as the
+  `3065341` debug build; not installed on a device.
 - Remaining sport screens on the new score bands, NHL goalies, race winners and
   translations: CI debug build green at `3065341` (run 38013663627); 788 core and 276
   data-layer JVM tests on the host. Not device-tested. Latest build for the device pass.

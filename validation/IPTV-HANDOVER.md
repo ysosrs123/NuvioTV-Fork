@@ -12,8 +12,8 @@ Older sections further down are history; read "Start here" first.
 State (end of the 8–9 October session):
 - Everything is committed and pushed. Latest green CI: debug `8354d89` (run 37867719176),
   which contains every fix up to the 9 October device findings plus widgets, sport
-  follow-ups and translations; later commits are docs only. Minified release (R8) last green
-  at `dd888c0` (run 37795570642) — run a release build again before shipping.
+  follow-ups and translations; later commits are docs only. Minified release (R8) green
+  at `03808ae` (run 38014569747, 10 October) — run it again before shipping.
 - Host tests: core 748, data 276, androidTest compiles
   (`python3 tools/iptv-host-tests/run.py`).
 - Device testing: user passes on 8 October (`f29cbe2`, `24d6868`), 9 October (`374e1f6`,
