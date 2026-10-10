@@ -433,3 +433,33 @@ UFC live round, result method and winner; cricket live `isBatting`/`isCurrent` a
 overs; soccer `keyEvents`, live clock and `subbedIn`/`subbedOut`; AFL/NRL/URC live
 clock and details `period`; golf leaderboard during a round with most of the field on
 the course (only 6 had started) and after a cut (this event has none).
+
+## Fifth pass (10 October evening)
+
+Real responses captured about 19:07 Brisbane time on 10 October (09:07Z). In play: one NBL
+game (Phoenix v United, 2nd quarter), six ATP matches in Shanghai and three WTA qualifying
+matches in Wuhan. PGA was between rounds (event `in`, round `STATUS_PLAY_COMPLETE`), not
+mid-round. `nhl-summary-LIVE.json` and `nbl-summary.json` in this capture are byte-for-byte
+the morning files, so NHL adds nothing new. Trimmed copies are in
+`app/src/test/resources/sports/*-real-20261010b.json` (`SportsRealDataLiveTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NBL scoreboard (live) | `STATUS_IN_PROGRESS`, `period` 2, `displayClock` `5:56` with `clock` 356.0 (counts down), `shortDetail` `5:56 - 2nd`. `linescores` carry `period`. `situation` holds only `lastPlay` (`text`, `scoreValue`, `team`, `athletesInvolved`), no probability, possession or fouls. No venue or broadcasts. | none |
+| NBL summary (live) | `format.regulation` `periods` 4, `clock` 600 (overtime 300). Header `linescores` without `period`; competitors also carry `timeoutsUsed`/`timeoutsRemaining`, `fouls.bonusState` and `possession` (false for both). 138 `plays`, clock counting **down** (`9:42` … `6:03`), `period.number`, `homeScore`/`awayScore`, `scoringPlay`, `team.id` only; no `wallclock` (`wallclockAvailable` false). `winprobability` empty, no `situation`. Team box score and `leaders` (points, assists, rebounds) filled in. | none — 10-minute shape puts 2nd 5:56 at 40 min after the start; the capture was 37 min after the scheduled tip-off |
+| Tennis (live) | In-play set has no `winner`; an unfinished 6–6 set can carry `tiebreak` points (`8`–`6`). `possession` (server) appears only on matches that also have a `situation` object (baseball-style `onFirst`… all false); 5 of 9 live matches had neither. `status.period` = current set, `detail` `3rd Set`. | none |
+| Golf (between rounds) | Every player has the finished round (18 holes, `F`) and an empty next-round line `{"period": 4}` with no tee time; the header has round-4 `teeTime` and `todayDetail` `-6(F)`. | none (event stays live with the round status as detail) |
+| URC summary | Header lines `0, 36, 0, 0` (half-time missing at source, two trailing zeros). | Rugby summary lines drop trailing zero entries after the second half (`0 36`, as on the scoreboard) |
+| Others | AFL, NRL, A-League, EPL, UCL, NFL, college football, MLB, NBA, NHL, F1, NASCAR, UFC and cricket all `pre`/`post` with the shapes above; NHL shootout final has a fifth line (`Final/SO`). | none |
+
+Confirmed now: NBL/basketball live status, running clock (counting down) on scoreboard and
+plays, live per-quarter lines, `lastPlay`, live box score and leaders, 10-minute quarter
+markers; tennis live sets, current set, serve and in-set tiebreak points; golf between rounds.
+
+Still unconfirmed: NFL/college `situation` (down and distance, possession, probability) and
+`drives.current`; MLB balls/strikes/outs and runners; NBA live win probability (NBL has
+none); NHL running clock and a power play in progress; tennis match tiebreak in play; F1
+live session state, classification and gaps; NASCAR running order; UFC live round, method
+and winner; cricket live `isBatting`/`isCurrent` and overs; soccer `keyEvents`, live clock
+and substitutions; AFL/NRL/URC live clock and details `period`; golf with the field on the
+course and after a cut.

@@ -134,8 +134,10 @@ object EspnSummary {
         val lines = c.optJSONArray("linescores")?.let(::objs).orEmpty().filter { (it.int("period") ?: 1) in 1..12 }.sortedBy { it.int("period") ?: 0 }.take(12)
         val afl = sport == "australian-football"
         val split = afl && lines.isNotEmpty() && lines.all { it.has("goals") && it.has("behinds") }
+        val values = lines.mapNotNull { (it.str("displayValue") ?: it.str("value")?.let(::whole))?.takeIf { v -> v.length <= 8 } }
+            .let { if (sport == "rugby" || sport == "rugby-league") it.take(2) + it.drop(2).dropLastWhile { v -> v == "0" } else it }
         val periods = if (score == null) emptyList() else if (split) lines.map { "${it.int("goals") ?: 0}.${it.int("behinds") ?: 0}" }
-        else SportsLines.perPeriod(lines.mapNotNull { (it.str("displayValue") ?: it.str("value")?.let(::whole))?.takeIf { v -> v.length <= 8 } }, score)
+        else SportsLines.perPeriod(values, score)
         val breakdown = if (afl) stats?.let { s -> val g = s["goals"]; val b = s["behinds"]; if (g != null && b != null) "$g.$b" else null }
             ?: lines.takeIf { split }?.let { "${it.sumOf { l -> l.int("goals") ?: 0 }}.${it.sumOf { l -> l.int("behinds") ?: 0 }}" } else null
         return SummaryLine(score, periods, breakdown)

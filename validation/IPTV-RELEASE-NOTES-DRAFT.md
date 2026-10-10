@@ -650,6 +650,11 @@ Navigation fixes:
 - Multiview: moving between categories and channels in the add/replace list no longer jumps
   to the pictures behind it.
 
+Sport data (second 10 October capture: live NBL and live tennis):
+- Rugby union game details no longer show empty extra score columns.
+- Live NBL games and tennis matches with live sets, serve and tiebreaks are checked against
+  real data.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
