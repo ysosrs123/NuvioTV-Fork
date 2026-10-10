@@ -697,6 +697,10 @@ Before merge and release (only on the user's confirmation):
   `#EXTVLCOPT`/`#KODIPROP` playlist tags, which must stay parseable), data sources (ESPN,
   TheSportsDB) and upstream Nuvio's own licence attributions (README). Check new work
   with a grep for app names before committing; give helpers this rule in their brief.
+- No people's names (user rule, 10 October): no author, developer, maintainer or contributor
+  names, handles, emails, copyright or "by" credits in code, comments, strings, docs or
+  fixtures, other than the commit identity below and upstream Nuvio's own existing files.
+  Real sport data in fixtures (players, teams) is fine.
 - Nothing may look machine-written: no mention of automated tools or assistants in code,
   comments, docs, commit messages or branch names.
 - Keep this handover, the progress log and the release notes current with every change;
