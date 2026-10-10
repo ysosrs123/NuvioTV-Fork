@@ -35,12 +35,14 @@ series open after episodes and TMDB load, up to ~45 s worst case; Play not Resum
 provider-only titles; library/watched for `iptv-vod:` ids excluded from sync), guide reads
 outside write transactions during imports, per-account refresh locks (max 2 sources).
 Follow-ups not done: show NHL goalies (`SportsSummary.goalies`) and F1 `RaceSession.top`
-in the UI; Sport redesign (item 27) built in `d81ba81` and the Home rows / Games now strip after it;
-still on the old look (suggested: reuse `TeamBand`/`CardState` from IptvSportCards.kt): Game
-Centre score line and LIVE tag, team screen, Nuvio player pop-up, All scores, multiview score
-cells, widget red dots; the video score bug stays.
-In progress (10 October, user away): those remaining screens moved to the new look, NHL
-goalies and the F1 top three shown; CI debug build started at `3de7568`.
+in the UI; Sport redesign (item 27) built in `d81ba81`, Home rows / Games now in `3de7568`, the rest
+after it; the video score bug (IptvSportsOverlay `BugSegment`) keeps its own look.
+Done 10 October (user away): those remaining screens moved to the new look (Game Centre,
+team page, player pop-up, All scores, multiview score tiles, widgets; the full-screen banner
+follows via `GameScoreLine`), NHL goalies (`SportsGoalies` in SportsLedger.kt) and racing
+session winners shown. CI green at `3de7568` (run 38012700521) before this step; a new run
+follows. Unverified: row heights computed from text sizes, live hockey now loads the
+focused game's summary (one extra request).
 
 Next, in order:
 1. Give the user the CI run link for the fixes of the second 9 October pass; take their

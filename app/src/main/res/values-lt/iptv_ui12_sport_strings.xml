@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui12_sport_goalies">Vartininkai</string>
+    <plurals name="iptv_ui12_sport_saves">
+        <item quantity="one">%1$d atrėmimas</item>
+        <item quantity="few">%1$d atrėmimai</item>
+        <item quantity="many">%1$d atrėmimo</item>
+        <item quantity="other">%1$d atrėmimų</item>
+    </plurals>
+    <plurals name="iptv_ui12_sport_shots_against">
+        <item quantity="one">%1$d metimas į vartus</item>
+        <item quantity="few">%1$d metimai į vartus</item>
+        <item quantity="many">%1$d metimo į vartus</item>
+        <item quantity="other">%1$d metimų į vartus</item>
+    </plurals>
+    <string name="iptv_ui12_sport_goalie_line">%1$s %2$s (%3$s)</string>
+</resources>

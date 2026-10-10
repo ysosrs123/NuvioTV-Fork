@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui12_sport_goalies">Kiper</string>
+    <plurals name="iptv_ui12_sport_saves">
+        <item quantity="other">%1$d penyelamatan</item>
+    </plurals>
+    <plurals name="iptv_ui12_sport_shots_against">
+        <item quantity="other">%1$d tembakan ke gawang</item>
+    </plurals>
+    <string name="iptv_ui12_sport_goalie_line">%1$s %2$s (%3$s)</string>
+</resources>

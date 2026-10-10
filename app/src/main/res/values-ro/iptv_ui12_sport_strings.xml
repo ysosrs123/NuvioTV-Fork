@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui12_sport_goalies">Portari</string>
+    <plurals name="iptv_ui12_sport_saves">
+        <item quantity="one">%1$d intervenție</item>
+        <item quantity="few">%1$d intervenții</item>
+        <item quantity="other">%1$d de intervenții</item>
+    </plurals>
+    <plurals name="iptv_ui12_sport_shots_against">
+        <item quantity="one">%1$d șut primit</item>
+        <item quantity="few">%1$d șuturi primite</item>
+        <item quantity="other">%1$d de șuturi primite</item>
+    </plurals>
+    <string name="iptv_ui12_sport_goalie_line">%1$s %2$s (%3$s)</string>
+</resources>

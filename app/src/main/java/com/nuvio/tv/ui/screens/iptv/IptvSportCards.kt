@@ -159,7 +159,7 @@ internal fun ColumnScope.SportCardContent(item: IptvFixtureItem, hidden: Boolean
     when {
         shaped && detail is SportsDetail.Tennis && home != null && away != null -> TennisMiddle(fixture, detail, home, away, hidden, focused, middle)
         shaped && detail is SportsDetail.Golf -> GolfMiddle(fixture, detail, hidden, favourites, focused, middle)
-        shaped && detail is SportsDetail.Sessions -> SessionsMiddle(fixture, detail, focused, middle)
+        shaped && detail is SportsDetail.Sessions -> SessionsMiddle(fixture, detail, hidden, focused, middle)
         shaped && detail is SportsDetail.Card -> FightMiddle(fixture, detail, hidden, focused, middle)
         shaped && detail is SportsDetail.Cricket && home != null && away != null -> CricketMiddle(fixture, detail, home, away, focused, middle)
         shaped && detail is SportsDetail.Baseball && home != null && away != null -> BaseballMiddle(fixture, detail, home, away, focused, middle)
@@ -212,7 +212,7 @@ private fun BandValue(value: BandText?, focused: Boolean) {
 }
 
 @Composable
-private fun CardBands(fixture: SportsFixture, home: FixtureTeam, away: FixtureTeam, focused: Boolean, modifier: Modifier, logo: Dp,
+internal fun CardBands(fixture: SportsFixture, home: FixtureTeam, away: FixtureTeam, focused: Boolean, modifier: Modifier, logo: Dp,
     active: FixtureSide? = null, extra: (@Composable () -> Unit)?, value: @Composable (FixtureTeam, FixtureSide) -> Unit) {
     val sides = if (SportsFixtureText.awayFirst(fixture)) listOf(FixtureSide.AWAY, FixtureSide.HOME) else listOf(FixtureSide.HOME, FixtureSide.AWAY)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -256,7 +256,7 @@ internal fun TeamBand(team: FixtureTeam, logo: Dp, active: Boolean, focused: Boo
 internal fun SportDetailBody(fixture: SportsFixture, hidden: Boolean, favourites: Set<String>, modifier: Modifier) {
     when (val detail = fixture.sportDetail) {
         is SportsDetail.Golf -> GolfMiddle(fixture, detail, hidden, favourites, false, modifier)
-        is SportsDetail.Sessions -> SessionsMiddle(fixture, detail, false, modifier)
+        is SportsDetail.Sessions -> SessionsMiddle(fixture, detail, hidden, false, modifier)
         is SportsDetail.Card -> FightMiddle(fixture, detail, hidden, false, modifier)
         else -> Unit
     }
@@ -387,7 +387,7 @@ private fun GolfMiddle(fixture: SportsFixture, detail: SportsDetail.Golf, hidden
 }
 
 @Composable
-private fun SessionsMiddle(fixture: SportsFixture, detail: SportsDetail.Sessions, focused: Boolean, modifier: Modifier) {
+private fun SessionsMiddle(fixture: SportsFixture, detail: SportsDetail.Sessions, hidden: Boolean, focused: Boolean, modifier: Modifier) {
     val all = detail.sessions
     val from = (all.indexOfFirst { it.state != FixtureStatus.FINAL }.takeIf { it >= 0 } ?: all.size).coerceAtMost(all.size - SESSION_ROWS).coerceAtLeast(0)
     val current = detail.current
@@ -406,7 +406,7 @@ private fun SessionsMiddle(fixture: SportsFixture, detail: SportsDetail.Sessions
                     fontWeight = if (now) FontWeight.SemiBold else FontWeight.Normal,
                     color = if (session.state == FixtureStatus.FINAL) NuvioTheme.colors.TextSecondary else itemContent(focused))
                 Text(when (session.state) {
-                    FixtureStatus.FINAL -> stringResource(R.string.iptv_sport5_section_done)
+                    FixtureStatus.FINAL -> session.top.firstOrNull()?.takeIf { !hidden } ?: stringResource(R.string.iptv_sport5_section_done)
                     FixtureStatus.LIVE -> stringResource(R.string.iptv_sport_live)
                     FixtureStatus.SCHEDULED -> sportWhen(session.startMillis)
                 }, style = MaterialTheme.typography.labelSmall, maxLines = 1,

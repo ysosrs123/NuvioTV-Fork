@@ -89,3 +89,18 @@ object SportsLedger {
         }
     }
 }
+
+object SportsGoalies {
+    fun inNet(goalies: List<SummaryGoalie>, awayFirst: Boolean): List<SummaryGoalie> =
+        (if (awayFirst) listOf(FixtureSide.AWAY, FixtureSide.HOME) else listOf(FixtureSide.HOME, FixtureSide.AWAY))
+            .mapNotNull { side -> goalies.filter { it.side == side }.maxByOrNull { it.shotsAgainst ?: -1 } }
+
+    fun savePct(text: String?): String? {
+        val value = text?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+        val number = value.toDoubleOrNull() ?: return value
+        if (number < 0 || number > 1) return value
+        return String.format(java.util.Locale.ROOT, "%.3f", number).let { if (it.startsWith("0.")) it.drop(1) else it }
+    }
+
+    fun surname(name: String): String = name.trim().substringAfterLast(' ').ifEmpty { name.trim() }
+}

@@ -15,10 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -54,7 +52,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
-import com.nuvio.tv.core.iptv.FixtureSide
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.RecordingStatus
 import com.nuvio.tv.core.iptv.SportsChange
@@ -622,19 +619,23 @@ private fun AlertCard(alert: IptvPlayerAlert, nuvio: IptvSportsNuvio, focus: Boo
     val fixture = alert.fixture
     val link = nuvio.linkFor(alert.key)
     val hidden = alertHidden(alert, nuvio)
-    val side = alert.change?.side?.let { if (it == FixtureSide.HOME) fixture.home else fixture.away } ?: fixture.home ?: fixture.away
+    val home = fixture.home
+    val away = fixture.away
+    val scorer = alert.change?.takeIf { it.kind == SportsChangeKind.SCORED && !hidden }?.side
     Column(modifier.width(430.dp).clip(RoundedCornerShape(16.dp)).background(NuvioTheme.colors.Background.copy(alpha = .95f))) {
-        Row(Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            if (side != null) TeamLogo(side, 44.dp)
-            Column(Modifier.weight(1f)) {
-                Text(alertHeadline(alert, hidden), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.Error, maxLines = 1)
-                Text(iptvScoreLine(fixture, hidden), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(link?.let { stringResource(R.string.iptv_sport5_nuvio_on_channel, sportLeagueName(fixture), channelName(it.row)) } ?: sportLeagueName(fixture),
-                    style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
+        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(alertHeadline(alert).uppercase(), style = SportCaps, color = NuvioTheme.colors.TextPrimary, maxLines = 1,
+                overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            CardState(fixture, fixture.sportDetail, hidden)
         }
+        if (home != null && away != null) CardBands(fixture, home, away, false, Modifier.fillMaxWidth().height(ALERT_BANDS), 32.dp, scorer, extra = null) { team, side ->
+            BandScore(fixture, team, side, hidden, false)
+        } else Text(fixture.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
+            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 16.dp))
+        Text(link?.let { stringResource(R.string.iptv_sport5_nuvio_on_channel, sportLeagueName(fixture), channelName(it.row)) } ?: sportLeagueName(fixture),
+            style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 10.dp))
         Row(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             if (link != null) NuvioActionPill(onWatch, Modifier.focusRequester(first)) { Text(stringResource(R.string.iptv_sport5_nuvio_watch_game)) }
             NuvioActionPill(onLater, if (link == null) Modifier.focusRequester(first) else Modifier) { Text(stringResource(R.string.iptv_sport5_nuvio_later)) }
@@ -655,10 +656,10 @@ private fun AlertChip(alert: IptvPlayerAlert, nuvio: IptvSportsNuvio, modifier: 
     val hidden = alertHidden(alert, nuvio)
     Row(modifier.widthIn(max = 520.dp).clip(RoundedCornerShape(50)).background(NuvioTheme.colors.Background.copy(alpha = .9f))
         .padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.size(8.dp).clip(CircleShape).background(NuvioTheme.colors.Error))
+        CardState(fixture, fixture.sportDetail, hidden)
         Text(if (hidden) SportsOverlayText.match(fixture) else SportsFixtureText.bug(fixture).primary, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
             maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-        Text(listOfNotNull(alertHeadline(alert, hidden), nuvio.linkFor(alert.key)?.let { channelName(it.row) }).joinToString(" · "),
+        Text(listOfNotNull(alertHeadline(alert).takeIf(String::isNotEmpty), nuvio.linkFor(alert.key)?.let { channelName(it.row) }).joinToString(" · "),
             style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1)
     }
 }
@@ -670,7 +671,7 @@ private fun alertHidden(alert: IptvPlayerAlert, nuvio: IptvSportsNuvio): Boolean
 }
 
 @Composable
-private fun alertHeadline(alert: IptvPlayerAlert, hidden: Boolean): String {
+private fun alertHeadline(alert: IptvPlayerAlert): String {
     val fixture = alert.fixture
     val reminder = alert.reminder
     if (reminder != null) {
@@ -684,8 +685,7 @@ private fun alertHeadline(alert: IptvPlayerAlert, hidden: Boolean): String {
             else R.string.iptv_sport2_final)
         null -> ""
     }
-    val state = SportsFixtureText.bug(fixture).state?.takeIf { fixture.status == FixtureStatus.LIVE && !hidden }
-    return listOfNotNull(label.takeIf { it.isNotEmpty() }, state).joinToString(" · ")
+    return label
 }
 
 internal fun iptvScoreLine(fixture: SportsFixture, hidden: Boolean): String {
@@ -714,3 +714,4 @@ private const val POPUP_MILLIS = 15_000L
 private const val CHIP_MILLIS = 8_000L
 private const val STALE_MILLIS = 3L * 60 * 1000
 private const val MAX_QUEUED = 4
+private val ALERT_BANDS = 84.dp

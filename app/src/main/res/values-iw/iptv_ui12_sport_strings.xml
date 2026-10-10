@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui12_sport_goalies">שוערים</string>
+    <plurals name="iptv_ui12_sport_saves">
+        <item quantity="one">%1$d הצלה</item>
+        <item quantity="two">%1$d הצלות</item>
+        <item quantity="many">%1$d הצלות</item>
+        <item quantity="other">%1$d הצלות</item>
+    </plurals>
+    <plurals name="iptv_ui12_sport_shots_against">
+        <item quantity="one">%1$d זריקה לשער</item>
+        <item quantity="two">%1$d זריקות לשער</item>
+        <item quantity="many">%1$d זריקות לשער</item>
+        <item quantity="other">%1$d זריקות לשער</item>
+    </plurals>
+    <string name="iptv_ui12_sport_goalie_line">%1$s %2$s (%3$s)</string>
+</resources>

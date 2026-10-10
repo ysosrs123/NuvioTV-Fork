@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui12_sport_goalies">Вратари</string>
+    <plurals name="iptv_ui12_sport_saves">
+        <item quantity="one">%1$d спасяване</item>
+        <item quantity="other">%1$d спасявания</item>
+    </plurals>
+    <plurals name="iptv_ui12_sport_shots_against">
+        <item quantity="one">%1$d удар към вратата</item>
+        <item quantity="other">%1$d удара към вратата</item>
+    </plurals>
+    <string name="iptv_ui12_sport_goalie_line">%1$s %2$s (%3$s)</string>
+</resources>

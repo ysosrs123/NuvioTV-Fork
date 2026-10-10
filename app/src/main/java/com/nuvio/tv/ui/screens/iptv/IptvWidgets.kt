@@ -272,12 +272,12 @@ private fun SportWidget(roomy: Boolean, short: Boolean) {
             val hidden = fixtures.hidden(fixture)
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (fixture.status == FixtureStatus.LIVE) Box(Modifier.size(6.dp).clip(CircleShape).background(NuvioTheme.colors.Error))
-                    Text(iptvScoreLine(fixture, hidden), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold,
-                        color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    CardState(fixture, fixture.sportDetail, hidden)
+                    Text(sportLeagueName(fixture), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1,
+                        overflow = TextOverflow.Ellipsis)
                 }
-                Text(iptvFixtureState(fixture, hidden), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1,
-                    overflow = TextOverflow.Ellipsis)
+                Text(iptvScoreLine(fixture, hidden), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold,
+                    color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -341,7 +341,6 @@ private fun RecordingsWidget(recordings: List<IptvRecording>, minute: Long, room
 private fun RecordingLine(recording: IptvRecording, live: Boolean, label: String, roomy: Boolean) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            if (live) Box(Modifier.size(6.dp).clip(CircleShape).background(NuvioTheme.colors.Error))
             Text(label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold,
                 color = if (live) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }

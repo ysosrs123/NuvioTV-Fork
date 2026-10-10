@@ -489,7 +489,7 @@ private fun AllScores(fixtures: IptvFixturesState, modifier: Modifier) {
     }.sortedBy { if (it.status == FixtureStatus.LIVE) 0L else it.startMillis }
     BoxWithConstraints(modifier.padding(start = 48.dp, end = 14.dp, top = 12.dp, bottom = 12.dp)) {
         val columns = if (maxWidth > 520.dp) 2 else 1
-        val rows = ((maxHeight - 32.dp) / 62.dp).toInt().coerceAtLeast(1)
+        val rows = ((maxHeight - 32.dp) / (SCORE_CELL + 8.dp)).toInt().coerceAtLeast(1)
         val size = columns * rows
         val pages = ((games.size + size - 1) / size).coerceAtLeast(1)
         var page by remember { mutableIntStateOf(0) }
@@ -514,19 +514,25 @@ private fun AllScores(fixtures: IptvFixturesState, modifier: Modifier) {
 
 @Composable
 private fun ScoreCell(fixture: SportsFixture, hidden: Boolean, modifier: Modifier) {
-    val bug = SportsFixtureText.bug(fixture)
     val live = fixture.status == FixtureStatus.LIVE
     val close = live && !hidden && com.nuvio.tv.core.iptv.SportsFixtureSections.close(fixture)
-    Column(modifier.height(54.dp).clip(RoundedCornerShape(8.dp)).background(NuvioTheme.colors.TextPrimary.copy(alpha = .06f))
-        .then(if (close) Modifier.border(1.dp, NuvioTheme.colors.Secondary, RoundedCornerShape(8.dp)) else Modifier)
-        .padding(horizontal = 10.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(listOfNotNull(sportLeagueName(fixture), if (live) bug.state?.takeIf { !hidden } ?: stringResource(R.string.iptv_sport_live) else clock(fixture.startMillis))
-            .joinToString(" · "), style = MaterialTheme.typography.labelSmall, color = if (live) NuvioTheme.colors.Error else NuvioTheme.colors.TextTertiary,
-            maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(if (hidden || !live) sportTitle(fixture) else bug.primary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold,
-            color = NuvioTheme.colors.TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    val home = fixture.home
+    val away = fixture.away
+    Column(modifier.height(SCORE_CELL).clip(RoundedCornerShape(8.dp)).background(NuvioTheme.colors.TextPrimary.copy(alpha = .06f))
+        .then(if (close) Modifier.border(1.dp, NuvioTheme.colors.Secondary, RoundedCornerShape(8.dp)) else Modifier), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Row(Modifier.fillMaxWidth().height(22.dp).padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(sportLeagueName(fixture).uppercase(), style = SportCaps, color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f))
+            CardState(fixture, fixture.sportDetail, hidden)
+        }
+        if (home != null && away != null) CardBands(fixture, home, away, false, Modifier.fillMaxWidth().weight(1f).padding(bottom = 4.dp), 22.dp, extra = null) { team, side ->
+            BandScore(fixture, team, side, hidden, false)
+        } else Text(if (hidden || !live) sportTitle(fixture) else SportsFixtureText.bug(fixture).primary, style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 10.dp))
     }
 }
 
+private val SCORE_CELL = 86.dp
 private const val PAGE_MILLIS = 8_000L
 private const val UPCOMING_MILLIS = 6L * 60 * 60 * 1000

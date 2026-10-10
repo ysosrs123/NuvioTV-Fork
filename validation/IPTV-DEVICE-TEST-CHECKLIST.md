@@ -116,6 +116,13 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 13. Settings → Live TV → Sport → TheSportsDB key: Show button aligned; dialog opaque. Other
     Live TV settings dialogs opaque.
 14. QR sign-in now present (CI builds include the keys from your secret).
+15. Sport new look: top panel ledger (live, pre-match, final; golf, tennis, racing,
+    cricket); score cards with team-colour bands and logos (Sport lanes, Home rows, Games now
+    strip, Game Centre, team page, All scores, multiview score tiles, widgets, the pop-up in
+    Nuvio's player). Check text fits, no clipping, spoiler-free hides scores.
+16. NHL game: goalie saves in Game Centre and the top panel. Racing card: session winners.
+17. Sport settings → leagues: NBL, WNBA, College Football available (off by default); NBL
+    timeline uses 10-minute quarters.
 
 ## 7b. Fixes from the 9 October pass (build after `8354d89`)
 1. Back: full screen → guide → Live TV menu → "Leave Live TV?" (Stay / Leave to Home).

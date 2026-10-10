@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +51,8 @@ import com.nuvio.tv.core.iptv.MomentKind
 import com.nuvio.tv.core.iptv.SportsEvents
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureText
+import com.nuvio.tv.core.iptv.SportsGoalies
+import com.nuvio.tv.core.iptv.SportsLedger
 import com.nuvio.tv.core.iptv.SportsMarker
 import com.nuvio.tv.core.iptv.SportsMarkers
 import com.nuvio.tv.core.iptv.SportsRefresh
@@ -242,10 +245,9 @@ private fun CentreHeader(fixture: SportsFixture, summary: SportsSummary?, hidden
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(listOfNotNull(sportLeagueName(fixture), round, fixture.venue).joinToString(" · "), style = MaterialTheme.typography.labelMedium,
                 color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-            if (fixture.status == FixtureStatus.LIVE) Tag((if (hidden) null else SportsFixtureText.periodClock(fixture)) ?: stringResource(R.string.iptv_sport_live), live = true)
-            else if (fixture.status == FixtureStatus.FINAL) Tag(stringResource(R.string.iptv_sport2_final))
+            CardState(fixture, fixture.sportDetail, hidden)
         }
-        GameScoreLine(fixture, hidden, 36.dp, MaterialTheme.typography.headlineSmall)
+        GameScoreLine(fixture, hidden, 24.dp, MaterialTheme.typography.titleLarge, cities = true)
         if (hidden) Text(stringResource(R.string.iptv_sport5p_hidden), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
         else summary?.homeLine?.breakdown?.let { home -> summary?.awayLine?.breakdown?.let { away ->
             Text(if (SportsFixtureText.awayFirst(fixture)) "$away – $home" else "$home – $away", style = MaterialTheme.typography.labelMedium,
@@ -259,7 +261,7 @@ private fun CentreHeader(fixture: SportsFixture, summary: SportsSummary?, hidden
 }
 
 @Composable
-internal fun GameScoreLine(fixture: SportsFixture, hidden: Boolean, logo: Dp, style: TextStyle, modifier: Modifier = Modifier) {
+internal fun GameScoreLine(fixture: SportsFixture, hidden: Boolean, logo: Dp, style: TextStyle, modifier: Modifier = Modifier, cities: Boolean = false) {
     val home = fixture.home
     val away = fixture.away
     if (home == null || away == null) {
@@ -269,16 +271,37 @@ internal fun GameScoreLine(fixture: SportsFixture, hidden: Boolean, logo: Dp, st
     }
     val first = SportsFixtureText.awayFirst(fixture)
     val (left, right) = if (first) away to home else home to away
-    val scores = SportsFixtureText.scores(fixture)?.takeIf { !hidden && fixture.status != FixtureStatus.SCHEDULED }?.let { if (first) it.second to it.first else it }
-    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        TeamLogo(left, logo)
-        Text(left.shortName ?: left.name, style = style, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1,
-            overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-        Text(scores?.let { "${it.first} – ${it.second}" } ?: if (first) "@" else "v", style = style, fontWeight = FontWeight.Bold,
-            color = if (scores != null) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextTertiary, maxLines = 1)
-        Text(right.shortName ?: right.name, style = style, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 1,
-            overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-        TeamLogo(right, logo)
+    val scores = SportsFixtureText.scores(fixture)?.takeIf { fixture.status != FixtureStatus.SCHEDULED }?.let { if (first) it.second to it.first else it }
+    val lead = scores?.let { SportsLedger.leader(it.first, it.second) }
+    val big = style.copy(fontSize = style.fontSize * 1.5f, lineHeight = style.fontSize * 1.5f, fontWeight = FontWeight.SemiBold, fontFeatureSettings = "tnum")
+    Row(modifier, verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        LedgerName(left, logo, style, cities, Modifier.weight(1f, fill = false))
+        when {
+            scores != null && hidden -> MaskBar(90.dp, Modifier.padding(bottom = 8.dp))
+            scores != null -> {
+                Text(scores.first, style = big, color = if (lead == 1) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.TextPrimary, maxLines = 1)
+                Text("/", style = big.copy(fontSize = style.fontSize * .75f), color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+                Text(scores.second, style = big, color = if (lead == 0) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.TextPrimary, maxLines = 1)
+            }
+            fixture.status == FixtureStatus.SCHEDULED -> Text(clock(fixture.startMillis), style = big.copy(fontSize = style.fontSize * 1.2f), color = NuvioTheme.colors.TextPrimary,
+                maxLines = 1)
+            else -> Text(if (first) "@" else "v", style = big.copy(fontSize = style.fontSize * .75f), color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+        }
+        LedgerName(right, logo, style, cities, Modifier.weight(1f, fill = false))
+    }
+}
+
+@Composable
+private fun LedgerName(team: FixtureTeam, logo: Dp, style: TextStyle, cities: Boolean, modifier: Modifier) {
+    val (city, nickname) = SportsLedger.names(team)
+    Column(modifier) {
+        if (cities && city != null) Text(city, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+            overflow = TextOverflow.Ellipsis)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            TeamLogo(team, logo)
+            Text(if (cities || city == null) nickname else team.shortName ?: team.name, style = style, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary,
+                maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
     }
 }
 
@@ -299,6 +322,14 @@ private fun centreItems(tab: CentreTab, fixture: SportsFixture, summary: SportsS
     val stats = summary?.stats.orEmpty().mapIndexed { i, stat ->
         CentreItem.Stat(stat.label, stat.home, stat.away, teamColour(fixture.home), teamColour(fixture.away), "stat:$i")
     }
+    val awayFirst = SportsFixtureText.awayFirst(fixture)
+    val goalies = summary?.goalies.orEmpty().sortedBy { (it.side == FixtureSide.HOME) == awayFirst }.mapIndexed { i, goalie ->
+            CentreItem.Line(listOfNotNull(team(goalie.side), goalie.name).joinToString(" · "), listOfNotNull(
+                goalie.saves?.let { pluralStringResource(R.plurals.iptv_ui12_sport_saves, it, it) },
+                goalie.shotsAgainst?.let { pluralStringResource(R.plurals.iptv_ui12_sport_shots_against, it, it) },
+                SportsGoalies.savePct(goalie.savePct)).joinToString(" · ").takeIf(String::isNotEmpty), false, "goalie:$i") to goalie
+        }
+    val inNet = summary?.let { SportsGoalies.inNet(it.goalies, awayFirst) }.orEmpty()
     val pointsText = summary?.let { endsNow(it, fixture.sport) }?.let { (home, away) ->
         stringResource(R.string.iptv_sport5p_ends_now_points, homeName.orEmpty(), home, awayName.orEmpty(), away)
     }
@@ -310,6 +341,9 @@ private fun centreItems(tab: CentreTab, fixture: SportsFixture, summary: SportsS
                 add(CentreItem.Moment(moment, SportsMarkers.estimate(moment, summary.sport, fixture.startMillis, league = fixture.league), team(moment.side), "m:$i"))
             }
             if (stats.isNotEmpty()) { add(CentreItem.Heading(R.string.iptv_sport5p_team_stats, "h:stats")); addAll(stats.take(4)) }
+            goalies.filter { (_, goalie) -> goalie in inNet }.takeIf { it.isNotEmpty() }?.let { list ->
+                add(CentreItem.Heading(R.string.iptv_ui12_sport_goalies, "h:goalies")); addAll(list.map { it.first })
+            }
             if (pointsText != null) { add(CentreItem.Heading(R.string.iptv_sport5p_ends_now, "h:ends")); add(CentreItem.Line(pointsText, null, true, "ends")) }
         }
         CentreTab.STATS -> if (hidden) emptyList() else buildList {
@@ -317,6 +351,7 @@ private fun centreItems(tab: CentreTab, fixture: SportsFixture, summary: SportsS
             summary?.leaders.orEmpty().forEachIndexed { i, leader ->
                 add(CentreItem.Line("${team(leader.side).orEmpty()} · ${leader.category}: ${leader.name}", leader.stat, false, "leader:$i"))
             }
+            if (goalies.isNotEmpty()) { add(CentreItem.Heading(R.string.iptv_ui12_sport_goalies, "h:goalies")); addAll(goalies.map { it.first }) }
         }
         CentreTab.LINEUPS -> buildList {
             summary?.rosters.orEmpty().forEach { roster ->

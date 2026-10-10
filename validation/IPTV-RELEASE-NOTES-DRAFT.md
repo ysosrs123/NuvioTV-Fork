@@ -556,6 +556,12 @@ Sport data (checked against a real capture with NHL and golf live, 10 October):
   team-colour bands with logos, codes and right-aligned scores. Golf, tennis, racing and
   cricket use the same language.
 - The Home sport rows and the guide's Games now strip use the same team-colour cards.
+- Game Centre, team page, the pop-up over Nuvio's player, All scores, multiview score tiles
+  and widgets use the same score bands and plain status text (no red dots or LIVE pills);
+  the full-screen banner's score line follows the ledger style.
+- NHL games show each goalie's saves and save percentage (Game Centre and the top panel;
+  live hockey games now load the game summary for the focused game); racing cards show
+  each finished session's winner (hidden when scores are hidden).
 - Sport can follow NBL, WNBA and College Football (off by default); NBL and WNBA timelines
   use 10-minute quarters.
 
@@ -771,6 +777,9 @@ Phone setup (security review)
 
 ## Validation
 
+- Sport redesign (ledger top panel, team-colour cards on the Sport section, Home rows and
+  Games now) and NBL/WNBA/College Football: CI debug build green at `3de7568`
+  (run 38012700521); 785 core and 276 data-layer JVM tests on the host. Not device-tested.
 - Fixes from the second 9 October device pass, the 10 October ESPN capture checks and
   translations: CI debug build green at `5a64305` (run 38009929728; the run at `16c7406`
   failed on one compile error, fixed in `5a64305`); 774 core and 276 data-layer JVM tests

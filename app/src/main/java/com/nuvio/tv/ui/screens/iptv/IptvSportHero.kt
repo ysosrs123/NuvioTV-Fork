@@ -63,6 +63,7 @@ import com.nuvio.tv.core.iptv.PeriodName
 import com.nuvio.tv.core.iptv.SportsDetail
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureText
+import com.nuvio.tv.core.iptv.SportsGoalies
 import com.nuvio.tv.core.iptv.SportsLedger
 import com.nuvio.tv.core.iptv.SportsSummary
 import com.nuvio.tv.data.iptv.IptvFixtureLink
@@ -86,7 +87,7 @@ internal fun IptvSportHero(active: Boolean, modifier: Modifier, fallback: @Compo
         IptvSportsFixturesViewModel.FEATURED -> state.rows.firstOrNull()?.items?.firstOrNull()
         else -> state.item(wanted)
     }
-    val watched = item?.fixture?.takeIf { it.status == FixtureStatus.LIVE && !state.hidden(it) && it.teams && it.sport == "soccer" }
+    val watched = item?.fixture?.takeIf { it.status == FixtureStatus.LIVE && !state.hidden(it) && it.teams && (it.sport == "soccer" || it.sport == "ice-hockey") }
     LaunchedEffect(watched?.key) { viewModel.watchSummary(watched) }
     DisposableEffect(viewModel) { onDispose { viewModel.watchSummary(null) } }
     when {
@@ -147,7 +148,7 @@ private fun SportHero(item: IptvFixtureItem, state: IptvFixturesState, summary: 
                 Box(Modifier.width(1.dp).fillMaxHeight().background(hairlineColour()))
                 Spacer(Modifier.width(18.dp))
                 Column(Modifier.width(HERO_SIDE).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(if (compact) 4.dp else 8.dp)) {
-                    val clock = heroClock(fixture, item, hidden, now)
+                    val clock = heroClock(fixture, item, hidden, now, summary)
                     clock.label?.let {
                         Text(it, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
@@ -394,7 +395,7 @@ private fun TennisLedgerLine(team: FixtureTeam, seed: Int?, side: FixtureSide, d
 }
 
 @Composable
-private fun heroClock(fixture: SportsFixture, item: IptvFixtureItem, hidden: Boolean, now: Long): Clock {
+private fun heroClock(fixture: SportsFixture, item: IptvFixtureItem, hidden: Boolean, now: Long, summary: SportsSummary?): Clock {
     val zone = ZoneId.systemDefault()
     val date = sportDate(Instant.ofEpochMilli(fixture.startMillis).atZone(zone).toLocalDate(), "EEEEdMMMM")
     val finished = stringResource(R.string.iptv_sport2_final)
@@ -458,9 +459,22 @@ private fun heroClock(fixture: SportsFixture, item: IptvFixtureItem, hidden: Boo
                 running != null -> running
                 else -> fixture.detail ?: live
             }
-            Clock(name ?: fixture.detail?.takeIf { it != big }, big, situationSentence(fixture))
+            Clock(name ?: fixture.detail?.takeIf { it != big }, big, listOfNotNull(goalieSentence(fixture, summary), situationSentence(fixture)).joinToString(" ")
+                .takeIf(String::isNotEmpty))
         }
     }
+}
+
+@Composable
+private fun goalieSentence(fixture: SportsFixture, summary: SportsSummary?): String? {
+    if (fixture.sport != "ice-hockey") return null
+    val goalies = summary?.goalies?.takeIf { it.isNotEmpty() } ?: return null
+    return SportsGoalies.inNet(goalies, SportsFixtureText.awayFirst(fixture)).mapNotNull { goalie ->
+        val saves = goalie.saves ?: return@mapNotNull null
+        val text = pluralStringResource(R.plurals.iptv_ui12_sport_saves, saves, saves)
+        val name = SportsGoalies.surname(goalie.name)
+        SportsGoalies.savePct(goalie.savePct)?.let { stringResource(R.string.iptv_ui12_sport_goalie_line, name, text, it) } ?: "$name $text"
+    }.joinToString(" · ").takeIf(String::isNotEmpty)?.let { if (it.endsWith('.')) it else "$it." }
 }
 
 @Composable

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui12_sport_goalies">حراس المرمى</string>
+    <plurals name="iptv_ui12_sport_saves">
+        <item quantity="zero">%1$d تصدٍّ</item>
+        <item quantity="one">%1$d تصدٍّ</item>
+        <item quantity="two">%1$d تصدّيان</item>
+        <item quantity="few">%1$d تصدّيات</item>
+        <item quantity="many">%1$d تصدّيًا</item>
+        <item quantity="other">%1$d تصدٍّ</item>
+    </plurals>
+    <plurals name="iptv_ui12_sport_shots_against">
+        <item quantity="zero">%1$d تسديدة على المرمى</item>
+        <item quantity="one">%1$d تسديدة على المرمى</item>
+        <item quantity="two">%1$d تسديدتان على المرمى</item>
+        <item quantity="few">%1$d تسديدات على المرمى</item>
+        <item quantity="many">%1$d تسديدة على المرمى</item>
+        <item quantity="other">%1$d تسديدة على المرمى</item>
+    </plurals>
+    <string name="iptv_ui12_sport_goalie_line">%1$s %2$s (%3$s)</string>
+</resources>

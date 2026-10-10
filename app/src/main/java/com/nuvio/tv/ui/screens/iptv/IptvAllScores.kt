@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -66,6 +65,8 @@ private const val FILTER_LIVE = "live"
 private const val FILTER_MINE = "mine"
 private const val FILTER_SPORT = "sport:"
 private val LineShape = RoundedCornerShape(10.dp)
+private val TEAM_LINE = 66.dp
+private val PLAIN_LINE = 40.dp
 
 private sealed class ScoreEntry {
     data class Header(val league: String, val live: Int) : ScoreEntry()
@@ -154,9 +155,10 @@ internal fun IptvAllScores(state: IptvFixturesState, playingId: String?, onWatch
 private fun ScoreHeader(entry: ScoreEntry.Header) {
     Row(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 14.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (entry.live > 0) Box(Modifier.size(7.dp).clip(CircleShape).background(NuvioTheme.colors.Error))
         Text((SportsLeagues.byId(entry.league)?.name ?: entry.league).uppercase(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold,
             color = NuvioTheme.colors.TextSecondary, maxLines = 1)
+        if (entry.live > 0) Text("${entry.live} ${stringResource(R.string.iptv_sport_live)}", style = SportCaps.copy(fontFeatureSettings = "tnum"),
+            fontWeight = FontWeight.Bold, color = NuvioTheme.colors.Error, maxLines = 1)
     }
 }
 
@@ -168,7 +170,10 @@ private fun ScoreLine(item: IptvFixtureItem, hidden: Boolean, spoiler: Boolean, 
     val fixture = item.fixture
     val live = fixture.status == FixtureStatus.LIVE
     val close = live && !hidden && !item.scheduleOnly && SportsFixtureSections.close(fixture)
-    Row(Modifier.fillMaxWidth().height(40.dp)
+    val home = fixture.home
+    val away = fixture.away
+    val teams = home != null && away != null
+    Row(Modifier.fillMaxWidth().height(if (teams) TEAM_LINE else PLAIN_LINE)
         .onFocusChanged { focused = it.isFocused }
         .iptvItem(focused, playing, LineShape)
         .onPreviewKeyEvent { event ->
@@ -180,33 +185,13 @@ private fun ScoreLine(item: IptvFixtureItem, hidden: Boolean, spoiler: Boolean, 
             if (isSelect(native.keyCode)) { if (native.action == AndroidKeyEvent.ACTION_UP) { if (!held) onClick(); held = false }; true } else false
         }
         .focusable().padding(end = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.width(3.dp).height(22.dp).clip(RoundedCornerShape(2.dp)).background(if (close) NuvioTheme.colors.Warning else Color.Transparent))
-        Text(when (fixture.status) {
-            FixtureStatus.LIVE -> SportsFixtureText.periodClock(fixture)?.takeIf { !hidden && !item.scheduleOnly } ?: stringResource(R.string.iptv_sport_live)
-            FixtureStatus.FINAL -> stringResource(R.string.iptv_sport2_final)
-            FixtureStatus.SCHEDULED -> sportWhen(fixture.startMillis)
-        }, style = MaterialTheme.typography.labelMedium, fontWeight = if (live) FontWeight.Bold else FontWeight.Normal, maxLines = 1, overflow = TextOverflow.Ellipsis,
-            color = if (live) NuvioTheme.colors.Error else NuvioTheme.colors.TextTertiary, modifier = Modifier.width(96.dp))
-        val home = fixture.home
-        val away = fixture.away
+        Box(Modifier.width(3.dp).height(if (teams) 44.dp else 22.dp).clip(RoundedCornerShape(2.dp)).background(if (close) NuvioTheme.colors.Warning else Color.Transparent))
+        Box(Modifier.width(96.dp), contentAlignment = Alignment.CenterStart) { CardState(fixture, fixture.sportDetail.takeIf { !item.scheduleOnly }, hidden || item.scheduleOnly) }
         val content = itemContent(focused)
         if (home != null && away != null) {
-            val awayFirst = SportsFixtureText.awayFirst(fixture)
-            val left = if (awayFirst) away else home
-            val right = if (awayFirst) home else away
-            Text(left.shortName ?: left.name, style = MaterialTheme.typography.bodyMedium, color = content, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.End, modifier = Modifier.weight(1f))
-            Box(Modifier.width(96.dp), contentAlignment = Alignment.Center) {
-                val scores = SportsFixtureText.scores(fixture)?.takeIf { fixture.status != FixtureStatus.SCHEDULED && !(item.scheduleOnly && live) }
-                when {
-                    scores == null -> Text(if (awayFirst) "@" else "v", style = MaterialTheme.typography.bodyMedium, color = NuvioTheme.colors.TextTertiary)
-                    hidden -> MaskBar(46.dp)
-                    else -> Text(if (awayFirst) "${scores.second} – ${scores.first}" else "${scores.first} – ${scores.second}", style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold, color = content, maxLines = 1)
-                }
+            CardBands(fixture, home, away, focused, Modifier.weight(1f).fillMaxHeight().padding(vertical = 3.dp), 22.dp, extra = null) { team, side ->
+                BandScore(fixture, team, side, hidden, focused, item.scheduleOnly)
             }
-            Text(right.shortName ?: right.name, style = MaterialTheme.typography.bodyMedium, color = content, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f))
         } else {
             Text(fixture.title, style = MaterialTheme.typography.bodyMedium, color = content, maxLines = 1, overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f))

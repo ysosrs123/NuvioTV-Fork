@@ -241,16 +241,15 @@ private fun NextPanel(state: IptvTeamState, viewModel: IptvTeamViewModel) {
         val live = fixture.status == FixtureStatus.LIVE
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(if (live) R.string.iptv_sport5_nuvio_now else R.string.iptv_sport5_nuvio_next), style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold, color = if (live) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary, modifier = Modifier.weight(1f))
-            Text(iptvFixtureState(fixture, state.currentHidden), style = MaterialTheme.typography.labelMedium,
-                color = NuvioTheme.colors.TextSecondary, maxLines = 1)
+                fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextSecondary, modifier = Modifier.weight(1f))
+            CardState(fixture, fixture.sportDetail, state.currentHidden)
         }
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            fixture.home?.let { TeamLogo(it, 30.dp) }
-            Text(iptvScoreLine(fixture, state.currentHidden), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
-                maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-            fixture.away?.let { TeamLogo(it, 30.dp) }
-        }
+        val home = fixture.home
+        val away = fixture.away
+        if (home != null && away != null) CardBands(fixture, home, away, false, Modifier.fillMaxWidth().height(TEAM_BANDS), 32.dp, extra = null) { team, side ->
+            BandScore(fixture, team, side, state.currentHidden, false)
+        } else Text(fixture.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
+            maxLines = 2, overflow = TextOverflow.Ellipsis)
         val side = state.home?.let { stringResource(if (it) R.string.iptv_sport2_home else R.string.iptv_sport2_away) }
         listOfNotNull(fixture.venue, side).takeIf { it.isNotEmpty() }?.let {
             Text(it.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -314,4 +313,5 @@ private fun InfoRow(label: String, value: String) {
 }
 
 private const val MAX_THEN = 4
+private val TEAM_BANDS = 84.dp
 private const val WATCH_AHEAD_MILLIS = 30L * 60 * 1000
