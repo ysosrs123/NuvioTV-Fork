@@ -296,7 +296,8 @@ fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewM
     IptvOpaqueDialogs { when (choosing) {
         IptvSportsChoice.LEAGUES -> SettingsMultiChoiceDialog(title = stringResource(R.string.iptv_sport_leagues),
             subtitle = stringResource(R.string.iptv_sport7_leagues_subtitle),
-            options = state.offered.map { SettingsPickerOption(it.id, it.name, stringResource(sourceLabel(it, state.hasKey))) },
+            options = state.offered.let { all -> all.map { it.sport }.distinct().let { order -> all.sortedBy { order.indexOf(it.sport) } } }
+                .map { SettingsPickerOption(it.id, it.name, sportName(it.sport) + " · " + stringResource(sourceLabel(it, state.hasKey))) },
             selectedValues = state.offered.filter { it.id in state.leagues }.map { it.id },
             onValuesSelected = { viewModel.setLeagues(it); dismiss() }, onDismiss = dismiss, maxHeight = 460.dp)
         IptvSportsChoice.SEARCH -> {

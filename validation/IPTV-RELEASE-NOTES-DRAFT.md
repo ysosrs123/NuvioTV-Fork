@@ -731,6 +731,9 @@ Sport data (live capture of 11 October):
   League, Conference League, EFL Championship, FA Cup, MLS, Liga MX, WSL, CFL, college
   hockey, LPGA, DP World Tour, LIV, IndyCar, NASCAR Xfinity and Truck, Premiership Rugby,
   Top 14, Champions Cup, Six Nations and The Rugby Championship.
+- The league list is grouped by sport, with the sport shown under each league. A league you
+  had added through TheSportsDB search that is now built in merges into the built-in one,
+  keeping your selection and favourite teams.
 
 Recording storage:
 - While a network share or the Movies folder is full, the recording says "Share full –

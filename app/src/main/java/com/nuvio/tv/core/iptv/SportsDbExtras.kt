@@ -180,6 +180,11 @@ object SportsDbLeagues {
 
     fun builtIn(league: SportsDbLeague): SportsLeague? = SportsLeagues.ALL.firstOrNull { it.sportsDbId == league.id }
 
+    fun builtInId(id: String): String? =
+        id.takeIf { it.startsWith(CUSTOM_PREFIX) }?.removePrefix(CUSTOM_PREFIX)?.let { sdb -> SportsLeagues.ALL.firstOrNull { it.sportsDbId == sdb }?.id }
+
+    fun favourite(key: String): String = key.substringBefore(':').let { league -> builtInId(league)?.let { it + key.substring(league.length) } } ?: key
+
     fun league(item: SportsDbLeague): SportsLeague {
         val sport = sport(item.sport)
         val aliases = (listOf(item.name) + item.alternate?.split(',').orEmpty()).map(SportsGuide::normalise).filter { it.length >= 3 }.distinct().take(8)

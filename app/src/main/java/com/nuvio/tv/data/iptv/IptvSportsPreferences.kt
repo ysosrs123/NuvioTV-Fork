@@ -55,7 +55,7 @@ class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretB
 
     var customLeagues: List<SportsLeague>
         @Synchronized get() = preferences.getStringSet(CUSTOM_KEY, null).orEmpty().take(SportsDbLeagues.MAX_CUSTOM * 2).mapNotNull(SportsDbLeagues::decodeCustom)
-            .distinctBy { it.id }.sortedBy { it.name.lowercase() }.take(SportsDbLeagues.MAX_CUSTOM)
+            .distinctBy { it.id }.filter { SportsDbLeagues.builtInId(it.id) == null }.sortedBy { it.name.lowercase() }.take(SportsDbLeagues.MAX_CUSTOM)
         @Synchronized set(value) {
             val kept = value.filter { it.custom }.distinctBy { it.id }.take(SportsDbLeagues.MAX_CUSTOM)
             preferences.edit().putStringSet(CUSTOM_KEY, kept.map(SportsDbLeagues::encodeCustom).toSet()).apply()
@@ -67,7 +67,8 @@ class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretB
         set(value) = preferences.edit().putString(LOGOS_KEY, value.name).apply()
 
     var leagues: Set<String>
-        get() = preferences.getStringSet(LEAGUES_KEY, null)?.filter { SportsLeagues.byId(it) != null }?.toSet() ?: SportsLeagues.DEFAULTS
+        get() = preferences.getStringSet(LEAGUES_KEY, null)?.map { SportsDbLeagues.builtInId(it) ?: it }?.filter { SportsLeagues.byId(it) != null }?.toSet()
+            ?: SportsLeagues.DEFAULTS
         set(value) = preferences.edit().putStringSet(LEAGUES_KEY, value.filter { SportsLeagues.byId(it) != null }.toSet()).apply()
 
     var showScores: Boolean
@@ -75,7 +76,7 @@ class IptvSportsPreferences(context: Context, private val box: () -> IptvSecretB
         set(value) = preferences.edit().putBoolean(SCORES_KEY, value).apply()
 
     var favouriteTeams: Set<String>
-        get() = preferences.getStringSet(FAVOURITES_KEY, null)?.filter { SportsFavourites.parse(it) != null }?.toSet().orEmpty()
+        get() = preferences.getStringSet(FAVOURITES_KEY, null)?.map(SportsDbLeagues::favourite)?.filter { SportsFavourites.parse(it) != null }?.toSet().orEmpty()
         set(value) = preferences.edit().putStringSet(FAVOURITES_KEY, value.filter { SportsFavourites.parse(it) != null && it.length <= 200 }
             .take(SportsFavourites.MAX).toSet()).apply()
 
