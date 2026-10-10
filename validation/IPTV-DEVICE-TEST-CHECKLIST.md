@@ -1,6 +1,6 @@
-# Nuvio IPTV — device test checklist (build `c1685393a`, run 38057188837)
+# Nuvio IPTV — device test checklist (build `f79646c53`, run 38081394566)
 
-For this build start with section 7g, then 7f, 7e, 7d, 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
+For this build start with section 7h, then 7g, 7f, 7e, 7d, 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -83,6 +83,28 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 11. Press Home on the remote with Game Centre open: logcat should show sports requests
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
+
+## 7h. 11 October sport capture, more leagues and full-share recordings (build `f79646c53`)
+1. Live TV settings → Sport → Leagues: the list is grouped by sport, each league showing its
+   sport and source underneath; scrolling the longer list is smooth.
+2. Turn on one or two of the new leagues (e.g. Ligue 1, MLS, Six Nations): their games
+   appear on the Sport page. Rugby: check Premiership Rugby, Top 14 and Champions Cup show
+   games (their ESPN ids are not confirmed by a capture).
+3. If you had added a league through TheSportsDB search that is now built in (e.g. Top 14),
+   it shows once, still selected, and your favourite teams for it are kept.
+4. Guide linking: programmes for games in the new leagues show the score/Watch on link; a
+   programme that only mentions another competition in its description is not linked.
+5. College football live (Saturday US time): last play without a "(08:05)" prefix; down and
+   distance shown; the timeline is not squashed.
+6. NHL live: a penalty shows a power play for the other team straight away.
+7. Live rugby: the clock is not stuck on 1'; half scores do not show "0 0".
+8. Football Game Centre: substitutions read "X replaces Y".
+9. Recording to a network share that is full (or nearly full): the recording row shows
+   "Share full – upload paused until there's space" in red; after freeing space it clears
+   within the next retry (up to 15 minutes, or open Recordings).
+10. Keep the share full: the recording stops once about 2 GB is waiting on the box, marked
+    "The network share is full"; it uploads after space is freed.
+11. Box storage low while recording to a share: the reason says the TV box's storage.
 
 ## 7g. Fixes from the night review of 10 October (build `c1685393a`)
 1. Phone access: right after starting the app, a paired phone cannot open a PIN-protected

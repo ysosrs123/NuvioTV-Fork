@@ -957,6 +957,9 @@ Phone setup (security review)
 
 ## Validation
 
+- 11 October sport capture fixes, 34 more leagues, league list grouped by sport, full-share
+  messages and the 2 GB backlog cap: CI debug green at `f79646c53` (run 38081394566); 859
+  core and 288 data-layer JVM tests on the host. Not device-tested.
 - Night review fixes (phone access, playback, sport matching, recording names), real
   TheSportsDB and live ESPN parser checks, Game Centre formation and cards: CI debug green
   at `c1685393a` (run 38057188837; earlier at `7c7e0e4ae`, run 38055457565); 848 core and

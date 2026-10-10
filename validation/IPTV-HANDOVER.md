@@ -9,6 +9,14 @@ Older sections further down are history; read "Start here" first.
 
 ## Start here — next session (from 10 October 2026)
 
+Update 11 October (morning): new ESPN/TheSportsDB capture checked (fixes and 34 more
+leagues, `1ad071a96`), full-share recording messages and a 2 GB backlog cap (`b8937dbff`),
+league list grouped by sport with built-in merging of searched leagues (`f79646c53`). Build
+for the device pass: CI debug green at `f79646c53` (run 38081394566). Host tests: core 859,
+data 288. Checklist: start at 7h, then 7g, 7f, 7e. Follow-ups: men's college basketball
+needs a halves timeline; ~200 minor football competitions, other golf tours, other MMA
+promotions, FIBA and minor sports are not offered; pre-game team stats are season figures.
+
 Update night of 10 October (user asleep): all night-review findings fixed and a second
 review of those fixes done (three more recording fixes); Game Centre formation and card
 marks; TheSportsDB checked against the user's real captures. Build for the next device
@@ -52,7 +60,7 @@ session winners shown. CI green at `3de7568` (run 38012700521) and at `3065341` 
 focused game's summary (one extra request).
 
 Next, in order:
-1. Device pass on `c1685393a` (run 38057188837; checklist 7g, 7f, then 7e); take the findings,
+1. Device pass on `f79646c53` (run 38081394566; checklist 7h, 7g, 7f, then 7e); take the findings,
    record and fix them the same way. Playback options, menu order, external player and
    source expiry (7e) have not been tried on a device yet.
 2. Waiting on the user (do not do these without them):
