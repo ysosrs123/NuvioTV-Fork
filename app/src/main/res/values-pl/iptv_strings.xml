@@ -242,7 +242,6 @@
     <string name="iptv_live_airing_results">Teraz: „%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Anuluj zaplanowane nagranie</string>
     <string name="iptv_recording_schedule">Nagraj o %1$s</string>
-    <string name="iptv_multiview_decoder_full">To urządzenie nie może dekodować kolejnego obrazu. Usuń jeden lub wybierz jakość obrazu Najlżejsza.</string>
     <string name="iptv_multiview_show_large">Pokaż w dużym oknie</string>
     <string name="iptv_multiview_layout">Układ</string>
     <string name="iptv_multiview_layout_grid">Siatka</string>

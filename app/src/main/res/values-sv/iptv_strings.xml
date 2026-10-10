@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">Sänds nu: ”%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Avbryt schemalagd inspelning</string>
     <string name="iptv_recording_schedule">Spela in kl. %1$s</string>
-    <string name="iptv_multiview_decoder_full">TV-boxen kan inte avkoda fler bilder. Ta bort en eller välj bildkvaliteten Lättast.</string>
     <string name="iptv_multiview_show_large">Visa stort</string>
     <string name="iptv_multiview_layout">Layout</string>
     <string name="iptv_multiview_layout_grid">Rutnät</string>

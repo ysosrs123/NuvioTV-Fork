@@ -241,7 +241,6 @@
     <string name="iptv_live_airing_results">Сада: „%1$s“</string>
     <string name="iptv_recording_cancel_scheduled">Откажи заказано снимање</string>
     <string name="iptv_recording_schedule">Сними у %1$s</string>
-    <string name="iptv_multiview_decoder_full">Овај ТВ уређај не може да декодира још једну слику. Уклоните једну или изаберите квалитет слике Најлакши.</string>
     <string name="iptv_multiview_show_large">Прикажи увећано</string>
     <string name="iptv_multiview_layout">Распоред</string>
     <string name="iptv_multiview_layout_grid">Мрежа</string>

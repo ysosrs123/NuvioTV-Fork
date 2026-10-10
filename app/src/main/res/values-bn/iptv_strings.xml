@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">এখন চলছে: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">নির্ধারিত রেকর্ডিং বাতিল করুন</string>
     <string name="iptv_recording_schedule">%1$s-এ রেকর্ড করুন</string>
-    <string name="iptv_multiview_decoder_full">এই টিভি বক্স আরেকটি ছবি ডিকোড করতে পারে না। একটি সরান বা সবচেয়ে হালকা ছবির মান বেছে নিন।</string>
     <string name="iptv_multiview_show_large">বড় করে দেখান</string>
     <string name="iptv_multiview_layout">লেআউট</string>
     <string name="iptv_multiview_layout_grid">গ্রিড</string>

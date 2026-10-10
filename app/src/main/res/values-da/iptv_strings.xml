@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">Vises nu: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Annuller planlagt optagelse</string>
     <string name="iptv_recording_schedule">Optag kl. %1$s</string>
-    <string name="iptv_multiview_decoder_full">Denne TV-boks kan ikke afkode endnu et billede. Fjern et, eller vælg billedkvaliteten Lettest.</string>
     <string name="iptv_multiview_show_large">Vis stort</string>
     <string name="iptv_multiview_layout">Layout</string>
     <string name="iptv_multiview_layout_grid">Gitter</string>

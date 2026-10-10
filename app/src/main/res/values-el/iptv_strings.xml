@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">Τώρα: «%1$s»</string>
     <string name="iptv_recording_cancel_scheduled">Ακύρωση προγραμματισμένης εγγραφής</string>
     <string name="iptv_recording_schedule">Εγγραφή στις %1$s</string>
-    <string name="iptv_multiview_decoder_full">Αυτή η συσκευή TV δεν μπορεί να αποκωδικοποιήσει άλλη εικόνα. Αφαιρέστε μία ή επιλέξτε την ποιότητα εικόνας Ελαφρύτερη.</string>
     <string name="iptv_multiview_show_large">Εμφάνιση σε μεγάλο</string>
     <string name="iptv_multiview_layout">Διάταξη</string>
     <string name="iptv_multiview_layout_grid">Πλέγμα</string>

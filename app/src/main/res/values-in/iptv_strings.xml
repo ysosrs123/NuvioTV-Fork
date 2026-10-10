@@ -239,7 +239,6 @@
     <string name="iptv_live_airing_results">Sedang tayang: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Batalkan rekaman terjadwal</string>
     <string name="iptv_recording_schedule">Rekam pukul %1$s</string>
-    <string name="iptv_multiview_decoder_full">TV box ini tidak dapat mendekode gambar lain. Hapus satu atau pilih kualitas gambar Teringan.</string>
     <string name="iptv_multiview_show_large">Tampilkan besar</string>
     <string name="iptv_multiview_layout">Tata letak</string>
     <string name="iptv_multiview_layout_grid">Kisi</string>

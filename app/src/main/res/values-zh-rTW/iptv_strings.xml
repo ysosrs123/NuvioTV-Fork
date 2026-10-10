@@ -239,7 +239,6 @@
     <string name="iptv_live_airing_results">正在播出：「%1$s」</string>
     <string name="iptv_recording_cancel_scheduled">取消預約錄影</string>
     <string name="iptv_recording_schedule">在 %1$s 錄影</string>
-    <string name="iptv_multiview_decoder_full">此電視盒無法再解碼更多畫面。請移除一個畫面，或將畫質設為「最省頻寬」。</string>
     <string name="iptv_multiview_show_large">放大顯示</string>
     <string name="iptv_multiview_layout">版面配置</string>
     <string name="iptv_multiview_layout_grid">格狀</string>

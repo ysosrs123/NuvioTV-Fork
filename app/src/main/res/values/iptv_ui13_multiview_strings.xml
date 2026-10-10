@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_decoder_room">This TV box is already decoding as much video as it can, even with the other pictures at their lightest. Remove a picture first, or swap one for a lower-resolution version of its channel (such as SD or 720p), then add this one again.</string>
+    <string name="iptv_multiview_decoder_busy">This TV box has no free video decoder for another picture right now. Remove a picture, or wait a few seconds and try again.</string>
+</resources>

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
+import androidx.media3.common.MimeTypes
 import androidx.media3.exoplayer.ExoPlayer
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.*
@@ -15,6 +16,7 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlin.math.roundToInt
 
 data class IptvLiveState(val sources: List<IptvSource> = emptyList(), val source: IptvSourceRef? = null,
     val channels: List<IptvListedChannel> = emptyList(), val next: IptvBrowseCursor? = null,
@@ -1183,7 +1185,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         mutable.update { state -> state.copy(multiview = state.multiview?.mapIndexed { i, tile -> if (i != index || tile.playback !== playback) tile
             else if (failed) tile.copy(failure = R.string.iptv_live_failed, playing = false, player = null, playback = null) else tile.copy(playing = playing ?: tile.playing) }) }
         if (failed) { val version = tileVersions[index]; viewModelScope.launch { if (tileVersions[index] == version) tileRuntimes[index].stop(owner) } }
-        else if (playing == true) applyTileAudio()
+        else if (playing == true) { applyTileAudio(); applyTileHeights("tile $index playing") }
     }
     private fun applyTileAudio() {
         val state = mutable.value
@@ -1201,7 +1203,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     private fun refusal(tile: LivePlaybackRuntime, result: LiveOpenResult): Int = when (result) {
         LiveOpenResult.CAPACITY -> when (tile.lastDenial) {
             AdmissionDenial.ACCOUNT_LIMIT -> R.string.iptv_multiview_account_full
-            AdmissionDenial.DEVICE_DECODERS -> R.string.iptv_multiview_decoder_full
+            AdmissionDenial.DEVICE_DECODERS -> R.string.iptv_multiview_decoder_busy
             AdmissionDenial.DEVICE_MEMORY -> R.string.iptv_multiview_memory_full
             AdmissionDenial.ACQUISITION_CLOSING -> R.string.iptv_live_closing
             else -> R.string.iptv_multiview_capacity
@@ -1221,10 +1223,14 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
         if (tiles.size >= minOf(device.maxTiles, multiviewMaxTiles(mutable.value.multiviewLayout, device.maxTiles))) {
             mutable.update { it.copy(message = R.string.iptv_multiview_tiles_full) }; return
         }
-        val load = tiles.mapIndexed { i, tile -> tile.playback?.pixelRate ?: multiviewPixelRate(tileHeight(i)) }
-        if (!multiviewHasRoom(load, device.decodeBudget)) { mutable.update { it.copy(message = R.string.iptv_multiview_decoder_full) }; return }
+        val loads = tileLoads(tiles + IptvTile(row))
+        if (!multiviewFits(loads, device.decode)) {
+            IptvLog.info(multiviewBudgetLine(loads, List(loads.size) { MULTIVIEW_RUNGS.first() }, device.decode, "refused"))
+            mutable.update { it.copy(message = R.string.iptv_multiview_decoder_room) }; return
+        }
         ensureGuide(listOf(row))
         mutable.update { it.copy(multiview = tiles + IptvTile(row), tileFocus = tiles.size) }
+        applyTileHeights("added")
         afterMultiviewJob { openTile(tiles.size) }
     }
     fun replaceTile(index: Int, row: IptvListedChannel) {
@@ -1274,13 +1280,24 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
     fun showLarge(index: Int) {
         if (mutable.value.multiview?.indices?.contains(index) == true) mutable.update { it.copy(mainTile = index) }
     }
-    private fun applyTileHeights() {
+    private fun applyTileHeights(action: String? = null) {
         val state = mutable.value
         val tiles = state.multiview ?: return
-        val sizes = tiles.indices.map { tileSizes.getOrNull(it) ?: state.panelHeight / 2 }
-        val heights = multiviewHeights(sizes, state.tileFocus, state.multiviewQuality, device.decodeBudget)
+        val loads = tileLoads(tiles)
+        val heights = multiviewHeights(loads, state.tileFocus, state.multiviewQuality, device.decode)
+        if (action != null || heights != state.tileHeights) IptvLog.info(multiviewBudgetLine(loads, heights, device.decode, action ?: "sized"))
         mutable.update { it.copy(tileHeights = heights) }
         tiles.forEachIndexed { i, tile -> tile.playback?.limitHeight(heights[i]) }
+    }
+    private fun tileLoads(tiles: List<IptvTile>): List<MultiviewTileLoad> = tiles.mapIndexed { i, tile ->
+        val physical = tileSizes.getOrNull(i) ?: (mutable.value.panelHeight / 2)
+        val player = tile.player
+        val format = player?.let { runCatching { it.videoFormat }.getOrNull() }?.takeIf { it.width > 0 && it.height > 0 }
+        if (player == null || format == null) return@mapIndexed MultiviewTileLoad(physical)
+        val rate = format.frameRate.takeIf { it > 0f }?.roundToInt() ?: MULTIVIEW_FRAME_RATE
+        val variants = runCatching { player.currentTracks.groups.filter { it.type == C.TRACK_TYPE_VIDEO }.sumOf { it.length } }.getOrDefault(0)
+        MultiviewTileLoad(physical, format.width.toLong() * format.height * rate, rate,
+            format.sampleMimeType == MimeTypes.VIDEO_H265 || format.sampleMimeType == MimeTypes.VIDEO_DOLBY_VISION, variants > 1)
     }
     private fun tileHeight(index: Int): Int = mutable.value.tileHeights.getOrNull(index)
         ?: multiviewRung(mutable.value.panelHeight / 2, mutable.value.multiviewQuality)
@@ -1331,7 +1348,7 @@ class IptvLiveViewModel @Inject constructor(@ApplicationContext private val cont
                     check(session === current && foreground && tileVersions[index] == version)
                     IptvLivePlayback(context, liveLocator(current, ref, source, item), purpose, format, headers = StreamHeaders.requestHeaders(item.attributes),
                         sourceUserAgent = livePreferences.userAgent(ref),
-                        onPlaying = { playing -> patch { it.copy(playing = playing) }; if (playing) applyTileAudio() },
+                        onPlaying = { playing -> patch { it.copy(playing = playing) }; if (playing) { applyTileAudio(); applyTileHeights("tile $index playing") } },
                         onError = {
                             patch { it.copy(failure = R.string.iptv_live_failed, playing = false, player = null, playback = null) }
                             if (tileVersions[index] == version) viewModelScope.launch { tileRuntimes[index].stop(owner) }

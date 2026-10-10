@@ -1,10 +1,13 @@
 package com.nuvio.tv.core.iptv
 
-data class IptvDeviceProfile(val maxTiles: Int, val tileBufferBytes: Int, val backgroundRows: Int, val decodeBudget: Long? = null) {
-    init { require(maxTiles in 1..4 && tileBufferBytes > 0 && backgroundRows > 0 && (decodeBudget == null || decodeBudget > 0)) }
+data class IptvDeviceProfile(val maxTiles: Int, val tileBufferBytes: Int, val backgroundRows: Int, val decodeBudget: Long? = null,
+    val hevcBudget: Long? = null) {
+    init { require(maxTiles in 1..4 && tileBufferBytes > 0 && backgroundRows > 0 && (decodeBudget == null || decodeBudget > 0) && (hevcBudget == null || hevcBudget > 0)) }
+    val decode: MultiviewDecode get() = MultiviewDecode(decodeBudget, hevcBudget)
 }
 
-fun iptvDeviceProfile(totalMemoryBytes: Long, lowRamDevice: Boolean, videoDecoderInstances: Int?, decodeBudget: Long? = null): IptvDeviceProfile {
+fun iptvDeviceProfile(totalMemoryBytes: Long, lowRamDevice: Boolean, videoDecoderInstances: Int?, decodeBudget: Long? = null,
+    hevcBudget: Long? = null): IptvDeviceProfile {
     val gib = totalMemoryBytes / (1024.0 * 1024 * 1024)
     val byMemory = when {
         lowRamDevice || gib < 1.6 -> 1
@@ -23,5 +26,6 @@ fun iptvDeviceProfile(totalMemoryBytes: Long, lowRamDevice: Boolean, videoDecode
             else -> 1_000
         },
         decodeBudget = decodeBudget,
+        hevcBudget = hevcBudget,
     )
 }

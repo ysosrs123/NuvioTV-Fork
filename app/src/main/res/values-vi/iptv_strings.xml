@@ -239,7 +239,6 @@
     <string name="iptv_live_airing_results">Đang phát: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Hủy lịch ghi hình</string>
     <string name="iptv_recording_schedule">Ghi hình lúc %1$s</string>
-    <string name="iptv_multiview_decoder_full">TV box này không thể giải mã thêm khung hình. Hãy xóa bớt một kênh hoặc chọn chất lượng hình ảnh Nhẹ nhất.</string>
     <string name="iptv_multiview_show_large">Hiển thị lớn</string>
     <string name="iptv_multiview_layout">Bố cục</string>
     <string name="iptv_multiview_layout_grid">Lưới</string>

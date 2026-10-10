@@ -241,7 +241,6 @@
     <string name="iptv_live_airing_results">Sada: „%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Otkaži zakazano snimanje</string>
     <string name="iptv_recording_schedule">Snimi u %1$s</string>
-    <string name="iptv_multiview_decoder_full">Ovaj TV box ne može dekodirati još jednu sliku. Ukloni jednu ili odaberi kvalitetu slike Najlakša.</string>
     <string name="iptv_multiview_show_large">Prikaži veliko</string>
     <string name="iptv_multiview_layout">Raspored</string>
     <string name="iptv_multiview_layout_grid">Mreža</string>

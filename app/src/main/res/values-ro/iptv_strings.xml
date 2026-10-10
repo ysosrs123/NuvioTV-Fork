@@ -241,7 +241,6 @@
     <string name="iptv_live_airing_results">Acum: „%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Anulează înregistrarea programată</string>
     <string name="iptv_recording_schedule">Înregistrează la %1$s</string>
-    <string name="iptv_multiview_decoder_full">Acest TV box nu poate decoda încă o imagine. Elimină una sau alege calitatea de imagine Cea mai ușoară.</string>
     <string name="iptv_multiview_show_large">Afișează mare</string>
     <string name="iptv_multiview_layout">Aranjament</string>
     <string name="iptv_multiview_layout_grid">Grilă</string>

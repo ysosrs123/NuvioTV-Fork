@@ -577,6 +577,12 @@ Live TV settings:
   Sources, phone setup and Recordings); Back returns to the Live TV menu. They are no longer
   a category in Nuvio's main Settings (reverses the 7 October decision).
 
+Multiview:
+- Before refusing another picture, multiview lowers the other pictures' quality where they
+  offer lighter versions; the box's capacity is judged from both H.264 and HEVC decoders,
+  their declared performance and the number of decoders. When a picture still can't be
+  added, the message says what to do. Log lines `multiview device` and `multiview budget=`.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

@@ -19,6 +19,8 @@ class DeviceProfileTest {
     @Test fun aSmallDecodeBudgetLimitsPictures() {
         assertEquals(1, iptvDeviceProfile(4 * gib, false, 16, decodeBudget = multiviewPixelRate(360)).maxTiles)
         assertEquals(4, iptvDeviceProfile(4 * gib, false, 16, decodeBudget = multiviewPixelRate(2160, 60)).maxTiles)
+        val profile = iptvDeviceProfile(4 * gib, false, 9, decodeBudget = multiviewPixelRate(1080) * 4, hevcBudget = 7680L * 4320 * 60)
+        assertEquals(MultiviewDecode(multiviewPixelRate(1080) * 4, 7680L * 4320 * 60), profile.decode)
     }
 
     @Test fun smallerPicturesAndBuffersOnSmallerDevices() {

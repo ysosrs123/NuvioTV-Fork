@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">இப்போது: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">திட்டமிட்ட பதிவை ரத்து செய்</string>
     <string name="iptv_recording_schedule">%1$s-க்குப் பதிவுசெய்</string>
-    <string name="iptv_multiview_decoder_full">இந்த டிவி பாக்ஸால் இன்னொரு படத்தை டிகோட் செய்ய முடியாது. ஒன்றை நீக்கவும் அல்லது மிக இலகுவான படத் தரத்தைத் தேர்ந்தெடுக்கவும்.</string>
     <string name="iptv_multiview_show_large">பெரிதாகக் காட்டு</string>
     <string name="iptv_multiview_layout">தளவமைப்பு</string>
     <string name="iptv_multiview_layout_grid">கட்டம்</string>

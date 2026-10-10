@@ -241,7 +241,6 @@
     <string name="iptv_live_airing_results">Passando agora: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Cancelar gravação agendada</string>
     <string name="iptv_recording_schedule">Gravar às %1$s</string>
-    <string name="iptv_multiview_decoder_full">Este aparelho de TV não consegue decodificar outra imagem. Remova uma ou escolha a qualidade de imagem Mais leve.</string>
     <string name="iptv_multiview_show_large">Mostrar grande</string>
     <string name="iptv_multiview_layout">Layout</string>
     <string name="iptv_multiview_layout_grid">Grade</string>

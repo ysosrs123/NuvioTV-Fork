@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">Most: „%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Ütemezett felvétel visszavonása</string>
     <string name="iptv_recording_schedule">Felvétel ekkor: %1$s</string>
-    <string name="iptv_multiview_decoder_full">Ez a TV-box nem tud több képet dekódolni. Távolíts el egyet, vagy válaszd a Legkönnyebb képminőséget.</string>
     <string name="iptv_multiview_show_large">Megjelenítés nagyban</string>
     <string name="iptv_multiview_layout">Elrendezés</string>
     <string name="iptv_multiview_layout_grid">Rács</string>

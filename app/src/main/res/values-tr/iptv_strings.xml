@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">Şimdi yayında: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Zamanlanmış kaydı iptal et</string>
     <string name="iptv_recording_schedule">%1$s saatinde kaydet</string>
-    <string name="iptv_multiview_decoder_full">Bu TV kutusu başka bir görüntüyü çözemiyor. Birini kaldırın veya En hafif görüntü kalitesini seçin.</string>
     <string name="iptv_multiview_show_large">Büyük göster</string>
     <string name="iptv_multiview_layout">Düzen</string>
     <string name="iptv_multiview_layout_grid">Izgara</string>

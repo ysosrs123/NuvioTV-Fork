@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">Tani: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Anulo regjistrimin e planifikuar</string>
     <string name="iptv_recording_schedule">Regjistro në %1$s</string>
-    <string name="iptv_multiview_decoder_full">Ky TV box nuk mund të dekodojë një pamje tjetër. Hiq një ose zgjidh cilësinë e pamjes Më e lehta.</string>
     <string name="iptv_multiview_show_large">Shfaq të madhe</string>
     <string name="iptv_multiview_layout">Paraqitja</string>
     <string name="iptv_multiview_layout_grid">Rrjetë</string>

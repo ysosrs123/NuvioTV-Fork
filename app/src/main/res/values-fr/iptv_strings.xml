@@ -241,7 +241,6 @@
     <string name="iptv_live_airing_results">En ce moment : « %1$s »</string>
     <string name="iptv_recording_cancel_scheduled">Annuler l’enregistrement programmé</string>
     <string name="iptv_recording_schedule">Enregistrer à %1$s</string>
-    <string name="iptv_multiview_decoder_full">Ce boîtier TV ne peut pas décoder une autre image. Retirez-en une ou choisissez la qualité d’image Légère.</string>
     <string name="iptv_multiview_show_large">Afficher en grand</string>
     <string name="iptv_multiview_layout">Disposition</string>
     <string name="iptv_multiview_layout_grid">Grille</string>

@@ -242,7 +242,6 @@
     <string name="iptv_live_airing_results">Práve beží: „%1$s“</string>
     <string name="iptv_recording_cancel_scheduled">Zrušiť naplánované nahrávanie</string>
     <string name="iptv_recording_schedule">Nahrať o %1$s</string>
-    <string name="iptv_multiview_decoder_full">Tento TV box nedokáže dekódovať ďalší obraz. Jeden odstráňte alebo zvoľte kvalitu obrazu Najúspornejšia.</string>
     <string name="iptv_multiview_show_large">Zobraziť veľký</string>
     <string name="iptv_multiview_layout">Rozloženie</string>
     <string name="iptv_multiview_layout_grid">Mriežka</string>

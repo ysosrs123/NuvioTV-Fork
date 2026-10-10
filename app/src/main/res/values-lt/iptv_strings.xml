@@ -242,7 +242,6 @@
     <string name="iptv_live_airing_results">Dabar rodoma: „%1$s“</string>
     <string name="iptv_recording_cancel_scheduled">Atšaukti suplanuotą įrašą</string>
     <string name="iptv_recording_schedule">Įrašyti %1$s</string>
-    <string name="iptv_multiview_decoder_full">Šis TV priedėlis negali dekoduoti dar vieno vaizdo. Pašalinkite vieną arba pasirinkite vaizdo kokybę „Lengviausia“.</string>
     <string name="iptv_multiview_show_large">Rodyti didelį</string>
     <string name="iptv_multiview_layout">Išdėstymas</string>
     <string name="iptv_multiview_layout_grid">Tinklelis</string>

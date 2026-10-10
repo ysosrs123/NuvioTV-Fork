@@ -242,7 +242,6 @@
     <string name="iptv_live_airing_results">משודר עכשיו: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">ביטול הקלטה מתוזמנת</string>
     <string name="iptv_recording_schedule">הקלטה ב-%1$s</string>
-    <string name="iptv_multiview_decoder_full">הממיר לא יכול לפענח תמונה נוספת. יש להסיר אחת או לבחור באיכות התמונה הקלה ביותר.</string>
     <string name="iptv_multiview_show_large">הצגה בגדול</string>
     <string name="iptv_multiview_layout">פריסה</string>
     <string name="iptv_multiview_layout_grid">רשת</string>

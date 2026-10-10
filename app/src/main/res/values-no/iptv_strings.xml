@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">Går nå: «%1$s»</string>
     <string name="iptv_recording_cancel_scheduled">Avbryt planlagt opptak</string>
     <string name="iptv_recording_schedule">Ta opp kl. %1$s</string>
-    <string name="iptv_multiview_decoder_full">TV-boksen kan ikke dekode flere bilder. Fjern ett eller velg bildekvaliteten Lettest.</string>
     <string name="iptv_multiview_show_large">Vis stort</string>
     <string name="iptv_multiview_layout">Oppsett</string>
     <string name="iptv_multiview_layout_grid">Rutenett</string>

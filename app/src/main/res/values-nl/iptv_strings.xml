@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">Nu: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">Geplande opname annuleren</string>
     <string name="iptv_recording_schedule">Opnemen om %1$s</string>
-    <string name="iptv_multiview_decoder_full">Dit tv-kastje kan geen extra beeld decoderen. Verwijder er een of kies beeldkwaliteit Lichtst.</string>
     <string name="iptv_multiview_show_large">Groot tonen</string>
     <string name="iptv_multiview_layout">Indeling</string>
     <string name="iptv_multiview_layout_grid">Raster</string>

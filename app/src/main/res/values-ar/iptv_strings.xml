@@ -244,7 +244,6 @@
     <string name="iptv_live_airing_results">يُعرض الآن: “%1$s”</string>
     <string name="iptv_recording_cancel_scheduled">إلغاء التسجيل المجدول</string>
     <string name="iptv_recording_schedule">تسجيل في %1$s</string>
-    <string name="iptv_multiview_decoder_full">لا يستطيع جهاز التلفاز هذا فك ترميز صورة أخرى. أزل واحدة أو اختر جودة الصورة الأخف.</string>
     <string name="iptv_multiview_show_large">عرض بحجم كبير</string>
     <string name="iptv_multiview_layout">التخطيط</string>
     <string name="iptv_multiview_layout_grid">شبكة</string>

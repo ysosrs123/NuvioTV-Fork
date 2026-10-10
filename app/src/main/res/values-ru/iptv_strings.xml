@@ -242,7 +242,6 @@
     <string name="iptv_live_airing_results">Сейчас в эфире: «%1$s»</string>
     <string name="iptv_recording_cancel_scheduled">Отменить запланированную запись</string>
     <string name="iptv_recording_schedule">Записать в %1$s</string>
-    <string name="iptv_multiview_decoder_full">Приставка не может декодировать ещё одно окно. Уберите одно или выберите качество «Облегчённое».</string>
     <string name="iptv_multiview_show_large">Показать крупно</string>
     <string name="iptv_multiview_layout">Раскладка</string>
     <string name="iptv_multiview_layout_grid">Сетка</string>

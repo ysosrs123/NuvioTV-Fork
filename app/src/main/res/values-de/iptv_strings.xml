@@ -240,7 +240,6 @@
     <string name="iptv_live_airing_results">Jetzt: „%1$s“</string>
     <string name="iptv_recording_cancel_scheduled">Geplante Aufnahme abbrechen</string>
     <string name="iptv_recording_schedule">Aufnehmen um %1$s</string>
-    <string name="iptv_multiview_decoder_full">Diese TV-Box kann kein weiteres Bild dekodieren. Entfernen Sie eines oder wählen Sie die Bildqualität Sparsamste.</string>
     <string name="iptv_multiview_show_large">Groß anzeigen</string>
     <string name="iptv_multiview_layout">Layout</string>
     <string name="iptv_multiview_layout_grid">Raster</string>
