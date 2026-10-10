@@ -20,7 +20,10 @@
     <string name="iptv_user_agent">यूज़र एजेंट</string>
     <string name="iptv_user_agent_description">इस सोर्स से चैनल, कैच-अप और फ़िल्में चलाते समय भेजा जाता है। चैनल की अपनी प्लेलिस्ट सेटिंग को फिर भी प्राथमिकता मिलती है।</string>
     <string name="iptv_user_agent_default">ऐप डिफ़ॉल्ट</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">सामान्य (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">कस्टम</string>
     <string name="iptv_user_agent_custom_hint">सिर्फ़ प्रिंट होने वाले अक्षर, 200 तक।</string>
 </resources>

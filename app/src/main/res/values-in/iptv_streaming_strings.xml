@@ -19,7 +19,10 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Dikirim saat memutar saluran, catch-up, dan film dari sumber ini. Pengaturan playlist milik saluran tetap diutamakan.</string>
     <string name="iptv_user_agent_default">Default aplikasi</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Generik (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Kustom</string>
     <string name="iptv_user_agent_custom_hint">Hanya karakter yang dapat dicetak, hingga 200.</string>
 </resources>

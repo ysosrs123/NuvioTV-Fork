@@ -20,7 +20,10 @@
     <string name="iptv_user_agent">Användaragent</string>
     <string name="iptv_user_agent_description">Skickas när kanaler, catch-up och filmer spelas från den här källan. En kanals egna spellisteinställningar har fortfarande företräde.</string>
     <string name="iptv_user_agent_default">Appens standard</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Generisk (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Anpassad</string>
     <string name="iptv_user_agent_custom_hint">Endast utskrivbara tecken, högst 200.</string>
 </resources>

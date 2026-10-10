@@ -325,7 +325,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 <section id="recordings" class="narrow" hidden aria-labelledby="recTitle">
 <div class="card">
 <div class="head"><div class="grow"><h2 id="recTitle">Recordings</h2><p class="lead">Finished recordings of the profile this page changes.</p></div><button type="button" class="small" id="recRefresh">Refresh</button></div>
-<p class="banner gap" id="recNote">Phone and tablet browsers can't play this video format. Download a recording and open it in a video player app. Keep Live TV setup open on your TV until the download finishes.</p>
+<p class="banner gap" id="recNote">Phone and tablet browsers can't play this video format. Download a recording and open it in a player such as VLC, or choose Open in VLC to watch it now. Keep Live TV setup open on your TV until the download finishes.</p>
 <p id="recLoading" class="hint" role="status" hidden>Loading recordings…</p>
 <ul id="recList" class="list" aria-labelledby="recTitle"></ul>
 <p id="recEmpty" class="empty" hidden>No finished recordings yet.</p>
@@ -799,6 +799,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
       var tools = document.createElement('div');
       tools.className = 'tools';
       tools.appendChild(link('Download', 'Download ' + r.title, base + file, true, true));
+      tools.appendChild(link('Open in VLC', 'Open ' + r.title + ' in VLC', 'vlc://' + location.origin + base + file + '&inline=1', false, false));
       li.appendChild(tools);
     } else {
       var off = document.createElement('div');

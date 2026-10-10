@@ -19,7 +19,10 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Được gửi khi phát kênh, nội dung xem lại và phim từ nguồn này. Cài đặt danh sách phát riêng của kênh vẫn được ưu tiên.</string>
     <string name="iptv_user_agent_default">Mặc định của ứng dụng</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Chung (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Tùy chỉnh</string>
     <string name="iptv_user_agent_custom_hint">Chỉ ký tự in được, tối đa 200.</string>
 </resources>

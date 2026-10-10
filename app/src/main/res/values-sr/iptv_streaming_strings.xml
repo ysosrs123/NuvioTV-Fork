@@ -21,7 +21,10 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Шаље се при пуштању канала, catch-up садржаја и филмова из овог извора. Подешавања плејлисте самог канала и даље имају предност.</string>
     <string name="iptv_user_agent_default">Подразумевано у апликацији</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Општи (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Прилагођено</string>
     <string name="iptv_user_agent_custom_hint">Само знакови за штампу, највише 200.</string>
 </resources>

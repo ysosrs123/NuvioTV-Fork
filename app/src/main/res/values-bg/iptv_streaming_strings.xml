@@ -20,7 +20,10 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Изпраща се при пускане на канали, catch-up и филми от този източник. Собствените настройки на плейлиста на канала остават с предимство.</string>
     <string name="iptv_user_agent_default">По подразбиране в приложението</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Общ (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Персонализиран</string>
     <string name="iptv_user_agent_custom_hint">Само печатни знаци, до 200.</string>
 </resources>

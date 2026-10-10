@@ -11,7 +11,7 @@ object StreamHeaders {
     const val MAX_VALUE = 512
     val attributes = setOf(USER_AGENT, REFERRER, ORIGIN)
     private val requestNames = mapOf(USER_AGENT to "User-Agent", REFERRER to "Referer", ORIGIN to "Origin")
-    private val adaptiveHeaders = setOf("inputstream.adaptive.stream_headers", "inputstream.adaptive.manifest_headers", "inputstream.adaptive.common_headers")
+    private val kodiHeaders = setOf("inputstream.adaptive.stream_headers", "inputstream.adaptive.manifest_headers", "inputstream.adaptive.common_headers")
 
     fun attribute(name: String): String? = when (name.trim().lowercase(Locale.ROOT)) {
         "user-agent", "useragent", "http-user-agent" -> USER_AGENT
@@ -32,7 +32,7 @@ object StreamHeaders {
             pairs(json.keys().asSequence().mapNotNull { key -> (json.opt(key) as? String)?.let { key to it } }.toList())
         } catch (_: Exception) { emptyMap() }
         line.startsWith("#KODIPROP:") -> line.substringAfter(':').let { property ->
-            if (property.substringBefore('=').trim().lowercase(Locale.ROOT) in adaptiveHeaders) query(property.substringAfter('=', "")) else emptyMap()
+            if (property.substringBefore('=').trim().lowercase(Locale.ROOT) in kodiHeaders) query(property.substringAfter('=', "")) else emptyMap()
         }
         else -> emptyMap()
     }

@@ -22,7 +22,10 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Надсилається під час відтворення каналів, catch-up і фільмів із цього джерела. Власні налаштування плейлиста каналу все одно мають пріоритет.</string>
     <string name="iptv_user_agent_default">Типовий для застосунку</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Загальний (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Власний</string>
     <string name="iptv_user_agent_custom_hint">Лише друковані символи, до 200.</string>
 </resources>

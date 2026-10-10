@@ -230,7 +230,7 @@ Done — wave 1 (`277489d` – `d263b18`, CI green):
   backup/restore, account groups screen, Stalker grouping, refresh review.
 
 Done — wave 2 and later (`7b26803` – `0c7ebe8`):
-- Phone setup page: recordings list and download (HMAC-signed links
+- Phone setup page: recordings list, download and "Open in VLC" (HMAC-signed links
   valid 6 h, single-range HTTP, multi-part USB recordings joined, network-share
   recordings streamed; at most 3 downloads; the setup screen must stay open).
 - WebDAV (OkHttp; SabreDAV partial-update append, else one PUT after the recording
@@ -689,18 +689,16 @@ Before merge and release (only on the user's confirmation):
 - No explanatory comments; minimal or no KDoc; match the surrounding style.
 - No dependency or version upgrades. WorkManager is not a dependency; NanoHTTPD 2.3.1
   and ZXing are; smbj 0.15.0 was approved by the user.
-- Original work only (user rule, 10 October): nothing may copy another IPTV or media app
-  (e.g. other IPTV players, sport apps, other Nuvio forks) in code, layout or wording, and
-  code, strings and docs must not name other apps. Design new screens from our own data
-  and style; when the user shows a competitor's screenshot, treat it as what to avoid.
-  Allowed: protocol and format names providers use (M3U, XMLTV, Xtream, Stalker portal,
-  `#EXTVLCOPT`/`#KODIPROP` playlist tags, which must stay parseable), data sources (ESPN,
-  TheSportsDB) and upstream Nuvio's own licence attributions (README). Check new work
-  with a grep for app names before committing; give helpers this rule in their brief.
-- No people's names (user rule, 10 October): no author, developer, maintainer or contributor
-  names, handles, emails, copyright or "by" credits in code, comments, strings, docs or
-  fixtures, other than the commit identity below and upstream Nuvio's own existing files.
-  Real sport data in fixtures (players, teams) is fine.
+- Original work (user rule, 10 October, revised the same day): our work must not look
+  taken from other apps or developers. Do not copy another IPTV/media app's design,
+  layout, wording or code (e.g. other IPTV players, sport apps, other Nuvio forks); design
+  from our own data and style, and treat a competitor screenshot the user shows as what to
+  avoid. Naming other apps is fine where it is functional or factual (user-agent presets
+  such as VLC/Kodi/IPTV Smarters, "Open in VLC", playlist tags `#EXTVLCOPT`/`#KODIPROP`,
+  protocol names, data sources ESPN/TheSportsDB). Genuine licence and attribution comments
+  (GPL, MIT, Apache etc., e.g. code ported under a licence) must stay. Do not strip
+  references wholesale; the test is whether something reads as copied, not whether a name
+  appears. Give helpers this rule in their brief.
 - Nothing may look machine-written: no mention of automated tools or assistants in code,
   comments, docs, commit messages or branch names.
 - Keep this handover, the progress log and the release notes current with every change;

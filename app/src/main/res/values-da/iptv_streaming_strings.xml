@@ -20,7 +20,10 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Sendes ved afspilning af kanaler, catch-up og film fra denne kilde. En kanals egne playlisteindstillinger har stadig forrang.</string>
     <string name="iptv_user_agent_default">Appens standard</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Generisk (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Brugerdefineret</string>
     <string name="iptv_user_agent_custom_hint">Kun skrivbare tegn, op til 200.</string>
 </resources>

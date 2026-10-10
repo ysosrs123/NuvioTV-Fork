@@ -21,7 +21,10 @@
     <string name="iptv_user_agent">User agent</string>
     <string name="iptv_user_agent_description">Envoyé lors de la lecture des chaînes, du replay et des films de cette source. Les réglages de playlist propres à une chaîne restent prioritaires.</string>
     <string name="iptv_user_agent_default">Par défaut de l’app</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">Générique (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">Personnalisé</string>
     <string name="iptv_user_agent_custom_hint">Caractères imprimables uniquement, 200 maximum.</string>
 </resources>

@@ -222,8 +222,8 @@ Decided: IPTV will ship as part of the full app after a clean device pass, merge
   Self-signed NAS certificates can be trusted from the test screen by fingerprint.
 - "Movies folder" recording location on Android 10 and later: recordings are copied to
   Movies/Nuvio Recordings when they finish, so other apps can see them.
-- Phone and tablet: the setup page lists finished recordings with Download; links last
-  6 hours; the Live TV setup screen must stay open on the TV.
+- Phone and tablet: the setup page lists finished recordings with Download and "Open
+  in VLC"; links last 6 hours; the Live TV setup screen must stay open on the TV.
 - Sport: optional fixtures from ESPN (unofficial) or TheSportsDB (your own key), off by
   default, with a league choice; fixtures are linked to channels by guide titles and
   broadcaster names and shown above the Sport grid.
@@ -562,9 +562,6 @@ Sport data (checked against a real capture with NHL and golf live, 10 October):
 - NHL games show each goalie's saves and save percentage (Game Centre and the top panel;
   live hockey games now load the game summary for the focused game); racing cards show
   each finished session's winner (hidden when scores are hidden).
-- Per-source user agent: the choices are now Default, Generic and Custom (presets named
-  after other apps were removed; a source set to one of them uses Default). The phone
-  page's recordings list offers Download only.
 - Sport can follow NBL, WNBA and College Football (off by default); NBL and WNBA timelines
   use 10-minute quarters.
 

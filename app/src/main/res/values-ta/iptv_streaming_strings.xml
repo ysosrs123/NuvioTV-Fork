@@ -20,7 +20,10 @@
     <string name="iptv_user_agent">பயனர் முகவர்</string>
     <string name="iptv_user_agent_description">இந்த மூலத்திலிருந்து சேனல்கள், கேட்ச்-அப், திரைப்படங்களை இயக்கும்போது அனுப்பப்படும். சேனலின் சொந்த பிளேலிஸ்ட் அமைப்புகளுக்கே முன்னுரிமை.</string>
     <string name="iptv_user_agent_default">ஆப்ஸ் இயல்புநிலை</string>
+    <string name="iptv_user_agent_vlc">VLC</string>
+    <string name="iptv_user_agent_kodi">Kodi</string>
     <string name="iptv_user_agent_okhttp">பொதுவானது (okhttp)</string>
+    <string name="iptv_user_agent_smarters">IPTV Smarters</string>
     <string name="iptv_user_agent_custom">தனிப்பயன்</string>
     <string name="iptv_user_agent_custom_hint">அச்சிடக்கூடிய எழுத்துகள் மட்டும், அதிகபட்சம் 200.</string>
 </resources>
