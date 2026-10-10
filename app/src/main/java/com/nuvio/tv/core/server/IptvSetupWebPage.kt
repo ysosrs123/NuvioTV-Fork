@@ -6,6 +6,8 @@ object IptvSetupWebPage {
 
     fun ended(nonce: String): String = ENDED.replace("NONCE_VALUE", nonce)
 
+    fun unpaired(nonce: String): String = UNPAIRED.replace("NONCE_VALUE", nonce)
+
     private const val HEAD = """<!DOCTYPE html>
 <html lang="en-AU">
 <head>
@@ -139,7 +141,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 
     private const val ORB = """<div class="orb" aria-hidden="true"><svg class="i-tv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="13" rx="3"/><path d="M8 21h8"/></svg><svg class="i-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><svg class="i-no" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg></div>"""
 
-    private const val PAGE = HEAD + """<body>
+    private val PAGE = HEAD + """<body>
 <main>
 <header class="top">""" + MARK + """<div class="brand"><b>Nuvio</b><h1>Live TV setup</h1></div><span id="connected" class="chip" hidden>Connected to TV</span></header>
 <p class="note" role="note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg><span><strong>Home network only.</strong> This page talks to your TV over your local network without encryption. Don't use it on public or shared Wi-Fi.</span></p>
@@ -185,6 +187,11 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 <div class="card" aria-labelledby="recordingsTitle">
 <div class="head"><div class="grow"><h2 id="recordingsTitle">Recordings</h2><p class="lead">Download recordings to this phone or tablet, or watch them in VLC.</p></div></div>
 <div class="actions"><button type="button" id="openRecordings">Show recordings</button></div>
+</div>
+<div class="card" id="deviceCard" aria-labelledby="deviceTitle" hidden>
+<div class="head"><div class="grow"><h2 id="deviceTitle">This device</h2><p class="lead">Paired with this TV. Bookmark this page or add it to your Home Screen to come back. It works while Nuvio is open or in the background on the TV and both are on your home network.</p></div></div>
+<div class="actions"><button type="button" id="forget">Forget this device</button></div>
+<p id="forgetError" class="error" role="alert" hidden></p>
 </div>
 </div>
 
@@ -347,12 +354,13 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 <p class="hint" id="endedText">Open Live TV setup on your TV and scan the new QR code.</p>
 </section>
 
-<footer>Nuvio · works only while the setup screen is open on your TV</footer>
+<footer id="foot">Nuvio · works only while the setup screen is open on your TV</footer>
 </main>
 <script nonce="NONCE_VALUE">
 (function () {
   'use strict';
   var base = location.pathname.replace(/[^\/]*$/, '');
+  var kept = base === '/p/';
   var views = ['pair', 'home', 'editor', 'assign', 'recordings', 'progress', 'ended'];
   var kindNames = { m3u: 'M3U playlist', xtream: 'Xtream account', stalker: 'Stalker portal', guide: 'XMLTV guide' };
   var badges = { m3u: 'M3U', xtream: 'XT', stalker: 'STB', guide: 'EPG' };
@@ -373,11 +381,16 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
   }
   function setText(id, text) { var node = el(id); node.textContent = text || ''; node.hidden = !text; }
 
-  function api(method, path, body) {
+  function api(method, path, body, tries) {
     var options = { method: method, headers: { 'X-Nuvio-Setup': '1' }, credentials: 'same-origin', cache: 'no-store', referrerPolicy: 'same-origin', redirect: 'error' };
     if (body !== undefined) { options.headers['Content-Type'] = 'application/json'; options.body = JSON.stringify(body); }
     return fetch(base + path, options).then(function (response) {
-      return response.json().catch(function () { return {}; }).then(function (data) { return { status: response.status, data: data || {} }; });
+      return response.json().catch(function () { return {}; }).then(function (data) {
+        data = data || {};
+        if (response.status === 503 && data.error === 'starting' && (tries || 0) < 4)
+          return new Promise(function (resolve) { setTimeout(resolve, 1500); }).then(function () { return api(method, path, body, (tries || 0) + 1); });
+        return { status: response.status, data: data };
+      });
     });
   }
 
@@ -389,10 +402,20 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
   }
 
   function lost() {
-    ended('Lost touch with the TV', 'The setup screen on the TV may have closed. Check the TV to see what was saved, then scan the QR code again.');
+    if (kept) ended('Lost touch with the TV', 'Nuvio may have closed on the TV, or the TV is asleep or on another network. Open Nuvio on the TV, then reload this page.');
+    else ended('Lost touch with the TV', 'The setup screen on the TV may have closed. Check the TV to see what was saved, then scan the QR code again.');
+  }
+
+  function unpaired() {
+    ended('This device isn\'t paired any more', 'To use it again, open Set up from phone or computer on your TV and scan the QR code.');
   }
 
   function common(result, errorId) {
+    if (result.status === 401 && kept) { unpaired(); return true; }
+    if (result.status === 403 && result.data.error === 'profile') {
+      ended('This profile is locked', 'The TV is using a profile with a PIN, and this device was paired with another profile. Pair it again while that profile is in use on the TV.');
+      return true;
+    }
     if (result.status === 401) { askForCode('Your session has ended. Enter the code shown on your TV.'); return true; }
     if (result.status === 404 && result.data.error === 'link') { ended(); return true; }
     if (result.status === 429) { setText(errorId, 'Too many requests. Wait a minute, then try again.'); return true; }
@@ -422,6 +445,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
           if (edits && listing.profile === profile) keepSettings(edits);
         } else el('settings').hidden = true;
         renderSaved();
+        el('deviceCard').hidden = !kept;
         show('home');
         return true;
       });
@@ -1063,10 +1087,10 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
     var misses = 0;
     var savedText = { source: 'The TV is loading the channels now.', guide: 'The TV is loading the guide now.', settings: 'Your new settings are saved. Some apply the next time you open Live TV.',
       links: 'The guides and their order are saved.', channel: 'The channel uses the new guide from now on.', profile: 'This page now changes the profile you chose.' };
-    progress('wait', 'Check your TV', what === 'settings'
+    progress('wait', 'Check your TV', (what === 'settings'
       ? 'Your TV is showing the settings you changed. Choose Save on this TV or Reject.'
       : what === 'profile' ? 'Your TV is asking whether this page may change another profile. Choose Allow or Reject on the TV.'
-      : 'Your TV is asking whether to save this. Choose Save on this TV or Reject.');
+      : 'Your TV is asking whether to save this. Choose Save on this TV or Reject.') + (kept ? ' If Nuvio isn\'t on screen, open it on the TV to see the request.' : ''));
     function poll() {
       api('GET', 'api/changes/' + encodeURIComponent(id)).then(function (result) {
         var status = result.data.status;
@@ -1077,6 +1101,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
         if (status === 'saved') progress('ok', 'Saved on the TV', savedText[what]);
         else if (status === 'rejected') progress('no', 'Rejected on the TV', 'Nothing was saved.');
         else if (status === 'failed') progress('no', 'The TV couldn\'t save this', 'Nothing was saved. Check the details and try again.');
+        else if (status === 'expired') progress('no', 'Not confirmed in time', 'Nothing was saved. Open Nuvio on the TV, then send it again.');
         else progress('no', 'The TV no longer has this change', 'Check the TV to see whether it was saved.');
       }, function () {
         misses += 1;
@@ -1094,6 +1119,7 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
     api('POST', 'api/pair', { code: code }).then(function (result) {
       el('pairButton').disabled = false;
       el('code').value = '';
+      if (result.status === 200 && result.data.phone === '/p/') { location.replace(result.data.phone); return; }
       if (result.status === 200) { setText('pairError', ''); load(); return; }
       if (result.status === 410) { ended('Too many wrong codes', 'For safety this link has been turned off. Scan the new QR code on your TV.'); return; }
       if (common(result, 'pairError')) return;
@@ -1132,6 +1158,16 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
   el('openRecordings').addEventListener('click', openRecordings);
   el('recRefresh').addEventListener('click', loadRecordings);
   el('recBack').addEventListener('click', load);
+  el('forget').addEventListener('click', function () {
+    if (!window.confirm('Forget this device? You\'ll need the code on the TV to pair it again.')) return;
+    el('forget').disabled = true;
+    api('POST', 'api/forget', {}).then(function (result) {
+      el('forget').disabled = false;
+      if (result.status === 200 || result.status === 401) { ended('This device is no longer paired', 'To use it again, open Set up from phone or computer on your TV and scan the QR code.'); return; }
+      if (!common(result, 'forgetError')) setText('forgetError', 'The TV couldn\'t forget this device. Try again.');
+    }, function () { el('forget').disabled = false; lost(); });
+  });
+  if (kept) el('foot').textContent = 'Nuvio · works while Nuvio is open or in the background on your TV';
   el('channelQuery').addEventListener('input', function () { later('channels', searchChannels); });
   el('guideQuery').addEventListener('input', function () { later('guide', searchGuide); });
   el('guideFeed').addEventListener('change', searchGuide);
@@ -1150,6 +1186,19 @@ footer{color:var(--faint);font-size:12px;text-align:center;margin-top:28px}
 """ + ORB + """
 <p class="big">This setup link has ended</p>
 <p class="hint">Open Live TV setup on your TV and scan the QR code it shows. Each link works only while the setup screen is open.</p>
+</section>
+</main>
+</body>
+</html>
+"""
+
+    private const val UNPAIRED = HEAD + """<body>
+<main>
+<header class="top">""" + MARK + """<div class="brand"><b>Nuvio</b><h1>Live TV setup</h1></div></header>
+<section class="card status narrow no">
+""" + ORB + """
+<p class="big">This device isn't paired</p>
+<p class="hint">On your TV, open Set up from phone or computer, turn on Keep phone access on, then scan the QR code. After that, this address works whenever Nuvio is open or in the background on the TV.</p>
 </section>
 </main>
 </body>

@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.GuideKey
@@ -25,6 +24,9 @@ import com.nuvio.tv.core.iptv.SetupLan
 import com.nuvio.tv.core.iptv.SetupListing
 import com.nuvio.tv.core.iptv.SetupListingItem
 import com.nuvio.tv.core.iptv.SetupLookup
+import com.nuvio.tv.core.iptv.SetupPhone
+import com.nuvio.tv.core.iptv.SetupPhoneAccess
+import com.nuvio.tv.core.iptv.SetupPhones
 import com.nuvio.tv.core.iptv.SetupProfile
 import com.nuvio.tv.core.iptv.SetupProfileChoice
 import com.nuvio.tv.core.iptv.SetupSetting
@@ -45,6 +47,7 @@ import com.nuvio.tv.data.iptv.IptvGuideFeed
 import com.nuvio.tv.data.iptv.IptvGuideRef
 import com.nuvio.tv.data.iptv.IptvGuideStore
 import com.nuvio.tv.data.iptv.IptvLivePreferences
+import com.nuvio.tv.data.iptv.IptvPhoneAccessStore
 import com.nuvio.tv.data.iptv.IptvProfileAccess
 import com.nuvio.tv.data.iptv.IptvSource
 import com.nuvio.tv.data.iptv.IptvSourceConnection
@@ -59,9 +62,12 @@ import com.nuvio.tv.data.local.ProfileLockStateDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -95,12 +101,16 @@ data class IptvSetupState(
     val pending: IptvSetupPending? = null,
     @StringRes val message: Int? = null,
     val editingProfile: String? = null,
+    val visible: Boolean = false,
+    val keep: Boolean = false,
+    val phones: List<SetupPhone> = emptyList(),
+    val phoneAddress: String? = null,
 ) {
-    override fun toString() = "IptvSetupState(phase=$phase, devices=$devices)"
+    override fun toString() = "IptvSetupState(phase=$phase, devices=$devices, keep=$keep, phones=${phones.size})"
 }
 
-@HiltViewModel
-class IptvSetupViewModel @Inject constructor(
+@Singleton
+class IptvSetupHost @Inject constructor(
     @ApplicationContext private val context: Context,
     private val catalogue: IptvCatalogueStore,
     private val guides: IptvGuideStore,
@@ -111,13 +121,19 @@ class IptvSetupViewModel @Inject constructor(
     private val device: IptvDeviceProfile,
     private val locks: ProfileLockStateDataStore,
     private val recorder: IptvRecorder,
-) : ViewModel() {
-    private val mutable = MutableStateFlow(IptvSetupState())
+) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val store = IptvPhoneAccessStore(context)
+    private val paired = SetupPhones().also { it.load(store.phones) }
+    @Volatile private var keep = store.enabled
+    private val mutable = MutableStateFlow(IptvSetupState(keep = keep, phones = paired.phones))
     val state = mutable.asStateFlow()
-    private var session: IptvProfileAccess.Session? = null
+    @Volatile private var session: IptvProfileAccess.Session? = null
     @Volatile private var listing = SetupListing()
+    @Volatile private var pinLocked: Set<Int> = emptySet()
     private var server: IptvSetupServer? = null
     private var monitor: Job? = null
+    private var keeper: Job? = null
     private var visible = false
     @Volatile private var activeProfile = -1
     private val lookup = object : SetupLookup {
@@ -131,12 +147,31 @@ class IptvSetupViewModel @Inject constructor(
             guides.searchChannels(IptvGuideRef(current.profileId, feedId), query, 200).map { SetupGuideChannel(it.externalId, it.names.firstOrNull()?.text ?: it.externalId) }
         }
     }
+    private val phoneAccess = object : SetupPhoneAccess {
+        override val enabled: Boolean get() = keep
+        override fun issue(userAgent: String?, profile: Int): String? = if (!keep) null else paired.issue(userAgent, profile).also { savePhones() }
+        override fun verify(token: String?): SetupPhone? = if (keep) paired.verify(token) else null
+        override fun allowed(phone: SetupPhone): Boolean? {
+            val current = session ?: return null
+            val shown = listing
+            if (shown.profile != current.profileId) return null
+            return SetupPhones.canUse(phone, shown.profile, pinLocked)
+        }
+        override fun forget(token: String?): Boolean = paired.forget(token).also { if (it) savePhones() }
+    }
 
     init {
-        viewModelScope.launch {
+        live.value = true
+        scope.launch { locks.pinEnabled.collect { pins -> pinLocked = pins.filterValues { it }.keys } }
+        scope.launch {
             combine(profiles.activeProfileId, profiles.activeProfileReady, profiles.profileSelectionRevision) { id, ready, revision -> Triple(id, ready, revision) }
                 .collect { (id, ready, _) ->
-                    stopServer()
+                    val kept = server?.takeIf { keep }
+                    if (kept != null) {
+                        kept.rejectPending()
+                        if (kept.pairingOpen) { kept.closePairing(); kept.openPairing() }
+                        mutable.update { it.copy(pending = null) }
+                    } else stopServer()
                     session = null
                     listing = SetupListing()
                     activeProfile = id
@@ -145,26 +180,89 @@ class IptvSetupViewModel @Inject constructor(
                         val current = withContext(Dispatchers.IO) { access.open(id) }
                         session = current
                         runCatching { reload(current) }.onFailure { if (it is CancellationException) throw it }
-                        if (visible && mutable.value.phase != IptvSetupPhase.IDLE_STOPPED) startServer()
+                        if (server == null && (keep || (visible && mutable.value.phase != IptvSetupPhase.IDLE_STOPPED))) startServer()
                     }
                 }
         }
+        if (keep) keepRunning()
+    }
+
+    fun attach() {
+        if (keep) keepRunning()
+    }
+
+    fun enter() {
+        mutable.update { it.copy(message = null, phase = if (it.phase == IptvSetupPhase.IDLE_STOPPED) IptvSetupPhase.STARTING else it.phase) }
     }
 
     fun start() {
         visible = true
-        if (server == null && mutable.value.phase != IptvSetupPhase.IDLE_STOPPED) startServer()
+        mutable.update { it.copy(visible = true) }
+        val active = server
+        if (active == null) {
+            if (mutable.value.phase != IptvSetupPhase.IDLE_STOPPED) startServer()
+            return
+        }
+        active.openPairing()
+        mutable.update { it.copy(phase = IptvSetupPhase.RUNNING, code = active.code, message = null) }
+        watchActive(active)
     }
 
     fun stop() {
         visible = false
-        val wasRunning = server != null
+        mutable.update { it.copy(visible = false) }
+        val active = server
+        if (active != null && keep) {
+            active.closePairing()
+            mutable.update { it.copy(address = null, qr = null, code = null, devices = 0) }
+            watchActive(active)
+            return
+        }
+        val wasRunning = active != null
         stopServer()
         if (wasRunning) mutable.update { it.copy(phase = IptvSetupPhase.PAUSED) }
     }
 
     fun restart() {
         if (visible) startServer()
+    }
+
+    fun setKeep(on: Boolean) {
+        if (on == keep) return
+        keep = on
+        store.enabled = on
+        if (on) keepRunning() else {
+            keeper?.cancel()
+            keeper = null
+            paired.clear()
+            savePhones()
+            if (!visible) stopServer() else server?.touch()
+        }
+        mutable.update { it.copy(keep = on, phoneAddress = if (on) server?.phoneAddress else null) }
+    }
+
+    fun removePhone(id: String) {
+        if (paired.remove(id)) savePhones()
+    }
+
+    fun removeAllPhones() {
+        paired.clear()
+        savePhones()
+    }
+
+    private fun savePhones() {
+        store.phones = paired.encode()
+        mutable.update { it.copy(phones = paired.phones) }
+    }
+
+    private fun keepRunning() {
+        if (keeper?.isActive == true) return
+        keeper = scope.launch {
+            while (isActive && keep) {
+                if (server == null && session != null) startServer()
+                delay(KEEP_RETRY_MILLIS)
+            }
+        }
     }
 
     private fun startServer() {
@@ -190,35 +288,69 @@ class IptvSetupViewModel @Inject constructor(
             listing = { listing },
             settings = ::settings,
             lookup = lookup,
-            onChangeProposed = { origin, id, change, from, profile -> viewModelScope.launch { propose(origin, id, change, from, profile) } },
-            recordings = SetupRecorderSource(recorder)
+            onChangeProposed = { origin, id, change, from, profile, phone -> scope.launch { propose(origin, id, change, sender(from, phone), profile) } },
+            recordings = SetupRecorderSource(recorder),
+            phones = phoneAccess,
+            pairingOpen = visible,
+            preferredPort = store.port,
         )
         if (started == null) {
             mutable.update { it.copy(phase = IptvSetupPhase.PORTS_BUSY, address = null, qr = null, code = null, devices = 0) }
             return
         }
         server = started
-        mutable.update { it.copy(phase = IptvSetupPhase.RUNNING, address = null, qr = null, code = started.code, devices = 0, message = null) }
-        monitor = viewModelScope.launch { watch(started) }
+        if (store.port != started.port) store.port = started.port
+        mutable.update { it.copy(phase = IptvSetupPhase.RUNNING, address = null, qr = null, code = if (visible) started.code else null, devices = 0, message = null,
+            phoneAddress = if (keep) started.phoneAddress else null) }
+        watchActive(started)
+    }
+
+    private fun watchActive(active: IptvSetupServer) {
+        monitor?.cancel()
+        monitor = scope.launch { watch(active) }
     }
 
     private suspend fun watch(active: IptvSetupServer) {
         var shownAddress: String? = null
-        while (viewModelScope.isActive && server === active) {
-            if (active.idleExpired) {
+        var waiting: Pair<String, Long>? = null
+        var checked = System.currentTimeMillis()
+        while (scope.isActive && server === active) {
+            val now = System.currentTimeMillis()
+            if (!keep && active.idleExpired) {
                 stopServer()
                 mutable.update { it.copy(phase = IptvSetupPhase.IDLE_STOPPED) }
                 return
             }
-            val address = active.address
-            if (address != shownAddress) {
-                val qr = withContext(Dispatchers.Default) { QrCodeGenerator.generate(address, 512) }
-                if (server !== active) return
-                shownAddress = address
-                mutable.update { it.copy(address = address, qr = qr) }
+            val pending = mutable.value.pending
+            val since = waiting?.takeIf { it.first == pending?.id }?.second
+            waiting = when {
+                pending == null || pending.applying -> null
+                since == null -> pending.id to now
+                now - since >= PENDING_MILLIS -> {
+                    active.resolve(pending.id, SetupChangeBook.Status.EXPIRED)
+                    mutable.update { if (it.pending?.id == pending.id) it.copy(pending = null) else it }
+                    null
+                }
+                else -> waiting
             }
-            mutable.update { it.copy(code = active.code, devices = active.pairedDevices) }
-            delay(1_000)
+            if (keep && now - checked >= ADDRESS_CHECK_MILLIS) {
+                checked = now
+                if (IptvSetupAddress.get(context) != active.boundHost) {
+                    startServer()
+                    return
+                }
+            }
+            if (visible && active.pairingOpen) {
+                val address = active.address
+                if (address != shownAddress) {
+                    val qr = withContext(Dispatchers.Default) { QrCodeGenerator.generate(address, 512) }
+                    if (server !== active) return
+                    shownAddress = address
+                    mutable.update { it.copy(address = address, qr = qr) }
+                }
+                mutable.update { it.copy(code = active.code, devices = active.pairedDevices) }
+            } else shownAddress = null
+            delay(if (visible) 1_000 else HIDDEN_TICK_MILLIS)
         }
     }
 
@@ -227,8 +359,11 @@ class IptvSetupViewModel @Inject constructor(
         monitor = null
         server?.stop()
         server = null
-        mutable.update { it.copy(address = null, qr = null, code = null, devices = 0, pending = null) }
+        mutable.update { it.copy(address = null, qr = null, code = null, devices = 0, pending = null, phoneAddress = null) }
     }
+
+    private fun sender(from: String, phone: SetupPhone?): String =
+        phone?.let { context.getString(R.string.iptv_phone_sent_from, phoneName(context, it), from) } ?: from
 
     private suspend fun propose(origin: IptvSetupServer, id: String, change: SetupChange, from: String, profile: Int) {
         val active = server
@@ -267,7 +402,7 @@ class IptvSetupViewModel @Inject constructor(
         if (pending.applying) return
         val active = server
         mutable.update { it.copy(pending = pending.applying()) }
-        viewModelScope.launch {
+        scope.launch {
             val message = try {
                 when (val change = pending.change) {
                     is SetupSettingsChange -> {
@@ -532,15 +667,28 @@ class IptvSetupViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        server?.stop()
-        server = null
-    }
-
     private class SavedEntry(val source: IptvSource? = null, val feed: IptvGuideFeed? = null)
 
     companion object {
+        private const val KEEP_RETRY_MILLIS = 60_000L
+        private const val ADDRESS_CHECK_MILLIS = 30_000L
+        private const val HIDDEN_TICK_MILLIS = 10_000L
+        private const val PENDING_MILLIS = 10 * 60_000L
+        val live = MutableStateFlow(false)
+
+        fun keepOn(context: Context): Boolean = IptvPhoneAccessStore(context).enabled
+
+        fun phoneName(context: Context, phone: SetupPhone): String {
+            val browser = phone.browser
+            val platform = phone.platform
+            return when {
+                browser != null && platform != null -> context.getString(R.string.iptv_phone_name, browser, platform)
+                browser != null -> browser
+                platform != null -> platform
+                else -> context.getString(R.string.iptv_phone_unknown)
+            }
+        }
+
         @StringRes fun kindLabel(kind: SetupKind): Int = when (kind) {
             SetupKind.M3U -> R.string.iptv_kind_m3u
             SetupKind.XTREAM -> R.string.iptv_kind_xtream
@@ -548,4 +696,28 @@ class IptvSetupViewModel @Inject constructor(
             SetupKind.GUIDE -> R.string.iptv_guide_xmltv
         }
     }
+}
+
+@HiltViewModel
+class IptvSetupViewModel @Inject constructor(private val host: IptvSetupHost) : ViewModel() {
+    val state = host.state
+
+    init { host.enter() }
+
+    fun start() = host.start()
+    fun stop() = host.stop()
+    fun restart() = host.restart()
+    fun confirm() = host.confirm()
+    fun reject() = host.reject()
+    fun toggleKeep() = host.setKeep(!host.state.value.keep)
+    fun removePhone(id: String) = host.removePhone(id)
+    fun removeAllPhones() = host.removeAllPhones()
+}
+
+@HiltViewModel
+class IptvPhoneRequestViewModel @Inject constructor(private val host: IptvSetupHost) : ViewModel() {
+    val state = host.state
+
+    fun confirm() = host.confirm()
+    fun reject() = host.reject()
 }

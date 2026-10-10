@@ -859,6 +859,7 @@ open class MainActivity : ComponentActivity() {
                     }
                     val navController = rememberNavController()
                     if (BuildConfig.FEATURE_IPTV_ENABLED) com.nuvio.tv.ui.screens.iptv.IptvSportsNuvioHost(navController)
+                    if (BuildConfig.FEATURE_IPTV_ENABLED) com.nuvio.tv.ui.screens.iptv.IptvPhoneRequestPrompt()
                     // Share destination state across renderer/navigation changes, but clear it
                     // when profile selection removes this profile's entire navigation subtree.
                     val navigationOwner = remember {

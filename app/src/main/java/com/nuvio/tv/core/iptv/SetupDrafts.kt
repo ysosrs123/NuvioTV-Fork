@@ -211,7 +211,7 @@ class SetupChangeBook(
     private val now: () -> Long = System::currentTimeMillis,
     private val cooldownMillis: Long = 10_000,
 ) {
-    enum class Status { PENDING, SAVED, REJECTED, FAILED }
+    enum class Status { PENDING, SAVED, REJECTED, FAILED, EXPIRED }
     private class Entry(val owner: String, var change: SetupChange?, var status: Status)
     private val entries = LinkedHashMap<String, Entry>()
     private val rejectedAt = HashMap<String, Long>()

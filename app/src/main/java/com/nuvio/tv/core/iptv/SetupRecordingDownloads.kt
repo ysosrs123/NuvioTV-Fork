@@ -32,7 +32,7 @@ object SetupRecordingDownloads {
     const val MAX_NAME = 80
     val ID = Regex("[A-Za-z0-9-]{8,64}")
     private val NUMBER = Regex("[0-9]{1,18}")
-    private val STAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm", Locale.ROOT)
+    private val STAMP = DateTimeFormatter.ofPattern("dd-MMM-yy HHmm", Locale.ENGLISH)
     private const val UNSAFE = "\\/:*?\"<>|"
     private const val ATTR = "!#$&+-.^_`|~"
 

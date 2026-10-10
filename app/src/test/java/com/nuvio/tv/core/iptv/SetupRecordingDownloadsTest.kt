@@ -44,25 +44,25 @@ class SetupRecordingDownloadsTest {
     @Test fun fileNamesAreSafeAndCarryTheStartTime() {
         val start = 1_791_400_200_000L
         val utc = ZoneOffset.UTC
-        assertEquals("News at Six 2026-10-07 1910", SetupRecordingDownloads.fileName("News at Six", start, utc))
-        assertEquals("a b c d 2026-10-07 1910", SetupRecordingDownloads.fileName("a/b\\c:d", start, utc))
-        assertEquals("Recording 2026-10-07 1910", SetupRecordingDownloads.fileName(" ../.. ", start, utc))
-        assertEquals("Recording 2026-10-07 1910", SetupRecordingDownloads.fileName("\u0000\n\t", start, utc))
+        assertEquals("News at Six 07-Oct-26 1910", SetupRecordingDownloads.fileName("News at Six", start, utc))
+        assertEquals("a b c d 07-Oct-26 1910", SetupRecordingDownloads.fileName("a/b\\c:d", start, utc))
+        assertEquals("Recording 07-Oct-26 1910", SetupRecordingDownloads.fileName(" ../.. ", start, utc))
+        assertEquals("Recording 07-Oct-26 1910", SetupRecordingDownloads.fileName("\u0000\n\t", start, utc))
         assertFalse(SetupRecordingDownloads.fileName("x‮y", start, utc).contains('‮'))
         val long = SetupRecordingDownloads.fileName("é".repeat(200), start, utc)
-        assertEquals(SetupRecordingDownloads.MAX_NAME + " 2026-10-07 1910".length, long.codePointCount(0, long.length))
+        assertEquals(SetupRecordingDownloads.MAX_NAME + " 07-Oct-26 1910".length, long.codePointCount(0, long.length))
         val emoji = SetupRecordingDownloads.fileName("😀".repeat(100), start, utc)
         assertFalse(Character.isHighSurrogate(emoji[emoji.indexOf(' ') - 1]))
-        assertEquals("Late 2026-10-08 0610", SetupRecordingDownloads.fileName("Late", start, ZoneId.of("Australia/Sydney")))
+        assertEquals("Late 08-Oct-26 0610", SetupRecordingDownloads.fileName("Late", start, ZoneId.of("Australia/Sydney")))
     }
 
     @Test fun asciiFallbackAndRfc5987Name() {
         assertEquals("Cafe Muller _ Friends", SetupRecordingDownloads.asciiName("Café Müller & Friends"))
         assertEquals("Recording", SetupRecordingDownloads.asciiName("日本語"))
         assertEquals("Recording", SetupRecordingDownloads.asciiName("\"\";;"))
-        val header = SetupRecordingDownloads.disposition("Café \"1\"; x 2026-10-07 1910", attachment = true)
-        assertTrue(header, header.startsWith("attachment; filename=\"Cafe _1_ x 2026-10-07 1910.ts\"; filename*=UTF-8''"))
-        assertTrue(header, header.endsWith("Caf%C3%A9%20%221%22%3B%20x%202026-10-07%201910.ts"))
+        val header = SetupRecordingDownloads.disposition("Café \"1\"; x 07-Oct-26 1910", attachment = true)
+        assertTrue(header, header.startsWith("attachment; filename=\"Cafe _1_ x 07-Oct-26 1910.ts\"; filename*=UTF-8''"))
+        assertTrue(header, header.endsWith("Caf%C3%A9%20%221%22%3B%20x%2007-Oct-26%201910.ts"))
         assertTrue(header.all { it.code in 32..126 })
         assertTrue(SetupRecordingDownloads.disposition("News", attachment = false).startsWith("inline; filename=\"News.ts\""))
     }

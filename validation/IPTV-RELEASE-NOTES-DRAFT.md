@@ -601,6 +601,15 @@ Sport:
   for Watch on, other feeds and recordings; "Never offer for games" removes them. A picker
   lists categories from all sources and searches channels.
 
+Phone and computer setup:
+- "Keep phone access on" (setup screen, off by default): pair a phone once with the code on
+  the TV; afterwards it reaches setup and recordings at a fixed address whenever Nuvio is open
+  or in the background on the TV, without the setup screen. Paired phones are listed on the
+  TV (Remove, Remove all); the phone page has "Forget this device". Changes from a phone still
+  need your OK on the TV, which now asks wherever you are in Nuvio (requests expire after 10
+  minutes). Phones hold a random token in an HttpOnly cookie; the TV stores only its hash.
+- Downloaded recording names use the same short date, e.g. "News at Six 07-Oct-26 1910.ts".
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

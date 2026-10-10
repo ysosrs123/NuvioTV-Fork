@@ -16,7 +16,10 @@ import com.nuvio.tv.core.iptv.SetupLan
 import com.nuvio.tv.core.iptv.SetupLinkSigner
 import com.nuvio.tv.core.iptv.SetupListing
 import com.nuvio.tv.core.iptv.SetupLookup
+import com.nuvio.tv.core.iptv.SetupPairGate
 import com.nuvio.tv.core.iptv.SetupPairing
+import com.nuvio.tv.core.iptv.SetupPhone
+import com.nuvio.tv.core.iptv.SetupPhoneAccess
 import com.nuvio.tv.core.iptv.SetupRangeStream
 import com.nuvio.tv.core.iptv.SetupRateLimiter
 import com.nuvio.tv.core.iptv.SetupRecordingDownloads
@@ -44,8 +47,9 @@ class IptvSetupServer private constructor(
     private val listing: () -> SetupListing,
     private val settings: () -> SetupSettings,
     private val lookup: SetupLookup,
-    private val onChangeProposed: (IptvSetupServer, String, SetupChange, String, Int) -> Unit,
+    private val onChangeProposed: (IptvSetupServer, String, SetupChange, String, Int, SetupPhone?) -> Unit,
     private val recordings: SetupRecordingSource?,
+    private val phones: SetupPhoneAccess?,
     private val now: () -> Long,
 ) : NanoHTTPD(host, port) {
 
@@ -54,7 +58,8 @@ class IptvSetupServer private constructor(
     private val changes = SetupChangeBook(random, now = now)
     private val idle = SetupIdleTimer(IDLE_TIMEOUT_MILLIS, now)
     private val requests = SetupRateLimiter(REQUESTS_PER_MINUTE, MINUTE, now)
-    private val pairAttempts = SetupRateLimiter(PAIR_ATTEMPTS_PER_MINUTE, MINUTE, now)
+    private val pairAttempts = SetupPairGate(PAIR_ATTEMPTS_PER_MINUTE, PAIR_ATTEMPTS_ALL_PER_MINUTE, MINUTE, now)
+    private val phoneFailures = SetupRateLimiter(PHONE_FAILURES_PER_MINUTE, MINUTE, now)
     private val signer = SetupLinkSigner(random)
     private val streams = Semaphore(MAX_STREAMS)
     private val runner = SetupBoundedRunner(SetupConnectionLimiter(MAX_CLIENTS, MAX_CLIENTS_PER_ADDRESS), CONNECTION_DEADLINE_MILLIS, "IptvSetup")
@@ -67,12 +72,27 @@ class IptvSetupServer private constructor(
     private val origin: String get() = "http://$authority"
 
     val address: String get() = "$origin/s/${pairing.credentials.token}/"
+    val phoneAddress: String get() = "$origin${SetupCookies.PHONE_PATH}"
+    val boundHost: String get() = host
+    val port: Int get() = listeningPort
+    val pairingOpen: Boolean get() = pairing.open
     val code: String get() = pairing.credentials.code
     val revision: Int get() = pairing.credentials.revision
     val pairedDevices: Int get() = pairing.sessionCount
     val idleExpired: Boolean get() = idle.expired()
 
     fun resolve(id: String, status: SetupChangeBook.Status): Boolean = changes.resolve(id, status)
+
+    fun openPairing() {
+        if (!pairing.open) pairing.reopen()
+        idle.touch()
+    }
+
+    fun closePairing() = pairing.close()
+
+    fun touch() = idle.touch()
+
+    fun rejectPending() = changes.rejectPending()
 
     override fun stop() {
         changes.rejectPending()
@@ -105,6 +125,8 @@ class IptvSetupServer private constructor(
         if (!SetupLan.isLanAddress(remote)) return text(Response.Status.FORBIDDEN, "Forbidden")
         if (!SetupGuard.hostMatches(session.headers["host"], authority)) return text(Response.Status.BAD_REQUEST, "Bad request")
         if (!requests.allow(remote)) return json(Response.Status.TOO_MANY_REQUESTS, error("rate"))
+        if (session.uri == SetupCookies.PHONE_PATH.removeSuffix("/")) return redirect(SetupCookies.PHONE_PATH)
+        if (session.uri.startsWith(SetupCookies.PHONE_PATH)) return phoneRoute(session, remote, session.uri.removePrefix(SetupCookies.PHONE_PATH))
         val match = PATH.matchEntire(session.uri) ?: return ended()
         val token = match.groupValues[1]
         val rest = match.groupValues[2]
@@ -125,14 +147,47 @@ class IptvSetupServer private constructor(
         val owner = pairing.session(token, SetupCookies.read(session.headers["cookie"]))
             ?: return json(Response.Status.UNAUTHORIZED, error("session"))
         idle.touch()
+        return api(session, path, post, owner, remote, null)
+    }
+
+    private fun phoneRoute(session: IHTTPSession, remote: String, rest: String): Response {
+        val cookie = SetupCookies.read(session.headers["cookie"], SetupCookies.PHONE)
+        if (!rest.startsWith("api/")) return when {
+            session.method != Method.GET -> text(Response.Status.METHOD_NOT_ALLOWED, "Method not allowed")
+            rest.isNotEmpty() -> text(Response.Status.NOT_FOUND, "Not found")
+            phones?.verify(cookie) == null -> unpaired()
+            else -> page().also { it.addHeader("Set-Cookie", SetupCookies.phone(requireNotNull(cookie))) }
+        }
+        val path = rest.removePrefix("api/")
+        RECORDING_FILE.matchEntire(path)?.let { return recordingFile(session, it.groupValues[1]) }
+        val post = session.method == Method.POST
+        if (!post && session.method != Method.GET) return json(Response.Status.METHOD_NOT_ALLOWED, error("method"))
+        if (SetupGuard.check(session.headers, origin, stateChanging = post) != null) return json(Response.Status.FORBIDDEN, error("request"))
+        val access = phones
+        val phone = access?.verify(cookie) ?: return if (phoneFailures.allow(remote)) json(Response.Status.UNAUTHORIZED, error("phone"))
+            else json(Response.Status.TOO_MANY_REQUESTS, error("rate"))
+        if (path == "forget") return if (!post) json(Response.Status.METHOD_NOT_ALLOWED, error("method")) else {
+            access.forget(cookie)
+            json(Response.Status.OK, JSONObject().put("forgotten", true).toString()).also { it.addHeader("Set-Cookie", SetupCookies.forgetPhone()) }
+        }
+        when (access.allowed(phone)) {
+            null -> return json(Response.Status.SERVICE_UNAVAILABLE, error("starting")).also { it.addHeader("Retry-After", "2") }
+            false -> return json(Response.Status.FORBIDDEN, error("profile"))
+            true -> Unit
+        }
+        idle.touch()
+        return api(session, path, post, PHONE_OWNER + phone.id, remote, phone)
+    }
+
+    private fun api(session: IHTTPSession, path: String, post: Boolean, owner: String, remote: String, phone: SetupPhone?): Response {
         return when {
             path == "state" && !post -> json(Response.Status.OK, listing().toJson(pending = changes.hasPending()))
             path == "settings" && !post -> json(Response.Status.OK, settings().toJson())
-            path == "settings" && post -> proposeSettings(session, owner, remote)
-            path == "changes" && post -> propose(session, owner, remote)
-            path == "links" && post -> proposeLinks(session, owner, remote)
-            path == "channel-guide" && post -> proposeChannelGuide(session, owner, remote)
-            path == "profile" && post -> proposeProfile(session, owner, remote)
+            path == "settings" && post -> proposeSettings(session, owner, Sender(remote, phone))
+            path == "changes" && post -> propose(session, owner, Sender(remote, phone))
+            path == "links" && post -> proposeLinks(session, owner, Sender(remote, phone))
+            path == "channel-guide" && post -> proposeChannelGuide(session, owner, Sender(remote, phone))
+            path == "profile" && post -> proposeProfile(session, owner, Sender(remote, phone))
             path == "channels" && !post -> channels(session)
             path == "guide-channels" && !post -> guideChannels(session)
             path == "recordings" && !post -> recordingList()
@@ -140,6 +195,8 @@ class IptvSetupServer private constructor(
             else -> json(Response.Status.NOT_FOUND, error("missing"))
         }
     }
+
+    private class Sender(val address: String, val phone: SetupPhone?)
 
     private fun pair(session: IHTTPSession, token: String, remote: String): Response {
         if (!pairAttempts.allow(remote)) return json(Response.Status.TOO_MANY_REQUESTS, error("rate"))
@@ -153,9 +210,12 @@ class IptvSetupServer private constructor(
             return json(Response.Status.BAD_REQUEST, error("body"))
         }
         return when (val result = pairing.pair(token, code)) {
-            is SetupPairing.Result.Paired -> json(Response.Status.OK, JSONObject().put("paired", true).toString()).also {
-                idle.touch()
-                it.addHeader("Set-Cookie", SetupCookies.session(result.sessionId, token))
+            is SetupPairing.Result.Paired -> {
+                val phone = phones?.takeIf { it.enabled }?.issue(session.headers["user-agent"], listing().profile)
+                json(Response.Status.OK, JSONObject().put("paired", true).apply { if (phone != null) put("phone", SetupCookies.PHONE_PATH) }.toString()).also {
+                    idle.touch()
+                    it.addHeader("Set-Cookie", if (phone != null) SetupCookies.phone(phone) else SetupCookies.session(result.sessionId, token))
+                }
             }
             is SetupPairing.Result.WrongCode -> json(Response.Status.FORBIDDEN, JSONObject().put("error", "code").put("attemptsLeft", result.attemptsLeft).toString())
             SetupPairing.Result.Renewed -> json(Response.Status.GONE, error("renewed"))
@@ -163,7 +223,7 @@ class IptvSetupServer private constructor(
         }
     }
 
-    private fun propose(session: IHTTPSession, owner: String, remote: String): Response {
+    private fun propose(session: IHTTPSession, owner: String, remote: Sender): Response {
         val draft = try {
             SetupDrafts.parse(readBody(session))
         } catch (invalid: SetupInputException) {
@@ -183,7 +243,7 @@ class IptvSetupServer private constructor(
         return submit(owner, draft, remote)
     }
 
-    private fun proposeSettings(session: IHTTPSession, owner: String, remote: String): Response {
+    private fun proposeSettings(session: IHTTPSession, owner: String, remote: Sender): Response {
         val change = try {
             SetupSettingsInput.parse(readBody(session))
         } catch (invalid: SetupInputException) {
@@ -197,14 +257,14 @@ class IptvSetupServer private constructor(
         return submit(owner, change, remote)
     }
 
-    private fun proposeLinks(session: IHTTPSession, owner: String, remote: String): Response {
+    private fun proposeLinks(session: IHTTPSession, owner: String, remote: Sender): Response {
         val change = try { SetupAssignments.parseLinks(readBody(session)) } catch (invalid: SetupInputException) { return invalid(invalid) }
         val listing = listing()
         SetupAssignments.checkLinks(change, listing)?.let { return refused(it) }
         return submit(owner, change, remote, listing.profile)
     }
 
-    private fun proposeChannelGuide(session: IHTTPSession, owner: String, remote: String): Response {
+    private fun proposeChannelGuide(session: IHTTPSession, owner: String, remote: Sender): Response {
         val change = try { SetupAssignments.parseChannelGuide(readBody(session)) } catch (invalid: SetupInputException) { return invalid(invalid) }
         val listing = listing()
         val current = if (listing.find(SetupKind.M3U, change.sourceId) == null) null else lookup.channel(change.sourceId, change.channelId)
@@ -214,7 +274,7 @@ class IptvSetupServer private constructor(
         return submit(owner, change, remote, listing.profile)
     }
 
-    private fun proposeProfile(session: IHTTPSession, owner: String, remote: String): Response {
+    private fun proposeProfile(session: IHTTPSession, owner: String, remote: Sender): Response {
         val change = try { SetupAssignments.parseProfile(readBody(session)) } catch (invalid: SetupInputException) { return invalid(invalid) }
         val listing = listing()
         SetupAssignments.checkProfile(change, listing)?.let { return refused(it) }
@@ -303,11 +363,11 @@ class IptvSetupServer private constructor(
         else -> Response.Status.BAD_REQUEST
     }, error(problem))
 
-    private fun submit(owner: String, change: SetupChange, remote: String, profile: Int = listing().profile): Response {
+    private fun submit(owner: String, change: SetupChange, remote: Sender, profile: Int = listing().profile): Response {
         if (changes.coolingDown(owner)) return json(Response.Status.CONFLICT, error("cooldown"))
         val id = changes.propose(owner, change) ?: return json(Response.Status.CONFLICT, error("busy"))
         try {
-            onChangeProposed(this, id, change, remote, profile)
+            onChangeProposed(this, id, change, remote.address, profile, remote.phone)
         } catch (_: Exception) {
             changes.resolve(id, SetupChangeBook.Status.FAILED)
             return json(Response.Status.INTERNAL_ERROR, error("server"))
@@ -339,6 +399,11 @@ class IptvSetupServer private constructor(
     private fun page(): Response {
         val nonce = SetupHeaders.nonce(random)
         return secured(newFixedLengthResponse(Response.Status.OK, "text/html; charset=utf-8", IptvSetupWebPage.page(nonce)), nonce)
+    }
+
+    private fun unpaired(): Response {
+        val nonce = SetupHeaders.nonce(random)
+        return secured(newFixedLengthResponse(Response.Status.UNAUTHORIZED, "text/html; charset=utf-8", IptvSetupWebPage.unpaired(nonce)), nonce)
     }
 
     private fun ended(): Response {
@@ -376,6 +441,9 @@ class IptvSetupServer private constructor(
         private const val CONNECTION_DEADLINE_MILLIS = 10_000L
         private const val REQUESTS_PER_MINUTE = 120
         private const val PAIR_ATTEMPTS_PER_MINUTE = 10
+        private const val PAIR_ATTEMPTS_ALL_PER_MINUTE = 30
+        private const val PHONE_FAILURES_PER_MINUTE = 20
+        private const val PHONE_OWNER = "phone:"
         private val PATH = Regex("/s/([^/]+)(.*)")
         private val CHANGE_ID = Regex("[0-9a-f]{32}")
         private val ID = Regex("[A-Za-z0-9_-]{1,80}")
@@ -386,16 +454,21 @@ class IptvSetupServer private constructor(
             listing: () -> SetupListing,
             settings: () -> SetupSettings,
             lookup: SetupLookup,
-            onChangeProposed: (IptvSetupServer, String, SetupChange, String, Int) -> Unit,
+            onChangeProposed: (IptvSetupServer, String, SetupChange, String, Int, SetupPhone?) -> Unit,
             recordings: SetupRecordingSource? = null,
+            phones: SetupPhoneAccess? = null,
+            pairingOpen: Boolean = true,
+            preferredPort: Int? = null,
             now: () -> Long = System::currentTimeMillis,
             startPort: Int = 8100,
             maxAttempts: Int = 10
         ): IptvSetupServer? {
             if (!SetupLan.isLanAddress(host)) return null
-            for (port in startPort until startPort + maxAttempts) {
+            val range = startPort until startPort + maxAttempts
+            for (port in (listOfNotNull(preferredPort?.takeIf { it in range }) + range).distinct()) {
                 try {
-                    val server = IptvSetupServer(host, port, listing, settings, lookup, onChangeProposed, recordings, now)
+                    val server = IptvSetupServer(host, port, listing, settings, lookup, onChangeProposed, recordings, phones, now)
+                    if (!pairingOpen) server.closePairing()
                     server.start(SOCKET_READ_TIMEOUT, false)
                     return server
                 } catch (_: Exception) {

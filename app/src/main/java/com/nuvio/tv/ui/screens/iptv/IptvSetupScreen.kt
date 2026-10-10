@@ -27,8 +27,11 @@ import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +41,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -54,19 +58,24 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.SetupPhone
 import com.nuvio.tv.ui.components.LoadingIndicator
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.screens.settings.SettingsActionRow
+import com.nuvio.tv.ui.screens.settings.SettingsToggleRow
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
 import com.nuvio.tv.ui.v2.components.NuvioActionPill
+import java.text.DateFormat
+import java.util.Date
 
 @Composable
 fun IptvSetupScreen(onBack: () -> Unit, viewModel: IptvSetupViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
     val first = remember { FocusRequester() }
+    var showPhones by remember { mutableStateOf(false) }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
@@ -96,12 +105,19 @@ fun IptvSetupScreen(onBack: () -> Unit, viewModel: IptvSetupViewModel = hiltView
                 if (stopped) SettingsActionRow(title = stringResource(R.string.iptv_remote_start_again),
                     subtitle = stringResource(R.string.iptv_remote_start_again_subtitle), onClick = viewModel::restart,
                     leadingIcon = Icons.Filled.Refresh, modifier = Modifier.focusRequester(first))
-                SettingsActionRow(title = stringResource(R.string.iptv_remote_done), subtitle = stringResource(R.string.iptv_remote_done_subtitle),
+                SettingsActionRow(title = stringResource(R.string.iptv_remote_done),
+                    subtitle = stringResource(if (state.keep) R.string.iptv_phone_done_kept else R.string.iptv_remote_done_subtitle),
                     onClick = onBack, leadingIcon = Icons.Filled.Check, modifier = if (stopped) Modifier else Modifier.focusRequester(first))
+                SettingsToggleRow(title = stringResource(R.string.iptv_phone_keep), subtitle = stringResource(R.string.iptv_phone_keep_subtitle),
+                    checked = state.keep, onToggle = viewModel::toggleKeep)
+                if (state.keep) SettingsActionRow(title = stringResource(R.string.iptv_phone_paired),
+                    subtitle = if (state.phones.isEmpty()) stringResource(R.string.iptv_phone_paired_none)
+                        else pluralStringResource(R.plurals.iptv_phone_paired_count, state.phones.size, state.phones.size),
+                    onClick = { showPhones = true }, leadingIcon = Icons.Filled.Smartphone)
                 Spacer(Modifier.weight(1f))
                 Note(Icons.Filled.Lock, stringResource(R.string.iptv_remote_home_network))
                 Note(null, stringResource(R.string.iptv_remote_confirm_note))
-                Note(null, stringResource(R.string.iptv_remote_idle_note))
+                Note(null, stringResource(if (state.keep) R.string.iptv_phone_keep_note else R.string.iptv_remote_idle_note))
                 state.editingProfile?.let { Note(null, stringResource(R.string.iptv_remote_editing_profile, it)) }
                 state.message?.let {
                     Spacer(Modifier.height(6.dp))
@@ -121,6 +137,41 @@ fun IptvSetupScreen(onBack: () -> Unit, viewModel: IptvSetupViewModel = hiltView
         }
     }
     state.pending?.let { pending -> PendingDialog(pending, onSave = viewModel::confirm, onReject = viewModel::reject) }
+    if (showPhones && state.keep && state.pending == null) PhonesDialog(state.phones, onRemove = viewModel::removePhone,
+        onRemoveAll = viewModel::removeAllPhones, onClose = { showPhones = false })
+}
+
+@Composable
+fun IptvPhoneRequestPrompt() {
+    val context = LocalContext.current
+    val live by IptvSetupHost.live.collectAsState()
+    val keep = remember { IptvSetupHost.keepOn(context) }
+    if (!live && !keep) return
+    val viewModel: IptvPhoneRequestViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    if (!state.visible) state.pending?.let { pending -> PendingDialog(pending, onSave = viewModel::confirm, onReject = viewModel::reject) }
+}
+
+@Composable
+private fun PhonesDialog(phones: List<SetupPhone>, onRemove: (String) -> Unit, onRemoveAll: () -> Unit, onClose: () -> Unit) {
+    val context = LocalContext.current
+    val close = remember { FocusRequester() }
+    val format = remember { DateFormat.getDateInstance(DateFormat.MEDIUM) }
+    LaunchedEffect(phones.size) { withFrameNanos { }; runCatching { close.requestFocus() } }
+    NuvioDialog(onDismiss = onClose, title = stringResource(R.string.iptv_phone_paired), subtitle = stringResource(R.string.iptv_phone_paired_subtitle), width = 640.dp) {
+        Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
+            if (phones.isEmpty()) Text(stringResource(R.string.iptv_phone_paired_none), color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
+            phones.forEach { phone ->
+                SettingsActionRow(title = IptvSetupHost.phoneName(context, phone),
+                    subtitle = stringResource(R.string.iptv_phone_paired_on, format.format(Date(phone.pairedAt))),
+                    value = stringResource(R.string.iptv_remove), onClick = { onRemove(phone.id) }, leadingIcon = Icons.Filled.Smartphone, trailingIcon = null)
+            }
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            NuvioActionPill(onClose, Modifier.focusRequester(close)) { Text(stringResource(R.string.action_close)) }
+            if (phones.isNotEmpty()) NuvioActionPill(onRemoveAll) { Text(stringResource(R.string.iptv_phone_remove_all)) }
+        }
+    }
 }
 
 @Composable
@@ -140,6 +191,11 @@ private fun Pairing(state: IptvSetupState) {
             Text(stringResource(R.string.iptv_remote_address), color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.labelLarge)
             Text(state.address.orEmpty(), color = NuvioTheme.colors.TextPrimary, style = MaterialTheme.typography.bodyLarge, maxLines = 3,
                 overflow = TextOverflow.Ellipsis)
+            state.phoneAddress?.let { phone ->
+                Spacer(Modifier.height(12.dp))
+                Text(stringResource(R.string.iptv_phone_address), color = NuvioTheme.colors.TextSecondary, style = MaterialTheme.typography.labelLarge)
+                Text(phone, color = NuvioTheme.colors.TextPrimary, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
             Spacer(Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Box(Modifier.size(10.dp).clip(CircleShape).background(if (state.devices > 0) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextTertiary))

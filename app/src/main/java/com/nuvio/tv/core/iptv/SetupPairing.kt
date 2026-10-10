@@ -98,6 +98,15 @@ class SetupPairing(
         credentials = Credentials(newToken(), newCode(), credentials.revision + 1)
     }
 
+    val open: Boolean @Synchronized get() = !closed
+
+    @Synchronized fun reopen() {
+        closed = false
+        attempts = 0
+        sessions.clear()
+        credentials = Credentials(newToken(), newCode(credentials.code), credentials.revision + 1)
+    }
+
     private fun newToken(): String = buildString(TOKEN_LENGTH) { repeat(TOKEN_LENGTH) { append(ALPHABET[random.nextInt(ALPHABET.length)]) } }
     private fun newCode(previous: String? = null): String {
         while (true) String.format(Locale.ROOT, "%06d", random.nextInt(1_000_000)).let { if (it != previous) return it }
@@ -211,4 +220,15 @@ object SetupCookies {
         require(SetupPairing.TOKEN.matches(token) && value.all { it in '0'..'9' || it in 'a'..'f' })
         return "$NAME=$value; Path=/s/$token/; HttpOnly; SameSite=Strict"
     }
+
+    fun phone(token: String): String {
+        require(SetupPhones.TOKEN.matches(token))
+        return "$PHONE=$token; Path=$PHONE_PATH; Max-Age=$PHONE_MAX_AGE; HttpOnly; SameSite=Strict"
+    }
+
+    fun forgetPhone(): String = "$PHONE=; Path=$PHONE_PATH; Max-Age=0; HttpOnly; SameSite=Strict"
+
+    const val PHONE = "nuvio_phone"
+    const val PHONE_PATH = "/p/"
+    private const val PHONE_MAX_AGE = 34_560_000
 }
