@@ -2,6 +2,8 @@
 package com.nuvio.tv.ui.screens.iptv
 
 import android.text.format.Formatter
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -12,10 +14,13 @@ import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -43,19 +48,49 @@ import com.nuvio.tv.ui.screens.settings.SettingsToggleRow
 import com.nuvio.tv.ui.screens.settings.SettingsVerticalScrollIndicators
 import com.nuvio.tv.ui.screens.settings.localizedName
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
+import com.nuvio.tv.ui.v2.appearance.V2Atmosphere
 import com.nuvio.tv.ui.v2.components.NuvioActionPill
+import kotlinx.coroutines.flow.MutableStateFlow
 
 private enum class IptvSettingsChoice { FORMAT, START, LAYOUT, QUALITY, EARLY, LATE, THEME }
 
-@Composable
-internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onRecordings: () -> Unit, initialFocusRequester: FocusRequester? = null,
-    viewModel: IptvSettingsViewModel = hiltViewModel()) {
-    IptvPanelFloor { IptvSettingsBody(onSources, onSetup, onRecordings, initialFocusRequester, viewModel) }
+object IptvSettingsReturn {
+    val requested = MutableStateFlow(false)
 }
 
 @Composable
-private fun IptvSettingsBody(onSources: () -> Unit, onSetup: () -> Unit, onRecordings: () -> Unit, initialFocusRequester: FocusRequester?,
-    viewModel: IptvSettingsViewModel) {
+fun IptvSettingsScreen(onBack: () -> Unit, onSources: () -> Unit, onSetup: () -> Unit, onRecordings: () -> Unit,
+    viewModel: IptvSettingsViewModel = hiltViewModel()) {
+    var link by rememberSaveable { mutableIntStateOf(0) }
+    val links = remember { List(3) { FocusRequester() } }
+    LaunchedEffect(Unit) { withFrameNanos { }; runCatching { links[link].requestFocus() } }
+    BackHandler(onBack = onBack)
+    var leftColumn by remember { mutableStateOf(false) }
+    Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background).onPreviewKeyEvent { event ->
+        val native = event.nativeKeyEvent
+        if (native.keyCode != android.view.KeyEvent.KEYCODE_DPAD_LEFT || !leftColumn) false
+        else { if (native.action == android.view.KeyEvent.ACTION_DOWN && native.repeatCount == 0) onBack(); true }
+    }) {
+        if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
+        Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+            Column(Modifier.width(340.dp).fillMaxHeight().onFocusChanged { leftColumn = it.hasFocus }, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                SettingsDetailHeader(stringResource(R.string.iptv_settings_title), stringResource(R.string.iptv_settings_description))
+                Spacer(Modifier.height(12.dp))
+                SettingsActionRow(title = stringResource(R.string.iptv_settings_sources), subtitle = stringResource(R.string.iptv_settings_sources_subtitle),
+                    onClick = { link = 0; onSources() }, leadingIcon = Icons.AutoMirrored.Filled.PlaylistPlay, modifier = Modifier.focusRequester(links[0]))
+                SettingsActionRow(title = stringResource(R.string.iptv_ui9_phone_setup), subtitle = stringResource(R.string.iptv_remote_entry_subtitle),
+                    onClick = { link = 1; onSetup() }, leadingIcon = Icons.Filled.PhoneAndroid, modifier = Modifier.focusRequester(links[1]))
+                SettingsActionRow(title = stringResource(R.string.iptv_recordings_open), subtitle = stringResource(R.string.iptv_settings_recordings_subtitle),
+                    onClick = { link = 2; onRecordings() }, leadingIcon = Icons.Filled.VideoLibrary, modifier = Modifier.focusRequester(links[2]))
+            }
+            IptvSettingsBody(viewModel, Modifier.weight(1f).fillMaxHeight())
+        }
+    }
+}
+
+@Composable
+private fun IptvSettingsBody(viewModel: IptvSettingsViewModel, modifier: Modifier) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val themes by viewModel.themes.collectAsStateWithLifecycle()
     var choosing by remember { mutableStateOf<IptvSettingsChoice?>(null) }
@@ -65,85 +100,71 @@ private fun IptvSettingsBody(onSources: () -> Unit, onSetup: () -> Unit, onRecor
         lifecycle.addObserver(observer)
         onDispose { lifecycle.removeObserver(observer) }
     }
-    Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        SettingsDetailHeader(title = stringResource(R.string.iptv_live_title), subtitle = stringResource(R.string.iptv_settings_description))
-        val list = rememberLazyListState()
-        Box(Modifier.fillMaxWidth().weight(1f)) {
-            LazyColumn(Modifier.fillMaxSize(), state = list, verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(bottom = 32.dp)) {
-                item(key = "links") {
-                    SettingsGroupCard {
-                        SettingsActionRow(title = stringResource(R.string.iptv_settings_sources), subtitle = stringResource(R.string.iptv_settings_sources_subtitle),
-                            onClick = onSources, leadingIcon = Icons.AutoMirrored.Filled.PlaylistPlay,
-                            modifier = if (initialFocusRequester != null) Modifier.focusRequester(initialFocusRequester) else Modifier)
-                        SettingsActionRow(title = stringResource(R.string.iptv_ui9_phone_setup), subtitle = stringResource(R.string.iptv_remote_entry_subtitle),
-                            onClick = onSetup, leadingIcon = Icons.Filled.PhoneAndroid)
-                        SettingsActionRow(title = stringResource(R.string.iptv_recordings_open), subtitle = stringResource(R.string.iptv_settings_recordings_subtitle),
-                            onClick = onRecordings, leadingIcon = Icons.Filled.VideoLibrary)
-                    }
-                }
-                item(key = "playback") {
-                    SettingsGroupCard(title = stringResource(R.string.iptv_settings_playback)) {
-                        SettingsActionRow(title = stringResource(R.string.iptv_live_format_title), subtitle = stringResource(R.string.iptv_settings_format_subtitle),
-                            value = stringResource(formatLabel(state.format)), onClick = { choosing = IptvSettingsChoice.FORMAT })
-                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_timeshift), subtitle = stringResource(R.string.iptv_settings_timeshift_subtitle),
-                            checked = state.timeshift, onToggle = viewModel::toggleTimeshift)
-                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_stats), subtitle = stringResource(R.string.iptv_settings_stats_subtitle),
-                            checked = state.stats, onToggle = viewModel::toggleStats)
-                    }
-                }
-                item(key = "streaming") { IptvStreamingSettingsSection() }
-                item(key = "local-timeshift") { IptvTimeshiftSettingsSection() }
-                item(key = "appearance") {
-                    SettingsGroupCard(title = stringResource(R.string.iptv_settings_appearance), subtitle = stringResource(R.string.iptv_settings_appearance_subtitle)) {
-                        SettingsActionRow(title = stringResource(R.string.iptv_settings_theme), subtitle = null,
-                            value = themeLabel(iptvTheme(state.appearance.theme)?.takeIf { it in themes }), onClick = { choosing = IptvSettingsChoice.THEME })
-                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_black), subtitle = stringResource(R.string.iptv_settings_black_subtitle),
-                            checked = state.appearance.black, onToggle = viewModel::toggleBlack)
-                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_solid), subtitle = stringResource(R.string.iptv_settings_solid_subtitle),
-                            checked = state.appearance.solidPanels, onToggle = viewModel::toggleSolid)
-                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_artwork), subtitle = stringResource(R.string.iptv_settings_artwork_subtitle),
-                            checked = !state.appearance.plainBackground, onToggle = viewModel::toggleArtwork)
-                    }
-                }
-                item(key = "guide") {
-                    SettingsGroupCard(title = stringResource(R.string.iptv_live_guide)) {
-                        SettingsActionRow(title = stringResource(R.string.iptv_settings_start), subtitle = null,
-                            value = stringResource(startLabel(state.startView)), onClick = { choosing = IptvSettingsChoice.START })
-                        IptvDensityRow(viewModel)
-                        IptvGuideDaysRow()
-                        SettingsToggleRow(title = stringResource(R.string.iptv_settings_sport), subtitle = stringResource(R.string.iptv_settings_sport_subtitle),
-                            checked = state.sport, onToggle = viewModel::toggleSport)
-                        SettingsActionRow(title = stringResource(R.string.iptv_live_hidden_categories),
-                            subtitle = stringResource(if (state.hiddenCategories > 0) R.string.iptv_settings_hidden_subtitle else R.string.iptv_settings_hidden_none),
-                            value = state.hiddenCategories.takeIf { it > 0 }?.toString(), enabled = state.hiddenCategories > 0,
-                            onClick = viewModel::unhideCategories, trailingIcon = null)
-                    }
-                }
-                if (state.sport) item(key = "sports") { IptvSportsSettingsSection() }
-                item(key = "vod") { IptvVodSettingsSection() }
-                item(key = "home") { IptvHomeSettingsSection() }
-                if (state.multiview) item(key = "multiview") {
-                    SettingsGroupCard(title = stringResource(R.string.iptv_multiview_title)) {
-                        SettingsActionRow(title = stringResource(R.string.iptv_multiview_layout), subtitle = null,
-                            value = stringResource(layoutLabel(state.layout)), onClick = { choosing = IptvSettingsChoice.LAYOUT })
-                        SettingsActionRow(title = stringResource(R.string.iptv_multiview_quality), subtitle = stringResource(R.string.iptv_multiview_quality_description),
-                            value = stringResource(qualityLabel(state.quality)), onClick = { choosing = IptvSettingsChoice.QUALITY })
-                    }
-                }
-                item(key = "recordings") {
-                    SettingsGroupCard(title = stringResource(R.string.iptv_recordings_open)) {
-                        SettingsActionRow(title = stringResource(R.string.iptv_settings_record_early), subtitle = null,
-                            value = minutes(state.recordEarly), onClick = { choosing = IptvSettingsChoice.EARLY })
-                        SettingsActionRow(title = stringResource(R.string.iptv_settings_record_late), subtitle = stringResource(R.string.iptv_settings_record_late_subtitle),
-                            value = minutes(state.recordLate), onClick = { choosing = IptvSettingsChoice.LATE })
-                        SettingsActionRow(title = stringResource(R.string.iptv_location_title), subtitle = stringResource(R.string.iptv_location_subtitle),
-                            value = locationLabel(state.location), valueColor = if (state.location.available) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.Error,
-                            onClick = viewModel::openLocations)
-                    }
+    val list = rememberLazyListState()
+    Box(modifier) {
+        LazyColumn(Modifier.fillMaxSize(), state = list, verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(bottom = 32.dp)) {
+            item(key = "playback") {
+                SettingsGroupCard(title = stringResource(R.string.iptv_settings_playback)) {
+                    SettingsActionRow(title = stringResource(R.string.iptv_live_format_title), subtitle = stringResource(R.string.iptv_settings_format_subtitle),
+                        value = stringResource(formatLabel(state.format)), onClick = { choosing = IptvSettingsChoice.FORMAT })
+                    SettingsToggleRow(title = stringResource(R.string.iptv_settings_timeshift), subtitle = stringResource(R.string.iptv_settings_timeshift_subtitle),
+                        checked = state.timeshift, onToggle = viewModel::toggleTimeshift)
+                    SettingsToggleRow(title = stringResource(R.string.iptv_settings_stats), subtitle = stringResource(R.string.iptv_settings_stats_subtitle),
+                        checked = state.stats, onToggle = viewModel::toggleStats)
                 }
             }
-            SettingsVerticalScrollIndicators(state = list)
+            item(key = "streaming") { IptvStreamingSettingsSection() }
+            item(key = "local-timeshift") { IptvTimeshiftSettingsSection() }
+            item(key = "appearance") {
+                SettingsGroupCard(title = stringResource(R.string.iptv_settings_appearance), subtitle = stringResource(R.string.iptv_settings_appearance_subtitle)) {
+                    SettingsActionRow(title = stringResource(R.string.iptv_settings_theme), subtitle = null,
+                        value = themeLabel(iptvTheme(state.appearance.theme)?.takeIf { it in themes }), onClick = { choosing = IptvSettingsChoice.THEME })
+                    SettingsToggleRow(title = stringResource(R.string.iptv_settings_black), subtitle = stringResource(R.string.iptv_settings_black_subtitle),
+                        checked = state.appearance.black, onToggle = viewModel::toggleBlack)
+                    SettingsToggleRow(title = stringResource(R.string.iptv_settings_solid), subtitle = stringResource(R.string.iptv_settings_solid_subtitle),
+                        checked = state.appearance.solidPanels, onToggle = viewModel::toggleSolid)
+                    SettingsToggleRow(title = stringResource(R.string.iptv_settings_artwork), subtitle = stringResource(R.string.iptv_settings_artwork_subtitle),
+                        checked = !state.appearance.plainBackground, onToggle = viewModel::toggleArtwork)
+                }
+            }
+            item(key = "guide") {
+                SettingsGroupCard(title = stringResource(R.string.iptv_live_guide)) {
+                    SettingsActionRow(title = stringResource(R.string.iptv_settings_start), subtitle = null,
+                        value = stringResource(startLabel(state.startView)), onClick = { choosing = IptvSettingsChoice.START })
+                    IptvDensityRow(viewModel)
+                    IptvGuideDaysRow()
+                    SettingsToggleRow(title = stringResource(R.string.iptv_settings_sport), subtitle = stringResource(R.string.iptv_settings_sport_subtitle),
+                        checked = state.sport, onToggle = viewModel::toggleSport)
+                    SettingsActionRow(title = stringResource(R.string.iptv_live_hidden_categories),
+                        subtitle = stringResource(if (state.hiddenCategories > 0) R.string.iptv_settings_hidden_subtitle else R.string.iptv_settings_hidden_none),
+                        value = state.hiddenCategories.takeIf { it > 0 }?.toString(), enabled = state.hiddenCategories > 0,
+                        onClick = viewModel::unhideCategories, trailingIcon = null)
+                }
+            }
+            if (state.sport) item(key = "sports") { IptvSportsSettingsSection() }
+            item(key = "vod") { IptvVodSettingsSection() }
+            item(key = "home") { IptvHomeSettingsSection() }
+            if (state.multiview) item(key = "multiview") {
+                SettingsGroupCard(title = stringResource(R.string.iptv_multiview_title)) {
+                    SettingsActionRow(title = stringResource(R.string.iptv_multiview_layout), subtitle = null,
+                        value = stringResource(layoutLabel(state.layout)), onClick = { choosing = IptvSettingsChoice.LAYOUT })
+                    SettingsActionRow(title = stringResource(R.string.iptv_multiview_quality), subtitle = stringResource(R.string.iptv_multiview_quality_description),
+                        value = stringResource(qualityLabel(state.quality)), onClick = { choosing = IptvSettingsChoice.QUALITY })
+                }
+            }
+            item(key = "recordings") {
+                SettingsGroupCard(title = stringResource(R.string.iptv_recordings_open)) {
+                    SettingsActionRow(title = stringResource(R.string.iptv_settings_record_early), subtitle = null,
+                        value = minutes(state.recordEarly), onClick = { choosing = IptvSettingsChoice.EARLY })
+                    SettingsActionRow(title = stringResource(R.string.iptv_settings_record_late), subtitle = stringResource(R.string.iptv_settings_record_late_subtitle),
+                        value = minutes(state.recordLate), onClick = { choosing = IptvSettingsChoice.LATE })
+                    SettingsActionRow(title = stringResource(R.string.iptv_location_title), subtitle = stringResource(R.string.iptv_location_subtitle),
+                        value = locationLabel(state.location), valueColor = if (state.location.available) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.Error,
+                        onClick = viewModel::openLocations)
+                }
+            }
         }
+        SettingsVerticalScrollIndicators(state = list)
     }
     IptvOpaqueDialogs { IptvSettingsDialogs(state, choosing, { choosing = null }, viewModel) }
 }

@@ -572,6 +572,11 @@ Recordings:
   "Al Jazeera - 101 East - 10-Oct-26 1355.ts"; when a name is already taken, " (2)", " (3)"
   and so on is added. Existing recordings keep their names.
 
+Live TV settings:
+- Live TV settings open inside Live TV in its own look (Sources-style layout with links to
+  Sources, phone setup and Recordings); Back returns to the Live TV menu. They are no longer
+  a category in Nuvio's main Settings (reverses the 7 October decision).
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

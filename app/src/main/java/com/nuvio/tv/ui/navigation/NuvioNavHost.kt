@@ -1259,10 +1259,7 @@ private fun PlaybackNavHost(
                 onRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } },
                 onSetup = { navController.navigate(Screen.IptvSetup.route) { launchSingleTop = true } },
                 onVod = { kind -> navController.navigate(Screen.IptvVod.createRoute(kind.wire)) { launchSingleTop = true } },
-                onSettings = {
-                    com.nuvio.tv.ui.screens.settings.SettingsCategoryRequest.open(com.nuvio.tv.ui.screens.settings.SettingsCategory.LIVE_TV)
-                    navController.openRootDestination(Screen.Settings.route)
-                },
+                onSettings = { navController.navigate(Screen.IptvSettings.route) { launchSingleTop = true } },
                 onSources = {
                     if (!navController.popBackStack(Screen.IptvSources.route, inclusive = false)) {
                         navController.navigate(Screen.IptvSources.route) { launchSingleTop = true }
@@ -1277,6 +1274,17 @@ private fun PlaybackNavHost(
                     }
                 },
                 onSetup = { navController.navigate(Screen.IptvSetup.route) { launchSingleTop = true } }) }
+        }
+        composable(Screen.IptvSettings.route) {
+            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvSettingsScreen(
+                onBack = {
+                    com.nuvio.tv.ui.screens.iptv.IptvSettingsReturn.requested.value = true
+                    com.nuvio.tv.ui.screens.iptv.IptvVodLiveMenu.requested.value = true
+                    navController.popBackStack(Screen.IptvSettings.route, inclusive = true)
+                },
+                onSources = { navController.navigate(Screen.IptvSources.route) { launchSingleTop = true } },
+                onSetup = { navController.navigate(Screen.IptvSetup.route) { launchSingleTop = true } },
+                onRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } }) }
         }
         if (com.nuvio.tv.BuildConfig.FEATURE_IPTV_ENABLED) {
             composable(Screen.IptvSetup.route) {
@@ -1321,10 +1329,7 @@ private fun PlaybackNavHost(
                 },
                 onNavigateToLicensesAttributions = {
                     navController.navigate(Screen.LicensesAttributions.route)
-                },
-                onNavigateToIptvSources = { navController.navigate(Screen.IptvSources.route) { launchSingleTop = true } },
-                onNavigateToIptvSetup = { navController.navigate(Screen.IptvSetup.route) { launchSingleTop = true } },
-                onNavigateToIptvRecordings = { navController.navigate(Screen.IptvRecordings.route) { launchSingleTop = true } }
+                }
             )
         }
 

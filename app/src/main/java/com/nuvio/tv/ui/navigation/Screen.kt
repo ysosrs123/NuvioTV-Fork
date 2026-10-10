@@ -8,6 +8,7 @@ sealed class Screen(val route: String) {
     data object IptvSources : Screen("iptv/sources")
     data object IptvSetup : Screen("iptv/setup")
     data object IptvRecordings : Screen("iptv/recordings")
+    data object IptvSettings : Screen("iptv/settings")
     data object IptvVod : Screen("iptv/vod/{kind}") {
         fun createRoute(kind: String): String = "iptv/vod/${URLEncoder.encode(kind, "UTF-8")}"
     }
