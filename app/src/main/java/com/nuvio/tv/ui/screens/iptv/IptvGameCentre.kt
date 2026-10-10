@@ -28,6 +28,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -60,6 +62,7 @@ import com.nuvio.tv.core.iptv.SportsSpoilers
 import com.nuvio.tv.core.iptv.SportsSummary
 import com.nuvio.tv.core.iptv.SummaryCount
 import com.nuvio.tv.core.iptv.SummaryMoment
+import com.nuvio.tv.core.iptv.SummaryPlayer
 import com.nuvio.tv.data.iptv.IptvListedChannel
 import com.nuvio.tv.data.iptv.IptvSportsSummaryClient
 import com.nuvio.tv.data.iptv.IptvSportsSummaryWatch
@@ -310,7 +313,7 @@ private sealed interface CentreItem {
     data class Heading(val text: Int, override val key: String) : CentreItem
     data class Moment(val moment: SummaryMoment, val marker: SportsMarker?, val team: String?, override val key: String) : CentreItem
     data class Stat(val label: String, val home: String, val away: String, val homeColour: Color?, val awayColour: Color?, override val key: String) : CentreItem
-    data class Line(val text: String, val trailing: String?, val strong: Boolean, override val key: String) : CentreItem
+    data class Line(val text: String, val trailing: String?, val strong: Boolean, override val key: String, val card: MomentKind? = null) : CentreItem
     data class Game(val item: IptvFixtureItem, val hidden: Boolean, override val key: String) : CentreItem
 }
 
@@ -356,10 +359,12 @@ private fun centreItems(tab: CentreTab, fixture: SportsFixture, summary: SportsS
         CentreTab.LINEUPS -> buildList {
             summary?.rosters.orEmpty().forEach { roster ->
                 val side = roster.side.name
-                add(CentreItem.Line(listOfNotNull(team(roster.side), stringResource(R.string.iptv_sport5p_starting)).joinToString(" · "), null, true, "r:$side"))
-                roster.starters.forEachIndexed { i, p -> add(CentreItem.Line(listOfNotNull(p.jersey, p.name).joinToString("  "), p.position, false, "r:$side:s:$i")) }
+                fun card(p: SummaryPlayer) = if (hidden) null else if (p.sentOff) MomentKind.CARD_RED else if (p.booked) MomentKind.CARD_YELLOW else null
+                add(CentreItem.Line(listOfNotNull(team(roster.side), stringResource(R.string.iptv_sport5p_starting), roster.formation?.takeIf(String::isNotBlank))
+                    .joinToString(" · "), null, true, "r:$side"))
+                roster.starters.forEachIndexed { i, p -> add(CentreItem.Line(listOfNotNull(p.jersey, p.name).joinToString("  "), p.position, false, "r:$side:s:$i", card(p))) }
                 if (roster.subs.isNotEmpty()) add(CentreItem.Line(listOfNotNull(team(roster.side), stringResource(R.string.iptv_sport5p_bench)).joinToString(" · "), null, true, "r:$side:b"))
-                roster.subs.forEachIndexed { i, p -> add(CentreItem.Line(listOfNotNull(p.jersey, p.name).joinToString("  "), p.position, false, "r:$side:b:$i")) }
+                roster.subs.forEachIndexed { i, p -> add(CentreItem.Line(listOfNotNull(p.jersey, p.name).joinToString("  "), p.position, false, "r:$side:b:$i", card(p))) }
             }
         }
         CentreTab.TABLE -> buildList {
@@ -414,8 +419,13 @@ private fun CentreRow(item: CentreItem, onClick: (() -> Unit)?) {
             }
             is CentreItem.Stat -> StatBar(item, focused)
             is CentreItem.Line -> {
-                Text(item.text, style = iptvItemStyle(item.strong, compact = true), color = itemContent(focused), maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f))
+                if (item.card == null) Text(item.text, style = iptvItemStyle(item.strong, compact = true), color = itemContent(focused), maxLines = 1,
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                else Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(item.text, style = iptvItemStyle(item.strong, compact = true), color = itemContent(focused), maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false))
+                    PlayerCard(item.card == MomentKind.CARD_RED)
+                }
                 item.trailing?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.End, modifier = Modifier.widthIn(max = 260.dp)) }
             }
@@ -453,6 +463,13 @@ private fun MomentMark(kind: MomentKind) {
         contentAlignment = Alignment.Center) {
         if (text.isNotEmpty()) Text(text, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.Background, maxLines = 1)
     }
+}
+
+@Composable
+private fun PlayerCard(red: Boolean) {
+    val label = stringResource(if (red) R.string.iptv_ui16_sport_sent_off else R.string.iptv_ui16_sport_booked)
+    Box(Modifier.size(10.dp, 14.dp).semantics { contentDescription = label }.clip(RoundedCornerShape(2.dp))
+        .background(if (red) Color(0xFFE53935) else Color(0xFFFFD54F)).border(1.dp, Color.Black.copy(alpha = .35f), RoundedCornerShape(2.dp)))
 }
 
 private fun statValue(text: String): Double? = text.trim().removeSuffix("%").substringBefore('/').substringBefore('-').trim().toDoubleOrNull()

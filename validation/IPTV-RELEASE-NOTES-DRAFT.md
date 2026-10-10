@@ -685,6 +685,8 @@ Sport data (live Premier League and NBL capture, evening of 10 October):
   shown to staff no longer appear as player cards on the match strip.
 - Basketball play text no longer breaks across lines; NBL key-moment markers sit closer to
   the real broadcast time. TheSportsDB fixtures skip postponed games.
+- Game Centre line-ups show each side's formation and mark booked (yellow) and sent-off (red)
+  players; the cards are hidden while scores are hidden.
 
 ## Ready below the UI (screens pending)
 
