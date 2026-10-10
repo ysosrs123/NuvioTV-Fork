@@ -330,6 +330,21 @@ reporting, resets 10 October 2026 00:00 UTC):
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
 
+## Device findings — 10 October 2026, evening (build `e7e1d17b5`, run 38029912007)
+
+Checklist 7e/7d passed except (fixes in progress):
+1. Live TV settings: toggling Pure black moves focus back to "Sources and guides"; focus
+   should stay on the toggle.
+2. The main guide should show all channels without the Sport only / All channels toggle
+   (keep the toggle on the Sport page only).
+3. Sport page: hard to reach the Sport only / All channels toggle from the cards above.
+4. Left from Recordings returns to the guide but focus is not where it was; returning from
+   any other Live TV screen, panel or settings should restore the previous focus.
+5. Opening settings (or other Live TV screens) while a channel plays in the corner or full
+   screen should keep it playing, so it is still playing on return.
+6. Multiview with four pictures: the focused picture is enlarged with a border and overlaps
+   the others; it should keep its size with a gentle border.
+
 ## Decisions — 10 October 2026 (playback options, menu, sources)
 
 User agreed to these recommendations (in progress):
