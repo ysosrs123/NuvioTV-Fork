@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Playback and audio</string>
+    <string name="iptv_play14_description">Picture and sound for live channels. Changes apply to the next channel you open.</string>
+    <string name="iptv_play14_same_as_nuvio">Same as Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Same as Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Follows the setting in Nuvio\'s player settings, now: %1$s</string>
+    <string name="iptv_play14_on">On</string>
+    <string name="iptv_play14_frame_rate">Frame rate matching</string>
+    <string name="iptv_play14_frame_rate_subtitle">Switches the TV to the channel\'s frame rate once it is playing.</string>
+    <string name="iptv_play14_resolution_subtitle">Also switches the TV to the channel\'s resolution while frame rate matching is on.</string>
+    <string name="iptv_play14_passthrough">Audio passthrough</string>
+    <string name="iptv_play14_passthrough_subtitle">Sends Dolby Digital and Dolby Digital Plus sound to your receiver or soundbar as set in Nuvio\'s audio settings.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Uses Nuvio\'s passthrough, AC-3 transcoding and downmix settings. Multiview and the corner picture always decode in the app.</string>
+    <string name="iptv_play14_passthrough_off">Off (decode in the app)</string>
+    <string name="iptv_play14_passthrough_off_hint">Always sends decoded sound. Try this if a channel has no sound through your receiver.</string>
+    <string name="iptv_play14_tunnel">Tunnelled playback</string>
+    <string name="iptv_play14_tunnel_subtitle">Lets the TV box keep picture and sound in sync in hardware. Main picture only; not used in multiview, with Prefer app decoder or when 4K and HDR in the corner picture is off. Volume boost and the surround lift are off while it is in use.</string>
+    <string name="iptv_play14_surround">Prefer surround audio (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Picks the audio track with the most channels in the same language. Stereo plays when a channel has no surround track.</string>
+    <string name="iptv_play14_language">Prefer audio language</string>
+    <string name="iptv_play14_language_subtitle">Picks this language when a channel has more than one audio track.</string>
+    <string name="iptv_play14_language_stream">Stream default</string>
+    <string name="iptv_play14_decoder">Audio decoder</string>
+    <string name="iptv_play14_decoder_subtitle">Which decoder plays live sound. Video keeps using the TV box\'s decoder.</string>
+    <string name="iptv_play14_decoder_auto">Automatic</string>
+    <string name="iptv_play14_decoder_auto_hint">The TV box\'s decoder, with the app\'s decoder for formats it cannot play.</string>
+    <string name="iptv_play14_decoder_app">Prefer app decoder</string>
+    <string name="iptv_play14_decoder_app_hint">Decodes sound in the app first, including formats your receiver could take as passthrough. Try this if a channel crackles or has no sound.</string>
+</resources>

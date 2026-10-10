@@ -26,11 +26,34 @@ import androidx.media3.exoplayer.DecoderReuseEvaluation
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.Renderer
 import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.common.TrackGroup
+import androidx.media3.decoder.ffmpeg.FfmpegAudioRenderer
+import androidx.media3.exoplayer.RendererCapabilities
+import androidx.media3.exoplayer.audio.AudioOffloadSupport
 import androidx.media3.exoplayer.audio.AudioRendererEventListener
 import androidx.media3.exoplayer.audio.AudioSink
+import androidx.media3.exoplayer.audio.DefaultAudioSink
+import androidx.media3.exoplayer.audio.ForwardingAudioSink
 import androidx.media3.exoplayer.audio.MediaCodecAudioRenderer
 import androidx.media3.exoplayer.mediacodec.MediaCodecAdapter
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.exoplayer.trackselection.ExoTrackSelection
+import androidx.media3.exoplayer.trackselection.MappingTrackSelector.MappedTrackInfo
+import androidx.media3.exoplayer.video.VideoRendererEventListener
+import com.nuvio.tv.core.player.AudioPassthroughPolicy
+import com.nuvio.tv.data.local.AudioOutputChannels
+import com.nuvio.tv.data.local.PlayerSettings
+import com.nuvio.tv.data.local.PlayerSettingsDataStore
+import com.nuvio.tv.ui.screens.player.AudioOutputRouteDetector
+import com.nuvio.tv.ui.screens.player.PassthroughOutputReturn
+import com.nuvio.tv.ui.screens.player.SurroundResolveInputs
+import com.nuvio.tv.ui.screens.player.applyDownmixSettings
+import com.nuvio.tv.ui.screens.player.resolveSurroundForRoute
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
@@ -59,7 +82,13 @@ import com.nuvio.tv.data.iptv.IptvStreamingPreferences
 import com.nuvio.tv.core.iptv.*
 import java.io.IOException
 import kotlin.concurrent.thread
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 
 class IptvLivePlayback(context: Context, private val locator: String, purpose: PlaybackPurpose,
@@ -86,9 +115,17 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private val client = IptvLiveNet.client(liveReceiveBytes(lowMemory)).newBuilder().eventListenerFactory(calls).addNetworkInterceptor(network).build()
     private val requestHeaders = headers.filterKeys { it in HEADER_NAMES }.mapNotNull { (name, value) -> StreamHeaders.clean(value)?.let { name to it } }.toMap()
     private val userAgent = LiveUserAgent.pick(requestHeaders["User-Agent"], sourceUserAgent?.let(StreamHeaders::clean), DEFAULT_USER_AGENT)
-    private val plan = if (!primary) null else IptvStreamingPreferences(context).let { streaming ->
-        LiveBufferPolicy.plan(streaming.start, if (isLive) streaming.cushion else LiveCushion.OFF,
-            LiveBufferPolicy.capBytes(lowMemory, Runtime.getRuntime().maxMemory()), targetBufferBytes)
+    private val streaming = IptvStreamingPreferences(context)
+    private val plan = if (!primary) null else LiveBufferPolicy.plan(streaming.start, if (isLive) streaming.cushion else LiveCushion.OFF,
+        LiveBufferPolicy.capBytes(lowMemory, Runtime.getRuntime().maxMemory()), targetBufferBytes)
+    private val audioPlan = LiveAudioOptions.audio(streaming.passthrough, streaming.tunnelling, streaming.audioDecoder, streaming.surroundLift, primary, streaming.cornerPicture)
+    private val output = if (audioPlan.passthrough) IptvLiveNuvioAudio.output(context) else null
+    private var tunnel = audioPlan.tunnelling
+    val tunnelling: Boolean get() = tunnel
+    private val tunnelActive: Boolean get() = tunnel && runCatching { player.isTunnelingEnabled }.getOrDefault(false)
+    private val trackSelector = LiveTrackSelector(context, streaming.preferSurround).apply {
+        setParameters(buildUponParameters().setTunnelingEnabled(tunnel)
+            .setPreferredAudioLanguages(*LiveAudioOptions.languages(streaming.audioLanguage, androidx.media3.common.util.Util.getSystemLanguageCodes().toList()).toTypedArray()))
     }
     private val cushionSpeed = LiveCushionSpeed()
     private var cushionCleared = false
@@ -153,7 +190,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         override fun run() {
             if (released) return
             val counters = player.videoDecoderCounters
-            val progress = if (player.videoFormat != null && counters != null) {
+            val progress = if (!tunnelActive && player.videoFormat != null && counters != null) {
                 counters.ensureUpdated()
                 counters.renderedOutputBufferCount.toLong() + counters.skippedOutputBufferCount + counters.droppedBufferCount
             } else player.currentPosition
@@ -168,10 +205,11 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     private var enhancer: android.media.audiofx.LoudnessEnhancer? = null
     var boostDb: Int = boostDb
         private set
-    private val surroundLift = IptvStreamingPreferences(context).surroundLift
+    private val surroundLift = streaming.surroundLift
+    @Volatile private var pcmOutput = false
     @Volatile var autoBoostDb: Int = 0
         private set
-    val appliedBoostDb: Int get() = (boostDb + autoBoostDb).coerceAtMost(MAX_BOOST_DB)
+    val appliedBoostDb: Int get() = if (tunnel || !pcmOutput) 0 else (boostDb + autoBoostDb).coerceAtMost(MAX_BOOST_DB)
     val player: ExoPlayer
     private val playbackThread: Thread
     init {
@@ -194,8 +232,9 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 { bufferedSnapshot }, { streamOpen }, { reconnects++; IptvLog.info("live reconnect seamless count=$reconnects") })
             FencedSource(IptvLocalTimeshiftRouter(direct) { ring }, fence, { Uri.parse(current) }, !isLive)
         }
-        val renderers = LiveRenderersFactory(context).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
-        player = ExoPlayer.Builder(context, renderers).setReleaseTimeoutMs(RELEASE_BLOCK_MS)
+        val renderers = LiveRenderersFactory(context, output).setExtensionRendererMode(
+            if (audioPlan.preferAppDecoder) DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER else DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+        player = ExoPlayer.Builder(context, renderers).setTrackSelector(trackSelector).setReleaseTimeoutMs(RELEASE_BLOCK_MS)
             .setLoadControl(DefaultLoadControl.Builder().apply {
                 if (plan == null) setBufferDurationsMs(1500, 8000, 500, 1000).setTargetBufferBytes(targetBufferBytes)
                 else setBufferDurationsMs(plan.minMs, plan.maxMs, plan.startMs, plan.rebufferMs).setTargetBufferBytes(plan.targetBytes)
@@ -212,10 +251,15 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         player.setAudioSessionId(audioSession)
         setBoost(boostDb)
         player.setHandleAudioBecomingNoisy(true)
+        if (primary) IptvLog.info("live audio passthrough=${output != null} tunnel=$tunnel decoder=${if (audioPlan.preferAppDecoder) "app" else "auto"} " +
+            "surround=${streaming.preferSurround} language=${streaming.audioLanguage}${output?.let { " " + it.describe() } ?: ""}")
         player.addAnalyticsListener(object : AnalyticsListener {
             override fun onAudioInputFormatChanged(eventTime: AnalyticsListener.EventTime, format: Format, decoderReuseEvaluation: DecoderReuseEvaluation?) {
-                val lift = if (surroundLift && format.sampleMimeType == MimeTypes.AUDIO_AAC && format.channelCount > 2) SURROUND_LIFT_DB else 0
-                if (lift != autoBoostDb) { autoBoostDb = lift; applyBoost() }
+                updateLift(format)
+            }
+            override fun onAudioTrackInitialized(eventTime: AnalyticsListener.EventTime, audioTrackConfig: AudioSink.AudioTrackConfig) {
+                val pcm = androidx.media3.common.util.Util.isEncodingLinearPcm(audioTrackConfig.encoding) && !audioTrackConfig.tunneling
+                if (pcm != pcmOutput) { pcmOutput = pcm; applyBoost() }
             }
         })
         player.addListener(object : Player.Listener {
@@ -242,6 +286,12 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
                 when (playbackState) {
                     Player.STATE_READY -> {
                         if (readyAt == 0L) readyAt = android.os.SystemClock.elapsedRealtime()
+                        if (!firstFrame && tunnelActive) {
+                            firstFrame = true
+                            if (frameAt == 0L) frameAt = android.os.SystemClock.elapsedRealtime()
+                            mainHandler.removeCallbacks(startCheck)
+                            telemetry.firstFrame(android.os.SystemClock.elapsedRealtime())
+                        }
                         behind.ready(android.os.SystemClock.elapsedRealtime(), player.currentPosition)
                         if (reconnecting) { reconnecting = false; onReconnecting(false) }
                         if (!readyReported) { readyReported = true; onAlternative(alternative) }
@@ -283,6 +333,18 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         boostDb = db.coerceIn(0, MAX_BOOST_DB)
         applyBoost()
     }
+    private fun updateLift(format: Format?) {
+        val lift = if (surroundLift && !tunnel && format != null && format.sampleMimeType == MimeTypes.AUDIO_AAC && format.channelCount > 2) SURROUND_LIFT_DB else 0
+        if (lift != autoBoostDb) { autoBoostDb = lift; applyBoost() }
+    }
+    private fun leaveTunnel() {
+        if (!tunnel || released) return
+        tunnel = false
+        trackSelector.setParameters(trackSelector.buildUponParameters().setTunnelingEnabled(false))
+        IptvLog.info("live tunnel off reason=tile")
+        updateLift(player.audioFormat)
+        applyBoost()
+    }
     private fun applyBoost() {
         if (released) return
         val gain = appliedBoostDb
@@ -294,6 +356,7 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
     fun limitHeight(height: Int?) {
         mainHandler.post {
             if (released) return@post
+            leaveTunnel()
             val builder = player.trackSelectionParameters.buildUpon()
             player.trackSelectionParameters = (if (height == null) builder.clearVideoSizeConstraints() else builder.setMaxVideoSize(height * 16 / 9, height)).build()
         }
@@ -567,13 +630,80 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
             ticket?.let { fence.leave(it); ticket = null }
         }
     }
-    private class LiveRenderersFactory(context: Context) : DefaultRenderersFactory(context) {
+    private class LiveRenderersFactory(context: Context, private val output: LiveAudioOutput?) : DefaultRenderersFactory(context) {
+        override fun buildVideoRenderers(context: Context, extensionRendererMode: Int, mediaCodecSelector: MediaCodecSelector, enableDecoderFallback: Boolean,
+            eventHandler: Handler, eventListener: VideoRendererEventListener, allowedVideoJoiningTimeMs: Long, out: ArrayList<Renderer>) =
+            super.buildVideoRenderers(context, if (extensionRendererMode == EXTENSION_RENDERER_MODE_PREFER) EXTENSION_RENDERER_MODE_ON else extensionRendererMode,
+                mediaCodecSelector, enableDecoderFallback, eventHandler, eventListener, allowedVideoJoiningTimeMs, out)
+
+        override fun buildAudioSink(context: Context, enableFloatOutput: Boolean, enableAudioTrackPlaybackParams: Boolean): AudioSink {
+            val capabilities = when {
+                output == null || output.bluetooth -> AudioOutputRouteDetector.bluetoothPcmOnlyCapabilities()
+                output.television -> runCatching { PassthroughOutputReturn.capabilities(context) }.getOrNull()
+                else -> null
+            }
+            val sink = (if (capabilities != null) DefaultAudioSink.Builder().setAudioCapabilities(capabilities) else DefaultAudioSink.Builder(context))
+                .setEnableFloatOutput(enableFloatOutput).setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams).build()
+            return if (output == null || output.bluetooth) sink else LiveAudioSink(sink, output.policy, output.forceAc3)
+        }
+
         override fun buildAudioRenderers(context: Context, extensionRendererMode: Int, mediaCodecSelector: MediaCodecSelector, enableDecoderFallback: Boolean,
             audioSink: AudioSink, eventHandler: Handler, eventListener: AudioRendererEventListener, out: ArrayList<Renderer>) {
             val start = out.size
             super.buildAudioRenderers(context, extensionRendererMode, mediaCodecSelector, enableDecoderFallback, audioSink, eventHandler, eventListener, out)
-            val index = (start until out.size).firstOrNull { out[it] is MediaCodecAudioRenderer } ?: return
-            out[index] = LiveAudioRenderer(context, getCodecAdapterFactory(), mediaCodecSelector, enableDecoderFallback, eventHandler, eventListener, audioSink)
+            (start until out.size).firstOrNull { out[it] is MediaCodecAudioRenderer }?.let { index ->
+                out[index] = LiveAudioRenderer(context, getCodecAdapterFactory(), mediaCodecSelector, enableDecoderFallback, eventHandler, eventListener, audioSink)
+            }
+            if (output == null || out.size <= start) return
+            out.subList(start, out.size).filterIsInstance<FfmpegAudioRenderer>().forEach {
+                it.applyDownmixSettings(output.downmix, output.channels, output.normalise, output.forceOptical, output.transcode)
+            }
+            if (output.forceOptical) {
+                val block = out.subList(start, out.size)
+                val ordered = block.sortedByDescending { it is FfmpegAudioRenderer }
+                ordered.forEachIndexed { i, renderer -> block[i] = renderer }
+            }
+        }
+    }
+    private class LiveAudioSink(sink: AudioSink, private val policy: AudioPassthroughPolicy, private val forceAc3: Boolean) : ForwardingAudioSink(sink) {
+        override fun getFormatSupport(format: Format): Int {
+            if (policy.deniesPassthrough(format.sampleMimeType)) return AudioSink.SINK_FORMAT_UNSUPPORTED
+            val support = super.getFormatSupport(format)
+            return if (forceAc3 && support == AudioSink.SINK_FORMAT_UNSUPPORTED && format.sampleMimeType == MimeTypes.AUDIO_AC3 && format.channelCount <= 6)
+                AudioSink.SINK_FORMAT_SUPPORTED_DIRECTLY else support
+        }
+        override fun getFormatOffloadSupport(format: Format): AudioOffloadSupport =
+            if (policy.deniesPassthrough(format.sampleMimeType)) AudioOffloadSupport.DEFAULT_UNSUPPORTED else super.getFormatOffloadSupport(format)
+    }
+    private class LiveTrackSelector(context: Context, private val preferSurround: Boolean) : DefaultTrackSelector(context) {
+        override fun selectAllTracks(mappedTrackInfo: MappedTrackInfo, rendererFormatSupports: Array<out Array<out IntArray>>,
+            rendererMixedMimeTypeAdaptationSupports: IntArray, params: DefaultTrackSelector.Parameters): Array<ExoTrackSelection.Definition?> {
+            val definitions = super.selectAllTracks(mappedTrackInfo, rendererFormatSupports, rendererMixedMimeTypeAdaptationSupports, params)
+            if (!preferSurround) return definitions
+            val slots = ArrayList<Triple<Int, TrackGroup, Int>>()
+            val candidates = ArrayList<LiveAudioCandidate>()
+            var chosen: Int? = null
+            for (renderer in 0 until mappedTrackInfo.rendererCount) {
+                if (mappedTrackInfo.getRendererType(renderer) != C.TRACK_TYPE_AUDIO) continue
+                val groups = mappedTrackInfo.getTrackGroups(renderer)
+                val selected = definitions[renderer]
+                for (g in 0 until groups.length) {
+                    val group = groups[g]
+                    for (t in 0 until group.length) {
+                        if (selected != null && selected.group === group && selected.tracks.firstOrNull() == t) chosen = candidates.size
+                        val format = group.getFormat(t)
+                        slots += Triple(renderer, group, t)
+                        candidates += LiveAudioCandidate(format.channelCount, format.language,
+                            RendererCapabilities.getFormatSupport(rendererFormatSupports[renderer][g][t]) == C.FORMAT_HANDLED)
+                    }
+                }
+            }
+            val pick = LiveAudioOptions.surround(candidates, chosen)
+            if (pick == null || pick == chosen) return definitions
+            val (renderer, group, track) = slots[pick]
+            for (r in definitions.indices) if (mappedTrackInfo.getRendererType(r) == C.TRACK_TYPE_AUDIO) definitions[r] = null
+            definitions[renderer] = ExoTrackSelection.Definition(group, track)
+            return definitions
         }
     }
     private class LiveAudioRenderer(context: Context, codecAdapterFactory: MediaCodecAdapter.Factory, mediaCodecSelector: MediaCodecSelector,
@@ -624,6 +754,49 @@ class IptvLivePlayback(context: Context, private val locator: String, purpose: P
         const val CLOSE_POLL_MS = 25L
         const val ORPHAN_MS = 20_000L
     }
+}
+
+internal class LiveAudioOutput(val bluetooth: Boolean, val television: Boolean, val forceOptical: Boolean, val policy: AudioPassthroughPolicy,
+    val downmix: Boolean, val channels: AudioOutputChannels, val normalise: Boolean, val transcode: Set<String>) {
+    val forceAc3: Boolean get() = forceOptical || transcode.isNotEmpty()
+    fun describe(): String = "bluetooth=$bluetooth pinned=$television ac3=$forceOptical downmix=${if (downmix) channels.settingValue else "off"} " +
+        "denied=${listOf("ac3" to policy.allowAc3, "eac3" to policy.allowEac3, "dts" to policy.allowDts).filterNot { it.second }.joinToString(",") { it.first }.ifEmpty { "none" }}"
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+internal interface IptvLiveAudioEntryPoint {
+    fun playerSettings(): PlayerSettingsDataStore
+}
+
+internal object IptvLiveNuvioAudio {
+    @Volatile private var latest: PlayerSettings? = null
+    private var watching = false
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    fun settings(context: Context): PlayerSettings {
+        latest?.let { return it }
+        val store = runCatching { EntryPointAccessors.fromApplication(context.applicationContext, IptvLiveAudioEntryPoint::class.java).playerSettings() }.getOrNull()
+            ?: return PlayerSettings()
+        synchronized(this) { if (!watching) { watching = true; scope.launch { store.playerSettings.collect { latest = it } } } }
+        return latest ?: runBlocking { withTimeoutOrNull(FIRST_READ_MS) { store.playerSettings.first() } } ?: PlayerSettings()
+    }
+
+    fun output(context: Context): LiveAudioOutput = runCatching {
+        val settings = settings(context)
+        val route = AudioOutputRouteDetector.detect(context)
+        val bluetooth = route?.isBluetooth == true
+        val forceOptical = !bluetooth && settings.forceOpticalPassthrough
+        val channels = if (bluetooth) AudioOutputChannels.CHANNELS_2_0 else settings.audioOutputChannels
+        val surround = resolveSurroundForRoute(context, settings, SurroundResolveInputs(route?.key, bluetooth, true, forceOptical, settings.downmixEnabled || bluetooth, channels))
+        LiveAudioOutput(bluetooth, context.packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_LEANBACK), forceOptical,
+            surround.resolution.policy, surround.downmixEnabled, surround.audioOutputChannels, !settings.maintainOriginalAudioOnDownmix, surround.deniedTranscodeMimes)
+    }.getOrElse { error ->
+        IptvLog.failure("live audio output", error)
+        LiveAudioOutput(false, false, false, AudioPassthroughPolicy.ALLOW_ALL, false, AudioOutputChannels.default, false, emptySet())
+    }
+
+    private const val FIRST_READ_MS = 300L
 }
 
 internal fun liveLowMemory(context: Context): Boolean = runCatching {

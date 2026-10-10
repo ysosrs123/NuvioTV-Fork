@@ -7,11 +7,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import androidx.media3.exoplayer.ExoPlayer
+import com.nuvio.tv.core.iptv.LiveAudioOptions
+import com.nuvio.tv.core.iptv.LiveDisplayMatch
+import com.nuvio.tv.core.iptv.LiveDisplayPlan
 import com.nuvio.tv.core.iptv.LiveFrameRate
 import com.nuvio.tv.core.player.FrameRateUtils
+import com.nuvio.tv.data.iptv.IptvStreamingPreferences
 import com.nuvio.tv.data.local.FrameRateMatchingMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
@@ -52,13 +57,23 @@ object IptvLiveDisplayMode {
         }
     }
 
+    fun plan(preferences: IptvStreamingPreferences, nuvioMode: FrameRateMatchingMode, nuvioResolution: Boolean): LiveDisplayPlan =
+        LiveAudioOptions.display(preferences.frameRate, preferences.resolution, LiveDisplayMatch.valueOf(nuvioMode.name), nuvioResolution)
+
+    fun mode(match: LiveDisplayMatch): FrameRateMatchingMode = FrameRateMatchingMode.valueOf(match.name)
+
     private const val DETECT_TIMEOUT_MS = 15_000L
     private const val SAMPLE_MS = 500L
 }
 
 @Composable
-internal fun IptvLiveDisplayModeEffect(player: ExoPlayer?, mode: FrameRateMatchingMode, resolutionMatching: Boolean) {
-    val activity = LocalContext.current as? Activity
+internal fun IptvLiveDisplayModeEffect(player: ExoPlayer?, nuvioMode: FrameRateMatchingMode, nuvioResolution: Boolean) {
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val preferences = remember(player) { IptvStreamingPreferences(context) }
+    val plan = remember(preferences, nuvioMode, nuvioResolution) { IptvLiveDisplayMode.plan(preferences, nuvioMode, nuvioResolution) }
+    val mode = IptvLiveDisplayMode.mode(plan.frameRate)
+    val resolutionMatching = plan.resolution
     val currentMode by rememberUpdatedState(mode)
     LaunchedEffect(activity, player, mode, resolutionMatching) {
         if (activity != null && player != null) IptvLiveDisplayMode.match(activity, player, mode, resolutionMatching)

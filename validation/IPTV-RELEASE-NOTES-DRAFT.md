@@ -630,6 +630,20 @@ Live TV menu and channels:
 - Channel options: "Open in external player" stops Live TV and plays the channel in another
   app through Nuvio's external player handling, with the channel's headers and user agent.
 
+Playback and audio (new group in Live TV settings):
+- Frame rate and resolution matching follow Nuvio's player settings ("Same as Nuvio",
+  showing Nuvio's value) or can be set for Live TV only.
+- Audio passthrough follows Nuvio's passthrough settings (route detection, formats,
+  downmix, AC-3); "Off" decodes all sound in the app. Multiview pictures and the corner
+  picture always decode in the app. Volume boost and the quiet-audio lift apply only to
+  decoded sound.
+- Tunnelled playback (off by default): main picture only, with the Automatic decoder and
+  "4K and HDR in the corner picture" on; volume boost and the lift are off while it is in
+  use; a tunnelled channel reopens rather than moving into multiview.
+- Prefer surround audio (5.1) with stereo fallback, and Prefer audio language; a track you
+  pick by hand still wins.
+- Audio decoder: Automatic or Prefer app decoder (video stays on the hardware decoder).
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
