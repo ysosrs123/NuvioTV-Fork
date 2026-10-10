@@ -765,6 +765,10 @@ Phone setup (security review)
 
 ## Validation
 
+- Fixes from the second 9 October device pass, the 10 October ESPN capture checks and
+  translations: CI debug build green at `5a64305` (run 38009929728; the run at `16c7406`
+  failed on one compile error, fixed in `5a64305`); 774 core and 276 data-layer JVM tests
+  on the host. Not device-tested.
 - Fixes from the 9 October device pass, widgets, sport follow-ups and translations: CI debug
   build green at `8354d89` (run 37867719176; earlier step `ea3fc4e`, run 37864431259);
   748 core and 276 data-layer JVM tests on the host. Not device-tested.
