@@ -39,6 +39,8 @@ in the UI; Sport redesign (item 27) built in `d81ba81` and the Home rows / Games
 still on the old look (suggested: reuse `TeamBand`/`CardState` from IptvSportCards.kt): Game
 Centre score line and LIVE tag, team screen, Nuvio player pop-up, All scores, multiview score
 cells, widget red dots; the video score bug stays.
+In progress (10 October, user away): those remaining screens moved to the new look, NHL
+goalies and the F1 top three shown; CI debug build started at `3de7568`.
 
 Next, in order:
 1. Give the user the CI run link for the fixes of the second 9 October pass; take their
