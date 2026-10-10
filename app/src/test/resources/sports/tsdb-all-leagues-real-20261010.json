@@ -1,0 +1,22 @@
+{"leagues":[
+ {"idLeague":"4328","strLeague":"English Premier League","strSport":"Soccer","strLeagueAlternate":"Premier League, EPL, England"},
+ {"idLeague":"4330","strLeague":"Scottish Premier League","strSport":"Soccer","strLeagueAlternate":"Scotland Premiership, SPFL, William Hill Premiership"},
+ {"idLeague":"4460","strLeague":"Indian Premier League","strSport":"Cricket","strLeagueAlternate":"IPL"},
+ {"idLeague":"5647","strLeague":"English Premier League Summer Series","strSport":"Soccer","strLeagueAlternate":""},
+ {"idLeague":"4380","strLeague":"NHL","strSport":"Ice Hockey","strLeagueAlternate":"National Hockey League"},
+ {"idLeague":"4456","strLeague":"Australian AFL","strSport":"Australian Football","strLeagueAlternate":"AFL, Australian rules football"},
+ {"idLeague":"4416","strLeague":"Australian National Rugby League","strSport":"Rugby","strLeagueAlternate":"NRL"},
+ {"idLeague":"4461","strLeague":"Australian Big Bash League","strSport":"Cricket","strLeagueAlternate":"KFC Big Bash League"},
+ {"idLeague":"4538","strLeague":"New Zealand Netball League","strSport":"Netball","strLeagueAlternate":"ANZ Premiership"},
+ {"idLeague":"4539","strLeague":"UK Netball Superleague","strSport":"Netball","strLeagueAlternate":"Netball Superleague"},
+ {"idLeague":"4540","strLeague":"Australian Super Netball League","strSport":"Netball","strLeagueAlternate":""},
+ {"idLeague":"4541","strLeague":"_Defunct Netball Teams","strSport":"Netball","strLeagueAlternate":""},
+ {"idLeague":"4842","strLeague":"_No League Netball","strSport":"Netball","strLeagueAlternate":""},
+ {"idLeague":"5369","strLeague":"Commonwealth Games Netball","strSport":"Netball","strLeagueAlternate":"Netball at the Commonwealth Games"},
+ {"idLeague":"5790","strLeague":"Netball World Cup","strSport":"Netball","strLeagueAlternate":"Vitality Netball World Cup"},
+ {"idLeague":"4554","strLeague":"PDC Darts","strSport":"Darts","strLeagueAlternate":""},
+ {"idLeague":"4561","strLeague":"BDO Darts","strSport":"Darts","strLeagueAlternate":"British Darts Organisation"},
+ {"idLeague":"5588","strLeague":"_Defunct Darts Teams","strSport":"Darts","strLeagueAlternate":""},
+ {"idLeague":"4555","strLeague":"World Snooker","strSport":"Snooker","strLeagueAlternate":""},
+ {"idLeague":"4735","strLeague":"Shoot Boxing","strSport":"Fighting","strLeagueAlternate":null}
+]}

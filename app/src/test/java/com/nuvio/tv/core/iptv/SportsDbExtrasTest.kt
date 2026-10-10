@@ -16,28 +16,82 @@ class SportsDbExtrasTest {
         SportsFixture(id, "epl", "soccer", "$home v $away", FixtureTeam(home, alternatives = alternatives.first), FixtureTeam(away, alternatives = alternatives.second),
             start, status, source = source)
 
-    @Test fun livescoresMergeIntoTheSportsDbFixturesByEventId() {
-        val scores = SportsDbLive.parse(sample("tsdb-livescore-soccer-synthetic.json"))
-        assertEquals(listOf("2494100", "2494101", "2494102"), scores.map { it.eventId })
-        val merged = SportsDbLive.merge(listOf(fixture("2494100", "Fulham", "Brentford"), fixture("2494101", "Everton", "Chelsea", kickOff - 3_600_000),
-            fixture("2494102", "Leeds United", "Burnley", now + 5_400_000), fixture("2494100", "Fulham", "Brentford", source = SportsService.ESPN),
-            fixture("2494999", "Arsenal", "Spurs")), scores.associateBy { it.eventId }, now)
-        val live = merged[0]
-        assertEquals(FixtureStatus.LIVE, live.status)
-        assertEquals("1–0", live.score)
-        assertEquals("1", live.homeLine?.score)
-        assertEquals("67'", live.clock)
-        assertEquals(2, live.period)
-        assertEquals("2H", live.detail)
-        assertEquals(FixtureStatus.FINAL, merged[1].status)
-        assertEquals("2–2", merged[1].score)
-        assertNull(merged[1].clock)
-        assertEquals(FixtureStatus.SCHEDULED, merged[2].status)
-        assertNull(merged[2].score)
-        assertEquals(FixtureStatus.SCHEDULED, merged[3].status)
-        assertEquals(FixtureStatus.SCHEDULED, merged[4].status)
+    @Test fun realSoccerLivescoresMergeIntoTheSportsDbFixturesByEventId() {
+        val scores = SportsDbLive.parse(sample("tsdb-livescore-soccer-real-20261010.json")).associateBy { it.eventId }
+        assertEquals(7, scores.size)
+        val merged = SportsDbLive.merge(listOf(fixture("2494052", "Arsenal", "Leeds United"), fixture("2478345", "Zalgiris Vilnius", "Suduva"),
+            fixture("2561953", "A", "B", kickOff - 3_600_000), fixture("2523792", "C", "D"), fixture("2605680", "South Melbourne", "Melbourne Victory"),
+            fixture("2494052", "Arsenal", "Leeds United", source = SportsService.ESPN), fixture("2494999", "Chelsea", "Bournemouth")), scores, now)
+        val arsenal = merged[0]
+        assertEquals(FixtureStatus.LIVE, arsenal.status)
+        assertEquals("0–0", arsenal.score)
+        assertEquals("0", arsenal.homeLine?.score)
+        assertEquals("45+1'", arsenal.clock)
+        assertEquals(1, arsenal.period)
+        assertEquals("1H", arsenal.detail)
+        assertEquals("HT", merged[1].detail)
+        assertEquals("45+4'", merged[1].clock)
+        assertEquals("2–0", merged[1].score)
+        assertEquals(FixtureStatus.FINAL, merged[2].status)
+        assertEquals("1–0", merged[2].score)
+        assertNull(merged[2].clock)
+        assertEquals("90+3'", merged[3].clock)
+        assertEquals(2, merged[3].period)
+        assertEquals(FixtureStatus.LIVE, merged[4].status)
+        assertEquals("1–1", merged[4].score)
+        assertNull(merged[4].clock)
+        assertEquals(FixtureStatus.SCHEDULED, merged[5].status)
+        assertEquals(FixtureStatus.SCHEDULED, merged[6].status)
         assertTrue(SportsDbLive.parse("""{"Message":"No data found"}""").isEmpty())
         assertTrue(SportsDbLive.parse("""{"livescore":null}""").isEmpty())
+    }
+
+    @Test fun realLivescoresFromOtherSportsMapStatusesAndProgress() {
+        val scores = SportsDbLive.parse(sample("tsdb-livescore-other-real-20261010.json")).associateBy { it.eventId }
+        assertEquals(11, scores.size)
+        fun merged(id: String, start: Long = kickOff) = SportsDbLive.merge(listOf(fixture(id, "Home", "Away", start)), scores, now).single()
+        val nfl = merged("2475438", kickOff - 86_400_000)
+        assertEquals(FixtureStatus.FINAL, nfl.status)
+        assertEquals("16–24", nfl.score)
+        assertNull(nfl.clock)
+        val noStatus = merged("2612959")
+        assertEquals(FixtureStatus.LIVE, noStatus.status)
+        assertEquals("41–46", noStatus.score)
+        assertNull(noStatus.detail)
+        assertEquals(FixtureStatus.SCHEDULED, merged("2612959", now + 600_000).status)
+        assertEquals(FixtureStatus.SCHEDULED, merged("2586119").status)
+        assertNull(merged("2586119").score)
+        assertEquals(FixtureStatus.SCHEDULED, merged("2522395").status)
+        val quarter = merged("2487908")
+        assertEquals(4, quarter.period)
+        assertEquals("9'", quarter.clock)
+        assertEquals("98–80", quarter.score)
+        val overtime = merged("2526140")
+        assertEquals(FixtureStatus.LIVE, overtime.status)
+        assertEquals("OT", overtime.detail)
+        assertEquals(2, merged("2506696").period)
+        assertEquals("BT", merged("2506694").detail)
+        assertEquals(FixtureStatus.FINAL, merged("2400532").status)
+        assertEquals("8–5", merged("2400532").score)
+        val partial = merged("2615590")
+        assertEquals(FixtureStatus.FINAL, partial.status)
+        assertNull(partial.score)
+    }
+
+    @Test fun realEventsDayAndLivescoreTogether() {
+        val epl = SportsLeagues.byId("epl")!!
+        val at = Instant.parse("2026-10-10T12:16:00Z").toEpochMilli()
+        val events = SportsDbEvents.parse(sample("tsdb-eventsday-epl-real-20261010.json"), epl, at)
+        assertEquals(listOf("2494050", "2494052"), events.map { it.id })
+        assertEquals(FixtureStatus.SCHEDULED, events[0].status)
+        assertEquals(Instant.parse("2026-10-10T16:30:00Z").toEpochMilli(), events[0].startMillis)
+        assertEquals(FixtureStatus.LIVE, events[1].status)
+        assertNull(events[1].clock)
+        assertTrue(events.all { it.broadcasters.isEmpty() })
+        val merged = SportsDbLive.merge(events, SportsDbLive.parse(sample("tsdb-livescore-soccer-real-20261010.json")).associateBy { it.eventId }, at)
+        assertEquals("45+1'", merged[1].clock)
+        assertEquals("0–0", merged[1].score)
+        assertEquals(events[0], merged[0])
     }
 
     @Test fun livescoresAreAskedOnlyForActiveTheSportsDbGamesInCoveredSports() {
@@ -48,18 +102,24 @@ class SportsDbExtrasTest {
         assertTrue(SportsDbLive.wanted(listOf(soccer.copy(sport = "netball")), now).isEmpty())
         val many = listOf("soccer", "basketball", "ice-hockey", "baseball", "american-football").mapIndexed { index, sport -> soccer.copy(id = "$index", sport = sport) }
         assertEquals(SportsDbLive.MAX_SPORTS, SportsDbLive.wanted(many, now).size)
-        assertEquals("ice_hockey", SportsDbLive.path("ice-hockey"))
+        assertEquals(listOf("Soccer", "Basketball", "Ice_Hockey", "Baseball", "American_Football"),
+            listOf("soccer", "basketball", "ice-hockey", "baseball", "american-football").map(SportsDbLive::path))
         assertNull(SportsDbLive.path("netball"))
     }
 
-    @Test fun tvChannelsPreferTheViewersCountry() {
-        val channels = SportsTv.parse(sample("tsdb-lookuptv-synthetic.json"))
-        assertEquals(4, channels.size)
-        assertEquals(listOf("Stan Sport"), SportsTv.names(channels, "AU"))
-        assertEquals(listOf("Sky Sports Premier League"), SportsTv.names(channels, "GB"))
-        assertEquals(listOf("Peacock"), SportsTv.names(channels, "US"))
-        assertEquals(channels.map { it.name }, SportsTv.names(channels, "NZ"))
-        assertEquals(channels.map { it.name }, SportsTv.names(channels, null))
+    @Test fun realTvChannelsPreferTheViewersCountry() {
+        val channels = SportsTv.parse(sample("tsdb-lookuptv-real-20261010.json"))
+        assertEquals(46, channels.size)
+        assertEquals(listOf("7mate NSW", "7mate Queensland", "7mate South Australia", "7mate Victoria", "7mate Western Australia", "DAZN Australia", "ESPN Australia"),
+            SportsTv.names(channels, "AU"))
+        assertEquals(listOf("Sky Sports NFL", "Sky Sports Main Event"), SportsTv.names(channels, "GB"))
+        assertEquals(listOf("NFL Sunday Ticket"), SportsTv.names(channels, "US"))
+        assertEquals(listOf("ESPN 1 Netherlands"), SportsTv.names(channels, "NL"))
+        assertEquals(listOf("DAZN Czechia"), SportsTv.names(channels, "CZ"))
+        assertEquals(listOf("DAZN Turkey"), SportsTv.names(channels, "TR"))
+        assertEquals(SportsTv.MAX_CHANNELS, SportsTv.names(channels, "CA").size)
+        assertEquals(channels.take(SportsTv.MAX_CHANNELS).map { it.name }, SportsTv.names(channels, "JP"))
+        assertEquals(channels.take(SportsTv.MAX_CHANNELS).map { it.name }, SportsTv.names(channels, null))
         assertTrue(SportsTv.parse("""{"tvevent":null}""").isEmpty())
         val added = SportsTv.add(listOf(fixture("1", "A", "B").copy(broadcasters = listOf("Optus Sport"))), mapOf("epl:sdb-1" to listOf("Stan Sport", "Optus Sport")))
         assertEquals(listOf("Optus Sport", "Stan Sport"), added.single().broadcasters)
@@ -86,23 +146,30 @@ class SportsDbExtrasTest {
         assertEquals("2400001", SportsTv.match(nfl, listOf(sportsDb))?.id)
     }
 
-    @Test fun leagueListSearchesAndBecomesCustomLeagues() {
-        val leagues = SportsDbLeagues.parse(sample("tsdb-all-leagues-synthetic.json"))
-        assertEquals(listOf("4328", "4380", "4459", "5310", "4554"), leagues.map { it.id })
-        assertEquals(listOf("Netball Super League", "Suncorp Super Netball"), SportsDbLeagues.search(leagues, "netball").map { it.name })
+    @Test fun realLeagueListSearchesAndBecomesCustomLeagues() {
+        val leagues = SportsDbLeagues.parse(sample("tsdb-all-leagues-real-20261010.json"))
+        assertEquals(17, leagues.size)
+        assertTrue(leagues.none { it.name.startsWith("_") })
+        assertEquals(leagues, SportsDbLeagues.parse(sample("tsdb-all-leagues-real-20261010.json").replace("\"leagues\"", "\"all\"")))
+        assertEquals(listOf("Netball World Cup", "Australian Super Netball League", "Commonwealth Games Netball", "New Zealand Netball League", "UK Netball Superleague"),
+            SportsDbLeagues.search(leagues, "netball").map { it.name })
         assertEquals("English Premier League", SportsDbLeagues.search(leagues, "premier").first().name)
-        assertEquals("Suncorp Super Netball", SportsDbLeagues.search(leagues, "Super Netball").first().name)
+        assertEquals("Australian Super Netball League", SportsDbLeagues.search(leagues, "Super Netball").first().name)
+        assertEquals("Australian Big Bash League", SportsDbLeagues.search(leagues, "kfc big bash").single().name)
         assertTrue(SportsDbLeagues.search(leagues, "n").isEmpty())
         assertEquals("epl", SportsDbLeagues.builtIn(leagues[0])?.id)
-        assertNull(SportsDbLeagues.builtIn(leagues[2]))
-        val netball = SportsDbLeagues.league(leagues[2])
-        assertEquals("sdb-4459", netball.id)
+        assertEquals("afl", SportsDbLeagues.builtIn(leagues.first { it.id == "4456" })?.id)
+        assertNull(SportsDbLeagues.builtIn(leagues.first { it.id == "4540" }))
+        assertNull(leagues.first { it.id == "4735" }.alternate)
+        assertTrue(SportsDbLeagues.parse("""{"leagues":[{"idLeague":"bad","strLeague":"X","strSport":"Soccer"},{"idLeague":"1","strLeague":null}]}""").isEmpty())
+        val netball = SportsDbLeagues.league(leagues.first { it.id == "4540" })
+        assertEquals("sdb-4540", netball.id)
         assertEquals("netball", netball.sport)
         assertNull(netball.espn)
-        assertEquals("Suncorp Super Netball", netball.sportsDb)
-        assertEquals("4459", netball.sportsDbId)
-        assertTrue("super netball" in netball.aliases)
-        assertEquals("ice-hockey", SportsDbLeagues.league(leagues[1]).sport)
+        assertEquals("Australian Super Netball League", netball.sportsDb)
+        assertEquals("4540", netball.sportsDbId)
+        assertTrue("australian super netball league" in netball.aliases)
+        assertEquals("ice-hockey", SportsDbLeagues.league(leagues.first { it.id == "4380" }).sport)
         assertEquals("ice-hockey", SportsDbLeagues.sport("Ice Hockey"))
         assertEquals("mma", SportsDbLeagues.sport("Fighting"))
         assertEquals(netball, SportsDbLeagues.decodeCustom(SportsDbLeagues.encodeCustom(netball)))

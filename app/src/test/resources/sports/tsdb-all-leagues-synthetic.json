@@ -1,9 +1,0 @@
-{"leagues":[
- {"idLeague":"4328","strLeague":"English Premier League","strSport":"Soccer","strLeagueAlternate":"Premier League, EPL"},
- {"idLeague":"4380","strLeague":"NHL","strSport":"Ice Hockey","strLeagueAlternate":"National Hockey League"},
- {"idLeague":"4459","strLeague":"Suncorp Super Netball","strSport":"Netball","strLeagueAlternate":"Super Netball"},
- {"idLeague":"5310","strLeague":"Netball Super League","strSport":"Netball","strLeagueAlternate":""},
- {"idLeague":"4554","strLeague":"PDC World Darts Championship","strSport":"Darts","strLeagueAlternate":null},
- {"idLeague":"bad","strLeague":"Broken","strSport":"Soccer"},
- {"idLeague":"4999","strSport":"Soccer"}
-]}

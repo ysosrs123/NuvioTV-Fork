@@ -671,6 +671,15 @@ Sport data (second 10 October capture: live NBL and live tennis):
   Sources or phone setup, and the picture comes back on return without re-tuning; it stops
   when you leave Live TV, the app goes to the background or a recording starts playing.
 
+TheSportsDB (checked against the user's real captures, 10 October):
+- TheSportsDB live scores now load (the sport names in the live-score requests were wrong);
+  they exist only for soccer, basketball, ice hockey, baseball and American football.
+- Finished NFL games and postponed basketball games no longer show as live; stoppage time
+  shows as 45+1'.
+- "Add a league" no longer lists placeholder leagues; TV channels match viewers in the
+  Netherlands, Czechia and Turkey; built-in leagues carry their TheSportsDB ids (Big Bash,
+  Super Rugby, A-League Women, PGA Tour, NASCAR Cup, URC).
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

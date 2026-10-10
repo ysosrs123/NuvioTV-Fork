@@ -1,0 +1,13 @@
+{"livescore":[
+ {"idEvent":"2612959","strStatus":null,"strProgress":null,"intHomeScore":"41","intAwayScore":"46"},
+ {"idEvent":"2586119","strStatus":"POST","strProgress":null,"intHomeScore":"0","intAwayScore":"0"},
+ {"idEvent":"2584240","strStatus":"Q1","strProgress":"6","intHomeScore":"18","intAwayScore":"14"},
+ {"idEvent":"2487908","strStatus":"Q4","strProgress":"9","intHomeScore":"98","intAwayScore":"80"},
+ {"idEvent":"2506694","strStatus":"BT","strProgress":null,"intHomeScore":"1","intAwayScore":"1"},
+ {"idEvent":"2522395","strStatus":"CANC","strProgress":null,"intHomeScore":"0","intAwayScore":"0"},
+ {"idEvent":"2526140","strStatus":"OT","strProgress":"4","intHomeScore":"3","intAwayScore":"3"},
+ {"idEvent":"2506696","strStatus":"P2","strProgress":"14","intHomeScore":"0","intAwayScore":"2"},
+ {"idEvent":"2400532","strStatus":"FT","strProgress":"FT","intHomeScore":"8","intAwayScore":"5"},
+ {"idEvent":"2615590","strStatus":"FT","strProgress":"FT","intHomeScore":"1","intAwayScore":null},
+ {"idEvent":"2475438","strStatus":null,"strProgress":"Final","intHomeScore":"16","intAwayScore":"24"}
+]}

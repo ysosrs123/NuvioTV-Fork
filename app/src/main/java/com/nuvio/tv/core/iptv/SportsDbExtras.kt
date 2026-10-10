@@ -10,8 +10,10 @@ object SportsDbLive {
     const val MAX_SPORTS = 3
     const val FRESH_MILLIS = 10L * 60 * 1000
     private const val MAX_SCORES = 500
-    private val PATHS = mapOf("soccer" to "soccer", "basketball" to "basketball", "ice-hockey" to "ice_hockey", "baseball" to "baseball",
-        "american-football" to "american_football")
+    private val PATHS = mapOf("soccer" to "Soccer", "basketball" to "Basketball", "ice-hockey" to "Ice_Hockey", "baseball" to "Baseball",
+        "american-football" to "American_Football")
+    private val SKIPPED = SportsDbEvents.SKIPPED + "post"
+    private val MINUTE = Regex("[0-9]{1,3}(\\+[0-9]{1,2})?")
     val SPORTS: Set<String> = PATHS.keys
 
     fun path(sport: String): String? = PATHS[sport]
@@ -36,14 +38,14 @@ object SportsDbLive {
 
     private fun apply(fixture: SportsFixture, score: SportsDbLiveScore, nowMillis: Long): SportsFixture {
         val raw = score.status.trim()
-        val code = SportsGuide.normalise(raw)
-        if (code in SportsDbEvents.SKIPPED || code in SportsDbEvents.NOT_STARTED || (code.isEmpty() && fixture.startMillis > nowMillis)) return fixture
+        val code = SportsGuide.normalise(raw).ifEmpty { SportsGuide.normalise(score.progress.orEmpty()).takeIf { it in SportsDbEvents.FINISHED }.orEmpty() }
+        if (code in SKIPPED || code in SportsDbEvents.NOT_STARTED || (code.isEmpty() && fixture.startMillis > nowMillis)) return fixture
         val status = if (code in SportsDbEvents.FINISHED) FixtureStatus.FINAL else FixtureStatus.LIVE
         val live = status == FixtureStatus.LIVE
         val home = score.homeScore?.trim()?.takeIf { it.isNotEmpty() && it.length <= 8 }
         val away = score.awayScore?.trim()?.takeIf { it.isNotEmpty() && it.length <= 8 }
         val both = fixture.teams && home != null && away != null
-        val progress = score.progress?.trim()?.takeIf { live && it.isNotEmpty() && it.length <= 8 }?.let { if (it.all(Char::isDigit)) "$it'" else it }
+        val progress = score.progress?.trim()?.takeIf { live && it.isNotEmpty() && it.length <= 8 }?.let { if (it.matches(MINUTE)) "$it'" else it }
         return fixture.copy(status = status, score = if (both) "$home–$away" else fixture.score, detail = raw.takeIf { live && it.isNotEmpty() && it.length <= 24 },
             period = if (live) SportsDbEvents.PERIODS[code] ?: fixture.period else null, clock = if (live) progress ?: fixture.clock else null,
             homeLine = if (both) FixtureLine(home) else fixture.homeLine, awayLine = if (both) FixtureLine(away) else fixture.awayLine)
@@ -59,7 +61,8 @@ object SportsTv {
     const val MAX_CHANNELS = 8
     private const val MATCH_WINDOW_MILLIS = 6L * 60 * 60 * 1000
     private val ALIASES = mapOf("US" to listOf("USA", "United States of America"), "GB" to listOf("UK", "England", "Scotland", "Wales", "Northern Ireland",
-        "Great Britain"), "IE" to listOf("Republic of Ireland"), "KR" to listOf("Korea"), "NL" to listOf("Holland"))
+        "Great Britain"), "IE" to listOf("Republic of Ireland"), "KR" to listOf("Korea"), "NL" to listOf("Holland", "The Netherlands"), "CZ" to listOf("Czechia", "Czech Republic"),
+        "TR" to listOf("Turkey", "Türkiye"))
 
     fun parse(json: String): List<SportsTvChannel> {
         val root = JSONObject(json)
@@ -124,7 +127,7 @@ object SportsDbLeagues {
             ?: root.keys().asSequence().mapNotNull { root.optJSONArray(it) }.firstOrNull() ?: return emptyList()
         return (0 until minOf(array.length(), MAX_LEAGUES)).mapNotNull { array.optJSONObject(it) }.mapNotNull { item ->
             val id = item.value("idLeague")?.takeIf { it.matches(ID) } ?: return@mapNotNull null
-            val name = item.value("strLeague")?.take(120) ?: return@mapNotNull null
+            val name = item.value("strLeague")?.takeUnless { it.startsWith('_') }?.take(120) ?: return@mapNotNull null
             SportsDbLeague(id, name, item.value("strSport")?.take(60).orEmpty(), item.value("strLeagueAlternate")?.take(240))
         }.distinctBy { it.id }
     }

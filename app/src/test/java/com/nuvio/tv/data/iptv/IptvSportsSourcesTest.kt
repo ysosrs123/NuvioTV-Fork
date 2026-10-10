@@ -66,7 +66,7 @@ class IptvSportsSourcesTest {
         return when {
             path.startsWith("/sports/australian-football/afl/scoreboard?dates=20261009") -> espnRichmond
             path.startsWith("/json/testkey/eventsday.php?d=2026-10-09&l=Australian_AFL") -> sportsDbRichmond
-            path.startsWith("/json/testkey/lookuptv.php?id=2470001") -> sample("tsdb-lookuptv-synthetic.json")
+            path.startsWith("/json/testkey/lookuptv.php?id=2470001") -> sample("tsdb-lookuptv-real-20261010.json")
             else -> null
         }
     }
@@ -119,13 +119,14 @@ class IptvSportsSourcesTest {
             val result = cache.load(listOf(afl), key, now, zone, refresh = true, favourites = favourites, country = "AU")
             val game = result.fixtures.single()
             assertEquals(SportsService.ESPN, game.source)
-            assertEquals(listOf("Stan Sport"), game.broadcasters)
+            assertEquals(listOf("7mate NSW", "7mate Queensland", "7mate South Australia", "7mate Victoria", "7mate Western Australia", "DAZN Australia",
+                "ESPN Australia"), game.broadcasters)
             assertEquals(1, fake.count("eventsday.php"))
             assertEquals(1, fake.count("lookuptv.php"))
             val again = cache.load(listOf(afl), key, now + minute, zone, refresh = true, favourites = favourites, country = "AU")
-            assertEquals(listOf("Stan Sport"), again.fixtures.single().broadcasters)
+            assertEquals(game.broadcasters, again.fixtures.single().broadcasters)
             val restarted = fresh().load(listOf(afl), key, now + 2 * minute, zone, refresh = true, favourites = favourites, country = "GB")
-            assertEquals(listOf("Sky Sports Premier League"), restarted.fixtures.single().broadcasters)
+            assertEquals(listOf("Sky Sports NFL", "Sky Sports Main Event"), restarted.fixtures.single().broadcasters)
             assertEquals(1, fake.count("eventsday.php"))
             assertEquals(1, fake.count("lookuptv.php"))
             val unfollowed = fresh().load(listOf(afl), key, now + 3 * minute, zone, refresh = true, favourites = emptySet())
@@ -149,13 +150,13 @@ class IptvSportsSourcesTest {
 
     @Test fun theSportsDbLivescoresUpdateItsLeaguesWithTheKeyHeader() {
         val custom = SportsDbLeagues.league(SportsDbLeague("4999", "Test League", "Soccer"))
-        val started = """{"events":[{"idEvent":"2494100","idLeague":"4999","strLeague":"Test League","strTimestamp":"2026-10-09T09:40:00","strStatus":"NS",
-            "strHomeTeam":"Fulham","strAwayTeam":"Brentford"}]}"""
+        val started = """{"events":[{"idEvent":"2494052","idLeague":"4999","strLeague":"Test League","strTimestamp":"2026-10-09T09:40:00","strStatus":"NS",
+            "strHomeTeam":"Arsenal","strAwayTeam":"Leeds United"}]}"""
         val fake = Fake { request ->
             val path = request.path.orEmpty()
             when {
                 path.startsWith("/json/testkey/eventsday.php?d=2026-10-09&l=Test_League") -> started
-                path == "/v2/livescore/soccer" -> sample("tsdb-livescore-soccer-synthetic.json")
+                path == "/v2/livescore/Soccer" -> sample("tsdb-livescore-soccer-real-20261010.json")
                 else -> null
             }
         }
@@ -163,25 +164,25 @@ class IptvSportsSourcesTest {
             val result = cache.load(listOf(custom), key, now, zone, refresh = true)
             val game = result.fixtures.single()
             assertEquals(FixtureStatus.LIVE, game.status)
-            assertEquals("1–0", game.score)
-            assertEquals("67'", game.clock)
-            assertEquals(1, fake.count("/v2/livescore/soccer"))
-            assertEquals(key, fake.requests.first { it.first == "/v2/livescore/soccer" }.second)
+            assertEquals("0–0", game.score)
+            assertEquals("45+1'", game.clock)
+            assertEquals(1, fake.count("/v2/livescore/Soccer"))
+            assertEquals(key, fake.requests.first { it.first == "/v2/livescore/Soccer" }.second)
             assertTrue(fake.requests.filter { it.first.startsWith("/json/") }.all { it.second == null })
             assertFalse(fake.paths.any { key in it && it.startsWith("/v2/") })
             val soon = cache.load(listOf(custom), key, now + minute, zone, refresh = true)
             assertEquals(FixtureStatus.LIVE, soon.fixtures.single().status)
-            assertEquals(1, fake.count("/v2/livescore/soccer"))
+            assertEquals(1, fake.count("/v2/livescore/Soccer"))
             cache.load(listOf(custom), key, now + 3 * minute, zone, refresh = true)
-            assertEquals(2, fake.count("/v2/livescore/soccer"))
+            assertEquals(2, fake.count("/v2/livescore/Soccer"))
             val shown = cache.load(listOf(custom), key, now + 4 * minute, zone, refresh = false)
-            assertEquals("1–0", shown.fixtures.single().score)
+            assertEquals("0–0", shown.fixtures.single().score)
         }
     }
 
     @Test fun clientBuildsTheSportsDbExtraAddresses() {
         val client = IptvSportsFixturesClient()
-        assertEquals("https://www.thesportsdb.com/api/v2/json/livescore/ice_hockey", client.livescoreUrl("ice-hockey", key).toString())
+        assertEquals("https://www.thesportsdb.com/api/v2/json/livescore/Ice_Hockey", client.livescoreUrl("ice-hockey", key).toString())
         assertNull(client.livescoreUrl("netball", key))
         assertNull(client.livescoreUrl("soccer", null))
         assertEquals("https://www.thesportsdb.com/api/v1/json/testkey/lookuptv.php?id=2494100", client.tvUrl("2494100", key).toString())
@@ -212,12 +213,12 @@ class IptvSportsSourcesTest {
     }
 
     @Test fun leagueListIsCachedForAWeek() {
-        val fake = Fake { request -> if (request.path.orEmpty().startsWith("/json/testkey/all_leagues.php")) sample("tsdb-all-leagues-synthetic.json") else null }
+        val fake = Fake { request -> if (request.path.orEmpty().startsWith("/json/testkey/all_leagues.php")) sample("tsdb-all-leagues-real-20261010.json") else null }
         withCache(fake) { cache, fresh ->
-            assertEquals(5, cache.leagues(key, now).size)
-            assertEquals(5, fresh().leagues(key, now + 6L * 24 * 60 * minute).size)
+            assertEquals(17, cache.leagues(key, now).size)
+            assertEquals(17, fresh().leagues(key, now + 6L * 24 * 60 * minute).size)
             assertEquals(1, fake.count("all_leagues.php"))
-            assertEquals(5, fresh().leagues(key, now + 8L * 24 * 60 * minute).size)
+            assertEquals(17, fresh().leagues(key, now + 8L * 24 * 60 * minute).size)
             assertEquals(2, fake.count("all_leagues.php"))
         }
     }

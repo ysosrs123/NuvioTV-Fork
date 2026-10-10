@@ -1,6 +1,0 @@
-{"tvevent":[
- {"id":"700001","idEvent":"2494100","strEvent":"Fulham vs Brentford","idChannel":"1","strCountry":"Australia","strLogo":"https://r2.thesportsdb.com/images/media/channel/logo/x.png","strChannel":"Stan Sport","strSeason":"2026-2027","strTime":"14:00:00","dateEvent":"2026-10-09","strTimeStamp":"2026-10-09T14:00:00"},
- {"id":"700002","idEvent":"2494100","strEvent":"Fulham vs Brentford","idChannel":"2","strCountry":"United Kingdom","strChannel":"Sky Sports Premier League","strTimeStamp":"2026-10-09T14:00:00"},
- {"id":"700003","idEvent":"2494100","strEvent":"Fulham vs Brentford","idChannel":"3","strCountry":"United States","strChannel":"Peacock","strTimeStamp":"2026-10-09T14:00:00"},
- {"id":"700004","idEvent":"2494100","strEvent":"Fulham vs Brentford","idChannel":"4","strCountry":"Iceland","strChannel":"Stöð 2 Sport IS","strTimeStamp":"2026-10-09T14:00:00"}
-]}
