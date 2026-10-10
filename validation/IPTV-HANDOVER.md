@@ -45,8 +45,8 @@ session winners shown. CI green at `3de7568` (run 38012700521) and at `3065341` 
 focused game's summary (one extra request).
 
 Next, in order:
-1. The user skipped `422d9d8f0` and will test the next build (7e, 7d, 7c) once findings
-   13–14 of 10 October are fixed. Playback options,
+1. Device pass on `e7e1d17b5` (run 38029912007; checklist 7e, then 7d and 7c); take the
+   findings, record and fix them the same way. Playback options,
    menu order, external player and source expiry are committed after it (`2c83574c9`,
    `826090865`, playback options pending) and go into the next build.
 2. Waiting on the user (do not do these without them):

@@ -862,6 +862,10 @@ Phone setup (security review)
 
 ## Validation
 
+- Everything since the 10 October pass (fixes, playback and audio options, menu order,
+  external player, source expiry, Recordings/multiview focus, translations): CI debug green
+  at `e7e1d17b5` (run 38029912007; compile checks `d78449491` run 38028980919, `422d9d8f0`
+  run 38027429837). 834 core and 277 data-layer JVM tests on the host. Not device-tested.
 - Fixes from the 10 October pass with translations: CI debug green at `422d9d8f0` (run
   38027429837; code compile check at `769e7bc63`, run 38026419701). 814 core and 276
   data-layer JVM tests on the host. Not device-tested. Build for the next device pass.

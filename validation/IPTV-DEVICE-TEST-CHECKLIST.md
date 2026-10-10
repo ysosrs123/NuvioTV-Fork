@@ -1,4 +1,4 @@
-# Nuvio IPTV — device test checklist (build `422d9d8f0`, run 38027429837)
+# Nuvio IPTV — device test checklist (build `e7e1d17b5`, run 38029912007)
 
 For this build start with section 7e, then 7d, 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
 
@@ -84,7 +84,7 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
 
-## 7e. Playback options, menu order, external player and source expiry (build after `593b5775b`)
+## 7e. Playback options, menu order, external player and source expiry (build `e7e1d17b5`)
 1. Live TV settings → Playback and audio: frame rate / resolution matching "Same as Nuvio"
    shows Nuvio's value; set Live TV only values and check the TV switches on a 50 fps channel.
 2. Passthrough with your receiver: "Same as Nuvio" passes AC-3/E-AC-3 (receiver shows Dolby);
