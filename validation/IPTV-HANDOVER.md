@@ -330,6 +330,24 @@ reporting, resets 10 October 2026 00:00 UTC):
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
 
+## Review — night of 10 October 2026 (`01f19bbed..96f8939ea`)
+
+Two read-only reviews of everything since the last full device pass; fixes in progress:
+- High: recording names without the id suffix could overwrite files on network shares and
+  delete same-named MediaStore entries (uniqueness was only checked on local storage).
+- Medium: PIN-locked profile reachable by a paired phone right after app start (PIN map not
+  loaded yet); tunnelling checks used the setting, not the actual state; Nuvio audio settings
+  read with runBlocking on the main thread; preferred channels outranked the channel that
+  actually shows the game; "Always in Sport only" channel picks could be dropped; sport
+  matching query count up to 5×; Sport only 24 h limited by a 3,000-record cap.
+- Low: phone list saves not atomic; phone change prompt over the profile gate; address
+  check on the main thread; preference reads during composition; focus requests treated as
+  successful when refused; category picks matched case-sensitively in queries; Stalker
+  expiry read as UTC; HEVC tiles measured against the AVC budget.
+- Not changed (waiting for a device test): multiview decode budget uses the larger of
+  performance points and size/rate support; check the `multiview device` log on the AM9.
+- To check on a device: tunnelled playback kept alive while in settings may need a re-tune.
+
 ## Device findings — 10 October 2026, evening (build `e7e1d17b5`, run 38029912007)
 
 Checklist 7e/7d passed except (all fixed in code, `9a88d0d41`..head; checklist 7f):
