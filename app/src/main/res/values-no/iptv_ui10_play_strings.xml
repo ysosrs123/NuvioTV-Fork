@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K og HDR i hjørnebildet</string>
+    <string name="iptv_play10_corner_picture_subtitle">Viser bildet fra 4K- og HDR-kanaler i hjørnet av guiden. Slå av hvis guiden hakker eller TV-en bytter til HDR mens du blar; hjørnet viser da kanallogoen med lyd.</string>
+    <string name="iptv_play10_surround_lift">Løft svak surroundlyd</string>
+    <string name="iptv_play10_surround_lift_subtitle">Øker nivået på AAC-surroundkanaler (5.1) som mikses ned til stereo, og som ofte spiller mye svakere enn andre kanaler.</string>
+    <string name="iptv_play10_fullscreen_hint">Venstre for kanaler, Høyre for kontroller, hold OK for valg</string>
+</resources>

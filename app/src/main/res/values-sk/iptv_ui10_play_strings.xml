@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K a HDR v rohovom obraze</string>
+    <string name="iptv_play10_corner_picture_subtitle">Zobrazuje obraz kanálov 4K a HDR v rohu programu. Vypnite, ak sa program seká alebo sa televízor pri prehliadaní prepína do HDR; roh potom zobrazí logo kanála so zvukom.</string>
+    <string name="iptv_play10_surround_lift">Zosilniť tichý priestorový zvuk</string>
+    <string name="iptv_play10_surround_lift_subtitle">Zvyšuje úroveň priestorového zvuku AAC (5.1) zmixovaného do sterea, ktorý často hrá oveľa tichšie než iné kanály.</string>
+    <string name="iptv_play10_fullscreen_hint">Doľava kanály, doprava ovládanie, podržte OK pre možnosti</string>
+</resources>

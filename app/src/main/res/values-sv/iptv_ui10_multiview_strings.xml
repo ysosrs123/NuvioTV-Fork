@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Alla anslutningar för den här kanalens konto används. Ta bort en bild från samma konto, stoppa en inspelning eller höj kontots anslutningar under Live-TV-källor om ditt abonnemang tillåter det.</string>
+    <string name="iptv_multiview_memory_full">TV-boxen har inte tillräckligt med minne för fler bilder. Ta bort en först.</string>
+    <string name="iptv_multiview_already">Kanalen finns redan i multivy.</string>
+    <string name="iptv_multiview_tiles_full">Det finns inte plats för fler bilder i den här layouten. Ta bort en eller välj en annan layout.</string>
+</resources>

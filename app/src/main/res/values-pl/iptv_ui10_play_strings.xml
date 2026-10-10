@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K i HDR w obrazie w rogu</string>
+    <string name="iptv_play10_corner_picture_subtitle">Pokazuje obraz kanałów 4K i HDR w rogu przewodnika. Wyłącz, jeśli przewodnik się zacina lub telewizor przełącza się na HDR podczas przeglądania; w rogu pojawi się wtedy logo kanału z dźwiękiem.</string>
+    <string name="iptv_play10_surround_lift">Podbij cichy dźwięk przestrzenny</string>
+    <string name="iptv_play10_surround_lift_subtitle">Podnosi poziom kanałów przestrzennych AAC (5.1) miksowanych do stereo, które często grają dużo ciszej niż inne kanały.</string>
+    <string name="iptv_play10_fullscreen_hint">W lewo: kanały, w prawo: sterowanie, przytrzymaj OK: opcje</string>
+</resources>

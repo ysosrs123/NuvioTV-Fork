@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Një miniaplikacion i lartë</string>
+    <string name="iptv_ui10_layout_square">Një miniaplikacion katror</string>
+    <string name="iptv_ui10_layout_stacked">Dy miniaplikacione të ulëta, njëri mbi tjetrin</string>
+    <string name="iptv_ui10_layout_two">Dy miniaplikacione të larta</string>
+    <string name="iptv_ui10_layout_three">Një miniaplikacion i lartë dhe dy të ulëta</string>
+    <string name="iptv_ui10_layout_squares">Një katror i madh dhe dy të vegjël</string>
+    <string name="iptv_ui10_layout_four">Katër katrorë të vegjël</string>
+    <string name="iptv_ui10_layout_partial">Nuk zë vend plotësisht në këtë ekran, ndaj disa miniaplikacione fshihen</string>
+    <string name="iptv_ui10_stream_video">Video</string>
+    <string name="iptv_ui10_stream_audio">Audio</string>
+    <string name="iptv_ui10_stream_format">Formati</string>
+    <string name="iptv_ui10_stream_buffer">Buferi</string>
+    <string name="iptv_ui10_stream_dropped">Të humbura</string>
+</resources>

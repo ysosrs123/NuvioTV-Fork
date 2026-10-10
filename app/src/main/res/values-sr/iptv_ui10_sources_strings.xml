@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Освежи све изворе</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">Поново учитај листу канала сваког извора</string>
+    <string name="iptv_ui10_refresh_all_guides">Освежи све водиче</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">Поново учитај емисије сваког водича</string>
+    <string name="iptv_ui10_refresh_all_progress">Освежавање… завршено %1$d од %2$d</string>
+    <string name="iptv_ui10_refresh_all_done">Завршено · освежено свих %1$d</string>
+    <string name="iptv_ui10_refresh_all_failed">Завршено · освежено %1$d, неуспешно %2$d</string>
+</resources>

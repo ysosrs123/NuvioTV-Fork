@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Të gjitha lidhjet e llogarisë së këtij kanali janë në përdorim. Hiq një pamje nga e njëjta llogari, ndalo një regjistrim ose rrit lidhjet e llogarisë te Burimet e TV-së live nëse paketa jote e lejon.</string>
+    <string name="iptv_multiview_memory_full">Ky TV box nuk ka memorie të mjaftueshme për një pamje tjetër. Hiq një fillimisht.</string>
+    <string name="iptv_multiview_already">Ky kanal është tashmë në multiview.</string>
+    <string name="iptv_multiview_tiles_full">Nuk ka vend për një pamje tjetër në këtë paraqitje. Hiq një ose zgjidh një paraqitje tjetër.</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$d勝 %2$d和 %3$d敗</string>
+    <string name="iptv_ui10_sport_record_wl">%1$d勝 %2$d敗</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$d勝 %2$d敗 %3$d和</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$d勝 %2$d敗 %3$d延長敗</string>
+    <string name="iptv_ui10_sport_season_record">賽季戰績 %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">%1$d 分鐘後開始</string>
+    <string name="iptv_ui10_sport_starts_hours">%1$d 小時 %2$d 分鐘後開始</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="other">%1$d 天 %2$d 小時後開始</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">即將開始</string>
+    <string name="iptv_ui10_sport_golf_to_par">相對標準桿</string>
+    <string name="iptv_ui10_sport_golf_thru">已打洞數</string>
+</resources>

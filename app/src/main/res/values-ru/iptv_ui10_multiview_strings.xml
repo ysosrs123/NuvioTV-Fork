@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Все подключения аккаунта этого канала заняты. Уберите окно с того же аккаунта, остановите запись или увеличьте число подключений в источниках ТВ-эфира, если позволяет тариф.</string>
+    <string name="iptv_multiview_memory_full">Приставке не хватает памяти для ещё одного окна. Сначала уберите одно.</string>
+    <string name="iptv_multiview_already">Этот канал уже есть в мультиэкране.</string>
+    <string name="iptv_multiview_tiles_full">В этой раскладке нет места для ещё одного окна. Уберите одно или выберите другую раскладку.</string>
+</resources>

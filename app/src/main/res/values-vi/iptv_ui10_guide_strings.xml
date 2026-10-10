@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Một tiện ích con cao</string>
+    <string name="iptv_ui10_layout_square">Một tiện ích con vuông</string>
+    <string name="iptv_ui10_layout_stacked">Hai tiện ích con thấp, xếp chồng</string>
+    <string name="iptv_ui10_layout_two">Hai tiện ích con cao</string>
+    <string name="iptv_ui10_layout_three">Một tiện ích con cao và hai thấp</string>
+    <string name="iptv_ui10_layout_squares">Một ô vuông lớn và hai ô nhỏ</string>
+    <string name="iptv_ui10_layout_four">Bốn ô vuông nhỏ</string>
+    <string name="iptv_ui10_layout_partial">Không vừa hết màn hình này nên một số tiện ích con bị ẩn</string>
+    <string name="iptv_ui10_stream_video">Video</string>
+    <string name="iptv_ui10_stream_audio">Âm thanh</string>
+    <string name="iptv_ui10_stream_format">Định dạng</string>
+    <string name="iptv_ui10_stream_buffer">Bộ đệm</string>
+    <string name="iptv_ui10_stream_dropped">Bị bỏ</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Obnoviť všetky zdroje</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">Znova načítať zoznam kanálov každého zdroja</string>
+    <string name="iptv_ui10_refresh_all_guides">Obnoviť všetky programy</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">Znova načítať relácie každého programu</string>
+    <string name="iptv_ui10_refresh_all_progress">Obnovuje sa… hotovo %1$d z %2$d</string>
+    <string name="iptv_ui10_refresh_all_done">Hotovo · obnovené všetky (%1$d)</string>
+    <string name="iptv_ui10_refresh_all_failed">Hotovo · obnovené: %1$d, zlyhalo: %2$d</string>
+</resources>

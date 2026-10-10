@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Vse povezave računa tega kanala so v uporabi. Odstranite sliko z istega računa, ustavite snemanje ali, če paket to dovoljuje, povečajte število povezav računa v Virih TV v živo.</string>
+    <string name="iptv_multiview_memory_full">Ta TV-sprejemnik nima dovolj pomnilnika za še eno sliko. Najprej eno odstranite.</string>
+    <string name="iptv_multiview_already">Ta kanal je že v multiview.</string>
+    <string name="iptv_multiview_tiles_full">V tej postavitvi ni prostora za še eno sliko. Eno odstranite ali izberite drugo postavitev.</string>
+</resources>

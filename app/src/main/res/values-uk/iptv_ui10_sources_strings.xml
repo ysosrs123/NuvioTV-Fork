@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Оновити всі джерела</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">Повторно завантажити список каналів кожного джерела</string>
+    <string name="iptv_ui10_refresh_all_guides">Оновити всі телепрограми</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">Повторно завантажити передачі кожної телепрограми</string>
+    <string name="iptv_ui10_refresh_all_progress">Оновлення… готово %1$d з %2$d</string>
+    <string name="iptv_ui10_refresh_all_done">Готово · оновлено: %1$d</string>
+    <string name="iptv_ui10_refresh_all_failed">Готово · оновлено: %1$d, помилок: %2$d</string>
+</resources>

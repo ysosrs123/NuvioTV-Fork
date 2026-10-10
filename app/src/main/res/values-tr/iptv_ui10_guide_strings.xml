@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Bir uzun widget</string>
+    <string name="iptv_ui10_layout_square">Bir kare widget</string>
+    <string name="iptv_ui10_layout_stacked">Üst üste iki kısa widget</string>
+    <string name="iptv_ui10_layout_two">İki uzun widget</string>
+    <string name="iptv_ui10_layout_three">Bir uzun ve iki kısa widget</string>
+    <string name="iptv_ui10_layout_squares">Bir büyük ve iki küçük kare</string>
+    <string name="iptv_ui10_layout_four">Dört küçük kare</string>
+    <string name="iptv_ui10_layout_partial">Bu ekrana tam sığmadığı için bazı widget\'lar gizlenir</string>
+    <string name="iptv_ui10_stream_video">Video</string>
+    <string name="iptv_ui10_stream_audio">Ses</string>
+    <string name="iptv_ui10_stream_format">Biçim</string>
+    <string name="iptv_ui10_stream_buffer">Arabellek</string>
+    <string name="iptv_ui10_stream_dropped">Atlanan</string>
+</resources>

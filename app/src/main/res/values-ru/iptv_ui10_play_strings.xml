@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K и HDR в угловом окне</string>
+    <string name="iptv_play10_corner_picture_subtitle">Показывает изображение каналов 4K и HDR в углу телепрограммы. Отключите, если телепрограмма подтормаживает или телевизор переключается в HDR при просмотре; тогда в углу будет логотип канала со звуком.</string>
+    <string name="iptv_play10_surround_lift">Усилить тихий объёмный звук</string>
+    <string name="iptv_play10_surround_lift_subtitle">Повышает уровень объёмного звука AAC (5.1), сведённого в стерео: он часто звучит намного тише других каналов.</string>
+    <string name="iptv_play10_fullscreen_hint">Влево — каналы, вправо — управление, удерживайте OK — параметры</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">Köşe görüntüsünde 4K ve HDR</string>
+    <string name="iptv_play10_corner_picture_subtitle">4K ve HDR kanallarının görüntüsünü yayın akışının köşesinde gösterir. Yayın akışı takılırsa veya gezinirken TV HDR\'ye geçerse kapatın; köşede o zaman sesli kanal logosu gösterilir.</string>
+    <string name="iptv_play10_surround_lift">Kısık surround sesi yükselt</string>
+    <string name="iptv_play10_surround_lift_subtitle">Stereoya indirgenen AAC surround kanallarının (5.1) seviyesini yükseltir; bunlar çoğu zaman diğer kanallardan çok daha kısık çalar.</string>
+    <string name="iptv_play10_fullscreen_hint">Sol: kanallar, Sağ: kontroller, OK basılı tut: seçenekler</string>
+</resources>

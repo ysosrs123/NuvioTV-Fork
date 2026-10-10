@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Actualizează toate sursele</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">Reîncarcă lista de canale a fiecărei surse</string>
+    <string name="iptv_ui10_refresh_all_guides">Actualizează toate ghidurile</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">Reîncarcă programele fiecărui ghid</string>
+    <string name="iptv_ui10_refresh_all_progress">Se actualizează… %1$d din %2$d gata</string>
+    <string name="iptv_ui10_refresh_all_done">Gata · toate cele %1$d actualizate</string>
+    <string name="iptv_ui10_refresh_all_failed">Gata · %1$d actualizate, %2$d eșuate</string>
+</resources>

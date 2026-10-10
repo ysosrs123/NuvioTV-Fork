@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Wszystkie połączenia konta tego kanału są w użyciu. Usuń obraz z tego samego konta, zatrzymaj nagrywanie lub, jeśli plan na to pozwala, zwiększ liczbę połączeń konta w źródłach telewizji na żywo.</string>
+    <string name="iptv_multiview_memory_full">To urządzenie nie ma dość pamięci na kolejny obraz. Najpierw usuń jeden.</string>
+    <string name="iptv_multiview_already">Ten kanał jest już w multiview.</string>
+    <string name="iptv_multiview_tiles_full">W tym układzie nie ma miejsca na kolejny obraz. Usuń jeden lub wybierz inny układ.</string>
+</resources>

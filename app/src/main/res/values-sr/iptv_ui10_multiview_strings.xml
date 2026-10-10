@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Све везе налога овог канала су у употреби. Уклоните слику са истог налога, зауставите снимање или повећајте број веза налога у изворима ТВ уживо ако ваш пакет то дозвољава.</string>
+    <string name="iptv_multiview_memory_full">Овај ТВ уређај нема довољно меморије за још једну слику. Прво уклоните једну.</string>
+    <string name="iptv_multiview_already">Овај канал је већ у Multiview приказу.</string>
+    <string name="iptv_multiview_tiles_full">Нема места за још једну слику у овом распореду. Уклоните једну или изаберите други распоред.</string>
+</resources>

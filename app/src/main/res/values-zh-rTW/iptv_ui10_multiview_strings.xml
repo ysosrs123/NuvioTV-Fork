@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">此頻道所屬帳戶的所有連線都在使用中。請移除同一帳戶的一個畫面、停止一項錄影，或在方案允許時於直播電視來源中提高帳戶的連線數。</string>
+    <string name="iptv_multiview_memory_full">此電視盒記憶體不足，無法再加入畫面。請先移除一個。</string>
+    <string name="iptv_multiview_already">此頻道已在多畫面中。</string>
+    <string name="iptv_multiview_tiles_full">此版面配置已無空間加入畫面。請移除一個或選擇其他版面配置。</string>
+</resources>

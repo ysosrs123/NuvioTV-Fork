@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$dV %2$dO %3$dF</string>
+    <string name="iptv_ui10_sport_record_wl">%1$dV %2$dF</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$dV %2$dF %3$dO</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$dV %2$dF %3$dÖF</string>
+    <string name="iptv_ui10_sport_season_record">Säsong %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">Startar om %1$d min</string>
+    <string name="iptv_ui10_sport_starts_hours">Startar om %1$d tim %2$d min</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="one">Startar om %1$d dag %2$d tim</item>
+        <item quantity="other">Startar om %1$d dagar %2$d tim</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">Startar nu</string>
+    <string name="iptv_ui10_sport_golf_to_par">Mot par</string>
+    <string name="iptv_ui10_sport_golf_thru">Hål</string>
+</resources>

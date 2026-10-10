@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">一個高版小工具</string>
+    <string name="iptv_ui10_layout_square">一個方形小工具</string>
+    <string name="iptv_ui10_layout_stacked">兩個矮版小工具，上下堆疊</string>
+    <string name="iptv_ui10_layout_two">兩個高版小工具</string>
+    <string name="iptv_ui10_layout_three">一個高版和兩個矮版小工具</string>
+    <string name="iptv_ui10_layout_squares">一大兩小方塊</string>
+    <string name="iptv_ui10_layout_four">四個小方塊</string>
+    <string name="iptv_ui10_layout_partial">此畫面無法完全容納，部分小工具將會隱藏</string>
+    <string name="iptv_ui10_stream_video">視訊</string>
+    <string name="iptv_ui10_stream_audio">音訊</string>
+    <string name="iptv_ui10_stream_format">格式</string>
+    <string name="iptv_ui10_stream_buffer">緩衝</string>
+    <string name="iptv_ui10_stream_dropped">掉格</string>
+</resources>

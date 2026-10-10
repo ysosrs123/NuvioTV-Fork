@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Alle tilkoblinger for kontoen til denne kanalen er i bruk. Fjern et bilde fra samme konto, stopp et opptak eller øk kontoens tilkoblinger i Direkte-TV-kilder hvis abonnementet tillater det.</string>
+    <string name="iptv_multiview_memory_full">TV-boksen har ikke nok minne til flere bilder. Fjern ett først.</string>
+    <string name="iptv_multiview_already">Denne kanalen er allerede i multivisning.</string>
+    <string name="iptv_multiview_tiles_full">Ikke plass til flere bilder i dette oppsettet. Fjern ett eller velg et annet oppsett.</string>
+</resources>

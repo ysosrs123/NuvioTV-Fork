@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K en HDR in het hoekbeeld</string>
+    <string name="iptv_play10_corner_picture_subtitle">Toont het beeld van 4K- en HDR-zenders in de hoek van de gids. Zet dit uit als de gids hapert of de tv tijdens het bladeren naar HDR schakelt; de hoek toont dan het zenderlogo met geluid.</string>
+    <string name="iptv_play10_surround_lift">Zacht surroundgeluid versterken</string>
+    <string name="iptv_play10_surround_lift_subtitle">Verhoogt het niveau van AAC-surroundkanalen (5.1) die naar stereo worden teruggemixt en vaak veel zachter klinken dan andere zenders.</string>
+    <string name="iptv_play10_fullscreen_hint">Links voor zenders, Rechts voor bediening, houd OK ingedrukt voor opties</string>
+</resources>

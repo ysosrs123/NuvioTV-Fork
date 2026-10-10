@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Todas as conexões da conta deste canal estão em uso. Remova uma imagem da mesma conta, pare uma gravação ou aumente as conexões da conta em Fontes de TV ao vivo se o seu plano permitir.</string>
+    <string name="iptv_multiview_memory_full">Este aparelho de TV não tem memória suficiente para outra imagem. Remova uma primeiro.</string>
+    <string name="iptv_multiview_already">Este canal já está na multivisão.</string>
+    <string name="iptv_multiview_tiles_full">Não há espaço para outra imagem neste layout. Remova uma ou escolha outro layout.</string>
+</resources>

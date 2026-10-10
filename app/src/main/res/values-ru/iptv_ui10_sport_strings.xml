@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$dВ %2$dН %3$dП</string>
+    <string name="iptv_ui10_sport_record_wl">%1$dВ %2$dП</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$dВ %2$dП %3$dН</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$dВ %2$dП %3$dПО</string>
+    <string name="iptv_ui10_sport_season_record">Сезон: %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">Начало через %1$d мин</string>
+    <string name="iptv_ui10_sport_starts_hours">Начало через %1$d ч %2$d мин</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="one">Начало через %1$d день %2$d ч</item>
+        <item quantity="few">Начало через %1$d дня %2$d ч</item>
+        <item quantity="many">Начало через %1$d дней %2$d ч</item>
+        <item quantity="other">Начало через %1$d дня %2$d ч</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">Начинается</string>
+    <string name="iptv_ui10_sport_golf_to_par">К пару</string>
+    <string name="iptv_ui10_sport_golf_thru">Лунки</string>
+</resources>

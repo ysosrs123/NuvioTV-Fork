@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Bu kanalın hesabındaki tüm bağlantılar kullanımda. Aynı hesaptan bir görüntüyü kaldırın, bir kaydı durdurun veya paketiniz izin veriyorsa Canlı TV kaynaklarından hesabın bağlantı sayısını artırın.</string>
+    <string name="iptv_multiview_memory_full">Bu TV kutusunda başka bir görüntü için yeterli bellek yok. Önce birini kaldırın.</string>
+    <string name="iptv_multiview_already">Bu kanal zaten çoklu görünümde.</string>
+    <string name="iptv_multiview_tiles_full">Bu düzende başka bir görüntüye yer yok. Birini kaldırın veya başka bir düzen seçin.</string>
+</resources>

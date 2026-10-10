@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">ஒரு உயரமான விட்ஜெட்</string>
+    <string name="iptv_ui10_layout_square">ஒரு சதுர விட்ஜெட்</string>
+    <string name="iptv_ui10_layout_stacked">இரண்டு குட்டையான விட்ஜெட்டுகள், அடுக்கியவை</string>
+    <string name="iptv_ui10_layout_two">இரண்டு உயரமான விட்ஜெட்டுகள்</string>
+    <string name="iptv_ui10_layout_three">ஒரு உயரமான, இரண்டு குட்டையான விட்ஜெட்டுகள்</string>
+    <string name="iptv_ui10_layout_squares">ஒரு பெரிய, இரண்டு சிறிய சதுரங்கள்</string>
+    <string name="iptv_ui10_layout_four">நான்கு சிறிய சதுரங்கள்</string>
+    <string name="iptv_ui10_layout_partial">இந்தத் திரையில் முழுமையாகப் பொருந்தாததால் சில விட்ஜெட்டுகள் மறைக்கப்பட்டுள்ளன</string>
+    <string name="iptv_ui10_stream_video">வீடியோ</string>
+    <string name="iptv_ui10_stream_audio">ஆடியோ</string>
+    <string name="iptv_ui10_stream_format">வடிவம்</string>
+    <string name="iptv_ui10_stream_buffer">பஃபர்</string>
+    <string name="iptv_ui10_stream_dropped">விடுபட்டவை</string>
+</resources>

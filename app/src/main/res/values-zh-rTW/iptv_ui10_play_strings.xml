@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">角落畫面顯示 4K 和 HDR</string>
+    <string name="iptv_play10_corner_picture_subtitle">在節目表角落顯示 4K 和 HDR 頻道的畫面。如果節目表卡頓或瀏覽時電視切換到 HDR，請關閉此項；角落將改為顯示頻道台標並播放聲音。</string>
+    <string name="iptv_play10_surround_lift">提升偏低的環繞音量</string>
+    <string name="iptv_play10_surround_lift_subtitle">提高混音為立體聲的 AAC 環繞聲（5.1）的音量，這類頻道的音量常比其他頻道低很多。</string>
+    <string name="iptv_play10_fullscreen_hint">左鍵：頻道，右鍵：控制，長按 OK：選項</string>
+</resources>

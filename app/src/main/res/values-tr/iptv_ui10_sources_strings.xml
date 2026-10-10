@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Tüm kaynakları yenile</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">Her kaynağın kanal listesini yeniden yükle</string>
+    <string name="iptv_ui10_refresh_all_guides">Tüm yayın akışlarını yenile</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">Her yayın akışının programlarını yeniden yükle</string>
+    <string name="iptv_ui10_refresh_all_progress">Yenileniyor… %1$d/%2$d tamamlandı</string>
+    <string name="iptv_ui10_refresh_all_done">Tamamlandı · tümü (%1$d) yenilendi</string>
+    <string name="iptv_ui10_refresh_all_failed">Tamamlandı · %1$d yenilendi, %2$d başarısız</string>
+</resources>

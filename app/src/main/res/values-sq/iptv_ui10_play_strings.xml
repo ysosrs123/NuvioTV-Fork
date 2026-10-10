@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K dhe HDR në pamjen e këndit</string>
+    <string name="iptv_play10_corner_picture_subtitle">Shfaq pamjen e kanaleve 4K dhe HDR në këndin e udhëzuesit. Çaktivizoje nëse udhëzuesi ngec ose televizori kalon në HDR gjatë shfletimit; këndi atëherë shfaq logon e kanalit me zë.</string>
+    <string name="iptv_play10_surround_lift">Përforco audion e ulët surround</string>
+    <string name="iptv_play10_surround_lift_subtitle">Rrit nivelin e kanaleve surround AAC (5.1) të përziera në stereo, që shpesh dëgjohen shumë më ulët se kanalet e tjera.</string>
+    <string name="iptv_play10_fullscreen_hint">Majtas për kanalet, Djathtas për kontrollet, mbaj OK për opsionet</string>
+</resources>

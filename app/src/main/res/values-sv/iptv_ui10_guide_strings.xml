@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">En hög widget</string>
+    <string name="iptv_ui10_layout_square">En kvadratisk widget</string>
+    <string name="iptv_ui10_layout_stacked">Två låga widgetar, staplade</string>
+    <string name="iptv_ui10_layout_two">Två höga widgetar</string>
+    <string name="iptv_ui10_layout_three">En hög och två låga widgetar</string>
+    <string name="iptv_ui10_layout_squares">En stor och två små kvadrater</string>
+    <string name="iptv_ui10_layout_four">Fyra små kvadrater</string>
+    <string name="iptv_ui10_layout_partial">Får inte plats helt på den här skärmen, så vissa widgetar döljs</string>
+    <string name="iptv_ui10_stream_video">Video</string>
+    <string name="iptv_ui10_stream_audio">Ljud</string>
+    <string name="iptv_ui10_stream_format">Format</string>
+    <string name="iptv_ui10_stream_buffer">Buffert</string>
+    <string name="iptv_ui10_stream_dropped">Tappade</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Один высокий виджет</string>
+    <string name="iptv_ui10_layout_square">Один квадратный виджет</string>
+    <string name="iptv_ui10_layout_stacked">Два низких виджета друг над другом</string>
+    <string name="iptv_ui10_layout_two">Два высоких виджета</string>
+    <string name="iptv_ui10_layout_three">Один высокий и два низких виджета</string>
+    <string name="iptv_ui10_layout_squares">Один большой и два маленьких квадрата</string>
+    <string name="iptv_ui10_layout_four">Четыре маленьких квадрата</string>
+    <string name="iptv_ui10_layout_partial">Не помещается на этом экране целиком, поэтому часть виджетов скрыта</string>
+    <string name="iptv_ui10_stream_video">Видео</string>
+    <string name="iptv_ui10_stream_audio">Аудио</string>
+    <string name="iptv_ui10_stream_format">Формат</string>
+    <string name="iptv_ui10_stream_buffer">Буфер</string>
+    <string name="iptv_ui10_stream_dropped">Пропущено</string>
+</resources>

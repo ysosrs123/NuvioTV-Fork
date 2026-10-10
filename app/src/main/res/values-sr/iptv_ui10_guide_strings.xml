@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Један висок виџет</string>
+    <string name="iptv_ui10_layout_square">Један квадратни виџет</string>
+    <string name="iptv_ui10_layout_stacked">Два ниска виџета, један изнад другог</string>
+    <string name="iptv_ui10_layout_two">Два висока виџета</string>
+    <string name="iptv_ui10_layout_three">Један висок и два ниска виџета</string>
+    <string name="iptv_ui10_layout_squares">Један велики и два мала квадрата</string>
+    <string name="iptv_ui10_layout_four">Четири мала квадрата</string>
+    <string name="iptv_ui10_layout_partial">Не стаје цео на овај екран, па су неки виџети скривени</string>
+    <string name="iptv_ui10_stream_video">Видео</string>
+    <string name="iptv_ui10_stream_audio">Звук</string>
+    <string name="iptv_ui10_stream_format">Формат</string>
+    <string name="iptv_ui10_stream_buffer">Бафер</string>
+    <string name="iptv_ui10_stream_dropped">Изгубљено</string>
+</resources>

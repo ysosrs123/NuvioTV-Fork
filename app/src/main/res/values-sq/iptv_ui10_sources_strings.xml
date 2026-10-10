@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Rifresko të gjitha burimet</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">Ringarko listën e kanaleve të çdo burimi</string>
+    <string name="iptv_ui10_refresh_all_guides">Rifresko të gjithë udhëzuesit</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">Ringarko programet e çdo udhëzuesi</string>
+    <string name="iptv_ui10_refresh_all_progress">Po rifreskohet… %1$d nga %2$d përfunduan</string>
+    <string name="iptv_ui10_refresh_all_done">Përfundoi · u rifreskuan të %1$d</string>
+    <string name="iptv_ui10_refresh_all_failed">Përfundoi · %1$d u rifreskuan, %2$d dështuan</string>
+</resources>

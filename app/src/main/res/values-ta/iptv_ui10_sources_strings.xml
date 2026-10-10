@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">எல்லா மூலங்களையும் புதுப்பி</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">ஒவ்வொரு மூலத்தின் சேனல் பட்டியலையும் மீண்டும் ஏற்று</string>
+    <string name="iptv_ui10_refresh_all_guides">எல்லா வழிகாட்டிகளையும் புதுப்பி</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">ஒவ்வொரு வழிகாட்டியின் நிகழ்ச்சிகளையும் மீண்டும் ஏற்று</string>
+    <string name="iptv_ui10_refresh_all_progress">புதுப்பிக்கிறது… %2$d இல் %1$d முடிந்தது</string>
+    <string name="iptv_ui10_refresh_all_done">முடிந்தது · %1$d உம் புதுப்பிக்கப்பட்டன</string>
+    <string name="iptv_ui10_refresh_all_failed">முடிந்தது · %1$d புதுப்பிக்கப்பட்டன, %2$d தோல்வி</string>
+</resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Alle verbindingen van het account van deze zender zijn in gebruik. Verwijder een beeld van hetzelfde account, stop een opname of verhoog de verbindingen van het account in Bronnen voor live-tv als je abonnement dat toestaat.</string>
+    <string name="iptv_multiview_memory_full">Dit tv-kastje heeft niet genoeg geheugen voor nog een beeld. Verwijder er eerst een.</string>
+    <string name="iptv_multiview_already">Deze zender staat al in multiview.</string>
+    <string name="iptv_multiview_tiles_full">Geen ruimte voor nog een beeld in deze indeling. Verwijder er een of kies een andere indeling.</string>
+</resources>

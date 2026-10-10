@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Toate conexiunile contului acestui canal sunt folosite. Elimină o imagine din același cont, oprește o înregistrare sau mărește numărul de conexiuni ale contului în Surse TV live, dacă abonamentul permite.</string>
+    <string name="iptv_multiview_memory_full">Acest TV box nu are destulă memorie pentru încă o imagine. Elimină una mai întâi.</string>
+    <string name="iptv_multiview_already">Acest canal este deja în multiview.</string>
+    <string name="iptv_multiview_tiles_full">Nu mai e loc pentru încă o imagine în acest aranjament. Elimină una sau alege alt aranjament.</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">En visok pripomoček</string>
+    <string name="iptv_ui10_layout_square">En kvadraten pripomoček</string>
+    <string name="iptv_ui10_layout_stacked">Dva nizka pripomočka, drug nad drugim</string>
+    <string name="iptv_ui10_layout_two">Dva visoka pripomočka</string>
+    <string name="iptv_ui10_layout_three">En visok in dva nizka pripomočka</string>
+    <string name="iptv_ui10_layout_squares">En velik in dva majhna kvadrata</string>
+    <string name="iptv_ui10_layout_four">Štirje majhni kvadrati</string>
+    <string name="iptv_ui10_layout_partial">Ne gre v celoti na ta zaslon, zato so nekateri pripomočki skriti</string>
+    <string name="iptv_ui10_stream_video">Video</string>
+    <string name="iptv_ui10_stream_audio">Zvok</string>
+    <string name="iptv_ui10_stream_format">Format</string>
+    <string name="iptv_ui10_stream_buffer">Medpomnilnik</string>
+    <string name="iptv_ui10_stream_dropped">Izpuščeno</string>
+</resources>

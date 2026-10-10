@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Làm mới tất cả nguồn</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">Tải lại danh sách kênh của mọi nguồn</string>
+    <string name="iptv_ui10_refresh_all_guides">Làm mới tất cả lịch phát sóng</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">Tải lại chương trình của mọi lịch phát sóng</string>
+    <string name="iptv_ui10_refresh_all_progress">Đang làm mới… xong %1$d/%2$d</string>
+    <string name="iptv_ui10_refresh_all_done">Xong · đã làm mới cả %1$d</string>
+    <string name="iptv_ui10_refresh_all_failed">Xong · đã làm mới %1$d, %2$d thất bại</string>
+</resources>

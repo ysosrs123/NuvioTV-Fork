@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Alle bronnen vernieuwen</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">De zenderlijst van elke bron opnieuw laden</string>
+    <string name="iptv_ui10_refresh_all_guides">Alle gidsen vernieuwen</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">De programma\'s van elke gids opnieuw laden</string>
+    <string name="iptv_ui10_refresh_all_progress">Vernieuwen… %1$d van %2$d klaar</string>
+    <string name="iptv_ui10_refresh_all_done">Klaar · alle %1$d vernieuwd</string>
+    <string name="iptv_ui10_refresh_all_failed">Klaar · %1$d vernieuwd, %2$d mislukt</string>
+</resources>

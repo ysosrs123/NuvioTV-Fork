@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K e HDR na imagem do canto</string>
+    <string name="iptv_play10_corner_picture_subtitle">Mostra a imagem dos canais 4K e HDR no canto do guia. Desative se o guia travar ou se a TV mudar para HDR enquanto você navega; o canto passa a mostrar o logo do canal com som.</string>
+    <string name="iptv_play10_surround_lift">Aumentar áudio surround baixo</string>
+    <string name="iptv_play10_surround_lift_subtitle">Aumenta o nível dos canais surround AAC (5.1) convertidos para estéreo, que costumam tocar bem mais baixo que outros canais.</string>
+    <string name="iptv_play10_fullscreen_hint">Esquerda para canais, Direita para controles, segure OK para opções</string>
+</resources>

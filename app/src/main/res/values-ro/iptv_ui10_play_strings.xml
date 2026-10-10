@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play10_corner_picture">4K și HDR în imaginea din colț</string>
+    <string name="iptv_play10_corner_picture_subtitle">Afișează imaginea canalelor 4K și HDR în colțul ghidului. Dezactivează dacă ghidul sacadează sau televizorul trece pe HDR în timpul navigării; colțul va afișa atunci sigla canalului, cu sunet.</string>
+    <string name="iptv_play10_surround_lift">Amplifică sunetul surround slab</string>
+    <string name="iptv_play10_surround_lift_subtitle">Ridică nivelul canalelor surround AAC (5.1) mixate în stereo, care se aud adesea mult mai încet decât alte canale.</string>
+    <string name="iptv_play10_fullscreen_hint">Stânga pentru canale, Dreapta pentru comenzi, ține apăsat OK pentru opțiuni</string>
+</resources>

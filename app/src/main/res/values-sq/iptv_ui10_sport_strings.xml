@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_sport_record_wdl">%1$dF %2$dB %3$dH</string>
+    <string name="iptv_ui10_sport_record_wl">%1$dF %2$dH</string>
+    <string name="iptv_ui10_sport_record_wlt">%1$dF %2$dH %3$dB</string>
+    <string name="iptv_ui10_sport_record_wlo">%1$dF %2$dH %3$dHV</string>
+    <string name="iptv_ui10_sport_season_record">Sezoni %1$s</string>
+    <string name="iptv_ui10_sport_starts_minutes">Fillon pas %1$d min</string>
+    <string name="iptv_ui10_sport_starts_hours">Fillon pas %1$d orë %2$d min</string>
+    <plurals name="iptv_ui10_sport_starts_days">
+        <item quantity="one">Fillon pas %1$d dite %2$d orë</item>
+        <item quantity="other">Fillon pas %1$d ditësh %2$d orë</item>
+    </plurals>
+    <string name="iptv_ui10_sport_starting">Po fillon</string>
+    <string name="iptv_ui10_sport_golf_to_par">Ndaj par-it</string>
+    <string name="iptv_ui10_sport_golf_thru">Vrima</string>
+</resources>

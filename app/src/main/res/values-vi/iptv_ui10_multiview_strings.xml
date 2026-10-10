@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Mọi kết nối của tài khoản kênh này đều đang được dùng. Hãy xóa một khung hình cùng tài khoản, dừng một bản ghi hoặc tăng số kết nối của tài khoản trong Nguồn TV trực tiếp nếu gói của bạn cho phép.</string>
+    <string name="iptv_multiview_memory_full">TV box này không đủ bộ nhớ cho thêm khung hình. Hãy xóa bớt một khung trước.</string>
+    <string name="iptv_multiview_already">Kênh này đã có trong đa màn hình.</string>
+    <string name="iptv_multiview_tiles_full">Bố cục này không còn chỗ cho thêm khung hình. Hãy xóa bớt một khung hoặc chọn bố cục khác.</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">Oppdater alle kilder</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">Last inn kanallisten for hver kilde på nytt</string>
+    <string name="iptv_ui10_refresh_all_guides">Oppdater alle guider</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">Last inn programmene for hver guide på nytt</string>
+    <string name="iptv_ui10_refresh_all_progress">Oppdaterer … %1$d av %2$d ferdig</string>
+    <string name="iptv_ui10_refresh_all_done">Ferdig · alle %1$d oppdatert</string>
+    <string name="iptv_ui10_refresh_all_failed">Ferdig · %1$d oppdatert, %2$d mislyktes</string>
+</resources>

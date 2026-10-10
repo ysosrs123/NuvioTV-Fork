@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">一个高小组件</string>
+    <string name="iptv_ui10_layout_square">一个方形小组件</string>
+    <string name="iptv_ui10_layout_stacked">两个矮小组件，上下堆叠</string>
+    <string name="iptv_ui10_layout_two">两个高小组件</string>
+    <string name="iptv_ui10_layout_three">一个高小组件和两个矮小组件</string>
+    <string name="iptv_ui10_layout_squares">一大两小方块</string>
+    <string name="iptv_ui10_layout_four">四个小方块</string>
+    <string name="iptv_ui10_layout_partial">此屏幕无法完全容纳，部分小组件将被隐藏</string>
+    <string name="iptv_ui10_stream_video">视频</string>
+    <string name="iptv_ui10_stream_audio">音频</string>
+    <string name="iptv_ui10_stream_format">格式</string>
+    <string name="iptv_ui10_stream_buffer">缓冲</string>
+    <string name="iptv_ui10_stream_dropped">丢帧</string>
+</resources>

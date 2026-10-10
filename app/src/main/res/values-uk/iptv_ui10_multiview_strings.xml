@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_multiview_account_full">Усі з\'єднання акаунта цього каналу зайняті. Приберіть зображення з того самого акаунта, зупиніть запис або збільште кількість з\'єднань акаунта в джерелах ТВ наживо, якщо тариф це дозволяє.</string>
+    <string name="iptv_multiview_memory_full">Цій ТВ-приставці не вистачає пам\'яті для ще одного зображення. Спершу приберіть одне.</string>
+    <string name="iptv_multiview_already">Цей канал уже є в Multiview.</string>
+    <string name="iptv_multiview_tiles_full">У цій розкладці немає місця для ще одного зображення. Приберіть одне або виберіть іншу розкладку.</string>
+</resources>

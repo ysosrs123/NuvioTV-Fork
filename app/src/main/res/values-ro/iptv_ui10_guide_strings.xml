@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_layout_tall">Un widget înalt</string>
+    <string name="iptv_ui10_layout_square">Un widget pătrat</string>
+    <string name="iptv_ui10_layout_stacked">Două widgeturi scurte, suprapuse</string>
+    <string name="iptv_ui10_layout_two">Două widgeturi înalte</string>
+    <string name="iptv_ui10_layout_three">Un widget înalt și două scurte</string>
+    <string name="iptv_ui10_layout_squares">Un pătrat mare și două mici</string>
+    <string name="iptv_ui10_layout_four">Patru pătrate mici</string>
+    <string name="iptv_ui10_layout_partial">Nu încape complet pe acest ecran, așa că unele widgeturi sunt ascunse</string>
+    <string name="iptv_ui10_stream_video">Video</string>
+    <string name="iptv_ui10_stream_audio">Audio</string>
+    <string name="iptv_ui10_stream_format">Format</string>
+    <string name="iptv_ui10_stream_buffer">Buffer</string>
+    <string name="iptv_ui10_stream_dropped">Pierdute</string>
+</resources>

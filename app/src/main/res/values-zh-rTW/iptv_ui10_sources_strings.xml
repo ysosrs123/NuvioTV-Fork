@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui10_refresh_all_sources">重新整理所有來源</string>
+    <string name="iptv_ui10_refresh_all_sources_subtitle">重新載入每個來源的頻道清單</string>
+    <string name="iptv_ui10_refresh_all_guides">重新整理所有節目表</string>
+    <string name="iptv_ui10_refresh_all_guides_subtitle">重新載入每個節目表的節目</string>
+    <string name="iptv_ui10_refresh_all_progress">正在重新整理… 已完成 %1$d/%2$d</string>
+    <string name="iptv_ui10_refresh_all_done">完成 · 全部 %1$d 個已重新整理</string>
+    <string name="iptv_ui10_refresh_all_failed">完成 · %1$d 個已重新整理，%2$d 個失敗</string>
+</resources>
