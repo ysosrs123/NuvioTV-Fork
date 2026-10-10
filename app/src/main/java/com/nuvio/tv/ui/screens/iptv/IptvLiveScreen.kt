@@ -136,7 +136,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
     var menuItemFor by remember { mutableStateOf<LiveMenuItem?>(null) }
     var movingItem by remember { mutableStateOf<LiveMenuItem?>(null) }
     var railReveal by remember { mutableIntStateOf(0) }
-    var railSettings by remember { mutableStateOf(false) }
+    var railReturn by remember { mutableStateOf<LiveMenuItem?>(null) }
     var boostFor by remember { mutableStateOf<IptvListedChannel?>(null) }
     var formatFor by remember { mutableStateOf<IptvListedChannel?>(null) }
     var recordFor by remember { mutableStateOf<Pair<IptvListedChannel, com.nuvio.tv.core.iptv.GuideProgramme?>?>(null) }
@@ -150,7 +150,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
     val guideList = remember(state.source, state.category, state.favourites, state.sports, state.search) { androidx.compose.foundation.lazy.LazyListState() }
     val scope = rememberCoroutineScope()
     val railFocus = remember { FocusRequester() }
-    val settingsFocus = remember { FocusRequester() }
+    val returnFocus = remember { FocusRequester() }
     val emptyFocus = remember { FocusRequester() }
     val openSidebar = com.nuvio.tv.LocalOpenSidebar.current
     val sidebarExpanded = com.nuvio.tv.LocalSidebarExpanded.current
@@ -225,11 +225,11 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
         if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) && !railOpen && !searching && !fullscreen && state.multiview == null) focusContent()
     }
     LaunchedEffect(railOpen, categoryMenu, leaveAsk, movingCategory, menuItemFor, movingItem) {
-        if (!railOpen) { railFocused = false; movingCategory = null; movingItem = null; railSettings = false; return@LaunchedEffect }
+        if (!railOpen) { railFocused = false; movingCategory = null; movingItem = null; railReturn = null; return@LaunchedEffect }
         if (categoryMenu != null || leaveAsk || movingCategory != null || menuItemFor != null || movingItem != null) return@LaunchedEffect
-        railSettings = IptvSettingsReturn.requested.value
-        val target = if (railSettings) settingsFocus else railFocus
-        IptvSettingsReturn.requested.value = false
+        railReturn = IptvSettingsReturn.requested.value
+        val target = if (railReturn != null) returnFocus else railFocus
+        IptvSettingsReturn.requested.value = null
         repeat(RAIL_FOCUS_FRAMES) {
             withFrameNanos { }
             if (railFocused || !railOpen) return@LaunchedEffect
@@ -346,7 +346,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
             }
             AnimatedVisibility(railOpen, Modifier.align(Alignment.CenterStart).fillMaxHeight(),
                 enter = fadeIn() + slideInHorizontally { -it / 3 }, exit = fadeOut() + slideOutHorizontally { -it / 3 }) {
-                CategoryRail(state, railFocus, settingsFocus, Modifier.onFocusChanged { railFocused = it.hasFocus }.sidebarPageContent().then(if (LocalV2Appearance.current != null) Modifier.width(320.dp)
+                CategoryRail(state, railFocus, returnFocus, Modifier.onFocusChanged { railFocused = it.hasFocus }.sidebarPageContent().then(if (LocalV2Appearance.current != null) Modifier.width(320.dp)
                     else Modifier.padding(start = 24.dp, top = 20.dp, bottom = 20.dp).width(320.dp)).fillMaxHeight(),
                     onFavourites = { viewModel.showFavourites(); railOpen = false; focusGrid() },
                     onSports = { viewModel.showSports(); railOpen = false; focusGrid() },
@@ -366,7 +366,7 @@ fun IptvLiveScreen(onSources: () -> Unit, onRecordings: () -> Unit = {}, onSetti
                     onMoveCategory = { name, move -> viewModel.moveCategory(name, move) },
                     onMoveCategoryDone = { movingCategory = null },
                     menu = menuLayout, onMenuItem = { menuItemFor = it }, movingItem = movingItem, onMoveItemDone = { movingItem = null },
-                    reveal = railReveal, revealSettings = railSettings, expiry = expiry)
+                    reveal = railReveal, returnItem = railReturn, expiry = expiry)
             }
         }
     }
@@ -732,13 +732,13 @@ private fun menuLabel(item: LiveMenuItem, state: IptvLiveState): String = string
 })
 
 @Composable
-private fun CategoryRail(state: IptvLiveState, first: FocusRequester, settingsFocus: FocusRequester, modifier: Modifier, onFavourites: () -> Unit, onSports: () -> Unit, onCategory: (String?) -> Unit,
+private fun CategoryRail(state: IptvLiveState, first: FocusRequester, returnFocus: FocusRequester, modifier: Modifier, onFavourites: () -> Unit, onSports: () -> Unit, onCategory: (String?) -> Unit,
     onSource: (com.nuvio.tv.data.iptv.IptvSourceRef) -> Unit, onSources: () -> Unit, onSetup: () -> Unit, onRecordings: () -> Unit, onSearch: (Boolean) -> Unit, onHide: (String) -> Unit, onClose: () -> Unit,
     vod: IptvVodAvailability, onVod: (com.nuvio.tv.core.iptv.VodKind) -> Unit,
     onSidebar: (() -> Unit)?, onAllSources: () -> Unit, onSourceCategory: (com.nuvio.tv.data.iptv.IptvSourceRef, String?) -> Unit,
     movingCategory: String?, onMoveCategory: (String, ListMove) -> Unit, onMoveCategoryDone: () -> Unit,
     menu: IptvMenuLayout, onMenuItem: (LiveMenuItem) -> Unit, movingItem: LiveMenuItem?, onMoveItemDone: () -> Unit,
-    reveal: Int, revealSettings: Boolean, expiry: ExpiryWarning? = null, notice: String? = null) {
+    reveal: Int, returnItem: LiveMenuItem?, expiry: ExpiryWarning? = null, notice: String? = null) {
     val list = rememberLazyListState()
     val moveFocus = remember { FocusRequester() }
     val visibleCategories = state.categories.filter { it.name !in state.hiddenCategories }
@@ -842,7 +842,7 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, settingsFo
         }
     }
     val firstFocusable = rows.indexOfFirst { it.focusable }
-    val settingsKey = "menu-" + LiveMenuItem.SETTINGS.id
+    val returnIndex = returnItem?.let { item -> rows.indexOfFirst { it.key == "menu-${item.id}" || it.key == "hidden-${item.id}" } }?.takeIf { it >= 0 } ?: firstFocusable
     val movingIndex = when {
         movingCategory != null -> rows.indexOfFirst { it.key == "category-$movingCategory" }
         movingItem != null -> rows.indexOfFirst { it.anchor == movingItem }
@@ -857,7 +857,7 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, settingsFo
     }
     LaunchedEffect(reveal) {
         if (reveal == 0) return@LaunchedEffect
-        val index = if (revealSettings) rows.indexOfFirst { it.key == settingsKey } else firstFocusable
+        val index = if (returnItem != null) returnIndex else firstFocusable
         if (index >= 0 && list.layoutInfo.visibleItemsInfo.none { it.index == index }) list.scrollToItem((index - 2).coerceAtLeast(0))
     }
     val surface = if (LocalV2Appearance.current == null) Modifier.iptvPanel() else Modifier.iptvPanel(RectangleShape, edge = true)
@@ -900,7 +900,7 @@ private fun CategoryRail(state: IptvLiveState, first: FocusRequester, settingsFo
             itemsIndexed(rows, key = { _, row -> row.key }) { index, row ->
                 var target: Modifier = Modifier
                 if (index == firstFocusable) target = target.focusRequester(first)
-                if (row.key == settingsKey) target = target.focusRequester(settingsFocus)
+                if (index == returnIndex) target = target.focusRequester(returnFocus)
                 if (index == movingIndex) target = target.focusRequester(moveFocus)
                 row.content(target)
             }

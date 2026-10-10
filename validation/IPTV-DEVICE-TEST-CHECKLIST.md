@@ -102,6 +102,11 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 8. Sources: Xtream sources show "Expires dd-MMM-yy · N connections" or "No expiry"; a source
    within 7 days shows the warning there and under the Live TV menu title.
 
+9. Recordings: Back and Left return to Live TV with the menu open on Recordings (from
+   Home or Live TV settings: back to where you came from).
+10. Multiview add/replace list: Left/Right between categories and channels never lands on
+    the pictures behind it.
+
 ## 7d. Fixes from the 10 October pass (build `422d9d8f0`)
 1. Stream info widget in the short stacked size: two labelled columns (video, audio,
    bitrate, buffer); other sizes use their space.

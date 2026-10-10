@@ -33,6 +33,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
+import com.nuvio.tv.core.iptv.LiveMenuItem
 import com.nuvio.tv.core.iptv.MultiviewLayout
 import com.nuvio.tv.core.iptv.MultiviewQuality
 import com.nuvio.tv.data.iptv.IptvStartView
@@ -56,7 +57,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 private enum class IptvSettingsChoice { FORMAT, START, LAYOUT, QUALITY, EARLY, LATE, THEME }
 
 object IptvSettingsReturn {
-    val requested = MutableStateFlow(false)
+    val requested = MutableStateFlow<LiveMenuItem?>(null)
 }
 
 @Composable

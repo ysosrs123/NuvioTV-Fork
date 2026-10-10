@@ -94,13 +94,18 @@ fun IptvRecordingsScreen(onBack: () -> Unit, onPlay: ((IptvRecordingStream) -> U
     var options by remember { mutableStateOf<IptvRecording?>(null) }
     var confirmDelete by remember { mutableStateOf<IptvRecording?>(null) }
     LaunchedEffect(state.ready, state.empty) {
-        if (state.ready && !state.empty && !focused) { withFrameNanos { }; runCatching { first.requestFocus() }; focused = true }
+        if (state.ready && state.playing == null) { withFrameNanos { }; runCatching { first.requestFocus() }; focused = true }
     }
     val playing = state.playing != null
+    BackHandler(onBack = onBack)
     LaunchedEffect(playing) {
         if (!playing && focused) { withFrameNanos { }; runCatching { first.requestFocus() } }
     }
-    Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
+    Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background).onPreviewKeyEvent { event ->
+        val native = event.nativeKeyEvent
+        if (native.keyCode != AndroidKeyEvent.KEYCODE_DPAD_LEFT || playing) false
+        else { if (native.action == AndroidKeyEvent.ACTION_DOWN && native.repeatCount == 0) onBack(); true }
+    }) {
         if (!LocalIptvAppearance.current.plainBackground) LocalV2Appearance.current?.let { V2Atmosphere(rich = false, background = it.settingsBackground) }
         Row(Modifier.fillMaxSize().padding(horizontal = 48.dp, vertical = 32.dp), horizontalArrangement = Arrangement.spacedBy(32.dp)) {
             Column(Modifier.width(340.dp).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -120,7 +125,7 @@ fun IptvRecordingsScreen(onBack: () -> Unit, onPlay: ((IptvRecordingStream) -> U
             }
             LazyColumn(Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(16.dp), contentPadding = PaddingValues(bottom = 32.dp)) {
                 if (state.ready && state.empty) item(key = "empty") {
-                    SettingsGroupCard(title = stringResource(R.string.iptv_recordings_title)) {
+                    SettingsGroupCard(Modifier.focusRequester(first).focusable(), title = stringResource(R.string.iptv_recordings_title)) {
                         Text(stringResource(R.string.iptv_recordings_empty), color = NuvioTheme.colors.TextSecondary,
                             style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp))
                     }

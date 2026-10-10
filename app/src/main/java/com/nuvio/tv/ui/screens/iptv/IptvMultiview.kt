@@ -11,6 +11,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
@@ -118,6 +120,16 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
     LaunchedEffect(pick, tiles.size) {
         if (pick == null) { repeat(2) { withFrameNanos { } }; runCatching { requesters[state.tileFocus.coerceIn(0, slots - 1)].requestFocus() } }
     }
+    val pickerFocus = remember { FocusRequester() }
+    var pickerFocused by remember { mutableStateOf(false) }
+    LaunchedEffect(pick, pickerFocused) {
+        if (pick == null || pickerFocused) return@LaunchedEffect
+        repeat(PICKER_FOCUS_FRAMES) {
+            withFrameNanos { }
+            if (pick == null || pickerFocused) return@LaunchedEffect
+            if (it >= 3) runCatching { pickerFocus.requestFocus() }
+        }
+    }
     BackHandler(pick != null) { pick = null; onPickerSource(null) }
     BackHandler(pick == null && menuFor == null && dataMenu == null && choosingGame == null) { onExit() }
     var header by remember { mutableStateOf(true) }
@@ -133,7 +145,7 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
                 val layout = multiviewEffectiveLayout(state.multiviewLayout, total)
                 val rects = multiviewGeometry(layout, slots, state.mainTile.coerceIn(0, (tiles.size - 1).coerceAtLeast(0)), maxWidth.value, maxHeight.value, gap.value)
                 rects.forEachIndexed { index, rect ->
-                    val modifier = Modifier.offset(rect.x.dp, rect.y.dp).size(rect.width.dp, rect.height.dp)
+                    val modifier = Modifier.offset(rect.x.dp, rect.y.dp).size(rect.width.dp, rect.height.dp).focusProperties { canFocus = pick == null }
                     if (index < tiles.size) TileSlot(state, tiles, index, now, requesters, modifier, { menuFor = it }, onFocusTile, onFull)
                     else if (index < total) DataSlot(data[index - tiles.size], fixtures, index, requesters[index], modifier) { dataMenu = index - tiles.size }
                     else AddSlot(requesters[index], modifier) { if (streamRoom) pick = TilePick.Add else dataMenu = ADD_DATA }
@@ -161,7 +173,7 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
             val picker = state.picker
             val panelState = if (picker == null) state else state.copy(categories = picker.categories.orEmpty(), favourites = picker.favourites,
                 sports = false, category = picker.category, hiddenCategories = picker.hidden)
-            ChannelPanel(panelState, now, onWatch = { row ->
+            Box(Modifier.focusRequester(pickerFocus).onFocusChanged { pickerFocused = it.hasFocus }.focusGroup()) { ChannelPanel(panelState, now, onWatch = { row ->
                 when (val target = pick) {
                     TilePick.Add -> onAdd(row)
                     is TilePick.Replace -> onReplace(target.index, row)
@@ -175,7 +187,7 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
                         onScores = { pick = null; onPickerSource(null); addData(DataTile.Scores, null) })
                     if (state.sources.count { it.playbackEligible } > 1) PickerSources(state, onPickerSource)
                 }, onLeft = { if (pickCategories) { pick = null; onPickerSource(null) } else pickCategories = true }, showCategories = pickCategories,
-                onFavourites = { onPickerCategory(true, null) }, onCategory = { onPickerCategory(false, it) })
+                onFavourites = { onPickerCategory(true, null) }, onCategory = { onPickerCategory(false, it) }) }
         }
     }
     if (choosingQuality) {
@@ -270,6 +282,7 @@ internal fun Multiview(state: IptvLiveState, tiles: List<IptvTile>, now: Long, o
 
 private const val MAX_SLOTS = 4
 private const val ADD_DATA = -1
+private const val PICKER_FOCUS_FRAMES = 30
 
 internal fun multiviewLayoutLabel(layout: MultiviewLayout): Int = when (layout) {
     MultiviewLayout.GRID -> R.string.iptv_multiview_layout_grid

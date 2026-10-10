@@ -1278,7 +1278,7 @@ private fun PlaybackNavHost(
         composable(Screen.IptvSettings.route) {
             com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvSettingsScreen(
                 onBack = {
-                    com.nuvio.tv.ui.screens.iptv.IptvSettingsReturn.requested.value = true
+                    com.nuvio.tv.ui.screens.iptv.IptvSettingsReturn.requested.value = com.nuvio.tv.core.iptv.LiveMenuItem.SETTINGS
                     com.nuvio.tv.ui.screens.iptv.IptvVodLiveMenu.requested.value = true
                     navController.popBackStack(Screen.IptvSettings.route, inclusive = true)
                 },
@@ -1295,7 +1295,13 @@ private fun PlaybackNavHost(
             }
         }
         composable(Screen.IptvRecordings.route) {
-            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvRecordingsScreen(onBack = { navController.popBackStack() },
+            com.nuvio.tv.ui.screens.iptv.IptvTheme { com.nuvio.tv.ui.screens.iptv.IptvRecordingsScreen(onBack = {
+                    if (navController.previousBackStackEntry?.destination?.route == Screen.IptvLive.route) {
+                        com.nuvio.tv.ui.screens.iptv.IptvSettingsReturn.requested.value = com.nuvio.tv.core.iptv.LiveMenuItem.RECORDINGS
+                        com.nuvio.tv.ui.screens.iptv.IptvVodLiveMenu.requested.value = true
+                    }
+                    navController.popBackStack()
+                },
                 onPlay = { stream -> navController.navigate(Screen.Player.createRoute(streamUrl = stream.url, title = stream.title,
                     streamName = stream.channel, filename = stream.title + ".ts", startFromBeginning = true)) }) }
         }

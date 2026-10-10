@@ -373,9 +373,9 @@ Checklist 7c done; findings (fixes in progress unless noted):
     MPEG-TS is a straight copy of the broadcast, survives interruptions and plays in VLC;
     MP4 would need a remux at the end).
 Passed otherwise (SMB recording worked).
-13. (added later) Left/Back on the Recordings screen does nothing; should return to Live TV
+13. (added later, fixed) Left/Back on the Recordings screen does nothing; should return to Live TV
     with the menu open.
-14. (added later) Multiview channel/category overlay: focus can drop behind the overlay onto
+14. (added later, fixed) Multiview channel/category overlay: focus can drop behind the overlay onto
     the multiview pictures when moving Left/Right between the category and channel lists.
 12. Recording file names: date as dd-MMM-yy and no id suffix (done: `RecordingFiles.name`
     takes a `taken` check; the recorder checks names of other recordings and local files).

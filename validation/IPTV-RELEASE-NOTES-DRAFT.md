@@ -644,6 +644,12 @@ Playback and audio (new group in Live TV settings):
   pick by hand still wins.
 - Audio decoder: Automatic or Prefer app decoder (video stays on the hardware decoder).
 
+Navigation fixes:
+- Recordings: Back or Left returns to Live TV with the menu open on Recordings, or to
+  wherever Recordings was opened from (Home, Live TV settings).
+- Multiview: moving between categories and channels in the add/replace list no longer jumps
+  to the pictures behind it.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own
