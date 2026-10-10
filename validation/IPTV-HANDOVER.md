@@ -45,8 +45,7 @@ session winners shown. CI green at `3de7568` (run 38012700521) and at `3065341` 
 focused game's summary (one extra request).
 
 Next, in order:
-1. The user's next device pass is on `01f19bbed` (run 38017089840, checklist section 7c
-   items 1–17); take their findings, record and fix them the same way.
+1. Fix the 10 October findings on `01f19bbed` (section below), then CI and a new pass.
 2. Waiting on the user (do not do these without them):
    - QR sign-in in CI builds: the fork needs the repository secret `LOCAL_PROPERTIES_BASE64`
      (base64 of a local.properties with NUVIO_SUPABASE_URL, NUVIO_SUPABASE_ANON_KEY and the
@@ -327,6 +326,33 @@ reporting, resets 10 October 2026 00:00 UTC):
 - Decisions recorded: tracking for matched titles uses Nuvio's normal history and
   services; unmatched titles resume locally; navigation and settings integration as
   above (reverses the earlier "IPTV settings only on the Live TV side").
+
+## Device findings — 10 October 2026 (build `01f19bbed`, run 38017089840)
+
+Checklist 7c done; findings (fixes in progress unless noted):
+1. Stream info widget in the short stacked size leaves much empty space; show more.
+2. Guide info panel: description stops after three lines with space left below; long titles
+   ("Gordon Ramsay's 24 Hours to Hell a…") are cut off.
+3. Live TV settings: opening Settings from Live TV jumps to Nuvio's main Settings (jarring).
+   Move the Live TV settings out of the main Settings into the Live TV area, in its style.
+4. Phone access needs the setup screen open on the TV; wanted: pair once on the TV, then the
+   phone reaches settings and recordings without the screen open.
+5. Multiview sometimes refuses another picture ("This TV box cannot decode another
+   picture…"); avoid it.
+6. Left from the guide sometimes shows the menu while focus stays on the programme; only
+   leaving Live TV recovers.
+7. Move Sport up next to Movies and Series in the Live TV menu.
+8. Sport page guide should cover 24 hours.
+9. Question: what decides the Sport only channels (channels with a matched game inside the
+   visible guide window, plus the focused one); wanted: choose categories/channels to
+   include or exclude.
+10. Question: what decides "Watch on …" and "N other feeds" (matches ranked by match type,
+    then programme start nearest kick-off, then channel order; hidden categories skipped);
+    wanted: choose preferred/excluded categories or channels.
+11. Question: are .ts recordings the best format, also for VLC on the phone (answered: yes,
+    MPEG-TS is a straight copy of the broadcast, survives interruptions and plays in VLC;
+    MP4 would need a remux at the end).
+Passed otherwise (SMB recording worked).
 
 ## Device findings — 9 October 2026, second pass (build `8354d89`, run 37867719176)
 
