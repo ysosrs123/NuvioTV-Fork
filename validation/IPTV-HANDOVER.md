@@ -35,7 +35,7 @@ series open after episodes and TMDB load, up to ~45 s worst case; Play not Resum
 provider-only titles; library/watched for `iptv-vod:` ids excluded from sync), guide reads
 outside write transactions during imports, per-account refresh locks (max 2 sources).
 Follow-ups not done: show NHL goalies (`SportsSummary.goalies`) and F1 `RaceSession.top`
-in the UI; Sport panel redesign (item 27) waits for the user's choice of direction.
+in the UI; Sport panel redesign (item 27) in progress.
 
 Next, in order:
 1. Give the user the CI run link for the fixes of the second 9 October pass; take their
@@ -369,7 +369,8 @@ The 7b list passed apart from the items below (all fixed in code on 10 October, 
     miss the opaque floor).
 27. (10 October) Sport panels look almost identical to another app's (screenshots compared);
     redesign wanted. Three directions on a design canvas (A scorebug bands, B ledger, C
-    momentum); waiting for the user's choice before building.
+    momentum). User's choice: B's whole top panel + A's cards with team logos (being built;
+    the condensed numeral face is not used: font downloads are blocked and no font is added).
 28. (10 October) Include every league we parse: NBL, WNBA and College Football added (off
     by default); NBL/WNBA use 4×10-minute quarters.
 Further screenshots (10 October): golf hero with uneven score positions and empty space; the
