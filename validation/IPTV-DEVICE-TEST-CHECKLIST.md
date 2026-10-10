@@ -1,6 +1,6 @@
-# Nuvio IPTV — device test checklist (build `f79646c53`, run 38081394566)
+# Nuvio IPTV — device test checklist (build `4d0c61b39`, run 38095469187)
 
-For this build start with section 7h, then 7g, 7f, 7e, 7d, 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
+For this build start with section 7i, then 7h, 7g, 7f, 7e, 7d, 7c (fixes from the second 9 October pass), then 7b, 7 (Sport) and the rest.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -83,6 +83,31 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 11. Press Home on the remote with Game Centre open: logcat should show sports requests
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
+
+## 7i. Recording playback and guide catch-up (build `4d0c61b39`)
+Recordings (use last night's NAS recording and a new one):
+1. Open last night's recording: "Preparing the recording…" shows briefly (note how long),
+   then the timebar shows the real length (about 3 h, not 24 h).
+2. Long seeks (e.g. jump to 1:30:00 and back to 0:10:00): quick, and the picture matches
+   the time shown. On the old recording a seek may be a few seconds out; note how far.
+3. Watch a few minutes, back out, open it again: it resumes there. The recording's options
+   show "Resume from …" and "Play from start"; the row shows a progress line.
+4. Watch to within a minute of the end, back out: next time it starts from the beginning.
+5. Make a new short recording (to the NAS and to device storage) with a network drop if
+   you can: length correct, seeks exact, no "Preparing" step.
+6. No watch party button when playing a recording; IPTV movies and series still have it.
+7. NAS asleep when opening a recording: note whether the first seconds stall or retry.
+Guide catch-up (on a channel with the history mark):
+8. Left from the current programme walks back through earlier programmes; the time bar
+   scrolls back; earlier rows fill in as you go (note any blank flash or delay).
+9. Past programmes on catch-up channels look normal with a small history mark; OK plays
+   from the start. Past programmes on other channels are dimmed (is the dimming right?).
+10. Rewind / Fast-forward jump 3 hours; the time bar shows the day when not today.
+11. Back returns to now; the next Back opens the menu. Left at the earliest reachable
+    programme opens the menu.
+12. A programme older than the provider's archive: OK says "No catch-up for this
+    programme" and does not stop what is playing.
+13. With a corner picture playing, Rewind/Fast-forward still work in the guide.
 
 ## 7h. 11 October sport capture, more leagues and full-share recordings (build `f79646c53`)
 1. Live TV settings → Sport → Leagues: the list is grouped by sport, each league showing its

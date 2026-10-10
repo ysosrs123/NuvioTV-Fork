@@ -9,6 +9,13 @@ Older sections further down are history; read "Start here" first.
 
 ## Start here — next session (from 10 October 2026)
 
+Update 11 October (evening): findings from the NAS recording test fixed in code. Recordings
+play as an HLS byte-range playlist built from a time index saved while recording (older
+recordings are indexed once on first open), with resume kept in the recording store and
+no watch party; the guide reaches earlier programmes for catch-up. A timing race in
+`IptvCaptureHttpTest` was fixed. Build for the device pass: CI debug green at `4d0c61b39`
+(run 38095469187). Host tests: core 881, data 293. Checklist: start at 7i, then 7h, 7g.
+
 Update 11 October (morning): new ESPN/TheSportsDB capture checked (fixes and 34 more
 leagues, `1ad071a96`), full-share recording messages and a 2 GB backlog cap (`b8937dbff`),
 league list grouped by sport with built-in merging of searched leagues (`f79646c53`). Build
@@ -60,7 +67,7 @@ session winners shown. CI green at `3de7568` (run 38012700521) and at `3065341` 
 focused game's summary (one extra request).
 
 Next, in order:
-1. Device pass on `f79646c53` (run 38081394566; checklist 7h, 7g, 7f, then 7e); take the findings,
+1. Device pass on `4d0c61b39` (run 38095469187; checklist 7i, 7h, 7g, 7f, then 7e); take the findings,
    record and fix them the same way. Playback options, menu order, external player and
    source expiry (7e) have not been tried on a device yet.
 2. Waiting on the user (do not do these without them):
@@ -346,7 +353,8 @@ reporting, resets 10 October 2026 00:00 UTC):
 
 ## Device findings — 11 October 2026 (build `f79646c53`; ~3 h recording to an SMB NAS)
 
-The overnight recording to the NAS worked. Findings (fixes in progress):
+The overnight recording to the NAS worked. Findings (all fixed in code: `b9e16e2e4` guide,
+`b8e315583` recordings; checklist 7i):
 1. Recording opened in the player showed a runtime of just over 24 hours on the timebar.
    Cause: recordings play in Nuvio's PlayerScreen as a raw .ts file over the local
    `IptvRecordingStreamServer`; ExoPlayer works the length out from the first and last

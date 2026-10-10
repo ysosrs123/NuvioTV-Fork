@@ -975,6 +975,11 @@ Phone setup (security review)
 
 ## Validation
 
+- Recording playback (indexed playlist, real length, quick seeks, resume, no watch party for
+  recordings) and guide catch-up browsing: CI debug green at `4d0c61b39` (run 38095469187);
+  the run before (38093717421, `b8e315583`) compiled and built but stopped on a timing race
+  in `IptvCaptureHttpTest`, fixed in the test. 881 core and 293 data-layer JVM tests on the
+  host. Not device-tested.
 - 11 October sport capture fixes, 34 more leagues, league list grouped by sport, full-share
   messages and the 2 GB backlog cap: CI debug green at `f79646c53` (run 38081394566); 859
   core and 288 data-layer JVM tests on the host. Not device-tested.
