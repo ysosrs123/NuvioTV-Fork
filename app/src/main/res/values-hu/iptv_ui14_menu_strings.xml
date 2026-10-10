@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Elrejtés a menüből</string>
+    <string name="iptv_ui14_menu_show">Megjelenítés a menüben</string>
+    <string name="iptv_ui14_menu_move">Áthelyezés a menüben</string>
+    <string name="iptv_ui14_menu_move_subtitle">Módosítsd, hol jelenjen meg ez az elem a menüben</string>
+    <string name="iptv_ui14_menu_required">Mindig látható a menüben</string>
+    <string name="iptv_ui14_menu_reset">Menü visszaállítása</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Alapértelmezett sorrend, minden elem látható</string>
+    <string name="iptv_ui14_menu_hidden">Rejtett menüelemek</string>
+    <string name="iptv_ui14_external_subtitle">Az Élő TV itt leáll, amíg a másik alkalmazás játszik</string>
+</resources>

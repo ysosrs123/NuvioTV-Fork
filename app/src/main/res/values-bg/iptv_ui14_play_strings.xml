@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Възпроизвеждане и звук</string>
+    <string name="iptv_play14_description">Картина и звук за каналите на живо. Промените важат от следващия отворен канал.</string>
+    <string name="iptv_play14_same_as_nuvio">Като в Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Като в Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Следва настройката на плейъра в Nuvio, сега: %1$s</string>
+    <string name="iptv_play14_on">Вкл.</string>
+    <string name="iptv_play14_frame_rate">Съгласуване на честотата на кадрите</string>
+    <string name="iptv_play14_frame_rate_subtitle">Превключва телевизора на честотата на кадрите на канала, щом започне възпроизвеждане.</string>
+    <string name="iptv_play14_resolution_subtitle">Превключва телевизора и на резолюцията на канала, докато съгласуването на честотата на кадрите е включено.</string>
+    <string name="iptv_play14_passthrough">Audio passthrough</string>
+    <string name="iptv_play14_passthrough_subtitle">Изпраща звук Dolby Digital и Dolby Digital Plus към receiver или саундбар според аудио настройките на Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Използва настройките на Nuvio за passthrough, AC-3 транскодиране и downmix. Multiview и картината в ъгъла винаги декодират в приложението.</string>
+    <string name="iptv_play14_passthrough_off">Изкл. (декодиране в приложението)</string>
+    <string name="iptv_play14_passthrough_off_hint">Винаги изпраща декодиран звук. Опитайте това, ако канал няма звук през receiver-а.</string>
+    <string name="iptv_play14_tunnel">Tunneled възпроизвеждане</string>
+    <string name="iptv_play14_tunnel_subtitle">ТВ устройството синхронизира картина и звук хардуерно. Само основната картина; не се ползва в Multiview, с „Предпочитай декодер на приложението“ или когато „4K и HDR в картината в ъгъла“ е изключено. Усилването на звука и на съраунда са изключени междувременно.</string>
+    <string name="iptv_play14_surround">Предпочитай съраунд звук (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Избира аудиописта с най-много канали на същия език. Ако каналът няма съраунд писта, звукът е стерео.</string>
+    <string name="iptv_play14_language">Предпочитан език на звука</string>
+    <string name="iptv_play14_language_subtitle">Избира този език, когато каналът има повече от една аудиописта.</string>
+    <string name="iptv_play14_language_stream">По подразбиране за потока</string>
+    <string name="iptv_play14_decoder">Аудио декодер</string>
+    <string name="iptv_play14_decoder_subtitle">Кой декодер възпроизвежда звука на живо. Видеото продължава да ползва декодера на ТВ устройството.</string>
+    <string name="iptv_play14_decoder_auto">Автоматично</string>
+    <string name="iptv_play14_decoder_auto_hint">Декодерът на ТВ устройството, с декодера на приложението за формати, които не може да възпроизведе.</string>
+    <string name="iptv_play14_decoder_app">Предпочитай декодер на приложението</string>
+    <string name="iptv_play14_decoder_app_hint">Декодира звука първо в приложението, включително формати, които receiver-ът би приел като passthrough. Опитайте това, ако канал пращи или няма звук.</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Lecture et audio</string>
+    <string name="iptv_play14_description">Image et son des chaînes en direct. Les changements s’appliquent à la prochaine chaîne ouverte.</string>
+    <string name="iptv_play14_same_as_nuvio">Comme dans Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Comme dans Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Suit le réglage du lecteur de Nuvio, actuellement : %1$s</string>
+    <string name="iptv_play14_on">Activé</string>
+    <string name="iptv_play14_frame_rate">Adaptation de la fréquence d’images</string>
+    <string name="iptv_play14_frame_rate_subtitle">Règle le téléviseur sur la fréquence d’images de la chaîne dès sa lecture.</string>
+    <string name="iptv_play14_resolution_subtitle">Règle aussi le téléviseur sur la résolution de la chaîne quand l’adaptation de la fréquence d’images est active.</string>
+    <string name="iptv_play14_passthrough">Passthrough audio</string>
+    <string name="iptv_play14_passthrough_subtitle">Envoie le son Dolby Digital et Dolby Digital Plus à votre récepteur ou barre de son selon les réglages audio de Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Utilise les réglages de passthrough, de transcodage AC-3 et de downmix de Nuvio. La multivue et l’image du coin décodent toujours dans l’app.</string>
+    <string name="iptv_play14_passthrough_off">Désactivé (décodage dans l’app)</string>
+    <string name="iptv_play14_passthrough_off_hint">Envoie toujours un son décodé. Essayez ceci si une chaîne n’a pas de son via votre récepteur.</string>
+    <string name="iptv_play14_tunnel">Lecture tunnelisée</string>
+    <string name="iptv_play14_tunnel_subtitle">Le boîtier TV synchronise l’image et le son au niveau matériel. Image principale seulement ; inactif en multivue, avec « Préférer le décodeur de l’app » ou si « 4K et HDR dans l’image du coin » est désactivé. L’amplification du volume et la remontée du surround sont alors désactivées.</string>
+    <string name="iptv_play14_surround">Préférer l’audio surround (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Choisit la piste audio ayant le plus de canaux dans la même langue. Le son passe en stéréo si la chaîne n’a pas de piste surround.</string>
+    <string name="iptv_play14_language">Langue audio préférée</string>
+    <string name="iptv_play14_language_subtitle">Choisit cette langue quand une chaîne a plusieurs pistes audio.</string>
+    <string name="iptv_play14_language_stream">Par défaut du flux</string>
+    <string name="iptv_play14_decoder">Décodeur audio</string>
+    <string name="iptv_play14_decoder_subtitle">Le décodeur qui lit le son en direct. La vidéo utilise toujours le décodeur du boîtier TV.</string>
+    <string name="iptv_play14_decoder_auto">Automatique</string>
+    <string name="iptv_play14_decoder_auto_hint">Le décodeur du boîtier TV, avec celui de l’app pour les formats qu’il ne peut pas lire.</string>
+    <string name="iptv_play14_decoder_app">Préférer le décodeur de l’app</string>
+    <string name="iptv_play14_decoder_app_hint">Décode d’abord le son dans l’app, y compris les formats que votre récepteur accepterait en passthrough. Essayez ceci si une chaîne grésille ou n’a pas de son.</string>
+</resources>

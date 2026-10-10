@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">メニューから非表示</string>
+    <string name="iptv_ui14_menu_show">メニューに表示</string>
+    <string name="iptv_ui14_menu_move">メニュー内で移動</string>
+    <string name="iptv_ui14_menu_move_subtitle">メニュー内でのこの項目の位置を変更</string>
+    <string name="iptv_ui14_menu_required">常にメニューに表示</string>
+    <string name="iptv_ui14_menu_reset">メニューをリセット</string>
+    <string name="iptv_ui14_menu_reset_subtitle">既定の順序で、すべての項目を表示</string>
+    <string name="iptv_ui14_menu_hidden">非表示のメニュー項目</string>
+    <string name="iptv_ui14_external_subtitle">他のアプリの再生中、ライブTVはここで停止します</string>
+</resources>

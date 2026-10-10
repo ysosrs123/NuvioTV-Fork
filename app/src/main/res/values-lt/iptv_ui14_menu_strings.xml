@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Slėpti meniu</string>
+    <string name="iptv_ui14_menu_show">Rodyti meniu</string>
+    <string name="iptv_ui14_menu_move">Perkelti meniu</string>
+    <string name="iptv_ui14_menu_move_subtitle">Pakeisti šio elemento vietą meniu</string>
+    <string name="iptv_ui14_menu_required">Visada rodoma meniu</string>
+    <string name="iptv_ui14_menu_reset">Atkurti meniu</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Numatytoji tvarka, rodomi visi elementai</string>
+    <string name="iptv_ui14_menu_hidden">Paslėpti meniu elementai</string>
+    <string name="iptv_ui14_external_subtitle">Tiesioginė TV čia sustoja, kol groja kita programa</string>
+</resources>

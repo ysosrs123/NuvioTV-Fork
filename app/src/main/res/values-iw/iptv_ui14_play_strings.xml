@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">הפעלה ושמע</string>
+    <string name="iptv_play14_description">תמונה וקול לערוצים חיים. השינויים חלים על הערוץ הבא שנפתח.</string>
+    <string name="iptv_play14_same_as_nuvio">כמו ב-Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">כמו ב-Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">לפי ההגדרה בהגדרות הנגן של Nuvio, כרגע: %1$s</string>
+    <string name="iptv_play14_on">פועל</string>
+    <string name="iptv_play14_frame_rate">התאמת קצב פריימים</string>
+    <string name="iptv_play14_frame_rate_subtitle">מעביר את הטלוויזיה לקצב הפריימים של הערוץ ברגע שהוא מתנגן.</string>
+    <string name="iptv_play14_resolution_subtitle">מעביר את הטלוויזיה גם לרזולוציה של הערוץ כשהתאמת קצב פריימים פועלת.</string>
+    <string name="iptv_play14_passthrough">מעבר שמע</string>
+    <string name="iptv_play14_passthrough_subtitle">שולח קול Dolby Digital ו-Dolby Digital Plus למקלט או ל-soundbar לפי הגדרות השמע של Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">משתמש בהגדרות מעבר השמע, הקידוד מחדש ל-AC-3 וה-downmix של Nuvio. ריבוי תצוגות והתמונה בפינה תמיד מפוענחים באפליקציה.</string>
+    <string name="iptv_play14_passthrough_off">כבוי (פענוח באפליקציה)</string>
+    <string name="iptv_play14_passthrough_off_hint">תמיד שולח קול מפוענח. כדאי לנסות אם לערוץ אין קול דרך המקלט.</string>
+    <string name="iptv_play14_tunnel">הפעלה ממונרת</string>
+    <string name="iptv_play14_tunnel_subtitle">הממיר שומר על סנכרון תמונה וקול בחומרה. בתמונה הראשית בלבד; לא בריבוי תצוגות, לא עם העדפת מפענח האפליקציה ולא כש-4K ו-HDR בתמונה שבפינה כבוי. הגברת עוצמת הקול והגברת הסראונד כבויות בזמן השימוש.</string>
+    <string name="iptv_play14_surround">העדפת שמע היקפי (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">בוחר את רצועת השמע עם הכי הרבה ערוצים באותה שפה. אם אין לערוץ רצועה היקפית, מתנגן סטריאו.</string>
+    <string name="iptv_play14_language">שפת שמע מועדפת</string>
+    <string name="iptv_play14_language_subtitle">בוחר בשפה הזו כשלערוץ יש יותר מרצועת שמע אחת.</string>
+    <string name="iptv_play14_language_stream">ברירת המחדל של השידור</string>
+    <string name="iptv_play14_decoder">מפענח שמע</string>
+    <string name="iptv_play14_decoder_subtitle">איזה מפענח מנגן את הקול החי. הווידאו ממשיך להשתמש במפענח של הממיר.</string>
+    <string name="iptv_play14_decoder_auto">אוטומטי</string>
+    <string name="iptv_play14_decoder_auto_hint">המפענח של הממיר, עם מפענח האפליקציה לפורמטים שהוא לא יכול לנגן.</string>
+    <string name="iptv_play14_decoder_app">העדפת מפענח האפליקציה</string>
+    <string name="iptv_play14_decoder_app_hint">מפענח את הקול קודם באפליקציה, כולל פורמטים שהמקלט יכול לקבל במעבר שמע. כדאי לנסות אם ערוץ מרשרש או בלי קול.</string>
+</resources>

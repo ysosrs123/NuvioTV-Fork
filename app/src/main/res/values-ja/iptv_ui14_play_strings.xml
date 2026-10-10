@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">再生とオーディオ</string>
+    <string name="iptv_play14_description">ライブチャンネルの映像と音声。変更は次に開くチャンネルから適用されます。</string>
+    <string name="iptv_play14_same_as_nuvio">Nuvio と同じ</string>
+    <string name="iptv_play14_same_as_nuvio_value">Nuvio と同じ（%1$s）</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Nuvio のプレーヤー設定に従います。現在: %1$s</string>
+    <string name="iptv_play14_on">オン</string>
+    <string name="iptv_play14_frame_rate">フレームレートの一致</string>
+    <string name="iptv_play14_frame_rate_subtitle">再生開始後、テレビをチャンネルのフレームレートに切り替えます。</string>
+    <string name="iptv_play14_resolution_subtitle">フレームレートの一致がオンの間、テレビをチャンネルの解像度にも切り替えます。</string>
+    <string name="iptv_play14_passthrough">音声パススルー</string>
+    <string name="iptv_play14_passthrough_subtitle">Nuvio のオーディオ設定に従い、Dolby Digital と Dolby Digital Plus の音声をレシーバーやサウンドバーに送ります。</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Nuvio のパススルー、AC-3 トランスコード、ダウンミックスの設定を使います。マルチビューと隅の画面は常にアプリでデコードします。</string>
+    <string name="iptv_play14_passthrough_off">オフ（アプリでデコード）</string>
+    <string name="iptv_play14_passthrough_off_hint">常にデコード済みの音声を送ります。レシーバー経由で音が出ないチャンネルがある場合に試してください。</string>
+    <string name="iptv_play14_tunnel">トンネル再生</string>
+    <string name="iptv_play14_tunnel_subtitle">TVボックスがハードウェアで映像と音声を同期します。メイン画面のみ。マルチビュー、「アプリデコーダーを優先」使用時、または「隅の画面で 4K と HDR を表示」がオフの時は使われません。使用中は音量ブーストとサラウンドの持ち上げがオフになります。</string>
+    <string name="iptv_play14_surround">サラウンド音声を優先（5.1）</string>
+    <string name="iptv_play14_surround_subtitle">同じ言語で最もチャンネル数の多い音声トラックを選びます。サラウンドトラックがない場合はステレオで再生します。</string>
+    <string name="iptv_play14_language">優先する音声言語</string>
+    <string name="iptv_play14_language_subtitle">チャンネルに複数の音声トラックがある場合、この言語を選びます。</string>
+    <string name="iptv_play14_language_stream">ストリームの既定</string>
+    <string name="iptv_play14_decoder">オーディオデコーダー</string>
+    <string name="iptv_play14_decoder_subtitle">ライブ音声を再生するデコーダー。映像は引き続き TVボックスのデコーダーを使います。</string>
+    <string name="iptv_play14_decoder_auto">自動</string>
+    <string name="iptv_play14_decoder_auto_hint">TVボックスのデコーダーを使い、再生できない形式にはアプリのデコーダーを使います。</string>
+    <string name="iptv_play14_decoder_app">アプリデコーダーを優先</string>
+    <string name="iptv_play14_decoder_app_hint">レシーバーがパススルーで受けられる形式も含め、まずアプリで音声をデコードします。チャンネルで音割れや無音がある場合に試してください。</string>
+</resources>

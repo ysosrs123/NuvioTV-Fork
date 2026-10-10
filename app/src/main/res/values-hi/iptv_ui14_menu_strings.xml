@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">मेन्यू से छिपाएँ</string>
+    <string name="iptv_ui14_menu_show">मेन्यू में दिखाएँ</string>
+    <string name="iptv_ui14_menu_move">मेन्यू में खिसकाएँ</string>
+    <string name="iptv_ui14_menu_move_subtitle">मेन्यू में यह आइटम कहाँ दिखे, बदलें</string>
+    <string name="iptv_ui14_menu_required">मेन्यू में हमेशा दिखता है</string>
+    <string name="iptv_ui14_menu_reset">मेन्यू रीसेट करें</string>
+    <string name="iptv_ui14_menu_reset_subtitle">डिफ़ॉल्ट क्रम, सभी आइटम दिखाई देंगे</string>
+    <string name="iptv_ui14_menu_hidden">छिपे मेन्यू आइटम</string>
+    <string name="iptv_ui14_external_subtitle">दूसरा ऐप चलने तक लाइव टीवी यहाँ रुका रहता है</string>
+</resources>

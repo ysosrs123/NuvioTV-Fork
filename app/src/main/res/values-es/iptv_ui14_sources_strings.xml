@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Caduca el %1$s</string>
+    <string name="iptv_ui14_no_expiry">Sin caducidad</string>
+    <string name="iptv_ui14_expires_today">Caduca hoy</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Caduca en %1$d día</item>
+        <item quantity="many">Caduca en %1$d días</item>
+        <item quantity="other">Caduca en %1$d días</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Caducó hoy</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">Caducó hace %1$d día</item>
+        <item quantity="many">Caducó hace %1$d días</item>
+        <item quantity="other">Caducó hace %1$d días</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

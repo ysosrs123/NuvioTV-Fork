@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Skrýt v nabídce</string>
+    <string name="iptv_ui14_menu_show">Zobrazit v nabídce</string>
+    <string name="iptv_ui14_menu_move">Přesunout v nabídce</string>
+    <string name="iptv_ui14_menu_move_subtitle">Změňte, kde se položka zobrazuje v nabídce</string>
+    <string name="iptv_ui14_menu_required">Vždy zobrazeno v nabídce</string>
+    <string name="iptv_ui14_menu_reset">Obnovit nabídku</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Výchozí pořadí, všechny položky zobrazené</string>
+    <string name="iptv_ui14_menu_hidden">Skryté položky nabídky</string>
+    <string name="iptv_ui14_external_subtitle">Živá TV se tu zastaví, dokud přehrává druhá aplikace</string>
+</resources>

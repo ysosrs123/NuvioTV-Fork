@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">प्लेबैक और ऑडियो</string>
+    <string name="iptv_play14_description">लाइव चैनलों के लिए तस्वीर और आवाज़। बदलाव अगला चैनल खोलने पर लागू होते हैं।</string>
+    <string name="iptv_play14_same_as_nuvio">Nuvio जैसा</string>
+    <string name="iptv_play14_same_as_nuvio_value">Nuvio जैसा (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Nuvio की प्लेयर सेटिंग का पालन करता है, अभी: %1$s</string>
+    <string name="iptv_play14_on">चालू</string>
+    <string name="iptv_play14_frame_rate">फ्रेम रेट मैचिंग</string>
+    <string name="iptv_play14_frame_rate_subtitle">चैनल चलते ही टीवी को उसके फ्रेम रेट पर बदल देता है।</string>
+    <string name="iptv_play14_resolution_subtitle">फ्रेम रेट मैचिंग चालू रहने पर टीवी को चैनल के रिज़ॉल्यूशन पर भी बदल देता है।</string>
+    <string name="iptv_play14_passthrough">ऑडियो पासथ्रू</string>
+    <string name="iptv_play14_passthrough_subtitle">Nuvio की ऑडियो सेटिंग के अनुसार Dolby Digital और Dolby Digital Plus आवाज़ आपके रिसीवर या साउंडबार को भेजता है।</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Nuvio की पासथ्रू, AC-3 ट्रांसकोडिंग और डाउनमिक्स सेटिंग इस्तेमाल करता है। मल्टीव्यू और कोने की तस्वीर हमेशा ऐप में डिकोड होती हैं।</string>
+    <string name="iptv_play14_passthrough_off">बंद (ऐप में डिकोड करें)</string>
+    <string name="iptv_play14_passthrough_off_hint">हमेशा डिकोड की गई आवाज़ भेजता है। अगर रिसीवर से किसी चैनल की आवाज़ न आए तो इसे आज़माएँ।</string>
+    <string name="iptv_play14_tunnel">टनल्ड प्लेबैक</string>
+    <string name="iptv_play14_tunnel_subtitle">टीवी बॉक्स हार्डवेयर में तस्वीर और आवाज़ को सिंक रखता है। सिर्फ़ मुख्य तस्वीर; मल्टीव्यू में, ऐप डिकोडर को प्राथमिकता के साथ या कोने की तस्वीर में 4K और HDR बंद होने पर इस्तेमाल नहीं होता। इसके चलते वॉल्यूम बूस्ट और सराउंड बढ़ाना बंद रहते हैं।</string>
+    <string name="iptv_play14_surround">सराउंड ऑडियो को प्राथमिकता (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">उसी भाषा में सबसे ज़्यादा चैनलों वाला ऑडियो ट्रैक चुनता है। सराउंड ट्रैक न होने पर स्टीरियो चलता है।</string>
+    <string name="iptv_play14_language">पसंदीदा ऑडियो भाषा</string>
+    <string name="iptv_play14_language_subtitle">चैनल में एक से ज़्यादा ऑडियो ट्रैक होने पर यह भाषा चुनता है।</string>
+    <string name="iptv_play14_language_stream">स्ट्रीम डिफ़ॉल्ट</string>
+    <string name="iptv_play14_decoder">ऑडियो डिकोडर</string>
+    <string name="iptv_play14_decoder_subtitle">लाइव आवाज़ कौन-सा डिकोडर चलाए। वीडियो टीवी बॉक्स का डिकोडर ही इस्तेमाल करता है।</string>
+    <string name="iptv_play14_decoder_auto">स्वचालित</string>
+    <string name="iptv_play14_decoder_auto_hint">टीवी बॉक्स का डिकोडर, और जो फ़ॉर्मेट वह न चला सके उनके लिए ऐप का डिकोडर।</string>
+    <string name="iptv_play14_decoder_app">ऐप डिकोडर को प्राथमिकता</string>
+    <string name="iptv_play14_decoder_app_hint">आवाज़ को पहले ऐप में डिकोड करता है, उन फ़ॉर्मेट को भी जो रिसीवर पासथ्रू से ले सकता है। अगर कोई चैनल चटकता है या आवाज़ नहीं आती तो इसे आज़माएँ।</string>
+</resources>

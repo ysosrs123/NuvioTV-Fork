@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Lejátszás és hang</string>
+    <string name="iptv_play14_description">Kép és hang az élő csatornákhoz. A változások a következő megnyitott csatornától érvényesek.</string>
+    <string name="iptv_play14_same_as_nuvio">Mint a Nuvióban</string>
+    <string name="iptv_play14_same_as_nuvio_value">Mint a Nuvióban (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">A Nuvio lejátszóbeállítását követi, jelenleg: %1$s</string>
+    <string name="iptv_play14_on">Be</string>
+    <string name="iptv_play14_frame_rate">Képfrissítés illesztése</string>
+    <string name="iptv_play14_frame_rate_subtitle">A tévét a csatorna képfrissítésére váltja, amint az elindul.</string>
+    <string name="iptv_play14_resolution_subtitle">A tévét a csatorna felbontására is váltja, amíg a képfrissítés illesztése be van kapcsolva.</string>
+    <string name="iptv_play14_passthrough">Hang passthrough</string>
+    <string name="iptv_play14_passthrough_subtitle">A Dolby Digital és Dolby Digital Plus hangot az erősítőre vagy soundbarra küldi a Nuvio hangbeállításai szerint.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">A Nuvio passthrough-, AC-3 átkódolási és downmix-beállításait használja. A többképes nézet és a sarokkép mindig az alkalmazásban dekódol.</string>
+    <string name="iptv_play14_passthrough_off">Ki (dekódolás az alkalmazásban)</string>
+    <string name="iptv_play14_passthrough_off_hint">Mindig dekódolt hangot küld. Próbáld ki, ha egy csatornának nincs hangja az erősítőn át.</string>
+    <string name="iptv_play14_tunnel">Alagutazott (tunneled) lejátszás</string>
+    <string name="iptv_play14_tunnel_subtitle">A TV-box hardveresen tartja szinkronban a képet és a hangot. Csak a fő képen; nem működik többképes nézetben, Alkalmazás dekóderének előnyben részesítése mellett, vagy ha a 4K és HDR a sarokképben ki van kapcsolva. A hangerő-erősítés és a térhatású hang erősítése ilyenkor ki van kapcsolva.</string>
+    <string name="iptv_play14_surround">Térhangzás előnyben (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Az azonos nyelvű, legtöbb csatornás hangsávot választja. Ha nincs térhatású sáv, sztereó szól.</string>
+    <string name="iptv_play14_language">Előnyben részesített hangnyelv</string>
+    <string name="iptv_play14_language_subtitle">Ezt a nyelvet választja, ha egy csatornának több hangsávja van.</string>
+    <string name="iptv_play14_language_stream">Adás alapértelmezése</string>
+    <string name="iptv_play14_decoder">Hangdekóder</string>
+    <string name="iptv_play14_decoder_subtitle">Melyik dekóder játssza az élő hangot. A videó továbbra is a TV-box dekóderét használja.</string>
+    <string name="iptv_play14_decoder_auto">Automatikus</string>
+    <string name="iptv_play14_decoder_auto_hint">A TV-box dekódere, az alkalmazás dekóderével az általa nem lejátszható formátumokhoz.</string>
+    <string name="iptv_play14_decoder_app">Alkalmazás dekóderének előnyben részesítése</string>
+    <string name="iptv_play14_decoder_app_hint">A hangot először az alkalmazásban dekódolja, azokat a formátumokat is, amelyeket az erősítő passthrough-val fogadna. Próbáld ki, ha egy csatorna recseg vagy nincs hangja.</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Wiedergabe und Audio</string>
+    <string name="iptv_play14_description">Bild und Ton für Live-Sender. Änderungen gelten ab dem nächsten geöffneten Sender.</string>
+    <string name="iptv_play14_same_as_nuvio">Wie in Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Wie in Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Folgt den Player-Einstellungen von Nuvio, derzeit: %1$s</string>
+    <string name="iptv_play14_on">An</string>
+    <string name="iptv_play14_frame_rate">Bildfrequenz-Anpassung</string>
+    <string name="iptv_play14_frame_rate_subtitle">Stellt den Fernseher auf die Bildfrequenz des Senders um, sobald er läuft.</string>
+    <string name="iptv_play14_resolution_subtitle">Stellt den Fernseher bei aktiver Bildfrequenz-Anpassung auch auf die Auflösung des Senders um.</string>
+    <string name="iptv_play14_passthrough">Audio-Passthrough</string>
+    <string name="iptv_play14_passthrough_subtitle">Sendet Dolby Digital und Dolby Digital Plus gemäß den Audioeinstellungen von Nuvio an Receiver oder Soundbar.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Nutzt die Nuvio-Einstellungen für Passthrough, AC-3-Transkodierung und Downmix. Multiview und Eckbild dekodieren immer in der App.</string>
+    <string name="iptv_play14_passthrough_off">Aus (in der App dekodieren)</string>
+    <string name="iptv_play14_passthrough_off_hint">Sendet immer dekodierten Ton. Probieren Sie dies, wenn ein Sender über den Receiver keinen Ton hat.</string>
+    <string name="iptv_play14_tunnel">Getunnelte Wiedergabe</string>
+    <string name="iptv_play14_tunnel_subtitle">Lässt die TV-Box Bild und Ton per Hardware synchron halten. Nur im Hauptbild; nicht in Multiview, mit „App-Decoder bevorzugen“ oder wenn „4K und HDR im Eckbild“ aus ist. Lautstärkeanhebung und Surround-Anhebung sind dabei aus.</string>
+    <string name="iptv_play14_surround">Surround-Ton bevorzugen (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Wählt die Tonspur mit den meisten Kanälen in derselben Sprache. Ohne Surround-Spur läuft Stereo.</string>
+    <string name="iptv_play14_language">Bevorzugte Audiosprache</string>
+    <string name="iptv_play14_language_subtitle">Wählt diese Sprache, wenn ein Sender mehrere Tonspuren hat.</string>
+    <string name="iptv_play14_language_stream">Stream-Standard</string>
+    <string name="iptv_play14_decoder">Audio-Decoder</string>
+    <string name="iptv_play14_decoder_subtitle">Welcher Decoder den Live-Ton abspielt. Video nutzt weiter den Decoder der TV-Box.</string>
+    <string name="iptv_play14_decoder_auto">Automatisch</string>
+    <string name="iptv_play14_decoder_auto_hint">Decoder der TV-Box, mit dem App-Decoder für Formate, die sie nicht abspielen kann.</string>
+    <string name="iptv_play14_decoder_app">App-Decoder bevorzugen</string>
+    <string name="iptv_play14_decoder_app_hint">Dekodiert Ton zuerst in der App, auch Formate, die Ihr Receiver per Passthrough annehmen könnte. Probieren Sie dies, wenn ein Sender knistert oder keinen Ton hat.</string>
+</resources>

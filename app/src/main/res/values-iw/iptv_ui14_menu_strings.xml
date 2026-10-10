@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">הסתרה מהתפריט</string>
+    <string name="iptv_ui14_menu_show">הצגה בתפריט</string>
+    <string name="iptv_ui14_menu_move">הזזה בתפריט</string>
+    <string name="iptv_ui14_menu_move_subtitle">שינוי המיקום של הפריט הזה בתפריט</string>
+    <string name="iptv_ui14_menu_required">מוצג תמיד בתפריט</string>
+    <string name="iptv_ui14_menu_reset">איפוס התפריט</string>
+    <string name="iptv_ui14_menu_reset_subtitle">סדר ברירת מחדל, כל הפריטים מוצגים</string>
+    <string name="iptv_ui14_menu_hidden">פריטי תפריט מוסתרים</string>
+    <string name="iptv_ui14_external_subtitle">הטלוויזיה החיה נעצרת כאן בזמן שהאפליקציה האחרת מנגנת</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Läuft ab: %1$s</string>
+    <string name="iptv_ui14_no_expiry">Kein Ablaufdatum</string>
+    <string name="iptv_ui14_expires_today">Läuft heute ab</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Läuft in %1$d Tag ab</item>
+        <item quantity="other">Läuft in %1$d Tagen ab</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Heute abgelaufen</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">Vor %1$d Tag abgelaufen</item>
+        <item quantity="other">Vor %1$d Tagen abgelaufen</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

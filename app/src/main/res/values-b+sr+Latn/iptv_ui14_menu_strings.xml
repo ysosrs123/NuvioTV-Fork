@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Sakrij iz menija</string>
+    <string name="iptv_ui14_menu_show">Prikaži u meniju</string>
+    <string name="iptv_ui14_menu_move">Premesti u meniju</string>
+    <string name="iptv_ui14_menu_move_subtitle">Promenite gde se ova stavka pojavljuje u meniju</string>
+    <string name="iptv_ui14_menu_required">Uvek prikazano u meniju</string>
+    <string name="iptv_ui14_menu_reset">Resetuj meni</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Podrazumevani redosled, sve stavke prikazane</string>
+    <string name="iptv_ui14_menu_hidden">Skrivene stavke menija</string>
+    <string name="iptv_ui14_external_subtitle">TV uživo se ovde zaustavlja dok druga aplikacija reprodukuje</string>
+</resources>

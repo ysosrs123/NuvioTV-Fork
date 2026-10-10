@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">মেয়াদ শেষ %1$s</string>
+    <string name="iptv_ui14_no_expiry">মেয়াদ শেষ হয় না</string>
+    <string name="iptv_ui14_expires_today">আজ মেয়াদ শেষ হবে</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">%1$d দিনে মেয়াদ শেষ হবে</item>
+        <item quantity="other">%1$d দিনে মেয়াদ শেষ হবে</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">আজ মেয়াদ শেষ হয়েছে</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">%1$d দিন আগে মেয়াদ শেষ হয়েছে</item>
+        <item quantity="other">%1$d দিন আগে মেয়াদ শেষ হয়েছে</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

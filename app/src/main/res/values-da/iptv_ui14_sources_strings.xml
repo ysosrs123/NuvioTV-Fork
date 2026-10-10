@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Udløber %1$s</string>
+    <string name="iptv_ui14_no_expiry">Intet udløb</string>
+    <string name="iptv_ui14_expires_today">Udløber i dag</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Udløber om %1$d dag</item>
+        <item quantity="other">Udløber om %1$d dage</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Udløb i dag</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">Udløb for %1$d dag siden</item>
+        <item quantity="other">Udløb for %1$d dage siden</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Berakhir %1$s</string>
+    <string name="iptv_ui14_no_expiry">Tanpa masa berlaku</string>
+    <string name="iptv_ui14_expires_today">Berakhir hari ini</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="other">Berakhir dalam %1$d hari</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Telah berakhir hari ini</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="other">Berakhir %1$d hari lalu</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Απόκρυψη από το μενού</string>
+    <string name="iptv_ui14_menu_show">Εμφάνιση στο μενού</string>
+    <string name="iptv_ui14_menu_move">Μετακίνηση στο μενού</string>
+    <string name="iptv_ui14_menu_move_subtitle">Αλλάξτε τη θέση αυτού του στοιχείου στο μενού</string>
+    <string name="iptv_ui14_menu_required">Εμφανίζεται πάντα στο μενού</string>
+    <string name="iptv_ui14_menu_reset">Επαναφορά μενού</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Προεπιλεγμένη σειρά, με όλα τα στοιχεία ορατά</string>
+    <string name="iptv_ui14_menu_hidden">Κρυφά στοιχεία μενού</string>
+    <string name="iptv_ui14_external_subtitle">Η ζωντανή TV σταματά εδώ όσο παίζει η άλλη εφαρμογή</string>
+</resources>

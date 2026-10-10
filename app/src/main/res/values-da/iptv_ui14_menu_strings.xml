@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Skjul i menuen</string>
+    <string name="iptv_ui14_menu_show">Vis i menuen</string>
+    <string name="iptv_ui14_menu_move">Flyt i menuen</string>
+    <string name="iptv_ui14_menu_move_subtitle">Skift, hvor punktet vises i menuen</string>
+    <string name="iptv_ui14_menu_required">Vises altid i menuen</string>
+    <string name="iptv_ui14_menu_reset">Nulstil menu</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Standardrækkefølge, alle punkter vises</string>
+    <string name="iptv_ui14_menu_hidden">Skjulte menupunkter</string>
+    <string name="iptv_ui14_external_subtitle">Live-TV stopper her, mens den anden app afspiller</string>
+</resources>

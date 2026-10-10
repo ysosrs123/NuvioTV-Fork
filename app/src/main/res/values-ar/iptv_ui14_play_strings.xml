@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">التشغيل والصوت</string>
+    <string name="iptv_play14_description">الصورة والصوت للقنوات المباشرة. تُطبّق التغييرات على القناة التالية التي تفتحها.</string>
+    <string name="iptv_play14_same_as_nuvio">مثل Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">مثل Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">يتبع إعداد مشغل Nuvio، حالياً: %1$s</string>
+    <string name="iptv_play14_on">تشغيل</string>
+    <string name="iptv_play14_frame_rate">مطابقة معدل الإطارات</string>
+    <string name="iptv_play14_frame_rate_subtitle">يحوّل التلفاز إلى معدل إطارات القناة بمجرد بدء تشغيلها.</string>
+    <string name="iptv_play14_resolution_subtitle">يحوّل التلفاز أيضاً إلى دقة القناة أثناء تفعيل مطابقة معدل الإطارات.</string>
+    <string name="iptv_play14_passthrough">تمرير الصوت</string>
+    <string name="iptv_play14_passthrough_subtitle">يرسل صوت Dolby Digital وDolby Digital Plus إلى المستقبل أو مكبر الصوت حسب إعدادات الصوت في Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">يستخدم إعدادات Nuvio للتمرير وتحويل AC-3 ودمج القنوات. العرض المتعدد وصورة الزاوية يفكّان التشفير دائماً في التطبيق.</string>
+    <string name="iptv_play14_passthrough_off">إيقاف (فك التشفير في التطبيق)</string>
+    <string name="iptv_play14_passthrough_off_hint">يرسل دائماً صوتاً مفكوك التشفير. جرّب هذا إذا لم يكن للقناة صوت عبر المستقبل.</string>
+    <string name="iptv_play14_tunnel">التشغيل النفقي</string>
+    <string name="iptv_play14_tunnel_subtitle">يتيح لجهاز التلفاز مزامنة الصورة والصوت عبر العتاد. للصورة الرئيسية فقط؛ لا يُستخدم في العرض المتعدد، ولا مع الأولوية لفك التشفير عبر التطبيق، ولا عند إيقاف 4K وHDR في صورة الزاوية. يتوقف تعزيز الصوت ورفع الصوت المحيطي أثناء استخدامه.</string>
+    <string name="iptv_play14_surround">تفضيل الصوت المحيطي (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">يختار المسار الصوتي الأكثر قنوات بنفس اللغة. يُشغَّل الستيريو إذا لم يكن للقناة مسار محيطي.</string>
+    <string name="iptv_play14_language">لغة الصوت المفضلة</string>
+    <string name="iptv_play14_language_subtitle">يختار هذه اللغة عندما يكون للقناة أكثر من مسار صوتي.</string>
+    <string name="iptv_play14_language_stream">افتراضي البث</string>
+    <string name="iptv_play14_decoder">فك تشفير الصوت</string>
+    <string name="iptv_play14_decoder_subtitle">ما الذي يفك تشفير الصوت المباشر. يستمر الفيديو في استخدام فك التشفير في جهاز التلفاز.</string>
+    <string name="iptv_play14_decoder_auto">تلقائي</string>
+    <string name="iptv_play14_decoder_auto_hint">فك التشفير في جهاز التلفاز، مع فك التشفير في التطبيق للصيغ التي لا يستطيع تشغيلها.</string>
+    <string name="iptv_play14_decoder_app">الأولوية لفك التشفير عبر التطبيق</string>
+    <string name="iptv_play14_decoder_app_hint">يفك تشفير الصوت في التطبيق أولاً، بما في ذلك الصيغ التي يستطيع المستقبل تلقيها بالتمرير. جرّب هذا إذا كانت القناة تطقطق أو بلا صوت.</string>
+</resources>

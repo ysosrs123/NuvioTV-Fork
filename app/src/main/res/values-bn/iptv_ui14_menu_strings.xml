@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">মেনু থেকে লুকান</string>
+    <string name="iptv_ui14_menu_show">মেনুতে দেখান</string>
+    <string name="iptv_ui14_menu_move">মেনুতে সরান</string>
+    <string name="iptv_ui14_menu_move_subtitle">মেনুতে এই আইটেম কোথায় দেখাবে তা বদলান</string>
+    <string name="iptv_ui14_menu_required">মেনুতে সবসময় দেখায়</string>
+    <string name="iptv_ui14_menu_reset">মেনু রিসেট করুন</string>
+    <string name="iptv_ui14_menu_reset_subtitle">ডিফল্ট ক্রম, সব আইটেম দেখানো হবে</string>
+    <string name="iptv_ui14_menu_hidden">লুকানো মেনু আইটেম</string>
+    <string name="iptv_ui14_external_subtitle">অন্য অ্যাপ চলার সময় লাইভ টিভি এখানে থেমে থাকে</string>
+</resources>

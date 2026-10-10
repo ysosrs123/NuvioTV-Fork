@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Im Menü ausblenden</string>
+    <string name="iptv_ui14_menu_show">Im Menü anzeigen</string>
+    <string name="iptv_ui14_menu_move">Im Menü verschieben</string>
+    <string name="iptv_ui14_menu_move_subtitle">Ändern, wo dieser Eintrag im Menü erscheint</string>
+    <string name="iptv_ui14_menu_required">Immer im Menü sichtbar</string>
+    <string name="iptv_ui14_menu_reset">Menü zurücksetzen</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Standardreihenfolge, alle Einträge sichtbar</string>
+    <string name="iptv_ui14_menu_hidden">Ausgeblendete Menüeinträge</string>
+    <string name="iptv_ui14_external_subtitle">Live-TV stoppt hier, solange die andere App abspielt</string>
+</resources>

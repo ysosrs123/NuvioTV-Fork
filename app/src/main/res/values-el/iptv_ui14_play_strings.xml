@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Αναπαραγωγή και ήχος</string>
+    <string name="iptv_play14_description">Εικόνα και ήχος για ζωντανά κανάλια. Οι αλλαγές ισχύουν από το επόμενο κανάλι που ανοίγετε.</string>
+    <string name="iptv_play14_same_as_nuvio">Όπως στο Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Όπως στο Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Ακολουθεί τη ρύθμιση του player του Nuvio, τώρα: %1$s</string>
+    <string name="iptv_play14_on">Ενεργό</string>
+    <string name="iptv_play14_frame_rate">Ταίριασμα ρυθμού καρέ</string>
+    <string name="iptv_play14_frame_rate_subtitle">Γυρίζει την τηλεόραση στον ρυθμό καρέ του καναλιού μόλις ξεκινήσει.</string>
+    <string name="iptv_play14_resolution_subtitle">Γυρίζει την τηλεόραση και στην ανάλυση του καναλιού όσο το ταίριασμα ρυθμού καρέ είναι ενεργό.</string>
+    <string name="iptv_play14_passthrough">Passthrough ήχου</string>
+    <string name="iptv_play14_passthrough_subtitle">Στέλνει ήχο Dolby Digital και Dolby Digital Plus στον receiver ή το soundbar όπως ορίζουν οι ρυθμίσεις ήχου του Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Χρησιμοποιεί τις ρυθμίσεις passthrough, μετακωδικοποίησης AC-3 και downmix του Nuvio. Η πολλαπλή προβολή και η γωνιακή εικόνα αποκωδικοποιούν πάντα στην εφαρμογή.</string>
+    <string name="iptv_play14_passthrough_off">Ανενεργό (αποκωδικοποίηση στην εφαρμογή)</string>
+    <string name="iptv_play14_passthrough_off_hint">Στέλνει πάντα αποκωδικοποιημένο ήχο. Δοκιμάστε το αν ένα κανάλι δεν έχει ήχο μέσω του receiver.</string>
+    <string name="iptv_play14_tunnel">Αναπαραγωγή tunneled</string>
+    <string name="iptv_play14_tunnel_subtitle">Η συσκευή TV συγχρονίζει εικόνα και ήχο σε επίπεδο υλικού. Μόνο κύρια εικόνα· όχι στην πολλαπλή προβολή, με Προτίμηση αποκωδικοποιητή εφαρμογής ή όταν το 4K και HDR στη γωνιακή εικόνα είναι ανενεργό. Η ενίσχυση έντασης και του surround είναι ανενεργές όσο χρησιμοποιείται.</string>
+    <string name="iptv_play14_surround">Προτίμηση ήχου surround (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Επιλέγει το κομμάτι ήχου με τα περισσότερα κανάλια στην ίδια γλώσσα. Αν το κανάλι δεν έχει surround, παίζει στερεοφωνικά.</string>
+    <string name="iptv_play14_language">Προτιμώμενη γλώσσα ήχου</string>
+    <string name="iptv_play14_language_subtitle">Επιλέγει αυτή τη γλώσσα όταν ένα κανάλι έχει πολλά κομμάτια ήχου.</string>
+    <string name="iptv_play14_language_stream">Προεπιλογή ροής</string>
+    <string name="iptv_play14_decoder">Αποκωδικοποιητής ήχου</string>
+    <string name="iptv_play14_decoder_subtitle">Ποιος αποκωδικοποιητής παίζει τον ζωντανό ήχο. Το βίντεο χρησιμοποιεί τον αποκωδικοποιητή της συσκευής TV.</string>
+    <string name="iptv_play14_decoder_auto">Αυτόματο</string>
+    <string name="iptv_play14_decoder_auto_hint">Ο αποκωδικοποιητής της συσκευής TV, με αυτόν της εφαρμογής για όσα formats δεν μπορεί να παίξει.</string>
+    <string name="iptv_play14_decoder_app">Προτίμηση αποκωδικοποιητή εφαρμογής</string>
+    <string name="iptv_play14_decoder_app_hint">Αποκωδικοποιεί πρώτα τον ήχο στην εφαρμογή, ακόμη και formats που ο receiver θα δεχόταν ως passthrough. Δοκιμάστε το αν ένα κανάλι τρίζει ή δεν έχει ήχο.</string>
+</resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Reproducción y audio</string>
+    <string name="iptv_play14_description">Imagen y sonido de los canales en vivo. Los cambios se aplican al próximo canal que abras.</string>
+    <string name="iptv_play14_same_as_nuvio">Igual que Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Igual que Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Sigue la configuración del reproductor de Nuvio, ahora: %1$s</string>
+    <string name="iptv_play14_on">Activado</string>
+    <string name="iptv_play14_frame_rate">Ajuste de frecuencia de cuadros</string>
+    <string name="iptv_play14_frame_rate_subtitle">Cambia la TV a la frecuencia de cuadros del canal cuando empieza a reproducirse.</string>
+    <string name="iptv_play14_resolution_subtitle">También cambia la TV a la resolución del canal mientras el ajuste de frecuencia de cuadros está activado.</string>
+    <string name="iptv_play14_passthrough">Passthrough de audio</string>
+    <string name="iptv_play14_passthrough_subtitle">Envía el sonido Dolby Digital y Dolby Digital Plus a tu receptor o barra de sonido según la configuración de audio de Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Usa la configuración de passthrough, transcodificación AC-3 y downmix de Nuvio. La multivista y la imagen de la esquina siempre decodifican en la app.</string>
+    <string name="iptv_play14_passthrough_off">Desactivado (decodificar en la app)</string>
+    <string name="iptv_play14_passthrough_off_hint">Siempre envía sonido decodificado. Pruébalo si un canal no tiene sonido a través del receptor.</string>
+    <string name="iptv_play14_tunnel">Reproducción en túnel</string>
+    <string name="iptv_play14_tunnel_subtitle">Permite que el dispositivo sincronice imagen y sonido por hardware. Solo imagen principal; no se usa en multivista, con Preferir decodificador de la app ni si 4K y HDR en la imagen de la esquina está desactivado. El aumento de volumen y la subida del envolvente se desactivan mientras se usa.</string>
+    <string name="iptv_play14_surround">Preferir audio envolvente (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Elige la pista de audio con más canales en el mismo idioma. Se reproduce en estéreo si el canal no tiene pista envolvente.</string>
+    <string name="iptv_play14_language">Idioma de audio preferido</string>
+    <string name="iptv_play14_language_subtitle">Elige este idioma cuando un canal tiene varias pistas de audio.</string>
+    <string name="iptv_play14_language_stream">Predeterminado de la transmisión</string>
+    <string name="iptv_play14_decoder">Decodificador de audio</string>
+    <string name="iptv_play14_decoder_subtitle">Qué decodificador reproduce el sonido en vivo. El video sigue usando el decodificador del dispositivo.</string>
+    <string name="iptv_play14_decoder_auto">Automático</string>
+    <string name="iptv_play14_decoder_auto_hint">El decodificador del dispositivo, con el de la app para los formatos que no puede reproducir.</string>
+    <string name="iptv_play14_decoder_app">Preferir decodificador de la app</string>
+    <string name="iptv_play14_decoder_app_hint">Decodifica el sonido primero en la app, incluso formatos que tu receptor podría recibir por passthrough. Pruébalo si un canal chisporrotea o no tiene sonido.</string>
+</resources>

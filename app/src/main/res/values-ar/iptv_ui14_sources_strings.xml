@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">ينتهي في %1$s</string>
+    <string name="iptv_ui14_no_expiry">بلا انتهاء</string>
+    <string name="iptv_ui14_expires_today">ينتهي اليوم</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="zero">ينتهي خلال %1$d يوم</item>
+        <item quantity="one">ينتهي خلال يوم واحد</item>
+        <item quantity="two">ينتهي خلال يومين</item>
+        <item quantity="few">ينتهي خلال %1$d أيام</item>
+        <item quantity="many">ينتهي خلال %1$d يوماً</item>
+        <item quantity="other">ينتهي خلال %1$d يوم</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">انتهى اليوم</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="zero">انتهى منذ %1$d يوم</item>
+        <item quantity="one">انتهى منذ يوم واحد</item>
+        <item quantity="two">انتهى منذ يومين</item>
+        <item quantity="few">انتهى منذ %1$d أيام</item>
+        <item quantity="many">انتهى منذ %1$d يوماً</item>
+        <item quantity="other">انتهى منذ %1$d يوم</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

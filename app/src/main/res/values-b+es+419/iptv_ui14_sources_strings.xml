@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_expires_on">Vence el %1$s</string>
+    <string name="iptv_ui14_no_expiry">Sin vencimiento</string>
+    <string name="iptv_ui14_expires_today">Vence hoy</string>
+    <plurals name="iptv_ui14_expires_in">
+        <item quantity="one">Vence en %1$d día</item>
+        <item quantity="many">Vence en %1$d días</item>
+        <item quantity="other">Vence en %1$d días</item>
+    </plurals>
+    <string name="iptv_ui14_expired_today">Venció hoy</string>
+    <plurals name="iptv_ui14_expired_ago">
+        <item quantity="one">Venció hace %1$d día</item>
+        <item quantity="many">Venció hace %1$d días</item>
+        <item quantity="other">Venció hace %1$d días</item>
+    </plurals>
+    <string name="iptv_ui14_source_expiry">%1$s: %2$s</string>
+</resources>

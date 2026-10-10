@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Atkūrimas ir garsas</string>
+    <string name="iptv_play14_description">Tiesioginių kanalų vaizdas ir garsas. Pakeitimai taikomi kitam atidarytam kanalui.</string>
+    <string name="iptv_play14_same_as_nuvio">Kaip Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Kaip Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Naudoja Nuvio grotuvo nustatymą, dabar: %1$s</string>
+    <string name="iptv_play14_on">Įjungta</string>
+    <string name="iptv_play14_frame_rate">Kadrų dažnio derinimas</string>
+    <string name="iptv_play14_frame_rate_subtitle">Perjungia televizorių į kanalo kadrų dažnį, kai jis pradeda groti.</string>
+    <string name="iptv_play14_resolution_subtitle">Kol įjungtas kadrų dažnio derinimas, televizorius perjungiamas ir į kanalo raišką.</string>
+    <string name="iptv_play14_passthrough">Garso passthrough</string>
+    <string name="iptv_play14_passthrough_subtitle">Siunčia Dolby Digital ir Dolby Digital Plus garsą į imtuvą ar garso juostą pagal Nuvio garso nustatymus.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Naudoja Nuvio passthrough, AC-3 perkodavimo ir downmix nustatymus. Keli vaizdai ir kampinis vaizdas visada dekoduojami programoje.</string>
+    <string name="iptv_play14_passthrough_off">Išjungta (dekoduoti programoje)</string>
+    <string name="iptv_play14_passthrough_off_hint">Visada siunčia dekoduotą garsą. Išbandykite, jei kanalas per imtuvą neturi garso.</string>
+    <string name="iptv_play14_tunnel">Tunelinis atkūrimas</string>
+    <string name="iptv_play14_tunnel_subtitle">TV priedėlis aparatiškai sinchronizuoja vaizdą ir garsą. Tik pagrindiniame vaizde; nenaudojamas keliuose vaizduose, su Teikti pirmenybę programos dekoderiui arba kai išjungta 4K ir HDR kampiniame vaizde. Garso stiprinimas ir erdvinio garso pagarsinimas tuo metu išjungti.</string>
+    <string name="iptv_play14_surround">Teikti pirmenybę erdviniam garsui (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Parenka tos pačios kalbos garso takelį su daugiausia kanalų. Jei kanalas neturi erdvinio takelio, groja stereo.</string>
+    <string name="iptv_play14_language">Pageidaujama garso kalba</string>
+    <string name="iptv_play14_language_subtitle">Parenka šią kalbą, kai kanalas turi kelis garso takelius.</string>
+    <string name="iptv_play14_language_stream">Srauto numatytoji</string>
+    <string name="iptv_play14_decoder">Garso dekoderis</string>
+    <string name="iptv_play14_decoder_subtitle">Kuris dekoderis groja tiesioginį garsą. Vaizdas toliau naudoja TV priedėlio dekoderį.</string>
+    <string name="iptv_play14_decoder_auto">Automatiškai</string>
+    <string name="iptv_play14_decoder_auto_hint">TV priedėlio dekoderis, o formatams, kurių jis negroja, programos dekoderis.</string>
+    <string name="iptv_play14_decoder_app">Teikti pirmenybę programos dekoderiui</string>
+    <string name="iptv_play14_decoder_app_hint">Pirmiausia dekoduoja garsą programoje, net formatus, kuriuos imtuvas priimtų kaip passthrough. Išbandykite, jei kanalas traška ar neturi garso.</string>
+</resources>

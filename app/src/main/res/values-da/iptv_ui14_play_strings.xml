@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Afspilning og lyd</string>
+    <string name="iptv_play14_description">Billede og lyd for live-kanaler. Ændringer gælder fra den næste kanal, du åbner.</string>
+    <string name="iptv_play14_same_as_nuvio">Som i Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Som i Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Følger indstillingen i Nuvios afspillerindstillinger, nu: %1$s</string>
+    <string name="iptv_play14_on">Til</string>
+    <string name="iptv_play14_frame_rate">Tilpasning af billedfrekvens</string>
+    <string name="iptv_play14_frame_rate_subtitle">Skifter fjernsynet til kanalens billedfrekvens, når den afspilles.</string>
+    <string name="iptv_play14_resolution_subtitle">Skifter også fjernsynet til kanalens opløsning, mens tilpasning af billedfrekvens er slået til.</string>
+    <string name="iptv_play14_passthrough">Audio passthrough</string>
+    <string name="iptv_play14_passthrough_subtitle">Sender Dolby Digital- og Dolby Digital Plus-lyd til din receiver eller soundbar som angivet i Nuvios lydindstillinger.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Bruger Nuvios indstillinger for passthrough, AC-3-transkodning og downmix. Multivisning og hjørnebilledet afkoder altid i appen.</string>
+    <string name="iptv_play14_passthrough_off">Fra (afkod i appen)</string>
+    <string name="iptv_play14_passthrough_off_hint">Sender altid afkodet lyd. Prøv dette, hvis en kanal ikke har lyd gennem din receiver.</string>
+    <string name="iptv_play14_tunnel">Tunneleret afspilning</string>
+    <string name="iptv_play14_tunnel_subtitle">Lader TV-boksen holde billede og lyd synkrone i hardware. Kun hovedbilledet; bruges ikke i multivisning, med Foretræk app-decoder, eller når 4K og HDR i hjørnebilledet er slået fra. Lydforstærkning og surroundløft er slået fra imens.</string>
+    <string name="iptv_play14_surround">Foretræk surroundlyd (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Vælger lydsporet med flest kanaler på samme sprog. Der afspilles stereo, hvis kanalen ikke har et surroundspor.</string>
+    <string name="iptv_play14_language">Foretrukket lydsprog</string>
+    <string name="iptv_play14_language_subtitle">Vælger dette sprog, når en kanal har mere end ét lydspor.</string>
+    <string name="iptv_play14_language_stream">Streamens standard</string>
+    <string name="iptv_play14_decoder">Lyddecoder</string>
+    <string name="iptv_play14_decoder_subtitle">Hvilken decoder der afspiller live-lyd. Video bruger fortsat TV-boksens decoder.</string>
+    <string name="iptv_play14_decoder_auto">Automatisk</string>
+    <string name="iptv_play14_decoder_auto_hint">TV-boksens decoder, med appens decoder til formater, den ikke kan afspille.</string>
+    <string name="iptv_play14_decoder_app">Foretræk app-decoder</string>
+    <string name="iptv_play14_decoder_app_hint">Afkoder lyd i appen først, også formater din receiver kunne tage som passthrough. Prøv dette, hvis en kanal knitrer eller ikke har lyd.</string>
+</resources>

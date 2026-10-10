@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">إخفاء من القائمة</string>
+    <string name="iptv_ui14_menu_show">إظهار في القائمة</string>
+    <string name="iptv_ui14_menu_move">نقل في القائمة</string>
+    <string name="iptv_ui14_menu_move_subtitle">تغيير موضع هذا العنصر في القائمة</string>
+    <string name="iptv_ui14_menu_required">يظهر دائماً في القائمة</string>
+    <string name="iptv_ui14_menu_reset">إعادة تعيين القائمة</string>
+    <string name="iptv_ui14_menu_reset_subtitle">الترتيب الافتراضي مع إظهار كل العناصر</string>
+    <string name="iptv_ui14_menu_hidden">عناصر القائمة المخفية</string>
+    <string name="iptv_ui14_external_subtitle">يتوقف البث المباشر هنا أثناء التشغيل في التطبيق الآخر</string>
+</resources>

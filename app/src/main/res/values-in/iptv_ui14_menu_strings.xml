@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_ui14_menu_hide">Sembunyikan dari menu</string>
+    <string name="iptv_ui14_menu_show">Tampilkan di menu</string>
+    <string name="iptv_ui14_menu_move">Pindahkan di menu</string>
+    <string name="iptv_ui14_menu_move_subtitle">Ubah posisi item ini di menu</string>
+    <string name="iptv_ui14_menu_required">Selalu tampil di menu</string>
+    <string name="iptv_ui14_menu_reset">Atur ulang menu</string>
+    <string name="iptv_ui14_menu_reset_subtitle">Urutan default, semua item ditampilkan</string>
+    <string name="iptv_ui14_menu_hidden">Item menu tersembunyi</string>
+    <string name="iptv_ui14_external_subtitle">TV Live berhenti di sini selama aplikasi lain memutar</string>
+</resources>

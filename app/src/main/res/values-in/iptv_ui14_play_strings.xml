@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">Pemutaran dan audio</string>
+    <string name="iptv_play14_description">Gambar dan suara untuk saluran live. Perubahan berlaku untuk saluran berikutnya yang dibuka.</string>
+    <string name="iptv_play14_same_as_nuvio">Sama seperti Nuvio</string>
+    <string name="iptv_play14_same_as_nuvio_value">Sama seperti Nuvio (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Mengikuti setelan pemutar Nuvio, saat ini: %1$s</string>
+    <string name="iptv_play14_on">Aktif</string>
+    <string name="iptv_play14_frame_rate">Penyesuaian frame rate</string>
+    <string name="iptv_play14_frame_rate_subtitle">Mengalihkan TV ke frame rate saluran setelah mulai diputar.</string>
+    <string name="iptv_play14_resolution_subtitle">Juga mengalihkan TV ke resolusi saluran selama penyesuaian frame rate aktif.</string>
+    <string name="iptv_play14_passthrough">Passthrough audio</string>
+    <string name="iptv_play14_passthrough_subtitle">Mengirim suara Dolby Digital dan Dolby Digital Plus ke penerima atau soundbar sesuai setelan audio Nuvio.</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Memakai setelan passthrough, transcoding AC-3, dan downmix Nuvio. Multiview dan gambar sudut selalu mendekode di aplikasi.</string>
+    <string name="iptv_play14_passthrough_off">Nonaktif (dekode di aplikasi)</string>
+    <string name="iptv_play14_passthrough_off_hint">Selalu mengirim suara yang sudah didekode. Coba ini jika saluran tidak bersuara lewat penerima.</string>
+    <string name="iptv_play14_tunnel">Tunneled Playback</string>
+    <string name="iptv_play14_tunnel_subtitle">TV box menjaga gambar dan suara tetap sinkron lewat hardware. Hanya gambar utama; tidak dipakai di multiview, dengan Utamakan dekoder aplikasi, atau saat 4K dan HDR di gambar sudut nonaktif. Penguat volume dan penguat surround nonaktif selama dipakai.</string>
+    <string name="iptv_play14_surround">Utamakan audio surround (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">Memilih trek audio dengan kanal terbanyak dalam bahasa yang sama. Stereo diputar jika saluran tidak punya trek surround.</string>
+    <string name="iptv_play14_language">Bahasa audio utama</string>
+    <string name="iptv_play14_language_subtitle">Memilih bahasa ini jika saluran punya lebih dari satu trek audio.</string>
+    <string name="iptv_play14_language_stream">Default stream</string>
+    <string name="iptv_play14_decoder">Dekoder audio</string>
+    <string name="iptv_play14_decoder_subtitle">Dekoder yang memutar suara live. Video tetap memakai dekoder TV box.</string>
+    <string name="iptv_play14_decoder_auto">Otomatis</string>
+    <string name="iptv_play14_decoder_auto_hint">Dekoder TV box, dengan dekoder aplikasi untuk format yang tidak bisa diputarnya.</string>
+    <string name="iptv_play14_decoder_app">Utamakan dekoder aplikasi</string>
+    <string name="iptv_play14_decoder_app_hint">Mendekode suara di aplikasi lebih dulu, termasuk format yang bisa diterima penerima sebagai passthrough. Coba ini jika saluran berderak atau tidak bersuara.</string>
+</resources>

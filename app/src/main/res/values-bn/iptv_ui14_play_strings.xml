@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="iptv_play14_title">প্লেব্যাক ও অডিও</string>
+    <string name="iptv_play14_description">লাইভ চ্যানেলের ছবি ও শব্দ। পরের খোলা চ্যানেল থেকে পরিবর্তন প্রযোজ্য হবে।</string>
+    <string name="iptv_play14_same_as_nuvio">Nuvio-র মতো</string>
+    <string name="iptv_play14_same_as_nuvio_value">Nuvio-র মতো (%1$s)</string>
+    <string name="iptv_play14_same_as_nuvio_hint">Nuvio-র প্লেয়ার সেটিং অনুসরণ করে, এখন: %1$s</string>
+    <string name="iptv_play14_on">চালু</string>
+    <string name="iptv_play14_frame_rate">ফ্রেম রেট ম্যাচিং</string>
+    <string name="iptv_play14_frame_rate_subtitle">চ্যানেল চলা শুরু হলে টিভিকে তার ফ্রেম রেটে বদলে দেয়।</string>
+    <string name="iptv_play14_resolution_subtitle">ফ্রেম রেট ম্যাচিং চালু থাকলে টিভিকে চ্যানেলের রেজোলিউশনেও বদলে দেয়।</string>
+    <string name="iptv_play14_passthrough">অডিও পাসথ্রু</string>
+    <string name="iptv_play14_passthrough_subtitle">Nuvio-র অডিও সেটিং অনুযায়ী Dolby Digital ও Dolby Digital Plus শব্দ আপনার রিসিভার বা সাউন্ডবারে পাঠায়।</string>
+    <string name="iptv_play14_passthrough_nuvio_hint">Nuvio-র পাসথ্রু, AC-3 ট্রান্সকোডিং ও ডাউনমিক্স সেটিং ব্যবহার করে। মাল্টিভিউ ও কোণের ছবি সবসময় অ্যাপে ডিকোড হয়।</string>
+    <string name="iptv_play14_passthrough_off">বন্ধ (অ্যাপে ডিকোড)</string>
+    <string name="iptv_play14_passthrough_off_hint">সবসময় ডিকোড করা শব্দ পাঠায়। রিসিভারে কোনো চ্যানেলের শব্দ না এলে এটি চেষ্টা করুন।</string>
+    <string name="iptv_play14_tunnel">টানেল প্লেব্যাক</string>
+    <string name="iptv_play14_tunnel_subtitle">টিভি বক্স হার্ডওয়্যারে ছবি ও শব্দ সিঙ্কে রাখে। শুধু মূল ছবিতে; মাল্টিভিউতে, অ্যাপ ডিকোডার পছন্দ করুন চালু থাকলে বা কোণের ছবিতে 4K ও HDR বন্ধ থাকলে ব্যবহার হয় না। এটি চলার সময় ভলিউম বুস্ট ও সারাউন্ড বাড়ানো বন্ধ থাকে।</string>
+    <string name="iptv_play14_surround">সারাউন্ড অডিও পছন্দ করুন (5.1)</string>
+    <string name="iptv_play14_surround_subtitle">একই ভাষায় সবচেয়ে বেশি চ্যানেলের অডিও ট্র্যাক বেছে নেয়। সারাউন্ড ট্র্যাক না থাকলে স্টেরিও চলে।</string>
+    <string name="iptv_play14_language">পছন্দের অডিও ভাষা</string>
+    <string name="iptv_play14_language_subtitle">কোনো চ্যানেলে একাধিক অডিও ট্র্যাক থাকলে এই ভাষা বেছে নেয়।</string>
+    <string name="iptv_play14_language_stream">স্ট্রিমের ডিফল্ট</string>
+    <string name="iptv_play14_decoder">অডিও ডিকোডার</string>
+    <string name="iptv_play14_decoder_subtitle">কোন ডিকোডার লাইভ শব্দ চালাবে। ভিডিও টিভি বক্সের ডিকোডারই ব্যবহার করে।</string>
+    <string name="iptv_play14_decoder_auto">স্বয়ংক্রিয়</string>
+    <string name="iptv_play14_decoder_auto_hint">টিভি বক্সের ডিকোডার, আর যে ফরম্যাট এটি চালাতে পারে না তার জন্য অ্যাপের ডিকোডার।</string>
+    <string name="iptv_play14_decoder_app">অ্যাপ ডিকোডার পছন্দ করুন</string>
+    <string name="iptv_play14_decoder_app_hint">শব্দ আগে অ্যাপে ডিকোড করে, রিসিভার পাসথ্রু হিসেবে নিতে পারে এমন ফরম্যাটও। কোনো চ্যানেলে চিড়চিড় শব্দ হলে বা শব্দ না থাকলে এটি চেষ্টা করুন।</string>
+</resources>
