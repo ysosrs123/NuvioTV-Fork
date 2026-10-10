@@ -500,6 +500,27 @@ Playback:
   to stereo. The stats show the AAC profile, channels, audio bitrate and gain; "Tune" is
   now "Start time" (time to the first picture).
 
+Sources and guides:
+- Live TV Sources: "Refresh all sources" and "Refresh all guides" with progress and a
+  failure count. Sources on different accounts refresh side by side (at most two at once),
+  sources on the same account one at a time; provider guides wait for their account too.
+- Guides import faster (programmes for channels you don't have are skipped while reading;
+  about 30% less import work on a large test guide) and the guide no longer waits behind
+  an import's writes while it reads.
+
+Sport:
+- Section headings, focused card borders and the timeline are no longer cut off; each lane
+  shows its own day heading; finished games leave the timeline.
+- Sport fixtures and scores are on by default unless you turned them off (this also turns
+  on the Home sport row for those users).
+- Upcoming matches show large team logos and names, the date, a kick-off countdown and the
+  broadcasters; season records read like "4W 0D 1L" (football W-D-L, NHL W-L-OTL, NFL
+  W-L(-T), basketball, baseball and AFL W-L).
+- Golf scores line up in columns and the golf hero shows the top 10 with Today and Thru.
+- Dark league logos (e.g. the Premier League's) get a light backing so they show on black.
+- TheSportsDB key: the Show button lines up with the field; Live TV settings dialogs opened
+  from the main Settings are opaque.
+
 ## Ready below the UI (screens pending)
 
 - Provider account groups shared by several sources (each source has its own

@@ -9,7 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -398,7 +401,7 @@ internal fun IptvSportsFixturesRow(source: IptvSourceRef?, hiddenCategories: Set
     }
     val warning = state.failed || state.missingKey
     if (state.rows.isEmpty()) {
-        Column(modifier.fillMaxWidth().height(SPORT_ROW_HEIGHT), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(modifier.fillMaxWidth().height(SPORT_ROW_HEIGHT + SPORT_ROW_BLEED), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(Modifier.height(22.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.iptv_sport_fixtures), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
                     color = NuvioTheme.colors.TextPrimary, maxLines = 1)
@@ -416,19 +419,32 @@ internal fun IptvSportsFixturesRow(source: IptvSourceRef?, hiddenCategories: Set
         val window = remember(now / TIMELINE_HOUR_MILLIS) { sportTimelineWindow(now) }
         val lanes = remember(state.rows, window) { SportsTimeline.lanes(state.items.map { it.fixture }, window.first, window.second) }
         var lastKey by remember { mutableIntStateOf(0) }
-        LazyColumn(modifier.fillMaxWidth().height(SPORT_ROW_HEIGHT)
-            .onPreviewKeyEvent { event -> if (event.nativeKeyEvent.action == AndroidKeyEvent.ACTION_DOWN) lastKey = event.nativeKeyEvent.keyCode; false }
-            .onFocusChanged { if (!it.hasFocus && lastKey == AndroidKeyEvent.KEYCODE_DPAD_DOWN) viewModel.focusFixture(null) }
-            .focusGroup(), verticalArrangement = Arrangement.spacedBy(SPORT_ROW_GAP)) {
-            state.rows.forEachIndexed { index, row ->
-                item(key = row.key) {
-                    SportFixtureRow(row, state, playingId, message.takeIf { index == 0 && state.failed }, onRail,
-                        onScores = if (index == 0) ({ viewModel.prompt(IptvSportPrompt.Scores) }) else null,
-                        onFocused = { viewModel.focusFixture(it.fixture.key) }, onClick = { open(it) }, onHold = { hold(it) }, onMenu = { options(it) })
-                }
-                if (index == 0 && lanes.isNotEmpty()) item(key = TIMELINE_KEY) {
-                    IptvSportTimeline(lanes, window, now, state, playingId, Modifier.fillMaxWidth().height(SPORT_ROW_HEIGHT), onRail,
-                        onFocused = { viewModel.focusFixture(it.fixture.key) }, onOpen = { open(it) }, onHold = { hold(it) }, onMenu = { options(it) })
+        val rowsState = rememberLazyListState()
+        val inner = LocalBringIntoViewSpec.current
+        CompositionLocalProvider(LocalBringIntoViewSpec provides SportRowsSpec) {
+            LazyColumn(modifier.fillMaxWidth().height(SPORT_ROW_HEIGHT + SPORT_ROW_BLEED)
+                .onPreviewKeyEvent { event -> if (event.nativeKeyEvent.action == AndroidKeyEvent.ACTION_DOWN) lastKey = event.nativeKeyEvent.keyCode; false }
+                .onFocusChanged { if (!it.hasFocus && lastKey == AndroidKeyEvent.KEYCODE_DPAD_DOWN) viewModel.focusFixture(null) }
+                .focusGroup(), state = rowsState, contentPadding = PaddingValues(bottom = SPORT_ROW_BLEED), verticalArrangement = Arrangement.spacedBy(SPORT_ROW_GAP)) {
+                var slot = 0
+                state.rows.forEachIndexed { index, row ->
+                    val at = slot++
+                    item(key = row.key) {
+                        SportSlot(at, rowsState, inner) {
+                            SportFixtureRow(row, state, playingId, message.takeIf { index == 0 && state.failed }, onRail,
+                                onScores = if (index == 0) ({ viewModel.prompt(IptvSportPrompt.Scores) }) else null,
+                                onFocused = { viewModel.focusFixture(it.fixture.key) }, onClick = { open(it) }, onHold = { hold(it) }, onMenu = { options(it) })
+                        }
+                    }
+                    if (index == 0 && lanes.isNotEmpty()) {
+                        val ruler = slot++
+                        item(key = TIMELINE_KEY) {
+                            SportSlot(ruler, rowsState, inner) {
+                                IptvSportTimeline(lanes, window, now, state, playingId, Modifier.fillMaxWidth().height(SPORT_ROW_HEIGHT), onRail,
+                                    onFocused = { viewModel.focusFixture(it.fixture.key) }, onOpen = { open(it) }, onHold = { hold(it) }, onMenu = { options(it) })
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -449,6 +465,18 @@ internal fun IptvSportsFixturesRow(source: IptvSourceRef?, hiddenCategories: Set
             onReminder = viewModel::toggleReminder, onDismiss = { viewModel.prompt(null) })
         null -> Unit
     }
+}
+
+@Composable
+private fun SportSlot(index: Int, list: LazyListState, spec: BringIntoViewSpec, content: @Composable () -> Unit) {
+    val scope = rememberCoroutineScope()
+    CompositionLocalProvider(LocalBringIntoViewSpec provides spec) {
+        Box(Modifier.onFocusChanged { if (it.hasFocus) scope.launch { list.animateScrollToItem(index) } }) { content() }
+    }
+}
+
+private val SportRowsSpec = object : BringIntoViewSpec {
+    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float = 0f
 }
 
 @Composable
@@ -622,6 +650,7 @@ private fun SportCardsPlaceholder() {
 internal val SportPlaceholderShape = RoundedCornerShape(4.dp)
 private val SPORT_ROW_HEIGHT = 168.dp
 private val SPORT_ROW_GAP = 12.dp
+private val SPORT_ROW_BLEED = 8.dp
 private const val PLACEHOLDER_CARDS = 6
 private const val TICK_MILLIS = 60_000L
 private const val TIMELINE_KEY = "\u0000timeline"

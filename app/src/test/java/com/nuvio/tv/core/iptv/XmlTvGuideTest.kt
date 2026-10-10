@@ -104,4 +104,21 @@ class XmlTvGuideTest {
     @Test(expected = IllegalArgumentException::class) fun nestingLimitIsEnforced() {
         XmlTvGuideParser(GuideParseLimits(depth = 2)).parse("<tv><channel id=\"one\"><display-name>A</display-name></channel></tv>".byteInputStream(), {}, {})
     }
+    @Test fun unwantedProgrammesAreSkippedButCounted() {
+        val programmes = mutableListOf<GuideProgramme>(); val rejected = mutableListOf<String?>(); val asked = mutableListOf<String>()
+        val xml = """<tv><programme channel="keep" start="20261005070000 +1000" stop="20261005080000 +1000"><title>A</title><desc>D</desc><category>News</category></programme><programme channel="drop" start="20261005070000 +1000" stop="20261005080000 +1000"><title>B</title><icon src="https://x/i.png"/></programme><programme channel="drop" start="bad"><title>C</title></programme><programme channel="keep" start="20261005080000 +1000" stop="20261005090000 +1000"><title>E</title></programme><programme channel="keep" start="bad"><title>F</title></programme></tv>"""
+        val result = XmlTvGuideParser().parse(xml.byteInputStream(), {}, programmes::add, { asked += it; it == "keep" }) { id, _ -> rejected += id }
+        assertEquals(listOf("A", "E"), programmes.map { it.titles.single().text })
+        assertEquals(listOf("D"), programmes.first().descriptions.map { it.text }); assertEquals(listOf("News"), programmes.first().categories)
+        assertNull(programmes.last().descriptions.firstOrNull()); assertNull(programmes.last().icon)
+        assertEquals(listOf<String?>("keep"), rejected)
+        assertEquals(GuideParseSummary(0, 4, 1), result)
+        assertEquals(listOf("keep", "drop", "drop", "keep", "keep"), asked)
+    }
+    @Test fun sharedTimestampsParseTheSameAsSeparateOnes() {
+        val programmes = mutableListOf<GuideProgramme>()
+        XmlTvGuideParser().parse("""<tv><programme channel="a" start="20261005070000 +1000" stop="20261005080000 +1000"><title>A</title></programme><programme channel="a" start="20261005080000 +1000" stop="20261005090000 +0000"><title>B</title></programme></tv>""".byteInputStream(), {}, programmes::add)
+        assertEquals(programmes[0].stop, programmes[1].start)
+        assertEquals(XmlTvGuideParser.parseTimestamp("20261005090000 +0000"), programmes[1].stop)
+    }
 }

@@ -5,7 +5,7 @@ enum class SportsLogos { ESPN, ALL, OFF }
 object SportsSources {
     const val FALLBACK_FAILURES = 2
 
-    fun enabled(stored: Boolean?, oldService: String?): Boolean = stored ?: (oldService == "ESPN" || oldService == "THESPORTSDB")
+    fun enabled(stored: Boolean?, oldService: String?): Boolean = stored ?: (oldService != "OFF")
 
     fun needsKey(league: SportsLeague): Boolean = league.espn == null && league.sportsDb != null
 

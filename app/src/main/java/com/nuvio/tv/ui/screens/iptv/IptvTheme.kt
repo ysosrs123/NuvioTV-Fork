@@ -87,4 +87,9 @@ internal fun IptvPanelFloor(content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalIptvAppearance provides appearance, LocalGlassBodyFloor provides if (appearance.solidPanels) 1f else GLASS_FLOOR, content = content)
 }
 
+@Composable
+internal fun IptvOpaqueDialogs(content: @Composable () -> Unit) {
+    CompositionLocalProvider(LocalGlassBodyFloor provides 1f, content = content)
+}
+
 internal fun iptvTheme(name: String?): AppTheme? = AppTheme.entries.firstOrNull { it.name == name && it != AppTheme.CUSTOM }

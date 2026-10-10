@@ -21,9 +21,9 @@ internal fun IptvDensityRow(viewModel: IptvSettingsViewModel) {
     var choosing by remember { mutableStateOf(false) }
     SettingsActionRow(title = stringResource(R.string.iptv_density), subtitle = stringResource(R.string.iptv_density_subtitle),
         value = stringResource(densityLabel(density)), onClick = { choosing = true })
-    if (choosing) SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_density),
+    if (choosing) IptvOpaqueDialogs { SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_density),
         options = GuideDensity.entries.map { SettingsPickerOption(it, stringResource(densityLabel(it)), stringResource(densityDescription(it))) },
-        selectedValue = density, onOptionSelected = { viewModel.setDensity(it); choosing = false }, onDismiss = { choosing = false }, width = 520.dp)
+        selectedValue = density, onOptionSelected = { viewModel.setDensity(it); choosing = false }, onDismiss = { choosing = false }, width = 520.dp) }
 }
 
 private fun densityLabel(value: GuideDensity): Int = when (value) {
@@ -44,10 +44,10 @@ internal fun IptvGuideDaysRow() {
     var choosing by remember { mutableStateOf(false) }
     SettingsActionRow(title = stringResource(R.string.iptv_guide_days), subtitle = stringResource(R.string.iptv_guide_days_subtitle),
         value = guideDaysLabel(days), onClick = { choosing = true })
-    if (choosing) SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_guide_days), subtitle = stringResource(R.string.iptv_guide_days_subtitle),
+    if (choosing) IptvOpaqueDialogs { SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_guide_days), subtitle = stringResource(R.string.iptv_guide_days_subtitle),
         options = GuideDays.OPTIONS.map { SettingsPickerOption(it, guideDaysLabel(it), guideDaysDescription(it)) },
         selectedValue = days, onOptionSelected = { preference.days = it; days = it; choosing = false }, onDismiss = { choosing = false },
-        width = 520.dp, maxHeight = 400.dp)
+        width = 520.dp, maxHeight = 400.dp) }
 }
 
 @Composable

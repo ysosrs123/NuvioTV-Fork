@@ -232,7 +232,7 @@ fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewM
         }
     }
     val dismiss = { choosing = null }
-    when (choosing) {
+    IptvOpaqueDialogs { when (choosing) {
         IptvSportsChoice.LEAGUES -> SettingsMultiChoiceDialog(title = stringResource(R.string.iptv_sport_leagues),
             subtitle = stringResource(R.string.iptv_sport7_leagues_subtitle),
             options = state.offered.map { SettingsPickerOption(it.id, it.name, stringResource(sourceLabel(it, state.hasKey))) },
@@ -292,7 +292,7 @@ fun IptvSportsSettingsSection(viewModel: IptvSportsSettingsViewModel = hiltViewM
             onOptionSelected = { viewModel.setReminderLead(it); dismiss() })
         IptvSportsChoice.KEY -> SportsKeyDialog(state.hasKey, onSave = { viewModel.saveKey(it, dismiss) }, onRemove = { viewModel.removeKey(); dismiss() }, onDismiss = dismiss)
         null -> Unit
-    }
+    } }
 }
 
 @Composable
@@ -303,14 +303,20 @@ private fun SportsKeyDialog(hasKey: Boolean, onSave: (String) -> Unit, onRemove:
     LaunchedEffect(Unit) { withFrameNanos { }; runCatching { first.requestFocus() } }
     val invalid = key.isNotBlank() && !IptvSportsPreferences.validKey(key)
     NuvioDialog(onDismiss = onDismiss, title = stringResource(R.string.iptv_sport_key), subtitle = stringResource(R.string.iptv_sport7_key_subtitle), width = 600.dp) {
-        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            SourceField(stringResource(R.string.iptv_sport_key), key, { key = it.take(IptvSportsPreferences.MAX_KEY) }, hint = stringResource(R.string.iptv_sport7_key_hint),
-                keyboardType = KeyboardType.Password, masked = !show, last = true, error = invalid, modifier = Modifier.weight(1f).focusRequester(first))
-            NuvioActionPill({ show = !show }) {
-                Icon(if (show) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, null, Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(if (show) R.string.iptv_password_hide else R.string.iptv_password_show))
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                SourceField(stringResource(R.string.iptv_sport_key), key, { key = it.take(IptvSportsPreferences.MAX_KEY) }, keyboardType = KeyboardType.Password,
+                    masked = !show, last = true, error = invalid, modifier = Modifier.weight(1f).focusRequester(first))
+                Box(Modifier.height(KEY_FIELD_HEIGHT), contentAlignment = Alignment.Center) {
+                    NuvioActionPill({ show = !show }) {
+                        Icon(if (show) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(if (show) R.string.iptv_password_hide else R.string.iptv_password_show))
+                    }
+                }
             }
+            Text(stringResource(R.string.iptv_sport7_key_hint), color = if (invalid) NuvioTheme.colors.Error else NuvioTheme.colors.TextTertiary,
+                style = MaterialTheme.typography.bodySmall)
         }
         if (invalid) Text(stringResource(R.string.iptv_sport_key_invalid), color = NuvioTheme.colors.Error, style = MaterialTheme.typography.bodyMedium)
         Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -430,3 +436,5 @@ private fun quietLabel(minutes: Int): String =
 @Composable
 private fun leadLabel(minutes: Int): String =
     if (minutes == 0) stringResource(R.string.iptv_sport4_reminder_at_start) else stringResource(R.string.iptv_sport4_reminder_minutes, minutes)
+
+private val KEY_FIELD_HEIGHT = 48.dp

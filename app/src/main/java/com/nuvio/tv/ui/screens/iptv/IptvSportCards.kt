@@ -58,11 +58,14 @@ import com.nuvio.tv.core.iptv.Fighter
 import com.nuvio.tv.core.iptv.FixtureSide
 import com.nuvio.tv.core.iptv.FixtureStatus
 import com.nuvio.tv.core.iptv.FixtureTeam
+import com.nuvio.tv.core.iptv.GolfPlayer
+import com.nuvio.tv.core.iptv.RecordShape
 import com.nuvio.tv.core.iptv.InningHalf
 import com.nuvio.tv.core.iptv.SportsDetail
 import com.nuvio.tv.core.iptv.SportsFixture
 import com.nuvio.tv.core.iptv.SportsFixtureText
 import com.nuvio.tv.core.iptv.SportsLeagues
+import com.nuvio.tv.core.iptv.SportsRecords
 import com.nuvio.tv.core.iptv.TennisPlayer
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.util.rememberLongPressKeyTracker
@@ -78,6 +81,9 @@ internal val SPORT_CARD_WIDTH = 236.dp
 internal val SPORT_CARD_HEIGHT = 140.dp
 private const val MAX_SETS = 5
 private const val GOLF_ROWS = 5
+private const val GOLF_BOARD_ROWS = 5
+internal val GOLF_COUNTRY_WIDTH = 28.dp
+internal val GOLF_SCORE_WIDTH = 34.dp
 private const val SESSION_ROWS = 4
 
 @Composable
@@ -133,9 +139,9 @@ internal fun SportFixtureCard(item: IptvFixtureItem, hidden: Boolean, spoiler: B
             shaped && detail is SportsDetail.Cricket && home != null && away != null -> CricketMiddle(fixture, detail, home, away, focused, middle)
             shaped && detail is SportsDetail.Baseball && home != null && away != null -> BaseballMiddle(fixture, detail, home, away, focused, middle)
             home != null && away != null -> Row(middle.padding(horizontal = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                CardTeam(home, stringResource(R.string.iptv_sport2_home), focused, Modifier.weight(1f))
+                CardTeam(home, fixture.sport, stringResource(R.string.iptv_sport2_home), focused, Modifier.weight(1f))
                 CardCentre(fixture, hidden, spoiler, item.scheduleOnly, focused, Modifier.width(84.dp))
-                CardTeam(away, stringResource(R.string.iptv_sport2_away), focused, Modifier.weight(1f))
+                CardTeam(away, fixture.sport, stringResource(R.string.iptv_sport2_away), focused, Modifier.weight(1f))
             }
             else -> Column(middle.padding(horizontal = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)) {
                 Text(fixture.title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis,
@@ -195,12 +201,13 @@ internal fun sportInning(detail: SportsDetail.Baseball): String? {
 }
 
 @Composable
-private fun CardTeam(team: FixtureTeam, side: String, focused: Boolean, modifier: Modifier) {
+private fun CardTeam(team: FixtureTeam, sport: String, side: String, focused: Boolean, modifier: Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)) {
         TeamLogo(team, 40.dp)
         Text(team.shortName ?: team.name, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, maxLines = 1,
             overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, color = itemContent(focused))
-        Text(team.record ?: side, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1)
+        Text(sportRecord(sport, team.record) ?: side, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1,
+            overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -310,10 +317,11 @@ private fun GolfMiddle(fixture: SportsFixture, detail: SportsDetail.Golf, hidden
                     Text(player.position, style = MaterialTheme.typography.labelSmall, color = if (mine) colour else NuvioTheme.colors.TextTertiary, maxLines = 1,
                         modifier = Modifier.width(24.dp))
                     Text(player.shortName ?: player.name, style = MaterialTheme.typography.labelMedium, color = colour, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false))
-                    player.country?.takeIf { it.length <= 3 }?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1) }
-                    Spacer(Modifier.weight(1f))
-                    Text(player.toPar.orEmpty(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = colour, maxLines = 1)
+                        modifier = Modifier.weight(1f))
+                    Text(golfCountry(player).orEmpty(), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1,
+                        modifier = Modifier.width(GOLF_COUNTRY_WIDTH))
+                    Text(player.toPar.orEmpty(), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = colour, maxLines = 1,
+                        textAlign = TextAlign.End, modifier = Modifier.width(GOLF_SCORE_WIDTH))
                 }
             }
         }
@@ -523,9 +531,78 @@ internal fun LeagueLogo(url: String, size: Dp, modifier: Modifier = Modifier): B
     val context = LocalContext.current
     val pixels = with(LocalDensity.current) { size.roundToPx() }.coerceAtLeast(1)
     val request = remember(url, pixels) { ImageRequest.Builder(context).data(url).size(pixels, pixels).build() }
-    AsyncImage(request, null, modifier.size(size), contentScale = ContentScale.Fit, onError = { failed = true })
+    val backed = !url.contains("-dark")
+    Box(modifier.size(size).then(if (backed) Modifier.clip(LeagueBackingShape).background(Color.White.copy(alpha = .88f), LeagueBackingShape).padding(size / 10)
+        else Modifier), contentAlignment = Alignment.Center) {
+        AsyncImage(request, null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit, onError = { failed = true })
+    }
     return true
 }
+
+private val LeagueBackingShape = RoundedCornerShape(4.dp)
+
+internal fun golfCountry(player: GolfPlayer): String? = player.country?.takeIf { it.length <= 3 }
+
+@Composable
+internal fun sportRecord(sport: String, record: String?): String? {
+    record ?: return null
+    val parsed = SportsRecords.parse(sport, record) ?: return record
+    val v = parsed.values
+    return when (parsed.shape) {
+        RecordShape.WIN_DRAW_LOSS -> stringResource(R.string.iptv_ui10_sport_record_wdl, v[0], v[1], v[2])
+        RecordShape.WIN_LOSS -> stringResource(R.string.iptv_ui10_sport_record_wl, v[0], v[1])
+        RecordShape.WIN_LOSS_TIE -> stringResource(R.string.iptv_ui10_sport_record_wlt, v[0], v[1], v[2])
+        RecordShape.WIN_LOSS_OVERTIME -> stringResource(R.string.iptv_ui10_sport_record_wlo, v[0], v[1], v[2])
+    }
+}
+
+@Composable
+internal fun GolfBoard(fixture: SportsFixture, detail: SportsDetail.Golf, favourites: Set<String>, modifier: Modifier) {
+    val followed = detail.leaders.filter { "${fixture.league}:${it.name.trim()}" in favourites }.toSet()
+    val columns = detail.leaders.chunked(GOLF_BOARD_ROWS).take(2)
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(28.dp)) {
+            columns.forEach { players ->
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Row(Modifier.fillMaxWidth().height(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Spacer(Modifier.weight(1f))
+                        GolfHeading(stringResource(R.string.iptv_sport2_today), GOLF_BOARD_NUMBER)
+                        GolfHeading(stringResource(R.string.iptv_ui10_sport_golf_thru), GOLF_BOARD_NUMBER)
+                        GolfHeading(stringResource(R.string.iptv_ui10_sport_golf_to_par), GOLF_BOARD_SCORE)
+                    }
+                    players.forEach { player ->
+                        val colour = if (player in followed) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextPrimary
+                        Row(Modifier.fillMaxWidth().height(22.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(player.position, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary, maxLines = 1,
+                                modifier = Modifier.width(28.dp))
+                            Text(player.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = colour, maxLines = 1,
+                                overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                            Text(golfCountry(player).orEmpty(), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1,
+                                modifier = Modifier.width(GOLF_COUNTRY_WIDTH))
+                            Text(player.today.orEmpty(), style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+                                textAlign = TextAlign.End, modifier = Modifier.width(GOLF_BOARD_NUMBER))
+                            Text(player.thru.orEmpty(), style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
+                                textAlign = TextAlign.End, modifier = Modifier.width(GOLF_BOARD_NUMBER))
+                            Text(player.toPar.orEmpty(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = colour, maxLines = 1,
+                                textAlign = TextAlign.End, modifier = Modifier.width(GOLF_BOARD_SCORE))
+                        }
+                    }
+                }
+            }
+        }
+        val note = listOfNotNull(detail.statusText, detail.purse).joinToString(" · ")
+        if (note.isNotEmpty()) Text(note, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+@Composable
+private fun GolfHeading(text: String, width: Dp) {
+    Text(text, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+        textAlign = TextAlign.End, modifier = Modifier.width(width))
+}
+
+private val GOLF_BOARD_NUMBER = 44.dp
+private val GOLF_BOARD_SCORE = 52.dp
 
 @Composable
 private fun LeagueMark(fixture: SportsFixture, size: Dp) {

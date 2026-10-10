@@ -57,12 +57,7 @@ internal fun IptvSettingsContent(onSources: () -> Unit, onSetup: () -> Unit, onR
 private fun IptvSettingsBody(onSources: () -> Unit, onSetup: () -> Unit, onRecordings: () -> Unit, initialFocusRequester: FocusRequester?,
     viewModel: IptvSettingsViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val locations by viewModel.locations.collectAsStateWithLifecycle()
-    val notice by viewModel.notice.collectAsStateWithLifecycle()
-    val shareForm by viewModel.shareForm.collectAsStateWithLifecycle()
-    val shareStatus by viewModel.shareStatus.collectAsStateWithLifecycle()
     val themes by viewModel.themes.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     var choosing by remember { mutableStateOf<IptvSettingsChoice?>(null) }
     val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
@@ -150,7 +145,17 @@ private fun IptvSettingsBody(onSources: () -> Unit, onSetup: () -> Unit, onRecor
             SettingsVerticalScrollIndicators(state = list)
         }
     }
-    val dismiss = { choosing = null }
+    IptvOpaqueDialogs { IptvSettingsDialogs(state, choosing, { choosing = null }, viewModel) }
+}
+
+@Composable
+private fun IptvSettingsDialogs(state: IptvSettingsState, choosing: IptvSettingsChoice?, dismiss: () -> Unit, viewModel: IptvSettingsViewModel) {
+    val locations by viewModel.locations.collectAsStateWithLifecycle()
+    val notice by viewModel.notice.collectAsStateWithLifecycle()
+    val shareForm by viewModel.shareForm.collectAsStateWithLifecycle()
+    val shareStatus by viewModel.shareStatus.collectAsStateWithLifecycle()
+    val themes by viewModel.themes.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     when (choosing) {
         IptvSettingsChoice.FORMAT -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_live_format_title),
             subtitle = stringResource(R.string.iptv_settings_format_subtitle),

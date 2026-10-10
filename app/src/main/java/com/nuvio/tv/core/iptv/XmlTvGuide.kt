@@ -57,7 +57,7 @@ const val MAX_GUIDE_ICON_CHARACTERS = 2048
 
 class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()) {
     fun parse(input: InputStream, channel: (GuideChannel) -> Unit, programme: (GuideProgramme) -> Unit,
-        rejected: (String?, Long?) -> Unit = { _, _ -> }): GuideParseSummary {
+        wants: ((String) -> Boolean)? = null, rejected: (String?, Long?) -> Unit = { _, _ -> }): GuideParseSummary {
         val parser = XmlPullParserFactory.newInstance().newPullParser()
         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true)
         try {
@@ -84,6 +84,8 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
         var rootEnded = false
         var recordTextCharacters = 0
         var icon: String? = null
+        var skipping = false
+        val timestamps = TimestampCache()
 
         while (true) {
             if (Thread.currentThread().isInterrupted) throw java.io.InterruptedIOException("Guide import cancelled")
@@ -111,11 +113,15 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                     } else if (parser.depth == 2 && parser.name in setOf("channel", "programme")) {
                         recordType = parser.name
                         recordId = parser.getAttributeValue(null, if (recordType == "channel") "id" else "channel")?.trim()?.takeIf(String::isNotEmpty)
-                        recordStart = parser.getAttributeValue(null, "start")?.let(::parseTimestamp)
-                        val stop = parser.getAttributeValue(null, "stop")
-                        recordStop = stop?.let(::parseTimestamp)
-                        badStop = stop != null && recordStop == null
+                        skipping = recordType == "programme" && wants != null && recordId != null && !wants(recordId)
+                        if (skipping) { recordStart = null; recordStop = null; badStop = false } else {
+                            recordStart = parser.getAttributeValue(null, "start")?.let(timestamps::parse)
+                            val stop = parser.getAttributeValue(null, "stop")
+                            recordStop = stop?.let(timestamps::parse)
+                            badStop = stop != null && recordStop == null
+                        }
                         names.clear(); descriptions.clear(); categories.clear(); recordTextCharacters = 0; icon = null
+                    } else if (skipping) {
                     } else if (parser.depth == 3 && recordType == "programme" && parser.name == "icon") {
                         if (icon == null) icon = guideIconUrl(parser.getAttributeValue(null, "src"))
                     } else if (parser.depth == 3 && recordType != null && parser.name in setOf("display-name", "title", "desc", "category")) {
@@ -150,7 +156,8 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
                             guideLimit(++programmeCount <= limits.programmes, "Guide programme limit")
                             val start = recordStart
                             val stop = recordStop
-                            if (recordId == null || start == null || badStop || (stop != null && stop.epochMillis <= start.epochMillis)) { rejectedCount++; rejected(recordId, start?.epochMillis) }
+                            if (skipping) skipping = false
+                            else if (recordId == null || start == null || badStop || (stop != null && stop.epochMillis <= start.epochMillis)) { rejectedCount++; rejected(recordId, start?.epochMillis) }
                             else programme(GuideProgramme(recordId, start, stop, names.toList(), descriptions.toList(), categories.toList(), icon))
                         }
                         recordType = null
@@ -176,6 +183,15 @@ class XmlTvGuideParser(private val limits: GuideParseLimits = GuideParseLimits()
         override fun read(): Int = `in`.read().also { if (it >= 0) { count(1); scan(it) } }
         override fun read(buffer: ByteArray, offset: Int, length: Int): Int = count(`in`.read(buffer, offset, length)).also { n ->
             for (index in offset until offset + n) scan(buffer[index].toInt() and 255)
+        }
+    }
+
+    private class TimestampCache {
+        private var raw: String? = null
+        private var value: GuideTimestamp? = null
+        fun parse(text: String): GuideTimestamp? {
+            if (text == raw) return value
+            return parseTimestamp(text).also { raw = text; value = it }
         }
     }
 

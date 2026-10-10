@@ -49,7 +49,7 @@ class SportsSourcesTest {
     }
 
     @Test fun oldServiceSettingMigrates() {
-        assertFalse(SportsSources.enabled(null, null))
+        assertTrue(SportsSources.enabled(null, null))
         assertFalse(SportsSources.enabled(null, "OFF"))
         assertTrue(SportsSources.enabled(null, "ESPN"))
         assertTrue(SportsSources.enabled(null, "THESPORTSDB"))

@@ -155,7 +155,7 @@ object SportsTimeline {
         val leagues = SportsLeagues.ALL.withIndex().associate { it.value.id to it.index }
         val sports = SportsLeagues.ALL.map { it.sport }.distinct().withIndex().associate { it.value to it.index }
         fun fraction(millis: Long) = ((millis - fromMillis) / span).coerceIn(0.0, 1.0).toFloat()
-        return fixtures.distinctBy { it.key }.filter { it.startMillis < untilMillis && it.startMillis + SportsRefresh.durationMillis(it) > fromMillis }
+        return fixtures.distinctBy { it.key }.filter { it.status != FixtureStatus.FINAL && it.startMillis < untilMillis && it.startMillis + SportsRefresh.durationMillis(it) > fromMillis }
             .groupBy { it.sport }.entries.sortedWith(compareBy({ sports[it.key] ?: Int.MAX_VALUE }, { it.key })).map { (sport, items) ->
                 val ends = mutableListOf<Long>()
                 SportsTimelineLane(sport, items.sortedWith(compareBy({ it.startMillis }, { leagues[it.league] ?: Int.MAX_VALUE }, { it.title })).map { fixture ->

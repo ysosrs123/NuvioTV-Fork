@@ -74,7 +74,7 @@ internal fun IptvStreamingSettingsSection(viewModel: IptvStreamingSettingsViewMo
         SettingsToggleRow(title = stringResource(R.string.iptv_play10_surround_lift), subtitle = stringResource(R.string.iptv_play10_surround_lift_subtitle),
             checked = state.surroundLift, onToggle = viewModel::toggleSurroundLift)
     }
-    when (choosing) {
+    IptvOpaqueDialogs { when (choosing) {
         START -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_stream_start), subtitle = stringResource(R.string.iptv_stream_start_subtitle),
             options = LiveStartBuffer.entries.map { SettingsPickerOption(it, stringResource(startLabel(it))) },
             selectedValue = state.start, onOptionSelected = { viewModel.setStart(it); choosing = null }, onDismiss = { choosing = null }, width = 520.dp)
@@ -82,7 +82,7 @@ internal fun IptvStreamingSettingsSection(viewModel: IptvStreamingSettingsViewMo
             subtitle = stringResource(R.string.iptv_stream_cushion_hls) + " " + stringResource(R.string.iptv_stream_cushion_memory, state.capMegabytes),
             options = LiveCushion.entries.map { SettingsPickerOption(it, cushionLabel(it)) },
             selectedValue = state.cushion, onOptionSelected = { viewModel.setCushion(it); choosing = null }, onDismiss = { choosing = null }, width = 520.dp)
-    }
+    } }
 }
 
 @Composable

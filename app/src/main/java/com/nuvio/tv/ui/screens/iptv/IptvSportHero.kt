@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +45,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.core.iptv.FixtureLine
+import com.nuvio.tv.core.iptv.SportsCountdown
 import com.nuvio.tv.core.iptv.FixtureSide
 import com.nuvio.tv.core.iptv.FixtureSituation
 import com.nuvio.tv.core.iptv.FixtureStatus
@@ -56,6 +58,9 @@ import com.nuvio.tv.data.iptv.IptvFixtureLink
 import com.nuvio.tv.ui.components.rememberShimmerBrush
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
+import java.time.Instant
+import java.time.ZoneId
+import kotlinx.coroutines.delay
 
 @Composable
 internal fun IptvSportHero(active: Boolean, modifier: Modifier, fallback: @Composable (Modifier) -> Unit) {
@@ -121,7 +126,9 @@ private fun SportHero(item: IptvFixtureItem, state: IptvFixturesState, summary: 
         val home = fixture.home
         val away = fixture.away
         val detail = fixture.sportDetail.takeIf { !item.scheduleOnly }
-        if (home != null && away != null) {
+        if (home != null && away != null && fixture.status == FixtureStatus.SCHEDULED) {
+            HeroPreMatch(fixture, home, away, Modifier.fillMaxWidth().weight(1f))
+        } else if (home != null && away != null) {
             Row(Modifier.fillMaxWidth().weight(1f), horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                 HeroScoreboard(fixture, home, away, !hidden && fixture.status != FixtureStatus.SCHEDULED && !item.scheduleOnly,
                     hidden && fixture.status != FixtureStatus.SCHEDULED, Modifier.weight(1.15f).fillMaxHeight())
@@ -131,6 +138,8 @@ private fun SportHero(item: IptvFixtureItem, state: IptvFixturesState, summary: 
             val win = fixture.situation?.homeWinPercent?.takeIf { !hidden && live }
             if (!hidden && live && SportsStrip.supports(fixture.sport) && (win == null || summary != null)) SportHeroStrip(fixture, summary, Modifier.fillMaxWidth())
             else win?.let { WinBar(fixture, home, away, it) }
+        } else if (detail is SportsDetail.Golf && !hidden && fixture.status != FixtureStatus.SCHEDULED && detail.leaders.isNotEmpty()) {
+            GolfBoard(fixture, detail, state.favourites, Modifier.fillMaxWidth().weight(1f).padding(top = 6.dp))
         } else if (detail is SportsDetail.Golf || detail is SportsDetail.Sessions || detail is SportsDetail.Card) {
             SportDetailBody(fixture, hidden, state.favourites, Modifier.fillMaxWidth(.6f).weight(1f))
         } else Spacer(Modifier.weight(1f))
@@ -189,20 +198,20 @@ private fun HeroScoreboard(fixture: SportsFixture, home: FixtureTeam, away: Fixt
         sides.forEach { side ->
             val team = if (side == FixtureSide.HOME) home else away
             val line = if (side == FixtureSide.HOME) fixture.homeLine else fixture.awayLine
-            HeroTeamLine(team, line, fixture.situation?.possession == side && scores && fixture.status == FixtureStatus.LIVE, scores, masked, periods)
+            HeroTeamLine(team, fixture.sport, line, fixture.situation?.possession == side && scores && fixture.status == FixtureStatus.LIVE, scores, masked, periods)
         }
     }
 }
 
 @Composable
-private fun HeroTeamLine(team: FixtureTeam, line: FixtureLine?, possession: Boolean, scores: Boolean, masked: Boolean, periods: List<Int>) {
-    Row(Modifier.fillMaxWidth().height(28.dp), verticalAlignment = Alignment.CenterVertically) {
-        TeamLogo(team, 26.dp)
-        Spacer(Modifier.width(10.dp))
+private fun HeroTeamLine(team: FixtureTeam, sport: String, line: FixtureLine?, possession: Boolean, scores: Boolean, masked: Boolean, periods: List<Int>) {
+    Row(Modifier.fillMaxWidth().height(38.dp), verticalAlignment = Alignment.CenterVertically) {
+        TeamLogo(team, 34.dp)
+        Spacer(Modifier.width(12.dp))
         Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(team.shortName ?: team.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary,
+            Text(team.shortName ?: team.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary,
                 maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-            team.record?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextTertiary, maxLines = 1) }
+            sportRecord(sport, team.record)?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary, maxLines = 1) }
             if (possession) Box(Modifier.size(6.dp).clip(CircleShape).background(NuvioTheme.colors.Secondary))
         }
         periods.forEach { index ->
@@ -212,6 +221,52 @@ private fun HeroTeamLine(team: FixtureTeam, line: FixtureLine?, possession: Bool
         if (scores) Text(line?.score.orEmpty(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
             maxLines = 1, textAlign = TextAlign.End, modifier = Modifier.width(TOTAL_WIDTH))
         else if (masked) MaskBar(TOTAL_WIDTH - 8.dp)
+    }
+}
+
+@Composable
+private fun HeroPreMatch(fixture: SportsFixture, home: FixtureTeam, away: FixtureTeam, modifier: Modifier) {
+    val now by produceState(System.currentTimeMillis()) { while (true) { delay(COUNTDOWN_TICK_MILLIS); value = System.currentTimeMillis() } }
+    val awayFirst = SportsFixtureText.awayFirst(fixture)
+    val zone = ZoneId.systemDefault()
+    val left = SportsCountdown.until(now, fixture.startMillis)
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(Modifier.fillMaxWidth().weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            PreMatchTeam(if (awayFirst) away else home, fixture.sport, false, Modifier.weight(1f))
+            Column(Modifier.width(200.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)) {
+                Text(clock(fixture.startMillis), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary,
+                    maxLines = 1)
+                Text(sportDate(Instant.ofEpochMilli(fixture.startMillis).atZone(zone).toLocalDate(), "EEEEdMMMM"), style = MaterialTheme.typography.labelLarge,
+                    color = NuvioTheme.colors.TextSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(when {
+                    left == null -> stringResource(R.string.iptv_ui10_sport_starting)
+                    left.days > 0 -> pluralStringResource(R.plurals.iptv_ui10_sport_starts_days, left.days, left.days, left.hours)
+                    left.hours > 0 -> stringResource(R.string.iptv_ui10_sport_starts_hours, left.hours, left.minutes)
+                    else -> stringResource(R.string.iptv_ui10_sport_starts_minutes, left.minutes)
+                }, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.Secondary, maxLines = 1,
+                    overflow = TextOverflow.Ellipsis)
+            }
+            PreMatchTeam(if (awayFirst) home else away, fixture.sport, true, Modifier.weight(1f))
+        }
+        if (fixture.broadcasters.isNotEmpty()) Text(stringResource(R.string.iptv_sport_broadcaster, fixture.broadcasters.joinToString(", ")),
+            style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+private fun PreMatchTeam(team: FixtureTeam, sport: String, end: Boolean, modifier: Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp, if (end) Alignment.End else Alignment.Start)) {
+        if (!end) TeamLogo(team, PRE_MATCH_LOGO)
+        Column(Modifier.weight(1f, fill = false), horizontalAlignment = if (end) Alignment.End else Alignment.Start, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(team.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = NuvioTheme.colors.TextPrimary, maxLines = 2,
+                overflow = TextOverflow.Ellipsis, textAlign = if (end) TextAlign.End else TextAlign.Start)
+            sportRecord(sport, team.record)?.let {
+                Text(stringResource(R.string.iptv_ui10_sport_season_record, it), style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextTertiary,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
+        if (end) TeamLogo(team, PRE_MATCH_LOGO)
     }
 }
 
@@ -257,3 +312,5 @@ private val BarShape = RoundedCornerShape(2.dp)
 private val PERIOD_WIDTH = 26.dp
 private val TOTAL_WIDTH = 40.dp
 private const val MAX_PERIODS = 6
+private val PRE_MATCH_LOGO = 64.dp
+private const val COUNTDOWN_TICK_MILLIS = 30_000L

@@ -108,7 +108,7 @@ internal fun IptvTimeshiftSettingsSection(viewModel: IptvTimeshiftSettingsViewMo
         SettingsActionRow(title = stringResource(R.string.iptv_timeshift_location), subtitle = stringResource(R.string.iptv_timeshift_location_subtitle),
             value = place, enabled = state.enabled, onClick = { viewModel.reload(); choosing = LOCATION })
     }
-    when (choosing) {
+    IptvOpaqueDialogs { when (choosing) {
         LENGTH -> SettingsSingleChoiceDialog(title = stringResource(R.string.iptv_timeshift_length),
             options = LocalTimeshiftLength.entries.map {
                 SettingsPickerOption(it, stringResource(lengthLabel(it)),
@@ -120,7 +120,7 @@ internal fun IptvTimeshiftSettingsSection(viewModel: IptvTimeshiftSettingsViewMo
                 stringResource(R.string.iptv_location_free, Formatter.formatShortFileSize(context, state.internalFreeBytes)))) +
                 state.drives.map { SettingsPickerOption(it.location, it.label, stringResource(R.string.iptv_location_free, Formatter.formatShortFileSize(context, it.freeBytes))) },
             selectedValue = state.location, onOptionSelected = { viewModel.setLocation(it); choosing = null }, onDismiss = { choosing = null }, width = 520.dp)
-    }
+    } }
 }
 
 private const val LENGTH = "length"

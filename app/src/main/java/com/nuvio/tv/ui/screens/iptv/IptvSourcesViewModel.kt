@@ -40,7 +40,7 @@ data class IptvSourcesState(val profileId: Int = 0, val revision: Long = 0, val 
     val automatic: Set<String> = emptySet(), val connections: Map<String, Int> = emptyMap(),
     val manualConnections: Set<String> = emptySet(), val providerConnections: Map<String, Int> = emptyMap(),
     val groups: List<IptvGroupView> = emptyList(), val suggestions: List<IptvGroupView> = emptyList(),
-    val reviews: Map<String, HeldCatalogue> = emptyMap())
+    val reviews: Map<String, HeldCatalogue> = emptyMap(), val batches: Map<IptvRefreshBatchKind, IptvRefreshBatch> = emptyMap())
 
 data class IptvGroupView(val id: String, val label: String, val limit: Int, val sources: List<IptvSourceRef>)
 
@@ -65,6 +65,7 @@ class IptvSourcesViewModel @Inject constructor(
         runCatching { refresher.localGuides.list() }.getOrDefault(emptyList()) to runCatching { refresher.localGuideFolders().map { it.path } }.getOrDefault(emptyList())
     }
     init {
+        viewModelScope.launch { refresher.batches.collect { batches -> mutable.update { it.copy(batches = batches) } } }
         viewModelScope.launch {
             var previous = emptyMap<String, IptvRefreshStatus>()
             refresher.status.collect { statuses ->
@@ -349,6 +350,8 @@ class IptvSourcesViewModel @Inject constructor(
     fun watch(source: IptvSource) { liveLaunch.source.value = source.ref }
     fun refresh(source: IptvSource) { session?.let { refresher.refresh(it, source) } }
     fun refresh(feed: IptvGuideFeed) { session?.let { refresher.refresh(it, feed) } }
+    fun refreshAllSources() { session?.let { refresher.refreshAllSources(it) } }
+    fun refreshAllGuides() { session?.let { refresher.refreshAllGuides(it) } }
     private companion object {
         val RELOAD_PHASES = setOf(IptvRefreshPhase.GUIDE, IptvRefreshPhase.DONE, IptvRefreshPhase.FAILED)
     }

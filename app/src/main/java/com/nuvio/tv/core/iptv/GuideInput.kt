@@ -17,6 +17,7 @@ fun parseGuideInput(
     maxInputBytes: Long = limits.expandedBytes,
     checkCancellation: () -> Unit = {},
     rejected: (String?, Long?) -> Unit = { _, _ -> },
+    wants: ((String) -> Boolean)? = null,
 ): GuideParseSummary {
     require(maxInputBytes > 0)
     val bounded = object : FilterInputStream(input) {
@@ -29,7 +30,7 @@ fun parseGuideInput(
         fun count(amount: Int) { count += amount; if (count > maxInputBytes) throw GuideFormatException(GuideFormatIssue.INPUT_LIMIT) }
         override fun close() = Unit
     }
-    return detectGuideDocument(bounded).use { XmlTvGuideParser(limits).parse(it, { checkCancellation(); channel(it) }, { checkCancellation(); programme(it) }, rejected) }
+    return detectGuideDocument(bounded).use { XmlTvGuideParser(limits).parse(it, { checkCancellation(); channel(it) }, { checkCancellation(); programme(it) }, wants, rejected) }
 }
 
 internal fun detectGuideDocument(input: InputStream, maxGzipLayers: Int = 2): InputStream {

@@ -163,6 +163,8 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
                                 value = if (state.selected == source.ref && state.sources.size > 1) stringResource(R.string.iptv_sources_guides_shown) else null,
                                 onClick = { sourceMenu = source }, leadingIcon = kindIcon(source.kind))
                         }
+                        if (state.sources.isNotEmpty()) RefreshAllRow(stringResource(R.string.iptv_ui10_refresh_all_sources),
+                            stringResource(R.string.iptv_ui10_refresh_all_sources_subtitle), state, IptvRefreshBatchKind.SOURCES, viewModel::refreshAllSources)
                     }
                 }
                 item(key = "guides") {
@@ -181,6 +183,8 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
                                 onClick = { feedMenu = feed },
                                 leadingIcon = if (linked) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked)
                         }
+                        if (state.feeds.isNotEmpty()) RefreshAllRow(stringResource(R.string.iptv_ui10_refresh_all_guides),
+                            stringResource(R.string.iptv_ui10_refresh_all_guides_subtitle), state, IptvRefreshBatchKind.GUIDES, viewModel::refreshAllGuides)
                         if (state.feeds.isNotEmpty()) Text(stringResource(R.string.iptv_guides_choice_help), color = NuvioTheme.colors.TextSecondary,
                             style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp))
                     }
@@ -311,6 +315,26 @@ fun IptvSourcesScreen(onBack: () -> Unit, onLive: () -> Unit = {}, onSetup: () -
         creating = false; naming = null
     }, onDismiss = { creating = false; naming = null })
     transfer?.let { mode -> IptvTransferDialog(mode, onClose = { transfer = null; viewModel.reloadNow() }) }
+}
+
+@Composable
+private fun RefreshAllRow(title: String, idle: String, state: IptvSourcesState, kind: IptvRefreshBatchKind, onClick: () -> Unit) {
+    val batch = state.batches[kind]?.takeIf { it.profileId == state.profileId }
+    val progress = batch?.progress(state.refresh)
+    val running = batch != null && (batch.keys.isEmpty() && System.currentTimeMillis() - batch.startedAtMillis < 10_000 || progress?.running == true)
+    val subtitle = when {
+        batch == null || progress == null -> idle
+        running -> stringResource(R.string.iptv_ui10_refresh_all_progress, progress.finished, progress.total)
+        progress.failed > 0 -> stringResource(R.string.iptv_ui10_refresh_all_failed, progress.updated, progress.failed)
+        else -> stringResource(R.string.iptv_ui10_refresh_all_done, progress.total)
+    }
+    SettingsActionRow(title = title, subtitle = null, subtitleContent = { _, _ ->
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (running) LoadingIndicator(Modifier.size(14.dp))
+            Text(subtitle, color = if (!running && (progress?.failed ?: 0) > 0) NuvioTheme.colors.Error else NuvioTheme.colors.TextSecondary,
+                style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+    }, onClick = onClick, enabled = state.ready, leadingIcon = Icons.Filled.Refresh, trailingIcon = null)
 }
 
 @Composable

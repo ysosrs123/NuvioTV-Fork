@@ -120,7 +120,7 @@ class IptvGuideStore(
         } }
     private fun release(uris: Collection<String>) { for (uri in uris) runCatching { releaseDocument(uri) } }
 
-    fun feeds(profileId: Int, offset: Int = 0, limit: Int = 100): List<IptvGuideFeed> = transaction { db ->
+    fun feeds(profileId: Int, offset: Int = 0, limit: Int = 100): List<IptvGuideFeed> = read { db ->
         require(profileId >= 0 && offset >= 0 && limit in 1..200)
         db.rawQuery("SELECT id,label,version,requested,active_generation,refreshed_at FROM feeds WHERE profile=? ORDER BY label COLLATE NOCASE,id LIMIT ? OFFSET ?",
             arrayOf(profileId.toString(), limit.toString(), offset.toString())).use { c -> buildList {
@@ -129,7 +129,7 @@ class IptvGuideStore(
             } }
     }
 
-    fun matchingIndexes(profileId: Int, feedIds: List<String>, externalIds: Set<String>): List<GuideFeedIndex> = transaction { db ->
+    fun matchingIndexes(profileId: Int, feedIds: List<String>, externalIds: Set<String>): List<GuideFeedIndex> = read { db ->
         require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size)
         feedIds.forEach { IptvGuideRef(profileId, it) }
         require(externalIds.size <= 600 && externalIds.all { it.isNotBlank() && it.length <= 4096 })
@@ -143,7 +143,7 @@ class IptvGuideStore(
         feedIds.map { GuideFeedIndex(it, matches.getValue(it)) }
     }
 
-    fun nameIndexes(profileId: Int, feedIds: List<String>, names: Set<String>): List<GuideNameIndex> = transaction { db ->
+    fun nameIndexes(profileId: Int, feedIds: List<String>, names: Set<String>): List<GuideNameIndex> = read { db ->
         require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && names.size <= 400)
         val found = feedIds.associateWith { mutableMapOf<String, MutableSet<String>>() }
         if (feedIds.isNotEmpty() && names.isNotEmpty()) {
@@ -155,7 +155,7 @@ class IptvGuideStore(
         feedIds.map { GuideNameIndex(it, found.getValue(it)) }
     }
 
-    fun programmeKeys(profileId: Int, keys: Collection<GuideKey>, window: IptvGuideWindow): Set<GuideKey> = transaction { db ->
+    fun programmeKeys(profileId: Int, keys: Collection<GuideKey>, window: IptvGuideWindow): Set<GuideKey> = read { db ->
         val feedIds = keys.map { it.feedId }.distinct()
         require(profileId >= 0 && feedIds.size <= 16 && keys.all { it.externalId.isNotBlank() && it.externalId.length <= 4096 })
         feedIds.forEach { IptvGuideRef(profileId, it) }
@@ -170,7 +170,7 @@ class IptvGuideStore(
         found
     }
 
-    fun searchChannels(ref: IptvGuideRef, query: String, limit: Int = 60): List<GuideChannel> = transaction { db ->
+    fun searchChannels(ref: IptvGuideRef, query: String, limit: Int = 60): List<GuideChannel> = read { db ->
         require(limit in 1..200 && query.length <= 256)
         feed(db, ref)
         val name = guideMatchName(query)
@@ -180,10 +180,10 @@ class IptvGuideStore(
         db.rawQuery(sql, args).use { c -> buildList { while (c.moveToNext()) add(IptvGuideJson.channel(c.getString(1), c.getString(0))) } }
     }
 
-    fun airingMatches(profileId: Int, feedIds: List<String>, query: String, nowMillis: Long, limit: Int = 200): List<IptvAiringMatch> = transaction { db ->
+    fun airingMatches(profileId: Int, feedIds: List<String>, query: String, nowMillis: Long, limit: Int = 200): List<IptvAiringMatch> = read { db ->
         require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && limit in 1..500)
         feedIds.forEach { IptvGuideRef(profileId, it) }
-        val text = guideSearchQuery(query) ?: return@transaction emptyList()
+        val text = guideSearchQuery(query) ?: return@read emptyList()
         val now = nowMillis.toString(); val since = (nowMillis - GUIDE_AIRING_LOOKBACK_MILLIS).toString()
         val found = mutableListOf<IptvAiringMatch>()
         for (feed in feedIds) {
@@ -201,7 +201,7 @@ class IptvGuideStore(
     }
 
     fun sportsMatches(profileId: Int, feedIds: List<String>, nowMillis: Long, untilMillis: Long, limit: Int = 400,
-        lookbackMillis: Long = GUIDE_AIRING_LOOKBACK_MILLIS): List<IptvAiringMatch> = transaction { db ->
+        lookbackMillis: Long = GUIDE_AIRING_LOOKBACK_MILLIS): List<IptvAiringMatch> = read { db ->
         require(profileId >= 0 && feedIds.size <= 16 && feedIds.distinct().size == feedIds.size && limit in 1..5000 && untilMillis >= nowMillis &&
             lookbackMillis in 0..GUIDE_AIRING_LOOKBACK_MILLIS)
         feedIds.forEach { IptvGuideRef(profileId, it) }
@@ -384,7 +384,6 @@ class IptvGuideStore(
                     GuideImportChannels.Admission.SKIPPED -> Unit
                 }
             }, programme = programme@{ parsed ->
-                inFile++
                 val id = channels.programme(parsed.channelExternalId) ?: return@programme
                 matched++
                 val start = parsed.start.epochMillis
@@ -401,7 +400,8 @@ class IptvGuideStore(
                 added(payload.length)
             }, limits = limits, checkCancellation = checkCancellation, rejected = { id, start ->
                 if (channels.wants(id) && (start == null || (start < window.untilMillis && start >= window.fromMillis - REJECTED_LOOKBACK_MILLIS))) rejected++
-            })
+            }, wants = { channels.programme(it) != null })
+            inFile = summary.programmes.toLong()
             flush()
             for (channel in channels.impliedChannels) { newChannels += channel; added(channel.externalId.length) }
             flush()
@@ -478,7 +478,7 @@ class IptvGuideStore(
         } catch (error: Exception) { IptvLog.failure("guide reclaim", error) }
     }
 
-    fun programmes(ref: IptvGuideRef, externalId: String, window: IptvGuideWindow, offset: Int = 0, limit: Int = 100): IptvProgrammePage = transaction { db ->
+    fun programmes(ref: IptvGuideRef, externalId: String, window: IptvGuideWindow, offset: Int = 0, limit: Int = 100): IptvProgrammePage = read { db ->
         require(offset >= 0 && limit in 1..200 && externalId.isNotBlank())
         feed(db, ref)
         val items = db.rawQuery("SELECT p.payload FROM programmes p JOIN feeds f ON p.stage=f.active_stage WHERE f.id=? AND f.profile=? AND f.version=f.active_version AND p.external_id=? AND p.start<? AND (p.stop>? OR (p.stop IS NULL AND p.start>=?)) ORDER BY p.start,p.id LIMIT ? OFFSET ?",
@@ -488,7 +488,7 @@ class IptvGuideStore(
         IptvProgrammePage(items.take(limit), items.size > limit)
     }
 
-    fun channelPage(ref: IptvGuideRef, offset: Int = 0, limit: Int = 200): List<GuideChannel> = transaction { db ->
+    fun channelPage(ref: IptvGuideRef, offset: Int = 0, limit: Int = 200): List<GuideChannel> = read { db ->
         require(offset >= 0 && limit in 1..500)
         feed(db, ref)
         db.rawQuery("SELECT c.external_id,c.payload FROM channels c JOIN feeds f ON c.stage=f.active_stage WHERE f.id=? AND f.profile=? AND f.version=f.active_version ORDER BY c.external_id LIMIT ? OFFSET ?",
@@ -507,6 +507,7 @@ class IptvGuideStore(
     private fun endpoint(db: SQLiteDatabase, ref: IptvGuideRef): String = db.rawQuery("SELECT endpoint FROM feeds WHERE id=? AND profile=?", arrayOf(ref.feedId, ref.profileId.toString())).use {
         require(it.moveToFirst()); secrets.open(aad(ref, "endpoint"), it.getBlob(0))
     }
+    private fun <T> read(block: (SQLiteDatabase) -> T): T = block(helper.writableDatabase)
     private fun <T> transaction(block: (SQLiteDatabase) -> T): T {
         val db = helper.writableDatabase
         db.beginTransactionNonExclusive()

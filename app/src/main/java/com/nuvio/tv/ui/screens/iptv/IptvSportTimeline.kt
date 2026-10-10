@@ -202,7 +202,7 @@ internal fun IptvSportTimeline(lanes: List<SportsTimelineLane>, window: Pair<Lon
             }
             .focusable()) {
             val track = maxWidth - LABEL_WIDTH - 8.dp
-            val viewport = maxHeight - AXIS_HEIGHT
+            val viewport = LANE_PITCH * ((maxHeight - AXIS_HEIGHT) / LANE_PITCH).toInt().coerceAtLeast(1)
             val scroll = rememberScrollState()
             val density = LocalDensity.current
             val focusLane = lanes.indexOfFirst { lane -> lane.items.any { it.fixture.key == selected?.fixture?.key } }
@@ -224,7 +224,7 @@ internal fun IptvSportTimeline(lanes: List<SportsTimelineLane>, window: Pair<Lon
                             modifier = Modifier.offset(x = LABEL_WIDTH + track * (step.toFloat() / TIMELINE_HOURS) + 3.dp, y = 3.dp))
                     }
                 }
-                Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(scroll, enabled = false)) {
+                Column(Modifier.fillMaxWidth().height(viewport).verticalScroll(scroll, enabled = false)) {
                     lanes.forEach { lane ->
                         Box(Modifier.fillMaxWidth().height(LANE_PITCH * lane.subLanes)) {
                             Text(sportName(lane.sport), style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary, maxLines = 1,
