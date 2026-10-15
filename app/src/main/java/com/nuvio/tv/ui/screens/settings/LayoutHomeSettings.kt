@@ -167,6 +167,7 @@ internal fun LayoutHomeContentSection(
         checked = uiState.hideUnreleasedContent,
         onToggle = { onEvent(LayoutSettingsEvent.SetHideUnreleasedContent(!uiState.hideUnreleasedContent)) }
     )
+    CalendarComingUpRowSetting()
     SettingsToggleRow(
         title = stringResource(R.string.layout_overall_ratings),
         subtitle = stringResource(

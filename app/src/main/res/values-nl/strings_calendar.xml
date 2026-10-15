@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_calendar">Kalender</string>
+    <string name="calendar_title">Kalender</string>
+    <string name="calendar_view_list">Lijst</string>
+    <string name="calendar_view_month">Maand</string>
+    <string name="calendar_times_in">Tijden in %1$s</string>
+    <string name="calendar_zone_with_city">%1$s (%2$s)</string>
+    <string name="calendar_credit">Uitzendtijden van TVmaze</string>
+    <string name="calendar_section_just_aired">Net uitgezonden</string>
+    <string name="calendar_section_just_aired_hint">Afgelopen 7 dagen</string>
+    <string name="calendar_section_today">Vandaag</string>
+    <string name="calendar_section_tomorrow">Morgen</string>
+    <string name="calendar_section_later">Later</string>
+    <string name="calendar_section_later_hint">Volgende bekende datum per serie</string>
+    <string name="calendar_section_no_date">Nog geen datum</string>
+    <string name="calendar_section_no_date_hint">Keert terug of in productie</string>
+    <string name="calendar_episode_code">S%1$d A%2$d</string>
+    <string name="calendar_line_join">%1$s · %2$s</string>
+    <string name="calendar_film_cinema">In de bioscoop</string>
+    <string name="calendar_film_digital">Streaming en digitale release</string>
+    <string name="calendar_show_returning">Keert terug</string>
+    <string name="calendar_show_in_production">In productie</string>
+    <string name="calendar_show_next_unknown">Volgende aflevering nog zonder datum</string>
+    <string name="calendar_time_not_announced">Tijd nog niet bekend</string>
+    <string name="calendar_unknown_title">Zonder titel</string>
+    <string name="calendar_label_new_show">Nieuwe serie</string>
+    <string name="calendar_label_season_premiere">Seizoenspremière</string>
+    <string name="calendar_label_mid_season_premiere">Midseason-première</string>
+    <string name="calendar_label_mid_season_finale">Midseason-finale</string>
+    <string name="calendar_label_season_finale">Seizoensfinale</string>
+    <string name="calendar_label_series_finale">Seriefinale</string>
+    <string name="calendar_cd_bell_on">Herinnering aan</string>
+    <string name="calendar_cd_bell_off">Herinner me</string>
+    <string name="calendar_cd_watched">Bekeken</string>
+    <string name="calendar_aired_on">Uitgezonden op %1$s</string>
+    <string name="calendar_out_on">Verschenen op %1$s</string>
+    <string name="calendar_options_subtitle">Kalenderopties voor deze titel</string>
+    <string name="calendar_action_open_show">Serie openen</string>
+    <string name="calendar_action_open_film">Film openen</string>
+    <string name="calendar_action_remind">Herinner me aan nieuwe afleveringen</string>
+    <string name="calendar_action_remind_film">Herinner me als hij uitkomt</string>
+    <string name="calendar_action_stop_remind">Herinneringen stoppen</string>
+    <string name="calendar_action_hide">Verbergen in Kalender</string>
+    <string name="calendar_building_title">Datums voor je series zoeken…</string>
+    <plurals name="calendar_building_progress">
+        <item quantity="one">Nog %1$d titel</item>
+        <item quantity="other">Nog %1$d titels</item>
+    </plurals>
+    <string name="calendar_empty_title">Nog niets gevolgd</string>
+    <string name="calendar_empty_subtitle">Series die je kijkt of opslaat verschijnen hier</string>
+    <string name="calendar_quiet_title">Alles rustig</string>
+    <plurals name="calendar_quiet_subtitle">
+        <item quantity="one">Niets nieuws van je series de komende dag</item>
+        <item quantity="other">Niets nieuws van je series de komende %1$d dagen</item>
+    </plurals>
+    <plurals name="calendar_month_episodes">
+        <item quantity="one">%1$d aflevering</item>
+        <item quantity="other">%1$d afleveringen</item>
+    </plurals>
+    <plurals name="calendar_month_films">
+        <item quantity="one">%1$d film</item>
+        <item quantity="other">%1$d films</item>
+    </plurals>
+    <string name="calendar_month_more">+%1$d</string>
+    <string name="calendar_month_day_empty">Niets op deze dag</string>
+    <string name="calendar_settings_title">Kalender</string>
+    <string name="calendar_settings_desc">Menu-item, getoonde dagen, tijdzone en verborgen series</string>
+    <string name="calendar_setting_menu">Kalender tonen in het menu</string>
+    <string name="calendar_setting_menu_sub">Kalender staat na Bibliotheek in het hoofdmenu</string>
+    <string name="calendar_setting_days">Getoonde dagen</string>
+    <string name="calendar_setting_days_sub">Hoe ver de lijst per dag vooruitkijkt; latere datums staan onder Later</string>
+    <plurals name="calendar_setting_days_value">
+        <item quantity="one">%1$d dag</item>
+        <item quantity="other">%1$d dagen</item>
+    </plurals>
+    <string name="calendar_setting_zone">Tijdzone</string>
+    <string name="calendar_setting_zone_sub_box">Volgt dit apparaat, nu %1$s</string>
+    <string name="calendar_setting_zone_sub_set">Uitzendtijden worden in deze zone getoond, nu %1$s</string>
+    <string name="calendar_zone_follow_box">Dit apparaat volgen</string>
+    <string name="calendar_zone_follow_box_desc">Nu %1$s</string>
+    <string name="calendar_setting_corner">Hoekmelding bij nieuwe afleveringen</string>
+    <string name="calendar_setting_corner_sub">Een korte melding in de hoek als er een nieuwe aflevering is van een serie met de bel aan</string>
+    <string name="calendar_setting_lists">Mijn eigen lijsten meenemen</string>
+    <string name="calendar_setting_lists_sub">Volgt ook titels in je eigen Trakt- en MDBList-lijsten. Lange lijsten maken de Kalender druk.</string>
+    <string name="calendar_setting_hidden">Verborgen series</string>
+    <string name="calendar_setting_hidden_sub">Titels die je in de Kalender hebt verborgen. Selecteer er een om hem weer te tonen.</string>
+    <plurals name="calendar_setting_hidden_value">
+        <item quantity="one">%1$d verborgen</item>
+        <item quantity="other">%1$d verborgen</item>
+    </plurals>
+    <string name="calendar_hidden_dialog_title">Verborgen series</string>
+    <string name="calendar_hidden_dialog_subtitle">Selecteer een titel om hem weer in de Kalender te tonen</string>
+    <string name="calendar_hidden_none">Geen verborgen series</string>
+    <string name="calendar_setting_coming_up">Rij Op komst</string>
+    <string name="calendar_setting_coming_up_sub">Een rij na Verder kijken met nieuwe en komende afleveringen en films uit je Kalender</string>
+    <string name="calendar_coming_up_title">Op komst</string>
+    <string name="calendar_coming_up_new">Nieuw</string>
+    <string name="calendar_coming_up_today_at">Vandaag %1$s</string>
+    <string name="calendar_coming_up_tonight_at">Vanavond %1$s</string>
+    <string name="calendar_reminder_title_one">Nieuwe aflevering</string>
+    <string name="calendar_reminder_title_one_film">Nieuwe film</string>
+    <string name="calendar_reminder_title_one_release">Nieuwe release</string>
+    <plurals name="calendar_reminder_title">
+        <item quantity="one">%1$d nieuwe aflevering</item>
+        <item quantity="other">%1$d nieuwe afleveringen</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_films">
+        <item quantity="one">%1$d nieuwe film</item>
+        <item quantity="other">%1$d nieuwe films</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_releases">
+        <item quantity="one">%1$d nieuwe release</item>
+        <item quantity="other">%1$d nieuwe releases</item>
+    </plurals>
+    <plurals name="calendar_reminder_more">
+        <item quantity="one">en nog %1$d</item>
+        <item quantity="other">en nog %1$d</item>
+    </plurals>
+    <string name="calendar_reminder_watch_now">Nu kijken</string>
+    <string name="calendar_reminder_later">Later</string>
+    <string name="calendar_reminder_see_all">Alles bekijken in Kalender</string>
+    <string name="calendar_reminder_row_show">Serie</string>
+    <string name="calendar_reminder_row_film">Film</string>
+    <string name="calendar_reminder_aired_today_at">Vandaag om %1$s uitgezonden</string>
+    <string name="calendar_reminder_aired_at">Uitgezonden op %2$s om %1$s</string>
+    <string name="calendar_reminder_aired_today">Vandaag uitgezonden</string>
+    <string name="calendar_reminder_out_today">Vandaag verschenen</string>
+    <string name="calendar_corner_press_menu">Druk op Menu om te openen</string>
+    <string name="calendar_reminder_finding">Aflevering zoeken…</string>
+    <string name="calendar_list_separator">", "</string>
+    <string name="calendar_list_last_pair">%1$s en %2$s</string>
+    <string name="calendar_runtime_hours_minutes">%1$du %2$dm</string>
+    <string name="calendar_runtime_hours">%1$du</string>
+    <string name="calendar_runtime_minutes">%1$dm</string>
+    <string name="calendar_zone_region_africa">Afrika</string>
+    <string name="calendar_zone_region_america">Amerika</string>
+    <string name="calendar_zone_region_antarctica">Antarctica</string>
+    <string name="calendar_zone_region_asia">Azië</string>
+    <string name="calendar_zone_region_atlantic">Atlantische Oceaan</string>
+    <string name="calendar_zone_region_australia">Australië</string>
+    <string name="calendar_zone_region_europe">Europa</string>
+    <string name="calendar_zone_region_indian">Indische Oceaan</string>
+    <string name="calendar_zone_region_pacific">Stille Oceaan</string>
+</resources>

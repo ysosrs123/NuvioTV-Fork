@@ -242,6 +242,11 @@ fun HomeScreen(
 
     // Reports the home screen as fully drawn once it leaves the loading state so startup timing is measurable and post-launch work can be deferred.
     ReportDrawnWhen { !showStartupLoader }
+    com.nuvio.tv.ui.screens.calendar.CalendarHomeSignal(contentShown = !showStartupLoader)
+    DisposableEffect(viewModel) {
+        viewModel.comingUpActive.value = true
+        onDispose { viewModel.comingUpActive.value = false }
+    }
 
     val startupLoadingState = LocalStartupLoadingState.current
     val showHomeLoader = shouldShowHomeStartupLoader(

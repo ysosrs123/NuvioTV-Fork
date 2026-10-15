@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_calendar">कैलेंडर</string>
+    <string name="calendar_title">कैलेंडर</string>
+    <string name="calendar_view_list">सूची</string>
+    <string name="calendar_view_month">महीना</string>
+    <string name="calendar_times_in">समय: %1$s</string>
+    <string name="calendar_zone_with_city">%1$s (%2$s)</string>
+    <string name="calendar_credit">एपिसोड का समय TVmaze से</string>
+    <string name="calendar_section_just_aired">अभी प्रसारित</string>
+    <string name="calendar_section_just_aired_hint">पिछले 7 दिन</string>
+    <string name="calendar_section_today">आज</string>
+    <string name="calendar_section_tomorrow">कल</string>
+    <string name="calendar_section_later">बाद में</string>
+    <string name="calendar_section_later_hint">हर शो की अगली ज्ञात तारीख</string>
+    <string name="calendar_section_no_date">अभी कोई तारीख नहीं</string>
+    <string name="calendar_section_no_date_hint">लौट रहा है या प्रोडक्शन में</string>
+    <string name="calendar_episode_code">S%1$d E%2$d</string>
+    <string name="calendar_line_join">%1$s · %2$s</string>
+    <string name="calendar_film_cinema">सिनेमाघरों में</string>
+    <string name="calendar_film_digital">स्ट्रीमिंग और डिजिटल रिलीज़</string>
+    <string name="calendar_show_returning">लौटने वाली सीरीज़</string>
+    <string name="calendar_show_in_production">प्रोडक्शन में</string>
+    <string name="calendar_show_next_unknown">अगले एपिसोड की तारीख अभी तय नहीं</string>
+    <string name="calendar_time_not_announced">समय घोषित नहीं</string>
+    <string name="calendar_unknown_title">बिना टाइटल</string>
+    <string name="calendar_label_new_show">नया शो</string>
+    <string name="calendar_label_season_premiere">सीज़न प्रीमियर</string>
+    <string name="calendar_label_mid_season_premiere">मिड-सीज़न प्रीमियर</string>
+    <string name="calendar_label_mid_season_finale">मिड-सीज़न फ़िनाले</string>
+    <string name="calendar_label_season_finale">सीज़न फ़िनाले</string>
+    <string name="calendar_label_series_finale">सीरीज़ फ़िनाले</string>
+    <string name="calendar_cd_bell_on">रिमाइंडर चालू</string>
+    <string name="calendar_cd_bell_off">मुझे याद दिलाएँ</string>
+    <string name="calendar_cd_watched">देखा गया</string>
+    <string name="calendar_aired_on">प्रसारित: %1$s</string>
+    <string name="calendar_out_on">रिलीज़: %1$s</string>
+    <string name="calendar_options_subtitle">इस टाइटल के लिए कैलेंडर विकल्प</string>
+    <string name="calendar_action_open_show">शो खोलें</string>
+    <string name="calendar_action_open_film">फ़िल्म खोलें</string>
+    <string name="calendar_action_remind">नए एपिसोड की याद दिलाएँ</string>
+    <string name="calendar_action_remind_film">रिलीज़ होने पर याद दिलाएँ</string>
+    <string name="calendar_action_stop_remind">रिमाइंडर बंद करें</string>
+    <string name="calendar_action_hide">कैलेंडर से छुपाएँ</string>
+    <string name="calendar_building_title">आपके शो की तारीखें खोजी जा रही हैं…</string>
+    <plurals name="calendar_building_progress">
+        <item quantity="one">%1$d टाइटल बाकी</item>
+        <item quantity="other">%1$d टाइटल बाकी</item>
+    </plurals>
+    <string name="calendar_empty_title">अभी कुछ फ़ॉलो नहीं किया</string>
+    <string name="calendar_empty_subtitle">आप जो शो देखते या सेव करते हैं, वे यहाँ दिखेंगे</string>
+    <string name="calendar_quiet_title">सब शांत</string>
+    <plurals name="calendar_quiet_subtitle">
+        <item quantity="one">अगले दिन आपके शो में कुछ नया नहीं</item>
+        <item quantity="other">अगले %1$d दिनों में आपके शो में कुछ नया नहीं</item>
+    </plurals>
+    <plurals name="calendar_month_episodes">
+        <item quantity="one">%1$d एपिसोड</item>
+        <item quantity="other">%1$d एपिसोड</item>
+    </plurals>
+    <plurals name="calendar_month_films">
+        <item quantity="one">%1$d फ़िल्म</item>
+        <item quantity="other">%1$d फ़िल्में</item>
+    </plurals>
+    <string name="calendar_month_more">+%1$d</string>
+    <string name="calendar_month_day_empty">इस दिन कुछ नहीं</string>
+    <string name="calendar_settings_title">कैलेंडर</string>
+    <string name="calendar_settings_desc">मेन्यू एंट्री, दिखाए गए दिन, टाइम ज़ोन और छुपाए गए शो</string>
+    <string name="calendar_setting_menu">मेन्यू में कैलेंडर दिखाएँ</string>
+    <string name="calendar_setting_menu_sub">मुख्य मेन्यू में कैलेंडर लाइब्रेरी के बाद आता है</string>
+    <string name="calendar_setting_days">दिखाए गए दिन</string>
+    <string name="calendar_setting_days_sub">सूची दिन-ब-दिन कितनी आगे जाती है; बाद की तारीखें बाद में के तहत आती हैं</string>
+    <plurals name="calendar_setting_days_value">
+        <item quantity="one">%1$d दिन</item>
+        <item quantity="other">%1$d दिन</item>
+    </plurals>
+    <string name="calendar_setting_zone">टाइम ज़ोन</string>
+    <string name="calendar_setting_zone_sub_box">इस डिवाइस के अनुसार, अभी %1$s</string>
+    <string name="calendar_setting_zone_sub_set">एपिसोड का समय इस ज़ोन में दिखता है, अभी %1$s</string>
+    <string name="calendar_zone_follow_box">इस डिवाइस के अनुसार</string>
+    <string name="calendar_zone_follow_box_desc">अभी %1$s</string>
+    <string name="calendar_setting_corner">नए एपिसोड के लिए कोने में संदेश</string>
+    <string name="calendar_setting_corner_sub">घंटी चालू वाले शो का नया एपिसोड आने पर कोने में छोटा संदेश</string>
+    <string name="calendar_setting_lists">मेरी अपनी लिस्ट शामिल करें</string>
+    <string name="calendar_setting_lists_sub">आपकी अपनी Trakt और MDBList लिस्ट के टाइटल भी फ़ॉलो करता है। लंबी लिस्ट से कैलेंडर भर जाता है।</string>
+    <string name="calendar_setting_hidden">छुपाए गए शो</string>
+    <string name="calendar_setting_hidden_sub">जो टाइटल आपने कैलेंडर से छुपाए। फिर से दिखाने के लिए एक चुनें।</string>
+    <plurals name="calendar_setting_hidden_value">
+        <item quantity="one">%1$d छुपा</item>
+        <item quantity="other">%1$d छुपे</item>
+    </plurals>
+    <string name="calendar_hidden_dialog_title">छुपाए गए शो</string>
+    <string name="calendar_hidden_dialog_subtitle">कैलेंडर में फिर से दिखाने के लिए टाइटल चुनें</string>
+    <string name="calendar_hidden_none">कोई छुपा शो नहीं</string>
+    <string name="calendar_setting_coming_up">जल्द आ रहे रो</string>
+    <string name="calendar_setting_coming_up_sub">देखना जारी रखें के बाद एक रो, आपके कैलेंडर के नए और आने वाले एपिसोड और फ़िल्मों के साथ</string>
+    <string name="calendar_coming_up_title">जल्द आ रहे</string>
+    <string name="calendar_coming_up_new">नया</string>
+    <string name="calendar_coming_up_today_at">आज %1$s</string>
+    <string name="calendar_coming_up_tonight_at">आज रात %1$s</string>
+    <string name="calendar_reminder_title_one">नया एपिसोड</string>
+    <string name="calendar_reminder_title_one_film">नई फ़िल्म</string>
+    <string name="calendar_reminder_title_one_release">नई रिलीज़</string>
+    <plurals name="calendar_reminder_title">
+        <item quantity="one">%1$d नया एपिसोड</item>
+        <item quantity="other">%1$d नए एपिसोड</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_films">
+        <item quantity="one">%1$d नई फ़िल्म</item>
+        <item quantity="other">%1$d नई फ़िल्में</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_releases">
+        <item quantity="one">%1$d नई रिलीज़</item>
+        <item quantity="other">%1$d नई रिलीज़</item>
+    </plurals>
+    <plurals name="calendar_reminder_more">
+        <item quantity="one">और %1$d अन्य</item>
+        <item quantity="other">और %1$d अन्य</item>
+    </plurals>
+    <string name="calendar_reminder_watch_now">अभी देखें</string>
+    <string name="calendar_reminder_later">बाद में</string>
+    <string name="calendar_reminder_see_all">कैलेंडर में सब देखें</string>
+    <string name="calendar_reminder_row_show">शो</string>
+    <string name="calendar_reminder_row_film">फ़िल्म</string>
+    <string name="calendar_reminder_aired_today_at">आज %1$s पर प्रसारित</string>
+    <string name="calendar_reminder_aired_at">%2$s %1$s पर प्रसारित</string>
+    <string name="calendar_reminder_aired_today">आज प्रसारित</string>
+    <string name="calendar_reminder_out_today">आज रिलीज़</string>
+    <string name="calendar_corner_press_menu">खोलने के लिए मेन्यू दबाएँ</string>
+    <string name="calendar_reminder_finding">एपिसोड खोजा जा रहा है…</string>
+    <string name="calendar_list_separator">", "</string>
+    <string name="calendar_list_last_pair">%1$s और %2$s</string>
+    <string name="calendar_runtime_hours_minutes">%1$dh %2$dm</string>
+    <string name="calendar_runtime_hours">%1$dh</string>
+    <string name="calendar_runtime_minutes">%1$dm</string>
+    <string name="calendar_zone_region_africa">अफ़्रीका</string>
+    <string name="calendar_zone_region_america">अमेरिका</string>
+    <string name="calendar_zone_region_antarctica">अंटार्कटिका</string>
+    <string name="calendar_zone_region_asia">एशिया</string>
+    <string name="calendar_zone_region_atlantic">अटलांटिक</string>
+    <string name="calendar_zone_region_australia">ऑस्ट्रेलिया</string>
+    <string name="calendar_zone_region_europe">यूरोप</string>
+    <string name="calendar_zone_region_indian">हिंद महासागर</string>
+    <string name="calendar_zone_region_pacific">प्रशांत</string>
+</resources>

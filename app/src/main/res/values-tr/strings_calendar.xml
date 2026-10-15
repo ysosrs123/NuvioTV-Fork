@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_calendar">Takvim</string>
+    <string name="calendar_title">Takvim</string>
+    <string name="calendar_view_list">Liste</string>
+    <string name="calendar_view_month">Ay</string>
+    <string name="calendar_times_in">Saatler: %1$s</string>
+    <string name="calendar_zone_with_city">%1$s (%2$s)</string>
+    <string name="calendar_credit">Bölüm saatleri TVmaze\'den</string>
+    <string name="calendar_section_just_aired">Yeni yayınlananlar</string>
+    <string name="calendar_section_just_aired_hint">Son 7 gün</string>
+    <string name="calendar_section_today">Bugün</string>
+    <string name="calendar_section_tomorrow">Yarın</string>
+    <string name="calendar_section_later">Daha sonra</string>
+    <string name="calendar_section_later_hint">Her dizi için bilinen sonraki tarih</string>
+    <string name="calendar_section_no_date">Henüz tarih yok</string>
+    <string name="calendar_section_no_date_hint">Geri dönüyor veya yapım aşamasında</string>
+    <string name="calendar_episode_code">S%1$d B%2$d</string>
+    <string name="calendar_line_join">%1$s · %2$s</string>
+    <string name="calendar_film_cinema">Sinemalarda</string>
+    <string name="calendar_film_digital">Platform ve dijital çıkış</string>
+    <string name="calendar_show_returning">Geri dönecek dizi</string>
+    <string name="calendar_show_in_production">Yapım aşamasında</string>
+    <string name="calendar_show_next_unknown">Sonraki bölümün tarihi belli değil</string>
+    <string name="calendar_time_not_announced">Saat açıklanmadı</string>
+    <string name="calendar_unknown_title">İsimsiz</string>
+    <string name="calendar_label_new_show">Yeni dizi</string>
+    <string name="calendar_label_season_premiere">Sezon prömiyeri</string>
+    <string name="calendar_label_mid_season_premiere">Sezon arası dönüşü</string>
+    <string name="calendar_label_mid_season_finale">Sezon arası finali</string>
+    <string name="calendar_label_season_finale">Sezon finali</string>
+    <string name="calendar_label_series_finale">Dizi finali</string>
+    <string name="calendar_cd_bell_on">Hatırlatıcı açık</string>
+    <string name="calendar_cd_bell_off">Bana hatırlat</string>
+    <string name="calendar_cd_watched">İzlendi</string>
+    <string name="calendar_aired_on">Yayınlandı: %1$s</string>
+    <string name="calendar_out_on">Çıktı: %1$s</string>
+    <string name="calendar_options_subtitle">Bu içerik için takvim seçenekleri</string>
+    <string name="calendar_action_open_show">Diziyi aç</string>
+    <string name="calendar_action_open_film">Filmi aç</string>
+    <string name="calendar_action_remind">Yeni bölümleri bana hatırlat</string>
+    <string name="calendar_action_remind_film">Çıkınca bana hatırlat</string>
+    <string name="calendar_action_stop_remind">Hatırlatmaları durdur</string>
+    <string name="calendar_action_hide">Takvimden gizle</string>
+    <string name="calendar_building_title">Dizilerinizin tarihleri bulunuyor…</string>
+    <plurals name="calendar_building_progress">
+        <item quantity="one">%1$d içerik kaldı</item>
+        <item quantity="other">%1$d içerik kaldı</item>
+    </plurals>
+    <string name="calendar_empty_title">Henüz takip edilen yok</string>
+    <string name="calendar_empty_subtitle">İzlediğiniz veya kaydettiğiniz diziler burada görünür</string>
+    <string name="calendar_quiet_title">Her şey sakin</string>
+    <plurals name="calendar_quiet_subtitle">
+        <item quantity="one">Önümüzdeki gün dizilerinizde yenilik yok</item>
+        <item quantity="other">Önümüzdeki %1$d gün dizilerinizde yenilik yok</item>
+    </plurals>
+    <plurals name="calendar_month_episodes">
+        <item quantity="one">%1$d bölüm</item>
+        <item quantity="other">%1$d bölüm</item>
+    </plurals>
+    <plurals name="calendar_month_films">
+        <item quantity="one">%1$d film</item>
+        <item quantity="other">%1$d film</item>
+    </plurals>
+    <string name="calendar_month_more">+%1$d</string>
+    <string name="calendar_month_day_empty">Bu gün bir şey yok</string>
+    <string name="calendar_settings_title">Takvim</string>
+    <string name="calendar_settings_desc">Menü girişi, gösterilen günler, saat dilimi ve gizlenen diziler</string>
+    <string name="calendar_setting_menu">Takvimi menüde göster</string>
+    <string name="calendar_setting_menu_sub">Takvim, ana menüde Kütüphanem\'den sonra yer alır</string>
+    <string name="calendar_setting_days">Gösterilen günler</string>
+    <string name="calendar_setting_days_sub">Listenin gün gün ne kadar ileri gideceği; sonraki tarihler Daha sonra altında</string>
+    <plurals name="calendar_setting_days_value">
+        <item quantity="one">%1$d gün</item>
+        <item quantity="other">%1$d gün</item>
+    </plurals>
+    <string name="calendar_setting_zone">Saat dilimi</string>
+    <string name="calendar_setting_zone_sub_box">Bu cihaza göre, şu an %1$s</string>
+    <string name="calendar_setting_zone_sub_set">Bölüm saatleri bu dilimde gösterilir, şu an %1$s</string>
+    <string name="calendar_zone_follow_box">Bu cihaza göre</string>
+    <string name="calendar_zone_follow_box_desc">Şu an %1$s</string>
+    <string name="calendar_setting_corner">Yeni bölümler için köşe mesajı</string>
+    <string name="calendar_setting_corner_sub">Zili açık bir dizinin yeni bölümü çıkınca köşede kısa bir mesaj</string>
+    <string name="calendar_setting_lists">Kendi listelerimi dahil et</string>
+    <string name="calendar_setting_lists_sub">Kendi Trakt ve MDBList listelerinizdeki içerikleri de takip eder. Uzun listeler Takvimi kalabalıklaştırır.</string>
+    <string name="calendar_setting_hidden">Gizlenen diziler</string>
+    <string name="calendar_setting_hidden_sub">Takvimden gizlediğiniz içerikler. Tekrar göstermek için birini seçin.</string>
+    <plurals name="calendar_setting_hidden_value">
+        <item quantity="one">%1$d gizli</item>
+        <item quantity="other">%1$d gizli</item>
+    </plurals>
+    <string name="calendar_hidden_dialog_title">Gizlenen diziler</string>
+    <string name="calendar_hidden_dialog_subtitle">Takvimde tekrar göstermek için bir içerik seçin</string>
+    <string name="calendar_hidden_none">Gizlenen dizi yok</string>
+    <string name="calendar_setting_coming_up">Yakında satırı</string>
+    <string name="calendar_setting_coming_up_sub">İzlemeye Devam Et\'ten sonra, Takviminizdeki yeni ve yaklaşan bölüm ve filmleri gösteren satır</string>
+    <string name="calendar_coming_up_title">Yakında</string>
+    <string name="calendar_coming_up_new">Yeni</string>
+    <string name="calendar_coming_up_today_at">Bugün %1$s</string>
+    <string name="calendar_coming_up_tonight_at">Bu akşam %1$s</string>
+    <string name="calendar_reminder_title_one">Yeni bölüm</string>
+    <string name="calendar_reminder_title_one_film">Yeni film</string>
+    <string name="calendar_reminder_title_one_release">Yeni çıkış</string>
+    <plurals name="calendar_reminder_title">
+        <item quantity="one">%1$d yeni bölüm</item>
+        <item quantity="other">%1$d yeni bölüm</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_films">
+        <item quantity="one">%1$d yeni film</item>
+        <item quantity="other">%1$d yeni film</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_releases">
+        <item quantity="one">%1$d yeni çıkış</item>
+        <item quantity="other">%1$d yeni çıkış</item>
+    </plurals>
+    <plurals name="calendar_reminder_more">
+        <item quantity="one">ve %1$d tane daha</item>
+        <item quantity="other">ve %1$d tane daha</item>
+    </plurals>
+    <string name="calendar_reminder_watch_now">Şimdi izle</string>
+    <string name="calendar_reminder_later">Daha sonra</string>
+    <string name="calendar_reminder_see_all">Tümünü Takvimde gör</string>
+    <string name="calendar_reminder_row_show">Dizi</string>
+    <string name="calendar_reminder_row_film">Film</string>
+    <string name="calendar_reminder_aired_today_at">Bugün saat %1$s yayınlandı</string>
+    <string name="calendar_reminder_aired_at">%2$s saat %1$s yayınlandı</string>
+    <string name="calendar_reminder_aired_today">Bugün yayınlandı</string>
+    <string name="calendar_reminder_out_today">Bugün çıktı</string>
+    <string name="calendar_corner_press_menu">Açmak için Menü tuşuna basın</string>
+    <string name="calendar_reminder_finding">Bölüm bulunuyor…</string>
+    <string name="calendar_list_separator">", "</string>
+    <string name="calendar_list_last_pair">%1$s ve %2$s</string>
+    <string name="calendar_runtime_hours_minutes">%1$d sa %2$d dk</string>
+    <string name="calendar_runtime_hours">%1$d sa</string>
+    <string name="calendar_runtime_minutes">%1$d dk</string>
+    <string name="calendar_zone_region_africa">Afrika</string>
+    <string name="calendar_zone_region_america">Amerika</string>
+    <string name="calendar_zone_region_antarctica">Antarktika</string>
+    <string name="calendar_zone_region_asia">Asya</string>
+    <string name="calendar_zone_region_atlantic">Atlantik</string>
+    <string name="calendar_zone_region_australia">Avustralya</string>
+    <string name="calendar_zone_region_europe">Avrupa</string>
+    <string name="calendar_zone_region_indian">Hint Okyanusu</string>
+    <string name="calendar_zone_region_pacific">Pasifik</string>
+</resources>

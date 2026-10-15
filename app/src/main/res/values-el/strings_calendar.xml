@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_calendar">Ημερολόγιο</string>
+    <string name="calendar_title">Ημερολόγιο</string>
+    <string name="calendar_view_list">Λίστα</string>
+    <string name="calendar_view_month">Μήνας</string>
+    <string name="calendar_times_in">Ώρες σε %1$s</string>
+    <string name="calendar_zone_with_city">%1$s (%2$s)</string>
+    <string name="calendar_credit">Ώρες επεισοδίων από το TVmaze</string>
+    <string name="calendar_section_just_aired">Μόλις προβλήθηκαν</string>
+    <string name="calendar_section_just_aired_hint">Τελευταίες 7 ημέρες</string>
+    <string name="calendar_section_today">Σήμερα</string>
+    <string name="calendar_section_tomorrow">Αύριο</string>
+    <string name="calendar_section_later">Αργότερα</string>
+    <string name="calendar_section_later_hint">Επόμενη γνωστή ημερομηνία κάθε σειράς</string>
+    <string name="calendar_section_no_date">Χωρίς ημερομηνία</string>
+    <string name="calendar_section_no_date_hint">Επιστρέφουν ή σε παραγωγή</string>
+    <string name="calendar_episode_code">S%1$d E%2$d</string>
+    <string name="calendar_line_join">%1$s · %2$s</string>
+    <string name="calendar_film_cinema">Στα σινεμά</string>
+    <string name="calendar_film_digital">Streaming και ψηφιακή κυκλοφορία</string>
+    <string name="calendar_show_returning">Σειρά που επιστρέφει</string>
+    <string name="calendar_show_in_production">Σε παραγωγή</string>
+    <string name="calendar_show_next_unknown">Επόμενο επεισόδιο χωρίς ημερομηνία</string>
+    <string name="calendar_time_not_announced">Η ώρα δεν έχει ανακοινωθεί</string>
+    <string name="calendar_unknown_title">Χωρίς τίτλο</string>
+    <string name="calendar_label_new_show">Νέα σειρά</string>
+    <string name="calendar_label_season_premiere">Πρεμιέρα σεζόν</string>
+    <string name="calendar_label_mid_season_premiere">Επιστροφή μέσης σεζόν</string>
+    <string name="calendar_label_mid_season_finale">Φινάλε μέσης σεζόν</string>
+    <string name="calendar_label_season_finale">Φινάλε σεζόν</string>
+    <string name="calendar_label_series_finale">Φινάλε σειράς</string>
+    <string name="calendar_cd_bell_on">Υπενθύμιση ενεργή</string>
+    <string name="calendar_cd_bell_off">Ορισμός υπενθύμισης</string>
+    <string name="calendar_cd_watched">Προβλήθηκε</string>
+    <string name="calendar_aired_on">Προβλήθηκε %1$s</string>
+    <string name="calendar_out_on">Κυκλοφόρησε %1$s</string>
+    <string name="calendar_options_subtitle">Επιλογές Ημερολογίου για αυτόν τον τίτλο</string>
+    <string name="calendar_action_open_show">Άνοιγμα σειράς</string>
+    <string name="calendar_action_open_film">Άνοιγμα ταινίας</string>
+    <string name="calendar_action_remind">Υπενθύμιση για νέα επεισόδια</string>
+    <string name="calendar_action_remind_film">Υπενθύμιση όταν κυκλοφορήσει</string>
+    <string name="calendar_action_stop_remind">Διακοπή υπενθυμίσεων</string>
+    <string name="calendar_action_hide">Απόκρυψη από το Ημερολόγιο</string>
+    <string name="calendar_building_title">Εύρεση ημερομηνιών για τις σειρές σας…</string>
+    <plurals name="calendar_building_progress">
+        <item quantity="one">Απομένει %1$d τίτλος</item>
+        <item quantity="other">Απομένουν %1$d τίτλοι</item>
+    </plurals>
+    <string name="calendar_empty_title">Δεν ακολουθείτε τίποτα ακόμα</string>
+    <string name="calendar_empty_subtitle">Οι σειρές που βλέπετε ή αποθηκεύετε θα εμφανίζονται εδώ</string>
+    <string name="calendar_quiet_title">Ησυχία</string>
+    <plurals name="calendar_quiet_subtitle">
+        <item quantity="one">Τίποτα νέο από τις σειρές σας αύριο</item>
+        <item quantity="other">Τίποτα νέο από τις σειρές σας τις επόμενες %1$d ημέρες</item>
+    </plurals>
+    <plurals name="calendar_month_episodes">
+        <item quantity="one">%1$d επεισόδιο</item>
+        <item quantity="other">%1$d επεισόδια</item>
+    </plurals>
+    <plurals name="calendar_month_films">
+        <item quantity="one">%1$d ταινία</item>
+        <item quantity="other">%1$d ταινίες</item>
+    </plurals>
+    <string name="calendar_month_more">+%1$d</string>
+    <string name="calendar_month_day_empty">Τίποτα αυτή την ημέρα</string>
+    <string name="calendar_settings_title">Ημερολόγιο</string>
+    <string name="calendar_settings_desc">Θέση στο μενού, ημέρες, ζώνη ώρας και κρυφές σειρές</string>
+    <string name="calendar_setting_menu">Ημερολόγιο στο μενού</string>
+    <string name="calendar_setting_menu_sub">Το Ημερολόγιο μπαίνει μετά τη Βιβλιοθήκη στο κύριο μενού</string>
+    <string name="calendar_setting_days">Ημέρες προβολής</string>
+    <string name="calendar_setting_days_sub">Πόσο μπροστά φτάνει η λίστα ημέρα προς ημέρα. Οι επόμενες ημερομηνίες μπαίνουν στο Αργότερα</string>
+    <plurals name="calendar_setting_days_value">
+        <item quantity="one">%1$d ημέρα</item>
+        <item quantity="other">%1$d ημέρες</item>
+    </plurals>
+    <string name="calendar_setting_zone">Ζώνη ώρας</string>
+    <string name="calendar_setting_zone_sub_box">Όπως η συσκευή, τώρα %1$s</string>
+    <string name="calendar_setting_zone_sub_set">Οι ώρες των επεισοδίων εμφανίζονται σε αυτή τη ζώνη, τώρα %1$s</string>
+    <string name="calendar_zone_follow_box">Όπως αυτή η συσκευή</string>
+    <string name="calendar_zone_follow_box_desc">Τώρα %1$s</string>
+    <string name="calendar_setting_corner">Μήνυμα στη γωνία για νέα επεισόδια</string>
+    <string name="calendar_setting_corner_sub">Σύντομο μήνυμα στη γωνία όταν μια σειρά με ενεργό καμπανάκι έχει νέο επεισόδιο</string>
+    <string name="calendar_setting_lists">Συμπερίληψη των λιστών μου</string>
+    <string name="calendar_setting_lists_sub">Ακολουθεί και τίτλους από τις δικές σας λίστες Trakt και MDBList. Οι μεγάλες λίστες γεμίζουν το Ημερολόγιο.</string>
+    <string name="calendar_setting_hidden">Κρυφές σειρές</string>
+    <string name="calendar_setting_hidden_sub">Τίτλοι που αποκρύψατε από το Ημερολόγιο. Επιλέξτε έναν για να εμφανιστεί ξανά.</string>
+    <plurals name="calendar_setting_hidden_value">
+        <item quantity="one">%1$d κρυφή</item>
+        <item quantity="other">%1$d κρυφές</item>
+    </plurals>
+    <string name="calendar_hidden_dialog_title">Κρυφές σειρές</string>
+    <string name="calendar_hidden_dialog_subtitle">Επιλέξτε έναν τίτλο για να εμφανιστεί ξανά στο Ημερολόγιο</string>
+    <string name="calendar_hidden_none">Καμία κρυφή σειρά</string>
+    <string name="calendar_setting_coming_up">Σειρά «Νέα και επερχόμενα»</string>
+    <string name="calendar_setting_coming_up_sub">Μια σειρά μετά τη Συνέχεια παρακολούθησης με νέα και επερχόμενα επεισόδια και ταινίες από το Ημερολόγιο</string>
+    <string name="calendar_coming_up_title">Νέα και επερχόμενα</string>
+    <string name="calendar_coming_up_new">Νέο</string>
+    <string name="calendar_coming_up_today_at">Σήμερα στις %1$s</string>
+    <string name="calendar_coming_up_tonight_at">Απόψε στις %1$s</string>
+    <string name="calendar_reminder_title_one">Νέο επεισόδιο</string>
+    <string name="calendar_reminder_title_one_film">Νέα ταινία</string>
+    <string name="calendar_reminder_title_one_release">Νέα κυκλοφορία</string>
+    <plurals name="calendar_reminder_title">
+        <item quantity="one">%1$d νέο επεισόδιο</item>
+        <item quantity="other">%1$d νέα επεισόδια</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_films">
+        <item quantity="one">%1$d νέα ταινία</item>
+        <item quantity="other">%1$d νέες ταινίες</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_releases">
+        <item quantity="one">%1$d νέα κυκλοφορία</item>
+        <item quantity="other">%1$d νέες κυκλοφορίες</item>
+    </plurals>
+    <plurals name="calendar_reminder_more">
+        <item quantity="one">και %1$d ακόμα</item>
+        <item quantity="other">και %1$d ακόμα</item>
+    </plurals>
+    <string name="calendar_reminder_watch_now">Δείτε τώρα</string>
+    <string name="calendar_reminder_later">Αργότερα</string>
+    <string name="calendar_reminder_see_all">Όλα στο Ημερολόγιο</string>
+    <string name="calendar_reminder_row_show">Σειρά</string>
+    <string name="calendar_reminder_row_film">Ταινία</string>
+    <string name="calendar_reminder_aired_today_at">Προβλήθηκε σήμερα στις %1$s</string>
+    <string name="calendar_reminder_aired_at">Προβλήθηκε %2$s στις %1$s</string>
+    <string name="calendar_reminder_aired_today">Προβλήθηκε σήμερα</string>
+    <string name="calendar_reminder_out_today">Κυκλοφόρησε σήμερα</string>
+    <string name="calendar_corner_press_menu">Πατήστε Μενού για άνοιγμα</string>
+    <string name="calendar_reminder_finding">Εύρεση του επεισοδίου…</string>
+    <string name="calendar_list_separator">", "</string>
+    <string name="calendar_list_last_pair">%1$s και %2$s</string>
+    <string name="calendar_runtime_hours_minutes">%1$d ώρ. %2$d λεπ.</string>
+    <string name="calendar_runtime_hours">%1$d ώρ.</string>
+    <string name="calendar_runtime_minutes">%1$d λεπ.</string>
+    <string name="calendar_zone_region_africa">Αφρική</string>
+    <string name="calendar_zone_region_america">Αμερική</string>
+    <string name="calendar_zone_region_antarctica">Ανταρκτική</string>
+    <string name="calendar_zone_region_asia">Ασία</string>
+    <string name="calendar_zone_region_atlantic">Ατλαντικός</string>
+    <string name="calendar_zone_region_australia">Αυστραλία</string>
+    <string name="calendar_zone_region_europe">Ευρώπη</string>
+    <string name="calendar_zone_region_indian">Ινδικός Ωκεανός</string>
+    <string name="calendar_zone_region_pacific">Ειρηνικός</string>
+</resources>

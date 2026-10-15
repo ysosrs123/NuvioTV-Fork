@@ -136,24 +136,40 @@ fun GridHomeContent(
     val upcomingRowFocusRequester = remember { FocusRequester() }
     val cwListState = androidx.compose.foundation.lazy.rememberLazyListState()
     val upcomingListState = androidx.compose.foundation.lazy.rememberLazyListState()
+    val lastFocusedComingUpIndex = rememberSaveable { mutableIntStateOf(-1) }
+    val comingUpFocusRequesters = remember { mutableMapOf<Int, FocusRequester>() }
+    val comingUpRowFocusRequester = remember { FocusRequester() }
+    val comingUpListState = androidx.compose.foundation.lazy.rememberLazyListState()
 
     // Improved Back navigation for CW/Upcoming rows: scroll to first item
     val contentHasFocus = remember { mutableStateOf(false) }
     val activeCwRowKey = remember { mutableStateOf<String?>(null) }
     val cwPendingScrollToStart = remember { mutableIntStateOf(0) }
     val upcomingPendingScrollToStart = remember { mutableIntStateOf(0) }
+    val comingUpPendingScrollToStart = remember { mutableIntStateOf(0) }
     BackHandler(enabled = contentHasFocus.value && run {
         val key = activeCwRowKey.value ?: return@run false
-        val idx = if (key == "continue_watching") lastFocusedCwIndex.intValue else lastFocusedUpcomingIndex.intValue
+        val idx = when (key) {
+            "continue_watching" -> lastFocusedCwIndex.intValue
+            MODERN_COMING_UP_ROW_KEY -> lastFocusedComingUpIndex.intValue
+            else -> lastFocusedUpcomingIndex.intValue
+        }
         idx > 0
     }) {
         val key = activeCwRowKey.value ?: return@BackHandler
-        if (key == "continue_watching") {
-            lastFocusedCwIndex.intValue = 0
-            cwPendingScrollToStart.intValue++
-        } else {
-            lastFocusedUpcomingIndex.intValue = 0
-            upcomingPendingScrollToStart.intValue++
+        when (key) {
+            "continue_watching" -> {
+                lastFocusedCwIndex.intValue = 0
+                cwPendingScrollToStart.intValue++
+            }
+            MODERN_COMING_UP_ROW_KEY -> {
+                lastFocusedComingUpIndex.intValue = 0
+                comingUpPendingScrollToStart.intValue++
+            }
+            else -> {
+                lastFocusedUpcomingIndex.intValue = 0
+                upcomingPendingScrollToStart.intValue++
+            }
         }
     }
 
@@ -446,6 +462,7 @@ fun GridHomeContent(
                     val fromCwRow = when (cwRow) {
                         "continue_watching" -> cwRowFocusRequester
                         "upcoming_section" -> upcomingRowFocusRequester
+                        MODERN_COMING_UP_ROW_KEY -> comingUpRowFocusRequester
                         else -> null
                     }
                     val lastKey = lastFocusedGridItemKey.value
@@ -657,6 +674,44 @@ fun GridHomeContent(
                         },
                         blurUnwatchedEpisodes = uiState.blurUnwatchedEpisodes,
                         useEpisodeThumbnails = uiState.useEpisodeThumbnailsInCw,
+                        cardStyle = uiState.continueWatchingCardStyle,
+                        cornerRadius = posterCardStyle.cornerRadius,
+                        posterCardWidth = posterCardStyle.width,
+                        posterCardHeight = posterCardStyle.height
+                    )
+                }
+            }
+
+            if (uiState.comingUpItems.isNotEmpty()) {
+                item(
+                    key = MODERN_COMING_UP_ROW_KEY,
+                    span = { GridItemSpan(maxLineSpan) },
+                    contentType = "upcoming_section"
+                ) {
+                    LaunchedEffect(comingUpPendingScrollToStart.intValue) {
+                        if (comingUpPendingScrollToStart.intValue > 0) {
+                            comingUpListState.scrollToItem(0, 0)
+                            runCatching { comingUpRowFocusRequester.requestFocus() }
+                            comingUpPendingScrollToStart.intValue = 0
+                        }
+                    }
+                    val openComingUp: (ContinueWatchingItem) -> Unit = { item ->
+                        (item as? ContinueWatchingItem.NextUp)?.info?.let { onNavigateToDetail(it.contentId, it.contentType, "") }
+                    }
+                    GridContinueWatchingSection(
+                        modifier = Modifier.fillMaxWidth(),
+                        fullWidth = gridWidth,
+                        items = uiState.comingUpItems,
+                        title = stringResource(R.string.calendar_coming_up_title),
+                        lastFocusedIndex = lastFocusedComingUpIndex,
+                        focusRequesters = comingUpFocusRequesters,
+                        rowFocusRequester = comingUpRowFocusRequester,
+                        listState = comingUpListState,
+                        onItemFocused = { lastFocusedComingUpIndex.intValue = it; activeCwRowKey.value = MODERN_COMING_UP_ROW_KEY },
+                        onItemClick = openComingUp,
+                        onLongPress = openComingUp,
+                        onRemoveItem = {},
+                        useEpisodeThumbnails = false,
                         cardStyle = uiState.continueWatchingCardStyle,
                         cornerRadius = posterCardStyle.cornerRadius,
                         posterCardWidth = posterCardStyle.width,

@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_calendar">Calendar</string>
+    <string name="calendar_title">Calendar</string>
+    <string name="calendar_view_list">List</string>
+    <string name="calendar_view_month">Month</string>
+    <string name="calendar_times_in">Times in %1$s</string>
+    <string name="calendar_zone_with_city">%1$s (%2$s)</string>
+    <string name="calendar_credit">Episode times from TVmaze</string>
+    <string name="licenses_attributions_tvmaze_title" translatable="false">TVmaze</string>
+
+    <string name="calendar_section_just_aired">Just aired</string>
+    <string name="calendar_section_just_aired_hint">Past 7 days</string>
+    <string name="calendar_section_today">Today</string>
+    <string name="calendar_section_tomorrow">Tomorrow</string>
+    <string name="calendar_section_later">Later</string>
+    <string name="calendar_section_later_hint">Next known date for each show</string>
+    <string name="calendar_section_no_date">No date yet</string>
+    <string name="calendar_section_no_date_hint">Returning or in production</string>
+
+    <string name="calendar_episode_code">S%1$d E%2$d</string>
+    <string name="calendar_line_join">%1$s · %2$s</string>
+    <string name="calendar_film_cinema">In cinemas</string>
+    <string name="calendar_film_digital">Streaming and digital release</string>
+    <string name="calendar_show_returning">Returning series</string>
+    <string name="calendar_show_in_production">In production</string>
+    <string name="calendar_show_next_unknown">Next episode not dated yet</string>
+    <string name="calendar_time_not_announced">Time not announced</string>
+    <string name="calendar_unknown_title">Untitled</string>
+
+    <string name="calendar_label_new_show">New show</string>
+    <string name="calendar_label_season_premiere">Season premiere</string>
+    <string name="calendar_label_mid_season_premiere">Mid-season premiere</string>
+    <string name="calendar_label_mid_season_finale">Mid-season finale</string>
+    <string name="calendar_label_season_finale">Season finale</string>
+    <string name="calendar_label_series_finale">Series finale</string>
+
+    <string name="calendar_cd_bell_on">Reminder on</string>
+    <string name="calendar_cd_bell_off">Remind me</string>
+    <string name="calendar_cd_watched">Watched</string>
+
+    <string name="calendar_aired_on">Aired %1$s</string>
+    <string name="calendar_out_on">Out %1$s</string>
+
+    <string name="calendar_options_subtitle">Calendar options for this title</string>
+    <string name="calendar_action_open_show">Open show</string>
+    <string name="calendar_action_open_film">Open film</string>
+    <string name="calendar_action_remind">Remind me about new episodes</string>
+    <string name="calendar_action_remind_film">Remind me when it is out</string>
+    <string name="calendar_action_stop_remind">Stop reminders</string>
+    <string name="calendar_action_hide">Hide from Calendar</string>
+
+    <string name="calendar_building_title">Finding dates for your shows…</string>
+    <plurals name="calendar_building_progress">
+        <item quantity="one">%1$d title to go</item>
+        <item quantity="other">%1$d titles to go</item>
+    </plurals>
+    <string name="calendar_empty_title">Nothing followed yet</string>
+    <string name="calendar_empty_subtitle">Shows you watch or save will appear here</string>
+    <string name="calendar_quiet_title">All quiet</string>
+    <plurals name="calendar_quiet_subtitle">
+        <item quantity="one">Nothing new from your shows in the next day</item>
+        <item quantity="other">Nothing new from your shows in the next %1$d days</item>
+    </plurals>
+
+    <plurals name="calendar_month_episodes">
+        <item quantity="one">%1$d episode</item>
+        <item quantity="other">%1$d episodes</item>
+    </plurals>
+    <plurals name="calendar_month_films">
+        <item quantity="one">%1$d film</item>
+        <item quantity="other">%1$d films</item>
+    </plurals>
+    <string name="calendar_month_more">+%1$d</string>
+    <string name="calendar_month_day_empty">Nothing on this day</string>
+
+    <string name="calendar_settings_title">Calendar</string>
+    <string name="calendar_settings_desc">Menu entry, days shown, time zone and hidden shows</string>
+    <string name="calendar_setting_menu">Show Calendar in the menu</string>
+    <string name="calendar_setting_menu_sub">Calendar sits after Library in the main menu</string>
+    <string name="calendar_setting_days">Days shown</string>
+    <string name="calendar_setting_days_sub">How far ahead the list goes day by day; later dates go under Later</string>
+    <plurals name="calendar_setting_days_value">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <string name="calendar_setting_zone">Time zone</string>
+    <string name="calendar_setting_zone_sub_box">Follows this box, now %1$s</string>
+    <string name="calendar_setting_zone_sub_set">Episode times are shown in this zone, now %1$s</string>
+    <string name="calendar_zone_follow_box">Follow this box</string>
+    <string name="calendar_zone_follow_box_desc">Now %1$s</string>
+    <string name="calendar_setting_corner">Corner message for new episodes</string>
+    <string name="calendar_setting_corner_sub">A short message in the corner when a show with the bell on has a new episode out</string>
+    <string name="calendar_setting_lists">Include my own lists</string>
+    <string name="calendar_setting_lists_sub">Also follows titles in your own Trakt and MDBList lists. Long lists make the Calendar busy.</string>
+    <string name="calendar_setting_hidden">Hidden shows</string>
+    <string name="calendar_setting_hidden_sub">Titles you hid from the Calendar. Select one to show it again.</string>
+    <plurals name="calendar_setting_hidden_value">
+        <item quantity="one">%1$d hidden</item>
+        <item quantity="other">%1$d hidden</item>
+    </plurals>
+    <string name="calendar_hidden_dialog_title">Hidden shows</string>
+    <string name="calendar_hidden_dialog_subtitle">Select a title to show it in the Calendar again</string>
+    <string name="calendar_hidden_none">No hidden shows</string>
+
+    <string name="calendar_setting_coming_up">Coming up row</string>
+    <string name="calendar_setting_coming_up_sub">A row after Continue Watching with new and upcoming episodes and films from your Calendar</string>
+    <string name="calendar_coming_up_title">Coming up</string>
+    <string name="calendar_coming_up_new">New</string>
+    <string name="calendar_coming_up_today_at">Today %1$s</string>
+    <string name="calendar_coming_up_tonight_at">Tonight %1$s</string>
+
+    <string name="calendar_reminder_title_one">New episode</string>
+    <string name="calendar_reminder_title_one_film">New film</string>
+    <string name="calendar_reminder_title_one_release">New release</string>
+    <plurals name="calendar_reminder_title">
+        <item quantity="one">%1$d new episode</item>
+        <item quantity="other">%1$d new episodes</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_films">
+        <item quantity="one">%1$d new film</item>
+        <item quantity="other">%1$d new films</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_releases">
+        <item quantity="one">%1$d new release</item>
+        <item quantity="other">%1$d new releases</item>
+    </plurals>
+    <plurals name="calendar_reminder_more">
+        <item quantity="one">and %1$d more</item>
+        <item quantity="other">and %1$d more</item>
+    </plurals>
+    <string name="calendar_reminder_watch_now">Watch now</string>
+    <string name="calendar_reminder_later">Later</string>
+    <string name="calendar_reminder_see_all">See all in Calendar</string>
+    <string name="calendar_reminder_row_show">Show</string>
+    <string name="calendar_reminder_row_film">Film</string>
+    <string name="calendar_reminder_aired_today_at">Aired %1$s today</string>
+    <string name="calendar_reminder_aired_at">Aired %1$s %2$s</string>
+    <string name="calendar_reminder_aired_today">Aired today</string>
+    <string name="calendar_reminder_out_today">Out today</string>
+    <string name="calendar_corner_press_menu">Press Menu to open</string>
+    <string name="calendar_reminder_finding">Finding the episode…</string>
+
+    <string name="calendar_list_separator">", "</string>
+    <string name="calendar_list_last_pair">%1$s and %2$s</string>
+    <string name="calendar_runtime_hours_minutes">%1$dh %2$dm</string>
+    <string name="calendar_runtime_hours">%1$dh</string>
+    <string name="calendar_runtime_minutes">%1$dm</string>
+
+    <string name="calendar_zone_region_africa">Africa</string>
+    <string name="calendar_zone_region_america">America</string>
+    <string name="calendar_zone_region_antarctica">Antarctica</string>
+    <string name="calendar_zone_region_asia">Asia</string>
+    <string name="calendar_zone_region_atlantic">Atlantic</string>
+    <string name="calendar_zone_region_australia">Australia</string>
+    <string name="calendar_zone_region_europe">Europe</string>
+    <string name="calendar_zone_region_indian">Indian Ocean</string>
+    <string name="calendar_zone_region_pacific">Pacific</string>
+</resources>

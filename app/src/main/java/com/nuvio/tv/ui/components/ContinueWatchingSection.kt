@@ -71,6 +71,7 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Text
 import com.nuvio.tv.ui.screens.home.ContinueWatchingItem
+import com.nuvio.tv.ui.screens.home.showsEpisodeCode
 import com.nuvio.tv.ui.theme.NuvioTheme
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
@@ -149,7 +150,9 @@ fun ContinueWatchingSection(
     imageHeight: Dp = 162.dp,
     cardStyle: ContinueWatchingCardStyle = ContinueWatchingCardStyle.CARD,
     cornerRadius: Dp = NuvioTheme.radii.md,
-    posterTitleOverride: TextStyle? = null
+    posterTitleOverride: TextStyle? = null,
+    /** Replaces the options dialog on a long press when set. */
+    onLongPress: ((ContinueWatchingItem) -> Unit)? = null
 ) {
     if (items.isEmpty()) return
 
@@ -259,7 +262,9 @@ fun ContinueWatchingSection(
                 val requester = focusRequesters.getOrPut(index) { FocusRequester() }
                 val focusModifier = Modifier.focusRequester(requester)
                 val stableOnClick = remember(progress) { { onItemClick(progress) } }
-                val stableOnLongPress = remember(progress) { { optionsItem = progress } }
+                val stableOnLongPress = remember(progress, onLongPress) {
+                    { if (onLongPress != null) onLongPress(progress) else { optionsItem = progress } }
+                }
                 var isCardFocused by remember { mutableStateOf(false) }
 
                     ContinueWatchingCard(
@@ -474,7 +479,7 @@ fun ContinueWatchingCard(
     val nextUp = remember(item) { (item as? ContinueWatchingItem.NextUp)?.info }
     val cardContext = LocalContext.current
     val episodeStr = remember(progress, nextUp, cardContext) {
-        val season = progress?.season ?: nextUp?.season
+        val season = progress?.season ?: nextUp?.season?.takeIf { nextUp.showsEpisodeCode }
         val episode = progress?.episode ?: nextUp?.episode
         if (season != null && episode != null) {
             cardContext.getString(R.string.season_episode_format, season, episode)
@@ -497,7 +502,9 @@ fun ContinueWatchingCard(
     val effectiveNextUpLabel = if (useShortLabels) strNextUpShort else strNextUp
     val effectiveNewEpisodeLabel = if (useShortLabels) strNewEpisodeShort else strNewEpisode
     val nextUpBadgeText = nextUp?.let { info ->
-        if (info.isReleaseAlert) {
+        if (info.badgeLabel != null) {
+            info.badgeLabel
+        } else if (info.isReleaseAlert) {
             if (info.isNewSeasonRelease) strNewSeason else effectiveNewEpisodeLabel
         } else if (!info.hasAired) {
             val airDateText = if (useShortLabels) {

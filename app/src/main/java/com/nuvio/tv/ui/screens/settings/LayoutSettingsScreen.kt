@@ -156,6 +156,7 @@ private fun LayoutSectionContent(
         LayoutSection.HOME_LAYOUT -> LayoutHomeLayoutSection(uiState, onEvent)
         LayoutSection.HOME_CONTENT -> LayoutHomeContentSection(uiState, onEvent)
         LayoutSection.SIDEBAR -> LayoutSidebarSection(uiState, onEvent)
+        LayoutSection.CALENDAR -> LayoutCalendarSection()
         LayoutSection.CONTINUE_WATCHING -> LayoutContinueWatchingSection(uiState, onEvent)
         LayoutSection.FOCUSED_POSTER -> LayoutFocusedPosterSection(uiState, onEvent)
         LayoutSection.POSTER_CARD -> LayoutPosterCardSection(uiState, onEvent)

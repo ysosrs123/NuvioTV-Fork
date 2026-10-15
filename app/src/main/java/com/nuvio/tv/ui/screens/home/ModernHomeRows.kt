@@ -930,7 +930,8 @@ internal fun ModernRowSection(
                     }
                 ) { index, item ->
                     val requester = itemFocusRequesters.getOrPut(index) { FocusRequester() }
-                    val isContinueWatchingRow = row.key == MODERN_CONTINUE_WATCHING_ROW_KEY || row.key == MODERN_UPCOMING_ROW_KEY
+                    val isContinueWatchingRow = row.key == MODERN_CONTINUE_WATCHING_ROW_KEY || row.key == MODERN_UPCOMING_ROW_KEY ||
+                        row.key == MODERN_COMING_UP_ROW_KEY
                     val onFocused = remember(row.key, index, isContinueWatchingRow) {
                         {
                             onRowItemFocused(row.key, index, isContinueWatchingRow)
@@ -954,6 +955,13 @@ internal fun ModernRowSection(
 
                     when (val payload = item.payload) {
                         is ModernPayload.ContinueWatching -> {
+                            val comingUp = row.key == MODERN_COMING_UP_ROW_KEY
+                            val openComingUp = remember(onNavigateToDetail) {
+                                { cw: ContinueWatchingItem ->
+                                    (cw as? ContinueWatchingItem.NextUp)?.info?.let { onNavigateToDetail(it.contentId, it.contentType, "") }
+                                    Unit
+                                }
+                            }
                             ModernContinueWatchingRowItem(
                                 payload = payload,
                                 requester = requester,
@@ -965,8 +973,8 @@ internal fun ModernRowSection(
                                 continueWatchingCardStyle = continueWatchingCardStyle,
                                 continueWatchingCornerRadius = continueWatchingCornerRadius,
                                 onFocused = onFocused,
-                                onContinueWatchingClick = onContinueWatchingClick,
-                                onShowOptions = onContinueWatchingOptions
+                                onContinueWatchingClick = if (comingUp) openComingUp else onContinueWatchingClick,
+                                onShowOptions = if (comingUp) openComingUp else onContinueWatchingOptions
                             )
                         }
 

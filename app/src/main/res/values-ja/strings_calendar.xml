@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_calendar">カレンダー</string>
+    <string name="calendar_title">カレンダー</string>
+    <string name="calendar_view_list">リスト</string>
+    <string name="calendar_view_month">月</string>
+    <string name="calendar_times_in">%1$s の時刻で表示</string>
+    <string name="calendar_zone_with_city">%1$s (%2$s)</string>
+    <string name="calendar_credit">放送時刻はTVmazeより</string>
+    <string name="calendar_section_just_aired">最近の放送</string>
+    <string name="calendar_section_just_aired_hint">過去7日間</string>
+    <string name="calendar_section_today">今日</string>
+    <string name="calendar_section_tomorrow">明日</string>
+    <string name="calendar_section_later">それ以降</string>
+    <string name="calendar_section_later_hint">各番組の次回予定日</string>
+    <string name="calendar_section_no_date">日付未定</string>
+    <string name="calendar_section_no_date_hint">継続予定または製作中</string>
+    <string name="calendar_episode_code">S%1$d E%2$d</string>
+    <string name="calendar_line_join">%1$s · %2$s</string>
+    <string name="calendar_film_cinema">劇場公開</string>
+    <string name="calendar_film_digital">配信・デジタル公開</string>
+    <string name="calendar_show_returning">継続中のシリーズ</string>
+    <string name="calendar_show_in_production">製作中</string>
+    <string name="calendar_show_next_unknown">次のエピソードは日付未定</string>
+    <string name="calendar_time_not_announced">時刻未発表</string>
+    <string name="calendar_unknown_title">無題</string>
+    <string name="calendar_label_new_show">新番組</string>
+    <string name="calendar_label_season_premiere">シーズン初回</string>
+    <string name="calendar_label_mid_season_premiere">シーズン後半初回</string>
+    <string name="calendar_label_mid_season_finale">シーズン前半最終話</string>
+    <string name="calendar_label_season_finale">シーズン最終話</string>
+    <string name="calendar_label_series_finale">シリーズ最終話</string>
+    <string name="calendar_cd_bell_on">リマインダー オン</string>
+    <string name="calendar_cd_bell_off">リマインドする</string>
+    <string name="calendar_cd_watched">視聴済み</string>
+    <string name="calendar_aired_on">%1$s 放送</string>
+    <string name="calendar_out_on">%1$s 公開</string>
+    <string name="calendar_options_subtitle">このタイトルのカレンダー設定</string>
+    <string name="calendar_action_open_show">番組を開く</string>
+    <string name="calendar_action_open_film">映画を開く</string>
+    <string name="calendar_action_remind">新しいエピソードをリマインド</string>
+    <string name="calendar_action_remind_film">公開時にリマインド</string>
+    <string name="calendar_action_stop_remind">リマインダーを停止</string>
+    <string name="calendar_action_hide">カレンダーから非表示</string>
+    <string name="calendar_building_title">番組の日付を確認中…</string>
+    <plurals name="calendar_building_progress">
+        <item quantity="one">残り%1$d件</item>
+        <item quantity="other">残り%1$d件</item>
+    </plurals>
+    <string name="calendar_empty_title">まだ何もフォローしていません</string>
+    <string name="calendar_empty_subtitle">視聴または保存した番組がここに表示されます</string>
+    <string name="calendar_quiet_title">予定なし</string>
+    <plurals name="calendar_quiet_subtitle">
+        <item quantity="one">明日までに番組の新着はありません</item>
+        <item quantity="other">今後%1$d日間、番組の新着はありません</item>
+    </plurals>
+    <plurals name="calendar_month_episodes">
+        <item quantity="one">%1$d話</item>
+        <item quantity="other">%1$d話</item>
+    </plurals>
+    <plurals name="calendar_month_films">
+        <item quantity="one">映画%1$d本</item>
+        <item quantity="other">映画%1$d本</item>
+    </plurals>
+    <string name="calendar_month_more">+%1$d</string>
+    <string name="calendar_month_day_empty">この日は予定なし</string>
+    <string name="calendar_settings_title">カレンダー</string>
+    <string name="calendar_settings_desc">メニュー項目、表示日数、タイムゾーン、非表示の番組</string>
+    <string name="calendar_setting_menu">メニューにカレンダーを表示</string>
+    <string name="calendar_setting_menu_sub">メインメニューのライブラリの次にカレンダーを表示</string>
+    <string name="calendar_setting_days">表示日数</string>
+    <string name="calendar_setting_days_sub">リストを日ごとに表示する期間。それより先の日付は「それ以降」に表示</string>
+    <plurals name="calendar_setting_days_value">
+        <item quantity="one">%1$d日</item>
+        <item quantity="other">%1$d日</item>
+    </plurals>
+    <string name="calendar_setting_zone">タイムゾーン</string>
+    <string name="calendar_setting_zone_sub_box">このデバイスに合わせる。現在: %1$s</string>
+    <string name="calendar_setting_zone_sub_set">エピソードの時刻をこのタイムゾーンで表示。現在: %1$s</string>
+    <string name="calendar_zone_follow_box">このデバイスに合わせる</string>
+    <string name="calendar_zone_follow_box_desc">現在: %1$s</string>
+    <string name="calendar_setting_corner">新着エピソードの通知</string>
+    <string name="calendar_setting_corner_sub">ベルをオンにした番組に新しいエピソードが出ると、画面の隅に短いメッセージを表示</string>
+    <string name="calendar_setting_lists">自分のリストを含める</string>
+    <string name="calendar_setting_lists_sub">自分のTraktとMDBListのリストにあるタイトルもフォローします。長いリストだとカレンダーが混み合います。</string>
+    <string name="calendar_setting_hidden">非表示の番組</string>
+    <string name="calendar_setting_hidden_sub">カレンダーから非表示にしたタイトル。選択すると再表示します。</string>
+    <plurals name="calendar_setting_hidden_value">
+        <item quantity="one">%1$d件を非表示</item>
+        <item quantity="other">%1$d件を非表示</item>
+    </plurals>
+    <string name="calendar_hidden_dialog_title">非表示の番組</string>
+    <string name="calendar_hidden_dialog_subtitle">タイトルを選択するとカレンダーに再表示します</string>
+    <string name="calendar_hidden_none">非表示の番組はありません</string>
+    <string name="calendar_setting_coming_up">「今後の予定」の行</string>
+    <string name="calendar_setting_coming_up_sub">視聴を続けるの後に、カレンダーの新着や近日公開のエピソードと映画を表示する行</string>
+    <string name="calendar_coming_up_title">今後の予定</string>
+    <string name="calendar_coming_up_new">新着</string>
+    <string name="calendar_coming_up_today_at">今日 %1$s</string>
+    <string name="calendar_coming_up_tonight_at">今夜 %1$s</string>
+    <string name="calendar_reminder_title_one">新着エピソード</string>
+    <string name="calendar_reminder_title_one_film">新着映画</string>
+    <string name="calendar_reminder_title_one_release">新着作品</string>
+    <plurals name="calendar_reminder_title">
+        <item quantity="one">新着エピソード %1$d件</item>
+        <item quantity="other">新着エピソード %1$d件</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_films">
+        <item quantity="one">新着映画 %1$d本</item>
+        <item quantity="other">新着映画 %1$d本</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_releases">
+        <item quantity="one">新着作品 %1$d件</item>
+        <item quantity="other">新着作品 %1$d件</item>
+    </plurals>
+    <plurals name="calendar_reminder_more">
+        <item quantity="one">ほか%1$d件</item>
+        <item quantity="other">ほか%1$d件</item>
+    </plurals>
+    <string name="calendar_reminder_watch_now">今すぐ視聴</string>
+    <string name="calendar_reminder_later">あとで</string>
+    <string name="calendar_reminder_see_all">カレンダーですべて表示</string>
+    <string name="calendar_reminder_row_show">番組</string>
+    <string name="calendar_reminder_row_film">映画</string>
+    <string name="calendar_reminder_aired_today_at">本日 %1$s 放送</string>
+    <string name="calendar_reminder_aired_at">%2$s %1$s 放送</string>
+    <string name="calendar_reminder_aired_today">本日放送</string>
+    <string name="calendar_reminder_out_today">本日公開</string>
+    <string name="calendar_corner_press_menu">メニューボタンで開く</string>
+    <string name="calendar_reminder_finding">エピソードを検索中…</string>
+    <string name="calendar_list_separator">、</string>
+    <string name="calendar_list_last_pair">%1$sと%2$s</string>
+    <string name="calendar_runtime_hours_minutes">%1$d時間%2$d分</string>
+    <string name="calendar_runtime_hours">%1$d時間</string>
+    <string name="calendar_runtime_minutes">%1$d分</string>
+    <string name="calendar_zone_region_africa">アフリカ</string>
+    <string name="calendar_zone_region_america">アメリカ</string>
+    <string name="calendar_zone_region_antarctica">南極</string>
+    <string name="calendar_zone_region_asia">アジア</string>
+    <string name="calendar_zone_region_atlantic">大西洋</string>
+    <string name="calendar_zone_region_australia">オーストラリア</string>
+    <string name="calendar_zone_region_europe">ヨーロッパ</string>
+    <string name="calendar_zone_region_indian">インド洋</string>
+    <string name="calendar_zone_region_pacific">太平洋</string>
+</resources>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_calendar">Lịch</string>
+    <string name="calendar_title">Lịch</string>
+    <string name="calendar_view_list">Danh sách</string>
+    <string name="calendar_view_month">Tháng</string>
+    <string name="calendar_times_in">Giờ theo %1$s</string>
+    <string name="calendar_zone_with_city">%1$s (%2$s)</string>
+    <string name="calendar_credit">Giờ phát sóng từ TVmaze</string>
+    <string name="calendar_section_just_aired">Vừa phát sóng</string>
+    <string name="calendar_section_just_aired_hint">7 ngày qua</string>
+    <string name="calendar_section_today">Hôm nay</string>
+    <string name="calendar_section_tomorrow">Ngày mai</string>
+    <string name="calendar_section_later">Sau này</string>
+    <string name="calendar_section_later_hint">Ngày kế tiếp đã biết của mỗi chương trình</string>
+    <string name="calendar_section_no_date">Chưa có ngày</string>
+    <string name="calendar_section_no_date_hint">Sẽ trở lại hoặc đang sản xuất</string>
+    <string name="calendar_episode_code">M%1$d T%2$d</string>
+    <string name="calendar_line_join">%1$s · %2$s</string>
+    <string name="calendar_film_cinema">Ngoài rạp</string>
+    <string name="calendar_film_digital">Phát trực tuyến và bản kỹ thuật số</string>
+    <string name="calendar_show_returning">Loạt phim sẽ trở lại</string>
+    <string name="calendar_show_in_production">Đang sản xuất</string>
+    <string name="calendar_show_next_unknown">Tập tiếp theo chưa có ngày</string>
+    <string name="calendar_time_not_announced">Chưa công bố giờ</string>
+    <string name="calendar_unknown_title">Không có tiêu đề</string>
+    <string name="calendar_label_new_show">Chương trình mới</string>
+    <string name="calendar_label_season_premiere">Mở màn mùa</string>
+    <string name="calendar_label_mid_season_premiere">Mở màn giữa mùa</string>
+    <string name="calendar_label_mid_season_finale">Tập cuối giữa mùa</string>
+    <string name="calendar_label_season_finale">Tập cuối mùa</string>
+    <string name="calendar_label_series_finale">Tập cuối loạt phim</string>
+    <string name="calendar_cd_bell_on">Đã bật nhắc</string>
+    <string name="calendar_cd_bell_off">Nhắc tôi</string>
+    <string name="calendar_cd_watched">Đã xem</string>
+    <string name="calendar_aired_on">Đã phát sóng %1$s</string>
+    <string name="calendar_out_on">Ra mắt %1$s</string>
+    <string name="calendar_options_subtitle">Tùy chọn Lịch cho nội dung này</string>
+    <string name="calendar_action_open_show">Mở chương trình</string>
+    <string name="calendar_action_open_film">Mở phim</string>
+    <string name="calendar_action_remind">Nhắc tôi khi có tập mới</string>
+    <string name="calendar_action_remind_film">Nhắc tôi khi ra mắt</string>
+    <string name="calendar_action_stop_remind">Tắt nhắc</string>
+    <string name="calendar_action_hide">Ẩn khỏi Lịch</string>
+    <string name="calendar_building_title">Đang tìm ngày cho chương trình của bạn…</string>
+    <plurals name="calendar_building_progress">
+        <item quantity="other">Còn %1$d nội dung</item>
+    </plurals>
+    <string name="calendar_empty_title">Chưa theo dõi gì</string>
+    <string name="calendar_empty_subtitle">Chương trình bạn xem hoặc lưu sẽ hiện ở đây</string>
+    <string name="calendar_quiet_title">Yên ắng</string>
+    <plurals name="calendar_quiet_subtitle">
+        <item quantity="other">Không có gì mới từ chương trình của bạn trong %1$d ngày tới</item>
+    </plurals>
+    <plurals name="calendar_month_episodes">
+        <item quantity="other">%1$d tập</item>
+    </plurals>
+    <plurals name="calendar_month_films">
+        <item quantity="other">%1$d phim</item>
+    </plurals>
+    <string name="calendar_month_more">+%1$d</string>
+    <string name="calendar_month_day_empty">Không có gì trong ngày này</string>
+    <string name="calendar_settings_title">Lịch</string>
+    <string name="calendar_settings_desc">Mục menu, số ngày hiển thị, múi giờ và chương trình đã ẩn</string>
+    <string name="calendar_setting_menu">Hiện Lịch trong menu</string>
+    <string name="calendar_setting_menu_sub">Lịch nằm sau Thư viện trong menu chính</string>
+    <string name="calendar_setting_days">Số ngày hiển thị</string>
+    <string name="calendar_setting_days_sub">Danh sách hiện từng ngày đến bao xa; ngày xa hơn nằm trong Sau này</string>
+    <plurals name="calendar_setting_days_value">
+        <item quantity="other">%1$d ngày</item>
+    </plurals>
+    <string name="calendar_setting_zone">Múi giờ</string>
+    <string name="calendar_setting_zone_sub_box">Theo thiết bị này, hiện là %1$s</string>
+    <string name="calendar_setting_zone_sub_set">Giờ phát sóng hiển thị theo múi giờ này, hiện là %1$s</string>
+    <string name="calendar_zone_follow_box">Theo thiết bị này</string>
+    <string name="calendar_zone_follow_box_desc">Hiện là %1$s</string>
+    <string name="calendar_setting_corner">Thông báo ở góc khi có tập mới</string>
+    <string name="calendar_setting_corner_sub">Thông báo ngắn ở góc màn hình khi chương trình đã bật chuông có tập mới</string>
+    <string name="calendar_setting_lists">Gồm danh sách của tôi</string>
+    <string name="calendar_setting_lists_sub">Theo dõi cả nội dung trong danh sách Trakt và MDBList của bạn. Danh sách dài sẽ làm Lịch rối.</string>
+    <string name="calendar_setting_hidden">Chương trình đã ẩn</string>
+    <string name="calendar_setting_hidden_sub">Nội dung bạn đã ẩn khỏi Lịch. Chọn một mục để hiện lại.</string>
+    <plurals name="calendar_setting_hidden_value">
+        <item quantity="other">Đã ẩn %1$d</item>
+    </plurals>
+    <string name="calendar_hidden_dialog_title">Chương trình đã ẩn</string>
+    <string name="calendar_hidden_dialog_subtitle">Chọn một mục để hiện lại trong Lịch</string>
+    <string name="calendar_hidden_none">Không có chương trình nào bị ẩn</string>
+    <string name="calendar_setting_coming_up">Hàng Mới và sắp tới</string>
+    <string name="calendar_setting_coming_up_sub">Một hàng sau Tiếp tục xem với các tập và phim mới, sắp ra mắt từ Lịch của bạn</string>
+    <string name="calendar_coming_up_title">Mới và sắp tới</string>
+    <string name="calendar_coming_up_new">Mới</string>
+    <string name="calendar_coming_up_today_at">Hôm nay %1$s</string>
+    <string name="calendar_coming_up_tonight_at">Tối nay %1$s</string>
+    <string name="calendar_reminder_title_one">Tập mới</string>
+    <string name="calendar_reminder_title_one_film">Phim mới</string>
+    <string name="calendar_reminder_title_one_release">Nội dung mới</string>
+    <plurals name="calendar_reminder_title">
+        <item quantity="other">%1$d tập mới</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_films">
+        <item quantity="other">%1$d phim mới</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_releases">
+        <item quantity="other">%1$d nội dung mới</item>
+    </plurals>
+    <plurals name="calendar_reminder_more">
+        <item quantity="other">và %1$d mục khác</item>
+    </plurals>
+    <string name="calendar_reminder_watch_now">Xem ngay</string>
+    <string name="calendar_reminder_later">Để sau</string>
+    <string name="calendar_reminder_see_all">Xem tất cả trong Lịch</string>
+    <string name="calendar_reminder_row_show">Chương trình</string>
+    <string name="calendar_reminder_row_film">Phim</string>
+    <string name="calendar_reminder_aired_today_at">Phát sóng lúc %1$s hôm nay</string>
+    <string name="calendar_reminder_aired_at">Phát sóng lúc %1$s %2$s</string>
+    <string name="calendar_reminder_aired_today">Phát sóng hôm nay</string>
+    <string name="calendar_reminder_out_today">Ra mắt hôm nay</string>
+    <string name="calendar_corner_press_menu">Nhấn Menu để mở</string>
+    <string name="calendar_reminder_finding">Đang tìm tập phim…</string>
+    <string name="calendar_list_separator">", "</string>
+    <string name="calendar_list_last_pair">%1$s và %2$s</string>
+    <string name="calendar_runtime_hours_minutes">%1$dg %2$dph</string>
+    <string name="calendar_runtime_hours">%1$dg</string>
+    <string name="calendar_runtime_minutes">%1$dph</string>
+    <string name="calendar_zone_region_africa">Châu Phi</string>
+    <string name="calendar_zone_region_america">Châu Mỹ</string>
+    <string name="calendar_zone_region_antarctica">Châu Nam Cực</string>
+    <string name="calendar_zone_region_asia">Châu Á</string>
+    <string name="calendar_zone_region_atlantic">Đại Tây Dương</string>
+    <string name="calendar_zone_region_australia">Châu Úc</string>
+    <string name="calendar_zone_region_europe">Châu Âu</string>
+    <string name="calendar_zone_region_indian">Ấn Độ Dương</string>
+    <string name="calendar_zone_region_pacific">Thái Bình Dương</string>
+</resources>

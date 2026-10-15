@@ -49,6 +49,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
@@ -213,6 +214,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -322,6 +324,20 @@ open class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var deepLinkHandler: DeepLinkHandler
+
+    @Inject
+    lateinit var calendarSettingsDataStore: com.nuvio.tv.core.calendar.CalendarSettingsDataStore
+
+    @Inject
+    lateinit var calendarReminders: com.nuvio.tv.core.calendar.CalendarReminderCenter
+
+    @Inject
+    lateinit var calendarAppVisibility: com.nuvio.tv.core.calendar.CalendarAppVisibility
+
+    @Inject
+    lateinit var calendarEpisodeResolver: dagger.Lazy<com.nuvio.tv.core.calendar.CalendarEpisodeResolver>
+
+    private var calendarMenuKeyDown = false
 
     private val pendingDeepLinkUrl = MutableStateFlow<String?>(null)
     private val pendingLaunchIntent = MutableStateFlow<Intent?>(null)
@@ -705,6 +721,7 @@ open class MainActivity : ComponentActivity() {
                     LocalAlwaysBackdropWithLogo provides mainUiPrefs.alwaysBackdropWithLogo,
                     LocalMemberAccess provides mainUiPrefs.memberAccess,
                     LocalAmbientIdleController provides ambientIdleController,
+                    com.nuvio.tv.ui.screens.calendar.LocalCalendarReminderCenter provides calendarReminders,
                     com.nuvio.tv.core.player.LocalTrailerPlayerPool provides trailerPlayerPool,
                     LocalSplashBackground provides splashBackground,
                     LocalStartupLoadingState provides startupLoadingState,
@@ -1030,16 +1047,16 @@ open class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    val rootRoutes = remember(discoverLocation) {
-                        buildSet {
-                            add(Screen.Home.route)
-                            add(Screen.Search.route)
-                            add(Screen.Library.route)
-                            add(Screen.Settings.route)
-                            if (discoverLocation == DiscoverLocation.IN_SIDEBAR) {
-                                add(Screen.Discover.route)
-                            }
-                        }
+                    val calendarInMenuFlow = remember {
+                        calendarSettingsDataStore.settings
+                            .map { com.nuvio.tv.ui.screens.calendar.calendarMenuVisible(it) }
+                            .distinctUntilChanged()
+                    }
+                    val calendarInMenu by calendarInMenuFlow.collectAsState(
+                        initial = com.nuvio.tv.ui.screens.calendar.calendarMenuVisible(calendarSettingsDataStore.settings.value)
+                    )
+                    val rootRoutes = remember(discoverLocation, calendarInMenu) {
+                        appRootRoutes(discoverInSidebar = discoverLocation == DiscoverLocation.IN_SIDEBAR, calendarInMenu = calendarInMenu)
                     }
 
                     val strNavHome = stringResource(R.string.nav_home)
@@ -1047,13 +1064,16 @@ open class MainActivity : ComponentActivity() {
                     val strNavSearch = stringResource(R.string.nav_search)
                     val strNavLibrary = stringResource(R.string.nav_library)
                     val strNavSettings = stringResource(R.string.nav_settings)
+                    val strNavCalendar = stringResource(R.string.nav_calendar)
                     val drawerItems = remember(
                         strNavHome,
                         strNavDiscover,
                         strNavSearch,
                         strNavLibrary,
                         strNavSettings,
-                        discoverLocation
+                        strNavCalendar,
+                        discoverLocation,
+                        calendarInMenu
                     ) {
                         buildList {
                             add(
@@ -1086,6 +1106,15 @@ open class MainActivity : ComponentActivity() {
                                     iconRes = R.raw.sidebar_library
                                 )
                             )
+                            if (calendarInMenu) {
+                                add(
+                                    DrawerItem(
+                                        route = Screen.Calendar.route,
+                                        label = strNavCalendar,
+                                        icon = Icons.Default.CalendarMonth
+                                    )
+                                )
+                            }
                             add(
                                 DrawerItem(
                                     route = Screen.Settings.route,
@@ -1189,6 +1218,59 @@ open class MainActivity : ComponentActivity() {
                                     onExitApp = handleExitApp
                                 )
                             }
+
+                            val ambientShowing by ambientIdleController.isShowing.collectAsState()
+                            com.nuvio.tv.ui.screens.calendar.CalendarReminderHost(
+                                center = calendarReminders,
+                                covered = ambientShowing,
+                                playerVisible = currentRoute?.startsWith("player/") == true,
+                                currentRoute = actualRoute,
+                                resolveWatch = { reminder -> calendarEpisodeResolver.get().resolve(reminder) },
+                                onWatchTarget = { target ->
+                                    val series = target.contentType.equals("series", ignoreCase = true)
+                                    val videoId = target.videoId
+                                    if (videoId != null) {
+                                        navController.navigate(
+                                            Screen.Stream.createRoute(
+                                                videoId = videoId,
+                                                contentType = target.contentType,
+                                                title = target.name,
+                                                poster = target.poster,
+                                                backdrop = target.backdrop,
+                                                logo = target.logo,
+                                                season = target.season,
+                                                episode = target.episode,
+                                                episodeName = target.episodeTitle,
+                                                contentId = target.contentId,
+                                                contentName = target.name,
+                                                returnToDetailOnBack = series,
+                                                returnToHomeOnBack = true
+                                            )
+                                        )
+                                    } else {
+                                        navController.navigate(
+                                            Screen.Detail.createRoute(
+                                                itemId = target.contentId,
+                                                itemType = target.contentType,
+                                                returnFocusSeason = target.season,
+                                                returnFocusEpisode = target.episode
+                                            )
+                                        )
+                                    }
+                                },
+                                onOpenTitle = { reminder ->
+                                    val ids = com.nuvio.tv.core.calendar.calendarContentIds(reminder.title)
+                                    ids.firstOrNull()?.let { id ->
+                                        val film = reminder.title.type == com.nuvio.tv.core.calendar.CalendarTitleType.MOVIE
+                                        navController.navigate(Screen.Detail.createRoute(id, if (film) "movie" else "series"))
+                                    }
+                                },
+                                onSeeAll = {
+                                    calendarReminders.requestCalendarAtJustAired()
+                                    optimisticRoute = Screen.Calendar.route
+                                    navigateToDrawerRoute(navController, currentRoute, Screen.Calendar.route)
+                                }
+                            )
 
                             val autoNextOverlay by externalPlaybackTracker.autoNextOverlay.collectAsState()
                             autoNextOverlay?.let { ov ->
@@ -1327,6 +1409,16 @@ open class MainActivity : ComponentActivity() {
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         if (ambientIdleController.consumeKeyEvent(event)) return true
+        if (event.keyCode == KeyEvent.KEYCODE_MENU) {
+            if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0 && calendarReminders.onMenuKey()) {
+                calendarMenuKeyDown = true
+                return true
+            }
+            if (calendarMenuKeyDown) {
+                if (event.action == KeyEvent.ACTION_UP) calendarMenuKeyDown = false
+                return true
+            }
+        }
         if (event.keyCode == KeyEvent.KEYCODE_BACK) {
             if (longPressBackHeld.value) {
                 if (event.action == KeyEvent.ACTION_UP) longPressBackHeld.value = false
@@ -1345,6 +1437,11 @@ open class MainActivity : ComponentActivity() {
         return super.dispatchKeyEvent(event)
     }
 
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (!hasFocus) calendarMenuKeyDown = false
+    }
+
     override fun onStart() {
         // Returning from an external player: raise the auto-next loader before the player's
         // result is dispatched and before the window repaints, so the transition shows the
@@ -1354,6 +1451,8 @@ open class MainActivity : ComponentActivity() {
         super.onStart()
         startupSyncService.startPeriodicSurfacePulls()
         androidTvChannelSyncService.onForegroundChanged(true)
+        calendarReminders.setAppVisible(true)
+        calendarAppVisibility.visible.value = true
     }
 
     override fun onStop() {
@@ -1363,6 +1462,9 @@ open class MainActivity : ComponentActivity() {
         // App going to background (e.g. user returning to the launcher): reconcile the
         // Continue Watching channel once so Projectivy repaints it with fresh progress.
         androidTvChannelSyncService.onForegroundChanged(false)
+        calendarReminders.setAppVisible(false)
+        calendarAppVisibility.visible.value = false
+        calendarMenuKeyDown = false
     }
 
     override fun onDestroy() {
@@ -2334,6 +2436,16 @@ private fun CollapsedSidebarPill(
     }
 }
 
+/** Pages with a menu entry; a page without one, such as a hidden Calendar opened from a reminder, goes Back to Home. */
+internal fun appRootRoutes(discoverInSidebar: Boolean, calendarInMenu: Boolean): Set<String> = buildSet {
+    add(Screen.Home.route)
+    add(Screen.Search.route)
+    add(Screen.Library.route)
+    if (calendarInMenu) add(Screen.Calendar.route)
+    add(Screen.Settings.route)
+    if (discoverInSidebar) add(Screen.Discover.route)
+}
+
 private fun navigateToDrawerRoute(
     navController: NavHostController,
     currentRoute: String?,
@@ -2350,6 +2462,14 @@ private fun navigateToDrawerRoute(
             }
             val homeViewModel = androidx.lifecycle.ViewModelProvider(homeEntry)[com.nuvio.tv.ui.screens.home.HomeViewModel::class.java]
             homeViewModel.requestScrollToTop()
+        }
+        if (targetRoute == Screen.Calendar.route) {
+            runCatching {
+                val calendarEntry = navController.getBackStackEntry(Screen.Calendar.route)
+                androidx.lifecycle.ViewModelProvider(calendarEntry)[
+                    com.nuvio.tv.ui.screens.calendar.CalendarViewModel::class.java
+                ].showToday()
+            }
         }
         return
     }

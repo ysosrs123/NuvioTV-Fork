@@ -1,5 +1,7 @@
 package com.nuvio.tv.data.remote.api
 
+import com.nuvio.tv.data.remote.dto.trakt.TraktCalendarEpisodeDto
+import com.nuvio.tv.data.remote.dto.trakt.TraktCalendarShowDto
 import com.nuvio.tv.data.remote.dto.trakt.TraktDeviceCodeRequestDto
 import com.nuvio.tv.data.remote.dto.trakt.TraktDeviceCodeResponseDto
 import com.nuvio.tv.data.remote.dto.trakt.TraktDeviceTokenRequestDto
@@ -167,6 +169,20 @@ interface TraktApi {
         @Path("id") id: String,
         @Query("extended") extended: String? = null
     ): Response<List<TraktSeasonDto>>
+
+    @GET("calendars/my/shows/{start_date}/{days}")
+    suspend fun getMyShowsCalendar(
+        @Header("Authorization") authorization: String,
+        @Path("start_date") startDate: String,
+        @Path("days") days: Int,
+        @Query("extended") extended: String = "full"
+    ): Response<List<TraktCalendarShowDto>>
+
+    @GET("shows/{id}/next_episode")
+    suspend fun getShowNextEpisode(
+        @Path("id") id: String,
+        @Query("extended") extended: String = "full"
+    ): Response<TraktCalendarEpisodeDto>
 
     @GET("movies/{id}/comments/{sort}")
     suspend fun getMovieComments(

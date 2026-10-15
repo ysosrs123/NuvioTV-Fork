@@ -197,6 +197,10 @@ class ModernCarouselRowBuildCache {
     var upcomingUseLandscapePosters: Boolean = false
     var upcomingShowImdbRatings: Boolean = true
     var upcomingRow: HeroCarouselRow? = null
+    var comingUpItems: List<ContinueWatchingItem> = emptyList()
+    var comingUpTitle: String = ""
+    var comingUpUseLandscapePosters: Boolean = false
+    var comingUpRow: HeroCarouselRow? = null
     internal val catalogRows = java.util.concurrent.ConcurrentHashMap<String, ModernCatalogRowBuildCacheEntry>()
     internal val collectionRows = java.util.concurrent.ConcurrentHashMap<String, ModernCollectionRowBuildCacheEntry>()
     // per-item cache: rowKey -> (itemId -> cached carousel item + source MetaPreview)
@@ -305,7 +309,9 @@ internal fun buildContinueWatchingItem(
             )
         }
         is ContinueWatchingItem.NextUp -> {
-            if (item.info.isReleaseAlert) {
+            if (item.info.badgeLabel != null) {
+                item.info.badgeLabel
+            } else if (item.info.isReleaseAlert) {
                 if (item.info.isNewSeasonRelease) {
                     context.getString(R.string.cw_new_season)
                 } else {
@@ -318,7 +324,7 @@ internal fun buildContinueWatchingItem(
                 context.getString(R.string.cw_next_up)
             }
         }
-    }.uppercase()
+    }.let { label -> if ((item as? ContinueWatchingItem.NextUp)?.info?.badgeLabel != null) label else label.uppercase() }
 
     val heroPreview = when (item) {
         is ContinueWatchingItem.InProgress -> {
@@ -360,21 +366,29 @@ internal fun buildContinueWatchingItem(
             )
         }
         is ContinueWatchingItem.NextUp -> {
+            val film = item.info.contentType.equals("movie", ignoreCase = true)
+            val coded = item.info.showsEpisodeCode
             val episodeCode = context.getString(
                 R.string.season_episode_format,
                 item.info.season,
                 item.info.episode
             )
             val episodeTitle = item.info.episodeTitle?.takeIf { it.isNotBlank() }?.localizeEpisodeTitle(context)
-            val episodeLabel = if (episodeTitle != null) "$episodeCode · $episodeTitle" else episodeCode
+            val episodeLabel = when {
+                film -> episodeTitle ?: localizedContentType(context, item.info.contentType)
+                !coded -> episodeTitle.orEmpty()
+                episodeTitle != null -> "$episodeCode · $episodeTitle"
+                else -> episodeCode
+            }
             HeroPreview(
                 title = item.info.name,
                 logo = item.info.logo,
-                description = item.info.episodeDescription
-                    ?: item.info.episodeTitle?.localizeEpisodeTitle(context)
-                    ?: item.info.airDateLabel?.let { airsDateTemplate.format(it) },
+                description = item.info.episodeDescription ?: if (item.info.badgeLabel != null) null else {
+                    item.info.episodeTitle?.localizeEpisodeTitle(context)
+                        ?: item.info.airDateLabel?.let { airsDateTemplate.format(it) }
+                },
                 contentTypeText = episodeLabel,
-                isSeries = true,
+                isSeries = !film,
                 yearText = extractYearOrRange(item.info.releaseInfo),
                 secondaryHighlightText = secondaryHighlightText,
                 imdbText = item.info.imdbRating
@@ -440,7 +454,9 @@ internal fun buildContinueWatchingItem(
                     item.info.season,
                     item.info.episode
                 )
-                if (item.info.hasAired) {
+                if (item.info.badgeLabel != null) {
+                    if (item.info.showsEpisodeCode) code else item.info.episodeTitle
+                } else if (item.info.hasAired) {
                     code
                 } else {
                     item.info.airDateLabel?.let { "$code • ${airsDateTemplate.format(it)}" } ?: "$code • $upcomingLabel"

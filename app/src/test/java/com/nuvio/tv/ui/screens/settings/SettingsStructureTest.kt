@@ -49,6 +49,7 @@ class SettingsStructureTest {
                 LayoutSection.HOME_LAYOUT,
                 LayoutSection.HOME_CONTENT,
                 LayoutSection.SIDEBAR,
+                LayoutSection.CALENDAR,
                 LayoutSection.CONTINUE_WATCHING,
                 LayoutSection.FOCUSED_POSTER,
                 LayoutSection.POSTER_CARD,

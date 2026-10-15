@@ -20,6 +20,8 @@ data class HomeUiState(
     val catalogRows: List<CatalogRow> = emptyList(),
     val continueWatchingItems: List<ContinueWatchingItem> = emptyList(),
     val upcomingItems: List<ContinueWatchingItem> = emptyList(),
+    /** The Calendar's "Coming up" row, empty while the row is switched off. */
+    val comingUpItems: List<ContinueWatchingItem> = emptyList(),
     val isLoading: Boolean = true,
     val layoutPreferencesReady: Boolean = false,
     val error: String? = null,
@@ -139,7 +141,9 @@ data class NextUpInfo(
     val seedSeason: Int? = null,
     val seedEpisode: Int? = null,
     val contentLanguage: String? = null,
-    val mdbListRatings: com.nuvio.tv.domain.model.MDBListRatings? = null
+    val mdbListRatings: com.nuvio.tv.domain.model.MDBListRatings? = null,
+    /** Shown on the card in place of the usual Next up or air date text. */
+    val badgeLabel: String? = null
 )
 
 @Immutable

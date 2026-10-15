@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_calendar">Kalender</string>
+    <string name="calendar_title">Kalender</string>
+    <string name="calendar_view_list">Lista</string>
+    <string name="calendar_view_month">Månad</string>
+    <string name="calendar_times_in">Tider i %1$s</string>
+    <string name="calendar_zone_with_city">%1$s (%2$s)</string>
+    <string name="calendar_credit">Sändningstider från TVmaze</string>
+    <string name="calendar_section_just_aired">Nyss sänt</string>
+    <string name="calendar_section_just_aired_hint">Senaste 7 dagarna</string>
+    <string name="calendar_section_today">Idag</string>
+    <string name="calendar_section_tomorrow">Imorgon</string>
+    <string name="calendar_section_later">Senare</string>
+    <string name="calendar_section_later_hint">Nästa kända datum för varje serie</string>
+    <string name="calendar_section_no_date">Inget datum än</string>
+    <string name="calendar_section_no_date_hint">Återkommer eller i produktion</string>
+    <string name="calendar_episode_code">S%1$d E%2$d</string>
+    <string name="calendar_line_join">%1$s · %2$s</string>
+    <string name="calendar_film_cinema">På bio</string>
+    <string name="calendar_film_digital">Streaming och digital release</string>
+    <string name="calendar_show_returning">Återkommer</string>
+    <string name="calendar_show_in_production">I produktion</string>
+    <string name="calendar_show_next_unknown">Nästa avsnitt har inget datum än</string>
+    <string name="calendar_time_not_announced">Tid inte annonserad</string>
+    <string name="calendar_unknown_title">Utan titel</string>
+    <string name="calendar_label_new_show">Ny serie</string>
+    <string name="calendar_label_season_premiere">Säsongspremiär</string>
+    <string name="calendar_label_mid_season_premiere">Mittsäsongspremiär</string>
+    <string name="calendar_label_mid_season_finale">Mittsäsongsfinal</string>
+    <string name="calendar_label_season_finale">Säsongsfinal</string>
+    <string name="calendar_label_series_finale">Seriefinal</string>
+    <string name="calendar_cd_bell_on">Påminnelse på</string>
+    <string name="calendar_cd_bell_off">Påminn mig</string>
+    <string name="calendar_cd_watched">Sedd</string>
+    <string name="calendar_aired_on">Sänt %1$s</string>
+    <string name="calendar_out_on">Släppt %1$s</string>
+    <string name="calendar_options_subtitle">Kalenderval för den här titeln</string>
+    <string name="calendar_action_open_show">Öppna serie</string>
+    <string name="calendar_action_open_film">Öppna film</string>
+    <string name="calendar_action_remind">Påminn mig om nya avsnitt</string>
+    <string name="calendar_action_remind_film">Påminn mig när den släpps</string>
+    <string name="calendar_action_stop_remind">Sluta påminna</string>
+    <string name="calendar_action_hide">Dölj i Kalender</string>
+    <string name="calendar_building_title">Letar datum för dina serier…</string>
+    <plurals name="calendar_building_progress">
+        <item quantity="one">%1$d titel kvar</item>
+        <item quantity="other">%1$d titlar kvar</item>
+    </plurals>
+    <string name="calendar_empty_title">Inget följs än</string>
+    <string name="calendar_empty_subtitle">Serier du tittar på eller sparar visas här</string>
+    <string name="calendar_quiet_title">Allt lugnt</string>
+    <plurals name="calendar_quiet_subtitle">
+        <item quantity="one">Inget nytt från dina serier det närmaste dygnet</item>
+        <item quantity="other">Inget nytt från dina serier de närmaste %1$d dagarna</item>
+    </plurals>
+    <plurals name="calendar_month_episodes">
+        <item quantity="one">%1$d avsnitt</item>
+        <item quantity="other">%1$d avsnitt</item>
+    </plurals>
+    <plurals name="calendar_month_films">
+        <item quantity="one">%1$d film</item>
+        <item quantity="other">%1$d filmer</item>
+    </plurals>
+    <string name="calendar_month_more">+%1$d</string>
+    <string name="calendar_month_day_empty">Inget denna dag</string>
+    <string name="calendar_settings_title">Kalender</string>
+    <string name="calendar_settings_desc">Menyval, visade dagar, tidszon och dolda serier</string>
+    <string name="calendar_setting_menu">Visa Kalender i menyn</string>
+    <string name="calendar_setting_menu_sub">Kalender ligger efter Bibliotek i huvudmenyn</string>
+    <string name="calendar_setting_days">Visade dagar</string>
+    <string name="calendar_setting_days_sub">Hur långt fram listan går dag för dag; senare datum hamnar under Senare</string>
+    <plurals name="calendar_setting_days_value">
+        <item quantity="one">%1$d dag</item>
+        <item quantity="other">%1$d dagar</item>
+    </plurals>
+    <string name="calendar_setting_zone">Tidszon</string>
+    <string name="calendar_setting_zone_sub_box">Följer den här boxen, nu %1$s</string>
+    <string name="calendar_setting_zone_sub_set">Sändningstider visas i den här zonen, nu %1$s</string>
+    <string name="calendar_zone_follow_box">Följ den här boxen</string>
+    <string name="calendar_zone_follow_box_desc">Nu %1$s</string>
+    <string name="calendar_setting_corner">Hörnmeddelande för nya avsnitt</string>
+    <string name="calendar_setting_corner_sub">Ett kort meddelande i hörnet när en serie med påminnelse på får ett nytt avsnitt</string>
+    <string name="calendar_setting_lists">Ta med mina egna listor</string>
+    <string name="calendar_setting_lists_sub">Följer även titlar i dina egna Trakt- och MDBList-listor. Långa listor gör Kalendern rörig.</string>
+    <string name="calendar_setting_hidden">Dolda serier</string>
+    <string name="calendar_setting_hidden_sub">Titlar du har dolt i Kalendern. Välj en för att visa den igen.</string>
+    <plurals name="calendar_setting_hidden_value">
+        <item quantity="one">%1$d dold</item>
+        <item quantity="other">%1$d dolda</item>
+    </plurals>
+    <string name="calendar_hidden_dialog_title">Dolda serier</string>
+    <string name="calendar_hidden_dialog_subtitle">Välj en titel för att visa den i Kalendern igen</string>
+    <string name="calendar_hidden_none">Inga dolda serier</string>
+    <string name="calendar_setting_coming_up">Raden På gång</string>
+    <string name="calendar_setting_coming_up_sub">En rad efter Fortsätt titta med nya och kommande avsnitt och filmer från din Kalender</string>
+    <string name="calendar_coming_up_title">På gång</string>
+    <string name="calendar_coming_up_new">Nyhet</string>
+    <string name="calendar_coming_up_today_at">Idag %1$s</string>
+    <string name="calendar_coming_up_tonight_at">I kväll %1$s</string>
+    <string name="calendar_reminder_title_one">Nytt avsnitt</string>
+    <string name="calendar_reminder_title_one_film">Ny film</string>
+    <string name="calendar_reminder_title_one_release">Ny release</string>
+    <plurals name="calendar_reminder_title">
+        <item quantity="one">%1$d nytt avsnitt</item>
+        <item quantity="other">%1$d nya avsnitt</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_films">
+        <item quantity="one">%1$d ny film</item>
+        <item quantity="other">%1$d nya filmer</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_releases">
+        <item quantity="one">%1$d ny release</item>
+        <item quantity="other">%1$d nya releaser</item>
+    </plurals>
+    <plurals name="calendar_reminder_more">
+        <item quantity="one">och %1$d till</item>
+        <item quantity="other">och %1$d till</item>
+    </plurals>
+    <string name="calendar_reminder_watch_now">Titta nu</string>
+    <string name="calendar_reminder_later">Senare</string>
+    <string name="calendar_reminder_see_all">Visa allt i Kalender</string>
+    <string name="calendar_reminder_row_show">Serie</string>
+    <string name="calendar_reminder_row_film">Film</string>
+    <string name="calendar_reminder_aired_today_at">Sänt idag %1$s</string>
+    <string name="calendar_reminder_aired_at">Sänt %2$s %1$s</string>
+    <string name="calendar_reminder_aired_today">Sänt idag</string>
+    <string name="calendar_reminder_out_today">Släppt idag</string>
+    <string name="calendar_corner_press_menu">Tryck på Meny för att öppna</string>
+    <string name="calendar_reminder_finding">Letar upp avsnittet…</string>
+    <string name="calendar_list_separator">", "</string>
+    <string name="calendar_list_last_pair">%1$s och %2$s</string>
+    <string name="calendar_runtime_hours_minutes">%1$dh %2$dm</string>
+    <string name="calendar_runtime_hours">%1$dh</string>
+    <string name="calendar_runtime_minutes">%1$dm</string>
+    <string name="calendar_zone_region_africa">Afrika</string>
+    <string name="calendar_zone_region_america">Amerika</string>
+    <string name="calendar_zone_region_antarctica">Antarktis</string>
+    <string name="calendar_zone_region_asia">Asien</string>
+    <string name="calendar_zone_region_atlantic">Atlanten</string>
+    <string name="calendar_zone_region_australia">Australien</string>
+    <string name="calendar_zone_region_europe">Europa</string>
+    <string name="calendar_zone_region_indian">Indiska oceanen</string>
+    <string name="calendar_zone_region_pacific">Stilla havet</string>
+</resources>

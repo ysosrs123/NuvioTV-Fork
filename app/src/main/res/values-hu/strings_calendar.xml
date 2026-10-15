@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_calendar">Naptár</string>
+    <string name="calendar_title">Naptár</string>
+    <string name="calendar_view_list">Lista</string>
+    <string name="calendar_view_month">Hónap</string>
+    <string name="calendar_times_in">Időzóna: %1$s</string>
+    <string name="calendar_zone_with_city">%1$s (%2$s)</string>
+    <string name="calendar_credit">Epizód-időpontok forrása: TVmaze</string>
+    <string name="calendar_section_just_aired">Nemrég adták le</string>
+    <string name="calendar_section_just_aired_hint">Az elmúlt 7 nap</string>
+    <string name="calendar_section_today">Ma</string>
+    <string name="calendar_section_tomorrow">Holnap</string>
+    <string name="calendar_section_later">Később</string>
+    <string name="calendar_section_later_hint">Minden sorozat következő ismert dátuma</string>
+    <string name="calendar_section_no_date">Még nincs dátum</string>
+    <string name="calendar_section_no_date_hint">Visszatér vagy készül</string>
+    <string name="calendar_episode_code">S%1$d E%2$d</string>
+    <string name="calendar_line_join">%1$s · %2$s</string>
+    <string name="calendar_film_cinema">Moziban</string>
+    <string name="calendar_film_digital">Streaming és digitális megjelenés</string>
+    <string name="calendar_show_returning">Visszatérő sorozat</string>
+    <string name="calendar_show_in_production">Gyártás alatt</string>
+    <string name="calendar_show_next_unknown">Következő epizód: még nincs dátum</string>
+    <string name="calendar_time_not_announced">Időpont még nem ismert</string>
+    <string name="calendar_unknown_title">Cím nélkül</string>
+    <string name="calendar_label_new_show">Új sorozat</string>
+    <string name="calendar_label_season_premiere">Évadpremier</string>
+    <string name="calendar_label_mid_season_premiere">Évadközi premier</string>
+    <string name="calendar_label_mid_season_finale">Évadközi finálé</string>
+    <string name="calendar_label_season_finale">Évadzáró</string>
+    <string name="calendar_label_series_finale">Sorozatzáró</string>
+    <string name="calendar_cd_bell_on">Emlékeztető bekapcsolva</string>
+    <string name="calendar_cd_bell_off">Emlékeztess</string>
+    <string name="calendar_cd_watched">Megnézve</string>
+    <string name="calendar_aired_on">Leadva: %1$s</string>
+    <string name="calendar_out_on">Megjelent: %1$s</string>
+    <string name="calendar_options_subtitle">Naptárbeállítások ehhez a címhez</string>
+    <string name="calendar_action_open_show">Sorozat megnyitása</string>
+    <string name="calendar_action_open_film">Film megnyitása</string>
+    <string name="calendar_action_remind">Emlékeztess az új epizódokra</string>
+    <string name="calendar_action_remind_film">Emlékeztess, ha megjelenik</string>
+    <string name="calendar_action_stop_remind">Emlékeztetők kikapcsolása</string>
+    <string name="calendar_action_hide">Elrejtés a Naptárból</string>
+    <string name="calendar_building_title">Sorozataid dátumainak keresése…</string>
+    <plurals name="calendar_building_progress">
+        <item quantity="one">Még %1$d cím van hátra</item>
+        <item quantity="other">Még %1$d cím van hátra</item>
+    </plurals>
+    <string name="calendar_empty_title">Még semmit sem követsz</string>
+    <string name="calendar_empty_subtitle">Itt jelennek meg a nézett és mentett sorozataid</string>
+    <string name="calendar_quiet_title">Minden csendes</string>
+    <plurals name="calendar_quiet_subtitle">
+        <item quantity="one">Sorozataidban nincs újdonság a következő napon</item>
+        <item quantity="other">Sorozataidban nincs újdonság a következő %1$d napban</item>
+    </plurals>
+    <plurals name="calendar_month_episodes">
+        <item quantity="one">%1$d epizód</item>
+        <item quantity="other">%1$d epizód</item>
+    </plurals>
+    <plurals name="calendar_month_films">
+        <item quantity="one">%1$d film</item>
+        <item quantity="other">%1$d film</item>
+    </plurals>
+    <string name="calendar_month_more">+%1$d</string>
+    <string name="calendar_month_day_empty">Ezen a napon nincs semmi</string>
+    <string name="calendar_settings_title">Naptár</string>
+    <string name="calendar_settings_desc">Menüpont, megjelenített napok, időzóna és rejtett sorozatok</string>
+    <string name="calendar_setting_menu">Naptár a menüben</string>
+    <string name="calendar_setting_menu_sub">A Naptár a főmenüben a Könyvtár után található</string>
+    <string name="calendar_setting_days">Megjelenített napok</string>
+    <string name="calendar_setting_days_sub">Meddig megy előre a lista naponként; a későbbi dátumok a Később alá kerülnek</string>
+    <plurals name="calendar_setting_days_value">
+        <item quantity="one">%1$d nap</item>
+        <item quantity="other">%1$d nap</item>
+    </plurals>
+    <string name="calendar_setting_zone">Időzóna</string>
+    <string name="calendar_setting_zone_sub_box">Az eszköz szerint, jelenleg %1$s</string>
+    <string name="calendar_setting_zone_sub_set">Epizódidőpontok ebben a zónában, jelenleg %1$s</string>
+    <string name="calendar_zone_follow_box">Az eszköz szerint</string>
+    <string name="calendar_zone_follow_box_desc">Jelenleg %1$s</string>
+    <string name="calendar_setting_corner">Sarokértesítés új epizódokról</string>
+    <string name="calendar_setting_corner_sub">Rövid üzenet a sarokban, ha egy bekapcsolt csengős sorozatnak új epizódja jelent meg</string>
+    <string name="calendar_setting_lists">Saját listáim is</string>
+    <string name="calendar_setting_lists_sub">A saját Trakt- és MDBList-listáid címeit is követi. A hosszú listák zsúfolttá teszik a Naptárt.</string>
+    <string name="calendar_setting_hidden">Rejtett sorozatok</string>
+    <string name="calendar_setting_hidden_sub">A Naptárból elrejtett címek. Válassz egyet, hogy újra megjelenjen.</string>
+    <plurals name="calendar_setting_hidden_value">
+        <item quantity="one">%1$d rejtett</item>
+        <item quantity="other">%1$d rejtett</item>
+    </plurals>
+    <string name="calendar_hidden_dialog_title">Rejtett sorozatok</string>
+    <string name="calendar_hidden_dialog_subtitle">Válassz egy címet, hogy újra megjelenjen a Naptárban</string>
+    <string name="calendar_hidden_none">Nincsenek rejtett sorozatok</string>
+    <string name="calendar_setting_coming_up">Következik sor</string>
+    <string name="calendar_setting_coming_up_sub">Sor a Megtekintés folytatása után a Naptár új és közelgő epizódjaival és filmjeivel</string>
+    <string name="calendar_coming_up_title">Következik</string>
+    <string name="calendar_coming_up_new">Új</string>
+    <string name="calendar_coming_up_today_at">Ma %1$s</string>
+    <string name="calendar_coming_up_tonight_at">Ma este %1$s</string>
+    <string name="calendar_reminder_title_one">Új epizód</string>
+    <string name="calendar_reminder_title_one_film">Új film</string>
+    <string name="calendar_reminder_title_one_release">Új megjelenés</string>
+    <plurals name="calendar_reminder_title">
+        <item quantity="one">%1$d új epizód</item>
+        <item quantity="other">%1$d új epizód</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_films">
+        <item quantity="one">%1$d új film</item>
+        <item quantity="other">%1$d új film</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_releases">
+        <item quantity="one">%1$d új megjelenés</item>
+        <item quantity="other">%1$d új megjelenés</item>
+    </plurals>
+    <plurals name="calendar_reminder_more">
+        <item quantity="one">és még %1$d</item>
+        <item quantity="other">és még %1$d</item>
+    </plurals>
+    <string name="calendar_reminder_watch_now">Megnézem most</string>
+    <string name="calendar_reminder_later">Később</string>
+    <string name="calendar_reminder_see_all">Összes a Naptárban</string>
+    <string name="calendar_reminder_row_show">Sorozat</string>
+    <string name="calendar_reminder_row_film">Film</string>
+    <string name="calendar_reminder_aired_today_at">Leadva ma, %1$s</string>
+    <string name="calendar_reminder_aired_at">Leadva: %2$s, %1$s</string>
+    <string name="calendar_reminder_aired_today">Leadva ma</string>
+    <string name="calendar_reminder_out_today">Ma jelenik meg</string>
+    <string name="calendar_corner_press_menu">Megnyitás a Menü gombbal</string>
+    <string name="calendar_reminder_finding">Epizód keresése…</string>
+    <string name="calendar_list_separator">", "</string>
+    <string name="calendar_list_last_pair">%1$s és %2$s</string>
+    <string name="calendar_runtime_hours_minutes">%1$d ó %2$d p</string>
+    <string name="calendar_runtime_hours">%1$d ó</string>
+    <string name="calendar_runtime_minutes">%1$d p</string>
+    <string name="calendar_zone_region_africa">Afrika</string>
+    <string name="calendar_zone_region_america">Amerika</string>
+    <string name="calendar_zone_region_antarctica">Antarktisz</string>
+    <string name="calendar_zone_region_asia">Ázsia</string>
+    <string name="calendar_zone_region_atlantic">Atlanti-óceán</string>
+    <string name="calendar_zone_region_australia">Ausztrália</string>
+    <string name="calendar_zone_region_europe">Európa</string>
+    <string name="calendar_zone_region_indian">Indiai-óceán</string>
+    <string name="calendar_zone_region_pacific">Csendes-óceán</string>
+</resources>

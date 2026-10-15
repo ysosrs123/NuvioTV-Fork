@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_calendar">日历</string>
+    <string name="calendar_title">日历</string>
+    <string name="calendar_view_list">列表</string>
+    <string name="calendar_view_month">月</string>
+    <string name="calendar_times_in">按 %1$s 时间显示</string>
+    <string name="calendar_zone_with_city">%1$s (%2$s)</string>
+    <string name="calendar_credit">播出时间由 TVmaze 提供</string>
+    <string name="calendar_section_just_aired">刚刚播出</string>
+    <string name="calendar_section_just_aired_hint">过去 7 天</string>
+    <string name="calendar_section_today">今天</string>
+    <string name="calendar_section_tomorrow">明天</string>
+    <string name="calendar_section_later">之后</string>
+    <string name="calendar_section_later_hint">每个节目的下一个已知日期</string>
+    <string name="calendar_section_no_date">日期待定</string>
+    <string name="calendar_section_no_date_hint">将回归或制作中</string>
+    <string name="calendar_episode_code">S%1$d E%2$d</string>
+    <string name="calendar_line_join">%1$s · %2$s</string>
+    <string name="calendar_film_cinema">院线上映</string>
+    <string name="calendar_film_digital">流媒体和数字发行</string>
+    <string name="calendar_show_returning">将回归</string>
+    <string name="calendar_show_in_production">制作中</string>
+    <string name="calendar_show_next_unknown">下一集日期待定</string>
+    <string name="calendar_time_not_announced">时间未公布</string>
+    <string name="calendar_unknown_title">无标题</string>
+    <string name="calendar_label_new_show">新节目</string>
+    <string name="calendar_label_season_premiere">季首播</string>
+    <string name="calendar_label_mid_season_premiere">季中首播</string>
+    <string name="calendar_label_mid_season_finale">季中收官</string>
+    <string name="calendar_label_season_finale">季终</string>
+    <string name="calendar_label_series_finale">全剧终</string>
+    <string name="calendar_cd_bell_on">提醒已开启</string>
+    <string name="calendar_cd_bell_off">提醒我</string>
+    <string name="calendar_cd_watched">已观看</string>
+    <string name="calendar_aired_on">%1$s 播出</string>
+    <string name="calendar_out_on">%1$s 发行</string>
+    <string name="calendar_options_subtitle">此标题的日历选项</string>
+    <string name="calendar_action_open_show">打开节目</string>
+    <string name="calendar_action_open_film">打开电影</string>
+    <string name="calendar_action_remind">有新剧集时提醒我</string>
+    <string name="calendar_action_remind_film">发行时提醒我</string>
+    <string name="calendar_action_stop_remind">停止提醒</string>
+    <string name="calendar_action_hide">从日历中隐藏</string>
+    <string name="calendar_building_title">正在查找您节目的日期…</string>
+    <plurals name="calendar_building_progress">
+        <item quantity="one">还剩 %1$d 个</item>
+        <item quantity="other">还剩 %1$d 个</item>
+    </plurals>
+    <string name="calendar_empty_title">尚未追踪任何内容</string>
+    <string name="calendar_empty_subtitle">您观看或收藏的节目将显示在这里</string>
+    <string name="calendar_quiet_title">暂无动静</string>
+    <plurals name="calendar_quiet_subtitle">
+        <item quantity="one">未来一天内您的节目没有新内容</item>
+        <item quantity="other">未来 %1$d 天内您的节目没有新内容</item>
+    </plurals>
+    <plurals name="calendar_month_episodes">
+        <item quantity="one">%1$d 集</item>
+        <item quantity="other">%1$d 集</item>
+    </plurals>
+    <plurals name="calendar_month_films">
+        <item quantity="one">%1$d 部电影</item>
+        <item quantity="other">%1$d 部电影</item>
+    </plurals>
+    <string name="calendar_month_more">+%1$d</string>
+    <string name="calendar_month_day_empty">当天没有安排</string>
+    <string name="calendar_settings_title">日历</string>
+    <string name="calendar_settings_desc">菜单项、显示天数、时区和隐藏的节目</string>
+    <string name="calendar_setting_menu">在菜单中显示日历</string>
+    <string name="calendar_setting_menu_sub">日历位于主菜单中媒体库之后</string>
+    <string name="calendar_setting_days">显示天数</string>
+    <string name="calendar_setting_days_sub">列表按天显示的范围；更晚的日期归入「之后」</string>
+    <plurals name="calendar_setting_days_value">
+        <item quantity="one">%1$d 天</item>
+        <item quantity="other">%1$d 天</item>
+    </plurals>
+    <string name="calendar_setting_zone">时区</string>
+    <string name="calendar_setting_zone_sub_box">跟随此设备，当前为 %1$s</string>
+    <string name="calendar_setting_zone_sub_set">播出时间按此时区显示，当前为 %1$s</string>
+    <string name="calendar_zone_follow_box">跟随此设备</string>
+    <string name="calendar_zone_follow_box_desc">当前为 %1$s</string>
+    <string name="calendar_setting_corner">新剧集角落提示</string>
+    <string name="calendar_setting_corner_sub">开启了铃铛提醒的节目有新剧集时，在角落显示简短提示</string>
+    <string name="calendar_setting_lists">包含我自己的列表</string>
+    <string name="calendar_setting_lists_sub">同时追踪您自己的 Trakt 和 MDBList 列表中的内容。列表过长会让日历显得拥挤。</string>
+    <string name="calendar_setting_hidden">隐藏的节目</string>
+    <string name="calendar_setting_hidden_sub">您从日历中隐藏的内容。选择一项即可重新显示。</string>
+    <plurals name="calendar_setting_hidden_value">
+        <item quantity="one">已隐藏 %1$d 个</item>
+        <item quantity="other">已隐藏 %1$d 个</item>
+    </plurals>
+    <string name="calendar_hidden_dialog_title">隐藏的节目</string>
+    <string name="calendar_hidden_dialog_subtitle">选择一项即可在日历中重新显示</string>
+    <string name="calendar_hidden_none">没有隐藏的节目</string>
+    <string name="calendar_setting_coming_up">「近期更新」行</string>
+    <string name="calendar_setting_coming_up_sub">在继续观看之后显示一行，包含日历中的新剧集、即将播出的剧集和电影</string>
+    <string name="calendar_coming_up_title">近期更新</string>
+    <string name="calendar_coming_up_new">新</string>
+    <string name="calendar_coming_up_today_at">今天 %1$s</string>
+    <string name="calendar_coming_up_tonight_at">今晚 %1$s</string>
+    <string name="calendar_reminder_title_one">新剧集</string>
+    <string name="calendar_reminder_title_one_film">新电影</string>
+    <string name="calendar_reminder_title_one_release">新内容</string>
+    <plurals name="calendar_reminder_title">
+        <item quantity="one">%1$d 个新剧集</item>
+        <item quantity="other">%1$d 个新剧集</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_films">
+        <item quantity="one">%1$d 部新电影</item>
+        <item quantity="other">%1$d 部新电影</item>
+    </plurals>
+    <plurals name="calendar_reminder_title_releases">
+        <item quantity="one">%1$d 项新内容</item>
+        <item quantity="other">%1$d 项新内容</item>
+    </plurals>
+    <plurals name="calendar_reminder_more">
+        <item quantity="one">及其他 %1$d 个</item>
+        <item quantity="other">及其他 %1$d 个</item>
+    </plurals>
+    <string name="calendar_reminder_watch_now">立即观看</string>
+    <string name="calendar_reminder_later">稍后</string>
+    <string name="calendar_reminder_see_all">在日历中查看全部</string>
+    <string name="calendar_reminder_row_show">节目</string>
+    <string name="calendar_reminder_row_film">电影</string>
+    <string name="calendar_reminder_aired_today_at">今天 %1$s 播出</string>
+    <string name="calendar_reminder_aired_at">%2$s %1$s 播出</string>
+    <string name="calendar_reminder_aired_today">今天播出</string>
+    <string name="calendar_reminder_out_today">今天发行</string>
+    <string name="calendar_corner_press_menu">按菜单键打开</string>
+    <string name="calendar_reminder_finding">正在查找该集…</string>
+    <string name="calendar_list_separator">、</string>
+    <string name="calendar_list_last_pair">%1$s和%2$s</string>
+    <string name="calendar_runtime_hours_minutes">%1$d 小时 %2$d 分钟</string>
+    <string name="calendar_runtime_hours">%1$d 小时</string>
+    <string name="calendar_runtime_minutes">%1$d 分钟</string>
+    <string name="calendar_zone_region_africa">非洲</string>
+    <string name="calendar_zone_region_america">美洲</string>
+    <string name="calendar_zone_region_antarctica">南极洲</string>
+    <string name="calendar_zone_region_asia">亚洲</string>
+    <string name="calendar_zone_region_atlantic">大西洋</string>
+    <string name="calendar_zone_region_australia">澳大利亚</string>
+    <string name="calendar_zone_region_europe">欧洲</string>
+    <string name="calendar_zone_region_indian">印度洋</string>
+    <string name="calendar_zone_region_pacific">太平洋</string>
+</resources>

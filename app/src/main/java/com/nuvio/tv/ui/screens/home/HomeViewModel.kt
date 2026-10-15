@@ -88,6 +88,7 @@ class HomeViewModel @Inject constructor(
     internal val profileManager: com.nuvio.tv.core.profile.ProfileManager,
     internal val tvRecommendationManager: TvRecommendationManager,
     internal val serverCatalog: ServerCatalog,
+    internal val calendarComingUp: CalendarComingUpSource? = null,
     internal val metaPreviewEnricher: MetaPreviewEnricher = MetaPreviewEnricher(
         tmdbService,
         tmdbMetadataService,
@@ -140,6 +141,9 @@ class HomeViewModel @Inject constructor(
     /** True once the CW pipeline has completed its first emission (items or empty). */
     internal val _initialCwResolved = MutableStateFlow(false)
     val initialCwResolved: StateFlow<Boolean> = _initialCwResolved.asStateFlow()
+
+    /** True while Home is on screen, so the Coming up row only keeps its clock running then. */
+    internal val comingUpActive = MutableStateFlow(false)
     val effectiveAutoplayEnabled = playerSettingsDataStore.playerSettings
         .map(StreamAutoPlayPolicy::isEffectivelyEnabled)
         .distinctUntilChanged()
@@ -382,6 +386,7 @@ class HomeViewModel @Inject constructor(
             observeCollections()
             observeInstalledAddons()
             observeManualAddonRefresh()
+            observeComingUpRow()
 
             // Clear CW state when profile changes so items don't leak between profiles.
             var previousProfileId = profileManager.activeProfileId.value
