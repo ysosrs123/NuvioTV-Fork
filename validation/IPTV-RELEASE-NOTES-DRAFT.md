@@ -1172,6 +1172,10 @@ Phone setup (security review)
 
 ## Validation
 
+- Twenty-first capture batch (17 October; NBA overtime finals, a postponed MLB game, an NHL
+  penalty shot, a TheSportsDB hockey shoot-out): CI debug green at `b4af47e5b` (run
+  39036483344); 1029 core and 305 data-layer JVM tests on the host. Not device-tested.
+
 - Twentieth capture batch (13–16 October; Champions League, MLB playoffs, NHL, UFC): CI debug
   green at `411ad607f` (run 38988428742; a first attempt was refused while GitHub Actions
   was disabled on the repository); 1022 core and 305 data-layer JVM tests on the host. Not

@@ -44,34 +44,35 @@ under "Earlier session notes" and the dated sections is history kept for referen
     `411ad607f` (7u): substitution text, own goals, MLB count after an at-bat, duplicate run
     moments, bench minors, finished fight cards.
   - Capture batch 21 (17 October, 19:59 and 22:58, two ESPN passes with two TheSportsDB
-    runs) in the commit after `49f1e65c0` (7v): TheSportsDB hockey shoot-out `PT` reads SO;
+    runs) in `b4af47e5b` (7v): TheSportsDB hockey shoot-out `PT` reads SO;
     NBA overtime finals, a postponed MLB game, an NHL penalty shot and an own goal by a
     penalty scorer confirmed with no change.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
-  CI debug green at `411ad607f` (run 38988428742; `8260658fc`, run 38242468867, `a7266ce95`,
+  CI debug green at `b4af47e5b` (run 39036483344; `411ad607f`, run 38988428742, `8260658fc`,
+  run 38242468867, `a7266ce95`,
   run 38201561490, `1e539a53a`, run 38196253340, `98d520804`, run 38186968485, `2d693cada`,
   run 38180390637, and `91e1e7f1b`, run 38178089678, were the builds before), app "Nuvio
   IPTV Prototype", file
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1022, data 305, androidTest compiles.
+- Host tests at that commit: core 1029, data 305, androidTest compiles.
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
   an SMB NAS on `f79646c53` (findings fixed in 7i). Everything in checklist sections 7f to
-  7u is built and host-tested but not yet tried on a device; the user was about to test
+  7v is built and host-tested but not yet tried on a device; the user was about to test
   `85fe99dce` (7m to 7f) when the merge was asked for, so findings may refer to that build.
 - A printable test sheet for the current build is made from the checklist (see "How to
   build and check" below); the user prints it for each device pass.
 
 ### Next, in order
 
-1. Device pass on `411ad607f` (checklist 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, then 7m, 7l, 7k,
-   7j, 7i, 7h, 7g, 7f, plus sections 1 and 2 as a regression check after the merge;
-   `8260658fc` differs only in 7u). Findings on `85fe99dce` are still valid unless 7n to 7u
+1. Device pass on `b4af47e5b` (checklist 7v, 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, then 7m, 7l,
+   7k, 7j, 7i, 7h, 7g, 7f, plus sections 1 and 2 as a regression check after the merge;
+   `411ad607f` differs only in 7v). Findings on `85fe99dce` are still valid unless 7n to 7v
    or the second-pass fixes changed that area. Record the
    findings in a new "Device findings" section below, fix them, update the release notes in
    the same commits, translate new strings, build, send the run link and a new test sheet.

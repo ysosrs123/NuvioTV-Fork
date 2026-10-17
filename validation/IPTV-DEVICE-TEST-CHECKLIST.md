@@ -1,4 +1,4 @@
-# Nuvio IPTV — device test checklist (build `411ad607f`, run 38988428742)
+# Nuvio IPTV — device test checklist (build `b4af47e5b`, run 39036483344)
 
 For this build start with section 7v, then 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
 
@@ -84,7 +84,7 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
 
-## 7v. 17 October captures: TheSportsDB shoot-out and NBA overtime (build pending)
+## 7v. 17 October captures: TheSportsDB shoot-out and NBA overtime (build `b4af47e5b`)
 1. Needs a TheSportsDB key: while a minor-league hockey game from TheSportsDB (QMJHL, AHL,
    ECHL, a European league) is in a shoot-out, its score bug, card and hero show "SO", not
    "PT".
