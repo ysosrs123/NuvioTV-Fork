@@ -43,6 +43,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture batch 20 (13–16 October, seven ESPN passes with seven TheSportsDB runs)
     `411ad607f` (7u): substitution text, own goals, MLB count after an at-bat, duplicate run
     moments, bench minors, finished fight cards.
+  - Capture batch 21 (17 October, 19:59 and 22:58, two ESPN passes with two TheSportsDB
+    runs) in the commit after `49f1e65c0` (7v): TheSportsDB hockey shoot-out `PT` reads SO;
+    NBA overtime finals, a postponed MLB game, an NHL penalty shot and an own goal by a
+    penalty scorer confirmed with no change.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -98,9 +102,14 @@ under "Earlier session notes" and the dated sections is history kept for referen
    with seven TheSportsDB runs) showed football own goals and penalties on ESPN, finished
    TheSportsDB baseball rows, a TheSportsDB NHL shoot-out going from live to `AP`, and
    TheSportsDB dating US evening MLB games a day early (the live row is then treated as
-   stale).
+   stale). The twenty-first pass (17 October, 19:59 and 22:58) showed NBA overtime finals
+   (`Final/OT`, five columns), the first postponed ESPN game (ALCS Game 4, left out of the
+   scoreboard; the summary reads Postponed), an NHL penalty shot (`PS`, no power play), an
+   A-League own goal by the penalty scorer, and a TheSportsDB hockey shoot-out stuck at
+   `PT` (now shown as SO); TheSportsDB NBA and NHL games after 00:00Z carry the right UTC
+   date.
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
-   the full list): the NFL two-minute warning on the scoreboard; NBA overtime; an NHL power
+   the full list): the NFL two-minute warning on the scoreboard; NBA overtime in progress; an NHL power
    play, empty net or shootout on the scoreboard, and a shootout in the summary; a pitching
    change as the MLB scoreboard's last play; TheSportsDB baseball half-innings, extra
    innings or a finished baseball row; a TheSportsDB
@@ -136,11 +145,13 @@ under "Earlier session notes" and the dated sections is history kept for referen
    - Ordinal table positions ("1st") are English only; other languages show the number.
    - Baseball inning words built in core ("Inning 4" from TheSportsDB, "Mid 4"/"End 4" on the
      score bug) are English only.
-   - TheSportsDB MLB (and probably other US) games starting after 00:00Z carry the US date
-     with the UTC time, so a live row looks a day old and is skipped as stale; check
-     `eventsday` (`SportsDbEvents.start`, `IptvSportsFixturesRepository`) before correcting the
-     start. TheSportsDB `AOT`/`AP` finals show only "Final" (`AP` also means after penalties
-     in football). "Serving for the set" also shows when it is for the match.
+   - TheSportsDB MLB postseason rows starting after 00:00Z carry the US date with the UTC
+     time, so a live row looks a day old and is skipped as stale; NBA and NHL rows are dated
+     correctly (17 October captures). Capture an MLB `eventsday` (the capture script has a
+     `v1-eventsday-mlb` line) during the World Series before correcting
+     `SportsDbEvents.start`. TheSportsDB `AOT`/`AP` finals show only "Final" (`AP` also
+     means after penalties in football); a stuck `PT` row settles 30 minutes after the game
+     length, without the shoot-out winner. "Serving for the set" also shows when it is for the match.
    - Not offered: ~200 minor football competitions, other golf tours, other MMA
      promotions, FIBA and minor sports. Pre-game NHL/MLB team stats are season figures.
 4. Waiting on the user (do not do these without them; give a recommendation and wait):

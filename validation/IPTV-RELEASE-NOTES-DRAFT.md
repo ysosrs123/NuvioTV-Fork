@@ -935,6 +935,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   the previous batter's count; a run scored on a wild pitch appears once in Game Centre.
 - Ice hockey: a bench minor (too many men) shows the power play straight away.
 - UFC: a finished card shows "Final" instead of "Scheduled".
+- Ice hockey from TheSportsDB: a game in a shoot-out shows "SO" on the score bug, cards and
+  hero instead of the code "PT" (captures of 17 October).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

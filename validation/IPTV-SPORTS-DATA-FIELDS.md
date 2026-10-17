@@ -1407,3 +1407,75 @@ and the server in a tie-break; NASCAR stages; F1 gaps, pit stops and fastest lap
 progress; live cricket; AFL/NRL live clock (off season); golf after a cut or a playoff; football extra
 time and penalty shoot-outs on ESPN; a TheSportsDB penalty shoot-out after extra time and a refreshed
 shoot-out row (`P` with a progress); an NBA free throw on the scoreboard with the player's name.
+
+## Twenty-first pass (17 October)
+
+Two ESPN passes, each with a TheSportsDB run, captured on Saturday 17 October, Brisbane time: 19:59
+(09:59Z; TheSportsDB `updated` 10:59 London) and 22:58 (12:58Z; 13:57 to 13:59 London), 12 hours
+after the last pass of the twentieth. 14 of the 43 files in the first pass are byte-for-byte the
+twentieth's last pass and 18 in the second are the first again, among them the multi-sport header;
+the nested `espn-pass.zip` is the 11 October capture again in both. In play in the first: the
+A-League (Mariners 1–1 Jets, 59'), the NBL (Kings 84–69 Wildcats, `7:43 - 4th`, with its summary),
+an ATP semifinal in Shanghai and three WTA matches; in the second: the Premier League (Everton 0–1
+Chelsea, 67', with its summary) and three WTA matches. Finals of note: twelve NBA preseason games,
+two of them `Final/OT` (Celtics 125–120 at 76ers, Bucks 128–127 at Pacers); the Mariners–Jets game
+2–2; Kings 102–81 Wildcats; two NHL games. Game 4 of the ALCS (Rays at Guardians, 00:00Z) is the
+first postponed game seen on ESPN. Each TheSportsDB calls folder holds that run's livescore (289 and
+480 rows) and 9 and 6 new `lookuptv` files; each coverage folder's `v2-livescore-app-*` files are the
+previous run's. League lists are unchanged. Every scoreboard and summary parses without errors.
+Trimmed copies are in `app/src/test/resources/sports/*-real-20261017b.json` (first pass) and
+`*-real-20261017c.json` (second) (`SportsRealDataSaturdayTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NBA overtime (finals) | `STATUS_FINAL`, `period` 5, `displayClock` `5:00`, `shortDetail` `Final/OT`, `altDetail` `OT`; five linescores a side (`28 32 34 21 5` against `34 24 26 31 10`); no `situation`; preseason records (`1-3`). The summary file was a regulation game, so no overtime summary yet. | none: `BOS 125–120 PHI`, `Final/OT`, an `OT` column |
+| MLB postponed (scoreboard and summary) | `STATUS_POSTPONED` (`id` 6, `state` `post`, `completed` false, `Postponed`), scores `0`, no linescores, `period` 1; the note `ALCS - Game 4 Rain - Makeup on Oct 18`; the summary has the same status and no plays. | none: the scoreboard leaves the game out (as for cancelled games); a summary reads it as finished (`Postponed`, no moments), so a summary watch stops |
+| Football own goal and penalties (A-League) | Mariners–Jets: two `Penalty - Scored` for the Mariners (11', 60') and at 78' an `Own Goal` by the player who took the second penalty, `team` the Jets; a `Goal - Header` (`type.id` 137) in another game. The live summary at 59' ended on the commentary for the second penalty (`Penalty conceded by …`, no `period`). | none: `O. Lavale` (home, 60') and `O. Lavale (own goal)` (away, 78') |
+| Football delays (summary) | Everton–Chelsea: `Start Delay` and `End Delay` key events in pairs, one with text (`Delay in match because of an injury …`) and one without. | none: not moments; the texted ones can be last plays |
+| NHL penalty shot (final summary) | `Hooking on Breakaway`, `abbreviation` `PS-Hooking`, `penaltyType` `PS`, no `penaltyMinutes`; the next play is the shot (saved), all `Even Strength`. A power-play goal later in the game (`strength` `Power Play`). | none: a penalty shot gives no power play |
+| NBL (live) | `7:43 - 4th` on the scoreboard and summary, last play and a 6–0 run; TheSportsDB at the same time `Q4` `1` at 78–65 (about a minute of play behind). | none: `Q4 · 7:43` |
+| Tennis (live) | Server only with a `situation`, as before; `OSTAPENKO serving for the set` at 6–5; a Ningbo match without `situation` or server. Still no point score and no tie-break in progress. | none |
+
+TheSportsDB, two runs: Basketball (133, then 124), Ice Hockey (108, 107), Soccer (42, 244), Baseball
+(5, 4) and American Football (1); every other sport answered `{"Message":"No data found"}`. Ice
+hockey: a QMJHL game from 22:00Z on the 16th read `PT` at 3–3 with no progress (a shoot-out in
+progress), last refreshed at 02:15 London, 3 h 15 min after the start, and still listed eight and
+eleven hours later; until now such a row showed `PT` on the score bug while fresh (it is skipped as
+stale here). A Belarusian `P3` `20` row from 16:00Z on the 16th still listed, 16 and 19 hours after its last refresh (skipped as before). KHL and
+VHL finals `FT`; `P1` `16`, `P2` `6`. Basketball: `HT` with progress `0` (as on 11 October) and with
+none, `Q2` `2` to `Q4` `10`, `NS` with progress `0`, finals `FT` `10` and `FT` with none. Baseball: a
+CPBL game `IN3` with both scores null, then `FT` with only the home 3; NPB `FT` 5–8; Venezuelan rows
+`NS`. No MLB row (the ALCS game was rained out). Football: stoppage up to `45+8` in the 1st half and
+`90+7` in the 2nd; Everton–Chelsea `2H` `66` at 12:57Z (ESPN 67'). The `eventsday` file for the
+Premier League had the same game live (`2H`, `strProgress` null, 0–1) with `strTime` shortened to
+`11:30` while `strTimestamp` kept `2026-10-17T11:30:00`. NFL: `Final/OT` for the Broncos game,
+still refreshed 36 hours after it. The NHL rows for Saturday are dated 17 October from 17:00Z to
+23:00Z, and none of the later games (after 00:00Z on the 18th) is listed yet; the NBA and NHL
+`lookuptv` files for games after 00:00Z (Lakers–Warriors and Kings–Trail Blazers 02:00Z, Mammoth–Maple
+Leafs 01:00Z on the 14th) carry the same UTC date as ESPN, so the day-early start is so far seen only
+on MLB postseason rows. The new `lookuptv` files all returned `{"tvevent":null}` apart from a VTB
+game (one channel).
+
+Parser changes: a TheSportsDB ice hockey `PT` row (livescore or `eventsday`) reads `SO`, as the
+shoot-out column on ESPN does, instead of the bare code.
+
+Checked again on this data: NBA and NBL clocks, finals and line scores; NHL finals, goals, goalies,
+awards and strength; football minutes, stoppage time, cards, goals, penalties, own goals, sides and
+substitution texts; tennis sets, server and serving for the set; TheSportsDB basketball quarters and
+breaks, hockey periods and finals, baseball innings and finals with a missing score, football
+minutes and half-time, stale rows, `Final/OT` progress; `eventsday` live rows.
+
+Confirmed now: NBA overtime finals on the scoreboard; a postponed game on ESPN (scoreboard and
+summary); an NHL penalty shot; a TheSportsDB hockey shoot-out in progress (`PT`, stuck); TheSportsDB
+NBA and NHL games after 00:00Z on the right UTC date; an `eventsday` `strTime` without seconds.
+
+Still unconfirmed: the NFL two-minute warning on the scoreboard; NBA overtime in progress and an
+overtime summary; an NHL power play, empty net or shootout in progress on the scoreboard, and a
+shootout in the summary; a pitching change as the MLB scoreboard's last play; TheSportsDB baseball
+half-innings or extra innings, and whether `eventsday` also lists US evening MLB games a day early
+(no MLB `eventsday` captured; livescore and `lookuptv` do for postseason rows); tennis point score
+and the server in a tie-break; NASCAR stages; F1 gaps, pit stops and fastest lap; a UFC bout in
+progress; live cricket; AFL/NRL live clock (off season); golf after a cut or a playoff; football
+extra time and penalty shoot-outs on ESPN; a TheSportsDB penalty shoot-out after extra time and a
+refreshed shoot-out row (`P` or `PT` with a progress, or `PT` moving to `AP`); an NBA free throw on
+the scoreboard with the player's name.

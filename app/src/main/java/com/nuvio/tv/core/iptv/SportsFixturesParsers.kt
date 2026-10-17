@@ -624,7 +624,7 @@ object SportsDbEvents {
         val period = inning ?: PERIODS[code]?.takeIf { live }
         val progress = event.text("strProgress")?.takeIf { live && inning == null && it.length <= 8 }?.let { if (it.all(Char::isDigit)) "$it'" else it }
         return SportsFixture(id, league.id, league.sport, title, home.takeIf { paired }, away.takeIf { paired }, start, status, score,
-            inning?.let(::inningText) ?: raw.takeIf { live && it.isNotEmpty() && it.length <= 24 }, stations.distinct().take(12), event.text("strVenue")?.take(MAX_TEXT),
+            inning?.let(::inningText) ?: raw.takeIf { live && it.isNotEmpty() && it.length <= 24 }?.let { shown(league.sport, code, it) }, stations.distinct().take(12), event.text("strVenue")?.take(MAX_TEXT),
             event.text("intRound")?.toIntOrNull()?.takeIf { it in 1..99 }, period, progress, if (started) FixtureLine(homeScore) else null,
             if (started) FixtureLine(awayScore) else null, null, event.text("strLeagueBadge")?.let(::sportsImage), source = SportsService.THESPORTSDB)
     }
@@ -646,6 +646,8 @@ object SportsDbEvents {
     internal fun inning(sport: String, code: String): Int? = if (sport == "baseball") INNING.matchEntire(code)?.groupValues?.get(1)?.toIntOrNull() else null
 
     internal fun inningText(inning: Int): String = "Inning $inning"
+
+    internal fun shown(sport: String, code: String, raw: String): String = if (sport == "ice-hockey" && code == "pt") "SO" else raw
 
     private val INNING = Regex("in ?([1-9][0-9]?)")
 

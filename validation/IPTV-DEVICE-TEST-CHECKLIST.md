@@ -1,6 +1,6 @@
 # Nuvio IPTV — device test checklist (build `411ad607f`, run 38988428742)
 
-For this build start with section 7u, then 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
+For this build start with section 7v, then 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -83,6 +83,13 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 11. Press Home on the remote with Game Centre open: logcat should show sports requests
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
+
+## 7v. 17 October captures: TheSportsDB shoot-out and NBA overtime (build pending)
+1. Needs a TheSportsDB key: while a minor-league hockey game from TheSportsDB (QMJHL, AHL,
+   ECHL, a European league) is in a shoot-out, its score bug, card and hero show "SO", not
+   "PT".
+2. A finished NBA overtime game shows "Final/OT" with an OT column in Game Centre and All
+   scores; an earlier NFL "Final/OT" game still looks the same.
 
 ## 7u. 13–16 October captures: football, baseball, hockey and UFC (build `411ad607f`)
 1. Champions League or Premier League live in Game Centre: a substitution reads

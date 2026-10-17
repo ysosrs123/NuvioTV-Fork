@@ -73,6 +73,7 @@ Get-Json "v1-all-leagues" "$v1/all_leagues.php"
 $day = (Get-Date).ToString("yyyy-MM-dd")
 Get-Json "v1-eventsday-epl" "$v1/eventsday.php?d=$day&l=English_Premier_League"
 Get-Json "v1-eventsday-afl" "$v1/eventsday.php?d=$day&l=Australian_AFL"
+Get-Json "v1-eventsday-mlb" "$v1/eventsday.php?d=$day&l=MLB"
 $ids = @()
 foreach ($f in Get-ChildItem $out -Filter "v2-livescore-app-*.json") {
   $j = Get-Content $f.FullName -Raw | ConvertFrom-Json

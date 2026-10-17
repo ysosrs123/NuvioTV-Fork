@@ -82,7 +82,7 @@ object SportsDbLive {
         val words = score.progress?.trim()?.takeIf { live && raw.isEmpty() && quarter == null && it.length in 9..24 && it.any(Char::isLetter) }
             ?: score.progress?.trim()?.takeIf { !live && raw.isEmpty() && SportsGuide.normalise(it).matches(SportsDbEvents.OVERTIME_FINAL) }
         return fixture.copy(status = status, score = if (both) "$home–$away" else fixture.score,
-            detail = inning?.let(SportsDbEvents::inningText) ?: raw.takeIf { live && it.isNotEmpty() && it.length <= 24 } ?: words,
+            detail = inning?.let(SportsDbEvents::inningText) ?: raw.takeIf { live && it.isNotEmpty() && it.length <= 24 }?.let { SportsDbEvents.shown(fixture.sport, code, it) } ?: words,
             period = if (live) inning ?: quarterPeriod ?: SportsDbEvents.PERIODS[code] ?: OVERTIME[fixture.sport]?.takeIf { code == "ot" } ?: fixture.period else null,
             clock = if (live && inning == null) progress ?: fixture.clock else null,
             homeLine = if (both) FixtureLine(home) else fixture.homeLine, awayLine = if (both) FixtureLine(away) else fixture.awayLine)
