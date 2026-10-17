@@ -291,6 +291,11 @@ under "Earlier session notes" and the dated sections is history kept for referen
   no longer asks; 400/404/410 stop the watch for that game); NASCAR 502s are transient;
   `form` is newest first (reversed when parsed); the F1 event status says FINAL while
   sessions are still live, so the parser follows the sessions.
+- Automatic captures (user decision, 18 October): scheduled runs in the cloud environment
+  capture ESPN and TheSportsDB with `tools/iptv-host-tests/sports_capture.py`, process the
+  capture as below and push fixes. The user relaxed the key rule for this only: the key lives
+  in the environment as `THESPORTSDB_KEY` (set by the user); it must still never be written to
+  the repository, docs, fixtures, logs or chat, and every saved file is scrubbed.
 - The ESPN capture script (18 October) skips summaries for tennis, golf, racing and MMA and
   also captures CFL, MLS, EFL Cup, Europa League, men's college hockey, LPGA and PFL.
 - Capture schedule given to the user (Brisbane, UTC+10; European games one hour later from

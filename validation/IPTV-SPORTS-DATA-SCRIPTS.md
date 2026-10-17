@@ -7,6 +7,16 @@ parser tests are in `app/src/test/resources/sports/`. Paste each block into Powe
 for the key script, type the `$key = "..."` line on its own first (a pasted `Read-Host`
 consumes the next pasted line). Never commit a key.
 
+## Scheduled captures in the cloud environment
+
+`tools/iptv-host-tests/sports_capture.py <out-dir>` makes the same requests as the blocks
+below (ESPN pass, TheSportsDB coverage and calls) into `espn-pass/`, `sports-coverage/` and
+`sportsdb-calls/`. It reads the TheSportsDB key only from the `THESPORTSDB_KEY` environment
+variable (set by the user in the environment settings), removes it from every saved file and
+deletes any file that still holds it. The environment must allow `site.api.espn.com`,
+`site.web.api.espn.com` and `www.thesportsdb.com`. Scheduled runs are described in the
+handover ("Automatic captures").
+
 ## ESPN capture (best while big games are live)
 
 ESPN has no game summary for tennis, golf, motor racing or MMA (it answers 400, 404 or 502),
