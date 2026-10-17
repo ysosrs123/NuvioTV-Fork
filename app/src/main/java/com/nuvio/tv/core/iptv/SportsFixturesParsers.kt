@@ -125,7 +125,8 @@ object EspnScoreboard {
                 else -> null
             }?.take(16)
             val period = item.optJSONObject("period")?.optIntOrNull("number")?.takeIf { it in 1..9 }
-            FixtureEvent(kind, side, clock, period, (person?.text("shortName") ?: person?.text("displayName"))?.take(MAX_NAME))
+            FixtureEvent(kind, side, clock, period, (person?.text("shortName") ?: person?.text("displayName"))?.take(MAX_NAME)
+                ?.let { if (kind == FixtureEventKind.GOAL && item.optBoolean("ownGoal")) "$it (own goal)" else it })
         }.takeLast(SportsEvents.MAX_EVENTS)
     }
 
@@ -379,7 +380,8 @@ object EspnScoreboard {
             else -> FixtureStatus.SCHEDULED
         }
         val start = bouts.minOfOrNull { it.startMillis } ?: eventStart ?: return null
-        val shown = raw.firstOrNull { it.third.state == FixtureStatus.LIVE }?.second ?: eventStatus?.optJSONObject("type") ?: raw.lastOrNull()?.second
+        val shown = raw.firstOrNull { it.third.state == FixtureStatus.LIVE }?.second ?: eventStatus?.optJSONObject("type")?.takeIf { status(it) == status }
+            ?: raw.lastOrNull()?.second
         val venue = (event.optJSONArray("venues")?.let(::objects)?.firstOrNull() ?: raw.firstNotNullOfOrNull { it.first.optJSONObject("venue") }
             ?: event.optJSONObject("venue"))?.let { it.text("fullName") ?: it.text("displayName") }?.take(MAX_TEXT)
         val broadcasters = (raw.map { it.first } + event).flatMap(::broadcasters).distinctBy { SportsGuide.normalise(it) }.take(12)
@@ -430,7 +432,10 @@ object EspnScoreboard {
         val half = listOfNotNull(status?.text("periodPrefix"), type?.text("shortDetail"), type?.text("detail")).firstNotNullOfOrNull(::half)
         if (situation == null && half == null) return null
         val between = half == InningHalf.MIDDLE || half == InningHalf.END
-        fun count(key: String) = situation?.optIntOrNull(key)?.takeIf { it in 0..4 && !between }
+        val last = situation?.optJSONObject("lastPlay")
+        val batter = situation?.optJSONObject("batter")?.let { it.text("playerId") ?: it.optJSONObject("athlete")?.text("id") }
+        val atBatOver = batter != null && last?.text("summaryType") == "N" && last.optJSONArray("athletesInvolved")?.let(::objects)?.firstOrNull()?.text("id") == batter
+        fun count(key: String) = situation?.optIntOrNull(key)?.takeIf { it in 0..4 && !between }?.let { if (atBatOver && key != "outs") 0 else it }
         fun base(key: String) = !between && when (val value = situation?.opt(key)) {
             is Boolean -> value
             is Number -> value.toInt() != 0

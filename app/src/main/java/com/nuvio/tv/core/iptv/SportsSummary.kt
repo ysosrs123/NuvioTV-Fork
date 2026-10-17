@@ -186,14 +186,16 @@ object EspnSummary {
         val details = competition?.optJSONArray("details")?.let(::objs).orEmpty()
         val scoring = if (sport == "american-football") root.optJSONArray("scoringPlays")?.let(::objs).orEmpty() else emptyList()
         val list = when {
-            sport == "soccer" && keyEvents.isNotEmpty() -> events(keyEvents, sport, sides)
+            sport == "soccer" && keyEvents.isNotEmpty() -> events(keyEvents, sport, sides, root.optJSONArray("commentary")?.let(::objs).orEmpty()
+                .mapNotNull { c -> c.optJSONObject("play")?.str("id")?.let { id -> c.str("text")?.let { id to it } } }.toMap())
             (sport == "soccer" || sport == "rugby-league" || sport == "rugby") && details.isNotEmpty() -> events(details, sport, sides)
             scoring.isNotEmpty() -> {
                 val wallclocks = plays.mapNotNull { p -> p.str("id")?.let { id -> p.str("wallclock")?.let { id to it } } }.toMap()
                 scoring.mapNotNull { play(it, sport, sides, it.str("id")?.let(wallclocks::get)) }
             }
             else -> plays.filter { it.optBoolean("scoringPlay") || sport == "australian-football" && it.optJSONObject("type")?.let { t -> t.str("type") ?: t.str("text") }?.lowercase() in AFL_SCORES }
-                .mapNotNull { play(it, sport, sides) }.ifEmpty { events(details, sport, sides) }
+                .mapNotNull { play(it, sport, sides) }.distinctBy { listOf(it.text, it.period, it.clock, it.homeScore, it.awayScore, it.bottom) }
+                .ifEmpty { events(details, sport, sides) }
         }
         return list.takeLast(MAX_MOMENTS)
     }
@@ -207,7 +209,7 @@ object EspnSummary {
             (play.str("wallclock") ?: wallclock)?.let(::sportsInstant), period?.str("type")?.let(::bottom))
     }
 
-    private fun events(items: List<JSONObject>, sport: String, sides: Sides): List<SummaryMoment> {
+    private fun events(items: List<JSONObject>, sport: String, sides: Sides, said: Map<String, String> = emptyMap()): List<SummaryMoment> {
         val rugby = sport == "rugby-league" || sport == "rugby"
         var home = 0
         var away = 0
@@ -238,7 +240,8 @@ object EspnSummary {
             val own = item.optBoolean("ownGoal")
             val built = listOfNotNull(typeText.takeIf(String::isNotEmpty)?.replaceFirstChar(Char::uppercaseChar)?.let { if (own && "own" !in lower) "$it (own goal)" else it },
                 people.joinToString(", ").takeIf(String::isNotEmpty)).joinToString(" – ")
-            val text = ((if (kind == MomentKind.SUBSTITUTION && people.size == 2) item.str("text") else null) ?: item.str("shortText") ?: built.takeIf(String::isNotEmpty)
+            val text = ((if (kind == MomentKind.SUBSTITUTION && people.size == 2) item.str("id")?.let(said::get) ?: item.str("text") else null) ?: item.str("shortText")
+                ?: built.takeIf(String::isNotEmpty)
                 ?: item.str("text"))?.let(::plain)?.take(MAX_TEXT) ?: return@mapNotNull null
             val withScore = scoring && side != null
             SummaryMoment(kind, side, item.optJSONObject("period")?.int("number"), clock(item), text,
@@ -530,7 +533,7 @@ object EspnSummary {
     private val BENCH = setOf("replacement", "reserve", "interchange", "substitute")
     private val MINUTE_SPORTS = setOf("soccer", "rugby", "rugby-league")
     private val BREAK_STATES = listOf("END", "INTERMISSION", "SHOOTOUT")
-    private val POWER_PLAY_PENALTIES = setOf("minor", "major", "double minor", "bench minor")
+    private val POWER_PLAY_PENALTIES = setOf("minor", "major", "double minor", "bench minor", "bench")
     private val SNAP = Regex("^\\(\\d{1,2}:\\d{2}\\)\\s+")
     private val BENCH_LABELS = setOf("sub", "substitute")
     private val AFL_SCORES = setOf("goal", "behind", "rushed")

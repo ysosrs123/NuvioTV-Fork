@@ -1318,3 +1318,92 @@ fastest lap; a UFC bout in progress; live cricket; AFL/NRL live clock (off seaso
 or a playoff; football own goals, penalties and extra time on ESPN; a TheSportsDB penalty shoot-out
 after extra time and a refreshed shoot-out row (`P` with a progress); an NBA free throw on the
 scoreboard with the player's name.
+
+## Twentieth pass (13–16 October)
+
+Seven ESPN passes, each with a TheSportsDB run, captured between Wednesday 14 and Saturday 17
+October, Brisbane time: 06:23 on the 14th (20:23Z on the 13th; TheSportsDB `updated` 21:23 London),
+09:03 (23:03Z; 00:02), 11:07 (01:07Z on the 14th; 02:06), 11:45 (01:45Z; 02:44), 08:01 on the 15th
+(22:01Z on the 14th; 23:01), 19:39 on the 15th (09:39Z; 10:39) and 07:38 on the 17th (21:38Z on the
+16th; 22:37). The upload folders are reused, so each pass also carries summaries from earlier passes
+whose league had nothing live since; the nested `espn-pass.zip` is the 11 October 05:07 capture
+again in all seven. In play: seven Champions League games in the 2nd half (63' to 66') in the first
+pass; NHL games in the second to fourth (four, then eleven, then nine at once), the NBA (three games,
+then one) and Game 2 of the ALCS (Guardians at Rays, `Top 4th` and `End 5th`) in the third and
+fourth; a Contender Series card in the second and third; an NBL game (`9:02 - 3rd`) and three WTA
+matches in the sixth; nothing in the fifth and seventh. Finals of note: the NFL Monday night game
+(Rams 34–37 Bills, `Final/OT`, an overtime field goal) and the Thursday game (Broncos 17–14
+Seahawks, `Final/OT`, a 53-yard field goal 5:07 into overtime) with its summary; NHL `Final/OT`
+(Devils 5–4 at Red Wings) and two `Final/SO` (Canadiens 4–3 Sabres, Stars 3–2 at Avalanche); 18
+Champions League games; Game 3 of the NLCS (Brewers 6–2 at Dodgers); Sydney FC 0–0 Western Sydney in
+the A-League. 11 to 23 of the 42 files in each pass are byte-for-byte the pass before; the
+multi-sport header lags as before. Each TheSportsDB calls folder holds that run's livescore
+(`v2-livescore-all` and the per-sport `app` files; the second run's `app-soccer` file is the first
+run's, and the sixth run has no American football file) and 1 to 10 new `lookuptv` files; each
+coverage folder's `v2-livescore-app-*` files are the previous run's. League lists (1,553) are
+unchanged. Every scoreboard and summary parses without errors. Trimmed copies are in
+`app/src/test/resources/sports/*-real-20261014*.json`, `*-real-20261015*.json` and
+`*-real-20261017.json` (`SportsRealDataMidweekTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Football substitution (live summary) | Arsenal–Lille at 66' (first pass): the three substitutions at 65' are `keyEvents` with `participants` [on, off] but the text `Bukayo Saka (Arsenal) Substitution at 65'`, which names only the player coming on. The `commentary` entry for the same play id already reads `Substitution, Arsenal. Bukayo Saka replaces Noni Madueke.` Across every football summary uploaded so far, all 167 substitution key events have a commentary entry with the same id, and 164 of them have the same text (the other three are these). | Substitution moments take the commentary text of the same play when there is one (`Substitution, Arsenal. Bukayo Saka replaces Noni Madueke.`) |
+| Football own goals and penalties (scoreboard) | `Own Goal` (`type.id` 97, `ownGoal` true) six times: `team` is the side credited with the goal (Feyenoord) while the athlete's own `team` is the other side (Como's Robert Sánchez). The summary key event reads `Own Goal by Robert Sánchez, Como. Feyenoord 3, Como 1.` (`shortText` `Robert Sánchez Own Goal`, `team` Feyenoord, `ownGoal` null). Penalties scored are `Penalty - Scored` with `penaltyKick` true (21); no missed penalty, extra time or shoot-out. | Scoreboard own goals carry the marker the summary already gives (`R. Sánchez (own goal)`); the side was already right |
+| MLB scoreboard after an at-bat | `Top 4th`, `outs` 2, `onFirst` true, `balls` 1 and `strikes` 2; `lastPlay` `Halpin singled to right.` (`play-result`, `summaryType` `N`, `alternativeType` `Single`, `athletesInvolved` Halpin) while `batter` is still Halpin (`summary` `1-2, K`). The count is the finished at-bat's; the summary, fetched just before, was still mid at-bat (`Freddy Peralta pitches to Petey Halpin`, 1–2). | The scoreboard count reads 0–0 once the last play is an at-bat result by the listed batter (as the summary already does after `end-batterpitcher`): `▲4`, `2 outs · 0–0` instead of `2 outs · 1–2`. A result led by another player (a balk, a steal) keeps the count |
+| MLB scoreboard between innings | `End 5th`, count and outs 0, no pitcher or batter, `lastPlay` `End of the 5th inning` (`end-inning`, no `summaryType`). | none: `End 5`, no count |
+| MLB final (summary) | 570 plays, first pitch 00:09:29Z, last out 03:11:18Z. A run on a wild pitch arrives as two scoring plays with the same text, score and `wallclock`: a `wild-pitch` play without `summaryType` and a `play-result` (`S`). Six pitching changes; no root `situation`; `featuredAthletes` winning, losing and saving pitcher. | Scoring moments that repeat the same text, period, clock and score are listed once (the run showed twice in Game Centre) |
+| NHL bench minor (summary) | `Too Many Men on the Ice`, `penaltyType` `Bench`, `penaltyMinutes` `2`; the penalty play itself is `Even Strength`, the next faceoff `Power Play` for the other side. Penalty types in all NHL summaries so far: `Minor` 261, `Major` 2, `Misconduct` 1, `Bench` 1. | `Bench` counts as a power-play penalty, so a summary that ends on it already shows the power play |
+| NHL (live and finals) | Up to eleven games at once. Intervals are `STATUS_END_PERIOD` (`End of 1st`, clock `0:00`); a new period shows `20:00 - 2nd` with the last play `End of 1st Period`. `situation` holds only `lastPlay`. Shoot-out finals `Final/SO` with five line-score columns (`1 2 0 0 1` and `1 0 2 0 0`). Two of the live summaries had 23 and 29 power-play plays, but every capture fell at even strength, and no goalie was pulled. | none: `End of 1st`, `P2 · 20:00`, an `SO` column |
+| UFC card | Second pass: event `STATUS_IN_PROGRESS`, the first bout `STATUS_PRE_FIGHT` (state `in`, `Pre-fight`), the rest scheduled. Third: four bouts final, the last pre-fight. Fourth and fifth: all five bouts `STATUS_FINAL` but the event's own status back to `STATUS_SCHEDULED` (`Scheduled`). Finishes `Unofficial Winner Decision` (22) and `Unofficial Winner Kotko` (21, KO/TKO); records updated on the card (5-0-0 to 5-1-0). | A finished card no longer reads `Scheduled`: when the event's status disagrees with the bouts, the last bout's (`Final`) is shown |
+| NBA (live) | `8:11 - 4th` and `10:58 - 4th` (blowouts, win probability 100), `37.4 - 2nd`, `4:01 - 3rd` with the last play `Thunder Full timeout`. All finals in regulation; no free throw as a last play. | none |
+| NFL | No game in play. Two more overtime finals on the scoreboard (`period` 5; Bills `3` and Broncos `3` in the fifth column, no `situation`); the Broncos summary ends with `END GAME` at 4:53 of overtime after `Wil Lutz 53 Yd Field Goal`. | none: `Final/OT`, an `OT` column |
+| Tennis (live) | Three WTA matches; as before the server (`possession`) comes only with a `situation` (`onFirst`… all false), here on the two doubles and not the singles. `HUNTER/SINIAKOVA serving for the set` at 6–3, 5–2 (also for the match). Still no point score and no tie-break in progress. | none |
+| NBL, A-League | `9:02 - 3rd` at 60–55 with the summary at the same clock; finals Kings 101–102 Breakers and JackJumpers 88–94 36ers; the A-League derby 0–0 with nine yellow cards in `details`. | none |
+
+TheSportsDB, seven runs: 132, 22, 150, 148, 26, 81 and 116 livescore rows. Ice hockey: the Canadiens
+game read `P1` `11`, `P3` `18` and then `AP` at 4–3 (the shoot-out winner counted in the score, as on
+ESPN), an OHL game `AP` too; the Red Wings game `AOT` 4–5; NHL intervals `BT` with no progress; the
+Utah game at its puck drop had `strStatus` and `strProgress` null at 0–0 (ESPN `20:00 - 1st`); a Swiss
+game `OT` `4`; `CANC` twice; WHL and AHL rows last refreshed at 05:06 London on the 15th still `P3` and
+`BT` 41 hours later (skipped as before). Basketball: EuroLeague `Q4` with minutes up to `10`, finals
+`FT` `10` (FIBA) and `FT` `12` (NBA), so the progress is the minute played in the quarter; a EuroCup
+game `OT` `6` at 69–69; `AOT` 100–101; a FIBA Europe Cup game `POST` at 0–0 (skipped). Baseball: the
+first finished rows, a Mexican Pacific game `FT` with `intHomeScore` null and 3 away, and a Venezuelan
+game `FT` 2–9; live rows up to `IN8` (no half-innings or extra innings), NPB `IN2` with null scores.
+The ALCS game read `IN4` with null scores and then `IN5` with only the home 3, while its
+`strTimestamp` is `2026-10-13T00:00:00`, 24 hours before ESPN's first pitch (00:00Z on the 14th;
+`lookuptv` gives the same date): the US date with the UTC time. Because the start looks 25 hours old,
+the live row is treated as stale and a TheSportsDB-sourced MLB game would not show live; with the
+real start it reads `Inning 4` and `Inning 5`. Football: an EFL Trophy game went to penalties after
+90 minutes (`P` at 2–2, empty progress, last refreshed 14 minutes before the first run) and was the same
+row in the second run, its last update by then 2 h 53 min old (settled as final 2–2 after 30 minutes
+without a refresh); a Copa
+Federación game the same (`P` 2–2, 47 minutes old). NFL: `Final/OT` in `strProgress` for the three
+overtime games, refreshed for one to two days after the game and then dropped. Most `lookuptv` answers were
+`{"tvevent":null}`; the Rams–Bills and Broncos–Seahawks files list 43 and 42 channels.
+
+Parser changes: substitution moments take the commentary text; scoreboard own goals say so; the MLB
+scoreboard count resets once the at-bat ends; a run that arrives as two plays is one moment; a bench
+minor gives a power play; a finished fight card reads `Final` (see the table).
+
+Checked again on this data: football minutes, cards, a second yellow (Olise, yellow then red at 73'),
+goals and their sides; NHL intervals, period starts, `Final/OT` and `Final/SO` columns, goalies and
+power-play strength; NBA clocks, last plays and win probability; MLB count, runners, pitcher and
+batter, last plays and awards; NFL overtime finals and summary; UFC pre-fight and finish methods;
+tennis sets, completed tie-breaks and server; TheSportsDB hockey intervals, overtime and shoot-out
+finals, basketball quarters and overtime, baseball innings, stuck shoot-out rows, stale rows,
+postponed and cancelled rows.
+
+Confirmed now: football own goals and scored penalties on the ESPN scoreboard and summary; finished
+TheSportsDB baseball rows (one with a score missing); a TheSportsDB NHL shoot-out from live to `AP`
+with the final score; a UFC card whose event status reverts to scheduled once every bout is final; an
+NHL bench minor; a run on a wild pitch sent as two plays.
+
+Still unconfirmed: the NFL two-minute warning on the scoreboard; NBA overtime; an NHL power play,
+empty net or shootout in progress on the scoreboard, and a shootout in the summary; a pitching change
+as the MLB scoreboard's last play; TheSportsDB baseball half-innings or extra innings, and whether
+`eventsday` also lists US evening games a day early (livescore and `lookuptv` do); tennis point score
+and the server in a tie-break; NASCAR stages; F1 gaps, pit stops and fastest lap; a UFC bout in
+progress; live cricket; AFL/NRL live clock (off season); golf after a cut or a playoff; football extra
+time and penalty shoot-outs on ESPN; a TheSportsDB penalty shoot-out after extra time and a refreshed
+shoot-out row (`P` with a progress); an NBA free throw on the scoreboard with the player's name.

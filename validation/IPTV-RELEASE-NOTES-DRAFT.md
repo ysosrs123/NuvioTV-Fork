@@ -928,6 +928,14 @@ Sport data:
 - Live baseball from TheSportsDB (e.g. KBO, CPBL) shows the inning ("Inning 4") instead of
   the raw code "IN4" (capture of 12 October, 21:03).
 
+Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
+- Football: live substitutions in Game Centre name both players as soon as they happen, and
+  own goals in the scoreboard timeline are marked "(own goal)".
+- Baseball: after a hit or an out, the score bug resets the count to 0–0 instead of keeping
+  the previous batter's count; a run scored on a wild pitch appears once in Game Centre.
+- Ice hockey: a bench minor (too many men) shows the power play straight away.
+- UFC: a finished card shows "Final" instead of "Scheduled".
+
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the
   stream's own clock when it carries programme date-times and otherwise smooth out the

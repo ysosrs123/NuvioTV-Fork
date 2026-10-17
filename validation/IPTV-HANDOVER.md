@@ -40,7 +40,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   figure on HLS, immediate rejoin behind the live window, local timeshift pause clamp) came
   after; they were suggested by reading an unmerged upstream player change and are our own
   design. The nineteenth capture (21:03, TheSportsDB baseball innings) is in `8260658fc`.
-  Checklist sections 7t, 7s, 7r, 7q, 7p, 7o and 7n list what to try. Open question for
+  The twentieth capture batch (13–16 October) is in the commit after `3e15badda`.
+  Checklist sections 7u, 7t, 7s, 7r, 7q, 7p, 7o and 7n list what to try. Open question for
   the user (7s.7): does a 5-minute pause with Safety buffer off leave TS channels behind
   live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -91,7 +92,11 @@ under "Earlier session notes" and the dated sections is history kept for referen
    NFL overtime win (`Final/OT` with a 7–0 overtime), the NLCS Game 1 final (pinch hitter
    and runner plays, no root `situation`), the NASCAR `winner` flag set hours after the race,
    and the first live TheSportsDB baseball rows (`IN4`, inning only, scores sometimes null),
-   now shown as "Inning 4".
+   now shown as "Inning 4". The twentieth pass (13–16 October, seven ESPN passes paired
+   with seven TheSportsDB runs) showed football own goals and penalties on ESPN, finished
+   TheSportsDB baseball rows, a TheSportsDB NHL shoot-out going from live to `AP`, and
+   TheSportsDB dating US evening MLB games a day early (the live row is then treated as
+   stale).
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
    the full list): the NFL two-minute warning on the scoreboard; NBA overtime; an NHL power
    play, empty net or shootout on the scoreboard, and a shootout in the summary; a pitching
@@ -129,6 +134,11 @@ under "Earlier session notes" and the dated sections is history kept for referen
    - Ordinal table positions ("1st") are English only; other languages show the number.
    - Baseball inning words built in core ("Inning 4" from TheSportsDB, "Mid 4"/"End 4" on the
      score bug) are English only.
+   - TheSportsDB MLB (and probably other US) games starting after 00:00Z carry the US date
+     with the UTC time, so a live row looks a day old and is skipped as stale; check
+     `eventsday` (`SportsDbEvents.start`, `IptvSportsFixturesRepository`) before correcting the
+     start. TheSportsDB `AOT`/`AP` finals show only "Final" (`AP` also means after penalties
+     in football). "Serving for the set" also shows when it is for the match.
    - Not offered: ~200 minor football competitions, other golf tours, other MMA
      promotions, FIBA and minor sports. Pre-game NHL/MLB team stats are season figures.
 4. Waiting on the user (do not do these without them; give a recommendation and wait):

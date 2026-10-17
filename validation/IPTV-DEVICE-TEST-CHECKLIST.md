@@ -1,6 +1,6 @@
 # Nuvio IPTV — device test checklist (build `8260658fc`, run 38242468867)
 
-For this build start with section 7t, then 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
+For this build start with section 7u, then 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -83,6 +83,18 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 11. Press Home on the remote with Game Centre open: logcat should show sports requests
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
+
+## 7u. 13–16 October captures: football, baseball, hockey and UFC (build pending)
+1. Champions League or Premier League live in Game Centre: a substitution reads
+   "Substitution, <team>. X replaces Y." within a minute of it happening.
+2. A football game with an own goal, before Game Centre is opened: the timeline shows
+   "<player> (own goal)" on the side credited with the goal.
+3. MLB live: straight after a hit or an out, the score bug count reads 0–0 with the runners
+   and outs correct.
+4. An MLB game with a run on a wild pitch: Game Centre shows the run once.
+5. NHL: after a too-many-men penalty, the power play shows for the other side.
+6. A UFC card after the last bout: the card, hero and score bug read "Final", not
+   "Scheduled".
 
 ## 7t. 21:03 12 October capture: TheSportsDB baseball innings (build `8260658fc`)
 1. With a TheSportsDB key and a custom baseball league added (KBO, NPB or CPBL) during a
