@@ -1479,3 +1479,71 @@ progress; live cricket; AFL/NRL live clock (off season); golf after a cut or a p
 extra time and penalty shoot-outs on ESPN; a TheSportsDB penalty shoot-out after extra time and a
 refreshed shoot-out row (`P` or `PT` with a progress, or `PT` moving to `AP`); an NBA free throw on
 the scoreboard with the player's name.
+
+## Twenty-second pass (18 October)
+
+One ESPN pass with one TheSportsDB run, captured on Sunday 18 October at 06:30 Brisbane time
+(20:30Z on the 17th; TheSportsDB `updated` up to 21:29 London, the per-sport soccer file 21:31),
+7.5 hours after the second pass of the twenty-first. 17 of the 43 ESPN files are byte-for-byte that
+pass (the summaries of leagues with nothing live since, among them the A-League, NBL, Premier League,
+NBA and MLB live summaries from earlier days); the nested `espn-pass.zip` is the 11 October capture
+again. In play: four college football games (Georgia 14–7 Auburn `10:38 - 2nd` with its summary,
+Tennessee 9–0 Alabama, Ole Miss 7–3 Missouri `12:05 - 2nd`, Texas Tech 21–7 Arizona State `End of
+1st`) and two NHL games (Jets 0–0 Hurricanes `End of 1st` with its summary, Lightning 0–0 Canucks
+`7:56 - 1st`). Finals of note: five college games, Capitals 4–2 Devils, the five Saturday Premier
+League games (Everton 0–2 Chelsea with its summary, Brentford 1–2 Liverpool with two Brentford reds),
+three A-League games and two NBL games. Game 4 of the ALCS is listed again as scheduled (`10/17 - 8:00
+PM EDT`, 00:00Z on the 18th) and had not started; the UFC card (21:00Z) and the NASCAR race were
+scheduled. The calls folder holds this run's livescore (176 rows) and six new `lookuptv` files; the
+coverage folder's `v2-livescore-app-*` files are the previous run's. League lists are unchanged. No
+`v1-eventsday-mlb` file came with the run, and the `eventsday` calls asked for 18 October (the PC's
+date), a day ahead of the US date of the evening games. Every scoreboard and summary parses without
+errors. Trimmed copies are in `app/src/test/resources/sports/*-real-20261018.json`
+(`SportsRealDataQuarterBreakTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| College football quarter break (scoreboard) | Tennessee–Alabama: `STATUS_IN_PROGRESS`, `period` 1, `displayClock` `15:00` (`clock` 900), `shortDetail` `15:00 - 1st`, one line-score column (9–0); `situation` keeps the down and spot (`3rd & 6 at ALA 36`) and the drive; `lastPlay` type `End Period` (`id` 2), text `End of 1st quarter.`, `secondsLeft` 2700. Texas Tech at the same moment: `End of 1st`, `0:00`, also `STATUS_IN_PROGRESS`. | A running clock whose last play is `End of` the period shown reads as the end of that period: `End of 1st`, clock `0:00` (was `Q1 · 15:00`). The NHL shape from the eighth pass (`20:00 - 3rd` while the last play is still `End of 2nd Period`) keeps its clock |
+| College football (live) | Clocks `10:38 - 2nd` and `12:05 - 2nd`, downs, spots, timeouts (2 and 3), win probability 93 and 72. The Georgia summary has the shape of the seventh pass: `drives.previous` (7) and `drives.current`, three `scoringPlays` with wallclocks from the drive plays, 53 win-probability rows. | none: `Q2 · 10:38`, `1st & 10 · AUB 36` |
+| NHL (live) | Jets–Hurricanes `STATUS_END_PERIOD` `End of 1st`, `0:00`; the summary ends on `End of 1st Period` at 20:00 with both goalies on 1.000 and no strength rows; Lightning–Canucks `7:56 - 1st`. | none |
+| Football finals (Premier League) | Straight reds (`type.id` 93) at `45'+8'` and `90'+4'`; Janelt booked at 63' and sent off at `90'+2'` (a second yellow, no other wording); `Goal - Header` three times, one `Penalty - Scored`; the Everton summary's `Second Half ends` at `90'+14'`. | none |
+| MLB | Only the rescheduled ALCS Game 4, `STATUS_SCHEDULED`, note `ALCS - Game 4`. | none |
+
+TheSportsDB, one run: Soccer (78), Ice Hockey (71), Basketball (23), Baseball
+(3) and American Football (1). Ice hockey: the Jets game `BT` at 0–0 with no progress while ESPN read
+`End of 1st`; the Lightning game `P1` `12` against ESPN's `7:56 - 1st` (the minute played, as
+before); AHL, QMJHL and WHL games in the 1st and 2nd; NHL and Swiss finals `FT` with no progress; the
+QMJHL `PT` row from the 16th still listed 19 hours after its last refresh, and four `P3` `20` rows
+from 23:00Z on the 16th last refreshed between 02:31 and 02:45 London (all skipped as stale); a Norwegian game
+`CANC`. Basketball: `Q4` `10` at the buzzer, `Q4` `6` and `1`, `Q2` `8`, finals `FT` `10` and `FT`
+with none. Baseball: a Venezuelan game `IN1` with `strProgress` `IN1` (the code repeated) and only
+the home 2 (away null), read as `Inning 1` with no score; two more `NS` with an empty progress. No MLB
+row. Football: finals carry the last minute in `strProgress` (`90`, `90+1` to `90+15`), half-time
+`45`, `45+2` and `45+3`, the 2nd half up to `90+12`. NFL: the Broncos `Final/OT` row still refreshed
+44 hours after kick-off. The new `lookuptv` files for the Capitals–Devils and Jets–Hurricanes games
+(11 and 4 channels) carry 17 October with the UTC times 17:00 and 19:30; the other four returned
+`{"tvevent":null}`.
+
+Parser changes: a scoreboard clock reset to the full period while the last play is the end of that
+period reads `End of 1st` (see the table).
+
+Checked again on this data: college football clocks, downs, spots, timeouts, win probability, end of
+quarter and the live summary's scoring plays; NHL intervals, goalies and live clocks; football
+cards, second yellows, stoppage time, goals and penalties; NBL and A-League finals; TheSportsDB
+hockey intervals and minutes, stale and cancelled rows, basketball quarters and finals, baseball
+innings with a missing score, football minutes, half-time and finals, `Final/OT` progress.
+
+Confirmed now: a college football quarter break with the clock already reset; a TheSportsDB
+baseball progress that repeats the inning code; two more TheSportsDB NHL games on the right UTC date.
+
+Still unconfirmed: the NFL two-minute warning on the scoreboard; NBA overtime in progress and an
+overtime summary; an NHL power play, empty net or shootout in progress on the scoreboard, and a
+shootout in the summary; a pitching change as the MLB scoreboard's last play; a quarter break with
+the clock reset in a live summary; TheSportsDB baseball half-innings or extra innings, and whether
+`eventsday` also lists US evening MLB games a day early (no MLB `eventsday` captured yet, and from a
+Brisbane morning the PC's date is the next US day; livescore and `lookuptv` do for postseason rows);
+tennis point score and the server in a tie-break; NASCAR stages; F1 gaps, pit stops and fastest lap;
+a UFC bout in progress; live cricket; AFL/NRL live clock (off season); golf after a cut or a playoff;
+football extra time and penalty shoot-outs on ESPN; a TheSportsDB penalty shoot-out after extra time
+and a refreshed shoot-out row (`P` or `PT` with a progress, or `PT` moving to `AP`); an NBA free throw
+on the scoreboard with the player's name.

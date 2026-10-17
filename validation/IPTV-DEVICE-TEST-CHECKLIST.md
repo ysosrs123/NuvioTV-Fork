@@ -1,6 +1,6 @@
 # Nuvio IPTV — device test checklist (build `b4af47e5b`, run 39036483344)
 
-For this build start with section 7v, then 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
+For this build start with section 7w, then 7v, 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -83,6 +83,12 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 11. Press Home on the remote with Game Centre open: logcat should show sports requests
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
+
+## 7w. 18 October capture: quarter break (build pending)
+1. During a college football (or NFL) quarter break, the Sport card, score bug and Game
+   Centre show "End of 1st" (not "Q1 · 15:00"); when the next quarter starts they show
+   "Q2 · 15:00" and the clock runs.
+2. An NHL game just after an intermission still shows "P3 · 20:00" (not "End of 2nd").
 
 ## 7v. 17 October captures: TheSportsDB shoot-out and NBA overtime (build `b4af47e5b`)
 1. Needs a TheSportsDB key: while a minor-league hockey game from TheSportsDB (QMJHL, AHL,

@@ -47,6 +47,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
     runs) in `b4af47e5b` (7v): TheSportsDB hockey shoot-out `PT` reads SO;
     NBA overtime finals, a postponed MLB game, an NHL penalty shot and an own goal by a
     penalty scorer confirmed with no change.
+  - Capture batch 22 (18 October 06:30, one ESPN pass with one TheSportsDB run) in the commit
+    after `dd495ee9a` (7w): an ESPN scoreboard clock reset to the full period at a quarter
+    break reads "End of 1st"; college football live, NHL intervals and two more NHL games on
+    the right UTC date confirmed with no change.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -108,7 +112,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
    scoreboard; the summary reads Postponed), an NHL penalty shot (`PS`, no power play), an
    A-League own goal by the penalty scorer, and a TheSportsDB hockey shoot-out stuck at
    `PT` (now shown as SO); TheSportsDB NBA and NHL games after 00:00Z carry the right UTC
-   date.
+   date. The twenty-second pass (18 October 06:30) showed a
+   college football quarter break with the clock already reset (`15:00 - 1st` after "End
+   of 1st quarter.", now End of 1st), NHL first intervals on both sources and finished
+   Premier League games with straight reds and a second yellow; still no MLB `eventsday`.
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
    the full list): the NFL two-minute warning on the scoreboard; NBA overtime in progress; an NHL power
    play, empty net or shootout on the scoreboard, and a shootout in the summary; a pitching
@@ -152,7 +159,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
      `v1-eventsday-mlb` line) during the World Series before correcting
      `SportsDbEvents.start`. TheSportsDB `AOT`/`AP` finals show only "Final" (`AP` also
      means after penalties in football); a stuck `PT` row settles 30 minutes after the game
-     length, without the shoot-out winner. "Serving for the set" also shows when it is for the match.
+     length, without the shoot-out winner. The capture script asks `eventsday` for the PC's date, which on a
+     Brisbane morning is the next US day, so it now also asks for the previous day
+     (`v1-eventsday-mlb-prev`). "Serving for the set" also shows when it is for the match.
    - Not offered: ~200 minor football competitions, other golf tours, other MMA
      promotions, FIBA and minor sports. Pre-game NHL/MLB team stats are season figures.
 4. Waiting on the user (do not do these without them; give a recommendation and wait):

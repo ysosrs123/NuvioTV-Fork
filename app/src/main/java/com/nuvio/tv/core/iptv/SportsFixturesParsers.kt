@@ -62,7 +62,8 @@ object EspnScoreboard {
         val events = if (started && league.sport in EVENT_SPORTS) events(competition, league.sport, home!!, away!!) else emptyList()
         val shownClock = statusJson?.text("displayClock")?.takeIf { status == FixtureStatus.LIVE && it.length <= 12 }
         val stale = shownClock != null && SportsLines.behind(shownClock, events.mapNotNull { it.clock })
-        val clock = shownClock.takeIf { !stale }
+        val ended = if (shownClock != null && !stale) ended(type?.text("shortDetail"), competition?.optJSONObject("situation")) else null
+        val clock = (if (ended != null) "0:00" else shownClock).takeIf { !stale }
         val homePeriods = periods(home, homeScore)
         val awayPeriods = periods(away, awayScore)
         val unfilled = listOf(home to homePeriods, away to awayPeriods).any { (competitor, lines) -> lines.isEmpty() && (competitor?.optJSONArray("linescores")?.length() ?: 0) > 0 } ||
@@ -78,7 +79,13 @@ object EspnScoreboard {
             else -> null
         }
         return SportsFixture(id, league.id, league.sport, title, homeTeam.takeIf { paired }, awayTeam.takeIf { paired }, start, status, score,
-            (if (stale) type?.text("description") else null) ?: type?.text("shortDetail") ?: type?.text("detail"), broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra, events)
+            ended ?: (if (stale) type?.text("description") else null) ?: type?.text("shortDetail") ?: type?.text("detail"), broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra, events)
+    }
+
+    private fun ended(detail: String?, situation: JSONObject?): String? {
+        val ordinal = detail?.substringAfter(" - ", "")?.trim()?.takeIf(ORDINAL::matches) ?: return null
+        val last = situation?.optJSONObject("lastPlay")?.text("text")?.trim()?.replaceFirst(SNAP, "") ?: return null
+        return "End of $ordinal".takeIf { Regex("^end of (?:the )?$ordinal\\b", RegexOption.IGNORE_CASE).containsMatchIn(last) }
     }
 
     private fun blankHalf(sport: String, home: List<String>, away: List<String>, events: List<FixtureEvent>): Boolean {
@@ -543,6 +550,7 @@ object EspnScoreboard {
     private val COLOUR = Regex("[0-9A-Fa-f]{6}")
     private val SPACES = Regex("\\s+")
     private val SNAP = Regex("^\\(\\d{1,2}:\\d{2}\\)\\s+")
+    private val ORDINAL = Regex("\\d{1,2}(?:st|nd|rd|th)", RegexOption.IGNORE_CASE)
     private val RECORD = Regex("\\d{1,3}(-\\d{1,3}){1,3}")
     private val RACES = setOf("Race", "Sprint")
     private val FIGHT_CLOCK = Regex("\\d{1,2}:\\d{2}")
