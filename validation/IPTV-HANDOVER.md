@@ -51,6 +51,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
     (7w): an ESPN scoreboard clock reset to the full period at a quarter
     break reads "End of 1st"; college football live, NHL intervals and two more NHL games on
     the right UTC date confirmed with no change.
+  - Capture 23 (18 October 07:10, the first scheduled cloud capture) in the commit after
+    `43ae401` (7x): an NHL penalty whose text is only the player and "Minor" names the
+    infraction; a UFC card at walkouts, live college hockey and MLS confirmed with no change;
+    the MLB `eventsday` dates evening games by UTC, which closes the day-early start question.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -62,7 +66,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles.
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1037 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
@@ -116,13 +120,19 @@ under "Earlier session notes" and the dated sections is history kept for referen
    college football quarter break with the clock already reset (`15:00 - 1st` after "End
    of 1st quarter.", now End of 1st), NHL first intervals on both sources and finished
    Premier League games with straight reds and a second yellow; still no MLB `eventsday`.
+   The twenty-third pass (18 October 07:10, the first scheduled capture) showed an NHL
+   penalty text without the infraction (`Liam Ohgren Minor`, now named from the type's
+   `abbreviation`), a UFC card at walkouts, live college hockey and MLS, and the first MLB
+   `eventsday`: Game 4 of the ALCS (00:00Z) is listed under the UTC date with
+   `dateEventLocal` the US date; the livescore merge uses that start, so the day-early
+   timestamps in livescore and `lookuptv` do not reach the app.
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
    the full list): the NFL two-minute warning on the scoreboard; NBA overtime in progress; an NHL power
    play, empty net or shootout on the scoreboard, and a shootout in the summary; a pitching
    change as the MLB scoreboard's last play; TheSportsDB baseball half-innings, extra
-   innings or a finished baseball row; a TheSportsDB
+   innings, or a live MLB postseason row merged into its `eventsday` game; a TheSportsDB
    penalty shoot-out after extra time; tennis point score and the
-   server during a match tie-break; NASCAR stages; a UFC bout in progress; live cricket;
+   server during a match tie-break; NASCAR stages; a UFC bout in progress (walkouts seen); live cricket;
    AFL/NRL clocks (off season); football own goals, penalties, second yellows and extra
    time. ESPN sends no gaps, pit stops or fastest lap during an F1 race. Coverage ideas from
    the 12 October league lists (not added; user decision): South American and Nordic
@@ -154,10 +164,13 @@ under "Earlier session notes" and the dated sections is history kept for referen
    - Baseball inning words built in core ("Inning 4" from TheSportsDB, "Mid 4"/"End 4" on the
      score bug) are English only.
    - TheSportsDB MLB postseason rows starting after 00:00Z carry the US date with the UTC
-     time, so a live row looks a day old and is skipped as stale; NBA and NHL rows are dated
-     correctly (17 October captures). Capture an MLB `eventsday` (the capture script has a
-     `v1-eventsday-mlb` line) during the World Series before correcting
-     `SportsDbEvents.start`. TheSportsDB `AOT`/`AP` finals show only "Final" (`AP` also
+     time in livescore and `lookuptv`, so a live row looks a day old and is skipped as stale;
+     NBA and NHL rows are dated correctly (17 October captures). The MLB `eventsday` (18
+     October 07:10) dates the same kind of game correctly (`strTimestamp` UTC,
+     `dateEventLocal` the US date), so `SportsDbEvents.start` needs no change, and
+     `SportsDbLive.merge` applies a livescore row to the `eventsday` fixture's own start (the
+     row's timestamp is not read), so a live MLB row is not skipped as stale. Closed unless a
+     live capture shows otherwise. TheSportsDB `AOT`/`AP` finals show only "Final" (`AP` also
      means after penalties in football); a stuck `PT` row settles 30 minutes after the game
      length, without the shoot-out winner. The capture script asks `eventsday` for the PC's date, which on a
      Brisbane morning is the next US day, so it now also asks for the previous day

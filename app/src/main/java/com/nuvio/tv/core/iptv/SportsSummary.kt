@@ -471,7 +471,8 @@ object EspnSummary {
     private fun lastPlays(root: JSONObject, plays: List<JSONObject>, sport: String): List<SummaryPlay> {
         val scored = root.optJSONArray("scoringPlays")?.let(::objs).orEmpty().mapNotNull { s -> s.str("id")?.let { id -> s.str("text")?.let { id to it } } }.toMap()
         val fromPlays = plays.filter { it.str("text") != null }.takeLast(3).mapNotNull {
-            val text = sportsPlay(plain(it.str("id")?.let(scored::get) ?: it.str("text")!!).replaceFirst(SNAP, ""))
+            val text = sportsPenaltyPlay(sportsPlay(plain(it.str("id")?.let(scored::get) ?: it.str("text")!!).replaceFirst(SNAP, "")),
+                it.optJSONObject("type")?.str("penaltyType"), it.optJSONObject("type")?.str("abbreviation"))
             (if (sport == "basketball") sportsCourtPlay(text, it.str("shortDescription") ?: it.optJSONObject("type")?.str("text")) else text)
                 ?.let { shown -> SummaryPlay(shown.take(MAX_TEXT), it.optJSONObject("period")?.int("number"), clock(it)) }
         }

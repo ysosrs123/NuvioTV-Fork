@@ -515,6 +515,7 @@ object EspnScoreboard {
         }
         val lastPlay = last?.takeIf { it.text("summaryType") != "P" }?.text("text")?.replace(SPACES, " ")?.replaceFirst(SNAP, "")?.let(::sportsPlay)?.let { text ->
             last.optJSONObject("type")?.text("text")?.takeIf { text.startsWith("(") && text.endsWith(")") }?.let { "$it $text" } ?: text }
+            ?.let { sportsPenaltyPlay(it, last.optJSONObject("type")?.text("penaltyType"), last.optJSONObject("type")?.text("abbreviation")) }
             ?.let { if (court) sportsCourtPlay(it, last.optJSONObject("type")?.text("text")) else it }?.take(MAX_PLAY)
         val probability = last?.optJSONObject("probability") ?: json.optJSONObject("probability")
         val homeWin = probability?.let { if (it.isNull("homeWinPercentage")) null else it.optDouble("homeWinPercentage", Double.NaN) }
@@ -667,6 +668,9 @@ object SportsDbEvents {
 }
 
 internal fun sportsPlay(text: String): String = text.replaceFirst(FORMATION, "")
+
+internal fun sportsPenaltyPlay(text: String, kind: String?, infraction: String?): String =
+    if (kind != null && infraction != null && !infraction.equals(kind, true) && text.endsWith(" $kind")) text.removeSuffix(kind) + infraction else text
 
 internal fun sportsCourtPlay(text: String, type: String?): String? = text.trim().let { if (VERSUS.matches(it)) type else it.replaceFirstChar(Char::uppercaseChar) }
 

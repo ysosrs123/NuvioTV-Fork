@@ -1547,3 +1547,61 @@ a UFC bout in progress; live cricket; AFL/NRL live clock (off season); golf afte
 football extra time and penalty shoot-outs on ESPN; a TheSportsDB penalty shoot-out after extra time
 and a refreshed shoot-out row (`P` or `PT` with a progress, or `PT` moving to `AP`); an NBA free throw
 on the scoreboard with the player's name.
+
+## Twenty-third pass (18 October, 07:10)
+
+One ESPN pass with one TheSportsDB run, captured on Sunday 18 October at 07:10 Brisbane time
+(21:10Z on the 17th; TheSportsDB `updated` up to 22:09 London), 40 minutes after the twenty-second.
+This is the first capture from the cloud schedule with the extended script: 44 ESPN files (CFL,
+MLS, EFL Cup, Europa League, men's college hockey, LPGA and PFL added; the CFL summary answered 502)
+and the MLB `eventsday` for 18 October and for the previous day. In play: the same four college
+football games late in the 2nd quarter (Georgia 14–17 Auburn `0:27 - 2nd` with its summary), two
+NHL games in the 2nd (Jets 2–1 Hurricanes with its summary, Lightning 0–2 Canucks), two college
+hockey games (Clarkson 1–0 Canisius `End of 1st`, UConn–Colorado College `16:09 - 1st`), MLS
+(Minnesota 0–2 St. Louis, 29', with its summary) and the first bout of the UFC Fight Night card.
+Every scoreboard and summary parses without errors. Trimmed copies are in
+`app/src/test/resources/sports/*-real-20261018b.json` (`SportsRealDataWalkoutTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NHL penalty without the infraction (scoreboard) | Lightning–Canucks `14:25 - 2nd`: `lastPlay` type `Penalty Shot Infraction` (`id` 143), `abbreviation` `Closing Hand on the Puck`, `penaltyMinutes` `2`, `penaltyType` `Minor`, text `Liam Ohgren Minor`. The same shape is in the 10 October summary twice; every other penalty text names the infraction (`William Borgen Tripping against Noah Cates`). `situation` still holds only `lastPlay`, so the scoreboard has no power-play flag. | A penalty text that ends in the bare penalty type takes the infraction from `abbreviation` (`Liam Ohgren Closing Hand on the Puck`), on the scoreboard and in the summary's last plays |
+| NHL power play (live summary) | Jets–Hurricanes: a power-play goal at 8:19 of the 2nd (`strength` `Power Play` on the plays before it), then `Even Strength` again; the summary (11:17 elapsed) runs about 15 seconds behind the scoreboard (`8:28 - 2nd`). | none |
+| UFC card at walkouts | Event `STATUS_IN_PROGRESS`; the first bout `STATUS_FIGHTERS_WALKING` (`state` `in`, `Walkouts`, `period` 0, `displayClock` `-`), the other twelve scheduled (seven at 21:00Z, six at 00:00Z). | none: the card is live with `Walkouts`, no round; the six 00:00Z bouts are the main card |
+| College hockey and MLS (live) | `STATUS_END_PERIOD` `End of 1st`, `16:09 - 1st`; MLS `STATUS_FIRST_HALF` `29'` with goals and yellow cards in the summary. The college hockey summary has no plays. | none |
+| College football (live) | Clocks `0:27`, `0:21`, `1:57` and `3:49` in the 2nd; no two-minute warning in the summary or as a last play. | none |
+| Finals | WTA `STATUS_RETIRED`; cricket (Australia 278/8 against England 166 in 39.1 overs) final with no status name; a CFL final; Europa League and A-League finals. | none |
+
+TheSportsDB, one run: Soccer (60), Ice Hockey (61), Basketball (8), Baseball (3) and American
+Football (1). The MLB `eventsday` for 18 October lists Game 4 of the ALCS (`dateEvent`
+`2026-10-18`, `strTime` `00:00:00`, `strTimestamp` `2026-10-18T00:00:00`, `dateEventLocal`
+`2026-10-17`, `strTimeLocal` `20:00:00`) and Game 5 (`2026-10-18T21:00:00`, local 17:00 the same
+day); the list for 17 October is empty. So `eventsday` dates a US evening game by its UTC date and
+gives the US date separately: the day-early start seen in livescore and `lookuptv` rows for postseason
+games does not come from `eventsday`. `SportsDbEvents` reads the right start from `strTimestamp`,
+and `SportsDbLive.merge` applies a livescore row to that fixture's start without reading the row's
+own timestamp, so a live MLB row is not treated as stale. No MLB livescore row yet (Game 4 was still to start). Ice hockey: Jets–Hurricanes
+`P2` `11` at 1–1 while ESPN already had 2–1; the QMJHL `PT` row from the 16th is still listed;
+five `P3` `20` rows. Baseball: a Venezuelan game `IN4` with progress `IN4`. Football: a stuck `P`
+row with an empty progress, finals up to `90+15`.
+
+Parser changes: hockey penalty texts that end in the bare penalty type name the infraction.
+
+Checked again on this data: NHL and college hockey clocks, intervals and power-play strength;
+college football clocks and last plays; MLS minutes, goals and cards; UFC card states and the main
+card split; tennis retirements; TheSportsDB hockey periods, baseball innings, football minutes,
+`eventsday` starts.
+
+Confirmed now: a UFC card at walkouts; `eventsday` gives US evening MLB games their UTC date (with
+`dateEventLocal` for the US date); live college hockey and MLS on ESPN.
+
+Still unconfirmed: the NFL two-minute warning on the scoreboard; NBA overtime in progress and an
+overtime summary; an NHL power play, empty net or shootout in progress on the scoreboard (the
+scoreboard carries only the penalty as its last play), and a shootout in the summary; a pitching
+change as the MLB scoreboard's last play; a quarter break with the clock reset in a live summary;
+TheSportsDB baseball half-innings or extra innings, and a live TheSportsDB MLB postseason row merged
+into its `eventsday` game; tennis point score and the server in a
+tie-break; NASCAR stages; F1 gaps, pit stops and fastest lap; a UFC bout in progress (round and
+clock); live cricket; AFL/NRL live clock (off season); golf after a cut or a playoff; football extra
+time and penalty shoot-outs on ESPN; a TheSportsDB penalty shoot-out after extra time and a refreshed
+shoot-out row (`P` or `PT` with a progress, or `PT` moving to `AP`); an NBA free throw on the
+scoreboard with the player's name.

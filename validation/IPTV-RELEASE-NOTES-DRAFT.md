@@ -939,6 +939,9 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   hero instead of the code "PT" (captures of 17 October).
 - College football (and NFL) between quarters shows "End of 1st" rather than a 15:00 clock
   for the quarter just finished (capture of 18 October).
+- Ice hockey: a penalty that ESPN reports only as "Minor" now names the infraction (for
+  example "Closing Hand on the Puck") on the score bug and in Game Centre's last plays
+  (capture of 18 October, 07:10).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the
