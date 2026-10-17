@@ -1174,6 +1174,10 @@ Phone setup (security review)
 
 ## Validation
 
+- Twenty-second sports capture (18 October; an ESPN quarter-break clock): CI debug green at
+  `8724e01f3` (run 39068602774); 1032 core and 305 data-layer JVM tests on the host. Not
+  device-tested.
+
 - Twenty-first capture batch (17 October; NBA overtime finals, a postponed MLB game, an NHL
   penalty shot, a TheSportsDB hockey shoot-out): CI debug green at `b4af47e5b` (run
   39036483344); 1029 core and 305 data-layer JVM tests on the host. Not device-tested.
