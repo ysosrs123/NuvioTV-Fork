@@ -1,7 +1,7 @@
 # Nuvio IPTV — progress
 
 Current status and next steps: [IPTV-HANDOVER.md](IPTV-HANDOVER.md).
-Updated 12 October 2026.
+Updated 17 October 2026.
 
 | Date | Commits | Work | Validation |
 | --- | --- | --- | --- |

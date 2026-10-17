@@ -7,7 +7,7 @@ Related: [progress](IPTV-PROGRESS.md), [draft release notes](IPTV-RELEASE-NOTES-
 [sports data fields](IPTV-SPORTS-DATA-FIELDS.md), [sports data scripts](IPTV-SPORTS-DATA-SCRIPTS.md).
 Older sections further down are history; read "Start here" first.
 
-## Start here — next session (state on 12 October 2026, 08:00 Brisbane)
+## Start here — next session (state on 17 October 2026, Brisbane)
 
 Read this section, then "Rules for this branch", "Code map" and "Target devices". Everything
 under "Earlier session notes" and the dated sections is history kept for reference.
@@ -28,22 +28,23 @@ under "Earlier session notes" and the dated sections is history kept for referen
   fork's notification icon `ic_arc_notification` (the release removed `drawable/ic_launcher`). Host tests unchanged in count and
   green on the merge; the rest of the upstream changes (V2 settings, player, calendar,
   media servers, watch party) need a regression look on the device.
-- 12 October, second pass over everything not yet tried on a device (`e7e1d17b5..85fe99dce`):
-  three read-only reviews (recordings and catch-up; sport data; Sport and multiview
-  screens) found 25 defects, all fixed in `74ab681fc` (screens), `7b7c32e02` (recordings)
-  and `91e1e7f1b` (sport data, sport recordings through overtime, unused strings removed).
-  The thirteenth sports capture (06:42) is in `011204b82`, the fourteenth (08:01) in
-  `2d693cada`, the fifteenth (09:40, NHL empty net) in `9d1c91585`, and "<team> empty net"
-  in the hero, Game Centre and multiview game tile in `98d520804`. The sixteenth to
-  eighteenth captures (11:26, 11:43, 12:06) are in `0238ba866`, `11b487e0b` (multiview
-  baseball count), `14945dbef` and `1e539a53a`. The live player changes (steady behind-live
-  figure on HLS, immediate rejoin behind the live window, local timeshift pause clamp) came
-  after; they were suggested by reading an unmerged upstream player change and are our own
-  design. The nineteenth capture (21:03, TheSportsDB baseball innings) is in `8260658fc`.
-  The twentieth capture batch (13–16 October) is in `411ad607f`.
-  Checklist sections 7u, 7t, 7s, 7r, 7q, 7p, 7o and 7n list what to try. Open question for
-  the user (7s.7): does a 5-minute pause with Safety buffer off leave TS channels behind
-  live? If so, offer Return to live there too.
+- Work since the merge (all host-tested and CI-built, none device-tested yet):
+  - Second pass over everything not yet tried on a device (`e7e1d17b5..85fe99dce`): three
+    read-only reviews found 25 defects, fixed in `74ab681fc` (Sport and multiview screens),
+    `7b7c32e02` (recordings and catch-up) and `91e1e7f1b` (sport data, sport recordings
+    through overtime, unused strings removed). Checklist 7n.
+  - Sports captures 13 to 19 (12 October): `011204b82` (06:42), `2d693cada` (08:01, 7o),
+    `9d1c91585` and `98d520804` (09:40, NHL empty net, 7p), `0238ba866` and `11b487e0b`
+    (11:26, baseball, 7q), `14945dbef` (11:43, basketball, 7r), `1e539a53a` (12:06, tests
+    only), `8260658fc` (21:03, TheSportsDB baseball innings, 7t).
+  - Live player `a7266ce95` (7s): steady behind-live figure on HLS, immediate rejoin behind
+    the live window, local timeshift pause held to the buffer. Suggested by reading an
+    unmerged upstream player change; our own design, no code taken.
+  - Capture batch 20 (13–16 October, seven ESPN passes with seven TheSportsDB runs)
+    `411ad607f` (7u): substitution text, own goals, MLB count after an at-bat, duplicate run
+    moments, bench minors, finished fight cards.
+  - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
+    channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
   CI debug green at `411ad607f` (run 38988428742; `8260658fc`, run 38242468867, `a7266ce95`,
   run 38201561490, `1e539a53a`, run 38196253340, `98d520804`, run 38186968485, `2d693cada`,
