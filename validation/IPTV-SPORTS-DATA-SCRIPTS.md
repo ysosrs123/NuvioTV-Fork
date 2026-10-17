@@ -9,6 +9,12 @@ consumes the next pasted line). Never commit a key.
 
 ## ESPN capture (best while big games are live)
 
+ESPN has no game summary for tennis, golf, motor racing or MMA (it answers 400, 404 or 502),
+so the script only fetches their scoreboards; the app does the same. Added on 18 October:
+CFL (three-down football, playoffs from late October), MLS (playoffs: extra time and
+penalties), EFL Cup (penalties straight after 90 minutes), Europa League (Thursday nights),
+men's college hockey, LPGA and PFL.
+
 ```powershell
 $out = "$env:USERPROFILE\Downloads\espn-pass"
 New-Item -ItemType Directory -Force -Path $out | Out-Null
@@ -23,9 +29,13 @@ $leagues = [ordered]@{
   "ncaaf"="football/college-football"; "nba"="basketball/nba"; "nbl"="basketball/nbl"; "nhl"="hockey/nhl";
   "mlb"="baseball/mlb"; "afl"="australian-football/afl"; "nrl"="rugby-league/3"; "rugby-urc"="rugby/270557";
   "atp"="tennis/atp"; "wta"="tennis/wta"; "pga"="golf/pga"; "f1"="racing/f1"; "nascar"="racing/nascar-premier";
-  "ufc"="mma/ufc"; "cricket"="cricket/8676" }
+  "ufc"="mma/ufc"; "cricket"="cricket/8676";
+  "cfl"="football/cfl"; "mls"="soccer/usa.1"; "eflcup"="soccer/eng.league_cup"; "uel"="soccer/uefa.europa";
+  "ncaah"="hockey/mens-college-hockey"; "lpga"="golf/lpga"; "pfl"="mma/pfl" }
+$noSummary = "atp","wta","pga","lpga","f1","nascar","ufc","pfl"
 foreach ($k in $leagues.Keys) {
   Get-Json "$k-scoreboard" "$espn/$($leagues[$k])/scoreboard"
+  if ($noSummary -contains $k) { continue }
   $sb = Get-Content "$out\$k-scoreboard.json" -Raw -ErrorAction SilentlyContinue | ConvertFrom-Json
   $live = $sb.events | Where-Object { $_.status.type.state -eq "in" } | Select-Object -First 1
   $ev = if ($live) { $live } else { $sb.events | Select-Object -First 1 }
