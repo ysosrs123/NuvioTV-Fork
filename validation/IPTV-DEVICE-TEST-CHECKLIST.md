@@ -1,4 +1,4 @@
-# Nuvio IPTV — device test checklist (build `8260658fc`, run 38242468867)
+# Nuvio IPTV — device test checklist (build `411ad607f`, run 38988428742)
 
 For this build start with section 7u, then 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
 
@@ -84,7 +84,7 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
 
-## 7u. 13–16 October captures: football, baseball, hockey and UFC (build pending)
+## 7u. 13–16 October captures: football, baseball, hockey and UFC (build `411ad607f`)
 1. Champions League or Premier League live in Game Centre: a substitution reads
    "Substitution, <team>. X replaces Y." within a minute of it happening.
 2. A football game with an own goal, before Game Centre is opened: the timeline shows

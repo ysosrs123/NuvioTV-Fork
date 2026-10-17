@@ -40,33 +40,34 @@ under "Earlier session notes" and the dated sections is history kept for referen
   figure on HLS, immediate rejoin behind the live window, local timeshift pause clamp) came
   after; they were suggested by reading an unmerged upstream player change and are our own
   design. The nineteenth capture (21:03, TheSportsDB baseball innings) is in `8260658fc`.
-  The twentieth capture batch (13–16 October) is in the commit after `3e15badda`.
+  The twentieth capture batch (13–16 October) is in `411ad607f`.
   Checklist sections 7u, 7t, 7s, 7r, 7q, 7p, 7o and 7n list what to try. Open question for
   the user (7s.7): does a 5-minute pause with Safety buffer off leave TS channels behind
   live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
-  CI debug green at `8260658fc` (run 38242468867; `a7266ce95`, run 38201561490, `1e539a53a`,
-  run 38196253340, `98d520804`, run 38186968485, `2d693cada`, run 38180390637, and
-  `91e1e7f1b`, run 38178089678, were the builds before), app "Nuvio IPTV Prototype", file
+  CI debug green at `411ad607f` (run 38988428742; `8260658fc`, run 38242468867, `a7266ce95`,
+  run 38201561490, `1e539a53a`, run 38196253340, `98d520804`, run 38186968485, `2d693cada`,
+  run 38180390637, and `91e1e7f1b`, run 38178089678, were the builds before), app "Nuvio
+  IPTV Prototype", file
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1013, data 305, androidTest compiles.
+- Host tests at that commit: core 1022, data 305, androidTest compiles.
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
   an SMB NAS on `f79646c53` (findings fixed in 7i). Everything in checklist sections 7f to
-  7t is built and host-tested but not yet tried on a device; the user was about to test
+  7u is built and host-tested but not yet tried on a device; the user was about to test
   `85fe99dce` (7m to 7f) when the merge was asked for, so findings may refer to that build.
 - A printable test sheet for the current build is made from the checklist (see "How to
   build and check" below); the user prints it for each device pass.
 
 ### Next, in order
 
-1. Device pass on `8260658fc` (checklist 7t, 7s, 7r, 7q, 7p, 7o, 7n, then 7m, 7l, 7k, 7j,
-   7i, 7h, 7g, 7f, plus sections 1 and 2 as a regression check after the merge; `a7266ce95`
-   differs only in 7t). Findings on `85fe99dce` are still valid unless 7n to 7t or the
-   second-pass fixes changed that area. Record the
+1. Device pass on `411ad607f` (checklist 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, then 7m, 7l, 7k,
+   7j, 7i, 7h, 7g, 7f, plus sections 1 and 2 as a regression check after the merge;
+   `8260658fc` differs only in 7u). Findings on `85fe99dce` are still valid unless 7n to 7u
+   or the second-pass fixes changed that area. Record the
    findings in a new "Device findings" section below, fix them, update the release notes in
    the same commits, translate new strings, build, send the run link and a new test sheet.
 2. Keep processing the user's ESPN/TheSportsDB captures (process below). The thirteenth

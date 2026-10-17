@@ -1170,6 +1170,11 @@ Phone setup (security review)
 
 ## Validation
 
+- Twentieth capture batch (13–16 October; Champions League, MLB playoffs, NHL, UFC): CI debug
+  green at `411ad607f` (run 38988428742; a first attempt was refused while GitHub Actions
+  was disabled on the repository); 1022 core and 305 data-layer JVM tests on the host. Not
+  device-tested.
+
 - Nineteenth sport capture (12 October 21:03; NFL overtime win, NLCS Game 1 final, first live
   TheSportsDB baseball rows): CI debug green at `8260658fc` (run 38242468867); 1013 core and
   305 data-layer JVM tests on the host. Not device-tested.
