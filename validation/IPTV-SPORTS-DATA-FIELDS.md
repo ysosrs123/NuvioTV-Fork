@@ -1829,3 +1829,13 @@ the Saudi league and 70 other football games. Trimmed copies are in
 Confirmed now: college volleyball and field hockey shapes (for a later league entry; user decision).
 
 Still unconfirmed: as in the twenty-ninth pass.
+
+## Thirty-second pass (19 October, 06:27)
+
+Scheduled full capture at 06:27 Brisbane time (20:27Z on the 18th): 567 files. NFL: Steelers 19–19
+Buccaneers `6:52 - OT` (live overtime, as on 12 October) and three games in the 1st quarter; the
+NASCAR Cup race at Phoenix in progress (`period` 143, the lap; 37 cars in order; no `situation`,
+notes or stage field; racing has no summary), read as `Race · Lap 143` with the top three; La Liga,
+Serie A, Ligue 1 and the Brasileirão live. Nothing new for the parser; no files added.
+
+Still unconfirmed: as in the twenty-ninth pass, without NASCAR stages (ESPN does not send them).

@@ -77,6 +77,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
     batch (7ac): a live cricket match in a rain delay shows "Match delayed by rain".
   - Capture 31 (19 October 04:28, scheduled): tests only (NFL end of the 2nd quarter, college
     volleyball and field hockey read by the generic parser).
+  - Capture 32 (19 October 06:27, scheduled): nothing new (NFL overtime in progress, a live
+    NASCAR race read as "Race · Lap 143"); NASCAR stages dropped from the plan, ESPN does not
+    send them.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -374,8 +377,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
     NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
     (World Series, to about 1 November); TheSportsDB baseball half-innings or extra innings
     and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
-  - The NFL two-minute warning on the scoreboard; a quarter break in a live summary; NASCAR
-    stages (season to early November): Monday 04:27, 06:27, 11:27 (`Mon NFL`), Friday 11:27
+  - The NFL two-minute warning on the scoreboard; a quarter break in a live summary: Monday 04:27, 06:27, 11:27 (`Mon NFL`), Friday 11:27
     and Sunday college football (daily US evening, weekend mornings).
   - A football game in extra time or in a shoot-out live on ESPN and its summary (finals
     after both were seen on 18 October), and a TheSportsDB shoot-out after extra time (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
@@ -386,7 +388,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
     and 23:27 (`nightly Europe`).
   - Done: college volleyball and field hockey (19 October 04:28; the generic parser reads
     them).
-  - Dropped: F1 gaps, pit stops and fastest lap (ESPN does not send them during a race);
+  - Dropped: NASCAR stages (19 October 06:27: the live race at Phoenix, lap 143, carries the
+    running order and lap only; no stage field, and racing has no summary); F1 gaps, pit stops
+    and fastest lap (ESPN does not send them during a race);
     AFL and NRL live clocks (off season until after 30 November).
   - Disabled on 18 October (covered by the slots above): `Tue-Sun NHL/NBA/MLB`, `Sun
     EPL/MLS`, `weekday tennis`.
