@@ -353,11 +353,33 @@ under "Earlier session notes" and the dated sections is history kept for referen
   summary); none for tennis, golf, racing or MMA. TheSportsDB: livescore for every sport, the
   `eventsday` lists for the Premier League, AFL, MLB (today and the day before) and the Big
   Bash, and `lookuptv`. One run takes about six minutes and 40 MB.
-- Schedule (18 October): a full capture every two hours around the clock (01:27, 03:27 …
-  23:27 Brisbane), plus Monday 04:27, 06:27 and 11:27 (NFL) and Thursday and Friday 05:27 and
-  06:57 (European cups); the Tue–Sun, Sunday Premier League and weekday tennis slots are
-  disabled. Reminders on 25 October and 1 November move the NFL and European-cup slots an
-  hour later for the end of summer time.
+- Batches (user, 18 October): captures commit locally and push once a day at the first run
+  after 18:00 Brisbane, only when the batch changes what the app does (a fixtures, tests and
+  docs batch waits for one that does, at most three days); one checklist section, release
+  notes block and progress row per pushed batch. Builds are started from the main session.
+- Capture plan (18 October; each run removes what the data confirms or what cannot be seen
+  before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
+  deleted). Times are Brisbane; US slots move an hour later from 1 November and European ones
+  from 25 October (reminders do this).
+  - NBA overtime in progress and its summary; an NBA free throw with the player's name; an
+    NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
+    (World Series, to about 1 November); TheSportsDB baseball half-innings or extra innings
+    and a refreshed shoot-out row; a UFC method posted later; college volleyball (no parser
+    yet): daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
+  - The NFL two-minute warning on the scoreboard; a quarter break in a live summary; NASCAR
+    stages (season to early November): Monday 04:27, 06:27, 11:27 (`Mon NFL`), Friday 11:27
+    and Sunday college football (daily US evening, weekend mornings).
+  - Football extra time and penalty shoot-outs on ESPN, and a TheSportsDB shoot-out after
+    extra time (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
+    Friday 05:27 and 06:57 (`Wed-Fri European cups`, `… late`).
+  - Golf after a cut or in a playoff: Saturday and Sunday 03:27 and 07:27 (`weekend
+    mornings`), Monday 04:27 and 06:27.
+  - Tennis point score and the server in a tie-break (European indoor events): daily 21:27
+    and 23:27 (`nightly Europe`).
+  - Dropped: F1 gaps, pit stops and fastest lap (ESPN does not send them during a race);
+    AFL and NRL live clocks (off season until after 30 November).
+  - Disabled on 18 October (covered by the slots above): `Tue-Sun NHL/NBA/MLB`, `Sun
+    EPL/MLS`, `weekday tennis`.
 - Capture schedule given to the user (Brisbane, UTC+10; European games one hour later from
   25 October, US games one hour later from 1 November): best Monday 04:00–08:00 (NFL);
   Monday ~10:30–13:00 (NFL Sunday night, NHL); Sunday 05:00–13:00 (college football, NHL,
