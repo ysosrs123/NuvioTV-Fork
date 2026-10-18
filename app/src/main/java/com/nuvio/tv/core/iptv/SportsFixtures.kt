@@ -530,7 +530,7 @@ object SportsFixtureText {
             else -> fixture.detail
         }
         val chase = detail.chase?.takeIf { fixture.status == FixtureStatus.LIVE }
-        return SportsBugText(latest.joinToString(" · "), state, chase?.let { "Need ${it.runs} from ${it.balls}" } ?: detail.result?.takeIf { fixture.status == FixtureStatus.FINAL })
+        return SportsBugText(latest.joinToString(" · "), state, detail.stoppage?.takeIf { fixture.status == FixtureStatus.LIVE } ?: chase?.let { "Need ${it.runs} from ${it.balls}" } ?: detail.result?.takeIf { fixture.status == FixtureStatus.FINAL })
     }
 }
 

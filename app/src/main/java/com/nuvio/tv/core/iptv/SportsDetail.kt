@@ -48,7 +48,7 @@ sealed class SportsDetail {
         val live: FightBout? get() = bouts.firstOrNull { it.state == FixtureStatus.LIVE }
     }
 
-    data class Cricket(val innings: List<CricketInnings>, val result: String? = null) : SportsDetail() {
+    data class Cricket(val innings: List<CricketInnings>, val result: String? = null, val stoppage: String? = null) : SportsDetail() {
         val chase: CricketChase? get() {
             val chasing = innings.lastOrNull() ?: return null
             val target = chasing.target ?: return null
@@ -114,7 +114,7 @@ object SportsDetails {
                 }) } })
             }
             is SportsDetail.Cricket -> {
-                put("type", "cricket"); detail.result?.let { put("result", it) }
+                put("type", "cricket"); detail.result?.let { put("result", it) }; detail.stoppage?.let { put("stoppage", it) }
                 put("innings", JSONArray().apply { detail.innings.forEach { innings -> put(JSONObject().apply {
                     put("team", innings.team); put("runs", innings.runs); put("wickets", innings.wickets); innings.overs?.let { put("overs", it) }
                     innings.maxOvers?.let { put("maxOvers", it) }; innings.target?.let { put("target", it) }; put("batting", innings.batting)
@@ -154,7 +154,7 @@ object SportsDetails {
             "cricket" -> SportsDetail.Cricket(json.objects("innings").mapNotNull { innings ->
                 CricketInnings(innings.text("team") ?: return@mapNotNull null, innings.int("runs") ?: 0, innings.int("wickets") ?: 0, innings.text("overs"),
                     innings.int("maxOvers"), innings.int("target"), innings.optBoolean("batting"))
-            }, json.text("result"))
+            }, json.text("result"), json.text("stoppage"))
             "baseball" -> SportsDetail.Baseball(json.int("inning"), InningHalf.entries.firstOrNull { it.name == json.text("half") }, json.int("outs"),
                 json.int("balls"), json.int("strikes"), json.optBoolean("first"), json.optBoolean("second"), json.optBoolean("third"))
             else -> null

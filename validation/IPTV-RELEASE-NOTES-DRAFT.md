@@ -951,6 +951,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   12:33).
 - Football: a game decided on penalties shows the winner and the shoot-out score with the
   result ("FT-Pens · CHL 7–6") (capture of 18 October, 23:28).
+- Cricket: a match held up by rain (or another stoppage ESPN reports) shows it, for example
+  "Match delayed by rain", instead of "Live" (capture of 18 October, 23:38).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

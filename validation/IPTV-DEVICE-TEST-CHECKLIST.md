@@ -1,6 +1,6 @@
 # Nuvio IPTV — device test checklist (build `8724e01f3`, run 39068602774)
 
-For this build start with section 7ab, then 7aa, 7z, 7y, 7x, 7w, 7v, 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
+For this build start with section 7ac, then 7ab, 7aa, 7z, 7y, 7x, 7w, 7v, 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -83,6 +83,11 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 11. Press Home on the remote with Game Centre open: logcat should show sports requests
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
+
+## 7ac. 18 October 23:38 capture: cricket rain delay (build pending)
+1. During a rain delay in a live cricket match, the card and hero show "Match delayed by
+   rain" and the score bug's third line says the same; once play resumes they show "Live"
+   and the run chase again.
 
 ## 7ab. 18 October 23:28 capture: penalty shoot-out result (build pending)
 1. A finished cup game decided on penalties shows "FT-Pens · <winner> 7–6" on its card,

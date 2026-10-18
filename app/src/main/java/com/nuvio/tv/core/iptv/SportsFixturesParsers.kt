@@ -74,14 +74,18 @@ object EspnScoreboard {
         val extra = when {
             !started -> null
             league.sport == "cricket" -> cricket(listOf(home!! to homeTeam!!, away!! to awayTeam!!),
-                statusJson?.text("summary")?.takeIf { status == FixtureStatus.FINAL }?.take(MAX_TEXT))
+                statusJson?.text("summary")?.takeIf { status == FixtureStatus.FINAL }?.take(MAX_TEXT))?.copy(stoppage = interruption(league.sport, status, type))
             league.sport == "baseball" && status == FixtureStatus.LIVE -> baseball(statusJson, type, competition?.optJSONObject("situation"))
             else -> null
         }
         return SportsFixture(id, league.id, league.sport, title, homeTeam.takeIf { paired }, awayTeam.takeIf { paired }, start, status, score,
-            ended ?: (if (stale) type?.text("description") else null) ?: (type?.text("shortDetail") ?: type?.text("detail"))?.let { text ->
+            ended ?: (if (stale) type?.text("description") else null) ?: interruption(league.sport, status, type) ?: (type?.text("shortDetail") ?: type?.text("detail"))?.let { text ->
                 shootout(home, away, homeTeam, awayTeam)?.takeIf { status == FixtureStatus.FINAL }?.let { "$text · $it" } ?: text }, broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra, events)
     }
+
+    private fun interruption(sport: String, status: FixtureStatus, type: JSONObject?): String? =
+        type?.text("description")?.takeIf { sport == "cricket" && status == FixtureStatus.LIVE && it.length <= MAX_TEXT && it.lowercase() !in RUNNING &&
+            !it.equals(type.text("shortDetail"), true) }
 
     private fun shootout(home: JSONObject?, away: JSONObject?, homeTeam: FixtureTeam?, awayTeam: FixtureTeam?): String? {
         val homeGoals = home?.optIntOrNull("shootoutScore")?.takeIf { it in 0..99 } ?: return null
@@ -565,6 +569,7 @@ object EspnScoreboard {
     private val RECORD = Regex("\\d{1,3}(-\\d{1,3}){1,3}")
     private val RACES = setOf("Race", "Sprint")
     private val FIGHT_CLOCK = Regex("\\d{1,2}:\\d{2}")
+    private val RUNNING = setOf("live", "in progress")
     private val LEADING = Regex("^\\d{1,3}")
     private val INITIAL = Regex("""[\p{L}.\-]{1,6}\.\s+(.+)""")
     private val TEE = Regex("""^\w{3} (\w{3}) (\d{1,2}) (\d{1,2}):(\d{2}):\d{2} \w+ (\d{4})$""")

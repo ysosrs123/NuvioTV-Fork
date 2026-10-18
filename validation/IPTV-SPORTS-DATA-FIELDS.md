@@ -1760,7 +1760,7 @@ international matches (ODI, Test, T20I, women's) that are live or finished. Trim
 | Shape | What the real response showed | Parser change |
 |---|---|---|
 | ODI chase (scoreboard) | Pakistan v Sri Lanka (`cricket/1550706`, ODI no. 5037, day/night): status `state` `in` with no `name`, `detail` `Live`, `period` 2, `displayClock` `0'`; `summary` `Sri Lanka require 301 runs`. Scores `305` (all out, 49.5 overs) and `5/0 (1.4/50 ov, target 306)`, while the line score already had `1.5` overs. | none: `PAK 305 · SL 5/0`, `1.5 ov`, `Need 301 from 289`; the period text is `Live` (the `0'` clock is dropped) |
-| Test, first innings (scoreboard) | South Africa v Australia (`cricket/24203`): `SA 20/2 (12.2 ov)`, Australia with no score, `summary` `Australia won toss & fielded`, unchanged over five minutes (a break). | none: `SA 20/2`, `12.2 ov` |
+| Test, first innings (scoreboard) | South Africa v Australia (`cricket/24203`): `SA 20/2 (12.2 ov)`, Australia with no score, `summary` `Australia won toss & fielded`, unchanged over five minutes (a rain delay: see the thirtieth pass). | none then: `SA 20/2`, `12.2 ov` |
 | Women's T20I final | Australia 165/8 (18.5 of 20 overs, target 163) beat New Zealand 162/2: `AUS Women won by 2 wkts (7b rem)`. | none |
 | Live cricket summary | No plays or commentary at all: `header` (innings in the line scores with `overs`, `target`, `isBatting`, partnerships and fall of wickets), `matchcards` (batting, bowling, partnerships), `notes` (hours of play), `rosters`. `situation` holds only `odds`. | none: innings only, no last plays or moments |
 
@@ -1797,3 +1797,15 @@ Confirmed now: ESPN football finals after extra time and on penalties, with the 
 
 Still unconfirmed: as in the twenty-sixth pass, with football extra time and penalties narrowed to a
 game in extra time or in a shoot-out live on ESPN, and the summary of a shoot-out.
+
+## Thirtieth pass (18 October, 23:38)
+
+South Africa v Australia (Test, day 1) captured on request during a rain delay at 23:38 Brisbane
+time (13:38Z). Trimmed copy in `app/src/test/resources/sports/espn-cricket-scoreboard-real-20261018r.json`
+(`SportsRealDataRainDelayTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Cricket rain delay (scoreboard and summary) | `state` `in`, `detail` and `shortDetail` `Live`, but `type.id` `101` and `description` `Match delayed by rain`; `session` `Day 1`, `summary` `Australia won toss & fielded`; the score unchanged at `20/2 (12.2 ov)`. The summary's `notes` log each stoppage (`Rain: South Africa - 20/2 in 12.2 overs …`, `Tea: …`, `Wet Ground: …`). The 22:40 and 22:45 captures of the twenty-eighth pass were the same delay. In normal play `type.id` is `0` and `description` `Live`. | A live cricket match whose status description is not `Live` shows it (`Match delayed by rain`) as its status, and the score bug's third line reads it in place of the run chase (`SportsDetail.Cricket.stoppage`, also in the cache) |
+
+Confirmed now: a cricket rain delay on ESPN.

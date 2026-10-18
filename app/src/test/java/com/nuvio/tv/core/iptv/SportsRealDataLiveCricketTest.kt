@@ -25,7 +25,7 @@ class SportsRealDataLiveCricketTest {
 
     @Test fun testMatchFirstInnings() {
         val game = EspnScoreboard.parse(sample("scoreboard", "o"), league("24203"), now).single()
-        assertEquals(listOf<Any?>(FixtureStatus.LIVE, null, "Live"), listOf(game.status, game.score, SportsFixtureText.periodClock(game)))
+        assertEquals(listOf<Any?>(FixtureStatus.LIVE, null, "Match delayed by rain"), listOf(game.status, game.score, SportsFixtureText.periodClock(game)))
         assertEquals(listOf(CricketInnings("SA", 20, 2, "12.2", null, null, true)), (game.sportDetail as SportsDetail.Cricket).innings)
         assertEquals("SA 20/2" to "12.2 ov", SportsFixtureText.bug(game).let { it.primary to it.state })
         assertEquals(listOf(SummaryInnings(FixtureSide.HOME, 1, 20, 2, "12.2", null)), EspnSummary.parse(sample("summary", "o"), league("24203"))!!.innings)

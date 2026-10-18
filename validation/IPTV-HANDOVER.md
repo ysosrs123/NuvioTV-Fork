@@ -73,6 +73,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 29 (18 October 23:28, first scheduled full capture) in the commit after `47fd503`
     (7ab): a football final on penalties names the winner and the shoot-out score
     ("FT-Pens · CHL 7–6").
+  - Capture 30 (18 October 23:38, cricket rain delay on request), local commit for the next
+    batch (7ac): a live cricket match in a rain delay shows "Match delayed by rain".
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -84,7 +86,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1054 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1056 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
