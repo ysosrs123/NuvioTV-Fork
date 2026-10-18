@@ -1655,3 +1655,38 @@ AFL/NRL live clock (off season); golf after a cut or a playoff; football extra t
 shoot-outs on ESPN; a TheSportsDB penalty shoot-out after extra time and a refreshed shoot-out row
 (`P` or `PT` with a progress, or `PT` moving to `AP`); an NBA free throw on the scoreboard with the
 player's name.
+
+## Twenty-fifth pass (18 October, 11:27)
+
+One ESPN pass with one TheSportsDB run, captured on Sunday 18 October at 11:27 Brisbane time
+(01:27Z), an hour after the twenty-fourth, as an extra run for the UFC main card. 110 files; the CFL
+summary answered 502 a third time. In play: Game 4 of the ALCS (`Bot 5th`, 1–1, with its summary),
+eight NHL games, college hockey, five college football games (two at half-time), ten MLS games, the
+final LPGA round and the UFC card, again between bouts. Every scoreboard and summary parses without
+errors. Trimmed copies are in `app/src/test/resources/sports/*-real-20261018d.json`
+(`SportsRealDataHalfTimeDownTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| College football half-time with a down (scoreboard) | BYU 21–10 Notre Dame and Houston 14–3 Oklahoma State, `STATUS_HALFTIME` `Halftime`: `lastPlay` `End of 2nd quarter.` (`End Period`), but `situation` still holds the last snap's `down` 2 and 3, `downDistanceText` `2nd & 10 at BYU 5` and `3rd & 11 at HOU 28`, `possessionText` and `possession`. Earlier half-times (NFL and college) had no down text. | At half-time the down line and possession are left out, so the bug reads `Halftime` alone (was `Halftime` with `3rd & 11 · HOU 28` and the ball marker) |
+| UFC card at the next walkouts | Ten bouts final, the eleventh `STATUS_FIGHTERS_WALKING`, two scheduled; no bout caught in a round in either extra run. An hour after the twenty-fourth pass, Anheliger–Koslow and Landwehr–Nallo still have no `Unofficial Winner …` detail, and Jourdain–Cuamba (`2`, `2:48`) joined them; the other seven have one. | none: winner, round and time with no method |
+| College football timeout | Miami 14–14 Florida State `8:10 - 3rd`, `Timeout Florida State`, `down` 0 and `isRedZone` false this time. | none |
+| College hockey | `End of 3rd` at 1–5, 2–2, 3–2 and 5–0, two `Final/OT`. | none |
+| MLB, NHL, MLS | `Bot 5th`, 1–1, `Start Batter/Pitcher`; NHL clocks in all three periods, no penalty or empty net on the scoreboard; MLS `85'` to `89'`, `HT`, `45'+2'`. | none |
+
+TheSportsDB, one run: the MLB `eventsday` still had Game 4 at `IN1`, 0–0, an hour after the first
+pitch (ESPN `Bot 5th`, 1–1); the row was not refreshed between the two runs. The day schedule has no
+`updated` time, so the app shows `Inning 1`, 0–0 until the row moves or the game length runs out;
+ESPN is the better source for MLB. The baseball livescore again listed only Game 5.
+
+Parser changes: a football half-time drops the stale down line and possession.
+
+Checked again on this data: college football half-time, clocks, timeouts and red zone; UFC
+finishes, end rounds and clocks; college hockey intervals and overtime; MLB inning and count; NHL
+clocks; MLS minutes and stoppage time; TheSportsDB `eventsday` live rows.
+
+Confirmed now: football half-time with the last down still in `situation`; UFC finishes still
+without a method an hour later; TheSportsDB `eventsday` MLB rows that do not refresh during play.
+
+Still unconfirmed: unchanged from the twenty-fourth pass, apart from the UFC method now known to stay
+missing for at least an hour (whether it ever arrives is still open).

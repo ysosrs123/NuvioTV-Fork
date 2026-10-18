@@ -59,6 +59,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
     flag needs a real down (timeouts with `down` 0 no longer read "Red zone"); a live MLB
     row from TheSportsDB (`eventsday` only), the UFC main card between bouts and college
     hockey intervals and overtime confirmed with no change.
+  - Capture 25 (18 October 11:27, extra run for the UFC main card) in the commit after
+    `ac9beae` (7z): a football half-time no longer shows the last down and possession; UFC
+    finishes without a method, and a TheSportsDB MLB row stuck at `IN1`, noted.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -70,7 +73,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1041 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1044 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
@@ -134,6 +137,11 @@ under "Earlier session notes" and the dated sections is history kept for referen
    and no down text (the red-zone flag now needs a down of 1 or more), Game 4 live in the MLB
    `eventsday` (`IN1`, right start) but missing from the livescore, two finished UFC bouts
    with a winner but no method yet, and college hockey intervals and an overtime final.
+   The twenty-fifth pass (18 October 11:27) showed college football half-times that still
+   carry the last down (`3rd & 11 at HOU 28`; now left out at half-time), a third UFC finish
+   without a method an hour on, and the TheSportsDB `eventsday` MLB row still `IN1` 0–0 in
+   the 5th inning (no refresh; ESPN is the better MLB source). No UFC round in progress in
+   either extra run.
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
    the full list): the NFL two-minute warning on the scoreboard; NBA overtime in progress; an NHL power
    play, empty net or shootout on the scoreboard, and a shootout in the summary; a pitching

@@ -503,9 +503,9 @@ object EspnScoreboard {
     private fun situation(json: JSONObject, home: JSONObject, away: JSONObject, halfTime: Boolean, court: Boolean): FixtureSituation? {
         val short = json.text("shortDownDistanceText")
         val spot = json.text("possessionText")?.takeIf { it.any(Char::isLetter) }
-        val downDistance = (if (short != null && spot != null) "$short · $spot" else json.text("downDistanceText") ?: short)?.take(MAX_TEXT)
+        val downDistance = (if (short != null && spot != null) "$short · $spot" else json.text("downDistanceText") ?: short)?.take(MAX_TEXT)?.takeIf { !halfTime }
         val last = json.optJSONObject("lastPlay")
-        val owner = json.text("possession") ?: last?.optJSONObject("end")?.optJSONObject("team")?.text("id")?.takeIf { downDistance != null }
+        val owner = (json.text("possession") ?: last?.optJSONObject("end")?.optJSONObject("team")?.text("id")?.takeIf { downDistance != null })?.takeIf { !halfTime }
         fun ids(competitor: JSONObject) = setOfNotNull(competitor.text("id"), competitor.optJSONObject("team")?.text("id"))
         val possession = when {
             owner == null -> null

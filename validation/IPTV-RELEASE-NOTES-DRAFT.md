@@ -944,6 +944,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   (capture of 18 October, 07:10).
 - College football (and NFL): the score bug and hero no longer show "Red zone" on their own
   during a timeout or kick-off when there is no down (capture of 18 October, 10:28).
+- College football (and NFL): at half-time the score bug shows "Halftime" without the last
+  down and spot, and no side has the ball (capture of 18 October, 11:27).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the
