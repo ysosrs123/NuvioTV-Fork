@@ -75,6 +75,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     ("FT-Pens · CHL 7–6").
   - Capture 30 (18 October 23:38, cricket rain delay on request), local commit for the next
     batch (7ac): a live cricket match in a rain delay shows "Match delayed by rain".
+  - Capture 31 (19 October 04:28, scheduled): tests only (NFL end of the 2nd quarter, college
+    volleyball and field hockey read by the generic parser).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -86,7 +88,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1056 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1058 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
@@ -371,8 +373,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - NBA overtime in progress and its summary; an NBA free throw with the player's name; an
     NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
     (World Series, to about 1 November); TheSportsDB baseball half-innings or extra innings
-    and a refreshed shoot-out row; a UFC method posted later; college volleyball (no parser
-    yet): daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
+    and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
   - The NFL two-minute warning on the scoreboard; a quarter break in a live summary; NASCAR
     stages (season to early November): Monday 04:27, 06:27, 11:27 (`Mon NFL`), Friday 11:27
     and Sunday college football (daily US evening, weekend mornings).
@@ -383,6 +384,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     mornings`), Monday 04:27 and 06:27.
   - Tennis point score and the server in a tie-break (European indoor events): daily 21:27
     and 23:27 (`nightly Europe`).
+  - Done: college volleyball and field hockey (19 October 04:28; the generic parser reads
+    them).
   - Dropped: F1 gaps, pit stops and fastest lap (ESPN does not send them during a race);
     AFL and NRL live clocks (off season until after 30 November).
   - Disabled on 18 October (covered by the slots above): `Tue-Sun NHL/NBA/MLB`, `Sun

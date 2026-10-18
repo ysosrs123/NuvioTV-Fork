@@ -1809,3 +1809,23 @@ time (13:38Z). Trimmed copy in `app/src/test/resources/sports/espn-cricket-score
 | Cricket rain delay (scoreboard and summary) | `state` `in`, `detail` and `shortDetail` `Live`, but `type.id` `101` and `description` `Match delayed by rain`; `session` `Day 1`, `summary` `Australia won toss & fielded`; the score unchanged at `20/2 (12.2 ov)`. The summary's `notes` log each stoppage (`Rain: South Africa - 20/2 in 12.2 overs …`, `Tea: …`, `Wet Ground: …`). The 22:40 and 22:45 captures of the twenty-eighth pass were the same delay. In normal play `type.id` is `0` and `description` `Live`. | A live cricket match whose status description is not `Live` shows it (`Match delayed by rain`) as its status, and the score bug's third line reads it in place of the run chase (`SportsDetail.Cricket.stoppage`, also in the cache) |
 
 Confirmed now: a cricket rain delay on ESPN.
+
+## Thirty-first pass (19 October, 04:28)
+
+Scheduled full capture on Monday 19 October at 04:28 Brisbane time (18:28Z on the 18th): 559 files.
+In play: seven NFL games at the end of the 2nd quarter (two at half-time), 23 women's college
+volleyball matches, ten women's college field hockey games, the Champions Tour, NWSL, the Eredivisie,
+the Saudi league and 70 other football games. Trimmed copies are in
+`app/src/test/resources/sports/espn-college-*-scoreboard-real-20261019.json`
+(`SportsRealDataNewSportsTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NFL end of the 2nd quarter (scoreboard) | Last plays `Timeout #1 by CHI at 01:02.  10-second runoff avoided.`, `Official Timeout at 02:42.`, `(Andy Borregales Kick)` (`Extra Point Good`), ` (No Huddle) A.Rodgers spiked the ball to stop the clock.` (a leading space), `4th & Goal at NYG 2` with `isRedZone` true; half-time with both sides' timeouts back at 3. The two-minute warning was in the three live summaries (`Two-Minute Warning`) but not a scoreboard's last play. | none: the spike reads `A.Rodgers spiked the ball to stop the clock.`, the kick `Extra Point Good (Andy Borregales Kick)`, `Red zone` on 4th and goal |
+| College volleyball (no league in the app) | `3rd Set`, `period` 3, `displayClock` `0:00`; `score` is sets won (`2`), `linescores` the points per set (`29 25 10` against `27 22 7`). | none: the generic parser reads `2–0`, `3rd Set` and a column per set |
+| College field hockey (no league in the app) | `55:54 - 4th` with the clock rising through 60 minutes, `End of 3rd` at `45:00`, a column per quarter. | none: `55:54 - 4th`, `End of 3rd` |
+| Football | `STATUS_IN_PROGRESS` (instead of `STATUS_FIRST_HALF`) with `30'` in two Eredivisie and other games. | none |
+
+Confirmed now: college volleyball and field hockey shapes (for a later league entry; user decision).
+
+Still unconfirmed: as in the twenty-ninth pass.
