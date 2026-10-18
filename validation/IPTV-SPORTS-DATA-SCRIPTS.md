@@ -9,9 +9,10 @@ consumes the next pasted line). Never commit a key.
 
 ## Scheduled captures in the cloud environment
 
-`tools/iptv-host-tests/sports_capture.py <out-dir>` makes the same requests as the blocks
-below (ESPN pass, TheSportsDB coverage and calls) into `espn-pass/`, `sports-coverage/` and
-`sportsdb-calls/`. It reads the TheSportsDB key only from the `THESPORTSDB_KEY` environment
+`tools/iptv-host-tests/sports_capture.py <out-dir>` makes the requests of the blocks below
+(ESPN pass, TheSportsDB coverage and calls) and, beyond them, every league the app offers,
+every league ESPN lists for 17 sports and the live cricket in ESPN's score panel, into
+`espn-pass/`, `sports-coverage/` and `sportsdb-calls/`. It reads the TheSportsDB key only from the `THESPORTSDB_KEY` environment
 variable (set by the user in the environment settings), removes it from every saved file and
 deletes any file that still holds it. The environment must allow `site.api.espn.com`,
 `site.web.api.espn.com` and `www.thesportsdb.com`. Scheduled runs are described in the
