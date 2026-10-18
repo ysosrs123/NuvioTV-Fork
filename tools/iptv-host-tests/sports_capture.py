@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Usage: sports_capture.py <out-dir> [--espn-only]  (TheSportsDB reads THESPORTSDB_KEY)"""
-import json, os, re, ssl, sys, urllib.request
+import json, os, re, ssl, sys, urllib.error, urllib.request
 from datetime import datetime, timedelta, timezone
 
 ESPN = "https://site.api.espn.com/apis/site/v2/sports"
@@ -14,7 +14,13 @@ LEAGUES = {
     "eflcup": "soccer/eng.league_cup", "uel": "soccer/uefa.europa", "ncaah": "hockey/mens-college-hockey",
     "lpga": "golf/lpga", "pfl": "mma/pfl",
 }
-NO_SUMMARY = {"atp", "wta", "pga", "lpga", "f1", "nascar", "ufc", "pfl"}
+NO_SUMMARY_SPORTS = ("tennis/", "golf/", "racing/", "mma/")
+APP_LEAGUES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "app", "src", "main", "java", "com", "nuvio", "tv", "core", "iptv", "SportsFixtures.kt")
+LIVE_SUMMARIES = 3
+DISCOVER_SPORTS = ["soccer", "football", "basketball", "hockey", "baseball", "rugby", "rugby-league", "australian-football", "tennis", "golf",
+                   "racing", "mma", "lacrosse", "volleyball", "water-polo", "field-hockey", "softball"]
+DROPDOWN = "https://site.api.espn.com/apis/site/v2/leagues/dropdown?sport={}&limit=1000"
+CRICKET_MATCHES = 8
 V2 = "https://www.thesportsdb.com/api/v2/json"
 V1 = "https://www.thesportsdb.com/api/v1/json"
 APP_SPORTS = ["Soccer", "Basketball", "Ice_Hockey", "Baseball", "American_Football", "Rugby", "Cricket", "Australian_Football"]
@@ -38,12 +44,16 @@ class Fetcher:
 
     def get(self, folder, name, url, headers=None):
         request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0", **(headers or {})})
-        try:
-            with urllib.request.urlopen(request, timeout=30, context=self.ssl) as response:
-                body = response.read().decode("utf-8", "replace")
-        except Exception as error:
-            print(f"FAIL {name} : {self.scrub(str(error))}")
-            return None
+        body = None
+        for attempt in range(2):
+            try:
+                with urllib.request.urlopen(request, timeout=30, context=self.ssl) as response:
+                    body = response.read().decode("utf-8", "replace")
+                break
+            except Exception as error:
+                if attempt or isinstance(error, urllib.error.HTTPError):
+                    print(f"FAIL {name} : {self.scrub(str(error))}")
+                    return None
         os.makedirs(folder, exist_ok=True)
         with open(os.path.join(folder, name + ".json"), "w", encoding="utf-8") as out:
             out.write(self.scrub(body))
@@ -54,17 +64,63 @@ class Fetcher:
             return None
 
 
+def leagues():
+    found = dict(LEAGUES)
+    try:
+        source = open(APP_LEAGUES, encoding="utf-8").read()
+    except OSError:
+        print("FAIL app leagues : SportsFixtures.kt not found, using the built-in list")
+        return found
+    known = set(found.values())
+    for key, path in re.findall(r'SportsLeague\("([a-z0-9-]+)", "[^"]*", "[a-z-]+", "([a-z0-9-]+/[a-z0-9._-]+)"', source):
+        if path not in known:
+            found[key] = path
+            known.add(path)
+    return found
+
+
+def discovered(fetch, folder, known):
+    found = {}
+    for sport in DISCOVER_SPORTS:
+        listing = fetch.get(os.path.join(folder, "leagues"), f"dropdown-{sport}", DROPDOWN.format(sport))
+        for league in (listing or {}).get("leagues") or []:
+            slug = str(league.get("slug") or "")
+            path = f"{sport}/{slug}"
+            if re.fullmatch(r"[a-z0-9._-]{1,40}", slug) and path not in known:
+                found[f"{sport}-{slug}"] = path
+                known.add(path)
+    return found
+
+
+def state(event):
+    return ((event.get("status") or {}).get("type") or {}).get("state")
+
+
+def recent(event):
+    try:
+        return datetime.now(timezone.utc) - datetime.fromisoformat(str(event.get("date")).replace("Z", "+00:00")) < timedelta(hours=12)
+    except ValueError:
+        return False
+
+
 def espn(fetch, folder):
     fetch.get(folder, "all-sports-header", HEADER)
-    for key, path in LEAGUES.items():
+    own = leagues()
+    extra = discovered(fetch, folder, set(own.values()))
+    for key, path in list(own.items()) + list(extra.items()):
         board = fetch.get(folder, f"{key}-scoreboard", f"{ESPN}/{path}/scoreboard")
-        if key in NO_SUMMARY or not board:
+        if path.startswith(NO_SUMMARY_SPORTS) or not board:
             continue
-        events = board.get("events") or []
-        live = next((e for e in events if ((e.get("status") or {}).get("type") or {}).get("state") == "in"), None)
-        event = live or (events[0] if events else None)
-        if event and event.get("id"):
-            fetch.get(folder, f"{key}-summary{'-LIVE' if live else ''}", f"{ESPN}/{path}/summary?event={event['id']}")
+        events = [e for e in board.get("events") or [] if re.fullmatch(r"[0-9]{1,12}", str(e.get("id") or ""))]
+        live = [e for e in events if state(e) == "in"][:LIVE_SUMMARIES]
+        if live:
+            for index, event in enumerate(live):
+                fetch.get(folder, f"{key}-summary-LIVE{'' if index == 0 else '-' + event['id']}", f"{ESPN}/{path}/summary?event={event['id']}")
+            continue
+        finished = [e for e in events if state(e) == "post" and recent(e)]
+        event = finished[-1] if finished else (events[0] if events and key in own else None)
+        if event:
+            fetch.get(folder, f"{key}-summary", f"{ESPN}/{path}/summary?event={event['id']}")
     cricket(fetch, folder)
 
 
@@ -77,11 +133,10 @@ def cricket(fetch, folder):
             competition = (event.get("competitions") or [{}])[0]
             kind = ((competition.get("class") or {}).get("generalClassCard") or "")
             state = ((competition.get("status") or event.get("status") or {}).get("type") or {}).get("state")
-            if re.fullmatch(r"[0-9]{1,10}", series) and re.fullmatch(r"[0-9]{1,10}", str(event.get("id") or "")) and state in ("in", "post") \
-                    and re.search(r"\b(ODI|Test|T20I|Women T20|Women ODI)\b", kind):
-                picked.append((series, str(event["id"]), state))
+            if re.fullmatch(r"[0-9]{1,10}", series) and re.fullmatch(r"[0-9]{1,10}", str(event.get("id") or "")) and state in ("in", "post"):
+                picked.append((series, str(event["id"]), state, not re.search(r"\b(ODI|Test|T20I|Women)\b", kind)))
     boards = set()
-    for series, event, state in sorted(picked, key=lambda p: p[2] != "in")[:4]:
+    for series, event, state, _ in sorted(picked, key=lambda p: (p[2] != "in", p[3]))[:CRICKET_MATCHES]:
         if series not in boards:
             boards.add(series)
             fetch.get(folder, f"cricket-{series}-scoreboard", f"{ESPN}/cricket/{series}/scoreboard")
@@ -115,6 +170,7 @@ def calls(fetch, folder, key):
     fetch.get(folder, "v1-eventsday-afl", f"{v1}/eventsday.php?d={day}&l=Australian_AFL")
     fetch.get(folder, "v1-eventsday-mlb", f"{v1}/eventsday.php?d={day}&l=MLB")
     fetch.get(folder, "v1-eventsday-mlb-prev", f"{v1}/eventsday.php?d={prev}&l=MLB")
+    fetch.get(folder, "v1-eventsday-bigbash", f"{v1}/eventsday.php?d={day}&l=Australian_Big_Bash_League")
     ids += [e.get("idEvent") for e in ((epl or {}).get("events") or [])[:3]]
     seen = []
     for event in ids:

@@ -344,10 +344,20 @@ under "Earlier session notes" and the dated sections is history kept for referen
   capture as below and push fixes. The user relaxed the key rule for this only: the key lives
   in the environment as `THESPORTSDB_KEY` (set by the user); it must still never be written to
   the repository, docs, fixtures, logs or chat, and every saved file is scrubbed.
-- The ESPN capture script (18 October) skips summaries for tennis, golf, racing and MMA and
-  also captures CFL, MLS, EFL Cup, Europa League, men's college hockey, LPGA and PFL, and up
-  to four live or finished international cricket matches found through ESPN's cricket score
-  panel.
+- The capture script (revised 18 October, user request: capture everything) reads every
+  league the app offers from `SportsFixtures.kt`, adds every other league ESPN lists for 17
+  sports (`/leagues/dropdown`, about 350 leagues in all; `sports.core.api.espn.com` is not
+  reachable from the cloud environment) and up to eight live or finished cricket matches from
+  ESPN's cricket score panel. Summaries: up to three live games per league, otherwise the
+  latest game finished in the last 12 hours (the app's own leagues also keep a pre-game
+  summary); none for tennis, golf, racing or MMA. TheSportsDB: livescore for every sport, the
+  `eventsday` lists for the Premier League, AFL, MLB (today and the day before) and the Big
+  Bash, and `lookuptv`. One run takes about six minutes and 40 MB.
+- Schedule (18 October): a full capture every two hours around the clock (01:27, 03:27 …
+  23:27 Brisbane), plus Monday 04:27, 06:27 and 11:27 (NFL) and Thursday and Friday 05:27 and
+  06:57 (European cups); the Tue–Sun, Sunday Premier League and weekday tennis slots are
+  disabled. Reminders on 25 October and 1 November move the NFL and European-cup slots an
+  hour later for the end of summer time.
 - Capture schedule given to the user (Brisbane, UTC+10; European games one hour later from
   25 October, US games one hour later from 1 November): best Monday 04:00–08:00 (NFL);
   Monday ~10:30–13:00 (NFL Sunday night, NHL); Sunday 05:00–13:00 (college football, NHL,
