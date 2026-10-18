@@ -62,6 +62,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 25 (18 October 11:27, extra run for the UFC main card) in the commit after
     `ac9beae` (7z): a football half-time no longer shows the last down and possession; UFC
     finishes without a method, and a TheSportsDB MLB row stuck at `IN1`, noted.
+  - Capture 26 (18 October 12:33 to 12:43, the UFC main event sampled every 45 s) in the
+    commit after `c90d05e` (7aa): a live UFC bout shows the time left in the round on the
+    score bug ("Round 1 of 5 · 3:03").
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -73,7 +76,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1044 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1047 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
@@ -142,15 +145,18 @@ under "Earlier session notes" and the dated sections is history kept for referen
    without a method an hour on, and the TheSportsDB `eventsday` MLB row still `IN1` 0–0 in
    the 5th inning (refreshed only later and behind: `IN7` 1–2 at 12:28 against ESPN's 2–5;
    ESPN is the better MLB source). No UFC round in progress in
-   either extra run.
+   either extra run. The twenty-sixth pass (18 October 12:33 to 12:43) sampled the UFC main
+   event: `STATUS_IN_PROGRESS_2` with `R1, 3:03` counting down, `R1, -` at the bell,
+   `STATUS_END_OF_ROUND` (`End R1`) in the break, a stoppage shown as `End R2` for two
+   minutes, then `Final` with the time left (`2:28`) corrected a minute later to the time
+   elapsed (`2:32`). A live bout now shows its clock on the score bug.
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
    the full list): the NFL two-minute warning on the scoreboard; NBA overtime in progress; an NHL power
    play, empty net or shootout on the scoreboard, and a shootout in the summary; a pitching
    change as the MLB scoreboard's last play; TheSportsDB baseball half-innings, extra
    innings; a TheSportsDB
    penalty shoot-out after extra time; tennis point score and the
-   server during a match tie-break; NASCAR stages; a UFC bout in progress (walkouts and
-   between bouts seen); live cricket;
+   server during a match tie-break; NASCAR stages; live cricket;
    AFL/NRL clocks (off season); football own goals, penalties, second yellows and extra
    time. ESPN sends no gaps, pit stops or fastest lap during an F1 race. Coverage ideas from
    the 12 October league lists (not added; user decision): South American and Nordic

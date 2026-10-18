@@ -372,7 +372,8 @@ object EspnScoreboard {
             val method = if (finished) finish(competition) ?: FightMethod.DRAW.takeIf { winner == null && endRound != null && endRound == rounds } else null
             val bout = FightBout(competition.optJSONObject("type")?.let { it.text("abbreviation") ?: it.text("text") }?.take(40), rounds, first, second, winner, start, state,
                 statusJson?.optIntOrNull("period")?.takeIf { state == FixtureStatus.LIVE && it in 1..12 }, method = method, endRound = endRound,
-                endClock = statusJson?.text("displayClock")?.takeIf { endRound != null && FIGHT_CLOCK.matches(it) })
+                endClock = statusJson?.text("displayClock")?.takeIf { endRound != null && FIGHT_CLOCK.matches(it) },
+                clock = statusJson?.text("displayClock")?.takeIf { state == FixtureStatus.LIVE && FIGHT_CLOCK.matches(it) && type?.text("name")?.contains("END") != true })
             Triple(competition, type, bout)
         }
         val bouts = raw.map { it.third }

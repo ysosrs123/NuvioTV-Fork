@@ -504,7 +504,7 @@ object SportsFixtureText {
         val primary = "${fighter(bout.first)} v ${fighter(bout.second)}"
         return when {
             bout.state == FixtureStatus.LIVE -> SportsBugText(primary, (if (bout.round == null) fixture.detail else null)
-                ?: ("Round ${bout.round ?: 1}" + (bout.rounds?.let { " of $it" } ?: "")), bout.weightClass)
+                ?: ("Round ${bout.round ?: 1}" + (bout.rounds?.let { " of $it" } ?: "") + (bout.clock?.let { " · $it" } ?: "")), bout.weightClass)
             fixture.status == FixtureStatus.FINAL -> SportsBugText(primary, fixture.detail ?: "Final", finish(bout) ?: bout.weightClass)
             else -> SportsBugText(primary, bout.weightClass, bout.rounds?.let { "$it rounds" })
         }

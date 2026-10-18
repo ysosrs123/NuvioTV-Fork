@@ -1693,3 +1693,33 @@ late during play (12:28: `IN7` at 1–2 against ESPN's `Bot 7th` at 2–5).
 
 Still unconfirmed: unchanged from the twenty-fourth pass, apart from the UFC method now known to stay
 missing for at least an hour (whether it ever arrives is still open).
+
+## Twenty-sixth pass (18 October, 12:33 to 12:43)
+
+One full ESPN and TheSportsDB capture at 12:33 Brisbane time (02:33Z) with the UFC main event
+(Buckley v Malott, five rounds) in its first round, then the UFC scoreboard alone every 45 seconds
+until 12:43. Nothing new in the other sports five minutes after the 12:28 run. Trimmed copies of the
+main event at each new state (the last two bouts of the card) are in
+`app/src/test/resources/sports/espn-ufc-scoreboard-real-20261018e.json` to `…k.json`
+(`SportsRealDataMainEventTest`).
+
+| Time | Bout `status` | Note |
+|---|---|---|
+| 12:33:12 | `STATUS_IN_PROGRESS_2` (`id` 31, `state` `in`), `period` 1, `displayClock` `3:03`, `shortDetail` `R1, 3:03` | The event stays `STATUS_IN_PROGRESS`. The clock counts down: `3:03`, `2:32`, `1:30`, `0:59` over the next two minutes, so it is the time left in the round |
+| 12:35:57 | `STATUS_IN_PROGRESS_2`, `R1, -`, `displayClock` `-` | At the bell, before the break status |
+| 12:36:43 | `STATUS_END_OF_ROUND` (`id` 142), `End R1`, clock `-` | The one-minute break |
+| 12:37:28 | `STATUS_IN_PROGRESS_2`, `R2, 4:40` | Round 2 |
+| 12:40:30 | `STATUS_END_OF_ROUND`, `End R2`, clock `2:28`; `details` `Fight Over` first | A stoppage 2:32 into round 2; the bout stays `End R2` (`state` `in`, no `winner`) for over two minutes |
+| 12:42:46 | `STATUS_FINAL`, `period` 2, `displayClock` `2:28`; `winner` set; `Unofficial Winner Kotko` | The finish first carries the time left |
+| 12:43:32 | `STATUS_FINAL`, `displayClock` `2:32` | Corrected to the time elapsed, as every earlier finish time was (`0:27`, `4:28`, a decision `5:00`) |
+
+Parser changes: a live bout keeps its clock (`FightBout.clock`, also in the cache) while a round is
+running, and the score bug reads `Round 1 of 5 · 3:03`; at the bell (`-`) and in the break
+(`STATUS_END_OF_ROUND`) it reads `Round 1 of 5` as before. A finish shows the time ESPN gives, so for
+about a minute after the result it can show the time left (`R2 2:28`) before the correction.
+
+Confirmed now: a UFC bout in progress (round and clock, counting down), the break between rounds,
+the stoppage reported as the end of the round before the result, and the corrected finish time.
+
+Still unconfirmed: as in the twenty-fourth pass, without the UFC bout in progress; whether a UFC
+finish posted without a method ever gets one is still open.

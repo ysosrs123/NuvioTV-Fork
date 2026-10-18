@@ -15,7 +15,7 @@ data class RaceSession(val abbreviation: String?, val name: String, val startMil
 data class Fighter(val name: String, val shortName: String? = null, val record: String? = null, val flag: String? = null)
 data class FightBout(val weightClass: String?, val rounds: Int?, val first: Fighter, val second: Fighter, val winner: Int? = null, val startMillis: Long,
     val state: FixtureStatus = FixtureStatus.SCHEDULED, val round: Int? = null, val mainCard: Boolean = false, val method: FightMethod? = null,
-    val endRound: Int? = null, val endClock: String? = null)
+    val endRound: Int? = null, val endClock: String? = null, val clock: String? = null)
 data class CricketInnings(val team: String, val runs: Int, val wickets: Int, val overs: String? = null, val maxOvers: Int? = null, val target: Int? = null,
     val batting: Boolean = false)
 data class CricketChase(val runs: Int, val balls: Int, val rate: Double)
@@ -110,7 +110,7 @@ object SportsDetails {
                     bout.weightClass?.let { put("weightClass", it) }; bout.rounds?.let { put("rounds", it) }; put("first", fighter(bout.first))
                     put("second", fighter(bout.second)); bout.winner?.let { put("winner", it) }; put("start", bout.startMillis); put("state", bout.state.name)
                     bout.round?.let { put("round", it) }; put("mainCard", bout.mainCard); bout.method?.let { put("method", it.name) }
-                    bout.endRound?.let { put("endRound", it) }; bout.endClock?.let { put("endClock", it) }
+                    bout.endRound?.let { put("endRound", it) }; bout.endClock?.let { put("endClock", it) }; bout.clock?.let { put("clock", it) }
                 }) } })
             }
             is SportsDetail.Cricket -> {
@@ -149,7 +149,7 @@ object SportsDetails {
                 FightBout(bout.text("weightClass"), bout.int("rounds"), bout.optJSONObject("first")?.let(::fighter) ?: return@mapNotNull null,
                     bout.optJSONObject("second")?.let(::fighter) ?: return@mapNotNull null, bout.int("winner"), bout.long("start") ?: return@mapNotNull null,
                     status(bout.text("state")), bout.int("round"), bout.optBoolean("mainCard"), FightMethod.entries.firstOrNull { it.name == bout.text("method") },
-                    bout.int("endRound"), bout.text("endClock"))
+                    bout.int("endRound"), bout.text("endClock"), bout.text("clock"))
             })
             "cricket" -> SportsDetail.Cricket(json.objects("innings").mapNotNull { innings ->
                 CricketInnings(innings.text("team") ?: return@mapNotNull null, innings.int("runs") ?: 0, innings.int("wickets") ?: 0, innings.text("overs"),
