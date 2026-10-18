@@ -76,7 +76,7 @@ class SportsRealDataSundayTest {
         val games = EspnScoreboard.parse(sample("ncaaf-scoreboard"), league("college-football"), now)
         val timeout = games.first { it.id == "401856715" }
         assertEquals("0:20", timeout.clock)
-        assertEquals(FixtureSituation(null, null, "Timeout Kentucky, clock 00:20", 32, true, 1, 1), timeout.situation)
+        assertEquals(FixtureSituation(null, null, "Timeout Kentucky, clock 00:20", 32, false, 1, 1), timeout.situation)
         val midfield = games.first { it.id == "401856712" }
         assertEquals(FixtureSituation("4th & 10 at 50", FixtureSide.HOME,
             "#12 K.Russell pass incomplete short middle to #3 L.Brooks thrown to UGA34", 42, false, 3, 3), midfield.situation)

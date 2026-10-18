@@ -942,6 +942,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
 - Ice hockey: a penalty that ESPN reports only as "Minor" now names the infraction (for
   example "Closing Hand on the Puck") on the score bug and in Game Centre's last plays
   (capture of 18 October, 07:10).
+- College football (and NFL): the score bug and hero no longer show "Red zone" on their own
+  during a timeout or kick-off when there is no down (capture of 18 October, 10:28).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

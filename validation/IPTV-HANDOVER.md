@@ -55,6 +55,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
     `43ae401` (7x): an NHL penalty whose text is only the player and "Minor" names the
     infraction; a UFC card at walkouts, live college hockey and MLS confirmed with no change;
     the MLB `eventsday` dates evening games by UTC, which closes the day-early start question.
+  - Capture 24 (18 October 10:28, scheduled) in the commit after `7674c24` (7y): the red-zone
+    flag needs a real down (timeouts with `down` 0 no longer read "Red zone"); a live MLB
+    row from TheSportsDB (`eventsday` only), the UFC main card between bouts and college
+    hockey intervals and overtime confirmed with no change.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -66,7 +70,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1037 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1041 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
@@ -125,14 +129,19 @@ under "Earlier session notes" and the dated sections is history kept for referen
    `abbreviation`), a UFC card at walkouts, live college hockey and MLS, and the first MLB
    `eventsday`: Game 4 of the ALCS (00:00Z) is listed under the UTC date with
    `dateEventLocal` the US date; the livescore merge uses that start, so the day-early
-   timestamps in livescore and `lookuptv` do not reach the app.
+   timestamps in livescore and `lookuptv` do not reach the app. The twenty-fourth pass (18
+   October 10:28) showed `isRedZone` true during a college football timeout with `down` 0
+   and no down text (the red-zone flag now needs a down of 1 or more), Game 4 live in the MLB
+   `eventsday` (`IN1`, right start) but missing from the livescore, two finished UFC bouts
+   with a winner but no method yet, and college hockey intervals and an overtime final.
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
    the full list): the NFL two-minute warning on the scoreboard; NBA overtime in progress; an NHL power
    play, empty net or shootout on the scoreboard, and a shootout in the summary; a pitching
    change as the MLB scoreboard's last play; TheSportsDB baseball half-innings, extra
-   innings, or a live MLB postseason row merged into its `eventsday` game; a TheSportsDB
+   innings; a TheSportsDB
    penalty shoot-out after extra time; tennis point score and the
-   server during a match tie-break; NASCAR stages; a UFC bout in progress (walkouts seen); live cricket;
+   server during a match tie-break; NASCAR stages; a UFC bout in progress (walkouts and
+   between bouts seen); live cricket;
    AFL/NRL clocks (off season); football own goals, penalties, second yellows and extra
    time. ESPN sends no gaps, pit stops or fastest lap during an F1 race. Coverage ideas from
    the 12 October league lists (not added; user decision): South American and Nordic

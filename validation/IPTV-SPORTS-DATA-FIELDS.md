@@ -1605,3 +1605,53 @@ clock); live cricket; AFL/NRL live clock (off season); golf after a cut or a pla
 time and penalty shoot-outs on ESPN; a TheSportsDB penalty shoot-out after extra time and a refreshed
 shoot-out row (`P` or `PT` with a progress, or `PT` moving to `AP`); an NBA free throw on the
 scoreboard with the player's name.
+
+## Twenty-fourth pass (18 October, 10:28)
+
+One ESPN pass with one TheSportsDB run, captured on Sunday 18 October at 10:28 Brisbane time
+(00:28Z; TheSportsDB `updated` up to 01:27 London), 3 h 18 min after the twenty-third, from the
+schedule. 110 files; the CFL summary answered 502 again. In play: Game 4 of the ALCS (Guardians
+1–0 Rays, `Top 2nd`, with its summary), six NHL games (Panthers 8–3 Kraken `7:18 - 3rd` with its
+summary), 18 college hockey games, five college football games in the 2nd quarter, five MLS games
+around half-time, the final LPGA round, and the UFC main card between bouts. Every scoreboard and
+summary parses without errors. Trimmed copies are in
+`app/src/test/resources/sports/*-real-20261018c.json` (`SportsRealDataMainCardTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| College football red zone without a down (scoreboard) | Miami 14–7 Florida State `2:00 - 2nd`: `lastPlay` `Timeout Florida State, clock 02:00` (type `Timeout`); `down` 0, `distance` 10, `yardLine` 15, `isRedZone` true, no down text and no `possession`; the drive is `1 play, 0 yards` with no result. Across every capture `down` 0 has come three times, always with `isRedZone` true and never with down text or possession (the Kentucky timeout of 11 October was the same shape). | The red-zone flag needs a down of 1 or more (was 0 or more), so the bug no longer reads `Red zone` alone during these timeouts |
+| UFC main card between bouts | Event `STATUS_IN_PROGRESS`; eight bouts `STATUS_FINAL`, the ninth `STATUS_PRE_FIGHT`, four scheduled. Finished bouts carry `period` and `displayClock` as the end of the fight (`3`, `4:19`; `2`, `0:47`). Six have `Unofficial Winner Submission` (20) or `Unofficial Winner Kotko` (21) in `details`; two do not yet: Anheliger–Koslow (`3`, `4:31`) has only `Fight Over` (19), and Landwehr–Nallo (`2`, `0:47`) `Results` (23) and `Fight Over`, though `winner` is set on both. | none: winner, round and time with no method for those two |
+| College hockey intervals and overtime | `STATUS_END_PERIOD` `End of 2nd` and `End of 3rd` (the latter at 8–2 and 2–4, games over but not yet final); one `STATUS_IN_PROGRESS` with `displayClock` `0:00` and `shortDetail` `End of 2nd`; a `Final/OT`. No plays in the live summary. | none: `End of 2nd`, `End of 3rd`, `Final/OT` |
+| MLB (live) | `Top 2nd`, 0–0 count, no runners, `lastPlay` `Foster Griffin pitches to Liam Hicks` (`Start Batter/Pitcher`, `summaryType` `A`). No pitching change yet. | none: `▲2`, `0 outs · 0–0` |
+| NHL (live) | Six games; the Panthers summary has 33 `Power Play` and 10 `Shorthanded` plays, all ended by the capture; scoreboard last plays `Off-side`, `TV Timeout`, shots and blocks. No penalty, power play or empty net on the scoreboard. | none |
+| MLS (live) | `45'`, `45'+2'`, `45'+3'` (`STATUS_FIRST_HALF`) and `HT` (`STATUS_HALFTIME`). | none |
+
+TheSportsDB, one run. The MLB `eventsday` for 18 October now has Game 4 live: `strStatus` `IN1`,
+`strProgress` null, 0–0 (ESPN at the same moment `Top 2nd`, 1–0), with the same start as before
+(`2026-10-18T00:00:00`). The baseball livescore (13 rows) does not list Game 4 at all; it has Game 5
+(`NS`, `2026-10-18T21:00:00`, the right UTC time) and Mexican Pacific and Venezuelan games (`IN1`
+to `IN7`, one with only the away score). So a live MLB game from TheSportsDB comes from `eventsday`
+with the right start and reads `Inning 1`; the livescore merge leaves it as it is.
+
+Parser changes: the college football (and NFL) red-zone flag needs a down of 1 or more.
+
+Checked again on this data: college football clocks, timeouts and win probability; UFC card
+states, finishes, end rounds and clocks, main card split; college hockey intervals and overtime
+finals; MLB inning, count and last play; NHL clocks and strength; MLS minutes, stoppage time and
+half-time; TheSportsDB baseball innings with a missing score, `eventsday` live rows.
+
+Confirmed now: a live TheSportsDB MLB postseason row (in `eventsday` only, right start); finished
+UFC bouts before the method is posted; college hockey overtime finals and an interval reported as
+in progress.
+
+Still unconfirmed: the NFL two-minute warning on the scoreboard; NBA overtime in progress and an
+overtime summary; an NHL power play, empty net or shootout in progress on the scoreboard (the
+scoreboard carries only the penalty as its last play), and a shootout in the summary; a pitching
+change as the MLB scoreboard's last play; a quarter break with the clock reset in a live summary;
+TheSportsDB baseball half-innings or extra innings; tennis point score and the server in a
+tie-break; NASCAR stages; F1 gaps, pit stops and fastest lap; a UFC bout in progress (round and
+clock), and the finish method arriving later for a bout first posted without one; live cricket;
+AFL/NRL live clock (off season); golf after a cut or a playoff; football extra time and penalty
+shoot-outs on ESPN; a TheSportsDB penalty shoot-out after extra time and a refreshed shoot-out row
+(`P` or `PT` with a progress, or `PT` moving to `AP`); an NBA free throw on the scoreboard with the
+player's name.

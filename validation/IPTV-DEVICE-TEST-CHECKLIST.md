@@ -1,6 +1,6 @@
 # Nuvio IPTV — device test checklist (build `8724e01f3`, run 39068602774)
 
-For this build start with section 7x, then 7w, 7v, 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
+For this build start with section 7y, then 7x, 7w, 7v, 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
@@ -83,6 +83,11 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 11. Press Home on the remote with Game Centre open: logcat should show sports requests
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
+
+## 7y. 18 October 10:28 capture: red zone without a down (build pending)
+1. During a college football or NFL timeout or kick-off near a goal line, the score bug
+   shows no "Red zone" when there is no down; with a down inside the 20 ("2nd & 5 · SF 8")
+   it still shows "Red zone".
 
 ## 7x. 18 October 07:10 capture: hockey penalty text (build pending)
 1. When an NHL penalty for closing a hand on the puck is the latest play, the Sport card,
