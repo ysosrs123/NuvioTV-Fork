@@ -65,6 +65,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 26 (18 October 12:33 to 12:43, the UFC main event sampled every 45 s) in the
     commit after `c90d05e` (7aa): a live UFC bout shows the time left in the round on the
     score bug ("Round 1 of 5 · 3:03").
+  - Capture 27 (18 October 13:17, the last UFC extra run) in the commit after `29a199b`:
+    tests only (a college double-overtime final, the finished UFC card).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -76,7 +78,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1047 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1049 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
@@ -149,7 +151,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
    event: `STATUS_IN_PROGRESS_2` with `R1, 3:03` counting down, `R1, -` at the bell,
    `STATUS_END_OF_ROUND` (`End R1`) in the break, a stoppage shown as `End R2` for two
    minutes, then `Final` with the time left (`2:28`) corrected a minute later to the time
-   elapsed (`2:32`). A live bout now shows its clock on the score bug.
+   elapsed (`2:32`). A live bout now shows its clock on the score bug. The twenty-seventh
+   pass (18 October 13:17) showed a college double-overtime final (`Final/2OT`, read
+   correctly) and the finished card; three UFC finishes never got a method within four hours.
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
    the full list): the NFL two-minute warning on the scoreboard; NBA overtime in progress; an NHL power
    play, empty net or shootout on the scoreboard, and a shootout in the summary; a pitching

@@ -1723,3 +1723,25 @@ the stoppage reported as the end of the round before the result, and the correct
 
 Still unconfirmed: as in the twenty-fourth pass, without the UFC bout in progress; whether a UFC
 finish posted without a method ever gets one is still open.
+
+## Twenty-seventh pass (18 October, 13:17)
+
+One ESPN pass with one TheSportsDB run at 13:17 Brisbane time (03:17Z), the last extra run for the
+UFC card. 110 files; the CFL summary answered 502 again. Every scoreboard and summary parses without
+errors. Trimmed copies are in `app/src/test/resources/sports/*-real-20261018l.json` and `…m.json`
+(`SportsRealDataDoubleOvertimeTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| College football double overtime (final) | Miami 43–35 Florida State: `STATUS_FINAL`, `period` 6, `shortDetail` `Final/2OT`, `altDetail` `2OT`; six line-score columns (`7 7 0 14 7 8` against `0 14 7 7 7 0`). | none: `Final/2OT`, columns `OT` and `2OT` |
+| UFC card (final) | The event's own status is `STATUS_FINAL` this time (on 11 October it went back to scheduled). All 13 bouts final; the main event `2`, `2:32`, `Unofficial Winner Kotko`. The three finishes posted without a method (Anheliger–Koslow, Landwehr–Nallo, Jourdain–Cuamba) still have none, two and a half to four hours after the bouts. | none: `Final`; those three show the winner, round and time only |
+| College football quarter break | Colorado–Utah `15:00 - 1st` with `End of 1st quarter.` as the last play. | none: `End of 1st` (twenty-second pass) |
+| MLB, NHL, MLS | ALCS Game 4 `Bot 9th`, 3–7; NHL overtime and shoot-out finals; MLS in both halves. | none |
+
+TheSportsDB: the MLB `eventsday` row was still `IN7`, 1–2, 50 minutes after the 12:28 run (ESPN
+`Bot 9th`, 3–7), so its refreshes are rare as well as late.
+
+Confirmed now: a college football double-overtime final; a finished UFC card whose event status is
+final; UFC finishes that stay without a method for hours.
+
+Still unconfirmed: as in the twenty-sixth pass.
