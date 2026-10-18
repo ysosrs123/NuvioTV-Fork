@@ -140,7 +140,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
    The twenty-fifth pass (18 October 11:27) showed college football half-times that still
    carry the last down (`3rd & 11 at HOU 28`; now left out at half-time), a third UFC finish
    without a method an hour on, and the TheSportsDB `eventsday` MLB row still `IN1` 0–0 in
-   the 5th inning (no refresh; ESPN is the better MLB source). No UFC round in progress in
+   the 5th inning (refreshed only later and behind: `IN7` 1–2 at 12:28 against ESPN's 2–5;
+   ESPN is the better MLB source). No UFC round in progress in
    either extra run.
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
    the full list): the NFL two-minute warning on the scoreboard; NBA overtime in progress; an NHL power

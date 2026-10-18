@@ -1675,9 +1675,10 @@ errors. Trimmed copies are in `app/src/test/resources/sports/*-real-20261018d.js
 | MLB, NHL, MLS | `Bot 5th`, 1–1, `Start Batter/Pitcher`; NHL clocks in all three periods, no penalty or empty net on the scoreboard; MLS `85'` to `89'`, `HT`, `45'+2'`. | none |
 
 TheSportsDB, one run: the MLB `eventsday` still had Game 4 at `IN1`, 0–0, an hour after the first
-pitch (ESPN `Bot 5th`, 1–1); the row was not refreshed between the two runs. The day schedule has no
-`updated` time, so the app shows `Inning 1`, 0–0 until the row moves or the game length runs out;
-ESPN is the better source for MLB. The baseball livescore again listed only Game 5.
+pitch (ESPN `Bot 5th`, 1–1); the row was not refreshed between the two runs. At 12:28 it had moved
+to `IN7`, 1–2, while ESPN was in the `Bot 7th` at 2–5: the row is refreshed, but late and with the
+score behind. The day schedule has no `updated` time, so the app shows what the row last said; ESPN
+is the better source for MLB. The baseball livescore again listed only Game 5.
 
 Parser changes: a football half-time drops the stale down line and possession.
 
@@ -1686,7 +1687,9 @@ finishes, end rounds and clocks; college hockey intervals and overtime; MLB inni
 clocks; MLS minutes and stoppage time; TheSportsDB `eventsday` live rows.
 
 Confirmed now: football half-time with the last down still in `situation`; UFC finishes still
-without a method an hour later; TheSportsDB `eventsday` MLB rows that do not refresh during play.
+without a method an hour later (a 12:28 capture: still none for those three, while the next two
+finishes and a decision had theirs straight away); TheSportsDB `eventsday` MLB rows that refresh
+late during play (12:28: `IN7` at 1–2 against ESPN's `Bot 7th` at 2–5).
 
 Still unconfirmed: unchanged from the twenty-fourth pass, apart from the UFC method now known to stay
 missing for at least an hour (whether it ever arrives is still open).
