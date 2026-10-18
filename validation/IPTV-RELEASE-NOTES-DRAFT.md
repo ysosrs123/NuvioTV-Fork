@@ -949,6 +949,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
 - UFC and PFL: a bout in progress shows the time left in the round on the score bug
   ("Round 1 of 5 · 3:03"); between rounds it shows the round alone (capture of 18 October,
   12:33).
+- Football: a game decided on penalties shows the winner and the shoot-out score with the
+  result ("FT-Pens · CHL 7–6") (capture of 18 October, 23:28).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

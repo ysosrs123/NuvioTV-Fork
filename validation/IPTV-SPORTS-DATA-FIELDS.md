@@ -1771,3 +1771,29 @@ ball-by-ball plays.
 
 Still unconfirmed: as in the twenty-sixth pass, without live cricket. The app offers only the Big
 Bash (TheSportsDB) for cricket; international series have no league entry (user decision).
+
+## Twenty-ninth pass (18 October, 23:28)
+
+The first scheduled run with the full capture (every league the app offers and every league ESPN
+lists): 543 files at 23:28 Brisbane time (13:28Z), 39 live summaries; the CFL summary answered 502.
+In play: the Premier League, La Liga, Serie A, Ligue 1, the Süper Lig, the WSL and the women's League
+Cup, 14 other football leagues, the Champions Cup and URC rugby, and seven cricket matches (the
+Pakistan–Sri Lanka ODI at 45/1 after 10.5 overs). Every scoreboard parses without errors. Trimmed
+copies are in `app/src/test/resources/sports/espn-*-scoreboard-real-20261018q.json`
+(`SportsRealDataShootoutTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Football final on penalties (scoreboard) | 23 `STATUS_FINAL_PEN` finals across ESPN's cup and play-off leagues: `shortDetail` `FT-Pens`, `period` 5, `displayClock` `120'`, `completed` true; each competitor has `shootoutScore` (EFL Trophy, Charlton 2–2 Tottenham U21, `7` and `6`) and `winner`. | The status reads `FT-Pens · CHL 7–6` (the winner's abbreviation and the shoot-out score) instead of `FT-Pens` alone, so the winner shows whichever side the score bug puts first |
+| Football final after extra time | 22 `STATUS_FINAL_AET` finals: `AET`, `period` 4, `120'`. A Copa del Rey tie ended 3–3 `AET` with `winner` true for the away side and no `shootoutScore` on either competitor, in the scoreboard or the summary. | none: `AET`, the score as given |
+| Other statuses | `STATUS_SUSPENDED` (Chilean cup, left out like postponed games), `STATUS_CANCELED` (football, LIV), `STATUS_TBD` (seven rugby fixtures). | none |
+| Live cricket | Seven matches in the score panel (an ODI, a Test, women's T20s and domestic one-dayers), several not yet started at the score level (no score text). | none |
+
+TheSportsDB: one football row in extra time (`ET`, `98`), as on 12 October.
+
+Parser changes: a football final decided on penalties names the winner and the shoot-out score.
+
+Confirmed now: ESPN football finals after extra time and on penalties, with the shoot-out score.
+
+Still unconfirmed: as in the twenty-sixth pass, with football extra time and penalties narrowed to a
+game in extra time or in a shoot-out live on ESPN, and the summary of a shoot-out.

@@ -79,7 +79,16 @@ object EspnScoreboard {
             else -> null
         }
         return SportsFixture(id, league.id, league.sport, title, homeTeam.takeIf { paired }, awayTeam.takeIf { paired }, start, status, score,
-            ended ?: (if (stale) type?.text("description") else null) ?: type?.text("shortDetail") ?: type?.text("detail"), broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra, events)
+            ended ?: (if (stale) type?.text("description") else null) ?: (type?.text("shortDetail") ?: type?.text("detail"))?.let { text ->
+                shootout(home, away, homeTeam, awayTeam)?.takeIf { status == FixtureStatus.FINAL }?.let { "$text · $it" } ?: text }, broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra, events)
+    }
+
+    private fun shootout(home: JSONObject?, away: JSONObject?, homeTeam: FixtureTeam?, awayTeam: FixtureTeam?): String? {
+        val homeGoals = home?.optIntOrNull("shootoutScore")?.takeIf { it in 0..99 } ?: return null
+        val awayGoals = away?.optIntOrNull("shootoutScore")?.takeIf { it in 0..99 } ?: return null
+        if (homeGoals == awayGoals) return null
+        val (winner, high, low) = if (homeGoals > awayGoals) Triple(homeTeam, homeGoals, awayGoals) else Triple(awayTeam, awayGoals, homeGoals)
+        return listOfNotNull(winner?.let { it.abbreviation ?: it.shortName ?: it.name }, "$high–$low").joinToString(" ")
     }
 
     private fun ended(detail: String?, situation: JSONObject?): String? {

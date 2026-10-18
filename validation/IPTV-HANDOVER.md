@@ -70,6 +70,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 28 (18 October 22:40 to 22:45, live cricket on request) in the commit after
     `f9279d6`: tests only (a live ODI chase, a Test and a women's T20I final read correctly);
     the capture script now finds live international cricket through ESPN's score panel.
+  - Capture 29 (18 October 23:28, first scheduled full capture) in the commit after `47fd503`
+    (7ab): a football final on penalties names the winner and the shoot-out score
+    ("FT-Pens · CHL 7–6").
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -81,7 +84,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1052 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1054 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
@@ -160,7 +163,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
    The twenty-eighth pass (18 October 22:40) showed the first live cricket: a Pakistan–Sri
    Lanka ODI chase and a South Africa–Australia Test, both read correctly; ESPN's cricket
    summary has no ball-by-ball plays. International cricket has no league in the app (only
-   the Big Bash through TheSportsDB); offering it is a user decision.
+   the Big Bash through TheSportsDB); offering it is a user decision. The twenty-ninth pass
+   (18 October 23:28, the first full capture of every ESPN league) showed 23 football finals
+   on penalties with `shootoutScore` (now shown with the winner) and 22 after extra time.
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
    the full list): the NFL two-minute warning on the scoreboard; NBA overtime in progress; an NHL power
    play, empty net or shootout on the scoreboard, and a shootout in the summary; a pitching
@@ -369,8 +374,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - The NFL two-minute warning on the scoreboard; a quarter break in a live summary; NASCAR
     stages (season to early November): Monday 04:27, 06:27, 11:27 (`Mon NFL`), Friday 11:27
     and Sunday college football (daily US evening, weekend mornings).
-  - Football extra time and penalty shoot-outs on ESPN, and a TheSportsDB shoot-out after
-    extra time (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
+  - A football game in extra time or in a shoot-out live on ESPN and its summary (finals
+    after both were seen on 18 October), and a TheSportsDB shoot-out after extra time (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
     Friday 05:27 and 06:57 (`Wed-Fri European cups`, `… late`).
   - Golf after a cut or in a playoff: Saturday and Sunday 03:27 and 07:27 (`weekend
     mornings`), Monday 04:27 and 06:27.
