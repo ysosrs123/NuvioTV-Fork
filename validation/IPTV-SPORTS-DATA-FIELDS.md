@@ -1745,3 +1745,29 @@ Confirmed now: a college football double-overtime final; a finished UFC card who
 final; UFC finishes that stay without a method for hours.
 
 Still unconfirmed: as in the twenty-sixth pass.
+
+## Twenty-eighth pass (18 October, 22:40 to 22:45)
+
+Live cricket, captured on request at 22:40 and 22:45 Brisbane time (12:40Z and 12:45Z). The fixed
+series in the capture script (`cricket/8676`, the Australia–England series) had nothing live, so the
+matches were found through ESPN's cricket score panel (`/cricket/scorepanel`, every series with a
+match today: Ranji Trophy, domestic T20s, an ODI tri-series, a Test and women's T20Is). The capture
+script now reads that panel and fetches the series scoreboard and summary of up to four
+international matches (ODI, Test, T20I, women's) that are live or finished. Trimmed copies are in
+`app/src/test/resources/sports/espn-cricket-*-real-20261018n.json` to `…p.json`
+(`SportsRealDataLiveCricketTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| ODI chase (scoreboard) | Pakistan v Sri Lanka (`cricket/1550706`, ODI no. 5037, day/night): status `state` `in` with no `name`, `detail` `Live`, `period` 2, `displayClock` `0'`; `summary` `Sri Lanka require 301 runs`. Scores `305` (all out, 49.5 overs) and `5/0 (1.4/50 ov, target 306)`, while the line score already had `1.5` overs. | none: `PAK 305 · SL 5/0`, `1.5 ov`, `Need 301 from 289`; the period text is `Live` (the `0'` clock is dropped) |
+| Test, first innings (scoreboard) | South Africa v Australia (`cricket/24203`): `SA 20/2 (12.2 ov)`, Australia with no score, `summary` `Australia won toss & fielded`, unchanged over five minutes (a break). | none: `SA 20/2`, `12.2 ov` |
+| Women's T20I final | Australia 165/8 (18.5 of 20 overs, target 163) beat New Zealand 162/2: `AUS Women won by 2 wkts (7b rem)`. | none |
+| Live cricket summary | No plays or commentary at all: `header` (innings in the line scores with `overs`, `target`, `isBatting`, partnerships and fall of wickets), `matchcards` (batting, bowling, partnerships), `notes` (hours of play), `rosters`. `situation` holds only `odds`. | none: innings only, no last plays or moments |
+
+TheSportsDB had no live cricket in its livescore.
+
+Confirmed now: live ODI and Test scoreboards and summaries on ESPN; the summary carries no
+ball-by-ball plays.
+
+Still unconfirmed: as in the twenty-sixth pass, without live cricket. The app offers only the Big
+Bash (TheSportsDB) for cricket; international series have no league entry (user decision).

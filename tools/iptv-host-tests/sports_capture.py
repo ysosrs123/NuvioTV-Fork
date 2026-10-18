@@ -65,6 +65,27 @@ def espn(fetch, folder):
         event = live or (events[0] if events else None)
         if event and event.get("id"):
             fetch.get(folder, f"{key}-summary{'-LIVE' if live else ''}", f"{ESPN}/{path}/summary?event={event['id']}")
+    cricket(fetch, folder)
+
+
+def cricket(fetch, folder):
+    panel = fetch.get(folder, "cricket-scorepanel", f"{ESPN}/cricket/scorepanel")
+    picked = []
+    for score in (panel or {}).get("scores") or []:
+        series = str(((score.get("leagues") or [{}])[0]).get("id") or "")
+        for event in score.get("events") or []:
+            competition = (event.get("competitions") or [{}])[0]
+            kind = ((competition.get("class") or {}).get("generalClassCard") or "")
+            state = ((competition.get("status") or event.get("status") or {}).get("type") or {}).get("state")
+            if re.fullmatch(r"[0-9]{1,10}", series) and re.fullmatch(r"[0-9]{1,10}", str(event.get("id") or "")) and state in ("in", "post") \
+                    and re.search(r"\b(ODI|Test|T20I|Women T20|Women ODI)\b", kind):
+                picked.append((series, str(event["id"]), state))
+    boards = set()
+    for series, event, state in sorted(picked, key=lambda p: p[2] != "in")[:4]:
+        if series not in boards:
+            boards.add(series)
+            fetch.get(folder, f"cricket-{series}-scoreboard", f"{ESPN}/cricket/{series}/scoreboard")
+        fetch.get(folder, f"cricket-{series}-summary-{event}{'-LIVE' if state == 'in' else ''}", f"{ESPN}/cricket/{series}/summary?event={event}")
 
 
 def coverage(fetch, folder, key):

@@ -67,6 +67,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
     score bug ("Round 1 of 5 · 3:03").
   - Capture 27 (18 October 13:17, the last UFC extra run) in the commit after `29a199b`:
     tests only (a college double-overtime final, the finished UFC card).
+  - Capture 28 (18 October 22:40 to 22:45, live cricket on request) in the commit after
+    `f9279d6`: tests only (a live ODI chase, a Test and a women's T20I final read correctly);
+    the capture script now finds live international cricket through ESPN's score panel.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -78,7 +81,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1049 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1052 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
@@ -154,13 +157,17 @@ under "Earlier session notes" and the dated sections is history kept for referen
    elapsed (`2:32`). A live bout now shows its clock on the score bug. The twenty-seventh
    pass (18 October 13:17) showed a college double-overtime final (`Final/2OT`, read
    correctly) and the finished card; three UFC finishes never got a method within four hours.
+   The twenty-eighth pass (18 October 22:40) showed the first live cricket: a Pakistan–Sri
+   Lanka ODI chase and a South Africa–Australia Test, both read correctly; ESPN's cricket
+   summary has no ball-by-ball plays. International cricket has no league in the app (only
+   the Big Bash through TheSportsDB); offering it is a user decision.
    Still not seen in real data (see the latest pass in `IPTV-SPORTS-DATA-FIELDS.md` for
    the full list): the NFL two-minute warning on the scoreboard; NBA overtime in progress; an NHL power
    play, empty net or shootout on the scoreboard, and a shootout in the summary; a pitching
    change as the MLB scoreboard's last play; TheSportsDB baseball half-innings, extra
    innings; a TheSportsDB
    penalty shoot-out after extra time; tennis point score and the
-   server during a match tie-break; NASCAR stages; live cricket;
+   server during a match tie-break; NASCAR stages;
    AFL/NRL clocks (off season); football own goals, penalties, second yellows and extra
    time. ESPN sends no gaps, pit stops or fastest lap during an F1 race. Coverage ideas from
    the 12 October league lists (not added; user decision): South American and Nordic
@@ -338,7 +345,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
   in the environment as `THESPORTSDB_KEY` (set by the user); it must still never be written to
   the repository, docs, fixtures, logs or chat, and every saved file is scrubbed.
 - The ESPN capture script (18 October) skips summaries for tennis, golf, racing and MMA and
-  also captures CFL, MLS, EFL Cup, Europa League, men's college hockey, LPGA and PFL.
+  also captures CFL, MLS, EFL Cup, Europa League, men's college hockey, LPGA and PFL, and up
+  to four live or finished international cricket matches found through ESPN's cricket score
+  panel.
 - Capture schedule given to the user (Brisbane, UTC+10; European games one hour later from
   25 October, US games one hour later from 1 November): best Monday 04:00–08:00 (NFL);
   Monday ~10:30–13:00 (NFL Sunday night, NHL); Sunday 05:00–13:00 (college football, NHL,
