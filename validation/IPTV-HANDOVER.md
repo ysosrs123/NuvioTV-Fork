@@ -366,10 +366,13 @@ under "Earlier session notes" and the dated sections is history kept for referen
   summary); none for tennis, golf, racing or MMA. TheSportsDB: livescore for every sport, the
   `eventsday` lists for the Premier League, AFL, MLB (today and the day before) and the Big
   Bash, and `lookuptv`. One run takes about six minutes and 40 MB.
-- Batches (user, 18 October): captures commit locally and push once a day at the first run
-  after 18:00 Brisbane, only when the batch changes what the app does (a fixtures, tests and
-  docs batch waits for one that does, at most three days); one checklist section, release
-  notes block and progress row per pushed batch. Builds are started from the main session.
+- Batches (user, 18 October; revised 19 October): every capture commits and pushes, so nothing
+  is left unpushed; only the build signal is batched. App changes go into one open checklist
+  section "(build pending — open batch)" with one release-notes block and one progress row,
+  extended by each capture; the first run after 18:00 Brisbane each day closes it as "(build
+  pending — ready to build)" when it holds an app change. Fixture, test and doc captures never
+  open a checklist section. Builds are started from the main session. First batch, ready to
+  build at `45d159f`: checklist 7x to 7ac (built last at `8724e01f3`, 7w).
 - Capture plan (18 October; each run removes what the data confirms or what cannot be seen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; US slots move an hour later from 1 November and European ones

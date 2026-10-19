@@ -1,6 +1,6 @@
 # Nuvio IPTV — device test checklist (build `8724e01f3`, run 39068602774)
 
-For this build start with section 7ac, then 7ab, 7aa, 7z, 7y, 7x, 7w, 7v, 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
+For the next build (7x to 7ac, ready to build) start with section 7ac, then 7ab, 7aa, 7z, 7y, 7x, 7w, 7v, 7u, 7t, 7s, 7r, 7q, 7p, 7o, 7n, 7m, 7l, 7k, 7j, 7i, 7h, 7g and 7f (not yet tried on a device). 7e and earlier passed on earlier builds; repeat them only as a regression check. After the 1.1.0-nt.5 merge, also repeat sections 1 and 2.
 
 Mark each item pass / fail / not tested. For failures, note what happened and keep a
 logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain addresses.
