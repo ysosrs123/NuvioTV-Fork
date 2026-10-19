@@ -150,7 +150,8 @@ class CalendarFollowedSourceReader @Inject constructor(
                 val type = calendarTitleType(item.type) ?: return@forEach
                 candidates += CalendarTitleCandidate(
                     CalendarIds.fromContentId(item.id), type, CalendarOrigin.LIBRARY,
-                    item.addedAt.toInstantOrNull(), item.name, item.id, item.poster
+                    item.addedAt.toInstantOrNull(), item.name, item.id, item.poster,
+                    releaseYear = calendarReleaseYear(item.releaseInfo)
                 )
             }
         }
@@ -381,6 +382,12 @@ private fun String.toInstantOrNull(): Instant? =
     runCatching { Instant.parse(this) }.getOrNull() ?: runCatching { OffsetDateTime.parse(this).toInstant() }.getOrNull()
 
 private val PLAIN_DATE = Regex("^\\d{4}-\\d{2}-\\d{2}")
+
+private val LEADING_YEAR = Regex("^(\\d{4})")
+
+/** The year an add-on's `releaseInfo` starts with ("2019", "2019-2023"); null when it has none. */
+fun calendarReleaseYear(releaseInfo: String?): Int? =
+    releaseInfo?.trim()?.let { LEADING_YEAR.find(it) }?.groupValues?.get(1)?.toIntOrNull()
 
 /** The date part of an add-on `released` value, as given; the time in it is not a real air time. */
 fun plainReleaseDate(value: String): String? = PLAIN_DATE.find(value.trim())?.value

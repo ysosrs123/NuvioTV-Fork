@@ -10,7 +10,8 @@ data class CalendarTitleCandidate(
     val lastActivity: Instant? = null,
     val name: String? = null,
     val contentId: String? = null,
-    val poster: String? = null
+    val poster: String? = null,
+    val releaseYear: Int? = null
 )
 
 data class CalendarFollowedTitle(
@@ -22,7 +23,8 @@ data class CalendarFollowedTitle(
     val name: String? = null,
     val contentId: String? = null,
     val poster: String? = null,
-    val bellOn: Boolean = false
+    val bellOn: Boolean = false,
+    val releaseYear: Int? = null
 )
 
 data class CalendarFollowRules(
@@ -111,7 +113,8 @@ fun followCalendarTitles(
             contentId = ids.imdb ?: named.firstNotNullOfOrNull { it.contentId?.takeIf(String::isNotBlank) }
                 ?: ids.tmdb?.let { "tmdb:$it" },
             poster = named.firstNotNullOfOrNull { it.poster?.takeIf(String::isNotBlank) },
-            bellOn = bell
+            bellOn = bell,
+            releaseYear = named.firstNotNullOfOrNull { it.releaseYear }
         )
     }
 
@@ -205,7 +208,8 @@ fun reconcileCalendarRecords(
             contentId = title.contentId ?: previous.contentId,
             poster = title.poster ?: previous.poster,
             origins = title.origins,
-            lastActivityMs = title.lastActivity?.toEpochMilli()
+            lastActivityMs = title.lastActivity?.toEpochMilli(),
+            releaseYear = title.releaseYear ?: previous.releaseYear
         ) ?: CalendarTitleRecord(
             key = title.key,
             type = title.type,
@@ -214,7 +218,8 @@ fun reconcileCalendarRecords(
             contentId = title.contentId,
             poster = title.poster,
             origins = title.origins,
-            lastActivityMs = title.lastActivity?.toEpochMilli()
+            lastActivityMs = title.lastActivity?.toEpochMilli(),
+            releaseYear = title.releaseYear
         )
     }
 }

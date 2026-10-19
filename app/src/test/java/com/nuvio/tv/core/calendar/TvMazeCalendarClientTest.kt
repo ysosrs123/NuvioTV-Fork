@@ -131,6 +131,27 @@ class TvMazeCalendarClientTest {
         assertEquals(CalendarShowStatus.UNKNOWN, tvMazeStatus("To Be Determined"))
     }
 
+    @Test fun theFullScheduleIsReadOnceAndOnlyWantedShowsAreKept() = runBlocking {
+        server.enqueue(json(
+            """
+            [{"id":1,"name":"A","season":38,"number":4,"airdate":"2026-10-26","airtime":"20:00","airstamp":"2026-10-27T00:00:00+00:00",
+              "_embedded":{"show":{"id":83,"name":"The Simpsons","status":"Running","network":{"name":"FOX"},
+                "externals":{"imdb":"tt0096697","thetvdb":71663}}}},
+             {"id":2,"name":"B","season":1,"number":1,"airdate":"2026-10-26","airtime":"20:00","airstamp":"2026-10-27T00:00:00+00:00",
+              "_embedded":{"show":{"id":9,"name":"Other","status":"Running","externals":{"imdb":"tt1"}}}}]
+            """.trimIndent()
+        ))
+        val schedule = client.schedule(setOf("imdb:tt0096697"))
+        assertEquals("/schedule/full", server.takeRequest().path)
+        assertEquals(listOf(83), schedule.shows.map { it.id })
+        assertEquals(listOf("S38E4"), schedule.shows.single().entries.map { it.slot })
+    }
+
+    @Test fun aScheduleThatCannotBeReadThrows() {
+        server.enqueue(json("oops", 500))
+        assertThrows(CalendarFetchException::class.java) { runBlocking { client.schedule(setOf("imdb:tt0096697")) } }
+    }
+
     private companion object {
         val SHOW_SOON = """
             {"id":83,"url":"https://www.tvmaze.com/shows/83/the-simpsons","name":"The Simpsons","type":"Animation",

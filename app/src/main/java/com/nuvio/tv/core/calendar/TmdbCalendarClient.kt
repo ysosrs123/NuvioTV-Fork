@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.calendar
 
+import android.os.SystemClock
 import com.nuvio.tv.core.tmdb.TmdbService
 import com.nuvio.tv.data.remote.api.TmdbApi
 import com.nuvio.tv.data.remote.api.TmdbEpisodeToAir
@@ -9,26 +10,34 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import retrofit2.Response
 
+/** Every call shares one [CalendarRateLimiter]: the key is the app's, so a first Calendar build must not flood it. */
 @Singleton
-class TmdbCalendarClient @Inject constructor(
+class TmdbCalendarClient internal constructor(
     private val tmdbApi: TmdbApi,
-    private val tmdbService: TmdbService
+    private val tmdbService: TmdbService,
+    private val limiter: CalendarRateLimiter
 ) {
+    @Inject
+    constructor(tmdbApi: TmdbApi, tmdbService: TmdbService) : this(
+        tmdbApi, tmdbService,
+        CalendarRateLimiter(limit = LIMIT, burst = BURST, windowMs = WINDOW_MS, nowMs = SystemClock::elapsedRealtime)
+    )
+
     private val apiKey: String get() = tmdbService.apiKey()
 
     suspend fun findTmdbId(imdb: String, type: CalendarTitleType): Long? {
-        val body = tmdbApi.findByExternalId(imdb, apiKey).foundOrNull() ?: return null
+        val body = call { tmdbApi.findByExternalId(imdb, apiKey) }.foundOrNull() ?: return null
         val results = if (type == CalendarTitleType.MOVIE) body.movieResults else body.tvResults
         return results?.firstOrNull()?.id?.toLong()
     }
 
     suspend fun film(tmdbId: Long, region: String): CalendarShowDates {
-        val results = tmdbApi.getMovieReleaseDates(tmdbId.toInt(), apiKey).foundOrNull()?.results.orEmpty()
+        val results = call { tmdbApi.getMovieReleaseDates(tmdbId.toInt(), apiKey) }.foundOrNull()?.results.orEmpty()
         return CalendarShowDates(entries = tmdbFilmReleaseEntries(results, region))
     }
 
     suspend fun show(tmdbId: Long): CalendarShowDates {
-        val details = tmdbApi.getTvDetails(tmdbId.toInt(), apiKey).foundOrNull() ?: return CalendarShowDates()
+        val details = call { tmdbApi.getTvDetails(tmdbId.toInt(), apiKey) }.foundOrNull() ?: return CalendarShowDates()
         return CalendarShowDates(
             status = tmdbShowStatus(details.status),
             entries = listOfNotNull(details.lastEpisodeToAir, details.nextEpisodeToAir).mapNotNull(::tmdbEpisodeEntry),
@@ -39,7 +48,7 @@ class TmdbCalendarClient @Inject constructor(
     }
 
     suspend fun season(tmdbId: Long, season: Int): List<CalendarEntry> {
-        val body = tmdbApi.getTvSeasonDetails(tmdbId.toInt(), season, apiKey).foundOrNull() ?: return emptyList()
+        val body = call { tmdbApi.getTvSeasonDetails(tmdbId.toInt(), season, apiKey) }.foundOrNull() ?: return emptyList()
         return body.episodes.orEmpty().mapNotNull { episode ->
             tmdbEpisodeEntry(
                 TmdbEpisodeToAir(
@@ -53,10 +62,29 @@ class TmdbCalendarClient @Inject constructor(
         }
     }
 
+    private suspend fun <T> call(block: suspend () -> Response<T>): Response<T> {
+        repeat(MAX_ATTEMPTS) {
+            limiter.acquire()
+            val response = block()
+            if (response.code() != 429) return response
+            limiter.pauseFor(parseRetryAfterMs(response.headers()["Retry-After"]) ?: DEFAULT_RETRY_MS)
+        }
+        throw CalendarFetchException("TMDB rate limit")
+    }
+
     private fun <T> Response<T>.foundOrNull(): T? = when {
         isSuccessful -> body()
         code() == 404 -> null
         else -> throw CalendarFetchException("TMDB ${code()}")
+    }
+
+    internal companion object {
+        /** At most 20 calls in any second and 15 a second sustained: well under TMDB's limit, with room for the rest of the app. */
+        const val LIMIT = 20
+        const val BURST = 5
+        const val WINDOW_MS = 1_000L
+        const val MAX_ATTEMPTS = 3
+        const val DEFAULT_RETRY_MS = 2_000L
     }
 }
 

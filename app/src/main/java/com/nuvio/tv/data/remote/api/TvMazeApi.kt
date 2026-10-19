@@ -3,10 +3,12 @@ package com.nuvio.tv.data.remote.api
 import com.nuvio.tv.data.remote.dto.TvMazeEpisodeDto
 import com.nuvio.tv.data.remote.dto.TvMazeSeasonDto
 import com.nuvio.tv.data.remote.dto.TvMazeShowDto
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Streaming
 
 interface TvMazeApi {
 
@@ -27,4 +29,9 @@ interface TvMazeApi {
 
     @GET("seasons/{id}/episodes")
     suspend fun getSeasonEpisodes(@Path("id") seasonId: Int): Response<List<TvMazeEpisodeDto>>
+
+    /** Every future episode TVmaze has a date for, each with its show embedded. A few MB, cached for a day. */
+    @Streaming
+    @GET("schedule/full")
+    suspend fun getFullSchedule(): Response<ResponseBody>
 }

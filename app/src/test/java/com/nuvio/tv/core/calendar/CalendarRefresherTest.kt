@@ -113,6 +113,12 @@ class CalendarRefresherTest {
         override suspend fun tmdbShow(tmdbId: Long) = CalendarShowDates()
         override suspend fun tmdbSeason(tmdbId: Long, season: Int) = emptyList<CalendarEntry>()
         override suspend fun tmdbFilm(tmdbId: Long, region: String) = CalendarShowDates()
+        var schedule: ((Set<String>) -> TvMazeSchedule)? = null
+        val scheduleCalls = AtomicInteger()
+        override suspend fun tvMazeSchedule(wanted: Set<String>): TvMazeSchedule {
+            scheduleCalls.incrementAndGet()
+            return schedule?.invoke(wanted) ?: throw java.io.IOException("schedule offline")
+        }
 
         suspend fun awaitStarted(id: Int) = withTimeout(5_000) { started.getOrPut(id) { CompletableDeferred() }.await() }
     }
@@ -486,5 +492,60 @@ class CalendarRefresherTest {
         refresher.requestRefresh(CalendarRefreshReason.CALENDAR_OPENED)
         until("the show to leave") { titles().keys == setOf(1) }
         assertEquals(listOf(1L), storage.load(1).titles.map { it.ids.tmdb })
+    }
+
+    @Test fun theFullScheduleGivesListedShowsTheirDatesWithoutCallsOfTheirOwn() = runBlocking {
+        val airs = now.plus(Duration.ofDays(70)).toEpochMilli()
+        remote.schedule = { wanted ->
+            assertTrue("imdb:tt1" in wanted && "imdb:tt2" in wanted)
+            TvMazeSchedule(
+                listOf(
+                    TvMazeScheduledShow(
+                        id = 501, ids = CalendarIds(imdb = "tt1"), status = CalendarShowStatus.RUNNING,
+                        entries = listOf(CalendarEntry(season = 2, episode = 1, airInstantMs = airs))
+                    )
+                )
+            )
+        }
+        inputs.followed[1] = shows(1, 2)
+        refresher.requestRefresh(CalendarRefreshReason.CALENDAR_OPENED)
+        awaitIdle()
+
+        val titles = titles()
+        assertEquals(501, titles.getValue(1).tvmazeId)
+        assertEquals(listOf(airs), titles.getValue(1).entries.map { it.airInstantMs })
+        assertTrue(titles.getValue(2).entries.isEmpty())
+        assertTrue(titles.values.all { it.scheduleCheckedAtMs == now.toEpochMilli() })
+        assertTrue(remote.calls.isEmpty())
+        assertEquals(1, remote.scheduleCalls.get())
+        assertEquals(now.toEpochMilli(), storage.load(1).scheduleFetchedAtMs)
+
+        refresher.requestRefresh(CalendarRefreshReason.CALENDAR_OPENED)
+        until("the second refresh") { inputs.reads.get() >= 2 && !refresher.state.value.refreshing }
+        assertEquals(1, remote.scheduleCalls.get())
+    }
+
+    @Test fun whenTheScheduleCannotBeReadShowsGoThroughThePerTitleRefresh() = runBlocking {
+        inputs.followed[1] = shows(1)
+        refresher.requestRefresh(CalendarRefreshReason.CALENDAR_OPENED)
+        awaitIdle()
+        assertEquals(1, remote.scheduleCalls.get())
+        assertEquals(listOf("show:1"), remote.calls.toList())
+        assertEquals(0L, titles().getValue(1).scheduleCheckedAtMs)
+    }
+
+    @Test fun aRefreshWithNoShowsYetDoesNotHoldTheScheduleBack() = runBlocking {
+        remote.schedule = { TvMazeSchedule(emptyList()) }
+        inputs.followed[1] = CalendarFollowedSnapshot()
+        refresher.requestRefresh(CalendarRefreshReason.HOME_SETTLED)
+        until("the empty refresh") { inputs.reads.get() >= 1 && !refresher.state.value.refreshing }
+        assertEquals(0, remote.scheduleCalls.get())
+        assertEquals(0L, storage.load(1).scheduleTriedAtMs)
+
+        inputs.followed[1] = shows(1)
+        refresher.requestRefresh(CalendarRefreshReason.CALENDAR_OPENED)
+        awaitIdle()
+        assertEquals(1, remote.scheduleCalls.get())
+        assertEquals(now.toEpochMilli(), titles().getValue(1).scheduleCheckedAtMs)
     }
 }

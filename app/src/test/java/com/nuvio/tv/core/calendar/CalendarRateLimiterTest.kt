@@ -59,6 +59,22 @@ class CalendarRateLimiterTest {
         assertTrue(testScheduler.currentTime >= 5_000L)
     }
 
+    @Test fun tmdbNeverGetsMoreThanTwentyCallsInAnySecond() = runTest {
+        val limiter = CalendarRateLimiter(
+            limit = TmdbCalendarClient.LIMIT,
+            burst = TmdbCalendarClient.BURST,
+            windowMs = TmdbCalendarClient.WINDOW_MS,
+            nowMs = { testScheduler.currentTime }
+        )
+        val times = mutableListOf<Long>()
+        repeat(300) {
+            limiter.acquire()
+            times += testScheduler.currentTime
+        }
+        times.forEach { start -> assertTrue(times.count { it >= start && it < start + 1_000L } <= 20) }
+        assertTrue("300 calls took ${times.last()} ms", times.last() in 19_000L..21_000L)
+    }
+
     @Test fun retryAfterHeader() {
         assertEquals(3_000L, parseRetryAfterMs("3"))
         assertEquals(1_000L, parseRetryAfterMs("0"))

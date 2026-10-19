@@ -197,7 +197,13 @@ data class CalendarTitleRecord(
     val posterCheckedAtMs: Long = 0L,
     val backdrop: String? = null,
     val logo: String? = null,
-    val backdropCheckedAtMs: Long = 0L
+    val backdropCheckedAtMs: Long = 0L,
+    /** When TVmaze's full schedule last covered this show; 0 while it never has. */
+    val scheduleCheckedAtMs: Long = 0L,
+    /** When TMDB was last asked for this show's finale marks. */
+    val finalesCheckedAtMs: Long = 0L,
+    /** The year a film came out, as the library has it. */
+    val releaseYear: Int? = null
 ) {
     val entries: List<CalendarEntry> by lazy { mergeCalendarEntries(sources.values.flatten(), sourceFetchedAtMs) }
 
@@ -215,6 +221,8 @@ data class CalendarSnapshot(
     val titles: List<CalendarTitleRecord> = emptyList(),
     val tvmazeIds: Map<String, CalendarTvMazeId> = emptyMap(),
     val traktCalendarFetchedAtMs: Long = 0L,
+    val scheduleFetchedAtMs: Long = 0L,
+    val scheduleTriedAtMs: Long = 0L,
     val seenReminders: Map<String, Long> = emptyMap(),
     val updatedAtMs: Long = 0L
 ) {

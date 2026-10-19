@@ -70,4 +70,28 @@ class CalendarRefreshPolicyTest {
         assertTrue(record(null).copy(nextRefreshAtMs = now.toEpochMilli()).isDue(now))
         assertFalse(record(null).copy(nextRefreshAtMs = now.toEpochMilli() + 1).isDue(now))
     }
+
+    @Test fun aShowTheScheduleCoversIsReadDailyWhileAReleaseIsNearAndMonthlyOtherwise() {
+        assertEquals(Duration.ofDays(1), wait(record(Duration.ofDays(20)).copy(scheduleCheckedAtMs = 1L)))
+        assertEquals(Duration.ofDays(30), wait(record(Duration.ofDays(90)).copy(scheduleCheckedAtMs = 1L)))
+        assertEquals(Duration.ofDays(30), wait(record(null).copy(scheduleCheckedAtMs = 1L)))
+    }
+
+    @Test fun filmsFromYearsAgoYearlyAndFilmsAlreadyOutEveryNinetyDays() {
+        val film = CalendarTitleRecord("movie:imdb:tt9", CalendarTitleType.MOVIE, CalendarIds(imdb = "tt9"))
+        assertEquals(Duration.ofDays(365), wait(film.copy(releaseYear = 2024)))
+        val out = film.copy(
+            releaseYear = 2026,
+            sources = mapOf(CalendarSource.TMDB to listOf(CalendarEntry(kind = CalendarEntryKind.MOVIE_DIGITAL, airDate = "2026-09-01")))
+        )
+        assertEquals(Duration.ofDays(90), wait(out))
+        assertEquals(Duration.ofDays(7), wait(film.copy(releaseYear = 2026)))
+    }
+
+    @Test fun theFilmYearComesFromTheLibraryReleaseInfo() {
+        assertEquals(2019, calendarReleaseYear("2019"))
+        assertEquals(2019, calendarReleaseYear(" 2019-2023"))
+        assertEquals(null, calendarReleaseYear("TBA"))
+        assertEquals(null, calendarReleaseYear(null))
+    }
 }

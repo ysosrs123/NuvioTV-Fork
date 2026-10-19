@@ -11,6 +11,8 @@ import java.time.LocalDate
 import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.Response
 
 class CalendarFetchException(message: String) : IOException(message)
@@ -58,11 +60,23 @@ class TvMazeCalendarClient internal constructor(
         return tvMazeShowDates(show, seasonEpisodes)
     }
 
+    /** The followed shows in TVmaze's full schedule: one call for every show, read as it streams in. */
+    suspend fun schedule(wanted: Set<String>): TvMazeSchedule {
+        val response = call { api.getFullSchedule() }
+        if (!response.isSuccessful) {
+            response.errorBody()?.close()
+            throw CalendarFetchException("TVmaze schedule ${response.code()}")
+        }
+        val body = response.body() ?: throw CalendarFetchException("TVmaze schedule empty")
+        return withContext(Dispatchers.IO) { body.use { parseTvMazeSchedule(it.source(), wanted) } }
+    }
+
     private suspend fun <T> call(permits: Int = 1, block: suspend () -> Response<T>): Response<T> {
         repeat(MAX_ATTEMPTS) {
             limiter.acquire(permits)
             val response = block()
             if (response.code() != 429) return response
+            response.errorBody()?.close()
             limiter.pauseFor(parseRetryAfterMs(response.headers()["Retry-After"]) ?: DEFAULT_RETRY_MS)
         }
         throw CalendarFetchException("TVmaze rate limit")
