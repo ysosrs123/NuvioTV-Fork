@@ -80,6 +80,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 32 (19 October 06:27, scheduled): nothing new (NFL overtime in progress, a live
     NASCAR race read as "Race · Lap 143"); NASCAR stages dropped from the plan, ESPN does not
     send them.
+  - Captures 33 and 34 (19 October 09:27 and 11:27, scheduled): nothing new.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -377,8 +378,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
     NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
     (World Series, to about 1 November); TheSportsDB baseball half-innings or extra innings
     and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
-  - The NFL two-minute warning on the scoreboard; a quarter break in a live summary: Monday 04:27, 06:27, 11:27 (`Mon NFL`), Friday 11:27
-    and Sunday college football (daily US evening, weekend mornings).
+  - The NFL two-minute warning on the scoreboard; a quarter break in a live summary: Monday
+    04:27 and 06:27 (`Mon NFL`; its 11:27 slot was dropped on 19 October as the daily 11:27
+    run covers it), Monday and Friday 11:27 and Sunday college football (daily US evening,
+    weekend mornings).
   - A football game in extra time or in a shoot-out live on ESPN and its summary (finals
     after both were seen on 18 October), and a TheSportsDB shoot-out after extra time (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
     Friday 05:27 and 06:57 (`Wed-Fri European cups`, `… late`).
