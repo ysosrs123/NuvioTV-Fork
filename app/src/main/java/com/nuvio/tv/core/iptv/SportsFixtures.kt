@@ -472,8 +472,9 @@ object SportsFixtureText {
         val primary = "${player(home)} ${line(FixtureSide.HOME)} / ${player(away)} ${line(FixtureSide.AWAY)}"
         if (fixture.status == FixtureStatus.FINAL) return SportsBugText(primary, fixture.detail ?: "Final", detail.round)
         val server = detail.server?.let { if (it == FixtureSide.HOME) home else away }?.let(::player)
-        val extra = server?.let { if (detail.servingForSet) "$it serving for the set" else "$it serving" }
-        return SportsBugText(primary, fixture.detail, extra)
+        val serving = server?.let { if (detail.servingForSet) "$it serving for the set" else "$it serving" }
+        val tiebreak = detail.sets.lastOrNull()?.takeIf { it.winner == null && it.homeTiebreak != null && it.awayTiebreak != null }?.let { "Tie-break ${it.homeTiebreak}–${it.awayTiebreak}" }
+        return SportsBugText(primary, fixture.detail, listOfNotNull(tiebreak, serving).joinToString(" · ").ifEmpty { null })
     }
 
     private fun player(team: FixtureTeam): String = team.abbreviation ?: team.name.substringAfterLast(' ').uppercase()

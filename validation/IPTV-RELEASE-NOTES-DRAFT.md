@@ -953,6 +953,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   result ("FT-Pens · CHL 7–6") (capture of 18 October, 23:28).
 - Cricket: a match held up by rain (or another stoppage ESPN reports) shows it, for example
   "Match delayed by rain", instead of "Live" (capture of 18 October, 23:38).
+- Tennis: during a tie-break the score bug shows its points, for example "Tie-break 2–2",
+  with the server after it when known (capture of 20 October, 21:28).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

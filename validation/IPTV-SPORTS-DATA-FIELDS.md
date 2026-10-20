@@ -1839,3 +1839,18 @@ notes or stage field; racing has no summary), read as `Race · Lap 143` with the
 Serie A, Ligue 1 and the Brasileirão live. Nothing new for the parser; no files added.
 
 Still unconfirmed: as in the twenty-ninth pass, without NASCAR stages (ESPN does not send them).
+
+## Thirty-third pass (20 October, 21:28)
+
+Scheduled full capture at 21:28 Brisbane time (11:28Z): 512 files. Eight ATP and WTA matches in
+play at the indoor events (Lyon among them). Trimmed copy in
+`app/src/test/resources/sports/espn-atp-scoreboard-real-20261020.json` (`SportsRealDataTiebreakTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Tennis tie-break in progress (scoreboard) | Nys/Roger-Vasselin v Reynolds/Watt, `2nd Set`: the second set's line scores `6` and `6` with `tiebreak` `2` on both, no `winner`; no `situation` or `possession` on this doubles. A singles (Schoenhaus v Griekspoor) carried finished tie-breaks (`7` with `tiebreak` `7`, `6` with `5`) and `possession` for the server. Across every capture ESPN has never sent the point score of an ordinary game. | The score bug's third line shows a running tie-break (`Tie-break 2–2`, the home side first as in the rows), followed by the server when ESPN gives one (`Tie-break 5–4 · BAEZ serving`) |
+
+Confirmed now: a tennis tie-break in progress with its points. The point score of an ordinary game
+is not in ESPN's data (dropped).
+
+Still unconfirmed: as in the twenty-ninth pass, without tennis.

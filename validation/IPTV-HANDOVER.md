@@ -81,6 +81,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     NASCAR race read as "Race · Lap 143"); NASCAR stages dropped from the plan, ESPN does not
     send them.
   - Captures 33 and 34 (19 October 09:27 and 11:27, scheduled): nothing new.
+  - Capture 35 (20 October 21:28, scheduled), batch 7ad ready to build: a tennis tie-break in
+    progress shows its points on the score bug ("Tie-break 2–2").
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -92,7 +94,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1058 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1060 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
@@ -372,7 +374,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   extended by each capture; the first run after 18:00 Brisbane each day closes it as "(build
   pending — ready to build)" when it holds an app change. Fixture, test and doc captures never
   open a checklist section. Builds are started from the main session. First batch, ready to
-  build at `45d159f`: checklist 7x to 7ac (built last at `8724e01f3`, 7w).
+  build at `45d159f`: checklist 7x to 7ac (built last at `8724e01f3`, 7w). Second batch, ready to
+  build on 20 October: 7ad.
 - Capture plan (18 October; each run removes what the data confirms or what cannot be seen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; US slots move an hour later from 1 November and European ones
@@ -390,8 +393,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     Friday 05:27 and 06:57 (`Wed-Fri European cups`, `… late`).
   - Golf after a cut or in a playoff: Saturday and Sunday 03:27 and 07:27 (`weekend
     mornings`), Monday 04:27 and 06:27.
-  - Tennis point score and the server in a tie-break (European indoor events): daily 21:27
-    and 23:27 (`nightly Europe`).
+  - Done: tennis tie-break points (20 October 21:28; shown on the score bug); the point score
+    of an ordinary game is not in ESPN's data. `nightly Europe` disabled on 20 October.
   - Done: college volleyball and field hockey (19 October 04:28; the generic parser reads
     them).
   - Dropped: NASCAR stages (19 October 06:27: the live race at Phoenix, lap 143, carries the
