@@ -1854,3 +1854,24 @@ Confirmed now: a tennis tie-break in progress with its points. The point score o
 is not in ESPN's data (dropped).
 
 Still unconfirmed: as in the twenty-ninth pass, without tennis.
+
+## Thirty-fourth pass (21 October, 05:28)
+
+Scheduled full capture on Wednesday 21 October at 05:28 Brisbane time (19:28Z on the 20th): 521
+files. In play: seven Champions League games, 23 League One and League Two games, the first NBA game
+of the season (`1:57 - 1st`), and at stumps the South Africa–Australia Test, three Sheffield Shield
+games and six Ranji Trophy games. Trimmed copies are in
+`app/src/test/resources/sports/espn-cricket-scoreboard-real-20261021.json` and `…b.json`
+(`SportsRealDataFirstClassTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Declared innings | `score` `425/9d`; the innings' line score has `description` `declared` (the other side's empty line for that innings says the same) and no `declared` field. | A declared innings is marked (`CricketInnings.declared`, also in the cache) and the score bug reads `SA 425/9d` |
+| Second innings in a first-class game | `score` `241 & 39/4`; three line scores (Tasmania's two innings, Victoria's one). | The score bug shows each side's innings joined with `&` (`TAS 241 & 39/4 · VIC 207`) instead of only the latest |
+| End of a day's play | `description` `Stumps` while `detail` stays `Live`. | none: read as the stoppage, as for the rain delay (`Stumps` in the third line) |
+
+Champions League and EFL games were all in normal time; no extra time or shoot-out.
+
+Confirmed now: declarations, two-innings matches and stumps on ESPN.
+
+Still unconfirmed: as in the thirty-third pass.

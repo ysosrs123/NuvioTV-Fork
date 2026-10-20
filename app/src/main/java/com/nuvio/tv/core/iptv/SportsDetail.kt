@@ -17,7 +17,7 @@ data class FightBout(val weightClass: String?, val rounds: Int?, val first: Figh
     val state: FixtureStatus = FixtureStatus.SCHEDULED, val round: Int? = null, val mainCard: Boolean = false, val method: FightMethod? = null,
     val endRound: Int? = null, val endClock: String? = null, val clock: String? = null)
 data class CricketInnings(val team: String, val runs: Int, val wickets: Int, val overs: String? = null, val maxOvers: Int? = null, val target: Int? = null,
-    val batting: Boolean = false)
+    val batting: Boolean = false, val declared: Boolean = false)
 data class CricketChase(val runs: Int, val balls: Int, val rate: Double)
 
 sealed class SportsDetail {
@@ -117,7 +117,7 @@ object SportsDetails {
                 put("type", "cricket"); detail.result?.let { put("result", it) }; detail.stoppage?.let { put("stoppage", it) }
                 put("innings", JSONArray().apply { detail.innings.forEach { innings -> put(JSONObject().apply {
                     put("team", innings.team); put("runs", innings.runs); put("wickets", innings.wickets); innings.overs?.let { put("overs", it) }
-                    innings.maxOvers?.let { put("maxOvers", it) }; innings.target?.let { put("target", it) }; put("batting", innings.batting)
+                    innings.maxOvers?.let { put("maxOvers", it) }; innings.target?.let { put("target", it) }; put("batting", innings.batting); if (innings.declared) put("declared", true)
                 }) } })
             }
             is SportsDetail.Baseball -> {
@@ -153,7 +153,7 @@ object SportsDetails {
             })
             "cricket" -> SportsDetail.Cricket(json.objects("innings").mapNotNull { innings ->
                 CricketInnings(innings.text("team") ?: return@mapNotNull null, innings.int("runs") ?: 0, innings.int("wickets") ?: 0, innings.text("overs"),
-                    innings.int("maxOvers"), innings.int("target"), innings.optBoolean("batting"))
+                    innings.int("maxOvers"), innings.int("target"), innings.optBoolean("batting"), innings.optBoolean("declared"))
             }, json.text("result"), json.text("stoppage"))
             "baseball" -> SportsDetail.Baseball(json.int("inning"), InningHalf.entries.firstOrNull { it.name == json.text("half") }, json.int("outs"),
                 json.int("balls"), json.int("strikes"), json.optBoolean("first"), json.optBoolean("second"), json.optBoolean("third"))

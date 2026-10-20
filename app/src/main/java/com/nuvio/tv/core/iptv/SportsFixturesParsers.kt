@@ -443,7 +443,8 @@ object EspnScoreboard {
                 val latest = (line.optIntOrNull("period") ?: 0) == last
                 (line.optIntOrNull("period") ?: 0) to CricketInnings(name, line.optIntOrNull("runs") ?: 0, (line.optIntOrNull("wickets") ?: 0).coerceIn(0, 10),
                     (line.text("overs") ?: summary?.groupValues?.get(1)?.takeIf { latest })?.takeIf { SportsDetails.balls(it) != null }, max,
-                    summary?.groupValues?.get(3)?.toIntOrNull()?.takeIf { latest }, line.optBoolean("isBatting") && line.optIntOrNull("isCurrent") != 0)
+                    summary?.groupValues?.get(3)?.toIntOrNull()?.takeIf { latest }, line.optBoolean("isBatting") && line.optIntOrNull("isCurrent") != 0,
+                    line.text("description").equals("declared", true) && ((line.optIntOrNull("runs") ?: 0) > 0 || (line.optIntOrNull("wickets") ?: 0) > 0))
             }
         }.sortedBy { it.first }.map { it.second }
         return if (innings.isEmpty()) null else SportsDetail.Cricket(innings.take(4), result)

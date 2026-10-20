@@ -84,6 +84,11 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
    stop (`sports fetch` lines cease).
 12. Useful logs: `sports fetch service=`, `sports links`, `sports fixtures`.
 
+## 7ae. 21 October captures (build pending — open batch)
+1. In a Test or other multi-day match, a declared innings shows "d" ("SA 425/9d") and a side
+   batting a second time shows both innings ("TAS 241 & 39/4 · VIC 207"); one-day and T20
+   matches look as before. At the end of a day's play the third line reads "Stumps".
+
 ## 7ad. 20 October captures (build pending — ready to build)
 1. During a tennis tie-break the score bug's third line reads "Tie-break 2–2" (the first
    number for the player or pair on the top row) and adds "· <name> serving" when the server

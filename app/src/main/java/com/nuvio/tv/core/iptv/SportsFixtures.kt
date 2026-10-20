@@ -524,7 +524,8 @@ object SportsFixtureText {
 
     private fun cricket(fixture: SportsFixture, detail: SportsDetail.Cricket): SportsBugText? {
         if (detail.innings.isEmpty()) return null
-        val latest = detail.innings.groupBy { it.team }.map { (team, list) -> list.last().let { "$team ${it.runs}" + if (it.wickets < 10) "/${it.wickets}" else "" } }
+        val latest = detail.innings.groupBy { it.team }.map { (team, list) ->
+            "$team " + list.joinToString(" & ") { it.runs.toString() + (if (it.wickets < 10) "/${it.wickets}" else "") + if (it.declared) "d" else "" } }
         val batting = detail.innings.lastOrNull { it.batting } ?: detail.innings.last()
         val state = when (fixture.status) {
             FixtureStatus.LIVE -> batting.overs?.let { "$it ov" } ?: fixture.detail
