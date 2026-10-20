@@ -1875,3 +1875,16 @@ Champions League and EFL games were all in normal time; no extra time or shoot-o
 Confirmed now: declarations, two-innings matches and stumps on ESPN.
 
 Still unconfirmed: as in the thirty-third pass.
+
+## Thirty-fifth pass (21 October, 06:58)
+
+Scheduled capture at 06:58 Brisbane time (20:58Z on the 20th): 515 files. The Champions League and
+EFL games had all finished in normal time (`STATUS_FULL_TIME`). Pistons 82–90 Celtics `11:46 - 4th`
+with the scoreboard's last play `Paul George misses free throw 1 of 1` (type `Free Throw - 1 of 1`),
+the first scoreboard free throw that names the player; read as it is. Trimmed copy in
+`app/src/test/resources/sports/espn-nba-scoreboard-real-20261021c.json`
+(`SportsRealDataNamedFreeThrowTest`).
+
+Confirmed now: an NBA scoreboard free throw with the player's name.
+
+Still unconfirmed: as in the thirty-third pass, without the NBA free throw.

@@ -85,6 +85,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     progress shows its points on the score bug ("Tie-break 2–2").
   - Capture 36 (21 October 05:28, scheduled), open batch 7ae: a declared innings reads
     "425/9d" and first-class sides show both innings ("TAS 241 & 39/4").
+  - Capture 37 (21 October 06:58, scheduled): tests only (an NBA scoreboard free throw with
+    the player's name); the European games had all finished in normal time.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -96,7 +98,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1062 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1063 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to
@@ -382,8 +384,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; US slots move an hour later from 1 November and European ones
   from 25 October (reminders do this).
-  - NBA overtime in progress and its summary; an NBA free throw with the player's name; an
-    NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
+  - NBA overtime in progress and its summary; an NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
     (World Series, to about 1 November); TheSportsDB baseball half-innings or extra innings
     and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
   - The NFL two-minute warning on the scoreboard; a quarter break in a live summary: Monday
@@ -397,7 +398,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     mornings`), Monday 04:27 and 06:27.
   - Done: tennis tie-break points (20 October 21:28; shown on the score bug); the point score
     of an ordinary game is not in ESPN's data. `nightly Europe` disabled on 20 October.
-  - Done: college volleyball and field hockey (19 October 04:28; the generic parser reads
+  - Done: an NBA scoreboard free throw with the player's name (21 October 06:58); college
+    volleyball and field hockey (19 October 04:28; the generic parser reads
     them).
   - Dropped: NASCAR stages (19 October 06:27: the live race at Phoenix, lap 143, carries the
     running order and lap only; no stage field, and racing has no summary); F1 gaps, pit stops
