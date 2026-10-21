@@ -957,6 +957,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   with the server after it when known (capture of 20 October, 21:28).
 - Cricket: a declared innings shows "d" (for example "425/9d"), and in a multi-day match the
   score bug shows both of a side's innings ("TAS 241 & 39/4") (capture of 21 October, 05:28).
+- Ice hockey: a penalty ESPN writes as "Minor against <player>" now reads "<player> Closing
+  Hand on the Puck", like the other penalties (capture of 21 October, 11:28).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

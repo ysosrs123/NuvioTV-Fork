@@ -685,8 +685,12 @@ object SportsDbEvents {
 
 internal fun sportsPlay(text: String): String = text.replaceFirst(FORMATION, "")
 
-internal fun sportsPenaltyPlay(text: String, kind: String?, infraction: String?): String =
-    if (kind != null && infraction != null && !infraction.equals(kind, true) && text.endsWith(" $kind")) text.removeSuffix(kind) + infraction else text
+internal fun sportsPenaltyPlay(text: String, kind: String?, infraction: String?): String = when {
+    kind == null || infraction == null || infraction.equals(kind, true) -> text
+    text.endsWith(" $kind") -> text.removeSuffix(kind) + infraction
+    text.startsWith("$kind against ") -> "${text.removePrefix("$kind against ")} $infraction"
+    else -> text
+}
 
 internal fun sportsCourtPlay(text: String, type: String?): String? = text.trim().let { if (VERSUS.matches(it)) type else it.replaceFirstChar(Char::uppercaseChar) }
 

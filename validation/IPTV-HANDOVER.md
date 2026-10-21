@@ -87,6 +87,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     "425/9d" and first-class sides show both innings ("TAS 241 & 39/4").
   - Capture 37 (21 October 06:58, scheduled): tests only (an NBA scoreboard free throw with
     the player's name); the European games had all finished in normal time.
+  - Capture 38 (21 October 11:28, scheduled), open batch 7ae: an NHL penalty written as
+    "Minor against <player>" names the player and the infraction.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -98,7 +100,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   `app-iptvPrototype-arm64-v8a-debug.apk`; the merge alone was green at `0d1d90ab3` (run
   38175520520). Minified release (R8) was last built at `c1685393a` (run 38058607115),
   before the merge; build it again before shipping.
-- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1063 now).
+- Host tests at that commit: core 1032, data 305, androidTest compiles (core 1064 now).
   Translations: all 40 locales, `check_translations.py` prints `problems 0`.
 - Device testing: the user's last checklist pass was on 10 October, evening (`e7e1d17b5`;
   7e and 7d passed apart from the findings fixed in 7f); on 11 October they recorded ~3 h to

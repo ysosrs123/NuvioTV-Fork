@@ -1888,3 +1888,18 @@ the first scoreboard free throw that names the player; read as it is. Trimmed co
 Confirmed now: an NBA scoreboard free throw with the player's name.
 
 Still unconfirmed: as in the thirty-third pass, without the NBA free throw.
+
+## Thirty-sixth pass (21 October, 11:28)
+
+Scheduled capture at 11:28 Brisbane time (01:28Z): 525 files. Eight NHL games, Knicks–76ers in the
+4th, Liga MX and college hockey. Trimmed copy in
+`app/src/test/resources/sports/espn-nhl-scoreboard-real-20261021d.json`
+(`SportsRealDataPenaltyAgainstTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NHL penalty written against the player | Blue Jackets–Maple Leafs `8:28 - 3rd`: `lastPlay` type `Penalty Shot Infraction`, `abbreviation` `Closing Hand on the Puck`, `penaltyType` `Minor`, text `Minor against Luca Del Bel Belluz`, `athletesInvolved` the same player (the one penalised, not a victim as in `X Hooking against Y`). The summaries carry the earlier form (`Chris Kreider Minor`). | The text is turned into `Luca Del Bel Belluz Closing Hand on the Puck`, as the `… Minor` form already was |
+
+Confirmed now: the second wording of the bare minor.
+
+Still unconfirmed: as in the thirty-fifth pass.
