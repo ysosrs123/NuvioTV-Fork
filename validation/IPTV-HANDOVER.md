@@ -387,8 +387,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   build on 20 October: 7ad.
 - Capture plan (18 October; each run removes what the data confirms or what cannot be seen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
-  deleted). Times are Brisbane; US slots move an hour later from 1 November and European ones
-  from 25 October (reminders do this).
+  deleted). Times are Brisbane; US slots move an hour later from 1 November (a reminder does this);
+  the European ones moved an hour later on 25 October.
   - NBA overtime in progress and its summary; an NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
     (World Series, to about 1 November); TheSportsDB baseball half-innings or extra innings
     and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
@@ -399,7 +399,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - A football game in extra time live on ESPN (a live shoot-out and its summary were seen on
     25 October), and a refreshed TheSportsDB shoot-out row (`P` with a progress, or moving to
     `AP`) (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
-    Friday 05:27 and 06:57 (`Wed-Fri European cups`, `… late`).
+    Friday 06:27 and 07:57 (`Wed-Fri European cups`, `… late`; an hour later from 25 October).
   - A golf playoff: Saturday and Sunday 03:27 and 07:27 (`weekend mornings`), Monday 04:27
     and 06:27.
   - Done: golf after the cut (25 October 03:27; the missed-cut players simply have no
