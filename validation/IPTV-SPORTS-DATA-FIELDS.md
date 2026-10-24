@@ -1903,3 +1903,29 @@ Scheduled capture at 11:28 Brisbane time (01:28Z): 525 files. Eight NHL games, K
 Confirmed now: the second wording of the bare minor.
 
 Still unconfirmed: as in the thirty-fifth pass.
+
+## Thirty-seventh pass (25 October, 03:27)
+
+Scheduled capture at 03:27 Brisbane time (17:27Z on the 24th): 550 files. In play: Chelsea–Spurs
+at half-time and some 60 other football games, six college football games late in the 2nd
+quarter, the PGA Tour's third round, an NHL game in the 1st and a Scottish Cup tie in a shoot-out.
+Trimmed copies are in `app/src/test/resources/sports/espn-sco-challenge-scoreboard-real-20261025.json`,
+`espn-sco-challenge-summary-real-20261025.json` (`SportsRealDataLiveShootoutTest`) and
+`espn-pga-scoreboard-real-20261025.json` (`SportsRealDataCutTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Football shoot-out in progress (scoreboard) | Brechin City 2–2 Strathspey Thistle: `STATUS_SHOOTOUT`, `shortDetail` `Pens`, `period` 5, `displayClock` `120'`, `completed` false; `shootoutScore` `6` and `5` on the competitors, `winner` false on both. The kicks are in `details` with `shootout` true and clocks `126'` to `128'`. | The status reads `Pens · 6–5` (home first, as the score) and the clock is dropped, so the score bug and the period line show the kicks instead of `120'` and `ET · 120'` |
+| Football shoot-out in progress (summary) | Header `detail` `AET-pens`, `period` 5, `120'`; the line scores carry the kicks as a fifth period (`1 1 0 0 6`); a root `shootout` array per team with each kick (`player`, `shotNumber`, `didScore`); `keyEvents` stop within extra time (the last at `114'`). | none: the kicks stay out of the moments and the line scores are not shown as a table for football |
+| Golf after the cut | 120 players: 73 with a third-round card, 47 stopping at round 2 (no cut field, no status per player); one player withdrew after 10 holes of round 2 (`-` for round 3). Round 3 `In Progress`, `period` 3. | none: positions count the whole field, so the missed-cut players rank below and never reach the top ten |
+| TheSportsDB extra time and penalties | The same Scottish Cup ties as `ET` `126` and `ET` `128` and as `P` with an empty progress, all re-stamped within minutes, an hour after ESPN had them final (`AET` and `FT-Pens`, Huntly 1–4 on penalties). | none: a fresh `updated` does not mean the row is live; such rows settle after three times the game's length, as before |
+
+Confirmed now: a football shoot-out in progress on ESPN (scoreboard and summary); golf after a cut.
+
+Still unconfirmed: the NFL two-minute warning on the scoreboard; NBA overtime in progress and an
+overtime summary; an NHL power play, empty net or shootout in progress on the scoreboard, and a
+shootout in the summary; a pitching change as the MLB scoreboard's last play; a quarter break with
+the clock reset in a live summary; TheSportsDB baseball half-innings or extra innings; the UFC finish
+method arriving later for a bout first posted without one; AFL/NRL live clock (off season); a golf
+playoff; a football game in extra time live on ESPN; a refreshed TheSportsDB shoot-out row (`P` or
+`PT` with a progress, or `PT` moving to `AP`).

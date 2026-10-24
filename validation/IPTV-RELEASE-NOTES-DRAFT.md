@@ -959,6 +959,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   score bug shows both of a side's innings ("TAS 241 & 39/4") (capture of 21 October, 05:28).
 - Ice hockey: a penalty ESPN writes as "Minor against <player>" now reads "<player> Closing
   Hand on the Puck", like the other penalties (capture of 21 October, 11:28).
+- Football: during a penalty shoot-out the score bug shows the kicks scored ("Pens · 6–5")
+  instead of the last minute of extra time (capture of 25 October, 03:27).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

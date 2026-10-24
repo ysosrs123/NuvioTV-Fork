@@ -89,6 +89,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
     the player's name); the European games had all finished in normal time.
   - Capture 38 (21 October 11:28, scheduled), open batch 7ae: an NHL penalty written as
     "Minor against <player>" names the player and the infraction.
+  - Capture 39 (25 October 03:27, scheduled), open batch 7ae: a football penalty shoot-out in
+    progress shows the kicks scored ("Pens · 6–5") instead of "120'"; golf after the cut
+    confirmed (tests only).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -393,11 +396,14 @@ under "Earlier session notes" and the dated sections is history kept for referen
     04:27 and 06:27 (`Mon NFL`; its 11:27 slot was dropped on 19 October as the daily 11:27
     run covers it), Monday and Friday 11:27 and Sunday college football (daily US evening,
     weekend mornings).
-  - A football game in extra time or in a shoot-out live on ESPN and its summary (finals
-    after both were seen on 18 October), and a TheSportsDB shoot-out after extra time (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
+  - A football game in extra time live on ESPN (a live shoot-out and its summary were seen on
+    25 October), and a refreshed TheSportsDB shoot-out row (`P` with a progress, or moving to
+    `AP`) (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
     Friday 05:27 and 06:57 (`Wed-Fri European cups`, `… late`).
-  - Golf after a cut or in a playoff: Saturday and Sunday 03:27 and 07:27 (`weekend
-    mornings`), Monday 04:27 and 06:27.
+  - A golf playoff: Saturday and Sunday 03:27 and 07:27 (`weekend mornings`), Monday 04:27
+    and 06:27.
+  - Done: golf after the cut (25 October 03:27; the missed-cut players simply have no
+    third-round card and rank below the field).
   - Done: tennis tie-break points (20 October 21:28; shown on the score bug); the point score
     of an ordinary game is not in ESPN's data. `nightly Europe` disabled on 20 October.
   - Done: an NBA scoreboard free throw with the player's name (21 October 06:58); college

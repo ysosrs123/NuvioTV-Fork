@@ -63,7 +63,8 @@ object EspnScoreboard {
         val shownClock = statusJson?.text("displayClock")?.takeIf { status == FixtureStatus.LIVE && it.length <= 12 }
         val stale = shownClock != null && SportsLines.behind(shownClock, events.mapNotNull { it.clock })
         val ended = if (shownClock != null && !stale) ended(type?.text("shortDetail"), competition?.optJSONObject("situation")) else null
-        val clock = (if (ended != null) "0:00" else shownClock).takeIf { !stale }
+        val kicks = if (league.sport == "soccer" && status == FixtureStatus.LIVE && "SHOOTOUT" in name) kicks(home, away) else null
+        val clock = (if (ended != null) "0:00" else shownClock).takeIf { !stale && kicks == null }
         val homePeriods = periods(home, homeScore)
         val awayPeriods = periods(away, awayScore)
         val unfilled = listOf(home to homePeriods, away to awayPeriods).any { (competitor, lines) -> lines.isEmpty() && (competitor?.optJSONArray("linescores")?.length() ?: 0) > 0 } ||
@@ -80,16 +81,21 @@ object EspnScoreboard {
         }
         return SportsFixture(id, league.id, league.sport, title, homeTeam.takeIf { paired }, awayTeam.takeIf { paired }, start, status, score,
             ended ?: (if (stale) type?.text("description") else null) ?: interruption(league.sport, status, type) ?: (type?.text("shortDetail") ?: type?.text("detail"))?.let { text ->
-                shootout(home, away, homeTeam, awayTeam)?.takeIf { status == FixtureStatus.FINAL }?.let { "$text · $it" } ?: text }, broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra, events)
+                shootout(home, away, homeTeam, awayTeam)?.takeIf { status == FixtureStatus.FINAL }?.let { "$text · $it" } ?: kicks?.let { "$text · ${it.first}–${it.second}" } ?: text }, broadcasters, venue, round, period, clock, homeLine, awayLine, situation, leagueLogo, extra, events)
     }
 
     private fun interruption(sport: String, status: FixtureStatus, type: JSONObject?): String? =
         type?.text("description")?.takeIf { sport == "cricket" && status == FixtureStatus.LIVE && it.length <= MAX_TEXT && it.lowercase() !in RUNNING &&
             !it.equals(type.text("shortDetail"), true) }
 
-    private fun shootout(home: JSONObject?, away: JSONObject?, homeTeam: FixtureTeam?, awayTeam: FixtureTeam?): String? {
+    private fun kicks(home: JSONObject?, away: JSONObject?): Pair<Int, Int>? {
         val homeGoals = home?.optIntOrNull("shootoutScore")?.takeIf { it in 0..99 } ?: return null
         val awayGoals = away?.optIntOrNull("shootoutScore")?.takeIf { it in 0..99 } ?: return null
+        return homeGoals to awayGoals
+    }
+
+    private fun shootout(home: JSONObject?, away: JSONObject?, homeTeam: FixtureTeam?, awayTeam: FixtureTeam?): String? {
+        val (homeGoals, awayGoals) = kicks(home, away) ?: return null
         if (homeGoals == awayGoals) return null
         val (winner, high, low) = if (homeGoals > awayGoals) Triple(homeTeam, homeGoals, awayGoals) else Triple(awayTeam, awayGoals, homeGoals)
         return listOfNotNull(winner?.let { it.abbreviation ?: it.shortName ?: it.name }, "$high–$low").joinToString(" ")
