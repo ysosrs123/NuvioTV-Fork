@@ -92,6 +92,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 39 (25 October 03:27, scheduled), open batch 7ae: a football penalty shoot-out in
     progress shows the kicks scored ("Pens · 6–5") instead of "120'"; golf after the cut
     confirmed (tests only).
+  - Captures 40 and 41 (25 October 07:28 and 09:28, scheduled): nothing new.
+  - Capture 42 (25 October 11:28, scheduled): tests only (an MLB pitching change in the
+    summary, a weather-delayed MLS clock left out, NBA quarter break and restart in the
+    summary); `weekend mornings` disabled.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -392,16 +396,19 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - NBA overtime in progress and its summary; an NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
     (World Series, to about 1 November); TheSportsDB baseball half-innings or extra innings
     and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
-  - The NFL two-minute warning on the scoreboard; a quarter break in a live summary: Monday
-    04:27 and 06:27 (`Mon NFL`; its 11:27 slot was dropped on 19 October as the daily 11:27
-    run covers it), Monday and Friday 11:27 and Sunday college football (daily US evening,
-    weekend mornings).
+  - The NFL two-minute warning on the scoreboard: Monday 04:27 and 06:27 (`Mon NFL`; its
+    11:27 slot was dropped on 19 October as the daily 11:27 run covers it), Monday and Friday
+    11:27 (daily US evening).
   - A football game in extra time live on ESPN (a live shoot-out and its summary were seen on
     25 October), and a refreshed TheSportsDB shoot-out row (`P` with a progress, or moving to
     `AP`) (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
     Friday 06:27 and 07:57 (`Wed-Fri European cups`, `… late`; an hour later from 25 October).
-  - A golf playoff: Saturday and Sunday 03:27 and 07:27 (`weekend mornings`), Monday 04:27
-    and 06:27.
+  - A golf playoff (only at the end of a final round): Monday 04:27 and 06:27 (`Mon NFL`) for
+    US events, the daily slots for Asian ones.
+  - Done: a quarter break and the clock reset in a live summary (25 October 11:28; NBA `End of
+    3rd` at `0.0` and `12:00 - 3rd`, college football `End of 2nd`); a pitching change in the
+    MLB summary (`Romero relieved Henderson`, `summaryType` `C`; the scoreboard's last play
+    is still wanted). `weekend mornings` disabled on 25 October (nothing left needs it).
   - Done: golf after the cut (25 October 03:27; the missed-cut players simply have no
     third-round card and rank below the field).
   - Done: tennis tie-break points (20 October 21:28; shown on the score bug); the point score

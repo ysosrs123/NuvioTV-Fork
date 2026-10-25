@@ -1929,3 +1929,25 @@ the clock reset in a live summary; TheSportsDB baseball half-innings or extra in
 method arriving later for a bout first posted without one; AFL/NRL live clock (off season); a golf
 playoff; a football game in extra time live on ESPN; a refreshed TheSportsDB shoot-out row (`P` or
 `PT` with a progress, or `PT` moving to `AP`).
+
+## Thirty-eighth pass (25 October, 11:28)
+
+Scheduled capture at 11:28 Brisbane time (01:28Z): 574 files. In play: the World Series
+(Rays at Brewers, `Top 4th`), six NBA games, four college football games, seven NHL games in the
+3rd and seven MLS games. The 07:28 and 09:28 captures held nothing new (UFC 333 had finished
+with every method posted; UCF–BYU in double overtime). Trimmed copies are in
+`app/src/test/resources/sports/espn-mlb-summary-real-20261025.json`,
+`espn-mls-scoreboard-real-20261025.json`, `espn-mls-summary-real-20261025.json`,
+`espn-nba-summary-real-20261025.json` and `…b.json` (`SportsRealDataBreaksTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| MLB pitching change (summary) | A play `Romero relieved Henderson`, type `Play Result` (id `57`), `summaryType` `C`, one `pitcher` participant, placed after `Top of the 4th inning` with an earlier `wallclock`. The `Start Batter/Pitcher` rows then name the reliever. By the capture two batters had followed, so the scoreboard's `lastPlay` was a pitch. | none: the change is kept as a last play and reads as written while it is the latest |
+| Football clock after a weather delay | Four MLS games kicked off at 23:30Z with `End Delay` at `38'`: `STATUS_SECOND_HALF`, `period` 2, `displayClock` `24'` to `28'` (`shortDetail` the same) almost 45 minutes into the second half, with a goal at `51'` in the details and the summary. | none: the clock is behind the goals, so it is left out and the status reads `Second Half` on the scoreboard and in the summary |
+| NBA quarter break and restart (summary) | `STATUS_END_PERIOD` `End of 3rd`, `displayClock` `0.0`, last play `End of the 3rd Quarter`; after half-time `STATUS_IN_PROGRESS` `12:00 - 3rd` with a `0` third-quarter line score for both sides. College football's `End of 2nd` stays `STATUS_IN_PROGRESS` with `0:00`. | none: `End of 3rd`, `Q3 · 12:00` |
+
+Confirmed now: a quarter break and the restarted clock in a live summary; a pitching change in the
+MLB summary.
+
+Still unconfirmed: as in the thirty-seventh pass, without the quarter break, and with the pitching
+change narrowed to the MLB scoreboard's last play.
