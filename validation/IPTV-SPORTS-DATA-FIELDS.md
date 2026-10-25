@@ -1967,3 +1967,20 @@ players) in `app/src/test/resources/sports/espn-lpga-scoreboard-real-20261025.js
 Confirmed now: nothing from the plan.
 
 Still unconfirmed: as in the thirty-eighth pass.
+
+## Fortieth pass (26 October, 09:27)
+
+Scheduled capture at 09:27 Brisbane time (23:27Z on the 25th): 555 files. The 04:28 and 06:28
+Monday captures held nothing new: the early NFL games were inside the last two minutes of the 2nd
+quarter at 04:28 and finished by 06:28 (Texans–Giants `Final/OT`). Now in play: Packers–Lions 17–17
+with 1:09 left, Rams–Raiders in the 4th, Lakers 118–117 Jazz with 3:15 left, four more NBA games
+and two NHL games. Trimmed copy (the first 12 players) in
+`app/src/test/resources/sports/espn-pga-scoreboard-real-20261026.json` (`SportsRealDataCutTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Golf round suspended | Bermuda, third round: the event `status` stays `STATUS_IN_PROGRESS` (`in`); the competition `status` is `STATUS_SUSPENDED` (id `8`, state `post`, `completed` false), `detail` `Round 3 - Suspended`, `period` 3. The leaders had finished the round (18 holes); no fourth-round line yet. | none: only the event status decides whether a golf event is left out, so it stays live and reads `Round 3 - Suspended` |
+
+Confirmed now: nothing from the plan.
+
+Still unconfirmed: as in the thirty-eighth pass.

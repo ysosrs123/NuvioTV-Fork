@@ -21,6 +21,15 @@ class SportsRealDataCutTest {
         assertEquals(entry, SportsFixtureCodec.decode(SportsFixtureCodec.encode(entry)))
     }
 
+    @Test fun suspendedRoundKeepsTheEventLive() {
+        val event = EspnScoreboard.parse(javaClass.getResourceAsStream("/sports/espn-pga-scoreboard-real-20261026.json")!!.bufferedReader().use { it.readText() },
+            SportsLeagues.byId("pga")!!, Instant.parse("2026-10-25T23:30:00Z").toEpochMilli()).single()
+        assertEquals(listOf<Any?>(FixtureStatus.LIVE, "Round 3 - Suspended", 3), listOf(event.status, event.detail, event.period))
+        val leaders = (event.sportDetail as SportsDetail.Golf).leaders
+        assertEquals(listOf("T1", "T1", "T3", "T3", "T3", "T6", "T6", "T6", "T6", "T6"), leaders.map { it.position })
+        assertTrue(leaders.all { it.thru == "F" })
+    }
+
     @Test fun leaderboardOutOfOrderIsRankedByScore() {
         val event = EspnScoreboard.parse(javaClass.getResourceAsStream("/sports/espn-lpga-scoreboard-real-20261025.json")!!.bufferedReader().use { it.readText() },
             SportsLeagues.byId("lpga")!!, Instant.parse("2026-10-25T03:30:00Z").toEpochMilli()).single()

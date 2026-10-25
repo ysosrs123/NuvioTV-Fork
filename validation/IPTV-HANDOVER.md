@@ -98,6 +98,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
     summary); `weekend mornings` disabled.
   - Capture 43 (25 October 13:27, scheduled), open batch 7ae: a golf leaderboard ESPN sends
     out of order (LPGA final round) is ranked by score.
+  - Captures 44 and 45 (26 October 04:28 and 06:28, Mon NFL): nothing new; the two-minute
+    warning was missed both times (passed at 04:28, games over by 06:28).
+  - Capture 46 (26 October 09:27, scheduled): tests only (a golf round suspended for weather
+    keeps the event live with "Round 3 - Suspended").
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
