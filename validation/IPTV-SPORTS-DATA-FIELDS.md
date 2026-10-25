@@ -1951,3 +1951,19 @@ MLB summary.
 
 Still unconfirmed: as in the thirty-seventh pass, without the quarter break, and with the pitching
 change narrowed to the MLB scoreboard's last play.
+
+## Thirty-ninth pass (25 October, 13:27)
+
+Scheduled capture at 13:27 Brisbane time (03:27Z): 562 files. In play: the LPGA final round,
+Nuggets–Pelicans late in the 4th, Texas–Ole Miss with 1:02 left, Utah–Tampa Bay 4–4 in the 3rd and
+the World Series in the bottom of the 8th (its last play a pitch). Trimmed copy (the first 15
+players) in `app/src/test/resources/sports/espn-lpga-scoreboard-real-20261025.json`
+(`SportsRealDataCutTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Golf leaderboard out of order | LPGA, `Round 4 - In Progress`: `order` 1 is Yuri Yoshida at `-13`, `order` 2 the leader Haeran Ryu at `-17`, `order` 5 Hye-Jin Choi at `-13`; every round-four card is empty (no holes) although the rounds show `-5`, `E`, `-3`. Two hours earlier the same field was in order. | Leaders are sorted by score, with ESPN's order breaking ties; positions were already worked out from the scores, so the board read `T2, 1, T5…` |
+
+Confirmed now: nothing from the plan.
+
+Still unconfirmed: as in the thirty-eighth pass.

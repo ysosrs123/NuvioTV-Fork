@@ -96,6 +96,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 42 (25 October 11:28, scheduled): tests only (an MLB pitching change in the
     summary, a weather-delayed MLS clock left out, NBA quarter break and restart in the
     summary); `weekend mornings` disabled.
+  - Capture 43 (25 October 13:27, scheduled), open batch 7ae: a golf leaderboard ESPN sends
+    out of order (LPGA final round) is ranked by score.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:

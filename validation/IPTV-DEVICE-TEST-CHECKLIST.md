@@ -93,6 +93,9 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 3. A football game in a penalty shoot-out (cup ties, mostly weekends) shows "Pens · 6–5" (the
    kicks scored, in the order of the score) on the score bug and in the period line, not the
    last minute ("120'"); at full time it reads "FT-Pens · BRC 6–5" as before.
+4. A golf leaderboard (Sport hero and Game Centre) is always in score order with the positions
+   rising ("1, T2, T2, T2, T5…"), even when ESPN briefly lists the players out of order late in
+   a final round.
 
 ## 7ad. 20 October captures (build pending — ready to build)
 1. During a tennis tie-break the score bug's third line reads "Tie-break 2–2" (the first

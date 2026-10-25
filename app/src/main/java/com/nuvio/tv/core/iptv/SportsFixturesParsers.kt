@@ -288,7 +288,7 @@ object EspnScoreboard {
             Triple(competitor.optIntOrNull("order") ?: (index + 1), score(competitor)?.takeIf { it.length <= 6 },
                 GolfPlayer("", name, athlete?.text("shortName")?.takeIf { it != name }, country, flag?.text("href")?.let(::sportsImage), null, thru,
                     (state?.text("todayDetail") ?: card?.text("displayValue")?.takeIf { holes != null })?.take(12), tee))
-        }
+        }.sortedBy { toPar(it.second) ?: Int.MAX_VALUE }
         val values = players.map { toPar(it.second) }
         val leaders = players.mapIndexed { index, (order, par, player) ->
             val value = values[index]

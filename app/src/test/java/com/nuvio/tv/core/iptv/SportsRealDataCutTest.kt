@@ -20,4 +20,13 @@ class SportsRealDataCutTest {
         val entry = SportsCacheEntry(listOf(event), now)
         assertEquals(entry, SportsFixtureCodec.decode(SportsFixtureCodec.encode(entry)))
     }
+
+    @Test fun leaderboardOutOfOrderIsRankedByScore() {
+        val event = EspnScoreboard.parse(javaClass.getResourceAsStream("/sports/espn-lpga-scoreboard-real-20261025.json")!!.bufferedReader().use { it.readText() },
+            SportsLeagues.byId("lpga")!!, Instant.parse("2026-10-25T03:30:00Z").toEpochMilli()).single()
+        val leaders = (event.sportDetail as SportsDetail.Golf).leaders
+        assertEquals(listOf("Haeran Ryu", "Yuri Yoshida", "Hye-Jin Choi", "Minji Park"), leaders.take(4).map { it.name })
+        assertEquals(listOf("1", "T2", "T2", "T2", "T5", "T5", "T5", "T5", "T9", "T9"), leaders.map { it.position })
+        assertEquals(listOf("-17", "-13", "-13", "-13", "-11", "-11", "-11", "-11", "-10", "-10"), leaders.map { it.toPar })
+    }
 }

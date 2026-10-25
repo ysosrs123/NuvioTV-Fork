@@ -961,6 +961,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   Hand on the Puck", like the other penalties (capture of 21 October, 11:28).
 - Football: during a penalty shoot-out the score bug shows the kicks scored ("Pens · 6–5")
   instead of the last minute of extra time (capture of 25 October, 03:27).
+- Golf: the leaderboard stays in score order when ESPN sends the players out of order
+  (capture of 25 October, 13:27).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the
