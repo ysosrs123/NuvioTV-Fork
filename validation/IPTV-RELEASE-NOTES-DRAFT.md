@@ -963,6 +963,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   instead of the last minute of extra time (capture of 25 October, 03:27).
 - Golf: the leaderboard stays in score order when ESPN sends the players out of order
   (capture of 25 October, 13:27).
+- Golf: after a playoff the leaderboard no longer reads the playoff holes as a round in
+  progress ("Thru 3") (capture of 27 October, 09:28).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

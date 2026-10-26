@@ -102,6 +102,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
     warning was missed both times (passed at 04:28, games over by 06:28).
   - Capture 46 (26 October 09:27, scheduled): tests only (a golf round suspended for weather
     keeps the event live with "Round 3 - Suspended").
+  - Captures 47 and 48 (26 October 11:27 and 13:28, scheduled): nothing new.
+  - Capture 49 (27 October 09:28, scheduled), open batch 7ae: the Bermuda playoff (event
+    shortened to 54 holes) is no longer read as a fourth round ("Thru 3").
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -409,8 +412,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
     25 October), and a refreshed TheSportsDB shoot-out row (`P` with a progress, or moving to
     `AP`) (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
     Friday 06:27 and 07:57 (`Wed-Fri European cups`, `… late`; an hour later from 25 October).
-  - A golf playoff (only at the end of a final round): Monday 04:27 and 06:27 (`Mon NFL`) for
-    US events, the daily slots for Asian ones.
+  - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
+    on 27 October): Monday 04:27 and 06:27 (`Mon NFL`) for US events, the daily slots for Asian
+    ones.
   - Done: a quarter break and the clock reset in a live summary (25 October 11:28; NBA `End of
     3rd` at `0.0` and `12:00 - 3rd`, college football `End of 2nd`); a pitching change in the
     MLB summary (`Romero relieved Henderson`, `summaryType` `C`; the scoreboard's last play

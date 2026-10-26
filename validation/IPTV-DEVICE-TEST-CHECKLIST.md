@@ -96,6 +96,8 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 4. A golf leaderboard (Sport hero and Game Centre) is always in score order with the positions
    rising ("1, T2, T2, T2, T5…"), even when ESPN briefly lists the players out of order late in
    a final round.
+5. A golf event decided in a playoff (e.g. a weather-shortened event): the finished leaderboard
+   shows no "Thru 3" or round score for the two players in the playoff.
 
 ## 7ad. 20 October captures (build pending — ready to build)
 1. During a tennis tie-break the score bug's third line reads "Tie-break 2–2" (the first

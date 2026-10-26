@@ -30,6 +30,17 @@ class SportsRealDataCutTest {
         assertTrue(leaders.all { it.thru == "F" })
     }
 
+    @Test fun playoffHolesAreNotReadAsAFourthRound() {
+        val event = EspnScoreboard.parse(javaClass.getResourceAsStream("/sports/espn-pga-scoreboard-real-20261027.json")!!.bufferedReader().use { it.readText() },
+            SportsLeagues.byId("pga")!!, Instant.parse("2026-10-26T23:30:00Z").toEpochMilli()).single()
+        assertEquals(listOf<Any?>(FixtureStatus.FINAL, "Final", 4), listOf(event.status, event.detail, (event.sportDetail as SportsDetail.Golf).round))
+        val leaders = (event.sportDetail as SportsDetail.Golf).leaders
+        assertEquals(listOf("Austin Smotherman" to "-16", "Séamus Power" to "-15", "Taylor Moore" to "-14"), leaders.take(3).map { it.name to it.toPar })
+        assertEquals(listOf("1", "2", "T3", "T3", "T3"), leaders.take(5).map { it.position })
+        assertTrue(leaders.take(2).all { it.thru == null && it.today == null })
+        assertNull(SportsFixtureText.bug(event).extra)
+    }
+
     @Test fun leaderboardOutOfOrderIsRankedByScore() {
         val event = EspnScoreboard.parse(javaClass.getResourceAsStream("/sports/espn-lpga-scoreboard-real-20261025.json")!!.bufferedReader().use { it.readText() },
             SportsLeagues.byId("lpga")!!, Instant.parse("2026-10-25T03:30:00Z").toEpochMilli()).single()

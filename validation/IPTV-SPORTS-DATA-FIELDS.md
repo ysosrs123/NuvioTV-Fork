@@ -1984,3 +1984,19 @@ and two NHL games. Trimmed copy (the first 12 players) in
 Confirmed now: nothing from the plan.
 
 Still unconfirmed: as in the thirty-eighth pass.
+
+## Forty-first pass (27 October, 09:28)
+
+Scheduled capture at 09:28 Brisbane time (23:28Z on the 26th): 527 files. The 11:27 and 13:28
+captures on the 26th held nothing new. Now in play: two NBA games and an NHL game in the 1st. The
+Bermuda Championship, suspended in the third round, finished on the Monday. Trimmed copy (the first
+eight players) in `app/src/test/resources/sports/espn-pga-scoreboard-real-20261027.json`
+(`SportsRealDataCutTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Golf playoff (final) | `STATUS_FINAL`, `period` 4, no playoff field anywhere. The event was cut to 54 holes; Smotherman and Power, both `-16` after three rounds, have a `period` 4 line of three holes all numbered `16` (`E`; Power `+1`, bogey on the third), plus an empty `period` 302 line. The playoff is folded into the total (Power `-15`). Everyone else's `period` 4 line is `-` with no holes. | A line that plays the same hole more than once is no longer taken as the round's card, so the two show no `Thru 3` and no round score; the order (1, 2, T3) was already right |
+
+Confirmed now: a golf playoff after the event (not yet one in progress).
+
+Still unconfirmed: as in the thirty-eighth pass, with the golf playoff narrowed to one in progress.

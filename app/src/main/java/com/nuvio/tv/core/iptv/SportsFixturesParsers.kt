@@ -277,7 +277,7 @@ object EspnScoreboard {
             val flag = flag(competitor)
             val state = competitor.optJSONObject("status")
             val card = competitor.optJSONArray("linescores")?.let(::objects).orEmpty().lastOrNull { line ->
-                (round == null || line.optIntOrNull("period") == round) && line.optJSONArray("linescores") != null
+                (round == null || line.optIntOrNull("period") == round) && line.optJSONArray("linescores")?.let(::objects)?.map { it.optIntOrNull("period") }?.let { it.distinct().size == it.size } == true
             }
             val holes = card?.optJSONArray("linescores")?.length()?.takeIf { it > 0 }
             val tee = if (holes != null || round == null) null else competitor.optJSONArray("linescores")?.let(::objects).orEmpty().firstOrNull { it.optIntOrNull("period") == round }
