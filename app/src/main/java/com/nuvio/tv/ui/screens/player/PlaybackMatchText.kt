@@ -24,11 +24,12 @@ internal fun playbackMatchText(info: PlayerMediaInfo, languages: List<String>, r
 }
 
 /**
- * What a badge pack is matched against on the player: what is playing, then the file name the
- * stats HUD shows, as one text like the stream list joins a stream's texts. The pack's own
- * patterns then meet the spellings they were written for. Words in the file name that the player
- * contradicts are taken out first, so a Dolby Vision file playing as HDR10 still reads HDR only
- * and a switch to another audio track drops the file name's audio.
+ * What a badge pack is matched against on the player: the file name the stats HUD shows comes first,
+ * then what is playing. File name first because AIOStreams-style packs gate rules on a video
+ * extension followed by more text (e.g. `\.mkv\s+\S`), and with the extension last those rules
+ * (5.1, 7.1) never match. Words in the file name that the player contradicts are taken out first,
+ * so a Dolby Vision file playing as HDR10 still reads HDR only and a switch to another audio track
+ * drops the file name's audio.
  */
 internal fun playerBadgeMatchText(
     info: PlayerMediaInfo,
@@ -39,7 +40,7 @@ internal fun playerBadgeMatchText(
 ): String {
     val playing = playbackMatchText(info, languages, releaseText.takeIf { audioFromRelease }.orEmpty())
     val file = playbackFileName(fileName, info, releaseText, audioFromRelease)
-    return "$playing $file".trim()
+    return "$file $playing".trim()
 }
 
 /**
