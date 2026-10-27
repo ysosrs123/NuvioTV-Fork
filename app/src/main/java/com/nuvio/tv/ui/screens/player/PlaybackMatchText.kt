@@ -232,7 +232,9 @@ private fun dynamicRangeTokens(info: PlayerMediaInfo): List<String> {
     val hdr10 = "HDR10" in info.hdr
     val hlg = "HLG" in info.hdr
     return buildList {
-        if (dv) addAll(listOf("DV", "DoVi", "Dolby Vision"))
+        // A space-separated "Vision" reads as the release group ViSiON in packs' media-source tier
+        // lists; packs match dolby[-_. ]?vision, so DolbyVision still reads as Dolby Vision.
+        if (dv) addAll(listOf("DV", "DoVi", "DolbyVision"))
         if (hdr10) addAll(listOf("HDR", "HDR10"))
         if (hlg) addAll(listOf("HDR", "HLG"))
         // Before mpv decodes a frame it knows DV from the file but not yet HDR10 under it, so
