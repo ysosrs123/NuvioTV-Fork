@@ -2022,3 +2022,20 @@ scoreboard's last play; TheSportsDB baseball half-innings or extra innings; the 
 arriving later for a bout first posted without one; AFL/NRL live clock (off season); a golf playoff
 in progress; a football game in extra time live on ESPN; a refreshed TheSportsDB shoot-out row (`P`
 or `PT` with a progress, or `PT` moving to `AP`).
+
+## Forty-third pass (27 October, 13:28)
+
+Scheduled capture at 13:28 Brisbane time (03:28Z): 524 files. Timberwolves at Cavaliers, 111–112
+with 25.8 seconds left at 11:28, had finished `Final/OT` 127–125; the capture keeps only live
+summaries while a league has games in play, so that game's summary was fetched on its own from the
+same endpoint. Trimmed copies in `app/src/test/resources/sports/espn-nba-scoreboard-real-20261027.json`
+and `espn-nba-summary-real-20261027.json` (`SportsRealDataOvertimeFinalTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NBA overtime final | Scoreboard and summary: `Final/OT` (`altDetail` `OT`), five line scores (`14` and `12` in overtime). Plays in `period` 5 end with `End of the 1st  Overtime` (two spaces) and `End of Game`. | none: `Final/OT`, an `OT` column, the double space closed up |
+| Overtime running scores | In the overtime plays ESPN's `homeScore`/`awayScore` do not add up: `116–113` at `4:45`, `114–113` at `3:14`, `113–116` at `2:52`, ending `124–125` while the final is `127–125`; `sequenceNumber` runs out of order (836, 790, 758). The fourth quarter is consistent. | none: the moments show the scores as sent; rebuilding them would be guesswork and ESPN usually corrects the play-by-play later |
+
+Confirmed now: an NBA overtime final and its summary (overtime in progress still unseen).
+
+Still unconfirmed: as in the forty-second pass, with NBA overtime narrowed to a game in progress.

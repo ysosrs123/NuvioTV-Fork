@@ -107,6 +107,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     shortened to 54 holes) is no longer read as a fourth round ("Thru 3").
   - Capture 50 (27 October 11:28, scheduled): tests only (the NFL two-minute warning on
     Monday Night Football); `Mon NFL` disabled.
+  - Capture 51 (27 October 13:28, scheduled): tests only (an NBA overtime final and its
+    summary; ESPN's running scores in the overtime plays are wrong, left as sent).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -404,7 +406,7 @@ under "Earlier session notes" and the dated sections is history kept for referen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; US slots move an hour later from 1 November (a reminder does this);
   the European ones moved an hour later on 25 October.
-  - NBA overtime in progress and its summary; an NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
+  - NBA overtime in progress (an overtime final and its summary were seen on 27 October); an NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
     (World Series, to about 1 November); TheSportsDB baseball half-innings or extra innings
     and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
   - A football game in extra time live on ESPN (a live shoot-out and its summary were seen on
