@@ -105,6 +105,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Captures 47 and 48 (26 October 11:27 and 13:28, scheduled): nothing new.
   - Capture 49 (27 October 09:28, scheduled), open batch 7ae: the Bermuda playoff (event
     shortened to 54 holes) is no longer read as a fourth round ("Thru 3").
+  - Capture 50 (27 October 11:28, scheduled): tests only (the NFL two-minute warning on
+    Monday Night Football); `Mon NFL` disabled.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -405,16 +407,16 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - NBA overtime in progress and its summary; an NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
     (World Series, to about 1 November); TheSportsDB baseball half-innings or extra innings
     and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
-  - The NFL two-minute warning on the scoreboard: Monday 04:27 and 06:27 (`Mon NFL`; its
-    11:27 slot was dropped on 19 October as the daily 11:27 run covers it), Monday and Friday
-    11:27 (daily US evening).
   - A football game in extra time live on ESPN (a live shoot-out and its summary were seen on
     25 October), and a refreshed TheSportsDB shoot-out row (`P` with a progress, or moving to
     `AP`) (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
     Friday 06:27 and 07:57 (`Wed-Fri European cups`, `… late`; an hour later from 25 October).
   - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
-    on 27 October): Monday 04:27 and 06:27 (`Mon NFL`) for US events, the daily slots for Asian
-    ones.
+    on 27 October): US final rounds end about 08:00 to 10:00 Brisbane on Monday, so the daily
+    09:27 slot; Asian events the daily slots.
+  - Done: the NFL two-minute warning on the scoreboard and in the summary (27 October 11:28,
+    Monday Night Football). `Mon NFL` disabled on 27 October: its 04:27 and 06:27 slots fall
+    before US golf playoffs and nothing else needs them.
   - Done: a quarter break and the clock reset in a live summary (25 October 11:28; NBA `End of
     3rd` at `0.0` and `12:00 - 3rd`, college football `End of 2nd`); a pitching change in the
     MLB summary (`Romero relieved Henderson`, `summaryType` `C`; the scoreboard's last play

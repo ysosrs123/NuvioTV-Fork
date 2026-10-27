@@ -2000,3 +2000,25 @@ eight players) in `app/src/test/resources/sports/espn-pga-scoreboard-real-202610
 Confirmed now: a golf playoff after the event (not yet one in progress).
 
 Still unconfirmed: as in the thirty-eighth pass, with the golf playoff narrowed to one in progress.
+
+## Forty-second pass (27 October, 11:28)
+
+Scheduled capture at 11:28 Brisbane time (01:28Z): 527 files. In play: Monday Night Football
+(Cowboys at Eagles) at the two-minute warning, seven NBA games, two NHL games and the World Series
+(Brewers at Rays, `Top 5th`, a pitch as the last play). Trimmed copies in
+`app/src/test/resources/sports/espn-nfl-scoreboard-real-20261027.json` and
+`espn-nfl-summary-real-20261027.json` (`SportsRealDataTwoMinuteTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NFL two-minute warning (scoreboard) | `2:00 - 2nd`, `clock` 120; `lastPlay` type `75` `Two-minute warning` (abbreviation `2Min Warn`), text `Two-Minute Warning`, with the play's drive (`1 play, 2 yards, 0:28`) and win probability; `down`, `distance` and `downDistanceText` (`2nd & 8 at DAL 4`) kept; `yardLine` 96 with Dallas in possession at its own 4, `isRedZone` false. | none: `Q2 · 2:00`, `2nd & 8 · DAL 4`, last play `Two-Minute Warning`, not the red zone |
+| NFL two-minute warning (summary) | The current drive ends with the same play at `2:00` after the rush at `2:28`; an `Official Timeout at 02:28.` precedes it. | none: the warning leads the last plays |
+
+Confirmed now: the NFL two-minute warning on the scoreboard and in the summary.
+
+Still unconfirmed: NBA overtime in progress and an overtime summary; an NHL power play, empty net or
+shootout in progress on the scoreboard, and a shootout in the summary; a pitching change as the MLB
+scoreboard's last play; TheSportsDB baseball half-innings or extra innings; the UFC finish method
+arriving later for a bout first posted without one; AFL/NRL live clock (off season); a golf playoff
+in progress; a football game in extra time live on ESPN; a refreshed TheSportsDB shoot-out row (`P`
+or `PT` with a progress, or `PT` moving to `AP`).
