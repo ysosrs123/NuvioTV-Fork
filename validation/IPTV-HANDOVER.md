@@ -109,6 +109,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     Monday Night Football); `Mon NFL` disabled.
   - Capture 51 (27 October 13:28, scheduled): tests only (an NBA overtime final and its
     summary; ESPN's running scores in the overtime plays are wrong, left as sent).
+  - Capture 52 (28 October 06:27, European cups): tests only (Copa del Rey extra time live on
+    ESPN, scoreboard and summary).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -409,9 +411,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - NBA overtime in progress (an overtime final and its summary were seen on 27 October); an NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
     (World Series, to about 1 November); TheSportsDB baseball half-innings or extra innings
     and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
-  - A football game in extra time live on ESPN (a live shoot-out and its summary were seen on
-    25 October), and a refreshed TheSportsDB shoot-out row (`P` with a progress, or moving to
-    `AP`) (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
+  - A refreshed TheSportsDB shoot-out row (`P` with a progress, or moving to `AP`; extra time
+    live on ESPN was seen on 28 October, a live shoot-out on 25 October; shoot-outs reach
+    penalties from about 06:15 to 08:00) (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
     Friday 06:27 and 07:57 (`Wed-Fri European cups`, `… late`; an hour later from 25 October).
   - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
     on 27 October): US final rounds end about 08:00 to 10:00 Brisbane on Monday, so the daily

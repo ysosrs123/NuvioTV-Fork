@@ -2039,3 +2039,25 @@ and `espn-nba-summary-real-20261027.json` (`SportsRealDataOvertimeFinalTest`).
 Confirmed now: an NBA overtime final and its summary (overtime in progress still unseen).
 
 Still unconfirmed: as in the forty-second pass, with NBA overtime narrowed to a game in progress.
+
+## Forty-fourth pass (28 October, 06:27)
+
+Scheduled capture at 06:27 Brisbane time (20:27Z on the 27th): 536 files. In play: 15 Copa del Rey
+ties, four DFB-Pokal and two EFL Cup games in the first half, the EFL Trophy, Serie B and a KNVB
+Cup tie in a shoot-out. Trimmed copies in
+`app/src/test/resources/sports/espn-copa-del-rey-scoreboard-real-20261028.json` and
+`espn-copa-del-rey-summary-real-20261028.json` (`SportsRealDataExtraTimeTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Football extra time in play (scoreboard) | Sestao River 3–3 Espanyol: `STATUS_OVERTIME` (id `24`, description `Overtime`), `period` 4, `displayClock` `120'+1'` (`clock` 7200), `detail` the same; no line scores; goals at `96'` and `98'` in the details. | none: `120'+1'` on the score bug, `ET · 120'+1'` in the period line |
+| Football extra time in play (summary) | Line scores per period `2 0 1 0` and `1 1 1 0` (both extra-time halves); the extra-time goals are in `period` 3. | none: the goals sit in their own period with the running score |
+| TheSportsDB rows | The same tie as `ET` `121` (fresh); the KNVB shoot-out and an Austrian Cup tie as `P` with an empty progress, the Austrian row 48 minutes old. | none |
+
+Confirmed now: football extra time in play on ESPN.
+
+Still unconfirmed: NBA overtime in progress; an NHL power play, empty net or shootout in progress
+on the scoreboard, and a shootout in the summary; a pitching change as the MLB scoreboard's last
+play; TheSportsDB baseball half-innings or extra innings; the UFC finish method arriving later for
+a bout first posted without one; AFL/NRL live clock (off season); a golf playoff in progress; a
+refreshed TheSportsDB shoot-out row (`P` or `PT` with a progress, or `PT` moving to `AP`).
