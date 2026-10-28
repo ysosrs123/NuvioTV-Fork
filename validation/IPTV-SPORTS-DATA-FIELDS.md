@@ -2061,3 +2061,24 @@ on the scoreboard, and a shootout in the summary; a pitching change as the MLB s
 play; TheSportsDB baseball half-innings or extra innings; the UFC finish method arriving later for
 a bout first posted without one; AFL/NRL live clock (off season); a golf playoff in progress; a
 refreshed TheSportsDB shoot-out row (`P` or `PT` with a progress, or `PT` moving to `AP`).
+
+## Forty-fifth pass (28 October, 13:28)
+
+Scheduled capture at 13:28 Brisbane time (03:28Z): 530 files. The 07:57, 09:27 and 11:28 captures
+held nothing new: three more Copa del Rey ties went to extra time and one to a shoot-out (both
+shapes known); TheSportsDB's shoot-out rows stayed `P` with no progress and dropped out of the live
+feed when the games ended, without an `AP`; the 11:28 World Series scoreboard's last play was one
+batter ahead of its own batter and count. Now in play: the World Series at `End 10th`, 2–2; the
+Celtics–Nets and Blue Jackets–Flyers games had finished `Final/OT` and Islanders–Predators
+`Final/SO`. Trimmed copies in `app/src/test/resources/sports/espn-mlb-scoreboard-real-20261028.json`,
+`tsdb-eventsday-mlb-real-20261028.json` and `tsdb-livescore-baseball-real-20261028.json`
+(`SportsRealDataExtraInningsTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| MLB extra innings (ESPN) | `End 10th`, `period` 10, ten line scores per side, last play `End of the 10th inning`, no pitcher or batter between innings. | none: `End 10` on the score bug, a tenth column (the hero shows the latest nine) |
+| MLB extra innings (TheSportsDB) | The live row is still `IN9` (progress `IN9`, 2–2, updated 13 minutes before) and carries the previous day's event id (`2619529`, timestamp the 27th); the day list has tonight's game as `2619530` already `FT` 2–2. | none: TheSportsDB is only a fallback for MLB; there the game would read final 2–2 until ESPN is back, as the merge never reopens a finished game |
+
+Confirmed now: extra innings on ESPN and on TheSportsDB (which does not go past `IN9`).
+
+Still unconfirmed: as in the forty-fourth pass, with TheSportsDB baseball narrowed to half-innings.
