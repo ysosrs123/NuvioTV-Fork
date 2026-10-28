@@ -115,6 +115,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     shoot-out rows stayed `P` and left the feed when the games ended).
   - Capture 56 (28 October 13:28, scheduled): tests only (World Series extra innings on ESPN;
     TheSportsDB stuck at `IN9` on the previous day's event id with the day list already `FT`).
+  - Captures 57 and 58 (29 October 06:28 and 07:58, European cups): docs only; the TheSportsDB
+    football shoot-out row dropped from the plan and both European cup tasks disabled.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -415,13 +417,14 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - NBA overtime in progress (an overtime final and its summary were seen on 27 October); an NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
     (World Series, to about 1 November); TheSportsDB baseball half-innings (extra innings seen on 28 October: it stops at `IN9`)
     and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
-  - A refreshed TheSportsDB shoot-out row (`P` with a progress, or moving to `AP`; extra time
-    live on ESPN was seen on 28 October, a live shoot-out on 25 October; shoot-outs reach
-    penalties from about 06:15 to 08:00) (EFL Cup, DFB-Pokal, Copa del Rey, Coppa Italia midweek rounds): Wednesday to
-    Friday 06:27 and 07:57 (`Wed-Fri European cups`, `… late`; an hour later from 25 October).
   - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
     on 27 October): US final rounds end about 08:00 to 10:00 Brisbane on Monday, so the daily
     09:27 slot; Asian events the daily slots.
+  - Dropped: a refreshed TheSportsDB football shoot-out row (28 and 29 October: about a dozen
+    cup shoot-outs; every row stayed `P` with an empty progress and either froze there, Man
+    City–Brighton 23 minutes after ESPN had it `FT-Pens`, or left the feed; none moved to `AP`,
+    which TheSportsDB uses only for hockey). `Wed-Fri European cups` and `… late` disabled on
+    29 October (nothing left needs them).
   - Done: the NFL two-minute warning on the scoreboard and in the summary (27 October 11:28,
     Monday Night Football). `Mon NFL` disabled on 27 October: its 04:27 and 06:27 slots fall
     before US golf playoffs and nothing else needs them.

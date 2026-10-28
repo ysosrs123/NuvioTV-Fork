@@ -2082,3 +2082,21 @@ Celtics–Nets and Blue Jackets–Flyers games had finished `Final/OT` and Islan
 Confirmed now: extra innings on ESPN and on TheSportsDB (which does not go past `IN9`).
 
 Still unconfirmed: as in the forty-fourth pass, with TheSportsDB baseball narrowed to half-innings.
+
+## Forty-sixth pass (29 October, 06:28 and 07:58)
+
+Scheduled captures at 06:28 and 07:58 Brisbane time (20:28Z and 21:58Z on the 28th): 543 and 528
+files. ESPN: a KNVB Cup shoot-out, Holstein Kiel–Hoffenheim in extra time (`102'`) and the EFL Cup's
+Liverpool–Chelsea in a shoot-out (`shootoutScore` 0 and 0 at the start; the EFL Cup goes straight to
+penalties), all shapes already read.
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| TheSportsDB football shoot-outs | Over the Wednesday and Thursday cup rounds about a dozen shoot-out rows (Copa del Rey, KNVB Cup, Austrian Cup, Coppa Italia Serie C, the women's U17 World Cup, the EFL Cup): every one `P` with an empty progress and the score after extra time. None gained a progress or moved to `AP`; each either left the live feed when the game ended (Excelsior, Austria Vienna, Sparta, Wacker Innsbruck) or froze at `P` (Man City–Brighton 23 minutes after ESPN's `FT-Pens`, 4–3). Liverpool–Chelsea was still `2H` `90+3` there while ESPN had the shoot-out under way. | none: a frozen row settles after 30 minutes without an update, as before |
+
+Dropped: a refreshed TheSportsDB football shoot-out row (its football feed does not publish one).
+
+Still unconfirmed: NBA overtime in progress; an NHL power play, empty net or shootout in progress
+on the scoreboard, and a shootout in the summary; a pitching change as the MLB scoreboard's last
+play; TheSportsDB baseball half-innings; the UFC finish method arriving later for a bout first
+posted without one; AFL/NRL live clock (off season); a golf playoff in progress.
