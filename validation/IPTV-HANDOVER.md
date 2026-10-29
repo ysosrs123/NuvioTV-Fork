@@ -117,6 +117,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
     TheSportsDB stuck at `IN9` on the previous day's event id with the day list already `FT`).
   - Captures 57 and 58 (29 October 06:28 and 07:58, European cups): docs only; the TheSportsDB
     football shoot-out row dropped from the plan and both European cup tasks disabled.
+  - Captures 59 and 60 (29 October 09:28 and 11:27, scheduled): nothing new.
+  - Capture 61 (29 October 13:28, scheduled): tests only (NBA overtime in progress,
+    scoreboard and summary).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -414,9 +417,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; US slots move an hour later from 1 November (a reminder does this);
   the European ones moved an hour later on 25 October.
-  - NBA overtime in progress (an overtime final and its summary were seen on 27 October); an NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
-    (World Series, to about 1 November); TheSportsDB baseball half-innings (extra innings seen on 28 October: it stops at `IN9`)
-    and a refreshed shoot-out row; a UFC method posted later: daily 09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
+  - An NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
+    (World Series, to about 1 November); TheSportsDB baseball half-innings (extra innings seen on
+    28 October: it stops at `IN9`); a UFC method posted later: daily 09:27, 11:27, 13:27
+    (`IPTV capture – daily US evening`).
   - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
     on 27 October): US final rounds end about 08:00 to 10:00 Brisbane on Monday, so the daily
     09:27 slot; Asian events the daily slots.
@@ -425,6 +429,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     City–Brighton 23 minutes after ESPN had it `FT-Pens`, or left the feed; none moved to `AP`,
     which TheSportsDB uses only for hockey). `Wed-Fri European cups` and `… late` disabled on
     29 October (nothing left needs them).
+  - Done: NBA overtime in progress, scoreboard and summary (29 October 13:28, Spurs at Jazz
+    `4:33 - OT`); the overtime final and its summary on 27 October.
   - Done: the NFL two-minute warning on the scoreboard and in the summary (27 October 11:28,
     Monday Night Football). `Mon NFL` disabled on 27 October: its 04:27 and 06:27 slots fall
     before US golf playoffs and nothing else needs them.

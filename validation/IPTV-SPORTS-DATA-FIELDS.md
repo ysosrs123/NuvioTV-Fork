@@ -2100,3 +2100,24 @@ Still unconfirmed: NBA overtime in progress; an NHL power play, empty net or sho
 on the scoreboard, and a shootout in the summary; a pitching change as the MLB scoreboard's last
 play; TheSportsDB baseball half-innings; the UFC finish method arriving later for a bout first
 posted without one; AFL/NRL live clock (off season); a golf playoff in progress.
+
+## Forty-seventh pass (29 October, 13:28)
+
+Scheduled capture at 13:28 Brisbane time (03:28Z): 540 files. The 09:28 and 11:27 captures held
+nothing new (a scoreboard last play with a line break inside its text, `bad pass\nturnover`, is
+closed up like other whitespace). Now in play: Spurs at Jazz in overtime, two other NBA games, two
+NHL games, MLS and the LPGA's first round. Trimmed copies in
+`app/src/test/resources/sports/espn-nba-scoreboard-real-20261029.json` and
+`espn-nba-summary-real-20261029.json` (`SportsRealDataOvertimeLiveTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NBA overtime in play (scoreboard) | `4:33 - OT`, `period` 5, `clock` 273; five line scores with `0` and `0` for overtime; `lastPlay` a turnover with win probability, no `situation` beyond it. | none: `OT · 4:33`, an `OT` column |
+| NBA overtime in play (summary) | `period` 5, `4:33`, `4:33 - OT`; overtime opens with a jump ball (`Victor Wembanyama vs. Jaxson Hayes (De'Aaron Fox gains possession)` at `5:00`). | none: the last plays sit in period 5 |
+
+Confirmed now: NBA overtime in progress.
+
+Still unconfirmed: an NHL power play, empty net or shootout in progress on the scoreboard, and a
+shootout in the summary; a pitching change as the MLB scoreboard's last play; TheSportsDB baseball
+half-innings; the UFC finish method arriving later for a bout first posted without one; AFL/NRL
+live clock (off season); a golf playoff in progress.
