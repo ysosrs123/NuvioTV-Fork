@@ -2121,3 +2121,17 @@ Still unconfirmed: an NHL power play, empty net or shootout in progress on the s
 shootout in the summary; a pitching change as the MLB scoreboard's last play; TheSportsDB baseball
 half-innings; the UFC finish method arriving later for a bout first posted without one; AFL/NRL
 live clock (off season); a golf playoff in progress.
+
+## Forty-eighth pass (30 October 09:28 to 31 October 11:28)
+
+Six scheduled captures (531 to 560 files each). Nothing new: Thursday Night Football at the
+two-minute warning again; NHL overtime finals (`Final/OT`); NBA and NHL games in regulation; golf
+first to third rounds. The World Series ended with Game 5 on the 29th (`MIL wins series 4-1`), so
+no MLB game will be seen before 30 November.
+
+Dropped: a pitching change as the MLB scoreboard's last play and TheSportsDB baseball half-innings
+(off season).
+
+Still unconfirmed: an NHL power play, empty net or shootout in progress on the scoreboard, and a
+shootout in the summary; the UFC finish method arriving later for a bout first posted without one;
+AFL/NRL live clock (off season); a golf playoff in progress.

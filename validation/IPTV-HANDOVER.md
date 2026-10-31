@@ -120,6 +120,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Captures 59 and 60 (29 October 09:28 and 11:27, scheduled): nothing new.
   - Capture 61 (29 October 13:28, scheduled): tests only (NBA overtime in progress,
     scoreboard and summary).
+  - Captures 62 to 67 (30 October 09:28 to 31 October 11:28, scheduled): nothing new; the
+    MLB items dropped from the plan as the season is over.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -417,13 +419,15 @@ under "Earlier session notes" and the dated sections is history kept for referen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; US slots move an hour later from 1 November (a reminder does this);
   the European ones moved an hour later on 25 October.
-  - An NHL shootout in progress (scoreboard and summary); a pitching change as the MLB last play
-    (World Series, to about 1 November); TheSportsDB baseball half-innings (extra innings seen on
-    28 October: it stops at `IN9`); a UFC method posted later: daily 09:27, 11:27, 13:27
-    (`IPTV capture – daily US evening`).
+  - An NHL shootout in progress (scoreboard and summary); a UFC method posted later: daily
+    09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
   - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
     on 27 October): US final rounds end about 08:00 to 10:00 Brisbane on Monday, so the daily
     09:27 slot; Asian events the daily slots.
+  - Dropped: a pitching change as the MLB scoreboard's last play and TheSportsDB baseball
+    half-innings (the World Series ended on 29 October, Milwaukee 4–1; no MLB before 30
+    November). The change was seen in the summary on 25 and 28 October; TheSportsDB extra innings
+    stop at `IN9`.
   - Dropped: a refreshed TheSportsDB football shoot-out row (28 and 29 October: about a dozen
     cup shoot-outs; every row stayed `P` with an empty progress and either froze there, Man
     City–Brighton 23 minutes after ESPN had it `FT-Pens`, or left the feed; none moved to `AP`,
