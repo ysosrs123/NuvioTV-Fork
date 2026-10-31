@@ -122,6 +122,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
     scoreboard and summary).
   - Captures 62 to 67 (30 October 09:28 to 31 October 11:28, scheduled): nothing new; the
     MLB items dropped from the plan as the season is over.
+  - Captures 68 and 69 (31 October 13:28 and 1 November 09:28, scheduled), with a 25-minute
+    UFC poll during the Fight Night: tests only (a stoppage posted final before its end time;
+    two unofficial-winner details on one bout).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:

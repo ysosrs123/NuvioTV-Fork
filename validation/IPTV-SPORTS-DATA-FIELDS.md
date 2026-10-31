@@ -2135,3 +2135,22 @@ Dropped: a pitching change as the MLB scoreboard's last play and TheSportsDB bas
 Still unconfirmed: an NHL power play, empty net or shootout in progress on the scoreboard, and a
 shootout in the summary; the UFC finish method arriving later for a bout first posted without one;
 AFL/NRL live clock (off season); a golf playoff in progress.
+
+## Forty-ninth pass (1 November, 09:28 to 09:54)
+
+Scheduled capture at 09:28 Brisbane time (23:28Z on 31 October, 563 files), plus the UFC scoreboard
+every 45 seconds for 25 minutes during the Fight Night (Moicano vs. Nolan). The 13:28 capture on the
+31st held nothing new. Also in play: two NBA and two NHL games; Blackhawks–Bruins `Final/OT` and
+Lightning–Predators `Final/SO`. Trimmed copies in
+`app/src/test/resources/sports/espn-ufc-scoreboard-real-20261101.json` and `…b.json`
+(`SportsRealDataFightNightTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| UFC stoppage posted before its time | The sixth bout went `STATUS_FINAL` between rounds with the winner and `Unofficial Winner` KO/TKO (`21`) at once, but `displayClock` `-` for two minutes, then `5:00` (round 2). | none: `R. Sezinando · KO/TKO · R2`, then `… R2 5:00` |
+| Two unofficial-winner details | The first bout (ended `3:20` of round 3) carries `Unofficial Winner Kotko` (`21`) and then `Unofficial Winner Decision` (`22`). | none: the first one is taken, `KO/TKO · R3 3:20` |
+| Methods on every bout | All six finished bouts (and the seventh's rounds through the poll) had the method from the first sample in which they were final. | none |
+
+Confirmed now: nothing from the plan (every method came with the result on this card).
+
+Still unconfirmed: as in the forty-eighth pass.
