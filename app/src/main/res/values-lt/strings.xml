@@ -1048,6 +1048,8 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     <string name="about_update_auto_install_notice_subtitle">Kitą kartą paleidus rodyti juostą, kai programa atsinaujino pati</string>
     <string name="licenses_attributions_avatars_title">Bendro žiūrėjimo avatarai</string>
     <string name="licenses_attributions_avatars_body">Sukurta su DiceBear, perdirbant šiuos dizainus: \"Fun Emoji\" (Davis Uche) ir \"Adventurer\" (Lisa Wischofsky), licencija CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" (Lisa Wischofsky), \"Notionists\" (Zoish), \"Pixel Art\" ir \"Thumbs\" (DiceBear), CC0 1.0. \"Bottts\" (Pablo Stanley), galima laisvai naudoti asmeniniais ir komerciniais tikslais. Gyvūnų veidai iš Twemoji (Twitter, Inc. ir kiti autoriai), licencija CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Subtitrų šriftai</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed ir Noto Sans (su Noto Sans Arabic, Hebrew, Devanagari, Bengali ir Tamil), autoriai: The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors ir The Noto Project Authors. Licencija SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby ir Silo</string>
     <string name="licenses_attributions_media_servers_body">„Nuvio Arc“ jungiasi prie jūsų nuosavo Jellyfin, Emby arba Silo serverio. Jų pavadinimai ir logotipai priklauso jų savininkams. „Nuvio Arc“ nėra susijusi su Jellyfin, Emby ar Silo ir nėra jų remiama.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -1644,6 +1646,8 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     <string name="seek_thumbnails_before_play_fastest_desc">Ketvirtadalis miniatiūrų prieš prasidedant. Trumpiausias laukimas.</string>
     <string name="seek_thumbnails_from_copy_title">Miniatiūros iš kopijos</string>
     <string name="seek_thumbnails_from_copy_subtitle">Greitesnės miniatiūros 4K pavadinimams iš 1080p arba 720p kopijos, o Usenet pavadinimams iš kopijos, kurios nėra Usenet tinkle. TorBox talpykloje esanti kopija gali būti kelioms minutėms pridėta prie jūsų sąrašo.</string>
+    <string name="seek_thumbnails_hardware_title">Aparatinis dekoderis miniatiūroms</string>
+    <string name="seek_thumbnails_hardware_subtitle">Greitesnės miniatiūros, kurias sukuria jūsų įrenginio aparatinis dekoderis. Jei miniatiūros atrodo netinkamai arba įrenginiui sunku, išjunkite tai ir jos bus kuriamos įprastu būdu.</string>
     <string name="seek_thumbnails_clear_title">Išvalyti išsaugotas miniatiūras</string>
     <string name="seek_thumbnails_clear_subtitle">Jos sukuriamos iš naujo, kai kitą kartą paleidžiate pavadinimą.</string>
     <string name="seek_thumbnails_cleared">Išsaugotos miniatiūros išvalytos</string>

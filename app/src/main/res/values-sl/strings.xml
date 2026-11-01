@@ -2219,6 +2219,8 @@
     <string name="about_update_auto_install_notice_subtitle">Ob naslednjem zagonu pokaži pasico, ko se aplikacija sama posodobi</string>
     <string name="licenses_attributions_avatars_title">Avatarji za skupni ogled</string>
     <string name="licenses_attributions_avatars_body">Ustvarjeno z DiceBear, s predelavo teh oblikovanj: \"Fun Emoji\" avtorja Davis Uche in \"Adventurer\" avtorice Lisa Wischofsky, z licenco CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" avtorice Lisa Wischofsky, \"Notionists\" avtorja Zoish, \"Pixel Art\" in \"Thumbs\" avtorja DiceBear, CC0 1.0. \"Bottts\" avtorja Pablo Stanley, brezplačno za osebno in komercialno uporabo. Živalski obrazi iz Twemoji avtorjev Twitter, Inc. in drugih sodelavcev, z licenco CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Pisave podnapisov</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed in Noto Sans (z Noto Sans Arabic, Hebrew, Devanagari, Bengali in Tamil), avtorji: The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors in The Noto Project Authors. Z licenco SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby in Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc se poveže z vašim lastnim strežnikom Jellyfin, Emby ali Silo. Njihova imena in logotipi pripadajo njihovim lastnikom. Nuvio Arc ni povezan z Jellyfin, Emby ali Silo niti odobren z njihove strani.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -2815,6 +2817,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">Štirikrat manj pred začetkom. Najkrajše čakanje.</string>
     <string name="seek_thumbnails_from_copy_title">Sličice iz kopije</string>
     <string name="seek_thumbnails_from_copy_subtitle">Hitrejše sličice za naslove 4K iz kopije 1080p ali 720p, za naslove iz omrežja Usenet pa iz kopije zunaj omrežja Usenet. Kopija iz predpomnilnika TorBox se lahko za nekaj minut doda na vaš seznam.</string>
+    <string name="seek_thumbnails_hardware_title">Strojni dekoder za sličice</string>
+    <string name="seek_thumbnails_hardware_subtitle">Hitrejše sličice, ki jih izdela strojni dekoder vaše naprave. Če sličice niso videti pravilne ali naprava ne zmore, to izklopite in izdelane bodo na običajen način.</string>
     <string name="seek_thumbnails_clear_title">Počisti shranjene sličice</string>
     <string name="seek_thumbnails_clear_subtitle">Znova se izdelajo, ko naslednjič predvajate naslov.</string>
     <string name="seek_thumbnails_cleared">Shranjene sličice so počiščene</string>

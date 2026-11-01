@@ -3310,6 +3310,8 @@
     <string name="about_update_auto_install_notice_subtitle">Εμφάνιση banner στην επόμενη εκκίνηση αφού η εφαρμογή ενημερωθεί αυτόματα</string>
     <string name="licenses_attributions_avatars_title">Avatar πάρτι προβολής</string>
     <string name="licenses_attributions_avatars_body">Δημιουργήθηκαν με το DiceBear, με ανάμειξη των εξής σχεδίων: \"Fun Emoji\" του Davis Uche και \"Adventurer\" της Lisa Wischofsky, με άδεια CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" της Lisa Wischofsky, \"Notionists\" της Zoish, \"Pixel Art\" και \"Thumbs\" του DiceBear, CC0 1.0. \"Bottts\" του Pablo Stanley, δωρεάν για προσωπική και εμπορική χρήση. Πρόσωπα ζώων από το Twemoji της Twitter, Inc. και άλλων συντελεστών, με άδεια CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Γραμματοσειρές υποτίτλων</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed και Noto Sans (με Noto Sans Arabic, Hebrew, Devanagari, Bengali και Tamil) από The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors και The Noto Project Authors. Διατίθενται υπό την άδεια SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby και Silo</string>
     <string name="licenses_attributions_media_servers_body">Το Nuvio Arc συνδέεται με τον δικό σας διακομιστή Jellyfin, Emby ή Silo. Τα ονόματα και τα λογότυπά τους ανήκουν στους κατόχους τους. Το Nuvio Arc δεν συνδέεται ούτε υποστηρίζεται από τα Jellyfin, Emby ή Silo.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -3903,6 +3905,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">Το ένα τέταρτο πριν ξεκινήσει. Η μικρότερη αναμονή.</string>
     <string name="seek_thumbnails_from_copy_title">Μικρογραφίες από αντίγραφο</string>
     <string name="seek_thumbnails_from_copy_subtitle">Ταχύτερες μικρογραφίες για τίτλους 4K από αντίγραφο 1080p ή 720p, και για τίτλους Usenet από αντίγραφο εκτός Usenet. Ένα αντίγραφο ήδη αποθηκευμένο στο TorBox μπορεί να προστεθεί στη λίστα σας για λίγα λεπτά.</string>
+    <string name="seek_thumbnails_hardware_title">Αποκωδικοποιητής υλικού για μικρογραφίες</string>
+    <string name="seek_thumbnails_hardware_subtitle">Ταχύτερες μικρογραφίες από τον αποκωδικοποιητή υλικού της συσκευής σας. Αν οι μικρογραφίες φαίνονται λάθος ή η συσκευή δυσκολεύεται, απενεργοποιήστε το και θα δημιουργούνται με τον συνηθισμένο τρόπο.</string>
     <string name="seek_thumbnails_clear_title">Διαγραφή αποθηκευμένων μικρογραφιών</string>
     <string name="seek_thumbnails_clear_subtitle">Δημιουργούνται ξανά την επόμενη φορά που θα παίξετε έναν τίτλο.</string>
     <string name="seek_thumbnails_cleared">Οι αποθηκευμένες μικρογραφίες διαγράφηκαν</string>

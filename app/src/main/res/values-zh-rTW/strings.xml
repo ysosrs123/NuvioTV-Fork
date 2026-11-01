@@ -3273,6 +3273,8 @@
     <string name="about_update_auto_install_notice_subtitle">應用程式自行更新後，於下次啟動時顯示橫幅</string>
     <string name="licenses_attributions_avatars_title">觀影派對頭像</string>
     <string name="licenses_attributions_avatars_body">使用 DiceBear 製作，改編自以下設計：Davis Uche 的 \"Fun Emoji\" 和 Lisa Wischofsky 的 \"Adventurer\"，採用 CC BY 4.0 授權 (creativecommons.org/licenses/by/4.0)。Lisa Wischofsky 的 \"Lorelei\"、Zoish 的 \"Notionists\"、DiceBear 的 \"Pixel Art\" 和 \"Thumbs\"，採用 CC0 1.0。Pablo Stanley 的 \"Bottts\"，可免費用於個人和商業用途。動物臉孔來自 Twitter, Inc. 及其他貢獻者的 Twemoji，採用 CC BY 4.0 授權。</string>
+    <string name="licenses_attributions_subtitle_fonts_title">字幕字體</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto、Montserrat、Asap Condensed 和 Noto Sans（含 Noto Sans Arabic、Hebrew、Devanagari、Bengali 和 Tamil），由 The Roboto Project Authors、The Montserrat Project Authors、The Asap Project Authors 和 The Noto Project Authors 製作。基於 SIL Open Font License, Version 1.1 授權。</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin、Emby 和 Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc 連線至您自己的 Jellyfin、Emby 或 Silo 伺服器。其名稱和標誌歸各自擁有者所有。Nuvio Arc 與 Jellyfin、Emby 或 Silo 無關聯或未經其認可。</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -3872,6 +3874,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">開始前只產生四分之一。等待時間最短。</string>
     <string name="seek_thumbnails_from_copy_title">用副本產生縮圖</string>
     <string name="seek_thumbnails_from_copy_subtitle">更快產生縮圖：4K 標題使用 1080p 或 720p 副本，Usenet 標題使用不在 Usenet 上的副本。TorBox 上已快取的副本可能會被新增到您的清單中，停留幾分鐘。</string>
+    <string name="seek_thumbnails_hardware_title">用硬體解碼器產生縮圖</string>
+    <string name="seek_thumbnails_hardware_subtitle">使用裝置的硬體解碼器更快產生縮圖。如果縮圖顯示異常或裝置運作吃力，請關閉此項，將改用一般方式產生。</string>
     <string name="seek_thumbnails_clear_title">清除已儲存的縮圖</string>
     <string name="seek_thumbnails_clear_subtitle">下次播放標題時會重新產生。</string>
     <string name="seek_thumbnails_cleared">已清除儲存的縮圖</string>

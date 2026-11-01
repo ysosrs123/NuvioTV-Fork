@@ -3414,6 +3414,8 @@
     <string name="about_update_auto_install_notice_subtitle">הצגת באנר בהפעלה הבאה לאחר שהאפליקציה מתעדכנת בעצמה</string>
     <string name="licenses_attributions_avatars_title">אווטארים של מסיבת צפייה</string>
     <string name="licenses_attributions_avatars_body">נוצרו עם DiceBear, בעיבוד של העיצובים הבאים: \"Fun Emoji\" מאת Davis Uche ו-\"Adventurer\" מאת Lisa Wischofsky, ברישיון CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" מאת Lisa Wischofsky, \"Notionists\" מאת Zoish, \"Pixel Art\" ו-\"Thumbs\" מאת DiceBear, CC0 1.0. \"Bottts\" מאת Pablo Stanley, חופשי לשימוש אישי ומסחרי. פרצופי חיות מתוך Twemoji מאת Twitter, Inc. ותורמים נוספים, ברישיון CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">גופני כתוביות</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed ו-Noto Sans (עם Noto Sans Arabic, Hebrew, Devanagari, Bengali ו-Tamil) מאת The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors ו-The Noto Project Authors. מסופקים תחת רישיון SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby ו-Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc מתחברת לשרת Jellyfin, Emby או Silo שלך. השמות והלוגואים שייכים לבעליהם. Nuvio Arc אינה קשורה או מאושרת על ידי Jellyfin, Emby או Silo.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -4001,6 +4003,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">רבע מהכמות לפני שהוא מתחיל. ההמתנה הקצרה ביותר.</string>
     <string name="seek_thumbnails_from_copy_title">תמונות ממוזערות מעותק</string>
     <string name="seek_thumbnails_from_copy_subtitle">תמונות ממוזערות מהירות יותר לכותרים ב-4K מעותק 1080p או 720p, ולכותרים מ-Usenet מעותק שאינו ב-Usenet. עותק השמור במטמון של TorBox עשוי להתווסף לרשימה שלך לכמה דקות.</string>
+    <string name="seek_thumbnails_hardware_title">מפענח חומרה לתמונות ממוזערות</string>
+    <string name="seek_thumbnails_hardware_subtitle">תמונות ממוזערות מהירות יותר בעזרת מפענח החומרה של המכשיר. אם התמונות הממוזערות נראות שגויות או שהמכשיר מתקשה, יש לכבות את האפשרות והן ייווצרו בדרך הרגילה.</string>
     <string name="seek_thumbnails_clear_title">ניקוי תמונות ממוזערות שמורות</string>
     <string name="seek_thumbnails_clear_subtitle">הן נבנות מחדש בפעם הבאה שמנגנים כותר.</string>
     <string name="seek_thumbnails_cleared">התמונות הממוזערות השמורות נוקו</string>

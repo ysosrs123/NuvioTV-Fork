@@ -2778,6 +2778,8 @@
     <string name="about_update_auto_install_notice_subtitle">Показувати банер під час наступного запуску після самооновлення застосунку</string>
     <string name="licenses_attributions_avatars_title">Аватари спільного перегляду</string>
     <string name="licenses_attributions_avatars_body">Створено за допомогою DiceBear на основі цих дизайнів: \"Fun Emoji\" (Davis Uche) і \"Adventurer\" (Lisa Wischofsky), ліцензія CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" (Lisa Wischofsky), \"Notionists\" (Zoish), \"Pixel Art\" і \"Thumbs\" (DiceBear), CC0 1.0. \"Bottts\" (Pablo Stanley), безкоштовно для особистого та комерційного використання. Мордочки тварин із Twemoji від Twitter, Inc. та інших учасників, ліцензія CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Шрифти субтитрів</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed і Noto Sans (з Noto Sans Arabic, Hebrew, Devanagari, Bengali і Tamil), автори: The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors і The Noto Project Authors. Ліцензія SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby та Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc підключається до вашого власного сервера Jellyfin, Emby або Silo. Їхні назви та логотипи належать їхнім власникам. Nuvio Arc не афілійований з Jellyfin, Emby або Silo та не схвалений ними.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -3374,6 +3376,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">Учетверо менше до початку. Найкоротше очікування.</string>
     <string name="seek_thumbnails_from_copy_title">Мініатюри з копії</string>
     <string name="seek_thumbnails_from_copy_subtitle">Швидші мініатюри для тайтлів 4K з копії 1080p або 720p, а для тайтлів з Usenet з копії поза Usenet. Кешована копія в TorBox може бути додана до вашого списку на кілька хвилин.</string>
+    <string name="seek_thumbnails_hardware_title">Апаратний декодер для мініатюр</string>
+    <string name="seek_thumbnails_hardware_subtitle">Швидші мініатюри за допомогою апаратного декодера пристрою. Якщо мініатюри виглядають неправильно або пристрій не справляється, вимкніть це, і вони створюватимуться звичайним способом.</string>
     <string name="seek_thumbnails_clear_title">Очистити збережені мініатюри</string>
     <string name="seek_thumbnails_clear_subtitle">Вони створюються знову під час наступного відтворення тайтлу.</string>
     <string name="seek_thumbnails_cleared">Збережені мініатюри очищено</string>

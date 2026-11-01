@@ -3424,6 +3424,8 @@
     <string name="about_update_auto_install_notice_subtitle">Uygulama kendini güncelledikten sonra bir sonraki açılışta bildirim göster</string>
     <string name="licenses_attributions_avatars_title">İzleme partisi avatarları</string>
     <string name="licenses_attributions_avatars_body">DiceBear ile yapıldı, şu tasarımlar uyarlandı: Davis Uche\'nin \"Fun Emoji\" ve Lisa Wischofsky\'nin \"Adventurer\" tasarımları, CC BY 4.0 lisanslı (creativecommons.org/licenses/by/4.0). Lisa Wischofsky\'nin \"Lorelei\", Zoish\'in \"Notionists\", DiceBear\'ın \"Pixel Art\" ve \"Thumbs\" tasarımları, CC0 1.0. Pablo Stanley\'nin \"Bottts\" tasarımı, kişisel ve ticari kullanım için ücretsiz. Hayvan yüzleri Twitter, Inc. ve diğer katkıda bulunanların Twemoji setinden, CC BY 4.0 lisanslı.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Altyazı yazı tipleri</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed ve Noto Sans (Noto Sans Arabic, Hebrew, Devanagari, Bengali ve Tamil ile birlikte), The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors ve The Noto Project Authors tarafından. SIL Open Font License, Version 1.1 altında lisanslanmıştır.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby ve Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc, kendi Jellyfin, Emby veya Silo sunucunuza bağlanır. Adları ve logoları sahiplerine aittir. Nuvio Arc; Jellyfin, Emby veya Silo ile bağlantılı veya onaylanmış değildir.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -4012,6 +4014,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">Başlamadan önce çeyreği kadar. En kısa bekleme.</string>
     <string name="seek_thumbnails_from_copy_title">Kopyadan küçük resimler</string>
     <string name="seek_thumbnails_from_copy_subtitle">4K içerikler için 1080p veya 720p kopyadan, Usenet içerikleri için Usenet dışındaki bir kopyadan daha hızlı küçük resimler. TorBox\'ta önbelleğe alınmış bir kopya birkaç dakikalığına listenize eklenebilir.</string>
+    <string name="seek_thumbnails_hardware_title">Küçük resimler için donanım kod çözücü</string>
+    <string name="seek_thumbnails_hardware_subtitle">Cihazınızın donanım kod çözücüsüyle daha hızlı küçük resimler. Küçük resimler yanlış görünürse veya cihazınız zorlanırsa bunu kapatın, küçük resimler olağan şekilde oluşturulur.</string>
     <string name="seek_thumbnails_clear_title">Kayıtlı küçük resimleri temizle</string>
     <string name="seek_thumbnails_clear_subtitle">Bir içeriği bir sonraki oynatışınızda yeniden oluşturulur.</string>
     <string name="seek_thumbnails_cleared">Kayıtlı küçük resimler temizlendi</string>

@@ -1042,6 +1042,8 @@
     <string name="about_update_auto_install_notice_subtitle">ऐप के खुद अपडेट होने के बाद अगली बार खोलने पर बैनर दिखाएँ</string>
     <string name="licenses_attributions_avatars_title">वॉच पार्टी अवतार</string>
     <string name="licenses_attributions_avatars_body">DiceBear से बनाए गए, इन डिज़ाइनों को रीमिक्स करके: Davis Uche का \"Fun Emoji\" और Lisa Wischofsky का \"Adventurer\", CC BY 4.0 (creativecommons.org/licenses/by/4.0) के तहत लाइसेंस्ड। Lisa Wischofsky का \"Lorelei\", Zoish का \"Notionists\", DiceBear के \"Pixel Art\" और \"Thumbs\", CC0 1.0। Pablo Stanley का \"Bottts\", निजी और व्यावसायिक इस्तेमाल के लिए मुफ़्त। जानवरों के चेहरे Twitter, Inc. और अन्य योगदानकर्ताओं के Twemoji से, CC BY 4.0 के तहत लाइसेंस्ड।</string>
+    <string name="licenses_attributions_subtitle_fonts_title">सबटाइटल फ़ॉन्ट</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed और Noto Sans (Noto Sans Arabic, Hebrew, Devanagari, Bengali और Tamil के साथ), The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors और The Noto Project Authors द्वारा। SIL Open Font License, Version 1.1 के तहत लाइसेंस प्राप्त।</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby और Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc आपके अपने Jellyfin, Emby या Silo सर्वर से कनेक्ट होता है। उनके नाम और लोगो उनके मालिकों के हैं। Nuvio Arc का Jellyfin, Emby या Silo से कोई संबंध नहीं है और न ही यह उनके द्वारा समर्थित है।</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -1638,6 +1640,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">शुरू होने से पहले एक-चौथाई। सबसे कम इंतज़ार।</string>
     <string name="seek_thumbnails_from_copy_title">कॉपी से थंबनेल</string>
     <string name="seek_thumbnails_from_copy_subtitle">4K टाइटल के लिए 1080p या 720p कॉपी से, और Usenet टाइटल के लिए Usenet से बाहर की कॉपी से तेज़ थंबनेल। TorBox पर कैश की गई कॉपी कुछ मिनटों के लिए आपकी लिस्ट में जोड़ी जा सकती है।</string>
+    <string name="seek_thumbnails_hardware_title">थंबनेल के लिए हार्डवेयर डिकोडर</string>
+    <string name="seek_thumbnails_hardware_subtitle">आपके डिवाइस के हार्डवेयर डिकोडर से बने तेज़ थंबनेल। अगर थंबनेल गलत दिखें या डिवाइस को दिक्कत हो, तो इसे बंद करें, फिर वे सामान्य तरीके से बनेंगे।</string>
     <string name="seek_thumbnails_clear_title">सेव किए थंबनेल साफ़ करें</string>
     <string name="seek_thumbnails_clear_subtitle">अगली बार टाइटल चलाने पर ये फिर बन जाते हैं।</string>
     <string name="seek_thumbnails_cleared">सेव किए थंबनेल साफ़ हुए</string>

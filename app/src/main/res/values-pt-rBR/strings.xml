@@ -4102,6 +4102,8 @@
     <string name="about_update_auto_install_subtitle">Baixar novas versões em segundo plano e instalá-las enquanto o dispositivo está ocioso</string>
     <string name="about_update_auto_install_notice_title">Avisar após atualizações automáticas</string>
     <string name="about_update_auto_install_notice_subtitle">Exibir um banner na próxima abertura depois que o app se atualizar sozinho</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Fontes das legendas</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed e Noto Sans (com Noto Sans Arabic, Hebrew, Devanagari, Bengali e Tamil) de The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors e The Noto Project Authors. Licenciadas sob a SIL Open Font License, Version 1.1.</string>
     <string name="audio_dtshd_tv_passthrough">Passthrough de DTS-HD e DTS:X</string>
     <string name="audio_dtshd_tv_passthrough_sub">Escolha Passthrough pela TV se a sua soundbar mostrar DTS simples ou não tocar nada em filmes DTS-HD ou DTS:X.</string>
     <string name="audio_dtshd_tv_passthrough_standard">Padrão</string>
@@ -4145,6 +4147,8 @@
     <string name="assessment_suggested">Sugerido: %1$s</string>
     <string name="playback_dim_hdr_overlays">Escurecer controles em HDR</string>
     <string name="playback_dim_hdr_overlays_sub">Controles do player mais suaves durante a reprodução HDR, HLG e Dolby Vision. O brilho do vídeo não muda. As legendas em HDR seguem o estilo HDR nas configurações de legendas.</string>
+    <string name="seek_thumbnails_hardware_title">Decodificador de hardware para miniaturas</string>
+    <string name="seek_thumbnails_hardware_subtitle">Miniaturas mais rápidas feitas pelo decodificador de hardware do seu dispositivo. Se as miniaturas parecerem erradas ou o dispositivo tiver dificuldades, desative esta opção e elas serão feitas da forma habitual.</string>
     <string name="stream_resume_from_time">Continuar de %1$s</string>
     <string name="stream_resume_from_percent">Continuar de %1$d%%</string>
     <string name="tvdb_metadata_credit">Metadados fornecidos por %1$s</string>

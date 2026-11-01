@@ -4142,6 +4142,8 @@
     <string name="player_track_role_audio_description">Audiodeskripcia</string>
 
     <!-- Nuvio-test additions -->
+    <string name="licenses_attributions_subtitle_fonts_title">Písma titulkov</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed a Noto Sans (s Noto Sans Arabic, Hebrew, Devanagari, Bengali a Tamil) od The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors a The Noto Project Authors. Licencované pod SIL Open Font License, Version 1.1.</string>
     <string name="audio_dtshd_tv_passthrough">Priechod zvuku DTS-HD a DTS:X</string>
     <string name="audio_dtshd_tv_passthrough_sub">Zvoľte Priechod cez TV, ak soundbar ukazuje len DTS alebo pri filmoch s DTS-HD či DTS:X nehrá nič.</string>
     <string name="audio_dtshd_tv_passthrough_standard">Štandardný</string>
@@ -4174,5 +4176,7 @@
     <string name="assessment_suggested">Odporúčané: %1$s</string>
     <string name="playback_dim_hdr_overlays">Stlmiť ovládanie v HDR</string>
     <string name="playback_dim_hdr_overlays_sub">Jemnejšie ovládacie prvky prehrávača počas prehrávania HDR, HLG a Dolby Vision. Jas videa sa nemení. Titulky v HDR sa riadia štýlom HDR v nastaveniach titulkov.</string>
+    <string name="seek_thumbnails_hardware_title">Hardvérový dekodér pre miniatúry</string>
+    <string name="seek_thumbnails_hardware_subtitle">Rýchlejšie miniatúry vytvorené hardvérovým dekodérom vášho zariadenia. Ak miniatúry vyzerajú zle alebo zariadenie nestíha, vypnite túto voľbu a vytvoria sa obvyklým spôsobom.</string>
     <string name="tvdb_metadata_credit">Metadáta poskytuje %1$s</string>
 </resources>

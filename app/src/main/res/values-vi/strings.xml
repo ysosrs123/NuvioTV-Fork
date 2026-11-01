@@ -4132,6 +4132,8 @@
     <string name="player_track_role_audio_description">Mô tả âm thanh</string>
 
     <!-- Nuvio-test additions -->
+    <string name="licenses_attributions_subtitle_fonts_title">Phông chữ phụ đề</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed và Noto Sans (kèm Noto Sans Arabic, Hebrew, Devanagari, Bengali và Tamil) của The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors và The Noto Project Authors. Được cấp phép theo SIL Open Font License, Version 1.1.</string>
     <string name="audio_dtshd_tv_passthrough">Truyền thẳng DTS-HD và DTS:X</string>
     <string name="audio_dtshd_tv_passthrough_sub">Chọn Truyền thẳng qua TV nếu loa thanh chỉ hiện DTS thường hoặc không phát gì với phim DTS-HD hay DTS:X.</string>
     <string name="audio_dtshd_tv_passthrough_standard">Tiêu chuẩn</string>
@@ -4155,5 +4157,7 @@
     <string name="assessment_suggested">Đề xuất: %1$s</string>
     <string name="playback_dim_hdr_overlays">Làm mờ điều khiển khi HDR</string>
     <string name="playback_dim_hdr_overlays_sub">Điều khiển trình phát dịu hơn khi phát HDR, HLG và Dolby Vision. Độ sáng video không đổi. Phụ đề trong HDR theo kiểu HDR trong cài đặt phụ đề.</string>
+    <string name="seek_thumbnails_hardware_title">Bộ giải mã phần cứng cho ảnh thu nhỏ</string>
+    <string name="seek_thumbnails_hardware_subtitle">Ảnh thu nhỏ nhanh hơn nhờ bộ giải mã phần cứng của thiết bị. Nếu ảnh thu nhỏ trông không đúng hoặc thiết bị bị chậm, hãy tắt mục này và ảnh sẽ được tạo theo cách thông thường.</string>
     <string name="tvdb_metadata_credit">Siêu dữ liệu do %1$s cung cấp</string>
 </resources>

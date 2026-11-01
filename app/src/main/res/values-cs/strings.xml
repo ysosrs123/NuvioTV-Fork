@@ -2880,6 +2880,8 @@
     <string name="about_update_auto_install_notice_subtitle">Po samočinné aktualizaci aplikace zobrazí při dalším spuštění banner</string>
     <string name="licenses_attributions_avatars_title">Avatary společného sledování</string>
     <string name="licenses_attributions_avatars_body">Vytvořeno pomocí DiceBear s úpravou těchto návrhů: \"Fun Emoji\" (Davis Uche) a \"Adventurer\" (Lisa Wischofsky), licence CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" (Lisa Wischofsky), \"Notionists\" (Zoish), \"Pixel Art\" a \"Thumbs\" (DiceBear), CC0 1.0. \"Bottts\" (Pablo Stanley), zdarma pro osobní i komerční použití. Zvířecí obličeje z Twemoji od Twitter, Inc. a dalších přispěvatelů, licence CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Písma titulků</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed a Noto Sans (s Noto Sans Arabic, Hebrew, Devanagari, Bengali a Tamil) od The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors a The Noto Project Authors. Licence SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby a Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc se připojuje k vašemu vlastnímu serveru Jellyfin, Emby nebo Silo. Jejich názvy a loga patří jejich vlastníkům. Nuvio Arc není s Jellyfin, Emby ani Silo spjaté ani jimi podporované.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -3476,6 +3478,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">Čtvrtinový počet před spuštěním. Nejkratší čekání.</string>
     <string name="seek_thumbnails_from_copy_title">Miniatury z kopie</string>
     <string name="seek_thumbnails_from_copy_subtitle">Rychlejší miniatury pro tituly 4K z kopie 1080p nebo 720p a pro tituly ze sítě Usenet z kopie mimo síť Usenet. Kopie uložená v cache služby TorBox se může na několik minut přidat do vašeho seznamu.</string>
+    <string name="seek_thumbnails_hardware_title">Hardwarový dekodér pro miniatury</string>
+    <string name="seek_thumbnails_hardware_subtitle">Rychlejší miniatury vytvořené hardwarovým dekodérem vašeho zařízení. Pokud miniatury vypadají špatně nebo zařízení nestíhá, vypněte tuto volbu a vytvoří se obvyklým způsobem.</string>
     <string name="seek_thumbnails_clear_title">Vymazat uložené miniatury</string>
     <string name="seek_thumbnails_clear_subtitle">Vytvoří se znovu při příštím přehrání titulu.</string>
     <string name="seek_thumbnails_cleared">Uložené miniatury vymazány</string>

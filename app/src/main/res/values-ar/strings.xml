@@ -3080,6 +3080,8 @@
     <string name="about_update_auto_install_notice_subtitle">إظهار شريط عند التشغيل التالي بعد أن يحدّث التطبيق نفسه</string>
     <string name="licenses_attributions_avatars_title">الصور الرمزية لحفلة المشاهدة</string>
     <string name="licenses_attributions_avatars_body">صُنعت باستخدام DiceBear مع تعديل هذه التصاميم: \"Fun Emoji\" من Davis Uche و \"Adventurer\" من Lisa Wischofsky، برخصة CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" من Lisa Wischofsky، \"Notionists\" من Zoish، \"Pixel Art\" و \"Thumbs\" من DiceBear، برخصة CC0 1.0. \"Bottts\" من Pablo Stanley، مجاني للاستخدام الشخصي والتجاري. وجوه الحيوانات من Twemoji من Twitter, Inc. ومساهمين آخرين، برخصة CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">خطوط الترجمة</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto وMontserrat وAsap Condensed وNoto Sans (مع Noto Sans Arabic وHebrew وDevanagari وBengali وTamil) من The Roboto Project Authors وThe Montserrat Project Authors وThe Asap Project Authors وThe Noto Project Authors. مرخّصة بموجب SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin و Emby و Silo</string>
     <string name="licenses_attributions_media_servers_body">يتصل Nuvio Arc بخادم Jellyfin أو Emby أو Silo الخاص بك. الأسماء والشعارات ملك لأصحابها. Nuvio Arc غير تابع لـ Jellyfin أو Emby أو Silo وغير معتمد منها.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -3676,6 +3678,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">ربع العدد قبل أن يبدأ. أقصر انتظار.</string>
     <string name="seek_thumbnails_from_copy_title">صور مصغرة من نسخة</string>
     <string name="seek_thumbnails_from_copy_subtitle">صور مصغرة أسرع لعناوين 4K من نسخة 1080p أو 720p، ولعناوين Usenet من نسخة ليست على Usenet. قد تُضاف نسخة جاهزة على TorBox إلى قائمتك لبضع دقائق.</string>
+    <string name="seek_thumbnails_hardware_title">فك تشفير الصور المصغرة عبر الجهاز</string>
+    <string name="seek_thumbnails_hardware_subtitle">صور مصغرة أسرع يُنشئها مفكك التشفير المدمج في جهازك. إذا ظهرت الصور المصغرة بشكل خاطئ أو واجه جهازك صعوبة، أوقف هذا الخيار لتُنشأ بالطريقة المعتادة.</string>
     <string name="seek_thumbnails_clear_title">مسح الصور المصغرة المحفوظة</string>
     <string name="seek_thumbnails_clear_subtitle">يُعاد إنشاؤها عند تشغيل العنوان في المرة القادمة.</string>
     <string name="seek_thumbnails_cleared">تم مسح الصور المصغرة المحفوظة</string>

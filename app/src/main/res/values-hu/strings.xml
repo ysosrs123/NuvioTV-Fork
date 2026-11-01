@@ -3906,6 +3906,8 @@
     <string name="player_track_role_audio_description">Audioleírás</string>
 
     <!-- Nuvio-test additions -->
+    <string name="licenses_attributions_subtitle_fonts_title">Felirat-betűtípusok</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed és Noto Sans (Noto Sans Arabic, Hebrew, Devanagari, Bengali és Tamil változattal), készítők: The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors és The Noto Project Authors. SIL Open Font License, Version 1.1 alatt érhető el.</string>
     <string name="audio_dtshd_tv_passthrough">DTS-HD és DTS:X passthrough</string>
     <string name="audio_dtshd_tv_passthrough_sub">Válassza a TV passthrough lehetőséget, ha a hangprojektor csak sima DTS-t mutat, vagy DTS-HD és DTS:X filmeknél nem szól semmi.</string>
     <string name="audio_dtshd_tv_passthrough_standard">Normál</string>
@@ -3935,5 +3937,7 @@
     <string name="assessment_suggested">Javasolt: %1$s</string>
     <string name="playback_dim_hdr_overlays">Vezérlők halványítása HDR-ben</string>
     <string name="playback_dim_hdr_overlays_sub">Lágyabb lejátszóvezérlők HDR, HLG és Dolby Vision lejátszás közben. A videó fényereje nem változik. A HDR-feliratok a feliratbeállítások HDR-stílusát követik.</string>
+    <string name="seek_thumbnails_hardware_title">Hardveres dekóder a miniatűrökhöz</string>
+    <string name="seek_thumbnails_hardware_subtitle">Gyorsabb miniatűrök az eszközöd hardveres dekóderével. Ha a miniatűrök hibásnak tűnnek, vagy az eszköz nehezen bírja, kapcsold ki, és a szokásos módon készülnek.</string>
     <string name="tvdb_metadata_credit">A metaadatokat a(z) %1$s biztosítja</string>
 </resources>

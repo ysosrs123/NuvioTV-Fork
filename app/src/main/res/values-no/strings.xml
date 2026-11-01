@@ -1167,6 +1167,8 @@
     <string name="about_update_auto_install_notice_subtitle">Vis et banner ved neste oppstart etter at appen har oppdatert seg selv</string>
     <string name="licenses_attributions_avatars_title">Avatarer for seerfest</string>
     <string name="licenses_attributions_avatars_body">Laget med DiceBear, som remikser disse designene: \"Fun Emoji\" av Davis Uche og \"Adventurer\" av Lisa Wischofsky, lisensiert under CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" av Lisa Wischofsky, \"Notionists\" av Zoish, \"Pixel Art\" og \"Thumbs\" av DiceBear, CC0 1.0. \"Bottts\" av Pablo Stanley, fri til personlig og kommersiell bruk. Dyreansikter fra Twemoji av Twitter, Inc. og andre bidragsytere, lisensiert under CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Skrifter for undertekster</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed og Noto Sans (med Noto Sans Arabic, Hebrew, Devanagari, Bengali og Tamil) av The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors og The Noto Project Authors. Lisensiert under SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby og Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc kobler til din egen Jellyfin-, Emby- eller Silo-server. Navnene og logoene tilhører eierne sine. Nuvio Arc er ikke tilknyttet eller godkjent av Jellyfin, Emby eller Silo.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -1763,6 +1765,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">En fjerdedel så mange før den starter. Den korteste ventetiden.</string>
     <string name="seek_thumbnails_from_copy_title">Miniatyrer fra en kopi</string>
     <string name="seek_thumbnails_from_copy_subtitle">Raskere miniatyrer for 4K-titler fra en 1080p- eller 720p-kopi, og for Usenet-titler fra en kopi som ikke ligger på Usenet. En bufret TorBox-kopi kan bli lagt til i listen din i noen minutter.</string>
+    <string name="seek_thumbnails_hardware_title">Maskinvaredekoder for miniatyrer</string>
+    <string name="seek_thumbnails_hardware_subtitle">Raskere miniatyrer laget av enhetens maskinvaredekoder. Hvis miniatyrene ser feil ut eller enheten sliter, slå av dette, så lages de på vanlig måte.</string>
     <string name="seek_thumbnails_clear_title">Fjern lagrede miniatyrer</string>
     <string name="seek_thumbnails_clear_subtitle">De lages på nytt neste gang du spiller av en tittel.</string>
     <string name="seek_thumbnails_cleared">Lagrede miniatyrer fjernet</string>

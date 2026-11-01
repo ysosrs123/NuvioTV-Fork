@@ -873,6 +873,8 @@
     <string name="about_update_auto_install_notice_subtitle">Afișează un banner la următoarea pornire după ce aplicația se actualizează singură</string>
     <string name="licenses_attributions_avatars_title">Avataruri pentru petrecerea de vizionare</string>
     <string name="licenses_attributions_avatars_body">Realizate cu DiceBear, pornind de la aceste modele: \"Fun Emoji\" de Davis Uche și \"Adventurer\" de Lisa Wischofsky, sub licența CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" de Lisa Wischofsky, \"Notionists\" de Zoish, \"Pixel Art\" și \"Thumbs\" de DiceBear, CC0 1.0. \"Bottts\" de Pablo Stanley, gratuit pentru uz personal și comercial. Fețe de animale din Twemoji, de Twitter, Inc. și alți contribuitori, sub licența CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Fonturi subtitrări</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed și Noto Sans (cu Noto Sans Arabic, Hebrew, Devanagari, Bengali și Tamil) de The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors și The Noto Project Authors. Sub licența SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby și Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc se conectează la propriul tău server Jellyfin, Emby sau Silo. Numele și siglele aparțin proprietarilor lor. Nuvio Arc nu este afiliat cu Jellyfin, Emby sau Silo și nu este susținut de acestea.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -1471,6 +1473,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">Un sfert din miniaturi înainte să înceapă. Cea mai scurtă așteptare.</string>
     <string name="seek_thumbnails_from_copy_title">Miniaturi dintr-o copie</string>
     <string name="seek_thumbnails_from_copy_subtitle">Miniaturi mai rapide pentru titlurile 4K dintr-o copie 1080p sau 720p, iar pentru titlurile de pe Usenet dintr-o copie din afara rețelei Usenet. O copie din cache-ul TorBox poate fi adăugată în lista ta pentru câteva minute.</string>
+    <string name="seek_thumbnails_hardware_title">Decoder hardware pentru miniaturi</string>
+    <string name="seek_thumbnails_hardware_subtitle">Miniaturi mai rapide create de decoderul hardware al dispozitivului tău. Dacă miniaturile arată greșit sau dispozitivul se descurcă greu, dezactivează opțiunea și vor fi create în modul obișnuit.</string>
     <string name="seek_thumbnails_clear_title">Șterge miniaturile salvate</string>
     <string name="seek_thumbnails_clear_subtitle">Sunt refăcute data viitoare când redai un titlu.</string>
     <string name="seek_thumbnails_cleared">Miniaturile salvate au fost șterse</string>

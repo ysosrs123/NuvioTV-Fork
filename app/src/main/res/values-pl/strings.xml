@@ -4210,6 +4210,8 @@
     <string name="player_track_role_audio_description">Audiodeskrypcja</string>
 
     <!-- Nuvio-test additions -->
+    <string name="licenses_attributions_subtitle_fonts_title">Czcionki napisów</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed i Noto Sans (z Noto Sans Arabic, Hebrew, Devanagari, Bengali i Tamil) autorstwa The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors i The Noto Project Authors. Na licencji SIL Open Font License, Version 1.1.</string>
     <string name="audio_dtshd_tv_passthrough">Przepuszczanie DTS-HD i DTS:X</string>
     <string name="audio_dtshd_tv_passthrough_sub">Wybierz Przepuszczanie przez TV, jeśli soundbar pokazuje zwykłe DTS lub nic nie odtwarza w filmach DTS-HD albo DTS:X.</string>
     <string name="audio_dtshd_tv_passthrough_standard">Standardowe</string>
@@ -4233,5 +4235,7 @@
     <string name="assessment_suggested">Sugerowane: %1$s</string>
     <string name="playback_dim_hdr_overlays">Przyciemniaj sterowanie w HDR</string>
     <string name="playback_dim_hdr_overlays_sub">Łagodniejsze elementy sterowania odtwarzacza podczas odtwarzania HDR, HLG i Dolby Vision. Jasność wideo się nie zmienia. Napisy w HDR korzystają ze stylu HDR w ustawieniach napisów.</string>
+    <string name="seek_thumbnails_hardware_title">Dekoder sprzętowy dla miniatur</string>
+    <string name="seek_thumbnails_hardware_subtitle">Szybsze miniatury tworzone przez dekoder sprzętowy urządzenia. Jeśli miniatury wyglądają źle lub urządzenie nie nadąża, wyłącz tę opcję, a będą tworzone w zwykły sposób.</string>
     <string name="tvdb_metadata_credit">Metadane dostarcza %1$s</string>
 </resources>

@@ -1657,6 +1657,8 @@
     <string name="about_update_auto_install_notice_subtitle">Visa en banner vid nästa start efter att appen har uppdaterat sig själv</string>
     <string name="licenses_attributions_avatars_title">Avatarer för tittarfest</string>
     <string name="licenses_attributions_avatars_body">Skapade med DiceBear, som remixar dessa designer: \"Fun Emoji\" av Davis Uche och \"Adventurer\" av Lisa Wischofsky, licensierade under CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" av Lisa Wischofsky, \"Notionists\" av Zoish, \"Pixel Art\" och \"Thumbs\" av DiceBear, CC0 1.0. \"Bottts\" av Pablo Stanley, fri för personligt och kommersiellt bruk. Djuransikten från Twemoji av Twitter, Inc. och andra bidragsgivare, licensierade under CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Typsnitt för undertexter</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed och Noto Sans (med Noto Sans Arabic, Hebrew, Devanagari, Bengali och Tamil) av The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors och The Noto Project Authors. Licensierade under SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby och Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc ansluter till din egen Jellyfin-, Emby- eller Silo-server. Namnen och logotyperna tillhör sina ägare. Nuvio Arc har ingen koppling till och är inte godkänt av Jellyfin, Emby eller Silo.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -2253,6 +2255,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">En fjärdedel så många innan den startar. Den kortaste väntan.</string>
     <string name="seek_thumbnails_from_copy_title">Miniatyrer från en kopia</string>
     <string name="seek_thumbnails_from_copy_subtitle">Snabbare miniatyrer för 4K-titlar från en 1080p- eller 720p-kopia, och för Usenet-titlar från en kopia som inte ligger på Usenet. En cachad TorBox-kopia kan läggas till i din lista i några minuter.</string>
+    <string name="seek_thumbnails_hardware_title">Hårdvaruavkodare för miniatyrer</string>
+    <string name="seek_thumbnails_hardware_subtitle">Snabbare miniatyrer skapade av enhetens hårdvaruavkodare. Om miniatyrerna ser fel ut eller enheten har svårt att hänga med, stäng av detta så skapas de på vanligt sätt.</string>
     <string name="seek_thumbnails_clear_title">Rensa sparade miniatyrer</string>
     <string name="seek_thumbnails_clear_subtitle">De skapas på nytt nästa gång du spelar en titel.</string>
     <string name="seek_thumbnails_cleared">Sparade miniatyrer rensade</string>

@@ -2744,6 +2744,8 @@
     <string name="about_update_auto_install_notice_subtitle">アプリが自動で更新された後、次回起動時にバナーを表示します</string>
     <string name="licenses_attributions_avatars_title">ウォッチパーティーのアバター</string>
     <string name="licenses_attributions_avatars_body">DiceBearで作成。次のデザインをリミックスしています: Davis Ucheの\"Fun Emoji\"とLisa Wischofskyの\"Adventurer\"（CC BY 4.0ライセンス、creativecommons.org/licenses/by/4.0）。Lisa Wischofskyの\"Lorelei\"、Zoishの\"Notionists\"、DiceBearの\"Pixel Art\"と\"Thumbs\"（CC0 1.0）。Pablo Stanleyの\"Bottts\"（個人・商用利用無料）。動物の顔はTwitter, Inc.およびその他の貢献者によるTwemoji（CC BY 4.0ライセンス）。</string>
+    <string name="licenses_attributions_subtitle_fonts_title">字幕フォント</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto、Montserrat、Asap Condensed、Noto Sans（Noto Sans Arabic、Hebrew、Devanagari、Bengali、Tamilを含む）。作成: The Roboto Project Authors、The Montserrat Project Authors、The Asap Project Authors、The Noto Project Authors。SIL Open Font License, Version 1.1でライセンスされています。</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin、Emby、Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arcはお使いのJellyfin、Emby、Siloサーバーに接続します。各名称とロゴはそれぞれの所有者に帰属します。Nuvio ArcはJellyfin、Emby、Siloと提携または承認されていません。</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -3340,6 +3342,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">再生前の枚数を4分の1にします。待ち時間は最も短くなります。</string>
     <string name="seek_thumbnails_from_copy_title">コピーからサムネイルを作成</string>
     <string name="seek_thumbnails_from_copy_subtitle">4Kタイトルは1080pまたは720pのコピーから、UsenetのタイトルはUsenet以外のコピーから、サムネイルをより速く作成します。TorBoxのリストにキャッシュ済みのコピーが数分間追加される場合があります。</string>
+    <string name="seek_thumbnails_hardware_title">サムネイルにハードウェアデコーダーを使用</string>
+    <string name="seek_thumbnails_hardware_subtitle">デバイスのハードウェアデコーダーでサムネイルをより速く作成します。サムネイルの表示がおかしい場合やデバイスの動作が重い場合は、オフにすると通常の方法で作成されます。</string>
     <string name="seek_thumbnails_clear_title">保存済みサムネイルを消去</string>
     <string name="seek_thumbnails_clear_subtitle">次にタイトルを再生したときに作り直されます。</string>
     <string name="seek_thumbnails_cleared">保存済みサムネイルを消去しました</string>

@@ -4126,6 +4126,8 @@
     <string name="player_track_role_audio_description">Audiodescripción</string>
 
     <!-- Nuvio-test additions -->
+    <string name="licenses_attributions_subtitle_fonts_title">Fuentes de subtítulos</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed y Noto Sans (con Noto Sans Arabic, Hebrew, Devanagari, Bengali y Tamil) de The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors y The Noto Project Authors. Con licencia SIL Open Font License, Version 1.1.</string>
     <string name="audio_dtshd_tv_passthrough">Passthrough de DTS-HD y DTS:X</string>
     <string name="audio_dtshd_tv_passthrough_sub">Elige Passthrough de la TV si tu barra de sonido muestra DTS simple o no reproduce nada en películas DTS-HD o DTS:X.</string>
     <string name="audio_dtshd_tv_passthrough_standard">Estándar</string>
@@ -4158,6 +4160,8 @@
     <string name="assessment_suggested">Sugerido: %1$s</string>
     <string name="playback_dim_hdr_overlays">Atenuar controles en HDR</string>
     <string name="playback_dim_hdr_overlays_sub">Controles del reproductor más suaves durante la reproducción HDR, HLG y Dolby Vision. El brillo del vídeo no cambia. Los subtítulos en HDR siguen el estilo HDR de los ajustes de subtítulos.</string>
+    <string name="seek_thumbnails_hardware_title">Decodificador de hardware para miniaturas</string>
+    <string name="seek_thumbnails_hardware_subtitle">Miniaturas más rápidas creadas por el decodificador de hardware de tu dispositivo. Si las miniaturas se ven mal o a tu dispositivo le cuesta, desactívalo y se crearán de la forma habitual.</string>
     <string name="stream_resume_from_time">Reanudar desde %1$s</string>
     <string name="stream_resume_from_percent">Reanudar desde %1$d%%</string>
     <string name="tvdb_metadata_credit">Metadatos proporcionados por %1$s</string>

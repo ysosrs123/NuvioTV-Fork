@@ -3185,6 +3185,8 @@
     <string name="about_update_auto_install_notice_subtitle">Toon een banner bij de volgende start nadat de app zichzelf heeft bijgewerkt</string>
     <string name="licenses_attributions_avatars_title">Avatars voor watchparty</string>
     <string name="licenses_attributions_avatars_body">Gemaakt met DiceBear, als remix van deze ontwerpen: \"Fun Emoji\" van Davis Uche en \"Adventurer\" van Lisa Wischofsky, gelicentieerd onder CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" van Lisa Wischofsky, \"Notionists\" van Zoish, \"Pixel Art\" en \"Thumbs\" van DiceBear, CC0 1.0. \"Bottts\" van Pablo Stanley, gratis voor persoonlijk en commercieel gebruik. Dierengezichten uit Twemoji van Twitter, Inc. en andere bijdragers, gelicentieerd onder CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Lettertypen van ondertiteling</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed en Noto Sans (met Noto Sans Arabic, Hebrew, Devanagari, Bengali en Tamil) door The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors en The Noto Project Authors. Gelicentieerd onder de SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby en Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc maakt verbinding met je eigen Jellyfin-, Emby- of Silo-server. De namen en logo\'s zijn eigendom van hun eigenaren. Nuvio Arc is niet verbonden aan of onderschreven door Jellyfin, Emby of Silo.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -3781,6 +3783,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">Een kwart zoveel voordat die begint. De kortste wachttijd.</string>
     <string name="seek_thumbnails_from_copy_title">Miniaturen uit een kopie</string>
     <string name="seek_thumbnails_from_copy_subtitle">Snellere miniaturen voor 4K-titels uit een 1080p- of 720p-kopie, en voor Usenet-titels uit een kopie die niet op Usenet staat. Een kopie uit de TorBox-cache kan een paar minuten aan je lijst worden toegevoegd.</string>
+    <string name="seek_thumbnails_hardware_title">Hardwaredecoder voor miniaturen</string>
+    <string name="seek_thumbnails_hardware_subtitle">Snellere miniaturen gemaakt door de hardwaredecoder van je apparaat. Zien miniaturen er verkeerd uit of heeft je apparaat het zwaar, zet dit dan uit en ze worden op de gewone manier gemaakt.</string>
     <string name="seek_thumbnails_clear_title">Opgeslagen miniaturen wissen</string>
     <string name="seek_thumbnails_clear_subtitle">Ze worden opnieuw gemaakt wanneer je weer een titel afspeelt.</string>
     <string name="seek_thumbnails_cleared">Opgeslagen miniaturen gewist</string>

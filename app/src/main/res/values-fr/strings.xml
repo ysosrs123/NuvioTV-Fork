@@ -4119,6 +4119,8 @@
     <string name="about_update_auto_install_subtitle">Télécharger les nouvelles versions en arrière-plan et les installer lorsque l’appareil est inactif</string>
     <string name="about_update_auto_install_notice_title">Notifier après les mises à jour automatiques</string>
     <string name="about_update_auto_install_notice_subtitle">Afficher une bannière au prochain lancement, une fois que l’application s’est mise à jour d’elle-même</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Polices des sous-titres</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed et Noto Sans (avec Noto Sans Arabic, Hebrew, Devanagari, Bengali et Tamil) par The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors et The Noto Project Authors. Distribuées sous licence SIL Open Font License, Version 1.1.</string>
     <string name="audio_dtshd_tv_passthrough">Passthrough DTS-HD et DTS:X</string>
     <string name="audio_dtshd_tv_passthrough_sub">Choisissez Passthrough par la TV si votre barre de son affiche un simple DTS ou ne joue rien sur les films DTS-HD ou DTS:X.</string>
     <string name="audio_dtshd_tv_passthrough_standard">Standard</string>
@@ -4156,6 +4158,8 @@
     <string name="assessment_suggested">Suggéré : %1$s</string>
     <string name="playback_dim_hdr_overlays">Atténuer les commandes en HDR</string>
     <string name="playback_dim_hdr_overlays_sub">Commandes du lecteur plus douces pendant la lecture HDR, HLG et Dolby Vision. La luminosité de la vidéo ne change pas. En HDR, les sous-titres suivent le style HDR des réglages des sous-titres.</string>
+    <string name="seek_thumbnails_hardware_title">Décodeur matériel pour les miniatures</string>
+    <string name="seek_thumbnails_hardware_subtitle">Des miniatures plus rapides créées par le décodeur matériel de votre appareil. Si les miniatures s\'affichent mal ou si votre appareil peine, désactivez cette option et elles seront créées de la façon habituelle.</string>
     <string name="stream_resume_from_time">Reprendre à %1$s</string>
     <string name="stream_resume_from_percent">Reprendre à %1$d&#160;%%</string>
     <string name="tvdb_metadata_credit">Métadonnées fournies par %1$s</string>

@@ -2617,6 +2617,8 @@
     <string name="about_update_auto_install_notice_subtitle">Mostra um banner no arranque seguinte depois de a app se atualizar sozinha</string>
     <string name="licenses_attributions_avatars_title">Avatares da sessão em grupo</string>
     <string name="licenses_attributions_avatars_body">Feitos com DiceBear, remisturando estes designs: \"Fun Emoji\" de Davis Uche e \"Adventurer\" de Lisa Wischofsky, licenciados sob CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" de Lisa Wischofsky, \"Notionists\" de Zoish, \"Pixel Art\" e \"Thumbs\" de DiceBear, CC0 1.0. \"Bottts\" de Pablo Stanley, livre para uso pessoal e comercial. Rostos de animais do Twemoji, do Twitter, Inc. e outros colaboradores, licenciados sob CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Tipos de letra das legendas</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed e Noto Sans (com Noto Sans Arabic, Hebrew, Devanagari, Bengali e Tamil) de The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors e The Noto Project Authors. Licenciados sob a SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby e Silo</string>
     <string name="licenses_attributions_media_servers_body">O Nuvio Arc liga-se ao teu próprio servidor Jellyfin, Emby ou Silo. Os nomes e logótipos pertencem aos respetivos proprietários. O Nuvio Arc não é afiliado nem endossado pelo Jellyfin, Emby ou Silo.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -3214,6 +3216,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">Um quarto das miniaturas antes de começar. A espera mais curta.</string>
     <string name="seek_thumbnails_from_copy_title">Miniaturas a partir de uma cópia</string>
     <string name="seek_thumbnails_from_copy_subtitle">Miniaturas mais rápidas para títulos 4K a partir de uma cópia 1080p ou 720p, e para títulos da Usenet a partir de uma cópia fora da Usenet. Uma cópia em cache no TorBox pode ser adicionada à tua lista durante alguns minutos.</string>
+    <string name="seek_thumbnails_hardware_title">Descodificador por hardware para miniaturas</string>
+    <string name="seek_thumbnails_hardware_subtitle">Miniaturas mais rápidas feitas pelo descodificador por hardware do teu dispositivo. Se as miniaturas parecerem erradas ou o dispositivo tiver dificuldades, desativa esta opção e serão feitas da forma habitual.</string>
     <string name="seek_thumbnails_clear_title">Limpar miniaturas guardadas</string>
     <string name="seek_thumbnails_clear_subtitle">São recriadas da próxima vez que reproduzires um título.</string>
     <string name="seek_thumbnails_cleared">Miniaturas guardadas limpas</string>

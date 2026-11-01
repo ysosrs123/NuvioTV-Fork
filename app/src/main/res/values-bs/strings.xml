@@ -1537,6 +1537,8 @@
     <string name="about_update_auto_install_notice_subtitle">Prikaži baner pri sljedećem pokretanju nakon što se aplikacija sama ažurira</string>
     <string name="licenses_attributions_avatars_title">Avatari za zajedničko gledanje</string>
     <string name="licenses_attributions_avatars_body">Napravljeno uz DiceBear, preradom ovih dizajna: \"Fun Emoji\" autora Davis Uche i \"Adventurer\" autorice Lisa Wischofsky, pod licencom CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" autorice Lisa Wischofsky, \"Notionists\" autora Zoish, \"Pixel Art\" i \"Thumbs\" autora DiceBear, CC0 1.0. \"Bottts\" autora Pablo Stanley, besplatno za ličnu i komercijalnu upotrebu. Životinjska lica iz Twemojija, autori Twitter, Inc. i drugi saradnici, pod licencom CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Fontovi titlova</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed i Noto Sans (sa Noto Sans Arabic, Hebrew, Devanagari, Bengali i Tamil), autori: The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors i The Noto Project Authors. Pod licencom SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby i Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc se povezuje s tvojim vlastitim Jellyfin, Emby ili Silo serverom. Njihovi nazivi i logotipi pripadaju njihovim vlasnicima. Nuvio Arc nije povezan s projektima Jellyfin, Emby i Silo niti ga oni podržavaju.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -2133,6 +2135,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">Četiri puta manje prije početka. Najkraće čekanje.</string>
     <string name="seek_thumbnails_from_copy_title">Thumbnailovi iz kopije</string>
     <string name="seek_thumbnails_from_copy_subtitle">Brži thumbnailovi za 4K naslove iz 1080p ili 720p kopije, a za Usenet naslove iz kopije koja nije na Usenet mreži. Keširana TorBox kopija može biti dodana na tvoju listu na nekoliko minuta.</string>
+    <string name="seek_thumbnails_hardware_title">Hardware dekoder za thumbnailove</string>
+    <string name="seek_thumbnails_hardware_subtitle">Brži thumbnailovi koje pravi hardware dekoder tvog uređaja. Ako thumbnailovi izgledaju pogrešno ili se uređaj muči, isključi ovo i pravit će se na uobičajen način.</string>
     <string name="seek_thumbnails_clear_title">Obriši sačuvane thumbnailove</string>
     <string name="seek_thumbnails_clear_subtitle">Ponovo se prave kada sljedeći put pustiš naslov.</string>
     <string name="seek_thumbnails_cleared">Sačuvani thumbnailovi obrisani</string>

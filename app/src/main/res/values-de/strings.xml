@@ -2315,6 +2315,8 @@
     <string name="about_update_auto_install_notice_subtitle">Beim nächsten Start ein Banner zeigen, nachdem sich die App selbst aktualisiert hat</string>
     <string name="licenses_attributions_avatars_title">Watch-Party-Avatare</string>
     <string name="licenses_attributions_avatars_body">Erstellt mit DiceBear, als Remix dieser Designs: \"Fun Emoji\" von Davis Uche und \"Adventurer\" von Lisa Wischofsky, lizenziert unter CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" von Lisa Wischofsky, \"Notionists\" von Zoish, \"Pixel Art\" und \"Thumbs\" von DiceBear, CC0 1.0. \"Bottts\" von Pablo Stanley, frei für private und kommerzielle Nutzung. Tiergesichter aus Twemoji von Twitter, Inc. und weiteren Mitwirkenden, lizenziert unter CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Untertitel-Schriftarten</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed und Noto Sans (mit Noto Sans Arabic, Hebrew, Devanagari, Bengali und Tamil) von The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors und The Noto Project Authors. Lizenziert unter der SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby und Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc verbindet sich mit Ihrem eigenen Jellyfin-, Emby- oder Silo-Server. Namen und Logos gehören ihren jeweiligen Inhabern. Nuvio Arc ist weder mit Jellyfin, Emby oder Silo verbunden noch von ihnen empfohlen.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -2911,6 +2913,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">Ein Viertel so viele vor dem Start. Die kürzeste Wartezeit.</string>
     <string name="seek_thumbnails_from_copy_title">Miniaturbilder aus einer Kopie</string>
     <string name="seek_thumbnails_from_copy_subtitle">Schnellere Miniaturbilder für 4K-Titel aus einer 1080p- oder 720p-Kopie und für Usenet-Titel aus einer Kopie, die nicht im Usenet liegt. Eine zwischengespeicherte TorBox-Kopie kann für einige Minuten zu Ihrer Liste hinzugefügt werden.</string>
+    <string name="seek_thumbnails_hardware_title">Hardware-Decoder für Miniaturbilder</string>
+    <string name="seek_thumbnails_hardware_subtitle">Schnellere Miniaturbilder durch den Hardware-Decoder Ihres Geräts. Wenn Miniaturbilder falsch aussehen oder Ihr Gerät überlastet ist, schalten Sie dies aus, dann werden sie wie gewohnt erzeugt.</string>
     <string name="seek_thumbnails_clear_title">Gespeicherte Miniaturbilder löschen</string>
     <string name="seek_thumbnails_clear_subtitle">Sie werden beim nächsten Abspielen eines Titels neu erzeugt.</string>
     <string name="seek_thumbnails_cleared">Gespeicherte Miniaturbilder gelöscht</string>

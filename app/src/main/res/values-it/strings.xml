@@ -4103,6 +4103,8 @@
     <string name="about_update_auto_install_subtitle">Scarica le nuove versioni in background e installale quando il dispositivo è inattivo</string>
     <string name="about_update_auto_install_notice_title">Avvisa dopo gli aggiornamenti automatici</string>
     <string name="about_update_auto_install_notice_subtitle">Mostra un banner all\'avvio successivo dopo che l\'app si è aggiornata da sola</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Font dei sottotitoli</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed e Noto Sans (con Noto Sans Arabic, Hebrew, Devanagari, Bengali e Tamil) di The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors e The Noto Project Authors. Distribuiti con licenza SIL Open Font License, Version 1.1.</string>
     <string name="audio_dtshd_tv_passthrough">Passthrough DTS-HD e DTS:X</string>
     <string name="audio_dtshd_tv_passthrough_sub">Scegli Passthrough dalla TV se la soundbar mostra solo DTS o non riproduce nulla con i film DTS-HD o DTS:X.</string>
     <string name="audio_dtshd_tv_passthrough_standard">Standard</string>
@@ -4146,5 +4148,7 @@
     <string name="assessment_suggested">Consigliato: %1$s</string>
     <string name="playback_dim_hdr_overlays">Attenua i controlli in HDR</string>
     <string name="playback_dim_hdr_overlays_sub">Controlli del player più tenui durante la riproduzione HDR, HLG e Dolby Vision. La luminosità del video non cambia. I sottotitoli in HDR seguono lo stile HDR nelle impostazioni dei sottotitoli.</string>
+    <string name="seek_thumbnails_hardware_title">Decoder hardware per le miniature</string>
+    <string name="seek_thumbnails_hardware_subtitle">Miniature più rapide create dal decoder hardware del tuo dispositivo. Se le miniature non sembrano corrette o il dispositivo fatica, disattiva questa opzione e verranno create nel modo consueto.</string>
     <string name="tvdb_metadata_credit">Metadati forniti da %1$s</string>
 </resources>

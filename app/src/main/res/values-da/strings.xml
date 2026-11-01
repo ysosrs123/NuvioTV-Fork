@@ -2744,6 +2744,8 @@
     <string name="about_update_auto_install_notice_subtitle">Vis et banner ved næste start, når appen har opdateret sig selv</string>
     <string name="licenses_attributions_avatars_title">Avatarer til seerfest</string>
     <string name="licenses_attributions_avatars_body">Lavet med DiceBear, som remixer disse designs: \"Fun Emoji\" af Davis Uche og \"Adventurer\" af Lisa Wischofsky, licenseret under CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" af Lisa Wischofsky, \"Notionists\" af Zoish, \"Pixel Art\" og \"Thumbs\" af DiceBear, CC0 1.0. \"Bottts\" af Pablo Stanley, fri til personlig og kommerciel brug. Dyreansigter fra Twemoji af Twitter, Inc. og andre bidragydere, licenseret under CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Skrifttyper til undertekster</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed og Noto Sans (med Noto Sans Arabic, Hebrew, Devanagari, Bengali og Tamil) af The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors og The Noto Project Authors. Licenseret under SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin, Emby og Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc forbinder til din egen Jellyfin-, Emby- eller Silo-server. Navne og logoer tilhører deres ejere. Nuvio Arc er ikke tilknyttet eller godkendt af Jellyfin, Emby eller Silo.</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -3340,6 +3342,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">En fjerdedel så mange, før den starter. Den korteste ventetid.</string>
     <string name="seek_thumbnails_from_copy_title">Miniaturer fra en kopi</string>
     <string name="seek_thumbnails_from_copy_subtitle">Hurtigere miniaturer til 4K-titler fra en 1080p- eller 720p-kopi, og til Usenet-titler fra en kopi, der ikke ligger på Usenet. En cachet TorBox-kopi kan blive føjet til din liste i nogle minutter.</string>
+    <string name="seek_thumbnails_hardware_title">Hardwaredecoder til miniaturer</string>
+    <string name="seek_thumbnails_hardware_subtitle">Hurtigere miniaturer lavet af din enheds hardwaredecoder. Hvis miniaturerne ser forkerte ud, eller enheden har svært ved det, så slå dette fra, så laves de på den sædvanlige måde.</string>
     <string name="seek_thumbnails_clear_title">Ryd gemte miniaturer</string>
     <string name="seek_thumbnails_clear_subtitle">De laves igen, næste gang du afspiller en titel.</string>
     <string name="seek_thumbnails_cleared">Gemte miniaturer ryddet</string>

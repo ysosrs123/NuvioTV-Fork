@@ -3273,6 +3273,8 @@
     <string name="about_update_auto_install_notice_subtitle">应用自行更新后，在下次启动时显示横幅</string>
     <string name="licenses_attributions_avatars_title">观影派对头像</string>
     <string name="licenses_attributions_avatars_body">使用 DiceBear 制作，改编自以下设计：Davis Uche 的 \"Fun Emoji\" 和 Lisa Wischofsky 的 \"Adventurer\"，采用 CC BY 4.0 许可 (creativecommons.org/licenses/by/4.0)。Lisa Wischofsky 的 \"Lorelei\"、Zoish 的 \"Notionists\"、DiceBear 的 \"Pixel Art\" 和 \"Thumbs\"，采用 CC0 1.0。Pablo Stanley 的 \"Bottts\"，可免费用于个人和商业用途。动物脸孔来自 Twitter, Inc. 及其他贡献者的 Twemoji，采用 CC BY 4.0 许可。</string>
+    <string name="licenses_attributions_subtitle_fonts_title">字幕字体</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto、Montserrat、Asap Condensed 和 Noto Sans（含 Noto Sans Arabic、Hebrew、Devanagari、Bengali 和 Tamil），由 The Roboto Project Authors、The Montserrat Project Authors、The Asap Project Authors 和 The Noto Project Authors 创作。基于 SIL Open Font License, Version 1.1 许可。</string>
     <string name="licenses_attributions_media_servers_title">Jellyfin、Emby 和 Silo</string>
     <string name="licenses_attributions_media_servers_body">Nuvio Arc 连接至您自己的 Jellyfin、Emby 或 Silo 服务器。其名称和标志归各自所有者所有。Nuvio Arc 与 Jellyfin、Emby 或 Silo 无关联或未经其认可。</string>
     <string name="licenses_attributions_trash_title">TRaSH Guides</string>
@@ -3872,6 +3874,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">开始前只生成四分之一。等待时间最短。</string>
     <string name="seek_thumbnails_from_copy_title">用副本生成缩略图</string>
     <string name="seek_thumbnails_from_copy_subtitle">更快生成缩略图：4K 标题使用 1080p 或 720p 副本，Usenet 标题使用不在 Usenet 上的副本。TorBox 上已缓存的副本可能会被添加到您的列表中，停留几分钟。</string>
+    <string name="seek_thumbnails_hardware_title">用硬件解码器生成缩略图</string>
+    <string name="seek_thumbnails_hardware_subtitle">使用设备的硬件解码器更快生成缩略图。如果缩略图显示异常或设备运行吃力，请关闭此项，将改用常规方式生成。</string>
     <string name="seek_thumbnails_clear_title">清除已保存的缩略图</string>
     <string name="seek_thumbnails_clear_subtitle">下次播放标题时会重新生成。</string>
     <string name="seek_thumbnails_cleared">已清除保存的缩略图</string>
