@@ -57,6 +57,11 @@ internal object CalendarSettingsKeys {
     val comingUpHiddenKeys = stringSetPreferencesKey("calendar_coming_up_hidden")
     val comingUpHiddenNames = stringSetPreferencesKey("calendar_coming_up_hidden_names")
     val viewMode = stringPreferencesKey("calendar_view_mode")
+
+    val names: Set<String> = setOf(
+        menuVisible, includePersonalLists, followOtherServices, windowDays, zoneOverride, cornerMessage, comingUpRow,
+        hiddenTitleKeys, bellOn, hiddenTitleNames, comingUpHiddenKeys, comingUpHiddenNames, viewMode
+    ).mapTo(linkedSetOf()) { it.name }
 }
 
 private const val NAME_SEPARATOR = '\u001F'
@@ -149,10 +154,9 @@ class CalendarSettingsDataStore @Inject constructor(
     suspend fun setWindowDays(days: Int) =
         store().edit { it[CalendarSettingsKeys.windowDays] = normalizeCalendarWindowDays(days) }
 
+    /** Back to the device's zone is stored as blank, so the choice reaches other boxes through sync. */
     suspend fun setZoneOverride(zone: String?) = store().edit { preferences ->
-        val normalized = normalizeCalendarZoneOverride(zone)
-        if (normalized == null) preferences.remove(CalendarSettingsKeys.zoneOverride)
-        else preferences[CalendarSettingsKeys.zoneOverride] = normalized
+        preferences[CalendarSettingsKeys.zoneOverride] = normalizeCalendarZoneOverride(zone).orEmpty()
     }
 
     suspend fun setCornerMessage(enabled: Boolean) = store().edit { it[CalendarSettingsKeys.cornerMessage] = enabled }
@@ -170,14 +174,14 @@ class CalendarSettingsDataStore @Inject constructor(
     }
 
     suspend fun unhideAllFromComingUp() = store().edit {
-        it.remove(CalendarSettingsKeys.comingUpHiddenKeys)
-        it.remove(CalendarSettingsKeys.comingUpHiddenNames)
+        it[CalendarSettingsKeys.comingUpHiddenKeys] = emptySet()
+        it[CalendarSettingsKeys.comingUpHiddenNames] = emptySet()
     }
 
     suspend fun setBell(titleKey: String, on: Boolean) =
         store().edit { it.toggleInSet(CalendarSettingsKeys.bellOn, titleKey, on) }
 
-    private companion object {
+    companion object {
         const val FEATURE = "calendar_settings"
     }
 }

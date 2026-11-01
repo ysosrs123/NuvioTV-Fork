@@ -138,6 +138,31 @@ class CalendarFollowedTitlesTest {
         assertEquals(listOf("series:imdb:tt99", "series:imdb:tt1", "series:imdb:tt2", "series:imdb:tt3"), titles.map { it.key })
     }
 
+    @Test fun overTheCapTheNuvioLibraryComesBeforeMoreRecentlyWatchedShows() {
+        val candidates = (1..5).map { show(CalendarOrigin.TRAKT_WATCHED, CalendarIds(imdb = "tt$it"), daysAgo(it.toLong())) } +
+            show(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt50"), daysAgo(500)) +
+            show(CalendarOrigin.LIBRARY, CalendarIds(imdb = "tt60"), daysAgo(600))
+        val titles = follow(candidates, CalendarFollowRules(cap = 3), now)
+        assertEquals(listOf("series:imdb:tt50", "series:imdb:tt60", "series:imdb:tt1"), titles.map { it.key })
+    }
+
+    @Test fun titlesWithNoReadableIdAreNamedOnOneLogLine() {
+        assertNull(calendarUnresolvedSummary(emptyList(), emptyMap()))
+        val unresolved = listOf(
+            CalendarTitleType.SERIES to "kitsu:1", CalendarTitleType.SERIES to "kitsu:1",
+            CalendarTitleType.SERIES to "mal:2", CalendarTitleType.MOVIE to "custom-id"
+        )
+        assertEquals(
+            "left out no-id=3: Frieren (kitsu), Dandadan (mal), custom-id",
+            calendarUnresolvedSummary(unresolved, mapOf("kitsu:1" to "Frieren", "mal:2" to "Dandadan"))
+        )
+        val many = (1..12).map { CalendarTitleType.SERIES to "kitsu:$it" }
+        assertEquals(
+            "left out no-id=12: kitsu:1, kitsu:2, +10 more",
+            calendarUnresolvedSummary(many, emptyMap(), max = 2)
+        )
+    }
+
     @Test fun capOfThreeHundredByDefault() {
         val candidates = (1..450).map { show(CalendarOrigin.LIBRARY, CalendarIds(tmdb = it.toLong()), daysAgo(it.toLong())) }
         val titles = follow(candidates, CalendarFollowRules(), now)

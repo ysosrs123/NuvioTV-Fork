@@ -167,7 +167,7 @@ fun mergeCalendarResolvedIds(
 fun Map<String, CalendarResolvedIds>.usableIds(): Map<String, CalendarIds> =
     entries.filter { !it.value.ids.isEmpty }.associate { it.key to it.value.ids }
 
-/** Content ids still unread that are worth asking the add-ons about: not already known, and no miss in the last week. */
+/** Content ids still unread that are worth asking the add-ons about: not already known, and no miss in the last day. */
 fun calendarIdsToLookUp(
     unresolved: List<Pair<CalendarTitleType, String>>,
     saved: Map<String, CalendarResolvedIds>,
@@ -181,7 +181,7 @@ fun calendarIdsToLookUp(
 }
 
 private val RESOLVED_MISSING_KEEP: Duration = Duration.ofDays(30)
-private val RESOLVED_MISSING_RETRY: Duration = Duration.ofDays(7)
+private val RESOLVED_MISSING_RETRY: Duration = Duration.ofDays(1)
 private const val MAX_RESOLVED_IDS = 1_000
 private const val MAX_ID_LOOKUPS = 10
 

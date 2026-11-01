@@ -185,6 +185,28 @@ class CalendarHomeTest {
         assertEquals(CalendarComingUpWhen.WEEKDAY, item.whenKind)
     }
 
+    @Test fun theNextUpEpisodeOutEarlierInTheCalendarStaysNew() {
+        val dexter = show(
+            "tt2",
+            CalendarEntry(season = 2, episode = 1, title = "Risky Business", airDate = "2026-10-02"),
+            CalendarEntry(season = 2, episode = 2, title = "Young Blood", airDate = "2026-10-09"),
+            name = "Dexter"
+        )
+        val watched = CalendarWatchedIndex.Builder().add("tt2", 1, 10)
+            .nextUpNotAired("tt2", LocalDate.parse("2026-10-05"), 2, 1, "Risky Business").build()
+        val item = buildCalendarComingUp(listOf(dexter), watched, now, sydney).single()
+        assertEquals(1, item.entry.episode)
+        assertEquals(CalendarComingUpWhen.NEW, item.whenKind)
+    }
+
+    @Test fun aShortNumberedLikeTheNextUpEpisodeStillCountsAsWatched() {
+        val watched = beavisWatched()
+            .nextUpNotAired("tt49022", LocalDate.parse("2026-10-08"), 4, 7, "Schlongmerica").build()
+        val item = buildCalendarComingUp(listOf(beavis()), watched, now, sydney).single()
+        assertEquals(8, item.entry.episode)
+        assertEquals(CalendarComingUpWhen.WEEKDAY, item.whenKind)
+    }
+
     @Test fun nextUpOutTheSameDayStillShowsNew() {
         val watched = CalendarWatchedIndex.Builder().nextUpNotAired("tt49022", LocalDate.parse("2026-10-01")).build()
         val item = buildCalendarComingUp(listOf(beavis()), watched, now, sydney).single()

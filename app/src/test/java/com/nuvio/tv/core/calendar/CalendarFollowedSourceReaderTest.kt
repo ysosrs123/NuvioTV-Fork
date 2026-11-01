@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -46,6 +47,8 @@ class CalendarFollowedSourceReaderTest {
         val meta = mockk<com.nuvio.tv.domain.model.Meta> {
             every { imdbId } returns "tt13706018"
             every { id } returns "kitsu:46474"
+            every { type } returns com.nuvio.tv.domain.model.ContentType.SERIES
+            every { links } returns emptyList()
         }
         val asked = mutableListOf<Pair<String, String>>()
         val out = calendarResolveUnreadableIds(listOf(anime, unknown, known)) { type, id ->
@@ -57,6 +60,58 @@ class CalendarFollowedSourceReaderTest {
         assertTrue(out[1].ids.isEmpty)
         assertEquals(known, out[2])
         assertEquals(listOf("series" to "kitsu:46474", "series" to "kitsu:1"), asked)
+    }
+
+    @Test fun detailsWithoutAnImdbIdGiveTheIdsInTheirImdbAndTmdbLinks() {
+        fun meta(kind: com.nuvio.tv.domain.model.ContentType, vararg urls: String) = mockk<com.nuvio.tv.domain.model.Meta> {
+            every { imdbId } returns null
+            every { id } returns "kitsu:46474"
+            every { type } returns kind
+            every { links } returns urls.map { com.nuvio.tv.domain.model.MetaLink("link", "imdb", it) }
+        }
+        val series = com.nuvio.tv.domain.model.ContentType.SERIES
+        assertEquals(
+            CalendarIds(imdb = "tt13706018", tmdb = 209867),
+            calendarIdsOf(meta(series, "stremio:///search?search=Frieren", "https://imdb.com/title/tt13706018/", "https://www.themoviedb.org/tv/209867-frieren"))
+        )
+        assertEquals(CalendarIds(), calendarIdsOf(meta(series, "https://www.themoviedb.org/movie/5", "https://www.imdb.com/name/nm1")))
+        assertEquals(
+            CalendarIds(tmdb = 5),
+            calendarIdsOf(meta(com.nuvio.tv.domain.model.ContentType.MOVIE, "https://www.themoviedb.org/movie/5"))
+        )
+        assertTrue(calendarIdsOf(meta(series)).isEmpty)
+    }
+
+    @Test fun animeIdsAreAskedOfSimklAndOtherIdsAreNot() {
+        assertEquals("kitsu" to "46474", calendarSimklLookup("kitsu:46474"))
+        assertEquals("mal" to "52991", calendarSimklLookup("MAL:52991"))
+        assertEquals("anilist" to "154587", calendarSimklLookup("anilist:154587:1:3"))
+        assertEquals("anidb" to "17617", calendarSimklLookup("anidb:17617"))
+        assertNull(calendarSimklLookup("kitsu:frieren"))
+        assertNull(calendarSimklLookup("tt13706018"))
+        assertNull(calendarSimklLookup("mycatalog:46474"))
+        assertNull(calendarSimklLookup("kitsu:"))
+    }
+
+    @Test fun simklIdsCountOnlyWithAnIdThatGivesDates() {
+        assertEquals(
+            CalendarIds(imdb = "tt13706018", tmdb = 209867, tvdb = 424536, simkl = 2177400),
+            calendarIdsFromSimkl("tt13706018", "209867", "424536", 2177400)
+        )
+        assertEquals(CalendarIds(tmdb = 209867, simkl = 1), calendarIdsFromSimkl("", " 209867 ", null, 1))
+        assertTrue(calendarIdsFromSimkl(null, null, null, 2177400).isEmpty)
+        assertTrue(calendarIdsFromSimkl("nm1", "x", "", 2177400).isEmpty)
+    }
+
+    @Test fun aLookupPrefersTheAddOnsAndFallsBackToSimkl() {
+        val addon = CalendarIds(imdb = "tt1")
+        val simkl = CalendarIds(imdb = "tt2", simkl = 2)
+        assertEquals(addon, calendarLookedUpIds(addon, simkl))
+        assertEquals(simkl, calendarLookedUpIds(CalendarIds(), simkl))
+        assertEquals(simkl, calendarLookedUpIds(null, simkl))
+        assertEquals(CalendarIds(), calendarLookedUpIds(CalendarIds(), null))
+        assertEquals(CalendarIds(), calendarLookedUpIds(null, CalendarIds()))
+        assertNull(calendarLookedUpIds(null, null))
     }
 
     @Test fun aKitsuTitleWithoutCachedDetailsTakesTheIdsFoundBefore() {

@@ -69,6 +69,7 @@ class TvMazeCalendarClientTest {
 
         assertEquals(CalendarShowStatus.RUNNING, dates.status)
         assertEquals("FOX", dates.network)
+        assertEquals("America/New_York", dates.networkZone)
         assertEquals("The Simpsons", dates.name)
         assertEquals(CalendarIds(imdb = "tt0096697", tvdb = 71663), dates.ids)
         assertEquals(listOf("S38E2", "S38E3", "S38E1", "S38E4", "S38E5"), dates.entries.map { it.slot })
@@ -101,7 +102,9 @@ class TvMazeCalendarClientTest {
 
     @Test fun aShowWithoutAnImageHasNoPoster() = runBlocking {
         server.enqueue(json(SHOW_FAR))
-        assertNull(client.show(83, now).poster)
+        val dates = client.show(83, now)
+        assertNull(dates.poster)
+        assertNull(dates.networkZone)
     }
 
     @Test fun aNextEpisodeFarAwayNeedsNoSeasonCall() = runBlocking {

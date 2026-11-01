@@ -24,7 +24,7 @@ import com.nuvio.tv.core.calendar.calendarTitleInContinueWatching
 import com.nuvio.tv.core.calendar.calendarEntryInKeys
 import com.nuvio.tv.core.calendar.calendarKeyMatches
 import com.nuvio.tv.core.calendar.calendarTitleKey
-import com.nuvio.tv.core.calendar.plainReleaseDate
+import com.nuvio.tv.core.calendar.calendarAddonRelease
 import com.nuvio.tv.core.util.parseEpisodeReleaseLocalDate
 import com.nuvio.tv.core.util.withAppLocale
 import com.nuvio.tv.domain.repository.MetaRepository
@@ -162,7 +162,9 @@ val HomeUiState.shownUpcomingItems: List<ContinueWatchingItem>
 fun upcomingAirDate(item: ContinueWatchingItem, zone: ZoneId): LocalDate? {
     val info = (item as? ContinueWatchingItem.NextUp)?.info ?: return null
     if (info.contentType.equals("movie", ignoreCase = true) || info.episode <= 0) return null
-    return info.released?.let(::plainReleaseDate)?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+    return info.released?.let(::calendarAddonRelease)?.let { (date, exactMs) ->
+        exactMs?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() } ?: LocalDate.parse(date)
+    }
         ?: parseEpisodeReleaseLocalDate(info.released, zone)
         ?: info.releaseTimestamp?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }
 }
@@ -185,11 +187,13 @@ fun calendarTitlesWithUpcoming(
         val info = (item as ContinueWatchingItem.NextUp).info
         val ids = CalendarIds.fromContentId(info.contentId)
         if (!ids.isEmpty && hiddenTitleKeys.any { calendarKeyMatches(it, CalendarTitleType.SERIES, ids) }) return@forEach
+        val release = info.released?.let(::calendarAddonRelease)
         val entry = CalendarEntry(
             season = info.season,
             episode = info.episode,
             title = info.episodeTitle,
-            airDate = date.toString(),
+            airDate = release?.first ?: date.toString(),
+            placeAtMs = release?.second,
             source = CalendarSource.ADDON
         )
         val index = result.indexOfFirst {
@@ -197,12 +201,13 @@ fun calendarTitlesWithUpcoming(
         }
         if (index >= 0) {
             val title = result[index]
+            val day = entry.placedFor(title.networkZone?.let { runCatching { ZoneId.of(it) }.getOrNull() }).localDate(zone) ?: date
             // A guess the Calendar has already passed (a later episode out on or before that date) is stale.
             val passed = title.sources.any { (source, entries) ->
                 source != CalendarSource.ADDON && entries.any { listed ->
                     listed.kind == CalendarEntryKind.EPISODE &&
                         ((listed.season ?: 0) > info.season || (listed.season == info.season && (listed.episode ?: 0) > info.episode)) &&
-                        listed.localDate(zone)?.let { it <= date } == true
+                        listed.localDate(zone)?.let { it <= day } == true
                 }
             }
             val listed = passed || title.entries.any { it.slot == entry.slot }

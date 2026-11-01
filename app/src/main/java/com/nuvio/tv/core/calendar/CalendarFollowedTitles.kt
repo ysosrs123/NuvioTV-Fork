@@ -62,7 +62,8 @@ data class CalendarFollowResult(
 /**
  * Hidden titles are always left out. Unless the bell is on, so are dropped titles, titles removed from Continue
  * Watching, started shows idle for [CalendarFollowRules.staleAfter] (or with no date and not saved anywhere) and films
- * that were only watched, not saved. A show in the Nuvio library is never idle.
+ * that were only watched, not saved. A show in the Nuvio library is never idle, and over the cap titles with the bell
+ * on go first, then the Nuvio library, then the most recently active.
  */
 fun followCalendarTitles(
     candidates: List<CalendarTitleCandidate>,
@@ -120,6 +121,7 @@ fun followCalendarTitles(
 
     val ordered = titles.sortedWith(
         compareByDescending<CalendarFollowedTitle> { it.bellOn }
+            .thenByDescending { CalendarOrigin.LIBRARY in it.origins }
             .thenByDescending { it.lastActivity ?: Instant.EPOCH }
             .thenBy { it.name.orEmpty().lowercase() }
             .thenBy { it.key }
@@ -165,6 +167,22 @@ fun calendarLeftOutSummary(leftOut: List<CalendarLeftOut>, perReason: Int = 3): 
         val more = items.size - perReason
         "left out ${reason.code}: $shown" + if (more > 0) ", +$more more" else ""
     }
+}
+
+/** One log line naming the titles left out because no id the Calendar can read was found, with each id's prefix. */
+fun calendarUnresolvedSummary(
+    unresolved: List<Pair<CalendarTitleType, String>>,
+    names: Map<String, String>,
+    max: Int = 10
+): String? {
+    val ids = unresolved.map { it.second }.distinct()
+    if (ids.isEmpty()) return null
+    val shown = ids.take(max).joinToString(", ") { id ->
+        val name = names[id]?.replace(SPACES, " ")?.trim()?.take(40)?.takeIf(String::isNotEmpty)
+        if (name != null) "$name (${id.substringBefore(':')})" else id
+    }
+    val more = ids.size - max
+    return "left out no-id=${ids.size}: $shown" + if (more > 0) ", +$more more" else ""
 }
 
 private fun groupBySharedIds(candidates: List<CalendarTitleCandidate>): List<List<CalendarTitleCandidate>> {

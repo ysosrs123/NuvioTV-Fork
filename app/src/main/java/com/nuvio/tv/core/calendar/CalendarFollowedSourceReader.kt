@@ -29,6 +29,7 @@ import com.nuvio.tv.data.simkl.idValue
 import com.nuvio.tv.data.simkl.simklIdValue
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -56,10 +57,25 @@ data class CalendarFollowedSnapshot(
     /** Ids found this time for content ids the Calendar cannot read, so they are known after a restart too. */
     val resolvedIds: Map<String, CalendarIds> = emptyMap(),
     /** Content ids the Calendar cannot read and found no ids for; their titles are left out this time. */
-    val unresolved: List<Pair<CalendarTitleType, String>> = emptyList()
+    val unresolved: List<Pair<CalendarTitleType, String>> = emptyList(),
+    /** Names of the [unresolved] titles, by content id, for the log. */
+    val unresolvedNames: Map<String, String> = emptyMap()
 ) {
     val complete: Boolean get() = notReady.isEmpty()
 }
+
+/** The episode Next Up points at and the day the add-on has it coming out. */
+data class CalendarNextUpMark(val date: LocalDate, val season: Int? = null, val episode: Int? = null, val name: String? = null) {
+    /** The same season and episode, unless the names differ (TVmaze can give that number to a short). */
+    fun isEpisode(season: Int?, episode: Int?, name: String?): Boolean {
+        if (season == null || episode == null || this.season != season || this.episode != episode) return false
+        val mine = this.name?.let(::episodeNameKey)?.takeIf { it.length >= 4 } ?: return true
+        val theirs = name?.let(::episodeNameKey)?.takeIf { it.length >= 4 } ?: return true
+        return mine == theirs || mine.endsWith(theirs) || theirs.endsWith(mine)
+    }
+}
+
+private fun laterNextUp(a: CalendarNextUpMark, b: CalendarNextUpMark) = if (b.date > a.date) b else a
 
 /** An episode as Nuvio's own episode list numbers it. */
 data class CalendarKnownEpisode(val season: Int, val episode: Int, val name: String?, val date: LocalDate)
@@ -67,12 +83,13 @@ data class CalendarKnownEpisode(val season: Int, val episode: Int, val name: Str
 /**
  * What has been watched, by season and episode. Sources such as TVmaze can number a season differently from Nuvio's
  * episode list (a short or special counted as an episode), so an episode is first matched to Nuvio's list by air date
- * and name. A title whose Next Up has not aired yet has nothing older left to watch.
+ * and name. A title whose Next Up has not aired yet has nothing older left to watch, but the Next Up episode itself
+ * stays unwatched when the Calendar has it out earlier than the add-on does.
  */
 class CalendarWatchedIndex(
     private val keys: Set<String> = emptySet(),
     private val episodes: Map<String, List<CalendarKnownEpisode>> = emptyMap(),
-    private val nextUpNotAired: Map<String, LocalDate> = emptyMap()
+    private val nextUpNotAired: Map<String, CalendarNextUpMark> = emptyMap()
 ) {
     fun isWatched(ids: CalendarIds, season: Int?, episode: Int?): Boolean {
         if (season == null || episode == null) return false
@@ -83,10 +100,14 @@ class CalendarWatchedIndex(
         if (entry.kind != CalendarEntryKind.EPISODE) return false
         val aliases = title.ids.aliases()
         val date = entry.airDateOrNull()
-        if (date != null && aliases.any { alias -> nextUpNotAired[alias]?.let { date < it } == true }) return true
         val known = date?.let { matchByDateAndName(aliases, entry.shownTitle, it) }
-        return if (known != null) isWatched(title.ids, known.season, known.episode)
-        else isWatched(title.ids, entry.season, entry.episode)
+        val season = known?.season ?: entry.season
+        val episode = known?.episode ?: entry.episode
+        if (date != null && aliases.any { alias ->
+                nextUpNotAired[alias]?.let { date < it.date && !it.isEpisode(season, episode, entry.shownTitle) } == true
+            }
+        ) return true
+        return isWatched(title.ids, season, episode)
     }
 
     private fun matchByDateAndName(aliases: Set<String>, name: String?, date: LocalDate): CalendarKnownEpisode? {
@@ -102,9 +123,9 @@ class CalendarWatchedIndex(
     class Builder {
         private val keys = HashSet<String>()
         private val episodes = HashMap<String, List<CalendarKnownEpisode>>()
-        private val nextUpNotAired = HashMap<String, LocalDate>()
+        private val nextUpNotAired = HashMap<String, CalendarNextUpMark>()
         private val unreadable = HashMap<String, MutableSet<Pair<Int, Int>>>()
-        private val unreadableNextUp = HashMap<String, LocalDate>()
+        private val unreadableNextUp = HashMap<String, CalendarNextUpMark>()
 
         fun add(contentId: String, season: Int?, episode: Int?) = apply {
             if (season == null || episode == null) return@apply
@@ -116,7 +137,7 @@ class CalendarWatchedIndex(
         /** What was recorded under an id the Calendar cannot read (such as kitsu:) counts for [ids] too. */
         fun alias(contentId: String, ids: CalendarIds) = apply {
             unreadable[contentId]?.forEach { (s, e) -> ids.aliases().forEach { keys += "$it|$s|$e" } }
-            unreadableNextUp[contentId]?.let { date -> ids.aliases().forEach { nextUpNotAired.merge(it, date) { a, b -> maxOf(a, b) } } }
+            unreadableNextUp[contentId]?.let { mark -> ids.aliases().forEach { nextUpNotAired.merge(it, mark, ::laterNextUp) } }
         }
 
         fun addAll(byContent: Map<String, Set<Pair<Int, Int>>>) = apply {
@@ -130,11 +151,12 @@ class CalendarWatchedIndex(
         }
 
         /** Next Up points at an episode that comes out on [date]: everything out before it is watched. */
-        fun nextUpNotAired(contentId: String, date: LocalDate) = apply {
+        fun nextUpNotAired(contentId: String, date: LocalDate, season: Int? = null, episode: Int? = null, name: String? = null) = apply {
+            val mark = CalendarNextUpMark(date, season, episode, name)
             val aliases = CalendarIds.fromContentId(contentId).aliases()
-            if (aliases.isEmpty()) unreadableNextUp.merge(contentId, date) { a, b -> maxOf(a, b) }
+            if (aliases.isEmpty()) unreadableNextUp.merge(contentId, mark, ::laterNextUp)
             aliases.forEach { alias ->
-                nextUpNotAired.merge(alias, date) { a, b -> maxOf(a, b) }
+                nextUpNotAired.merge(alias, mark, ::laterNextUp)
             }
         }
 
@@ -171,9 +193,53 @@ fun calendarResolveUnreadableIds(
     candidate.copy(ids = ids)
 }
 
-/** The ids the Calendar can read from a title's details. */
+/** The ids the Calendar can read from a title's details: its IMDb id, its own id, and its IMDb or TMDB page link. */
 fun calendarIdsOf(meta: com.nuvio.tv.domain.model.Meta): CalendarIds =
-    CalendarIds.fromContentId(meta.imdbId?.takeIf { it.startsWith("tt") }).merged(CalendarIds.fromContentId(meta.id))
+    CalendarIds.fromContentId(meta.imdbId?.takeIf { it.startsWith("tt") })
+        .merged(CalendarIds.fromContentId(meta.id))
+        .merged(calendarIdsFromLinks(meta.links.map { it.url }, movie = meta.type == com.nuvio.tv.domain.model.ContentType.MOVIE))
+
+private val IMDB_TITLE_LINK = Regex("""imdb\.com/title/(tt\d+)""", RegexOption.IGNORE_CASE)
+private val TMDB_TITLE_LINK = Regex("""themoviedb\.org/(tv|movie)/(\d+)""", RegexOption.IGNORE_CASE)
+
+/** An IMDb id from an IMDb title page link, and a TMDB id from a TMDB page link of the same kind of title. */
+fun calendarIdsFromLinks(urls: List<String>, movie: Boolean): CalendarIds {
+    val tmdbKind = if (movie) "movie" else "tv"
+    return CalendarIds(
+        imdb = urls.firstNotNullOfOrNull { IMDB_TITLE_LINK.find(it)?.groupValues?.get(1) },
+        tmdb = urls.firstNotNullOfOrNull { url ->
+            TMDB_TITLE_LINK.find(url)?.takeIf { it.groupValues[1].equals(tmdbKind, ignoreCase = true) }
+                ?.groupValues?.get(2)?.toLongOrNull()
+        }
+    )
+}
+
+private val CALENDAR_SIMKL_SOURCES = setOf("kitsu", "mal", "anilist", "anidb")
+
+/** The source and id Simkl can map for an anime id such as kitsu:1376 or mal:21; null for any other id. */
+fun calendarSimklLookup(contentId: String): Pair<String, String>? {
+    val prefix = contentId.substringBefore(':', "").trim().lowercase()
+    if (prefix !in CALENDAR_SIMKL_SOURCES) return null
+    val id = contentId.substringAfter(':').substringBefore(':').trim()
+    return if (id.isNotEmpty() && id.all(Char::isDigit)) prefix to id else null
+}
+
+/** Simkl's ids for a title, empty unless one of them can be used to fetch dates (IMDb, TMDB or TheTVDB). */
+fun calendarIdsFromSimkl(imdb: String?, tmdb: String?, tvdb: String?, simkl: Long?): CalendarIds {
+    val ids = CalendarIds(
+        imdb = imdb?.trim()?.takeIf { it.startsWith("tt") },
+        tmdb = tmdb?.trim()?.toLongOrNull(),
+        tvdb = tvdb?.trim()?.toLongOrNull()
+    )
+    return if (ids.isEmpty) ids else ids.copy(simkl = simkl)
+}
+
+/**
+ * What a lookup found: the add-ons' ids when they have usable ones, else Simkl's. Empty when a source answered without
+ * ids, null when neither could be read.
+ */
+fun calendarLookedUpIds(fromAddons: CalendarIds?, fromSimkl: CalendarIds?): CalendarIds? =
+    fromAddons?.takeIf { !it.isEmpty } ?: fromSimkl?.takeIf { !it.isEmpty } ?: fromAddons ?: fromSimkl
 
 /** Nuvio's own numbering of a show's episodes, from an add-on's episode list. */
 fun calendarKnownEpisodes(videos: List<com.nuvio.tv.domain.model.Video>): List<CalendarKnownEpisode> =
@@ -263,12 +329,20 @@ class CalendarFollowedSourceReader @Inject constructor(
         } ?: everything
 
         if (plan.nuvioLibrary) unread.part("library", CalendarOrigin.LIBRARY) {
+            val otherTypes = mutableListOf<String>()
             libraryPreferences.libraryItems.first().forEach { item ->
-                val type = calendarTitleType(item.type) ?: return@forEach
+                val type = calendarTitleType(item.type)
+                if (type == null) {
+                    otherTypes += item.type
+                    return@forEach
+                }
                 candidates += CalendarTitleCandidate(
                     CalendarIds.fromContentId(item.id), type, CalendarOrigin.LIBRARY,
                     item.addedAt.toInstantOrNull(), item.name, item.id, item.poster
                 )
+            }
+            if (otherTypes.isNotEmpty()) {
+                Log.i(TAG, "library: skipped ${otherTypes.size} titles of type ${otherTypes.distinct().take(5).joinToString(", ")}")
             }
         }
         unread.part("progress", CalendarOrigin.PROGRESS) {
@@ -391,12 +465,13 @@ class CalendarFollowedSourceReader @Inject constructor(
         val addon = unread.runPart("next up dates", counts = false) {
             nextUp.mapNotNull { item ->
                 if (item.hasAired) return@mapNotNull null
-                val date = item.released?.let(::plainReleaseDate) ?: return@mapNotNull null
+                val (date, exactMs) = item.released?.let(::calendarAddonRelease) ?: return@mapNotNull null
                 CalendarIds.fromContentId(item.contentId) to CalendarEntry(
                     season = item.season,
                     episode = item.episode,
                     title = item.episodeTitle,
                     airDate = date,
+                    placeAtMs = exactMs,
                     label = deriveEpisodeLabel(item.season, item.episode),
                     source = CalendarSource.ADDON
                 )
@@ -406,18 +481,20 @@ class CalendarFollowedSourceReader @Inject constructor(
             if (item.hasAired) return@forEach
             val date = item.released?.let(::plainReleaseDate)?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
                 ?: return@forEach
-            watched.nextUpNotAired(item.contentId, date)
+            watched.nextUpNotAired(item.contentId, date, item.season, item.episode, item.episodeTitle)
         }
         val resolved = unread.runPart("unreadable ids", counts = false) {
             calendarResolveUnreadableIds(candidates, knownIds) { type, id -> metaRepository.getCachedMeta(type, id) }
         } ?: candidates
         val resolvedIds = HashMap<String, CalendarIds>()
         val unresolved = mutableListOf<Pair<CalendarTitleType, String>>()
+        val unresolvedNames = HashMap<String, String>()
         resolved.forEach { candidate ->
             val contentId = candidate.contentId?.takeIf(String::isNotBlank) ?: return@forEach
             if (!CalendarIds.fromContentId(contentId).isEmpty) return@forEach
             if (candidate.ids.isEmpty) {
                 unresolved += candidate.type to contentId
+                candidate.name?.takeIf(String::isNotBlank)?.let { unresolvedNames.putIfAbsent(contentId, it) }
             } else {
                 watched.alias(contentId, candidate.ids)
                 resolvedIds[contentId] = candidate.ids
@@ -460,11 +537,12 @@ class CalendarFollowedSourceReader @Inject constructor(
         return CalendarFollowedSnapshot(
             usable, removed, addon, watched.build(), traktWatchedLoaded, traktProgress, posters,
             unread.reasons, unread.origins, cachedArt = art,
-            resolvedIds = resolvedIds, unresolved = unresolved.distinct()
+            resolvedIds = resolvedIds, unresolved = unresolved.distinct(), unresolvedNames = unresolvedNames
         )
     }
 
     private companion object {
+        const val TAG = "CalendarSources"
         val TRAKT_PROGRESS_ORIGINS = arrayOf(CalendarOrigin.TRAKT_WATCHED, CalendarOrigin.TRAKT_CALENDAR)
         val TRAKT_LIBRARY_ORIGINS = arrayOf(CalendarOrigin.TRAKT_WATCHLIST, CalendarOrigin.TRAKT_LIST)
         val SIMKL_ORIGINS = arrayOf(
@@ -519,7 +597,7 @@ internal class CalendarSourceParts(private val timeoutMs: Long = 5_000L) {
 
 fun calendarTitleType(contentType: String?): CalendarTitleType? = when (contentType?.trim()?.lowercase()) {
     "movie", "film" -> CalendarTitleType.MOVIE
-    "series", "tv", "show", "anime" -> CalendarTitleType.SERIES
+    "series", "tv", "show", "tvshow", "anime" -> CalendarTitleType.SERIES
     else -> null
 }
 
@@ -533,5 +611,15 @@ private fun String.toInstantOrNull(): Instant? =
 
 private val PLAIN_DATE = Regex("^\\d{4}-\\d{2}-\\d{2}")
 
-/** The date part of an add-on `released` value, as given; the time in it is not a real air time. */
+/** The date part of an add-on `released` value, as given. */
 fun plainReleaseDate(value: String): String? = PLAIN_DATE.find(value.trim())?.value
+
+/**
+ * An add-on `released` value: its date as given, and the moment it airs when it carries a real time. Midnight (UTC or
+ * the value's own offset) only marks a date, so it gives no moment.
+ */
+fun calendarAddonRelease(value: String): Pair<String, Long?>? {
+    val date = plainReleaseDate(value)?.takeIf { runCatching { LocalDate.parse(it) }.isSuccess } ?: return null
+    val exact = runCatching { OffsetDateTime.parse(value.trim()) }.getOrNull()?.takeIf { it.toLocalTime() != LocalTime.MIDNIGHT }
+    return date to exact?.toInstant()?.toEpochMilli()
+}

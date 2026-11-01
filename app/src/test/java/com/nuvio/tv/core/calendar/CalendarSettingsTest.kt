@@ -26,6 +26,10 @@ class CalendarSettingsTest {
         )
     }
 
+    @Test fun aBlankZoneMeansTheDevicesZone() {
+        assertNull(mutablePreferencesOf(CalendarSettingsKeys.zoneOverride to "").toCalendarSettings().zoneOverride)
+    }
+
     @Test fun storedValuesAreReadAndOddOnesFallBack() {
         val preferences = mutablePreferencesOf(
             CalendarSettingsKeys.menuVisible to false,

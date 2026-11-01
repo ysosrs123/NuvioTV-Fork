@@ -24,7 +24,13 @@ data class TvMazeImageDto(
 @JsonClass(generateAdapter = true)
 data class TvMazeNetworkDto(
     @Json(name = "id") val id: Int? = null,
-    @Json(name = "name") val name: String? = null
+    @Json(name = "name") val name: String? = null,
+    @Json(name = "country") val country: TvMazeCountryDto? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class TvMazeCountryDto(
+    @Json(name = "timezone") val timezone: String? = null
 )
 
 @JsonClass(generateAdapter = true)

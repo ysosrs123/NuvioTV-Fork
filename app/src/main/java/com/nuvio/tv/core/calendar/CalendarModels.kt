@@ -2,6 +2,7 @@ package com.nuvio.tv.core.calendar
 
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -148,7 +149,8 @@ data class CalendarEntry(
     @SerialName("at") val airInstantMs: Long? = null,
     @SerialName("d") val airDate: String? = null,
     @SerialName("l") val label: CalendarEpisodeLabel = CalendarEpisodeLabel.NONE,
-    @SerialName("src") val source: CalendarSource = CalendarSource.TVMAZE
+    @SerialName("src") val source: CalendarSource = CalendarSource.TVMAZE,
+    @SerialName("pa") val placeAtMs: Long? = null
 ) {
     val timeKnown: Boolean get() = airInstantMs != null
 
@@ -156,7 +158,7 @@ data class CalendarEntry(
         get() = if (kind == CalendarEntryKind.EPISODE) "S${season ?: 0}E${episode ?: 0}" else kind.name
 
     fun localDate(zone: ZoneId): LocalDate? =
-        airInstantMs?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }
+        (airInstantMs ?: placeAtMs)?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }
             ?: airDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
 
     /** An exact time is out when it airs; a plain date once that date has begun everywhere (next day 00:00 UTC). */
@@ -166,14 +168,26 @@ data class CalendarEntry(
         return !date.plusDays(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant().isAfter(now)
     }
 
+    /**
+     * An add-on's plain date read as an evening release in the show's own time zone, so a US Sunday night episode falls
+     * on Monday in Sydney. Without the show's zone the date stays as given.
+     */
+    fun placedFor(showZone: ZoneId?): CalendarEntry {
+        if (source != CalendarSource.ADDON || airInstantMs != null || placeAtMs != null || showZone == null) return this
+        val date = airDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return this
+        return copy(placeAtMs = date.atTime(ADDON_EVENING).atZone(showZone).toInstant().toEpochMilli())
+    }
+
     /** The episode name, without placeholders such as "TBA". */
     val shownTitle: String?
         get() = title?.trim()?.takeIf { it.isNotEmpty() && it.uppercase() !in PLACEHOLDER_TITLES }
 
     /** A plain date counts from midnight on the box's clock, so it sorts with the day it is shown under. */
-    fun sortInstant(zone: ZoneId = ZoneId.systemDefault()): Instant? = airInstantMs?.let(Instant::ofEpochMilli)
+    fun sortInstant(zone: ZoneId = ZoneId.systemDefault()): Instant? = (airInstantMs ?: placeAtMs)?.let(Instant::ofEpochMilli)
         ?: airDate?.let { runCatching { LocalDate.parse(it).atStartOfDay(zone).toInstant() }.getOrNull() }
 }
+
+private val ADDON_EVENING: LocalTime = LocalTime.of(20, 0)
 
 private val PLACEHOLDER_TITLES = setOf("TBA", "TBD", "TBC", "TBA.", "TBD.", "TO BE ANNOUNCED", "TO BE DETERMINED")
 
@@ -190,6 +204,7 @@ data class CalendarTitleRecord(
     val tvmazeId: Int? = null,
     val status: CalendarShowStatus = CalendarShowStatus.UNKNOWN,
     val network: String? = null,
+    val networkZone: String? = null,
     val sources: Map<CalendarSource, List<CalendarEntry>> = emptyMap(),
     val sourceFetchedAtMs: Map<CalendarSource, Long> = emptyMap(),
     val fetchedAtMs: Long = 0L,
@@ -202,7 +217,10 @@ data class CalendarTitleRecord(
     val rating: Double? = null,
     val genre: String? = null
 ) {
-    val entries: List<CalendarEntry> by lazy { mergeCalendarEntries(sources.values.flatten(), sourceFetchedAtMs) }
+    val entries: List<CalendarEntry> by lazy {
+        val showZone = networkZone?.let { runCatching { ZoneId.of(it) }.getOrNull() }
+        mergeCalendarEntries(sources.values.flatten().map { it.placedFor(showZone) }, sourceFetchedAtMs)
+    }
 
     fun episodeKey(entry: CalendarEntry): String = "$key|${entry.slot}"
 

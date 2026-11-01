@@ -103,6 +103,7 @@ class CalendarTitleFetcher(
                 name = record.name ?: dates.name,
                 poster = record.poster ?: dates.poster,
                 network = dates.network ?: record.network,
+                networkZone = dates.networkZone ?: record.networkZone,
                 status = dates.status
             ).withSource(CalendarSource.TVMAZE, dates.entries, now)
             return withFinales(withTraktTime(withTvdbTimes(updated, CalendarSource.TVMAZE, now), now), now)

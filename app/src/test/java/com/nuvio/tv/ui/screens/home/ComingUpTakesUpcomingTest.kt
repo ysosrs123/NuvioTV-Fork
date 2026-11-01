@@ -66,6 +66,20 @@ class ComingUpTakesUpcomingTest {
     private fun row(titles: List<CalendarTitleRecord>, items: List<ContinueWatchingItem>, watched: CalendarWatchedIndex? = CalendarWatchedIndex()) =
         buildCalendarComingUp(calendarTitlesWithUpcoming(titles, items, sydney), watched, now, sydney)
 
+    @Test fun anUpcomingAirTimeFallsOnTheViewersDayAndAPlainDateOnTheNetworksEvening() {
+        val losAngeles = ZoneId.of("America/Los_Angeles")
+        val timed = upcoming("tt200", 2, 3, "2026-10-20T01:00:00.000Z")
+        assertEquals(LocalDate.of(2026, 10, 20), upcomingAirDate(timed, sydney))
+        assertEquals(LocalDate.of(2026, 10, 19), upcomingAirDate(timed, losAngeles))
+        assertEquals(LocalDate.of(2026, 10, 20), upcomingAirDate(upcoming("tt200", 2, 3, "2026-10-20T00:00:00.000Z"), losAngeles))
+
+        val followed = show("tt200", on("2026-10-13", 2, season = 2)).copy(networkZone = "America/New_York")
+        val added = calendarTitlesWithUpcoming(listOf(followed), listOf(upcoming("tt200", 2, 3, "2026-10-20")), sydney).single()
+        val entry = added.entries.first { it.episode == 3 }
+        assertEquals(LocalDate.of(2026, 10, 21), entry.localDate(sydney))
+        assertEquals(LocalDate.of(2026, 10, 20), entry.localDate(losAngeles))
+    }
+
     @Test fun aShowTheCalendarDoesNotFollowGetsItsOwnCard() {
         val items = row(emptyList(), listOf(upcoming("tt100", 1, 3, "2026-10-22", name = "VisionQuest", backdrop = "vq.jpg")))
         assertEquals(1, items.size)
@@ -223,7 +237,8 @@ class ComingUpTakesUpcomingTest {
 
     @Test fun aTimedReleaseUsesItsDateAsTheCalendarDoes() {
         val item = upcoming("tt100", 1, 3, "2026-10-21T22:00:00.000Z")
-        assertEquals(LocalDate.of(2026, 10, 21), upcomingAirDate(item, sydney))
+        assertEquals(LocalDate.of(2026, 10, 22), upcomingAirDate(item, sydney))
+        assertEquals(LocalDate.of(2026, 10, 21), upcomingAirDate(item, ZoneId.of("America/Los_Angeles")))
     }
 
     @Test fun anEpisodeContinueWatchingShowsIsStillLeftOut() {

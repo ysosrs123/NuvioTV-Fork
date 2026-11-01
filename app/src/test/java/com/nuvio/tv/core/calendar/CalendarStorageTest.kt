@@ -215,8 +215,8 @@ class CalendarStorageTest {
         val day = Duration.ofDays(1).toMillis()
         val saved = mapOf(
             "kitsu:1" to CalendarResolvedIds(CalendarIds(imdb = "tt1"), now.toEpochMilli()),
-            "kitsu:2" to CalendarResolvedIds(CalendarIds(), now.toEpochMilli() - 2 * day),
-            "kitsu:3" to CalendarResolvedIds(CalendarIds(), now.toEpochMilli() - 8 * day)
+            "kitsu:2" to CalendarResolvedIds(CalendarIds(), now.toEpochMilli() - day / 2),
+            "kitsu:3" to CalendarResolvedIds(CalendarIds(), now.toEpochMilli() - 2 * day)
         )
         val unresolved = (1..14).map { CalendarTitleType.SERIES to "kitsu:$it" } + (CalendarTitleType.SERIES to "kitsu:4")
         assertEquals((3..12).map { "kitsu:$it" }, calendarIdsToLookUp(unresolved, saved, now).map { it.second })

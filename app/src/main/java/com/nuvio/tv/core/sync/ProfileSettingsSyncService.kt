@@ -15,6 +15,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.calendar.CalendarSettingsDataStore
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.ContinueWatchingEnrichmentCache
 import com.nuvio.tv.data.local.ExperienceModeDataStore
@@ -240,7 +241,8 @@ class ProfileSettingsSyncService @Inject constructor(
         "mdblist_settings",
         "trakt_settings",
         "debrid_settings",
-        "track_preference"
+        "track_preference",
+        CalendarSettingsDataStore.FEATURE
     )
 
     init {

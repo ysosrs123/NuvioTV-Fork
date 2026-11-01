@@ -9,6 +9,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 import retrofit2.Response
@@ -25,6 +26,7 @@ data class CalendarShowDates(
     val entries: List<CalendarEntry> = emptyList(),
     val name: String? = null,
     val network: String? = null,
+    val networkZone: String? = null,
     val ids: CalendarIds = CalendarIds(),
     val poster: String? = null
 )
@@ -95,6 +97,7 @@ fun tvMazeShowDates(show: TvMazeShowDto, seasonEpisodes: List<TvMazeEpisodeDto>)
         entries = episodes.mapNotNull(::tvMazeEpisodeEntry).distinctBy(CalendarEntry::slot),
         name = show.name,
         network = show.network?.name ?: show.webChannel?.name,
+        networkZone = show.network?.country?.timezone?.takeIf { runCatching { ZoneId.of(it) }.isSuccess },
         ids = CalendarIds(imdb = show.externals?.imdb?.takeIf { it.startsWith("tt") }, tvdb = show.externals?.thetvdb),
         poster = show.image?.let { it.medium ?: it.original }?.takeIf(String::isNotBlank)?.replaceFirst("http://", "https://")
     )

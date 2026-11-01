@@ -38,7 +38,9 @@ class SimklIdResolver @Inject constructor(
         val anilist: String? = null,
         val kitsu: String? = null,
         val imdb: String? = null,
-        val tvdbSeason: Int? = null
+        val tvdbSeason: Int? = null,
+        val tmdb: String? = null,
+        val tvdb: String? = null
     )
 
     data class EpisodeMapping(
@@ -70,7 +72,9 @@ class SimklIdResolver @Inject constructor(
                 anilist = ids?.optString("anilist")?.takeIf { it.isNotBlank() },
                 kitsu = ids?.optString("kitsu")?.takeIf { it.isNotBlank() },
                 imdb = ids?.optString("imdb")?.takeIf { it.isNotBlank() },
-                tvdbSeason = details.optInt("season", -1).takeIf { it > 0 }
+                tvdbSeason = details.optInt("season", -1).takeIf { it > 0 },
+                tmdb = ids?.optString("tmdb")?.takeIf { it.isNotBlank() },
+                tvdb = ids?.optString("tvdb")?.takeIf { it.isNotBlank() }
             ).also { idsCache[cacheKey] = it }
         } catch (e: CancellationException) {
             throw e
@@ -185,7 +189,9 @@ class SimklIdResolver @Inject constructor(
                 anilist = ids?.optString("anilist")?.takeIf { it.isNotBlank() },
                 kitsu = ids?.optString("kitsu")?.takeIf { it.isNotBlank() },
                 imdb = ids?.optString("imdb")?.takeIf { it.isNotBlank() },
-                tvdbSeason = details.optInt("season", -1).takeIf { it > 0 }
+                tvdbSeason = details.optInt("season", -1).takeIf { it > 0 },
+                tmdb = ids?.optString("tmdb")?.takeIf { it.isNotBlank() },
+                tvdb = ids?.optString("tvdb")?.takeIf { it.isNotBlank() }
             ).also { idsCache[cacheKey] = it }
         } catch (e: CancellationException) {
             throw e

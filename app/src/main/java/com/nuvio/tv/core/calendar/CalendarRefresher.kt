@@ -8,6 +8,7 @@ import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.tracking.TrackingProviderId
 import com.nuvio.tv.core.tracking.TrackingProviderRegistry
 import com.nuvio.tv.data.repository.MetaCaller
+import com.nuvio.tv.data.repository.SimklIdResolver
 import com.nuvio.tv.domain.repository.MetaRepository
 import java.time.Clock
 import java.time.Duration
@@ -100,6 +101,7 @@ class DefaultCalendarRefreshInputs @Inject constructor(
     private val deviceTier: CalendarDeviceTier,
     private val zoneProvider: CalendarZoneProvider,
     private val metaRepository: MetaRepository,
+    private val simklIdResolver: SimklIdResolver,
     profileManager: ProfileManager,
     screensaverController: ScreensaverController,
     appVisibility: CalendarAppVisibility
@@ -147,7 +149,19 @@ class DefaultCalendarRefreshInputs @Inject constructor(
         } catch (_: Exception) {
             null
         }
-        return (result as? NetworkResult.Success)?.let { calendarIdsOf(it.data) }
+        val fromAddons = (result as? NetworkResult.Success)?.let { calendarIdsOf(it.data) }
+        if (fromAddons != null && !fromAddons.isEmpty) return fromAddons
+        val fromSimkl = calendarSimklLookup(contentId)?.let { (source, id) ->
+            val resolved = try {
+                withTimeoutOrNull(ART_FETCH_MS) { simklIdResolver.resolveIds(source, id) }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                null
+            }
+            resolved?.let { calendarIdsFromSimkl(it.imdb, it.tmdb, it.tvdb, it.simklId) }
+        }
+        return calendarLookedUpIds(fromAddons, fromSimkl)
     }
 
     /** The box's own region, not the app language, for film release dates. */
@@ -379,6 +393,7 @@ class CalendarRefresher internal constructor(
             save(current, force = true)
             Log.i(TAG, "refresh reason=$reason titles=${followed.size} due=${due.size} trakt=${traktItems?.size ?: "-"}")
             calendarLeftOutSummary(result.leftOut).forEach { Log.i(TAG, it) }
+            calendarUnresolvedSummary(sources.unresolved, sources.unresolvedNames)?.let { Log.i(TAG, it) }
             if (!complete) {
                 val notReady = sources.notReady.entries.joinToString(", ") { (name, why) -> "$name $why" }
                 val kept = snapshot.titles.count { record -> record.origins.any { it in unread } }
