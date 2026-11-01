@@ -32,6 +32,8 @@ object StreamPrefetchCache {
     private const val TTL_MS = 5L * 60L * 1000L
     private const val MAX_ENTRIES = 2
     private const val JOIN_TIMEOUT_MS = 20_000L
+    /** The player takes over a completed list only this fresh; an older one is loaded again. */
+    const val PLAYER_REUSE_MS = 3L * 60L * 1000L
 
     /** Outlives any ViewModel: the details screen may be gone before this finishes. */
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -381,6 +383,29 @@ object StreamPrefetchCache {
         val key = keyOf(type, videoId, season, episode)
         synchronized(lock) {
             return policyProfile == currentProfile() && (completed[key]?.capHit ?: false)
+        }
+    }
+
+    /**
+     * Whether a completed list may stand in for the player's own load: complete (not cut short by the cap), at most
+     * [maxAgeMs] old and of the profile now in use.
+     */
+    fun reusableForPlayer(ageMs: Long, capHit: Boolean, sameProfile: Boolean, maxAgeMs: Long = PLAYER_REUSE_MS): Boolean =
+        sameProfile && !capHit && ageMs in 0..maxAgeMs
+
+    /**
+     * The completed list the stream screen just showed for this target (same profile, title, season and episode),
+     * for the player's own source list instead of searching every source again; null when there is none fit to
+     * reuse ([reusableForPlayer]): the player then loads it as usual.
+     */
+    fun completedForPlayer(type: String, videoId: String, season: Int?, episode: Int?): List<AddonStreams>? {
+        if (type.isBlank() || videoId.isBlank()) return null
+        val key = keyOf(type, videoId, season, episode)
+        synchronized(lock) {
+            val entry = completed[key] ?: return null
+            val age = SystemClock.elapsedRealtime() - entry.atMs
+            if (!reusableForPlayer(age, entry.capHit, policyProfile == currentProfile() && currentProfile() != null)) return null
+            return entry.streams.takeIf { it.isNotEmpty() }
         }
     }
 

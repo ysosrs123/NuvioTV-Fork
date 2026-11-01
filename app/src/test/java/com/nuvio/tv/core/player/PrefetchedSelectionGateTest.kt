@@ -112,6 +112,34 @@ class PrefetchedSelectionGateTest {
     }
 
     @Test
+    fun `a winner ranked with the same server order is used with several servers`() {
+        val winner = stream("4K TB Instant")
+        val servers = setOf("Emby · Home")
+        val outcome = PrefetchedSelectionGate.resolve(
+            prefetched = PrefetchedSelection(snapshot().copy(preferredServerNames = servers), winner, listOf(winner)),
+            snapshot = snapshot().copy(preferredServerNames = servers),
+            streams = listOf(winner),
+            identityOf = identity
+        )
+        assertTrue(outcome is SelectionOutcome.Hit)
+    }
+
+    @Test
+    fun `a different server order falls back to a live rank`() {
+        val winner = stream("4K TB Instant")
+        val outcome = PrefetchedSelectionGate.resolve(
+            prefetched = PrefetchedSelection(snapshot(), winner, listOf(winner)),
+            snapshot = snapshot().copy(preferredServerNames = setOf("Silo · Den")),
+            streams = listOf(winner),
+            identityOf = identity
+        )
+        assertEquals(
+            PrefetchedSelectionGate.REASON_INPUTS_CHANGED,
+            (outcome as SelectionOutcome.Live).reason
+        )
+    }
+
+    @Test
     fun `a changed setting falls back to a live rank`() {
         val winner = stream("4K TB Instant")
         val outcome = PrefetchedSelectionGate.resolve(

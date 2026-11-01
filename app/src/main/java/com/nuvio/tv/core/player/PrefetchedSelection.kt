@@ -22,7 +22,9 @@ import com.nuvio.tv.domain.model.Stream
 data class SelectionSnapshot(
     val inputs: AutoPlaySelection.Inputs,
     val installedAddonOrder: List<String>,
-    val preferences: DebridStreamPreferences?
+    val preferences: DebridStreamPreferences?,
+    /** Media servers listed first on the stream screen; they decide the order servers are ranked in. */
+    val preferredServerNames: Set<String> = emptySet()
 )
 
 /**

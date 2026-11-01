@@ -707,20 +707,17 @@ class StreamScreenViewModel @Inject constructor(
                 } else {
                     val gateT0 = SystemClock.elapsedRealtime()
                     val outcome = PrefetchedSelectionGate.resolve(
-                        prefetched = if (serverSourceNames.size > 1) {
-                            null
-                        } else {
-                            com.nuvio.tv.core.stream.StreamPrefetchCache.selectionFor(
-                                type = contentType,
-                                videoId = videoId,
-                                season = season,
-                                episode = episode
-                            )
-                        },
+                        prefetched = com.nuvio.tv.core.stream.StreamPrefetchCache.selectionFor(
+                            type = contentType,
+                            videoId = videoId,
+                            season = season,
+                            episode = episode
+                        ),
                         snapshot = SelectionSnapshot(
                             inputs = autoPlayInputs,
                             installedAddonOrder = installedAddonOrder,
-                            preferences = latestDebridStreamPreferences
+                            preferences = latestDebridStreamPreferences,
+                            preferredServerNames = preferredServerNames
                         ),
                         streams = allStreams,
                         identityOf = { it.badgeMergeKey() }

@@ -31,20 +31,21 @@ object StreamQualityRank {
         if (streams.size <= 1) return streams
         val effective = preferences ?: DEFAULT_PREFERENCES
         // Times the three cost centres separately: fact extraction, the exclusion
-        // filter, and a nine-level sort whose every key lookup is a deep structural
-        // hash of a Stream. Logging only.
+        // filter, and the sort. Logging only.
         val rankT0 = SystemClock.elapsedRealtime()
-        val factsByStream = streams.associateWith { DirectDebridStreamFilter.factsFor(it, effective) }
+        val facts = streams.map { DirectDebridStreamFilter.factsFor(it, effective) }
         val rankFactsMs = SystemClock.elapsedRealtime() - rankT0
-        val pool = streams.filter {
-            DirectDebridStreamFilter.passesExclusionFilters(factsByStream.getValue(it), effective)
-        }.ifEmpty { streams }
+        val pool = streams.indices.filter {
+            DirectDebridStreamFilter.passesExclusionFilters(facts[it], effective)
+        }.ifEmpty { streams.indices.toList() }
         val rankFilterMs = SystemClock.elapsedRealtime() - rankT0 - rankFactsMs
-        val ranked = pool.sortedWith(bestFirst({ factsByStream.getValue(it) }, ::containerScore))
+        val containers = IntArray(streams.size)
+        pool.forEach { containers[it] = containerScore(streams[it]) }
+        val ranked = pool.sortedWith(bestFirst({ facts[it] }, { containers[it] })).map(streams::get)
         val rankSortMs = SystemClock.elapsedRealtime() - rankT0 - rankFactsMs - rankFilterMs
         android.util.Log.i(
             "StreamQualityRank",
-            "R1_SPLIT in=${streams.size} distinct=${factsByStream.size} pool=${pool.size} " +
+            "R1_SPLIT in=${streams.size} pool=${pool.size} " +
                 "facts=${rankFactsMs}ms filter=${rankFilterMs}ms sort=${rankSortMs}ms " +
                 "total=${SystemClock.elapsedRealtime() - rankT0}ms"
         )

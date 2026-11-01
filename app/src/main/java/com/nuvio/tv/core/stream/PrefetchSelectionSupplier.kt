@@ -24,7 +24,8 @@ class PrefetchSelectionSupplier @Inject constructor(
     private val addonRepository: AddonRepository,
     private val bingeGroupCacheDataStore: BingeGroupCacheDataStore,
     private val debridSettingsDataStore: DebridSettingsDataStore,
-    private val streamBadgePresentation: com.nuvio.tv.core.streams.StreamBadgePresentation
+    private val streamBadgePresentation: com.nuvio.tv.core.streams.StreamBadgePresentation,
+    private val serverStreams: com.nuvio.tv.data.mediaserver.ServerStreams
 ) {
 
     private val signalStore = SourcePrefetchSignalStore()
@@ -39,11 +40,18 @@ class PrefetchSelectionSupplier @Inject constructor(
         season: Int?,
         episode: Int?,
         bingeOverride: String? = null,
-        uiKey: String? = null
+        uiKey: String? = null,
+        type: String? = null,
+        videoId: String? = null
     ): PrefetchedSelection? {
         val generation = uiKey?.let(signalStore::begin)
         val rankT0 = SystemClock.elapsedRealtime()
-        val selection = rank(groups, contentId, bingeOverride)
+        val preferredServerNames = if (type != null && videoId != null) {
+            serverStreams.preferredSourceNames(type, videoId)
+        } else {
+            emptySet()
+        }
+        val selection = rank(groups, contentId, bingeOverride, preferredServerNames)
         // Local ranking excludes provider resolution and media I/O.
         val winnerLabel = if (selection == null) "none" else "yes"
         android.util.Log.i(
@@ -83,7 +91,8 @@ class PrefetchSelectionSupplier @Inject constructor(
     private suspend fun rank(
         groups: List<AddonStreams>,
         contentId: String?,
-        bingeOverride: String?
+        bingeOverride: String?,
+        preferredServerNames: Set<String>
     ): PrefetchedSelection? {
         val settings = playerSettingsDataStore.playerSettings.first()
         if (settings.streamAutoPlayMode == StreamAutoPlayMode.MANUAL) return null
@@ -123,7 +132,8 @@ class PrefetchSelectionSupplier @Inject constructor(
             preferredBingeGroup = preferredBingeGroup
         )
 
-        val ordered = StreamAutoPlaySelector.orderAddonStreams(groups, installedAddonOrder)
+        // Same server order as the stream screen, so a winner ranked here also holds there.
+        val ordered = StreamAutoPlaySelector.orderAddonStreams(groups, installedAddonOrder, preferredServerNames)
         val allStreams = ordered.flatMap { it.streams }
         val winner = AutoPlaySelection.select(
             streams = allStreams,
@@ -135,7 +145,8 @@ class PrefetchSelectionSupplier @Inject constructor(
             snapshot = SelectionSnapshot(
                 inputs = inputs,
                 installedAddonOrder = installedAddonOrder,
-                preferences = preferences
+                preferences = preferences,
+                preferredServerNames = preferredServerNames
             ),
             winner = winner,
             candidates = allStreams
