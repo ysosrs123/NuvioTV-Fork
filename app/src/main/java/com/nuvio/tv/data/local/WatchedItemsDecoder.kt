@@ -8,7 +8,7 @@ import java.util.Collections
 
 /** Accessed under its owner's mutex. Null parses are cached along with valid items. */
 internal class WatchedItemsDecoder(private val gson: Gson = Gson(), private val parse: (String) -> WatchedItem? = { raw ->
-    runCatching { gson.fromJson(raw, WatchedItem::class.java) }.getOrNull()
+    parseWatchedItem(gson, raw)
 }) {
     private var entries = linkedMapOf<String, WatchedItem?>()
     private var snapshot: List<WatchedItem> = emptyList()

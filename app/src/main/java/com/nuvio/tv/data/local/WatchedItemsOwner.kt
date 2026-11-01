@@ -40,9 +40,7 @@ internal class WatchedItemsOwner(
     private val mutex = Mutex()
     private val epoch = AtomicLong()
     private val gson = Gson()
-    val decoder = WatchedItemsDecoder { raw ->
-        runCatching { gson.fromJson(raw, WatchedItem::class.java) }.getOrNull()
-    }
+    val decoder = WatchedItemsDecoder { raw -> parseWatchedItem(gson, raw) }
     private val retired = (store as? ProfileStoreLifetime)?.retired ?: MutableStateFlow(false)
 
     // No synthetic initial value. Stop disk observation and expire replay immediately

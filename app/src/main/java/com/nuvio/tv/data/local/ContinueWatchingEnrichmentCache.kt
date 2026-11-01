@@ -3,6 +3,7 @@ package com.nuvio.tv.data.local
 import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 import com.nuvio.tv.core.profile.ProfileManager
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -13,60 +14,62 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@androidx.annotation.Keep
 data class CachedNextUpItem(
-    val contentId: String,
-    val contentType: String,
-    val name: String,
-    val poster: String?,
-    val backdrop: String?,
-    val logo: String?,
-    val videoId: String,
-    val season: Int,
-    val episode: Int,
-    val episodeTitle: String?,
-    val episodeDescription: String? = null,
-    val thumbnail: String?,
-    val released: String? = null,
-    val hasAired: Boolean = true,
-    val airDateLabel: String? = null,
-    val lastWatched: Long,
-    val imdbRating: Float? = null,
-    val genres: List<String> = emptyList(),
-    val releaseInfo: String? = null,
-    val sortTimestamp: Long,
-    val releaseTimestamp: Long? = null,
-    val isReleaseAlert: Boolean = false,
-    val isNewSeasonRelease: Boolean = false,
-    val seedSeason: Int? = null,
-    val seedEpisode: Int? = null,
-    val contentLanguage: String? = null,
+    @SerializedName("contentId", alternate = ["a"]) val contentId: String,
+    @SerializedName("contentType", alternate = ["b"]) val contentType: String,
+    @SerializedName("name", alternate = ["c"]) val name: String,
+    @SerializedName("poster", alternate = ["d"]) val poster: String?,
+    @SerializedName("backdrop", alternate = ["e"]) val backdrop: String?,
+    @SerializedName("logo", alternate = ["f"]) val logo: String?,
+    @SerializedName("videoId", alternate = ["g"]) val videoId: String,
+    @SerializedName("season", alternate = ["h"]) val season: Int,
+    @SerializedName("episode", alternate = ["i"]) val episode: Int,
+    @SerializedName("episodeTitle", alternate = ["j"]) val episodeTitle: String?,
+    @SerializedName("episodeDescription", alternate = ["k"]) val episodeDescription: String? = null,
+    @SerializedName("thumbnail", alternate = ["l"]) val thumbnail: String?,
+    @SerializedName("released", alternate = ["m"]) val released: String? = null,
+    @SerializedName("hasAired", alternate = ["n"]) val hasAired: Boolean = true,
+    @SerializedName("airDateLabel", alternate = ["o"]) val airDateLabel: String? = null,
+    @SerializedName("lastWatched", alternate = ["p"]) val lastWatched: Long,
+    @SerializedName("imdbRating", alternate = ["q"]) val imdbRating: Float? = null,
+    @SerializedName("genres", alternate = ["r"]) val genres: List<String> = emptyList(),
+    @SerializedName("releaseInfo", alternate = ["s"]) val releaseInfo: String? = null,
+    @SerializedName("sortTimestamp", alternate = ["t"]) val sortTimestamp: Long,
+    @SerializedName("releaseTimestamp", alternate = ["u"]) val releaseTimestamp: Long? = null,
+    @SerializedName("isReleaseAlert", alternate = ["v"]) val isReleaseAlert: Boolean = false,
+    @SerializedName("isNewSeasonRelease", alternate = ["w"]) val isNewSeasonRelease: Boolean = false,
+    @SerializedName("seedSeason", alternate = ["x"]) val seedSeason: Int? = null,
+    @SerializedName("seedEpisode", alternate = ["y"]) val seedEpisode: Int? = null,
+    @SerializedName("contentLanguage", alternate = ["z"]) val contentLanguage: String? = null,
     /** Null in snapshots from before this field: Gson skips Kotlin defaults, and those showed the rating. */
-    val ratingVisible: Boolean? = null
+    @SerializedName("ratingVisible", alternate = ["A"]) val ratingVisible: Boolean? = null
 )
 
+@androidx.annotation.Keep
 data class CachedInProgressItem(
-    val contentId: String,
-    val contentType: String,
-    val name: String,
-    val poster: String?,
-    val backdrop: String?,
-    val logo: String?,
-    val videoId: String,
-    val season: Int?,
-    val episode: Int?,
-    val episodeTitle: String?,
-    val position: Long,
-    val duration: Long,
-    val lastWatched: Long,
-    val progressPercent: Float?,
-    val episodeThumbnail: String? = null,
-    val episodeDescription: String? = null,
-    val episodeImdbRating: Float? = null,
-    val genres: List<String> = emptyList(),
-    val releaseInfo: String? = null,
-    val contentLanguage: String? = null,
+    @SerializedName("contentId", alternate = ["a"]) val contentId: String,
+    @SerializedName("contentType", alternate = ["b"]) val contentType: String,
+    @SerializedName("name", alternate = ["c"]) val name: String,
+    @SerializedName("poster", alternate = ["d"]) val poster: String?,
+    @SerializedName("backdrop", alternate = ["e"]) val backdrop: String?,
+    @SerializedName("logo", alternate = ["f"]) val logo: String?,
+    @SerializedName("videoId", alternate = ["g"]) val videoId: String,
+    @SerializedName("season", alternate = ["h"]) val season: Int?,
+    @SerializedName("episode", alternate = ["i"]) val episode: Int?,
+    @SerializedName("episodeTitle", alternate = ["j"]) val episodeTitle: String?,
+    @SerializedName("position", alternate = ["k"]) val position: Long,
+    @SerializedName("duration", alternate = ["l"]) val duration: Long,
+    @SerializedName("lastWatched", alternate = ["m"]) val lastWatched: Long,
+    @SerializedName("progressPercent", alternate = ["n"]) val progressPercent: Float?,
+    @SerializedName("episodeThumbnail", alternate = ["o"]) val episodeThumbnail: String? = null,
+    @SerializedName("episodeDescription", alternate = ["p"]) val episodeDescription: String? = null,
+    @SerializedName("episodeImdbRating", alternate = ["q"]) val episodeImdbRating: Float? = null,
+    @SerializedName("genres", alternate = ["r"]) val genres: List<String> = emptyList(),
+    @SerializedName("releaseInfo", alternate = ["s"]) val releaseInfo: String? = null,
+    @SerializedName("contentLanguage", alternate = ["t"]) val contentLanguage: String? = null,
     /** Null in snapshots from before this field: Gson skips Kotlin defaults, and those showed the rating. */
-    val ratingVisible: Boolean? = null
+    @SerializedName("ratingVisible", alternate = ["u"]) val ratingVisible: Boolean? = null
 )
 
 @Singleton
@@ -149,7 +152,10 @@ class ContinueWatchingEnrichmentCache @Inject constructor(
         force: Boolean = false,
         profileId: Int,
         expectedClearVersion: Int? = null
-    ) = saveSnapshot("nextup", items.toList(), force, profileId, expectedClearVersion, nextUpWrites)
+    ) = saveSnapshot(
+        "nextup", items.savableSnapshot("next-up", CachedNextUpItem::isSavable) { Log.w(TAG, it) },
+        force, profileId, expectedClearVersion, nextUpWrites
+    )
 
     suspend fun saveInProgressSnapshot(items: List<CachedInProgressItem>, force: Boolean = false) =
         saveInProgressSnapshot(items, force, profileManager.activeProfileId.value)
@@ -159,7 +165,10 @@ class ContinueWatchingEnrichmentCache @Inject constructor(
         force: Boolean = false,
         profileId: Int,
         expectedClearVersion: Int? = null
-    ) = saveSnapshot("inprogress", items.toList(), force, profileId, expectedClearVersion, inProgressWrites)
+    ) = saveSnapshot(
+        "inprogress", items.savableSnapshot("in-progress", CachedInProgressItem::isSavable) { Log.w(TAG, it) },
+        force, profileId, expectedClearVersion, inProgressWrites
+    )
 
     private suspend fun saveSnapshot(
         kind: String,

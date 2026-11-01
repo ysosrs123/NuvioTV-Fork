@@ -3,7 +3,9 @@ package com.nuvio.tv.core.sync
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.nuvio.tv.data.local.ProfileDataStoreFactory
+import com.nuvio.tv.data.local.completeOrNull
 import com.nuvio.tv.data.mediaserver.ServerItemRef
 import com.nuvio.tv.domain.model.WatchProgress
 import com.nuvio.tv.domain.model.WatchedItem
@@ -13,14 +15,16 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@androidx.annotation.Keep
 private data class PendingProgressUpsert(
-    val key: String,
-    val progress: WatchProgress
+    @SerializedName("key", alternate = ["a"]) val key: String,
+    @SerializedName("progress", alternate = ["b"]) val progress: WatchProgress
 )
 
+@androidx.annotation.Keep
 private data class PendingWatchedUpsert(
-    val key: WatchedMutationKey,
-    val item: WatchedItem
+    @SerializedName("key", alternate = ["a"]) val key: WatchedMutationKey,
+    @SerializedName("item", alternate = ["b"]) val item: WatchedItem
 )
 
 @Singleton
@@ -185,12 +189,13 @@ class WatchStateMutationStore @Inject constructor(
     private fun parseProgressUpserts(raw: Set<String>?): Map<String, WatchProgress> {
         return raw.orEmpty().mapNotNull { json ->
             runCatching { gson.fromJson(json, PendingProgressUpsert::class.java) }.getOrNull()
+                ?.takeIf { it.isComplete() }
         }.associate { it.key to it.progress }
     }
 
     private fun parseWatchedUpserts(raw: Set<String>?): Map<WatchedMutationKey, WatchedItem> {
         return raw.orEmpty().mapNotNull { json ->
-            runCatching { gson.fromJson(json, PendingWatchedUpsert::class.java) }.getOrNull()
+            runCatching { gson.fromJson(json, PendingWatchedUpsert::class.java) }.getOrNull()?.completeOrNull()
         }.associate { it.key to it.item }
     }
 
@@ -199,4 +204,19 @@ class WatchStateMutationStore @Inject constructor(
             runCatching { gson.fromJson(json, WatchedMutationKey::class.java) }.getOrNull()
         }
     }
+}
+
+@Suppress("SENSELESS_COMPARISON", "USELESS_CAST")
+private fun PendingProgressUpsert.isComplete(): Boolean {
+    val progress = progress as WatchProgress? ?: return false
+    return (key as String?) != null && !(progress.contentId as String?).isNullOrBlank() &&
+        (progress.contentType as String?) != null && (progress.videoId as String?) != null
+}
+
+@Suppress("SENSELESS_COMPARISON", "USELESS_CAST")
+private fun PendingWatchedUpsert.completeOrNull(): PendingWatchedUpsert? {
+    val key = key as WatchedMutationKey? ?: return null
+    if ((key.contentId as String?).isNullOrBlank()) return null
+    val item = (item as WatchedItem?)?.completeOrNull() ?: return null
+    return if (item === this.item) this else copy(item = item)
 }
