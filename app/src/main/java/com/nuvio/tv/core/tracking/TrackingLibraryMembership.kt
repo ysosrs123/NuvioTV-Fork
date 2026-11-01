@@ -21,11 +21,17 @@ data class TrackingMembershipRemovalConfirmation(
 )
 
 data class TrackingMembershipApplyResult(
-    val requiredRemovalConfirmations: List<TrackingMembershipRemovalConfirmation> = emptyList()
+    val requiredRemovalConfirmations: List<TrackingMembershipRemovalConfirmation> = emptyList(),
+    /** For the one-press toggle: true when it added the title, false when it removed it, null when not known. */
+    val added: Boolean? = null
 ) {
     val requiresRemovalConfirmation: Boolean
         get() = requiredRemovalConfirmations.isNotEmpty()
 }
+
+/** True when the toggle puts the title into a list it was not in, false when it only takes it out. */
+fun defaultToggleAdds(current: Map<String, Boolean>, desired: Map<String, Boolean>): Boolean =
+    desired.any { (key, selected) -> selected && current[key] != true }
 
 data class TrackingMembershipMutationFailure(
     val providerId: TrackingProviderId,

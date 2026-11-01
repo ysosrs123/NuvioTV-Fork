@@ -12,6 +12,7 @@ import com.nuvio.tv.core.tracking.TrackingMembershipApplyResult
 import com.nuvio.tv.core.tracking.TrackingProviderId
 import com.nuvio.tv.core.tracking.LOCAL_LIBRARY_LIST_KEY
 import com.nuvio.tv.core.tracking.TrackingMembershipMutationException
+import com.nuvio.tv.core.tracking.defaultToggleAdds
 import com.nuvio.tv.core.tracking.dispatchTrackingMembershipChanges
 import com.nuvio.tv.core.tracking.TrackingRefreshIntent
 import com.nuvio.tv.core.tracking.effectiveLibrarySourceMode
@@ -159,7 +160,7 @@ class LibraryRepositoryImpl @Inject constructor(
             val provider = mode.providerId?.let(trackingProviders::provider)
             if (provider != null) {
                 provider.observeMembership(itemId, itemType)
-                    .map { memberships -> memberships.isNotEmpty() }
+                    .map { memberships -> memberships.any(provider::countsAsInLibrary) }
             } else {
                 libraryPreferences.isInLibrary(itemId = itemId, itemType = itemType)
             }
@@ -207,7 +208,7 @@ class LibraryRepositoryImpl @Inject constructor(
                 changes = changes,
                 destructiveRemovalConfirmed = provider.providerId in confirmedRemovalProviders
             )
-            return TrackingMembershipApplyResult()
+            return TrackingMembershipApplyResult(added = defaultToggleAdds(currentMembership, changes.desiredMembership))
         }
 
         val profileId = profileManager.activeProfileId.value
@@ -229,7 +230,7 @@ class LibraryRepositoryImpl @Inject constructor(
             )
         }
         triggerRemoteSync(profileId)
-        return TrackingMembershipApplyResult()
+        return TrackingMembershipApplyResult(added = !isInLocal)
     }
 
     override suspend fun getMembershipSnapshot(item: LibraryEntryInput): ListMembershipSnapshot {

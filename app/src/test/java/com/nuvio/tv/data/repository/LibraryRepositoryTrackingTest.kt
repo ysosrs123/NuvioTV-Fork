@@ -193,6 +193,38 @@ class LibraryRepositoryTrackingTest {
         assertEquals(listOf(TrackingRefreshIntent.USER_INITIATED), providers.last().refreshIntents)
     }
 
+    @Test
+    fun `a title only in a read-only list is not shown as in the library`() = runTest {
+        val source = MutableStateFlow(LibrarySourceMode.MDBLIST)
+        val watchlist = tab("mdblist:watchlist", TrackingProviderId.MDBLIST)
+        val readOnly = FakeLibraryProvider(
+            TrackingProviderId.MDBLIST, watchlist,
+            observed = setOf("mdblist:dynamic:5"), readOnlyKeys = setOf("mdblist:dynamic:5")
+        )
+        assertFalse(repository(source, setOf(readOnly)).isInLibrary("tt1", "series").first())
+
+        val ownList = FakeLibraryProvider(
+            TrackingProviderId.MDBLIST, watchlist,
+            observed = setOf("mdblist:dynamic:5", "mdblist:list:7"), readOnlyKeys = setOf("mdblist:dynamic:5")
+        )
+        assertTrue(repository(source, setOf(ownList)).isInLibrary("tt1", "series").first())
+    }
+
+    @Test
+    fun `default toggle reports whether it added or removed the title`() = runTest {
+        val source = MutableStateFlow(LibrarySourceMode.MDBLIST)
+        val watchlist = tab("mdblist:watchlist", TrackingProviderId.MDBLIST)
+        val item = LibraryEntryInput("tt1", "series", "Series")
+
+        val notInWatchlist = FakeLibraryProvider(
+            TrackingProviderId.MDBLIST, watchlist, membership = mapOf(watchlist.key to false, "mdblist:list:7" to true)
+        )
+        assertEquals(true, repository(source, setOf(notInWatchlist)).toggleDefault(item).added)
+
+        val inWatchlist = FakeLibraryProvider(TrackingProviderId.MDBLIST, watchlist, membership = mapOf(watchlist.key to true))
+        assertEquals(false, repository(source, setOf(inWatchlist)).toggleDefault(item).added)
+    }
+
     private fun repository(
         sourceMode: MutableStateFlow<LibrarySourceMode>,
         providers: Set<TrackingLibraryProvider>
@@ -225,7 +257,9 @@ class LibraryRepositoryTrackingTest {
         private val tab: LibraryListTab,
         private val membership: Map<String, Boolean> = emptyMap(),
         private val removalConfirmation: TrackingMembershipRemovalConfirmation? = null,
-        override val listManager: TrackingListManager? = null
+        override val listManager: TrackingListManager? = null,
+        private val observed: Set<String> = emptySet(),
+        private val readOnlyKeys: Set<String> = emptySet()
     ) : TrackingLibraryProvider {
         val refreshIntents = mutableListOf<TrackingRefreshIntent>()
         var applyCalls = 0
@@ -238,8 +272,10 @@ class LibraryRepositoryTrackingTest {
 
         override fun recognizesListKey(key: String): Boolean = key == tab.key || key.startsWith("${providerId.storageId}:")
 
+        override fun countsAsInLibrary(listKey: String): Boolean = listKey !in readOnlyKeys
+
         override fun observeMembership(itemId: String, itemType: String): Flow<Set<String>> =
-            flowOf(emptySet())
+            flowOf(observed)
 
         override fun toggledDefaultMembership(
             currentMembership: Map<String, Boolean>

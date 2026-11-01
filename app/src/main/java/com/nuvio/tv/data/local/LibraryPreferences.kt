@@ -228,7 +228,7 @@ class LibraryPreferences @Inject constructor(
     private fun Preferences.toLibrarySyncState(): LibrarySyncState {
         return LibrarySyncReducer.sanitize(
             LibrarySyncState(
-                items = decodeSet(libraryItemsKey, SavedLibraryItem::class.java),
+                items = decodeSet(libraryItemsKey, SavedLibraryItem::class.java).mapNotNull { it.completeOrNull() },
                 deltaCursorEventId = this[deltaCursorKey] ?: 0L,
                 deltaInitialized = this[deltaInitializedKey] ?: false,
                 pendingUpsertKeys = decodeSet(pendingUpsertKeysKey, LibrarySyncKey::class.java),
