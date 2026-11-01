@@ -60,6 +60,7 @@ import androidx.media3.extractor.TrueHdSampleRechunker;
 import androidx.media3.extractor.text.SubtitleParser;
 import androidx.media3.extractor.text.SubtitleTranscodingExtractorOutput;
 import com.google.common.collect.ImmutableList;
+import com.nuvio.tv.core.player.DolbyVisionBaseLayerColor;
 import com.nuvio.tv.core.util.TtffTrace;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -3440,6 +3441,8 @@ public class MatroskaExtractor implements Extractor {
     public float maxMasteringLuminance = Format.NO_VALUE;
     public float minMasteringLuminance = Format.NO_VALUE;
     public byte @MonotonicNonNull [] dolbyVisionConfigBytes;
+    public @C.ColorTransfer int bitstreamColorTransfer = Format.NO_VALUE;
+    public @C.ColorTransfer int dolbyVisionBaseLayerTransfer = Format.NO_VALUE;
     public byte @MonotonicNonNull [] pendingDolbyVisionBlockAdditionalData;
 
     // Audio elements. Initially set to their default values.
@@ -3515,6 +3518,7 @@ public class MatroskaExtractor implements Extractor {
           initializationData = hevcConfig.initializationData;
           nalUnitLengthFieldLength = hevcConfig.nalUnitLengthFieldLength;
           codecs = hevcConfig.codecs;
+          bitstreamColorTransfer = hevcConfig.colorTransfer;
           break;
         case CODEC_ID_FOURCC:
           Pair<String, @NullableType List<byte[]>> pair =
@@ -3713,6 +3717,11 @@ public class MatroskaExtractor implements Extractor {
               if (DolbyVisionCompatibility.isHdr10BaseLayerModeActive()) {
                 mimeType = MimeTypes.VIDEO_H265;
                 codecs = hevcCodecsString;
+                dolbyVisionBaseLayerTransfer =
+                    DolbyVisionBaseLayerColor.baseLayerTransfer(
+                        dolbyVisionConfig.profile,
+                        DolbyVisionBaseLayerColor.compatibilityId(this.dolbyVisionConfigBytes),
+                        bitstreamColorTransfer);
               }
             }
           }
@@ -3783,6 +3792,7 @@ public class MatroskaExtractor implements Extractor {
                   .setChromaBitdepth(bitsPerChannel)
                   .build();
         }
+        colorInfo = DolbyVisionBaseLayerColor.colorInfoFor(colorInfo, dolbyVisionBaseLayerTransfer);
         int rotationDegrees = Format.NO_VALUE;
 
         if (name != null && TRACK_NAME_TO_ROTATION_DEGREES.containsKey(name)) {

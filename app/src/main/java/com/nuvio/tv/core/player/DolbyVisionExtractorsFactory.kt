@@ -49,8 +49,12 @@ internal class DolbyVisionExtractorsFactory(
     private val config: DolbyVisionConversionConfig,
     private val stripDvRpu: Boolean = false,
     private val stripHdr10PlusSei: Boolean = false,
-    private val injectHdr10Sei: Boolean = false
+    private val injectHdr10Sei: Boolean = false,
+    autoSyncObservesText: Boolean = false
 ) : ExtractorsFactory {
+
+    private val subtitleParsers =
+        RenderTimeSubtitles.extractionParsers(DefaultSubtitleParserFactory(), autoSyncObservesText)
 
     override fun createExtractors(): Array<Extractor> =
         delegate.createExtractors().map(::wrap).toTypedArray()
@@ -82,7 +86,7 @@ internal class DolbyVisionExtractorsFactory(
         // the stock write path at no extra cost.
         if (extractor.javaClass.name == STOCK_MATROSKA_EXTRACTOR) {
             val mkv = DvMatroskaExtractor(
-                DefaultSubtitleParserFactory(),
+                subtitleParsers,
                 /* flags= */ 0,
                 DolbyVisionMatroskaTransformer(
                     config = config,
