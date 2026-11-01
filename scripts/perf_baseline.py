@@ -38,6 +38,7 @@ def main():
     parser.add_argument("--skip-build", action="store_true", help="Use the already built benchmark APK")
     parser.add_argument("--profile-apk", type=Path, help="Matching isolated fullNonMinifiedRelease APK for reusable source-profile collection")
     parser.add_argument("--profile-test", choices=PROFILE_TESTS, help="Repeat one profile journey while preserving other collected results")
+    parser.add_argument("--profile-clip", help="Clip id of the local test add-on for the player journeys")
     args = parser.parse_args()
     gradle = str(REPOSITORY / ("gradlew.bat" if os.name == "nt" else "gradlew"))
     if args.command == "release-with-profile":
@@ -114,7 +115,10 @@ def main():
     command = adb + ["shell", "am", "instrument", "-w", "-r", "-e", "class", test_class,
                      "-e", "nuvioPackage", args.package, "-e", "nuvioIterations", str(args.iterations),
                      "-e", "nuvioCompilation", "speed",
-                     "-e", "additionalTestOutputDir", remote_output, RUNNER]
+                     "-e", "additionalTestOutputDir", remote_output]
+    if args.profile_clip and args.command == "generate-profile":
+        command += ["-e", "nuvioClipId", args.profile_clip]
+    command.append(RUNNER)
     with (args.output / "instrumentation.log").open("w", encoding="utf-8") as log:
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                    text=True, encoding="utf-8", errors="replace")

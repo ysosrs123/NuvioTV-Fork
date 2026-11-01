@@ -35,6 +35,7 @@ private val CALENDAR_READY: Pattern = Pattern.compile("Just aired|Today|Tomorrow
 private val CALENDAR_EMPTY: Pattern = Pattern.compile("Nothing followed yet|All quiet")
 private const val SORT_SOURCE_ORDER = "Source order"
 private const val SORT_BEST_FIRST = "Best quality first"
+private val PLAYER_CONTROLS: Pattern = Pattern.compile("Play|Pause")
 private val THUMBNAIL_PREPARE: Pattern = Pattern.compile("Generating thumbnails|Thumbnails ready")
 
 // The libraries every cold start runs through are kept too. Most of them (OkHttp, Moshi, Retrofit) ship
@@ -57,6 +58,7 @@ class BaselineProfileGenerator {
         .also { require(it in ALLOWED_PACKAGES) }
     private val clipId = arguments.getString("nuvioClipId", "am9dv:fmt-av1-10bit")
     private val clipStream = arguments.getString("nuvioClipStream", "AM9 local")
+    private val clipWatchMs = arguments.getString("nuvioClipWatchMs", "45000").toLong()
     private val calendarSeries = arguments.getString("nuvioCalendarSeries", "tt0096697")
 
     private fun collect(iterations: Int, startup: Boolean = false, block: MacrobenchmarkScope.() -> Unit) {
@@ -104,7 +106,7 @@ class BaselineProfileGenerator {
     @Test
     fun generatePlayer() {
         ensureInterface(targetPackage, STYLE_V2)
-        collect(iterations = 3) { playClip(targetPackage, clipId, clipStream) }
+        collect(iterations = 3) { playClip(targetPackage, clipId, clipStream, clipWatchMs) }
     }
 
     // A followed series gives the Calendar rows and a month; it is added before collection.
@@ -433,7 +435,7 @@ private fun MacrobenchmarkScope.openSourceList(targetPackage: String, clipId: St
     device.waitIntroGone()
 }
 
-private fun MacrobenchmarkScope.playClip(targetPackage: String, clipId: String, streamLabel: String) {
+private fun MacrobenchmarkScope.playClip(targetPackage: String, clipId: String, streamLabel: String, watchMs: Long) {
     openSourceList(targetPackage, clipId)
     if (device.waitFor(By.text(streamLabel), 20_000) != true) {
         saveFailure("streams")
@@ -443,17 +445,18 @@ private fun MacrobenchmarkScope.playClip(targetPackage: String, clipId: String, 
     device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
     // Loading screen, first frames and the hidden controls; pausing then brings the control row up.
     device.waitGone(By.text(streamLabel), 10_000)
-    Thread.sleep(8_000)
     // With "Generate thumbnails before play" on, the generating screen holds playback; Back starts it.
-    if (device.freshHas(By.text(THUMBNAIL_PREPARE))) {
-        device.settle(3_000)
-        device.profileKey(targetPackage, KeyEvent.KEYCODE_BACK)
-        Thread.sleep(6_000)
+    if (device.waitFor(By.text(THUMBNAIL_PREPARE), 12_000) == true) {
+        device.settle(5_000)
+        if (device.freshHas(By.text(THUMBNAIL_PREPARE))) device.profileKey(targetPackage, KeyEvent.KEYCODE_BACK)
     }
+    // About a minute of plain playback, so the per-frame and per-buffer paths are recorded too.
+    Thread.sleep(watchMs)
     device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_CENTER)
-    if (device.waitFor(By.desc("Subtitles"), 5_000) != true) {
+    // Subtitles and Audio tracks are missing on clips without such tracks; Play / Pause is always there.
+    if (device.waitFor(By.desc(PLAYER_CONTROLS), 5_000) != true) {
         device.profileKey(targetPackage, KeyEvent.KEYCODE_DPAD_DOWN)
-        if (device.waitFor(By.desc("Subtitles"), 5_000) != true) {
+        if (device.waitFor(By.desc(PLAYER_CONTROLS), 5_000) != true) {
             saveFailure("player")
             error("Player controls did not appear")
         }
