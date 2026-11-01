@@ -420,13 +420,13 @@ under "Earlier session notes" and the dated sections is history kept for referen
   build on 20 October: 7ad.
 - Capture plan (18 October; each run removes what the data confirms or what cannot be seen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
-  deleted). Times are Brisbane; US slots move an hour later from 1 November (a reminder does this);
-  the European ones moved an hour later on 25 October.
+  deleted). Times are Brisbane; the US slots moved an hour later on 1 November and the European ones
+  on 25 October.
   - An NHL shootout in progress (scoreboard and summary); a UFC method posted later: daily
-    09:27, 11:27, 13:27 (`IPTV capture – daily US evening`).
+    10:27, 12:27, 14:27 from 1 November (`IPTV capture – daily US evening`; 09:27, 11:27, 13:27 before).
   - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
-    on 27 October): US final rounds end about 08:00 to 10:00 Brisbane on Monday, so the daily
-    09:27 slot; Asian events the daily slots.
+    on 27 October): US final rounds end about 09:00 to 11:00 Brisbane on Monday, so the daily
+    10:27 slot; Asian events the daily slots.
   - Dropped: a pitching change as the MLB scoreboard's last play and TheSportsDB baseball
     half-innings (the World Series ended on 29 October, Milwaukee 4–1; no MLB before 30
     November). The change was seen in the summary on 25 and 28 October; TheSportsDB extra innings
