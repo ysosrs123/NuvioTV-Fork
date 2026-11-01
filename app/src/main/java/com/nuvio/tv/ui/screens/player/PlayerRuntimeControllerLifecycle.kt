@@ -13,7 +13,8 @@ internal fun PlayerRuntimeController.releasePlayer() {
 internal fun PlayerRuntimeController.releasePlayer(
     flushPlaybackState: Boolean,
     preserveRecovery: Boolean = false,
-    keepTorrentStream: Boolean = false
+    keepTorrentStream: Boolean = false,
+    trimBufferInBackground: Boolean = false
 ) {
     if (!preserveRecovery) {
         playbackRecoveryJob?.cancel()
@@ -113,6 +114,13 @@ internal fun PlayerRuntimeController.releasePlayer(
     // reads _exoPlayer.audioSessionId and MUST run before _exoPlayer is nulled
     // below, or the audio-effect close broadcast silently no-ops and the
     // session leaks. Keep that call ahead of this block in any refactor.
+    // Leaving the player: the playback thread would free the whole buffer while stop() and clearVideoSurface() wait
+    // for it on Main, so that is done on a background thread once the player is gone.
+    val deferredTrim = if (trimBufferInBackground) {
+        (_loadControl as? com.nuvio.tv.core.player.BufferBudgetControl)?.stopTrim?.also { it.deferred = true }
+    } else {
+        null
+    }
     _exoPlayer?.let { player ->
         // No pause()/clearMediaItems(): they are redundant pre-release round
         // trips (see disposeExoPlayerBeforeRebuild). release() itself must stay
@@ -130,7 +138,9 @@ internal fun PlayerRuntimeController.releasePlayer(
             PlayerRuntimeController.TAG,
             "PLAYER_RELEASE: site=teardown exoReleaseMs=$releaseMs"
         )
+        com.nuvio.tv.core.player.AllocationRecorder.stop()
     }
+    deferredTrim?.trimInBackground()
     _exoPlayer = null
     nativeVideoSelection.clear()
     attachBufferMemoryKeeper(null)
@@ -161,6 +171,7 @@ internal fun PlayerRuntimeController.notifyAudioSessionUpdate(active: Boolean) {
                 intent.putExtra(AudioEffect.EXTRA_CONTENT_TYPE, AudioEffect.CONTENT_TYPE_MOVIE)
             }
             context.sendBroadcast(intent)
+            effectControlSessionId = if (active) player.audioSessionId else null
         } catch (e: SecurityException) {
             e.printStackTrace()
         }

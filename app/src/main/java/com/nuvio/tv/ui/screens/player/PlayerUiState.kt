@@ -1,6 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
-import com.nuvio.tv.domain.model.AppFont
+import com.nuvio.tv.domain.model.SubtitleFont
 import com.nuvio.tv.data.local.SubtitleEdgeStyle
 import androidx.media3.common.C
 import androidx.media3.common.TrackGroup
@@ -417,7 +417,7 @@ sealed class PlayerEvent {
     data class OnSetSubtitleHdrBrightness(val brightness: Int) : PlayerEvent()
     data class OnSetSubtitleTextColor(val color: Int) : PlayerEvent()
     data class OnSetSubtitleBold(val bold: Boolean) : PlayerEvent()
-    data class OnSetSubtitleFont(val font: AppFont?) : PlayerEvent()
+    data class OnSetSubtitleFont(val font: SubtitleFont?) : PlayerEvent()
     data class OnSetSubtitleEdgeStyle(val style: SubtitleEdgeStyle) : PlayerEvent()
     data class OnSetSubtitleOutlineEnabled(val enabled: Boolean) : PlayerEvent()
     data class OnSetSubtitleOutlineColor(val color: Int) : PlayerEvent()

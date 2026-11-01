@@ -9,6 +9,7 @@ import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.player.AutoPlaySelection
 import com.nuvio.tv.core.player.PlayerSessionTracker
 import com.nuvio.tv.core.player.StreamAutoPlaySelector
+import com.nuvio.tv.core.stream.StreamPrefetchCache
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.local.StreamAutoPlayMode
 import com.nuvio.tv.data.local.StreamAutoPlaySource
@@ -28,6 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -311,13 +313,24 @@ internal fun PlayerRuntimeController.loadSourceStreams(forceRefresh: Boolean) {
             updateSourceChipsForFetchStart(type, vid, installedAddons)
         }
 
-        streamRepository.getStreamsFromAllAddons(
-            type = type,
-            videoId = vid,
-            season = seasonArg,
-            episode = episodeArg,
-            forceRefresh = forceRefresh
-        ).collect { result ->
+        // The stream screen's list of a moment ago is taken over instead of searching every source again.
+        val reused = if (forceRefresh) null else StreamPrefetchCache.completedForPlayer(type, vid, seasonArg, episodeArg)
+        if (reused != null) {
+            Log.i(PlayerRuntimeController.TAG, "SOURCE_LIST reused the stream screen's list groups=${reused.size} " +
+                "streams=${reused.sumOf { it.streams.size }}")
+        }
+        val results = if (reused != null) {
+            flowOf<NetworkResult<List<AddonStreams>>>(NetworkResult.Loading, NetworkResult.Success(reused))
+        } else {
+            streamRepository.getStreamsFromAllAddons(
+                type = type,
+                videoId = vid,
+                season = seasonArg,
+                episode = episodeArg,
+                forceRefresh = forceRefresh
+            )
+        }
+        results.collect { result ->
             when (result) {
                 is NetworkResult.Success -> {
                     val addonStreams = StreamAutoPlaySelector.orderAddonStreams(result.data, installedAddonOrder, preferredServerNames)

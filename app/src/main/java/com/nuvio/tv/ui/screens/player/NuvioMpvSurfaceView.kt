@@ -497,10 +497,10 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
             val subMarginY = (MPV_SUB_MARGIN_Y_MIN +
                 (normalizedOffset * (MPV_SUB_MARGIN_Y_MAX - MPV_SUB_MARGIN_Y_MIN))).toInt()
             val edges = mpvSubtitleEdges(style, isAssOrSsaSubtitleSelectedNow())
-            mpv.setPropertyString("sub-font", style.font?.mpvFontName() ?: "Roboto")
+            mpv.setPropertyString("sub-font", style.font.mpvFontName(style.bold))
 
             mpv.setPropertyDouble("sub-scale", scale)
-            mpv.setPropertyBoolean("sub-bold", style.bold)
+            mpv.setPropertyBoolean("sub-bold", style.font.mpvBold(style.bold))
             mpv.setPropertyDouble("sub-outline-size", edges.outlineSize)
             // Subtitles sit above the controls while they are shown; the user's offset still wins below that line.
             val liftedSubPos = if (subtitleLiftFraction > 0.0) {
@@ -813,7 +813,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         mpv.setOptionString("sub-ass-override", "no")
         mpv.setOptionString("sub-codepage", "auto:utf-8")
         mpv.setOptionString("sub-fonts-dir", prepareMpvSubtitleFonts(context).absolutePath)
-        mpv.setOptionString("sub-font", "Roboto")
+        mpv.setOptionString("sub-font", MPV_RENDERER_DEFAULT_SUBTITLE_FONT)
         mpv.setOptionString("sub-use-margins", "yes")
         mpv.setOptionString("sub-ass-force-margins", "yes")
         mpv.setOptionString(

@@ -599,6 +599,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                             (budgetMb?.let { ", budgetMb=$it" } ?: "")
                         scope.launch(Dispatchers.IO) {
                             Log.i(PlayerRuntimeController.TAG, bufferLine + PlaybackRuntimeCounters.logFields())
+                            com.nuvio.tv.core.player.AllocationRecorder.sample(context.applicationContext, pos / 1000)
                         }
                         bufferMemoryKeeper?.onTick()
                         
@@ -1453,7 +1454,8 @@ internal fun PlayerRuntimeController.schedulePauseOverlay() {
 }
 
 /**
- * "Generate thumbnails before play": holds the player like a user pause, so start-up autoplay leaves it paused.
+ * "Generate thumbnails before play": holds the player like a user pause, so start-up autoplay leaves it paused, but a
+ * rebuilt player plays again (see [PauseIntent]).
  * False when the user already paused, null when this start cannot be held.
  */
 internal fun PlayerRuntimeController.pauseForSeekThumbnails(): Boolean? {
@@ -1462,7 +1464,7 @@ internal fun PlayerRuntimeController.pauseForSeekThumbnails(): Boolean? {
     if (partyBridge?.inParty == true) return null
     val player = _exoPlayer ?: return false
     // Already a user pause (or "start paused"): not ours to hold, and never ours to resume.
-    if (userPausedManually) return false
+    if (pausedByUser) return false
     // A tunnelled start only leaves the loading screen on its first READY with autoplay still armed.
     if ((_uiState.value.tunnelingEnabled || player.isTunnelingEnabled) && !hasRenderedFirstFrame) return null
     // The native Dolby Vision renderer must show its first frame before anything pauses it.
@@ -1470,7 +1472,7 @@ internal fun PlayerRuntimeController.pauseForSeekThumbnails(): Boolean? {
     val mayUseNativeRoute = currentVideoTrackMimeType.let { it == null || it == androidx.media3.common.MimeTypes.VIDEO_DOLBY_VISION } ||
         currentVideoTrackCodecs?.startsWith("dv") == true
     if (isNativeFelActiveForCurrentPlayback && mayUseNativeRoute && !hasRenderedFirstFrame) return null
-    userPausedManually = true
+    pauseIntent.holdForThumbnails()
     shouldEnforceAutoplayOnFirstReady = false
     player.pause()
     cancelPauseOverlay()
@@ -1491,8 +1493,18 @@ internal fun PlayerRuntimeController.letGoForSeekThumbnails(): Boolean {
 
 internal fun PlayerRuntimeController.loadAgainAfterSeekThumbnails(play: Boolean) {
     val player = _exoPlayer ?: return
-    if (player.playbackState == Player.STATE_IDLE && player.playerError == null) player.prepare()
-    if (play && !player.playWhenReady) player.play()
+    // Left paused for the user (the app was left meanwhile): from here on it is a pause like the user's own.
+    if (!play && pauseIntent.heldForThumbnails) userPausedManually = true
+    if (play) pauseIntent.onPlayWhenReady(true)
+    when (HandBackReload.of(player.playbackState == Player.STATE_IDLE, player.playerError != null)) {
+        HandBackReload.REBUILD -> {
+            Log.i(PlayerRuntimeController.TAG, "prepare: the player let go for the thumbnails is built again at " +
+                "${player.currentPosition / 1000} s" + if (pausedByUser) ", paused" else "")
+            scheduleOwnedPlaybackRecovery(player.currentPosition, 0L)
+        }
+        HandBackReload.PLAY -> if (play && !player.playWhenReady) player.play()
+        HandBackReload.NONE -> Unit
+    }
 }
 
 internal fun PlayerRuntimeController.cancelPauseOverlay() {
@@ -2764,14 +2776,25 @@ private fun PlayerRuntimeController.sampleAutoSpeedup(player: Player, positionMs
     AutoSpeedup.updateReadAhead(roomBytes) {
         if (player.playWhenReady) 0L else com.nuvio.tv.core.player.thumbnail.SeekThumbnails.memoryFloorBytes()
     }
-    // A guessed start runs several downloads before the first sample; their memory comes off the buffer as usual.
-    if (keeper != null && keeper.lentBytes == 0L && AutoSpeedup.downloads > 1) keeper.setLentBytes(AutoSpeedup.lentBytes())
-    val before = AutoSpeedup.downloads
     val fileBitrate = AutoSpeedup.fileBitrate(
         PlaybackByteCounter.contentLengthFor(currentStreamUrl),
         currentVideoSize,
         player.duration
     )
+    // The buffer lends nothing until the film is on screen and past its start cushion, and never so much that
+    // fewer than a few seconds of film fit: a 5 s buffer against a 6 s cushion froze a 4K remux on a 2 GB box.
+    if (keeper != null) {
+        val cushionArmed = (_loadControl as? com.nuvio.tv.core.player.StartCushionControl)?.startCushion?.armed == true
+        keeper.setLendingHeld(cushionArmed || !hasRenderedFirstFrame)
+        keeper.setLendFloorBytes(
+            com.nuvio.tv.core.player.BufferMemoryKeeper.lendFloorBytes(
+                fileBitrate, maxOf(AutoSpeedup.pieceBytes, AutoSpeedup.activePieceBytes)
+            )
+        )
+    }
+    // A guessed start runs several downloads before the first sample; their memory comes off the buffer as usual.
+    if (keeper != null && keeper.lentBytes == 0L && AutoSpeedup.downloads > 1) keeper.setLentBytes(AutoSpeedup.lentBytes())
+    val before = AutoSpeedup.downloads
     val targetBytes = control?.allocatorTargetBytes()?.toLong() ?: 0L
     val maxBufferMs = control?.maxBufferMs?.toLong() ?: 0L
     val bufferTargetMs = AutoSpeedup.bufferTargetMs(maxBufferMs, targetBytes, fileBitrate)

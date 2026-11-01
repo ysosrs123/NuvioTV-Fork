@@ -319,14 +319,15 @@ object NuvioExoPlayerPerformanceHelper {
     fun sizeTargetFromFreeMemory(
         free: com.nuvio.tv.core.player.BufferSizing.FreeMemory?,
         chunkWindowMb: Int,
-        heldMb: Int
+        heldMb: Int,
+        fourKInAppMemory: Boolean = false
     ): String {
         val boxMb = targetBufferSizeMb
         unsizedTargetBufferSizeMb = boxMb
         if (!targetIsAutomatic) return "boxMb=$boxMb sizedMb=$boxMb user=true"
-        val sized = com.nuvio.tv.core.player.BufferSizing.sizedBudgetMb(boxMb, free, chunkWindowMb, heldMb)
+        val sized = com.nuvio.tv.core.player.BufferSizing.sizedBudgetMb(boxMb, free, chunkWindowMb, heldMb, fourKInAppMemory)
         targetBufferSizeMb = sized
-        return com.nuvio.tv.core.player.BufferSizing.describe(boxMb, sized, free, chunkWindowMb, heldMb)
+        return com.nuvio.tv.core.player.BufferSizing.describe(boxMb, sized, free, chunkWindowMb, heldMb, fourKInAppMemory)
     }
 
     /**
@@ -374,7 +375,8 @@ object NuvioExoPlayerPerformanceHelper {
                         "native arena chunk $NATIVE_ARENA_CHUNK_SIZE; native pooling is disabled"
                 )
             }
-            val allocator = DefaultAllocator(true, DEFAULT_NUVIO_ALLOCATOR_SEGMENT_SIZE, 0, enabled)
+            // ReservableLoadControl frees the idle memory itself when the player stops (AllocatorStopTrim).
+            val allocator = DefaultAllocator(false, DEFAULT_NUVIO_ALLOCATOR_SEGMENT_SIZE, 0, enabled)
             liveAllocator = allocator
             val sizing = com.nuvio.tv.core.player.BufferSizing
             val bytesPerSecond = sizing.backBufferBytesPerSecond(fileBitrateBps)

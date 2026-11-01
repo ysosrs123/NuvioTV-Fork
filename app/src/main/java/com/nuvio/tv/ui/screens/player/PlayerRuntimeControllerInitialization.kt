@@ -60,6 +60,7 @@ import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
 import androidx.media3.exoplayer.upstream.BandwidthMeter
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.extractor.DefaultExtractorsFactory
+import androidx.media3.extractor.text.DefaultSubtitleParserFactory
 import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.ts.DefaultTsPayloadReaderFactory
 import androidx.media3.extractor.ts.TsExtractor
@@ -78,6 +79,7 @@ import com.nuvio.tv.core.player.DolbyVisionConversionConfig
 import com.nuvio.tv.core.player.DolbyVisionConversionStats
 import com.nuvio.tv.core.player.DrawingMemory
 import com.nuvio.tv.core.player.AviTrackFormatExtractorsFactory
+import com.nuvio.tv.core.player.RenderTimeSubtitles
 import com.nuvio.tv.core.player.DolbyVisionExtractorsFactory
 import com.nuvio.tv.core.player.DoviBridge
 import com.nuvio.tv.core.player.LastPlaybackDiagnostics
@@ -844,6 +846,12 @@ internal fun PlayerRuntimeController.initializePlayer(
             var builtCeilingMb = 0
             // The back buffer is read once when the player is built, before this stream's size arrives from the server.
             val fileBitrateAtBuild = fileBitrateBeforeBuild(url)
+            // A 4K decoder on a 2 GB box without a video memory pool the app can read (a Fire TV Stick) takes its
+            // pictures from app memory: the sizing keeps more for it.
+            val fourKInAppMemory =
+                BufferSizing.looksFourK(fileBitrateAtBuild, currentFilename, streamName, currentStreamDescription) &&
+                    BufferSizing.isSmallBox(NuvioExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(context)) &&
+                    com.nuvio.tv.core.player.thumbnail.VideoPoolReader.read() == null
             val topUpPieceBytes = if (parallelForSizing) chunkMbForSizing * 1024L * 1024L else BufferTopUp.DEFAULT_PIECE_BYTES
             val loadControl = if (playerSettings.nuvioPerformanceModeEnabled) {
                 effectiveBackBufferDurationMs = NuvioExoPlayerPerformanceHelper.backBufferMs
@@ -860,7 +868,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                     0
                 }
                 val sizing = NuvioExoPlayerPerformanceHelper.sizeTargetFromFreeMemory(
-                    BufferSizing.read(context), chunkWindowMb, heldBufferMb
+                    BufferSizing.read(context), chunkWindowMb, heldBufferMb, fourKInAppMemory
                 )
                 Log.i(
                     PlayerRuntimeController.TAG,
@@ -898,8 +906,8 @@ internal fun PlayerRuntimeController.initializePlayer(
                 val budgetMbEffective = if (budgetManaged) {
                     val boxMb = MemoryBudget.autoBudgetMb
                     val free = if (MemoryBudget.offHeapBuffers) BufferSizing.read(context) else null
-                    currentManagedBudgetMb = BufferSizing.sizedBudgetMb(boxMb, free, 0, heldBufferMb)
-                    sizing = BufferSizing.describe(boxMb, currentManagedBudgetMb, free, 0, heldBufferMb) + " "
+                    currentManagedBudgetMb = BufferSizing.sizedBudgetMb(boxMb, free, 0, heldBufferMb, fourKInAppMemory)
+                    sizing = BufferSizing.describe(boxMb, currentManagedBudgetMb, free, 0, heldBufferMb, fourKInAppMemory) + " "
                     unsizedBudgetMb = (boxMb - currentParallelChunkOverheadMb).coerceAtLeast(MemoryBudget.MIN_BUFFER_MB)
                     (currentManagedBudgetMb - currentParallelChunkOverheadMb).coerceAtLeast(MemoryBudget.MIN_BUFFER_MB)
                 } else {
@@ -937,8 +945,9 @@ internal fun PlayerRuntimeController.initializePlayer(
                 effectiveBackBufferDurationMs = backBufferMsAtBuild
                 // Native memory without the rest of performance mode, and no initial allocations:
                 // the allocator never frees them, so they would stay out of the shared arena.
+                // BitrateAwareLoadControl frees the idle memory itself when the player stops (AllocatorStopTrim).
                 val allocator = androidx.media3.exoplayer.upstream.DefaultAllocator(
-                    true,
+                    false,
                     C.DEFAULT_BUFFER_SEGMENT_SIZE,
                     0,
                     MemoryBudget.offHeapBuffers
@@ -1221,10 +1230,14 @@ internal fun PlayerRuntimeController.initializePlayer(
             }
 
             // ── Extractors & DV Hook ──
+            val autoSyncObservesText = com.nuvio.tv.ui.screens.player.autosync.AutoSyncPreferences.isEnabled(context)
             val extractorsFactory: ExtractorsFactory = AviTrackFormatExtractorsFactory(
                 DefaultExtractorsFactory()
                     .setTsExtractorFlags(DefaultTsPayloadReaderFactory.FLAG_ENABLE_HDMV_DTS_AUDIO_STREAMS)
                     .setTsExtractorTimestampSearchBytes(1500 * TsExtractor.TS_PACKET_SIZE)
+                    .setSubtitleParserFactory(
+                        RenderTimeSubtitles.extractionParsers(DefaultSubtitleParserFactory(), autoSyncObservesText)
+                    )
             )
 
             // Manual Convert-to-DV8.1, and Auto on a device it converts the same way, use mode 2;
@@ -1386,6 +1399,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                 )
             }
 
+            if (SpeakerlessBoxRoute.hdmiSoundOff(currentRouteKey)) logHdmiSoundOff("start", currentRouteKey)
             currentAudioPassthroughPolicy = surroundResolution.policy
             lastAppliedSurroundResolve = surround
             lastAppliedSurroundHdmi = AudioChainProbe.hdmiPlugSnapshot(context)
@@ -1497,7 +1511,8 @@ internal fun PlayerRuntimeController.initializePlayer(
                         ),
                         stripDvRpu = stripDvRpuEnabled,
                         stripHdr10PlusSei = stripHdr10PlusSei,
-                        injectHdr10Sei = playerSettings.injectHdr10MetadataOnStrip
+                        injectHdr10Sei = playerSettings.injectHdr10MetadataOnStrip,
+                        autoSyncObservesText = autoSyncObservesText
                     )
             // The thumbnail tap wraps the outermost factory. The libass path takes the unwrapped one and wraps
             // after its own Matroska swap.
@@ -2496,7 +2511,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                             detailedError = detailedError,
                             allowEngineFailover = allowEngineFailover,
                             savedPosition = currentPosition,
-                            paused = userPausedManually
+                            paused = pausedByUser
                         )) {
                             return
                         }
@@ -2642,6 +2657,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                             append(')')
                         }
                         currentAudioPathDescription = "$sourceCodec \u2192 $detail"
+                        if (_exoPlayer === this@apply) logAudioStart(this@apply, audioTrackConfig, "$sourceCodec \u2192 $detail")
                         if (_exoPlayer === this@apply) {
                             val openedGroup = passthroughGroupOfEncoding(audioTrackConfig.encoding)
                             playbackRecoveryGate.noteAudioOutputOpened(openedGroup)
@@ -2690,6 +2706,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         reason: Int
                     ) {
                         playbackAnalyticsDiagnostics.onPlayWhenReadyChanged(eventTime, playWhenReady, reason)
+                        if (_exoPlayer === this@apply) pauseIntent.onPlayWhenReady(playWhenReady)
                     }
 
                     override fun onIsPlayingChanged(eventTime: AnalyticsListener.EventTime, isPlaying: Boolean) {
@@ -3547,6 +3564,7 @@ private class SubtitleOffsetRenderersFactory(
         )
         val startIndex = out.size
         super.buildTextRenderers(context, normalizingOutput, outputLooper, extensionRendererMode, out)
+        RenderTimeSubtitles.enableRenderTimeDecoding(out, startIndex)
         for (index in startIndex until out.size) {
             out[index] = SubtitleOffsetRenderer(
                 baseRenderer = out[index],

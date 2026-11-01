@@ -354,7 +354,7 @@ class PlayerRuntimeController(
         PlayerMemoryReporter.stopSampling(context)
         releaseProcessWideReferences()
         mediaSourceFactory.evictCachedSession()
-        releasePlayer()
+        releasePlayer(flushPlaybackState = true, trimBufferInBackground = true)
         playerSession.close()
     }
 
@@ -641,7 +641,11 @@ class PlayerRuntimeController(
     internal var nextEpisodeVideo: Video? = null
     internal var nextEpisodePreloadJob: Job? = null
     internal var nextEpisodePreloadTriggered: Boolean = false
-    internal var userPausedManually = false
+    internal val pauseIntent = PauseIntent()
+    internal var userPausedManually: Boolean
+        get() = pauseIntent.paused
+        set(value) { pauseIntent.paused = value }
+    internal val pausedByUser: Boolean get() = pauseIntent.pausedByUser
     /** Playback paused by a held scrub, not by the user; resumed when the seek commits. */
     internal var scrubHoldPaused = false
     internal var scrubGlideJob: Job? = null
@@ -997,6 +1001,8 @@ class PlayerRuntimeController(
     // offering a dead slider. Set from onAudioTrackInitialized (Exo only -
     // MPV always decodes), reset per playback and on release.
     internal var isAudioOutputBypassing: Boolean = false
+    // The audio session the system sound-effects control was last told is open, until it is told it closed.
+    internal var effectControlSessionId: Int? = null
     internal var currentVideoTrackWidth: Int = 0
     internal var currentVideoTrackHeight: Int = 0
     internal var currentVideoTrackBitrate: Int = -1
@@ -1090,7 +1096,7 @@ class PlayerRuntimeController(
         ScrubGlide.stop()
         playerSession.close()
         stopServerPlayback()
-        releasePlayer()
+        releasePlayer(flushPlaybackState = true, trimBufferInBackground = true)
         stopTorrentStream()
         torrentService.shutdown()
         startupLoadingReportJob?.cancel()

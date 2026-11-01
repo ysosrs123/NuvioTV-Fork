@@ -215,6 +215,9 @@ class PlayerViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .collect { thumbnailCopyDebrid.notePlaying(it) }
         }
+        viewModelScope.launch(Dispatchers.IO) {
+            com.nuvio.tv.core.performance.ArtCompileStatus.logOnce(context, PlayerRuntimeController.TAG)
+        }
     }
 
     val playbackTimeline: StateFlow<PlaybackTimelineState>

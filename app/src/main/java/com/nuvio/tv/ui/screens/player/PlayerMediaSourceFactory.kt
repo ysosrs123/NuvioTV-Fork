@@ -575,6 +575,7 @@ internal class PlayerMediaSourceFactory(
                 dropStaleConnections = { client.connectionPool.evictAll() },
                 onRateLimited = { uri, inFlight -> AutoSpeedup.onRateLimited(uri?.toString(), inFlight) },
                 onExtraRefused = { uri, running -> AutoSpeedup.onExtraDownloadRefused(uri?.toString(), running) },
+                onAllFailed = { uri, f -> AutoSpeedup.onAllDownloadsFailed(uri?.toString(), f) },
                 heldLimit = heldLimit
             )
         }
@@ -588,7 +589,7 @@ internal class PlayerMediaSourceFactory(
         return AutoSpeedupDataSource.Factory(
             single = single,
             multi = { multiFor(AutoSpeedup.fixPiece()).createDataSource() },
-            pieceBytes = AutoSpeedup::fixPiece,
+            pieceBytes = { AutoSpeedup.fixPiece() },
             downloads = { AutoSpeedup.downloads },
             received = AutoSpeedup.received,
             onMultiClosed = ParallelRangeDataSource::releaseRetainedSessionIfIdle,

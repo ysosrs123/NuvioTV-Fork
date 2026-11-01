@@ -7,7 +7,6 @@ package com.nuvio.tv.ui.screens.player
 
 import com.nuvio.tv.core.player.thumbnail.handsPlayerBackOnRestart
 import com.nuvio.tv.core.player.thumbnail.isThumbnailSource
-import com.nuvio.tv.data.local.SubtitleEdgeStyle
 import com.nuvio.tv.ui.v2.components.GlassRole
 
 import com.nuvio.tv.ui.v2.components.nuvioGlass
@@ -3126,14 +3125,15 @@ internal fun PlayerView.applySubtitleStyleIfNeeded(
 
         val typeface = subtitleTypeface(context, subtitleStyle.font, subtitleStyle.bold)
         val edgeType = subtitleCaptionEdge(subtitleStyle.effectiveEdgeStyle)
+        val colors = exoSubtitleColors(subtitleStyle)
 
         setStyle(
             androidx.media3.ui.CaptionStyleCompat(
                 subtitleStyle.textColor,
-                subtitleStyle.backgroundColor,
-                android.graphics.Color.TRANSPARENT,
+                colors.background,
+                colors.window,
                 edgeType,
-                if (subtitleStyle.effectiveEdgeStyle == SubtitleEdgeStyle.DROP_SHADOW) SUBTITLE_SHADOW_COLOR else subtitleStyle.outlineColor,
+                colors.edgeColor,
                 typeface
             )
         )

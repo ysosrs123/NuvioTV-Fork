@@ -434,7 +434,9 @@ internal fun PlayerRuntimeController.maybePrefetchNextEpisodeForBinge(
                 contentId = contentId,
                 season = nextVideo.season,
                 episode = nextVideo.episode,
-                bingeOverride = lookaheadBingeGroup
+                bingeOverride = lookaheadBingeGroup,
+                type = type,
+                videoId = nextVideo.id
             )
         }
     )
