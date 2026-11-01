@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -254,7 +256,7 @@ private fun CastDetailContent(
                             onBiographyExpandedChange(!isBiographyExpanded)
                         }
                     },
-                    modifier = if (isBiographyExpanded) Modifier.weight(1f) else Modifier
+                    modifier = Modifier.weight(1f, fill = isBiographyExpanded)
                 )
 
                 AnimatedVisibility(
@@ -333,8 +335,8 @@ private fun HeroSection(
         Card(
             onClick = onPortraitClick,
             modifier = Modifier
-                .width(160.dp)
-                .height(240.dp)
+                .heightIn(max = 240.dp)
+                .aspectRatio(2f / 3f, matchHeightConstraintsFirst = true)
                 .focusRequester(portraitFocusRequester)
                 .focusProperties {
                     canFocus = isBiographyExpanded || isBiographyTruncated

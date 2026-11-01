@@ -70,16 +70,16 @@ class ParentalGuideRepository @Inject constructor(
 
         // Find the severity with the most votes, excluding "none"
         val dominant = breakdowns
-            .filter { it.severityLevel.lowercase() != "none" }
-            .maxByOrNull { it.voteCount }
+            .filter { !it.severityLevel.isNullOrBlank() && it.severityLevel.lowercase() != "none" }
+            .maxByOrNull { it.voteCount ?: 0 }
 
         // If "none" has more votes than any other severity, treat as no concern
         val noneVotes = breakdowns
-            .firstOrNull { it.severityLevel.lowercase() == "none" }
+            .firstOrNull { it.severityLevel?.lowercase() == "none" }
             ?.voteCount ?: 0
 
-        if (dominant == null || dominant.voteCount <= noneVotes) return null
+        if (dominant == null || (dominant.voteCount ?: 0) <= noneVotes) return null
 
-        return dominant.severityLevel.lowercase()
+        return dominant.severityLevel?.lowercase()
     }
 }

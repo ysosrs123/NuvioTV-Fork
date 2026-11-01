@@ -48,6 +48,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -110,6 +111,7 @@ fun CompanyLogosSection(
 
     var holdRestoreScrollSuppress by remember { mutableStateOf(false) }
     var revealOverflowPx by remember { mutableFloatStateOf(0f) }
+    var fullRevealOverflowPx by remember { mutableFloatStateOf(0f) }
     val view = LocalView.current
     val density = LocalDensity.current
     val revealPaddingPx = remember(density) { with(density) { NuvioTheme.spacing.md.toPx() } }
@@ -154,6 +156,12 @@ fun CompanyLogosSection(
             .onGloballyPositioned { coords ->
                 val bounds = coords.boundsInWindow()
                 revealOverflowPx = (bounds.bottom - view.height + revealPaddingPx).coerceAtLeast(0f)
+                fullRevealOverflowPx = companyRowRevealOverflowPx(
+                    rowTopPx = coords.positionInWindow().y,
+                    rowHeightPx = coords.size.height,
+                    windowHeightPx = view.height,
+                    paddingPx = revealPaddingPx
+                )
             }
     ) {
         Text(
@@ -217,7 +225,13 @@ fun CompanyLogosSection(
                         upFocusRequester = upFocusRequester,
                         onFocused = {
                             companyId?.let(onLastFocusedCompanyIdChange)
-                            onCompanyFocused(if (suppressRestoreScroll) 0f else revealOverflowPx)
+                            onCompanyFocused(
+                                when {
+                                    suppressRestoreScroll -> 0f
+                                    allowPageScrollState.value() -> revealOverflowPx
+                                    else -> fullRevealOverflowPx
+                                }
+                            )
                             if (isRestoreTarget) {
                                 restorePending = false
                                 onRestoreFocusHandled()
@@ -230,6 +244,10 @@ fun CompanyLogosSection(
         }
     }
 }
+
+/** How far the row reaches below the window, measured unclipped so a row that only peeks in is fully revealed. */
+internal fun companyRowRevealOverflowPx(rowTopPx: Float, rowHeightPx: Int, windowHeightPx: Int, paddingPx: Float): Float =
+    (rowTopPx + rowHeightPx - windowHeightPx + paddingPx).coerceAtLeast(0f)
 
 private fun companyWindowId(company: MetaCompany): String =
     "${company.tmdbId ?: company.name}:${company.name}"

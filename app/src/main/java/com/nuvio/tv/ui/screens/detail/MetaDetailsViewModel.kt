@@ -291,7 +291,9 @@ class MetaDetailsViewModel @Inject constructor(
                         contentId = contentId,
                         season = season,
                         episode = episode,
-                        uiKey = if (source != "episode_focus") key else null
+                        uiKey = if (source != "episode_focus") key else null,
+                        type = type,
+                        videoId = videoId
                     )
                 }
             )
@@ -2702,10 +2704,10 @@ class MetaDetailsViewModel @Inject constructor(
                 }
                 pendingDefaultLibraryToggle = null
                 _uiState.update { it.copy(defaultLibraryTogglePending = false) }
-                val message = if (wasInLibrary || wasInWatchlist) {
-                    localizedContext.getString(R.string.detail_removed_from_library)
-                } else {
+                val message = if (result.added ?: !(wasInLibrary || wasInWatchlist)) {
                     localizedContext.getString(R.string.detail_added_to_library)
+                } else {
+                    localizedContext.getString(R.string.detail_removed_from_library)
                 }
                 showMessage(message)
             }.onFailure { error ->
@@ -2891,7 +2893,11 @@ class MetaDetailsViewModel @Inject constructor(
                             removalConfirmations = emptyList()
                         )
                     }
-                    showMessage(localizedContext.getString(R.string.detail_removed_from_library))
+                    showMessage(
+                        localizedContext.getString(
+                            if (result.added == true) R.string.detail_added_to_library else R.string.detail_removed_from_library
+                        )
+                    )
                 }
             }.onFailure { error ->
                 pendingDefaultLibraryToggle = null
