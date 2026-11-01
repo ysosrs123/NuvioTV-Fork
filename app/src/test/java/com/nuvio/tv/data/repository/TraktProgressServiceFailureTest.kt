@@ -18,6 +18,7 @@ import com.nuvio.tv.data.remote.dto.trakt.TraktPlaybackItemDto
 import com.nuvio.tv.data.remote.dto.trakt.TraktShowDto
 import com.nuvio.tv.domain.repository.MetaRepository
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CompletableDeferred
@@ -75,7 +76,18 @@ class TraktProgressServiceFailureTest {
         assertTrue(service.isShowHiddenFromProgress(DROPPED_SHOW_ID))
     }
 
-    private fun createService(): TraktProgressService {
+    @Test
+    fun `without a Trakt account nothing is polled`() = runBlocking {
+        val service = createService(signedIn = false)
+        service.refreshNow()
+        delay(SETTLE_MS)
+
+        coVerify(exactly = 0) { traktApi.getLastActivities(any()) }
+        coVerify(exactly = 0) { traktApi.getPlayback(any(), any(), any(), any()) }
+    }
+
+    private fun createService(signedIn: Boolean = true): TraktProgressService {
+        val auth = if (signedIn) TraktAuthState(accessToken = "access", refreshToken = "refresh") else TraktAuthState()
         coEvery { traktApi.getLastActivities(any()) } returns Response.success(
             TraktLastActivitiesResponseDto(
                 movies = TraktLastActivitiesMediaDto(watchedAt = "2026-01-01T00:00:00.000Z"),
@@ -131,8 +143,8 @@ class TraktProgressServiceFailureTest {
             profileManager = profileManager,
             watchedSeriesStateHolder = watchedSeries,
             traktAuthDataStore = mockk<TraktAuthDataStore>(relaxed = true) {
-                every { state } returns MutableStateFlow(TraktAuthState())
-                coEvery { getCurrentState(any<Int>()) } returns TraktAuthState()
+                every { state } returns MutableStateFlow(auth)
+                coEvery { getCurrentState(any<Int>()) } returns auth
             },
             savedWatchedMovies = TraktSavedWatchedMovies(FakeTraktWatchedMoviesStorage())
         )

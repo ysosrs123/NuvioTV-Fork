@@ -345,15 +345,33 @@ class TraktAuthService @Inject constructor(
         return username
     }
 
+    // Each kind of failure is logged once until a request succeeds again; polls repeat them every few minutes.
+    private val reportedFailures: MutableSet<String> = java.util.concurrent.ConcurrentHashMap.newKeySet()
+
+    @androidx.annotation.VisibleForTesting
+    internal fun reportedFailureKinds(): Set<String> = reportedFailures.toSet()
+
+    private fun reportFailure(kind: String, error: Throwable? = null) {
+        if (reportedFailures.add(kind)) Log.w("TraktAuthService", "Authorized request failed: $kind", error)
+    }
+
     suspend fun <T> executeAuthorizedRequest(
         call: suspend (authorizationHeader: String) -> Response<T>
     ): Response<T>? {
         if (isCircuitOpen()) {
             trace("authorized request: circuit breaker is OPEN, skipping request")
+            reportFailure("circuit breaker open")
             return null
         }
 
-        var token = getValidAccessToken() ?: return null
+        if (getCurrentAuthState().accessToken.isNullOrBlank()) {
+            reportFailure("not signed in")
+            return null
+        }
+        var token = getValidAccessToken() ?: run {
+            reportFailure("token refresh failed")
+            return null
+        }
         var retriedAuth = false
         var retriedRateLimit = false
         var retriedTransient = false
@@ -371,7 +389,7 @@ class TraktAuthService @Inject constructor(
                     retriedNetwork = true
                     continue
                 }
-                Log.w("TraktAuthService", "Network error during authorized request", e)
+                reportFailure("network ${e.javaClass.simpleName}", e)
                 return null
             }
 
@@ -379,8 +397,10 @@ class TraktAuthService @Inject constructor(
 
             if (response.isSuccessful) {
                 resetCircuit()
+                reportedFailures.clear()
                 return response
             }
+            reportFailure("HTTP $code ${response.raw().request.url.encodedPath}")
 
             if (code == 403) {
                 tripCircuit("403 Forbidden (invalid API key or unapproved app) for ${responseTarget(response)}")

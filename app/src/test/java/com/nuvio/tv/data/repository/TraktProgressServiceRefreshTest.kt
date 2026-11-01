@@ -214,8 +214,8 @@ class TraktProgressServiceRefreshTest {
             profileManager = profileManager,
             watchedSeriesStateHolder = watchedSeries,
             traktAuthDataStore = mockk<TraktAuthDataStore>(relaxed = true) {
-                every { state } returns MutableStateFlow(TraktAuthState())
-                coEvery { getCurrentState(any<Int>()) } returns TraktAuthState()
+                every { state } returns MutableStateFlow(TraktAuthState(accessToken = "access", refreshToken = "refresh"))
+                coEvery { getCurrentState(any<Int>()) } returns TraktAuthState(accessToken = "access", refreshToken = "refresh")
             },
             savedWatchedMovies = TraktSavedWatchedMovies(FakeTraktWatchedMoviesStorage())
         )

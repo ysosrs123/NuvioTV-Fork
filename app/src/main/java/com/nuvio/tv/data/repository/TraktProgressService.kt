@@ -48,6 +48,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -311,16 +313,31 @@ class TraktProgressService @Inject constructor(
             }
         }
         scope.launch {
-            refreshEvents().collectLatest {
-                val success = try {
-                    refreshRemoteSnapshot()
-                    true
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to refresh remote snapshot", e)
-                    false
+            // Without a Trakt account on this profile there is nothing to poll.
+            traktAuthDataStore.state
+                .map { it.isAuthenticated }
+                .distinctUntilChanged()
+                .flatMapLatest { signedIn ->
+                    if (signedIn) {
+                        refreshEvents()
+                    } else {
+                        consecutiveRefreshFailures = 0
+                        refreshIntervalMs = baseRefreshIntervalMs
+                        emptyFlow()
+                    }
                 }
-                updateRefreshBackoff(success)
-            }
+                .collectLatest {
+                    val success = try {
+                        refreshRemoteSnapshot()
+                        true
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        logRefreshFailure("Failed to refresh remote snapshot", e)
+                        false
+                    }
+                    updateRefreshBackoff(success)
+                }
         }
     }
 
@@ -1129,6 +1146,15 @@ class TraktProgressService @Inject constructor(
         return merge(refreshTicker(), refreshSignals).onStart { emit(Unit) }
     }
 
+    // The stack trace once per run of failures; the backoff already spaces the retries out.
+    private fun logRefreshFailure(message: String, error: Exception) {
+        if (consecutiveRefreshFailures == 0) {
+            Log.w(TAG, message, error)
+        } else {
+            Log.w(TAG, "$message (${consecutiveRefreshFailures + 1} in a row): ${error.javaClass.simpleName}: ${error.message}")
+        }
+    }
+
     private fun updateRefreshBackoff(success: Boolean) {
         if (success) {
             if (consecutiveRefreshFailures > 0 || refreshIntervalMs != baseRefreshIntervalMs) {
@@ -1210,7 +1236,7 @@ class TraktProgressService @Inject constructor(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Log.w(TAG, "fetchAllProgressSnapshot failed, keeping existing snapshot", e)
+                logRefreshFailure("fetchAllProgressSnapshot failed, keeping existing snapshot", e)
                 null
             }
             watchedMoviesDeferred?.let {

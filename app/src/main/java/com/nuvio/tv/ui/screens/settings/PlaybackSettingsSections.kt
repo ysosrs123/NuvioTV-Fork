@@ -188,7 +188,7 @@ private fun PlaybackThumbnailRows(
     val seekThumbPrepare = seekThumbPrepareRead ?: ThumbPrepareMode.OFF
     val seekThumbBeforePlay by SeekThumbnailPreferences.beforePlayFlow(context)
         .collectAsState(initial = ThumbsBeforePlay.FASTER)
-    val seekThumbFromCopy by SeekThumbnailPreferences.copyFlow(context).collectAsState(initial = false)
+    val seekThumbHardware by SeekThumbnailPreferences.hardwareFlow(context).collectAsState(initial = true)
     var seekThumbStoredBytes by remember { mutableStateOf(-1L) }
     val seekThumbScope = rememberCoroutineScope()
     var showClearSeekThumbs by remember { mutableStateOf(false) }
@@ -223,10 +223,10 @@ private fun PlaybackThumbnailRows(
         onClick = { onOpenDialog(PlaybackDialog.SEEK_THUMBNAILS_BEFORE_PLAY) }
     )
     SettingsToggleRow(
-        title = stringResource(R.string.seek_thumbnails_from_copy_title),
-        subtitle = stringResource(R.string.seek_thumbnails_from_copy_subtitle),
-        checked = seekThumbFromCopy,
-        onToggle = { seekThumbScope.launch { SeekThumbnailPreferences.setCopy(context, !seekThumbFromCopy) } },
+        title = stringResource(R.string.seek_thumbnails_hardware_title),
+        subtitle = stringResource(R.string.seek_thumbnails_hardware_subtitle),
+        checked = seekThumbHardware,
+        onToggle = { seekThumbScope.launch { SeekThumbnailPreferences.setHardware(context, !seekThumbHardware) } },
         enabled = internalPlayer && seekThumbsOn
     )
     val seekThumbStoredLabel = when {

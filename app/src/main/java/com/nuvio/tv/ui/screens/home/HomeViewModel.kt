@@ -221,7 +221,9 @@ class HomeViewModel @Inject constructor(
                             groups = groups,
                             contentId = target.contentId,
                             season = target.season,
-                            episode = target.episode
+                            episode = target.episode,
+                            type = target.type,
+                            videoId = target.videoId
                         )
                     }
                 )
@@ -276,7 +278,9 @@ class HomeViewModel @Inject constructor(
                             groups = groups,
                             contentId = target.contentId,
                             season = target.season,
-                            episode = target.episode
+                            episode = target.episode,
+                            type = target.type,
+                            videoId = target.videoId
                         )
                     }
                 )

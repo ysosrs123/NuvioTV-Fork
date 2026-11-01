@@ -469,6 +469,8 @@
     <string name="licenses_attributions_haze_body">Used for background blur effects. Created by Chris Banes. Licensed under the Apache License, Version 2.0.</string>
     <string name="licenses_attributions_avatars_title">Watch party avatars</string>
     <string name="licenses_attributions_avatars_body">Made with DiceBear, remixing these designs: \"Fun Emoji\" by Davis Uche and \"Adventurer\" by Lisa Wischofsky, licensed under CC BY 4.0 (creativecommons.org/licenses/by/4.0). \"Lorelei\" by Lisa Wischofsky, \"Notionists\" by Zoish, \"Pixel Art\" and \"Thumbs\" by DiceBear, CC0 1.0. \"Bottts\" by Pablo Stanley, free for personal and commercial use. Animal faces from Twemoji by Twitter, Inc. and other contributors, licensed under CC BY 4.0.</string>
+    <string name="licenses_attributions_subtitle_fonts_title">Subtitle fonts</string>
+    <string name="licenses_attributions_subtitle_fonts_body">Roboto, Montserrat, Asap Condensed and Noto Sans (with Noto Sans Arabic, Hebrew, Devanagari, Bengali and Tamil) by The Roboto Project Authors, The Montserrat Project Authors, The Asap Project Authors and The Noto Project Authors. Licensed under the SIL Open Font License, Version 1.1.</string>
     <string name="licenses_attributions_nuvio_title">Nuvio Arc (fork of Nuvio TV)</string>
     <string name="licenses_attributions_nuvio_body">A modified version of Nuvio TV. Source code and licence terms for this build are in the fork\'s repository. Nuvio TV is at github.com/NuvioMedia/NuvioTV. Licensed under the GNU General Public License v3.0.</string>
     <string name="licenses_attributions_tmdb_title">The Movie Database (TMDB)</string>
@@ -3997,6 +3999,8 @@
     <string name="seek_thumbnails_before_play_fastest_desc">A quarter as many before it starts. The shortest wait.</string>
     <string name="seek_thumbnails_from_copy_title">Thumbnails from a copy</string>
     <string name="seek_thumbnails_from_copy_subtitle">Faster thumbnails for 4K titles from a 1080p or 720p copy, and for Usenet titles from a copy that is not on Usenet. A cached TorBox copy may be added to your list for a few minutes.</string>
+    <string name="seek_thumbnails_hardware_title">Hardware decoder for thumbnails</string>
+    <string name="seek_thumbnails_hardware_subtitle">Faster thumbnails made by your box\'s hardware decoder. If thumbnails look wrong or your box struggles, turn this off and they are made the usual way.</string>
     <string name="seek_thumbnails_clear_title">Clear saved thumbnails</string>
     <string name="seek_thumbnails_clear_subtitle">They are rebuilt the next time you play a title.</string>
     <string name="seek_thumbnails_cleared">Saved thumbnails cleared</string>

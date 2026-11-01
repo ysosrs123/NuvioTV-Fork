@@ -1,6 +1,6 @@
 package com.nuvio.tv.ui.screens.settings
 
-import com.nuvio.tv.domain.model.AppFont
+import com.nuvio.tv.domain.model.SubtitleFont
 import com.nuvio.tv.data.local.SubtitleEdgeStyle
 import androidx.lifecycle.ViewModel
 import androidx.media3.common.util.UnstableApi
@@ -418,7 +418,7 @@ class PlaybackSettingsViewModel @Inject constructor(
         playerSettingsDataStore.setSubtitleBackgroundColor(color)
     }
 
-    suspend fun setSubtitleFont(font: AppFont?) { playerSettingsDataStore.setSubtitleFont(font) }
+    suspend fun setSubtitleFont(font: SubtitleFont?) { playerSettingsDataStore.setSubtitleFont(font) }
     suspend fun setSubtitleEdgeStyle(style: SubtitleEdgeStyle) { playerSettingsDataStore.setSubtitleEdgeStyle(style) }
 
     suspend fun setSubtitleOutlineEnabled(enabled: Boolean) {
