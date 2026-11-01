@@ -60,7 +60,7 @@ internal fun PlayerRuntimeController.attemptStartupRecovery(
     if (!isRetryablePlaybackError(error)) return false
     if (startupRetryCount >= MAX_STARTUP_AUTO_RETRIES) return false
 
-    val paused = userPausedManually
+    val paused = pausedByUser
     val attempt = startupRetryCount
     startupRetryCount++
 
@@ -347,7 +347,7 @@ internal fun PlayerRuntimeController.attemptAutoRetry(
     if (isDeadSourcePlaybackError(error)) return false
     if (errorRetryCount >= MAX_AUTO_RETRIES) return false
 
-    val paused = userPausedManually
+    val paused = pausedByUser
     val attempt = errorRetryCount
     errorRetryCount++
 
@@ -482,7 +482,7 @@ internal fun PlayerRuntimeController.tryAudioTrackPcmFallback(
 
     val player = _exoPlayer ?: return false
     val savedPosition = player.currentPosition.takeIf { it > 0L } ?: 0L
-    val paused = userPausedManually
+    val paused = pausedByUser
 
     Log.d(PlayerRuntimeController.TAG, "Audio track init failed (5001) — rebuilding player with PCM forcing, position=${savedPosition}ms")
     showRecoveryOverlay()
@@ -592,7 +592,7 @@ internal fun PlayerRuntimeController.scheduleOwnedPlaybackRecovery(
     val headers = currentHeaders.toMap()
     val generation = playbackRecoveryGate.generation
     var route = runCatching { AudioOutputRouteDetector.detect(context)?.key }.getOrNull()
-    val paused = userPausedManually
+    val paused = pausedByUser
     val position = _uiState.value.pendingSeekPosition ?: positionMs.coerceAtLeast(0L)
     val preference = rememberedTrackPreference ?: persistedTrackPreference
     cancelFirstFrameWatchdog()
@@ -623,7 +623,7 @@ internal fun PlayerRuntimeController.scheduleOwnedPlaybackRecovery(
         )
         _uiState.update { it.copy(pendingSeekPosition = position, error = null) }
         playbackRecoveryJob = null
-        initializePlayer(url, headers, startPaused = paused || userPausedManually)
+        initializePlayer(url, headers, startPaused = paused || pausedByUser)
     }
     playbackRecoveryJob = job
     job.start()
@@ -691,7 +691,7 @@ internal fun PlayerRuntimeController.tryDeniedAudioFfmpegFallback(
 
     preferFfmpegAudioStreamUrls.add(currentStreamUrl)
 
-    val paused = userPausedManually
+    val paused = pausedByUser
     val savedPosition = _exoPlayer?.currentPosition?.takeIf { it > 0L } ?: 0L
 
     Log.d(
@@ -766,7 +766,7 @@ internal fun PlayerRuntimeController.tryDv7HevcFallback(
     hasTriedDv7HevcFallback = true
     forceDv7ToHevc = true
 
-    val paused = userPausedManually
+    val paused = pausedByUser
     val savedPosition = _exoPlayer?.currentPosition?.takeIf { it > 0L } ?: 0L
 
     Log.d(
@@ -794,7 +794,7 @@ internal fun PlayerRuntimeController.tryParsingErrorProbeFallback(
     detailedError: String,
     allowEngineFailover: Boolean,
     savedPosition: Long = 0L,
-    paused: Boolean = userPausedManually
+    paused: Boolean = pausedByUser
 ): Boolean {
     if (currentVideoTrackIsLikelyVc1 ||
         Vc1VideoFormatHeuristics.isLikelyVc1(streamName = _uiState.value.currentStreamName ?: streamName)
@@ -964,11 +964,13 @@ internal fun PlayerRuntimeController.attemptDeadSourceFailover(
     // attempt never fixed this case). One full retry, then the URL is treated as dead.
     if (clearMimeOverrideForParsingError(error) && !hasRetriedAfterMimeOverrideClear) {
         hasRetriedAfterMimeOverrideClear = true
-        val paused = userPausedManually
+        val paused = pausedByUser
         val savedPosition = _exoPlayer?.currentPosition?.takeIf { it > 0L } ?: 0L
         Log.w(
             PlayerRuntimeController.TAG,
-            "Dead-source check: mimeType override cleared; one full re-init for: ${detailedError.redactLinksForLog()}"
+            "Dead-source check: mimeType override cleared; one full re-init (" +
+                "${com.nuvio.tv.core.player.thumbnail.ConnectionLedger.app.inFlightNote(currentStreamUrl)}, " +
+                "speed-up requests ${AutoSpeedup.requestsNow()}) for: ${detailedError.redactLinksForLog()}"
         )
         errorRetryJob?.cancel()
         errorRetryJob = scope.launch {
@@ -988,7 +990,7 @@ internal fun PlayerRuntimeController.attemptDeadSourceFailover(
     val serverKey = serverPlayback.session(currentStreamUrl)?.target?.key()
     if (ServerDeadAnswerRetry.shouldRetry(serverKey, isDeadSourceHttpError(error), serverDeadAnswerRetried)) {
         serverKey?.let { serverDeadAnswerRetried += it }
-        val paused = userPausedManually
+        val paused = pausedByUser
         val savedPosition = _exoPlayer?.currentPosition?.takeIf { it > 0L } ?: 0L
         Log.w(
             PlayerRuntimeController.TAG,
