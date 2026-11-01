@@ -133,7 +133,7 @@ internal fun PlaybackSubtitlesSection(
         valueText = "${style.size}%",
         minValue = 50,
         maxValue = 200,
-        step = 10,
+        step = 5,
         onValueChange = { size -> onUpdate { setSubtitleSize(size) } },
         enabled = enabled
     )

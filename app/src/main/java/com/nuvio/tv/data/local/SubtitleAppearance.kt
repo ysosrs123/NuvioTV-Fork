@@ -1,6 +1,6 @@
 package com.nuvio.tv.data.local
 
-import com.nuvio.tv.domain.model.AppFont
+import com.nuvio.tv.domain.model.SubtitleFont
 
 enum class SubtitleEdgeStyle { NONE, OUTLINE, DROP_SHADOW }
 
@@ -10,8 +10,8 @@ internal val DEFAULT_SUBTITLE_EDGE_STYLE = SubtitleEdgeStyle.DROP_SHADOW
 internal fun parseSubtitleEdgeStyle(value: String?): SubtitleEdgeStyle? =
     SubtitleEdgeStyle.entries.firstOrNull { it.name == value }
 
-internal fun parseSubtitleFont(value: String?): AppFont? =
-    AppFont.entries.firstOrNull { it.name == value }
+internal fun parseSubtitleFont(value: String?): SubtitleFont? =
+    SubtitleFont.entries.firstOrNull { it.name == value }
 
 /** New profiles use shadow; explicit modern or legacy choices retain their existing semantics. */
 internal fun resolveSubtitleEdgeStyle(value: String?, legacyOutline: Boolean?): SubtitleEdgeStyle? =

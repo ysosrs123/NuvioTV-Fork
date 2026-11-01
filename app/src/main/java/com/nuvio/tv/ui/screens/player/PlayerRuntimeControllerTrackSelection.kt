@@ -132,7 +132,7 @@ internal fun PlayerRuntimeController.maybeRebuildForTunneledAudioSwitch(trackInd
         sourceEngine = InternalPlayerEngine.EXOPLAYER
     )
     val savedPosition = player.currentPosition.takeIf { it > 0L } ?: 0L
-    val paused = userPausedManually
+    val paused = pausedByUser
     logSwitchTrace(
         stage = "tunneled-audio-switch-rebuild",
         message = "trackIndex=$trackIndex position=$savedPosition paused=$paused " +
@@ -340,27 +340,18 @@ internal fun PlayerRuntimeController.rememberInternalSubtitleSelection(trackInde
 }
 
 /**
- * A subtitle choice made in the player becomes the profile's subtitle preference for every title:
- * a language, or off when [language] is null. A language the settings do not offer changes nothing.
+ * A subtitle language picked in the player becomes the profile's subtitle preference for every title.
+ * Turning subtitles off is kept for that title only and never changes this preference. A language the
+ * settings do not offer changes nothing.
  */
-private fun PlayerRuntimeController.rememberSubtitleLanguagePreference(language: String?) {
-    val chosen = if (language == null) {
-        "none"
-    } else {
-        playerSettingsDataStore.selectableSubtitleLanguage(language) ?: return
-    }
-    if (chosen == "none") {
-        if (lastSubtitlePreferredLanguage == chosen) return
-        // Recorded first, so the settings observer does not treat this as a change to re-select for.
-        lastSubtitlePreferredLanguage = chosen
-    } else {
-        val after = subtitleLanguagesAfterPlayerChoice(_uiState.value.subtitleStyle, chosen) ?: return
-        lastSubtitlePreferredLanguage = after.first
-        lastSubtitleSecondaryLanguage = after.second
-        lastSubtitleTertiaryLanguage = after.third
-    }
+private fun PlayerRuntimeController.rememberSubtitleLanguagePreference(language: String) {
+    val chosen = playerSettingsDataStore.selectableSubtitleLanguage(language) ?: return
+    val after = subtitleLanguagesAfterPlayerChoice(_uiState.value.subtitleStyle, chosen) ?: return
+    lastSubtitlePreferredLanguage = after.first
+    lastSubtitleSecondaryLanguage = after.second
+    lastSubtitleTertiaryLanguage = after.third
     scope.launch {
-        runCatching { playerSettingsDataStore.rememberPlayerSubtitleChoice(chosen.takeUnless { it == "none" }) }
+        runCatching { playerSettingsDataStore.rememberPlayerSubtitleChoice(chosen) }
     }
 }
 
@@ -505,7 +496,6 @@ internal fun PlayerRuntimeController.rememberSubtitleDisabled() {
         basePreference
             .copy(subtitle = PlayerRuntimeController.RememberedSubtitleSelection.Disabled)
     persistTrackPreference()
-    rememberSubtitleLanguagePreference(null)
 }
 
 internal fun PlayerRuntimeController.buildAddonSubtitleTrackId(subtitle: Subtitle): String {

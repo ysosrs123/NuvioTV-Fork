@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.domain.model.AppFont
+import com.nuvio.tv.domain.model.SubtitleFont
 import io.mockk.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -52,6 +53,32 @@ class SubtitleAppearancePreferencesTest {
         }
     }
 
+    @Test fun `stored UI font names still read as the same subtitle font`() = settings(
+        AppFont.entries.map { preferencesOf(fontKey to it.name) }
+    ) { player, _, active, stores ->
+        for ((id, font) in AppFont.entries.withIndex()) {
+            active.value = id
+            val chosen = player.playerSettings.first().subtitleStyle.font
+            assertEquals(font, chosen?.appFont)
+            assertEquals(font.displayName, chosen?.displayName)
+            assertEquals(font.name, stores[id].data.value[fontKey])
+        }
+    }
+
+    @Test fun `subtitle-only fonts are stored by name and read back`() = settings(
+        listOf(emptyPreferences())
+    ) { player, theme, _, stores ->
+        for (font in listOf(SubtitleFont.ROBOTO, SubtitleFont.MONTSERRAT, SubtitleFont.NOTO_SANS_SEMIBOLD, SubtitleFont.ASAP_CONDENSED)) {
+            player.setSubtitleFont(font)
+            assertEquals(font.name, stores[0].data.value[fontKey])
+            assertEquals(font, player.playerSettings.first().subtitleStyle.font)
+            assertNull(font.appFont)
+        }
+        assertEquals(AppFont.INTER, theme.selectedFont.first())
+        assertEquals(SubtitleFont.NOTO_SANS_SEMIBOLD, parseSubtitleFont("NOTO_SANS_SEMIBOLD"))
+        assertNull(parseSubtitleFont(null))
+    }
+
     @Test fun `unknown font and edge retain renderer default and legacy off`() = settings(
         listOf(preferencesOf(fontKey to "FUTURE_FONT", edgeKey to "FUTURE_EDGE", oldOutline to false))
     ) { player, _, _, stores ->
@@ -60,23 +87,24 @@ class SubtitleAppearancePreferencesTest {
         assertEquals("FUTURE_FONT", stores[0].data.value[fontKey])
     }
 
-    @Test fun `all five font choices are independent of UI choice and other profiles`() = settings(
+    @Test fun `all subtitle font choices are independent of UI choice and other profiles`() = settings(
         listOf(emptyPreferences(), emptyPreferences())
     ) { player, theme, active, _ ->
         assertEquals(5, AppFont.entries.size)
-        for (font in AppFont.entries) {
+        assertEquals(9, SubtitleFont.entries.size)
+        for (font in SubtitleFont.entries) {
             player.setSubtitleFont(font)
             assertEquals(font, player.playerSettings.first().subtitleStyle.font)
             assertEquals(AppFont.INTER, theme.selectedFont.first())
         }
         theme.setFont(AppFont.ATKINSON_HYPERLEGIBLE_NEXT)
-        assertEquals(AppFont.SOURCE_SANS_3, player.playerSettings.first().subtitleStyle.font)
+        assertEquals(SubtitleFont.ASAP_CONDENSED, player.playerSettings.first().subtitleStyle.font)
         active.value = 1
         assertNull(player.playerSettings.first().subtitleStyle.font)
         theme.setFont(AppFont.SOURCE_SANS_3)
-        player.setSubtitleFont(AppFont.DM_SANS)
+        player.setSubtitleFont(SubtitleFont.DM_SANS)
         active.value = 0
-        assertEquals(AppFont.SOURCE_SANS_3, player.playerSettings.first().subtitleStyle.font)
+        assertEquals(SubtitleFont.ASAP_CONDENSED, player.playerSettings.first().subtitleStyle.font)
         assertEquals(AppFont.ATKINSON_HYPERLEGIBLE_NEXT, theme.selectedFont.first())
         player.setSubtitleFont(null)
         assertNull(player.playerSettings.first().subtitleStyle.font)
@@ -104,7 +132,7 @@ class SubtitleAppearancePreferencesTest {
         listOf(preferencesOf(stringPreferencesKey("subtitle_preferred_language") to "fr"))
     ) { player, theme, _, stores ->
         theme.setFont(AppFont.SOURCE_SANS_3)
-        player.setSubtitleFont(AppFont.ATKINSON_HYPERLEGIBLE_NEXT)
+        player.setSubtitleFont(SubtitleFont.ATKINSON_HYPERLEGIBLE_NEXT)
         player.setSubtitleEdgeStyle(SubtitleEdgeStyle.NONE)
         player.setSubtitleSize(180)
         player.resetSubtitleAppearance()
@@ -154,10 +182,6 @@ class SubtitleAppearancePreferencesTest {
         player.rememberPlayerSubtitleChoice("es")
         val picked = player.playerSettings.first { it.subtitleStyle.preferredLanguage == "es" }.subtitleStyle
         assertTrue(picked.useForcedSubtitles)
-        assertEquals(true, stores[0].data.value[forcedKey])
-        player.rememberPlayerSubtitleChoice(null)
-        player.playerSettings.first { it.subtitleStyle.preferredLanguage == "none" }
-        assertEquals("none", stores[0].data.value[languageKey])
         assertEquals(true, stores[0].data.value[forcedKey])
     }
 }

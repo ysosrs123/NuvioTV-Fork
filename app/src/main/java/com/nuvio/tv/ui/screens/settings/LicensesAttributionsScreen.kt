@@ -224,6 +224,13 @@ private fun LicensesAttributionsDetailsPanel(
                             url = "https://www.dicebear.com/licenses/"
                         )
                     )
+                    AttributionDetailRow(
+                        item = LicenseAttributionItem(
+                            title = stringResource(R.string.licenses_attributions_subtitle_fonts_title),
+                            body = stringResource(R.string.licenses_attributions_subtitle_fonts_body),
+                            url = "https://openfontlicense.org"
+                        )
+                    )
                 }
             }
             SettingsVerticalScrollIndicators(state = scrollState)

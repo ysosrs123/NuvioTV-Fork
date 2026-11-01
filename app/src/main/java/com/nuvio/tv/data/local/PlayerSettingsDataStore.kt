@@ -1,7 +1,7 @@
 package com.nuvio.tv.data.local
 
 import com.nuvio.tv.BuildConfig
-import com.nuvio.tv.domain.model.AppFont
+import com.nuvio.tv.domain.model.SubtitleFont
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -163,7 +163,7 @@ data class SubtitleStyleSettings(
     val outlineColor: Int = Color.Black.toArgb(),
     val outlineWidth: Int = 2, // 1-5
     val bitmapSize: Int = 100, // Independent image-subtitle scale (50-200)
-    val font: AppFont? = null, // null retains each renderer's existing default
+    val font: SubtitleFont? = null, // null retains each renderer's existing default
     val edgeStyle: SubtitleEdgeStyle? = null, // null preserves the legacy outline toggle
     val hdrStyleEnabled: Boolean = false,
     val hdrTextColor: Int = Color.White.toArgb(),
@@ -1466,7 +1466,7 @@ class PlayerSettingsDataStore @Inject constructor(
                         android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O,
                 subtitleStyle = run {
                     val resolvedPreferredLanguage = resolveSubtitlePreferredLanguage(
-                        prefs[subtitlePreferredLanguageKey],
+                        storedSubtitlePreferredLanguage(prefs),
                         prefs[subtitleSecondaryLanguageKey]
                     )
                     SubtitleStyleSettings(
@@ -2189,6 +2189,20 @@ class PlayerSettingsDataStore @Inject constructor(
         return when (value) { "HARDWARE_COPY" -> MpvHardwareDecodeMode.HARDWARE_COPY; "HARDWARE_DIRECT" -> MpvHardwareDecodeMode.HARDWARE_DIRECT; "DISABLED" -> MpvHardwareDecodeMode.DISABLED; "LEGACY_DIRECT_COPY" -> MpvHardwareDecodeMode.LEGACY_DIRECT_COPY; else -> MpvHardwareDecodeMode.AUTO_SAFE }
     }
 
+    /**
+     * The preferred subtitle language as stored, except that an off saved by the player in earlier versions
+     * counts as the language it kept aside. Turning subtitles off in the player no longer changes this setting.
+     */
+    private fun storedSubtitlePreferredLanguage(prefs: androidx.datastore.preferences.core.Preferences): String? {
+        val stored = prefs[subtitlePreferredLanguageKey]
+        if (stored?.let(::normalizeSelectableLanguageCode) != "none") return stored
+        return prefs[subtitlePreferredLanguageBeforeOffKey]
+            ?.takeIf { it.isNotBlank() }
+            ?.let(::normalizeSelectableLanguageCode)
+            ?.takeUnless { it == "none" }
+            ?: stored
+    }
+
     private fun normalizeSelectableLanguageCode(language: String): String {
         val code = language.trim().lowercase()
         return when (code) {
@@ -2357,25 +2371,18 @@ class PlayerSettingsDataStore @Inject constructor(
     }
 
     /**
-     * A subtitle choice made in the player becomes the profile's preference: [language] as the preferred
-     * subtitle language, null as off. The forced-subtitles rule in force is stored with it, so storing a
-     * language does not change that rule. A language that is already one of the three preferred ones leaves
-     * them as they are, any other goes first and moves the three down one place, and turning subtitles off
-     * keeps the preferred language aside for when they come back.
+     * A subtitle language picked in the player becomes the profile's preferred subtitle language. The
+     * forced-subtitles rule in force is stored with it, so storing a language does not change that rule. A
+     * language that is already one of the three preferred ones leaves them as they are, any other goes first
+     * and moves the three down one place. A language an earlier version kept aside when subtitles were turned
+     * off in the player comes back first.
      */
-    suspend fun rememberPlayerSubtitleChoice(language: String?) {
+    suspend fun rememberPlayerSubtitleChoice(language: String) {
         store().edit { prefs ->
             if (prefs[subtitleUseForcedSubtitlesKey] == null) {
                 prefs[subtitleUseForcedSubtitlesKey] = prefs[subtitlePreferredLanguageKey] == null
             }
             val current = prefs[subtitlePreferredLanguageKey]?.let(::normalizeSelectableLanguageCode)
-            if (language == null) {
-                if (current != "none") {
-                    prefs[subtitlePreferredLanguageBeforeOffKey] = current ?: SubtitleLanguageOption.DEVICE
-                }
-                prefs[subtitlePreferredLanguageKey] = "none"
-                return@edit
-            }
             val chosen = normalizeSelectableLanguageCode(language)
             val restoring = current == "none"
             val base = if (restoring) {
@@ -2436,7 +2443,7 @@ class PlayerSettingsDataStore @Inject constructor(
     suspend fun setSubtitleBold(bold: Boolean) { store().edit { it[subtitleBoldKey] = bold } }
     suspend fun setSubtitleTextColor(color: Int) { store().edit { it[subtitleTextColorKey] = color } }
     suspend fun setSubtitleBackgroundColor(color: Int) { store().edit { it[subtitleBackgroundColorKey] = color } }
-    suspend fun setSubtitleFont(font: AppFont?) {
+    suspend fun setSubtitleFont(font: SubtitleFont?) {
         store().edit { prefs ->
             if (font == null) prefs.remove(subtitleFontKey) else prefs[subtitleFontKey] = font.name
         }

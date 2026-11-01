@@ -58,14 +58,15 @@ class PlayerSubtitleStylingTest {
         ))
         assertEquals(CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW, styles.last().edgeType)
         assertEquals(SUBTITLE_SHADOW_COLOR, styles.last().edgeColor)
-        assertEquals(Color.BLUE, styles.last().backgroundColor)
+        assertEquals(Color.TRANSPARENT, styles.last().backgroundColor)
+        assertEquals(Color.BLUE, styles.last().windowColor)
     }
 
     @Test
     fun `ASS ignores selected font and drop shadow without resolving custom typeface`() {
         select(MimeTypes.TEXT_SSA)
         view.applySubtitleStyleIfNeeded(custom.copy(
-            font = com.nuvio.tv.domain.model.AppFont.SOURCE_SANS_3,
+            font = com.nuvio.tv.domain.model.SubtitleFont.SOURCE_SANS_3,
             edgeStyle = com.nuvio.tv.data.local.SubtitleEdgeStyle.DROP_SHADOW
         ))
         assertEquals(CaptionStyleCompat.EDGE_TYPE_NONE, styles.last().edgeType)
@@ -136,5 +137,26 @@ class PlayerSubtitleStylingTest {
         view.applySubtitleStyleIfNeeded(custom, force = true)
         pending.forEach { it.run() }
         verify(exactly = 2) { subtitles.setPadding(4, 8, 12, 100) }
+    }
+
+    @Test
+    fun `every subtitle font keeps colours edges size and position on plain text`() {
+        select(MimeTypes.APPLICATION_SUBRIP)
+        for (edge in com.nuvio.tv.data.local.SubtitleEdgeStyle.entries) for (bold in listOf(false, true)) {
+            val base = custom.copy(bold = bold, edgeStyle = edge, textColor = Color.YELLOW, outlineColor = Color.RED, size = 150)
+            view.applySubtitleStyleIfNeeded(base, force = true)
+            val reference = styles.last()
+            for (font in com.nuvio.tv.domain.model.SubtitleFont.entries) {
+                view.applySubtitleStyleIfNeeded(base.copy(font = font), force = true)
+                val style = styles.last()
+                assertEquals(reference.foregroundColor, style.foregroundColor)
+                assertEquals(reference.backgroundColor, style.backgroundColor)
+                assertEquals(reference.edgeType, style.edgeType)
+                assertEquals(reference.edgeColor, style.edgeColor)
+                verify { subtitleTypeface(any(), font, bold) }
+            }
+        }
+        verify(atLeast = 36) { subtitles.setFixedTextSize(any(), 36f) }
+        verify(exactly = 0) { subtitles.setFixedTextSize(any(), neq(36f)) }
     }
 }

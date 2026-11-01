@@ -156,14 +156,14 @@ internal fun SubtitleStyleSidePanel(
                         SubtitleStyleStepperButton(
                             icon = Icons.Default.Remove,
                             contentDescription = stringResource(R.string.cd_decrease),
-                            onClick = { if (!bitmapTrack || bitmapScaleAvailable) onEvent(sizeEvent(displayedSize - 10)) },
+                            onClick = { if (!bitmapTrack || bitmapScaleAvailable) onEvent(sizeEvent(displayedSize - 5)) },
                             modifier = Modifier.focusRequester(firstItemFocusRequester)
                         )
                         SubtitleStyleValueDisplay(text = "${displayedSize}%")
                         SubtitleStyleStepperButton(
                             icon = Icons.Default.Add,
                             contentDescription = stringResource(R.string.cd_increase),
-                            onClick = { if (!bitmapTrack || bitmapScaleAvailable) onEvent(sizeEvent(displayedSize + 10)) }
+                            onClick = { if (!bitmapTrack || bitmapScaleAvailable) onEvent(sizeEvent(displayedSize + 5)) }
                         )
                     }
                 }

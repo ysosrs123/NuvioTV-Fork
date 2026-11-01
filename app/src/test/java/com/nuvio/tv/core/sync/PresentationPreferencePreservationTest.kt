@@ -102,4 +102,25 @@ class PresentationPreferencePreservationTest {
         assertTrue(captureMissingPresentationChoices("layout_settings", local, incoming).isEmpty())
         assertTrue(captureMissingPresentationChoices("theme_settings", local, emptySet()).isEmpty())
     }
+
+    @Test fun `calendar choices survive a snapshot without them and an explicit remote choice wins`() {
+        val row = booleanPreferencesKey("calendar_coming_up_row")
+        val hidden = stringSetPreferencesKey("calendar_hidden_titles")
+        val zone = stringPreferencesKey("calendar_zone_override")
+        val local = preferencesOf(row to true, hidden to setOf("series:imdb:tt1"), zone to "Australia/Sydney")
+        assertEquals(mapOf<Preferences.Key<*>, Any>(Pair(row, true), Pair(hidden, setOf("series:imdb:tt1")), Pair(zone, "Australia/Sydney")),
+            captureMissingPresentationChoices("calendar_settings", local, emptySet()))
+        assertEquals(mapOf<Preferences.Key<*>, Any>(Pair(hidden, setOf("series:imdb:tt1"))),
+            captureMissingPresentationChoices("calendar_settings", local, setOf(row.name, zone.name)))
+        assertTrue(captureMissingPresentationChoices("theme_settings", local, emptySet()).isEmpty())
+    }
+
+    @Test fun `every calendar setting is synced and kept when a snapshot lacks it`() {
+        val synced = com.nuvio.tv.core.calendar.CalendarSettingsKeys.names
+        assertEquals(13, synced.size)
+        synced.forEach { assertFalse(it, shouldExcludePreferenceFromProfileSettingsSync("calendar_settings", it)) }
+        val local = mutablePreferencesOf()
+        synced.forEach { local[stringPreferencesKey(it)] = "x" }
+        assertEquals(synced, captureMissingPresentationChoices("calendar_settings", local, emptySet()).keys.map { it.name }.toSet())
+    }
 }

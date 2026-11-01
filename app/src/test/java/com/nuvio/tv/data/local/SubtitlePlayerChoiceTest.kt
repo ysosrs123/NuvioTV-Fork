@@ -34,6 +34,7 @@ class SubtitlePlayerChoiceTest {
     private val beforeOffKey = stringPreferencesKey("subtitle_preferred_language_before_off")
 
     private val threeLanguages = preferencesOf(preferredKey to "es-419", secondaryKey to "es", tertiaryKey to "en")
+    private val offKeptAside = preferencesOf(preferredKey to "none", beforeOffKey to "es-419", secondaryKey to "es", tertiaryKey to "en")
 
     private fun settings(initial: Preferences, block: suspend (PlayerSettingsDataStore, MemoryStore) -> Unit) = runBlocking {
         val manager = mockk<ProfileManager> { every { activeProfileId } returns MutableStateFlow(0) }
@@ -60,17 +61,22 @@ class SubtitlePlayerChoiceTest {
         assertEquals("es-419", store.data.value[preferredKey])
     }
 
-    @Test fun `subtitles turned off and back on with the second language bring the first one back`() = settings(threeLanguages) { player, store ->
-        player.rememberPlayerSubtitleChoice(null)
-        val off = player.playerSettings.first().subtitleStyle
-        assertEquals("none", off.preferredLanguage)
-        assertEquals("es-419", off.preferredLanguageBeforeOff)
-        assertEquals("es-419", store.data.value[beforeOffKey])
+    @Test fun `an off saved by the player before reads as the language it kept aside`() = settings(offKeptAside) { player, store ->
+        val style = player.playerSettings.first().subtitleStyle
+        assertEquals(listOf("es-419", "es", "en"), player.languages())
+        assertEquals(false, style.isPreferredLanguageSystemDefault)
+        assertNull(style.preferredLanguageBeforeOff)
+        assertEquals("none", store.data.value[preferredKey])
+    }
 
-        player.rememberPlayerSubtitleChoice(null)
-        assertEquals("es-419", store.data.value[beforeOffKey])
+    @Test fun `None chosen in settings stays None`() = settings(threeLanguages) { player, _ ->
+        player.setSubtitlePreferredLanguage("none")
+        assertEquals(listOf("none", "es", "en"), player.languages())
+    }
 
+    @Test fun `picking the second language after an older off brings the first one back`() = settings(offKeptAside) { player, store ->
         player.rememberPlayerSubtitleChoice("es")
+        assertEquals("es-419", store.data.value[preferredKey])
         assertEquals(listOf("es-419", "es", "en"), player.languages())
         assertNull(player.playerSettings.first().subtitleStyle.preferredLanguageBeforeOff)
         assertNull(store.data.value[beforeOffKey])
@@ -80,7 +86,6 @@ class SubtitlePlayerChoiceTest {
         player.rememberPlayerSubtitleChoice("fr")
         assertEquals(listOf("fr", "es-419", "es"), player.languages())
 
-        player.rememberPlayerSubtitleChoice(null)
         player.rememberPlayerSubtitleChoice("it")
         assertEquals(listOf("it", "fr", "es-419"), player.languages())
         assertNull(store.data.value[beforeOffKey])
@@ -89,11 +94,10 @@ class SubtitlePlayerChoiceTest {
         assertEquals(listOf("it", "fr", "es-419"), player.languages())
     }
 
-    @Test fun `turning subtitles off leaves the second and third language alone`() = settings(threeLanguages) { player, store ->
-        player.rememberPlayerSubtitleChoice(null)
-        assertEquals(listOf("none", "es", "en"), player.languages())
-        assertEquals("es", store.data.value[secondaryKey])
-        assertEquals("en", store.data.value[tertiaryKey])
+    @Test fun `a new language after an older off goes before the language kept aside`() = settings(offKeptAside) { player, store ->
+        player.rememberPlayerSubtitleChoice("fr")
+        assertEquals(listOf("fr", "es-419", "es"), player.languages())
+        assertNull(store.data.value[beforeOffKey])
     }
 
     @Test fun `a list with the same language twice loses the copy when a new one goes first`() = settings(
@@ -164,8 +168,7 @@ class SubtitlePlayerChoiceTest {
         assertEquals(listOf("zh", "zh-TW", "en"), player.languages())
     }
 
-    @Test fun `a language chosen in settings replaces what was kept aside`() = settings(threeLanguages) { player, store ->
-        player.rememberPlayerSubtitleChoice(null)
+    @Test fun `a language chosen in settings replaces what was kept aside`() = settings(offKeptAside) { player, store ->
         player.setSubtitlePreferredLanguage("de")
         assertNull(store.data.value[beforeOffKey])
         assertNull(player.playerSettings.first().subtitleStyle.preferredLanguageBeforeOff)
@@ -179,9 +182,12 @@ class SubtitlePlayerChoiceTest {
         player.rememberPlayerSubtitleChoice("es")
         assertNull(store.data.value[preferredKey])
         assertEquals("es", player.playerSettings.first().subtitleStyle.secondaryPreferredLanguage)
+    }
 
-        player.rememberPlayerSubtitleChoice(null)
-        assertEquals(SubtitleLanguageOption.DEVICE, store.data.value[beforeOffKey])
+    @Test fun `an older off of the device language default brings the default back`() = settings(
+        preferencesOf(preferredKey to "none", beforeOffKey to SubtitleLanguageOption.DEVICE, secondaryKey to "es")
+    ) { player, store ->
+        assertEquals(true, player.playerSettings.first().subtitleStyle.isPreferredLanguageSystemDefault)
         player.rememberPlayerSubtitleChoice("es")
         assertEquals(SubtitleLanguageOption.DEVICE, store.data.value[preferredKey])
         assertEquals(true, player.playerSettings.first().subtitleStyle.isPreferredLanguageSystemDefault)

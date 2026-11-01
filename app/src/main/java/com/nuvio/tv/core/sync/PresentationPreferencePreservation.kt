@@ -1,6 +1,8 @@
 package com.nuvio.tv.core.sync
 
 import androidx.datastore.preferences.core.Preferences
+import com.nuvio.tv.core.calendar.CalendarSettingsDataStore
+import com.nuvio.tv.core.calendar.CalendarSettingsKeys
 
 /** Older clients omit these choices. Absence must not erase an explicit local preference. */
 internal fun captureMissingPresentationChoices(
@@ -38,6 +40,7 @@ internal fun captureMissingPresentationChoices(
             "show_source_line_release_group",
             "addon_stream_timeout_seconds"
         )
+        CalendarSettingsDataStore.FEATURE -> CalendarSettingsKeys.names
         else -> emptySet()
     }
     return local.asMap().filterKeys { it.name in keys && it.name !in incomingKeys }

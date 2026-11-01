@@ -504,8 +504,8 @@ private fun SubtitleStyleRail(
                 ) {
                     StepperRow(
                         value = "${displayedSize}%",
-                        onDecrease = { if (!bitmapTrack || bitmapScaleAvailable) dispatchStyleEvent(sizeEvent(displayedSize - 10)) },
-                        onIncrease = { if (!bitmapTrack || bitmapScaleAvailable) dispatchStyleEvent(sizeEvent(displayedSize + 10)) },
+                        onDecrease = { if (!bitmapTrack || bitmapScaleAvailable) dispatchStyleEvent(sizeEvent(displayedSize - 5)) },
+                        onIncrease = { if (!bitmapTrack || bitmapScaleAvailable) dispatchStyleEvent(sizeEvent(displayedSize + 5)) },
                         onMoveLeft = onMoveLeft,
                         decrementFocusRequester = focusRequesters[StyleFocusKey.FontSizeDecrease],
                         incrementFocusRequester = focusRequesters[StyleFocusKey.FontSizeIncrease],

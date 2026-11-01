@@ -17,6 +17,7 @@ import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.mkv.MatroskaExtractor as StockMatroskaExtractor
 import androidx.media3.extractor.text.SubtitleParser
 import com.nuvio.tv.core.player.HdrColorSignalingExtractor
+import com.nuvio.tv.core.player.RenderTimeSubtitles
 import com.nuvio.tv.core.player.dvmkv.MatroskaExtractor as DvMatroskaExtractor
 import com.nuvio.tv.libass.media.AssHandler
 import com.nuvio.tv.libass.media.parser.AssSubtitleParserFactory
@@ -49,7 +50,10 @@ internal fun ExoPlayer.Builder.buildWithAssSupportCompat(
     val assSubtitleParserFactory = CompatAssSubtitleParserFactory(assHandler)
     // AutoSync and the tap wrap after the Matroska swap, which matches extractors by class.
     val swappedExtractorsFactory = extractorsFactory.withAssMkvSupportCompat(
-        subtitleParserFactory = assSubtitleParserFactory,
+        subtitleParserFactory = RenderTimeSubtitles.extractionParsers(
+            assSubtitleParserFactory,
+            autoSyncObservesText = autoSyncSourceKey != null
+        ),
         assHandler = assHandler
     )
     val assExtractorsFactory = com.nuvio.tv.core.player.thumbnail.PlaybackTap.wrap(
