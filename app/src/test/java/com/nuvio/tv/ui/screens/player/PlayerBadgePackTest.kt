@@ -77,7 +77,7 @@ class PlayerBadgePackTest {
     @Test
     fun `dolby vision remux with truehd atmos`() {
         val info = uhd.copy(hdr = listOf("DV", "HDR10"), audioCodec = "TrueHD", audioChannels = 8)
-        assertEquals(listOf("Remux", "4K", "DV", "HDR10", "HEVC", "10-bit", "TrueHD", "7.1"), names(info, remuxFile))
+        assertEquals(listOf("Remux", "4K", "DV", "HEVC", "10-bit", "TrueHD", "7.1"), names(info, remuxFile))
     }
 
     @Test
@@ -90,7 +90,7 @@ class PlayerBadgePackTest {
     @Test
     fun `web release with dd+ atmos`() {
         val info = uhd.copy(bitDepth = null, hdr = listOf("DV", "HDR10"), audioCodec = "E-AC-3-JOC", audioChannels = 6)
-        assertEquals(listOf("4K", "DV", "HDR10", "HEVC", "10-bit", "Atmos", "5.1"), names(info, webFile))
+        assertEquals(listOf("4K", "DV", "HEVC", "10-bit", "Atmos", "5.1"), names(info, webFile))
     }
 
     @Test
@@ -111,16 +111,16 @@ class PlayerBadgePackTest {
     @Test
     fun `the dts core keeps dts-hd ma out`() {
         val info = PlayerMediaInfo(audioCodec = "DTS", audioChannels = 6)
-        val file = playbackFileName(dtsMaFile, info)
-        assertFalse("DTS-HD" in file)
-        assertTrue("5.1" in file)
+        val text = playerBadgeMatchText(info, emptyList(), dtsMaFile, dtsMaFile, audioFromRelease = true)
+        assertFalse("DTS-HD" in text)
+        assertTrue("5.1" in text.split(" "))
     }
 
     @Test
     fun `another audio track drops the file name's audio`() {
         val info = uhd.copy(hdr = listOf("DV", "HDR10"), audioCodec = "AC-3", audioChannels = 6)
         val shown = names(info, remuxFile)
-        assertEquals(listOf("Remux", "4K", "DV", "HDR10", "HEVC", "10-bit", "5.1"), shown)
+        assertEquals(listOf("Remux", "4K", "DV", "HEVC", "10-bit", "5.1"), shown)
         assertEquals(shown, names(info, remuxFile, audioFromRelease = false))
     }
 

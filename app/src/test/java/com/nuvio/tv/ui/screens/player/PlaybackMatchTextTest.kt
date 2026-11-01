@@ -50,7 +50,7 @@ class PlaybackMatchTextTest {
             bitDepth = 10
         )
         assertEquals(
-            listOf("4K", "Vision", "HDR", "10bit", "HEVC", "Atmos", "English"),
+            listOf("4K", "Vision", "10bit", "HEVC", "Atmos", "English"),
             matchedNames(info, listOf("eng"))
         )
     }
@@ -133,14 +133,14 @@ class PlaybackMatchTextTest {
             videoCodec = "HEVC", videoWidth = 3840, videoHeight = 2160,
             audioCodec = "E-AC-3-JOC", audioChannels = 6, hdr = listOf("DV", "HDR10")
         )
-        assertEquals(listOf("DDP Atmos", "DV HDR"), filenameNames(info))
+        assertEquals(listOf("DDP Atmos"), filenameNames(info))
     }
 
     @Test
-    fun `a dolby vision file shown as hdr10 reads hdr only`() {
+    fun `a dolby vision file shown as hdr10 reads no dolby vision`() {
         val info = PlayerMediaInfo(videoCodec = "HEVC", videoWidth = 3840, videoHeight = 2160, audioCodec = "TrueHD", audioChannels = 8, hdr = listOf("HDR10"), hdrKnown = true)
         assertEquals(
-            listOf("TrueHD Atmos", "HDR Only"),
+            listOf("TrueHD Atmos"),
             filenameNames(info, release = "Film.2160p.REMUX.DV.HDR.TrueHD.7.1.Atmos-GRP")
         )
         assertEquals(listOf("DV Only"), filenameNames(PlayerMediaInfo(hdr = listOf("DV"), hdrKnown = true)))
@@ -172,10 +172,10 @@ class PlaybackMatchTextTest {
         val text = playbackMatchText(
             PlayerMediaInfo(videoCodec = "HEVC", audioCodec = "E-AC-3-JOC", audioChannels = 6), emptyList()
         ).split(' ')
-        listOf("DDP5.1", "DD+5.1", "EAC3.5.1", "DDP5.1.Atmos", "DDPA5.1", "H.265", "x265").forEach {
+        listOf("DDP", "DDP5.1", "DDP.5.1", "DDP5.1.Atmos", "DDPA5.1", "H.265", "x265").forEach {
             assertEquals(it, true, it in text)
         }
-        assertEquals(false, "EAC35.1" in text)
+        assertEquals(false, text.any { "AC3" in it.uppercase() || "AC-3" in it.uppercase() || "DD+" in it })
     }
 
     @Test
@@ -240,7 +240,7 @@ class PlaybackMatchTextTest {
         val early = PlayerMediaInfo(videoCodec = "HEVC", videoWidth = 3840, videoHeight = 2160, hdr = listOf("DV"))
         assertEquals(emptyList<String>(), filenameNames(early))
         assertEquals(emptyList<String>(), filenameNames(early.copy(hdr = emptyList())))
-        assertEquals(listOf("DV HDR"), filenameNames(early.copy(hdr = listOf("DV", "HDR10"), hdrKnown = true)))
+        assertEquals(emptyList<String>(), filenameNames(early.copy(hdr = listOf("DV", "HDR10"), hdrKnown = true)))
     }
 
     @Test
