@@ -2,7 +2,7 @@ package com.nuvio.tv.core.player.thumbnail
 
 /**
  * How many keyframes are decoded at once, each lane with its own decoder. A lane is added while the median decode
- * time at the current count stays within [GAIN_RATIO] of the median at one lane fewer, and taken away when it does
+ * time at the current count stays within [allowedRatio] of the median at one lane fewer, and taken away when it does
  * not, when the box runs hot or when memory runs short. Worker thread only.
  */
 internal class ThumbDecodeLanes(
@@ -19,8 +19,18 @@ internal class ThumbDecodeLanes(
         const val SMALL_4K_STRIP_LANES = 2
         const val WINDOW = 6
         const val GAIN_RATIO = 1.25
+        /** A second lane stays while it delivers this many more pictures a second than one lane. */
+        const val MIN_THROUGHPUT_GAIN = 1.2
         /** Decodes before a lane count that brought no gain, or was given up for memory, is tried again. */
         const val RETRY_AFTER_DECODES = 60
+
+        /**
+         * How much slower each decode may be at [lanes] than at one lane fewer. Two lanes are judged on pictures a
+         * second (a strip decoder already uses more than one core, so the second lane always costs some per-decode
+         * time); from the third lane on the per-decode rule applies.
+         */
+        fun allowedRatio(lanes: Int): Double =
+            if (lanes < 2) GAIN_RATIO else maxOf(GAIN_RATIO, lanes / ((lanes - 1) * MIN_THROUGHPUT_GAIN))
 
         fun median(values: Collection<Long>): Long {
             if (values.isEmpty()) return 0L
@@ -91,7 +101,7 @@ internal class ThumbDecodeLanes(
         if (freshAtLanes < WINDOW) return null
         val now = median(w)
         val below = if (lanes > 1) windows[lanes - 1].takeIf { it.size >= WINDOW }?.let { median(it) } else null
-        if (below != null && now > below * GAIN_RATIO) {
+        if (below != null && now > below * allowedRatio(lanes)) {
             block(lanes)
             return set(lanes - 1, "no gain over ${lanes - 1} at ${below}ms")
         }

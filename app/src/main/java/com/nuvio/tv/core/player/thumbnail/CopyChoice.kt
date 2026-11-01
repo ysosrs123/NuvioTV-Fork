@@ -41,12 +41,14 @@ internal class CopyOffer(
     val text: String,
     /** A media server away from the home network. */
     val remote: Boolean = false,
+    /** The add-on or server it comes from, for what is learned about copies ([CopySourceBook]). */
+    val source: String = "",
 )
 
 /** Which copy of a 4K title, or of a title playing from Usenet, its thumbnails are made from. */
 internal object CopyChoice {
     /** Copies checked by pictures before falling back to the 4K file. */
-    const val MAX_TRIES = 2
+    const val MAX_TRIES = 3
     /** How long a smaller box's own 4K pass waits while the copy pass is still looking for a copy. */
     const val LOOK_HOLD_MS = 90_000L
     private val CONTAINERS = setOf("mkv", "mp4", "m4v")
@@ -55,9 +57,10 @@ internal object CopyChoice {
      * A smaller box decodes the 4K film itself only when no copy will do: while the copy pass is still [looking] its
      * own pass waits, up to [LOOK_HOLD_MS] after the copy pass started. A strong box carries on meanwhile.
      */
-    fun ownPassWaitsForLook(strongBox: Boolean, looking: Boolean, sinceStartMs: Long): Boolean =
-        !strongBox && looking && sinceStartMs < LOOK_HOLD_MS
+    fun ownPassWaitsForLook(strongBox: Boolean, looking: Boolean, sinceStartMs: Long, holdMs: Long = LOOK_HOLD_MS): Boolean =
+        !strongBox && looking && sinceStartMs < holdMs
     private val HEIGHTS = listOf(1080, 720)
+    const val FOUR_K = 2160
 
     enum class Edition(val word: Regex) {
         EXTENDED(Regex("(?<![a-z])extended(?![a-z])")),
@@ -154,21 +157,26 @@ internal object CopyChoice {
     /**
      * Why [offer] cannot stand in for the playing title, null when it can. Nothing is opened for this. [maxHeight]: the
      * playing picture's height class. [usenet]: the title plays from Usenet, so another Usenet link (another grab) is
-     * never used. Edition words count only when the copy's length is not known: a matching length settles it.
+     * never used. Edition words count only when the copy's length or [ownMs] is not known (0): a matching length
+     * settles it. [ownEditions]: [editions] of [playingText], when worked out once for a whole list.
      */
-    fun rejection(offer: CopyOffer, playingText: String, ownMs: Long, maxHeight: Int = 2160, usenet: Boolean = false): String? {
+    fun rejection(
+        offer: CopyOffer, playingText: String, ownMs: Long, maxHeight: Int = 2160, usenet: Boolean = false,
+        fourKCopies: Boolean = false, ownEditions: Set<Edition>? = null,
+    ): String? {
         if (usenet && offer.kind == CopyKind.USENET) return "another Usenet link"
         offer.container?.let { if (it !in CONTAINERS) return "container $it" }
         when {
             offer.height == 0 -> return "resolution not stated"
             offer.height > maxHeight -> return "${offer.height}p is above the playing ${maxHeight}p"
+            offer.height == FOUR_K && fourKCopies -> Unit
             offer.height > HEIGHTS.first() -> return "${offer.height}p is not a smaller copy"
             offer.height !in HEIGHTS -> return "${offer.height}p is too small"
         }
-        offer.durationMs?.let { ms ->
+        offer.durationMs?.takeIf { ownMs > 0L }?.let { ms ->
             return if (ReleaseMatch.ratio(ownMs, ms) == null) "length ${ms / 1000} s against ${ownMs / 1000} s" else null
         }
-        val own = editions(playingText)
+        val own = ownEditions ?: editions(playingText)
         val theirs = editions(offer.text)
         if (own != theirs) {
             val diff = (own - theirs) + (theirs - own)
@@ -197,28 +205,48 @@ internal object CopyChoice {
     /**
      * Every copy a link or a key reaches first (TorBox list, server versions, ready links, a TorBox copy added and
      * removed again, Premiumize, a debrid resolve link), then a version on a media server away from home, then Usenet
-     * (an indexer grab). Within that: light copies before [heavy] ones (fewer bytes per
+     * (an indexer grab). Within that copies from sources that failed the picture check or were slow lately
+     * ([penalised]) last, then the smallest picture first: 720p, then 1080p (a thumbnail is 480 wide), a 4K copy last.
+     * Then light copies before [heavy] ones (fewer bytes per
      * thumbnail), then servers known to send many keyframes in one request ([batched]: TorBox and the home network
      * always, a TorBox resolve link too, Real-Debrid and Premiumize never, others as remembered) before unknown ones and those known to refuse, then the cheaper
-     * source (nothing added before added and removed again), SDR before HDR, H.264 before HEVC (a thumbnail is 480 wide,
-     * so a 720p H.264 copy gives the same picture faster than a 1080p HEVC one), 1080p before 720p, WEB first, smaller
+     * source (nothing added before added and removed again), SDR before HDR, H.264 before HEVC, WEB first, smaller
      * files first. For a title playing from Usenet ([usenet]) the source comes first: server versions, the TorBox list,
      * Premiumize, ready links, a TorBox copy added and removed again, then a debrid resolve link.
      */
     fun order(
         offers: List<CopyOffer>, usenet: Boolean = false, ownMs: Long? = null, awayServer: Boolean = false,
+        penalised: (CopyOffer) -> Boolean = { false },
         batched: (CopyOffer) -> Boolean? = { null },
-    ): List<CopyOffer> = offers.filter { !awayServer || awayUsable(it) }.sortedWith(
-        compareBy<CopyOffer> { if (usenet) usenetRank(it.kind) else sideEffects(it) }
-            .thenBy { if (heavy(it, ownMs)) 1 else 0 }
-            .thenBy { batchedRank(it, batched(it)) }
-            .thenBy { costRank(it.kind) }
-            .thenBy { if (it.hdr) 1 else 0 }
-            .thenBy { codecRank(it.codec) }
-            .thenBy { HEIGHTS.indexOf(it.height).let { i -> if (i < 0) HEIGHTS.size else i } }
-            .thenBy { if (it.web) 0 else 1 }
-            .thenBy { it.sizeBytes ?: Long.MAX_VALUE }
-    )
+    ): List<CopyOffer> = offers.filter { !awayServer || awayUsable(it) }
+        .map { o -> o to rankKey(o, usenet, ownMs, penalised(o), batched(o)) }
+        .sortedWith { a, b -> compareKeys(a.second, b.second) }
+        .map { it.first }
+
+    /** [order]'s facts of one offer, worked out once: the sort compares these instead of asking again per comparison. */
+    private fun rankKey(o: CopyOffer, usenet: Boolean, ownMs: Long?, penalised: Boolean, batched: Boolean?): LongArray =
+        longArrayOf(
+            (if (usenet) usenetRank(o.kind) else sideEffects(o)).toLong(),
+            if (penalised) 1L else 0L,
+            SMALLEST_FIRST.indexOf(o.height).let { i -> if (i < 0) SMALLEST_FIRST.size else i }.toLong(),
+            if (heavy(o, ownMs)) 1L else 0L,
+            batchedRank(o, batched).toLong(),
+            costRank(o.kind).toLong(),
+            if (o.hdr) 1L else 0L,
+            codecRank(o.codec).toLong(),
+            if (o.web) 0L else 1L,
+            o.sizeBytes ?: Long.MAX_VALUE,
+        )
+
+    private fun compareKeys(a: LongArray, b: LongArray): Int {
+        for (i in a.indices) {
+            val c = a[i].compareTo(b[i])
+            if (c != 0) return c
+        }
+        return 0
+    }
+
+    private val SMALLEST_FIRST = HEIGHTS.sorted() + FOUR_K
 
     private fun sideEffects(o: CopyOffer): Int = when (o.kind) {
         CopyKind.SERVER -> if (o.remote) 1 else 0
@@ -242,6 +270,31 @@ internal object CopyChoice {
         CopyKind.PREMIUMIZE -> 2
         CopyKind.RESOLVE -> 3
         else -> 0
+    }
+
+    private val TORBOX_TEXT = Regex("""torbox|\[tb(?![a-z])|(?<![a-z])tb\+""")
+
+    /** Where a copy comes from: one provider, one set of servers. */
+    fun providerOf(o: CopyOffer): CopyProvider = when (o.kind) {
+        CopyKind.SERVER -> if (o.remote) CopyProvider.AWAY_SERVER else CopyProvider.HOME_SERVER
+        CopyKind.DEBRID, CopyKind.TORBOX_ADD -> CopyProvider.TORBOX
+        CopyKind.PREMIUMIZE -> CopyProvider.PREMIUMIZE
+        CopyKind.USENET -> CopyProvider.USENET
+        CopyKind.LINK -> CopyProvider.LINK
+        CopyKind.RESOLVE -> if (TORBOX_TEXT.containsMatchIn(o.text.lowercase())) CopyProvider.TORBOX else CopyProvider.OTHER_DEBRID
+    }
+
+    /**
+     * Why a 4K copy of a 4K title may not be read, null when it may (any other copy: null). Only from another provider
+     * than the playing stream ([playing]; not known: never) and from a server known to send many keyframes in one
+     * request ([batched]): its keyframes are as large as the film's, so it only helps where it is reached faster.
+     */
+    fun fourKCopyRejection(o: CopyOffer, playing: CopyOffer?, batched: Boolean?): String? {
+        if (o.height != FOUR_K) return null
+        if (playing == null) return "a 4K copy, and the playing source is not known"
+        if (providerOf(o) == providerOf(playing)) return "a 4K copy from the same source as the film"
+        if (batchedRank(o, batched) != 0) return "a 4K copy from a server not known to batch keyframes"
+        return null
     }
 
     /**
@@ -273,7 +326,23 @@ internal object CopyChoice {
      * yet. Never while the playing server transcodes.
      */
     fun anyFits(offers: CopyOffers, ownMs: Long): Boolean =
-        !offers.playingTranscoded && offers.offers.any { awayUsable(it) && rejection(it, offers.playingText, ownMs) == null }
+        !offers.playingTranscoded && awayVerdicts(offers, ownMs).any { it.second == null }
+
+    /** Each offer with why it cannot stand in for a title playing from a server away from home, null when it can. */
+    fun awayVerdicts(offers: CopyOffers, ownMs: Long): List<Pair<CopyOffer, String?>> {
+        val own = editions(offers.playingText)
+        return offers.offers.map {
+            it to (if (!awayUsable(it)) "a media server away from home"
+                else rejection(it, offers.playingText, ownMs, ownEditions = own))
+        }
+    }
+
+    private val LENGTH_REASON = Regex("^length \\d+ s against \\d+ s$")
+
+    /** The reasons counted, most common first; length mismatches count as one reason. */
+    fun reasonTally(reasons: List<String>): String = reasons
+        .groupingBy { if (LENGTH_REASON.matches(it)) "another length" else it }.eachCount()
+        .entries.sortedByDescending { it.value }.joinToString("; ") { "${it.value} x ${it.key}" }
 
     private fun usenetRank(k: CopyKind): Int = when (k) {
         CopyKind.SERVER -> 0

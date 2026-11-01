@@ -127,6 +127,7 @@ internal object NextEpisodeThumbs {
     private suspend fun run(context: Context, source: ThumbSource, allow4K: Boolean, playerProvider: () -> ExoPlayer?) {
         val t0 = SystemClock.elapsedRealtime()
         if (!withContext(Dispatchers.IO) { ThumbNative.load() }) return
+        HardwareThumbSwitch.refresh(context)
         MemoryGovernor.init(context)
         withContext(Dispatchers.IO) { ConnectionLedger.app.attach(PrefsLedgerMemory(context)) }
         val rgb565 = runCatching { ImagePerformancePreferences(context).rgb565Enabled }.getOrDefault(true)

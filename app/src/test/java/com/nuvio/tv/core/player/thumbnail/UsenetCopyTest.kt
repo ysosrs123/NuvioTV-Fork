@@ -63,13 +63,13 @@ class UsenetCopyTest {
 
     @Test
     fun behindTheGeneratingScreenTorBoxTakesFourAndOthersWhatTheLedgerAllows() {
-        assertEquals(8, fetches(screenUp = true, playing = false))
+        assertEquals(4, fetches(screenUp = true, playing = false))
         assertEquals(4, fetches(screenUp = true, playing = false, torBox = true))
         assertEquals(3, fetches(screenUp = true, playing = false, serverCap = 3))
         assertEquals(2, fetches(screenUp = true, playing = false, smallBox = true))
         assertEquals(1, fetches(screenUp = true, playing = false, serverCap = 1))
         // Playback's buffer is not read while the screen holds it.
-        assertEquals(8, fetches(screenUp = true, playing = false, headroom = 0))
+        assertEquals(4, fetches(screenUp = true, playing = false, headroom = 0))
     }
 
     @Test

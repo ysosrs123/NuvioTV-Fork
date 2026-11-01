@@ -90,8 +90,27 @@ class ThumbDecodeLanesTest {
         val c = lanes(cpus = 8)
         assertNull(c.feed(200, concurrent = 1, n = 20))           // other counts never decide
         assertEquals(2, c.lanes)
-        val ch = c.feed(300, concurrent = 2)                     // 300 > 1.25 x 200
+        val ch = c.feed(350, concurrent = 2)                     // 350 > 1.67 x 200
         assertEquals(1, ch!!.to)
+    }
+
+    @Test fun aSecondLaneStaysWhileItDeliversMorePicturesASecond() {
+        assertEquals(1.667, ThumbDecodeLanes.allowedRatio(2), 0.001)
+        assertEquals(1.25, ThumbDecodeLanes.allowedRatio(3), 0.001)
+        assertEquals(1.25, ThumbDecodeLanes.allowedRatio(4), 0.001)
+        // The Fire TV Stick 4K Max on a 4K remux in strips: 529 ms at one lane, 665 ms at two (up 59 % a second).
+        val c = lanes(strong = false, fourK = true, cpus = 4)
+        assertNull(c.onStrips(true))
+        assertEquals(2, c.feed(529, concurrent = 1)!!.to)
+        assertNull(c.feed(665, concurrent = 2, n = 20))
+        assertEquals(2, c.lanes)
+        val back = c.feed(900, concurrent = 2, n = 4)            // median passes 1.67 x 529 on the fourth
+        assertEquals(1, back!!.to)
+        assertTrue(back.reason, back.reason.startsWith("no gain"))
+        // Three lanes still need each decode within a quarter of the two-lane time.
+        val strong = lanes(cpus = 8)
+        assertEquals(3, strong.feed(300, concurrent = 2)!!.to)
+        assertEquals(2, strong.feed(380, concurrent = 3)!!.to)   // 380 > 1.25 x 300
     }
 
     @Test fun noLaneIsAddedWhileHot() {

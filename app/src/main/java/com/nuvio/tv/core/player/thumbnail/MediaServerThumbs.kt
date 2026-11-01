@@ -23,6 +23,13 @@ internal object MediaServerThumbs {
     fun copyFills(onDemand: Boolean, copiesOn: Boolean, identityExact: Boolean, fits: Boolean): Boolean =
         onDemand && copiesOn && identityExact && fits
 
+    /**
+     * A copy that fits turns up while the server's batched pass is still running: the copy takes over, the server
+     * then gives only the spot a seek asks for and the picture check. Once the batched pass is done it stays as it is.
+     */
+    fun copyTakesOver(fits: Boolean, remoteBatched: Boolean, onDemand: Boolean, passFinished: Boolean): Boolean =
+        fits && remoteBatched && !onDemand && !passFinished
+
     /** A private, link-local or Tailscale address, a home-network name, or the box itself. */
     fun onHomeNetwork(url: String): Boolean {
         val host = url.trim().toHttpUrlOrNull()?.host ?: return false

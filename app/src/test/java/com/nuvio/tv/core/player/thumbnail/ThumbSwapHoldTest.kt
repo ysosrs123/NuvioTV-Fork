@@ -38,6 +38,25 @@ class ThumbSwapHoldTest {
     }
 
     @Test
+    fun softwareCarriesOnAfterTheHardwareDecoderClosedWhileTheBoxHasRoom() {
+        // On a 2 GB Fire TV Stick: the decoder closed at SwapFree 43, software was then held at 44 with 425 MB free.
+        val held = GovernorVerdict(false, "SwapFree 44 MB < 64", 44L)
+        val lifted = MemoryGovernor.afterHardwareClose(held, mem(availMb = 425, swapFreeMb = 44), DecodeTier.SW_4K_STRIPS, lowRam = true)
+        assertTrue(lifted.reason, lifted.allowed)
+        assertTrue(lifted.reason, lifted.reason.contains("400 MB free after the 4K hardware decoder closed"))
+        // Not with the box really out of swap, nor without 100 MB of room over the floor and the decode's own size.
+        assertFalse(MemoryGovernor.afterHardwareClose(GovernorVerdict(false, "SwapFree 31 MB < 64", 31L),
+            mem(availMb = 425, swapFreeMb = 31), DecodeTier.SW_4K_STRIPS, lowRam = true).allowed)
+        assertFalse(MemoryGovernor.afterHardwareClose(held, mem(availMb = 324, swapFreeMb = 44), DecodeTier.SW_4K_STRIPS, lowRam = true).allowed)
+        assertTrue(MemoryGovernor.afterHardwareClose(held, mem(availMb = 325, swapFreeMb = 44), DecodeTier.SW_4K_STRIPS, lowRam = true).allowed)
+        // A verdict that is not a swap refusal is passed through untouched.
+        val notSwap = GovernorVerdict(false, "MemAvailable 150 MB < 200")
+        assertEquals(notSwap, MemoryGovernor.afterHardwareClose(notSwap, mem(availMb = 900), DecodeTier.SW_4K_STRIPS, lowRam = true))
+        val ok = GovernorVerdict(true, "ok")
+        assertEquals(ok, MemoryGovernor.afterHardwareClose(ok, mem(), DecodeTier.SW_4K_STRIPS, lowRam = true))
+    }
+
+    @Test
     fun memAvailableRefusalIsNotASwapRefusal() {
         val v = fireStick(availMb = 150, swapFreeMb = 0, funded = false)
         assertFalse(v.allowed)

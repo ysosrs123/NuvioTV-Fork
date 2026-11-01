@@ -384,6 +384,29 @@ internal object MemoryGovernor {
     private const val CLOSE_DECODERS_SWAP_MB = FUNDED_SWAP_FLOOR_MB - 16
 
     /**
+     * MemAvailable above the decode floor (after the decode's own size) that lets software carry on under the swap
+     * floor once the 4K hardware decoder has closed: its 200 MB come back at once, the swap it pushed out comes back
+     * over tens of seconds, and a hold for that swap cost a Fire TV Stick 20 to 50 s per set.
+     */
+    private const val AFTER_HARDWARE_CLOSE_ROOM_MB = 100L
+
+    /** A swap refusal after the 4K hardware decoder closed is lifted while the box has [AFTER_HARDWARE_CLOSE_ROOM_MB] of room. */
+    fun afterHardwareClose(verdict: GovernorVerdict, tier: DecodeTier): GovernorVerdict {
+        if (!verdict.swapLow) return verdict
+        val mem = readMeminfo() ?: return verdict
+        return afterHardwareClose(verdict, mem, tier, lowRam)
+    }
+
+    internal fun afterHardwareClose(verdict: GovernorVerdict, mem: Meminfo, tier: DecodeTier, lowRam: Boolean): GovernorVerdict {
+        if (!verdict.swapLow) return verdict
+        if (mem.swapTotalMb > 0 && mem.swapFreeMb < CLOSE_DECODERS_SWAP_MB) return verdict
+        val room = decodeFloorMb(funded = false, lowRam = lowRam) + AFTER_HARDWARE_CLOSE_ROOM_MB
+        val after = mem.availableMb - tier.rssMb
+        if (mem.availableMb < 0 || after < room) return verdict
+        return GovernorVerdict(true, "${verdict.reason}, carrying on with $after MB free after the 4K hardware decoder closed")
+    }
+
+    /**
      * A swap refusal well under the floor on a smaller box closes the decoders, so their working set goes back until
      * swap recovers. Just under the floor they are trimmed, so a SwapFree hovering there does not reopen them each time.
      */

@@ -121,7 +121,7 @@ class ReleaseMatchTest {
 
     @Test fun sameFramePairsComeFirst() {
         // Same-frame pairs only at the start and the end; nearer pairs in the middle come after them.
-        val eligible = listOf(20 to 10_000L, 580 to 30_000L, 300 to 200_000L, 100 to 900_000L, 500 to 2_000_000L)
+        val eligible = listOf(20 to 10_000L, 580 to 5_000L, 300 to 200_000L, 100 to 900_000L, 500 to 2_000_000L)
         val picked = ReleaseMatch.pickCheckSlots(eligible.filter { it.second <= ReleaseMatch.WIDE_US }, 600)
         assertEquals(listOf(20, 580, 300, 100), picked)
     }
@@ -132,12 +132,56 @@ class ReleaseMatchTest {
         // A scene cut between keyframes 0.3 s apart: no verdict either way.
         assertEquals(ReleaseMatch.Outcome.SKIP, ReleaseMatch.outcome(0.1f, 0.2f, null, 300_000L))
         assertEquals(ReleaseMatch.Outcome.MISMATCH, ReleaseMatch.outcome(0.5f, 0.95f, null, near))
-        assertEquals(ReleaseMatch.Outcome.FAIL, ReleaseMatch.outcome(0.7f, 0.95f, null, 300_000L))
+        assertEquals(ReleaseMatch.Outcome.SKIP, ReleaseMatch.outcome(0.7f, 0.95f, null, 300_000L))
         assertEquals(ReleaseMatch.Outcome.PASS, ReleaseMatch.outcome(0.95f, 0.9f, 0.4f, 300_000L))
-        // Alike but not alike enough: never a match, and the borrow ends.
+        // Alike but not alike enough on the same frame: never a match, more pictures decide.
         assertEquals(ReleaseMatch.Outcome.FAIL, ReleaseMatch.outcome(0.85f, null, null, near))
         assertEquals(ReleaseMatch.Outcome.SKIP, ReleaseMatch.outcome(0.5f, null, null, 300_000L))
         assertEquals(ReleaseMatch.Outcome.SKIP, ReleaseMatch.outcome(null, null, null, near))
+    }
+
+    @Test fun keyframesTwoThirdsOfASecondApartAreNoBorderlinePicture() {
+        // A WEB copy against a Blu-ray remux, keyframes 667 ms apart: the picture moved in between.
+        assertEquals(ReleaseMatch.Outcome.SKIP, ReleaseMatch.outcome(0.80f, 0.6f, 0.7f, 667_000L))
+        assertEquals(ReleaseMatch.Outcome.SKIP, ReleaseMatch.outcome(0.80f, null, null, ReleaseMatch.NEAR_US))
+        assertEquals(ReleaseMatch.Outcome.PASS, ReleaseMatch.outcome(0.93f, 0.7f, 0.7f, 667_000L))
+        assertEquals(ReleaseMatch.Outcome.FAIL, ReleaseMatch.outcome(0.80f, null, null, 0L))
+    }
+
+    @Test fun borderlinePicturesNeedMoreMatchesThanThemselves() {
+        val t = ReleaseMatch::tally
+        assertEquals(ReleaseMatch.Tally.GOING, t(0, listOf(0.8f)))
+        assertEquals(ReleaseMatch.Tally.GOING, t(2, listOf(0.8f)))
+        assertEquals(ReleaseMatch.Tally.MATCHED, t(3, listOf(0.8f)))
+        assertEquals(ReleaseMatch.Tally.MATCHED, t(3, emptyList()))
+        // Two borderline pairs and two matches: the third match decides.
+        assertEquals(ReleaseMatch.Tally.GOING, t(2, listOf(0.8f, 0.75f)))
+        assertEquals(ReleaseMatch.Tally.MATCHED, t(3, listOf(0.8f, 0.75f)))
+        assertEquals(ReleaseMatch.Tally.NOT_MATCHED, t(1, listOf(0.8f, 0.75f, 0.7f)))
+        assertEquals(ReleaseMatch.Tally.NOT_MATCHED, t(3, listOf(0.8f, 0.75f, 0.7f)))
+    }
+
+    @Test fun twoDifferentFilmsNeverPassTheCheck() {
+        // Scenes of another film: same-frame pairs are mismatches, pairs further apart decide nothing.
+        var passes = 0
+        val borderline = ArrayList<Float>()
+        var mismatches = 0
+        for (seed in 40 until 52) {
+            val own = sig(render(Scene(seed), 480, 270), 480, 270)
+            val other = sig(render(Scene(seed + 100), 240, 135), 240, 135)
+            val c = corr(own, other) ?: continue
+            for (gap in longArrayOf(0L, 300_000L, 667_000L)) {
+                when (ReleaseMatch.outcome(c, null, null, gap)) {
+                    ReleaseMatch.Outcome.PASS -> passes++
+                    ReleaseMatch.Outcome.FAIL -> borderline += c
+                    ReleaseMatch.Outcome.MISMATCH -> mismatches++
+                    ReleaseMatch.Outcome.SKIP -> Unit
+                }
+            }
+        }
+        assertEquals(0, passes)
+        assertTrue("mismatches $mismatches", mismatches >= 2)
+        assertTrue(ReleaseMatch.tally(passes, borderline) != ReleaseMatch.Tally.MATCHED)
     }
 
     @Test fun anotherShotOfASimilarSceneDoesNotMatch() {

@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
+import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.core.debrid.CopyRoute
 import com.nuvio.tv.core.debrid.DebridProviders
@@ -15,16 +16,21 @@ import com.nuvio.tv.core.player.thumbnail.CopyOffer
 import com.nuvio.tv.core.player.thumbnail.CopyOffers
 import com.nuvio.tv.core.player.thumbnail.CopySources
 import com.nuvio.tv.core.player.thumbnail.MediaServerThumbs
+import com.nuvio.tv.core.player.thumbnail.MkvIndexReader
 import com.nuvio.tv.core.player.thumbnail.MultiRangeSupport
+import com.nuvio.tv.core.player.thumbnail.thumbnailHttpClient
 import com.nuvio.tv.data.mediaserver.ServerPlayMethod
 import com.nuvio.tv.domain.model.DebridStreamEncode
 import com.nuvio.tv.domain.model.DebridStreamQuality
 import com.nuvio.tv.domain.model.DebridStreamVisualTag
 import com.nuvio.tv.domain.model.Stream
 import com.nuvio.tv.domain.model.StreamDebridCacheState
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import okhttp3.Request
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -41,6 +47,9 @@ internal class ThumbnailCopySources(
 ) : CopySources {
     private companion object {
         const val TAG = "ThumbCopy"
+        /** A link followed ahead is used within this long, else followed again. */
+        const val WARM_MS = 10L * 60 * 1000
+        const val WARM_WAIT_MS = 20_000L
         val VIDEO_EXTENSIONS = setOf("mkv", "mp4", "m4v", "avi", "ts", "m2ts", "m3u8", "webm", "mov", "wmv", "iso")
         val HDR_TAGS = setOf(
             DebridStreamVisualTag.HDR_DV, DebridStreamVisualTag.DV_ONLY, DebridStreamVisualTag.HDR_ONLY,
@@ -85,6 +94,10 @@ internal class ThumbnailCopySources(
     @Volatile private var title = ""
     @Volatile private var playingUrl: String? = null
 
+    override suspend fun loadNow() {
+        withContext(Dispatchers.Main) { controller.loadSourceStreams(forceRefresh = false) }
+    }
+
     override suspend fun offers(): CopyOffers? {
         val snap = withContext(Dispatchers.Main) {
             val key = controller.currentSourceRequestKey() ?: return@withContext null
@@ -125,6 +138,8 @@ internal class ThumbnailCopySources(
         fun leaveOut(why: String) {
             leftOut[why] = (leftOut[why] ?: 0) + 1
         }
+        var torboxListed: Set<String>? = null
+        var torboxRead = false
         val offers = snap.streams.mapIndexedNotNull { i, stream ->
             if (i == snap.playingIndex) return@mapIndexedNotNull null
             if (!SourceFailoverSelection.isAutoFailoverPlayable(stream, snap.season, snap.episode)) return@mapIndexedNotNull null
@@ -145,7 +160,13 @@ internal class ThumbnailCopySources(
                     leaveOut(route.why)
                     return@mapIndexedNotNull null
                 }
-                route == CopyRoute.Torbox -> if (debrid.inTorboxList(stream) == true) CopyKind.DEBRID else CopyKind.TORBOX_ADD
+                route == CopyRoute.Torbox -> {
+                    if (!torboxRead) {
+                        torboxRead = true
+                        torboxListed = debrid.torboxListHashes(settings)
+                    }
+                    if (debrid.inTorboxList(stream, torboxListed) == true) CopyKind.DEBRID else CopyKind.TORBOX_ADD
+                }
                 route == CopyRoute.Premiumize -> CopyKind.PREMIUMIZE
                 route == CopyRoute.Resolve -> CopyKind.RESOLVE
                 else -> {
@@ -168,7 +189,22 @@ internal class ThumbnailCopySources(
         if (leftOut.isNotEmpty()) {
             Log.i(TAG, "left out: " + leftOut.entries.joinToString("; ") { "${it.value} x ${it.key}" })
         }
-        return CopyOffers(snap.playingText, offers, playingTranscoded = !snap.serverCopies)
+        val playing = snap.streams.getOrNull(snap.playingIndex)?.let { stream ->
+            val kind = when {
+                stream.serverTarget != null -> CopyKind.SERVER
+                else -> when (debrid.routeOf(stream, settings)) {
+                    CopyRoute.Torbox -> CopyKind.DEBRID
+                    CopyRoute.Premiumize -> CopyKind.PREMIUMIZE
+                    CopyRoute.Resolve -> CopyKind.RESOLVE
+                    else -> stream.getStreamUrl()?.let { CopyChoice.linkKind(it, streamText(stream)) } ?: CopyKind.LINK
+                }
+            }
+            val remote = stream.serverTarget?.let {
+                MediaServerThumbs.copyLanes(controller.serverPlayback.serverAddress(it)) != Int.MAX_VALUE
+            } == true
+            offerOf("playing", stream, kind, DirectDebridStreamFilter.facts(stream, settings), remote)
+        }
+        return CopyOffers(snap.playingText, offers, playingTranscoded = !snap.serverCopies, playing = playing)
     }
 
     private fun offerOf(
@@ -206,6 +242,7 @@ internal class ThumbnailCopySources(
             durationMs = stream.durationMs ?: CopyChoice.parsedDurationMs(parsed?.duration),
             text = text,
             remote = remote,
+            source = stream.addonName,
         )
     }
 
@@ -237,7 +274,9 @@ internal class ThumbnailCopySources(
                 }
             }
             CopyKind.LINK -> stream.getStreamUrl()?.let {
-                CopyLink(it, stream.behaviorHints?.proxyHeaders?.request.orEmpty(), "a ready link")
+                val w = warmed(it)
+                CopyLink(w?.url ?: it, stream.behaviorHints?.proxyHeaders?.request.orEmpty(), "a ready link",
+                    prewarmed = w != null, head = w?.head, length = w?.length ?: -1L)
             }
             CopyKind.USENET -> {
                 if (!usenetTried.add(title)) {
@@ -272,9 +311,60 @@ internal class ThumbnailCopySources(
                 }
             } else {
                 stream.getStreamUrl()?.let {
-                    CopyLink(it, stream.behaviorHints?.proxyHeaders?.request.orEmpty(), "the add-on's debrid link")
+                    val w = warmed(it)
+                    CopyLink(w?.url ?: it, stream.behaviorHints?.proxyHeaders?.request.orEmpty(), "the add-on's debrid link",
+                        prewarmed = w != null, head = w?.head, length = w?.length ?: -1L)
                 }
             }
+        }
+    }
+
+    /** [head]: the file's first bytes from the same answer, with the [length] it named. */
+    private class Warm(val url: String, val atMs: Long, val head: ByteArray?, val length: Long)
+
+    /** Links whose redirects were followed ahead of the pass, by the source's own link. */
+    private val warm = ConcurrentHashMap<String, Warm>()
+
+    /** Links being followed ahead right now: the pass waits for that answer instead of resolving the link twice. */
+    private val warming = ConcurrentHashMap<String, CompletableDeferred<Unit>>()
+
+    private suspend fun warmed(url: String): Warm? {
+        warming[url]?.let { withTimeoutOrNull(WARM_WAIT_MS) { it.await() } }
+        return warm.remove(url)?.takeIf { SystemClock.elapsedRealtime() - it.atMs < WARM_MS }
+    }
+
+    override suspend fun prewarm(offer: CopyOffer): Long? {
+        if (offer.kind != CopyKind.LINK && offer.kind != CopyKind.RESOLVE) return null
+        val stream = byId[offer.id] ?: return null
+        if (stream.isDirectDebrid()) return null
+        val url = stream.getStreamUrl() ?: return null
+        val headers = stream.behaviorHints?.proxyHeaders?.request.orEmpty()
+        val done = CompletableDeferred<Unit>()
+        if (warming.putIfAbsent(url, done) != null) return null
+        try {
+            val t0 = SystemClock.elapsedRealtime()
+            val got = withContext(Dispatchers.IO) {
+                runCatching {
+                    val request = Request.Builder().url(url)
+                        .header("Range", "bytes=0-${MkvIndexReader.HEAD_BYTES - 1}")
+                        .header("Accept-Encoding", "identity")
+                        .build()
+                    thumbnailHttpClient(headers).newCall(request).execute().use { r ->
+                        if (r.code != 206) return@use null
+                        val length = r.header("Content-Range")?.substringAfterLast('/')?.toLongOrNull() ?: -1L
+                        val head = runCatching { r.body?.source()?.let { src ->
+                            src.request(MkvIndexReader.HEAD_BYTES.toLong())
+                            src.buffer.readByteArray(minOf(src.buffer.size, MkvIndexReader.HEAD_BYTES.toLong()))
+                        } }.getOrNull()
+                        Warm(r.request.url.toString(), SystemClock.elapsedRealtime(), head, length)
+                    }
+                }.getOrNull()
+            } ?: return null
+            if (got.url != url || got.head != null) warm[url] = got
+            return SystemClock.elapsedRealtime() - t0
+        } finally {
+            warming.remove(url, done)
+            done.complete(Unit)
         }
     }
 

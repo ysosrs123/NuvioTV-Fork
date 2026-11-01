@@ -72,4 +72,13 @@ class MediaServerThumbsTest {
         assertFalse(MediaServerThumbs.copyFills(onDemand = true, copiesOn = true, identityExact = false, fits = true))
         assertFalse(MediaServerThumbs.copyFills(onDemand = true, copiesOn = true, identityExact = true, fits = false))
     }
+
+    @Test
+    fun aCopyThatTurnsUpLateTakesOverTheServersBatchedPassWhileItRuns() {
+        assertTrue(MediaServerThumbs.copyTakesOver(fits = true, remoteBatched = true, onDemand = false, passFinished = false))
+        assertFalse(MediaServerThumbs.copyTakesOver(fits = false, remoteBatched = true, onDemand = false, passFinished = false))
+        assertFalse(MediaServerThumbs.copyTakesOver(fits = true, remoteBatched = true, onDemand = false, passFinished = true))
+        assertFalse(MediaServerThumbs.copyTakesOver(fits = true, remoteBatched = false, onDemand = true, passFinished = true))
+        assertFalse(MediaServerThumbs.copyTakesOver(fits = true, remoteBatched = true, onDemand = true, passFinished = true))
+    }
 }

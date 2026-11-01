@@ -27,6 +27,7 @@ internal object UsenetCopy {
      * Copy pictures fetched at once, by the same server rules as the title's own ([ThumbFetchLanes.limit]): behind the
      * generating screen as generating would use, otherwise as while playing. [serverCap]: what the ledger leaves now.
      * [headroom]: lanes playback's buffer allows ([PlaybackHeadroom]); none still plans one, the pass waits for it.
+     * Never more than [CopyFirst.MAX_LANES]: the film's own requests keep the rest.
      */
     fun fetches(
         screenUp: Boolean, playing: Boolean, serverCap: Int, smallBox: Boolean, rateLimited: Boolean,
@@ -35,7 +36,8 @@ internal object UsenetCopy {
         val phase = if (screenUp && !playing) FetchPhase.GENERATING else FetchPhase.PLAYBACK
         val lanes = ThumbFetchLanes.limit(phase, rateLimited, smallBox4K = smallBox, ledgerCap = serverCap,
             torBox = torBox, refused = refused, surplus = surplus)
-        return if (phase == FetchPhase.PLAYBACK) minOf(lanes, headroom.coerceAtLeast(1)) else lanes
+        val n = if (phase == FetchPhase.PLAYBACK) minOf(lanes, headroom.coerceAtLeast(1)) else lanes
+        return minOf(n, CopyFirst.MAX_LANES)
     }
 
     /** Why the copy is given up, null while it may go on. [sinceProgressMs]: since its last thumbnail, null while none is being made. */

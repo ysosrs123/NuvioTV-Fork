@@ -1,18 +1,36 @@
 package com.nuvio.tv.core.player.thumbnail
 
+import android.content.Context
 import com.nuvio.tv.ui.screens.player.isSoftwareVideoDecoderName
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
 /**
  * Thumbnails from the box's hardware video decoder, only while no film decodes (generating screen, after the film).
- * Off unless `adb shell setprop debug.nuvio.thumb.hw 1`.
+ * Follows the "Hardware decoder for thumbnails" setting, read again as each title starts ([refresh]);
+ * `adb shell setprop debug.nuvio.thumb.hw 0` (or 1) overrides it.
  */
 internal object HardwareThumbSwitch {
+    @Volatile internal var setting = true
+
     val on: Boolean
-        get() = runCatching {
+        get() = onFor(setting, runCatching {
             Class.forName("android.os.SystemProperties").getMethod("get", String::class.java)
                 .invoke(null, "debug.nuvio.thumb.hw") as? String
-        }.getOrNull() == "1"
+        }.getOrNull())
+
+    fun onFor(setting: Boolean, property: String?): Boolean = when (property?.trim()) {
+        "0" -> false
+        "1" -> true
+        else -> setting
+    }
+
+    suspend fun refresh(context: Context) {
+        setting = withContext(Dispatchers.IO) {
+            runCatching { SeekThumbnailPreferences.hardwareEnabled(context) }.getOrDefault(true)
+        }
+    }
 }
 
 /** Which keyframes may go to the hardware decoder. */
@@ -21,9 +39,13 @@ internal object HardwareRoute {
     /** VC-1 gave no pictures from the hardware decoder in tests; MPEG-1 was not tried. */
     val CODECS = setOf(VideoCodec.H264, VideoCodec.HEVC, VideoCodec.MPEG2, VideoCodec.MPEG4, VideoCodec.VP9, VideoCodec.AV1)
 
-    /** Decoders that hold a lone picture until told the stream ends: MPEG-4 Part 2 everywhere, every format outside Amlogic (MediaTek gave none in 3 s). */
+    /**
+     * Decoders that hold a lone picture until told the stream ends: MPEG-4 Part 2 and H.264 everywhere (Amlogic's H.264
+     * decoder keeps a Blu-ray keyframe back for reordering), every format outside Amlogic (MediaTek gave none in 3 s).
+     */
     fun endsEachKeyframe(codec: VideoCodec, codecName: String): Boolean =
-        codec == VideoCodec.MPEG4 || !codecName.lowercase().let { it.startsWith("c2.amlogic.") || it.startsWith("omx.amlogic.") }
+        codec == VideoCodec.MPEG4 || codec == VideoCodec.H264 ||
+            !codecName.lowercase().let { it.startsWith("c2.amlogic.") || it.startsWith("omx.amlogic.") }
 
     private val LIKELY_MIMES = setOf("video/hevc", "video/avc", "video/dolby-vision", "video/mpeg2", "video/x-vnd.on2.vp9",
         "video/av01", "video/mp4v-es")
@@ -46,13 +68,14 @@ internal object HardwareRoute {
         blocked: Boolean,
         decoder: Boolean,
         fourKFromAppMemory: Boolean = false,
+        appMemoryWhy: String? = null,
     ): String? = when {
         sdk < MIN_SDK -> "Android $sdk"
         phase == FetchPhase.PLAYBACK -> "film playing"
         codec !in CODECS -> "codec ${codec.name}"
         bitDepth > 10 -> "$bitDepth-bit"
         dolbyVisionProfile == 5 -> "Dolby Vision profile 5"
-        fourKFromAppMemory -> "4K on a small box whose decoder takes its pictures from app memory (about 300 MB on a Fire TV Stick)"
+        fourKFromAppMemory -> appMemoryWhy ?: AppMemoryHardware.OFF_TEXT
         titleOff != null -> titleOff
         blocked -> "failed ${HardwareFailureBook.FAILURES} times on this box, software for ${HardwareFailureBook.BLOCK_DAYS} days"
         !decoder -> "no hardware decoder"

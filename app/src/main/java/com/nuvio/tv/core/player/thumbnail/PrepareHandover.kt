@@ -18,6 +18,10 @@ internal object PrepareHandover {
     const val HOLD_RETRY_MAX_PLAYED_MS = 3_000L
     const val HOLD_RETRY_POLL_MS = 200L
 
+    /** A session that finds no player at its start waits this long for a rebuilt one before it ends. */
+    const val PLAYER_BACK_WAIT_MS = 15_000L
+    const val PLAYER_BACK_POLL_MS = 250L
+
     fun retriesHold(sinceRefusedMs: Long, playedMs: Long): Boolean =
         sinceRefusedMs < HOLD_RETRY_WAIT_MS && playedMs <= HOLD_RETRY_MAX_PLAYED_MS
 

@@ -75,6 +75,19 @@ class HardwareThumbsTest {
         assertNull(why(fourKFromAppMemory = false))
     }
 
+    @Test fun theSettingDecidesUnlessTheTestPropertyIsSet() {
+        assertEquals(true, HardwareThumbSwitch.onFor(true, null))
+        assertEquals(true, HardwareThumbSwitch.onFor(true, ""))
+        assertEquals(true, HardwareThumbSwitch.onFor(true, "1"))
+        assertEquals(false, HardwareThumbSwitch.onFor(true, "0"))
+        assertEquals(false, HardwareThumbSwitch.onFor(false, null))
+        assertEquals(false, HardwareThumbSwitch.onFor(false, ""))
+        assertEquals(true, HardwareThumbSwitch.onFor(false, "1"))
+        assertEquals(false, HardwareThumbSwitch.onFor(false, "0"))
+        assertEquals(false, HardwareThumbSwitch.onFor(true, " 0 "))
+        assertEquals(false, HardwareThumbSwitch.onFor(false, "yes"))
+    }
+
     @Test fun hardwareOnlyWhileNoFilmPlays() {
         assertNull(why(phase = FetchPhase.GENERATING))
         assertNull(why(phase = FetchPhase.PLAYER_CLOSED))

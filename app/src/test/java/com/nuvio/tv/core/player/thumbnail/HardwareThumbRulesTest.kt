@@ -303,7 +303,10 @@ class HardwareThumbRulesTest {
         }
         assertTrue(HardwareRoute.endsEachKeyframe(VideoCodec.MPEG4, "c2.amlogic.mpeg4.decoder"))
         assertFalse(HardwareRoute.endsEachKeyframe(VideoCodec.HEVC, "c2.amlogic.hevc.decoder"))
-        assertFalse(HardwareRoute.endsEachKeyframe(VideoCodec.H264, "OMX.amlogic.avc.decoder.awesome2"))
+        assertTrue(HardwareRoute.endsEachKeyframe(VideoCodec.H264, "OMX.amlogic.avc.decoder.awesome2"))
+        assertTrue(HardwareRoute.endsEachKeyframe(VideoCodec.H264, "c2.amlogic.avc.decoder"))
+        assertFalse(HardwareRoute.endsEachKeyframe(VideoCodec.HEVC, "OMX.amlogic.hevc.decoder.awesome2"))
+        assertFalse(HardwareRoute.endsEachKeyframe(VideoCodec.VP9, "c2.amlogic.vp9.decoder"))
         assertTrue(HardwareRoute.endsEachKeyframe(VideoCodec.HEVC, "OMX.MTK.VIDEO.DECODER.HEVC"))
         assertTrue(HardwareRoute.endsEachKeyframe(VideoCodec.H264, "c2.mtk.avc.decoder"))
     }
@@ -340,14 +343,34 @@ class HardwareThumbRulesTest {
         assertNull(HardwareSetup.csd(VideoCodec.MPEG4, ByteArray(0), ByteArray(0), vop))
     }
 
-    @Test fun aVp9IndexIsNotUsedWithTheSwitchOff() {
-        assertFalse(HardwareThumbSwitch.on)
+    @Test fun aVp9IndexIsUsedWithTheSwitchOnByDefault() {
+        assertTrue(HardwareThumbSwitch.on)
         fun index(codec: VideoCodec) = MediaIndex(
             ContainerKind.MATROSKA, 1_000L, 60_000_000L,
             VideoTrack(codec, 1920, 1080, 0.0, 4, ByteArray(0), 8, ContainerColour(), null, 1L),
             KeyframeIndex(longArrayOf(0L), longArrayOf(100L), longArrayOf(-1L), intArrayOf(-1)),
         )
-        assertNull(KeyframeIndexCodec.decode(KeyframeIndexCodec.encode(index(VideoCodec.VP9))))
+        assertEquals(VideoCodec.VP9, KeyframeIndexCodec.decode(KeyframeIndexCodec.encode(index(VideoCodec.VP9)))!!.video.codec)
         assertEquals(VideoCodec.AV1, KeyframeIndexCodec.decode(KeyframeIndexCodec.encode(index(VideoCodec.AV1)))!!.video.codec)
+    }
+
+    @Test fun aVp9IndexSavedWhileOnIsReadAgainOnceTheSettingIsOff() {
+        fun index(codec: VideoCodec) = MediaIndex(
+            ContainerKind.MATROSKA, 1_000L, 60_000_000L,
+            VideoTrack(codec, 1920, 1080, 0.0, 4, ByteArray(0), 8, ContainerColour(), null, 1L),
+            KeyframeIndex(longArrayOf(0L), longArrayOf(100L), longArrayOf(-1L), intArrayOf(-1)),
+        )
+        val vp9 = KeyframeIndexCodec.encode(index(VideoCodec.VP9))
+        val av1 = KeyframeIndexCodec.encode(index(VideoCodec.AV1))
+        try {
+            HardwareThumbSwitch.setting = false
+            assertFalse(HardwareThumbSwitch.on)
+            assertNull(KeyframeIndexCodec.decode(vp9))
+            assertEquals(VideoCodec.AV1, KeyframeIndexCodec.decode(av1)!!.video.codec)
+            HardwareThumbSwitch.setting = true
+            assertEquals(VideoCodec.VP9, KeyframeIndexCodec.decode(vp9)!!.video.codec)
+        } finally {
+            HardwareThumbSwitch.setting = true
+        }
     }
 }

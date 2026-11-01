@@ -4,6 +4,8 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlaybackException
 import androidx.media3.exoplayer.ExoPlayer
 import io.mockk.every
+import io.mockk.just
+import io.mockk.runs
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
@@ -21,6 +23,8 @@ class SeekThumbnailsLetGoTest {
 
     @Before fun setUp() {
         mockkStatic("com.nuvio.tv.ui.screens.player.PlayerRuntimeControllerMpvKt")
+        mockkStatic("com.nuvio.tv.ui.screens.player.PlayerRuntimeControllerErrorRecoveryKt")
+        every { runtime.scheduleOwnedPlaybackRecovery(any(), any(), any()) } just runs
         every { runtime.isUsingMpvEngine() } returns false
         every { runtime._exoPlayer } returns player
         every { runtime.partyBridge } returns null
@@ -31,6 +35,7 @@ class SeekThumbnailsLetGoTest {
 
     @After fun tearDown() {
         unmockkStatic("com.nuvio.tv.ui.screens.player.PlayerRuntimeControllerMpvKt")
+        unmockkStatic("com.nuvio.tv.ui.screens.player.PlayerRuntimeControllerErrorRecoveryKt")
     }
 
     @Test fun aHeldPlayerStopsAndKeepsItsTitleAndPosition() {
@@ -62,18 +67,20 @@ class SeekThumbnailsLetGoTest {
         verify(exactly = 0) { player.stop() }
     }
 
-    @Test fun theFilmLoadsAgainAndPlaysWhenAsked() {
+    @Test fun theFilmIsBuiltAgainWhereItWas() {
         every { player.playbackState } returns Player.STATE_IDLE
+        every { player.currentPosition } returns 1_844_000L
         runtime.loadAgainAfterSeekThumbnails(play = true)
-        verify(exactly = 1) { player.prepare() }
-        verify(exactly = 1) { player.play() }
+        verify(exactly = 1) { runtime.scheduleOwnedPlaybackRecovery(1_844_000L, 0L, any()) }
+        verify(exactly = 0) { player.prepare() }
         verify(exactly = 0) { player.seekTo(any<Long>()) }
     }
 
     @Test fun leftInTheBackgroundItLoadsPaused() {
         every { player.playbackState } returns Player.STATE_IDLE
         runtime.loadAgainAfterSeekThumbnails(play = false)
-        verify(exactly = 1) { player.prepare() }
+        verify(exactly = 1) { runtime.scheduleOwnedPlaybackRecovery(any(), 0L, any()) }
+        verify(exactly = 0) { player.prepare() }
         verify(exactly = 0) { player.play() }
     }
 
@@ -83,6 +90,7 @@ class SeekThumbnailsLetGoTest {
         every { player.playerError } returns mockk<ExoPlaybackException>(relaxed = true)
         runtime.loadAgainAfterSeekThumbnails(play = false)
         verify(exactly = 0) { player.prepare() }
+        verify(exactly = 0) { runtime.scheduleOwnedPlaybackRecovery(any(), any(), any()) }
         verify(exactly = 1) { player.play() }
     }
 }

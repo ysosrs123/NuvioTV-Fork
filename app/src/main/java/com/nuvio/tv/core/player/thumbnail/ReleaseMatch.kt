@@ -20,14 +20,22 @@ internal object ReleaseMatch {
     const val FLAT_STDEV = 4.0
     const val MATCH_MIN = 0.90f
     const val DIFFERENT_MAX = 0.40f
-    /** An undecided picture this alike still fails the check: a near miss is never taken for a match. */
+    /**
+     * A same-frame pair from here up to [MATCH_MIN] is borderline: never a match on its own, more pictures decide
+     * ([tally]).
+     */
     const val FAIL_MIN = 0.60f
+    /** Borderline pairs that end the check for this copy unless more pairs matched. */
+    const val BORDERLINE_CHECKS = 3
     /** A neighbour slot this much better than the slot itself means the timing is shifted. */
     const val SHIFT_MARGIN = 0.08f
     const val CHECKS_NEEDED = 3
     const val CHECK_SPARES = 3
-    /** Own and borrowed keyframe within one frame (24 fps): the same picture, so a mismatch is real. */
-    const val SAME_FRAME_US = 42_000L
+    /**
+     * Own and borrowed keyframe this close: the same picture, so a mismatch is real. Under half a frame up to 60 fps:
+     * keyframes one frame apart (41.7 ms at 24 fps) are two pictures, across a scene cut two different scenes.
+     */
+    const val SAME_FRAME_US = 12_000L
     const val NEAR_US = 250_000L
     /** Farther apart than this a pair is not compared, and a borrowed picture is not copied into the slot. */
     const val WIDE_US = 1_000_000L
@@ -55,9 +63,11 @@ internal object ReleaseMatch {
         if (durationMs <= 0L) 0 else ((durationMs - 1) / spacingMs).toInt() + 1
 
     /**
-     * Check slots from [eligible] (slot to own/borrowed keyframe gap in us), closest pairs first: same-frame pairs,
-     * then within [NEAR_US], then [WIDE_US]. Within a tier spread over the title: near 1/6, 1/2 and 5/6, then near
-     * 1/4, 1/2 and 3/4.
+     * Check slots from [eligible] (slot to the own keyframe's offset from the borrowed one in us, own minus borrowed;
+     * a plain gap counts as an own keyframe after the borrowed one), closest pairs first: same-frame pairs, then within
+     * [NEAR_US], then [WIDE_US], each first with the own keyframe after the borrowed one (a copy's keyframes sit on
+     * scene cuts, so an own picture just before one is the scene before), then either way. Within a tier spread over
+     * the title: near 1/6, 1/2 and 5/6, then near 1/4, 1/2 and 3/4.
      */
     fun pickCheckSlots(eligible: List<Pair<Int, Long>>, slotCount: Int): List<Int> {
         if (eligible.isEmpty() || slotCount <= 0) return emptyList()
@@ -65,8 +75,10 @@ internal object ReleaseMatch {
         val targets = (0 until CHECKS_NEEDED).map { (2 * it + 1).toDouble() / (2 * CHECKS_NEEDED) } +
             (0 until CHECK_SPARES).map { (it + 1).toDouble() / (CHECK_SPARES + 1) }
         val picked = ArrayList<Int>()
-        for (tier in longArrayOf(SAME_FRAME_US, NEAR_US, WIDE_US)) {
-            val pool = eligible.filter { it.second <= tier && it.first !in picked }.map { it.first }.toMutableList()
+        val tiers = listOf(SAME_FRAME_US to false, NEAR_US to true, WIDE_US to true, NEAR_US to false, WIDE_US to false)
+        for ((tier, afterOnly) in tiers) {
+            val pool = eligible.filter { abs(it.second) <= tier && (!afterOnly || it.second >= 0L) && it.first !in picked }
+                .map { it.first }.toMutableList()
             for (f in targets) {
                 if (picked.size >= total || pool.isEmpty()) break
                 val want = f * slotCount
@@ -79,8 +91,35 @@ internal object ReleaseMatch {
     }
 
     /**
-     * [SIG_W] x [SIG_H] area-averaged grey of the picture inside the given margins, mean 0 and spread 1, so a
-     * brightness or contrast change (SDR against a tone-mapped HDR copy) keeps the shape. Null when flat.
+     * Each copy slot with its gap (us, own timeline) to the nearest own landing keyframe it serves, within [WIDE_US]:
+     * the copy slot's keyframe ([copyKeyframeUs], copy timeline, negative for none) against the landing keyframes
+     * ([ownLandingUs], -1 for none) of the own slots it serves ([owners]), signed: own minus copy, the nearest one.
+     * [pickCheckSlots] over these gives the copy pictures the check can decide on first.
+     */
+    fun copyGaps(
+        owners: Map<Int, IntArray>, copyKeyframeUs: (Int) -> Long, ownLandingUs: LongArray, ratio: Double,
+    ): List<Pair<Int, Long>> {
+        if (ratio <= 0.0) return emptyList()
+        val gaps = ArrayList<Pair<Int, Long>>()
+        for ((m, served) in owners) {
+            val copyUs = copyKeyframeUs(m).takeIf { it >= 0L } ?: continue
+            val onOwn = (copyUs / ratio).toLong()
+            var best = Long.MAX_VALUE
+            for (s in served) {
+                val landing = ownLandingUs.getOrElse(s) { -1L }
+                if (landing < 0L) continue
+                val d = landing - onOwn
+                if (abs(d) < abs(best) || (abs(d) == abs(best) && d > best)) best = d
+            }
+            if (best != Long.MAX_VALUE && abs(best) <= WIDE_US) gaps += m to best
+        }
+        return gaps
+    }
+
+    /**
+     * [SIG_W] x [SIG_H] area-averaged grey of the picture inside the given margins, as ranks (brightest cell highest),
+     * mean 0 and spread 1: any change that keeps brighter cells brighter (another tone curve, an HDR or Dolby Vision
+     * picture mapped otherwise than an SDR copy, brightness or contrast) keeps the signature. Null when flat.
      */
     fun signature(px: IntArray, w: Int, h: Int, left: Int = 0, top: Int = 0, right: Int = 0, bottom: Int = 0): FloatArray? {
         val cw = w - left - right
@@ -107,8 +146,25 @@ internal object ReleaseMatch {
         val mean = sig.average()
         val sd = sqrt(sig.sumOf { (it - mean) * (it - mean) } / sig.size)
         if (sd < FLAT_STDEV) return null
-        for (i in sig.indices) sig[i] = ((sig[i] - mean) / sd).toFloat()
-        return sig
+        return ranked(sig)
+    }
+
+    /** [values] as ranks (ties share their average rank), mean 0 and spread 1; all-equal values give zeros. */
+    fun ranked(values: FloatArray): FloatArray {
+        val n = values.size
+        val order = (0 until n).sortedBy { values[it] }
+        val rank = DoubleArray(n)
+        var i = 0
+        while (i < n) {
+            var j = i
+            while (j + 1 < n && values[order[j + 1]] == values[order[i]]) j++
+            val r = (i + j) / 2.0
+            for (k in i..j) rank[order[k]] = r
+            i = j + 1
+        }
+        val mean = rank.average()
+        val sd = sqrt(rank.sumOf { (it - mean) * (it - mean) } / n)
+        return FloatArray(n) { if (sd > 0.0) ((rank[it] - mean) / sd).toFloat() else 0f }
     }
 
     /** Pearson correlation of two signatures, -1..1. */
@@ -142,19 +198,48 @@ internal object ReleaseMatch {
         PASS,
         /** Decides nothing: a spare pair is tried. */
         SKIP,
-        /** Too alike to call different, too unlike to call the same: the borrow ends for this session. */
+        /** A same-frame pair too alike to call different, too unlike to call the same: more pairs decide. */
         FAIL,
         /** A clear mismatch on the same frame. */
         MISMATCH,
     }
 
-    /** [gapUs]: own keyframe to borrowed keyframe on the own timeline. Only a same-frame pair can show a real mismatch. */
+    /**
+     * [gapUs]: own keyframe to borrowed keyframe on the own timeline. Only a same-frame pair can show a mismatch or a
+     * borderline picture; pairs further apart can only match, since the picture moves between their keyframes.
+     */
     fun outcome(same: Float?, before: Float?, after: Float?, gapUs: Long): Outcome {
-        val undecided = if ((same ?: -1f) >= FAIL_MIN) Outcome.FAIL else Outcome.SKIP
+        val sameFrame = gapUs <= SAME_FRAME_US
         return when (verdict(same, before, after)) {
             Verdict.MATCH -> Outcome.PASS
-            Verdict.SHIFTED, Verdict.DIFFERENT -> if (gapUs <= SAME_FRAME_US) Outcome.MISMATCH else undecided
-            Verdict.UNSURE -> undecided
+            Verdict.SHIFTED, Verdict.DIFFERENT -> if (sameFrame) Outcome.MISMATCH else Outcome.SKIP
+            Verdict.UNSURE -> if (sameFrame && (same ?: -1f) >= FAIL_MIN) Outcome.FAIL else Outcome.SKIP
         }
+    }
+
+    /** One picture check for the log: where, how far apart the keyframes are, the scores and what it counts as. */
+    fun checkLine(atS: Long, gapUs: Long, same: Float?, before: Float?, after: Float?, outcome: Outcome): String {
+        fun score(v: Float?) = v?.let { String.format(java.util.Locale.ROOT, "%.2f", it) } ?: "-"
+        val counts = when (outcome) {
+            Outcome.PASS -> "a match"
+            Outcome.SKIP -> "decides nothing"
+            Outcome.FAIL -> "borderline"
+            Outcome.MISMATCH -> "a mismatch"
+        }
+        return "reuse check at $atS s (keyframes ${gapUs / 1000} ms apart${if (gapUs <= SAME_FRAME_US) ", same frame" else ""}): " +
+            "score ${same?.let { score(it) } ?: "no picture"} (either side ${score(before)} / ${score(after)}) - $counts"
+    }
+
+    enum class Tally { GOING, MATCHED, NOT_MATCHED }
+
+    /**
+     * The check so far: [passes] matching pairs and the [borderline] scores. Matched with [CHECKS_NEEDED] matches that
+     * outnumber the borderline pairs; not matched once [BORDERLINE_CHECKS] borderline pairs are at least as many as
+     * the matches.
+     */
+    fun tally(passes: Int, borderline: List<Float>): Tally = when {
+        passes >= CHECKS_NEEDED && passes > borderline.size -> Tally.MATCHED
+        borderline.size >= BORDERLINE_CHECKS && borderline.size >= passes -> Tally.NOT_MATCHED
+        else -> Tally.GOING
     }
 }

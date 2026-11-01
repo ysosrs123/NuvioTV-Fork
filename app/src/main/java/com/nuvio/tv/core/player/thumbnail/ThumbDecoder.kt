@@ -285,12 +285,15 @@ internal class DecoderLane {
     fun decoderFor(hardware: Boolean): ThumbLaneDecoder = if (hardware) this.hardware ?: NOT_OPEN else decoder
 
     /** The lane's hardware decoder for [codecName], opened on first use. Only during a decode on this lane. */
-    fun hardwareFor(codecName: String): HardwareThumbDecoder = synchronized(this) {
-        hardware?.takeIf { it.codecName == codecName } ?: run {
+    fun hardwareFor(codecName: String, smallInput: Boolean = false): HardwareThumbDecoder = synchronized(this) {
+        hardware?.takeIf { it.codecName == codecName && it.smallInput == smallInput } ?: run {
             hardware?.close()
-            HardwareThumbDecoder(codecName).also { hardware = it }
+            HardwareThumbDecoder(codecName, smallInput).also { hardware = it }
         }
     }
+
+    /** A hardware decoder is open on this lane, or about to close as its decode ends. */
+    val hardwareOpen: Boolean get() = hardware != null
 
     val inUse: Boolean get() = synchronized(this) { busy }
 
@@ -320,6 +323,14 @@ internal class DecoderLane {
             }
             closeWhenFree = busy
         }
+    }
+
+    /** Closes the software decoder unless a decode runs on this lane; it opens again on its next use. True if it was warm. */
+    fun closeSoftwareIfIdle(): Boolean = synchronized(this) {
+        if (busy) return false
+        val was = decoder.warm
+        decoder.close()
+        was
     }
 
     /** Gives the hardware decoder back (to the player), at once or when the running decode ends. Any thread. */

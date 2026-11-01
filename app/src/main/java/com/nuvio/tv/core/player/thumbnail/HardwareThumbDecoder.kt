@@ -77,6 +77,7 @@ internal object HardwareCodecs {
 internal object HardwareFailures {
     @Volatile private var book: HardwareFailureBook? = null
     @Volatile private var lanes: HardwareLaneBook? = null
+    @Volatile private var costs: HardwareCostBook? = null
 
     private fun memory(context: Context) = object : HardwareFailureMemory {
         private val prefs = context.applicationContext.getSharedPreferences("seek_thumbs_hw", Context.MODE_PRIVATE)
@@ -92,6 +93,10 @@ internal object HardwareFailures {
         lanes ?: HardwareLaneBook(memory(context)).also { lanes = it }
     }
 
+    fun costBook(context: Context): HardwareCostBook = costs ?: synchronized(this) {
+        costs ?: HardwareCostBook(memory(context)).also { costs = it }
+    }
+
     val box: String get() = Integer.toHexString(Build.FINGERPRINT.hashCode())
 
     fun key(decoder: String): String = "$box|$decoder"
@@ -104,9 +109,10 @@ internal object VideoPoolReader {
 
 /**
  * One hardware decoder in synchronous mode, drawing to a [GlThumbShrink]. Reset after every picture: some decoders
- * (Amlogic) keep only the first picture when keyframes come back to back. Not thread-safe: each decode lane owns one.
+ * (Amlogic) keep only the first picture when keyframes come back to back. [smallInput]: the input buffer is sized to the
+ * keyframes ([HardwareInputSize]) instead of [MAX_INPUT_BYTES]. Not thread-safe: each decode lane owns one.
  */
-internal class HardwareThumbDecoder(val codecName: String) : ThumbLaneDecoder {
+internal class HardwareThumbDecoder(val codecName: String, val smallInput: Boolean = false) : ThumbLaneDecoder {
     companion object {
         const val TIMEOUT_MS = 3_000L
         const val MAX_INPUT_BYTES = 8 * 1024 * 1024
@@ -117,6 +123,8 @@ internal class HardwareThumbDecoder(val codecName: String) : ThumbLaneDecoder {
     private var openTrack: VideoTrack? = null
     private var openPlan: HardwarePlan? = null
     private var pts = 0L
+    /** The input size asked for or given, kept across a close so a reopen does not start small again. */
+    private var inputBytes = 0
     private val info = MediaCodec.BufferInfo()
 
     override val warm: Boolean get() = codec != null
@@ -128,13 +136,17 @@ internal class HardwareThumbDecoder(val codecName: String) : ThumbLaneDecoder {
         val deadline = SystemClock.elapsedRealtime() + TIMEOUT_MS
         val data = HardwareSetup.keyframe(track.codec, bytes, track.extradata)
         if (data.size > MAX_INPUT_BYTES) throw HardwareThumbFailure("keyframe of ${data.size / 1024} KB", keyframeOnly = true)
+        val inputSize = if (smallInput) HardwareInputSize.wanted(data.size, inputBytes, MAX_INPUT_BYTES) else MAX_INPUT_BYTES
+        if (smallInput && codec != null && inputSize > inputBytes) close()
+        inputBytes = inputSize
         try {
-            val c = open(track, plan, data)
+            val c = open(track, plan, data, inputSize)
             val surface = gl ?: throw HardwareThumbFailure("no surface")
             val ii = c.dequeueInputBuffer(left(deadline) * 1000)
             if (ii < 0) throw HardwareThumbFailure("no input buffer", missed = true)
             val input = c.getInputBuffer(ii) ?: throw HardwareThumbFailure("no input buffer", missed = true)
             input.clear()
+            if (smallInput) inputBytes = maxOf(inputBytes, input.capacity())
             if (input.capacity() < data.size) {
                 c.flush()
                 throw HardwareThumbFailure("keyframe of ${data.size / 1024} KB", keyframeOnly = true)
@@ -175,7 +187,7 @@ internal class HardwareThumbDecoder(val codecName: String) : ThumbLaneDecoder {
 
     private fun left(deadline: Long): Long = (deadline - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
 
-    private fun open(track: VideoTrack, plan: HardwarePlan, keyframe: ByteArray): MediaCodec {
+    private fun open(track: VideoTrack, plan: HardwarePlan, keyframe: ByteArray, inputSize: Int): MediaCodec {
         codec?.takeIf { openTrack === track && openPlan === plan }?.let { return it }
         close()
         val mime = HardwareCodecs.mime(track.codec) ?: throw HardwareThumbFailure("codec ${track.codec.name}")
@@ -201,7 +213,7 @@ internal class HardwareThumbDecoder(val codecName: String) : ThumbLaneDecoder {
         val format = MediaFormat.createVideoFormat(mime, track.width, track.height).apply {
             HardwareSetup.csd(track.codec, track.parameterSetsAnnexB, track.extradata, keyframe)
                 ?.let { setByteBuffer("csd-0", ByteBuffer.wrap(it)) }
-            setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, MAX_INPUT_BYTES)
+            setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, inputSize)
             setInteger(MediaFormat.KEY_PRIORITY, 1)
             if (Build.VERSION.SDK_INT >= 30) setInteger(MediaFormat.KEY_LOW_LATENCY, 1)
         }

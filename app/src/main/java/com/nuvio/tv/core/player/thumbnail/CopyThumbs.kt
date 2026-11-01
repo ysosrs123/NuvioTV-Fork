@@ -2,6 +2,7 @@ package com.nuvio.tv.core.player.thumbnail
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Build
@@ -22,6 +23,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -32,6 +34,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 internal interface CopySources {
     /** The playing title's source list as copy offers; null while it is not loaded yet. */
     suspend fun offers(): CopyOffers?
+
+    /** Loads the source list now instead of once playback has settled in (usually a cache hit from the details page). */
+    suspend fun loadNow() = Unit
+
+    /**
+     * Follows [offer]'s redirects now with one tiny read, so the pass starts on the final link; only for links with
+     * nothing to add or remove. The milliseconds it took, null when not done.
+     */
+    suspend fun prewarm(offer: CopyOffer): Long? = null
 
     /**
      * A link to read [offer] from, or null. A cached TorBox copy added to the user's list is removed again through
@@ -48,6 +59,8 @@ internal class CopyOffers(
     val offers: List<CopyOffer>,
     /** The playing stream is a media server's transcode. */
     val playingTranscoded: Boolean = false,
+    /** The playing stream's own facts from the source list (height, length, size); null when it is not in the list. */
+    val playing: CopyOffer? = null,
 )
 
 /**
@@ -60,7 +73,70 @@ internal class CopyLink(
     val via: String,
     /** Requests at once at most, on top of the usual lane rules. */
     val maxLanes: Int = Int.MAX_VALUE,
+    /** [url] is where the link's redirects led when [CopySources.prewarm] followed them ahead of the pass. */
+    val prewarmed: Boolean = false,
+    /** The file's first bytes, read while the redirects were followed; null when not read. */
+    val head: ByteArray? = null,
+    /** The file's length from that answer, -1 when not known. */
+    val length: Long = -1L,
     val done: () -> Unit = {},
+) {
+    /** Header and index read as soon as the link opened ([CopyHeadStart]); the pass takes them instead of reading again. */
+    @Volatile var preread: Deferred<CopyPreread?>? = null
+    /** The reader of [preread] while it reads; closed with [dropPreread]. */
+    @Volatile var prereadReader: HttpRangeReader? = null
+
+    /** Copy pictures made from [preread] before the title's session ([CopyEarly]). */
+    @Volatile var early: CopyEarly? = null
+
+    /** Stops a read ahead nobody takes, and the pictures made from it, and closes its reader. */
+    fun dropPreread() {
+        early?.drop()
+        early = null
+        preread?.cancel()
+        preread = null
+        prereadReader?.close()
+        prereadReader = null
+    }
+
+    /** The pictures made before the session, once; making them stops. */
+    suspend fun takeEarly(): List<CopyEarlyPicture> {
+        val e = early ?: return emptyList()
+        early = null
+        return e.take()
+    }
+
+    /**
+     * The header and index read ahead, waiting up to [waitMs] for a read still under way; null when there is none or it
+     * failed. The caller owns the reader from then on.
+     */
+    suspend fun takePreread(waitMs: Long): CopyPreread? {
+        val d = preread ?: return null
+        val got = withTimeoutOrNull(waitMs) { runCatching { d.await() }.getOrNull() }
+        if (got == null) {
+            if (!kotlinx.coroutines.currentCoroutineContext().isActive) {
+                dropPreread()
+                throw CancellationException("stopped")
+            }
+            dropPreread()
+            return null
+        }
+        preread = null
+        prereadReader = null
+        return got
+    }
+}
+
+/** A copy's header and index read ahead, with the reader that read them (the pass reads on with it). */
+internal class CopyPreread(
+    val reader: HttpRangeReader,
+    val head: ByteArray,
+    val index: MediaIndex,
+    val mkv: Boolean,
+    /** First bytes: 0 when they came with the link's redirects. */
+    val headMs: Long,
+    val readMs: Long,
+    val doneAtMs: Long,
 )
 
 /** The playing title as the copy pass needs it. */
@@ -83,6 +159,12 @@ internal class CopyOwn(
     val screenStride: Int = 1,
     /** The title plays from a media server away from home: its stream is never read for the copy's pictures. */
     val awayServer: Boolean = false,
+    /** Not 4K: a copy is used only when it is lighter than the playing file ([CopyFirst.notLighter]). */
+    val lighterOnly: Boolean = false,
+    /** When the stream was picked (elapsed realtime), for the log's timings; 0 when not known. */
+    val pickedAtMs: Long = 0L,
+    /** The playing picture is HDR or Dolby Vision. */
+    val hdr: Boolean = false,
 )
 
 /** A copy's pictures, ready for the picture check: its store and its timing against the playing title. */
@@ -111,6 +193,8 @@ internal class CopyPass(
     private val screenUp: () -> Boolean = { false },
     /** The player has closed and the session finishes on its own. */
     private val playerClosed: () -> Boolean = { false },
+    /** The top copy's link opened at the stream pick, taken instead of opening it again. */
+    private val headStart: CopyHeadStart? = null,
 ) {
     private companion object {
         const val TAG = "ThumbCopy"
@@ -135,6 +219,7 @@ internal class CopyPass(
         const val NO_SLOT_TRIES = 10
         const val MAX_REJECT_LOGS = 12
         const val PROGRESS_LOG_EVERY = 60
+        const val OWN_DECODER = "the 4K thumbnail decoder to be let go"
     }
 
     enum class State { LOOKING, FILLING, WAITING, DONE, STOPPED }
@@ -156,6 +241,15 @@ internal class CopyPass(
         private set
     /** Copy slots stored so far, all copies tried. */
     @Volatile var made = 0
+        private set
+    /** When a copy's link last came back open (elapsed realtime), 0 before. */
+    @Volatile var linkOpenedAt = 0L
+        private set
+    /**
+     * Since when the pass waits for the title's own 4K decoder to be let go, or for memory (elapsed realtime); 0 while
+     * it does not.
+     */
+    @Volatile var ownDecoderWaitSince = 0L
         private set
 
     val filling: Boolean get() = state == State.FILLING
@@ -238,62 +332,147 @@ internal class CopyPass(
 
     private fun isRejected(): Boolean = currentKey != null && rejectedKey == currentKey
 
+    private fun sincePick(): String =
+        if (own.pickedAtMs > 0L) ", ${SystemClock.elapsedRealtime() - own.pickedAtMs} ms after the stream pick" else ""
+
     private suspend fun run() {
+        try {
+            look()
+        } finally {
+            headStart?.release()
+        }
+    }
+
+    private suspend fun look() {
         MemoryGovernor.init(context)
         Log.i(TAG, "looking for ${when {
             own.usenet -> "a copy of this Usenet title"
             own.awayServer -> "a copy of this title from a media server away from home"
+            own.lighterOnly -> "a lighter copy of this title"
             else -> "a smaller copy of this 4K title"
         }} " +
             "(${own.store.slots().size} own thumbnails stored, ${own.durationMs / 1000} s)")
-        val offers = awaitOffers() ?: return end(State.STOPPED, "the player's source list did not load")
-        val usable = ArrayList<CopyOffer>()
-        var logged = 0
-        for (o in offers.offers) {
-            val why = if (own.awayServer && !CopyChoice.awayUsable(o)) "a media server away from home"
-                else CopyChoice.rejection(o, offers.playingText, own.durationMs, own.maxHeight, own.usenet)
-            if (why == null) usable += o else if (logged++ < MAX_REJECT_LOGS) Log.i(TAG, "not used: ${o.label} - $why")
-        }
-        val ranked = CopyChoice.order(usable, own.usenet, own.durationMs, own.awayServer) { sources.multiRange(it) }
-        if (ranked.isEmpty()) return end(State.DONE, "no copy of this title among ${offers.offers.size} sources fits")
-        Log.i(TAG, "${ranked.size} possible copies, in order: " + ranked.take(5).joinToString("; ") { describe(it) })
+        val fourK = own.maxHeight >= CopyChoice.FOUR_K && !own.usenet && !own.awayServer
+        fun verdict(o: CopyOffer, offers: CopyOffers, editions: Set<CopyChoice.Edition>): String? =
+            (if (own.awayServer && !CopyChoice.awayUsable(o)) "a media server away from home" else null)
+                ?: CopyChoice.rejection(o, offers.playingText, own.durationMs, own.maxHeight, own.usenet, fourKCopies = fourK,
+                    ownEditions = editions)
+                ?: (if (fourK) CopyChoice.fourKCopyRejection(o, offers.playing, sources.multiRange(o)) else null)
+                ?: (if (own.lighterOnly) CopyFirst.notLighter(o, own.fileLength, own.durationMs) else null)
+        val book = runCatching { CopySourceBooks.app(context) }.getOrNull()
         var checks = 0
         var opens = 0
-        for (offer in ranked) {
-            if (stopping || checks >= CopyChoice.MAX_TRIES || opens >= MAX_OPENS) break
+
+        /** Opens and tries [offer]; true when the pass ended with it. */
+        suspend fun attempt(offer: CopyOffer): Boolean {
+            val openStart = SystemClock.elapsedRealtime()
             var opened: CopyLink? = null
-            val link = runCatching { withTimeoutOrNull(OPEN_TIMEOUT_MS) { sources.open(offer).also { opened = it } } }
+            val link = runCatching { withTimeoutOrNull(OPEN_TIMEOUT_MS) {
+                (headStart?.take(offer) ?: sources.open(offer)).also { opened = it }
+            } }
                 .onFailure {
                     if (it is CancellationException) {
-                        opened?.let { o -> runCatching { o.done() } }
+                        opened?.let { o -> o.dropPreread(); runCatching { o.done() } }
                         throw it
                     }
                 }.getOrNull()
             if (link == null) {
-                opened?.let { runCatching { it.done() } }
+                opened?.let { it.dropPreread(); runCatching { it.done() } }
                 Log.i(TAG, "${offer.label}: no link")
-                continue
+                if (!stopping) learn(book, offer, CopySourceBook.SLOW, "no link")
+                return false
+            }
+            val openMs = SystemClock.elapsedRealtime() - openStart
+            if (openMs >= CopySourceBook.SLOW_OPEN_MS && headStart?.offer?.id != offer.id) {
+                learn(book, offer, CopySourceBook.SLOW, "link open in $openMs ms")
             }
             opens++
-            Log.i(TAG, "trying ${describe(offer)} via ${link.via}")
+            linkOpenedAt = SystemClock.elapsedRealtime()
+            Log.i(TAG, "trying ${describe(offer)} via ${link.via}${sincePick()}")
             val outcome = try {
                 tryCopy(offer, link)
             } finally {
+                link.dropPreread()
                 runCatching { link.done() }
             }
             when (outcome) {
                 Outcome.FILLED -> when (awaitVerdict()) {
-                    Outcome.FILLED -> return end(State.DONE, "${offer.label}: confirmed by pictures")
-                    Outcome.REJECTED -> checks++
-                    else -> return end(State.STOPPED, stopWhy ?: "the picture check could not decide ($verdictWhy)")
+                    Outcome.FILLED -> {
+                        runCatching { book?.cleared(offer) }
+                        end(State.DONE, "${offer.label}: confirmed by pictures")
+                        return true
+                    }
+                    Outcome.REJECTED -> {
+                        checks++
+                        turnedDown(book, offer)
+                    }
+                    else -> {
+                        end(State.STOPPED, stopWhy ?: "the picture check could not decide ($verdictWhy)")
+                        return true
+                    }
                 }
-                Outcome.REJECTED -> checks++
-                Outcome.STOP -> return end(State.STOPPED, stopWhy ?: "stopped")
+                Outcome.REJECTED -> {
+                    checks++
+                    turnedDown(book, offer)
+                }
+                Outcome.STOP -> {
+                    end(State.STOPPED, stopWhy ?: "stopped")
+                    return true
+                }
                 Outcome.UNUSABLE -> Unit
             }
             ready = null
             currentKey = null
             state = State.LOOKING
+            return false
+        }
+
+        // The copy whose link opened at the stream pick goes first, on the list it was chosen from: the whole list is
+        // read and ranked again only when it is not used.
+        val early = headStart?.takeIf { it.opened }
+        val earlyOffer = early?.offer
+        val earlyList = early?.listed
+        var first: CopyOffer? = null
+        if (early != null && earlyOffer != null && earlyList != null) {
+            val why = verdict(earlyOffer, earlyList, CopyChoice.editions(earlyList.playingText))
+            if (why == null) {
+                first = earlyOffer
+                Log.i(TAG, "copy first: the pass starts ${SystemClock.elapsedRealtime() - early.openedAtMs} ms after the " +
+                    "link of ${earlyOffer.label} opened${sincePick()} - it goes first, the other sources are ranked " +
+                    "only if it is not used")
+                if (attempt(earlyOffer)) return
+            } else {
+                Log.i(TAG, "copy first: ${earlyOffer.label}, opened at the stream pick, not used - $why")
+            }
+        }
+        if (stopping) return end(State.STOPPED, stopWhy ?: "stopped")
+        runCatching { sources.loadNow() }.onFailure { if (it is CancellationException) throw it }
+        val offers = awaitOffers() ?: return end(State.STOPPED, "the player's source list did not load")
+        val usable = ArrayList<CopyOffer>()
+        val reasons = ArrayList<String>()
+        var logged = 0
+        val editions = CopyChoice.editions(offers.playingText)
+        for (o in offers.offers) {
+            val why = verdict(o, offers, editions)
+            if (why == null) {
+                usable += o
+            } else {
+                reasons += why
+                if (logged++ < MAX_REJECT_LOGS) Log.i(TAG, "not used: ${o.label} - $why")
+            }
+        }
+        if (reasons.isNotEmpty()) Log.i(TAG, "not used: " + CopyChoice.reasonTally(reasons))
+        val ranked = CopyChoice.order(usable.filter { o -> first == null || !CopyFirst.sameOffer(o, first) }, own.usenet,
+            own.durationMs, own.awayServer, penalised = { book?.penalised(it) == true }) { sources.multiRange(it) }
+        if (ranked.isEmpty() && first == null) {
+            return end(State.DONE, "no copy of this title among ${offers.offers.size} sources fits")
+        }
+        if (ranked.isEmpty()) Log.i(TAG, "no other copy of this title among ${offers.offers.size} sources fits")
+        else Log.i(TAG, "${ranked.size} ${if (first != null) "other " else ""}possible copies${sincePick()}, in order: " +
+            ranked.take(5).joinToString("; ") { describe(it) })
+        for (offer in ranked) {
+            if (stopping || checks >= CopyChoice.MAX_TRIES || opens >= MAX_OPENS) break
+            if (attempt(offer)) return
         }
         if (own.awayServer) {
             return end(State.DONE, (if (checks > 0) "no copy matched the pictures of the media server stream"
@@ -302,6 +481,28 @@ internal class CopyPass(
         val ownFile = if (own.usenet) "the Usenet stream" else "the 4K file"
         end(State.DONE, if (checks > 0) "no copy matched the pictures of $ownFile - $ownFile makes the rest" else "no copy could be used")
     }
+
+    /**
+     * The picture check turned [offer] down. Against an HDR or Dolby Vision title the own pictures come through another
+     * colour path than an SDR copy's, so that is not held against the copy's source.
+     */
+    private fun turnedDown(book: CopySourceBook?, offer: CopyOffer) {
+        if (CopySourceBook.countsWrong(own.hdr)) {
+            learn(book, offer, CopySourceBook.WRONG, "turned down by the picture check")
+        } else {
+            Log.i(TAG, "${offer.label}: turned down by the picture check - not counted against its source " +
+                "(the playing title is HDR or Dolby Vision)")
+        }
+    }
+
+    private fun learn(book: CopySourceBook?, offer: CopyOffer, weight: Double, why: String) {
+        val score = runCatching { book?.count(offer, weight) }.getOrNull() ?: return
+        Log.i(TAG, "${offer.label}: $why - counted against ${CopySourceBook.keyOf(offer)} (now %.1f%s)".format(score,
+            if (score >= CopySourceBook.LAST_AT) ", its copies rank last for now" else ""))
+    }
+
+    /** The decode tier of the copy being read: 4K only for a 4K copy of a 4K title. */
+    @Volatile private var copyTier = DecodeTier.SW_UP_TO_1080P
 
     private fun end(s: State, why: String) {
         if (ended) return
@@ -360,13 +561,21 @@ internal class CopyPass(
         ledgerUrl = link.url
         laneCap = link.maxLanes.coerceAtLeast(1)
         if (laneCap < Int.MAX_VALUE) ConnectionLedger.app.capThumbnails(link.url, laneCap)
-        if (!awaitReady(null, host)) return Outcome.STOP
-        val r = HttpRangeReader(link.url, link.headers, thumbnailHttpClient(link.headers),
+        if (!awaitReady(null, host)) {
+            link.dropPreread()
+            return Outcome.STOP
+        }
+        val asked = SystemClock.elapsedRealtime()
+        val pre = link.takePreread(CopyFirst.PREREAD_WAIT_MS)
+        val r = pre?.reader ?: HttpRangeReader(link.url, link.headers, thumbnailHttpClient(link.headers),
             slotWaitMs = ConnectionLedger.START_SLOT_WAIT_MS)
         reader = r
         try {
             val t0 = SystemClock.elapsedRealtime()
-            val head = request(host) { r.read(0, MkvIndexReader.HEAD_BYTES) }
+            val linkHead = link.head?.takeIf { pre == null && link.length > 0L && it.isNotEmpty() }
+            if (linkHead != null) r.noteLength(link.length)
+            val head = pre?.head ?: linkHead ?: request(host) { r.read(0, MkvIndexReader.HEAD_BYTES) }
+            val headMs = pre?.headMs ?: if (linkHead != null) 0L else SystemClock.elapsedRealtime() - t0
             val fileLength = r.totalLength
             ledgerUrl = r.resolvedUrl
             if (laneCap < Int.MAX_VALUE) ConnectionLedger.app.capThumbnails(r.resolvedUrl, laneCap)
@@ -378,29 +587,47 @@ internal class CopyPass(
             }
             val mkv = MkvIndexReader.looksLikeMatroska(head)
             if (!mkv && !Mp4IndexReader.looksLikeMp4(head)) throw Unusable("not MKV or MP4")
-            var idx: MediaIndex? = null
-            val (durationUs, video) = if (mkv) {
+            var idx: MediaIndex? = pre?.index
+            val split = SplitRangeReader(r, CopyFirst.indexParts(MemoryGovernor.isStrongBox, laneCap,
+                ConnectionLedger.app.thumbnailRoom(r.resolvedUrl)))
+            val (durationUs, video) = pre?.index?.let { it.durationUs to it.video } ?: if (mkv) {
                 request(host) { MkvIndexReader.peek(r, head) }.let { it.durationUs to it.video }
             } else {
-                request(host) { Mp4IndexReader.read(r, head) }.also { idx = it }.let { it.durationUs to it.video }
+                request(host) { Mp4IndexReader.read(split, head) }.also { idx = it }.let { it.durationUs to it.video }
             }
             val copyMs = durationUs / 1000L
             val ratio = ReleaseMatch.ratio(own.durationMs, copyMs)
                 ?: throw Unusable("length ${copyMs / 1000} s against ${own.durationMs / 1000} s")
-            if (MemoryGovernor.tierFor(video.width, video.height) != DecodeTier.SW_UP_TO_1080P) {
+            val tier = MemoryGovernor.tierFor(video.width, video.height)
+            val fourKCopy = tier == DecodeTier.SW_4K && own.maxHeight >= CopyChoice.FOUR_K && offer.height == CopyChoice.FOUR_K
+            if (tier != DecodeTier.SW_UP_TO_1080P && !fourKCopy) {
                 throw Unusable("${video.width}x${video.height} is not a smaller copy")
             }
+            copyTier = tier
             if (CopyChoice.heightClass(video.width, video.height) > own.maxHeight) {
                 throw Unusable("${video.width}x${video.height} is above the playing ${own.maxHeight}p")
             }
             val natural = ThumbGeometry.outputSize(video.width, video.height, 1, 1, video.displayAspect)
             CopyFit.plan(natural[0], natural[1], own.pictureW, own.pictureH)
                 ?: throw Unusable("picture shape ${natural[0]}x${natural[1]} against ${own.pictureW}x${own.pictureH}")
-            val index = idx ?: request(host) { MkvIndexReader.read(r, head) }
+            val index = idx ?: request(host) { MkvIndexReader.read(split, head) }
             val timing = if (ratio == 1.0) "same length" else "PAL ratio %.4f".format(ratio)
+            val read = if (pre != null) {
+                "header and index ${r.bytes / 1024} KB read as its link opened, in ${pre.readMs} ms, ready " +
+                    "${(asked - pre.doneAtMs).coerceAtLeast(0L)} ms before the pass asked" +
+                    (if (pre.doneAtMs > asked) " (waited ${pre.doneAtMs - asked} ms)" else "")
+            } else {
+                "header and index ${r.bytes / 1024} KB in ${SystemClock.elapsedRealtime() - t0} ms (first bytes " +
+                    (if (linkHead != null) "came with the link's redirects" else "with the link's redirects $headMs ms") +
+                    ", ${if (link.prewarmed) "link resolved ahead" else "link resolved now"})"
+            }
             Log.i(TAG, "${offer.label}: ${video.codec} ${video.width}x${video.height}, ${copyMs / 1000} s ($timing), " +
-                "${index.keyframes.count} keyframes, header and index ${r.bytes / 1024} KB in " +
-                "${SystemClock.elapsedRealtime() - t0} ms")
+                "${index.keyframes.count} keyframes, $read${sincePick()}")
+            val indexMs = pre?.readMs ?: (SystemClock.elapsedRealtime() - t0)
+            if (indexMs >= CopySourceBook.SLOW_INDEX_MS) {
+                learn(runCatching { CopySourceBooks.app(context) }.getOrNull(), offer, CopySourceBook.SLOW,
+                    "header and index in $indexMs ms")
+            }
             val rgb565 = runCatching { ImagePerformancePreferences(context).rgb565Enabled }.getOrDefault(true)
             val key = ThumbStore.copyKeyFor(own.identity, fileLength, own.pictureW, own.pictureH)
             if (own.store.verdictOn(key) == false) throw Unusable("its pictures did not match this title before")
@@ -420,7 +647,8 @@ internal class CopyPass(
             try {
                 store.noteDuration(copyMs)
                 if (store.cachedKeyframeIndex() == null) store.setKeyframeIndex(KeyframeIndexCodec.encode(index))
-                return fill(offer, r, index, store, ratio, copyMs, host)
+                val early = if (pre != null) link.takeEarly() else emptyList()
+                return fill(offer, r, index, store, ratio, copyMs, host, early)
             } finally {
                 store.flush()
                 ThumbStore.unmarkBusy(store.key)
@@ -443,6 +671,7 @@ internal class CopyPass(
 
     private suspend fun fill(
         offer: CopyOffer, r: HttpRangeReader, idx: MediaIndex, store: ThumbStore, ratio: Double, copyMs: Long, host: String?,
+        early: List<CopyEarlyPicture> = emptyList(),
     ): Outcome {
         val copyCount = ReleaseMatch.slotCount(copyMs, SPACING_MS)
         val owners = CopyChoice.ownSlotsByCopySlot(own.slotPtsUs.size, ratio, copyCount)
@@ -457,8 +686,15 @@ internal class CopyPass(
         val kfSlots = HashMap<Int, MutableList<Int>>()
         kfOf.forEachIndexed { m, kf -> if (kf >= 0) kfSlots.getOrPut(kf) { ArrayList() }.add(m) }
         val anchor = ReleaseMatch.mapSlot(own.anchorSlot, ratio, copyCount).coerceAtLeast(0)
-        val order = UsenetCopy.screenFirst(
+        // The pictures the check can decide on come first: the copy is confirmed before the rest is made.
+        val gaps = ReleaseMatch.copyGaps(owners, { m -> kfOf[m].takeIf { it >= 0 }?.let { pts[it] } ?: -1L },
+            own.slotPtsUs, ratio).filter { (m, _) -> owners[m]?.any { !own.store.has(slotUs(it)) } == true }
+        val confirm = ReleaseMatch.pickCheckSlots(gaps, copyCount)
+        val confirmSet = confirm.toHashSet()
+        val sameFrame = gaps.count { it.first in confirmSet && kotlin.math.abs(it.second) <= ReleaseMatch.SAME_FRAME_US }
+        val order = confirm + UsenetCopy.screenFirst(
             SeekGrid.latticeOrder(copyCount, STRIDES, anchor, LOCAL_BEFORE_SLOTS, LOCAL_AFTER_SLOTS), owners, own.screenStride)
+            .filter { it !in confirmSet }
         val coarse = (0 until copyCount step STRIDES.first()).toList()
         val extractors = ArrayList<KeyframeExtractor>()
         val spare = ArrayDeque<KeyframeExtractor>()
@@ -471,15 +707,41 @@ internal class CopyPass(
             if (idx.kind == ContainerKind.MATROSKA) k.relPos[kf].takeIf { it >= 0 }?.let { BatchRangeReader.Planned(k.offset[kf] + it, 0) }
             else k.size[kf].takeIf { it > 0 }?.let { BatchRangeReader.Planned(k.offset[kf], it) }
         val decoder = FfmpegThumbDecoder()
-        val hardware = if (HardwareThumbSwitch.on) CopyHardware(offer.label) else null
+        // A 4K copy decodes in software only: the 4K hardware decoder's memory rules belong to the title's own pass.
+        val hardware = if (HardwareThumbSwitch.on && copyTier == DecodeTier.SW_UP_TO_1080P) CopyHardware(offer.label) else null
         val attempts = HashMap<Int, Int>()
         val dv5 = idx.video.dolbyVision?.profile == 5
         val smallBox = !MemoryGovernor.isStrongBox
         var pictures = 0
         val t0 = SystemClock.elapsedRealtime()
         state = State.FILLING
-        Log.i(TAG, "making thumbnails from ${offer.label} (${order.size} slots, ${store.slots().size} stored already)" +
+        Log.i(TAG, "making thumbnails from ${offer.label} (${order.size} slots, ${store.slots().size} stored already, " +
+            "${confirm.size} for the picture check first, $sameFrame on the same frame)" +
             if (pacer != null) ", behind the dropped-frame pacer while playing" else "")
+        if (early.isNotEmpty()) {
+            val fit = CopyEarlyFit.slots(early, kfSlots, own.pictureW, own.pictureH,
+                wanted = { m -> !store.has(slotUs(m)) && owners[m]?.all { own.store.has(slotUs(it)) } != true })
+            var dropped = 0
+            for ((p, slots, plan) in fit.used) {
+                val bmp = atBackground { BitmapFactory.decodeByteArray(p.jpeg, 0, p.jpeg.size) } ?: continue
+                atBackground { store.put(LongArray(slots.size) { slotUs(slots[it]) }, pts[p.kf], compose(bmp, plan)) }
+                made += slots.size
+                pictures++
+                dropped += slots.size
+            }
+            Log.i(TAG, "copy first: ${early.size} pictures made before the session, $pictures put into $dropped slots " +
+                "(${fit.otherKeyframe} for another keyframe or slots already made, ${fit.otherShape} of another size)" +
+                sincePick())
+            if (pictures > 0) {
+                Log.i(TAG, "first thumbnail from ${offer.label} made before the session, in place " +
+                    "${SystemClock.elapsedRealtime() - t0} ms after its index was taken${sincePick()}")
+                if (!MemoryGovernor.isStrongBox) store.trimMemory(SMALL_MEM_FRAMES)
+                if (pictures >= READY_PICTURES || coarse.all { store.has(slotUs(it)) } ||
+                    (confirm.size >= ReleaseMatch.CHECKS_NEEDED && confirm.all { store.has(slotUs(it)) })) {
+                    ready = CopySet(store, ratio, copyCount, offer.label)
+                }
+            }
+        }
         try {
             val end: Outcome? = coroutineScope {
                 val pending = ArrayDeque<Fetch>()
@@ -588,8 +850,11 @@ internal class CopyPass(
                         suspend fun counted(n: Int) {
                             made += n
                             pictures++
+                            if (pictures == 1) Log.i(TAG, "first thumbnail from ${offer.label} " +
+                                "${SystemClock.elapsedRealtime() - t0} ms after its index${sincePick()}")
                             if (!MemoryGovernor.isStrongBox) store.trimMemory(SMALL_MEM_FRAMES)
-                            if (ready == null && (pictures >= READY_PICTURES || coarse.all { store.has(slotUs(it)) })) {
+                            if (ready == null && (pictures >= READY_PICTURES || coarse.all { store.has(slotUs(it)) } ||
+                                    (confirm.size >= ReleaseMatch.CHECKS_NEEDED && confirm.all { store.has(slotUs(it)) }))) {
                                 ready = CopySet(store, ratio, copyCount, offer.label)
                             }
                             if (pictures % PROGRESS_LOG_EVERY == 0) {
@@ -647,7 +912,7 @@ internal class CopyPass(
         }
         if (ready == null) ready = CopySet(store, ratio, copyCount, offer.label)
         Log.i(TAG, "${offer.label}: $pictures thumbnails in ${(SystemClock.elapsedRealtime() - t0) / 1000} s, " +
-            "${bytesRead() / (1024 * 1024)} MB, stored=${store.slots().size} of $copyCount")
+            "${bytesRead() / (1024 * 1024)} MB, stored=${store.slots().size} of $copyCount${sincePick()}")
         return Outcome.FILLED
     }
 
@@ -907,9 +1172,9 @@ internal class CopyPass(
                     "a pause (dropped frames or a stall stopped copy decodes while playing)"
                 decoder != null && !MemoryGovernor.isStrongBox && ownDecoderBusy() -> {
                     decoder.trim()
-                    "the 4K thumbnail decoder to be let go"
+                    OWN_DECODER
                 }
-                decoder != null -> MemoryGovernor.allow(DecodeTier.SW_UP_TO_1080P, decoderWarm = decoder.warm, addressSpace = true)
+                decoder != null -> MemoryGovernor.allow(copyTier, decoderWarm = decoder.warm, addressSpace = true)
                     .takeIf { !it.allowed }?.let {
                         memory = true
                         decoder.trim()
@@ -917,6 +1182,7 @@ internal class CopyPass(
                     }
                 else -> null
             }
+            ownDecoderWaitSince = if (why == OWN_DECODER || memory) ownDecoderWaitSince.takeIf { it > 0L } ?: now else 0L
             if (why == null) {
                 if (waitingFor != null) Log.d(TAG, "carrying on (waited for $waitingFor)")
                 lastPlaying = s?.playing == true

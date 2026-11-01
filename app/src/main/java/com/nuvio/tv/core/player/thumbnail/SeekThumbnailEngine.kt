@@ -224,6 +224,52 @@ object SeekThumbnails {
 
     @Volatile private var pendingIdentity: String? = null
 
+    private val screenGuard = PrepareScreenGuard()
+    private var screenGuardJob: Job? = null
+
+    /** What on the generating screen counts as progress; null when it is not shown. */
+    private fun progressKey(ui: PrepareUi): Any? = when (ui) {
+        is PrepareUi.Hidden -> null
+        is PrepareUi.Checking -> "checking"
+        is PrepareUi.Generating -> ui.done
+        is PrepareUi.Ready -> "ready"
+    }
+
+    /** Runs while a session runs or the screen is up: a screen left without a session or without progress ends. */
+    private fun watchPrepareScreen() {
+        mainScope.launch {
+            if (screenGuardJob?.isActive == true) return@launch
+            screenGuard.reset()
+            screenGuardJob = mainScope.launch {
+                while (true) {
+                    val ui = prepareUi.value
+                    val owned = session != null || pendingIdentity != null
+                    if (ui is PrepareUi.Hidden && !owned) break
+                    val now = SystemClock.elapsedRealtime()
+                    val end = screenGuard.note(now, progressKey(ui), owned, hostResumed)
+                    val stillMs = screenGuard.stillForMs(now)
+                    when (end) {
+                        PrepareScreenGuard.End.NO_SESSION -> {
+                            Log.w(TAG, "prepare: generating screen left without a thumbnails session - ended, the film shows")
+                            earlyScreenFor = null
+                            prepareUi.value = PrepareUi.Hidden
+                            screenGuard.reset()
+                        }
+                        PrepareScreenGuard.End.NO_PROGRESS -> {
+                            Log.w(TAG, "prepare: generating screen without progress for ${stillMs / 1000} s - ended, the film shows")
+                            startWatchingNow()
+                            prepareUi.value = PrepareUi.Hidden
+                            screenGuard.reset()
+                        }
+                        null -> Unit
+                    }
+                    delay(PrepareScreenGuard.POLL_MS)
+                }
+                screenGuard.reset()
+            }
+        }
+    }
+
     private suspend fun startWhenEligibleInner(
         context: Context,
         source: ThumbSource,
@@ -235,14 +281,17 @@ object SeekThumbnails {
         skipReason: () -> String?,
     ) {
         NextEpisodeThumbs.stopAndJoinFor(source.identity)
+        HardwareThumbSwitch.refresh(context)
         val early = showsScreenEarly(context, source)
         val prefetch = if (early) prefetchIndex(context, source) else null
+        val head = if (early) copyHeadStart(context, source, playerProvider) else null
         var started = false
         try {
             started = startWhenEligibleAfterEarly(context, source, playerProvider, reserveProvider, pauseForPrepare,
-                letGoForPrepare, loadAgainAfterPrepare, skipReason, early, prefetch)
+                letGoForPrepare, loadAgainAfterPrepare, skipReason, early, prefetch, head)
         } finally {
             if (!started) {
+                head?.release()
                 prefetch?.let { p -> prefetchScope.launch { runCatching { p.await()?.reader?.close() }; p.cancel() } }
                 if (early) withContext(NonCancellable) { dropEarlyScreen() }
             }
@@ -275,6 +324,7 @@ object SeekThumbnails {
         withContext(Dispatchers.Main) {
             earlyScreenFor = source.identity
             if (session == null) prepareUi.value = PrepareUi.Checking
+            watchPrepareScreen()
         }
         Log.i(TAG, "prepare: screen shown while the player opens the stream")
         return true
@@ -286,6 +336,23 @@ object SeekThumbnails {
     }
 
     private class Prefetched(val url: String, val reader: HttpRangeReader, val head: ByteArray, val index: MediaIndex?)
+
+    /**
+     * The top copy's link opened at the stream pick, while the player opens the film, when the generating screen will
+     * most likely come up. Usenet, torrent and away-server titles keep their own copy paths.
+     */
+    private fun copyHeadStart(context: Context, source: ThumbSource, playerProvider: () -> ExoPlayer?): CopyHeadStart? {
+        val sources = source.copySources ?: return null
+        if (!source.identityExact || source.usenet || source.torrent) return null
+        if (MediaServerThumbs.onDemandOnly(source.mediaServer, source.url)) return null
+        val book = runCatching { CopySourceBooks.app(context) }.getOrNull()
+        val startsAt: suspend () -> Long = {
+            withContext(Dispatchers.Main) { playerProvider()?.currentPosition?.coerceAtLeast(0L) ?: 0L }
+        }
+        return CopyHeadStart(source.identity).also {
+            it.start(prefetchScope, sources, book, source.fileSizeHint, anchorMs = startsAt, early = true)
+        }
+    }
 
     /** Header and keyframe index read while the player opens the same stream; strong boxes, nothing saved for it yet. */
     private fun prefetchIndex(context: Context, source: ThumbSource): Deferred<Prefetched?>? {
@@ -326,6 +393,7 @@ object SeekThumbnails {
         skipReason: () -> String?,
         early: Boolean,
         prefetch: Deferred<Prefetched?>?,
+        head: CopyHeadStart? = null,
     ): Boolean {
         val t0 = SystemClock.elapsedRealtime()
         var width = 0
@@ -368,7 +436,7 @@ object SeekThumbnails {
         // The stream can be rejected while the decoder loads.
         if (skipped()) return false
         val s = Session(context.applicationContext, source, playerProvider, reserveProvider, fourK, pauseForPrepare, video,
-            letGoForPrepare, loadAgainAfterPrepare, earlyScreen = early, prefetch = prefetch)
+            letGoForPrepare, loadAgainAfterPrepare, earlyScreen = early, prefetch = prefetch, headStart = head)
         synchronized(sessionLock) { session = s }
         s.start()
         return true
@@ -559,6 +627,8 @@ object SeekThumbnails {
         /** The generating screen was put up before this session could decide; it takes it down if it does not hold. */
         private val earlyScreen: Boolean = false,
         private val prefetch: Deferred<Prefetched?>? = null,
+        /** The top copy's link, opened at the stream pick ([CopyHeadStart]). */
+        private val headStart: CopyHeadStart? = null,
     ) {
         private companion object {
             const val HEAD_BYTES = MkvIndexReader.HEAD_BYTES
@@ -656,7 +726,8 @@ object SeekThumbnails {
             const val USENET_COPY_CHECK_MS = 40_000L
             const val AWAY_PROBE_MS = 3_000L
             const val AWAY_PROBE_LATE_MS = 5L * 60 * 1000
-            const val AWAY_PROBE_POLL_MS = 5_000L
+            const val AWAY_PROBE_POLL_MS = 2_000L
+            const val AWAY_REJECT_LOGS = 12
             /** The player's memory reaches MemAvailable a moment after it lets go. */
             const val LET_GO_SETTLE_MS = 1_000L
         }
@@ -716,6 +787,16 @@ object SeekThumbnails {
         private val copyPacer = PlaybackDecodePacer(COPY_PLAYING_PACE_MS)
         @Volatile private var copy: CopyPass? = null
         @Volatile private var copyAllowed = false
+        /**
+         * Thumbnails from a lighter copy first ([CopyFirst]): every title with a source list except Usenet, torrent and
+         * away-server ones, which have their own copy paths.
+         */
+        @Volatile private var copyFirst = false
+        /** When the stream was picked: the head start's time, else this session's. */
+        private val pickedAtMs = headStart?.pickedAtMs ?: SystemClock.elapsedRealtime()
+        /** The generating screen's wait for the copy is over (confirmed, or the usual way from now on). */
+        private var copyScreenDecided = false
+        @Volatile private var copyScreenWait = false
         /** Plays from Usenet: thumbnails come from a copy where one fits, and the stream is spared meanwhile. */
         @Volatile private var usenet = source.usenet || source.torrent
         /** Never a keyframe from the stream itself, only from a copy (and the few that check the copy is this film). */
@@ -733,6 +814,7 @@ object SeekThumbnails {
         /** On demand: a copy of this title fits, so the copy makes the full set ([MediaServerThumbs.copyFills]). */
         @Volatile private var awayCopy = false
         @Volatile private var probeJob: Job? = null
+        @Volatile private var prewarmJob: Job? = null
         private var awayCheckingSince = 0L
         private var copyTried = false
         private var copyWaitLogged = false
@@ -839,6 +921,33 @@ object SeekThumbnails {
         private val fourKFromAppMemory: Boolean by lazy {
             fourK && MemoryGovernor.isLowRam && VideoPoolReader.read() == null
         }
+        private val hw4k = AppMemoryHardware.on
+        private val hw4kSmallInput = hw4k && AppMemoryHardware.smallInput
+        private val hw4kOpenFloorMb = if (hw4k) AppMemoryHardware.openFloorMb else AppMemoryHardware.OPEN_FLOOR_MB
+        private val hw4kReleasesFirst = hw4k && AppMemoryHardware.releasesFirst
+        /** The thumbnails' own memory was given back before the first 4K hardware open. Worker only. */
+        private var appMemoryReleased = false
+        /** This title's 4K hardware decodes take their pictures from app memory and follow [AppMemoryHardware]. */
+        private val appMemory4K: Boolean get() = hw4k && fourKFromAppMemory
+        /** The 4K hardware decoder closed part way through the set: software carries on without a swap hold. Worker only. */
+        private var hwClosedMidSet = false
+        private var hwClosedMidSetLogged = false
+
+        /** Software decodes after a mid-set hardware close are not held for the swap that decoder pushed out. */
+        private fun afterHwClose(verdict: GovernorVerdict, tier: DecodeTier): GovernorVerdict {
+            if (!hwClosedMidSet || !verdict.swapLow) return verdict
+            val lifted = MemoryGovernor.afterHardwareClose(verdict, tier)
+            if (lifted.allowed && !hwClosedMidSetLogged) {
+                hwClosedMidSetLogged = true
+                Log.i(TAG, "software carries on after the 4K hardware decoder closed: ${lifted.reason}")
+            }
+            return lifted
+        }
+        @Volatile private var hwCostMb = -1
+        /** MemAvailable before the latest and the first hardware decoder open, -1 before. */
+        @Volatile private var hwOpenAvailMb = -1L
+        @Volatile private var hwFirstOpenAvailMb = -1L
+        @Volatile private var appMemoryHwUsed = false
         /** When this title's first hardware decode began, 0 before. */
         @Volatile private var hwFirstDecodeAt = 0L
         private var poolReadAt = 0L
@@ -939,6 +1048,8 @@ object SeekThumbnails {
             }
             endYield()
             probeJob?.cancel()
+            prewarmJob?.cancel()
+            headStart?.release()
             reader?.close()
             copy?.stop("the player stopped this title")
             job?.cancel()
@@ -950,7 +1061,7 @@ object SeekThumbnails {
             ConnectionLedger.app.attach(PrefsLedgerMemory(context))
             ConnectionLedger.app.notePlaybackConnections(source.playbackConnections)
             ConnectionLedger.app.notePlayingUrl(source.url)
-            val first = sample() ?: return
+            val first = sample() ?: awaitPlayerBack() ?: return
             lastDurationMs = first.durationMs
             beforePlay = runCatching { SeekThumbnailPreferences.beforePlay(context) }.getOrDefault(ThumbsBeforePlay.FASTER)
             // A saved store shows its thumbnails before any network access; its size is checked against the server's below.
@@ -1020,10 +1131,17 @@ object SeekThumbnails {
             ConnectionLedger.app.notePlayingUrl(r.resolvedUrl)
             if (awayServer) ConnectionLedger.app.capThumbnails(r.resolvedUrl, MediaServerThumbs.ON_DEMAND_FETCHES)
             if (!usenet && SlowStartServer.isUsenet(r.resolvedUrl)) usenet = true
-            if ((fourK || usenet) && source.copySources != null && !onDemand) {
-                copyAllowed = runCatching { SeekThumbnailPreferences.copyEnabled(context) }.getOrDefault(false)
+            if (source.copySources != null && !onDemand && source.identityExact) {
+                copyAllowed = true
+                copyFirst = !usenet
                 if (usenet) Log.i(COPY_TAG, (if (copyOnly) "torrent" else "Usenet") + " stream: thumbnails from a copy " +
-                    "of this title where one fits" + if (copyAllowed) "" else " - off in settings")
+                    "of this title where one fits")
+                if (copyFirst) {
+                    copyScreenWait = prepareStage in 1..4
+                    Log.i(COPY_TAG, "copy first: thumbnails from a lighter copy where one fits" +
+                        (if (headStart != null) ", its link opened at the stream pick" else "") +
+                        ", the usual way ${CopyFirst.FALLBACK_MS / 1000} s after the pick without its link")
+                }
             }
             if (copyOnly && !copyAllowed) {
                 Log.i(TAG, "skip: a torrent's thumbnails come only from a copy, and copies are off or not offered")
@@ -1352,6 +1470,11 @@ object SeekThumbnails {
         private fun tendReserve() {
             if (trimRequested) {
                 trimRequested = false
+                if (appMemory4K && decoderLanes.any { it.hardwareOpen }) {
+                    hwName?.let { hardwareOff("memory trim with the 4K hardware decoder open", it, counts = false) }
+                    hwClosedMidSet = true
+                    closeHardwareLanes()
+                }
                 trimDecoders()
             }
             tendPauseCap()
@@ -1662,16 +1785,22 @@ object SeekThumbnails {
                 if (slot < 0) {
                     // Nothing to do. A 4K context (~80 MB) is closed outright, and at once when 4K may not decode.
                     val idle = SystemClock.elapsedRealtime() - lastWorkAt > IDLE_TRIM_MS
+                    // The copy waits for these decoders or their memory: nothing to make here, so they go now.
+                    val copyWaits = copy?.let { it.filling && it.ownDecoderWaitSince > 0L } == true &&
+                        decoderLanes.any { it.decoder.warm || it.hardwareOpen }
                     if (fourK) {
                         val open = sample()?.let(::fourKAllowed) ?: false
                         decodeOpen = open
-                        if (!open || idle) {
+                        if (!open || idle || copyWaits) {
                             closeDecoders()
                             buffers.releaseIdle()
                         }
                     } else {
                         if (prepareStage in 1..4) sample()
-                        if (idle) {
+                        if (copyWaits) {
+                            closeDecoders()
+                            buffers.releaseIdle()
+                        } else if (idle) {
                             trimDecoders()
                             buffers.releaseIdle()
                         }
@@ -1841,7 +1970,10 @@ object SeekThumbnails {
                 reserveProvider()?.yieldHolding == true
             // Playback's held-back read-ahead covers one decode: an extra lane has to fit on its own.
             val funded = MemoryGovernor.funded(busy, tier, reserveFunded, naturalFunded, screenHolds)
-            val verdict = MemoryGovernor.allow(tier, decoderWarm = lane.decoderFor(hw).warm, funded = funded)
+            val appMem = hw && appMemory4K
+            if (appMem && !lane.decoderFor(true).warm) releaseBeforeAppMemoryOpen()
+            val verdict = if (appMem) appMemoryVerdict(idx.video.codec, lane.decoderFor(true).warm)
+                else afterHwClose(MemoryGovernor.allow(tier, decoderWarm = lane.decoderFor(hw).warm, funded = funded), tier)
             refusedForSwap = verdict.swapLow
             if (!verdict.allowed) return deferForMemory(verdict, tier, slot, priority, busy, funded, afterFetch = false)
             attempts[kf] = (attempts[kf] ?: 0) + 1
@@ -1883,7 +2015,7 @@ object SeekThumbnails {
             if (charge != tier) {
                 noteStrips(0)
                 val wholeFunded = MemoryGovernor.funded(busy, charge, reserveFunded, naturalFunded, screenHolds)
-                val whole = MemoryGovernor.allow(charge, decoderWarm = lane.decoder.warm, funded = wholeFunded)
+                val whole = afterHwClose(MemoryGovernor.allow(charge, decoderWarm = lane.decoder.warm, funded = wholeFunded), charge)
                 if (!whole.allowed) {
                     keepForLater()
                     refusedForSwap = whole.swapLow
@@ -1891,13 +2023,15 @@ object SeekThumbnails {
                 }
             }
             // The fetch can take a while: swap is read again before the decode starts. The keyframe is kept for later.
-            val late = if (MemoryGovernor.isStrongHardware) null else MemoryGovernor.swapAllows(funded)
+            val late = if (appMem) appMemoryVerdict(idx.video.codec, lane.decoderFor(true).warm)
+                else if (MemoryGovernor.isStrongHardware) null else afterHwClose(MemoryGovernor.swapAllows(funded), charge)
             if (late != null && !late.allowed) {
                 keepForLater()
                 refusedForSwap = true
                 return deferForMemory(late, charge, slot, priority, decodeJobs.size, funded, afterFetch = true)
             }
             val concurrent = decodeJobs.values.count { !it.result.isCompleted } + 1
+            if (appMem) appMemoryHwUsed = true
             lane.acquire()
             // ATOMIC: the lane is always released, even when the session ends before the decode starts.
             val result = decodeScope.async(start = CoroutineStart.ATOMIC) {
@@ -1923,6 +2057,14 @@ object SeekThumbnails {
             verdict: GovernorVerdict, tier: DecodeTier, slot: Int, priority: Int, busy: Int, funded: Boolean,
             afterFetch: Boolean,
         ): Outcome {
+            if (tier == DecodeTier.HW && appMemory4K) {
+                // Waiting with the decoder open would wait for memory the decoder itself holds.
+                hwName?.let { hardwareOff("4K hardware decoder: ${verdict.reason}", it, counts = false) }
+                if (verdict.swapLow) hwClosedMidSet = true
+                closeHardwareLanes()
+                if (busy > 0) awaitAnyDecode()
+                return Outcome.POSTPONED
+            }
             laneChange(laneCtl.onMemoryRefused())
             val close = MemoryGovernor.closesDecodersFor(verdict)
             if (verdict.swapLow) {
@@ -1992,7 +2134,7 @@ object SeekThumbnails {
          */
         private fun decodeOnHardware(lane: DecoderLane, au: ThumbAu, idx: MediaIndex, codecName: String, lanes: Int): Decoded {
             val plan = hwPlan ?: return decodeOn(lane, au, idx)
-            val dec = lane.hardwareFor(codecName)
+            val dec = lane.hardwareFor(codecName, hw4kSmallInput && appMemory4K)
             val cold = !dec.warm
             val t1 = SystemClock.elapsedRealtime()
             if (hwFirstDecodeAt == 0L) hwFirstDecodeAt = t1
@@ -2014,6 +2156,7 @@ object SeekThumbnails {
                 lane.hardwareSince = 0L
             }
             val ms = SystemClock.elapsedRealtime() - t1
+            if (cold && appMemory4K) learnAppMemoryCost(idx.video.codec)
             if (HardwarePicture.flat(bmp.width, bmp.height, bmp::getPixel)) {
                 // Black or one colour: right for a fade, wrong when the software decoder shows a picture.
                 val sw = decodeOn(lane, au, idx)
@@ -2040,6 +2183,81 @@ object SeekThumbnails {
                 "${HardwareFailureBook.FAILURES} times on this box: software for ${HardwareFailureBook.BLOCK_DAYS} days)" else "")
         }
 
+        /** Worker only. A cold decoder is charged its learned cost; MemAvailable before it opens is kept. */
+        private fun appMemoryVerdict(codec: VideoCodec, warm: Boolean): GovernorVerdict {
+            val mem = MemoryGovernor.readMeminfo() ?: return GovernorVerdict(true, "meminfo unavailable")
+            val v = AppMemoryHardware.verdict(mem, warm, appMemoryCostMb(codec), hw4kOpenFloorMb)
+            if (!warm && v.allowed) {
+                hwOpenAvailMb = mem.availableMb
+                if (hwFirstOpenAvailMb < 0) hwFirstOpenAvailMb = mem.availableMb
+            }
+            return v
+        }
+
+        private fun appMemoryCostMb(codec: VideoCodec): Int {
+            if (hwCostMb < 0) {
+                val learned = runCatching {
+                    HardwareFailures.costBook(context).get(HardwareCostBook.key(HardwareFailures.box, codec))
+                }.getOrNull()
+                hwCostMb = AppMemoryHardware.costMb(learned)
+                Log.i(DECODE_TAG, "4K hardware decoder from app memory: charged $hwCostMb MB" +
+                    (if (learned != null) " (measured on this box)" else " until measured") +
+                    ", opens with $hw4kOpenFloorMb MB left, closes below ${AppMemoryHardware.KEEP_FLOOR_MB} MB " +
+                    "or SwapFree ${AppMemoryHardware.KEEP_SWAP_MB} MB (${AppMemoryHardware.KEEP_SWAP_TIGHT_MB} under " +
+                    "${AppMemoryHardware.KEEP_SWAP_AVAIL_MB} MB free)" + (if (hw4kSmallInput) ", input buffer sized to the keyframes" else "") +
+                    if (hw4kReleasesFirst) ", the thumbnails' own memory given back before it opens" else "")
+            }
+            return hwCostMb
+        }
+
+        /**
+         * Worker only, once a title, before its first 4K hardware open: the software decoders (the plan's first picture
+         * was made in software), the idle thumbnail buffers and the Java heap's garbage go back, so the open is judged
+         * on what the box really has. All of it comes back by itself when it is needed again.
+         */
+        private suspend fun releaseBeforeAppMemoryOpen() {
+            if (!hw4kReleasesFirst || appMemoryReleased) return
+            appMemoryReleased = true
+            fun avail() = MemoryGovernor.readMeminfo()?.availableMb ?: -1L
+            val r = AppMemoryRelease(avail())
+            val ahead = fetches.values.sumOf { d ->
+                if (!d.isCompleted || d.isCancelled) 0 else runCatching { d.getCompleted().au?.length ?: 0 }.getOrDefault(0)
+            }
+            Log.i(DECODE_TAG, "4K hardware open: MemAvailable ${r.lastMb} MB at the start, " +
+                "${decodeJobs.values.count { !it.result.isCompleted }} decodes running, ${ahead / 1024} KB fetched ahead" +
+                if (letGoAvailMb >= 0) ", ${letGoAvailMb} MB at the let-go ${(SystemClock.elapsedRealtime() - letGoAt) / 1000} s ago" else "")
+            var closed = 0
+            for (l in decoderLanes) if (l.closeSoftwareIfIdle()) closed++
+            Log.i(DECODE_TAG, r.step("$closed software decoders closed", avail()).line())
+            buffers.releaseIdle()
+            Log.i(DECODE_TAG, r.step("idle thumbnail buffers given back", avail()).line())
+            Runtime.getRuntime().gc()
+            Log.i(DECODE_TAG, r.step("Java heap collected", avail()).line())
+            val start = SystemClock.elapsedRealtime()
+            var best = r.lastMb
+            while (SystemClock.elapsedRealtime() - start < AppMemoryRelease.SETTLE_MS) {
+                delay(AppMemoryRelease.SETTLE_POLL_MS)
+                val now = avail()
+                if (now <= best) break
+                best = now
+            }
+            Log.i(DECODE_TAG, r.step("settled ${SystemClock.elapsedRealtime() - start} ms", avail()).line())
+            Log.i(DECODE_TAG, r.summary())
+        }
+
+        /** Lane thread, after a cold decoder's first picture: what it took off MemAvailable. */
+        private fun learnAppMemoryCost(codec: VideoCodec) {
+            val before = hwOpenAvailMb.takeIf { it >= 0 } ?: return
+            val after = MemoryGovernor.readMeminfo()?.availableMb ?: return
+            val seen = before - after
+            val next = runCatching {
+                HardwareFailures.costBook(context).note(HardwareCostBook.key(HardwareFailures.box, codec), seen)
+            }.getOrNull()
+            if (next != null) hwCostMb = next
+            Log.i(DECODE_TAG, "4K hardware decoder took $seen MB (MemAvailable $before -> $after MB)" +
+                if (next != null) ", $next MB charged from now on" else ", not used as a measurement")
+        }
+
         /** The hardware decoder for this title's keyframes now, or null for software. Worker only. */
         private fun hardwareChoice(idx: MediaIndex): HardwareCodecs.Choice? {
             if (!hwSwitch) return null
@@ -2048,8 +2266,11 @@ object SeekThumbnails {
             val blocked = choice != null &&
                 runCatching { HardwareFailures.book(context).blocked(HardwareFailures.key(choice.name)) }.getOrDefault(false)
             val phase = phase()
+            val appWhy = if (!fourKFromAppMemory) null else AppMemoryHardware.softwareBecause(hw4k, prepareStage in 1..4,
+                playerLetGo, SystemClock.elapsedRealtime() - letGoAt, { MemoryGovernor.readMeminfo()?.availableMb ?: -1L },
+                letGoAvailMb)
             val why = HardwareRoute.softwareBecause(Build.VERSION.SDK_INT, phase, v.codec, v.bitDepth,
-                v.dolbyVision?.profile, hwOff, blocked, choice != null, fourKFromAppMemory)
+                v.dolbyVision?.profile, hwOff, blocked, choice != null, appWhy != null, appWhy)
             if (why == null) return choice
             if (why != hwWhyLogged && phase != FetchPhase.PLAYBACK && why != hwOff) {
                 hwWhyLogged = why
@@ -2587,6 +2808,11 @@ object SeekThumbnails {
             while (!ended) {
                 val now = SystemClock.elapsedRealtime()
                 val p = if (afterPlayback) null else playerProvider()
+                if (p != null && p !== monitoredPlayer) {
+                    val rebuilt = monitoredPlayer != null
+                    monitoredPlayer = p
+                    if (rebuilt) playerRebuiltDuringPrepare()
+                }
                 if (p != null) {
                     val playing = p.isPlaying
                     val buffering = p.playbackState == Player.STATE_BUFFERING
@@ -2661,6 +2887,26 @@ object SeekThumbnails {
                 }
                 delay(MONITOR_INTERVAL_MS)
             }
+        }
+
+        private var monitoredPlayer: Player? = null
+
+        /**
+         * Main thread: the player was rebuilt (a sound output that came back, a recovery) while the screen had it let go.
+         * The new one lets go too; a 4K hardware decoder from app memory never stays open beside a film that loads.
+         */
+        private fun playerRebuiltDuringPrepare() {
+            if (prepareStage !in 1..4 || !playerLetGo) return
+            if (appMemory4K) closeHardwareLanes()
+            val again = hostResumed && runCatching { letGoForPrepare() }.getOrDefault(false)
+            if (again) noteLetGo()
+            else if (appMemory4K) hwName?.let { hardwareOff("the player was rebuilt behind the screen", it, counts = false) }
+            Log.i(TAG, "prepare: the player was rebuilt behind the screen - " +
+                when {
+                    again -> "it lets go again"
+                    appMemory4K -> "it keeps its decoders, the 4K thumbnails stay on software"
+                    else -> "it keeps its decoders"
+                })
         }
 
         private class PaceTick(val event: PlaybackDecodePacer.Event, val note: String, val paceMs: Long, val levelPaceMs: Long)
@@ -2960,6 +3206,8 @@ object SeekThumbnails {
         /** Check slot -> own to borrowed keyframe gap (us). Worker only. */
         private val checkGap = HashMap<Int, Long>()
         private var checkMatches = 0
+        /** Scores of the borderline same-frame pairs of the current check. Worker only. */
+        private val checkBorderline = ArrayList<Float>()
 
         private fun slotUs(slot: Int): Long = slot.toLong() * SPACING_MS * 1000L
 
@@ -3008,8 +3256,9 @@ object SeekThumbnails {
                 checkQueue.clear()
                 checkGap.clear()
                 checkQueue += ReleaseMatch.pickCheckSlots(eligible, slotKeyframe.size)
-                for ((s, gap) in eligible) if (s in checkQueue) checkGap[s] = gap
+                for ((s, gap) in eligible) if (s in checkQueue) checkGap[s] = kotlin.math.abs(gap)
                 checkMatches = 0
+                checkBorderline.clear()
                 if (checkQueue.size < ReleaseMatch.CHECKS_NEEDED) {
                     Log.i(TAG, "reuse: too few borrowed pictures at our keyframes' times - not used")
                     dropBorrow()
@@ -3030,18 +3279,22 @@ object SeekThumbnails {
         private suspend fun probeAwayCopy() {
             val sources = source.copySources ?: return
             if (!source.identityExact) return
-            if (!runCatching { SeekThumbnailPreferences.copyEnabled(context) }.getOrDefault(false)) {
-                Log.i(COPY_TAG, "media server away from home: copies off in settings - only the spot a seek asks for")
-                return
-            }
+            awayProbeAt = SystemClock.elapsedRealtime()
+            val screenLikely = source.holdBeforePlay && runCatching { SeekThumbnailPreferences.prepareMode(context) }
+                .getOrDefault(ThumbPrepareMode.OFF) != ThumbPrepareMode.OFF
+            if (screenLikely) runCatching { sources.loadNow() }.onFailure { if (it is CancellationException) throw it }
             if (awayCopyDecided(sources, AWAY_PROBE_MS, beforeStart = true)) return
             probeJob = worker.launch { awayCopyDecided(sources, AWAY_PROBE_LATE_MS, beforeStart = false) }
         }
 
+        private var awayProbeAt = 0L
+        /** When a copy was chosen to make the thumbnails; cleared once its first thumbnail is in. */
+        @Volatile private var awayCopyChosenAt = 0L
+
         /**
          * True once the source list answered; [awayCopy] then says whether a copy fits. A copy that fits before the
-         * start takes the place of the server's batched pass; a later answer only helps a stream that gives the spot a
-         * seek asks for.
+         * start takes the place of the server's batched pass; a later answer takes over while that pass still runs,
+         * or helps a stream that gives the spot a seek asks for.
          */
         private suspend fun awayCopyDecided(sources: CopySources, waitMs: Long, beforeStart: Boolean): Boolean {
             val deadline = SystemClock.elapsedRealtime() + waitMs
@@ -3052,7 +3305,17 @@ object SeekThumbnails {
                     runCatching { sources.offers() }.onFailure { if (it is CancellationException) throw it }.getOrNull()
                 } else null
                 if (offers != null) {
-                    val fits = CopyChoice.anyFits(offers, ownMs)
+                    val listMs = SystemClock.elapsedRealtime() - awayProbeAt
+                    val verdicts = CopyChoice.awayVerdicts(offers, ownMs)
+                    val fitting = verdicts.count { it.second == null }
+                    val fits = !offers.playingTranscoded && fitting > 0
+                    val takesOver = !beforeStart &&
+                        MediaServerThumbs.copyTakesOver(fits, remoteBatched, onDemand, latticeFinished)
+                    if (takesOver) {
+                        onDemand = true
+                        latticeFinished = true
+                        batchReader?.plan(emptyList())
+                    }
                     awayCopy = MediaServerThumbs.copyFills(if (beforeStart) awayServer else onDemand, true,
                         source.identityExact, fits)
                     if (awayCopy && remoteBatched) {
@@ -3060,12 +3323,34 @@ object SeekThumbnails {
                         onDemand = true
                         latticeFinished = true
                     }
-                    Log.i(COPY_TAG, "media server away from home: " + when {
-                        awayCopy -> "a copy of this title fits - it makes the thumbnails"
+                    if (awayCopy) {
+                        awayCopyChosenAt = SystemClock.elapsedRealtime()
+                        val top = CopyChoice.order(verdicts.filter { it.second == null }.map { it.first }, ownMs = ownMs,
+                            awayServer = true) { sources.multiRange(it) }.firstOrNull()
+                        if (top != null) prewarmJob = worker.launch {
+                            val ms = runCatching { sources.prewarm(top) }
+                                .onFailure { if (it is CancellationException) throw it }.getOrNull()
+                            if (ms != null) Log.i(COPY_TAG, "media server away from home: link of ${top.label} followed ahead in $ms ms")
+                        }
+                    }
+                    val n = offers.offers.size
+                    Log.i(COPY_TAG, "media server away from home: source list after $listMs ms, " + when {
+                        awayCopy && takesOver -> "$fitting of $n sources fit - a copy takes over from the server's batched pass"
+                        awayCopy -> "$fitting of $n sources fit - a copy makes the thumbnails"
                         offers.playingTranscoded -> "the server transcodes - only the spot a seek asks for"
-                        remoteBatched -> "no copy of this title among ${offers.offers.size} sources fits - the server's batched pass makes the thumbnails"
-                        else -> "no copy of this title among ${offers.offers.size} sources fits - only the spot a seek asks for"
+                        fits && remoteBatched -> "$fitting of $n sources fit, but the server's batched pass already made the thumbnails"
+                        fits -> "$fitting of $n sources fit, but they are not used for this stream"
+                        remoteBatched -> "no copy of this title among $n sources fits - the server's batched pass makes the thumbnails"
+                        else -> "no copy of this title among $n sources fits - only the spot a seek asks for"
                     })
+                    if (fitting == 0 && verdicts.isNotEmpty()) {
+                        val editions = CopyChoice.editions(offers.playingText).joinToString { it.name.lowercase() }
+                        Log.i(COPY_TAG, "media server away from home: not used (own ${ownMs / 1000} s, editions " +
+                            "${editions.ifEmpty { "none" }}): " + CopyChoice.reasonTally(verdicts.mapNotNull { it.second }))
+                        verdicts.asSequence().filter { it.second != null }.take(AWAY_REJECT_LOGS).forEach { (o, why) ->
+                            Log.i(COPY_TAG, "not used: ${o.label} (${o.kind.name.lowercase()}, ${o.height}p) - $why")
+                        }
+                    }
                     return true
                 }
                 if (SystemClock.elapsedRealtime() >= deadline) return false
@@ -3101,13 +3386,21 @@ object SeekThumbnails {
          * while the copy pass runs within [UsenetCopy]'s limits; only the picture check and scrub stops read it.
          */
         private fun copyHoldsLattice(): Boolean {
-            val c = copy ?: return false
+            val c = copy ?: return copyFirst && prepareStage in 1..4 && copyScreenWait
             if (usenet) return usenetCopyHolds(c)
-            if (prepareStage in 1..4 || borrow?.failed == true) return false
+            if (prepareStage in 1..4) {
+                // Copy first behind the screen: the title's own pass waits for the copy, and while a confirmed copy fills.
+                return copyFirst && !c.ended &&
+                    (copyScreenWait || (borrow?.let { it.copy === c && it.confirmed } == true && c.filling) ||
+                        copyTurnHolds(c))
+            }
+            if (borrow?.failed == true) return false
             val now = SystemClock.elapsedRealtime()
             if (!c.filling) {
+                if (copyFirst && !fourK) return false
                 val waits = CopyChoice.ownPassWaitsForLook(MemoryGovernor.isStrongBox,
-                    c.state == CopyPass.State.LOOKING, now - copyStartedAt)
+                    c.state == CopyPass.State.LOOKING, now - copyStartedAt,
+                    if (copyFirst) CopyFirst.FALLBACK_MS else CopyChoice.LOOK_HOLD_MS)
                 if (!waits && c.state == CopyPass.State.LOOKING && !copyLookReleased && !MemoryGovernor.isStrongBox) {
                     copyLookReleased = true
                     Log.i(COPY_TAG, "no copy found in ${CopyChoice.LOOK_HOLD_MS / 1000} s - the 4K pass carries on")
@@ -3126,6 +3419,33 @@ object SeekThumbnails {
                 return false
             }
             copyHoldReleased = false
+            return true
+        }
+
+        /** When the copy's current turn began (elapsed realtime), 0 outside one, and its pictures then. Worker only. */
+        private var copyTurnAt = 0L
+        private var copyTurnMade = 0
+
+        /**
+         * Behind the screen after its wait for the copy: a copy not confirmed yet that keeps waiting for the title's own
+         * 4K decoder gets turns, so its pictures and the check go on instead of the title's own grid taking all the
+         * screen's time ([CopyFirst.turnStarts]).
+         */
+        private fun copyTurnHolds(c: CopyPass): Boolean {
+            val now = SystemClock.elapsedRealtime()
+            val b = borrow
+            val unconfirmed = b == null || (b.copy === c && !b.confirmed && !b.failed)
+            if (copyTurnAt > 0L) {
+                if (!CopyFirst.turnOver(c.filling, unconfirmed, now - copyTurnAt, c.made - copyTurnMade)) return true
+                copyTurnAt = 0L
+                return false
+            }
+            val waited = c.ownDecoderWaitSince.takeIf { it > 0L }?.let { now - it } ?: 0L
+            if (!CopyFirst.turnStarts(MemoryGovernor.isStrongBox, c.filling, unconfirmed, waited)) return false
+            copyTurnAt = now
+            copyTurnMade = c.made
+            Log.i(COPY_TAG, "copy first: a turn for the copy (${c.made} thumbnails, not confirmed yet) - " +
+                "the title's own grid waits up to ${CopyFirst.TURN_MS / 1000} s")
             return true
         }
 
@@ -3191,6 +3511,12 @@ object SeekThumbnails {
                 maybeStartCopy(idx, st)
                 return
             }
+            if (awayCopyChosenAt > 0L && c.made > 0) {
+                val now = SystemClock.elapsedRealtime()
+                Log.i(COPY_TAG, "media server away from home: first copy thumbnail ${now - awayCopyChosenAt} ms after " +
+                    "the copy was chosen, ${now - awayProbeAt} ms after the source list was asked for")
+                awayCopyChosenAt = 0L
+            }
             val set = c.ready
             borrow?.let { old ->
                 if (old.copy === c && !old.confirmed && set?.store?.key != old.store.key) {
@@ -3220,13 +3546,13 @@ object SeekThumbnails {
          */
         private fun maybeStartCopy(idx: MediaIndex, st: ThumbStore) {
             if (!memoryStop.allowsSideWork) return
-            val wanted = if (onDemand) awayCopy else copyAllowed && (fourK || usenet)
+            val wanted = if (onDemand) awayCopy else copyAllowed
             if (copyTried || !wanted || !source.identityExact) return
             val sources = source.copySources ?: return
-            val screenCopy = usenet || onDemand
+            val screenCopy = usenet || onDemand || copyFirst
             if (afterPlayback || ended || (prepareStage in 1..4 && !screenCopy) || borrow != null || slotKeyframe.isEmpty()) return
-            if (!screenCopy && !MemoryGovernor.isStrongBox && !PlayerSessionTracker.settled.value) {
-                if (!copyWaitLogged) Log.i(COPY_TAG, "copy waits until the film has settled in (small box)")
+            if (copyFirst && !CopyFirst.startsNow(prepareStage in 1..4, PlayerSessionTracker.firstFrameShown)) {
+                if (!copyWaitLogged) Log.i(COPY_TAG, "copy first: the copy starts at the film's first frame")
                 copyWaitLogged = true
                 return
             }
@@ -3239,7 +3565,9 @@ object SeekThumbnails {
             val durationMs = lastDurationMs.takeIf { it > 0 } ?: (idx.durationUs / 1000L)
             val own = CopyOwn(source.identity, durationMs, idx.fileLength, picture[0], picture[1], landing, st,
                 slotOf(lastPositionMs.coerceAtLeast(0L)), CopyChoice.heightClass(v.width, v.height), usenet,
-                screenStride = if (screenCopy) prepareStride() else 1, awayServer = onDemand)
+                screenStride = if (screenCopy && (!copyFirst || prepareStage in 1..4)) prepareStride() else 1,
+                awayServer = onDemand, lighterOnly = copyFirst && !fourK, pickedAtMs = pickedAtMs,
+                hdr = CopySourceBook.hdrPicture(v.colour.transfer, v.colour.primaries, v.dolbyVision != null))
             copyStartedAt = SystemClock.elapsedRealtime()
             copy = CopyPass(
                 context = context,
@@ -3251,6 +3579,7 @@ object SeekThumbnails {
                 pacer = if (MemoryGovernor.isStrongBox) null else copyPacer,
                 screenUp = { screenCopy && prepareStage in 1..4 },
                 playerClosed = { afterPlayback },
+                headStart = headStart?.takeIf { copyFirst && it.identity == source.identity },
             ).also { it.start() }
         }
 
@@ -3275,6 +3604,7 @@ object SeekThumbnails {
             checkQueue.clear()
             checkGap.clear()
             checkMatches = 0
+            checkBorderline.clear()
             checkedSlots.clear()
             borrow = b
             borrowSince = SystemClock.elapsedRealtime()
@@ -3286,7 +3616,8 @@ object SeekThumbnails {
                 return
             }
             Log.i(COPY_TAG, "reuse: showing ${set.store.slots().size} thumbnails of ${set.label} until " +
-                "${ReleaseMatch.CHECKS_NEEDED} pictures of this file confirm them")
+                "${ReleaseMatch.CHECKS_NEEDED} pictures of this file confirm them, " +
+                "${SystemClock.elapsedRealtime() - pickedAtMs} ms after the stream pick")
             refillCopyChecks(idx, st, b)
         }
 
@@ -3298,43 +3629,50 @@ object SeekThumbnails {
             val stored = b.store.slots()
             val ownStored = slotKeyframe.indices.mapNotNull { s ->
                 if (s in checkedSlots || !st.has(slotUs(s))) return@mapNotNull null
-                keyframeGap(idx, b, s, stored)?.takeIf { it <= ReleaseMatch.WIDE_US }?.let { s to it }
+                keyframeOffset(idx, b, s, stored)?.takeIf { kotlin.math.abs(it) <= ReleaseMatch.WIDE_US }?.let { s to it }
             }
             for (s in ReleaseMatch.pickCheckSlots(ownStored, slotKeyframe.size)) {
                 if (borrow !== b || b.confirmed) return
-                val gap = ownStored.first { it.first == s }.second
+                val gap = kotlin.math.abs(ownStored.first { it.first == s }.second)
                 if (b.failed && gap > ReleaseMatch.SAME_FRAME_US) continue
                 val bmp = st.load(slotUs(s)) ?: continue
                 checkGap[s] = gap
                 checkBorrow(st, s, bmp)
             }
             if (borrow !== b || b.confirmed) return
-            val want = ReleaseMatch.CHECKS_NEEDED + ReleaseMatch.CHECK_SPARES - checkMatches
+            val want = ReleaseMatch.CHECKS_NEEDED + ReleaseMatch.CHECK_SPARES - checkMatches + checkBorderline.size
             if (checkQueue.size >= want) return
             val eligible = checkEligible(idx, st, b).filter { it.first !in checkQueue && it.first !in checkedSlots }
             for (s in ReleaseMatch.pickCheckSlots(eligible, slotKeyframe.size)) {
                 if (checkQueue.size >= want) break
                 checkQueue += s
-                checkGap[s] = eligible.first { it.first == s }.second
+                checkGap[s] = kotlin.math.abs(eligible.first { it.first == s }.second)
             }
         }
 
         /** Own to borrowed keyframe gap (us) at [slot], on the own timeline; null without both keyframes. */
-        private fun keyframeGap(idx: MediaIndex, b: Borrow, slot: Int, stored: Set<Long>): Long? {
+        private fun keyframeGap(idx: MediaIndex, b: Borrow, slot: Int, stored: Set<Long>): Long? =
+            keyframeOffset(idx, b, slot, stored)?.let { kotlin.math.abs(it) }
+
+        /** Own keyframe time minus the borrowed one's (us) at [slot], on the own timeline; null without both keyframes. */
+        private fun keyframeOffset(idx: MediaIndex, b: Borrow, slot: Int, stored: Set<Long>): Long? {
             val pts = idx.keyframes.ptsUs
             val kf = slotKeyframe.getOrElse(slot) { -1 }
             val m = b.map(slot)
             if (kf !in pts.indices || m < 0 || slotUs(m) !in stored) return null
             val otherPts = b.store.keyframePtsFor(slotUs(m)) ?: return null
-            return kotlin.math.abs(pts[kf] - (otherPts / b.ratio).toLong())
+            return pts[kf] - (otherPts / b.ratio).toLong()
         }
 
-        /** Own slots still to make, with the gap to the borrowed keyframe of the same slot, within [ReleaseMatch.WIDE_US]. */
+        /**
+         * Own slots still to make, with the own keyframe's offset from the borrowed one of the same slot, within
+         * [ReleaseMatch.WIDE_US].
+         */
         private fun checkEligible(idx: MediaIndex, st: ThumbStore, b: Borrow): List<Pair<Int, Long>> {
             val stored = b.store.slots()
             return slotKeyframe.indices.mapNotNull { s ->
                 if (!needs(st, s)) return@mapNotNull null
-                keyframeGap(idx, b, s, stored)?.takeIf { it <= ReleaseMatch.WIDE_US }?.let { s to it }
+                keyframeOffset(idx, b, s, stored)?.takeIf { kotlin.math.abs(it) <= ReleaseMatch.WIDE_US }?.let { s to it }
             }
         }
 
@@ -3359,12 +3697,10 @@ object SeekThumbnails {
                 if (pool.isEmpty() && b.copy.filling) return -1
             }
             if (pool.isEmpty()) {
-                Log.i(TAG, if (b.failed) "reuse: a mismatch not seen twice - another release's thumbnails dropped for this session"
-                    else "reuse: the check found too few clear pictures - another release's thumbnails dropped")
-                dropBorrow()
+                notThisBorrow(b, if (b.failed) "a mismatch not seen twice" else "too few clear pictures")
                 return -1
             }
-            val window = if (b.failed) 1 else ReleaseMatch.CHECKS_NEEDED - checkMatches
+            val window = if (b.failed) 1 else (ReleaseMatch.CHECKS_NEEDED - checkMatches + checkBorderline.size).coerceAtLeast(1)
             return pool.take(window).firstOrNull { wanted(st, it) } ?: -1
         }
 
@@ -3418,21 +3754,28 @@ object SeekThumbnails {
                 }
             }
             val same = other(m)
-            val outcome = ReleaseMatch.outcome(same, other(m - 1), other(m + 1), gap)
-            Log.d(TAG, "reuse check at ${slot * SPACING_MS / 1000} s (keyframes ${gap / 1000} ms apart): $outcome (" +
-                (same?.let { "%.2f".format(it) } ?: "no picture") + ")")
+            val before = other(m - 1)
+            val after = other(m + 1)
+            val outcome = ReleaseMatch.outcome(same, before, after, gap)
+            Log.i(if (b.copy != null) COPY_TAG else TAG, ReleaseMatch.checkLine(slot * SPACING_MS / 1000, gap, same, before,
+                after, outcome))
             when {
                 outcome == ReleaseMatch.Outcome.SKIP -> Unit
                 b.failed -> if (outcome == ReleaseMatch.Outcome.MISMATCH) {
                     rejectBorrow(st, b, "two pictures of the same frame differ")
                 } else {
-                    Log.i(TAG, "reuse: a mismatch not seen twice - another release's thumbnails dropped for this session")
-                    dropBorrow()
+                    notThisBorrow(b, "a mismatch not seen twice")
                 }
-                outcome == ReleaseMatch.Outcome.PASS -> if (++checkMatches >= ReleaseMatch.CHECKS_NEEDED) adoptBorrow(st, b)
-                outcome == ReleaseMatch.Outcome.FAIL -> {
-                    Log.i(TAG, "reuse: a picture too unsure to trust - another release's thumbnails dropped for this session")
-                    dropBorrow()
+                outcome == ReleaseMatch.Outcome.PASS || outcome == ReleaseMatch.Outcome.FAIL -> {
+                    if (outcome == ReleaseMatch.Outcome.PASS) checkMatches++ else checkBorderline += same ?: 0f
+                    when (ReleaseMatch.tally(checkMatches, checkBorderline)) {
+                        ReleaseMatch.Tally.MATCHED -> adoptBorrow(st, b)
+                        ReleaseMatch.Tally.NOT_MATCHED -> notThisBorrow(b, "${checkBorderline.size} borderline pictures " +
+                            "(average %.2f) against $checkMatches matching".format(checkBorderline.average()))
+                        ReleaseMatch.Tally.GOING -> if (outcome == ReleaseMatch.Outcome.FAIL) {
+                            Log.i(TAG, "reuse: a borderline picture - more pictures decide")
+                        }
+                    }
                 }
                 else -> {
                     b.failed = true
@@ -3507,12 +3850,24 @@ object SeekThumbnails {
             dropBorrow()
         }
 
+        /** The check did not confirm [b], nor prove it another film: a copy pass moves on to its next copy. */
+        private fun notThisBorrow(b: Borrow, why: String) {
+            if (b.copy != null) {
+                Log.i(COPY_TAG, "reuse: not confirmed ($why) - the next copy is tried")
+                b.copy.rejected(b.store.key, why)
+            } else {
+                Log.i(TAG, "reuse: not confirmed ($why) - another release's thumbnails dropped for this session")
+            }
+            dropBorrow()
+        }
+
         private fun dropBorrow() {
             val b = borrow ?: return
             borrow = null
             checkQueue.clear()
             checkGap.clear()
             checkMatches = 0
+            checkBorderline.clear()
             checkedSlots.clear()
             if (!b.confirmed) b.copy?.undecided(b.store.key, "see the reuse lines above")
             ThumbStore.unmarkBusy(b.store.key)
@@ -3747,7 +4102,7 @@ object SeekThumbnails {
             val early = playerLetGo && !letGoNoted
             val gone = early || withContext(Dispatchers.Main) {
                 if (prepareStage !in 1..4 || !preparePausedPlayer || playerLetGo || !hostResumed) return@withContext false
-                runCatching { letGoForPrepare() }.getOrDefault(false).also { if (it) playerLetGo = true }
+                runCatching { letGoForPrepare() }.getOrDefault(false).also { if (it) noteLetGo() }
             }
             if (!gone || letGoNoted) return
             letGoNoted = true
@@ -3757,10 +4112,20 @@ object SeekThumbnails {
                 if (early) " (let go as the screen came up)" else "")
             val settled = if (early) SystemClock.elapsedRealtime() - letGoAt else 0L
             if (settled < LET_GO_SETTLE_MS) delay(LET_GO_SETTLE_MS - settled)
+            if (appMemory4K) Log.i(DECODE_TAG, "4K hardware: MemAvailable $letGoAvailMb MB at the let-go, " +
+                "${MemoryGovernor.readMeminfo()?.availableMb ?: -1L} MB ${(SystemClock.elapsedRealtime() - letGoAt) / 1000.0} s later")
         }
 
         @Volatile private var letGoNoted = false
         @Volatile private var letGoAt = 0L
+        @Volatile private var letGoAvailMb = -1L
+
+        /** Main thread. */
+        private fun noteLetGo() {
+            playerLetGo = true
+            letGoAt = SystemClock.elapsedRealtime()
+            if (appMemory4K) letGoAvailMb = MemoryGovernor.readMeminfo()?.availableMb ?: -1L
+        }
 
         /**
          * Hardware thumbnails need the decoder the held player keeps: let it go as the screen comes up, so its release
@@ -3772,14 +4137,38 @@ object SeekThumbnails {
                 val fmt = playerProvider()?.videoFormat ?: return@withContext
                 if (!HardwareRoute.likelyFor(Build.VERSION.SDK_INT, fmt.sampleMimeType, fmt.codecs)) return@withContext
                 if (prepareStage !in 1..4 || !preparePausedPlayer || playerLetGo || !hostResumed) return@withContext
-                if (runCatching { letGoForPrepare() }.getOrDefault(false)) {
-                    playerLetGo = true
-                    letGoAt = SystemClock.elapsedRealtime()
-                }
+                if (runCatching { letGoForPrepare() }.getOrDefault(false)) noteLetGo()
             }
         }
 
         @Volatile private var holdRetrying = false
+
+        /**
+         * The player can be rebuilt just as the session starts (a sound output that came back, a recovery): the session
+         * carries on with the new one instead of ending under the screen.
+         */
+        private suspend fun awaitPlayerBack(): PlayerState? {
+            val start = SystemClock.elapsedRealtime()
+            while (!stoppedExternally && SystemClock.elapsedRealtime() - start < PrepareHandover.PLAYER_BACK_WAIT_MS) {
+                delay(PrepareHandover.PLAYER_BACK_POLL_MS)
+                val ps = sample() ?: continue
+                Log.i(TAG, "prepare: the player was rebuilt as the thumbnails started - carrying on with the new one " +
+                    "after ${SystemClock.elapsedRealtime() - start} ms")
+                return ps
+            }
+            Log.i(TAG, "prepare: no player ${PrepareHandover.PLAYER_BACK_WAIT_MS / 1000} s after the thumbnails started - ending")
+            return null
+        }
+
+        /** Main thread. A session that ends before its screen came up leaves no early screen behind. */
+        private fun dropEarlyScreenAtEnd() {
+            if (session != null || pendingIdentity != null) return
+            if (earlyScreenFor == source.identity) earlyScreenFor = null
+            if (prepareUi.value is PrepareUi.Checking) {
+                prepareUi.value = PrepareUi.Hidden
+                Log.i(TAG, "prepare: thumbnails session ended before its screen - screen taken down")
+            }
+        }
 
         /** Main thread. */
         private fun takeDownEarlyScreen() {
@@ -3804,6 +4193,7 @@ object SeekThumbnails {
                 return@withContext false
             }
             preparePausedPlayer = held
+            watchPrepareScreen()
             startYield()
             // A "playing" sample from before the hold must not read as "the user pressed play" in the next round.
             sampledPlaying = false
@@ -3836,6 +4226,7 @@ object SeekThumbnails {
                         }
                         true -> {
                             preparePausedPlayer = true
+                            watchPrepareScreen()
                             startYield()
                             sampledPlaying = false
                             giveUp.beforePlay = "shown after the first frame (${beforePlayName()})"
@@ -3895,9 +4286,15 @@ object SeekThumbnails {
             if (playerLetGo) {
                 playerLetGo = false
                 val play = hostResumed && (!prepareLeft || userAsked)
-                runCatching { loadAgainAfterPrepare(play) }
-                Log.i(TAG, "prepare: film loading again at ${(playerProvider()?.currentPosition ?: 0L) / 1000} s" +
-                    if (play) "" else ", paused until play")
+                if (appMemoryHwUsed) {
+                    // The film's buffer is sized as it loads: the thumbnail decoder's memory must be back first.
+                    mainScope.launch {
+                        withContext(Dispatchers.IO) { awaitAppMemoryDecoderGone() }
+                        loadAgain(play)
+                    }
+                    return
+                }
+                loadAgain(play)
                 return
             }
             if (!hostResumed) {
@@ -3912,6 +4309,33 @@ object SeekThumbnails {
                 it.play()
                 Log.i(TAG, "prepare: playback resumed")
             }
+        }
+
+        /** Main thread. */
+        private fun loadAgain(play: Boolean) {
+            runCatching { loadAgainAfterPrepare(play) }
+            Log.i(TAG, "prepare: film loading again at ${(playerProvider()?.currentPosition ?: 0L) / 1000} s" +
+                if (play) "" else ", paused until play")
+        }
+
+        /** Until every hardware decoder is closed and its memory is back, within [AppMemoryHardware]'s waits. */
+        private suspend fun awaitAppMemoryDecoderGone() {
+            val start = SystemClock.elapsedRealtime()
+            var closedAt = -1L
+            var avail: Long
+            while (true) {
+                val now = SystemClock.elapsedRealtime()
+                // A decode the worker began meanwhile closes as it ends.
+                closeHardwareLanes()
+                if (closedAt < 0 && decoderLanes.none { it.hardwareOpen }) closedAt = now
+                avail = MemoryGovernor.readMeminfo()?.availableMb ?: -1L
+                val closedFor = if (closedAt < 0) -1L else now - closedAt
+                if (AppMemoryHardware.filmMayLoad(now - start, closedFor, avail, hwFirstOpenAvailMb)) break
+                delay(AppMemoryHardware.POLL_MS)
+            }
+            Log.i(TAG, "prepare: 4K hardware decoder " + (if (closedAt < 0) "still open" else "closed") +
+                " after ${SystemClock.elapsedRealtime() - start} ms, MemAvailable $avail MB " +
+                "($hwFirstOpenAvailMb MB before it opened)")
         }
 
         fun startWatchingNow() {
@@ -3974,6 +4398,11 @@ object SeekThumbnails {
                             Log.i(TAG, "prepare: no copy confirmed in ${USENET_COPY_CHECK_MS / 1000} s - playing, " +
                                 "thumbnails carry on from the copy")
                         }
+                    // Copy first: the screen waits for the copy's link, then for the copy to be confirmed.
+                    copyFirst && !copyScreenDecided -> if (!copyScreenWaits(now)) {
+                        copyScreenDecided = true
+                        advancePrepare(1, 3)
+                    }
                     // Another release's set may cover it all: the check comes before any generating.
                     borrow?.let { !it.confirmed && !it.failed } == true && now - borrowSince < CHECK_HOLD_MS -> Unit
                     else -> advancePrepare(1, 3)
@@ -4025,6 +4454,31 @@ object SeekThumbnails {
                     withContext(Dispatchers.Main) { resumePlayerAfterPrepare() }
                 }
             }
+        }
+
+        /** Stage 1 with copy first: whether the screen keeps waiting for the copy. Worker only. */
+        private fun copyScreenWaits(now: Long): Boolean {
+            val c = copy
+            val confirmed = c != null && borrow?.let { it.copy === c && it.confirmed } == true
+            val linkOpen = (c?.linkOpenedAt ?: 0L) > 0L || headStart?.opened == true
+            val sincePick = now - pickedAtMs
+            val ended = c?.ended ?: (copyTried || !copyAllowed)
+            val wait = CopyFirst.screenWaits(ended, linkOpen, confirmed, sincePick)
+            copyScreenWait = wait
+            if (wait) return true
+            when {
+                confirmed -> Log.i(COPY_TAG, "copy first: confirmed $sincePick ms after the stream pick - the copy makes the thumbnails")
+                ended -> Log.i(COPY_TAG, "copy first: no copy could be used ($sincePick ms after the stream pick) - the usual way")
+                CopyFirst.fallsBack(linkOpen, sincePick) -> {
+                    Log.i(COPY_TAG, "copy first: no copy link open ${CopyFirst.FALLBACK_MS / 1000} s after the stream pick - " +
+                        "thumbnails the usual way")
+                    c?.stop("no copy link open ${CopyFirst.FALLBACK_MS / 1000} s after the stream pick")
+                    headStart?.release()
+                }
+                else -> Log.i(COPY_TAG, "copy first: not confirmed ${CopyFirst.SCREEN_WAIT_MS / 1000} s after the stream pick - " +
+                    "the title's own thumbnails carry on beside the copy")
+            }
+            return false
         }
 
         fun memoryFloorBytes(): Long =
@@ -4096,6 +4550,7 @@ object SeekThumbnails {
             }
             swapHolds.summary()?.let { Log.i(TAG, it) }
             sessionEnded(this)
+            if (earlyScreen) mainScope.launch { dropEarlyScreenAtEnd() }
             MemoryGovernor.removeTrimListener(trimListener)
             runCatching { rememberHardwareLanes() }
             runCatching { closeDecoders() }

@@ -30,15 +30,10 @@ class SeekThumbnailPreferencesTest {
     private val copyKey = booleanPreferencesKey("seek_thumbnails_from_copy")
     private val prepareKey = stringPreferencesKey("seek_thumbnails_prepare")
     private val beforePlayKey = stringPreferencesKey("seek_thumbnails_before_play")
-    private val migration = SeekThumbnailPreferences.copyDefaultMigration
     private val beforePlayMigration = SeekThumbnailPreferences.beforePlayDefaultMigration
 
     private fun prefs(block: MutablePreferences.() -> Unit = {}): Preferences =
         emptyPreferences().toMutablePreferences().apply(block).toPreferences()
-
-    private fun migrated(p: Preferences): Preferences = runBlocking {
-        if (migration.shouldMigrate(p)) migration.migrate(p) else p
-    }
 
     private fun migratedBeforePlay(p: Preferences): Preferences = runBlocking {
         if (beforePlayMigration.shouldMigrate(p)) beforePlayMigration.migrate(p) else p
@@ -132,71 +127,12 @@ class SeekThumbnailPreferencesTest {
     }
 
     @Test
-    fun `untouched store gets copies off`() {
-        val out = migrated(emptyPreferences())
-        assertEquals(false, out[copyKey])
-        assertEquals(SeekThumbMode.ALL, SeekThumbnailPreferences.modeOf(out))
-    }
-
-    @Test
-    fun `store with only other settings counts as untouched`() {
-        val out = migrated(prefs { this[prepareKey] = ThumbPrepareMode.ALWAYS.name })
-        assertEquals(false, out[copyKey])
-        assertEquals(ThumbPrepareMode.ALWAYS.name, out[prepareKey])
-    }
-
-    @Test
-    fun `chosen mode without copy key keeps copies on`() {
-        listOf(SeekThumbMode.ALL, SeekThumbMode.HD, SeekThumbMode.OFF).forEach { mode ->
-            val out = migrated(prefs { this[modeKey] = mode.name })
-            assertEquals(true, out[copyKey])
-            assertEquals(onOrOff(mode), SeekThumbnailPreferences.modeOf(out))
-        }
-    }
-
-    @Test
-    fun `legacy switch without copy key keeps copies on and the mode`() {
-        val on = migrated(prefs { this[legacyEnabledKey] = true; this[legacyFourKKey] = "OFF" })
-        assertEquals(true, on[copyKey])
-        assertEquals(SeekThumbMode.ALL, SeekThumbnailPreferences.modeOf(on))
-        val off = migrated(prefs { this[legacyEnabledKey] = false })
-        assertEquals(true, off[copyKey])
-        assertEquals(SeekThumbMode.OFF, SeekThumbnailPreferences.modeOf(off))
-    }
-
-    @Test
-    fun `stored copy choice is never changed`() = runBlocking {
-        listOf(true, false).forEach { choice ->
-            listOf(prefs { this[copyKey] = choice }, prefs { this[modeKey] = "ALL"; this[copyKey] = choice }).forEach { p ->
-                assertFalse(migration.shouldMigrate(p))
-                assertEquals(choice, migration.migrate(p)[copyKey])
-            }
-        }
-    }
-
-    @Test
-    fun `migration runs once`() = runBlocking {
-        val first = migration.migrate(emptyPreferences())
-        assertFalse(migration.shouldMigrate(first))
-        assertTrue(migration.shouldMigrate(emptyPreferences()))
-    }
-
-    @Test
-    fun `changing the mode later leaves copies off for a new install`() {
-        val out = migrated(emptyPreferences()).toMutablePreferences().apply {
-            this[modeKey] = SeekThumbMode.HD.name
-            remove(legacyEnabledKey)
-        }.toPreferences()
-        assertEquals(false, migrated(out)[copyKey])
-    }
-
-    @Test
     fun `untouched store gets Faster before play`() {
         val out = migratedBeforePlay(emptyPreferences())
         assertEquals(ThumbsBeforePlay.FASTER.name, out[beforePlayKey])
         assertEquals(ThumbsBeforePlay.FASTER, beforePlay(out))
-        // The copy migration ran first on an install that never chose a mode: still a new install.
-        assertEquals(ThumbsBeforePlay.FASTER, beforePlay(migratedBeforePlay(migrated(emptyPreferences()))))
+        // An older copy choice stored on an install that never chose a mode: still a new install.
+        assertEquals(ThumbsBeforePlay.FASTER, beforePlay(migratedBeforePlay(prefs { this[copyKey] = false })))
     }
 
     @Test
@@ -249,12 +185,22 @@ class SeekThumbnailPreferencesTest {
     }
 
     @Test
-    fun `unreadable store reads as off with no copies`() = runBlocking {
+    fun `unreadable store reads as off`() = runBlocking {
         val failing: Flow<Preferences> = flow { throw IOException("disk full") }
         assertEquals(SeekThumbMode.OFF, SeekThumbnailPreferences.modeFlow(failing).first())
-        assertEquals(false, SeekThumbnailPreferences.copyFlow(failing).first())
         assertEquals(ThumbPrepareMode.OFF, SeekThumbnailPreferences.prepareModeFlow(failing).first())
         assertEquals(ThumbsBeforePlay.FASTER, SeekThumbnailPreferences.beforePlayFlow(failing).first())
+    }
+
+    @Test
+    fun `hardware decoder is on until switched off`() = runBlocking {
+        val hardwareKey = booleanPreferencesKey("seek_thumbnails_hardware")
+        fun read(p: Preferences) = runBlocking { SeekThumbnailPreferences.hardwareFlow(flow { emit(p) }).first() }
+        assertTrue(read(emptyPreferences()))
+        assertTrue(read(prefs { this[modeKey] = "OFF"; this[copyKey] = false }))
+        assertFalse(read(prefs { this[hardwareKey] = false }))
+        assertTrue(read(prefs { this[hardwareKey] = true }))
+        assertTrue(SeekThumbnailPreferences.hardwareFlow(flow { throw IOException("disk full") }).first())
     }
 
     @Test(expected = IllegalStateException::class)
@@ -267,7 +213,7 @@ class SeekThumbnailPreferencesTest {
         try {
             val store = PreferenceDataStoreFactory.create(
                 corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
-                migrations = listOf(migration, beforePlayMigration),
+                migrations = listOf(beforePlayMigration),
                 scope = scope,
                 produceFile = { file }
             )
@@ -285,7 +231,6 @@ class SeekThumbnailPreferencesTest {
         val file = tempStoreFile()
         withStore(file) { data ->
             assertEquals(SeekThumbMode.ALL, SeekThumbnailPreferences.modeFlow(data).first())
-            assertEquals(false, SeekThumbnailPreferences.copyFlow(data).first())
             assertEquals(ThumbsBeforePlay.FASTER, SeekThumbnailPreferences.beforePlayFlow(data).first())
         }
         assertTrue(file.length() > 0)
@@ -298,7 +243,6 @@ class SeekThumbnailPreferencesTest {
         file.writeBytes(byteArrayOf(0x7f, 0x01, 0x02, 0x03, 0x04, 0x05))
         withStore(file) { data ->
             assertEquals(SeekThumbMode.ALL, SeekThumbnailPreferences.modeFlow(data).first())
-            assertEquals(false, SeekThumbnailPreferences.copyFlow(data).first())
             assertEquals(ThumbPrepareMode.OFF, SeekThumbnailPreferences.prepareModeFlow(data).first())
             assertEquals(ThumbsBeforePlay.FASTER, SeekThumbnailPreferences.beforePlayFlow(data).first())
         }

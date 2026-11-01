@@ -49,6 +49,11 @@ internal class HttpRangeReader(
     override var totalLength: Long = -1L
         private set
 
+    /** The file's length from an answer read before this reader, e.g. the one that followed the link's redirects. */
+    fun noteLength(length: Long) {
+        if (length > 0 && totalLength < 0) totalLength = length
+    }
+
     private val inFlight: MutableSet<Call> = Collections.newSetFromMap(ConcurrentHashMap<Call, Boolean>())
 
     @Volatile

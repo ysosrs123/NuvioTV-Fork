@@ -23,7 +23,7 @@ private val Context.seekThumbnailDataStore by preferencesDataStore(
     name = "seek_thumbnails",
     corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
     produceMigrations = {
-        listOf(SeekThumbnailPreferences.copyDefaultMigration, SeekThumbnailPreferences.beforePlayDefaultMigration)
+        listOf(SeekThumbnailPreferences.beforePlayDefaultMigration)
     }
 )
 
@@ -127,32 +127,17 @@ object SeekThumbnailPreferences {
         context.applicationContext.seekThumbnailDataStore.edit { prefs -> prefs[prepareKey] = mode.name }
     }
 
-    private val copyKey = booleanPreferencesKey("seek_thumbnails_from_copy")
+    private val hardwareKey = booleanPreferencesKey("seek_thumbnails_hardware")
 
-    /**
-     * Stores the copy choice once: off for a store with no thumbnail choice yet, on for one that has
-     * a choice (the old default). After that the key is always present.
-     */
-    internal val copyDefaultMigration = object : DataMigration<Preferences> {
-        override suspend fun shouldMigrate(currentData: Preferences): Boolean = copyKey !in currentData
+    /** Thumbnails from the box's hardware decoder where it can make them; on until switched off. */
+    internal fun hardwareFlow(data: Flow<Preferences>): Flow<Boolean> = data.readOr(true) { it[hardwareKey] ?: true }
 
-        override suspend fun migrate(currentData: Preferences): Preferences {
-            if (copyKey in currentData) return currentData
-            return currentData.toMutablePreferences().apply { this[copyKey] = hasChosenMode(currentData) }.toPreferences()
-        }
+    fun hardwareFlow(context: Context): Flow<Boolean> = hardwareFlow(context.applicationContext.seekThumbnailDataStore.data)
 
-        override suspend fun cleanUp() = Unit
-    }
+    suspend fun hardwareEnabled(context: Context): Boolean = hardwareFlow(context).first()
 
-    /** 4K thumbnails from a smaller copy of the same title; off until switched on. */
-    internal fun copyFlow(data: Flow<Preferences>): Flow<Boolean> = data.readOr(false) { it[copyKey] ?: false }
-
-    fun copyFlow(context: Context): Flow<Boolean> = copyFlow(context.applicationContext.seekThumbnailDataStore.data)
-
-    suspend fun copyEnabled(context: Context): Boolean = copyFlow(context).first()
-
-    suspend fun setCopy(context: Context, on: Boolean) {
-        context.applicationContext.seekThumbnailDataStore.edit { prefs -> prefs[copyKey] = on }
+    suspend fun setHardware(context: Context, on: Boolean) {
+        context.applicationContext.seekThumbnailDataStore.edit { prefs -> prefs[hardwareKey] = on }
     }
 
     private val beforePlayKey = stringPreferencesKey("seek_thumbnails_before_play")

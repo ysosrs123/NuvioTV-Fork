@@ -95,14 +95,26 @@ class ThumbnailCopyDebrid @Inject constructor(
     /** Whether [stream]'s torrent is in the user's TorBox list; null when the list cannot be read. */
     internal suspend fun inTorboxList(stream: Stream): Boolean? {
         val hash = hashOf(stream) ?: return false
-        val apiKey = torboxKey() ?: return null
+        return torboxListHashes(dataStore.settings.first())?.contains(hash)
+    }
+
+    /** The torrents in the user's TorBox list, read once for a whole source list; null when it cannot be read. */
+    internal suspend fun torboxListHashes(settings: DebridSettings): Set<String>? {
+        if (!settings.canResolvePlayableLinks) return null
+        val apiKey = settings.torboxApiKey.trim().takeIf { it.isNotBlank() } ?: return null
         return try {
-            torboxList("Bearer $apiKey", fresh = false)?.items?.any { AddedCopyRecords.normal(it.hash) == hash }
+            torboxList("Bearer $apiKey", fresh = false)?.items?.mapNotNullTo(HashSet()) { AddedCopyRecords.normal(it.hash) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             null
         }
+    }
+
+    /** Whether [stream]'s torrent is among [listed] ([torboxListHashes]); null when the list could not be read. */
+    internal fun inTorboxList(stream: Stream, listed: Set<String>?): Boolean? {
+        val hash = hashOf(stream) ?: return false
+        return listed?.contains(hash)
     }
 
     /** Playback is on [hash]: a thumbnail copy of it stays in the user's list. */
