@@ -97,6 +97,8 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
 ) {
     mpvMediaLoadPrepared = true
     prefetchAutoSyncIndex(url, headers) // AutoSync hook
+    // Reads the Exo player's session, so it goes before the player is released.
+    notifyAudioSessionUpdate(false)
     _exoPlayer?.let { player ->
         runCatching { player.releaseAssHandlerCompat() }
         player.release()
@@ -106,7 +108,6 @@ internal fun PlayerRuntimeController.initializeMpvPlayer(
     nativeVideoSelection.clear()
     trackSelector = null
     releaseMediaSession()
-    notifyAudioSessionUpdate(false)
 
     val view = mpvView
     if (view == null) {

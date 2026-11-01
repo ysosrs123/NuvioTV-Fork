@@ -53,7 +53,7 @@ internal object TvArcAudioOutput {
     }
 
     @SuppressLint("PrivateApi")
-    private fun hdmiDeviceType(): String? = runCatching {
+    internal fun hdmiDeviceType(): String? = runCatching {
         Class.forName("android.os.SystemProperties")
             .getMethod("get", String::class.java)
             .invoke(null, "ro.hdmi.device_type") as? String

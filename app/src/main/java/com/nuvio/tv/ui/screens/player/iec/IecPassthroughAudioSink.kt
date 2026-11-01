@@ -35,6 +35,7 @@ internal class IecPassthroughAudioSink(
     private var mode: Mode = Mode.FORWARD
     private val pendingFrames = ArrayDeque<ByteArray>()
     private val uncommitted = ArrayDeque<UncommittedAu>()
+    private val sourceCopies = SourceCopyPool()
     private val replays = ArrayDeque<Replay>()
     private var replayEndOfStream: Boolean = false
     private val sourcesOnFrame = ArrayDeque<Int>()
@@ -981,7 +982,7 @@ internal class IecPassthroughAudioSink(
         )
         for (au in queued) {
             notePts(au.ptsUs)
-            queueForIec(ByteBuffer.wrap(au.bytes).order(ByteOrder.LITTLE_ENDIAN), au.ptsUs, au.count)
+            queueForIec(au.buffer(), au.ptsUs, au.count)
         }
         if (endOfStreamRequested) {
             leftover = ByteArray(0)
@@ -1022,7 +1023,7 @@ internal class IecPassthroughAudioSink(
             }
             if (playing) super.play()
             for (au in queued) {
-                val bytes = ByteBuffer.wrap(au.bytes).order(ByteOrder.LITTLE_ENDIAN)
+                val bytes = au.buffer()
                 replays.add(Replay(bytes, au.ptsUs, au.count))
             }
             replayEndOfStream = endOfStreamRequested
@@ -1085,10 +1086,7 @@ internal class IecPassthroughAudioSink(
     private fun rememberSource(buffer: ByteBuffer, ptsUs: Long, count: Int) {
         val size = buffer.remaining()
         if (size <= 0) return
-        val bytes = ByteArray(size)
-        val view = buffer.duplicate()
-        view.get(bytes)
-        uncommitted.add(UncommittedAu(bytes, ptsUs, count))
+        uncommitted.add(UncommittedAu(sourceCopies.copyOf(buffer), size, ptsUs, count))
         sourcesSinceFrame++
     }
 
@@ -1101,7 +1099,7 @@ internal class IecPassthroughAudioSink(
         if (sourcesOnFrame.isEmpty()) return
         var drop = sourcesOnFrame.removeFirst()
         while (drop > 0 && uncommitted.isNotEmpty()) {
-            uncommitted.removeFirst()
+            sourceCopies.recycle(uncommitted.removeFirst().bytes)
             drop--
         }
     }
@@ -1183,7 +1181,9 @@ internal class IecPassthroughAudioSink(
         mode = Mode.FORWARD
     }
 
-    private class UncommittedAu(val bytes: ByteArray, val ptsUs: Long, val count: Int)
+    private class UncommittedAu(val bytes: ByteArray, val size: Int, val ptsUs: Long, val count: Int) {
+        fun buffer(): ByteBuffer = ByteBuffer.wrap(bytes, 0, size).slice().order(ByteOrder.LITTLE_ENDIAN)
+    }
 
     private class Replay(val buffer: ByteBuffer, val ptsUs: Long, val count: Int)
 

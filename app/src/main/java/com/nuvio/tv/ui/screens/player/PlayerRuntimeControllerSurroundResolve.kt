@@ -236,6 +236,7 @@ private fun PlayerRuntimeController.commitSurroundResolution(
             "transcodePreferred=${surround.resolution.transcodePreferred} " +
             "channelTarget=${surround.targetChannels} tvArcSoundbar=${settings.surroundTvArcSoundbar}"
     )
+    if (SpeakerlessBoxRoute.hdmiSoundOff(routeKey)) logHdmiSoundOff(reason, routeKey)
     if (!changed) return
     val wasPlaying = hasActivePlayIntent() && !userPausedManually
     playbackSpeedAwareAudioSink?.notifyAudioProcessingRequirementChanged()
@@ -255,3 +256,12 @@ internal fun surroundResolveNeedsReselect(
     previous: SurroundResolveResult?,
     next: SurroundResolveResult
 ): Boolean = previous != next
+
+internal fun PlayerRuntimeController.logHdmiSoundOff(reason: String, routeKey: String?) {
+    Log.i(
+        PlayerRuntimeController.TAG,
+        "AUDIO_ROUTE_HDMI_SOUND_OFF: reason=$reason route=$routeKey; no HDMI sound on this box, " +
+            "the film holds its place until HDMI sound returns"
+    )
+    queuePlaybackRawEventLine("audio_route_hdmi_sound_off reason=$reason route=$routeKey")
+}
