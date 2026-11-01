@@ -38,6 +38,10 @@ object PlayerSessionTracker {
 
     val settled: StateFlow<Boolean> = settledState.asStateFlow()
 
+    /** The newest session's stream has shown its first frame; false while it starts a stream. */
+    @Volatile var firstFrameShown: Boolean = false
+        private set
+
     internal var timerScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val lock = Any()
@@ -51,6 +55,7 @@ object PlayerSessionTracker {
     }
 
     private fun unsettle(session: Session, ms: Long) = synchronized(lock) {
+        firstFrameShown = ms == SETTLE_MS
         current = session
         timer?.cancel()
         val gen = ++generation
@@ -64,6 +69,7 @@ object PlayerSessionTracker {
     private fun settle(session: Session) = synchronized(lock) {
         if (current === session || openSessions.value == 0) {
             current = null
+            firstFrameShown = false
             timer?.cancel()
             timer = null
             generation++

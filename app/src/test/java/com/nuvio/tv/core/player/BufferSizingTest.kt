@@ -72,6 +72,27 @@ class BufferSizingTest {
     }
 
     @Test
+    fun `a 4K film on a box whose decoder lives in app memory keeps more for the decoder`() {
+        // Fire TV Stick 4K Max before a 4K DV remux: sized 97 MB, then the decoder took 200 MB and the box ran short.
+        assertEquals(97, BufferSizing.sizedBudgetMb(200, free(409, 144), 0, 0))
+        assertEquals(50, BufferSizing.sizedBudgetMb(200, free(409, 144), 0, 0, fourKInAppMemory = true))
+        assertEquals(108, BufferSizing.sizedBudgetMb(200, free(500, 144), 0, 0, fourKInAppMemory = true))
+        assertEquals(200, BufferSizing.sizedBudgetMb(200, free(700, 144), 0, 0, fourKInAppMemory = true))
+        assertEquals(220, BufferSizing.videoOutputReserveMb(true))
+        assertEquals(140, BufferSizing.videoOutputReserveMb(false))
+    }
+
+    @Test
+    fun `4K is read from the name or from a bitrate only 4K carries`() {
+        assertTrue(BufferSizing.looksFourK(0L, "Jaws.1975.2160p.UHD.BluRay.REMUX.DV.HDR.TrueHD.Atmos.7.1.mkv"))
+        assertTrue(BufferSizing.looksFourK(0L, null, "TorBox 4K"))
+        assertTrue(BufferSizing.looksFourK(81_700_000L, "jaws.mkv"))
+        assertFalse(BufferSizing.looksFourK(35_000_000L, "Law.and.Order.S01E01.1080p.BluRay.REMUX.AVC.DTS-HD.MA.2.0.mkv"))
+        assertFalse(BufferSizing.looksFourK(0L, "The.4Kids.Show.S01E01.720p.mkv"))
+        assertFalse(BufferSizing.looksFourK(0L, null, null))
+    }
+
+    @Test
     fun `unknown free memory keeps the box size`() {
         assertEquals(150, BufferSizing.sizedBudgetMb(150, null, 96, 0))
     }

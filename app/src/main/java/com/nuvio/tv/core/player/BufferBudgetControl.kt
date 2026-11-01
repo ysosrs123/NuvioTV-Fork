@@ -8,6 +8,9 @@ import androidx.media3.exoplayer.upstream.DefaultAllocator
 interface BufferBudgetControl {
     val bufferAllocator: DefaultAllocator
 
+    /** Frees the allocator's idle memory once the player stops; the teardown can defer it to a background thread. */
+    val stopTrim: AllocatorStopTrim
+
     /** Budget without the memory-pressure cap. */
     val uncappedBudgetBytes: Long
 

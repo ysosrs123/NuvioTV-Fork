@@ -39,6 +39,12 @@ class BufferMemoryKeeper(
     @Volatile private var detached = false
     @Volatile var lentBytes: Long = 0L
         private set
+    /** What the lending may never take the buffer below (seconds of film), on top of the sized floor. */
+    @Volatile var lendFloorBytes: Long = 0L
+        private set
+    /** Lending waits until the film has its first picture and its start cushion. */
+    @Volatile var lendingHeld: Boolean = false
+        private set
     /** Off: a size the user set is only cut when memory is critical; idle memory is still given back. */
     @Volatile var budgetManaged: Boolean = budgetManaged
         private set
@@ -68,7 +74,19 @@ class BufferMemoryKeeper(
             else -> LEVEL_NONE
         }
         worker.run {
-            if (wanted > LEVEL_NONE) raise(wanted, "trim:$level") else trimIdle("trim:$level")
+            if (wanted == LEVEL_NONE) {
+                trimIdle("trim:$level")
+                return@run
+            }
+            val free = freeMemory()
+            val swap = swapFreeMb()
+            if (free == null || warningStands(free, swap)) {
+                raise(wanted, "trim:$level")
+                return@run
+            }
+            val freed = trimIdle(null)
+            Log.i(TAG, "BUFFER_MEMORY: trim:$level set aside availMb=${free.availMb} thresholdMb=${free.thresholdMb} " +
+                "swapFreeMb=$swap freedMb=${freed / MB}")
         }
     }
 
@@ -128,6 +146,28 @@ class BufferMemoryKeeper(
             applyTarget()
             if (!returned) trimIdle("lent")
             Log.i(TAG, "BUFFER_MEMORY: lent to downloads mb=${lent / MB} capMb=${capOrBudgetMb()}")
+        }
+    }
+
+    fun setLendFloorBytes(bytes: Long) {
+        if (detached) return
+        val floor = bytes.coerceAtLeast(0L)
+        worker.run {
+            if (floor == lendFloorBytes) return@run
+            lendFloorBytes = floor
+            if (lentBytes > 0L && !lendingHeld) applyTarget()
+        }
+    }
+
+    fun setLendingHeld(held: Boolean) {
+        if (detached) return
+        worker.run {
+            if (held == lendingHeld) return@run
+            lendingHeld = held
+            if (lentBytes <= 0L) return@run
+            applyTarget()
+            if (!held) trimIdle("lent")
+            Log.i(TAG, "BUFFER_MEMORY: lending ${if (held) "held for the start" else "resumed"} mb=${lentBytes / MB} capMb=${capOrBudgetMb()}")
         }
     }
 
@@ -237,8 +277,8 @@ class BufferMemoryKeeper(
     internal fun effectiveCapBytes(): Long {
         val pressure = if (pressureLevel == LEVEL_NONE) -1L else capBytes(pressureLevel)
         val budget = control.uncappedBudgetBytes
-        if (lentBytes <= 0L || budget <= 0L) return pressure
-        val floor = minOf(budget, BufferSizing.MIN_SIZED_BUFFER_MB * MB)
+        if (lentBytes <= 0L || lendingHeld || budget <= 0L) return pressure
+        val floor = minOf(budget, maxOf(BufferSizing.MIN_SIZED_BUFFER_MB * MB, lendFloorBytes))
         val lent = (budget - lentBytes).coerceAtLeast(floor)
         return if (pressure < 0L) lent else minOf(pressure, lent)
     }
@@ -291,6 +331,25 @@ class BufferMemoryKeeper(
     companion object {
         /** Only a Target buffer size set by hand counts as unmanaged. */
         fun budgetManaged(customBuffers: Boolean, budgetManaged: Boolean): Boolean = !customBuffers || budgetManaged
+
+        /** [LEND_FLOOR_SECONDS] of film at [bitrateBps] plus one piece; 0 while the bitrate is not known. */
+        fun lendFloorBytes(bitrateBps: Long, pieceBytes: Long): Long =
+            if (bitrateBps <= 0L) 0L else bitrateBps / 8L * LEND_FLOOR_SECONDS + pieceBytes.coerceAtLeast(0L)
+
+        /** A heavy film's start waits for six seconds of buffer; the lending leaves two more. */
+        const val LEND_FLOOR_SECONDS = 8L
+
+        /**
+         * Android's memory warning counts once the box's own numbers agree: past its low-memory line, within the
+         * system margin of it, or nearly out of swap. Fire OS sends RUNNING_LOW and RUNNING_CRITICAL to every app
+         * with hundreds of MB free and closes idle apps itself; the extra downloads already judge them this way.
+         */
+        fun warningStands(free: BufferSizing.FreeMemory, swapFreeMb: Long): Boolean =
+            free.lowMemory || free.availMb - free.thresholdMb < BufferSizing.SYSTEM_MARGIN_MB ||
+                swapFreeMb in 0 until WARNING_SWAP_MB
+
+        /** The same line as the extra downloads' swap rule. */
+        const val WARNING_SWAP_MB = 50L
 
         private const val TAG = "BufferMemory"
         private const val MB = 1024L * 1024L

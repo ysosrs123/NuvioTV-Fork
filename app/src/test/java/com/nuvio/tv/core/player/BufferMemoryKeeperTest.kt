@@ -82,6 +82,14 @@ class BufferMemoryKeeperTest {
 
     private fun giveBack(allocations: List<Allocation>) = allocations.forEach(allocator::release)
 
+    /** Android's warning on a box that is really short: inside the margin above its low-memory line. */
+    private fun warn(k: BufferMemoryKeeper, level: Int) {
+        val before = free
+        free = BufferSizing.FreeMemory(200 * mb, 130 * mb, false)
+        k.onTrimMemory(level)
+        free = before
+    }
+
     @Test
     fun `a seek gives back what the new position does not use`() {
         val k = keeper(customControl())
@@ -119,7 +127,7 @@ class BufferMemoryKeeperTest {
         val k = keeper(lc)
         val held = take(70)
         giveBack(held.take(320))
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
         assertEquals(BufferMemoryKeeper.LEVEL_LOW, k.pressureLevel)
         assertEquals(60 * mb, k.capBytes(k.pressureLevel))
         assertTrue(allocator.availableBytes <= BufferMemoryKeeper.KEEP_IDLE_BYTES)
@@ -132,7 +140,7 @@ class BufferMemoryKeeperTest {
     @Test
     fun `critical cuts deeper but not below the floor`() {
         val k = keeper(customControl(budgetMb = 120))
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         assertEquals(BufferMemoryKeeper.LEVEL_CRITICAL, k.pressureLevel)
         assertEquals(50 * mb, k.capBytes(BufferMemoryKeeper.LEVEL_CRITICAL))
         val big = keeper(customControl(budgetMb = 1000))
@@ -149,7 +157,7 @@ class BufferMemoryKeeperTest {
         val k = keeper(lc)
         val budget = 200 * mb
         val forward = budget - lc.backBufferBytes
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
         val low = k.capBytes(BufferMemoryKeeper.LEVEL_LOW)
         assertEquals(lc.backBufferBytes + forward * 60 / 100, low)
         assertEquals(low, k.effectiveCapBytes())
@@ -173,7 +181,7 @@ class BufferMemoryKeeperTest {
         lc.backBufferBytes = 300 * mb
         assertEquals(100 * mb, k.capBytes(BufferMemoryKeeper.LEVEL_CRITICAL))
         lc.backBufferBytes = 40 * mb
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
         k.setLentBytes(48 * mb)
         assertEquals(52 * mb, k.effectiveCapBytes())
     }
@@ -193,7 +201,7 @@ class BufferMemoryKeeperTest {
         val k = keeper(lc)
         take(65)
         assertTrue(lc.shouldContinueLoading(params(bufferedMs = 6_000)))
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
         assertTrue(lc.shouldContinueLoading(params(bufferedMs = 2_000)))
         assertFalse(lc.shouldContinueLoading(params(bufferedMs = 6_000)))
         assertTrue(lc.shouldStartPlayback(params(bufferedMs = 6_000)))
@@ -207,7 +215,7 @@ class BufferMemoryKeeperTest {
         val lc = performanceControl(budgetMb = 62, minBufferMs = 200_000, maxBufferMs = 280_000, backBufferMs = 12_000)
         val k = keeper(lc)
         take(120)
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         assertEquals(50 * mb, k.capBytes(k.pressureLevel))
         // media3 warns below 500 ms ahead, and its log cannot print in unit tests.
         androidx.media3.common.util.Log.setLogLevel(androidx.media3.common.util.Log.LOG_LEVEL_OFF)
@@ -233,7 +241,7 @@ class BufferMemoryKeeperTest {
     fun `the budget comes back once the box has room again`() {
         val lc = customControl(budgetMb = 100)
         val k = keeper(lc)
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         now += BufferMemoryKeeper.RESTORE_QUIET_MS - 1
         k.check()
         assertEquals(BufferMemoryKeeper.LEVEL_CRITICAL, k.pressureLevel)
@@ -250,7 +258,7 @@ class BufferMemoryKeeperTest {
     @Test
     fun `no room means the budget stays down`() {
         val k = keeper(customControl(budgetMb = 100))
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
         free = BufferSizing.FreeMemory(250 * mb, 130 * mb, false)
         now += BufferMemoryKeeper.RESTORE_QUIET_MS
         k.check()
@@ -275,6 +283,7 @@ class BufferMemoryKeeperTest {
     fun `trim signals reach the player through the app's one callback`() {
         val k = keeper(customControl())
         k.attach()
+        free = BufferSizing.FreeMemory(200 * mb, 130 * mb, false)
         try {
             MemoryPressure.dispatch(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE)
             assertEquals(BufferMemoryKeeper.LEVEL_NONE, k.pressureLevel)
@@ -317,6 +326,59 @@ class BufferMemoryKeeperTest {
     }
 
     @Test
+    fun `lent memory leaves eight seconds of film plus a piece`() {
+        val control = customControl(budgetMb = 108)
+        val keeper = keeper(control)
+        val bps = 82_373_000L
+        val floor = BufferMemoryKeeper.lendFloorBytes(bps, 2 * mb)
+        assertEquals(bps / 8 * 8 + 2 * mb, floor)
+        keeper.setLendFloorBytes(floor)
+        keeper.setLentBytes(56 * mb)
+        assertEquals(floor, keeper.effectiveCapBytes())
+        assertEquals(floor.toInt(), control.allocatorTargetBytes())
+        // A light film keeps the sized floor.
+        keeper.setLendFloorBytes(BufferMemoryKeeper.lendFloorBytes(8_000_000L, 2 * mb))
+        assertEquals(52 * mb, keeper.effectiveCapBytes())
+        // No bitrate yet: the sized floor alone.
+        assertEquals(0L, BufferMemoryKeeper.lendFloorBytes(0L, 2 * mb))
+        keeper.setLendFloorBytes(0L)
+        keeper.setLentBytes(96 * mb)
+        assertEquals(BufferSizing.MIN_SIZED_BUFFER_MB * mb, keeper.effectiveCapBytes())
+    }
+
+    @Test
+    fun `a floor above the budget means nothing is lent`() {
+        val control = customControl(budgetMb = 60)
+        val keeper = keeper(control)
+        keeper.setLendFloorBytes(84 * mb)
+        keeper.setLentBytes(30 * mb)
+        assertEquals(60 * mb, keeper.effectiveCapBytes())
+        assertEquals((60 * mb).toInt(), control.allocatorTargetBytes())
+    }
+
+    @Test
+    fun `lending waits for the first picture and the start cushion`() {
+        val control = customControl(budgetMb = 108)
+        val keeper = keeper(control)
+        keeper.setLendingHeld(true)
+        keeper.setLentBytes(56 * mb)
+        assertEquals(56 * mb, keeper.lentBytes)
+        assertEquals(-1L, keeper.effectiveCapBytes())
+        assertEquals((108 * mb).toInt(), control.allocatorTargetBytes())
+        take(100)
+        assertTrue(control.shouldContinueLoading(params(bufferedMs = 5_000)))
+        keeper.setLendingHeld(false)
+        assertEquals(52 * mb, keeper.effectiveCapBytes())
+        assertEquals((52 * mb).toInt(), control.allocatorTargetBytes())
+        assertFalse(control.shouldContinueLoading(params(bufferedMs = 5_000)))
+        keeper.setLendingHeld(true)
+        assertEquals(-1L, keeper.effectiveCapBytes())
+        keeper.setLentBytes(0L)
+        keeper.setLendingHeld(false)
+        assertEquals(-1L, keeper.effectiveCapBytes())
+    }
+
+    @Test
     fun `nothing is lent before the buffer has a size`() {
         val control = ReservableLoadControl(
             allocator = allocator,
@@ -339,7 +401,7 @@ class BufferMemoryKeeperTest {
         val lc = customControl(budgetMb = 100)
         val k = keeper(lc, budgetManaged = false)
         giveBack(take(30))
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
         assertEquals(BufferMemoryKeeper.LEVEL_NONE, k.pressureLevel)
         assertTrue(allocator.availableBytes <= BufferMemoryKeeper.KEEP_IDLE_BYTES)
         free = BufferSizing.FreeMemory(140 * mb, 130 * mb, true)
@@ -358,7 +420,7 @@ class BufferMemoryKeeperTest {
     fun `a hand-set size is still cut when memory is critical`() {
         val lc = customControl(budgetMb = 200)
         val k = keeper(lc, budgetManaged = false)
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         assertEquals(BufferMemoryKeeper.LEVEL_CRITICAL, k.pressureLevel)
         assertEquals(70 * mb, k.effectiveCapBytes())
         take(90)
@@ -368,7 +430,7 @@ class BufferMemoryKeeperTest {
     @Test
     fun `a critical cut on a hand-set size stays while free memory cannot be read`() {
         val k = keeper(customControl(budgetMb = 100), budgetManaged = false)
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         free = null
         now += BufferMemoryKeeper.RESTORE_QUIET_MS
         k.check()
@@ -379,7 +441,7 @@ class BufferMemoryKeeperTest {
     fun `a critical cut on a hand-set size comes back in full once memory is no longer low`() {
         val lc = customControl(budgetMb = 100)
         val k = keeper(lc, budgetManaged = false)
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         free = BufferSizing.FreeMemory(140 * mb, 130 * mb, true)
         now += BufferMemoryKeeper.RESTORE_QUIET_MS
         k.check()
@@ -398,14 +460,14 @@ class BufferMemoryKeeperTest {
     fun `turning Managed memory budget off lifts a low-memory cut but keeps a critical one`() {
         val lc = customControl(budgetMb = 100)
         val k = keeper(lc)
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
         assertEquals((60 * mb).toInt(), lc.allocatorTargetBytes())
         k.setBudgetManaged(false)
         assertEquals(BufferMemoryKeeper.LEVEL_NONE, k.pressureLevel)
         assertEquals((100 * mb).toInt(), lc.allocatorTargetBytes())
 
         val critical = keeper(customControl(budgetMb = 100))
-        critical.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        warn(critical, ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         critical.setBudgetManaged(false)
         assertEquals(BufferMemoryKeeper.LEVEL_CRITICAL, critical.pressureLevel)
     }
@@ -476,7 +538,7 @@ class BufferMemoryKeeperTest {
         val k = keeper(lc, ceilingMb = 200)
         k.check(); k.check()
         assertEquals(164 * mb, lc.uncappedBudgetBytes)
-        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        warn(k, ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
         assertEquals(0L, k.grownBytes)
         assertEquals(100 * mb, lc.uncappedBudgetBytes)
         assertEquals(60 * mb, k.capBytes(BufferMemoryKeeper.LEVEL_LOW))
@@ -519,5 +581,52 @@ class BufferMemoryKeeperTest {
         assertEquals(70 * mb, lc.uncappedBudgetBytes)
         g.check()
         assertEquals(70 * mb, lc.uncappedBudgetBytes)
+    }
+    @Test
+    fun `a warning the box's own numbers do not confirm only gives idle memory back`() {
+        val lc = customControl(budgetMb = 100)
+        val k = keeper(lc, ceilingMb = 200)
+        k.check()
+        assertEquals(132 * mb, lc.uncappedBudgetBytes)
+        giveBack(take(30))
+        // A Fire TV Stick at a 4K film's first frame: Android says critical with 273 MB free against a 144 MB line.
+        free = BufferSizing.FreeMemory(273 * mb, 144 * mb, false)
+        swapFree = 68
+        k.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        assertEquals(BufferMemoryKeeper.LEVEL_NONE, k.pressureLevel)
+        assertEquals(132 * mb, lc.uncappedBudgetBytes)
+        assertEquals(-1L, k.effectiveCapBytes())
+        assertTrue(allocator.availableBytes <= BufferMemoryKeeper.KEEP_IDLE_BYTES)
+        // The warning was not pressure: growth goes on at the next check without a quiet minute.
+        free = BufferSizing.FreeMemory(800 * mb, 130 * mb, false)
+        swapFree = -1
+        k.check()
+        assertEquals(164 * mb, lc.uncappedBudgetBytes)
+    }
+
+    @Test
+    fun `the warning stands inside the margin, past the line, nearly out of swap, or with memory unreadable`() {
+        assertFalse(BufferMemoryKeeper.warningStands(BufferSizing.FreeMemory(273 * mb, 144 * mb, false), 68))
+        assertTrue(BufferMemoryKeeper.warningStands(BufferSizing.FreeMemory(240 * mb, 144 * mb, false), 68))
+        assertTrue(BufferMemoryKeeper.warningStands(BufferSizing.FreeMemory(400 * mb, 144 * mb, true), 68))
+        assertTrue(BufferMemoryKeeper.warningStands(BufferSizing.FreeMemory(400 * mb, 144 * mb, false), 20))
+        assertFalse(BufferMemoryKeeper.warningStands(BufferSizing.FreeMemory(400 * mb, 144 * mb, false), -1))
+
+        val inside = keeper(customControl(budgetMb = 100))
+        free = BufferSizing.FreeMemory(240 * mb, 144 * mb, false)
+        inside.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        assertEquals(BufferMemoryKeeper.LEVEL_LOW, inside.pressureLevel)
+
+        val swap = keeper(customControl(budgetMb = 100))
+        free = BufferSizing.FreeMemory(400 * mb, 144 * mb, false)
+        swapFree = 20
+        swap.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+        assertEquals(BufferMemoryKeeper.LEVEL_CRITICAL, swap.pressureLevel)
+
+        val unknown = keeper(customControl(budgetMb = 100))
+        free = null
+        swapFree = -1
+        unknown.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        assertEquals(BufferMemoryKeeper.LEVEL_LOW, unknown.pressureLevel)
     }
 }

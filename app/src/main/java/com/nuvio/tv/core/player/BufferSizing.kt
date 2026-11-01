@@ -30,9 +30,14 @@ object BufferSizing {
     // Kept free when the buffer is sized at the start: Android closes idle apps to hold its own line, and the
     // memory keeper trims the buffer if the box really runs short later.
     const val SIZING_MARGIN_MB = 28
-    // Still to come once the player is built: the video decoder and its pictures, about 140 MB for 4K on 2 GB boxes.
+    // Still to come once the player is built: the video decoder and its pictures, about 140 MB on 2 GB boxes.
     // The native allocator's 32 MB arena is not reserved: it holds the first 32 MB of the buffer itself.
     const val VIDEO_OUTPUT_RESERVE_MB = 140
+    // A 4K decoder whose pictures live in app memory (a Fire TV Stick 4K Max: no video memory pool the app can
+    // read) took 195 to 240 MB at the first frame.
+    const val VIDEO_OUTPUT_RESERVE_4K_MB = 220
+    /** A bitrate only a 4K file carries; 1080p disc remuxes stay under 40 Mbit/s. */
+    const val FOUR_K_BITRATE_BPS = 50_000_000L
     /** About 5 s of a 4K remux at 80 Mbit/s. */
     const val MIN_SIZED_BUFFER_MB = 50
 
@@ -56,6 +61,16 @@ object BufferSizing {
 
     fun isSmallBox(totalMem: Long): Boolean = totalMem <= 0L || totalMem < SMALL_BOX_RAM_BYTES
 
+    /** What the sizing keeps for the video decoder and its pictures. */
+    fun videoOutputReserveMb(fourKInAppMemory: Boolean): Int =
+        if (fourKInAppMemory) VIDEO_OUTPUT_RESERVE_4K_MB else VIDEO_OUTPUT_RESERVE_MB
+
+    /** Whether the film looks like 4K before its first byte: a name that says so, or a bitrate only 4K carries. */
+    fun looksFourK(bitrateBps: Long, vararg names: String?): Boolean =
+        bitrateBps >= FOUR_K_BITRATE_BPS || names.any { it != null && UHD.containsMatchIn(it) }
+
+    private val UHD = Regex("""2160p|\buhd\b|\b4k\b""", RegexOption.IGNORE_CASE)
+
     /** Parallel connections when the user has not picked a number. */
     fun defaultConnectionCount(totalMem: Long, nativeMemory: Boolean, fallback: Int): Int = when {
         !nativeMemory -> fallback
@@ -78,17 +93,26 @@ object BufferSizing {
     /**
      * MB the buffer can take before the box drops below its low-memory line plus [SIZING_MARGIN_MB].
      * [outsideBudgetMb] is memory the player holds outside this budget (the parallel chunk window);
-     * [heldByPlayerMb] is buffer memory already held that the new player takes over or frees.
+     * [heldByPlayerMb] is buffer memory already held that the new player takes over or frees;
+     * [fourKInAppMemory] keeps [VIDEO_OUTPUT_RESERVE_4K_MB] for the decoder instead of [VIDEO_OUTPUT_RESERVE_MB].
      */
-    fun spareMb(free: FreeMemory, outsideBudgetMb: Int, heldByPlayerMb: Int): Long =
-        free.availMb - free.thresholdMb - SIZING_MARGIN_MB - VIDEO_OUTPUT_RESERVE_MB - outsideBudgetMb + heldByPlayerMb
+    fun spareMb(free: FreeMemory, outsideBudgetMb: Int, heldByPlayerMb: Int, fourKInAppMemory: Boolean = false): Long =
+        free.availMb - free.thresholdMb - SIZING_MARGIN_MB - videoOutputReserveMb(fourKInAppMemory) -
+            outsideBudgetMb + heldByPlayerMb
 
     /** The box's size, lowered to what is free now, never below [MIN_SIZED_BUFFER_MB] (or the box's size if smaller). */
-    fun sizedBudgetMb(boxMb: Int, free: FreeMemory?, outsideBudgetMb: Int, heldByPlayerMb: Int): Int {
+    fun sizedBudgetMb(
+        boxMb: Int,
+        free: FreeMemory?,
+        outsideBudgetMb: Int,
+        heldByPlayerMb: Int,
+        fourKInAppMemory: Boolean = false
+    ): Int {
         if (free == null) return boxMb
         val floor = minOf(MIN_SIZED_BUFFER_MB, boxMb)
         if (free.lowMemory) return floor
-        return spareMb(free, outsideBudgetMb, heldByPlayerMb).coerceIn(floor.toLong(), boxMb.toLong()).toInt()
+        return spareMb(free, outsideBudgetMb, heldByPlayerMb, fourKInAppMemory)
+            .coerceIn(floor.toLong(), boxMb.toLong()).toInt()
     }
 
     /** Bytes per second of the film from its average bitrate in bits per second; the 80 Mbit/s default while unknown. */
@@ -140,8 +164,16 @@ object BufferSizing {
     @Volatile
     var lastPlaybackBudget: PlaybackBudget? = null
 
-    fun describe(boxMb: Int, sizedMb: Int, free: FreeMemory?, outsideBudgetMb: Int, heldByPlayerMb: Int): String =
+    fun describe(
+        boxMb: Int,
+        sizedMb: Int,
+        free: FreeMemory?,
+        outsideBudgetMb: Int,
+        heldByPlayerMb: Int,
+        fourKInAppMemory: Boolean = false
+    ): String =
         if (free == null) "boxMb=$boxMb sizedMb=$sizedMb free=unknown"
         else "boxMb=$boxMb sizedMb=$sizedMb availMb=${free.availMb} thresholdMb=${free.thresholdMb} " +
-            "lowMemory=${free.lowMemory} windowMb=$outsideBudgetMb heldMb=$heldByPlayerMb"
+            "lowMemory=${free.lowMemory} windowMb=$outsideBudgetMb heldMb=$heldByPlayerMb " +
+            "reserveMb=${videoOutputReserveMb(fourKInAppMemory)}"
 }

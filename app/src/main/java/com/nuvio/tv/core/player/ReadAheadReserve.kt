@@ -6,6 +6,7 @@ import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.LoadControl
+import androidx.media3.exoplayer.analytics.PlayerId
 import androidx.media3.exoplayer.trackselection.ExoTrackSelection
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import com.nuvio.tv.core.player.thumbnail.PlaybackBufferReserve
@@ -43,12 +44,12 @@ internal class ReadAheadReserve(
             SystemClock.elapsedRealtime() - maxOf(cancelledAtMs, lastStallAtMs) < RETRY_QUIET_MS)
 
     /** Clamped again here because the budget can change while reserved. */
-    private fun effective(): Long = held.coerceAtMost(budget() * MAX_FRACTION_PERCENT / 100)
+    private fun effective(): Long = reservable(budget(), held)
 
     override fun reserve(bytes: Long) {
         if (cancelledByRebuffer || bytes <= 0L) return
         leaseUntilMs = SystemClock.elapsedRealtime() + LEASE_MS
-        held = bytes.coerceAtMost(budget() * MAX_FRACTION_PERCENT / 100)
+        held = reservable(budget(), bytes)
     }
 
     override fun giveBack(): Long {
@@ -115,8 +116,8 @@ internal class ReadAheadReserve(
         return holds
     }
 
-    private companion object {
-        const val TAG = "ThumbReserve"
+    internal companion object {
+        private const val TAG = "ThumbReserve"
         /** The cap never holds the read-ahead below this much buffered time. */
         const val MIN_AHEAD_US = 8_000_000L
         /** A stall this soon after the cap held loading back is blamed on the reserve. */
@@ -130,6 +131,16 @@ internal class ReadAheadReserve(
          * Half is often not enough for a cold 4K decode (~280 MB) on a Fire TV Stick.
          */
         const val MAX_FRACTION_PERCENT = 60L
+
+        /**
+         * What a reserve of [wantedBytes] may hold out of [budgetBytes]: [MAX_FRACTION_PERCENT] of the budget, and
+         * nothing from a budget already at the sizing minimum. A 2 GB box plays a 4K remux on the 50 MB minimum, and a
+         * 30 MB reserve on it left the film 20 MB (two seconds) right at its first frame.
+         */
+        fun reservable(budgetBytes: Long, wantedBytes: Long): Long {
+            if (budgetBytes <= BufferSizing.MIN_SIZED_BUFFER_MB * 1024L * 1024L) return 0L
+            return wantedBytes.coerceIn(0L, budgetBytes * MAX_FRACTION_PERCENT / 100)
+        }
     }
 }
 
@@ -166,6 +177,18 @@ class ReservableLoadControl(
     @Volatile private var growthBytes = 0L
 
     override val bufferAllocator: DefaultAllocator = allocator
+
+    override val stopTrim: AllocatorStopTrim = AllocatorStopTrim(allocator)
+
+    override fun onStopped(playerId: PlayerId) {
+        super.onStopped(playerId)
+        stopTrim.onPlayerGone()
+    }
+
+    override fun onReleased(playerId: PlayerId) {
+        super.onReleased(playerId)
+        stopTrim.onPlayerGone()
+    }
 
     override val maxBufferMs: Int = maxBufferMs
 
@@ -239,7 +262,7 @@ class ReservableLoadControl(
     companion object {
         /** Same as DefaultLoadControl.Builder().setBackBuffer(backBufferMs, true).build(). */
         fun stock(backBufferMs: Int): ReservableLoadControl = ReservableLoadControl(
-            allocator = DefaultAllocator(/* trimOnReset= */ true, C.DEFAULT_BUFFER_SEGMENT_SIZE),
+            allocator = DefaultAllocator(/* trimOnReset= */ false, C.DEFAULT_BUFFER_SEGMENT_SIZE),
             minBufferMs = DefaultLoadControl.DEFAULT_MIN_BUFFER_MS,
             maxBufferMs = DefaultLoadControl.DEFAULT_MAX_BUFFER_MS,
             bufferForPlaybackMs = DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_MS,

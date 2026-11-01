@@ -70,6 +70,23 @@ class PlayerSessionTrackerTest {
     }
 
     @Test
+    fun `first frame shown is set at the first frame and cleared by the next stream`() = runTest {
+        PlayerSessionTracker.timerScope = backgroundScope
+        val session = PlayerSessionTracker.open()
+        assertFalse(PlayerSessionTracker.firstFrameShown)
+        session.firstFrame()
+        assertTrue(PlayerSessionTracker.firstFrameShown)
+        advance(PlayerSessionTracker.SETTLE_MS)
+        assertTrue(PlayerSessionTracker.firstFrameShown)
+        session.streamStarting()
+        assertFalse(PlayerSessionTracker.firstFrameShown)
+        session.firstFrame()
+        assertTrue(PlayerSessionTracker.firstFrameShown)
+        session.close()
+        assertFalse(PlayerSessionTracker.firstFrameShown)
+    }
+
+    @Test
     fun `a stream that never shows a frame settles after the longer wait`() = runTest {
         PlayerSessionTracker.timerScope = backgroundScope
         val session = PlayerSessionTracker.open()

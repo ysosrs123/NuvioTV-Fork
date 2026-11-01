@@ -33,7 +33,7 @@ object PlayerMemoryReporter {
     @Volatile
     var bufferedAheadProvider: (() -> Long)? = null
 
-    fun snapshot(context: Context): String {
+    fun snapshot(context: Context, allocStats: String = allocatorStats()): String {
         val info = Debug.MemoryInfo()
         Debug.getMemoryInfo(info)
         val rssMb = info.totalPss / 1024
@@ -43,17 +43,6 @@ object PlayerMemoryReporter {
             context.getSystemService(Context.ACTIVITY_SERVICE) as? android.app.ActivityManager
         val system = android.app.ActivityManager.MemoryInfo()
         activityManager?.getMemoryInfo(system)
-
-        // Held against idle shows whether growth outgrew the native arena pool, which the
-        // allocator's own recycling would otherwise hide.
-        val allocator = NuvioExoPlayerPerformanceHelper.liveAllocator
-        val allocStats = if (allocator == null) {
-            "allocHeldMb=- allocIdleMb=- allocFootprintMb=-"
-        } else {
-            "allocHeldMb=${allocator.totalBytesAllocated / (1024 * 1024)} " +
-                "allocIdleMb=${allocator.availableBytes / (1024 * 1024)} " +
-                "allocFootprintMb=${allocator.memoryFootprint / (1024 * 1024)}"
-        }
 
         return "rssMb=$rssMb peakMb=$peakRssMb " +
             "javaMb=${info.dalvikPrivateDirty / 1024} nativeMb=${info.nativePrivateDirty / 1024} " +
@@ -77,9 +66,23 @@ object PlayerMemoryReporter {
         }
     }
 
+    // Held against idle shows whether growth outgrew the native arena pool, which the
+    // allocator's own recycling would otherwise hide.
+    private fun allocatorStats(): String {
+        val allocator = NuvioExoPlayerPerformanceHelper.liveAllocator
+            ?: return "allocHeldMb=- allocIdleMb=- allocFootprintMb=-"
+        return "allocHeldMb=${allocator.totalBytesAllocated / (1024 * 1024)} " +
+            "allocIdleMb=${allocator.availableBytes / (1024 * 1024)} " +
+            "allocFootprintMb=${allocator.memoryFootprint / (1024 * 1024)}"
+    }
+
+    // The allocator is read here, before the player lets go of it; the memory map read takes about 400 ms on a
+    // large process, so it runs off the caller's thread.
     fun stopSampling(context: Context) {
         samplerJob?.cancel()
         samplerJob = null
-        Log.i(TAG, "MEM_FINAL: ${snapshot(context.applicationContext)}")
+        val appContext = context.applicationContext
+        val allocStats = allocatorStats()
+        scope.launch { Log.i(TAG, "MEM_FINAL: ${snapshot(appContext, allocStats)}") }
     }
 }

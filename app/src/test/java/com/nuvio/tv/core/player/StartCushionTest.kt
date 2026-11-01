@@ -61,8 +61,8 @@ class StartCushionTest {
     fun `a buffer full by bytes starts before six seconds`() {
         val cushion = StartCushion(userStartMs = 2_500)
         cushion.arm(heavy = true)
-        assertFalse(cushion.start(bufferedMs = 4_000, allocatedMb = 49L, targetMb = 50L))
-        assertTrue(cushion.start(bufferedMs = 4_000, allocatedMb = 50L, targetMb = 50L))
+        assertFalse(cushion.start(bufferedMs = 4_000, allocatedMb = 47L, targetMb = 50L))
+        assertTrue(cushion.start(bufferedMs = 4_000, allocatedMb = 48L, targetMb = 50L))
     }
 
     @Test

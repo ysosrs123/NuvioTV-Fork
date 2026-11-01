@@ -51,7 +51,8 @@ class StartCushion(
             lastGrowthAtMs = now
         }
         val stalled = now - lastGrowthAtMs >= STALLED_MS
-        val start = bufferedDurationUs >= cushionUs || (targetBytes > 0L && allocatedBytes >= targetBytes) || stalled
+        val full = targetBytes > 0L && allocatedBytes >= targetBytes - FULL_SLACK_BYTES
+        val start = bufferedDurationUs >= cushionUs || full || stalled
         if (start) pending = false
         return start
     }
@@ -60,6 +61,8 @@ class StartCushion(
         const val HEAVY_START_MS = 6_000
         /** The buffer has not grown for this long: loading stopped short of the cushion, so the film starts. */
         const val STALLED_MS = 1_500L
+        /** The loader stops a piece short of its target; within one piece the buffer counts as full. */
+        const val FULL_SLACK_BYTES = 2L * 1024 * 1024
         /** The real bitrate when known, else the guess from the add-on's size or the release name. */
         fun isHeavy(fileBitrateBps: Long, guessedBitrateBps: Long, heavyBps: Long): Boolean =
             (if (fileBitrateBps > 0L) fileBitrateBps else guessedBitrateBps) >= heavyBps

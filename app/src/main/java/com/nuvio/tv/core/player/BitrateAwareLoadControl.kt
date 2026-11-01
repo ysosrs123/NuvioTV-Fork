@@ -4,6 +4,7 @@ import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.LoadControl
+import androidx.media3.exoplayer.analytics.PlayerId
 import androidx.media3.exoplayer.trackselection.ExoTrackSelection
 import androidx.media3.exoplayer.upstream.Allocator
 import androidx.media3.exoplayer.upstream.DefaultAllocator
@@ -32,7 +33,7 @@ class BitrateAwareLoadControl(
     retainBackBufferFromKeyframe: Boolean,
     /** Memory ceiling in bytes. */
     budgetBytes: Long,
-    allocator: DefaultAllocator = DefaultAllocator(/* trimOnReset= */ true, C.DEFAULT_BUFFER_SEGMENT_SIZE, 64),
+    allocator: DefaultAllocator = DefaultAllocator(/* trimOnReset= */ false, C.DEFAULT_BUFFER_SEGMENT_SIZE, 64),
     topUpPieceBytes: Long = BufferTopUp.DEFAULT_PIECE_BYTES
 ) : DefaultLoadControl(
     allocator,
@@ -47,6 +48,18 @@ class BitrateAwareLoadControl(
 ), PlaybackBufferReserve, BufferBudgetControl, StartCushionControl {
 
     override val bufferAllocator: DefaultAllocator = allocator
+
+    override val stopTrim: AllocatorStopTrim = AllocatorStopTrim(allocator)
+
+    override fun onStopped(playerId: PlayerId) {
+        super.onStopped(playerId)
+        stopTrim.onPlayerGone()
+    }
+
+    override fun onReleased(playerId: PlayerId) {
+        super.onReleased(playerId)
+        stopTrim.onPlayerGone()
+    }
 
     override val startCushion: StartCushion = StartCushion(bufferForPlaybackMs, maxBufferMs)
 

@@ -29,7 +29,10 @@ internal fun PlayerRuntimeController.attachBufferMemoryKeeper(
             { BufferSizing.read(appContext) },
             budgetManaged = budgetManaged,
             ceilingBytes = ceilingMb.toLong() * 1024L * 1024L,
-            swapFreeMb = { com.nuvio.tv.core.player.thumbnail.MemoryGovernor.readMeminfo()?.swapFreeMb ?: -1L },
+            swapFreeMb = {
+                com.nuvio.tv.core.player.thumbnail.MemoryGovernor.readMeminfo()
+                    ?.takeIf { it.swapTotalMb > 0L }?.swapFreeMb ?: -1L
+            },
         ).also { it.attach() }
     }
 }

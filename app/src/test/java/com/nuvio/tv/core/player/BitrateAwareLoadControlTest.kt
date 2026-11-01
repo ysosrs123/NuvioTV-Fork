@@ -151,4 +151,36 @@ class BitrateAwareLoadControlTest {
         assertFalse(lc.shouldContinueLoading(params(bufferedMs = 41_000)))
         assertEquals(42_000, lc.topUp.resumeBelowMs)
     }
+
+    @Test
+    fun `stopping the player frees the idle buffer unless the teardown takes it over`() {
+        val own = DefaultAllocator(false, C.DEFAULT_BUFFER_SEGMENT_SIZE)
+        fun control() = BitrateAwareLoadControl(
+            minBufferMs = 15_000,
+            maxBufferMs = 45_000,
+            bufferForPlaybackMs = 5_000,
+            bufferForPlaybackAfterRebufferMs = 3_000,
+            prioritizeTimeOverSizeThresholds = true,
+            backBufferDurationMs = 0,
+            retainBackBufferFromKeyframe = true,
+            budgetBytes = 20 * mb,
+            allocator = own,
+        ).also {
+            it.onPrepared(playerId)
+            it.onTracksSelected(params(0), TrackGroupArray.EMPTY, arrayOf<ExoTrackSelection?>())
+        }
+        fun fillAndEmpty() = List(16) { own.allocate() }.forEach(own::release)
+
+        val first = control()
+        fillAndEmpty()
+        first.onStopped(playerId)
+        assertEquals(0, own.availableBytes)
+
+        val second = control()
+        fillAndEmpty()
+        second.stopTrim.deferred = true
+        second.onStopped(playerId)
+        second.onReleased(playerId)
+        assertEquals(16 * C.DEFAULT_BUFFER_SEGMENT_SIZE, own.availableBytes)
+    }
 }
