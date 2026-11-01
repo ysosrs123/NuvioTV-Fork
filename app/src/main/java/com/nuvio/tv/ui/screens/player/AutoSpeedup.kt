@@ -361,6 +361,7 @@ internal object AutoSpeedup {
         val p = policy ?: return
         val limit = HostSpeeds.limitOf(key)
         if (limit != null) p.onRateLimited(limit)
+        if (limit != null) HostSpeeds.heldBlock(key)?.let { logBlockHeld(key, limit, it) }
         val known = HostSpeeds.get(key)
         p.stepBoost = known == null && limit == null && LedgerKey.knownTotal(LedgerKey.of(resolvedUrl)) == null
         if (known == null) return
@@ -390,6 +391,7 @@ internal object AutoSpeedup {
     fun begin(streamUrl: String, totalRamBytes: Long) {
         if (policy != null && streamUrl == url) return
         end()
+        blockTrial.reset()
         limits = limitsFor(totalRamBytes)
         url = streamUrl
         hostKey = HostSpeeds.keyOf(streamUrl)
@@ -414,6 +416,7 @@ internal object AutoSpeedup {
             p.readAheadMaxBytes = limits.readAheadMaxBytes
             val limit = hostKey?.let { HostSpeeds.limitOf(it) }
             if (limit != null) p.requestLimit = limit
+            if (limit != null) hostKey?.let(HostSpeeds::heldBlock)?.let { logBlockHeld(hostKey, limit, it) }
             p.stepBoost = remembered == null && limit == null && LedgerKey.knownTotal(LedgerKey.of(streamUrl)) == null
             policy = p
             pieceFixed = limits.quickHoldBytes == limits.holdBytes
@@ -593,6 +596,59 @@ internal object AutoSpeedup {
         Log.i(TAG, "AUTO_SPEEDUP: extra download refused running=$running limit=$limit server=$key")
     }
 
+    private val blockTrial = ParallelBlockTrial()
+
+    @Volatile
+    private var limitBeforeTrial = Int.MAX_VALUE
+
+    private fun logBlockHeld(key: String?, limit: Int, block: HostSpeeds.Limit) {
+        val leftH = (block.atMs + HostSpeeds.blockHoldMs(block.strikes) - System.currentTimeMillis()) / (60 * 60 * 1000)
+        Log.i(TAG, "AUTO_SPEEDUP: server $key blocks parallel downloads, held to $limit " +
+            "strike=${block.strikes} hoursLeft=$leftH")
+    }
+
+    /**
+     * Every download to the server failed while none delivered ([ParallelBlockTrial.failed]). The first such failure
+     * after downloads ran side by side holds this film to one download to see whether the server serves one.
+     */
+    fun onAllDownloadsFailed(url: String?, f: AllDownloadsFailed) {
+        val p = policy ?: return
+        val now = System.currentTimeMillis()
+        when (blockTrial.failed(f.running, f.served, now - f.ageMs, f.beside, f.block, received.get(), now)) {
+            ParallelBlockTrial.Verdict.TRYING -> {
+                limitBeforeTrial = p.requestLimit
+                p.requestLimit = 1
+                Log.i(TAG, "AUTO_SPEEDUP: every download failed together running=${f.running}, trying one " +
+                    "server=${HostSpeeds.keyOf(url)}")
+            }
+            ParallelBlockTrial.Verdict.CLEARED -> endTrial(p, learnt = false)
+            else -> Unit
+        }
+    }
+
+    private fun checkTrial(p: AutoSpeedupPolicy) {
+        if (!blockTrial.trying) return
+        when (blockTrial.progress(received.get(), requestsNow(), System.currentTimeMillis())) {
+            ParallelBlockTrial.Verdict.LEARNT -> endTrial(p, learnt = true)
+            ParallelBlockTrial.Verdict.CLEARED -> endTrial(p, learnt = false)
+            else -> Unit
+        }
+    }
+
+    private fun endTrial(p: AutoSpeedupPolicy, learnt: Boolean) {
+        val keys = listOfNotNull(HostSpeeds.keyOf(servedUrl), serverKey, hostKey).distinct()
+        if (learnt) {
+            val kept = keys.map { HostSpeeds.noteLimit(it, 1, blocks = true) }.firstOrNull()
+            val strike = kept?.strikes ?: 1
+            Log.i(TAG, "AUTO_SPEEDUP: server ${keys.firstOrNull()} blocks parallel downloads, learnt limit=1 " +
+                "holdDays=${HostSpeeds.blockHoldMs(strike) / (24 * 60 * 60 * 1000)} strike=$strike")
+        } else {
+            if (p.requestLimit == 1) p.requestLimit = limitBeforeTrial
+            Log.i(TAG, "AUTO_SPEEDUP: one download failed too or the server recovered, nothing learnt " +
+                "server=${keys.firstOrNull()} limit=${if (p.requestLimit == Int.MAX_VALUE) -1 else p.requestLimit}")
+        }
+    }
+
     /** What thumbnails may use next to the film ([PlaybackLine]). */
     private fun publishLine(p: AutoSpeedupPolicy, sample: AutoSpeedupPolicy.Sample) {
         val running = requestsNow()
@@ -634,6 +690,7 @@ internal object AutoSpeedup {
     fun onPlayerSample(sample: AutoSpeedupPolicy.Sample): Boolean {
         val p = policy ?: return false
         val before = p.downloads
+        checkTrial(p)
         p.roomCap = ConnectionLedger.app.playbackRoom(ledgerUrl, limits.maxDownloads, requests.running())
         p.onSample(sample.copy(bytes = received.get(), multiActive = multiOpen.get() > 0,
             requestMs = requests.requestMs(), requests = requestsNow()))

@@ -234,6 +234,57 @@ class ParallelRangeLazyMemoryTest {
         assertTrue("bytes differ after waiting", read.contentEquals(file))
     }
 
+    private fun withLongHeldWait(block: () -> Unit) {
+        val before = ParallelRangeDataSource.heldWaitMs
+        ParallelRangeDataSource.heldWaitMs = 60_000L
+        try {
+            block()
+        } finally {
+            ParallelRangeDataSource.heldWaitMs = before
+        }
+    }
+
+    private fun parkPieceOne(source: ParallelRangeDataSource): ByteArray {
+        source.open(spec(0))
+        val first = ByteArray(1_000)
+        assertTrue(source.read(first, 0, first.size) > 0)
+        futures(source)[0L]!!.get(10, TimeUnit.SECONDS)
+        call(source, "ensureChunkScheduled", 1L)
+        awaitTrue("the piece ahead started") { futures(source)[1L] != null }
+        Thread.sleep(300)
+        assertFalse("piece 1 must wait while piece 0 holds the share", futures(source)[1L]!!.isDone)
+        return first
+    }
+
+    @Test
+    fun `a waiting piece goes on as soon as the reader reaches it`() = withLongHeldWait {
+        val source = source { 2L * ParallelRangeDataSource.SEGMENT_BYTES }
+        val first = parkPieceOne(source)
+        val out = ByteArray(CHUNK + 50_000)
+        System.arraycopy(first, 0, out, 0, first.size)
+        var position = first.size
+        val started = System.nanoTime()
+        while (position < out.size) {
+            val read = source.read(out, position, minOf(70_000, out.size - position))
+            assertTrue(read > 0)
+            position += read
+        }
+        val tookMs = (System.nanoTime() - started) / 1_000_000L
+        assertTrue("reader waited $tookMs ms for the parked piece", tookMs < 5_000L)
+        assertTrue(out.contentEquals(file.copyOfRange(0, out.size)))
+    }
+
+    @Test
+    fun `a waiting piece stops as soon as its session ends`() = withLongHeldWait {
+        val source = source { 2L * ParallelRangeDataSource.SEGMENT_BYTES }
+        parkPieceOne(source)
+        val executor = (field(owned, "executorDelegate") as Lazy<*>).value as ThreadPoolExecutor
+        assertTrue(executor.activeCount > 0)
+        source.close()
+        call(owned, "releaseRetainedSession")
+        awaitTrue("the parked download is still running") { executor.activeCount == 0 }
+    }
+
     private companion object {
         const val CHUNK = 1_500_000
     }

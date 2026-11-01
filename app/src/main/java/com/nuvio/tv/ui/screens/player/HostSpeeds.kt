@@ -109,39 +109,93 @@ internal object HostSpeeds {
 
     /**
      * The requests a server took before it answered "too many requests": [limit] at [atMs]. One more is allowed for
-     * each [LIMIT_EASE_MS] without a refusal since, until [AutoSpeedup.MAX_IN_FLIGHT] lifts it.
+     * each [LIMIT_EASE_MS] without a refusal since, until [AutoSpeedup.MAX_IN_FLIGHT] lifts it. A server that [blocks]
+     * parallel downloads stays held for [blockHoldMs] of its [strikes] before it starts to ease; [blockAtMs] is when
+     * the last block was learnt.
      */
-    data class Limit(val limit: Int, val atMs: Long)
+    data class Limit(
+        val limit: Int,
+        val atMs: Long,
+        val blocks: Boolean = false,
+        val strikes: Int = 0,
+        val blockAtMs: Long = 0L
+    )
 
     const val LIMIT_EASE_MS = 30L * 60 * 1000
+    private const val DAY_MS = 24L * 60 * 60 * 1000
+    const val BLOCK_HOLD_MAX_MS = 7L * DAY_MS
+
+    /** Blocks stop counting after this long without one once the last hold ended. */
+    const val BLOCK_CLEAN_MS = 14L * DAY_MS
     private const val LIMIT_PREFIX = "limit:"
     private val limits = ConcurrentHashMap<String, Limit>()
 
+    /** One day at the first block, doubled at each block after a hold ran out, a week at most. */
+    fun blockHoldMs(strikes: Int): Long =
+        if (strikes <= 0) 0L else minOf(DAY_MS shl (strikes - 1).coerceAtMost(3), BLOCK_HOLD_MAX_MS)
+
+    private fun stored(key: String): Limit? =
+        limits[key] ?: prefs?.getString(LIMIT_PREFIX + key, null)?.let(::decodeLimit)?.also { limits[key] = it }
+
     /** The requests [key]'s server takes at once now, null when it never refused or has eased back. */
     fun limitOf(key: String, nowMs: Long = System.currentTimeMillis()): Int? {
-        val l = limits[key] ?: prefs?.getString(LIMIT_PREFIX + key, null)?.let(::decodeLimit)?.also { limits[key] = it }
-            ?: return null
+        val l = stored(key) ?: return null
         return easedLimit(l, nowMs)
     }
 
+    /** The held block verdict of [key]'s server, null when none holds now. */
+    fun heldBlock(key: String, nowMs: Long = System.currentTimeMillis()): Limit? =
+        stored(key)?.takeIf { blockHeld(it, nowMs) }
+
+    fun blockHeld(l: Limit, nowMs: Long): Boolean = l.blocks && nowMs - l.atMs in 0 until blockHoldMs(l.strikes)
+
     fun easedLimit(l: Limit, nowMs: Long): Int? {
-        val eased = l.limit + ((nowMs - l.atMs).coerceAtLeast(0L) / LIMIT_EASE_MS).toInt()
+        val since = if (l.blocks) (nowMs - l.atMs - blockHoldMs(l.strikes)) else (nowMs - l.atMs)
+        val eased = l.limit + (since.coerceAtLeast(0L) / LIMIT_EASE_MS).toInt()
         return eased.takeIf { it < AutoSpeedup.MAX_IN_FLIGHT }
     }
 
-    /** A refusal: the server is held to [limit] (or less, if it was held lower still) from [nowMs]. */
-    fun noteLimit(key: String, limit: Int, nowMs: Long = System.currentTimeMillis()) {
-        val held = limitOf(key, nowMs)
-        val l = Limit(if (held != null) minOf(held, limit) else limit, nowMs)
+    /**
+     * A refusal: the server is held to [limit] (or less, if it was held lower still) from [nowMs]. A softer refusal
+     * leaves a held [blocks] verdict as it is and keeps the count of blocks. Returns what is kept now.
+     */
+    fun noteLimit(key: String, limit: Int, nowMs: Long = System.currentTimeMillis(), blocks: Boolean = false): Limit? {
+        val old = stored(key)
+        val l = merged(old, limit, nowMs, blocks) ?: return old
         limits[key] = l
-        prefs?.edit()?.putString(LIMIT_PREFIX + key, "${l.limit},${l.atMs}")?.apply()
+        prefs?.edit()?.putString(LIMIT_PREFIX + key, encodeLimit(l))?.apply()
+        return l
     }
 
-    private fun decodeLimit(text: String): Limit? {
+    /** The block count a block learnt at [nowMs] starts: one more than [old]'s unless its last hold ended clean. */
+    fun strikesAfter(old: Limit?, nowMs: Long): Int {
+        if (old == null || old.strikes <= 0) return 1
+        if (old.blocks && blockHeld(old, nowMs)) return old.strikes
+        val holdEndMs = old.blockAtMs + blockHoldMs(old.strikes)
+        return if (nowMs - holdEndMs < BLOCK_CLEAN_MS) old.strikes + 1 else 1
+    }
+
+    /** What [noteLimit] keeps: null when [old] stays as it is. */
+    fun merged(old: Limit?, limit: Int, nowMs: Long, blocks: Boolean): Limit? {
+        if (old != null && !blocks && blockHeld(old, nowMs) && old.limit <= limit) return null
+        val held = old?.let { easedLimit(it, nowMs) }
+        val n = if (held != null) minOf(held, limit) else limit
+        if (blocks) return Limit(n, nowMs, blocks = true, strikes = strikesAfter(old, nowMs), blockAtMs = nowMs)
+        return Limit(n, nowMs, strikes = old?.strikes ?: 0, blockAtMs = old?.blockAtMs ?: 0L)
+    }
+
+    fun encodeLimit(l: Limit): String =
+        "${l.limit},${l.atMs}" + if (l.strikes > 0) ",${if (l.blocks) "b" else "s"},${l.strikes},${l.blockAtMs}" else ""
+
+    fun decodeLimit(text: String): Limit? {
         val p = text.split(',')
         val n = p.getOrNull(0)?.toIntOrNull() ?: return null
         val at = p.getOrNull(1)?.toLongOrNull() ?: return null
-        return if (n > 0) Limit(n, at) else null
+        if (n <= 0) return null
+        val strikes = p.getOrNull(3)?.toIntOrNull()?.coerceAtLeast(0) ?: 0
+        val blockAt = p.getOrNull(4)?.toLongOrNull() ?: 0L
+        if (strikes == 0) return Limit(n, at)
+        return Limit(n, at, blocks = p[2] == "b", strikes = strikes, blockAtMs = blockAt)
     }
 
     internal fun clearForTest() {

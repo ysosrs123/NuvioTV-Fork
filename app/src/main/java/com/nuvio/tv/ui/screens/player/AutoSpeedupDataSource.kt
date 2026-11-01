@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong
 internal class AutoSpeedupDataSource(
     private val single: DataSource.Factory,
     private val multi: DataSource.Factory,
-    private val pieceBytes: () -> Long,
+    private val pieceBytes: PieceBytes,
     private val downloads: () -> Int,
     private val received: AtomicLong,
     private val onMultiClosed: () -> Unit = {},
@@ -40,6 +40,11 @@ internal class AutoSpeedupDataSource(
 ) : DataSource, ByteBufferDataReader {
     private class Pending(val multi: Boolean, val atRead: Long, val source: DataSource, val opened: Future<*>)
     private class Prestarted(val pieceBytes: Long, val atRead: Long, val uri: Uri)
+
+    /** Asked on every read, so it returns a plain long. */
+    fun interface PieceBytes {
+        operator fun invoke(): Long
+    }
 
     /** Chunk sessions by piece size. */
     interface PieceSwitch {
@@ -293,7 +298,7 @@ internal class AutoSpeedupDataSource(
     class Factory(
         private val single: DataSource.Factory,
         private val multi: DataSource.Factory,
-        private val pieceBytes: () -> Long,
+        private val pieceBytes: PieceBytes,
         private val downloads: () -> Int,
         private val received: AtomicLong,
         private val onMultiClosed: () -> Unit = {},

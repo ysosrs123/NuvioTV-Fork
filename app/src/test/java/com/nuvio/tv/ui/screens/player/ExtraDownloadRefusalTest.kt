@@ -91,7 +91,11 @@ class ExtraDownloadRefusalTest {
         NuvioEngineConfig.set(NuvioEngineConfig.stockMode())
     }
 
-    private fun learnt(refuse: (Long) -> Boolean, pauseAfterOpenMs: Long): List<Int> {
+    private fun learnt(
+        refuse: (Long) -> Boolean,
+        pauseAfterOpenMs: Long,
+        allFailed: MutableList<AllDownloadsFailed> = mutableListOf()
+    ): List<Int> {
         val link = mockk<Uri>(relaxed = true) {
             every { host } returns "files.example"
             every { this@mockk.toString() } returns "https://files.example/film.mkv"
@@ -134,7 +138,8 @@ class ExtraDownloadRefusalTest {
             shouldAllowBackgroundPrefetch = { false },
             isolateSession = true,
             requestMeter = RequestMeter(),
-            onExtraRefused = { _, running -> learnt += running }
+            onExtraRefused = { _, running -> learnt += running },
+            onAllFailed = { _, f -> synchronized(allFailed) { allFailed += f } }
         )
         try {
             source.open(DataSpec.Builder().setUri(link).setPosition(0L).build())
@@ -163,7 +168,12 @@ class ExtraDownloadRefusalTest {
     }
 
     @Test fun `every download failing teaches nothing`() {
-        val learnt = learnt(refuse = { it >= 1L }, pauseAfterOpenMs = ExtraDownloadRefusal.DELIVERING_WITHIN_MS + 500L)
+        val allFailed = mutableListOf<AllDownloadsFailed>()
+        val learnt = learnt(refuse = { it >= 1L }, pauseAfterOpenMs = ExtraDownloadRefusal.DELIVERING_WITHIN_MS + 500L, allFailed)
         assertEquals(emptyList<Int>(), learnt)
+        synchronized(allFailed) {
+            assertTrue("allFailed $allFailed", allFailed.isNotEmpty())
+            assertTrue("allFailed $allFailed", allFailed.all { it.block })
+        }
     }
 }

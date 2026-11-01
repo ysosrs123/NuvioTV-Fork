@@ -23,7 +23,15 @@ import java.util.concurrent.ConcurrentHashMap
 object DirectDebridStreamFilter {
     const val FALLBACK_SOURCE_NAME = "Direct Debrid"
 
-    private val tokenRegexCache = ConcurrentHashMap<String, Regex>()
+    private const val FACTS_CACHE_SIZE = 4096
+    private const val TITLE_PATTERN_CACHE_SIZE = 256
+
+    /** Facts that do not depend on preferences, by stream value: ranking the same list again costs a lookup. */
+    private val baseFactsCache = object : LinkedHashMap<Stream, BaseFacts>(256, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Stream, BaseFacts>?): Boolean =
+            size > FACTS_CACHE_SIZE
+    }
+    private val titlePatternCache = ConcurrentHashMap<String, TitlePattern>()
     private val RESOLUTION_TOKENS = listOf(
         resolutionRegex("2160p?", "4k", "uhd") to DebridStreamResolution.P2160,
         resolutionRegex("1440p?", "2k") to DebridStreamResolution.P1440,
@@ -40,6 +48,8 @@ object DirectDebridStreamFilter {
     private val BRACKET_GROUP_REGEX = Regex("^\\[([A-Za-z0-9][A-Za-z0-9._-]{1,23})\\]")
     private val CHANNEL_TOKEN_REGEX = Regex("^\\d\\.\\d$")
     private val NON_ALPHANUMERIC_RUN_REGEX = Regex("[^a-z0-9]+")
+    private val NON_ALPHANUMERIC_REGEX = Regex("[^a-z0-9]")
+    private val NON_ALPHANUMERIC_OR_PLUS_REGEX = Regex("[^a-z0-9+]")
 
     /** Hyphen-suffixed tokens in release names that are never the group. */
     private val NON_GROUP_TOKENS = setOf(
@@ -75,9 +85,20 @@ object DirectDebridStreamFilter {
         DebridStreamLanguage.ZH to listOf("chinese"),
         DebridStreamLanguage.HE to listOf("heb", "hebrew")
     )
-    private val languageRegexes = DebridStreamLanguage.entries.map { language ->
-        language to languageRegex(listOf(language.code) + languageAliases[language].orEmpty())
+    private val languageMatchers = DebridStreamLanguage.entries.map { language ->
+        val tokens = listOf(language.code) + languageAliases[language].orEmpty()
+        LanguageMatcher(language, tokens.map { it.lowercase() }, languageRegex(tokens))
     }
+
+    private class LanguageMatcher(
+        val language: DebridStreamLanguage,
+        val tokens: List<String>,
+        val regex: Regex
+    ) {
+        fun matches(text: String): Boolean = tokens.any { text.contains(it) } && regex.containsMatchIn(text)
+    }
+
+    private class TitlePattern(val regex: Regex?)
 
     fun filterInstant(streams: List<Stream>, settings: DebridSettings? = null): List<Stream> {
         val instantStreams = streams
@@ -275,38 +296,65 @@ object DirectDebridStreamFilter {
         }
     }
 
+    private class BaseFacts(
+        val resolution: DebridStreamResolution,
+        val quality: DebridStreamQuality,
+        val visualTags: List<DebridStreamVisualTag>,
+        val audioTags: List<DebridStreamAudioTag>,
+        val audioChannels: List<DebridStreamAudioChannel>,
+        val encode: DebridStreamEncode,
+        val languages: List<DebridStreamLanguage>,
+        val releaseGroup: String,
+        val size: Long?
+    )
+
     private fun streamFacts(stream: Stream, preferences: DebridStreamPreferences): StreamFacts {
+        val base = baseFacts(stream)
+        return StreamFacts(
+            resolution = base.resolution,
+            quality = base.quality,
+            visualTags = base.visualTags,
+            audioTags = base.audioTags,
+            audioChannels = base.audioChannels,
+            encode = base.encode,
+            languages = base.languages,
+            releaseGroup = base.releaseGroup,
+            size = base.size,
+            resolutionRank = rank(base.resolution, preferences.preferredResolutions),
+            qualityRank = rank(base.quality, preferences.preferredQualities),
+            visualRank = rankAny(base.visualTags, preferences.preferredVisualTags),
+            audioRank = rankAny(base.audioTags, preferences.preferredAudioTags),
+            channelRank = rankAny(base.audioChannels, preferences.preferredAudioChannels),
+            encodeRank = rank(base.encode, preferences.preferredEncodes),
+            languageRank = if (base.languages.isEmpty()) Int.MAX_VALUE else base.languages.minOf { rank(it, preferences.preferredLanguages) },
+            groupRank = releaseGroupRank(base.releaseGroup, preferences.preferredReleaseGroups)
+        )
+    }
+
+    private fun baseFacts(stream: Stream): BaseFacts {
+        synchronized(baseFactsCache) { baseFactsCache[stream] }?.let { return it }
+        val computed = computeBaseFacts(stream)
+        synchronized(baseFactsCache) { baseFactsCache[stream] = computed }
+        return computed
+    }
+
+    private fun computeBaseFacts(stream: Stream): BaseFacts {
         val parsed = stream.clientResolve?.stream?.raw?.parsed
         val searchText = streamSearchText(stream)
-        val resolution = streamResolution(parsed?.resolution, parsed?.quality, stream.quality, searchText)
-        val quality = streamQuality(parsed?.quality, searchText)
-        val visualTags = streamVisualTags(parsed?.hdr.orEmpty(), searchText)
-        val audioTags = streamAudioTags(parsed?.audio.orEmpty(), searchText)
-        val audioChannels = streamAudioChannels(parsed?.channels.orEmpty(), searchText)
-        val encode = streamEncode(parsed?.codec, searchText)
         val languages = parsed?.languages.orEmpty().mapNotNull { languageFor(it) }.ifEmpty {
             val languageText = languageSearchText(stream)
-            languageRegexes.filter { (_, regex) -> regex.containsMatchIn(languageText) }.map { it.first }
+            languageMatchers.filter { it.matches(languageText) }.map { it.language }
         }
-        val releaseGroup = releaseGroupOf(stream)
-        return StreamFacts(
-            resolution = resolution,
-            quality = quality,
-            visualTags = visualTags,
-            audioTags = audioTags,
-            audioChannels = audioChannels,
-            encode = encode,
+        return BaseFacts(
+            resolution = streamResolution(parsed?.resolution, parsed?.quality, stream.quality, searchText),
+            quality = streamQuality(parsed?.quality, searchText),
+            visualTags = streamVisualTags(parsed?.hdr.orEmpty(), searchText),
+            audioTags = streamAudioTags(parsed?.audio.orEmpty(), searchText),
+            audioChannels = streamAudioChannels(parsed?.channels.orEmpty(), searchText),
+            encode = streamEncode(parsed?.codec, searchText),
             languages = languages,
-            releaseGroup = releaseGroup,
-            size = streamSize(stream),
-            resolutionRank = rank(resolution, preferences.preferredResolutions),
-            qualityRank = rank(quality, preferences.preferredQualities),
-            visualRank = rankAny(visualTags, preferences.preferredVisualTags),
-            audioRank = rankAny(audioTags, preferences.preferredAudioTags),
-            channelRank = rankAny(audioChannels, preferences.preferredAudioChannels),
-            encodeRank = rank(encode, preferences.preferredEncodes),
-            languageRank = if (languages.isEmpty()) Int.MAX_VALUE else languages.minOf { rank(it, preferences.preferredLanguages) },
-            groupRank = releaseGroupRank(releaseGroup, preferences.preferredReleaseGroups)
+            releaseGroup = releaseGroupOf(stream),
+            size = streamSize(stream)
         )
     }
 
@@ -491,18 +539,27 @@ object DirectDebridStreamFilter {
     private fun languageRegex(tokens: List<String>): Regex =
         Regex("(^|[^a-z0-9])(${tokens.joinToString("|") { Regex.escape(it) }})([^a-z0-9]|\$)")
 
+    /** [token] as a whole word: no letter or digit right before or after it. The receiver is lower case. */
     private fun String.hasToken(token: String): Boolean {
-        val pattern = "(^|[^a-z0-9])${Regex.escape(token.lowercase())}([^a-z0-9]|\$)"
-        return tokenRegexCache.getOrPut(pattern) { Regex(pattern) }.containsMatchIn(lowercase())
+        var from = 0
+        while (true) {
+            val at = indexOf(token, from)
+            if (at < 0) return false
+            val end = at + token.length
+            if ((at == 0 || !this[at - 1].isWordChar()) && (end == length || !this[end].isWordChar())) return true
+            from = at + 1
+        }
     }
 
+    private fun Char.isWordChar(): Boolean = this in 'a'..'z' || this in '0'..'9'
+
     private fun String.isDolbyVisionToken(): Boolean {
-        val normalized = lowercase().replace(Regex("[^a-z0-9]"), "")
+        val normalized = lowercase().replace(NON_ALPHANUMERIC_REGEX, "")
         return normalized == "dv" || normalized == "dovi" || normalized == "dolbyvision"
     }
 
     private fun String.isHdrToken(): Boolean {
-        val normalized = lowercase().replace(Regex("[^a-z0-9+]"), "")
+        val normalized = lowercase().replace(NON_ALPHANUMERIC_OR_PLUS_REGEX, "")
         return normalized == "hdr" ||
             normalized == "hdr10" ||
             normalized == "hdr10+" ||
@@ -548,12 +605,18 @@ object DirectDebridStreamFilter {
     private fun languageSearchText(stream: Stream): String {
         val resolve = stream.clientResolve
         val titleRegexes = listOfNotNull(resolve?.stream?.raw?.parsed?.parsedTitle, resolve?.title)
-            .mapNotNull { titleRegex(it) }
+            .mapNotNull { titlePattern(it) }
             .distinctBy { it.pattern }
             .sortedByDescending { it.pattern.length }
         return streamTexts(stream).joinToString(" ") { text ->
             titleRegexes.fold(text.lowercase()) { remaining, regex -> regex.replaceFirst(remaining, " ") }
         }
+    }
+
+    private fun titlePattern(title: String): Regex? {
+        titlePatternCache[title]?.let { return it.regex }
+        if (titlePatternCache.size >= TITLE_PATTERN_CACHE_SIZE) titlePatternCache.clear()
+        return TitlePattern(titleRegex(title)).also { titlePatternCache[title] = it }.regex
     }
 
     private fun titleRegex(title: String): Regex? {
