@@ -68,6 +68,8 @@ internal class IecPassthroughAudioSink(
     private var configuredHbr: Boolean = false
     private var writeStallStartedNanos: Long = WRITE_STALL_NOT_STARTED
     private var totalWriteStalls: Long = 0L
+    private var stallCounted = false
+    internal val writeStallCount: Long get() = totalWriteStalls
     private var reopenedAtNanos: Long = NEVER
     private var reopensForFormat: Int = 0
     private var deadOutputSinceNanos: Long = NEVER
@@ -777,7 +779,6 @@ internal class IecPassthroughAudioSink(
                 }
                 if (written == 0) {
                     if (playing) {
-                        if (!capHeld) totalWriteStalls++
                         val now = nanoTime()
                         val headNow = track.playbackHeadFrames()
                         if (writeStallStartedNanos == WRITE_STALL_NOT_STARTED ||
@@ -785,8 +786,13 @@ internal class IecPassthroughAudioSink(
                         ) {
                             writeStallStartedNanos = now
                             stallHeadFrames = headNow
+                            stallCounted = false
                         }
                         val stalledFor = now - writeStallStartedNanos
+                        if (!capHeld && !stallCounted && stalledFor >= WRITE_STALL_COUNT_NANOS) {
+                            stallCounted = true
+                            totalWriteStalls++
+                        }
                         if (stallIsFatal && stalledFor >= WRITE_STALL_BUDGET_NANOS) {
                             return fallbackToWrappedSink("write_stall_ms=${stalledFor / 1_000_000L}")
                         }
@@ -811,7 +817,11 @@ internal class IecPassthroughAudioSink(
         val frame = TrueHdMatPacker.paddingOnlyFrame()
         fillerFrame = if (track.payload == HbrPayload.MAT) frame else Iec61937Packer.packTrueHdInPlace(frame)
         fillerOffset = 0
-        onDiagnosticEvent?.invoke("iec_keepalive_armed payload=${track.payload} capMs=$KEEP_ALIVE_CAP_MS")
+        onDiagnosticEvent?.invoke(
+            "iec_keepalive_armed payload=${track.payload} " +
+                "capMs=${keepAliveCapFrames(track) * 1000L / track.sampleRate} " +
+                "lowWaterMs=${keepAliveLowWaterFrames(track) * 1000L / track.sampleRate}"
+        )
         if (keepAliveThreadEnabled) startKeepAliveThread()
     }
 
@@ -843,8 +853,8 @@ internal class IecPassthroughAudioSink(
 
     /**
      * Tops the track up with a padding-only MAT frame whenever less than [KEEP_ALIVE_LOW_WATER_MS]
-     * of audio is queued: during a pause or a seek, and when the playback thread is late. Runs on
-     * the keep-alive thread, or from a test.
+     * (less on a small track, see [IecKeepAliveLevels]) of audio is queued: during a pause or a seek,
+     * and when the playback thread is late. Runs on the keep-alive thread, or from a test.
      */
     internal fun keepAliveTick() {
         val track = iecTrack ?: return
@@ -926,10 +936,13 @@ internal class IecPassthroughAudioSink(
     }
 
     private fun keepAliveCapFrames(track: IecAudioTrack): Long =
-        KEEP_ALIVE_CAP_MS * track.sampleRate / 1000L
+        IecKeepAliveLevels.capFrames(track.sampleRate, trackBufferFrames(track))
 
     private fun keepAliveLowWaterFrames(track: IecAudioTrack): Long =
-        KEEP_ALIVE_LOW_WATER_MS * track.sampleRate / 1000L
+        IecKeepAliveLevels.lowWaterFrames(track.sampleRate, trackBufferFrames(track))
+
+    private fun trackBufferFrames(track: IecAudioTrack): Long =
+        if (track.frameSizeBytes > 0) track.bufferSizeBytes.toLong() / track.frameSizeBytes else 0L
 
     /**
      * The output went away under the track (HDMI hotplug, TV input switch). Opens a new IEC track once and
@@ -1194,6 +1207,8 @@ internal class IecPassthroughAudioSink(
         const val IEC_SAMPLE_RATE_44K1 = 176_400
         internal const val IEC_BUFFER_TARGET_MS = 1_000
         internal const val WRITE_STALL_BUDGET_NANOS = 500_000_000L
+        /** A full buffer refuses writes for moments as it plays: only this long without a write counts as a stall. */
+        internal const val WRITE_STALL_COUNT_NANOS = 200_000_000L
         private const val WRITE_STALL_NOT_STARTED = Long.MIN_VALUE
         internal const val WRITE_ERROR_FALLBACK_REFUSED = -1_000
         internal const val WRITE_ERROR_DEAD_OBJECT = -6

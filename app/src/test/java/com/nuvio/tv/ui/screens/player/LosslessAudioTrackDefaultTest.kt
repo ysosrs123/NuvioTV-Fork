@@ -192,4 +192,75 @@ class LosslessAudioTrackDefaultTest {
     fun `empty track list is a no-op`() {
         assertNull(LosslessAudioTrackDefault.pickDefaultIndex(emptyList(), listOf("en"), exactMatch))
     }
+
+    // --- commentary and the language pool ---
+
+    @Test
+    fun `a language whose only track is a commentary does not form the pool`() {
+        val tracks = listOf(
+            track(0, "TrueHD", "TrueHD Atmos 7.1", language = "ko", channels = 8),
+            track(1, "AC-3", "Commentary by Bong Joon Ho/Tony Rayns (AC-3 Stereo)", channels = 2, selected = true)
+        )
+        assertEquals(0, LosslessAudioTrackDefault.pickDefaultIndex(tracks, listOf("en"), exactMatch))
+    }
+
+    @Test
+    fun `flagged commentary does not form the pool either`() {
+        val tracks = listOf(
+            track(0, "AC-3", "English (AC-3 Stereo)", channels = 2, selected = true).copy(role = TrackRole.COMMENTARY),
+            track(1, "TrueHD", "Korean (TrueHD 7.1)", language = "ko", channels = 8)
+        )
+        assertEquals(1, LosslessAudioTrackDefault.pickDefaultIndex(tracks, listOf("en"), exactMatch))
+    }
+
+    @Test
+    fun `english truehd still wins over an english commentary`() {
+        val tracks = listOf(
+            track(0, "AC-3", "Commentary (AC-3 Stereo)", channels = 2, selected = true),
+            track(1, "TrueHD", "English (TrueHD 7.1)", channels = 8),
+            track(2, "TrueHD", "Deutsch (TrueHD 7.1)", language = "de", channels = 8)
+        )
+        assertEquals(1, LosslessAudioTrackDefault.pickDefaultIndex(tracks, listOf("en"), exactMatch))
+    }
+
+    @Test
+    fun `english lossy main with a commentary keeps the engine pick`() {
+        val tracks = listOf(
+            track(0, "E-AC-3", "English (E-AC-3 5.1)", selected = true),
+            track(1, "AC-3", "Commentary (AC-3 Stereo)", channels = 2),
+            track(2, "TrueHD", "Deutsch (TrueHD 7.1)", language = "de", channels = 8)
+        )
+        assertNull(LosslessAudioTrackDefault.pickDefaultIndex(tracks, listOf("en"), exactMatch))
+        assertNull(LosslessAudioTrackDefault.pickInsteadOfCommentary(tracks, 0, listOf("en"), exactMatch))
+    }
+
+    @Test
+    fun `engine pick of a commentary is replaced by the main track`() {
+        val tracks = listOf(
+            track(0, "AC-3", "Korean (AC-3 5.1)", language = "ko"),
+            track(1, "AC-3", "Commentary (AC-3 Stereo)", channels = 2, selected = true)
+        )
+        assertNull(LosslessAudioTrackDefault.pickDefaultIndex(tracks, listOf("en"), exactMatch))
+        assertEquals(0, LosslessAudioTrackDefault.pickInsteadOfCommentary(tracks, 1, listOf("en"), exactMatch))
+    }
+
+    @Test
+    fun `replacement for a commentary prefers the preferred language, then channels`() {
+        val tracks = listOf(
+            track(0, "AC-3", "Deutsch (AC-3 5.1)", language = "de"),
+            track(1, "AC-3", "Commentary (AC-3 Stereo)", channels = 2, selected = true),
+            track(2, "AAC", "English (AAC Stereo)", channels = 2),
+            track(3, "E-AC-3", "English (E-AC-3 5.1)")
+        )
+        assertEquals(3, LosslessAudioTrackDefault.pickInsteadOfCommentary(tracks, 1, listOf("en"), exactMatch))
+    }
+
+    @Test
+    fun `commentary pick stands when every track is a commentary`() {
+        val tracks = listOf(
+            track(0, "AC-3", "Commentary 1 (AC-3 Stereo)", channels = 2, selected = true),
+            track(1, "AC-3", "Commentary 2 (AC-3 Stereo)", channels = 2)
+        )
+        assertNull(LosslessAudioTrackDefault.pickInsteadOfCommentary(tracks, 0, listOf("en"), exactMatch))
+    }
 }

@@ -66,6 +66,13 @@ internal fun PlayerRuntimeController.logAudioStart(
     player: ExoPlayer,
     config: AudioSink.AudioTrackConfig,
     output: String
+) = logAudioStart(player, config.tunneling, config.offload, output)
+
+internal fun PlayerRuntimeController.logAudioStart(
+    player: ExoPlayer,
+    tunnelled: Boolean,
+    offload: Boolean,
+    output: String
 ) {
     runCatching {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
@@ -76,9 +83,9 @@ internal fun PlayerRuntimeController.logAudioStart(
                 sessionId = player.audioSessionId,
                 effectControlSessionId = effectControlSessionId,
                 output = output,
-                tunnelled = config.tunneling,
+                tunnelled = tunnelled,
                 tunnellingAsked = isTunnelingActiveForCurrentPlayback,
-                offload = config.offload,
+                offload = offload,
                 outputTakes = runCatching { PassthroughOutputReturn.liveEncodings(context) }.getOrNull(),
                 mediaVolume = audioManager?.getStreamVolume(AudioManager.STREAM_MUSIC),
                 mediaVolumeMax = audioManager?.getStreamMaxVolume(AudioManager.STREAM_MUSIC),

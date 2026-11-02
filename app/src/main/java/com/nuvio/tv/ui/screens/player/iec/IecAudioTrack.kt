@@ -156,7 +156,10 @@ internal class PlatformIecAudioTrackFactory : IecAudioTrackFactory {
                         sessionId
                     )
                     if (track != null) {
-                        Log.i(TAG, "opened IEC61937 $sampleRate/$channelCount")
+                        Log.i(
+                            TAG,
+                            "opened IEC61937 $sampleRate/$channelCount ${bufferDescription(track, sampleRate, channelCount)}"
+                        )
                         if (trueHd) Log.i(TAG, "TrueHD output: IEC61937 (MAT in IEC 61937 bursts)")
                         return PlatformIecAudioTrack(
                             track.first,
@@ -178,7 +181,10 @@ internal class PlatformIecAudioTrackFactory : IecAudioTrackFactory {
                     val mat = dolbyMatEncoding() ?: continue
                     val track = createTrack(sampleRate, mask, mat, bufferSizeBytes, sessionId)
                     if (track != null) {
-                        Log.i(TAG, "opened DOLBY_MAT $sampleRate/$channelCount")
+                        Log.i(
+                            TAG,
+                            "opened DOLBY_MAT $sampleRate/$channelCount ${bufferDescription(track, sampleRate, channelCount)}"
+                        )
                         Log.i(TAG, "TrueHD output: Dolby MAT (IEC61937 not available)")
                         return PlatformIecAudioTrack(
                             track.first,
@@ -206,10 +212,25 @@ internal class PlatformIecAudioTrackFactory : IecAudioTrackFactory {
         if (min <= 0) return null
         val requested = maxOf(min, bufferSizeBytes)
         if (requested > min) {
-            createTrackAtSize(sampleRate, channelMask, encoding, requested, sessionId)
-                ?.let { return it to requested }
+            // A refusal here usually means the previous output on HDMI is still closing; it is gone
+            // a few tens of milliseconds later, while the minimum size holds only tens of milliseconds.
+            for (attempt in 1..FULL_SIZE_OPEN_ATTEMPTS) {
+                if (attempt > 1) SystemClock.sleep(FULL_SIZE_RETRY_MS)
+                val track = createTrackAtSize(sampleRate, channelMask, encoding, requested, sessionId)
+                if (track != null) {
+                    if (attempt > 1) Log.i(TAG, "full buffer open succeeded on attempt $attempt")
+                    return track to requested
+                }
+            }
+            Log.w(TAG, "full buffer open refused $FULL_SIZE_OPEN_ATTEMPTS times, trying the minimum size $min")
         }
         return createTrackAtSize(sampleRate, channelMask, encoding, min, sessionId)?.let { it to min }
+    }
+
+    private fun bufferDescription(track: Pair<AudioTrack, Int>, sampleRate: Int, channelCount: Int): String {
+        val bytes = track.second
+        val ms = bytes.toLong() * 1000L / (sampleRate.toLong() * channelCount * 2)
+        return "buffer=$bytes bytes (${ms} ms) frames=${track.first.bufferSizeInFrames}"
     }
 
     private fun createTrackAtSize(
@@ -258,6 +279,10 @@ internal class PlatformIecAudioTrackFactory : IecAudioTrackFactory {
         private val PROBE_DELAYS_MS = longArrayOf(0L, 2_000L, 1_000L)
 
         private const val PROBE_DEFER_RETRY_MS = 2_000L
+
+        private const val FULL_SIZE_OPEN_ATTEMPTS = 4
+
+        private const val FULL_SIZE_RETRY_MS = 50L
 
         @Volatile
         private var iec61937Usable: Boolean = false

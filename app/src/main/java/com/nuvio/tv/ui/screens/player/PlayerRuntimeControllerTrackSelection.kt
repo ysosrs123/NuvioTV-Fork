@@ -787,7 +787,7 @@ internal fun PlayerRuntimeController.rememberAddonSubtitleSelection(subtitle: Su
     rememberSubtitleLanguagePreference(PlayerSubtitleUtils.normalizeLanguageCode(subtitle.lang))
 }
 
-private fun PlayerRuntimeController.currentTrackPreferenceForPersistence(): PlayerRuntimeController.TrackPreference {
+internal fun PlayerRuntimeController.currentTrackPreferenceForPersistence(): PlayerRuntimeController.TrackPreference {
     return trackPreferenceForPersistence(
         remembered = rememberedTrackPreference,
         pending = persistedTrackPreference,

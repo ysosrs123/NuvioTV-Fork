@@ -986,6 +986,26 @@ class IecPassthroughAudioSinkTest {
     }
 
     @Test
+    fun dtsHd_aFullBufferForMomentsIsNotCountedAsAStall() {
+        val clock = longArrayOf(0L)
+        val factory = ReadyFactory(FakeIecAudioTrack(192_000, 16, fixedWriteResult = 0))
+        val sink = IecPassthroughAudioSink(sink = RecordingSink(), trackFactory = factory, nanoTime = { clock[0] })
+        sink.configure(dtsHdFormat(), 0, null)
+        sink.play()
+        assertTrue(sink.handleBuffer(ByteBuffer.allocate(64), 0L, 1))
+        repeat(20) {
+            clock[0] += 5_000_000L
+            sink.handleBuffer(ByteBuffer.allocate(64), 0L, 1)
+        }
+        assertEquals(0L, sink.writeStallCount)
+        clock[0] = IecPassthroughAudioSink.WRITE_STALL_COUNT_NANOS
+        sink.handleBuffer(ByteBuffer.allocate(64), 0L, 1)
+        clock[0] += 5_000_000L
+        sink.handleBuffer(ByteBuffer.allocate(64), 0L, 1)
+        assertEquals(1L, sink.writeStallCount)
+    }
+
+    @Test
     fun dtsHd_stalledWritesWhilePaused_doNotCountTowardFallback() {
         val clock = longArrayOf(0L)
         val inner = RecordingSink()

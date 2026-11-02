@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.update
  * an engine-failover carry-over, this default, then the engine's own default.
  *
  * The preference applies only within the first preferred language that has any
- * track; a lossless track is never chosen over the user's language. A track is
+ * track other than a commentary; a lossless track is never chosen over the user's
+ * language. When nothing lossless qualifies and the engine landed on a commentary,
+ * the main track is chosen instead. A track is
  * ranked only when its codec or name proves the tier (mpv reports plain "dts",
  * so it needs an MA / Master Audio hint; ExoPlayer's DTS-HD mime ranks as
  * lossless). The default is never persisted.
@@ -63,6 +65,19 @@ internal object LosslessAudioTrackDefault {
         return commentaryHints.any { it in n }
     }
 
+    private fun isCommentary(track: TrackInfo): Boolean =
+        isCommentaryLike(track.name) || isCommentaryRole(track.role)
+
+    private fun languagePool(
+        tracks: List<TrackInfo>,
+        preferredLanguages: List<String>,
+        languageMatches: (String?, String) -> Boolean
+    ): List<TrackInfo> = preferredLanguages
+        .asSequence()
+        .map { lang -> tracks.filter { languageMatches(it.language, lang) && !isCommentary(it) } }
+        .firstOrNull { it.isNotEmpty() }
+        ?: tracks
+
     /**
      * Index of the track the default should select, or null when the engine's own pick
      * should stand. [languageMatches] is (trackLanguage, preferredLanguage) -> Boolean,
@@ -75,13 +90,9 @@ internal object LosslessAudioTrackDefault {
     ): Int? {
         if (tracks.isEmpty()) return null
 
-        // Candidate pool: the first preferred language that has any track; if no
-        // preferred language matches anything, the whole set.
-        val pool = preferredLanguages
-            .asSequence()
-            .map { lang -> tracks.filter { languageMatches(it.language, lang) } }
-            .firstOrNull { it.isNotEmpty() }
-            ?: tracks
+        // Candidate pool: the first preferred language that has a track other than a
+        // commentary; if no preferred language matches anything, the whole set.
+        val pool = languagePool(tracks, preferredLanguages, languageMatches)
 
         val ranked = pool.mapNotNull { track ->
             losslessTier(track.codec, track.name)?.let { tier -> track to tier }
@@ -93,19 +104,38 @@ internal object LosslessAudioTrackDefault {
         val byTierDesc = ranked.groupBy({ it.second }, { it.first })
             .toSortedMap(compareByDescending { it })
         for ((_, tierTracks) in byTierDesc) {
-            val clean = tierTracks.filterNot { isCommentaryLike(it.name) || isCommentaryRole(it.role) }
-            if (clean.isNotEmpty()) {
-                return clean
-                    .sortedWith(
-                        compareByDescending<TrackInfo> { it.channelCount ?: 0 }
-                            .thenBy { it.index }
-                    )
-                    .first()
-                    .index
-            }
+            val clean = tierTracks.filterNot { isCommentary(it) }
+            if (clean.isNotEmpty()) return mostChannels(clean)
         }
         return null
     }
+
+    /**
+     * Index of a main track to use instead of the engine's pick when that pick is a
+     * commentary, or null when the engine's pick should stand. Only used when
+     * [pickDefaultIndex] found nothing lossless.
+     */
+    fun pickInsteadOfCommentary(
+        tracks: List<TrackInfo>,
+        selectedIndex: Int,
+        preferredLanguages: List<String>,
+        languageMatches: (String?, String) -> Boolean
+    ): Int? {
+        val selected = tracks.firstOrNull { it.index == selectedIndex } ?: return null
+        if (!isCommentary(selected)) return null
+        val clean = tracks.filterNot { isCommentary(it) }
+        if (clean.isEmpty()) return null
+        return mostChannels(languagePool(clean, preferredLanguages, languageMatches))
+    }
+
+    private fun mostChannels(tracks: List<TrackInfo>): Int =
+        tracks
+            .sortedWith(
+                compareByDescending<TrackInfo> { it.channelCount ?: 0 }
+                    .thenBy { it.index }
+            )
+            .first()
+            .index
 }
 
 /**
@@ -138,7 +168,7 @@ internal fun PlayerRuntimeController.applyLosslessAudioDefaultIfUnset(
 
     losslessAudioDefaultAppliedForStream = true
 
-    val pick = LosslessAudioTrackDefault.pickDefaultIndex(
+    val losslessPick = LosslessAudioTrackDefault.pickDefaultIndex(
         tracks = audioTracks,
         preferredLanguages = mpvPreferredAudioLanguages,
         languageMatches = { trackLanguage, preferred ->
@@ -147,6 +177,14 @@ internal fun PlayerRuntimeController.applyLosslessAudioDefaultIfUnset(
     )
     val selectedIndex = audioTracks.indexOfFirst { it.isSelected }
         .takeIf { it >= 0 } ?: _uiState.value.selectedAudioTrackIndex
+    val pick = losslessPick ?: LosslessAudioTrackDefault.pickInsteadOfCommentary(
+        tracks = audioTracks,
+        selectedIndex = selectedIndex,
+        preferredLanguages = mpvPreferredAudioLanguages,
+        languageMatches = { trackLanguage, preferred ->
+            PlayerSubtitleUtils.matchesLanguageCode(trackLanguage, preferred)
+        }
+    )
     if (pick == null || pick == selectedIndex) {
         logSwitchTrace(
             stage = "lossless-default",
@@ -160,7 +198,8 @@ internal fun PlayerRuntimeController.applyLosslessAudioDefaultIfUnset(
     val target = audioTracks[pick]
     logSwitchTrace(
         stage = "lossless-default",
-        message = "result=apply index=$pick codec=${target.codec} lang=${target.language} " +
+        message = "result=apply reason=${if (losslessPick != null) "lossless" else "not-commentary"} " +
+            "index=$pick codec=${target.codec} lang=${target.language} " +
             "name=${target.name} channels=${target.channelCount} was=$selectedIndex"
     )
     selectAudioTrack(pick)
