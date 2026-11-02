@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.player.thumbnail
 
+import android.graphics.Bitmap
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.CancellationException
@@ -189,6 +190,20 @@ internal object CopyFirst {
     /** [a] and [b] are the same entry of the same source list. */
     fun sameOffer(a: CopyOffer, b: CopyOffer): Boolean = a.id == b.id && a.label == b.label && a.sizeBytes == b.sizeBytes
 
+    /** The same entry on another reading of the list, where the sources may be numbered otherwise. */
+    fun sameListing(a: CopyOffer, b: CopyOffer): Boolean =
+        a.label == b.label && a.sizeBytes == b.sizeBytes && a.height == b.height && a.source == b.source
+
+    /** The same file listed by another add-on: the same size to the byte (a size the list states). */
+    fun sameFile(a: CopyOffer, b: CopyOffer): Boolean =
+        a.sizeBytes != null && a.sizeBytes > 0L && a.sizeBytes == b.sizeBytes && a.height == b.height
+
+    /** Reasons a copy is not used that hold for the file itself, wherever it is listed. */
+    fun turnsDownTheFile(why: String?): Boolean =
+        why != null && (why.startsWith("length ") || why.startsWith("only ") || why.startsWith("picture shape ") ||
+            why.startsWith("its pictures did not match") || why.startsWith("encoded (compressed)") ||
+            why.startsWith("not MKV or MP4"))
+
     /** During play the copy starts at the film's first frame; behind the generating screen at once. */
     fun startsNow(screenUp: Boolean, firstFrameShown: Boolean): Boolean = screenUp || firstFrameShown
 
@@ -207,8 +222,18 @@ internal object CopyFirst {
     fun headStartPick(
         verdicts: List<Pair<CopyOffer, String?>>, offers: CopyOffers, penalised: (CopyOffer) -> Boolean = { false },
         batched: (CopyOffer) -> Boolean? = { null },
-    ): CopyOffer? = CopyChoice.order(verdicts.filter { it.second == null }.map { it.first },
-        ownMs = offers.playing?.durationMs, penalised = penalised, batched = batched).firstOrNull()
+    ): CopyOffer? = headStartOrder(verdicts, offers, penalised, batched).firstOrNull()
+
+    /** Every offer [headStartPick] could open, best first. */
+    fun headStartOrder(
+        verdicts: List<Pair<CopyOffer, String?>>, offers: CopyOffers, penalised: (CopyOffer) -> Boolean = { false },
+        batched: (CopyOffer) -> Boolean? = { null },
+    ): List<CopyOffer> = CopyChoice.order(verdicts.filter { it.second == null }.map { it.first },
+        ownMs = offers.playing?.durationMs, penalised = penalised, batched = batched)
+
+    /** The next copy after [top] that is another file, so a bad file never takes its backup with it. */
+    fun backupOf(order: List<CopyOffer>, top: CopyOffer): CopyOffer? =
+        order.firstOrNull { !sameOffer(it, top) && !sameFile(it, top) }
 
     /** Each offer with why the head start leaves it out, null when it may be opened; empty when the playing picture is not known. */
     fun headStartVerdicts(
@@ -235,14 +260,19 @@ internal object CopyFirst {
  */
 internal class CopyHeadStart(
     val identity: String,
-    val pickedAtMs: Long = SystemClock.elapsedRealtime(),
+    pickedAtMs: Long = SystemClock.elapsedRealtime(),
     private val client: (Map<String, String>) -> OkHttpClient = ::thumbnailHttpClient,
+    /** Started while the stream list was shown ([CopyPrePick]): the player's list may number its sources otherwise. */
+    private val beforePick: Boolean = false,
 ) {
     private companion object {
         const val TAG = "ThumbCopy"
         const val LIST_POLL_MS = 300L
     }
 
+    @Volatile var pickedAtMs = pickedAtMs
+        private set
+    @Volatile private var picked = !beforePick
     @Volatile var offer: CopyOffer? = null
         private set
     @Volatile var openedAtMs = 0L
@@ -253,6 +283,12 @@ internal class CopyHeadStart(
     /** The link opened: [openedAtMs] is set and a link came back. */
     @Volatile var opened = false
         private set
+    /** The next copy, another file, opened beside this one so the pass has it ready when this one is not used. */
+    @Volatile var backup: CopyHeadStart? = null
+        private set
+    /** The header and index read on the link failed: a link opened before the pick is not handed over then. */
+    @Volatile var prereadFailed = false
+        private set
     private val link = CompletableDeferred<CopyLink?>()
     /** The copy chosen, or null once it is clear none is. */
     private val chosen = CompletableDeferred<CopyOffer?>()
@@ -260,9 +296,11 @@ internal class CopyHeadStart(
     private val released = AtomicBoolean(false)
     private val givenBack = AtomicBoolean(false)
     @Volatile private var job: Job? = null
+    @Volatile private var earlyShown: ((Int, Long, Bitmap) -> Unit)? = null
 
     private fun giveBack(l: CopyLink?) {
         if (l != null && givenBack.compareAndSet(false, true)) {
+            if (beforePick) Log.i(TAG, "copy first: link of ${offer?.label} given back, ${at()} (${l.via})")
             l.dropPreread()
             runCatching { l.done() }
         }
@@ -270,14 +308,23 @@ internal class CopyHeadStart(
 
     private fun since(): Long = SystemClock.elapsedRealtime() - pickedAtMs
 
+    private fun at(): String =
+        if (picked) "${since()} ms after the stream pick" else "${since()} ms after the stream list was shown"
+
+    private fun matches(a: CopyOffer, b: CopyOffer): Boolean =
+        if (beforePick) CopyFirst.sameListing(a, b) else CopyFirst.sameOffer(a, b)
+
+    private fun handOut(): Boolean = synchronized(this) { handed.compareAndSet(false, true) }
+
     /**
      * [anchorMs]: where playback starts, for the pictures made before the session ([CopyEarly]); [early]: whether
-     * they are made at all.
+     * they are made at all; [shown]: each of them as it is made, for the generating screen.
      */
     fun start(
         scope: CoroutineScope, sources: CopySources, book: CopySourceBook?, ownBytes: Long?,
-        anchorMs: suspend () -> Long = { 0L }, early: Boolean = false,
+        anchorMs: suspend () -> Long = { 0L }, early: Boolean = false, shown: ((Int, Long, Bitmap) -> Unit)? = null,
     ) {
+        earlyShown = shown
         job = scope.launch {
             try {
                 runCatching { sources.loadNow() }.onFailure { if (it is CancellationException) throw it }
@@ -298,10 +345,11 @@ internal class CopyHeadStart(
                 val batched: (CopyOffer) -> Boolean? = { sources.multiRange(it) }
                 val ranking = SystemClock.elapsedRealtime()
                 val verdicts = CopyFirst.headStartVerdicts(offers, ownBytes, batched)
-                val top = CopyFirst.headStartPick(verdicts, offers, { book?.penalised(it) == true }, batched)
+                val order = CopyFirst.headStartOrder(verdicts, offers, { book?.penalised(it) == true }, batched)
+                val top = order.firstOrNull()
                 val rankMs = SystemClock.elapsedRealtime() - ranking
                 if (top == null) {
-                    Log.i(TAG, "copy first: source list ${since()} ms after the stream pick, " + if (verdicts.isEmpty())
+                    Log.i(TAG, "copy first: source list ${at()}, " + if (verdicts.isEmpty())
                         "the playing picture is not known yet - the pass decides" else
                         "no copy fits (" + CopyChoice.reasonTally(verdicts.mapNotNull { it.second }) + ")")
                     link.complete(null)
@@ -310,26 +358,13 @@ internal class CopyHeadStart(
                 offer = top
                 listed = offers
                 chosen.complete(top)
-                Log.i(TAG, "copy first: ${top.label} chosen ${since()} ms after the stream pick " +
+                Log.i(TAG, "copy first: ${top.label} chosen ${at()} " +
                     "(${verdicts.count { it.second == null }} of ${offers.offers.size} sources fit, list ready " +
                     "${listedAt - pickedAtMs} ms after the pick, read in $buildMs ms, ranked in $rankMs ms)")
-                runCatching { sources.prewarm(top) }.onFailure { if (it is CancellationException) throw it }
-                var got: CopyLink? = null
-                try {
-                    withTimeoutOrNull(CopyFirst.OPEN_TIMEOUT_MS) { sources.open(top).also { got = it } }
-                } catch (e: CancellationException) {
-                    giveBack(got)
-                    throw e
+                CopyFirst.backupOf(order, top)?.let { next ->
+                    backup = CopyHeadStart(identity, pickedAtMs, client, beforePick).also { it.startOn(scope, sources, next, offers, ownBytes) }
                 }
-                val l = got
-                openedAtMs = SystemClock.elapsedRealtime()
-                opened = l != null
-                Log.i(TAG, if (l != null) "copy first: link of ${top.label} open ${since()} ms after the stream pick via ${l.via}"
-                    else "copy first: no link for ${top.label} (${since()} ms after the stream pick)")
-                if (l != null && !released.get()) l.preread = scope.async(Dispatchers.IO) {
-                    preread(top, l, ownBytes)?.also { p -> if (early && !released.get()) startEarly(scope, top, l, p, anchorMs) }
-                }
-                if (!link.complete(l) || (released.get() && !handed.get())) giveBack(l)
+                openChosen(scope, sources, top, ownBytes, anchorMs, early)
             } catch (e: CancellationException) {
                 link.complete(null)
                 throw e
@@ -340,6 +375,50 @@ internal class CopyHeadStart(
                 chosen.complete(null)
             }
         }
+    }
+
+    /** The backup: [o] chosen by the head start that made this one, opened the same way without early pictures. */
+    private fun startOn(scope: CoroutineScope, sources: CopySources, o: CopyOffer, offers: CopyOffers, ownBytes: Long?) {
+        job = scope.launch {
+            try {
+                offer = o
+                listed = offers
+                chosen.complete(o)
+                Log.i(TAG, "copy first: ${o.label} opened beside it as the backup, ${at()}")
+                openChosen(scope, sources, o, ownBytes, { 0L }, early = false)
+            } catch (e: CancellationException) {
+                link.complete(null)
+                throw e
+            } catch (t: Throwable) {
+                Log.w(TAG, "copy first: backup ended (${t.javaClass.simpleName})")
+                link.complete(null)
+            } finally {
+                chosen.complete(null)
+            }
+        }
+    }
+
+    private suspend fun openChosen(
+        scope: CoroutineScope, sources: CopySources, top: CopyOffer, ownBytes: Long?, anchorMs: suspend () -> Long,
+        early: Boolean,
+    ) {
+        runCatching { sources.prewarm(top) }.onFailure { if (it is CancellationException) throw it }
+        var got: CopyLink? = null
+        try {
+            withTimeoutOrNull(CopyFirst.OPEN_TIMEOUT_MS) { sources.open(top).also { got = it } }
+        } catch (e: CancellationException) {
+            giveBack(got)
+            throw e
+        }
+        val l = got
+        openedAtMs = SystemClock.elapsedRealtime()
+        opened = l != null
+        Log.i(TAG, if (l != null) "copy first: link of ${top.label} open ${at()} via ${l.via}"
+            else "copy first: no link for ${top.label} (${at()})")
+        if (l != null && !released.get()) l.preread = scope.async(Dispatchers.IO) {
+            preread(top, l, ownBytes)?.also { p -> if (early && !released.get()) startEarly(scope, top, l, p, anchorMs) }
+        }
+        if (!link.complete(l) || (released.get() && !handed.get())) giveBack(l)
     }
 
     /**
@@ -384,20 +463,21 @@ internal class CopyHeadStart(
             Log.i(TAG, "copy first: header and index of ${o.label} read ${done - openedAtMs} ms after its link opened " +
                 "(${(r.bytes + if (linkHead != null) linkHead.size else 0) / 1024} KB, " +
                 (if (linkHead != null) "first bytes with the link's redirects" else "first bytes in $headMs ms") +
-                ", index in up to $parts ranges at once), ${since()} ms after the stream pick")
+                ", index in up to $parts ranges at once), ${at()}")
             return CopyPreread(r, head, index, mkv, headMs, done - t0, done)
         } catch (e: CancellationException) {
             r.close()
             throw e
         } catch (t: Throwable) {
             r.close()
-            Log.i(TAG, "copy first: header and index of ${o.label} not read ahead (${t.javaClass.simpleName}) - the pass reads them")
+            prereadFailed = true
+            Log.i(TAG, "copy first: header and index of ${o.label} not read ahead (${t.message ?: t.javaClass.simpleName}) - the pass reads them")
             return null
         }
     }
 
     private fun startEarly(scope: CoroutineScope, o: CopyOffer, l: CopyLink, p: CopyPreread, anchorMs: suspend () -> Long) {
-        val e = CopyEarly(o.label, pickedAtMs)
+        val e = CopyEarly(o.label, pickedAtMs, earlyShown)
         l.early = e
         e.start(scope, p, MemoryGovernor.isStrongHardware, anchorMs) {
             if (released.get() && !handed.get()) "the title's session did not start" else
@@ -406,12 +486,51 @@ internal class CopyHeadStart(
         }
     }
 
+    /** The copy chosen, waiting for the choice; null when none is. */
+    suspend fun chosenOffer(): CopyOffer? = withTimeoutOrNull(CopyFirst.FALLBACK_MS) { chosen.await() }
+
+    /** The stream was picked at [atMs] and the copy still fits it: times count from the pick, the pass checks [offers]. */
+    fun repicked(atMs: Long, offers: CopyOffers) {
+        pickedAtMs = atMs
+        picked = true
+        if (offer != null) listed = offers
+        backup?.repicked(atMs, offers)
+    }
+
+    /** The backup no longer fits the stream picked: its link is given back. */
+    fun dropBackup() {
+        backup?.release()
+        backup = null
+    }
+
+    /**
+     * For a head start begun before the pick: the pictures made before the session start from the header and index
+     * read ahead, unless the pass took the link first.
+     */
+    fun earlyFrom(scope: CoroutineScope, anchorMs: suspend () -> Long) {
+        scope.launch {
+            val l = withTimeoutOrNull(CopyFirst.OPEN_TIMEOUT_MS) { link.await() } ?: return@launch
+            val o = offer ?: return@launch
+            val p = l.preread?.let { d ->
+                runCatching { d.await() }.onFailure { if (it is CancellationException) throw it }.getOrNull()
+            } ?: return@launch
+            synchronized(this@CopyHeadStart) {
+                if (!handed.get() && !released.get() && l.early == null) startEarly(scope, o, l, p, anchorMs)
+            }
+        }
+    }
+
+    /** [o] is the copy this head start opened, or its backup. */
+    fun owns(o: CopyOffer): Boolean =
+        offer?.let { matches(it, o) } == true || backup?.owns(o) == true
+
     /** The link opened ahead for [o], once; null when it was for another copy or did not open. */
     suspend fun take(o: CopyOffer): CopyLink? {
         if (released.get()) return null
+        backup?.let { b -> if (b.offer?.let { matches(it, o) } == true) return b.take(o) }
         val mine = withTimeoutOrNull(CopyFirst.FALLBACK_MS) { chosen.await() } ?: return null
-        if (!CopyFirst.sameOffer(mine, o)) return null
-        if (released.get() || !handed.compareAndSet(false, true)) return null
+        if (!matches(mine, o)) return null
+        if (released.get() || !handOut()) return null
         val l = withTimeoutOrNull(CopyFirst.OPEN_TIMEOUT_MS) { link.await() }
         if (l == null) handed.set(false)
         return l
@@ -419,6 +538,7 @@ internal class CopyHeadStart(
 
     /** Gives back a link nobody took and stops a head start still under way. */
     fun release() {
+        backup?.release()
         if (!released.compareAndSet(false, true)) return
         job?.cancel()
         chosen.complete(null)

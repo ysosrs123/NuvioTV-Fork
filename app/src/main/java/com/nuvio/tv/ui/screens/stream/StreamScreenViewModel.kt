@@ -35,6 +35,7 @@ import com.nuvio.tv.core.tracking.TrackingScrobbleCoordinator
 import com.nuvio.tv.core.tracking.TrackingScrobbleEvent
 import com.nuvio.tv.core.tracking.buildTrackingMediaReference
 import com.nuvio.tv.core.util.parseRuntimeMinutes
+import com.nuvio.tv.core.stream.StreamListHandOver
 import com.nuvio.tv.core.streams.StreamBadgePresentation
 import com.nuvio.tv.core.streams.YouTubeStreamResolver
 import com.nuvio.tv.data.local.PlayerPreference
@@ -119,6 +120,7 @@ class StreamScreenViewModel @Inject constructor(
     private val torrentService: TorrentService,
     private val serverStreams: ServerStreams,
     private val serverPlayback: ServerPlayback,
+    thumbnailCopyDebrid: com.nuvio.tv.core.debrid.ThumbnailCopyDebrid,
     partyRuntime: com.nuvio.tv.core.party.PartyRuntime,
     profileManager: com.nuvio.tv.core.profile.ProfileManager,
     savedStateHandle: SavedStateHandle
@@ -192,6 +194,14 @@ class StreamScreenViewModel @Inject constructor(
         partyRuntime.guestMediaFor(videoId, season, episode)
     private val autoSelectionOff: Boolean = manualSelection || partyHostMedia != null
     private var partyPickDone = false
+    private val copyPrePick = StreamCopyPrePick(
+        context, thumbnailCopyDebrid, serverPlayback, directDebridResolver, debridSettingsDataStore.settings,
+        identity = videoId,
+        title = if (season != null && episode != null) "$contentType|$videoId|$season|$episode"
+            else "${contentType.ifBlank { "movie" }}|${contentId ?: videoId}|-1|-1",
+        season = season,
+        episode = episode,
+    )
 
     /** Set while this picker is choosing a source for a watch party: rows show how they compare with the host's file. */
     val partyFingerprint: com.nuvio.tv.core.party.PartyFingerprint? = partyHostMedia?.fingerprint
@@ -849,6 +859,8 @@ class StreamScreenViewModel @Inject constructor(
             )
 
             var lastSuccessData: List<AddonStreams>? = null
+            var partialHandedOver = false
+            var listFailed = false
             var autoSelectTriggered = false
             var timeoutElapsed = false
             var debridPreparationLaunched = false
@@ -992,8 +1004,13 @@ class StreamScreenViewModel @Inject constructor(
                                     }
                                 }
                             }
+                            if (resolvedAutoPlayTarget && !partialHandedOver) {
+                                partialHandedOver = true
+                                handOverToPlayer(result.data, partial = true)
+                            }
                         }
                         is NetworkResult.Error -> {
+                            listFailed = true
                             if (directAutoPlayFlowEnabledForSession) {
                                 directAutoPlayFlowEnabledForSession = false
                             }
@@ -1037,23 +1054,27 @@ class StreamScreenViewModel @Inject constructor(
                 val hasLoadingChips = _uiState.value.sourceChips.any {
                     it.status == SourceChipStatus.LOADING
                 }
-                if (hasLoadingChips &&
-                    com.nuvio.tv.core.stream.StreamPrefetchCache.capHitFor(
-                        contentType, videoId, season, episode
-                    )
-                ) {
+                val cutShort = com.nuvio.tv.core.stream.StreamPrefetchCache.capHitFor(
+                    contentType, videoId, season, episode
+                )
+                if (hasLoadingChips && cutShort) {
                     sessionFillJob?.cancel()
                     sessionFillJob = viewModelScope.launch {
+                        var filled: List<AddonStreams>? = null
                         streamRepository.getStreamsFromAllAddons(
                             contentType, videoId, season, episode
                         ).collect { fillResult ->
                             if (fillResult is NetworkResult.Success) {
+                                filled = fillResult.data
                                 applySuccess(fillResult.data, isAllLoaded = false)
                             }
                         }
+                        filled?.let { handOverToPlayer(it) }
                         markRemainingSourceChipsAsError()
+                        copyListReady()
                     }
                 } else {
+                    if (!cutShort && !listFailed) lastSuccessData?.let { handOverToPlayer(it) }
                     markRemainingSourceChipsAsError()
                 }
                 if (directAutoPlayFlowEnabledForSession && !resolvedAutoPlayTarget) {
@@ -1071,6 +1092,7 @@ class StreamScreenViewModel @Inject constructor(
                     }
                     externalPlaybackTracker.releaseAutoNextOverlay(forceRelease = true)
                 }
+                copyListReady()
             }
 
             // Timeout semantics:
@@ -1184,7 +1206,39 @@ class StreamScreenViewModel @Inject constructor(
             // would block resumption on return.
             ensureActive()
             streamLoadCompleted = true
+            copyListReady()
         }
+    }
+
+    /** The list in the order it is shown, so the stream taken as the one that plays is the top one on screen. */
+    private fun copyListReady() {
+        copyPrePick.listReady(viewModelScope, ::shownOrder, ::copyListShown) {
+            playerSettingsDataStore.playerSettings.first()
+        }
+    }
+
+    /** The finished list, or what came before an automatic pick, for the player opened from this screen ([StreamListHandOver]). */
+    private fun handOverToPlayer(streams: List<AddonStreams>, partial: Boolean = false) {
+        StreamListHandOver.shared.put(
+            com.nuvio.tv.core.stream.StreamPrefetchCache.keyOf(contentType, videoId, season, episode),
+            streams,
+            SystemClock.elapsedRealtime(),
+            partial
+        )
+    }
+
+    private fun shownOrder(): List<Stream> {
+        val all = _uiState.value.allStreams
+        val order = listOrder?.takeIf { listSortBestFirst && it.covers(all) } ?: return all
+        return order.apply(all)
+    }
+
+    /** The source list is up for the user to pick from: no automatic pick, no watch party pick, the app in front. */
+    private fun copyListShown(): Boolean {
+        val ui = _uiState.value
+        return partyHostMedia == null && hostInForeground.value && !ui.isLoading && ui.allStreams.isNotEmpty() &&
+            !ui.isDirectAutoPlayFlow && !ui.showDirectAutoPlayOverlay && !ui.externalPlayerOverlayVisible &&
+            ui.autoPlayStream == null && ui.autoPlayPlaybackInfo == null
     }
 
     private fun shouldAttemptEmbeddedMetaStreamLookup(): Boolean {
@@ -1496,6 +1550,7 @@ class StreamScreenViewModel @Inject constructor(
     }
 
     suspend fun resolveStreamForPlayback(stream: Stream): StreamPlaybackInfo? {
+        copyPrePick.picked(stream)
         stream.serverTarget?.let { target -> return prepareServerStream(stream, target) }
         TtffTrace.mark("resolve_start")
         if (stream.youTubeIdToResolve() != null) {
@@ -1914,6 +1969,7 @@ class StreamScreenViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        copyPrePick.left()
         if (isTorrentStreamStarted && !externalPlaybackTracker.isOwningTorrentStream) {
             torrentService.stopStream()
             isTorrentStreamStarted = false

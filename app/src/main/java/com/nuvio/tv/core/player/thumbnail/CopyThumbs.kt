@@ -165,10 +165,14 @@ internal class CopyOwn(
     val pickedAtMs: Long = 0L,
     /** The playing picture is HDR or Dolby Vision. */
     val hdr: Boolean = false,
+    /** Every keyframe of the playing file (us, sorted): a copy of another length is lined up against them. */
+    val keyframesUs: LongArray = LongArray(0),
+    /** A copy picture farther than this from where a seek lands is not used for that slot ([CopyPass.ownOnlySlots]). */
+    val wideUs: Long = 2_000_000L,
 )
 
 /** A copy's pictures, ready for the picture check: its store and its timing against the playing title. */
-internal class CopySet(val store: ThumbStore, val ratio: Double, val slotCount: Int, val label: String)
+internal class CopySet(val store: ThumbStore, val timing: ReleaseMatch.Timing, val slotCount: Int, val label: String)
 
 /**
  * 4K thumbnails from a smaller copy of the same title in the player's own source list, and a Usenet title's from a
@@ -203,11 +207,15 @@ internal class CopyPass(
         const val LOCAL_BEFORE_SLOTS = 60
         const val LOCAL_AFTER_SLOTS = 120
         const val LIST_WAIT_MS = 5L * 60 * 1000
-        const val LIST_POLL_MS = 5_000L
+        const val LIST_POLL_MS = 250L
         const val OPEN_TIMEOUT_MS = 45_000L
         const val MAX_OPENS = 4
         const val MAX_BYTES = 200L * 1024 * 1024
         const val READY_PICTURES = 12
+        /** Behind the generating screen the copy's pictures show from this many on: an empty screen waits for nothing. */
+        const val READY_PICTURES_SCREEN = 2
+        /** A copy this short is a sample or a placeholder, never the film. */
+        const val NOT_A_FILM_MS = 10L * 60 * 1000
         const val FULL_AHEAD_MS = 14_000L
         const val QUIET_AFTER_STALL_MS = 60_000L
         const val TROUBLE_WINDOW_MS = 20_000L
@@ -227,6 +235,39 @@ internal class CopyPass(
     private enum class Outcome { FILLED, UNUSABLE, REJECTED, STOP }
 
     private class Unusable(why: String) : Exception(why)
+
+    /** Copy lengths whose keyframes followed no one shift: another cut, so another copy of that length is too. */
+    private val otherCuts = HashSet<Long>()
+    @Volatile private var unusableWhy: String? = null
+
+    /**
+     * How the copy's time maps to the playing file's: the same length, PAL timing, or one shift its keyframes agree on
+     * (a few logos or credits more or less). A same-length copy is shifted only when its keyframes clearly say so.
+     */
+    private fun lineUp(ratio: Double?, copyMs: Long, index: MediaIndex): ReleaseMatch.Timing {
+        if (ratio != null && ratio != 1.0) return ReleaseMatch.Timing(ratio)
+        val maxUs = (if (ratio == null) ReleaseMatch.MAX_SHIFT_MS else ReleaseMatch.SAME_LENGTH_MS) * 1000L
+        val found = if (own.keyframesUs.isEmpty()) null
+            else ReleaseMatch.findShift(own.keyframesUs, index.keyframes.ptsUs, maxUs, own.durationMs * 1000L)
+        fun note(f: ReleaseMatch.Shift) = Log.i(TAG, String.format(java.util.Locale.ROOT,
+            "copy lined up by its keyframes: shift %+.2f s (%d keyframes on the same frame, %s by third, %d unshifted)",
+            f.shiftUs / 1_000_000.0, f.pairs, f.thirds.joinToString("/"), f.atZero))
+        if (ratio == null) {
+            if (found == null) {
+                otherCuts += copyMs
+                throw Unusable("length ${copyMs / 1000} s against ${own.durationMs / 1000} s, and no one shift lines " +
+                    "its keyframes up")
+            }
+            note(found)
+            return ReleaseMatch.Timing(1.0, found.shiftUs)
+        }
+        if (found != null && kotlin.math.abs(found.shiftUs) > ReleaseMatch.SAME_FRAME_US &&
+            found.pairs >= 2 * maxOf(found.atZero, 1)) {
+            note(found)
+            return ReleaseMatch.Timing(1.0, found.shiftUs)
+        }
+        return ReleaseMatch.Timing.SAME
+    }
     private class Fetch(
         val m: Int, val kf: Int, val extractor: KeyframeExtractor, val shared: Boolean,
         val result: Deferred<Result<ByteArray?>>,
@@ -241,6 +282,9 @@ internal class CopyPass(
         private set
     /** Copy slots stored so far, all copies tried. */
     @Volatile var made = 0
+        private set
+    /** Own slots the current copy has no picture close enough for: the title's own pass makes them meanwhile. */
+    @Volatile var ownOnlySlots: Set<Int> = emptySet()
         private set
     /** When a copy's link last came back open (elapsed realtime), 0 before. */
     @Volatile var linkOpenedAt = 0L
@@ -330,6 +374,8 @@ internal class CopyPass(
         undecidedKey = key
     }
 
+    private fun readyAt(): Int = if (screenUp()) READY_PICTURES_SCREEN else READY_PICTURES
+
     private fun isRejected(): Boolean = currentKey != null && rejectedKey == currentKey
 
     private fun sincePick(): String =
@@ -362,6 +408,13 @@ internal class CopyPass(
         val book = runCatching { CopySourceBooks.app(context) }.getOrNull()
         var checks = 0
         var opens = 0
+        // The same file is often listed by several add-ons: once turned down, its other listings are not opened.
+        val refused = ArrayList<CopyOffer>()
+        fun alreadyTurnedDown(o: CopyOffer): Boolean {
+            val same = refused.firstOrNull { CopyFirst.sameFile(it, o) } ?: return false
+            Log.i(TAG, "not tried: ${o.label} - the same file as ${same.label}, already turned down")
+            return true
+        }
 
         /** Opens and tries [offer]; true when the pass ended with it. */
         suspend fun attempt(offer: CopyOffer): Boolean {
@@ -383,17 +436,24 @@ internal class CopyPass(
                 return false
             }
             val openMs = SystemClock.elapsedRealtime() - openStart
-            if (openMs >= CopySourceBook.SLOW_OPEN_MS && headStart?.offer?.id != offer.id) {
+            if (openMs >= CopySourceBook.SLOW_OPEN_MS && headStart?.owns(offer) != true) {
                 learn(book, offer, CopySourceBook.SLOW, "link open in $openMs ms")
             }
             opens++
             linkOpenedAt = SystemClock.elapsedRealtime()
             Log.i(TAG, "trying ${describe(offer)} via ${link.via}${sincePick()}")
+            unusableWhy = null
             val outcome = try {
                 tryCopy(offer, link)
             } finally {
                 link.dropPreread()
                 runCatching { link.done() }
+            }
+            if (outcome == Outcome.REJECTED || (outcome == Outcome.UNUSABLE && CopyFirst.turnsDownTheFile(unusableWhy))) {
+                refused += offer
+            }
+            if (outcome == Outcome.UNUSABLE && unusableWhy?.endsWith("not the film") == true) {
+                learn(book, offer, CopySourceBook.WRONG, "a sample or another file, not the film")
             }
             when (outcome) {
                 Outcome.FILLED -> when (awaitVerdict()) {
@@ -404,6 +464,7 @@ internal class CopyPass(
                     }
                     Outcome.REJECTED -> {
                         checks++
+                        refused += offer
                         turnedDown(book, offer)
                     }
                     else -> {
@@ -423,6 +484,7 @@ internal class CopyPass(
             }
             ready = null
             currentKey = null
+            ownOnlySlots = emptySet()
             state = State.LOOKING
             return false
         }
@@ -472,6 +534,7 @@ internal class CopyPass(
             ranked.take(5).joinToString("; ") { describe(it) })
         for (offer in ranked) {
             if (stopping || checks >= CopyChoice.MAX_TRIES || opens >= MAX_OPENS) break
+            if (alreadyTurnedDown(offer)) continue
             if (attempt(offer)) return
         }
         if (own.awayServer) {
@@ -597,7 +660,12 @@ internal class CopyPass(
             }
             val copyMs = durationUs / 1000L
             val ratio = ReleaseMatch.ratio(own.durationMs, copyMs)
-                ?: throw Unusable("length ${copyMs / 1000} s against ${own.durationMs / 1000} s")
+            val shiftable = ReleaseMatch.shiftCandidate(own.durationMs, copyMs) && own.keyframesUs.isNotEmpty()
+            if (copyMs in 1 until NOT_A_FILM_MS && own.durationMs >= NOT_A_FILM_MS) {
+                throw Unusable("only ${copyMs / 1000} s long, not the film")
+            }
+            if (ratio == null && !shiftable) throw Unusable("length ${copyMs / 1000} s against ${own.durationMs / 1000} s")
+            if (copyMs in otherCuts) throw Unusable("length ${copyMs / 1000} s, the cut of a copy already turned down")
             val tier = MemoryGovernor.tierFor(video.width, video.height)
             val fourKCopy = tier == DecodeTier.SW_4K && own.maxHeight >= CopyChoice.FOUR_K && offer.height == CopyChoice.FOUR_K
             if (tier != DecodeTier.SW_UP_TO_1080P && !fourKCopy) {
@@ -611,7 +679,7 @@ internal class CopyPass(
             CopyFit.plan(natural[0], natural[1], own.pictureW, own.pictureH)
                 ?: throw Unusable("picture shape ${natural[0]}x${natural[1]} against ${own.pictureW}x${own.pictureH}")
             val index = idx ?: request(host) { MkvIndexReader.read(split, head) }
-            val timing = if (ratio == 1.0) "same length" else "PAL ratio %.4f".format(ratio)
+            val timing = lineUp(ratio, copyMs, index)
             val read = if (pre != null) {
                 "header and index ${r.bytes / 1024} KB read as its link opened, in ${pre.readMs} ms, ready " +
                     "${(asked - pre.doneAtMs).coerceAtLeast(0L)} ms before the pass asked" +
@@ -621,7 +689,7 @@ internal class CopyPass(
                     (if (linkHead != null) "came with the link's redirects" else "with the link's redirects $headMs ms") +
                     ", ${if (link.prewarmed) "link resolved ahead" else "link resolved now"})"
             }
-            Log.i(TAG, "${offer.label}: ${video.codec} ${video.width}x${video.height}, ${copyMs / 1000} s ($timing), " +
+            Log.i(TAG, "${offer.label}: ${video.codec} ${video.width}x${video.height}, ${copyMs / 1000} s (${timing.describe()}), " +
                 "${index.keyframes.count} keyframes, $read${sincePick()}")
             val indexMs = pre?.readMs ?: (SystemClock.elapsedRealtime() - t0)
             if (indexMs >= CopySourceBook.SLOW_INDEX_MS) {
@@ -648,12 +716,13 @@ internal class CopyPass(
                 store.noteDuration(copyMs)
                 if (store.cachedKeyframeIndex() == null) store.setKeyframeIndex(KeyframeIndexCodec.encode(index))
                 val early = if (pre != null) link.takeEarly() else emptyList()
-                return fill(offer, r, index, store, ratio, copyMs, host, early)
+                return fill(offer, r, index, store, timing, copyMs, host, early)
             } finally {
                 store.flush()
                 ThumbStore.unmarkBusy(store.key)
             }
         } catch (e: Unusable) {
+            unusableWhy = e.message
             Log.i(TAG, "${offer.label}: not used - ${e.message}")
             return Outcome.UNUSABLE
         } catch (e: Halt) {
@@ -670,25 +739,34 @@ internal class CopyPass(
     }
 
     private suspend fun fill(
-        offer: CopyOffer, r: HttpRangeReader, idx: MediaIndex, store: ThumbStore, ratio: Double, copyMs: Long, host: String?,
+        offer: CopyOffer, r: HttpRangeReader, idx: MediaIndex, store: ThumbStore, timing: ReleaseMatch.Timing, copyMs: Long, host: String?,
         early: List<CopyEarlyPicture> = emptyList(),
     ): Outcome {
         val copyCount = ReleaseMatch.slotCount(copyMs, SPACING_MS)
-        val owners = CopyChoice.ownSlotsByCopySlot(own.slotPtsUs.size, ratio, copyCount)
+        val owners = CopyChoice.ownSlotsByCopySlot(own.slotPtsUs.size, timing, copyCount, SPACING_MS)
         val pts = idx.keyframes.ptsUs
         // The copy's keyframe nearest to where a 4K seek lands, not to the slot centre.
         val kfOf = IntArray(copyCount) { -1 }
         for ((m, served) in owners) {
             val s = UsenetCopy.pictureFor(served, own.screenStride)
             val landing = own.slotPtsUs[s].takeIf { it >= 0 } ?: (s * SPACING_MS * 1000L + SPACING_MS * 500L)
-            kfOf[m] = idx.keyframes.nearest((landing * ratio).toLong())
+            kfOf[m] = idx.keyframes.nearest(timing.toCopyUs(landing).coerceAtLeast(0L))
         }
+        val far = HashSet<Int>()
+        for (s in own.slotPtsUs.indices) if (own.slotPtsUs[s] >= 0L) far += s
+        for ((m, served) in owners) {
+            val kf = kfOf[m].takeIf { it >= 0 } ?: continue
+            val at = timing.toOwnUs(pts[kf])
+            for (s in served) if (kotlin.math.abs(own.slotPtsUs[s] - at) <= own.wideUs) far -= s
+        }
+        ownOnlySlots = far
+        if (far.isNotEmpty()) Log.i(TAG, "${far.size} slots this copy cannot serve go to the title's own pass at once")
         val kfSlots = HashMap<Int, MutableList<Int>>()
         kfOf.forEachIndexed { m, kf -> if (kf >= 0) kfSlots.getOrPut(kf) { ArrayList() }.add(m) }
-        val anchor = ReleaseMatch.mapSlot(own.anchorSlot, ratio, copyCount).coerceAtLeast(0)
+        val anchor = timing.mapSlot(own.anchorSlot, copyCount, SPACING_MS).coerceAtLeast(0)
         // The pictures the check can decide on come first: the copy is confirmed before the rest is made.
         val gaps = ReleaseMatch.copyGaps(owners, { m -> kfOf[m].takeIf { it >= 0 }?.let { pts[it] } ?: -1L },
-            own.slotPtsUs, ratio).filter { (m, _) -> owners[m]?.any { !own.store.has(slotUs(it)) } == true }
+            own.slotPtsUs, timing).filter { (m, _) -> owners[m]?.any { !own.store.has(slotUs(it)) } == true }
         val confirm = ReleaseMatch.pickCheckSlots(gaps, copyCount)
         val confirmSet = confirm.toHashSet()
         val sameFrame = gaps.count { it.first in confirmSet && kotlin.math.abs(it.second) <= ReleaseMatch.SAME_FRAME_US }
@@ -736,9 +814,9 @@ internal class CopyPass(
                 Log.i(TAG, "first thumbnail from ${offer.label} made before the session, in place " +
                     "${SystemClock.elapsedRealtime() - t0} ms after its index was taken${sincePick()}")
                 if (!MemoryGovernor.isStrongBox) store.trimMemory(SMALL_MEM_FRAMES)
-                if (pictures >= READY_PICTURES || coarse.all { store.has(slotUs(it)) } ||
+                if (pictures >= readyAt() || coarse.all { store.has(slotUs(it)) } ||
                     (confirm.size >= ReleaseMatch.CHECKS_NEEDED && confirm.all { store.has(slotUs(it)) })) {
-                    ready = CopySet(store, ratio, copyCount, offer.label)
+                    ready = CopySet(store, timing, copyCount, offer.label)
                 }
             }
         }
@@ -853,9 +931,9 @@ internal class CopyPass(
                             if (pictures == 1) Log.i(TAG, "first thumbnail from ${offer.label} " +
                                 "${SystemClock.elapsedRealtime() - t0} ms after its index${sincePick()}")
                             if (!MemoryGovernor.isStrongBox) store.trimMemory(SMALL_MEM_FRAMES)
-                            if (ready == null && (pictures >= READY_PICTURES || coarse.all { store.has(slotUs(it)) } ||
+                            if (ready == null && (pictures >= readyAt() || coarse.all { store.has(slotUs(it)) } ||
                                     (confirm.size >= ReleaseMatch.CHECKS_NEEDED && confirm.all { store.has(slotUs(it)) }))) {
-                                ready = CopySet(store, ratio, copyCount, offer.label)
+                                ready = CopySet(store, timing, copyCount, offer.label)
                             }
                             if (pictures % PROGRESS_LOG_EVERY == 0) {
                                 Log.i(TAG, "$pictures thumbnails from ${offer.label} in " +
@@ -910,7 +988,7 @@ internal class CopyPass(
             Log.i(TAG, "${offer.label}: no thumbnail could be made")
             return Outcome.UNUSABLE
         }
-        if (ready == null) ready = CopySet(store, ratio, copyCount, offer.label)
+        if (ready == null) ready = CopySet(store, timing, copyCount, offer.label)
         Log.i(TAG, "${offer.label}: $pictures thumbnails in ${(SystemClock.elapsedRealtime() - t0) / 1000} s, " +
             "${bytesRead() / (1024 * 1024)} MB, stored=${store.slots().size} of $copyCount${sincePick()}")
         return Outcome.FILLED

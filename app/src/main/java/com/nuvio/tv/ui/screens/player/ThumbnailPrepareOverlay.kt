@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
+import android.graphics.Bitmap
 import android.os.SystemClock
 import android.view.KeyEvent
 import androidx.compose.animation.core.Animatable
@@ -76,6 +77,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.nuvio.tv.R
+import com.nuvio.tv.core.player.thumbnail.CopyEarlyRow
 import com.nuvio.tv.core.player.thumbnail.SeekThumbnails
 import com.nuvio.tv.core.player.thumbnail.SeekThumbnails.PrepareUi
 import com.nuvio.tv.ui.theme.NuvioTheme
@@ -132,10 +134,15 @@ fun ThumbnailPrepareOverlay(backdropUrl: String?, modifier: Modifier = Modifier)
         val lastGenerating = remember { arrayOfNulls<PrepareUi.Generating>(1) }
         val current = ui
         if (current is PrepareUi.Generating) lastGenerating[0] = current
+        val earlyRow by SeekThumbnails.earlyRow
+        val early = earlyRow?.takeIf {
+            CopyEarlyRow.showsEarly(current, it.identity, SeekThumbnails.screenIdentity(), it.frames.size)
+        }
         PrepareBackdrop(backdropUrl)
         GeneratingScreen(
             ui = if (current is PrepareUi.Checking) null else lastGenerating[0],
-            ready = current as? PrepareUi.Ready
+            ready = current as? PrepareUi.Ready,
+            early = early
         )
     }
 }
@@ -191,7 +198,7 @@ private fun RequestFirstFocus(requester: FocusRequester) {
 }
 
 @Composable
-private fun GeneratingScreen(ui: PrepareUi.Generating?, ready: PrepareUi.Ready?) {
+private fun GeneratingScreen(ui: PrepareUi.Generating?, ready: PrepareUi.Ready?, early: CopyEarlyRow.Row<Bitmap>?) {
     val colors = NuvioTheme.colors
     val type = MaterialTheme.typography
     val accent = createThemeBrush(v2AccentColors())
@@ -263,7 +270,10 @@ private fun GeneratingScreen(ui: PrepareUi.Generating?, ready: PrepareUi.Ready?)
             // Space is held so the screen does not shift when the first counts arrive.
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 Box(Modifier.heightIn(min = RowFrameHeight), contentAlignment = Alignment.Center) {
-                    if (ui != null) NewestRow(ui)
+                    when {
+                        early != null -> EarlyRow(early)
+                        ui != null -> NewestRow(ui)
+                    }
                 }
                 Box(Modifier.heightIn(min = 22.dp), contentAlignment = Alignment.TopCenter) {
                     if (ui != null) CoverageTimeline(ui.coverage, ui.spacingMs, accent)
@@ -327,25 +337,43 @@ private fun ReadyTick(brush: Brush) {
     }
 }
 
-/** The newest thumbnails, oldest left; the row follows the newest one on a spring so arrivals read as one glide. */
 @Composable
 private fun NewestRow(ui: PrepareUi.Generating) {
+    val tick by SeekThumbnails.tick
+    ThumbRow(ui.recentEndSeq, ui.recent) { pos ->
+        remember(tick, pos) { SeekThumbnails.tileFor(pos)?.takeIf { it.exact }?.bitmap }
+    }
+}
+
+/** The copy's pictures made before the session, in the same row. */
+@Composable
+private fun EarlyRow(row: CopyEarlyRow.Row<Bitmap>) {
+    val frames = row.frames
+    // Times on the copy's own timeline can be shifted against the film's, so these show none.
+    ThumbRow(row.newestSeq, frames.map { it.ptsMs }, times = false) { pos ->
+        frames.firstOrNull { it.ptsMs == pos }?.picture?.takeIf { !it.isRecycled }
+    }
+}
+
+/** The newest thumbnails, oldest left; the row follows the newest one on a spring so arrivals read as one glide. */
+@Composable
+private fun ThumbRow(
+    newestSeq: Int, recent: List<Long>, times: Boolean = true, bitmapFor: @Composable (Long) -> Bitmap?,
+) {
     val colors = NuvioTheme.colors
     val type = MaterialTheme.typography
-    val tick by SeekThumbnails.tick
     val shape = RoundedCornerShape(NuvioTheme.radii.sm)
     val stridePx = with(LocalDensity.current) { (RowFrameWidth + RowGap).toPx() }
-    val newestSeq = ui.recentEndSeq
     val head by animateFloatAsState(
         newestSeq.toFloat(),
         spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = 60f),
         label = "rowHead"
     )
     Box(Modifier.width(RowWidth).height(RowFrameHeight).clip(RoundedCornerShape(0.dp))) {
-        ui.recent.forEachIndexed { i, pos ->
-            val seq = newestSeq - (ui.recent.size - 1 - i)
+        recent.forEachIndexed { i, pos ->
+            val seq = newestSeq - (recent.size - 1 - i)
             key(seq) {
-                val bitmap = remember(tick, pos) { SeekThumbnails.tileFor(pos)?.takeIf { it.exact }?.bitmap }
+                val bitmap = bitmapFor(pos)
                 Box(
                     Modifier
                         .offset { IntOffset(((RowFrames - 1 - (head - seq)) * stridePx).roundToInt(), 0) }
@@ -359,7 +387,7 @@ private fun NewestRow(ui: PrepareUi.Generating) {
                         Image(bitmap.asImageBitmap(), contentDescription = null, contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize())
                     }
-                    Box(
+                    if (times) Box(
                         Modifier
                             .align(Alignment.BottomStart)
                             .fillMaxWidth()

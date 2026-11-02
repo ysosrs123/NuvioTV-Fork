@@ -564,4 +564,25 @@ class ConnectionLedgerTest {
         assertEquals(1, l.thumbnailCap(away))
         assertTrue(l.thumbnailCap(cdn) > 1)
     }
+
+    @Test fun nothingPlayingLeavesTorBoxRoomUntilPlaybackOpensARequest() {
+        val l = ledger()
+        l.notePlaybackConnections(8)
+        assertTrue(noSlot(l, tb))
+        l.noteNothingPlays(true)
+        assertFalse(noSlot(l, tb))
+        val p = l.playback(tb)
+        assertTrue(noSlot(l, tb))
+        p?.close()
+        l.noteNothingPlays(false)
+        assertTrue(noSlot(l, tb))
+    }
+
+    @Test fun nothingPlayingLapsesAfterItsLease() {
+        val l = ledger()
+        l.notePlaybackConnections(8)
+        l.noteNothingPlays(true)
+        now += ConnectionLedger.IDLE_LEASE_MS
+        assertTrue(noSlot(l, tb))
+    }
 }

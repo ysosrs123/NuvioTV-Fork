@@ -1,10 +1,12 @@
 package com.nuvio.tv.ui.screens.player
 
+import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.core.debrid.CopyRoute
 import com.nuvio.tv.core.debrid.DebridProviders
 import com.nuvio.tv.core.debrid.DirectDebridPlayableResult
+import com.nuvio.tv.core.debrid.DirectDebridResolver
 import com.nuvio.tv.core.debrid.DirectDebridStreamFilter
 import com.nuvio.tv.core.debrid.ThumbnailCopyDebrid
 import com.nuvio.tv.core.debrid.streamText
@@ -20,46 +22,67 @@ import com.nuvio.tv.core.player.thumbnail.MkvIndexReader
 import com.nuvio.tv.core.player.thumbnail.MultiRangeSupport
 import com.nuvio.tv.core.player.thumbnail.thumbnailHttpClient
 import com.nuvio.tv.data.mediaserver.ServerPlayMethod
+import com.nuvio.tv.data.mediaserver.ServerPlayback
 import com.nuvio.tv.domain.model.DebridStreamEncode
 import com.nuvio.tv.domain.model.DebridStreamQuality
+import com.nuvio.tv.domain.model.DebridSettings
 import com.nuvio.tv.domain.model.DebridStreamVisualTag
 import com.nuvio.tv.domain.model.Stream
 import com.nuvio.tv.domain.model.StreamDebridCacheState
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.Request
 import java.util.concurrent.ConcurrentHashMap
 
-/**
- * The player's source list as copies for 4K thumbnails, failing closed: media-server versions (only while the playing
- * server stream is direct play; one request at a time from a server away from the home network), Usenet links streamed by a local
- * AIOStreams, plain file links, app debrid entries or add-on sources naming their torrent, through the app's own
- * keys: TorBox (from the user's list, or a cached copy added and removed again) and Premiumize (direct download),
- * and otherwise cached debrid copies through their resolve links or the app's resolver, which may leave the title in
- * that debrid account ([CopyChoice.linkRejection]).
- */
-internal class ThumbnailCopySources(
-    private val controller: PlayerRuntimeController,
-    private val debrid: ThumbnailCopyDebrid,
-) : CopySources {
-    private companion object {
-        const val TAG = "ThumbCopy"
-        /** A link followed ahead is used within this long, else followed again. */
-        const val WARM_MS = 10L * 60 * 1000
-        const val WARM_WAIT_MS = 20_000L
-        val VIDEO_EXTENSIONS = setOf("mkv", "mp4", "m4v", "avi", "ts", "m2ts", "m3u8", "webm", "mov", "wmv", "iso")
-        val HDR_TAGS = setOf(
-            DebridStreamVisualTag.HDR_DV, DebridStreamVisualTag.DV_ONLY, DebridStreamVisualTag.HDR_ONLY,
-            DebridStreamVisualTag.HDR10_PLUS, DebridStreamVisualTag.HDR10, DebridStreamVisualTag.DV,
-            DebridStreamVisualTag.HDR, DebridStreamVisualTag.HLG,
-        )
-        val H264_TEXT = Regex("h\\.?\\s?264|avc", RegexOption.IGNORE_CASE)
+/** Where [ThumbnailCopySources] reads its source list: the player's, or the stream list's before the pick. */
+internal interface CopyListHost {
+    val context: Context
+    val serverPlayback: ServerPlayback
+    val directDebridResolver: DirectDebridResolver
+    val debridSettings: Flow<DebridSettings>
 
-        /** Titles a Usenet copy was opened for in this run: one indexer grab per title at most. */
-        val usenetTried: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    suspend fun loadNow() = Unit
+
+    /** The list with the playing entry; null while it is not loaded. */
+    suspend fun listed(): CopyListed?
+
+    /** The torrent playback is on now, for a TorBox copy given back. */
+    fun playingHash(): String?
+
+    /**
+     * A TorBox copy added for thumbnails stays in the user's list when given back: playback may read [copy]'s torrent
+     * through a link that does not name it. [listedPlayingUrl]: the playing link when the list was read.
+     */
+    fun keepsAdded(copy: CopyOffer, listedPlayingUrl: String?): Boolean
+}
+
+internal class CopyListed(
+    val streams: List<Stream>, val playingIndex: Int, val season: Int?, val episode: Int?, val playingText: String,
+    val serverCopies: Boolean, val title: String, val playingHash: String?, val playingUrl: String?,
+)
+
+/** The player's source list. */
+internal class PlayerCopyList(private val controller: PlayerRuntimeController) : CopyListHost {
+    override val context: Context get() = controller.context
+    override val serverPlayback: ServerPlayback get() = controller.serverPlayback
+    override val directDebridResolver: DirectDebridResolver get() = controller.directDebridResolver
+    override val debridSettings: Flow<DebridSettings> get() = controller.debridSettingsDataStore.settings
+
+    override suspend fun loadNow() {
+        val fromMemory = withContext(Dispatchers.Main) {
+            controller.loadSourceStreams(forceRefresh = false)
+            controller.sourceStreamsJob?.takeIf { controller.sourceStreamsFromMemory }
+        }
+        // A list taken over from the stream screen is ready within moments: waited for, not polled.
+        fromMemory?.let { withTimeoutOrNull(MEMORY_LIST_WAIT_MS) { it.join() } }
+    }
+
+    private companion object {
+        const val MEMORY_LIST_WAIT_MS = 2_000L
     }
 
     /** Main thread: the playing stream plays from Usenet, by its link or by its add-on's marking. */
@@ -83,10 +106,77 @@ internal class ThumbnailCopySources(
         return CopyChoice.usenetMarked(resolve.type, resolve.service)
     }
 
-    private class Snapshot(
-        val streams: List<Stream>, val playingIndex: Int, val season: Int?, val episode: Int?, val playingText: String,
-        val serverCopies: Boolean, val title: String, val playingHash: String?, val playingUrl: String?,
-    )
+    override suspend fun listed(): CopyListed? = withContext(Dispatchers.Main) {
+        val key = controller.currentSourceRequestKey() ?: return@withContext null
+        if (controller.sourceStreamsCacheRequestKey != key ||
+            !(controller.sourceStreamsFetchCompleted || controller.sourceCopyListEarly)) {
+            return@withContext null
+        }
+        val ui = controller._uiState.value
+        val streams = copyCandidates(ui.sourceAllStreams, controller.sourceThumbnailCopyStreams)
+        val request = controller.currentSourceStreamsRequest()
+        val playing = findCurrentStreamIndex(
+            streams = streams,
+            currentStreamInfoHash = ui.currentStreamInfoHash,
+            currentStreamFileIdx = ui.currentStreamFileIdx,
+            currentStreamAddonName = ui.currentStreamAddonName,
+            currentStreamUrl = ui.currentStreamUrl,
+            currentStreamName = ui.currentStreamName
+        ).takeIf { it >= 0 }
+        val serverSession = controller.serverPlayback.session(controller.currentStreamUrl)
+        CopyListed(
+            streams, playing ?: indexOfServerTarget(streams, serverSession?.target), request?.season, request?.episode,
+            listOfNotNull(ui.currentStreamName, controller.currentFilename, controller.currentStreamDescription).joinToString(" "),
+            serverCopies = serverSession == null || serverSession.playMethod == ServerPlayMethod.DIRECT_PLAY,
+            title = key,
+            playingHash = ui.currentStreamInfoHash ?: playing?.let { streams.getOrNull(it)?.getEffectiveInfoHash() }
+                ?: playing?.let { streams.getOrNull(it) }?.let { CopyChoice.linkHash(it.getStreamUrl(), streamText(it)) },
+            playingUrl = ui.currentStreamUrl,
+        )
+    }
+
+    override fun playingHash(): String? = controller._uiState.value.currentStreamInfoHash
+
+    override fun keepsAdded(copy: CopyOffer, listedPlayingUrl: String?): Boolean {
+        val ui = controller._uiState.value
+        return ui.currentStreamInfoHash == null && ui.currentStreamUrl != listedPlayingUrl
+    }
+}
+
+/**
+ * The player's source list as copies for 4K thumbnails, failing closed: media-server versions (only while the playing
+ * server stream is direct play; one request at a time from a server away from the home network), Usenet links streamed by a local
+ * AIOStreams, plain file links, app debrid entries or add-on sources naming their torrent, through the app's own
+ * keys: TorBox (from the user's list, or a cached copy added and removed again) and Premiumize (direct download),
+ * and otherwise cached debrid copies through their resolve links or the app's resolver, which may leave the title in
+ * that debrid account ([CopyChoice.linkRejection]).
+ */
+internal class ThumbnailCopySources(
+    private val host: CopyListHost,
+    private val debrid: ThumbnailCopyDebrid,
+) : CopySources {
+    constructor(controller: PlayerRuntimeController, debrid: ThumbnailCopyDebrid) : this(PlayerCopyList(controller), debrid)
+
+    private companion object {
+        const val TAG = "ThumbCopy"
+        /** A link followed ahead is used within this long, else followed again. */
+        const val WARM_MS = 10L * 60 * 1000
+        const val WARM_WAIT_MS = 20_000L
+        val VIDEO_EXTENSIONS = setOf("mkv", "mp4", "m4v", "avi", "ts", "m2ts", "m3u8", "webm", "mov", "wmv", "iso")
+        val HDR_TAGS = setOf(
+            DebridStreamVisualTag.HDR_DV, DebridStreamVisualTag.DV_ONLY, DebridStreamVisualTag.HDR_ONLY,
+            DebridStreamVisualTag.HDR10_PLUS, DebridStreamVisualTag.HDR10, DebridStreamVisualTag.DV,
+            DebridStreamVisualTag.HDR, DebridStreamVisualTag.HLG,
+        )
+        val H264_TEXT = Regex("h\\.?\\s?264|avc", RegexOption.IGNORE_CASE)
+
+        /** Titles a Usenet copy was opened for in this run: one indexer grab per title at most. */
+        val usenetTried: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    }
+
+    /** Main thread: the playing stream plays from Usenet, by its link or by its add-on's marking. */
+    fun playingIsUsenet(url: String?): Boolean =
+        (host as? PlayerCopyList)?.playingIsUsenet(url) ?: SlowStartServer.isUsenet(url)
 
     private val byId = ConcurrentHashMap<String, Stream>()
     @Volatile private var season: Int? = null
@@ -94,46 +184,18 @@ internal class ThumbnailCopySources(
     @Volatile private var title = ""
     @Volatile private var playingUrl: String? = null
 
-    override suspend fun loadNow() {
-        withContext(Dispatchers.Main) { controller.loadSourceStreams(forceRefresh = false) }
-    }
+    override suspend fun loadNow() = host.loadNow()
 
     override suspend fun offers(): CopyOffers? {
-        val snap = withContext(Dispatchers.Main) {
-            val key = controller.currentSourceRequestKey() ?: return@withContext null
-            if (controller.sourceStreamsCacheRequestKey != key || !controller.sourceStreamsFetchCompleted) {
-                return@withContext null
-            }
-            val ui = controller._uiState.value
-            val streams = copyCandidates(ui.sourceAllStreams, controller.sourceThumbnailCopyStreams)
-            val request = controller.currentSourceStreamsRequest()
-            val playing = findCurrentStreamIndex(
-                streams = streams,
-                currentStreamInfoHash = ui.currentStreamInfoHash,
-                currentStreamFileIdx = ui.currentStreamFileIdx,
-                currentStreamAddonName = ui.currentStreamAddonName,
-                currentStreamUrl = ui.currentStreamUrl,
-                currentStreamName = ui.currentStreamName
-            ).takeIf { it >= 0 }
-            val serverSession = controller.serverPlayback.session(controller.currentStreamUrl)
-            Snapshot(
-                streams, playing ?: indexOfServerTarget(streams, serverSession?.target), request?.season, request?.episode,
-                listOfNotNull(ui.currentStreamName, controller.currentFilename, controller.currentStreamDescription).joinToString(" "),
-                serverCopies = serverSession == null || serverSession.playMethod == ServerPlayMethod.DIRECT_PLAY,
-                title = key,
-                playingHash = ui.currentStreamInfoHash ?: playing?.let { streams.getOrNull(it)?.getEffectiveInfoHash() }
-                    ?: playing?.let { streams.getOrNull(it) }?.let { CopyChoice.linkHash(it.getStreamUrl(), streamText(it)) },
-                playingUrl = ui.currentStreamUrl,
-            )
-        } ?: return null
+        val snap = host.listed() ?: return null
         season = snap.season
         episode = snap.episode
         title = snap.title
         playingUrl = snap.playingUrl
         debrid.notePlaying(snap.playingHash)
         debrid.sweepLeftovers()
-        val settings = controller.debridSettingsDataStore.settings.first()
-        byId.clear()
+        val settings = host.debridSettings.first()
+        val ids = HashMap<String, Stream>()
         val leftOut = LinkedHashMap<String, Int>()
         fun leaveOut(why: String) {
             leftOut[why] = (leftOut[why] ?: 0) + 1
@@ -150,7 +212,7 @@ internal class ThumbnailCopySources(
                         leaveOut("server version while the server transcodes playback")
                         return@mapIndexedNotNull null
                     }
-                    if (MediaServerThumbs.copyLanes(controller.serverPlayback.serverAddress(stream.serverTarget)) == 0) {
+                    if (MediaServerThumbs.copyLanes(host.serverPlayback.serverAddress(stream.serverTarget)) == 0) {
                         leaveOut("server version without a server address")
                         return@mapIndexedNotNull null
                     }
@@ -180,12 +242,14 @@ internal class ThumbnailCopySources(
                 }
             }
             val id = "s$i"
-            byId[id] = stream
+            ids[id] = stream
             val remote = stream.serverTarget?.let {
-                MediaServerThumbs.copyLanes(controller.serverPlayback.serverAddress(it)) != Int.MAX_VALUE
+                MediaServerThumbs.copyLanes(host.serverPlayback.serverAddress(it)) != Int.MAX_VALUE
             } == true
             offerOf(id, stream, kind, DirectDebridStreamFilter.facts(stream, settings), remote)
         }
+        byId.keys.retainAll(ids.keys)
+        byId.putAll(ids)
         if (leftOut.isNotEmpty()) {
             Log.i(TAG, "left out: " + leftOut.entries.joinToString("; ") { "${it.value} x ${it.key}" })
         }
@@ -200,7 +264,7 @@ internal class ThumbnailCopySources(
                 }
             }
             val remote = stream.serverTarget?.let {
-                MediaServerThumbs.copyLanes(controller.serverPlayback.serverAddress(it)) != Int.MAX_VALUE
+                MediaServerThumbs.copyLanes(host.serverPlayback.serverAddress(it)) != Int.MAX_VALUE
             } == true
             offerOf("playing", stream, kind, DirectDebridStreamFilter.facts(stream, settings), remote)
         }
@@ -246,10 +310,13 @@ internal class ThumbnailCopySources(
         )
     }
 
+    /** The list entry behind [offer]. */
+    fun streamOf(offer: CopyOffer): Stream? = byId[offer.id]
+
     override fun multiRange(offer: CopyOffer): Boolean? {
         val stream = byId[offer.id] ?: return null
         return when (offer.kind) {
-            CopyKind.LINK -> stream.getStreamUrl()?.let { MultiRangeSupport.app(controller.context).known(it) }
+            CopyKind.LINK -> stream.getStreamUrl()?.let { MultiRangeSupport.app(host.context).known(it) }
             CopyKind.RESOLVE -> if (stream.isDirectDebrid()) {
                 when (stream.clientResolve?.service?.let { DebridProviders.byId(it)?.id }) {
                     DebridProviders.TORBOX_ID -> true
@@ -268,7 +335,7 @@ internal class ThumbnailCopySources(
         return when (offer.kind) {
             CopyKind.SERVER -> {
                 val target = stream.serverTarget ?: return null
-                controller.serverPlayback.staticUrl(target)?.let {
+                host.serverPlayback.staticUrl(target)?.let {
                     val lanes = MediaServerThumbs.copyLanes(it)
                     CopyLink(it, emptyMap(), if (lanes == 1) "a media server away from home" else "the media server", lanes)
                 }
@@ -292,12 +359,7 @@ internal class ThumbnailCopySources(
                     CopyLink(c.url, emptyMap(), "your TorBox list")
                 } else {
                     CopyLink(c.url, emptyMap(), "a TorBox copy added for thumbnails") {
-                        val ui = controller._uiState.value
-                        if (ui.currentStreamInfoHash == null && ui.currentStreamUrl != playingUrl) {
-                            debrid.keep(c)
-                        } else {
-                            debrid.release(c, ui.currentStreamInfoHash)
-                        }
+                        if (host.keepsAdded(offer, playingUrl)) debrid.keep(c) else debrid.release(c, host.playingHash())
                     }
                 }
             }
@@ -305,7 +367,7 @@ internal class ThumbnailCopySources(
                 CopyLink(it, emptyMap(), "a Premiumize direct download")
             }
             CopyKind.RESOLVE -> if (stream.isDirectDebrid()) {
-                val r = controller.directDebridResolver.resolveToPlayableStream(stream, season, episode)
+                val r = host.directDebridResolver.resolveToPlayableStream(stream, season, episode)
                 (r as? DirectDebridPlayableResult.Success)?.stream?.getStreamUrl()?.let {
                     CopyLink(it, emptyMap(), "your debrid service")
                 }

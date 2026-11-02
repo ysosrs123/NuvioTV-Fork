@@ -216,6 +216,8 @@ internal class ConnectionLedger(
         /** Header and index reads wait less, and the engine gives up after a few. */
         const val START_SLOT_WAIT_MS = 5_000L
         const val HEALTH_TTL_MS = 10_000L
+        /** How long the stream list's "nothing plays" holds without being renewed or ended. */
+        const val IDLE_LEASE_MS = CopyPrePick.HOLD_MAX_MS
         const val HEALTHY_AHEAD_MS = 30_000L
         /** A reset of an idle stream as playback resumes is not the server refusing. */
         const val AFTER_YIELD_QUIET_MS = 10_000L
@@ -293,6 +295,7 @@ internal class ConnectionLedger(
     @Volatile private var quietUntilMs = Long.MIN_VALUE
     @Volatile private var yieldUntilMs = Long.MIN_VALUE
     @Volatile private var yieldEndAtMs = Long.MIN_VALUE
+    @Volatile private var idleUntilMs = Long.MIN_VALUE
 
     /** Once per app run; the learned levels then apply to every server first seen after it. */
     fun attach(m: Memory) {
@@ -393,6 +396,18 @@ internal class ConnectionLedger(
         quietUntilMs = if (quiet) now + HEALTH_TTL_MS else Long.MIN_VALUE
     }
 
+    /**
+     * Nothing plays: the stream list is up before a pick ([active]), for at most [IDLE_LEASE_MS]. A server counts as
+     * quiet then until playback opens a request on it.
+     */
+    fun noteNothingPlays(active: Boolean) {
+        idleUntilMs = if (active) clock() + IDLE_LEASE_MS else Long.MIN_VALUE
+        lock.withLock { freed.signalAll() }
+    }
+
+    private fun quiet(e: Entry, now: Long, yielding: Boolean): Boolean =
+        yielding || now < quietUntilMs || (now < idleUntilMs && e.playback == 0)
+
     /** The generating screen's yield, renewed while it is up (see [PlaybackYield]). */
     fun noteYield(active: Boolean) {
         val now = clock()
@@ -436,7 +451,7 @@ internal class ConnectionLedger(
             val b = budgetOf(key, e)
             persist(key, b)
             val yielding = yielding(now)
-            val quiet = yielding || now < quietUntilMs
+            val quiet = quiet(e, now, yielding)
             val live = e.playback - if (yielding) e.streams else 0
             minOf(b.thumbSlots(playbackOf(e), if (quiet) live else maxOf(playbackOf(e), live), quiet, yielding), e.thumbCap)
         }
@@ -544,7 +559,7 @@ internal class ConnectionLedger(
         persist(key, b)
         val yielding = yielding(now)
         val live = e.playback - if (yielding) e.streams else 0
-        return minOf(b.thumbSlots(playbackOf(e), live, yielding || now < quietUntilMs, yielding), e.thumbCap)
+        return minOf(b.thumbSlots(playbackOf(e), live, quiet(e, now, yielding), yielding), e.thumbCap)
     }
 
     private fun add(e: Entry, kind: Kind) {

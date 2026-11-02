@@ -31,6 +31,8 @@ internal object ReleaseMatch {
     const val SHIFT_MARGIN = 0.08f
     const val CHECKS_NEEDED = 3
     const val CHECK_SPARES = 3
+    /** After one clear mismatch, this many more same-frame matches keep the copy; a second mismatch ends it. */
+    const val MATCHES_AFTER_MISMATCH = 2
     /**
      * Own and borrowed keyframe this close: the same picture, so a mismatch is real. Under half a frame up to 60 fps:
      * keyframes one frame apart (41.7 ms at 24 fps) are two pictures, across a scene cut two different scenes.
@@ -46,6 +48,126 @@ internal object ReleaseMatch {
         if (abs(ownMs - otherMs) <= SAME_LENGTH_MS) return 1.0
         val r = otherMs.toDouble() / ownMs
         return if (r in PAL_MIN..PAL_MAX || 1.0 / r in PAL_MIN..PAL_MAX) r else null
+    }
+
+    /**
+     * A copy this much longer or shorter can still be the same cut with a few logos or credits more or less: its
+     * keyframes say whether one shift lines it up ([findShift]).
+     */
+    const val MAX_SHIFT_MS = 180_000L
+
+    /** Not the same length or PAL timing, but close enough for [findShift] to try. */
+    fun shiftCandidate(ownMs: Long, otherMs: Long): Boolean =
+        ownMs > 0L && otherMs > 0L && ratio(ownMs, otherMs) == null && abs(ownMs - otherMs) <= MAX_SHIFT_MS
+
+    /** Copy time for an own time: [ratio] as [ReleaseMatch.ratio], then [shiftUs] added (copy minus own). */
+    class Timing(val ratio: Double, val shiftUs: Long = 0L) {
+        val plain: Boolean get() = ratio == 1.0 && shiftUs == 0L
+
+        fun toCopyUs(ownUs: Long): Long = (if (ratio == 1.0) ownUs else (ownUs * ratio).toLong()) + shiftUs
+
+        fun toOwnUs(copyUs: Long): Long = (copyUs - shiftUs).let { if (ratio == 1.0) it else (it / ratio).toLong() }
+
+        /** The copy slot holding the same moment as own [slot] (slot centres), -1 outside it. */
+        fun mapSlot(slot: Int, otherSlotCount: Int, spacingMs: Long): Int {
+            if (shiftUs == 0L) return mapSlot(slot, ratio, otherSlotCount)
+            if (slot < 0) return -1
+            val spacingUs = spacingMs * 1000L
+            val at = toCopyUs(slot * spacingUs + spacingUs / 2)
+            if (at < 0L) return -1
+            val m = (at / spacingUs).toInt()
+            return if (m in 0 until otherSlotCount) m else -1
+        }
+
+        fun describe(): String = when {
+            shiftUs != 0L -> String.format(java.util.Locale.ROOT, "shifted %+.2f s", shiftUs / 1_000_000.0)
+            ratio == 1.0 -> "same length"
+            else -> String.format(java.util.Locale.ROOT, "PAL ratio %.4f", ratio)
+        }
+
+        companion object {
+            val SAME = Timing(1.0)
+        }
+    }
+
+    /** Keyframe pairs [SHIFT_BIN_US] apart share a histogram bin; a shift is read over [SAME_FRAME_US] either side. */
+    private const val SHIFT_BIN_US = 4_000L
+    /** Keyframes that land on the same frame at the shift, at least. */
+    const val SHIFT_MIN_PAIRS = 24
+    /** The shift's pairs against what chance gives the same width elsewhere, at least. */
+    const val SHIFT_MIN_LIFT = 6.0
+    /**
+     * Pairs each third of the title needs at the shift, at least this many and this share of all of them: one shift for
+     * the whole film, not a scene added or cut (a remux's keyframe every second lines a few up by chance).
+     */
+    const val SHIFT_MIN_THIRD = 5
+    const val SHIFT_MIN_THIRD_SHARE = 0.15
+
+    /** The shift [findShift] found, with the keyframe pairs behind it overall and per third of the own timeline. */
+    class Shift(val shiftUs: Long, val pairs: Int, val thirds: IntArray, val atZero: Int)
+
+    /**
+     * The one shift (copy minus own, us) that lines the copy's keyframes up with the own ones, within [maxShiftUs]
+     * either way. Both encodes put keyframes on scene cuts, so at the right shift hundreds land on the same frame; a
+     * wrong one gets a few by chance. Null when no shift stands out, or when one third of the own timeline does not
+     * follow it (another cut). Both arrays sorted, us.
+     */
+    fun findShift(own: LongArray, copy: LongArray, maxShiftUs: Long, ownDurationUs: Long): Shift? {
+        if (own.size < SHIFT_MIN_PAIRS || copy.size < SHIFT_MIN_PAIRS || maxShiftUs <= 0L || ownDurationUs <= 0L) return null
+        val half = (maxShiftUs / SHIFT_BIN_US).toInt()
+        val bins = IntArray(2 * half + 1)
+        var total = 0L
+        var lo = 0
+        for (c in copy) {
+            while (lo < own.size && own[lo] < c - maxShiftUs) lo++
+            var j = lo
+            while (j < own.size && own[j] <= c + maxShiftUs) {
+                val b = Math.floorDiv(c - own[j], SHIFT_BIN_US).toInt() + half
+                if (b in bins.indices) {
+                    bins[b]++
+                    total++
+                }
+                j++
+            }
+        }
+        val width = (SAME_FRAME_US / SHIFT_BIN_US).toInt()
+        var best = -1
+        var bestSum = 0
+        var sum = 0
+        for (i in 0 until minOf(2 * width + 1, bins.size)) sum += bins[i]
+        for (centre in width until bins.size - width) {
+            if (centre > width) sum += bins[centre + width] - bins[centre - width - 1]
+            if (sum > bestSum) {
+                bestSum = sum
+                best = centre
+            }
+        }
+        if (best < 0 || bestSum < SHIFT_MIN_PAIRS) return null
+        val chance = total.toDouble() * (2 * width + 1) / bins.size
+        if (bestSum < chance * SHIFT_MIN_LIFT) return null
+        val roughUs = (best - half) * SHIFT_BIN_US + SHIFT_BIN_US / 2
+        val diffs = ArrayList<Long>()
+        val thirds = IntArray(3)
+        lo = 0
+        for (c in copy) {
+            val want = c - roughUs
+            while (lo < own.size && own[lo] < want - SAME_FRAME_US) lo++
+            if (lo < own.size && abs(own[lo] - want) <= SAME_FRAME_US) {
+                diffs += c - own[lo]
+                thirds[(own[lo] * 3 / ownDurationUs).toInt().coerceIn(0, 2)]++
+            }
+        }
+        val perThird = maxOf(SHIFT_MIN_THIRD.toDouble(), diffs.size * SHIFT_MIN_THIRD_SHARE)
+        if (thirds.any { it < perThird }) return null
+        diffs.sort()
+        val shift = diffs[diffs.size / 2]
+        var zero = 0
+        lo = 0
+        for (c in copy) {
+            while (lo < own.size && own[lo] < c - SAME_FRAME_US) lo++
+            if (lo < own.size && abs(own[lo] - c) <= SAME_FRAME_US) zero++
+        }
+        return Shift(shift, diffs.size, thirds, zero)
     }
 
     /** Another release's saved set is worth trying: enough pictures, the same length or PAL timing, never found different. */
@@ -98,12 +220,16 @@ internal object ReleaseMatch {
      */
     fun copyGaps(
         owners: Map<Int, IntArray>, copyKeyframeUs: (Int) -> Long, ownLandingUs: LongArray, ratio: Double,
+    ): List<Pair<Int, Long>> = copyGaps(owners, copyKeyframeUs, ownLandingUs, Timing(ratio))
+
+    fun copyGaps(
+        owners: Map<Int, IntArray>, copyKeyframeUs: (Int) -> Long, ownLandingUs: LongArray, timing: Timing,
     ): List<Pair<Int, Long>> {
-        if (ratio <= 0.0) return emptyList()
+        if (timing.ratio <= 0.0) return emptyList()
         val gaps = ArrayList<Pair<Int, Long>>()
         for ((m, served) in owners) {
             val copyUs = copyKeyframeUs(m).takeIf { it >= 0L } ?: continue
-            val onOwn = (copyUs / ratio).toLong()
+            val onOwn = timing.toOwnUs(copyUs)
             var best = Long.MAX_VALUE
             for (s in served) {
                 val landing = ownLandingUs.getOrElse(s) { -1L }

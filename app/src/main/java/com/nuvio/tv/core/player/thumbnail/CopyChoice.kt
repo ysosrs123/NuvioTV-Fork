@@ -174,7 +174,8 @@ internal object CopyChoice {
             offer.height !in HEIGHTS -> return "${offer.height}p is too small"
         }
         offer.durationMs?.takeIf { ownMs > 0L }?.let { ms ->
-            return if (ReleaseMatch.ratio(ownMs, ms) == null) "length ${ms / 1000} s against ${ownMs / 1000} s" else null
+            if (ReleaseMatch.ratio(ownMs, ms) != null) return null
+            if (!ReleaseMatch.shiftCandidate(ownMs, ms)) return "length ${ms / 1000} s against ${ownMs / 1000} s"
         }
         val own = ownEditions ?: editions(playingText)
         val theirs = editions(offer.text)
@@ -362,10 +363,15 @@ internal object CopyChoice {
     }
 
     /** Copy slot -> the own slots it serves (same moment, slot centres), for a copy of [ratio] (copy / own time). */
-    fun ownSlotsByCopySlot(ownSlotCount: Int, ratio: Double, copySlotCount: Int): Map<Int, IntArray> {
+    fun ownSlotsByCopySlot(ownSlotCount: Int, ratio: Double, copySlotCount: Int): Map<Int, IntArray> =
+        ownSlotsByCopySlot(ownSlotCount, ReleaseMatch.Timing(ratio), copySlotCount, SeekThumbnails.SPACING_MS)
+
+    fun ownSlotsByCopySlot(
+        ownSlotCount: Int, timing: ReleaseMatch.Timing, copySlotCount: Int, spacingMs: Long,
+    ): Map<Int, IntArray> {
         val m = LinkedHashMap<Int, MutableList<Int>>()
         for (s in 0 until ownSlotCount) {
-            val c = ReleaseMatch.mapSlot(s, ratio, copySlotCount)
+            val c = timing.mapSlot(s, copySlotCount, spacingMs)
             if (c >= 0) m.getOrPut(c) { ArrayList() }.add(s)
         }
         return m.mapValues { it.value.toIntArray() }

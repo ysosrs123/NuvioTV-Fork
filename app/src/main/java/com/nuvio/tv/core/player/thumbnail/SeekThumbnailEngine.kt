@@ -13,6 +13,7 @@ import android.util.Log
 import android.util.LruCache
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.media3.common.C
 import androidx.media3.common.Format
 import androidx.media3.common.Player
@@ -37,6 +38,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.withContext
@@ -87,6 +89,35 @@ object SeekThumbnails {
     /** One slot per 10 s, each served by the nearest real keyframe. */
     const val SPACING_MS = 10_000L
     private const val STARTUP_HOUSEKEEPING_DELAY_MS = 60_000L
+    /** The player asks [takeDeferredOpen] within this long of the stream pick; later it opens the film as usual. */
+    private const val DEFER_OPEN_WINDOW_MS = 4_000L
+    /** Error cards and placeholders: a stream this short gets no thumbnails. */
+    private const val SHORT_STREAM_US = 121_000_000L
+
+    @Volatile private var deferOpenAskedAt = 0L
+    @Volatile private var openDeferred = false
+
+    /**
+     * Player side, once, just before it would open the film: true = leave it unopened, the thumbnails screen comes up
+     * from the index read early and the film opens when it ends ([loadAgainAfterPrepare]). A 4K film opened only to be
+     * let go again costs seconds and, with Dolby Vision, two mode switches on the TV.
+     */
+    fun takeDeferredOpen(): Boolean {
+        val asked = deferOpenAskedAt
+        deferOpenAskedAt = 0L
+        if (asked == 0L || SystemClock.elapsedRealtime() - asked > DEFER_OPEN_WINDOW_MS) return false
+        openDeferred = true
+        ConnectionLedger.app.noteNothingPlays(true)
+        return true
+    }
+
+    /** Player side: the film is being opened now. */
+    fun deferredOpenEnded() {
+        openDeferred = false
+        ConnectionLedger.app.noteNothingPlays(false)
+    }
+
+    val isOpenDeferred: Boolean get() = openDeferred
     private const val SPOOL_DIR = "spool"
     private const val MB = 1024L * 1024L
 
@@ -149,6 +180,7 @@ object SeekThumbnails {
     /** Player screen closed: an unfinished 4K coverage pass carries on for a few minutes, anything else stops. */
     fun playerClosed() {
         prepareUi.value = PrepareUi.Hidden
+        dropEarlyRow()
         stopServer(keep = false)
         ServerThumbSet.dropRetained()
         val s = session ?: return
@@ -210,6 +242,7 @@ object SeekThumbnails {
         ServerThumbSet.dropRetained()
         if (!isThumbnailSource(source.url)) {
             Log.i(TAG, "skip: not a single-file stream")
+            CopyPrePick.drop(source.identity)
             return
         }
         // Marks the title as starting, so a next-episode pass cannot begin writing the same store meanwhile.
@@ -284,12 +317,24 @@ object SeekThumbnails {
         HardwareThumbSwitch.refresh(context)
         val early = showsScreenEarly(context, source)
         val prefetch = if (early) prefetchIndex(context, source) else null
-        val head = if (early) copyHeadStart(context, source, playerProvider) else null
+        if (prefetch != null) deferOpenAskedAt = SystemClock.elapsedRealtime()
+        // A title with thumbnails saved but not finished gets its screen later: its copy is opened at the pick all the same.
+        val head = if (early || screenLikelyLater(context, source)) {
+            copyHeadStart(context, source, playerProvider)
+        } else {
+            CopyPrePick.drop(source.identity)
+            null
+        }
         var started = false
         try {
             started = startWhenEligibleAfterEarly(context, source, playerProvider, reserveProvider, pauseForPrepare,
                 letGoForPrepare, loadAgainAfterPrepare, skipReason, early, prefetch, head)
         } finally {
+            deferOpenAskedAt = 0L
+            if (!started && openDeferred) withContext(NonCancellable + Dispatchers.Main) {
+                Log.i(TAG, "prepare: no thumbnails session - the film opens now")
+                runCatching { loadAgainAfterPrepare(true) }
+            }
             if (!started) {
                 head?.release()
                 prefetch?.let { p -> prefetchScope.launch { runCatching { p.await()?.reader?.close() }; p.cancel() } }
@@ -305,7 +350,7 @@ object SeekThumbnails {
 
     /**
      * The generating screen at once, while the player still opens the stream, when this title will most likely get
-     * it: before-play on, all titles, a held start, not a media server away from home, not already complete.
+     * it: before-play on, all titles, a held start, not a media server away from home, nothing saved for it yet.
      */
     private suspend fun showsScreenEarly(context: Context, source: ThumbSource): Boolean {
         val shows = withContext(Dispatchers.IO) {
@@ -315,8 +360,10 @@ object SeekThumbnails {
                     source.holdBeforePlay &&
                     !MediaServerThumbs.onDemandOnly(source.mediaServer, source.url) &&
                     !RateLimitedHosts.appSession.contains(source.url) &&
-                    source.fileSizeHint?.takeIf { it > 0 }
-                        ?.let { ThumbStore.isMarkedComplete(context, source.identity, it) } != true
+                    source.fileSizeHint?.takeIf { it > 0 }?.let {
+                        ThumbStore.isMarkedComplete(context, source.identity, it) ||
+                            ThumbStore.exists(context, source.identity, it)
+                    } != true
             }.getOrDefault(false)
         }
         prepareDeclinedFor = null
@@ -330,6 +377,18 @@ object SeekThumbnails {
         return true
     }
 
+    /** Like [showsScreenEarly], for a title with a saved set that is not complete: the screen comes after the first frame. */
+    private suspend fun screenLikelyLater(context: Context, source: ThumbSource): Boolean = withContext(Dispatchers.IO) {
+        runCatching {
+            SeekThumbnailPreferences.prepareMode(context) != ThumbPrepareMode.OFF &&
+                SeekThumbnailPreferences.mode(context) == SeekThumbMode.ALL &&
+                source.holdBeforePlay &&
+                !MediaServerThumbs.onDemandOnly(source.mediaServer, source.url) &&
+                !RateLimitedHosts.appSession.contains(source.url) &&
+                source.fileSizeHint?.takeIf { it > 0 }?.let { !ThumbStore.isMarkedComplete(context, source.identity, it) } == true
+        }.getOrDefault(false)
+    }
+
     private suspend fun dropEarlyScreen() = withContext(Dispatchers.Main) {
         earlyScreenFor = null
         if (prepareUi.value is PrepareUi.Checking && session?.prepareActive() != true) prepareUi.value = PrepareUi.Hidden
@@ -339,18 +398,29 @@ object SeekThumbnails {
 
     /**
      * The top copy's link opened at the stream pick, while the player opens the film, when the generating screen will
-     * most likely come up. Usenet, torrent and away-server titles keep their own copy paths.
+     * most likely come up; the one opened while the stream list was shown when it fits ([CopyPrePick]). Usenet, torrent
+     * and away-server titles keep their own copy paths.
      */
-    private fun copyHeadStart(context: Context, source: ThumbSource, playerProvider: () -> ExoPlayer?): CopyHeadStart? {
-        val sources = source.copySources ?: return null
-        if (!source.identityExact || source.usenet || source.torrent) return null
-        if (MediaServerThumbs.onDemandOnly(source.mediaServer, source.url)) return null
+    private suspend fun copyHeadStart(context: Context, source: ThumbSource, playerProvider: () -> ExoPlayer?): CopyHeadStart? {
+        val sources = source.copySources
+        if (sources == null || !source.identityExact || source.usenet || source.torrent ||
+            MediaServerThumbs.onDemandOnly(source.mediaServer, source.url)) {
+            CopyPrePick.drop(source.identity)
+            return null
+        }
         val book = runCatching { CopySourceBooks.app(context) }.getOrNull()
         val startsAt: suspend () -> Long = {
             withContext(Dispatchers.Main) { playerProvider()?.currentPosition?.coerceAtLeast(0L) ?: 0L }
         }
+        CopyPrePick.take(source.identity)?.let { held ->
+            Log.i(TAG, "copy first: the copy opened while the stream list was shown is used")
+            held.earlyFrom(prefetchScope, startsAt)
+            return held
+        }
         return CopyHeadStart(source.identity).also {
-            it.start(prefetchScope, sources, book, source.fileSizeHint, anchorMs = startsAt, early = true)
+            it.start(prefetchScope, sources, book, source.fileSizeHint, anchorMs = startsAt, early = true) { kf, ptsMs, bmp ->
+                offerEarlyPicture(source.identity, kf, ptsMs, bmp)
+            }
         }
     }
 
@@ -382,6 +452,7 @@ object SeekThumbnails {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun startWhenEligibleAfterEarly(
         context: Context,
         source: ThumbSource,
@@ -401,6 +472,22 @@ object SeekThumbnails {
         var video = ""
         var ready = false
         while (SystemClock.elapsedRealtime() - t0 < 30_000L) {
+            // The film may wait unopened for the screen: the index read early has what the session needs.
+            val indexed = prefetch?.takeIf { it.isCompleted }?.let { runCatching { it.getCompleted() }.getOrNull() }?.index
+            if (indexed != null && indexed.video.width > 0 && indexed.durationUs > 0 && playerProvider()?.videoFormat == null) {
+                if (indexed.durationUs < SHORT_STREAM_US) {
+                    Log.i(TAG, "skip: under 2 minutes (index read early)")
+                    return false
+                }
+                width = indexed.video.width
+                height = indexed.video.height
+                video = "${indexed.video.width}x${indexed.video.height} ${indexed.video.codec.name}" +
+                    (indexed.video.dolbyVision?.let { " Dolby Vision ${it.profile}" } ?: "")
+                ready = true
+                Log.i(TAG, "session starts from the index read early (${SystemClock.elapsedRealtime() - t0} ms)" +
+                    if (openDeferred) ", the film opens when the screen ends" else "")
+                break
+            }
             val p = playerProvider()
             val fmt = p?.videoFormat
             if (p != null && fmt != null && p.duration != C.TIME_UNSET && p.duration > 0) {
@@ -476,6 +563,55 @@ object SeekThumbnails {
     }
 
     val prepareUi = mutableStateOf<PrepareUi>(PrepareUi.Hidden)
+
+    /** The copy's pictures made before the session, for the generating screen's row ([CopyEarlyRow]). Main thread. */
+    internal val earlyRow = mutableStateOf<CopyEarlyRow.Row<Bitmap>?>(null)
+    private var earlyRowJob: Job? = null
+    private const val EARLY_RECYCLE_DELAY_MS = 1_000L
+
+    /** The title the generating screen is up for, or about to be. */
+    internal fun screenIdentity(): String? = session?.takeIf { it.prepareActive() }?.identity ?: earlyScreenFor
+
+    /** Any thread: [bmp] stays the caller's; a small copy of it goes into the row while the screen checks for [identity]. */
+    private fun offerEarlyPicture(identity: String, kf: Int, ptsMs: Long, bmp: Bitmap) {
+        if (!CopyEarlyRow.wanted(identity, screenIdentity(), prepareUi.value) || bmp.isRecycled) return
+        val size = CopyEarlyRow.scaledSize(bmp.width, bmp.height)
+        if (size[0] <= 0) return
+        val small = runCatching {
+            Bitmap.createBitmap(size[0], size[1], Bitmap.Config.RGB_565).also {
+                Canvas(it).drawBitmap(bmp, null, Rect(0, 0, size[0], size[1]), Paint(Paint.FILTER_BITMAP_FLAG))
+            }
+        }.getOrNull() ?: return
+        mainScope.launch {
+            if (!CopyEarlyRow.wanted(identity, screenIdentity(), prepareUi.value)) {
+                small.recycle()
+                return@launch
+            }
+            val added = CopyEarlyRow.add(earlyRow.value, identity, kf, ptsMs, small)
+            earlyRow.value = added.row
+            recycleLater(added.dropped)
+            if (earlyRowJob?.isActive != true) earlyRowJob = mainScope.launch {
+                snapshotFlow { prepareUi.value }.first { CopyEarlyRow.ends(it) }
+                dropEarlyRow()
+            }
+        }
+    }
+
+    /** Main thread. */
+    private fun dropEarlyRow() {
+        val row = earlyRow.value ?: return
+        earlyRow.value = null
+        recycleLater(row.frames.map { it.picture })
+    }
+
+    /** Main thread: recycled once the row has let go of them on screen. */
+    private fun recycleLater(bitmaps: List<Bitmap>) {
+        if (bitmaps.isEmpty()) return
+        mainScope.launch {
+            delay(EARLY_RECYCLE_DELAY_MS)
+            bitmaps.forEach { if (!it.isRecycled) it.recycle() }
+        }
+    }
 
     /** Applied on Main only if [from] is still current and preparing, so a late post cannot re-show a dismissed overlay. */
     private fun postPrepareUi(from: Session, v: PrepareUi) {
@@ -724,6 +860,11 @@ object SeekThumbnails {
             const val COPY_STALL_HOLD_MS = 3L * 60 * 1000
             /** A Usenet title's generating screen waits this long for a copy to be confirmed before playing. */
             const val USENET_COPY_CHECK_MS = 40_000L
+            /**
+             * A media server away from home without thumbnails of its own waits for a copy's: a screen still without a
+             * copy picture this long after it came up ends, the copy carries on during play.
+             */
+            const val AWAY_EMPTY_SCREEN_MS = 25_000L
             const val AWAY_PROBE_MS = 3_000L
             const val AWAY_PROBE_LATE_MS = 5L * 60 * 1000
             const val AWAY_PROBE_POLL_MS = 2_000L
@@ -1120,6 +1261,10 @@ object SeekThumbnails {
                 }
             }
             if (!holdRetrying) withContext(Dispatchers.Main) { takeDownEarlyScreen() }
+            if (openDeferred && prepareStage !in 1..4) withContext(Dispatchers.Main) {
+                Log.i(TAG, "prepare: not holding - the film opens now")
+                runCatching { loadAgainAfterPrepare(true) }
+            }
             val pre = prefetch?.let { runCatching { it.await() }.getOrNull() }?.takeIf { it.url == source.url }
             if (pre == null) awaitIndexGate()
             val r = pre?.reader ?: HttpRangeReader(source.url, source.headers, thumbnailHttpClient(source.headers),
@@ -1670,14 +1815,17 @@ object SeekThumbnails {
                 if ((fourK && !MemoryGovernor.isStrongBox) || prepareStage in 1..4) {
                     // Without the screen the paused hint counts the whole pass on this box.
                     val grid = if (prepareStage in 1..4) prepareStride() else latticeStrides.last()
-                    val counted = lattice.filter { it % grid == 0 }
+                    // Away from home the stream is not read: slots the confirmed copy cannot make are not waited for.
+                    val unmade = if (onDemand) copy?.takeIf { c -> borrow?.let { it.copy === c && it.confirmed } == true }
+                        ?.ownOnlySlots.orEmpty() else emptySet()
+                    val counted = lattice.filter { it % grid == 0 && it !in unmade }
                     latticeTotal = counted.size
                     latticeDone = counted.count { !needs(st, it) }
                     if (prepareStage in 1..4) {
                         latticeMade = lattice.count { !needs(st, it) }
                         latticeWorkLeft = PrepareHandover.workLeft(lattice, prepareStride()) { needs(st, it) }
                         prepareLastCoverage = counted.sorted().map { !needs(st, it) }
-                        val waited = PrepareHandover.screenSet(lattice, grid)
+                        val waited = PrepareHandover.screenSet(lattice, grid).filter { it !in unmade }
                         screenTotal = waited.size
                         screenDone = waited.count { !needs(st, it) }
                         tendPrepare(latticeTotal, latticeDone)
@@ -1766,6 +1914,11 @@ object SeekThumbnails {
                 if (slot < 0 && !fetchesStopped && !copyHolds && !onDemand && !copyOnly) {
                     while (latticePos < lattice.size && !wanted(st, lattice[latticePos])) latticePos++
                     if (latticePos < lattice.size) slot = lattice[latticePos]
+                }
+                // A confirmed copy fills the grid: the slots it has no picture close enough for are made meanwhile.
+                if (slot < 0 && !fetchesStopped && copyHolds && !onDemand && !copyOnly && !usenet) {
+                    val only = copy?.takeIf { c -> borrow?.let { it.copy === c && it.confirmed } == true }?.ownOnlySlots
+                    if (!only.isNullOrEmpty()) slot = lattice.firstOrNull { it in only && wanted(st, it) } ?: -1
                 }
                 if (slot < 0 && decodeJobs.isNotEmpty()) {
                     awaitAnyDecode()
@@ -3173,17 +3326,19 @@ object SeekThumbnails {
          * a smaller copy's store that pass is still filling. [wideUs]: keyframes farther apart are not copied over.
          */
         private class Borrow(
-            val store: ThumbStore, val ratio: Double, val slotCount: Int,
+            val store: ThumbStore, val timing: ReleaseMatch.Timing, val slotCount: Int,
             val copy: CopyPass? = null, val wideUs: Long = ReleaseMatch.WIDE_US,
             val fit: BorrowFit? = null,
         ) {
             /** Borrowed slot -> (its picture, that picture fitted to ours), for the few shown while scrubbing. */
             val fitted = LruCache<Int, Pair<Bitmap, Bitmap>>(FITTED_SHOWN_KEPT)
             @Volatile var confirmed = false
-            /** A clear mismatch was seen: hidden, and one more same-frame pair decides whether it is remembered. */
+            /** A clear mismatch was seen: hidden until [ReleaseMatch.MATCHES_AFTER_MISMATCH] same-frame pairs match. */
             @Volatile var failed = false
+            /** Same-frame matches since the mismatch. Worker only. */
+            var matchesSinceMiss = 0
 
-            fun map(slot: Int): Int = ReleaseMatch.mapSlot(slot, ratio, slotCount)
+            fun map(slot: Int): Int = timing.mapSlot(slot, slotCount, SPACING_MS)
         }
 
         /** Another release's pictures are [fromW] x [fromH]: each is scaled to ours and its bars cut or added by [plan]. */
@@ -3243,10 +3398,10 @@ object SeekThumbnails {
                 val fit = plan?.let { BorrowFit(it, size[0], size[1], own[0], own[1]) }
                 if (fit != null) Log.i(TAG, "reuse: another release has ${size[0]}x${size[1]} pictures " +
                     "(ours ${own[0]}x${own[1]}) - fitted to ours")
-                val b = Borrow(other, ratio, ReleaseMatch.slotCount(sib.durationMs, SPACING_MS), fit = fit)
+                val b = Borrow(other, ReleaseMatch.Timing(ratio), ReleaseMatch.slotCount(sib.durationMs, SPACING_MS), fit = fit)
                 borrow = b
                 borrowSince = SystemClock.elapsedRealtime()
-                val timing = if (ratio == 1.0) "same length" else "PAL ratio %.4f".format(ratio)
+                val timing = b.timing.describe()
                 if (st.verdictOn(other.key) == true) {
                     Log.i(TAG, "reuse: another release confirmed earlier ($timing)")
                     adoptBorrow(st, b)
@@ -3567,7 +3722,8 @@ object SeekThumbnails {
                 slotOf(lastPositionMs.coerceAtLeast(0L)), CopyChoice.heightClass(v.width, v.height), usenet,
                 screenStride = if (screenCopy && (!copyFirst || prepareStage in 1..4)) prepareStride() else 1,
                 awayServer = onDemand, lighterOnly = copyFirst && !fourK, pickedAtMs = pickedAtMs,
-                hdr = CopySourceBook.hdrPicture(v.colour.transfer, v.colour.primaries, v.dolbyVision != null))
+                hdr = CopySourceBook.hdrPicture(v.colour.transfer, v.colour.primaries, v.dolbyVision != null),
+                keyframesUs = pts, wideUs = COPY_WIDE_US)
             copyStartedAt = SystemClock.elapsedRealtime()
             copy = CopyPass(
                 context = context,
@@ -3600,7 +3756,7 @@ object SeekThumbnails {
                 return
             }
             ThumbStore.markBusy(set.store.key)
-            val b = Borrow(set.store, set.ratio, set.slotCount, copy = c, wideUs = COPY_WIDE_US)
+            val b = Borrow(set.store, set.timing, set.slotCount, copy = c, wideUs = COPY_WIDE_US)
             checkQueue.clear()
             checkGap.clear()
             checkMatches = 0
@@ -3661,7 +3817,7 @@ object SeekThumbnails {
             val m = b.map(slot)
             if (kf !in pts.indices || m < 0 || slotUs(m) !in stored) return null
             val otherPts = b.store.keyframePtsFor(slotUs(m)) ?: return null
-            return pts[kf] - (otherPts / b.ratio).toLong()
+            return pts[kf] - b.timing.toOwnUs(otherPts)
         }
 
         /**
@@ -3761,10 +3917,19 @@ object SeekThumbnails {
                 after, outcome))
             when {
                 outcome == ReleaseMatch.Outcome.SKIP -> Unit
-                b.failed -> if (outcome == ReleaseMatch.Outcome.MISMATCH) {
-                    rejectBorrow(st, b, "two pictures of the same frame differ")
-                } else {
-                    notThisBorrow(b, "a mismatch not seen twice")
+                b.failed -> when (outcome) {
+                    ReleaseMatch.Outcome.MISMATCH -> rejectBorrow(st, b, "two pictures of the same frame differ")
+                    ReleaseMatch.Outcome.PASS -> {
+                        checkMatches++
+                        b.matchesSinceMiss++
+                        if (b.matchesSinceMiss >= ReleaseMatch.MATCHES_AFTER_MISMATCH &&
+                            ReleaseMatch.tally(checkMatches, checkBorderline) == ReleaseMatch.Tally.MATCHED) {
+                            Log.i(TAG, "reuse: $checkMatches matches, one odd picture - confirmed")
+                            b.failed = false
+                            adoptBorrow(st, b)
+                        }
+                    }
+                    else -> notThisBorrow(b, "a mismatch, then a borderline picture")
                 }
                 outcome == ReleaseMatch.Outcome.PASS || outcome == ReleaseMatch.Outcome.FAIL -> {
                     if (outcome == ReleaseMatch.Outcome.PASS) checkMatches++ else checkBorderline += same ?: 0f
@@ -3780,7 +3945,8 @@ object SeekThumbnails {
                 else -> {
                     b.failed = true
                     bumpTick()
-                    Log.i(TAG, "reuse: a picture of the same frame differs - hidden, one more decides")
+                    Log.i(TAG, "reuse: a picture of the same frame differs - hidden, " +
+                        "${ReleaseMatch.MATCHES_AFTER_MISMATCH} more decide")
                 }
             }
         }
@@ -3823,7 +3989,7 @@ object SeekThumbnails {
                     val raw = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: continue
                     val pic = fitTo(raw, fit)
                     raw.recycle()
-                    st.put(v.second.toLongArray(), (otherPts / b.ratio).toLong(), pic)
+                    st.put(v.second.toLongArray(), b.timing.toOwnUs(otherPts), pic)
                     copied += v.second.size
                 }
                 groups.clear()
@@ -3831,7 +3997,7 @@ object SeekThumbnails {
             for (chunk in groups.entries.chunked(ADOPT_CHUNK)) {
                 val items = chunk.mapNotNull { (otherPts, v) ->
                     val bytes = b.store.compressed(v.first) ?: return@mapNotNull null
-                    ThumbStore.Compressed(v.second.toLongArray(), (otherPts / b.ratio).toLong(), bytes)
+                    ThumbStore.Compressed(v.second.toLongArray(), b.timing.toOwnUs(otherPts), bytes)
                 }
                 if (!st.putCompressed(items, indexNow = false)) break
                 copied += items.sumOf { it.slotsUs.size }
@@ -3908,7 +4074,7 @@ object SeekThumbnails {
                     ?: fitTo(raw, f).also { b.fitted.put(slot, raw to it) }
             } ?: raw
             val ptsMs = if (slot == m) slotPtsMs(target)
-            else other.keyframePtsFor(key)?.let { (it / b.ratio / 1000.0).toLong() } ?: slotPtsMs(target)
+            else other.keyframePtsFor(key)?.let { b.timing.toOwnUs(it) / 1000L } ?: slotPtsMs(target)
             return Shown(bmp, ptsMs, exact = false, crop = crop.current, borrowed = true)
         }
 
@@ -4109,7 +4275,11 @@ object SeekThumbnails {
             dropReserve("player let go")
             naturalFunding()
             Log.i(TAG, "prepare: player let go for the ${if (fourK) "4K" else "hardware"} thumbnails - the film loads when the screen ends" +
-                if (early) " (let go as the screen came up)" else "")
+                when {
+                    early && openDeferred -> " (not opened yet)"
+                    early -> " (let go as the screen came up)"
+                    else -> ""
+                })
             val settled = if (early) SystemClock.elapsedRealtime() - letGoAt else 0L
             if (settled < LET_GO_SETTLE_MS) delay(LET_GO_SETTLE_MS - settled)
             if (appMemory4K) Log.i(DECODE_TAG, "4K hardware: MemAvailable $letGoAvailMb MB at the let-go, " +
@@ -4193,6 +4363,10 @@ object SeekThumbnails {
                 return@withContext false
             }
             preparePausedPlayer = held
+            if (held && openDeferred) {
+                noteLetGo()
+                letGoAt = 0L
+            }
             watchPrepareScreen()
             startYield()
             // A "playing" sample from before the hold must not read as "the user pressed play" in the next round.
@@ -4382,12 +4556,16 @@ object SeekThumbnails {
                         val c = copy
                         val over = c?.ended ?: copyTried
                         val since = if (c != null) copyStartedAt else awayCheckingSince
-                        if ((over || now - since >= USENET_COPY_CHECK_MS) && advancePrepare(1, 5)) {
+                        val empty = (c?.made ?: 0) == 0 && now - awayCheckingSince >= AWAY_EMPTY_SCREEN_MS
+                        if ((over || empty || now - since >= USENET_COPY_CHECK_MS) && advancePrepare(1, 5)) {
                             showPrepare(PrepareUi.Hidden)
                             withContext(Dispatchers.Main) { resumePlayerAfterPrepare() }
-                            Log.i(TAG, "prepare: " + (if (over) "no copy could be used" else
-                                "no copy confirmed in ${USENET_COPY_CHECK_MS / 1000} s") +
-                                " for the media server away from home - playing")
+                            Log.i(TAG, "prepare: " + when {
+                                over -> "no copy could be used"
+                                empty -> "no copy picture ${AWAY_EMPTY_SCREEN_MS / 1000} s after the screen came up"
+                                else -> "no copy confirmed in ${USENET_COPY_CHECK_MS / 1000} s"
+                            } + " for the media server away from home - playing" +
+                                if (!over) ", the copy carries on" else "")
                         }
                     }
                     // A Usenet title waits for its copy to be confirmed; the stream itself is not read meanwhile.

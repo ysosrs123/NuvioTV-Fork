@@ -226,7 +226,7 @@ class CopyFirstTest {
             assertTrue(head.opened)
             head.release()
             assertEquals(0, done)
-            assertEquals(listOf("720"), sources.opened)
+            assertEquals(1, sources.opened.count { it == "720" })
         } finally {
             scope.cancel()
         }

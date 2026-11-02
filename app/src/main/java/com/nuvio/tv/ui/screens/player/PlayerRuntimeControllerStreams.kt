@@ -2,6 +2,7 @@ package com.nuvio.tv.ui.screens.player
 
 import android.content.Intent
 import android.net.Uri
+import android.os.SystemClock
 import android.util.Log
 import androidx.media3.common.util.UnstableApi
 import com.nuvio.tv.core.debrid.DirectDebridPlayableResult
@@ -9,6 +10,7 @@ import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.player.AutoPlaySelection
 import com.nuvio.tv.core.player.PlayerSessionTracker
 import com.nuvio.tv.core.player.StreamAutoPlaySelector
+import com.nuvio.tv.core.stream.StreamListHandOver
 import com.nuvio.tv.core.stream.StreamPrefetchCache
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.local.StreamAutoPlayMode
@@ -223,6 +225,8 @@ internal fun PlayerRuntimeController.clearSourceStreams() {
     sourceBadgeJob = null
     sourceStreamsCacheRequestKey = null
     sourceStreamsFetchCompleted = false
+    sourceStreamsFromMemory = false
+    sourceCopyListEarly = false
     sourceBadgedAddonNames = emptySet()
     sourceFilterFullList = emptyList()
     sourceThumbnailCopyStreams = emptyList()
@@ -276,6 +280,15 @@ internal fun PlayerRuntimeController.loadSourceStreams(forceRefresh: Boolean) {
 
     val targetChanged = requestKey != sourceStreamsCacheRequestKey
     val isResume = !forceRefresh && !targetChanged && requestKey == sourceStreamsCacheRequestKey && hasCachedPayload && !sourceStreamsFetchCompleted
+    // The stream screen's list of a moment ago is taken over instead of searching every source again.
+    val handedOver = if (forceRefresh) null else StreamListHandOver.shared.take(
+        StreamPrefetchCache.keyOf(type, vid, seasonArg, episodeArg), SystemClock.elapsedRealtime()
+    )
+    val partial = handedOver?.takeIf { it.partial }
+    val reused = handedOver?.takeIf { !it.partial }?.streams
+        ?: if (forceRefresh || partial != null) null else StreamPrefetchCache.completedForPlayer(type, vid, seasonArg, episodeArg)
+    sourceStreamsFromMemory = reused != null
+    sourceCopyListEarly = false
     sourceStreamsScope?.cancel()
     sourceStreamsJob = null
     val newScope = kotlinx.coroutines.CoroutineScope(scope.coroutineContext + kotlinx.coroutines.SupervisorJob())
@@ -313,13 +326,17 @@ internal fun PlayerRuntimeController.loadSourceStreams(forceRefresh: Boolean) {
             updateSourceChipsForFetchStart(type, vid, installedAddons)
         }
 
-        // The stream screen's list of a moment ago is taken over instead of searching every source again.
-        val reused = if (forceRefresh) null else StreamPrefetchCache.completedForPlayer(type, vid, seasonArg, episodeArg)
         if (reused != null) {
-            Log.i(PlayerRuntimeController.TAG, "SOURCE_LIST reused the stream screen's list groups=${reused.size} " +
+            Log.i(PlayerRuntimeController.TAG, "SOURCE_LIST reused the stream screen's list " +
+                "(${if (handedOver != null) "handed over" else "prefetched"}) groups=${reused.size} " +
                 "streams=${reused.sumOf { it.streams.size }}")
         }
-        val results = if (reused != null) {
+        if (partial != null) {
+            Log.i(PlayerRuntimeController.TAG, "SOURCE_LIST shows the stream screen's list from before the automatic pick " +
+                "(handed over, partial) groups=${partial.streams.size} streams=${partial.streams.sumOf { it.streams.size }}, " +
+                "the rest loads")
+        }
+        val live = if (reused != null) {
             flowOf<NetworkResult<List<AddonStreams>>>(NetworkResult.Loading, NetworkResult.Success(reused))
         } else {
             streamRepository.getStreamsFromAllAddons(
@@ -329,6 +346,12 @@ internal fun PlayerRuntimeController.loadSourceStreams(forceRefresh: Boolean) {
                 episode = episodeArg,
                 forceRefresh = forceRefresh
             )
+        }
+        val results = if (partial == null) live else kotlinx.coroutines.flow.flow<NetworkResult<List<AddonStreams>>> {
+            emit(NetworkResult.Success(partial.streams))
+            live.collect { r ->
+                emit(if (r is NetworkResult.Success) NetworkResult.Success(StreamListHandOver.withHanded(partial.streams, r.data)) else r)
+            }
         }
         results.collect { result ->
             when (result) {
@@ -390,6 +413,7 @@ internal fun PlayerRuntimeController.loadSourceStreams(forceRefresh: Boolean) {
                             sourceStreamsError = null
                         )
                     }
+                    if (partial != null) sourceCopyListEarly = true
                     launchSourceDebridPreparationIfNeeded(
                         launched = debridPreparationLaunched,
                         streams = allStreams,
@@ -417,6 +441,11 @@ internal fun PlayerRuntimeController.loadSourceStreams(forceRefresh: Boolean) {
         sourceStreamsFetchCompleted = true
         _uiState.update { it.copy(isLoadingSourceStreams = false) }
         markRemainingSourceChipsAsError()
+    }
+    if (handedOver != null) {
+        sourceStreamsJob?.invokeOnCompletion { cause ->
+            if (cause != null) StreamListHandOver.shared.giveBack(handedOver)
+        }
     }
 }
 

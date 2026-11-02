@@ -72,12 +72,16 @@ class CopyChoiceTest {
     }
 
     @Test
-    fun lengthWithinEightSecondsOrPalRatio() {
+    fun lengthWithinThreeMinutesOrPalRatio() {
         assertNull(CopyChoice.rejection(offer("a", durationMs = ownMs + 1_900), playing, ownMs))
         assertNull(CopyChoice.rejection(offer("a5", durationMs = ownMs + 5_000), playing, ownMs))
         assertNull(CopyChoice.rejection(offer("a8", durationMs = ownMs - 8_000), playing, ownMs))
-        assertNotNull(CopyChoice.rejection(offer("b", durationMs = ownMs + 8_001), playing, ownMs))
-        assertNotNull(CopyChoice.rejection(offer("b12", durationMs = ownMs - 12_000), playing, ownMs))
+        // Further apart, up to three minutes, the copy's keyframes decide when it opens.
+        assertNull(CopyChoice.rejection(offer("b", durationMs = ownMs + 8_001), playing, ownMs))
+        assertNull(CopyChoice.rejection(offer("b12", durationMs = ownMs - 12_000), playing, ownMs))
+        assertNull(CopyChoice.rejection(offer("b180", durationMs = ownMs + 180_000), playing, ownMs))
+        assertNotNull(CopyChoice.rejection(offer("b181", durationMs = ownMs + 181_000), playing, ownMs))
+        assertNotNull(CopyChoice.rejection(offer("bcut", durationMs = ownMs + 60_000, text = "Film.2019.Extended.1080p.WEB-DL"), playing, ownMs))
         assertNull(CopyChoice.rejection(offer("c", durationMs = (ownMs * 0.959).toLong()), playing, ownMs))
         assertNotNull(CopyChoice.rejection(offer("d", durationMs = (ownMs * 0.9).toLong()), playing, ownMs))
         assertEquals(7_200_000L, CopyChoice.parsedDurationMs(7_200L))
@@ -229,7 +233,7 @@ class CopyChoiceTest {
         assertEquals("another Usenet link",
             CopyChoice.rejection(offer("nzb", kind = CopyKind.USENET), hd, ownMs, maxHeight = 1080, usenet = true))
         assertNotNull(CopyChoice.rejection(offer("cut", text = "Film.Extended.1080p"), hd, ownMs, maxHeight = 1080, usenet = true))
-        assertNotNull(CopyChoice.rejection(offer("long", durationMs = ownMs + 9_000), hd, ownMs, maxHeight = 1080, usenet = true))
+        assertNotNull(CopyChoice.rejection(offer("long", durationMs = ownMs + 200_000), hd, ownMs, maxHeight = 1080, usenet = true))
         // A 4K title from Usenet keeps the smaller-copy rule.
         assertNotNull(CopyChoice.rejection(offer("4k", height = 2160), playing, ownMs, maxHeight = 2160, usenet = true))
         assertNull(CopyChoice.rejection(offer("hd"), playing, ownMs, maxHeight = 2160, usenet = true))

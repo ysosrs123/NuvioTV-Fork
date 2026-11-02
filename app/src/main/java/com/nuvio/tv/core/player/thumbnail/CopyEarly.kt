@@ -19,11 +19,16 @@ internal class CopyEarlyPicture(val kf: Int, val jpeg: ByteArray, val width: Int
 
 /**
  * Copy pictures made as soon as the copy's index is read, before the title's thumbnails session exists: software only,
- * one request at a time, kept as small JPEGs in memory up to [maxPictures] / [maxBytes]. Nothing is shown or stored
- * from them here; the copy pass puts the ones whose keyframe it picks for a slot into the copy's store, after which the
- * usual picture check decides. A list nobody takes is dropped.
+ * one request at a time, kept as small JPEGs in memory up to [maxPictures] / [maxBytes]. Nothing is stored from them
+ * here, the generating screen may show them ([CopyEarlyRow]); the copy pass puts the ones whose keyframe it picks for a
+ * slot into the copy's store, after which the usual picture check decides. A list nobody takes is dropped.
  */
-internal class CopyEarly(private val label: String, private val pickedAtMs: Long) {
+internal class CopyEarly(
+    private val label: String,
+    private val pickedAtMs: Long,
+    /** Each picture as it is made, keyframe and its time (ms) on the copy; the bitmap is recycled after the call. */
+    private val shown: ((kf: Int, ptsMs: Long, bitmap: Bitmap) -> Unit)? = null,
+) {
     companion object {
         private const val TAG = "ThumbCopy"
         const val MAX_STRONG = 60
@@ -130,12 +135,16 @@ internal class CopyEarly(private val label: String, private val pickedAtMs: Long
                     val jpeg = ByteArrayOutputStream(24 * 1024).also {
                         bmp.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it)
                     }.toByteArray()
-                    bmp.recycle()
                     synchronized(pictures) {
-                        if (closed) return@launch
+                        if (closed) {
+                            bmp.recycle()
+                            return@launch
+                        }
                         pictures += CopyEarlyPicture(kf, jpeg, size[0], size[1])
                         bytes += jpeg.size
                     }
+                    shown?.let { s -> runCatching { s(kf, idx.keyframes.ptsUs[kf] / 1000L, bmp) } }
+                    bmp.recycle()
                     if (firstAtMs == 0L) {
                         firstAtMs = SystemClock.elapsedRealtime()
                         Log.i(TAG, "copy first: first early picture from $label ${firstAtMs - t0} ms after its index, " +
@@ -200,5 +209,65 @@ internal object CopyEarlyFit {
             used += Use(p, slots, plan)
         }
         return Result(used, otherKeyframe, otherShape)
+    }
+}
+
+/**
+ * The generating screen's row while it checks: the copy's pictures made before the session, in the order they were
+ * made, until the session's own row has pictures. Shown like a copy's thumbnails before the picture check, unmarked.
+ */
+internal object CopyEarlyRow {
+    /** Pictures kept for the row: the six it shows and the ones gliding out. */
+    const val KEEP = 8
+    /** Width the row's pictures are scaled down to at most, in pixels. */
+    const val MAX_WIDTH_PX = 240
+
+    class Frame<T>(val seq: Int, val kf: Int, val ptsMs: Long, val picture: T)
+
+    class Row<T>(val identity: String, val frames: List<Frame<T>>) {
+        val newestSeq: Int get() = frames.lastOrNull()?.seq ?: 0
+    }
+
+    class Added<T>(val row: Row<T>?, val dropped: List<T>)
+
+    /** Pictures are taken only while the screen checks, for the title it is up for. */
+    fun wanted(identity: String, screenIdentity: String?, ui: SeekThumbnails.PrepareUi): Boolean =
+        ui is SeekThumbnails.PrepareUi.Checking && identity.isNotEmpty() && identity == screenIdentity
+
+    /**
+     * [row] with [picture] of keyframe [kf] for [identity] added as the newest; a row of another title is dropped whole,
+     * a keyframe already in the row is not added again ([Added.dropped] holds [picture] then).
+     */
+    fun <T> add(row: Row<T>?, identity: String, kf: Int, ptsMs: Long, picture: T, keep: Int = KEEP): Added<T> {
+        val dropped = ArrayList<T>()
+        val same = row?.takeIf { it.identity == identity }
+        if (row != null && same == null) row.frames.mapTo(dropped) { it.picture }
+        if (same != null && same.frames.any { it.kf == kf }) return Added(same, listOf(picture))
+        val frames = ArrayList(same?.frames.orEmpty())
+        frames += Frame((same?.newestSeq ?: 0) + 1, kf, ptsMs, picture)
+        while (frames.size > keep.coerceAtLeast(1)) dropped += frames.removeAt(0).picture
+        return Added(Row(identity, frames), dropped)
+    }
+
+    /** The row shows the early pictures: while checking, and while generating until the session's row has one. */
+    fun showsEarly(ui: SeekThumbnails.PrepareUi, rowIdentity: String?, screenIdentity: String?, early: Int): Boolean =
+        early > 0 && rowIdentity != null && rowIdentity == screenIdentity && when (ui) {
+            is SeekThumbnails.PrepareUi.Checking -> true
+            is SeekThumbnails.PrepareUi.Generating -> ui.recent.isEmpty()
+            else -> false
+        }
+
+    /** The early pictures are no longer needed: the screen is gone, ready, or shows the session's own row. */
+    fun ends(ui: SeekThumbnails.PrepareUi): Boolean = when (ui) {
+        is SeekThumbnails.PrepareUi.Checking -> false
+        is SeekThumbnails.PrepareUi.Generating -> ui.recent.isNotEmpty()
+        else -> true
+    }
+
+    /** [w] x [h] scaled to at most [maxW] wide, the shape kept; never larger. */
+    fun scaledSize(w: Int, h: Int, maxW: Int = MAX_WIDTH_PX): IntArray {
+        if (w <= 0 || h <= 0) return intArrayOf(0, 0)
+        if (w <= maxW) return intArrayOf(w, h)
+        return intArrayOf(maxW, ((h.toLong() * maxW + w / 2) / w).toInt().coerceAtLeast(1))
     }
 }
