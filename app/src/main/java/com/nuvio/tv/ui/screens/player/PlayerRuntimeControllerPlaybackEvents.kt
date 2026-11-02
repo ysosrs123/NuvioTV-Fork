@@ -1460,6 +1460,11 @@ internal fun PlayerRuntimeController.schedulePauseOverlay() {
  */
 internal fun PlayerRuntimeController.pauseForSeekThumbnails(): Boolean? {
     if (isUsingMpvEngine()) return false
+    if (openDeferredForThumbnails) {
+        pauseIntent.holdForThumbnails()
+        shouldEnforceAutoplayOnFirstReady = false
+        return true
+    }
     // In a party the room decides when this box plays; a hold here would pause everyone.
     if (partyBridge?.inParty == true) return null
     val player = _exoPlayer ?: return false
@@ -1485,13 +1490,54 @@ internal fun PlayerRuntimeController.pauseForSeekThumbnails(): Boolean? {
  */
 internal fun PlayerRuntimeController.letGoForSeekThumbnails(): Boolean {
     if (isUsingMpvEngine() || partyBridge?.inParty == true) return false
+    if (openDeferredForThumbnails) return true
     val player = _exoPlayer ?: return false
     if (player.playWhenReady || player.playbackState == Player.STATE_IDLE || player.playerError != null) return false
+    // Amlogic's Dolby Vision decoder built again after its first picture plays sound over a black picture: kept held.
+    if (hasRenderedFirstFrame && playbackAnalyticsDiagnostics.hudSample().videoDecoderName
+            ?.startsWith(AMLOGIC_DV_DECODER) == true) {
+        if (!dvDecoderKeptNoted) {
+            dvDecoderKeptNoted = true
+            Log.i(PlayerRuntimeController.TAG, "prepare: Dolby Vision decoder kept held for the thumbnails, not let go")
+        }
+        return false
+    }
     player.stop()
     return true
 }
 
+private const val AMLOGIC_DV_DECODER = "c2.amlogic.dolby-vision"
+
+/** The film stays unopened at [positionMs] for the thumbnails screen; it opens after [DEFERRED_OPEN_FAILSAFE_MS] if no screen holds it. */
+internal fun PlayerRuntimeController.deferFilmOpen(positionMs: Long) {
+    openDeferredForThumbnails = true
+    deferredOpenAtMs = positionMs
+    Log.i(PlayerRuntimeController.TAG, "prepare: the film opens when the thumbnails screen ends (at ${positionMs / 1000} s)")
+    scope.launch {
+        delay(DEFERRED_OPEN_FAILSAFE_MS)
+        if (openDeferredForThumbnails && !pauseIntent.heldForThumbnails) {
+            openDeferredFilm(play = true, why = "no thumbnails screen in ${DEFERRED_OPEN_FAILSAFE_MS / 1000} s")
+        }
+    }
+}
+
+private const val DEFERRED_OPEN_FAILSAFE_MS = 8_000L
+
+internal fun PlayerRuntimeController.openDeferredFilm(play: Boolean, why: String) {
+    if (!openDeferredForThumbnails) return
+    openDeferredForThumbnails = false
+    com.nuvio.tv.core.player.thumbnail.SeekThumbnails.deferredOpenEnded()
+    if (!play && pauseIntent.heldForThumbnails) userPausedManually = true
+    if (play) pauseIntent.onPlayWhenReady(true)
+    Log.i(PlayerRuntimeController.TAG, "prepare: the film opens now at ${deferredOpenAtMs / 1000} s ($why)")
+    scheduleOwnedPlaybackRecovery(deferredOpenAtMs, 0L)
+}
+
 internal fun PlayerRuntimeController.loadAgainAfterSeekThumbnails(play: Boolean) {
+    if (openDeferredForThumbnails) {
+        openDeferredFilm(play, "the thumbnails screen ended")
+        return
+    }
     val player = _exoPlayer ?: return
     // Left paused for the user (the app was left meanwhile): from here on it is a pause like the user's own.
     if (!play && pauseIntent.heldForThumbnails) userPausedManually = true

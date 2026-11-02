@@ -1805,7 +1805,10 @@ internal fun PlayerRuntimeController.initializePlayer(
                     phase = "starting_stream",
                     message = context.getString(R.string.player_loading_starting)
                 )
-                scheduleStartupWatchdog()
+                // The thumbnails screen comes up from an index read early: the film opens when it ends.
+                val deferOpen = partyBridge?.inParty != true &&
+                    com.nuvio.tv.core.player.thumbnail.SeekThumbnails.takeDeferredOpen()
+                if (!deferOpen) scheduleStartupWatchdog()
                 val isTunneledPlayback = isTunnelingActiveForCurrentPlayback
                 // Hold playWhenReady=false through prepare() so audio does not race ahead
                 // while the video decoder is still opening. The first STATE_READY primes the
@@ -1823,7 +1826,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                     exoDelayStartAfterAfrSwitch && !startPaused && !userPausedManually
                 exoDelayStartAfterAfrSwitch = false
                 playWhenReady = false
-                prepare()
+                if (deferOpen) deferFilmOpen(initialResumePosition) else prepare()
 
                 currentExoPlayerListener?.let { staleListener -> removeListener(staleListener) }
                 currentExoPlayerListener = null
@@ -2757,6 +2760,9 @@ internal fun PlayerRuntimeController.initializePlayer(
                                         append(')')
                                     }
                                     currentAudioPathDescription = "$src \u2192 $detail"
+                                    if (playbackSpeedAwareAudioSink?.isIecHbrActive() == true && _exoPlayer === this@apply) {
+                                        logAudioStart(this@apply, tunnelled = false, offload = false, output = "$src \u2192 $detail")
+                                    }
                                 }
                             }
                         }

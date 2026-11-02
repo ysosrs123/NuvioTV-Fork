@@ -594,7 +594,17 @@ internal fun PlayerRuntimeController.scheduleOwnedPlaybackRecovery(
     var route = runCatching { AudioOutputRouteDetector.detect(context)?.key }.getOrNull()
     val paused = pausedByUser
     val position = _uiState.value.pendingSeekPosition ?: positionMs.coerceAtLeast(0L)
-    val preference = rememberedTrackPreference ?: persistedTrackPreference
+    // The track that plays is kept: a restored choice is cleared once it matched, so it is not always remembered.
+    val playingAudio = _uiState.value.audioTracks.firstOrNull { it.isSelected }
+    val preference = (rememberedTrackPreference ?: persistedTrackPreference).let { base ->
+        if (playingAudio == null) base else (base ?: currentTrackPreferenceForPersistence()).copy(
+            audio = PlayerRuntimeController.RememberedTrackSelection(
+                language = playingAudio.language,
+                name = playingAudio.name,
+                trackId = playingAudio.trackId
+            )
+        )
+    }
     cancelFirstFrameWatchdog()
     cancelTunnelAvSyncWatchdog()
     cancelStallWatchdog()

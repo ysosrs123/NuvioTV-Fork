@@ -495,6 +495,9 @@ class PlayerRuntimeController(
         get() = _exoPlayer
     @Volatile var videoAspectRatio: Float = 0f
     @Volatile var exoPlayerView: androidx.media3.ui.PlayerView? = null
+    /** The film waits unopened for the thumbnails screen ([openDeferredFilm]); [deferredOpenAtMs] is where it starts. */
+    @Volatile internal var openDeferredForThumbnails = false
+    @Volatile internal var deferredOpenAtMs = 0L
     val videoBottomFractionState = mutableStateOf<Float?>(null)
     internal var _loadControl: DefaultLoadControl? = null
     internal var playbackSpeedAwareAudioSink: PlaybackSpeedAwareAudioSink? = null
@@ -562,6 +565,10 @@ class PlayerRuntimeController(
     internal var sourceChipErrorDismissJob: Job? = null
     internal var sourceStreamsCacheRequestKey: String? = null
     internal var sourceStreamsFetchCompleted: Boolean = false
+    /** The list being filled was taken from memory (the stream screen's), not searched for again. */
+    internal var sourceStreamsFromMemory: Boolean = false
+    /** A partial list was handed over and is shown while the rest loads: the copy search may start on it. */
+    internal var sourceCopyListEarly: Boolean = false
     internal var hostActivityRef: WeakReference<Activity>? = null
     internal var initialPlaybackStarted: Boolean = false
     internal var lastPlaybackDiagnosticsForReport: LastPlaybackDiagnostics =
@@ -588,6 +595,12 @@ class PlayerRuntimeController(
 
     internal var playbackStartedForParentalGuide = false
     internal var hasRenderedFirstFrame = false
+        set(value) {
+            field = value
+            if (!value) dvDecoderKeptNoted = false
+        }
+    /** "Dolby Vision decoder kept held" was logged for this play. */
+    internal var dvDecoderKeptNoted = false
     // Prevent the previous stream's end from completing the new stream.
     internal var endDetectionArmed = false
     // Ignore EOF until MPV has reported a non-EOF state for this stream.
