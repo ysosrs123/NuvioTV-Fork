@@ -101,6 +101,6 @@ class StreamBadgePresentation @Inject constructor(
             val key = badge.dedupeKey()
             if (key !in merged) merged[key] = badge // already pooled
         }
-        return merged.values.toList()
+        return StreamBadgeMatcher.mostExactDts(merged.values.toList())
     }
 }

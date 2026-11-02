@@ -284,21 +284,28 @@ private fun audioFacts(codec: String?, profiles: List<String>, release: String):
 
 private fun dtsFacts(label: String, key: String, profileLabel: String, release: String): AudioFacts {
     val x = key == "DTSX" || profileLabel.contains("DTS:X") || releaseSaysDtsX(label, release)
-    val ma = profileLabel.contains("MA") || releaseSaysDtsHdMa(label, release)
+    val ma = x || profileLabel.contains("MA") || releaseSaysDtsHdMa(label, release)
     val hd = ma || label.contains("HD") || profileLabel.contains("DTS-HD")
+    val es = profileLabel.contains("DTS-ES")
+    val express = label.contains("EXPRESS") || profileLabel.contains("EXPRESS")
+    // Only the most exact name: a pack's DTS, DTS-HD and DTS-HD MA rules each match their own word, one badge each.
     val labels = buildList {
-        add("DTS")
-        if (hd) addAll(listOf("DTS-HD", "DTSHD"))
-        if (ma) addAll(listOf("DTS-HD MA", "DTS-HD.MA", "DTS-HDMA", "DTS-MA"))
         if (x) addAll(listOf("DTS:X", "DTS-X", "DTSX"))
-        if (profileLabel.contains("DTS-ES")) add("DTS-ES")
-        if (label.contains("EXPRESS") || profileLabel.contains("EXPRESS")) add("DTS Express")
+        when {
+            ma -> addAll(listOf("DTS-HD MA", "DTS-HD.MA", "DTS-HDMA", "DTS-MA"))
+            hd -> addAll(listOf("DTS-HD", "DTSHD"))
+            es -> add("DTS-ES")
+            express -> add("DTS Express")
+            else -> add("DTS")
+        }
     }
     val forms = buildList {
         if (x) add("DTS-X")
-        if (ma) add("DTS-HD.MA")
-        if (hd) add("DTS-HD")
-        add("DTS")
+        add(when {
+            ma -> "DTS-HD.MA"
+            hd -> "DTS-HD"
+            else -> "DTS"
+        })
     }
     return AudioFacts(labels, forms, atmos = false)
 }

@@ -274,7 +274,7 @@ internal object StreamBadgeMatcher {
                 if (key !in matched) matched[key] = filter.badge
             }
         }
-        return matched.values.toList()
+        return mostExactDts(matched.values.toList())
     }
 
     /**
@@ -309,8 +309,24 @@ internal object StreamBadgeMatcher {
                 if (key !in matched) matched[key] = filter.badge
             }
         }
-        return matched.values.toList()
+        return mostExactDts(matched.values.toList())
     }
+
+    /** A pack's DTS rule may also match inside "DTS-HD MA": next to a more exact DTS badge it is left out. */
+    internal fun mostExactDts(badges: List<StreamBadge>): List<StreamBadge> {
+        if (badges.size < 2) return badges
+        fun key(b: StreamBadge) = b.name.lowercase().filter { it.isLetterOrDigit() }
+        val keys = badges.map(::key)
+        val ma = keys.any { it.startsWith("dtsx") || it.contains("dtshdma") || it.contains("masteraudio") || it == "dtsma" }
+        val hd = keys.any { it.startsWith("dtshd") || it.startsWith("dtsx") }
+        if (!ma && !hd) return badges
+        return badges.filterNot { b ->
+            val k = key(b)
+            k in PLAIN_DTS || (ma && k == "dtshd")
+        }
+    }
+
+    private val PLAIN_DTS = setOf("dts", "dtsaudio", "dtsdigitalsurround")
 
     fun matchedBadgesPooled(
         stream: Stream,
@@ -350,7 +366,7 @@ internal object StreamBadgeMatcher {
         }
 
         return when {
-            matched != null -> matched!!.values.toList()
+            matched != null -> mostExactDts(matched!!.values.toList())
             firstMatch != null -> listOf(firstMatch!!)
             else -> emptyList()
         }
