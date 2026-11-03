@@ -193,7 +193,8 @@ object EspnSummary {
                 val wallclocks = plays.mapNotNull { p -> p.str("id")?.let { id -> p.str("wallclock")?.let { id to it } } }.toMap()
                 scoring.mapNotNull { play(it, sport, sides, it.str("id")?.let(wallclocks::get)) }
             }
-            else -> plays.filter { it.optBoolean("scoringPlay") || sport == "australian-football" && it.optJSONObject("type")?.let { t -> t.str("type") ?: t.str("text") }?.lowercase() in AFL_SCORES }
+            else -> plays.filter { (it.optBoolean("scoringPlay") || sport == "australian-football" && it.optJSONObject("type")?.let { t -> t.str("type") ?: t.str("text") }?.lowercase() in AFL_SCORES) &&
+                it.optJSONObject("period")?.str("displayValue")?.equals("SO", true) != true }
                 .mapNotNull { play(it, sport, sides) }.distinctBy { listOf(it.text, it.period, it.clock, it.homeScore, it.awayScore, it.bottom) }
                 .ifEmpty { events(details, sport, sides) }
         }

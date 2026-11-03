@@ -98,6 +98,9 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
    a final round.
 5. A golf event decided in a playoff (e.g. a weather-shortened event): the finished leaderboard
    shows no "Thru 3" or round score for the two players in the playoff.
+6. An NHL game won in a shootout: Game Centre's goals and timeline end with the last real goal
+   (for example "2–2" in the 3rd); the shootout winner is not listed as a goal at "1–0". The line
+   score still has an "SO" column.
 
 ## 7ad. 20 October captures (build pending — ready to build)
 1. During a tennis tie-break the score bug's third line reads "Tie-break 2–2" (the first

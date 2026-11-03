@@ -965,6 +965,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   (capture of 25 October, 13:27).
 - Golf: after a playoff the leaderboard no longer reads the playoff holes as a round in
   progress ("Thru 3") (capture of 27 October, 09:28).
+- Ice hockey: a shootout winner no longer appears among the goals as "1–0" after the last real
+  goal (capture of 3 November, 14:28).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

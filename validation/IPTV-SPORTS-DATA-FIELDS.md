@@ -2172,3 +2172,21 @@ and eight men's games live. Trimmed copies in
 Confirmed now: women's college basketball live.
 
 Still unconfirmed: as in the forty-eighth pass.
+
+## Fifty-first pass (3 November, 12:28 and 14:28)
+
+Scheduled captures at 12:28 and 14:28 Brisbane time (02:28Z and 04:28Z): 536 and 533 files. At
+12:28 Bruins–Golden Knights were 2–2 with 1:45 left; by 14:28 the game was `Final/SO`, so its
+summary was fetched on its own from the same endpoint. Trimmed copies in
+`app/src/test/resources/sports/espn-nhl-scoreboard-real-20261103.json` and
+`espn-nhl-summary-real-20261103.json` (`SportsRealDataShootoutSummaryTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NHL shootout (summary) | `Final/SO` (`altDetail` `SO`); line scores `1 1 0 0 1` and `0 1 1 0 0` (the shootout as a fifth column of 1–0). The shootout is `period` 5 with `displayValue` `SO`: `Start of Shootout`, each attempt as a `Shot` (`… saved by Jeremy Swayman`) at `0:00`, the winner as `Goal` (`David Pastrnak Goal Wrist Shot`, `scoringPlay` true, `homeScore` 1, `awayScore` 0 — the shootout's own tally), then `End of Shootout`, `End of SO`, `Game End`. | Plays in the `SO` period are left out of the moments, so the goals end with the last real one (`2–2` in the 3rd) instead of a goal at `1–0`; the line score keeps its `SO` column |
+
+Confirmed now: a shootout in the NHL summary.
+
+Still unconfirmed: an NHL power play, empty net or shootout in progress on the scoreboard; the UFC
+finish method arriving later for a bout first posted without one; AFL/NRL live clock (off season);
+a golf playoff in progress.

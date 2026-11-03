@@ -130,6 +130,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 76 (3 November 10:28, scheduled): tests only (women's college basketball live, the
     season's first). Men's college basketball is not in the app (halves, not quarters, if it is
     added: a user decision).
+  - Capture 77 (3 November 12:28, scheduled): nothing new.
+  - Capture 78 (3 November 14:28, scheduled), open batch 7ae: a shootout winner in the NHL
+    summary is no longer a goal at "1–0" after the last real goal.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -427,7 +430,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; the US slots moved an hour later on 1 November and the European ones
   on 25 October.
-  - An NHL shootout in progress (scoreboard and summary); a UFC method posted later: daily
+  - An NHL shootout in progress on the scoreboard (a shootout in the summary was seen on
+    3 November); a UFC method posted later: daily
     10:27, 12:27, 14:27 from 1 November (`IPTV capture – daily US evening`; 09:27, 11:27, 13:27 before).
   - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
     on 27 October): US final rounds end about 09:00 to 11:00 Brisbane on Monday, so the daily
