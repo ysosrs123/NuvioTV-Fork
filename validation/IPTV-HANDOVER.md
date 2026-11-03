@@ -125,6 +125,11 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Captures 68 and 69 (31 October 13:28 and 1 November 09:28, scheduled), with a 25-minute
     UFC poll during the Fight Night: tests only (a stoppage posted final before its end time;
     two unofficial-winner details on one bout).
+  - Captures 70 to 75 (1 November 11:28 to 2 November 14:28, scheduled): nothing new; daily
+    slots moved to 10:27, 12:27 and 14:27 on 1 November.
+  - Capture 76 (3 November 10:28, scheduled): tests only (women's college basketball live, the
+    season's first). Men's college basketball is not in the app (halves, not quarters, if it is
+    added: a user decision).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:

@@ -2154,3 +2154,21 @@ Lightning–Predators `Final/SO`. Trimmed copies in
 Confirmed now: nothing from the plan (every method came with the result on this card).
 
 Still unconfirmed: as in the forty-eighth pass.
+
+## Fiftieth pass (3 November, 10:28)
+
+Scheduled capture at 10:28 Brisbane time (00:28Z): 534 files. The captures from 1 November 11:28
+to 2 November 14:28 held nothing new (both golf events finished without a playoff; the rest of the
+UFC card all had methods with the results). College basketball's season has begun: five women's
+and eight men's games live. Trimmed copies in
+`app/src/test/resources/sports/espn-wcbb-scoreboard-real-20261103.json` and
+`espn-wcbb-summary-real-20261103.json` (`SportsRealDataWomensCollegeTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Women's college basketball | Quarters: `End of 1st` (`STATUS_END_PERIOD`, last play `End of 1st Quarter`), `Halftime`, `9:16 - 4th`, `0:01 - 3rd`; a line score per quarter. Substitutions read `Kensley Feltner subbing in for Morehead State` (the NBA's `X enters the game for Y` elsewhere). | none: `End of 1st`, `Halftime`, `Q4 · 9:16`, `Q3 · 0:01` |
+| Men's college basketball (no league in the app) | Two halves: `15:52 - 2nd`, `7:16 - 1st`, `Halftime`. | none: if the league is added, its periods need half labels (`1H`/`2H`), not `Q1`/`Q2` |
+
+Confirmed now: women's college basketball live.
+
+Still unconfirmed: as in the forty-eighth pass.
