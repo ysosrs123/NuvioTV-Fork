@@ -133,6 +133,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 77 (3 November 12:28, scheduled): nothing new.
   - Capture 78 (3 November 14:28, scheduled), open batch 7ae: a shootout winner in the NHL
     summary is no longer a goal at "1–0" after the last real goal.
+  - Capture 79 (4 November 10:28, scheduled): docs only (the NHL scoreboard carries no power
+    play or empty net, only the penalty as the last play; dropped from the unconfirmed list).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:

@@ -2190,3 +2190,17 @@ Confirmed now: a shootout in the NHL summary.
 Still unconfirmed: an NHL power play, empty net or shootout in progress on the scoreboard; the UFC
 finish method arriving later for a bout first posted without one; AFL/NRL live clock (off season);
 a golf playoff in progress.
+
+## Fifty-second pass (4 November, 10:28)
+
+Scheduled capture at 10:28 Brisbane time (00:28Z): 535 files. Eight NHL games in the 1st. Jets at
+Canadiens had just had a minor called (`Neal Pionk Roughing against Zachary Bolduc`, type `45`,
+`penaltyMinutes` 2, `penaltyType` `Minor`): the scoreboard's `situation` holds only that `lastPlay`,
+with no strength, power-play or empty-net field and nothing on the competitors, as noted before. The
+power play stays a summary-only shape (`SummaryStrength`).
+
+Dropped: an NHL power play or empty net on the scoreboard (ESPN's scoreboard does not carry them).
+
+Still unconfirmed: an NHL shootout in progress on the scoreboard; the UFC finish method arriving
+later for a bout first posted without one; AFL/NRL live clock (off season); a golf playoff in
+progress.
