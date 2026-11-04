@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.player.autosync
 
+import com.nuvio.tv.core.network.IPv4FirstDns
 import androidx.media3.common.C
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.ParsableByteArray
@@ -109,6 +110,7 @@ internal object EmbeddedSubtitleTimelineLoader {
     private const val ID_CUE_DURATION = 0xB2L
 
     private val httpClient = OkHttpClient.Builder()
+        .dns(IPv4FirstDns())
         .socketFactory(NoDelaySocketFactory)
         .connectTimeout(5, TimeUnit.SECONDS)
         .readTimeout(8, TimeUnit.SECONDS)

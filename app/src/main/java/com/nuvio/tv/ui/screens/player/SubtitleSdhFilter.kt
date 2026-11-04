@@ -1,5 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
+import android.text.SpannableString
+import android.text.Spanned
 import androidx.media3.common.text.Cue
 import androidx.media3.common.text.CueGroup
 import androidx.media3.exoplayer.text.TextOutput
@@ -21,7 +23,14 @@ internal object SubtitleSdhFilter {
     fun filterCues(cues: List<Cue>): List<Cue> = cues.mapNotNull { cue ->
         val text = cue.text?.toString() ?: return@mapNotNull cue
         val filtered = filterPlainText(text) ?: return@mapNotNull null
-        if (filtered == text) cue else cue.buildUpon().setText(filtered).build()
+        if (filtered == text) cue else cue.buildUpon().setText(keepEdgeSpan(cue.text, filtered)).build()
+    }
+
+    /** The outline and shadow of plain text survive the filter; other styling does not, as before. */
+    private fun keepEdgeSpan(original: CharSequence?, filtered: String): CharSequence {
+        val span = (original as? Spanned)?.getSpans(0, original.length, SubtitleEdgeSpan::class.java)?.firstOrNull()
+        if (span == null || filtered.isEmpty()) return filtered
+        return SpannableString(filtered).apply { setSpan(span, 0, length, Spanned.SPAN_INCLUSIVE_INCLUSIVE) }
     }
 
     internal fun filterPlainText(text: String): String? {

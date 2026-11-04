@@ -104,20 +104,31 @@ internal fun subtitleTypeface(context: Context?, font: SubtitleFont?, bold: Bool
     val face = font.face(bold)
     val base = ResourcesCompat.getFont(ctx, face.resource)
         ?: return if (bold) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
-    if (face.weightFromFile) return base
+    if (face.weightFromFile) {
+        val asRegular = !bold && face.weight != NOTO_REGULAR_DRAWN_WEIGHT && Build.VERSION.SDK_INT >= 28
+        return if (asRegular) Typeface.create(base, NOTO_REGULAR_DRAWN_WEIGHT, false) else base
+    }
     return if (Build.VERSION.SDK_INT >= 28) Typeface.create(base, face.weight, false)
     else Typeface.create(base, if (bold) Typeface.BOLD else Typeface.NORMAL)
 }
 
+/**
+ * Android treats a face of weight 600 or more as bold, so an italic span on Noto's semi-bold regular asked for bold
+ * italic and drew the bold file. The semi-bold file is registered as the family's regular instead.
+ */
+internal const val NOTO_REGULAR_DRAWN_WEIGHT = 400
+
+internal fun notoDrawnWeight(bold: Boolean): Int = if (bold) 700 else NOTO_REGULAR_DRAWN_WEIGHT
+
 @RequiresApi(29)
 private fun notoSubtitleTypeface(context: Context, bold: Boolean): Typeface {
     fun family(regular: Int, boldRes: Int) = FontFamily.Builder(
-        Font.Builder(context.resources, regular).setWeight(600).build()
-    ).addFont(Font.Builder(context.resources, boldRes).setWeight(700).build()).build()
+        Font.Builder(context.resources, regular).setWeight(notoDrawnWeight(false)).build()
+    ).addFont(Font.Builder(context.resources, boldRes).setWeight(notoDrawnWeight(true)).build()).build()
     val builder = Typeface.CustomFallbackBuilder(family(R.font.subtitle_noto_sans_semibold, R.font.subtitle_noto_sans_bold))
     NOTO_SUBTITLE_SCRIPT_FONTS.forEach { (regular, boldRes) -> builder.addCustomFallback(family(regular, boldRes)) }
     return builder.setSystemFallback("sans-serif")
-        .setStyle(FontStyle(subtitleFontWeight(SubtitleFont.NOTO_SANS_SEMIBOLD, bold), FontStyle.FONT_SLANT_UPRIGHT))
+        .setStyle(FontStyle(notoDrawnWeight(bold), FontStyle.FONT_SLANT_UPRIGHT))
         .build()
 }
 

@@ -25,6 +25,9 @@ class SubtitleAppearancePreferencesTest {
     private val fontKey = stringPreferencesKey("subtitle_font")
     private val edgeKey = stringPreferencesKey("subtitle_edge_style")
     private val oldOutline = booleanPreferencesKey("subtitle_outline_enabled")
+    private val outlineSizeKey = stringPreferencesKey("subtitle_outline_size")
+    private val shadowKey = booleanPreferencesKey("subtitle_shadow_enabled")
+    private val shadowOpacityKey = intPreferencesKey("subtitle_shadow_opacity")
     private fun settings(initial: List<Preferences>, block: suspend (PlayerSettingsDataStore, ThemeDataStore, MutableStateFlow<Int>, List<MemoryStore>) -> Unit) = runBlocking {
         val active = MutableStateFlow(0)
         val manager = mockk<ProfileManager> { every { activeProfileId } returns active }
@@ -49,7 +52,11 @@ class SubtitleAppearancePreferencesTest {
             val style = player.playerSettings.first().subtitleStyle
             assertNull(style.font)
             assertEquals(when (id) { 0 -> SubtitleEdgeStyle.DROP_SHADOW; 1 -> SubtitleEdgeStyle.OUTLINE; else -> SubtitleEdgeStyle.NONE }, style.effectiveEdgeStyle)
+            assertEquals(if (id == 1) SubtitleOutlineSize.NORMAL else SubtitleOutlineSize.OFF, style.effectiveOutlineSize)
+            assertEquals(id == 0, style.effectiveShadowEnabled)
+            assertEquals(70, style.shadowOpacity)
             assertNull(stores[id].data.value[fontKey]); assertNull(stores[id].data.value[edgeKey])
+            assertNull(stores[id].data.value[outlineSizeKey]); assertNull(stores[id].data.value[shadowKey])
         }
     }
 
@@ -111,21 +118,45 @@ class SubtitleAppearancePreferencesTest {
         assertEquals(AppFont.ATKINSON_HYPERLEGIBLE_NEXT, theme.selectedFont.first())
     }
 
-    @Test fun `edge choices persist and old outline setter clears the new mode`() = settings(
+    @Test fun `outline and shadow persist apart and keep the single edge choice for older builds`() = settings(
         listOf(emptyPreferences(), emptyPreferences())
     ) { player, _, active, stores ->
-        for (edge in SubtitleEdgeStyle.entries) {
-            player.setSubtitleEdgeStyle(edge)
-            assertEquals(edge, player.playerSettings.first().subtitleStyle.effectiveEdgeStyle)
-            assertEquals(edge.name, stores[0].data.value[edgeKey])
-            assertEquals(edge == SubtitleEdgeStyle.OUTLINE, stores[0].data.value[oldOutline])
+        player.setSubtitleOutlineSize(SubtitleOutlineSize.THICK)
+        var style = player.playerSettings.first().subtitleStyle
+        assertEquals(SubtitleOutlineSize.THICK, style.effectiveOutlineSize)
+        assertTrue("the shadow a new profile had stays on", style.effectiveShadowEnabled)
+        assertEquals("THICK", stores[0].data.value[outlineSizeKey])
+        assertEquals(true, stores[0].data.value[shadowKey])
+        assertEquals(SubtitleEdgeStyle.OUTLINE.name, stores[0].data.value[edgeKey])
+        assertEquals(true, stores[0].data.value[oldOutline])
+        player.setSubtitleShadowEnabled(false)
+        player.setSubtitleOutlineSize(SubtitleOutlineSize.OFF)
+        style = player.playerSettings.first().subtitleStyle
+        assertEquals(SubtitleOutlineSize.OFF, style.effectiveOutlineSize)
+        assertFalse(style.effectiveShadowEnabled)
+        assertEquals(SubtitleEdgeStyle.NONE.name, stores[0].data.value[edgeKey])
+        assertEquals(false, stores[0].data.value[oldOutline])
+        player.setSubtitleShadowEnabled(true)
+        assertEquals(SubtitleEdgeStyle.DROP_SHADOW.name, stores[0].data.value[edgeKey])
+        for ((asked, saved) in listOf(0 to 10, 34 to 30, 35 to 40, 70 to 70, 140 to 100)) {
+            player.setSubtitleShadowOpacity(asked)
+            assertEquals(saved, stores[0].data.value[shadowOpacityKey])
+            assertEquals(saved, player.playerSettings.first().subtitleStyle.shadowOpacity)
         }
         active.value = 1
-        assertEquals(SubtitleEdgeStyle.DROP_SHADOW, player.playerSettings.first().subtitleStyle.effectiveEdgeStyle)
-        active.value = 0
-        player.setSubtitleOutlineEnabled(true)
-        assertEquals(SubtitleEdgeStyle.OUTLINE, player.playerSettings.first().subtitleStyle.effectiveEdgeStyle)
-        assertNull(stores[0].data.value[edgeKey])
+        style = player.playerSettings.first().subtitleStyle
+        assertEquals(SubtitleOutlineSize.OFF, style.effectiveOutlineSize)
+        assertTrue(style.effectiveShadowEnabled)
+    }
+
+    @Test fun `a saved outline choice keeps its shadow off when the outline changes`() = settings(
+        listOf(preferencesOf(edgeKey to SubtitleEdgeStyle.OUTLINE.name, oldOutline to true))
+    ) { player, _, _, stores ->
+        player.setSubtitleOutlineSize(SubtitleOutlineSize.THIN)
+        val style = player.playerSettings.first().subtitleStyle
+        assertEquals(SubtitleOutlineSize.THIN, style.effectiveOutlineSize)
+        assertFalse(style.effectiveShadowEnabled)
+        assertEquals(false, stores[0].data.value[shadowKey])
     }
 
     @Test fun `reset restores shadow atomically but preserves UI and subtitle language`() = settings(
@@ -133,11 +164,16 @@ class SubtitleAppearancePreferencesTest {
     ) { player, theme, _, stores ->
         theme.setFont(AppFont.SOURCE_SANS_3)
         player.setSubtitleFont(SubtitleFont.ATKINSON_HYPERLEGIBLE_NEXT)
-        player.setSubtitleEdgeStyle(SubtitleEdgeStyle.NONE)
+        player.setSubtitleOutlineSize(SubtitleOutlineSize.THICK)
+        player.setSubtitleShadowEnabled(false)
+        player.setSubtitleShadowOpacity(30)
         player.setSubtitleSize(180)
         player.resetSubtitleAppearance()
         val style = player.playerSettings.first().subtitleStyle
         assertNull(style.font); assertEquals(SubtitleEdgeStyle.DROP_SHADOW, style.effectiveEdgeStyle)
+        assertEquals(SubtitleOutlineSize.OFF, style.effectiveOutlineSize)
+        assertTrue(style.effectiveShadowEnabled)
+        assertEquals(70, style.shadowOpacity)
         assertEquals(100, style.size)
         assertEquals("fr", style.preferredLanguage)
         assertEquals(AppFont.SOURCE_SANS_3, theme.selectedFont.first())

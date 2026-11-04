@@ -4,7 +4,7 @@ package com.nuvio.tv.ui.screens.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.nuvio.tv.R
-import com.nuvio.tv.data.local.SubtitleEdgeStyle
+import com.nuvio.tv.data.local.SubtitleOutlineSize
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -17,10 +17,11 @@ import com.nuvio.tv.ui.theme.getFontFamily
 internal fun subtitleFontName(font: SubtitleFont?): String = font?.displayName ?: stringResource(R.string.subtitle_font_renderer_default)
 
 @Composable
-internal fun subtitleEdgeName(edge: SubtitleEdgeStyle): String = stringResource(when (edge) {
-    SubtitleEdgeStyle.NONE -> R.string.action_none
-    SubtitleEdgeStyle.OUTLINE -> R.string.subtitle_style_outline
-    SubtitleEdgeStyle.DROP_SHADOW -> R.string.subtitle_edge_drop_shadow
+internal fun subtitleOutlineSizeName(size: SubtitleOutlineSize): String = stringResource(when (size) {
+    SubtitleOutlineSize.OFF -> R.string.subtitle_style_off
+    SubtitleOutlineSize.THIN -> R.string.subtitle_outline_thin
+    SubtitleOutlineSize.NORMAL -> R.string.subtitle_outline_normal
+    SubtitleOutlineSize.THICK -> R.string.subtitle_outline_thick
 })
 
 @Composable
@@ -35,11 +36,10 @@ internal fun SubtitleFontDialog(selected: SubtitleFont?, onSelected: (SubtitleFo
 }
 
 @Composable
-internal fun SubtitleEdgeDialog(selected: SubtitleEdgeStyle, onSelected: (SubtitleEdgeStyle) -> Unit, onDismiss: () -> Unit) {
+internal fun SubtitleOutlineSizeDialog(selected: SubtitleOutlineSize, onSelected: (SubtitleOutlineSize) -> Unit, onDismiss: () -> Unit) {
     SettingsSingleChoiceDialog(
-        title = stringResource(R.string.subtitle_edge_style),
-        options = SubtitleEdgeStyle.entries.map { SettingsPickerOption(it, subtitleEdgeName(it),
-            description = if (it == SubtitleEdgeStyle.DROP_SHADOW) stringResource(R.string.subtitle_shadow_note) else null) },
+        title = stringResource(R.string.subtitle_style_outline),
+        options = SubtitleOutlineSize.entries.map { SettingsPickerOption(it, subtitleOutlineSizeName(it)) },
         selectedValue = selected,
         onOptionSelected = { onSelected(it); onDismiss() }, onDismiss = onDismiss
     )

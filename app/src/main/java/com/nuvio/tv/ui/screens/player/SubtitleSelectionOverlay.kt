@@ -2,11 +2,11 @@
 
 package com.nuvio.tv.ui.screens.player
 
-import com.nuvio.tv.data.local.SubtitleEdgeStyle
+import com.nuvio.tv.data.local.SubtitleOutlineSize
+import com.nuvio.tv.data.local.next
 import com.nuvio.tv.ui.screens.settings.SubtitleFontDialog
-import com.nuvio.tv.ui.screens.settings.SubtitleEdgeDialog
 import com.nuvio.tv.ui.screens.settings.subtitleFontName
-import com.nuvio.tv.ui.screens.settings.subtitleEdgeName
+import com.nuvio.tv.ui.screens.settings.subtitleOutlineSizeName
 import com.nuvio.tv.ui.components.PanelEyebrow
 import com.nuvio.tv.ui.components.PanelActionRow
 import com.nuvio.tv.ui.components.PlayerPanelRow
@@ -425,7 +425,6 @@ private fun SubtitleStyleRail(
     bitmapScaleAvailable: Boolean = true
 ) {
     var showFontPicker by remember { mutableStateOf(false) }
-    var showEdgePicker by remember { mutableStateOf(false) }
     val displayedSize = if (bitmapTrack) subtitleStyle.bitmapSize else subtitleStyle.size
     fun sizeEvent(value: Int): PlayerEvent = if (bitmapTrack) PlayerEvent.OnSetSubtitleBitmapSize(value) else PlayerEvent.OnSetSubtitleSize(value)
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
@@ -618,35 +617,72 @@ private fun SubtitleStyleRail(
                     }
                 }
                 item {
+                    val outlineSize = subtitleStyle.effectiveOutlineSize
                     OverlaySectionCard(
-                        title = stringResource(R.string.subtitle_edge_style),
+                        title = stringResource(R.string.subtitle_style_outline),
                         modifier = styleCardModifier
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
                             ToggleChip(
-                                label = subtitleEdgeName(subtitleStyle.effectiveEdgeStyle),
-                                isEnabled = subtitleStyle.effectiveEdgeStyle != SubtitleEdgeStyle.NONE,
+                                label = subtitleOutlineSizeName(outlineSize),
+                                isEnabled = outlineSize != SubtitleOutlineSize.OFF,
                                 onMoveLeft = onMoveLeft,
                                 focusRequester = focusRequesters[StyleFocusKey.OutlineToggle],
                                 focusKey = StyleFocusKey.OutlineToggle,
                                 onFocused = onStyleFocused,
-                                onClick = { showEdgePicker = true }
+                                onClick = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleOutlineSize(outlineSize.next())) }
                             )
-                            if (subtitleStyle.effectiveEdgeStyle == SubtitleEdgeStyle.OUTLINE) ColorChipRow(
+                            ColorChipRow(
                                 colors = SubtitleOutlineColors,
                                 selectedColor = subtitleStyle.outlineColor,
-                                enabled = subtitleStyle.outlineEnabled,
+                                enabled = outlineSize != SubtitleOutlineSize.OFF,
                                 onMoveLeft = onMoveLeft,
                                 focusRequesters = focusRequesters,
                                 focusKeyPrefix = StyleFocusKey.OutlineColorPrefix,
                                 onFocused = onStyleFocused,
                                 onColorSelected = { color ->
-                                    if (!subtitleStyle.outlineEnabled) {
-                                        dispatchStyleEvent(PlayerEvent.OnSetSubtitleOutlineEnabled(true))
+                                    if (outlineSize == SubtitleOutlineSize.OFF) {
+                                        dispatchStyleEvent(PlayerEvent.OnSetSubtitleOutlineSize(SubtitleOutlineSize.NORMAL))
                                     }
                                     dispatchStyleEvent(PlayerEvent.OnSetSubtitleOutlineColor(color))
                                 }
                             )
+                        }
+                    }
+                }
+                item {
+                    val shadow = subtitleStyle.effectiveShadowEnabled
+                    OverlaySectionCard(
+                        title = stringResource(R.string.subtitle_shadow),
+                        modifier = styleCardModifier
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+                            ToggleChip(
+                                label = stringResource(if (shadow) R.string.subtitle_style_on else R.string.subtitle_style_off),
+                                isEnabled = shadow,
+                                onMoveLeft = onMoveLeft,
+                                focusRequester = focusRequesters[StyleFocusKey.ShadowToggle],
+                                focusKey = StyleFocusKey.ShadowToggle,
+                                onFocused = onStyleFocused,
+                                onClick = { dispatchStyleEvent(PlayerEvent.OnSetSubtitleShadowEnabled(!shadow)) }
+                            )
+                            Box(modifier = if (shadow) Modifier else Modifier.alpha(0.35f)) {
+                                StepperRow(
+                                    value = "${subtitleStyle.shadowOpacity}%",
+                                    onDecrease = {
+                                        dispatchStyleEvent(PlayerEvent.OnSetSubtitleShadowOpacity(subtitleStyle.shadowOpacity - 10))
+                                    },
+                                    onIncrease = {
+                                        dispatchStyleEvent(PlayerEvent.OnSetSubtitleShadowOpacity(subtitleStyle.shadowOpacity + 10))
+                                    },
+                                    onMoveLeft = onMoveLeft,
+                                    decrementFocusRequester = focusRequesters[StyleFocusKey.ShadowOpacityDecrease],
+                                    incrementFocusRequester = focusRequesters[StyleFocusKey.ShadowOpacityIncrease],
+                                    decrementFocusKey = StyleFocusKey.ShadowOpacityDecrease,
+                                    incrementFocusKey = StyleFocusKey.ShadowOpacityIncrease,
+                                    onFocusChanged = onStyleFocused
+                                )
+                            }
                         }
                     }
                 }
@@ -709,8 +745,6 @@ private fun SubtitleStyleRail(
     }
     if (showFontPicker && !bitmapTrack && !isStyleDisabledByLibass) SubtitleFontDialog(subtitleStyle.font,
         { dispatchStyleEvent(PlayerEvent.OnSetSubtitleFont(it)) }) { showFontPicker = false }
-    if (showEdgePicker && !bitmapTrack && !isStyleDisabledByLibass) SubtitleEdgeDialog(subtitleStyle.effectiveEdgeStyle,
-        { dispatchStyleEvent(PlayerEvent.OnSetSubtitleEdgeStyle(it)) }) { showEdgePicker = false }
 }
 
 @Composable
@@ -1101,6 +1135,9 @@ private object StyleFocusKey {
     const val HdrBrightnessDecrease = "hdr_brightness_decrease"
     const val HdrBrightnessIncrease = "hdr_brightness_increase"
     const val OutlineColorPrefix = "outline_color"
+    const val ShadowToggle = "shadow_toggle"
+    const val ShadowOpacityDecrease = "shadow_opacity_decrease"
+    const val ShadowOpacityIncrease = "shadow_opacity_increase"
 }
 
 private enum class OverlayFocusRail {
@@ -1118,8 +1155,10 @@ private fun styleListIndexForFocusKey(focusKey: String): Int {
         focusKey.startsWith("${StyleFocusKey.TextColorPrefix}:") -> 4
         focusKey == StyleFocusKey.OpacityDecrease || focusKey == StyleFocusKey.OpacityIncrease -> 5
         focusKey == StyleFocusKey.OutlineToggle || focusKey.startsWith("${StyleFocusKey.OutlineColorPrefix}:") -> 6
-        focusKey == StyleFocusKey.OffsetDecrease || focusKey == StyleFocusKey.OffsetIncrease -> 7
-        focusKey == StyleFocusKey.Reset -> 8
+        focusKey == StyleFocusKey.ShadowToggle || focusKey == StyleFocusKey.ShadowOpacityDecrease ||
+            focusKey == StyleFocusKey.ShadowOpacityIncrease -> 7
+        focusKey == StyleFocusKey.OffsetDecrease || focusKey == StyleFocusKey.OffsetIncrease -> 8
+        focusKey == StyleFocusKey.Reset -> 9
         else -> 0
     }
 }
@@ -1142,6 +1181,9 @@ private fun rememberStyleFocusRequesters(): Map<String, FocusRequester> {
             StyleFocusKey.HdrBrightnessDecrease,
             StyleFocusKey.HdrBrightnessIncrease,
             StyleFocusKey.OutlineToggle,
+            StyleFocusKey.ShadowToggle,
+            StyleFocusKey.ShadowOpacityDecrease,
+            StyleFocusKey.ShadowOpacityIncrease,
             StyleFocusKey.OffsetDecrease,
             StyleFocusKey.OffsetIncrease,
             StyleFocusKey.DelaySet,

@@ -53,15 +53,18 @@ internal class SubtitlePresentation {
     private var dimmedBitmap: Bitmap? = null
 
     @Synchronized
-    fun apply(input: Cue, style: SubtitleStyleSettings, dim: Boolean, preserveAss: Boolean): Cue {
+    fun apply(input: Cue, style: SubtitleStyleSettings, dim: Boolean, preserveAss: Boolean, edgeSpan: SubtitleEdgeSpan? = null): Cue {
         val cue = originals[input] ?: input
         var builder: Cue.Builder? = null
         val text = cue.text
-        if (text is Spanned) {
+        if (text != null && (text is Spanned || (edgeSpan != null && text.isNotEmpty()))) {
             val result = SpannableString(text)
             var changed = false
             for (span in result.getSpans(0, result.length, Any::class.java)) {
-                if (!preserveAss && isAuthoredFontSpan(span)) {
+                if (span is SubtitleEdgeSpan) {
+                    result.removeSpan(span)
+                    changed = true
+                } else if (!preserveAss && isAuthoredFontSpan(span)) {
                     result.removeSpan(span)
                     changed = true
                 } else if (dim && span is ForegroundColorSpan) {
@@ -75,6 +78,10 @@ internal class SubtitlePresentation {
                         changed = true
                     }
                 }
+            }
+            if (edgeSpan != null) {
+                result.setSpan(edgeSpan, 0, result.length, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+                changed = true
             }
             if (changed) builder = cue.buildUpon().setText(result)
         }
@@ -126,7 +133,10 @@ internal fun PlayerRuntimeController.presentSubtitleCue(cue: Cue): Cue {
     val url = state.selectedAddonSubtitle?.url.orEmpty()
     val ass = codec.contains("ass", true) || codec.contains("ssa", true) ||
         url.contains(".ass", true) || url.contains(".ssa", true)
-    return subtitlePresentation.apply(cue, state.subtitleStyle, state.isEditingHdrSubtitleStyle, ass || (codec.isBlank() && url.isBlank()))
+    return subtitlePresentation.apply(
+        cue, state.subtitleStyle, state.isEditingHdrSubtitleStyle, ass || (codec.isBlank() && url.isBlank()),
+        if (ass) null else subtitleEdgeSpan(state.subtitleStyle)
+    )
 }
 
 /** Track labels (including SDH) do not identify the rendering format. */

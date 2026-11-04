@@ -15,7 +15,9 @@ import com.nuvio.tv.data.local.LibassRenderScale
 import com.nuvio.tv.data.local.LibassRenderMode
 import com.nuvio.tv.data.local.PlayerPreference
 import com.nuvio.tv.data.local.PlayerSettings
-import com.nuvio.tv.data.local.SubtitleEdgeStyle
+import com.nuvio.tv.data.local.MAX_SUBTITLE_SHADOW_OPACITY
+import com.nuvio.tv.data.local.MIN_SUBTITLE_SHADOW_OPACITY
+import com.nuvio.tv.data.local.SubtitleOutlineSize
 import com.nuvio.tv.data.local.SubtitleLanguageOption
 import com.nuvio.tv.data.local.SubtitleStyleSettings
 import com.nuvio.tv.data.local.displayName
@@ -167,24 +169,43 @@ internal fun PlaybackSubtitlesSection(
         onClick = { onOpenDialog(PlaybackDialog.SUBTITLE_BACKGROUND_COLOR) },
         enabled = enabled
     )
-    var showEdgePicker by remember { mutableStateOf(false) }
+    var showOutlinePicker by remember { mutableStateOf(false) }
     SettingsActionRow(
-        title = stringResource(R.string.subtitle_edge_style),
-        subtitle = null,
-        value = subtitleEdgeName(style.effectiveEdgeStyle),
+        title = stringResource(R.string.subtitle_style_outline),
+        subtitle = stringResource(R.string.subtitle_outline_sub),
+        value = subtitleOutlineSizeName(style.effectiveOutlineSize),
         enabled = enabled,
-        onClick = { showEdgePicker = true }
+        onClick = { showOutlinePicker = true }
     )
-    if (showEdgePicker && enabled) {
-        SubtitleEdgeDialog(style.effectiveEdgeStyle, { edge -> onUpdate { setSubtitleEdgeStyle(edge) } }) {
-            showEdgePicker = false
+    if (showOutlinePicker && enabled) {
+        SubtitleOutlineSizeDialog(style.effectiveOutlineSize, { size -> onUpdate { setSubtitleOutlineSize(size) } }) {
+            showOutlinePicker = false
         }
     }
-    if (style.effectiveEdgeStyle == SubtitleEdgeStyle.OUTLINE) {
+    if (style.effectiveOutlineSize != SubtitleOutlineSize.OFF) {
         ColorSettingsItem(
             title = stringResource(R.string.sub_outline_color),
             currentColor = Color(style.outlineColor),
             onClick = { onOpenDialog(PlaybackDialog.SUBTITLE_OUTLINE_COLOR) },
+            enabled = enabled
+        )
+    }
+    SettingsToggleRow(
+        title = stringResource(R.string.subtitle_shadow),
+        subtitle = stringResource(R.string.subtitle_shadow_sub),
+        checked = style.effectiveShadowEnabled,
+        onToggle = { onUpdate { setSubtitleShadowEnabled(!style.effectiveShadowEnabled) } },
+        enabled = enabled
+    )
+    if (style.effectiveShadowEnabled) {
+        SliderSettingsItem(
+            title = stringResource(R.string.subtitle_shadow_opacity),
+            value = style.shadowOpacity,
+            valueText = "${style.shadowOpacity}%",
+            minValue = MIN_SUBTITLE_SHADOW_OPACITY,
+            maxValue = MAX_SUBTITLE_SHADOW_OPACITY,
+            step = 10,
+            onValueChange = { opacity -> onUpdate { setSubtitleShadowOpacity(opacity) } },
             enabled = enabled
         )
     }

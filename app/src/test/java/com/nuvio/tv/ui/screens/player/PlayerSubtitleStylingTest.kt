@@ -51,15 +51,23 @@ class PlayerSubtitleStylingTest {
     fun cleanupTypefaceBoundary() { unmockkStatic("com.nuvio.tv.ui.screens.player.SubtitleFontsKt") }
 
     @Test
-    fun `plain text applies fixed drop shadow through actual subtitle view`() {
+    fun `plain text applies the shadow through actual subtitle view and a background box replaces it`() {
         select(MimeTypes.APPLICATION_SUBRIP)
+        view.applySubtitleStyleIfNeeded(custom.copy(
+            edgeStyle = com.nuvio.tv.data.local.SubtitleEdgeStyle.DROP_SHADOW,
+            backgroundColor = Color.TRANSPARENT,
+            shadowOpacity = 50
+        ))
+        assertEquals(CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW, styles.last().edgeType)
+        assertEquals(0x80000000.toInt(), styles.last().edgeColor)
+        assertEquals(Color.TRANSPARENT, styles.last().backgroundColor)
+        assertEquals(Color.TRANSPARENT, styles.last().windowColor)
         view.applySubtitleStyleIfNeeded(custom.copy(
             edgeStyle = com.nuvio.tv.data.local.SubtitleEdgeStyle.DROP_SHADOW
         ))
-        assertEquals(CaptionStyleCompat.EDGE_TYPE_DROP_SHADOW, styles.last().edgeType)
-        assertEquals(SUBTITLE_SHADOW_COLOR, styles.last().edgeColor)
-        assertEquals(Color.TRANSPARENT, styles.last().backgroundColor)
-        assertEquals(Color.BLUE, styles.last().windowColor)
+        assertEquals(CaptionStyleCompat.EDGE_TYPE_NONE, styles.last().edgeType)
+        assertEquals(Color.BLUE, styles.last().backgroundColor)
+        assertEquals(Color.TRANSPARENT, styles.last().windowColor)
     }
 
     @Test

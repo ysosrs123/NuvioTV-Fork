@@ -83,6 +83,12 @@ class SubtitleFontFilesTest {
         assertEquals(400, subtitleFontWeight(null, false))
     }
 
+    @Test fun `noto regular is not drawn as a bold face so italic lines keep its weight`() {
+        assertTrue(notoDrawnWeight(false) < 600)
+        assertEquals(700, notoDrawnWeight(true))
+        assertEquals(600, names(R.font.subtitle_noto_sans_semibold).weight)
+    }
+
     @Test fun `renderer default still reaches the MPV fallback font only`() {
         val name = (null as SubtitleFont?).mpvFontName(false).lowercase()
         for (resource in mpvSubtitleFontResources()) {
