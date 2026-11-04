@@ -217,6 +217,9 @@ internal class PlaybackAudioSinkMonitor(
         }
     }
 
+    /** TrueHD keep-alive filler written mid-content while playing, or null when the keep-alive is not running. */
+    fun iecFillerWhilePlaying(): Long? = iecSink?.iecFillerWhilePlaying()
+
     /** The output track's own underrun count, or null when no track can be read. */
     fun nativeAudioTrackUnderrunCount(): Int? {
         if (iecSink?.isIecActive == true) return iecSink.iecUnderrunCount()

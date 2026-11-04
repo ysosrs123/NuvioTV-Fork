@@ -80,7 +80,7 @@ private val STATS_GROUP_BY_LABEL: Map<String, StatsGroup> = buildMap {
     listOf("Video", "HDR", "V bitrate", "DV", "DV HDR", "DV CM", "DV levels", "DV L1", "DV L5", "Format",
         "Decoder", "Dropped", "Frame lead", "Display")
         .forEach { put(it, StatsGroup.VIDEO) }
-    listOf("Audio", "A bitrate", "Underruns", "Route", "A jitter")
+    listOf("Audio", "A bitrate", "Underruns", "Route", "A jitter", "A filler")
         .forEach { put(it, StatsGroup.AUDIO) }
     listOf("Buffer", "Back buffer", "Speed", "Connections", "Requests", "Ping", "Request", "Rate limit", "Hedge", "Load errors", "Loaded", "Rebuffers", "Pos. freeze", "Server latency", "Mux estimate")
         .forEach { put(it, StatsGroup.NETWORK) }

@@ -84,6 +84,9 @@ internal class IecPassthroughAudioSink(
     private var fillerFrame: ByteArray = ByteArray(0)
     private var fillerOffset: Int = 0
     private var fillerFramesWritten: Long = 0L
+    @Volatile
+    private var fillerWhilePlaying: Long = 0L
+    private var contentSinceHold: Boolean = false
     private var realEndBytes: Long = 0L
     @Volatile
     private var trackStarted: Boolean = false
@@ -126,6 +129,9 @@ internal class IecPassthroughAudioSink(
     fun iecUnderrunCount(): Int? = runCatching { iecTrack?.underrunCount() }.getOrNull()
 
     fun iecTrackIdentity(): Int? = iecTrack?.let { System.identityHashCode(it) }
+
+    /** Filler frames that went in mid-content while playing; pauses and seeks are not counted. */
+    fun iecFillerWhilePlaying(): Long? = if (isKeepAliveActive) fillerWhilePlaying else null
 
     fun iecPayload(): HbrPayload? = if (isIecActive) iecTrack?.payload else null
 
@@ -313,6 +319,7 @@ internal class IecPassthroughAudioSink(
             if (isKeepAliveActive) {
                 synchronized(writeLock) {
                     finishPartialFrame()
+                    contentSinceHold = false
                     heldSinceNanos = nanoTime()
                 }
                 onDiagnosticEvent?.invoke("iec_keepalive_hold reason=pause ${keepAliveState()}")
@@ -331,6 +338,7 @@ internal class IecPassthroughAudioSink(
                 synchronized(writeLock) {
                     finishPartialFrame()
                     resetIecState(keepTrack = true, keepCounters = true)
+                    contentSinceHold = false
                     // Content written before the seek still plays out; the new timeline starts after it.
                     headAnchorFrames = fillerLedger.contentFrames(realEndFrames)
                     if (!playing) heldSinceNanos = nanoTime()
@@ -770,6 +778,7 @@ internal class IecPassthroughAudioSink(
                         pendingOffset += count
                         writtenBytes += count
                         if (pendingOffset == frame.size) realEndBytes = writtenBytes
+                        if (playing) contentSinceHold = true
                     }
                     count
                 }
@@ -870,6 +879,8 @@ internal class IecPassthroughAudioSink(
             }
             // A content frame half written by the playback thread must not be split by filler.
             if (pendingOffset > 0) return
+            // While playing, a low reading with content still waiting is the head jumping, not a gap.
+            if (playing && fillerOffset == 0 && pendingFrames.isNotEmpty()) return
             if (fillerOffset == 0) {
                 val queued = writtenFrames - track.playbackHeadFrames()
                 if (queued >= keepAliveLowWaterFrames(track)) return
@@ -910,6 +921,7 @@ internal class IecPassthroughAudioSink(
         }
         fillerOffset = 0
         fillerFramesWritten++
+        if (playing && contentSinceHold) fillerWhilePlaying++
         return true
     }
 
@@ -1162,6 +1174,8 @@ internal class IecPassthroughAudioSink(
                 trackStarted = false
                 fillerFrame = ByteArray(0)
                 fillerFramesWritten = 0L
+                fillerWhilePlaying = 0L
+                contentSinceHold = false
                 heldSinceNanos = NOT_HELD
                 heldTooLong = false
                 awaitHeadMove()

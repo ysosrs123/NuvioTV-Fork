@@ -166,7 +166,7 @@ class IecKeepAliveTest {
     }
 
     @Test
-    fun whilePlaying_contentStopsAtTheCapAndFillerCoversAStall() {
+    fun whilePlaying_contentStopsAtTheCapAndALowReadingWithContentWaitingAddsNoFiller() {
         val track = HeadTrack()
         val sink = sink(track)
         sink.configure(trueHdFormat(), 0, null)
@@ -189,8 +189,67 @@ class IecKeepAliveTest {
         sink.keepAliveTick()
         assertFalse("enough queued, no filler", track.writes.last().filler)
         track.playHead = track.written - FRAME
+        val writtenBefore = track.written
+        repeat(5) { sink.keepAliveTick() }
+        assertEquals("the head jumped but content is waiting", writtenBefore, track.written)
+        assertEquals(0L, sink.iecFillerWhilePlaying())
+
+        assertTrue(sink.handleBuffer(ByteBuffer.wrap(TrueHdMatPackerTest.trueHdAu((au - 1) * 40, false)), pts - AU_US, 1))
+        assertTrue("the waiting content goes in", track.written > writtenBefore)
+        assertTrue(track.writes.none { it.filler })
+    }
+
+    @Test
+    fun whilePlaying_fillerOnlyOnceTheContentHasRunOut_andIsCounted() {
+        val track = HeadTrack()
+        val sink = sink(track)
+        sink.configure(trueHdFormat(), 0, null)
+        sink.play()
+        feed(sink, 0 until 48, ptsStartUs = 0L)
+        assertEquals(0L, sink.iecFillerWhilePlaying())
+
+        track.playHead = track.written - FRAME
         sink.keepAliveTick()
-        assertTrue("the playback thread is late, filler covers the gap", track.writes.last().filler)
+        assertTrue("the content ran out, filler covers the gap", track.writes.last().filler)
+        assertEquals(1L, sink.iecFillerWhilePlaying())
+        sink.keepAliveTick()
+        assertEquals(2L, sink.iecFillerWhilePlaying())
+    }
+
+    @Test
+    fun fillerAtPausesAndSeeks_isNotCountedAsPlaying() {
+        val track = HeadTrack()
+        val sink = sink(track)
+        sink.configure(trueHdFormat(), 0, null)
+        sink.play()
+        feed(sink, 0 until 48, ptsStartUs = 0L)
+
+        sink.pause()
+        track.playOut()
+        repeat(4) { sink.keepAliveTick() }
+        assertTrue(track.writes.takeLast(4).all { it.filler })
+        sink.play()
+        repeat(2) { sink.keepAliveTick() }
+
+        track.playOut()
+        sink.flush()
+        repeat(4) { sink.keepAliveTick() }
+        assertTrue("seek filler still goes in while playing", track.writes.last().filler)
+        assertEquals(0L, sink.iecFillerWhilePlaying())
+
+        feed(sink, 0 until 48, ptsStartUs = 5_000_000L)
+        assertFalse(track.writes.last().filler)
+        assertEquals(0L, sink.iecFillerWhilePlaying())
+    }
+
+    @Test
+    fun fillerWhilePlaying_isOnlyReportedWhileTheKeepAliveRuns() {
+        val track = HeadTrack()
+        val sink = sink(track, keepAlive = false)
+        sink.configure(trueHdFormat(), 0, null)
+        sink.play()
+        feed(sink, 0 until 48, ptsStartUs = 0L)
+        assertEquals(null, sink.iecFillerWhilePlaying())
     }
 
     @Test
