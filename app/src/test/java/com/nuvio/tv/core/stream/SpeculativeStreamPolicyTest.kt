@@ -35,7 +35,10 @@ class SpeculativeStreamPolicyTest {
                 emit(NetworkResult.Success(rows))
             } finally { cancelled.complete(Unit) }
         }
-        override fun getStreamsFromAllAddons(type: String, videoId: String, season: Int?, episode: Int?, forceRefresh: Boolean) = flow {
+        override fun getStreamsFromAllAddons(
+            type: String, videoId: String, season: Int?, episode: Int?, forceRefresh: Boolean,
+            priorityBingeGroup: String?, preferredPluginOnly: Boolean, continuePluginOnly: Boolean
+        ) = flow {
             explicit.incrementAndGet()
             emit(NetworkResult.Success(rows))
         }

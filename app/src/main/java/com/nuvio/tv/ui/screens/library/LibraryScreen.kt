@@ -381,6 +381,7 @@ fun LibraryScreen(
                         uiState.sourceMode == LibrarySourceMode.TRAKT -> "TRAKT"
                         uiState.sourceMode == LibrarySourceMode.SIMKL -> "SIMKL"
                         uiState.sourceMode == LibrarySourceMode.MDBLIST -> "MDBLIST"
+                        uiState.sourceMode == LibrarySourceMode.WETRAKR -> "WETRAKR"
                         uiState.isNuvioAccount -> "NUVIO"
                         else -> stringResource(R.string.library_source_local)
                     },
@@ -497,7 +498,9 @@ fun LibraryScreen(
                         uiState.sourceMode == LibrarySourceMode.TRAKT && !uiState.isTrackingAuthenticated -> stringResource(R.string.library_empty_trakt_not_auth_title)
                         uiState.sourceMode == LibrarySourceMode.SIMKL && !uiState.isTrackingAuthenticated -> stringResource(R.string.library_empty_simkl_not_auth_title)
                         uiState.sourceMode == LibrarySourceMode.MDBLIST && !uiState.isTrackingAuthenticated -> stringResource(R.string.library_empty_mdblist_not_auth_title)
-                        uiState.sourceMode == LibrarySourceMode.TRAKT || uiState.sourceMode == LibrarySourceMode.MDBLIST -> stringResource(R.string.library_empty_trakt_title, selectedTypeLabel)
+                        uiState.sourceMode == LibrarySourceMode.WETRAKR && !uiState.isTrackingAuthenticated -> stringResource(R.string.library_empty_wetrakr_not_auth_title)
+                        uiState.sourceMode == LibrarySourceMode.TRAKT || uiState.sourceMode == LibrarySourceMode.MDBLIST ||
+                            uiState.sourceMode == LibrarySourceMode.WETRAKR -> stringResource(R.string.library_empty_trakt_title, selectedTypeLabel)
                         uiState.sourceMode == LibrarySourceMode.SIMKL -> stringResource(R.string.library_empty_simkl_title, selectedTypeLabel)
                         else -> stringResource(R.string.library_empty_local_title, selectedTypeLabel)
                     }
@@ -505,7 +508,9 @@ fun LibraryScreen(
                         uiState.sourceMode == LibrarySourceMode.TRAKT && !uiState.isTrackingAuthenticated -> stringResource(R.string.library_empty_trakt_not_auth_subtitle)
                         uiState.sourceMode == LibrarySourceMode.SIMKL && !uiState.isTrackingAuthenticated -> stringResource(R.string.library_empty_simkl_not_auth_subtitle)
                         uiState.sourceMode == LibrarySourceMode.MDBLIST && !uiState.isTrackingAuthenticated -> stringResource(R.string.library_empty_mdblist_not_auth_subtitle)
-                        uiState.sourceMode == LibrarySourceMode.TRAKT || uiState.sourceMode == LibrarySourceMode.MDBLIST -> stringResource(R.string.library_empty_trakt_subtitle)
+                        uiState.sourceMode == LibrarySourceMode.WETRAKR && !uiState.isTrackingAuthenticated -> stringResource(R.string.library_empty_wetrakr_not_auth_subtitle)
+                        uiState.sourceMode == LibrarySourceMode.TRAKT || uiState.sourceMode == LibrarySourceMode.MDBLIST ||
+                            uiState.sourceMode == LibrarySourceMode.WETRAKR -> stringResource(R.string.library_empty_trakt_subtitle)
                         uiState.sourceMode == LibrarySourceMode.SIMKL -> stringResource(R.string.library_empty_simkl_subtitle)
                         else -> stringResource(R.string.library_empty_local_subtitle)
                     }

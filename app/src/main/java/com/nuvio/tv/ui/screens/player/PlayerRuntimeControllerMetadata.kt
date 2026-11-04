@@ -441,6 +441,44 @@ internal fun PlayerRuntimeController.maybePrefetchNextEpisodeForBinge(
         }
     )
     maybeStartNextEpisodeThumbnails(type, nextVideo.id, nextVideo.season, nextVideo.episode)
+    maybePrepareNextEpisodeFromAccount(type, nextVideo.id, nextVideo.season, nextVideo.episode)
+}
+
+/**
+ * Gets the next episode's link ahead of the press when its release is already in the Real-Debrid or AllDebrid
+ * account (a season pack), so the next episode starts without the add step. Nothing new is added.
+ */
+internal fun PlayerRuntimeController.maybePrepareNextEpisodeFromAccount(
+    type: String,
+    videoId: String,
+    season: Int?,
+    episode: Int?
+) {
+    if (!NextEpisodeAccountLinks.mayTry(videoId)) return
+    val selection = com.nuvio.tv.core.stream.StreamPrefetchCache.selectionFor(type, videoId, season, episode) ?: return
+    NextEpisodeAccountLinks.markTried(videoId)
+    scope.launch {
+        runCatching { directDebridResolver.prepareFromAccount(selection.winner, season, episode) }
+    }
+}
+
+private object NextEpisodeAccountLinks {
+    private val tried = java.util.Collections.synchronizedSet(LinkedHashSet<String>())
+    private var lastLookAtMs = 0L
+
+    @Synchronized
+    fun mayTry(videoId: String): Boolean {
+        if (videoId in tried) return false
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - lastLookAtMs < 10_000L) return false
+        lastLookAtMs = now
+        return true
+    }
+
+    fun markTried(videoId: String) {
+        if (tried.size > 50) tried.clear()
+        tried += videoId
+    }
 }
 
 /**
@@ -466,7 +504,7 @@ internal fun PlayerRuntimeController.maybeStartNextEpisodeThumbnails(
         val winner = selection.winner
         val resolved = if (directDebridResolver.shouldResolveToPlayableStream(winner)) {
             // A resolved link is cached by the resolver; a failed lookup is not repeated for this episode.
-            val result = directDebridResolver.resolveToPlayableStream(winner, season, episode)
+            val result = directDebridResolver.resolveToPlayableStream(winner, season, episode, mayAddToAccount = false)
             (result as? com.nuvio.tv.core.debrid.DirectDebridPlayableResult.Success)?.stream ?: run {
                 nextEpisodeThumbsFailedFor = videoId
                 return@launch

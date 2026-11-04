@@ -57,6 +57,19 @@ class CopyFirstTest {
     }
 
     @Test
+    fun anotherReleaseSetThatMatchesEndsTheWaitForTheCopy() {
+        assertFalse(
+            CopyFirst.screenWaits(ended = false, linkOpen = true, confirmed = false, sincePickMs = 5_000, setConfirmed = true)
+        )
+        assertFalse(
+            CopyFirst.screenWaits(ended = false, linkOpen = false, confirmed = false, sincePickMs = 1_000, setConfirmed = true)
+        )
+        assertTrue(
+            CopyFirst.screenWaits(ended = false, linkOpen = true, confirmed = false, sincePickMs = 5_000, setConfirmed = false)
+        )
+    }
+
+    @Test
     fun withoutItsLinkTheCopyFallsBackTwentySecondsAfterThePick() {
         assertFalse(CopyFirst.fallsBack(linkOpen = false, sincePickMs = 19_999))
         assertTrue(CopyFirst.fallsBack(linkOpen = false, sincePickMs = 20_000))

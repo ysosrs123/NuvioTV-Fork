@@ -283,6 +283,8 @@ class WatchProgressRepositoryImpl @Inject constructor(
     private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val syncJobs = mutableMapOf<Int, Job>()
     private val syncJobsLock = Any()
+    private val trackerHistoryLock = Any()
+    private var lastTrackerHistoryWrite: Job? = null
     private val remoteProgressWriteDeduplicator = RemoteProgressWriteDeduplicator()
     var isSyncingFromRemote = false
     var hasCompletedInitialPull = false
@@ -1175,7 +1177,9 @@ class WatchProgressRepositoryImpl @Inject constructor(
 
     private suspend fun connectedHistoryWriters(): List<TrackingHistoryWriter> {
         val connectedIds = connectedProgressProviders().mapTo(mutableSetOf()) { it.providerId }
-        return trackingHistoryWriters.writers().filter { writer -> writer.providerId in connectedIds }
+        return trackingHistoryWriters.writers().filter { writer ->
+            writer.providerId in connectedIds || writer.isConnected?.first() == true
+        }
     }
 
     /** Server titles go to trackers under their IMDb, TMDB or TVDB id; one without any is left out. */
@@ -1213,7 +1217,32 @@ class WatchProgressRepositoryImpl @Inject constructor(
             ?.let { TrackingExternalIds(imdb = it) }
             ?: serverWatched.trackerIds(catalog.contentId)
 
-    private suspend fun broadcastHistoryAdd(
+    /** Tracker writes run after the local change, one after another, so a slow tracker never holds up the mark. */
+    private fun enqueueTrackerHistoryWrite(write: suspend () -> Unit) {
+        synchronized(trackerHistoryLock) {
+            val previous = lastTrackerHistoryWrite
+            lastTrackerHistoryWrite = syncScope.launch {
+                previous?.join()
+                write()
+            }
+        }
+    }
+
+    internal suspend fun awaitTrackerHistoryWrites() {
+        synchronized(trackerHistoryLock) { lastTrackerHistoryWrite }?.join()
+    }
+
+    private fun broadcastHistoryAdd(profileId: Int, items: Collection<TrackingHistoryItem>) {
+        if (items.isEmpty()) return
+        enqueueTrackerHistoryWrite { writeHistoryAdd(profileId, items) }
+    }
+
+    private fun broadcastHistoryRemoval(profileId: Int, items: Collection<TrackingMediaReference>) {
+        if (items.isEmpty()) return
+        enqueueTrackerHistoryWrite { writeHistoryRemoval(profileId, items) }
+    }
+
+    private suspend fun writeHistoryAdd(
         profileId: Int,
         items: Collection<TrackingHistoryItem>
     ) {
@@ -1236,7 +1265,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun broadcastHistoryRemoval(
+    private suspend fun writeHistoryRemoval(
         profileId: Int,
         items: Collection<TrackingMediaReference>
     ) {

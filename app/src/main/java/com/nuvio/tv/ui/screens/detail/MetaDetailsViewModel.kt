@@ -21,6 +21,7 @@ import com.nuvio.tv.data.local.PlayerSettingsDataStore
 import com.nuvio.tv.data.local.TraktAuthDataStore
 import com.nuvio.tv.data.local.TraktSettingsDataStore
 import com.nuvio.tv.data.local.TmdbSettingsDataStore
+import com.nuvio.tv.data.repository.rankedEntries
 import com.nuvio.tv.data.repository.ImdbEpisodeRatingsRepository
 import com.nuvio.tv.data.trailer.TrailerPlaybackFailures
 import com.nuvio.tv.data.trailer.YouTubeUnplayableReason
@@ -47,6 +48,7 @@ import com.nuvio.tv.domain.model.TmdbSettings
 import com.nuvio.tv.domain.model.TraktCommentReview
 import com.nuvio.tv.domain.model.Video
 import com.nuvio.tv.domain.model.WatchProgress
+import com.nuvio.tv.domain.model.enabledAddons
 import com.nuvio.tv.domain.repository.LibraryRepository
 import com.nuvio.tv.domain.repository.MetaRepository
 import com.nuvio.tv.domain.repository.WatchProgressRepository
@@ -99,6 +101,7 @@ private const val STREAM_PREFETCH_DEBOUNCE_MS = 300L
 private const val EPISODE_FOCUS_PREFETCH_DEBOUNCE_MS = 600L
 
 private const val SERVER_STATES_TIMEOUT_MS = 3_000L
+private const val ADDON_RETRY_WINDOW_MS = 60_000L
 
 /**
  * Whether pressing Back on the full-screen trailer should hand playback back to the
@@ -132,11 +135,13 @@ class MetaDetailsViewModel @Inject constructor(
     private val traktRelatedService: TraktRelatedService,
     private val traktSettingsDataStore: TraktSettingsDataStore,
     private val simklRelatedService: com.nuvio.tv.data.simkl.SimklRelatedService,
+    private val weTrakrRelatedService: com.nuvio.tv.data.wetrakr.WeTrakrRelatedService,
     private val simklAuthRepository: com.nuvio.tv.data.simkl.SimklAuthRepository,
     private val layoutPreferenceDataStore: LayoutPreferenceDataStore,
     private val episodeShuffleStore: com.nuvio.tv.data.local.EpisodeShuffleStore,
     private val episodeShuffle: com.nuvio.tv.domain.model.EpisodeShuffle,
     private val playerSettingsDataStore: PlayerSettingsDataStore,
+    private val parentalGuideRepository: com.nuvio.tv.data.repository.ParentalGuideRepository,
     private val watchedSeriesStateHolder: com.nuvio.tv.data.local.WatchedSeriesStateHolder,
     val posterOptions: com.nuvio.tv.ui.components.posteroptions.PosterOptionsController,
     private val prefetchSelectionSupplier: com.nuvio.tv.core.stream.PrefetchSelectionSupplier,
@@ -146,7 +151,8 @@ class MetaDetailsViewModel @Inject constructor(
     // Scopes the watched-episodes refresh to the active profile.
     private val profileManager: com.nuvio.tv.core.profile.ProfileManager,
     private val streamBadgeSettingsDataStore: com.nuvio.tv.data.local.StreamBadgeSettingsDataStore,
-    private val serverEpisodeStates: com.nuvio.tv.data.mediaserver.ServerEpisodeStates
+    private val serverEpisodeStates: com.nuvio.tv.data.mediaserver.ServerEpisodeStates,
+    private val addonRepository: com.nuvio.tv.domain.repository.AddonRepository
 ) : ViewModel() {
     private val traceSetup = com.nuvio.tv.core.performance.DetailEntryTrace.mark("viewmodel_setup")
     private val itemId: String = savedStateHandle["itemId"] ?: ""
@@ -181,6 +187,8 @@ class MetaDetailsViewModel @Inject constructor(
     )
 
     private var metaLoadJob: Job? = null
+    private var addonRetryJob: Job? = null
+    private var addonUrlsAtLoad: List<String>? = null
     private val presentationGate = DetailPresentationGate()
     private val secondaryContentReady = MutableStateFlow(false)
     val secondaryReady = secondaryContentReady.asStateFlow()
@@ -425,6 +433,8 @@ class MetaDetailsViewModel @Inject constructor(
 
     val lastFocusedEpisodeIdBySeason = androidx.compose.runtime.mutableStateMapOf<Int, String>()
     private var episodeRatingsJob: Job? = null
+    private var parentalGuideJob: Job? = null
+    private var parentalGuideImdbId: String? = null
     private var nextToWatchJob: Job? = null
     @Volatile
     private var nextToWatchFromData = false
@@ -1079,6 +1089,7 @@ class MetaDetailsViewModel @Inject constructor(
             // meta) to measure addon-meta-ready, enrich and total text-ready
             // latency. Logging only.
             metaLoadStartMs = android.os.SystemClock.elapsedRealtime()
+            addonUrlsAtLoad = currentAddonUrls()
             cancelCommentsRequests()
             val mdbListSettings = mdbListSettingsDataStore.settings.first()
             val isMdbListActive = mdbListRepository.isAvailable(mdbListSettings)
@@ -1148,6 +1159,7 @@ class MetaDetailsViewModel @Inject constructor(
                             } else {
                                 val errorMsg = buildMetaLoadErrorMessage(result.message, metaLookupId)
                                 _uiState.update { it.copy(isLoading = false, error = errorMsg) }
+                                retryWhenAddonsChange()
                             }
                         }
                         NetworkResult.Loading -> {
@@ -1176,6 +1188,7 @@ class MetaDetailsViewModel @Inject constructor(
                                 if (!tryApplyTmdbFallbackMeta()) {
                                     val errorMsg = buildMetaLoadErrorMessage(result.message, metaLookupId)
                                     _uiState.update { it.copy(isLoading = false, error = errorMsg) }
+                                    retryWhenAddonsChange()
                                 }
                             }
                             NetworkResult.Loading -> {
@@ -1274,6 +1287,20 @@ class MetaDetailsViewModel @Inject constructor(
             ?.takeIf { it.isNotBlank() }
             ?: raw
     }
+
+    /** Opened before the addons finished loading (start-up, profile switch): try again once they arrive. */
+    private fun retryWhenAddonsChange() {
+        if (addonRetryJob?.isActive == true) return
+        addonRetryJob = viewModelScope.launch {
+            val before = addonUrlsAtLoad ?: currentAddonUrls()
+            val addonUrls = addonRepository.getInstalledAddons().map { addons -> addons.enabledAddons().map { it.baseUrl } }
+            withTimeoutOrNull(ADDON_RETRY_WINDOW_MS) { addonUrls.first { it != before } } ?: return@launch
+            if (_uiState.value.error != null) loadMeta()
+        }
+    }
+
+    private suspend fun currentAddonUrls(): List<String> =
+        addonRepository.getInstalledAddons().first().enabledAddons().map { it.baseUrl }
 
     private fun buildMetaLoadErrorMessage(originalMessage: String?, lookupId: String): String {
         val base = originalMessage ?: "Failed to load metadata"
@@ -1429,6 +1456,7 @@ class MetaDetailsViewModel @Inject constructor(
             }
             refreshNextToWatchFromSnapshot(enriched, "remote_refine")
         }
+        loadParentalGuide(enriched)
         if (isServerItem) return
         // Episode ratings and MDBList are independent — launch both without waiting.
         loadEpisodeRatingsAsync(enriched)
@@ -1646,6 +1674,8 @@ class MetaDetailsViewModel @Inject constructor(
             presentationGate.awaitQuietPeriod(150L)
             val source = when {
                 shouldLoadSimklMoreLikeThis() -> MoreLikeThisSource.SIMKL
+                moreLikeThisSourcePreference == com.nuvio.tv.data.local.MoreLikeThisSourcePreference.WETRAKR &&
+                    weTrakrRelatedService.isAvailable -> MoreLikeThisSource.WETRAKR
                 shouldLoadTraktMoreLikeThis(meta) -> MoreLikeThisSource.TRAKT
                 else -> {
                     val settings = tmdbSettingsDataStore.settings.first()
@@ -1667,6 +1697,15 @@ class MetaDetailsViewModel @Inject constructor(
                         )
                     }.getOrElse {
                         Log.w(TAG, "Failed to load Trakt related titles for ${meta.id}: ${it.message}")
+                        emptyList()
+                    }
+                }
+
+                MoreLikeThisSource.WETRAKR -> {
+                    runCatching {
+                        weTrakrRelatedService.getRelated(meta, fallbackItemId = itemId)
+                    }.getOrElse {
+                        Log.w(TAG, "Failed to load WeTrakr related titles for ${meta.id}: ${it.message}")
                         emptyList()
                     }
                 }
@@ -1806,6 +1845,21 @@ class MetaDetailsViewModel @Inject constructor(
                 mdbListRatingOrder = settings.enabledRatingOrder(),
                 isMdbListRatingsActive = isMdbListActive
             )
+        }
+    }
+
+    private fun loadParentalGuide(meta: Meta) {
+        val imdbId = meta.id.split(":").firstOrNull()?.takeIf { it.startsWith("tt") }
+            ?: meta.imdbId?.takeIf { it.startsWith("tt") }
+        if (imdbId != null && imdbId == parentalGuideImdbId) return
+        parentalGuideJob?.cancel()
+        parentalGuideImdbId = imdbId
+        _uiState.update { if (it.parentalGuide.isEmpty()) it else it.copy(parentalGuide = emptyList()) }
+        if (imdbId == null) return
+        parentalGuideJob = viewModelScope.launch {
+            if (!playerSettingsDataStore.playerSettings.first().parentalGuideEnabled) return@launch
+            val entries = parentalGuideRepository.getParentalGuide(imdbId)?.rankedEntries().orEmpty()
+            _uiState.update { it.copy(parentalGuide = entries) }
         }
     }
 

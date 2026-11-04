@@ -21,12 +21,18 @@ import com.nuvio.tv.data.mdblist.MdbListItemType
 import com.nuvio.tv.data.mdblist.MdbListSyncRepository
 import com.nuvio.tv.data.repository.TraktLibraryService
 import com.nuvio.tv.data.repository.TraktProgressService
-import com.nuvio.tv.domain.model.LibrarySourceMode
-import com.nuvio.tv.domain.repository.MetaRepository
 import com.nuvio.tv.data.simkl.SimklListStatus
 import com.nuvio.tv.data.simkl.SimklSyncRepository
 import com.nuvio.tv.data.simkl.idValue
 import com.nuvio.tv.data.simkl.simklIdValue
+import com.nuvio.tv.data.wetrakr.WeTrakrIds
+import com.nuvio.tv.data.wetrakr.WeTrakrList
+import com.nuvio.tv.data.wetrakr.WeTrakrSnapshot
+import com.nuvio.tv.data.wetrakr.WeTrakrSyncRepository
+import com.nuvio.tv.data.wetrakr.WeTrakrTitle
+import com.nuvio.tv.data.wetrakr.WeTrakrType
+import com.nuvio.tv.domain.model.LibrarySourceMode
+import com.nuvio.tv.domain.repository.MetaRepository
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -305,6 +311,7 @@ class CalendarFollowedSourceReader @Inject constructor(
     private val traktProgressService: TraktProgressService,
     private val simklSyncRepository: SimklSyncRepository,
     private val mdbListSyncRepository: MdbListSyncRepository,
+    private val weTrakrSyncRepository: WeTrakrSyncRepository,
     private val traktSettingsDataStore: TraktSettingsDataStore,
     private val enrichmentCache: ContinueWatchingEnrichmentCache,
     private val trackingProviders: TrackingProviderRegistry,
@@ -459,6 +466,15 @@ class CalendarFollowedSourceReader @Inject constructor(
             }
             watched.addAll(mdbListSyncRepository.currentProjection().watchedShowEpisodes)
         }
+        val weTrakrProgress = TrackingProviderId.WETRAKR in plan.progressFrom
+        val weTrakrLibrary = TrackingProviderId.WETRAKR in plan.libraryFrom
+        val weTrakrOrigins = WETRAKR_ORIGINS.filter { if (it.started) weTrakrProgress else weTrakrLibrary }.toTypedArray()
+        if (plan.reads(TrackingProviderId.WETRAKR)) unread.part("wetrakr", *weTrakrOrigins) {
+            val snapshot = weTrakrSyncRepository.currentSnapshot()
+                ?: return@part unread.notLoaded("wetrakr", *weTrakrOrigins)
+            calendarWeTrakrCandidates(snapshot, weTrakrProgress, weTrakrLibrary).forEach { candidates += it }
+            watched.addAll(weTrakrSyncRepository.currentProjection().watchedShowEpisodes)
+        }
 
         val removed = unread.runPart("hidden") { traktSettingsDataStore.dismissedNextUpKeys.first() }.orEmpty()
         val nextUp = unread.runPart("next up", counts = false) { enrichmentCache.getNextUpSnapshot(profileId) }.orEmpty()
@@ -553,6 +569,10 @@ class CalendarFollowedSourceReader @Inject constructor(
             CalendarOrigin.MDBLIST_WATCHED, CalendarOrigin.MDBLIST_PLAYBACK, CalendarOrigin.MDBLIST_WATCHLIST,
             CalendarOrigin.MDBLIST_LIST
         )
+        val WETRAKR_ORIGINS = arrayOf(
+            CalendarOrigin.WETRAKR_WATCHING, CalendarOrigin.WETRAKR_WATCHED, CalendarOrigin.WETRAKR_PLAYBACK,
+            CalendarOrigin.WETRAKR_PLANNING
+        )
     }
 }
 
@@ -600,6 +620,42 @@ fun calendarTitleType(contentType: String?): CalendarTitleType? = when (contentT
     "series", "tv", "show", "tvshow", "anime" -> CalendarTitleType.SERIES
     else -> null
 }
+
+/** WeTrakr's followed shows, its watched and paused episodes as progress, its Plan to watch list as library. */
+internal fun calendarWeTrakrCandidates(
+    snapshot: WeTrakrSnapshot,
+    progress: Boolean,
+    library: Boolean
+): List<CalendarTitleCandidate> = buildList {
+    fun add(title: WeTrakrTitle, origin: CalendarOrigin, at: String?) {
+        val ids = title.ids.toCalendarIds()
+        if (ids.imdb == null && ids.tmdb == null && ids.tvdb == null) return
+        val type = if (title.type == WeTrakrType.MOVIE) CalendarTitleType.MOVIE else CalendarTitleType.SERIES
+        add(CalendarTitleCandidate(ids, type, origin, at?.toInstantOrNull(), title.title, ids.imdb ?: ids.tmdb?.let { "tmdb:$it" }, title.poster))
+    }
+    if (progress) {
+        (snapshot.list(WeTrakrList.WATCHING) + snapshot.list(WeTrakrList.WAITING) + snapshot.list(WeTrakrList.HOLD)).forEach {
+            add(it.title, CalendarOrigin.WETRAKR_WATCHING, it.listedAt)
+        }
+        snapshot.watchedEpisodes.groupBy { it.showId?.let { id -> "wetrakr:$id" } ?: it.showIds.key }.values.forEach { episodes ->
+            val latest = episodes.maxBy { it.lastWatchedAt }
+            add(
+                WeTrakrTitle(WeTrakrType.SHOW, latest.showIds),
+                CalendarOrigin.WETRAKR_WATCHED, latest.lastWatchedAt
+            )
+        }
+        snapshot.playback.filter { it.type == WeTrakrType.EPISODE }.forEach {
+            add(it.title, CalendarOrigin.WETRAKR_PLAYBACK, it.updatedAt)
+        }
+    }
+    snapshot.list(WeTrakrList.DROPPED).filter { it.title.type == WeTrakrType.SHOW }.forEach {
+        add(it.title, CalendarOrigin.DROPPED, null)
+    }
+    if (library) snapshot.list(WeTrakrList.PLANNING).forEach { add(it.title, CalendarOrigin.WETRAKR_PLANNING, it.listedAt) }
+}
+
+private fun WeTrakrIds.toCalendarIds() =
+    CalendarIds(imdb = imdb?.takeIf { it.startsWith("tt") }, tmdb = tmdb, tvdb = tvdb)
 
 private fun MdbListIds.toCalendarIds() =
     CalendarIds(imdb = imdb?.takeIf { it.startsWith("tt") }, tmdb = tmdb, tvdb = tvdb, trakt = trakt)

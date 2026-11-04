@@ -434,3 +434,12 @@ private fun findOwnerAfter(order: List<String>, index: Int, owners: Map<String, 
     }
     return null
 }
+
+/** The app and navigation frames that asked for a Home view model, for telling a second one apart in a log. */
+internal fun homeViewModelCaller(frames: Array<StackTraceElement> = Throwable().stackTrace): String =
+    frames.asSequence()
+        .filter { f -> f.className.let { it.startsWith("com.nuvio.") || it.startsWith("androidx.navigation.") } }
+        .filterNot { it.className.startsWith("com.nuvio.tv.ui.screens.home.HomeViewModel") }
+        .take(6)
+        .joinToString(" < ") { "${it.className.substringAfterLast('.')}.${it.methodName}:${it.lineNumber}" }
+        .ifEmpty { "unknown" }

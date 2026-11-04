@@ -2,6 +2,7 @@ package com.nuvio.tv.core.sync
 
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.logging.forLog
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.CollectionsDataStore
 import com.nuvio.tv.data.local.LayoutPreferenceDataStore
@@ -136,7 +137,7 @@ class HomeCatalogSettingsSyncService @Inject constructor(
             Log.d(TAG, "Push success profile=$profileId reason=$reason")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Push failed reason=$reason", e)
+            Log.e(TAG, "Push failed reason=$reason", e.forLog())
             Result.failure(e)
         }
     }
@@ -199,7 +200,7 @@ class HomeCatalogSettingsSyncService @Inject constructor(
             Log.d(TAG, "Pull apply success profile=$profileId ${remotePayload.summary()}")
             Result.success(true)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to pull home catalog settings", e)
+            Log.e(TAG, "Failed to pull home catalog settings", e.forLog())
             Result.failure(e)
         }
     }

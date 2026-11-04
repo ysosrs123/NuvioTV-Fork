@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.sync
 
+import com.nuvio.tv.core.logging.forLog
 import com.nuvio.tv.core.util.StartupLatencyTrace
 
 import android.os.SystemClock
@@ -92,12 +93,10 @@ private val localOnlyPlayerProfileSettingsKeys = setOf(
     "downmix_enabled",
     "audio_output_channels",
     "maintain_original_audio_on_downmix",
-    "downmix_lfe_level",
     "downmix_normalization_enabled",
     "tunneling_enabled",
     "audio_amplification_db",
     "center_mix_level_db",
-    "night_mode",
     "persist_audio_amplification",
     "night_mode",
     "night_mode_last_on",
@@ -185,7 +184,8 @@ private val credentialProfileSettingsKeys = mapOf(
     "debrid_settings" to setOf(
         "torbox_api_key",
         "premiumize_api_key",
-        "real_debrid_api_key"
+        "real_debrid_api_key",
+        "all_debrid_api_key"
     ),
     "mdblist_settings" to setOf("mdblist_api_key"),
     "animeskip_settings" to setOf("animeskip_client_id")
@@ -272,7 +272,7 @@ class ProfileSettingsSyncService @Inject constructor(
                 Log.d(TAG, "Pushed profile settings blob for profile $profileId")
                 Result.success(Unit)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to push profile settings blob", e)
+                Log.e(TAG, "Failed to push profile settings blob", e.forLog())
                 Result.failure(e)
             }
         }
@@ -324,7 +324,7 @@ class ProfileSettingsSyncService @Inject constructor(
                 Log.d(TAG, "Applied remote profile settings blob for profile $profileId")
                 Result.success(true)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to pull profile settings blob", e)
+                Log.e(TAG, "Failed to pull profile settings blob", e.forLog())
                 Result.failure(e)
             }
         }
@@ -421,7 +421,7 @@ class ProfileSettingsSyncService @Inject constructor(
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    Log.e(TAG, "Failed to copy profile setup from $sourceProfileId to $targetProfileId", e)
+                    Log.e(TAG, "Failed to copy profile setup from $sourceProfileId to $targetProfileId", e.forLog())
                     Result.failure(e)
                 }
             }

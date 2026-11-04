@@ -8,6 +8,7 @@ import com.nuvio.tv.core.auth.diagnostics.AuthDiagnosticsSession
 import com.nuvio.tv.core.auth.diagnostics.authDiagnosticFilteredBody
 import com.nuvio.tv.core.logging.bodySnippetForLog
 import com.nuvio.tv.core.logging.diagnosticSummary
+import com.nuvio.tv.core.logging.forLog
 import com.nuvio.tv.core.logging.rawForLog
 import com.nuvio.tv.core.logging.urlForLog
 import com.nuvio.tv.core.util.findCause
@@ -316,20 +317,20 @@ class AuthManager @Inject constructor(
                 } catch (retryError: Exception) {
                     if (!isCurrentUser()) return null
                     if (fallbackToOwnIdOnFailure) {
-                        Log.e(TAG, "Failed to get effective user ID after refresh; falling back to own ID", retryError)
+                        Log.e(TAG, "Failed to get effective user ID after refresh; falling back to own ID", retryError.forLog())
                         userId
                     } else {
-                        Log.e(TAG, "Failed to get effective user ID after refresh", retryError)
+                        Log.e(TAG, "Failed to get effective user ID after refresh", retryError.forLog())
                         null
                     }
                 }
             }
 
             if (fallbackToOwnIdOnFailure) {
-                Log.e(TAG, "Failed to get effective user ID, falling back to own ID", e)
+                Log.e(TAG, "Failed to get effective user ID, falling back to own ID", e.forLog())
                 userId
             } else {
-                Log.e(TAG, "Failed to get effective user ID", e)
+                Log.e(TAG, "Failed to get effective user ID", e.forLog())
                 null
             }
         }
@@ -360,7 +361,7 @@ class AuthManager @Inject constructor(
             diagnostics.finishSuccess("signup_completed")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Sign up failed", e)
+            Log.e(TAG, "Sign up failed", e.forLog())
             diagnostics.finishFailure("signup_failed", AUTH_ENDPOINT_SIGNUP, e.authHttpStatus(), e)
             Result.failure(e)
         }
@@ -390,7 +391,7 @@ class AuthManager @Inject constructor(
             diagnostics.finishSuccess("password_login_completed")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Sign in failed", e)
+            Log.e(TAG, "Sign in failed", e.forLog())
             diagnostics.finishFailure("password_login_failed", AUTH_ENDPOINT_PASSWORD, e.authHttpStatus(), e)
             Result.failure(e)
         }
@@ -406,7 +407,7 @@ class AuthManager @Inject constructor(
         try {
             auth.signOut()
         } catch (e: Exception) {
-            Log.e(TAG, "Sign out failed", e)
+            Log.e(TAG, "Sign out failed", e.forLog())
         }
         cachedEffectiveUserId = null
         cachedEffectiveUserSourceUserId = null
@@ -481,13 +482,13 @@ class AuthManager @Inject constructor(
                 }
                 AuthSessionValidationResult.INVALID_SESSION -> {
                     outcome.error?.let { error ->
-                        Log.w(TAG, "Supabase session is no longer active; clearing local authentication", error)
+                        Log.w(TAG, "Supabase session is no longer active; clearing local authentication", error.forLog())
                     }
                     clearInvalidRemoteSession(outcome.error)
                     false
                 }
                 AuthSessionValidationResult.TRANSIENT_FAILURE -> {
-                    Log.w(TAG, "Unable to validate Supabase session; keeping cached authentication", outcome.error)
+                    Log.w(TAG, "Unable to validate Supabase session; keeping cached authentication", outcome.error?.forLog())
                     true
                 }
             }
@@ -501,7 +502,7 @@ class AuthManager @Inject constructor(
             throw cancellation
         } catch (clearError: Throwable) {
             if (error != null) clearError.addSuppressed(error)
-            Log.w(TAG, "Failed to clear invalid Supabase session", clearError)
+            Log.w(TAG, "Failed to clear invalid Supabase session", clearError.forLog())
         }
         handleUnexpectedSignedOut()
     }
@@ -561,9 +562,9 @@ class AuthManager @Inject constructor(
                 )
             }
             if (result == SessionRefreshResult.INVALID_SESSION) {
-                Log.e(TAG, "Supabase session refresh failed with invalid session", refreshError)
+                Log.e(TAG, "Supabase session refresh failed with invalid session", refreshError.forLog())
             } else {
-                Log.w(TAG, "Supabase session refresh failed transiently", refreshError)
+                Log.w(TAG, "Supabase session refresh failed transiently", refreshError.forLog())
             }
             SessionRefreshOutcome(result, refreshError)
         }
@@ -605,7 +606,7 @@ class AuthManager @Inject constructor(
             val missingV2 = message.contains("could not find the function") &&
                 message.contains("start_device_login_session")
             if (!missingV2) {
-                Log.e(TAG, "$trace startDeviceLoginSession failed elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${error.diagnosticSummary()}", error)
+                Log.e(TAG, "$trace startDeviceLoginSession failed elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${error.diagnosticSummary()}", error.forLog())
                 return Result.failure(error)
             }
 
@@ -670,12 +671,12 @@ class AuthManager @Inject constructor(
                     Log.d(TAG, "$trace startTvLoginSession legacy retry ok elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} code=${result.code.rawForLog()} url=${result.webUrl.urlForLog()} urlLength=${result.webUrl.length} expiresAt=${result.expiresAt} pollInterval=${result.pollIntervalSeconds}")
                     Result.success(result)
                 } catch (retryError: Exception) {
-                    Log.e(TAG, "$trace startTvLoginSession legacy retry failed elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${retryError.diagnosticSummary()}", retryError)
+                    Log.e(TAG, "$trace startTvLoginSession legacy retry failed elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${retryError.diagnosticSummary()}", retryError.forLog())
                     Result.failure(retryError)
                 }
             }
 
-            Log.e(TAG, "$trace startTvLoginSession failed elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${e.diagnosticSummary()}", e)
+            Log.e(TAG, "$trace startTvLoginSession failed elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${e.diagnosticSummary()}", e.forLog())
             Result.failure(e)
         }
     }
@@ -736,7 +737,7 @@ class AuthManager @Inject constructor(
             Log.d(TAG, "$trace pollTvLoginSession ok attempt=${attempt ?: "-"} rows=${results.size} status=${result.status} expiresAt=${result.expiresAt ?: "-"} pollInterval=${result.pollIntervalSeconds ?: "-"} elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs}")
             Result.success(result)
         } catch (e: Exception) {
-            Log.e(TAG, "$trace pollTvLoginSession failed attempt=${attempt ?: "-"} elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${e.diagnosticSummary()}", e)
+            Log.e(TAG, "$trace pollTvLoginSession failed attempt=${attempt ?: "-"} elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${e.diagnosticSummary()}", e.forLog())
             Result.failure(e)
         }
     }
@@ -769,7 +770,7 @@ class AuthManager @Inject constructor(
             Log.d(TAG, "$trace exchangeTvLoginSession imported auth token elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs}")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "$trace exchangeTvLoginSession failed elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${e.diagnosticSummary()}", e)
+            Log.e(TAG, "$trace exchangeTvLoginSession failed elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${e.diagnosticSummary()}", e.forLog())
             Result.failure(e)
         }
     }
@@ -877,7 +878,7 @@ class AuthManager @Inject constructor(
             }
         } catch (e: Exception) {
             diagnostics?.recordException(endpoint, e)
-            Log.e(TAG, "auth request #$requestId attempt=$attempt endpoint=$endpoint failed elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${e.diagnosticSummary()}", e)
+            Log.e(TAG, "auth request #$requestId attempt=$attempt endpoint=$endpoint failed elapsedMs=${SystemClock.elapsedRealtime() - startedAtMs} error=${e.diagnosticSummary()}", e.forLog())
             throw e
         }
     }

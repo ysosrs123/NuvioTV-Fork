@@ -419,15 +419,25 @@ object StreamPrefetchCache {
         videoId: String,
         season: Int?,
         episode: Int?,
-        forceRefresh: Boolean = false
+        forceRefresh: Boolean = false,
+        priorityBingeGroup: String? = null,
+        preferredPluginOnly: Boolean = false,
+        continuePluginOnly: Boolean = false
     ): Flow<NetworkResult<List<AddonStreams>>> {
         // A user refresh must bypass BOTH caches -- this
         // prefetch layer (hit/join below) AND the repository session cache
         // (forwarded via getStreamsFromAllAddons). Skipping the hit/join here
         // means a refresh always reaches a live scrape rather than replaying a
         // warmed or in-flight prefetch.
-        if (forceRefresh) {
-            return repository.getStreamsFromAllAddons(type, videoId, season, episode, forceRefresh = true)
+        // A search narrowed to the playing plugin is not what the prefetch warmed, so it goes live too.
+        if (forceRefresh || preferredPluginOnly || continuePluginOnly) {
+            return repository.getStreamsFromAllAddons(
+                type, videoId, season, episode,
+                forceRefresh = forceRefresh,
+                priorityBingeGroup = priorityBingeGroup,
+                preferredPluginOnly = preferredPluginOnly,
+                continuePluginOnly = continuePluginOnly
+            )
         }
         val requestedProfile = currentProfile()
         val key = keyOf(type, videoId, season, episode)
@@ -446,7 +456,7 @@ object StreamPrefetchCache {
             Log.i(TAG, "PREFETCH hit key=$key groups=${hitData.size}")
             return flow {
                 if (currentProfile() != requestedProfile) {
-                    emitAll(repository.getStreamsFromAllAddons(type, videoId, season, episode))
+                    emitAll(repository.getStreamsFromAllAddons(type, videoId, season, episode, priorityBingeGroup = priorityBingeGroup))
                     return@flow
                 }
                 emit(NetworkResult.Loading)
@@ -471,12 +481,12 @@ object StreamPrefetchCache {
                     emit(NetworkResult.Success(joined))
                 } else {
                     Log.i(TAG, "PREFETCH join empty; falling back to live scrape")
-                    emitAll(repository.getStreamsFromAllAddons(type, videoId, season, episode))
+                    emitAll(repository.getStreamsFromAllAddons(type, videoId, season, episode, priorityBingeGroup = priorityBingeGroup))
                 }
             }
         }
 
         Log.i(TAG, "PREFETCH miss key=$key")
-        return repository.getStreamsFromAllAddons(type, videoId, season, episode)
+        return repository.getStreamsFromAllAddons(type, videoId, season, episode, priorityBingeGroup = priorityBingeGroup)
     }
 }

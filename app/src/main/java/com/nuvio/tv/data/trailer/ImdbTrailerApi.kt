@@ -1,5 +1,6 @@
 package com.nuvio.tv.data.trailer
 
+import com.nuvio.tv.core.network.IPv4FirstDns
 import android.os.SystemClock
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -28,7 +29,7 @@ class ImdbTrailerApi internal constructor(
     now: () -> Long
 ) {
     @Inject constructor() : this(
-        OkHttpClient.Builder().socketFactory(NoDelaySocketFactory).connectTimeout(3, TimeUnit.SECONDS)
+        OkHttpClient.Builder().dns(IPv4FirstDns()).socketFactory(NoDelaySocketFactory).connectTimeout(3, TimeUnit.SECONDS)
             .readTimeout(3, TimeUnit.SECONDS).callTimeout(4, TimeUnit.SECONDS).build(),
         ENDPOINT,
         BUDGET_MS,

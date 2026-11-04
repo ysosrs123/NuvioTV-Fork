@@ -461,9 +461,6 @@ internal fun PlayerRuntimeController.observeSubtitleSettings() {
             if (resolvedCenterMixLevelDb != currentState.centerMixLevelDb) {
                 applyCenterMixLevel(resolvedCenterMixLevelDb)
             }
-            if (settings.nightMode != currentState.nightMode) {
-                applyNightMode(settings.nightMode)
-            }
 
             if (settings.rememberAudioDelayPerDevice && !wasRememberingAudioDelayPerDevice) {
                 applyStoredAudioDelayForCurrentRouteIfEnabled()

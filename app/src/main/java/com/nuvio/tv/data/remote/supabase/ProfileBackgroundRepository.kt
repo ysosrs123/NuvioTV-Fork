@@ -2,6 +2,7 @@ package com.nuvio.tv.data.remote.supabase
 
 import android.content.Context
 import android.util.Log
+import com.nuvio.tv.core.logging.forLog
 import com.nuvio.tv.data.local.MemberCatalogStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.postgrest.Postgrest
@@ -73,7 +74,7 @@ class ProfileBackgroundRepository @Inject constructor(
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
-                Log.w(ProfileBackgroundTag, "Unable to load supporter profile backgrounds", error)
+                Log.w(ProfileBackgroundTag, "Unable to load supporter profile backgrounds", error.forLog())
             }
         }
     }
@@ -194,7 +195,7 @@ class ProfileBackgroundRepository @Inject constructor(
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
-            Log.w(ProfileBackgroundTag, "Unable to load supporter profile background ${item.id}", error)
+            Log.w(ProfileBackgroundTag, "Unable to load supporter profile background ${item.id}", error.forLog())
         }
     }
 

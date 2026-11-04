@@ -140,6 +140,8 @@ internal fun HomeViewModel.observeTmdbSettingsPipeline() {
 internal fun HomeViewModel.observeInstalledAddonsPipeline() {
     viewModelScope.launch {
         combine(addonRepository.getInstalledAddons(), serverCatalog.addons) { installed, servers ->
+            val hidden = layoutPreferenceDataStore.hideNewCatalogsByDefault(ServerCatalog.hiddenByDefaultKeys(servers))
+            if (hidden.isNotEmpty()) disabledHomeCatalogKeys = disabledHomeCatalogKeys + hidden
             installed.enabledAddons() + servers
         }
             .distinctUntilChanged()

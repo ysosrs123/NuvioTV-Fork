@@ -81,4 +81,37 @@ class MetaRequestGuardTest {
         assertTrue(stats.request("cw", "Bingecat"))
         assertEquals(600_000L, stats.currentWindowMs())
     }
+
+    @Test
+    fun `an AIOStreams error item is not a title`() {
+        assertTrue(isAddonErrorMetaId("aiostreamserror.%7B%22errorDescription%22%3A%22Rate%20Limit%20Exceeded%22%7D"))
+        assertTrue(isAddonErrorMetaId("aiostreamserror.{\"errorDescription\":\"Rate Limit Exceeded\"}"))
+        assertFalse(isAddonErrorMetaId("tt11712058"))
+        assertFalse(isAddonErrorMetaId(null))
+    }
+
+    @Test
+    fun `an addon that keeps answering not found rests and comes back`() {
+        val misses = AddonMetaMisses(nowMs = { now }, missesToRest = 3, restMs = 60_000L)
+
+        assertFalse(misses.recordMiss("aios"))
+        assertFalse(misses.recordMiss("aios"))
+        assertFalse(misses.isResting("aios"))
+        assertTrue(misses.recordMiss("aios"))
+        assertTrue(misses.isResting("aios"))
+        assertFalse(misses.isResting("cinemeta"))
+        now += 60_000L
+        assertFalse(misses.isResting("aios"))
+        assertFalse(misses.recordMiss("aios"))
+    }
+
+    @Test
+    fun `a title found clears the not found count`() {
+        val misses = AddonMetaMisses(nowMs = { now }, missesToRest = 2)
+
+        assertFalse(misses.recordMiss("aios"))
+        misses.recordFound("aios")
+        assertFalse(misses.recordMiss("aios"))
+        assertFalse(misses.isResting("aios"))
+    }
 }

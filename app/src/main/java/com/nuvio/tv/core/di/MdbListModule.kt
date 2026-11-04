@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.di
 
+import com.nuvio.tv.core.network.IPv4FirstDns
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.core.network.NoDelaySocketFactory
 import com.nuvio.tv.core.profile.ProfileScopedCredentialStore
@@ -53,6 +54,7 @@ object MdbListModule {
     fun http(configuration: MdbListConfiguration): MdbListHttpClient = MdbListHttpClient(
         OkHttpMdbListEngine(
             OkHttpClient.Builder()
+                .dns(IPv4FirstDns())
                 .socketFactory(NoDelaySocketFactory)
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)

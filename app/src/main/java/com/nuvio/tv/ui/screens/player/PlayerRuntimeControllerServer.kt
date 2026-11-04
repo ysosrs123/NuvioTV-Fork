@@ -155,7 +155,9 @@ internal suspend fun PlayerRuntimeController.prepareServerStream(
         throw error
     } catch (error: Exception) {
         if (!quiet) {
-            Toast.makeText(context, context.getString(error.serverPlaybackMessageRes()), Toast.LENGTH_SHORT).show()
+            val message = error.serverPlaybackMessageRes()
+            val length = if (message == R.string.plex_remote_pass_needed) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+            Toast.makeText(context, context.getString(message), length).show()
         }
         return null
     }

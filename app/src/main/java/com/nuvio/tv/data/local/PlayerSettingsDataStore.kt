@@ -165,6 +165,9 @@ data class SubtitleStyleSettings(
     val bitmapSize: Int = 100, // Independent image-subtitle scale (50-200)
     val font: SubtitleFont? = null, // null retains each renderer's existing default
     val edgeStyle: SubtitleEdgeStyle? = null, // null preserves the legacy outline toggle
+    val outlineSize: SubtitleOutlineSize? = null, // null follows the legacy edge choice
+    val shadowEnabled: Boolean? = null, // null follows the legacy edge choice
+    val shadowOpacity: Int = DEFAULT_SUBTITLE_SHADOW_OPACITY, // 10-100 in steps of 10
     val hdrStyleEnabled: Boolean = false,
     val hdrTextColor: Int = Color.White.toArgb(),
     val hdrBrightness: Int = HDR_BRIGHTNESS_DEFAULT, // 0-100, see hdrBrightnessFactor
@@ -172,6 +175,12 @@ data class SubtitleStyleSettings(
 ) {
     val effectiveEdgeStyle: SubtitleEdgeStyle
         get() = edgeStyle ?: if (outlineEnabled) SubtitleEdgeStyle.OUTLINE else SubtitleEdgeStyle.NONE
+
+    val effectiveOutlineSize: SubtitleOutlineSize
+        get() = outlineSize ?: effectiveEdgeStyle.toOutlineSize()
+
+    val effectiveShadowEnabled: Boolean
+        get() = shadowEnabled ?: effectiveEdgeStyle.hasShadow()
 
     /**
      * The style to render with: on HDR/Dolby Vision video with the override enabled, the HDR text
@@ -285,39 +294,11 @@ enum class AudioOutputChannels(
     CHANNELS_7_0("7.0", "7.0", 7, "7.0"),
     CHANNELS_7_1("7.1", "7.1", 8, "7.1");
 
-    val hasLfe: Boolean get() = settingValue.endsWith(".1")
-
     companion object {
         val default = CHANNELS_7_1
 
         fun fromSettingValue(value: String?): AudioOutputChannels {
             return entries.firstOrNull { it.settingValue == value } ?: default
-        }
-    }
-}
-
-/** LFE share mixed into the other channels when the downmix layout has no LFE channel. */
-enum class DownmixLfeLevel(val settingValue: String, val level: Float) {
-    OFF("off", 0f),
-    HALF("50", 0.5f),
-    FULL("100", 1f);
-
-    companion object {
-        fun fromSettingValue(value: String?): DownmixLfeLevel {
-            return entries.firstOrNull { it.settingValue == value } ?: OFF
-        }
-    }
-}
-
-enum class NightMode(val settingValue: String) {
-    OFF("off"),
-    LIGHT("light"),
-    MEDIUM("medium"),
-    STRONG("strong");
-
-    companion object {
-        fun fromSettingValue(value: String?): NightMode {
-            return entries.firstOrNull { it.settingValue == value } ?: OFF
         }
     }
 }
@@ -341,7 +322,6 @@ data class PlayerSettings(
     val downmixEnabled: Boolean = false,
     val audioOutputChannels: AudioOutputChannels = AudioOutputChannels.default,
     val maintainOriginalAudioOnDownmix: Boolean = true,
-    val downmixLfeLevel: DownmixLfeLevel = DownmixLfeLevel.OFF,
     val tunnelingEnabled: Boolean = false,
     val forceOpticalPassthrough: Boolean = false,
     val useSystemPassthrough: Boolean = false,
@@ -360,7 +340,6 @@ data class PlayerSettings(
     val tunnelDeadAudioClasses: Set<String> = emptySet(),
     val tunnelDeadAudioSignature: String? = null,
     val skipSilence: Boolean = false,
-    val nightMode: NightMode = NightMode.OFF,
     val audioAmplificationDb: Int = 0,
     val centerMixLevelDb: Int = 0,
     val persistAudioAmplification: Boolean = false,
@@ -821,7 +800,6 @@ class PlayerSettingsDataStore @Inject constructor(
     private val audioOutputChannelsKey = stringPreferencesKey("audio_output_channels")
     private val maintainOriginalAudioOnDownmixKey =
         booleanPreferencesKey("maintain_original_audio_on_downmix")
-    private val downmixLfeLevelKey = stringPreferencesKey("downmix_lfe_level")
     private val downmixNormalizationEnabledLegacyKey =
         booleanPreferencesKey("downmix_normalization_enabled")
     private val tunnelingEnabledKey = booleanPreferencesKey("tunneling_enabled")
@@ -848,7 +826,6 @@ class PlayerSettingsDataStore @Inject constructor(
     internal var tunnelStallClock: () -> Long = System::currentTimeMillis
     internal var tunnelStallAppVersion: () -> Int = { BuildConfig.VERSION_CODE }
     private val skipSilenceKey = booleanPreferencesKey("skip_silence")
-    private val nightModeKey = stringPreferencesKey("night_mode")
     private val audioAmplificationDbKey = intPreferencesKey("audio_amplification_db")
     private val centerMixLevelDbKey = intPreferencesKey("center_mix_level_db")
     private val persistAudioAmplificationKey = booleanPreferencesKey("persist_audio_amplification")
@@ -958,6 +935,9 @@ class PlayerSettingsDataStore @Inject constructor(
     private val subtitleOutlineWidthKey = intPreferencesKey("subtitle_outline_width")
     private val subtitleFontKey = stringPreferencesKey("subtitle_font")
     private val subtitleEdgeStyleKey = stringPreferencesKey("subtitle_edge_style")
+    private val subtitleOutlineSizeKey = stringPreferencesKey("subtitle_outline_size")
+    private val subtitleShadowEnabledKey = booleanPreferencesKey("subtitle_shadow_enabled")
+    private val subtitleShadowOpacityKey = intPreferencesKey("subtitle_shadow_opacity")
     private val subtitleHdrStyleEnabledKey = booleanPreferencesKey("subtitle_hdr_style_enabled")
     private val subtitleHdrTextColorKey = intPreferencesKey("subtitle_hdr_text_color")
     private val subtitleHdrBrightnessKey = intPreferencesKey("subtitle_hdr_brightness")
@@ -1318,7 +1298,6 @@ class PlayerSettingsDataStore @Inject constructor(
                 maintainOriginalAudioOnDownmix =
                     prefs[maintainOriginalAudioOnDownmixKey]
                         ?: !(prefs[downmixNormalizationEnabledLegacyKey] ?: false),
-                downmixLfeLevel = DownmixLfeLevel.fromSettingValue(prefs[downmixLfeLevelKey]),
                 tunnelingEnabled = prefs[tunnelingEnabledKey] ?: false,
                 forceOpticalPassthrough = prefs[forceOpticalPassthroughKey] ?: false,
                 useSystemPassthrough = prefs[useSystemPassthroughKey] ?: false,
@@ -1349,7 +1328,6 @@ class PlayerSettingsDataStore @Inject constructor(
                 tunnelDeadAudioClasses = if (tunnelStallsRunOut) emptySet() else prefs[tunnelDeadAudioClassesKey] ?: emptySet(),
                 tunnelDeadAudioSignature = if (tunnelStallsRunOut) null else prefs[tunnelDeadAudioSignatureKey],
                 skipSilence = prefs[skipSilenceKey] ?: false,
-                nightMode = NightMode.fromSettingValue(prefs[nightModeKey]),
                 audioAmplificationDb = (prefs[audioAmplificationDbKey] ?: 0).coerceIn(
                     AUDIO_AMPLIFICATION_DB_MIN,
                     AUDIO_AMPLIFICATION_DB_MAX
@@ -1534,6 +1512,11 @@ class PlayerSettingsDataStore @Inject constructor(
                         outlineWidth = prefs[subtitleOutlineWidthKey] ?: 2,
                         font = parseSubtitleFont(prefs[subtitleFontKey]),
                         edgeStyle = resolveSubtitleEdgeStyle(prefs[subtitleEdgeStyleKey], prefs[subtitleOutlineEnabledKey]),
+                        outlineSize = parseSubtitleOutlineSize(prefs[subtitleOutlineSizeKey]),
+                        shadowEnabled = prefs[subtitleShadowEnabledKey],
+                        shadowOpacity = normalizeSubtitleShadowOpacity(
+                            prefs[subtitleShadowOpacityKey] ?: DEFAULT_SUBTITLE_SHADOW_OPACITY
+                        ),
                         hdrStyleEnabled = prefs[subtitleHdrStyleEnabledKey] ?: (prefs[dimHdrOverlaysKey] ?: false),
                         hdrTextColor = prefs[subtitleHdrTextColorKey] ?: Color.White.toArgb(),
                         hdrBrightness = prefs[subtitleHdrBrightnessKey] ?: SubtitleStyleSettings.HDR_BRIGHTNESS_DEFAULT,
@@ -1633,12 +1616,6 @@ class PlayerSettingsDataStore @Inject constructor(
         store().edit { prefs ->
             prefs[downmixEnabledKey] = true
             prefs[maintainOriginalAudioOnDownmixKey] = enabled
-        }
-    }
-
-    suspend fun setDownmixLfeLevel(level: DownmixLfeLevel) {
-        store().edit { prefs ->
-            prefs[downmixLfeLevelKey] = level.settingValue
         }
     }
 
@@ -1840,12 +1817,6 @@ class PlayerSettingsDataStore @Inject constructor(
     suspend fun setSkipSilence(enabled: Boolean) {
         store().edit { prefs ->
             prefs[skipSilenceKey] = enabled
-        }
-    }
-
-    suspend fun setNightMode(mode: NightMode) {
-        store().edit { prefs ->
-            prefs[nightModeKey] = mode.settingValue
         }
     }
 
@@ -2494,29 +2465,39 @@ class PlayerSettingsDataStore @Inject constructor(
             if (font == null) prefs.remove(subtitleFontKey) else prefs[subtitleFontKey] = font.name
         }
     }
-    suspend fun setSubtitleEdgeStyle(style: SubtitleEdgeStyle) {
-        store().edit { prefs ->
-            prefs[subtitleEdgeStyleKey] = style.name
-            // Keep the old toggle coherent for older builds/profile readers.
-            prefs[subtitleOutlineEnabledKey] = style == SubtitleEdgeStyle.OUTLINE
-        }
+    suspend fun setSubtitleOutlineSize(size: SubtitleOutlineSize) {
+        store().edit { prefs -> writeSubtitleEdges(prefs, size, currentSubtitleShadow(prefs)) }
     }
-    suspend fun setSubtitleOutlineEnabled(enabled: Boolean) {
-        store().edit { prefs ->
-            prefs[subtitleOutlineEnabledKey] = enabled
-            prefs.remove(subtitleEdgeStyleKey)
-        }
+    suspend fun setSubtitleShadowEnabled(enabled: Boolean) {
+        store().edit { prefs -> writeSubtitleEdges(prefs, currentSubtitleOutline(prefs), enabled) }
+    }
+    suspend fun setSubtitleShadowOpacity(opacity: Int) {
+        store().edit { it[subtitleShadowOpacityKey] = normalizeSubtitleShadowOpacity(opacity) }
+    }
+    private fun currentSubtitleOutline(prefs: androidx.datastore.preferences.core.Preferences): SubtitleOutlineSize =
+        parseSubtitleOutlineSize(prefs[subtitleOutlineSizeKey])
+            ?: legacySubtitleEdgeStyle(prefs[subtitleEdgeStyleKey], prefs[subtitleOutlineEnabledKey]).toOutlineSize()
+    private fun currentSubtitleShadow(prefs: androidx.datastore.preferences.core.Preferences): Boolean =
+        prefs[subtitleShadowEnabledKey]
+            ?: legacySubtitleEdgeStyle(prefs[subtitleEdgeStyleKey], prefs[subtitleOutlineEnabledKey]).hasShadow()
+    private fun writeSubtitleEdges(prefs: MutablePreferences, outline: SubtitleOutlineSize, shadow: Boolean) {
+        prefs[subtitleOutlineSizeKey] = outline.name
+        prefs[subtitleShadowEnabledKey] = shadow
+        // Older builds and profile readers only know the single edge choice.
+        val legacy = legacySubtitleEdgeStyle(outline, shadow)
+        prefs[subtitleEdgeStyleKey] = legacy.name
+        prefs[subtitleOutlineEnabledKey] = legacy == SubtitleEdgeStyle.OUTLINE
     }
     suspend fun resetSubtitleAppearance() {
         val defaults = SubtitleStyleSettings()
         store().edit { prefs ->
             prefs.remove(subtitleFontKey)
-            prefs[subtitleEdgeStyleKey] = DEFAULT_SUBTITLE_EDGE_STYLE.name
+            writeSubtitleEdges(prefs, DEFAULT_SUBTITLE_EDGE_STYLE.toOutlineSize(), DEFAULT_SUBTITLE_EDGE_STYLE.hasShadow())
+            prefs[subtitleShadowOpacityKey] = DEFAULT_SUBTITLE_SHADOW_OPACITY
             prefs[subtitleSizeKey] = defaults.size
             prefs[subtitleBitmapSizeKey] = defaults.bitmapSize
             prefs[subtitleTextColorKey] = defaults.textColor
             prefs[subtitleBoldKey] = defaults.bold
-            prefs[subtitleOutlineEnabledKey] = DEFAULT_SUBTITLE_EDGE_STYLE == SubtitleEdgeStyle.OUTLINE
             prefs[subtitleOutlineColorKey] = defaults.outlineColor
             prefs[subtitleOutlineWidthKey] = defaults.outlineWidth
             prefs[subtitleVerticalOffsetKey] = defaults.verticalOffset

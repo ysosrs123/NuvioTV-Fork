@@ -126,7 +126,7 @@ class CalendarSourcePlanTest {
         }
         return CalendarFollowedSourceReader(
             library, progress, watchedItems, traktLibrary, traktProgress, mockk<SimklSyncRepository>(),
-            mockk<MdbListSyncRepository>(), traktSettings, enrichment, tracking, mockk<MetaRepository>(relaxed = true)
+            mockk<MdbListSyncRepository>(), mockk<com.nuvio.tv.data.wetrakr.WeTrakrSyncRepository>(), traktSettings, enrichment, tracking, mockk<MetaRepository>(relaxed = true)
         )
     }
 

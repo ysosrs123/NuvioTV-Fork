@@ -1,6 +1,6 @@
 package com.nuvio.tv.core.logging
 
-private val CREDENTIAL_PARAMETERS = listOf("api_key", "apikey", "token", "secret", "x-emby-token", "x-mediabrowser-token")
+private val CREDENTIAL_PARAMETERS = listOf("api_key", "apikey", "token", "secret", "x-emby-token", "x-mediabrowser-token", "x-plex-token")
 private val SERVER_KEY_PARAMETERS = setOf("api_key", "apikey")
 
 private val URL_CREDENTIAL = Regex(

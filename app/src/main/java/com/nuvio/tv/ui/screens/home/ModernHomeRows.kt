@@ -1643,6 +1643,8 @@ private fun ModernCarouselCard(
     // Use the image model directly — Coil's memory cache handles repeated
     // requests efficiently without needing scroll-aware request swapping.
     val hasImage = !imageUrl.isNullOrBlank()
+    val folderNameTile = isCollectionFolder && item.imageUrl.isNullOrBlank() && payload?.coverEmoji.isNullOrBlank() &&
+        item.title.isNotBlank()
     val logoOverTrailer = LocalLogoOverCardTrailer.current
     val showsLandscapePoster = !customPosterLoadFailed &&
         (useLandscapeAsExpanded ||
@@ -1822,6 +1824,13 @@ private fun ModernCarouselCard(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .placeholderCardShimmer(effectivePlaceholderShimmerOffsetState)
+                        )
+                    } else if (folderNameTile) {
+                        ModernFolderNameTile(
+                            title = item.title,
+                            pictureUrl = payload?.heroBackdropUrl,
+                            requestWidthPx = requestWidthPx,
+                            requestHeightPx = requestHeightPx
                         )
                     } else if (hasImage && !posterFailed) {
                         val watchedDim = watchedPosterDim(isWatched, isFocused)

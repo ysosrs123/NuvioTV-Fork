@@ -2,6 +2,7 @@ package com.nuvio.tv.core.sync
 
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.logging.forLog
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.tracking.TrackingProgressProviderRegistry
 import com.nuvio.tv.core.tracking.providerId
@@ -142,7 +143,7 @@ class WatchProgressSyncService @Inject constructor(
             Log.d(TAG, "Deleted ${distinctKeys.size} watch progress entries from remote for profile $profileId")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to delete watch progress from remote", e)
+            Log.e(TAG, "Failed to delete watch progress from remote", e.forLog())
             Result.failure(e)
         }
     }
@@ -203,7 +204,7 @@ class WatchProgressSyncService @Inject constructor(
             }
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to push watch progress to remote", e)
+            Log.e(TAG, "Failed to push watch progress to remote", e.forLog())
             Result.failure(e)
         }
     }
@@ -261,7 +262,7 @@ class WatchProgressSyncService @Inject constructor(
             // Only the full push in pushToRemote may move it.
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to push single watch progress to remote", e)
+            Log.e(TAG, "Failed to push single watch progress to remote", e.forLog())
             Result.failure(e)
         }
     }
@@ -333,7 +334,7 @@ class WatchProgressSyncService @Inject constructor(
             Log.d(TAG, "pullFromRemote: normalized ${pulled.size} -> ${normalized.size} entries")
             Result.success(normalized)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to pull watch progress from remote", e)
+            Log.e(TAG, "Failed to pull watch progress from remote", e.forLog())
             Result.failure(e)
         }
     }
@@ -358,7 +359,7 @@ class WatchProgressSyncService @Inject constructor(
                 val cursorBeforeSnapshot = try {
                     fetchDeltaCursor(profileId)
                 } catch (e: Exception) {
-                    Log.w(TAG, "syncSnapshotFromRemote: delta cursor unavailable, applying snapshot without initialized cursor for profile $profileId", e)
+                    Log.w(TAG, "syncSnapshotFromRemote: delta cursor unavailable, applying snapshot without initialized cursor for profile $profileId", e.forLog())
                     null
                 }
                 val result = pullSnapshotFromRemote(profileId, resetDeltaState = cursorBeforeSnapshot == null)
@@ -367,7 +368,7 @@ class WatchProgressSyncService @Inject constructor(
                 }
                 Result.success(result)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to pull watch progress snapshot from remote", e)
+                Log.e(TAG, "Failed to pull watch progress snapshot from remote", e.forLog())
                 Result.failure(e)
             }
         }
@@ -394,7 +395,7 @@ class WatchProgressSyncService @Inject constructor(
                 val cursorBeforeSnapshot = try {
                     fetchDeltaCursor(profileId)
                 } catch (e: Exception) {
-                    Log.w(TAG, "syncDeltaFromRemote: delta cursor unavailable, falling back to snapshot for profile $profileId", e)
+                    Log.w(TAG, "syncDeltaFromRemote: delta cursor unavailable, falling back to snapshot for profile $profileId", e.forLog())
                     val fallbackResult = pullSnapshotFromRemote(profileId, resetDeltaState = true)
                     return Result.success(fallbackResult)
                 }
@@ -432,7 +433,7 @@ class WatchProgressSyncService @Inject constructor(
                 val events = try {
                     pullDeltaPage(profileId, cursor)
                 } catch (e: Exception) {
-                    Log.w(TAG, "syncDeltaFromRemote: delta pull unavailable, falling back to snapshot for profile $profileId", e)
+                    Log.w(TAG, "syncDeltaFromRemote: delta pull unavailable, falling back to snapshot for profile $profileId", e.forLog())
                     val fallbackResult = pullSnapshotFromRemote(profileId, resetDeltaState = true)
                     return Result.success(fallbackResult)
                 }
@@ -491,7 +492,7 @@ class WatchProgressSyncService @Inject constructor(
                 )
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to pull watch progress delta from remote", e)
+            Log.e(TAG, "Failed to pull watch progress delta from remote", e.forLog())
             Result.failure(e)
         }
     }

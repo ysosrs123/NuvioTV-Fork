@@ -220,7 +220,10 @@ class StreamRepositoryImpl @Inject constructor(
             if (isNativeServerRequest) emptyList() else config.addons,
             config.debridSettings,
             !isNativeServerRequest && config.pluginsEnabled && config.enabledScrapers.any { it.supportsType(type) },
-            serverStreams.sources(type, videoId, season, episode)
+            serverStreams.sources(type, videoId, season, episode),
+            priorityBingeGroup = null,
+            preferredPluginOnly = false,
+            continuePluginOnly = false
         ))
     }
 

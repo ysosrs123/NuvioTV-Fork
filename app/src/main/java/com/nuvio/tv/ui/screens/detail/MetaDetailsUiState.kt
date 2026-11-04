@@ -16,6 +16,7 @@ import com.nuvio.tv.domain.model.MDBListRatings
 import com.nuvio.tv.domain.model.HomeImdbRatingsVisibility
 
 enum class MoreLikeThisSource {
+    WETRAKR,
     TMDB,
     TRAKT,
     SIMKL
@@ -80,6 +81,7 @@ data class MetaDetailsUiState(
     val collectionName: String? = null,
     val relatedWatchedStatus: Map<String, Boolean> = emptyMap(),
     val episodeImdbRatings: Map<Pair<Int, Int>, Double> = emptyMap(),
+    val parentalGuide: List<com.nuvio.tv.data.repository.ParentalGuideEntry> = emptyList(),
     val isEpisodeRatingsLoading: Boolean = false,
     val episodeRatingsError: String? = null,
     val mdbListRatings: MDBListRatings? = null,

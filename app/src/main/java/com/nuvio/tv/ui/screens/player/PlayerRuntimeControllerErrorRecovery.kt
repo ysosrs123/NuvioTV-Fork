@@ -1106,7 +1106,9 @@ private fun PlayerRuntimeController.nextFailoverSource(): Stream? {
         currentStreamFileIdx = state.currentStreamFileIdx,
         currentStreamAddonName = state.currentStreamAddonName,
         currentStreamUrl = state.currentStreamUrl,
-        currentStreamName = state.currentStreamName
+        currentStreamName = state.currentStreamName,
+        currentStreamDescription = state.currentStreamDescription,
+        currentFilename = currentFilename
     ).takeIf { it >= 0 } ?: indexOfServerTarget(streams, serverTarget)
     if (currentIdx >= 0) {
         streams.getOrNull(currentIdx)?.let(SourceFailoverSelection::failoverKey)?.let { url ->

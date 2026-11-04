@@ -161,6 +161,7 @@ class CatalogOrderViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 combine(addonRepository.getInstalledAddons(), serverCatalog.addons) { installed, servers ->
+                    layoutPreferenceDataStore.hideNewCatalogsByDefault(ServerCatalog.hiddenByDefaultKeys(servers))
                     installed.enabledAddons() + servers
                 },
                 collectionsDataStore.collections,

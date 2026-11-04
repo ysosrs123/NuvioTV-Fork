@@ -1,5 +1,6 @@
 package com.nuvio.tv.data.trailer
 
+import com.nuvio.tv.core.network.IPv4FirstDns
 import com.nuvio.tv.core.network.NoDelaySocketFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -18,7 +19,7 @@ import kotlin.coroutines.resume
 
 @Singleton
 class ImdbStreamSelector @Inject constructor() {
-    private val client = OkHttpClient.Builder().socketFactory(NoDelaySocketFactory).connectTimeout(2, TimeUnit.SECONDS)
+    private val client = OkHttpClient.Builder().dns(IPv4FirstDns()).socketFactory(NoDelaySocketFactory).connectTimeout(2, TimeUnit.SECONDS)
         .readTimeout(2, TimeUnit.SECONDS).callTimeout(2, TimeUnit.SECONDS).build()
 
     internal data class Selection(val source: TrailerPlaybackSource?, val complete: Boolean)

@@ -46,6 +46,7 @@ class LibraryTransferService @Inject constructor(
     private val trackingProviders: TrackingLibraryProviderRegistry,
     private val libraryPreferences: LibraryPreferences,
     private val mdbListWatchlist: MdbListWatchlistBatch,
+    private val weTrakrPlanning: com.nuvio.tv.data.wetrakr.WeTrakrPlanningBatch,
     private val librarySyncService: LibrarySyncService,
     private val profileManager: ProfileManager
 ) {
@@ -145,6 +146,7 @@ class LibraryTransferService @Inject constructor(
     private suspend fun writeAll(to: LibrarySourceMode, items: List<LibraryEntryInput>): Int {
         if (items.isEmpty()) return 0
         if (to == LibrarySourceMode.MDBLIST) return mdbListWatchlist.add(items)
+        if (to == LibrarySourceMode.WETRAKR) return weTrakrPlanning.add(items)
         val providerId = to.providerId
         if (providerId != null) {
             val provider = trackingProviders.provider(providerId) ?: return 0
@@ -190,6 +192,10 @@ class LibraryTransferService @Inject constructor(
 
         if (from == LibrarySourceMode.MDBLIST) {
             val removed = mdbListWatchlist.remove(items)
+            return RemovalOutcome(removed, items.size - removed)
+        }
+        if (from == LibrarySourceMode.WETRAKR) {
+            val removed = weTrakrPlanning.remove(items)
             return RemovalOutcome(removed, items.size - removed)
         }
 

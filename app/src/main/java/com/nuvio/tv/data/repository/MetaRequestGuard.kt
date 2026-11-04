@@ -131,3 +131,47 @@ internal class MetaRequestStats(
     private fun Map<String, Int>.summary(): String =
         if (isEmpty()) "{}" else entries.sortedByDescending { it.value }.joinToString(",", "{", "}") { "${it.key}=${it.value}" }
 }
+
+/** AIOStreams answers some failures, its rate limit among them, with an item whose id carries the error instead of a title. */
+internal fun isAddonErrorMetaId(id: String?): Boolean = id?.startsWith("aiostreamserror.", ignoreCase = true) == true
+
+/**
+ * Stops asking an addon for meta for a while once it has answered "not found" for [missesToRest] different titles in a
+ * row. An AIOStreams setup without a meta addon declares meta yet answers 404 to everything, and a Home start then sent
+ * it dozens of requests at once. Any title found clears the count.
+ */
+internal class AddonMetaMisses(
+    private val nowMs: () -> Long = System::currentTimeMillis,
+    private val missesToRest: Int = 8,
+    private val restMs: Long = 10 * 60_000L
+) {
+    private class State(val misses: Int, val restingUntilMs: Long)
+
+    private val states = HashMap<String, State>()
+
+    @Synchronized
+    fun isResting(addonKey: String): Boolean {
+        val state = states[addonKey] ?: return false
+        if (state.restingUntilMs == 0L) return false
+        if (nowMs() < state.restingUntilMs) return true
+        states.remove(addonKey)
+        return false
+    }
+
+    /** Returns true when this miss starts a rest. */
+    @Synchronized
+    fun recordMiss(addonKey: String): Boolean {
+        val misses = (states[addonKey]?.misses ?: 0) + 1
+        val rest = misses >= missesToRest
+        states[addonKey] = State(if (rest) 0 else misses, if (rest) nowMs() + restMs else 0L)
+        return rest
+    }
+
+    @Synchronized
+    fun recordFound(addonKey: String) {
+        states.remove(addonKey)
+    }
+
+    @Synchronized
+    fun clear() = states.clear()
+}

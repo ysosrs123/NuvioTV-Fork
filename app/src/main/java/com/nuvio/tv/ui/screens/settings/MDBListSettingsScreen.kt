@@ -82,6 +82,7 @@ fun MDBListSettingsContent(
             WatchProgressSource.SIMKL -> strWatchProgressSimkl
             WatchProgressSource.NUVIO_SYNC -> strWatchProgressNuvio
             WatchProgressSource.MDBLIST -> strWatchProgressMdbList
+            WatchProgressSource.WETRAKR -> "WeTrakr"
         }
     }
 

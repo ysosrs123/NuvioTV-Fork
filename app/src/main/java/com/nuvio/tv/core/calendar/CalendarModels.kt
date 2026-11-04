@@ -94,6 +94,10 @@ enum class CalendarOrigin(val started: Boolean = false, val personalList: Boolea
     MDBLIST_PLAYBACK(started = true),
     MDBLIST_WATCHLIST(savesFilms = true),
     MDBLIST_LIST(personalList = true, savesFilms = true),
+    WETRAKR_WATCHING(started = true),
+    WETRAKR_WATCHED(started = true),
+    WETRAKR_PLAYBACK(started = true),
+    WETRAKR_PLANNING(savesFilms = true),
     DROPPED,
     BELL(savesFilms = true)
 }

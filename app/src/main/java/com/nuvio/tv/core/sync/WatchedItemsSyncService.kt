@@ -2,6 +2,7 @@ package com.nuvio.tv.core.sync
 
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.logging.forLog
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.tracking.TrackingProgressProviderRegistry
 import com.nuvio.tv.core.tracking.providerId
@@ -125,7 +126,7 @@ class WatchedItemsSyncService @Inject constructor(
             pushItemsToRemoteLocked(items, updateLastSuccessfulPush = true, profileId = profileId).getOrThrow()
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to push watched items to remote", e)
+            Log.e(TAG, "Failed to push watched items to remote", e.forLog())
             Result.failure(e)
         }
     }
@@ -179,7 +180,7 @@ class WatchedItemsSyncService @Inject constructor(
             }
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to push watched item batch to remote", e)
+            Log.e(TAG, "Failed to push watched item batch to remote", e.forLog())
             Result.failure(e)
         }
     }
@@ -227,7 +228,7 @@ class WatchedItemsSyncService @Inject constructor(
             Log.d(TAG, "pullFromRemote: fetched ${allItems.size} total watched items from Supabase for profile $profileId")
             Result.success(allItems)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to pull watched items from remote", e)
+            Log.e(TAG, "Failed to pull watched items from remote", e.forLog())
             Result.failure(e)
         }
     }
@@ -262,7 +263,7 @@ class WatchedItemsSyncService @Inject constructor(
             val cursorBeforeSnapshot = try {
                 fetchDeltaCursor(profileId)
             } catch (e: Exception) {
-                Log.w(TAG, "syncSnapshotFromRemote: delta cursor unavailable, applying snapshot without initialized cursor for profile $profileId", e)
+                Log.w(TAG, "syncSnapshotFromRemote: delta cursor unavailable, applying snapshot without initialized cursor for profile $profileId", e.forLog())
                 null
             }
             val result = pullSnapshotFromRemote(profileId, resetDeltaState = cursorBeforeSnapshot == null, generation = generation)
@@ -271,7 +272,7 @@ class WatchedItemsSyncService @Inject constructor(
             }
             Result.success(result)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to pull watched items snapshot from remote", e)
+            Log.e(TAG, "Failed to pull watched items snapshot from remote", e.forLog())
             Result.failure(e)
         }
     }
@@ -298,7 +299,7 @@ class WatchedItemsSyncService @Inject constructor(
                 val cursorBeforeSnapshot = try {
                     fetchDeltaCursor(profileId)
                 } catch (e: Exception) {
-                    Log.w(TAG, "syncDeltaFromRemote: delta cursor unavailable, falling back to snapshot for profile $profileId", e)
+                    Log.w(TAG, "syncDeltaFromRemote: delta cursor unavailable, falling back to snapshot for profile $profileId", e.forLog())
                     val fallbackResult = pullSnapshotFromRemote(profileId, resetDeltaState = true, generation = generation)
                     return Result.success(fallbackResult)
                 }
@@ -318,7 +319,7 @@ class WatchedItemsSyncService @Inject constructor(
                 val events = try {
                     pullDeltaPage(profileId, cursor)
                 } catch (e: Exception) {
-                    Log.w(TAG, "syncDeltaFromRemote: watched items delta pull unavailable, falling back to snapshot for profile $profileId", e)
+                    Log.w(TAG, "syncDeltaFromRemote: watched items delta pull unavailable, falling back to snapshot for profile $profileId", e.forLog())
                     val fallbackResult = pullSnapshotFromRemote(profileId, resetDeltaState = true, generation = generation)
                     return Result.success(fallbackResult)
                 }
@@ -376,7 +377,7 @@ class WatchedItemsSyncService @Inject constructor(
                 )
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to pull watched items delta from remote", e)
+            Log.e(TAG, "Failed to pull watched items delta from remote", e.forLog())
             Result.failure(e)
         }
     }
@@ -468,7 +469,7 @@ class WatchedItemsSyncService @Inject constructor(
             Log.d(TAG, "Deleted ${distinctKeys.size} watched items from remote for profile $profileId")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to delete watched items from remote", e)
+            Log.e(TAG, "Failed to delete watched items from remote", e.forLog())
             Result.failure(e)
         }
     }

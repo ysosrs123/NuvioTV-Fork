@@ -183,7 +183,7 @@ class CalendarFollowedSourceReaderTest {
         val enrichment = mockk<ContinueWatchingEnrichmentCache> { coEvery { getNextUpSnapshot(1) } throws IllegalStateException("bad file") }
         val reader = CalendarFollowedSourceReader(
             library, progress, watchedItems, traktLibrary, traktProgress, mockk<SimklSyncRepository>(),
-            mockk<MdbListSyncRepository>(), traktSettings, enrichment, tracking, mockk<MetaRepository>(relaxed = true)
+            mockk<MdbListSyncRepository>(), mockk<com.nuvio.tv.data.wetrakr.WeTrakrSyncRepository>(), traktSettings, enrichment, tracking, mockk<MetaRepository>(relaxed = true)
         )
 
         val snapshot = reader.read(1, followOtherServices = true)

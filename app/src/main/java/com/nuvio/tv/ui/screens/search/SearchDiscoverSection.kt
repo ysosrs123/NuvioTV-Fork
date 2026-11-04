@@ -111,6 +111,8 @@ internal fun DiscoverSection(
     onSelectType: (String) -> Unit,
     onSelectCatalog: (String) -> Unit,
     onSelectGenre: (String?) -> Unit,
+    onSelectLetter: (String?) -> Unit = {},
+    onSetUnwatched: (Boolean) -> Unit = {},
     onLoadMore: () -> Unit,
     onItemLongPress: (MetaPreview, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
@@ -209,6 +211,48 @@ internal fun DiscoverSection(
                 },
                 blockFocus = blockFilterFocus
             )
+
+            val letters = selectedCatalog?.letters.orEmpty()
+            if (letters.isNotEmpty()) {
+                val allLetters = stringResource(R.string.discover_letter_all)
+                DiscoverDropdownPicker(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(R.string.discover_filter_letter),
+                    value = uiState.selectedDiscoverLetter ?: allLetters,
+                    selectedValue = uiState.selectedDiscoverLetter ?: "__default__",
+                    expanded = expandedPicker == "letter",
+                    options = listOf(DiscoverOption(allLetters, "__default__")) + letters.map { DiscoverOption(it, it) },
+                    onExpandedChange = { shouldExpand ->
+                        expandedPicker = if (shouldExpand) "letter" else null
+                    },
+                    onSelect = { option ->
+                        onSelectLetter(option.value.takeUnless { it == "__default__" })
+                        expandedPicker = null
+                    },
+                    blockFocus = blockFilterFocus
+                )
+            }
+
+            if (selectedCatalog?.offersUnwatched == true) {
+                val allTitles = stringResource(R.string.discover_show_all)
+                val unwatched = stringResource(R.string.discover_show_unwatched)
+                DiscoverDropdownPicker(
+                    modifier = Modifier.weight(1f),
+                    title = stringResource(R.string.discover_filter_show),
+                    value = if (uiState.discoverUnwatchedOnly) unwatched else allTitles,
+                    selectedValue = if (uiState.discoverUnwatchedOnly) "unwatched" else "all",
+                    expanded = expandedPicker == "show",
+                    options = listOf(DiscoverOption(allTitles, "all"), DiscoverOption(unwatched, "unwatched")),
+                    onExpandedChange = { shouldExpand ->
+                        expandedPicker = if (shouldExpand) "show" else null
+                    },
+                    onSelect = { option ->
+                        onSetUnwatched(option.value == "unwatched")
+                        expandedPicker = null
+                    },
+                    blockFocus = blockFilterFocus
+                )
+            }
         }
 
         selectedCatalog?.let { catalog ->
@@ -220,6 +264,10 @@ internal fun DiscoverSection(
                         ?.let(::add)
                 }
                 uiState.selectedDiscoverGenre?.let { add(localizedGenreLabel(it)) }
+                uiState.selectedDiscoverLetter?.takeIf { it in catalog.letters }?.let {
+                    add(localContext.getString(R.string.discover_letter_selected, it))
+                }
+                if (uiState.discoverUnwatchedOnly && catalog.offersUnwatched) add(localContext.getString(R.string.discover_show_unwatched))
             }
             Text(
                 text = metadataSegments.joinToString(" • "),
@@ -273,7 +321,8 @@ internal fun DiscoverSection(
                     onItemLongPress = { item ->
                         onItemLongPress(item, selectedCatalog?.addonBaseUrl ?: "")
                     },
-                    filterKey = "${uiState.selectedDiscoverType}|${uiState.selectedDiscoverCatalogKey}|${uiState.selectedDiscoverGenre}"
+                    filterKey = "${uiState.selectedDiscoverType}|${uiState.selectedDiscoverCatalogKey}|${uiState.selectedDiscoverGenre}|" +
+                        "${uiState.selectedDiscoverLetter}|${uiState.discoverUnwatchedOnly}"
                 )
                 }
             }

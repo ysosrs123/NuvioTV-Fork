@@ -874,6 +874,12 @@ class PlayerViewModel @Inject constructor(
             )
         }
 
+        // TrueHD keep-alive filler that went in mid-film. Hidden while it stays 0; a count means the
+        // content ran out and silence was slipped between content frames.
+        controller.playbackSpeedAwareAudioSink?.iecFillerWhilePlaying()?.takeIf { it > 0L }?.let { filler ->
+            rows += StatsRow("A filler", "while playing $filler", StatsDot.WARN)
+        }
+
         // App CPU and memory.
         playbackStatsCpuSampler.samplePercent()?.let { pct ->
             val dot = when {

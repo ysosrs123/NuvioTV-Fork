@@ -1001,9 +1001,9 @@ open class MainActivity : ComponentActivity() {
 
                     // A watch party guest is taken to the title the host is playing.
                     LaunchedEffect(navController) {
-                        partyRuntime.session.mediaRequest.collect { media ->
+                        partyRuntime.mediaRequest.collect { media ->
                             if (media == null) return@collect
-                            partyRuntime.session.consumeMediaRequest()
+                            partyRuntime.consumeMediaRequest()
                             // A player that opened from the stream screen has already replaced it; close that player
                             // instead of stacking a second one on top.
                             val inPlayer = runCatching { navController.getBackStackEntry(Screen.Player.route) }.isSuccess

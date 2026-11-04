@@ -16,7 +16,7 @@ fun Throwable.diagnosticSummary(): String {
     var current: Throwable? = this
     while (current != null && parts.size < 6) {
         val name = current.javaClass.simpleName.ifBlank { current.javaClass.name }
-        val message = current.message.bodySnippetForLog()
+        val message = current.message?.withoutRequestSecrets().bodySnippetForLog()
         parts.add("$name: $message")
         current = current.cause
     }

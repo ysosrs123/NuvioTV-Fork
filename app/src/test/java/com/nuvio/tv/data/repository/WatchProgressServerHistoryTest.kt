@@ -100,6 +100,7 @@ class WatchProgressServerHistoryTest {
         coEvery { serverWatched.trackerIds(show) } returns TrackingExternalIds(imdb = "tt0944947", tmdb = 1399L, tvdb = "121361")
 
         repository.markAsCompleted(episodeProgress(season = 2, episode = 3), broadcastTrackingHistory = true)
+        repository.awaitTrackerHistoryWrites()
 
         val media = added.single().media
         assertEquals("tt0944947", media.ids.imdb)
@@ -118,6 +119,7 @@ class WatchProgressServerHistoryTest {
             meta(movie, ServerMediaKind.MOVIE, "Movie", imdbId = "tt0111161")
 
         repository.markAsCompleted(movieProgress(), broadcastTrackingHistory = true)
+        repository.awaitTrackerHistoryWrites()
 
         val media = added.single().media
         assertEquals("tt0111161", media.catalog?.contentId)
@@ -130,6 +132,7 @@ class WatchProgressServerHistoryTest {
         coEvery { serverWatched.trackerIds(show) } returns TrackingExternalIds(tmdb = 1399L)
 
         repository.removeFromHistoryBatch(show, null, listOf(Triple(1, 1, episode), Triple(1, 2, null)))
+        repository.awaitTrackerHistoryWrites()
 
         assertEquals(listOf("tmdb:1399", "tmdb:1399"), removed.map { it.catalog?.contentId })
         assertEquals(listOf(1, 2), removed.map { it.episode?.number })
@@ -139,9 +142,11 @@ class WatchProgressServerHistoryTest {
     @Test
     fun aServerTitleWithoutUsableIdsIsLeftOutAndOtherTitlesStillGo() = runTest {
         repository.removeFromHistory(movie, videoId = movie)
+        repository.awaitTrackerHistoryWrites()
         assertTrue(removed.isEmpty())
 
         repository.removeFromHistory("tt0111161", videoId = "tt0111161")
+        repository.awaitTrackerHistoryWrites()
         assertEquals(listOf("tt0111161"), removed.map { it.catalog?.contentId })
     }
 
@@ -152,6 +157,7 @@ class WatchProgressServerHistoryTest {
         repository.saveProgressBatch(listOf(episodeProgress(season = 1, episode = 1)), profileId = 1, syncRemote = false)
         repository.saveProgress(movieProgress(), profileId = 1, syncRemote = false)
         repository.markAsCompleted(movieProgress(), profileId = 1, broadcastTrackingHistory = false)
+        repository.awaitTrackerHistoryWrites()
 
         assertTrue(added.isEmpty())
         assertTrue(removed.isEmpty())

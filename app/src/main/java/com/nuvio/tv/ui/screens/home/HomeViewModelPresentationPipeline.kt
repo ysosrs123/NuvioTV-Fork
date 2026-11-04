@@ -303,6 +303,8 @@ private data class ContinueWatchingPosterInput(
     val screens: Set<CustomPosterScreen>,
     val continueWatchingItems: List<ContinueWatchingItem>,
     val upcomingItems: List<ContinueWatchingItem>,
+    val episodesLeft: Boolean = false,
+    val episodeLists: Map<String, Set<Pair<Int, Int>>> = emptyMap(),
 )
 
 private data class ContinueWatchingPosterOverlay(
@@ -326,6 +328,12 @@ internal fun HomeViewModel.observeModernHomePresentationPipeline() {
                     upcomingItems = state.shownUpcomingItems,
                 )
             }
+            .combine(layoutPreferenceDataStore.cwEpisodesLeftEnabled) { input, episodesLeft ->
+                input.copy(episodesLeft = episodesLeft)
+            }
+            .combine(cwEpisodeLists) { input, lists ->
+                if (input.episodesLeft) input.copy(episodeLists = lists) else input
+            }
             .distinctUntilChanged()
             .map { input ->
                 if (!input.enabled) {
@@ -336,8 +344,9 @@ internal fun HomeViewModel.observeModernHomePresentationPipeline() {
                         CustomPosterScreen.CONTINUE_WATCHING,
                         input.screens,
                     )
+                    val main = input.continueWatchingItems.withCustomPosterUrls(pattern)
                     ContinueWatchingPosterOverlay(
-                        continueWatchingItems = input.continueWatchingItems.withCustomPosterUrls(pattern),
+                        continueWatchingItems = if (input.episodesLeft) main.withEpisodesLeft(input.episodeLists) else main,
                         upcomingItems = input.upcomingItems.withCustomPosterUrls(pattern),
                     )
                 }

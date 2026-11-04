@@ -123,6 +123,14 @@ fun DiscoverScreen(
                     discoverFocusedItemIndex = 0
                     viewModel.onEvent(SearchEvent.SelectDiscoverGenre(it))
                 },
+                onSelectLetter = {
+                    discoverFocusedItemIndex = 0
+                    viewModel.onEvent(SearchEvent.SelectDiscoverLetter(it))
+                },
+                onSetUnwatched = {
+                    discoverFocusedItemIndex = 0
+                    viewModel.onEvent(SearchEvent.SetDiscoverUnwatched(it))
+                },
                 onLoadMore = { viewModel.onEvent(SearchEvent.LoadNextDiscoverResults) },
                 onItemLongPress = { item, addonBaseUrl ->
                     viewModel.posterOptions.show(item, addonBaseUrl)

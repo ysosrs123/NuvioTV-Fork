@@ -185,6 +185,8 @@ class SearchViewModel @Inject constructor(
                             selectedDiscoverType = "movie",
                             selectedDiscoverCatalogKey = null,
                             selectedDiscoverGenre = null,
+                            selectedDiscoverLetter = null,
+                            discoverUnwatchedOnly = false,
                             discoverResults = emptyList(),
                             pendingDiscoverResults = emptyList(),
                             discoverHasMore = true,
@@ -292,6 +294,8 @@ class SearchViewModel @Inject constructor(
             is SearchEvent.SelectDiscoverType -> selectDiscoverType(event.type)
             is SearchEvent.SelectDiscoverCatalog -> selectDiscoverCatalog(event.catalogKey)
             is SearchEvent.SelectDiscoverGenre -> selectDiscoverGenre(event.genre)
+            is SearchEvent.SelectDiscoverLetter -> selectDiscoverFilter { it.copy(selectedDiscoverLetter = event.letter) }
+            is SearchEvent.SetDiscoverUnwatched -> selectDiscoverFilter { it.copy(discoverUnwatchedOnly = event.unwatched) }
             SearchEvent.LoadNextDiscoverResults -> loadNextDiscoverResults()
             SearchEvent.Retry -> {
                 // An explicit retry must refetch even though nothing about the request changed.
@@ -1056,6 +1060,7 @@ class SearchViewModel @Inject constructor(
                         .firstOrNull { it.name.equals("genre", ignoreCase = true) }
                         ?.options
                         .orEmpty()
+                    val server = ServerCatalog.isServerAddon(addon.baseUrl)
                     DiscoverCatalog(
                         key = catalogRowLegacyKey(addon.id, catalog.apiType, catalog.id),
                         addonId = addon.id,
@@ -1066,7 +1071,9 @@ class SearchViewModel @Inject constructor(
                         type = catalog.apiType,
                         genres = genres,
                         supportsSkip = catalog.supportsExtra("skip"),
-                        skipStep = catalog.skipStep()
+                        skipStep = catalog.skipStep(),
+                        letters = if (server) catalog.extra.firstOrNull { it.name == ServerCatalog.LETTER_EXTRA }?.options.orEmpty() else emptyList(),
+                        offersUnwatched = server && catalog.supportsExtra(ServerCatalog.UNWATCHED_EXTRA)
                     )
                 }
         }
@@ -1086,6 +1093,8 @@ class SearchViewModel @Inject constructor(
                 selectedDiscoverType = selectedType,
                 selectedDiscoverCatalogKey = selectedCatalog?.key,
                 selectedDiscoverGenre = selectedGenre,
+                selectedDiscoverLetter = null,
+                discoverUnwatchedOnly = false,
                 discoverInitialized = true,
                 discoverLoading = false,
                 discoverResults = emptyList(),
@@ -1115,6 +1124,8 @@ class SearchViewModel @Inject constructor(
                 selectedDiscoverType = type,
                 selectedDiscoverCatalogKey = selectedCatalog?.key,
                 selectedDiscoverGenre = selectedGenre,
+                selectedDiscoverLetter = null,
+                discoverUnwatchedOnly = false,
                 discoverResults = emptyList(),
                 pendingDiscoverResults = emptyList(),
                 discoverPage = 1,
@@ -1136,6 +1147,8 @@ class SearchViewModel @Inject constructor(
                 selectedDiscoverCatalogKey = catalog.key,
                 selectedDiscoverType = catalog.type,
                 selectedDiscoverGenre = null,
+                selectedDiscoverLetter = null,
+                discoverUnwatchedOnly = false,
                 discoverResults = emptyList(),
                 pendingDiscoverResults = emptyList(),
                 discoverPage = 1,
@@ -1152,6 +1165,18 @@ class SearchViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 selectedDiscoverGenre = genre,
+                discoverResults = emptyList(),
+                pendingDiscoverResults = emptyList(),
+                discoverPage = 1,
+                discoverHasMore = true
+            )
+        }
+        fetchDiscoverContent(reset = true)
+    }
+
+    private fun selectDiscoverFilter(change: (SearchUiState) -> SearchUiState) {
+        _uiState.update {
+            change(it).copy(
                 discoverResults = emptyList(),
                 pendingDiscoverResults = emptyList(),
                 discoverPage = 1,
@@ -1218,6 +1243,8 @@ class SearchViewModel @Inject constructor(
             val visibleCountBeforeRequest = state.discoverResults.size
             val extraArgs = buildMap<String, String> {
                 state.selectedDiscoverGenre?.takeIf { it.isNotBlank() }?.let { put("genre", it) }
+                state.selectedDiscoverLetter?.takeIf { it in selectedCatalog.letters }?.let { put(ServerCatalog.LETTER_EXTRA, it) }
+                if (state.discoverUnwatchedOnly && selectedCatalog.offersUnwatched) put(ServerCatalog.UNWATCHED_EXTRA, "true")
             }
 
             catalogRepository.getCatalog(

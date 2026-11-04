@@ -26,6 +26,7 @@ enum class WatchProgressSource {
     TRAKT,
     SIMKL,
     MDBLIST,
+    WETRAKR,
     NUVIO_SYNC;
 
     companion object {
@@ -38,7 +39,8 @@ enum class WatchProgressSource {
 enum class MoreLikeThisSourcePreference {
     TRAKT,
     TMDB,
-    SIMKL
+    SIMKL,
+    WETRAKR
 }
 
 @Singleton

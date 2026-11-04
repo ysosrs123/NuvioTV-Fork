@@ -2,6 +2,7 @@ package com.nuvio.tv.data.repository
 
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.logging.forLog
 import com.nuvio.tv.data.remote.supabase.ClaimSyncResult
 import com.nuvio.tv.data.remote.supabase.SupabaseLinkedDevice
 import com.nuvio.tv.data.remote.supabase.SyncCodeResult
@@ -29,7 +30,7 @@ class SyncRepositoryImpl @Inject constructor(
                 ?: return Result.failure(Exception("Empty response from generate_sync_code"))
             Result.success(result.code)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to generate sync code", e)
+            Log.e(TAG, "Failed to generate sync code", e.forLog())
             Result.failure(e)
         }
     }
@@ -43,7 +44,7 @@ class SyncRepositoryImpl @Inject constructor(
                 ?: return Result.failure(Exception("No sync code found"))
             Result.success(result.code)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to get sync code", e)
+            Log.e(TAG, "Failed to get sync code", e.forLog())
             Result.failure(e)
         }
     }
@@ -68,7 +69,7 @@ class SyncRepositoryImpl @Inject constructor(
             }
             Result.success(result)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to claim sync code", e)
+            Log.e(TAG, "Failed to claim sync code", e.forLog())
             Result.failure(e)
         }
     }
@@ -80,7 +81,7 @@ class SyncRepositoryImpl @Inject constructor(
             authManager.clearEffectiveUserIdCache()
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to unlink device", e)
+            Log.e(TAG, "Failed to unlink device", e.forLog())
             Result.failure(e)
         }
     }
@@ -94,7 +95,7 @@ class SyncRepositoryImpl @Inject constructor(
                 .decodeList<SupabaseLinkedDevice>()
             Result.success(result)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to get linked devices", e)
+            Log.e(TAG, "Failed to get linked devices", e.forLog())
             Result.failure(e)
         }
     }

@@ -4641,11 +4641,14 @@ object SeekThumbnails {
             val linkOpen = (c?.linkOpenedAt ?: 0L) > 0L || headStart?.opened == true
             val sincePick = now - pickedAtMs
             val ended = c?.ended ?: (copyTried || !copyAllowed)
-            val wait = CopyFirst.screenWaits(ended, linkOpen, confirmed, sincePick)
+            val setConfirmed = borrow?.let { it.confirmed && it.copy !== c } == true
+            val wait = CopyFirst.screenWaits(ended, linkOpen, confirmed, sincePick, setConfirmed)
             copyScreenWait = wait
             if (wait) return true
             when {
                 confirmed -> Log.i(COPY_TAG, "copy first: confirmed $sincePick ms after the stream pick - the copy makes the thumbnails")
+                setConfirmed -> Log.i(COPY_TAG, "copy first: another release's thumbnails match this file $sincePick ms after " +
+                    "the stream pick - the screen counts on without waiting for the copy")
                 ended -> Log.i(COPY_TAG, "copy first: no copy could be used ($sincePick ms after the stream pick) - the usual way")
                 CopyFirst.fallsBack(linkOpen, sincePick) -> {
                     Log.i(COPY_TAG, "copy first: no copy link open ${CopyFirst.FALLBACK_MS / 1000} s after the stream pick - " +

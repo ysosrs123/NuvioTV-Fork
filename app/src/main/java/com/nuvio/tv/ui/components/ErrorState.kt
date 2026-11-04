@@ -187,7 +187,7 @@ private fun buildErrorStatePresentation(
     message: String,
     strings: ErrorStateStrings
 ): ErrorStatePresentation {
-    val trimmed = message.trim()
+    val (trimmed, idLine) = splitIdLine(message.trimEnd())
     if (trimmed.isBlank()) {
         return ErrorStatePresentation(
             text = withPossibleFix(strings.genericIssue, strings.retrySoonFix, strings),
@@ -199,8 +199,10 @@ private fun buildErrorStatePresentation(
         .takeIf { it.isNotBlank() && it.length < trimmed.length }
     val reason = trimmed.substringAfter(':', missingDelimiterValue = trimmed).trim()
 
+    fun withId(issue: String): String = if (idLine == null) issue else issue + "\n\n" + idLine
+
     fun messageWithFix(issue: String, fix: String): String {
-        return withPossibleFix(issue, fix, strings)
+        return withPossibleFix(withId(issue), fix, strings)
     }
 
     val displayMessage = when {
@@ -272,7 +274,7 @@ private fun buildErrorStatePresentation(
             )
         }
 
-        else -> trimmed
+        else -> withId(trimmed)
     }
 
     val boldRanges = linkedSetOf<IntRange>()
@@ -288,6 +290,7 @@ private fun buildErrorStatePresentation(
     displayMessage.indexOf(':')
         .takeIf {
             it > 0 &&
+                displayMessage.indexOf("\n\n").let { end -> end < 0 || it < end } &&
                 !displayMessage.startsWith(strings.triedMetaAddonsPrefix, ignoreCase = true) &&
                 !displayMessage.startsWith(strings.noSupportedMetadataPrefix, ignoreCase = true)
         }
@@ -301,6 +304,13 @@ private fun buildErrorStatePresentation(
         text = displayMessage,
         boldRanges = boldRanges.toList()
     )
+}
+
+/** Detail errors end with "ID: <id>"; kept apart so the id is neither read as an addon name nor reworded. */
+internal fun splitIdLine(message: String): Pair<String, String?> {
+    val index = message.lastIndexOf("\n\nID: ")
+    if (index < 0) return message.trim() to null
+    return message.substring(0, index).trim() to message.substring(index + 2).trim()
 }
 
 private fun withPossibleFix(issue: String, fix: String, strings: ErrorStateStrings): String {

@@ -160,10 +160,17 @@ internal object CopyFirst {
 
     /**
      * The generating screen keeps waiting for the copy: until its link is open [FALLBACK_MS] after the stream pick,
-     * then until it is confirmed [SCREEN_WAIT_MS] after the pick. [linkOpen]: a copy's link is open.
+     * then until it is confirmed [SCREEN_WAIT_MS] after the pick. [linkOpen]: a copy's link is open. [setConfirmed]: another
+     * release's set already matches this file, so the copy has nothing left to settle.
      */
-    fun screenWaits(ended: Boolean, linkOpen: Boolean, confirmed: Boolean, sincePickMs: Long): Boolean = when {
-        confirmed || ended -> false
+    fun screenWaits(
+        ended: Boolean,
+        linkOpen: Boolean,
+        confirmed: Boolean,
+        sincePickMs: Long,
+        setConfirmed: Boolean = false
+    ): Boolean = when {
+        confirmed || ended || setConfirmed -> false
         !linkOpen -> sincePickMs < FALLBACK_MS
         else -> sincePickMs < SCREEN_WAIT_MS
     }

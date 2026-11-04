@@ -7,6 +7,7 @@ import com.nuvio.tv.data.remote.dto.MetaDto
 import com.nuvio.tv.data.remote.dto.MetaResponseDto
 import com.nuvio.tv.domain.model.Addon
 import com.nuvio.tv.domain.model.AddonResource
+import com.nuvio.tv.domain.model.CatalogDescriptor
 import com.nuvio.tv.domain.model.ContentType
 import com.nuvio.tv.domain.repository.AddonRepository
 import io.mockk.coEvery
@@ -125,6 +126,131 @@ class MetaRepositoryRateLimitTest {
         assertTrue(result is NetworkResult.Success)
         assertEquals(1, requested.size)
     }
+
+    @Test
+    fun `an AIOStreams error item is not taken as the title and pauses its host`() = runTest {
+        val repository = newRepository(
+            apiAnswering { url ->
+                if (url.startsWith("https://aio.example")) errorItem() else found(url)
+            },
+            addon("aios", "https://aio.example/config"),
+            addon("cinemeta", "https://calm.example")
+        )
+
+        val first = repository.getMetaFromAllAddons("series", "tt0000001").last()
+        val second = repository.getMetaFromAllAddons("series", "tt0000002").last()
+
+        assertEquals("Found tt0000001", (first as NetworkResult.Success).data.name)
+        assertTrue(second is NetworkResult.Success)
+        assertEquals(1, requested.count { it.startsWith("https://aio.example") })
+    }
+
+    @Test
+    fun `an addon answering not found to title after title stops being asked`() = runTest {
+        val repository = newRepository(
+            apiAnswering { notFound() },
+            addon("aios", "https://aio.example/config")
+        )
+
+        repeat(12) { n -> repository.getMetaFromAllAddons("series", "tt10000%02d".format(n)).last() }
+
+        assertEquals(8, requested.size)
+    }
+
+    @Test
+    fun `an addon whose meta covers only its own ids stops being asked once it keeps finding nothing`() = runTest {
+        val repository = newRepository(apiAnswering { notFound() }, ownIdsOnly("aios", "https://aio.example/config"))
+
+        val first = repository.getMetaFromAllAddons("movie", "tt0000001").last()
+        repository.getMetaFromAllAddons("movie", "tt0000001").last()
+        repeat(12) { n -> repository.getMetaFromAllAddons("movie", "tt20000%02d".format(n)).last() }
+
+        assertEquals(8, requested.size)
+        assertEquals(NetworkResult.META_NOT_FOUND_CODE, (first as NetworkResult.Error).code)
+    }
+
+    @Test
+    fun `an addon that answers for ids its manifest leaves out still gives the details`() = runTest {
+        val repository = newRepository(
+            apiAnswering { url -> if (url.startsWith("https://aio.example")) notFound() else found(url) },
+            ownIdsOnly("aios", "https://aio.example/config"),
+            ownIdsOnly("bingecat", "https://cat.example/config")
+        )
+
+        val results = (1..12).map { n -> repository.getMetaFromAllAddons("series", "tt30000%02d".format(n)).last() }
+
+        assertTrue(results.all { it is NetworkResult.Success })
+        assertEquals(12, requested.count { it.startsWith("https://cat.example") })
+        assertEquals(8, requested.count { it.startsWith("https://aio.example") })
+    }
+
+    @Test
+    fun `a catalog addon without declared meta is asked when AIOStreams only has meta for its own ids`() = runTest {
+        val bingecat = addon("bingecat", "https://cat.example/config").copy(
+            catalogs = listOf(
+                CatalogDescriptor(type = ContentType.MOVIE, id = "ai-movies", name = "AI movies"),
+                CatalogDescriptor(type = ContentType.SERIES, id = "ai-series", name = "AI series")
+            ),
+            resources = listOf(AddonResource(name = "catalog", types = listOf("movie", "series"), idPrefixes = null)),
+            idPrefixes = emptyList()
+        )
+        val repository = newRepository(
+            apiAnswering { url -> if (url.startsWith("https://aio.example")) notFound() else found(url) },
+            ownIdsOnly("aios", "https://aio.example/config"),
+            bingecat
+        )
+
+        val results = (1..12).map { n -> repository.getMetaFromAllAddons("series", "tt40000%02d".format(n)).last() } +
+            repository.getMetaFromAllAddons("movie", "tt22084616").last()
+
+        assertTrue(results.all { it is NetworkResult.Success })
+        assertEquals(13, requested.count { it.startsWith("https://cat.example") })
+        assertEquals(0, requested.count { it.startsWith("https://aio.example") })
+    }
+
+    @Test
+    fun `a resting AIOStreams leaves the other addons to answer`() = runTest {
+        val seriesOnly = addon("cat", "https://cat.example/config").copy(
+            catalogs = listOf(CatalogDescriptor(type = ContentType.SERIES, id = "ai-series", name = "AI series")),
+            resources = listOf(AddonResource(name = "catalog", types = listOf("series"), idPrefixes = null)),
+            rawTypes = listOf("series"),
+            idPrefixes = emptyList()
+        )
+        val repository = newRepository(
+            apiAnswering { url -> if (url.startsWith("https://aio.example")) notFound() else found(url) },
+            ownIdsOnly("aios", "https://aio.example/config"),
+            seriesOnly
+        )
+
+        repeat(10) { n -> repository.getMetaFromAllAddons("movie", "tt50000%02d".format(n)).last() }
+        assertEquals(8, requested.count { it.startsWith("https://aio.example") })
+
+        val show = repository.getMetaFromAllAddons("series", "tt1839337").last()
+
+        assertTrue(show is NetworkResult.Success)
+        assertEquals(8, requested.count { it.startsWith("https://aio.example") })
+    }
+
+    private fun ownIdsOnly(key: String, baseUrl: String) = addon(key, baseUrl).copy(
+        resources = listOf(
+            AddonResource(name = "stream", types = listOf("movie", "series"), idPrefixes = listOf("tt")),
+            AddonResource(name = "meta", types = listOf("other"), idPrefixes = listOf("realdebrid", "torbox"))
+        ),
+        idPrefixes = emptyList()
+    )
+
+    private fun errorItem(): Response<MetaResponseDto> = Response.success(
+        MetaResponseDto(
+            meta = MetaDto(
+                id = "aiostreamserror.%7B%22errorDescription%22%3A%22Rate%20Limit%20Exceeded%22%7D",
+                type = "series",
+                name = "[x] AIOStreams - Error"
+            )
+        )
+    )
+
+    private fun notFound(): Response<MetaResponseDto> =
+        Response.error(404, "{}".toResponseBody("application/json".toMediaType()))
 
     private fun found(url: String): Response<MetaResponseDto> {
         val id = url.substringAfterLast('/').substringBefore(".json")

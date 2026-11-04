@@ -170,4 +170,5 @@ private fun libraryModeLabel(mode: LibrarySourceMode): String = when (mode) {
     LibrarySourceMode.TRAKT -> stringResource(R.string.trakt_name)
     LibrarySourceMode.SIMKL -> stringResource(R.string.simkl_name)
     LibrarySourceMode.MDBLIST -> stringResource(R.string.mdblist_name)
+    LibrarySourceMode.WETRAKR -> stringResource(R.string.wetrakr_name)
 }

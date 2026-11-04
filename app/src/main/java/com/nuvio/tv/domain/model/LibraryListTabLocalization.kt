@@ -12,6 +12,8 @@ fun LibraryListTab.localizedMembershipTitle(): String {
         TrackingProviderId.TRAKT -> stringResource(R.string.trakt_name)
         TrackingProviderId.SIMKL -> stringResource(R.string.simkl_name)
         TrackingProviderId.MDBLIST -> stringResource(R.string.mdblist_name)
+        TrackingProviderId.FLOPPY -> stringResource(R.string.floppy_name)
+        TrackingProviderId.WETRAKR -> stringResource(R.string.wetrakr_name)
         null -> null
     }
     return provider?.let { "$it · ${localizedTitle()}" } ?: localizedTitle()
@@ -26,6 +28,11 @@ fun LibraryListTab.localizedTitle(): String {
         key == "simkl:status:hold" -> stringResource(R.string.library_status_on_hold)
         key == "simkl:status:completed" -> stringResource(R.string.library_status_completed)
         key == "simkl:status:dropped" -> stringResource(R.string.library_status_dropped)
+        key == "wetrakr:status:planning" -> stringResource(R.string.library_status_plan_to_watch)
+        key == "wetrakr:status:watching" -> stringResource(R.string.library_status_watching)
+        key == "wetrakr:status:watched" -> stringResource(R.string.library_filter_watched)
+        key == "wetrakr:status:hold" -> stringResource(R.string.library_status_on_hold)
+        key == "wetrakr:status:dropped" -> stringResource(R.string.library_status_dropped)
         type == LibraryListTab.Type.WATCHLIST -> stringResource(R.string.library_watchlist)
         else -> title
     }

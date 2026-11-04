@@ -5,5 +5,6 @@ import com.nuvio.tv.domain.model.WatchProgress
 internal fun streamResumeProgress(progress: WatchProgress?, startFromBeginning: Boolean): WatchProgress? =
     progress?.takeUnless {
         startFromBeginning || it.isCompleted() ||
-            (it.position <= 0L && it.progressPercentage <= 0f)
+            (it.position <= 0L && it.progressPercentage <= 0f) ||
+            (it.duration > 0L && it.progressPercentage < WatchProgress.STARTED_THRESHOLD)
     }

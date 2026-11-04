@@ -32,6 +32,7 @@ class TmdbService @Inject constructor(
 
     private val imdbToTmdbInFlight = ConcurrentHashMap<String, CompletableDeferred<Int?>>()
     private val tmdbToImdbInFlight = ConcurrentHashMap<String, CompletableDeferred<String?>>()
+    private val tmdbToTvdbCache = ConcurrentHashMap<Int, Int>()
     
     // Mutex for thread-safe cache operations
     private val cacheMutex = Mutex()
@@ -194,6 +195,21 @@ class TmdbService @Inject constructor(
             null
         } finally {
             tmdbToImdbInFlight.remove(requestKey, requestDeferred)
+        }
+    }
+
+    /** TheTVDB id of a TMDB series, for media servers that know a show only by its TVDB id. */
+    suspend fun tmdbToTvdb(tmdbId: Int): Int? = withContext(Dispatchers.IO) {
+        tmdbToTvdbCache[tmdbId]?.let { return@withContext it }
+        try {
+            val response = tmdbApi.getTvExternalIds(tmdbId, TMDB_API_KEY)
+            response.body()?.takeIf { response.isSuccessful }?.tvdbId?.takeIf { it > 0 }
+                ?.also { tmdbToTvdbCache[tmdbId] = it }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "TVDB id lookup failed for TMDB $tmdbId: ${e.message}")
+            null
         }
     }
     

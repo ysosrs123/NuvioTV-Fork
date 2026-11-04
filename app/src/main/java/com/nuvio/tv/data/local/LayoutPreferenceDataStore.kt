@@ -76,6 +76,7 @@ class LayoutPreferenceDataStore @Inject constructor(
     private val heroCatalogKeysKey = stringPreferencesKey("hero_catalog_keys")
     private val homeCatalogOrderKeysKey = stringPreferencesKey("home_catalog_order_keys")
     private val disabledHomeCatalogKeysKey = stringPreferencesKey("disabled_home_catalog_keys")
+    private val offByDefaultSeenKeysKey = stringPreferencesKey("off_by_default_seen_catalog_keys")
     private val customCatalogTitlesKey = stringPreferencesKey("custom_catalog_titles")
     private val sidebarCollapsedKey = booleanPreferencesKey("sidebar_collapsed_by_default")
     private val modernSidebarEnabledKey = booleanPreferencesKey("modern_sidebar_enabled")
@@ -122,6 +123,7 @@ class LayoutPreferenceDataStore @Inject constructor(
     private val showUnairedNextUpKey = booleanPreferencesKey("show_unaired_next_up")
     private val nextUpFromFurthestEpisodeKey = booleanPreferencesKey("next_up_from_furthest_episode")
     private val blurContinueWatchingNextUpKey = booleanPreferencesKey("blur_continue_watching_next_up")
+    private val cwEpisodesLeftEnabledKey = booleanPreferencesKey("cw_episodes_left_enabled")
     private val continueWatchingSortModeKey = stringPreferencesKey("continue_watching_sort_mode")
     private val detailPageTrailerButtonEnabledKey = booleanPreferencesKey("detail_page_trailer_button_enabled")
     private val preferExternalMetaAddonDetailKey = booleanPreferencesKey("prefer_external_meta_addon_detail")
@@ -411,6 +413,10 @@ class LayoutPreferenceDataStore @Inject constructor(
         prefs[blurContinueWatchingNextUpKey] ?: false
     }
 
+    val cwEpisodesLeftEnabled: Flow<Boolean> = profileFlow { prefs ->
+        prefs[cwEpisodesLeftEnabledKey] ?: false
+    }
+
     val continueWatchingSortMode: Flow<ContinueWatchingSortMode> = profileFlow { prefs ->
         val stored = prefs[continueWatchingSortModeKey] ?: ContinueWatchingSortMode.DEFAULT.name
         runCatching { ContinueWatchingSortMode.valueOf(stored) }
@@ -587,6 +593,22 @@ class LayoutPreferenceDataStore @Inject constructor(
                 prefs[disabledHomeCatalogKeysKey] = gson.toJson(normalizedKeys)
             }
         }
+    }
+
+    /** Switches [keys] off on Home the first time each one appears; returns the keys switched off now. */
+    suspend fun hideNewCatalogsByDefault(keys: List<String>): Set<String> {
+        if (keys.isEmpty()) return emptySet()
+        var hidden = emptySet<String>()
+        store().edit { prefs ->
+            val seen = parseCatalogKeys(prefs[offByDefaultSeenKeysKey])
+            val fresh = normalizeCatalogOrderKeys(keys).filterNot { it in seen }
+            if (fresh.isEmpty()) return@edit
+            val disabled = parseCatalogKeys(prefs.getStringOrMigrateSet(disabledHomeCatalogKeysKey))
+            prefs[disabledHomeCatalogKeysKey] = gson.toJson(normalizeCatalogOrderKeys(disabled + fresh))
+            prefs[offByDefaultSeenKeysKey] = gson.toJson(seen + fresh)
+            hidden = fresh.toSet()
+        }
+        return hidden
     }
 
     suspend fun setSidebarCollapsedByDefault(collapsed: Boolean) {
@@ -863,6 +885,12 @@ class LayoutPreferenceDataStore @Inject constructor(
     suspend fun setBlurContinueWatchingNextUp(enabled: Boolean) {
         store().edit { prefs ->
             prefs[blurContinueWatchingNextUpKey] = enabled
+        }
+    }
+
+    suspend fun setCwEpisodesLeftEnabled(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[cwEpisodesLeftEnabledKey] = enabled
         }
     }
 

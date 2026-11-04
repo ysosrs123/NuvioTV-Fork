@@ -1308,7 +1308,8 @@ private fun PlaybackNavHost(
 
         composable(Screen.WatchParty.route) {
             PartyScreen(
-                onBackPress = { navController.popBackStack() }
+                onBackPress = { navController.popBackStack() },
+                onSignIn = { navController.navigate(Screen.AuthQrSignIn.route) }
             )
         }
 
