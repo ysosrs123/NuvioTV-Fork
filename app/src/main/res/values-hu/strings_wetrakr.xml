@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">Megtekintési előzmények, listáid és lejátszási állapot szinkronizálása az eszközök között</string>
+    <string name="wetrakr_connected_as">Csatlakoztatott fiók: %1$s</string>
+    <string name="wetrakr_account_fallback">a WeTrakr-fiókod</string>
+    <string name="wetrakr_qr_description">QR-kód a WeTrakr csatlakoztatásához</string>
+    <string name="wetrakr_missing_client">A WeTrakr nincs beállítva ebben a verzióban.</string>
+    <string name="wetrakr_status_syncing">Szinkronizálás a WeTrakrrel…</string>
+    <string name="wetrakr_status_enter_code">Várakozás, hogy engedélyezd a Nuvio Arcot a WeTrakren</string>
+    <string name="wetrakr_status_paused">Szüneteltetve</string>
+    <string name="wetrakr_daily_limit_row">A mai WeTrakr-keret elfogyott. A szinkronizálás %1$s-kor folytatódik.</string>
+    <string name="wetrakr_limit_message">A mai WeTrakr-keret elfogyott. A lejátszást ez nem érinti, de a megtekintések %1$s-ig nem kerülnek át a WeTrakrre.</string>
+    <string name="wetrakr_requests_used">%1$s / %2$s</string>
+    <string name="wetrakr_requests_used_label">Mai WeTrakr-kérések</string>
+    <string name="wetrakr_last_synced_label">Utolsó szinkronizálás</string>
+    <string name="wetrakr_resumes_label">Szinkronizálás folytatása</string>
+    <string name="wetrakr_never_synced">Még nem</string>
+    <string name="wetrakr_synced_summary">Szinkronizálva: megnézve %1$d, folyamatban %2$d, Megnézendő %3$d</string>
+    <string name="wetrakr_visit">WeTrakr megnyitása</string>
+    <string name="wetrakr_credit">Adatok: WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">WeTrakr-funkciók</string>
+    <string name="tracking_wetrakr_features_subtitle">WeTrakr-specifikus beállítások</string>
+    <string name="wetrakr_continue_watching_subtitle">A WeTrakr-előzmények figyelembe vétele a folytatáshoz</string>
+    <string name="wetrakr_error_unavailable">A WeTrakr nem érhető el. Próbáld újra kicsit később.</string>
+    <string name="wetrakr_error_invalid_response">A WeTrakr olyan választ küldött, amelyet az alkalmazás nem tud olvasni.</string>
+    <string name="wetrakr_error_busy">A WeTrakr foglalt, hamarosan újrapróbáljuk.</string>
+    <string name="wetrakr_error_suspended">A WeTrakr letiltotta a hozzáférést ennek az alkalmazásnak.</string>
+    <string name="wetrakr_error_signin">Jelentkezz be újra a WeTrakrbe.</string>
+    <string name="wetrakr_error_invalid_client">A WeTrakr nem fogadta el az alkalmazás kulcsát.</string>
+    <string name="wetrakr_error_code_expired">A kód lejárt. Próbáld újra.</string>
+    <string name="wetrakr_error_denied">A hozzáférést elutasították a WeTrakren.</string>
+    <string name="wetrakr_error_too_many_codes">Túl sok kódot kértél. Próbáld újra 15 perc múlva.</string>
+    <string name="wetrakr_disconnect_title">Leválasztod a WeTrakrt?</string>
+    <string name="wetrakr_disconnect_subtitle">Ez a profil nem küld több megtekintési adatot, és a WeTrakr-adatai törlődnek erről az eszközről. A WeTrakr-előzményeid megmaradnak.</string>
+    <string name="wetrakr_cw_window_subtitle">Válaszd ki, milyen régi WeTrakr-előzményeket vegyen figyelembe a Megtekintés folytatása sor.</string>
+    <string name="library_empty_wetrakr_not_auth_title">A WeTrakr nincs csatlakoztatva</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">A WeTrakr-listáid megtekintéséhez csatlakoztasd a WeTrakrt a Beállításokban</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">Hasonlók a WeTrakren</string>
+    <string name="wetrakr_upload_title">Előzményeim küldése a WeTrakrre</string>
+    <string name="wetrakr_upload_subtitle">Egyszer átmásolja a profil megnézett címeit és könyvtárát a WeTrakrre. A már meglévő címeket kihagyja.</string>
+    <string name="wetrakr_upload_counting">Előzmények megszámolása…</string>
+    <string name="wetrakr_upload_nothing">Nincs mit küldeni: a WeTrakren már minden megvan erről a profilról.</string>
+    <string name="wetrakr_upload_confirm">Elküldöd a WeTrakrre a megnézett címeket (%1$s) és a könyvtár címeit (%2$s)?</string>
+    <string name="wetrakr_upload_sending">Küldés a WeTrakrre…</string>
+    <string name="wetrakr_upload_done">Kész. Hozzáadva a WeTrakren: %1$s, már megvolt vagy nem található: %2$s.</string>
+    <string name="wetrakr_upload_send">Küldés</string>
+    <string name="wetrakr_upload_close">Bezárás</string>
+    <string name="licenses_attributions_wetrakr_body">A Nuvio Arc a WeTrakrt használja a megtekintési előzményekhez, listákhoz, lejátszáskövetéshez és a hasonló címekhez. Adatok: WeTrakr. A Nuvio Arc nem áll kapcsolatban a WeTrakrrel, és a WeTrakr nem támogatja.</string>
+    <string name="wetrakr_revoke_failed">Itt kijelentkeztél, de a WeTrakrt nem sikerült értesíteni. A Nuvio Arcot a wetrakr.com csatlakoztatott alkalmazásai között távolíthatod el.</string>
+</resources>

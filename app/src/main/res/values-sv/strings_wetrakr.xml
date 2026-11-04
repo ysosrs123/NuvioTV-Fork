@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">Synka tittarhistorik, dina listor och uppspelningsförlopp mellan enheter</string>
+    <string name="wetrakr_connected_as">Ansluten som %1$s</string>
+    <string name="wetrakr_account_fallback">ditt WeTrakr-konto</string>
+    <string name="wetrakr_qr_description">QR-kod för att ansluta WeTrakr</string>
+    <string name="wetrakr_missing_client">WeTrakr är inte konfigurerat i den här versionen.</string>
+    <string name="wetrakr_status_syncing">Synkar med WeTrakr…</string>
+    <string name="wetrakr_status_enter_code">Väntar på att du godkänner Nuvio Arc på WeTrakr</string>
+    <string name="wetrakr_status_paused">Pausad</string>
+    <string name="wetrakr_daily_limit_row">Dagens WeTrakr-gräns är förbrukad. Synkningen fortsätter kl. %1$s.</string>
+    <string name="wetrakr_limit_message">Dagens WeTrakr-gräns är förbrukad. Uppspelningen påverkas inte, men inget skickas till WeTrakr förrän kl. %1$s.</string>
+    <string name="wetrakr_requests_used">%1$s av %2$s</string>
+    <string name="wetrakr_requests_used_label">WeTrakr-förfrågningar använda i dag</string>
+    <string name="wetrakr_last_synced_label">Senast synkad</string>
+    <string name="wetrakr_resumes_label">Synkningen fortsätter</string>
+    <string name="wetrakr_never_synced">Inte än</string>
+    <string name="wetrakr_synced_summary">Synkat: %1$d sedda, %2$d påbörjade, %3$d på Vill se</string>
+    <string name="wetrakr_visit">Besök WeTrakr</string>
+    <string name="wetrakr_credit">Data från WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">WeTrakr-funktioner</string>
+    <string name="tracking_wetrakr_features_subtitle">WeTrakr-specifika inställningar</string>
+    <string name="wetrakr_continue_watching_subtitle">WeTrakr-historik som beaktas för fortsätt titta</string>
+    <string name="wetrakr_error_unavailable">Kunde inte nå WeTrakr. Försök igen strax.</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr skickade ett svar som appen inte kunde läsa.</string>
+    <string name="wetrakr_error_busy">WeTrakr är upptaget, försöker igen strax.</string>
+    <string name="wetrakr_error_suspended">WeTrakr har stängt av åtkomsten för den här appen.</string>
+    <string name="wetrakr_error_signin">Logga in på WeTrakr igen.</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr godkände inte den här appens nyckel.</string>
+    <string name="wetrakr_error_code_expired">Koden har gått ut. Försök igen.</string>
+    <string name="wetrakr_error_denied">Åtkomsten nekades på WeTrakr.</string>
+    <string name="wetrakr_error_too_many_codes">För många koder begärdes. Försök igen om 15 minuter.</string>
+    <string name="wetrakr_disconnect_title">Koppla från WeTrakr?</string>
+    <string name="wetrakr_disconnect_subtitle">Sluta skicka tittaruppdateringar från den här profilen och ta bort dess WeTrakr-data från den här enheten. Din WeTrakr-historik sparas.</string>
+    <string name="wetrakr_cw_window_subtitle">Välj hur mycket WeTrakr-aktivitet som ska visas i fortsätt titta.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr inte anslutet</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">Anslut WeTrakr i Inställningar för att se dina listor på WeTrakr</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">Liknande på WeTrakr</string>
+    <string name="wetrakr_upload_title">Skicka min historik till WeTrakr</string>
+    <string name="wetrakr_upload_subtitle">Kopierar en gång dina sedda titlar och biblioteket på den här profilen till WeTrakr. Titlar som redan finns hoppas över.</string>
+    <string name="wetrakr_upload_counting">Räknar din historik…</string>
+    <string name="wetrakr_upload_nothing">Inget att skicka: WeTrakr har redan allt från den här profilen.</string>
+    <string name="wetrakr_upload_confirm">Skicka %1$s sedda titlar och %2$s bibliotekstitlar till WeTrakr?</string>
+    <string name="wetrakr_upload_sending">Skickar till WeTrakr…</string>
+    <string name="wetrakr_upload_done">Klart: %1$s tillagda på WeTrakr, %2$s fanns redan eller hittades inte.</string>
+    <string name="wetrakr_upload_send">Skicka</string>
+    <string name="wetrakr_upload_close">Stäng</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc använder WeTrakr för tittarhistorik, listor, spårning av uppspelning och liknande titlar. Data från WeTrakr. Nuvio Arc är inte anknutet till eller godkänt av WeTrakr.</string>
+    <string name="wetrakr_revoke_failed">Utloggad här, men WeTrakr kunde inte meddelas. Du kan ta bort Nuvio Arc under anslutna appar på wetrakr.com.</string>
+</resources>

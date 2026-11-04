@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Мрежа</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Кой намира адресите на сървърите за приложението. Изберете услуга, ако интернет доставчикът ви блокира или променя адресите на добавки, TMDB или debrid.</string>
+    <string name="advanced_dns_system">Система</string>
+    <string name="advanced_dns_system_description">Собственото търсене на устройството, обикновено от вашия интернет доставчик. По подразбиране.</string>
+    <string name="advanced_dns_quad9_description">Блокира известни вредни сайтове.</string>
+    <string name="advanced_dns_adguard_description">Блокира реклами и тракери.</string>
+    <string name="advanced_dns_adguard_warning">Може да спре добавка, която използва рекламен или проследяващ адрес.</string>
+    <string name="advanced_dns_custom">Собствен адрес</string>
+    <string name="advanced_dns_custom_description">Вашият собствен https адрес, например от NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Въведете адрес, който започва с https://</string>
+    <string name="advanced_dns_custom_failed">Този адрес не отговори като DNS услуга.</string>
+    <string name="advanced_dns_note">Използва се за добавки, изображения, debrid, медийни сървъри, съвместно гледане, вашия акаунт и ExoPlayer. Плейърът MPV, трейлърите и торентите продължават да използват търсенето на устройството.</string>
+    <string name="advanced_dns_unreachable">%1$s е недостъпен, затова засега се използва търсенето на устройството.</string>
+    <string name="advanced_dns_test">Тест на DNS</string>
+    <string name="advanced_dns_test_subtitle">Търси TMDB и Cinemeta с избрания DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: няма отговор</string>
+    <string name="advanced_dns_test_unreachable">Недостъпно</string>
+</resources>

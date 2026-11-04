@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">Sinkroniziraj povijest gledanja, svoje popise i napredak reprodukcije na svim uređajima</string>
+    <string name="wetrakr_connected_as">Povezano kao %1$s</string>
+    <string name="wetrakr_account_fallback">tvoj WeTrakr račun</string>
+    <string name="wetrakr_qr_description">QR kôd za povezivanje WeTrakra</string>
+    <string name="wetrakr_missing_client">WeTrakr nije postavljen u ovom buildu.</string>
+    <string name="wetrakr_status_syncing">Sinkronizacija s WeTrakrom…</string>
+    <string name="wetrakr_status_enter_code">Čeka se da dopustiš Nuvio Arc na WeTrakru</string>
+    <string name="wetrakr_status_paused">Pauzirano</string>
+    <string name="wetrakr_daily_limit_row">Današnje WeTrakr ograničenje je potrošeno. Sinkronizacija se nastavlja u %1$s.</string>
+    <string name="wetrakr_limit_message">Današnje WeTrakr ograničenje je potrošeno. Reprodukcija radi normalno, ali gledanja se ne šalju WeTrakru do %1$s.</string>
+    <string name="wetrakr_requests_used">%1$s od %2$s</string>
+    <string name="wetrakr_requests_used_label">WeTrakr zahtjevi iskorišteni danas</string>
+    <string name="wetrakr_last_synced_label">Zadnja sinkronizacija</string>
+    <string name="wetrakr_resumes_label">Sinkronizacija se nastavlja</string>
+    <string name="wetrakr_never_synced">Još ne</string>
+    <string name="wetrakr_synced_summary">Sinkronizirano: pogledano %1$d, u tijeku %2$d, Planiram gledati %3$d</string>
+    <string name="wetrakr_visit">Posjeti WeTrakr</string>
+    <string name="wetrakr_credit">Podaci s WeTrakra</string>
+    <string name="tracking_wetrakr_features_title">WeTrakr značajke</string>
+    <string name="tracking_wetrakr_features_subtitle">Postavke specifične za WeTrakr</string>
+    <string name="wetrakr_continue_watching_subtitle">WeTrakr povijest koja se uzima u obzir za Nastavi gledati</string>
+    <string name="wetrakr_error_unavailable">WeTrakr nije dostupan. Pokušaj ponovno uskoro.</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr je poslao odgovor koji aplikacija ne može pročitati.</string>
+    <string name="wetrakr_error_busy">WeTrakr je zauzet, uskoro pokušavamo ponovno.</string>
+    <string name="wetrakr_error_suspended">WeTrakr je isključio pristup za ovu aplikaciju.</string>
+    <string name="wetrakr_error_signin">Ponovno se prijavi na WeTrakr.</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr nije prihvatio ključ ove aplikacije.</string>
+    <string name="wetrakr_error_code_expired">Kôd je istekao. Pokušaj ponovno.</string>
+    <string name="wetrakr_error_denied">Pristup je odbijen na WeTrakru.</string>
+    <string name="wetrakr_error_too_many_codes">Zatraženo je previše kôdova. Pokušaj ponovno za 15 minuta.</string>
+    <string name="wetrakr_disconnect_title">Prekinuti vezu s WeTrakrom?</string>
+    <string name="wetrakr_disconnect_subtitle">Prestani slati ažuriranja gledanja s ovog profila i ukloni njegove WeTrakr podatke s ovog uređaja. Tvoja WeTrakr povijest se čuva.</string>
+    <string name="wetrakr_cw_window_subtitle">Odaberi koliko WeTrakr aktivnosti treba prikazivati u Nastavi gledati.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr nije povezan</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">Poveži WeTrakr u Postavkama za prikaz svojih WeTrakr popisa</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">Slično na WeTrakru</string>
+    <string name="wetrakr_upload_title">Pošalji moju povijest na WeTrakr</string>
+    <string name="wetrakr_upload_subtitle">Jednom kopira pogledane naslove i biblioteku ovog profila na WeTrakr. Naslovi koje već ima se preskaču.</string>
+    <string name="wetrakr_upload_counting">Brojanje povijesti…</string>
+    <string name="wetrakr_upload_nothing">Nema se što poslati: WeTrakr već ima sve s ovog profila.</string>
+    <string name="wetrakr_upload_confirm">Poslati na WeTrakr pogledane naslove (%1$s) i naslove iz biblioteke (%2$s)?</string>
+    <string name="wetrakr_upload_sending">Slanje na WeTrakr…</string>
+    <string name="wetrakr_upload_done">Gotovo. Dodano na WeTrakr: %1$s, već postoji ili nije pronađeno: %2$s.</string>
+    <string name="wetrakr_upload_send">Pošalji</string>
+    <string name="wetrakr_upload_close">Zatvori</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc koristi WeTrakr za povijest gledanja, popise, praćenje reprodukcije i slične naslove. Podaci s WeTrakra. Nuvio Arc nije povezan s WeTrakrom niti ga WeTrakr podržava.</string>
+    <string name="wetrakr_revoke_failed">Odjavljeno ovdje, ali WeTrakr nije bilo moguće obavijestiti. Nuvio Arc možeš ukloniti pod povezanim aplikacijama na wetrakr.com.</string>
+</resources>

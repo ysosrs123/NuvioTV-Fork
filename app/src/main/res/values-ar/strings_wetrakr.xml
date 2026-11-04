@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">مزامنة سجل المشاهدة وقوائمك وتقدم التشغيل عبر الأجهزة</string>
+    <string name="wetrakr_connected_as">متصل باسم %1$s</string>
+    <string name="wetrakr_account_fallback">حسابك في WeTrakr</string>
+    <string name="wetrakr_qr_description">رمز QR لربط WeTrakr</string>
+    <string name="wetrakr_missing_client">WeTrakr غير مُعدّ في هذا الإصدار.</string>
+    <string name="wetrakr_status_syncing">جارٍ المزامنة مع WeTrakr…</string>
+    <string name="wetrakr_status_enter_code">بانتظار سماحك لـ Nuvio Arc على WeTrakr</string>
+    <string name="wetrakr_status_paused">متوقف مؤقتًا</string>
+    <string name="wetrakr_daily_limit_row">تم استهلاك حد WeTrakr لليوم. تُستأنف المزامنة في %1$s.</string>
+    <string name="wetrakr_limit_message">تم استهلاك حد WeTrakr لليوم. لا يتأثر التشغيل، لكن لن تُرسل المشاهدات إلى WeTrakr حتى %1$s.</string>
+    <string name="wetrakr_requests_used">%1$s من %2$s</string>
+    <string name="wetrakr_requests_used_label">طلبات WeTrakr المستخدمة اليوم</string>
+    <string name="wetrakr_last_synced_label">آخر مزامنة</string>
+    <string name="wetrakr_resumes_label">استئناف المزامنة</string>
+    <string name="wetrakr_never_synced">ليس بعد</string>
+    <string name="wetrakr_synced_summary">تمت المزامنة: %1$d تمت مشاهدتها، %2$d قيد المشاهدة، %3$d في أخطط لمشاهدته</string>
+    <string name="wetrakr_visit">زيارة WeTrakr</string>
+    <string name="wetrakr_credit">البيانات من WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">ميزات WeTrakr</string>
+    <string name="tracking_wetrakr_features_subtitle">إعدادات خاصة بـ WeTrakr</string>
+    <string name="wetrakr_continue_watching_subtitle">تاريخ WeTrakr المعتمد لمتابعة المشاهدة</string>
+    <string name="wetrakr_error_unavailable">تعذر الوصول إلى WeTrakr. حاول مجددًا بعد قليل.</string>
+    <string name="wetrakr_error_invalid_response">أرسل WeTrakr ردًا لم يتمكن التطبيق من قراءته.</string>
+    <string name="wetrakr_error_busy">WeTrakr مشغول، ستتم إعادة المحاولة بعد قليل.</string>
+    <string name="wetrakr_error_suspended">أوقف WeTrakr وصول هذا التطبيق.</string>
+    <string name="wetrakr_error_signin">سجّل الدخول إلى WeTrakr مجددًا.</string>
+    <string name="wetrakr_error_invalid_client">لم يقبل WeTrakr مفتاح هذا التطبيق.</string>
+    <string name="wetrakr_error_code_expired">انتهت صلاحية الرمز. حاول مجددًا.</string>
+    <string name="wetrakr_error_denied">تم رفض الوصول على WeTrakr.</string>
+    <string name="wetrakr_error_too_many_codes">تم طلب رموز كثيرة جدًا. حاول مجددًا بعد 15 دقيقة.</string>
+    <string name="wetrakr_disconnect_title">قطع اتصال WeTrakr؟</string>
+    <string name="wetrakr_disconnect_subtitle">إيقاف إرسال تحديثات المشاهدة من هذا الملف الشخصي وإزالة بيانات WeTrakr الخاصة به من هذا الجهاز. يبقى سجل WeTrakr الخاص بك محفوظًا.</string>
+    <string name="wetrakr_cw_window_subtitle">اختر كمية نشاط WeTrakr التي تظهر في متابعة المشاهدة.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr غير متصل</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">اربط WeTrakr من الإعدادات لعرض قوائمك في WeTrakr</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">أعمال مشابهة على WeTrakr</string>
+    <string name="wetrakr_upload_title">إرسال سجلي إلى WeTrakr</string>
+    <string name="wetrakr_upload_subtitle">ينسخ العناوين التي شاهدتها ومكتبتك في هذا الملف الشخصي إلى WeTrakr مرة واحدة. يتم تخطي العناوين الموجودة لديه مسبقًا.</string>
+    <string name="wetrakr_upload_counting">جارٍ عدّ سجلك…</string>
+    <string name="wetrakr_upload_nothing">لا شيء لإرساله: كل ما في هذا الملف الشخصي موجود مسبقًا في WeTrakr.</string>
+    <string name="wetrakr_upload_confirm">إرسال %1$s عنوانًا تمت مشاهدته و%2$s عنوانًا من المكتبة إلى WeTrakr؟</string>
+    <string name="wetrakr_upload_sending">جارٍ الإرسال إلى WeTrakr…</string>
+    <string name="wetrakr_upload_done">تم: أُضيف %1$s إلى WeTrakr، و%2$s موجود مسبقًا أو لم يُعثر عليه.</string>
+    <string name="wetrakr_upload_send">إرسال</string>
+    <string name="wetrakr_upload_close">إغلاق</string>
+    <string name="licenses_attributions_wetrakr_body">يستخدم Nuvio Arc خدمة WeTrakr لسجل المشاهدة والقوائم وتتبع التشغيل والعناوين المشابهة. البيانات من WeTrakr. Nuvio Arc غير تابع لـ WeTrakr ولا معتمد منه.</string>
+    <string name="wetrakr_revoke_failed">تم تسجيل الخروج هنا، لكن تعذر إبلاغ WeTrakr. يمكنك إزالة Nuvio Arc من التطبيقات المتصلة على wetrakr.com.</string>
+</resources>

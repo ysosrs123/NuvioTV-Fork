@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Red</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Quién resuelve las direcciones de los servidores para la app. Elige un servicio si tu proveedor de internet bloquea o cambia las direcciones de complementos, TMDB o debrid.</string>
+    <string name="advanced_dns_system">Sistema</string>
+    <string name="advanced_dns_system_description">La resolución propia del dispositivo, normalmente la de tu proveedor de internet. Predeterminado.</string>
+    <string name="advanced_dns_quad9_description">Bloquea sitios dañinos conocidos.</string>
+    <string name="advanced_dns_adguard_description">Bloquea anuncios y rastreadores.</string>
+    <string name="advanced_dns_adguard_warning">Puede bloquear un complemento que use una dirección de anuncios o de rastreo.</string>
+    <string name="advanced_dns_custom">Dirección personalizada</string>
+    <string name="advanced_dns_custom_description">Tu propia dirección https, por ejemplo de NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Introduce una dirección que empiece por https://</string>
+    <string name="advanced_dns_custom_failed">Esa dirección no respondió como servicio DNS.</string>
+    <string name="advanced_dns_note">Se usa para complementos, imágenes, debrid, servidores multimedia, fiesta de visionado, tu cuenta y ExoPlayer. El reproductor MPV, los tráilers y los torrents siguen usando la resolución del dispositivo.</string>
+    <string name="advanced_dns_unreachable">No se pudo contactar con %1$s, así que por ahora se usa la resolución del dispositivo.</string>
+    <string name="advanced_dns_test">Probar DNS</string>
+    <string name="advanced_dns_test_subtitle">Resuelve TMDB y Cinemeta con el DNS elegido.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: sin respuesta</string>
+    <string name="advanced_dns_test_unreachable">Inaccesible</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Hálózat</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Ki keresi ki a szerverek címét az alkalmazásnak. Válassz szolgáltatást, ha az internetszolgáltatód letiltja vagy módosítja a bővítmények, a TMDB vagy a debrid címeit.</string>
+    <string name="advanced_dns_system">Rendszer</string>
+    <string name="advanced_dns_system_description">Az eszköz saját névfeloldása, általában az internetszolgáltatódé. Alapértelmezett.</string>
+    <string name="advanced_dns_quad9_description">Letiltja az ismert kártékony oldalakat.</string>
+    <string name="advanced_dns_adguard_description">Letiltja a hirdetéseket és a nyomkövetőket.</string>
+    <string name="advanced_dns_adguard_warning">Leállíthat egy bővítményt, amely hirdetési vagy követési címet használ.</string>
+    <string name="advanced_dns_custom">Egyéni cím</string>
+    <string name="advanced_dns_custom_description">Saját https-címed, például a NextDNS-től.</string>
+    <string name="advanced_dns_custom_invalid">Adj meg egy https:// kezdetű címet</string>
+    <string name="advanced_dns_custom_failed">Ez a cím nem válaszolt DNS-szolgáltatásként.</string>
+    <string name="advanced_dns_note">Ezt használják a bővítmények, a képek, a debrid, a médiaszerverek, a nézőparti, a fiókod és az ExoPlayer. Az MPV lejátszó, az előzetesek és a torrentek továbbra is az eszköz saját névfeloldását használják.</string>
+    <string name="advanced_dns_unreachable">A(z) %1$s nem érhető el, ezért egyelőre az eszköz saját névfeloldása működik.</string>
+    <string name="advanced_dns_test">DNS tesztelése</string>
+    <string name="advanced_dns_test_subtitle">A választott DNS-sel kikeresi a TMDB-t és a Cinemetát.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: nincs válasz</string>
+    <string name="advanced_dns_test_unreachable">Nem érhető el</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Nätverk</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Vem som slår upp serveradresser åt appen. Välj en tjänst om din internetleverantör blockerar eller ändrar adresser för tillägg, TMDB eller debrid.</string>
+    <string name="advanced_dns_system">System</string>
+    <string name="advanced_dns_system_description">Enhetens egen uppslagning, oftast din internetleverantörs. Standard.</string>
+    <string name="advanced_dns_quad9_description">Blockerar kända skadliga webbplatser.</string>
+    <string name="advanced_dns_adguard_description">Blockerar annonser och spårare.</string>
+    <string name="advanced_dns_adguard_warning">Kan stoppa ett tillägg som använder en annons- eller spårningsadress.</string>
+    <string name="advanced_dns_custom">Egen adress</string>
+    <string name="advanced_dns_custom_description">Din egen https-adress, till exempel från NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Ange en adress som börjar med https://</string>
+    <string name="advanced_dns_custom_failed">Adressen svarade inte som en DNS-tjänst.</string>
+    <string name="advanced_dns_note">Används för tillägg, bilder, debrid, medieservrar, tittarfest, ditt konto och ExoPlayer. MPV-spelaren, trailers och torrenter använder fortfarande enhetens egen uppslagning.</string>
+    <string name="advanced_dns_unreachable">%1$s kunde inte nås, så enhetens egen uppslagning används tills vidare.</string>
+    <string name="advanced_dns_test">Testa DNS</string>
+    <string name="advanced_dns_test_subtitle">Slår upp TMDB och Cinemeta med vald DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: inget svar</string>
+    <string name="advanced_dns_test_unreachable">Kan inte nås</string>
+</resources>

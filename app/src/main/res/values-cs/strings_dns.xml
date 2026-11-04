@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Síť</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Kdo pro aplikaci vyhledává adresy serverů. Vyberte službu, pokud váš poskytovatel internetu blokuje nebo mění adresy doplňků, TMDB nebo debrid.</string>
+    <string name="advanced_dns_system">Systém</string>
+    <string name="advanced_dns_system_description">Vlastní vyhledávání zařízení, obvykle od vašeho poskytovatele internetu. Výchozí.</string>
+    <string name="advanced_dns_quad9_description">Blokuje známé škodlivé weby.</string>
+    <string name="advanced_dns_adguard_description">Blokuje reklamy a sledovače.</string>
+    <string name="advanced_dns_adguard_warning">Může zastavit doplněk, který používá reklamní nebo sledovací adresu.</string>
+    <string name="advanced_dns_custom">Vlastní adresa</string>
+    <string name="advanced_dns_custom_description">Vaše vlastní adresa https, například od NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Zadejte adresu, která začíná https://</string>
+    <string name="advanced_dns_custom_failed">Tato adresa neodpověděla jako služba DNS.</string>
+    <string name="advanced_dns_note">Používá se pro doplňky, obrázky, debrid, mediální servery, společné sledování, váš účet a ExoPlayer. Přehrávač MPV, trailery a torrenty dál používají vyhledávání zařízení.</string>
+    <string name="advanced_dns_unreachable">%1$s není dostupné, proto se zatím používá vyhledávání zařízení.</string>
+    <string name="advanced_dns_test">Otestovat DNS</string>
+    <string name="advanced_dns_test_subtitle">Vyhledá TMDB a Cinemeta pomocí zvoleného DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: bez odpovědi</string>
+    <string name="advanced_dns_test_unreachable">Nedostupné</string>
+</resources>

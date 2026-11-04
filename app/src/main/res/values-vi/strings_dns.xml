@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Mạng</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Ai tra cứu địa chỉ máy chủ cho ứng dụng. Chọn một dịch vụ nếu nhà mạng chặn hoặc thay đổi địa chỉ tiện ích, TMDB hay Debrid.</string>
+    <string name="advanced_dns_system">Hệ thống</string>
+    <string name="advanced_dns_system_description">Tra cứu riêng của thiết bị, thường là của nhà mạng. Mặc định.</string>
+    <string name="advanced_dns_quad9_description">Chặn các trang web độc hại đã biết.</string>
+    <string name="advanced_dns_adguard_description">Chặn quảng cáo và trình theo dõi.</string>
+    <string name="advanced_dns_adguard_warning">Có thể làm dừng tiện ích dùng địa chỉ quảng cáo hoặc theo dõi.</string>
+    <string name="advanced_dns_custom">Địa chỉ tùy chỉnh</string>
+    <string name="advanced_dns_custom_description">Địa chỉ https của riêng bạn, ví dụ từ NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Nhập địa chỉ bắt đầu bằng https://</string>
+    <string name="advanced_dns_custom_failed">Địa chỉ đó không phản hồi như một dịch vụ DNS.</string>
+    <string name="advanced_dns_note">Dùng cho tiện ích, hình ảnh, Debrid, máy chủ đa phương tiện, xem chung, tài khoản của bạn và ExoPlayer. Trình phát MPV, trailer và torrent vẫn dùng tra cứu riêng của thiết bị.</string>
+    <string name="advanced_dns_unreachable">Không thể kết nối %1$s, nên tạm thời đang dùng tra cứu riêng của thiết bị.</string>
+    <string name="advanced_dns_test">Kiểm tra DNS</string>
+    <string name="advanced_dns_test_subtitle">Tra cứu TMDB và Cinemeta bằng DNS đã chọn.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: không có phản hồi</string>
+    <string name="advanced_dns_test_unreachable">Không thể kết nối</string>
+</resources>

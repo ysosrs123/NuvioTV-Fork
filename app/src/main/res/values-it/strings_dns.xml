@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Rete</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Chi risolve gli indirizzi dei server per l\'app. Scegli un servizio se il tuo provider internet blocca o modifica gli indirizzi di addon, TMDB o debrid.</string>
+    <string name="advanced_dns_system">Sistema</string>
+    <string name="advanced_dns_system_description">La risoluzione del dispositivo, di solito quella del tuo provider internet. Predefinito.</string>
+    <string name="advanced_dns_quad9_description">Blocca i siti dannosi noti.</string>
+    <string name="advanced_dns_adguard_description">Blocca pubblicità e tracker.</string>
+    <string name="advanced_dns_adguard_warning">Può bloccare un addon che usa un indirizzo pubblicitario o di tracciamento.</string>
+    <string name="advanced_dns_custom">Indirizzo personalizzato</string>
+    <string name="advanced_dns_custom_description">Il tuo indirizzo https, per esempio di NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Inserisci un indirizzo che inizia con https://</string>
+    <string name="advanced_dns_custom_failed">Quell\'indirizzo non ha risposto come servizio DNS.</string>
+    <string name="advanced_dns_note">Usato per addon, immagini, debrid, server multimediali, watch party, il tuo account ed ExoPlayer. Il player MPV, i trailer e i torrent usano ancora la risoluzione del dispositivo.</string>
+    <string name="advanced_dns_unreachable">%1$s non è raggiungibile, quindi per ora si usa la risoluzione del dispositivo.</string>
+    <string name="advanced_dns_test">Prova DNS</string>
+    <string name="advanced_dns_test_subtitle">Risolve TMDB e Cinemeta con il DNS scelto.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: nessuna risposta</string>
+    <string name="advanced_dns_test_unreachable">Non raggiungibile</string>
+</resources>

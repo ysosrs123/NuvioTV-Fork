@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Мережа</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Хто шукає адреси серверів для застосунку. Виберіть сервіс, якщо інтернет-провайдер блокує або підмінює адреси адонів, TMDB чи Debrid.</string>
+    <string name="advanced_dns_system">Системний</string>
+    <string name="advanced_dns_system_description">Власний DNS пристрою, зазвичай від інтернет-провайдера. За замовчуванням.</string>
+    <string name="advanced_dns_quad9_description">Блокує відомі шкідливі сайти.</string>
+    <string name="advanced_dns_adguard_description">Блокує рекламу та трекери.</string>
+    <string name="advanced_dns_adguard_warning">Може зупинити адон, який використовує рекламну або відстежувальну адресу.</string>
+    <string name="advanced_dns_custom">Власна адреса</string>
+    <string name="advanced_dns_custom_description">Ваша власна адреса https, наприклад від NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Введіть адресу, що починається з https://</string>
+    <string name="advanced_dns_custom_failed">Ця адреса не відповіла як DNS-сервіс.</string>
+    <string name="advanced_dns_note">Використовується для адонів, зображень, Debrid, медіасерверів, спільного перегляду, вашого акаунта та ExoPlayer. Плеєр MPV, трейлери й торенти й далі використовують DNS пристрою.</string>
+    <string name="advanced_dns_unreachable">%1$s недоступний, тому поки що використовується DNS пристрою.</string>
+    <string name="advanced_dns_test">Перевірити DNS</string>
+    <string name="advanced_dns_test_subtitle">Шукає TMDB і Cinemeta через вибраний DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: немає відповіді</string>
+    <string name="advanced_dns_test_unreachable">Недоступно</string>
+</resources>

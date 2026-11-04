@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">在裝置間同步觀看歷史、您的清單和播放進度</string>
+    <string name="wetrakr_connected_as">以 %1$s 身分連線</string>
+    <string name="wetrakr_account_fallback">您的 WeTrakr 帳號</string>
+    <string name="wetrakr_qr_description">用於連線 WeTrakr 的 QR 碼</string>
+    <string name="wetrakr_missing_client">此版本未設定 WeTrakr。</string>
+    <string name="wetrakr_status_syncing">正在與 WeTrakr 同步…</string>
+    <string name="wetrakr_status_enter_code">等待您在 WeTrakr 上授權 Nuvio Arc</string>
+    <string name="wetrakr_status_paused">已暫停</string>
+    <string name="wetrakr_daily_limit_row">今日 WeTrakr 上限已用完。同步將於 %1$s 恢復。</string>
+    <string name="wetrakr_limit_message">今日 WeTrakr 上限已用完。播放不受影響，但在 %1$s 之前，觀看記錄不會傳送到 WeTrakr。</string>
+    <string name="wetrakr_requests_used">%1$s / %2$s</string>
+    <string name="wetrakr_requests_used_label">今日已用 WeTrakr 請求</string>
+    <string name="wetrakr_last_synced_label">上次同步</string>
+    <string name="wetrakr_resumes_label">同步恢復時間</string>
+    <string name="wetrakr_never_synced">尚未同步</string>
+    <string name="wetrakr_synced_summary">已同步：%1$d 部已看，%2$d 部觀看中，%3$d 部計劃觀看</string>
+    <string name="wetrakr_visit">造訪 WeTrakr</string>
+    <string name="wetrakr_credit">資料來自 WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">WeTrakr 功能</string>
+    <string name="tracking_wetrakr_features_subtitle">WeTrakr 專屬設定</string>
+    <string name="wetrakr_continue_watching_subtitle">納入繼續觀看的 WeTrakr 歷史記錄</string>
+    <string name="wetrakr_error_unavailable">無法存取 WeTrakr。請稍後重試。</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr 傳回了應用程式無法讀取的回應。</string>
+    <string name="wetrakr_error_busy">WeTrakr 忙碌中，稍後將重試。</string>
+    <string name="wetrakr_error_suspended">WeTrakr 已關閉此應用程式的存取權限。</string>
+    <string name="wetrakr_error_signin">請重新登入 WeTrakr。</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr 未接受此應用程式的金鑰。</string>
+    <string name="wetrakr_error_code_expired">代碼已過期。請重試。</string>
+    <string name="wetrakr_error_denied">WeTrakr 上的存取遭到拒絕。</string>
+    <string name="wetrakr_error_too_many_codes">要求的代碼過多。請在 15 分鐘後重試。</string>
+    <string name="wetrakr_disconnect_title">中斷 WeTrakr 連線？</string>
+    <string name="wetrakr_disconnect_subtitle">停止從此個人資料傳送觀看更新，並從此裝置移除其 WeTrakr 資料。您的 WeTrakr 歷史記錄將保留。</string>
+    <string name="wetrakr_cw_window_subtitle">選擇多少 WeTrakr 活動應出現在繼續觀看中。</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr 未連線</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">在設定中連線 WeTrakr 以查看您的 WeTrakr 清單</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">WeTrakr 上的相似內容</string>
+    <string name="wetrakr_upload_title">將我的歷史記錄傳送到 WeTrakr</string>
+    <string name="wetrakr_upload_subtitle">將此個人資料中已觀看的影片和媒體庫一次性複製到 WeTrakr。已有的影片會略過。</string>
+    <string name="wetrakr_upload_counting">正在統計您的歷史記錄…</string>
+    <string name="wetrakr_upload_nothing">沒有可傳送的內容：WeTrakr 已包含此個人資料的全部內容。</string>
+    <string name="wetrakr_upload_confirm">將 %1$s 部已觀看影片和 %2$s 部媒體庫影片傳送到 WeTrakr？</string>
+    <string name="wetrakr_upload_sending">正在傳送到 WeTrakr…</string>
+    <string name="wetrakr_upload_done">完成：已在 WeTrakr 新增 %1$s 部，%2$s 部已存在或找不到。</string>
+    <string name="wetrakr_upload_send">傳送</string>
+    <string name="wetrakr_upload_close">關閉</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc 使用 WeTrakr 取得觀看歷史、清單、播放追蹤和相似內容。資料來自 WeTrakr。Nuvio Arc 與 WeTrakr 無關聯或未經其認可。</string>
+    <string name="wetrakr_revoke_failed">已在此裝置登出，但無法通知 WeTrakr。您可以在 wetrakr.com 的已連線應用程式中移除 Nuvio Arc。</string>
+</resources>

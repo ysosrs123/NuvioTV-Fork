@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Netwerk</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Wie serveradressen opzoekt voor de app. Kies een dienst als je internetprovider add-on-, TMDB- of Debrid-adressen blokkeert of wijzigt.</string>
+    <string name="advanced_dns_system">Systeem</string>
+    <string name="advanced_dns_system_description">De eigen opzoeking van het apparaat, meestal die van je internetprovider. Standaard.</string>
+    <string name="advanced_dns_quad9_description">Blokkeert bekende schadelijke sites.</string>
+    <string name="advanced_dns_adguard_description">Blokkeert advertenties en trackers.</string>
+    <string name="advanced_dns_adguard_warning">Kan een add-on stoppen die een advertentie- of trackingadres gebruikt.</string>
+    <string name="advanced_dns_custom">Eigen adres</string>
+    <string name="advanced_dns_custom_description">Je eigen https-adres, bijvoorbeeld van NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Voer een adres in dat begint met https://</string>
+    <string name="advanced_dns_custom_failed">Dat adres antwoordde niet als DNS-dienst.</string>
+    <string name="advanced_dns_note">Gebruikt voor add-ons, afbeeldingen, Debrid, mediaservers, watchparty, je account en ExoPlayer. De MPV-speler, trailers en torrents gebruiken nog de eigen opzoeking van het apparaat.</string>
+    <string name="advanced_dns_unreachable">%1$s is niet bereikbaar, dus de eigen opzoeking van het apparaat wordt voorlopig gebruikt.</string>
+    <string name="advanced_dns_test">DNS testen</string>
+    <string name="advanced_dns_test_subtitle">Zoekt TMDB en Cinemeta op met de gekozen DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: geen antwoord</string>
+    <string name="advanced_dns_test_unreachable">Niet bereikbaar</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Sieć</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Kto wyszukuje adresy serwerów dla aplikacji. Wybierz usługę, jeśli dostawca internetu blokuje lub zmienia adresy dodatków, TMDB lub Debrid.</string>
+    <string name="advanced_dns_system">System</string>
+    <string name="advanced_dns_system_description">Własne wyszukiwanie urządzenia, zwykle dostawcy internetu. Domyślne.</string>
+    <string name="advanced_dns_quad9_description">Blokuje znane szkodliwe strony.</string>
+    <string name="advanced_dns_adguard_description">Blokuje reklamy i elementy śledzące.</string>
+    <string name="advanced_dns_adguard_warning">Może zatrzymać dodatek, który używa adresu reklamowego lub śledzącego.</string>
+    <string name="advanced_dns_custom">Własny adres</string>
+    <string name="advanced_dns_custom_description">Twój własny adres https, na przykład z NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Wpisz adres zaczynający się od https://</string>
+    <string name="advanced_dns_custom_failed">Ten adres nie odpowiedział jako usługa DNS.</string>
+    <string name="advanced_dns_note">Używane dla dodatków, obrazów, Debrid, serwerów multimediów, wspólnego oglądania, Twojego konta i ExoPlayer. Odtwarzacz MPV, zwiastuny i torrenty nadal korzystają z wyszukiwania urządzenia.</string>
+    <string name="advanced_dns_unreachable">Nie udało się połączyć z %1$s, więc na razie używane jest wyszukiwanie urządzenia.</string>
+    <string name="advanced_dns_test">Testuj DNS</string>
+    <string name="advanced_dns_test_subtitle">Wyszukuje TMDB i Cinemeta przez wybrany DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: brak odpowiedzi</string>
+    <string name="advanced_dns_test_unreachable">Nieosiągalny</string>
+</resources>

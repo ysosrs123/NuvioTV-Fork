@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">סנכרון היסטוריית צפייה, הרשימות שלך והתקדמות הפעלה בין מכשירים</string>
+    <string name="wetrakr_connected_as">מחוברים בתור %1$s</string>
+    <string name="wetrakr_account_fallback">חשבון ה-WeTrakr שלך</string>
+    <string name="wetrakr_qr_description">קוד QR לחיבור WeTrakr</string>
+    <string name="wetrakr_missing_client">WeTrakr לא מוגדר בגרסה הזו.</string>
+    <string name="wetrakr_status_syncing">מסתנכרן עם WeTrakr…</string>
+    <string name="wetrakr_status_enter_code">ממתין לאישור של Nuvio Arc ב-WeTrakr</string>
+    <string name="wetrakr_status_paused">מושהה</string>
+    <string name="wetrakr_daily_limit_row">המגבלה היומית של WeTrakr נוצלה. הסנכרון יתחדש ב-%1$s.</string>
+    <string name="wetrakr_limit_message">המגבלה היומית של WeTrakr נוצלה. ההפעלה לא מושפעת, אבל צפיות לא יישלחו ל-WeTrakr עד %1$s.</string>
+    <string name="wetrakr_requests_used">%1$s מתוך %2$s</string>
+    <string name="wetrakr_requests_used_label">בקשות WeTrakr שנוצלו היום</string>
+    <string name="wetrakr_last_synced_label">סנכרון אחרון</string>
+    <string name="wetrakr_resumes_label">הסנכרון מתחדש</string>
+    <string name="wetrakr_never_synced">עדיין לא</string>
+    <string name="wetrakr_synced_summary">סונכרנו: %1$d נצפו, %2$d בצפייה, %3$d ברשימת מתוכנן לצפייה</string>
+    <string name="wetrakr_visit">ביקור ב-WeTrakr</string>
+    <string name="wetrakr_credit">נתונים מ-WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">תכונות WeTrakr</string>
+    <string name="tracking_wetrakr_features_subtitle">הגדרות ייעודיות ל-WeTrakr</string>
+    <string name="wetrakr_continue_watching_subtitle">היסטוריית WeTrakr הנחשבת להמשך צפייה</string>
+    <string name="wetrakr_error_unavailable">לא ניתן להתחבר ל-WeTrakr. כדאי לנסות שוב בקרוב.</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr שלח תשובה שהאפליקציה לא הצליחה לקרוא.</string>
+    <string name="wetrakr_error_busy">WeTrakr עמוס, מנסים שוב בקרוב.</string>
+    <string name="wetrakr_error_suspended">WeTrakr חסם את הגישה לאפליקציה הזו.</string>
+    <string name="wetrakr_error_signin">יש להתחבר שוב ל-WeTrakr.</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr לא קיבל את המפתח של האפליקציה.</string>
+    <string name="wetrakr_error_code_expired">תוקף הקוד פג. כדאי לנסות שוב.</string>
+    <string name="wetrakr_error_denied">הגישה נדחתה ב-WeTrakr.</string>
+    <string name="wetrakr_error_too_many_codes">התבקשו יותר מדי קודים. כדאי לנסות שוב בעוד 15 דקות.</string>
+    <string name="wetrakr_disconnect_title">לנתק את WeTrakr?</string>
+    <string name="wetrakr_disconnect_subtitle">הפסקת שליחת עדכוני צפייה מהפרופיל הזה והסרת נתוני ה-WeTrakr שלו מהמכשיר. היסטוריית ה-WeTrakr נשמרת.</string>
+    <string name="wetrakr_cw_window_subtitle">בחירת היקף פעילות ה-WeTrakr שתופיע בהמשך צפייה.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr לא מחובר</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">יש לחבר את WeTrakr בהגדרות כדי לצפות ברשימות ב-WeTrakr</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">דומים ב-WeTrakr</string>
+    <string name="wetrakr_upload_title">שליחת ההיסטוריה שלי ל-WeTrakr</string>
+    <string name="wetrakr_upload_subtitle">העתקה חד-פעמית של הכותרים שנצפו ושל הספרייה בפרופיל הזה ל-WeTrakr. כותרים שכבר קיימים שם מדולגים.</string>
+    <string name="wetrakr_upload_counting">סופרים את ההיסטוריה…</string>
+    <string name="wetrakr_upload_nothing">אין מה לשלוח: כל מה שבפרופיל הזה כבר קיים ב-WeTrakr.</string>
+    <string name="wetrakr_upload_confirm">לשלוח ל-WeTrakr %1$s כותרים שנצפו ו-%2$s כותרים מהספרייה?</string>
+    <string name="wetrakr_upload_sending">שולחים ל-WeTrakr…</string>
+    <string name="wetrakr_upload_done">הסתיים: %1$s נוספו ל-WeTrakr, %2$s כבר היו שם או לא נמצאו.</string>
+    <string name="wetrakr_upload_send">שליחה</string>
+    <string name="wetrakr_upload_close">סגירה</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc משתמשת ב-WeTrakr עבור היסטוריית צפייה, רשימות, מעקב הפעלה וכותרים דומים. נתונים מ-WeTrakr. Nuvio Arc אינה קשורה או מאושרת על ידי WeTrakr.</string>
+    <string name="wetrakr_revoke_failed">יצאת מהחשבון כאן, אבל לא ניתן היה לעדכן את WeTrakr. אפשר להסיר את Nuvio Arc תחת אפליקציות מחוברות ב-wetrakr.com.</string>
+</resources>

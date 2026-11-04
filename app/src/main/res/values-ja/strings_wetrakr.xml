@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">視聴履歴、リスト、再生の進行状況をデバイス間で同期</string>
+    <string name="wetrakr_connected_as">%1$s としてログイン中</string>
+    <string name="wetrakr_account_fallback">WeTrakrアカウント</string>
+    <string name="wetrakr_qr_description">WeTrakrに接続するためのQRコード</string>
+    <string name="wetrakr_missing_client">このビルドではWeTrakrが設定されていません。</string>
+    <string name="wetrakr_status_syncing">WeTrakrと同期中…</string>
+    <string name="wetrakr_status_enter_code">WeTrakrでNuvio Arcが許可されるのを待っています</string>
+    <string name="wetrakr_status_paused">一時停止中</string>
+    <string name="wetrakr_daily_limit_row">本日のWeTrakrの上限に達しました。同期は%1$sに再開します。</string>
+    <string name="wetrakr_limit_message">本日のWeTrakrの上限に達しました。再生には影響しませんが、%1$sまで視聴はWeTrakrに送信されません。</string>
+    <string name="wetrakr_requests_used">%1$s / %2$s</string>
+    <string name="wetrakr_requests_used_label">本日使用したWeTrakrリクエスト</string>
+    <string name="wetrakr_last_synced_label">最終同期</string>
+    <string name="wetrakr_resumes_label">同期再開</string>
+    <string name="wetrakr_never_synced">未同期</string>
+    <string name="wetrakr_synced_summary">同期済み: 視聴済み%1$d件、視聴中%2$d件、見たい%3$d件</string>
+    <string name="wetrakr_visit">WeTrakrにアクセス</string>
+    <string name="wetrakr_credit">データ提供: WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">WeTrakr機能</string>
+    <string name="tracking_wetrakr_features_subtitle">WeTrakr専用の設定</string>
+    <string name="wetrakr_continue_watching_subtitle">「視聴を続ける」に使うWeTrakrの履歴</string>
+    <string name="wetrakr_error_unavailable">WeTrakrに接続できませんでした。しばらくしてから再試行してください。</string>
+    <string name="wetrakr_error_invalid_response">WeTrakrからアプリが読み取れない応答が返されました。</string>
+    <string name="wetrakr_error_busy">WeTrakrが混雑しています。まもなく再試行します。</string>
+    <string name="wetrakr_error_suspended">WeTrakrがこのアプリのアクセスを停止しました。</string>
+    <string name="wetrakr_error_signin">WeTrakrに再度サインインしてください。</string>
+    <string name="wetrakr_error_invalid_client">WeTrakrがこのアプリのキーを受け付けませんでした。</string>
+    <string name="wetrakr_error_code_expired">コードの有効期限が切れました。もう一度お試しください。</string>
+    <string name="wetrakr_error_denied">WeTrakrでアクセスが拒否されました。</string>
+    <string name="wetrakr_error_too_many_codes">コードのリクエストが多すぎます。15分後にもう一度お試しください。</string>
+    <string name="wetrakr_disconnect_title">WeTrakrの接続を解除しますか？</string>
+    <string name="wetrakr_disconnect_subtitle">このプロフィールからの視聴の更新送信を停止し、このデバイスからWeTrakrデータを削除します。WeTrakrの履歴は保持されます。</string>
+    <string name="wetrakr_cw_window_subtitle">「視聴を続ける」にどの期間のWeTrakr履歴を表示するか選択</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakrが接続されていません</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">設定でWeTrakrを接続してWeTrakrのリストを表示</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">WeTrakrの類似作品</string>
+    <string name="wetrakr_upload_title">履歴をWeTrakrに送信</string>
+    <string name="wetrakr_upload_subtitle">このプロフィールの視聴済みタイトルとライブラリをWeTrakrに一度だけコピーします。既にあるタイトルはスキップされます。</string>
+    <string name="wetrakr_upload_counting">履歴を集計中…</string>
+    <string name="wetrakr_upload_nothing">送信するものはありません: このプロフィールの内容はすべてWeTrakrにあります。</string>
+    <string name="wetrakr_upload_confirm">視聴済みタイトル%1$s件とライブラリのタイトル%2$s件をWeTrakrに送信しますか？</string>
+    <string name="wetrakr_upload_sending">WeTrakrに送信中…</string>
+    <string name="wetrakr_upload_done">完了: WeTrakrに%1$s件追加、%2$s件は登録済みか見つかりませんでした。</string>
+    <string name="wetrakr_upload_send">送信</string>
+    <string name="wetrakr_upload_close">閉じる</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arcは視聴履歴、リスト、再生の記録、類似作品にWeTrakrを使用します。データ提供: WeTrakr。Nuvio ArcはWeTrakrと提携または承認されていません。</string>
+    <string name="wetrakr_revoke_failed">ここではサインアウトしましたが、WeTrakrに通知できませんでした。wetrakr.comの連携済みアプリからNuvio Arcを削除できます。</string>
+</resources>

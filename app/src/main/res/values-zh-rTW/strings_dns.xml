@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">網路</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">由誰為應用程式查詢伺服器位址。如果網路業者封鎖或更改擴充套件、TMDB 或 Debrid 位址，請選擇一項服務。</string>
+    <string name="advanced_dns_system">系統</string>
+    <string name="advanced_dns_system_description">裝置自身的解析，通常來自網路業者。預設。</string>
+    <string name="advanced_dns_quad9_description">封鎖已知的有害網站。</string>
+    <string name="advanced_dns_adguard_description">封鎖廣告和追蹤器。</string>
+    <string name="advanced_dns_adguard_warning">可能導致使用廣告或追蹤位址的擴充套件無法運作。</string>
+    <string name="advanced_dns_custom">自訂位址</string>
+    <string name="advanced_dns_custom_description">您自己的 https 位址，例如來自 NextDNS。</string>
+    <string name="advanced_dns_custom_invalid">請輸入以 https:// 開頭的位址</string>
+    <string name="advanced_dns_custom_failed">此位址未以 DNS 服務回應。</string>
+    <string name="advanced_dns_note">用於擴充套件、圖片、Debrid、媒體伺服器、觀影派對、您的帳戶和 ExoPlayer。MPV 播放器、預告片和 Torrent 仍使用裝置自身的解析。</string>
+    <string name="advanced_dns_unreachable">無法連線至 %1$s，暫時使用裝置自身的解析。</string>
+    <string name="advanced_dns_test">測試 DNS</string>
+    <string name="advanced_dns_test_subtitle">使用所選 DNS 查詢 TMDB 和 Cinemeta。</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s：無回應</string>
+    <string name="advanced_dns_test_unreachable">無法連線</string>
+</resources>

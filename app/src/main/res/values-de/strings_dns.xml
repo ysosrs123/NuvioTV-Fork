@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Netzwerk</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Wer für die App Serveradressen auflöst. Wählen Sie einen Dienst, wenn Ihr Internetanbieter Addon-, TMDB- oder Debrid-Adressen sperrt oder ändert.</string>
+    <string name="advanced_dns_system">System</string>
+    <string name="advanced_dns_system_description">Die eigene Namensauflösung des Geräts, meist die Ihres Internetanbieters. Standard.</string>
+    <string name="advanced_dns_quad9_description">Blockiert bekannte schädliche Websites.</string>
+    <string name="advanced_dns_adguard_description">Blockiert Werbung und Tracker.</string>
+    <string name="advanced_dns_adguard_warning">Kann ein Addon stoppen, das eine Werbe- oder Tracking-Adresse nutzt.</string>
+    <string name="advanced_dns_custom">Eigene Adresse</string>
+    <string name="advanced_dns_custom_description">Ihre eigene https-Adresse, zum Beispiel von NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Geben Sie eine Adresse ein, die mit https:// beginnt</string>
+    <string name="advanced_dns_custom_failed">Diese Adresse hat nicht als DNS-Dienst geantwortet.</string>
+    <string name="advanced_dns_note">Gilt für Addons, Bilder, Debrid, Medienserver, Watch-Party, Ihr Konto und ExoPlayer. Der MPV-Player, Trailer und Torrents nutzen weiter die Namensauflösung des Geräts.</string>
+    <string name="advanced_dns_unreachable">%1$s ist nicht erreichbar, daher wird vorerst die Namensauflösung des Geräts genutzt.</string>
+    <string name="advanced_dns_test">DNS testen</string>
+    <string name="advanced_dns_test_subtitle">Löst TMDB und Cinemeta mit dem gewählten DNS auf.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: keine Antwort</string>
+    <string name="advanced_dns_test_unreachable">Nicht erreichbar</string>
+</resources>

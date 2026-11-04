@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Mreža</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Ko za aplikaciju pronalazi adrese servera. Izaberite uslugu ako vaš internet provajder blokira ili menja adrese dodataka, TMDB-a ili debrida.</string>
+    <string name="advanced_dns_system">Sistem</string>
+    <string name="advanced_dns_system_description">Sopstveno pretraživanje uređaja, obično ono vašeg internet provajdera. Podrazumevano.</string>
+    <string name="advanced_dns_quad9_description">Blokira poznate štetne sajtove.</string>
+    <string name="advanced_dns_adguard_description">Blokira reklame i praćenje.</string>
+    <string name="advanced_dns_adguard_warning">Može da zaustavi dodatak koji koristi adresu za reklame ili praćenje.</string>
+    <string name="advanced_dns_custom">Prilagođena adresa</string>
+    <string name="advanced_dns_custom_description">Vaša sopstvena https adresa, na primer od NextDNS-a.</string>
+    <string name="advanced_dns_custom_invalid">Unesite adresu koja počinje sa https://</string>
+    <string name="advanced_dns_custom_failed">Ta adresa nije odgovorila kao DNS usluga.</string>
+    <string name="advanced_dns_note">Koristi se za dodatke, slike, debrid, medijske servere, zajedničko gledanje, vaš nalog i ExoPlayer. MPV plejer, trejleri i torrenti i dalje koriste pretraživanje uređaja.</string>
+    <string name="advanced_dns_unreachable">%1$s nije dostupan, pa se za sada koristi pretraživanje uređaja.</string>
+    <string name="advanced_dns_test">Testiraj DNS</string>
+    <string name="advanced_dns_test_subtitle">Pronalazi TMDB i Cinemeta pomoću izabranog DNS-a.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: nema odgovora</string>
+    <string name="advanced_dns_test_unreachable">Nedostupno</string>
+</resources>

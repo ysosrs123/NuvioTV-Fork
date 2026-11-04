@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">İzleme geçmişini, listelerinizi ve oynatma ilerlemesini cihazlar arasında eşitler</string>
+    <string name="wetrakr_connected_as">%1$s olarak bağlı</string>
+    <string name="wetrakr_account_fallback">WeTrakr hesabınız</string>
+    <string name="wetrakr_qr_description">WeTrakr bağlantısı için QR kodu</string>
+    <string name="wetrakr_missing_client">WeTrakr bu sürümde ayarlanmamış.</string>
+    <string name="wetrakr_status_syncing">WeTrakr ile eşitleniyor…</string>
+    <string name="wetrakr_status_enter_code">Nuvio Arc için WeTrakr üzerinde izin vermeniz bekleniyor</string>
+    <string name="wetrakr_status_paused">Duraklatıldı</string>
+    <string name="wetrakr_daily_limit_row">Bugünkü WeTrakr sınırı doldu. Eşitleme saat %1$s itibarıyla yeniden başlar.</string>
+    <string name="wetrakr_limit_message">Bugünkü WeTrakr sınırı doldu. Oynatma etkilenmez, ancak izlemeler saat %1$s olana kadar WeTrakr hesabına gönderilmez.</string>
+    <string name="wetrakr_requests_used">%1$s / %2$s</string>
+    <string name="wetrakr_requests_used_label">Bugün kullanılan WeTrakr istekleri</string>
+    <string name="wetrakr_last_synced_label">Son eşitleme</string>
+    <string name="wetrakr_resumes_label">Eşitleme yeniden başlar</string>
+    <string name="wetrakr_never_synced">Henüz yok</string>
+    <string name="wetrakr_synced_summary">Eşitlendi: %1$d izlendi, %2$d devam ediyor, %3$d İzlenecekler listesinde</string>
+    <string name="wetrakr_visit">WeTrakr sitesini ziyaret et</string>
+    <string name="wetrakr_credit">Veri kaynağı: WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">WeTrakr özellikleri</string>
+    <string name="tracking_wetrakr_features_subtitle">WeTrakr ile ilgili ayarlar</string>
+    <string name="wetrakr_continue_watching_subtitle">İzlemeye devam etme için dikkate alınan WeTrakr geçmişi</string>
+    <string name="wetrakr_error_unavailable">WeTrakr hizmetine ulaşılamadı. Birazdan tekrar deneyin.</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr, uygulamanın okuyamadığı bir yanıt gönderdi.</string>
+    <string name="wetrakr_error_busy">WeTrakr meşgul, birazdan tekrar deneniyor.</string>
+    <string name="wetrakr_error_suspended">WeTrakr bu uygulamanın erişimini kapattı.</string>
+    <string name="wetrakr_error_signin">WeTrakr hesabına yeniden giriş yapın.</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr bu uygulamanın anahtarını kabul etmedi.</string>
+    <string name="wetrakr_error_code_expired">Kodun süresi doldu. Tekrar deneyin.</string>
+    <string name="wetrakr_error_denied">Erişim WeTrakr üzerinde reddedildi.</string>
+    <string name="wetrakr_error_too_many_codes">Çok fazla kod istendi. 15 dakika sonra tekrar deneyin.</string>
+    <string name="wetrakr_disconnect_title">WeTrakr bağlantısı kesilsin mi?</string>
+    <string name="wetrakr_disconnect_subtitle">Bu profilden izleme güncellemelerini göndermeyi durdurur ve profilin WeTrakr verilerini bu cihazdan kaldırır. WeTrakr geçmişiniz korunur.</string>
+    <string name="wetrakr_cw_window_subtitle">WeTrakr aktivitenizin ne kadarının İzlemeye devam et bölümünde görüneceğini seçin.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr bağlı değil</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">WeTrakr listelerinizi görmek için Ayarlar bölümünde WeTrakr bağlantısı kurun</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">WeTrakr üzerinde benzerleri</string>
+    <string name="wetrakr_upload_title">Geçmişimi WeTrakr hesabına gönder</string>
+    <string name="wetrakr_upload_subtitle">Bu profildeki izlenen başlıkları ve kütüphaneyi WeTrakr hesabına bir kez kopyalar. Zaten orada olan başlıklar atlanır.</string>
+    <string name="wetrakr_upload_counting">Geçmişiniz sayılıyor…</string>
+    <string name="wetrakr_upload_nothing">Gönderilecek bir şey yok: bu profildeki her şey WeTrakr hesabında zaten var.</string>
+    <string name="wetrakr_upload_confirm">%1$s izlenen başlık ve %2$s kütüphane başlığı WeTrakr hesabına gönderilsin mi?</string>
+    <string name="wetrakr_upload_sending">WeTrakr hesabına gönderiliyor…</string>
+    <string name="wetrakr_upload_done">Bitti: WeTrakr hesabına %1$s eklendi, %2$s zaten vardı veya bulunamadı.</string>
+    <string name="wetrakr_upload_send">Gönder</string>
+    <string name="wetrakr_upload_close">Kapat</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc; izleme geçmişi, listeler, oynatma takibi ve benzer başlıklar için WeTrakr kullanır. Veri kaynağı: WeTrakr. Nuvio Arc, WeTrakr ile bağlantılı veya onaylanmış değildir.</string>
+    <string name="wetrakr_revoke_failed">Burada oturum kapatıldı, ancak WeTrakr bilgilendirilemedi. Nuvio Arc uygulamasını wetrakr.com üzerinde bağlı uygulamalar bölümünden kaldırabilirsiniz.</string>
+</resources>

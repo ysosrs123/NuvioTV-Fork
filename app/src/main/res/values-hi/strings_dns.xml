@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">नेटवर्क</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">ऐप के लिए सर्वर पते कौन ढूँढता है। अगर आपका इंटरनेट प्रोवाइडर ऐडऑन, TMDB या debrid के पते ब्लॉक करता है या बदलता है, तो कोई सर्विस चुनें।</string>
+    <string name="advanced_dns_system">सिस्टम</string>
+    <string name="advanced_dns_system_description">डिवाइस का अपना लुकअप, आमतौर पर आपके इंटरनेट प्रोवाइडर का। डिफ़ॉल्ट।</string>
+    <string name="advanced_dns_quad9_description">जानी-मानी हानिकारक साइटें ब्लॉक करता है।</string>
+    <string name="advanced_dns_adguard_description">विज्ञापन और ट्रैकर ब्लॉक करता है।</string>
+    <string name="advanced_dns_adguard_warning">विज्ञापन या ट्रैकिंग पता इस्तेमाल करने वाले ऐडऑन को रोक सकता है।</string>
+    <string name="advanced_dns_custom">कस्टम पता</string>
+    <string name="advanced_dns_custom_description">आपका अपना https पता, जैसे NextDNS से।</string>
+    <string name="advanced_dns_custom_invalid">https:// से शुरू होने वाला पता डालें</string>
+    <string name="advanced_dns_custom_failed">उस पते ने DNS सर्विस की तरह जवाब नहीं दिया।</string>
+    <string name="advanced_dns_note">ऐडऑन, इमेज, debrid, मीडिया सर्वर, वॉच पार्टी, आपके अकाउंट और ExoPlayer के लिए इस्तेमाल होता है। MPV प्लेयर, ट्रेलर और टोरेंट अब भी डिवाइस का अपना लुकअप इस्तेमाल करते हैं।</string>
+    <string name="advanced_dns_unreachable">%1$s तक नहीं पहुँचा जा सका, इसलिए अभी डिवाइस का अपना लुकअप इस्तेमाल हो रहा है।</string>
+    <string name="advanced_dns_test">DNS टेस्ट करें</string>
+    <string name="advanced_dns_test_subtitle">चुने गए DNS से TMDB और Cinemeta ढूँढता है।</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: कोई जवाब नहीं</string>
+    <string name="advanced_dns_test_unreachable">पहुँच से बाहर</string>
+</resources>

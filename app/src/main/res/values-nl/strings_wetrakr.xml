@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">Synchroniseer kijkgeschiedenis, je lijsten en afspeelvoortgang tussen apparaten</string>
+    <string name="wetrakr_connected_as">Verbonden als %1$s</string>
+    <string name="wetrakr_account_fallback">je WeTrakr-account</string>
+    <string name="wetrakr_qr_description">QR-code om WeTrakr te verbinden</string>
+    <string name="wetrakr_missing_client">WeTrakr is in deze build niet ingesteld.</string>
+    <string name="wetrakr_status_syncing">Synchroniseren met WeTrakr…</string>
+    <string name="wetrakr_status_enter_code">Wachten tot je Nuvio Arc toestaat op WeTrakr</string>
+    <string name="wetrakr_status_paused">Gepauzeerd</string>
+    <string name="wetrakr_daily_limit_row">De WeTrakr-limiet van vandaag is op. Synchroniseren wordt om %1$s hervat.</string>
+    <string name="wetrakr_limit_message">De WeTrakr-limiet van vandaag is op. Afspelen werkt gewoon, maar er wordt tot %1$s niets naar WeTrakr gestuurd.</string>
+    <string name="wetrakr_requests_used">%1$s van %2$s</string>
+    <string name="wetrakr_requests_used_label">WeTrakr-verzoeken vandaag gebruikt</string>
+    <string name="wetrakr_last_synced_label">Laatst gesynchroniseerd</string>
+    <string name="wetrakr_resumes_label">Synchroniseren gaat verder</string>
+    <string name="wetrakr_never_synced">Nog niet</string>
+    <string name="wetrakr_synced_summary">Gesynchroniseerd: %1$d bekeken, %2$d bezig, %3$d op Van plan te kijken</string>
+    <string name="wetrakr_visit">WeTrakr bezoeken</string>
+    <string name="wetrakr_credit">Gegevens van WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">WeTrakr-functies</string>
+    <string name="tracking_wetrakr_features_subtitle">WeTrakr-specifieke instellingen</string>
+    <string name="wetrakr_continue_watching_subtitle">WeTrakr-geschiedenis die wordt meegenomen voor Verder kijken</string>
+    <string name="wetrakr_error_unavailable">WeTrakr is niet bereikbaar. Probeer het zo opnieuw.</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr stuurde een antwoord dat de app niet kan lezen.</string>
+    <string name="wetrakr_error_busy">WeTrakr is druk, nieuwe poging zo meteen.</string>
+    <string name="wetrakr_error_suspended">WeTrakr heeft de toegang voor deze app uitgeschakeld.</string>
+    <string name="wetrakr_error_signin">Log opnieuw in bij WeTrakr.</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr heeft de sleutel van deze app niet geaccepteerd.</string>
+    <string name="wetrakr_error_code_expired">De code is verlopen. Probeer het opnieuw.</string>
+    <string name="wetrakr_error_denied">Toegang is geweigerd op WeTrakr.</string>
+    <string name="wetrakr_error_too_many_codes">Te veel codes aangevraagd. Probeer het over 15 minuten opnieuw.</string>
+    <string name="wetrakr_disconnect_title">Verbinding met WeTrakr verbreken?</string>
+    <string name="wetrakr_disconnect_subtitle">Stop met het versturen van kijkupdates vanaf dit profiel en verwijder de WeTrakr-gegevens ervan van dit apparaat. Je WeTrakr-geschiedenis blijft bewaard.</string>
+    <string name="wetrakr_cw_window_subtitle">Kies hoeveel WeTrakr-activiteit wordt weergegeven bij Verder kijken.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr niet verbonden</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">Verbind WeTrakr in de instellingen om je WeTrakr-lijsten te bekijken</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">Vergelijkbaar op WeTrakr</string>
+    <string name="wetrakr_upload_title">Mijn geschiedenis naar WeTrakr sturen</string>
+    <string name="wetrakr_upload_subtitle">Kopieert je bekeken titels en de bibliotheek van dit profiel eenmalig naar WeTrakr. Titels die er al staan worden overgeslagen.</string>
+    <string name="wetrakr_upload_counting">Je geschiedenis wordt geteld…</string>
+    <string name="wetrakr_upload_nothing">Niets te versturen: WeTrakr heeft al alles van dit profiel.</string>
+    <string name="wetrakr_upload_confirm">%1$s bekeken titels en %2$s bibliotheektitels naar WeTrakr sturen?</string>
+    <string name="wetrakr_upload_sending">Versturen naar WeTrakr…</string>
+    <string name="wetrakr_upload_done">Klaar: %1$s toegevoegd op WeTrakr, %2$s stonden er al of zijn niet gevonden.</string>
+    <string name="wetrakr_upload_send">Versturen</string>
+    <string name="wetrakr_upload_close">Sluiten</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc gebruikt WeTrakr voor kijkgeschiedenis, lijsten, het bijhouden van afspelen en vergelijkbare titels. Gegevens van WeTrakr. Nuvio Arc is niet verbonden aan of onderschreven door WeTrakr.</string>
+    <string name="wetrakr_revoke_failed">Hier afgemeld, maar WeTrakr kon niet worden ingelicht. Je kunt Nuvio Arc verwijderen onder gekoppelde apps op wetrakr.com.</string>
+</resources>

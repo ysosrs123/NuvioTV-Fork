@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Сеть</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Кто находит адреса серверов для приложения. Выберите сервис, если интернет-провайдер блокирует или подменяет адреса аддонов, TMDB или Debrid.</string>
+    <string name="advanced_dns_system">Системный</string>
+    <string name="advanced_dns_system_description">Собственный DNS устройства, обычно от интернет-провайдера. По умолчанию.</string>
+    <string name="advanced_dns_quad9_description">Блокирует известные вредоносные сайты.</string>
+    <string name="advanced_dns_adguard_description">Блокирует рекламу и трекеры.</string>
+    <string name="advanced_dns_adguard_warning">Может помешать аддону, который использует рекламный или отслеживающий адрес.</string>
+    <string name="advanced_dns_custom">Свой адрес</string>
+    <string name="advanced_dns_custom_description">Ваш собственный адрес https, например от NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Введите адрес, начинающийся с https://</string>
+    <string name="advanced_dns_custom_failed">Этот адрес не ответил как DNS-сервис.</string>
+    <string name="advanced_dns_note">Используется для аддонов, изображений, Debrid, медиасерверов, совместного просмотра, вашего аккаунта и ExoPlayer. Плеер MPV, трейлеры и торренты по-прежнему используют DNS устройства.</string>
+    <string name="advanced_dns_unreachable">%1$s недоступен, поэтому пока используется DNS устройства.</string>
+    <string name="advanced_dns_test">Проверить DNS</string>
+    <string name="advanced_dns_test_subtitle">Находит TMDB и Cinemeta через выбранный DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: нет ответа</string>
+    <string name="advanced_dns_test_unreachable">Недоступен</string>
+</resources>

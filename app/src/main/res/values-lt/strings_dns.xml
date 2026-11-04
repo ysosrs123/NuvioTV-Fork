@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Tinklas</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Kas programai ieško serverių adresų. Pasirinkite paslaugą, jei jūsų interneto tiekėjas blokuoja arba keičia priedų, TMDB ar debrid adresus.</string>
+    <string name="advanced_dns_system">Sistema</string>
+    <string name="advanced_dns_system_description">Paties įrenginio paieška, dažniausiai jūsų interneto tiekėjo. Numatytoji.</string>
+    <string name="advanced_dns_quad9_description">Blokuoja žinomas kenksmingas svetaines.</string>
+    <string name="advanced_dns_adguard_description">Blokuoja reklamas ir sekiklius.</string>
+    <string name="advanced_dns_adguard_warning">Gali sustabdyti priedą, kuris naudoja reklamos ar sekimo adresą.</string>
+    <string name="advanced_dns_custom">Pasirinktinis adresas</string>
+    <string name="advanced_dns_custom_description">Jūsų nuosavas https adresas, pavyzdžiui, iš NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Įveskite adresą, prasidedantį https://</string>
+    <string name="advanced_dns_custom_failed">Šis adresas neatsakė kaip DNS paslauga.</string>
+    <string name="advanced_dns_note">Naudojama priedams, vaizdams, debrid, medijos serveriams, bendram žiūrėjimui, jūsų paskyrai ir ExoPlayer. MPV grotuvas, anonsai ir torrentai vis dar naudoja įrenginio paiešką.</string>
+    <string name="advanced_dns_unreachable">Nepavyko pasiekti %1$s, todėl kol kas naudojama įrenginio paieška.</string>
+    <string name="advanced_dns_test">Testuoti DNS</string>
+    <string name="advanced_dns_test_subtitle">Ieško TMDB ir Cinemeta per pasirinktą DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: nėra atsakymo</string>
+    <string name="advanced_dns_test_unreachable">Nepasiekiama</string>
+</resources>

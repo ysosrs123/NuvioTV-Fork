@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Δίκτυο</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Ποιος βρίσκει τις διευθύνσεις διακομιστών για την εφαρμογή. Επιλέξτε υπηρεσία αν ο πάροχος internet μπλοκάρει ή αλλάζει διευθύνσεις πρόσθετων, TMDB ή debrid.</string>
+    <string name="advanced_dns_system">Σύστημα</string>
+    <string name="advanced_dns_system_description">Η αναζήτηση της ίδιας της συσκευής, συνήθως του παρόχου internet σας. Προεπιλογή.</string>
+    <string name="advanced_dns_quad9_description">Μπλοκάρει γνωστούς επιβλαβείς ιστότοπους.</string>
+    <string name="advanced_dns_adguard_description">Μπλοκάρει διαφημίσεις και ιχνηλάτες.</string>
+    <string name="advanced_dns_adguard_warning">Μπορεί να σταματήσει ένα πρόσθετο που χρησιμοποιεί διεύθυνση διαφημίσεων ή παρακολούθησης.</string>
+    <string name="advanced_dns_custom">Προσαρμοσμένη διεύθυνση</string>
+    <string name="advanced_dns_custom_description">Η δική σας διεύθυνση https, για παράδειγμα από το NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Εισάγετε διεύθυνση που ξεκινά με https://</string>
+    <string name="advanced_dns_custom_failed">Αυτή η διεύθυνση δεν απάντησε ως υπηρεσία DNS.</string>
+    <string name="advanced_dns_note">Χρησιμοποιείται για πρόσθετα, εικόνες, debrid, διακομιστές πολυμέσων, πάρτι προβολής, τον λογαριασμό σας και το ExoPlayer. Το MPV, τα τρέιλερ και τα torrent χρησιμοποιούν ακόμα την αναζήτηση της συσκευής.</string>
+    <string name="advanced_dns_unreachable">Το %1$s δεν είναι προσβάσιμο, οπότε προς το παρόν χρησιμοποιείται η αναζήτηση της συσκευής.</string>
+    <string name="advanced_dns_test">Δοκιμή DNS</string>
+    <string name="advanced_dns_test_subtitle">Αναζητά TMDB και Cinemeta με το επιλεγμένο DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: καμία απάντηση</string>
+    <string name="advanced_dns_test_unreachable">Μη προσβάσιμο</string>
+</resources>

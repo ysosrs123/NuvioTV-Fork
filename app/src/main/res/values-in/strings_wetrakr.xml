@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">Sinkronkan riwayat tontonan, daftar Anda, dan progres pemutaran di semua perangkat</string>
+    <string name="wetrakr_connected_as">Terhubung sebagai %1$s</string>
+    <string name="wetrakr_account_fallback">akun WeTrakr Anda</string>
+    <string name="wetrakr_qr_description">Kode QR untuk menghubungkan WeTrakr</string>
+    <string name="wetrakr_missing_client">WeTrakr belum diatur di build ini.</string>
+    <string name="wetrakr_status_syncing">Menyinkronkan dengan WeTrakr…</string>
+    <string name="wetrakr_status_enter_code">Menunggu Anda mengizinkan Nuvio Arc di WeTrakr</string>
+    <string name="wetrakr_status_paused">Dijeda</string>
+    <string name="wetrakr_daily_limit_row">Batas WeTrakr hari ini sudah habis. Sinkronisasi berlanjut pada %1$s.</string>
+    <string name="wetrakr_limit_message">Batas WeTrakr hari ini sudah habis. Pemutaran tidak terpengaruh, tetapi tontonan tidak dikirim ke WeTrakr hingga %1$s.</string>
+    <string name="wetrakr_requests_used">%1$s dari %2$s</string>
+    <string name="wetrakr_requests_used_label">Permintaan WeTrakr terpakai hari ini</string>
+    <string name="wetrakr_last_synced_label">Terakhir disinkronkan</string>
+    <string name="wetrakr_resumes_label">Sinkronisasi berlanjut</string>
+    <string name="wetrakr_never_synced">Belum</string>
+    <string name="wetrakr_synced_summary">Tersinkron: %1$d ditonton, %2$d sedang ditonton, %3$d di Rencana Ditonton</string>
+    <string name="wetrakr_visit">Kunjungi WeTrakr</string>
+    <string name="wetrakr_credit">Data dari WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">Fitur WeTrakr</string>
+    <string name="tracking_wetrakr_features_subtitle">Pengaturan khusus WeTrakr</string>
+    <string name="wetrakr_continue_watching_subtitle">Riwayat WeTrakr yang dipertimbangkan untuk lanjutkan menonton</string>
+    <string name="wetrakr_error_unavailable">Tidak dapat menjangkau WeTrakr. Coba lagi sebentar lagi.</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr mengirim jawaban yang tidak dapat dibaca aplikasi.</string>
+    <string name="wetrakr_error_busy">WeTrakr sedang sibuk, mencoba lagi sebentar lagi.</string>
+    <string name="wetrakr_error_suspended">WeTrakr telah menonaktifkan akses untuk aplikasi ini.</string>
+    <string name="wetrakr_error_signin">Masuk lagi ke WeTrakr.</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr tidak menerima kunci aplikasi ini.</string>
+    <string name="wetrakr_error_code_expired">Kode sudah kedaluwarsa. Coba lagi.</string>
+    <string name="wetrakr_error_denied">Akses ditolak di WeTrakr.</string>
+    <string name="wetrakr_error_too_many_codes">Terlalu banyak kode diminta. Coba lagi dalam 15 menit.</string>
+    <string name="wetrakr_disconnect_title">Putuskan koneksi WeTrakr?</string>
+    <string name="wetrakr_disconnect_subtitle">Berhenti mengirim pembaruan tontonan dari profil ini dan hapus data WeTrakr-nya dari perangkat ini. Riwayat WeTrakr Anda tetap tersimpan.</string>
+    <string name="wetrakr_cw_window_subtitle">Pilih seberapa banyak aktivitas WeTrakr yang harus muncul di lanjutkan menonton.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr belum terhubung</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">Hubungkan WeTrakr di Pengaturan untuk melihat daftar WeTrakr Anda</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">Serupa di WeTrakr</string>
+    <string name="wetrakr_upload_title">Kirim riwayat saya ke WeTrakr</string>
+    <string name="wetrakr_upload_subtitle">Menyalin judul yang sudah ditonton dan pustaka di profil ini ke WeTrakr sekali. Judul yang sudah ada di sana dilewati.</string>
+    <string name="wetrakr_upload_counting">Menghitung riwayat Anda…</string>
+    <string name="wetrakr_upload_nothing">Tidak ada yang perlu dikirim: WeTrakr sudah memiliki semua isi profil ini.</string>
+    <string name="wetrakr_upload_confirm">Kirim %1$s judul yang ditonton dan %2$s judul pustaka ke WeTrakr?</string>
+    <string name="wetrakr_upload_sending">Mengirim ke WeTrakr…</string>
+    <string name="wetrakr_upload_done">Selesai: %1$s ditambahkan di WeTrakr, %2$s sudah ada atau tidak ditemukan.</string>
+    <string name="wetrakr_upload_send">Kirim</string>
+    <string name="wetrakr_upload_close">Tutup</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc menggunakan WeTrakr untuk riwayat tontonan, daftar, pelacakan pemutaran, dan judul serupa. Data dari WeTrakr. Nuvio Arc tidak berafiliasi dengan atau didukung oleh WeTrakr.</string>
+    <string name="wetrakr_revoke_failed">Sudah keluar di sini, tetapi WeTrakr tidak dapat diberi tahu. Anda dapat menghapus Nuvio Arc di bagian aplikasi terhubung di wetrakr.com.</string>
+</resources>

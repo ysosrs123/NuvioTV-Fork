@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">Sincronizează istoricul, listele tale și progresul redării pe toate dispozitivele</string>
+    <string name="wetrakr_connected_as">Conectat ca %1$s</string>
+    <string name="wetrakr_account_fallback">contul tău WeTrakr</string>
+    <string name="wetrakr_qr_description">Cod QR pentru conectarea WeTrakr</string>
+    <string name="wetrakr_missing_client">WeTrakr nu este configurat în această versiune.</string>
+    <string name="wetrakr_status_syncing">Se sincronizează cu WeTrakr…</string>
+    <string name="wetrakr_status_enter_code">Se așteaptă să permiți Nuvio Arc pe WeTrakr</string>
+    <string name="wetrakr_status_paused">În pauză</string>
+    <string name="wetrakr_daily_limit_row">Limita WeTrakr de azi s-a epuizat. Sincronizarea se reia la %1$s.</string>
+    <string name="wetrakr_limit_message">Limita WeTrakr de azi s-a epuizat. Redarea nu este afectată, dar nimic nu este trimis către WeTrakr până la %1$s.</string>
+    <string name="wetrakr_requests_used">%1$s din %2$s</string>
+    <string name="wetrakr_requests_used_label">Cereri WeTrakr folosite azi</string>
+    <string name="wetrakr_last_synced_label">Ultima sincronizare</string>
+    <string name="wetrakr_resumes_label">Sincronizarea se reia</string>
+    <string name="wetrakr_never_synced">Încă nu</string>
+    <string name="wetrakr_synced_summary">Sincronizat: %1$d vizionate, %2$d în curs, %3$d în De văzut</string>
+    <string name="wetrakr_visit">Vizitează WeTrakr</string>
+    <string name="wetrakr_credit">Date de la WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">Funcții WeTrakr</string>
+    <string name="tracking_wetrakr_features_subtitle">Setări specifice WeTrakr</string>
+    <string name="wetrakr_continue_watching_subtitle">Istoricul WeTrakr este luat în considerare pentru continuarea vizionării</string>
+    <string name="wetrakr_error_unavailable">WeTrakr nu a putut fi contactat. Încearcă din nou în curând.</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr a trimis un răspuns pe care aplicația nu îl poate citi.</string>
+    <string name="wetrakr_error_busy">WeTrakr este ocupat, se reîncearcă în curând.</string>
+    <string name="wetrakr_error_suspended">WeTrakr a dezactivat accesul pentru această aplicație.</string>
+    <string name="wetrakr_error_signin">Conectează-te din nou la WeTrakr.</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr nu a acceptat cheia acestei aplicații.</string>
+    <string name="wetrakr_error_code_expired">Codul a expirat. Încearcă din nou.</string>
+    <string name="wetrakr_error_denied">Accesul a fost refuzat pe WeTrakr.</string>
+    <string name="wetrakr_error_too_many_codes">Au fost cerute prea multe coduri. Încearcă din nou peste 15 minute.</string>
+    <string name="wetrakr_disconnect_title">Deconectare WeTrakr?</string>
+    <string name="wetrakr_disconnect_subtitle">Nu mai trimite actualizări de vizionare din acest profil și șterge datele sale WeTrakr de pe acest dispozitiv. Istoricul tău WeTrakr se păstrează.</string>
+    <string name="wetrakr_cw_window_subtitle">Alege câtă activitate WeTrakr ar trebui să apară în continuarea vizionării.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr nu este conectat</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">Conectează WeTrakr în Setări pentru a vedea listele tale WeTrakr</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">Similare pe WeTrakr</string>
+    <string name="wetrakr_upload_title">Trimite istoricul meu către WeTrakr</string>
+    <string name="wetrakr_upload_subtitle">Copiază o singură dată titlurile vizionate și biblioteca acestui profil pe WeTrakr. Titlurile pe care le are deja sunt omise.</string>
+    <string name="wetrakr_upload_counting">Se numără istoricul…</string>
+    <string name="wetrakr_upload_nothing">Nimic de trimis: WeTrakr are deja tot din acest profil.</string>
+    <string name="wetrakr_upload_confirm">Trimiți %1$s titluri vizionate și %2$s titluri din bibliotecă către WeTrakr?</string>
+    <string name="wetrakr_upload_sending">Se trimite către WeTrakr…</string>
+    <string name="wetrakr_upload_done">Gata: %1$s adăugate pe WeTrakr, %2$s existau deja sau nu au fost găsite.</string>
+    <string name="wetrakr_upload_send">Trimite</string>
+    <string name="wetrakr_upload_close">Închide</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc folosește WeTrakr pentru istoricul vizionărilor, liste, urmărirea redării și titluri similare. Date de la WeTrakr. Nuvio Arc nu este afiliat cu WeTrakr și nici aprobat de acesta.</string>
+    <string name="wetrakr_revoke_failed">Deconectat aici, dar WeTrakr nu a putut fi anunțat. Poți elimina Nuvio Arc din aplicațiile conectate pe wetrakr.com.</string>
+</resources>

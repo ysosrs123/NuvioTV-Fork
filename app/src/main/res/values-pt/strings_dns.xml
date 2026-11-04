@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Rede</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Quem resolve os endereços dos servidores para a app. Escolhe um serviço se o teu fornecedor de internet bloquear ou alterar endereços de addons, TMDB ou debrid.</string>
+    <string name="advanced_dns_system">Sistema</string>
+    <string name="advanced_dns_system_description">A resolução do próprio dispositivo, normalmente a do teu fornecedor de internet. Predefinição.</string>
+    <string name="advanced_dns_quad9_description">Bloqueia sites nocivos conhecidos.</string>
+    <string name="advanced_dns_adguard_description">Bloqueia anúncios e rastreadores.</string>
+    <string name="advanced_dns_adguard_warning">Pode parar um addon que use um endereço de anúncios ou rastreio.</string>
+    <string name="advanced_dns_custom">Endereço personalizado</string>
+    <string name="advanced_dns_custom_description">O teu próprio endereço https, por exemplo do NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Introduz um endereço que comece por https://</string>
+    <string name="advanced_dns_custom_failed">Esse endereço não respondeu como serviço DNS.</string>
+    <string name="advanced_dns_note">Usado para addons, imagens, debrid, servidores multimédia, sessão em grupo, a tua conta e o ExoPlayer. O leitor MPV, os trailers e os torrents continuam a usar a resolução do próprio dispositivo.</string>
+    <string name="advanced_dns_unreachable">Não foi possível contactar %1$s, por isso, por agora, é usada a resolução do próprio dispositivo.</string>
+    <string name="advanced_dns_test">Testar DNS</string>
+    <string name="advanced_dns_test_subtitle">Resolve TMDB e Cinemeta com o DNS escolhido.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: sem resposta</string>
+    <string name="advanced_dns_test_unreachable">Inacessível</string>
+</resources>

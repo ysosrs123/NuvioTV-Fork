@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Jaringan</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Siapa yang mencari alamat server untuk aplikasi. Pilih layanan jika penyedia internet Anda memblokir atau mengubah alamat addon, TMDB, atau debrid.</string>
+    <string name="advanced_dns_system">Sistem</string>
+    <string name="advanced_dns_system_description">Pencarian milik perangkat sendiri, biasanya dari penyedia internet Anda. Bawaan.</string>
+    <string name="advanced_dns_quad9_description">Memblokir situs berbahaya yang dikenal.</string>
+    <string name="advanced_dns_adguard_description">Memblokir iklan dan pelacak.</string>
+    <string name="advanced_dns_adguard_warning">Dapat menghentikan addon yang memakai alamat iklan atau pelacak.</string>
+    <string name="advanced_dns_custom">Alamat kustom</string>
+    <string name="advanced_dns_custom_description">Alamat https Anda sendiri, misalnya dari NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Masukkan alamat yang diawali https://</string>
+    <string name="advanced_dns_custom_failed">Alamat itu tidak menjawab sebagai layanan DNS.</string>
+    <string name="advanced_dns_note">Dipakai untuk addon, gambar, debrid, server media, nonton bareng, akun Anda, dan ExoPlayer. Pemutar MPV, trailer, dan torrent tetap memakai pencarian perangkat.</string>
+    <string name="advanced_dns_unreachable">%1$s tidak dapat dijangkau, jadi untuk sementara dipakai pencarian perangkat.</string>
+    <string name="advanced_dns_test">Uji DNS</string>
+    <string name="advanced_dns_test_subtitle">Mencari TMDB dan Cinemeta dengan DNS yang dipilih.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: tidak ada jawaban</string>
+    <string name="advanced_dns_test_unreachable">Tidak terjangkau</string>
+</resources>

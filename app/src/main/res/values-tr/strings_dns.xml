@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Ağ</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Uygulama için sunucu adreslerini kimin çözümlediği. İnternet sağlayıcınız eklenti, TMDB veya Debrid adreslerini engelliyor ya da değiştiriyorsa bir hizmet seçin.</string>
+    <string name="advanced_dns_system">Sistem</string>
+    <string name="advanced_dns_system_description">Cihazın kendi çözümlemesi, genellikle internet sağlayıcınızınki. Varsayılan.</string>
+    <string name="advanced_dns_quad9_description">Bilinen zararlı siteleri engeller.</string>
+    <string name="advanced_dns_adguard_description">Reklamları ve izleyicileri engeller.</string>
+    <string name="advanced_dns_adguard_warning">Reklam veya izleme adresi kullanan bir eklentiyi durdurabilir.</string>
+    <string name="advanced_dns_custom">Özel adres</string>
+    <string name="advanced_dns_custom_description">Kendi https adresiniz, örneğin NextDNS hizmetinden.</string>
+    <string name="advanced_dns_custom_invalid">https:// ile başlayan bir adres girin</string>
+    <string name="advanced_dns_custom_failed">Bu adres bir DNS hizmeti olarak yanıt vermedi.</string>
+    <string name="advanced_dns_note">Eklentiler, görseller, Debrid, medya sunucuları, izleme partisi, hesabınız ve ExoPlayer için kullanılır. MPV oynatıcı, fragmanlar ve torrentler hâlâ cihazın kendi çözümlemesini kullanır.</string>
+    <string name="advanced_dns_unreachable">%1$s ile bağlantı kurulamadı, bu yüzden şimdilik cihazın kendi çözümlemesi kullanılıyor.</string>
+    <string name="advanced_dns_test">DNS testi</string>
+    <string name="advanced_dns_test_subtitle">Seçilen DNS ile TMDB ve Cinemeta adreslerini çözümler.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: yanıt yok</string>
+    <string name="advanced_dns_test_unreachable">Ulaşılamıyor</string>
+</resources>

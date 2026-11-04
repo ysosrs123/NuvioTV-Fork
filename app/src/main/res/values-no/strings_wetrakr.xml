@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">Synkroniser seerhistorikk, listene dine og avspillingsfremdrift på tvers av enheter</string>
+    <string name="wetrakr_connected_as">Tilkoblet som %1$s</string>
+    <string name="wetrakr_account_fallback">WeTrakr-kontoen din</string>
+    <string name="wetrakr_qr_description">QR-kode for å koble til WeTrakr</string>
+    <string name="wetrakr_missing_client">WeTrakr er ikke satt opp i denne versjonen.</string>
+    <string name="wetrakr_status_syncing">Synkroniserer med WeTrakr…</string>
+    <string name="wetrakr_status_enter_code">Venter på at du tillater Nuvio Arc på WeTrakr</string>
+    <string name="wetrakr_status_paused">Satt på pause</string>
+    <string name="wetrakr_daily_limit_row">Dagens WeTrakr-grense er brukt opp. Synkroniseringen fortsetter kl. %1$s.</string>
+    <string name="wetrakr_limit_message">Dagens WeTrakr-grense er brukt opp. Avspilling påvirkes ikke, men ingenting sendes til WeTrakr før kl. %1$s.</string>
+    <string name="wetrakr_requests_used">%1$s av %2$s</string>
+    <string name="wetrakr_requests_used_label">WeTrakr-forespørsler brukt i dag</string>
+    <string name="wetrakr_last_synced_label">Sist synkronisert</string>
+    <string name="wetrakr_resumes_label">Synkronisering fortsetter</string>
+    <string name="wetrakr_never_synced">Ikke ennå</string>
+    <string name="wetrakr_synced_summary">Synkronisert: %1$d sett, %2$d påbegynt, %3$d på Skal se</string>
+    <string name="wetrakr_visit">Besøk WeTrakr</string>
+    <string name="wetrakr_credit">Data fra WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">WeTrakr-funksjoner</string>
+    <string name="tracking_wetrakr_features_subtitle">WeTrakr-spesifikke innstillinger</string>
+    <string name="wetrakr_continue_watching_subtitle">WeTrakr-historikk vurdert for fortsett å se</string>
+    <string name="wetrakr_error_unavailable">Fikk ikke kontakt med WeTrakr. Prøv igjen snart.</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr sendte et svar appen ikke kunne lese.</string>
+    <string name="wetrakr_error_busy">WeTrakr er opptatt, prøver igjen snart.</string>
+    <string name="wetrakr_error_suspended">WeTrakr har slått av tilgangen for denne appen.</string>
+    <string name="wetrakr_error_signin">Logg på WeTrakr igjen.</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr godtok ikke nøkkelen til denne appen.</string>
+    <string name="wetrakr_error_code_expired">Koden er utløpt. Prøv igjen.</string>
+    <string name="wetrakr_error_denied">Tilgang ble avvist på WeTrakr.</string>
+    <string name="wetrakr_error_too_many_codes">Det er bedt om for mange koder. Prøv igjen om 15 minutter.</string>
+    <string name="wetrakr_disconnect_title">Koble fra WeTrakr?</string>
+    <string name="wetrakr_disconnect_subtitle">Slutt å sende seeroppdateringer fra denne profilen og fjern WeTrakr-dataene dens fra denne enheten. WeTrakr-historikken din beholdes.</string>
+    <string name="wetrakr_cw_window_subtitle">Velg hvor mye WeTrakr-aktivitet som skal vises i fortsett å se.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr er ikke tilkoblet</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">Koble til WeTrakr i Innstillinger for å se WeTrakr-listene dine</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">Lignende på WeTrakr</string>
+    <string name="wetrakr_upload_title">Send historikken min til WeTrakr</string>
+    <string name="wetrakr_upload_subtitle">Kopierer én gang de sette titlene og biblioteket på denne profilen til WeTrakr. Titler som allerede finnes, hoppes over.</string>
+    <string name="wetrakr_upload_counting">Teller historikken din…</string>
+    <string name="wetrakr_upload_nothing">Ingenting å sende: WeTrakr har allerede alt fra denne profilen.</string>
+    <string name="wetrakr_upload_confirm">Sende %1$s sette titler og %2$s bibliotektitler til WeTrakr?</string>
+    <string name="wetrakr_upload_sending">Sender til WeTrakr…</string>
+    <string name="wetrakr_upload_done">Ferdig: %1$s lagt til på WeTrakr, %2$s fantes allerede eller ble ikke funnet.</string>
+    <string name="wetrakr_upload_send">Send</string>
+    <string name="wetrakr_upload_close">Lukk</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc bruker WeTrakr til seerhistorikk, lister, sporing av avspilling og lignende titler. Data fra WeTrakr. Nuvio Arc er ikke tilknyttet eller godkjent av WeTrakr.</string>
+    <string name="wetrakr_revoke_failed">Logget ut her, men WeTrakr kunne ikke varsles. Du kan fjerne Nuvio Arc under tilkoblede apper på wetrakr.com.</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">רשת</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">מי מאתר את כתובות השרתים עבור האפליקציה. כדאי לבחור שירות אם ספק האינטרנט חוסם או משנה כתובות של תוספים, TMDB או debrid.</string>
+    <string name="advanced_dns_system">מערכת</string>
+    <string name="advanced_dns_system_description">האיתור של המכשיר עצמו, בדרך כלל של ספק האינטרנט. ברירת מחדל.</string>
+    <string name="advanced_dns_quad9_description">חוסם אתרים מזיקים ידועים.</string>
+    <string name="advanced_dns_adguard_description">חוסם פרסומות ורכיבי מעקב.</string>
+    <string name="advanced_dns_adguard_warning">עלול לעצור תוסף שמשתמש בכתובת פרסום או מעקב.</string>
+    <string name="advanced_dns_custom">כתובת מותאמת אישית</string>
+    <string name="advanced_dns_custom_description">כתובת https משלך, למשל מ-NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">יש להזין כתובת שמתחילה ב-https://</string>
+    <string name="advanced_dns_custom_failed">הכתובת הזו לא ענתה כשירות DNS.</string>
+    <string name="advanced_dns_note">משמש לתוספים, תמונות, debrid, שרתי מדיה, מסיבת צפייה, החשבון שלך ו-ExoPlayer. נגן MPV, טריילרים וטורנטים עדיין משתמשים באיתור של המכשיר.</string>
+    <string name="advanced_dns_unreachable">לא ניתן להגיע אל %1$s, לכן בינתיים נעשה שימוש באיתור של המכשיר.</string>
+    <string name="advanced_dns_test">בדיקת DNS</string>
+    <string name="advanced_dns_test_subtitle">מאתר את TMDB ואת Cinemeta עם ה-DNS שנבחר.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: אין תשובה</string>
+    <string name="advanced_dns_test_unreachable">לא ניתן להגיע</string>
+</resources>

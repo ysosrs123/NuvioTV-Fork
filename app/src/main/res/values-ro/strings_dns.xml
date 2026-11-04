@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Rețea</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Cine caută adresele serverelor pentru aplicație. Alege un serviciu dacă furnizorul de internet blochează sau schimbă adresele de add-onuri, TMDB sau debrid.</string>
+    <string name="advanced_dns_system">Sistem</string>
+    <string name="advanced_dns_system_description">Căutarea proprie a dispozitivului, de obicei cea a furnizorului de internet. Implicit.</string>
+    <string name="advanced_dns_quad9_description">Blochează site-urile dăunătoare cunoscute.</string>
+    <string name="advanced_dns_adguard_description">Blochează reclamele și trackerele.</string>
+    <string name="advanced_dns_adguard_warning">Poate opri un add-on care folosește o adresă de reclame sau urmărire.</string>
+    <string name="advanced_dns_custom">Adresă personalizată</string>
+    <string name="advanced_dns_custom_description">Propria ta adresă https, de exemplu de la NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Introdu o adresă care începe cu https://</string>
+    <string name="advanced_dns_custom_failed">Acea adresă nu a răspuns ca serviciu DNS.</string>
+    <string name="advanced_dns_note">Folosit pentru add-onuri, imagini, debrid, servere media, petrecerea de vizionare, contul tău și ExoPlayer. Playerul MPV, trailerele și torrentele folosesc în continuare căutarea proprie a dispozitivului.</string>
+    <string name="advanced_dns_unreachable">%1$s nu a putut fi contactat, așa că deocamdată se folosește căutarea proprie a dispozitivului.</string>
+    <string name="advanced_dns_test">Testează DNS</string>
+    <string name="advanced_dns_test_subtitle">Caută TMDB și Cinemeta cu DNS-ul ales.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: niciun răspuns</string>
+    <string name="advanced_dns_test_unreachable">Inaccesibil</string>
+</resources>

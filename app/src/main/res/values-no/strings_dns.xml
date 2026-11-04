@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Nettverk</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Hvem som slår opp serveradresser for appen. Velg en tjeneste hvis internettleverandøren din blokkerer eller endrer adresser for tillegg, TMDB eller debrid.</string>
+    <string name="advanced_dns_system">System</string>
+    <string name="advanced_dns_system_description">Enhetens eget oppslag, vanligvis fra internettleverandøren din. Standard.</string>
+    <string name="advanced_dns_quad9_description">Blokkerer kjente skadelige nettsteder.</string>
+    <string name="advanced_dns_adguard_description">Blokkerer annonser og sporere.</string>
+    <string name="advanced_dns_adguard_warning">Kan stoppe et tillegg som bruker en annonse- eller sporingsadresse.</string>
+    <string name="advanced_dns_custom">Egendefinert adresse</string>
+    <string name="advanced_dns_custom_description">Din egen https-adresse, for eksempel fra NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Skriv inn en adresse som starter med https://</string>
+    <string name="advanced_dns_custom_failed">Den adressen svarte ikke som en DNS-tjeneste.</string>
+    <string name="advanced_dns_note">Brukes for tillegg, bilder, debrid, medieservere, seerfest, kontoen din og ExoPlayer. MPV-spilleren, trailere og torrenter bruker fortsatt enhetens eget oppslag.</string>
+    <string name="advanced_dns_unreachable">%1$s kunne ikke nås, så enhetens eget oppslag brukes inntil videre.</string>
+    <string name="advanced_dns_test">Test DNS</string>
+    <string name="advanced_dns_test_subtitle">Slår opp TMDB og Cinemeta med valgt DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: ingen svar</string>
+    <string name="advanced_dns_test_unreachable">Ikke tilgjengelig</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">الشبكة</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">الجهة التي تبحث عن عناوين الخوادم للتطبيق. اختر خدمة إذا كان مزود الإنترنت يحجب أو يغيّر عناوين الإضافات أو TMDB أو debrid.</string>
+    <string name="advanced_dns_system">النظام</string>
+    <string name="advanced_dns_system_description">بحث الجهاز نفسه، وعادةً ما يكون من مزود الإنترنت. الافتراضي.</string>
+    <string name="advanced_dns_quad9_description">يحجب المواقع الضارة المعروفة.</string>
+    <string name="advanced_dns_adguard_description">يحجب الإعلانات وأدوات التتبع.</string>
+    <string name="advanced_dns_adguard_warning">قد يوقف إضافة تستخدم عنوان إعلانات أو تتبع.</string>
+    <string name="advanced_dns_custom">عنوان مخصص</string>
+    <string name="advanced_dns_custom_description">عنوان https خاص بك، مثلًا من NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">أدخل عنوانًا يبدأ بـ https://</string>
+    <string name="advanced_dns_custom_failed">لم يستجب هذا العنوان كخدمة DNS.</string>
+    <string name="advanced_dns_note">يُستخدم للإضافات والصور وdebrid وخوادم الوسائط وحفلة المشاهدة وحسابك وExoPlayer. مشغل MPV والمقاطع الدعائية والتورنت ما زالت تستخدم بحث الجهاز.</string>
+    <string name="advanced_dns_unreachable">تعذّر الوصول إلى %1$s، لذا يُستخدم بحث الجهاز مؤقتًا.</string>
+    <string name="advanced_dns_test">اختبار DNS</string>
+    <string name="advanced_dns_test_subtitle">يبحث عن TMDB وCinemeta باستخدام DNS المختار.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: لا يوجد رد</string>
+    <string name="advanced_dns_test_unreachable">يتعذر الوصول</string>
+</resources>

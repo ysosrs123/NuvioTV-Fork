@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Rede</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Quem consulta os endereços dos servidores para o app. Escolha um serviço se o seu provedor de internet bloquear ou alterar endereços de addons, TMDB ou Debrid.</string>
+    <string name="advanced_dns_system">Sistema</string>
+    <string name="advanced_dns_system_description">A consulta do próprio dispositivo, geralmente a do seu provedor de internet. Padrão.</string>
+    <string name="advanced_dns_quad9_description">Bloqueia sites nocivos conhecidos.</string>
+    <string name="advanced_dns_adguard_description">Bloqueia anúncios e rastreadores.</string>
+    <string name="advanced_dns_adguard_warning">Pode impedir um addon que use um endereço de anúncios ou rastreamento.</string>
+    <string name="advanced_dns_custom">Endereço personalizado</string>
+    <string name="advanced_dns_custom_description">Seu próprio endereço https, por exemplo do NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Digite um endereço que comece com https://</string>
+    <string name="advanced_dns_custom_failed">Esse endereço não respondeu como um serviço DNS.</string>
+    <string name="advanced_dns_note">Usado para addons, imagens, Debrid, servidores de mídia, sessão em grupo, sua conta e ExoPlayer. O player MPV, trailers e torrents ainda usam a consulta do próprio dispositivo.</string>
+    <string name="advanced_dns_unreachable">Não foi possível acessar %1$s, então a consulta do próprio dispositivo está sendo usada por enquanto.</string>
+    <string name="advanced_dns_test">Testar DNS</string>
+    <string name="advanced_dns_test_subtitle">Consulta TMDB e Cinemeta com o DNS escolhido.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: sem resposta</string>
+    <string name="advanced_dns_test_unreachable">Inacessível</string>
+</resources>

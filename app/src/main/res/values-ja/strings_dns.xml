@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">ネットワーク</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">アプリのサーバーアドレスを調べる仕組みです。プロバイダーがアドオン、TMDB、debridのアドレスをブロックまたは変更する場合はサービスを選んでください。</string>
+    <string name="advanced_dns_system">システム</string>
+    <string name="advanced_dns_system_description">デバイス自身の名前解決で、通常はプロバイダーのものです。デフォルトです。</string>
+    <string name="advanced_dns_quad9_description">既知の有害サイトをブロックします。</string>
+    <string name="advanced_dns_adguard_description">広告とトラッカーをブロックします。</string>
+    <string name="advanced_dns_adguard_warning">広告やトラッキング用のアドレスを使うアドオンが止まることがあります。</string>
+    <string name="advanced_dns_custom">カスタムアドレス</string>
+    <string name="advanced_dns_custom_description">自分のhttpsアドレス（NextDNSなど）。</string>
+    <string name="advanced_dns_custom_invalid">https://で始まるアドレスを入力してください</string>
+    <string name="advanced_dns_custom_failed">このアドレスはDNSサービスとして応答しませんでした。</string>
+    <string name="advanced_dns_note">アドオン、画像、debrid、メディアサーバー、ウォッチパーティー、アカウント、ExoPlayerで使われます。MPVプレーヤー、予告編、トレントは引き続きデバイス自身の名前解決を使います。</string>
+    <string name="advanced_dns_unreachable">%1$sに接続できないため、当面はデバイス自身の名前解決を使っています。</string>
+    <string name="advanced_dns_test">DNSをテスト</string>
+    <string name="advanced_dns_test_subtitle">選択したDNSでTMDBとCinemetaを調べます。</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: 応答なし</string>
+    <string name="advanced_dns_test_unreachable">接続できません</string>
+</resources>

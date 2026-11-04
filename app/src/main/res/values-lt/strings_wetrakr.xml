@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">Sinchronizuokite žiūrėjimo istoriją, savo sąrašus ir atkūrimo pažangą tarp įrenginių</string>
+    <string name="wetrakr_connected_as">Prisijungta kaip %1$s</string>
+    <string name="wetrakr_account_fallback">jūsų „WeTrakr“ paskyra</string>
+    <string name="wetrakr_qr_description">QR kodas „WeTrakr“ prijungimui</string>
+    <string name="wetrakr_missing_client">„WeTrakr“ šioje versijoje nesukonfigūruotas.</string>
+    <string name="wetrakr_status_syncing">Sinchronizuojama su „WeTrakr“…</string>
+    <string name="wetrakr_status_enter_code">Laukiama, kol „WeTrakr“ paskyroje leisite „Nuvio Arc“ prieigą</string>
+    <string name="wetrakr_status_paused">Pristabdyta</string>
+    <string name="wetrakr_daily_limit_row">Šiandienos „WeTrakr“ limitas išnaudotas. Sinchronizavimas atsinaujins %1$s.</string>
+    <string name="wetrakr_limit_message">Šiandienos „WeTrakr“ limitas išnaudotas. Atkūrimas veikia įprastai, bet peržiūros į „WeTrakr“ nesiunčiamos iki %1$s.</string>
+    <string name="wetrakr_requests_used">%1$s iš %2$s</string>
+    <string name="wetrakr_requests_used_label">Šiandien panaudotos „WeTrakr“ užklausos</string>
+    <string name="wetrakr_last_synced_label">Paskutinis sinchronizavimas</string>
+    <string name="wetrakr_resumes_label">Sinchronizavimas atsinaujins</string>
+    <string name="wetrakr_never_synced">Dar ne</string>
+    <string name="wetrakr_synced_summary">Sinchronizuota: peržiūrėta %1$d, žiūrima %2$d, „Planuoju žiūrėti“ %3$d</string>
+    <string name="wetrakr_visit">Apsilankyti „WeTrakr“ svetainėje</string>
+    <string name="wetrakr_credit">Duomenys iš „WeTrakr“</string>
+    <string name="tracking_wetrakr_features_title">„WeTrakr“ funkcijos</string>
+    <string name="tracking_wetrakr_features_subtitle">„WeTrakr“ nustatymai</string>
+    <string name="wetrakr_continue_watching_subtitle">„WeTrakr“ istorija, naudojama „Tęsti žiūrėjimą“ skilčiai</string>
+    <string name="wetrakr_error_unavailable">Nepavyko pasiekti „WeTrakr“. Netrukus bandykite dar kartą.</string>
+    <string name="wetrakr_error_invalid_response">„WeTrakr“ atsiuntė atsakymą, kurio programa negali perskaityti.</string>
+    <string name="wetrakr_error_busy">„WeTrakr“ užimtas, netrukus bandysime dar kartą.</string>
+    <string name="wetrakr_error_suspended">„WeTrakr“ išjungė prieigą šiai programai.</string>
+    <string name="wetrakr_error_signin">Vėl prisijunkite prie „WeTrakr“.</string>
+    <string name="wetrakr_error_invalid_client">„WeTrakr“ nepriėmė šios programos rakto.</string>
+    <string name="wetrakr_error_code_expired">Kodo galiojimas baigėsi. Bandykite dar kartą.</string>
+    <string name="wetrakr_error_denied">Prieiga atmesta „WeTrakr“ paskyroje.</string>
+    <string name="wetrakr_error_too_many_codes">Paprašyta per daug kodų. Bandykite dar kartą po 15 minučių.</string>
+    <string name="wetrakr_disconnect_title">Atsijungti nuo „WeTrakr“?</string>
+    <string name="wetrakr_disconnect_subtitle">Šis profilis nebesiųs žiūrėjimo atnaujinimų, o jo „WeTrakr“ duomenys bus pašalinti iš šio įrenginio. Jūsų „WeTrakr“ istorija išliks.</string>
+    <string name="wetrakr_cw_window_subtitle">Pasirinkite, kiek „WeTrakr“ veiklos turėtų būti rodoma „Tęsti žiūrėjimą“ lange.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr neprijungtas</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">Prijunkite WeTrakr nustatymuose, kad matytumėte savo WeTrakr sąrašus</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">Panašūs pagal „WeTrakr“</string>
+    <string name="wetrakr_upload_title">Siųsti mano istoriją į „WeTrakr“</string>
+    <string name="wetrakr_upload_subtitle">Vieną kartą nukopijuoja šio profilio peržiūrėtus pavadinimus ir biblioteką į „WeTrakr“. Jau esantys pavadinimai praleidžiami.</string>
+    <string name="wetrakr_upload_counting">Skaičiuojama jūsų istorija…</string>
+    <string name="wetrakr_upload_nothing">Nėra ką siųsti: „WeTrakr“ jau turi viską iš šio profilio.</string>
+    <string name="wetrakr_upload_confirm">Siųsti į „WeTrakr“ peržiūrėtus pavadinimus (%1$s) ir bibliotekos pavadinimus (%2$s)?</string>
+    <string name="wetrakr_upload_sending">Siunčiama į „WeTrakr“…</string>
+    <string name="wetrakr_upload_done">Atlikta. Pridėta į „WeTrakr“: %1$s, jau buvo arba nerasta: %2$s.</string>
+    <string name="wetrakr_upload_send">Siųsti</string>
+    <string name="wetrakr_upload_close">Uždaryti</string>
+    <string name="licenses_attributions_wetrakr_body">„Nuvio Arc“ naudoja „WeTrakr“ žiūrėjimo istorijai, sąrašams, atkūrimo stebėjimui ir panašiems pavadinimams. Duomenys iš „WeTrakr“. „Nuvio Arc“ nėra susijusi su „WeTrakr“ ir nėra „WeTrakr“ remiama.</string>
+    <string name="wetrakr_revoke_failed">Čia atsijungta, bet „WeTrakr“ nepavyko apie tai pranešti. „Nuvio Arc“ galite pašalinti prijungtų programų skiltyje svetainėje wetrakr.com.</string>
+</resources>

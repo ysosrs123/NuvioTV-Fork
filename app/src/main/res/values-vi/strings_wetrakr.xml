@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Nuvio-test additions -->
+    <string name="wetrakr_tracking_description">Đồng bộ lịch sử đã xem, danh sách của bạn và tiến trình phát lại trên các thiết bị</string>
+    <string name="wetrakr_connected_as">Đã kết nối với %1$s</string>
+    <string name="wetrakr_account_fallback">tài khoản WeTrakr của bạn</string>
+    <string name="wetrakr_qr_description">Mã QR để kết nối WeTrakr</string>
+    <string name="wetrakr_missing_client">WeTrakr chưa được thiết lập trong bản dựng này.</string>
+    <string name="wetrakr_status_syncing">Đang đồng bộ với WeTrakr…</string>
+    <string name="wetrakr_status_enter_code">Đang chờ bạn cho phép Nuvio Arc trên WeTrakr</string>
+    <string name="wetrakr_status_paused">Đã tạm dừng</string>
+    <string name="wetrakr_daily_limit_row">Đã dùng hết giới hạn WeTrakr hôm nay. Đồng bộ sẽ tiếp tục lúc %1$s.</string>
+    <string name="wetrakr_limit_message">Đã dùng hết giới hạn WeTrakr hôm nay. Việc phát không bị ảnh hưởng, nhưng lượt xem sẽ không được gửi đến WeTrakr cho đến %1$s.</string>
+    <string name="wetrakr_requests_used">%1$s / %2$s</string>
+    <string name="wetrakr_requests_used_label">Yêu cầu WeTrakr đã dùng hôm nay</string>
+    <string name="wetrakr_last_synced_label">Lần đồng bộ cuối</string>
+    <string name="wetrakr_resumes_label">Đồng bộ tiếp tục</string>
+    <string name="wetrakr_never_synced">Chưa</string>
+    <string name="wetrakr_synced_summary">Đã đồng bộ: %1$d đã xem, %2$d đang xem, %3$d trong Xem sau</string>
+    <string name="wetrakr_visit">Truy cập WeTrakr</string>
+    <string name="wetrakr_credit">Dữ liệu từ WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">Tính năng WeTrakr</string>
+    <string name="tracking_wetrakr_features_subtitle">Cài đặt riêng của WeTrakr</string>
+    <string name="wetrakr_continue_watching_subtitle">Lịch sử WeTrakr được dùng cho mục Tiếp tục xem</string>
+    <string name="wetrakr_error_unavailable">Không thể kết nối với WeTrakr. Vui lòng thử lại sau ít phút.</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr gửi phản hồi mà ứng dụng không đọc được.</string>
+    <string name="wetrakr_error_busy">WeTrakr đang bận, sẽ thử lại sau ít phút.</string>
+    <string name="wetrakr_error_suspended">WeTrakr đã tắt quyền truy cập của ứng dụng này.</string>
+    <string name="wetrakr_error_signin">Hãy đăng nhập lại WeTrakr.</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr không chấp nhận khoá của ứng dụng này.</string>
+    <string name="wetrakr_error_code_expired">Mã đã hết hạn. Vui lòng thử lại.</string>
+    <string name="wetrakr_error_denied">Quyền truy cập đã bị từ chối trên WeTrakr.</string>
+    <string name="wetrakr_error_too_many_codes">Đã yêu cầu quá nhiều mã. Vui lòng thử lại sau 15 phút.</string>
+    <string name="wetrakr_disconnect_title">Ngắt kết nối WeTrakr?</string>
+    <string name="wetrakr_disconnect_subtitle">Dừng gửi cập nhật xem từ hồ sơ này và xoá dữ liệu WeTrakr của hồ sơ khỏi thiết bị này. Lịch sử WeTrakr của bạn vẫn được giữ lại.</string>
+    <string name="wetrakr_cw_window_subtitle">Chọn mức độ hoạt động WeTrakr hiển thị trong Tiếp tục xem.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr chưa được kết nối</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">Kết nối WeTrakr trong Cài đặt để xem danh sách WeTrakr của bạn</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">Tương tự trên WeTrakr</string>
+    <string name="wetrakr_upload_title">Gửi lịch sử của tôi đến WeTrakr</string>
+    <string name="wetrakr_upload_subtitle">Sao chép một lần các tựa đã xem và thư viện của hồ sơ này sang WeTrakr. Các tựa đã có sẽ được bỏ qua.</string>
+    <string name="wetrakr_upload_counting">Đang đếm lịch sử của bạn…</string>
+    <string name="wetrakr_upload_nothing">Không có gì để gửi: WeTrakr đã có mọi thứ trong hồ sơ này.</string>
+    <string name="wetrakr_upload_confirm">Gửi %1$s tựa đã xem và %2$s tựa trong thư viện đến WeTrakr?</string>
+    <string name="wetrakr_upload_sending">Đang gửi đến WeTrakr…</string>
+    <string name="wetrakr_upload_done">Xong: đã thêm %1$s trên WeTrakr, %2$s đã có sẵn hoặc không tìm thấy.</string>
+    <string name="wetrakr_upload_send">Gửi</string>
+    <string name="wetrakr_upload_close">Đóng</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc sử dụng WeTrakr cho lịch sử đã xem, danh sách, theo dõi phát lại và các tựa tương tự. Dữ liệu từ WeTrakr. Nuvio Arc không liên kết hoặc được xác nhận bởi WeTrakr.</string>
+    <string name="wetrakr_revoke_failed">Đã đăng xuất ở đây, nhưng không thể báo cho WeTrakr. Bạn có thể gỡ Nuvio Arc trong mục ứng dụng đã kết nối trên wetrakr.com.</string>
+</resources>

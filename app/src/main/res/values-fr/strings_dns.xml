@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Réseau</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Qui résout les adresses des serveurs pour l\'app. Choisissez un service si votre fournisseur d\'accès bloque ou modifie les adresses des addons, de TMDB ou du debrid.</string>
+    <string name="advanced_dns_system">Système</string>
+    <string name="advanced_dns_system_description">La résolution propre à l\'appareil, en général celle de votre fournisseur d\'accès. Par défaut.</string>
+    <string name="advanced_dns_quad9_description">Bloque les sites malveillants connus.</string>
+    <string name="advanced_dns_adguard_description">Bloque les publicités et les traqueurs.</string>
+    <string name="advanced_dns_adguard_warning">Peut bloquer un addon qui utilise une adresse publicitaire ou de suivi.</string>
+    <string name="advanced_dns_custom">Adresse personnalisée</string>
+    <string name="advanced_dns_custom_description">Votre propre adresse https, par exemple de NextDNS.</string>
+    <string name="advanced_dns_custom_invalid">Saisissez une adresse commençant par https://</string>
+    <string name="advanced_dns_custom_failed">Cette adresse n\'a pas répondu comme un service DNS.</string>
+    <string name="advanced_dns_note">Utilisé pour les addons, les images, le debrid, les serveurs multimédias, la watch party, votre compte et ExoPlayer. Le lecteur MPV, les bandes-annonces et les torrents utilisent toujours la résolution de l\'appareil.</string>
+    <string name="advanced_dns_unreachable">%1$s est injoignable, la résolution de l\'appareil est donc utilisée pour l\'instant.</string>
+    <string name="advanced_dns_test">Tester le DNS</string>
+    <string name="advanced_dns_test_subtitle">Résout TMDB et Cinemeta avec le DNS choisi.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s : aucune réponse</string>
+    <string name="advanced_dns_test_unreachable">Injoignable</string>
+</resources>
