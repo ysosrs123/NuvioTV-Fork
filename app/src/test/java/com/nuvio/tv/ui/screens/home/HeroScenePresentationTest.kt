@@ -53,6 +53,11 @@ class HeroScenePresentationTest {
         assertTrue(landscapeHeroArtwork(null, "poster", null, null, widePoster = "poster").urls.isEmpty())
     }
 
+    @Test fun `a collection folder without its own backdrop shows its cover picture`() {
+        assertEquals(listOf("cover"),
+            landscapeHeroArtwork("folder", "cover", "cover", null, "cover", "cover", widePoster = "cover").urls)
+    }
+
     @Test fun `own stand-in keeps its logo after the timeout`() {
         val a = HeroScenePresentation<String>().select("a")
         val standIn = a.fallback(a.ticket, "a text + logo")

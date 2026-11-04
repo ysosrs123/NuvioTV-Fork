@@ -41,4 +41,32 @@ class ParentalGuideRepositoryTest {
         assertEquals("moderate", result?.violence)
         assertNull(result?.profanity)
     }
+
+    @Test
+    fun `ranked entries put the worst level first and keep the category order within a level`() {
+        val guide = ParentalGuideResult(
+            nudity = "mild",
+            violence = "Moderate",
+            profanity = "severe",
+            alcohol = null,
+            frightening = "moderate"
+        )
+
+        val ranked = guide.rankedEntries()
+
+        assertEquals(
+            listOf(
+                ParentalGuideEntry(ParentalGuideCategory.PROFANITY, "severe"),
+                ParentalGuideEntry(ParentalGuideCategory.VIOLENCE, "moderate"),
+                ParentalGuideEntry(ParentalGuideCategory.FRIGHTENING, "moderate"),
+                ParentalGuideEntry(ParentalGuideCategory.NUDITY, "mild")
+            ),
+            ranked
+        )
+    }
+
+    @Test
+    fun `a guide with nothing rated gives no entries`() {
+        assertEquals(emptyList<ParentalGuideEntry>(), ParentalGuideResult().rankedEntries())
+    }
 }

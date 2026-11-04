@@ -130,6 +130,40 @@ class HeroSeriesFactsTest {
         assertNull(meta.toHeroSeriesFacts(null, null).episodeDescription)
     }
 
+    @Test fun comingUpCardWithoutArtGetsTheShowBackdropAndLogoBehindIt() {
+        val card = nextUp(episodeTitle = "Risky Business", badgeLabel = "New", newSeason = false).let {
+            it.copy(info = it.info.copy(poster = "https://img/poster.jpg"))
+        }
+        val item = build(card)
+        fun artwork(preview: HeroPreview) = landscapeHeroArtwork(
+            owner = item.key, poster = preview.poster, background = preview.backdrop, landscape = null,
+            fallbackBackground = item.heroPreview.backdrop, fallbackPoster = item.heroPreview.poster
+        ).urls
+        assertEquals(emptyList<String>(), artwork(item.heroPreview))
+
+        val meta = Meta(
+            id = "tt11061714", type = ContentType.SERIES, name = "Show", poster = "https://img/poster.jpg",
+            posterShape = PosterShape.POSTER, background = "https://img/backdrop.jpg", logo = "https://img/logo.png",
+            description = null, releaseInfo = null, imdbRating = null, genres = emptyList(), runtime = null,
+            director = emptyList(), cast = emptyList(), videos = emptyList(), ageRating = null, country = null,
+            awards = null, language = null, links = emptyList()
+        )
+        val filled = item.heroPreview.withSeriesFacts(meta.toHeroSeriesFacts(2, 1))
+        assertEquals(listOf("https://img/backdrop.jpg"), artwork(filled))
+        assertEquals("https://img/logo.png", filled.logo)
+
+        val posterOnly = meta.copy(background = "https://img/poster.jpg").toHeroSeriesFacts(2, 1)
+        assertNull(posterOnly.backdrop)
+        assertEquals(emptyList<String>(), artwork(item.heroPreview.withSeriesFacts(posterOnly)))
+    }
+
+    @Test fun theCardsOwnBackdropAndLogoWinOverTheShows() {
+        val card = build(nextUp()).heroPreview.copy(backdrop = "own-backdrop", logo = "own-logo")
+        val filled = card.withSeriesFacts(HeroSeriesFacts(backdrop = "show-backdrop", logo = "show-logo"))
+        assertEquals("own-backdrop", filled.backdrop)
+        assertEquals("own-logo", filled.logo)
+    }
+
     @Test fun comingUpFilmsAreLookedUpWithoutAnEpisode() {
         val film = ContinueWatchingItem.NextUp(
             NextUpInfo(

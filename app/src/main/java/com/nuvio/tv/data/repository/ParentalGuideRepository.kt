@@ -19,6 +19,20 @@ data class ParentalGuideResult(
     val frightening: String? = null
 )
 
+enum class ParentalGuideCategory { NUDITY, VIOLENCE, PROFANITY, ALCOHOL, FRIGHTENING }
+
+data class ParentalGuideEntry(val category: ParentalGuideCategory, val severity: String)
+
+private val severityRank = mapOf("severe" to 0, "moderate" to 1, "mild" to 2)
+
+fun ParentalGuideResult.rankedEntries(): List<ParentalGuideEntry> = listOfNotNull(
+    nudity?.let { ParentalGuideEntry(ParentalGuideCategory.NUDITY, it.lowercase()) },
+    violence?.let { ParentalGuideEntry(ParentalGuideCategory.VIOLENCE, it.lowercase()) },
+    profanity?.let { ParentalGuideEntry(ParentalGuideCategory.PROFANITY, it.lowercase()) },
+    alcohol?.let { ParentalGuideEntry(ParentalGuideCategory.ALCOHOL, it.lowercase()) },
+    frightening?.let { ParentalGuideEntry(ParentalGuideCategory.FRIGHTENING, it.lowercase()) }
+).sortedBy { severityRank[it.severity] ?: 3 }
+
 @Singleton
 class ParentalGuideRepository @Inject constructor(
     private val api: ParentalGuideApi

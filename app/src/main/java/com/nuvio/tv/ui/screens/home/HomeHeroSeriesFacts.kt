@@ -23,7 +23,9 @@ data class HeroSeriesFacts(
     val genres: List<String> = emptyList(),
     val releaseInfo: String? = null,
     val runtime: String? = null,
-    val ageRating: String? = null
+    val ageRating: String? = null,
+    val backdrop: String? = null,
+    val logo: String? = null
 )
 
 @Immutable
@@ -57,28 +59,39 @@ private fun heroSeriesFacts(
     runtime: String?,
     ageRating: String?,
     episodeOverview: String?,
-    episodeRuntime: Int?
+    episodeRuntime: Int?,
+    poster: String?,
+    backdrop: String?,
+    logo: String?
 ) = HeroSeriesFacts(
     description = description.clean(),
     episodeDescription = episodeOverview.clean(),
     genres = genres.filter { it.isNotBlank() }.take(3),
     releaseInfo = releaseInfo.clean(),
     runtime = episodeRuntime?.takeIf { it > 0 }?.let { "$it min" } ?: runtime.clean(),
-    ageRating = ageRating.clean()
+    ageRating = ageRating.clean(),
+    backdrop = backdrop.clean()?.takeUnless { it == poster.clean() },
+    logo = logo.clean()
 )
 
 internal fun Meta.toHeroSeriesFacts(season: Int?, episode: Int?): HeroSeriesFacts {
     val video = if (season != null && episode != null) {
         videos.firstOrNull { it.season == season && it.episode == episode }
     } else null
-    return heroSeriesFacts(description, genres, releaseInfo, runtime, ageRating, video?.overview, video?.runtime)
+    return heroSeriesFacts(
+        description, genres, releaseInfo, runtime, ageRating, video?.overview, video?.runtime,
+        poster, background ?: landscapePoster, logo
+    )
 }
 
 internal fun CwMetaSummary.toHeroSeriesFacts(season: Int?, episode: Int?): HeroSeriesFacts {
     val video = if (season != null && episode != null) {
         videos.firstOrNull { it.season == season && it.episode == episode }
     } else null
-    return heroSeriesFacts(description, genres, releaseInfo, runtime, ageRating, video?.overview, video?.runtime)
+    return heroSeriesFacts(
+        description, genres, releaseInfo, runtime, ageRating, video?.overview, video?.runtime,
+        poster, backdropUrl, logo
+    )
 }
 
 /**
@@ -93,7 +106,9 @@ internal fun HeroPreview.withSeriesFacts(facts: HeroSeriesFacts?): HeroPreview {
         genres = if (filledGenres === genres.list) genres else filledGenres.asStable(),
         yearText = yearText.clean() ?: extractYearOrRange(facts.releaseInfo),
         runtimeText = runtimeText.clean() ?: formatHeroRuntime(facts.runtime),
-        ageRatingText = ageRatingText.clean() ?: facts.ageRating
+        ageRatingText = ageRatingText.clean() ?: facts.ageRating,
+        backdrop = backdrop.clean() ?: facts.backdrop,
+        logo = logo.clean() ?: facts.logo
     )
 }
 
@@ -138,6 +153,9 @@ internal fun HomeViewModel.onSeriesHeroSettledPipeline(ref: HeroSeriesRef) {
                 withTimeoutOrNull(HERO_SERIES_FACTS_TIMEOUT_MS) {
                     metaRepository.getMetaFromPrimaryAddon(ref.contentType, ref.contentId)
                         .first { it !is NetworkResult.Loading }
+                        .takeIf { it is NetworkResult.Success }
+                        ?: metaRepository.getMetaFromAllAddons(ref.contentType, ref.contentId)
+                            .first { it !is NetworkResult.Loading }
                 }
             }
         } catch (e: CancellationException) {
