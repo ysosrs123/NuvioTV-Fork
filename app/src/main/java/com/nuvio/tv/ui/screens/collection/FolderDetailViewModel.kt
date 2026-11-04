@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.collection
 
+import com.nuvio.tv.data.mediaserver.ServerCatalog
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -139,6 +140,7 @@ class FolderDetailViewModel @Inject constructor(
     private val trailerService: TrailerService,
     private val tmdbCollectionSourceResolver: TmdbCollectionSourceResolver,
     private val traktPublicListSourceResolver: TraktPublicListSourceResolver,
+    private val serverCatalog: ServerCatalog,
     val posterOptions: com.nuvio.tv.ui.components.posteroptions.PosterOptionsController
 ) : ViewModel() {
 
@@ -259,7 +261,7 @@ class FolderDetailViewModel @Inject constructor(
                 return@launch
             }
 
-            val addons = addonRepository.getInstalledAddons().first().enabledAddons()
+            val addons = addonRepository.getInstalledAddons().first().enabledAddons() + serverCatalog.addons.first()
             val homeLayout = layoutPreferenceDataStore.selectedLayout.first()
             val homeImdbRatingsVisibility = layoutPreferenceDataStore.homeImdbRatingsVisibility.first()
             val posterLabelsEnabled = layoutPreferenceDataStore.posterLabelsEnabled.first()
@@ -762,7 +764,7 @@ class FolderDetailViewModel @Inject constructor(
 
     private fun loadAddonCatalogForTab(tabIndex: Int, source: AddonCatalogCollectionSource) {
         viewModelScope.launch {
-            val addons = addonRepository.getInstalledAddons().first().enabledAddons()
+            val addons = addonRepository.getInstalledAddons().first().enabledAddons() + serverCatalog.addons.first()
             val addon = addons.find { it.id == source.addonId }
 
             if (addon == null) {

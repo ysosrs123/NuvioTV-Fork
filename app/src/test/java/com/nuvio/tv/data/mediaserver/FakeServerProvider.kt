@@ -68,6 +68,18 @@ internal class FakeServerProvider(
     val titleQueries = mutableListOf<ServerTitleQuery>()
     val signIns = mutableListOf<Pair<String, String>>()
     var indexRequests = 0
+    val libraryRequests = mutableListOf<LibraryRequest>()
+    val genres = mutableMapOf<String, List<ServerGenre>>()
+    var failingGenres = false
+    @Volatile var genreReads = 0
+
+    var listed: ServerAddresses? = null
+    var listedRequests = 0
+
+    override suspend fun listedAddresses(session: ServerSession): ServerAddresses? {
+        listedRequests++
+        return listed
+    }
 
     override suspend fun locate(address: String): ServerLocation? = locations[address]?.takeIf { address !in downAddresses }
 
@@ -83,12 +95,30 @@ internal class FakeServerProvider(
         session: ServerSession,
         library: ServerLibrary,
         start: Int,
-        limit: Int
+        limit: Int,
+        sort: ServerSort,
+        genreId: String?,
+        filter: ServerLibraryFilter
     ): ServerPage<ServerTitle> {
         if (library.id in failingLibraries) throw ServerException(ServerFailure.UNREACHABLE)
-        val ids = (start until minOf(start + limit, movieCount)).map { it.toString() }
-        return ServerPage(ids.map { title(session, it) }, movieCount)
+        libraryRequests += LibraryRequest(library.id, sort, genreId)
+        libraryFilters += filter
+        val count = if (genreId == null) movieCount else GENRE_ITEMS
+        val ids = (start until minOf(start + limit, count)).map { it.toString() }
+        return ServerPage(ids.map { title(session, it) }, count)
     }
+
+    override suspend fun libraryGenres(session: ServerSession, library: ServerLibrary): List<ServerGenre> {
+        genreReads++
+        if (failingGenres) throw ServerException(ServerFailure.UNREACHABLE)
+        return genres[library.id].orEmpty()
+    }
+
+    var artworkBase: String? = null
+
+    val libraryFilters = mutableListOf<ServerLibraryFilter>()
+
+    data class LibraryRequest(val libraryId: String, val sort: ServerSort, val genreId: String?)
 
     override suspend fun collectionPage(
         session: ServerSession,
@@ -341,9 +371,9 @@ internal class FakeServerProvider(
             type = kind.domainType(),
             rawType = kind.contentType,
             name = "Item $itemId",
-            poster = null,
+            poster = artworkBase?.let { "$it/poster/$itemId.jpg" },
             posterShape = PosterShape.POSTER,
-            background = null,
+            background = artworkBase?.let { "$it/backdrop/$itemId.jpg" },
             logo = null,
             description = null,
             releaseInfo = null,
@@ -356,6 +386,7 @@ internal class FakeServerProvider(
     companion object {
         const val SHOW_ID = "500"
         const val EPISODE_ID = "901"
+        const val GENRE_ITEMS = 3
         val MOVIE_LIBRARY = ServerLibrary(id = "10", name = "Movies", kind = ServerMediaKind.MOVIE)
         val SERIES_LIBRARY = ServerLibrary(id = "20", name = "Shows", kind = ServerMediaKind.SERIES)
         val COLLECTION_LIBRARY = ServerLibrary(id = "30", name = "Featured", kind = ServerMediaKind.COLLECTION)

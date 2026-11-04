@@ -51,6 +51,8 @@ data class ServerHomeRow(
     val kind: ServerMediaKind
 )
 
+data class ServerAddresses(val address: String, val alternateAddress: String?)
+
 @Serializable
 data class ServerConnection(
     val id: String,
@@ -316,6 +318,7 @@ enum class ServerSignInIssue {
     PASSWORD_SIGN_IN_OFF,
     TOO_MANY_TRIES,
     SILO_NOT_NATIVE,
+    PLEX_REMOTE_PASS,
     SERVER_MESSAGE
 }
 

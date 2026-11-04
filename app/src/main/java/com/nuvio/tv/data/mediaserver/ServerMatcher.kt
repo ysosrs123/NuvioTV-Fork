@@ -134,11 +134,21 @@ class ServerMatcher internal constructor(
             ?.videos
             ?.firstOrNull { it.season == season && it.episode == episode }
             ?.released
+        if (itemIds.isEmpty()) Log.i(TAG, "MATCH ${connection.providerId}: no series found for ${request.describe()}")
         return itemIds.mapNotNull { seriesId ->
             val match = repository.call(connection.id) { provider, session ->
                 provider.findEpisode(session, seriesId, season, episode)
-            } ?: return@mapNotNull null
-            match.takeIf { datesCompatible(catalogDate, it.premiereDate) }?.let { ServerItemRef(connection.id, it.itemId) }
+            }
+            if (match == null) {
+                Log.i(TAG, "MATCH ${connection.providerId}: series $seriesId has no S${season}E$episode")
+                return@mapNotNull null
+            }
+            if (!datesCompatible(catalogDate, match.premiereDate)) {
+                Log.i(TAG, "MATCH ${connection.providerId}: S${season}E$episode of $seriesId aired ${match.premiereDate}, " +
+                    "catalog says $catalogDate - not taken")
+                return@mapNotNull null
+            }
+            ServerItemRef(connection.id, match.itemId)
         }
     }
 
@@ -210,6 +220,12 @@ class ServerMatcher internal constructor(
             async { repository.call(connection.id) { provider, session -> provider.lookupTitle(session, library, query) } }
         }.awaitAll()
         if (found.any { it == null }) return@coroutineScope null
+        found.zip(libraries).forEach { (entries, library) ->
+            val kept = verifiedTitleMatches(entries.orEmpty(), query)
+            Log.i(TAG, "MATCH ${connection.providerId} ${library.name}: ${entries.orEmpty().size} answers for " +
+                "${query.describe()}, kept ${kept.size}" +
+                entries.orEmpty().take(3).joinToString("") { " [${it.itemId} ${it.ids.describe()} ${it.year}]" })
+        }
         found.flatMap { verifiedTitleMatches(it.orEmpty(), query) }.distinct()
     }
 
@@ -271,12 +287,24 @@ class ServerMatcher internal constructor(
 
     private suspend fun withConvertedIds(request: MatchRequest): TrackingExternalIds {
         val ids = withConvertedImdb(request)
-        if (ids.tmdb != null) return ids
-        val imdb = ids.imdb ?: return ids
-        val tmdb = withTimeoutOrNull(CONVERSION_TIMEOUT_MS) {
-            runCatching { tmdbService.ensureTmdbId(imdb, request.kind.contentType) }.getOrNull()
-        }?.toLongOrNull() ?: return ids
-        return ids.copy(tmdb = tmdb)
+        val withTmdb = if (ids.tmdb != null) ids else {
+            val imdb = ids.imdb ?: return ids
+            val tmdb = withTimeoutOrNull(CONVERSION_TIMEOUT_MS) {
+                runCatching { tmdbService.ensureTmdbId(imdb, request.kind.contentType) }.getOrNull()
+            }?.toLongOrNull() ?: return ids
+            ids.copy(tmdb = tmdb)
+        }
+        return withTvdb(request.kind, withTmdb)
+    }
+
+    /** A server that tags a show only by its TVDB id (Silo does) is matched on it too. */
+    private suspend fun withTvdb(kind: ServerMediaKind, ids: TrackingExternalIds): TrackingExternalIds {
+        if (kind == ServerMediaKind.MOVIE || ids.tvdb != null) return ids
+        val tmdb = ids.tmdb ?: return ids
+        val tvdb = withTimeoutOrNull(CONVERSION_TIMEOUT_MS) {
+            runCatching { tmdbService.tmdbToTvdb(tmdb.toInt()) }.getOrNull()
+        } ?: return ids
+        return ids.copy(tvdb = tvdb.toString())
     }
 
     private suspend fun withConvertedImdb(request: MatchRequest): TrackingExternalIds {
@@ -328,6 +356,12 @@ class ServerMatcher internal constructor(
         const val TITLE_NAME_CACHE_SIZE = 200
     }
 }
+
+private fun MatchRequest.describe(): String = "${kind.contentType} ${ids.describe()} \"$name\" $year"
+
+private fun ServerTitleQuery.describe(): String = "${ids.describe()} \"$name\" $year" + (originalName?.let { " (\"$it\")" } ?: "")
+
+private fun TrackingExternalIds.describe(): String = catalogIds().joinToString(",").ifEmpty { "no ids" }
 
 internal fun datesCompatible(catalogDate: String?, serverDate: String?): Boolean {
     val catalogDay = catalogDate?.epochDay() ?: return true

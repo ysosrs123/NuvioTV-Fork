@@ -18,6 +18,8 @@ import com.nuvio.tv.data.mediaserver.ServerQuickConnect
 import com.nuvio.tv.data.mediaserver.ServerRepository
 import com.nuvio.tv.data.mediaserver.ServersUiState
 import com.nuvio.tv.data.mediaserver.serverFailure
+import com.nuvio.tv.data.mediaserver.plex.PlexHomeUser
+import com.nuvio.tv.data.mediaserver.plex.PlexProvider
 import com.nuvio.tv.data.mediaserver.silo.SiloNativeProvider
 import com.nuvio.tv.data.mediaserver.silo.SiloProfile
 import kotlinx.coroutines.CoroutineScope
@@ -63,6 +65,16 @@ data class SiloProfileChange(
     val error: ServerFailure? = null
 )
 
+data class PlexUserChange(
+    val connectionId: String,
+    val users: List<PlexHomeUser> = emptyList(),
+    val loading: Boolean = true,
+    val pinFor: PlexHomeUser? = null,
+    val pinWrong: Boolean = false,
+    val busy: Boolean = false,
+    val error: ServerFailure? = null
+)
+
 data class QuickConnectState(
     val phase: QuickConnectPhase = QuickConnectPhase.IDLE,
     val code: String? = null,
@@ -94,6 +106,12 @@ class MediaServersViewModel @Inject constructor(
 
     private val siloFlow = lazy { SiloSignInFlow(repository, viewModelScope, CoroutineScope(SupervisorJob() + Dispatchers.IO)) }
     val silo: SiloSignInFlow by siloFlow
+
+    private val plexFlow = lazy { PlexSignInFlow(repository, viewModelScope) }
+    val plex: PlexSignInFlow by plexFlow
+
+    private val mutablePlexUsers = MutableStateFlow<PlexUserChange?>(null)
+    val plexUsers: StateFlow<PlexUserChange?> = mutablePlexUsers.asStateFlow()
 
     private val mutableSiloProfiles = MutableStateFlow<SiloProfileChange?>(null)
     val siloProfiles: StateFlow<SiloProfileChange?> = mutableSiloProfiles.asStateFlow()
@@ -176,7 +194,77 @@ class MediaServersViewModel @Inject constructor(
         mutableSiloProfiles.value = null
     }
 
+    fun plexUserName(connection: ServerConnection): String? {
+        val provider = repository.provider(connection) as? PlexProvider ?: return null
+        return repository.session(connection.id)?.let(provider::homeUserName)
+    }
+
+    fun plexUserId(connection: ServerConnection): String? {
+        val provider = repository.provider(connection) as? PlexProvider ?: return null
+        return repository.session(connection.id)?.let(provider::homeUserId)
+    }
+
+    fun openPlexUsers(connectionId: String) {
+        mutablePlexUsers.value = PlexUserChange(connectionId)
+        viewModelScope.launch {
+            val users = try {
+                repository.call(connectionId) { provider, session ->
+                    (provider as? PlexProvider ?: throw ServerException(ServerFailure.UNSUPPORTED)).homeUsers(session)
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                mutablePlexUsers.update { it?.copy(loading = false, error = error.serverFailure()) }
+                return@launch
+            }
+            mutablePlexUsers.update { it?.copy(loading = false, users = users) }
+        }
+    }
+
+    fun pickPlexUser(user: PlexHomeUser, pin: String? = null) {
+        val change = mutablePlexUsers.value ?: return
+        if (change.busy) return
+        if (user.hasPin && pin == null) {
+            mutablePlexUsers.value = change.copy(pinFor = user, pinWrong = false, error = null)
+            return
+        }
+        mutablePlexUsers.value = change.copy(busy = true, pinWrong = false, error = null)
+        viewModelScope.launch {
+            val token = try {
+                repository.call(change.connectionId) { provider, session ->
+                    (provider as? PlexProvider ?: throw ServerException(ServerFailure.UNSUPPORTED)).withUser(session, user, pin)
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                mutablePlexUsers.update { it?.copy(busy = false, error = error.serverFailure()) }
+                return@launch
+            }
+            if (token == null) {
+                mutablePlexUsers.update { it?.copy(busy = false, pinWrong = true) }
+            } else {
+                repository.setCredential(change.connectionId, token)
+                mutablePlexUsers.value = null
+                try {
+                    repository.refreshHomeRows(change.connectionId)
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (_: Exception) {
+                }
+            }
+        }
+    }
+
+    fun backToPlexUsers() {
+        mutablePlexUsers.update { it?.copy(pinFor = null, pinWrong = false, error = null) }
+    }
+
+    fun closePlexUsers() {
+        mutablePlexUsers.value = null
+    }
+
     override fun onCleared() {
+        if (plexFlow.isInitialized()) plex.close()
         if (siloFlow.isInitialized()) silo.close()
         super.onCleared()
     }

@@ -42,7 +42,15 @@ class ServerRenewalTest {
             return current
         }
 
-        override suspend fun libraryPage(session: ServerSession, library: ServerLibrary, start: Int, limit: Int) =
+        override suspend fun libraryPage(
+            session: ServerSession,
+            library: ServerLibrary,
+            start: Int,
+            limit: Int,
+            sort: ServerSort,
+            genreId: String?,
+            filter: ServerLibraryFilter
+        ) =
             throw ServerException(ServerFailure.UNSUPPORTED)
 
         override suspend fun details(session: ServerSession, itemId: String) = throw ServerException(ServerFailure.UNSUPPORTED)

@@ -25,6 +25,7 @@ class ServerMatcherTest {
     private val tmdbService = mockk<TmdbService> {
         coEvery { ensureTmdbId(any(), any(), any()) } returns null
         coEvery { tmdbToImdb(any(), any()) } returns null
+        coEvery { tmdbToTvdb(any()) } returns null
     }
     private val metaRepository = mockk<MetaRepository> {
         every { getCachedMeta(any(), any()) } returns null
@@ -186,6 +187,24 @@ class ServerMatcherTest {
 
         val miss = matcher.request("series", "tt0944947:1:2", 1, 2)!!
         assertTrue(matcher.match(connection, miss, forceRefresh = false).isEmpty())
+    }
+
+    @Test
+    fun aShowTheServerKnowsOnlyByItsTvdbIdIsMatched() = runBlocking {
+        val provider = FakeServerProvider().apply {
+            indexedIds[FakeServerProvider.SHOW_ID] = TrackingExternalIds(tvdb = "360261")
+            episodes[1 to 2] = ServerEpisode(FakeServerProvider.EPISODE_ID, "2019-06-23")
+        }
+        coEvery { tmdbService.ensureTmdbId("tt8772296", "series", any()) } returns "85552"
+        coEvery { tmdbService.tmdbToTvdb(85552) } returns 360261
+        val (matcher, _, connection) = matcher(provider)
+
+        val request = matcher.request("series", "tt8772296:1:2", 1, 2)!!
+
+        assertEquals(
+            listOf(ServerItemRef(connection.id, FakeServerProvider.EPISODE_ID)),
+            matcher.match(connection, request, forceRefresh = false)
+        )
     }
 
     @Test

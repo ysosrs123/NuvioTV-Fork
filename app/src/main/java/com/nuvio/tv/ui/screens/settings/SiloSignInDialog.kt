@@ -486,7 +486,8 @@ internal fun SiloPinPanel(
     canGoBack: Boolean,
     onSubmit: (String) -> Unit,
     onBack: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    otherText: String = stringResource(R.string.silo_other_profile)
 ) {
     var pin by remember { mutableStateOf("") }
     val pinFocus = remember { FocusRequester() }
@@ -512,7 +513,7 @@ internal fun SiloPinPanel(
     }
     SettingsDialogActionRow {
         SettingsDialogActionButton(
-            text = stringResource(if (canGoBack) R.string.silo_other_profile else R.string.action_cancel),
+            text = if (canGoBack) otherText else stringResource(R.string.action_cancel),
             onClick = if (canGoBack) onBack else onCancel,
             enabled = !busy
         )
@@ -526,12 +527,12 @@ internal fun SiloPinPanel(
 }
 
 @Composable
-private fun SiloQrCode(link: String) {
+internal fun SiloQrCode(link: String, description: String = stringResource(R.string.silo_code_qr)) {
     val bitmap = remember(link) { runCatching { QrCodeGenerator.generate(link, size = 360, margin = 1) }.getOrNull() }
     if (bitmap != null) {
         Image(
             bitmap = bitmap.asImageBitmap(),
-            contentDescription = stringResource(R.string.silo_code_qr),
+            contentDescription = description,
             modifier = Modifier
                 .size(168.dp)
                 .background(Color.White, RoundedCornerShape(8.dp))
@@ -541,7 +542,7 @@ private fun SiloQrCode(link: String) {
 }
 
 @Composable
-private fun SiloCountdown(expiresAtMs: Long) {
+internal fun SiloCountdown(expiresAtMs: Long) {
     var remainingMs by remember(expiresAtMs) { mutableLongStateOf(expiresAtMs - System.currentTimeMillis()) }
     LaunchedEffect(expiresAtMs) {
         while (remainingMs > 0L) {
@@ -590,7 +591,7 @@ internal fun ServerFailure.siloMessage(): String = when (this) {
 }
 
 @Composable
-private fun SiloLine(text: String, centred: Boolean = false, color: Color = NuvioTheme.colors.TextSecondary) {
+internal fun SiloLine(text: String, centred: Boolean = false, color: Color = NuvioTheme.colors.TextSecondary) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyMedium,
@@ -612,7 +613,7 @@ private fun SiloField(label: String, field: @Composable () -> Unit) {
 }
 
 @Composable
-private fun BoxScope.SiloDialogBackground() {
+internal fun BoxScope.SiloDialogBackground() {
     Box(Modifier.matchParentSize().background(NuvioTheme.colors.BackgroundElevated.copy(alpha = 0.94f)))
 }
 

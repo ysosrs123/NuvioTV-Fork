@@ -9,6 +9,7 @@ fun serverLogoRes(providerId: String): Int? = when (providerId) {
     "jellyfin" -> R.raw.jellyfin_logo
     "emby" -> R.raw.emby_logo
     "silo", "silo-native" -> R.raw.silo_logo
+    "plex" -> R.raw.plex_logo
     else -> null
 }
 

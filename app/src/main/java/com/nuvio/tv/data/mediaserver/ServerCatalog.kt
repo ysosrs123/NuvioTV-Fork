@@ -3,6 +3,7 @@ package com.nuvio.tv.data.mediaserver
 import android.content.Context
 import android.util.Log
 import com.nuvio.tv.R
+import com.nuvio.tv.core.sync.homeCatalogKey
 import com.nuvio.tv.core.poster.CustomPosterUrlResolver.ContentIds
 import com.nuvio.tv.core.poster.withCustomPosterUrl
 import com.nuvio.tv.core.streams.supportsResource
@@ -25,6 +26,9 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +39,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withTimeoutOrNull
 
 data class ServerLibraryRef(
@@ -99,7 +105,8 @@ class ServerCatalog internal constructor(
     private val repository: ServerRepository,
     private val addonRepository: AddonRepository,
     private val artwork: ServerArtwork,
-    private val kindName: (ServerMediaKind) -> String = { if (it == ServerMediaKind.SERIES) "Series" else "Movies" }
+    private val kindName: (ServerMediaKind) -> String = { if (it == ServerMediaKind.SERIES) "Series" else "Movies" },
+    private val sortName: (ServerSort) -> String = { if (it == ServerSort.TITLE) "A to Z" else "Newest release" }
 ) {
     @Inject
     constructor(
@@ -113,6 +120,9 @@ class ServerCatalog internal constructor(
         artwork = artwork,
         kindName = { kind ->
             context.getString(if (kind == ServerMediaKind.SERIES) R.string.type_series_plural else R.string.type_movies)
+        },
+        sortName = { sort ->
+            context.getString(if (sort == ServerSort.TITLE) R.string.server_library_sort_title else R.string.server_library_sort_released)
         }
     )
 
@@ -123,6 +133,10 @@ class ServerCatalog internal constructor(
     private val searchLock = Mutex()
     private val serverSearches = HashMap<String, ServerSearch>()
     internal var searchWaitMs = SEARCH_WAIT_MS
+    private val genreCache = java.util.concurrent.ConcurrentHashMap<String, CachedGenres>()
+    private val genreLoads = java.util.concurrent.ConcurrentHashMap<String, Deferred<List<ServerGenre>>>()
+    internal var genreWaitMs = GENRE_WAIT_MS
+    internal var now: () -> Long = System::currentTimeMillis
 
     val libraryLoaded = MutableSharedFlow<String>(extraBufferCapacity = DETAILS_BUFFER)
 
@@ -133,15 +147,17 @@ class ServerCatalog internal constructor(
         }
         .distinctUntilChanged()
 
-    /** Search rows, one per type and server, and the movie and show libraries Discover browses. */
+    /** Search rows, one per type and server, and the movie and show libraries Discover browses, with their genres. */
     val searchAddons: Flow<List<Addon>> = addons.map { addons ->
-        addons.map { addon ->
-            addon.copy(
-                catalogs = addon.catalogs.filter {
-                    !it.id.startsWith(HOME_ROW_PREFIX) && ServerMediaKind.fromContentType(it.apiType) != null
-                }
-            )
-        }.filter { it.catalogs.isNotEmpty() }
+        withGenres(
+            addons.map { addon ->
+                addon.copy(
+                    catalogs = addon.catalogs.filter {
+                        !it.id.startsWith(HOME_ROW_PREFIX) && ServerMediaKind.fromContentType(it.apiType) != null
+                    }
+                )
+            }.filter { it.catalogs.isNotEmpty() }
+        )
     }
 
     fun libraries(): List<ServerLibraryRef> {
@@ -185,13 +201,21 @@ class ServerCatalog internal constructor(
             catalogId.startsWith(SEARCH_PREFIX) ->
                 searchPage(connection, catalogId.removePrefix(SEARCH_PREFIX), query, skip, posterPattern)
             else -> {
-                val library = connection.libraries.firstOrNull { it.id == catalogId }
+                val (sort, libraryId) = libraryCatalog(catalogId)
+                val library = connection.libraries.firstOrNull { it.id == libraryId }
                     ?: throw ServerException(ServerFailure.NOT_FOUND)
-                pageOf(connection, skip, posterPattern) {
-                    repository.call(connection.id) { provider, session ->
-                        provider.libraryPage(session, library, skip, PAGE_SIZE)
-                    }
-                }.also { if (skip == 0) libraryLoaded.tryEmit(connection.id) }
+                val genre = extraArgs["genre"]?.trim()?.takeIf { it.isNotEmpty() }
+                val genreId = genre?.let { name -> genres(connection, library).firstOrNull { it.name.equals(name, ignoreCase = true) }?.id }
+                val filter = ServerLibraryFilter.of(extraArgs[LETTER_EXTRA], extraArgs[UNWATCHED_EXTRA])
+                if (genre != null && genreId == null) {
+                    Page(emptyList(), null)
+                } else {
+                    pageOf(connection, skip, posterPattern) {
+                        repository.call(connection.id) { provider, session ->
+                            provider.libraryPage(session, library, skip, PAGE_SIZE, sort, genreId, filter)
+                        }
+                    }.also { if (skip == 0 && genre == null && filter == ServerLibraryFilter.NONE) libraryLoaded.tryEmit(connection.id) }
+                }
             }
         }
         return CatalogRow(
@@ -303,16 +327,20 @@ class ServerCatalog internal constructor(
                 hasExplicitShowInHome = true
             )
         }
-        val catalogs = homeCatalogs + libraries.map { library ->
-            CatalogDescriptor(
-                type = library.kind.domainType(),
-                rawType = library.kind.contentType,
-                id = library.id,
-                name = "$rowLabel · ${library.name}",
-                extra = listOf(CatalogExtra(name = "skip")),
-                showInHome = true,
-                hasExplicitShowInHome = true
-            )
+        val catalogs = homeCatalogs + libraries.flatMap { library ->
+            val titles = library.kind == ServerMediaKind.MOVIE || library.kind == ServerMediaKind.SERIES
+            val sorts = if (titles) SORTED_VERSIONS else emptyList()
+            (listOf<ServerSort?>(null) + sorts).map { sort ->
+                CatalogDescriptor(
+                    type = library.kind.domainType(),
+                    rawType = library.kind.contentType,
+                    id = if (sort == null) library.id else sortedCatalogId(sort, library.id),
+                    name = listOfNotNull(rowLabel, library.name, sort?.let(sortName)).joinToString(" · "),
+                    extra = listOf(CatalogExtra(name = "skip")) + libraryFilterExtras(titles, sort),
+                    showInHome = true,
+                    hasExplicitShowInHome = true
+                )
+            }
         }
         val searches = searchKinds.map { kind ->
             CatalogDescriptor(
@@ -337,6 +365,105 @@ class ServerCatalog internal constructor(
             resources = listOf(AddonResource(name = "catalog", types = emptyList(), idPrefixes = null))
         )
     }
+
+    /**
+     * The genres [library] can be narrowed to, read from the server at most every [GENRE_TTL_MS]
+     * and again after [GENRE_RETRY_MS] when the server could not answer.
+     */
+    suspend fun genres(connection: ServerConnection, library: ServerLibrary): List<ServerGenre> {
+        if (library.kind != ServerMediaKind.MOVIE && library.kind != ServerMediaKind.SERIES) return emptyList()
+        val key = genreKey(connection.id, library.id)
+        freshGenres(key)?.let { return it }
+        val load = genreLoads.computeIfAbsent(key) {
+            refreshScope.async(start = CoroutineStart.LAZY) { loadGenres(connection.id, library, key) }
+        }
+        load.invokeOnCompletion { genreLoads.remove(key, load) }
+        load.start()
+        return load.await()
+    }
+
+    /** Per genre name: how many titles it holds and a picture of its newest title; genres the server can't answer for are left out. */
+    suspend fun genreSummaries(connectionId: String, libraryId: String): Map<String, GenreSummary> {
+        val connection = repository.connection(connectionId) ?: return emptyMap()
+        val library = connection.libraries.firstOrNull { it.id == libraryId } ?: return emptyMap()
+        val gate = Semaphore(GENRE_COUNTS_AT_ONCE)
+        val pages = coroutineScope {
+            genres(connection, library).map { genre ->
+                async {
+                    gate.withPermit {
+                        try {
+                            repository.call(connection.id) { provider, session ->
+                                provider.libraryPage(session, library, 0, 1, ServerSort.ADDED, genre.id)
+                            }?.let { genre.name to it }
+                        } catch (error: CancellationException) {
+                            throw error
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
+                }
+            }.awaitAll().filterNotNull()
+        }
+        val firsts = pages.mapNotNull { (_, page) -> page.items.firstOrNull() }
+        val shown = present(connection, firsts, "").associateBy { it.id }
+        return pages.associate { (name, page) ->
+            val first = page.items.firstOrNull()?.let { shown[it.preview.id] ?: it.preview }
+            val picture = listOf(first?.background, first?.poster).firstOrNull { shareableArtwork(it, connection) }
+            name to GenreSummary(page.totalCount, picture?.trim())
+        }
+    }
+
+    private fun freshGenres(key: String): List<ServerGenre>? =
+        genreCache[key]?.takeIf { now() - it.readAtMs < if (it.failed) GENRE_RETRY_MS else GENRE_TTL_MS }?.genres
+
+    private suspend fun loadGenres(connectionId: String, library: ServerLibrary, key: String): List<ServerGenre> {
+        val genres = try {
+            repository.call(connectionId) { provider, session -> provider.libraryGenres(session, library) }
+                .distinctBy { it.name.lowercase() }
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            Log.w(TAG, "Library genres not read: ${error.forLog()}")
+            genreCache[key] = CachedGenres(emptyList(), now(), failed = true)
+            return emptyList()
+        }
+        genreCache[key] = CachedGenres(genres, now(), failed = false)
+        return genres
+    }
+
+    /** Adds each library's genres as an optional genre choice; a library without genres offers none. */
+    private suspend fun withGenres(addons: List<Addon>): List<Addon> {
+        val connections = repository.enabledConnections().associateBy { it.id }
+        val wanted = addons.flatMap { addon ->
+            val connection = connectionIdFromAddonId(addon.id)?.let(connections::get) ?: return@flatMap emptyList()
+            addon.catalogs.mapNotNull { catalog -> libraryOf(connection, catalog.id)?.let { connection to it } }
+        }.distinctBy { (connection, library) -> genreKey(connection.id, library.id) }
+        if (wanted.isEmpty()) return addons
+        withTimeoutOrNull(genreWaitMs) {
+            coroutineScope {
+                wanted.map { (connection, library) -> async { genres(connection, library) } }.awaitAll()
+            }
+        }
+        return addons.map { addon ->
+            val connection = connectionIdFromAddonId(addon.id)?.let(connections::get) ?: return@map addon
+            addon.copy(
+                catalogs = addon.catalogs.map { catalog ->
+                    val library = libraryOf(connection, catalog.id)
+                    val genres = library?.let { genreCache[genreKey(connection.id, it.id)]?.genres }.orEmpty()
+                    if (genres.isEmpty()) catalog
+                    else catalog.copy(extra = catalog.extra + CatalogExtra(name = "genre", options = genres.map { it.name }))
+                }
+            )
+        }
+    }
+
+    private fun libraryOf(connection: ServerConnection, catalogId: String): ServerLibrary? {
+        if (catalogId.startsWith(HOME_ROW_PREFIX) || catalogId.startsWith(COLLECTION_PREFIX) || catalogId.startsWith(SEARCH_PREFIX)) return null
+        val libraryId = libraryCatalog(catalogId).second
+        return connection.libraries.firstOrNull { it.id == libraryId }
+    }
+
+    private class CachedGenres(val genres: List<ServerGenre>, val readAtMs: Long, val failed: Boolean)
 
     /** Once per app run the server's own rows are read again, also when none were read at sign-in. */
     private fun refreshHomeRowsOnce(connection: ServerConnection) {
@@ -471,8 +598,59 @@ class ServerCatalog internal constructor(
         private const val HOME_ROW_PREFIX = "home:"
         private const val SEARCH_PREFIX = "search."
         private val SEARCH_KINDS = listOf(ServerMediaKind.MOVIE, ServerMediaKind.SERIES)
+        private const val SORTED_PREFIX = "sorted."
+        private val SORTED_VERSIONS = listOf(ServerSort.TITLE, ServerSort.RELEASED)
+        private const val GENRE_WAIT_MS = 3_000L
+        private const val GENRE_TTL_MS = 6 * 60 * 60 * 1000L
+        private const val GENRE_RETRY_MS = 10 * 60 * 1000L
+        private const val GENRE_COUNTS_AT_ONCE = 4
+        private val PRIVATE_QUERY = Regex("token|key|auth|sig|session|password", RegexOption.IGNORE_CASE)
+
+        /** A picture link that may be saved into a collection, which syncs: public, not from the server, nothing secret in it. */
+        fun shareableArtwork(url: String?, connection: ServerConnection): Boolean {
+            if (url.isNullOrBlank()) return false
+            val uri = runCatching { java.net.URI(url.trim()) }.getOrNull() ?: return false
+            if (uri.scheme?.lowercase() !in setOf("http", "https") || uri.host.isNullOrBlank()) return false
+            if (uri.userInfo != null) return false
+            val serverHosts = listOfNotNull(connection.address, connection.alternateAddress, connection.lastGoodAddress)
+                .mapNotNull { runCatching { java.net.URI(it.trim()).host }.getOrNull()?.lowercase() }
+            if (uri.host.lowercase() in serverHosts) return false
+            val names = uri.rawQuery?.split('&')?.map { it.substringBefore('=') }.orEmpty()
+            return names.none { PRIVATE_QUERY.containsMatchIn(it) }
+        }
+
+        const val LETTER_EXTRA = "letter"
+        const val UNWATCHED_EXTRA = "unwatched"
+
+        /** Discover's letter choice on the A to Z version, and the unwatched choice on every version of a title library. */
+        internal fun libraryFilterExtras(titles: Boolean, sort: ServerSort?): List<CatalogExtra> {
+            if (!titles) return emptyList()
+            val letter = CatalogExtra(name = LETTER_EXTRA, options = ServerLibraryFilter.LETTERS.map { it.toString() })
+            val unwatched = CatalogExtra(name = UNWATCHED_EXTRA, options = listOf("true"))
+            return if (sort == ServerSort.TITLE) listOf(letter, unwatched) else listOf(unwatched)
+        }
+
         private const val BASE_URL_PREFIX = "nuvio-server://"
         private const val ADDON_ID_PREFIX = "server."
+
+        private fun genreKey(connectionId: String, libraryId: String) = "$connectionId/$libraryId"
+
+        internal fun sortedCatalogId(sort: ServerSort, libraryId: String): String = "$SORTED_PREFIX${sort.key}:$libraryId"
+
+        /** The order and library a library catalog id stands for; a plain library id is the added order. */
+        internal fun libraryCatalog(catalogId: String): Pair<ServerSort, String> {
+            if (!catalogId.startsWith(SORTED_PREFIX)) return ServerSort.ADDED to catalogId
+            val rest = catalogId.removePrefix(SORTED_PREFIX)
+            val sort = ServerSort.fromKey(rest.substringBefore(':')) ?: return ServerSort.ADDED to catalogId
+            return sort to rest.substringAfter(':')
+        }
+
+        /** Home keys of the ready-sorted library versions, which stay off Home until switched on. */
+        fun hiddenByDefaultKeys(addons: List<Addon>): List<String> = addons
+            .filter { isServerAddonId(it.id) }
+            .flatMap { addon ->
+                addon.catalogs.filter { it.id.startsWith(SORTED_PREFIX) }.map { homeCatalogKey(addon.id, it.apiType, it.id) }
+            }
 
         fun isServerAddon(baseUrl: String?): Boolean = baseUrl?.startsWith(BASE_URL_PREFIX) == true
 

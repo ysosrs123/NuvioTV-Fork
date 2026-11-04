@@ -44,6 +44,7 @@ import com.nuvio.tv.R
 import com.nuvio.tv.core.network.displayFingerprint
 import com.nuvio.tv.data.mediaserver.ServerCapability
 import com.nuvio.tv.data.mediaserver.messageRes
+import com.nuvio.tv.data.mediaserver.plex.PlexProvider
 import com.nuvio.tv.data.mediaserver.silo.SiloNativeProvider
 import com.nuvio.tv.data.mediaserver.silo.SiloProvider
 import com.nuvio.tv.data.mediaserver.supports
@@ -71,6 +72,8 @@ internal fun MediaServerSettingsContent(
     var signIn by remember { mutableStateOf<ServerSignInRequest?>(null) }
     var siloSignIn by remember { mutableStateOf<SiloSignInRequest?>(null) }
     val siloNative = connection.providerId == SiloNativeProvider.ID
+    val plex = connection.providerId == PlexProvider.ID
+    var plexSignIn by remember { mutableStateOf(false) }
     var confirmRemove by remember { mutableStateOf(false) }
     var editAlternate by remember { mutableStateOf(false) }
     var editName by remember { mutableStateOf(false) }
@@ -134,6 +137,37 @@ internal fun MediaServerSettingsContent(
                             SettingsToggleRow(
                                 title = stringResource(R.string.servers_silo_home_rows),
                                 subtitle = stringResource(R.string.servers_silo_home_rows_description),
+                                checked = connection.showHomeRows,
+                                enabled = connection.enabled,
+                                onToggle = { viewModel.setShowHomeRows(connection.id, !connection.showHomeRows) }
+                            )
+                        }
+                    }
+                    if (plex) {
+                        item(key = "server_plex_connected_with") {
+                            SettingsActionRow(
+                                title = stringResource(R.string.servers_silo_connected_with),
+                                subtitle = stringResource(R.string.plex_connected_with_value),
+                                value = connection.userName,
+                                leadingIcon = Icons.Default.VpnKey,
+                                trailingIcon = null,
+                                onClick = {}
+                            )
+                        }
+                        item(key = "server_plex_user") {
+                            SettingsActionRow(
+                                title = stringResource(R.string.plex_home_user),
+                                subtitle = stringResource(R.string.plex_home_user_description),
+                                value = viewModel.plexUserName(connection),
+                                leadingIcon = Icons.Default.AccountCircle,
+                                enabled = connection.enabled,
+                                onClick = { viewModel.openPlexUsers(connection.id) }
+                            )
+                        }
+                        item(key = "server_plex_home_rows") {
+                            SettingsToggleRow(
+                                title = stringResource(R.string.plex_home_rows),
+                                subtitle = stringResource(R.string.plex_home_rows_description),
                                 checked = connection.showHomeRows,
                                 enabled = connection.enabled,
                                 onToggle = { viewModel.setShowHomeRows(connection.id, !connection.showHomeRows) }
@@ -253,6 +287,8 @@ internal fun MediaServerSettingsContent(
                                 onClick = {
                                     if (siloNative) {
                                         siloSignIn = SiloSignInRequest(connection.address)
+                                    } else if (plex) {
+                                        plexSignIn = true
                                     } else {
                                         signIn = ServerSignInRequest(provider, address = connection.address, username = connection.userName)
                                     }
@@ -301,6 +337,20 @@ internal fun MediaServerSettingsContent(
     }
 
     if (siloNative) SiloProfileDialog(viewModel, current = viewModel.siloProfileId(connection))
+
+    if (plex) PlexUserDialog(viewModel, current = viewModel.plexUserId(connection))
+
+    if (plexSignIn) {
+        PlexSignInDialog(
+            viewModel = viewModel,
+            onConnected = { connected ->
+                plexSignIn = false
+                if (connected.id != connection.id) onOpenServer(connected.id)
+            },
+            onDismiss = { plexSignIn = false },
+            replacing = connection.id
+        )
+    }
 
     if (editAlternate) {
         AlternateAddressDialog(

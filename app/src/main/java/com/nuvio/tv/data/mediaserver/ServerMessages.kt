@@ -17,8 +17,10 @@ fun ServerFailure.messageRes(): Int = when (this) {
 }
 
 @StringRes
-fun Throwable.serverPlaybackMessageRes(): Int =
-    serverFailure().takeUnless { it == ServerFailure.FAILED }?.messageRes() ?: R.string.servers_playback_failed
+fun Throwable.serverPlaybackMessageRes(): Int {
+    if ((this as? ServerException)?.issue == ServerSignInIssue.PLEX_REMOTE_PASS) return R.string.plex_remote_pass_needed
+    return serverFailure().takeUnless { it == ServerFailure.FAILED }?.messageRes() ?: R.string.servers_playback_failed
+}
 
 @StringRes
 fun ServerPlayMethod.labelRes(): Int = when (this) {

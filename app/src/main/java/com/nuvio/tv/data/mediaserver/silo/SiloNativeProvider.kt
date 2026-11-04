@@ -8,9 +8,11 @@ import com.nuvio.tv.data.mediaserver.ServerEpisode
 import com.nuvio.tv.data.mediaserver.ServerIndexEntry
 import com.nuvio.tv.data.mediaserver.ServerException
 import com.nuvio.tv.data.mediaserver.ServerFailure
+import com.nuvio.tv.data.mediaserver.ServerGenre
 import com.nuvio.tv.data.mediaserver.ServerHomeRow
 import com.nuvio.tv.data.mediaserver.ServerItemDetails
 import com.nuvio.tv.data.mediaserver.ServerLibrary
+import com.nuvio.tv.data.mediaserver.ServerLibraryFilter
 import com.nuvio.tv.data.mediaserver.ServerLocation
 import com.nuvio.tv.data.mediaserver.ServerMediaKind
 import com.nuvio.tv.data.mediaserver.ServerPage
@@ -34,6 +36,7 @@ import com.nuvio.tv.domain.model.Subtitle
 import com.nuvio.tv.data.mediaserver.ServerSession
 import com.nuvio.tv.data.mediaserver.ServerSignIn
 import com.nuvio.tv.data.mediaserver.ServerSignInIssue
+import com.nuvio.tv.data.mediaserver.ServerSort
 import com.nuvio.tv.data.mediaserver.ServerTitle
 import com.nuvio.tv.data.mediaserver.ServerTitleQuery
 import com.nuvio.tv.data.mediaserver.ServerUserState
@@ -320,12 +323,34 @@ class SiloNativeProvider internal constructor(
         session: ServerSession,
         library: ServerLibrary,
         start: Int,
-        limit: Int
+        limit: Int,
+        sort: ServerSort,
+        genreId: String?,
+        filter: ServerLibraryFilter
     ): ServerPage<ServerTitle> {
-        val page = catalogPage(session, "library", libraryQuery(library, sort = "-added_at", drawn("medium")), start, limit)
+        val order = when (sort) {
+            ServerSort.TITLE -> "title"
+            ServerSort.RELEASED -> "-release_date"
+            ServerSort.ADDED -> "-added_at"
+        }
+        val query = libraryQuery(library, sort = order, drawn("medium")) + mapOf(
+            "genre" to genreId?.takeIf { it.isNotBlank() },
+            "name_prefix" to filter.letter?.lowercaseChar()?.toString(),
+            "groups" to UNWATCHED_GROUPS.takeIf { filter.unwatched }
+        )
+        val page = catalogPage(session, "library", query, start, limit)
         val mapper = mapper(session)
         return ServerPage(page.items.mapNotNull(mapper::title), page.total.takeIf { page.totalExact })
     }
+
+    override suspend fun libraryGenres(session: ServerSession, library: ServerLibrary): List<ServerGenre> =
+        get(
+            session.address,
+            CATALOG_FILTERS_PATH,
+            CatalogFiltersWire.serializer(),
+            authHeaders(session),
+            mapOf("library_id" to library.id.substringBefore(PART), "skip_technical" to "true")
+        ).genres.map { it.trim() }.filter { it.isNotEmpty() }.distinct().map { ServerGenre(it, it) }
 
     override suspend fun search(
         session: ServerSession,
@@ -1179,6 +1204,7 @@ class SiloNativeProvider internal constructor(
         const val PROFILES_PATH = "/api/v2/profiles"
         const val USER_LIBRARIES_PATH = "/api/v2/user/libraries"
         const val CATALOG_PATH = "/api/v2/catalog"
+        const val CATALOG_FILTERS_PATH = "/api/v2/catalog/filters"
         const val CATALOG_ITEMS_PATH = "/api/v2/catalog/items"
         const val SERIES_PATH = "/api/v2/catalog/series"
         const val WATCHED_PATH = "/api/v2/watched"
@@ -1212,6 +1238,7 @@ class SiloNativeProvider internal constructor(
         const val CAPACITY_UNAVAILABLE = "capacity_unavailable"
         const val VALIDATION_FAILED = "validation_failed"
         const val DEVICE_NAME_MAX = 120
+        const val UNWATCHED_GROUPS = "[{\"match\":\"all\",\"rules\":[{\"field\":\"watched\",\"op\":\"is\",\"value\":false}]}]"
         const val RENEW_BEFORE_MS = 60_000L
 
         /** A mixed Silo library (movies and shows together) shows as two libraries, one per kind. */

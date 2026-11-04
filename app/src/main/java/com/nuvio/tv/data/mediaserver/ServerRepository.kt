@@ -3,6 +3,7 @@ package com.nuvio.tv.data.mediaserver
 import android.util.Log
 import com.nuvio.tv.core.network.ServerTrust
 import com.nuvio.tv.core.profile.ProfileScopedCredentialStore
+import com.nuvio.tv.data.mediaserver.plex.PlexProvider
 import com.nuvio.tv.data.mediaserver.silo.SiloNativeProvider
 import com.nuvio.tv.data.mediaserver.silo.SiloProvider
 import kotlinx.coroutines.CancellationException
@@ -86,6 +87,7 @@ class ServerRepository(
     private var showServerLogos = true
     private var localVersion = 0L
     private val activeAddresses = ConcurrentHashMap<String, AddressChoice>()
+    private val addressRefreshes = ConcurrentHashMap<String, Long>()
     private val renewLocks = ConcurrentHashMap<String, Mutex>()
     private val trustLock = Any()
     private val mutableLocalChanges = MutableSharedFlow<Int>(extraBufferCapacity = 8)
@@ -202,7 +204,10 @@ class ServerRepository(
                 if (first == null) run(session) else run(first).also { chooseAddress(connectionId, first.address) }
             } catch (error: ServerException) {
                 val switched = if (error.network) switchAddress(provider, first ?: session) else null
-                if (switched == null) throw error
+                if (switched == null) {
+                    if (error.network) refreshAddresses(provider, session)
+                    throw error
+                }
                 run(switched)
             }
         } catch (error: ServerException) {
@@ -259,6 +264,26 @@ class ServerRepository(
         return ServerSession(connection, session.token, other)
     }
 
+    /** When no saved address answers, the server's account service may know where it is now; the next call uses that. */
+    private suspend fun refreshAddresses(provider: ServerProvider, session: ServerSession) {
+        val connection = session.connection
+        val now = clock()
+        if (addressRefreshes[connection.id]?.let { now - it < ADDRESS_REFRESH_MS } == true) return
+        addressRefreshes[connection.id] = now
+        val listed = try {
+            withTimeoutOrNull(ADDRESS_REFRESH_WAIT_MS) { provider.listedAddresses(session) }
+        } catch (error: CancellationException) {
+            throw error
+        } catch (_: Exception) {
+            null
+        } ?: return
+        val alternate = listed.alternateAddress ?: connection.alternateAddress?.takeIf { it != listed.address }
+        if (listed.address == connection.address && alternate == connection.alternateAddress) return
+        if (!isSafeToUse(listed.address) && alternate?.let(::isSafeToUse) != true) return
+        activeAddresses.remove(connection.id)
+        updateConnection(connection.id) { it.copy(address = listed.address, alternateAddress = alternate, lastGoodAddress = null) }
+    }
+
     private fun rememberGoodAddress(connectionId: String, address: String) {
         val connections = mutableState.value.connections.map {
             if (it.id == connectionId) it.copy(lastGoodAddress = address) else it
@@ -281,6 +306,13 @@ class ServerRepository(
         if (location.address == connection.address) return AlternateAddressResult.SAME_ADDRESS
         updateConnection(connectionId) { it.copy(alternateAddress = location.address) }
         return AlternateAddressResult.SAVED
+    }
+
+    /** Saves a second address the server's account service listed, without asking it first: from home it may not answer. */
+    fun setListedAlternateAddress(connectionId: String, address: String) {
+        val connection = connection(connectionId) ?: return
+        if (address.isBlank() || address == connection.address || address == connection.alternateAddress) return
+        updateConnection(connectionId) { it.copy(alternateAddress = address) }
     }
 
     suspend fun connect(
@@ -699,13 +731,15 @@ class ServerRepository(
         prefix + (0 until 15).joinToString("") { Random.nextInt(16).toString(16) }
 
     private val ServerConnection.syncsToAccount: Boolean
-        get() = providerId != SiloProvider.ID && providerId != SiloNativeProvider.ID
+        get() = providerId != SiloProvider.ID && providerId != SiloNativeProvider.ID && providerId != PlexProvider.ID
 
     private class AddressChoice(val address: String, val atMs: Long)
 
     private companion object {
         const val TAG = "ServerRepository"
         const val ADDRESS_PROBE_MS = 5_000L
+        const val ADDRESS_REFRESH_MS = 5 * 60_000L
+        const val ADDRESS_REFRESH_WAIT_MS = 15_000L
         const val ALTERNATE_CONNECT_TIMEOUT_MS = 4_000L
         const val FIRST_ADDRESS_RETRY_MS = 10 * 60_000L
     }

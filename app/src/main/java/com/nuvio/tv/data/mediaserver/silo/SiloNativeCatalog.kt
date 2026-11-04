@@ -20,6 +20,11 @@ import kotlinx.serialization.Serializable
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 @Serializable
+internal data class CatalogFiltersWire(
+    val genres: List<String> = emptyList()
+)
+
+@Serializable
 internal data class CatalogPageWire(
     val items: List<CatalogItemWire> = emptyList(),
     val page: PageWire? = null,

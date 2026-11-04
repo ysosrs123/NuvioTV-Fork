@@ -1,5 +1,7 @@
 package com.nuvio.tv.ui.screens.collection
 
+import com.nuvio.tv.data.mediaserver.ServerCatalog
+import com.nuvio.tv.data.mediaserver.ServerSort
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -31,6 +33,8 @@ import com.nuvio.tv.domain.model.TraktCollectionSource
 import com.nuvio.tv.domain.model.enabledAddons
 import com.nuvio.tv.domain.repository.AddonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -84,7 +88,8 @@ data class CollectionEditorUiState(
     val traktPopularResults: List<TraktPublicListSearchResult> = emptyList(),
     val traktSearchError: String? = null,
     val genrePickerSourceIndex: Int? = null,
-    val showEmojiPicker: Boolean = false
+    val showEmojiPicker: Boolean = false,
+    val genreFolders: GenreFoldersState? = null
 )
 
 data class AvailableCatalog(
@@ -126,7 +131,8 @@ class CollectionEditorViewModel @Inject constructor(
     private val addonRepository: AddonRepository,
     private val tmdbCollectionSourceResolver: TmdbCollectionSourceResolver,
     private val traktPublicListSourceResolver: TraktPublicListSourceResolver,
-    private val collectionSyncService: CollectionSyncService
+    private val collectionSyncService: CollectionSyncService,
+    private val serverCatalog: ServerCatalog
 ) : ViewModel() {
 
     private val collectionIdArg: String = savedStateHandle["collectionId"] ?: ""
@@ -142,7 +148,7 @@ class CollectionEditorViewModel @Inject constructor(
 
     private fun loadData() {
         viewModelScope.launch {
-            val addons = addonRepository.getInstalledAddons().first().enabledAddons()
+            val addons = addonRepository.getInstalledAddons().first().enabledAddons() + serverCatalog.searchAddons.first()
             val availableCatalogs = addons.flatMap { addon ->
                 addon.catalogs
                     .filter { catalog ->
@@ -202,6 +208,91 @@ class CollectionEditorViewModel @Inject constructor(
                     addonCatalogInfoByKey = addonCatalogInfoByKey,
                     isLoading = false
                 )
+            }
+        }
+    }
+
+    fun showGenreFolders() {
+        val libraries = genreFolderLibraries(_uiState.value.availableCatalogs)
+        val library = libraries.firstOrNull() ?: return
+        _uiState.update { it.copy(genreFolders = GenreFoldersState(libraries = libraries, library = library)) }
+        loadGenreCounts(library)
+    }
+
+    fun hideGenreFolders() {
+        genreCountsJob?.cancel()
+        _uiState.update { it.copy(genreFolders = null) }
+    }
+
+    fun selectGenreFolderLibrary(library: AvailableCatalog) {
+        val state = _uiState.value.genreFolders ?: return
+        if (state.library == library) return
+        _uiState.update { it.copy(genreFolders = state.copy(library = library)) }
+        loadGenreCounts(library)
+    }
+
+    fun selectGenreFolderSort(sort: ServerSort) {
+        _uiState.update { state -> state.copy(genreFolders = state.genreFolders?.copy(sort = sort)) }
+    }
+
+    fun toggleGenreFolderGenre(name: String) {
+        genreTicksTouched = true
+        _uiState.update { state ->
+            val folders = state.genreFolders ?: return@update state
+            state.copy(
+                genreFolders = folders.copy(
+                    genres = folders.genres.map { if (it.name == name) it.copy(ticked = !it.ticked) else it }
+                )
+            )
+        }
+    }
+
+    fun createGenreFolders() {
+        val state = _uiState.value
+        val picker = state.genreFolders?.takeIf { it.canCreate } ?: return
+        val created = genreFolders(picker, state.folders, collectionsDataStore::generateId)
+        genreCountsJob?.cancel()
+        _uiState.update {
+            it.copy(
+                folders = it.folders + created,
+                title = it.title.ifBlank { picker.library.catalogName },
+                genreFolders = null
+            )
+        }
+    }
+
+    private var genreCountsJob: Job? = null
+    private var genreTicksTouched = false
+
+    private fun loadGenreCounts(library: AvailableCatalog) {
+        genreCountsJob?.cancel()
+        genreTicksTouched = false
+        val connectionId = ServerCatalog.connectionIdFromAddonId(library.addonId)
+        _uiState.update { state ->
+            state.copy(
+                genreFolders = state.genreFolders?.copy(
+                    genres = genreChoices(library.genreOptions, summaries = if (connectionId == null) emptyMap() else null),
+                    countsLoading = connectionId != null
+                )
+            )
+        }
+        if (connectionId == null) return
+        val libraryId = ServerCatalog.libraryCatalog(library.catalogId).second
+        genreCountsJob = viewModelScope.launch {
+            val summaries = try {
+                serverCatalog.genreSummaries(connectionId, libraryId)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                emptyMap()
+            }
+            _uiState.update { state ->
+                val folders = state.genreFolders?.takeIf { it.library == library } ?: return@update state
+                val ticks = folders.genres.associate { it.name to it.ticked }
+                val genres = genreChoices(library.genreOptions, summaries).map { choice ->
+                    if (genreTicksTouched) choice.copy(ticked = ticks[choice.name] ?: false) else choice
+                }
+                state.copy(genreFolders = folders.copy(genres = genres, countsLoading = false))
             }
         }
     }

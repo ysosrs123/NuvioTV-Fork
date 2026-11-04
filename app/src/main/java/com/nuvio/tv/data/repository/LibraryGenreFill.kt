@@ -181,7 +181,7 @@ class LibraryGenreFill internal constructor(
         internal const val START_DELAY_MS = 1_500L
         internal const val FAILURE_PAUSE_MS = 10L * 60L * 1000L
         private const val FAILURE_PAUSE_MIN_CHUNK = 4
-        private val FILLED_PROVIDERS = setOf(TrackingProviderId.SIMKL.storageId, TrackingProviderId.MDBLIST.storageId)
+        private val FILLED_PROVIDERS = setOf(TrackingProviderId.SIMKL.storageId, TrackingProviderId.MDBLIST.storageId, TrackingProviderId.WETRAKR.storageId)
 
         internal fun fillSettings(settings: TmdbSettings) =
             LibraryGenreFillSettings(settings.language, settings.enabled || !LOOKUPS_FOLLOW_TMDB_SWITCH)

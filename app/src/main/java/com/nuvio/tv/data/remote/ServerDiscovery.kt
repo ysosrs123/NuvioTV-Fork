@@ -1,6 +1,8 @@
 package com.nuvio.tv.data.remote
 
 import com.nuvio.tv.BuildConfig
+import com.nuvio.tv.core.network.ArcDns
+import com.nuvio.tv.core.network.IPv4FirstDns
 import com.nuvio.tv.core.network.NoDelaySocketFactory
 import com.nuvio.tv.domain.model.ServerCapabilities
 import com.nuvio.tv.domain.model.ServerConfiguration
@@ -140,6 +142,7 @@ internal object ServerDiscoveryPolicy {
 @Singleton
 class ServerDiscoveryService @Inject constructor() {
     private val client = OkHttpClient.Builder()
+        .dns(IPv4FirstDns(ArcDns.withSystemRetry))
         .socketFactory(NoDelaySocketFactory)
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)

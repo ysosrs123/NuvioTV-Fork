@@ -43,8 +43,14 @@ interface ServerProvider {
         session: ServerSession,
         library: ServerLibrary,
         start: Int,
-        limit: Int
+        limit: Int,
+        sort: ServerSort = ServerSort.ADDED,
+        genreId: String? = null,
+        filter: ServerLibraryFilter = ServerLibraryFilter.NONE
     ): ServerPage<ServerTitle>
+
+    /** The genres [library] can be narrowed to; empty when the server lists none. */
+    suspend fun libraryGenres(session: ServerSession, library: ServerLibrary): List<ServerGenre> = emptyList()
 
     suspend fun details(session: ServerSession, itemId: String): ServerItemDetails
 
@@ -84,6 +90,9 @@ interface ServerProvider {
         start: Int,
         limit: Int
     ): ServerPage<ServerIndexEntry> = unsupported()
+
+    /** Where the server is now according to its account service, for when no saved address answers; null without one. */
+    suspend fun listedAddresses(session: ServerSession): ServerAddresses? = null
 
     /** Items of [library] that may be [query]; null when the server cannot look up a single title this way. */
     suspend fun lookupTitle(
@@ -153,6 +162,36 @@ interface ServerProvider {
     /** A link that reads [target]'s file as it is (range requests), without opening a playback session; null when none. */
     fun staticStreamUrl(session: ServerSession, target: ServerPlaybackTarget): String? = null
 }
+
+enum class ServerSort(val key: String) {
+    ADDED("added"),
+    TITLE("title"),
+    RELEASED("released");
+
+    companion object {
+        fun fromKey(key: String?): ServerSort? = entries.firstOrNull { it.key == key }
+    }
+}
+
+/** Narrows a library list: titles whose sort title starts with [letter], and only the ones not watched yet. */
+data class ServerLibraryFilter(val letter: Char? = null, val unwatched: Boolean = false) {
+    companion object {
+        val NONE = ServerLibraryFilter()
+        val LETTERS: List<Char> = ('A'..'Z').toList()
+
+        fun of(letter: String?, unwatched: String?): ServerLibraryFilter = ServerLibraryFilter(
+            letter = letter?.trim()?.singleOrNull()?.uppercaseChar()?.takeIf { it in LETTERS },
+            unwatched = unwatched.toBoolean()
+        )
+    }
+}
+
+data class ServerGenre(
+    val id: String,
+    val name: String
+)
+
+data class GenreSummary(val count: Int?, val picture: String?)
 
 data class ServerIndexEntry(
     val itemId: String,

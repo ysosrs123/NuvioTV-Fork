@@ -3,6 +3,7 @@ package com.nuvio.tv.core.sync
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.logging.forLog
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.mediaserver.ServerRepository
 import com.nuvio.tv.data.mediaserver.ServerSyncSnapshot
@@ -80,7 +81,7 @@ class MediaServerSyncService @Inject constructor(
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
-                Log.w(TAG, "Removing media servers from the account failed for profile $profileId", error)
+                Log.w(TAG, "Removing media servers from the account failed for profile $profileId", error.forLog())
                 Result.failure(error)
             }
         }
@@ -127,7 +128,7 @@ class MediaServerSyncService @Inject constructor(
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
-            Log.e(TAG, "Media server sync failed for profile $profileId", error)
+            Log.e(TAG, "Media server sync failed for profile $profileId", error.forLog())
             Result.failure(error)
         }
 
@@ -164,7 +165,7 @@ class MediaServerSyncService @Inject constructor(
         } catch (error: CancellationException) {
             throw error
         } catch (error: Exception) {
-            Log.w(TAG, "Could not read the account's import switches before pushing", error)
+            Log.w(TAG, "Could not read the account's import switches before pushing", error.forLog())
             null
         }?.associateBy { it.key } ?: return snapshot
         val servers = snapshot.servers.map { server ->
@@ -199,7 +200,7 @@ class MediaServerSyncService @Inject constructor(
                     throw retryError
                 }
                 displayNamesRefused = true
-                Log.w(TAG, "The account did not take server display names; they stay on this device", error)
+                Log.w(TAG, "The account did not take server display names; they stay on this device", error.forLog())
             }
         }
         repository.markPushed(snapshot)

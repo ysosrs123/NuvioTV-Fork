@@ -59,6 +59,22 @@ class ServerAlternateAddressTest {
     }
 
     @Test
+    fun aServerThatMovedIsFoundAgainThroughItsAccountService() = runTest {
+        val moved = "https://moved.example"
+        provider.downAddresses += home
+        provider.listed = ServerAddresses(moved, away)
+
+        runCatching { libraries() }
+        runCatching { libraries() }
+        assertEquals(1, provider.listedRequests)
+        assertEquals(moved, repository.connection(connection.id)?.address)
+        assertEquals(away, repository.connection(connection.id)?.alternateAddress)
+
+        assertEquals(2, libraries().size)
+        assertEquals(moved, provider.libraryCallAddresses.last())
+    }
+
+    @Test
     fun aServerErrorDoesNotSwitchAddresses() = runTest {
         withAlternate()
         provider.failingWithStatus += home

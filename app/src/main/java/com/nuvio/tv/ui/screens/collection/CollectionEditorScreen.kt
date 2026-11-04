@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.collection
 
+import androidx.activity.compose.BackHandler
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import androidx.compose.foundation.BorderStroke
@@ -137,6 +138,18 @@ fun CollectionEditorScreen(
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             LoadingIndicator()
         }
+        return
+    }
+
+    uiState.genreFolders?.let { genreFolders ->
+        BackHandler { viewModel.hideGenreFolders() }
+        GenreFoldersContent(
+            state = genreFolders,
+            onSelectLibrary = viewModel::selectGenreFolderLibrary,
+            onSelectSort = viewModel::selectGenreFolderSort,
+            onToggleGenre = viewModel::toggleGenreFolderGenre,
+            onCreate = viewModel::createGenreFolders
+        )
         return
     }
 
@@ -480,7 +493,10 @@ fun CollectionEditorScreen(
 
         item(key = "add_folder") {
             val addFolderFocusRequester = folderFocusRequesters.getOrPut("add_folder") { FocusRequester() }
-            Box(modifier = Modifier.padding(start = NuvioTheme.spacing.sm, end = NuvioTheme.spacing.sm, top = NuvioTheme.spacing.xs)) {
+            Row(
+                modifier = Modifier.padding(start = NuvioTheme.spacing.sm, end = NuvioTheme.spacing.sm, top = NuvioTheme.spacing.xs),
+                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            ) {
                 NuvioButton(
                     onClick = {
                         lastFocusedFolderId = "add_folder"
@@ -491,6 +507,11 @@ fun CollectionEditorScreen(
                     Icon(imageVector = Icons.Default.Add, contentDescription = null)
                     Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
                     Text(stringResource(R.string.collections_editor_add_folder))
+                }
+                if (genreFolderLibraries(uiState.availableCatalogs).isNotEmpty()) {
+                    NuvioButton(onClick = viewModel::showGenreFolders) {
+                        Text(stringResource(R.string.collections_editor_genre_folders))
+                    }
                 }
             }
         }

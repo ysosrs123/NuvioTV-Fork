@@ -132,11 +132,11 @@ class ServerCatalogTest {
         assertEquals(ServerCatalog.addonId(connection.id), addon.id)
         assertEquals("Fake · Box", addon.displayName)
         assertTrue(ServerCatalog.isServerAddon(addon.baseUrl))
-        assertEquals(listOf("10", "search.movie", "search.series"), addon.catalogs.map { it.id })
+        assertEquals(listOf("10", "sorted.title:10", "sorted.released:10", "search.movie", "search.series"), addon.catalogs.map { it.id })
         assertEquals("Box · Movies", addon.catalogs.single { it.id == "10" }.name)
         assertEquals("Box · Movies", addon.catalogs.single { it.id == "search.movie" }.name)
         assertEquals(
-            listOf("10", "search.movie", "search.series"),
+            listOf("10", "sorted.title:10", "sorted.released:10", "search.movie", "search.series"),
             catalog.searchAddons.first().single().catalogs.map { it.id }
         )
         assertEquals(listOf("search.movie", "search.series"), addon.catalogs.filter { it.supportsExtra("search") }.map { it.id })

@@ -1,5 +1,7 @@
 package com.nuvio.tv.core.di
 
+import com.nuvio.tv.core.network.ArcDns
+import com.nuvio.tv.core.network.IPv4FirstDns
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
@@ -21,6 +23,7 @@ import com.nuvio.tv.data.mediaserver.ServerResumeImports
 import com.nuvio.tv.data.mediaserver.emby.EmbyProvider
 import com.nuvio.tv.data.mediaserver.jellyfin.JellyfinProvider
 import com.nuvio.tv.data.mediaserver.mediabrowser.ServerClientIdentity
+import com.nuvio.tv.data.mediaserver.plex.PlexProvider
 import com.nuvio.tv.data.mediaserver.silo.SiloNativeProvider
 import com.nuvio.tv.data.mediaserver.silo.SiloProvider
 import dagger.Module
@@ -49,6 +52,7 @@ object MediaServerModule {
         profileDataStore: ProfileDataStore
     ): ServerRepository {
         val http = OkHttpClient.Builder()
+            .dns(IPv4FirstDns(ArcDns.withSystemRetry))
             .socketFactory(NoDelaySocketFactory)
             .withServerTrust()
             .connectTimeout(15, TimeUnit.SECONDS)
@@ -70,7 +74,8 @@ object MediaServerModule {
                 SiloProvider(http, clientIdentity),
                 SiloNativeProvider(http, clientIdentity) { kind ->
                     context.getString(if (kind == ServerMediaKind.SERIES) R.string.type_series else R.string.type_movies)
-                }
+                },
+                PlexProvider(http, clientIdentity)
             ),
             scope = scope,
             isOnCurrentNetwork = { host -> isOnCurrentNetwork(context, host) }

@@ -6,9 +6,11 @@ import com.nuvio.tv.data.mediaserver.ServerCapability
 import com.nuvio.tv.data.mediaserver.ServerEpisode
 import com.nuvio.tv.data.mediaserver.ServerException
 import com.nuvio.tv.data.mediaserver.ServerFailure
+import com.nuvio.tv.data.mediaserver.ServerGenre
 import com.nuvio.tv.data.mediaserver.ServerIndexEntry
 import com.nuvio.tv.data.mediaserver.ServerItemDetails
 import com.nuvio.tv.data.mediaserver.ServerLibrary
+import com.nuvio.tv.data.mediaserver.ServerLibraryFilter
 import com.nuvio.tv.data.mediaserver.ServerLocation
 import com.nuvio.tv.data.mediaserver.ServerMediaKind
 import com.nuvio.tv.data.mediaserver.ServerPage
@@ -29,6 +31,7 @@ import com.nuvio.tv.data.mediaserver.ServerBytes
 import com.nuvio.tv.data.mediaserver.ServerSession
 import com.nuvio.tv.data.mediaserver.ServerSignIn
 import com.nuvio.tv.data.mediaserver.ServerSignInIssue
+import com.nuvio.tv.data.mediaserver.ServerSort
 import com.nuvio.tv.data.mediaserver.ServerThumbnailFormat
 import com.nuvio.tv.data.mediaserver.ServerTitle
 import com.nuvio.tv.data.mediaserver.ServerTitleQuery
@@ -60,7 +63,7 @@ internal abstract class MediaBrowserProvider(
     override val capabilities: Set<ServerCapability> = ServerCapability.entries.toSet() - ServerCapability.HOME_ROWS
 
     protected val client = MediaBrowserClient(authorizationHeader, http, identity)
-    private val libraryGenres = ConcurrentHashMap<String, String>()
+    private val fallbackGenres = ConcurrentHashMap<String, String>()
     private val aioStreamsServers = ConcurrentHashMap<String, Boolean>()
 
     protected abstract fun viewsEndpoint(userId: String): Endpoint
@@ -229,14 +232,17 @@ internal abstract class MediaBrowserProvider(
         session: ServerSession,
         library: ServerLibrary,
         start: Int,
-        limit: Int
+        limit: Int,
+        sort: ServerSort,
+        genreId: String?,
+        filter: ServerLibraryFilter
     ): ServerPage<ServerTitle> {
         val key = "${session.connection.id}:${library.id}"
-        var result = libraryItems(session, library, start, limit, libraryGenres[key])
-        if (result.items.isEmpty() && start == 0 && !libraryGenres.containsKey(key) && library.kind != ServerMediaKind.COLLECTION) {
+        var result = libraryItems(session, library, start, limit, genreId ?: fallbackGenres[key], sort, filter)
+        if (genreId == null && filter == ServerLibraryFilter.NONE && result.items.isEmpty() && start == 0 && !fallbackGenres.containsKey(key) && library.kind != ServerMediaKind.COLLECTION) {
             val genre = firstGenre(session, library).orEmpty()
-            libraryGenres[key] = genre
-            if (genre.isNotEmpty()) result = libraryItems(session, library, start, limit, genre)
+            fallbackGenres[key] = genre
+            if (genre.isNotEmpty()) result = libraryItems(session, library, start, limit, genre, sort, filter)
         }
         val mapper = mapper(session)
         return ServerPage(result.items.mapNotNull(mapper::title), result.totalRecordCount)
@@ -247,34 +253,45 @@ internal abstract class MediaBrowserProvider(
         library: ServerLibrary,
         start: Int,
         limit: Int,
-        genreId: String?
+        genreId: String?,
+        sort: ServerSort,
+        filter: ServerLibraryFilter
     ): ItemsResult = get(
         session,
         itemsEndpoint(session.userId),
         ItemsResult.serializer(),
-        itemQuery(library) + mapOf(
+        itemQuery(library) + itemOrder(library, sort) + mapOf(
             "genreIds" to genreId?.takeIf { it.isNotEmpty() },
-            "sortBy" to if (library.kind == ServerMediaKind.COLLECTION) "SortName" else "DateCreated,SortName",
-            "sortOrder" to if (library.kind == ServerMediaKind.COLLECTION) "Ascending" else "Descending",
+            "nameStartsWith" to filter.letter?.toString(),
+            "isPlayed" to "false".takeIf { filter.unwatched },
             "startIndex" to start.toString(),
             "limit" to limit.toString(),
             "enableTotalRecordCount" to "true"
         )
     )
 
+    override suspend fun libraryGenres(session: ServerSession, library: ServerLibrary): List<ServerGenre> =
+        genres(session, library, limit = null)
+
     /** Some libraries (AIOStreams catalogs) list nothing without a genre; their first genre opens them. */
     private suspend fun firstGenre(session: ServerSession, library: ServerLibrary): String? =
         try {
-            get(
-                session,
-                Endpoint("/Genres"),
-                ItemsResult.serializer(),
-                mapOf("parentId" to library.id, "userId" to session.userId, "limit" to "1")
-            ).items.firstOrNull()?.id
+            genres(session, library, limit = 1).firstOrNull()?.id
         } catch (error: CancellationException) {
             throw error
         } catch (_: Exception) {
             null
+        }
+
+    private suspend fun genres(session: ServerSession, library: ServerLibrary, limit: Int?): List<ServerGenre> =
+        get(
+            session,
+            Endpoint("/Genres"),
+            ItemsResult.serializer(),
+            mapOf("parentId" to library.id, "userId" to session.userId, "sortBy" to "SortName", "limit" to limit?.toString())
+        ).items.mapNotNull { genre ->
+            val name = genre.name?.trim().orEmpty()
+            if (genre.id.isBlank() || name.isEmpty()) null else ServerGenre(genre.id, name)
         }
 
     override suspend fun collectionPage(
@@ -823,6 +840,12 @@ internal abstract class MediaBrowserProvider(
         "imageTypeLimit" to "1",
         "enableImageTypes" to "Primary,Backdrop,Logo"
     )
+
+    private fun itemOrder(library: ServerLibrary, sort: ServerSort): Map<String, String> = when {
+        library.kind == ServerMediaKind.COLLECTION || sort == ServerSort.TITLE -> mapOf("sortBy" to "SortName", "sortOrder" to "Ascending")
+        sort == ServerSort.RELEASED -> mapOf("sortBy" to "PremiereDate,SortName", "sortOrder" to "Descending")
+        else -> mapOf("sortBy" to "DateCreated,SortName", "sortOrder" to "Descending")
+    }
 
     private val ServerSession.userId: String
         get() = connection.remoteUserId

@@ -38,6 +38,7 @@ import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.data.mediaserver.ServerConnection
 import com.nuvio.tv.data.mediaserver.ServerFailure
 import com.nuvio.tv.data.mediaserver.serverLogoRes
+import com.nuvio.tv.data.mediaserver.plex.PlexProvider
 import com.nuvio.tv.data.mediaserver.silo.SiloNativeProvider
 import com.nuvio.tv.data.mediaserver.silo.SiloProvider
 import com.nuvio.tv.ui.theme.NuvioTheme
@@ -51,6 +52,7 @@ internal fun MediaServersSettingsContent(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var signIn by remember { mutableStateOf<ServerSignInRequest?>(null) }
     var siloSetup by remember { mutableStateOf(false) }
+    var plexSignIn by remember { mutableStateOf(false) }
     var confirmRemoveFromAccount by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val connections = uiState.connections
@@ -103,13 +105,17 @@ internal fun MediaServersSettingsContent(
                     items(viewModel.addableProviders, key = { "provider_${it.id}" }) { provider ->
                         SettingsActionRow(
                             title = provider.displayName,
-                            subtitle = if (provider.id == SiloProvider.ID) {
-                                stringResource(R.string.servers_add_silo_description)
-                            } else {
-                                stringResource(R.string.servers_add_description, provider.displayName)
+                            subtitle = when (provider.id) {
+                                SiloProvider.ID -> stringResource(R.string.servers_add_silo_description)
+                                PlexProvider.ID -> stringResource(R.string.servers_add_plex_description)
+                                else -> stringResource(R.string.servers_add_description, provider.displayName)
                             },
                             onClick = {
-                                if (provider.id == SiloProvider.ID) siloSetup = true else signIn = ServerSignInRequest(provider)
+                                when (provider.id) {
+                                    SiloProvider.ID -> siloSetup = true
+                                    PlexProvider.ID -> plexSignIn = true
+                                    else -> signIn = ServerSignInRequest(provider)
+                                }
                             },
                             leadingIcon = Icons.Default.Dns.takeIf { serverLogoRes(provider.id) == null },
                             leadingRawIconRes = serverLogoRes(provider.id),
@@ -199,6 +205,17 @@ internal fun MediaServersSettingsContent(
         )
     }
 
+    if (plexSignIn) {
+        PlexSignInDialog(
+            viewModel = viewModel,
+            onConnected = { connection ->
+                plexSignIn = false
+                onOpenServer(connection.id)
+            },
+            onDismiss = { plexSignIn = false }
+        )
+    }
+
     signIn?.let { request ->
         ServerSignInDialog(
             request = request,
@@ -243,7 +260,9 @@ internal fun ServerConnection.kindLabel(viewModel: MediaServersViewModel): Strin
 
 @Composable
 internal fun ServerConnection.userLabel(viewModel: MediaServersViewModel): String =
-    viewModel.siloProfileName(this)?.let { stringResource(R.string.silo_user_profile, userName, it) } ?: userName
+    viewModel.siloProfileName(this)?.let { stringResource(R.string.silo_user_profile, userName, it) }
+        ?: viewModel.plexUserName(this)?.takeIf { it != userName }?.let { stringResource(R.string.silo_user_profile, userName, it) }
+        ?: userName
 
 @Composable
 internal fun ServerConnection.statusLabel(failure: ServerFailure?): String? = when {

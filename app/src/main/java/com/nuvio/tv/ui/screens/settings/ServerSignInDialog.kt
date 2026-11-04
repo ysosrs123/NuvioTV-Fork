@@ -352,6 +352,7 @@ private fun ServerSignInIssue.message(): String = stringResource(
         ServerSignInIssue.PASSWORD_SIGN_IN_OFF -> R.string.servers_error_password_sign_in_off
         ServerSignInIssue.TOO_MANY_TRIES -> R.string.servers_error_too_many_tries
         ServerSignInIssue.SILO_NOT_NATIVE -> R.string.servers_error_silo_not_native
+        ServerSignInIssue.PLEX_REMOTE_PASS -> R.string.plex_remote_pass_needed
         ServerSignInIssue.SERVER_MESSAGE -> R.string.servers_error_failed
     }
 )
