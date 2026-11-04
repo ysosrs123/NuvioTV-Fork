@@ -9,6 +9,8 @@ import android.os.SystemClock
 import android.util.Log
 import android.provider.Settings
 import com.nuvio.tv.core.profile.ProfileManager
+import com.nuvio.tv.core.party.nuvio.PartyError
+import com.nuvio.tv.core.party.nuvio.PartyRepository
 import com.nuvio.tv.data.local.ProfileLockStateDataStore
 import com.nuvio.tv.data.remote.supabase.AvatarCatalogItem
 import com.nuvio.tv.data.remote.supabase.AvatarRepository
@@ -56,6 +58,7 @@ class PartyRuntime @Inject constructor(
     private val localAvatars: LocalProfileAvatars,
     private val friendStore: PartyFriendStore,
     private val memberAccess: MemberAccessRepository,
+    private val nuvioParties: PartyRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -138,7 +141,75 @@ class PartyRuntime @Inject constructor(
         onFriendAdded = ::onFriendAdded,
     )
 
-    val state: StateFlow<PartyState> get() = session.state
+    /** A party with people on the Nuvio apps, through Nuvio's server. */
+    val nuvio = NuvioPartySession(
+        link = NuvioRepositoryLink(nuvioParties, scope),
+        clock = SystemClock::elapsedRealtime,
+        log = ::log,
+    )
+
+    /** The party this device is in, or Arc's own when it is in none. */
+    val party: PartyEngine get() = if (showsNuvio(session.state.value, nuvio.state.value)) nuvio else session
+
+    val state: StateFlow<PartyState> = combine(session.state, nuvio.state) { arc, withNuvio ->
+        if (showsNuvio(arc, withNuvio)) withNuvio else arc
+    }.stateIn(scope, SharingStarted.Eagerly, session.state.value)
+
+    private fun showsNuvio(arc: PartyState, withNuvio: PartyState): Boolean =
+        withNuvio.isActive || (withNuvio.endedByHost && !arc.isActive)
+
+    /** The title a guest should open, from whichever party this device is in. */
+    val mediaRequest: StateFlow<PartyMedia?> = combine(session.mediaRequest, nuvio.mediaRequest) { arc, withNuvio -> withNuvio ?: arc }
+        .stateIn(scope, SharingStarted.Eagerly, null)
+
+    fun consumeMediaRequest() {
+        session.consumeMediaRequest()
+        nuvio.consumeMediaRequest()
+    }
+
+    private val _withNuvioApps = MutableStateFlow(preferences.getBoolean(KEY_WITH_NUVIO_APPS, false))
+
+    /** The kind of party Start and Join use: false for an Arc party, true for one with Nuvio app users. */
+    val withNuvioApps: StateFlow<Boolean> = _withNuvioApps.asStateFlow()
+
+    fun setWithNuvioApps(enabled: Boolean) {
+        _withNuvioApps.value = enabled
+        preferences.edit().putBoolean(KEY_WITH_NUVIO_APPS, enabled).apply()
+        session.acknowledgeEnded()
+        nuvio.acknowledgeEnded()
+    }
+
+    /** Parties with Nuvio app users need a signed-in Nuvio account. */
+    val nuvioSignedIn: StateFlow<Boolean> get() = nuvioParties.canUse
+
+    /** Why the last start or join of a party with Nuvio app users did not work. */
+    val nuvioError: StateFlow<PartyError?> get() = nuvio.error
+
+    /** Starts a party of the kind chosen on the party page, unless [withNuvio] says otherwise. */
+    fun startParty(withNuvio: Boolean = withNuvioApps.value) {
+        nuvio.acknowledgeEnded()
+        if (withNuvio) {
+            session.leaveParty()
+            nuvio.createParty()
+        } else {
+            nuvio.leaveParty()
+            session.createParty()
+        }
+    }
+
+    /** False when the code cannot be a party code. */
+    fun joinParty(code: String): Boolean {
+        nuvio.acknowledgeEnded()
+        if (!withNuvioApps.value) {
+            nuvio.leaveParty()
+            return session.joinParty(code)
+        }
+        val normalized = com.nuvio.tv.core.party.nuvio.normalizePartyCode(code)
+        if (normalized.length != com.nuvio.tv.core.party.nuvio.PARTY_CODE_LENGTH) return false
+        session.leaveParty()
+        nuvio.joinParty(normalized)
+        return true
+    }
 
     val relays: List<String> get() = PartyRelays.DEFAULT
 
@@ -146,17 +217,18 @@ class PartyRuntime @Inject constructor(
     fun guestMediaFor(videoId: String, season: Int?, episode: Int?): PartyMedia? {
         val current = state.value
         if (!current.isActive || current.role != PartyRole.GUEST) return null
-        val media = session.partyMedia ?: return null
+        val media = party.partyMedia ?: return null
         return media.takeIf { (it.videoId ?: it.contentId) == videoId && it.season == season && it.episode == episode }
     }
 
     init {
         scope.launch {
-            session.state.map { it.isActive }.distinctUntilChanged().collectLatest { active ->
+            state.map { it.isActive }.distinctUntilChanged().collectLatest { active ->
                 if (!active) return@collectLatest
                 var ticks = 0
                 while (true) {
                     session.tick()
+                    nuvio.tick()
                     if (++ticks % TRANSPORT_TICK_EVERY == 0) transport?.tick()
                     if (ticks % TOGETHER_EVERY == TRANSPORT_TICK_EVERY) noteTogether()
                     delay(TICK_MS)
@@ -257,11 +329,13 @@ class PartyRuntime @Inject constructor(
     fun inviteFriend(friend: PartyFriend) {
         val profileId = activeId
         val me = friendStore.identity(profileId, create = true) ?: return
-        val current = state.value
+        nuvio.leaveParty()
+        nuvio.acknowledgeEnded()
+        val current = session.state.value
         val code = (if (current.isActive) current.code else null) ?: session.createParty()
         val media = session.partyMedia ?: session.attachedMedia
         val card = currentProfile()
-        val host = state.value.members.firstOrNull { it.isHost }?.name?.ifBlank { null }
+        val host = session.state.value.members.firstOrNull { it.isHost }?.name?.ifBlank { null }
         val invite = PartyInvite(
             id = "",
             from = me.publicKeyHex,
@@ -272,7 +346,7 @@ class PartyRuntime @Inject constructor(
             hostId = session.hostMemberId,
             title = media?.title?.ifBlank { null },
             poster = PartyInvites.cleanImage(media?.poster),
-            watching = state.value.members.size.coerceAtLeast(1),
+            watching = session.state.value.members.size.coerceAtLeast(1),
             avatarUrl = card.avatarUrl,
             colour = card.colour,
             sentAt = 0L,
@@ -376,6 +450,8 @@ class PartyRuntime @Inject constructor(
         }
         invites.clear()
         _invite.value = null
+        nuvio.leaveParty()
+        nuvio.acknowledgeEnded()
         if (current.profileId == activeId) {
             session.joinParty(current.invite.code, current.invite.roomKey, current.invite.hostId)
             return
@@ -518,6 +594,7 @@ class PartyRuntime @Inject constructor(
         private const val TAG = "WatchParty"
         private const val KEY_RELAYS = "relays"
         private const val KEY_NAME = "name"
+        private const val KEY_WITH_NUVIO_APPS = "with_nuvio_apps"
         private const val TICK_MS = 100L
         private const val TRANSPORT_TICK_EVERY = 10
         private const val TOGETHER_EVERY = 300

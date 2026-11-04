@@ -39,6 +39,7 @@ import com.nuvio.tv.core.party.PartyRuntime
 import com.nuvio.tv.core.party.PartyState
 import com.nuvio.tv.core.party.PartyStatus
 import com.nuvio.tv.core.party.PartyTransportProblem
+import com.nuvio.tv.core.party.nuvio.PartyError
 import com.nuvio.tv.core.qr.QrCodeGenerator
 import com.nuvio.tv.ui.screens.player.DialogButton
 import com.nuvio.tv.ui.theme.NuvioTheme
@@ -88,6 +89,7 @@ private const val HOST_NOTICE_MS = 5_000L
 internal fun partyStatusLine(state: PartyState): String = when {
     state.problem == PartyTransportProblem.DEVICE_CLOCK_REJECTED -> stringResource(R.string.party_problem_clock)
     state.problem == PartyTransportProblem.NO_RELAY_REACHABLE -> stringResource(R.string.party_problem_unreachable)
+    state.waitingForTitle -> stringResource(R.string.party_nuvio_waiting_title)
     state.status == PartyStatus.CONNECTING -> stringResource(R.string.party_connecting)
     state.status == PartyStatus.RECONNECTING -> stringResource(R.string.party_reconnecting)
     state.hold != null -> partyHoldLine(state.hold)
@@ -159,6 +161,48 @@ internal fun PartyInviteQr(code: String, large: Boolean = false, captionBetween:
     }
 }
 
+/** One QR code with the address that opens a party with Nuvio app users in the Nuvio apps. */
+@Composable
+internal fun PartyLinkQr(link: String?, large: Boolean = false) {
+    if (link.isNullOrEmpty()) return
+    QrCell(message = link, label = stringResource(R.string.party_nuvio_qr_label), large = large)
+}
+
+/** "With Nuvio app users · Experimental", the seats, and where the party runs. */
+@Composable
+internal fun PartyNuvioLine(state: PartyState) {
+    val seats = state.maxMembers?.let { stringResource(R.string.party_nuvio_seats, state.members.size, it) }
+    Text(
+        text = listOfNotNull(
+            stringResource(R.string.party_kind_nuvio),
+            stringResource(R.string.party_experimental),
+            seats,
+        ).joinToString("  ·  "),
+        style = MaterialTheme.typography.labelMedium,
+        color = NuvioTheme.colors.Secondary,
+    )
+    Text(
+        text = stringResource(R.string.party_nuvio_room_note),
+        style = MaterialTheme.typography.bodySmall,
+        color = NuvioTheme.colors.TextTertiary,
+    )
+}
+
+/** Why a party with Nuvio app users could not start or be joined. */
+@Composable
+internal fun nuvioErrorText(error: PartyError): String = stringResource(
+    when (error) {
+        PartyError.NotFound -> R.string.party_nuvio_error_not_found
+        PartyError.Full -> R.string.party_nuvio_error_full
+        PartyError.Removed -> R.string.party_nuvio_error_removed
+        PartyError.Ended -> R.string.party_nuvio_error_ended
+        PartyError.RateLimited -> R.string.party_nuvio_error_rate_limited
+        PartyError.SignInRequired -> R.string.party_nuvio_error_sign_in
+        PartyError.Unavailable -> R.string.party_nuvio_error_unavailable
+        PartyError.Network -> R.string.party_nuvio_error_network
+    }
+)
+
 @Composable
 private fun QrCell(message: String, label: String, large: Boolean) {
     val bitmap = remember(message) {
@@ -202,8 +246,9 @@ internal fun PartyRoomContent(
     modifier: Modifier = Modifier,
     inviteList: Boolean = true,
 ) {
-    val session = runtime.session
+    val party = runtime.party
     val isHost = state.role == PartyRole.HOST
+    val withNuvioApps = state.withNuvioApps
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xl),
@@ -223,11 +268,12 @@ internal fun PartyRoomContent(
                     color = NuvioTheme.colors.TextPrimary,
                 )
             }
-            if (isHost) PartyInviteQr(code = state.code.orEmpty())
+            if (isHost && withNuvioApps) PartyLinkQr(link = state.inviteLink)
+            else if (isHost) PartyInviteQr(code = state.code.orEmpty())
         }
         if (isHost) {
             Text(
-                text = stringResource(R.string.party_invite_qr),
+                text = stringResource(if (withNuvioApps) R.string.party_nuvio_qr_caption else R.string.party_invite_qr),
                 style = MaterialTheme.typography.labelSmall,
                 color = NuvioTheme.colors.TextTertiary,
             )
@@ -237,6 +283,7 @@ internal fun PartyRoomContent(
             style = MaterialTheme.typography.bodyMedium,
             color = NuvioTheme.colors.TextSecondary,
         )
+        if (withNuvioApps) PartyNuvioLine(state)
         state.durationMismatchMs?.let { difference ->
             Text(
                 text = stringResource(
@@ -256,7 +303,7 @@ internal fun PartyRoomContent(
                 )
             }
         }
-        if (inviteList) PartyPanelInviteList(state = state, runtime = runtime)
+        if (inviteList && !withNuvioApps) PartyPanelInviteList(state = state, runtime = runtime)
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
             verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
@@ -266,21 +313,21 @@ internal fun PartyRoomContent(
                     text = stringResource(
                         if (state.guestsControl) R.string.party_guests_control_on else R.string.party_guests_control_off
                     ),
-                    onClick = { session.setGuestsControl(!state.guestsControl) },
+                    onClick = { party.setGuestsControl(!state.guestsControl) },
                     isPrimary = false,
                     modifier = Modifier.focusRequester(firstFocus),
                 )
-                if (canShareLink) {
+                if (canShareLink && !withNuvioApps) {
                     DialogButton(
                         text = stringResource(if (state.shareLink) R.string.party_share_link_on else R.string.party_share_link_off),
-                        onClick = { session.setShareLink(!state.shareLink) },
+                        onClick = { runtime.session.setShareLink(!state.shareLink) },
                         isPrimary = false,
                     )
                 }
-                if (canStartTogether) {
+                if (canStartTogether && !withNuvioApps) {
                     DialogButton(
                         text = stringResource(R.string.party_start_together),
-                        onClick = { session.startTogether() },
+                        onClick = { runtime.session.startTogether() },
                         isPrimary = false,
                         enabled = state.members.size > 1 && state.hold == null,
                     )
@@ -288,19 +335,19 @@ internal fun PartyRoomContent(
                 if (state.hold?.reason == PartyHoldReason.BUFFERING) {
                     DialogButton(
                         text = stringResource(R.string.party_continue_without),
-                        onClick = { session.continueWithoutWaiting() },
+                        onClick = { party.continueWithoutWaiting() },
                         isPrimary = false,
                     )
                 }
                 DialogButton(
                     text = stringResource(R.string.party_end),
-                    onClick = { session.endParty() },
+                    onClick = { party.endParty() },
                     isPrimary = false,
                 )
             } else {
                 DialogButton(
                     text = stringResource(R.string.party_leave),
-                    onClick = { session.leaveParty() },
+                    onClick = { party.leaveParty() },
                     isPrimary = false,
                     modifier = Modifier.focusRequester(firstFocus),
                 )

@@ -23,7 +23,7 @@ class PartySession(
     private val friendIdentity: (create: Boolean) -> PartyIdentity? = { null },
     private val isFriend: (String) -> Boolean = { false },
     private val onFriendAdded: (PartyFriendRequest) -> Unit = {},
-) {
+) : PartyEngine {
     private class Member(val id: String) {
         var name: String = ""
         var speedOk: Boolean = true
@@ -56,12 +56,12 @@ class PartySession(
     }
 
     private val _state = MutableStateFlow(PartyState())
-    val state: StateFlow<PartyState> = _state.asStateFlow()
+    override val state: StateFlow<PartyState> = _state.asStateFlow()
 
     private val _mediaRequest = MutableStateFlow<PartyMedia?>(null)
 
     /** The title a guest should open. The app navigates there, then calls [consumeMediaRequest]. */
-    val mediaRequest: StateFlow<PartyMedia?> = _mediaRequest.asStateFlow()
+    override val mediaRequest: StateFlow<PartyMedia?> = _mediaRequest.asStateFlow()
 
     private val _friendRequest = MutableStateFlow<PartyFriendRequest?>(null)
 
@@ -69,7 +69,7 @@ class PartySession(
     val friendRequest: StateFlow<PartyFriendRequest?> = _friendRequest.asStateFlow()
 
     /** What the party is watching, for the guest's stream picker. */
-    val partyMedia: PartyMedia? get() = hostMedia
+    override val partyMedia: PartyMedia? get() = hostMedia
 
     /** The party's long key; null for an older room that runs on its code. */
     val roomKey: String? get() = access?.key
@@ -200,21 +200,21 @@ class PartySession(
     /** The current host's id, for invites. */
     val hostMemberId: String? get() = hostId
 
-    fun leaveParty() {
+    override fun leaveParty() {
         if (status == PartyStatus.IDLE) return
         transport?.send(PartyCodec.encode(PartyMessage.Bye))
         shutDown(endedByHost = false)
     }
 
     /** Host only: closes the room for everyone. */
-    fun endParty() {
+    override fun endParty() {
         if (status == PartyStatus.IDLE) return
         if (role == PartyRole.HOST) transport?.send(PartyCodec.encode(PartyMessage.End(term)))
         else transport?.send(PartyCodec.encode(PartyMessage.Bye))
         shutDown(endedByHost = false)
     }
 
-    fun acknowledgeEnded() {
+    override fun acknowledgeEnded() {
         if (endedByHost) {
             endedByHost = false
             publish()
@@ -285,17 +285,17 @@ class PartySession(
         _friendRequest.value = friendRequests.firstOrNull()
     }
 
-    fun consumeMediaRequest() {
+    override fun consumeMediaRequest() {
         _mediaRequest.value = null
     }
 
     /** Guest only: opens what the party is watching again, for a guest who wandered off. */
-    fun requestPartyTitle() {
+    override fun requestPartyTitle() {
         if (role != PartyRole.GUEST) return
         hostMedia?.let { _mediaRequest.value = it }
     }
 
-    fun setGuestsControl(enabled: Boolean) {
+    override fun setGuestsControl(enabled: Boolean) {
         if (role != PartyRole.HOST || guestsControl == enabled) return
         guestsControl = enabled
         broadcastState()
@@ -320,7 +320,7 @@ class PartySession(
     }
 
     /** Host only: stops waiting for a member who is still buffering. */
-    fun continueWithoutWaiting() {
+    override fun continueWithoutWaiting() {
         val current = hold ?: return
         if (role != PartyRole.HOST) return
         val now = clock()
@@ -328,7 +328,7 @@ class PartySession(
         endHold(now)
     }
 
-    fun attachPlayer(player: PartyPlayer, media: PartyMedia) {
+    override fun attachPlayer(player: PartyPlayer, media: PartyMedia) {
         val now = clock()
         this.player = player
         this.playerMedia = media
@@ -385,7 +385,7 @@ class PartySession(
         publish()
     }
 
-    fun detachPlayer(player: PartyPlayer) {
+    override fun detachPlayer(player: PartyPlayer) {
         if (this.player !== player) return
         lastHostPosition = runCatching { player.positionMs }.getOrDefault(lastHostPosition)
         applySpeed(player, 1f)
@@ -409,7 +409,7 @@ class PartySession(
         publish()
     }
 
-    val attachedMedia: PartyMedia? get() = playerMedia
+    override val attachedMedia: PartyMedia? get() = playerMedia
 
     /** A host with company hands the room over while away; a guest is left out of the waiting and lines up on return. */
     private fun updateAway(now: Long) {
@@ -449,11 +449,11 @@ class PartySession(
      * The person at this device is about to move the position. Only announced jumps are shared with the room;
      * the player's own recovery seeks are left to the normal drift handling.
      */
-    fun noteLocalSeek() {
+    override fun noteLocalSeek() {
         seekIntentUntil = clock() + SEEK_INTENT_WINDOW_MS
     }
 
-    fun tick() {
+    override fun tick() {
         if (status == PartyStatus.IDLE) return
         val now = clock()
         lastTickAt?.let { if (now - it > TICK_GAP_MS) lastAbsentAt = now }

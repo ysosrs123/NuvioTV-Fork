@@ -64,6 +64,14 @@ data class PartyState(
     val hostChanges: Int = 0,
     /** Members this device asked to add as a friend and who have not answered yet. */
     val friendAsked: Set<String> = emptySet(),
+    /** A party with Nuvio app users, through Nuvio's server. */
+    val withNuvioApps: Boolean = false,
+    /** Seats in a party with Nuvio app users. */
+    val maxMembers: Int? = null,
+    /** A party with Nuvio app users is started and waits for the first title to play. */
+    val waitingForTitle: Boolean = false,
+    /** The address that opens a party with Nuvio app users on a phone. */
+    val inviteLink: String? = null,
 ) {
     val isActive: Boolean get() = status != PartyStatus.IDLE
 }

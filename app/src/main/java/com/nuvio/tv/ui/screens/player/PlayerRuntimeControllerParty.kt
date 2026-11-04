@@ -13,7 +13,7 @@ import com.nuvio.tv.core.party.PartyFingerprint
 import com.nuvio.tv.core.party.PartyLinkPolicy
 import com.nuvio.tv.core.party.PartyMedia
 import com.nuvio.tv.core.party.PartyPlayer
-import com.nuvio.tv.core.party.PartySession
+import com.nuvio.tv.core.party.PartyRuntime
 import com.nuvio.tv.data.mediaserver.ServerItemRef
 import com.nuvio.tv.ui.screens.party.rememberPartyRuntime
 import kotlinx.coroutines.delay
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 /** The open player as a watch party sees it. Lives as long as the player screen. */
 internal class PartyPlayerBridge(
     private val controller: PlayerRuntimeController,
-    private val session: PartySession,
+    private val runtime: PartyRuntime,
 ) : PartyPlayer {
 
     /** True while the party, not the person at this device, has playback paused. */
@@ -102,7 +102,7 @@ internal class PartyPlayerBridge(
     }
 
     /** True while this player is in a party: the room decides when it plays. */
-    val inParty: Boolean get() = session.state.value.isActive
+    val inParty: Boolean get() = runtime.state.value.isActive
 
     /** Called before the player handles an event. True means the party has dealt with it. */
     fun onPlayerEvent(event: PlayerEvent): Boolean {
@@ -110,7 +110,7 @@ internal class PartyPlayerBridge(
             controller.pausedFromOutside = false
             partyPaused = false
         }
-        if (!session.state.value.isActive) return false
+        if (!runtime.state.value.isActive) return false
         when (event) {
             PlayerEvent.OnPlayPause -> partyPaused = false
             PlayerEvent.OnSeekForward,
@@ -118,7 +118,7 @@ internal class PartyPlayerBridge(
             is PlayerEvent.OnSeekBy,
             PlayerEvent.OnCommitPreviewSeek,
             is PlayerEvent.OnSeekTo,
-            PlayerEvent.OnSkipIntro -> session.noteLocalSeek()
+            PlayerEvent.OnSkipIntro -> runtime.party.noteLocalSeek()
             is PlayerEvent.OnSetPlaybackSpeed -> if (event.speed != 1f) {
                 controller.showPartySpeedNotice()
                 return true
@@ -197,7 +197,7 @@ internal fun PlayerRuntimeController.partyMedia(): PartyMedia? {
 internal fun PartyPlayerBinding(viewModel: PlayerViewModel) {
     val runtime = rememberPartyRuntime()
     val controller = viewModel.controller
-    val bridge = remember(controller) { PartyPlayerBridge(controller, runtime.session) }
+    val bridge = remember(controller) { PartyPlayerBridge(controller, runtime) }
     val uiState by viewModel.uiState.collectAsState()
     val timeline by viewModel.playbackTimeline.collectAsState()
     val partyState by runtime.state.collectAsState()
@@ -206,6 +206,7 @@ internal fun PartyPlayerBinding(viewModel: PlayerViewModel) {
         controller.partyBridge = bridge
         onDispose {
             runtime.session.detachPlayer(bridge)
+            runtime.nuvio.detachPlayer(bridge)
             controller.partyBridge = null
         }
     }
@@ -220,9 +221,11 @@ internal fun PartyPlayerBinding(viewModel: PlayerViewModel) {
         val media = if (playing != null) controller.partyMedia() else null
         if (media == null) {
             runtime.session.detachPlayer(bridge)
+            runtime.nuvio.detachPlayer(bridge)
         } else {
             if (partyState.isActive) bridge.useNormalSpeed()
             runtime.session.attachPlayer(bridge, media)
+            runtime.nuvio.attachPlayer(bridge, media)
         }
     }
 }

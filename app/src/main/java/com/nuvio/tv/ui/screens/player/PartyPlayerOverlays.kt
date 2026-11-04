@@ -90,6 +90,7 @@ internal fun PartyPanelOverlay(
                 )
             } else {
                 val canCreate = runtime.session.attachedMedia != null
+                val signedIn by runtime.nuvioSignedIn.collectAsState()
                 Text(
                     text = stringResource(if (canCreate) R.string.party_create_description else R.string.party_not_available),
                     style = MaterialTheme.typography.bodyMedium,
@@ -98,10 +99,16 @@ internal fun PartyPanelOverlay(
                 Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
                     DialogButton(
                         text = stringResource(R.string.party_create),
-                        onClick = { runtime.session.createParty() },
+                        onClick = { runtime.startParty(withNuvio = false) },
                         isPrimary = true,
                         enabled = canCreate,
                         modifier = Modifier.focusRequester(firstFocus),
+                    )
+                    DialogButton(
+                        text = stringResource(R.string.party_kind_nuvio),
+                        onClick = { runtime.startParty(withNuvio = true) },
+                        isPrimary = false,
+                        enabled = canCreate && signedIn,
                     )
                     DialogButton(
                         text = stringResource(R.string.party_close),

@@ -81,6 +81,7 @@ import com.nuvio.tv.core.party.PartyMemberView
 import com.nuvio.tv.core.party.PartyRole
 import com.nuvio.tv.core.party.PartyRuntime
 import com.nuvio.tv.core.party.PartyState
+import com.nuvio.tv.core.party.nuvio.PARTY_CODE_ALPHABET
 import com.nuvio.tv.domain.model.SettingsPresentation
 import com.nuvio.tv.ui.screens.player.DialogButton
 import com.nuvio.tv.ui.screens.settings.SettingsPageAtmosphere
@@ -93,11 +94,12 @@ import kotlinx.coroutines.delay
 
 /** Settings > Watch party: start or join a party, or follow the one this device is in. */
 @Composable
-fun PartyScreen(onBackPress: () -> Unit) {
+fun PartyScreen(onBackPress: () -> Unit, onSignIn: () -> Unit = {}) {
     BackHandler { onBackPress() }
 
     val runtime = rememberPartyRuntime()
     val state by runtime.state.collectAsState()
+    val withNuvioApps by runtime.withNuvioApps.collectAsState()
     val firstFocus = remember { FocusRequester() }
     var showLook by remember { mutableStateOf(false) }
     var lookChanges by remember { mutableIntStateOf(0) }
@@ -157,17 +159,26 @@ fun PartyScreen(onBackPress: () -> Unit) {
                                 firstFocus = firstFocus,
                                 lookChanges = lookChanges,
                                 onLook = { showLook = true },
+                                onSignIn = onSignIn,
                             )
                         }
                     }
                     PartyCard(modifier = Modifier.width(if (state.isActive) 340.dp else 300.dp)) {
                         if (state.isActive) PartyMembers(state = state, runtime = runtime)
-                        PartyFriendsSection(
-                            state = state,
-                            runtime = runtime,
-                            onShowAll = { showAll = true },
-                            limit = if (state.isActive) 2 else 4,
-                        )
+                        if (state.withNuvioApps || (!state.isActive && withNuvioApps)) {
+                            Text(
+                                text = stringResource(R.string.party_nuvio_friends_hint),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = NuvioTheme.colors.TextSecondary,
+                            )
+                        } else {
+                            PartyFriendsSection(
+                                state = state,
+                                runtime = runtime,
+                                onShowAll = { showAll = true },
+                                limit = if (state.isActive) 2 else 4,
+                            )
+                        }
                     }
                 }
             }
@@ -215,10 +226,15 @@ private fun PartyStartStage(
     firstFocus: FocusRequester,
     lookChanges: Int,
     onLook: () -> Unit,
+    onSignIn: () -> Unit,
 ) {
     var joining by remember { mutableStateOf(false) }
     var code by remember { mutableStateOf("") }
     var invalid by remember { mutableStateOf(false) }
+    val withNuvioApps by runtime.withNuvioApps.collectAsState()
+    val signedIn by runtime.nuvioSignedIn.collectAsState()
+    val nuvioError by runtime.nuvioError.collectAsState()
+    val needsSignIn = withNuvioApps && !signedIn
 
     fun leaveCode() {
         joining = false
@@ -227,7 +243,7 @@ private fun PartyStartStage(
     }
 
     fun join() {
-        if (runtime.session.joinParty(code)) leaveCode() else invalid = true
+        if (runtime.joinParty(code)) leaveCode() else invalid = true
     }
 
     BackHandler(enabled = joining) { leaveCode() }
@@ -239,6 +255,13 @@ private fun PartyStartStage(
     }
 
     Overline(stringResource(R.string.party_title))
+    PartyKindSwitch(
+        withNuvioApps = withNuvioApps,
+        onChange = { nuvio ->
+            leaveCode()
+            runtime.setWithNuvioApps(nuvio)
+        },
+    )
     if (state.endedByHost) {
         Text(
             text = stringResource(R.string.party_ended_by_host),
@@ -246,18 +269,55 @@ private fun PartyStartStage(
             color = NuvioTheme.colors.TextPrimary,
         )
     }
+    nuvioError?.takeIf { withNuvioApps }?.let { error ->
+        Text(
+            text = nuvioErrorText(error),
+            style = MaterialTheme.typography.bodyMedium,
+            color = NuvioTheme.colors.Error,
+        )
+    }
     Text(
-        text = stringResource(R.string.party_stage_headline),
+        text = stringResource(
+            when {
+                needsSignIn -> R.string.party_nuvio_signin_headline
+                withNuvioApps -> R.string.party_nuvio_headline
+                else -> R.string.party_stage_headline
+            }
+        ),
         style = MaterialTheme.typography.displaySmall,
         fontWeight = FontWeight.Bold,
         color = NuvioTheme.colors.TextPrimary,
     )
     Text(
-        text = stringResource(R.string.party_stage_lead),
+        text = stringResource(
+            when {
+                needsSignIn -> R.string.party_nuvio_signin_lead
+                withNuvioApps -> R.string.party_nuvio_lead
+                else -> R.string.party_stage_lead
+            }
+        ),
         style = MaterialTheme.typography.bodyLarge,
         color = NuvioTheme.colors.TextSecondary,
         modifier = Modifier.widthIn(max = 480.dp),
     )
+    if (needsSignIn) {
+        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+            StageButton(
+                text = stringResource(R.string.party_nuvio_signin),
+                icon = Icons.Default.Groups,
+                isPrimary = true,
+                onClick = onSignIn,
+                modifier = Modifier.focusRequester(firstFocus),
+            )
+            StageButton(
+                text = stringResource(R.string.party_nuvio_use_arc),
+                icon = Icons.Default.Dialpad,
+                isPrimary = false,
+                onClick = { runtime.setWithNuvioApps(false) },
+            )
+        }
+        return
+    }
     if (joining) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
@@ -266,9 +326,11 @@ private fun PartyStartStage(
             PartyCodeField(
                 value = code,
                 onValueChange = { typed ->
-                    code = typed.uppercase().filter(PartyCode::isAllowedChar).take(PartyCode.LENGTH)
+                    code = typed.uppercase()
+                        .filter { if (withNuvioApps) it in PARTY_CODE_ALPHABET else PartyCode.isAllowedChar(it) }
+                        .take(PartyCode.LENGTH)
                     invalid = false
-                    runtime.session.acknowledgeEnded()
+                    runtime.party.acknowledgeEnded()
                 },
                 onDone = { if (code.length == PartyCode.LENGTH) join() },
                 autoEdit = true,
@@ -294,7 +356,7 @@ private fun PartyStartStage(
                 text = stringResource(R.string.party_start_title),
                 icon = Icons.Default.Groups,
                 isPrimary = true,
-                onClick = { runtime.session.createParty() },
+                onClick = { runtime.startParty() },
                 modifier = Modifier.focusRequester(firstFocus),
             )
             StageButton(
@@ -306,7 +368,69 @@ private fun PartyStartStage(
         }
     }
     PartyLook(runtime = runtime, lookChanges = lookChanges, onLook = onLook)
-    StepsLine()
+    if (withNuvioApps) {
+        Text(
+            text = stringResource(R.string.party_nuvio_server_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = NuvioTheme.colors.TextTertiary,
+            modifier = Modifier.widthIn(max = 480.dp),
+        )
+    } else {
+        StepsLine()
+    }
+}
+
+/** Arc party or a party with Nuvio app users, for Start and Join. */
+@Composable
+private fun PartyKindSwitch(withNuvioApps: Boolean, onChange: (Boolean) -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs), verticalAlignment = Alignment.CenterVertically) {
+        PartyKindPill(text = stringResource(R.string.party_kind_arc), selected = !withNuvioApps, onClick = { onChange(false) })
+        PartyKindPill(
+            text = stringResource(R.string.party_kind_nuvio),
+            badge = stringResource(R.string.party_experimental),
+            selected = withNuvioApps,
+            onClick = { onChange(true) },
+        )
+    }
+}
+
+@Composable
+private fun PartyKindPill(text: String, selected: Boolean, onClick: () -> Unit, badge: String? = null) {
+    val shape = RoundedCornerShape(NuvioTheme.radii.md)
+    Surface(
+        onClick = onClick,
+        colors = ClickableSurfaceDefaults.colors(
+            containerColor = if (selected) NuvioTheme.colors.BackgroundCard else Color.Transparent,
+            contentColor = if (selected) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary,
+            focusedContainerColor = NuvioTheme.colors.FocusBackground,
+            focusedContentColor = NuvioTheme.colors.Primary,
+        ),
+        border = ClickableSurfaceDefaults.border(
+            focusedBorder = Border(border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs), shape = shape),
+        ),
+        shape = ClickableSurfaceDefaults.shape(shape),
+        scale = ClickableSurfaceDefaults.scale(focusedScale = 1f),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, maxLines = 1)
+            if (badge != null) {
+                Text(
+                    text = badge.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = NuvioTheme.colors.Warning,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(NuvioTheme.radii.sm))
+                        .background(NuvioTheme.colors.Warning.copy(alpha = 0.18f))
+                        .padding(horizontal = 6.dp, vertical = 1.dp),
+                )
+            }
+        }
+    }
 }
 
 /** Your name and avatar in parties as a chip; it opens [PartyLookDialog]. */
@@ -501,10 +625,11 @@ private fun PartyRoomStage(
     lookChanges: Int,
     onLook: () -> Unit,
 ) {
-    val session = runtime.session
+    val session = runtime.party
     val isHost = state.role == PartyRole.HOST
     val media = session.partyMedia
     Overline(pageSubtitle(state))
+    if (state.withNuvioApps) PartyNuvioLine(state)
     rememberHostNotice(state)?.let { notice ->
         Text(
             text = notice,
@@ -513,15 +638,31 @@ private fun PartyRoomStage(
             color = NuvioTheme.colors.Secondary,
         )
     }
-    Text(
-        text = PartyCode.display(state.code.orEmpty()),
-        style = MaterialTheme.typography.displayLarge,
-        fontWeight = FontWeight.ExtraBold,
-        letterSpacing = 7.sp,
-        maxLines = 1,
-        color = NuvioTheme.colors.TextPrimary,
-    )
-    if (isHost) PartyInviteQr(code = state.code.orEmpty(), large = true, captionBetween = true)
+    state.code?.let { code ->
+        Text(
+            text = PartyCode.display(code),
+            style = MaterialTheme.typography.displayLarge,
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 7.sp,
+            maxLines = 1,
+            color = NuvioTheme.colors.TextPrimary,
+        )
+    }
+    if (isHost && state.withNuvioApps) {
+        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg), verticalAlignment = Alignment.CenterVertically) {
+            PartyLinkQr(link = state.inviteLink, large = true)
+            if (state.inviteLink != null) {
+                Text(
+                    text = stringResource(R.string.party_nuvio_qr_caption),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = NuvioTheme.colors.TextTertiary,
+                    modifier = Modifier.widthIn(max = 220.dp),
+                )
+            }
+        }
+    } else if (isHost) {
+        PartyInviteQr(code = state.code.orEmpty(), large = true, captionBetween = true)
+    }
     Text(
         text = partyStatusLine(state),
         style = MaterialTheme.typography.bodyMedium,
@@ -625,7 +766,7 @@ private fun PartyMembers(state: PartyState, runtime: PartyRuntime) {
         val isFriend = member.friendKey != null && friends.any { it.key == member.friendKey }
         PartyMemberRow(
             member = member,
-            canAdd = !member.isSelf && !isFriend,
+            canAdd = !member.isSelf && !isFriend && !state.withNuvioApps,
             asked = member.id in state.friendAsked,
             onAdd = { runtime.session.addFriend(member.id) },
         )
