@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.nuvio.tv.R
@@ -72,6 +73,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.ui.screens.home.ContinueWatchingItem
+import com.nuvio.tv.ui.screens.home.canMarkWatched
 import com.nuvio.tv.ui.screens.home.showsEpisodeCode
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.components.nuvioV2Focus
@@ -136,6 +138,7 @@ fun ContinueWatchingSection(
     onStartFromBeginning: (ContinueWatchingItem) -> Unit = {},
     showManualPlayOption: Boolean = false,
     onPlayManually: (ContinueWatchingItem) -> Unit = {},
+    onMarkWatched: (ContinueWatchingItem) -> Unit = {},
     modifier: Modifier = Modifier,
     title: String? = null,
     focusedItemIndex: Int = -1,
@@ -325,6 +328,11 @@ fun ContinueWatchingSection(
             showPlayManually = showManualPlayOption,
             onPlayManually = {
                 onPlayManually(menuItem)
+                optionsItem = null
+            },
+            onMarkWatched = {
+                pendingFocusIndex = if (items.size <= 1) null else minOf(lastFocusedIndex, items.lastIndex)
+                onMarkWatched(menuItem)
                 optionsItem = null
             }
         )
@@ -624,9 +632,16 @@ fun ContinueWatchingCard(
 
     val bgColor = NuvioTheme.colors.Background
     val badgeBackground = remember { Color.Black.copy(alpha = 0.7f) }
+    val episodesLeft = when (item) {
+        is ContinueWatchingItem.InProgress -> item.episodesLeft
+        is ContinueWatchingItem.NextUp -> item.episodesLeft
+    }
+    val episodesLeftText = episodesLeft?.let {
+        pluralStringResource(R.plurals.cw_episodes_left, it, it)
+    }
     
-    val cardDescription = remember(titleText, episodeStr, episodeTitle, badgeText) {
-        listOfNotNull(titleText, episodeStr, episodeTitle, badgeText).filter { it.isNotBlank() }.joinToString(", ")
+    val cardDescription = remember(titleText, episodeStr, episodeTitle, badgeText, episodesLeftText) {
+        listOfNotNull(titleText, episodeStr, episodeTitle, badgeText, episodesLeftText).filter { it.isNotBlank() }.joinToString(", ")
     }
     val bgCardColor = NuvioTheme.colors.BackgroundCard
     val backgroundPainter = remember(bgCardColor) { androidx.compose.ui.graphics.painter.ColorPainter(bgCardColor) }
@@ -703,6 +718,7 @@ fun ContinueWatchingCard(
                 episodeTitle = episodeTitle,
                 badgeText = badgeText,
                 badgeBackground = badgeBackground,
+                episodesLeftText = episodesLeftText,
                 showBadge = progress == null,
                 shufflePlayback = item.shufflePlayback,
                 progressFraction = progressFraction,
@@ -813,6 +829,9 @@ fun ContinueWatchingCard(
                 }
 
                 if (item.shufflePlayback) EpisodeShuffleBadge(Modifier.align(Alignment.TopStart))
+                episodesLeftText?.let {
+                    EpisodesLeftBadge(it, badgeBackground, Modifier.align(Alignment.TopStart))
+                }
 
                 // Content info at bottom
                 if (!textBelowArtwork) {
@@ -951,6 +970,7 @@ private fun WideCardContent(
     episodeTitle: String?,
     badgeText: String,
     badgeBackground: Color,
+    episodesLeftText: String?,
     showBadge: Boolean,
     shufflePlayback: Boolean,
     progressFraction: Float,
@@ -993,6 +1013,9 @@ private fun WideCardContent(
                 )
             }
             if (shufflePlayback) EpisodeShuffleBadge(Modifier.align(Alignment.TopStart))
+            episodesLeftText?.let {
+                EpisodesLeftBadge(it, badgeBackground, Modifier.align(Alignment.TopStart))
+            }
         }
 
         Column(
@@ -1095,6 +1118,24 @@ private fun WideCardContent(
     }
 }
 
+@Composable
+private fun EpisodesLeftBadge(text: String, background: Color, modifier: Modifier) {
+    Box(
+        modifier = modifier
+            .padding(NuvioTheme.spacing.sm)
+            .clip(BadgeShape)
+            .background(background)
+            .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = NuvioTheme.colors.TextPrimary,
+            maxLines = 1
+        )
+    }
+}
+
 // Title block drawn on top of the artwork by the landscape card.
 @Composable
 private fun ContinueWatchingCardText(
@@ -1141,7 +1182,8 @@ fun ContinueWatchingOptionsDialog(
     showPlayManually: Boolean = false,
     onPlayManually: () -> Unit = {},
     showRemove: Boolean = true,
-    onHideFromComingUp: (() -> Unit)? = null
+    onHideFromComingUp: (() -> Unit)? = null,
+    onMarkWatched: (() -> Unit)? = null
 ) {
     val isPlayEnabled = LocalPlaybackAvailability.current.canStream(item)
     val title = when (item) {
@@ -1177,6 +1219,13 @@ fun ContinueWatchingOptionsDialog(
             PanelActionRow(
                 label = stringResource(R.string.cw_action_start_from_beginning),
                 onClick = onStartFromBeginning
+            )
+        }
+
+        if (onMarkWatched != null && item.canMarkWatched()) {
+            PanelActionRow(
+                label = stringResource(R.string.hero_mark_watched),
+                onClick = onMarkWatched
             )
         }
 

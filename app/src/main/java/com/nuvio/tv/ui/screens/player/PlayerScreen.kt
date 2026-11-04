@@ -177,6 +177,7 @@ import androidx.compose.ui.res.stringResource
 import com.nuvio.tv.R
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.core.player.PlayerWindowBackdrop
+import com.nuvio.tv.ui.util.keepLtr
 import com.nuvio.tv.ui.util.localizeEpisodeTitle
 import com.nuvio.tv.data.local.PlayerControlAction
 import com.nuvio.tv.data.local.nextForKey
@@ -2465,6 +2466,7 @@ fun PlayerScreen(
                 Box(modifier = Modifier.fillMaxSize()) {
                     StreamSourcesSidePanel(
                         uiState = uiState,
+                        currentFilename = viewModel.playerStreamFilename(),
                         streamsFocusRequester = sourceStreamsFocusRequester,
                         onClose = {
                             if (uiState.currentStreamUrl.isNullOrBlank()) {
@@ -3124,16 +3126,15 @@ internal fun PlayerView.applySubtitleStyleIfNeeded(
         setApplyEmbeddedFontSizes(false)
 
         val typeface = subtitleTypeface(context, subtitleStyle.font, subtitleStyle.bold)
-        val edgeType = subtitleCaptionEdge(subtitleStyle.effectiveEdgeStyle)
-        val colors = exoSubtitleColors(subtitleStyle)
+        val edges = exoSubtitleEdges(subtitleStyle)
 
         setStyle(
             androidx.media3.ui.CaptionStyleCompat(
                 subtitleStyle.textColor,
-                colors.background,
-                colors.window,
-                edgeType,
-                colors.edgeColor,
+                edges.background,
+                android.graphics.Color.TRANSPARENT,
+                edges.edgeType,
+                edges.edgeColor,
                 typeface
             )
         )
@@ -4695,13 +4696,11 @@ private fun SubtitleDelayOverlay(
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
                 color = Color.White
             )
-            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Text(
-                    text = formatSubtitleDelay(subtitleDelayMs),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.White.copy(alpha = 0.95f)
-                )
-            }
+            Text(
+                text = formatSubtitleDelay(subtitleDelayMs).keepLtr(),
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White.copy(alpha = 0.95f)
+            )
         }
 
         Spacer(modifier = Modifier.height(18.dp))

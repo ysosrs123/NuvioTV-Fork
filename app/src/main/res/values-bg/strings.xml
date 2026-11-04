@@ -148,7 +148,7 @@
     <string name="cw_hours_min_left">Остават %1$dh %2$dm</string>
     <string name="cw_min_left">Остава %1$dm</string>
     <string name="cw_almost_done">Почти готово</string>
-    <string name="cw_airs_date">Излъчва се %1$s</string>
+    <string name="cw_airs_date">Ще се излъчи на %1$s</string>
     <string name="cw_airs_today">Излъчва се днес</string>
     <string name="cw_airs_tomorrow">Излъчва се утре</string>
     <plurals name="cw_airs_in_days">
@@ -177,7 +177,7 @@
     <string name="hero_director">Режисьор: %1$s</string>
     <string name="hero_writer">Автор: %1$s</string>
     <string name="hero_play">Учаватват</string>
-    <string name="hero_play_episode">Пусни Сезон %1$d Епизод %2$d</string>
+    <string name="hero_play_episode">Пусни Сезон %1$d еп. %2$d</string>
     <string name="hero_add_to_library">Добавяне към библиотеката</string>
     <string name="hero_remove_from_library">Премахване от библиотеката</string>
     <string name="hero_mark_watched">Маркирай като гледано</string>
@@ -189,7 +189,7 @@
     <string name="cd_rating">Рейтинг</string>
 
     <string name="episodes_season">Сезон %1$d</string>
-    <string name="episodes_specials">Специални издания</string>
+    <string name="episodes_specials">Специални епизоди</string>
     <string name="episodes_episode">Епизод</string>
     <string name="episodes_cd_watched">Гледано</string>
     <string name="episodes_dialog_subtitle">Действия с епизода</string>
@@ -219,13 +219,13 @@
     <string name="detail_marked_episodes_unwatched">Епизоди, маркирани като негледани: %1$d</string>
     <string name="detail_marked_previous_watched">Предишни епизоди, маркирани като гледани: %1$d</string>
     <string name="playback_unavailable">Възпроизвеждането не е налично</string>
-    <string name="playback_unavailable_message">Възпроизвеждането не е възможно за това заглавие с текущата ви настройка.</string>
 
+    <string name="playback_unavailable_message">Възпроизвеждането не е възможно за това заглавие с текущата настройка.</string>
     <string name="detail_btn_play">Пускане</string>
-    <string name="detail_btn_resume">Автобиография</string>
-    <string name="detail_btn_play_episode">Пусни Сезон %1$d Епизод %2$d</string>
-    <string name="detail_btn_resume_episode">Възобновяване на Сезон %1$d Епизод %2$d</string>
-    <string name="detail_btn_next_episode">Следва Сезон %1$d Епизод %2$d</string>
+    <string name="detail_btn_resume">Продължи</string>
+    <string name="detail_btn_play_episode">Пусни Сезон %1$d еп. %2$d</string>
+    <string name="detail_btn_resume_episode">Възобновяване на Сезон %1$d еп. %2$d</string>
+    <string name="detail_btn_next_episode">Следва Сезон %1$d еп. %2$d</string>
     <string name="detail_tab_cast">Създател и актьорски състав</string>
     <string name="cast_role_creator">Създател</string>
     <string name="cast_role_director">Режисьор</string>
@@ -238,14 +238,14 @@
     <string name="detail_more_like_this_powered_by_simkl">Задвижвано от Simkl</string>
     <string name="detail_comments_title">Коментари</string>
     <string name="detail_comments_subtitle">Отзиви от Trakt</string>
-    <string name="detail_comments_subtitle_episode">Отзиви от Trakt за S%1$dE%2$d</string>
+    <string name="detail_comments_subtitle_episode">Отзиви от Trakt за Сезон %1$d еп. %2$d</string>
     <string name="detail_comments_mode_show">Показване</string>
-    <string name="detail_comments_mode_episode">Епизод</string>
+    <string name="detail_comments_mode_episode">еп.</string>
     <string name="detail_comments_mode_episode_change">Промяна на епизода (%1$s)</string>
     <string name="detail_comments_episode_picker_title">Избор на епизод</string>
     <string name="detail_comments_episode_picker_subtitle">Изберете епизод, за да видите рецензиите му в Trakt</string>
     <string name="detail_section_network">Мрежа</string>
-    <string name="detail_section_production">Производство</string>
+    <string name="detail_section_production">Продукция</string>
     <string name="detail_comments_empty">Все още няма налични отзиви за Trakt.</string>
     <string name="detail_comments_error">Не можах да заредя отзивите за Trakt в момента.</string>
     <string name="detail_trailer_loading">Зареждане на трейлъра...</string>
@@ -263,7 +263,7 @@
     <string name="tmdb_entity_rail_popular">Популярни</string>
     <string name="tmdb_entity_rail_top_rated">Най-високо оценени</string>
     <string name="tmdb_entity_rail_recent">Последни</string>
-    <string name="tmdb_entity_rail_most_voted">Най-гласуван</string>
+    <string name="tmdb_entity_rail_most_voted">Най-оценен</string>
     <string name="collections_editor_tmdb_watch_region">Регион за наблюдение</string>
     <string name="collections_editor_tmdb_watch_region_helper">Код на държавата по ISO 3166-1, където е налично заглавието. Пример: САЩ, Великобритания.</string>
     <string name="collections_editor_tmdb_quick_watch_regions">Региони за бързо наблюдение</string>
@@ -290,23 +290,23 @@
     <string name="episodes_unavailable">Не е налично</string>
     <!-- Status labels for series (some languages need gendered forms) -->
     <string name="series_status_ended">Приключи</string>
-    <string name="series_status_continuing">В процес</string>
-    <string name="series_status_current">Текущ</string>
-    <string name="series_status_cancelled">Отменено</string>
-    <string name="series_status_released">Издадена</string>
-    <string name="series_status_planned">Планирано</string>
-    <string name="series_status_rumored">Слухове</string>
-    <string name="series_status_in_production">В процес на производство</string>
+    <string name="series_status_continuing">Продължава</string>
+    <string name="series_status_current">Излъчва се</string>
+    <string name="series_status_cancelled">Отменен</string>
+    <string name="series_status_released">Излязъл</string>
+    <string name="series_status_planned">Планиран</string>
+    <string name="series_status_rumored">Слух</string>
+    <string name="series_status_in_production">В процес на продукция</string>
     <string name="series_status_post_production">Постпродукция</string>
     <!-- Status labels for movies (allows gendered translations in languages that need it) -->
     <string name="movie_status_ended">Приключи</string>
-    <string name="movie_status_continuing">В процес</string>
+    <string name="movie_status_continuing">Продължава</string>
     <string name="movie_status_current">Текущ</string>
-    <string name="movie_status_cancelled">Отменено</string>
-    <string name="movie_status_released">Издаден</string>
+    <string name="movie_status_cancelled">Отменен</string>
+    <string name="movie_status_released">Излязъл</string>
     <string name="movie_status_planned">Планиран</string>
-    <string name="movie_status_rumored">Носят се слухове</string>
-    <string name="movie_status_in_production">В процес на производство</string>
+    <string name="movie_status_rumored">Слух</string>
+    <string name="movie_status_in_production">В процес на продукция</string>
     <string name="movie_status_post_production">Постпродукция</string>
     <string name="detail_lists_fallback">Списъци</string>
     <string name="detail_lists_subtitle">Изберете кои списъци да включват това заглавие.</string>
@@ -1723,7 +1723,8 @@
     <string name="player_ends_at">Край на %1$s</string>
     <string name="player_live_watched">НА ЖИВО %1$s</string>
     <!-- Season/episode code shown in player UI (e.g. S01E02). %1$d = season, %2$d = episode. -->
-    <string name="season_episode_format">Сезон %1$d Епизод %2$d</string>
+<!-- Season/episode code shown in player UI (e.g. S01E02). %1$d = season, %2$d = episode. --> 
+    <string name="season_episode_format">Сезон %1$d еп. %2$d</string>
     <string name="player_subtitle_delay">Забавяне на субтитрите</string>
     <string name="player_error_title">Грешка при възпроизвеждане</string>
     <string name="player_go_back">Върни се</string>
@@ -3244,8 +3245,13 @@
     <string name="autosync_label_synced">Автоматично синхронизирано</string>
 
     <!-- Nuvio-test additions -->
+    <plurals name="cw_episodes_left">
+        <item quantity="one">Остава %d</item>
+        <item quantity="other">Остават %d</item>
+    </plurals>
     <string name="cw_no_artwork">Няма изображение</string>
     <string name="detail_eyebrow_episodes">Епизоди</string>
+    <string name="detail_section_parental_guide">Родителски насоки</string>
     <string name="detail_trailer_error_age_restricted">Този трейлър е с възрастово ограничение в YouTube и не може да се пусне тук.</string>
     <string name="detail_trailer_error_unavailable">Този трейлър не е наличен в YouTube.</string>
     <string name="detail_trailer_error_sign_in">YouTube изисква вход, за да пусне този трейлър.</string>
@@ -3441,6 +3447,8 @@
     <string name="layout_watched_titles_dim_desc">Гледаните заглавия остават на мястото си, по-тъмни, с отметка.</string>
     <string name="layout_watched_titles_hide">Скриване</string>
     <string name="layout_watched_titles_hide_desc">Гледаните филми и изцяло изгледаните сериали не се показват в редовете на Начало и в банера. „Продължаване на гледането“ не се засяга.</string>
+    <string name="layout_cw_episodes_left">Оставащи епизоди в Продължаване на гледането</string>
+    <string name="layout_cw_episodes_left_sub">Показва колко излъчени епизода остават на картата на всеки сериал, като се брои и текущият.</string>
     <string name="layout_trailer_logo">Лого върху трейлъра в картата</string>
     <string name="layout_trailer_logo_sub">Показвай логото на заглавието върху трейлъра в картата.</string>
     <string name="layout_preset_extra_large">Много голям</string>
@@ -3474,6 +3482,30 @@
     <string name="mdblist_last_synced">Последно синхронизирано %1$s</string>
     <string name="mdblist_disconnect_title">Да прекъсна ли MDBList?</string>
     <string name="mdblist_disconnect_subtitle">Спрете изпращането на актуализации за гледане от този профил. Историята на вашия MDBList се запазва.</string>
+    <string name="floppy_client_name">%1$s на %2$s</string>
+    <string name="floppy_tracking_description">Изпращайте гледаното към собствения си сървър Floppy</string>
+    <string name="floppy_connected_to">Свързан с %1$s</string>
+    <string name="floppy_connected_description">Гледаното в този профил отива във Floppy: „Now Playing“ по време на гледане, завършените заглавия в историята, спрените с точка за продължаване. „Маркирай като гледано“ също се пренася.</string>
+    <string name="floppy_qr_description">QR код за одобряване на Nuvio Arc във Floppy</string>
+    <string name="floppy_address_instruction">Въведете адреса, на който отваряте Floppy в браузъра.</string>
+    <string name="floppy_token_instruction">Във Floppy отворете Settings, Integrations, App tokens и създайте токен за този телевизор.</string>
+    <string name="floppy_address_placeholder">Адрес на сървъра, например 192.168.1.20:8000</string>
+    <string name="floppy_token_placeholder">Токен за приложение</string>
+    <string name="floppy_next">Напред</string>
+    <string name="floppy_back">Назад</string>
+    <string name="floppy_connect">Свържи</string>
+    <string name="floppy_use_token">Използвай токен</string>
+    <string name="floppy_status_waiting">Изчаква се одобрение във Floppy…</string>
+    <string name="floppy_disconnect_title">Да прекъсна ли Floppy?</string>
+    <string name="floppy_disconnect_subtitle">Спрете изпращането на актуализации за гледане от този профил. Историята ви във Floppy се запазва.</string>
+    <string name="floppy_error_address">Въведете валиден адрес на сървър.</string>
+    <string name="floppy_error_unreachable">Адресът е недостъпен. Проверете адреса и мрежата си.</string>
+    <string name="floppy_error_not_floppy">Този адрес не отговори като сървър Floppy.</string>
+    <string name="floppy_error_no_code_sign_in">Тази версия на Floppy е твърде стара за вход с код. Обновете я или използвайте токен.</string>
+    <string name="floppy_error_rejected">Floppy отказа този токен. Проверете дали е активен и създаден на този сървър.</string>
+    <string name="floppy_error_code_expired">Кодът е изтекъл. Натиснете Напред за нов.</string>
+    <string name="floppy_error_denied">Входът беше отказан във Floppy.</string>
+    <string name="floppy_error_revoked">Floppy вече не приема тази връзка. Свържете се отново.</string>
     <string name="mdblist_missing_client">MDBList връзката не е налична в тази компилация.</string>
     <string name="mdblist_invalid_response">MDBList върна непълен отговор. Моля, опитайте отново.</string>
     <string name="mdblist_code_expired">Този код е изтекъл. Опитайте отново, за да получите нов код.</string>
@@ -3493,6 +3525,7 @@
     <string name="mdblist_requests_title">API заявки днес</string>
     <string name="mdblist_requests_subtitle">Рейтингите и синхронизацията на гледането се броят заедно към дневния лимит</string>
     <string name="mdblist_ratings_heading">Значки за рейтинг</string>
+    <string name="debrid_resolve_first_description">Пита се първа за торенти, които не посочват услуга. Резултатите, които посочват Torbox, Premiumize, Real-Debrid или AllDebrid, винаги използват тази услуга.</string>
     <string name="debrid_stream_release_groups_preferred">Предпочитани release групи</string>
     <string name="settings_stream_badges_in_player_title">Показване в плейъра</string>
     <string name="settings_stream_badges_in_player_description">Показва значки за видеото и звука, които се възпроизвеждат, под заглавието в плейъра. Използва собствените значки на Arc или твоя пакет значки, ако съвпада с обикновен текст, като 2160p или Atmos.</string>
@@ -3503,6 +3536,7 @@
     <string name="trakt_watch_progress_mdblist_selected">Източникът на прогрес на гледане е зададен на MDBList</string>
     <string name="profile_avatar_category_local">Забавен набор · това устройство</string>
     <string name="profile_local_avatar_note">Показва се само на това устройство. На другите устройства остава аватарът от Nuvio.</string>
+    <string name="debrid_not_cached_trying_next">Не е кеширано, опитва се следващият източник</string>
     <string name="player_engine_switch_title">Да превключим към %1$s?</string>
     <string name="player_engine_switch_message">Видеото ще се презареди от мястото, където се намирате.</string>
     <string name="player_more_short">Още</string>
@@ -3878,9 +3912,13 @@
     <string name="player_layout_more_collapsed">Меню „Още“: затворено</string>
     <string name="subtitle_font_family">Шрифт на субтитрите</string>
     <string name="subtitle_font_renderer_default">По подразбиране за рендерера</string>
-    <string name="subtitle_edge_style">Ръб на текста</string>
-    <string name="subtitle_edge_drop_shadow">Сянка</string>
-    <string name="subtitle_shadow_note">Лека тъмна сянка. В MPV тя замества фоновата кутия.</string>
+    <string name="subtitle_outline_sub">Линия около всяка буква</string>
+    <string name="subtitle_outline_thin">Тънка</string>
+    <string name="subtitle_outline_normal">Нормална</string>
+    <string name="subtitle_outline_thick">Дебела</string>
+    <string name="subtitle_shadow">Сянка</string>
+    <string name="subtitle_shadow_sub">Сянка зад текста, може и заедно с контура. Не се показва при цвят на фона.</string>
+    <string name="subtitle_shadow_opacity">Непрозрачност на сянката</string>
     <string name="subtitle_font_and_weight">Шрифт и тегло</string>
     <string name="playback_seeking">Превъртане</string>
     <string name="playback_seeking_sub">Колко бързо се ускорява задържането на ляво или дясно и колко филмът изчаква на миниатюрата, преди да скочи. Без миниатюри винаги скача веднага щом пуснете бутона.</string>
@@ -4000,6 +4038,30 @@
     <string name="party_join_title">Присъедини се с код</string>
     <string name="party_stage_headline">Гледайте заедно,\nот различни домове.</string>
     <string name="party_stage_lead">Започни парти и пусни каквото и да е: всички отиват на същото заглавие и гледат в синхрон. Не е нужен акаунт.</string>
+    <string name="party_kind_arc">Arc парти</string>
+    <string name="party_kind_nuvio">С потребители на Nuvio приложения</string>
+    <string name="party_experimental">Експериментално</string>
+    <string name="party_nuvio_headline">Гледай с приятели в приложенията Nuvio.</string>
+    <string name="party_nuvio_lead">До 3 души в което и да е приложение Nuvio: Nuvio на телевизор, телефон, компютър, телевизор LG или Samsung, или Arc. Използва входа ти в Nuvio.</string>
+    <string name="party_nuvio_server_note">Работи през сървъра на Nuvio, като собствените партита на приложенията Nuvio: той вижда имената, заглавието и докъде си стигнал. Експериментално: може да спре да работи, когато Nuvio промени своето парти.</string>
+    <string name="party_nuvio_signin_headline">Влез, за да гледаш с потребители на приложенията Nuvio.</string>
+    <string name="party_nuvio_signin_lead">Партитата с приложенията Nuvio минават през сървъра на Nuvio и изискват акаунт в Nuvio. Arc партитата работят и без него.</string>
+    <string name="party_nuvio_signin">Вход в Nuvio</string>
+    <string name="party_nuvio_use_arc">Използвай Arc парти</string>
+    <string name="party_nuvio_friends_hint">Поканите за приятели работят в Arc партита. За парти с потребители на приложенията Nuvio сподели кода или QR кода: отваря се във всяко приложение Nuvio.</string>
+    <string name="party_nuvio_seats">%1$d от %2$d места</string>
+    <string name="party_nuvio_qr_label">Приложение Nuvio</string>
+    <string name="party_nuvio_qr_caption">Сканирай с телефон: партито се отваря в приложението Nuvio. Или въведи кода в Съвместно гледане във всяко приложение Nuvio.</string>
+    <string name="party_nuvio_waiting_title">Пусни нещо, за да отвориш партито. Кодът се появява, когато започне.</string>
+    <string name="party_nuvio_room_note">През сървъра на Nuvio. Поканите за приятели работят в Arc партита.</string>
+    <string name="party_nuvio_error_not_found">Няма парти с този код.</string>
+    <string name="party_nuvio_error_full">Това парти е пълно.</string>
+    <string name="party_nuvio_error_removed">Домакинът те премахна от партито.</string>
+    <string name="party_nuvio_error_ended">Това парти приключи.</string>
+    <string name="party_nuvio_error_rate_limited">Твърде много опити. Изчакай минута и опитай пак.</string>
+    <string name="party_nuvio_error_sign_in">Първо влез в акаунта си в Nuvio.</string>
+    <string name="party_nuvio_error_unavailable">Партитата на Nuvio са изключени в момента.</string>
+    <string name="party_nuvio_error_network">Няма връзка със сървъра на Nuvio.</string>
     <string name="party_step_short_one">Започни или се присъедини</string>
     <string name="party_step_short_two">Сподели кода</string>
     <string name="party_step_short_three">Пусни каквото и да е</string>

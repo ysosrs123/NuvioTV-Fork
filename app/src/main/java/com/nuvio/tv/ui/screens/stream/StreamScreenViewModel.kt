@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.R
 import com.nuvio.tv.core.debrid.DebridStreamPresentation
 import com.nuvio.tv.core.debrid.DirectDebridResolveResult
+import com.nuvio.tv.ui.screens.player.SourceFailoverSelection
 import com.nuvio.tv.core.debrid.DirectDebridResolver
 import com.nuvio.tv.core.debrid.DirectDebridStreamPreparer
 import com.nuvio.tv.core.party.PartyPlayerRule
@@ -90,6 +91,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 private const val TAG = "StreamScreenViewModel"
+private const val MAX_NOT_CACHED_FALLBACKS = 3
 private const val DIRECT_AUTOPLAY_HARD_TIMEOUT_MS = 60_000L
 private const val STREAM_FILTER_PAGE_SIZE = 100
 private const val BADGE_PUBLISH_INTERVAL_NS = 300_000_000L
@@ -149,6 +151,7 @@ class StreamScreenViewModel @Inject constructor(
     private var sourceChipErrorDismissJob: Job? = null
     private var sessionFillJob: Job? = null
     private var pendingCacheSaveJob: Job? = null
+    private var playedFallbackSource: Stream? = null
     private var streamBadgePresentationJob: Job? = null
     private var streamFilterExpandJob: Job? = null
     private var streamFilterFullList: List<Stream> = emptyList()
@@ -455,6 +458,7 @@ class StreamScreenViewModel @Inject constructor(
         sessionFillJob?.cancel()
         val newScope = kotlinx.coroutines.CoroutineScope(viewModelScope.coroutineContext + kotlinx.coroutines.SupervisorJob())
         streamLoadScope = newScope
+        directDebridResolver.warmUp()
         streamLoadJob = newScope.launch {
             streamLoadCompleted = false
             // LOAD_SPLIT: on a StreamPrefetchCache hit the addon scrape is already
@@ -569,7 +573,10 @@ class StreamScreenViewModel @Inject constructor(
                                 sources = cached.sources,
                                 contentLanguage = cached.contentLanguage ?: contentLanguage,
                                 audioDelayMs = cached.audioDelayMs,
-                                audioDelayLanguage = cached.audioDelayLanguage
+                                audioDelayLanguage = cached.audioDelayLanguage,
+                                addonName = cached.addonName,
+                                addonLogo = cached.addonLogo,
+                                streamDescription = cached.streamDescription
                             ),
                             showDirectAutoPlayOverlay = showOverlay || it.showDirectAutoPlayOverlay,
                             isDirectAutoPlayFlow = showOverlay || it.isDirectAutoPlayFlow
@@ -871,7 +878,9 @@ class StreamScreenViewModel @Inject constructor(
                     return
                 }
                 debridPreparationLaunched = true
-                viewModelScope.launch {
+                // Off the main thread: each prepared link rewrites the whole stream list,
+                // and the badge job can make that update retry many times.
+                viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
                     directDebridStreamPreparer.prepare(
                         streams = _uiState.value.allStreams,
                         season = season,
@@ -920,7 +929,8 @@ class StreamScreenViewModel @Inject constructor(
                     videoId = videoId,
                     season = season,
                     episode = episode,
-                    forceRefresh = forceRefresh
+                    forceRefresh = forceRefresh,
+                    priorityBingeGroup = persistedBingeGroup
                 )
                     // Each emission carries the FULL accumulated
                     // list and applySuccess reprocesses all of it (ordering,
@@ -1500,7 +1510,7 @@ class StreamScreenViewModel @Inject constructor(
      */
     private fun viewOf(all: List<Stream>, addonName: String?): List<Stream> {
         val chosen = if (addonName == null) all else all.filter { it.addonName == addonName }
-        if (!listSortBestFirst || all.isEmpty()) return chosen
+        if (!listSortBestFirst || all.isEmpty()) return groupStreamsByProvider(chosen)
         val order = listOrder
         if (order == null || !order.covers(all)) scheduleListOrder(all)
         return order?.apply(chosen) ?: chosen
@@ -1550,6 +1560,11 @@ class StreamScreenViewModel @Inject constructor(
     }
 
     suspend fun resolveStreamForPlayback(stream: Stream): StreamPlaybackInfo? {
+        playedFallbackSource = null
+        return resolveStreamForPlayback(stream, triedKeys = emptySet())
+    }
+
+    private suspend fun resolveStreamForPlayback(stream: Stream, triedKeys: Set<String>): StreamPlaybackInfo? {
         copyPrePick.picked(stream)
         stream.serverTarget?.let { target -> return prepareServerStream(stream, target) }
         TtffTrace.mark("resolve_start")
@@ -1618,9 +1633,14 @@ class StreamScreenViewModel @Inject constructor(
                             filename = resolved.filename,
                             videoHash = resolved.videoHash,
                             videoSize = resolved.videoSize,
+                            infoHash = resolved.infoHash,
+                            fileIdx = resolved.fileIdx,
                             bingeGroup = resolved.bingeGroup,
                             contentLanguage = contentLanguage,
-                            year = year
+                            year = year,
+                            addonName = resolved.addonName,
+                            addonLogo = resolved.addonLogo,
+                            streamDescription = resolved.streamDescription
                         )
                     }
                 }
@@ -1632,8 +1652,24 @@ class StreamScreenViewModel @Inject constructor(
                 null
             }
             DirectDebridResolveResult.NotCached -> {
-                showDirectDebridPlaybackError(context.getString(R.string.debrid_not_cached), refreshStreams = false)
-                null
+                val tried = triedKeys + listOfNotNull(SourceFailoverSelection.failoverKey(stream))
+                val next = nextCachedSourceAfter(stream, tried)
+                if (next != null && tried.size <= MAX_NOT_CACHED_FALLBACKS) {
+                    Log.i(TAG, "resolveStreamForPlayback: not cached, trying the next cached source")
+                    updateUiStateIfChanged {
+                        it.copy(directAutoPlayMessage = context.getString(R.string.debrid_not_cached_trying_next))
+                    }
+                    resolveStreamForPlayback(next, tried)?.also {
+                        if (playedFallbackSource == null) playedFallbackSource = next
+                        updateUiStateIfChanged { state ->
+                            if (state.isDirectAutoPlayFlow) state.copy(directAutoPlayMessage = null)
+                            else state.copy(showDirectAutoPlayOverlay = false, directAutoPlayMessage = null)
+                        }
+                    }
+                } else {
+                    showDirectDebridPlaybackError(context.getString(R.string.debrid_not_cached), refreshStreams = false)
+                    null
+                }
             }
             DirectDebridResolveResult.Stale -> {
                 showDirectDebridPlaybackError(context.getString(R.string.debrid_stale_stream), refreshStreams = true)
@@ -1722,6 +1758,10 @@ class StreamScreenViewModel @Inject constructor(
         updateUiStateIfChanged { it.copy(playbackErrorMessage = null) }
     }
 
+    fun rememberPlayedPlugin(bingeGroup: String?) {
+        pluginManager.recordPluginProviderPlay(bingeGroup)
+    }
+
     fun onInternalPlayerLaunching() {
         streamRepository.setLocalPluginSearchPaused(true)
         updateUiStateIfChanged {
@@ -1796,6 +1836,21 @@ class StreamScreenViewModel @Inject constructor(
         externalOverlayHideJob = viewModelScope.launch {
             kotlinx.coroutines.delay(700L)
             updateUiStateIfChanged { it.copy(externalPlayerOverlayVisible = false) }
+        }
+    }
+
+    /** The next entry in the list, after [stream], that is a ready link or a cached debrid source. */
+    private fun nextCachedSourceAfter(stream: Stream, tried: Set<String>): Stream? {
+        val streams = _uiState.value.filteredStreams
+        val index = streams.indexOfFirst { it == stream }.takeIf { it >= 0 }
+            ?: SourceFailoverSelection.failoverKey(stream)?.let { key ->
+                streams.indexOfFirst { SourceFailoverSelection.failoverKey(it) == key }
+            }
+            ?: -1
+        val startIndex = if (index >= 0) index + 1 else 0
+        return streams.drop(startIndex).firstOrNull { candidate ->
+            SourceFailoverSelection.isAutoFailoverPlayable(candidate, season, episode) &&
+                SourceFailoverSelection.failoverKey(candidate)?.let { it !in tried } == true
         }
     }
 
@@ -1900,11 +1955,16 @@ class StreamScreenViewModel @Inject constructor(
                     filename = playbackInfo.filename,
                     videoHash = playbackInfo.videoHash,
                     videoSize = playbackInfo.videoSize,
+                    infoHash = playbackInfo.infoHash,
+                    fileIdx = playbackInfo.fileIdx,
                     bingeGroup = playbackInfo.bingeGroup,
                     contentLanguage = contentLanguage,
                     year = year,
                     audioDelayMs = playbackInfo.audioDelayMs,
-                    audioDelayLanguage = playbackInfo.audioDelayLanguage
+                    audioDelayLanguage = playbackInfo.audioDelayLanguage,
+                    addonName = playbackInfo.addonName,
+                    addonLogo = playbackInfo.addonLogo,
+                    streamDescription = playbackInfo.streamDescription
                 )
             }
         }
@@ -1920,8 +1980,9 @@ class StreamScreenViewModel @Inject constructor(
         bingeGroupCacheDataStore.replace(cid, playbackInfo.bingeGroup, playbackInfo.filename, playbackInfo.infoHash)
     }
 
-    fun persistBingeGroupForStream(stream: Stream) {
+    fun persistBingeGroupForStream(pressed: Stream) {
         val cid = contentId?.takeIf { it.isNotBlank() } ?: return
+        val stream = playedFallbackSource ?: pressed
         val bg = stream.behaviorHints?.bingeGroup
         val fn = stream.behaviorHints?.filename
         val ih = stream.infoHash
@@ -1955,7 +2016,21 @@ class StreamScreenViewModel @Inject constructor(
         debridPreferences: com.nuvio.tv.domain.model.DebridStreamPreferences?
     ): Stream? {
         val group = streams.filter { !it.isExternal() && it.behaviorHints?.bingeGroup == bingeGroup }
-        if (group.isEmpty()) return null
+        if (group.isEmpty()) {
+            // A local plugin's group carries per-episode words, so it is matched by its identity tokens.
+            val byFilename = nextFilename?.let { name ->
+                StreamAutoPlaySelector.selectEarlyBingeGroupMatch(
+                    streams.filter { FilenameEpisodeMatcher.matches(it.behaviorHints?.filename, name) },
+                    bingeGroup
+                )
+            }
+            return byFilename ?: infoHash?.let { hash ->
+                StreamAutoPlaySelector.selectEarlyBingeGroupMatch(
+                    streams.filter { it.infoHash?.equals(hash, ignoreCase = true) == true },
+                    bingeGroup
+                )
+            }
+        }
         val byFilename = if (nextFilename != null) {
             group.filter { FilenameEpisodeMatcher.matches(it.behaviorHints?.filename, nextFilename) }
         } else emptyList()
@@ -2235,6 +2310,7 @@ class StreamScreenViewModel @Inject constructor(
                 ownsTorrentStream = isTorrentStreamStarted,
                 context = context
             )
+            if (launched) rememberPlayedPlugin(playbackInfo.bingeGroup)
         } finally {
             if (!launched) abortExternalHandoff()
         }

@@ -333,7 +333,7 @@ private fun PlayerRuntimeController.attemptMpvAutoRetry(
         if (savedPosition > 0L) {
             _uiState.update { it.copy(pendingSeekPosition = savedPosition) }
         }
-        initializePlayer(currentStreamUrl, currentHeaders, startPaused = paused)
+        reinitializeCurrentStream(startPaused = paused)
     }
     return true
 }

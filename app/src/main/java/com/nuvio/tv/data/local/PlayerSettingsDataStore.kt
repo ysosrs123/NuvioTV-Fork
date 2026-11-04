@@ -285,11 +285,39 @@ enum class AudioOutputChannels(
     CHANNELS_7_0("7.0", "7.0", 7, "7.0"),
     CHANNELS_7_1("7.1", "7.1", 8, "7.1");
 
+    val hasLfe: Boolean get() = settingValue.endsWith(".1")
+
     companion object {
         val default = CHANNELS_7_1
 
         fun fromSettingValue(value: String?): AudioOutputChannels {
             return entries.firstOrNull { it.settingValue == value } ?: default
+        }
+    }
+}
+
+/** LFE share mixed into the other channels when the downmix layout has no LFE channel. */
+enum class DownmixLfeLevel(val settingValue: String, val level: Float) {
+    OFF("off", 0f),
+    HALF("50", 0.5f),
+    FULL("100", 1f);
+
+    companion object {
+        fun fromSettingValue(value: String?): DownmixLfeLevel {
+            return entries.firstOrNull { it.settingValue == value } ?: OFF
+        }
+    }
+}
+
+enum class NightMode(val settingValue: String) {
+    OFF("off"),
+    LIGHT("light"),
+    MEDIUM("medium"),
+    STRONG("strong");
+
+    companion object {
+        fun fromSettingValue(value: String?): NightMode {
+            return entries.firstOrNull { it.settingValue == value } ?: OFF
         }
     }
 }
@@ -313,6 +341,7 @@ data class PlayerSettings(
     val downmixEnabled: Boolean = false,
     val audioOutputChannels: AudioOutputChannels = AudioOutputChannels.default,
     val maintainOriginalAudioOnDownmix: Boolean = true,
+    val downmixLfeLevel: DownmixLfeLevel = DownmixLfeLevel.OFF,
     val tunnelingEnabled: Boolean = false,
     val forceOpticalPassthrough: Boolean = false,
     val useSystemPassthrough: Boolean = false,
@@ -331,6 +360,7 @@ data class PlayerSettings(
     val tunnelDeadAudioClasses: Set<String> = emptySet(),
     val tunnelDeadAudioSignature: String? = null,
     val skipSilence: Boolean = false,
+    val nightMode: NightMode = NightMode.OFF,
     val audioAmplificationDb: Int = 0,
     val centerMixLevelDb: Int = 0,
     val persistAudioAmplification: Boolean = false,
@@ -791,6 +821,7 @@ class PlayerSettingsDataStore @Inject constructor(
     private val audioOutputChannelsKey = stringPreferencesKey("audio_output_channels")
     private val maintainOriginalAudioOnDownmixKey =
         booleanPreferencesKey("maintain_original_audio_on_downmix")
+    private val downmixLfeLevelKey = stringPreferencesKey("downmix_lfe_level")
     private val downmixNormalizationEnabledLegacyKey =
         booleanPreferencesKey("downmix_normalization_enabled")
     private val tunnelingEnabledKey = booleanPreferencesKey("tunneling_enabled")
@@ -817,6 +848,7 @@ class PlayerSettingsDataStore @Inject constructor(
     internal var tunnelStallClock: () -> Long = System::currentTimeMillis
     internal var tunnelStallAppVersion: () -> Int = { BuildConfig.VERSION_CODE }
     private val skipSilenceKey = booleanPreferencesKey("skip_silence")
+    private val nightModeKey = stringPreferencesKey("night_mode")
     private val audioAmplificationDbKey = intPreferencesKey("audio_amplification_db")
     private val centerMixLevelDbKey = intPreferencesKey("center_mix_level_db")
     private val persistAudioAmplificationKey = booleanPreferencesKey("persist_audio_amplification")
@@ -1286,6 +1318,7 @@ class PlayerSettingsDataStore @Inject constructor(
                 maintainOriginalAudioOnDownmix =
                     prefs[maintainOriginalAudioOnDownmixKey]
                         ?: !(prefs[downmixNormalizationEnabledLegacyKey] ?: false),
+                downmixLfeLevel = DownmixLfeLevel.fromSettingValue(prefs[downmixLfeLevelKey]),
                 tunnelingEnabled = prefs[tunnelingEnabledKey] ?: false,
                 forceOpticalPassthrough = prefs[forceOpticalPassthroughKey] ?: false,
                 useSystemPassthrough = prefs[useSystemPassthroughKey] ?: false,
@@ -1316,6 +1349,7 @@ class PlayerSettingsDataStore @Inject constructor(
                 tunnelDeadAudioClasses = if (tunnelStallsRunOut) emptySet() else prefs[tunnelDeadAudioClassesKey] ?: emptySet(),
                 tunnelDeadAudioSignature = if (tunnelStallsRunOut) null else prefs[tunnelDeadAudioSignatureKey],
                 skipSilence = prefs[skipSilenceKey] ?: false,
+                nightMode = NightMode.fromSettingValue(prefs[nightModeKey]),
                 audioAmplificationDb = (prefs[audioAmplificationDbKey] ?: 0).coerceIn(
                     AUDIO_AMPLIFICATION_DB_MIN,
                     AUDIO_AMPLIFICATION_DB_MAX
@@ -1602,6 +1636,12 @@ class PlayerSettingsDataStore @Inject constructor(
         }
     }
 
+    suspend fun setDownmixLfeLevel(level: DownmixLfeLevel) {
+        store().edit { prefs ->
+            prefs[downmixLfeLevelKey] = level.settingValue
+        }
+    }
+
     suspend fun setTunnelingEnabled(enabled: Boolean) {
         store().edit { prefs ->
             if ((prefs[tunnelingEnabledKey] ?: false) != enabled) {
@@ -1800,6 +1840,12 @@ class PlayerSettingsDataStore @Inject constructor(
     suspend fun setSkipSilence(enabled: Boolean) {
         store().edit { prefs ->
             prefs[skipSilenceKey] = enabled
+        }
+    }
+
+    suspend fun setNightMode(mode: NightMode) {
+        store().edit { prefs ->
+            prefs[nightModeKey] = mode.settingValue
         }
     }
 

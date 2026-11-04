@@ -76,6 +76,11 @@ private data class HomePosterOptionsTarget(
 )
 
 private const val HOME_STABLE_GATE_TIMEOUT_MS = 5_000L
+internal const val HOME_EMPTY_RETRY_MS = 20_000L
+
+/** Home that is still loading with nothing to show, or has rows its Modern layout never drew, gets one fresh load. */
+internal fun homeStillEmpty(loading: Boolean, hasContent: Boolean, hasError: Boolean, presentationReady: Boolean): Boolean =
+    !hasError && ((loading && !hasContent) || (hasContent && !presentationReady))
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -234,6 +239,22 @@ fun HomeScreen(
         (uiState.continueWatchingEnabled && uiState.continueWatchingItems.isNotEmpty()) ||
         uiState.heroItems.isNotEmpty() ||
         hasCollectionContent
+    val viewModelOwner = androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner.current
+    LaunchedEffect(viewModel) {
+        Log.i("HOMEVM_LIFECYCLE", "SHOWN id=${viewModel.instanceId} owner=" +
+            viewModelOwner?.let { it.javaClass.simpleName + "@" + Integer.toHexString(System.identityHashCode(it)) })
+    }
+    val stillEmpty = androidx.compose.runtime.rememberUpdatedState(
+        homeStillEmpty(uiState.isLoading, hasAnyContent, uiState.error != null, modernPresentationReady)
+    )
+    LaunchedEffect(viewModel) {
+        delay(HOME_EMPTY_RETRY_MS)
+        if (stillEmpty.value) {
+            Log.w("HomeGate", "RETRY: Home still empty after ${HOME_EMPTY_RETRY_MS} ms id=${viewModel.instanceId} " +
+                "isLoading=${uiState.isLoading} rows=${uiState.catalogRows.size} presentation=$modernPresentationReady")
+            viewModel.onEvent(HomeEvent.OnRetry)
+        }
+    }
     val showStartupLoader = when {
         !uiState.layoutPreferencesReady -> true
         uiState.isLoading && !hasAnyContent -> true
@@ -580,6 +601,9 @@ private fun ClassicHomeRoute(
         showContinueWatchingManualPlayOption = showContinueWatchingManualPlayOption,
         onNavigateToCatalogSeeAll = onNavigateToCatalogSeeAll,
         onNavigateToFolderDetail = onNavigateToFolderDetail,
+        onMarkContinueWatchingWatched = remember(viewModel) {
+            { item -> viewModel.onEvent(HomeEvent.OnMarkContinueWatchingWatched(item)) }
+        },
         onRemoveContinueWatching = { contentId, season, episode, isNextUp ->
             viewModel.onEvent(HomeEvent.OnRemoveContinueWatching(contentId, season, episode, isNextUp))
         },
@@ -641,6 +665,9 @@ private fun GridHomeRoute(
         showContinueWatchingManualPlayOption = showContinueWatchingManualPlayOption,
         onNavigateToCatalogSeeAll = onNavigateToCatalogSeeAll,
         onNavigateToFolderDetail = onNavigateToFolderDetail,
+        onMarkContinueWatchingWatched = remember(viewModel) {
+            { item -> viewModel.onEvent(HomeEvent.OnMarkContinueWatchingWatched(item)) }
+        },
         onRemoveContinueWatching = remember(viewModel) {
             { contentId, season, episode, isNextUp ->
                 viewModel.onEvent(HomeEvent.OnRemoveContinueWatching(contentId, season, episode, isNextUp))
@@ -739,6 +766,9 @@ private fun ModernHomeRoute(
         onRequestTrailerPreview = requestTrailerPreview,
         onLoadMoreCatalog = loadMoreCatalog,
         onServerArtworkWindow = remember(viewModel) { { rows -> viewModel.requestServerArtwork(rows) } },
+        onMarkContinueWatchingWatched = remember(viewModel) {
+            { item -> viewModel.onEvent(HomeEvent.OnMarkContinueWatchingWatched(item)) }
+        },
         onRemoveContinueWatching = removeContinueWatching,
         onHideFromComingUp = remember(viewModel) { { item: ContinueWatchingItem -> viewModel.hideFromComingUp(item) } },
         isCatalogItemWatched = isCatalogItemWatched,

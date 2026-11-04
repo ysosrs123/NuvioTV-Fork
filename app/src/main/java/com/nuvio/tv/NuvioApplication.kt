@@ -54,6 +54,7 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
     @Inject lateinit var simklAnimeIdPreferenceHolder: SimklAnimeIdPreferenceHolder
     @Inject lateinit var serverUserStateProjection: ServerUserStateProjection
     @Inject lateinit var siloArtworkRefresher: com.nuvio.tv.data.mediaserver.silo.SiloArtworkRefresher
+    @Inject lateinit var plexArtworkSigner: com.nuvio.tv.data.mediaserver.plex.PlexArtworkSigner
 
     companion object {
         private const val CACHE_TAG = "NuvioCache"
@@ -93,8 +94,10 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
         }
     }
 
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun onCreate() {
         com.nuvio.tv.core.util.StartupLatencyTrace.coldOnce("app_create")
+        com.nuvio.tv.core.network.ArcDns.init(this)
         super.onCreate()
         com.nuvio.tv.core.util.StartupLatencyTrace.coldOnce("app_injected")
         PluginRuntimeHooks.onApplicationCreate(this)
@@ -172,6 +175,7 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
         }
     }
 
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun newImageLoader(context: android.content.Context): ImageLoader {
         val imageOkHttpClient by lazy {
             val imageDispatcher = okhttp3.Dispatcher().apply {
@@ -190,6 +194,11 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
                 .addInterceptor(
                     com.nuvio.tv.data.mediaserver.silo.SiloArtworkInterceptor({
                         if (::siloArtworkRefresher.isInitialized) siloArtworkRefresher else null
+                    })
+                )
+                .addInterceptor(
+                    com.nuvio.tv.data.mediaserver.plex.PlexArtworkInterceptor({
+                        if (::plexArtworkSigner.isInitialized) plexArtworkSigner else null
                     })
                 )
                 .addInterceptor { chain ->
@@ -220,7 +229,10 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
                     }
                 }
                 .build()
-                .also { ServerTrust.closeConnectionsOnWithdrawal(it.connectionPool) }
+                .also {
+                    ServerTrust.closeConnectionsOnWithdrawal(it.connectionPool)
+                    com.nuvio.tv.core.network.ArcDns.onChange(it.connectionPool::evictAll)
+                }
         }
 
         val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager

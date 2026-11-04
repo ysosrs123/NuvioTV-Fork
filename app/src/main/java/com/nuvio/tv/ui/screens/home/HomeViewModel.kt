@@ -2,6 +2,7 @@ package com.nuvio.tv.ui.screens.home
 
 import com.nuvio.tv.core.util.StartupLatencyTrace
 
+import android.util.Log
 import android.content.Context
 import android.os.SystemClock
 import androidx.compose.runtime.mutableStateMapOf
@@ -454,6 +455,7 @@ class HomeViewModel @Inject constructor(
     internal val cwMetaNegativeCacheTimestamps: MutableMap<String, Long> = createLruMap(MAX_CW_CACHE_SIZE)
     internal val cwMetaRefreshAtMs: MutableMap<String, Long> = createLruMap(MAX_CW_CACHE_SIZE)
     internal val cwMetaStaleKeys: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    internal val cwEpisodeLists = MutableStateFlow<Map<String, Set<Pair<Int, Int>>>>(emptyMap())
     /** Ultra-light cache for badge evaluation: contentId → set of aired (season, episode) pairs. */
     internal val cwBadgeEpisodeCache: MutableMap<String, Set<Pair<Int, Int>>?> = createLruMap(MAX_CW_CACHE_SIZE)
     /** Per-series check-again time (epochMs): next known release, else a fallback interval. */
@@ -539,14 +541,14 @@ class HomeViewModel @Inject constructor(
     val trailerPreviewAudioUrls: Map<String, String>
         get() = trailerPreviewAudioUrlsState
 
-    private val vmInstanceId: String = System.identityHashCode(this).toString(16)
+    internal val instanceId: String = System.identityHashCode(this).toString(16)
 
     init {
         StartupLatencyTrace.mark("home_vm_init")
         shownUiState = createShuffleHomeState()
         observeCwPrefetch(shownUiState)
         observeServerArtwork()
-        android.util.Log.i("HOMEVM_LIFECYCLE", "INIT id=" + vmInstanceId)
+        android.util.Log.i("HOMEVM_LIFECYCLE", "INIT id=" + instanceId + " from " + homeViewModelCaller())
         // Accumulates individual watched status changes and flushes them as a single
         // update after 150ms of inactivity, preventing N separate recompositions.
         viewModelScope.launch {
@@ -570,6 +572,7 @@ class HomeViewModel @Inject constructor(
             observeLayoutPreferences()
             observeWatchedTitlesPipeline()
             observeModernHomePresentation()
+            observeCwEpisodeListsPipeline()
             loadContinueWatching()
             watchedSeriesStateHolder.loadFromDisk()
             observeExternalMetaPrefetchPreference()
@@ -612,6 +615,7 @@ class HomeViewModel @Inject constructor(
                     // profile doesn't leak into the new one.
                     cwMetaCache.clear()
                     clearHeroSeriesFacts()
+                    cwEpisodeLists.value = emptyMap()
                     cwMetaNegativeCacheTimestamps.clear()
                     cwMetaRefreshAtMs.clear()
                     cwMetaStaleKeys.clear()
@@ -675,6 +679,7 @@ class HomeViewModel @Inject constructor(
     private fun clearAllCwInMemoryCaches() {
         cwMetaCache.clear()
         clearHeroSeriesFacts()
+        cwEpisodeLists.value = emptyMap()
         cwMetaNegativeCacheTimestamps.clear()
         cwMetaRefreshAtMs.clear()
         cwMetaStaleKeys.clear()
@@ -927,6 +932,7 @@ class HomeViewModel @Inject constructor(
         when (event) {
             is HomeEvent.OnItemClick -> navigateToDetail(event.itemId, event.itemType)
             is HomeEvent.OnLoadMoreCatalog -> loadMoreCatalogItems(event.catalogId, event.addonId, event.type)
+            is HomeEvent.OnMarkContinueWatchingWatched -> markContinueWatchingWatched(event.item)
             is HomeEvent.OnRemoveContinueWatching -> removeContinueWatching(
                 contentId = event.contentId,
                 season = event.season,
@@ -1039,6 +1045,14 @@ class HomeViewModel @Inject constructor(
         episode = episode,
         isNextUp = isNextUp
     )
+
+    private fun markContinueWatchingWatched(item: ContinueWatchingItem) {
+        if (!item.canMarkWatched()) return
+        viewModelScope.launch {
+            runCatching { watchProgressRepository.markAsCompleted(item.toCompletedProgress()) }
+                .onFailure { error -> Log.w(TAG, "Failed to mark continue watching item as watched", error) }
+        }
+    }
 
     private fun observeCollections() = observeCollectionsPipeline()
 
@@ -1312,7 +1326,7 @@ class HomeViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        android.util.Log.i("HOMEVM_LIFECYCLE", "CLEARED id=" + vmInstanceId)
+        android.util.Log.i("HOMEVM_LIFECYCLE", "CLEARED id=" + instanceId)
         startupAuthNoticeJob?.cancel()
         posterStatusReconcileJob?.cancel()
         movieWatchedBatchJob?.cancel()

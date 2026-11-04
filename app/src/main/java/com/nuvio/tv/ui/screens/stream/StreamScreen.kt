@@ -89,7 +89,6 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
-import com.nuvio.tv.core.player.ExternalPlayerLauncher
 import com.nuvio.tv.core.streams.StreamBadgePlacement
 import com.nuvio.tv.core.streams.StreamBadgeSettings
 import com.nuvio.tv.data.local.PlayerPreference
@@ -101,6 +100,7 @@ import com.nuvio.tv.ui.components.StreamBadgeChips
 import com.nuvio.tv.ui.components.StreamsSkeletonList
 import com.nuvio.tv.ui.screens.player.LoadingOverlay
 import com.nuvio.tv.ui.screens.player.AddonFilterChips
+import com.nuvio.tv.ui.screens.player.focusChip
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.components.GlassRole
@@ -114,6 +114,7 @@ import com.nuvio.tv.ui.navigation.sourceSelectionRestoreTarget
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.delay as coroutineDelay
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch as coroutineLaunch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -199,17 +200,15 @@ fun StreamScreen(
         val url = playbackInfo.url?.takeIf { it.isNotBlank() } ?: return false
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             .addCategory(Intent.CATEGORY_BROWSABLE)
-        runCatching {
+        val openedInBrowser = runCatching {
             context.startActivity(browserIntent)
-        }.onFailure {
-            ExternalPlayerLauncher.launch(
-                context = context,
-                url = url,
-                title = playbackInfo.title,
-                headers = playbackInfo.headers,
-                startFromBeginning = startFromBeginning
-            )
+        }.isSuccess
+        if (!openedInBrowser) {
+            // The external player records the provider after its own launch succeeds.
+            launchExternalPlayer(playbackInfo)
+            return true
         }
+        viewModel.rememberPlayedPlugin(playbackInfo.bingeGroup)
         return true
     }
 
@@ -832,19 +831,21 @@ private fun RightStreamSection(
             }
         }
     }
+    val chipListState = rememberLazyListState()
     fun onAddonFilterSelectedGuarded(addon: String?) {
         userMovedFromFirstResult = true
-        onAddonFilterSelected(addon)
-        focusJob?.cancel()
-        focusJob = scope.coroutineLaunch {
-            withFrameNanos {}
-            val targetRequester = if (addon == null) {
-                chipFocusRequesters.getOrNull(1)
-            } else {
-                addonFocusRequesters[addon]
-            }
-            runCatching { targetRequester?.requestFocus() }
+        val targetRequester = if (addon == null) {
+            chipFocusRequesters.getOrNull(1)
+        } else {
+            addonFocusRequesters[addon]
         }
+        focusJob?.cancel()
+        // Focus the chip before the results change: once the focused card is gone,
+        // Compose would otherwise park focus on another chip first.
+        focusJob = scope.coroutineLaunch(start = CoroutineStart.UNDISPATCHED) {
+            chipListState.focusChip(chipFocusRequesters.indexOf(targetRequester), chipFocusRequesters)
+        }
+        onAddonFilterSelected(addon)
     }
 
     LaunchedEffect(Unit) {
@@ -884,7 +885,7 @@ private fun RightStreamSection(
         focusJob?.cancel()
         focusJob = scope.coroutineLaunch {
             withFrameNanos { }
-            runCatching { chipFocusRequesters[index].requestFocus() }
+            chipListState.focusChip(index, chipFocusRequesters)
         }
     }
 
@@ -917,6 +918,7 @@ private fun RightStreamSection(
                     onAddonSelected = { onAddonFilterSelected(it) },
                     externalFocusRequesters = chipFocusRequesters,
                     externalOrderedNames = orderedAddonNames,
+                    chipListState = chipListState,
                     debugTag = "StreamScreen"
                 )
             }

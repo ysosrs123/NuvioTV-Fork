@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.settings
 
+import com.nuvio.tv.core.util.readAppLogoBytes
 import com.nuvio.tv.domain.model.catalogRowLegacyKey
 import android.content.Context
 import android.graphics.Bitmap
@@ -78,6 +79,7 @@ data class LayoutSettingsUiState(
     val homeImdbRatingsVisibility: HomeImdbRatingsVisibility = HomeImdbRatingsVisibility.SHOW_ALL,
     val detailImdbRatingsVisibility: DetailImdbRatingsVisibility = DetailImdbRatingsVisibility.SHOW_ALL,
     val blurContinueWatchingNextUp: Boolean = false,
+    val cwEpisodesLeftEnabled: Boolean = false,
     val useEpisodeThumbnailsInCw: Boolean = true,
     val detailPageTrailerButtonEnabled: Boolean = true,
     val detailPageTrailerAutoplayEnabled: Boolean = true,
@@ -148,6 +150,7 @@ sealed class LayoutSettingsEvent {
     data class SetHomeImdbRatingsVisibility(val visibility: HomeImdbRatingsVisibility) : LayoutSettingsEvent()
     data class SetDetailImdbRatingsVisibility(val visibility: DetailImdbRatingsVisibility) : LayoutSettingsEvent()
     data class SetBlurContinueWatchingNextUp(val enabled: Boolean) : LayoutSettingsEvent()
+    data class SetCwEpisodesLeftEnabled(val enabled: Boolean) : LayoutSettingsEvent()
     data class SetUseEpisodeThumbnailsInCw(val enabled: Boolean) : LayoutSettingsEvent()
     data class SetDetailPageTrailerButtonEnabled(val enabled: Boolean) : LayoutSettingsEvent()
     data class SetDetailPageTrailerAutoplayEnabled(val enabled: Boolean) : LayoutSettingsEvent()
@@ -191,7 +194,7 @@ class LayoutSettingsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(LayoutSettingsUiState())
     val uiState: StateFlow<LayoutSettingsUiState> = _uiState.asStateFlow()
     private var streamBadgeServer: StreamBadgeConfigServer? = null
-    private var logoBytes: ByteArray? = null
+    private val logoBytes: ByteArray? by lazy { context.readAppLogoBytes() }
 
     private val _streamBadgeUiState = MutableStateFlow(StreamBadgeSettingsUiState())
     val streamBadgeUiState: StateFlow<StreamBadgeSettingsUiState> = _streamBadgeUiState.asStateFlow()
@@ -206,7 +209,6 @@ class LayoutSettingsViewModel @Inject constructor(
     }
 
     init {
-        loadLogoBytes()
         viewModelScope.launch {
             streamBadgeSettingsDataStore.settings.collectLatest { settings ->
                 _streamBadgeUiState.update { it.copy(settings = settings) }
@@ -373,6 +375,11 @@ class LayoutSettingsViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            layoutPreferenceDataStore.cwEpisodesLeftEnabled.distinctUntilChanged().collectLatest { enabled ->
+                updateUiStateIfChanged { it.copy(cwEpisodesLeftEnabled = enabled) }
+            }
+        }
+        viewModelScope.launch {
             layoutPreferenceDataStore.useEpisodeThumbnailsInCw.distinctUntilChanged().collectLatest { enabled ->
                 updateUiStateIfChanged { it.copy(useEpisodeThumbnailsInCw = enabled) }
             }
@@ -515,6 +522,7 @@ class LayoutSettingsViewModel @Inject constructor(
             is LayoutSettingsEvent.SetHomeImdbRatingsVisibility -> setHomeImdbRatingsVisibility(event.visibility)
             is LayoutSettingsEvent.SetDetailImdbRatingsVisibility -> setDetailImdbRatingsVisibility(event.visibility)
             is LayoutSettingsEvent.SetBlurContinueWatchingNextUp -> setBlurContinueWatchingNextUp(event.enabled)
+            is LayoutSettingsEvent.SetCwEpisodesLeftEnabled -> setCwEpisodesLeftEnabled(event.enabled)
             is LayoutSettingsEvent.SetUseEpisodeThumbnailsInCw -> setUseEpisodeThumbnailsInCw(event.enabled)
             is LayoutSettingsEvent.SetDetailPageTrailerButtonEnabled -> setDetailPageTrailerButtonEnabled(event.enabled)
             is LayoutSettingsEvent.SetDetailPageTrailerAutoplayEnabled -> setDetailPageTrailerAutoplayEnabled(event.enabled)
@@ -602,14 +610,6 @@ class LayoutSettingsViewModel @Inject constructor(
 
     fun setStreamBadgePlacement(placement: StreamBadgePlacement) {
         viewModelScope.launch { streamBadgeSettingsDataStore.setStreamBadgePlacement(placement) }
-    }
-
-    private fun loadLogoBytes() {
-        try {
-            val inputStream = context.resources.openRawResource(R.drawable.app_logo_wordmark)
-            logoBytes = inputStream.use { it.readBytes() }
-        } catch (_: Exception) {
-        }
     }
 
     private fun stopStreamBadgeServer() {
@@ -893,6 +893,13 @@ class LayoutSettingsViewModel @Inject constructor(
         if (_uiState.value.blurContinueWatchingNextUp == enabled) return
         viewModelScope.launch {
             layoutPreferenceDataStore.setBlurContinueWatchingNextUp(enabled)
+        }
+    }
+
+    private fun setCwEpisodesLeftEnabled(enabled: Boolean) {
+        if (_uiState.value.cwEpisodesLeftEnabled == enabled) return
+        viewModelScope.launch {
+            layoutPreferenceDataStore.setCwEpisodesLeftEnabled(enabled)
         }
     }
 

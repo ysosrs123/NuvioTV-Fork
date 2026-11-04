@@ -176,6 +176,7 @@ fun ModernHomeContent(
     onServerArtworkWindow: (List<Pair<String, List<MetaPreview>>>) -> Unit = {},
     onRemoveContinueWatching: (String, Int?, Int?, Boolean) -> Unit,
     onHideFromComingUp: (ContinueWatchingItem) -> Unit = {},
+    onMarkContinueWatchingWatched: (ContinueWatchingItem) -> Unit = {},
     isCatalogItemWatched: (MetaPreview) -> Boolean = { false },
     onCatalogItemLongPress: (MetaPreview, String) -> Unit = { _, _ -> },
     onNavigateToFolderDetail: (String, String) -> Unit = { _, _ -> },
@@ -852,6 +853,8 @@ fun ModernHomeContent(
                         fallbackPoster = heroCarouselItem?.heroPreview?.poster,
                         widePoster = heroCarouselItem?.metaPreview
                             ?.takeIf { it.posterShape == PosterShape.LANDSCAPE }?.poster
+                            ?: heroCarouselItem?.heroPreview?.backdrop
+                                ?.takeIf { heroCarouselItem.payload is ModernPayload.CollectionFolder }
                     )
                     ResolvedModernHeroState(artwork, resolvedHero, effectiveEnrichmentActive)
                 }
@@ -1334,6 +1337,13 @@ fun ModernHomeContent(
                 {
                     keepFocusAfterRemoval()
                     onHideFromComingUp(selectedOptionsItem)
+                    optionsItem.value = null
+                }
+            } else null,
+            onMarkWatched = if (!comingUp) {
+                {
+                    keepFocusAfterRemoval()
+                    onMarkContinueWatchingWatched(selectedOptionsItem)
                     optionsItem.value = null
                 }
             } else null

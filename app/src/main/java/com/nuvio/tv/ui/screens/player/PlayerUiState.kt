@@ -1,7 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
 import com.nuvio.tv.domain.model.SubtitleFont
-import com.nuvio.tv.data.local.SubtitleEdgeStyle
+import com.nuvio.tv.data.local.SubtitleOutlineSize
 import androidx.media3.common.C
 import androidx.media3.common.TrackGroup
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -76,6 +76,7 @@ data class PlayerUiState(
     val currentStreamInfoHash: String? = null, // InfoHash of the currently playing stream (for debrid matching)
     val currentStreamFileIdx: Int? = null, // FileIdx of the currently playing stream (for debrid matching)
     val currentStreamAddonName: String? = null, // Addon name of the currently playing stream
+    val currentStreamDescription: String? = null, // Description of the currently playing stream
     val backdrop: String? = null,
     val logo: String? = null,
     val description: String? = null,
@@ -418,8 +419,9 @@ sealed class PlayerEvent {
     data class OnSetSubtitleTextColor(val color: Int) : PlayerEvent()
     data class OnSetSubtitleBold(val bold: Boolean) : PlayerEvent()
     data class OnSetSubtitleFont(val font: SubtitleFont?) : PlayerEvent()
-    data class OnSetSubtitleEdgeStyle(val style: SubtitleEdgeStyle) : PlayerEvent()
-    data class OnSetSubtitleOutlineEnabled(val enabled: Boolean) : PlayerEvent()
+    data class OnSetSubtitleOutlineSize(val size: SubtitleOutlineSize) : PlayerEvent()
+    data class OnSetSubtitleShadowEnabled(val enabled: Boolean) : PlayerEvent()
+    data class OnSetSubtitleShadowOpacity(val opacity: Int) : PlayerEvent()
     data class OnSetSubtitleOutlineColor(val color: Int) : PlayerEvent()
     data class OnSetSubtitleVerticalOffset(val offset: Int) : PlayerEvent()
     data object OnResetSubtitleDefaults : PlayerEvent()

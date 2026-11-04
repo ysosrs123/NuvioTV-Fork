@@ -8,6 +8,7 @@ import com.nuvio.tv.ui.screens.settings.SubtitleEdgeDialog
 import com.nuvio.tv.ui.screens.settings.subtitleFontName
 import com.nuvio.tv.ui.screens.settings.subtitleEdgeName
 import com.nuvio.tv.ui.theme.NuvioTheme
+import com.nuvio.tv.ui.util.keepLtr
 
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -447,7 +448,7 @@ private fun SubtitleStyleValueDisplay(text: String) {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = text,
+            text = text.keepLtr(),
             style = MaterialTheme.typography.bodySmall,
             color = Color.White,
             maxLines = 1,

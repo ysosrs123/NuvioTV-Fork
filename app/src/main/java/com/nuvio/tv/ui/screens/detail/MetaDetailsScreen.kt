@@ -490,6 +490,8 @@ fun MetaDetailsScreen(
         .collectAsStateWithLifecycle(initialValue = viewModel.uiState.value.ratingState())
     val peopleState = remember(viewModel) { viewModel.uiState.map { it.peopleState() }.distinctUntilChanged() }
         .collectAsStateWithLifecycle(initialValue = viewModel.uiState.value.peopleState())
+    val parentalGuideState = remember(viewModel) { viewModel.uiState.map { it.parentalGuide }.distinctUntilChanged() }
+        .collectAsStateWithLifecycle(initialValue = viewModel.uiState.value.parentalGuide)
     val secondaryReady by viewModel.secondaryReady.collectAsStateWithLifecycle()
     var scrolledPastHero by remember(viewModel) { mutableStateOf(false) }
     var isBackgroundTrailerRendered by remember(
@@ -556,7 +558,7 @@ fun MetaDetailsScreen(
         } else if (uiState.isTrailerPlaying) {
             restorePlayFocusAfterTrailerBackToken += 1
             isTrailerPaused = false
-            viewModel.onEvent(MetaDetailsEvent.OnTrailerEnded)
+            viewModel.onEvent(MetaDetailsEvent.OnTrailerBackPress)
         } else {
             onBackPress()
         }
@@ -908,6 +910,7 @@ fun MetaDetailsScreen(
                     commentState = commentState,
                     ratingState = ratingState,
                     peopleState = peopleState,
+                    parentalGuideState = parentalGuideState,
                     meta = meta,
                     heroLogoUrl = heroLogoUrl,
                     detailReturnEpisodeFocusRequest = DetailReturnEpisodeFocusRequest(
@@ -1259,6 +1262,7 @@ private fun MetaDetailsContent(
     commentState: State<DetailCommentState>,
     ratingState: State<DetailRatingState>,
     peopleState: State<DetailPeopleState>,
+    parentalGuideState: State<List<com.nuvio.tv.data.repository.ParentalGuideEntry>>,
     meta: Meta,
     heroLogoUrl: String? = null,
     detailReturnEpisodeFocusRequest: DetailReturnEpisodeFocusRequest? = null,
@@ -1891,6 +1895,7 @@ private fun MetaDetailsContent(
 
     LaunchedEffect(isScrolledPastHero) { onScrollPastHero(isScrolledPastHero) }
     val people = if (secondaryReady) peopleState.value else DetailPeopleState(emptyList(), emptyList(), emptyList(), emptyList())
+    val parentalGuide = if (secondaryReady) parentalGuideState.value else emptyList()
 
     // Prepare cast only after the hero or explicit Down demand.
     val castMembersToShow = remember(people.castMembers, people.cast) {
@@ -1967,6 +1972,7 @@ private fun MetaDetailsContent(
         MoreLikeThisSource.TMDB -> stringResource(R.string.detail_more_like_this_powered_by_tmdb)
         MoreLikeThisSource.TRAKT -> stringResource(R.string.detail_more_like_this_powered_by_trakt)
         MoreLikeThisSource.SIMKL -> stringResource(R.string.detail_more_like_this_powered_by_simkl)
+        MoreLikeThisSource.WETRAKR -> stringResource(R.string.detail_more_like_this_powered_by_wetrakr)
         null -> null
     }
     val peopleTabItems = remember(
@@ -2035,16 +2041,19 @@ private fun MetaDetailsContent(
     val visiblePeopleTabItems = if (shouldSplitCollection) peopleTabItems.filterNot { it.tab == PeopleSectionTab.COLLECTION } else peopleTabItems
     val hasVisiblePeopleSection = visiblePeopleTabItems.isNotEmpty()
     val hasVisiblePeopleTabs = visiblePeopleTabItems.size > 1
+    val showParentalGuide = parentalGuide.isNotEmpty()
     val commentsItemIndex = remember(
         isSeries,
         seasons,
         hasVisiblePeopleSection,
-        hasVisiblePeopleTabs
+        hasVisiblePeopleTabs,
+        showParentalGuide
     ) {
         var index = 1
         if (isSeries && seasons.isNotEmpty()) {
             index += 2
         }
+        if (showParentalGuide) index += 1
         if (hasVisiblePeopleSection) {
             if (hasVisiblePeopleTabs) index += 1
             index += 1
@@ -2812,6 +2821,12 @@ private fun MetaDetailsContent(
                     }
                 }
 
+                if (showParentalGuide) {
+                    detailSection(key = "parental_guide", contentType = "parental_guide", immediate = revealSecondaryImmediately) {
+                        ParentalGuideSection(entries = parentalGuide)
+                    }
+                }
+
                 // Cast / More like this section
                 if (hasVisiblePeopleSection) {
                     if (hasVisiblePeopleTabs) {
@@ -3553,14 +3568,16 @@ private fun BackdropLayer(
     val isBackgroundTrailerPaused =
         isBackgroundTrailerPlaying && pauseBackgroundTrailerOnScroll && isScrolledPastHero
     val isBackgroundTrailerVisible = isBackgroundTrailerPlaying && !isBackgroundTrailerPaused
-    val backgroundTrailerAlphaState = animateFloatAsState(
+    val isAnyTrailerPlaying = isTrailerPlaying || isBackgroundTrailerPlaying
+    val trailerAlphaState = animateFloatAsState(
         targetValue = when {
+            isTrailerPlaying -> 1f
             !isBackgroundTrailerVisible || !isBackgroundTrailerRendered -> 0f
             isScrolledPastHero -> 0.15f
             else -> 1f
         },
         animationSpec = tween(durationMillis = if (isScrolledPastHero) 300 else 800),
-        label = "backgroundTrailerFade"
+        label = "trailerFade"
     )
     val gradientAlphaState = animateFloatAsState(
         targetValue = if ((isTrailerPlaying && isBackgroundTrailerRendered) || isScrolledPastHero) 0f else 1f,
@@ -3584,7 +3601,7 @@ private fun BackdropLayer(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                    alpha = if (isBackgroundTrailerPlaying) backgroundTrailerAlphaState.value else 1f
+                    alpha = if (isAnyTrailerPlaying) trailerAlphaState.value else 1f
                 }
         )
         Box(
@@ -3628,11 +3645,12 @@ private fun PeopleSectionTabs(
         fun androidx.compose.foundation.layout.RowScope.renderTabs(items: List<PeopleTabItem>) {
             items.forEachIndexed { index, item ->
                 if (index > 0) {
-                    Text(
-                        text = "|",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = NuvioTheme.colors.TextPrimary.copy(alpha = 0.45f),
-                        modifier = Modifier.padding(horizontal = 10.dp)
+                    Spacer(
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
+                            .width(1.dp)
+                            .height(16.dp)
+                            .background(NuvioTheme.colors.TextPrimary.copy(alpha = 0.45f))
                     )
                 }
 

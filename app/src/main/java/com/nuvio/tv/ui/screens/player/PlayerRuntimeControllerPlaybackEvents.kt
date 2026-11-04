@@ -1081,6 +1081,11 @@ internal fun PlayerRuntimeController.currentPlaybackProgressPercent(): Float {
     return ((position.toFloat() / duration.toFloat()) * 100f).coerceIn(0f, 100f)
 }
 
+internal fun PlayerRuntimeController.currentScrobbleDurationSeconds(): Long? =
+    (currentPlaybackDurationMs().takeIf { it > 0L } ?: lastKnownDuration)
+        .takeIf { it >= 1_000L }
+        ?.div(1_000L)
+
 internal fun PlayerRuntimeController.refreshScrobbleItem() {
     currentScrobbleItem = buildScrobbleItem()
     hasSentScrobbleStartForCurrentItem = false
@@ -1158,7 +1163,7 @@ internal fun PlayerRuntimeController.emitScrobbleStart() {
         logScrobbleDiagnostic("start_dispatching", "requestGeneration=$requestGeneration progress=$progressPercent")
         val failures = trackingScrobbleCoordinator.scrobble(
             action = TrackingScrobbleAction.START,
-            event = TrackingScrobbleEvent(item, progressPercent.toDouble(), serverScrobbledProviders)
+            event = TrackingScrobbleEvent(item, progressPercent.toDouble(), serverScrobbledProviders, currentScrobbleDurationSeconds())
         )
         logScrobbleDiagnostic(
             "start_dispatched",
@@ -1193,6 +1198,7 @@ internal fun PlayerRuntimeController.emitScrobbleStop(progressPercent: Float? = 
 
     val percent = provided ?: currentPlaybackProgressPercent()
     logScrobbleDiagnostic("stop_queued", "progress=$percent")
+    val durationSeconds = currentScrobbleDurationSeconds()
     val known = serverScrobbledProviders
     val streamUrl = currentStreamUrl
     scope.launch(kotlinx.coroutines.NonCancellable) {
@@ -1202,7 +1208,7 @@ internal fun PlayerRuntimeController.emitScrobbleStop(progressPercent: Float? = 
         }
         val failures = trackingScrobbleCoordinator.scrobble(
             action = TrackingScrobbleAction.STOP,
-            event = TrackingScrobbleEvent(item, percent.toDouble(), skipped)
+            event = TrackingScrobbleEvent(item, percent.toDouble(), skipped, durationSeconds)
         )
         logScrobbleDiagnostic("stop_dispatched", "progress=$percent failures=${failures.map { it.providerId.storageId }}")
     }
@@ -1233,12 +1239,13 @@ internal fun PlayerRuntimeController.emitScrobblePause(progressPercent: Float? =
         return
     }
     logScrobbleDiagnostic("pause_queued", "progress=$percent")
+    val durationSeconds = currentScrobbleDurationSeconds()
     val skipped = serverScrobbledProviders
     scope.launch(kotlinx.coroutines.NonCancellable) {
         logScrobbleDiagnostic("pause_dispatching", "progress=$percent")
         val failures = trackingScrobbleCoordinator.scrobble(
             action = TrackingScrobbleAction.PAUSE,
-            event = TrackingScrobbleEvent(item, percent.toDouble(), skipped)
+            event = TrackingScrobbleEvent(item, percent.toDouble(), skipped, durationSeconds)
         )
         logScrobbleDiagnostic("pause_dispatched", "progress=$percent failures=${failures.map { it.providerId.storageId }}")
     }
@@ -1280,16 +1287,16 @@ internal fun PlayerRuntimeController.emitSeekScrobbleRestart(progressPercent: Fl
     val item = currentScrobbleItem ?: return
     if (!hasRequestedScrobbleStartForCurrentItem) return
     val skipped = serverScrobbledProviders
+    val durationSeconds = currentScrobbleDurationSeconds()
+    val generation = scrobbleStartRequestGeneration
     scope.launch {
-        trackingScrobbleCoordinator.scrobbleSeek(
-            action = TrackingScrobbleAction.STOP,
-            event = TrackingScrobbleEvent(item, progressPercent.toDouble(), skipped)
-        )
-        if (isPlaybackCurrentlyPlaying()) {
-            trackingScrobbleCoordinator.scrobbleSeek(
-                action = TrackingScrobbleAction.START,
-                event = TrackingScrobbleEvent(item, currentPlaybackProgressPercent().toDouble(), skipped)
-            )
+        trackingScrobbleCoordinator.scrobbleSeekRestart(
+            stop = TrackingScrobbleEvent(item, progressPercent.toDouble(), skipped, durationSeconds)
+        ) {
+            val sameItem = generation == scrobbleStartRequestGeneration && currentScrobbleItem == item &&
+                hasRequestedScrobbleStartForCurrentItem
+            if (!sameItem || !isPlaybackCurrentlyPlaying()) return@scrobbleSeekRestart null
+            TrackingScrobbleEvent(item, currentPlaybackProgressPercent().toDouble(), skipped, durationSeconds)
         }
     }
 }
@@ -2191,7 +2198,7 @@ fun PlayerRuntimeController.onEvent(
                 )
             } else {
                 releasePlayer()
-                initializePlayer(currentStreamUrl, currentHeaders)
+                reinitializeCurrentStream()
             }
         }
         PlayerEvent.OnReportPlaybackIssue -> {
@@ -2265,11 +2272,14 @@ fun PlayerRuntimeController.onEvent(
         is PlayerEvent.OnSetSubtitleFont -> {
             scope.launch { playerSettingsDataStore.setSubtitleFont(event.font) }
         }
-        is PlayerEvent.OnSetSubtitleEdgeStyle -> {
-            scope.launch { playerSettingsDataStore.setSubtitleEdgeStyle(event.style) }
+        is PlayerEvent.OnSetSubtitleOutlineSize -> {
+            scope.launch { playerSettingsDataStore.setSubtitleOutlineSize(event.size) }
         }
-        is PlayerEvent.OnSetSubtitleOutlineEnabled -> {
-            scope.launch { playerSettingsDataStore.setSubtitleOutlineEnabled(event.enabled) }
+        is PlayerEvent.OnSetSubtitleShadowEnabled -> {
+            scope.launch { playerSettingsDataStore.setSubtitleShadowEnabled(event.enabled) }
+        }
+        is PlayerEvent.OnSetSubtitleShadowOpacity -> {
+            scope.launch { playerSettingsDataStore.setSubtitleShadowOpacity(event.opacity) }
         }
         is PlayerEvent.OnSetSubtitleOutlineColor -> {
             scope.launch { playerSettingsDataStore.setSubtitleOutlineColor(event.color) }
