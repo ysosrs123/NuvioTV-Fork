@@ -1,7 +1,13 @@
 package com.nuvio.tv.core.tracking
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TrackingScrobbleCoordinatorTest {
@@ -52,36 +58,64 @@ class TrackingScrobbleCoordinatorTest {
     }
 
     @Test
-    fun `seek fanout targets only providers that restart sessions`() = runTest {
-        val trakt = FakeScrobbler(
-            providerId = TrackingProviderId.TRAKT,
-            seekPolicy = TrackingSeekScrobblePolicy.STOP_AND_RESTART
-        )
-        val simkl = FakeScrobbler(TrackingProviderId.SIMKL)
-        val mdblist = FakeScrobbler(TrackingProviderId.MDBLIST)
-        val event = TrackingScrobbleEvent(
-            media = TrackingMediaReference(
-                kind = TrackingMediaKind.MOVIE,
-                ids = TrackingExternalIds(imdb = "tt0111161")
-            ),
-            progressPercent = 55.0
-        )
+    fun `a tracker cancelled from inside does not cancel the others`() = runTest {
+        val log = mutableListOf<String>()
+        val trakt = FakeScrobbler(TrackingProviderId.TRAKT, log = log, delayMs = 5_000L)
+        val floppy = FakeScrobbler(TrackingProviderId.FLOPPY, CancellationException("account changed"), log = log)
 
-        dispatchTrackingSeekScrobble(
-            scrobblers = listOf(trakt, simkl, mdblist),
-            action = TrackingScrobbleAction.STOP,
-            event = event
-        )
+        val failures = dispatchTrackingScrobble(listOf(trakt, floppy), TrackingScrobbleAction.STOP, event(80.0))
 
-        assertEquals(1, trakt.callCount)
-        assertEquals(0, simkl.callCount)
-        assertEquals(0, mdblist.callCount)
+        assertEquals(listOf("FLOPPY stop", "TRAKT stop"), log)
+        assertEquals(listOf(TrackingProviderId.FLOPPY), failures.map { it.providerId })
     }
+
+    @Test
+    fun `cancelling the caller still cancels the trackers`() = runTest {
+        val log = mutableListOf<String>()
+        val trakt = FakeScrobbler(TrackingProviderId.TRAKT, log = log, delayMs = 5_000L)
+        val job = launch { dispatchTrackingScrobble(listOf(trakt), TrackingScrobbleAction.STOP, event(80.0)) }
+        runCurrent()
+        job.cancel()
+        advanceUntilIdle()
+        assertTrue(job.isCancelled)
+        assertTrue(log.isEmpty())
+    }
+
+    @Test
+    fun `seek restart goes per tracker and only to trackers that restart`() = runTest {
+        val log = mutableListOf<String>()
+        val trakt = FakeScrobbler(TrackingProviderId.TRAKT, log = log, delayMs = 10_000L, seekPolicy = TrackingSeekScrobblePolicy.STOP_AND_RESTART)
+        val floppy = FakeScrobbler(TrackingProviderId.FLOPPY, log = log, seekPolicy = TrackingSeekScrobblePolicy.STOP_AND_RESTART)
+        val simkl = FakeScrobbler(TrackingProviderId.SIMKL, log = log)
+
+        dispatchTrackingSeekRestart(listOf(trakt, floppy, simkl), event(40.0)) { event(41.0) }
+
+        assertEquals(listOf("FLOPPY stop", "FLOPPY start", "TRAKT stop", "TRAKT start"), log)
+    }
+
+    @Test
+    fun `seek restart skips the start when playback moved on`() = runTest {
+        val log = mutableListOf<String>()
+        val trakt = FakeScrobbler(TrackingProviderId.TRAKT, log = log, seekPolicy = TrackingSeekScrobblePolicy.STOP_AND_RESTART)
+        val skipped = event(40.0).copy(skippedProviders = setOf(TrackingProviderId.FLOPPY))
+        val floppy = FakeScrobbler(TrackingProviderId.FLOPPY, log = log, seekPolicy = TrackingSeekScrobblePolicy.STOP_AND_RESTART)
+
+        dispatchTrackingSeekRestart(listOf(trakt, floppy), skipped) { null }
+
+        assertEquals(listOf("TRAKT stop"), log)
+    }
+
+    private fun event(percent: Double) = TrackingScrobbleEvent(
+        media = TrackingMediaReference(kind = TrackingMediaKind.MOVIE, ids = TrackingExternalIds(imdb = "tt0111161")),
+        progressPercent = percent
+    )
 
     private class FakeScrobbler(
         override val providerId: TrackingProviderId,
         private val failure: Throwable? = null,
-        private val seekPolicy: TrackingSeekScrobblePolicy = TrackingSeekScrobblePolicy.NONE
+        private val seekPolicy: TrackingSeekScrobblePolicy = TrackingSeekScrobblePolicy.NONE,
+        private val log: MutableList<String>? = null,
+        private val delayMs: Long = 0L
     ) : TrackingScrobbler {
         var callCount = 0
         val actions = mutableListOf<TrackingScrobbleAction>()
@@ -90,6 +124,8 @@ class TrackingScrobbleCoordinatorTest {
         override suspend fun scrobble(action: TrackingScrobbleAction, event: TrackingScrobbleEvent) {
             callCount += 1
             actions += action
+            if (delayMs > 0L) delay(delayMs)
+            log?.add("${providerId.name} ${action.wireValue}")
             failure?.let { throw it }
         }
     }

@@ -493,7 +493,10 @@ internal fun ConnectedTrackingAccountContent(
     stats: TraktProgressService.TraktCachedStats? = null,
     isStatsLoading: Boolean = false,
     onVisit: (() -> Unit)? = null,
-    onInfo: (() -> Unit)? = null
+    onInfo: (() -> Unit)? = null,
+    visitLabel: String? = null,
+    footnote: String? = null,
+    extraContent: (@Composable () -> Unit)? = null
 ) {
     TrackingConnectedWordmark(
         brand = brand,
@@ -526,6 +529,7 @@ internal fun ConnectedTrackingAccountContent(
     if (stats != null || isStatsLoading) {
         TraktConnectedStatsStrip(stats, isStatsLoading)
     }
+    extraContent?.invoke()
     if (onSync != null) {
         TrackingBrandPrimaryButton(
             label = stringResource(R.string.simkl_sync_now),
@@ -549,7 +553,7 @@ internal fun ConnectedTrackingAccountContent(
         val hasMultipleActions = onVisit != null || onInfo != null
         if (onVisit != null) {
             TrackingBrandFooterButton(
-                text = stringResource(R.string.simkl_visit),
+                text = visitLabel ?: stringResource(R.string.simkl_visit),
                 onClick = onVisit,
                 modifier = if (hasMultipleActions) Modifier.weight(0.95f) else Modifier,
                 fillContentWidth = hasMultipleActions
@@ -570,6 +574,15 @@ internal fun ConnectedTrackingAccountContent(
                 fillContentWidth = true
             )
         }
+    }
+    if (!footnote.isNullOrBlank()) {
+        Text(
+            text = footnote,
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White.copy(alpha = 0.55f),
+            textAlign = TextAlign.End,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -654,10 +667,15 @@ private fun TrackingConnectedWordmark(
     logo: Painter,
     contentDescription: String
 ) {
-    if (brand == TrackingDialogBrand.MDBLIST) {
+    val namedLogo = when (brand) {
+        TrackingDialogBrand.MDBLIST -> R.string.mdblist_name
+        TrackingDialogBrand.FLOPPY -> R.string.floppy_name
+        else -> null
+    }
+    if (namedLogo != null) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Image(painter = logo, contentDescription = null, modifier = Modifier.size(40.dp))
-            Text(stringResource(R.string.mdblist_name), color = Color.White, style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(namedLogo), color = Color.White, style = MaterialTheme.typography.headlineSmall)
         }
         return
     }
@@ -671,7 +689,10 @@ private fun TrackingConnectedWordmark(
             TrackingDialogBrand.SIMKL -> Modifier
                 .width(124.dp)
                 .height(30.dp)
-            TrackingDialogBrand.MDBLIST -> Modifier.size(40.dp)
+            TrackingDialogBrand.MDBLIST, TrackingDialogBrand.FLOPPY -> Modifier.size(40.dp)
+            TrackingDialogBrand.WETRAKR -> Modifier
+                .width(140.dp)
+                .height(30.dp)
         },
         contentScale = ContentScale.Fit,
         alignment = Alignment.CenterStart
@@ -798,7 +819,7 @@ private fun TrackingBrandMessage(
 }
 
 @Composable
-private fun TrackingProviderWordmark(
+internal fun TrackingProviderWordmark(
     logo: Painter,
     contentDescription: String,
     label: String? = null
@@ -827,7 +848,9 @@ private fun TrackingProviderWordmark(
 internal enum class TrackingDialogBrand {
     TRAKT,
     SIMKL,
-    MDBLIST
+    MDBLIST,
+    FLOPPY,
+    WETRAKR
 }
 
 private fun TrackingDialogBrand.cardBrush(): Brush = when (this) {
@@ -839,6 +862,12 @@ private fun TrackingDialogBrand.cardBrush(): Brush = when (this) {
     )
     TrackingDialogBrand.MDBLIST -> Brush.linearGradient(
         colors = listOf(Color(0xFF173D69), Color(0xFF225C97), Color(0xFF16385D))
+    )
+    TrackingDialogBrand.FLOPPY -> Brush.linearGradient(
+        colors = listOf(Color(0xFF1E2754), Color(0xFF2F3C7E), Color(0xFF1A2147))
+    )
+    TrackingDialogBrand.WETRAKR -> Brush.linearGradient(
+        colors = listOf(Color(0xFF13161D), Color(0xFF2B2E78), Color(0xFF13161D))
     )
 }
 

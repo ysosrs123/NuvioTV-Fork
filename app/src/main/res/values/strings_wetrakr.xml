@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wetrakr_name" translatable="false">WeTrakr</string>
+    <string name="wetrakr_tracking_description">Sync watched history, your lists and playback progress across devices</string>
+    <string name="wetrakr_connected_as">Connected as %1$s</string>
+    <string name="wetrakr_account_fallback">your WeTrakr account</string>
+    <string name="wetrakr_qr_description">QR code to connect WeTrakr</string>
+    <string name="wetrakr_missing_client">WeTrakr is not set up in this build.</string>
+    <string name="wetrakr_status_syncing">Syncing with WeTrakr…</string>
+    <string name="wetrakr_status_enter_code">Waiting for you to allow Nuvio Arc on WeTrakr</string>
+    <string name="wetrakr_status_paused">Paused</string>
+    <string name="wetrakr_daily_limit_row">Today\'s WeTrakr limit is used up. Syncing resumes at %1$s.</string>
+    <string name="wetrakr_limit_message">Today\'s WeTrakr limit is used up. Playback is not affected, but plays are not sent to WeTrakr until %1$s.</string>
+    <string name="wetrakr_requests_used">%1$s of %2$s</string>
+    <string name="wetrakr_requests_used_label">WeTrakr requests used today</string>
+    <string name="wetrakr_last_synced_label">Last synced</string>
+    <string name="wetrakr_resumes_label">Syncing resumes</string>
+    <string name="wetrakr_never_synced">Not yet</string>
+    <string name="wetrakr_synced_summary">Synced: %1$d watched, %2$d in progress, %3$d on Plan to watch</string>
+    <string name="wetrakr_visit">Visit WeTrakr</string>
+    <string name="wetrakr_credit">Data from WeTrakr</string>
+    <string name="tracking_wetrakr_features_title">WeTrakr features</string>
+    <string name="tracking_wetrakr_features_subtitle">WeTrakr-specific settings</string>
+    <string name="wetrakr_continue_watching_subtitle">WeTrakr history considered for continue watching</string>
+    <string name="wetrakr_error_unavailable">Could not reach WeTrakr. Try again shortly.</string>
+    <string name="wetrakr_error_invalid_response">WeTrakr sent an answer the app could not read.</string>
+    <string name="wetrakr_error_busy">WeTrakr is busy, trying again shortly.</string>
+    <string name="wetrakr_error_suspended">WeTrakr has turned off access for this app.</string>
+    <string name="wetrakr_error_signin">Sign in to WeTrakr again.</string>
+    <string name="wetrakr_error_invalid_client">WeTrakr did not accept this app\'s key.</string>
+    <string name="wetrakr_error_code_expired">The code expired. Try again.</string>
+    <string name="wetrakr_error_denied">Access was refused on WeTrakr.</string>
+    <string name="wetrakr_error_too_many_codes">Too many codes were asked for. Try again in 15 minutes.</string>
+    <string name="wetrakr_disconnect_title">Disconnect WeTrakr?</string>
+    <string name="wetrakr_disconnect_subtitle">Stop sending watch updates from this profile and remove its WeTrakr data from this device. Your WeTrakr history is kept.</string>
+    <string name="wetrakr_cw_window_subtitle">Choose how much WeTrakr activity should appear in continue watching.</string>
+    <string name="library_empty_wetrakr_not_auth_title">WeTrakr not connected</string>
+    <string name="library_empty_wetrakr_not_auth_subtitle">Connect WeTrakr in Settings to view your WeTrakr lists</string>
+    <string name="detail_more_like_this_powered_by_wetrakr">Similar on WeTrakr</string>
+    <string name="wetrakr_upload_title">Send my history to WeTrakr</string>
+    <string name="wetrakr_upload_subtitle">Copies your watched titles and library on this profile to WeTrakr once. Titles it already has are skipped.</string>
+    <string name="wetrakr_upload_counting">Counting your history…</string>
+    <string name="wetrakr_upload_nothing">Nothing to send: WeTrakr already has everything on this profile.</string>
+    <string name="wetrakr_upload_confirm">Send %1$s watched titles and %2$s library titles to WeTrakr?</string>
+    <string name="wetrakr_upload_sending">Sending to WeTrakr…</string>
+    <string name="wetrakr_upload_done">Done: %1$s added on WeTrakr, %2$s already there or not found.</string>
+    <string name="wetrakr_upload_send">Send</string>
+    <string name="wetrakr_upload_close">Close</string>
+    <string name="licenses_attributions_wetrakr_body">Nuvio Arc uses WeTrakr for watched history, lists, playback tracking and similar titles. Data from WeTrakr. Nuvio Arc is not affiliated with or endorsed by WeTrakr.</string>
+    <string name="wetrakr_revoke_failed">Signed out here, but WeTrakr could not be told. You can remove Nuvio Arc under connected apps on wetrakr.com.</string>
+</resources>

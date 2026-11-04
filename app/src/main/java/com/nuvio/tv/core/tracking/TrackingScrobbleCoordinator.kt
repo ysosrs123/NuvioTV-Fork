@@ -3,9 +3,10 @@ package com.nuvio.tv.core.tracking
 import android.util.Log
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.supervisorScope
 
 data class TrackingScrobbleFailure(
@@ -42,14 +43,12 @@ class TrackingScrobbleCoordinator @Inject constructor(
         }
     }
 
-    suspend fun scrobbleSeek(
-        action: TrackingScrobbleAction,
-        event: TrackingScrobbleEvent
-    ): List<TrackingScrobbleFailure> = dispatchSeek(
-        scrobblers = providerRegistry.connectedScrobblers(),
-        action = action,
-        event = event
-    )
+    /** [restart] runs per tracker after its own stop, so it is read again each time and may return null to skip the start. */
+    suspend fun scrobbleSeekRestart(
+        stop: TrackingScrobbleEvent,
+        restart: () -> TrackingScrobbleEvent?
+    ): List<TrackingScrobbleFailure> = dispatchTrackingSeekRestart(providerRegistry.connectedScrobblers(), stop, restart)
+        .also { failures -> failures.log(TrackingScrobbleAction.STOP, true) }
 
     private suspend fun dispatch(
         scrobblers: Collection<TrackingScrobbler>,
@@ -57,13 +56,6 @@ class TrackingScrobbleCoordinator @Inject constructor(
         event: TrackingScrobbleEvent
     ): List<TrackingScrobbleFailure> = dispatchTrackingScrobble(scrobblers, action, event)
         .also { failures -> failures.log(action, false) }
-
-    private suspend fun dispatchSeek(
-        scrobblers: Collection<TrackingScrobbler>,
-        action: TrackingScrobbleAction,
-        event: TrackingScrobbleEvent
-    ): List<TrackingScrobbleFailure> = dispatchTrackingSeekScrobble(scrobblers, action, event)
-        .also { failures -> failures.log(action, true) }
 
     private fun List<TrackingScrobbleFailure>.log(
         action: TrackingScrobbleAction,
@@ -85,25 +77,37 @@ suspend fun dispatchTrackingScrobble(
     event: TrackingScrobbleEvent
 ): List<TrackingScrobbleFailure> = supervisorScope {
     scrobblers.filter { it.providerId !in event.skippedProviders }.map { scrobbler ->
-        async {
-            try {
-                scrobbler.scrobble(action, event)
-                null
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Throwable) {
-                TrackingScrobbleFailure(scrobbler.providerId, error)
-            }
-        }
+        async { scrobbleCatching(scrobbler, action, event) }
     }.awaitAll().filterNotNull()
 }
 
-suspend fun dispatchTrackingSeekScrobble(
+suspend fun dispatchTrackingSeekRestart(
     scrobblers: Collection<TrackingScrobbler>,
+    stop: TrackingScrobbleEvent,
+    restart: () -> TrackingScrobbleEvent?
+): List<TrackingScrobbleFailure> = supervisorScope {
+    scrobblers
+        .filter { it.seekScrobblePolicy == TrackingSeekScrobblePolicy.STOP_AND_RESTART && it.providerId !in stop.skippedProviders }
+        .map { scrobbler ->
+            async {
+                val stopFailure = scrobbleCatching(scrobbler, TrackingScrobbleAction.STOP, stop)
+                val startFailure = restart()?.let { scrobbleCatching(scrobbler, TrackingScrobbleAction.START, it) }
+                listOfNotNull(stopFailure, startFailure)
+            }
+        }
+        .awaitAll()
+        .flatten()
+}
+
+/** A tracker's own cancellation (an account switched mid-call) is its failure; only a cancelled caller stops the rest. */
+private suspend fun scrobbleCatching(
+    scrobbler: TrackingScrobbler,
     action: TrackingScrobbleAction,
     event: TrackingScrobbleEvent
-): List<TrackingScrobbleFailure> = dispatchTrackingScrobble(
-    scrobblers = scrobblers.filter { it.seekScrobblePolicy == TrackingSeekScrobblePolicy.STOP_AND_RESTART },
-    action = action,
-    event = event
-)
+): TrackingScrobbleFailure? = try {
+    scrobbler.scrobble(action, event)
+    null
+} catch (error: Throwable) {
+    currentCoroutineContext().ensureActive()
+    TrackingScrobbleFailure(scrobbler.providerId, error)
+}

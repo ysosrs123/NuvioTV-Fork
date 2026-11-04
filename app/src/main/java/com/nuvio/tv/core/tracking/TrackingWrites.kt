@@ -1,5 +1,7 @@
 package com.nuvio.tv.core.tracking
 
+import kotlinx.coroutines.flow.Flow
+
 enum class TrackingScrobbleAction(val wireValue: String) {
     START("start"),
     PAUSE("pause"),
@@ -45,7 +47,8 @@ data class TrackingScrobbleEvent(
     val media: TrackingMediaReference,
     val progressPercent: Double,
     /** Services that already get this play from elsewhere, such as a media server that scrobbles itself. */
-    val skippedProviders: Set<TrackingProviderId> = emptySet()
+    val skippedProviders: Set<TrackingProviderId> = emptySet(),
+    val durationSeconds: Long? = null
 )
 
 data class TrackingMutationResult(
@@ -83,6 +86,10 @@ interface TrackingListWriter {
 
 interface TrackingHistoryWriter {
     val providerId: TrackingProviderId
+
+    /** Set by a writer whose service is not a watch progress source, so marks reach it whenever it is connected. */
+    val isConnected: Flow<Boolean>?
+        get() = null
 
     suspend fun addToHistory(
         profileId: Int,
