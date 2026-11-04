@@ -1,10 +1,15 @@
 package com.nuvio.tv.core.sync
 
+import com.nuvio.tv.core.debrid.DebridProviders
 import com.nuvio.tv.data.remote.supabase.SupabaseProviderCredential
+import com.nuvio.tv.domain.model.DebridSettings
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.put
+
+private const val API_KEY_FIELD = "api_key"
+private const val CLIENT_ID_FIELD = "client_id"
 
 internal object ProviderCredentialIds {
     const val MDBLIST = "mdblist"
@@ -53,3 +58,26 @@ internal fun shouldSeedProviderCredentials(
     val remoteProviders = rows.mapTo(mutableSetOf()) { row -> row.provider.lowercase() }
     return snapshot.values.any { credential -> credential.provider.lowercase() !in remoteProviders }
 }
+
+/** The keys account sync carries. Real-Debrid and AllDebrid are left out: the server does not take them. */
+internal fun localProviderCredentials(
+    profileId: Int,
+    debrid: DebridSettings,
+    mdbListApiKey: String,
+    animeSkipClientId: String
+) = ProviderCredentialSnapshot(
+    profileId = profileId,
+    values = buildList {
+        DebridProviders.syncedWithAccount().forEach { provider ->
+            add(
+                ProviderCredentialValue(
+                    provider = ProviderCredentialIds.debrid(provider.id),
+                    field = API_KEY_FIELD,
+                    value = debrid.apiKeyFor(provider.id)
+                )
+            )
+        }
+        add(ProviderCredentialValue(ProviderCredentialIds.MDBLIST, API_KEY_FIELD, mdbListApiKey))
+        add(ProviderCredentialValue(ProviderCredentialIds.ANIMESKIP, CLIENT_ID_FIELD, animeSkipClientId))
+    }
+)

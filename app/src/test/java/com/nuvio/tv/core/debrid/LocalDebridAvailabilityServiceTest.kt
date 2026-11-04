@@ -66,16 +66,60 @@ class LocalDebridAvailabilityServiceTest {
         assertEquals(DebridProviders.TORBOX_ID, status?.providerId)
     }
 
+    @Test
+    fun `a torrent cached only on the second account is marked cached there`() = runTest {
+        val localDebridService = mockk<LocalDebridService>()
+        coEvery {
+            localDebridService.checkCached(match { it.provider.id == DebridProviders.TORBOX_ID }, any())
+        } returns emptyMap()
+        coEvery {
+            localDebridService.checkCached(match { it.provider.id == DebridProviders.PREMIUMIZE_ID }, any())
+        } returns mapOf("abc123" to LocalDebridCachedItem(name = "pm.mkv", size = 5L))
+        val service = service(localDebridService, DebridSettings(enabled = true, torboxApiKey = "tb", premiumizeApiKey = "pm"))
+
+        val result = service.annotateCachedAvailability(
+            listOf(group(listOf(stream(name = "On PM", infoHash = "ABC123"), stream(name = "Nowhere", infoHash = "DEF456"))))
+        )
+        val streams = result.single().streams
+
+        assertEquals(StreamDebridCacheState.CACHED, streams[0].debridCacheStatus?.state)
+        assertEquals(DebridProviders.PREMIUMIZE_ID, streams[0].debridCacheStatus?.providerId)
+        assertEquals(StreamDebridCacheState.NOT_CACHED, streams[1].debridCacheStatus?.state)
+    }
+
+    @Test
+    fun `the preferred account wins when both have the torrent`() = runTest {
+        val localDebridService = mockk<LocalDebridService>()
+        coEvery { localDebridService.checkCached(any(), any()) } returns
+            mapOf("abc123" to LocalDebridCachedItem(name = "both.mkv", size = 5L))
+        val settings = DebridSettings(
+            enabled = true,
+            torboxApiKey = "tb",
+            premiumizeApiKey = "pm",
+            preferredResolverProviderId = DebridProviders.PREMIUMIZE_ID
+        )
+
+        val status = service(localDebridService, settings)
+            .annotateCachedAvailability(listOf(group(listOf(stream(infoHash = "ABC123")))))
+            .single().streams.single().debridCacheStatus
+
+        assertEquals(DebridProviders.PREMIUMIZE_ID, status?.providerId)
+    }
+
+    @Test
+    fun `real-debrid and alldebrid are not asked about plain torrents when torbox is connected`() {
+        val settings = DebridSettings(enabled = true, torboxApiKey = "tb", realDebridApiKey = "rd", allDebridApiKey = "ad")
+        assertEquals(listOf(DebridProviders.TORBOX_ID), DebridProviders.plainTorrentServices(settings).map { it.provider.id })
+        val rdOnly = DebridSettings(enabled = true, realDebridApiKey = "rd")
+        assertEquals(listOf(DebridProviders.REAL_DEBRID_ID), DebridProviders.plainTorrentServices(rdOnly).map { it.provider.id })
+    }
+
     private fun service(
-        localDebridService: LocalDebridService = mockk(relaxed = true)
+        localDebridService: LocalDebridService = mockk(relaxed = true),
+        settings: DebridSettings = DebridSettings(enabled = true, torboxApiKey = "tb_token")
     ): LocalDebridAvailabilityService {
         val dataStore = mockk<DebridSettingsDataStore>()
-        every { dataStore.settings } returns flowOf(
-            DebridSettings(
-                enabled = true,
-                torboxApiKey = "tb_token"
-            )
-        )
+        every { dataStore.settings } returns flowOf(settings)
         return LocalDebridAvailabilityService(dataStore, localDebridService)
     }
 

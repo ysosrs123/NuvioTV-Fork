@@ -3,7 +3,7 @@ package com.nuvio.tv.core.sync
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
-import com.nuvio.tv.core.debrid.DebridProviders
+import com.nuvio.tv.core.logging.forLog
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.AnimeSkipSettingsDataStore
 import com.nuvio.tv.data.local.DebridSettingsDataStore
@@ -39,8 +39,6 @@ private const val PROVIDER_CREDENTIAL_TAG = "ProviderCredentialSync"
 private const val PROVIDER_CREDENTIAL_PUSH_DEBOUNCE_MS = 500L
 private const val PROVIDER_CREDENTIAL_FOREGROUND_DELAY_MS = 2500L
 private const val PROVIDER_CREDENTIAL_FOREGROUND_MIN_INTERVAL_MS = 60_000L
-private const val API_KEY_FIELD = "api_key"
-private const val CLIENT_ID_FIELD = "client_id"
 
 private data class ProviderCredentialScope(
     val userId: String,
@@ -126,7 +124,7 @@ class ProviderCredentialSyncService @Inject constructor(
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
-                Log.e(PROVIDER_CREDENTIAL_TAG, "Failed to synchronize provider credentials", error)
+                Log.e(PROVIDER_CREDENTIAL_TAG, "Failed to synchronize provider credentials", error.forLog())
                 Result.failure(error)
             }
         }
@@ -194,34 +192,7 @@ class ProviderCredentialSyncService @Inject constructor(
         val mdbList = mdbListSettingsDataStore.settings.first()
         val animeSkipClientId = animeSkipSettingsDataStore.clientId.first()
         check(profileManager.activeProfileId.value == profileId)
-        return ProviderCredentialSnapshot(
-            profileId = profileId,
-            values = buildList {
-                DebridProviders.all().forEach { provider ->
-                    add(
-                        ProviderCredentialValue(
-                            provider = ProviderCredentialIds.debrid(provider.id),
-                            field = API_KEY_FIELD,
-                            value = debrid.apiKeyFor(provider.id)
-                        )
-                    )
-                }
-                add(
-                    ProviderCredentialValue(
-                        provider = ProviderCredentialIds.MDBLIST,
-                        field = API_KEY_FIELD,
-                        value = mdbList.apiKey
-                    )
-                )
-                add(
-                    ProviderCredentialValue(
-                        provider = ProviderCredentialIds.ANIMESKIP,
-                        field = CLIENT_ID_FIELD,
-                        value = animeSkipClientId
-                    )
-                )
-            }
-        )
+        return localProviderCredentials(profileId, debrid, mdbList.apiKey, animeSkipClientId)
     }
 
     private suspend fun applySnapshot(snapshot: ProviderCredentialSnapshot) {
@@ -264,34 +235,7 @@ class ProviderCredentialSyncService @Inject constructor(
                         mdbListSettingsDataStore.settings,
                         animeSkipSettingsDataStore.clientId
                     ) { debrid, mdbList, animeSkipClientId ->
-                        ProviderCredentialSnapshot(
-                            profileId = profileId,
-                            values = buildList {
-                                DebridProviders.all().forEach { provider ->
-                                    add(
-                                        ProviderCredentialValue(
-                                            provider = ProviderCredentialIds.debrid(provider.id),
-                                            field = API_KEY_FIELD,
-                                            value = debrid.apiKeyFor(provider.id)
-                                        )
-                                    )
-                                }
-                                add(
-                                    ProviderCredentialValue(
-                                        provider = ProviderCredentialIds.MDBLIST,
-                                        field = API_KEY_FIELD,
-                                        value = mdbList.apiKey
-                                    )
-                                )
-                                add(
-                                    ProviderCredentialValue(
-                                        provider = ProviderCredentialIds.ANIMESKIP,
-                                        field = CLIENT_ID_FIELD,
-                                        value = animeSkipClientId
-                                    )
-                                )
-                            }
-                        )
+                        localProviderCredentials(profileId, debrid, mdbList.apiKey, animeSkipClientId)
                     }
                 }
                 .distinctUntilChanged()
@@ -335,7 +279,7 @@ class ProviderCredentialSyncService @Inject constructor(
                 Log.e(
                     PROVIDER_CREDENTIAL_TAG,
                     "Failed to push local provider credential changes for profile ${snapshot.profileId}",
-                    error
+                    error.forLog()
                 )
             }
         }

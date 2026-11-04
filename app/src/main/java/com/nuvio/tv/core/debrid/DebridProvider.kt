@@ -9,7 +9,8 @@ data class DebridProvider(
     val shortName: String,
     val visibleInUi: Boolean = true,
     val authMethod: DebridProviderAuthMethod = DebridProviderAuthMethod.ApiKey,
-    val capabilities: Set<DebridProviderCapability> = emptySet()
+    val capabilities: Set<DebridProviderCapability> = emptySet(),
+    val syncsWithAccount: Boolean = true
 )
 
 data class DebridServiceCredential(
@@ -33,6 +34,7 @@ object DebridProviders {
     const val TORBOX_ID = "torbox"
     const val PREMIUMIZE_ID = "premiumize"
     const val REAL_DEBRID_ID = "realdebrid"
+    const val ALL_DEBRID_ID = "alldebrid"
 
     val Torbox = DebridProvider(
         id = TORBOX_ID,
@@ -64,11 +66,29 @@ object DebridProviders {
         id = REAL_DEBRID_ID,
         displayName = "Real-Debrid",
         shortName = "RD",
-        visibleInUi = false,
-        capabilities = setOf(DebridProviderCapability.ClientResolve)
+        authMethod = DebridProviderAuthMethod.DeviceCode,
+        syncsWithAccount = false,
+        capabilities = setOf(
+            DebridProviderCapability.ClientResolve,
+            DebridProviderCapability.LocalTorrentResolve,
+            DebridProviderCapability.CloudLibrary
+        )
     )
 
-    private val registered = listOf(Torbox, Premiumize, RealDebrid)
+    val AllDebrid = DebridProvider(
+        id = ALL_DEBRID_ID,
+        displayName = "AllDebrid",
+        shortName = "AD",
+        authMethod = DebridProviderAuthMethod.DeviceCode,
+        syncsWithAccount = false,
+        capabilities = setOf(
+            DebridProviderCapability.ClientResolve,
+            DebridProviderCapability.LocalTorrentResolve,
+            DebridProviderCapability.CloudLibrary
+        )
+    )
+
+    private val registered = listOf(Torbox, Premiumize, RealDebrid, AllDebrid)
 
     fun premiumizeAuthMethod(clientId: String): DebridProviderAuthMethod =
         if (clientId.isBlank()) DebridProviderAuthMethod.ApiKey else DebridProviderAuthMethod.DeviceCode
@@ -76,6 +96,9 @@ object DebridProviders {
     fun all(): List<DebridProvider> = registered
 
     fun visible(): List<DebridProvider> = registered.filter { it.visibleInUi }
+
+    /** The services whose keys Nuvio account sync stores; the others stay on the device. */
+    fun syncedWithAccount(): List<DebridProvider> = registered.filter { it.syncsWithAccount }
 
     fun byId(id: String?): DebridProvider? {
         val normalized = id?.trim()?.takeIf { it.isNotBlank() } ?: return null
@@ -118,6 +141,24 @@ object DebridProviders {
         if (services.isEmpty()) return null
         val preferredId = byId(settings.preferredResolverProviderId)?.id
         return services.firstOrNull { it.provider.id == preferredId } ?: services.firstOrNull()
+    }
+
+    /** Connected resolver accounts, the preferred one first. */
+    fun orderedResolverServices(settings: DebridSettings): List<DebridServiceCredential> {
+        val services = configuredResolverServices(settings)
+        val preferred = preferredResolverService(settings) ?: return services
+        return listOf(preferred) + services.filter { it.provider.id != preferred.provider.id }
+    }
+
+    /**
+     * The accounts that handle torrents an add-on gives without a service: those that can say what they have
+     * cached, in the preferred order. Real-Debrid and AllDebrid only when nothing else is connected.
+     */
+    fun plainTorrentServices(settings: DebridSettings): List<DebridServiceCredential> {
+        val ordered = orderedResolverServices(settings)
+            .filter { it.provider.supports(DebridProviderCapability.LocalTorrentResolve) }
+        val checkable = ordered.filter { it.provider.supports(DebridProviderCapability.LocalTorrentCacheCheck) }
+        return checkable.ifEmpty { ordered.take(1) }
     }
 
     fun configuredSourceNames(settings: DebridSettings): List<String> {

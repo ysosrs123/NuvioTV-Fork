@@ -47,7 +47,7 @@ class DebridSettingsPremiumizeKeyTest {
     }
 
     private fun viewModel(api: PremiumizeApi) =
-        DebridSettingsViewModel(context, dataStore, mockk(relaxed = true), api)
+        DebridSettingsViewModel(context, dataStore, mockk(relaxed = true), api, mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true))
 
     @Test
     fun `accepted premiumize key is sent as bearer and saved`() = runTest {

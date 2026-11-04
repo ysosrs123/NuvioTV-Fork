@@ -15,8 +15,12 @@ import com.nuvio.tv.core.qr.QrCodeGenerator
 import com.nuvio.tv.core.server.DebridFormatterConfigServer
 import com.nuvio.tv.core.server.DebridFormatterSettings
 import com.nuvio.tv.core.server.DeviceIpAddress
+import com.nuvio.tv.core.debrid.RealDebridAuth
+import com.nuvio.tv.core.debrid.RealDebridDeviceCredential
 import com.nuvio.tv.core.util.readAppLogoBytes
 import com.nuvio.tv.data.local.DebridSettingsDataStore
+import com.nuvio.tv.data.remote.api.AllDebridApi
+import com.nuvio.tv.data.remote.api.RealDebridApi
 import com.nuvio.tv.data.remote.dto.PremiumizeAccountInfoDto
 import com.nuvio.tv.data.remote.dto.PremiumizeDeviceTokenDto
 import com.nuvio.tv.data.remote.dto.TorboxDeviceTokenDto
@@ -49,7 +53,10 @@ class DebridSettingsViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val dataStore: DebridSettingsDataStore,
     private val torboxApi: TorboxApi,
-    private val premiumizeApi: PremiumizeApi
+    private val premiumizeApi: PremiumizeApi,
+    private val realDebridApi: RealDebridApi,
+    private val realDebridAuth: RealDebridAuth,
+    private val allDebridApi: AllDebridApi
 ) : ViewModel() {
     private var formatterServer: DebridFormatterConfigServer? = null
     private val logoBytes: ByteArray? by lazy { context.readAppLogoBytes() }
@@ -235,6 +242,17 @@ class DebridSettingsViewModel @Inject constructor(
                     response.errorBody()?.close()
                     premiumizeAccountAccepted(response)
                 }
+                DebridProviders.REAL_DEBRID_ID -> {
+                    val response = realDebridApi.getUser("Bearer $apiKey")
+                    response.body()?.close()
+                    response.errorBody()?.close()
+                    response.isSuccessful
+                }
+                DebridProviders.ALL_DEBRID_ID -> {
+                    val response = allDebridApi.getUser("Bearer $apiKey")
+                    response.errorBody()?.close()
+                    response.isSuccessful && response.body()?.isSuccess == true
+                }
                 else -> false
             }
         } catch (error: Exception) {
@@ -278,6 +296,38 @@ class DebridSettingsViewModel @Inject constructor(
                     expiresAt = data.expiresIn?.takeIf { it > 0 }?.let { "${it}s" }
                 )
             }
+            DebridProviders.REAL_DEBRID_ID -> {
+                val response = realDebridApi.startDeviceAuthorization(RealDebridApi.OPEN_SOURCE_CLIENT_ID)
+                val data = response.body()?.takeIf { response.isSuccessful } ?: return null
+                val deviceCode = data.deviceCode?.takeIf { it.isNotBlank() } ?: return null
+                val userCode = data.userCode?.takeIf { it.isNotBlank() } ?: return null
+                val verificationUrl = data.verificationUrl?.takeIf { it.isNotBlank() } ?: return null
+                DebridDeviceAuthorization(
+                    providerId = DebridProviders.REAL_DEBRID_ID,
+                    deviceCode = deviceCode,
+                    userCode = userCode,
+                    verificationUrl = verificationUrl,
+                    friendlyVerificationUrl = data.directVerificationUrl?.takeIf { it.isNotBlank() } ?: verificationUrl,
+                    intervalSeconds = data.interval?.coerceAtLeast(1) ?: 5,
+                    expiresAt = data.expiresIn?.takeIf { it > 0 }?.let { "${it}s" }
+                )
+            }
+            DebridProviders.ALL_DEBRID_ID -> {
+                val response = allDebridApi.getPin()
+                val data = response.body()?.takeIf { response.isSuccessful && it.isSuccess }?.data ?: return null
+                val pin = data.pin?.takeIf { it.isNotBlank() } ?: return null
+                val check = data.check?.takeIf { it.isNotBlank() } ?: return null
+                val baseUrl = data.baseUrl?.takeIf { it.isNotBlank() } ?: ALL_DEBRID_PIN_URL
+                DebridDeviceAuthorization(
+                    providerId = DebridProviders.ALL_DEBRID_ID,
+                    deviceCode = "$check|$pin",
+                    userCode = pin,
+                    verificationUrl = baseUrl,
+                    friendlyVerificationUrl = data.userUrl?.takeIf { it.isNotBlank() } ?: baseUrl,
+                    intervalSeconds = 5,
+                    expiresAt = data.expiresIn?.takeIf { it > 0 }?.let { "${it}s" }
+                )
+            }
             else -> null
         }
     }
@@ -298,7 +348,47 @@ class DebridSettingsViewModel @Inject constructor(
                 )
                 premiumizeDeviceAuthorizationTokenResult(response)
             }
+            DebridProviders.REAL_DEBRID_ID -> redeemRealDebrid(normalized)
+            DebridProviders.ALL_DEBRID_ID -> redeemAllDebrid(normalized)
             else -> DebridDeviceAuthorizationTokenResult.Unsupported
+        }
+    }
+
+    private suspend fun redeemRealDebrid(deviceCode: String): DebridDeviceAuthorizationTokenResult {
+        val credentials = realDebridApi.deviceCredentials(RealDebridApi.OPEN_SOURCE_CLIENT_ID, deviceCode)
+        val refusal = credentials.errorBody()?.use { it.string() }.orEmpty().lowercase()
+        val issued = credentials.body()?.takeIf { credentials.isSuccessful }
+        val clientId = issued?.clientId?.takeIf { it.isNotBlank() }
+        val clientSecret = issued?.clientSecret?.takeIf { it.isNotBlank() }
+        if (clientId == null || clientSecret == null) {
+            return if (refusal.contains("expired")) DebridDeviceAuthorizationTokenResult.Expired
+            else DebridDeviceAuthorizationTokenResult.Pending
+        }
+        val token = realDebridApi.token(clientId = clientId, clientSecret = clientSecret, code = deviceCode)
+        token.errorBody()?.close()
+        val body = token.body()?.takeIf { token.isSuccessful }
+        val accessToken = body?.accessToken?.takeIf { it.isNotBlank() }
+        val refreshToken = body?.refreshToken?.takeIf { it.isNotBlank() }
+        if (accessToken == null || refreshToken == null) {
+            return DebridDeviceAuthorizationTokenResult.Failed(null)
+        }
+        val stored = RealDebridDeviceCredential(clientId, clientSecret, refreshToken).encode()
+        realDebridAuth.remember(stored, accessToken, body.expiresIn)
+        return DebridDeviceAuthorizationTokenResult.Authorized(stored)
+    }
+
+    private suspend fun redeemAllDebrid(deviceCode: String): DebridDeviceAuthorizationTokenResult {
+        val check = deviceCode.substringBefore('|')
+        val pin = deviceCode.substringAfter('|', missingDelimiterValue = "")
+        if (check.isBlank() || pin.isBlank()) return DebridDeviceAuthorizationTokenResult.Failed(null)
+        val response = allDebridApi.checkPin(check = check, pin = pin)
+        response.errorBody()?.close()
+        val envelope = response.body()
+        envelope?.data?.apiKey?.takeIf { envelope.isSuccess && envelope.data.activated == true && it.isNotBlank() }
+            ?.let { return DebridDeviceAuthorizationTokenResult.Authorized(it) }
+        return when (envelope?.error?.code) {
+            "PIN_EXPIRED", "PIN_INVALID" -> DebridDeviceAuthorizationTokenResult.Expired
+            else -> DebridDeviceAuthorizationTokenResult.Pending
         }
     }
 
@@ -375,6 +465,8 @@ class DebridSettingsViewModel @Inject constructor(
     }
 }
 
+private const val ALL_DEBRID_PIN_URL = "https://alldebrid.com/pin/"
+
 internal fun premiumizeAccountAccepted(response: retrofit2.Response<PremiumizeAccountInfoDto>): Boolean {
     val body = response.body() ?: return false
     return response.isSuccessful && !body.status.equals("error", ignoreCase = true)
@@ -386,6 +478,7 @@ data class DebridSettingsUiState(
     val torboxApiKey: String = "",
     val premiumizeApiKey: String = "",
     val realDebridApiKey: String = "",
+    val allDebridApiKey: String = "",
     val preferredResolverProviderId: String = "",
     val instantPlaybackPreparationLimit: Int = 0,
     val streamMaxResults: Int = 0,
@@ -406,7 +499,8 @@ data class DebridSettingsUiState(
         get() = mapOf(
             DebridProviders.TORBOX_ID to torboxApiKey,
             DebridProviders.PREMIUMIZE_ID to premiumizeApiKey,
-            DebridProviders.REAL_DEBRID_ID to realDebridApiKey
+            DebridProviders.REAL_DEBRID_ID to realDebridApiKey,
+            DebridProviders.ALL_DEBRID_ID to allDebridApiKey
         )
 
     val hasAnyApiKey: Boolean
@@ -452,6 +546,7 @@ data class DebridSettingsUiState(
         torboxApiKey = settings.torboxApiKey,
         premiumizeApiKey = settings.premiumizeApiKey,
         realDebridApiKey = settings.realDebridApiKey,
+        allDebridApiKey = settings.allDebridApiKey,
         preferredResolverProviderId = settings.preferredResolverProviderId,
         instantPlaybackPreparationLimit = settings.instantPlaybackPreparationLimit,
         streamMaxResults = settings.streamMaxResults,

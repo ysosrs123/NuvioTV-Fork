@@ -25,24 +25,33 @@ class DirectDebridResolver @Inject constructor(
     private val dataStore: DebridSettingsDataStore,
     private val torboxResolver: TorboxDirectDebridResolver,
     private val realDebridResolver: RealDebridDirectDebridResolver,
+    private val allDebridResolver: AllDebridDirectDebridResolver,
     private val premiumizeResolver: PremiumizeDirectDebridResolver,
     private val localDebridService: LocalDebridService,
     private val healthStore: AddonHealthStore,
-    private val thumbnailCopies: ThumbnailCopyAdded
+    private val thumbnailCopies: ThumbnailCopyAdded,
+    private val linkStore: ResolvedLinkStore,
+    private val accounts: DebridAccounts
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val mutex = Mutex()
     private val resolvedCache = mutableMapOf<String, CachedDirectDebridResolve>()
     private val inFlightResolves = mutableMapOf<String, Deferred<DirectDebridResolveResult>>()
 
+    /**
+     * [mayAddToAccount] false keeps Real-Debrid and AllDebrid to titles already in the account. Torbox and
+     * Premiumize keep their own rules (Torbox removes what it added for a copy). Only a lookup that may add claims a
+     * TorBox thumbnail copy of the same title for playback.
+     */
     suspend fun resolve(
         stream: Stream,
         season: Int?,
-        episode: Int?
+        episode: Int?,
+        mayAddToAccount: Boolean = true
     ): DirectDebridResolveResult {
-        thumbnailCopies.claimAndWait(stream.getEffectiveInfoHash())
+        if (mayAddToAccount) thumbnailCopies.claimAndWait(stream.getEffectiveInfoHash())
         val t0 = android.os.SystemClock.elapsedRealtime()
-        val result = resolveInternal(stream, season, episode)
+        val result = resolveInternal(stream, season, episode, mayAddToAccount)
         recordResolverHealth(stream, result, android.os.SystemClock.elapsedRealtime() - t0)
         return result
     }
@@ -50,32 +59,40 @@ class DirectDebridResolver @Inject constructor(
     private suspend fun resolveInternal(
         stream: Stream,
         season: Int?,
-        episode: Int?
+        episode: Int?,
+        mayAddToAccount: Boolean
     ): DirectDebridResolveResult {
         if (!shouldResolveToPlayableStream(stream)) {
             return DirectDebridResolveResult.Stale
         }
         val cacheKey = stream.directDebridResolveCacheKey(season, episode)
         if (cacheKey == null) {
-            return resolveUncached(stream, season, episode)
+            return resolveUncached(stream, season, episode, mayAddToAccount)
         }
         getCachedResult(cacheKey)?.let {
             return it
         }
+        linkStore.get(cacheKey)?.let { stored ->
+            mutex.withLock {
+                resolvedCache[cacheKey] = CachedDirectDebridResolve(stored.result, stored.savedAtMs)
+            }
+            return stored.result
+        }
 
+        val flightKey = if (mayAddToAccount) cacheKey else "$cacheKey|account"
         var ownsResolve = false
         val newResolve = scope.async(start = CoroutineStart.LAZY) {
-            resolveUncached(stream, season, episode)
+            resolveUncached(stream, season, episode, mayAddToAccount)
         }
         val activeResolve = mutex.withLock {
             getCachedResultLocked(cacheKey)?.let { cached ->
                 return@withLock null to cached
             }
-            val existing = inFlightResolves[cacheKey]
+            val existing = inFlightResolves[flightKey]
             if (existing != null) {
                 existing to null
             } else {
-                inFlightResolves[cacheKey] = newResolve
+                inFlightResolves[flightKey] = newResolve
                 ownsResolve = true
                 newResolve to null
             }
@@ -97,13 +114,14 @@ class DirectDebridResolver @Inject constructor(
                         cachedAtMs = System.currentTimeMillis()
                     )
                 }
+                linkStore.put(cacheKey, result)
             }
             result
         } finally {
             if (ownsResolve) {
                 mutex.withLock {
-                    if (inFlightResolves[cacheKey] === deferred) {
-                        inFlightResolves.remove(cacheKey)
+                    if (inFlightResolves[flightKey] === deferred) {
+                        inFlightResolves.remove(flightKey)
                     }
                 }
             }
@@ -119,12 +137,13 @@ class DirectDebridResolver @Inject constructor(
     suspend fun resolveToPlayableStream(
         stream: Stream,
         season: Int?,
-        episode: Int?
+        episode: Int?,
+        mayAddToAccount: Boolean = true
     ): DirectDebridPlayableResult {
         if (!shouldResolveToPlayableStream(stream)) {
             return DirectDebridPlayableResult.Success(stream)
         }
-        return when (val result = resolve(stream, season, episode)) {
+        return when (val result = resolve(stream, season, episode, mayAddToAccount)) {
             is DirectDebridResolveResult.Success -> DirectDebridPlayableResult.Success(stream.withResolvedDebridUrl(result))
             DirectDebridResolveResult.MissingApiKey -> DirectDebridPlayableResult.MissingApiKey
             DirectDebridResolveResult.NotCached -> DirectDebridPlayableResult.NotCached
@@ -137,12 +156,11 @@ class DirectDebridResolver @Inject constructor(
         val settings = dataStore.settings.first()
         if (!settings.canResolvePlayableLinks) return false
         if (stream.needsLocalDebridResolve()) {
-            return localTorrentResolveCredential(settings) != null
+            return DebridProviders.plainTorrentServices(settings).isNotEmpty()
         }
         if (!stream.isDirectDebrid() || stream.getStreamUrl() != null) return false
         val providerId = DebridProviders.byId(stream.clientResolve?.service)?.id ?: return false
-        return providerId == settings.activeResolverProviderId &&
-            settings.apiKeyFor(providerId).isNotBlank()
+        return DebridProviders.isVisible(providerId) && settings.apiKeyFor(providerId).isNotBlank()
     }
 
     private suspend fun getCachedResult(cacheKey: String): DirectDebridResolveResult.Success? =
@@ -179,23 +197,55 @@ class DirectDebridResolver @Inject constructor(
     private suspend fun resolveUncached(
         stream: Stream,
         season: Int?,
-        episode: Int?
+        episode: Int?,
+        mayAddToAccount: Boolean
     ): DirectDebridResolveResult {
         if (stream.needsLocalDebridResolve()) {
-            return resolveLocalTorrentStream(stream, season, episode)
+            return resolveLocalTorrentStream(stream, season, episode, mayAddToAccount)
         }
-        return when (DebridProviders.byId(stream.clientResolve?.service)?.id) {
+        return resolveWithProvider(stream.clientResolve?.service, stream, season, episode, mayAddToAccount)
+    }
+
+    private suspend fun resolveWithProvider(
+        service: String?,
+        stream: Stream,
+        season: Int?,
+        episode: Int?,
+        mayAddToAccount: Boolean
+    ): DirectDebridResolveResult =
+        when (DebridProviders.byId(service)?.id) {
             DebridProviders.TORBOX_ID -> torboxResolver.resolve(stream, season, episode)
             DebridProviders.PREMIUMIZE_ID -> premiumizeResolver.resolve(stream, season, episode)
-            DebridProviders.REAL_DEBRID_ID -> realDebridResolver.resolve(stream, season, episode)
+            DebridProviders.REAL_DEBRID_ID -> realDebridResolver.resolve(stream, season, episode, mayAddToAccount)
+            DebridProviders.ALL_DEBRID_ID -> allDebridResolver.resolve(stream, season, episode, mayAddToAccount)
             else -> DirectDebridResolveResult.Error
         }
+
+    /**
+     * Gets the link for [stream] only when the title is already in the Real-Debrid or AllDebrid account, so
+     * nothing new is added. Other services are left alone.
+     */
+    suspend fun prepareFromAccount(stream: Stream, season: Int?, episode: Int?): Boolean {
+        if (!shouldResolveToPlayableStream(stream)) return false
+        if (!DebridAccounts.supportsAccountList(resolverProviderId(stream))) return false
+        return resolve(stream, season, episode, mayAddToAccount = false) is DirectDebridResolveResult.Success
+    }
+
+    private suspend fun resolverProviderId(stream: Stream): String? =
+        if (stream.needsLocalDebridResolve()) {
+            plainTorrentCredential(dataStore.settings.first(), stream)?.provider?.id
+        } else {
+            DebridProviders.byId(stream.clientResolve?.service)?.id
+        }
+
+    fun warmUp() {
+        accounts.warmUp()
     }
 
     private suspend fun Stream.directDebridResolveCacheKey(season: Int?, episode: Int?): String? {
         if (needsLocalDebridResolve()) {
             val settings = dataStore.settings.first()
-            val account = localTorrentResolveCredential(settings) ?: return null
+            val account = plainTorrentCredential(settings, this) ?: return null
             val apiKey = account.apiKey.trim().takeIf { it.isNotBlank() } ?: return null
             val identity = getEffectiveInfoHash() ?: torrentMagnetUri() ?: behaviorHints?.filename ?: return null
             return listOf(
@@ -211,7 +261,7 @@ class DirectDebridResolver @Inject constructor(
         val resolve = clientResolve ?: return null
         val providerId = DebridProviders.byId(resolve.service)?.id ?: return null
         val settings = dataStore.settings.first()
-        if (!settings.canResolvePlayableLinks || providerId != settings.activeResolverProviderId) return null
+        if (!settings.canResolvePlayableLinks || !DebridProviders.isVisible(providerId)) return null
         val apiKey = settings.apiKeyFor(providerId).trim().takeIf { it.isNotBlank() } ?: return null
         val identity = resolve.infoHash
             ?: resolve.magnetUri
@@ -233,24 +283,19 @@ class DirectDebridResolver @Inject constructor(
     private suspend fun resolveLocalTorrentStream(
         stream: Stream,
         season: Int?,
-        episode: Int?
+        episode: Int?,
+        mayAddToAccount: Boolean
     ): DirectDebridResolveResult {
         val settings = dataStore.settings.first()
-        val account = localTorrentResolveCredential(settings) ?: return DirectDebridResolveResult.MissingApiKey
+        val services = DebridProviders.plainTorrentServices(settings)
+        if (services.isEmpty()) return DirectDebridResolveResult.MissingApiKey
         val hash = stream.getEffectiveInfoHash()?.trim()?.lowercase()
         if (stream.debridCacheStatus?.state == StreamDebridCacheState.NOT_CACHED) {
             return DirectDebridResolveResult.NotCached
         }
-        if (
-            !hash.isNullOrBlank() &&
-            stream.debridCacheStatus?.state != StreamDebridCacheState.CACHED &&
-            account.provider.supports(DebridProviderCapability.LocalTorrentCacheCheck)
-        ) {
-            when (localDebridService.isCached(account, hash)) {
-                false -> return DirectDebridResolveResult.NotCached
-                true, null -> Unit
-            }
-        }
+        val account = plainTorrentCredential(settings, stream)
+            ?: firstAccountWithCopy(services, hash)
+            ?: return DirectDebridResolveResult.NotCached
 
         val magnet = DebridMagnetBuilder.fromStream(stream)
             ?: return DirectDebridResolveResult.Stale
@@ -277,18 +322,42 @@ class DirectDebridResolver @Inject constructor(
             )
         )
 
-        return when (account.provider.id) {
-            DebridProviders.TORBOX_ID -> torboxResolver.resolve(resolveStream, season, episode)
-            DebridProviders.PREMIUMIZE_ID -> premiumizeResolver.resolve(resolveStream, season, episode)
-            else -> DirectDebridResolveResult.Error
-        }
+        return resolveWithProvider(account.provider.id, resolveStream, season, episode, mayAddToAccount)
     }
 
-    private fun localTorrentResolveCredential(
-        settings: com.nuvio.tv.domain.model.DebridSettings
-    ): DebridServiceCredential? =
-        settings.activeResolverCredential
-            ?.takeIf { credential -> credential.provider.supports(DebridProviderCapability.LocalTorrentResolve) }
+    /**
+     * The account a plain torrent goes to: the one the list marked it cached on, or, when nothing was marked,
+     * the preferred account if it cannot be asked; null when the accounts still have to be asked.
+     */
+    private fun plainTorrentCredential(
+        settings: com.nuvio.tv.domain.model.DebridSettings,
+        stream: Stream
+    ): DebridServiceCredential? {
+        val services = DebridProviders.plainTorrentServices(settings)
+        val status = stream.debridCacheStatus
+        if (status?.state == StreamDebridCacheState.CACHED) {
+            services.firstOrNull { it.provider.id == DebridProviders.byId(status.providerId)?.id }?.let { return it }
+        }
+        return services.firstOrNull()?.takeIf { services.size == 1 }
+    }
+
+    /** The first account, in the preferred order, that has [hash] cached; the first one when none can say. */
+    private suspend fun firstAccountWithCopy(
+        services: List<DebridServiceCredential>,
+        hash: String?
+    ): DebridServiceCredential? {
+        if (hash.isNullOrBlank()) return services.firstOrNull()
+        var unknown: DebridServiceCredential? = null
+        for (account in services) {
+            if (!account.provider.supports(DebridProviderCapability.LocalTorrentCacheCheck)) return account
+            when (localDebridService.isCached(account, hash)) {
+                true -> return account
+                null -> if (unknown == null) unknown = account
+                false -> Unit
+            }
+        }
+        return unknown
+    }
 }
 
 private const val DIRECT_DEBRID_RESOLVE_CACHE_TTL_MS = 15L * 60L * 1000L

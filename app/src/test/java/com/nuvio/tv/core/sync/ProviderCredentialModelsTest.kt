@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.sync
 
 import com.nuvio.tv.data.remote.supabase.SupabaseProviderCredential
+import com.nuvio.tv.domain.model.DebridSettings
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
@@ -92,4 +93,51 @@ class ProviderCredentialModelsTest {
 
         assertEquals("", local.mergeRemote(remote).values.single().value)
     }
+
+    @Test
+    fun `real-debrid and alldebrid keys never go to the account`() {
+        val snapshot = localProviderCredentials(profileId = 1, debrid = allKeys(), mdbListApiKey = "md", animeSkipClientId = "as")
+
+        assertEquals(
+            listOf("debrid:torbox", "debrid:premiumize", "mdblist", "animeskip"),
+            snapshot.values.map { it.provider }
+        )
+        assertFalse(snapshot.values.any { it.value == "rd-key" || it.value == "ad-key" })
+        assertFalse(snapshot.values.any { it.credentialJson().toString().contains("rd-key") })
+        assertFalse(snapshot.values.any { it.credentialJson().toString().contains("ad-key") })
+    }
+
+    @Test
+    fun `account rows for real-debrid or alldebrid are not applied`() {
+        val snapshot = localProviderCredentials(profileId = 1, debrid = allKeys(), mdbListApiKey = "md", animeSkipClientId = "as")
+        val remote = listOf(
+            SupabaseProviderCredential(
+                provider = "debrid:alldebrid",
+                credentialJson = buildJsonObject { put("api_key", "remote-ad") }
+            ),
+            SupabaseProviderCredential(
+                provider = "debrid:realdebrid",
+                credentialJson = buildJsonObject { put("api_key", "remote-rd") }
+            )
+        )
+
+        assertEquals(snapshot, snapshot.mergeRemote(remote))
+    }
+
+    @Test
+    fun `services kept on the device do not ask for a seed`() {
+        val snapshot = localProviderCredentials(profileId = 1, debrid = allKeys(), mdbListApiKey = "md", animeSkipClientId = "as")
+        val rows = listOf("debrid:torbox", "debrid:premiumize", "mdblist", "animeskip").map { provider ->
+            SupabaseProviderCredential(provider = provider, credentialJson = buildJsonObject { put("api_key", "x") })
+        }
+
+        assertFalse(shouldSeedProviderCredentials(snapshot, rows))
+    }
+
+    private fun allKeys() = DebridSettings(
+        torboxApiKey = "tb-key",
+        premiumizeApiKey = "pm-key",
+        realDebridApiKey = "rd-key",
+        allDebridApiKey = "ad-key"
+    )
 }

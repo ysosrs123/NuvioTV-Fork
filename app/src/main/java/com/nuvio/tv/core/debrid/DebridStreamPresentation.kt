@@ -50,7 +50,7 @@ class DebridStreamPresentation @Inject constructor(
         }
         return groups.map { group ->
             val visibleStreams = group.streams
-                .filterNot { stream -> stream.isInactiveResolverStream(settings) }
+                .filterNot { stream -> stream.isUnconnectedServiceStream(settings) }
                 .filterNot { stream -> stream.isUncachedDebridStream() }
             val debridStreams = visibleStreams.filter { stream -> stream.isManagedDebridStream() }
             if (debridStreams.isEmpty()) {
@@ -93,9 +93,9 @@ class DebridStreamPresentation @Inject constructor(
             DebridProviders.byId(debridCacheStatus?.providerId)?.supports(DebridProviderCapability.LocalTorrentCacheCheck) == true &&
             debridCacheStatus?.state == StreamDebridCacheState.NOT_CACHED
 
-    private fun Stream.isInactiveResolverStream(settings: DebridSettings): Boolean {
+    private fun Stream.isUnconnectedServiceStream(settings: DebridSettings): Boolean {
         val streamProviderId = DebridProviders.byId(clientResolve?.service)?.id ?: return false
-        val activeProviderId = settings.activeResolverProviderId ?: return false
-        return isDirectDebrid() && streamProviderId != activeProviderId
+        if (!isDirectDebrid()) return false
+        return !DebridProviders.isVisible(streamProviderId) || settings.apiKeyFor(streamProviderId).isBlank()
     }
 }

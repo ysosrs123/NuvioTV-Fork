@@ -5,6 +5,9 @@ import com.nuvio.tv.domain.model.AddonStreams
 import com.nuvio.tv.domain.model.Stream
 import com.nuvio.tv.domain.model.StreamDebridCacheState
 import com.nuvio.tv.domain.model.StreamDebridCacheStatus
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,7 +18,7 @@ class LocalDebridAvailabilityService @Inject constructor(
     private val localDebridService: LocalDebridService
 ) {
     suspend fun markChecking(groups: List<AddonStreams>): List<AddonStreams> {
-        val account = cacheCheckAccount() ?: return groups
+        val account = cacheCheckAccounts().firstOrNull() ?: return groups
         return groups.updateAvailabilityStatus { stream ->
             if (stream.localAvailabilityHash() == null || stream.debridCacheStatus?.state == StreamDebridCacheState.CACHED) {
                 stream
@@ -31,8 +34,13 @@ class LocalDebridAvailabilityService @Inject constructor(
         }
     }
 
+    /**
+     * Asks every connected account that can tell what it has cached, all at once. A torrent is marked cached with
+     * the first account in the preferred order that has it, and not cached only when every account answered no.
+     */
     suspend fun annotateCachedAvailability(groups: List<AddonStreams>): List<AddonStreams> {
-        val account = cacheCheckAccount() ?: return groups
+        val accounts = cacheCheckAccounts()
+        if (accounts.isEmpty()) return groups
         val allHashes = groups.flatMap { group ->
             group.streams.mapNotNull { stream ->
                 stream.localAvailabilityHash()
@@ -41,16 +49,58 @@ class LocalDebridAvailabilityService @Inject constructor(
         }.distinct()
         if (allHashes.isEmpty()) return groups
 
-        // Short-TTL result memo so the same hash surfaced by
-        // two addons in DIFFERENT batches isn't checked twice against the
-        // debrid API. 60s staleness is acceptable: a NOT_CACHED torrent that
-        // becomes cached is picked up on the next stream-list open.
+        val answers = coroutineScope {
+            accounts.map { account -> async { checkAccount(account, allHashes) } }.awaitAll()
+        }
+        val first = accounts.first()
+
+        return groups.updateAvailabilityStatus { stream ->
+            val hash = stream.localAvailabilityHash() ?: return@updateAvailabilityStatus stream
+            if (stream.debridCacheStatus?.state in FINAL_CACHE_STATES) return@updateAvailabilityStatus stream
+            val cachedAt = accounts.indices.firstOrNull { index -> answers[index]?.get(hash) != null }
+            val status = when {
+                cachedAt != null -> {
+                    val account = accounts[cachedAt]
+                    val item = answers[cachedAt]?.get(hash)
+                    StreamDebridCacheStatus(
+                        providerId = account.provider.id,
+                        providerName = account.provider.displayName,
+                        state = StreamDebridCacheState.CACHED,
+                        cachedName = item?.name,
+                        cachedSize = item?.size
+                    )
+                }
+                answers.all { it != null && hash in it } -> StreamDebridCacheStatus(
+                    providerId = first.provider.id,
+                    providerName = first.provider.displayName,
+                    state = StreamDebridCacheState.NOT_CACHED
+                )
+                else -> StreamDebridCacheStatus(
+                    providerId = first.provider.id,
+                    providerName = first.provider.displayName,
+                    state = StreamDebridCacheState.UNKNOWN
+                )
+            }
+            stream.copy(debridCacheStatus = status)
+        }
+    }
+
+    /**
+     * What [account] says about [hashes]: cached ones map to their item, checked but not cached ones to null.
+     * Hashes this account could not answer for are missing; null when it answered nothing at all.
+     */
+    private suspend fun checkAccount(
+        account: DebridServiceCredential,
+        hashes: List<String>
+    ): Map<String, LocalDebridCachedItem?>? {
+        // Short-TTL memo so the same hash surfaced by two addons in different batches is not checked twice.
+        // 60s staleness is acceptable: a NOT_CACHED torrent that becomes cached is picked up on the next list.
         val now = System.currentTimeMillis()
         val memoKeyPrefix = account.provider.id + "|"
         val fresh = HashMap<String, LocalDebridCachedItem?>()
-        val toCheck = ArrayList<String>(allHashes.size)
+        val toCheck = ArrayList<String>(hashes.size)
         synchronized(resultMemo) {
-            allHashes.forEach { hash ->
+            hashes.forEach { hash ->
                 val entry = resultMemo[memoKeyPrefix + hash]
                 if (entry != null && now - entry.atMs <= MEMO_TTL_MS) {
                     fresh[hash] = entry.item
@@ -59,67 +109,17 @@ class LocalDebridAvailabilityService @Inject constructor(
                 }
             }
         }
-
-        val checked: Map<String, LocalDebridCachedItem>? = if (toCheck.isEmpty()) {
-            emptyMap()
-        } else {
-            localDebridService.checkCached(account = account, hashes = toCheck)
-        }
-        if (checked == null) {
-            // API failure: mark only what we had to check as UNKNOWN; memoised
-            // hashes still resolve below.
-            if (fresh.isEmpty()) {
-                return groups.updateAvailabilityStatus { stream ->
-                    val hash = stream.localAvailabilityHash()
-                    if (hash == null) {
-                        stream
-                    } else {
-                        stream.copy(
-                            debridCacheStatus = StreamDebridCacheStatus(
-                                providerId = account.provider.id,
-                                providerName = account.provider.displayName,
-                                state = StreamDebridCacheState.UNKNOWN
-                            )
-                        )
-                    }
-                }
+        if (toCheck.isEmpty()) return fresh
+        val checked = localDebridService.checkCached(account = account, hashes = toCheck)
+            ?: return fresh.takeIf { it.isNotEmpty() }
+        synchronized(resultMemo) {
+            if (resultMemo.size > MEMO_MAX_ENTRIES) resultMemo.clear()
+            toCheck.forEach { hash ->
+                resultMemo[memoKeyPrefix + hash] = MemoEntry(checked[hash], now)
             }
-        } else {
-            synchronized(resultMemo) {
-                if (resultMemo.size > MEMO_MAX_ENTRIES) resultMemo.clear()
-                toCheck.forEach { hash ->
-                    resultMemo[memoKeyPrefix + hash] = MemoEntry(checked[hash], now)
-                }
-            }
-            checked.forEach { (hash, item) -> fresh[hash] = item }
-            toCheck.forEach { hash -> if (hash !in fresh) fresh[hash] = null }
         }
-
-        return groups.updateAvailabilityStatus { stream ->
-            val hash = stream.localAvailabilityHash() ?: return@updateAvailabilityStatus stream
-            if (stream.debridCacheStatus?.state in FINAL_CACHE_STATES) return@updateAvailabilityStatus stream
-            if (hash !in fresh) {
-                // Only possible on the partial-failure path above: this hash's
-                // API call failed while others were memoised.
-                return@updateAvailabilityStatus stream.copy(
-                    debridCacheStatus = StreamDebridCacheStatus(
-                        providerId = account.provider.id,
-                        providerName = account.provider.displayName,
-                        state = StreamDebridCacheState.UNKNOWN
-                    )
-                )
-            }
-            val cachedItem = fresh[hash]
-            stream.copy(
-                debridCacheStatus = StreamDebridCacheStatus(
-                    providerId = account.provider.id,
-                    providerName = account.provider.displayName,
-                    state = if (cachedItem == null) StreamDebridCacheState.NOT_CACHED else StreamDebridCacheState.CACHED,
-                    cachedName = cachedItem?.name,
-                    cachedSize = cachedItem?.size
-                )
-            )
-        }
+        toCheck.forEach { hash -> fresh[hash] = checked[hash] }
+        return fresh
     }
 
     private class MemoEntry(val item: LocalDebridCachedItem?, val atMs: Long)
@@ -132,15 +132,24 @@ class LocalDebridAvailabilityService @Inject constructor(
     }
 
     suspend fun isCached(hash: String): Boolean? {
-        val account = cacheCheckAccount() ?: return null
-        return localDebridService.isCached(account, hash)
+        val accounts = cacheCheckAccounts()
+        if (accounts.isEmpty()) return null
+        var unknown = false
+        for (account in accounts) {
+            when (localDebridService.isCached(account, hash)) {
+                true -> return true
+                null -> unknown = true
+                false -> Unit
+            }
+        }
+        return if (unknown) null else false
     }
 
-    private suspend fun cacheCheckAccount(): DebridServiceCredential? {
+    private suspend fun cacheCheckAccounts(): List<DebridServiceCredential> {
         val settings = dataStore.settings.first()
-        if (!settings.canResolvePlayableLinks) return null
-        return settings.activeResolverCredential
-            ?.takeIf { credential -> credential.provider.supports(DebridProviderCapability.LocalTorrentCacheCheck) }
+        if (!settings.canResolvePlayableLinks) return emptyList()
+        return DebridProviders.plainTorrentServices(settings)
+            .filter { credential -> credential.provider.supports(DebridProviderCapability.LocalTorrentCacheCheck) }
     }
 }
 

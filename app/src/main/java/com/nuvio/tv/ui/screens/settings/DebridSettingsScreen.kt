@@ -230,7 +230,7 @@ fun DebridSettingsContent(
                                 item(key = "debrid_resolve_with") {
                                     SettingsActionRow(
                                         title = stringResource(R.string.debrid_resolve_with),
-                                        subtitle = stringResource(R.string.debrid_resolve_with_description),
+                                        subtitle = stringResource(R.string.debrid_resolve_first_description),
                                         value = activeResolverProvider.displayName,
                                         onClick = { showResolverPicker = true },
                                         enabled = true
@@ -886,7 +886,7 @@ private fun DebridResolverProviderDialog(
 
     SettingsSingleChoiceDialog(
         title = stringResource(R.string.debrid_resolve_with),
-        subtitle = stringResource(R.string.debrid_resolve_with_description),
+        subtitle = stringResource(R.string.debrid_resolve_first_description),
         options = providers.map { provider ->
             SettingsPickerOption(provider.id, provider.displayName)
         },

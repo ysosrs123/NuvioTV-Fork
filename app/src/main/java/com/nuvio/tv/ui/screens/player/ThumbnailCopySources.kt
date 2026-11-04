@@ -100,7 +100,9 @@ internal class PlayerCopyList(private val controller: PlayerRuntimeController) :
             currentStreamFileIdx = ui.currentStreamFileIdx,
             currentStreamAddonName = ui.currentStreamAddonName,
             currentStreamUrl = ui.currentStreamUrl,
-            currentStreamName = ui.currentStreamName
+            currentStreamName = ui.currentStreamName,
+            currentStreamDescription = ui.currentStreamDescription,
+            currentFilename = controller.currentFilename
         )
         val resolve = streams.getOrNull(i)?.clientResolve ?: return false
         return CopyChoice.usenetMarked(resolve.type, resolve.service)
@@ -121,7 +123,9 @@ internal class PlayerCopyList(private val controller: PlayerRuntimeController) :
             currentStreamFileIdx = ui.currentStreamFileIdx,
             currentStreamAddonName = ui.currentStreamAddonName,
             currentStreamUrl = ui.currentStreamUrl,
-            currentStreamName = ui.currentStreamName
+            currentStreamName = ui.currentStreamName,
+            currentStreamDescription = ui.currentStreamDescription,
+            currentFilename = controller.currentFilename
         ).takeIf { it >= 0 }
         val serverSession = controller.serverPlayback.session(controller.currentStreamUrl)
         CopyListed(
@@ -367,7 +371,7 @@ internal class ThumbnailCopySources(
                 CopyLink(it, emptyMap(), "a Premiumize direct download")
             }
             CopyKind.RESOLVE -> if (stream.isDirectDebrid()) {
-                val r = host.directDebridResolver.resolveToPlayableStream(stream, season, episode)
+                val r = host.directDebridResolver.resolveToPlayableStream(stream, season, episode, mayAddToAccount = false)
                 (r as? DirectDebridPlayableResult.Success)?.stream?.getStreamUrl()?.let {
                     CopyLink(it, emptyMap(), "your debrid service")
                 }

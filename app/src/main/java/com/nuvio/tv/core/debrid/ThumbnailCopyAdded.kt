@@ -250,7 +250,10 @@ internal class TorboxAddLimits {
 internal sealed class CopyRoute {
     data object Torbox : CopyRoute()
     data object Premiumize : CopyRoute()
-    /** An app debrid entry of another service, resolved with the app's key (the title may stay in that account). */
+    /**
+     * An app debrid entry of another service, resolved with the app's key. Real-Debrid and AllDebrid only use titles
+     * already in the account.
+     */
     data object Resolve : CopyRoute()
     data class LeftOut(val why: String) : CopyRoute()
 
