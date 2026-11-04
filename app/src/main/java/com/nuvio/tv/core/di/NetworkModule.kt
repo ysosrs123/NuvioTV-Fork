@@ -7,6 +7,7 @@ import com.nuvio.tv.core.network.NoDelaySocketFactory
 import com.nuvio.tv.data.remote.api.AniSkipApi
 import com.nuvio.tv.data.remote.api.AnimeSkipApi
 import com.nuvio.tv.data.remote.api.AddonApi
+import com.nuvio.tv.data.remote.api.AllDebridApi
 import com.nuvio.tv.data.remote.api.AuthDiagnosticReportApi
 import com.nuvio.tv.data.remote.api.GitHubReleaseApi
 import com.nuvio.tv.data.remote.api.SupportersApi
@@ -43,6 +44,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import com.nuvio.tv.core.network.ArcDns
 import com.nuvio.tv.core.network.IPv4FirstDns
 import com.nuvio.tv.core.network.ServerTrust
 import java.io.File
@@ -170,6 +172,7 @@ object NetworkModule {
                 }
             )
             .build()
+            .also { ArcDns.onChange(it.connectionPool::evictAll) }
     }
 
     /**
@@ -451,6 +454,24 @@ object NetworkModule {
     @Singleton
     fun provideRealDebridApi(@Named("realdebrid") retrofit: Retrofit): RealDebridApi =
         retrofit.create(RealDebridApi::class.java)
+
+    @Provides
+    @Singleton
+    @Named("alldebrid")
+    fun provideAllDebridRetrofit(
+        @Named("directDebrid") okHttpClient: OkHttpClient,
+        moshi: Moshi
+    ): Retrofit =
+        Retrofit.Builder()
+            .baseUrl("https://api.alldebrid.com/")
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideAllDebridApi(@Named("alldebrid") retrofit: Retrofit): AllDebridApi =
+        retrofit.create(AllDebridApi::class.java)
 
     @Provides
     @Singleton

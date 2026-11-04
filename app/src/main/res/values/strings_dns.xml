@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_section_network">Network</string>
+    <string name="advanced_dns">DNS</string>
+    <string name="advanced_dns_subtitle">Who looks up server addresses for the app. Pick a service if your internet provider blocks or changes add-on, TMDB or debrid addresses.</string>
+    <string name="advanced_dns_system">System</string>
+    <string name="advanced_dns_system_description">The box\'s own lookup, usually your internet provider\'s. The default.</string>
+    <string name="advanced_dns_quad9_description">Blocks known harmful sites.</string>
+    <string name="advanced_dns_adguard_description">Blocks ads and trackers.</string>
+    <string name="advanced_dns_adguard_warning">Can stop an add-on that uses an ad or tracking address.</string>
+    <string name="advanced_dns_custom">Custom address</string>
+    <string name="advanced_dns_custom_description">Your own https address, for example from NextDNS.</string>
+    <string name="advanced_dns_custom_hint" translatable="false">https://dns.example.com/dns-query</string>
+    <string name="advanced_dns_custom_invalid">Enter an address that starts with https://</string>
+    <string name="advanced_dns_custom_failed">That address did not answer as a DNS service.</string>
+    <string name="advanced_dns_note">Used for add-ons, images, debrid, media servers, watch party, your account and ExoPlayer. The MPV player, trailers and torrents still use the box\'s own lookup.</string>
+    <string name="advanced_dns_unreachable">%1$s could not be reached, so the box\'s own lookup is being used for now.</string>
+    <string name="advanced_dns_test">Test DNS</string>
+    <string name="advanced_dns_test_subtitle">Looks up TMDB and Cinemeta with the chosen DNS.</string>
+    <string name="advanced_dns_test_time">%1$s %2$d ms</string>
+    <string name="advanced_dns_test_no_answer">%1$s: no answer</string>
+    <string name="advanced_dns_test_unreachable">Not reachable</string>
+</resources>
