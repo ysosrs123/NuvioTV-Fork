@@ -56,20 +56,44 @@ and the right HDR -- without needing to be the kind of person who tunes buffer s
   exactly where you will land, from an old AVI to a 4K Dolby Vision remux. On by default. A new
   thumbnail every 10 seconds, sharp enough to read the scene, ready straight away for anything
   you've played before, and carried over to another release of the same film. When your Jellyfin,
-  Emby or Silo server has made its own thumbnails, the player uses those. Turn on **Thumbnails from a
+  Emby, Silo or Plex server has made its own thumbnails, the player uses those. Turn on **Thumbnails from a
   copy** and a 4K film gets its thumbnails from a 1080p copy in your sources, about five times less to
   download, so even a Fire TV Stick can make them while the film plays. No third-party service, no API
   key, nothing uploaded.
-- **Your own media server** -- Jellyfin, Emby and Silo libraries on Home, in Search, in the Library
-  and as a source on any title the server has, with direct play, second addresses and self-signed
+- **Your own media server** -- Jellyfin, Emby, Silo and now **Plex** libraries on Home, in Search, in the
+  Library and as a source on any title the server has, with direct play, second addresses and self-signed
   certificates. Give each server your own name, show or hide the server logos, and sign in to Silo
   with the same address you open it with in the browser.
   Silo also has its own sign-in now: a code and a QR on the TV, sign in on your
   phone, pick your Silo profile on screen, and your Silo Home rows show up on Nuvio Home.
+  Big libraries get genres, A to Z with a letter jump, Newest release and an Unwatched filter, and
+  **Folders from genres** turns a whole library into one tidy Home row.
+- **Plex** -- sign in with a code at plex.tv/link (no password on the TV), pick your server and your
+  Plex Home user, and your libraries, shared servers included, show up as Home rows, in Search, in
+  Continue Watching and as sources, with Plex's own intro and credits markers and thumbnails. Playing
+  away from home needs Plex Pass on the server owner's account or a Remote Watch Pass on yours: that's
+  Plex's rule, not Arc's.
+- **Real-Debrid and AllDebrid** -- they join TorBox and Premiumize in Integrations, with sign-in on the TV
+  (scan the code, done) and their cloud libraries, and all your debrid accounts now work at once. A result
+  meant for one account goes to that account, plain torrents get checked on TorBox and Premiumize together
+  and play from whichever has them, and a source that isn't cached moves on to the next cached one instead
+  of showing an error.
+- **More trackers: WeTrakr and Floppy** -- they join Trakt, Simkl and MDBList in Settings > Tracking.
+  Sign in with a code on your phone. WeTrakr gets scrobbling, watched marks both ways, Continue Watching,
+  your lists in the Library and a one-press "Send my history to WeTrakr". Floppy shows what you're
+  watching, keeps a resume point when you stop and adds finished titles to your history.
+- **Encrypted DNS (DNS over HTTPS)** -- pick Cloudflare, Google, Quad9, AdGuard or your own address under
+  Settings > Advanced, so an internet provider that blocks or fakes addresses can't get in the way of
+  add-ons, TMDB, images, debrid, media servers and ExoPlayer streams. System stays the default. MPV,
+  trailers and torrents still use the box's own DNS.
 - **Watch party** -- watch the same title with friends in other homes, in sync, with a six-character
   code or an invite. No account and no server of ours; bitstream audio is never sped up or slowed
   down to catch up. Every party runs on a long random key and only the host runs the room.
   Everyone in a party needs Nuvio Arc 1.1.0-nt.5 or newer.
+  New and still experimental: **cross-play with Nuvio app users**. Pick "With Nuvio app users" and join
+  the same party as friends on the official Nuvio apps (TV, phone, computer, LG and Samsung TVs). That
+  one takes up to 3 people, a limit set by Nuvio's server, needs your Nuvio sign-in and goes through
+  Nuvio's server.
 - **Calendar and new-episode reminders** -- a new page in the menu that shows when the next episodes
   of your shows come out, in your own time zone, plus cinema and streaming dates for films on your
   lists. Ring the bell on a show and a card on Home tells you when a new episode is out, with Watch
@@ -80,6 +104,9 @@ and the right HDR -- without needing to be the kind of person who tunes buffer s
   with colour buttons, number pads, your TV's own remote over HDMI and buttons set up in tvQuickActions
   or Button Mapper, and comes with a starting setup that just works on the Fire TV remote. The Search
   button on your remote opens Search.
+- **Subtitles the way you like them** -- plain subtitles get their own Outline size and a separate
+  Shadow with its own opacity, so a thick outline and a shadow can be on at the same time, on both players,
+  plus a choice of subtitle fonts (Roboto, Montserrat, Noto Sans, Asap Condensed and more).
 - **Lossless audio you can trust** -- a surround engine that packs TrueHD, DTS-HD MA and DTS:X for
   HDMI itself, with an **Auto surround** mode that picks the formats from what your TV and receiver
   report. Or set it yourself with per-format passthrough switches (Dolby Digital, DD+, TrueHD, DTS,
@@ -131,6 +158,12 @@ and the right HDR -- without needing to be the kind of person who tunes buffer s
   from its own temperature limit so you know when it's being throttled, audio-clock jitter and underrun
   cross-checks. When it says TrueHD Atmos is hitting the sink, it measured it. The assessment
   configures; this overlay verifies.
+- **Automatic speed-up** -- for films that keep buffering from far-away servers. On by default, nothing to
+  tune: the app asks the box for a bigger download window and, on boxes with enough memory, adds extra
+  downloads when a film needs them and hands them back when it doesn't. It remembers what each server
+  can do, starts heavy 4K remuxes on more than one download and gets the buffer back quickly after a seek
+  or a stall. Measured on a Fire TV Stick 4K Max from a server on the other side of the world: 28 Mbit/s
+  became 86 Mbit/s and 23 stops in three minutes became 6.
 - **Playback that holds up** --
   - *Fewer stalls, less wasted bandwidth:* upstream's parallel downloading kept too little data
     queued ahead of playback and threw away chunks it had already paid to download (measured ~47% of
@@ -213,7 +246,7 @@ The "Generating thumbnails" screen -- the thumbnails being made before play, the
 
 
 
-**Your own media server** -- Jellyfin, Emby and Silo rows on Home, and a server stream in the source list.
+**Your own media server** -- Jellyfin, Emby, Silo and Plex work the same way: rows on Home, and a server stream in the source list.
 
 <img width="1920" height="1080" alt="Screenshot_20261004_220636" src="https://github.com/user-attachments/assets/91100a10-6725-4770-ab40-43db44de17f3" />
 
@@ -289,7 +322,7 @@ community-tested.
 
 This is a modified version of [NuvioTV](https://github.com/NuvioMedia/NuvioTV), changed by ysosrs123
 from July 2026 onwards. Every change is in this repository's history on top of the official release
-it builds on (currently 1.1.0-beta.8). It is licensed under the
+it builds on (currently 1.1.0-beta.10). It is licensed under the
 [GNU General Public License v3.0](./LICENSE), the same as NuvioTV. All upstream copyright notices,
 licence headers and author attributions are kept. Full credit to the NuvioTV maintainers and contributors.
 
@@ -308,8 +341,9 @@ Parts from other projects keep their own licences:
   `app/src/main/assets/licenses/`).
 - Watch party avatars: made with DiceBear and Twemoji, under CC BY 4.0, CC0 1.0 and the Bottts terms.
   They are credited in the app under Settings > About > Licenses & attribution and are not covered by the GPL.
-- Calendar episode times come from TVmaze's schedule service, credited in the app under
-  Settings > About > Licenses & attribution.
+- Calendar episode times come from TVmaze's schedule service and TheTVDB (metadata provided by TheTVDB),
+  credited in the app under Settings > About > Licenses & attribution.
+- Floppy and the original tracker design are by dannyvfilms (NuvioMedia/NuvioTV#3811).
 - Other service logos and names belong to their owners and only show which service the app connects to.
 - Prebuilt libraries that come unchanged from the official app are covered by the official project's
   sources and notices.
