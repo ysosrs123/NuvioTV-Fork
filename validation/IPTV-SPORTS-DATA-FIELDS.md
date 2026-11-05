@@ -2204,3 +2204,17 @@ Dropped: an NHL power play or empty net on the scoreboard (ESPN's scoreboard doe
 Still unconfirmed: an NHL shootout in progress on the scoreboard; the UFC finish method arriving
 later for a bout first posted without one; AFL/NRL live clock (off season); a golf playoff in
 progress.
+
+## Fifty-third pass (4 November 12:28 to 5 November 14:28)
+
+Six scheduled captures (527 to 542 files each). Nothing from the plan: Devils–Oilers (`Final/SO`)
+and Jets–Canadiens (`Final/OT`) finished between captures; NBA overtime finals only; the LPGA's first
+round. One new status in a league the app does not offer, NCAA women's soccer: Wisconsin at UCLA
+`STATUS_FINAL_AGT` (id `46`, description `Final Score - After Golden Goal`, `shortDetail` `AGT`,
+`period` 3, `92'`), 0–1 with `winner` on the away side.
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Football golden goal | `STATUS_FINAL_AGT`, `completed` true, `AGT`, period 3. | none: read as final with `AGT`, as `AET` is |
+
+Still unconfirmed: as in the fifty-second pass.

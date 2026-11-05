@@ -135,6 +135,8 @@ under "Earlier session notes" and the dated sections is history kept for referen
     summary is no longer a goal at "1–0" after the last real goal.
   - Capture 79 (4 November 10:28, scheduled): docs only (the NHL scoreboard carries no power
     play or empty net, only the penalty as the last play; dropped from the unconfirmed list).
+  - Captures 80 to 85 (4 November 12:28 to 5 November 14:28, scheduled): nothing from the plan;
+    a golden-goal final (`AGT`) noted in NCAA women's soccer.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
