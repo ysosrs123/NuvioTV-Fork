@@ -88,7 +88,7 @@ class FloppyTrackingProviderTest {
     }
 
     @Test
-    fun `mark as watched is sent as a manual stop and unmark is never sent`() = runTest {
+    fun `mark as watched is a manual stop and unmark is an unwatch action`() = runTest {
         val h = manualToken()
         val writer = FloppyTrackingHistoryWriter(h.store, h.api)
         assertTrue(writer.isConnected.first())
@@ -106,9 +106,12 @@ class FloppyTrackingProviderTest {
         assertTrue(h.engine.requests.all { it.json!!.contains("\"manual\":true") })
 
         h.engine.requests.clear()
-        assertEquals(0, writer.removeFromHistory(1, listOf(movie)).attemptedCount)
+        val removal = writer.removeFromHistory(1, listOf(movie))
+        assertEquals(1, removal.attemptedCount)
+        assertEquals(1, h.engine.requests.size)
+        assertTrue(h.engine.requests.single().json!!.contains("\"action\":\"unwatch\""))
         assertEquals(0, writer.addToHistory(2, listOf(TrackingHistoryItem(movie))).attemptedCount)
-        assertTrue(h.engine.requests.isEmpty())
+        assertEquals(1, h.engine.requests.size)
     }
 
     private suspend fun manualToken(): FloppyTestHarness {

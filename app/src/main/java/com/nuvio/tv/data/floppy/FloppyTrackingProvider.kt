@@ -56,7 +56,7 @@ class FloppyTrackingScrobbler @Inject constructor(
     }
 }
 
-/** Unmarking is never sent: Floppy keeps past plays, and its guide asks clients to leave them alone. */
+/** Marks and unmarks are sent as scrobble actions; Floppy retracts the play it recorded. */
 @Singleton
 class FloppyTrackingHistoryWriter @Inject constructor(
     private val store: FloppyAuthStore,
@@ -91,5 +91,21 @@ class FloppyTrackingHistoryWriter @Inject constructor(
     override suspend fun removeFromHistory(
         profileId: Int,
         items: Collection<TrackingMediaReference>
-    ): TrackingMutationResult = TrackingMutationResult(0)
+    ): TrackingMutationResult {
+        val scope = store.scope()
+        if (scope.profileId != profileId || !store.state.value.isAuthenticated) return TrackingMutationResult(0)
+        val bodies = items.mapNotNull(::floppyUnwatchBody)
+        var notFound = 0
+        bodies.forEach { body ->
+            try {
+                api.scrobble(scope, body)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: FloppyApiException) {
+                if (error.status != 404) throw error
+                notFound++
+            }
+        }
+        return TrackingMutationResult(attemptedCount = bodies.size, notFoundCount = notFound)
+    }
 }
