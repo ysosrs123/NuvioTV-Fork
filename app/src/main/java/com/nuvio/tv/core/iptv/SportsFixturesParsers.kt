@@ -568,7 +568,7 @@ object EspnScoreboard {
     private val YELLOW_IDS = setOf("94")
     private val RED_IDS = setOf("93")
     private const val MAX_NAME = 40
-    private val SKIPPED = listOf("POSTPONED", "CANCELED", "CANCELLED", "ABANDONED", "FORFEIT", "SUSPENDED", "DELAYED")
+    private val SKIPPED = listOf("POSTPONED", "CANCELED", "CANCELLED", "ABANDONED", "FORFEIT", "SUSPENDED")
     private val COLOUR = Regex("[0-9A-Fa-f]{6}")
     private val SPACES = Regex("\\s+")
     private val SNAP = Regex("^\\(\\d{1,2}:\\d{2}\\)\\s+")

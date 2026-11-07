@@ -137,6 +137,10 @@ under "Earlier session notes" and the dated sections is history kept for referen
     play or empty net, only the penalty as the last play; dropped from the unconfirmed list).
   - Captures 80 to 85 (4 November 12:28 to 5 November 14:28, scheduled): nothing from the plan;
     a golden-goal final (`AGT`) noted in NCAA women's soccer.
+  - Captures 86 to 90 (6 November 12:28 to 7 November 12:28; two runs lost to a worker
+    restart on the 6th, one catch-up capture at 10:02 on the 7th): nothing new.
+  - Capture 91 (7 November 14:28, scheduled), open batch 7ae: a delayed kick-off (A-League,
+    `STATUS_DELAYED`) stays listed as live with "Delay" instead of being left out.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:

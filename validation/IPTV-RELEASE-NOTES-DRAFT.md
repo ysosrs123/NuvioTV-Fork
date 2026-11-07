@@ -967,6 +967,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   progress ("Thru 3") (capture of 27 October, 09:28).
 - Ice hockey: a shootout winner no longer appears among the goals as "1–0" after the last real
   goal (capture of 3 November, 14:28).
+- A game whose kick-off is delayed now stays listed with "Delay" instead of disappearing until it
+  starts (capture of 7 November, 14:28).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

@@ -44,7 +44,7 @@ line-up returned 5 rows each. Expect a paid key to return full lists.
 | `events[].name`, `shortName` | `Tampa Bay Buccaneers at Dallas Cowboys`, `TB @ DAL` | all | Fallback title only |
 | `events[].week.number` / root `week.number` | `5` | NFL, AFL, NRL (missing for soccer, NBA) | Yes (Week / Round) |
 | `c.status.type.state` | `pre` / `in` / `post` | all | Yes (status) |
-| `c.status.type.name` | `STATUS_SCHEDULED`, `STATUS_FINAL`, `STATUS_FULL_TIME` | all | Yes (skips postponed, cancelled, delayed) |
+| `c.status.type.name` | `STATUS_SCHEDULED`, `STATUS_FINAL`, `STATUS_FULL_TIME` | all | Yes (skips postponed and cancelled; a delayed start is kept since 7 November) |
 | `c.status.type.completed` | `true` | all | Yes |
 | `c.status.type.shortDetail`, `detail` | `10/8 - 8:15 PM EDT`, `Final` | all | Yes (live detail fallback) |
 | `c.format.regulation.periods` | `4` (NFL, NBA), `2` (NRL) | most | No |
@@ -2216,5 +2216,21 @@ round. One new status in a league the app does not offer, NCAA women's soccer: W
 | Shape | What the real response showed | Parser change |
 |---|---|---|
 | Football golden goal | `STATUS_FINAL_AGT`, `completed` true, `AGT`, period 3. | none: read as final with `AGT`, as `AET` is |
+
+Still unconfirmed: as in the fifty-second pass.
+
+## Fifty-fourth pass (6 November 12:28 to 7 November 14:28)
+
+Six captures (two scheduled runs on the 6th were lost to a worker restart; one catch-up capture at
+10:02 on the 7th). Nothing from the plan. At 14:28 on the 7th the A-League's Wellington Phoenix at
+Auckland FC, due at 04:00Z, had not started half an hour later. Trimmed copies in
+`app/src/test/resources/sports/espn-aleague-scoreboard-real-20261107.json` and
+`espn-aleague-summary-real-20261107.json` (`SportsRealDataDelayedStartTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Football start delayed | `STATUS_DELAYED` (id `7`, description `Delayed`, `shortDetail` `Delay`), state `in`, `completed` false, `displayClock` `0'`, no period, no details; the summary the same. | The scoreboard no longer leaves `DELAYED` games out (they were skipped with postponed and cancelled ones since the first version, without real data): the game stays listed as live with `Delay`; postponed games are still left out |
+
+Confirmed now: nothing from the plan.
 
 Still unconfirmed: as in the fifty-second pass.
