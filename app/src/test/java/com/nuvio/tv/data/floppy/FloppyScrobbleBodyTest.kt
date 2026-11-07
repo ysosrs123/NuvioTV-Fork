@@ -91,6 +91,18 @@ class FloppyScrobbleBodyTest {
     }
 
     @Test
+    fun `unwatch names the title the same way a mark does`() {
+        val movieBody = floppyUnwatchBody(movie)!!
+        assertEquals("unwatch", movieBody["action"].toString().trim('"'))
+        assertEquals("{\"imdb\":\"tt0133093\",\"tmdb\":\"603\"}", movieBody["ids"].toString())
+        val episodeBody = floppyUnwatchBody(episode)!!
+        assertEquals("episode", episodeBody["media_type"].toString().trim('"'))
+        assertEquals("2", episodeBody["season_number"].toString())
+        assertEquals("3", episodeBody["episode_number"].toString())
+        assertNull(floppyUnwatchBody(episode.copy(episode = null)))
+    }
+
+    @Test
     fun `two episodes marked together get different event ids`() {
         val first = floppyManualMarkBody(TrackingHistoryItem(episode, watchedAtEpochMs = 5L))!!
         val second = floppyManualMarkBody(

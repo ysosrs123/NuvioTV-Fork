@@ -40,6 +40,12 @@ internal fun floppyScrobbleBody(
     }
 }
 
+/** Retract the watch this client added, using the same identity a mark uses. */
+internal fun floppyUnwatchBody(media: TrackingMediaReference): JsonObject? = buildJsonObject {
+    put("action", "unwatch")
+    if (!putMedia(media)) return null
+}
+
 internal fun floppyManualMarkBody(item: TrackingHistoryItem): JsonObject? = buildJsonObject {
     put("action", TrackingScrobbleAction.STOP.wireValue)
     if (!putMedia(item.media)) return null
