@@ -2234,3 +2234,19 @@ Auckland FC, due at 04:00Z, had not started half an hour later. Trimmed copies i
 Confirmed now: nothing from the plan.
 
 Still unconfirmed: as in the fifty-second pass.
+
+## Fifty-fifth pass (8 November 10:28 to 9 November 10:28)
+
+Five scheduled captures and a 25-minute UFC poll (34 samples) during the Fight Night. Every finished
+bout had its method in the first sample in which it was final (a third whole card); one stoppage
+was first posted with the time left (`0:13` of round 3) and corrected to `4:47` 45 seconds later.
+On the 9th the PGA event (72 holes) ended in a playoff. Trimmed copy (the first eight players) in
+`app/src/test/resources/sports/espn-pga-scoreboard-real-20261109.json` (`SportsRealDataCutTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| Golf playoff after four rounds | `STATUS_FINAL`, competition `period` 5. Blades Brown (`-25`) and Ben James (`-24`) have a `period` 5 line (Brown hole 18 twice, `-2`; James hole 18 once, `-1`) and an empty `period` 402 line; nobody else has either. On the shortened Bermuda event the same placeholder was `302` and the playoff `period` 4. | ESPN's placeholder (`period` of 100 × rounds + 2) gives the regular rounds: the event's round is capped at it and cards come from that round, so the leaders read `F` with the last round's score and the golf card says `Round 4` (`Round 3` for Bermuda) instead of `Round 5`; a one-hole playoff line no longer reads `Thru 1` |
+
+Confirmed now: a golf playoff after a full event (not yet one in progress).
+
+Still unconfirmed: as in the fifty-second pass.

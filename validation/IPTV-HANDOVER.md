@@ -141,6 +141,11 @@ under "Earlier session notes" and the dated sections is history kept for referen
     restart on the 6th, one catch-up capture at 10:02 on the 7th): nothing new.
   - Capture 91 (7 November 14:28, scheduled), open batch 7ae: a delayed kick-off (A-League,
     `STATUS_DELAYED`) stays listed as live with "Delay" instead of being left out.
+  - Captures 92 to 95 (8 November 10:28 to 14:28, with a 25-minute UFC poll): nothing new; the
+    third full card with every method posted with its result.
+  - Capture 96 (9 November 10:28, scheduled), open batch 7ae: a golf playoff after four rounds
+    (period 5) no longer shows "Round 5" or "Thru 1"; the regular rounds come from ESPN's
+    placeholder line (402, 302).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:

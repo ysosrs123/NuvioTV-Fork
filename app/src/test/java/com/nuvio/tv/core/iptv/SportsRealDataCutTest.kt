@@ -30,15 +30,24 @@ class SportsRealDataCutTest {
         assertTrue(leaders.all { it.thru == "F" })
     }
 
-    @Test fun playoffHolesAreNotReadAsAFourthRound() {
+    @Test fun playoffAfterAShortenedEventIsNotReadAsAFourthRound() {
         val event = EspnScoreboard.parse(javaClass.getResourceAsStream("/sports/espn-pga-scoreboard-real-20261027.json")!!.bufferedReader().use { it.readText() },
             SportsLeagues.byId("pga")!!, Instant.parse("2026-10-26T23:30:00Z").toEpochMilli()).single()
-        assertEquals(listOf<Any?>(FixtureStatus.FINAL, "Final", 4), listOf(event.status, event.detail, (event.sportDetail as SportsDetail.Golf).round))
+        assertEquals(listOf<Any?>(FixtureStatus.FINAL, "Final", 3), listOf(event.status, event.detail, (event.sportDetail as SportsDetail.Golf).round))
         val leaders = (event.sportDetail as SportsDetail.Golf).leaders
         assertEquals(listOf("Austin Smotherman" to "-16", "Séamus Power" to "-15", "Taylor Moore" to "-14"), leaders.take(3).map { it.name to it.toPar })
         assertEquals(listOf("1", "2", "T3", "T3", "T3"), leaders.take(5).map { it.position })
-        assertTrue(leaders.take(2).all { it.thru == null && it.today == null })
-        assertNull(SportsFixtureText.bug(event).extra)
+        assertEquals(listOf("F" to "-5", "F" to "-4"), leaders.take(2).map { it.thru to it.today })
+        assertEquals("F", SportsFixtureText.bug(event).extra)
+    }
+
+    @Test fun playoffAfterFourRoundsKeepsTheFourthRound() {
+        val event = EspnScoreboard.parse(javaClass.getResourceAsStream("/sports/espn-pga-scoreboard-real-20261109.json")!!.bufferedReader().use { it.readText() },
+            SportsLeagues.byId("pga")!!, Instant.parse("2026-11-09T00:30:00Z").toEpochMilli()).single()
+        assertEquals(listOf<Any?>(FixtureStatus.FINAL, "Final", 4), listOf(event.status, event.detail, (event.sportDetail as SportsDetail.Golf).round))
+        val leaders = (event.sportDetail as SportsDetail.Golf).leaders
+        assertEquals(listOf("Blades Brown" to "-25", "Ben James" to "-24", "Michael Kim" to "-22"), leaders.take(3).map { it.name to it.toPar })
+        assertEquals(listOf("F" to "-9", "F" to "-2", "F" to "-8"), leaders.take(3).map { it.thru to it.today })
     }
 
     @Test fun leaderboardOutOfOrderIsRankedByScore() {

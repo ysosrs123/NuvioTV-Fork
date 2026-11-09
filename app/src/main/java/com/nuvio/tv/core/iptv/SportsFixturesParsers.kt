@@ -270,7 +270,9 @@ object EspnScoreboard {
         val roundType = roundStatus?.optJSONObject("type")
         if (skipped(eventType)) return null
         val status = status(eventType)
-        val round = roundStatus?.optIntOrNull("period")?.takeIf { it in 1..6 }
+        val rounds = competitors(competition ?: JSONObject()).flatMap { it.optJSONArray("linescores")?.let(::objects).orEmpty() }
+            .mapNotNull { it.optIntOrNull("period")?.takeIf { p -> p >= 100 }?.div(100) }.maxOrNull()
+        val round = roundStatus?.optIntOrNull("period")?.takeIf { it in 1..6 }?.let { p -> rounds?.let { minOf(p, it) } ?: p }
         val players = competitors(competition ?: JSONObject()).withIndex().sortedBy { it.value.optIntOrNull("order") ?: (1000 + it.index) }.mapNotNull { (index, competitor) ->
             val athlete = competitor.optJSONObject("athlete")
             val name = (athlete?.text("displayName") ?: athlete?.text("fullName"))?.take(MAX_TEXT) ?: return@mapNotNull null

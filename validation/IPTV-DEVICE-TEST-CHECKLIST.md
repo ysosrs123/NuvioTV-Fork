@@ -96,8 +96,9 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
 4. A golf leaderboard (Sport hero and Game Centre) is always in score order with the positions
    rising ("1, T2, T2, T2, T5…"), even when ESPN briefly lists the players out of order late in
    a final round.
-5. A golf event decided in a playoff (e.g. a weather-shortened event): the finished leaderboard
-   shows no "Thru 3" or round score for the two players in the playoff.
+5. A golf event decided in a playoff: the finished leaderboard shows "F" and the last regular
+   round's score for the players in the playoff (no "Thru 1"/"Thru 3"), and the golf card says
+   "Round 4" (or "Round 3" for a shortened event), not "Round 5".
 6. An NHL game won in a shootout: Game Centre's goals and timeline end with the last real goal
    (for example "2–2" in the 3rd); the shootout winner is not listed as a goal at "1–0". The line
    score still has an "SO" column.
