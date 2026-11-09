@@ -146,6 +146,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
   - Capture 96 (9 November 10:28, scheduled), open batch 7ae: a golf playoff after four rounds
     (period 5) no longer shows "Round 5" or "Thru 1"; the regular rounds come from ESPN's
     placeholder line (402, 302).
+  - Capture 97 (9 November 12:28, with a 30-minute NHL poll): no app change. Calgary–Philadelphia
+    went to overtime but Calgary scored on the buzzer (`End of OT` 4–3, then `Final/OT`), so no
+    shootout; overtime in progress and the buzzer goal read correctly (fixtures and a test only).
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:

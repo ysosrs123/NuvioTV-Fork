@@ -2250,3 +2250,20 @@ On the 9th the PGA event (72 holes) ended in a playoff. Trimmed copy (the first 
 Confirmed now: a golf playoff after a full event (not yet one in progress).
 
 Still unconfirmed: as in the fifty-second pass.
+
+## Fifty-sixth pass (9 November 12:28)
+
+One scheduled capture and a 30-minute NHL poll (41 samples) while Philadelphia at Calgary was level
+3–3 late in the third. It went to overtime and Calgary scored with the clock at `0:00`, so there was
+no shootout. Trimmed copies in `app/src/test/resources/sports/espn-nhl-scoreboard-real-20261109.json`
+(overtime at `4:03`) and `espn-nhl-scoreboard-real-20261109b.json` (`End of OT`)
+(`SportsRealDataHockeyOvertimeTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NHL overtime in progress | `STATUS_IN_PROGRESS`, `period` 4, `shortDetail` `4:03 - OT`; the clock sat at `5:00` for about two minutes before the period started. Four linescores, the fourth `0` for both until the goal. | None: the bug reads `OT · 4:03` and the fourth column `OT` |
+| NHL overtime goal on the buzzer | `STATUS_END_PERIOD` `End of OT`, clock `0:00`, the score already 4–3, then `STATUS_FINAL` `Final/OT` about 45 seconds later; no fifth linescore and no shootout fields. | None: `End of OT` with the winning score, then `Final/OT` |
+
+Confirmed now: nothing from the plan (overtime ended before a shootout).
+
+Still unconfirmed: as in the fifty-second pass.
