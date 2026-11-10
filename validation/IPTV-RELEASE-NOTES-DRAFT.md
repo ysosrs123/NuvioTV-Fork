@@ -970,6 +970,8 @@ Sport data (captures of 13–16 October; Champions League, MLB playoffs, NHL):
   goal (capture of 3 November, 14:28).
 - A game whose kick-off is delayed now stays listed with "Delay" instead of disappearing until it
   starts (capture of 7 November, 14:28).
+- Ice hockey: while a shootout is under way the line score's last column reads "SO" instead
+  of "2OT" (capture of 10 November, 14:28).
 
 Live player (behind live, rejoin, local timeshift):
 - HLS channels: the "behind live" hint and Return to live are steadier. They use the

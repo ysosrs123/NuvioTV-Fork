@@ -150,6 +150,9 @@ under "Earlier session notes" and the dated sections is history kept for referen
     went to overtime but Calgary scored on the buzzer (`End of OT` 4–3, then `Final/OT`), so no
     shootout; overtime in progress and the buzzer goal read correctly (fixtures and a test only).
   - Captures 98 to 100 (9 November 14:28 to 10 November 12:28): nothing new.
+  - Capture 101 (10 November 14:28, with a 90-minute NHL poll), open batch 7ae: San
+    Jose–Islanders went to a shootout (`In SO`, period 5, clock `0:00`); the fifth line-score
+    column read "2OT" until the final and now reads "SO" while the shootout runs.
   - Open question for the user (7s.7): does a 5-minute pause with Safety buffer off leave TS
     channels behind live? If so, offer Return to live there too.
 - All work is committed and pushed to `iptv/player-binding`. Build for the next device pass:
@@ -447,12 +450,15 @@ under "Earlier session notes" and the dated sections is history kept for referen
   before 30 November, then drops the slots nothing needs; scheduled tasks are disabled, never
   deleted). Times are Brisbane; the US slots moved an hour later on 1 November and the European ones
   on 25 October.
-  - An NHL shootout in progress on the scoreboard (a shootout in the summary was seen on
-    3 November); a UFC method posted later: daily
-    10:27, 12:27, 14:27 from 1 November (`IPTV capture – daily US evening`; 09:27, 11:27, 13:27 before).
+  - A UFC method posted later (cards end on Sunday mornings Brisbane; UFC 334 on 15 November):
+    Sundays 10:27, 12:27, 14:27 (`IPTV capture – daily US evening`, cut to Sundays and Mondays on
+    10 November; daily from 1 November; 09:27, 11:27, 13:27 before).
   - A golf playoff in progress (only at the end of a final round; a finished playoff was seen
     on 27 October): US final rounds end about 09:00 to 11:00 Brisbane on Monday, so the daily
-    10:27 slot; Asian events the daily slots.
+    10:27 slot (the Monday 12:27 and 14:27 runs come with the Sunday hours in one schedule).
+  - Done: an NHL shootout in progress on the scoreboard (10 November 15:51, San Jose–Islanders,
+    `In SO`; the shootout in the summary on 3 November). The daily runs were cut to Sundays and
+    Mondays: nothing left needs Tuesday to Saturday.
   - Dropped: a pitching change as the MLB scoreboard's last play and TheSportsDB baseball
     half-innings (the World Series ended on 29 October, Milwaukee 4–1; no MLB before 30
     November). The change was seen in the summary on 25 and 28 October; TheSportsDB extra innings

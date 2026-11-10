@@ -398,8 +398,8 @@ object SportsFixtureText {
 
     fun periodLabel(fixture: SportsFixture, period: Int): String? {
         val last = maxOf(fixture.homeLine?.periods?.size ?: 0, fixture.awayLine?.periods?.size ?: 0)
-        val shootout = fixture.sport == "ice-hockey" && period == last && period > 4 && fixture.status == FixtureStatus.FINAL &&
-            fixture.detail?.substringAfter('/', "")?.trim()?.equals("SO", ignoreCase = true) == true
+        val shootout = fixture.sport == "ice-hockey" && period == last && period > 4 && fixture.status != FixtureStatus.SCHEDULED &&
+            fixture.detail?.split('/', ' ')?.any { it.equals("SO", ignoreCase = true) } == true
         return if (shootout) "SO" else periodLabel(fixture.sport, period)
     }
 

@@ -2267,3 +2267,21 @@ no shootout. Trimmed copies in `app/src/test/resources/sports/espn-nhl-scoreboar
 Confirmed now: nothing from the plan (overtime ended before a shootout).
 
 Still unconfirmed: as in the fifty-second pass.
+
+## Fifty-seventh pass (10 November 14:28)
+
+One scheduled capture and a 90-minute NHL poll (118 samples) while San Jose and the
+Islanders were level 2–2 in the second period. Overtime was scoreless and the shootout ran for
+about eight minutes; Ivar Stenberg scored the winner. Trimmed copies in
+`app/src/test/resources/sports/espn-nhl-scoreboard-real-20261110.json` (shootout in progress) and
+`espn-nhl-scoreboard-real-20261110b.json` (final) (`SportsRealDataLiveHockeyShootoutTest`).
+
+| Shape | What the real response showed | Parser change |
+|---|---|---|
+| NHL shootout in progress (scoreboard) | `STATUS_IN_PROGRESS`, `period` 5, clock `0:00`, `shortDetail` `In SO` from `End of OT` 45 seconds earlier; a fifth linescore `0` for both, the score level (2–2) throughout. `situation.lastPlay` gives each attempt ("Collin Graf Wrist Shot saved by Ilya Sorokin", "Ivar Stenberg Goal"; one had no shooter, " saved by Yaroslav Askarov"). No shootout tally anywhere. | The fifth column is labelled `SO` while the shootout runs (it read `2OT`; only a final with `Final/SO` was labelled), and later overtimes keep their numbers. The bug reads `In SO` as sent |
+| NHL shootout final (scoreboard) | `Final/SO`, score 3–2, but the fifth linescore still `0` for both (on 3 November it was 1 for the winner); no `altDetail`. | None: the score carries the extra goal; the `SO` column shows `0`–`0` until ESPN fills it |
+
+Confirmed now: an NHL shootout in progress on the scoreboard.
+
+Still unconfirmed: the UFC finish method arriving later for a bout first posted without one;
+AFL/NRL live clock (off season); a golf playoff in progress.

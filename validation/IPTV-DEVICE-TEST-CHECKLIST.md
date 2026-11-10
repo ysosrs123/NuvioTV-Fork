@@ -104,6 +104,9 @@ logcat (`adb logcat -s NuvioIptv:V *:E`). Do not share logs that contain address
    score still has an "SO" column.
 7. A game whose start is delayed (ESPN "Delay") stays listed in Live TV, the guide and Game
    Centre as live with "Delay", instead of disappearing until play begins.
+8. An NHL game in a shootout (regular season, after a scoreless overtime): while the shootout
+   runs the score bug reads "In SO" and the line score's fifth column is "SO", not "2OT"; the
+   score stays level until the final adds the winning goal.
 
 ## 7ad. 20 October captures (build pending — ready to build)
 1. During a tennis tie-break the score bug's third line reads "Tie-break 2–2" (the first
