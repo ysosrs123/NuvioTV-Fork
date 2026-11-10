@@ -1,6 +1,7 @@
 package com.nuvio.tv.ui.screens.plugin
 
 import android.graphics.Bitmap
+import com.nuvio.tv.core.plugin.PluginRunOutcome
 import com.nuvio.tv.core.plugin.TestDiagnostics
 import com.nuvio.tv.domain.model.LocalScraperResult
 import com.nuvio.tv.domain.model.PluginRepository
@@ -11,6 +12,10 @@ data class PluginUiState(
     val groupStreamsByRepository: Boolean = false,
     val repositories: List<PluginRepository> = emptyList(),
     val scrapers: List<ScraperInfo> = emptyList(),
+    val syncedReposToReview: List<PluginRepository> = emptyList(),
+    val outcomes: Map<String, PluginRunOutcome> = emptyMap(),
+    val pendingRepoAdd: String? = null,
+    val providerChooser: ProviderChooserState? = null,
     val isLoading: Boolean = false,
     val isAddingRepo: Boolean = false,
     val isTesting: Boolean = false,
@@ -60,4 +65,16 @@ sealed interface PluginUiEvent {
     object RejectPendingRepoChange : PluginUiEvent
     object ConfirmPendingScraperEnable : PluginUiEvent
     object DismissPendingScraperEnable : PluginUiEvent
+    object ConfirmPendingRepoAdd : PluginUiEvent
+    object DismissPendingRepoAdd : PluginUiEvent
+    object AcknowledgeSyncedRepos : PluginUiEvent
+    data class OpenProviderChooser(val repoId: String) : PluginUiEvent
+    data class ChooserToggle(val scraperId: String) : PluginUiEvent
+    data class ChooserType(val type: ProviderTypeFilter) : PluginUiEvent
+    data class ChooserLanguage(val language: String?) : PluginUiEvent
+    object ChooserSelectShown : PluginUiEvent
+    object ChooserClear : PluginUiEvent
+    object ChooserApply : PluginUiEvent
+    object ChooserKeepAllOff : PluginUiEvent
+    object ChooserDismiss : PluginUiEvent
 }

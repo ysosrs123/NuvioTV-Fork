@@ -164,6 +164,26 @@ private class ReflectivePluginWrapper(private val foreignInstance: Any) : Plugin
 
 private const val MAX_DEX_SIZE = 10 * 1024 * 1024L // 10MB max per .cs3 file
 
+/** Only touches [target] once the new bytes are safely on disk, so a failed update keeps the working file. */
+internal fun replaceFileKeepingOldOnFailure(target: File, bytes: ByteArray, readOnly: Boolean) {
+    val temp = File(target.parentFile, "${target.name}.tmp")
+    try {
+        temp.delete()
+        temp.writeBytes(bytes)
+        if (readOnly) temp.setReadOnly()
+        if (!temp.renameTo(target)) {
+            target.setWritable(true)
+            target.delete()
+            if (!temp.renameTo(target)) throw java.io.IOException("Could not replace ${target.name}")
+        }
+    } finally {
+        if (temp.exists()) {
+            temp.setWritable(true)
+            temp.delete()
+        }
+    }
+}
+
 /**
  * Manages downloading, loading, and caching of DEX-based external extensions (.cs3 files).
  */
@@ -179,8 +199,8 @@ class ExternalExtensionLoader @Inject constructor(
         .followRedirects(true)
         .build()
 
-    /** Cache of loaded MainAPI instances by scraper ID */
-    private val apiCache = ConcurrentHashMap<String, MainAPI>()
+    /** Every MainAPI an extension registered, by scraper ID. An empty list means it registered none. */
+    private val apiCache = ConcurrentHashMap<String, List<MainAPI>>()
 
     /** Cache of loaded class loaders by scraper ID */
     private val classLoaderCache = ConcurrentHashMap<String, DexClassLoader>()
@@ -207,13 +227,6 @@ class ExternalExtensionLoader @Inject constructor(
         try {
             val targetFile = File(extensionsDir, "${safeFileName(scraperId)}.cs3")
 
-            // Remove existing read-only file before writing (DEX files are set
-            // read-only for API 28+ compat, so overwriting would fail with EACCES)
-            if (targetFile.exists()) {
-                targetFile.setWritable(true)
-                targetFile.delete()
-            }
-
             val request = Request.Builder()
                 .url(downloadUrl)
                 .header("User-Agent", "NuvioTV/1.0")
@@ -237,14 +250,13 @@ class ExternalExtensionLoader @Inject constructor(
                     return@withContext null
                 }
 
-                targetFile.writeBytes(bytes)
-
                 // Fix for Android API 28+: DEX files must be read-only
                 // Writing writable DEX files is blocked on newer Android versions
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    targetFile.setReadOnly()
-                    Log.d(TAG, "Set DEX file read-only for API ${Build.VERSION.SDK_INT}")
-                }
+                replaceFileKeepingOldOnFailure(
+                    targetFile,
+                    bytes,
+                    readOnly = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                )
 
                 Log.d(TAG, "Downloaded extension $scraperId: ${bytes.size} bytes -> ${targetFile.absolutePath}")
                 targetFile
@@ -260,7 +272,7 @@ class ExternalExtensionLoader @Inject constructor(
      */
     fun loadExtension(scraperId: String): List<MainAPI> {
         // Check cache first
-        apiCache[scraperId]?.let { return listOf(it) }
+        apiCache[scraperId]?.let { return it }
         com.nuvio.tv.core.runtime.PluginRuntimeHooks.ensureCloudstreamInitialized()
 
         val dexFile = File(extensionsDir, "${safeFileName(scraperId)}.cs3")
@@ -391,14 +403,7 @@ class ExternalExtensionLoader @Inject constructor(
                 }
             }
 
-            apis.forEach { api ->
-                apiCache["$scraperId:${api.name}"] = api
-            }
-
-            // Also cache the first API under the plain scraper ID
-            if (apis.isNotEmpty()) {
-                apiCache[scraperId] = apis.first()
-            }
+            apiCache[scraperId] = apis.toList()
 
             Log.d(TAG, "Loaded extension $scraperId: ${apis.size} providers (${apis.joinToString { it.name }})")
             apis
@@ -417,22 +422,12 @@ class ExternalExtensionLoader @Inject constructor(
     }
 
     /**
-     * Get a cached MainAPI for the given scraper ID, loading if necessary.
-     */
-    fun getApi(scraperId: String): MainAPI? {
-        return apiCache[scraperId] ?: run {
-            val apis = loadExtension(scraperId)
-            apis.firstOrNull()
-        }
-    }
-
-    /**
      * Load extension with diagnostic output.
      */
     fun loadExtensionWithDiagnostics(scraperId: String, diagnostics: TestDiagnostics): List<MainAPI> {
-        apiCache[scraperId]?.let {
-            diagnostics.addStep("MainAPI cached: ${it.name}")
-            return listOf(it)
+        apiCache[scraperId]?.let { cached ->
+            diagnostics.addStep("MainAPIs cached: ${cached.joinToString { it.name }}")
+            return cached
         }
         com.nuvio.tv.core.runtime.PluginRuntimeHooks.ensureCloudstreamInitialized()
 
@@ -551,12 +546,7 @@ class ExternalExtensionLoader @Inject constructor(
                 }
             }
 
-            apis.forEach { api ->
-                apiCache["$scraperId:${api.name}"] = api
-            }
-            if (apis.isNotEmpty()) {
-                apiCache[scraperId] = apis.first()
-            }
+            apiCache[scraperId] = apis.toList()
 
             apis
         } catch (e: Exception) {
@@ -677,11 +667,7 @@ class ExternalExtensionLoader @Inject constructor(
         }
     }
 
-    private fun extractMissingClassName(e: Error): String? {
-        val msg = e.message ?: return null
-        val match = Regex("""(?:L?)([\w/.]+)(?:;)?""").find(msg)
-        return match?.groupValues?.get(1)?.replace('/', '.')
-    }
+    private fun extractMissingClassName(e: Error): String? = missingClassName(e.message)
 
     private fun findAndLoadPlugin(classLoader: DexClassLoader, cs3File: File): Plugin? {
         val pluginClassName = readPluginClassNameFromZip(cs3File)

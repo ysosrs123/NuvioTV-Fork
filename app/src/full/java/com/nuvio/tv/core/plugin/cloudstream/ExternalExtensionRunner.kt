@@ -1,5 +1,8 @@
 package com.nuvio.tv.core.plugin.cloudstream
 
+import com.nuvio.tv.core.plugin.PluginRunProblems
+import com.nuvio.tv.core.plugin.PluginRunReason
+import kotlinx.coroutines.currentCoroutineContext
 import android.util.Log
 import com.lagradost.cloudstream3.AnimeLoadResponse
 import com.lagradost.cloudstream3.Episode
@@ -27,6 +30,7 @@ import com.nuvio.tv.core.tmdb.TmdbMetadataService
 import com.nuvio.tv.core.tmdb.TmdbService
 import com.nuvio.tv.domain.model.ContentType
 import com.nuvio.tv.domain.model.LocalScraperResult
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -38,12 +42,30 @@ import javax.inject.Singleton
 
 private const val TAG = "ExtExtensionRunner"
 private const val EXECUTION_TIMEOUT_MS = 120_000L
+// Below PluginManager's 120 s scraper timeout, which would throw away finished providers.
+private const val EXTENSION_BUDGET_MS = 110_000L
+private const val MAX_PROVIDERS_AT_ONCE = 4
 // Per-provider loadLinks cap. Mega-aggregators (Phisher StreamPlay, Ultima,
 // TorraStream) scrape many source sites in parallel and happily burn through
 // minutes — cap them at 60s and return the partial link set collected so far.
 private const val LOADLINKS_TIMEOUT_MS = 60_000L
 private const val MIN_TITLE_SIMILARITY = 0.5
 private const val MAX_ALT_TITLES = 8
+
+/** A film or live page has one link, which can't be the episode that was asked for. */
+internal fun singleLinkFitsRequest(season: Int?, episode: Int?): Boolean = season == null && episode == null
+
+private val JVM_CLASS_NAME = Regex("""L([\w$]+(?:/[\w$]+)+);""")
+private val DOTTED_CLASS_NAME = Regex("""[\w$]+(?:[./][\w$]+)+""")
+
+/** Finds the class in messages like: Failed resolution of: Lcom/foo/Bar; */
+internal fun missingClassName(message: String?): String? {
+    if (message == null) return null
+    val name = JVM_CLASS_NAME.find(message)?.groupValues?.get(1)
+        ?: DOTTED_CLASS_NAME.find(message)?.value
+        ?: return null
+    return name.replace('/', '.')
+}
 
 /**
  * Executes external DEX extensions by bridging between NuvioTV's TMDB ID-based system
@@ -67,26 +89,41 @@ class ExternalExtensionRunner @Inject constructor(
     ): List<LocalScraperResult> = withContext(Dispatchers.IO) {
         extensionLoader.ensureExtractorsLoaded(listOf(scraperId))
 
-        val api = extensionLoader.getApi(scraperId)
-        if (api == null) {
+        val apis = extensionLoader.loadExtension(scraperId)
+        if (apis.isEmpty()) {
             Log.e(TAG, "No API loaded for scraper: $scraperId")
+            coroutineContext[PluginRunProblems]?.note(PluginRunReason.DID_NOT_LOAD)
             return@withContext emptyList()
         }
 
-        try {
-            executeInternal(api, tmdbId, mediaType, season, episode)
-        } catch (e: Exception) {
-            Log.e(TAG, "Extension ${api.name} failed: ${e.javaClass.simpleName}: ${e.message}", e)
-            emptyList()
-        } catch (e: Error) {
-            val missing = extractMissingClass(e)
-            if (missing != null) {
-                Log.e(TAG, "Extension ${api.name} MISSING CLASS: $missing", e)
-            } else {
-                Log.e(TAG, "Extension ${api.name} linkage error: ${e.javaClass.simpleName}: ${e.message}", e)
-            }
-            emptyList()
+        runProviders(apis, MAX_PROVIDERS_AT_ONCE, EXTENSION_BUDGET_MS) { api ->
+            executeProvider(api, tmdbId, mediaType, season, episode)
+        }.distinctBy { it.url }
+    }
+
+    private suspend fun executeProvider(
+        api: MainAPI,
+        tmdbId: String,
+        mediaType: String,
+        season: Int?,
+        episode: Int?
+    ): List<LocalScraperResult> = try {
+        executeInternal(api, tmdbId, mediaType, season, episode)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        noteProblem(e)
+        Log.e(TAG, "Extension ${api.name} failed: ${e.javaClass.simpleName}: ${e.message}", e)
+        emptyList()
+    } catch (e: Error) {
+        noteProblem(e)
+        val missing = extractMissingClass(e)
+        if (missing != null) {
+            Log.e(TAG, "Extension ${api.name} MISSING CLASS: $missing", e)
+        } else {
+            Log.e(TAG, "Extension ${api.name} linkage error: ${e.javaClass.simpleName}: ${e.message}", e)
         }
+        emptyList()
     }
 
     suspend fun executeWithDiagnostics(
@@ -101,24 +138,26 @@ class ExternalExtensionRunner @Inject constructor(
 
         diagnostics.addStep("Loading DEX extension...")
         val apis = extensionLoader.loadExtensionWithDiagnostics(scraperId, diagnostics)
-        val api = apis.firstOrNull()
 
-        if (api == null) {
+        if (apis.isEmpty()) {
             diagnostics.addStep("No MainAPI available after load")
             return@withContext emptyList()
         }
 
-        diagnostics.addStep("Using MainAPI: ${api.name} (${api.javaClass.simpleName})")
-        val isTmdb = api is TmdbProvider
-        diagnostics.addStep("Provider type: ${if (isTmdb) "TmdbProvider" else "search-based"}")
-
-        withTimeoutOrNull(EXECUTION_TIMEOUT_MS) {
+        // One at a time so each provider's steps stay together in the test output.
+        runProviders(apis, maxAtOnce = 1, EXECUTION_TIMEOUT_MS) { api ->
+            diagnostics.addStep("Using MainAPI: ${api.name} (${api.javaClass.simpleName})")
+            val isTmdb = api is TmdbProvider
+            diagnostics.addStep("Provider type: ${if (isTmdb) "TmdbProvider" else "search-based"}")
             try {
                 if (isTmdb) {
                     executeTmdbProviderWithDiagnostics(api, tmdbId, mediaType, season, episode, diagnostics)
                 } else {
                     executeSearchBasedWithDiagnostics(api, tmdbId, mediaType, season, episode, diagnostics)
                 }
+            } catch (e: CancellationException) {
+                diagnostics.addStep("TIMEOUT after ${EXECUTION_TIMEOUT_MS}ms")
+                throw e
             } catch (e: Error) {
                 Log.e(TAG, "Diagnostic ${api.name} error: ${e.javaClass.simpleName}: ${e.message}", e)
                 diagnostics.addStep("Runtime error: ${e.javaClass.simpleName}")
@@ -129,10 +168,7 @@ class ExternalExtensionRunner @Inject constructor(
                 diagnostics.addStep("Runtime exception: ${e.javaClass.simpleName}: ${e.message?.take(300)}")
                 emptyList()
             }
-        } ?: run {
-            diagnostics.addStep("TIMEOUT after ${EXECUTION_TIMEOUT_MS}ms")
-            emptyList()
-        }
+        }.distinctBy { it.url }
     }
 
     private suspend fun executeTmdbProviderWithDiagnostics(
@@ -336,11 +372,7 @@ class ExternalExtensionRunner @Inject constructor(
         return links.filterValid().map { it.toLocalScraperResult(api.name, domainSubtitles) }
     }
 
-    private fun extractMissingClass(e: Error): String? {
-        val msg = e.message ?: return null
-        val match = Regex("""(?:L?)([\w/.]+)(?:;)?""").find(msg)
-        return match?.groupValues?.get(1)?.replace('/', '.')
-    }
+    private fun extractMissingClass(e: Error): String? = missingClassName(e.message)
 
     private suspend fun executeInternal(
         api: MainAPI,
@@ -385,10 +417,14 @@ class ExternalExtensionRunner @Inject constructor(
         Log.d(TAG, "TmdbProvider ${api.name}: load($loadJson)")
         val loadResponse = try {
             api.load(loadJson)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
+            noteProblem(e)
             Log.w(TAG, "TmdbProvider ${api.name} load(json) threw: ${e.javaClass.simpleName}: ${e.message?.take(100)}")
             null
         } catch (e: Error) {
+            noteProblem(e)
             val missing = extractMissingClass(e)
             Log.w(TAG, "TmdbProvider ${api.name} load(json) error: ${missing ?: e.message?.take(100)}")
             null
@@ -413,10 +449,13 @@ class ExternalExtensionRunner @Inject constructor(
         Log.d(TAG, "TmdbProvider ${api.name}: fallback load($tmdbUrl)")
         val fallbackResponse = try {
             api.load(tmdbUrl)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
+            noteProblem(e)
             Log.w(TAG, "TmdbProvider ${api.name} fallback load(url) threw: ${e.javaClass.simpleName}: ${e.message?.take(100)}")
             null
-        } catch (e: Error) { null }
+        } catch (e: Error) { noteProblem(e); null }
 
         if (fallbackResponse != null) {
             val data = extractData(fallbackResponse, mediaType, season, episode)
@@ -442,7 +481,7 @@ class ExternalExtensionRunner @Inject constructor(
         // (returning null locally) rather than propagating cancellation out and
         // discarding the already-collected link set. This is the cancellation-scope
         // trick that lets us return partial results from mega-aggregators.
-        val completed = withTimeoutOrNull(LOADLINKS_TIMEOUT_MS) {
+        val completed = withTimeoutOrNull(linkWaitMs()) {
             try {
                 api.loadLinks(
                     data = data,
@@ -451,17 +490,22 @@ class ExternalExtensionRunner @Inject constructor(
                     callback = { links.add(it) }
                 )
                 true
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
+                noteProblem(e)
                 Log.w(TAG, "TmdbProvider ${api.name} loadLinks threw: ${e.javaClass.simpleName} (${links.size} links collected)")
                 false
             } catch (e: Error) {
+                noteProblem(e)
                 val missing = extractMissingClass(e)
                 Log.w(TAG, "TmdbProvider ${api.name} loadLinks error: ${missing ?: e.message} (${links.size} links collected)")
                 false
             }
         }
         if (completed == null) {
-            Log.w(TAG, "TmdbProvider ${api.name} loadLinks timed out at ${LOADLINKS_TIMEOUT_MS}ms (${links.size} links collected so far)")
+            Log.w(TAG, "TmdbProvider ${api.name} loadLinks timed out (${links.size} links collected so far)")
+            currentCoroutineContext()[PluginRunProblems]?.note(PluginRunReason.TIMEOUT)
         }
 
         if (links.isEmpty()) {
@@ -574,10 +618,14 @@ class ExternalExtensionRunner @Inject constructor(
 
         val loadResponse = try {
             api.load(bestMatch.url)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
+            noteProblem(e)
             Log.e(TAG, "SearchBased ${api.name} load() threw: ${e.javaClass.simpleName}: ${e.message}", e)
             null
         } catch (e: Error) {
+            noteProblem(e)
             val missing = extractMissingClass(e)
             Log.e(TAG, "SearchBased ${api.name} load() error: ${missing ?: e.message}", e)
             null
@@ -597,7 +645,7 @@ class ExternalExtensionRunner @Inject constructor(
         val links = java.util.Collections.synchronizedList(mutableListOf<ExtractorLink>())
         val subtitles = java.util.Collections.synchronizedList(mutableListOf<SubtitleFile>())
 
-        val success = withTimeoutOrNull(LOADLINKS_TIMEOUT_MS) {
+        val success = withTimeoutOrNull(linkWaitMs()) {
             try {
                 api.loadLinks(
                     data = data,
@@ -605,17 +653,22 @@ class ExternalExtensionRunner @Inject constructor(
                     subtitleCallback = { subtitles.add(it) },
                     callback = { links.add(it) }
                 )
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
+                noteProblem(e)
                 Log.e(TAG, "SearchBased ${api.name} loadLinks threw: ${e.javaClass.simpleName}: ${e.message}", e)
                 false
             } catch (e: Error) {
+                noteProblem(e)
                 val missing = extractMissingClass(e)
                 Log.e(TAG, "SearchBased ${api.name} loadLinks error: ${missing ?: e.message}", e)
                 false
             }
         }
         if (success == null) {
-            Log.w(TAG, "SearchBased ${api.name} loadLinks timed out at ${LOADLINKS_TIMEOUT_MS}ms (${links.size} links collected so far)")
+            Log.w(TAG, "SearchBased ${api.name} loadLinks timed out (${links.size} links collected so far)")
+            currentCoroutineContext()[PluginRunProblems]?.note(PluginRunReason.TIMEOUT)
         }
 
         if (success != true && links.isEmpty()) {
@@ -684,6 +737,9 @@ class ExternalExtensionRunner @Inject constructor(
                     else -> 0.0 // type mismatch but exact title — neutral, don't boost
                 }
                 val score = titleSimilarity + yearBonus + typeBonus
+                val titleEvidence = titleSimilarity >= MIN_TITLE_SIMILARITY ||
+                    candidateTitles.any { titleContainedWholeWords(result.name, it) }
+                if (!titleEvidence) return@mapNotNull null
                 result to score
             }
             .filter { it.second >= MIN_TITLE_SIMILARITY }
@@ -700,6 +756,7 @@ class ExternalExtensionRunner @Inject constructor(
     private suspend fun trySearch(api: MainAPI, query: String): SearchOutcome = try {
         SearchOutcome(api.search(query, 1)?.items)
     } catch (e: java.net.UnknownHostException) {
+        noteProblem(e)
         Log.e(TAG, "SearchBased ${api.name} search(\"$query\") DNS fail: ${e.message}")
         SearchOutcome(null, hostUnreachable = true)
     } catch (e: NotImplementedError) {
@@ -707,13 +764,24 @@ class ExternalExtensionRunner @Inject constructor(
         // with alt titles will all throw the same. Short-circuit.
         Log.e(TAG, "SearchBased ${api.name}: search() not implemented; skipping provider")
         SearchOutcome(null, unsupported = true)
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
+        noteProblem(e)
         Log.e(TAG, "SearchBased ${api.name} search(\"$query\") threw: ${e.javaClass.simpleName}: ${e.message}", e)
         SearchOutcome(null)
     } catch (e: Error) {
+        noteProblem(e)
         val missing = extractMissingClass(e)
         Log.e(TAG, "SearchBased ${api.name} search(\"$query\") error: ${missing ?: e.message}", e)
         SearchOutcome(null)
+    }
+
+    private suspend fun linkWaitMs(): Long =
+        currentCoroutineContext()[PluginRunProblems]?.linkWaitMs(LOADLINKS_TIMEOUT_MS) ?: LOADLINKS_TIMEOUT_MS
+
+    private suspend fun noteProblem(error: Throwable) {
+        currentCoroutineContext()[PluginRunProblems]?.noteFailure(error)
     }
 
     private fun equalsIgnoreCase(a: String, b: String): Boolean = a.equals(b, ignoreCase = true)
@@ -746,8 +814,8 @@ class ExternalExtensionRunner @Inject constructor(
         season: Int?,
         episode: Int?
     ): String? = when (response) {
-        is MovieLoadResponse -> response.dataUrl
-        is LiveStreamLoadResponse -> response.dataUrl
+        is MovieLoadResponse -> response.dataUrl.takeIf { singleLinkFitsRequest(season, episode) }
+        is LiveStreamLoadResponse -> response.dataUrl.takeIf { singleLinkFitsRequest(season, episode) }
         is TvSeriesLoadResponse -> {
             findEpisode(response.episodes, season, episode)?.data
         }
@@ -765,74 +833,6 @@ class ExternalExtensionRunner @Inject constructor(
             episode = episode
         ) ?: return null
         return episodes.getOrNull(index)
-    }
-
-    private fun calculateSimilarity(s1: String, s2: String): Double {
-        val a = s1.lowercase().trim()
-        val b = s2.lowercase().trim()
-        if (a == b) return 1.0
-        if (a.isEmpty() || b.isEmpty()) return 0.0
-
-        val aNorm = normalizeTitleForMatch(a)
-        val bNorm = normalizeTitleForMatch(b)
-        if (aNorm == bNorm) return 0.95
-        if (aNorm.isEmpty() || bNorm.isEmpty()) return 0.0
-
-        if (aNorm.contains(bNorm) || bNorm.contains(aNorm)) {
-            // Length-ratio-weighted containment. Prevents "Boys" ⊂ "Fantasy Boys" or
-            // "Invincible" ⊂ "The Boys: Diábolico Latino" from scoring 0.85 — those
-            // are different works. Only treat as strong match when the strings are
-            // close in length (trivial punctuation/articles diff).
-            val shortLen = minOf(aNorm.length, bNorm.length).toDouble()
-            val longLen = maxOf(aNorm.length, bNorm.length).toDouble()
-            val ratio = shortLen / longLen
-            if (ratio >= 0.8) return 0.85
-            // else fall through to Levenshtein — naturally scores lower for
-            // significant length mismatches.
-        }
-
-        val distance = levenshteinDistance(aNorm, bNorm)
-        val maxLen = maxOf(aNorm.length, bNorm.length)
-        return 1.0 - (distance.toDouble() / maxLen)
-    }
-
-    /**
-     * Strip noise that provider titles commonly add: release year, season/part
-     * markers, language/dub tags. Lets "Invincible S4 Castellano" normalize to
-     * "Invincible" so it matches the TMDB primary title cleanly.
-     */
-    private fun normalizeTitleForMatch(lowered: String): String {
-        return lowered
-            .replace(Regex("\\(\\d{4}\\)"), " ")
-            .replace(Regex("\\b\\d{4}\\b"), " ") // bare year
-            .replace(Regex("\\b(temporada|season)\\s*\\d+\\b"), " ")
-            .replace(Regex("\\b[st]\\d{1,2}\\b"), " ") // s1, t2, s04
-            .replace(Regex("\\b(part|parte)\\s*\\d+\\b"), " ")
-            .replace(Regex("\\b(latino|castellano|subtitulado|sub\\s*espa(ñ|n)ol|espa(ñ|n)ol|dual|vose|vostfr|subbed|dubbed)\\b"), " ")
-            .replace(Regex("[:\\-–—]"), " ")
-            .replace(Regex("\\s+"), " ")
-            .trim()
-    }
-
-    private fun levenshteinDistance(s1: String, s2: String): Int {
-        val m = s1.length
-        val n = s2.length
-        val dp = Array(m + 1) { IntArray(n + 1) }
-
-        for (i in 0..m) dp[i][0] = i
-        for (j in 0..n) dp[0][j] = j
-
-        for (i in 1..m) {
-            for (j in 1..n) {
-                val cost = if (s1[i - 1] == s2[j - 1]) 0 else 1
-                dp[i][j] = minOf(
-                    dp[i - 1][j] + 1,
-                    dp[i][j - 1] + 1,
-                    dp[i - 1][j - 1] + cost
-                )
-            }
-        }
-        return dp[m][n]
     }
 
     /** Filter out broken ExtractorLinks (invalid URLs, error strings, etc.) */

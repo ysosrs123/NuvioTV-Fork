@@ -55,6 +55,7 @@ import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -150,6 +151,22 @@ fun PluginScreenContent(
     val listState = rememberLazyListState()
     val manageFromPhoneFocusRequester = remember { FocusRequester() }
     var hasEnteredQrMode by remember { mutableStateOf(false) }
+    val chooseButtonFocus = remember { mutableMapOf<String, FocusRequester>() }
+    var chooserReturnRepoId by remember { mutableStateOf<String?>(null) }
+    val chooserOpen = uiState.providerChooser != null
+
+    LaunchedEffect(chooserOpen) {
+        if (chooserOpen) {
+            chooserReturnRepoId = uiState.providerChooser?.repoId
+        } else {
+            val repoId = chooserReturnRepoId ?: return@LaunchedEffect
+            chooserReturnRepoId = null
+            if (chooseButtonFocus[repoId]?.requestFocusAfterFrames() != true) {
+                listState.scrollToItem(0)
+                manageFromPhoneFocusRequester.requestFocusAfterFrames()
+            }
+        }
+    }
 
     DisposableEffect(Unit) {
         onDispose { viewModel.stopQrMode() }
@@ -186,6 +203,10 @@ fun PluginScreenContent(
                 .fillMaxSize()
                 .padding(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.xl)
         ) {
+            val chooser = uiState.providerChooser
+            if (chooser != null) {
+                ProviderChooserPage(state = chooser, onEvent = viewModel::onEvent)
+            } else
             LazyColumn(
                 state = listState,
                 contentPadding = PaddingValues(bottom = NuvioTheme.spacing.xxl),
@@ -199,7 +220,7 @@ fun PluginScreenContent(
                     androidx.compose.material3.Card(
                         modifier = Modifier.fillMaxWidth().settingsSubmenuSurface(),
                         colors = androidx.compose.material3.CardDefaults.cardColors(
-                            containerColor = androidx.compose.ui.graphics.Color(0xFF1A3A5C)
+                            containerColor = settingsItemColor(NuvioTheme.colors.BackgroundCard)
                         ),
                         shape = settingsItemShape(NuvioTheme.radii.md)
                     ) {
@@ -210,6 +231,23 @@ fun PluginScreenContent(
                             modifier = Modifier.padding(NuvioTheme.spacing.lg)
                         )
                     }
+                }
+            }
+
+            if (uiState.syncedReposToReview.isNotEmpty()) {
+                item(key = "synced_repos_notice") {
+                    SyncedReposNotice(
+                        repoNames = uiState.syncedReposToReview.map { it.name.ifBlank { it.url } },
+                        onChooseProviders = {
+                            uiState.syncedReposToReview.firstOrNull()?.let {
+                                viewModel.onEvent(PluginUiEvent.OpenProviderChooser(it.id))
+                            }
+                        },
+                        onAcknowledge = {
+                            runCatching { manageFromPhoneFocusRequester.requestFocus() }
+                            viewModel.onEvent(PluginUiEvent.AcknowledgeSyncedRepos)
+                        }
+                    )
                 }
             }
 
@@ -283,6 +321,8 @@ fun PluginScreenContent(
                     onToggleAll = { enabled ->
                         viewModel.onEvent(PluginUiEvent.ToggleAllScrapersForRepo(repo.id, enabled))
                     },
+                    onChooseProviders = { viewModel.onEvent(PluginUiEvent.OpenProviderChooser(repo.id)) },
+                    chooseFocusRequester = chooseButtonFocus.getOrPut(repo.id) { FocusRequester() },
                     isLoading = uiState.isLoading,
                     isReadOnly = viewModel.isReadOnly
                 )
@@ -302,6 +342,7 @@ fun PluginScreenContent(
                 items(uiState.scrapers, key = { it.id }) { scraper ->
                     ScraperCard(
                         scraper = scraper,
+                        outcome = uiState.outcomes[scraper.id],
                         onToggle = { enabled ->
                             viewModel.onEvent(PluginUiEvent.ToggleScraper(scraper.id, enabled))
                         },
@@ -321,6 +362,13 @@ fun PluginScreenContent(
         successMessage = uiState.successMessage,
         errorMessage = uiState.errorMessage
     )
+
+    uiState.pendingRepoAdd?.let {
+        TrustRepoDialog(
+            onConfirm = { viewModel.onEvent(PluginUiEvent.ConfirmPendingRepoAdd) },
+            onDismiss = { viewModel.onEvent(PluginUiEvent.DismissPendingRepoAdd) }
+        )
+    }
 
     if (uiState.isQrModeActive || uiState.pendingRepoChange != null || uiState.pendingScraperEnable != null) {
         if (uiState.isQrModeActive) {
@@ -364,20 +412,19 @@ private fun PluginStreamGroupingCard(
             }
         },
         modifier = Modifier
-            .fillMaxWidth().settingsSubmenuSurface()
+            .fillMaxWidth()
+            .pluginFocus()
+            .settingsSubmenuSurface()
             .semantics {
                 role = Role.Switch
                 toggleableState = if (groupStreamsByRepository) ToggleableState.On else ToggleableState.Off
             },
         colors = ClickableSurfaceDefaults.colors(
             containerColor = settingsItemColor(NuvioTheme.colors.BackgroundCard),
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            focusedContainerColor = pluginFocusedFill()
         ),
         border = ClickableSurfaceDefaults.border(
-            focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = settingsItemShape(NuvioTheme.radii.md)
-            )
+            focusedBorder = pluginFocusedBorder(settingsItemShape(NuvioTheme.radii.md))
         ),
         shape = ClickableSurfaceDefaults.shape(settingsItemShape(NuvioTheme.radii.md)),
         scale = ClickableSurfaceDefaults.scale(focusedScale = if (isV2Settings()) 1f else 1.01f)
@@ -430,20 +477,19 @@ private fun PluginsEnabledCard(
             }
         },
         modifier = Modifier
-            .fillMaxWidth().settingsSubmenuSurface()
+            .fillMaxWidth()
+            .pluginFocus()
+            .settingsSubmenuSurface()
             .semantics {
                 role = Role.Switch
                 toggleableState = if (pluginsEnabled) ToggleableState.On else ToggleableState.Off
             },
         colors = ClickableSurfaceDefaults.colors(
             containerColor = settingsItemColor(NuvioTheme.colors.BackgroundCard),
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            focusedContainerColor = pluginFocusedFill()
         ),
         border = ClickableSurfaceDefaults.border(
-            focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = settingsItemShape(NuvioTheme.radii.md)
-            )
+            focusedBorder = pluginFocusedBorder(settingsItemShape(NuvioTheme.radii.md))
         ),
         shape = ClickableSurfaceDefaults.shape(settingsItemShape(NuvioTheme.radii.md)),
         scale = ClickableSurfaceDefaults.scale(focusedScale = if (isV2Settings()) 1f else 1.01f)
@@ -523,7 +569,7 @@ private fun AddRepositoryInline(
                 // Surface always stays in the tree for stable D-pad focus
                 Surface(
                     onClick = { isEditing = true },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).pluginFocus(),
                     colors = ClickableSurfaceDefaults.colors(
                         containerColor = settingsItemColor(NuvioTheme.colors.BackgroundElevated),
                         focusedContainerColor = NuvioTheme.colors.BackgroundElevated
@@ -533,10 +579,7 @@ private fun AddRepositoryInline(
                             border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
                             shape = settingsItemShape(NuvioTheme.radii.md)
                         ),
-                        focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = settingsItemShape(NuvioTheme.radii.md)
-                        )
+                        focusedBorder = pluginFocusedBorder(settingsItemShape(NuvioTheme.radii.md))
                     ),
                     shape = ClickableSurfaceDefaults.shape(settingsItemShape(NuvioTheme.radii.md)),
                     scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
@@ -596,6 +639,7 @@ private fun AddRepositoryInline(
                     },
                     enabled = !isLoading && url.isNotBlank(),
                     modifier = Modifier
+                        .pluginFocus(RoundedCornerShape(50))
                         .focusProperties { right = FocusRequester.Cancel }
                         .semantics { role = Role.Button },
                     colors = ButtonDefaults.colors(
@@ -605,10 +649,7 @@ private fun AddRepositoryInline(
                         focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
                     ),
                     border = ButtonDefaults.border(
-                        focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(50)
-                        )
+                        focusedBorder = pluginFocusedBorder(RoundedCornerShape(50))
                     )
                 ) {
                     if (isLoading) {
@@ -638,19 +679,18 @@ private fun ManageFromPhoneCard(
     Surface(
         onClick = onClick,
         modifier = Modifier
-            .fillMaxWidth().settingsSubmenuSurface()
+            .fillMaxWidth()
+            .pluginFocus()
+            .settingsSubmenuSurface()
             .focusRequester(focusRequester)
             .onFocusChanged { isFocused = it.isFocused }
             .semantics { role = Role.Button },
         colors = ClickableSurfaceDefaults.colors(
             containerColor = settingsItemColor(NuvioTheme.colors.BackgroundCard),
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            focusedContainerColor = pluginFocusedFill()
         ),
         border = ClickableSurfaceDefaults.border(
-            focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = settingsItemShape(18.dp)
-            )
+            focusedBorder = pluginFocusedBorder(settingsItemShape(18.dp))
         ),
         shape = ClickableSurfaceDefaults.shape(settingsItemShape(18.dp)),
         scale = ClickableSurfaceDefaults.scale(focusedScale = if (isV2Settings()) 1f else 1.01f)
@@ -753,17 +793,15 @@ private fun QrCodeOverlay(
             Surface(
                 onClick = onClose,
                 modifier = Modifier
+                    .pluginFocus(RoundedCornerShape(50))
                     .focusRequester(focusRequester)
                     .semantics { role = Role.Button },
                 colors = ClickableSurfaceDefaults.colors(
                     containerColor = NuvioTheme.colors.Surface,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground
+                    focusedContainerColor = pluginFocusedFill()
                 ),
                 border = ClickableSurfaceDefaults.border(
-                    focusedBorder = Border(
-                        border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                        shape = RoundedCornerShape(50)
-                    )
+                    focusedBorder = pluginFocusedBorder(RoundedCornerShape(50))
                 ),
                 shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(50)),
                 scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
@@ -877,6 +915,14 @@ private fun ConfirmRepoChangesDialog(
             }
         }
 
+        if (pendingChange.addedUrls.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.plugin_trust_message),
+                style = MaterialTheme.typography.bodySmall,
+                color = NuvioTheme.colors.Warning,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
         Text(
             text = stringResource(R.string.plugin_confirm_total, pendingChange.proposedUrls.size),
             style = MaterialTheme.typography.bodySmall,
@@ -887,13 +933,114 @@ private fun ConfirmRepoChangesDialog(
             LoadingIndicator(modifier = Modifier.size(36.dp).align(Alignment.CenterHorizontally))
         } else {
             SettingsDialogActionRow {
-                SettingsDialogActionButton(text = stringResource(R.string.plugin_confirm_reject), onClick = onReject)
+                SettingsDialogActionButton(
+                    text = stringResource(R.string.plugin_confirm_reject),
+                    onClick = onReject,
+                    modifier = Modifier.focusRequester(focusRequester)
+                )
                 SettingsDialogActionButton(
                     text = stringResource(R.string.plugin_confirm_confirm),
                     onClick = onConfirm,
-                    primary = true,
-                    modifier = Modifier.focusRequester(focusRequester)
+                    primary = true
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TrustRepoDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocusAfterFrames()
+    }
+
+    NuvioDialog(
+        onDismiss = onDismiss,
+        title = stringResource(R.string.plugin_trust_title),
+        subtitle = stringResource(R.string.plugin_trust_message),
+        width = 560.dp
+    ) {
+        SettingsDialogActionRow {
+            SettingsDialogActionButton(
+                text = stringResource(R.string.plugin_risky_enable_cancel),
+                onClick = onDismiss,
+                modifier = Modifier.focusRequester(focusRequester)
+            )
+            SettingsDialogActionButton(
+                text = stringResource(R.string.plugin_trust_confirm),
+                onClick = onConfirm,
+                primary = true
+            )
+        }
+    }
+}
+
+@Composable
+private fun SyncedReposNotice(
+    repoNames: List<String>,
+    onChooseProviders: () -> Unit,
+    onAcknowledge: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().settingsSubmenuSurface(),
+        colors = CardDefaults.cardColors(containerColor = settingsItemColor(NuvioTheme.colors.BackgroundCard)),
+        shape = settingsItemShape(18.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(if (isV2Settings()) 14.dp else 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Warning,
+                contentDescription = null,
+                modifier = Modifier.size(28.dp),
+                tint = NuvioTheme.colors.Warning
+            )
+            Spacer(modifier = Modifier.width(NuvioTheme.spacing.lg))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.plugin_synced_title),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = NuvioTheme.colors.TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = repoNames.joinToString(", "),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = NuvioTheme.colors.TextPrimary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = stringResource(R.string.plugin_synced_message),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = NuvioTheme.colors.TextSecondary
+                )
+                Text(
+                    text = stringResource(R.string.plugin_synced_off),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = NuvioTheme.colors.TextPrimary
+                )
+                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+                    SettingsDialogActionButton(
+                        text = stringResource(R.string.plugin_choose_button),
+                        onClick = onChooseProviders,
+                        primary = true
+                    )
+                    SettingsDialogActionButton(
+                        text = stringResource(R.string.plugin_synced_ok),
+                        onClick = onAcknowledge
+                    )
+                }
             }
         }
     }
@@ -935,6 +1082,8 @@ private fun RepositoryCard(
     repoScrapers: List<ScraperInfo>,
     onRefresh: () -> Unit,
     onRemove: () -> Unit,
+    onChooseProviders: () -> Unit = {},
+    chooseFocusRequester: FocusRequester? = null,
     onToggleAll: (Boolean) -> Unit,
     isLoading: Boolean,
     isReadOnly: Boolean = false
@@ -945,13 +1094,14 @@ private fun RepositoryCard(
     var isToggleFocused by remember { mutableStateOf(false) }
     var isRefreshFocused by remember { mutableStateOf(false) }
     var isRemoveFocused by remember { mutableStateOf(false) }
-    val isCardFocused = isToggleFocused || isRefreshFocused || isRemoveFocused
+    var isChooseFocused by remember { mutableStateOf(false) }
+    val isCardFocused = isToggleFocused || isChooseFocused || isRefreshFocused || isRemoveFocused
     val cardBorderColor by animateColorAsState(
-        targetValue = if (isCardFocused) NuvioTheme.colors.FocusRing else Color.Transparent,
+        targetValue = if (isCardFocused && !isV2Settings()) NuvioTheme.colors.FocusRing else Color.Transparent,
         label = "repositoryCardBorder"
     )
     val cardScale by animateFloatAsState(
-        targetValue = if (isCardFocused) 1.01f else 1f,
+        targetValue = if (isCardFocused && !isV2Settings()) 1.01f else 1f,
         label = "repositoryCardScale"
     )
 
@@ -1006,6 +1156,7 @@ private fun RepositoryCard(
                     Surface(
                         onClick = { onToggleAll(!anyEnabled) },
                         modifier = Modifier
+                            .pluginFocus()
                             .onFocusChanged { isToggleFocused = it.isFocused }
                             .semantics {
                                 role = Role.Switch
@@ -1013,13 +1164,10 @@ private fun RepositoryCard(
                             },
                         colors = ClickableSurfaceDefaults.colors(
                             containerColor = NuvioTheme.colors.Surface,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground
+                            focusedContainerColor = pluginFocusedFill()
                         ),
                         border = ClickableSurfaceDefaults.border(
-                            focusedBorder = Border(
-                                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                shape = settingsItemShape(NuvioTheme.radii.md)
-                            )
+                            focusedBorder = pluginFocusedBorder(settingsItemShape(NuvioTheme.radii.md))
                         ),
                         shape = ClickableSurfaceDefaults.shape(settingsItemShape(NuvioTheme.radii.md)),
                         scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
@@ -1046,16 +1194,38 @@ private fun RepositoryCard(
                     }
                 }
 
+                if (repoScrapers.size > 1) {
+                    Button(
+                        onClick = onChooseProviders,
+                        enabled = !isLoading,
+                        modifier = Modifier
+                            .then(if (chooseFocusRequester != null) Modifier.focusRequester(chooseFocusRequester) else Modifier)
+                            .pluginFocus()
+                            .onFocusChanged { isChooseFocused = it.isFocused }
+                            .semantics { role = Role.Button },
+                        colors = ButtonDefaults.colors(
+                            containerColor = NuvioTheme.colors.Surface,
+                            contentColor = NuvioTheme.colors.TextSecondary,
+                            focusedContainerColor = pluginFocusedFill(),
+                            focusedContentColor = NuvioTheme.colors.Primary
+                        ),
+                        shape = ButtonDefaults.shape(settingsItemShape(NuvioTheme.radii.md))
+                    ) {
+                        Text(stringResource(R.string.plugin_choose_button))
+                    }
+                }
+
                 Button(
                     onClick = onRefresh,
                     enabled = !isLoading,
                     modifier = Modifier
+                        .pluginFocus()
                         .onFocusChanged { isRefreshFocused = it.isFocused }
                         .semantics { role = Role.Button },
                     colors = ButtonDefaults.colors(
                         containerColor = NuvioTheme.colors.Surface,
                         contentColor = NuvioTheme.colors.TextSecondary,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
+                        focusedContainerColor = pluginFocusedFill(),
                         focusedContentColor = NuvioTheme.colors.Primary
                     ),
                     shape = ButtonDefaults.shape(settingsItemShape(NuvioTheme.radii.md))
@@ -1070,12 +1240,13 @@ private fun RepositoryCard(
                     onClick = onRemove,
                     enabled = !isLoading,
                     modifier = Modifier
+                        .pluginFocus()
                         .onFocusChanged { isRemoveFocused = it.isFocused }
                         .semantics { role = Role.Button },
                     colors = ButtonDefaults.colors(
                         containerColor = NuvioTheme.colors.Surface,
                         contentColor = NuvioTheme.colors.TextSecondary,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
+                        focusedContainerColor = pluginFocusedFill(),
                         focusedContentColor = NuvioTheme.colors.Error
                     ),
                     shape = ButtonDefaults.shape(settingsItemShape(NuvioTheme.radii.md))
@@ -1093,6 +1264,7 @@ private fun RepositoryCard(
 @Composable
 private fun ScraperCard(
     scraper: ScraperInfo,
+    outcome: com.nuvio.tv.core.plugin.PluginRunOutcome? = null,
     onToggle: (Boolean) -> Unit,
     onTest: () -> Unit,
     isTesting: Boolean,
@@ -1105,11 +1277,11 @@ private fun ScraperCard(
     var isToggleFocused by remember { mutableStateOf(false) }
     val isCardFocused = isTestFocused || isToggleFocused
     val cardBorderColor by animateColorAsState(
-        targetValue = if (isCardFocused) NuvioTheme.colors.FocusRing else Color.Transparent,
+        targetValue = if (isCardFocused && !isV2Settings()) NuvioTheme.colors.FocusRing else Color.Transparent,
         label = "scraperCardBorder"
     )
     val cardScale by animateFloatAsState(
-        targetValue = if (isCardFocused) 1.01f else 1f,
+        targetValue = if (isCardFocused && !isV2Settings()) 1.01f else 1f,
         label = "scraperCardScale"
     )
 
@@ -1169,6 +1341,17 @@ private fun ScraperCard(
                         style = MaterialTheme.typography.bodySmall,
                         color = NuvioTheme.colors.TextSecondary
                     )
+
+                    if (scraper.enabled) {
+                        val (statusText, statusColor) = pluginOutcomeLabel(outcome)
+                        Text(
+                            text = statusText,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = statusColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
 
                 Row(
@@ -1181,12 +1364,13 @@ private fun ScraperCard(
                         enabled = !isTesting && scraper.enabled,
                         modifier = Modifier
                             .focusProperties { left = FocusRequester.Cancel }
+                            .pluginFocus()
                             .onFocusChanged { isTestFocused = it.isFocused }
                             .semantics { role = Role.Button },
                         colors = ButtonDefaults.colors(
                             containerColor = NuvioTheme.colors.Surface,
                             contentColor = NuvioTheme.colors.TextPrimary,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground,
+                            focusedContainerColor = pluginFocusedFill(),
                             focusedContentColor = NuvioTheme.colors.Primary
                         ),
                         shape = ButtonDefaults.shape(settingsItemShape(NuvioTheme.radii.md))
@@ -1212,6 +1396,7 @@ private fun ScraperCard(
                         Surface(
                             onClick = { onToggle(!scraper.enabled) },
                             modifier = Modifier
+                                .pluginFocus()
                                 .onFocusChanged { isToggleFocused = it.isFocused }
                                 .semantics {
                                     role = Role.Switch
@@ -1220,13 +1405,10 @@ private fun ScraperCard(
                                 },
                             colors = ClickableSurfaceDefaults.colors(
                                 containerColor = NuvioTheme.colors.Surface,
-                                focusedContainerColor = NuvioTheme.colors.FocusBackground
+                                focusedContainerColor = pluginFocusedFill()
                             ),
                             border = ClickableSurfaceDefaults.border(
-                                focusedBorder = Border(
-                                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                    shape = settingsItemShape(NuvioTheme.radii.md)
-                                )
+                                focusedBorder = pluginFocusedBorder(settingsItemShape(NuvioTheme.radii.md))
                             ),
                             shape = ClickableSurfaceDefaults.shape(settingsItemShape(NuvioTheme.radii.md)),
                             scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
@@ -1269,13 +1451,14 @@ private fun ScraperCard(
                             ),
                             shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(6.dp)),
                             border = ClickableSurfaceDefaults.border(
-                                focusedBorder = Border(
+                                focusedBorder = if (isV2Settings()) Border.None else Border(
                                     BorderStroke(NuvioTheme.spacing.xxs, NuvioTheme.colors.Primary),
                                     shape = RoundedCornerShape(6.dp)
                                 )
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .pluginFocus(RoundedCornerShape(6.dp))
                                 .semantics { role = Role.Button }
                         ) {
                             Column(modifier = Modifier.padding(NuvioTheme.spacing.sm)) {
@@ -1322,10 +1505,10 @@ private fun ScraperCard(
 }
 
 @Composable
-private fun TypeBadge(type: String) {
+internal fun TypeBadge(type: String) {
     val color = when (type.lowercase()) {
-        "movie" -> Color(0xFF4CAF50)
-        "series", "show", "tv" -> Color(0xFF2196F3)
+        "movie" -> NuvioTheme.colors.Success
+        "series", "show", "tv" -> NuvioTheme.colors.Info
         else -> NuvioTheme.colors.TextSecondary
     }
 

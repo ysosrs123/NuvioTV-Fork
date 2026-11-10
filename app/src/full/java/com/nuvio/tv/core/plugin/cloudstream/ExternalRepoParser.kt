@@ -24,7 +24,8 @@ private const val TAG = "ExternalRepoParser"
 data class ExternalRepoParseResult(
     val name: String,
     val description: String?,
-    val plugins: List<ExternalPluginEntry>
+    val plugins: List<ExternalPluginEntry>,
+    val complete: Boolean = true
 )
 
 /**
@@ -48,6 +49,10 @@ class ExternalRepoParser @Inject constructor(
     private val repoManifestAdapter = moshi.adapter(ExternalRepoManifest::class.java)
     private val pluginListType = Types.newParameterizedType(List::class.java, ExternalPluginEntry::class.java)
     private val pluginListAdapter = moshi.adapter<List<ExternalPluginEntry>>(pluginListType)
+    private val refusedStatus = java.util.concurrent.ConcurrentHashMap<String, Int>()
+
+    /** The HTTP status the host last answered [url] with, if it refused it. */
+    fun refusedStatus(url: String): Int? = refusedStatus[url]
 
     /**
      * Try to parse the given URL as an external repository.
@@ -63,18 +68,16 @@ class ExternalRepoParser @Inject constructor(
                 val manifest = repoManifestAdapter.fromJson(trimmed)
                 if (manifest != null && manifest.pluginLists.isNotEmpty()) {
                     Log.d(TAG, "Parsed as repo manifest: ${manifest.name}, ${manifest.pluginLists.size} plugin lists")
-                    val allPlugins = coroutineScope {
+                    val lists = coroutineScope {
                         manifest.pluginLists.map { listUrl ->
-                            async {
-                                val resolvedUrl = resolveUrl(url, listUrl)
-                                fetchPluginList(resolvedUrl) ?: emptyList()
-                            }
-                        }.awaitAll().flatten()
+                            async { fetchPluginList(resolveUrl(url, listUrl)) }
+                        }.awaitAll()
                     }
                     return@withContext ExternalRepoParseResult(
                         name = manifest.name,
                         description = manifest.description,
-                        plugins = allPlugins
+                        plugins = lists.filterNotNull().flatten(),
+                        complete = lists.none { it == null }
                     )
                 }
             } catch (e: Exception) {
@@ -122,8 +125,10 @@ class ExternalRepoParser @Inject constructor(
             httpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     Log.e(TAG, "HTTP ${response.code} for $url")
+                    refusedStatus[url] = response.code
                     return null
                 }
+                refusedStatus.remove(url)
                 response.body?.string()
             }
         } catch (e: Exception) {

@@ -11,12 +11,14 @@ import com.nuvio.tv.core.qr.QrCodeGenerator
 import com.nuvio.tv.core.server.DeviceIpAddress
 import com.nuvio.tv.core.server.RepositoryConfigServer
 import com.nuvio.tv.core.util.readAppLogoBytes
+import com.nuvio.tv.domain.model.NewRepoProviders
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -43,6 +45,9 @@ class PluginViewModel @Inject constructor(
 
     init {
         observePluginData()
+        viewModelScope.launch {
+            pluginManager.lastOutcomes.collect { outcomes -> _uiState.update { it.copy(outcomes = outcomes) } }
+        }
     }
 
     private fun observePluginData() {
@@ -51,13 +56,15 @@ class PluginViewModel @Inject constructor(
                 pluginManager.pluginsEnabled,
                 pluginManager.groupStreamsByRepository,
                 pluginManager.repositories,
-                pluginManager.scrapers
-            ) { enabled, groupStreamsByRepository, repos, scrapers ->
+                pluginManager.scrapers,
+                pluginManager.syncedReposToReview
+            ) { enabled, groupStreamsByRepository, repos, scrapers, toReview ->
                 PluginUiState(
                     pluginsEnabled = enabled,
                     groupStreamsByRepository = groupStreamsByRepository,
                     repositories = repos,
-                    scrapers = scrapers
+                    scrapers = scrapers,
+                    syncedReposToReview = repos.filter { it.id in toReview }
                 )
             }.collect { nextState ->
                 val visibleScrapers = if (isReadOnly) {
@@ -70,7 +77,8 @@ class PluginViewModel @Inject constructor(
                         pluginsEnabled = nextState.pluginsEnabled,
                         groupStreamsByRepository = nextState.groupStreamsByRepository,
                         repositories = nextState.repositories,
-                        scrapers = visibleScrapers
+                        scrapers = visibleScrapers,
+                        syncedReposToReview = if (isReadOnly) emptyList() else nextState.syncedReposToReview
                     )
                 }
             }
@@ -79,7 +87,7 @@ class PluginViewModel @Inject constructor(
 
     fun onEvent(event: PluginUiEvent) {
         when (event) {
-            is PluginUiEvent.AddRepository -> addRepository(event.url)
+            is PluginUiEvent.AddRepository -> requestAddRepository(event.url)
             is PluginUiEvent.RemoveRepository -> removeRepository(event.repoId)
             is PluginUiEvent.RefreshRepository -> refreshRepository(event.repoId)
             is PluginUiEvent.ToggleScraper -> toggleScraper(event.scraperId, event.enabled)
@@ -96,7 +104,68 @@ class PluginViewModel @Inject constructor(
             PluginUiEvent.RejectPendingRepoChange -> rejectPendingRepoChange()
             PluginUiEvent.ConfirmPendingScraperEnable -> confirmPendingScraperEnable()
             PluginUiEvent.DismissPendingScraperEnable -> dismissPendingScraperEnable()
+            PluginUiEvent.ConfirmPendingRepoAdd -> {
+                val url = _uiState.value.pendingRepoAdd
+                _uiState.update { it.copy(pendingRepoAdd = null) }
+                if (url != null) addRepository(url)
+            }
+            PluginUiEvent.DismissPendingRepoAdd -> _uiState.update { it.copy(pendingRepoAdd = null) }
+            PluginUiEvent.AcknowledgeSyncedRepos -> viewModelScope.launch { pluginManager.acknowledgeSyncedRepos() }
+            is PluginUiEvent.OpenProviderChooser -> openProviderChooser(event.repoId, isNewRepo = false)
+            is PluginUiEvent.ChooserToggle -> updateChooser { it.toggle(event.scraperId) }
+            is PluginUiEvent.ChooserType -> updateChooser { it.copy(type = event.type) }
+            is PluginUiEvent.ChooserLanguage -> updateChooser { it.copy(language = event.language) }
+            PluginUiEvent.ChooserSelectShown -> updateChooser { it.selectShown() }
+            PluginUiEvent.ChooserClear -> updateChooser { it.clear() }
+            PluginUiEvent.ChooserApply -> closeChooser(apply = true)
+            PluginUiEvent.ChooserKeepAllOff -> updateChooser { it.clear() }.also { closeChooser(apply = true) }
+            PluginUiEvent.ChooserDismiss -> {
+                val isNewRepo = _uiState.value.providerChooser?.isNewRepo == true
+                if (isNewRepo) updateChooser { it.clear() }
+                closeChooser(apply = isNewRepo)
+            }
         }
+    }
+
+    private fun updateChooser(change: (ProviderChooserState) -> ProviderChooserState) {
+        _uiState.update { state -> state.copy(providerChooser = state.providerChooser?.let(change)) }
+    }
+
+    private fun openProviderChooser(repoId: String, isNewRepo: Boolean) {
+        if (isReadOnly) return
+        viewModelScope.launch {
+            val repo = pluginManager.repositories.first().firstOrNull { it.id == repoId } ?: return@launch
+            val providers = pluginManager.scrapers.first().filter { it.repositoryId == repoId }
+            if (providers.size < 2 && isNewRepo) return@launch
+            _uiState.update {
+                it.copy(
+                    providerChooser = ProviderChooserState.forRepo(
+                        repoId = repoId,
+                        repoName = repo.name.ifBlank { repo.url },
+                        providers = providers,
+                        isNewRepo = isNewRepo
+                    )
+                )
+            }
+        }
+    }
+
+    private fun closeChooser(apply: Boolean) {
+        val chooser = _uiState.value.providerChooser ?: return
+        _uiState.update { it.copy(providerChooser = null) }
+        if (!apply) return
+        viewModelScope.launch {
+            pluginManager.setProvidersForRepo(chooser.repoId, chooser.selected)
+            pluginManager.acknowledgeSyncedRepo(chooser.repoId)
+        }
+    }
+
+    private fun requestAddRepository(url: String) {
+        if (url.isBlank()) {
+            _uiState.update { it.copy(errorMessage = context.getString(R.string.plugin_error_invalid_url)) }
+            return
+        }
+        _uiState.update { it.copy(pendingRepoAdd = url.trim()) }
     }
 
     private fun addRepository(url: String) {
@@ -108,7 +177,8 @@ class PluginViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isAddingRepo = true, errorMessage = null) }
 
-            val result = pluginManager.addRepository(url)
+            val knownRepoIds = pluginManager.repositories.first().map { it.id }.toSet()
+            val result = pluginManager.addRepository(url, NewRepoProviders.OFF_IF_SEVERAL)
 
             result.fold(
                 onSuccess = { repo ->
@@ -122,6 +192,7 @@ class PluginViewModel @Inject constructor(
                             )
                         )
                     }
+                    if (repo.id !in knownRepoIds) openProviderChooser(repo.id, isNewRepo = true)
                 },
                 onFailure = { e ->
                     _uiState.update {
@@ -356,7 +427,7 @@ class PluginViewModel @Inject constructor(
 
         viewModelScope.launch {
             for (url in pending.addedUrls) {
-                pluginManager.addRepository(url)
+                pluginManager.addRepository(url, NewRepoProviders.ALL_OFF)
             }
 
             val currentRepos = _uiState.value.repositories
