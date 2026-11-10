@@ -22,6 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
@@ -76,6 +77,12 @@ fun NuvioNavHost(
             ?: checkNotNull(LocalViewModelStoreOwner.current)
         CompositionLocalProvider(LocalViewModelStoreOwner provides navViewModelStoreOwner) {
             PlaybackNavHost(navController, startDestination, hideBuiltInHeaders)
+            if (com.nuvio.tv.domain.model.ScoutFeature.available) {
+                val entry = navController.currentBackStackEntryAsState().value
+                com.nuvio.tv.ui.scout.ScoutAskHost(
+                    isPlayerShowing = entry?.destination?.route?.startsWith("player/") == true
+                )
+            }
         }
     }
 }
@@ -88,6 +95,8 @@ private fun PlaybackNavHost(
 ) {
     val playbackAvailability = LocalPlaybackAvailability.current
     val context = LocalContext.current
+    val scoutNav: com.nuvio.tv.ui.screens.scout.ScoutNavViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    val scoutMixNav: com.nuvio.tv.ui.screens.scout.ScoutMixNavViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     fun isStreamToPlayer(from: String, to: String): Boolean {
         return from.startsWith("stream/") && to.startsWith("player/")
     }
@@ -283,7 +292,20 @@ private fun PlaybackNavHost(
                     navController.navigate(Screen.CatalogSeeAll.createRoute(catalogId, addonId, type))
                 },
                 onNavigateToFolderDetail = { collectionId, folderId ->
-                    navController.navigate(Screen.FolderDetail.createRoute(collectionId, folderId))
+                    val scoutTile = collectionId == com.nuvio.tv.core.scout.ScoutCatalogProvider.TILES_COLLECTION_ID
+                    val surprise = if (scoutTile && folderId == com.nuvio.tv.core.scout.ScoutCatalogProvider.FOLDER_SURPRISE) scoutNav.surprisePick() else null
+                    when {
+                        collectionId == com.nuvio.tv.core.scout.ScoutMixCatalogProvider.COLLECTION_ID ->
+                            navController.navigate(Screen.ScoutMix.createRoute(folderId))
+                        surprise != null -> navController.navigate(
+                            Screen.Detail.createRoute("tmdb:${surprise.tmdbId}", if (surprise.tv) "series" else "movie", null)
+                        )
+                        scoutTile && folderId in setOf(
+                            com.nuvio.tv.core.scout.ScoutCatalogProvider.FOLDER_SURPRISE,
+                            com.nuvio.tv.core.scout.ScoutCatalogProvider.FOLDER_MORE
+                        ) -> navController.navigate(Screen.Scout.route)
+                        else -> navController.navigate(Screen.FolderDetail.createRoute(collectionId, folderId))
+                    }
                 }
             )
         }
@@ -922,8 +944,11 @@ private fun PlaybackNavHost(
             }
 
             PlayerScreen(
-                onBackPress = { currentVideoId, currentSeason, currentEpisode, autoPlayEnabled, playbackCompleted ->
+                onBackPress = onBackPress@{ currentVideoId, currentSeason, currentEpisode, autoPlayEnabled, playbackCompleted ->
                     val args = backStackEntry.arguments
+                    if (scoutMixNav.backPressed(args?.getString("contentId"), watched = playbackCompleted) &&
+                        navController.popBackStack(Screen.ScoutMix.route, inclusive = false)
+                    ) return@onBackPress
                     val initialSeason = args?.getString("season")?.toIntOrNull()
                     val initialEpisode = args?.getString("episode")?.toIntOrNull()
                     val episodeChangedInPlace = (currentSeason != null || currentEpisode != null) &&
@@ -1035,8 +1060,14 @@ private fun PlaybackNavHost(
                         }
                     }
                 },
-                onPlaybackEnded = { nextVideoId, nextSeason, nextEpisode, exitReason ->
+                onPlaybackEnded = onPlaybackEnded@{ nextVideoId, nextSeason, nextEpisode, exitReason ->
                     val args = backStackEntry.arguments
+                    if (exitReason == PlayerExitReason.ScoutMixNext && scoutMixNav.nextChosen(args?.getString("contentId")) &&
+                        navController.popBackStack(Screen.ScoutMix.route, inclusive = false)
+                    ) return@onPlaybackEnded
+                    if (nextVideoId == null && scoutMixNav.playbackEnded(args?.getString("contentId")) &&
+                        navController.popBackStack(Screen.ScoutMix.route, inclusive = false)
+                    ) return@onPlaybackEnded
                     val contentType = args?.getString("contentType").orEmpty()
                     val contentId = args?.getString("contentId").orEmpty()
                     val returnToDetailOnBack = args?.getString("returnToDetailOnBack")
@@ -1203,11 +1234,66 @@ private fun PlaybackNavHost(
             )
         }
 
+        composable(Screen.ScoutAsk.route) {
+            com.nuvio.tv.ui.screens.scout.ask.AskScreen(
+                onOpenTitle = { itemId, itemType ->
+                    navController.navigate(Screen.Detail.createRoute(itemId = itemId, itemType = itemType))
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.ScoutAskQuestion.route,
+            arguments = listOf(navArgument("q") { type = NavType.StringType })
+        ) {
+            com.nuvio.tv.ui.screens.scout.ask.AskScreen(
+                onOpenTitle = { itemId, itemType ->
+                    navController.navigate(Screen.Detail.createRoute(itemId = itemId, itemType = itemType))
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.ScoutMix.route,
+            arguments = listOf(navArgument("mixId") { type = NavType.StringType })
+        ) {
+            com.nuvio.tv.ui.screens.scout.ScoutMixScreen(
+                onBack = { navController.popBackStack() },
+                onPlay = { pick ->
+                    navController.navigate(
+                        Screen.Stream.createRoute(
+                            videoId = pick.video.id,
+                            contentType = pick.meta.apiType,
+                            title = pick.meta.name,
+                            poster = pick.meta.poster,
+                            backdrop = pick.meta.backdropUrl,
+                            logo = pick.meta.logo,
+                            season = pick.video.season,
+                            episode = pick.video.episode,
+                            episodeName = pick.video.title,
+                            genres = pick.meta.genres.joinToString(", "),
+                            year = pick.meta.releaseInfo,
+                            contentId = pick.meta.id,
+                            contentName = pick.meta.name,
+                            runtime = pick.video.runtime
+                        )
+                    )
+                },
+                onOpenShow = { show ->
+                    navController.navigate(Screen.Detail.createRoute(show.id, show.type, show.addonBaseUrl))
+                },
+                onFindShow = { navController.navigate(Screen.Search.route) }
+            )
+        }
+
         composable(Screen.Search.route) { backStackEntry ->
             val searchViewModel: com.nuvio.tv.ui.screens.search.SearchViewModel =
                 androidx.hilt.navigation.compose.hiltViewModel(backStackEntry)
             SearchScreen(
                 viewModel = searchViewModel,
+                onAskScout = { question -> navController.navigate(Screen.ScoutAskQuestion.createRoute(question)) },
                 onNavigateToDetail = { itemId, itemType, addonBaseUrl ->
                     val heroBackdrop = HeroBackdropState.consumeAndClear()
                     navController.navigate(
@@ -1294,6 +1380,8 @@ private fun PlaybackNavHost(
                 showBuiltInHeader = !hideBuiltInHeaders,
                 onNavigateToAddons = { navController.navigate(Screen.AddonManager.route) },
                 onNavigateToPlugins = { navController.navigate(Screen.Plugins.route) },
+                onNavigateToScoutTaste = { navController.navigate(Screen.ScoutTaste.route) },
+                onNavigateToScoutRoute = { route -> navController.navigate(route) },
                 onNavigateToWatchParty = { navController.navigate(Screen.WatchParty.route) },
                 onNavigateToAuthQrSignIn = { navController.navigate(Screen.AuthQrSignIn.route) },
                 onNavigateToManageProfiles = { navController.navigate(Screen.ManageProfiles.route) },
@@ -1371,6 +1459,10 @@ private fun PlaybackNavHost(
             )
         }
 
+        composable(Screen.FormatCheck.route) {
+            com.nuvio.tv.ui.screens.settings.FormatCheckScreen(onBackPress = { navController.popBackStack() })
+        }
+
         composable(Screen.AddonManager.route) {
             AddonManagerScreen(
                 showBuiltInHeader = !hideBuiltInHeaders,
@@ -1406,6 +1498,38 @@ private fun PlaybackNavHost(
             )
         ) {
             com.nuvio.tv.ui.screens.collection.CollectionEditorScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.ScoutQuickStart.route) {
+            com.nuvio.tv.ui.screens.scout.ScoutQuickStartScreen(onDone = { navController.popBackStack() })
+        }
+
+        composable(Screen.ScoutWords.route) {
+            com.nuvio.tv.ui.screens.scout.ScoutWordsScreen()
+        }
+
+        composable(Screen.Scout.route) {
+            com.nuvio.tv.ui.screens.scout.ScoutQuickStartGate(onOffer = { navController.navigate(Screen.ScoutQuickStart.route) })
+            val askAccess: com.nuvio.tv.ui.screens.scout.ask.AskAccessViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+            val askHasKey by askAccess.hasKey.collectAsStateWithLifecycle()
+            ScoutPageRoute(navController, askHasKey, startOnTaste = false)
+        }
+
+        composable(Screen.ScoutTaste.route) {
+            val askAccess: com.nuvio.tv.ui.screens.scout.ask.AskAccessViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+            val askHasKey by askAccess.hasKey.collectAsStateWithLifecycle()
+            ScoutPageRoute(navController, askHasKey, startOnTaste = true)
+        }
+
+        composable(Screen.ScoutPicker.route) {
+            com.nuvio.tv.ui.screens.scout.ScoutPickerScreen(
+                onOpenSlice = { sliceId ->
+                    navController.navigate(
+                        Screen.FolderDetail.createRoute(com.nuvio.tv.core.scout.ScoutCatalogProvider.TILES_COLLECTION_ID, sliceId)
+                    )
+                },
                 onBack = { navController.popBackStack() }
             )
         }
@@ -1552,4 +1676,21 @@ private fun PlaybackNavHost(
             )
         }
     }
+}
+
+@androidx.compose.runtime.Composable
+private fun ScoutPageRoute(navController: androidx.navigation.NavHostController, askHasKey: Boolean, startOnTaste: Boolean) {
+    com.nuvio.tv.ui.screens.scout.ScoutScreen(
+        onOpenTitle = { id, type -> navController.navigate(Screen.Detail.createRoute(id, type, null)) },
+        onPlayTitle = { id, type, backdrop, logo ->
+            navController.navigate(Screen.Detail.createRoute(id, type, null, heroBackdropUrl = backdrop, playOnLoad = true, heroLogoUrl = logo))
+        },
+        onOpenPicker = { navController.navigate(Screen.ScoutPicker.route) },
+        onOpenPerson = { id, name, crew -> navController.navigate(Screen.CastDetail.createRoute(id, name, crew)) },
+        onOpenSlice = { sliceId ->
+            navController.navigate(Screen.FolderDetail.createRoute(com.nuvio.tv.core.scout.ScoutCatalogProvider.TILES_COLLECTION_ID, sliceId))
+        },
+        onAsk = if (askHasKey) { { navController.navigate(Screen.ScoutAsk.route) } } else null,
+        startOnTaste = startOnTaste
+    )
 }

@@ -78,6 +78,7 @@ import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -788,7 +789,8 @@ internal fun SettingsToggleRow(
     enabled: Boolean = true,
     titleTrailingIcon: ImageVector? = null,
     titleTrailingIconTint: Color = NuvioTheme.colors.TextPrimary,
-    expandSubtitleOnFocus: Boolean = false
+    expandSubtitleOnFocus: Boolean = false,
+    leadingIcon: ImageVector? = null
 ) {
     val contentAlpha = if (enabled) 1f else 0.4f
     var isFocused by remember { mutableStateOf(false) }
@@ -800,6 +802,7 @@ internal fun SettingsToggleRow(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = if (isV2Settings()) 50.dp else 62.dp)
+            .settingsJumpAnchor(title, settingsRowShape())
             .focusProperties { canFocus = enabled }
             .semantics {
                 if (!enabled) disabled()
@@ -826,6 +829,10 @@ internal fun SettingsToggleRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            if (leadingIcon != null) {
+                SettingsRowLeadingIcon(icon = leadingIcon, enabled = enabled, focused = isFocused)
+                Spacer(modifier = Modifier.width(NuvioTheme.spacing.lg))
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -887,7 +894,9 @@ internal fun SettingsActionRow(
     leadingIcon: ImageVector? = null,
     @RawRes leadingRawIconRes: Int? = null,
     leadingArtworkSize: Dp = NuvioTheme.spacing.xl,
-    valueColor: Color = NuvioTheme.colors.TextSecondary
+    valueColor: Color = NuvioTheme.colors.TextSecondary,
+    annotatedTitle: AnnotatedString? = null,
+    jumpAnchor: Boolean = true
 ) {
     val contentAlpha = if (enabled) 1f else 0.4f
     var isFocused by remember { mutableStateOf(false) }
@@ -897,6 +906,7 @@ internal fun SettingsActionRow(
         modifier = modifier
             .padding(top = NuvioTheme.spacing.xxs, bottom = NuvioTheme.spacing.xxs)
             .fillMaxWidth()
+            .then(if (jumpAnchor) Modifier.settingsJumpAnchor(title, shape ?: settingsRowShape()) else Modifier)
             .focusProperties { canFocus = enabled }
             .semantics {
                 if (!enabled) disabled()
@@ -939,7 +949,7 @@ internal fun SettingsActionRow(
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = title,
+                        text = annotatedTitle ?: AnnotatedString(title),
                         style = MaterialTheme.typography.bodyLarge,
                         color = NuvioTheme.colors.TextPrimary.copy(alpha = contentAlpha),
                         maxLines = 1,
@@ -1031,7 +1041,7 @@ internal fun <T> SettingsSingleChoiceDialog(
             LazyColumn(
                 state = listState,
                 verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-                contentPadding = PaddingValues(vertical = NuvioTheme.spacing.xs)
+                contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm)
             ) {
                 itemsIndexed(
                     items = options,
@@ -1166,7 +1176,7 @@ internal fun <T> SettingsMultiChoiceDialog(
                 LazyColumn(
                     state = listState,
                     verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-                    contentPadding = PaddingValues(vertical = NuvioTheme.spacing.xs)
+                    contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm)
                 ) {
                     itemsIndexed(
                         items = options,
@@ -1387,7 +1397,7 @@ internal fun SettingsChoiceChip(
 }
 
 @Composable
-private fun SettingsTogglePill(
+internal fun SettingsTogglePill(
     checked: Boolean,
     enabled: Boolean
 ) {

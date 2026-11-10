@@ -104,6 +104,7 @@ fun MDBListSettingsContent(
                 .weight(1f)
         ) {
             val mdbListState = rememberLazyListState()
+            SettingsJumpScroll(mdbListState, SettingsCategory.INTEGRATION)
             Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 state = mdbListState,

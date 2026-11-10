@@ -647,6 +647,7 @@ internal fun TrackingSettingsOverview(
     val traktProgressActive = trackingState.watchProgressSource == WatchProgressSource.TRAKT
 
     val content: @Composable () -> Unit = {
+        SettingsJumpScroll(listState, SettingsCategory.TRACKING)
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(14.dp)

@@ -152,6 +152,18 @@ internal fun LayoutHomeContentSection(
         selectedMode = uiState.watchedTitlesMode,
         onModeSelected = { mode -> onEvent(LayoutSettingsEvent.SetWatchedTitlesMode(mode)) }
     )
+    SettingsToggleRow(
+        title = stringResource(R.string.layout_hide_plan_to_watch),
+        subtitle = stringResource(R.string.layout_hide_plan_to_watch_sub),
+        checked = uiState.hidePlanToWatch,
+        onToggle = { onEvent(LayoutSettingsEvent.SetHidePlanToWatch(!uiState.hidePlanToWatch)) }
+    )
+    SettingsToggleRow(
+        title = stringResource(R.string.layout_hide_watching),
+        subtitle = stringResource(R.string.layout_hide_watching_sub),
+        checked = uiState.hideWatching,
+        onToggle = { onEvent(LayoutSettingsEvent.SetHideWatching(!uiState.hideWatching)) }
+    )
     CalendarComingUpRowSetting()
     SettingsToggleRow(
         title = stringResource(R.string.layout_overall_ratings),

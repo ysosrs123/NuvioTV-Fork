@@ -167,11 +167,14 @@ fun DebridSettingsContent(
         ) {
             SettingsGroupCard(modifier = Modifier.fillMaxSize()) {
                 val state = rememberLazyListState()
+                SettingsJumpScroll(state, if (qualityRulesPage) SettingsCategory.PLAYBACK else SettingsCategory.INTEGRATION)
                 var qualityRulesShown by remember { mutableStateOf(false) }
                 // Keyed on the row set too: with links resolved here, the debrid rows only appear once the saved
                 // settings have loaded, and the first row is then Max results.
+                val jumping = LocalSettingsJump.current?.target != null
                 LaunchedEffect(qualityRulesFocusRequester, allFilters) {
                     val requester = qualityRulesFocusRequester ?: return@LaunchedEffect
+                    if (jumping) return@LaunchedEffect
                     // Coming back in from the menu starts at the first row again.
                     if (qualityRulesShown) state.scrollToItem(0)
                     qualityRulesShown = true

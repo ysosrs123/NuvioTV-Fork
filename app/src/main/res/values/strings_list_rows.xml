@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="layout_hide_plan_to_watch">Also hide Plan to watch</string>
+    <string name="layout_hide_plan_to_watch_sub">Leaves titles on your Plan to watch list out of Home rows and the banner.</string>
+    <string name="layout_hide_watching">Also hide Watching</string>
+    <string name="layout_hide_watching_sub">Leaves shows and films you\'re part way through out of Home rows and the banner. Continue Watching keeps them.</string>
+</resources>

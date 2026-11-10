@@ -1,15 +1,15 @@
 <resources>
     <string name="settings_media_servers">Media servers</string>
-    <string name="settings_media_servers_subtitle">Connect Jellyfin, Emby or Silo to browse and play your own library.</string>
+    <string name="settings_media_servers_subtitle">Connect Jellyfin, Emby, Silo or Plex to browse and play your own library.</string>
     <string name="servers_section_connected">Servers</string>
     <string name="servers_section_add">Add server</string>
     <string name="servers_section_account">Nuvio account</string>
     <string name="servers_source_details">Source details</string>
-    <string name="servers_source_details_description">Full shows the file name and icons on server sources. Clean shows only picture, sound and size.</string>
+    <string name="servers_source_details_description">Full shows the file name and more detail on server sources. Clean shows only picture, sound and size.</string>
     <string name="servers_source_details_full">Full</string>
     <string name="servers_source_details_clean">Clean</string>
     <string name="servers_show_logos">Show server logos</string>
-    <string name="servers_show_logos_description">Show the Jellyfin, Emby or Silo logo next to server sources and in the player.</string>
+    <string name="servers_show_logos_description">Show the Jellyfin, Emby, Silo or Plex logo next to server sources and in the player.</string>
     <string name="servers_account_sync">Sync media servers to my Nuvio account</string>
     <string name="servers_account_sync_description">Off: your servers and their sign-ins stay on this device. On: the server list, including the sign-ins, is saved to your Nuvio account and shared with your other devices.</string>
     <string name="servers_account_remove">Remove my servers from my Nuvio account</string>
@@ -50,7 +50,7 @@
     <string name="servers_enabled">Enabled</string>
     <string name="servers_enabled_description">Show this server in Home, search, and stream results.</string>
     <string name="servers_catalog_metadata">Use addon metadata</string>
-    <string name="servers_catalog_metadata_description">Titles open with your addons\' details and sync like any other catalog title, with playback and watched marks still sent to %1$s. Some titles may not match or play if your addons number or identify them differently.</string>
+    <string name="servers_catalog_metadata_description">Titles open with your addons\' details and sync like any other catalog title, with playback and watched marks still sent to %1$s. Some titles may not match or play if your addons number or identify them differently. Turn this off to play from %1$s only, with no addon search.</string>
     <string name="servers_import_continue_watching">Import Continue Watching</string>
     <string name="servers_import_continue_watching_description">Titles you have started on %1$s appear in Continue Watching on Home. Watched marks are kept in step either way.</string>
     <string name="servers_import_watch_state">Import watch progress</string>

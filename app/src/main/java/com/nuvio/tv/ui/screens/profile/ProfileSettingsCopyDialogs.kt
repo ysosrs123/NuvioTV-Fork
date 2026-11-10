@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -63,13 +64,15 @@ internal fun ProfileSettingsSourceDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.profile_copy_settings_setup_title),
         subtitle = stringResource(R.string.profile_copy_settings_setup_subtitle),
-        width = 520.dp
+        width = 520.dp,
+        solidWithoutBlur = true
     ) {
         LazyColumn(
+            contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm),
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(
-                    max = NuvioTheme.sizes.buttons.defaultHeight * 2 +
+                    max = NuvioTheme.spacing.lg + NuvioTheme.sizes.buttons.defaultHeight * 2 +
                         NuvioTheme.spacing.sm
                 ),
             state = listState,
@@ -175,7 +178,8 @@ internal fun CopyProfileSettingsDialog(
         onDismiss = { if (!isCopying) onDismiss() },
         title = stringResource(R.string.profile_copy_settings_title, targetProfile.name),
         subtitle = stringResource(R.string.profile_copy_settings_subtitle),
-        width = 560.dp
+        width = 560.dp,
+        solidWithoutBlur = true
     ) {
         Text(
             text = stringResource(R.string.profile_copy_settings_from),
@@ -183,10 +187,11 @@ internal fun CopyProfileSettingsDialog(
             fontWeight = FontWeight.SemiBold
         )
         LazyColumn(
+            contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm),
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(
-                    max = NuvioTheme.sizes.buttons.defaultHeight * 2 +
+                    max = NuvioTheme.spacing.lg + NuvioTheme.sizes.buttons.defaultHeight * 2 +
                         NuvioTheme.spacing.sm
                 ),
             verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)

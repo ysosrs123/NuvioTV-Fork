@@ -91,6 +91,11 @@ fun LayoutSettingsContent(
         ) {
             SettingsGroupCard(modifier = Modifier.fillMaxSize()) {
                 val listState = rememberLazyListState()
+                val jumpTarget = LocalSettingsJump.current?.target?.entry?.layout
+                LaunchedEffect(jumpTarget) {
+                    if (jumpTarget != null && jumpTarget.name !in expandedSections) expandedSections = expandedSections + jumpTarget.name
+                }
+                SettingsJumpScroll(listState, SettingsCategory.LAYOUT, sections.indexOf(jumpTarget))
                 Box(modifier = Modifier.fillMaxSize()) {
                     LazyColumn(
                         state = listState,

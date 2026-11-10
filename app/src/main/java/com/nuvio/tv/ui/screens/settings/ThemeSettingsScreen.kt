@@ -188,13 +188,14 @@ fun ThemeSettingsContent(
         uiState.availableThemes.sortedBy { if (it == AppTheme.GLASS) 0 else 1 }
     }
     var initialTheme by remember { mutableStateOf<AppTheme?>(null) }
+    val settingsJump = LocalSettingsJump.current
     LaunchedEffect(uiState.themesLoaded) {
         if (!uiState.themesLoaded || initialTheme != null) return@LaunchedEffect
         initialTheme = uiState.selectedTheme
         val selectedIndex = displayedThemes.indexOf(initialTheme)
         if (selectedIndex < 0) return@LaunchedEffect
         themeRowState.scrollToItem(selectedIndex)
-        initialFocusRequester?.requestFocusAfterFrames()
+        if (settingsJump?.busy != true) initialFocusRequester?.requestFocusAfterFrames()
     }
     Box(modifier = Modifier.fillMaxSize()) {
         Column(

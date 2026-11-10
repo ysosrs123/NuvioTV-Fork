@@ -192,6 +192,15 @@ internal fun PlaybackStreamSelectionSection(
         onValueChange = { seconds -> onUpdate { setAddonStreamTimeoutSeconds(seconds) } }
     )
 
+    SliderSettingsItem(
+        title = stringResource(R.string.plugin_search_timeout_title),
+        subtitle = stringResource(R.string.plugin_search_timeout_sub),
+        values = PlayerSettings.PLUGIN_SEARCH_TIMEOUT_VALUES,
+        selected = settings.pluginSearchTimeoutSeconds,
+        valueText = "${settings.pluginSearchTimeoutSeconds}s",
+        onValueChange = { seconds -> onUpdate { setPluginSearchTimeoutSeconds(seconds) } }
+    )
+
     SettingsToggleRow(
         title = stringResource(R.string.autoplay_reuse_last_link),
         subtitle = stringResource(R.string.autoplay_reuse_last_link_sub),
@@ -684,7 +693,7 @@ private fun StreamAutoPlayProviderSelectionDialog(
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 300.dp),
                     verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = NuvioTheme.spacing.xs)
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = NuvioTheme.spacing.sm)
                 ) {
                     items(
                         items = items,

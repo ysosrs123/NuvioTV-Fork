@@ -52,7 +52,7 @@ internal fun MdbListLibraryListsDialog(
                     .fillMaxWidth()
                     .heightIn(max = 380.dp),
                 verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-                contentPadding = PaddingValues(vertical = NuvioTheme.spacing.xs)
+                contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm)
             ) {
                 itemsIndexed(state.lists, key = { _, option -> option.key }) { index, option ->
                     // Taps are ignored while a change is saving; the row stays focusable so focus never jumps.

@@ -21,7 +21,8 @@ internal fun subtitleOutlineSizeName(size: SubtitleOutlineSize): String = string
     SubtitleOutlineSize.OFF -> R.string.subtitle_style_off
     SubtitleOutlineSize.THIN -> R.string.subtitle_outline_thin
     SubtitleOutlineSize.NORMAL -> R.string.subtitle_outline_normal
-    SubtitleOutlineSize.THICK -> R.string.subtitle_outline_thick
+    SubtitleOutlineSize.MEDIUM -> R.string.subtitle_outline_thick
+    SubtitleOutlineSize.THICK -> R.string.subtitle_outline_extra_thick
 })
 
 @Composable

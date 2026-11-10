@@ -91,7 +91,7 @@ fun ObserveArtworkAccent(contentId: String?, imageUrl: String?) {
 /** A small software decode from Coil's existing caches; never a second artwork network fetch. */
 private suspend fun resolveCachedArtworkAccent(context: Context, url: String): Color? = withContext(Dispatchers.IO) {
     val result = try {
-        context.imageLoader.execute(ImageRequest.Builder(context).data(url).size(48, 48).allowHardware(false)
+        context.imageLoader.execute(ImageRequest.Builder(context).data(url).diskCacheKey(url).size(48, 48).allowHardware(false)
             .memoryCachePolicy(CachePolicy.ENABLED).diskCachePolicy(CachePolicy.READ_ONLY)
             .networkCachePolicy(CachePolicy.DISABLED).build())
     } catch (cancelled: CancellationException) {

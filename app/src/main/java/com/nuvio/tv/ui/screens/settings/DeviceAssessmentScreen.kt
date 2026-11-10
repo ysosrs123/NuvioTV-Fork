@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -323,6 +324,7 @@ internal fun LazyListScope.deviceAssessmentItems(
     onApply: () -> Unit,
     onRevert: () -> Unit
 ) {
+    item(key = "format_check") { FormatCheckAssessmentRow() }
     item(key = "assessment_run") {
         val hasStream = !diagnostics.streamUrl.isNullOrBlank()
         SettingsGroupCard(modifier = Modifier.fillMaxWidth()) {
@@ -714,7 +716,7 @@ private fun AssessmentItemRow(item: AssessmentItem) {
                     } else {
                         AnnotatedString(item.recommendedValue)
                     },
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = valueColor
                 )
             }
@@ -818,7 +820,7 @@ private fun AssessmentFactRow(label: String, value: String, valueMaxLines: Int =
         Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             color = NuvioTheme.colors.TextPrimary,
             maxLines = valueMaxLines,
             overflow = TextOverflow.Ellipsis,
@@ -871,7 +873,7 @@ private fun AssessmentPassRow(
                 note != null -> note.state
                 else -> "---"
             },
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             color = if (speed != null && !isRunning) {
                 NuvioTheme.colors.TextPrimary
             } else {
@@ -888,4 +890,26 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
+}
+
+@Composable
+private fun FormatCheckAssessmentRow() {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val saved by remember { com.nuvio.tv.core.formatcheck.FormatCheckStore.results(context) }
+        .collectAsState(initial = null)
+    val verdicts = saved?.results?.map { it.verdict }.orEmpty()
+    SettingsGroupCard(modifier = Modifier.fillMaxWidth()) {
+        SettingsActionRow(
+            shape = assessmentCardShape(),
+            title = stringResource(R.string.format_check_title),
+            subtitle = stringResource(R.string.format_check_row_subtitle),
+            value = if (verdicts.isEmpty()) null else stringResource(
+                R.string.format_check_summary,
+                verdicts.count(com.nuvio.tv.core.formatcheck.FormatCheckVerdicts::isFine),
+                verdicts.count(com.nuvio.tv.core.formatcheck.FormatCheckVerdicts::isCatch),
+                verdicts.count { it == com.nuvio.tv.core.formatcheck.FormatVerdict.FAILED }
+            ),
+            onClick = { com.nuvio.tv.core.formatcheck.FormatCheckSession.requestOpen() }
+        )
+    }
 }

@@ -3,6 +3,7 @@ package com.nuvio.tv.ui.components.posteroptions
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import com.nuvio.tv.domain.model.LibrarySourceMode
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.components.PanelActionRow
 import com.nuvio.tv.ui.components.PlayerPanelRow
+import com.nuvio.tv.ui.theme.NuvioTheme
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -48,7 +50,10 @@ fun PosterOptionsDialog(
     onDetails: () -> Unit,
     onToggleLibrary: () -> Unit,
     onManageLists: () -> Unit,
-    onToggleWatched: () -> Unit
+    onToggleWatched: () -> Unit,
+    scoutTitle: com.nuvio.tv.domain.model.ScoutTitle? = null,
+    onMoreLike: (() -> Unit)? = null,
+    mixItem: com.nuvio.tv.domain.model.MetaPreview? = null
 ) {
     val primaryFocusRequester = remember { FocusRequester() }
 
@@ -96,6 +101,13 @@ fun PosterOptionsDialog(
                 enabled = !isWatchedPending
             )
         }
+
+        if (onMoreLike != null) {
+            PanelActionRow(label = stringResource(R.string.scout_pick_more_like), onClick = onMoreLike)
+        }
+
+        scoutTitle?.let { com.nuvio.tv.ui.scout.ScoutPosterRateLine(it, onDone = onDismiss) }
+        mixItem?.let { com.nuvio.tv.ui.screens.scout.ScoutAddToMixLine(it, onDone = onDismiss) }
     }
 }
 
@@ -132,6 +144,7 @@ fun PosterListPickerDialog(
         }
 
         LazyColumn(
+            contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm),
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 300.dp),
@@ -164,7 +177,8 @@ fun PosterListPickerDialog(
 fun PosterOptionsHost(
     state: PosterOptionsState,
     controller: PosterOptionsController,
-    onNavigateToDetail: (id: String, type: String, addonBaseUrl: String) -> Unit
+    onNavigateToDetail: (id: String, type: String, addonBaseUrl: String) -> Unit,
+    onMoreLike: ((com.nuvio.tv.domain.model.MetaPreview) -> Unit)? = null
 ) {
     val target = state.target
     if (target != null) {
@@ -181,6 +195,9 @@ fun PosterOptionsHost(
             isSeries = isSeries,
             isWatched = state.isWatched,
             isWatchedPending = state.isWatchedPending,
+            scoutTitle = com.nuvio.tv.domain.model.ScoutTitle(target.id, target.apiType, target.name, target.poster),
+            mixItem = target,
+            onMoreLike = onMoreLike?.let { more -> { more(target); controller.dismiss() } },
             onDismiss = { controller.dismiss() },
             onDetails = {
                 onNavigateToDetail(target.id, target.apiType, state.addonBaseUrl)

@@ -563,16 +563,16 @@ fun AddonManagerScreen(
                             .padding(vertical = NuvioTheme.spacing.sm)
                     ) {
                         Text(
-                            text = "Debrid",
+                            text = stringResource(R.string.addon_health_debrid),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             color = NuvioTheme.colors.TextPrimary
                         )
                         resolverLevels.forEach { (key, level) ->
                             val providerId = key.removePrefix(AddonHealthStore.RESOLVER_PREFIX)
                             val chip = when (level) {
-                                AddonHealthLevel.HEALTHY -> "OK" to NuvioTheme.colors.Success
-                                AddonHealthLevel.DEGRADED -> "Slow" to NuvioTheme.colors.Warning
-                                AddonHealthLevel.DOWN -> "Down" to NuvioTheme.colors.Error
+                                AddonHealthLevel.HEALTHY -> stringResource(R.string.addon_health_ok) to NuvioTheme.colors.Success
+                                AddonHealthLevel.DEGRADED -> stringResource(R.string.addon_health_slow) to NuvioTheme.colors.Warning
+                                AddonHealthLevel.DOWN -> stringResource(R.string.addon_health_down) to NuvioTheme.colors.Error
                                 else -> "-" to NuvioTheme.colors.TextTertiary
                             }
                             Row(
@@ -602,9 +602,9 @@ fun AddonManagerScreen(
                 if (metadataLevels.isNotEmpty()) {
                     val level = metadataLevels.values.first()
                     val chip = when (level) {
-                        AddonHealthLevel.HEALTHY -> "OK" to NuvioTheme.colors.Success
-                        AddonHealthLevel.DEGRADED -> "Slow" to NuvioTheme.colors.Warning
-                        AddonHealthLevel.DOWN -> "Down" to NuvioTheme.colors.Error
+                        AddonHealthLevel.HEALTHY -> stringResource(R.string.addon_health_ok) to NuvioTheme.colors.Success
+                        AddonHealthLevel.DEGRADED -> stringResource(R.string.addon_health_slow) to NuvioTheme.colors.Warning
+                        AddonHealthLevel.DOWN -> stringResource(R.string.addon_health_down) to NuvioTheme.colors.Error
                         else -> "-" to NuvioTheme.colors.TextTertiary
                     }
                     Row(
@@ -615,7 +615,7 @@ fun AddonManagerScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Metadata",
+                            text = stringResource(R.string.addon_health_metadata),
                             style = MaterialTheme.typography.bodyMedium,
                             color = NuvioTheme.colors.TextSecondary
                         )
@@ -1478,10 +1478,10 @@ private fun AddonCardContent(
                     if (addon.enabled) {
                         val setup = addon.behaviorHints?.configurationRequired == true
                         val chip = when {
-                            setup -> "Setup" to NuvioTheme.colors.Warning
-                            healthLevel == AddonHealthLevel.HEALTHY -> "OK" to NuvioTheme.colors.Success
-                            healthLevel == AddonHealthLevel.DEGRADED -> "Slow" to NuvioTheme.colors.Warning
-                            healthLevel == AddonHealthLevel.DOWN -> "Down" to NuvioTheme.colors.Error
+                            setup -> stringResource(R.string.addon_health_setup) to NuvioTheme.colors.Warning
+                            healthLevel == AddonHealthLevel.HEALTHY -> stringResource(R.string.addon_health_ok) to NuvioTheme.colors.Success
+                            healthLevel == AddonHealthLevel.DEGRADED -> stringResource(R.string.addon_health_slow) to NuvioTheme.colors.Warning
+                            healthLevel == AddonHealthLevel.DOWN -> stringResource(R.string.addon_health_down) to NuvioTheme.colors.Error
                             else -> null
                         }
                         if (chip != null) {

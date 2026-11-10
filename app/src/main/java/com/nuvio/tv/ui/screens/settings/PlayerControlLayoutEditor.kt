@@ -191,7 +191,7 @@ internal fun PlayerControlLayoutEditor(
         if (editor.draft.rejected) Text(stringResource(R.string.player_layout_stale), style = MaterialTheme.typography.bodySmall)
         if (failed) Text(stringResource(R.string.player_layout_save_failed), style = MaterialTheme.typography.bodySmall)
         FlowRow(Modifier.fillMaxWidth().heightIn(max = footerHeight).verticalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = {
+            SettingsDialogActionButton(stringResource(if (saving) R.string.player_layout_saving else R.string.action_save), onClick = {
                 if (!saving && !editor.draft.rejected && !editor.moving) {
                     cancelPress(); saving = true; failed = false
                     val captured = editor.draft
@@ -203,32 +203,22 @@ internal fun PlayerControlLayoutEditor(
                         finally { saving = false }
                     }
                 }
-            }, enabled = !editor.draft.rejected && !editor.moving, modifier = Modifier.focusRequester(saveFocus)) {
-                Text(stringResource(if (saving) R.string.player_layout_saving else R.string.action_save))
-            }
-            Button(onClick = ::dismiss, enabled = !saving, modifier = Modifier.focusRequester(cancelFocus)) {
-                Text(stringResource(R.string.action_cancel))
-            }
-            Button(onClick = { cancelPress(); editor = editor.reset() }, enabled = !saving && !editor.draft.rejected && !editor.moving) {
-                Text(stringResource(R.string.player_layout_reset), maxLines = 1)
-            }
-            Button(onClick = { cancelPress(); editor = editor.beginMove(); focusRequest++ },
-                enabled = !saving && editor.canMove, modifier = Modifier.focusRequester(moveFocus)) {
-                Text(stringResource(R.string.player_layout_move), maxLines = 1)
-            }
-            Button(onClick = { cancelPress(); editor = editor.style(PlayerControlButtonStyle.entries[
-                (editor.draft.preview.style.ordinal + 1) % PlayerControlButtonStyle.entries.size]) },
-                enabled = !saving && !editor.draft.rejected && !editor.moving) {
-                Text(stringResource(R.string.player_layout_button_style, stringResource(
+            }, enabled = !editor.draft.rejected && !editor.moving, modifier = Modifier.focusRequester(saveFocus))
+            SettingsDialogActionButton(stringResource(R.string.action_cancel), ::dismiss, enabled = !saving,
+                modifier = Modifier.focusRequester(cancelFocus))
+            SettingsDialogActionButton(stringResource(R.string.player_layout_reset), { cancelPress(); editor = editor.reset() },
+                enabled = !saving && !editor.draft.rejected && !editor.moving)
+            SettingsDialogActionButton(stringResource(R.string.player_layout_move), { cancelPress(); editor = editor.beginMove(); focusRequest++ },
+                enabled = !saving && editor.canMove, modifier = Modifier.focusRequester(moveFocus))
+            SettingsDialogActionButton(stringResource(R.string.player_layout_button_style, stringResource(
                     if (editor.draft.preview.style == PlayerControlButtonStyle.PREVIOUS) R.string.player_layout_style_previous
-                    else R.string.player_layout_style_labelled)), maxLines = 1)
-            }
-            Button(onClick = { cancelPress(); moreExpanded = !moreExpanded }, enabled = !saving && !editor.draft.rejected && !editor.moving && editor.canPreviewMore) {
-                Text(stringResource(if (moreExpanded) R.string.player_layout_more_expanded else R.string.player_layout_more_collapsed), maxLines = 1)
-            }
-            Button(onClick = { cancelPress(); previewEpisode = !previewEpisode }, enabled = !saving && !editor.draft.rejected && !editor.moving) {
-                Text(stringResource(if (previewEpisode) R.string.player_layout_preview_episode else R.string.player_layout_preview_movie), maxLines = 1)
-            }
+                    else R.string.player_layout_style_labelled)), { cancelPress(); editor = editor.style(PlayerControlButtonStyle.entries[
+                (editor.draft.preview.style.ordinal + 1) % PlayerControlButtonStyle.entries.size]) },
+                enabled = !saving && !editor.draft.rejected && !editor.moving)
+            SettingsDialogActionButton(stringResource(if (moreExpanded) R.string.player_layout_more_expanded else R.string.player_layout_more_collapsed),
+                { cancelPress(); moreExpanded = !moreExpanded }, enabled = !saving && !editor.draft.rejected && !editor.moving && editor.canPreviewMore)
+            SettingsDialogActionButton(stringResource(if (previewEpisode) R.string.player_layout_preview_episode else R.string.player_layout_preview_movie),
+                { cancelPress(); previewEpisode = !previewEpisode }, enabled = !saving && !editor.draft.rejected && !editor.moving)
         }
     }
 }

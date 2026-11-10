@@ -31,7 +31,7 @@
     <string name="support_nuvio_thanks_subtitle">Your perks follow your Nuvio account, so they work here in Nuvio Arc and in the official app.</string>
     <string name="support_nuvio_gentle_eyebrow">Nuvio Supporter</string>
     <string name="support_nuvio_gentle_title">Everything in Nuvio Arc works without a membership</string>
-    <string name="support_nuvio_gentle_body">This account has no Nuvio Supporter membership, and that’s completely fine. If you ever want to help the Nuvio team, a membership adds a few extras:</string>
+    <string name="support_nuvio_gentle_body">This account has no Nuvio Supporter membership. If you ever want to help the Nuvio team, a membership adds a few extras:</string>
     <string name="support_nuvio_gentle_unavailable">Your membership couldn’t be checked right now. Everything in Nuvio Arc works without one. If you want to help the Nuvio team, a membership adds a few extras:</string>
     <string name="support_nuvio_gentle_scan">See the options on your phone</string>
     <string name="support_nuvio_paid_check_again">Paid just now? Check again</string>

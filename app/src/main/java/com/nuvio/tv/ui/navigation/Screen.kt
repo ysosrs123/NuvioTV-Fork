@@ -143,6 +143,11 @@ sealed class Screen(val route: String) {
         }
     }
     data object Search : Screen("search")
+    data object ScoutAsk : Screen("scout_ask")
+    data object ScoutAskQuestion : Screen("scout_ask_question/{q}") {
+        fun createRoute(question: String): String =
+            "scout_ask_question/" + URLEncoder.encode(question, "UTF-8").replace("+", "%20")
+    }
     data object Discover : Screen("discover")
     data object Library : Screen("library")
     data object Calendar : Screen("calendar")
@@ -156,8 +161,18 @@ sealed class Screen(val route: String) {
     data object SupportersContributors : Screen("supporters_contributors")
     data object LicensesAttributions : Screen("licenses_attributions")
     data object AddonManager : Screen("addon_manager")
+    data object FormatCheck : Screen("format_check")
     data object CatalogOrder : Screen("catalog_order")
     data object Plugins : Screen("plugins")
+
+    data object ScoutPicker : Screen("scout_picker")
+    data object Scout : Screen("scout")
+    data object ScoutTaste : Screen("scout_taste")
+    data object ScoutQuickStart : Screen("scout_quick_start")
+    data object ScoutWords : Screen("scout_words")
+    data object ScoutMix : Screen("scout_mix/{mixId}") {
+        fun createRoute(mixId: String): String = "scout_mix/${URLEncoder.encode(mixId, "UTF-8")}"
+    }
     data object ExperienceModeSelection : Screen("experience_mode_selection")
     data object LayoutSelection : Screen("layout_selection")
     data object LayoutSettings : Screen("layout_settings")

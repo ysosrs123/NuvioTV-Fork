@@ -26,7 +26,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -50,7 +54,7 @@ fun StreamsSkeletonList(
         contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm)
     ) {
         items(itemCount) {
-            StreamCardSkeleton(showAddonLogo = showAddonLogo, shimmerBrush = rememberShimmerBrush())
+            StreamCardSkeleton(showAddonLogo = showAddonLogo, shimmerBrush = rememberShimmerFill())
         }
     }
 }
@@ -59,7 +63,7 @@ fun StreamsSkeletonList(
 fun StreamCardSkeleton(
     modifier: Modifier = Modifier,
     showAddonLogo: Boolean = true,
-    shimmerBrush: Brush = rememberShimmerBrush()
+    shimmerBrush: ShimmerFill = rememberShimmerFill()
 ) {
     Box(
         modifier = modifier
@@ -93,7 +97,7 @@ fun StreamCardSkeleton(
                         modifier = Modifier
                             .size(NuvioTheme.spacing.xxl)
                             .clip(RoundedCornerShape(NuvioTheme.radii.sm))
-                            .background(shimmerBrush)
+                            .shimmerFill(shimmerBrush)
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     SkeletonBar(width = 64.dp, height = 10.dp, brush = shimmerBrush, cornerRadius = NuvioTheme.spacing.sm)
@@ -105,7 +109,7 @@ fun StreamCardSkeleton(
 
 @Composable
 fun MetaDetailsSkeleton(backdropAware: Boolean = false) {
-    val shimmerBrush = rememberShimmerBrush(backdropAware = backdropAware)
+    val shimmerBrush = rememberShimmerFill(backdropAware = backdropAware)
     val episodeCardColor = if (backdropAware) {
         NuvioTheme.colors.BackgroundCard.copy(alpha = 0.40f)
     } else {
@@ -210,7 +214,7 @@ private fun BackdropLoadingScrim() {
 }
 
 @Composable
-private fun MetaHeroSkeleton(shimmerBrush: Brush) {
+private fun MetaHeroSkeleton(shimmerBrush: ShimmerFill) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -241,7 +245,7 @@ private fun MetaHeroSkeleton(shimmerBrush: Brush) {
                     modifier = Modifier
                         .size(NuvioTheme.spacing.xxxl)
                         .clip(CircleShape)
-                        .background(shimmerBrush)
+                        .shimmerFill(shimmerBrush)
                 )
             }
 
@@ -273,7 +277,7 @@ private fun MetaHeroSkeleton(shimmerBrush: Brush) {
 }
 
 @Composable
-private fun SeasonTabsSkeleton(shimmerBrush: Brush) {
+private fun SeasonTabsSkeleton(shimmerBrush: ShimmerFill) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.xl),
@@ -287,7 +291,7 @@ private fun SeasonTabsSkeleton(shimmerBrush: Brush) {
 
 @Composable
 private fun EpisodesRowSkeleton(
-    shimmerBrush: Brush,
+    shimmerBrush: ShimmerFill,
     cardColor: Color
 ) {
     LazyRow(
@@ -307,7 +311,7 @@ private fun EpisodesRowSkeleton(
                         .fillMaxWidth()
                         .height(158.dp)
                         .clip(RoundedCornerShape(topStart = NuvioTheme.spacing.md, topEnd = NuvioTheme.spacing.md))
-                        .background(shimmerBrush)
+                        .shimmerFill(shimmerBrush)
                 )
                 Column(modifier = Modifier.padding(NuvioTheme.spacing.md)) {
                     SkeletonBar(width = 160.dp, height = 14.dp, brush = shimmerBrush, cornerRadius = 10.dp)
@@ -320,7 +324,7 @@ private fun EpisodesRowSkeleton(
 }
 
 @Composable
-private fun CastSectionSkeleton(shimmerBrush: Brush) {
+private fun CastSectionSkeleton(shimmerBrush: ShimmerFill) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -346,7 +350,7 @@ private fun CastSectionSkeleton(shimmerBrush: Brush) {
                         modifier = Modifier
                             .size(72.dp)
                             .clip(CircleShape)
-                            .background(shimmerBrush)
+                            .shimmerFill(shimmerBrush)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     SkeletonBar(width = 90.dp, height = NuvioTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
@@ -361,7 +365,7 @@ private fun CastSectionSkeleton(shimmerBrush: Brush) {
 @Composable
 private fun CompanyLogosSkeleton(
     titleWidth: Dp,
-    shimmerBrush: Brush
+    shimmerBrush: ShimmerFill
 ) {
     Column(
         modifier = Modifier
@@ -383,7 +387,7 @@ private fun CompanyLogosSkeleton(
                         .width(140.dp)
                         .height(NuvioTheme.spacing.huge)
                         .clip(RoundedCornerShape(NuvioTheme.radii.md))
-                        .background(shimmerBrush)
+                        .shimmerFill(shimmerBrush)
                 )
             }
         }
@@ -394,7 +398,7 @@ private fun CompanyLogosSkeleton(
 fun SkeletonBar(
     width: Dp,
     height: Dp,
-    brush: Brush,
+    brush: ShimmerFill,
     cornerRadius: Dp = NuvioTheme.spacing.sm
 ) {
     Box(
@@ -402,7 +406,7 @@ fun SkeletonBar(
             .width(width)
             .height(height)
             .clip(RoundedCornerShape(cornerRadius))
-            .background(brush)
+            .shimmerFill(brush)
     )
 }
 
@@ -410,7 +414,7 @@ fun SkeletonBar(
 fun SkeletonBar(
     width: Float,
     height: Dp,
-    brush: Brush,
+    brush: ShimmerFill,
     cornerRadius: Dp = NuvioTheme.spacing.sm
 ) {
     Box(
@@ -418,7 +422,7 @@ fun SkeletonBar(
             .fillMaxWidth(width)
             .height(height)
             .clip(RoundedCornerShape(cornerRadius))
-            .background(brush)
+            .shimmerFill(brush)
     )
 }
 
@@ -426,19 +430,19 @@ fun SkeletonBar(
 fun SkeletonPill(
     width: Dp,
     height: Dp,
-    brush: Brush
+    brush: ShimmerFill
 ) {
     Box(
         modifier = Modifier
             .width(width)
             .height(height)
             .clip(RoundedCornerShape(NuvioTheme.spacing.xxl))
-            .background(brush)
+            .shimmerFill(brush)
     )
 }
 
 @Composable
-fun rememberShimmerBrush(backdropAware: Boolean = false): Brush {
+fun rememberShimmerFill(backdropAware: Boolean = false): ShimmerFill {
     val shimmerColors = if (backdropAware) {
         listOf(
             NuvioTheme.colors.TextPrimary.copy(alpha = 0.08f),
@@ -453,7 +457,7 @@ fun rememberShimmerBrush(backdropAware: Boolean = false): Brush {
         )
     }
     val transition = rememberInfiniteTransition(label = "shimmer")
-    val translate by transition.animateFloat(
+    val translate = transition.animateFloat(
         initialValue = 0f,
         targetValue = 1000f,
         animationSpec = infiniteRepeatable(
@@ -462,9 +466,23 @@ fun rememberShimmerBrush(backdropAware: Boolean = false): Brush {
         label = "shimmer_translate"
     )
 
-    return Brush.linearGradient(
-        colors = shimmerColors,
-        start = Offset(translate - 1000f, 0f),
-        end = Offset(translate, 0f)
-    )
+    return remember(shimmerColors, translate) { ShimmerFill(shimmerColors, translate) }
 }
+
+/** One moving gradient shared by a skeleton; it is read while drawing, so the animation never recomposes. */
+@Stable
+class ShimmerFill internal constructor(private val colors: List<Color>, private val translate: State<Float>) {
+    private var builtAt = Float.NaN
+    private var built: Brush? = null
+
+    internal fun brush(): Brush {
+        val t = translate.value
+        built?.takeIf { t == builtAt }?.let { return it }
+        return Brush.linearGradient(colors, start = Offset(t - 1000f, 0f), end = Offset(t, 0f)).also {
+            built = it
+            builtAt = t
+        }
+    }
+}
+
+fun Modifier.shimmerFill(fill: ShimmerFill): Modifier = drawBehind { drawRect(fill.brush()) }

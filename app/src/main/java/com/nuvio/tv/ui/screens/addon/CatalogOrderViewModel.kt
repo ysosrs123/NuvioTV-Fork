@@ -28,7 +28,8 @@ class CatalogOrderViewModel @Inject constructor(
     private val collectionsDataStore: CollectionsDataStore,
     private val layoutPreferenceDataStore: LayoutPreferenceDataStore,
     private val homeCatalogSettingsSyncService: HomeCatalogSettingsSyncService,
-    private val serverCatalog: ServerCatalog
+    private val serverCatalog: ServerCatalog,
+    private val builtInCatalogs: com.nuvio.tv.core.catalog.BuiltInCatalogs = com.nuvio.tv.core.catalog.BuiltInCatalogs.None
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CatalogOrderUiState())
@@ -160,11 +161,13 @@ class CatalogOrderViewModel @Inject constructor(
     private fun observeCatalogs() {
         viewModelScope.launch {
             combine(
-                combine(addonRepository.getInstalledAddons(), serverCatalog.addons) { installed, servers ->
-                    layoutPreferenceDataStore.hideNewCatalogsByDefault(ServerCatalog.hiddenByDefaultKeys(servers))
-                    installed.enabledAddons() + servers
+                combine(addonRepository.getInstalledAddons(), serverCatalog.addons, builtInCatalogs.addons) { installed, servers, builtIn ->
+                    layoutPreferenceDataStore.hideNewCatalogsByDefault(
+                        ServerCatalog.hiddenByDefaultKeys(servers) + builtInCatalogs.hiddenByDefaultKeys(builtIn)
+                    )
+                    installed.enabledAddons() + servers + builtIn
                 },
-                collectionsDataStore.collections,
+                combine(collectionsDataStore.collections, builtInCatalogs.collections) { saved, builtIn -> saved + builtIn },
                 layoutPreferenceDataStore.homeCatalogOrderKeys,
                 layoutPreferenceDataStore.disabledHomeCatalogKeys,
                 layoutPreferenceDataStore.customCatalogTitles,
@@ -175,7 +178,7 @@ class CatalogOrderViewModel @Inject constructor(
                 @Suppress("UNCHECKED_CAST")
                 val collections = values[1] as List<Collection>
                 @Suppress("UNCHECKED_CAST")
-                val savedOrderKeys = values[2] as List<String>
+                val savedOrderKeys = builtInCatalogs.withDefaultFirst(values[2] as List<String>)
                 @Suppress("UNCHECKED_CAST")
                 val disabledKeys = (values[3] as List<String>).toSet()
                 @Suppress("UNCHECKED_CAST")

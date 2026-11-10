@@ -111,7 +111,7 @@ fun AutoScrollingText(
         }
 
         val density = LocalDensity.current
-        val viewportPx = layout.getLineBottom(maxLines - 1)
+        val viewportPx = layout.getLineBottom(maxLines - 1).coerceAtMost(constraints.maxHeight.toFloat())
         val overflowPx = layout.size.height - viewportPx
         val viewportHeight = with(density) { viewportPx.toDp() }
         val speedPxPerSecond = with(density) { AUTO_SCROLL_SPEED_DP_PER_SECOND.dp.toPx() }

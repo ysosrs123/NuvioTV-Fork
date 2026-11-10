@@ -271,6 +271,7 @@ fun AdvancedSettingsContent(
     }
 
     val networkListState = rememberLazyListState()
+    SettingsJumpScroll(networkListState, SettingsCategory.ADVANCED)
 
     // The same treatment for the device-assessment results card. It grows the
     // same way and overflows the same way - it just never had the effect,
@@ -668,7 +669,7 @@ fun AdvancedSettingsContent(
                             streamDiagnostic.verdict?.let { verdict ->
                                 Text(
                                     text = verdict,
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                                     color = NuvioTheme.colors.TextPrimary
                                 )
                             }

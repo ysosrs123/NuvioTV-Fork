@@ -118,13 +118,15 @@ internal fun PlaybackVideoSection(
             enabled = enabled,
             onClick = { onOpenDialog(PlaybackDialog.DV7_HANDLING_MODE) }
         )
-        SettingsToggleRow(
-            title = stringResource(R.string.audio_dv5_to_dv81_title),
-            subtitle = stringResource(R.string.audio_dv5_to_dv81_sub),
-            checked = settings.dv5ToDv81Enabled && dv81Conversion,
-            onToggle = { onUpdate { setDv5ToDv81Enabled(!settings.dv5ToDv81Enabled) } },
-            enabled = enabled && dv81Conversion
-        )
+        if (dv81Conversion) {
+            SettingsToggleRow(
+                title = stringResource(R.string.audio_dv5_to_dv81_title),
+                subtitle = stringResource(R.string.audio_dv5_to_dv81_sub),
+                checked = settings.dv5ToDv81Enabled,
+                onToggle = { onUpdate { setDv5ToDv81Enabled(!settings.dv5ToDv81Enabled) } },
+                enabled = enabled
+            )
+        }
         SettingsToggleRow(
             title = stringResource(R.string.audio_strip_hdr10plus_title),
             subtitle = stringResource(R.string.audio_strip_hdr10plus_sub),

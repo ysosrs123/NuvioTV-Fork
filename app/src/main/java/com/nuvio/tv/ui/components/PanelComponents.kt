@@ -54,7 +54,7 @@ internal fun PanelEyebrow(text: String) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
-            letterSpacing = 2.2.sp,
+            letterSpacing = 1.2.sp,
             color = Color.White.copy(alpha = 0.55f),
             modifier = Modifier.padding(start = 10.dp, bottom = 10.dp)
         )
@@ -77,7 +77,7 @@ internal fun RailEyebrow(
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
-            letterSpacing = 2.2.sp,
+            letterSpacing = 1.2.sp,
             color = Color.White.copy(alpha = 0.55f),
             modifier = Modifier.padding(bottom = 10.dp)
         )

@@ -24,19 +24,24 @@ fun NuvioActionPill(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     neutralBackdrop: Boolean = false,
+    stationary: Boolean = false,
+    containerColor: Color? = null,
     content: @Composable RowScope.() -> Unit
 ) {
     var focused by remember { mutableStateOf(false) }
     val shape = remember { RoundedCornerShape(12.dp) }
     val cinematic = com.nuvio.tv.ui.v2.appearance.LocalV2Appearance.current?.visualStyle ==
         com.nuvio.tv.domain.model.VisualStyle.CINEMATIC_GLASS
-    val surface = if (cinematic) Modifier.nuvioGlass(GlassRole.CONTROL, focused, shape, neutralBackdrop = neutralBackdrop)
-        else Modifier.background(NuvioTheme.colors.BackgroundElevated, shape)
+    val surface = when {
+        containerColor != null -> Modifier.background(containerColor, shape)
+        cinematic -> Modifier.nuvioGlass(GlassRole.CONTROL, focused, shape, neutralBackdrop = neutralBackdrop)
+        else -> Modifier.background(NuvioTheme.colors.BackgroundElevated, shape)
+    }
     Button(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier.onFocusChanged { focused = it.isFocused }
-            .nuvioV2Focus(focused, shape)
+            .nuvioV2Focus(focused, shape, stationary = stationary)
             .then(surface),
         shape = ButtonDefaults.shape(shape),
         scale = ButtonDefaults.scale(focusedScale = 1f),

@@ -42,6 +42,7 @@ fun EssentialPlaybackSettingsContent(
     val settings = playerSettings
 
     val listState = rememberLazyListState()
+    SettingsJumpScroll(listState, SettingsCategory.PLAYBACK)
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(

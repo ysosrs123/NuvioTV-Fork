@@ -383,6 +383,11 @@ private fun appLicenseItem() = LicenseAttributionItem(
 
 @Composable
 private fun dataAttributionItems() = listOfNotNull(
+    if (com.nuvio.tv.domain.model.ScoutFeature.available) LicenseAttributionItem(
+        title = stringResource(R.string.scout_licence_icon_title),
+        body = stringResource(R.string.scout_licence_icon_body),
+        url = ApacheLicenseUrl
+    ) else null,
     LicenseAttributionItem(
         title = stringResource(R.string.licenses_attributions_tmdb_title),
         body = stringResource(R.string.licenses_attributions_tmdb_body),

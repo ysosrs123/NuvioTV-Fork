@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -21,6 +20,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
 import com.nuvio.tv.ui.components.NuvioDialog
+import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.util.rememberRawSvgPainter
 import java.text.NumberFormat
 
@@ -91,7 +91,7 @@ internal fun WeTrakrAccountDialog(
 private fun WeTrakrUsageStrip(state: WeTrakrTrackerUiState, formatTime: (Long) -> String) {
     val numbers = NumberFormat.getIntegerInstance()
     val quota = state.quota
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
         WeTrakrUsageBox(
             value = quota?.let {
                 stringResource(R.string.wetrakr_requests_used, numbers.format(it.used), numbers.format(it.limit))
@@ -116,11 +116,11 @@ private fun WeTrakrUsageStrip(state: WeTrakrTrackerUiState, formatTime: (Long) -
 private fun WeTrakrUsageBox(value: String, label: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .background(Color.White.copy(alpha = 0.07f), RoundedCornerShape(12.dp))
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .background(NuvioTheme.colors.TextPrimary.copy(alpha = 0.07f), RoundedCornerShape(NuvioTheme.radii.md))
+            .padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.xs)
     ) {
-        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
-        Text(label, style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.65f))
+        Text(value, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = NuvioTheme.colors.TextPrimary)
+        Text(label, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary)
     }
 }
 

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scout_picks_why_person_keyword">Because you love %1$s and %2$s</string>
+    <string name="scout_picks_why_person_loved">Because you love %1$s</string>
+    <string name="scout_picks_why_person">You often watch %1$s</string>
+    <string name="scout_picks_why_keyword">Because you like %1$s</string>
+    <string name="scout_picks_why_stretch">Something a little different</string>
+    <string name="scout_picks_row_genre_language">%1$s in %2$s</string>
+    <string name="scout_picks_row_genre_keyword">%1$s: %2$s</string>
+    <string name="scout_picks_row_genre">More %1$s</string>
+    <string name="scout_picks_row_new">New for you</string>
+    <string name="scout_picks_row_trending">Trending for you</string>
+    <string name="scout_picks_quick_title">Pick five you love</string>
+    <string name="scout_picks_quick_sub">This gives Scout a head start. Change them any time in Your taste.</string>
+    <string name="scout_picks_quick_row_sub">A quick way to teach Scout what you enjoy</string>
+    <string name="scout_picks_quick_count">%1$d of %2$d</string>
+    <string name="scout_picks_quick_done">Done</string>
+    <string name="scout_picks_quick_skip">Skip</string>
+    <string name="scout_picks_words_title">Your taste in words</string>
+    <string name="scout_picks_words_row_sub">With an AI key: a description you can edit, and AI sorting</string>
+    <string name="scout_picks_words_sub">Written by your AI from the titles you rated. You can edit it. Ask and AI sorting both use it.</string>
+    <string name="scout_picks_words_empty">Nothing yet. Write your own, or let your AI write it from the titles you rated.</string>
+    <string name="scout_picks_words_edit">Edit</string>
+    <string name="scout_picks_words_write">Write it again</string>
+    <string name="scout_picks_words_writing">Writing…</string>
+    <string name="scout_picks_words_remove">Remove</string>
+    <string name="scout_picks_sort_title">Let AI sort my picks</string>
+    <string name="scout_picks_sort_sub">About once a week, using your key. Scout\'s own picks need no AI.</string>
+    <string name="scout_picks_on">On</string>
+    <string name="scout_picks_off">Off</string>
+    <string name="scout_picks_sent">Goes to your AI service with your key: about 100 titles Scout found for you, your taste in words, titles you liked and didn\'t, and genres you leave out. It doesn\'t get your full history.</string>
+    <string name="scout_picks_refine_violent">Less violent</string>
+    <string name="scout_picks_refine_older">Older</string>
+    <string name="scout_picks_refine_newer">Newer</string>
+    <string name="scout_picks_refine_lighter">Something lighter</string>
+</resources>

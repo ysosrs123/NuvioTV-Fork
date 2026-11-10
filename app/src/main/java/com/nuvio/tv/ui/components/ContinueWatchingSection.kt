@@ -498,6 +498,10 @@ fun ContinueWatchingCard(
             null
         }
     }
+    val episodesLeft = when (item) {
+        is ContinueWatchingItem.InProgress -> item.episodesLeft
+        is ContinueWatchingItem.NextUp -> item.episodesLeft
+    }
     val strUpcoming = stringResource(R.string.cw_upcoming)
     val strNextUp = stringResource(R.string.cw_next_up)
     val strNextUpShort = stringResource(R.string.cw_next_up_short)
@@ -516,7 +520,11 @@ fun ContinueWatchingCard(
         if (info.badgeLabel != null) {
             info.badgeLabel
         } else if (info.isReleaseAlert) {
-            if (info.isNewSeasonRelease) strNewSeason else effectiveNewEpisodeLabel
+            if (info.isNewSeasonRelease) {
+                cwNewSeasonLabel(isPosterStyle, episodesLeft != null, strNewSeason, effectiveNewEpisodeLabel)
+            } else {
+                effectiveNewEpisodeLabel
+            }
         } else if (!info.hasAired) {
             val airDateText = if (useShortLabels) {
                 computeAirDateBadgeTextShort(cardContext, info.released, info.airDateLabel)
@@ -608,7 +616,7 @@ fun ContinueWatchingCard(
         val builder = ImageRequest.Builder(context)
             .data(effectiveImageModel)
             .homePosterPriority(homeImagePriority)
-            .crossfade(true)
+            .crossfade(false)
             .memoryCacheKey(
                 continueWatchingImageCacheKey(
                     effectiveImageModel, requestWidthPx, requestHeightPx, shouldBlur
@@ -618,28 +626,21 @@ fun ContinueWatchingCard(
             .apply {
                 if (shouldBlur) transformations(com.nuvio.tv.ui.util.BlurTransformation())
             }
-        val fallbackUrl = when (item) {
-            is ContinueWatchingItem.InProgress -> item.originalPoster
-            is ContinueWatchingItem.NextUp -> item.originalPoster
-        }
-        if (!fallbackUrl.isNullOrBlank() && fallbackUrl != effectiveImageModel) {
-            builder.memoryCacheKeyExtras(
-                mapOf(com.nuvio.tv.core.image.CustomPosterFallbackInterceptor.FALLBACK_URL_KEY to fallbackUrl)
-            )
-        }
+        continueWatchingFallbackExtras(item, effectiveImageModel).takeIf { it.isNotEmpty() }
+            ?.let(builder::memoryCacheKeyExtras)
         builder.build()
     }
 
     val bgColor = NuvioTheme.colors.Background
     val badgeBackground = remember { Color.Black.copy(alpha = 0.7f) }
-    val episodesLeft = when (item) {
-        is ContinueWatchingItem.InProgress -> item.episodesLeft
-        is ContinueWatchingItem.NextUp -> item.episodesLeft
-    }
     val episodesLeftText = episodesLeft?.let {
         pluralStringResource(R.plurals.cw_episodes_left, it, it)
     }
     
+    val episodesLeftPillText = episodesLeftText?.let { text ->
+        episodesLeft?.let { count -> cwEpisodesLeftPillText(count, isPosterStyle, text) }
+    }
+
     val cardDescription = remember(titleText, episodeStr, episodeTitle, badgeText, episodesLeftText) {
         listOfNotNull(titleText, episodeStr, episodeTitle, badgeText, episodesLeftText).filter { it.isNotBlank() }.joinToString(", ")
     }
@@ -829,7 +830,7 @@ fun ContinueWatchingCard(
                 }
 
                 if (item.shufflePlayback) EpisodeShuffleBadge(Modifier.align(Alignment.TopStart))
-                episodesLeftText?.let {
+                episodesLeftPillText?.let {
                     EpisodesLeftBadge(it, badgeBackground, Modifier.align(Alignment.TopStart))
                 }
 
@@ -1118,6 +1119,26 @@ private fun WideCardContent(
     }
 }
 
+/** The extras that are part of a card's memory entry when it has a custom poster to fall back from. */
+internal fun continueWatchingFallbackExtras(item: ContinueWatchingItem, model: String?): Map<String, String> {
+    val fallbackUrl = when (item) {
+        is ContinueWatchingItem.InProgress -> item.originalPoster
+        is ContinueWatchingItem.NextUp -> item.originalPoster
+    }
+    return if (!fallbackUrl.isNullOrBlank() && fallbackUrl != model) {
+        mapOf(com.nuvio.tv.core.image.CustomPosterFallbackInterceptor.FALLBACK_URL_KEY to fallbackUrl)
+    } else {
+        emptyMap()
+    }
+}
+
+/** A poster card is too narrow for two worded pills: the count stands alone there. */
+internal fun cwEpisodesLeftPillText(count: Int, posterCard: Boolean, fullText: String): String =
+    if (posterCard) count.toString() else fullText
+
+internal fun cwNewSeasonLabel(posterCard: Boolean, showsEpisodesLeft: Boolean, newSeason: String, shortNew: String): String =
+    if (posterCard && showsEpisodesLeft) shortNew else newSeason
+
 @Composable
 private fun EpisodesLeftBadge(text: String, background: Color, modifier: Modifier) {
     Box(
@@ -1241,6 +1262,10 @@ fun ContinueWatchingOptionsDialog(
                 label = stringResource(R.string.cw_action_remove),
                 onClick = onRemove
             )
+        }
+
+        remember(item) { com.nuvio.tv.ui.screens.scout.scoutMixPreview(item) }?.let {
+            com.nuvio.tv.ui.screens.scout.ScoutAddToMixLine(it, onDone = onDismiss)
         }
     }
 }

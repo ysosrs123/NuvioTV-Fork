@@ -96,6 +96,13 @@ fun buildNuvioTypography(fontFamily: FontFamily): Typography = Typography(
         lineHeight = 44.sp,
         letterSpacing = 0.sp
     ),
+    displaySmall = TextStyle(
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 36.sp,
+        lineHeight = 44.sp,
+        letterSpacing = 0.sp
+    ),
     headlineLarge = TextStyle(
         fontFamily = fontFamily,
         fontWeight = FontWeight.SemiBold,
@@ -106,6 +113,13 @@ fun buildNuvioTypography(fontFamily: FontFamily): Typography = Typography(
     headlineMedium = TextStyle(
         fontFamily = fontFamily,
         fontWeight = FontWeight.SemiBold,
+        fontSize = 24.sp,
+        lineHeight = 32.sp,
+        letterSpacing = 0.sp
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = fontFamily,
+        fontWeight = FontWeight.Normal,
         fontSize = 24.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.sp

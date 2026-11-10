@@ -36,6 +36,7 @@ import com.nuvio.tv.core.debrid.DirectDebridStreamFilter
 import com.nuvio.tv.core.stream.SourcePrefetchPhase
 import com.nuvio.tv.core.stream.SourcePrefetchSignal
 import com.nuvio.tv.core.stream.showsReadyTick
+import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.domain.model.DebridStreamAudioChannel
 import com.nuvio.tv.domain.model.DebridStreamAudioTag
 import com.nuvio.tv.domain.model.DebridStreamQuality
@@ -78,7 +79,7 @@ fun SourceBadgeRow(
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = Color(0xFF4CAF7D),
+                        tint = NuvioTheme.colors.Success,
                         modifier = Modifier.size(18.dp)
                     )
                     if (signal.badgesHidden) {

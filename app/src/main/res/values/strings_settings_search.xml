@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_rail">Search</string>
+    <string name="settings_search_title">Search settings</string>
+    <string name="settings_search_subtitle">Find any setting by its name or what it does.</string>
+    <string name="settings_search_try">Try night mode, subtitles, passthrough or buffer.</string>
+    <string name="settings_search_none">Nothing found for \"%1$s\"</string>
+    <string name="settings_search_none_tip">Try a shorter word, or describe what it does.</string>
+    <string name="settings_search_results">Results: %1$d</string>
+    <string name="settings_search_more_advanced">%1$d more in Advanced mode</string>
+    <string name="settings_search_unavailable">This setting isn\'t available right now. Another setting may need to be on first.</string>
+</resources>

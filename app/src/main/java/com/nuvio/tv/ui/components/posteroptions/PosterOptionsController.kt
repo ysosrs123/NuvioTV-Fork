@@ -167,6 +167,19 @@ class PosterOptionsController @Inject constructor(
         }
     }
 
+    suspend fun isInLibrary(item: MetaPreview): Boolean {
+        val canonical = canonicalize(item)
+        return runCatching { libraryRepository.isInLibrary(canonical.id, canonical.apiType).first() }.getOrDefault(false)
+    }
+
+    /** For a page with its own library button. Returns whether the title is in the library afterwards. */
+    suspend fun toggleLibraryOf(item: MetaPreview): Boolean {
+        val canonical = canonicalize(item)
+        runCatching { libraryRepository.toggleDefault(canonical.toLibraryEntryInput(null)) }
+            .onFailure { Log.w(TAG, "Failed to toggle library for ${canonical.id}: ${it.message}") }
+        return runCatching { libraryRepository.isInLibrary(canonical.id, canonical.apiType).first() }.getOrDefault(false)
+    }
+
     private suspend fun canonicalize(item: MetaPreview): MetaPreview {
         if (item.id.startsWith("tt", ignoreCase = false)) return item
         val tmdbNumber = parseContentIds(item.id).tmdb ?: item.id.toIntOrNull() ?: return item
@@ -500,7 +513,7 @@ class PosterOptionsController @Inject constructor(
     private suspend fun unmarkSeriesWatched(item: MetaPreview) {
         val episodes = fetchSeriesEpisodes(item).filter { it.season != null && it.episode != null && it.season != 0 }
         if (episodes.isEmpty()) {
-            watchProgressRepository.removeFromHistory(item.id, videoId = item.imdbId)
+            watchProgressRepository.removeFromHistory(item.id, videoId = item.imdbId, wholeSeries = true)
             return
         }
 

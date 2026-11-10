@@ -80,7 +80,7 @@ import com.nuvio.tv.ui.support.SupportStatus
 import com.nuvio.tv.domain.model.AuthState
 import com.nuvio.tv.ui.components.BrandWordmark
 import com.nuvio.tv.ui.components.SkeletonBar
-import com.nuvio.tv.ui.components.rememberShimmerBrush
+import com.nuvio.tv.ui.components.rememberShimmerFill
 import com.nuvio.tv.ui.screens.detail.requestFocusAfterFrames
 import kotlin.math.PI
 import kotlin.math.abs
@@ -118,6 +118,10 @@ fun AuthQrSignInScreen(
     val supportState by supportViewModel.uiState.collectAsState()
     var showSupportDialog by remember { mutableStateOf(false) }
     var refocusLogin by remember { mutableStateOf(false) }
+    val backupViewModel: com.nuvio.tv.ui.screens.backup.BackupViewModel = hiltViewModel()
+    val backupState by backupViewModel.state.collectAsState()
+    val restoreFocus = remember { FocusRequester() }
+    com.nuvio.tv.ui.screens.backup.ReturnFocusWhenClosed(backupState, restoreFocus)
 
     fun leaveAuthScreen() {
         exitRequested = true
@@ -201,7 +205,10 @@ fun AuthQrSignInScreen(
                     .padding(start = 56.dp, end = 56.dp),
                 isSignedIn = isSignedIn,
                 fullAccount = fullAccount,
-                useEmailLogin = useEmailLogin
+                useEmailLogin = useEmailLogin,
+                showRestore = isOnboardingMode && !isSignedIn,
+                onRestore = backupViewModel::openWhereFrom,
+                restoreFocusRequester = restoreFocus
             )
 
             AuthQrLoginPane(
@@ -251,7 +258,9 @@ fun AuthQrSignInScreen(
                     .padding(28.dp)
             )
         }
+        com.nuvio.tv.ui.screens.backup.BackupPhoneOverlay(backupState, backupViewModel)
     }
+    com.nuvio.tv.ui.screens.backup.BackupFlow(backupState, backupViewModel)
 
     LaunchedEffect(Unit) {
         loginFocusRequester.requestFocusAfterFrames(frames = 3)
@@ -300,7 +309,10 @@ private fun AuthQrBrandPanel(
     modifier: Modifier,
     isSignedIn: Boolean,
     fullAccount: AuthState.FullAccount?,
-    useEmailLogin: Boolean
+    useEmailLogin: Boolean,
+    showRestore: Boolean = false,
+    onRestore: () -> Unit = {},
+    restoreFocusRequester: FocusRequester? = null
 ) {
     Column(
         modifier = modifier,
@@ -353,6 +365,38 @@ private fun AuthQrBrandPanel(
                 style = MaterialTheme.typography.bodySmall,
                 color = AuthTextSecondary
             )
+        }
+        if (showRestore) {
+            Spacer(modifier = Modifier.height(18.dp))
+            Text(
+                text = stringResource(R.string.backup_signin_hint),
+                modifier = Modifier.widthIn(max = 400.dp),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    color = AuthTextSecondary,
+                    fontSize = 17.sp,
+                    lineHeight = 26.sp,
+                    fontWeight = FontWeight.Normal
+                )
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = onRestore,
+                modifier = if (restoreFocusRequester != null) Modifier.focusRequester(restoreFocusRequester) else Modifier,
+                colors = ButtonDefaults.colors(
+                    containerColor = AuthSecondaryButtonBackground,
+                    focusedContainerColor = Color.White,
+                    contentColor = AuthTextPrimary,
+                    focusedContentColor = Color.Black
+                ),
+                border = ButtonDefaults.border(
+                    border = androidx.tv.material3.Border(
+                        border = androidx.compose.foundation.BorderStroke(1.dp, AuthSecondaryButtonBorder),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                )
+            ) {
+                Text(stringResource(R.string.backup_signin_button))
+            }
         }
     }
 }
@@ -711,7 +755,7 @@ private fun AuthQrManualCodeDetails(
                 AuthQrExpiresText(expiresAtMillis = expiresAtMillis)
             }
         } else if (isLoading) {
-            val shimmerBrush = rememberShimmerBrush(backdropAware = true)
+            val shimmerBrush = rememberShimmerFill(backdropAware = true)
             Spacer(modifier = Modifier.height(18.dp))
             Box(
                 modifier = Modifier

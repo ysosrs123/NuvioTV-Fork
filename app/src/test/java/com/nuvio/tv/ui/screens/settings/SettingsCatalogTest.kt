@@ -26,11 +26,13 @@ class SettingsCatalogTest {
                 SettingsCategory.INTEGRATION,
                 SettingsCategory.TRACKING,
                 SettingsCategory.ADVANCED,
+                SettingsCategory.BACKUP,
                 SettingsCategory.ABOUT,
                 SettingsCategory.DEBUG
             ),
-            categories
+            categories - SettingsCategory.SCOUT - SettingsCategory.SEARCH
         )
+        assertEquals(com.nuvio.tv.domain.model.ScoutFeature.available, SettingsCategory.SCOUT in categories)
     }
 
     @Test
@@ -43,7 +45,8 @@ class SettingsCatalogTest {
 
         assertFalse(SettingsCategory.ACCOUNT in categories)
         assertFalse(SettingsCategory.PROFILES in categories)
-        assertEquals(SettingsCategory.APPEARANCE, categories.first())
+        assertEquals(SettingsCategory.SEARCH, categories.first())
+        assertEquals(SettingsCategory.APPEARANCE, categories[1])
     }
 
     @Test
@@ -57,6 +60,13 @@ class SettingsCatalogTest {
         allCombinations().forEach { categories ->
             assertFalse(SettingsCategory.EXPERIENCE in categories)
         }
+    }
+
+    @Test
+    fun `report a problem sits next to about, and only when reports are available`() {
+        val shown = visibleSettingsCategories(true, isEssentialMode = true, isDebugBuild = false, reportsAvailable = true)
+        assertEquals(shown.indexOf(SettingsCategory.ABOUT) - 1, shown.indexOf(SettingsCategory.REPORT))
+        assertFalse(SettingsCategory.REPORT in visibleSettingsCategories(true, isEssentialMode = true, isDebugBuild = false))
     }
 
     @Test
@@ -89,6 +99,7 @@ class SettingsCatalogTest {
 
         assertEquals(
             listOf(
+                SettingsCategory.ACCOUNT,
                 SettingsCategory.APPEARANCE,
                 SettingsCategory.CONTENT_DISCOVERY,
                 SettingsCategory.INTEGRATION,

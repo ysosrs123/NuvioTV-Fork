@@ -22,7 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.Button
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.R
@@ -69,7 +68,8 @@ internal fun UiDiagnosticsSettingsRow() {
         NuvioDialog(
             title = stringResource(R.string.v2_ui_diagnostics_title),
             onDismiss = ::dismiss,
-            width = 680.dp
+            width = 680.dp,
+            solidWithoutBlur = true
         ) {
             Text(
                 text = text,
@@ -78,12 +78,15 @@ internal fun UiDiagnosticsSettingsRow() {
                     .verticalScroll(rememberScrollState()).focusable()
             )
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Button(onClick = ::dismiss, modifier = Modifier.focusRequester(closeFocus)) {
-                    Text(stringResource(R.string.action_close))
-                }
-                Button(onClick = ::capture) {
-                    Text(stringResource(R.string.display_mode_refresh))
-                }
+                SettingsDialogActionButton(
+                    text = stringResource(R.string.action_close),
+                    onClick = ::dismiss,
+                    modifier = Modifier.focusRequester(closeFocus)
+                )
+                SettingsDialogActionButton(
+                    text = stringResource(R.string.display_mode_refresh),
+                    onClick = ::capture
+                )
             }
         }
     }
