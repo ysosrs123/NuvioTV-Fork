@@ -4,7 +4,8 @@ import com.nuvio.tv.domain.model.SubtitleFont
 
 enum class SubtitleEdgeStyle { NONE, OUTLINE, DROP_SHADOW }
 
-enum class SubtitleOutlineSize { OFF, THIN, NORMAL, THICK }
+/** Stored by name: THICK keeps its width for everyone who chose it; the UI calls it Extra thick and MEDIUM Thick. */
+enum class SubtitleOutlineSize { OFF, THIN, NORMAL, MEDIUM, THICK }
 
 internal val DEFAULT_SUBTITLE_EDGE_STYLE = SubtitleEdgeStyle.DROP_SHADOW
 

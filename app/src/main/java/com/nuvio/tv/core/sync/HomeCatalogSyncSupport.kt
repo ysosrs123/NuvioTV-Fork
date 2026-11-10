@@ -6,6 +6,7 @@ import com.nuvio.tv.domain.model.catalogRowLegacyKey
 import com.nuvio.tv.domain.model.Addon
 import com.nuvio.tv.domain.model.CatalogDescriptor
 import com.nuvio.tv.domain.model.Collection
+import com.nuvio.tv.core.catalog.BuiltInCatalogs
 import com.nuvio.tv.domain.model.WatchedTitlesMode
 import com.nuvio.tv.domain.model.enabledAddons
 
@@ -14,7 +15,9 @@ internal data class LocalHomeCatalogSettingsState(
     val disabledKeys: Set<String> = emptySet(),
     val customTitles: Map<String, String> = emptyMap(),
     val hideUnreleasedContent: Boolean = false,
-    val watchedTitlesMode: WatchedTitlesMode = WatchedTitlesMode.SHOW
+    val watchedTitlesMode: WatchedTitlesMode = WatchedTitlesMode.SHOW,
+    val hidePlanToWatch: Boolean = false,
+    val hideWatching: Boolean = false
 )
 
 private data class HomeCatalogSyncEntry(
@@ -36,10 +39,13 @@ internal fun homeCollectionKey(collectionId: String): String {
     return "collection_${collectionId}"
 }
 
+internal fun isDeviceOnlyCatalogKey(key: String): Boolean =
+    ServerCatalog.isServerKey(key) || BuiltInCatalogs.isBuiltInKey(key)
+
 internal fun List<String>.withLocalServerKeys(local: List<String>): List<String> =
     local.withIndex()
-        .filter { ServerCatalog.isServerKey(it.value) }
-        .fold(filterNot(ServerCatalog::isServerKey).toMutableList()) { keys, (index, key) ->
+        .filter { isDeviceOnlyCatalogKey(it.value) }
+        .fold(filterNot(::isDeviceOnlyCatalogKey).toMutableList()) { keys, (index, key) ->
             keys.apply { add(index.coerceAtMost(size), key) }
         }
 
@@ -132,6 +138,8 @@ internal fun buildHomeCatalogSyncPayload(
     return SyncHomeCatalogPayload(
         hideUnreleasedContent = localState.hideUnreleasedContent,
         watchedTitlesMode = localState.watchedTitlesMode.name,
+        hidePlanToWatch = localState.hidePlanToWatch,
+        hideWatching = localState.hideWatching,
         items = items
     )
 }

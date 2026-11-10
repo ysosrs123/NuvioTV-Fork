@@ -48,6 +48,8 @@ private val credentialKeyRegex = Regex("(authorization|cookie|token|secret|passw
 private val credentialJsonValueRegex = Regex("(\"[^\"]*(?:authorization|cookie|token|secret|password|apikey|api_key|accesskey|session|refresh|bearer)[^\"]*\"\\s*:\\s*)(\"(?:\\\\.|[^\"])*\"|[^,}\\]]+)", setOf(RegexOption.IGNORE_CASE))
 private val authDiagnosticsJson = Json { ignoreUnknownKeys = true }
 
+private const val UPLOAD_WITHOUT_ASKING = false
+
 class AuthDiagnosticsSession(
     private val repository: AuthDiagnosticReportRepository,
     private val flowType: String,
@@ -226,7 +228,7 @@ class AuthDiagnosticsSession(
             )
         }
         if (payload == null) return Result.failure(IllegalStateException("Auth diagnostics session already finished"))
-        if (serverConfiguration.isCustom) {
+        if (!UPLOAD_WITHOUT_ASKING) {
             Log.d(TAG, "attempt=$attemptId flow=$flowType upload=disabled")
             return Result.success("disabled")
         }

@@ -25,6 +25,7 @@ object DeepLinkParser {
             .mapNotNull { segment -> decode(segment).trim().takeIf(String::isNotBlank) }
 
         return when (host) {
+            "scout-ask" -> AppDeepLink.ScoutAsk.takeIf { com.nuvio.tv.core.scout.ask.ScoutAskFeature.available }
             "meta" -> parseMetaFromParameters(parsedUrl) ?: parseMetaFromPath(pathSegments)
             "detail", "details", "open", "watch" -> parseMetaFromPath(pathSegments)
             "movie", "movies", "series", "show", "shows", "tv" -> {

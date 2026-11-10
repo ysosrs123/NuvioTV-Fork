@@ -34,6 +34,7 @@ private val retainedStandaloneDataStoreNames = setOf(
     "debug_settings",
     "device_local_player_prefs",
     "device_ui_preferences_v2",
+    "format_check_device",
     "profile_lock_state",
     "profile_settings",
     "seek_thumbnails",

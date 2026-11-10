@@ -151,6 +151,18 @@ class WatchProgressServerHistoryTest {
     }
 
     @Test
+    fun aSeriesUnmarkedWithoutItsEpisodesNeverReachesTrackersAsAFilm() = runTest {
+        repository.removeFromHistory("tmdb:603", videoId = null, wholeSeries = true)
+        repository.awaitTrackerHistoryWrites()
+        assertTrue(removed.isEmpty())
+
+        repository.removeFromHistory("tmdb:603")
+        repository.awaitTrackerHistoryWrites()
+        assertEquals(listOf(TrackingMediaKind.MOVIE), removed.map { it.kind })
+        assertEquals(listOf(603L), removed.map { it.ids.tmdb })
+    }
+
+    @Test
     fun watchedStateImportedFromTheServerIsNeverSentToTrackers() = runTest {
         coEvery { serverWatched.trackerIds(any()) } returns TrackingExternalIds(imdb = "tt0944947")
 

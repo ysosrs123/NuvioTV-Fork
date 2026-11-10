@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.core.network.NoDelaySocketFactory
+import com.nuvio.tv.core.network.ReportTransport
 import com.nuvio.tv.data.remote.api.AniSkipApi
 import com.nuvio.tv.data.remote.api.AnimeSkipApi
 import com.nuvio.tv.data.remote.api.AddonApi
@@ -17,7 +18,7 @@ import com.nuvio.tv.data.remote.api.IntroDbApi
 import com.nuvio.tv.data.remote.api.ImdbTapframeApi
 import com.nuvio.tv.data.remote.api.MDBListApi
 import com.nuvio.tv.data.remote.api.ParentalGuideApi
-import com.nuvio.tv.data.remote.api.PlaybackIssueReportApi
+import com.nuvio.tv.data.remote.api.ReportRelayApi
 import com.nuvio.tv.data.remote.api.PremiumizeApi
 import com.nuvio.tv.data.remote.api.RealDebridApi
 import com.nuvio.tv.data.remote.api.SeriesGraphApi
@@ -619,17 +620,17 @@ object NetworkModule {
     @Provides
     @Singleton
     @Named("playbackReports")
-    fun providePlaybackReportsRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit =
+    fun providePlaybackReportsRetrofit(@ApplicationContext context: Context, okHttpClient: OkHttpClient, moshi: Moshi): Retrofit =
         Retrofit.Builder()
             .baseUrl(normalizedBaseUrl(BuildConfig.PLAYBACK_REPORTS_BASE_URL, "https://localhost/"))
-            .client(okHttpClient)
+            .client(ReportTransport.client(context, okHttpClient, BuildConfig.REPORTS_SIGNING_KEY))
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
 
     @Provides
     @Singleton
-    fun providePlaybackIssueReportApi(@Named("playbackReports") retrofit: Retrofit): PlaybackIssueReportApi =
-        retrofit.create(PlaybackIssueReportApi::class.java)
+    fun provideReportRelayApi(@Named("playbackReports") retrofit: Retrofit): ReportRelayApi =
+        retrofit.create(ReportRelayApi::class.java)
 
     @Provides
     @Singleton

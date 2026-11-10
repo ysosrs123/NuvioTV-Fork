@@ -12,6 +12,16 @@ import java.util.Locale
  * language whenever the app language differs from the device's. Returns the receiver unchanged
  * when no app language is set.
  */
+/**
+ * The process default locale for an app language [tag]. With no app language (system default) it
+ * is the device's locale again, so number and date formats do not keep a language set earlier.
+ */
+fun processLocale(tag: String?, systemLocale: Locale): Locale {
+    if (tag.isNullOrEmpty() || tag == LocaleCache.UNSET) return systemLocale
+    val locale = Locale.forLanguageTag(tag)
+    return if (locale.toLanguageTag().isEmpty() || locale.language.isEmpty()) systemLocale else locale
+}
+
 fun Context.withAppLocale(): Context {
     val tag = LocaleCache.localeTag.takeIf { it != LocaleCache.UNSET && it.isNotEmpty() }
         ?: return this

@@ -1,5 +1,6 @@
 package com.nuvio.tv.data.local
 
+import androidx.datastore.core.DataStore
 import android.content.Context
 import androidx.datastore.core.DataMigration
 import androidx.datastore.preferences.core.Preferences
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.map
 
 private val Context.deviceUiDataStore by preferencesDataStore(
     name = "device_ui_preferences_v2",
+    corruptionHandler = androidx.datastore.core.handlers.ReplaceFileCorruptionHandler { androidx.datastore.preferences.core.emptyPreferences() },
     produceMigrations = { context ->
         listOf(DeviceUiMigration { UiScalePreference.storedPercent(context).first() })
     }
@@ -89,3 +91,5 @@ object DeviceUiPreferenceStore {
         }
     }
 }
+
+internal fun Context.backupDeviceUiStore(): DataStore<Preferences> = deviceUiDataStore

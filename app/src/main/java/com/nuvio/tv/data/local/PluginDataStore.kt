@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.nuvio.tv.core.plugin.PluginProviderPlayStat
 import com.nuvio.tv.core.plugin.pluginProviderPlayStats
 import com.nuvio.tv.core.profile.ProfileManager
@@ -81,6 +82,7 @@ class PluginDataStore @Inject constructor(
     private val groupStreamsByRepositoryKey = booleanPreferencesKey(GROUP_STREAMS_BY_REPOSITORY)
     private val pluginProviderPlaysKey = stringPreferencesKey("plugin_provider_plays")
     private val scraperSettingsKey = stringPreferencesKey("scraper_settings")
+    private val syncedReposToReviewKey = stringSetPreferencesKey("synced_repos_to_review")
     private val pluginProviderPlaysAdapter = moshi.adapter<List<String>>(
         Types.newParameterizedType(List::class.java, String::class.java)
     )
@@ -139,6 +141,23 @@ class PluginDataStore @Inject constructor(
         val current = repositories.first().toMutableList()
         current.removeAll { it.id == repoId }
         saveRepositories(current)
+    }
+
+    val syncedReposToReview: Flow<Set<String>> = profileState { pid ->
+        factory.get(pid, FEATURE).data.map { prefs -> prefs[syncedReposToReviewKey] ?: emptySet() }
+    }
+
+    suspend fun markSyncedRepoToReview(repoId: String) {
+        if (sharedPluginWriteBlocked()) return
+        store().edit { prefs -> prefs[syncedReposToReviewKey] = (prefs[syncedReposToReviewKey] ?: emptySet()) + repoId }
+    }
+
+    suspend fun clearSyncedReposToReview(repoIds: Set<String>? = null) {
+        if (sharedPluginWriteBlocked()) return
+        store().edit { prefs ->
+            val remaining = if (repoIds == null) emptySet() else (prefs[syncedReposToReviewKey] ?: emptySet()) - repoIds
+            if (remaining.isEmpty()) prefs.remove(syncedReposToReviewKey) else prefs[syncedReposToReviewKey] = remaining
+        }
     }
 
     suspend fun updateRepository(repo: PluginRepository) {

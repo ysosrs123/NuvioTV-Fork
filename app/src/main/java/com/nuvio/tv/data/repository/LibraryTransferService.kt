@@ -6,6 +6,7 @@ import com.nuvio.tv.core.tracking.TrackingRefreshIntent
 import com.nuvio.tv.core.tracking.providerId
 import com.nuvio.tv.data.local.LibraryPreferences
 import com.nuvio.tv.data.mdblist.MdbListWatchlistBatch
+import com.nuvio.tv.data.wetrakr.withoutWeTrakrCustomListOnly
 import com.nuvio.tv.domain.model.LibraryEntry
 import com.nuvio.tv.domain.model.LibraryListTab
 import com.nuvio.tv.domain.model.LibraryEntryInput
@@ -61,7 +62,9 @@ class LibraryTransferService @Inject constructor(
         } else {
             val provider = trackingProviders.provider(providerId) ?: return emptyList()
             provider.refresh(TrackingRefreshIntent.USER_INITIATED)
-            val items = provider.items.first()
+            val items = provider.items.first().let { entries ->
+                if (providerId == TrackingProviderId.WETRAKR) entries.withoutWeTrakrCustomListOnly() else entries
+            }
             if (watchlistOnly) {
                 // Restrict to the watchlist / plan-to-watch tab so a transfer
                 // doesn't sweep in completed/watching/history and dump it on the

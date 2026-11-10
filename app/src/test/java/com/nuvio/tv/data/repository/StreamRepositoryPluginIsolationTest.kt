@@ -8,6 +8,7 @@ import com.nuvio.tv.core.plugin.PluginManager
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.tmdb.TmdbService
 import com.nuvio.tv.data.local.DebridSettingsDataStore
+import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.remote.api.AddonApi
 import com.nuvio.tv.data.remote.dto.StreamDto
 import com.nuvio.tv.data.remote.dto.StreamResponseDto
@@ -25,8 +26,11 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.toList
@@ -137,7 +141,8 @@ class StreamRepositoryPluginIsolationTest {
                 null,
                 null,
                 "local-plugin-plugin",
-                true
+                true,
+                any()
             )
         } returns flowOf(
             scraper to listOf(
@@ -189,7 +194,7 @@ class StreamRepositoryPluginIsolationTest {
         val harness = newHarness(listOf(scraper))
         coEvery { harness.tmdbService.ensureTmdbId("tt1341338", "movie") } returns "123"
         every {
-            harness.pluginManager.executeScrapersStreaming("123", "movie", null, null, "local-plugin-plugin", any())
+            harness.pluginManager.executeScrapersStreaming("123", "movie", null, null, "local-plugin-plugin", any(), any())
         } returns flowOf(
             scraper to listOf(
                 LocalScraperResult(
@@ -222,6 +227,89 @@ class StreamRepositoryPluginIsolationTest {
     }
 
     @Test
+    fun `slow plugins are stopped at the time limit and earlier results stay`() = runTest {
+        val fast = compatibleScraper().copy(id = "fast", name = "Fast provider")
+        val slow = compatibleScraper().copy(id = "slow", name = "Slow provider")
+        val harness = newHarness(listOf(fast, slow))
+        coEvery { harness.tmdbService.ensureTmdbId("tt1341338", "movie") } returns "123"
+        every {
+            harness.pluginManager.executeScrapersStreaming("123", "movie", null, null, null, false, any())
+        } returns flow {
+            emit(fast to listOf(LocalScraperResult(title = "Fast", url = "https://stream.example/fast.m3u8")))
+            delay((PlayerSettings.DEFAULT_PLUGIN_SEARCH_TIMEOUT_SECONDS + 5) * 1_000L)
+            emit(slow to listOf(LocalScraperResult(title = "Slow", url = "https://stream.example/slow.m3u8")))
+        }
+
+        val results = harness.repository.getStreamsFromAllAddons(
+            type = "movie", videoId = "tt1341338", season = null, episode = null
+        ).toList()
+        val names = (results.last() as NetworkResult.Success).data.map { it.addonName }
+        assertEquals(setOf("Fast Addon", "Fast provider"), names.toSet())
+    }
+
+    @Test
+    fun `plugin streams carry the provider logo`() = runTest {
+        assertPluginLogos(groupByRepository = false)
+    }
+
+    @Test
+    fun `grouped plugin streams keep each provider logo on the row`() = runTest {
+        assertPluginLogos(groupByRepository = true)
+    }
+
+    private suspend fun assertPluginLogos(groupByRepository: Boolean) {
+        val scraper = compatibleScraper().copy(logo = PLUGIN_LOGO)
+        val harness = newHarness(listOf(scraper))
+        every { harness.pluginManager.groupStreamsByRepository } returns flowOf(groupByRepository)
+        every { harness.pluginManager.repositories } returns flowOf(
+            listOf(PluginRepository(id = "repo", name = "Repository", url = "https://repo.example"))
+        )
+        coEvery { harness.tmdbService.ensureTmdbId("tt1341338", "movie") } returns "123"
+        every {
+            harness.pluginManager.executeScrapersStreaming("123", "movie", null, null, null, false, any())
+        } returns flowOf(scraper to listOf(LocalScraperResult(title = "Movie", url = "https://stream.example/m.m3u8")))
+
+        val results = harness.repository.getStreamsFromAllAddons(
+            type = "movie", videoId = "tt1341338", season = null, episode = null
+        ).toList()
+        val group = (results.last() as NetworkResult.Success).data.single { it.addonName != "Fast Addon" }
+        assertEquals(if (groupByRepository) null else PLUGIN_LOGO, group.addonLogo)
+        assertEquals(listOf(PLUGIN_LOGO), group.streams.map { it.addonLogo })
+    }
+
+    @Test
+    fun `plugins are told to hand over their links before the search limit`() = runTest {
+        val harness = newHarness(listOf(compatibleScraper()))
+        val limit = slot<Long>()
+        coEvery { harness.tmdbService.ensureTmdbId("tt1341338", "movie") } returns "123"
+        every {
+            harness.pluginManager.executeScrapersStreaming("123", "movie", null, null, null, false, capture(limit))
+        } returns flowOf()
+
+        harness.repository.getStreamsFromAllAddons(
+            type = "movie", videoId = "tt1341338", season = null, episode = null
+        ).toList()
+        assertEquals(PlayerSettings.DEFAULT_PLUGIN_SEARCH_TIMEOUT_SECONDS * 1_000L - 1_500L, limit.captured)
+    }
+
+    @Test
+    fun `the icon size placeholder is filled in`() = runTest {
+        val scraper = compatibleScraper().copy(logo = "https://icons.example/?domain=a&sz=%size%")
+        val harness = newHarness(listOf(scraper))
+        coEvery { harness.tmdbService.ensureTmdbId("tt1341338", "movie") } returns "123"
+        every {
+            harness.pluginManager.executeScrapersStreaming("123", "movie", null, null, null, false, any())
+        } returns flowOf(scraper to listOf(LocalScraperResult(title = "Movie", url = "https://stream.example/m.m3u8")))
+
+        val results = harness.repository.getStreamsFromAllAddons(
+            type = "movie", videoId = "tt1341338", season = null, episode = null
+        ).toList()
+        val group = (results.last() as NetworkResult.Success).data.single { it.addonName != "Fast Addon" }
+        assertEquals("https://icons.example/?domain=a&sz=128", group.addonLogo)
+        assertEquals(listOf("https://icons.example/?domain=a&sz=128"), group.streams.map { it.addonLogo })
+    }
+
+    @Test
     fun `repository grouping preserves each plugin provider name`() = runTest {
         assertPluginProviderNames(groupByRepository = true)
     }
@@ -243,7 +331,7 @@ class StreamRepositoryPluginIsolationTest {
         )
         coEvery { harness.tmdbService.ensureTmdbId("tt1341338", "movie") } returns "123"
         every {
-            harness.pluginManager.executeScrapersStreaming("123", "movie", null, null, null, false)
+            harness.pluginManager.executeScrapersStreaming("123", "movie", null, null, null, false, any())
         } returns
             flowOf(*scrapers.map { scraper ->
                 scraper to listOf(LocalScraperResult(
@@ -378,6 +466,7 @@ class StreamRepositoryPluginIsolationTest {
 
     private companion object {
         const val ADDON_LOGO = "https://addon.example/logo.png"
+        const val PLUGIN_LOGO = "https://repo.example/icon.png"
     }
 
     private data class Harness(

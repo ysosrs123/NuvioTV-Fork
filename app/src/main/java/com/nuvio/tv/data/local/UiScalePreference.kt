@@ -1,5 +1,7 @@
 package com.nuvio.tv.data.local
 
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.core.DataStore
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -7,7 +9,10 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-private val Context.uiScaleDataStore by preferencesDataStore(name = "ui_scale_prefs")
+private val Context.uiScaleDataStore by preferencesDataStore(
+    name = "ui_scale_prefs",
+    corruptionHandler = androidx.datastore.core.handlers.ReplaceFileCorruptionHandler { androidx.datastore.preferences.core.emptyPreferences() }
+)
 
 /**
  * App-wide UI scale (percent). Standalone store so the value is readable at the
@@ -27,3 +32,5 @@ object UiScalePreference {
         context.uiScaleDataStore.edit { prefs -> prefs[key] = percent.coerceIn(85, 115) }
     }
 }
+
+internal fun Context.backupUiScaleStore(): DataStore<Preferences> = uiScaleDataStore

@@ -28,7 +28,8 @@ data class TmdbCollectionSource(
     val tmdbId: Int? = null,
     val mediaType: TmdbCollectionMediaType = TmdbCollectionMediaType.MOVIE,
     val sortBy: String = TmdbCollectionSort.POPULAR_DESC.value,
-    val filters: TmdbCollectionFilters = TmdbCollectionFilters()
+    val filters: TmdbCollectionFilters = TmdbCollectionFilters(),
+    val ids: List<Int> = emptyList()
 ) : CollectionSource
 
 @Immutable
@@ -113,7 +114,14 @@ data class TmdbCollectionFilters(
     val year: Int? = null,
     val watchRegion: String? = null,
     val withWatchProviders: String? = null,
-    val withoutWatchProviders: String? = null
+    val withoutWatchProviders: String? = null,
+    val voteCountLte: Int? = null,
+    val withRuntimeLte: Int? = null,
+    val withRuntimeGte: Int? = null,
+    val withStatus: String? = null,
+    val certificationCountry: String? = null,
+    val certificationLte: String? = null,
+    val withType: String? = null
 )
 
 @Immutable
@@ -129,7 +137,8 @@ data class CollectionFolder(
     val sources: List<CollectionSource> = emptyList(),
     val heroBackdropUrl: String? = null,
     val heroVideoUrl: String? = null,
-    val titleLogoUrl: String? = null
+    val titleLogoUrl: String? = null,
+    val scoutMix: ScoutMixTile? = null
 ) {
     val catalogSources: List<CollectionCatalogSource>
         get() = sources.mapNotNull { source ->

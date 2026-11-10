@@ -82,7 +82,8 @@ data class ScraperInfo(
     val contentLanguage: List<String>,
     val repositoryId: String,
     val formats: List<String>?,
-    val type: RepositoryType = RepositoryType.NUVIO_JS
+    val type: RepositoryType = RepositoryType.NUVIO_JS,
+    val tags: List<String> = emptyList()
 ) {
     fun supportsType(type: String): Boolean {
         val normalizedType = normalizePluginType(type)
@@ -144,8 +145,11 @@ data class ExternalPluginEntry(
     val iconUrl: String? = null,
     val url: String,
     val fileSize: Long? = null,
-    val repositoryUrl: String? = null
+    val repositoryUrl: String? = null,
+    val language: String? = null
 )
+
+enum class NewRepoProviders { NORMAL, OFF_IF_SEVERAL, ALL_OFF }
 
 const val PLUGIN_BINGE_GROUP_PREFIX = "local-plugin-"
 private const val PLUGIN_BINGE_GROUP_SEPARATOR = "|"

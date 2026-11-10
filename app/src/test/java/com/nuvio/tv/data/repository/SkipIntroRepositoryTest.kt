@@ -45,18 +45,18 @@ class SkipIntroRepositoryTest {
 
     @Test fun `missing TVDB mapping still permits MAL and Kitsu Anime-Skip results`() = runTest {
         for (result in listOf(repository.getSkipIntervalsForMal("20", 1), repository.getSkipIntervalsForKitsu("40", 1))) {
-            assertEquals(listOf("animeskip", "aniskip"), result.map { it.provider })
-            assertEquals(listOf(5.0, 1200.0), result.map { it.startTime })
+            assertEquals(listOf("aniskip", "aniskip"), result.map { it.provider })
+            assertEquals(listOf(10.0, 1200.0), result.map { it.startTime })
         }
         coVerify(exactly = 0) { introDb.getSegments(any(), any(), any(), any()) }
     }
 
     @Test fun `settings and profile changes cannot reuse stale interval cache`() = runTest {
-        assertEquals("animeskip", repository.getSkipIntervalsForMal("20", 1).first().provider)
+        assertEquals("aniskip", repository.getSkipIntervalsForMal("20", 1).first().provider)
         snapshot = snapshot.copy(enabled = false)
         assertEquals("aniskip", repository.getSkipIntervalsForMal("20", 1).first().provider)
         snapshot = AnimeSkipSettingsSnapshot(2, true, "other-client")
-        assertEquals("animeskip", repository.getSkipIntervalsForMal("20", 1).first().provider)
+        assertEquals("aniskip", repository.getSkipIntervalsForMal("20", 1).first().provider)
         coVerify(exactly = 2) { animeSkip.query("other-client", any()) }
         coVerify(exactly = 3) { aniSkip.getSkipTimes("20", 1, any(), any()) }
     }

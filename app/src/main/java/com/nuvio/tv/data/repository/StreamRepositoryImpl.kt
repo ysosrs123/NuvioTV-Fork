@@ -9,6 +9,7 @@ import com.nuvio.tv.core.logging.redactLinksForLog
 import com.nuvio.tv.core.debrid.DebridStreamPresentation
 import com.nuvio.tv.core.debrid.LocalDebridAvailabilityService
 import com.nuvio.tv.core.plugin.PluginManager
+import com.nuvio.tv.core.plugin.pluginSearchKey
 import com.nuvio.tv.domain.model.pluginBingeGroup
 import com.nuvio.tv.core.plugin.resolvePluginSeasonEpisode
 import com.nuvio.tv.core.profile.ProfileManager
@@ -27,6 +28,10 @@ import com.nuvio.tv.data.mediaserver.serverSourceLogLine
 import com.nuvio.tv.data.mediaserver.serverSourceOutcome
 import com.nuvio.tv.data.remote.api.AddonApi
 import com.nuvio.tv.domain.model.Addon
+import com.nuvio.tv.core.formatcheck.FormatCheckStore
+import com.nuvio.tv.core.formatcheck.FormatCheckStreamRules
+import com.nuvio.tv.core.formatcheck.FormatFamily
+import com.nuvio.tv.core.formatcheck.StreamAction
 import com.nuvio.tv.domain.model.AddonStreams
 import com.nuvio.tv.domain.model.DebridSettings
 import com.nuvio.tv.domain.model.LocalScraperResult
@@ -51,6 +56,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.TimeoutCancellationException
@@ -69,6 +75,8 @@ private const val TAG = "StreamRepositoryImpl"
 
 /** Deadline for loading one media server's streams. */
 private const val SERVER_SOURCE_FETCH_TIMEOUT_MS = 15_000L
+private const val PLUGIN_LINK_DELIVERY_MARGIN_MS = 1_500L
+private const val PLUGIN_ICON_SIZE = "128"
 
 class StreamRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -94,6 +102,17 @@ class StreamRepositoryImpl @Inject constructor(
      * one upstream service is slow or down. Results stream out as each addon lands,
      * so a slow addon never holds back the others.
      */
+    private suspend fun pluginSearchTimeoutMs(): Long {
+        val seconds = try {
+            playerSettingsDataStore.playerSettings.first().pluginSearchTimeoutSeconds
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            PlayerSettings.DEFAULT_PLUGIN_SEARCH_TIMEOUT_SECONDS
+        }
+        return seconds * 1_000L
+    }
+
     private suspend fun addonStreamTimeoutMs(): Long {
         val seconds = try {
             playerSettingsDataStore.playerSettings.first().addonStreamTimeoutSeconds
@@ -208,6 +227,28 @@ class StreamRepositoryImpl @Inject constructor(
                 )
             }
         )
+    }.withoutHiddenFormats()
+
+    private suspend fun hiddenFormatRules(): Map<FormatFamily, StreamAction> = try {
+        FormatCheckStore.rules(context).first()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        emptyMap()
+    }
+
+    private fun Flow<NetworkResult<List<AddonStreams>>>.withoutHiddenFormats(): Flow<NetworkResult<List<AddonStreams>>> {
+        val upstream = this
+        return flow {
+            val rules = hiddenFormatRules()
+            if (StreamAction.HIDE !in rules.values) {
+                emitAll(upstream)
+            } else {
+                emitAll(upstream.map { result ->
+                    if (result is NetworkResult.Success) NetworkResult.Success(FormatCheckStreamRules.withoutHidden(result.data, rules)) else result
+                })
+            }
+        }
     }
 
     override fun getStreamsForPrefetch(
@@ -225,7 +266,7 @@ class StreamRepositoryImpl @Inject constructor(
             preferredPluginOnly = false,
             continuePluginOnly = false
         ))
-    }
+    }.withoutHiddenFormats()
 
     override suspend fun getCachedStreamsFromAllAddons(
         type: String,
@@ -234,7 +275,7 @@ class StreamRepositoryImpl @Inject constructor(
         episode: Int?
     ): List<AddonStreams>? = streamSearchSessions.peek(
         buildStreamSearchRequestKey(captureSourceConfiguration(), type, videoId, season, episode)
-    )
+    )?.let { FormatCheckStreamRules.withoutHidden(it, hiddenFormatRules()) }
 
     private fun buildStreamSearchRequestKey(
         sourceConfiguration: StreamSourceConfigurationSnapshot,
@@ -530,6 +571,13 @@ class StreamRepositoryImpl @Inject constructor(
                             videoId = videoId,
                             season = season,
                             episode = episode
+                        )
+                        pluginManager.aliasSearch(
+                            contentKey = pluginSearchKey(type, videoId, season, episode),
+                            tmdbId = pluginRequest.id,
+                            mediaType = pluginRequest.mediaType,
+                            season = pluginSeason,
+                            episode = pluginEpisode
                         )
                         val runPlugins: suspend () -> Unit = {
                             streamLocalPlugins(
@@ -833,31 +881,41 @@ class StreamRepositoryImpl @Inject constructor(
                 emptyMap()
             }
 
-            // Collect streaming results from each scraper
-            pluginManager.executeScrapersStreaming(
-                tmdbId = pluginId,
-                mediaType = mediaType,
-                season = season,
-                episode = episode,
-                priorityBingeGroup = priorityBingeGroup,
-                preferredPluginOnly = preferredPluginOnly
-            ).collect { (scraper, results) ->
-                if (results.isNotEmpty()) {
-                    val addonName = scraper.pluginAddonName(groupByRepository, repositoriesById)
-                    val addonStreams = AddonStreams(
-                        addonName = addonName,
-                        addonLogo = null,
-                        streams = results.map { result -> result.toPluginStream(scraper, addonName) }
-                    )
-                    resultChannel.send(addonStreams)
-                    Log.d(TAG, "Streamed ${results.size} results from ${scraper.name}")
+            val deadlineMs = pluginSearchTimeoutMs()
+            val finished = withTimeoutOrNull(deadlineMs) {
+                pluginManager.executeScrapersStreaming(
+                    tmdbId = pluginId,
+                    mediaType = mediaType,
+                    season = season,
+                    episode = episode,
+                    priorityBingeGroup = priorityBingeGroup,
+                    preferredPluginOnly = preferredPluginOnly,
+                    linkTimeLimitMs = (deadlineMs - PLUGIN_LINK_DELIVERY_MARGIN_MS).coerceAtLeast(0L)
+                ).collect { (scraper, results) ->
+                    if (results.isNotEmpty()) {
+                        val addonName = scraper.pluginAddonName(groupByRepository, repositoriesById)
+                        val addonStreams = AddonStreams(
+                            addonName = addonName,
+                            addonLogo = if (groupByRepository) null else scraper.rowLogo(),
+                            streams = results.map { result -> result.toPluginStream(scraper, addonName) }
+                        )
+                        resultChannel.send(addonStreams)
+                        Log.d(TAG, "Streamed ${results.size} results from ${scraper.name}")
+                    }
                 }
+            }
+            if (finished == null) {
+                Log.w(TAG, "Plugin search stopped at its ${deadlineMs}ms time limit; results so far are kept")
             }
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             Log.e(TAG, "Failed to stream plugins: ${e.message}", e)
         }
     }
+
+    private fun ScraperInfo.rowLogo(): String? = logo?.takeIf { it.isNotBlank() }
+        ?.replace("%exact_size%", PLUGIN_ICON_SIZE)
+        ?.replace("%size%", PLUGIN_ICON_SIZE)
 
     private fun ScraperInfo.pluginAddonName(
         groupByRepository: Boolean,
@@ -886,7 +944,7 @@ class StreamRepositoryImpl @Inject constructor(
             url = url,
             addonName = addonName,
             pluginSourceName = scraper.name,
-            addonLogo = null,
+            addonLogo = scraper.rowLogo(),
             description = buildDescription(this),
             behaviorHints = StreamBehaviorHints(
                 notWebReady = null,

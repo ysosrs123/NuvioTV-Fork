@@ -27,6 +27,7 @@ import com.nuvio.tv.data.remote.dto.trakt.TraktUserEpisodeHistoryItemDto
 import com.nuvio.tv.data.remote.dto.trakt.TraktWatchedMovieItemDto
 import com.nuvio.tv.data.remote.dto.trakt.TraktWatchedShowItemDto
 import com.nuvio.tv.domain.model.WatchProgress
+import com.nuvio.tv.domain.model.WatchedItem
 import com.nuvio.tv.domain.repository.MetaRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -51,6 +52,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.dropWhile
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -175,6 +177,7 @@ class TraktProgressService @Inject constructor(
     private val optimisticProgress = MutableStateFlow<Map<String, OptimisticProgressEntry>>(emptyMap())
     private val metadataState = MutableStateFlow<Map<String, ContentMetadata>>(emptyMap())
     private val watchedMoviesState = MutableStateFlow<Set<String>>(emptySet())
+    private val watchedMovieHistory = MutableStateFlow<List<WatchedItem>>(emptyList())
     private val watchedMoviesRestored = MutableStateFlow(false)
     private val watchedShowSeedsState = MutableStateFlow<List<WatchProgress>>(emptyList())
     /** Content IDs of shows dropped on Trakt (from users/hidden/progress_watched). */
@@ -350,6 +353,7 @@ class TraktProgressService @Inject constructor(
         optimisticProgress.value = emptyMap()
         metadataState.value = emptyMap()
         watchedMoviesState.value = emptySet()
+        watchedMovieHistory.value = emptyList()
         watchedMoviesRestored.value = false
         watchedShowSeedsState.value = emptyList()
         hiddenProgressShowIds.value = emptySet()
@@ -586,6 +590,29 @@ class TraktProgressService @Inject constructor(
         return hasLoadedRemoteProgress
     }
 
+    /** Finished films and shows as Trakt lists them, one entry a title, newest first. */
+    fun observeTasteHistory(): Flow<List<WatchedItem>> = flow {
+        getWatchedMoviesSnapshot(forceRefresh = !hasLoadedWatchedMovies)
+        getWatchedShowSeedsSnapshot(forceRefresh = false)
+        emitAll(
+            combine(watchedMovieHistory, observeWatchedShowSeeds()) { movies, shows ->
+                val episodes = getWatchedShowEpisodes()
+                (movies + shows.flatMap { show ->
+                    val seen = episodes[show.contentId].orEmpty().ifEmpty { setOf<Pair<Int?, Int?>>(null to null) }
+                    seen.map { (season, episode) ->
+                        WatchedItem(show.contentId, "series", show.name, season, episode, show.lastWatched, show.poster)
+                    }
+                }).sortedByDescending { it.watchedAt }
+            }
+        )
+    }.distinctUntilChanged()
+
+    private fun watchedMovieToItem(item: TraktWatchedMovieItemDto): WatchedItem? {
+        val movie = item.movie ?: return null
+        val id = movie.ids?.tmdb?.let { "tmdb:$it" } ?: movie.ids?.imdb?.takeIf { it.isNotBlank() } ?: return null
+        return WatchedItem(contentId = id, contentType = "movie", title = movie.title.orEmpty(), watchedAt = parseIsoToMillis(item.lastWatchedAt))
+    }
+
     fun observeWatchedShowSeeds(): Flow<List<WatchProgress>> {
         return combine(
             watchedShowSeedsState,
@@ -793,6 +820,7 @@ class TraktProgressService @Inject constructor(
                         if (profileManager.activeProfileId.value != profileId) return@synchronized
                         watchedMoviesAccountGeneration.incrementAndGet()
                         watchedMoviesState.value = emptySet()
+        watchedMovieHistory.value = emptyList()
                         watchedMoviesUpdatedAtMs = 0L
                         hasLoadedWatchedMovies = false
                         watchedMoviesStale = true
@@ -1509,6 +1537,7 @@ class TraktProgressService @Inject constructor(
                     profileManager.activeProfileId.value == profileId
                 if (current) {
                     watchedMoviesState.value = watchedMovies
+                    watchedMovieHistory.value = watchedMovieItems.mapNotNull(::watchedMovieToItem)
                     watchedMoviesUpdatedAtMs = System.currentTimeMillis()
                     hasLoadedWatchedMovies = true
                     watchedMoviesStale = false

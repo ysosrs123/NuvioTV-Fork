@@ -20,6 +20,7 @@ internal fun captureMissingPresentationChoices(
             "landscape_poster_scope",
             "watched_titles_mode",
             "addon_landscape_backdrop_logo",
+            "hero_description_auto_scroll_enabled",
             "continue_watching_card_style",
             "poster_card_width_dp",
             "poster_card_height_dp",
@@ -38,7 +39,8 @@ internal fun captureMissingPresentationChoices(
             "speculative_stream_search_enabled",
             "show_source_line_badges",
             "show_source_line_release_group",
-            "addon_stream_timeout_seconds"
+            "addon_stream_timeout_seconds",
+            "plugin_search_timeout_seconds"
         )
         CalendarSettingsDataStore.FEATURE -> CalendarSettingsKeys.names
         else -> emptySet()

@@ -9,4 +9,6 @@ sealed interface AppDeepLink {
     data class AddonInstall(
         val manifestUrl: String
     ) : AppDeepLink
+
+    data object ScoutAsk : AppDeepLink
 }

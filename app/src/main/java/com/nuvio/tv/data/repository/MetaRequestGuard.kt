@@ -10,6 +10,9 @@ class MetaCaller(val name: String) : AbstractCoroutineContextElement(MetaCaller)
     companion object Key : CoroutineContext.Key<MetaCaller>
 }
 
+/** A title page the viewer opened: it asks even an addon that is resting, and leaves the rest as it was. */
+internal const val TITLE_PAGE_META_CALLER = "title-page"
+
 /** Continue Watching lookups, which can wait while a film plays. */
 internal fun isBackgroundMetaCaller(caller: String): Boolean = caller == "cw" || caller.startsWith("cw-")
 

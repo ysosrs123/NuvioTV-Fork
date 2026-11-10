@@ -1,5 +1,7 @@
 package com.nuvio.tv.core.torrent
 
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.core.DataStore
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -99,3 +101,5 @@ class TorrentSettings @Inject constructor(
         }
     }
 }
+
+internal fun Context.backupTorrentStore(): DataStore<Preferences> = torrentDataStore

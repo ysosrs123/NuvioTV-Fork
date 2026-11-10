@@ -19,6 +19,8 @@ private val Context.appOnboardingDataStore: DataStore<Preferences> by preference
     corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() }
 )
 
+internal fun Context.backupOnboardingStore(): DataStore<Preferences> = appOnboardingDataStore
+
 @Singleton
 class AppOnboardingDataStore @Inject constructor(
     @ApplicationContext private val context: Context

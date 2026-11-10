@@ -1,5 +1,8 @@
 package com.nuvio.tv.core.profile
 
+import android.security.keystore.KeyPermanentlyInvalidatedException
+import android.util.Log
+import javax.crypto.AEADBadTagException
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
@@ -29,8 +32,11 @@ class ProtectedProfilePreferences(
             cipher.init(Cipher.DECRYPT_MODE, secretKey(), GCMParameterSpec(128, decode(parts[0])))
             cipher.updateAAD("$keyAlias:$key".toByteArray(Charsets.UTF_8))
             cipher.doFinal(decode(parts[1])).toString(Charsets.UTF_8)
-        } catch (_: Exception) {
-            if (!preferences.edit().remove(key).commit()) throw IOException("Unable to clear protected credentials")
+        } catch (error: Exception) {
+            Log.w(TAG, "Saved sign-in not read: ${error.javaClass.simpleName}")
+            if (isPermanentCredentialFailure(error) && !preferences.edit().remove(key).commit()) {
+                throw IOException("Unable to clear protected credentials")
+            }
             null
         }
     }
@@ -70,4 +76,12 @@ class ProtectedProfilePreferences(
 
     private fun encode(value: ByteArray): String = Base64.encodeToString(value, Base64.NO_WRAP)
     private fun decode(value: String): ByteArray = Base64.decode(value, Base64.NO_WRAP)
+}
+
+private const val TAG = "ProtectedPrefs"
+
+/** A one-off keystore error must not cost a sign-in: only a value that can never be read again is removed. */
+internal fun isPermanentCredentialFailure(error: Exception): Boolean = when (error) {
+    is IllegalArgumentException, is AEADBadTagException, is KeyPermanentlyInvalidatedException -> true
+    else -> false
 }

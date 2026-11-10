@@ -518,7 +518,12 @@ class WatchProgressRepositoryImpl @Inject constructor(
     override val watchedItems: Flow<List<WatchedItem>>
         get() = activeProgressProviderFlow().flatMapLatest { provider ->
             provider?.watchedItems ?: watchedItemsPreferences.allItems
-        }.distinctUntilChanged()
+        }.distinctUntilChanged().flowOn(Dispatchers.Default)
+
+    override val tasteHistory: Flow<List<WatchedItem>>
+        get() = activeProgressProviderFlow().flatMapLatest { provider ->
+            provider?.tasteHistory ?: watchedItemsPreferences.allItems
+        }.distinctUntilChanged().flowOn(Dispatchers.Default)
 
     override fun getProgress(contentId: String): Flow<WatchProgress?> {
         return profileManager.activeProfileId.flatMapLatest { profileId ->
@@ -948,7 +953,13 @@ class WatchProgressRepositoryImpl @Inject constructor(
         triggerRemoteSync(profileId = profileId)
     }
 
-    override suspend fun removeFromHistory(contentId: String, videoId: String?, season: Int?, episode: Int?) {
+    override suspend fun removeFromHistory(
+        contentId: String,
+        videoId: String?,
+        season: Int?,
+        episode: Int?,
+        wholeSeries: Boolean
+    ) {
         val profileId = profileManager.activeProfileId.value
         val watchedGeneration = watchedItemsPreferences.captureGeneration(profileId)
         val remoteDeleteKeys = resolveRemoteDeleteKeys(contentId, season, episode, profileId = profileId)
@@ -965,7 +976,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
         connectedProgressProviders().forEach { provider ->
             provider.applyOptimisticRemoval(contentId, season, episode)
         }
-        broadcastHistoryRemoval(profileId, listOf(media))
+        if (!wholeSeries) broadcastHistoryRemoval(profileId, listOf(media))
         syncServerWatched(
             listOf(ServerWatchMark(contentId, if (season != null || episode != null) "series" else "movie", videoId, season, episode)),
             played = false,

@@ -158,6 +158,60 @@ class MetaRepositoryRateLimitTest {
     }
 
     @Test
+    fun `tmdb ids nobody claims never stop an addon being asked for its own`() = runTest {
+        val repository = newRepository(
+            apiAnswering { url -> if ("tmdb" in url) notFound() else found(url) },
+            addon("cinemeta", "https://cinemeta.example")
+        )
+
+        repeat(12) { n -> repository.getMetaFromAllAddons("series", "tmdb:%d".format(1000 + n)).last() }
+
+        assertEquals("the unclaimed ones rest on their own", 8, requested.size)
+        assertTrue(repository.getMetaFromAllAddons("series", "tt0101188").last() is NetworkResult.Success)
+    }
+
+    @Test
+    fun `bare numbers from Continue Watching never stop an addon being asked for its own`() = runTest {
+        val repository = newRepository(
+            apiAnswering { url -> if ("/tt" in url) found(url) else notFound() },
+            addon("cinemeta", "https://cinemeta.example")
+        )
+
+        repeat(12) { n -> repository.getMetaFromAllAddons("series", (1000 + n).toString()).last() }
+
+        assertTrue(repository.getMetaFromAllAddons("series", "tt0101188").last() is NetworkResult.Success)
+    }
+
+    @Test
+    fun `a title page asks a resting addon and the rest carries on`() = runTest {
+        var answers = false
+        val repository = newRepository(
+            apiAnswering { url -> if (answers) found(url) else notFound() },
+            addon("cinemeta", "https://cinemeta.example")
+        )
+        repeat(8) { n -> repository.getMetaFromAllAddons("series", "tt10000%02d".format(n)).last() }
+        answers = true
+        assertTrue(repository.getMetaFromAllAddons("series", "tt0101188").last() is NetworkResult.Error)
+        assertEquals(8, requested.size)
+
+        val opened = withContext(MetaCaller(TITLE_PAGE_META_CALLER)) {
+            repository.getMetaFromAllAddons("series", "tt0101188").last()
+        }
+
+        assertTrue(opened is NetworkResult.Success)
+        assertEquals(9, requested.size)
+        assertTrue(repository.getMetaFromAllAddons("series", "tt0000099").last() is NetworkResult.Error)
+        assertEquals("background lookups still rest", 9, requested.size)
+    }
+
+    @Test
+    fun `an addon claims only ids its manifest names`() = runTest {
+        val repository = newRepository(apiAnswering { notFound() }, addon("cinemeta", "https://cinemeta.example"))
+        assertTrue(repository.addonClaimsMeta("tt0101188"))
+        assertTrue(!repository.addonClaimsMeta("tmdb:3452"))
+    }
+
+    @Test
     fun `an addon whose meta covers only its own ids stops being asked once it keeps finding nothing`() = runTest {
         val repository = newRepository(apiAnswering { notFound() }, ownIdsOnly("aios", "https://aio.example/config"))
 
@@ -229,6 +283,26 @@ class MetaRepositoryRateLimitTest {
 
         assertTrue(show is NetworkResult.Success)
         assertEquals(8, requested.count { it.startsWith("https://aio.example") })
+    }
+
+    @Test
+    fun `a title skipped while its only addon is paused is not remembered as missing`() = runTest {
+        var limited = true
+        val repository = newRepository(
+            apiAnswering { url -> if (limited) tooMany("30") else found(url) },
+            ownIdsOnly("aios", "https://aio.example/config")
+        )
+        repository.getMetaFromAllAddons("movie", "tt0000001").last()
+
+        val skipped = repository.getMetaFromAllAddons("movie", "tt0000002").last()
+        assertEquals(1, requested.size)
+        assertNull("a paused addon keeps the title retryable", (skipped as NetworkResult.Error).code)
+
+        limited = false
+        repository.rateLimits.clear()
+
+        assertTrue(repository.getMetaFromAllAddons("movie", "tt0000002").last() is NetworkResult.Success)
+        assertEquals(2, requested.size)
     }
 
     private fun ownIdsOnly(key: String, baseUrl: String) = addon(key, baseUrl).copy(

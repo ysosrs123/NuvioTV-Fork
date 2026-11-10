@@ -1,5 +1,7 @@
 package com.nuvio.tv.data.local
 
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.core.DataStore
 import android.content.Context
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.MutablePreferences
@@ -23,7 +25,10 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 // Device-level appearance also acts as the pre-profile snapshot. No hardware values go here.
-private val Context.v2AppearanceDataStore by preferencesDataStore(name = "appearance_v2")
+private val Context.v2AppearanceDataStore by preferencesDataStore(
+    name = "appearance_v2",
+    corruptionHandler = androidx.datastore.core.handlers.ReplaceFileCorruptionHandler { androidx.datastore.preferences.core.emptyPreferences() }
+)
 
 object V2AppearancePreferenceStore {
     private val style = stringPreferencesKey("visual_style")
@@ -86,3 +91,5 @@ object V2AppearancePreferenceStore {
         p[blurStrength] = next.glassBlurStrengthPercent.coerceIn(0, 100)
     }
 }
+
+internal fun Context.backupAppearanceStore(): DataStore<Preferences> = v2AppearanceDataStore

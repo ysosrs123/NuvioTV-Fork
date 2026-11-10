@@ -223,3 +223,5 @@ internal data class ProfileJson(
         )
     }
 }
+
+internal fun Context.backupProfilesStore(): DataStore<Preferences> = profileDataStore

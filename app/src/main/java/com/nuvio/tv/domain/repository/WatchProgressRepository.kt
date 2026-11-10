@@ -22,6 +22,10 @@ interface WatchProgressRepository {
 
     val watchedItems: Flow<List<WatchedItem>>
         get() = flowOf(emptyList())
+
+    /** Everything the user has finished, from whichever source they keep it in. */
+    val tasteHistory: Flow<List<WatchedItem>>
+        get() = watchedItems
     
     /**
      * Get watch progress for a specific content item (movie or series)
@@ -140,7 +144,17 @@ interface WatchProgressRepository {
     
     suspend fun removeProgress(contentId: String, season: Int? = null, episode: Int? = null)
 
-    suspend fun removeFromHistory(contentId: String, videoId: String? = null, season: Int? = null, episode: Int? = null)
+    /**
+     * [wholeSeries] is a series whose episode list could not be loaded. Trackers are left out: without
+     * episodes the removal would reach them as a film with the series' id, which can be a different title.
+     */
+    suspend fun removeFromHistory(
+        contentId: String,
+        videoId: String? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        wholeSeries: Boolean = false
+    )
 
     /**
      * Mark content as completed

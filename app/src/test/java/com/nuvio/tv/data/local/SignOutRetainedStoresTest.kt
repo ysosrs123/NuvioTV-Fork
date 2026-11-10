@@ -7,7 +7,7 @@ import org.junit.Test
 class SignOutRetainedStoresTest {
     @Test
     fun `device settings stores survive sign-out`() {
-        listOf("seek_thumbnails", "ui_scale_prefs", "appearance_v2", "device_ui_preferences_v2", "device_local_player_prefs", "torrent_settings")
+        listOf("seek_thumbnails", "ui_scale_prefs", "appearance_v2", "device_ui_preferences_v2", "device_local_player_prefs", "torrent_settings", "format_check_device")
             .forEach { assertFalse(it, isProfileScopedDataStoreFile("$it.preferences_pb")) }
     }
 

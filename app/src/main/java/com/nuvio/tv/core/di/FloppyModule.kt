@@ -10,10 +10,12 @@ import com.nuvio.tv.core.profile.ProfileScopedCredentialStore
 import com.nuvio.tv.core.tracking.TrackingHistoryWriter
 import com.nuvio.tv.core.tracking.TrackingProvider
 import com.nuvio.tv.data.floppy.AndroidFloppyAuthPersistence
+import com.nuvio.tv.data.floppy.AndroidFloppyPlayPersistence
 import com.nuvio.tv.data.floppy.FloppyApiClient
 import com.nuvio.tv.data.floppy.FloppyAuthRepository
 import com.nuvio.tv.data.floppy.FloppyAuthStore
 import com.nuvio.tv.data.floppy.FloppyHttpEngine
+import com.nuvio.tv.data.floppy.FloppyPlayLedger
 import com.nuvio.tv.data.floppy.FloppyTrackingHistoryWriter
 import com.nuvio.tv.data.floppy.FloppyTrackingProvider
 import com.nuvio.tv.data.floppy.OkHttpFloppyEngine
@@ -75,6 +77,10 @@ object FloppyModule {
     @Singleton
     fun api(http: FloppyHttpEngine, auth: FloppyAuthRepository, store: FloppyAuthStore) =
         FloppyApiClient(http, auth, store)
+
+    @Provides
+    @Singleton
+    fun playLedger(@ApplicationContext context: Context) = FloppyPlayLedger(AndroidFloppyPlayPersistence(context))
 
     @Provides
     @IntoSet

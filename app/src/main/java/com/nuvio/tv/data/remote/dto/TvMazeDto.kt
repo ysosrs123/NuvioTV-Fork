@@ -8,6 +8,8 @@ data class TvMazeShowDto(
     @Json(name = "id") val id: Int,
     @Json(name = "name") val name: String? = null,
     @Json(name = "status") val status: String? = null,
+    @Json(name = "type") val type: String? = null,
+    @Json(name = "language") val language: String? = null,
     @Json(name = "network") val network: TvMazeNetworkDto? = null,
     @Json(name = "webChannel") val webChannel: TvMazeNetworkDto? = null,
     @Json(name = "externals") val externals: TvMazeExternalsDto? = null,

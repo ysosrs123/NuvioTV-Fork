@@ -17,6 +17,9 @@ interface MetaRepository {
         sourceAddonBaseUrl: String? = null
     ): Flow<NetworkResult<Meta>>
 
+    /** Whether an installed addon names this kind of id in its manifest, rather than just accepting anything. */
+    suspend fun addonClaimsMeta(id: String): Boolean = true
+
     fun getMetaFromPrimaryAddon(
         type: String,
         id: String

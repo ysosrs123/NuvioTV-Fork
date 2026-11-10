@@ -264,8 +264,14 @@ class MetaRepositoryImpl @Inject constructor(
             null
         }
 
-    private fun noteMetaMissing(addon: Addon) {
-        if (metaMisses.recordMiss(normalizedAddonKey(addon.baseUrl))) {
+    /** Ids an addon never claimed count apart, so they can't stop it being asked for the ones it does. */
+    private fun Addon.missKey(id: String): String =
+        normalizedAddonKey(baseUrl).let { if (supportsMetaId(id)) it else "$it|unclaimed" }
+
+    private fun noteMetaMissing(addon: Addon, type: String, id: String, fromTitlePage: Boolean) {
+        Log.d(TAG, "Meta not found addonId=${addon.id} type=$type id=$id")
+        if (fromTitlePage) return
+        if (metaMisses.recordMiss(addon.missKey(id))) {
             Log.w(TAG, "Meta: ${addon.name} answered not found for several titles in a row, not asking it for a while")
         }
     }
@@ -423,7 +429,8 @@ class MetaRepositoryImpl @Inject constructor(
         }
         val addons = installedAddonsOrEmpty()
         val addonSet = addonSetKey(addons)
-        val flightKey = "$cacheKey|$addonSet"
+        val fromTitlePage = currentCaller() == TITLE_PAGE_META_CALLER
+        val flightKey = "$cacheKey|$addonSet" + if (fromTitlePage) "|$TITLE_PAGE_META_CALLER" else ""
 
         // Joining a lookup that is already running shares its outcome, failures included.
         // Running the loop again after a shared failure doubled the requests to an addon that
@@ -504,10 +511,20 @@ class MetaRepositoryImpl @Inject constructor(
 
             for (addon in fallbackAddons) {
                 attemptedAddonNames += addon.displayName
-                if (metaMisses.isResting(normalizedAddonKey(addon.baseUrl))) {
+                if (!fromTitlePage && metaMisses.isResting(addon.missKey(id))) {
                     noteSkipped(caller, addon.name)
                     attemptedFailures += buildMissingMetaFailure(addon)
                     skippedResting = true
+                    continue
+                }
+                val host = addonHost(addon.baseUrl)
+                if (rateLimits.isPaused(host)) {
+                    noteSkipped(caller, addon.name)
+                    attemptedFailures += MetaAttemptFailure(
+                        addonName = addon.displayName,
+                        kind = MetaFailureKind.REQUEST_FAILED,
+                        detail = "HTTP 429"
+                    )
                     continue
                 }
                 val url = buildMetaUrl(addon.baseUrl, requestedType, id)
@@ -518,12 +535,13 @@ class MetaRepositoryImpl @Inject constructor(
                     // request failure.
                     val response = withTimeoutOrNull(ADDON_REQUEST_TIMEOUT_MS) { api.getMeta(url) }
                         ?: throw java.io.IOException(context.getString(R.string.network_error_addon_timeout))
+                    noteResponse(host, addon.name, response.code(), response.headers()["Retry-After"])
                     if (response.isSuccessful) {
-                        val metaDto = usableMeta(response.body()?.meta, addonHost(addon.baseUrl), addon.name)
+                        val metaDto = usableMeta(response.body()?.meta, host, addon.name)
                         if (metaDto != null) {
-                            metaMisses.recordFound(normalizedAddonKey(addon.baseUrl))
+                            if (!fromTitlePage) metaMisses.recordFound(addon.missKey(id))
                             val episodeLabel = context.getString(R.string.episodes_episode)
-                            val meta = metaDto.toDomain(episodeLabel)
+                            val meta = kotlinx.coroutines.withContext(Dispatchers.Default) { metaDto.toDomain(episodeLabel) }
                             val ttlMs = parseMaxAgeMs(response.headers()["Cache-Control"])
                             val cached = CachedMeta(meta, System.currentTimeMillis() + ttlMs)
                             addonMetaCache[cacheKey] = cached
@@ -532,7 +550,7 @@ class MetaRepositoryImpl @Inject constructor(
                             return@flow
                         } else {
                             attemptedFailures += buildMissingMetaFailure(addon)
-                            if (response.body()?.meta == null) noteMetaMissing(addon)
+                            if (response.body()?.meta == null) noteMetaMissing(addon, requestedType, id, fromTitlePage)
                         }
                     } else {
                         attemptedFailures += MetaAttemptFailure(
@@ -540,7 +558,7 @@ class MetaRepositoryImpl @Inject constructor(
                             kind = if (response.code() == 404) MetaFailureKind.MISSING else MetaFailureKind.REQUEST_FAILED,
                             detail = response.message() ?: "HTTP ${response.code()}"
                         )
-                        if (response.code() == 404) noteMetaMissing(addon)
+                        if (response.code() == 404) noteMetaMissing(addon, requestedType, id, fromTitlePage)
                     }
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
@@ -606,6 +624,11 @@ class MetaRepositoryImpl @Inject constructor(
                             }
                         }
 
+                        metaCache[addonMetaCacheKey(addon.baseUrl, candidateType, id)]?.takeUnless { it.isExpired() }?.let { cached ->
+                            addonMetaCache[cacheKey] = cached
+                            return@async MetaLookupResult.Found(cached.meta)
+                        }
+
                         holdWhilePlayerOpen(caller)
                         val url = buildMetaUrl(addon.baseUrl, candidateType, id)
                         val host = addonHost(addon.baseUrl)
@@ -620,7 +643,7 @@ class MetaRepositoryImpl @Inject constructor(
                             allMissing = false
                             continue
                         }
-                        if (metaMisses.isResting(normalizedAddonKey(addon.baseUrl))) {
+                        if (!fromTitlePage && metaMisses.isResting(addon.missKey(id))) {
                             noteSkipped(caller, addon.name)
                             loopFailures += buildMissingMetaFailure(addon)
                             allMissing = false
@@ -639,7 +662,7 @@ class MetaRepositoryImpl @Inject constructor(
                                 val metaDto = usableMeta(rawMeta, host, addon.name)
                                 if (rawMeta != null && metaDto == null) allMissing = false
                                 if (metaDto != null) {
-                                    metaMisses.recordFound(normalizedAddonKey(addon.baseUrl))
+                                    if (!fromTitlePage) metaMisses.recordFound(addon.missKey(id))
                                     val meta = metaDto.toDomain(context.getString(R.string.episodes_episode))
                                     val ttlMs = parseMaxAgeMs(response.headers()["Cache-Control"])
                                     val cached = CachedMeta(meta, System.currentTimeMillis() + ttlMs)
@@ -656,7 +679,7 @@ class MetaRepositoryImpl @Inject constructor(
                                     kind = if (response.code() == 404) MetaFailureKind.MISSING else MetaFailureKind.REQUEST_FAILED,
                                     detail = response.message() ?: "HTTP ${response.code()}"
                                 )
-                                if (response.code() == 404) noteMetaMissing(addon) else allMissing = false
+                                if (response.code() == 404) noteMetaMissing(addon, candidateType, id, fromTitlePage) else allMissing = false
                             }
                         } catch (e: kotlinx.coroutines.CancellationException) {
                             throw e
@@ -692,6 +715,12 @@ class MetaRepositoryImpl @Inject constructor(
 
         emit(lookupOutcome(deferred.await(), requestedType, id))
     }
+
+    override suspend fun addonClaimsMeta(id: String): Boolean =
+        addonRepository.getInstalledAddons().first().enabledAddons().any { addon ->
+            val meta = addon.resources.firstOrNull { it.name == "meta" } ?: return@any false
+            meta.idPrefixes.orEmpty().ifEmpty { addon.idPrefixes }.any { id.startsWith(it, ignoreCase = true) }
+        }
 
     private fun lookupOutcome(lookupResult: MetaLookupResult, requestedType: String, id: String): NetworkResult<Meta> =
         when (lookupResult) {
@@ -746,6 +775,11 @@ class MetaRepositoryImpl @Inject constructor(
         }
 
         val (addon, candidateType) = candidate
+        metaCache[addonMetaCacheKey(addon.baseUrl, candidateType, id)]?.takeUnless { it.isExpired() }?.let { cached ->
+            primaryAddonMetaCache[cacheKey] = cached
+            emit(NetworkResult.Success(cached.meta))
+            return@flow
+        }
         val url = buildMetaUrl(addon.baseUrl, candidateType, id)
         Log.d(
             TAG,

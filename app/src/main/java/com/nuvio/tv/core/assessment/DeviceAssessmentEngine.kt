@@ -632,21 +632,6 @@ object DeviceAssessmentEngine {
             changeNeeded = settings.dv7HandlingMode != Dv7HandlingMode.AUTO && !(settings.dv7HandlingMode == Dv7HandlingMode.NATIVE_FEL && facts.nativeFelUsable)
         )
 
-        val dv5RecommendOn = !policy.displayDv && policy.bridgeReady && policy.codecSupportsDvheSt
-        items += AssessmentItem(
-            key = "dv5",
-            title = s(R.string.assessment_item_dv5),
-            currentValue = if (settings.dv5ToDv81Enabled) on else off,
-            recommendedValue = if (dv5RecommendOn) on else off,
-            grounds = when {
-                policy.displayDv -> s(R.string.assessment_grounds_dv5_off_display)
-                dv5RecommendOn -> s(R.string.assessment_grounds_dv5_on)
-                else -> s(R.string.assessment_grounds_dv5_off_nopath)
-            },
-            tier = AssessmentTier.VERIFY,
-            changeNeeded = settings.dv5ToDv81Enabled != dv5RecommendOn
-        )
-
         val stripRecommendOn = policy.hdrCapsKnown && !policy.displayHdr10Plus
         items += AssessmentItem(
             key = "strip_hdr10plus",

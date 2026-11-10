@@ -32,6 +32,7 @@ enum class RemoteButtonJob(val id: String) {
     ASPECT("aspect"),
     WATCH_PARTY("watch_party"),
     EXTERNAL("external"),
+    REPORT_MARK("report_mark"),
     LEAVE("leave");
 
     val needsSkipSize: Boolean get() = this == SKIP_FORWARD || this == SKIP_BACK

@@ -83,7 +83,7 @@ private val localOnlyLayoutProfileSettingsKeys = setOf(
     "last_non_off_discover_location"
 )
 
-private val localOnlyPlayerProfileSettingsKeys = setOf(
+internal val localOnlyPlayerProfileSettingsKeys = setOf(
     "player_preference",
     "internal_player_engine",
     "auto_switch_internal_player_on_error",

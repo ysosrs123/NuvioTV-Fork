@@ -124,6 +124,10 @@ class TmdbService @Inject constructor(
         }
     }
     
+    /** The IMDB ID if it is already known, with no request. */
+    fun cachedImdbId(tmdbId: Int, mediaType: String): String? =
+        tmdbToImdbCache["$tmdbId:${normalizeMediaType(mediaType)}"]
+
     /**
      * Convert a TMDB ID to an IMDB ID.
      * 

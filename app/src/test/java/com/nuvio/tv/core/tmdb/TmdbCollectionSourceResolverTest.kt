@@ -124,6 +124,18 @@ class TmdbCollectionSourceResolverTest {
     }
 
     @Test
+    fun `a fixed list fails when no title on the page can be fetched`() = runTest {
+        val api = mockk<TmdbApi>()
+        coEvery { api.getMovieDetails(any(), any(), any()) } throws java.io.IOException("offline")
+        val resolver = TmdbCollectionSourceResolver(context, api, settings)
+        val result = resolver.resolve(
+            TmdbCollectionSource(sourceType = TmdbCollectionSourceType.LIST, title = "Awards", ids = listOf(1, 2, 3))
+        ).first { it !is NetworkResult.Loading }
+
+        assertTrue(result is NetworkResult.Error)
+    }
+
+    @Test
     fun `list import metadata uses tmdb list name`() = runTest {
         val api = mockk<TmdbApi>()
         coEvery { api.getListDetails(44, any(), "en", 1) } returns Response.success(

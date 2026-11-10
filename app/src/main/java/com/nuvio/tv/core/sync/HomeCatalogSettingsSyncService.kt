@@ -35,6 +35,8 @@ private const val HOME_CATALOG_SHARED_SYNC_PLATFORM = "home_catalog_shared"
 private const val PAYLOAD_SAMPLE_LIMIT = 5
 private const val HIDE_UNRELEASED_CONTENT_KEY = "hide_unreleased_content"
 private const val WATCHED_TITLES_MODE_KEY = "watched_titles_mode"
+private const val HIDE_PLAN_TO_WATCH_KEY = "hide_plan_to_watch"
+private const val HIDE_WATCHING_KEY = "hide_watching"
 
 @Serializable
 data class SyncCatalogItem(
@@ -52,6 +54,8 @@ data class SyncCatalogItem(
 data class SyncHomeCatalogPayload(
     @SerialName("hide_unreleased_content") val hideUnreleasedContent: Boolean = false,
     @SerialName("watched_titles_mode") val watchedTitlesMode: String = WatchedTitlesMode.SHOW.name,
+    @SerialName(HIDE_PLAN_TO_WATCH_KEY) val hidePlanToWatch: Boolean = false,
+    @SerialName(HIDE_WATCHING_KEY) val hideWatching: Boolean = false,
     val items: List<SyncCatalogItem> = emptyList(),
 )
 
@@ -89,6 +93,16 @@ internal fun decodeHomeCatalogPayloadPreservingLocal(
             decoded.watchedTitlesMode
         } else {
             localPayload.watchedTitlesMode
+        },
+        hidePlanToWatch = if (settingsJson.containsKey(HIDE_PLAN_TO_WATCH_KEY)) {
+            decoded.hidePlanToWatch
+        } else {
+            localPayload.hidePlanToWatch
+        },
+        hideWatching = if (settingsJson.containsKey(HIDE_WATCHING_KEY)) {
+            decoded.hideWatching
+        } else {
+            localPayload.hideWatching
         }
     )
 }
