@@ -125,6 +125,10 @@ internal class DolbyVisionExtractorsFactory(
 /** How HEVC NAL units are framed in the sample stream for a given container. */
 internal enum class NalFormat { ANNEX_B, LENGTH_DELIMITED }
 
+/** 00 00 01 alone can't decide it: it is also the length prefix of a 256-511 byte NAL. */
+internal fun hasFourByteStartCode(sample: ByteArray, length: Int): Boolean =
+    length >= 4 && sample[0].toInt() == 0 && sample[1].toInt() == 0 && sample[2].toInt() == 0 && sample[3].toInt() == 1
+
 /**
  * Per-playback DV7 to 8.1 conversion diagnostics, fed by the factory/transformer and read
  * by the player diagnostics. Reset per playback alongside the DoviBridge counters.
@@ -290,8 +294,7 @@ internal data class DolbyVisionConversionConfig(
     val allowMode2Fallback: Boolean get() = (manualDv81 || autoMode2) && forcedMode !in 0..4
 
     /**
-     * DV5 via the toggle is signal-only (codec rewritten to 8.1, profile-5 RPU kept). A
-     * libdovi RPU rewrite runs only when a mode is forced in Advanced, OR when the user
+     * A DV5 libdovi RPU rewrite runs only when a mode is forced in Advanced, OR when the user
      * explicitly chose Convert to DV8.1 with DV5 enabled. DV7 always converts.
      */
     val convertDv5Rpu: Boolean get() = forcedMode in 0..4 || (dv5Enabled && manualDv81)
@@ -684,7 +687,8 @@ private class NativeOptimizedVideoTrackOutput(
         val sampleEnd = pendingLen - carrySize
 
         val mode = if (converting) config.conversionMode(profile) else 1
-        val formatVal = if (nalFormat == NalFormat.LENGTH_DELIMITED) 1 else 0
+        // Same reason as the probe above: Mp4Extractor hands over start codes, not length prefixes.
+        val formatVal = if (nalFormat == NalFormat.ANNEX_B || hasFourByteStartCode(pendingBuf, sampleEnd)) 0 else 1
 
         // Process in native C++ layer
         val written = DoviBridge.processVideoSampleNonAllocating(

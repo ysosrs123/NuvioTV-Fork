@@ -709,6 +709,11 @@ object FrameRateUtils {
                 "Switching display mode: ${activeMode.refreshRate}Hz -> ${modeBest.refreshRate}Hz " +
                     "(video ${frameRate}fps)"
             )
+            com.nuvio.tv.core.report.PlaybackRecorder.event(
+                com.nuvio.tv.core.report.RecorderEvent.DISPLAY_MODE,
+                "asked fromHz=${activeMode.refreshRate} toHz=${modeBest.refreshRate} " +
+                    "${modeBest.physicalWidth}x${modeBest.physicalHeight} videoFps=$frameRate"
+            )
 
             val layoutParams = window.attributes
             layoutParams.preferredDisplayModeId = modeBest.modeId
@@ -740,6 +745,10 @@ object FrameRateUtils {
                         TAG,
                         "Display mode switch stabilized at ${mode.refreshRate}Hz (modeId=${mode.modeId})"
                     )
+                    com.nuvio.tv.core.report.PlaybackRecorder.event(
+                        com.nuvio.tv.core.report.RecorderEvent.DISPLAY_MODE,
+                        "android_reports hz=${mode.refreshRate}"
+                    )
                     return DisplayModeSwitchResult(mode)
                 }
             } else {
@@ -752,6 +761,10 @@ object FrameRateUtils {
         Log.w(
             TAG,
             "Display mode polling timed out after ${SWITCH_TIMEOUT_MS}ms, using ${fallbackMode.refreshRate}Hz"
+        )
+        com.nuvio.tv.core.report.PlaybackRecorder.event(
+            com.nuvio.tv.core.report.RecorderEvent.DISPLAY_MODE,
+            "timed_out lastHz=${fallbackMode.refreshRate}"
         )
         return DisplayModeSwitchResult(fallbackMode)
     }
