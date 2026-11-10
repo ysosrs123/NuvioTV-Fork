@@ -163,5 +163,11 @@
 -keep class androidx.appcompat.app.** { *; }
 -keep interface androidx.appcompat.app.** { *; }
 
+# Libraries extensions use by name
+-keep class kotlinx.serialization.** { *; }
+-keep interface kotlinx.serialization.** { *; }
+-keep class com.google.gson.** { *; }
+-keep interface com.google.gson.** { *; }
+
 -dontwarn java.beans.ConstructorProperties
 -dontwarn java.beans.Transient

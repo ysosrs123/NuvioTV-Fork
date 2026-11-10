@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import com.nuvio.tv.ui.screens.settings.FormatCheckHost
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -221,6 +222,7 @@ import dev.chrisbanes.haze.hazeEffect
 import com.nuvio.tv.ui.v2.components.GlassRole
 import com.nuvio.tv.ui.v2.components.nuvioGlass
 import dev.chrisbanes.haze.hazeSource
+import com.nuvio.tv.core.util.processLocale
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -307,6 +309,12 @@ open class MainActivity : ComponentActivity() {
     lateinit var authManager: AuthManager
 
     @Inject
+    lateinit var backupSignInOffer: com.nuvio.tv.core.backup.BackupSignInOffer
+
+    @Inject
+    lateinit var backupPartialNotice: com.nuvio.tv.core.backup.BackupPartialNotice
+
+    @Inject
     lateinit var deviceSessionRegistration: DeviceSessionRegistration
 
     @Inject
@@ -378,12 +386,12 @@ open class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalFoundationApi::class)
     override fun attachBaseContext(newBase: Context) {
         val tag = LocaleCache.localeTag.takeIf { it != LocaleCache.UNSET }
+        val systemLocale = newBase.resources.configuration.locales.get(0) ?: Locale.getDefault()
+        Locale.setDefault(processLocale(tag, systemLocale))
 
         if (!tag.isNullOrEmpty()) {
-            val locale = Locale.forLanguageTag(tag)
-            Locale.setDefault(locale)
             val config = Configuration(newBase.resources.configuration)
-            config.setLocale(locale)
+            config.setLocale(Locale.forLanguageTag(tag))
             super.attachBaseContext(newBase.createConfigurationContext(config))
         } else {
             // Cache not ready yet (very early cold start) — use system locale
@@ -398,6 +406,7 @@ open class MainActivity : ComponentActivity() {
         com.nuvio.tv.core.util.StartupLatencyTrace.coldOnce("activity_create")
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        hideSystemBarsOnHandheld()
         window?.decorView?.let { com.nuvio.tv.core.util.StartupLatencyTrace.coldOnFirstDraw(it, "first_frame") }
         com.nuvio.tv.core.performance.DetailEntryTrace.attach(window)
         isFirstResumeAfterCreate = true
@@ -469,6 +478,8 @@ open class MainActivity : ComponentActivity() {
             }
             val hasSeenAuthQrOnFirstLaunch by hasSeenAuthQrFlow.collectAsState(initial = null)
             val authState by authManager.authState.collectAsState()
+            var backupSignInPrompt by remember { mutableStateOf(backupSignInOffer.pending) }
+            val backupPartlyRestored by backupPartialNotice.visible.collectAsState()
             val context = LocalContext.current
 
             LaunchedEffect(authSessionNoticeDataStore, context) {
@@ -776,6 +787,32 @@ open class MainActivity : ComponentActivity() {
                         return@Surface
                     }
 
+                    if (backupPartlyRestored) {
+                        com.nuvio.tv.ui.screens.backup.BackupPartialRestorePrompt(
+                            onDone = {
+                                if (!backupPartialNotice.finish()) {
+                                    Toast.makeText(context, context.getString(R.string.backup_restored_reopen), Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        )
+                    }
+
+                    val showBackupSignIn = com.nuvio.tv.core.backup.BackupSignInOffer.shouldShow(
+                        backupSignInPrompt, hasSeenAuthQrOnFirstLaunch, authState is AuthState.SignedOut
+                    )
+                    LaunchedEffect(showBackupSignIn) {
+                        if (showBackupSignIn) backupSignInOffer.clear()
+                    }
+                    if (showBackupSignIn) {
+                        com.nuvio.tv.ui.screens.backup.BackupSignInPrompt(
+                            onSignIn = {
+                                backupSignInPrompt = false
+                                lifecycleScope.launch { appOnboardingDataStore.setHasSeenAuthQrOnFirstLaunch(false) }
+                            },
+                            onNotNow = { backupSignInPrompt = false }
+                        )
+                    }
+
                     if (
                         hasSeenAuthQrOnFirstLaunch == false &&
                         authState !is AuthState.FullAccount &&
@@ -928,7 +965,10 @@ open class MainActivity : ComponentActivity() {
                                 LocalNavViewModelStoreOwner provides navViewModelStoreOwner,
                                 com.nuvio.tv.ui.screens.calendar.LocalCalendarReminderCenter provides calendarReminders
                             ) {
+                                androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
                                 NuvioNavHost(navController, startDestination, hideBuiltInHeaders = hideHeaders)
+                                FormatCheckHost(navController)
+                                }
                             }
                         }
                     }
@@ -1112,6 +1152,12 @@ open class MainActivity : ComponentActivity() {
                                     launchSingleTop = true
                                 }
                             }
+                            AppDeepLink.ScoutAsk -> {
+                                pendingDeepLinkUrl.value = null
+                                navController.navigate(Screen.ScoutAsk.route) {
+                                    launchSingleTop = true
+                                }
+                            }
                             is AppDeepLink.AddonInstall -> {
                                 navController.navigate(Screen.AddonManager.route) {
                                     launchSingleTop = true
@@ -1181,6 +1227,7 @@ open class MainActivity : ComponentActivity() {
                     val strNavLibrary = stringResource(R.string.nav_library)
                     val strNavSettings = stringResource(R.string.nav_settings)
                     val strNavCalendar = stringResource(R.string.nav_calendar)
+                    val strNavScout = stringResource(R.string.scout_title)
                     val drawerItems = remember(
                         strNavHome,
                         strNavDiscover,
@@ -1215,6 +1262,9 @@ open class MainActivity : ComponentActivity() {
                                     iconRes = R.raw.sidebar_search
                                 )
                             )
+                            if (com.nuvio.tv.domain.model.ScoutFeature.available) {
+                                add(DrawerItem(route = Screen.Scout.route, label = strNavScout, iconRes = R.raw.sidebar_scout))
+                            }
                             add(
                                 DrawerItem(
                                     route = Screen.Library.route,
@@ -1445,6 +1495,19 @@ open class MainActivity : ComponentActivity() {
                                     trailerPlayerPool.stop()
                                 }
                             )
+                            if (com.nuvio.tv.core.build.IssueReports.available) {
+                                com.nuvio.tv.ui.screens.settings.CrashPromptHost(
+                                    canShow = actualRoute == Screen.Home.route &&
+                                        !playbackUiActive &&
+                                        !playbackActive &&
+                                        autoNextOverlay == null &&
+                                        !profileEntry.pending &&
+                                        !screensaverVisible &&
+                                        !ambientShowing &&
+                                        !updateState.showBanner,
+                                    lastInteractionAt = screensaverController.lastInteractionAt
+                                )
+                            }
                         }
                     }
                 }
@@ -1589,6 +1652,17 @@ open class MainActivity : ComponentActivity() {
         // eligibility while this window lacks focus; refocus restarts the idle clock.
         screensaverController.setWindowFocused(hasFocus)
         if (!hasFocus) calendarMenuKeyDown = false
+        if (hasFocus) hideSystemBarsOnHandheld()
+    }
+
+    /** Handhelds and tablets keep Android's bars on screen; a swipe from the edge brings them back. TV boxes have none. */
+    private fun hideSystemBarsOnHandheld() {
+        if (packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_LEANBACK)) return
+        val currentWindow = window ?: return
+        androidx.core.view.WindowCompat.getInsetsController(currentWindow, currentWindow.decorView).apply {
+            systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+        }
     }
 
     override fun onStart() {
@@ -2768,6 +2842,7 @@ internal fun launchTargetsReady(storedMode: ExperienceMode?, hasChosenLayout: Bo
 internal fun appRootRoutes(discoverInSidebar: Boolean, calendarInMenu: Boolean): Set<String> = buildSet {
     add(Screen.Home.route)
     add(Screen.Search.route)
+    if (com.nuvio.tv.domain.model.ScoutFeature.available) add(Screen.Scout.route)
     add(Screen.Library.route)
     if (calendarInMenu) add(Screen.Calendar.route)
     add(Screen.Settings.route)
@@ -2864,6 +2939,12 @@ internal fun DrawerItemIcon(
 object LocaleCache {
     const val UNSET = "__UNSET__"
 
-    @Volatile
-    var localeTag: String = UNSET
+    private val tag = kotlinx.coroutines.flow.MutableStateFlow(UNSET)
+    val tags: kotlinx.coroutines.flow.StateFlow<String> = tag
+
+    var localeTag: String
+        get() = tag.value
+        set(value) {
+            tag.value = value
+        }
 }

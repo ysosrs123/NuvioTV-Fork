@@ -20,6 +20,7 @@ import coil3.request.maxBitmapSize
 import coil3.bitmapFactoryMaxParallelism
 
 import okio.Path.Companion.toOkioPath
+import com.nuvio.tv.core.runtime.GuardedLifecycleCallbacks
 import com.nuvio.tv.core.runtime.PluginRuntimeHooks
 import com.nuvio.tv.core.sync.StartupSyncService
 import com.nuvio.tv.core.sync.androidtv.AndroidTvChannelSyncService
@@ -55,6 +56,7 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
     @Inject lateinit var serverUserStateProjection: ServerUserStateProjection
     @Inject lateinit var siloArtworkRefresher: com.nuvio.tv.data.mediaserver.silo.SiloArtworkRefresher
     @Inject lateinit var plexArtworkSigner: com.nuvio.tv.data.mediaserver.plex.PlexArtworkSigner
+    @Inject lateinit var reportOutbox: com.nuvio.tv.data.repository.ReportOutbox
 
     companion object {
         private const val CACHE_TAG = "NuvioCache"
@@ -94,6 +96,23 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
         }
     }
 
+    private val guardedLifecycleCallbacks =
+        ConcurrentHashMap<ActivityLifecycleCallbacks, GuardedLifecycleCallbacks>()
+
+    override fun registerActivityLifecycleCallbacks(callback: ActivityLifecycleCallbacks) {
+        if (!GuardedLifecycleCallbacks.isFromLoadedCode(callback, javaClass.classLoader)) {
+            super.registerActivityLifecycleCallbacks(callback)
+            return
+        }
+        val guarded = GuardedLifecycleCallbacks(callback)
+        guardedLifecycleCallbacks[callback] = guarded
+        super.registerActivityLifecycleCallbacks(guarded)
+    }
+
+    override fun unregisterActivityLifecycleCallbacks(callback: ActivityLifecycleCallbacks) {
+        super.unregisterActivityLifecycleCallbacks(guardedLifecycleCallbacks.remove(callback) ?: callback)
+    }
+
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun onCreate() {
         com.nuvio.tv.core.util.StartupLatencyTrace.coldOnce("app_create")
@@ -106,6 +125,7 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
         // rewatches take the preflight hit path (switch before prepare).
         com.nuvio.tv.core.player.FrameRateUtils.initFrameRateCachePersistence(this)
         serverUserStateProjection.start()
+        reportOutbox.start()
         // Load locale synchronously so it's available before Activity.attachBaseContext.
         // SharedPreferences reads are fast (cached in memory after first access).
         val tag = getSharedPreferences("app_locale", Context.MODE_PRIVATE)
@@ -247,6 +267,7 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
         return ImageLoader.Builder(this)
             .eventListenerFactory(com.nuvio.tv.core.image.ArtworkDiagnostics.imageEvents)
             .components {
+                add(com.nuvio.tv.core.image.ScoutMixArt.Factory())
                 add(CustomPosterFallbackInterceptor())
                 add(com.nuvio.tv.core.image.HomePosterLoadingInterceptor(diskDecodeSlots))
                 // Size-aware TMDB downscaler: the Bingecat catalogue serves original-size
