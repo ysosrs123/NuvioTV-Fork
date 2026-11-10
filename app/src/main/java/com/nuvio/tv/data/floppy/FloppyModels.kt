@@ -69,7 +69,11 @@ class FloppyAuthException(val error: FloppyAuthError) : Exception(error.name)
 
 class FloppyAccountChangedException : Exception("Floppy account changed")
 
-class FloppyApiException(val status: Int, val code: String? = null) : Exception("Floppy HTTP $status ${code.orEmpty()}")
+class FloppyApiException(
+    val status: Int,
+    val code: String? = null,
+    val detail: String? = null
+) : Exception("Floppy HTTP $status ${code.orEmpty()}")
 
 @Serializable
 internal data class FloppyStoredAuth(

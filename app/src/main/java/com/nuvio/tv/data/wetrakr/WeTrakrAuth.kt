@@ -7,11 +7,13 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -356,17 +358,19 @@ class WeTrakrAuthRepository(
         if (rejectedAccessToken == null && current.tokens.expiresAtEpochMs - nowEpochMs() > REFRESH_MARGIN_MS) {
             return@withLock current
         }
-        val response = post("/oauth/token/refresh", mapOf("refresh_token" to current.tokens.refreshToken), scope)
-        if (response.status !in 200..299) {
-            if (response.status in setOf(400, 401)) {
-                store.clearAuth(scope, WeTrakrAuthError.AUTHORIZATION_REVOKED, current.tokens.accessToken)
-                throw WeTrakrAuthException(WeTrakrAuthError.AUTHORIZATION_REVOKED)
+        withContext(NonCancellable) {
+            val response = post("/oauth/token/refresh", mapOf("refresh_token" to current.tokens.refreshToken), scope)
+            if (response.status !in 200..299) {
+                if (response.status in setOf(400, 401)) {
+                    store.clearAuth(scope, WeTrakrAuthError.AUTHORIZATION_REVOKED, current.tokens.accessToken)
+                    throw WeTrakrAuthException(WeTrakrAuthError.AUTHORIZATION_REVOKED)
+                }
+                throw WeTrakrApiException(response.status, response.errorCode())
             }
-            throw WeTrakrApiException(response.status, response.errorCode())
+            val tokens = tokensFrom(response, current.tokens.refreshToken)
+            if (!store.refreshTokens(tokens, current)) scopeChanged()
+            WeTrakrAuthorization(scope, tokens)
         }
-        val tokens = tokensFrom(response, current.tokens.refreshToken)
-        if (!store.refreshTokens(tokens, current)) scopeChanged()
-        WeTrakrAuthorization(scope, tokens)
     }
 
     suspend fun disconnect(scope: WeTrakrAuthScope = store.scope()): Boolean {

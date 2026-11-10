@@ -48,6 +48,7 @@ class FloppyTestHarness {
     val store = FloppyAuthStore(persistence)
     val auth = FloppyAuthRepository(engine, store, "Nuvio Arc on Test", nowEpochMs = { now })
     val api = FloppyApiClient(engine, auth, store)
+    val ledger = FloppyPlayLedger(FakeFloppyPersistence())
 
     fun floppyServer() {
         engine.on(FloppyHttpMethod.POST, "/oauth/register", 201, """{"client_id":"flp_oauth_1"}""")

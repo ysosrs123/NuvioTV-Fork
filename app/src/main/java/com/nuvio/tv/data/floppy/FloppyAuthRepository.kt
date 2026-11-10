@@ -2,8 +2,10 @@ package com.nuvio.tv.data.floppy
 
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -51,7 +53,7 @@ class FloppyAuthRepository(
             verificationUriComplete = complete,
             expiresAtEpochMs = expiresAt(payload.expiresIn, now),
             intervalSeconds = interval,
-            nextPollAtEpochMs = now + interval * 1_000L
+            nextPollAtEpochMs = now + interval * 1_000L + POLL_MARGIN_MS
         )
         if (!store.saveSession(session, deviceCode, scope)) scopeChanged()
         session
@@ -68,7 +70,7 @@ class FloppyAuthRepository(
             }
             if (now < session.nextPollAtEpochMs) return@withLock FloppyDevicePollResult.Pending
             val deviceCode = store.deviceCode(scope) ?: scopeChanged()
-            if (!store.updateSession(session.copy(nextPollAtEpochMs = now + session.intervalSeconds * 1_000L), scope)) {
+            if (!store.updateSession(session.copy(nextPollAtEpochMs = now + session.intervalSeconds * 1_000L + POLL_MARGIN_MS), scope)) {
                 scopeChanged()
             }
             val response = send(
@@ -94,7 +96,7 @@ class FloppyAuthRepository(
                 "slow_down" -> {
                     val interval = (session.intervalSeconds + 5).coerceAtMost(3_600)
                     store.updateSession(
-                        session.copy(intervalSeconds = interval, nextPollAtEpochMs = nowEpochMs() + interval * 1_000L),
+                        session.copy(intervalSeconds = interval, nextPollAtEpochMs = nowEpochMs() + interval * 1_000L + POLL_MARGIN_MS),
                         scope
                     )
                     FloppyDevicePollResult.Pending
@@ -151,28 +153,30 @@ class FloppyAuthRepository(
         }
         val expiresAt = credentials.expiresAtEpochMs ?: 0L
         if (rejectedAccessToken == null && expiresAt - nowEpochMs() > REFRESH_MARGIN_MS) return@withLock current
-        val response = send(
-            FloppyHttpRequest(
-                serverUrl = credentials.serverUrl,
-                method = FloppyHttpMethod.POST,
-                path = "/oauth/token",
-                form = mapOf(
-                    "client_id" to requireNotNull(credentials.clientId),
-                    "grant_type" to "refresh_token",
-                    "refresh_token" to requireNotNull(credentials.refreshToken)
+        withContext(NonCancellable) {
+            val response = send(
+                FloppyHttpRequest(
+                    serverUrl = credentials.serverUrl,
+                    method = FloppyHttpMethod.POST,
+                    path = "/oauth/token",
+                    form = mapOf(
+                        "client_id" to requireNotNull(credentials.clientId),
+                        "grant_type" to "refresh_token",
+                        "refresh_token" to requireNotNull(credentials.refreshToken)
+                    )
                 )
             )
-        )
-        if (response.status !in 200..299) {
-            if (response.errorCode() in setOf("invalid_grant", "invalid_client", "invalid_token")) {
-                store.clearAuth(scope, FloppyAuthError.AUTHORIZATION_REVOKED, credentials.accessToken)
-                fail(FloppyAuthError.AUTHORIZATION_REVOKED)
+            if (response.status !in 200..299) {
+                if (response.errorCode() in setOf("invalid_grant", "invalid_client", "invalid_token")) {
+                    store.clearAuth(scope, FloppyAuthError.AUTHORIZATION_REVOKED, credentials.accessToken)
+                    fail(FloppyAuthError.AUTHORIZATION_REVOKED)
+                }
+                throw FloppyApiException(response.status, response.errorCode())
             }
-            throw FloppyApiException(response.status, response.errorCode())
+            val refreshed = credentialsFrom(response, credentials.serverUrl, credentials.clientId, credentials.refreshToken)
+            if (!store.refreshCredentials(refreshed, current)) scopeChanged()
+            FloppyAuthorization(scope, refreshed)
         }
-        val refreshed = credentialsFrom(response, credentials.serverUrl, credentials.clientId, credentials.refreshToken)
-        if (!store.refreshCredentials(refreshed, current)) scopeChanged()
-        FloppyAuthorization(scope, refreshed)
     }
 
     suspend fun disconnect(scope: FloppyAuthScope = store.scope()): Boolean {
@@ -281,5 +285,6 @@ class FloppyAuthRepository(
         private const val DEFAULT_TOKEN_SECONDS = 3_600L
         private const val DEVICE_CODE_GRANT = "urn:ietf:params:oauth:grant-type:device_code"
         private const val REFRESH_MARGIN_MS = 60_000L
+        private const val POLL_MARGIN_MS = 1_000L
     }
 }

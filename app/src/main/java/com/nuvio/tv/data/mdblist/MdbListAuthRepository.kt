@@ -1,8 +1,10 @@
 package com.nuvio.tv.data.mdblist
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
@@ -105,21 +107,23 @@ class MdbListAuthRepository(
         if (rejectedAccessToken == null && current.tokens.expiresAtEpochMs - nowEpochMs() > 60_000L) {
             return@withLock current
         }
-        val response = oauth(
-            "/oauth/token/",
-            mapOf("grant_type" to "refresh_token", "refresh_token" to current.tokens.refreshToken),
-            scope
-        )
-        if (response.status !in 200..299) {
-            if (response.errorCode() in setOf("invalid_grant", "invalid_token")) {
-                store.clearAuth(scope, MdbListAuthError.AUTHORIZATION_REVOKED, current.tokens.accessToken)
-                throw MdbListAuthException(MdbListAuthError.AUTHORIZATION_REVOKED)
+        withContext(NonCancellable) {
+            val response = oauth(
+                "/oauth/token/",
+                mapOf("grant_type" to "refresh_token", "refresh_token" to current.tokens.refreshToken),
+                scope
+            )
+            if (response.status !in 200..299) {
+                if (response.errorCode() in setOf("invalid_grant", "invalid_token")) {
+                    store.clearAuth(scope, MdbListAuthError.AUTHORIZATION_REVOKED, current.tokens.accessToken)
+                    throw MdbListAuthException(MdbListAuthError.AUTHORIZATION_REVOKED)
+                }
+                throw MdbListApiException(response.status, response.errorCode())
             }
-            throw MdbListApiException(response.status, response.errorCode())
+            val tokens = tokensFrom(response, current.tokens.refreshToken)
+            if (!store.refreshTokens(tokens, current)) scopeChanged()
+            MdbListAuthorization(scope, tokens)
         }
-        val tokens = tokensFrom(response, current.tokens.refreshToken)
-        if (!store.refreshTokens(tokens, current)) scopeChanged()
-        MdbListAuthorization(scope, tokens)
     }
 
     suspend fun disconnect(scope: MdbListAuthScope = store.scope()): Boolean {

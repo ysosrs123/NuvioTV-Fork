@@ -26,6 +26,7 @@ import com.nuvio.tv.core.tracking.scrobbleDiagnosticSummary
 import com.nuvio.tv.data.local.LayoutPreferenceDataStore
 import com.nuvio.tv.domain.model.LibraryEntry
 import com.nuvio.tv.domain.model.LibraryEntryInput
+import com.nuvio.tv.domain.model.LibraryListPrivacy
 import com.nuvio.tv.domain.model.LibraryListTab
 import com.nuvio.tv.domain.model.ListMembershipChanges
 import com.nuvio.tv.domain.model.ListMembershipSnapshot
@@ -208,6 +209,7 @@ internal data class WeTrakrTabDefinition(
 )
 
 internal const val WETRAKR_STATUS_GROUP = "wetrakr:status"
+internal const val WETRAKR_CUSTOM_LIST_PREFIX = "wetrakr:list:"
 
 internal val weTrakrTabDefinitions = listOf(
     WeTrakrTabDefinition("wetrakr:status:planning", setOf(WeTrakrList.PLANNING), WeTrakrList.PLANNING, setOf("movie", "series"), watchlist = true),
@@ -217,10 +219,23 @@ internal val weTrakrTabDefinitions = listOf(
     WeTrakrTabDefinition("wetrakr:status:dropped", setOf(WeTrakrList.DROPPED), WeTrakrList.DROPPED, setOf("movie", "series"))
 )
 
+internal fun WeTrakrCustomList.tab() = LibraryListTab(
+    key = "$WETRAKR_CUSTOM_LIST_PREFIX$id",
+    title = name,
+    type = LibraryListTab.Type.PERSONAL,
+    description = description,
+    privacy = if (isPrivate) LibraryListPrivacy.PRIVATE else LibraryListPrivacy.PUBLIC,
+    trackingProviderId = TrackingProviderId.WETRAKR.storageId,
+    supportedContentTypes = setOf("movie", "series"),
+    isMembershipDestination = false
+)
+
 internal fun WeTrakrSnapshot.libraryEntries(): List<LibraryEntry> {
     val fallback = checkedAtEpochMs ?: 0L
-    return weTrakrTabDefinitions.flatMap { tab ->
-        tab.lists.flatMap { list(it) }.mapIndexed { index, entry ->
+    val tabs = weTrakrTabDefinitions.map { tab -> tab.key to tab.lists.flatMap { list(it) } } +
+        customLists.map { list -> list.tab().key to list.items }
+    return tabs.flatMap { (tabKey, entries) ->
+        entries.mapIndexed { index, entry ->
             val title = entry.title
             LibraryEntry(
                 id = title.ids.contentId,
@@ -235,7 +250,8 @@ internal fun WeTrakrSnapshot.libraryEntries(): List<LibraryEntry> {
                 imdbRating = null,
                 genres = emptyList(),
                 addonBaseUrl = null,
-                listKeys = setOf(tab.key),
+                listKeys = setOf(tabKey),
+                listRanks = if (tabKey.startsWith(WETRAKR_CUSTOM_LIST_PREFIX)) mapOf(tabKey to index) else emptyMap(),
                 listedAt = weTrakrTimestamp(entry.listedAt).takeIf { it > 0L } ?: (fallback - index),
                 imdbId = title.ids.imdb,
                 tmdbId = title.ids.tmdb?.toInt(),
@@ -246,9 +262,16 @@ internal fun WeTrakrSnapshot.libraryEntries(): List<LibraryEntry> {
             )
         }
     }.groupBy { "${it.type}:${it.id}" }
-        .map { (_, entries) -> entries.reduce { a, b -> a.copy(listKeys = a.listKeys + b.listKeys, listedAt = maxOf(a.listedAt, b.listedAt)) } }
+        .map { (_, entries) -> entries.reduce { a, b -> a.copy(listKeys = a.listKeys + b.listKeys, listRanks = a.listRanks + b.listRanks, listedAt = maxOf(a.listedAt, b.listedAt)) } }
         .sortedByDescending(LibraryEntry::listedAt)
 }
+
+/**
+ * A transfer only ever writes to Plan to watch, so a title that's only on a custom list isn't there yet:
+ * counting it as already present would skip the copy, and a Move would then remove it from the source.
+ */
+internal fun List<LibraryEntry>.withoutWeTrakrCustomListOnly(): List<LibraryEntry> =
+    filter { entry -> entry.listKeys.any { !it.startsWith(WETRAKR_CUSTOM_LIST_PREFIX) } }
 
 internal fun WeTrakrSnapshot.listsOf(contentId: String, contentType: String): Set<WeTrakrList> {
     val type = if (contentType.lowercase() in setOf("movie", "film")) WeTrakrType.MOVIE else WeTrakrType.SHOW
@@ -269,7 +292,10 @@ class WeTrakrTrackingLibraryProvider @Inject constructor(
     override val items = sync.state.map { state -> state.snapshot?.libraryEntries().orEmpty() }
         .onStart { sync.refreshAsync(TrackingRefreshIntent.AUTOMATIC) }
         .distinctUntilChanged()
-    override val tabs = isAuthenticated.map { authenticated ->
+    override val tabs = combine(
+        isAuthenticated,
+        sync.state.map { state -> state.snapshot?.customLists.orEmpty().map(WeTrakrCustomList::tab) }.distinctUntilChanged()
+    ) { authenticated, customTabs ->
         if (!authenticated) emptyList() else weTrakrTabDefinitions.map { tab ->
             LibraryListTab(
                 key = tab.key,
@@ -280,10 +306,11 @@ class WeTrakrTrackingLibraryProvider @Inject constructor(
                 supportedContentTypes = tab.supportedContentTypes,
                 isMembershipDestination = tab.destination != null
             )
-        }
+        } + customTabs
     }.distinctUntilChanged()
 
-    override fun recognizesListKey(key: String): Boolean = weTrakrTabDefinitions.any { it.key == key }
+    override fun recognizesListKey(key: String): Boolean =
+        weTrakrTabDefinitions.any { it.key == key } || key.startsWith(WETRAKR_CUSTOM_LIST_PREFIX)
 
     override fun countsAsInLibrary(listKey: String): Boolean = listKey != "wetrakr:status:watched"
 

@@ -20,6 +20,8 @@ interface TrackingProgressProvider {
         get() = false
     val watchedItems: Flow<List<WatchedItem>>
         get() = flowOf(emptyList())
+    val tasteHistory: Flow<List<WatchedItem>>
+        get() = watchedItems
 
     fun episodeProgress(contentId: String): Flow<Map<Pair<Int, Int>, WatchProgress>>
     fun airedEpisodeOrder(contentId: String): Flow<List<Pair<Int, Int>>>

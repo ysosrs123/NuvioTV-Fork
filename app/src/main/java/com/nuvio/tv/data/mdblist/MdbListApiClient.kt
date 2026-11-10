@@ -72,10 +72,7 @@ class MdbListApiClient(
                 checkScope = { store.checkScope(scope) }
             )
             if (response.status == 401) {
-                if (attempt == 1) {
-                    store.clearAuth(scope, MdbListAuthError.AUTHORIZATION_REVOKED, authorization.tokens.accessToken)
-                    throw MdbListAuthException(MdbListAuthError.AUTHORIZATION_REVOKED)
-                }
+                if (attempt == 1) throw MdbListApiException(response.status, response.errorCode())
                 authorization = auth.authorization(scope, authorization.tokens.accessToken)
             } else {
                 if (response.status !in 200..299 && response.status !in acceptedStatuses) {

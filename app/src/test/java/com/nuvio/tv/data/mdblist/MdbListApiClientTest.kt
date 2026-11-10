@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.mdblist
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -75,17 +76,34 @@ class MdbListApiClientTest {
     }
 
     @Test
-    fun `second unauthorized response ends connection instead of refreshing forever`() = runTest {
+    fun `second unauthorized response stops refreshing and keeps the connection`() = runTest {
         val harness = MdbListTestHarness()
         harness.connected()
         harness.reply(401)
         harness.reply(body = MdbListTestHarness.TOKEN_RESPONSE)
         harness.reply(401)
 
-        expectMdbListFailure<MdbListAuthException> { harness.api.get("/sync/playback") }
+        expectMdbListFailure<MdbListApiException> { harness.api.get("/sync/playback") }
 
         assertEquals(3, harness.engine.requests.size)
-        assertFalse(harness.store.state.value.isAuthenticated)
+        assertEquals(true, harness.store.state.value.isAuthenticated)
+    }
+
+    @Test
+    fun `refresh answer is saved even when the caller is cancelled`() = runTest {
+        val harness = MdbListTestHarness()
+        harness.connected()
+        harness.reply(401)
+        harness.reply(body = MdbListTestHarness.TOKEN_RESPONSE)
+        harness.reply(body = "{}")
+        var calls = 0
+        lateinit var job: kotlinx.coroutines.Job
+        harness.engine.intercept = { if (++calls == 2) job.cancel() }
+
+        job = launch { harness.api.get("/sync/playback") }
+        job.join()
+
+        assertEquals("access-two", harness.store.authorization()?.tokens?.accessToken)
     }
 
     @Test

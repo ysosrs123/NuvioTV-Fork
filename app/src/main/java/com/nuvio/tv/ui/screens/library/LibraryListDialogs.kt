@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -97,6 +98,7 @@ internal fun ManageListsDialog(
             )
         } else {
             LazyColumn(
+                contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(220.dp),
@@ -229,8 +231,8 @@ internal fun ListEditorDialog(
                     keyboardController?.hide()
                 }
             ),
-            label = { androidx.compose.material3.Text(stringResource(R.string.library_list_name_label)) },
-            textStyle = androidx.compose.material3.LocalTextStyle.current.copy(
+            label = { androidx.compose.material3.Text(stringResource(R.string.library_list_name_label), fontFamily = MaterialTheme.typography.bodyLarge.fontFamily) },
+            textStyle = MaterialTheme.typography.bodyMedium.copy(
                 textDirection = TextDirection.Content
             ),
             colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
@@ -271,8 +273,8 @@ internal fun ListEditorDialog(
                 readOnly = !descriptionEditing,
                 minLines = 3,
                 maxLines = 5,
-                label = { androidx.compose.material3.Text(stringResource(R.string.library_list_description_label)) },
-                textStyle = androidx.compose.material3.LocalTextStyle.current.copy(
+                label = { androidx.compose.material3.Text(stringResource(R.string.library_list_description_label), fontFamily = MaterialTheme.typography.bodyLarge.fontFamily) },
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
                     textDirection = TextDirection.Content
                 ),
                 colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(

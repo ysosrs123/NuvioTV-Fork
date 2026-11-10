@@ -238,9 +238,12 @@ class LibraryViewModel @Inject constructor(
             delay(150)
             if (id in metaPrefetchedIds) return@launch
             metaPrefetchedIds.add(id)
-            metaRepository.getMetaFromAllAddons(type = type, id = id)
+            val meta = metaRepository.getMetaFromAllAddons(type = type, id = id)
                 .first { it !is com.nuvio.tv.core.network.NetworkResult.Loading }
             watchProgressRepository.getAllEpisodeProgress(id.substringBefore(":")).first()
+            (meta as? com.nuvio.tv.core.network.NetworkResult.Success)?.data?.let {
+                com.nuvio.tv.core.image.warmDetailArtworkOnDisk(context, it.background, it.logo)
+            }
         }
     }
 

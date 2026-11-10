@@ -82,10 +82,6 @@ class WeTrakrApiClient(
             when {
                 response.status == 401 && attempt == 0 ->
                     authorization = auth.authorization(scope, authorization.tokens.accessToken)
-                response.status == 401 -> {
-                    store.clearAuth(scope, WeTrakrAuthError.AUTHORIZATION_REVOKED, authorization.tokens.accessToken)
-                    throw WeTrakrAuthException(WeTrakrAuthError.AUTHORIZATION_REVOKED)
-                }
                 response.status in 200..299 || response.status in acceptedStatuses -> return response
                 else -> throw WeTrakrApiException(response.status, response.errorCode())
             }

@@ -132,6 +132,30 @@ internal fun decodeWeTrakrListEntries(rows: List<JsonObject>, fallbackType: WeTr
         )
     }
 
+/** Locked lists are left out; the ones a plan no longer covers come back on their own when it does. */
+internal fun decodeWeTrakrCustomLists(body: String): List<WeTrakrCustomList> =
+    weTrakrJson(body).array().mapNotNull { row ->
+        val id = row.long("id") ?: return@mapNotNull null
+        val name = row.text("name")?.takeIf(String::isNotBlank) ?: return@mapNotNull null
+        if (row["locked"]?.let { (it as? JsonPrimitive)?.booleanOrNull } == true) return@mapNotNull null
+        WeTrakrCustomList(
+            id = id,
+            name = name,
+            description = row.text("description"),
+            isPrivate = row.text("privacy") == "private",
+            updatedAt = row.text("list_updated_at")
+        )
+    }
+
+/** A list can also hold seasons, episodes and people; only films and shows can open as a title here. */
+internal fun decodeWeTrakrCustomListItems(rows: List<JsonObject>): List<WeTrakrListEntry> =
+    rows.mapNotNull { row ->
+        val type = decodeWeTrakrType(row.text("type"))
+        if (type != WeTrakrType.MOVIE && type != WeTrakrType.SHOW) return@mapNotNull null
+        val title = decodeWeTrakrTitle(row, type) ?: return@mapNotNull null
+        WeTrakrListEntry(title = title, listedAt = row.text("list_item_created_at"))
+    }
+
 internal fun decodeWeTrakrPlayback(rows: List<JsonObject>, type: WeTrakrType): List<WeTrakrPlayback> = rows.mapNotNull { row ->
     val playback = row.obj("playback") ?: return@mapNotNull null
     val progress = playback.double("progress_percent")?.toFloat()?.coerceIn(0f, 100f) ?: return@mapNotNull null

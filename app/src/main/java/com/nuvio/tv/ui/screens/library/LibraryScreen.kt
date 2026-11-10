@@ -1155,6 +1155,7 @@ private fun CloudFilePickerDialog(
         suppressFirstKeyUp = false
     ) {
         LazyColumn(
+            contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm),
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 420.dp),

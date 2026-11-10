@@ -7,10 +7,16 @@ import com.nuvio.tv.core.tracking.TrackingScrobbleAction
 import com.nuvio.tv.core.tracking.TrackingScrobbleEvent
 import java.time.Instant
 import java.util.UUID
+import kotlin.math.abs
 import kotlin.math.roundToLong
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonObjectBuilder
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.put
 
 internal const val FLOPPY_COMPLETED_PERCENT = 80.0
@@ -51,6 +57,21 @@ internal fun floppyManualMarkBody(item: TrackingHistoryItem): JsonObject? = buil
     put("client_event_id", "arc-mark-${item.media.stableKey}$episode${watchedAt?.let { "-$it" }.orEmpty()}".take(200))
 }
 
+/** A new id for each unmark: Floppy answers a repeated id from its first result, so mark, unmark, mark, unmark must not share one. */
+internal fun floppyUnwatchBody(
+    media: TrackingMediaReference,
+    eventId: () -> String = { UUID.randomUUID().toString() }
+): JsonObject? = buildJsonObject {
+    put("action", "unwatch")
+    if (!putMedia(media)) return null
+    put("client_event_id", "arc-unmark-${eventId()}")
+}
+
+internal fun floppyErrorDetail(body: String): String? {
+    val root = runCatching { Json.parseToJsonElement(body) }.getOrNull() as? JsonObject ?: return null
+    return (root["detail"] as? JsonPrimitive)?.contentOrNull
+}
+
 private fun JsonObjectBuilder.putMedia(media: TrackingMediaReference): Boolean {
     val ids = media.ids
     val imdb = ids.imdb?.takeIf { IMDB_ID.matches(it) }
@@ -81,5 +102,27 @@ private fun JsonObjectBuilder.putMedia(media: TrackingMediaReference): Boolean {
     }
     return true
 }
+
+data class FloppyPlay(val id: Long, val endedAtMs: Long?)
+
+/** Floppy's reply is a plain list or a page with `results`; a row without a usable end time can't be matched. */
+internal fun parseFloppyPlays(body: String): List<FloppyPlay> {
+    val root = runCatching { Json.parseToJsonElement(body) }.getOrNull() ?: return emptyList()
+    val rows = (root as? JsonArray) ?: ((root as? JsonObject)?.get("results") as? JsonArray) ?: return emptyList()
+    return rows.mapNotNull { row ->
+        val fields = row as? JsonObject ?: return@mapNotNull null
+        val id = (fields["consumption_id"] as? JsonPrimitive)?.longOrNull ?: return@mapNotNull null
+        val ended = (fields["end_date"] as? JsonPrimitive)?.contentOrNull
+        FloppyPlay(id, ended?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() })
+    }
+}
+
+/** Floppy rounds a playback stop's end time down to the minute, so a stamp matches within two minutes. */
+internal fun floppyPlaysMadeHere(plays: List<FloppyPlay>, stamps: List<Long>): List<FloppyPlay> = plays.filter { play ->
+    val ended = play.endedAtMs ?: return@filter false
+    stamps.any { abs(it - ended) <= FLOPPY_PLAY_MATCH_MS }
+}
+
+private const val FLOPPY_PLAY_MATCH_MS = 120_000L
 
 private val IMDB_ID = Regex("tt[0-9]+")

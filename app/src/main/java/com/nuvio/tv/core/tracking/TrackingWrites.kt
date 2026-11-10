@@ -107,5 +107,9 @@ interface TrackingScrobbler {
     val seekScrobblePolicy: TrackingSeekScrobblePolicy
         get() = TrackingSeekScrobblePolicy.NONE
 
+    /** A pause saves nothing on this tracker, so leaving while paused has to send a stop. */
+    val stopsWhenLeftPaused: Boolean
+        get() = false
+
     suspend fun scrobble(action: TrackingScrobbleAction, event: TrackingScrobbleEvent)
 }

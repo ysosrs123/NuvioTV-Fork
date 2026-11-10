@@ -109,5 +109,42 @@ class FloppyScrobbleBodyTest {
         assertEquals("\"arc-stop-two\"", second["client_event_id"].toString())
     }
 
+    @Test
+    fun `an unmark names a film and an episode the way a mark does`() {
+        assertEquals(
+            json(
+                """{"action":"unwatch","media_type":"movie","ids":{"imdb":"tt0133093","tmdb":"603"},"title":"The Matrix",
+                "client_event_id":"arc-unmark-one"}"""
+            ),
+            floppyUnwatchBody(movie) { "one" }
+        )
+        assertEquals(
+            json(
+                """{"action":"unwatch","media_type":"episode","ids":{"imdb":"tt11280740","tvdb":"371980"},"series_title":"Severance",
+                "title":"Who Is Alive?","season_number":2,"episode_number":3,"client_event_id":"arc-unmark-one"}"""
+            ),
+            floppyUnwatchBody(episode) { "one" }
+        )
+    }
+
+    @Test
+    fun `an unmark Floppy could not match has no body`() {
+        assertNull(floppyUnwatchBody(episode.copy(episode = null)))
+        assertNull(floppyUnwatchBody(movie.copy(ids = TrackingExternalIds())))
+        assertNull(floppyUnwatchBody(episode.copy(episode = episode.episode!!.copy(usesTvdbSeasonMapping = true))))
+    }
+
+    @Test
+    fun `two unmarks of one title get different event ids`() {
+        assertNotEquals(floppyUnwatchBody(movie)!!["client_event_id"], floppyUnwatchBody(movie)!!["client_event_id"])
+    }
+
+    @Test
+    fun `an error detail is read from the reply and anything else gives none`() {
+        assertEquals("nope", floppyErrorDetail("""{"detail":"nope"}"""))
+        assertNull(floppyErrorDetail("""<html>Bad Request</html>"""))
+        assertNull(floppyErrorDetail("""["detail"]"""))
+    }
+
     private fun json(value: String): JsonObject = Json.parseToJsonElement(value).jsonObject
 }

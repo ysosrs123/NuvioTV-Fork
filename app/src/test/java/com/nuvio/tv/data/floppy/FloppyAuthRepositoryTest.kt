@@ -12,12 +12,32 @@ class FloppyAuthRepositoryTest {
     @Test
     fun `address is normalised to a server root`() {
         assertEquals("http://192.168.1.20:8000", normalizeFloppyServerUrl(" 192.168.1.20:8000/ "))
+        assertEquals("http://floppy.example.com", normalizeFloppyServerUrl("http://floppy.example.com"))
         assertEquals("https://floppy.example.com", normalizeFloppyServerUrl("https://floppy.example.com"))
         assertEquals("https://example.com/floppy", normalizeFloppyServerUrl("https://example.com/floppy/"))
         assertNull(normalizeFloppyServerUrl(""))
         assertNull(normalizeFloppyServerUrl("not a url"))
         assertNull(normalizeFloppyServerUrl("http://user:pass@host"))
         assertNull(normalizeFloppyServerUrl("http://host/?a=1"))
+    }
+
+    @Test
+    fun `a bare address uses http at home and https everywhere else`() {
+        listOf("10.0.0.5", "127.0.0.1", "100.100.1.2", "169.254.0.9", "172.16.0.1", "172.31.255.1", "192.168.1.20", "localhost", "nas", "floppy.local", "floppy.lan", "floppy.home.arpa", "[fd12::1]", "[fe80::1]", "[::1]").forEach {
+            assertEquals(it, "http://$it:8000", normalizeFloppyServerUrl("$it:8000"))
+        }
+        listOf("8.8.8.8", "172.32.0.1", "100.128.0.1", "192.169.0.1", "floppy.example.com", "local.example.com", "[2001:db8::1]").forEach {
+            assertEquals(it, "https://$it", normalizeFloppyServerUrl(it))
+        }
+        assertEquals("https://floppy.example.com:8443", normalizeFloppyServerUrl("floppy.example.com:8443"))
+    }
+
+    @Test
+    fun `a typed api path is taken off and a proxy prefix stays`() {
+        assertEquals("http://192.168.1.20:8000", normalizeFloppyServerUrl("192.168.1.20:8000/api"))
+        assertEquals("http://192.168.1.20:8000", normalizeFloppyServerUrl("192.168.1.20:8000/api/v1/"))
+        assertEquals("https://example.com/floppy", normalizeFloppyServerUrl("https://example.com/floppy/api/v1"))
+        assertEquals("https://example.com/apis", normalizeFloppyServerUrl("https://example.com/apis"))
     }
 
     @Test
@@ -41,9 +61,9 @@ class FloppyAuthRepositoryTest {
         assertEquals(FloppyDevicePollResult.Pending, h.auth.pollDeviceAuthorization())
         assertEquals(listOf("/oauth/register", "/oauth/device/authorization"), h.engine.paths())
 
-        h.now += 5_000L
+        h.now += 6_000L
         assertEquals(FloppyDevicePollResult.Pending, h.auth.pollDeviceAuthorization())
-        h.now += 5_000L
+        h.now += 6_000L
         assertEquals(FloppyDevicePollResult.Authorized, h.auth.pollDeviceAuthorization())
 
         val state = h.store.state.value
@@ -93,7 +113,7 @@ class FloppyAuthRepositoryTest {
         h.floppyServer()
         h.engine.onceFirst(FloppyHttpMethod.POST, "/oauth/token", 400, """{"error":"access_denied"}""")
         h.auth.startDeviceAuthorization(FloppyTestHarness.SERVER)
-        h.now += 5_000L
+        h.now += 6_000L
         assertEquals(FloppyDevicePollResult.Denied, h.auth.pollDeviceAuthorization())
         assertNull(h.store.state.value.session)
         assertEquals(FloppyAuthError.ACCESS_DENIED, h.store.state.value.error)
@@ -105,14 +125,33 @@ class FloppyAuthRepositoryTest {
     }
 
     @Test
+    fun `a poll waits a second past the interval so Floppy doesn't slow it down`() = runTest {
+        val h = FloppyTestHarness()
+        h.floppyServer()
+        h.engine.onceFirst(FloppyHttpMethod.POST, "/oauth/token", 400, """{"error":"authorization_pending"}""")
+        h.auth.startDeviceAuthorization(FloppyTestHarness.SERVER)
+        h.engine.requests.clear()
+
+        h.now += 5_000L
+        assertEquals(FloppyDevicePollResult.Pending, h.auth.pollDeviceAuthorization())
+        assertTrue(h.engine.requests.isEmpty())
+
+        h.now += 1_000L
+        assertEquals(FloppyDevicePollResult.Pending, h.auth.pollDeviceAuthorization())
+        assertEquals(1, h.engine.requests.size)
+        assertEquals(h.now + 6_000L, h.store.state.value.session!!.nextPollAtEpochMs)
+    }
+
+    @Test
     fun `slow down stretches the poll interval`() = runTest {
         val h = FloppyTestHarness()
         h.floppyServer()
         h.engine.onceFirst(FloppyHttpMethod.POST, "/oauth/token", 400, """{"error":"slow_down"}""")
         h.auth.startDeviceAuthorization(FloppyTestHarness.SERVER)
-        h.now += 5_000L
+        h.now += 6_000L
         assertEquals(FloppyDevicePollResult.Pending, h.auth.pollDeviceAuthorization())
         assertEquals(10, h.store.state.value.session!!.intervalSeconds)
+        assertEquals(h.now + 11_000L, h.store.state.value.session!!.nextPollAtEpochMs)
     }
 
     @Test
@@ -207,7 +246,7 @@ class FloppyAuthRepositoryTest {
         val h = FloppyTestHarness()
         h.floppyServer()
         h.auth.startDeviceAuthorization(FloppyTestHarness.SERVER)
-        h.now += 5_000L
+        h.now += 6_000L
         assertEquals(FloppyDevicePollResult.Authorized, h.auth.pollDeviceAuthorization())
         h.engine.requests.clear()
         return h

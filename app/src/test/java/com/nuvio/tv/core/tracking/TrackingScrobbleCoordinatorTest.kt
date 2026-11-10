@@ -39,6 +39,26 @@ class TrackingScrobbleCoordinatorTest {
     }
 
     @Test
+    fun `leaving paused only stops the trackers that save nothing on a pause`() = runTest {
+        val trakt = FakeScrobbler(TrackingProviderId.TRAKT)
+        val floppy = FakeScrobbler(TrackingProviderId.FLOPPY, stopsLeftPaused = true)
+
+        dispatchTrackingStopWhenLeftPaused(listOf(trakt, floppy), event(40.0))
+
+        assertEquals(emptyList<TrackingScrobbleAction>(), trakt.actions)
+        assertEquals(listOf(TrackingScrobbleAction.STOP), floppy.actions)
+    }
+
+    @Test
+    fun `leaving paused respects a tracker the media server already scrobbles to`() = runTest {
+        val floppy = FakeScrobbler(TrackingProviderId.FLOPPY, stopsLeftPaused = true)
+
+        dispatchTrackingStopWhenLeftPaused(listOf(floppy), event(40.0).copy(skippedProviders = setOf(TrackingProviderId.FLOPPY)))
+
+        assertEquals(0, floppy.callCount)
+    }
+
+    @Test
     fun `services a media server already scrobbles to are left out`() = runTest {
         val trakt = FakeScrobbler(TrackingProviderId.TRAKT)
         val simkl = FakeScrobbler(TrackingProviderId.SIMKL)
@@ -115,11 +135,13 @@ class TrackingScrobbleCoordinatorTest {
         private val failure: Throwable? = null,
         private val seekPolicy: TrackingSeekScrobblePolicy = TrackingSeekScrobblePolicy.NONE,
         private val log: MutableList<String>? = null,
-        private val delayMs: Long = 0L
+        private val delayMs: Long = 0L,
+        private val stopsLeftPaused: Boolean = false
     ) : TrackingScrobbler {
         var callCount = 0
         val actions = mutableListOf<TrackingScrobbleAction>()
         override val seekScrobblePolicy = seekPolicy
+        override val stopsWhenLeftPaused = stopsLeftPaused
 
         override suspend fun scrobble(action: TrackingScrobbleAction, event: TrackingScrobbleEvent) {
             callCount += 1

@@ -50,6 +50,10 @@ class TrackingScrobbleCoordinator @Inject constructor(
     ): List<TrackingScrobbleFailure> = dispatchTrackingSeekRestart(providerRegistry.connectedScrobblers(), stop, restart)
         .also { failures -> failures.log(TrackingScrobbleAction.STOP, true) }
 
+    suspend fun scrobbleStopWhenLeftPaused(event: TrackingScrobbleEvent): List<TrackingScrobbleFailure> =
+        dispatchTrackingStopWhenLeftPaused(providerRegistry.connectedScrobblers(), event)
+            .also { failures -> failures.log(TrackingScrobbleAction.STOP, false) }
+
     private suspend fun dispatch(
         scrobblers: Collection<TrackingScrobbler>,
         action: TrackingScrobbleAction,
@@ -80,6 +84,12 @@ suspend fun dispatchTrackingScrobble(
         async { scrobbleCatching(scrobbler, action, event) }
     }.awaitAll().filterNotNull()
 }
+
+suspend fun dispatchTrackingStopWhenLeftPaused(
+    scrobblers: Collection<TrackingScrobbler>,
+    event: TrackingScrobbleEvent
+): List<TrackingScrobbleFailure> =
+    dispatchTrackingScrobble(scrobblers.filter { it.stopsWhenLeftPaused }, TrackingScrobbleAction.STOP, event)
 
 suspend fun dispatchTrackingSeekRestart(
     scrobblers: Collection<TrackingScrobbler>,

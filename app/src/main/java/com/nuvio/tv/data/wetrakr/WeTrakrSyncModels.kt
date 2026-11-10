@@ -160,8 +160,19 @@ data class WeTrakrActivities(val stamps: Map<String, String>) {
         )
         val PLAYBACK_KEYS = listOf("movies.last_playback_at", "episodes.last_playback_at")
         val REMOVAL_KEYS = listOf("movies.last_tracking_removed_at", "shows.last_tracking_removed_at")
+        val CUSTOM_LIST_KEYS = listOf("lists.all")
     }
 }
+
+@Serializable
+data class WeTrakrCustomList(
+    val id: Long,
+    val name: String,
+    val description: String? = null,
+    val isPrivate: Boolean = false,
+    val updatedAt: String? = null,
+    val items: List<WeTrakrListEntry> = emptyList()
+)
 
 @Serializable
 data class WeTrakrSnapshot(
@@ -170,6 +181,8 @@ data class WeTrakrSnapshot(
     val watchedEpisodes: List<WeTrakrWatchedEpisode> = emptyList(),
     val playback: List<WeTrakrPlayback> = emptyList(),
     val lists: Map<WeTrakrList, List<WeTrakrListEntry>> = emptyMap(),
+    val customLists: List<WeTrakrCustomList> = emptyList(),
+    val customListsCheckedAtEpochMs: Long? = null,
     val showIds: Map<Long, WeTrakrIds> = emptyMap(),
     val activities: Map<String, String> = emptyMap(),
     val journalMark: String? = null,

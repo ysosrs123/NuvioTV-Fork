@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.wetrakr
 
 import java.time.Instant
+import kotlin.coroutines.cancellation.CancellationException
 
 interface WeTrakrSyncRemote {
     suspend fun activities(): WeTrakrActivities
@@ -10,6 +11,10 @@ interface WeTrakrSyncRemote {
     suspend fun playback(): List<WeTrakrPlayback>
     suspend fun journal(since: String): WeTrakrJournalPage
     suspend fun showIds(showId: Long): WeTrakrIds?
+    suspend fun customLists(): List<WeTrakrCustomList> = emptyList()
+
+    /** Null when the list can't be read right now, for example locked by the plan quota. */
+    suspend fun customListItems(listId: Long): List<WeTrakrListEntry>? = emptyList()
 }
 
 class WeTrakrHttpSyncRemote(
@@ -70,6 +75,27 @@ class WeTrakrHttpSyncRemote(
         return decodeWeTrakrIds(root["ids"], root.long("id") ?: showId).takeUnless { it.isEmpty }
     }
 
+    override suspend fun customLists(): List<WeTrakrCustomList> =
+        decodeWeTrakrCustomLists(api.get("/sync/lists", scope = scope).body)
+
+    override suspend fun customListItems(listId: Long): List<WeTrakrListEntry>? {
+        val entries = mutableListOf<WeTrakrListEntry>()
+        var page = 1
+        while (entries.size < MAX_CUSTOM_LIST_ITEMS) {
+            val response = api.get(
+                "/sync/lists/$listId/items",
+                mapOf("extended" to "movie_level_1,show_level_1", "limit" to "100", "page" to page.toString()),
+                scope,
+                acceptedStatuses = setOf(404, 420)
+            )
+            if (response.status != 200) return null
+            entries += decodeWeTrakrCustomListItems(weTrakrJson(response.body).array())
+            if (!hasMorePages(response, page)) break
+            page += 1
+        }
+        return entries.take(MAX_CUSTOM_LIST_ITEMS)
+    }
+
     private suspend fun compact(path: String): List<kotlinx.serialization.json.JsonObject> {
         val rows = mutableListOf<kotlinx.serialization.json.JsonObject>()
         val seen = mutableSetOf<String>()
@@ -105,6 +131,7 @@ class WeTrakrHttpSyncRemote(
 
     private companion object {
         const val MAX_PAGES = 500
+        const val MAX_CUSTOM_LIST_ITEMS = 300
     }
 }
 
@@ -114,6 +141,10 @@ class WeTrakrSyncEngine(
 ) {
     suspend fun synchronize(previous: WeTrakrSnapshot): WeTrakrSnapshot {
         val activities = remote.activities()
+        return withCustomLists(trackingSync(previous, activities), previous, activities)
+    }
+
+    private suspend fun trackingSync(previous: WeTrakrSnapshot, activities: WeTrakrActivities): WeTrakrSnapshot {
         val mark = previous.journalMark
         if (!previous.isInitialized || previous.invalidated || mark == null) return fullSync(previous, activities)
         val unchanged = activities.stamps["all"] != null && activities.stamps["all"] == previous.activities["all"]
@@ -163,6 +194,41 @@ class WeTrakrSyncEngine(
         )
     }
 
+    /**
+     * Lists are read when their stamp moved, once a day in case a dynamic list refilled itself, and on the
+     * first sync after an update. Only a list that changed downloads its items again. A failure here keeps
+     * the lists already held and is tried again next sync, so it never stops the tracking sync.
+     */
+    private suspend fun withCustomLists(
+        snapshot: WeTrakrSnapshot,
+        previous: WeTrakrSnapshot,
+        activities: WeTrakrActivities
+    ): WeTrakrSnapshot {
+        val checked = snapshot.customListsCheckedAtEpochMs
+        val due = checked == null || now() - checked >= CUSTOM_LISTS_RECHECK_MS ||
+            activities.changed(previous.activities, WeTrakrActivities.CUSTOM_LIST_KEYS)
+        if (!due) return snapshot
+        val known = snapshot.customLists.associateBy { it.id }
+        val lists = try {
+            remote.customLists().map { list ->
+                val held = known[list.id]
+                if (held != null && list.updatedAt != null && held.updatedAt == list.updatedAt) {
+                    list.copy(items = held.items)
+                } else {
+                    remote.customListItems(list.id)?.let { list.copy(items = it) }
+                        ?: list.copy(items = held?.items.orEmpty(), updatedAt = null)
+                }
+            }
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: WeTrakrAccountChangedException) {
+            throw error
+        } catch (error: Exception) {
+            return snapshot
+        }
+        return snapshot.copy(customLists = lists, customListsCheckedAtEpochMs = now())
+    }
+
     private fun overlap(mark: String): String {
         val time = weTrakrTimestamp(mark).takeIf { it > 0L } ?: return mark
         return Instant.ofEpochMilli(time - JOURNAL_HOLD_BACK_MS).toString()
@@ -171,6 +237,7 @@ class WeTrakrSyncEngine(
     private companion object {
         const val JOURNAL_HOLD_BACK_MS = 5_000L
         const val PENDING_PLAY_MS = 30L * 60 * 1_000
+        const val CUSTOM_LISTS_RECHECK_MS = 24L * 60 * 60 * 1_000
     }
 }
 
