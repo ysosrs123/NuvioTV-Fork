@@ -25,6 +25,7 @@ import android.graphics.RectF
 import com.nuvio.tv.ui.theme.NuvioMotion
 import kotlinx.coroutines.delay
 
+import com.nuvio.tv.ui.components.NuvioNoticePill
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.theme.accentBrush
 
@@ -302,6 +303,9 @@ fun PlayerScreen(
     // are visible, reported by PlayerControlsOverlay. Default is the safe flat-case value.
     var controlsSkipAnchor by remember { mutableStateOf(148.dp) }
     var reportCodeVisible by remember { mutableStateOf(false) }
+    val reportMarkFocusRequester = remember { FocusRequester() }
+    val markFocusOnOpen = remember { booleanArrayOf(false) }
+    val recordingStatus by com.nuvio.tv.core.report.PlaybackRecorder.status.collectAsState()
     var exitDispatched by remember { mutableStateOf(false) }
     var externalHandoffInProgress by remember { mutableStateOf(false) }
     val autoPlayEnabledForBack = playerBackTreatsSkipAsAutoPlay(
@@ -309,6 +313,8 @@ fun PlayerScreen(
         preferBingeGroupForNextEpisode = uiState.streamAutoPlayPreferBingeGroupForNextEpisode
     )
 
+    val scoutRatings: com.nuvio.tv.ui.scout.ScoutRatingViewModel? =
+        if (com.nuvio.tv.domain.model.ScoutFeature.available) hiltViewModel() else null
     val exitPlayer: () -> Unit = exitPlayer@{
         if (exitDispatched) return@exitPlayer
         exitDispatched = true
@@ -318,6 +324,17 @@ fun PlayerScreen(
             (!timeline.isLive &&
                 timeline.duration > 0L &&
                 (timeline.currentPosition.toFloat() / timeline.duration.toFloat()) >= WatchProgress.COMPLETED_THRESHOLD)
+        scoutRatings?.offerAsk(
+            com.nuvio.tv.domain.model.scoutAskTargetFor(
+                completed = completed,
+                contentId = viewModel.scoutContentId,
+                contentType = uiState.contentType,
+                name = uiState.contentName ?: uiState.title,
+                poster = null,
+                season = uiState.currentSeason,
+                nextEpisodeSeason = uiState.nextEpisode?.takeIf { it.mixName == null }?.season
+            )
+        )
         val (focusSeason, focusEpisode) = uiState.returnFocusSeasonEpisode(completed)
         onBackPress(
             uiState.currentVideoId,
@@ -347,7 +364,7 @@ fun PlayerScreen(
     val currentOnPlayRecommendation by rememberUpdatedState(onPlayRecommendation)
     val currentOnOpenRecommendationDetails by rememberUpdatedState(onOpenRecommendationDetails)
     val nextEpisodeForEndPrompt = uiState.nextEpisode?.takeIf {
-        it.hasAired && !(it.released.isNullOrBlank() && it.available == false)
+        it.mixName == null && it.hasAired && !(it.released.isNullOrBlank() && it.available == false)
     }
     val shouldConfirmNextEpisodeOnEnd =
         uiState.playbackEnded &&
@@ -489,8 +506,21 @@ fun PlayerScreen(
             uiState.postPlayMode?.blocksNaturalCompletion() != true &&
             !postPlayRecommendationState.blocksNaturalCompletion &&
             !shouldConfirmNextEpisodeOnEnd &&
-            explicitReason == null
+            explicitReason == null &&
+            !exitDispatched
         when {
+            explicitReason == PlayerExitReason.ScoutMixNext -> {
+                exitDispatched = true
+                viewModel.stopAndRelease()
+                val cb = currentOnPlaybackEnded
+                if (cb != null) {
+                    cb(null, null, null, PlayerExitReason.ScoutMixNext)
+                } else {
+                    val (focusSeason, focusEpisode) = uiState.returnFocusSeasonEpisode(completed = true)
+                    currentOnBackPress(uiState.currentVideoId, focusSeason, focusEpisode, autoPlayEnabledForBack, true)
+                }
+                viewModel.consumePendingExitReason()
+            }
             explicitReason == PlayerExitReason.StillWatchingPrompt -> {
                 viewModel.stopAndRelease()
                 val cb = currentOnPlaybackEnded
@@ -511,7 +541,7 @@ fun PlayerScreen(
             shouldDispatchNatural -> {
                 viewModel.stopAndRelease()
                 val next = uiState.nextEpisode?.takeIf {
-                    it.hasAired && !(it.released.isNullOrBlank() && it.available == false)
+                    it.mixName == null && it.hasAired && !(it.released.isNullOrBlank() && it.available == false)
                 }
                 val cb = currentOnPlaybackEnded
                 if (cb != null) {
@@ -589,6 +619,9 @@ fun PlayerScreen(
     }
 
     // Seek thumbnails follow the stream and the engine; ExoPlayer only (with MPV the provider returns null).
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let { com.nuvio.tv.core.formatcheck.FormatCheckSession.onError(it) }
+    }
     val seekThumbsEnabled = SeekThumbnailPreferences.enabledFlow(context).collectAsState(initial = false)
     val thumbsOnMpv = uiState.internalPlayerEngine == InternalPlayerEngine.MVP_PLAYER
     val lastThumbRun = remember { mutableStateOf<Pair<String?, Boolean>?>(null) }
@@ -598,7 +631,9 @@ fun PlayerScreen(
         SeekThumbnails.stopSession(handBackPlayer = handsPlayerBackOnRestart(previousRun, thumbSourceUrl, thumbsOnMpv))
         val engineChanged = previousRun != null && previousRun.first == thumbSourceUrl && previousRun.second != thumbsOnMpv
         lastThumbRun.value = thumbSourceUrl to thumbsOnMpv
-        if (!seekThumbsEnabled.value || thumbSourceUrl.isNullOrBlank() || thumbsOnMpv) {
+        if (!seekThumbsEnabled.value || thumbSourceUrl.isNullOrBlank() || thumbsOnMpv ||
+            com.nuvio.tv.core.formatcheck.FormatCheckSession.active
+        ) {
             SeekThumbnails.dropServerMemory()
             return@LaunchedEffect
         }
@@ -728,6 +763,12 @@ fun PlayerScreen(
                 viewModel.onEvent(PlayerEvent.OnShowMoreDialog)
             }
             delay(250)
+            if (markFocusOnOpen[0]) {
+                markFocusOnOpen[0] = false
+                runCatching { reportMarkFocusRequester.requestFocus() }
+                v2Focus.pendingReturn = null
+                return@LaunchedEffect
+            }
             val returningLayout = uiState.controlLayout
             val settle = PauseOnTimeline.afterSettle(
                 pauseRequest = pauseRequest,
@@ -856,6 +897,24 @@ fun PlayerScreen(
         remoteButtonBanner = RemoteButtonBanner(text)
         remoteButtonBannerText = text
     }
+    LaunchedEffect(uiState.reportPillTick) {
+        if (uiState.reportPillTick == 0) return@LaunchedEffect
+        val marks = com.nuvio.tv.core.report.PlaybackRecorder.status.value.marks
+        val clock = com.nuvio.tv.core.report.recordingClock(com.nuvio.tv.core.report.PlaybackRecorder.recordingElapsedMs())
+        val text = if (marks > 0) {
+            context.resources.getQuantityString(R.plurals.report_recording_pill_marks, marks, clock, marks)
+        } else {
+            context.getString(R.string.report_recording_pill, clock)
+        }
+        remoteButtonBanner = RemoteButtonBanner(text)
+        remoteButtonBannerText = text
+    }
+    LaunchedEffect(uiState.reportNoSpaceTick) {
+        if (uiState.reportNoSpaceTick == 0) return@LaunchedEffect
+        val text = context.getString(R.string.report_recording_no_space)
+        remoteButtonBanner = RemoteButtonBanner(text)
+        remoteButtonBannerText = text
+    }
     // Runs on the first key-down of a button. True claims the button, so its repeats and release stay here too.
     val runRemoteButton: (RemoteButtonBinding, KeyEvent) -> Boolean = runRemoteButton@{ binding, native ->
         val job = binding.job
@@ -923,6 +982,22 @@ fun PlayerScreen(
                 }
                 viewModel.onEvent(PlayerEvent.OnToggleDetails)
                 true
+            }
+            RemoteButtonJob.REPORT_MARK -> when (
+                com.nuvio.tv.core.report.reportKeyAction(
+                    reportsAvailable = com.nuvio.tv.core.build.IssueReports.available && uiState.playbackIssueReportsEnabled,
+                    recording = recordingStatus.active
+                )
+            ) {
+                com.nuvio.tv.core.report.ReportKeyAction.ADD_MARK -> {
+                    viewModel.onEvent(PlayerEvent.OnMarkReportProblem)
+                    true
+                }
+                com.nuvio.tv.core.report.ReportKeyAction.OPEN_PANEL -> {
+                    viewModel.onEvent(PlayerEvent.OnReportPlaybackIssue)
+                    true
+                }
+                com.nuvio.tv.core.report.ReportKeyAction.UNAVAILABLE -> unavailable()
             }
             RemoteButtonJob.SOURCES -> {
                 viewModel.onEvent(PlayerEvent.OnShowSourcesPanel)
@@ -1392,7 +1467,12 @@ fun PlayerScreen(
                                 // The release lands on the control that takes focus; it must not click it.
                                 if (firstPress) {
                                     swallowKeyUp = keyEvent.nativeKeyEvent.keyCode
-                                    viewModel.onEvent(PlayerEvent.OnPlayPause)
+                                    if (recordingStatus.active) {
+                                        markFocusOnOpen[0] = true
+                                        viewModel.onEvent(PlayerEvent.OnToggleControls)
+                                    } else {
+                                        viewModel.onEvent(PlayerEvent.OnPlayPause)
+                                    }
                                 }
                                 true
                             } else {
@@ -1889,6 +1969,21 @@ fun PlayerScreen(
                     .zIndex(2.6f)
             )
 
+            uiState.playerNotice?.takeIf { uiState.error == null }?.let { notice ->
+                NuvioNoticePill(
+                    text = notice,
+                    maxLines = 2,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(
+                            start = NuvioTheme.spacing.xl,
+                            end = NuvioTheme.spacing.xl,
+                            top = if (partyState.isActive) NuvioTheme.spacing.xl + NuvioTheme.spacing.xxxl else NuvioTheme.spacing.xl,
+                        )
+                        .zIndex(2.8f)
+                )
+            }
+
             if (partyState.isActive && uiState.error == null && !uiState.showLoadingOverlay && !uiState.showPartyPanel) {
                 if (partyState.hold == null) {
                     PartyHostNotice(
@@ -2033,6 +2128,44 @@ fun PlayerScreen(
                     reportError = uiState.playbackIssueReportError,
                     onReport = { viewModel.onEvent(PlayerEvent.OnReportPlaybackIssue) },
                     onBack = exitPlayerFromError
+                )
+            }
+
+            if (uiState.showReportPanel) {
+                ReportProblemPanel(
+                    started = uiState.reportPanelStarted,
+                    titleLabel = uiState.reportPanelTitle,
+                    keptMinutes = uiState.reportPanelKeptMinutes,
+                    status = uiState.playbackIssueReportStatus,
+                    reportId = uiState.playbackIssueReportId,
+                    followUrl = uiState.playbackIssueReportFollowUrl,
+                    error = uiState.playbackIssueReportError,
+                    onSend = { viewModel.onEvent(PlayerEvent.OnSendPlaybackIssue(it)) },
+                    onClose = { viewModel.onEvent(PlayerEvent.OnCloseReportPanel) },
+                    fileName = uiState.reportPanelFileName,
+                    source = uiState.reportPanelSource,
+                    afterRecording = uiState.reportPanelAfterRecording,
+                    recordingMs = uiState.reportPanelRecordingMs,
+                    recordingMarks = uiState.reportPanelRecordingMarks,
+                    onRecord = if (uiState.reportPanelStarted && !uiState.isLive && !recordingStatus.active) {
+                        ({ viewModel.onEvent(PlayerEvent.OnStartReportRecording) })
+                    } else {
+                        null
+                    }
+                )
+            }
+
+            if (recordingStatus.active && playerControlsVisible) {
+                RecordingMarkControls(
+                    markFocus = reportMarkFocusRequester,
+                    downFocus = if (uiState.showControls) progressBarFocusRequester else null,
+                    onMark = { viewModel.onEvent(PlayerEvent.OnMarkReportProblem) },
+                    onStop = { viewModel.onEvent(PlayerEvent.OnStopReportRecording) },
+                    onInteraction = { viewModel.scheduleHideControls() },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = NuvioTheme.spacing.xxl, bottom = controlsSkipAnchor)
+                        .zIndex(2.1f)
                 )
             }
 
@@ -2203,6 +2336,7 @@ fun PlayerScreen(
                     progressBarUpFocusRequester = when {
                         skipButtonActuallyVisible -> skipIntroFocusRequester
                         uiState.postPlayMode is PostPlayMode.AutoPlay -> nextEpisodeFocusRequester
+                        recordingStatus.active -> reportMarkFocusRequester
                         else -> null
                     },
                     onSkipAnchorChanged = { controlsSkipAnchor = it },
@@ -3047,7 +3181,7 @@ private data class SubtitleAppliedConfig(
 private val SUBTITLE_CONTROLS_LIFT = 130.dp
 private val SUBTITLE_CONTROLS_GAP = 8.dp
 private val SUBTITLE_TITLE_MARGIN = 16.dp
-private const val EXO_SUBTITLE_BASE_SP = 24f
+internal const val EXO_SUBTITLE_BASE_SP = 24f
 private const val EXO_SUBTITLE_INNER_PADDING_RATIO = 0.125f
 
 @Composable
@@ -3682,8 +3816,7 @@ private fun PlayerControlsOverlay(
                                     reportId = uiState.playbackIssueReportId,
                                     showReportId = reportCodeVisible,
                                     onClick = onReportPlaybackIssue,
-                                    enabled = uiState.playbackIssueReportStatus != PlaybackIssueReportStatus.Sending &&
-                                        uiState.playbackIssueReportStatus != PlaybackIssueReportStatus.Sent,
+                                    enabled = !uiState.playbackIssueReportStatus.isReportBusyOrDone,
                                     upFocusRequester = progressBarFocusRequester,
                                     onDownKey = onHideControls,
                                     onFocused = onResetHideTimer
@@ -4869,6 +5002,7 @@ private fun LoadingIssueReportAction(
     ) {
         val reportMessage = when (reportStatus) {
             PlaybackIssueReportStatus.Sent -> stringResource(R.string.player_report_issue_sent, reportId.orEmpty())
+            PlaybackIssueReportStatus.Saved -> stringResource(R.string.report_saved)
             PlaybackIssueReportStatus.Failed -> reportError ?: stringResource(R.string.player_report_issue_failed)
             PlaybackIssueReportStatus.Sending -> stringResource(R.string.player_report_issue_sending)
             PlaybackIssueReportStatus.Idle -> {
@@ -4890,12 +5024,12 @@ private fun LoadingIssueReportAction(
             text = when (reportStatus) {
                 PlaybackIssueReportStatus.Sending -> stringResource(R.string.player_report_issue_sending_button)
                 PlaybackIssueReportStatus.Sent -> stringResource(R.string.player_report_issue_sent_button)
+                PlaybackIssueReportStatus.Saved -> stringResource(R.string.report_saved_title)
                 else -> stringResource(R.string.player_report_loading_issue)
             },
             onClick = onReport,
             isPrimary = false,
-            enabled = reportStatus != PlaybackIssueReportStatus.Sending &&
-                reportStatus != PlaybackIssueReportStatus.Sent,
+            enabled = !reportStatus.isReportBusyOrDone,
             modifier = Modifier.focusRequester(focusRequester)
         )
     }
@@ -4979,6 +5113,7 @@ private fun ErrorOverlay(
                 PlaybackIssueReportStatus.Idle -> null
                 PlaybackIssueReportStatus.Sending -> stringResource(R.string.player_report_issue_sending)
                 PlaybackIssueReportStatus.Sent -> stringResource(R.string.player_report_issue_sent, reportId.orEmpty())
+                PlaybackIssueReportStatus.Saved -> stringResource(R.string.report_saved)
                 PlaybackIssueReportStatus.Failed -> reportError ?: stringResource(R.string.player_report_issue_failed)
             }
             if (showReportAction && reportMessage != null) {
@@ -4986,7 +5121,7 @@ private fun ErrorOverlay(
                     text = reportMessage,
                     style = MaterialTheme.typography.bodyMedium,
                     color = when (reportStatus) {
-                        PlaybackIssueReportStatus.Sent -> NuvioTheme.colors.Secondary
+                        PlaybackIssueReportStatus.Sent, PlaybackIssueReportStatus.Saved -> NuvioTheme.colors.Secondary
                         PlaybackIssueReportStatus.Failed -> Color(0xFFFF8A80)
                         else -> Color.White.copy(alpha = 0.7f)
                     },
@@ -5020,12 +5155,12 @@ private fun ErrorOverlay(
                         text = when (reportStatus) {
                             PlaybackIssueReportStatus.Sending -> stringResource(R.string.player_report_issue_sending_button)
                             PlaybackIssueReportStatus.Sent -> stringResource(R.string.player_report_issue_sent_button)
+                            PlaybackIssueReportStatus.Saved -> stringResource(R.string.report_saved_title)
                             else -> stringResource(R.string.player_report_issue)
                         },
                         onClick = onReport,
                         primary = false,
-                        enabled = reportStatus != PlaybackIssueReportStatus.Sending &&
-                            reportStatus != PlaybackIssueReportStatus.Sent,
+                        enabled = !reportStatus.isReportBusyOrDone,
                         modifier = Modifier
                             .focusRequester(reportFocusRequester)
                             .onFocusChanged { reportFocused = it.isFocused }
@@ -5135,7 +5270,7 @@ private fun SpeedSelectionDialog(
         NuvioSideSheet(onDismiss, requestInitialFocus = false) {
             Text(stringResource(R.string.player_speed_title), style = MaterialTheme.typography.headlineSmall,
                 color = Color.White, modifier = Modifier.padding(bottom = 20.dp))
-            LazyColumn(state = listState, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            LazyColumn(state = listState, contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 itemsIndexed(PLAYBACK_SPEEDS) { index, speed ->
                     PlayerPanelRow(
                         title = if (speed == 1f) stringResource(R.string.player_speed_normal) else "${speed}x",
@@ -5168,7 +5303,7 @@ private fun SpeedSelectionDialog(
                 LazyColumn(
                     state = listState,
                     verticalArrangement = Arrangement.spacedBy(4.dp),
-                    contentPadding = PaddingValues(top = NuvioTheme.spacing.xs)
+                    contentPadding = PaddingValues(top = NuvioTheme.spacing.sm)
                 ) {
                     itemsIndexed(PLAYBACK_SPEEDS) { index, speed ->
                         PlayerPanelRow(

@@ -97,6 +97,7 @@ internal fun remoteJobLabel(context: Context, job: RemoteButtonJob): String = co
     RemoteButtonJob.CHAPTERS_LIST -> R.string.remote_buttons_job_chapters_list
     RemoteButtonJob.NEXT_CHAPTER -> R.string.remote_buttons_job_next_chapter
     RemoteButtonJob.PREVIOUS_CHAPTER -> R.string.remote_buttons_job_previous_chapter
+    RemoteButtonJob.REPORT_MARK -> R.string.remote_buttons_job_report_mark
     RemoteButtonJob.LEAVE -> R.string.remote_buttons_job_leave
 })
 
@@ -126,6 +127,7 @@ internal fun remoteJobDescription(
         NightModeKeyStyle.TOGGLE -> R.string.remote_buttons_job_night_mode_desc
         NightModeKeyStyle.CYCLE -> R.string.remote_buttons_job_night_mode_cycle_desc
     })
+    RemoteButtonJob.REPORT_MARK -> context.getString(R.string.remote_buttons_job_report_mark_desc)
     RemoteButtonJob.CHAPTERS_LIST -> context.getString(R.string.remote_buttons_job_chapters_list_desc)
     RemoteButtonJob.PREVIOUS_CHAPTER -> context.getString(R.string.remote_buttons_job_previous_chapter_desc)
     else -> null

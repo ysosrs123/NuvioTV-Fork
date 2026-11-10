@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
+import android.media.MediaCrypto
 import android.media.MediaFormat
 import android.util.Log
 import androidx.media3.common.Format
@@ -12,6 +13,7 @@ import androidx.media3.exoplayer.mediacodec.MediaCodecInfo
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.video.MediaCodecVideoRenderer
 import com.nuvio.tv.core.player.DecodeOrderTimestamps
+import com.nuvio.tv.core.player.H264LevelLabel
 import java.nio.ByteBuffer
 
 /**
@@ -20,6 +22,11 @@ import java.nio.ByteBuffer
  * Those containers carry decode-order times, so a hardware decoder hands back display-order pictures with
  * times that step backwards and roughly one frame in three is dropped as late. See [DecodeOrderTimestamps].
  * Every other format passes through untouched.
+ *
+ * H.264 streams that declare a level above 5.2 without needing it reach the decoder with the level corrected,
+ * see [H264LevelLabel].
+ *
+ * A frame rate the decoder refuses to be told is withheld, see [decoderRefusesDeclaredFrameRate].
  *
  * Also leaves Android's software decoders out of the fallback list when a hardware decoder supports the
  * format, see [hardwareFirstVideoDecoders], and Android's software AV1 decoders out for the streams dav1d takes,
@@ -40,8 +47,14 @@ internal class DecodeOrderPtsVideoRenderer(
     private var consumed = 0L
     private var loggedEngage = false
 
+    private var levelRelabel: H264LevelLabel.Relabel? = null
+    private var frameRateWithheld = false
+
     override fun supportsFormat(mediaCodecSelector: MediaCodecSelector, format: Format): Int =
-        super.supportsFormat(withoutAndroidSoftwareAv1(mediaCodecSelector, format, dav1dLoaded), format)
+        super.supportsFormat(
+            withoutAndroidSoftwareAv1(mediaCodecSelector, format, dav1dLoaded),
+            H264LevelLabel.relabel(format)?.format ?: format
+        )
 
     override fun getDecoderInfos(
         mediaCodecSelector: MediaCodecSelector,
@@ -56,7 +69,55 @@ internal class DecodeOrderPtsVideoRenderer(
         )
     )
 
+    override fun getMediaCodecConfiguration(
+        codecInfo: MediaCodecInfo,
+        format: Format,
+        crypto: MediaCrypto?,
+        codecOperatingRate: Float
+    ): MediaCodecAdapter.Configuration {
+        frameRateWithheld = decoderRefusesDeclaredFrameRate(
+            codecInfo.name,
+            format.sampleMimeType,
+            format.width,
+            format.height,
+            format.frameRate
+        )
+        if (!frameRateWithheld) {
+            return super.getMediaCodecConfiguration(codecInfo, format, crypto, codecOperatingRate)
+        }
+        Log.i(TAG_DECODER, "frame rate withheld from ${codecInfo.name}: ${format.width}x${format.height} at ${format.frameRate} fps")
+        return super.getMediaCodecConfiguration(
+            codecInfo,
+            format.buildUpon().setFrameRate(Format.NO_VALUE.toFloat()).build(),
+            crypto,
+            CODEC_OPERATING_RATE_UNSET
+        )
+    }
+
+    override fun getCodecOperatingRateV23(
+        targetPlaybackSpeed: Float,
+        format: Format,
+        streamFormats: Array<out Format>
+    ): Float = if (frameRateWithheld) {
+        CODEC_OPERATING_RATE_UNSET
+    } else {
+        super.getCodecOperatingRateV23(targetPlaybackSpeed, format, streamFormats)
+    }
+
     override fun onInputFormatChanged(formatHolder: FormatHolder): DecoderReuseEvaluation? {
+        val relabelled = formatHolder.format?.let(H264LevelLabel::relabel)
+        if (relabelled != null) {
+            formatHolder.format = relabelled.format
+            if (levelRelabel == null) {
+                Log.i(
+                    LEVEL_TAG,
+                    "level ${H264LevelLabel.describe(relabelled.relabel.fromLevelIdc)} declared, decoder gets " +
+                        "${H264LevelLabel.describe(relabelled.relabel.toLevelIdc)}: " +
+                        "${relabelled.format.width}x${relabelled.format.height} at ${relabelled.format.frameRate} fps"
+                )
+            }
+        }
+        levelRelabel = relabelled?.relabel
         val evaluation = super.onInputFormatChanged(formatHolder)
         val format = formatHolder.format
         if (format != null && !sameTrackKind(format, inputFormat)) {
@@ -72,6 +133,11 @@ internal class DecodeOrderPtsVideoRenderer(
     override fun onQueueInputBuffer(buffer: DecoderInputBuffer) {
         super.onQueueInputBuffer(buffer)
         timestamps?.onInputQueued(buffer.timeUs)
+        val relabel = levelRelabel
+        val data = buffer.data
+        if (relabel != null && data != null && !buffer.isEncrypted) {
+            H264LevelLabel.relabelParameterSets(data, data.position(), data.limit(), relabel)
+        }
     }
 
     override fun processOutputBuffer(
@@ -123,6 +189,7 @@ internal class DecodeOrderPtsVideoRenderer(
 
     override fun onCodecReleased(name: String) {
         timestamps?.flush()
+        frameRateWithheld = false
         super.onCodecReleased(name)
     }
 
@@ -174,6 +241,8 @@ internal class DecodeOrderPtsVideoRenderer(
 
     private companion object {
         const val TAG = "PTS_REPAIR"
+        const val LEVEL_TAG = "H264_LEVEL"
+        const val TAG_DECODER = "H264_DECODER"
         const val KEY_AMLOGIC_UNSTABLE_PTS = "vendor.unstable-pts.enable"
         const val KEY_AMLOGIC_AVI_DISCARD = "vendor.is-avi-discard.enable"
         const val LOG_EVERY = 500L

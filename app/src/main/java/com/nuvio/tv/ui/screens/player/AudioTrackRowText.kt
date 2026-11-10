@@ -42,7 +42,7 @@ internal fun audioTrackRowText(
     val language = languageName?.takeIf { it.isNotBlank() && !base.contains(it, ignoreCase = true) }
     val subtitle = listOfNotNull(
         language,
-        audioCodecDisplayName(track.codec),
+        track.codecDetail ?: audioCodecDisplayName(track.codec),
         track.channelCount?.let { CustomDefaultTrackNameProvider.getChannelLayoutName(it) },
         track.sampleRate?.let { sampleRateLabel(it) }
     ).joinToString(" · ").ifBlank { null }

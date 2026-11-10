@@ -1,5 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.core.logging.ReportHosts
+
 /**
  * Resolves a human "provider" label for a playing stream: the debrid store that
  * served it (TorBox, AllDebrid, ...) if one is named, else the library back-end
@@ -59,10 +61,14 @@ private fun containsDebridCode(haystack: String, code: String): Boolean {
         val after = if (i + code.length < haystack.length) haystack[i + code.length] else null
         val okBefore = before == null || before in CODE_BEFORE
         val okAfter = after == null || after in CODE_AFTER
-        if (okBefore && okAfter) return true
+        if (okBefore && okAfter && !isFileSizeUnit(haystack, i, code)) return true
         from = i + 1
     }
 }
+
+// "1.7 TB" in a label is the size of a season pack, not TorBox.
+private fun isFileSizeUnit(haystack: String, codeStart: Int, code: String): Boolean =
+    code == "TB" && haystack.substring(0, codeStart).trimEnd().lastOrNull()?.isDigit() == true
 
 // AIOStreams native (Usenet / other) results carry an "[AIO...] <indexer> ..."
 // marketing label. The indexer is the first whitespace-delimited token after the
@@ -95,8 +101,14 @@ fun resolveStreamProvider(
     streamName: String?,
     streamDescription: String?,
     addonName: String?,
-    host: String?
+    host: String?,
+    servingHost: String? = null
 ): String? {
+    // The server the video really comes from outranks what the label says.
+    ReportHosts.knownService(servingHost)
+        ?.takeIf { service -> DEBRID_STORES.any { it.display == service } }
+        ?.let { return it }
+
     val label = listOfNotNull(streamName, streamDescription).joinToString("\n")
     val lower = label.lowercase()
 

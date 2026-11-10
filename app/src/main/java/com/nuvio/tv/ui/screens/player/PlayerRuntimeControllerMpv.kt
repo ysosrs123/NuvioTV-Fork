@@ -261,9 +261,6 @@ internal fun PlayerRuntimeController.pauseForLifecycle() {
         return
     }
     _exoPlayer?.let { player ->
-        // Disable automatic audio focus handling so ExoPlayer can't
-        // re-acquire focus and set playWhenReady=true behind our back.
-        player.setAudioAttributes(player.audioAttributes, false)
         player.playWhenReady = false
         player.pause()
     }
@@ -324,9 +321,6 @@ internal fun PlayerRuntimeController.resumeForLifecycle() {
 
     val player = _exoPlayer
     if (player != null) {
-        // Restore automatic audio focus handling that was disabled in pauseForLifecycle().
-        player.setAudioAttributes(player.audioAttributes, true)
-
         // Re-create the MediaSession so media controls work in the foreground.
         if (currentMediaSession == null) runCatching { installExoMediaSession(player) }
             .onFailure { it.printStackTrace() }
@@ -661,6 +655,7 @@ internal fun PlayerRuntimeController.seekPlaybackTo(
 ) {
     if (isUsingMpvEngine()) {
         mpvView?.let { view ->
+            com.nuvio.tv.core.report.PlaybackRecorder.seek(view.currentPositionMs().coerceAtLeast(0L), positionMs)
             if (exact) view.seekToMsExact(positionMs) else view.seekToMs(positionMs)
             // Keep subtitle/audio delay sticky during FF/RW seeks.
             view.setSubtitleDelayMs(mpvSubtitleDelayMs(_uiState.value.subtitleDelayMs))

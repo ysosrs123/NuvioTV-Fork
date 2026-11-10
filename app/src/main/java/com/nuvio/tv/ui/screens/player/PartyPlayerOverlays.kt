@@ -29,6 +29,7 @@ import com.nuvio.tv.ui.screens.party.PartyRoomContent
 import com.nuvio.tv.ui.screens.party.partyHoldLine
 import com.nuvio.tv.ui.screens.party.partyStatusLine
 import com.nuvio.tv.ui.screens.party.rememberPartyRuntime
+import com.nuvio.tv.ui.components.NuvioNoticePill
 import com.nuvio.tv.ui.theme.NuvioTheme
 import com.nuvio.tv.ui.v2.appearance.LocalV2Appearance
 import com.nuvio.tv.ui.v2.components.GlassRole
@@ -125,7 +126,7 @@ internal fun PartyPanelOverlay(
 /** A small line in the corner while the controls are up, so a member can see where they stand. */
 @Composable
 internal fun PartyStatusChip(state: PartyState, modifier: Modifier = Modifier) {
-    PartyPill(
+    NuvioNoticePill(
         text = stringResource(R.string.party_chip, state.members.size, partyStatusLine(state)),
         modifier = modifier,
     )
@@ -135,37 +136,12 @@ internal fun PartyStatusChip(state: PartyState, modifier: Modifier = Modifier) {
 @Composable
 internal fun PartyHostNotice(state: PartyState, modifier: Modifier = Modifier) {
     val notice = com.nuvio.tv.ui.screens.party.rememberHostNotice(state) ?: return
-    PartyPill(text = notice, modifier = modifier)
+    NuvioNoticePill(text = notice, modifier = modifier)
 }
 
 /** Shown to everyone while the room is paused for a member, with or without the controls. */
 @Composable
 internal fun PartyHoldBanner(state: PartyState, modifier: Modifier = Modifier) {
     val hold = state.hold ?: return
-    PartyPill(text = partyHoldLine(hold), modifier = modifier)
-}
-
-@Composable
-private fun PartyPill(text: String, modifier: Modifier = Modifier) {
-    val shape = RoundedCornerShape(NuvioTheme.radii.md)
-    Box(
-        modifier = modifier
-            .then(
-                if (LocalV2Appearance.current != null) {
-                    Modifier.nuvioGlass(GlassRole.HUD, shape = shape)
-                } else {
-                    Modifier
-                        .clip(shape)
-                        .background(NuvioTheme.colors.BackgroundElevated.copy(alpha = 0.86f))
-                }
-            )
-            .padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.xs),
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium,
-            color = NuvioTheme.colors.TextPrimary,
-            maxLines = 1,
-        )
-    }
+    NuvioNoticePill(text = partyHoldLine(hold), modifier = modifier)
 }

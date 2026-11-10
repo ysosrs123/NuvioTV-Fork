@@ -36,6 +36,26 @@ internal fun hardwareFirstVideoDecoders(format: Format, decoders: List<MediaCode
         runCatching { it.isFormatSupported(format) }.getOrDefault(false)
     }
 
+private const val AMLOGIC_AVC_DECODER = "c2.amlogic.avc.decoder"
+private const val FULL_HD_PIXELS = 1920 * 1088
+private const val HIGHEST_ACCEPTED_FRAME_RATE = 30.5f
+
+/**
+ * Amlogic's H.264 decoder fails at configure when told a frame rate above 30 fps for a picture larger than
+ * 1080p, and takes the same picture when no rate is given. The stream's own timestamps still pace the output.
+ */
+internal fun decoderRefusesDeclaredFrameRate(
+    decoderName: String,
+    mimeType: String?,
+    width: Int,
+    height: Int,
+    frameRate: Float,
+): Boolean =
+    decoderName.equals(AMLOGIC_AVC_DECODER, ignoreCase = true) &&
+        mimeType == MimeTypes.VIDEO_H264 &&
+        width.toLong() * height > FULL_HD_PIXELS &&
+        frameRate > HIGHEST_ACCEPTED_FRAME_RATE
+
 internal fun isSoftwareDecoder(info: MediaCodecInfo): Boolean =
     info.softwareOnly || hasSoftwareDecoderName(info.name)
 

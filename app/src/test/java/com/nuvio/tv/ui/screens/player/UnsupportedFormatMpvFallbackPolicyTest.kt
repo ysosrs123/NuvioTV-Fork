@@ -104,4 +104,42 @@ class UnsupportedFormatMpvFallbackPolicyTest {
         assertFalse(missing("movie.mkv"))
         assertFalse(UnsupportedFormatMpvFallbackPolicy.shouldSwitchForMissingVideoTrack(false, false, true, "a.ts", null))
     }
+
+    @Test
+    fun `H264 10-bit, 422 and 444 profiles are recognised from the codec string`() {
+        fun high(codecs: String?, mime: String? = MimeTypes.VIDEO_H264) =
+            UnsupportedFormatMpvFallbackPolicy.isHighBitDepthH264(mime, codecs)
+        assertTrue(high("avc1.6E0033"))
+        assertTrue(high("avc1.6e0028"))
+        assertTrue(high("avc1.7A0033"))
+        assertTrue(high("avc1.F40033"))
+        assertTrue(high("avc3.6E0029"))
+        assertFalse(high("avc1.640033"))
+        assertFalse(high("avc1.4D401F"))
+        assertFalse(high(null))
+        assertFalse(high("hvc1.2.4.L153", MimeTypes.VIDEO_H265))
+        assertFalse(high("avc1.6E0033", MimeTypes.VIDEO_H265))
+    }
+
+    @Test
+    fun `a 10-bit H264 track the box can't decode goes to MPV before playing, once`() {
+        fun hi10p(support: Int, exo: Boolean = true, switched: Boolean = false, codecs: String = "avc1.6E0033") =
+            UnsupportedFormatMpvFallbackPolicy.shouldSwitchForHighBitDepthH264(exo, switched, MimeTypes.VIDEO_H264, codecs, support)
+        assertTrue(hi10p(C.FORMAT_EXCEEDS_CAPABILITIES))
+        assertTrue(hi10p(C.FORMAT_UNSUPPORTED_SUBTYPE))
+        assertFalse(hi10p(C.FORMAT_HANDLED))
+        assertFalse(hi10p(C.FORMAT_EXCEEDS_CAPABILITIES, switched = true))
+        assertFalse(hi10p(C.FORMAT_EXCEEDS_CAPABILITIES, exo = false))
+        assertFalse(hi10p(C.FORMAT_EXCEEDS_CAPABILITIES, codecs = "avc1.640033"))
+    }
+
+    @Test
+    fun `a decoder failure on 10-bit H264 goes to MPV, ordinary H264 does not`() {
+        fun fail(codecs: String?) = UnsupportedFormatMpvFallbackPolicy.shouldSwitchForFatalError(
+            true, false, false, PlaybackException.ERROR_CODE_DECODING_FAILED, MimeTypes.VIDEO_H264, "a.mkv", null, codecs
+        )
+        assertTrue(fail("avc1.6E0033"))
+        assertFalse(fail("avc1.640033"))
+        assertFalse(fail(null))
+    }
 }

@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.MimeTypes
+import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import java.net.URI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -117,6 +118,8 @@ class PlayerViewModel @Inject constructor(
     profileManager: com.nuvio.tv.core.profile.ProfileManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
+    val scoutContentId: String? get() = controller.contentId
+
 
     private val diagnosticPlaybackLease = com.nuvio.tv.core.network.DiagnosticPlaybackGuard.shared.enterPlayback()
 
@@ -419,7 +422,8 @@ class PlayerViewModel @Inject constructor(
             streamName = statsUi.currentStreamName,
             streamDescription = controller.currentStreamDescription,
             addonName = statsUi.currentStreamAddonName,
-            host = host
+            host = host,
+            servingHost = hud.transfer.endpoint?.host
         ))?.let { rows += StatsRow("Provider", it) }
         // Resolved only by this media source's network data sources; background calls cannot set it.
         hud.transfer.endpoint?.let { rows += StatsRow("Server", it.display) }
@@ -775,7 +779,7 @@ class PlayerViewModel @Inject constructor(
 
         // Audio: format + passthrough state + bitrate.
         player?.audioFormat?.let { format ->
-            val codec = audioCodecLabel(format.sampleMimeType)
+            val codec = DtsStreamType.of(format)?.label ?: audioCodecLabel(format.sampleMimeType)
             val srcChannels = format.channelCount.takeIf { it > 0 }
             // Output channel count: for a PCM decode (incl. FFmpeg downmix) the sink's
             // configured input IS the decoder's PCM output, so its channelCount is the
@@ -880,6 +884,11 @@ class PlayerViewModel @Inject constructor(
             rows += StatsRow("A filler", "while playing $filler", StatsDot.WARN)
         }
 
+        // The audio clock proved too jumpy on this box, so the picture follows the averaged head position.
+        if (controller.playbackSpeedAwareAudioSink?.iecClockSteadied() == true) {
+            rows += StatsRow("A clock", "steadied", StatsDot.WARN)
+        }
+
         // App CPU and memory.
         playbackStatsCpuSampler.samplePercent()?.let { pct ->
             val dot = when {
@@ -895,7 +904,7 @@ class PlayerViewModel @Inject constructor(
         val nativeMb = android.os.Debug.getNativeHeapAllocatedSize() / (1024L * 1024L)
         rows += StatsRow(
             "Memory",
-            "Java heap ${heapUsed / (1024L * 1024L)}/${heapMax / (1024L * 1024L)} MB · native heap $nativeMb MB",
+            memoryRowText(heapUsed / (1024L * 1024L), heapMax / (1024L * 1024L), nativeMb),
             StatsDot.NONE
         )
 
@@ -934,8 +943,7 @@ class PlayerViewModel @Inject constructor(
      */
     private fun audioCodecLabel(mimeType: String?): String? = when (mimeType) {
         MimeTypes.AUDIO_TRUEHD -> "TrueHD"
-        // MIME-honest: vnd.dts.hd covers both MA and HRA; the container label may
-        // say MA but the MIME cannot confirm it. Matches the diagnostics card.
+        // vnd.dts.hd covers MA, HRA and DTS:X; the caller names them when the frames said which.
         MimeTypes.AUDIO_DTS_HD -> "DTS-HD"
         MimeTypes.AUDIO_DTS_EXPRESS -> "DTS Express"
         MimeTypes.AUDIO_DTS_X -> "DTS:X"
@@ -1125,6 +1133,7 @@ class PlayerViewModel @Inject constructor(
     override fun onCleared() {
         screensaverController.setPlaybackActive(false)
         postPlayRecommendationController.stop()
+        com.nuvio.tv.core.report.PlaybackRecorder.playerClosed()
         controller.onCleared()
         diagnosticPlaybackLease.close()
         // Allow the trailer player to be re-created when returning to home screen.

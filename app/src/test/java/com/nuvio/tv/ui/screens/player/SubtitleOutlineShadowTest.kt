@@ -58,7 +58,7 @@ class SubtitleOutlineShadowTest {
 
     @Test fun `the player button steps through the outline sizes and back to off`() {
         assertEquals(
-            listOf(SubtitleOutlineSize.THIN, SubtitleOutlineSize.NORMAL, SubtitleOutlineSize.THICK, SubtitleOutlineSize.OFF),
+            listOf(SubtitleOutlineSize.THIN, SubtitleOutlineSize.NORMAL, SubtitleOutlineSize.MEDIUM, SubtitleOutlineSize.THICK, SubtitleOutlineSize.OFF),
             SubtitleOutlineSize.entries.map { it.next() }
         )
     }
@@ -80,6 +80,7 @@ class SubtitleOutlineShadowTest {
         val textSize = 48f
         assertEquals(2f, textSize * subtitleOutlineStrokeRatio(SubtitleOutlineSize.THIN), 1e-4f)
         assertEquals(4f, textSize * subtitleOutlineStrokeRatio(SubtitleOutlineSize.NORMAL), 1e-4f)
+        assertEquals(6f, textSize * subtitleOutlineStrokeRatio(SubtitleOutlineSize.MEDIUM), 1e-4f)
         assertEquals(8f, textSize * subtitleOutlineStrokeRatio(SubtitleOutlineSize.THICK), 1e-4f)
         assertEquals(4f, textSize * SUBTITLE_SHADOW_OFFSET_RATIO, 1e-4f)
         assertTrue(SUBTITLE_SHADOW_RADIUS_RATIO < SUBTITLE_SHADOW_OFFSET_RATIO)
@@ -124,7 +125,7 @@ class SubtitleOutlineShadowTest {
         val paint = paint(Paint.Style.FILL_AND_STROKE)
         SubtitleEdgeSpan(subtitleOutlineStrokeRatio(SubtitleOutlineSize.THICK), subtitleShadowColor(70)).updateDrawState(paint)
         verify { paint.strokeWidth = match { kotlin.math.abs(it - 8f) < 1e-3f } }
-        verify { paint.setShadowLayer(48f * SUBTITLE_SHADOW_RADIUS_RATIO, 48f * SUBTITLE_SHADOW_OFFSET_RATIO, 48f * SUBTITLE_SHADOW_OFFSET_RATIO, subtitleShadowColor(70)) }
+        verify { paint.setShadowLayer(48f * SUBTITLE_SHADOW_RADIUS_RATIO, 48f * SUBTITLE_SHADOW_OFFSET_OUTLINED_RATIO, 48f * SUBTITLE_SHADOW_OFFSET_OUTLINED_RATIO, subtitleShadowColor(70)) }
         val fill = paint(Paint.Style.FILL)
         SubtitleEdgeSpan(subtitleOutlineStrokeRatio(SubtitleOutlineSize.THICK), subtitleShadowColor(70)).updateDrawState(fill)
         verify(exactly = 0) { fill.strokeWidth = any() }
@@ -148,6 +149,14 @@ class SubtitleOutlineShadowTest {
         verify(exactly = 0) { paint.setShadowLayer(any(), any(), any(), any()) }
     }
 
+    @Test fun `MPV plain subtitles match the ExoPlayer letter size on any screen density`() {
+        for (font in com.nuvio.tv.domain.model.SubtitleFont.entries + listOf(null)) for (exoPx in listOf(36.0, 48.0)) {
+            val scale = mpvPlainSubtitleScale(font, 38.0, exoPx, 1080.0, 720.0)
+            assertEquals(exoPx, 38.0 / font.mpvLineHeightEm() * 1080.0 / 720.0 * scale, 1e-6)
+        }
+        assertEquals(1.0, mpvPlainSubtitleScale(null, 0.0, 48.0, 1080.0, 720.0), 0.0)
+    }
+
     @Test fun `equal spans compare equal so Media3 keeps its cached layout`() {
         assertEquals(SubtitleEdgeSpan(.1f, 5), SubtitleEdgeSpan(.1f, 5))
         assertEquals(SubtitleEdgeSpan(.1f, 5).hashCode(), SubtitleEdgeSpan(.1f, 5).hashCode())
@@ -158,7 +167,7 @@ class SubtitleOutlineShadowTest {
     @Test fun `MPV sizes the outline and shades the shadow by the chosen opacity`() {
         for ((size, expected) in listOf(
             SubtitleOutlineSize.OFF to 0.0, SubtitleOutlineSize.THIN to 0.5,
-            SubtitleOutlineSize.NORMAL to 1.0, SubtitleOutlineSize.THICK to 2.0
+            SubtitleOutlineSize.NORMAL to 1.0, SubtitleOutlineSize.MEDIUM to 1.5, SubtitleOutlineSize.THICK to 2.0
         )) {
             val plain = mpvSubtitleEdges(SubtitleStyleSettings(outlineSize = size, shadowEnabled = true, shadowOpacity = 40), false)
             assertEquals(expected, plain.outlineSize, 0.0)

@@ -211,6 +211,9 @@ internal fun noteIecFailure(strikes: MutableMap<String, Int>, iecOff: MutableSet
 
 internal fun PlayerRuntimeController.onOwnIecOutputFailed() {
     val url = currentStreamUrl
+    val nowMs = SystemClock.elapsedRealtime()
+    if (IecFailureReturn.forgetsEarlierFailure(iecLastFailureMs[url], nowMs)) iecFailureStrikes.remove(url)
+    iecLastFailureMs[url] = nowMs
     val count = noteIecFailure(iecFailureStrikes, iecOffStreamUrls, url)
     Log.i(
         PlayerRuntimeController.TAG,
@@ -220,14 +223,25 @@ internal fun PlayerRuntimeController.onOwnIecOutputFailed() {
             "IEC_FAILURE_NOTED: own IEC output failed once, tried again on the next rebuild host=${url.safeHost()}"
         }
     )
+    val player = _exoPlayer
+    val mimeType = player?.audioFormat?.sampleMimeType
+    if (IecFailureReturn.retriesAfter(count, mimeType)) {
+        startIecFailureReturnChecks()
+    } else if (player != null && url in iecOffStreamUrls && decodeStreamAfterIecFailure(mimeType)) {
+        scheduleDeferredPlayerReinitialize(fromPositionMs = player.currentPosition)
+    }
 }
 
-internal fun PlayerRuntimeController.retryCurrentStreamWithoutIec(fromPositionMs: Long) {
+internal fun PlayerRuntimeController.retryCurrentStreamWithoutIec(
+    fromPositionMs: Long,
+    failingMimeType: String? = null
+) {
     iecOffStreamUrls.add(currentStreamUrl)
     Log.i(
         PlayerRuntimeController.TAG,
         "IEC_OFF_AUDIO_FALLBACK: rebuilding without IEC output host=${currentStreamUrl.safeHost()}"
     )
+    decodeStreamAfterIecFailure(failingMimeType ?: _exoPlayer?.audioFormat?.sampleMimeType)
     scheduleDeferredPlayerReinitialize(fromPositionMs = fromPositionMs)
 }
 
@@ -938,9 +952,9 @@ private fun PlayerRuntimeController.clearMimeOverrideForParsingError(error: Play
  * HTTP 404/410 are equally permanent for the URL. Same-URL retries only make the
  * user sit through doomed rebuild cycles.
  *
- * Deliberately NOT classified dead: HTTP 429 and timeouts - auto-advancing on a
+ * Deliberately NOT classified dead: timeouts and short 429s - auto-advancing on a
  * debrid rate limit (TorBox parallel-connection 429s are transient) would wrongly
- * burn perfectly good sources.
+ * burn perfectly good sources. A 429 naming a long wait is dead for that long.
  */
 internal fun PlayerRuntimeController.isDeadSourcePlaybackError(error: PlaybackException): Boolean {
     if (isDeadSourceHttpError(error)) return true
@@ -955,7 +969,7 @@ internal fun PlayerRuntimeController.isDeadSourcePlaybackError(error: PlaybackEx
  */
 internal fun PlayerRuntimeController.isDeadSourceHttpError(error: PlaybackException): Boolean {
     val http = error.findInvalidResponseCodeException()
-    return http != null && (http.responseCode == 404 || http.responseCode == 410)
+    return http != null && (http.responseCode == 404 || http.responseCode == 410 || longRefusalMs(http) != null)
 }
 
 /**
@@ -1022,7 +1036,11 @@ internal fun PlayerRuntimeController.attemptDeadSourceFailover(
         return true
     }
 
-    return advanceToNextLiveSource(detailedError)
+    val refusal = error.findInvalidResponseCodeException()?.let { longRefusalMs(it) }
+    return advanceToNextLiveSource(
+        if (refusal == null) detailedError
+        else context.getString(com.nuvio.tv.R.string.player_source_rate_limited, ((refusal + 59_999L) / 60_000L).toInt())
+    )
 }
 
 /**

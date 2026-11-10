@@ -5,6 +5,7 @@ import com.nuvio.tv.core.player.BufferSizing
 import com.nuvio.tv.core.player.thumbnail.ConnectionLedger
 import com.nuvio.tv.core.player.thumbnail.LedgerKey
 import com.nuvio.tv.core.player.thumbnail.MemoryGovernor
+import com.nuvio.tv.core.player.thumbnail.RequestBudget
 import com.nuvio.tv.core.player.thumbnail.PlaybackLine
 import com.nuvio.tv.core.player.thumbnail.SeekThumbnails
 import java.util.concurrent.atomic.AtomicInteger
@@ -355,6 +356,7 @@ internal object AutoSpeedup {
     fun onResolved(resolvedUrl: String?) {
         val key = HostSpeeds.keyOf(resolvedUrl) ?: return
         if (policy != null) servedUrl = resolvedUrl
+        preferStorePieces(resolvedUrl)
         if (key == serverKey || policy == null) return
         serverKey = key
         if (key == hostKey) return
@@ -382,6 +384,18 @@ internal object AutoSpeedup {
         Log.i(TAG, "AUTO_SPEEDUP: server $key behind $hostKey perDownloadKbps=${known.perDownloadBps * 8 / 1000}" +
             " pieceMb=${pieceBytes / MB}" + if (restarted) " start downloads=$start" else "")
         if (restarted) noteRequests()
+    }
+
+    private fun preferStorePieces(resolvedUrl: String?) {
+        val p = policy ?: return
+        if (p.preferredPieceBytes > 0L || !RequestBudget.isStoreUrl(resolvedUrl)) return
+        synchronized(pieceLock) {
+            p.preferredPieceBytes = RequestBudget.STORE_PIECE_BYTES
+            val n = if (guessedBps > 0L) p.startFor(guessedBps) else p.downloads
+            if (n > 1) p.pieceBytes = p.rememberedStartPiece(n)
+            pieceBytes = p.pieceBytes
+        }
+        Log.i(TAG, "AUTO_SPEEDUP: store server, pieces of at least ${RequestBudget.STORE_PIECE_BYTES / MB} MB, pieceMb=${pieceBytes / MB}")
     }
 
     /**

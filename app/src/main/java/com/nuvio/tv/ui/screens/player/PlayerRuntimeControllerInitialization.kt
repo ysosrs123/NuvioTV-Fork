@@ -1,6 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
 import com.nuvio.tv.core.build.IssueReports
+import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import com.nuvio.tv.core.util.TtffTrace
 import com.nuvio.tv.core.logging.diagnosticStreamUrl
 import com.nuvio.tv.core.logging.redactedUrlForLog
@@ -123,6 +124,9 @@ private const val AUDIO_DELAY_REFRESH_DEBOUNCE_MS = 120L
  * With Nuvio AFR on, keep it OFF so the two mechanisms don't fight.
  */
 private fun nuvioFrameRateStrategy(mode: FrameRateMatchingMode): Int =
+    if (com.nuvio.tv.core.formatcheck.FormatCheckSession.active) {
+        C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_OFF
+    } else
     if (mode == FrameRateMatchingMode.OFF) {
         C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_ONLY_IF_SEAMLESS
     } else {
@@ -421,6 +425,7 @@ internal fun PlayerRuntimeController.initializePlayer(
             _uiState.update {
                 it.copy(
                     playbackIssueReportStatus = PlaybackIssueReportStatus.Idle,
+                    showReportPanel = false,
                     playbackIssueReportId = null,
                     playbackIssueReportError = null
                 )
@@ -430,6 +435,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                 userPausedManually = true
                 shouldEnforceAutoplayOnFirstReady = false
             }
+            if (url in iecDecodeStreamUrls) markAudioPcmFallbackTried()
             val applyPcmFallbackOnStartup = pendingAudioPcmFallbackRebuild
             val applyDv7FallbackOnStartup = forceDv7ToHevc
             if (!applyPcmFallbackOnStartup) {
@@ -475,6 +481,7 @@ internal fun PlayerRuntimeController.initializePlayer(
             val playerSettings = playerSettingsDataStore.playerSettings.first()
             if (initializationGeneration != playbackRecoveryGate.generation) return@launch
             currentPlayerSettingsForReport = playerSettings
+            com.nuvio.tv.core.report.PlaybackRecorder.begin(context, playerSettings.reportRecorderEnabled)
             rememberAudioDelayPerDeviceEnabled = playerSettings.rememberAudioDelayPerDevice
             // Always watch output-device changes so Bluetooth connect/disconnect can switch
             // PCM/passthrough policy in place (Media3 1.8.0 BT semantics; do not rebuild).
@@ -515,6 +522,10 @@ internal fun PlayerRuntimeController.initializePlayer(
             var effectiveInternalPlayerEngine = overrideInternalPlayerEngine ?: playerSettings.internalPlayerEngine
             if (effectiveInternalPlayerEngine == InternalPlayerEngine.AUTO) {
                 effectiveInternalPlayerEngine = resolveAutoInternalPlayerEngine()
+            }
+            // A format check always starts on the main player, whatever player is chosen; MPV only as its fallback.
+            if (overrideInternalPlayerEngine == null && com.nuvio.tv.core.formatcheck.FormatCheckSession.active) {
+                effectiveInternalPlayerEngine = InternalPlayerEngine.EXOPLAYER
             }
             runtimeInternalPlayerEngineOverride = overrideInternalPlayerEngine
             if (overrideInternalPlayerEngine == null && playerSettings.internalPlayerEngine == InternalPlayerEngine.AUTO) {
@@ -1499,6 +1510,16 @@ internal fun PlayerRuntimeController.initializePlayer(
             if (stripDvRpuEnabled) {
                 Log.i(PlayerRuntimeController.TAG, "DV_RPU_STRIP: enabled — will remove DV RPU NALs")
             }
+            com.nuvio.tv.core.formatcheck.FormatCheckSession.onDolbyVisionRoute(
+                when {
+                    nativeFelActive -> com.nuvio.tv.core.formatcheck.DolbyVisionRoute.NATIVE_FEL
+                    stripDvRpuEnabled -> com.nuvio.tv.core.formatcheck.DolbyVisionRoute.STRIPPED
+                    isExperimentalDv7ToDv81ActiveForCurrentPlayback &&
+                        currentFilename?.startsWith("fc02.") == true ->
+                        com.nuvio.tv.core.formatcheck.DolbyVisionRoute.CONVERTED
+                    else -> null
+                }
+            )
             val stripHdr10PlusSei = playerSettings.stripHdr10PlusSei
             if (stripHdr10PlusSei) {
                 Log.i(PlayerRuntimeController.TAG, "HDR10PLUS_STRIP: enabled — will remove HDR10+ SEI NALs")
@@ -1739,14 +1760,9 @@ internal fun PlayerRuntimeController.initializePlayer(
                     .setUsage(C.USAGE_MEDIA)
                     .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
                     .build()
-                // On Android TV, disable audio focus handling: focus-driven ducking applies
-                // a software volume multiplier, which can't be applied to a compressed
-                // bitstream, so ExoPlayer drops passthrough (Atmos/TrueHD/DTS-HD) to PCM.
-                // Keep focus handling on phones/tablets, where ducking/pausing for calls
-                // and other apps' audio matters.
-                val handleAudioFocus = !context.packageManager
-                    .hasSystemFeature(android.content.pm.PackageManager.FEATURE_LEANBACK)
-                setAudioAttributes(audioAttributes, handleAudioFocus)
+                // Focus-driven ducking applies a software volume multiplier, which can't be applied to a
+                // compressed bitstream, so ExoPlayer would drop passthrough (Atmos/TrueHD/DTS-HD) to PCM.
+                setAudioAttributes(audioAttributes, false)
                 setPlaybackSpeed(_uiState.value.playbackSpeed)
                 if (applyPcmFallbackOnStartup) {
                     pendingAudioPcmFallbackRebuild = false
@@ -1851,6 +1867,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         reason: Int
                     ) {
                         if (isReleasingPlayer || reason != Player.DISCONTINUITY_REASON_SEEK) return
+                        com.nuvio.tv.core.report.PlaybackRecorder.seek(oldPosition.positionMs, newPosition.positionMs)
                         // Holding the seek button emits a discontinuity per step, and reading the
                         // span set on each one is real work on a cache holding thousands of spans.
                         val seekedToMs = newPosition.positionMs
@@ -2207,6 +2224,10 @@ internal fun PlayerRuntimeController.initializePlayer(
                     override fun onRenderedFirstFrame() {
                         val isFirstFrame = !hasRenderedFirstFrame  // capture BEFORE flipping
                         hasRenderedFirstFrame = true
+                        if (com.nuvio.tv.core.formatcheck.FormatCheckSession.active) {
+                            repeatMode = Player.REPEAT_MODE_ONE
+                            com.nuvio.tv.core.formatcheck.FormatCheckSession.onFirstFrame()
+                        }
                         if (isFirstFrame) playerSession.firstFrame()
                         logSeekReady("first_frame")
                         if (isFirstFrame) {
@@ -2308,7 +2329,8 @@ internal fun PlayerRuntimeController.initializePlayer(
                                     errorCode = error.errorCode,
                                     videoMimeType = currentVideoTrackMimeType,
                                     fileName = currentFilename ?: currentStreamUrl,
-                                    streamMimeType = currentStreamMimeType
+                                    streamMimeType = currentStreamMimeType,
+                                    videoCodecs = currentVideoTrackCodecs
                                 ) && switchToMpvForUnsupportedFormat(error.errorCodeName)
 
                         // Every branch below re-initialises playback and
@@ -2417,7 +2439,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                                 failingMimeType = error.failingAudioMimeType()
                             )
                         ) {
-                            retryCurrentStreamWithoutIec(currentPosition)
+                            retryCurrentStreamWithoutIec(currentPosition, error.failingAudioMimeType())
                             return
                         }
 
@@ -2645,10 +2667,15 @@ internal fun PlayerRuntimeController.initializePlayer(
                         audioTrackConfig: androidx.media3.exoplayer.audio.AudioSink.AudioTrackConfig
                     ) {
                         recordStashedAudioRejection(audioTrackConfig.encoding)
+                        com.nuvio.tv.core.formatcheck.FormatCheckSession.onAudioPath(
+                            audioTrackConfig.encoding != C.ENCODING_PCM_16BIT &&
+                                audioTrackConfig.encoding != C.ENCODING_PCM_FLOAT
+                        )
                         // Records whether audio is passed through, decoded to PCM,
                         // or transcoded, for the Audio Path row.
                         val sourceMime = this@apply.audioFormat?.sampleMimeType
-                        val sourceCodec = describeAudioMime(sourceMime)
+                        val sourceCodec = DtsStreamType.of(this@apply.audioFormat)?.label
+                            ?: describeAudioMime(sourceMime)
                         // The only transcode this app performs is
                         // x -> AC-3 (denied-codec handling / Force AC-3). When the
                         // sink opened AC-3 for a non-AC-3 source, "Passthrough (AC-3)"
@@ -2674,6 +2701,10 @@ internal fun PlayerRuntimeController.initializePlayer(
                             append(')')
                         }
                         currentAudioPathDescription = "$sourceCodec \u2192 $detail"
+                        com.nuvio.tv.core.report.PlaybackRecorder.event(
+                            com.nuvio.tv.core.report.RecorderEvent.AUDIO_PATH,
+                            "audio_path=$sourceCodec \u2192 $detail"
+                        )
                         if (_exoPlayer === this@apply) logAudioStart(this@apply, audioTrackConfig, "$sourceCodec \u2192 $detail")
                         if (_exoPlayer === this@apply) {
                             val openedGroup = passthroughGroupOfEncoding(audioTrackConfig.encoding)
@@ -2752,7 +2783,8 @@ internal fun PlayerRuntimeController.initializePlayer(
                                 val source = this@apply.audioFormat
                                 val sinkFormat = playbackSpeedAwareAudioSink?.activeInputFormat
                                 if (source?.sampleMimeType != null && sinkFormat?.sampleMimeType != null) {
-                                    val src = describeAudioMime(source.sampleMimeType)
+                                    val src = DtsStreamType.of(source)?.label
+                                        ?: describeAudioMime(source.sampleMimeType)
                                     val detail = buildString {
                                         when {
                                             sinkFormat.sampleMimeType == MimeTypes.AUDIO_RAW -> append("PCM decode")
@@ -2774,6 +2806,10 @@ internal fun PlayerRuntimeController.initializePlayer(
                                         append(')')
                                     }
                                     currentAudioPathDescription = "$src \u2192 $detail"
+                                    com.nuvio.tv.core.report.PlaybackRecorder.event(
+                                        com.nuvio.tv.core.report.RecorderEvent.AUDIO_PATH,
+                                        "audio_path=$src \u2192 $detail"
+                                    )
                                     if (playbackSpeedAwareAudioSink?.isIecHbrActive() == true && _exoPlayer === this@apply) {
                                         logAudioStart(this@apply, tunnelled = false, offload = false, output = "$src \u2192 $detail")
                                     }
@@ -2816,6 +2852,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         initializationDurationMs: Long
                     ) {
                         if (_exoPlayer !== this@apply) return
+                        com.nuvio.tv.core.formatcheck.FormatCheckSession.onDecoder(decoderName)
                         currentDiagnostics = currentDiagnostics.copy(dv81DecoderName = decoderName)
                         playbackAnalyticsDiagnostics.onVideoDecoderInitialized(
                             eventTime = eventTime,
@@ -2861,6 +2898,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                         droppedFrames: Int,
                         elapsedMs: Long
                     ) {
+                        com.nuvio.tv.core.formatcheck.FormatCheckSession.onDroppedFrames(droppedFrames)
                         playbackAnalyticsDiagnostics.onDroppedVideoFrames(eventTime, droppedFrames, elapsedMs)
                     }
 

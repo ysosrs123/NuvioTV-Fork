@@ -27,8 +27,18 @@ class EpisodeShufflePlayback @Inject constructor(
     private val shuffle: EpisodeShuffle,
     private val progressRepository: WatchProgressRepository,
     private val watchedPreferences: WatchedItemsPreferences,
-    private val profileManager: ProfileManager
+    private val profileManager: ProfileManager,
+    private val mixSession: ScoutMixSession = ScoutMixSession()
 ) {
+    /** A mix chooses what plays after this episode, so nothing else should. */
+    fun inMix(profileId: Int, contentId: String?, videoId: String?): Boolean = mixSession.matches(profileId, contentId, videoId)
+
+    fun mixUpNext(profileId: Int, contentId: String?, videoId: String?): ScoutMixUpNext? =
+        mixSession.upNextFor(profileId, contentId, videoId)
+
+    fun pressedMixNext(profileId: Int, contentId: String?, videoId: String?) =
+        mixSession.pressedNext(profileId, contentId, videoId)
+
     fun observe(profileId: Int, contentId: String, contentType: String) = combine(
         store.observeProfile(profileId),
         progressRepository.getAllEpisodeProgress(contentId, profileId),
@@ -71,6 +81,9 @@ class EpisodeShufflePlayback @Inject constructor(
         videos: List<Video>,
         preferredVideoId: String? = null
     ): ExternalNextEpisodeSnapshot {
+        if (inMix(metadata.profileId, metadata.contentId, metadata.videoId)) {
+            return ExternalNextEpisodeSnapshot(metadataResolved = true, shufflePlayback = true)
+        }
         val state = observe(metadata.profileId, metadata.contentId, metadata.contentType).first()
         if (!state.settings.enabled) {
             shuffle.clearSelection(metadata.profileId, metadata.contentId, ShuffleSurface.PLAYBACK)

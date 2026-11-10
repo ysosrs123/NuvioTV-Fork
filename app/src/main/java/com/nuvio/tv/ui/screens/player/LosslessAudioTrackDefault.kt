@@ -1,5 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
+import androidx.media3.common.MimeTypes
+import com.nuvio.tv.core.player.AudioPassthroughPolicy
 import kotlinx.coroutines.flow.update
 
 /**
@@ -17,6 +19,10 @@ import kotlinx.coroutines.flow.update
  * ranked only when its codec or name proves the tier (mpv reports plain "dts",
  * so it needs an MA / Master Audio hint; ExoPlayer's DTS-HD mime ranks as
  * lossless). The default is never persisted.
+ *
+ * Lossless that the app would only re-encode is not lossless at the receiver: when the top
+ * pick would be transcoded, a surround track of the same language that the output takes as it
+ * is goes first.
  */
 internal object LosslessAudioTrackDefault {
 
@@ -86,7 +92,8 @@ internal object LosslessAudioTrackDefault {
     fun pickDefaultIndex(
         tracks: List<TrackInfo>,
         preferredLanguages: List<String>,
-        languageMatches: (String?, String) -> Boolean
+        languageMatches: (String?, String) -> Boolean,
+        outputs: AudioTrackOutputs? = null
     ): Int? {
         if (tracks.isEmpty()) return null
 
@@ -105,9 +112,33 @@ internal object LosslessAudioTrackDefault {
             .toSortedMap(compareByDescending { it })
         for ((_, tierTracks) in byTierDesc) {
             val clean = tierTracks.filterNot { isCommentary(it) }
-            if (clean.isNotEmpty()) return mostChannels(clean)
+            if (clean.isNotEmpty()) {
+                val pick = mostChannels(clean)
+                val pickTrack = clean.first { it.index == pick }
+                if (outputs?.isTranscoded(pickTrack.codec) == true) {
+                    pickDirectSurround(pool, outputs)?.let { return it }
+                }
+                return pick
+            }
         }
         return null
+    }
+
+    private fun pickDirectSurround(pool: List<TrackInfo>, outputs: AudioTrackOutputs): Int? {
+        val candidates = pool.filter {
+            !isCommentary(it) && (it.channelCount ?: 0) >= 6 && outputs.passesDirectly(it.codec)
+        }
+        val bestRank = candidates.maxOfOrNull(::directRank)?.takeIf { it > 0 } ?: return null
+        return mostChannels(candidates.filter { directRank(it) == bestRank })
+    }
+
+    private fun directRank(track: TrackInfo): Int = when (track.codec) {
+        "DTS-HD" -> 5
+        "E-AC-3-JOC" -> 4
+        "E-AC-3" -> if ("atmos" in track.name.lowercase()) 4 else 3
+        "DTS" -> 2
+        "AC-3" -> 1
+        else -> 0
     }
 
     /**
@@ -136,6 +167,33 @@ internal object LosslessAudioTrackDefault {
             )
             .first()
             .index
+}
+
+/** What the output does with a track, by the codec name the ExoPlayer track list shows. */
+internal class AudioTrackOutputs(
+    private val policy: AudioPassthroughPolicy,
+    private val transcodedMimes: Set<String>,
+    private val forceAc3: Boolean
+) {
+    fun isTranscoded(codec: String?): Boolean {
+        val mime = mimeOf(codec) ?: return false
+        return if (forceAc3) mime != MimeTypes.AUDIO_AC3 else mime in transcodedMimes
+    }
+
+    fun passesDirectly(codec: String?): Boolean {
+        val mime = mimeOf(codec) ?: return false
+        return !isTranscoded(codec) && !policy.deniesPassthrough(mime)
+    }
+
+    private fun mimeOf(codec: String?): String? = when (codec) {
+        "TrueHD" -> MimeTypes.AUDIO_TRUEHD
+        "DTS-HD" -> MimeTypes.AUDIO_DTS_HD
+        "DTS" -> MimeTypes.AUDIO_DTS
+        "E-AC-3" -> MimeTypes.AUDIO_E_AC3
+        "E-AC-3-JOC" -> MimeTypes.AUDIO_E_AC3_JOC
+        "AC-3" -> MimeTypes.AUDIO_AC3
+        else -> null
+    }
 }
 
 /**
@@ -173,7 +231,10 @@ internal fun PlayerRuntimeController.applyLosslessAudioDefaultIfUnset(
         preferredLanguages = mpvPreferredAudioLanguages,
         languageMatches = { trackLanguage, preferred ->
             PlayerSubtitleUtils.matchesLanguageCode(trackLanguage, preferred)
-        }
+        },
+        outputs = lastAppliedSurroundResolve
+            ?.takeUnless { isUsingMpvEngine() }
+            ?.let { AudioTrackOutputs(it.resolution.policy, it.deniedTranscodeMimes, it.forceAc3) }
     )
     val selectedIndex = audioTracks.indexOfFirst { it.isSelected }
         .takeIf { it >= 0 } ?: _uiState.value.selectedAudioTrackIndex

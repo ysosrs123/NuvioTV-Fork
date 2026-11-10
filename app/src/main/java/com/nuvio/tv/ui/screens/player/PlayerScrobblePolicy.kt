@@ -20,6 +20,12 @@ internal fun shouldSendStopScrobble(
     progressPercent: Float
 ): Boolean = hasActiveScrobble || progressPercent >= 80f
 
+internal fun shouldSendStopWhenLeftPaused(
+    hasPausedScrobble: Boolean,
+    hasActiveScrobble: Boolean,
+    progressPercent: Float
+): Boolean = hasPausedScrobble && !hasActiveScrobble && progressPercent in 0f..<80f
+
 /** A film, or an episode of a series: real streams of these are never under about 2 minutes. */
 internal fun isFilmOrEpisode(contentType: String?, season: Int?, episode: Int?): Boolean {
     val type = contentType?.trim()?.lowercase() ?: return false

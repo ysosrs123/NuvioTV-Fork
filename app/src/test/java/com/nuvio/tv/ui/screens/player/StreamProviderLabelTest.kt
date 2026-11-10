@@ -77,6 +77,62 @@ class StreamProviderLabelTest {
         provider("Movie HDR HEVC", "2160p HDR10", host = "host.example")
     )
 
+    @Test
+    fun packSizeInTerabytes_doesNotMatchTorBox() = assertEquals(
+        "Real-Debrid",
+        provider("[RD⚡] AIOStreams 2160p", "Game of Thrones S01-S08\n1.7 TB · FraMeSToR")
+    )
+
+    @Test
+    fun packSizeAlone_fallsToHost() = assertEquals(
+        "192.168.0.29",
+        provider("AIOStreams 2160p", "1.7 TB · REMUX", host = "192.168.0.29")
+    )
+
+    @Test
+    fun torBoxTagAfterSize_stillMatches() = assertEquals(
+        "TorBox",
+        provider("[TB] 2160p", "1.7 TB", host = "192.168.0.29")
+    )
+
+    // --- Serving host ------------------------------------------------------------
+
+    @Test
+    fun servingHost_outranksLabel() = assertEquals(
+        "Real-Debrid",
+        resolveStreamProvider(
+            "[TB⚡] 2160p",
+            null,
+            "AIOStreams",
+            "192.168.0.29",
+            servingHost = "sgp1-4.download.real-debrid.com"
+        )
+    )
+
+    @Test
+    fun servingHost_namesStoreWhenLabelDoesNot() = assertEquals(
+        "Real-Debrid",
+        resolveStreamProvider(
+            "AIOStreams 2160p",
+            null,
+            "AIOStreams",
+            "192.168.0.29",
+            servingHost = "sgp1-4.download.real-debrid.com"
+        )
+    )
+
+    @Test
+    fun servingHost_unknownServerLeavesLabelInCharge() = assertEquals(
+        "TorBox",
+        resolveStreamProvider("[TB] 2160p", null, null, "192.168.0.29", servingHost = "192.168.0.29")
+    )
+
+    @Test
+    fun servingHost_nonStoreServiceLeavesLabelInCharge() = assertEquals(
+        "TorBox",
+        resolveStreamProvider("[TB] 2160p", null, null, null, servingHost = "stream.elfhosted.com")
+    )
+
     // --- Fallback ----------------------------------------------------------------
 
     @Test

@@ -156,4 +156,43 @@ class HardwareVideoDecoderSelectorTest {
         assertFalse(isSoftwareVideoDecoderName("amstream_dves_hevc.sideband", softwareOnly))
         assertFalse(isSoftwareVideoDecoderName("OMX.MTK.VIDEO.DECODER.HEVC", softwareOnly))
     }
+
+    private fun refused(
+        name: String = "c2.amlogic.avc.decoder",
+        mime: String = MimeTypes.VIDEO_H264,
+        width: Int = 3840,
+        height: Int = 2160,
+        fps: Float = 60f,
+    ) = decoderRefusesDeclaredFrameRate(name, mime, width, height, fps)
+
+    @Test
+    fun `Amlogic H264 above 1080p and 30 fps has its rate withheld`() {
+        assertTrue(refused())
+        assertTrue(refused(fps = 50f))
+        assertTrue(refused(width = 2560, height = 1440))
+    }
+
+    @Test
+    fun `rates the Amlogic decoder takes are still passed on`() {
+        assertFalse(refused(fps = 30f))
+        assertFalse(refused(fps = 29.97f))
+        assertFalse(refused(fps = 23.976f))
+        assertFalse(refused(width = 1920, height = 1080))
+        assertFalse(refused(fps = Format.NO_VALUE.toFloat()))
+    }
+
+    @Test
+    fun `other formats on the Amlogic decoders keep their rate`() {
+        assertFalse(refused(name = "c2.amlogic.hevc.decoder", mime = MimeTypes.VIDEO_H265))
+        assertFalse(refused(name = "c2.amlogic.av1.decoder", mime = MimeTypes.VIDEO_AV1))
+        assertFalse(refused(name = "c2.amlogic.avc.decoder.secure"))
+    }
+
+    @Test
+    fun `decoders on other boxes keep their rate`() {
+        assertFalse(refused(name = "OMX.MTK.VIDEO.DECODER.AVC"))
+        assertFalse(refused(name = "c2.mtk.avc.decoder"))
+        assertFalse(refused(name = "c2.android.avc.decoder"))
+        assertFalse(refused(name = "OMX.google.h264.decoder"))
+    }
 }

@@ -2,6 +2,8 @@ package com.nuvio.tv.ui.screens.player
 
 import android.util.Log
 import com.nuvio.tv.core.logging.redactLinksForLog
+import com.nuvio.tv.core.report.PlaybackRecorder
+import com.nuvio.tv.core.report.RecorderEvent
 
 import android.os.SystemClock
 import androidx.media3.common.C
@@ -106,6 +108,7 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
     private var initializationStartedAtWallTimeMs: Long = 0L
     private var startPositionMs: Long? = null
     private var lastHealthSnapshotAtElapsedMs: Long = 0L
+    private var rebufferAheadAtStartMs: Long = 0L
 
     fun setTraceContext(host: String?, engine: String?) {
         traceHost = host?.takeIf { it.isNotBlank() } ?: "unknown"
@@ -250,6 +253,8 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
         PlaybackConnectionEvents.clear()
         LoggingDataSource.clear()
     }
+
+    fun audioUnderrunTotal(): Int = audioUnderrunCount
 
     fun recordRawEventLine(line: String) {
         rawEventLines.addLast(line.rawPlaybackLine())
@@ -918,6 +923,7 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
             details = details
         )
         recordRawEventLine(rawLine)
+        mirrorToRecorder(name, details)
         // Fork: mirror warning-class events and Loader load
         // lifecycle events to logcat so a device log capture can see load_error
         // exception/dataType and dropped_video_frames timing. The in-memory ring
@@ -941,6 +947,36 @@ internal class PlayerPlaybackAnalyticsDiagnostics {
         )
         while (events.size > PLAYBACK_ANALYTICS_EVENT_LIMIT) {
             events.removeFirst()
+        }
+    }
+
+    private fun mirrorToRecorder(name: String, details: Map<String, String>) {
+        when (name) {
+            "play_when_ready" -> PlaybackRecorder.event(
+                if (details["ready"] == "true") RecorderEvent.PLAY else RecorderEvent.PAUSE,
+                "reason=${details["reason"]}"
+            )
+            "dropped_video_frames" ->
+                PlaybackRecorder.event(
+                    RecorderEvent.DROPPED,
+                    "count=${details["count"]} total=${details["total"]} windowMs=${details["elapsedMs"]}"
+                )
+            "rebuffer_start" -> {
+                val ahead = ((bufferedPositionMs ?: 0L) - (positionMs ?: 0L)).coerceAtLeast(0L)
+                rebufferAheadAtStartMs = ahead
+                PlaybackRecorder.event(RecorderEvent.REBUFFER, "start count=${details["count"]} aheadMs=$ahead")
+            }
+            "rebuffer_end" ->
+                PlaybackRecorder.event(
+                    RecorderEvent.REBUFFER,
+                    "end lengthMs=${details["lastDurationMs"]} totalMs=${details["totalMs"]} aheadAtStartMs=$rebufferAheadAtStartMs"
+                )
+            "position_stall", "position_stall_recovered" ->
+                PlaybackRecorder.event(RecorderEvent.STALL, "$name ${details.recorderFields(STALL_FIELDS)}")
+            "player_error", "load_error" ->
+                PlaybackRecorder.event(RecorderEvent.ERROR, "$name ${details.recorderFields(ERROR_FIELDS)}")
+            "video_format", "audio_format" ->
+                PlaybackRecorder.event(RecorderEvent.TRACK, "$name ${details.recorderFields(FORMAT_FIELDS)}")
         }
     }
 
@@ -973,6 +1009,13 @@ internal fun PlayerRuntimeController.flushPendingPlaybackRawEventLines() {
 }
 
 private const val EXO_EVENT_LOG_TAG = "NuvioExoEvent"
+
+private val STALL_FIELDS = listOf("count", "stallMs", "lastDurationMs", "totalMs", "positionMs", "bufferedPositionMs", "state")
+private val ERROR_FIELDS = listOf("errorCode", "errorCodeName", "exception", "cause", "httpStatus", "dataType", "wasCanceled")
+private val FORMAT_FIELDS = listOf("trackType", "mime", "size", "frameRate", "channels", "sampleRate", "language")
+
+private fun Map<String, String>.recorderFields(allowed: List<String>): String =
+    allowed.mapNotNull { key -> this[key]?.let { "$key=$it" } }.joinToString(" ")
 
 private fun String.isLoaderLoadEvent(): Boolean =
     this == "load_started" ||

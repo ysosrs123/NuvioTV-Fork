@@ -30,7 +30,9 @@ private const val TAG = "PlayerViewModel"
  * Upstream: NuvioMedia/NuvioTV. Licensed under GPL-3.0.
  */
 internal fun PlayerRuntimeController.probePlaceholderStream(player: ExoPlayer): PlaceholderStreamPolicy.Verdict {
-    if (placeholderProbeDone) return PlaceholderStreamPolicy.Verdict.Accept
+    if (placeholderProbeDone || com.nuvio.tv.core.formatcheck.FormatCheckSession.active) {
+        return PlaceholderStreamPolicy.Verdict.Accept
+    }
     placeholderProbeDone = true
 
     val contentLengthBytes = PlaybackByteCounter.contentLengthFor(currentStreamUrl)

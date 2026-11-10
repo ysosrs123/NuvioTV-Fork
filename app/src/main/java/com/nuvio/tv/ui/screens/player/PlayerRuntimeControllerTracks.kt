@@ -11,6 +11,7 @@ import androidx.media3.common.Tracks
 import androidx.media3.common.util.Util
 import androidx.media3.common.util.UnstableApi
 import com.nuvio.tv.core.player.FrameRateUtils
+import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import com.nuvio.tv.data.local.AVAILABLE_SUBTITLE_LANGUAGES
 import com.nuvio.tv.data.local.InternalPlayerEngine
 import com.nuvio.tv.data.local.SubtitleStyleSettings
@@ -97,6 +98,8 @@ internal fun PlayerRuntimeController.updateAvailableTracks(tracks: Tracks) {
                         // the format ExoPlayer just reported (self-gating; see
                         // PlayerRuntimeControllerAfrTrack.kt).
                         maybeRunTrackFormatAfr(rawFps = raw, format = format)
+                    } else {
+                        maybeRunTrackAfrForUndeclaredRate(format)
                     }
                     // Extract video codec, resolution, and bitrate for stream info
                     currentVideoCodec = CustomDefaultTrackNameProvider.resolveCodecName(format.sampleMimeType, format.codecs)
@@ -129,6 +132,7 @@ internal fun PlayerRuntimeController.updateAvailableTracks(tracks: Tracks) {
                             language = format.language,
                             trackId = format.id,
                             codec = codecName,
+                            codecDetail = DtsStreamType.of(format)?.label,
                             channelCount = format.channelCount.takeIf { it > 0 },
                             isSelected = isSelected,
                             sampleRate = format.sampleRate.takeIf { it > 0 },
@@ -253,6 +257,16 @@ internal fun PlayerRuntimeController.updateAvailableTracks(tracks: Tracks) {
                 videoTrackSelected = currentVideoTrackSelected,
                 videoFormatSupport = currentVideoTrackBestSupport
             ) && switchToMpvForUnsupportedFormat("no-decoder")
+        ) {
+            return
+        }
+        if (UnsupportedFormatMpvFallbackPolicy.shouldSwitchForHighBitDepthH264(
+                exoPlayerActive = isExoPlayerActiveForFormatFallback,
+                alreadySwitched = currentStreamUrl in mpvFormatFallbackStreamUrls,
+                videoMimeType = currentVideoTrackMimeType,
+                videoCodecs = currentVideoTrackCodecs,
+                videoFormatSupport = currentVideoTrackBestSupport
+            ) && switchToMpvForUnsupportedFormat("h264-high-bit-depth")
         ) {
             return
         }

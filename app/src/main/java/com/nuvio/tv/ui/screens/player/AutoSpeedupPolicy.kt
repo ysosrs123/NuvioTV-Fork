@@ -33,6 +33,15 @@ internal class AutoSpeedupPolicy(
     @Volatile
     var knownStartPieceBytes: Long = 0L
 
+    /** The piece this server's films run on at least, where it fits [pieceBudgetBytes]: fewer requests for the same film. */
+    var preferredPieceBytes: Long = 0L
+
+    private fun atLeastPreferred(downloads: Int, piece: Long): Long {
+        val prefer = preferredPieceBytes
+        if (prefer <= piece || pieceBudgetBytes <= 0L) return piece
+        return maxOf(piece, fittingPiece(downloads, prefer, pieceBudgetBytes))
+    }
+
     /** The wait for the first byte on the start's single request (an add-on's redirect included), -1 while unknown. */
     @Volatile
     var firstByteMs: Long = -1L
@@ -332,8 +341,8 @@ internal class AutoSpeedupPolicy(
         val usual = startDownloads(fileBitrate, maxDownloads, plan.pieceBytes, smallBox, knownPerDownloadBps)
         val n = maxOf(usual, plan.downloads)
         val raw = rawRateNow()
-        pieceBytes = if (n == plan.downloads || raw == null) plan.pieceBytes
-            else pieceForDownloads(n, waitMs(), raw, targetNow(fileBitrate), pieceBudgetBytes) ?: plan.pieceBytes
+        pieceBytes = atLeastPreferred(n, if (n == plan.downloads || raw == null) plan.pieceBytes
+            else pieceForDownloads(n, waitMs(), raw, targetNow(fileBitrate), pieceBudgetBytes) ?: plan.pieceBytes)
         return n
     }
 
@@ -344,8 +353,8 @@ internal class AutoSpeedupPolicy(
     fun rememberedStartPiece(downloads: Int): Long {
         val known = knownStartPieceBytes
         val piece = pieceBytes
-        if (pieceBudgetBytes <= 0L || known !in PIECE_STEPS || known <= piece) return piece
-        return maxOf(piece, fittingPiece(downloads, known, pieceBudgetBytes))
+        if (pieceBudgetBytes <= 0L || known !in PIECE_STEPS || known <= piece) return atLeastPreferred(downloads, piece)
+        return atLeastPreferred(downloads, maxOf(piece, fittingPiece(downloads, known, pieceBudgetBytes)))
     }
 
     /**
@@ -391,7 +400,7 @@ internal class AutoSpeedupPolicy(
             if (s.userBudget) Long.MAX_VALUE else s.roomBytes, readAheadMaxBytes) ?: return
         lastPieceChange = if (step.held) "piece held ${piece / MB}->${step.to / MB}MB ${step.why}"
             else "piece ${piece / MB}->${step.to / MB}MB ${step.why}"
-        if (!step.held) pieceBytes = step.to
+        if (!step.held) pieceBytes = atLeastPreferred(downloads, step.to)
     }
 
     /** What the downloads carry now while the loader never rests: the network is the limit then. */

@@ -127,6 +127,6 @@ private fun movieRecommendationTriggerPositionMs(
     return if (postCreditsGapMs > userThresholdMs) {
         (durationMs - userThresholdMs).coerceAtLeast(latestCreditsEndMs)
     } else {
-        (credits.minOf { it.startTime } * 1_000.0).toLong()
+        (credits.maxBy { it.endTime }.startTime * 1_000.0).toLong()
     }
 }

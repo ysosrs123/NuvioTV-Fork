@@ -75,6 +75,16 @@ class MergeSkipIntervalsTest {
     }
 
     @Test
+    fun `every API range of a category chapters do not cover is kept`() {
+        val api = listOf(
+            interval("outro", 1200.0, 1260.0, "server"),
+            interval("outro", 1300.0, 1400.0, "server")
+        )
+        val chapters = listOf(interval("intro", 90.0, 180.0, "chapters"))
+        assertEquals(chapters + api, mergeSkipIntervals(api, chapters))
+    }
+
+    @Test
     fun `both empty returns empty`() {
         assertEquals(emptyList<SkipInterval>(), mergeSkipIntervals(emptyList(), emptyList()))
     }

@@ -1,5 +1,7 @@
 package com.nuvio.tv.ui.screens.player
 
+import androidx.media3.common.MimeTypes
+import com.nuvio.tv.core.player.AudioPassthroughPolicy
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -262,5 +264,85 @@ class LosslessAudioTrackDefaultTest {
             track(1, "AC-3", "Commentary 2 (AC-3 Stereo)", channels = 2)
         )
         assertNull(LosslessAudioTrackDefault.pickInsteadOfCommentary(tracks, 0, listOf("en"), exactMatch))
+    }
+
+    // --- lossless that would only be transcoded ---
+
+    private val noTrueHd = AudioTrackOutputs(
+        policy = AudioPassthroughPolicy(allowTrueHd = false),
+        transcodedMimes = setOf(MimeTypes.AUDIO_TRUEHD),
+        forceAc3 = false
+    )
+
+    private fun pick(tracks: List<TrackInfo>, outputs: AudioTrackOutputs? = noTrueHd) =
+        LosslessAudioTrackDefault.pickDefaultIndex(tracks, listOf("en"), exactMatch, outputs)
+
+    private val truehd71 = track(0, "TrueHD", "English (TrueHD 7.1)", channels = 8)
+
+    @Test
+    fun `transcoded truehd gives way to atmos then eac3 then ac3`() {
+        val ac3 = track(1, "AC-3", "English (AC-3 5.1)")
+        val eac3 = track(2, "E-AC-3", "English (E-AC-3 5.1)")
+        val joc = track(3, "E-AC-3-JOC", "English (E-AC-3-JOC 5.1)")
+        assertEquals(3, pick(listOf(truehd71, ac3, eac3, joc)))
+        assertEquals(2, pick(listOf(truehd71, ac3, eac3)))
+        assertEquals(1, pick(listOf(truehd71, ac3)))
+    }
+
+    @Test
+    fun `eac3 named atmos counts as atmos`() {
+        val plain = track(1, "E-AC-3", "English (E-AC-3 5.1)")
+        val named = track(2, "E-AC-3", "English (E-AC-3 5.1) - DD+ Atmos")
+        assertEquals(2, pick(listOf(truehd71, plain, named)))
+    }
+
+    @Test
+    fun `transcoded truehd stays without a usable surround track`() {
+        assertEquals(0, pick(listOf(truehd71, track(1, "AC-3", "English (AC-3 Stereo)", channels = 2))))
+        assertEquals(0, pick(listOf(truehd71, track(1, "AC-3", "English (AC-3 5.1) - Commentary"))))
+        assertEquals(0, pick(listOf(truehd71, track(1, "AC-3", "French (AC-3 5.1)", language = "fr"))))
+    }
+
+    @Test
+    fun `truehd stays when it reaches the receiver or decodes to pcm`() {
+        val tracks = listOf(truehd71, track(1, "E-AC-3-JOC", "English (E-AC-3-JOC 5.1)"))
+        assertEquals(0, pick(tracks, AudioTrackOutputs(AudioPassthroughPolicy(), emptySet(), false)))
+        assertEquals(0, pick(tracks, AudioTrackOutputs(AudioPassthroughPolicy(allowTrueHd = false), emptySet(), false)))
+        assertEquals(0, pick(tracks, null))
+    }
+
+    @Test
+    fun `denied or transcoded tracks are not offered as direct`() {
+        val tracks = listOf(
+            truehd71,
+            track(1, "E-AC-3", "English (E-AC-3 5.1)"),
+            track(2, "AC-3", "English (AC-3 5.1)")
+        )
+        val noEac3 = AudioTrackOutputs(
+            AudioPassthroughPolicy(allowTrueHd = false, allowEac3 = false),
+            setOf(MimeTypes.AUDIO_TRUEHD, MimeTypes.AUDIO_E_AC3),
+            false
+        )
+        assertEquals(2, pick(tracks, noEac3))
+    }
+
+    @Test
+    fun `force ac3 keeps only ac3 as direct`() {
+        val tracks = listOf(
+            truehd71,
+            track(1, "E-AC-3-JOC", "English (E-AC-3-JOC 5.1)"),
+            track(2, "AC-3", "English (AC-3 5.1)")
+        )
+        assertEquals(2, pick(tracks, AudioTrackOutputs(AudioPassthroughPolicy(), emptySet(), true)))
+    }
+
+    @Test
+    fun `lossless dts hd that passes goes before lossy tracks`() {
+        val tracks = listOf(
+            truehd71,
+            track(1, "DTS-HD", "English (DTS-HD 5.1)"),
+            track(2, "E-AC-3-JOC", "English (E-AC-3-JOC 5.1)")
+        )
+        assertEquals(1, pick(tracks))
     }
 }

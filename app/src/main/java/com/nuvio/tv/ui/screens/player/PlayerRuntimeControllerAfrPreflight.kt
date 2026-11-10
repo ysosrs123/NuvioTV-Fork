@@ -79,7 +79,7 @@ internal suspend fun PlayerRuntimeController.runAfrCachePreflightIfEnabled(
     mpvDelayStartAfterAfrSwitch = false
     exoDelayStartAfterAfrSwitch = false
 
-    if (frameRateMatchingMode == FrameRateMatchingMode.OFF) {
+    if (frameRateMatchingMode == FrameRateMatchingMode.OFF || com.nuvio.tv.core.formatcheck.FormatCheckSession.active) {
         _uiState.update {
             it.clearFrameRateDetection().copy(afrProbeRunning = false)
         }
@@ -100,7 +100,10 @@ internal suspend fun PlayerRuntimeController.runAfrCachePreflightIfEnabled(
     // Keyed with the filename, as the cache writers key it, so their entries
     // are visible here. Falls back to the URL-based key when no filename is
     // known, the same rule the writers use, so the two sides never disagree.
-    val cached = FrameRateUtils.getCachedFrameRate(url, headers, currentFilename)
+    val saved = FrameRateUtils.getCachedFrameRate(url, headers, currentFilename)
+    // A saved rate is checked against the track like a seed: another file can share the filename.
+    if (saved != null) afrSeededRateRaw = saved.raw
+    val cached = saved
         ?: seedFrameRateFromPrewarmedHead(url, headers)
         ?: run {
             Log.d(PlayerRuntimeController.TAG, "AFR cache preflight: miss; deferring to track-format AFR after prepare")
@@ -180,7 +183,7 @@ internal suspend fun PlayerRuntimeController.runAfrPreflightIfEnabled(
     mpvDelayStartAfterAfrSwitch = false
     exoDelayStartAfterAfrSwitch = false
 
-    if (frameRateMatchingMode == FrameRateMatchingMode.OFF) {
+    if (frameRateMatchingMode == FrameRateMatchingMode.OFF || com.nuvio.tv.core.formatcheck.FormatCheckSession.active) {
         _uiState.update {
             it.clearFrameRateDetection().copy(afrProbeRunning = false)
         }

@@ -3,6 +3,7 @@ package com.nuvio.tv.ui.screens.player
 import java.util.Locale
 
 internal fun PlayerRuntimeController.shouldUseMpvHi10pGnextSoftwareFallback(): Boolean {
+    if (currentStreamUrl in mpvSoftwareDecodeStreamUrls) return true
     if (!mpvHi10pGnextSoftwareFallbackEnabledSetting) return false
     return mpvPlaybackHintsIndicateHi10p(
         currentFilename,

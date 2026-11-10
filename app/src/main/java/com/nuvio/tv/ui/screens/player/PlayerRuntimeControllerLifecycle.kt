@@ -67,6 +67,7 @@ internal fun PlayerRuntimeController.releasePlayer(
     unregisterAudioDelayRouteCallback()
     audioRouteChangeJob?.cancel()
     audioRouteChangeJob = null
+    com.nuvio.tv.core.report.PlaybackRecorder.end()
 
     releaseMediaSession()
     progressJob?.cancel()

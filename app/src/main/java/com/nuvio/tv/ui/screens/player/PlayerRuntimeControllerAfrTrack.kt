@@ -6,10 +6,13 @@ import android.os.Build
 import android.util.Log
 import androidx.media3.common.C
 import androidx.media3.common.Format
+import androidx.media3.common.MimeTypes
 import com.nuvio.tv.core.player.FrameRateUtils
 import com.nuvio.tv.data.local.FrameRateMatchingMode
 import com.nuvio.tv.data.local.InternalPlayerEngine
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -27,6 +30,86 @@ private const val TRACK_AFR_ABSOLUTE_DEADLINE_MS = 8_000L
 // AFR_EXO_SETTLE_HOLD_MS on the preflight path: don't start the A/V pipeline
 // inside the mode transition.
 private const val TRACK_AFR_SETTLE_HOLD_MS = 2_000L
+
+// How long playback waits to learn the rate of an MKV that declares none.
+private const val UNDECLARED_RATE_PROBE_TIMEOUT_MS = 6_000L
+
+/** MKV stores the rate only as an optional DefaultDuration, and the H.264 header can't stand in for it. */
+internal fun needsProbeForUndeclaredRate(frameRate: Float, containerMimeType: String?): Boolean =
+    frameRate <= 0f &&
+        (containerMimeType == MimeTypes.VIDEO_MATROSKA || containerMimeType == MimeTypes.VIDEO_WEBM)
+
+/**
+ * The file declares no frame rate, so the track format alone can't drive the switch. Runs the same probe as the MPV
+ * path with playback held, then hands the result to [maybeRunTrackFormatAfr], which also saves it for the next play.
+ * Without a result in time, playback just starts.
+ */
+internal fun PlayerRuntimeController.maybeRunTrackAfrForUndeclaredRate(format: Format) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+    if (currentInternalPlayerEngine != InternalPlayerEngine.EXOPLAYER) return
+    if (!needsProbeForUndeclaredRate(format.frameRate, format.containerMimeType)) return
+    if (trackAfrAttemptedForCurrentStream || afrModeAppliedPreStart) return
+    if (_uiState.value.frameRateMatchingMode == FrameRateMatchingMode.OFF || com.nuvio.tv.core.formatcheck.FormatCheckSession.active) return
+    if (_uiState.value.afrProbeRunning) return
+    if (hasRenderedFirstFrame && _exoPlayer?.isPlaying == true) {
+        trackAfrAttemptedForCurrentStream = true
+        return
+    }
+    if (currentHostActivity() == null) return
+
+    trackAfrAttemptedForCurrentStream = true
+    afrTrackSwitchInFlight = true
+    _exoPlayer?.playWhenReady = false
+    val startGeneration = afrTrackGeneration
+    val url = currentStreamUrl
+    val headers = FrameRateUtils.streamHeadersForAfrProbe(currentHeaders)
+    val mimeType = currentStreamMimeType
+    val filename = currentFilename
+
+    scope.launch {
+        var switchStarted = false
+        try {
+            val probe = scope.async(Dispatchers.IO) {
+                runCatching {
+                    FrameRateUtils.detectFrameRateWithOkHttpProbe(
+                        context = context,
+                        sourceUrl = url,
+                        headers = headers,
+                        mimeType = mimeType,
+                        filename = filename,
+                        isCancelled = { afrTrackGeneration != startGeneration }
+                    )
+                }.getOrNull()
+            }
+            // Awaited rather than run inside the timeout: a blocked native read would hold the timeout up too.
+            val detection = withTimeoutOrNull(UNDECLARED_RATE_PROBE_TIMEOUT_MS) { probe.await() }
+            probe.cancel()
+            Log.i(PlayerRuntimeController.TAG, "AFR undeclared rate: probe fps=${detection?.raw}")
+            if (detection != null && afrTrackGeneration == startGeneration) {
+                withContext(Dispatchers.Main) {
+                    trackAfrAttemptedForCurrentStream = false
+                    afrTrackSwitchInFlight = false
+                    _uiState.update {
+                        it.copy(
+                            detectedFrameRateRaw = detection.raw,
+                            detectedFrameRate = detection.snapped,
+                            detectedFrameRateSource = FrameRateSource.PROBE
+                        )
+                    }
+                    maybeRunTrackFormatAfr(rawFps = detection.raw, format = format)
+                    switchStarted = afrTrackSwitchInFlight
+                }
+            }
+        } finally {
+            if (!switchStarted && afrTrackGeneration == startGeneration) {
+                withContext(NonCancellable + Dispatchers.Main) {
+                    afrTrackSwitchInFlight = false
+                    resumePlaybackAfterTrackAfrIfHeld()
+                }
+            }
+        }
+    }
+}
 
 /**
  * Frame-rate matching from ExoPlayer's reported track format instead of a
@@ -90,7 +173,7 @@ internal fun PlayerRuntimeController.maybeRunTrackFormatAfr(rawFps: Float, forma
         trackAfrAttemptedForCurrentStream = true
         return
     }
-    if (_uiState.value.frameRateMatchingMode == FrameRateMatchingMode.OFF) return
+    if (_uiState.value.frameRateMatchingMode == FrameRateMatchingMode.OFF || com.nuvio.tv.core.formatcheck.FormatCheckSession.active) return
     if (_uiState.value.afrProbeRunning) return
     // Too late: playback is already running. A mid-playback mode switch is the
     // known black-screen/stutter risk this design avoids; skip rather than

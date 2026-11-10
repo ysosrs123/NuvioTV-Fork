@@ -10,6 +10,19 @@ import org.junit.Test
 
 class PlayerScrobblePolicyTest {
     @Test
+    fun `leaving while paused below the watched mark sends a stop`() {
+        assertTrue(shouldSendStopWhenLeftPaused(hasPausedScrobble = true, hasActiveScrobble = false, progressPercent = 40f))
+        assertTrue(shouldSendStopWhenLeftPaused(hasPausedScrobble = true, hasActiveScrobble = false, progressPercent = 79.99f))
+    }
+
+    @Test
+    fun `leaving is left to the normal stop when playing, unpaused or past the watched mark`() {
+        assertFalse(shouldSendStopWhenLeftPaused(hasPausedScrobble = false, hasActiveScrobble = false, progressPercent = 40f))
+        assertFalse(shouldSendStopWhenLeftPaused(hasPausedScrobble = true, hasActiveScrobble = true, progressPercent = 40f))
+        assertFalse(shouldSendStopWhenLeftPaused(hasPausedScrobble = true, hasActiveScrobble = false, progressPercent = 80f))
+    }
+
+    @Test
     fun `ready non-playing state emits pause`() {
         assertEquals(
             TrackingScrobbleAction.PAUSE,

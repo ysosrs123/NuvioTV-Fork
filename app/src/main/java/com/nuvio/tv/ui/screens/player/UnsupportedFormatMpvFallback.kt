@@ -34,7 +34,8 @@ internal object UnsupportedFormatMpvFallbackPolicy {
         errorCode: Int,
         videoMimeType: String?,
         fileName: String?,
-        streamMimeType: String?
+        streamMimeType: String?,
+        videoCodecs: String? = null
     ): Boolean {
         if (!exoPlayerActive || alreadySwitched) return false
         return when (errorCode) {
@@ -45,9 +46,34 @@ internal object UnsupportedFormatMpvFallbackPolicy {
             PlaybackException.ERROR_CODE_DECODER_QUERY_FAILED,
             PlaybackException.ERROR_CODE_DECODING_FAILED,
             PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
-            PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES -> isLegacyVideoMime(videoMimeType)
+            PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES ->
+                isLegacyVideoMime(videoMimeType) || isHighBitDepthH264(videoMimeType, videoCodecs)
             else -> false
         }
+    }
+
+    /**
+     * H.264 High 10 (Hi10P), High 4:2:2 and High 4:4:4. TV chips decode none of them in hardware, so when the box says
+     * so before playing, the stream goes to MPV's software decoder at once instead of failing through the retries.
+     */
+    fun shouldSwitchForHighBitDepthH264(
+        exoPlayerActive: Boolean,
+        alreadySwitched: Boolean,
+        videoMimeType: String?,
+        videoCodecs: String?,
+        videoFormatSupport: Int
+    ): Boolean {
+        if (!exoPlayerActive || alreadySwitched) return false
+        return isHighBitDepthH264(videoMimeType, videoCodecs) && videoFormatSupport != C.FORMAT_HANDLED
+    }
+
+    private val AVC_PROFILE = Regex("avc[13]\\.([0-9a-f]{2})")
+    private val HIGH_BIT_DEPTH_PROFILES = setOf(110, 122, 244)
+
+    fun isHighBitDepthH264(mimeType: String?, codecs: String?): Boolean {
+        if (mimeType?.lowercase() != MimeTypes.VIDEO_H264) return false
+        val profile = codecs?.lowercase()?.let { AVC_PROFILE.find(it) }?.groupValues?.get(1)?.toIntOrNull(16) ?: return false
+        return profile in HIGH_BIT_DEPTH_PROFILES
     }
 
     /** A transport stream read with sound but no picture: VC-1 there has no reader in ExoPlayer. */
@@ -88,10 +114,14 @@ internal object UnsupportedFormatMpvFallbackPolicy {
 internal fun PlayerRuntimeController.switchToMpvForUnsupportedFormat(reason: String): Boolean {
     val url = currentStreamUrl
     if (url.isBlank() || !mpvFormatFallbackStreamUrls.add(url)) return false
+    if (UnsupportedFormatMpvFallbackPolicy.isHighBitDepthH264(currentVideoTrackMimeType, currentVideoTrackCodecs)) {
+        mpvSoftwareDecodeStreamUrls.add(url)
+    }
     Log.w(
         PlayerRuntimeController.TAG,
         "FORMAT_FALLBACK: ExoPlayer cannot play this stream ($reason), mime=$currentVideoTrackMimeType; switching to MPV"
     )
+    com.nuvio.tv.core.formatcheck.FormatCheckSession.onMovedToMpv()
     switchToInternalPlayerEngine(InternalPlayerEngine.MVP_PLAYER, reason = "unsupported-format:$reason")
     return true
 }

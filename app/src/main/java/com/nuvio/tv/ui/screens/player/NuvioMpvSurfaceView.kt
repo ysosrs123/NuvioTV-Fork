@@ -485,7 +485,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     fun applySubtitleStyle(style: SubtitleStyleSettings) {
         if (!initialized) return
         runCatching {
-            val scale = subtitleScale(style)
+            val scale = subtitleScale(style) * plainFontScale(style)
             val clampedOffset = style.verticalOffset.coerceIn(
                 SUBTITLE_VERTICAL_OFFSET_MIN,
                 SUBTITLE_VERTICAL_OFFSET_MAX
@@ -544,7 +544,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
         if (!initialized || width <= 0 || height <= 0 || isAssOrSsaSubtitleSelectedNow()) return null
         val fontSize = mpv.getPropertyDouble("sub-font-size") ?: return null
         val unitPx = height / MPV_SUBTITLE_REFERENCE_HEIGHT
-        val textSizePx = (fontSize * subtitleScale(style)).toFloat() * unitPx
+        val textSizePx = (fontSize / style.font.mpvLineHeightEm() * subtitleScale(style) * plainFontScale(style)).toFloat() * unitPx
         val marginXPx = (mpv.getPropertyInt("sub-margin-x") ?: MPV_SUBTITLE_DEFAULT_MARGIN_X) * unitPx
         val location = IntArray(2)
         getLocationInWindow(location)
@@ -559,6 +559,20 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     }
 
     private fun subtitleScale(style: SubtitleStyleSettings): Double = (style.size / 100.0).coerceIn(0.5, 3.0)
+
+    private fun plainFontScale(style: SubtitleStyleSettings): Double {
+        if (isAssOrSsaSubtitleSelectedNow()) return 1.0
+        val metrics = resources.displayMetrics
+        return mpvPlainSubtitleScale(
+            font = style.font,
+            fontSize = mpv.getPropertyDouble("sub-font-size") ?: return 1.0,
+            exoTextSizePx = android.util.TypedValue.applyDimension(
+                android.util.TypedValue.COMPLEX_UNIT_SP, EXO_SUBTITLE_BASE_SP, metrics
+            ).toDouble(),
+            screenHeightPx = metrics.heightPixels.toDouble(),
+            referenceHeight = MPV_SUBTITLE_REFERENCE_HEIGHT.toDouble()
+        )
+    }
 
     private fun isAssOrSsaSubtitleSelectedNow(): Boolean {
         if (!initialized) return false

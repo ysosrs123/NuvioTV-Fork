@@ -104,7 +104,7 @@ fun V2PlayerControls(
         add(Utility(V2PlayerControl.ENGINE, Icons.Default.SwapHoriz, stringResource(R.string.cd_switch_player_engine), actions.engine))
         if (uiState.playbackIssueReportsEnabled) add(Utility(V2PlayerControl.REPORT, Icons.Default.BugReport,
             if (reportCodeVisible && uiState.playbackIssueReportId != null) uiState.playbackIssueReportId else stringResource(R.string.player_report_issue),
-            actions.report, enabled = uiState.playbackIssueReportStatus != PlaybackIssueReportStatus.Sending && uiState.playbackIssueReportStatus != PlaybackIssueReportStatus.Sent))
+            actions.report, enabled = !uiState.playbackIssueReportStatus.isReportBusyOrDone))
     }
     Box(Modifier.fillMaxSize()) {
         Box(Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(240.dp)

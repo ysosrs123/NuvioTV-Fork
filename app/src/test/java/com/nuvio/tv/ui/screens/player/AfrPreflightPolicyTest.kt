@@ -162,4 +162,13 @@ class AfrPreflightPolicyTest {
         assertTrue(shouldSkipDuplicate(false, FrameRateSource.TRACK))
         assertTrue(shouldSkipDuplicate(true, FrameRateSource.PROBE))
     }
+
+    @Test
+    fun `only an MKV or WebM with no rate needs the probe`() {
+        assertTrue(needsProbeForUndeclaredRate(-1f, "video/x-matroska"))
+        assertTrue(needsProbeForUndeclaredRate(-1f, "video/webm"))
+        assertFalse(needsProbeForUndeclaredRate(23.976f, "video/x-matroska"))
+        assertFalse(needsProbeForUndeclaredRate(-1f, "video/mp4"))
+        assertFalse(needsProbeForUndeclaredRate(-1f, null))
+    }
 }

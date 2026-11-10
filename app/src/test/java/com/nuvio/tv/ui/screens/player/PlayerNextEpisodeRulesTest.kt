@@ -6,6 +6,9 @@ import com.nuvio.tv.domain.model.Video
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -24,6 +27,24 @@ class PlayerNextEpisodeRulesTest {
             episode = episode,
             overview = null
         )
+
+    @Test
+    fun `next episode waits for the last of several outros`() {
+        val outros = listOf(
+            SkipInterval(2400.0, 2460.0, "outro", "server"),
+            SkipInterval(2600.0, 2640.0, "outro", "server")
+        )
+        fun showsAt(seconds: Long) = PlayerNextEpisodeRules.shouldShowNextEpisodeCard(
+            positionMs = seconds * 1_000L,
+            durationMs = 2_640_000L,
+            skipIntervals = outros,
+            thresholdMode = NextEpisodeThresholdMode.PERCENTAGE,
+            thresholdPercent = 99f,
+            thresholdMinutesBeforeEnd = 1f
+        )
+        assertFalse(showsAt(2420))
+        assertTrue(showsAt(2600))
+    }
 
     @Test
     fun `advances to next episode in same season`() {
@@ -217,5 +238,53 @@ class PlayerNextEpisodeRulesTest {
     @Test
     fun `an unknown duration is not away from the end`() {
         assertFalse(awayFromEnd(positionMs = 0L, durationMs = 0L))
+    }
+
+    private fun mixStep(inWindow: Boolean = true, counting: Boolean = true, previous: Long = 100_000L, now: Long) =
+        PlayerNextEpisodeRules.mixCardStep(inWindow, counting, previous, now)
+
+    @Test
+    fun `a mix card keeps counting while playback moves forward or jitters`() {
+        assertEquals(PlayerNextEpisodeRules.MixCardStep.KEEP, mixStep(now = 100_500L))
+        assertEquals(PlayerNextEpisodeRules.MixCardStep.KEEP, mixStep(now = 99_000L))
+    }
+
+    @Test
+    fun `rewinding inside the window stops the mix count but keeps the card`() {
+        assertEquals(PlayerNextEpisodeRules.MixCardStep.STOP_COUNTING, mixStep(now = 90_000L))
+    }
+
+    @Test
+    fun `a card with no count stays when rewinding inside the window`() {
+        assertEquals(PlayerNextEpisodeRules.MixCardStep.KEEP, mixStep(counting = false, now = 90_000L))
+    }
+
+    @Test
+    fun `leaving the window hides the mix card`() {
+        assertEquals(PlayerNextEpisodeRules.MixCardStep.HIDE, mixStep(inWindow = false, now = 10_000L))
+        assertEquals(PlayerNextEpisodeRules.MixCardStep.HIDE, mixStep(inWindow = false, counting = false, now = 10_000L))
+    }
+
+    @Test
+    fun `the mix countdown takes eight seconds of playing time`() = runTest {
+        val shown = mutableListOf<Int>()
+        PlayerNextEpisodeRules.countMixDown(8, running = { true }, onSecond = shown::add)
+        assertEquals((8 downTo 1).toList(), shown)
+        assertEquals(8_000L, testScheduler.currentTime)
+    }
+
+    @Test
+    fun `a pause holds the mix countdown until play resumes`() = runTest {
+        var playing = true
+        val shown = mutableListOf<Int>()
+        val job = launch { PlayerNextEpisodeRules.countMixDown(2, running = { playing }, onSecond = shown::add) }
+        advanceTimeBy(1_100L)
+        playing = false
+        advanceTimeBy(60_000L)
+        assertEquals(listOf(2, 1), shown)
+        assertTrue(job.isActive)
+        playing = true
+        advanceTimeBy(1_100L)
+        assertFalse(job.isActive)
     }
 }

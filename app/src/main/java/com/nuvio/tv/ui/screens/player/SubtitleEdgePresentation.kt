@@ -14,10 +14,14 @@ internal fun subtitleOutlineStrokeRatio(size: SubtitleOutlineSize): Float = when
     SubtitleOutlineSize.OFF -> 0f
     SubtitleOutlineSize.THIN -> 1f / 24f
     SubtitleOutlineSize.NORMAL -> 2f / 24f
+    SubtitleOutlineSize.MEDIUM -> 3f / 24f
     SubtitleOutlineSize.THICK -> 4f / 24f
 }
 
 internal const val SUBTITLE_SHADOW_OFFSET_RATIO = 2f / 24f
+
+/** Behind an outline the shadow sits closer, about where MPV draws it. */
+internal const val SUBTITLE_SHADOW_OFFSET_OUTLINED_RATIO = 1f / 24f
 internal const val SUBTITLE_SHADOW_RADIUS_RATIO = 0.75f / 24f
 
 internal fun subtitleShadowColor(opacity: Int): Int =
@@ -58,7 +62,7 @@ internal class SubtitleEdgeSpan(val strokeRatio: Float, val shadowColor: Int) : 
         val textSize = tp.textSize
         if (outlinePass) tp.strokeWidth = textSize * strokeRatio
         if (shadowColor != 0) {
-            val offset = textSize * SUBTITLE_SHADOW_OFFSET_RATIO
+            val offset = textSize * if (outlinePass) SUBTITLE_SHADOW_OFFSET_OUTLINED_RATIO else SUBTITLE_SHADOW_OFFSET_RATIO
             tp.setShadowLayer(textSize * SUBTITLE_SHADOW_RADIUS_RATIO, offset, offset, shadowColor)
         }
     }
@@ -78,6 +82,7 @@ internal fun mpvSubtitleOutlineSize(size: SubtitleOutlineSize): Double = when (s
     SubtitleOutlineSize.OFF -> 0.0
     SubtitleOutlineSize.THIN -> 0.5
     SubtitleOutlineSize.NORMAL -> 1.0
+    SubtitleOutlineSize.MEDIUM -> 1.5
     SubtitleOutlineSize.THICK -> 2.0
 }
 

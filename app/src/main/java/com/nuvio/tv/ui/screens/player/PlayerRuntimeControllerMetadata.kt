@@ -240,6 +240,12 @@ private suspend fun PlayerRuntimeController.enrichDescriptionFromTmdb(id: String
 }
 
 internal fun PlayerRuntimeController.recomputeNextEpisode(resetVisibility: Boolean) {
+    if (episodeShufflePlayback.inMix(profileId, contentId, currentVideoId)) {
+        nextEpisodeVideo = null
+        val mixNext = mixNextEpisodeInfo()
+        if (mixNext == null) clearNextEpisodeAndCancelPostPlay() else applyRecomputedNextEpisode(mixNext, resetVisibility)
+        return
+    }
     val normalizedType = contentType?.lowercase()
     if (normalizedType !in listOf("series", "tv", "other", "cloud")) {
         nextEpisodeVideo = null
@@ -313,6 +319,88 @@ internal fun PlayerRuntimeController.recomputeNextEpisode(resetVisibility: Boole
     )
     applyRecomputedNextEpisode(nextInfo, resetVisibility)
 }
+
+/** The mix's next pick as the player's next episode. It may belong to another show. */
+private fun PlayerRuntimeController.mixNextEpisodeInfo(): NextEpisodeInfo? {
+    val next = episodeShufflePlayback.mixUpNext(profileId, contentId, currentVideoId) ?: return null
+    return NextEpisodeInfo(
+        videoId = next.videoId,
+        season = next.season ?: 0,
+        episode = next.episode ?: 0,
+        title = next.title,
+        thumbnail = next.thumbnail,
+        overview = null,
+        released = null,
+        hasAired = true,
+        unairedMessage = null,
+        mixName = next.mixName,
+        showName = next.showName
+    )
+}
+
+/** Inside a mix the card hands the next pick back to the mix page, which plays it. */
+private fun PlayerRuntimeController.evaluateMixNextCard(positionMs: Long, durationMs: Long) {
+    if (_uiState.value.nextEpisode == null) {
+        val mixNext = mixNextEpisodeInfo() ?: return
+        applyRecomputedNextEpisode(mixNext, resetVisibility = false)
+    }
+    val state = _uiState.value
+    val next = state.nextEpisode ?: return
+    val shouldShow = PlayerNextEpisodeRules.shouldShowNextEpisodeCard(
+        positionMs = positionMs,
+        durationMs = durationMs,
+        skipIntervals = skipIntervals,
+        thresholdMode = nextEpisodeThresholdModeSetting,
+        thresholdPercent = nextEpisodeThresholdPercentSetting,
+        thresholdMinutesBeforeEnd = nextEpisodeThresholdMinutesBeforeEndSetting
+    )
+    val mode = state.postPlayMode
+    if (mode is PostPlayMode.AutoPlay) {
+        val step = PlayerNextEpisodeRules.mixCardStep(
+            inWindow = shouldShow,
+            counting = mode.countdownSec != null,
+            previousPositionMs = mixCardPositionMs,
+            positionMs = positionMs
+        )
+        mixCardPositionMs = positionMs
+        if (step != PlayerNextEpisodeRules.MixCardStep.KEEP) {
+            nextEpisodeAutoPlayJob?.cancel()
+            nextEpisodeAutoPlayJob = null
+            val stays = if (step == PlayerNextEpisodeRules.MixCardStep.STOP_COUNTING) mode.copy(countdownSec = null) else null
+            _uiState.update { it.copy(postPlayMode = stays) }
+        }
+        return
+    }
+    if (mode != null || state.postPlayDismissedForCurrentEpisode || state.playbackEnded || !shouldShow) return
+    mixCardPositionMs = positionMs
+    val startsByItself = episodeShufflePlayback.mixUpNext(profileId, contentId, currentVideoId)?.startsByItself == true
+    if (!startsByItself) {
+        _uiState.update { it.copy(postPlayMode = PostPlayMode.AutoPlay(nextEpisode = next)) }
+        return
+    }
+    nextEpisodeAutoPlayJob?.cancel()
+    nextEpisodeAutoPlayJob = scope.launch {
+        PlayerNextEpisodeRules.countMixDown(
+            seconds = MIX_NEXT_COUNTDOWN_SECONDS,
+            running = { _uiState.value.run { isPlaying || playbackEnded } },
+            onSecond = { left ->
+                _uiState.update { it.copy(postPlayMode = PostPlayMode.AutoPlay(nextEpisode = next, countdownSec = left)) }
+            }
+        )
+        playMixNext()
+    }
+}
+
+internal fun PlayerRuntimeController.playMixNext(pressed: Boolean = false) {
+    if (pressed) episodeShufflePlayback.pressedMixNext(profileId, contentId, currentVideoId)
+    nextEpisodeAutoPlayJob?.cancel()
+    nextEpisodeAutoPlayJob = null
+    _uiState.update {
+        it.copy(postPlayMode = null, postPlayDismissedForCurrentEpisode = true, pendingExitReason = PlayerExitReason.ScoutMixNext)
+    }
+}
+
+private const val MIX_NEXT_COUNTDOWN_SECONDS = 8
 
 private fun PlayerRuntimeController.clearNextEpisodeAndCancelPostPlay() {
     val mode = _uiState.value.postPlayMode
@@ -550,6 +638,10 @@ internal fun PlayerRuntimeController.evaluatePostPlayOverlayVisibility(positionM
         endDetectionArmed = true
     }
     if (!_uiState.value.error.isNullOrBlank()) return
+    if (episodeShufflePlayback.inMix(profileId, contentId, currentVideoId)) {
+        evaluateMixNextCard(positionMs, effectiveDurationEarly)
+        return
+    }
 
     val state = _uiState.value
     if (state.nextEpisode == null || nextEpisodeVideo == null) {

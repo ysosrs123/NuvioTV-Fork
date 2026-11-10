@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.data.repository.PlaybackIssueViewerChoices
 import com.nuvio.tv.domain.model.SubtitleFont
 import com.nuvio.tv.data.local.SubtitleOutlineSize
 import androidx.media3.common.C
@@ -23,15 +24,20 @@ import com.nuvio.tv.domain.model.WatchProgress
 import com.nuvio.tv.ui.components.SourceChipItem
 
 enum class PlayerExitReason {
-    StillWatchingPrompt
+    StillWatchingPrompt,
+    ScoutMixNext
 }
 
 enum class PlaybackIssueReportStatus {
     Idle,
     Sending,
     Sent,
+    Saved,
     Failed
 }
+
+val PlaybackIssueReportStatus.isReportBusyOrDone: Boolean
+    get() = this == PlaybackIssueReportStatus.Sending || this == PlaybackIssueReportStatus.Sent || this == PlaybackIssueReportStatus.Saved
 
 sealed interface PostPlayMode {
     val nextEpisode: NextEpisodeInfo
@@ -195,6 +201,18 @@ data class PlayerUiState(
     val playbackIssueReportStatus: PlaybackIssueReportStatus = PlaybackIssueReportStatus.Idle,
     val playbackIssueReportId: String? = null,
     val playbackIssueReportError: String? = null,
+    val playbackIssueReportFollowUrl: String? = null,
+    val showReportPanel: Boolean = false,
+    val reportPanelStarted: Boolean = false,
+    val reportPanelTitle: String? = null,
+    val reportPanelKeptMinutes: Int? = null,
+    val reportPanelAfterRecording: Boolean = false,
+    val reportPanelRecordingMs: Long? = null,
+    val reportPanelRecordingMarks: Int = 0,
+    val reportPanelFileName: String? = null,
+    val reportPanelSource: String? = null,
+    val reportPillTick: Int = 0,
+    val reportNoSpaceTick: Int = 0,
     val pendingSeekPosition: Long? = null, // For resuming from saved progress
     // Parental guide overlay
     val parentalWarnings: List<ParentalWarning> = emptyList(),
@@ -258,7 +276,8 @@ data class PlayerUiState(
     // from loading overlay, rebuffering indicator, and corner overlay.
     val hideTorrentStats: Boolean = true,
     val controlLayout: com.nuvio.tv.data.local.PlayerControlLayout? = null,
-    val isLive: Boolean = false
+    val isLive: Boolean = false,
+    val playerNotice: String? = null
 ) {
     /** Subtitle style to render with, after applying the HDR override for the current video. */
     val effectiveSubtitleStyle: SubtitleStyleSettings
@@ -308,6 +327,8 @@ data class TrackInfo(
     val language: String?,
     val trackId: String? = null,
     val codec: String? = null,
+    /** More exact name for display, read from the frames; [codec] stays what track choice compares. */
+    val codecDetail: String? = null,
     val channelCount: Int? = null,
     val isForced: Boolean = false,
     val isSelected: Boolean = false,
@@ -330,7 +351,10 @@ data class NextEpisodeInfo(
     val hasAired: Boolean,
     val available: Boolean? = null,
     val unairedMessage: String?,
-    val isOtherType: Boolean = false
+    val isOtherType: Boolean = false,
+    /** Set when a mix chose this episode, possibly from another show. */
+    val mixName: String? = null,
+    val showName: String? = null
 )
 
 data class SubtitleSyncCue(
@@ -399,6 +423,11 @@ sealed class PlayerEvent {
     data object OnDismissTransientOverlay : PlayerEvent()
     data object OnRetry : PlayerEvent()
     data object OnReportPlaybackIssue : PlayerEvent()
+    data class OnSendPlaybackIssue(val choices: PlaybackIssueViewerChoices) : PlayerEvent()
+    data object OnCloseReportPanel : PlayerEvent()
+    data object OnStartReportRecording : PlayerEvent()
+    data object OnMarkReportProblem : PlayerEvent()
+    data object OnStopReportRecording : PlayerEvent()
     data object OnParentalGuideHide : PlayerEvent()
     data class OnShowDisplayModeInfo(val info: DisplayModeInfo) : PlayerEvent()
     data object OnHideDisplayModeInfo : PlayerEvent()

@@ -88,6 +88,11 @@ data class LastPlaybackDiagnostics(
 
     val result: String = "Pending"       // "Played", "Error: ..."
 ) {
+    /** A film left part-way keeps its rebuffers; [openRebufferMs] is the stop still running at the exit. */
+    fun withRebuffersAtExit(firstFrameRendered: Boolean, count: Int, totalMs: Long, openRebufferMs: Long): LastPlaybackDiagnostics =
+        if (!firstFrameRendered || result != "Played") this
+        else copy(rebufferCount = count, rebufferTotalMs = totalMs + openRebufferMs.coerceAtLeast(0L))
+
     /**
      * Serialize to a JSON string for DataStore persistence.
      * Uses org.json (built into Android) to avoid pulling in kotlinx-serialization

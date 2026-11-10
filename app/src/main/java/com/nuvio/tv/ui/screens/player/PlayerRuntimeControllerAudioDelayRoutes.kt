@@ -14,6 +14,12 @@ import kotlinx.coroutines.launch
 /** Debounce window so flapping add/remove events coalesce into one route decision. */
 private const val AUDIO_ROUTE_CHANGE_DEBOUNCE_MS = 700L
 
+private val HDMI_OUTPUT_TYPES = setOf(
+    AudioDeviceInfo.TYPE_HDMI,
+    AudioDeviceInfo.TYPE_HDMI_ARC,
+    AudioDeviceInfo.TYPE_HDMI_EARC
+)
+
 internal enum class BluetoothRoutePlaybackAction {
     NONE,
     UPDATE_SINK_IN_PLACE,
@@ -170,6 +176,12 @@ private fun PlayerRuntimeController.onAudioOutputRouteMaybeChanged(
         return
     }
     noteOutputChangeForTunnelWatch()
+    val sinks = devices.filter { it.isSink }
+    val hdmiOutput = sinks.any { it.type in HDMI_OUTPUT_TYPES }
+    com.nuvio.tv.core.report.PlaybackRecorder.event(
+        if (hdmiOutput) com.nuvio.tv.core.report.RecorderEvent.HDMI else com.nuvio.tv.core.report.RecorderEvent.SOUND_ROUTE,
+        "$reason outputTypes=${sinks.map { it.type }}"
+    )
 
     Log.d(
         PlayerRuntimeController.TAG,

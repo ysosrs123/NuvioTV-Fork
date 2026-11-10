@@ -59,6 +59,35 @@ internal fun SubtitleFont.face(bold: Boolean): SubtitleFontFace {
     }
 }
 
+/**
+ * Line height of each regular file (OS/2 win ascent + descent) in font sizes. libass fits this height into the size it
+ * is asked for, while ExoPlayer sizes the letters, so the same size draws smaller letters in MPV on a tall font.
+ */
+internal fun SubtitleFont?.mpvLineHeightEm(): Double = when (this) {
+    SubtitleFont.INTER -> 1.430
+    SubtitleFont.DM_SANS -> 1.322
+    SubtitleFont.OPEN_SANS -> 1.442
+    SubtitleFont.ATKINSON_HYPERLEGIBLE_NEXT -> 1.407
+    SubtitleFont.SOURCE_SANS_3 -> 1.326
+    SubtitleFont.MONTSERRAT -> 1.379
+    SubtitleFont.NOTO_SANS_SEMIBOLD -> 1.519
+    SubtitleFont.ASAP_CONDENSED -> 1.319
+    SubtitleFont.ROBOTO, null -> 1.200
+}
+
+/** sub-scale that draws plain subtitles at the letter size ExoPlayer gives them on this screen. */
+internal fun mpvPlainSubtitleScale(
+    font: SubtitleFont?,
+    fontSize: Double,
+    exoTextSizePx: Double,
+    screenHeightPx: Double,
+    referenceHeight: Double
+): Double {
+    if (fontSize <= 0.0 || exoTextSizePx <= 0.0 || screenHeightPx <= 0.0) return 1.0
+    val mpvLettersPx = fontSize / font.mpvLineHeightEm() * screenHeightPx / referenceHeight
+    return exoTextSizePx / mpvLettersPx
+}
+
 /** Noto Sans semi-bold and bold for every script the app is translated into (CJK comes from the system). */
 internal val NOTO_SUBTITLE_SCRIPT_FONTS: List<Pair<Int, Int>> = listOf(
     R.font.subtitle_noto_sans_arabic_semibold to R.font.subtitle_noto_sans_arabic_bold,

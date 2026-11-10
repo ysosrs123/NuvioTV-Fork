@@ -1458,6 +1458,18 @@ internal class NewPlaybackGate {
     }
 }
 
+/** A 429 whose Retry-After is long enough that waiting on it is no use: the time left in ms, else null. */
+internal fun longRefusalMs(code: Int, retryAfter: String?): Long? =
+    if (code != 429) null
+    else ParallelRangeRetryAfter.parseHeaderMs(retryAfter)?.takeIf { it >= com.nuvio.tv.core.player.thumbnail.RequestBudget.LONG_WAIT_MS }
+
+internal fun longRefusalMs(http: androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException): Long? =
+    longRefusalMs(http.responseCode, http.headerFields.entries
+        .firstOrNull { it.key?.equals("Retry-After", ignoreCase = true) == true }?.value?.firstOrNull()?.trim())
+
+private fun isLongRefusal(http: androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException): Boolean =
+    longRefusalMs(http) != null
+
 private class PlayerLoadErrorHandlingPolicy : DefaultLoadErrorHandlingPolicy(6) {
 
     // Monotonic ms of the last 429/503 seen and the
@@ -1510,6 +1522,10 @@ private class PlayerLoadErrorHandlingPolicy : DefaultLoadErrorHandlingPolicy(6) 
             if (code == 400 || code == 401 || code == 403 || code == 404 || code == 410) {
                 return androidx.media3.common.C.TIME_UNSET
             }
+        }
+        // A server naming a long wait keeps refusing until it ends: the next source is the way on.
+        if (httpException != null && isLongRefusal(httpException)) {
+            return androidx.media3.common.C.TIME_UNSET
         }
         // 429/503 is transient server rate-limiting, not
         // a dead stream. ParallelRangeDataSource already backs off (Retry-After / AIMD depth)

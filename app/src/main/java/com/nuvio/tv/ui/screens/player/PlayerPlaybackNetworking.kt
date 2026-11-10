@@ -41,6 +41,8 @@ internal object PlayerPlaybackNetworking {
         }
     }
 
+    private val playbackRefusalLog = PlaybackRefusalLog()
+
     /**
      * Fallback OkHttpClient equipped with trust-all SSL configuration for self-signed
      * or untrusted local media servers (e.g. self-signed WebDAV / Plex / Jellyfin).
@@ -55,6 +57,7 @@ internal object PlayerPlaybackNetworking {
             .dns(IPv4FirstDns())
             .socketFactory(PlaybackSocketFactory)
             .eventListenerFactory(PlaybackConnectionEvents)
+            .addNetworkInterceptor(playbackRefusalLog)
             .sslSocketFactory(sslContext.socketFactory, trustAllManager)
             .hostnameVerifier(playbackHostnameVerifier)
             .protocols(listOf(okhttp3.Protocol.HTTP_1_1))
@@ -97,6 +100,7 @@ internal object PlayerPlaybackNetworking {
             // applyNetworkOptimizations sets no listener, so nothing
             // overwrites it. One attachment covers all three startup opens.
             .eventListenerFactory(PlaybackConnectionEvents)
+            .addNetworkInterceptor(playbackRefusalLog)
             .withServerTrust()
             .protocols(listOf(okhttp3.Protocol.HTTP_1_1))
             .connectTimeout(15, TimeUnit.SECONDS)

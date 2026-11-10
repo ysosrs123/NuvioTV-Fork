@@ -118,16 +118,15 @@ internal fun mergeSkipIntervals(
     if (apiIntervals.isEmpty()) return chapterIntervals
     // For movies: prefer API entirely when it has data (handles post-credits trimming)
     if (isMovie && apiIntervals.isNotEmpty()) return apiIntervals
-    val chosen = LinkedHashMap<String, SkipInterval>()
+    val chosen = LinkedHashMap<String, List<SkipInterval>>()
     for (interval in chapterIntervals) {
         val category = segmentCategory(interval.type) ?: continue
-        chosen.putIfAbsent(category, interval)
+        chosen.putIfAbsent(category, listOf(interval))
     }
-    for (interval in apiIntervals) {
-        val category = segmentCategory(interval.type) ?: continue
-        chosen.putIfAbsent(category, interval)
-    }
+    apiIntervals.filter { segmentCategory(it.type) != null }
+        .groupBy { segmentCategory(it.type)!! }
+        .forEach { (category, intervals) -> chosen.putIfAbsent(category, intervals) }
     val uncategorized = (chapterIntervals + apiIntervals)
         .filter { segmentCategory(it.type) == null }
-    return chosen.values.toList() + uncategorized
+    return chosen.values.flatten() + uncategorized
 }

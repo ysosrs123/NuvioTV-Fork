@@ -6,6 +6,8 @@ import androidx.media3.common.Format
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import com.nuvio.tv.core.player.dvmkv.DtsStreamType
+import com.nuvio.tv.core.player.dvmkv.TrueHdAtmos
 
 data class PlayerMediaInfo(
     val videoCodec: String? = null,
@@ -152,14 +154,16 @@ internal fun exoAudioProfiles(audio: Format?): List<String> {
     val codecs = audio.codecs.orEmpty().lowercase()
     val label = audio.label.orEmpty().lowercase()
     val combined = "$codecs $label"
+    val dtsType = DtsStreamType.of(audio)
     return buildList {
-        if (combined.contains("atmos")) add("Atmos")
-        if (combined.contains("dts:x") || combined.contains("dtsx")
+        if (mime == MimeTypes.AUDIO_E_AC3_JOC || TrueHdAtmos.isPresent(audio) || combined.contains("atmos")) add("Atmos")
+        if (dtsType?.isDtsX == true || combined.contains("dts:x") || combined.contains("dtsx")
             || mime == MimeTypes.AUDIO_DTS_X) add("DTS:X")
         val isDtsHd = combined.contains("dts-hd") || combined.contains("dtshd")
             || codecs.startsWith("dtsh") || codecs.startsWith("dtsl")
-        if (codecs.startsWith("dtsl") || (isDtsHd && DTS_HD_MA_LABEL.containsMatchIn(combined))) add("DTS-HD MA")
-        else if (isDtsHd) add("DTS-HD")
+        if (dtsType?.isLossless == true || codecs.startsWith("dtsl")
+            || (dtsType == null && isDtsHd && DTS_HD_MA_LABEL.containsMatchIn(combined))) add("DTS-HD MA")
+        else if (isDtsHd || dtsType != null) add("DTS-HD")
     }
 }
 

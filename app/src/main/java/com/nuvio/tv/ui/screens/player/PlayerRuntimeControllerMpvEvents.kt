@@ -253,6 +253,10 @@ internal fun PlayerRuntimeController.handleMpvPlaybackError(
             "MPV_PLAYBACK_ERROR: source=$source mpvErrorCode=$mpvErrorCode " +
                 "httpStatus=${mpvHttpStatusCodeFromLog()} detail=${detailedError.take(200)}"
         )
+        com.nuvio.tv.core.report.PlaybackRecorder.event(
+            com.nuvio.tv.core.report.RecorderEvent.ERROR,
+            "mpv source=$source code=${mpvErrorCodeName(mpvErrorCode)} httpStatus=${httpCode ?: "n/a"}"
+        )
         lastPlaybackIssueError = PlaybackIssueErrorInput(
             displayMessage = detailedError,
             errorCode = mpvErrorCode,

@@ -420,6 +420,13 @@ internal class PostPlayRecommendationController(
         // Preferences/history may only be used by the profile owning this playback session.
         if (snapshot.identity.activeProfileId != playbackController.profileId ||
             profileManager.activeProfileId.value != playbackController.profileId) return
+        if (playbackController.episodeShufflePlayback.inMix(
+                playbackController.profileId, playbackController.contentId, playbackController.currentVideoId
+            )
+        ) {
+            clearRecommendationState()
+            return
+        }
         // If the player already has an active auto-play (next episode found and queued),
         // recommendations must not appear — clear any in-flight state and bail out.
         if (snapshot.hasActiveAutoPlay) {

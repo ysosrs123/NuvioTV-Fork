@@ -80,7 +80,7 @@ private val STATS_GROUP_BY_LABEL: Map<String, StatsGroup> = buildMap {
     listOf("Video", "HDR", "V bitrate", "DV", "DV HDR", "DV CM", "DV levels", "DV L1", "DV L5", "Format",
         "Decoder", "Dropped", "Frame lead", "Display")
         .forEach { put(it, StatsGroup.VIDEO) }
-    listOf("Audio", "A bitrate", "Underruns", "Route", "A jitter", "A filler")
+    listOf("Audio", "A bitrate", "Underruns", "Route", "A jitter", "A filler", "A clock")
         .forEach { put(it, StatsGroup.AUDIO) }
     listOf("Buffer", "Back buffer", "Speed", "Connections", "Requests", "Ping", "Request", "Rate limit", "Hedge", "Load errors", "Loaded", "Rebuffers", "Pos. freeze", "Server latency", "Mux estimate")
         .forEach { put(it, StatsGroup.NETWORK) }
@@ -187,6 +187,10 @@ private val DotBad = Color(0xFFF44336)
 
 /** Fixed HUD width; toggling stats never changes the player control layout. */
 internal val StatsPanelWidth = 380.dp
+
+/** Short enough to stay on one line with four-digit figures on any box. */
+internal fun memoryRowText(heapUsedMb: Long, heapMaxMb: Long, nativeMb: Long): String =
+    "Java $heapUsedMb/$heapMaxMb MB · native $nativeMb MB"
 
 /** Compact is a view of the same sample; full mode always retains every row. */
 internal fun visibleStatsSections(sections: List<StatsSection>, compact: Boolean): List<StatsSection> {

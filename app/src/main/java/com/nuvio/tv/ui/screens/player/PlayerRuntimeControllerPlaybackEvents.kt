@@ -1,5 +1,6 @@
 package com.nuvio.tv.ui.screens.player
 
+import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import com.nuvio.tv.core.util.TtffTrace
 import android.net.Uri
 import android.util.Log
@@ -15,6 +16,11 @@ import com.nuvio.tv.core.tracking.TrackingProviderId
 import com.nuvio.tv.core.tracking.TrackingScrobbleEvent
 import com.nuvio.tv.core.tracking.buildTrackingMediaReference
 import com.nuvio.tv.core.tracking.scrobbleDiagnosticIdentity
+import com.nuvio.tv.data.repository.PlaybackIssueViewerChoices
+import com.nuvio.tv.data.repository.ReportText
+import com.nuvio.tv.data.repository.cleanedFacts
+import com.nuvio.tv.data.repository.recorderSettingsFacts
+import com.nuvio.tv.data.repository.routeFactsFromCapabilities
 import com.nuvio.tv.data.local.InternalPlayerEngine
 import com.nuvio.tv.data.local.NightModeLevel
 import com.nuvio.tv.data.local.rememberedNightModeLevel
@@ -23,16 +29,19 @@ import com.nuvio.tv.data.mediaserver.ServerItemRef
 import com.nuvio.tv.data.repository.PlaybackIssueErrorInput
 import com.nuvio.tv.data.repository.PlaybackIssuePlaybackSettingsInput
 import com.nuvio.tv.data.repository.PlaybackIssueReportInput
+import com.nuvio.tv.data.repository.PlaybackReportFacts
 import com.nuvio.tv.data.repository.SkipInterval
 import com.nuvio.tv.domain.model.WatchProgress
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import com.nuvio.tv.core.player.PlaceholderStreamPolicy
 import com.nuvio.tv.core.player.thumbnail.SeekThumbnails
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal const val AUDIO_AMPLIFICATION_MIN_DB = 0
 internal const val AUDIO_AMPLIFICATION_MAX_DB = 10
@@ -145,6 +154,9 @@ internal fun PlayerRuntimeController.applyAudioDelay(delayMs: Int) {
 /** Pushes the current total delay to the UI state and the active engine. */
 internal fun PlayerRuntimeController.applyEffectiveAudioDelay() {
     val totalMs = audioDelayParts.totalMs
+    if (_uiState.value.audioDelayMs != totalMs) {
+        com.nuvio.tv.core.report.PlaybackRecorder.event(com.nuvio.tv.core.report.RecorderEvent.AUDIO_DELAY, "ms=$totalMs")
+    }
     audioDelayUs.set(totalMs.toLong() * 1000L)
     _exoPlayer?.getAssHandlerCompat()?.let { it.audioDelayUs = totalMs.toLong() * 1000L }
     _uiState.update { it.copy(audioDelayMs = totalMs) }
@@ -411,6 +423,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                                 (pos > 0L || (playingNow && !cacheBuffering && playerDuration > 0L))
                             if (firstFrameReady) {
                                 hasRenderedFirstFrame = true
+                                com.nuvio.tv.core.formatcheck.FormatCheckSession.onFirstFrame()
                                 playerSession.firstFrame()
                                 resetMpvStartupWatchdog()
                                 scheduleMpvStableProgressReset()
@@ -438,6 +451,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                     }
                     val displayPosition = pendingPreviewSeekPosition ?: pos
                     val playingForWatchClock = playingNow && !cacheBuffering
+                    val cacheAheadMs = (view.demuxerCacheDurationSec() * 1000.0).toLong()
                     mpvDurationGrowth = LivePlaybackUiPolicy.nextDurationGrowth(
                         previous = mpvDurationGrowth,
                         mediaKey = currentStreamUrl,
@@ -448,11 +462,11 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                         currentPosition = displayPosition,
                         playbackPosition = pos,
                         duration = playerDuration,
-                        bufferedPosition = (pos + (view.demuxerCacheDurationSec() * 1000.0).toLong())
-                            .coerceAtLeast(pos),
+                        bufferedPosition = (pos + cacheAheadMs).coerceAtLeast(pos),
                         playerReportsLive = view.isLiveStreamNow() || mpvDurationGrowth.grew,
                         isPlaying = playingForWatchClock
                     )
+                    recordMpvSample(pos, cacheAheadMs, playingNow, cacheBuffering)
                     // Prefer the largest known duration; MPV can report a shorter one transiently.
                     // The playerDuration check stays: lastKnownDuration can still hold the previous
                     // stream's value until it resets.
@@ -575,6 +589,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                     }
                 }
                 sampleAutoSpeedup(player, pos)
+                recordExoSample(player, pos)
                 recomputeChapterSkipIntervalsIfNeeded()
                 updateActiveSkipInterval(pos)
                 if (!_playbackTimeline.value.isLive) {
@@ -701,12 +716,104 @@ internal fun PlayerRuntimeController.stopWatchProgressSaving() {
     watchProgressSaveJob = null
 }
 
-internal fun PlayerRuntimeController.submitPlaybackIssueReport() {
+private fun PlayerRuntimeController.reportProvider(iptvSource: Boolean): String? = when {
+    iptvSource -> null
+    isServerStream -> serverPlayback.providerName(currentStreamUrl)
+    else -> resolveStreamProvider(
+        streamName = _uiState.value.currentStreamName,
+        streamDescription = currentStreamDescription,
+        addonName = currentAddonName,
+        host = null
+    )
+}
+
+private fun PlayerRuntimeController.reportSourceLine(): String? {
+    val iptv = LivePlaybackUiPolicy.isLiveContentType(contentType) || ReportText.isIptvLink(currentStreamUrl)
+    return reportSourceNote(reportProvider(iptv), currentStreamDescription.takeUnless { iptv || isServerStream })
+}
+
+internal fun PlayerRuntimeController.reportFileName(): String? {
+    val iptv = LivePlaybackUiPolicy.isLiveContentType(contentType) || ReportText.isIptvLink(currentStreamUrl)
+    if (iptv) return null
+    return ReportText.fileName(
+        currentFilename?.takeIf { it.isNotBlank() } ?: ReportText.fileNameFromLink(currentStreamUrl),
+        300
+    )
+}
+
+internal fun PlayerRuntimeController.startReportRecording() {
+    if (!_uiState.value.playbackIssueReportsEnabled) return
+    if (!com.nuvio.tv.core.report.PlaybackRecorder.startRecording()) {
+        _uiState.update { it.copy(reportNoSpaceTick = it.reportNoSpaceTick + 1) }
+        return
+    }
+    closeReportPanel()
+    _uiState.update { it.copy(showMoreDialog = false, reportPillTick = it.reportPillTick + 1) }
+}
+
+internal fun PlayerRuntimeController.markReportProblem() {
+    val position = _playbackTimeline.value.currentPosition
+    com.nuvio.tv.core.report.PlaybackRecorder.mark(position) ?: return
+    _uiState.update { it.copy(reportPillTick = it.reportPillTick + 1) }
+}
+
+internal fun PlayerRuntimeController.stopReportRecording() {
+    com.nuvio.tv.core.report.PlaybackRecorder.stopRecording()
+    reportRecordingEnded(com.nuvio.tv.core.report.RecordingEnd.STOPPED)
+}
+
+/** A recording is over, by the viewer or by its limits: leave the frame listener and go to Ready to send. */
+internal fun PlayerRuntimeController.reportRecordingEnded(end: com.nuvio.tv.core.report.RecordingEnd?) {
+    if (end == null) return
+    detachFrameListener()
+    openReportPanel(afterRecording = true)
+}
+
+internal fun PlayerRuntimeController.openReportPanel(afterRecording: Boolean = false) {
+    val state = _uiState.value
+    if (!state.playbackIssueReportsEnabled || state.showReportPanel || state.playbackIssueReportStatus.isReportBusyOrDone) return
+    val started = hasRenderedFirstFrame && state.error == null
+    reportPanelResumeOnClose = started && partyBridge?.inParty != true && hasActivePlayIntent()
+    if (reportPanelResumeOnClose) pauseForStillWatchingPrompt()
+    val episode = if (state.currentSeason != null && state.currentEpisode != null) {
+        " S${state.currentSeason} E${state.currentEpisode}"
+    } else ""
+    val keptMinutes = com.nuvio.tv.core.report.PlaybackRecorder.keptMinutes()
+    val recorded = com.nuvio.tv.core.report.PlaybackRecorder.finishedSummary()
+    _uiState.update {
+        it.copy(
+            showReportPanel = true,
+            reportPanelStarted = started,
+            reportPanelKeptMinutes = keptMinutes,
+            reportPanelAfterRecording = afterRecording && recorded != null,
+            reportPanelRecordingMs = recorded?.lengthMs,
+            reportPanelRecordingMarks = recorded?.marks ?: 0,
+            reportPanelFileName = reportFileName(),
+            reportPanelSource = reportSourceLine(),
+            reportPanelTitle = title.takeUnless { LivePlaybackUiPolicy.isLiveContentType(contentType) }
+                ?.takeIf { name -> name.isNotBlank() }
+                ?.plus(episode),
+            playbackIssueReportStatus = PlaybackIssueReportStatus.Idle,
+            playbackIssueReportError = null
+        )
+    }
+}
+
+internal fun PlayerRuntimeController.closeReportPanel() {
+    val resume = reportPanelResumeOnClose
+    reportPanelResumeOnClose = false
+    val status = _uiState.value.playbackIssueReportStatus
+    if (status == PlaybackIssueReportStatus.Sent || status == PlaybackIssueReportStatus.Saved) {
+        com.nuvio.tv.core.report.PlaybackRecorder.discardRecording()
+    }
+    _uiState.update { it.copy(showReportPanel = false, reportPanelAfterRecording = false) }
+    if (resume && !hasActivePlayIntent()) onEvent(PlayerEvent.OnPlayPause) else showControlsTemporarily()
+}
+
+internal fun PlayerRuntimeController.submitPlaybackIssueReport(choices: PlaybackIssueViewerChoices) {
     val state = _uiState.value
     if (!state.playbackIssueReportsEnabled) return
-    if (state.playbackIssueReportStatus == PlaybackIssueReportStatus.Sending ||
-        state.playbackIssueReportStatus == PlaybackIssueReportStatus.Sent
-    ) return
+    if (state.playbackIssueReportStatus.isReportBusyOrDone) return
     val timeline = _playbackTimeline.value
     val diagnostics = lastPlaybackDiagnosticsForReport.takeIf { it.timestampMs > 0L }
         ?: LastPlaybackDiagnostics(
@@ -750,22 +857,30 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport() {
             )
         )
     }
+    val liveChannel = LivePlaybackUiPolicy.isLiveContentType(contentType)
+    val iptvSource = liveChannel || ReportText.isIptvLink(currentStreamUrl)
     val input = PlaybackIssueReportInput(
         diagnostics = diagnostics,
         error = reportError,
-        title = title,
-        contentName = contentName,
-        contentId = contentId,
+        title = title.takeUnless { liveChannel },
+        contentName = contentName.takeUnless { liveChannel },
+        contentId = contentId.takeUnless { liveChannel },
         contentType = contentType,
-        videoId = currentVideoId,
+        videoId = currentVideoId.takeUnless { liveChannel },
         season = currentSeason,
         episode = currentEpisode,
-        episodeTitle = currentEpisodeTitle,
+        episodeTitle = currentEpisodeTitle.takeUnless { liveChannel },
         releaseYear = year,
         streamUrl = currentStreamUrl,
+        hideLinkHash = iptvSource,
+        viewer = choices,
         streamMimeType = currentStreamMimeType,
-        streamName = state.currentStreamName,
-        addonName = currentAddonName,
+        streamName = state.currentStreamName.takeUnless { isServerStream || iptvSource },
+        addonName = when {
+            iptvSource -> null
+            isServerStream -> currentAddonName?.substringBefore(" · ")
+            else -> currentAddonName
+        },
         videoHash = currentVideoHash,
         videoSize = currentVideoSize,
         requestHeaders = currentHeaders,
@@ -779,7 +894,13 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport() {
         selectedSubtitleTrack = subtitleTrack,
         isTorrentStream = isTorrentStream,
         playbackSettings = buildPlaybackIssuePlaybackSettingsInput(),
-        playbackAnalytics = playbackAnalyticsInput
+        playbackAnalytics = playbackAnalyticsInput,
+        recorder = com.nuvio.tv.core.report.PlaybackRecorder.snapshot(),
+        recorderSettings = recorderSettingsFacts(currentPlayerSettingsForReport, state.audioDelayMs),
+        recorderRoute = recorderRouteFacts(currentAudioPathDescription ?: diagnostics.audioPath, diagnostics.audioCapabilities),
+        filename = reportFileName(),
+        provider = reportProvider(iptvSource),
+        sourceDetail = currentStreamDescription.takeUnless { iptvSource || isServerStream }
     )
 
     val requestVersion = playbackIssueReportRequestVersion.incrementAndGet()
@@ -791,7 +912,15 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport() {
         )
     }
     scope.launch {
-        val result = playbackIssueReportRepository.submit(input)
+        val appContext = context.applicationContext
+        val result = withContext(NonCancellable + Dispatchers.IO) {
+            playbackIssueReportRepository.submit(
+                input.copy(
+                    network = PlaybackReportFacts.network(appContext),
+                    box = PlaybackReportFacts.box(appContext)
+                )
+            )
+        }
         _uiState.update { current ->
             if (playbackIssueReportRequestVersion.get() != requestVersion ||
                 current.playbackIssueReportStatus != PlaybackIssueReportStatus.Sending
@@ -799,10 +928,11 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport() {
                 current
             } else {
                 result.fold(
-                    onSuccess = { reportId ->
+                    onSuccess = { receipt ->
                         current.copy(
-                            playbackIssueReportStatus = PlaybackIssueReportStatus.Sent,
-                            playbackIssueReportId = reportId,
+                            playbackIssueReportStatus = if (receipt.saved) PlaybackIssueReportStatus.Saved else PlaybackIssueReportStatus.Sent,
+                            playbackIssueReportId = receipt.id.takeUnless { receipt.saved },
+                            playbackIssueReportFollowUrl = receipt.followUrl,
                             playbackIssueReportError = null
                         )
                     },
@@ -817,6 +947,18 @@ internal fun PlayerRuntimeController.submitPlaybackIssueReport() {
             }
         }
     }
+}
+
+/** The same route facts the Diagnostics card shows, read again when the report is built. */
+private fun recorderRouteFacts(audioPath: String?, diagnosticsCapabilities: String?): Map<String, String> {
+    val facts = LinkedHashMap<String, String>()
+    facts.putAll(cleanedFacts(mapOf("audioPath" to audioPath)))
+    facts.putAll(routeFactsFromCapabilities(AudioCapabilityReport.latest ?: diagnosticsCapabilities))
+    val rejected = AudioTrackRejectionLog.snapshot().map { it.encoding }.distinct()
+    if (rejected.isNotEmpty()) facts.putAll(cleanedFacts(mapOf("rejectedEncodings" to rejected.joinToString(" "))))
+    AudioCapabilityReport.tunnelStallLine(PlayerTunnelAvSyncPolicy.deadAudioClasses)
+        ?.let { facts.putAll(cleanedFacts(mapOf("tunnelStall" to it))) }
+    return facts
 }
 
 private fun PlayerRuntimeController.buildPlaybackIssuePlaybackSettingsInput(): PlaybackIssuePlaybackSettingsInput {
@@ -1149,6 +1291,7 @@ internal fun PlayerRuntimeController.refreshScrobbleItem() {
     currentScrobbleItem = buildScrobbleItem()
     hasSentScrobbleStartForCurrentItem = false
     hasRequestedScrobbleStartForCurrentItem = false
+    hasPausedScrobbleForCurrentItem = false
     scrobbleStartRequestGeneration++
     hasSentCompletionScrobbleForCurrentItem = false
     serverScrobbledProviders = emptySet()
@@ -1199,6 +1342,7 @@ internal fun PlayerRuntimeController.emitScrobbleStart() {
     }
 
     hasRequestedScrobbleStartForCurrentItem = true
+    hasPausedScrobbleForCurrentItem = false
     val requestGeneration = ++scrobbleStartRequestGeneration
     logScrobbleDiagnostic("start_queued", "requestGeneration=$requestGeneration")
     scope.launch {
@@ -1274,6 +1418,7 @@ internal fun PlayerRuntimeController.emitScrobbleStop(progressPercent: Float? = 
     scrobbleStartRequestGeneration++
     hasRequestedScrobbleStartForCurrentItem = false
     hasSentScrobbleStartForCurrentItem = false
+    hasPausedScrobbleForCurrentItem = false
     logScrobbleDiagnostic("stop_state_reset", "progress=$percent")
 }
 
@@ -1311,6 +1456,7 @@ internal fun PlayerRuntimeController.emitScrobblePause(progressPercent: Float? =
     scrobbleStartRequestGeneration++
     hasRequestedScrobbleStartForCurrentItem = false
     hasSentScrobbleStartForCurrentItem = false
+    hasPausedScrobbleForCurrentItem = true
     logScrobbleDiagnostic("pause_state_reset", "progress=$percent")
 }
 
@@ -1322,6 +1468,15 @@ internal fun PlayerRuntimeController.emitCompletionScrobbleStop(progressPercent:
 
 internal fun PlayerRuntimeController.emitStopScrobbleForCurrentProgress() {
     val progressPercent = currentPlaybackProgressPercent()
+    if (shouldSendStopWhenLeftPaused(
+            hasPausedScrobbleForCurrentItem,
+            hasRequestedScrobbleStartForCurrentItem,
+            progressPercent
+        )
+    ) {
+        emitStopWhenLeftPaused(progressPercent)
+        return
+    }
     if (!shouldSendStopScrobble(hasRequestedScrobbleStartForCurrentItem, progressPercent)) {
         logScrobbleDiagnostic(
             "stop_current_skipped",
@@ -1334,6 +1489,21 @@ internal fun PlayerRuntimeController.emitStopScrobbleForCurrentProgress() {
         return
     }
     emitCompletionScrobbleStop(progressPercent = progressPercent)
+}
+
+private fun PlayerRuntimeController.emitStopWhenLeftPaused(progressPercent: Float) {
+    hasPausedScrobbleForCurrentItem = false
+    val item = currentScrobbleItem
+    if (item == null || isPlaceholderPlayback()) {
+        logScrobbleDiagnostic("left_paused_skipped", "progress=$progressPercent")
+        return
+    }
+    logScrobbleDiagnostic("left_paused_queued", "progress=$progressPercent")
+    val event = TrackingScrobbleEvent(item, progressPercent.toDouble(), serverScrobbledProviders, currentScrobbleDurationSeconds())
+    scope.launch(kotlinx.coroutines.NonCancellable) {
+        val failures = trackingScrobbleCoordinator.scrobbleStopWhenLeftPaused(event)
+        logScrobbleDiagnostic("left_paused_dispatched", "failures=${failures.map { it.providerId.storageId }}")
+    }
 }
 
 internal fun PlayerRuntimeController.emitPauseScrobbleForCurrentProgress() {
@@ -1559,12 +1729,12 @@ internal fun PlayerRuntimeController.letGoForSeekThumbnails(): Boolean {
     if (openDeferredForThumbnails) return true
     val player = _exoPlayer ?: return false
     if (player.playWhenReady || player.playbackState == Player.STATE_IDLE || player.playerError != null) return false
-    // Amlogic's Dolby Vision decoder built again after its first picture plays sound over a black picture: kept held.
-    if (hasRenderedFirstFrame && playbackAnalyticsDiagnostics.hudSample().videoDecoderName
-            ?.startsWith(AMLOGIC_DV_DECODER) == true) {
-        if (!dvDecoderKeptNoted) {
-            dvDecoderKeptNoted = true
-            Log.i(PlayerRuntimeController.TAG, "prepare: Dolby Vision decoder kept held for the thumbnails, not let go")
+    // An Amlogic decoder built again after its first picture can play sound over a stuck picture: kept held.
+    val decoder = playbackAnalyticsDiagnostics.hudSample().videoDecoderName
+    if (keepsFilmDecoderHeld(hasRenderedFirstFrame, decoder)) {
+        if (!filmDecoderKeptNoted) {
+            filmDecoderKeptNoted = true
+            Log.i(PlayerRuntimeController.TAG, "prepare: $decoder kept held for the thumbnails, not let go")
         }
         return false
     }
@@ -1572,7 +1742,8 @@ internal fun PlayerRuntimeController.letGoForSeekThumbnails(): Boolean {
     return true
 }
 
-private const val AMLOGIC_DV_DECODER = "c2.amlogic.dolby-vision"
+internal fun keepsFilmDecoderHeld(firstPictureDrawn: Boolean, decoderName: String?): Boolean =
+    firstPictureDrawn && decoderName?.startsWith("c2.amlogic.") == true && PlayerLateVideoPolicy.isHardwareDecoder(decoderName)
 
 /** The film stays unopened at [positionMs] for the thumbnails screen; it opens after [DEFERRED_OPEN_FAILSAFE_MS] if no screen holds it. */
 internal fun PlayerRuntimeController.deferFilmOpen(positionMs: Long) {
@@ -1857,6 +2028,7 @@ fun PlayerRuntimeController.onEvent(
                 stage = "event-select-audio",
                 message = "index=${event.index}"
             )
+            com.nuvio.tv.core.report.PlaybackRecorder.event(com.nuvio.tv.core.report.RecorderEvent.TRACK, "audio_selected index=${event.index}")
             if (_uiState.value.serverAudioTracks.isNotEmpty()) {
                 selectServerAudio(event.index)
             } else {
@@ -1920,6 +2092,7 @@ fun PlayerRuntimeController.onEvent(
                 stage = "event-select-subtitle-internal",
                 message = "index=${event.index}"
             )
+            com.nuvio.tv.core.report.PlaybackRecorder.event(com.nuvio.tv.core.report.RecorderEvent.TRACK, "subtitle_selected index=${event.index}")
             autoSubtitleSelected = true
             pendingAddonSubtitleLanguage = null
             pendingAddonSubtitleTrackId = null
@@ -2227,6 +2400,7 @@ fun PlayerRuntimeController.onEvent(
                 state.copy(
                     error = null,
                     playbackIssueReportStatus = PlaybackIssueReportStatus.Idle,
+                    showReportPanel = false,
                     playbackIssueReportId = null,
                     playbackIssueReportError = null,
                     loadingIssueReportVisible = false,
@@ -2261,9 +2435,12 @@ fun PlayerRuntimeController.onEvent(
                 reinitializeCurrentStream()
             }
         }
-        PlayerEvent.OnReportPlaybackIssue -> {
-            submitPlaybackIssueReport()
-        }
+        PlayerEvent.OnReportPlaybackIssue -> openReportPanel()
+        is PlayerEvent.OnSendPlaybackIssue -> submitPlaybackIssueReport(event.choices)
+        PlayerEvent.OnCloseReportPanel -> closeReportPanel()
+        PlayerEvent.OnStartReportRecording -> startReportRecording()
+        PlayerEvent.OnMarkReportProblem -> markReportProblem()
+        PlayerEvent.OnStopReportRecording -> stopReportRecording()
         PlayerEvent.OnParentalGuideHide -> {
             _uiState.update { it.copy(showParentalGuide = false) }
         }
@@ -2502,7 +2679,8 @@ internal fun PlayerRuntimeController.buildStreamInfoData(): StreamInfoData {
     // The live format carries the refinement; the track-list value stays as fallback
     // (and is the only value on the mpv engine, where the Exo player handle is null).
     val liveAudioCodec = _exoPlayer?.audioFormat?.let { format ->
-        CustomDefaultTrackNameProvider.formatNameFromMime(format.sampleMimeType)
+        DtsStreamType.of(format)?.label
+            ?: CustomDefaultTrackNameProvider.formatNameFromMime(format.sampleMimeType)
             ?: CustomDefaultTrackNameProvider.formatNameFromMime(format.codecs)
     }
 

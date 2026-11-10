@@ -202,6 +202,8 @@ fun PostPlayRecommendationOverlay(
                 ImageRequest.Builder(context)
                     .data(url)
                     .size(1280, 720)
+                    .memoryCachePolicy(coil3.request.CachePolicy.DISABLED)
+                    .decoderFactory(coil3.decode.BlackholeDecoder.Factory())
                     .build()
             )
         }

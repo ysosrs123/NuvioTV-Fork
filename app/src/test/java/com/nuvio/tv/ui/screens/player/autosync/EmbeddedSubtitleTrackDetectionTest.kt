@@ -147,9 +147,11 @@ class EmbeddedSubtitleTrackDetectionTest {
         assertEquals(1, EmbeddedSubtitleTimelineLoader.load(url)!!.tracks.size)
     }
 
-    @Test fun `only a video without subtitle tracks gets the no embedded subtitles message`() {
-        assertEquals(R.string.autosync_toast_failed_no_reference, autoSyncFailureMessage(AutoSyncAnalysisOutcome.NO_SUBTITLE_TRACKS))
-        assertEquals(R.string.autosync_toast_failed, autoSyncFailureMessage(AutoSyncAnalysisOutcome.NO_USABLE_REFERENCE))
-        assertEquals(R.string.autosync_toast_failed, autoSyncFailureMessage(AutoSyncAnalysisOutcome.SUBTITLE_UNAVAILABLE))
+    @Test fun `only a confirmed no fit tells the viewer`() {
+        assertEquals(R.string.autosync_toast_no_fit, autoSyncFailureMessage(AutoSyncAnalysisOutcome.NO_FIT))
+        assertNull(autoSyncFailureMessage(AutoSyncAnalysisOutcome.NO_SUBTITLE_TRACKS))
+        assertNull(autoSyncFailureMessage(AutoSyncAnalysisOutcome.NO_USABLE_REFERENCE))
+        assertNull(autoSyncFailureMessage(AutoSyncAnalysisOutcome.SUBTITLE_UNAVAILABLE))
+        assertNull(autoSyncFailureMessage(AutoSyncAnalysisOutcome.INCONCLUSIVE))
     }
 }

@@ -1,5 +1,10 @@
 package com.nuvio.tv.ui.screens.player
 
+import android.text.style.StyleSpan
+import android.text.style.MetricAffectingSpan
+import android.text.TextPaint
+import android.os.Build
+import android.graphics.Typeface
 import android.graphics.Bitmap
 import android.text.SpannableString
 import android.text.Spanned
@@ -46,6 +51,37 @@ internal fun resizedSubtitleAnchor(position: Float, before: Float, after: Float,
 internal fun isAuthoredFontSpan(span: Any): Boolean =
     span is AbsoluteSizeSpan || span is RelativeSizeSpan || span is TypefaceSpan
 
+/**
+ * With the Bold setting on, the typeface is already bold. A StyleSpan asks Android for that face's bold again (700 + 300),
+ * and Android thickens it by faking bold, so italic lines came out heavier than the rest.
+ */
+internal fun subtitleItalicNeedsOwnWeight(spanStyle: Int, boldSetting: Boolean, preserveAss: Boolean): Boolean =
+    boldSetting && !preserveAss && (spanStyle and Typeface.ITALIC) != 0
+
+/** Italic at the weight the line already has. */
+internal class SubtitleBoldItalicSpan : MetricAffectingSpan() {
+    override fun updateDrawState(paint: TextPaint) = apply(paint)
+
+    override fun updateMeasureState(paint: TextPaint) = apply(paint)
+
+    private fun apply(paint: TextPaint) {
+        if (Build.VERSION.SDK_INT >= 28) {
+            paint.typeface = Typeface.create(paint.typeface ?: Typeface.DEFAULT, BOLD_WEIGHT, true)
+        } else {
+            paint.textSkewX = FAKE_ITALIC_SKEW
+        }
+    }
+
+    override fun equals(other: Any?): Boolean = other is SubtitleBoldItalicSpan
+
+    override fun hashCode(): Int = SubtitleBoldItalicSpan::class.hashCode()
+
+    private companion object {
+        const val BOLD_WEIGHT = 700
+        const val FAKE_ITALIC_SKEW = -0.25f
+    }
+}
+
 internal class SubtitlePresentation {
     // Work happens at cue changes, never on a video frame. Bound retained bitmap memory.
     private val originals = java.util.WeakHashMap<Cue, Cue>()
@@ -66,6 +102,13 @@ internal class SubtitlePresentation {
                     changed = true
                 } else if (!preserveAss && isAuthoredFontSpan(span)) {
                     result.removeSpan(span)
+                    changed = true
+                } else if (span is StyleSpan && subtitleItalicNeedsOwnWeight(span.style, style.bold, preserveAss)) {
+                    val start = result.getSpanStart(span)
+                    val end = result.getSpanEnd(span)
+                    val flags = result.getSpanFlags(span)
+                    result.removeSpan(span)
+                    result.setSpan(SubtitleBoldItalicSpan(), start, end, flags)
                     changed = true
                 } else if (dim && span is ForegroundColorSpan) {
                     val color = capSubtitleHighlight(span.foregroundColor)

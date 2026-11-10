@@ -49,6 +49,16 @@ class SubtitlePresentationTest {
         }
     }
 
+    @Test fun `only an italic line under the Bold setting gets its own span`() {
+        val italic = android.graphics.Typeface.ITALIC
+        val boldItalic = android.graphics.Typeface.BOLD_ITALIC
+        org.junit.Assert.assertTrue(subtitleItalicNeedsOwnWeight(italic, boldSetting = true, preserveAss = false))
+        org.junit.Assert.assertTrue(subtitleItalicNeedsOwnWeight(boldItalic, boldSetting = true, preserveAss = false))
+        org.junit.Assert.assertFalse(subtitleItalicNeedsOwnWeight(italic, boldSetting = false, preserveAss = false))
+        org.junit.Assert.assertFalse(subtitleItalicNeedsOwnWeight(android.graphics.Typeface.BOLD, boldSetting = true, preserveAss = false))
+        org.junit.Assert.assertFalse(subtitleItalicNeedsOwnWeight(italic, boldSetting = true, preserveAss = true))
+    }
+
     @Test fun `bitmap detection uses codec not SDH label`() {
         for (codec in listOf("PGS", "application/pgs", "VobSub", "DVD_SUBTITLE", "DVB subtitles", "S_HDMV/PGS", "XSUB")) {
             assertTrue(codec, isBitmapSubtitleCodec(codec))
