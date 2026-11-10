@@ -90,6 +90,8 @@ data class LayoutSettingsUiState(
     val preferExternalMetaAddonDetail: Boolean = false,
     val hideUnreleasedContent: Boolean = false,
     val watchedTitlesMode: WatchedTitlesMode = WatchedTitlesMode.SHOW,
+    val hidePlanToWatch: Boolean = false,
+    val hideWatching: Boolean = false,
     val showFullReleaseDate: Boolean = true,
     val nextUpFromFurthestEpisode: Boolean = true,
     val showUnairedNextUp: Boolean = true,
@@ -101,6 +103,7 @@ data class LayoutSettingsUiState(
         com.nuvio.tv.core.poster.CustomPosterScreen.ALL,
     val alwaysShowLandscapeClearlogo: Boolean = false,
     val addonLandscapeBackdropLogo: Boolean = false,
+    val heroDescriptionAutoScrollEnabled: Boolean = false,
 ) {
     val modernLandscapePostersEnabled: Boolean get() = landscapePosterScope.onHome
 }
@@ -161,6 +164,8 @@ sealed class LayoutSettingsEvent {
     data class SetPreferExternalMetaAddonDetail(val enabled: Boolean) : LayoutSettingsEvent()
     data class SetHideUnreleasedContent(val enabled: Boolean) : LayoutSettingsEvent()
     data class SetWatchedTitlesMode(val mode: WatchedTitlesMode) : LayoutSettingsEvent()
+    data class SetHidePlanToWatch(val hide: Boolean) : LayoutSettingsEvent()
+    data class SetHideWatching(val hide: Boolean) : LayoutSettingsEvent()
     data class SetShowFullReleaseDate(val enabled: Boolean) : LayoutSettingsEvent()
     data class SetNextUpFromFurthestEpisode(val enabled: Boolean) : LayoutSettingsEvent()
     data class SetShowUnairedNextUp(val enabled: Boolean) : LayoutSettingsEvent()
@@ -169,6 +174,7 @@ sealed class LayoutSettingsEvent {
     data class SetContinueWatchingCardStyle(val style: ContinueWatchingCardStyle) : LayoutSettingsEvent()
     data class SetAlwaysShowLandscapeClearlogo(val enabled: Boolean) : LayoutSettingsEvent()
     data class SetAddonLandscapeBackdropLogo(val enabled: Boolean) : LayoutSettingsEvent()
+    data class SetHeroDescriptionAutoScrollEnabled(val enabled: Boolean) : LayoutSettingsEvent()
     data object ResetPosterCardStyle : LayoutSettingsEvent()
     data object ResetCardDepthStyle : LayoutSettingsEvent()
     data class SetCustomPosterUrlPattern(val pattern: String) : LayoutSettingsEvent()
@@ -418,6 +424,16 @@ class LayoutSettingsViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            layoutPreferenceDataStore.hidePlanToWatch.distinctUntilChanged().collectLatest { hide ->
+                updateUiStateIfChanged { it.copy(hidePlanToWatch = hide) }
+            }
+        }
+        viewModelScope.launch {
+            layoutPreferenceDataStore.hideWatching.distinctUntilChanged().collectLatest { hide ->
+                updateUiStateIfChanged { it.copy(hideWatching = hide) }
+            }
+        }
+        viewModelScope.launch {
             layoutPreferenceDataStore.showFullReleaseDate.distinctUntilChanged().collectLatest { enabled ->
                 updateUiStateIfChanged { it.copy(showFullReleaseDate = enabled) }
             }
@@ -481,6 +497,13 @@ class LayoutSettingsViewModel @Inject constructor(
                     updateUiStateIfChanged { it.copy(addonLandscapeBackdropLogo = enabled) }
                 }
         }
+        viewModelScope.launch {
+            layoutPreferenceDataStore.heroDescriptionAutoScrollEnabled
+                .distinctUntilChanged()
+                .collect { enabled ->
+                    updateUiStateIfChanged { it.copy(heroDescriptionAutoScrollEnabled = enabled) }
+                }
+        }
         loadAvailableCatalogs()
     }
 
@@ -533,6 +556,8 @@ class LayoutSettingsViewModel @Inject constructor(
             is LayoutSettingsEvent.SetPreferExternalMetaAddonDetail -> setPreferExternalMetaAddonDetail(event.enabled)
             is LayoutSettingsEvent.SetHideUnreleasedContent -> setHideUnreleasedContent(event.enabled)
             is LayoutSettingsEvent.SetWatchedTitlesMode -> setWatchedTitlesMode(event.mode)
+            is LayoutSettingsEvent.SetHidePlanToWatch -> setHidePlanToWatch(event.hide)
+            is LayoutSettingsEvent.SetHideWatching -> setHideWatching(event.hide)
             is LayoutSettingsEvent.SetShowFullReleaseDate -> setShowFullReleaseDate(event.enabled)
             is LayoutSettingsEvent.SetNextUpFromFurthestEpisode -> setNextUpFromFurthestEpisode(event.enabled)
             is LayoutSettingsEvent.SetShowUnairedNextUp -> setShowUnairedNextUp(event.enabled)
@@ -541,6 +566,7 @@ class LayoutSettingsViewModel @Inject constructor(
             is LayoutSettingsEvent.SetContinueWatchingCardStyle -> setContinueWatchingCardStyle(event.style)
             is LayoutSettingsEvent.SetAlwaysShowLandscapeClearlogo -> setAlwaysShowLandscapeClearlogo(event.enabled)
             is LayoutSettingsEvent.SetAddonLandscapeBackdropLogo -> setAddonLandscapeBackdropLogo(event.enabled)
+            is LayoutSettingsEvent.SetHeroDescriptionAutoScrollEnabled -> setHeroDescriptionAutoScrollEnabled(event.enabled)
             LayoutSettingsEvent.ResetPosterCardStyle -> resetPosterCardStyle()
             LayoutSettingsEvent.ResetCardDepthStyle -> resetCardDepthStyle()
             is LayoutSettingsEvent.SetCustomPosterUrlPattern -> setCustomPosterUrlPattern(event.pattern)
@@ -926,6 +952,20 @@ class LayoutSettingsViewModel @Inject constructor(
         }
     }
 
+    private fun setHidePlanToWatch(hide: Boolean) {
+        viewModelScope.launch {
+            layoutPreferenceDataStore.setHidePlanToWatch(hide)
+            homeCatalogSettingsSyncService.triggerPush()
+        }
+    }
+
+    private fun setHideWatching(hide: Boolean) {
+        viewModelScope.launch {
+            layoutPreferenceDataStore.setHideWatching(hide)
+            homeCatalogSettingsSyncService.triggerPush()
+        }
+    }
+
     private fun setWatchedTitlesMode(mode: WatchedTitlesMode) {
         if (_uiState.value.watchedTitlesMode == mode) return
         viewModelScope.launch {
@@ -980,6 +1020,13 @@ class LayoutSettingsViewModel @Inject constructor(
         if (_uiState.value.addonLandscapeBackdropLogo == enabled) return
         viewModelScope.launch {
             layoutPreferenceDataStore.setAddonLandscapeBackdropLogo(enabled)
+        }
+    }
+
+    private fun setHeroDescriptionAutoScrollEnabled(enabled: Boolean) {
+        if (_uiState.value.heroDescriptionAutoScrollEnabled == enabled) return
+        viewModelScope.launch {
+            layoutPreferenceDataStore.setHeroDescriptionAutoScrollEnabled(enabled)
         }
     }
 
@@ -1098,7 +1145,7 @@ class LayoutSettingsViewModel @Inject constructor(
                                 addonName = addon.displayName
                             )
                         }
-                }
+                }.distinctBy { it.key }
                 updateUiStateIfChanged { it.copy(availableCatalogs = catalogs) }
             }
         }

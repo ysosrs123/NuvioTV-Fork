@@ -336,6 +336,11 @@ class PlayerRuntimeController(
             // still runs the bridge self-test and would otherwise stamp a conversion that never ran.
             val converted = diagnostics.dv7DoviSuccess > 0 &&
                 diagnostics.dvSourceProfile in CONVERTIBLE_DV_PROFILES
+            val openRebufferMs = if (rebufferStartedAtMs != 0L && !currentRebufferSeekInduced) {
+                android.os.SystemClock.elapsedRealtime() - rebufferStartedAtMs
+            } else {
+                0L
+            }
             val updated = diagnostics.copy(
                 audioPath = if (fillAudioPath) audioPathAtTeardown else diagnostics.audioPath,
                 vodCacheStats = mediaSourceFactory.vodCacheStatsLabel(context),
@@ -344,7 +349,7 @@ class PlayerRuntimeController(
                 } else {
                     diagnostics.dvConvertEndedAtMs
                 }
-            )
+            ).withRebuffersAtExit(hasRenderedFirstFrame, rebufferCount, rebufferTotalMs, openRebufferMs)
             lastPlaybackDiagnosticsForReport = updated
             scope.launch {
                 runCatching { playerSettingsDataStore.setLastPlaybackDiagnostics(updated) }
@@ -551,6 +556,7 @@ class PlayerRuntimeController(
     /** Cancels previous TEXT-track bounce jobs when subtitle delay is adjusted repeatedly. */
     internal var subtitleTimingRefreshJob: Job? = null
     internal var nextEpisodeAutoPlayJob: Job? = null
+    internal var mixCardPositionMs: Long = 0L
     internal var debridResolveJob: Job? = null
     internal var stillWatchingPromptJob: Job? = null
     internal var startupLoadingReportJob: Job? = null
@@ -576,6 +582,8 @@ class PlayerRuntimeController(
         LastPlaybackDiagnostics.EMPTY
     internal var lastPlaybackIssueError: PlaybackIssueErrorInput? = null
     internal val playbackIssueReportRequestVersion = AtomicLong(0L)
+    internal var reportPanelResumeOnClose = false
+    internal var frameListenerPlayer: Any? = null
     internal val playbackAnalyticsDiagnostics = PlayerPlaybackAnalyticsDiagnostics()
     internal val skippedFrameTally = PlaybackSkippedFrameTally()
     internal val loadingDiagnosticEvents: ArrayDeque<PlayerLoadingDiagnosticEvent> = ArrayDeque()
@@ -598,14 +606,16 @@ class PlayerRuntimeController(
     internal var hasRenderedFirstFrame = false
         set(value) {
             field = value
-            if (!value) dvDecoderKeptNoted = false
+            if (!value) filmDecoderKeptNoted = false
         }
     /** "Dolby Vision decoder kept held" was logged for this play. */
-    internal var dvDecoderKeptNoted = false
+    internal var filmDecoderKeptNoted = false
     // Prevent the previous stream's end from completing the new stream.
     internal var endDetectionArmed = false
     // Ignore EOF until MPV has reported a non-EOF state for this stream.
     internal var mpvEofSeenClear = false
+    // Set once the Exo progress loop forced a natural end for a position past duration.
+    internal var exoEndOverrunHandled = false
     internal var shouldEnforceAutoplayOnFirstReady = true
 
     internal var rebufferCount: Int = 0
@@ -679,6 +689,7 @@ class PlayerRuntimeController(
     /** True after the system or the TV paused playback through the media session, until play is pressed again. */
     internal var pausedFromOutside: Boolean = false
     internal val onSessionPlayPause: (Boolean) -> Unit = { playing -> pausedFromOutside = !playing }
+    internal var releaseDecoderOnBackground: Boolean = false
     internal var pendingBackgroundCrashRecovery: Boolean = false
     internal var backgroundCrashSavedPositionMs: Long = 0L
 
@@ -904,6 +915,7 @@ class PlayerRuntimeController(
     internal var errorRetryJob: Job? = null
     internal var stableProgressResetJob: Job? = null
     @Volatile internal var currentPlayerSettingsForReport: PlayerSettings = PlayerSettings()
+    @Volatile internal var hasObservedPlayerSettings: Boolean = false
 
     internal val dv7ToHevcForcedStreamUrls: MutableSet<String> = mutableSetOf()
     // AM9 native FEL: streams that left the native dual-layer path (MEL, non-P7 RPU, device error or
@@ -927,10 +939,16 @@ class PlayerRuntimeController(
     internal val vc1TrackSelectionBypassStreamUrls: MutableSet<String> = mutableSetOf()
     internal val vc1DecoderRetryStreamUrls: MutableSet<String> = mutableSetOf()
     internal val mpvFormatFallbackStreamUrls: MutableSet<String> = mutableSetOf()
+    /** Streams MPV must decode in software: the box's hardware decoder can't take them. */
+    internal val mpvSoftwareDecodeStreamUrls: MutableSet<String> = mutableSetOf()
     internal val safeAudioForcedStreamUrls: MutableSet<String> = mutableSetOf()
     // Own IEC output failures per stream; from the second one, rebuilds leave HD audio to the system sink.
     internal val iecFailureStrikes: MutableMap<String, Int> = mutableMapOf()
     internal val iecOffStreamUrls: MutableSet<String> = mutableSetOf()
+    internal val iecLastFailureMs: MutableMap<String, Long> = mutableMapOf()
+    internal val iecDecodeStreamUrls: MutableSet<String> = mutableSetOf()
+    internal var iecFailureReturnJob: Job? = null
+    internal var playerNoticeJob: Job? = null
     internal val audioDisabledForcedStreamUrls: MutableSet<String> = mutableSetOf()
     // URLs proven dead this session (sniff failure on a non-media body, or HTTP
     // 404/410): auto-failover skips them and the source panel greys them out.
@@ -965,6 +983,7 @@ class PlayerRuntimeController(
     internal var currentTraktEpisodeMappingKey: String? = null
     internal var hasSentScrobbleStartForCurrentItem: Boolean = false
     internal var hasRequestedScrobbleStartForCurrentItem: Boolean = false
+    internal var hasPausedScrobbleForCurrentItem: Boolean = false
     internal var scrobbleStartRequestGeneration: Long = 0L
     internal var playbackPreparationJob: Job? = null
     internal var traktMappingJob: Job? = null
@@ -1056,6 +1075,7 @@ class PlayerRuntimeController(
         // Fork: observePlayerStatsHud() deliberately not armed, upstream stats HUD stays permanently dormant.
         observeDeviceLocalTransparentLetterbox()
         observeDeviceLocalTunneledSurfaceFill()
+        observeDeviceLocalReleaseDecoderOnBackground()
         observeStreamDelayTrackSelection()
     }
 

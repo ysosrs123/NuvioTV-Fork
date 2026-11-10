@@ -303,6 +303,8 @@ enum class AudioOutputChannels(
     }
 }
 
+internal fun playbackReportsSwitch(stored: Boolean?, reportsAvailable: Boolean): Boolean = stored ?: reportsAvailable
+
 /**
  * Data class representing player settings
  */
@@ -351,7 +353,8 @@ data class PlayerSettings(
     val loadingOverlayEnabled: Boolean = true,
     val showPlayerLoadingStatus: Boolean = true,
     val showPlayerLoadingSource: Boolean = true,
-    val playbackIssueReportsEnabled: Boolean = false,
+    val playbackIssueReportsEnabled: Boolean = com.nuvio.tv.core.build.IssueReports.available,
+    val reportRecorderEnabled: Boolean = true,
     val pauseOverlayEnabled: Boolean = false,
     val dimHdrOverlays: Boolean = false,
     val osdClockEnabled: Boolean = true,
@@ -405,6 +408,7 @@ data class PlayerSettings(
     val streamAutoPlayEagerReadyEnabled: Boolean = true,
     /** How long each addon gets to return streams before it is abandoned. */
     val addonStreamTimeoutSeconds: Int = DEFAULT_ADDON_STREAM_TIMEOUT_SECONDS,
+    val pluginSearchTimeoutSeconds: Int = DEFAULT_PLUGIN_SEARCH_TIMEOUT_SECONDS,
     val speculativeStreamSearchEnabled: Boolean = false,
     val showSourceLineBadges: Boolean = true,
     val showSourceLineReleaseGroup: Boolean = true,
@@ -514,6 +518,15 @@ data class PlayerSettings(
         fun sanitizeAddonStreamTimeout(stored: Int?): Int {
             val raw = stored ?: return DEFAULT_ADDON_STREAM_TIMEOUT_SECONDS
             return ADDON_STREAM_TIMEOUT_VALUES.minBy { kotlin.math.abs(it.toLong() - raw.toLong()) }
+        }
+
+        const val DEFAULT_PLUGIN_SEARCH_TIMEOUT_SECONDS = 45
+
+        val PLUGIN_SEARCH_TIMEOUT_VALUES: List<Int> = listOf(20, 30, 45, 60, 90, 120)
+
+        fun sanitizePluginSearchTimeout(stored: Int?): Int {
+            val raw = stored ?: return DEFAULT_PLUGIN_SEARCH_TIMEOUT_SECONDS
+            return PLUGIN_SEARCH_TIMEOUT_VALUES.minBy { kotlin.math.abs(it.toLong() - raw.toLong()) }
         }
 
         fun isBoundedTimeout(timeoutSeconds: Int): Boolean =
@@ -838,6 +851,7 @@ class PlayerSettingsDataStore @Inject constructor(
     private val showPlayerLoadingStatusKey = booleanPreferencesKey("show_player_loading_status")
     private val showPlayerLoadingSourceKey = booleanPreferencesKey("show_player_loading_source")
     private val playbackIssueReportsEnabledKey = booleanPreferencesKey("playback_issue_reports_enabled")
+    private val reportRecorderEnabledKey = booleanPreferencesKey("report_recorder_enabled")
     private val dimHdrOverlaysKey = booleanPreferencesKey("dim_hdr_overlays")
     private val pauseOverlayEnabledKey = booleanPreferencesKey("pause_overlay_enabled")
     private val osdClockEnabledKey = booleanPreferencesKey("osd_clock_enabled")
@@ -879,6 +893,7 @@ class PlayerSettingsDataStore @Inject constructor(
     private val streamAutoPlayTimeoutSecondsKey = intPreferencesKey("stream_auto_play_timeout_seconds")
     private val speculativeStreamSearchEnabledKey = booleanPreferencesKey("speculative_stream_search_enabled")
     private val addonStreamTimeoutSecondsKey = intPreferencesKey("addon_stream_timeout_seconds")
+    private val pluginSearchTimeoutSecondsKey = intPreferencesKey("plugin_search_timeout_seconds")
     private val showSourceLineBadgesKey = booleanPreferencesKey("show_source_line_badges")
     private val showSourceLineReleaseGroupKey = booleanPreferencesKey("show_source_line_release_group")
     private val streamAutoPlayEagerReadyEnabledKey = booleanPreferencesKey("stream_auto_play_eager_ready_enabled")
@@ -1348,7 +1363,8 @@ class PlayerSettingsDataStore @Inject constructor(
                 loadingOverlayEnabled = prefs[loadingOverlayEnabledKey] ?: true,
                 showPlayerLoadingStatus = prefs[showPlayerLoadingStatusKey] ?: true,
                 showPlayerLoadingSource = prefs[showPlayerLoadingSourceKey] ?: true,
-                playbackIssueReportsEnabled = prefs[playbackIssueReportsEnabledKey] ?: false,
+                playbackIssueReportsEnabled = playbackReportsSwitch(prefs[playbackIssueReportsEnabledKey], com.nuvio.tv.core.build.IssueReports.available),
+                reportRecorderEnabled = prefs[reportRecorderEnabledKey] ?: true,
                 pauseOverlayEnabled = prefs[pauseOverlayEnabledKey] ?: false,
                 dimHdrOverlays = prefs[dimHdrOverlaysKey] ?: false,
                 osdClockEnabled = prefs[osdClockEnabledKey] ?: true,
@@ -1407,6 +1423,7 @@ class PlayerSettingsDataStore @Inject constructor(
                 ),
                 speculativeStreamSearchEnabled = prefs[speculativeStreamSearchEnabledKey] ?: false,
                 addonStreamTimeoutSeconds = PlayerSettings.sanitizeAddonStreamTimeout(prefs[addonStreamTimeoutSecondsKey]),
+                pluginSearchTimeoutSeconds = PlayerSettings.sanitizePluginSearchTimeout(prefs[pluginSearchTimeoutSecondsKey]),
                 showSourceLineBadges = prefs[showSourceLineBadgesKey] ?: true,
                 showSourceLineReleaseGroup = prefs[showSourceLineReleaseGroupKey] ?: true,
                 streamAutoPlayEagerReadyEnabled = prefs[streamAutoPlayEagerReadyEnabledKey] ?: true,
@@ -1965,6 +1982,12 @@ class PlayerSettingsDataStore @Inject constructor(
         }
     }
 
+    suspend fun setReportRecorderEnabled(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[reportRecorderEnabledKey] = enabled
+        }
+    }
+
     suspend fun setFrameRateMatchingMode(mode: FrameRateMatchingMode) = setFrameRateMatchingMode(mode, profileManager.activeProfileId.value)
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
@@ -2080,6 +2103,12 @@ class PlayerSettingsDataStore @Inject constructor(
     suspend fun setAddonStreamTimeoutSeconds(seconds: Int) {
         store().edit { prefs ->
             prefs[addonStreamTimeoutSecondsKey] = PlayerSettings.sanitizeAddonStreamTimeout(seconds)
+        }
+    }
+
+    suspend fun setPluginSearchTimeoutSeconds(seconds: Int) {
+        store().edit { prefs ->
+            prefs[pluginSearchTimeoutSecondsKey] = PlayerSettings.sanitizePluginSearchTimeout(seconds)
         }
     }
 
@@ -2712,6 +2741,7 @@ class PlayerSettingsDataStore @Inject constructor(
         store(profileId).edit { it[bufferBudgetManagedKey] = enabled }
     }
     suspend fun setLastPlaybackDiagnostics(diagnostics: LastPlaybackDiagnostics) {
+        if (com.nuvio.tv.core.formatcheck.FormatCheckSession.active) return
         store().edit { it[lastPlaybackDiagnosticsKey] = diagnostics.toJson() }
     }
     suspend fun setParallelConnectionCount(count: Int) = setParallelConnectionCount(count, profileManager.activeProfileId.value)

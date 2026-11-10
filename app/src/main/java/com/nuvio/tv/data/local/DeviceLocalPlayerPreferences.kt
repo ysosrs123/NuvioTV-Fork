@@ -27,6 +27,7 @@ import javax.inject.Singleton
  *  - playerStatsHudButtonEnabled  (whether stats overlay button is available in stream info)
  *  - playerStatsHudActive  (whether playback stats HUD is turned on by the user)
  *  - remoteButtons  (jobs given to remote keys while a video plays; each box has its own remote)
+ *  - releaseDecoderOnBackground  (free the hardware decoder when the app leaves the foreground)
  */
 @Singleton
 class DeviceLocalPlayerPreferences @Inject constructor(
@@ -40,11 +41,14 @@ class DeviceLocalPlayerPreferences @Inject constructor(
         context.preferencesDataStoreFile("device_local_player_prefs")
     }
 
+    internal val backupStore: DataStore<Preferences> get() = store
+
     private val aspectModeKey = stringPreferencesKey("aspect_mode")
     private val transparentLetterboxKey = booleanPreferencesKey("transparent_letterbox")
     private val tunneledSurfaceFillKey = booleanPreferencesKey("tunneled_surface_fill")
     private val playerStatsHudButtonEnabledKey = booleanPreferencesKey("player_stats_hud_enabled")
     private val playerStatsHudActiveKey = booleanPreferencesKey("player_stats_hud_active")
+    private val releaseDecoderOnBackgroundKey = booleanPreferencesKey("release_decoder_on_background")
     private val tunnelFrameReportDecodersKey = stringSetPreferencesKey("tunnel_frame_report_decoders")
     private val remoteButtonsKey = stringPreferencesKey("remote_buttons")
 
@@ -134,6 +138,16 @@ class DeviceLocalPlayerPreferences @Inject constructor(
     suspend fun setPlayerStatsHudActive(active: Boolean) {
         store.edit { prefs ->
             prefs[playerStatsHudActiveKey] = active
+        }
+    }
+
+    val releaseDecoderOnBackground: Flow<Boolean> = store.data.map { prefs ->
+        prefs[releaseDecoderOnBackgroundKey] ?: false
+    }
+
+    suspend fun setReleaseDecoderOnBackground(enabled: Boolean) {
+        store.edit { prefs ->
+            prefs[releaseDecoderOnBackgroundKey] = enabled
         }
     }
 }

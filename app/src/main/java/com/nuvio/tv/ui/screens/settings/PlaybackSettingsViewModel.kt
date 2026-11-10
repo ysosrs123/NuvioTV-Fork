@@ -74,6 +74,7 @@ class PlaybackSettingsViewModel @Inject constructor(
     suspend fun saveControlLayout(snapshot: com.nuvio.tv.data.local.PlayerControlLayoutSnapshot,
         layout: com.nuvio.tv.data.local.PlayerControlLayout?) = playerSettingsDataStore.saveControlLayout(snapshot, layout)
     val transparentLetterbox: Flow<Boolean> = deviceLocalPlayerPreferences.transparentLetterbox
+    val releaseDecoderOnBackground: Flow<Boolean> = deviceLocalPlayerPreferences.releaseDecoderOnBackground
     val trailerSettings: Flow<TrailerSettings> = trailerSettingsDataStore.settings
     val torrentSettingsFlow: Flow<TorrentSettingsData> = torrentSettings.settings
     val torrentCacheState: StateFlow<TorrentCacheState> = torrentService.cacheState
@@ -284,6 +285,10 @@ class PlaybackSettingsViewModel @Inject constructor(
 
     suspend fun setRemoteButtons(map: RemoteButtonMap) {
         deviceLocalPlayerPreferences.setRemoteButtons(map)
+    }
+
+    suspend fun setReleaseDecoderOnBackground(enabled: Boolean) {
+        deviceLocalPlayerPreferences.setReleaseDecoderOnBackground(enabled)
     }
 
     suspend fun setSkipIntroEnabled(enabled: Boolean) {
@@ -670,6 +675,10 @@ class PlaybackSettingsViewModel @Inject constructor(
 
     suspend fun setStreamAutoPlayTimeoutSeconds(seconds: Int) {
         playerSettingsDataStore.setStreamAutoPlayTimeoutSeconds(seconds)
+    }
+
+    suspend fun setPluginSearchTimeoutSeconds(seconds: Int) {
+        playerSettingsDataStore.setPluginSearchTimeoutSeconds(seconds)
     }
 
     suspend fun setAddonStreamTimeoutSeconds(seconds: Int) {

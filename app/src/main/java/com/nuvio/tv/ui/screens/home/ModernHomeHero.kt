@@ -79,6 +79,7 @@ import com.nuvio.tv.R
 import kotlinx.coroutines.delay
 import com.nuvio.tv.ui.components.ImdbRatingSourceLabel
 import com.nuvio.tv.ui.components.TrailerPlayer
+import com.nuvio.tv.ui.components.AutoScrollingText
 import androidx.compose.ui.res.stringResource
 
 private data class ModernHeroSecondaryMeta(
@@ -393,6 +394,7 @@ internal fun HeroTitleBlock(
     mdbListShowOnHero: Boolean = false,
     mdbListRatingOrder: List<String> = com.nuvio.tv.domain.model.MDBListSettings.DEFAULT_RATING_ORDER,
     trailerPlaying: () -> Boolean = { false },
+    descriptionAutoScrollEnabled: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     // The providers read hero state that is rewritten on every focus move, often with an equal
@@ -433,7 +435,8 @@ internal fun HeroTitleBlock(
             showImdbRatings = showImdbRatings,
             mdbListShowOnHero = mdbListShowOnHero,
             mdbListRatingOrder = mdbListRatingOrder,
-            trailerPlaying = trailerPlaying
+            trailerPlaying = trailerPlaying,
+            descriptionAutoScrollEnabled = descriptionAutoScrollEnabled
         )
     }
 }
@@ -447,7 +450,8 @@ private fun HeroTitleContent(
     showImdbRatings: Boolean,
     mdbListShowOnHero: Boolean = false,
     mdbListRatingOrder: List<String> = com.nuvio.tv.domain.model.MDBListSettings.DEFAULT_RATING_ORDER,
-    trailerPlaying: () -> Boolean = { false }
+    trailerPlaying: () -> Boolean = { false },
+    descriptionAutoScrollEnabled: Boolean = false
 ) {
     val preview = previewProvider() ?: return
     val highlighterEnabled = LocalRecompositionHighlighterEnabled.current
@@ -665,6 +669,7 @@ private fun HeroTitleContent(
         secondaryHighlightText?.let { text ->
                     Text(
                         text = text,
+                        modifier = Modifier.weight(1f, fill = false),
                         style = semiBoldLabelMedium,
                         color = NuvioTheme.colors.TextPrimary,
                         maxLines = 1,
@@ -753,16 +758,43 @@ private fun HeroTitleContent(
 
         }
 
+        if (preview.logos.isNotEmpty()) {
+            HeroLogoRow(logos = preview.logos, scale = metaScale, modifier = Modifier.graphicsLayer { alpha = metaAlpha })
+        }
+
         // The block sits on the rows and grows upwards, so a short description leaves no gap above them.
         // Weighted, the description is measured last and gives up lines first when the hero is short.
         preview.description?.takeIf { it.isNotBlank() }?.let { description ->
-            Text(
+            AutoScrollingText(
                 text = description,
                 style = scaledDescriptionStyle.copy(textDirection = description.contentTextDirection()),
                 color = NuvioTheme.colors.TextPrimary,
                 maxLines = descriptionMaxLines,
-                overflow = TextOverflow.Ellipsis,
+                autoScrollEnabled = descriptionAutoScrollEnabled,
+                paused = trailerPlaying,
                 modifier = Modifier.weight(1f, fill = false).graphicsLayer { alpha = metaAlpha }
+            )
+        }
+    }
+}
+
+/** The shows behind a hero that stands for several, by their own logos. */
+@Composable
+private fun HeroLogoRow(logos: List<String>, scale: Float, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val height = NuvioTheme.spacing.xl * scale
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        logos.forEach { logo ->
+            AsyncImage(
+                model = remember(context, logo) { HeroImageRequests.logo(context, logo).build() },
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.CenterStart,
+                modifier = Modifier.height(height).widthIn(max = height * 3.2f)
             )
         }
     }

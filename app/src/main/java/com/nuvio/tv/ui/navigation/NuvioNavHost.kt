@@ -474,7 +474,10 @@ private fun PlaybackNavHost(
             arguments = listOf(
                 navArgument("videoId") { type = NavType.StringType },
                 navArgument("contentType") { type = NavType.StringType },
-                navArgument("title") { type = NavType.StringType },
+                navArgument("title") {
+                    type = NavType.StringType
+                    nullable = true
+                },
                 navArgument("poster") {
                     type = NavType.StringType
                     nullable = true
@@ -714,7 +717,10 @@ private fun PlaybackNavHost(
             route = Screen.Player.route,
             arguments = listOf(
                 navArgument("streamUrl") { type = NavType.StringType },
-                navArgument("title") { type = NavType.StringType },
+                navArgument("title") {
+                    type = NavType.StringType
+                    nullable = true
+                },
                 navArgument("streamName") {
                     type = NavType.StringType
                     nullable = true
@@ -969,6 +975,20 @@ private fun PlaybackNavHost(
                             // autoplay moved to next episode — skip Stream, go to detail
                             if (returnToDetailOnBack && contentType.equals("series", ignoreCase = true) && contentId.isNotBlank()) {
                                 returnToDetail()
+                            } else if (
+                                navController.previousBackStackEntry?.destination?.route
+                                    ?.startsWith("stream/") == true
+                            ) {
+                                // Binge group reuse keeps the first episode's manual Stream screen
+                                // below the player; drop it like the autoplay path does
+                                navController.popBackStack(Screen.Stream.route, inclusive = true)
+                                navController.currentBackStackEntry
+                                    ?.takeIf { it.destination.route?.startsWith("detail/") == true }
+                                    ?.savedStateHandle
+                                    ?.let { state ->
+                                        state["returnFocusSeason"] = focusSeason
+                                        state["returnFocusEpisode"] = focusEpisode
+                                    }
                             } else {
                                 navController.popBackStack()
                             }

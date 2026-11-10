@@ -73,7 +73,7 @@ class AuthDiagnosticReportRepository internal constructor(
     }
 
     private suspend fun upload(report: AuthDiagnosticReportRequestDto): String {
-        val response = authDiagnosticReportApi.createAuthDiagnosticReport(report)
+        val response = authDiagnosticReportApi.createAuthDiagnosticReport(report.forUpload())
         if (!response.isSuccessful) {
             error("Auth diagnostics upload failed: HTTP ${response.code()}")
         }

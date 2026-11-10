@@ -53,6 +53,7 @@ internal fun PlaybackSettingsSections(
     playerSettings: PlayerSettings,
     p2p: P2pSettingsUi,
     transparentLetterbox: Boolean,
+    releaseDecoderOnBackground: Boolean,
     onUpdate: PlaybackSettingsUpdate,
     onOpenDialog: (PlaybackDialog) -> Unit,
     onMemorySettingChanged: () -> Unit,
@@ -72,6 +73,11 @@ internal fun PlaybackSettingsSections(
     val qualityRulesFocusRequester = initialFocusRequester.takeIf { returnToQualityRules }
     val headerFocusRequester = initialFocusRequester.takeIf { !returnToQualityRules }
     val listState = rememberLazyListState()
+    val jumpTarget = LocalSettingsJump.current?.target?.entry?.playback
+    LaunchedEffect(jumpTarget) {
+        if (jumpTarget != null && jumpTarget.name !in expandedSections) expandedSections = expandedSections + jumpTarget.name
+    }
+    SettingsJumpScroll(listState, SettingsCategory.PLAYBACK, sections.indexOf(jumpTarget))
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -103,6 +109,7 @@ internal fun PlaybackSettingsSections(
                         p2p = p2p,
                         transparentLetterbox = transparentLetterbox,
                         remoteButtons = remoteButtons,
+                        releaseDecoderOnBackground = releaseDecoderOnBackground,
                         onUpdate = onUpdate,
                         onOpenDialog = onOpenDialog,
                         onMemorySettingChanged = onMemorySettingChanged,
@@ -125,6 +132,7 @@ private fun PlaybackSectionContent(
     p2p: P2pSettingsUi,
     transparentLetterbox: Boolean,
     remoteButtons: RemoteButtonMap,
+    releaseDecoderOnBackground: Boolean,
     onUpdate: PlaybackSettingsUpdate,
     onOpenDialog: (PlaybackDialog) -> Unit,
     onMemorySettingChanged: () -> Unit,
@@ -134,7 +142,7 @@ private fun PlaybackSectionContent(
     qualityRulesFocusRequester: FocusRequester?
 ) {
     when (section) {
-        PlaybackSection.PLAYER -> PlaybackPlayerSection(playerSettings, onUpdate, onOpenDialog)
+        PlaybackSection.PLAYER -> PlaybackPlayerSection(playerSettings, releaseDecoderOnBackground, onUpdate, onOpenDialog)
         PlaybackSection.STREAM_SELECTION -> PlaybackStreamSelectionSection(
             playerSettings,
             onUpdate,

@@ -15,6 +15,8 @@ import com.nuvio.tv.core.sync.SyncHomeCatalogPayload
 import com.nuvio.tv.core.sync.buildHomeCatalogSyncPayload
 import com.nuvio.tv.core.sync.homeCatalogKey
 import com.nuvio.tv.core.sync.homeCollectionKey
+import com.nuvio.tv.core.catalog.BuiltInCatalogs
+import com.nuvio.tv.core.sync.isDeviceOnlyCatalogKey
 import com.nuvio.tv.core.sync.withLocalServerKeys
 import com.nuvio.tv.data.mediaserver.ServerCatalog
 import com.nuvio.tv.domain.model.Addon
@@ -113,6 +115,7 @@ class LayoutPreferenceDataStore @Inject constructor(
     private val startupSplashEnabledKey = booleanPreferencesKey("startup_splash_enabled")
     private val alwaysShowLandscapeClearlogoKey = booleanPreferencesKey("always_show_landscape_clearlogo")
     private val addonLandscapeBackdropLogoKey = booleanPreferencesKey("addon_landscape_backdrop_logo")
+    private val heroDescriptionAutoScrollEnabledKey = booleanPreferencesKey("hero_description_auto_scroll_enabled")
     private val episodeOptionsOverlayStyleKey = stringPreferencesKey("episode_options_overlay_style")
     private val episodeSynopsisUnderRowKey = booleanPreferencesKey("episode_synopsis_under_row")
     private val homeImdbRatingsVisibilityKey = stringPreferencesKey("home_imdb_ratings_visibility")
@@ -130,6 +133,8 @@ class LayoutPreferenceDataStore @Inject constructor(
     private val modernHeroFullScreenBackdropKey = booleanPreferencesKey("modern_hero_full_screen_backdrop")
     private val hideUnreleasedContentKey = booleanPreferencesKey("hide_unreleased_content")
     private val watchedTitlesModeKey = stringPreferencesKey("watched_titles_mode")
+    private val hidePlanToWatchKey = booleanPreferencesKey("hide_plan_to_watch")
+    private val hideWatchingKey = booleanPreferencesKey("hide_watching")
     private val showFullReleaseDateKey = booleanPreferencesKey("show_full_release_date")
     private val memoryOnlyVerticalScrollKey = booleanPreferencesKey("memory_only_vertical_scroll")
     private val smoothBringIntoViewEnabledKey = booleanPreferencesKey("smooth_bring_into_view_enabled")
@@ -374,6 +379,10 @@ class LayoutPreferenceDataStore @Inject constructor(
         prefs[addonLandscapeBackdropLogoKey] ?: false
     }
 
+    val heroDescriptionAutoScrollEnabled: Flow<Boolean> = profileFlow { prefs ->
+        prefs[heroDescriptionAutoScrollEnabledKey] ?: false
+    }
+
     val episodeOptionsOverlayStyle: Flow<EpisodeOptionsOverlayStyle> = profileFlow { prefs ->
         val stored = prefs[episodeOptionsOverlayStyleKey] ?: EpisodeOptionsOverlayStyle.BLUR.name
         runCatching { EpisodeOptionsOverlayStyle.valueOf(stored) }
@@ -438,6 +447,10 @@ class LayoutPreferenceDataStore @Inject constructor(
     val watchedTitlesMode: Flow<WatchedTitlesMode> = profileFlow { prefs ->
         WatchedTitlesMode.fromStored(prefs[watchedTitlesModeKey])
     }
+
+    val hidePlanToWatch: Flow<Boolean> = profileFlow { prefs -> prefs[hidePlanToWatchKey] ?: false }
+
+    val hideWatching: Flow<Boolean> = profileFlow { prefs -> prefs[hideWatchingKey] ?: false }
 
     val showFullReleaseDate: Flow<Boolean> = profileFlow { prefs ->
         prefs[showFullReleaseDateKey] ?: true
@@ -688,7 +701,6 @@ class LayoutPreferenceDataStore @Inject constructor(
             prefs[focusedPosterBackdropExpandEnabledKey] = enabled
             if (!enabled) {
                 prefs[focusedPosterBackdropTrailerEnabledKey] = false
-                prefs[focusedPosterBackdropTrailerMutedKey] = true
             }
         }
     }
@@ -703,9 +715,6 @@ class LayoutPreferenceDataStore @Inject constructor(
     suspend fun setFocusedPosterBackdropTrailerEnabled(enabled: Boolean) {
         store().edit { prefs ->
             prefs[focusedPosterBackdropTrailerEnabledKey] = enabled
-            if (!enabled) {
-                prefs[focusedPosterBackdropTrailerMutedKey] = true
-            }
         }
     }
 
@@ -828,6 +837,12 @@ class LayoutPreferenceDataStore @Inject constructor(
         }
     }
 
+    suspend fun setHeroDescriptionAutoScrollEnabled(enabled: Boolean) {
+        store().edit { prefs ->
+            prefs[heroDescriptionAutoScrollEnabledKey] = enabled
+        }
+    }
+
     suspend fun setEpisodeOptionsOverlayStyle(style: EpisodeOptionsOverlayStyle) {
         store().edit { prefs ->
             prefs[episodeOptionsOverlayStyleKey] = style.name
@@ -924,6 +939,14 @@ class LayoutPreferenceDataStore @Inject constructor(
         }
     }
 
+    suspend fun setHidePlanToWatch(hide: Boolean) {
+        store().edit { prefs -> prefs[hidePlanToWatchKey] = hide }
+    }
+
+    suspend fun setHideWatching(hide: Boolean) {
+        store().edit { prefs -> prefs[hideWatchingKey] = hide }
+    }
+
     suspend fun setShowFullReleaseDate(enabled: Boolean) {
         store().edit { prefs ->
             prefs[showFullReleaseDateKey] = enabled
@@ -1004,10 +1027,13 @@ class LayoutPreferenceDataStore @Inject constructor(
         store().edit { prefs ->
             val local = readHomeCatalogSettingsState(prefs)
             val orderKeys = remoteOrderKeys.withLocalServerKeys(local.orderKeys)
-            val disabledKeys = remoteDisabledKeys + local.disabledKeys.filter(ServerCatalog::isServerKey)
-            val titles = remoteTitles + local.customTitles.filterKeys(ServerCatalog::isServerKey)
+            val disabledKeys = remoteDisabledKeys.filterNot(BuiltInCatalogs::isBuiltInKey) +
+                local.disabledKeys.filter(::isDeviceOnlyCatalogKey)
+            val titles = remoteTitles + local.customTitles.filterKeys(::isDeviceOnlyCatalogKey)
             prefs[hideUnreleasedContentKey] = payload.hideUnreleasedContent
             prefs[watchedTitlesModeKey] = WatchedTitlesMode.fromStored(payload.watchedTitlesMode).name
+            prefs[hidePlanToWatchKey] = payload.hidePlanToWatch
+            prefs[hideWatchingKey] = payload.hideWatching
             if (orderKeys.isNotEmpty()) {
                 prefs[homeCatalogOrderKeysKey] = gson.toJson(orderKeys)
             } else {
@@ -1032,7 +1058,9 @@ class LayoutPreferenceDataStore @Inject constructor(
             disabledKeys = parseCatalogKeys(prefs.getStringOrMigrateSet(disabledHomeCatalogKeysKey)).toSet(),
             customTitles = parseCustomTitles(prefs.getStringOrMigrateSet(customCatalogTitlesKey)),
             hideUnreleasedContent = prefs[hideUnreleasedContentKey] ?: false,
-            watchedTitlesMode = WatchedTitlesMode.fromStored(prefs[watchedTitlesModeKey])
+            watchedTitlesMode = WatchedTitlesMode.fromStored(prefs[watchedTitlesModeKey]),
+            hidePlanToWatch = prefs[hidePlanToWatchKey] ?: false,
+            hideWatching = prefs[hideWatchingKey] ?: false
         )
     }
 }

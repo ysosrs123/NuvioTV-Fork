@@ -82,6 +82,7 @@ private data class LayoutUiPrefs(
     val modernLandscapePostersEnabled: Boolean,
     val alwaysShowLandscapeClearlogo: Boolean = false,
     val addonLandscapeBackdropLogo: Boolean = false,
+    val heroDescriptionAutoScrollEnabled: Boolean = false,
     val modernHeroFullScreenBackdropEnabled: Boolean,
     val homeImdbRatingsVisibility: HomeImdbRatingsVisibility,
     val detailImdbRatingsVisibility: DetailImdbRatingsVisibility = DetailImdbRatingsVisibility.SHOW_ALL,
@@ -211,8 +212,9 @@ internal fun HomeViewModel.observeLayoutPreferencesPipeline() {
     viewModelScope.launch {
         combine(
             baseLayoutUiPrefsFlow,
-            modernLayoutPrefsFlow
-        ) { basePrefs, modernPrefs ->
+            modernLayoutPrefsFlow,
+            layoutPreferenceDataStore.heroDescriptionAutoScrollEnabled
+        ) { basePrefs, modernPrefs, heroDescriptionAutoScrollEnabled ->
             basePrefs.copy(
                 modernLandscapePostersEnabled = modernPrefs.landscapePosters,
                 modernHeroFullScreenBackdropEnabled = modernPrefs.fullScreenBackdrop,
@@ -220,6 +222,7 @@ internal fun HomeViewModel.observeLayoutPreferencesPipeline() {
                 alwaysShowLandscapeClearlogo = modernPrefs.alwaysShowLandscapeClearlogo,
                 addonLandscapeBackdropLogo = modernPrefs.addonLandscapeBackdropLogo,
                 detailImdbRatingsVisibility = modernPrefs.detailImdbRatingsVisibility,
+                heroDescriptionAutoScrollEnabled = heroDescriptionAutoScrollEnabled,
             )
         }
             .distinctUntilChanged()
@@ -265,6 +268,7 @@ internal fun HomeViewModel.observeLayoutPreferencesPipeline() {
                         modernLandscapePostersEnabled = prefs.modernLandscapePostersEnabled,
                         alwaysShowLandscapeClearlogo = prefs.alwaysShowLandscapeClearlogo,
                         addonLandscapeBackdropLogo = prefs.addonLandscapeBackdropLogo,
+                        heroDescriptionAutoScrollEnabled = prefs.heroDescriptionAutoScrollEnabled,
                         modernHeroFullScreenBackdropEnabled = prefs.modernHeroFullScreenBackdropEnabled,
                         homeImdbRatingsVisibility = prefs.homeImdbRatingsVisibility,
                         detailImdbRatingsVisibility = prefs.detailImdbRatingsVisibility,
@@ -623,10 +627,26 @@ private sealed interface ExternalMetaOutcome {
 private fun HomeViewModel.externalEnrichmentOutstanding(itemId: String): Boolean =
     externalMetaPrefetchEnabled && itemId !in prefetchedExternalMetaIds
 
+/** The id to ask addons for, or null when none would know it and TMDB already fills the hero. */
+internal suspend fun addonLookupId(
+    item: MetaPreview,
+    claimedByAddon: suspend (String) -> Boolean,
+    cachedImdbId: (Int, String) -> String?
+): String? {
+    if (!item.id.startsWith("tmdb:")) return item.id
+    item.imdbId?.takeIf(String::isNotBlank)?.let { return it }
+    if (claimedByAddon(item.id)) return item.id
+    return item.id.substringAfter(':').substringBefore(':').toIntOrNull()?.let { cachedImdbId(it, item.apiType) }
+}
+
+private suspend fun HomeViewModel.addonLookupId(item: MetaPreview): String? =
+    addonLookupId(item, metaRepository::addonClaimsMeta, tmdbService::cachedImdbId)
+
 private suspend fun HomeViewModel.fetchExternalMetaOutcome(item: MetaPreview): ExternalMetaOutcome =
     try {
+        val lookupId = addonLookupId(item) ?: return ExternalMetaOutcome.Final
         val result = withContext(MetaCaller("home-enrich")) {
-            metaRepository.getMetaFromAllAddons(item.apiType, item.id, item.sourceAddonBaseUrl)
+            metaRepository.getMetaFromAllAddons(item.apiType, lookupId, item.sourceAddonBaseUrl)
                 .first { it is NetworkResult.Success || it is NetworkResult.Error }
         }
         when {
@@ -949,12 +969,13 @@ private suspend fun HomeViewModel.prefetchFocusedDetails(item: MetaPreview) {
 }
 
 internal suspend fun HomeViewModel.prefetchDetailsMeta(item: MetaPreview): Unit = withContext(MetaCaller("home-details")) {
+    val lookupId = addonLookupId(item) ?: return@withContext
     val source = item.sourceAddonBaseUrl?.takeIf(String::isNotBlank)
     val preferred = if (!externalMetaPrefetchEnabled && source != null) {
-        metaRepository.getMeta(source, item.apiType, item.id).first { it !is NetworkResult.Loading }
+        metaRepository.getMeta(source, item.apiType, lookupId).first { it !is NetworkResult.Loading }
     } else null
     val result = if (preferred is NetworkResult.Success) preferred else {
-        metaRepository.getMetaFromAllAddons(item.apiType, item.id).first { it !is NetworkResult.Loading }
+        metaRepository.getMetaFromAllAddons(item.apiType, lookupId).first { it !is NetworkResult.Loading }
     }
     if (result is NetworkResult.Success) backgroundMetaPrefetchedIds.add(item.id)
 }

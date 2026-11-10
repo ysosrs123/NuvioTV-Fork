@@ -618,6 +618,7 @@ fun ClassicHomeContent(
                     showImdbRatings = uiState.homeImdbRatingsVisibility.showRatings,
                     mdbListShowOnHero = uiState.mdbListShowOnHero,
                     mdbListRatingOrder = uiState.mdbListRatingOrder,
+                    descriptionAutoScrollEnabled = uiState.heroDescriptionAutoScrollEnabled,
                     onActiveItemChanged = { item ->
                         activeHeroItem = item
                         val idx = uiState.heroItems.indexOfFirst { it.id == item.id }

@@ -183,6 +183,8 @@ internal fun PlayerRuntimeController.fetchAddonSubtitles() {
                     ?: visibleSubtitles.firstOrNull { PlayerSubtitleUtils.matchesLanguageCode(it.lang, pendingAddon.lang) }
                 if (match != null) {
                     autoSelectAddonSubtitleDeferringReload(match)
+                    // After a player rebuild this reapplies the earlier result without analysing again.
+                    if (deferredAutoAddonSubtitle == null) runSelectedAutomaticSubtitleSync(match) // AutoSync hook
                     return@launch
                 }
             }
@@ -249,6 +251,7 @@ internal fun PlayerRuntimeController.maybeAttachDeferredAddonSubtitle() {
     autoSubtitleSelected = true
     selectAddonSubtitle(subtitle)
     _uiState.update { it.copy(selectedAddonSubtitle = subtitle, selectedSubtitleTrackIndex = -1) }
+    runSelectedAutomaticSubtitleSync(subtitle)
 }
 
 private fun PlayerRuntimeController.publishStreamSidecarSubtitlesWithoutAddonFetch() {
@@ -381,6 +384,7 @@ internal fun PlayerRuntimeController.observeSubtitleSettings() {
         playerSettingsDataStore.runtimePlayerSettings
             .onEach { snapshot ->
                 currentPlayerSettingsForReport = snapshot.settings
+                hasObservedPlayerSettings = true
                 _uiState.update { it.copy(controlLayout = snapshot.settings.controlLayout) }
             }
             .playbackSettingsChanges()
@@ -1583,5 +1587,13 @@ internal fun PlayerRuntimeController.observeDeviceLocalTunneledSurfaceFill() {
                     _uiState.update { it.copy(tunneledSurfaceFill = fill) }
                 }
             }
+    }
+}
+
+internal fun PlayerRuntimeController.observeDeviceLocalReleaseDecoderOnBackground() {
+    scope.launch {
+        deviceLocalPlayerPreferences.releaseDecoderOnBackground
+            .distinctUntilChanged()
+            .collect { enabled -> releaseDecoderOnBackground = enabled }
     }
 }

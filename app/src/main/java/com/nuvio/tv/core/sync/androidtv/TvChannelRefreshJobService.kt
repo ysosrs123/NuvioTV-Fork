@@ -7,6 +7,8 @@ import android.app.job.JobService
 import android.content.ComponentName
 import android.content.Context
 import android.util.Log
+import com.nuvio.tv.core.util.hasPendingJob
+import com.nuvio.tv.core.util.scheduleSafely
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -80,35 +82,31 @@ class TvChannelRefreshJobService : JobService() {
 
     companion object {
         fun schedulePeriodic(context: Context) {
-            runCatching {
-                val scheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-                if (scheduler.allPendingJobs.any { it.id == JOB_ID_PERIODIC }) return
-                val job = JobInfo.Builder(
-                    JOB_ID_PERIODIC,
-                    ComponentName(context, TvChannelRefreshJobService::class.java)
-                )
-                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                    .setPeriodic(PERIODIC_INTERVAL_MS)
-                    .setPersisted(true)
-                    .build()
-                scheduler.schedule(job)
-                Log.d(TAG, "Scheduled periodic TV channel refresh every ${PERIODIC_INTERVAL_MS / 60_000}min")
-            }.onFailure { Log.w(TAG, "schedulePeriodic failed", it) }
+            val scheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+            if (scheduler.hasPendingJob(JOB_ID_PERIODIC)) return
+            val job = JobInfo.Builder(
+                JOB_ID_PERIODIC,
+                ComponentName(context, TvChannelRefreshJobService::class.java)
+            )
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .setPeriodic(PERIODIC_INTERVAL_MS)
+                .setPersisted(true)
+                .build()
+            if (!scheduler.scheduleSafely(job)) return
+            Log.d(TAG, "Scheduled periodic TV channel refresh every ${PERIODIC_INTERVAL_MS / 60_000}min")
         }
 
         fun scheduleImmediate(context: Context) {
-            runCatching {
-                val scheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-                val job = JobInfo.Builder(
-                    JOB_ID_IMMEDIATE,
-                    ComponentName(context, TvChannelRefreshJobService::class.java)
-                )
-                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                    .setOverrideDeadline(5_000)
-                    .build()
-                scheduler.schedule(job)
-                Log.d(TAG, "Scheduled immediate TV channel refresh")
-            }.onFailure { Log.w(TAG, "scheduleImmediate failed", it) }
+            val scheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+            val job = JobInfo.Builder(
+                JOB_ID_IMMEDIATE,
+                ComponentName(context, TvChannelRefreshJobService::class.java)
+            )
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .setOverrideDeadline(5_000)
+                .build()
+            if (!scheduler.scheduleSafely(job)) return
+            Log.d(TAG, "Scheduled immediate TV channel refresh")
         }
     }
 }

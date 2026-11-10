@@ -1663,12 +1663,13 @@ internal class ParallelRangeDataSource(
         val chunk = currentChunk ?: return C.RESULT_END_OF_INPUT
         val available = chunk.size - currentChunkReadOffset
         if (available <= 0) {
-            // Current chunk exhausted, move to next
-            if (chunk === bootstrapChunk) {
+            val wasBootstrap = chunk === bootstrapChunk
+            if (wasBootstrap) {
                 bootstrapChunk = null
                 bootstrapStartPosition = C.TIME_UNSET
             }
             currentChunk = null
+            if (!wasBootstrap && position / chunkSize == currentChunkIndex) return C.RESULT_END_OF_INPUT
             return read(buffer, offset, length)
         }
 
@@ -2885,11 +2886,13 @@ internal class ParallelRangeDataSource(
         val chunk = currentChunk ?: return C.RESULT_END_OF_INPUT
         val available = chunk.size - currentChunkReadOffset
         if (available <= 0) {
-            if (chunk === bootstrapChunk) {
+            val wasBootstrap = chunk === bootstrapChunk
+            if (wasBootstrap) {
                 bootstrapChunk = null
                 bootstrapStartPosition = C.TIME_UNSET
             }
             currentChunk = null
+            if (!wasBootstrap && position / chunkSize == currentChunkIndex) return C.RESULT_END_OF_INPUT
             return read(buffer, length)
         }
 

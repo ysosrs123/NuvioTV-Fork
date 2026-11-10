@@ -60,6 +60,7 @@ fun PlaybackSettingsContent(
     val playerSettings by viewModel.playerSettings.collectAsStateWithLifecycle(initialValue = PlayerSettings())
     val transparentLetterbox by viewModel.transparentLetterbox.collectAsStateWithLifecycle(initialValue = false)
     val remoteButtons by viewModel.remoteButtons.collectAsStateWithLifecycle(initialValue = RemoteButtonMap.DEFAULT)
+    val releaseDecoderOnBackground by viewModel.releaseDecoderOnBackground.collectAsStateWithLifecycle(initialValue = false)
     val torrentSettings by viewModel.torrentSettingsFlow.collectAsStateWithLifecycle(initialValue = TorrentSettingsData())
     val torrentCacheState by viewModel.torrentCacheState.collectAsStateWithLifecycle()
     val torrentState by viewModel.torrentState.collectAsStateWithLifecycle()
@@ -144,6 +145,7 @@ fun PlaybackSettingsContent(
                 p2p = p2p,
                 transparentLetterbox = transparentLetterbox,
                 remoteButtons = remoteButtons,
+                releaseDecoderOnBackground = releaseDecoderOnBackground,
                 onUpdate = onUpdate,
                 onOpenDialog = { openDialog = it },
                 onMemorySettingChanged = { memoryUsageTrigger++ },

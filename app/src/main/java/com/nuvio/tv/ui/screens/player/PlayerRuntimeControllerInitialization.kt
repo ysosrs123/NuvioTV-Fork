@@ -1658,7 +1658,7 @@ internal fun PlayerRuntimeController.initializePlayer(
             if (initializationGeneration != playbackRecoveryGate.generation) return@launch
             // Left the foreground while preparing: build on return instead of claiming a decoder
             // the foreground app may need. The resume rebuild uses currentStreamUrl.
-            if (isInBackground && url == currentStreamUrl) {
+            if (releaseDecoderOnBackground && isInBackground && url == currentStreamUrl) {
                 pendingBackgroundCrashRecovery = true
                 return@launch
             }
@@ -3228,6 +3228,7 @@ internal fun PlayerRuntimeController.resetLoadingOverlayForNewStream() {
     playerSession.streamStarting()
     endDetectionArmed = false
     mpvEofSeenClear = false
+    exoEndOverrunHandled = false
     hasMarkedCurrentEpisodeCompleted = false
     // The placeholder probe is a per-stream measurement, not a
     // per-screen one: the reuse path re-enters initializePlayer on the

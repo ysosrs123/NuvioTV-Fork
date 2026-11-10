@@ -248,6 +248,7 @@ fun ModernHomeContent(
                 com.nuvio.tv.ui.components.HeroCarousel(
                     items = uiState.heroItems.asStable(),
                     showImdbRatings = uiState.homeImdbRatingsVisibility.showRatings,
+                    descriptionAutoScrollEnabled = uiState.heroDescriptionAutoScrollEnabled,
                     onItemClick = { item ->
                         onNavigateToDetail(item.id, item.apiType, "")
                     },
@@ -806,6 +807,7 @@ fun ModernHomeContent(
                                 ?: heroCarouselItem?.heroPreview?.yearText,
                             runtimeText = formatHeroRuntime(enrichedItem.runtime)
                                 ?: heroCarouselItem?.heroPreview?.runtimeText,
+                            secondaryHighlightText = heroCarouselItem?.metaPreview?.scoutReason ?: enrichedItem.scoutReason,
                             imdbText = enrichedItem.imdbRating
                                 ?.let { String.format(java.util.Locale.US, "%.1f", it) },
                             ageRatingText = enrichedItem.ageRating,
@@ -1153,6 +1155,7 @@ fun ModernHomeContent(
                     }
                 },
                 descriptionMaxLines = heroDescriptionMaxLines,
+                descriptionAutoScrollEnabled = uiState.heroDescriptionAutoScrollEnabled,
                 modifier = heroMetadataModifier
             )
 

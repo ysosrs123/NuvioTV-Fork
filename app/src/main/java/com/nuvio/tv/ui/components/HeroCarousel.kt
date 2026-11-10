@@ -80,6 +80,8 @@ import com.nuvio.tv.ui.util.LocalRecompositionHighlighterEnabled
 import com.nuvio.tv.ui.util.localizedContentType
 import com.nuvio.tv.ui.util.localizedGenreLabel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.snapshotFlow
 
 private const val AUTO_ADVANCE_INTERVAL_MS = 10000L
 private val YEAR_REGEX = Regex("""\b\d{4}\b""")
@@ -98,6 +100,7 @@ fun HeroCarousel(
     initialActiveIndex: Int = 0,
     mdbListShowOnHero: Boolean = false,
     mdbListRatingOrder: List<String> = com.nuvio.tv.domain.model.MDBListSettings.DEFAULT_RATING_ORDER,
+    descriptionAutoScrollEnabled: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     if (items.isEmpty()) return
@@ -107,6 +110,8 @@ fun HeroCarousel(
     val currentOnActiveItemChanged by rememberUpdatedState(onActiveItemChanged)
     var activeIndex by remember { mutableIntStateOf(initialActiveIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))) }
     var isFocused by remember { mutableStateOf(false) }
+    // Slide whose description is still on its first scroll pass, or -1.
+    var descriptionScrollHoldIndex by remember { mutableIntStateOf(-1) }
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     LaunchedEffect(activeIndex, isFocused) {
@@ -124,6 +129,8 @@ fun HeroCarousel(
         delay(AUTO_ADVANCE_INTERVAL_MS * 2) // 20s before first advance
         while (true) {
             delay(AUTO_ADVANCE_INTERVAL_MS)
+            // Let a long description finish scrolling before the slide is replaced.
+            snapshotFlow { descriptionScrollHoldIndex == activeIndex }.first { !it }
             if (!isFocused) {
                 activeIndex = (activeIndex + 1) % items.size
             }
@@ -194,7 +201,17 @@ fun HeroCarousel(
                 showImdbRatings = showImdbRatings,
                 showBackdrop = showBackdrop,
                 mdbListShowOnHero = mdbListShowOnHero,
-                mdbListRatingOrder = mdbListRatingOrder
+                mdbListRatingOrder = mdbListRatingOrder,
+                descriptionAutoScrollEnabled = descriptionAutoScrollEnabled,
+                onDescriptionScrollHoldChanged = { hold ->
+                    // A slide can only clear its own hold, so the outgoing slide in the
+                    // crossfade can't release the new one, and a slide without a
+                    // description never blocks the advance.
+                    when {
+                        hold -> descriptionScrollHoldIndex = index
+                        descriptionScrollHoldIndex == index -> descriptionScrollHoldIndex = -1
+                    }
+                }
             )
         }
 
@@ -242,7 +259,9 @@ private fun HeroCarouselSlide(
     showImdbRatings: Boolean,
     showBackdrop: Boolean,
     mdbListShowOnHero: Boolean = false,
-    mdbListRatingOrder: List<String> = com.nuvio.tv.domain.model.MDBListSettings.DEFAULT_RATING_ORDER
+    mdbListRatingOrder: List<String> = com.nuvio.tv.domain.model.MDBListSettings.DEFAULT_RATING_ORDER,
+    descriptionAutoScrollEnabled: Boolean = false,
+    onDescriptionScrollHoldChanged: (Boolean) -> Unit = {}
 ) {
     val highlighterEnabled = LocalRecompositionHighlighterEnabled.current
     val context = LocalContext.current
@@ -404,14 +423,15 @@ private fun HeroCarouselSlide(
             }
 
             item.description?.takeIf { it.isNotBlank() }?.let { description ->
-                Text(
+                AutoScrollingText(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         textDirection = description.contentTextDirection()
                     ),
                     color = NuvioTheme.colors.TextPrimary,
                     maxLines = 4,
-                    overflow = TextOverflow.Ellipsis
+                    autoScrollEnabled = descriptionAutoScrollEnabled,
+                    onScrollHoldChanged = onDescriptionScrollHoldChanged
                 )
             }
         }
