@@ -6,6 +6,7 @@ import androidx.media3.common.MimeTypes
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.ForwardingAudioSink
 import androidx.media3.extractor.DtsUtil
+import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import com.nuvio.tv.ui.screens.player.PassthroughWaterLevelPacer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -54,6 +55,12 @@ internal class IecPassthroughAudioSink(
     private var audioSessionId: Int = 0
     private var volume: Float = 1f
     private var dtsChannelCount: Int = 8
+    private var dtsCarrierOverride: Int? = null
+    private var dtsCarrierKnown = false
+    private var dtsCarrierLossless = false
+    // Plain DTS on the own track: IEC 61937 bursts at the stream's own rate, stereo, as Kodi and VLC send it.
+    private var dtsCore = false
+    private var coreIecFailed = false
     private val dtsDuration = DtsHdFrameDurationEstimator()
     private val uhdAudioChunkId = AtomicInteger()
     private var configuredFormat: Format? = null
@@ -133,6 +140,8 @@ internal class IecPassthroughAudioSink(
     /** Filler frames that went in mid-content while playing; pauses and seeks are not counted. */
     fun iecFillerWhilePlaying(): Long? = if (isKeepAliveActive) fillerWhilePlaying else null
 
+    fun iecClockSteadied(): Boolean = isIecActive && timestampClock.isSteadied
+
     fun iecPayload(): HbrPayload? = if (isIecActive) iecTrack?.payload else null
 
     fun iecRoutedDevice(): android.media.AudioDeviceInfo? =
@@ -172,11 +181,20 @@ internal class IecPassthroughAudioSink(
     override fun configure(inputFormat: Format, specifiedBufferSize: Int, outputChannels: IntArray?) {
         attachReadyListener()
         deliverIecReadyIfProbeAlreadySucceeded()
+        if (com.nuvio.tv.core.formatcheck.FormatCheckSession.active && mode != Mode.FORWARD &&
+            iecTrack != null && inputFormat == configuredFormat
+        ) {
+            return
+        }
         configuredFormat = inputFormat
         configuredBufferSize = specifiedBufferSize
         configuredOutputChannels = outputChannels
         dropReplays()
         releaseIec()
+        dtsCarrierOverride = null
+        dtsCarrierKnown = false
+        dtsCarrierLossless = false
+        dtsCore = false
         configuredHbr = iecCarries(inputFormat)
         iecChosenForFormat = false
         reopenedAtNanos = NEVER
@@ -206,6 +224,10 @@ internal class IecPassthroughAudioSink(
                 return
             }
         }
+        if (hbrAllowed && tunnelReady && tryDtsCoreIec(inputFormat)) {
+            refreshPassthroughLive()
+            return
+        }
         mode = Mode.FORWARD
         if (isHbrPassthrough(inputFormat)) {
             android.util.Log.i(
@@ -217,7 +239,7 @@ internal class IecPassthroughAudioSink(
                     "iecFailedThisSession=$iecFailedThisSession tunnelReady=$tunnelReady"
             )
         }
-        super.configure(inputFormat, specifiedBufferSize, outputChannels)
+        super.configure(passthroughLayout(inputFormat), specifiedBufferSize, outputChannels)
         refreshPassthroughLive()
     }
 
@@ -284,7 +306,8 @@ internal class IecPassthroughAudioSink(
             latencyUs = track.outputLatencyUs(),
             playHeld = track.isPlayHeld(),
             timestamp = sample,
-            playing = playing
+            playing = playing,
+            guardJumps = mode == Mode.TRUEHD
         )
     }
 
@@ -585,6 +608,7 @@ internal class IecPassthroughAudioSink(
 
     private fun hbrIecChannelCount(format: Format): Int {
         if (format.sampleMimeType == MimeTypes.AUDIO_TRUEHD) return 8
+        dtsCarrierOverride?.let { return it }
         val count = format.channelCount
         return if (count > 0) Iec61937Packer.dtsHdChannelMask(count) else 8
     }
@@ -678,7 +702,128 @@ internal class IecPassthroughAudioSink(
         android.util.Log.i("IecPassthrough", line)
     }
 
+    private fun tryDtsCoreIec(format: Format): Boolean {
+        if (coreIecFailed || iecFailedThisSession) return false
+        if (!carriesDtsCoreOnIec(format.sampleMimeType, dtsHdIecEnabled) || !trackFactory.iec61937Ready()) return false
+        if (format.sampleRate != 48_000 && format.sampleRate != 44_100) return false
+        // Only a route change: the own track is used where Android's own DTS output would be.
+        if (super.getFormatSupport(format) != AudioSink.SINK_FORMAT_SUPPORTED_DIRECTLY) return false
+        if (!openDtsCoreTrack(format)) return false
+        mode = Mode.DTS_HD
+        dtsCore = true
+        dtsChannelCount = 2
+        android.util.Log.i(
+            "IecPassthrough",
+            "DTS active payload=${iecTrack?.payload} path=${iecPathName(iecTrack?.payload)} rate=$iecOutputSampleRate"
+        )
+        onDiagnosticEvent?.invoke("iec_dts_active rate=$iecOutputSampleRate")
+        return true
+    }
+
+    private fun openDtsCoreTrack(format: Format): Boolean {
+        val sampleRate = format.sampleRate
+        val track = trackFactory.openHbr(
+            sampleRate = sampleRate,
+            channelCount = 2,
+            bufferSizeBytes = maxOf(
+                Iec61937Packer.dtsCoreBurstBytes(DTS_CORE_MAX_SAMPLES) * 4,
+                IEC_BUFFER_TARGET_MS * sampleRate / 1000 * 4
+            ),
+            sessionId = audioSessionId,
+            trueHd = false
+        ) ?: return false
+        track.setVolume(volume)
+        iecTrack = track
+        LiveDirectAudioPlayback.noteOwnTrackOpened()
+        iecBufferSizeBytes = track.bufferSizeBytes
+        iecOutputSampleRate = sampleRate
+        return true
+    }
+
+    private fun handleDtsCore(buffer: ByteBuffer): Boolean {
+        if (!buffer.hasRemaining()) return true
+        val position = buffer.position()
+        val head = ByteArray(buffer.remaining().coerceAtMost(16))
+        buffer.get(head)
+        buffer.position(position)
+        val littleEndian = dtsCoreLittleEndian(head)
+        val sampleCount = try {
+            DtsUtil.parseDtsAudioSampleCount(head)
+        } catch (_: Exception) {
+            0
+        }
+        val burstBytes = Iec61937Packer.dtsCoreBurstBytes(sampleCount)
+        if (littleEndian == null || burstBytes == 0) {
+            return fallbackToWrappedSink("dts_core_unsupported samples=$sampleCount")
+        }
+        val burst = acquireDtsBurst(burstBytes)
+        if (!Iec61937Packer.packDtsCoreInto(buffer, sampleCount, littleEndian, burst)) {
+            recycleFrame(burst)
+            return fallbackToWrappedSink("dts_core_too_big size=${buffer.remaining()} burst=$burstBytes")
+        }
+        pendingFrames.add(burst)
+        noteFrameQueued()
+        return true
+    }
+
+    /** Kodi's speaker layout for Android's own DTS outputs; falls back to the format's own when refused. */
+    private fun passthroughLayout(format: Format): Format {
+        val channels = kodiPassthroughChannels(format) ?: return format
+        if (channels == format.channelCount) return format
+        val adjusted = format.buildUpon().setChannelCount(channels).build()
+        return if (super.getFormatSupport(adjusted) == AudioSink.SINK_FORMAT_SUPPORTED_DIRECTLY) adjusted else format
+    }
+
+    private fun moveDtsCarrierIfNeeded(buffer: ByteBuffer): Boolean {
+        val format = configuredFormat ?: return false
+        if (dtsCarrierLossless || format.sampleMimeType?.startsWith("audio/vnd.dts.uhd") == true) return false
+        val wanted = Iec61937Packer.dtsHdCarrierChannels(buffer) ?: return false
+        if (wanted == 8) {
+            dtsCarrierLossless = true
+        } else if (dtsCarrierKnown) {
+            return false
+        }
+        dtsCarrierKnown = true
+        val current = Iec61937Packer.dtsHdChannelMask(dtsChannelCount)
+        if (wanted == current) return false
+        moveDtsCarrier(format, from = current, to = wanted)
+        return true
+    }
+
+    private fun moveDtsCarrier(format: Format, from: Int, to: Int) {
+        val queued = ArrayList(uncommitted)
+        resetIecState(keepTrack = false)
+        dtsCarrierOverride = to
+        var opened = openIec(format)
+        if (!opened) {
+            dtsCarrierOverride = from
+            opened = openIec(format)
+        }
+        if (!opened) {
+            uncommitted.addAll(queued)
+            fallbackToWrappedSink("carrier_move from=$from to=$to")
+            return
+        }
+        dtsChannelCount = dtsCarrierOverride ?: to
+        dtsDuration.clockSampleRate = clockSampleRateFor(iecOutputSampleRate)
+        android.util.Log.i(
+            "IecPassthrough",
+            "DTS-HD carrier from=$from to=$to used=$dtsChannelCount rate=$iecOutputSampleRate"
+        )
+        onDiagnosticEvent?.invoke("iec_dts_carrier from=$from to=$to used=$dtsChannelCount")
+        for (au in queued) {
+            notePts(au.ptsUs)
+            queueForIec(au.buffer(), au.ptsUs, au.count)
+        }
+        refreshPassthroughLive()
+    }
+
     private fun handleDtsHd(buffer: ByteBuffer, presentationTimeUs: Long): Boolean {
+        if (dtsCore) return handleDtsCore(buffer)
+        if (moveDtsCarrierIfNeeded(buffer)) {
+            buffer.position(buffer.limit())
+            return true
+        }
         val position = buffer.position()
         val head = ByteArray(buffer.remaining().coerceAtMost(8))
         buffer.get(head)
@@ -991,7 +1136,7 @@ internal class IecPassthroughAudioSink(
         resetIecState(keepTrack = false)
         reopenedAtNanos = now
         reopensForFormat++
-        if (!openIec(format)) {
+        if (!(if (dtsCore) openDtsCoreTrack(format) else openIec(format))) {
             uncommitted.addAll(queued)
             handledEndOfStream = endOfStreamRequested
             return fallbackToWrappedSink("$reason reopen=failed")
@@ -1029,15 +1174,21 @@ internal class IecPassthroughAudioSink(
         onDiagnosticEvent?.invoke(
             "iec_fallback_to_raw reason=$reason mime=${format?.sampleMimeType} replay=${queued.size}"
         )
-        trackFactory.markIecUnusable()
-        iecFailedThisSession = true
-        onIecFailed?.invoke()
+        // Plain DTS failing on the own track only sends that stream to Android's output; TrueHD and DTS-HD keep IEC.
+        if (dtsCore) {
+            coreIecFailed = true
+        } else {
+            trackFactory.markIecUnusable()
+            iecFailedThisSession = true
+            onIecFailed?.invoke()
+        }
         resetIecState(keepTrack = false)
         mode = Mode.FORWARD
+        dtsCore = false
         if (format != null) {
             super.reset()
             try {
-                super.configure(format, configuredBufferSize, configuredOutputChannels)
+                super.configure(passthroughLayout(format), configuredBufferSize, configuredOutputChannels)
             } catch (e: AudioSink.ConfigurationException) {
                 onDiagnosticEvent?.invoke(
                     "iec_fallback_configure_refused mime=${format.sampleMimeType} reason=$reason"
@@ -1161,6 +1312,7 @@ internal class IecPassthroughAudioSink(
         writeStallStartedNanos = WRITE_STALL_NOT_STARTED
         timestampClock.reset()
         if (!keepTrack) {
+            timestampClock.release()
             deadOutputSinceNanos = NEVER
             outputCheckedAtNanos = NEVER
             fillerWriteCode = 0
@@ -1195,7 +1347,7 @@ internal class IecPassthroughAudioSink(
         if (underruns == lastHealthUnderruns && now - lastHealthNanos < HEALTH_INTERVAL_NANOS) return
         lastHealthNanos = now
         lastHealthUnderruns = underruns
-        val line = "iec_health mode=$mode payload=${track.payload} underruns=$underruns " +
+        val line = "iec_health mode=${if (dtsCore) "DTS" else mode} payload=${track.payload} underruns=$underruns " +
             "head=${track.playbackHeadFrames()} written=$writtenFrames " +
             "pending=${pendingFrames.size} stalls=$totalWriteStalls playing=$playing " +
             "keepAlive=$isKeepAliveActive ${keepAliveState()}"
@@ -1206,6 +1358,7 @@ internal class IecPassthroughAudioSink(
     private fun releaseIec() {
         resetIecState(keepTrack = false)
         mode = Mode.FORWARD
+        dtsCore = false
     }
 
     private class UncommittedAu(val bytes: ByteArray, val size: Int, val ptsUs: Long, val count: Int) {
@@ -1243,6 +1396,7 @@ internal class IecPassthroughAudioSink(
         internal const val KEEP_ALIVE_MAX_HOLD_NANOS = 30L * 60L * 1_000_000_000L
         internal const val KEEP_ALIVE_HEAD_IDLE_NANOS = 200_000_000L
         private const val HEAD_NOT_MOVED = Long.MIN_VALUE
+        private const val DTS_CORE_MAX_SAMPLES = 2048
 
         fun isTrueHd(format: Format): Boolean {
             return format.sampleMimeType == MimeTypes.AUDIO_TRUEHD
@@ -1256,6 +1410,41 @@ internal class IecPassthroughAudioSink(
         fun carriesOnIec(mimeType: String?, dtsHdIecEnabled: Boolean): Boolean {
             if (!PassthroughWaterLevelPacer.isHbrMime(mimeType)) return false
             return dtsHdIecEnabled || mimeType == MimeTypes.AUDIO_TRUEHD
+        }
+
+        /** Plain DTS goes on the own track too, unless System Passthrough sends DTS to Android's output. */
+        fun carriesDtsCoreOnIec(mimeType: String?, dtsHdIecEnabled: Boolean): Boolean =
+            dtsHdIecEnabled && mimeType == MimeTypes.AUDIO_DTS
+
+        /**
+         * Kodi's speaker layout for Android's own DTS and DTS-HD outputs: stereo, 7.1 for lossless.
+         * Null leaves other formats as they are.
+         */
+        fun kodiPassthroughChannels(format: Format): Int? = when (format.sampleMimeType) {
+            MimeTypes.AUDIO_DTS, MimeTypes.AUDIO_DTS_EXPRESS -> 2
+            MimeTypes.AUDIO_DTS_HD -> {
+                val type = DtsStreamType.of(format)
+                when {
+                    type != null -> if (type.isLossless) 8 else 2
+                    format.channelCount > 2 -> 8
+                    else -> 2
+                }
+            }
+            else -> null
+        }
+
+        /** True for 16-bit little-endian, false for big-endian, null for 14-bit or no sync word. */
+        internal fun dtsCoreLittleEndian(head: ByteArray): Boolean? {
+            if (head.size < 4) return null
+            val b0 = head[0].toInt() and 0xFF
+            val b1 = head[1].toInt() and 0xFF
+            val b2 = head[2].toInt() and 0xFF
+            val b3 = head[3].toInt() and 0xFF
+            return when {
+                b0 == 0x7F && b1 == 0xFE && b2 == 0x80 && b3 == 0x01 -> false
+                b0 == 0xFE && b1 == 0x7F && b2 == 0x01 && b3 == 0x80 -> true
+                else -> null
+            }
         }
 
         private fun hasDtsCoreSyncWord(head: ByteArray): Boolean {

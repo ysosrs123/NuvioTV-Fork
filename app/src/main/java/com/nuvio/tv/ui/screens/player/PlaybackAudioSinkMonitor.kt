@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.media3.common.C
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
+import com.nuvio.tv.core.report.PlaybackRecorder
 import com.nuvio.tv.ui.screens.player.iec.IecPassthroughAudioSink
 import java.lang.reflect.Field
 import kotlin.math.abs
@@ -54,6 +55,9 @@ internal class PlaybackAudioSinkMonitor(
 
     @Volatile
     private var jitterLastWallMs: Long = 0L
+
+    @Volatile
+    private var lastPositionUs: Long = C.TIME_UNSET
 
     @Volatile
     private var jitterSamples: Int = 0
@@ -136,6 +140,7 @@ internal class PlaybackAudioSinkMonitor(
     /** Called with the sink position the renderer has just read, on the playback thread. */
     fun onPositionRead(positionUs: Long, playbackSpeed: Float) {
         if (positionUs == AudioSink.CURRENT_POSITION_NOT_SET) return
+        lastPositionUs = positionUs
         val nowMs = SystemClock.elapsedRealtime()
         val lastWall = jitterLastWallMs
         if (lastWall != 0L && nowMs - lastWall < JITTER_MIN_INTERVAL_MS) return
@@ -153,7 +158,10 @@ internal class PlaybackAudioSinkMonitor(
                 jitterSamples += 1
                 jitterSumAbsMs += absMs
                 if (absMs > jitterMaxAbsMs) jitterMaxAbsMs = absMs
-                if (absMs >= JITTER_EVENT_MS) jitterEvents += 1
+                if (absMs >= JITTER_EVENT_MS) {
+                    jitterEvents += 1
+                    PlaybackRecorder.noteClockJump(posDeltaMs - expectedMs)
+                }
                 driftWallAccumMs += wallDeltaMs
                 driftPosAccumMs += posDeltaMs
                 driftExpectedAccumMs += expectedMs
@@ -173,6 +181,9 @@ internal class PlaybackAudioSinkMonitor(
         jitterLastPosUs = positionUs
         jitterLastWallMs = nowMs
     }
+
+    /** The sink position the renderer read last, in milliseconds, or null before the first read. */
+    fun lastAudioPositionMs(): Long? = lastPositionUs.takeIf { it != C.TIME_UNSET }?.div(1_000L)
 
     fun audioClockJitter(): AudioClockJitter? {
         val n = jitterSamples
@@ -219,6 +230,8 @@ internal class PlaybackAudioSinkMonitor(
 
     /** TrueHD keep-alive filler written mid-content while playing, or null when the keep-alive is not running. */
     fun iecFillerWhilePlaying(): Long? = iecSink?.iecFillerWhilePlaying()
+
+    fun iecClockSteadied(): Boolean = iecSink?.iecClockSteadied() == true
 
     /** The output track's own underrun count, or null when no track can be read. */
     fun nativeAudioTrackUnderrunCount(): Int? {

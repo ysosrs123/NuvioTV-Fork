@@ -495,7 +495,8 @@ class IecAudioTimestampClockTest {
         val track = ScriptedIecAudioTrack()
         val sink = IecPassthroughAudioSink(
             sink = SilentSink(),
-            trackFactory = ReadyFactory(track)
+            trackFactory = ReadyFactory(track),
+            keepAliveEnabled = false
         )
         sink.configure(trueHdFormat(), 0, null)
         sink.play()

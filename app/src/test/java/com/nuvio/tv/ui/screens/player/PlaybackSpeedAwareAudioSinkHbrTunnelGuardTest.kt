@@ -2,11 +2,13 @@ package com.nuvio.tv.ui.screens.player
 
 import androidx.media3.common.C
 import androidx.media3.common.Format
+import androidx.media3.common.Metadata
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.exoplayer.audio.AudioOffloadSupport
 import androidx.media3.exoplayer.audio.AudioSink
 import com.nuvio.tv.core.player.AudioPassthroughPolicy
+import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -78,6 +80,39 @@ class PlaybackSpeedAwareAudioSinkHbrTunnelGuardTest {
         sink.configure(format(MimeTypes.AUDIO_AC3), 0, null)
         assertEquals(MimeTypes.AUDIO_AC3, sink.currentTunnelAudioClass)
     }
+
+    @Test
+    fun dtsExpress_isDecoded() {
+        val sink = PlaybackSpeedAwareAudioSink(sink = PlainSink())
+        val express = dtsHd(DtsStreamType.EXPRESS)
+        assertTrue(sink.isPolicyDeniedPassthrough(express))
+        assertTrue(sink.shouldForcePcmForFormat(express))
+        assertEquals(AudioSink.SINK_FORMAT_UNSUPPORTED, sink.getFormatSupport(express))
+    }
+
+    @Test
+    fun otherDtsTypes_stayPassthrough() {
+        val sink = PlaybackSpeedAwareAudioSink(sink = PlainSink())
+        for (type in listOf(DtsStreamType.MASTER_AUDIO, DtsStreamType.DTS_X, DtsStreamType.HIGH_RESOLUTION)) {
+            assertFalse(type.name, sink.isPolicyDeniedPassthrough(dtsHd(type)))
+        }
+        assertFalse(sink.isPolicyDeniedPassthrough(format(MimeTypes.AUDIO_DTS_HD)))
+        assertFalse(sink.isPolicyDeniedPassthrough(format(MimeTypes.AUDIO_DTS)))
+    }
+
+    @Test
+    fun dtsExpress_staysPassthrough_withoutSoftwareDecoders() {
+        val sink = PlaybackSpeedAwareAudioSink(
+            sink = PlainSink(),
+            passthroughPolicy = AudioPassthroughPolicy(softwareDecodersAvailable = false)
+        )
+        assertFalse(sink.isPolicyDeniedPassthrough(dtsHd(DtsStreamType.EXPRESS)))
+    }
+
+    private fun dtsHd(type: DtsStreamType): Format = format(MimeTypes.AUDIO_DTS_HD)
+        .buildUpon()
+        .setMetadata(Metadata(type))
+        .build()
 
     private fun format(mime: String): Format = Format.Builder()
         .setSampleMimeType(mime)

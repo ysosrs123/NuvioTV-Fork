@@ -25,6 +25,10 @@ internal class IecAudioTimestampClock(
     private var hasAcceptedTimestamp = false
     private var lastSystemTimeUs = C.TIME_UNSET
     private var lastPositionUs = C.TIME_UNSET
+    private val steadyClock = IecSteadyHeadClock()
+
+    /** True once this box's position has proved too jumpy to follow; lasts for the track, seeks included. */
+    val isSteadied: Boolean get() = steadyClock.engaged
 
     init {
         reset()
@@ -36,6 +40,13 @@ internal class IecAudioTimestampClock(
         timestampWraps = 0L
         lastSystemTimeUs = C.TIME_UNSET
         lastPositionUs = C.TIME_UNSET
+        steadyClock.reset()
+    }
+
+    /** A new track starts on the normal clock again. */
+    fun release() {
+        reset()
+        steadyClock.release()
     }
 
     fun positionUs(
@@ -47,7 +58,8 @@ internal class IecAudioTimestampClock(
         playHeld: Boolean,
         timestamp: IecAudioTimestampSample?,
         playbackSpeed: Float = 1f,
-        playing: Boolean = true
+        playing: Boolean = true,
+        guardJumps: Boolean = false
     ): Long {
         if (playHeld || writtenFrames <= 0L || startPtsUs == C.TIME_UNSET) {
             return AudioSink.CURRENT_POSITION_NOT_SET
@@ -60,6 +72,11 @@ internal class IecAudioTimestampClock(
         val safeHead = headFrames.coerceAtLeast(0L)
         val safeWritten = writtenFrames.coerceAtLeast(0L)
         val headUs = framesToUs(safeHead, sampleRate)
+        if (guardJumps && steadyClock.engaged) {
+            val steadyUs = steadyClock.positionUs(systemTimeUs, headUs, playing)
+                .coerceAtMost(framesToUs(safeWritten, sampleRate))
+            return startPtsUs + (steadyUs - latencyUs.coerceAtLeast(0L)).coerceAtLeast(0L)
+        }
         poll(systemTimeUs, timestamp, headUs, sampleRate, speed)
         val fromTimestamp = state == State.TIMESTAMP_ADVANCING && hasAcceptedTimestamp
         var positionUs = if (fromTimestamp) {
@@ -84,7 +101,9 @@ internal class IecAudioTimestampClock(
         } else {
             (positionUs - latencyUs.coerceAtLeast(0L)).coerceAtLeast(0L)
         }
-        return startPtsUs + presentedUs
+        val resultUs = startPtsUs + presentedUs
+        if (guardJumps) steadyClock.observe(systemTimeUs, resultUs, playing)
+        return resultUs
     }
 
     private fun resetPoller() {
@@ -110,7 +129,8 @@ internal class IecAudioTimestampClock(
             return
         }
         lastTimestampSampleTimeUs = systemTimeUs
-        val stamp = sample
+        // As Kodi: a timestamp more than 2 s old says nothing about now.
+        val stamp = sample?.takeIf { systemTimeUs - it.nanoTime / 1000L <= MAX_TIMESTAMP_AGE_US }
         val updated = stamp != null
         var wrappedFrames = 0L
         if (stamp != null) {
@@ -279,6 +299,7 @@ internal class IecAudioTimestampClock(
         const val INITIALIZING_DURATION_US = 500_000L
         const val WAIT_FOR_ADVANCE_DURATION_US = 2_000_000L
         const val MAX_AUDIO_TIMESTAMP_OFFSET_US = 5L * C.MICROS_PER_SECOND
+        const val MAX_TIMESTAMP_AGE_US = 2L * C.MICROS_PER_SECOND
         const val MAX_POSITION_DRIFT_ADVANCING_TIMESTAMP_US = 1_000L
         const val MAX_POSITION_DRIFT_FOR_SMOOTHING_US = C.MICROS_PER_SECOND
         const val MAX_POSITION_SMOOTHING_SPEED_CHANGE_PERCENT = 10

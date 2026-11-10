@@ -26,7 +26,8 @@ internal data class SurroundResolveResult(
     val targetChannels: Int?,
     val downmixEnabled: Boolean,
     val audioOutputChannels: AudioOutputChannels,
-    val deniedTranscodeMimes: Set<String>
+    val deniedTranscodeMimes: Set<String>,
+    val forceAc3: Boolean = false
 )
 
 internal fun resolveSurroundForRoute(
@@ -87,7 +88,8 @@ internal fun resolveSurroundForRoute(
         targetChannels = surroundTargetChannels,
         downmixEnabled = surroundDownmixEnabled,
         audioOutputChannels = surroundAudioOutputChannels,
-        deniedTranscodeMimes = deniedTranscodeMimes
+        deniedTranscodeMimes = deniedTranscodeMimes,
+        forceAc3 = inputs.forceOpticalActive
     )
 }
 
@@ -237,6 +239,14 @@ private fun PlayerRuntimeController.commitSurroundResolution(
             "channelTarget=${surround.targetChannels} tvArcSoundbar=${settings.surroundTvArcSoundbar}"
     )
     if (SpeakerlessBoxRoute.hdmiSoundOff(routeKey)) logHdmiSoundOff(reason, routeKey)
+    if (changed) {
+        com.nuvio.tv.core.report.PlaybackRecorder.event(
+            com.nuvio.tv.core.report.RecorderEvent.SURROUND,
+            "reason=$reason mode=${settings.surroundFormatMode.name} ac3=${policy.allowAc3} eac3=${policy.allowEac3} " +
+                "truehd=${policy.allowTrueHd} dts=${policy.allowDts} dtshd=${policy.allowDtsHd} " +
+                "transcode=${surround.resolution.transcodePreferred}"
+        )
+    }
     if (!changed) return
     val wasPlaying = hasActivePlayIntent() && !userPausedManually
     playbackSpeedAwareAudioSink?.notifyAudioProcessingRequirementChanged()

@@ -13,6 +13,7 @@ import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.ForwardingAudioSink
 import androidx.media3.extractor.Ac3Util
 import com.nuvio.tv.core.player.AudioPassthroughPolicy
+import com.nuvio.tv.core.player.dvmkv.DtsStreamType
 import com.nuvio.tv.ui.screens.player.iec.HbrPayload
 import com.nuvio.tv.ui.screens.player.iec.IecPassthroughAudioSink
 import java.nio.ByteBuffer
@@ -131,9 +132,13 @@ internal class PlaybackSpeedAwareAudioSink(
 
     fun audioClockJitter(): AudioClockJitter? = monitor.audioClockJitter()
 
+    fun lastAudioPositionMs(): Long? = monitor.lastAudioPositionMs()
+
     fun nativeAudioTrackUnderrunCount(): Int? = monitor.nativeAudioTrackUnderrunCount()
 
     fun iecFillerWhilePlaying(): Long? = monitor.iecFillerWhilePlaying()
+
+    fun iecClockSteadied(): Boolean = monitor.iecClockSteadied()
 
     fun sampleAudioRoute(): AudioRouteSnapshot? = monitor.sampleAudioRoute()
 
@@ -313,7 +318,8 @@ internal class PlaybackSpeedAwareAudioSink(
     }
 
     fun isPolicyDeniedPassthrough(format: Format): Boolean {
-        return passthroughPolicy.deniesPassthrough(format.sampleMimeType)
+        return passthroughPolicy.deniesPassthrough(format.sampleMimeType) ||
+            (passthroughPolicy.softwareDecodersAvailable && DtsStreamType.of(format) == DtsStreamType.EXPRESS)
     }
 
     private fun markPcmFallbackIfNeeded(format: Format?, speed: Float): Boolean {
@@ -374,6 +380,7 @@ internal class PlaybackSpeedAwareAudioSink(
 
     private fun noteIecFallbackIfFlipped(iecWasActive: Boolean) {
         if (iecWasActive && iecSink?.isIecActive == false) {
+            com.nuvio.tv.core.report.PlaybackRecorder.event(com.nuvio.tv.core.report.RecorderEvent.AUDIO_PATH, "iec_stopped_to_pcm")
             passthroughPacer.setIecPacked(false)
             armForwardAnchor(armedBy = "fallback", forceResync = true)
         }
