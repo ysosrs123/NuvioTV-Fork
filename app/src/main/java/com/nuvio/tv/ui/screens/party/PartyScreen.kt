@@ -210,10 +210,9 @@ private fun pageSubtitle(state: PartyState): String {
 @Composable
 private fun Overline(text: String) {
     Text(
-        text = text.uppercase(),
-        style = MaterialTheme.typography.labelMedium,
+        text = text,
+        style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.SemiBold,
-        letterSpacing = 2.sp,
         color = NuvioTheme.colors.Secondary,
     )
 }
@@ -285,7 +284,7 @@ private fun PartyStartStage(
             }
         ),
         style = MaterialTheme.typography.displaySmall,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.SemiBold,
         color = NuvioTheme.colors.TextPrimary,
     )
     Text(
@@ -419,9 +418,9 @@ private fun PartyKindPill(text: String, selected: Boolean, onClick: () -> Unit, 
             Text(text = text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, maxLines = 1)
             if (badge != null) {
                 Text(
-                    text = badge.uppercase(),
+                    text = badge,
                     style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     color = NuvioTheme.colors.Warning,
                     modifier = Modifier
                         .clip(RoundedCornerShape(NuvioTheme.radii.sm))

@@ -371,7 +371,8 @@ internal fun PartyPanelInviteList(state: PartyState, runtime: PartyRuntime) {
         Column(
             modifier = Modifier
                 .heightIn(max = 200.dp)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(vertical = NuvioTheme.spacing.sm),
             verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs),
         ) {
             shown.forEach { friend ->

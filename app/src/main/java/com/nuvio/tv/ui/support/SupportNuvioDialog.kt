@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalTvMaterial3Api::class, ExperimentalLayoutApi::class)
+@file:OptIn(ExperimentalTvMaterial3Api::class)
 
 package com.nuvio.tv.ui.support
 
@@ -9,8 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,16 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Forum
-import androidx.compose.material.icons.outlined.HowToVote
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.outlined.Wallpaper
-import androidx.compose.material.icons.outlined.WorkspacePremium
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,7 +31,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,7 +43,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
-import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.BuildConfig
@@ -144,7 +130,6 @@ private fun SupportInviteDialog(
             verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
         ) {
             SupportHeader(
-                icon = if (supporter) Icons.Filled.Check else Icons.Filled.Favorite,
                 title = stringResource(if (supporter) R.string.support_nuvio_thanks_title else R.string.support_nuvio_title),
                 subtitle = stringResource(if (supporter) R.string.support_nuvio_thanks_subtitle else R.string.support_nuvio_subtitle)
             )
@@ -163,22 +148,11 @@ private fun SupportInviteDialog(
                                 manageOnPatreon = state.manageOnPatreon
                             )
                         } else {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Info,
-                                    contentDescription = null,
-                                    tint = NuvioTheme.colors.Secondary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Text(
-                                    text = stringResource(R.string.support_nuvio_already_title),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = NuvioTheme.colors.TextPrimary
-                                )
-                            }
+                            Text(
+                                text = stringResource(R.string.support_nuvio_already_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = NuvioTheme.colors.TextPrimary
+                            )
                             Spacer(Modifier.height(NuvioTheme.spacing.xs))
                             Text(
                                 text = stringResource(R.string.support_nuvio_already_body),
@@ -258,8 +232,8 @@ private fun SupportGentleDialog(
         Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xl)) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.support_nuvio_gentle_eyebrow).uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
+                    text = stringResource(R.string.support_nuvio_gentle_eyebrow),
+                    style = MaterialTheme.typography.labelMedium,
                     color = NuvioTheme.colors.TextTertiary
                 )
                 Spacer(Modifier.height(NuvioTheme.spacing.xs))
@@ -275,10 +249,7 @@ private fun SupportGentleDialog(
                     color = NuvioTheme.colors.TextSecondary
                 )
                 Spacer(Modifier.height(NuvioTheme.spacing.md))
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
-                ) {
+                PerkList(
                     listOf(
                         R.string.support_nuvio_perk_themes,
                         R.string.support_nuvio_perk_backgrounds,
@@ -286,8 +257,8 @@ private fun SupportGentleDialog(
                         R.string.support_nuvio_perk_badge,
                         R.string.support_nuvio_perk_discord,
                         R.string.support_nuvio_perk_votes_chip
-                    ).forEach { label -> PerkChip(stringResource(label)) }
-                }
+                    )
+                )
             }
             Column(
                 modifier = Modifier.width(150.dp),
@@ -343,50 +314,31 @@ private fun SupportCheckingDialog(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun SupportHeader(icon: ImageVector, title: String, subtitle: String) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-        verticalAlignment = Alignment.Top
-    ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(RoundedCornerShape(if (isV2()) 14.dp else 10.dp))
-                .background(NuvioTheme.colors.Secondary),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = NuvioTheme.colors.OnSecondary,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = NuvioTheme.colors.TextPrimary,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary
-            )
-        }
+private fun SupportHeader(title: String, subtitle: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = NuvioTheme.colors.TextPrimary,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodyMedium,
+            color = NuvioTheme.colors.TextSecondary
+        )
     }
 }
 
-private data class Perk(val icon: ImageVector, val title: Int, val description: Int, val plusOnly: Boolean = false)
+private data class Perk(val title: Int, val description: Int, val plusOnly: Boolean = false)
 
 private val perks = listOf(
-    Perk(Icons.Outlined.Palette, R.string.support_nuvio_perk_themes, R.string.support_nuvio_perk_themes_desc),
-    Perk(Icons.Outlined.Wallpaper, R.string.support_nuvio_perk_backgrounds, R.string.support_nuvio_perk_backgrounds_desc),
-    Perk(Icons.Outlined.AccountCircle, R.string.support_nuvio_perk_avatars, R.string.support_nuvio_perk_avatars_desc),
-    Perk(Icons.Outlined.WorkspacePremium, R.string.support_nuvio_perk_badge, R.string.support_nuvio_perk_badge_desc),
-    Perk(Icons.Outlined.Forum, R.string.support_nuvio_perk_discord, R.string.support_nuvio_perk_discord_desc),
-    Perk(Icons.Outlined.HowToVote, R.string.support_nuvio_perk_votes, R.string.support_nuvio_perk_votes_desc, plusOnly = true)
+    Perk(R.string.support_nuvio_perk_themes, R.string.support_nuvio_perk_themes_desc),
+    Perk(R.string.support_nuvio_perk_backgrounds, R.string.support_nuvio_perk_backgrounds_desc),
+    Perk(R.string.support_nuvio_perk_avatars, R.string.support_nuvio_perk_avatars_desc),
+    Perk(R.string.support_nuvio_perk_badge, R.string.support_nuvio_perk_badge_desc),
+    Perk(R.string.support_nuvio_perk_discord, R.string.support_nuvio_perk_discord_desc),
+    Perk(R.string.support_nuvio_perk_votes, R.string.support_nuvio_perk_votes_desc, plusOnly = true)
 )
 
 @Composable
@@ -403,60 +355,57 @@ private fun PerkGrid(perksOn: Boolean, modifier: Modifier = Modifier) {
 @Composable
 private fun PerkCard(perk: Perk, on: Boolean, modifier: Modifier = Modifier) {
     SupportCard(modifier = modifier) {
-        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
-            Icon(
-                imageVector = perk.icon,
-                contentDescription = null,
-                tint = NuvioTheme.colors.Secondary,
-                modifier = Modifier.size(22.dp)
-            )
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(perk.title),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = NuvioTheme.colors.TextPrimary,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-                    val tag = when {
-                        on -> stringResource(R.string.support_nuvio_on_tag)
-                        perk.plusOnly -> stringResource(R.string.support_nuvio_plus_tag)
-                        else -> null
-                    }
-                    if (tag != null) {
-                        Spacer(Modifier.width(NuvioTheme.spacing.sm))
-                        Text(
-                            text = tag,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = if (on) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.TextSecondary,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .background(if (on) NuvioTheme.colors.Secondary else cardColor())
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        )
-                    }
-                }
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = stringResource(perk.description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextSecondary
+                    text = stringResource(perk.title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = NuvioTheme.colors.TextPrimary,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
+                val tag = when {
+                    on -> stringResource(R.string.support_nuvio_on_tag)
+                    perk.plusOnly -> stringResource(R.string.support_nuvio_plus_tag)
+                    else -> null
+                }
+                if (tag != null) {
+                    Spacer(Modifier.width(NuvioTheme.spacing.sm))
+                    Text(
+                        text = tag,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (on) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.TextSecondary,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(NuvioTheme.radii.full))
+                            .background(if (on) NuvioTheme.colors.Secondary else cardColor())
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
             }
+            Text(
+                text = stringResource(perk.description),
+                style = MaterialTheme.typography.bodySmall,
+                color = NuvioTheme.colors.TextSecondary
+            )
         }
     }
 }
 
 @Composable
-private fun PerkChip(label: String) {
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium,
-        color = NuvioTheme.colors.TextSecondary,
-        modifier = Modifier
-            .clip(RoundedCornerShape(if (isV2()) 50 else 6))
-            .background(cardColor())
-            .padding(horizontal = 10.dp, vertical = 5.dp)
-    )
+private fun PerkList(labels: List<Int>) {
+    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)) {
+        labels.chunked(2).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+                row.forEach { label ->
+                    Text(
+                        text = stringResource(label),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = NuvioTheme.colors.TextSecondary,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -555,7 +504,7 @@ private fun SupportDialogButton(
 ) {
     val v2 = isV2()
     var focused by remember { mutableStateOf(false) }
-    val shape = if (v2) RoundedCornerShape(12.dp) else RoundedCornerShape(50)
+    val shape = if (v2) RoundedCornerShape(12.dp) else RoundedCornerShape(NuvioTheme.radii.full)
     Button(
         onClick = onClick,
         enabled = enabled,

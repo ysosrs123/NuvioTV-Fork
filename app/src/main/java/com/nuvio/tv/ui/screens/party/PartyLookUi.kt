@@ -380,8 +380,8 @@ private fun LookPreview(name: String, avatar: String?, colour: String?, saved: B
         verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
     ) {
         Text(
-            text = stringResource(R.string.party_look_preview).uppercase(),
-            style = MaterialTheme.typography.labelSmall,
+            text = stringResource(R.string.party_look_preview),
+            style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
             color = NuvioTheme.colors.Secondary,
             modifier = Modifier.fillMaxWidth(),
@@ -390,7 +390,7 @@ private fun LookPreview(name: String, avatar: String?, colour: String?, saved: B
         Text(
             text = name,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             color = NuvioTheme.colors.TextPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
