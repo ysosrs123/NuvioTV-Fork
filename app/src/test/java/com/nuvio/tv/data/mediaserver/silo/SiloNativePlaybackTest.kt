@@ -399,6 +399,36 @@ class SiloNativePlaybackTest {
     }
 
     @Test
+    fun anAccountsOwnLimitIsAStreamLimit() = runTest {
+        listOf("stream_limit_reached", "transcode_limit_reached").forEach { reason ->
+            val (provider, _) = silo(
+                start = """{"protocol_version":3,"server_features":[],"outcome":"adaptation_unavailable",
+                    "terminal":{"reason":"$reason","message":"Limit reached.","retryable":true}}"""
+            )
+            try {
+                provider.preparePlayback(session(), request())
+                fail("expected a refusal")
+            } catch (error: ServerException) {
+                assertEquals(ServerFailure.STREAM_LIMIT, error.failure)
+                assertEquals(reason, error.code)
+            }
+        }
+    }
+
+    @Test
+    fun subtitlesNoRouteCanShowAreNotOffered() = runTest {
+        val start = decision().replace(
+            """{"track_id":"file:43:subtitle:2",""",
+            """{"track_id":"file:43:subtitle:3","combined_index":3,"source":"embedded","codec":"weird","language":"spa","label":"Spanish","forced":false,"default":false,"hearing_impaired":false,"delivery":"burn_in_only","unplayable":true},
+            {"track_id":"file:43:subtitle:4","combined_index":4,"source":"embedded","language":"jpn","label":"Japanese","forced":false,"default":false,"hearing_impaired":false,"delivery":"burn_in_only"},
+            {"track_id":"file:43:subtitle:2","""
+        )
+        val (provider, _) = silo(start = start)
+
+        assertEquals(listOf("German"), provider.preparePlayback(session(), request()).burnInSubtitles.map { it.label })
+    }
+
+    @Test
     fun playbackIsOffWhenSilosPlaybackIsNotSetUp() = runTest {
         val (provider, http) = silo { request ->
             if (request.url.encodedPath == "/api/v2/playback/capabilities") {
@@ -435,6 +465,45 @@ class SiloNativePlaybackTest {
         assertEquals(listOf("22.0", "32.5", "33.0"), bodies.map { it["position"]!!.jsonPrimitive.content })
         assertEquals("true", bodies[1]["is_paused"]!!.jsonPrimitive.content)
         assertTrue(bodies.last().containsKey("stop_id"))
+    }
+
+    @Test
+    fun aSessionEndedByAnAdministratorStopsTheReports() = runTest {
+        val (provider, http) = silo { request ->
+            if (request.url.encodedPath == "/api/v2/playback/s-1/progress") {
+                Reply(410, """{"type":"https://siloserver.org/docs/api/v2/problems/playback_session_ended","title":"x","status":410,"detail":"","instance":"i"}""")
+            } else null
+        }
+        val playback = provider.preparePlayback(session(), request())
+
+        provider.report(session(), playback, ServerPlaybackEvent(ServerPlaybackEventType.PROGRESS, 10_000L, false))
+        provider.report(session(), playback, ServerPlaybackEvent(ServerPlaybackEventType.PROGRESS, 20_000L, false))
+
+        assertEquals(1, http.requests.count { it.url.encodedPath == "/api/v2/playback/s-1/progress" })
+    }
+
+    @Test
+    fun markersAndChaptersNameThePlayedFile() = runTest {
+        val (provider, http) = silo()
+
+        provider.segments(session(), "movie-tmdb-603", "43")
+        provider.chapters(session(), "movie-tmdb-603", "43")
+
+        assertEquals(
+            listOf("43", "43"),
+            http.requests.filter { it.url.encodedPath == "/api/v2/watch/movie-tmdb-603" }.map { it.url.queryParameter("file_id") }
+        )
+    }
+
+    @Test
+    fun aServerThatRefusesTheFileParameterStillGivesMarkers() = runTest {
+        val (provider, _) = silo { request ->
+            if (request.url.encodedPath == "/api/v2/watch/movie-tmdb-603" && request.url.queryParameter("file_id") != null) {
+                Reply(422, """{"type":"https://siloserver.org/docs/api/v2/problems/validation_failed","title":"x","status":422,"detail":"","instance":"i"}""")
+            } else null
+        }
+
+        assertEquals(2, provider.segments(session(), "movie-tmdb-603", "43").size)
     }
 
     @Test

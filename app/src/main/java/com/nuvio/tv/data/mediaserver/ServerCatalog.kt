@@ -106,6 +106,7 @@ class ServerCatalog internal constructor(
     private val addonRepository: AddonRepository,
     private val artwork: ServerArtwork,
     private val kindName: (ServerMediaKind) -> String = { if (it == ServerMediaKind.SERIES) "Series" else "Movies" },
+    private val origins: ServerOrigins = ServerOrigins.inMemory(),
     private val sortName: (ServerSort) -> String = { if (it == ServerSort.TITLE) "A to Z" else "Newest release" }
 ) {
     @Inject
@@ -113,11 +114,13 @@ class ServerCatalog internal constructor(
         @ApplicationContext context: Context,
         repository: ServerRepository,
         addonRepository: AddonRepository,
-        artwork: ServerArtwork
+        artwork: ServerArtwork,
+        origins: ServerOrigins
     ) : this(
         repository = repository,
         addonRepository = addonRepository,
         artwork = artwork,
+        origins = origins,
         kindName = { kind ->
             context.getString(if (kind == ServerMediaKind.SERIES) R.string.type_series_plural else R.string.type_movies)
         },
@@ -566,9 +569,37 @@ class ServerCatalog internal constructor(
     }
 
     private suspend fun present(connection: ServerConnection, titles: List<ServerTitle>, posterPattern: String): List<MetaPreview> {
+        rememberOrigins(connection, titles)
         val items = withAddonArtwork(connection, titles.map(presenter(connection)))
-        if (posterPattern.isBlank()) return items
-        return titles.zip(items) { title, item -> title.withPosterPattern(item, posterPattern) }
+        val shown = if (posterPattern.isBlank()) items else titles.zip(items) { title, item -> title.withPosterPattern(item, posterPattern) }
+        logRowIds(connection, titles, shown)
+        return shown
+    }
+
+    private fun logRowIds(connection: ServerConnection, titles: List<ServerTitle>, shown: List<MetaPreview>) {
+        if (titles.isEmpty()) return
+        val withIds = titles.count { it.externalIds.catalogIds().isNotEmpty() }
+        val swapped = shown.count { !ServerItemRef.isServerId(it.id) }
+        Log.i(
+            TAG,
+            "ROW_IDS ${connection.providerId} metadata=${connection.useCatalogMetadata} items=${titles.size} " +
+                "withIds=$withIds swapped=$swapped first=${titles.first().preview.name}"
+        )
+    }
+
+    private fun rememberOrigins(connection: ServerConnection, titles: List<ServerTitle>) {
+        if (!connection.useCatalogMetadata) return
+        titles.groupBy { it.preview.apiType }.forEach { (type, sameType) ->
+            origins.remember(
+                connection.id,
+                type,
+                sameType.mapNotNull { title ->
+                    val ref = ServerItemRef.parse(title.preview.id) ?: return@mapNotNull null
+                    val ids = title.externalIds.catalogIds()
+                    if (ids.isEmpty()) null else ref.itemId to ids
+                }
+            )
+        }
     }
 
     private suspend fun withAddonArtwork(connection: ServerConnection, items: List<MetaPreview>): List<MetaPreview> =

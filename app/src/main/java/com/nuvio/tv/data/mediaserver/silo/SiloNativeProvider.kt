@@ -501,14 +501,32 @@ class SiloNativeProvider internal constructor(
 
     /** Silo's Home rows for the profile, without Continue Watching (Nuvio has its own) and rows with nothing to watch. */
     override suspend fun homeRows(session: ServerSession): List<ServerHomeRow> =
-        get(session.address, HOME_SECTIONS_PATH, HomeLayoutWire.serializer(), authHeaders(session), drawn("small"))
-            .sections
+        homeSections(session)
             .filter { it.id.isNotBlank() && it.sectionType != "continue_watching" }
             .mapNotNull { section ->
                 val kinds = section.items.mapNotNull { siloKind(it.type) ?: ServerMediaKind.SERIES.takeIf { _ -> it.isEpisodeOrSeason() } }
                 val kind = kinds.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: return@mapNotNull null
                 ServerHomeRow(section.id, section.title.ifBlank { section.id }, kind)
             }
+
+    /**
+     * The rows with a few cards each, enough to tell what a row holds. A row emptied by the smaller read (Silo leaves
+     * out cards other rows already show) would look like an empty row, so those ask again in full.
+     */
+    private suspend fun homeSections(session: ServerSession): List<HomeSectionWire> {
+        suspend fun read(limit: Int?) = get(
+            session.address,
+            HOME_SECTIONS_PATH,
+            HomeLayoutWire.serializer(),
+            authHeaders(session),
+            drawn("small") + mapOf("item_limit" to limit?.toString())
+        ).sections
+        val most = optional {
+            get(session.address, HOME_CAPABILITIES_PATH, HomeCapabilitiesWire.serializer(), authHeaders(session))
+        }?.sectionItemLimitMax?.takeIf { it > 0 } ?: return read(null)
+        val sections = read(minOf(HOME_ROW_KIND_CARDS, most))
+        return if (sections.any { it.items.isEmpty() && (it.totalCount ?: 0) > 0 }) read(null) else sections
+    }
 
     override suspend fun homeRowItems(session: ServerSession, rowId: String): List<ServerTitle> {
         val items = get(
@@ -704,7 +722,7 @@ class SiloNativeProvider internal constructor(
         val startedSession = decision.sessionId
         if (decision.outcome != "playable" || started == null || startedSession.isNullOrBlank() || started.stream.url.isBlank()) {
             if (installationIdChanged(decision)) installations.remove(cacheKey(session))
-            val failure = if (decision.terminal?.reason == CAPACITY_UNAVAILABLE) ServerFailure.STREAM_LIMIT else ServerFailure.UNSUPPORTED
+            val failure = if (decision.terminal?.reason in STREAM_LIMIT_REASONS) ServerFailure.STREAM_LIMIT else ServerFailure.UNSUPPORTED
             throw ServerException(failure, decision.terminal?.message, detail = decision.terminal?.message, code = decision.terminal?.reason)
         }
         val (sessionId, plan) = seekablePlan(session, body, startedSession, started)
@@ -744,7 +762,7 @@ class SiloNativeProvider internal constructor(
             audioTracks = version?.audioTracks.orEmpty().mapIndexed { index, track ->
                 ServerTrack(index, track.label(), track.language, selected = index == selectedAudio)
             },
-            burnInSubtitles = plan.subtitle.inventory.filter { it.delivery == "burn_in_only" }.map { entry ->
+            burnInSubtitles = plan.subtitle.inventory.filter { it.delivery == "burn_in_only" && !it.unplayable() }.map { entry ->
                 ServerTrack(entry.combinedIndex, entry.label ?: entry.language ?: entry.combinedIndex.toString(), entry.language, entry.combinedIndex == selectedSubtitle)
             },
             transcodeReasons = if (method == ServerPlayMethod.DIRECT_PLAY) {
@@ -809,7 +827,7 @@ class SiloNativeProvider internal constructor(
                 }
             }
         } catch (error: ServerException) {
-            if (error.failure != ServerFailure.NOT_FOUND) throw error
+            if (error.failure != ServerFailure.NOT_FOUND && error.httpStatus != SESSION_ENDED_STATUS) throw error
             playStates.remove(sessionId)
         }
     }
@@ -883,7 +901,7 @@ class SiloNativeProvider internal constructor(
     }
 
     override suspend fun segments(session: ServerSession, itemId: String, mediaSourceId: String?): List<ServerSegment> = try {
-        val versions = watchState(session, itemId).versions
+        val versions = watchStateOf(session, itemId, mediaSourceId).versions
         val version = versions.firstOrNull { it.fileId == mediaSourceId } ?: versions.firstOrNull()
         version?.markerSegments.orEmpty().mapNotNull { marker ->
             val kind = when (marker.kind.lowercase()) {
@@ -902,7 +920,7 @@ class SiloNativeProvider internal constructor(
     }
 
     override suspend fun chapters(session: ServerSession, itemId: String, mediaSourceId: String?): List<ServerChapter> = try {
-        val versions = watchState(session, itemId).versions
+        val versions = watchStateOf(session, itemId, mediaSourceId).versions
         val version = versions.firstOrNull { it.fileId == mediaSourceId } ?: versions.firstOrNull()
         version?.chapters.orEmpty().mapNotNull { chapter ->
             val start = chapter.startSeconds?.takeIf { it >= 0.0 } ?: return@mapNotNull null
@@ -936,6 +954,23 @@ class SiloNativeProvider internal constructor(
 
     private suspend fun watchState(session: ServerSession, itemId: String): WatchStateWire =
         get(session.address, "$WATCH_PATH/${pathSegment(itemId)}", WatchStateWire.serializer(), authHeaders(session) + deviceHeaders())
+
+    /** Silo fills on-demand markers only for the file it is told about; an old server may refuse the parameter. */
+    private suspend fun watchStateOf(session: ServerSession, itemId: String, fileId: String?): WatchStateWire {
+        if (fileId.isNullOrBlank()) return watchState(session, itemId)
+        return try {
+            get(
+                session.address,
+                "$WATCH_PATH/${pathSegment(itemId)}",
+                WatchStateWire.serializer(),
+                authHeaders(session) + deviceHeaders(),
+                mapOf("file_id" to fileId)
+            )
+        } catch (error: ServerException) {
+            if (error.httpStatus != 422) throw error
+            watchState(session, itemId)
+        }
+    }
 
     private suspend fun playbackCapabilities(session: ServerSession): PlaybackCapabilitiesWire {
         val key = cacheKey(session)
@@ -1210,6 +1245,8 @@ class SiloNativeProvider internal constructor(
         const val WATCHED_PATH = "/api/v2/watched"
         const val HOME_LAYOUT_PATH = "/api/v2/home/layout"
         const val HOME_SECTIONS_PATH = "/api/v2/home/sections"
+        const val HOME_CAPABILITIES_PATH = "/api/v2/home/capabilities"
+        const val HOME_ROW_KIND_CARDS = 20
         const val WATCH_PATH = "/api/v2/watch"
         const val PLAYBACK_PATH = "/api/v2/playback"
         const val PLAYBACK_START_PATH = "/api/v2/playback/start"
@@ -1235,8 +1272,9 @@ class SiloNativeProvider internal constructor(
         const val PROFILE_ID = "X-Profile-Id"
         const val PROFILE_TOKEN = "X-Profile-Token"
         const val PROFILE_VERIFICATION = "profile_verification_required"
-        const val CAPACITY_UNAVAILABLE = "capacity_unavailable"
+        val STREAM_LIMIT_REASONS = setOf("capacity_unavailable", "stream_limit_reached", "transcode_limit_reached")
         const val VALIDATION_FAILED = "validation_failed"
+        const val SESSION_ENDED_STATUS = 410
         const val DEVICE_NAME_MAX = 120
         const val UNWATCHED_GROUPS = "[{\"match\":\"all\",\"rules\":[{\"field\":\"watched\",\"op\":\"is\",\"value\":false}]}]"
         const val RENEW_BEFORE_MS = 60_000L

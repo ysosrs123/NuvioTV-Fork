@@ -58,9 +58,17 @@ class ServerStreams @Inject constructor(
             .filter { matcher.supports(it, request.kind) }
             .map { connection ->
                 source(connection, preferred = connection.useCatalogMetadata) {
-                    val refs = matcher.match(connection, request, forceRefresh)
-                    matchedItems = refs.size
-                    refs.flatMap { candidates(it) }
+                    suspend fun load(): List<Stream> {
+                        val refs = matcher.match(connection, request, forceRefresh)
+                        matchedItems = refs.size
+                        return refs.flatMap { candidates(it) }
+                    }
+                    try {
+                        load()
+                    } catch (error: ServerException) {
+                        if (error.serverFailure() != ServerFailure.NOT_FOUND || !matcher.forgetOrigin(connection, request)) throw error
+                        load()
+                    }
                 }
             }
     }
@@ -208,10 +216,10 @@ internal fun serverStreamDescription(
     serverName: String,
     versionName: String? = null
 ): String? {
-    val file = candidate.filename?.takeIf { it.isNotBlank() }?.let { "📄 $it" }
+    val file = candidate.filename?.takeIf { it.isNotBlank() }
     val media = listOfNotNull(
-        candidate.video?.takeIf { it.isNotBlank() }?.let { "🎥 $it" },
-        candidate.audio?.takeIf { it.isNotBlank() }?.let { "🔊 $it" }
+        candidate.video?.takeIf { it.isNotBlank() },
+        candidate.audio?.takeIf { it.isNotBlank() }
     ).joinToString(" | ").ifEmpty { null }
     val details = listOfNotNull(
         candidate.sizeBytes?.takeIf { it > 0 }?.let(::formatServerSize),
@@ -219,11 +227,11 @@ internal fun serverStreamDescription(
         candidate.container?.takeIf { it.isNotBlank() }
     )
     val source = listOfNotNull(
-        serverName.takeIf { it.isNotBlank() }?.let { "🔍 $it" },
+        serverName.takeIf { it.isNotBlank() },
         versionName?.takeIf { it.isNotBlank() }
     )
     val last = when {
-        details.isNotEmpty() -> "💾 " + (details + source).joinToString(" • ")
+        details.isNotEmpty() -> (details + source).joinToString(" • ")
         source.isNotEmpty() -> source.joinToString(" • ")
         else -> null
     }

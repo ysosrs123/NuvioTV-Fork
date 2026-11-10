@@ -63,6 +63,7 @@ class ServerMatcher internal constructor(
     private val repository: ServerRepository,
     private val tmdbService: TmdbService,
     private val metaRepository: MetaRepository,
+    private val origins: ServerOrigins = ServerOrigins.inMemory(),
     private val originalTitle: (tmdbId: Long, kind: ServerMediaKind) -> String? = { _, _ -> null }
 ) {
     @Inject
@@ -70,14 +71,16 @@ class ServerMatcher internal constructor(
         repository: ServerRepository,
         tmdbService: TmdbService,
         metaRepository: MetaRepository,
-        tmdbMetadata: TmdbMetadataService
+        tmdbMetadata: TmdbMetadataService,
+        origins: ServerOrigins
     ) : this(
         repository = repository,
         tmdbService = tmdbService,
         metaRepository = metaRepository,
         originalTitle = { tmdbId, kind ->
             tmdbMetadata.cachedOriginalTitle(tmdbId.toString(), ContentType.fromString(kind.contentType))
-        }
+        },
+        origins = origins
     )
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -135,9 +138,17 @@ class ServerMatcher internal constructor(
             ?.firstOrNull { it.season == season && it.episode == episode }
             ?.released
         if (itemIds.isEmpty()) Log.i(TAG, "MATCH ${connection.providerId}: no series found for ${request.describe()}")
+        val remembered = rememberedItemId(connection, request)
         return itemIds.mapNotNull { seriesId ->
-            val match = repository.call(connection.id) { provider, session ->
-                provider.findEpisode(session, seriesId, season, episode)
+            val match = try {
+                repository.call(connection.id) { provider, session ->
+                    provider.findEpisode(session, seriesId, season, episode)
+                }
+            } catch (error: ServerException) {
+                if (seriesId != remembered || error.serverFailure() != ServerFailure.NOT_FOUND) throw error
+                Log.i(TAG, "MATCH ${connection.providerId}: remembered series $seriesId is gone")
+                forgetOrigin(connection, request)
+                null
             }
             if (match == null) {
                 Log.i(TAG, "MATCH ${connection.providerId}: series $seriesId has no S${season}E$episode")
@@ -152,7 +163,25 @@ class ServerMatcher internal constructor(
         }
     }
 
+    fun forgetOrigin(connection: ServerConnection, request: MatchRequest): Boolean =
+        origins.forget(connection.id, request.kind.contentType, request.originIds())
+
+    /** A row's remembered item is added to the lookup, never in place of it: other copies and seasons still count. */
     private suspend fun titleItemIds(connection: ServerConnection, request: MatchRequest, forceRefresh: Boolean): List<String> {
+        val remembered = rememberedItemId(connection, request)
+        val found = try {
+            lookedUpItemIds(connection, request, forceRefresh)
+        } catch (error: ServerException) {
+            if (remembered == null) throw error
+            emptyList()
+        }
+        return (listOfNotNull(remembered) + found).distinct()
+    }
+
+    private fun rememberedItemId(connection: ServerConnection, request: MatchRequest): String? =
+        origins.itemId(connection.id, request.kind.contentType, request.originIds())
+
+    private suspend fun lookedUpItemIds(connection: ServerConnection, request: MatchRequest, forceRefresh: Boolean): List<String> {
         val ids = withConvertedIds(request)
         val libraries = connection.librariesHolding(request.kind)
         val original = ids.tmdb?.let { originalTitle(it, request.kind) }?.takeIf { it.isNotBlank() }
@@ -362,6 +391,8 @@ private fun MatchRequest.describe(): String = "${kind.contentType} ${ids.describ
 private fun ServerTitleQuery.describe(): String = "${ids.describe()} \"$name\" $year" + (originalName?.let { " (\"$it\")" } ?: "")
 
 private fun TrackingExternalIds.describe(): String = catalogIds().joinToString(",").ifEmpty { "no ids" }
+
+private fun MatchRequest.originIds(): List<String> = (listOf(parentId) + ids.catalogIds()).distinct()
 
 internal fun datesCompatible(catalogDate: String?, serverDate: String?): Boolean {
     val catalogDay = catalogDate?.epochDay() ?: return true

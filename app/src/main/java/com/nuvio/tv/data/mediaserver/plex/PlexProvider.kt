@@ -75,7 +75,11 @@ class PlexProvider internal constructor(
 
     internal val account = PlexAccountClient(http, identity, now)
     private val client = MediaBrowserClient(PlexAccountClient.TOKEN_HEADER, http, identity)
-    private val json = client.json
+    /** Plex's replies vary by field and version: a tag's id is a number in some and a string in others. */
+    private val json = kotlinx.serialization.json.Json(client.json) {
+        isLenient = true
+        coerceInputValues = true
+    }
     private val plays = ConcurrentHashMap<String, PlexPlay>()
     private val recentlyPlayed = ConcurrentHashMap<String, Long>()
     private val leaves = ConcurrentHashMap<String, Pair<Long, List<MetadataWire>>>()
@@ -676,7 +680,8 @@ class PlexProvider internal constructor(
 
     private fun <T> decodeOrNull(reply: DeserializationStrategy<T>, body: String): T? = try {
         json.decodeFromString(reply, body)
-    } catch (_: IllegalArgumentException) {
+    } catch (error: IllegalArgumentException) {
+        android.util.Log.w("PlexProvider", "Plex reply not readable: ${error.message?.substringBefore("JSON input")?.take(160)}")
         null
     }
 

@@ -34,7 +34,7 @@ internal class MediaBrowserMapper(
             type = kind.domainType(),
             rawType = kind.contentType,
             name = item.name.orEmpty(),
-            poster = item.primaryImage(),
+            poster = rowPoster(item.id, item.imageTags["Primary"]),
             posterShape = PosterShape.POSTER,
             background = item.backdropImage(),
             logo = item.logoImage(),
@@ -61,7 +61,7 @@ internal class MediaBrowserMapper(
             id = ref(seriesId),
             type = ContentType.SERIES,
             name = item.seriesName ?: item.name.orEmpty(),
-            poster = item.seriesPrimaryImageTag?.let { image(seriesId, "Primary", it, maxHeight = 600) },
+            poster = rowPoster(seriesId, item.seriesPrimaryImageTag),
             posterShape = PosterShape.POSTER,
             background = item.backdropImage(),
             logo = item.logoImage(),
@@ -170,6 +170,13 @@ internal class MediaBrowserMapper(
                 "quality" to "90"
             )
         )
+
+    /** Row art at the size Home draws it; a title's own page keeps the larger size. */
+    private fun rowPoster(itemId: String, tag: String?): String? {
+        tag ?: return null
+        val width = com.nuvio.tv.data.mediaserver.DrawnArtworkWidths.current?.poster
+        return if (width != null) image(itemId, "Primary", tag, maxWidth = width) else image(itemId, "Primary", tag, maxHeight = 600)
+    }
 
     private fun BaseItem.primaryImage(): String? =
         imageTags["Primary"]?.let { image(id, "Primary", it, maxHeight = 600) }

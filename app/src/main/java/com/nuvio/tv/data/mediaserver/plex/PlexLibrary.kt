@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.mediaserver.plex
 
 import com.nuvio.tv.core.tracking.TrackingExternalIds
+import com.nuvio.tv.data.mediaserver.DrawnArtworkWidths
 import com.nuvio.tv.data.mediaserver.ServerIndexEntry
 import com.nuvio.tv.data.mediaserver.ServerItemRef
 import com.nuvio.tv.data.mediaserver.ServerMediaKind
@@ -87,6 +88,7 @@ internal data class MetadataWire(
     @SerialName("leafCount") val leafCount: Int? = null,
     @SerialName("viewedLeafCount") val viewedLeafCount: Int? = null,
     @SerialName("librarySectionID") val librarySectionId: Long? = null,
+    val guid: String? = null,
     @SerialName("Guid") val guids: List<TagWire> = emptyList(),
     @SerialName("Genre") val genres: List<TagWire> = emptyList(),
     @SerialName("Country") val countries: List<TagWire> = emptyList(),
@@ -198,6 +200,17 @@ internal class PlexMapper(private val address: String, private val connectionId:
         return PlexArtworkLink.picture(address, connectionId, value, width, height)
     }
 
+    /** Row art at the size Home draws it; a title's own page keeps the larger sizes. */
+    private fun rowPoster(path: String?): String? {
+        val width = DrawnArtworkWidths.current?.poster ?: POSTER_WIDTH
+        return artwork(path, width, width * POSTER_HEIGHT / POSTER_WIDTH)
+    }
+
+    private fun rowLogo(path: String?): String? {
+        val width = DrawnArtworkWidths.current?.logo ?: LOGO_WIDTH
+        return artwork(path, width, width * LOGO_HEIGHT / LOGO_WIDTH)
+    }
+
     fun preview(item: MetadataWire): MetaPreview? {
         val kind = plexKind(item.type) ?: return null
         if (item.ratingKey.isBlank()) return null
@@ -206,10 +219,10 @@ internal class PlexMapper(private val address: String, private val connectionId:
             type = kind.domainType(),
             rawType = kind.contentType,
             name = item.title,
-            poster = artwork(item.thumb, POSTER_WIDTH, POSTER_HEIGHT),
+            poster = rowPoster(item.thumb),
             posterShape = PosterShape.POSTER,
             background = artwork(item.art, BACKDROP_WIDTH, BACKDROP_HEIGHT),
-            logo = artwork(item.logo(), LOGO_WIDTH, LOGO_HEIGHT),
+            logo = rowLogo(item.logo()),
             description = item.summary,
             releaseInfo = item.year?.toString(),
             imdbRating = item.audienceRating?.oneDecimal() ?: item.rating?.oneDecimal(),
@@ -293,7 +306,7 @@ internal class PlexMapper(private val address: String, private val connectionId:
             type = ContentType.SERIES,
             rawType = ServerMediaKind.SERIES.contentType,
             name = item.grandparentTitle ?: item.title,
-            poster = artwork(item.grandparentThumb ?: item.thumb, POSTER_WIDTH, POSTER_HEIGHT),
+            poster = rowPoster(item.grandparentThumb ?: item.thumb),
             posterShape = PosterShape.POSTER,
             background = artwork(item.grandparentArt ?: item.art, BACKDROP_WIDTH, BACKDROP_HEIGHT),
             logo = null,
@@ -324,17 +337,47 @@ internal class PlexMapper(private val address: String, private val connectionId:
     }
 }
 
-/** imdb://tt0133093, tmdb://603 and tvdb://121361 from the item's Guid list (Plex sends them with includeGuids=1). */
+/**
+ * imdb://tt0133093, tmdb://603 and tvdb://121361 from the item's Guid list (Plex sends them with includeGuids=1).
+ * Libraries on the older agents have no such list, only the guid field: com.plexapp.agents.imdb://tt0133093?lang=en,
+ * com.plexapp.agents.themoviedb://603, com.plexapp.agents.thetvdb://121361, or HAMA's anidb-23 / tvdb-81797 for anime.
+ */
 internal fun MetadataWire.externalIds(): TrackingExternalIds {
     fun id(scheme: String) = guids.firstNotNullOfOrNull { guid ->
         guid.id?.takeIf { it.startsWith("$scheme://", ignoreCase = true) }?.substringAfter("://")?.trim()?.takeIf { it.isNotEmpty() }
     }
-    return TrackingExternalIds(
+    val fromList = TrackingExternalIds(
         imdb = id("imdb")?.lowercase()?.takeIf { IMDB_ID.matches(it) },
         tmdb = id("tmdb")?.let { LEADING_DIGITS.find(it)?.value?.toLongOrNull() },
         tvdb = id("tvdb")?.let { LEADING_DIGITS.find(it)?.value }
     )
+    return fromList.mergeMissing(legacyGuidIds(guid))
 }
 
+internal fun legacyGuidIds(guid: String?): TrackingExternalIds {
+    val match = LEGACY_GUID.find(guid?.trim().orEmpty()) ?: return TrackingExternalIds()
+    val agent = match.groupValues[1].lowercase()
+    val value = match.groupValues[2]
+    fun digits(text: String) = LEADING_DIGITS.find(text)?.value
+    return when (agent) {
+        "imdb" -> TrackingExternalIds(imdb = value.lowercase().takeIf { IMDB_ID.matches(it) })
+        "themoviedb", "tmdb" -> TrackingExternalIds(tmdb = digits(value)?.toLongOrNull())
+        "thetvdb", "tvdb", "thetvdbdvdorder" -> TrackingExternalIds(tvdb = digits(value))
+        "hama" -> {
+            val source = value.substringBefore('-').lowercase()
+            val id = value.substringAfter('-', "")
+            when {
+                source == "anidb" || source == "anidb2" -> TrackingExternalIds(anidb = digits(id)?.toLongOrNull())
+                source.startsWith("tvdb") -> TrackingExternalIds(tvdb = digits(id))
+                source == "tmdb" -> TrackingExternalIds(tmdb = digits(id)?.toLongOrNull())
+                source == "imdb" -> TrackingExternalIds(imdb = id.lowercase().takeIf { IMDB_ID.matches(it) })
+                else -> TrackingExternalIds()
+            }
+        }
+        else -> TrackingExternalIds()
+    }
+}
+
+private val LEGACY_GUID = Regex("""^com\.plexapp\.agents\.([a-z0-9]+)://([^/?]+)""", RegexOption.IGNORE_CASE)
 private val IMDB_ID = Regex("""tt\d+""")
 private val LEADING_DIGITS = Regex("""^\d+""")

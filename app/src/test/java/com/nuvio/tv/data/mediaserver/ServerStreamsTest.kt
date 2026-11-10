@@ -45,9 +45,9 @@ class ServerStreamsTest {
         val text = serverStreamTexts(listOf(candidate()), "Jellyfin", "HomeServer").single()
         assertEquals("Jellyfin · 2160p", text.name)
         assertEquals(
-            "📄 $file\n" +
-                "🎥 HEVC • DV P7.6 (HDR10) | 🔊 TrueHD Atmos • 7.1\n" +
-                "💾 53.6 GB • 52 Mbps • MKV • 🔍 HomeServer",
+            "$file\n" +
+                "HEVC • DV P7.6 (HDR10) | TrueHD Atmos • 7.1\n" +
+                "53.6 GB • 52 Mbps • MKV • HomeServer",
             text.description
         )
     }
@@ -55,15 +55,15 @@ class ServerStreamsTest {
     @Test
     fun leavesOutWhatTheServerDoesNotSend() {
         assertEquals(
-            "🎥 HEVC • DV P7.6 (HDR10)\n💾 MKV • 🔍 HomeServer",
+            "HEVC • DV P7.6 (HDR10)\nMKV • HomeServer",
             serverStreamDescription(candidate(filename = null, audio = null, sizeBytes = null, bitrateBps = null), "HomeServer")
         )
         assertEquals(
-            "📄 $file\n🔊 TrueHD Atmos • 7.1\n💾 53.6 GB • 🔍 HomeServer",
+            "$file\nTrueHD Atmos • 7.1\n53.6 GB • HomeServer",
             serverStreamDescription(candidate(video = null, bitrateBps = null, container = null), "HomeServer")
         )
         assertEquals(
-            "🔍 HomeServer",
+            "HomeServer",
             serverStreamDescription(
                 candidate(filename = " ", video = null, audio = null, sizeBytes = 0L, bitrateBps = null, container = null),
                 "HomeServer"
@@ -98,9 +98,9 @@ class ServerStreamsTest {
             "HomeServer"
         )
         assertEquals(listOf("Jellyfin · 2160p", "Jellyfin · 2160p", "Jellyfin · 1080p"), texts.map { it.name })
-        assertEquals("💾 53.6 GB • 52 Mbps • MKV • 🔍 HomeServer • Theatrical Cut", texts[0].description!!.lines().last())
-        assertEquals("💾 53.6 GB • 52 Mbps • MKV • 🔍 HomeServer • Redux", texts[1].description!!.lines().last())
-        assertEquals("💾 53.6 GB • 52 Mbps • MKV • 🔍 HomeServer", texts[2].description!!.lines().last())
+        assertEquals("53.6 GB • 52 Mbps • MKV • HomeServer • Theatrical Cut", texts[0].description!!.lines().last())
+        assertEquals("53.6 GB • 52 Mbps • MKV • HomeServer • Redux", texts[1].description!!.lines().last())
+        assertEquals("53.6 GB • 52 Mbps • MKV • HomeServer", texts[2].description!!.lines().last())
     }
 
     @Test
@@ -141,8 +141,8 @@ class ServerStreamsTest {
             itemCandidates["m1"] = listOf(candidate())
         }
         val stream = streams(provider, fullSourceText = true).candidates(ServerItemRef("cfake", "m1")).single()
-        assertEquals("📄 $file", stream.description!!.lines().first())
-        assertEquals("💾 53.6 GB • 52 Mbps • MKV • 🔍 Box", stream.description!!.lines().last())
+        assertEquals("$file", stream.description!!.lines().first())
+        assertEquals("53.6 GB • 52 Mbps • MKV • Box", stream.description!!.lines().last())
     }
 
     @Test

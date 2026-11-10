@@ -36,7 +36,27 @@ class ServerSkipIntervalsTest {
             segment(ServerSegmentKind.OUTRO, 6_400_000L, 6_500_000L)
         ).toSkipIntervals(isMovie = true)
 
-        assertEquals(listOf(SkipInterval(6000.0, 6300.0, "movie-credits", "server")), intervals)
+        assertEquals(
+            listOf(
+                SkipInterval(6000.0, 6300.0, "movie-credits", "server"),
+                SkipInterval(6400.0, 6500.0, "movie-credits", "server")
+            ),
+            intervals
+        )
+    }
+
+    @Test
+    fun everyRangeOfAKindIsKeptAndRepeatsAreNot() {
+        val intervals = listOf(
+            segment(ServerSegmentKind.OUTRO, 2_400_000L, 2_460_000L),
+            segment(ServerSegmentKind.OUTRO, 2_600_000L, 2_640_000L),
+            segment(ServerSegmentKind.OUTRO, 2_600_000L, 2_640_000L)
+        ).toSkipIntervals(isMovie = false)
+
+        assertEquals(
+            listOf(SkipInterval(2400.0, 2460.0, "outro", "server"), SkipInterval(2600.0, 2640.0, "outro", "server")),
+            intervals
+        )
     }
 
     @Test

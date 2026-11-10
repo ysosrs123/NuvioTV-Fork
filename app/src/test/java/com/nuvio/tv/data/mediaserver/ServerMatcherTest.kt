@@ -517,4 +517,72 @@ class ServerMatcherTest {
         assertEquals(0, provider.indexRequests)
         verify(exactly = 0) { metaRepository.getMetaFromAllAddons(any(), any(), any()) }
     }
+
+    @Test
+    fun aTitleSeenInAServerRowKeepsThatItemEvenWhenTheLookupMissesIt() = runBlocking {
+        val (repository, connection) = fakeServerRepository(FakeServerProvider(), libraries = listOf(FakeServerProvider.MOVIE_LIBRARY))
+        val origins = ServerOrigins.inMemory()
+        origins.remember(connection.id, "movie", listOf("m9" to listOf("tt0000009")))
+        val matcher = ServerMatcher(repository, tmdbService, metaRepository, origins = origins)
+        val request = matcher.titleRequest("movie", "tt0000009")!!
+        assertEquals(listOf(ServerItemRef(connection.id, "m9")), matcher.matchTitle(connection, request))
+        assertTrue(matcher.forgetOrigin(connection, request))
+        assertFalse(matcher.forgetOrigin(connection, request))
+    }
+
+    @Test
+    fun aRememberedRowItemDoesNotHideOtherCopies() = runBlocking {
+        val provider = FakeServerProvider().apply {
+            indexedIds["42"] = TrackingExternalIds(imdb = "tt0000009")
+            indexedIds["43"] = TrackingExternalIds(imdb = "tt0000009")
+        }
+        val (repository, connection) = fakeServerRepository(provider, libraries = listOf(FakeServerProvider.MOVIE_LIBRARY))
+        val origins = ServerOrigins.inMemory()
+        origins.remember(connection.id, "movie", listOf("42" to listOf("tt0000009")))
+        val matcher = ServerMatcher(repository, tmdbService, metaRepository, origins = origins)
+        val request = matcher.request("movie", "tt0000009", null, null)!!
+
+        assertEquals(
+            listOf("42", "43").map { ServerItemRef(connection.id, it) },
+            matcher.match(connection, request, forceRefresh = false)
+        )
+    }
+
+    @Test
+    fun anotherSeasonItemStillMatchesAfterOneSeasonWasShownInARow() = runBlocking {
+        val provider = FakeServerProvider().apply {
+            indexedIds[FakeServerProvider.SHOW_ID] = TrackingExternalIds(kitsu = 77)
+            seriesEpisodes["season-1"] = mapOf((1 to 1) to ServerEpisode("s1e1", null))
+            seriesEpisodes[FakeServerProvider.SHOW_ID] = mapOf((2 to 1) to ServerEpisode("s2e1", null))
+        }
+        val (repository, connection) = fakeServerRepository(provider, libraries = listOf(FakeServerProvider.SERIES_LIBRARY))
+        val origins = ServerOrigins.inMemory()
+        origins.remember(connection.id, "series", listOf("season-1" to listOf("kitsu:77")))
+        val matcher = ServerMatcher(repository, tmdbService, metaRepository, origins = origins)
+
+        val second = matcher.request("series", "kitsu:77:2:1", 2, 1)!!
+        assertEquals(listOf(ServerItemRef(connection.id, "s2e1")), matcher.match(connection, second, forceRefresh = false))
+        val first = matcher.request("series", "kitsu:77:1:1", 1, 1)!!
+        assertEquals(listOf(ServerItemRef(connection.id, "s1e1")), matcher.match(connection, first, forceRefresh = false))
+    }
+
+    @Test
+    fun aRememberedSeriesThatIsGoneIsForgottenAndTheNewOneUsed() = runBlocking {
+        val provider = FakeServerProvider().apply {
+            indexedIds[FakeServerProvider.SHOW_ID] = TrackingExternalIds(tmdb = 100)
+            episodes[1 to 1] = ServerEpisode(FakeServerProvider.EPISODE_ID, null)
+            goneItems += "old-show"
+        }
+        val (repository, connection) = fakeServerRepository(provider, libraries = listOf(FakeServerProvider.SERIES_LIBRARY))
+        val origins = ServerOrigins.inMemory()
+        origins.remember(connection.id, "series", listOf("old-show" to listOf("tmdb:100")))
+        val matcher = ServerMatcher(repository, tmdbService, metaRepository, origins = origins)
+        val request = matcher.request("series", "tmdb:100:1:1", 1, 1)!!
+
+        assertEquals(
+            listOf(ServerItemRef(connection.id, FakeServerProvider.EPISODE_ID)),
+            matcher.match(connection, request, forceRefresh = false)
+        )
+        assertNull(origins.itemId(connection.id, "series", listOf("tmdb:100")))
+    }
 }

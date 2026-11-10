@@ -15,7 +15,7 @@ fun List<ServerSegment>.toSkipIntervals(isMovie: Boolean): List<SkipInterval> =
             }
             SkipInterval(segment.startMs / 1000.0, segment.endMs / 1000.0, type, provider = "server")
         }
-        .distinctBy { it.type }
+        .distinct()
 
 /** Server markers are timed against the file being played, so they win over every other provider per segment. */
 fun mergeServerSkipIntervals(server: List<SkipInterval>, others: List<SkipInterval>): List<SkipInterval> {

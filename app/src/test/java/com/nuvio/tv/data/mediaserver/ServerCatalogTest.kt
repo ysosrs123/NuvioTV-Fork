@@ -583,4 +583,22 @@ class ServerCatalogTest {
         resources = listOf(AddonResource(name = "meta", types = listOf("movie", "series"), idPrefixes = prefixes)),
         idPrefixes = prefixes
     )
+
+    @Test
+    fun aServerRowRemembersWhichItemEachCatalogIdCameFrom() = runTest {
+        val provider = FakeServerProvider().apply {
+            indexedIds["0"] = TrackingExternalIds(imdb = "tt0111161", tmdb = 278)
+        }
+        val (repository, connection) = fakeServerRepository(provider, libraries = listOf(FakeServerProvider.MOVIE_LIBRARY))
+        val origins = ServerOrigins.inMemory()
+        val catalog = ServerCatalog(repository, addonRepository, serverArtwork(FakeMetaRepository()), origins = origins)
+
+        catalog.page(connection, FakeServerProvider.MOVIE_LIBRARY.id, skip = 0)
+        assertEquals(null, origins.itemId(connection.id, "movie", listOf("tt0111161")))
+
+        repository.setCatalogMetadata(connection.id, true)
+        catalog.page(connection, FakeServerProvider.MOVIE_LIBRARY.id, skip = 0)
+        assertEquals("0", origins.itemId(connection.id, "movie", listOf("tt0111161")))
+        assertEquals("0", origins.itemId(connection.id, "movie", listOf("tmdb:278")))
+    }
 }

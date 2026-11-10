@@ -107,12 +107,13 @@ class SiloNativeBrowseTest {
         provider.libraryPage(session(), movies, 0, 1)
         provider.homeRows(session())
 
-        http.requests.forEach {
+        val reads = http.requests.filter { it.url.encodedPath != "/api/v2/home/capabilities" }
+        reads.forEach {
             assertEquals("254", it.url.queryParameter("poster_width"))
             assertEquals("2560", it.url.queryParameter("backdrop_width"))
             assertEquals("330", it.url.queryParameter("logo_width"))
         }
-        assertEquals(listOf("medium", "small"), http.requests.map { it.url.queryParameter("image_size") })
+        assertEquals(listOf("medium", "small"), reads.map { it.url.queryParameter("image_size") })
     }
 
     @Test
@@ -318,6 +319,69 @@ class SiloNativeBrowseTest {
         assertEquals(1_200_500L, entries.first().state.positionMs)
 
         assertEquals(listOf("The Matrix"), provider.resumeItems(session(listOf(movies)), 20).map { it.title.preview.name })
+    }
+
+    @Test
+    fun theRowListAsksForAFewCardsWhenTheServerAllowsIt() = runTest {
+        val rows = """{"sections":[{"id":"new","section_type":"recently_added","title":"New","total_count":100,"items":[${card("movie-tmdb-603", "The Matrix")}]}]}"""
+        val (provider, http) = silo { request ->
+            when (request.url.encodedPath) {
+                "/api/v2/home/capabilities" -> Reply(200, """{"section_item_limit_max":100}""")
+                "/api/v2/home/sections" -> Reply(200, rows)
+                else -> null
+            }
+        }
+
+        assertEquals(listOf("new"), provider.homeRows(session()).map { it.id })
+        assertEquals(listOf("20"), http.requests.filter { it.url.encodedPath == "/api/v2/home/sections" }.map { it.url.queryParameter("item_limit") })
+    }
+
+    @Test
+    fun aServerThatDoesNotOfferTheLimitIsNotSentIt() = runTest {
+        val (provider, http) = silo { request ->
+            if (request.url.encodedPath == "/api/v2/home/sections") Reply(200, """{"sections":[]}""") else null
+        }
+
+        provider.homeRows(session())
+
+        assertNull(http.requests.single { it.url.encodedPath == "/api/v2/home/sections" }.url.queryParameter("item_limit"))
+    }
+
+    @Test
+    fun aRowEmptiedByTheSmallerReadIsReadAgainInFull() = runTest {
+        val full = """{"sections":[{"id":"new","section_type":"recently_added","title":"New","total_count":40,"items":[${card("movie-tmdb-603", "The Matrix")}]}]}"""
+        val cut = """{"sections":[{"id":"new","section_type":"recently_added","title":"New","total_count":40,"items":[]}]}"""
+        val (provider, http) = silo { request ->
+            when (request.url.encodedPath) {
+                "/api/v2/home/capabilities" -> Reply(200, """{"section_item_limit_max":100}""")
+                "/api/v2/home/sections" -> Reply(200, if (request.url.queryParameter("item_limit") != null) cut else full)
+                else -> null
+            }
+        }
+
+        assertEquals(listOf("new"), provider.homeRows(session()).map { it.id })
+        assertEquals(2, http.requests.count { it.url.encodedPath == "/api/v2/home/sections" })
+    }
+
+    @Test
+    fun episodeCardsShowTheSeriesPicturesWhenSiloSendsThem() = runTest {
+        val episode = card(
+            "episode-tvdb-121361-1-3",
+            "Lord Snow",
+            type = "episode",
+            extra = ",\"series_id\":\"series-tvdb-121361\",\"series_title\":\"Game of Thrones\"," +
+                "\"backdrop_url\":\"/still.webp\",\"series_poster_url\":\"/series-poster.webp\",\"series_backdrop_url\":\"/series-backdrop.webp\""
+        )
+        val (provider, _) = silo { request ->
+            if (request.url.encodedPath == "/api/v2/home/sections/next/items") {
+                Reply(200, """{"id":"next","section_type":"next_up","title":"Next Up","items":[$episode]}""")
+            } else null
+        }
+
+        val preview = provider.homeRowItems(session(), "next").single().preview
+
+        assertTrue(preview.poster!!.contains("/series-poster.webp"))
+        assertTrue(preview.background!!.contains("/series-backdrop.webp"))
     }
 
     @Test

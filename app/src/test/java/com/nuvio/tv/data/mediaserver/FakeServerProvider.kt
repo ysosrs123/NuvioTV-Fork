@@ -29,6 +29,8 @@ internal class FakeServerProvider(
 
     val indexedIds = mutableMapOf<String, TrackingExternalIds>()
     val episodes = mutableMapOf<Pair<Int, Int>, ServerEpisode>()
+    val seriesEpisodes = mutableMapOf<String, Map<Pair<Int, Int>, ServerEpisode>>()
+    val goneItems = mutableSetOf<String>()
     val reported = mutableListOf<ServerPlaybackEventType>()
     val reportedPositions = mutableListOf<Long>()
     val playbackRequests = mutableListOf<ServerPlaybackRequest>()
@@ -71,7 +73,8 @@ internal class FakeServerProvider(
     val libraryRequests = mutableListOf<LibraryRequest>()
     val genres = mutableMapOf<String, List<ServerGenre>>()
     var failingGenres = false
-    @Volatile var genreReads = 0
+    private val genreReadCount = java.util.concurrent.atomic.AtomicInteger()
+    val genreReads: Int get() = genreReadCount.get()
 
     var listed: ServerAddresses? = null
     var listedRequests = 0
@@ -109,7 +112,7 @@ internal class FakeServerProvider(
     }
 
     override suspend fun libraryGenres(session: ServerSession, library: ServerLibrary): List<ServerGenre> {
-        genreReads++
+        genreReadCount.incrementAndGet()
         if (failingGenres) throw ServerException(ServerFailure.UNREACHABLE)
         return genres[library.id].orEmpty()
     }
@@ -327,8 +330,11 @@ internal class FakeServerProvider(
         return lookup(library, query)
     }
 
-    override suspend fun findEpisode(session: ServerSession, seriesItemId: String, season: Int, episode: Int): ServerEpisode? =
-        episodes[season to episode]
+    override suspend fun findEpisode(session: ServerSession, seriesItemId: String, season: Int, episode: Int): ServerEpisode? {
+        if (seriesItemId in goneItems) throw ServerException(ServerFailure.NOT_FOUND)
+        seriesEpisodes[seriesItemId]?.let { return it[season to episode] }
+        return episodes[season to episode]
+    }
 
     override fun authHeaders(session: ServerSession): Map<String, String> = mapOf("X-Test-Token" to session.token)
 

@@ -81,6 +81,18 @@ class PlexProviderTest {
         "Chapter":[{"tag":"Opening","startTimeOffset":0},{"startTimeOffset":600000}]}"""
 
     @Test
+    fun aRealServersTagsWithNumberIdsStillGiveTheTitleItsSources() = runTest {
+        val real = movie
+            .replace("\"Genre\":[{\"tag\":\"Science Fiction\"}]", "\"Genre\":[{\"id\":88,\"filter\":\"genre=88\",\"tag\":\"Science Fiction\"}],\"Director\":[{\"id\":12,\"filter\":\"director=12\",\"tag\":\"Lana\"}],\"Country\":[{\"id\":3,\"tag\":\"USA\"}]")
+        val (provider, _) = plex { request ->
+            if (request.url.encodedPath == "/library/metadata/101") Reply(200, container("\"Metadata\":[$real]")) else null
+        }
+
+        assertEquals("21", provider.candidates(session(), "101").single().target.mediaSourceId)
+        assertEquals(listOf("Lana"), provider.details(session(), "101").meta.director)
+    }
+
+    @Test
     fun theLinkCodeIsShortAndA404MeansStillWaitingUntilTheCodeRunsOut() = runTest {
         var checks = 0
         val (provider, http) = plex { request ->

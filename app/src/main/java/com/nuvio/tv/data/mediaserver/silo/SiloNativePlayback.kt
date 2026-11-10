@@ -159,8 +159,12 @@ internal data class SubtitleEntryWire(
     val label: String? = null,
     val forced: Boolean = false,
     val delivery: String = "",
-    val url: String? = null
-)
+    val url: String? = null,
+    val unplayable: Boolean = false
+) {
+    /** Older servers don't send the flag; an embedded track they can't name has no route either. */
+    fun unplayable(): Boolean = unplayable || (source == "embedded" && codec.isNullOrBlank())
+}
 
 @Serializable
 internal data class QualityWire(val label: String = "")

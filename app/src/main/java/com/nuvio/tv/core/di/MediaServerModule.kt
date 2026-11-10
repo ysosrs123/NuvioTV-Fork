@@ -5,8 +5,11 @@ import com.nuvio.tv.core.network.IPv4FirstDns
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
+import android.net.NetworkCapabilities
 import android.os.Build
 import com.nuvio.tv.core.network.NoDelaySocketFactory
+import com.nuvio.tv.core.report.PlaybackRecorder
+import com.nuvio.tv.data.repository.networkKindForRecorder
 import java.net.InetAddress
 import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.R
@@ -120,6 +123,17 @@ object MediaServerModule {
                     val previous = current
                     current = network
                     if (previous != null && previous != network) repository.onNetworkChanged()
+                }
+
+                override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
+                    PlaybackRecorder.noteNetwork(
+                        kind = networkKindForRecorder(capabilities),
+                        validated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                    )
+                }
+
+                override fun onLost(network: Network) {
+                    PlaybackRecorder.noteNetwork(kind = "none", validated = false)
                 }
             })
         }

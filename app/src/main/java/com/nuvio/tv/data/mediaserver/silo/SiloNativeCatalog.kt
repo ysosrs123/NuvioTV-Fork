@@ -59,6 +59,8 @@ internal data class CatalogItemWire(
     @SerialName("backdrop_url") val backdropUrl: String? = null,
     @SerialName("logo_url") val logoUrl: String? = null,
     @SerialName("thumb_url") val thumbUrl: String? = null,
+    @SerialName("series_poster_url") val seriesPosterUrl: String? = null,
+    @SerialName("series_backdrop_url") val seriesBackdropUrl: String? = null,
     val genres: List<String> = emptyList(),
     val countries: List<String> = emptyList(),
     @SerialName("user_state") val userState: UserStateWire? = null,
@@ -129,8 +131,12 @@ internal data class HomeSectionWire(
     val id: String = "",
     @SerialName("section_type") val sectionType: String = "",
     val title: String = "",
-    val items: List<CatalogItemWire> = emptyList()
+    val items: List<CatalogItemWire> = emptyList(),
+    @SerialName("total_count") val totalCount: Int? = null
 )
+
+@Serializable
+internal data class HomeCapabilitiesWire(@SerialName("section_item_limit_max") val sectionItemLimitMax: Int? = null)
 
 /** Turns Silo's catalog answers into the app's titles, with links to [address]'s artwork. */
 internal class SiloNativeMapper(address: String, private val connectionId: String) {
@@ -261,9 +267,9 @@ internal class SiloNativeMapper(address: String, private val connectionId: Strin
             id = ref(seriesId),
             type = ContentType.SERIES,
             name = item.seriesTitle ?: item.title,
-            poster = artwork(item.posterUrl, seriesId, SiloArtworkKind.POSTER),
+            poster = artwork(item.seriesPosterUrl ?: item.posterUrl, seriesId, SiloArtworkKind.POSTER),
             posterShape = PosterShape.POSTER,
-            background = artwork(item.backdropUrl, seriesId, SiloArtworkKind.BACKGROUND),
+            background = artwork(item.seriesBackdropUrl ?: item.backdropUrl, seriesId, SiloArtworkKind.BACKGROUND),
             logo = artwork(item.logoUrl, seriesId, SiloArtworkKind.LOGO),
             description = item.overview,
             releaseInfo = null,
