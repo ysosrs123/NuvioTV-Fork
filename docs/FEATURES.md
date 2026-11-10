@@ -243,6 +243,8 @@ The "Generating thumbnails" screen -- the thumbnails being made before play, the
 
 <img width="100%" alt="Media server rows on Home" src="https://github.com/user-attachments/assets/91100a10-6725-4770-ab40-43db44de17f3" />
 
+<img width="100%" alt="Plex, Jellyfin, Emby and Silo in Settings" src="readme/shots/media-servers.jpg" />
+
 
 **The Nuvio Arc look** -- the launcher icons and themes.
 
@@ -283,6 +285,36 @@ The "Generating thumbnails" screen -- the thumbnails being made before play, the
 **Audio passthrough** -- a switch for each format.
 
 <img width="100%" alt="Per-format audio passthrough switches" src="https://github.com/user-attachments/assets/85f3a839-11bb-45f6-9154-3d471efe2319" />
+
+
+**More filters in Scout** -- the Acclaim tab, with Oscar winners and other award lists.
+
+<img width="100%" alt="More filters, Acclaim tab" src="readme/shots/more-filters.jpg" />
+
+
+**Settings search** -- find any setting by its name or what it does.
+
+<img width="100%" alt="Settings search results" src="readme/shots/settings-search.jpg" />
+
+
+**Tracking** -- Trakt, Simkl, MDBList, Floppy and WeTrakr in one place.
+
+<img width="100%" alt="Tracking settings" src="readme/shots/tracking.jpg" />
+
+
+**Format check** -- the start page. A quick check takes about 5 minutes.
+
+<img width="100%" alt="Format check start page" src="readme/shots/format-check.jpg" />
+
+
+**Backup and restore** -- a file on the box, or a copy on your phone or computer.
+
+<img width="100%" alt="Backup and restore" src="readme/shots/backup.jpg" />
+
+
+**Report a problem** -- from Settings, with what you'd like to report.
+
+<img width="100%" alt="Report a problem in Settings" src="readme/shots/report-a-problem.jpg" />
 
 ---
 

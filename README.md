@@ -124,14 +124,14 @@ The details, more screenshots and what's been removed are on the **[full feature
 <table>
 <tr>
 <td width="50%"><img alt="Seek thumbnails" src="https://github.com/user-attachments/assets/7ad837f7-a18a-4f1a-993c-be474099ea9c" /><br><b>Seek thumbnails</b></td>
-<td width="50%"><img alt="Media servers on Home" src="https://github.com/user-attachments/assets/91100a10-6725-4770-ab40-43db44de17f3" /><br><b>Your own media server</b></td>
+<td width="50%"><img alt="Plex, Jellyfin, Emby and Silo" src="docs/readme/shots/media-servers.jpg" /><br><b>Your own media server</b></td>
 </tr>
 <tr>
 <td><img alt="Stats panel" src="https://github.com/user-attachments/assets/0107b69c-a463-43ad-9a5f-e3b8162abc07" /><br><b>Stats panel</b></td>
 <td><img alt="Calendar" src="docs/screenshots/nt5/02-calendar-list.jpg" /><br><b>Calendar</b></td>
 </tr>
 <tr>
-<td><img alt="Generating thumbnails" src="docs/screenshots/nt5/07-generating-screen.jpg" /><br><b>Thumbnails before the film</b></td>
+<td><img alt="Trakt, Simkl, MDBList, Floppy and WeTrakr" src="docs/readme/shots/tracking.jpg" /><br><b>All your trackers</b></td>
 <td><img alt="Remote buttons" src="docs/screenshots/nt5/05-remote-buttons.jpg" /><br><b>Remote buttons</b></td>
 </tr>
 </table>
