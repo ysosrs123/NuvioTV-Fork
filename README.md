@@ -1,328 +1,160 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/branding/nuvio-arc-logo-on-dark.png">
-    <img src=".github/branding/nuvio-arc-logo-on-light.png" alt="Nuvio Arc" width="440">
-  </picture>
+  <img src="docs/readme/banner.jpg" alt="Nuvio Arc: Scout, the stats panel, thumbnails and the Calendar" width="100%">
 </p>
 
-## About
+<p align="center">
+  <a href="https://github.com/ysosrs123/NuvioTV-Fork/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/ysosrs123/NuvioTV-Fork?include_prereleases&label=latest&style=flat-square"></a>
+  <a href="https://github.com/ysosrs123/NuvioTV-Fork/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/ysosrs123/NuvioTV-Fork/total?style=flat-square"></a>
+  <a href="./LICENSE"><img alt="Licence" src="https://img.shields.io/badge/licence-GPL--3.0-blue?style=flat-square"></a>
+  <a href="https://www.reddit.com/r/NuvioForks/"><img alt="r/NuvioForks" src="https://img.shields.io/badge/chat-r%2FNuvioForks-orange?style=flat-square"></a>
+</p>
 
-**Nuvio Arc** is my hobby fork of [NuvioTV](https://github.com/NuvioMedia/NuvioTV) -- an experimental build where I try
-out new ideas on top of the official app. It isn't a competitor to Nuvio and it isn't meant to replace it. Think of it
-as a test bench: some ideas work out, some don't, and the ones that are solid, well tested and good for everyone may
-end up suggested for the official app.
+<p align="center">
+  <a href="#install"><b>Install</b></a> &nbsp;·&nbsp;
+  <a href="#what-it-adds"><b>What it adds</b></a> &nbsp;·&nbsp;
+  <a href="#a-look-around"><b>A look around</b></a> &nbsp;·&nbsp;
+  <a href="#support-and-contact"><b>Support</b></a>
+</p>
 
-I also contribute to the official app myself. When a fix or feature here is thoroughly tested and fits what Nuvio is
-aiming for, I offer it upstream. Most of what's in Nuvio Arc stays here, because it's built for a narrower audience.
+**Nuvio Arc** is my hobby fork of [NuvioTV](https://github.com/NuvioMedia/NuvioTV) for Android TV: a test bench for new ideas, built around picture quality, lossless sound, your own libraries and finding something to watch. It isn't a competitor to Nuvio and isn't meant to replace it. It's for people who like Nuvio and are happy to try new, largely untested features. If you want the dependable everyday app, use the official Nuvio.
 
-**Who it's for.** The official Nuvio app is designed for everyone, on every kind of device. Nuvio Arc runs on the
-same boxes, from a Fire TV Stick up, and is for people who like Nuvio, want to stay in the Nuvio ecosystem, and are
-happy to try new and largely untested features. A lot of the work goes into speed and quality for high-bitrate 4K
-remuxes and lossless audio (100 GB+ remuxes, TrueHD / DTS-HD MA / Atmos / DTS:X passthrough, Dolby Vision), so it
-shines on stronger boxes, but everyday use on regular boxes works too.
+Nuvio Arc is a media player. It doesn't host, provide or link to any content. You add your own sources, and you're responsible for making sure you're allowed to play what you add.
 
-**Expect rough edges.** New features land here before they are proven, so things can break between releases. Some
-features (for example 4K thumbnails) do more work on the box and write to its storage, and the app tells you where a
-feature is heavy. If you want the dependable everyday app, use the official Nuvio.
+## Install
 
-## Support, issues and contact
+It installs next to the official Nuvio, and tells you when a new release is out.
 
-Nuvio Arc is a one-person project, so there's no Discord and no support team. You're welcome to:
+| Your box | [Downloader](https://www.aftvnews.com/downloader/) code | Direct download |
+|---|:--:|---|
+| **32-bit:** Fire TV Stick, Chromecast with Google TV, Xiaomi, Onn and many other Google TV boxes | **`2764920`** | [32-bit APK](https://github.com/ysosrs123/NuvioTV-Fork/releases/latest/download/app-full-armeabi-v7a-release.apk) |
+| **64-bit:** Nvidia Shield, Ugoos | **`4993875`** | [64-bit APK](https://github.com/ysosrs123/NuvioTV-Fork/releases/latest/download/app-full-arm64-v8a-release.apk) |
 
-- **Report a bug or suggest an idea** in this repo's [Issues](https://github.com/ysosrs123/NuvioTV-Fork/issues). I read
-  them when I can, but it's a hobby, so no promises on replies or fixes. Please include your box, the Nuvio Arc version
-  (Settings > About) and what you were playing.
-- **Chat with other users** at [r/NuvioForks](https://www.reddit.com/r/NuvioForks/).
+1. Install **Downloader** by AFTVnews from your box's app store.
+2. Allow it to install unknown apps in your box's settings.
+3. Open Downloader, type the code and press Go.
+4. Press Install when the download finishes.
 
-Nuvio Arc is not affiliated with or endorsed by the NuvioTV project. **Please don't report problems from this build to
-the official Nuvio GitHub or the official Nuvio Discord** -- they can't help with changes they didn't make, and it
-takes their time away from the official app.
+Not sure which one? Many boxes run a 32-bit system even with a 64-bit chip. Try 64-bit first. If it says the app isn't compatible, use 32-bit.
+
+## What it adds
+
+<img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"> Only in Arc
+
+<p><img src="docs/readme/head-scout.svg" width="100%" alt="Scout: your personal film curator"></p>
+
+Meet Scout, your personal film curator. It's on for everyone and doesn't need an external add-on. Scout is experimental for now, so you may run into some bugs or slow spots. It's being actively developed, and its picks get better over time as it learns what you like.
+
+<table>
+<tr><td width="33%" valign="top"><img src="docs/readme/scout-ask-answer.jpg" alt="Just ask for it"><br><b>Just ask for it</b><br><sub>"Films like Inception, but without the dreaming"</sub></td><td width="33%" valign="top"><img src="docs/readme/scout-picks-two.jpg" alt="What should we watch tonight?"><br><b>What should we watch tonight?</b><br><sub>Picks that suit everyone on the couch, and why</sub></td><td width="33%" valign="top"><img src="docs/readme/scout-your-taste.jpg" alt="It gets to know you"><br><b>It gets to know you</b><br><sub>See what it has learned about what you like</sub></td></tr>
+<tr><td width="33%" valign="top"><img src="docs/readme/scout-tiles.jpg" alt="Something to watch, right on Home"><br><b>Something to watch, right on Home</b><br><sub>New picks on Home each day</sub></td><td width="33%" valign="top"><img src="docs/readme/scout-mix-page.jpg" alt="Can't decide? Mix it up"><br><b>Can't decide? Mix it up</b><br><sub>Random episodes from the shows you choose</sub></td><td width="33%" valign="top"><img src="docs/readme/scout-rate.jpg" alt="Tell it what you think"><br><b>Tell it what you think</b><br><sub>Love it, like it or not for me, and your picks follow</sub></td></tr>
+</table>
+
+<table>
+<tr><td width="50%" valign="top"><b>Picks that know you, made on your box</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Scout learns from what you really do on each profile: what you finish, rewatch, stop early and rate. Your history stays on the box, and picks need no account, key or external add-on.</td><td width="50%" valign="top"><b>It tells you why</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Each pick comes with a plain reason, like "Because you love Villeneuve and slow sci-fi".</td></tr>
+<tr><td width="50%" valign="top"><b>All your tastes, not an average</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Slow sci-fi and comfort sitcoms get their own named rows, not one blended row.</td><td width="50%" valign="top"><b>A few presses with the remote</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Rest on a mood and the page changes. Set how long you've got and who's in the room, with no typing. Add everyone on the couch and the picks must suit you all.</td></tr>
+<tr><td width="50%" valign="top"><b>Ask for anything, with your own AI key</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Speak into the remote, type or use your phone, in any language: "films like Inception, but without the dreaming". You get normal title cards, each with a reason, and an answer opens like a title page.</td><td width="50%" valign="top"><b>Your key, your choice</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Gemini, Groq, OpenAI, Claude or any service with the OpenAI format. Paste it on your phone; it stays encrypted on the box. You see what gets sent before anything goes.</td></tr>
+<tr><td width="50%" valign="top"><b>AI that can't make titles up</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>It only reorders real titles Scout has already found, so every pick exists. Read and edit your taste summary, like "no jump scares".</td><td width="50%" valign="top"><b>A sentence becomes a Home row</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Save any answer as a row. It refreshes itself about once a week with your key and moves like any other row.</td></tr>
+</table>
+
+<p><img src="docs/readme/head-scout-more.svg" width="100%" alt="More from Scout"></p>
+
+<table>
+<tr><td colspan="1" valign="top"><b>More filters</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Browse by mood, decade, country, region, language, length, theme and acclaim.</td><td colspan="1" valign="top"><b>Mixes</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Random episodes across several shows you pick, with their own artwork on Home. Remix, Unwatched only and Keep playing are one press away.</td><td colspan="1" valign="top"><b>Love it, like it, not for me</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Rate titles in one press and your picks follow. One switch turns it all off.</td></tr>
+<tr><td colspan="1" valign="top"><b>Your taste</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>One plain sentence about what you watch, and the titles behind it. Stays on your box.</td><td colspan="1" valign="top"><b>Complete series and Family night</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Only shows that have ended, or PG and under with no horror, no kids profile needed.</td><td colspan="1" valign="top"><b>Save as a Home row</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Keep any set of picks as a row that keeps finding new titles.</td></tr>
+<tr><td colspan="1" valign="top"><b>New for you and Trending for you</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>What's just out and what's big this week, sorted by your taste, not by popularity.</td><td colspan="1" valign="top"><b>Refine with one press</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Less violent, Older, Newer or Something lighter on any Ask answer.</td><td colspan="1" valign="top"><b>Pick five to get started</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>A new profile chooses five posters it loves, and Scout has something to work with straight away.</td></tr>
+</table>
+
+<p><img src="docs/readme/head-picture.svg" width="100%" alt="Picture and sound"></p>
+
+<table>
+<tr><td colspan="1" valign="top"><b>Own surround engine</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Packs TrueHD, DTS-HD MA and DTS:X for HDMI itself, and recovers after input switches.</td><td colspan="1" valign="top"><b>Auto surround</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Picks passthrough formats from what your TV and receiver report, or set each yourself.</td><td colspan="1" valign="top"><b>Soundbar on your TV</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Arc on a TV with a soundbar on ARC: formats it can't take become Dolby Digital 5.1, and DTS-HD can go through the TV.</td></tr>
+<tr><td colspan="1" valign="top"><b>Surround kept when decoding</b><br>Formats your gear refuses decode to 5.1 or AC-3 instead of stereo, and DTS-HD that keeps failing is decoded rather than left silent.</td><td colspan="1" valign="top"><b>Night mode and Dialogue boost</b><br>Night mode on a remote button, Strong also lowers the loudest moments, and speech goes up to +12 dB.</td><td colspan="1" valign="top"><b>Dolby Vision Auto</b><br>Converts Profile 7 whenever the screen does Dolby Vision, even if the box doesn't list a Profile 8 decoder.</td></tr>
+<tr><td colspan="1" valign="top"><b>Native Dolby Vision FEL</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Full Profile 7 dual layer on a Ugoos AM9 Pro with a test kernel (not available yet).</td><td colspan="1" valign="top"><b>Precise frame rates</b><br>On TVs with QMS, picks a rate the TV can switch to without the black screen.</td><td colspan="1" valign="top"><b>Old formats</b><br>Big AVI files and XviD, DivX and VC-1 fixes; WMV and 10-bit H.264 open in MPV by themselves.</td></tr>
+</table>
+
+<p><img src="docs/readme/head-watching.svg" width="100%" alt="While you watch"></p>
+
+<table>
+<tr><td colspan="1" valign="top"><b>Seek thumbnails</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Hold left or right for a picture strip, even on a 4K Dolby Vision remux. On ExoPlayer.</td><td colspan="1" valign="top"><b>Thumbnails before the film</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Have them ready before it starts, with a choice of Full, Faster or Fastest wait.</td><td colspan="1" valign="top"><b>Thumbnails from a copy</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Makes 4K thumbnails from a lighter copy in your sources, on the hardware decoder.</td></tr>
+<tr><td colspan="1" valign="top"><b>Your server's own thumbnails</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>When Jellyfin, Emby, Silo or Plex has already made thumbnails, the player uses those.</td><td colspan="1" valign="top"><b>Seeking your way</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Gentle, Balanced, Fast or Confirm with OK.</td><td colspan="1" valign="top"><b>Remote buttons</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Give any button a press job and a hold job in the player.</td></tr>
+<tr><td colspan="1" valign="top"><b>Player button editor</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Show, hide and move the player's buttons, with icons or labels.</td><td colspan="1" valign="top"><b>Chapters from more files</b><br>MP4 and media-server chapters too, recaps left out, with a remote button.</td><td colspan="1" valign="top"><b>Subtitle look</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Choice of fonts, outline size and a separate shadow, on both players.</td></tr>
+<tr><td colspan="1" valign="top"><b>Subtitle languages</b><br>A third preferred language, and the panel opens language first.</td><td colspan="1" valign="top"><b>Image subtitle size</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Picture subtitles (PGS, VobSub) get their own size.</td><td colspan="1" valign="top"><b>Stats panel</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>The audio path, Dolby Vision layers, connections, requests and server replies, as your film plays.</td></tr>
+<tr><td colspan="3" valign="top"><b>IMDb trailers</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Choose IMDb as the trailer source: looked up by IMDb id, up to 4K.</td></tr>
+</table>
+
+<p><img src="docs/readme/head-libraries.svg" width="100%" alt="Your libraries and accounts"></p>
+
+<table><tr><td align="center"><img src="docs/readme/logos/plex_logo.svg" height="30" alt="Plex"><br><sub>Plex</sub></td><td align="center"><img src="docs/readme/logos/jellyfin_logo.png" height="30" alt="Jellyfin"><br><sub>Jellyfin</sub></td><td align="center"><img src="docs/readme/logos/emby_logo.svg" height="30" alt="Emby"><br><sub>Emby</sub></td><td align="center"><img src="docs/readme/logos/silo_logo.png" height="30" alt="Silo"><br><sub>Silo</sub></td><td align="center"><img src="docs/readme/logos/wetrakr_icon.svg" height="30" alt="WeTrakr"><br><sub>WeTrakr</sub></td><td align="center"><img src="docs/readme/logos/floppy_logo.png" height="30" alt="Floppy"><br><sub>Floppy</sub></td><td align="center"><img src="docs/readme/logos/trakt_tv_favicon.svg" height="30" alt="Trakt"><br><sub>Trakt</sub></td><td align="center"><img src="docs/readme/logos/simkl_tv_glyph.svg" height="30" alt="Simkl"><br><sub>Simkl</sub></td><td align="center"><img src="docs/readme/logos/mdblist_glyph.svg" height="30" alt="MDBList"><br><sub>MDBList</sub></td></tr></table>
+
+<table>
+<tr><td colspan="1" valign="top"><b>Plex</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Sign in with a code; libraries on Home, in Search and as sources.</td><td colspan="1" valign="top"><b>Silo</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Own sign-in, profile picker and your Silo Home rows.</td><td colspan="1" valign="top"><b>Jellyfin and Emby extras</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Second addresses, your own server names, Quick Connect, and skip intro from the server's own markers.</td></tr>
+<tr><td colspan="1" valign="top"><b>Your own server's certificate</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>A self-signed home server can be trusted once, with its details shown first.</td><td colspan="1" valign="top"><b>Server sign-ins stay here</b><br>They stay on the box unless you switch on account sync.</td><td colspan="1" valign="top"><b>Big library browsing</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Genres, A to Z, letter jump, Unwatched and Folders from genres.</td></tr>
+<tr><td colspan="1" valign="top"><b>All debrid at once</b><br>Real-Debrid, AllDebrid, TorBox and Premiumize together; uncached picks move to the next.</td><td colspan="1" valign="top"><b>WeTrakr and Floppy</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Two more trackers, next to Trakt, Simkl and MDBList. Mark as unwatched reaches Floppy too.</td><td colspan="1" valign="top"><b>Tracker lists on Home</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Any list from WeTrakr, Trakt, MDBList or Simkl as its own row, films and shows together.</td></tr>
+<tr><td colspan="2" valign="top"><b>Transfer library</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Copy or move your library between services, with a preview first.</td><td colspan="1" valign="top"><b>Best quality picks</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>TRaSH Guides release tiers decide what auto-play picks and what sorts first.</td></tr>
+</table>
+
+<p><img src="docs/readme/head-playing.svg" width="100%" alt="Getting the film playing"></p>
+
+<table>
+<tr><td colspan="1" valign="top"><b>Automatic speed-up</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Adds downloads when a film needs them and remembers each server.</td><td colspan="1" valign="top"><b>Dead links skipped</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>A dead link moves on to the next ready source.</td><td colspan="1" valign="top"><b>Search before Play</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Finds and ranks sources while you browse, so Play starts sooner. Off to start.</td></tr>
+<tr><td colspan="1" valign="top"><b>Buffers sized to your box</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>One Buffer ahead setting, sized from your memory, with honest numbers.</td><td colspan="1" valign="top"><b>Encrypted DNS</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>For add-ons, debrid, servers and ExoPlayer, so a provider that blocks or fakes addresses can't get in the way.</td><td colspan="1" valign="top"><b>Polite to TorBox</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Thumbnails wait near TorBox's limit, and a refused source moves straight on.</td></tr>
+<tr><td colspan="1" valign="top"><b>Device assessment</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Measures your box and link, suggests settings, applies them in one press.</td><td colspan="1" valign="top"><b>Format check</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Plays tiny test clips to find which video, HDR and audio formats your box really handles, then suggests settings. Test any clip again from the results.</td><td colspan="1" valign="top"><b>Smarter speed test</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Tries connection and piece sizes on your last stream and says what to use.</td></tr>
+<tr><td colspan="2" valign="top"><b>Add-on health</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Marks each add-on and debrid service OK, Slow or Down.</td><td colspan="1" valign="top"><b>Add-on timeout</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Give a slow add-on such as AIOStreams longer to answer.</td></tr>
+</table>
+
+<p><img src="docs/readme/head-together.svg" width="100%" alt="Together and keeping up"></p>
+
+<table>
+<tr><td colspan="1" valign="top"><b>Watch party</b><br>No account needed, surround left alone, plus cross-play with Nuvio app users (experimental).</td><td colspan="1" valign="top"><b>Watch party friends</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Add a friend once and invite them later without a code, with over 140 avatars.</td><td colspan="1" valign="top"><b>Calendar</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Next episodes, film dates and new-episode reminders, in your own time zone.</td></tr>
+<tr><td colspan="1" valign="top"><b>Coming up on Home</b><br>A row of new and upcoming episodes and films from your Calendar.</td><td colspan="1" valign="top"><b>Episodes left</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Show cards in Continue watching can show how many aired episodes are left.</td><td colspan="1" valign="top"><b>Parental guide</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>IMDb's guide on the details page, above Cast, worst first.</td></tr>
+<tr><td colspan="1" valign="top"><b>Backup and restore</b><br>Save your profiles and settings to a file and bring them back after a wipe or on a new box. Passwords are only included with a PIN.</td><td colspan="1" valign="top"><b>Report a problem</b><br>Tell me what went wrong from inside Arc. You see exactly what will be sent before anything goes, with your private details taken out first.</td><td colspan="1" valign="top"><b>Record a problem</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>For faults that come and go: up to 30 minutes of playback numbers, never the sound or picture, with a mark at each moment it goes wrong.</td></tr>
+</table>
+
+<p><img src="docs/readme/head-look.svg" width="100%" alt="Look and Home"></p>
+
+<table>
+<tr><td colspan="1" valign="top"><b>Nuvio V2 look</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Cinematic Glass or Pure Liquid Dark, Control Deck or Invisible player controls, floating sidebar or top menu.</td><td colspan="1" valign="top"><b>Arc look</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Logo in your theme colours, intro with sound, 16 icon colours, card and banner looks, launcher icon pack.</td><td colspan="1" valign="top"><b>Interface scale</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Shrink or enlarge the whole interface, or let the app size it.</td></tr>
+<tr><td colspan="2" valign="top"><b>Watched titles on Home</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Show, Dim or Hide what you've already watched.</td><td colspan="1" valign="top"><b>Keep it fresh</b> <img src="docs/readme/arc-mark.png" height="15" alt="Only in Arc"><br>Also keep Plan to watch and part-watched titles out of Home rows and the banner.</td></tr>
+</table>
+
+The details, more screenshots and what's been removed are on the **[full feature page](docs/FEATURES.md)**.
+
+## A look around
+
+<table>
+<tr>
+<td width="50%"><img alt="Seek thumbnails" src="https://github.com/user-attachments/assets/7ad837f7-a18a-4f1a-993c-be474099ea9c" /><br><b>Seek thumbnails</b></td>
+<td width="50%"><img alt="Media servers on Home" src="https://github.com/user-attachments/assets/91100a10-6725-4770-ab40-43db44de17f3" /><br><b>Your own media server</b></td>
+</tr>
+<tr>
+<td><img alt="Stats panel" src="https://github.com/user-attachments/assets/0107b69c-a463-43ad-9a5f-e3b8162abc07" /><br><b>Stats panel</b></td>
+<td><img alt="Calendar" src="docs/screenshots/nt5/02-calendar-list.jpg" /><br><b>Calendar</b></td>
+</tr>
+<tr>
+<td><img alt="Generating thumbnails" src="docs/screenshots/nt5/07-generating-screen.jpg" /><br><b>Thumbnails before the film</b></td>
+<td><img alt="Remote buttons" src="docs/screenshots/nt5/05-remote-buttons.jpg" /><br><b>Remote buttons</b></td>
+</tr>
+</table>
+
+## Support and contact
+
+Nuvio Arc is a one-person hobby, with no Discord and no support team.
+
+**The best way to report a problem is from inside Arc.** Press Report in the player, or on the loading and error screens, or open Report a problem in Settings. You see exactly what will be sent before you press Send, links, keys and addresses are taken out first, and you get a short code for your report. For faults that come and go, Record a problem keeps up to 30 minutes of playback numbers while you mark the moments it goes wrong. You can send ideas the same way. Reports go to a private inbox for this project, never to the official team.
+
+Can't use that, or want to talk it through? Open an [Issue](https://github.com/ysosrs123/NuvioTV-Fork/issues) with your box, the Arc version (Settings > About) and what you were playing, or chat with other users at [r/NuvioForks](https://www.reddit.com/r/NuvioForks/). No promises on replies or fixes.
+
+Nuvio Arc is not affiliated with or endorsed by the NuvioTV project. **Please don't report problems from this build to the official Nuvio GitHub or Discord.** They can't help with changes they didn't make.
 
 ## Supporting Nuvio
 
-Nuvio Arc is built on Nuvio. If you enjoy it, support the Nuvio team at [nuvio.tv/support](https://nuvio.tv/support).
-Every supporter membership and donation in the app goes straight to the official Nuvio team -- none of it comes to me.
-
----
-
-## What this fork adds
-
-Optimisation and playback-quality work, most of it aimed at high-bitrate remux and lossless audio,
-plus a few features I've always wanted in a TV player. The short version: streams start faster,
-buffer deeper, stall less, and you can *see* that your device is genuinely delivering lossless audio
-and the right HDR -- without needing to be the kind of person who tunes buffer settings for fun.
-
-- **Seek thumbnails made by the app itself** -- hold left or right and a strip of pictures shows
-  exactly where you will land, from an old AVI to a 4K Dolby Vision remux. On by default. A new
-  thumbnail every 10 seconds, sharp enough to read the scene, ready straight away for anything
-  you've played before, and carried over to another release of the same film. When your Jellyfin,
-  Emby, Silo or Plex server has made its own thumbnails, the player uses those. Turn on **Thumbnails from a
-  copy** and a 4K film gets its thumbnails from a 1080p copy in your sources, about five times less to
-  download, so even a Fire TV Stick can make them while the film plays. No third-party service, no API
-  key, nothing uploaded.
-- **Your own media server** -- Jellyfin, Emby, Silo and now **Plex** libraries on Home, in Search, in the
-  Library and as a source on any title the server has, with direct play, second addresses and self-signed
-  certificates. Give each server your own name, show or hide the server logos, and sign in to Silo
-  with the same address you open it with in the browser.
-  Silo also has its own sign-in now: a code and a QR on the TV, sign in on your
-  phone, pick your Silo profile on screen, and your Silo Home rows show up on Nuvio Home.
-  Big libraries get genres, A to Z with a letter jump, Newest release and an Unwatched filter, and
-  **Folders from genres** turns a whole library into one tidy Home row.
-- **Plex** -- sign in with a code at plex.tv/link (no password on the TV), pick your server and your
-  Plex Home user, and your libraries, shared servers included, show up as Home rows, in Search, in
-  Continue Watching and as sources, with Plex's own intro and credits markers and thumbnails. Playing
-  away from home needs Plex Pass on the server owner's account or a Remote Watch Pass on yours: that's
-  Plex's rule, not Arc's.
-- **Real-Debrid and AllDebrid** -- they join TorBox and Premiumize in Integrations, with sign-in on the TV
-  (scan the code, done) and their cloud libraries, and all your debrid accounts now work at once. A result
-  meant for one account goes to that account, plain torrents get checked on TorBox and Premiumize together
-  and play from whichever has them, and a source that isn't cached moves on to the next cached one instead
-  of showing an error.
-- **More trackers: WeTrakr and Floppy** -- they join Trakt, Simkl and MDBList in Settings > Tracking.
-  Sign in with a code on your phone. WeTrakr gets scrobbling, watched marks both ways, Continue Watching,
-  your lists in the Library and a one-press "Send my history to WeTrakr". Floppy shows what you're
-  watching, keeps a resume point when you stop and adds finished titles to your history.
-- **Encrypted DNS (DNS over HTTPS)** -- pick Cloudflare, Google, Quad9, AdGuard or your own address under
-  Settings > Advanced, so an internet provider that blocks or fakes addresses can't get in the way of
-  add-ons, TMDB, images, debrid, media servers and ExoPlayer streams. System stays the default. MPV,
-  trailers and torrents still use the box's own DNS.
-- **Watch party** -- watch the same title with friends in other homes, in sync, with a six-character
-  code or an invite. No account and no server of ours; bitstream audio is never sped up or slowed
-  down to catch up. Every party runs on a long random key and only the host runs the room.
-  Everyone in a party needs Nuvio Arc 1.1.0-nt.5 or newer.
-  New and still experimental: **cross-play with Nuvio app users**. Pick "With Nuvio app users" and join
-  the same party as friends on the official Nuvio apps (TV, phone, computer, LG and Samsung TVs). That
-  one takes up to 3 people, a limit set by Nuvio's server, needs your Nuvio sign-in and goes through
-  Nuvio's server.
-- **Calendar and new-episode reminders** -- a new page in the menu that shows when the next episodes
-  of your shows come out, in your own time zone, plus cinema and streaming dates for films on your
-  lists. Ring the bell on a show and a card on Home tells you when a new episode is out, with Watch
-  now straight to its sources. An optional **Coming up** row on Home shows what's just out and
-  what's next.
-- **Remote buttons** -- give any button on your remote a job while you watch: stats on or off,
-  subtitles on or off, next audio track, skip 5 minutes, start over, sources and plenty more. Works
-  with colour buttons, number pads, your TV's own remote over HDMI and buttons set up in tvQuickActions
-  or Button Mapper, and comes with a starting setup that just works on the Fire TV remote. The Search
-  button on your remote opens Search.
-- **Subtitles the way you like them** -- plain subtitles get their own Outline size and a separate
-  Shadow with its own opacity, so a thick outline and a shadow can be on at the same time, on both players,
-  plus a choice of subtitle fonts (Roboto, Montserrat, Noto Sans, Asap Condensed and more).
-- **Lossless audio you can trust** -- a surround engine that packs TrueHD, DTS-HD MA and DTS:X for
-  HDMI itself, with an **Auto surround** mode that picks the formats from what your TV and receiver
-  report. Or set it yourself with per-format passthrough switches (Dolby Digital, DD+, TrueHD, DTS,
-  DTS-HD) phrased as questions about your receiver, following Kodi's audio settings: switch off what
-  your gear can't decode and Nuvio decodes just those in the app, with its own decoder, because some
-  boxes ship a vendor DTS decoder that quietly folds 5.1 to stereo. It resists mid-film renegotiation
-  dropping you to lossy without telling you, comes back after the TV switches input, plays DTS Express
-  commentary tracks, and picks the lossless track so you don't start every film in the wrong audio.
-- **Native Dolby Vision Profile 7, FEL and MEL** -- the full dual-layer signal decoded inside
-  Nuvio on Android, enhancement layer included, the way a disc player does it. For now this needs a
-  Ugoos AM9 Pro on Android 14 running my own test kernel, plus a Dolby Vision display. That kernel
-  is not available yet; I plan to share it once it has had more testing. Stock firmware and other
-  boxes can't do it, so there the mode simply behaves like Auto.
-- **Dolby Vision on more TVs** -- app-side Profile 7 and Profile 5 -> 8.1 conversion via libdovi with
-  no per-frame stutter, correct enhancement-layer handling for single-track remuxes, and **Auto**
-  converting Profile 7 on every Dolby Vision TV, including TVs with Android built in whose decoder
-  claims it can play Profile 7 and then shows nothing.
-- **Better streams picked for you, automatically** -- source filtering and sorting re-baselined
-  around TRaSH-guides-aligned release-group quality tiers, so the best-quality trustworthy release
-  floats to the top and auto-play grabs the right one without you reading twenty filenames.
-  **Sort sources: Best quality first** puts the best link at the top of the source list too, by the
-  same rules. Safe to experiment: one tap resets to the recommended baseline, another shows everything
-  unfiltered while keeping best-first ordering, and **Quality rules** has its own page under Playback.
-- **Smoother browsing, even on a Fire TV Stick** -- Home no longer rebuilds itself as you move from
-  poster to poster, the focus ring glides calmly along a row, and Up and Down keep your place across
-  rows. Settings, Library and Search paint their poster wall or artwork background once and reuse it:
-  on a Fire TV Stick 4K Max, scrolling Settings with the Posters background and Glass went from 2 % to
-  96 % of frames on time.
-- **Device settings assessment -- your settings, tuned for *your* hardware in one press.** Stop
-  guessing what connection count, buffer size or Dolby Vision mode your box wants: the assessment
-  measures your link against the last thing you actually played, reads what your device and
-  display genuinely support, and lays out recommended settings with the reasoning next to every
-  one -- what was measured, what was calculated from your hardware, what's a personal trade-off
-  (pick a buffer profile; it'll suggest one based on how steady your connection looked), and what
-  it can't honestly know so won't touch. Like the answers? Apply them all in one press. Change
-  your mind? Revert restores every previous value, even after a restart. You stay in charge; it
-  just does the homework.
-- **A speed test that tells you what to do about it** -- goes further than the official app's speed
-  test: an adaptive sweep of connection and chunk-size combinations against the *actual* stream you
-  last played, over the same path playback uses. It finds the cheapest configuration that comfortably
-  sustains the title and says so in plain terms -- and on memory-tight boxes it's smart enough to
-  prefer a config that leaves room for a deeper playback buffer, telling you the trade in MB and
-  seconds. Slow source or buffering bug? Now you can tell them apart.
-- **Stats-for-nerds overlay -- proof, not vibes.** A fuller version of the official app's stats
-  overlay, built for high-bitrate/lossless content: measured video bitrate, the audio codec by name
-  with its measured passthrough bitrate, whether bitstream is *genuinely* reaching your AVR, Dolby
-  Vision details (which layers made it to the picture, CLL/FALL), live network throughput and buffer
-  health, dropped *and* skipped frames, the negotiated audio path, SoC stats and how far your box is
-  from its own temperature limit so you know when it's being throttled, audio-clock jitter and underrun
-  cross-checks. When it says TrueHD Atmos is hitting the sink, it measured it. The assessment
-  configures; this overlay verifies.
-- **Automatic speed-up** -- for films that keep buffering from far-away servers. On by default, nothing to
-  tune: the app asks the box for a bigger download window and, on boxes with enough memory, adds extra
-  downloads when a film needs them and hands them back when it doesn't. It remembers what each server
-  can do, starts heavy 4K remuxes on more than one download and gets the buffer back quickly after a seek
-  or a stall. Measured on a Fire TV Stick 4K Max from a server on the other side of the world: 28 Mbit/s
-  became 86 Mbit/s and 23 stops in three minutes became 6.
-- **Playback that holds up** --
-  - *Fewer stalls, less wasted bandwidth:* upstream's parallel downloading kept too little data
-    queued ahead of playback and threw away chunks it had already paid to download (measured ~47% of
-    transfer wasted on a 4K remux). This fork keeps the pipeline properly fed and stops the
-    re-downloading, roughly halving the debrid data burned per title. Buffers are sized from the
-    memory your box really has, so a 2 GB box no longer chokes on its own buffer.
-  - *Faster stream start:* pressing play opens the connection at the press. With **Search sources
-    before Play** on (off by default) the app also searches and ranks sources while you browse.
-  - *A dead link is not a dead end:* when a source fails at the start, the player moves on to the next
-    ready one by itself, on ExoPlayer and MPV, and a dead server is noticed within seconds.
-  - *Judder-free frame rates:* precise 23.976-vs-24 matching, 120 Hz for films on screens without
-    24 Hz, and frames kept evenly spaced on the TV's refresh ticks.
-  - *Old formats that play properly:* AVI, XviD, DivX, VC-1 and WMV, with frame rate matching, and
-    non-faststart MP4s that seek without stalling.
-  - *Faster AV1 on boxes without an AV1 chip,* decoded with dav1d.
-- **Trailers that start quickly** -- with Trailer source set to IMDb, the trailer is found in under a
-  second, plays at the best resolution IMDb has (up to 4K) and starts after a short buffer.
-- **The Nuvio Arc look** -- a logo that takes its colours from your theme, an intro where the Arc
-  lights up, with sound in 5.1 where your system has it, 16 launcher icons, a new Copper theme, Glass
-  that looks like glass and a new main menu in Nuvio V2.
-- **Watched titles on Home: Show, Dim or Hide** -- fade or hide what you've already watched, without
-  touching Continue Watching, Library or Search.
-- **Player buttons you can arrange** -- show, hide and reorder the player controls per profile.
-- **Support the Nuvio team, built in** -- a button on the start screen and in Settings shows what a
-  Nuvio Supporter membership gives you and a QR code to nuvio.tv/support, and tells supporters their
-  tier once they sign in.
-- **The whole fork in 37 languages.**
-- **Lighter, faster build** -- unused engine components stripped out, so the app itself is smaller
-  and snappier (see *What's been removed*).
-
-## Screenshots (Nuvio V2)
-
-<img width="1920" height="1080" alt="Home with the main menu open" src="docs/screenshots/nt5/01-home-menu.jpg" />
-
-
-
-https://github.com/user-attachments/assets/b2063feb-7c4a-4fa1-924d-63686184f5dd
-
-
-**Native Dolby Vision Profile 7 FEL on the Ugoos AM9 Pro** -- the stats overlay showing "Profile 7.6 FEL - RPU + BL + EL" on the native route.
-
-For now this needs a Ugoos AM9 Pro on Android 14 running my own test kernel, plus a Dolby Vision display. That kernel is not available yet; I plan to share it once it has had more testing. Stock firmware and other boxes can't do it, so there the mode simply behaves like Auto.
-
-<img width="1920" height="1080" alt="Screenshot_20261004_215744" src="https://github.com/user-attachments/assets/86dba33b-f2c3-496c-a0d6-5b6ba6c9d41f" />
-<img width="4032" height="3024" alt="IMG_4946 - Copy" src="https://github.com/user-attachments/assets/c6bbf874-916c-4433-9a5b-bba6fedd5603" />
-
-
-
-**Seek thumbnails** -- the strip and the framed picture while holding left or right.
-
-<img width="1920" height="1080" alt="Screenshot_20261004_221200" src="https://github.com/user-attachments/assets/7ad837f7-a18a-4f1a-993c-be474099ea9c" />
-<img width="1920" height="1080" alt="Screenshot_20261004_221224" src="https://github.com/user-attachments/assets/17dbaca2-f569-4362-a625-0b195a87ce31" />
-
-The "Generating thumbnails" screen -- the thumbnails being made before play, the strip filling in as they come. Start watching now skips the wait.
-
-<img width="1920" height="1080" alt="Generating thumbnails" src="docs/screenshots/nt5/07-generating-screen.jpg" />
-
-
-
-**Calendar** -- what just aired and what's coming, in your own time zone.
-
-<img width="1920" height="1080" alt="Calendar, list view" src="docs/screenshots/nt5/02-calendar-list.jpg" />
-
-<img width="1920" height="1080" alt="Calendar, month view" src="docs/screenshots/nt5/03-calendar-month.jpg" />
-
-<img width="1920" height="1080" alt="Home with the Upcoming and Coming up rows" src="docs/screenshots/nt5/04-home-coming-up.jpg" />
-
-
-
-**Remote buttons** -- give any button a job in the player.
-
-<img width="1920" height="1080" alt="Remote buttons" src="docs/screenshots/nt5/05-remote-buttons.jpg" />
-
-
-
-**Watch party** -- the party page with the code, the phone QR codes and the member list.
-
-
-<img width="1920" height="1080" alt="Screenshot_20261004_223318" src="https://github.com/user-attachments/assets/00567a6b-f6a6-4b2f-9393-847fba1ac0d3" />
-
-
-
-**Your own media server** -- Jellyfin, Emby, Silo and Plex work the same way: rows on Home, and a server stream in the source list.
-
-<img width="1920" height="1080" alt="Screenshot_20261004_220636" src="https://github.com/user-attachments/assets/91100a10-6725-4770-ab40-43db44de17f3" />
-
-
-**The Nuvio Arc look** -- the launcher icons and themes.
-
-<img width="1920" height="1080" alt="App icon and banner picker" src="docs/screenshots/nt5/06-icon-picker.jpg" />
-
-
-
-**Player buttons** -- the editor with its live preview.
-
-<img width="1920" height="1080" alt="Screenshot_20261004_215639" src="https://github.com/user-attachments/assets/f0fa9504-8c06-492a-8f89-4fd6c863b786" />
-
-
-**Surround sound** -- Surround Format on Auto, with the per-format switches.
-
-<img width="1920" height="1080" alt="Screenshot_20261004_215721" src="https://github.com/user-attachments/assets/be46a0c2-7b62-4370-b270-c70fcee583b3" />
-
-
-## Stats for Nerds Overlay -
-
-<img width="1920" height="1080" alt="Screenshot_20261004_220235" src="https://github.com/user-attachments/assets/0107b69c-a463-43ad-9a5f-e3b8162abc07" />
-
-**Source & hardware** -- Settings > Advanced after a Profile 7 FEL title on the AM9, with the DV7 decoder and DV7 EL type rows.
-
-<img width="1920" height="1080" alt="Source and hardware card" src="docs/screenshots/nt5/09-source-hardware.jpg" />
-
-
-## Revised Last Played Stream Speed Test:
-
-<img width="1920" height="1080" alt="Screenshot_20261004_224058" src="https://github.com/user-attachments/assets/0b91b0b5-4f54-4e4b-b783-e19ebfac52bb" />
-
-
-## Device Assessment:
-
-<img width="1920" height="1080" alt="screenshot4" src="https://github.com/user-attachments/assets/eb274129-553c-4b5c-b1ac-665aca9101fa" />
-<img width="1920" height="1080" alt="Screenshot_20261004_224127" src="https://github.com/user-attachments/assets/111b52aa-695c-4fa0-8cea-c9376fb879d4" />
-
-
-## Per-Format Audio Passthrough Switches:
-
-<img width="1920" height="1080" alt="Screenshot_20260826_084841" src="https://github.com/user-attachments/assets/85f3a839-11bb-45f6-9154-3d471efe2319" />
-
----
-
-## What's been removed
-
-- **IAMF** and **MPEG-H** audio decoder components, and an unused UI component -- dropped to slim
-  the build. No user-facing loss.
-- **Android TV channel / preview-program sync** -- not used on this fork's target setup.
-- **The upstream update feed** -- in-app updates come from this fork's own releases only.
-- **The "Choose your Nuvio experience" screen on first start** -- everyone gets the full settings
-  straight away. Essential is still there under Settings > Advanced > Switch to Essential.
-- **The Report buttons** in the player and under Settings > Advanced -- they could never send anything
-  from this build. Please use this repo's Issues instead (see *Support, issues and contact*).
-
-**Not removed** (sometimes assumed otherwise): all **40 languages** (the fork's own text is translated
-into 37 of them), the Classic, Grid and Modern **Home layouts**, the **add-on manager**, and
-**subtitle add-on support** are intact.
-
----
-
-## Target hardware
-
-Primary/validated target is the **Amlogic S905X4 / 4GB RAM, Amlogic S905X5M / 2GB RAM class (armeabi-v7a) and AmLogic S905X5-J / 4GB RAM (arm64-v8a)**, tested on a Homatics Box R
-4K Plus, Xiaomi Box S 3rd Gen, Fire TV Stick 4K Max and Ugoos AM9 Pro in a Samsung HW-Q800F -> LG C9 eARC chain. Other devices (Nvidia Shield, Prism+, Xiaomi) have been
-community-tested.
-
----
+Nuvio Arc is completely free, and I don't take donations. It's built on Nuvio, so if you enjoy it, please support the Nuvio team at [nuvio.tv/support](https://nuvio.tv/support). Every supporter membership and donation in the app goes straight to the official team, and none of it comes to me.
 
 ## Licence
 
 This is a modified version of [NuvioTV](https://github.com/NuvioMedia/NuvioTV), changed by ysosrs123
 from July 2026 onwards. Every change is in this repository's history on top of the official release
-it builds on (currently 1.1.0-beta.10). It is licensed under the
+it builds on (currently 1.1.0). It is licensed under the
 [GNU General Public License v3.0](./LICENSE), the same as NuvioTV. All upstream copyright notices,
 licence headers and author attributions are kept. Full credit to the NuvioTV maintainers and contributors.
 
@@ -337,13 +169,13 @@ Parts from other projects keep their own licences:
   cpu_features by Google (Apache-2.0).
 - libdovi by quietvoid (MIT). Matroska extractor files from AndroidX Media3 (Apache-2.0), changed.
 - Release group lists from TRaSH Guides (MIT).
-- Fonts Atkinson Hyperlegible Next and Source Sans 3 (SIL Open Font License 1.1, texts in
+- Fonts Atkinson Hyperlegible Next, Source Sans 3, and the subtitle fonts Roboto, Montserrat, Noto Sans and Asap Condensed (SIL Open Font License 1.1, texts in
   `app/src/main/assets/licenses/`).
 - Watch party avatars: made with DiceBear and Twemoji, under CC BY 4.0, CC0 1.0 and the Bottts terms.
   They are credited in the app under Settings > About > Licenses & attribution and are not covered by the GPL.
 - Calendar episode times come from TVmaze's schedule service and TheTVDB (metadata provided by TheTVDB),
   credited in the app under Settings > About > Licenses & attribution.
-- Floppy and the original tracker design are by dannyvfilms (NuvioMedia/NuvioTV#3811).
+- The film in the screenshots is *Tears of Steel*, (CC) Blender Foundation, mango.blender.org, under CC BY 3.0.
 - Other service logos and names belong to their owners and only show which service the app connects to.
 - Prebuilt libraries that come unchanged from the official app are covered by the official project's
   sources and notices.
